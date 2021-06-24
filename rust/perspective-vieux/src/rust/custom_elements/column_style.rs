@@ -52,7 +52,7 @@ impl PerspectiveColumnStyleElement {
         let default_config = js_def_config.into_serde().unwrap();
         let on_change = {
             clone!(elem);
-            Callback::from(move |x: ColumnStyleConfig| on_change(&elem, &x.clone()))
+            Callback::from(move |x: ColumnStyleConfig| on_change(&elem, &x))
         };
 
         let weak_link = WeakComponentLink::default();
@@ -78,7 +78,9 @@ impl PerspectiveColumnStyleElement {
     /// * `config` - a `ColumnStyle` config in JSON form.
     pub fn reset(&mut self, config: JsValue) {
         let msg = ColumnStyleMsg::Reset(config.into_serde().unwrap());
-        self.weak_link.borrow().as_ref().map(|elem| elem.send_message(msg));
+        if let Some(elem) = self.weak_link.borrow().as_ref() {
+            elem.send_message(msg);
+        }
     }
 
     /// Dispatches to `ModalElement::open(target)`

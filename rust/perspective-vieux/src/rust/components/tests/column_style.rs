@@ -59,8 +59,11 @@ fn cs_query(node: &NodeRef, query: &str) -> HtmlElement {
 #[wasm_bindgen_test]
 pub fn test_initial_fixed() {
     let panel_div = NodeRef::default();
-    let mut config = ColumnStyleConfig::default();
-    config.fixed = Some(4);
+    let config = ColumnStyleConfig {
+        fixed: Some(4),
+        ..ColumnStyleConfig::default()
+    };
+
     test_html! {
         <ColumnStyle
             config=config
@@ -78,8 +81,11 @@ pub fn test_initial_fixed() {
 pub fn test_fixed_msg_overrides_default() {
     let link: WeakComponentLink<ColumnStyle> = WeakComponentLink::default();
     let panel_div = NodeRef::default();
-    let mut default_config = ColumnStyleDefaultConfig::default();
-    default_config.fixed = 4;
+    let default_config = ColumnStyleDefaultConfig {
+        fixed: 4,
+        ..ColumnStyleDefaultConfig::default()
+    };
+
     test_html! {
         <ColumnStyle
             default_config=default_config
@@ -104,8 +110,10 @@ pub fn test_fixed_msg_overrides_default() {
 #[wasm_bindgen_test]
 pub fn test_fixed_is_0() {
     let panel_div = NodeRef::default();
-    let mut config = ColumnStyleConfig::default();
-    config.fixed = Some(0);
+    let config = ColumnStyleConfig {
+        fixed: Some(0),
+        ..ColumnStyleConfig::default()
+    };
     test_html! {
         <ColumnStyle
             config=config
@@ -148,8 +156,11 @@ pub fn test_color_mode_changed() {
     let link: WeakComponentLink<ColumnStyle> = WeakComponentLink::default();
     let result: Rc<RefCell<ColumnStyleConfig>> =
         Rc::new(RefCell::new(ColumnStyleConfig::default()));
-    let mut default_config = ColumnStyleDefaultConfig::default();
-    default_config.pos_color = "#123".to_owned();
+    let default_config = ColumnStyleDefaultConfig {
+        pos_color: "#123".to_owned(),
+        ..ColumnStyleDefaultConfig::default()
+    };
+
     let on_change = {
         clone!(result);
         Callback::from(move |config| {

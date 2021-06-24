@@ -183,7 +183,7 @@ impl Component for ColumnStyle {
                 self.props.config.fixed = match fixed.parse::<u32>() {
                     Ok(x) if x != self.props.default_config.fixed => Some(x),
                     Ok(_) => None,
-                    Err(_) if fixed == "" => Some(0),
+                    Err(_) if fixed.is_empty() => Some(0),
                     Err(_) => None,
                 };
                 self.props.dispatch_config();
@@ -223,7 +223,7 @@ impl Component for ColumnStyle {
             }
             ColumnStyleMsg::ColorModeChanged(val) => {
                 self.color_mode = val.clone();
-                self.props.config.color_mode = Some(val.clone());
+                self.props.config.color_mode = Some(val);
                 if self.color_mode == ColorMode::Gradient {
                     self.props.config.gradient = Some(self.gradient);
                 } else {
@@ -239,7 +239,7 @@ impl Component for ColumnStyle {
                         self.gradient = x;
                         Some(x)
                     }
-                    Err(_) if gradient == "" => {
+                    Err(_) if gradient.is_empty() => {
                         self.gradient = self.props.default_config.gradient;
                         Some(self.props.default_config.gradient)
                     }
@@ -297,7 +297,7 @@ impl Component for ColumnStyle {
             let link = self.props.weak_link.borrow();
             link.as_ref()
                 .unwrap()
-                .callback(|val: ColorMode| ColumnStyleMsg::ColorModeChanged(val))
+                .callback(ColumnStyleMsg::ColorModeChanged)
         };
 
         // Gradient input callback
@@ -344,7 +344,7 @@ impl Component for ColumnStyle {
                             class="parameter"
                             type="color"
                             value={ &self.pos_color }
-                            disabled={ self.props.config.color_mode.is_none() }
+                            disabled=self.props.config.color_mode.is_none()
                             oninput=pos_color_oninput />
                         <span class="operator">{ " + / - " }</span>
                         <input
@@ -352,7 +352,7 @@ impl Component for ColumnStyle {
                             class="parameter"
                             type="color"
                             value={ &self.neg_color }
-                            disabled={ self.props.config.color_mode.is_none() }
+                            disabled=self.props.config.color_mode.is_none()
                             oninput=neg_color_oninput />
                     </div>
 
@@ -375,7 +375,7 @@ impl Component for ColumnStyle {
                             value={ self.gradient }
                             class="parameter indent"
                             oninput={ gradient_changed }
-                            disabled={ !gradient_enabled }
+                            disabled=!gradient_enabled
                             type="number"
                             min="0" />
                     </div>
@@ -434,18 +434,27 @@ mod tests {
     #[wasm_bindgen_test]
     pub fn text_fixed_text_default() {
         let config = ColumnStyleConfig::default();
-        let mut default_config = ColumnStyleDefaultConfig::default();
-        default_config.fixed = 2;
+        let default_config = ColumnStyleDefaultConfig {
+            fixed: 2,
+            ..ColumnStyleDefaultConfig::default()
+        };
+
         let props = make_props(config, default_config);
         assert!(props.make_fixed_text() == "0.01");
     }
 
     #[wasm_bindgen_test]
     pub fn text_fixed_text_override() {
-        let mut config = ColumnStyleConfig::default();
-        config.fixed = Some(3);
-        let mut default_config = ColumnStyleDefaultConfig::default();
-        default_config.fixed = 2;
+        let config = ColumnStyleConfig {
+            fixed: Some(3),
+            ..ColumnStyleConfig::default()
+        };
+
+        let default_config = ColumnStyleDefaultConfig {
+            fixed: 3,
+            ..ColumnStyleDefaultConfig::default()
+        };
+
         let props = make_props(config, default_config);
         assert!(props.make_fixed_text() == "0.001");
     }

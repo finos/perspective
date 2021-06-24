@@ -7,17 +7,9 @@
  *
  */
 
-import {renderers} from "./renderers.js";
-
 export class StateElement extends HTMLElement {
     get _plugin() {
-        let current_renderers = renderers.getInstance();
-        let view = this.getAttribute("plugin");
-        if (!view) {
-            view = Object.keys(current_renderers)[0];
-            this.setAttribute("plugin", view);
-        }
-        return current_renderers[view] || current_renderers[Object.keys(current_renderers)[0]];
+        return this._vieux.get_plugin();
     }
 
     // deprecate

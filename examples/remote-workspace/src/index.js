@@ -47,7 +47,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         },
         viewers: {
             One: {table: "securities", name: "Heat Map", plugin: "heatmap", "row-pivots": ["client"], columns: ["chg"], "column-pivots": '["name"]'},
-            Two: {table: "securities", name: "Bar Chart", plugin: "x_bar", "row-pivots": ["client"], columns: ["chg"]}
+            Two: {table: "securities", name: "Bar Chart", plugin: "X Bar", "row-pivots": ["client"], columns: ["chg"]}
         }
     });
 

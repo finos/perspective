@@ -19,9 +19,9 @@ class Plugin(Enum):
 
     GRID = "datagrid"
 
-    YBAR = "y_bar"
-    XBAR = "x_bar"
-    YLINE = "y_line"
+    YBAR = "Y Bar"
+    XBAR = "X Bar"
+    YLINE = "Y Line"
     YAREA = "y_area"
     YSCATTER = "y_scatter"
     XYLINE = "xy_line"
@@ -30,18 +30,18 @@ class Plugin(Enum):
     SUNBURST = "sunburst"
     HEATMAP = "heatmap"
 
-    YBAR_D3 = "d3_y_bar"
-    XBAR_D3 = "d3_x_bar"
-    YLINE_D3 = "d3_y_line"
-    YAREA_D3 = "d3_y_area"
-    YSCATTER_D3 = "d3_y_scatter"
-    XYSCATTER_D3 = "d3_xy_scatter"
-    TREEMAP_D3 = "d3_treemap"
-    SUNBURST_D3 = "d3_sunburst"
-    HEATMAP_D3 = "d3_heatmap"
+    YBAR_D3 = "Y Bar"
+    XBAR_D3 = "X Bar"
+    YLINE_D3 = "Y Line"
+    YAREA_D3 = "Y Area"
+    YSCATTER_D3 = "Y Scatter"
+    XYSCATTER_D3 = "X/Y Scatter"
+    TREEMAP_D3 = "Treemap"
+    SUNBURST_D3 = "Sunburst"
+    HEATMAP_D3 = "Heatmap"
 
-    CANDLESTICK = "d3_candlestick"
-    OHLC = "d3_ohlc"
+    CANDLESTICK = "Candlestick"
+    OHLC = "OHLC"
 
     @staticmethod
     def options():

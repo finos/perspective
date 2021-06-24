@@ -41,13 +41,19 @@ impl Deref for Session {
     }
 }
 
-impl Session {
-    pub fn new() -> Session {
+impl Default for Session {
+    fn default() -> Self {
         Session(Rc::new(RefCell::new(SessionData {
             table: None,
             view_sub: None,
             on_stats: None,
         })))
+    }
+}
+
+impl Session {
+    pub fn new() -> Session {
+        Self::default()
     }
 
     /// Set a callback for `TableStats` updates when this perspective table updates.
@@ -69,7 +75,8 @@ impl Session {
 
     /// The `table`'s unique column names.  This value is not
     pub async fn get_column_names(self) -> Result<Vec<String>, JsValue> {
-        match self.borrow().table.as_ref() {
+        let table_opt = self.borrow().table.clone();
+        match table_opt {
             None => Ok(vec![]),
             Some(table) => {
                 let columns = table.columns().await?;
@@ -91,15 +98,8 @@ impl Session {
         expr: JsValue,
     ) -> Result<Option<PerspectiveValidationError>, JsValue> {
         let arr = js_sys::Array::from_iter([expr].iter());
-        let errors = self
-            .borrow()
-            .table
-            .as_ref()
-            .unwrap()
-            .validate_expressions(arr)
-            .await?
-            .errors();
-
+        let table = self.borrow().table.as_ref().unwrap().clone();
+        let errors = table.validate_expressions(arr).await?.errors();
         let error_keys = js_sys::Object::keys(&errors);
         if error_keys.length() > 0 {
             let js_err = js_sys::Reflect::get(&errors, &error_keys.get(0))?;
@@ -134,7 +134,7 @@ impl Session {
     pub fn set_view(&mut self, view: PerspectiveJsView) {
         let table = self.borrow().table.clone().unwrap();
         let on_stats = self.borrow().on_stats.clone();
-        let sub = ViewSubscription::new(table, view, on_stats.clone().unwrap());
+        let sub = ViewSubscription::new(table, view, on_stats.unwrap());
         self.borrow_mut().view_sub = Some(sub);
     }
 

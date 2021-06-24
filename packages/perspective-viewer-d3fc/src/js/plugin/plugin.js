@@ -7,12 +7,13 @@
  *
  */
 
+import "./polyfills/index";
 import {registerPlugin} from "@finos/perspective-viewer/src/js/utils.js";
 import charts from "../charts/charts";
-import "./polyfills/index";
-import "./template";
+import {initialiseStyles} from "../series/colorStyles";
+import style from "../../less/chart.less";
 
-export const PRIVATE = Symbol("D3FC chart");
+import * as d3 from "d3";
 
 const DEFAULT_PLUGIN_SETTINGS = {
     initial: {
@@ -22,140 +23,231 @@ const DEFAULT_PLUGIN_SETTINGS = {
     selectMode: "select"
 };
 
-export function register(...plugins) {
-    plugins = new Set(plugins.length > 0 ? plugins : charts.map(chart => chart.plugin.type));
-    charts.forEach(chart => {
-        if (plugins.has(chart.plugin.type)) {
-            registerPlugin(chart.plugin.type, {
-                ...DEFAULT_PLUGIN_SETTINGS,
-                ...chart.plugin,
-                create: drawChart(chart),
-                resize: resizeChart,
-                delete: deleteChart,
-                save,
-                restore
-            });
+const styleWithD3FC = `${style}${getD3FCStyles()}`;
+const EXCLUDED_SETTINGS = ["crossValues", "mainValues", "splitValues", "filter", "data", "size", "colorStyles"];
+
+function getD3FCStyles() {
+    const headerStyles = document.querySelector("head").querySelectorAll("style");
+    const d3fcStyles = [];
+    headerStyles.forEach(s => {
+        if (s.innerText.indexOf("d3fc-") !== -1) {
+            d3fcStyles.push(s.innerText);
         }
     });
+    return d3fcStyles.join("");
 }
 
-function drawChart(chart) {
-    return async function(el, view, task, end_col, end_row) {
-        let jsonp, metadata;
-        const realValues = JSON.parse(this.getAttribute("columns"));
-        const leaves_only = chart.plugin.type !== "d3_sunburst";
-        if (end_col && end_row) {
-            jsonp = view.to_json({end_row, end_col, leaves_only});
-        } else if (end_col) {
-            jsonp = view.to_json({end_col, leaves_only});
-        } else if (end_row) {
-            jsonp = view.to_json({end_row, leaves_only});
-        } else {
-            jsonp = view.to_json({leaves_only});
+export function register(...plugins) {
+    plugins = new Set(plugins.length > 0 ? plugins : charts.map(chart => chart.plugin.name));
+    charts.forEach(chart => {
+        if (plugins.has(chart.plugin.name)) {
+            const name = chart.plugin.name.toLowerCase().replace(/[ \t\r\n\/]*/g, "");
+            const plugin_name = `perspective-viewer-d3fc-${name}`;
+            customElements.define(
+                plugin_name,
+                class extends HTMLElement {
+                    constructor() {
+                        super();
+                        this._chart = null;
+                        this._settings = null;
+                        this.render_warning = true;
+                    }
+
+                    connectedCallback() {
+                        if (!this._initialized) {
+                            this.attachShadow({mode: "open"});
+                            this.shadowRoot.innerHTML = `<style>${styleWithD3FC}</style>`;
+                            this.shadowRoot.innerHTML += `<div id="container" class="chart"></div>`;
+                            this._container = this.shadowRoot.querySelector(".chart");
+                            this._initialized = true;
+                        }
+                    }
+
+                    get name() {
+                        return chart.plugin.name;
+                    }
+
+                    get selectMode() {
+                        return chart.plugin.selectMode || "select";
+                    }
+
+                    get initial() {
+                        return chart.plugin.initial || DEFAULT_PLUGIN_SETTINGS.initial;
+                    }
+
+                    get max_cells() {
+                        return chart.plugin.max_cells || 4000;
+                    }
+
+                    set max_cells(x) {
+                        chart.plugin.max_cells = x;
+                    }
+
+                    get max_columns() {
+                        return chart.plugin.max_columns || 50;
+                    }
+
+                    set max_columns(x) {
+                        chart.plugin.max_columns = x;
+                    }
+
+                    async draw(view, task, end_col, end_row) {
+                        await this.update(view, task, end_col, end_row, true);
+                    }
+
+                    async update(view, task, end_col, end_row, clear = false) {
+                        if (!this.isConnected) {
+                            return;
+                        }
+
+                        const viewer = this.parentElement;
+                        let jsonp, metadata;
+                        const realValues = JSON.parse(viewer.getAttribute("columns"));
+                        const leaves_only = chart.plugin.name !== "Sunburst";
+                        if (end_col && end_row) {
+                            jsonp = view.to_json({end_row, end_col, leaves_only});
+                        } else if (end_col) {
+                            jsonp = view.to_json({end_col, leaves_only});
+                        } else if (end_row) {
+                            jsonp = view.to_json({end_row, leaves_only});
+                        } else {
+                            jsonp = view.to_json({leaves_only});
+                        }
+                        metadata = await Promise.all([viewer._table.schema(false), view.expression_schema(false), view.schema(false), jsonp, view.get_config()]);
+
+                        if (task.cancelled) {
+                            return;
+                        }
+
+                        let [table_schema, expression_schema, view_schema, json, config] = metadata;
+
+                        /**
+                         * Retrieve a tree axis column from the table and
+                         * expression schemas, returning a String type or
+                         * `undefined`.
+                         * @param {String} column a column name
+                         */
+                        const get_pivot_column_type = function(column) {
+                            let type = table_schema[column];
+                            if (!type) {
+                                type = expression_schema[column];
+                            }
+                            return type;
+                        };
+
+                        const {columns, row_pivots, column_pivots, filter} = config;
+                        const filtered =
+                            row_pivots.length > 0
+                                ? json.reduce(
+                                      (acc, col) => {
+                                          if (col.__ROW_PATH__ && col.__ROW_PATH__.length == row_pivots.length) {
+                                              acc.agg_paths.push(acc.aggs.slice());
+                                              acc.rows.push(col);
+                                          } else {
+                                              const len = col.__ROW_PATH__.filter(x => x !== undefined).length;
+                                              acc.aggs[len] = col;
+                                              acc.aggs = acc.aggs.slice(0, len + 1);
+                                          }
+                                          return acc;
+                                      },
+                                      {rows: [], aggs: [], agg_paths: []}
+                                  )
+                                : {rows: json};
+                        const dataMap = (col, i) => (!row_pivots.length ? {...col, __ROW_PATH__: [i]} : col);
+                        const mapped = filtered.rows.map(dataMap);
+
+                        let settings = {
+                            realValues,
+                            crossValues: row_pivots.map(r => ({name: r, type: get_pivot_column_type(r)})),
+                            mainValues: columns.map(a => ({name: a, type: view_schema[a]})),
+                            splitValues: column_pivots.map(r => ({name: r, type: get_pivot_column_type(r)})),
+                            filter,
+                            data: mapped,
+                            agg_paths: filtered.agg_paths
+                        };
+
+                        this._chart = chart;
+
+                        const handler = {
+                            set: (obj, prop, value) => {
+                                if (!EXCLUDED_SETTINGS.includes(prop)) {
+                                    this._container && this._container.dispatchEvent(new Event("perspective-plugin-update", {bubbles: true, composed: true}));
+                                }
+                                obj[prop] = value;
+                                return true;
+                            }
+                        };
+
+                        this._settings = new Proxy({...this._settings, ...settings}, handler);
+                        initialiseStyles(this._container, this._settings);
+
+                        if (clear) {
+                            this._container.innerHTML = "";
+                        }
+
+                        this._draw();
+                    }
+
+                    async clear() {
+                        if (this._container) {
+                            this._container.innerHTML = "";
+                        }
+                    }
+
+                    _draw() {
+                        if (this._settings.data) {
+                            const containerDiv = d3.select(this._container);
+                            const chartClass = `chart ${name}`;
+                            this._settings.size = this._container.getBoundingClientRect();
+
+                            if (this._settings.data.length > 0) {
+                                this._chart(containerDiv.attr("class", chartClass), this._settings);
+                            } else {
+                                containerDiv.attr("class", `${chartClass} disabled`);
+                            }
+                        }
+                    }
+
+                    async resize() {
+                        if (this.isConnected) {
+                            this._draw();
+                        }
+                    }
+
+                    save() {
+                        return this.getSettings();
+                    }
+
+                    restore(settings) {
+                        this.setSettings(settings);
+                    }
+
+                    async delete() {
+                        this._container.innerHTML = "";
+                    }
+
+                    getContainer() {
+                        return this._container;
+                    }
+
+                    getSettings() {
+                        const settings = {...this._settings};
+                        EXCLUDED_SETTINGS.forEach(s => {
+                            delete settings[s];
+                        });
+                        return settings;
+                    }
+
+                    setSettings(settings) {
+                        this._settings = {...this._settings, ...settings};
+                        this._draw();
+                    }
+                }
+            );
+
+            registerPlugin(plugin_name);
         }
-        metadata = await Promise.all([this._table.schema(false), view.expression_schema(false), view.schema(false), jsonp, view.get_config()]);
-
-        if (task.cancelled) {
-            return;
-        }
-
-        let [table_schema, expression_schema, view_schema, json, config] = metadata;
-
-        /**
-         * Retrieve a tree axis column from the table and expression schemas,
-         * returning a String type or `undefined`.
-         * @param {String} column a column name
-         */
-        const get_pivot_column_type = function(column) {
-            let type = table_schema[column];
-            if (!type) {
-                type = expression_schema[column];
-            }
-            return type;
-        };
-
-        const {columns, row_pivots, column_pivots, filter} = config;
-        const filtered =
-            row_pivots.length > 0
-                ? json.reduce(
-                      (acc, col) => {
-                          if (col.__ROW_PATH__ && col.__ROW_PATH__.length == row_pivots.length) {
-                              acc.agg_paths.push(acc.aggs.slice());
-                              acc.rows.push(col);
-                          } else {
-                              const len = col.__ROW_PATH__.filter(x => x !== undefined).length;
-                              acc.aggs[len] = col;
-                              acc.aggs = acc.aggs.slice(0, len + 1);
-                          }
-                          return acc;
-                      },
-                      {rows: [], aggs: [], agg_paths: []}
-                  )
-                : {rows: json};
-        const dataMap = (col, i) => (!row_pivots.length ? {...col, __ROW_PATH__: [i]} : col);
-        const mapped = filtered.rows.map(dataMap);
-
-        let settings = {
-            realValues,
-            crossValues: row_pivots.map(r => ({name: r, type: get_pivot_column_type(r)})),
-            mainValues: columns.map(a => ({name: a, type: view_schema[a]})),
-            splitValues: column_pivots.map(r => ({name: r, type: get_pivot_column_type(r)})),
-            filter,
-            data: mapped,
-            agg_paths: filtered.agg_paths
-        };
-
-        createOrUpdateChart.call(this, el, chart, settings);
-        await new Promise(setTimeout);
-    };
-}
-
-function getOrCreatePluginElement() {
-    let perspective_d3fc_element;
-    this[PRIVATE] = this[PRIVATE] || {};
-    if (!this[PRIVATE].chart) {
-        perspective_d3fc_element = this[PRIVATE].chart = document.createElement("perspective-d3fc-chart");
-    } else {
-        perspective_d3fc_element = this[PRIVATE].chart;
-    }
-    return perspective_d3fc_element;
-}
-
-function createOrUpdateChart(div, chart, settings) {
-    const perspective_d3fc_element = getOrCreatePluginElement.call(this);
-
-    if (!div.contains(perspective_d3fc_element)) {
-        div.innerHTML = "";
-        div.appendChild(perspective_d3fc_element);
-    }
-
-    perspective_d3fc_element.render(chart, settings);
-}
-
-function resizeChart() {
-    if (this[PRIVATE] && this[PRIVATE].chart) {
-        const perspective_d3fc_element = this[PRIVATE].chart;
-        perspective_d3fc_element.resize();
-    }
-}
-
-function deleteChart() {
-    if (this[PRIVATE] && this[PRIVATE].chart) {
-        const perspective_d3fc_element = this[PRIVATE].chart;
-        perspective_d3fc_element.delete();
-    }
-}
-
-function save() {
-    if (this[PRIVATE] && this[PRIVATE].chart) {
-        const perspective_d3fc_element = this[PRIVATE].chart;
-        return perspective_d3fc_element.getSettings();
-    }
-}
-
-function restore(config) {
-    const perspective_d3fc_element = getOrCreatePluginElement.call(this);
-    perspective_d3fc_element.setSettings(config);
+    });
 }
 
 if (!Element.prototype.matches) {

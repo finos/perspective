@@ -159,7 +159,7 @@
             }
         }
 
-        #side_panel #divider {
+        #columns_container #divider {
             display: none;
         }
 
@@ -170,7 +170,7 @@
         }
     }
 
-    #side_panel perspective-row {
+    #columns_container perspective-row {
         --name-before-display: inline-block;
         --is_visible-display: inline-block;
         --row_draggable--padding: 0px 8px 0px 0px;
@@ -262,7 +262,7 @@
         font-family: var(--interface-monospace--font-family, monospace);
     }
 
-    #side_panel #side_panel__actions {
+    #columns_container #side_panel__actions {
         display: flex;
         flex-direction: column;
         flex-shrink: 1000;
@@ -433,6 +433,7 @@
 
     select {
         border-radius: 0;
+        outline: none;
         background-color: var(--select--background-color, white);
         .bordered();
     }

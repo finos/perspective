@@ -78,7 +78,6 @@ function sunburst(container, settings) {
 }
 
 sunburst.plugin = {
-    type: "d3_sunburst",
     name: "Sunburst",
     max_cells: 7500,
     max_columns: 50,

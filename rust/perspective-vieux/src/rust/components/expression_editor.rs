@@ -59,7 +59,7 @@ impl Component for ExpressionEditor {
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         let on_validate = Rc::new(
-            link.callback(|x| ExpressionEditorMsg::Validate(x))
+            link.callback(ExpressionEditorMsg::Validate)
                 .to_closure(),
         );
         let on_save = Rc::new(
@@ -85,9 +85,8 @@ impl Component for ExpressionEditor {
             ExpressionEditorMsg::SetPos(top, left) => {
                 self.top = top;
                 self.left = left;
-                match self.editor.borrow().as_ref() {
-                    Some((_, x)) => x.set_value(""),
-                    None => {}
+                if let Some((_, x)) = self.editor.borrow().as_ref() {
+                    x.set_value("");
                 }
 
                 true
@@ -143,7 +142,7 @@ impl Component for ExpressionEditor {
                         id="psp-expression-editor-button-save"
                         class="psp-expression-editor__button"
                         onclick={ click }
-                        disabled={ !self.save_enabled }>
+                        disabled=!self.save_enabled>
                         { "Save" }
                     </button>
                 </div>

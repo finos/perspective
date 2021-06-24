@@ -8,6 +8,7 @@
 
 pub mod monaco;
 pub mod perspective;
+pub mod perspective_viewer;
 
 mod closure;
 mod js_object;

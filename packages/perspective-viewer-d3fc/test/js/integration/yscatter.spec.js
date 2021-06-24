@@ -14,14 +14,14 @@ const simple_tests = require("@finos/perspective-viewer/test/js/simple_tests.js"
 const render_warning_tests = require("@finos/perspective-viewer/test/js/render_warning_tests.js");
 
 const {withTemplate} = require("./simple-template");
-withTemplate("yscatter", "d3_y_scatter");
+withTemplate("yscatter", "Y Scatter");
 
 utils.with_server({}, () => {
     describe.page(
         "yscatter.html",
         () => {
             simple_tests.default();
-            render_warning_tests.default("d3_y_scatter");
+            render_warning_tests.default("Y Scatter");
         },
         {reload_page: false, root: path.join(__dirname, "..", "..", "..")}
     );

@@ -125,11 +125,7 @@
             let req = await fetch("layout.json");
             let layout = await req.json();
 
-            const plugin = window.getPlugin("d3_heatmap");
-            plugin.max_cells = 10000;
-            plugin.max_columns = 200;
             window.workspace.tables.set("movies", datasource());
-
 
             window.workspace.restore(layout);
         });

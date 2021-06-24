@@ -17,7 +17,7 @@ class TestLayout:
         with patch('IPython.display.display'):
             df = pd.DataFrame([1, 2], columns=['1'])
             PerspectiveWidget(df, plugin=Plugin.YBAR)
-            PerspectiveWidget(df, plugin='y_line')
+            PerspectiveWidget(df, plugin='Y Line')
             try:
                 PerspectiveWidget(df, plugin='test')
                 assert False

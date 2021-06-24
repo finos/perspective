@@ -8,9 +8,11 @@
 
 use crate::components::vieux::*;
 use crate::custom_elements::expression_editor::PerspectiveExpressionEditorElement;
+use crate::plugin::*;
 use crate::session::Session;
 use crate::utils::perspective::*;
-use crate::utils::WeakComponentLink;
+use crate::utils::perspective_viewer::PerspectiveViewerJsPlugin;
+use crate::utils::*;
 use crate::*;
 
 use futures::channel::oneshot::*;
@@ -40,7 +42,19 @@ pub struct PerspectiveVieuxElement {
     elem: HtmlElement,
     root: ComponentLink<PerspectiveVieux>,
     session: Session,
+    plugin: Plugin,
     expression_editor: Rc<RefCell<Option<PerspectiveExpressionEditorElement>>>,
+}
+
+fn update_plugin(elem: &HtmlElement, plugin: PerspectiveViewerJsPlugin) {
+    let mut event_init = web_sys::CustomEventInit::new();
+    event_init.detail(&plugin);
+    let event = web_sys::CustomEvent::new_with_event_init_dict(
+        "-perspective-plugin-changed",
+        &event_init,
+    );
+
+    elem.dispatch_event(&event.unwrap()).unwrap();
 }
 
 #[wasm_bindgen]
@@ -55,6 +69,11 @@ impl PerspectiveVieuxElement {
             .unchecked_into::<web_sys::Element>();
 
         let session = Session::new();
+        let plugin = Plugin::new(session.clone(), {
+            clone!(elem);
+            vec!(Box::new(move |plugin| update_plugin(&elem, plugin)))
+        });
+
         let props = PerspectiveVieuxProps {
             elem: elem.clone(),
             panels: (
@@ -62,6 +81,7 @@ impl PerspectiveVieuxElement {
                 children.item(1).unwrap().unchecked_into(),
             ),
             session: session.clone(),
+            plugin: plugin.clone(),
             weak_link: WeakComponentLink::default(),
         };
 
@@ -71,6 +91,7 @@ impl PerspectiveVieuxElement {
             elem,
             root,
             session,
+            plugin,
             expression_editor: Rc::new(RefCell::new(None)),
         }
     }
@@ -102,7 +123,24 @@ impl PerspectiveVieuxElement {
         let (sender, receiver) = channel::<Result<JsValue, JsValue>>();
         let msg = Msg::ToggleConfig(force, Some(sender));
         self.root.send_message(msg);
-        future_to_promise(async move { receiver.await.unwrap() })
+        future_to_promise(async move {
+            match receiver.await {
+                Ok(x) => x,
+                Err(_x) => Err(JsValue::from("Cancelled")),
+            }
+        })
+    }
+
+    pub fn get_plugin(&self) -> Result<PerspectiveViewerJsPlugin, JsValue> {
+        self.plugin.get_plugin()
+    }
+
+    pub fn set_plugin(&mut self, name: &str) -> Result<bool, JsValue> {
+        self.plugin.set_plugin(Some(name))
+    }
+
+    pub fn set_plugin_default(&mut self) -> Result<bool, JsValue> {
+        self.plugin.set_plugin(None)
     }
 
     fn create_expression_editor(

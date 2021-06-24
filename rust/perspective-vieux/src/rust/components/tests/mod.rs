@@ -7,6 +7,7 @@
 // file.
 
 mod column_style;
+mod plugin_selector;
 mod split_panel;
 mod status_bar;
 mod status_bar_counter;

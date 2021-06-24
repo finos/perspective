@@ -110,7 +110,7 @@
             "linked": false
         },
         "PERSPECTIVE_GENERATED_ID_5": {
-            "plugin": "d3_candlestick",
+            "plugin": "Candlestick",
             "columns": [
                 "open",
                 "close",
@@ -134,7 +134,7 @@
             "linked": false
         },
         "PERSPECTIVE_GENERATED_ID_3": {
-            "plugin": "d3_y_bar",
+            "plugin": "Y Bar",
             "columns": [
                 "uVolume"
             ],

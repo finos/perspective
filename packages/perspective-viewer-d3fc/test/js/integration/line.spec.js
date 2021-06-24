@@ -13,7 +13,7 @@ const utils = require("@finos/perspective-test");
 const simple_tests = require("@finos/perspective-viewer/test/js/simple_tests.js");
 
 const {withTemplate} = require("./simple-template");
-withTemplate("line", "d3_y_line");
+withTemplate("line", "Y Line");
 
 utils.with_server({}, () => {
     describe.page(

@@ -11,8 +11,7 @@ import ohlcCandle from "./ohlcCandle";
 
 const ohlc = ohlcCandle(seriesCanvasOhlc);
 ohlc.plugin = {
-    type: "d3_ohlc",
-    name: "OHLC Chart",
+    name: "OHLC",
     max_cells: 3500,
     max_columns: 50,
     render_warning: true,

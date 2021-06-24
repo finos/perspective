@@ -44,7 +44,7 @@ fn ignore_view_delete(f: JsValue) {
                     if js_sys::Reflect::get(&f, js_intern!("message"))
                         .unwrap()
                         .as_string()
-                        .unwrap_or("".to_owned())
+                        .unwrap_or_else(|| "".to_owned())
                         == "View is not initialized" => {}
                 _ => wasm_bindgen::throw_val(f),
             },
