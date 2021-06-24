@@ -21,7 +21,8 @@ export function activate_plugin_menu(regularTable, target, column_max) {
     const default_config = {
         gradient: column_max,
         pos_color: this._pos_color[0],
-        neg_color: this._neg_color[0]
+        neg_color: this._neg_color[0],
+        color_mode: "foreground"
     };
 
     if (column_type === "float") {

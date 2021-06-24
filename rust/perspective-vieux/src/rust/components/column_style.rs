@@ -20,8 +20,11 @@ use wasm_bindgen_test::*;
 
 pub static CSS: &str = include_str!("../../../dist/css/column-style.css");
 
-#[derive(PartialEq, Serialize, Deserialize, Clone, Debug)]
+#[derive(PartialEq, Clone, Copy, Debug, Serialize, Deserialize)]
 pub enum ColorMode {
+    #[serde(rename = "disabled")]
+    Disabled,
+
     #[serde(rename = "foreground")]
     Foreground,
 
@@ -44,6 +47,7 @@ impl Display for ColorMode {
             ColorMode::Foreground => "foreground",
             ColorMode::Background => "background",
             ColorMode::Gradient => "gradient",
+            _ => panic!("Unknown color mode!"),
         };
 
         write!(f, "{}", text)
@@ -57,16 +61,27 @@ impl FromStr for ColorMode {
             "foreground" => Ok(ColorMode::Foreground),
             "background" => Ok(ColorMode::Background),
             "gradient" => Ok(ColorMode::Gradient),
-            x => Err(format!("Unknown ColorMode '{}'", x)),
+            x => Err(format!("Unknown ColorMode::{}", x)),
         }
+    }
+}
+
+impl ColorMode {
+    fn is_foreground(&self) -> bool {
+        *self == ColorMode::Foreground
+    }
+
+    fn is_enabled(&self) -> bool {
+        *self != ColorMode::Disabled
     }
 }
 
 #[cfg_attr(test, derive(Debug))]
 #[derive(Serialize, Deserialize, Clone, Default)]
 pub struct ColumnStyleConfig {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub color_mode: Option<ColorMode>,
+    #[serde(default = "ColorMode::default")]
+    #[serde(skip_serializing_if = "ColorMode::is_foreground")]
+    pub color_mode: ColorMode,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub fixed: Option<u32>,
@@ -85,16 +100,19 @@ pub struct ColumnStyleConfig {
 /// this struct represents the default values we should use in the GUI when they
 /// are `None` in the real config.  It is also used to decide when to omit a
 /// field when serialized a `ColumnStyleConfig` to JSON.
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Deserialize, Clone, Default, Debug)]
 pub struct ColumnStyleDefaultConfig {
     pub gradient: f64,
     pub fixed: u32,
     pub pos_color: String,
     pub neg_color: String,
+
+    #[serde(default = "ColorMode::default")]
+    pub color_mode: ColorMode,
 }
 
 pub enum ColumnStyleMsg {
-    Reset(ColumnStyleConfig),
+    Reset(ColumnStyleConfig, ColumnStyleDefaultConfig),
     SetPos(u32, u32),
     FixedChanged(String),
     ColorEnabledChanged(bool),
@@ -165,9 +183,10 @@ impl Component for ColumnStyle {
 
     fn update(&mut self, _msg: Self::Message) -> ShouldRender {
         match _msg {
-            ColumnStyleMsg::Reset(config) => {
+            ColumnStyleMsg::Reset(config, default_config) => {
                 let props = ColumnStyleProps {
                     config,
+                    default_config,
                     ..self.props.clone()
                 };
 
@@ -191,7 +210,12 @@ impl Component for ColumnStyle {
             }
             ColumnStyleMsg::ColorEnabledChanged(val) => {
                 if val {
-                    self.props.config.color_mode = Some(self.color_mode.clone());
+                    let color_mode = match self.color_mode {
+                        ColorMode::Disabled => ColorMode::default(),
+                        x => x,
+                    };
+
+                    self.props.config.color_mode = color_mode;
                     self.props.config.pos_color = Some(self.pos_color.to_owned());
                     self.props.config.neg_color = Some(self.neg_color.to_owned());
                     if self.color_mode == ColorMode::Gradient {
@@ -200,7 +224,7 @@ impl Component for ColumnStyle {
                         self.props.config.gradient = None;
                     }
                 } else {
-                    self.props.config.color_mode = None;
+                    self.props.config.color_mode = ColorMode::Disabled;
                     self.props.config.pos_color = None;
                     self.props.config.neg_color = None;
                     self.props.config.gradient = None;
@@ -222,8 +246,8 @@ impl Component for ColumnStyle {
                 false
             }
             ColumnStyleMsg::ColorModeChanged(val) => {
-                self.color_mode = val.clone();
-                self.props.config.color_mode = Some(val);
+                self.color_mode = val;
+                self.props.config.color_mode = val;
                 if self.color_mode == ColorMode::Gradient {
                     self.props.config.gradient = Some(self.gradient);
                 } else {
@@ -281,6 +305,11 @@ impl Component for ColumnStyle {
                 },
             );
 
+        let color_mode_selected = match self.color_mode {
+            ColorMode::Disabled => ColorMode::default(),
+            x => x,
+        };
+
         // Color controls callback
         let pos_color_oninput =
             self.props.weak_link.borrow().as_ref().unwrap().callback(
@@ -306,7 +335,7 @@ impl Component for ColumnStyle {
                 move |event: InputData| ColumnStyleMsg::GradientChanged(event.value),
             );
 
-        let gradient_enabled = self.props.config.color_mode.is_some()
+        let gradient_enabled = self.props.config.color_mode.is_enabled()
             && self.color_mode == ColorMode::Gradient;
 
         html! {
@@ -338,13 +367,13 @@ impl Component for ColumnStyle {
                             id="color-selected"
                             type="checkbox"
                             oninput=color_enabled_oninput
-                            checked={ self.props.config.color_mode.is_some() } />
+                            checked={ self.props.config.color_mode.is_enabled() } />
                         <input
                             id="color-param"
                             class="parameter"
                             type="color"
                             value={ &self.pos_color }
-                            disabled=self.props.config.color_mode.is_none()
+                            disabled=!self.props.config.color_mode.is_enabled()
                             oninput=pos_color_oninput />
                         <span class="operator">{ " + / - " }</span>
                         <input
@@ -352,33 +381,34 @@ impl Component for ColumnStyle {
                             class="parameter"
                             type="color"
                             value={ &self.neg_color }
-                            disabled=self.props.config.color_mode.is_none()
+                            disabled=!self.props.config.color_mode.is_enabled()
                             oninput=neg_color_oninput />
                     </div>
 
                     <RadioList<ColorMode>
                         class="indent"
-                        disabled={ self.props.config.color_mode.is_none() }
+                        disabled={ !self.props.config.color_mode.is_enabled() }
                         values={ vec!(ColorMode::Foreground, ColorMode::Background, ColorMode::Gradient) }
-                        selected={ self.color_mode.clone() }
+                        selected={ color_mode_selected }
                         on_change={ color_mode_changed } >
 
                         <span>{ "Foreground" }</span>
                         <span>{ "Background" }</span>
-                        <span>{ "Gradient" }</span>
+                        <>
+                            <span>{ "Gradient" }</span>
+                            <div class="row indent" style={ if gradient_enabled { "" } else { "display:none" } }>
+                                <input
+                                    id="gradient-param"
+                                    value={ self.gradient }
+                                    class="parameter"
+                                    oninput={ gradient_changed }
+                                    type="number"
+                                    min="0" />
+                            </div>
+                        </>
 
                     </RadioList<ColorMode>>
 
-                    <div class="row indent">
-                        <input
-                            id="gradient-param"
-                            value={ self.gradient }
-                            class="parameter indent"
-                            oninput={ gradient_changed }
-                            disabled=!gradient_enabled
-                            type="number"
-                            min="0" />
-                    </div>
                 </div>
             </>
         }
@@ -386,21 +416,33 @@ impl Component for ColumnStyle {
 }
 
 impl ColumnStyle {
-    fn reset(props: ColumnStyleProps) -> ColumnStyle {
-        let config = props.config.clone();
-        let default_config = props.default_config.clone();
+    fn reset(mut props: ColumnStyleProps) -> ColumnStyle {
+        let config = &mut props.config;
+        let default_config = &props.default_config;
         let gradient = match config.gradient {
             Some(x) => x,
             None => default_config.gradient,
         };
 
-        let (color_mode, pos_color, neg_color) = match config.color_mode {
-            Some(x) => (x, config.pos_color.unwrap(), config.neg_color.unwrap()),
-            None => (
-                Default::default(),
-                default_config.pos_color,
-                default_config.neg_color,
-            ),
+        let pos_color = config
+            .pos_color
+            .as_ref()
+            .unwrap_or(&default_config.pos_color)
+            .to_owned();
+
+        let neg_color = config
+            .neg_color
+            .as_ref()
+            .unwrap_or(&default_config.neg_color)
+            .to_owned();
+
+        let color_mode = match config.color_mode {
+            ColorMode::Disabled => ColorMode::default(),
+            x => {
+                config.pos_color = Some(pos_color.to_owned());
+                config.neg_color = Some(neg_color.to_owned());
+                x
+            }
         };
 
         ColumnStyle {

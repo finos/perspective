@@ -38,11 +38,8 @@ function styleListener(regularTable) {
 
         let type = get_psp_type.call(this, metadata);
         const is_numeric = type === "integer" || type === "float";
-        const float_val = is_numeric && metadata.user;
         td.classList.toggle("psp-align-right", is_numeric);
         td.classList.toggle("psp-align-left", !is_numeric);
-        td.classList.toggle("psp-positive", float_val > 0);
-        td.classList.toggle("psp-negative", float_val < 0);
         td.classList.toggle("psp-menu-open", this._open_column_styles_menu[0] === metadata._virtual_x);
         td.classList.toggle("psp-menu-enabled", is_numeric && !is_corner);
 
@@ -127,12 +124,12 @@ function styleListener(regularTable) {
                     const foreground = infer_foreground_from_background(rgbaToRgb([r, g, b, a], source));
                     td.style.color = foreground;
                     td.style.backgroundColor = `rgba(${r},${g},${b},${a})`;
-                } else if (plugin?.color_mode === "foreground") {
-                    td.style.backgroundColor = "";
-                    td.style.color = hex;
-                } else {
+                } else if (plugin?.color_mode === "disabled") {
                     td.style.backgroundColor = "";
                     td.style.color = "";
+                } else {
+                    td.style.backgroundColor = "";
+                    td.style.color = hex;
                 }
             } else {
                 td.style.backgroundColor = "";
@@ -151,11 +148,8 @@ function styleListener(regularTable) {
                 td.classList.toggle("psp-tree-leaf", is_not_empty && is_leaf);
             }
 
-            const float_val = is_numeric && metadata.user;
             td.classList.toggle("psp-align-right", !is_th && is_numeric);
             td.classList.toggle("psp-align-left", is_th || !is_numeric);
-            td.classList.toggle("psp-positive", float_val > 0);
-            td.classList.toggle("psp-negative", float_val < 0);
         }
     }
 }
