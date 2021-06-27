@@ -408,6 +408,12 @@ class ElemFactory {
     }
 }
 
+export function create_color_record(color) {
+    const chroma_neg = chroma(color);
+    const _neg_grad = make_gradient(chroma_neg);
+    return [color, ...chroma_neg.rgb(), _neg_grad];
+}
+
 export async function createModel(regular, table, view, extend = {}) {
     const config = await view.get_config();
 
@@ -426,16 +432,8 @@ export async function createModel(regular, table, view, extend = {}) {
     ]);
 
     const _plugin_background = chroma(get_rule(regular, "--plugin--background", "#FFFFFF")).rgb();
-    let _pos_color = get_rule(regular, "--rt-pos-cell--color", "#338DCD");
-    const chroma_pos = chroma(_pos_color);
-    const _pos_grad = make_gradient(chroma_pos);
-    _pos_color = [_pos_color, ...chroma_pos.rgb(), _pos_grad];
-
-    let _neg_color = get_rule(regular, "--rt-neg-cell--color", "#FF5942");
-    const chroma_neg = chroma(_neg_color);
-    const _neg_grad = make_gradient(chroma_neg);
-    _neg_color = [_neg_color, ...chroma_neg.rgb(), _neg_grad];
-
+    const _pos_color = create_color_record(get_rule(regular, "--rt-pos-cell--color", "#338DCD"));
+    const _neg_color = create_color_record(get_rule(regular, "--rt-neg-cell--color", "#FF5942"));
     const model = Object.assign(extend, {
         _view: view,
         _table: table,

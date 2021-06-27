@@ -10,7 +10,7 @@
 import {registerPlugin} from "@finos/perspective-viewer/src/js/utils.js";
 import "regular-table";
 
-import {createModel, configureRegularTable, formatters} from "./regular_table_handlers.js";
+import {createModel, configureRegularTable, formatters, create_color_record} from "./regular_table_handlers.js";
 import MATERIAL_STYLE from "../less/regular_table.less";
 import {configureRowSelectable, deselect} from "./row_selection.js";
 import {configureClick} from "./click.js";
@@ -127,13 +127,31 @@ customElements.define(
             if (this.datagrid) {
                 const datagrid = this.datagrid;
                 if (datagrid[PLUGIN_SYMBOL]) {
-                    return JSON.parse(JSON.stringify(datagrid[PLUGIN_SYMBOL]));
+                    const token = {};
+                    for (const col of Object.keys(datagrid[PLUGIN_SYMBOL])) {
+                        const config = Object.assign({}, datagrid[PLUGIN_SYMBOL][col]);
+                        if (config?.pos_color) {
+                            config.pos_color = config.pos_color[0];
+                            config.neg_color = config.neg_color[0];
+                        }
+                        token[col] = config;
+                    }
+
+                    return JSON.parse(JSON.stringify(token));
                 }
             }
             return {};
         }
 
         restore(token) {
+            for (const col of Object.keys(token)) {
+                const config = token[col];
+                if (config?.pos_color) {
+                    config.pos_color = create_color_record(config.pos_color);
+                    config.neg_color = create_color_record(config.neg_color);
+                }
+            }
+
             const datagrid = this.datagrid;
             datagrid[PLUGIN_SYMBOL] = token;
         }
