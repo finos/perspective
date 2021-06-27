@@ -25,6 +25,7 @@ export default () => {
     let xValueName = "crossValue";
     let yValueName = "mainValue";
     let altDataWithScale = null;
+    let scale_factor = 1;
 
     function nearbyTip(selection) {
         const chartPlotArea = `d3fc-${canvas ? "canvas" : "svg"}.plot-area`;
@@ -61,7 +62,7 @@ export default () => {
             .append("circle")
             .attr("class", "nearbyTip")
             .merge(tips)
-            .attr("r", d => (size ? Math.sqrt(size(d.size)) : 10))
+            .attr("r", d => (size ? scale_factor * Math.sqrt(size(d.size)) : 10))
             .attr("transform", d => `translate(${xScale(d[xValueName])},${useYScale(d[yValueName])})`)
             .style("stroke", "none")
             .style("fill", d => color && withOpacity(color(d.key)));
@@ -91,6 +92,13 @@ export default () => {
         return {data: best1, scale: yScale};
     };
 
+    nearbyTip.scaleFactor = (...args) => {
+        if (!args.length) {
+            return scale_factor;
+        }
+        scale_factor = args[0];
+        return nearbyTip;
+    };
     nearbyTip.xScale = (...args) => {
         if (!args.length) {
             return xScale;
