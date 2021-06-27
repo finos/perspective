@@ -24,7 +24,7 @@ const DEFAULT_PLUGIN_SETTINGS = {
 };
 
 const styleWithD3FC = `${style}${getD3FCStyles()}`;
-const EXCLUDED_SETTINGS = ["crossValues", "mainValues", "splitValues", "filter", "data", "size", "colorStyles"];
+const EXCLUDED_SETTINGS = ["crossValues", "mainValues", "splitValues", "filter", "data", "size", "colorStyles", "agg_paths"];
 
 function getD3FCStyles() {
     const headerStyles = document.querySelector("head").querySelectorAll("style");

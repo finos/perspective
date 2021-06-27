@@ -26,7 +26,7 @@ export function gridLayoutMultiChart() {
         const containerHeight = innerRect.height;
         const containerWidth = innerRect.width - (color ? 70 : 0);
 
-        const minSize = 500;
+        const minSize = 300;
         const data = container.datum();
         const cols = Math.min(data.length, Math.floor(containerWidth / minSize));
         const rows = Math.ceil(data.length / cols);
