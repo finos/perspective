@@ -42,9 +42,6 @@ function styleListener(regularTable) {
         td.classList.toggle("psp-align-left", !is_numeric);
         td.classList.toggle("psp-menu-open", this._open_column_styles_menu[0] === metadata._virtual_x);
         td.classList.toggle("psp-menu-enabled", is_numeric && !is_corner);
-
-        const plugin = plugins[column_name];
-        td.classList.toggle("psp-color-mode-bar", plugin?.color_mode === "bar");
     }
 
     const m = [];
@@ -149,6 +146,7 @@ function styleListener(regularTable) {
 
             td.classList.toggle("psp-align-right", !is_th && is_numeric);
             td.classList.toggle("psp-align-left", is_th || !is_numeric);
+            td.classList.toggle("psp-color-mode-bar", plugin?.color_mode === "bar");
         }
     }
     this._div_factory.clear();
