@@ -156,7 +156,7 @@ export class DomElement extends PerspectiveElement {
                 this._drop_target_hover = this._active_columns.children[this._original_index];
                 setTimeout(() => row.setAttribute("drop-target", true));
             } else {
-                this._drop_target_hover = this._new_row(name, type, aggregate);
+                this._drop_target_hover = this._new_row(name, type, undefined);
             }
         });
         row.addEventListener("row-dragend", () => {
