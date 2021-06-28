@@ -6,6 +6,7 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
+from random import random
 from pytest import raises
 from datetime import date, datetime
 from time import mktime
@@ -64,6 +65,22 @@ class TestViewExpression(object):
             "computed": [6, 8, 10, 12],
         }
         assert view.expression_schema() == {"computed": float}
+
+
+    def test_view_streaming_expression(self):
+        def data():
+            return [{"a": random()} for _ in range(50)]
+
+        table = Table(data())
+        view = table.view(expressions=["123"])
+
+        for i in range(5):
+            table.update(data())
+        
+        assert table.size() == 300
+        result = view.to_dict()
+        assert result["123"] == [123 for _ in range(300)]
+
 
     def test_view_expression_create_no_alias(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
