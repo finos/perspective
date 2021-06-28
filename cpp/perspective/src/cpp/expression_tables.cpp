@@ -108,12 +108,12 @@ t_expression_tables::calculate_transitions(std::shared_ptr<t_data_table> existed
 }
 
 void
-t_expression_tables::set_transitional_table_capacity(t_uindex capacity) {
-    m_flattened->set_capacity(capacity);
-    m_prev->set_capacity(capacity);
-    m_current->set_capacity(capacity);
-    m_delta->set_capacity(capacity);
-    m_transitions->set_capacity(capacity);
+t_expression_tables::reserve_transitional_table_size(t_uindex size) {
+    m_flattened->reserve(size);
+    m_prev->reserve(size);
+    m_current->reserve(size);
+    m_delta->reserve(size);
+    m_transitions->reserve(size);
 }
 
 void
