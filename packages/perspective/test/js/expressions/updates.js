@@ -152,21 +152,34 @@ module.exports = perspective => {
             expect(await view.num_rows()).toEqual(24);
             console.log(after);
             expect(after["123"]).toEqual(Array(24).fill(123));
-            expect(after["c0"]).toEqual(
-                Array(6)
-                    .fill([11.5, 12.5, 13.5, 14.5])
-                    .flat()
-            );
-            expect(after["c1"]).toEqual(
-                Array(6)
-                    .fill([["a", "b", "c", "d"]])
-                    .flat()
-            );
-            expect(after["c2"]).toEqual(
-                Array(6)
-                    .fill([["A abcd", "B abcd", "C abcd", "D abcd"]])
-                    .flat()
-            );
+            expect(after["c0"]).toEqual([11.5, 12.5, 13.5, 14.5, 11.5, 12.5, 13.5, 14.5, 11.5, 12.5, 13.5, 14.5, 11.5, 12.5, 13.5, 14.5, 11.5, 12.5, 13.5, 14.5, 11.5, 12.5, 13.5, 14.5]);
+            expect(after["c1"]).toEqual(["a", "b", "c", "d", "a", "b", "c", "d", "a", "b", "c", "d", "a", "b", "c", "d", "a", "b", "c", "d", "a", "b", "c", "d"]);
+            expect(after["c2"]).toEqual([
+                "A abcd",
+                "B abcd",
+                "C abcd",
+                "D abcd",
+                "A abcd",
+                "B abcd",
+                "C abcd",
+                "D abcd",
+                "A abcd",
+                "B abcd",
+                "C abcd",
+                "D abcd",
+                "A abcd",
+                "B abcd",
+                "C abcd",
+                "D abcd",
+                "A abcd",
+                "B abcd",
+                "C abcd",
+                "D abcd",
+                "A abcd",
+                "B abcd",
+                "C abcd",
+                "D abcd"
+            ]);
 
             view.delete();
             table.delete();

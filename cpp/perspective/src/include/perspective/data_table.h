@@ -69,7 +69,12 @@ public:
         t_uindex init_cap, t_backing_store backing_store);
     ~t_data_table();
 
-    void init();
+    /**
+     * @brief Initialize the `t_data_table`. If `make_columns` is True (the
+     * default option), construct and initialize the `t_column`s for the
+     * table.
+     */
+    void init(bool make_columns = true);
 
     const std::string& name() const;
 
