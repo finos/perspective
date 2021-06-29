@@ -32,8 +32,19 @@ struct t_expression_tables {
     t_expression_tables(
         const std::vector<std::shared_ptr<t_computed_expression>>& expressions);
     
-    void set_transitional_table_capacity(t_uindex capacity);
+    /**
+     * @brief Reserve space on each transitional table - reserve is important
+     * because it also reserves space on each underlying column, whereas
+     * `set_capacity` only affects the table, and can lead to a situation where
+     * the table's capacity and the capacity of underlying columns grow out
+     * of sync, which causes memory errors.
+     * 
+     * @param size 
+     */
+    void reserve_transitional_table_size(t_uindex size);
+
     void set_transitional_table_size(t_uindex size);
+
     void clear_transitional_tables();
 
     // Calculate the `t_transitions` value for each row.

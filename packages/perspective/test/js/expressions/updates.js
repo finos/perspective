@@ -126,6 +126,65 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("Expressions should respond to multiple streaming updates", async function() {
+            const table = await perspective.table({
+                x: [1.5, 2.5, 3.5, 4.5],
+                y: ["A", "B", "C", "D"]
+            });
+            const view = await table.view({
+                expressions: ["123", '//c0\n10 + "x"', '//c1\nlower("y")', `//c2\nconcat("y", ' ', 'abcd')`]
+            });
+
+            const before = await view.to_columns();
+            expect(before["123"]).toEqual(Array(4).fill(123));
+            expect(before["c0"]).toEqual([11.5, 12.5, 13.5, 14.5]);
+            expect(before["c1"]).toEqual(["a", "b", "c", "d"]);
+            expect(before["c2"]).toEqual(["A abcd", "B abcd", "C abcd", "D abcd"]);
+
+            for (let i = 0; i < 5; i++) {
+                table.update({
+                    x: [1.5, 2.5, 3.5, 4.5],
+                    y: ["A", "B", "C", "D"]
+                });
+            }
+
+            const after = await view.to_columns();
+            expect(await view.num_rows()).toEqual(24);
+            console.log(after);
+            expect(after["123"]).toEqual(Array(24).fill(123));
+            expect(after["c0"]).toEqual([11.5, 12.5, 13.5, 14.5, 11.5, 12.5, 13.5, 14.5, 11.5, 12.5, 13.5, 14.5, 11.5, 12.5, 13.5, 14.5, 11.5, 12.5, 13.5, 14.5, 11.5, 12.5, 13.5, 14.5]);
+            expect(after["c1"]).toEqual(["a", "b", "c", "d", "a", "b", "c", "d", "a", "b", "c", "d", "a", "b", "c", "d", "a", "b", "c", "d", "a", "b", "c", "d"]);
+            expect(after["c2"]).toEqual([
+                "A abcd",
+                "B abcd",
+                "C abcd",
+                "D abcd",
+                "A abcd",
+                "B abcd",
+                "C abcd",
+                "D abcd",
+                "A abcd",
+                "B abcd",
+                "C abcd",
+                "D abcd",
+                "A abcd",
+                "B abcd",
+                "C abcd",
+                "D abcd",
+                "A abcd",
+                "B abcd",
+                "C abcd",
+                "D abcd",
+                "A abcd",
+                "B abcd",
+                "C abcd",
+                "D abcd"
+            ]);
+
+            view.delete();
+            table.delete();
+        });
+
         it("Conditional expressions should respond to partial updates", async function() {
             const table = await perspective.table(
                 {

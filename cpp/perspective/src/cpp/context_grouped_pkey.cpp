@@ -676,6 +676,7 @@ t_ctx_grouped_pkey::compute_expressions(std::shared_ptr<t_data_table> flattened_
     std::shared_ptr<t_data_table> master_expression_table = m_expression_tables->m_master;
 
     // Set the master table to the right size.
+    master_expression_table->reserve(flattened_masked->size());
     master_expression_table->set_size(flattened_masked->size());
 
     const auto& expressions = m_config.get_expressions();
@@ -698,12 +699,14 @@ t_ctx_grouped_pkey::compute_expressions(
     m_expression_tables->clear_transitional_tables();
 
     // All tables are the same size
-    m_expression_tables->set_transitional_table_capacity(flattened->size());
-    m_expression_tables->set_transitional_table_size(flattened->size());
+    t_uindex flattened_num_rows = flattened->size();
+    m_expression_tables->reserve_transitional_table_size(flattened_num_rows);
+    m_expression_tables->set_transitional_table_size(flattened_num_rows);
 
-    // Update the master expression table's capacity and size
-    m_expression_tables->m_master->set_capacity(master->get_capacity());
-    m_expression_tables->m_master->set_size(master->size());
+    // Update the master expression table's size
+    t_uindex master_num_rows = master->size();
+    m_expression_tables->m_master->reserve(master_num_rows);
+    m_expression_tables->m_master->set_size(master_num_rows);
 
     const auto& expressions = m_config.get_expressions();
     for (const auto& expr : expressions) {

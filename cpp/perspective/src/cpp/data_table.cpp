@@ -99,26 +99,28 @@ t_data_table::name() const {
 }
 
 void
-t_data_table::init() {
+t_data_table::init(bool make_columns) {
     PSP_TRACE_SENTINEL();
     LOG_INIT("t_data_table");
     m_columns = std::vector<std::shared_ptr<t_column>>(m_schema.size());
 
-#ifdef PSP_PARALLEL_FOR
-    tbb::parallel_for(0, int(m_schema.size()), 1,
-        [this](int idx)
-#else
-    for (t_uindex idx = 0, loop_end = m_schema.size(); idx < loop_end; ++idx)
-#endif
-        {
-            const std::string& colname = m_schema.m_columns[idx];
-            t_dtype dtype = m_schema.m_types[idx];
-            m_columns[idx] = make_column(colname, dtype, m_schema.m_status_enabled[idx]);
-            m_columns[idx]->init();
-        }
-#ifdef PSP_PARALLEL_FOR
-    );
-#endif
+    if (make_columns) {
+    #ifdef PSP_PARALLEL_FOR
+        tbb::parallel_for(0, int(m_schema.size()), 1,
+            [this](int idx)
+    #else
+        for (t_uindex idx = 0, loop_end = m_schema.size(); idx < loop_end; ++idx)
+    #endif
+            {
+                const std::string& colname = m_schema.m_columns[idx];
+                t_dtype dtype = m_schema.m_types[idx];
+                m_columns[idx] = make_column(colname, dtype, m_schema.m_status_enabled[idx]);
+                m_columns[idx]->init();
+            }
+    #ifdef PSP_PARALLEL_FOR
+        );
+    #endif
+    }
 
     m_init = true;
 }
@@ -639,21 +641,27 @@ t_data_table::join(std::shared_ptr<t_data_table> other_table) const {
     } 
 
     std::shared_ptr<t_data_table> rval = std::make_shared<t_data_table>(
-        "", "", schema, get_capacity(), BACKING_STORE_MEMORY);
-    rval->init();
+        "", "", schema, DEFAULT_EMPTY_CAPACITY, BACKING_STORE_MEMORY);
+
+    // init() without initializing the t_columns on the returned table, as
+    // they will be immediately replaced by the columns from the tables
+    // we are joining together.
+    rval->init(false);
 
     // borrow columns from the current table
     for (const std::string& column : m_schema.m_columns) {
         rval->set_column(column, get_column(column));
     }
 
+    // and the columns we need from the other table
     for (const std::string& column : other_columns) {
         rval->set_column(column, other_table->get_column(column));
     }
 
-    // don't set size on the columns - they are already of equal size, and we
-    // don't want to mutate the columns.
+    // Set size and capacity on the table only - don't mutate any of the
+    // columns.
     rval->set_table_size(size());
+    rval->set_capacity(std::max(get_capacity(), other_table->get_capacity()));
 
     return rval;
 }
