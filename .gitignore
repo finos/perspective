@@ -177,9 +177,14 @@ rust/perspective-vieux/pkg
 rust/perspective-vieux/target
 rust/perspective-vieux/target2
 .emsdk
+
 docs/static/css/material.dark.css
 docs/i18n/en.json
 docs/static/js
 
 rust/perspective-vieux/target.vscode
 target.vscode
+
+# jupyterlab test artifacts
+packages/perspective-jupyterlab/test/config/jupyter/lab
+packages/perspective-jupyterlab/test/config/jupyter/migrated

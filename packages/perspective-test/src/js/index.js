@@ -46,6 +46,11 @@ exports.with_server = function with_server({paths}, body) {
     body();
 };
 
+exports.with_jupyterlab = function with_jupyterlab(port, body) {
+    __PORT__ = port;
+    body();
+};
+
 let results;
 const seen_results = new Set();
 
@@ -73,6 +78,12 @@ async function get_new_page() {
         } else {
             interceptedRequest.continue();
         }
+    });
+
+    // Disable all alerts and dialogs, as Jupyterlab alerts when trying to
+    // navigate off the page, which will block test completion.
+    page.on("dialog", async dialog => {
+        await dialog.accept();
     });
 
     page.track_mouse = track_mouse.bind(page);
@@ -262,7 +273,7 @@ function mkdirSyncRec(targetDir) {
     }, initDir);
 }
 
-describe.page = (url, body, {reload_page = true, name, root} = {}) => {
+describe.page = (url, body, {reload_page = true, check_results = true, name, root} = {}) => {
     let _url = url ? url : page_url;
     test_root = root ? root : test_root;
 
@@ -277,7 +288,7 @@ describe.page = (url, body, {reload_page = true, name, root} = {}) => {
         return result;
     });
 
-    if (IS_LOCAL_PUPPETEER && !fs.existsSync(path.join(test_root, "test", "results", RESULTS_FILENAME)) && !process.env.WRITE_TESTS) {
+    if (IS_LOCAL_PUPPETEER && !fs.existsSync(path.join(test_root, "test", "results", RESULTS_FILENAME)) && !process.env.WRITE_TESTS && check_results) {
         throw new Error(`
         
 ERROR: Running in puppeteer tests without "${RESULTS_FILENAME}"
@@ -306,8 +317,27 @@ expect.extend({
     }
 });
 
-test.capture = function capture(name, body, {timeout = 60000, viewport = null, wait_for_update = true, fail_on_errors = true, preserve_hover = false} = {}) {
-    const _url = page_url;
+test.run = function run(name, body, {url = page_url, timeout = 60000, viewport = null}) {
+    test(
+        name,
+        async () => {
+            if (viewport !== null) {
+                await page.setViewport({
+                    width: viewport.width,
+                    height: viewport.height
+                });
+            }
+            await new Promise(setTimeout);
+            await page.close();
+            page = await get_new_page();
+            await page.goto(`http://127.0.0.1:${__PORT__}/${url}`, {waitUntil: "domcontentloaded"});
+            await body(page);
+        },
+        timeout
+    );
+};
+
+test.capture = function capture(name, body, {url = page_url, timeout = 60000, viewport = null, wait_for_update = true, fail_on_errors = true, preserve_hover = false} = {}) {
     const _reload_page = page_reload;
     const spec = test(
         name,
@@ -335,19 +365,19 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
                 if (_reload_page) {
                     await page.close();
                     page = await get_new_page();
-                    await page.goto(`http://127.0.0.1:${__PORT__}/${_url}#test=${encodeURIComponent(name)}`, {waitUntil: "domcontentloaded"});
+                    await page.goto(`http://127.0.0.1:${__PORT__}/${url}#test=${encodeURIComponent(name)}`, {waitUntil: "domcontentloaded"});
                 } else {
-                    if (!OLD_SETTINGS[test_root + _url]) {
+                    if (!OLD_SETTINGS[test_root + url]) {
                         await page.close();
                         page = await get_new_page();
-                        await page.goto(`http://127.0.0.1:${__PORT__}/${_url}#test=${encodeURIComponent(name)}`, {waitUntil: "domcontentloaded"});
+                        await page.goto(`http://127.0.0.1:${__PORT__}/${url}#test=${encodeURIComponent(name)}`, {waitUntil: "domcontentloaded"});
                     } else {
                         await page.evaluate(async x => {
                             const viewer = document.querySelector("perspective-viewer");
                             viewer.restore(x);
                             await viewer.notifyResize();
                             await viewer.toggleConfig(false);
-                        }, OLD_SETTINGS[test_root + _url]);
+                        }, OLD_SETTINGS[test_root + url]);
                     }
                 }
 
@@ -361,9 +391,9 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
                     await page.waitForSelector("perspective-viewer");
                 }
 
-                if (!_reload_page && !OLD_SETTINGS[test_root + _url]) {
+                if (!_reload_page && !OLD_SETTINGS[test_root + url]) {
                     await page.waitForSelector("perspective-viewer:not([updating])");
-                    OLD_SETTINGS[test_root + _url] = await page.evaluate(() => {
+                    OLD_SETTINGS[test_root + url] = await page.evaluate(() => {
                         const viewer = document.querySelector("perspective-viewer");
                         return viewer.save();
                     });
