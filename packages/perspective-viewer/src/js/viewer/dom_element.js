@@ -361,7 +361,11 @@ export class DomElement extends PerspectiveElement {
 
         // If columns were not passed in, this is needed to keep the attribute
         // API in sync with DOM state.
-        this.setAttribute("columns", JSON.stringify(columns));
+        const json_cols = JSON.stringify(columns);
+        if ((this.getAttribute("columns") || "[]") !== json_cols) {
+            this.setAttribute("columns", json_cols);
+            return;
+        }
 
         const pop_cols = columns.filter(x => typeof x !== "undefined" && x !== null);
         const lis = this._get_view_inactive_columns();
@@ -503,24 +507,25 @@ export class DomElement extends PerspectiveElement {
     }
 
     async _check_responsive_layout() {
-        if (this.shadowRoot) {
+        const side_panel = this._side_panel();
+        if (this.shadowRoot && side_panel) {
             const app = this.shadowRoot.querySelector("#app");
             if (this.clientHeight < 500 && this.clientWidth > 600 && this._get_view_columns({active: false}).length > this._get_view_columns().length) {
                 if (!app.classList.contains("columns_horizontal")) {
                     const old = this._persisted_side_panel_width;
-                    this._persisted_side_panel_width = this._side_panel().style.width;
-                    this._side_panel().style.width = old || "";
+                    this._persisted_side_panel_width = side_panel.style.width;
+                    side_panel.style.width = old || "";
                     app.classList.add("columns_horizontal");
                 }
             } else if (app.classList.contains("columns_horizontal")) {
                 const panel = this.shadowRoot.querySelector("#pivot_chart_container");
-                panel.clientWidth + this._side_panel().clientWidth;
-                const width = this._persisted_side_panel_width || panel.clientWidth + this._side_panel().clientWidth / 2;
+                panel.clientWidth + side_panel.clientWidth;
+                const width = this._persisted_side_panel_width || panel.clientWidth + side_panel.clientWidth / 2;
                 const height = panel.clientHeight + 50;
                 await this._pre_resize(width, height, () => {
                     const old = this._persisted_side_panel_width;
-                    this._persisted_side_panel_width = this._side_panel().style.width;
-                    this._side_panel().style.width = old || "";
+                    this._persisted_side_panel_width = side_panel.style.width;
+                    side_panel.style.width = old || "";
                     app.classList.remove("columns_horizontal");
                 });
                 return true;

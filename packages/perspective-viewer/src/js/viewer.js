@@ -408,15 +408,15 @@ class PerspectiveViewer extends ActionElement {
      */
     set plugin(v) {
         if (v === "null" || v === null || v === undefined) {
-            this._vieux.set_plugin_default();
+            (this._vieux._instance || this._vieux).set_plugin_default();
             return;
         }
 
         if (this.hasAttribute("plugin")) {
             let plugin = this.getAttribute("plugin");
-            this._vieux.set_plugin(plugin);
+            (this._vieux._instance || this._vieux).set_plugin(plugin);
         } else {
-            this._vieux.set_plugin_default();
+            (this._vieux._instance || this._vieux).set_plugin_default();
             return;
         }
     }
