@@ -188,3 +188,4 @@ target.vscode
 # jupyterlab test artifacts
 packages/perspective-jupyterlab/test/config/jupyter/lab
 packages/perspective-jupyterlab/test/config/jupyter/migrated
+docs/static/features

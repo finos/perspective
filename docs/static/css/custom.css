@@ -38,6 +38,12 @@ body {
     background: #242526;
 }
 
+.homeContainer .buttonWrapper a {
+    border: 1px solid #666;
+    color: #666;
+    cursor: default; 
+}
+
 .imageAlignSide .blockImage {
     flex: 0 1 50%;
     margin-top: 82px;
@@ -179,12 +185,67 @@ h2.headerTitle {
     --plugin--box-shadow: none !important;
 }
 
+.floating_example ~ perspective-expression-editor, .floating_example ~ perspective-column-style {
+    z-index: 100000000 !important;
+    position: fixed !important;
+}
+
+.floating_example {
+    position:fixed;
+    z-index: 1000000;
+    justify-content: center;
+    inset: 0;
+    background-color: rgba(0,0,0,0.8);
+    padding: 80px;
+}
+
+.floating_example perspective-viewer {
+    max-width: 1200px;
+    max-height: 1000px;
+    flex: 1 1 auto;
+    height: auto;
+}
+
+.productShowcaseSection {
+    padding-top: 80px;
+    user-select: none;
+}
+
+.productShowcaseSection img {
+    transition: transform 0.05s;
+    cursor: pointer;
+}
+
+.productShowcaseSection img:hover {
+    transform: scale(1.1);
+}
+
+.productShowcaseSection.dark {
+    background-color: #242526;
+
+}
+
+.productShowcaseSection.dark .button:hover {
+    color: #242526;
+    background-color: #fff !important;
+}
+
+.productShowcaseSection.dark .buttonWrapper a {
+    border: 1px solid #666 !important;
+    color: #666 !important;
+    cursor: default; 
+}
+
 .productShowcaseSection .logos img {
     width: auto;
     max-height: 10000px;
     padding: 0px;
     margin: 20px;
     box-shadow: 0 5px 5px rgba(0,0,0,0.2);
+}
+
+.productShowcaseSection #dark {
+    display: none;
 }
 
 .productShowcaseSection .logos a {
