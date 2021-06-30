@@ -67,7 +67,7 @@ function legendComponent(scrollLegendComponent, scaleModifier) {
                         settings.hideKeys.push(d);
                     }
 
-                    getChartElement(this).draw();
+                    getChartElement(this)._draw();
                 });
 
             scrollLegend.labels(options => {
