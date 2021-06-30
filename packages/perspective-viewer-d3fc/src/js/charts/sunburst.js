@@ -14,6 +14,7 @@ import {sunburstSeries} from "../series/sunburst/sunburstSeries";
 import {tooltip} from "../tooltip/tooltip";
 import {gridLayoutMultiChart} from "../layout/gridLayoutMultiChart";
 import {colorRangeLegend} from "../legend/colorRangeLegend";
+import {colorLegend} from "../legend/legend";
 
 function sunburst(container, settings) {
     if (settings.crossValues.length === 0) {
@@ -22,17 +23,22 @@ function sunburst(container, settings) {
     }
 
     const data = treeData(settings);
-    const color = treeColor(
-        settings,
-        data.map(d => d.extents)
-    );
+    const color = treeColor(settings, data);
     const sunburstGrid = gridLayoutMultiChart().elementsPrefix("sunburst");
 
     container.datum(data).call(sunburstGrid);
 
     if (color) {
-        const legend = colorRangeLegend().scale(color);
-        container.call(legend);
+        const color_column = settings.realValues[1];
+        if (settings.mainValues.find(x => x.name === color_column)?.type === "string") {
+            const legend = colorLegend()
+                .settings(settings)
+                .scale(color);
+            container.call(legend);
+        } else {
+            const legend = colorRangeLegend().scale(color);
+            container.call(legend);
+        }
     }
 
     const sunburstContainer = sunburstGrid.chartContainer();
@@ -59,7 +65,7 @@ function sunburst(container, settings) {
             const svgNode = this.parentNode;
             const {width, height} = svgNode.getBoundingClientRect();
 
-            const radius = (Math.min(width, height) - 120) / 6;
+            const radius = (Math.min(width, height) - 24) / (settings.crossValues.length * 2);
             sunburstSeries()
                 .settings(settings)
                 .split(split)
@@ -72,7 +78,6 @@ function sunburst(container, settings) {
 }
 
 sunburst.plugin = {
-    type: "d3_sunburst",
     name: "Sunburst",
     max_cells: 7500,
     max_columns: 50,

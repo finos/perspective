@@ -63,10 +63,10 @@ which loads a dataset stored in the Apache Arrow format using the `Fetch` API.
 Add these scripts to your `.html`'s `<head>` section:
 
 ```html
-<script src="https://unpkg.com/@finos/perspective"></script>
-<script src="https://unpkg.com/@finos/perspective-viewer"></script>
-<script src="https://unpkg.com/@finos/perspective-viewer-datagrid"></script>
-<script src="https://unpkg.com/@finos/perspective-viewer-d3fc"></script>
+<script src="https://unpkg.com/@finos/perspective/dist/umd/perspective.js"></script>
+<script src="https://unpkg.com/@finos/perspective-viewer/dist/umd/perspective-viewer.js"></script>
+<script src="https://unpkg.com/@finos/perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js"></script>
+<script src="https://unpkg.com/@finos/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js"></script>
 ```
 
 Once added to your page, you can access the Javascript API through the
@@ -83,7 +83,7 @@ Or create a `<perspective-viewer>` in HTML:
 ```html
 <perspective-viewer columns="['Sales', 'Profit']">`
   <script>
-    document.addEventListener("WebComponentsReady", function() {
+    document.addEventListener("DOMContentLoaded", function() {
       const data = {
         Sales: [500, 1000, 1500],
         Profit: [100.25, 200.5, 300.75]
@@ -96,10 +96,8 @@ Or create a `<perspective-viewer>` in HTML:
 </perspective-viewer>
 ```
 
-You must wait for the document `WebComponentsReady` event to fire,
-which indicates that the provided
-[webcomponents.js polyfill](https://github.com/webcomponents/webcomponentsjs)
-has loaded.
+You may choose to wait for the document's `DOMContentLoaded` event to fire,
+which indicates that all page DOM content is available.
 
 This makes it extremely easy to spin up Perspective locally without depending
 on a build chain or other tooling. For production usage, you should incorporate

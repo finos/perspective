@@ -6,7 +6,10 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-@sans-serif-fonts: Arial, sans-serif;
+ 
+ @import "~@finos/perspective-viewer/src/less/variables.less";
+ 
+ @sans-serif-fonts: Arial, sans-serif;
 
 :host {
     .chart {
@@ -19,8 +22,8 @@
         padding: 15px;
         overflow: hidden;
 
-        &.d3_heatmap,
-        &.d3_treemap {
+        &.heatmap,
+        &.treemap {
             d3fc-group.cartesian-chart {
                 grid-template-columns: minmax(0em, max-content) auto 1fr auto minmax(
                         0em,
@@ -37,12 +40,13 @@
             display: none;
         }
 
-        &.d3_heatmap {
+        &.heatmap {
             padding-right: 120px;
         }
 
-        &.d3_sunburst {
+        &.sunburst {
             padding: 0;
+            font-size: 14px;
 
             & .inner-container {
                 width: 100%;
@@ -57,10 +61,13 @@
                     overflow: hidden;
                 }
 
+                .sunburst-container:not(:only-child) svg {
+                    transform: translate(0, -27px);
+                }
+
                 & svg {
                     width: 100%;
                     height: 100%;
-                    transform: translate(0, -27px);
                 }
 
                 & path {
@@ -85,7 +92,7 @@
             padding-right: 120px;
         }
 
-        &.d3_treemap {
+        &.treemap {
            
 
             & .treemap-container {
@@ -148,20 +155,17 @@
                 }
 
                 & .top {
-                    font-size: 19px;
-                    font-weight: bold;
+                    font-size: 14px;
                     z-index: 5;
                     pointer-events: none;
                 }
                 & .mid {
-                    font-size: 10px;
-                    font-weight: bold;
+                    font-size: 8px;
                     opacity: 0.7;
                     z-index: 4;
                 }
                 & .lower {
                     font-size: 0px;
-                    font-weight: bold;
                     opacity: 0;
                     z-index: 4;
                 }
@@ -193,13 +197,18 @@
             line-height: 1em !important;
         }
 
+        & .x-label, & .y-label {
+            color: var(--d3fc-label--color, inherit);
+            font-size: 14px;
+        }
+
         & d3fc-canvas.plot-area {
             display: none;
         }
-        &.d3_xy_scatter,
-        &.d3_xy_line,
-        &.d3_ohlc,
-        &.d3_candlestick {
+        &.xyscatter,
+        &.xyline,
+        &.ohlc,
+        &.candlestick {
             & d3fc-canvas.plot-area {
                 display: block;
             }
@@ -249,15 +258,15 @@
             content: var(--d3fc-y2-label--content, "\1f845");
         }
 
-        &.d3_y_bar .y-axis path,
-        &.d3_y_line .y-axis path,
-        &.d3_xy_line .y-axis path,
-        &.d3_xy_line .x-axis path,
-        &.d3_y_area .y-axis path,
-        &.d3_y_scatter .y-axis path,
-        &.d3_xy_scatter .y-axis path,
-        &.d3_xy_scatter .x-axis path,
-        &.d3_x_bar .x-axis path {
+        &.ybar .y-axis path,
+        &.yline .y-axis path,
+        &.xyline .y-axis path,
+        &.xyline .x-axis path,
+        &.yarea .y-axis path,
+        &.yscatter .y-axis path,
+        &.xyscatter .y-axis path,
+        &.xyscatter .x-axis path,
+        &.xbar .x-axis path {
             visibility: hidden;
         }
 
@@ -339,8 +348,9 @@
         &[borderbox-on-hover="true"] {
             transition: box-shadow 1s;
             &:hover {
-                box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
-                transition: box-shadow 0.2s;
+                background-color: var(--d3fc-legend--background, #ffffff);
+                box-shadow: @elevation1;
+                transition: box-shadow 0.2s,  background-color 0.2s;
             }
         }
 
@@ -397,12 +407,16 @@
         }
     }
 
-    .d3_heatmap .legend-container.legend-color {
+    .heatmap .legend-container.legend-color {
         height: 200px;
     }
 
-    .d3_treemap .legend-container.legend-color {
+    .treemap .legend-container.legend-color {
         height: 200px;
+    }
+
+    .treemap .legend-container:not(.legend-color) {
+        width: 100px;
     }
 
     .zoom-controls {
@@ -450,13 +464,14 @@
     div.tooltip {
         position: absolute;
         text-align: left;
-        font-size: 10pt;
+        font-size: 12px;
+        font-weight: 300;
         white-space: nowrap;
         padding: 0.5em;
         background: var(--d3fc-tooltip--background, #ffffff);
         color: var(--d3fc-tooltip--color, black);
-        border: 1px solid #777777;
-        border-radius: 2px;
+        border: 1px solid var(--d3fc-tooltip--border-color, #777777);
+        box-shadow: var(--d3fc-tooltip--box-shadow, none);
         pointer-events: none;
     }
 

@@ -261,15 +261,8 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
             ...     row_pivots=["a"],
             ...     sort=[["b", "desc"]],
             ...     filter=[["a", ">", 1]],
-            ...     computed_columns=[{
-            ...         "column": "sqrt(a)",
-            ...         "computed_function_name": "sqrt",
-            ...         "inputs": ["a"]
-            ...     }])
+            ...     expressions=["// new column \n \"Sales\" + \"Profit\""])
         """
-        self._displayed = False
-        self.on_displayed(self._on_display)
-
         # Trigger special flow when receiving an ArrayBuffer/binary
         self._pending_binary = None
 
@@ -285,10 +278,6 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
 
         # Pass table load options to the front-end, unless in server mode
         self._options = {}
-
-        if self.client:
-            # Cache calls to `update()` before the widget has been displayed.
-            self._predisplay_update_cache = []
 
         if index is not None and limit is not None:
             raise PerspectiveError("Index and Limit cannot be set at the same time!")
@@ -382,10 +371,6 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
         method. Otherwise, it calls `Viewer.update()` using `super()`.
         """
         if self.client is True:
-            if self._displayed is False:
-                self._predisplay_update_cache.append(data)
-                return
-
             # serialize the data and send a custom message to the browser
             if isinstance(data, pandas.DataFrame) or isinstance(data, pandas.Series):
                 data, _ = deconstruct_pandas(data)
@@ -495,13 +480,6 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
                 # return the dataset or table name to the front-end
                 msg = self._make_load_message()
                 self.send(msg.to_dict())
-
-                # In client mode, users can call `update()` before the widget
-                # is visible. This applies the updates after the viewer has
-                # loaded the initial dataset.
-                if self.client is True and len(self._predisplay_update_cache) > 0:
-                    for data in self._predisplay_update_cache:
-                        self.update(data)
             else:
                 # If the message has `binary_length` set, wait for the arrow
                 # and join it with the JSON message.
@@ -561,9 +539,3 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
             raise PerspectiveError(
                 "Widget does not have any data loaded - use the `load()` method to provide it with data."
             )
-
-    def _on_display(self, widget, **kwargs):
-        """When the widget has been displayed, make sure `displayed` is set to
-        True so updates stop being cached.
-        """
-        self._displayed = True

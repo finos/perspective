@@ -13,7 +13,8 @@ import queue
 import threading
 
 from functools import partial
-from perspective import Table, PerspectiveManager
+from pytest import raises
+from perspective import Table, PerspectiveManager, PerspectiveError
 
 
 def syncify(f):
@@ -74,6 +75,59 @@ class TestAsync(object):
             return tbl.size()
 
         assert _task() == 5
+        tbl.delete()
+
+    def test_async_queue_process_csv(self):
+        """Make sure GIL release during CSV loading works"""     
+        tbl = Table("x,y,z\n1,a,true\n2,b,false\n3,c,true\n4,d,false")
+        manager = PerspectiveManager()
+        manager.set_loop_callback(TestAsync.loop.add_callback)
+        manager.host(tbl)
+
+        @syncify
+        def _task():
+            assert tbl.size() == 4
+            for i in range(5):
+                tbl.update("x,y,z\n1,a,true\n2,b,false\n3,c,true\n4,d,false")
+            return tbl.size()
+
+        assert _task() == 24
+
+        tbl.delete()
+
+    def test_async_call_loop(self):
+        tbl = Table({"a": int, "b": float, "c": str})
+        manager = PerspectiveManager()
+        manager.set_loop_callback(TestAsync.loop.add_callback)
+        manager.call_loop(tbl.update, data)
+        manager.host(tbl)
+
+        @syncify
+        def _task():
+            return tbl.size()
+
+        assert _task() == 10
+        tbl.delete()
+
+    def test_async_call_loop_error_if_no_loop(self):
+        tbl = Table({"a": int, "b": float, "c": str})
+        manager = PerspectiveManager()
+
+        with raises(PerspectiveError):
+            # loop not set - errors
+            manager.call_loop(tbl.update, data)
+
+        manager.set_loop_callback(TestAsync.loop.add_callback)
+        manager.call_loop(tbl.update, data)
+        manager.host(tbl)
+
+        @syncify
+        def _task():
+            return tbl.size()
+
+        # subsequent calls to call_loop will work if loop_callback is set.
+        assert _task() == 10
+
         tbl.delete()
 
     def test_async_multiple_managers_queue_process(self):

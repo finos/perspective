@@ -15,6 +15,7 @@
 #include <perspective/sort_specification.h>
 #include <perspective/traversal.h>
 #include <perspective/data_table.h>
+#include <perspective/expression_tables.h>
 
 namespace perspective {
 
@@ -42,12 +43,16 @@ public:
 
     t_depth get_trav_depth(t_index idx) const;
 
+    std::pair<t_tscalar, t_tscalar> get_min_max(const std::string& colname) const;
+
     using t_ctxbase<t_ctx1>::get_data;
 
 private:
     std::shared_ptr<t_traversal> m_traversal;
     std::shared_ptr<t_stree> m_tree;
     std::vector<t_sortspec> m_sortby;
+    std::shared_ptr<t_vocab> m_expression_vocab;
+    std::shared_ptr<t_expression_tables> m_expression_tables;
     t_depth m_depth;
     bool m_depth_set;
 };

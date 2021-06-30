@@ -16,6 +16,7 @@
 #include <perspective/data_table.h>
 #include <perspective/path.h>
 #include <perspective/sym_table.h>
+#include <perspective/expression_tables.h>
 
 namespace perspective {
 
@@ -55,6 +56,10 @@ public:
 private:
     void rebuild();
 
+    t_tscalar get_value_from_gstate(
+        const std::string& colname,
+        const t_tscalar& pkey) const;
+
     std::shared_ptr<t_traversal> m_traversal;
     std::shared_ptr<t_stree> m_tree;
     std::vector<t_sortspec> m_sortby;
@@ -62,6 +67,8 @@ private:
     bool m_has_label;
     t_depth m_depth;
     bool m_depth_set;
+    std::shared_ptr<t_vocab> m_expression_vocab;
+    std::shared_ptr<t_expression_tables> m_expression_tables;
 };
 
 typedef std::shared_ptr<t_ctx_grouped_pkey> t_ctx_grouped_pkey_sptr;

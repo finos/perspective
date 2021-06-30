@@ -36,8 +36,13 @@ module.exports = {
             },
             {
                 test: /\.css$/,
-                exclude: /node_modules/,
+                include: /monaco\-editor/,
                 use: [{loader: "css-loader"}]
+            },
+            {
+                test: /\.ttf$/,
+                include: /monaco\-editor/,
+                use: ["file-loader"]
             },
             {
                 test: /\.(html)$/,
@@ -50,6 +55,20 @@ module.exports = {
                 test: /\.ts$/,
                 exclude: /node_modules/,
                 loader: "ts-loader"
+            },
+            {
+                test: /\.wasm$/,
+                type: "javascript/auto",
+                include: path.dirname(require.resolve("@finos/perspective-viewer")),
+                loader: "arraybuffer-loader"
+            },
+            {
+                test: /editor\.worker/,
+                type: "javascript/auto",
+                loader: "worker-loader",
+                options: {
+                    inline: "no-fallback"
+                }
             }
         ]
     },

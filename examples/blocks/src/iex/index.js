@@ -35,7 +35,7 @@ async function get_layout() {
     return json;
 }
 
-window.addEventListener("WebComponentsReady", async function() {
+window.addEventListener("DOMContentLoaded", async function() {
     const workspace = document.getElementsByTagName("perspective-workspace")[0];
     const input = document.getElementById("ticker");
 

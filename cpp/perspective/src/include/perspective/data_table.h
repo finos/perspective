@@ -69,7 +69,12 @@ public:
         t_uindex init_cap, t_backing_store backing_store);
     ~t_data_table();
 
-    void init();
+    /**
+     * @brief Initialize the `t_data_table`. If `make_columns` is True (the
+     * default option), construct and initialize the `t_column`s for the
+     * table.
+     */
+    void init(bool make_columns = true);
 
     const std::string& name() const;
 
@@ -106,6 +111,13 @@ public:
 
     void set_size(t_uindex size);
 
+    /**
+     * @brief Only set `m_size` for the table without setting it for columns.
+     * 
+     * @param size 
+     */
+    void set_table_size(t_uindex size);
+
     t_column* _get_column(const std::string& colname);
 
     std::shared_ptr<t_data_table> flatten() const;
@@ -128,6 +140,23 @@ public:
     t_data_table* clone_(const t_mask& mask) const;
     std::shared_ptr<t_data_table> clone(const t_mask& mask) const;
     std::shared_ptr<t_data_table> clone() const;
+
+    /**
+     * @brief Given `other_table`, return a new `t_data_table` that references
+     * both the columns of the current table and `table` without making any
+     * copies of the underlying data.
+     * 
+     * If a column is present in both the current table and `other_table`, the
+     * column from the current table takes precedence. This method is designed
+     * for quick, temporary copies of a `t_data_table` that can be used and
+     * disposed of, which is why it returns a stack-allocated table instead
+     * of a heap-allocated pointer to a table.
+     * 
+     * @param table 
+     * @return t_data_table 
+     */
+    std::shared_ptr<t_data_table>
+    join(std::shared_ptr<t_data_table> other_table) const;
 
     /**
      * @brief Create a new `t_data_table` from the specified schema. For each

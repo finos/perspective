@@ -40,7 +40,6 @@
         "babel-jest": "^25.1.0",
         "babel-plugin-lodash": "^3.3.4",
         "babel-plugin-transform-custom-element-classes": "^0.1.0",
-        "babel-polyfill": "^6.26.0",
         "base64-font-loader": "0.0.4",
         "chalk": "^2.4.2",
         "core-js": "^3.6.4",
@@ -122,6 +121,7 @@
         "setup": "node scripts/setup.js",
         "docs": "node scripts/docs.js",
         "test": "node scripts/test.js",
+        "test:jupyter": "yarn workspace @finos/perspective-jupyterlab test:jupyter",
         "test_js": "node scripts/test_js.js",
         "test_python": "node scripts/test_python.js",
         "clean": "node scripts/clean.js",
@@ -142,6 +142,7 @@
         "fix": "npm-run-all --silent fix:*",
         "toggle_puppeteer": "node scripts/toggle_puppeteer.js",
         "version": "python3 python/perspective/scripts/write_version.py && git add python/perspective/perspective/core/_version.py",
-        "jlab_link": "node scripts/jlab_link.js"
+        "jlab_link": "node scripts/jlab_link.js",
+        "repl": "node scripts/repl.js"
     }
 }

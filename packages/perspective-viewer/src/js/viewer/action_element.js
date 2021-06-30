@@ -8,8 +8,8 @@
  */
 
 import {dragend, column_dragend, column_dragleave, column_dragover, column_drop, drop, dragenter, dragover, dragleave} from "./dragdrop.js";
-
 import {DomElement} from "./dom_element.js";
+import {findExpressionByAlias, throttlePromise} from "../utils.js";
 
 export class ActionElement extends DomElement {
     async _toggle_config(event) {
@@ -18,7 +18,7 @@ export class ActionElement extends DomElement {
             const panel = this.shadowRoot.querySelector("#pivot_chart_container");
             if (!this._show_config) {
                 await this._pre_resize(
-                    panel.clientWidth + this._side_panel.clientWidth,
+                    panel.clientWidth + this._side_panel().clientWidth,
                     panel.clientHeight + this._top_panel.clientHeight,
                     () => {
                         this._app.classList.remove("settings-open");
@@ -58,7 +58,8 @@ export class ActionElement extends DomElement {
         this._datavis.style.height = `${height}px`;
         try {
             if (!document.hidden && this.offsetParent) {
-                await this._plugin.resize.call(this);
+                let plugin = await this._vieux.get_plugin();
+                await plugin.resize();
             }
         } finally {
             pre?.();
@@ -72,7 +73,8 @@ export class ActionElement extends DomElement {
         pre?.();
         try {
             if (!document.hidden && this.offsetParent) {
-                await this._plugin.resize.call(this);
+                let plugin = await this._vieux.get_plugin();
+                await plugin.resize();
             }
         } finally {
             post();
@@ -80,94 +82,68 @@ export class ActionElement extends DomElement {
     }
 
     /**
-     * Display the computed expressions panel.
+     * Display the expressions editor.
      *
      * @param {*} event
      */
-    _open_computed_expression_widget(event) {
+    _open_expression_editor(event) {
         event.stopImmediatePropagation();
-        // FIXME: we need a better way to pass down types, metadata, etc.
-        // from the parent viewer to child web components.
-        this._computed_expression_widget._computed_expression_parser = this._computed_expression_parser;
-
-        // Bind `get_type` so the expression editor can render the correct
-        // types for each column.
-        this._computed_expression_widget._get_type = this._get_type.bind(this);
-
-        // Pass down a way to get the column names from the viewer.
-        this._computed_expression_widget._get_view_all_column_names = this._get_view_all_column_names.bind(this);
-        this._computed_expression_widget._get_view_column_names_by_types = this._get_view_column_names_by_types.bind(this);
-
-        this._computed_expression_widget.style.display = "flex";
-        this._side_panel_actions.style.display = "none";
-        this._computed_expression_widget._observe_editor();
+        this._vieux._open_expression_editor(this._add_expression_button);
+        this._add_expression_button.classList.toggle("expr_editor_open", true);
     }
 
-    /**
-     * Given an expression (in the `detail` property of the
-     * `perspective-computed-expression-save` event), retrieve the viewer's
-     * `computed-columns` array and append the new expression to be parsed.
-     *
-     * @param {*} event
-     */
-    _save_computed_expression(event) {
-        const expression = event.detail.expression;
+    _close_expression_editor(event) {
+        event.stopImmediatePropagation();
+        this._add_expression_button.classList.toggle("expr_editor_open", false);
+    }
 
-        // `computed-columns` stores the raw expression typed by the user.
-        let computed_columns = this._get_view_computed_columns();
+    _save_expression(expression) {
+        const expressions = this._get_view_expressions();
+        expressions.push(expression);
+        this.setAttribute("expressions", JSON.stringify(expressions));
+    }
 
-        if (computed_columns.includes(expression)) {
-            console.warn(`"${expression}" was not applied because it already exists.`);
+    async _type_check_expression(event) {
+        const {expression, alias} = event.detail;
+        const expressions = this._get_view_expressions();
+        const is_duplicate = findExpressionByAlias(alias, expressions);
+
+        if (expressions.includes(expression) || is_duplicate) {
+            console.warn(`Cannot apply duplicate expression: "${expression}"`);
+            const result = {
+                expression_schema: {},
+                errors: {}
+            };
+            result.errors[alias] = "Value Error - Cannot apply duplicate expression.";
+            this._expression_editor.type_check_expression(result);
             return;
         }
 
-        computed_columns.push(expression);
-
-        this.setAttribute("computed-columns", JSON.stringify(computed_columns));
-    }
-
-    async _type_check_computed_expression(event) {
-        const parsed = event.detail.parsed_expression || [];
-        if (parsed.length === 0) {
-            this._computed_expression_widget._type_check_expression({});
+        if (!expression || expression.length === 0) {
+            this._expression_editor.type_check_expression({});
             return;
         }
-        const functions = {};
-        for (const col of parsed) {
-            functions[col.column] = col.computed_function_name;
+
+        this._expression_editor.type_check_expression(await this._table.validate_expressions([expression]));
+    }
+
+    @throttlePromise
+    async _column_visibility_clicked(_ev) {
+        const parent = _ev.currentTarget;
+        const shiftKey = _ev.detail.shiftKey;
+        let plugin = await this._vieux.get_plugin();
+        if (!parent || !parent.parentElement) {
+            return;
         }
-        const schema = await this._table.computed_schema(parsed);
-        // Look at the failing values, and get their expected types
-        const expected_types = {};
-        for (const key in functions) {
-            if (!schema[key]) {
-                expected_types[key] = await this._table.get_computation_input_types(functions[key]);
-            }
-        }
 
-        this._computed_expression_widget._type_check_expression(schema, expected_types);
-    }
-
-    /**
-     * Remove all computed expressions from the DOM.
-     */
-    _clear_all_computed_expressions() {
-        this.setAttribute("computed-columns", JSON.stringify([]));
-    }
-
-    _set_computed_expression(event) {
-        return event;
-    }
-
-    _column_visibility_clicked(ev) {
-        const parent = ev.currentTarget;
         const is_active = parent.parentElement.getAttribute("id") === "active_columns";
+
         if (is_active) {
-            const min_columns = this._plugin.initial?.count || 1;
+            const min_columns = plugin.initial?.count || 1;
             if (this._get_view_active_valid_column_count() === min_columns) {
                 return;
             }
-            if (ev.detail.shiftKey) {
+            if (shiftKey) {
                 for (let child of Array.prototype.slice.call(this._active_columns.children)) {
                     if (child !== parent) {
                         this._active_columns.removeChild(child);
@@ -175,20 +151,20 @@ export class ActionElement extends DomElement {
                 }
             } else {
                 const index = Array.prototype.slice.call(this._active_columns.children).indexOf(parent);
-                if (index < this._plugin.initial?.count) {
+                if (index < plugin.initial?.count) {
                     return;
-                } else if (index < this._plugin.initial?.names?.length - 1) {
+                } else if (index < plugin.initial?.names?.length - 1) {
                     this._active_columns.insertBefore(this._new_row(null), parent);
                 }
                 this._active_columns.removeChild(parent);
             }
         } else {
-            if ((ev.detail.shiftKey && this._plugin.selectMode === "toggle") || (!ev.detail.shiftKey && this._plugin.selectMode === "select")) {
+            if ((shiftKey && plugin.selectMode === "toggle") || (!shiftKey && plugin.selectMode === "select")) {
                 for (let child of Array.prototype.slice.call(this._active_columns.children)) {
                     this._active_columns.removeChild(child);
                 }
             }
-            let row = this._new_row(parent.getAttribute("name"), parent.getAttribute("type"));
+            let row = this._new_row(parent.getAttribute("name"), parent.getAttribute("type"), undefined, undefined, undefined, parent.getAttribute("expression"));
             const cols = this._get_view_active_columns();
             let i = cols.length - 1;
             if (!cols[i] || !cols[i]?.classList.contains("null-column")) {
@@ -271,14 +247,23 @@ export class ActionElement extends DomElement {
         }
     }
 
-    _vis_selector_changed() {
+    _vis_selector_changed(plugin) {
+        this._cached_plugin = plugin;
+        let plugin_name = this.getAttribute("plugin");
+        if (plugin_name !== plugin.name) {
+            this._setAttributeSafe("plugin", plugin.name);
+        }
+
         this._plugin_information.classList.add("hidden");
-        this.setAttribute("plugin", this._vis_selector.value);
         this._active_columns.classList.remove("one_lock", "two_lock");
-        const classname = ["one_lock", "two_lock"][this._plugin.initial?.count - 1];
+        const classname = ["one_lock", "two_lock"][plugin.initial?.count - 1];
         if (classname) {
             this._active_columns.classList.add(classname);
         }
+
+        this._set_row_styles(plugin);
+        this._set_column_defaults(plugin);
+        this.dispatchEvent(new Event("perspective-config-update"));
         this._debounce_update();
     }
 
@@ -309,27 +294,18 @@ export class ActionElement extends DomElement {
         this._active_columns.addEventListener("dragend", column_dragend.bind(this));
         this._active_columns.addEventListener("dragover", column_dragover.bind(this));
         this._active_columns.addEventListener("dragleave", column_dragleave.bind(this));
-        this._add_computed_expression_button.addEventListener("click", this._open_computed_expression_widget.bind(this));
-        this._computed_expression_widget.addEventListener("perspective-computed-expression-save", this._save_computed_expression.bind(this));
-
-        // TODO WIP
-        // this._computed_expression_widget.addEventListener(
-        //     "perspective-computed-expression-resize",
-        //     this._reset_sidepanel.bind(this)
-        // );
-
-        this._computed_expression_widget.addEventListener("perspective-computed-expression-type-check", this._type_check_computed_expression.bind(this));
-        this._computed_expression_widget.addEventListener("perspective-computed-expression-remove", this._clear_all_computed_expressions.bind(this));
-        this._computed_expression_widget.addEventListener("perspective-computed-expression-update", this._set_computed_expression.bind(this));
+        this._add_expression_button.addEventListener("click", this._open_expression_editor.bind(this));
+        this._add_expression_button.addEventListener("-perspective-close-expression", this._close_expression_editor.bind(this));
         this._transpose_button.addEventListener("click", this._transpose.bind(this));
-        this._vis_selector.addEventListener("change", this._vis_selector_changed.bind(this));
         this._vieux.addEventListener("perspective-vieux-reset", () => this.reset());
-        this._vieux.addEventListener("perspective-vieux-resize", () => this._plugin.resize.call(this));
+        this._vieux.addEventListener("-perspective-plugin-changed", ({detail}) => this._vis_selector_changed(detail));
+        this._vieux.addEventListener("-perspective-add-expression", ({detail}) => this._save_expression(detail));
 
-        this._plugin_information_action.addEventListener("click", () => {
+        this._plugin_information_action.addEventListener("click", async () => {
+            let plugin = await this._vieux.get_plugin();
             this._debounce_update({ignore_size_check: true, limit_points: false});
             this._plugin_information.classList.add("hidden");
-            this._plugin.render_warning = false;
+            plugin.render_warning = false;
         });
     }
 }

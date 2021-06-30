@@ -247,10 +247,10 @@ using a websocket API.
 By default, `perspective` will run with a synchronous interface.  Using the
 `PerspectiveManager.set_loop_callback()` method, `perspective` can be configured
 to defer the application of side-effectful calls like `update()` to an event
-loop, such as `asyncio`.  When running in Async mode, Perspective will release
-the GIL for some operations, enabling better parallelism and overall better
-server performance.  There are a few important differences when running
-`PerspectiveManager` in this mode:
+loop, such as `tornado.ioloop.IOLoop`.  When running in Async mode, Perspective
+will release the GIL for some operations, enabling better parallelism and
+overall better server performance.  There are a few important differences when
+running `PerspectiveManager` in this mode:
 
   * Calls to methods like `update()` will return immediately, and the reciprocal 
     `on_update()` callbacks will be invoked on an event later scheduled.  Calls
@@ -378,7 +378,7 @@ _*index.html*_
 <perspective-viewer id="viewer" editable></perspective-viewer>
 
 <script>
-  window.addEventListener("WebComponentsReady", async function () {
+  window.addEventListener("DOMContentLoaded", async function () {
     // Create a client that expects a Perspective server
     // to accept connections at the specified URL.
     const websocket = perspective.websocket("ws://localhost:8888/websocket");
@@ -480,6 +480,10 @@ PerspectiveWidget(table)
 ```python
 PerspectiveWidget(None)
 ```
+
+## `PerspectiveRenderer`
+
+Perspective also exposes a JS-only `mimerender-extension`. This lets you view `csv`, `json`, and `arrow` files directly from the file browser. You can see this by right clicking one of these files and `Open With->CSVPerspective` (or `JSONPerspective` or `ArrowPerspective`). Perspective will also install itself as the default handler for opening `.arrow` files.
 
 ## `PerspectiveTornadoHandler`
 

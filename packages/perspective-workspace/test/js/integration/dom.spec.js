@@ -40,13 +40,13 @@ utils.with_server({paths: PATHS}, () => {
                             workspace.appendChild(viewer);
                             workspace.appendChild(viewer2);
                         });
-                        await page.waitForSelector("perspective-workspace perspective-viewer:not([updating])");
+                        while ((await page.$$("perspective-workspace > perspective-viewer[updating]")).length > 0);
                         await page.evaluate(() => {
                             const viewer = document.body.querySelector('perspective-viewer[name="one"]');
                             const workspace = document.getElementById("workspace");
                             workspace.removeChild(viewer);
                         });
-                        await page.waitForSelector("perspective-workspace perspective-viewer:not([updating])");
+                        while ((await page.$$("perspective-workspace > perspective-viewer[updating]")).length > 0);
                     },
                     {timeout: 30000}
                 );
@@ -63,7 +63,7 @@ utils.with_server({paths: PATHS}, () => {
                             const workspace = document.getElementById("workspace");
                             workspace.appendChild(viewer);
                         });
-                        await page.waitForSelector("perspective-workspace perspective-viewer:not([updating])");
+                        while ((await page.$$("perspective-workspace > perspective-viewer[updating]")).length > 0);
                     },
                     {timeout: 30000}
                 );
@@ -82,7 +82,7 @@ utils.with_server({paths: PATHS}, () => {
                             workspace.appendChild(viewer);
                             workspace.appendChild(viewer2);
                         });
-                        await page.waitForSelector("perspective-workspace perspective-viewer:not([updating])");
+                        while ((await page.$$("perspective-workspace > perspective-viewer[updating]")).length > 0);
                     },
                     {timeout: 30000}
                 );
@@ -98,7 +98,7 @@ utils.with_server({paths: PATHS}, () => {
                             const workspace = document.getElementById("workspace");
                             workspace.appendChild(viewer);
                         });
-                        await page.waitForSelector("perspective-workspace perspective-viewer:not([updating])");
+                        while ((await page.$$("perspective-workspace > perspective-viewer[updating]")).length > 0);
                     },
                     {timeout: 30000}
                 );
@@ -112,7 +112,7 @@ utils.with_server({paths: PATHS}, () => {
                             const workspace = document.getElementById("workspace");
                             workspace.appendChild(viewer);
                         });
-                        await page.waitForSelector("perspective-workspace perspective-viewer:not([updating])");
+                        while ((await page.$$("perspective-workspace > perspective-viewer[updating]")).length > 0);
                     },
                     {timeout: 30000}
                 );

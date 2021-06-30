@@ -31,7 +31,7 @@ function get_text_width(text, max = 0) {
     // FIXME get these values form the stylesheet
     SPAN.innerHTML = text;
     document.body.appendChild(SPAN);
-    const width = `${Math.max(max, SPAN.offsetWidth) + 20}px`;
+    const width = `${Math.max(max, SPAN.offsetWidth) + 10}px`;
     document.body.removeChild(SPAN);
     return width;
 }
@@ -162,27 +162,6 @@ class Row extends HTMLElement {
         this._blur_agg_dropdown();
     }
 
-    set computed_column(c) {
-        // const data = this._get_computed_data();
-        // const computed_input_column =
-        //    this.shadowRoot.querySelector('#computed_input_column');
-        // const computation_name =
-        //    this.shadowRoot.querySelector('#computation_name');
-        // computation_name.textContent = data.computation.name;
-        // computed_input_column.textContent = data.input_column;
-    }
-
-    _get_computed_data() {
-        const data = JSON.parse(this.getAttribute("computed_column"));
-        return {
-            column_name: data.column_name,
-            input_columns: data.input_columns,
-            input_type: data.input_type,
-            computation: data.computation,
-            type: data.type
-        };
-    }
-
     _update_filter(event) {
         const filter_operand = this.shadowRoot.querySelector("#filter_operand");
         const filter_operator = this.shadowRoot.querySelector("#filter_operator");
@@ -209,15 +188,19 @@ class Row extends HTMLElement {
     }
 
     _set_data_transfer(event) {
+        let data;
         if (this.hasAttribute("filter")) {
             const {operator, operand} = JSON.parse(this.getAttribute("filter"));
-            event.dataTransfer.setData("text/plain", JSON.stringify([this.getAttribute("name"), operator, operand, this.getAttribute("type"), this.getAttribute("aggregate")]));
+            data = [this.getAttribute("name"), operator, operand, this.getAttribute("type"), this.getAttribute("aggregate")];
         } else {
-            event.dataTransfer.setData(
-                "text/plain",
-                JSON.stringify([this.getAttribute("name"), get_type_config(this.getAttribute("type")).filter_operator, undefined, this.getAttribute("type"), this.getAttribute("aggregate")])
-            );
+            data = [this.getAttribute("name"), get_type_config(this.getAttribute("type")).filter_operator, undefined, this.getAttribute("type"), this.getAttribute("aggregate")];
         }
+        if (this.hasAttribute("expression") && this.hasAttribute("title")) {
+            // Add the expression to drag-data so it automatically
+            // resolves inside the expression editor.
+            data.push(this.getAttribute("title"));
+        }
+        event.dataTransfer.setData("text/plain", JSON.stringify(data));
         this.dispatchEvent(new CustomEvent("row-drag"));
     }
 
@@ -229,7 +212,6 @@ class Row extends HTMLElement {
         this._sort_order = this.shadowRoot.querySelector("#sort_order");
         this._filter_operand = this.shadowRoot.querySelector("#filter_operand");
         this._filter_operator = this.shadowRoot.querySelector("#filter_operator");
-        this._edit_computed_column_button = this.shadowRoot.querySelector("#row_edit");
         this._column_aggregate_category = this.shadowRoot.querySelector("#column_aggregate_category");
     }
 
@@ -276,14 +258,6 @@ class Row extends HTMLElement {
             const filter_input = this.shadowRoot.querySelector("#filter_operand");
             filter_input.style.width = get_text_width("" + this._filter_operand.value, 30);
             debounced_filter();
-        });
-        this._edit_computed_column_button.addEventListener("click", () => {
-            this.dispatchEvent(
-                new CustomEvent("perspective-computed-column-edit", {
-                    bubbles: true,
-                    detail: this._get_computed_data()
-                })
-            );
         });
     }
 

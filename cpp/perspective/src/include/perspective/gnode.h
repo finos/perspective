@@ -20,14 +20,12 @@
 #include <perspective/gnode_state.h>
 #include <perspective/sparse_tree.h>
 #include <perspective/process_state.h>
-#include <perspective/computed.h>
-#include <perspective/computed_column_map.h>
+#include <perspective/computed_expression.h>
 #include <perspective/computed_function.h>
+#include <perspective/expression_tables.h>
 #include <tsl/ordered_map.h>
-#ifdef PSP_ENABLE_PYTHON
-#include <thread>
-#endif
 #ifdef PSP_PARALLEL_FOR
+#include <thread>
 #include <tbb/parallel_sort.h>
 #include <tbb/tbb.h>
 #endif
@@ -131,7 +129,22 @@ public:
      */
     void remove_input_port(t_uindex port_id);
 
+    /**
+     * @brief Given a new context, register it with the gnode, compute and
+     * add its expression columns.
+     * 
+     * @param name 
+     * @param type 
+     * @param ptr 
+     */
     void _register_context(const std::string& name, t_ctx_type type, std::int64_t ptr);
+
+    /**
+     * @brief Remove a context by name from the gnode, and remove its
+     * computed expression columns.
+     * 
+     * @param name 
+     */
     void _unregister_context(const std::string& name);
 
     const t_data_table* get_table() const;
@@ -192,7 +205,7 @@ public:
     void pprint() const;
     std::string repr() const;
 
-#ifdef PSP_ENABLE_PYTHON
+#ifdef PSP_PARALLEL_FOR
     void set_event_loop_thread_id(std::thread::id id);
 #endif
 
@@ -218,7 +231,10 @@ protected:
      * @param changed_rows 
      */
     template <typename CTX_T>
-    void update_context_from_state(CTX_T* ctx, std::shared_ptr<t_data_table> tbl);
+    void update_context_from_state(
+        CTX_T* ctx,
+        const std::string& name,
+        std::shared_ptr<t_data_table> flattened);
 
     /**
      * @brief Provide the registered `t_ctx*` with a pointer to this gnode's
@@ -232,15 +248,13 @@ protected:
     void set_ctx_state(void* ptr);
 
     bool have_context(const std::string& name) const;
-    void notify_contexts(const t_data_table& flattened);
+    void notify_contexts(std::shared_ptr<t_data_table> flattened);
 
     template <typename CTX_T>
-    void notify_context(const t_data_table& flattened, const t_ctx_handle& ctxh);
-
-    template <typename CTX_T>
-    void notify_context(CTX_T* ctx, const t_data_table& flattened, const t_data_table& delta,
-        const t_data_table& prev, const t_data_table& current, const t_data_table& transitions,
-        const t_data_table& existed);
+    void notify_context(
+        std::shared_ptr<t_data_table> flattened,
+        const t_ctx_handle& ctxh,
+        const std::string& name);
 
     /**
      * @brief Given the process state, create a `t_mask` bitset set to true for
@@ -285,75 +299,27 @@ protected:
      */
     t_value_transition calc_transition(bool prev_existed, bool row_pre_existed, bool exists,
         bool prev_valid, bool cur_valid, bool prev_cur_eq, bool prev_pkey_eq);
+    
+    /******************************************************************************
+     *
+     * Expression Column Operations
+     */
 
     /**
-     * @brief For all valid computed columns registered with the gnode,
-     * the master `m_table` of `m_state`.
-     * 
-     * @param tbl 
-     * @param flattened 
-     * @param changed_rows 
+     * @brief Compute all expressions on each registered context using the
+     * flattened table. This method is called on the first update applied
+     * on an empty gstate master table.
      */
-    void
-    _recompute_all_columns(
-        std::shared_ptr<t_data_table> tbl,
-        std::shared_ptr<t_data_table> flattened,
-        const std::vector<t_rlookup>& changed_rows);
+    void _compute_expressions(std::shared_ptr<t_data_table> flattened_masked);
 
     /**
-     * @brief For each `t_data_table` in tables, apply computations for each
-     * computed column registered with the gnode.
-     * 
-     * @param table 
+     * @brief Compute all expressions on each registered context using all
+     * data and transition tables. This method is called on all subsequent
+     * updates applied after the first update.
      */
-    void _compute_all_columns(
-        std::vector<std::shared_ptr<t_data_table>> tables);
-
-    /**
-     * @brief Add all valid computed columns to `table` with the specified
-     * `dtype`. Used when a column needs to be present for future operations,
-     * but when a computation is not necessary/the dtype of the column != the
-     * dtype of the actual computed column.
-     * 
-     * @param table 
-     * @param dtype 
-     */
-    void _add_all_computed_columns(
-        std::shared_ptr<t_data_table> table,
-        t_dtype dtype);
-
-    /**
-     * @brief Add a computed column to `tbl` without computing it.
-     * 
-     * @param computed_column 
-     * @param tbl 
-     */
-    void _add_computed_column(
-        const t_computed_column_definition& computed_column,
-        std::shared_ptr<t_data_table> tbl);
-
-    /**
-     * @brief Apply a computed column to `tbl`.
-     * 
-     * @param computed_column 
-     * @param tbl 
-     */
-    void _compute_column(
-        const t_computed_column_definition& computed_column,
-        std::shared_ptr<t_data_table> tbl);
-
-    /**
-     * @brief Recompute the computed column on `flattened`,
-     * using information from both `flattened` and `tbl`.
-     * 
-     * @param ctx 
-     * @param tbl 
-     */
-    void _recompute_column(
-        const t_computed_column_definition& computed_column,
-        std::shared_ptr<t_data_table> table,
-        std::shared_ptr<t_data_table> flattened,
-        const std::vector<t_rlookup>& changed_rows);
+    void _compute_expressions(
+        std::shared_ptr<t_data_table> master,
+        std::shared_ptr<t_data_table> flattened);
 
 private:
     /**
@@ -376,8 +342,6 @@ private:
     // A vector of `t_schema`s for each transitional `t_data_table`.
     std::vector<t_schema> m_transitional_schemas;
 
-    t_computed_column_map m_computed_column_map;
-
     bool m_init;
     t_uindex m_id;
 
@@ -390,8 +354,9 @@ private:
     // Output ports stored sequentially in a vector, keyed by the
     // `t_gnode_port` enum.
     std::vector<std::shared_ptr<t_port>> m_oports;
-    std::map<std::string, t_ctx_handle> m_contexts;
+    tsl::ordered_map<std::string, t_ctx_handle> m_contexts;
     std::shared_ptr<t_gstate> m_gstate;
+
     std::chrono::high_resolution_clock::time_point m_epoch;
     std::function<void()> m_pool_cleanup;
     bool m_was_updated;
@@ -411,44 +376,56 @@ private:
  */
 template <typename CTX_T>
 void
-t_gnode::notify_context(const t_data_table& flattened, const t_ctx_handle& ctxh) {
+t_gnode::notify_context(
+    std::shared_ptr<t_data_table> flattened,
+    const t_ctx_handle& ctxh,
+    const std::string& name) {
     CTX_T* ctx = ctxh.get<CTX_T>();
-    // These tables are guaranteed to have all computed columns.
-    const t_data_table& delta = *(m_oports[PSP_PORT_DELTA]->get_table().get());
-    const t_data_table& prev = *(m_oports[PSP_PORT_PREV]->get_table().get());
-    const t_data_table& current = *(m_oports[PSP_PORT_CURRENT]->get_table().get());
-    const t_data_table& transitions = *(m_oports[PSP_PORT_TRANSITIONS]->get_table().get());
-    const t_data_table& existed = *(m_oports[PSP_PORT_EXISTED]->get_table().get());
-    notify_context<CTX_T>(ctx, flattened, delta, prev, current, transitions, existed);
-}
+    
+    // Tables from the gnode which do not have the expressions applied yet
+    std::shared_ptr<t_data_table> delta = m_oports[PSP_PORT_DELTA]->get_table();
+    std::shared_ptr<t_data_table> prev = m_oports[PSP_PORT_PREV]->get_table();
+    std::shared_ptr<t_data_table> current = m_oports[PSP_PORT_CURRENT]->get_table();
+    std::shared_ptr<t_data_table> transitions = m_oports[PSP_PORT_TRANSITIONS]->get_table();
 
-/**
- * @brief Given multiple `t_data_table`s containing the different states of the context,
- * update the context with new data.
- *
- * Called on updates and additions AFTER a view is constructed from the table/context.
- *
- * @tparam CTX_T
- * @param ctx
- * @param flattened a `t_data_table` containing the flat data for the context
- * @param delta a `t_data_table` containing the changes to the dataset
- * @param prev a `t_data_table` containing the previous state
- * @param current a `t_data_table` containing the current state
- * @param transitions a `t_data_table` containing operations to transform the context
- * @param existed
- */
-template <typename CTX_T>
-void
-t_gnode::notify_context(CTX_T* ctx, const t_data_table& flattened, const t_data_table& delta,
-    const t_data_table& prev, const t_data_table& current, const t_data_table& transitions,
-    const t_data_table& existed) {
-    auto ctx_config = ctx->get_config();
-    auto computed_columns = ctx_config.get_computed_columns();
+    // Existed is special - it will never have any expression columns and can
+    // be used as-is from the gnode.
+    const t_data_table& existed = *(m_oports[PSP_PORT_EXISTED]->get_table());
 
     ctx->step_begin();
-    // Flattened has the computed columns at this point, as it has
-    // passed through the body of `process_table`.
-    ctx->notify(flattened, delta, prev, current, transitions, existed);
+
+    if (ctx->num_expressions() > 0) {
+        // Join expression tables on the context with gnode tables and pass those
+        // into the context so there is no distinction between expression and real
+        // columns for the context.
+        std::shared_ptr<t_expression_tables> ctx_expression_tables = ctx->get_expression_tables();
+
+        auto joined_flattened = flattened->join(ctx_expression_tables->m_flattened);
+        auto joined_delta = delta->join(ctx_expression_tables->m_delta);
+        auto joined_prev = prev->join(ctx_expression_tables->m_prev);
+        auto joined_current = current->join(ctx_expression_tables->m_current);
+        auto joined_transitions = transitions->join(ctx_expression_tables->m_transitions);
+
+        // pass the tables as const references - the destructors for all of the
+        // joined tables will be called after this function finishes executing,
+        // as the contexts do not retain a reference to these tables.
+        ctx->notify(
+            *joined_flattened,
+            *joined_delta,
+            *joined_prev,
+            *joined_current,
+            *joined_transitions,
+            existed);
+    } else {
+        ctx->notify(
+            *flattened,
+            *delta,
+            *prev,
+            *current,
+            *transitions,
+            existed);
+    }
+
     ctx->step_end();
 }
 
@@ -464,22 +441,37 @@ t_gnode::notify_context(CTX_T* ctx, const t_data_table& flattened, const t_data_
 template <typename CTX_T>
 void
 t_gnode::update_context_from_state(
-    CTX_T* ctx, std::shared_ptr<t_data_table> flattened) {
+    CTX_T* ctx,
+    const std::string& name,
+    std::shared_ptr<t_data_table> flattened) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     PSP_VERBOSE_ASSERT(
         m_mode == NODE_PROCESSING_SIMPLE_DATAFLOW, "Only simple dataflows supported currently")
 
-    if (flattened->size() == 0)
-        return;
-
-    // Need to cast shared ptr to a const reference before passing to notify,
-    // reference is valid as `notify` is not async
-    const t_data_table& const_flattened = 
-        const_cast<const t_data_table&>(*flattened);
+    if (flattened->size() == 0) return;
 
     ctx->step_begin();
-    ctx->notify(const_flattened);
+
+    // This method is called in two places:
+    //
+    // 1. when a new context is created and it needs to get the current state
+    //  of the gstate master table in order to calculate aggregates, etc.
+    //
+    // 2. when a table created from schema (0 rows) gets data and now needs
+    //  to update its registered contexts with the new data.
+    if (ctx->num_expressions() > 0) {
+        // If the context has expression columns, it has already been computed
+        // in `process_table` and we can join the "real" and expression columns
+        // together and pass it to the context.
+        std::shared_ptr<t_expression_tables> ctx_expression_tables = ctx->get_expression_tables();
+        std::shared_ptr<t_data_table> joined_flattened = flattened->join(ctx_expression_tables->m_master);
+        ctx->notify(*joined_flattened);
+    } else {
+        // Just use the table from the gnode
+        ctx->notify(*flattened);
+    }
+
     ctx->step_end();
 }
 

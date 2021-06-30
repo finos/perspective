@@ -13,7 +13,7 @@ export default (width, height) => {
     const treemapLayout = d3
         .treemap()
         .size([width, height])
-        .paddingInner(d => 1 + 2 * d.height);
+        .paddingInner(d => 1 + 2 * (d.height - 1));
 
     treemapLayout.tile(d3.treemapBinary);
 

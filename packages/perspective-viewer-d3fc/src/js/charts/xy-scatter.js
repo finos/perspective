@@ -94,8 +94,7 @@ function xyScatter(container, settings) {
 }
 
 xyScatter.plugin = {
-    type: "d3_xy_scatter",
-    name: "X/Y Scatter Chart",
+    name: "X/Y Scatter",
     max_cells: 50000,
     max_columns: 50,
     render_warning: true,

@@ -309,7 +309,7 @@ class Suite {
         return results.map(x => {
             // TODO perspective bug :(
             for (const col of columns) {
-                x[col] = x[col] || "-";
+                x[col] = x[col] === undefined ? "-" : x[col];
             }
             return x;
         });

@@ -6,9 +6,8 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::js_object;
 use crate::utils::perspective::*;
-use crate::utils::*;
+use crate::*;
 
 use js_sys::{JsString, Promise};
 use std::cell::RefCell;
@@ -19,8 +18,8 @@ use wasm_bindgen_futures::future_to_promise;
 
 /// Copy a flat (unpivoted with all columns) CSV to the clipboard.
 #[wasm_bindgen]
-pub fn copy_flat(table: &PerspectiveJsTable) -> JsResult<Promise> {
-    let table = table.clone();
+pub fn copy_flat(table: &PerspectiveJsTable) -> Result<Promise, JsValue> {
+    clone!(table);
     let csv_ref: Rc<RefCell<Option<String>>> = Rc::new(RefCell::new(None));
     poll(0, csv_ref.clone())?;
     Ok(future_to_promise(async move {
@@ -34,8 +33,8 @@ pub fn copy_flat(table: &PerspectiveJsTable) -> JsResult<Promise> {
 
 /// Copy a `PerspectiveJsView` to the clipboard as a CSV.
 #[wasm_bindgen]
-pub fn copy(view: &PerspectiveJsView) -> JsResult<Promise> {
-    let view = view.clone();
+pub fn copy(view: &PerspectiveJsView) -> Result<Promise, JsValue> {
+    clone!(view);
     let csv_ref: Rc<RefCell<Option<String>>> = Rc::new(RefCell::new(None));
     poll(0, csv_ref.clone())?;
     Ok(future_to_promise(async move {
@@ -48,7 +47,7 @@ pub fn copy(view: &PerspectiveJsView) -> JsResult<Promise> {
 /// This method must be called from an event handler, subject to the browser's
 /// restrictions on clipboard access.  See
 /// [ws](https://www.w3.org/TR/clipboard-apis/#allow-read-clipboard).
-fn poll(count: u32, csv_ref: Rc<RefCell<Option<String>>>) -> JsResult<()> {
+fn poll(count: u32, csv_ref: Rc<RefCell<Option<String>>>) -> Result<(), JsValue> {
     if let Some(csv) = csv_ref.borrow().as_ref() {
         let _promise = web_sys::window()
             .unwrap()
@@ -56,9 +55,9 @@ fn poll(count: u32, csv_ref: Rc<RefCell<Option<String>>>) -> JsResult<()> {
             .clipboard()
             .write_text(csv);
     } else {
-        let csv_ref_ = csv_ref.clone();
+        clone!(csv_ref);
         let f: js_sys::Function =
-            Closure::once(Box::new(move || poll(count + 1, csv_ref_)))
+            Closure::once(Box::new(move || poll(count + 1, csv_ref)))
                 .into_js_value()
                 .unchecked_into();
 
@@ -70,7 +69,7 @@ fn poll(count: u32, csv_ref: Rc<RefCell<Option<String>>>) -> JsResult<()> {
 }
 
 /// Copy a CSV, but not a `Promise`.  Used to implement the public methods.
-async fn copy_async(view: &PerspectiveJsView) -> JsResult<JsString> {
+async fn copy_async(view: &PerspectiveJsView) -> Result<JsString, JsValue> {
     let csv = view.to_csv(js_object!("formatted", true));
     Ok(csv.await.unwrap())
 }

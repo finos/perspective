@@ -119,6 +119,28 @@ t_ctxunit::notify(const t_data_table& flattened) {
     }
 }
 
+std::pair<t_tscalar, t_tscalar> 
+t_ctxunit::get_min_max(const std::string& colname) const {
+    auto col = m_gstate->get_table()->get_const_column(colname);
+    auto rval = std::make_pair(mknone(), mknone());
+    for (std::size_t i = 0; i < col->size(); i++) {
+        t_tscalar val = col->get_scalar(i);
+        if (!val.is_valid()) {
+            continue;
+        }
+
+        if (rval.first.is_none() || (!val.is_none() && val < rval.first)) {
+            rval.first = val;
+        }
+
+        if (val > rval.second) {
+            rval.second = val;
+        }
+    }
+
+    return rval;
+}
+
 /**
  * @brief Given a start/end row and column, return the data for the subset.
  *
@@ -146,6 +168,8 @@ t_ctxunit::get_data(
 
     auto none = mknone();
 
+    const t_data_table& master_table = *(m_gstate->get_table());
+
     for (t_index cidx = ext.m_scol; cidx < ext.m_ecol; ++cidx) {
         const std::string& colname = m_config.col_at(cidx);
 
@@ -153,7 +177,7 @@ t_ctxunit::get_data(
 
         // Read directly from the row indices on the table - they will
         // always correspond exactly.
-        m_gstate->read_column(colname, start_row, end_row, out_data);
+        m_gstate->read_column(master_table, colname, start_row, end_row, out_data);
 
         for (t_index ridx = ext.m_srow; ridx < ext.m_erow; ++ridx) {
             auto v = out_data[ridx - ext.m_srow];
@@ -183,9 +207,12 @@ t_ctxunit::get_data(const std::vector<t_uindex>& rows) const {
 
     auto none = mknone();
 
+    const t_data_table& master_table = *(m_gstate->get_table());
+
     for (t_uindex cidx = 0; cidx < stride; ++cidx) {
         std::vector<t_tscalar> out_data(rows.size());
-        m_gstate->read_column(m_config.col_at(cidx), rows, out_data);
+        const std::string& colname = m_config.col_at(cidx);
+        m_gstate->read_column(master_table, colname, rows, out_data);
 
         for (t_uindex ridx = 0; ridx < rows.size(); ++ridx) {
             auto v = out_data[ridx];
@@ -207,9 +234,13 @@ t_ctxunit::get_data(const std::vector<t_tscalar>& pkeys) const {
 
     auto none = mknone();
 
+    const t_data_table& master_table = *(m_gstate->get_table());
+
     for (t_uindex cidx = 0; cidx < stride; ++cidx) {
         std::vector<t_tscalar> out_data(pkeys.size());
-        m_gstate->read_column(m_config.col_at(cidx), pkeys, out_data);
+        const std::string& colname = m_config.col_at(cidx);
+
+        m_gstate->read_column(master_table, colname, pkeys, out_data);
 
         for (t_uindex ridx = 0; ridx < pkeys.size(); ++ridx) {
             auto v = out_data[ridx];
@@ -248,8 +279,8 @@ t_ctxunit::get_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells) co
         all_rows.insert(cells[idx].first);
     }
 
-    std::shared_ptr<const t_data_table> master_table = m_gstate->get_table();
-    std::shared_ptr<const t_column> pkey_sptr = master_table->get_const_column("psp_pkey");
+    const t_data_table& master_table = *(m_gstate->get_table());
+    std::shared_ptr<const t_column> pkey_sptr = master_table.get_const_column("psp_pkey");
 
     std::vector<t_tscalar> rval(all_rows.size());
 

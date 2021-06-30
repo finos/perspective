@@ -58,8 +58,9 @@ module.exports = {
 
 Otherwise, you'll need to configure your `webpack.config.js` to handle these
 `perspective` assets correctly.  ~`@finos/perspective-webpack-plugin` itself
-uses a combination of `worker-loader` and `file-loader`, which can be easily
-modified as needed:
+uses a combination of `worker-loader` and `file-loader` (or `arraybuffer-loader`
+to inline the contents of this file as a base64-encoded string), which can be
+easily modified as needed:
 
 ```javascript
 module.exports = {
@@ -71,10 +72,16 @@ module.exports = {
             loader: "worker-loader"
         },
         {
-            test: /perspective\.cpp\.wasm$/,
+            test: /perspective\.wasm$/,
             type: "javascript/auto",
             include: path.dirname(require.resolve("@finos/perspective")),
-            loader: "file-loader"
+            loader: "file-loader" // or "arraybuffer-loader"
+        },
+        {
+            test: /perspective-viewer\.wasm$/,
+            type: "javascript/auto",
+            include: path.dirname(require.resolve("@finos/perspective-viewer")),
+            loader: "file-loader" // or "arraybuffer-loader"
         }
     ]
 };
@@ -92,10 +99,10 @@ which loads a dataset stored in the Apache Arrow format using the `Fetch` API.
 Add these scripts to your `.html`'s `<head>` section:
 
 ```html
-<script src="https://unpkg.com/@finos/perspective"></script>
-<script src="https://unpkg.com/@finos/perspective-viewer"></script>
-<script src="https://unpkg.com/@finos/perspective-viewer-datagrid"></script>
-<script src="https://unpkg.com/@finos/perspective-viewer-d3fc"></script>
+<script src="https://unpkg.com/@finos/perspective/dist/umd/perspective.js"></script>
+<script src="https://unpkg.com/@finos/perspective-viewer/dist/umd/perspective-viewer.js"></script>
+<script src="https://unpkg.com/@finos/perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js"></script>
+<script src="https://unpkg.com/@finos/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js"></script>
 ```
 
 Once added to your page, you can access the Javascript API through the
@@ -112,7 +119,7 @@ Or create a `<perspective-viewer>` in HTML:
 ```html
 <perspective-viewer columns="['Sales', 'Profit']">`
   <script>
-    document.addEventListener("WebComponentsReady", async function() {
+    document.addEventListener("DOMContentLoaded", async function() {
       const data = {
         Sales: [500, 1000, 1500],
         Profit: [100.25, 200.5, 300.75]
@@ -609,7 +616,7 @@ _*index.html*_
 <perspective-viewer id="viewer" editable></perspective-viewer>
 
 <script>
-  window.addEventListener("WebComponentsReady", async function () {
+  window.addEventListener("DOMContentLoaded", async function () {
     // Create a client that expects a Perspective server
     // to accept connections at the specified URL.
     const websocket = perspective.websocket("ws://localhost:8888/websocket");

@@ -1,0 +1,235 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+ @row-height: 19px;
+ 
+ regular-table {
+     padding-top: 12px;
+     padding-left: 12px;
+     padding-bottom: 0;
+     padding-right: 0;
+ 
+     // firefox scrollbar styling
+     scrollbar-color: transparent transparent;
+     scrollbar-width: thin;
+     outline: none;
+ }
+ 
+ regular-table:hover {
+     scrollbar-color: rgba(0,0,0,0.3) transparent;
+ }
+ 
+ regular-table {
+     font-family: "Open Sans";
+ 
+     div[tabindex] {
+         outline: none;
+     }
+ 
+     & > div {
+         position: absolute;
+         top: 0;
+         left: 0;
+         right: 0;
+         bottom: 0;
+         overflow: hidden;
+     }
+ 
+     th {
+         text-align: center;
+     }
+ 
+     // Header groups should overflow and not contribute to auto-sizing.
+     thead tr:not(:last-child) th {
+         overflow: hidden;
+         max-width: 0px;
+     }
+ 
+     thead tr:last-child .rt-float,
+     tbody .rt-float {
+         text-align: right;
+     }
+ 
+     thead .rt-integer,
+     tbody .rt-integer {
+         text-align: right;
+     }
+ 
+     tbody th {
+         text-align: left;
+     }
+ 
+ 
+ 
+ 
+     span.rt-tree-container {
+         display:flex;
+         align-items:center;
+         height:100%;
+     }
+ 
+     thead .rt-string,
+     tbody .rt-string,
+     thead .rt-date,
+     tbody .rt-date,
+     thead .rt-datetime,
+     tbody .rt-datetime  {
+         text-align: left;
+     }
+ 
+     // frozen rows
+ 
+ 
+ 
+     thead tr:last-child th {
+         border-bottom: 1px solid #ddd;
+     }
+ 
+     th {
+         position: relative;
+     }
+ 
+     tr th span.rt-tree-group {
+         margin-left: 5px;
+         margin-right: 15px;
+         border-left: 1px solid #eee;
+         height: 100%;
+     }
+ 
+     td, th {
+         white-space: nowrap;
+         font-size: 12px;
+         padding-right: 5px;
+         padding-left: 5px;
+         padding-top: 0px;
+         padding-bottom: 0px;
+         height: @row-height;
+     }
+ 
+ 
+ 
+     tr:hover td {
+         background: #eee;
+         opacity: 1;
+     }
+ 
+     tr:hover {
+         color: #333;
+     }
+ 
+     table * {
+         box-sizing: border-box;
+     }
+ 
+     table {
+         position: absolute;
+         overflow: hidden;
+         color: #666;
+         outline: none;
+     }
+ 
+     span.rt-row-header-icon {
+         color: #AAA;
+         padding-right: 4px;
+         font-family: "Material Icons";
+     }
+ 
+     span.rt-column-header-icon {
+         font-size: 10px;
+         padding-left: 3px;
+         display: inline-block;
+         width: 10px;
+         font-family: "Material Icons";
+     }
+ 
+     span.rt-row-header-icon:hover {
+         color: #1a7da1;
+         text-shadow: 0px 0px 3px #1a7da1;
+     }
+ 
+     .rt-selected td {
+         background-color: #eee;
+     }
+ 
+     .rt-cell-clip {
+         overflow: hidden;
+         text-overflow: ellipsis;
+     }
+ 
+     // OPTIONAL zebra striping
+ 
+     // @zebra-stripe-color: rgb(238,238,238);
+ 
+     // tbody tr:nth-child(even) td:not(.rt-group-header) {
+     //     background: @zebra-stripe-color;
+     // }
+ 
+     // tbody tr:nth-child(even) span.rt-group-name {
+     //     background: @zebra-stripe-color;
+     // }
+ 
+     td span.rt-group-name, th span.rt-group-name {
+         margin-right: -5px;
+         padding-right: 5px;
+         padding-left: 8px;
+         flex: 1;
+         height: 100%;
+     }
+ 
+     th span.rt-group-name {
+         text-align: left;
+     }
+ 
+     td th span.rt-group-leaf, th span.rt-group-leaf {
+         margin-left: 16px;
+         height: 100%;
+     }
+ 
+     .rt-column-resize {
+         height: 100%;
+         width: 10px;
+         position: absolute;
+         top: 0;
+         right: 0;
+         cursor: col-resize;
+     }
+ 
+     // webkit (chrome, safari, etc) scrollbar styling
+ 
+     &::-webkit-scrollbar,
+     &::-webkit-scrollbar-corner {
+         background-color: transparent;
+         height: 12px;
+         width: 12px;
+     }
+ 
+     &::-webkit-scrollbar-thumb {
+         background-clip: content-box;
+         background-color: rgba(0,0,0,0);
+         border-radius: 5px;
+     }
+ 
+     &::-webkit-scrollbar-thumb:horizontal {
+         border-bottom: 2px solid transparent;
+         border-top: 2px solid transparent;
+     }
+ 
+     &::-webkit-scrollbar-thumb:vertical {
+         border-left: 2px solid transparent;
+         border-right: 2px solid transparent;
+     }
+ 
+     &:hover::-webkit-scrollbar-thumb {
+         background-color: rgba(0,0,0,0.15);
+     }
+     &::-webkit-scrollbar-thumb:hover {
+         background-color: rgba(0,0,0,0.3);
+     }
+ }
+ 

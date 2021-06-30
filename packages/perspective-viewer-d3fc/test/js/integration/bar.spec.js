@@ -15,16 +15,16 @@ const render_warning_tests = require("@finos/perspective-viewer/test/js/render_w
 
 const {withTemplate} = require("./simple-template");
 
-withTemplate("bar", "d3_y_bar");
-withTemplate("bar-x", "d3_x_bar");
-withTemplate("bar-themed", "d3_y_bar", {template: "themed-template"});
+withTemplate("bar", "Y Bar");
+withTemplate("bar-x", "X Bar");
+withTemplate("bar-themed", "Y Bar", {template: "themed-template"});
 
 utils.with_server({}, () => {
     describe.page(
         "bar.html",
         () => {
             simple_tests.default();
-            render_warning_tests.default("d3_y_bar");
+            render_warning_tests.default("Y Bar");
         },
         {root: path.join(__dirname, "..", "..", "..")}
     );
@@ -33,7 +33,7 @@ utils.with_server({}, () => {
         "bar-x.html",
         () => {
             simple_tests.default();
-            render_warning_tests.default("d3_x_bar");
+            render_warning_tests.default("X Bar");
         },
         {root: path.join(__dirname, "..", "..", "..")}
     );
@@ -42,7 +42,7 @@ utils.with_server({}, () => {
         "bar-themed.html",
         () => {
             simple_tests.default();
-            render_warning_tests.default("d3_y_bar");
+            render_warning_tests.default("Y Bar");
         },
         {root: path.join(__dirname, "..", "..", "..")}
     );

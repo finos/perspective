@@ -12,7 +12,7 @@ const {execute} = require("./script_utils.js");
 try {
     if (process.platform === "linux") {
         console.log("-- Installing Boost 1.71.0");
-        execute`wget https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.gz >/dev/null 2>&1`;
+        execute`wget https://boostorg.jfrog.io/artifactory/main/release/1.71.0/source/boost_1_71_0.tar.gz >/dev/null 2>&1`;
         execute`tar xfz boost_1_71_0.tar.gz`;
         process.chdir("boost_1_71_0");
         execute`./bootstrap.sh`;

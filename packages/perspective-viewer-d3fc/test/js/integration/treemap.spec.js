@@ -13,7 +13,7 @@ const utils = require("@finos/perspective-test");
 const simple_tests = require("@finos/perspective-viewer/test/js/simple_tests.js");
 
 const {withTemplate} = require("./simple-template");
-withTemplate("treemap", "d3_treemap", {columns: ["Quantity", "Profit"]});
+withTemplate("treemap", "Treemap", {columns: ["Quantity", "Profit"]});
 
 utils.with_server({}, () => {
     describe.page(
@@ -48,7 +48,7 @@ utils.with_server({}, () => {
                     await page.mouse.move(500, 200);
                     await page.waitFor(
                         element => {
-                            const elem = element.shadowRoot.querySelector("perspective-d3fc-chart").shadowRoot.querySelector(".tooltip");
+                            const elem = element.children[0].shadowRoot.querySelector(".tooltip");
                             if (elem) {
                                 return window.getComputedStyle(elem).opacity === "0.9";
                             }

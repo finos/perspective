@@ -9,6 +9,8 @@
 
 const {get_config} = require("@finos/perspective/dist/esm/config");
 const path = require("path");
+const webpack = require("webpack");
+const cssnano = require("cssnano");
 
 class PerspectiveWebpackPlugin {
     constructor(options = {}) {
@@ -43,13 +45,40 @@ class PerspectiveWebpackPlugin {
             }
         });
 
+        rules.push({
+            test: /editor\.worker\.js$/,
+            type: "javascript/auto",
+            include: /monaco\-editor/,
+            use: {
+                loader: "worker-loader",
+                options: {
+                    filename: "editor.worker.js"
+                }
+            }
+        });
+
         if (this.options.inline || this.options.inlineWorker) {
+            rules[rules.length - 2].use.options.inline = "no-fallback";
             rules[rules.length - 1].use.options.inline = "no-fallback";
+        } else {
+            rules.push({
+                test: /\.js$/,
+                include: /@finos\/perspective\-vieux/,
+                use: [
+                    {
+                        loader: "string-replace-loader",
+                        options: {
+                            search: /webpackMode:\s*?"eager"/g,
+                            replace: ""
+                        }
+                    }
+                ]
+            });
         }
 
         if (!(this.options.inline || this.options.inlineWasm)) {
             rules.push({
-                test: /perspective\.cpp\.wasm$/,
+                test: /\.wasm$/,
                 type: "javascript/auto",
                 include: this.options.wasmPath,
                 use: {
@@ -61,12 +90,42 @@ class PerspectiveWebpackPlugin {
             });
         } else {
             rules.push({
-                test: /perspective\.cpp\.wasm$/,
+                test: /\.wasm$/,
                 type: "javascript/auto",
                 include: this.options.wasmPath,
                 loader: "arraybuffer-loader"
             });
         }
+
+        rules.push({
+            test: /\.css$/,
+            include: /monaco\-editor/,
+            use: [
+                {loader: "css-loader", options: {sourceMap: false}},
+                {
+                    loader: "postcss-loader",
+                    options: {
+                        sourceMap: false,
+                        postcssOptions: {
+                            map: {annotation: false},
+                            minimize: true,
+                            plugins: [
+                                cssnano({
+                                    preset: "lite",
+                                    discardComments: {removeAll: true}
+                                })
+                            ]
+                        }
+                    }
+                }
+            ]
+        });
+
+        rules.push({
+            test: /\.ttf$/,
+            include: /monaco\-editor/,
+            use: ["file-loader"]
+        });
 
         const perspective_config = get_config();
         if (perspective_config) {
@@ -84,6 +143,9 @@ class PerspectiveWebpackPlugin {
                 ]
             });
         }
+
+        const plugin_replace = new webpack.NormalModuleReplacementPlugin(/@finos\/perspective$/, "@finos/perspective/dist/esm/perspective.parallel.js");
+        plugin_replace.apply(compiler);
 
         moduleOptions.rules = (moduleOptions.rules || []).concat(rules);
     }

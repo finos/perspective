@@ -9,6 +9,7 @@
 
 const PerspectivePlugin = require("@finos/perspective-webpack-plugin");
 const HtmlWebPackPlugin = require("html-webpack-plugin");
+const path = require("path");
 
 module.exports = {
     mode: process.env.NODE_ENV || "development",
@@ -18,7 +19,8 @@ module.exports = {
     },
     plugins: [
         new HtmlWebPackPlugin({
-            title: "Workspace Example"
+            title: "Workspace Example",
+            template: "./src/index.html"
         }),
         new PerspectivePlugin({})
     ],
@@ -29,6 +31,9 @@ module.exports = {
                 use: [{loader: "style-loader"}, {loader: "css-loader"}, {loader: "less-loader"}]
             }
         ]
+    },
+    devServer: {
+        contentBase: [path.join(__dirname, "dist"), path.join(__dirname, "../../node_modules/superstore-arrow")]
     },
     devtool: "source-map"
 };

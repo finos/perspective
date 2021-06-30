@@ -35,7 +35,8 @@ std::tuple<std::string, std::string, std::vector<t_tscalar>>
 make_filter_term(t_dtype column_type, t_val date_parser, const std::string& column_name, const std::string& filter_op_str, t_val filter_term);
 
 template <>
-std::shared_ptr<t_view_config> make_view_config(std::shared_ptr<t_schema> schema, t_val date_parser, t_val config);
+std::shared_ptr<t_view_config> make_view_config(
+    std::shared_ptr<t_schema> schema, t_val date_parser, t_val config);
 
 template <typename CTX_T>
 std::shared_ptr<View<CTX_T>> make_view(std::shared_ptr<Table> table, const std::string& name, const std::string& separator, t_val view_config, t_val date_parser);

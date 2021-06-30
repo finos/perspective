@@ -29,7 +29,7 @@
 
     <div id="container">
 
-        <perspective-viewer class="example-chart" plugin="d3_ohlc" row-pivots='["Date"]' column-pivots='[]' filters='[]'
+        <perspective-viewer class="example-chart" plugin="OHLC" row-pivots='["Date"]' column-pivots='[]' filters='[]'
             sort='[]' columns='["Open","Price","High","Low"]'
             aggregates='{"Date":"distinct count","Change%":"sum","High":"sum","Low":"sum","Open":"sum","Price":"sum","Vol.":"sum"}'>
 
@@ -38,7 +38,7 @@
     </div>
 
     <script>
-        window.addEventListener("WebComponentsReady", function () {
+        window.addEventListener("DOMContentLoaded", function () {
             var url = './FTSE100.csv';
             var xhr = new XMLHttpRequest();
             xhr.open('GET', url, true);

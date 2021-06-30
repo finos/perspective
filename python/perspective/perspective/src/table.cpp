@@ -27,8 +27,17 @@ namespace binding {
  * Table API
  */
 
-std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor,
-        std::uint32_t limit, py::str index, t_op op, bool is_update, bool is_arrow, t_uindex port_id) {
+std::shared_ptr<Table> make_table_py(
+    t_val table,
+    t_data_accessor accessor,
+    std::uint32_t limit,
+    py::str index,
+    t_op op,
+    bool is_update,
+    bool is_arrow,
+    bool is_csv,
+    t_uindex port_id
+) {
     bool table_initialized = !table.is_none();
     std::shared_ptr<t_pool> pool;
     std::shared_ptr<Table> tbl;
@@ -53,19 +62,85 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor,
     numpy::NumpyLoader numpy_loader(accessor);
 
     // don't call `is_numpy` on an arrow binary
-    bool is_numpy = !is_arrow && accessor.attr("_is_numpy").cast<bool>();
+    bool is_numpy = !is_arrow && !is_csv && accessor.attr("_is_numpy").cast<bool>();
 
     // Determine metadata
     bool is_delete = op == OP_DELETE;
     if (is_arrow && !is_delete) {
-        py::bytes bytes = accessor.cast<py::bytes>();
-        std::int32_t size = bytes.attr("__len__")().cast<std::int32_t>();
-        ptr = malloc(size);
-        std::memcpy(ptr, bytes.cast<std::string>().c_str(), size);
+        std::string csv_string;
+        std::int32_t binary_size;
+
+        if (is_csv) {
+            // Load a string in CSV format
+            csv_string = accessor.cast<std::string>();
+        } else {
+            // Load an arrow binary
+            py::bytes bytes = accessor.cast<py::bytes>();
+            binary_size = bytes.attr("__len__")().cast<std::int32_t>();
+            ptr = malloc(binary_size);
+            std::memcpy(ptr, bytes.cast<std::string>().c_str(), binary_size);
+        }
+
         {
             PerspectiveScopedGILRelease acquire(pool->get_event_loop_thread_id());
-        
-            arrow_loader.initialize((uintptr_t)ptr, size);
+
+            // With the GIL released, load the arrow
+            if (is_csv) {
+                auto map = std::unordered_map<std::string, std::shared_ptr<arrow::DataType>>();
+
+                if (is_update) {
+                    auto gnode_output_schema = gnode->get_output_schema();
+                    auto schema = gnode_output_schema.drop({"psp_okey"});
+                    auto column_names = schema.columns();
+                    auto data_types = schema.types();
+                    
+                    for (auto idx = 0; idx < column_names.size(); ++idx) {
+                        const std::string& name = column_names[idx];
+                        const t_dtype& type = data_types[idx];
+                        switch (type) {
+                            case DTYPE_FLOAT32:
+                                map[name] = std::make_shared<arrow::FloatType>();
+                                break;
+                            case DTYPE_FLOAT64:
+                                map[name] = std::make_shared<arrow::DoubleType>();
+                                break;
+                            case DTYPE_STR:
+                                map[name] = std::make_shared<arrow::StringType>();
+                                break;
+                            case DTYPE_BOOL:
+                                map[name] = std::make_shared<arrow::BooleanType>();
+                                break;
+                            case DTYPE_UINT32:
+                                map[name] = std::make_shared<arrow::UInt32Type>();
+                                break;
+                            case DTYPE_UINT64:
+                                map[name] = std::make_shared<arrow::UInt64Type>();
+                                break;                  
+                            case DTYPE_INT32:
+                                map[name] = std::make_shared<arrow::Int32Type>();
+                                break;
+                            case DTYPE_INT64:
+                                map[name] = std::make_shared<arrow::Int64Type>();
+                                break;
+                            case DTYPE_TIME:
+                                map[name] = std::make_shared<arrow::TimestampType>();
+                                break;                       
+                            case DTYPE_DATE:
+                                map[name] = std::make_shared<arrow::Date64Type>();
+                                break;
+                            default:
+                                std::stringstream ss;
+                                ss << "Error loading arrow type " << dtype_to_str(type) << " for column " << name << std::endl;
+                                PSP_COMPLAIN_AND_ABORT(ss.str())
+                                break;
+                        }
+                    }
+                }
+
+                arrow_loader.init_csv(csv_string, is_update, map);
+            } else {
+                arrow_loader.initialize((uintptr_t)ptr, binary_size);
+            }
 
             // Always use the `Table` column names and data types on update.
             if (table_initialized && is_update) {
@@ -179,6 +254,7 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor,
     t_data_table data_table(output_schema);
     data_table.init();
     std::uint32_t row_count;
+
     if (is_arrow) {
         PerspectiveScopedGILRelease acquire(pool->get_event_loop_thread_id());
         row_count = arrow_loader.row_count();
@@ -194,7 +270,7 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor,
         _fill_data(data_table, accessor, input_schema, index, offset, limit, is_update);
     }
 
-    if (is_arrow) {
+    if (is_arrow && !is_csv) {
         free(ptr);
     }
 

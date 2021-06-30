@@ -185,7 +185,7 @@ class TestViewer:
 
     def test_viewer_reset(self):
         table = Table({"a": [1, 2, 3]})
-        viewer = PerspectiveViewer(plugin="x_bar", filters=[["a", "==", 2]])
+        viewer = PerspectiveViewer(plugin="X Bar", filters=[["a", "==", 2]])
         viewer.load(table)
         assert viewer.filters == [["a", "==", 2]]
         viewer.reset()
@@ -196,7 +196,7 @@ class TestViewer:
 
     def test_viewer_delete(self):
         table = Table({"a": [1, 2, 3]})
-        viewer = PerspectiveViewer(plugin="x_bar", filters=[["a", "==", 2]])
+        viewer = PerspectiveViewer(plugin="X Bar", filters=[["a", "==", 2]])
         viewer.load(table)
         assert viewer.filters == [["a", "==", 2]]
         viewer.delete()
@@ -205,7 +205,7 @@ class TestViewer:
 
     def test_viewer_delete_without_table(self):
         table = Table({"a": [1, 2, 3]})
-        viewer = PerspectiveViewer(plugin="x_bar", filters=[["a", "==", 2]])
+        viewer = PerspectiveViewer(plugin="X Bar", filters=[["a", "==", 2]])
         viewer.load(table)
         assert viewer.filters == [["a", "==", 2]]
         viewer.delete(delete_table=False)
@@ -215,25 +215,28 @@ class TestViewer:
 
     def test_save_restore(self):
         table = Table({"a": [1, 2, 3]})
-        viewer = PerspectiveViewer(plugin="x_bar", filters=[["a", "==", 2]], editable=True)
+        viewer = PerspectiveViewer(plugin="X Bar", filters=[["a", "==", 2]], editable=True, expressions=['"a" * 2'])
         viewer.load(table)
 
         # Save config
         config = viewer.save()
         assert viewer.filters == [["a", "==", 2]]
         assert config["filters"] == [["a", "==", 2]]
-        assert viewer.plugin == "x_bar"
-        assert config["plugin"] == "x_bar"
+        assert viewer.plugin == "X Bar"
+        assert config["plugin"] == "X Bar"
         assert config["editable"] is True
+        assert config["expressions"] == ['"a" * 2']
 
         # reset configuration
         viewer.reset()
         assert viewer.plugin == "datagrid"
         assert viewer.filters == []
         assert viewer.editable is False
+        assert viewer.expressions == []
 
         # restore configuration
         viewer.restore(**config)
         assert viewer.filters == [["a", "==", 2]]
-        assert viewer.plugin == "x_bar"
+        assert viewer.plugin == "X Bar"
         assert viewer.editable is True
+        assert viewer.expressions == ['"a" * 2']

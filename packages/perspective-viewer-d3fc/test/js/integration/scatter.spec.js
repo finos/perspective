@@ -13,7 +13,7 @@ const utils = require("@finos/perspective-test");
 const simple_tests = require("@finos/perspective-viewer/test/js/simple_tests.js");
 
 const {withTemplate} = require("./simple-template");
-withTemplate("scatter", "d3_xy_scatter", {columns: ["Sales", "Quantity"]});
+withTemplate("scatter", "X/Y Scatter", {columns: ["Sales", "Quantity"]});
 
 utils.with_server({}, () => {
     describe.page(
@@ -34,7 +34,7 @@ utils.with_server({}, () => {
                     await page.mouse.move(500, 200);
                     await page.waitFor(
                         element => {
-                            const elem = element.shadowRoot.querySelector("perspective-d3fc-chart").shadowRoot.querySelector(".tooltip");
+                            const elem = element.children[0].shadowRoot.querySelector(".tooltip");
                             if (elem) {
                                 return window.getComputedStyle(elem).opacity === "0.9";
                             }
@@ -60,7 +60,7 @@ utils.with_server({}, () => {
                     await page.mouse.move(550, 200);
                     await page.waitFor(
                         element => {
-                            const elem = element.shadowRoot.querySelector("perspective-d3fc-chart").shadowRoot.querySelector(".tooltip");
+                            const elem = element.children[0].shadowRoot.querySelector(".tooltip");
                             if (elem) {
                                 return window.getComputedStyle(elem).opacity === "0.9";
                             }
@@ -86,7 +86,7 @@ utils.with_server({}, () => {
                     await page.mouse.move(500, 200);
                     await page.waitFor(
                         element => {
-                            const elem = element.shadowRoot.querySelector("perspective-d3fc-chart").shadowRoot.querySelector(".tooltip");
+                            const elem = element.children[0].shadowRoot.querySelector(".tooltip");
                             if (elem) {
                                 return window.getComputedStyle(elem).opacity === "0.9";
                             }

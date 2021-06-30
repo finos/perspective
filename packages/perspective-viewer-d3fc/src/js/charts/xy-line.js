@@ -92,8 +92,7 @@ function xyLine(container, settings) {
 }
 
 xyLine.plugin = {
-    type: "d3_xy_line",
-    name: "X/Y Line Chart",
+    name: "X/Y Line",
     max_cells: 50000,
     max_columns: 50,
     render_warning: true,

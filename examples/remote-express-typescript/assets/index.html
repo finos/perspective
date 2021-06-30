@@ -29,7 +29,7 @@
 
     <perspective-viewer 
         id="view1"
-        plugin="d3_heatmap"
+        plugin="Heatmap"
         row-pivots='["client"]'
         columns='["chg"]'
         column-pivots='["name"]'>
@@ -38,7 +38,7 @@
 
     <script>
 
-        window.addEventListener('WebComponentsReady', async function() {
+        window.addEventListener('DOMContentLoaded', async function () {
 
             // Create two perspective interfaces, one remotely via WebSocket, 
             // and one local via WebWorker.

@@ -6,20 +6,20 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 from __future__ import print_function
-from setuptools import setup, find_packages, Extension
-from setuptools.command.build_ext import build_ext
-from setuptools.command.sdist import sdist
-from distutils.version import LooseVersion
-from codecs import open
 
 import io
 import os
 import os.path
-import re
 import platform
-import sys
+import re
 import subprocess
+import sys
+from codecs import open
+from distutils.version import LooseVersion
 
+from setuptools import Extension, find_packages, setup
+from setuptools.command.build_ext import build_ext
+from setuptools.command.sdist import sdist
 
 try:
     from shutil import which
@@ -75,6 +75,7 @@ requires_dev_py2 = [
     "pytz>=2018.9",
     "Sphinx>=1.8.4",
     "sphinx-markdown-builder>=0.5.2",
+    "wheel",
 ] + requires
 
 requires_dev = [

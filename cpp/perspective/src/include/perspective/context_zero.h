@@ -17,6 +17,7 @@
 #include <perspective/traversal.h>
 #include <perspective/flat_traversal.h>
 #include <perspective/data_table.h>
+#include <perspective/expression_tables.h>
 #include <tsl/hopscotch_set.h>
 
 namespace perspective {
@@ -40,6 +41,8 @@ public:
 
     void sort_by();
     std::vector<t_sortspec> get_sort_by() const;
+
+    std::pair<t_tscalar, t_tscalar> get_min_max(const std::string& colname) const;
 
     using t_ctxbase<t_ctx0>::get_data;
 
@@ -72,10 +75,26 @@ protected:
 
     void add_delta_pkey(t_tscalar pkey);
 
+    /**
+     * @brief Read the specified column using the gnode's mapping - if the
+     * column is an expression column, uses the expression master table,
+     * otherwise use the gstate master table.
+     * 
+     * @param colname 
+     * @param pkeys 
+     * @param out_data 
+     */
+    void read_column_from_gstate(
+        const std::string& colname,
+        const std::vector<t_tscalar>& pkeys,
+        std::vector<t_tscalar>& out_data) const;
+
 private:
     std::shared_ptr<t_ftrav> m_traversal;
     std::shared_ptr<t_zcdeltas> m_deltas;
     tsl::hopscotch_set<t_tscalar> m_delta_pkeys;
+    std::shared_ptr<t_vocab> m_expression_vocab;
+    std::shared_ptr<t_expression_tables> m_expression_tables;
     t_symtable m_symtable;
     bool m_has_delta;
 };

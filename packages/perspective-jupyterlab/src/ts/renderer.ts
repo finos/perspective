@@ -37,13 +37,13 @@ const baddialog = (): void => {
     });
 };
 
+const WORKER = perspective.worker();
+
 export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget> {
     constructor(options: DocumentWidget.IOptionsOptionalContent<PerspectiveWidget>, type: IPerspectiveDocumentType = "csv") {
-        super({content: new PerspectiveWidget("Perspective"), context: options.context, reveal: options.reveal});
+        super({content: new PerspectiveWidget("Perspective", {editable: true}), context: options.context, reveal: options.reveal});
 
         this._psp = this.content;
-        this._table = undefined;
-
         this._type = type;
         this._context = options.context;
 
@@ -57,7 +57,7 @@ export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget>
         });
     }
 
-    private _update(): void {
+    private async _update(): Promise<void> {
         try {
             let data;
             if (this._type === "csv") {
@@ -82,21 +82,39 @@ export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget>
                 // don't handle other mimetypes for now
                 throw "Not handled";
             }
-            perspective
-                .worker()
-                .table(data)
-                .then((table: any) => {
-                    this._table = table;
-                    if (this._psp.viewer.table === undefined) {
-                        // construct new table
-                        this._psp.viewer.load(this._table);
-                    } else {
-                        // replace existing table for whatever reason
-                        this._psp.replace(this._table);
+
+            if (this._psp.viewer.table === undefined) {
+                // construct new table
+                const table = await WORKER.table(data);
+
+                // load data
+                this._psp.viewer.load(table);
+
+                // create a flat view
+                const view = await table.view();
+                view.on_update(async () => {
+                    if (this._type === "csv") {
+                        const result: string = await view.to_csv();
+                        this.context.model.fromString(result);
+                        this.context.save();
+                    } else if (this._type === "arrow") {
+                        const result: ArrayBuffer = await view.to_arrow();
+                        const resultAsB64 = btoa(new Uint8Array(result).reduce((acc, i) => (acc += String.fromCharCode.apply(null, [i])), ""));
+                        this.context.model.fromString(resultAsB64);
+                        this.context.save();
+                    } else if (this._type === "json") {
+                        const result: any = await view.to_json();
+                        this.context.model.fromJSON(result);
+                        this.context.save();
                     }
                 });
-        } catch {
+            } else {
+                // replace existing table for whatever reason
+                this._psp.replace(data);
+            }
+        } catch (e) {
             baddialog();
+            throw e;
         }
 
         // pickup theme from env
@@ -118,7 +136,6 @@ export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget>
     private _type: IPerspectiveDocumentType;
     private _context: DocumentRegistry.Context;
     private _psp: PerspectiveWidget;
-    private _table: any;
     private _monitor: ActivityMonitor<DocumentRegistry.IModel, void> | null = null;
 }
 

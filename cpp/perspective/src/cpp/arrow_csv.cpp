@@ -12,9 +12,13 @@
 #include <arrow/util/value_parsing.h>
 #include <arrow/io/memory.h>
 
-// This causes build warnings
-// https://github.com/emscripten-core/emscripten/issues/8574
-#include <perspective/vendor/arrow_single_threaded_reader.h>
+#ifdef PSP_ENABLE_WASM
+    // This causes build warnings
+    // https://github.com/emscripten-core/emscripten/issues/8574
+    #include <perspective/vendor/arrow_single_threaded_reader.h>
+#else
+    #include <arrow/csv/reader.h>
+#endif
 
 namespace perspective {
 namespace apachearrow {

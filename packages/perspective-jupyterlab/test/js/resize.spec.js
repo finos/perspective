@@ -17,6 +17,7 @@ utils.with_server({}, () => {
             test.capture(
                 "Basic widget functions",
                 async page => {
+                    await page.waitForSelector("perspective-viewer:not([updating])");
                     await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                     await page.waitForSelector("perspective-viewer[settings]");
                     await page.waitForSelector("perspective-viewer:not([updating])");
@@ -27,6 +28,7 @@ utils.with_server({}, () => {
             test.capture(
                 "Resize the container causes the widget to resize",
                 async page => {
+                    await page.waitForSelector("perspective-viewer:not([updating])");
                     await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                     await page.waitForSelector("perspective-viewer:not([updating])");
                     await page.evaluate(async () => {
@@ -45,6 +47,7 @@ utils.with_server({}, () => {
             test.capture(
                 "row_pivots traitlet works",
                 async page => {
+                    await page.waitForSelector("perspective-viewer:not([updating])");
                     await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                     await page.evaluate(() => {
                         window.__WIDGET__.row_pivots = ["State"];

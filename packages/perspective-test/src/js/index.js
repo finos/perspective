@@ -46,6 +46,11 @@ exports.with_server = function with_server({paths}, body) {
     body();
 };
 
+exports.with_jupyterlab = function with_jupyterlab(port, body) {
+    __PORT__ = port;
+    body();
+};
+
 let results;
 const seen_results = new Set();
 
@@ -75,6 +80,12 @@ async function get_new_page() {
         }
     });
 
+    // Disable all alerts and dialogs, as Jupyterlab alerts when trying to
+    // navigate off the page, which will block test completion.
+    page.on("dialog", async dialog => {
+        await dialog.accept();
+    });
+
     page.track_mouse = track_mouse.bind(page);
     page.shadow_click = async function(...path) {
         await this.evaluate(path => {
@@ -99,9 +110,14 @@ async function get_new_page() {
         }, path);
     };
 
-    page.shadow_type = async function(content, ...path) {
+    page.shadow_type = async function(content, is_incremental, ...path) {
+        if (typeof is_incremental !== "boolean") {
+            path.unshift(is_incremental);
+            is_incremental = false;
+        }
+
         await this.evaluate(
-            (content, path) => {
+            async (content, path, is_incremental) => {
                 let elem = document;
                 while (path.length > 0) {
                     if (elem.shadowRoot) {
@@ -112,15 +128,6 @@ async function get_new_page() {
 
                 elem.focus();
 
-                function triggerKeyEvent(key, eventType) {
-                    const keyEvent = new KeyboardEvent(eventType, {
-                        bubbles: true,
-                        cancelable: true,
-                        key: key
-                    });
-                    document.dispatchEvent(keyEvent);
-                }
-
                 function triggerInputEvent(element) {
                     const event = new Event("input", {
                         bubbles: true,
@@ -130,22 +137,32 @@ async function get_new_page() {
                     element.dispatchEvent(event);
                 }
 
-                for (let i = 0; i < content.length; i++) {
-                    const char = content[i];
-                    triggerKeyEvent(char, "keydown");
-                    triggerInputEvent(elem);
-                    triggerKeyEvent(char, "keyUp");
-                    elem.innerText += char;
-                }
-
-                if (elem.innerText !== content) {
-                    elem.innerText = content;
+                if (is_incremental) {
+                    while (content.length > 0) {
+                        elem.value += content[0];
+                        triggerInputEvent(elem);
+                        await new Promise(requestAnimationFrame);
+                        content = content.slice(1);
+                    }
+                } else {
+                    elem.value = content;
                     triggerInputEvent(elem);
                 }
             },
             content,
-            path
+            path,
+            is_incremental
         );
+    };
+
+    page.shadow_blur = async function() {
+        await this.evaluate(() => {
+            let elem = document.activeElement;
+            while (elem) {
+                elem.blur();
+                elem = elem.shadowRoot?.activeElement;
+            }
+        });
     };
 
     page.shadow_focus = async function(...path) {
@@ -256,7 +273,7 @@ function mkdirSyncRec(targetDir) {
     }, initDir);
 }
 
-describe.page = (url, body, {reload_page = true, name, root} = {}) => {
+describe.page = (url, body, {reload_page = true, check_results = true, name, root} = {}) => {
     let _url = url ? url : page_url;
     test_root = root ? root : test_root;
 
@@ -271,7 +288,7 @@ describe.page = (url, body, {reload_page = true, name, root} = {}) => {
         return result;
     });
 
-    if (IS_LOCAL_PUPPETEER && !fs.existsSync(path.join(test_root, "test", "results", RESULTS_FILENAME)) && !process.env.WRITE_TESTS) {
+    if (IS_LOCAL_PUPPETEER && !fs.existsSync(path.join(test_root, "test", "results", RESULTS_FILENAME)) && !process.env.WRITE_TESTS && check_results) {
         throw new Error(`
         
 ERROR: Running in puppeteer tests without "${RESULTS_FILENAME}"
@@ -300,8 +317,27 @@ expect.extend({
     }
 });
 
-test.capture = function capture(name, body, {timeout = 60000, viewport = null, wait_for_update = true, fail_on_errors = true, preserve_hover = false} = {}) {
-    const _url = page_url;
+test.run = function run(name, body, {url = page_url, timeout = 60000, viewport = null}) {
+    test(
+        name,
+        async () => {
+            if (viewport !== null) {
+                await page.setViewport({
+                    width: viewport.width,
+                    height: viewport.height
+                });
+            }
+            await new Promise(setTimeout);
+            await page.close();
+            page = await get_new_page();
+            await page.goto(`http://127.0.0.1:${__PORT__}/${url}`, {waitUntil: "domcontentloaded"});
+            await body(page);
+        },
+        timeout
+    );
+};
+
+test.capture = function capture(name, body, {url = page_url, timeout = 60000, viewport = null, wait_for_update = true, fail_on_errors = true, preserve_hover = false} = {}) {
     const _reload_page = page_reload;
     const spec = test(
         name,
@@ -329,19 +365,19 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
                 if (_reload_page) {
                     await page.close();
                     page = await get_new_page();
-                    await page.goto(`http://127.0.0.1:${__PORT__}/${_url}#test=${encodeURIComponent(name)}`, {waitUntil: "domcontentloaded"});
+                    await page.goto(`http://127.0.0.1:${__PORT__}/${url}#test=${encodeURIComponent(name)}`, {waitUntil: "domcontentloaded"});
                 } else {
-                    if (!OLD_SETTINGS[test_root + _url]) {
+                    if (!OLD_SETTINGS[test_root + url]) {
                         await page.close();
                         page = await get_new_page();
-                        await page.goto(`http://127.0.0.1:${__PORT__}/${_url}#test=${encodeURIComponent(name)}`, {waitUntil: "domcontentloaded"});
+                        await page.goto(`http://127.0.0.1:${__PORT__}/${url}#test=${encodeURIComponent(name)}`, {waitUntil: "domcontentloaded"});
                     } else {
                         await page.evaluate(async x => {
                             const viewer = document.querySelector("perspective-viewer");
                             viewer.restore(x);
                             await viewer.notifyResize();
                             await viewer.toggleConfig(false);
-                        }, OLD_SETTINGS[test_root + _url]);
+                        }, OLD_SETTINGS[test_root + url]);
                     }
                 }
 
@@ -355,9 +391,9 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
                     await page.waitForSelector("perspective-viewer");
                 }
 
-                if (!_reload_page && !OLD_SETTINGS[test_root + _url]) {
+                if (!_reload_page && !OLD_SETTINGS[test_root + url]) {
                     await page.waitForSelector("perspective-viewer:not([updating])");
-                    OLD_SETTINGS[test_root + _url] = await page.evaluate(() => {
+                    OLD_SETTINGS[test_root + url] = await page.evaluate(() => {
                         const viewer = document.querySelector("perspective-viewer");
                         return viewer.save();
                     });
@@ -387,7 +423,7 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
                     });
                 }
 
-                const screenshot = await page.screenshot();
+                const screenshot = await page.screenshot({captureBeyondViewport: false, fullPage: true});
                 // await page.close();
                 const hash = crypto
                     .createHash("md5")

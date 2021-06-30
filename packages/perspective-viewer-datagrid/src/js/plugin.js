@@ -8,18 +8,15 @@
  */
 
 import {registerPlugin} from "@finos/perspective-viewer/src/js/utils.js";
-
 import "regular-table";
+
 import {createModel, configureRegularTable, formatters} from "./regular_table_handlers.js";
 import MATERIAL_STYLE from "../less/regular_table.less";
-
 import {configureRowSelectable, deselect} from "./row_selection.js";
 import {configureClick} from "./click.js";
 import {configureEditable} from "./editing.js";
 import {configureSortable} from "./sorting.js";
-
-const VIEWER_MAP = new WeakMap();
-const INSTALLED = new WeakMap();
+import {PLUGIN_SYMBOL} from "./plugin_menu.js";
 
 function lock(body) {
     let lock;
@@ -39,130 +36,109 @@ function lock(body) {
     };
 }
 
-const datagridPlugin = lock(async function(regular, viewer, view) {
-    const is_installed = INSTALLED.has(regular);
-    const table = viewer.table;
-    let model;
-    if (!is_installed) {
-        model = await createModel(regular, table, view);
-        configureRegularTable(regular, model);
-        await configureRowSelectable.call(model, regular, viewer);
-        await configureClick.call(model, regular, viewer);
-        await configureEditable.call(model, regular, viewer);
-        await configureSortable.call(model, regular, viewer);
-        INSTALLED.set(regular, model);
-    } else {
-        model = INSTALLED.get(regular);
-        await createModel(regular, table, view, model);
-    }
-
+async function with_safe_view(f) {
     try {
-        const draw = regular.draw({invalid_columns: true});
-        if (!model._preserve_focus_state) {
-            regular.scrollTop = 0;
-            regular.scrollLeft = 0;
-            deselect(regular, viewer);
-            regular._resetAutoSize();
-        } else {
-            model._preserve_focus_state = false;
-        }
-
-        await draw;
+        return await f();
     } catch (e) {
         if (e.message !== "View is not initialized") {
             throw e;
         }
     }
-});
-
-/**
- * Initializes a new datagrid renderer if needed, or returns an existing one
- * associated with a rendering `<div>` from a cache.
- *
- * @param {*} element
- * @param {*} div
- * @returns
- */
-function get_or_create_datagrid(element, div) {
-    let datagrid;
-    if (!VIEWER_MAP.has(div)) {
-        datagrid = document.createElement("regular-table");
-        datagrid.formatters = formatters;
-        div.innerHTML = "";
-        div.appendChild(document.createElement("slot"));
-        element.appendChild(datagrid);
-        VIEWER_MAP.set(div, datagrid);
-    } else {
-        datagrid = VIEWER_MAP.get(div);
-        if (!datagrid.isConnected) {
-            div.innerHTML = "";
-            div.appendChild(document.createElement("slot"));
-            datagrid.clear();
-            element.appendChild(datagrid);
-        }
-    }
-
-    return datagrid;
 }
 
-/**
- * <perspective-viewer> plugin.
- *
- * @class DatagridPlugin
- */
-class DatagridPlugin {
-    static name = "Datagrid";
-    static selectMode = "toggle";
-    static deselectMode = "pivots";
+customElements.define(
+    "perspective-viewer-datagrid",
+    class extends HTMLElement {
+        constructor() {
+            super();
+            this.datagrid = document.createElement("regular-table");
+            this.datagrid.formatters = formatters;
+            this.draw = lock(this.draw);
+        }
 
-    static async update(div) {
-        try {
-            const datagrid = VIEWER_MAP.get(div);
-            const model = INSTALLED.get(datagrid);
-            model._num_rows = await model._view.num_rows();
-            await datagrid.draw();
-        } catch (e) {
-            if (e.message !== "View is not initialized") {
-                throw e;
+        async activate(view) {
+            let viewer = this.parentElement;
+            let table = viewer.table;
+            if (!this._initialized) {
+                this._initialized = true;
+                this.innerHTML = "";
+                this.appendChild(this.datagrid);
+                this.model = await createModel(this.datagrid, table, view);
+                configureRegularTable(this.datagrid, this.model);
+                await configureRowSelectable.call(this.model, this.datagrid, viewer);
+                await configureClick.call(this.model, this.datagrid, viewer);
+                await configureEditable.call(this.model, this.datagrid, viewer);
+                await configureSortable.call(this.model, this.datagrid, viewer);
+            } else {
+                await createModel(this.datagrid, table, view, this.model);
             }
         }
-    }
 
-    static async create(div, view) {
-        try {
-            const datagrid = get_or_create_datagrid(this, div);
-            await datagridPlugin(datagrid, this, view);
-        } catch (e) {
-            if (e.message !== "View is not initialized") {
-                throw e;
-            }
+        get name() {
+            return "Datagrid";
         }
-    }
 
-    static async resize() {
-        if (this.view && VIEWER_MAP.has(this._datavis)) {
-            const datagrid = VIEWER_MAP.get(this._datavis);
-            try {
-                await datagrid.draw();
-            } catch (e) {
-                if (e.message !== "View is not initialized") {
-                    throw e;
+        get selectMode() {
+            return "toggle";
+        }
+
+        get deselectMode() {
+            return "pivots";
+        }
+
+        async draw(view) {
+            await with_safe_view(async () => {
+                await this.activate(view);
+                let viewer = this.parentElement;
+                const draw = this.datagrid.draw({invalid_columns: true});
+                if (!this.model._preserve_focus_state) {
+                    this.datagrid.scrollTop = 0;
+                    this.datagrid.scrollLeft = 0;
+                    deselect(this.datagrid, viewer);
+                    this.datagrid._resetAutoSize();
+                } else {
+                    this.model._preserve_focus_state = false;
+                }
+
+                await draw;
+            });
+        }
+
+        async update(view) {
+            await with_safe_view(async () => {
+                this.model._num_rows = await view.num_rows();
+                await this.datagrid.draw();
+            });
+        }
+
+        async resize() {
+            await with_safe_view(async () => {
+                if (this._initialized) {
+                    await this.datagrid.draw();
+                }
+            });
+        }
+
+        async clear() {
+            this.datagrid.clear();
+        }
+
+        save() {
+            if (this.datagrid) {
+                const datagrid = this.datagrid;
+                if (datagrid[PLUGIN_SYMBOL]) {
+                    return JSON.parse(JSON.stringify(datagrid[PLUGIN_SYMBOL]));
                 }
             }
+            return {};
+        }
+
+        restore(token) {
+            const datagrid = this.datagrid;
+            datagrid[PLUGIN_SYMBOL] = token;
         }
     }
-
-    static delete() {
-        if (this.view && VIEWER_MAP.has(this._datavis)) {
-            const datagrid = VIEWER_MAP.get(this._datavis);
-            datagrid.clear();
-        }
-    }
-
-    static save() {}
-
-    static restore() {}
-}
+);
 
 /**
  * Appends the default table CSS to `<head>`, should be run once on module
@@ -181,6 +157,6 @@ function _register_global_styles() {
  *
  */
 
-registerPlugin("datagrid", DatagridPlugin);
+registerPlugin("perspective-viewer-datagrid");
 
 _register_global_styles();

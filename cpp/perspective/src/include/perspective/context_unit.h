@@ -32,7 +32,7 @@ namespace perspective {
  * the order in which the table is meant to be read.
  * 
  * Additionally, to create a unit context, the context must have no pivots,
- * sorts, filters, or computed columns applied. It can have any number of
+ * sorts, filters, or expressions applied. It can have any number of
  * columns in any order. See implementations in the binding language to see
  * how a unit context is created.
  * 
@@ -50,6 +50,8 @@ public:
     perspective::t_index get_row_count() const;
 
     perspective::t_index get_column_count() const;
+
+    std::pair<t_tscalar, t_tscalar> get_min_max(const std::string& colname) const;
 
     using t_ctxbase<t_ctxunit>::get_data;
 

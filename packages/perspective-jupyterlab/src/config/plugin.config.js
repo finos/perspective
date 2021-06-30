@@ -27,7 +27,7 @@ module.exports = {
         maxEntrypointSize: 512000,
         maxAssetSize: 512000
     },
-    externals: [/^[a-z0-9@]/],
+    externals: [/^([a-z0-9]|@(?!finos\/perspective-viewer))/],
     stats: {modules: false, hash: false, version: false, builtAt: false, entrypoints: false},
     module: {
         rules: [
@@ -37,7 +37,6 @@ module.exports = {
             },
             {
                 test: /\.css$/,
-                exclude: /node_modules/,
                 use: [{loader: "css-loader"}]
             },
             {
@@ -51,15 +50,35 @@ module.exports = {
                 test: /\.ts$/,
                 exclude: /node_modules/,
                 loader: "ts-loader"
+            },
+            {
+                test: /\.wasm$/,
+                type: "javascript/auto",
+                include: path.dirname(require.resolve("@finos/perspective-viewer")),
+                loader: "arraybuffer-loader"
+            },
+            {
+                test: /editor\.worker/,
+                type: "javascript/auto",
+                loader: "worker-loader",
+                options: {
+                    inline: "no-fallback"
+                }
+            },
+            {
+                test: /\.ttf$/,
+                use: ["file-loader"]
             }
         ]
     },
+    externalsPresets: {web: false, webAsync: true},
     experiments: {
         syncWebAssembly: true
     },
     output: {
         filename: "[name].js",
-        libraryTarget: "umd",
+        libraryTarget: "commonjs2",
+        publicPath: "",
         path: path.resolve(__dirname, "../../dist")
     }
 };

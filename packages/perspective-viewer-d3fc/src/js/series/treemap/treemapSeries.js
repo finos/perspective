@@ -56,7 +56,13 @@ export function treemapSeries() {
             .style("y", d => d.y0)
             .style("width", d => calcWidth(d))
             .style("height", d => calcHeight(d));
-        color && rects.style("fill", d => color(d.data.color));
+
+        color &&
+            rects.style("fill", d => {
+                if (d.data.color) {
+                    return color(d.data.color);
+                }
+            });
 
         const labels = nodesMerge
             .filter(d => d.value !== 0)

@@ -44,7 +44,7 @@ export class Client {
     }
 
     /**
-     * Process an asynchronous message.
+     * Send a message to the server.
      */
     post(msg, resolve, reject, keep_alive = false) {
         ++this._worker.msg_id;
@@ -55,8 +55,26 @@ export class Client {
         if (this._worker.initialized.value) {
             this.send(msg);
         } else {
-            this._worker.messages.push(() => this.send(msg));
+            this._worker.messages.push(() => {
+                this.send(msg);
+
+                if ((msg.cmd === "table" || msg.cmd === "view") && !this._features?.wait_for_response && resolve) {
+                    resolve();
+                }
+            });
         }
+    }
+
+    /**
+     * Snapshots memory usage from the WebWorker or Node.js process, with the
+     * addition of `wasmHeap` Emscripten's linear memory
+     * @async
+     * @returns {MemoryUsage}
+     */
+    async memory_usage() {
+        return await new Promise((resolve, reject) => {
+            this.post({cmd: "memory_usage"}, resolve, reject);
+        });
     }
 
     initialize_profile_thread() {
@@ -87,10 +105,8 @@ export class Client {
     }
 
     /**
-     * Handle a command from Perspective. If the Client is not initialized,
-     * initialize it and dispatch the `perspective-ready` event.
-     *
-     * Otherwise, reject or resolve the incoming command.
+     * Receive a message from the server, and resolve/reject the promise that
+     * is awaiting the content of the message.
      */
     _handle(e) {
         if (!this._worker.initialized.value) {
@@ -107,6 +123,16 @@ export class Client {
             this._worker.initialized.value = true;
             this._worker.messages = [];
 
+            // If the `data` attribute of the init message is set, then
+            // set the `features` dictionary with the flags from the server.
+            if (e.data?.data) {
+                this._features = {};
+
+                for (const feature of e.data.data) {
+                    this._features[feature] = true;
+                }
+            }
+
             if (msgs) {
                 for (const m in msgs) {
                     if (msgs.hasOwnProperty(m)) {
@@ -117,13 +143,15 @@ export class Client {
         }
 
         if (e.data.id) {
-            var handler = this._worker.handlers[e.data.id];
+            const handler = this._worker.handlers[e.data.id];
+
             if (handler) {
                 if (e.data.error) {
                     handler.reject(e.data.error);
                 } else {
                     handler.resolve(e.data.data);
                 }
+
                 if (!handler.keep_alive) {
                     delete this._worker.handlers[e.data.id];
                 }

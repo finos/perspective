@@ -33,7 +33,7 @@
 #include <perspective/pyutils.h>
 #include <perspective/python/accessor.h>
 #include <perspective/python/base.h>
-#include <perspective/python/computed.h>
+#include <perspective/python/expressions.h>
 #include <perspective/python/context.h>
 #include <perspective/python/fill.h>
 #include <perspective/python/serialization.h>
@@ -95,7 +95,7 @@ PYBIND11_MODULE(libbinding, m)
         .def("num_columns", &View<t_ctxunit>::num_columns)
         .def("get_row_expanded", &View<t_ctxunit>::get_row_expanded)
         .def("schema", &View<t_ctxunit>::schema)
-        .def("computed_schema", &View<t_ctxunit>::computed_schema)
+        .def("expression_schema", &View<t_ctxunit>::expression_schema)
         .def("column_names", &View<t_ctxunit>::column_names)
         .def("column_paths", &View<t_ctxunit>::column_paths)
         .def("_get_deltas_enabled", &View<t_ctxunit>::_get_deltas_enabled)
@@ -106,6 +106,7 @@ PYBIND11_MODULE(libbinding, m)
         .def("get_aggregates", &View<t_ctxunit>::get_aggregates)
         .def("get_filter", &View<t_ctxunit>::get_filter)
         .def("get_sort", &View<t_ctxunit>::get_sort)
+        .def("get_min_max", &View<t_ctxunit>::get_min_max)
         .def("get_step_delta", &View<t_ctxunit>::get_step_delta)
         .def("get_column_dtype", &View<t_ctxunit>::get_column_dtype)
         .def("is_column_only", &View<t_ctxunit>::is_column_only);
@@ -118,7 +119,7 @@ PYBIND11_MODULE(libbinding, m)
         .def("num_columns", &View<t_ctx0>::num_columns)
         .def("get_row_expanded", &View<t_ctx0>::get_row_expanded)
         .def("schema", &View<t_ctx0>::schema)
-        .def("computed_schema", &View<t_ctx0>::computed_schema)
+        .def("expression_schema", &View<t_ctx0>::expression_schema)
         .def("column_names", &View<t_ctx0>::column_names)
         .def("column_paths", &View<t_ctx0>::column_paths)
         .def("_get_deltas_enabled", &View<t_ctx0>::_get_deltas_enabled)
@@ -129,6 +130,7 @@ PYBIND11_MODULE(libbinding, m)
         .def("get_aggregates", &View<t_ctx0>::get_aggregates)
         .def("get_filter", &View<t_ctx0>::get_filter)
         .def("get_sort", &View<t_ctx0>::get_sort)
+        .def("get_min_max", &View<t_ctx0>::get_min_max)
         .def("get_step_delta", &View<t_ctx0>::get_step_delta)
         .def("get_column_dtype", &View<t_ctx0>::get_column_dtype)
         .def("is_column_only", &View<t_ctx0>::is_column_only);
@@ -144,7 +146,7 @@ PYBIND11_MODULE(libbinding, m)
         .def("collapse", &View<t_ctx1>::collapse)
         .def("set_depth", &View<t_ctx1>::set_depth)
         .def("schema", &View<t_ctx1>::schema)
-        .def("computed_schema", &View<t_ctx1>::computed_schema)
+        .def("expression_schema", &View<t_ctx1>::expression_schema)
         .def("column_names", &View<t_ctx1>::column_names)
         .def("column_paths", &View<t_ctx1>::column_paths)
         .def("_get_deltas_enabled", &View<t_ctx1>::_get_deltas_enabled)
@@ -155,6 +157,7 @@ PYBIND11_MODULE(libbinding, m)
         .def("get_aggregates", &View<t_ctx1>::get_aggregates)
         .def("get_filter", &View<t_ctx1>::get_filter)
         .def("get_sort", &View<t_ctx1>::get_sort)
+        .def("get_min_max", &View<t_ctx1>::get_min_max)
         .def("get_step_delta", &View<t_ctx1>::get_step_delta)
         .def("get_column_dtype", &View<t_ctx1>::get_column_dtype)
         .def("is_column_only", &View<t_ctx1>::is_column_only);
@@ -170,7 +173,7 @@ PYBIND11_MODULE(libbinding, m)
         .def("collapse", &View<t_ctx2>::collapse)
         .def("set_depth", &View<t_ctx2>::set_depth)
         .def("schema", &View<t_ctx2>::schema)
-        .def("computed_schema", &View<t_ctx2>::computed_schema)
+        .def("expression_schema", &View<t_ctx2>::expression_schema)
         .def("column_names", &View<t_ctx2>::column_names)
         .def("column_paths", &View<t_ctx2>::column_paths)
         .def("_get_deltas_enabled", &View<t_ctx2>::_get_deltas_enabled)
@@ -181,6 +184,7 @@ PYBIND11_MODULE(libbinding, m)
         .def("get_aggregates", &View<t_ctx2>::get_aggregates)
         .def("get_filter", &View<t_ctx2>::get_filter)
         .def("get_sort", &View<t_ctx2>::get_sort)
+        .def("get_min_max", &View<t_ctx2>::get_min_max)
         .def("get_row_path", &View<t_ctx2>::get_row_path)
         .def("get_step_delta", &View<t_ctx2>::get_step_delta)
         .def("get_column_dtype", &View<t_ctx2>::get_column_dtype)
@@ -198,7 +202,7 @@ PYBIND11_MODULE(libbinding, m)
             const std::vector<std::string>&,
             const std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>>&,
             const std::vector<std::vector<std::string>>&,
-            const std::vector<t_computed_column_definition>&,
+            const std::vector<std::shared_ptr<t_computed_expression>>&,
             const std::string,
             bool>())
         .def("add_filter_term", &t_view_config::add_filter_term);
@@ -292,6 +296,24 @@ PYBIND11_MODULE(libbinding, m)
         .def("unregister_gnode", &t_pool::unregister_gnode)
         .def("set_event_loop", &t_pool::set_event_loop)
         .def("_process", &t_pool::_process);
+
+    /******************************************************************************
+     *
+     * t_validated_expression_map
+     */
+    py::class_<t_validated_expression_map>(m, "t_validated_expression_map")
+        .def(py::init<>())
+        .def("get_expression_schema", &t_validated_expression_map::get_expression_schema)
+        .def("get_expression_errors", &t_validated_expression_map::get_expression_errors);
+
+    /******************************************************************************
+     *
+     * t_expression_error
+     */
+    py::class_<t_expression_error>(m, "t_expression_error")
+        .def_readwrite("error_message", &t_expression_error::m_error_message)
+        .def_readwrite("line", &t_expression_error::m_line)
+        .def_readwrite("column", &t_expression_error::m_column);
 
     /******************************************************************************
      *
@@ -420,10 +442,8 @@ PYBIND11_MODULE(libbinding, m)
     m.def("get_row_delta_zero", &get_row_delta_zero);
     m.def("get_row_delta_one", &get_row_delta_one);
     m.def("get_row_delta_two", &get_row_delta_two);
-    m.def("get_table_computed_schema", &get_table_computed_schema_py);
-    m.def("get_computation_input_types", &get_computation_input_types);
-    m.def("get_computed_functions", &get_computed_functions);
-    m.def("make_computations", &make_computations);
+    m.def("validate_expressions", &validate_expressions_py);
+    m.def("init_expression_parser", &init_expression_parser);
     m.def("scalar_to_py", &scalar_to_py);
     m.def("_set_nthreads", &_set_nthreads);
 }

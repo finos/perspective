@@ -32,8 +32,10 @@ function addDataValues(tooltipDiv, values) {
 }
 
 const formatNumber = value =>
-    value.toLocaleString(undefined, {
-        style: "decimal",
-        minimumFractionDigits: get_type_config("float").precision,
-        maximumFractionDigits: get_type_config("float").precision
-    });
+    value === null
+        ? "-"
+        : value.toLocaleString(undefined, {
+              style: "decimal",
+              minimumFractionDigits: get_type_config("float").precision,
+              maximumFractionDigits: get_type_config("float").precision
+          });

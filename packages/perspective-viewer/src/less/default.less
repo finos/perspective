@@ -8,6 +8,7 @@
  */
 
 @import "variables";
+@import "scrollbars";
 
 .psp-text-field {
     position: relative;
@@ -20,7 +21,9 @@
     flex-direction: column;
     justify-content: flex-end;
     min-height: 24px;
-    transition: border-color 0.3s ease-out;
+    // background is nor transitionable ...
+    transition: border-color 0.3s ease-out, background-size 0.3s ease-out;
+    background-size: 100% 200%;
 }
 
 :host(.dragging) .psp-text-field.dropping {
@@ -33,6 +36,8 @@
     border-bottom-width: 1px;
     border-style: solid;
     border-color: var(--active--color, @blue800);
+    background: var(--input-dragover--background, linear-gradient(to top, rgb(203, 231, 249), transparent 25%));
+    background-size: 100% 100%;
 }
 
 .psp-text-field > .psp-text-field__input {
@@ -48,8 +53,8 @@
     height: var(--column--height, auto);
     line-height: 17px;
     box-sizing: border-box;
-    color: var(--inactive--color, rgb(204, 204, 204));
-    font-weight: 400;
+    font-weight: 300;
+    color: var(--inactive--color, #B4B7BE);
     white-space: nowrap;
     padding: var(--column-drop-container--padding, 0px 0px 2px 10px);
     font-size: 12px;
@@ -91,7 +96,7 @@
 .bordered() {
     border-bottom-width: 1px;
     border-style: solid;
-    border-color: var(--inactive--color, #ccc);
+    border-color: var(--inactive--color, #C5C9D0);
     border-top-width: 0px;
     border-left-width: 0px;
     border-right-width: 0px;
@@ -112,19 +117,22 @@
 }
 
 :host([row-pivots]) {
-    #active_columns perspective-row {
-        height: var(--active-column--height, 41px);
+    #columns_container #active_columns {
         min-height: var(--active-column--height, 41px);
-        --row_draggable-height: var(--active-column--height, 41px);
-        --column_aggregate-display: inline-block;
-        --is_visible--height: var(--active-column-selector--height, auto);
+        perspective-row {
+            height: var(--active-column--height, 41px);
+            min-height: var(--active-column--height, 41px);
+            --row_draggable-height: var(--active-column--height, 41px);
+            --column_aggregate-display: inline-block;
+            --is_visible--height: var(--active-column-selector--height, auto);
+        }
     }
 }
 
 :host {
     font-family: @sans-serif-fonts;
-    background-color: #eee;
-    color: #333;
+    background-color: #F2F4F6;
+    color: #161616;
 
     #app.columns_horizontal {
         #columns_container {
@@ -151,21 +159,22 @@
             }
         }
 
-        #side_panel #divider {
+        #columns_container #divider {
             display: none;
         }
 
-        perspective-computed-expression-widget {
+        perspective-expression-editor {
             max-height: none;
             margin-right: 24px;
             width: auto;
         }
     }
 
-    #side_panel perspective-row {
+    #columns_container perspective-row {
         --name-before-display: inline-block;
         --is_visible-display: inline-block;
-        --row_draggable-padding: 0px 10px 0px 0px;
+        --row_draggable--padding: 0px 8px 0px 0px;
+        --row_draggable--margin: 0px 8px 0px 0px;
         --row_close-display: none;
         --column_name-max-width: 180px;
     }
@@ -182,6 +191,7 @@
 
         #active_columns {
             flex: 0 1 auto;
+            min-height: var(--column--height, 21px);
 
             perspective-row {
                 margin-bottom: 2px;
@@ -189,14 +199,14 @@
                     --column--background,
                     white
                 );
-                --row_draggable-border-color: var(--inactive--color, #ccc);
+                --row_draggable-border-color: var(--inactive--color, #C5C9D0);
                 --row_draggable-border-width: 0 0 1px 0;
                 --row_draggable-overflow: hidden;
                 --row_draggable--justify-content: space-evenly;
             }
 
             perspective-row:last-child {
-                --row_draggable-border-color: var(--row_draggable-last-child-border-color, var(--inactive--color, #ccc));
+                --row_draggable-border-color: var(--row_draggable-last-child-border-color, var(--inactive--color, #C5C9D0));
             }
 
             perspective-row[drop-target] {
@@ -208,23 +218,25 @@
                 pointer-events: none;
             }
        
+            // "Locked" columns are columns in the GUI that cannot be removed
+            // (but can sstill be replaced or switched via drag/drop).
             &.one_lock,
             &.two_lock {
                 perspective-row:first-child {
-                    --active--color: #ccc;
+                    --active--color: var(--inactive--color, #ccc);
                     --is_visible--cursor: normal;
                 }
             }
 
             &.two_lock {
                 perspective-row:nth-child(2) {
-                    --active--color: #ccc;
+                    --active--color: var(--inactive--color, #ccc);
                     --is_visible--cursor: normal;
                 }
             }
         
             perspective-row:only-child {
-                --active--color: #ccc;
+                --active--color: var(--inactive--color, #ccc);
                 --is_visible--cursor: normal;
             }
         }
@@ -250,16 +262,35 @@
         font-family: var(--interface-monospace--font-family, monospace);
     }
 
-    #side_panel #side_panel__actions {
+    #columns_container #side_panel__actions {
         display: flex;
         flex-direction: column;
         flex-shrink: 1000;
         justify-content: flex-start;
         position: relative;
-        overflow-y: hidden;
         width: 100%;
         margin: var(--column-container--margin, 8px);
         min-height: 36px;
+
+        #add-expression {
+            padding: 6px 0px;
+            margin: -6px 0 0 0;
+            &.expr_editor_open {
+                background: rgba(0,0,0,0.05);
+            }
+        }
+
+        #add-computed-expression:hover {
+            background-color: rgba(0,0,0,0.05);
+            border: 5px solid transparent;
+            border-left-width: 0px;
+            border-right-width: 0px;
+            margin-top: -5px;
+            margin-bottom: -5px;
+            // .psp-icon {
+            //     color: var(--active--color, @blue500);
+            // }
+        }
 
         button.side_panel-action {
             align-items: center;
@@ -310,10 +341,6 @@
 
     #drop_target {
         border: var(--plugin--border, none);
-    }
-
-    #pivot_chart_container {
-        box-shadow: var(--plugin--box-shadow, none);
     }
 
     #filters perspective-row {
@@ -406,6 +433,7 @@
 
     select {
         border-radius: 0;
+        outline: none;
         background-color: var(--select--background-color, white);
         .bordered();
     }
@@ -428,20 +456,5 @@
 
     #app {
         background-color: inherit;
-    }
-
-    ::-webkit-scrollbar,
-    ::shadow ::-webkit-scrollbar {
-        width: 12px;
-    }
-
-    ::-webkit-scrollbar-thumb,
-    ::shadow ::-webkit-scrollbar-thumb {
-        background: #ccc;
-    }
-
-    ::-webkit-scrollbar-track,
-    ::shadow ::-webkit-scrollbar-track {
-        background: none;
     }
 }

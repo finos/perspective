@@ -14,7 +14,7 @@ import {Message} from "@lumino/messaging";
 import {Widget} from "@lumino/widgets";
 import {MIME_TYPE, PSP_CLASS, PSP_CONTAINER_CLASS, PSP_CONTAINER_CLASS_DARK} from "./utils";
 
-import {HTMLPerspectiveViewerElement, Pivots, Aggregates, Sort, ComputedColumns, PerspectiveViewerOptions, Filters, Columns} from "@finos/perspective-viewer";
+import {HTMLPerspectiveViewerElement, Pivots, Aggregates, Sort, Expressions, PerspectiveViewerOptions, Filters, Columns} from "@finos/perspective-viewer";
 
 let _increment = 0;
 
@@ -30,7 +30,8 @@ export interface PerspectiveWidgetOptions extends PerspectiveViewerOptions {
     // ["row-pivots"]
     column_pivots?: Pivots;
     row_pivots?: Pivots;
-    computed_columns?: ComputedColumns;
+    expressions?: Expressions;
+    editable?: boolean;
 }
 
 /**
@@ -56,7 +57,7 @@ export class PerspectiveWidget extends Widget {
      *
      * @param options
      */
-    _set_attributes(options: PerspectiveWidgetOptions): void {
+    _set_attributes(options: PerspectiveViewerOptions & PerspectiveWidgetOptions): void {
         const plugin: string = options.plugin || "datagrid";
         const columns: Columns = options.columns || [];
         const row_pivots: Pivots = options.row_pivots || options["row-pivots"] || [];
@@ -64,7 +65,7 @@ export class PerspectiveWidget extends Widget {
         const aggregates: Aggregates = options.aggregates || {};
         const sort: Sort = options.sort || [];
         const filters: Filters = options.filters || [];
-        const computed_columns: ComputedColumns = options.computed_columns || options["computed-columns"] || [];
+        const expressions: Expressions = options.expressions || options["expressions"] || [];
         const plugin_config: PerspectiveViewerOptions = options.plugin_config || {};
         const dark: boolean = options.dark || false;
         const editable: boolean = options.editable || false;
@@ -87,8 +88,8 @@ export class PerspectiveWidget extends Widget {
         // do aggregates after columns
         this.aggregates = aggregates;
 
-        // do computed last
-        this.computed_columns = computed_columns;
+        // do expressions last
+        this.expressions = expressions;
         this.filters = filters;
     }
 
@@ -271,14 +272,14 @@ export class PerspectiveWidget extends Widget {
         this.viewer.setAttribute("sort", JSON.stringify(sort));
     }
 
-    get computed_columns(): ComputedColumns {
-        return JSON.parse(this.viewer.getAttribute("computed-columns"));
+    get expressions(): Expressions {
+        return JSON.parse(this.viewer.getAttribute("expressions"));
     }
-    set computed_columns(computed_columns: ComputedColumns) {
-        if (computed_columns.length > 0) {
-            this.viewer.setAttribute("computed-columns", JSON.stringify(computed_columns));
+    set expressions(expressions: Expressions) {
+        if (expressions.length > 0) {
+            this.viewer.setAttribute("expressions", JSON.stringify(expressions));
         } else {
-            this.viewer.removeAttribute("computed-columns");
+            this.viewer.removeAttribute("expressions");
         }
     }
 

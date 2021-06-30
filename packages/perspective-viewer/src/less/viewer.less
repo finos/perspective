@@ -10,6 +10,7 @@
 @import "./column_labels.less";
 @import "./variables.less";
 // @import "./status_bar.less";
+@import "./scrollbars.less";
 
 
 .button {
@@ -18,7 +19,7 @@
 
 @keyframes expand {
     from {
-        opacity: 0;
+        opacity: 0.5;
     }
 }
 
@@ -91,6 +92,7 @@
         margin-left: 24px;
         margin-top: 3px;
         font-size: 12px;
+        font-weight: 300;
     }
     .side_panel-action:hover {
         cursor: pointer;
@@ -100,7 +102,7 @@
         line-height: 1.42857143;
     }
     #app {
-        #side_panel {
+        #columns_container {
             width: 100%;
         }
     }
@@ -126,7 +128,6 @@
         right: 0;
         bottom: 0;
         border: var(--plugin--border, none);
-        overflow: hidden;
     }
     .config {
         display: flex;
@@ -191,8 +192,7 @@
         flex-direction: column;
         overflow-x: hidden;
         width: 100%;
-        flex: 0 1 auto;
-        min-height: 35px;
+        flex: 0 100 auto;
         &.collapse {
             flex: 0 1 auto;
             flex-shrink: 0;
@@ -206,7 +206,7 @@
         }
     }
     #app:not(.columns_horizontal) #columns_container:not(.collapse) #active_columns {
-        max-height: 60%;
+        max-height: ~"min(calc(100% - 95px), 60%)";
     }
     #columns_container.collapse #sub_columns {
         flex: 0 1 auto;
@@ -297,6 +297,8 @@
     }
     #top_panel perspective-row::after {
         content: ",";
+        line-height: 26px;
+        padding-left: 4px;
     }
     #top_panel perspective-row:last-child::after {
         display: none;
@@ -357,9 +359,11 @@
         background-color: #fff;
         color: inherit;
         border-radius: 5px;
-        height: 24px;
+        height: 21px;
+        margin-top: 3px;
         padding: var(--select--padding, 0px 0px 0px 6px);
         font-size: 12px;
+        font-weight: 300;
         font-family: inherit;
     }
     input {
@@ -383,30 +387,19 @@
             --psp_row-display: inline-block;
         }
     }
-    #side_panel {
-        position: relative;
-        flex: 0 0 auto;
-        padding: var(--side_panel--padding, 10px 2px 0px 11px);
-    }
-    #side_panel > div {
+    #columns_container {
         display: flex;
     }
-    #vis_selector_container {
-        min-height: 29px;
-        margin-left: var(--column_selector--width, 20px);
-        overflow: hidden;
-    }
-    #vis_selector {
-        flex-grow: 1;
-    }
+ 
     #transpose_button {
         cursor: pointer;
         min-width: 5px;
         max-width: 5px;
         flex-grow: 0;
-        color: #999;
+        color: var(--inactive--color, inherit);
         font-family: Arial;
         font-size: 12px;
+        user-select: none;
         &:hover {
             color: var(--active--color, inherit);
         }
@@ -419,27 +412,5 @@
         bottom: 0;
         width: 8px;
         cursor: col-resize;
-    }
-
-    ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-    }
-
-    :hover::-webkit-scrollbar-thumb {
-        background-color: rgba(0,0,0,0.15);
-    }
-    
-    :hover::-webkit-scrollbar-thumb:hover {
-        background-color: rgba(0,0,0,0.3);
-    }
-
-    ::-webkit-scrollbar-thumb {
-        border-radius: 4px;
-        background-color: rgba(0, 0, 0, 0);
-    }
-
-    ::-webkit-scrollbar-corner {
-        background-color: rgba(0, 0, 0, 0);
     }
 }

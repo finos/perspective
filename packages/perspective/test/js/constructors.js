@@ -799,6 +799,44 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("CSV constructor with null columns", async function() {
+            const table = await perspective.table("x,y\n1,");
+            const view = await table.view();
+            expect(await table.schema()).toEqual({
+                x: "integer",
+                y: "string"
+            });
+            const result = await view.to_columns();
+            expect(result).toEqual({
+                x: [1],
+                y: [null]
+            });
+            await view.delete();
+            await table.delete();
+        });
+
+        it("CSV constructor indexed, with null columns, and update", async function() {
+            const table = await perspective.table("x,y\n1,", {index: "x"});
+            const view = await table.view();
+            expect(await table.schema()).toEqual({
+                x: "integer",
+                y: "string"
+            });
+            const result = await view.to_columns();
+            expect(result).toEqual({
+                x: [1],
+                y: [null]
+            });
+            table.update("x,y\n1,abc\n2,123");
+            const result2 = await view.to_columns();
+            expect(result2).toEqual({
+                x: [1, 2],
+                y: ["abc", "123"]
+            });
+            await view.delete();
+            await table.delete();
+        });
+
         it("Meta constructor", async function() {
             var table = await perspective.table(meta);
             var view = await table.view();

@@ -54,13 +54,28 @@ export function registerElement(templateString, styleString, proto) {
     }
     template.innerHTML = `<style id="psp_styles" scope="${template.getAttribute("id")}">test{}</style>` + template.innerHTML;
 
+    let is_locked = 0;
     const _perspective_element = class extends proto {
         attributeChangedCallback(name, old, value) {
+            if (is_locked > 0) {
+                return;
+            }
+
             if (value === null) {
                 value = "null";
             }
+
             if (name[0] !== "_" && old != value && !!Object.getOwnPropertyDescriptor(proto.prototype, name).set) {
                 this[name] = value;
+            }
+        }
+
+        _setAttributeSafe(key, val) {
+            is_locked++;
+            try {
+                this.setAttribute(key, val);
+            } finally {
+                is_locked--;
             }
         }
 
@@ -71,6 +86,11 @@ export function registerElement(templateString, styleString, proto) {
             this._initializing = true;
             var node = document.importNode(template.content, true);
             this.attachShadow({mode: "open"});
+            if (this._vieux) {
+                this._vieux.appendChild(node);
+                node = this._vieux;
+            }
+
             this.shadowRoot.appendChild(node);
 
             if (super.connectedCallback) {
@@ -180,42 +200,117 @@ export async function setPromise(cb = async () => {}, timeout = 0) {
     return await cb();
 }
 
-/**
- * Returns a promise whose resolve method can be called from elsewhere.
- */
-export function invertPromise() {
-    let resolve;
-    let promise = new Promise(_resolve => {
-        resolve = _resolve;
+export const invertPromise = () => {
+    let _resolve;
+    const promise = new Promise(resolve => {
+        _resolve = resolve;
     });
-    promise.resolve = resolve;
-    return promise;
-}
 
-export function throttlePromise(target, property, descriptor) {
+    promise.resolve = _resolve;
+    return promise;
+};
+
+export function throttlePromise(target, property, descriptor, clear = false) {
+    if (typeof target === "boolean") {
+        return function(target, property, descriptor) {
+            return throttlePromise(target, property, descriptor, true);
+        };
+    }
+
+    // Each call to `throttlePromise` has a unique `lock`
     const lock = Symbol("private lock");
-    const f = descriptor.value;
+    const _super = descriptor.value;
+
+    async function throttleOnce(id) {
+        if (id !== this[lock].gen) {
+            // This invocation got de-duped with a later one, but it will
+            // wake up first, so if there is not a lock acquired here, push
+            // it to the back of the event queue.
+            if (!this[lock].lock) {
+                await new Promise(requestAnimationFrame);
+            }
+
+            // Now await the currently-processing invocation (which
+            // occurred after than this one) and return.
+            await this[lock].lock;
+            return true;
+        }
+    }
+
+    // Wrap the underlying function
     descriptor.value = async function(...args) {
-        if (this[lock]) {
-            await this[lock];
-            if (this[lock]) {
-                await this[lock];
+        // Initialize the lock for this Object instance, if it has never been
+        // initialized.
+        this[lock] = this[lock] || {gen: 0};
+
+        // Assign this invocation a unique ID.
+        let id = ++this[lock].gen;
+
+        if (clear) {
+            await new Promise(requestAnimationFrame);
+        }
+
+        // If the `lock` property is defined, a previous invocation is still
+        // processing.
+        if (this[lock].lock) {
+            // `await` the previous call;  afterwards, the drawn state will be
+            // updated but we need to draw again to incorporate this
+            // invocation's state changes.
+            await this[lock].lock;
+
+            // We only want to execute the _last_ invocation, since each call
+            // precludes the previous ones if they are still queue-ed.
+            if (await throttleOnce.call(this, id)) {
+                return;
+            }
+        } else if (clear) {
+            // Even if the lock is clear, we need to debounce the queue-ed.
+            const debounced = await throttleOnce.call(this, id);
+            if (debounced) {
                 return;
             }
         }
-        this[lock] = invertPromise();
+
+        // This invocation has made it to the render process, so "acquire" the
+        // lock.
+        this[lock].lock = invertPromise();
+
+        // Call the decorated function itself
         let result;
         try {
-            result = await f.call(this, ...args);
-        } catch (e) {
-            console.error(e);
+            result = await _super.call(this, ...args);
         } finally {
-            const l = this[lock];
-            this[lock] = undefined;
+            // Errors can leave promises which depend on this behavior
+            // dangling.
+            const l = this[lock].lock;
+            delete this[lock]["lock"];
+
+            // If this invocation is still the latest, clear the attribute
+            // state.
+            // TODO this is likely not he behavior we want for this event ..
+            if (id === this[lock].gen && clear) {
+                this.removeAttribute("updating");
+                this.dispatchEvent(new Event("perspective-update-complete"));
+            }
+
             l.resolve();
-            return result;
+        }
+
+        return result;
+    };
+
+    // A function which clears the lock just like the main wrapper, but then
+    // does nothing.
+    descriptor.value.flush = async function(obj) {
+        if (obj[lock]?.lock) {
+            await obj[lock].lock;
+            await new Promise(requestAnimationFrame);
+            if (obj[lock]?.lock) {
+                await obj[lock].lock;
+            }
         }
     };
+
     return descriptor;
 }
 
@@ -252,3 +347,68 @@ export const registerPlugin = (name, plugin) => {
         global.__perspective_plugins__.push([name, plugin]);
     }
 };
+
+/**
+ * Given an expression, return its alias.
+ *
+ * @param {*} expression
+ * @returns String
+ */
+export function getExpressionAlias(expression) {
+    const matches = expression.match(/\/\/(.+?)$/m);
+    let alias;
+
+    // Has an alias - use that to type check.
+    if (matches && matches.length == 2) {
+        alias = matches[1].trim();
+        return alias;
+    } else {
+        return expression;
+    }
+}
+
+/**
+ * Adds an alias to the given expression and returns it.
+ *
+ * @param {*} expression
+ * @returns String
+ */
+// export function addExpressionAlias(expression) {
+//     let alias;
+//     expression.length > 20
+//         ? (alias =
+//               expression
+//                   .replace("\n", " ")
+//                   .substr(0, 20)
+//                   .trim() + "...")
+//         : (alias = expression);
+//     return `//${alias}\n${expression}`;
+// }
+
+/**
+ * Given an alias and an array of string expressions, find the alias inside
+ * the expressions array. This is important so we can map aliases back to
+ * expressions inside _new_row.
+ *
+ * @param {String} alias
+ * @param {Array<String>} expressions
+ * @returns String
+ */
+export function findExpressionByAlias(alias, expressions) {
+    for (const expr of expressions) {
+        const expr_alias = getExpressionAlias(expr);
+        if (alias === expr_alias) {
+            return expr;
+        }
+    }
+}
+
+/**
+ * Given an expression, strips the alias and returns the expression.
+ *
+ * @param {String} expression
+ * @returns String
+ */
+export function getRawExpression(expression) {
+    return expression.replace(/\/\/(.+)\n/, "");
+}

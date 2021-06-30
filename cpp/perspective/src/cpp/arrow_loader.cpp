@@ -172,9 +172,8 @@ namespace apachearrow {
         }
     }
 
-#ifdef PSP_ENABLE_WASM
     void
-    ArrowLoader::init_csv(std::string& csv, bool is_update,  std::unordered_map<std::string, std::shared_ptr<arrow::DataType>>& psp_schema) {        
+    ArrowLoader::init_csv(std::string& csv, bool is_update, std::unordered_map<std::string, std::shared_ptr<arrow::DataType>>& psp_schema) {        
         m_table = csvToTable(csv, is_update, psp_schema);
 
         std::shared_ptr<arrow::Schema> schema = m_table->schema();
@@ -185,7 +184,6 @@ namespace apachearrow {
             m_types.push_back(convert_type(field->type()->name()));
         }
     }
-#endif
 
     void
     ArrowLoader::fill_table(
@@ -576,18 +574,26 @@ namespace apachearrow {
 
             // Fill validity bitmap
             std::int64_t null_count = array->null_count();
+
             if (null_count == 0) {
                 col->valid_raw_fill();
             } else {
                 const uint8_t* null_bitmap = array->null_bitmap_data();
 
-                // arrow packs bools into a bitmap
-                for (uint32_t i = 0; i < len; ++i) {
-                    std::uint8_t elem = null_bitmap[i / 8];
-                    bool v = elem & (1 << (i % 8));
-                    col->set_valid(offset + i, v);
+                // If the arrow column is of null type, the null bitmap is
+                // a nullptr - so just mark everything as invalid and move on.
+                if (null_bitmap == NULL) {
+                    col->invalid_raw_fill();
+                } else {
+                    // Read the null bitmap and set the correct rows as valid
+                    for (uint32_t i = 0; i < len; ++i) {
+                        std::uint8_t elem = null_bitmap[i / 8];
+                        bool v = elem & (1 << (i % 8));
+                        col->set_valid(offset + i, v);
+                    }
                 }
             }
+
             offset += len;
         }
     }

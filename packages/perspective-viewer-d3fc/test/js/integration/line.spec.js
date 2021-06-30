@@ -13,7 +13,7 @@ const utils = require("@finos/perspective-test");
 const simple_tests = require("@finos/perspective-viewer/test/js/simple_tests.js");
 
 const {withTemplate} = require("./simple-template");
-withTemplate("line", "d3_y_line");
+withTemplate("line", "Y Line");
 
 utils.with_server({}, () => {
     describe.page(
@@ -21,12 +21,12 @@ utils.with_server({}, () => {
         () => {
             simple_tests.default();
 
-            test.capture("Sets a category axis when pivoted by a computed datetime", async page => {
+            test.capture("Sets a category axis when pivoted by an expression datetime", async page => {
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
-                await page.evaluate(element => element.setAttribute("computed-columns", JSON.stringify(["hour_bucket('Ship Date')"])), viewer);
+                await page.evaluate(element => element.setAttribute("expressions", JSON.stringify([`// abc \n bucket("Ship Date", 'M')`])), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
-                await page.evaluate(element => element.setAttribute("row-pivots", '["hour_bucket(Ship Date)"]'), viewer);
+                await page.evaluate(element => element.setAttribute("row-pivots", JSON.stringify(["abc"])), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(element => element.setAttribute("columns", '["State","Sales"]'), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");

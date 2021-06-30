@@ -60,6 +60,51 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("Aggregates are processed in the order of the columns array", async function() {
+            const table = await perspective.table(data);
+            const view = await table.view({
+                row_pivots: ["z"],
+                columns: ["y", "z"],
+                aggregates: {
+                    z: "last",
+                    y: "last"
+                }
+            });
+            const paths = await view.column_paths();
+            expect(paths).toEqual(["__ROW_PATH__", "y", "z"]);
+            const answer = [
+                {__ROW_PATH__: [], y: "c", z: true},
+                {__ROW_PATH__: [false], y: "d", z: false},
+                {__ROW_PATH__: [true], y: "c", z: true}
+            ];
+            const result = await view.to_json();
+            expect(result).toEqual(answer);
+            view.delete();
+            table.delete();
+        });
+
+        it("Aggregates are not in columns are ignored", async function() {
+            const table = await perspective.table(data);
+            const view = await table.view({
+                row_pivots: ["z"],
+                columns: ["y", "z"],
+                aggregates: {
+                    x: "count"
+                }
+            });
+            const paths = await view.column_paths();
+            expect(paths).toEqual(["__ROW_PATH__", "y", "z"]);
+            const answer = [
+                {__ROW_PATH__: [], y: 4, z: 4},
+                {__ROW_PATH__: [false], y: 2, z: 2},
+                {__ROW_PATH__: [true], y: 2, z: 2}
+            ];
+            const result = await view.to_json();
+            expect(result).toEqual(answer);
+            view.delete();
+            table.delete();
+        });
+
         it("['z'], sum", async function() {
             var table = await perspective.table(data);
             var view = await table.view({
@@ -176,6 +221,44 @@ module.exports = perspective => {
                 {__ROW_PATH__: [], x: 1},
                 {__ROW_PATH__: [false], x: 2},
                 {__ROW_PATH__: [true], x: 1}
+            ];
+            let result = await view.to_json();
+            expect(result).toEqual(answer);
+            view.delete();
+            table.delete();
+        });
+
+        it("['z'], join", async function() {
+            var table = await perspective.table(data);
+            var view = await table.view({
+                row_pivots: ["z"],
+                columns: ["x"],
+                aggregates: {x: "join"}
+            });
+            var answer = [
+                {__ROW_PATH__: [], x: "1, 2, 3, 4"},
+                {__ROW_PATH__: [false], x: "2, 4"},
+                {__ROW_PATH__: [true], x: "1, 3"}
+            ];
+            let result = await view.to_json();
+            expect(result).toEqual(answer);
+            view.delete();
+            table.delete();
+        });
+
+        it("['z'], join exceeds max join size", async function() {
+            let data2 = JSON.parse(JSON.stringify(data));
+            data2.push({x: 5, y: "abcdefghijklmnopqrstuvwxyz".repeat(12), z: false});
+            var table = await perspective.table(data2);
+            var view = await table.view({
+                row_pivots: ["z"],
+                columns: ["y"],
+                aggregates: {y: "join"}
+            });
+            var answer = [
+                {__ROW_PATH__: [], y: "a"},
+                {__ROW_PATH__: [false], y: ""},
+                {__ROW_PATH__: [true], y: "a, c"}
             ];
             let result = await view.to_json();
             expect(result).toEqual(answer);
@@ -969,10 +1052,10 @@ module.exports = perspective => {
             });
             let result2 = await view.to_columns();
             expect(result2).toEqual({
-                "2019-4-11 23:40:35|x": [null, null, 3, 4],
-                "2019-4-11 23:40:35|y": [null, null, "c", "d"],
-                "2019-4-13 03:27:15|x": [1, 2, null, null],
-                "2019-4-13 03:27:15|y": ["a", "b", null, null]
+                "4/11/2019, 11:40:35 PM|x": [null, null, 3, 4],
+                "4/11/2019, 11:40:35 PM|y": [null, null, "c", "d"],
+                "4/13/2019, 3:27:15 AM|x": [1, 2, null, null],
+                "4/13/2019, 3:27:15 AM|y": ["a", "b", null, null]
             });
             view.delete();
             table.delete();
@@ -1286,6 +1369,33 @@ module.exports = perspective => {
             });
             const paths = await view.column_paths();
             expect(paths).toEqual(["__ROW_PATH__", "x", "y", "z"]);
+            view.delete();
+            table.delete();
+        });
+
+        it("Should return numerical column names in the correct order, 1-sided view", async function() {
+            const table = await perspective.table({
+                "2345": [0, 1, 2, 3],
+                "1.23456789": [0, 1, 2, 3],
+                "1234": [1, 2, 3, 4],
+                x: [5, 6, 7, 8]
+            });
+
+            // Previously, we iterated through the aggregates map using the
+            // order given in Object.keys() which meant that column names that
+            // were parsable as numbers automatically ended up at the front of
+            // the map. This test makes sure that column orders are respected
+            // by the engine for all column names.
+            const view = await table.view({
+                row_pivots: ["x"],
+                columns: ["2345", "1234", "x", "1.23456789"],
+                aggregates: {
+                    x: "sum",
+                    "1234": "sum"
+                }
+            });
+            const paths = await view.column_paths();
+            expect(paths).toEqual(["__ROW_PATH__", "2345", "1234", "x", "1.23456789"]);
             view.delete();
             table.delete();
         });

@@ -84,9 +84,9 @@ export class PerspectiveViewerWidget extends Widget {
         return this.viewer.restore({...viewerConfig});
     }
 
-    save() {
+    async save() {
         return {
-            ...this.viewer.save(),
+            ...(await this.viewer.save()),
             master: this.master,
             name: this.viewer.getAttribute("name"),
             table: this.viewer.getAttribute("table"),

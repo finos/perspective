@@ -21,10 +21,9 @@ export default () => {
                 postcss({
                     inject: false,
                     extract: path.resolve(`dist/umd/${key}.css`),
-                    sourceMap: true,
-                    minimize: {preset: "lite"}
-                }),
-                sourcemaps()
+                    sourceMap: false,
+                    minimize: false
+                })
             ]
         };
     }
@@ -61,8 +60,8 @@ export default () => {
                 filesize(),
                 postcss({
                     inject: false,
-                    sourceMap: true,
-                    minimize: {preset: "lite"}
+                    sourceMap: false,
+                    minimize: false
                 }),
                 sourcemaps()
             ].filter(x => x),

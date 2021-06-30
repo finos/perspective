@@ -15,13 +15,13 @@ import perspective.viewer.validate as validate
 class TestValidate:
 
     def test_validate_plugin_valid_instance(self):
-        assert validate.validate_plugin(Plugin.XBAR) == "x_bar"
+        assert validate.validate_plugin(Plugin.XBAR) == "X Bar"
 
     def test_validate_plugin_valid_instance_datagrid(self):
         assert validate.validate_plugin(Plugin.GRID) == "datagrid"
 
     def test_validate_plugin_valid_string(self):
-        assert validate.validate_plugin("x_bar") == "x_bar"
+        assert validate.validate_plugin("X Bar") == "X Bar"
 
     def test_validate_plugin_invalid_string(self):
         with raises(PerspectiveError):
@@ -48,18 +48,10 @@ class TestValidate:
         filters = [["a", "is not null"]]
         assert validate.validate_filters(filters) == filters
 
-    def test_validate_computed_columns_valid(self):
-        computed = [{
-            "column": "abc",
-            "computed_function_name": "+",
-            "inputs": ["first", "second"]
-        }]
-        assert validate.validate_computed_columns(computed) == computed
+    def test_validate_expressions(self):
+        computed = ["// expression1 \n 'Hello'"]
+        assert validate.validate_expressions(["// expression1 \n 'Hello'"]) == computed
 
-    def test_validate_computed_columns_invalid(self):
+    def test_validate_expressions_invalid(self):
         with raises(PerspectiveError):
-            assert validate.validate_computed_columns([{"column": "abc", "inputs": ["first", "second"]}])
-
-    def test_validate_computed_columns_str(self):
-        computed = ["expression"]
-        assert validate.validate_computed_columns(computed) == computed
+            assert validate.validate_expressions({})

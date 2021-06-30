@@ -7,6 +7,16 @@
  *
  */
 
+export const DATA_TYPES = {
+    integer: "integer",
+    float: "float",
+    string: "string",
+    boolean: "boolean",
+    date: "date",
+    datetime: "datetime",
+    object: "object"
+};
+
 export const CONFIG_ALIASES = {
     row_pivot: "row_pivots",
     "row-pivot": "row_pivots",
@@ -20,7 +30,7 @@ export const CONFIG_ALIASES = {
     sorts: "sort"
 };
 
-export const CONFIG_VALID_KEYS = ["viewport", "row_pivots", "column_pivots", "aggregates", "columns", "filter", "sort", "computed_columns", "row_pivot_depth", "filter_op"];
+export const CONFIG_VALID_KEYS = ["viewport", "row_pivots", "column_pivots", "aggregates", "columns", "filter", "sort", "computed_columns", "expressions", "row_pivot_depth", "filter_op"];
 
 const NUMBER_AGGREGATES = [
     "any",
@@ -33,6 +43,7 @@ const NUMBER_AGGREGATES = [
     "last by index",
     "last",
     "high",
+    "join",
     "low",
     "mean",
     "median",
@@ -44,9 +55,9 @@ const NUMBER_AGGREGATES = [
     "unique"
 ];
 
-const STRING_AGGREGATES = ["any", "count", "distinct count", "distinct leaf", "dominant", "first by index", "last by index", "last", "unique"];
+const STRING_AGGREGATES = ["any", "count", "distinct count", "distinct leaf", "dominant", "first by index", "join", "last by index", "last", "unique"];
 
-const BOOLEAN_AGGREGATES = ["any", "count", "distinct count", "distinct leaf", "dominant", "first by index", "last by index", "last", "unique", "and", "or"];
+const BOOLEAN_AGGREGATES = ["any", "count", "distinct count", "distinct leaf", "dominant", "first by index", "last by index", "last", "unique"];
 
 export const SORT_ORDERS = ["none", "asc", "desc", "col asc", "col desc", "asc abs", "desc abs", "col asc abs", "col desc abs"];
 

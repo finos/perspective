@@ -19,7 +19,7 @@ function newRows() {
     return rows;
 }
 
-window.addEventListener("WebComponentsReady", async function() {
+window.addEventListener("DOMContentLoaded", async function() {
     // Get element from the DOM.
     var elem = document.getElementsByTagName("perspective-viewer")[0];
 

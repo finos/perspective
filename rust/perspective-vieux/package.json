@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-vieux",
-    "version": "0.6.2",
+    "version": "0.9.0",
     "private": true,
     "description": "A regular `<table>`, for an async and virtual data model.",
     "repository": {
@@ -8,21 +8,20 @@
         "url": "https://github.com/finos/perspective"
     },
     "license": "Apache-2.0",
-    "main": "dist/esm/bootstrap.js",
-    "module": "dist/esm/bootstrap.js",
-    "browser": "dist/esm/bootstrap.js",
+    "main": "dist/esm/vieux.js",
+    "module": "dist/esm/vieux.js",
+    "browser": "dist/esm/vieux.js",
     "files": [
         "dist/**/*",
         "pkg/**/*",
         "src/**/*"
     ],
     "scripts": {
-        "build:wasm": "wasm-pack build --debug",
+        "build:wasm": "wasm-pack build --target web",
         "build:rollup": "rollup --config rollup.config.js",
         "build": "npm-run-all build:rollup build:wasm && cpx 'src/less/*' dist/less",
         "postbuild": "rimraf pkg/package.json pkg/.gitignore",
         "clean": "rimraf dist && rimraf pkg && rimraf target",
-        "docs": "jsdoc2md src/js/index.js --separators > api.md",
         "fix": "yarn lint --fix",
         "lint": "eslint src examples/*.md examples/*.html",
         "test:build": "cpx ../../packages/perspective/dist/umd/perspective.inline.js pkg/",
@@ -35,6 +34,6 @@
         "access": "public"
     },
     "dependencies": {
-        "@finos/perspective": "^0.6.1"
+        "@finos/perspective": "^0.9.0"
     }
 }

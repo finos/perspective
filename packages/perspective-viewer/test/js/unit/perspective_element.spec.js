@@ -23,15 +23,13 @@ describe(PerspectiveElement, () => {
                 num_columns: num_columns_fn
             };
 
-            Object.defineProperty(perspective_element, "_plugin", {
-                get: () => {
-                    return {
-                        max_columns,
-                        max_cells,
-                        render_warning: true
-                    };
-                }
-            });
+            perspective_element._vieux = {
+                get_plugin: jest.fn(() => ({
+                    max_columns,
+                    max_cells,
+                    render_warning: true
+                }))
+            };
         });
 
         describe("when schema is empty and no columns", () => {

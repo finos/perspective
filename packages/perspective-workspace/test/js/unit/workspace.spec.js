@@ -11,7 +11,7 @@ import {PerspectiveWorkspace} from "../../../src/js/workspace/workspace";
 import {toArray} from "@lumino/algorithm";
 
 describe("workspace", () => {
-    test("restores detail to dockpanel", () => {
+    test("restores detail to dockpanel", async () => {
         const viewers = {One: {table: "superstore", name: "One"}};
         const config = {
             viewers,
@@ -31,10 +31,10 @@ describe("workspace", () => {
 
         const expected = {table: "superstore", name: "One", master: false, linked: false};
         expect(widgets.length).toBe(1);
-        expect(widgets[0].save()).toStrictEqual(expected);
+        expect(await widgets[0].save()).toStrictEqual(expected);
     });
 
-    test("restores master to masterpanel", () => {
+    test("restores master to masterpanel", async () => {
         const viewers = {One: {table: "superstore", name: "One"}};
         const config = {
             viewers,
@@ -50,10 +50,10 @@ describe("workspace", () => {
 
         const expected = {table: "superstore", name: "One", master: true, linked: false};
         expect(widgets.length).toBe(1);
-        expect(widgets[0].save()).toStrictEqual(expected);
+        expect(await widgets[0].save()).toStrictEqual(expected);
     });
 
-    test("restores master to masterpanel and detail to dockpanel", () => {
+    test("restores master to masterpanel and detail to dockpanel", async () => {
         const viewers = {One: {table: "superstore", name: "One"}, Two: {table: "superstore", name: "Two"}};
         const config = {
             viewers,
@@ -79,9 +79,9 @@ describe("workspace", () => {
         const detail = {table: "superstore", name: "Two", master: false, linked: false};
 
         expect(masterWidgets.length).toBe(1);
-        expect(masterWidgets[0].save()).toStrictEqual(master);
+        expect(await masterWidgets[0].save()).toStrictEqual(master);
 
         expect(detailWidgets.length).toBe(1);
-        expect(detailWidgets[0].save()).toStrictEqual(detail);
+        expect(await detailWidgets[0].save()).toStrictEqual(detail);
     });
 });

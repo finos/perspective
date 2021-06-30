@@ -67,7 +67,9 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         super({orientation: "horizontal"});
 
         this.addClass("perspective-workspace");
-        this.dockpanel = new PerspectiveDockPanel("main", {enableContextMenu: false});
+        this.dockpanel = new PerspectiveDockPanel("main", {
+            enableContextMenu: false
+        });
         this.detailPanel = new Panel();
         this.detailPanel.layout.fitPolicy = "set-no-constraint";
         this.detailPanel.addClass("perspective-scroll-panel");
@@ -148,7 +150,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         return this._side;
     }
 
-    save() {
+    async save() {
         const layout = {
             sizes: [...this.relativeSizes()],
             detail: PerspectiveDockPanel.mapWidgets(widget => widget.viewer.getAttribute("slot"), this.dockpanel.saveLayout()),
@@ -163,11 +165,14 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         }
         const viewers = {};
         for (const widget of this.masterPanel.widgets) {
-            viewers[widget.viewer.getAttribute("slot")] = widget.save();
+            viewers[widget.viewer.getAttribute("slot")] = await widget.save();
         }
-        PerspectiveDockPanel.mapWidgets(widget => {
-            viewers[widget.viewer.getAttribute("slot")] = widget.save();
-        }, this.dockpanel.saveLayout());
+        const widgets = PerspectiveDockPanel.getWidgets(this.dockpanel.saveLayout());
+        await Promise.all(
+            widgets.map(async widget => {
+                viewers[widget.viewer.getAttribute("slot")] = await widget.save();
+            })
+        );
         return {...layout, viewers};
     }
 
@@ -178,6 +183,10 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         if (this.mode === MODE.GLOBAL_FILTERS && master && master.widgets.length > 0) {
             this.setupMasterPanel(sizes || DEFAULT_WORKSPACE_SIZE);
         } else {
+            if (this.masterPanel.isAttached) {
+                this.masterPanel.close();
+            }
+
             this.addWidget(this.detailPanel);
         }
 
@@ -341,11 +350,11 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
      *
      */
 
-    duplicate(widget) {
+    async duplicate(widget) {
         if (this.dockpanel.mode === "single-document") {
             this.toggleSingleDocument(widget);
         }
-        const config = widget.save();
+        const config = await widget.save();
         config.name = config.name ? `${config.name} (duplicate)` : "";
         const duplicate = this._createWidgetAndNode({config});
         if (config.linked) {
@@ -405,7 +414,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
     }
 
     async _filterViewer(viewer, filters, candidates) {
-        const config = viewer.save();
+        const config = await viewer.save();
         const availableColumns = Object.keys(await viewer.table.schema());
         const currentFilters = config.filters || [];
         const columnAvailable = filter => filter[0] && availableColumns.includes(filter[0]);
@@ -416,11 +425,11 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         viewer.restore({filters: newFilters});
     }
 
-    onPerspectiveSelect = event => {
-        const config = event.target.save();
+    onPerspectiveSelect = async event => {
+        const config = await event.target.save();
         // perspective-select is already handled for hypergrid
 
-        if (event.type === "perspective-click" && config.plugin === "datagrid") {
+        if (event.type === "perspective-click" && (config.plugin === "Datagrid" || config.plugin === null)) {
             return;
         }
         const candidates = new Set([...(config["row-pivots"] || []), ...(config["column-pivots"] || []), ...(config.filters || []).map(x => x[0])]);
@@ -477,15 +486,15 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         return this._linkedViewers.indexOf(widget.viewer) > -1;
     }
 
-    _linkWidget(widget) {
+    async _linkWidget(widget) {
         widget.title.className += " linked";
         if (this._linkedViewers.indexOf(widget.viewer) === -1) {
             this._linkedViewers.push(widget.viewer);
             // if this is the first linked viewer, make viewers with
             // row-pivots selectable
             if (this._linkedViewers.length === 1) {
-                this.getAllWidgets().forEach(widget => {
-                    const config = widget.viewer.save();
+                this.getAllWidgets().forEach(async widget => {
+                    const config = await widget.viewer.save();
                     if (config["row-pivots"]) {
                         widget.viewer.restore({selectable: true});
                     }
@@ -514,7 +523,10 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
      */
 
     createContextMenu(widget) {
-        const contextMenu = new Menu({commands: this.commands, renderer: this.menuRenderer});
+        const contextMenu = new Menu({
+            commands: this.commands,
+            renderer: this.menuRenderer
+        });
 
         contextMenu.addItem({command: "workspace:maximize", args: {widget}});
         contextMenu.addItem({command: "workspace:minimize", args: {widget}});
@@ -709,10 +721,10 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
             }
         };
         const contextMenu = event => this.showContextMenu(widget, event);
-        const updated = event => {
+        const updated = async event => {
             this.workspaceUpdated();
             if (this.mode === MODE.LINKED) {
-                const config = event.target?.save();
+                const config = await event.target?.save();
                 if (config) {
                     const selectable = this._linkedViewers.length > 0 && !!config["row-pivots"];
                     if (selectable !== !!config.selectable) {
@@ -746,14 +758,18 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
      *
      */
 
-    _fireUpdateEvent() {
-        const layout = this.save();
+    async _fireUpdateEvent() {
+        const layout = await this.save();
         if (layout) {
             const tables = {};
             this.tables.forEach((value, key) => {
                 tables[key] = value;
             });
-            this.element.dispatchEvent(new CustomEvent("workspace-layout-update", {detail: {tables, layout}}));
+            this.element.dispatchEvent(
+                new CustomEvent("workspace-layout-update", {
+                    detail: {tables, layout}
+                })
+            );
         }
     }
 

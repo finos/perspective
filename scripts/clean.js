@@ -15,20 +15,17 @@ const args = process.argv.slice(2);
 
 const IS_SCREENSHOTS = args.indexOf("--screenshots") !== -1;
 
-function clean_screenshots() {
+function clean_screenshots(scope) {
     if (args.indexOf("--all") !== -1) {
         try {
-            execute`lerna exec --scope="@finos/${process.env.PACKAGE}" -- yarn rimraf screenshots`;
+            execute`lerna exec --scope="@finos/${scope}" -- yarn rimraf screenshots`;
         } catch (e) {}
     } else {
-        execute`lerna run clean:screenshots --scope="@finos/${process.env.PACKAGE}"`;
+        execute`lerna run clean:screenshots --scope="@finos/${scope}"`;
     }
 }
 
 try {
-    if (!process.env.PSP_PROJECT || args.indexOf("--deps") > -1) {
-        clean`packages/perspective/build`;
-    }
     if (process.env.PSP_PROJECT === "python") {
         clean(
             "python/perspective/dist",
@@ -44,16 +41,24 @@ try {
         );
         return;
     }
-    if (!IS_SCREENSHOTS && (!process.env.PACKAGE || minimatch("perspective", process.env.PACKAGE))) {
-        clean`cpp/perspective/cppbuild`;
-        const files = ["CMakeFiles", "build", "cmake_install.cmake", "CMakeCache.txt", "compile_commands.json", "libpsp.a", "Makefile"];
-        clean(...files.map(x => `cpp/perspective/obj/${x}`));
+
+    if (!process.env.PSP_PROJECT || args.indexOf("--deps") > -1) {
+        clean("cpp/perspective/dist", "cpp/perspective/build", "packages/perspective/build");
     }
+
+    let scope = process.env.PACKAGE && process.env.PACKAGE !== "" ? `${process.env.PACKAGE}` : "*";
+
     if (!IS_SCREENSHOTS) {
-        execute`lerna run clean --scope="@finos/${process.env.PACKAGE}"`;
+        if (!process.env.PACKAGE || minimatch("perspective", process.env.PACKAGE)) {
+            const files = ["CMakeFiles", "build", "cmake_install.cmake", "CMakeCache.txt", "compile_commands.json", "libpsp.a", "Makefile"];
+            clean(...files.map(x => `cpp/perspective/obj/${x}`));
+        }
+
+        execute`lerna exec --scope="@finos/${scope}" -- yarn clean`;
         clean("docs/build", "docs/python", "docs/obj");
     }
-    clean_screenshots();
+
+    clean_screenshots(scope);
 } catch (e) {
     console.error(e.message);
     process.exit(1);

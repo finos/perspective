@@ -1,0 +1,46 @@
+:host {
+
+    ::-webkit-scrollbar,
+    ::shadow ::-webkit-scrollbar {
+        width: 12px;
+    }
+
+
+    ::-webkit-scrollbar-track,
+    ::shadow ::-webkit-scrollbar-track {
+        background: none;
+    }
+    
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background-color: var(--scrollbar--background-color, #E0E4E9);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-corner {
+        background-color: rgba(0, 0, 0, 0);
+    }
+
+    #inactive_columns, #active_columns {
+        -webkit-mask-image:
+            ~"linear-gradient(black, black)",
+            ~"linear-gradient(to top, transparent 10%, black 90%)";
+        -webkit-mask-position: ~"-8px 0px", ~"bottom right";
+        -webkit-mask-size: ~"100% 100%", ~"8px 1000%";
+        -webkit-mask-repeat: no-repeat;
+        transition: -webkit-mask-position 0.3s;
+    
+        &:hover {
+            -webkit-mask-position: ~"-8px 0px", ~"top right";
+        }
+    }
+}
+
+

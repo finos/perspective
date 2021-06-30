@@ -93,9 +93,9 @@ async function script(page) {
 
     await poke2("column-pivots", [], "row-pivots", ["client"]);
     await page.waitFor(200);
-    await poke2("plugin", "y_bar");
+    await poke2("plugin", "Y Bar");
     await page.waitFor(500);
-    await poke2("plugin", "x_bar");
+    await poke2("plugin", "X Bar");
     await page.waitFor(200);
 
     await poke2("columns", ["chg"]);
@@ -108,7 +108,7 @@ async function script(page) {
     // create filter
     await page.evaluate(viewer => viewer.toggleConfig(), viewer);
     await page.waitFor(200);
-    await poke("plugin", "datagrid");
+    await poke("plugin", "Datagrid");
     await page.waitFor(200);
     await poke("column-pivots", [], "columns", ["chg", "vol"]);
     await page.waitFor(200);
@@ -138,7 +138,7 @@ async function script(page) {
     await page.mouse.click(100, 150);
     await page.waitFor(500);
 
-    await poke2("column-pivots", [], "plugin", "treemap");
+    await poke2("column-pivots", [], "plugin", "Treemap");
     await page.waitFor(500);
     await poke2("columns", ["vol", "chg"]);
     await page.waitFor(500);
@@ -152,7 +152,7 @@ async function script(page) {
 
     // close filter
     await page.evaluate(viewer => viewer.toggleConfig(), viewer2);
-    await page.waitFor(200);
+    await page.waitFor(1000);
     await page.mouse.click(200, 200, {button: "right"});
     await page.waitFor(100);
     await page.mouse.click(220, 220);
@@ -166,7 +166,7 @@ async function script(page) {
     // time series
 
     await poke("computed-columns", ['second_bucket("lastUpdate")']);
-    await poke("plugin", "y_line");
+    await poke("plugin", "Y Line");
     await page.waitFor(200);
     await poke("columns", ["chg"]);
     await page.waitFor(200);
@@ -180,10 +180,14 @@ async function script(page) {
     await poke("row-pivots", ["second_bucket(lastUpdate)"]);
     await page.waitFor(1000);
     await poke("column-pivots", ["client"]);
-    await page.waitFor(3000);
+    await page.waitFor(1000);
+    await poke("filters", [["client", "in", ["Marge", "Lisa"]]]);
+    await page.waitFor(1000);
 
-    await poke("plugin", "heatmap");
-    await page.waitFor(3000);
+    await poke("plugin", "Heatmap");
+    await page.waitFor(200);
+    await poke("filters", []);
+    await page.waitFor(1000);
 
     await poke("filters", [["vol", ">", 107]]);
     await page.waitFor(200);
@@ -197,7 +201,7 @@ async function script(page) {
     await page.waitFor(200);
 
     await poke("columns", ["bid"]);
-    await page.waitFor(3000);
+    await page.waitFor(1000);
 
     //script(page);
 }

@@ -20,11 +20,6 @@
 
 :host {
     display: block;
-
-    .row_computed {
-        display: none;
-        flex-direction: row;
-    }
 }
 
 .dropping * {
@@ -65,17 +60,19 @@
 
 :host {
     #filter_operand {
+        font-family: inherit;
+        font-size: 12px;
         display: var(--filter_operand-display, none);
         margin: 0;
         padding: 0px;
         height: 19px;
         color: inherit;
         outline: none;
-        border-color: var(--inactive--color, #ccc);
+        border-color: var(--inactive--color, #C5C9D0);
     }
 
     #filter_operator {
-        margin: 0 0 0 15px;
+        margin: 0 0 0 8px;
         display: var(--filter_operator-display, none);
         height: 17px;
         &:hover {
@@ -150,18 +147,15 @@
     }
 
     #row_close {
-        color: #999;
-        font-family: Arial;
+        color: inherit;
         font-size: 10px;
         &:hover {
             color: var(--active--color, inherit);
         }
     }
-    #column_aggregate {
-        font-family: Arial;
-    }
 
     .row_draggable select {
+        font-family: inherit;
         border: none;
     }
 
@@ -186,9 +180,12 @@
         background-color: var(--select--background-color, white);
         color: inherit;
         border-radius: 5px;
-        height: 24px;
+        height: 21px;
+        margin-top: 3px;
         padding: var(--column_type--padding, 0px 0px 0px 5px);
         font-size: 12px;
+        font-weight: 300;
+        font-family: inherit;
     }
 
     .awesomplete > ul {
@@ -218,7 +215,7 @@
         overflow: var(--row_draggable-overflow, visible);
         border-color: var(--row_draggable-border-color, none);
         border-width: var(--row_draggable-border-width, 0);
-        padding: var(--row_draggable-padding, 0);
+        padding: var(--row_draggable--padding, 0);
         font-size: 12px;
         flex-grow: 1;
         color: inherit;
@@ -253,8 +250,9 @@
     }
     .row_draggable {
         background-color: var(--null--background, transparent) !important;
-        border-color: @border-color !important;
+        box-shadow: var(--null--box-shadow, none);
         border-width: 0 0 1px 0 !important;
+        border-color: transparent !important;
     }
 }
 
@@ -262,13 +260,11 @@
     .row_draggable {
         background-color: var(
             --active--background,
-            rgb(240, 240, 255)
+            rgba(38, 112, 169, 0.3)
         ) !important;
-        animation: var(
-            --drop-target--animation,
-            var(--row_draggable--animation, expand3 0.5s ease-out)
-        );
-        box-shadow: inset 0px 0px 0px 3px #1078d1 !important;
+        box-shadow: var(--null--box-shadow, none);
+        border-width: 0 0 1px 0 !important;
+        border-color: transparent !important;
     }
 }
 
@@ -349,12 +345,13 @@
     .column_row();
     display: var(--name-before-display, none);
     width: var(--column_type--width, auto);
+    font-weight: 200;
 }
 
 :host #column_aggregate {
     display: var(--column_aggregate-display, none);
     font-size: 10px;
-    font-family: @sans-serif-fonts;
+    font-family: inherit;
     width: 88%;
     height: 20px;
 }

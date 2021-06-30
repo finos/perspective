@@ -40,6 +40,10 @@ export function view(worker, table_name, config) {
             },
             reject
         );
+
+        if (this._worker._initialized === true && !this._worker._features?.wait_for_response) {
+            resolve(this);
+        }
     });
 }
 
@@ -61,6 +65,8 @@ proxy_view.prototype = view.prototype;
 
 view.prototype.get_config = async_queue("get_config");
 
+view.prototype.get_min_max = async_queue("get_min_max");
+
 view.prototype.to_json = async_queue("to_json");
 
 view.prototype.to_arrow = async_queue("to_arrow");
@@ -71,7 +77,7 @@ view.prototype.to_csv = async_queue("to_csv");
 
 view.prototype.schema = async_queue("schema");
 
-view.prototype.computed_schema = async_queue("computed_schema");
+view.prototype.expression_schema = async_queue("expression_schema");
 
 view.prototype.column_paths = async_queue("column_paths");
 

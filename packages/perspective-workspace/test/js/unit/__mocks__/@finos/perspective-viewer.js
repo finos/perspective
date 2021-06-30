@@ -17,7 +17,7 @@ document.createElement = name => {
 const patchUnknownElement = element => {
     let config = {};
     element.load = jest.fn();
-    element.save = () => config;
+    element.save = async () => config;
     element.restore = value => {
         config = {...config, ...value};
         return Promise.resolve();

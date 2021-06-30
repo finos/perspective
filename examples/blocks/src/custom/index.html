@@ -11,101 +11,17 @@
     <script src="/node_modules/@finos/perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js"></script>
     <script src="/node_modules/@finos/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js"></script>
     <script src="/node_modules/@finos/perspective/dist/umd/perspective.js"></script>
+
+    <script src="custom_plugin.js"></script>
 </head>
 
 <body>
     <perspective-viewer 
-        plugin="datagrid" 
+        plugin="Custom Datagrid" 
         columns='["Profit","Sub-Category","State","Sales","Category","Order Date","Quantity"]'>
     </perspective-viewer>
 
     <script>
-
-        function hue(value, min, max) {
-            const norm = "0" + Math.abs(Math.round(255 * (Math.min(Math.max(value, min), max) / (max - min)))).toString(16);
-            return norm.slice(norm.length - 2, norm.length);
-        }
-
-        function getBase64Image(img) {
-            var canvas = document.createElement("canvas");
-            canvas.width = img.width;
-            canvas.height = img.height;
-            var ctx = canvas.getContext("2d");
-            ctx.drawImage(img, 0, 0);
-
-            return canvas.toDataURL("image/png");
-        }
-
-        function make_led_cell(td, metadata) {
-            if (metadata.value < 0) {
-                const fg = hue(Math.min(metadata.value, -50), -100, 0);
-                td.style.color = `#${fg}${fg}${fg}`;
-                td.style.background = `radial-gradient(#${hue(Math.min(metadata.value, -20), -100, 0)}3136, #243136`;
-                td.style.border = `1px solid #${hue(Math.min(metadata.value / 3, -20), -100, 0)}3136`;
-            } else if (metadata.value > 0) {
-                const fg = hue(Math.max(metadata.value, 50), 0, 100);
-                td.style.color = `#${fg}${fg}${fg}`;
-                td.style.background = `radial-gradient(#24${hue(Math.max(20, metadata.value), 0, 100)}36, #243136`;
-                td.style.border = `1px solid #24${hue(Math.max(metadata.value / 3, 20), 0, 100)}36`;
-            } else {
-                td.style.color = "#000";
-                td.style.background = "";
-                td.style.border = ``;
-            }
-        }
-
-        function make_bar_chart(td, metadata, max) {
-            td.style.background = "";
-            td.style.border = ``;;
-            if (!metadata.value) {
-            } else {
-                max = Math.max(max, metadata.value || 0);
-                let v = (metadata.value || 0) / max
-                td.innerHTML = `<div style="height:13px;width:${v * 100}%;background:linear-gradient(90deg, #2bb0af 0, #23a7d7);"><div>`;
-            }
-            return max;
-        }
-
-        function make_flag(td, metadata, cache, clean_name) {
-            td.style.background = "";
-            td.style.border = ``;;
-            if (cache[clean_name] && cache[clean_name].length > 0) {
-                const name = metadata.value;
-                td.textContent = "";
-                td.appendChild(cache[name].pop());
-            } else {
-                const name = metadata.value;
-                const span = document.createElement("span")
-                const img = document.createElement("img");
-                img.onload = () => {
-                    img.onload = undefined;
-                    const data = getBase64Image(img);
-                    img.src = data;
-                }
-                img.setAttribute("crossorigin", "anonymous")
-                img.setAttribute("src", `http://perspective.finos.org/img/flags/${states[clean_name].toLowerCase()}.png`);
-   
-                td.textContent = "";
-                span.appendChild(img)
-                td.appendChild(span);
-                CACHE[name] = CACHE[name] || [];
-                CACHE[name].push(img);
-            }
-        }
-
-        function make_clear(td) {
-            td.style.border = ``;
-            td.style.background = "";
-            td.style.color = "";
-        }
-
-        const CACHE = {}
-        function clone_img_cache() {
-            return Object.keys(CACHE).reduce((obj, key) => {
-                obj[key] = CACHE[key].slice();
-                return obj;
-            }, {});
-        }
 
         window.addEventListener('DOMContentLoaded', async function () {
             const viewer = document.getElementsByTagName('perspective-viewer')[0];
@@ -114,112 +30,7 @@
             const table = await perspective.worker().table(arr.slice());
             await viewer.load(table);
             viewer.toggleConfig();
-
-            let max = -Infinity;
-            let config = {}
-
-            const table_schema = await viewer.table.schema();
-            let dirty = false;
-            let column_paths = await viewer.view.column_paths();
-            let row_pivots = await viewer.view.get_config()["row_pivots"];
-            let schema = await viewer.view.schema();
-
-            viewer.addEventListener("perspective-config-update", async () => {
-                max = -Infinity;
-                dirty = true;
-            });
-
-            const datagrid = viewer.querySelector("regular-table");
-            datagrid.addStyleListener(async () => {
-                if (dirty) {
-                    column_paths = await viewer.view.column_paths();
-                    row_pivots = await viewer.view.get_config()["row_pivots"];
-                    schema = await viewer.view.schema();
-                    dirty = false;
-                }
-                const cache = clone_img_cache();
-                for (const td of datagrid.querySelectorAll("td")) {
-                    const metadata = datagrid.getMeta(td);
-                    
-                    let type;
-                    if (metadata.x >= 0) {
-                        const column_path = column_paths[metadata.x];
-                        const column_path_parts = column_path.split("|");
-                        type = schema[column_path_parts[column_path_parts.length - 1]];
-                    } else {
-                        const column_path = row_pivots[metadata.row_header_x - 1];
-                        type = table_schema[column_path];
-                    }
-                    const clean_name = metadata.value && metadata.value.trim && metadata.value.trim();
-                    td.classList.toggle("orbitron", type === "integer" || type === "float");
-                    if (type === "float") {
-                        make_led_cell(td, metadata);
-                    } else if (type === "integer") {
-                        max = make_bar_chart(td, metadata, max);
-                    } else if (clean_name in states) {
-                        make_flag(td, metadata, cache, clean_name);
-                    } else {
-                        make_clear(td);
-                    }
-                }
-            });
-
-            datagrid.draw();
         });
-
-        const states = {
-            "Alabama": "AL",
-            "Alaska": "AK",
-            "Arizona": "AZ",
-            "Arkansas": "AR",
-            "California": "CA",
-            "Colorado": "CO",
-            "Connecticut": "CT",
-            "District of Columbia": "DC",
-            "Delaware": "DE",
-            "Florida": "FL",
-            "Georgia": "GA",
-            "Hawaii": "HI",
-            "Idaho": "ID",
-            "Illinois": "IL",
-            "Indiana": "IN",
-            "Iowa": "IA",
-            "Kansas": "KS",
-            "Kentucky": "KY",
-            "Louisiana": "LA",
-            "Maine": "ME",
-            "Maryland": "MD",
-            "Massachusetts": "MA",
-            "Michigan": "MI",
-            "Minnesota": "MN",
-            "Mississippi": "MS",
-            "Missouri": "MO",
-            "Montana": "MT",
-            "Nebraska": "NE",
-            "Nevada": "NV",
-            "New Hampshire": "NH",
-            "New Jersey": "NJ",
-            "New Mexico": "NM",
-            "New York": "NY",
-            "North Carolina": "NC",
-            "North Dakota": "ND",
-            "Ohio": "OH",
-            "Oklahoma": "OK",
-            "Oregon": "OR",
-            "Pennsylvania": "PA",
-            "Rhode Island": "RI",
-            "South Carolina": "SC",
-            "South Dakota": "SD",
-            "Tennessee": "TN",
-            "Texas": "TX",
-            "Utah": "UT",
-            "Vermont": "VT",
-            "Virginia": "VA",
-            "Washington": "WA",
-            "West Virginia": "WV",
-            "Wisconsin": "WI",
-            "Wyoming": "WY"
-        };
 
     </script>
 
@@ -230,11 +41,6 @@
 
         perspective-viewer table, perspective-viewer table tr:hover {
             color: #cfd8dc;
-        }
-
-        perspective-viewer tr td.pd-group-header,
-        perspective-viewer tr th.pd-group-header {
-            border-right: 1px solid #666 !important;
         }
 
         perspective-viewer tbody:hover tr {
@@ -254,14 +60,6 @@
             transition: none;
         }
 
-        /* perspective-viewer tr:last-child th {
-            border-bottom: 1px solid #666;
-        } */
-
-        perspective-viewer tr th {
-            border-right: 1px solid #666;
-        }
-
         perspective-viewer tbody:hover tr:hover td {
             background: none;
             opacity: 1;
@@ -275,11 +73,6 @@
         perspective-viewer td.orbitron {
             text-align: center !important;
             font-family: Orbitron;
-        }
-
-        perspective-viewer th.integer,
-        perspective-viewer td.integer {
-            width: 100px;
         }
         
         perspective-viewer {
