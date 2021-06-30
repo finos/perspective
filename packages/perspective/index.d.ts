@@ -157,7 +157,7 @@ declare module "@finos/perspective" {
         PERSPECTIVE_READY = "perspective-ready"
     }
 
-    export type PerspectiveWorker = {
+    export type PerspectiveWorker = Worker & {
         table(data: TableData | View, options?: TableOptions): Promise<Table>;
     };
 

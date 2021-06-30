@@ -60,7 +60,8 @@ const DEFAULT_ASSETS = [
     "@finos/perspective-viewer/dist/umd",
     "@finos/perspective-viewer-datagrid/dist/umd",
     "@finos/perspective-viewer-d3fc/dist/umd",
-    "@finos/perspective-workspace/dist/umd"
+    "@finos/perspective-workspace/dist/umd",
+    "@finos/perspective-jupyterlab/dist/umd"
 ];
 
 const CONTENT_TYPES = {
@@ -92,10 +93,18 @@ function perspective_assets(assets, host_psp) {
         response.setHeader("Access-Control-Request-Method", "*");
         response.setHeader("Access-Control-Allow-Methods", "OPTIONS,GET");
         response.setHeader("Access-Control-Allow-Headers", "*");
+
         let url = request.url.split(/[\?\#]/)[0];
+
+        // Strip version numbers from the URL so we can handle CDN-like requests
+        // of the form @[^~]major.minor.patch when testing local versions of
+        // Perspective against Voila.
+        url = url.replace(/@[\^~]?\d+.[\d\*]*.[\d\*]*/, "");
+
         if (url === "/") {
             url = "/index.html";
         }
+
         let extname = path.extname(url);
         let contentType = CONTENT_TYPES[extname] || "text/html";
         try {

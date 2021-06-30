@@ -59,7 +59,7 @@ utils.with_jupyterlab(process.env.__JUPYTERLAB_PORT__, () => {
                     return tbl.querySelector("thead tr").childElementCount;
                 });
 
-                expect(num_columns).toEqual(14);
+                expect(num_columns).toEqual(8);
 
                 const num_rows = await viewer.evaluate(async viewer => {
                     const tbl = viewer.querySelector("regular-table");
@@ -129,7 +129,7 @@ utils.with_jupyterlab(process.env.__JUPYTERLAB_PORT__, () => {
                     return tbl.querySelectorAll("tbody tr").length;
                 });
 
-                expect(num_columns).toEqual(13);
+                expect(num_columns).toEqual(12);
                 expect(num_rows).toEqual(5);
             });
 
@@ -176,6 +176,23 @@ utils.with_jupyterlab(process.env.__JUPYTERLAB_PORT__, () => {
                         return viewer.getAttribute("plugin");
                     });
                     expect(plugin).toEqual("Y Line");
+                }
+            );
+
+            test.jupyterlab(
+                "Sets layout",
+                [["table = perspective.Table(arrow_data)\n", "w = perspective.PerspectiveWidget(table)"], ["w"], ["w.columns = ['f64']\n", "w.layout.width = '200px'\nw.layout.height = '100px'"]],
+                async page => {
+                    await execute_all_cells(page);
+                    await page.waitForTimeout(5000);
+                    const container = await page.waitForSelector(".jp-OutputArea-output .PSPContainer", {visible: true});
+                    await page.waitForTimeout(2500);
+                    const dimensions = await container.evaluate(async container => {
+                        const computed = getComputedStyle(container);
+                        return [computed.width, computed.height];
+                    });
+                    expect(dimensions[0]).toEqual("200px");
+                    expect(dimensions[1]).toEqual("100px");
                 }
             );
         },

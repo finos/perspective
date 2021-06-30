@@ -12,15 +12,18 @@ import {Table, View} from "@finos/perspective";
 
 export interface HTMLPerspectiveViewerElement extends PerspectiveViewerOptions, HTMLElement {
     load(data: Table): void;
-    notifyResize(): void;
     delete(): Promise<void>;
     flush(): Promise<void>;
     getEditPort(): Promise<number>;
-    toggleConfig(): void;
-    save(): PerspectiveViewerOptions;
-    reset(): void;
+    toggleConfig(): Promise<void>;
+    download(flat: boolean): Promise<any>;
+    copy(flat: boolean): Promise<void>;
+    save(): Promise<PerspectiveViewerOptions>;
     restore(x: any): Promise<void>;
+    reset(): void;
+    notifyResize(): void;
     restyleElement(): void;
+
     readonly table?: Table;
     readonly view?: View;
 }

@@ -128,12 +128,18 @@ export class PerspectiveWidget extends Widget {
         }
     }
 
-    save(): PerspectiveViewerOptions {
-        return this.viewer.save();
+    async toggleConfig(): Promise<void> {
+        if (this.isVisible) {
+            await this.viewer.toggleConfig();
+        }
     }
 
-    restore(config: PerspectiveViewerOptions): Promise<void> {
-        return this.viewer.restore(config);
+    async save(): Promise<PerspectiveViewerOptions> {
+        return await this.viewer.save();
+    }
+
+    async restore(config: PerspectiveViewerOptions): Promise<void> {
+        return await this.viewer.restore(config);
     }
 
     /**
@@ -141,8 +147,8 @@ export class PerspectiveWidget extends Widget {
      *
      * @param table A `perspective.table` object.
      */
-    load(table: Table): void {
-        this.viewer.load(table);
+    async load(table: Table): Promise<void> {
+        await this.viewer.load(table);
     }
 
     /**
@@ -157,8 +163,8 @@ export class PerspectiveWidget extends Widget {
     /**
      * Removes all rows from the viewer's table. Does not reset viewer state.
      */
-    clear(): void {
-        this.viewer.table.clear();
+    async clear(): Promise<void> {
+        await this.viewer.table.clear();
     }
 
     /**
@@ -167,8 +173,8 @@ export class PerspectiveWidget extends Widget {
      *
      * @param data
      */
-    replace(data: TableData): void {
-        this.viewer.table.replace(data);
+    async replace(data: TableData): Promise<void> {
+        await this.viewer.table.replace(data);
     }
 
     /**
@@ -371,10 +377,6 @@ export class PerspectiveWidget extends Widget {
         }
     }
 
-    toggleConfig(): void {
-        this._viewer.toggleConfig();
-    }
-
     static createNode(node: HTMLDivElement): HTMLPerspectiveViewerElement {
         node.classList.add("p-Widget");
         node.classList.add(PSP_CONTAINER_CLASS);
@@ -405,6 +407,7 @@ export class PerspectiveWidget extends Widget {
                 }
             });
             resize_observer.observe(node, {attributes: true});
+            viewer.toggleConfig();
         }
 
         return viewer;

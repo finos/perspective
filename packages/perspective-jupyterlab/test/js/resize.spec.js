@@ -15,12 +15,10 @@ utils.with_server({}, () => {
         "resize.html",
         () => {
             test.capture(
-                "Basic widget functions",
+                "Config should show by default",
                 async page => {
                     await page.waitForSelector("perspective-viewer:not([updating])");
-                    await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
                     await page.waitForSelector("perspective-viewer[settings]");
-                    await page.waitForSelector("perspective-viewer:not([updating])");
                 },
                 {}
             );

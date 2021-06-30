@@ -342,6 +342,15 @@ export class PerspectiveView extends DOMWidgetView {
     }
 
     /**
+     * When the View is removed after the widget terminates, clean up the
+     * client viewer and Web Worker.
+     */
+    remove(): void {
+        this.pWidget.delete();
+        this.client_worker.terminate();
+    }
+
+    /**
      * When traitlets are updated in python, update the corresponding value on
      * the front-end viewer. `client` and `server` are not included, as they
      * are not properties in `<perspective-viewer>`.
