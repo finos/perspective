@@ -653,8 +653,8 @@ class PerspectiveViewer extends ActionElement {
     /**
      * Restyles the elements and to pick up any style changes
      */
-    restyleElement() {
-        this._restyle_plugin();
+    async restyleElement() {
+        await this._restyle_plugin();
     }
 
     /**

@@ -144,6 +144,7 @@ customElements.define(
         }
 
         restore(token) {
+            token = JSON.parse(JSON.stringify(token));
             for (const col of Object.keys(token)) {
                 const config = token[col];
                 if (config?.pos_color) {

@@ -195,7 +195,7 @@ export function register(...plugins) {
                     }
 
                     _draw() {
-                        if (this._settings.data) {
+                        if (this._settings.data && this.isConnected) {
                             const containerDiv = d3.select(this._container);
                             const chartClass = `chart ${name}`;
                             this._settings.size = this._container.getBoundingClientRect();
@@ -211,6 +211,14 @@ export function register(...plugins) {
                     async resize() {
                         if (this.isConnected) {
                             this._draw();
+                        }
+                    }
+
+                    async restyleElement(...args) {
+                        let settings = this._settings;
+                        if (settings) {
+                            delete settings["colorStyles"];
+                            await this.draw(...args);
                         }
                     }
 

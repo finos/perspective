@@ -556,7 +556,7 @@ export class DomElement extends PerspectiveElement {
         this._inactive_columns = this.shadowRoot.querySelector("#inactive_columns");
         this._side_panel_actions = this.shadowRoot.querySelector("#side_panel__actions");
         this._add_expression_button = this.shadowRoot.querySelector("#add-expression");
-        this._side_panel = () => this._vieux.shadowRoot.querySelector("#side_panel");
+        this._side_panel = () => this._vieux?.shadowRoot?.querySelector("#side_panel");
         this._top_panel = this.shadowRoot.querySelector("#top_panel");
         this._sort = this.shadowRoot.querySelector("#sort");
         this._transpose_button = this.shadowRoot.querySelector("#transpose_button");
