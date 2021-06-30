@@ -24,7 +24,6 @@ export interface PerspectiveWidgetOptions extends PerspectiveViewerOptions {
     server?: boolean;
     title?: string;
     bindto?: HTMLElement;
-    plugin_config?: PerspectiveViewerOptions;
 
     // these shouldn't exist, PerspectiveViewerOptions should be sufficient e.g.
     // ["row-pivots"]
@@ -66,7 +65,7 @@ export class PerspectiveWidget extends Widget {
         const sort: Sort = options.sort || [];
         const filters: Filters = options.filters || [];
         const expressions: Expressions = options.expressions || options["expressions"] || [];
-        const plugin_config: PerspectiveViewerOptions = options.plugin_config || {};
+        const plugin_config: object = options.plugin_config || {};
         const dark: boolean = options.dark || false;
         const editable: boolean = options.editable || false;
         const server: boolean = options.server || false;
@@ -300,13 +299,20 @@ export class PerspectiveWidget extends Widget {
         }
     }
 
-    get plugin_config(): PerspectiveViewerOptions {
+    // `plugin_config` cannot be synchronously read from the viewer, as it is
+    // not part of the attribute API and only emitted from save(). Users can
+    // pass in a plugin config and have it applied to the viewer, but they
+    // cannot read the current `plugin_config` of the viewer if it has not
+    // already been set from Python.
+    get plugin_config(): object {
         return this._plugin_config;
     }
-    set plugin_config(plugin_config: PerspectiveViewerOptions) {
+    set plugin_config(plugin_config: object) {
         this._plugin_config = plugin_config;
+
+        // Allow plugin configs passed from Python to take effect on the viewer
         if (this._plugin_config) {
-            this.viewer.restore(this._plugin_config);
+            this.viewer.restore({plugin_config: this._plugin_config});
         }
     }
 
@@ -414,7 +420,7 @@ export class PerspectiveWidget extends Widget {
     }
 
     private _viewer: HTMLPerspectiveViewerElement;
-    private _plugin_config: PerspectiveViewerOptions;
+    private _plugin_config: object;
     private _client: boolean;
     private _server: boolean;
     private _dark: boolean;

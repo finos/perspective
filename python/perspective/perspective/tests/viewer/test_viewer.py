@@ -240,3 +240,19 @@ class TestViewer:
         assert viewer.plugin == "X Bar"
         assert viewer.editable is True
         assert viewer.expressions == ['"a" * 2']
+
+    def test_save_restore_plugin_config(self):
+        viewer = PerspectiveViewer(plugin="datagrid", plugin_config={"a": {"fixed": 4}})
+        config = viewer.save()
+
+        assert config["plugin_config"] == {
+            "a": {
+                "fixed": 4
+            }
+        }
+
+        viewer.reset()
+        assert viewer.plugin_config == {}
+
+        viewer.restore(**config)
+        assert viewer.plugin_config == config["plugin_config"]

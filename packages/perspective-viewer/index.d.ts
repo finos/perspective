@@ -19,7 +19,7 @@ export interface HTMLPerspectiveViewerElement extends PerspectiveViewerOptions, 
     download(flat: boolean): Promise<any>;
     copy(flat: boolean): Promise<void>;
     save(): Promise<PerspectiveViewerOptions>;
-    restore(x: any): Promise<void>;
+    restore(x: PerspectiveViewerOptions): Promise<void>;
     reset(): void;
     notifyResize(): void;
     restyleElement(): void;
@@ -36,15 +36,16 @@ export type Pivots = string[];
 export type Columns = string[];
 
 export interface PerspectiveViewerOptions {
-    aggregates?: Aggregates;
-    editable?: boolean;
     plugin?: string;
     columns?: Columns;
-    expressions?: Expressions;
     "row-pivots"?: Pivots;
     "column-pivots"?: Pivots;
+    aggregates?: Aggregates;
     filters?: Filters;
     sort?: Sort;
+    expressions?: Expressions;
+    plugin_config?: object;
+    editable?: boolean;
     selectable?: boolean;
 }
 
