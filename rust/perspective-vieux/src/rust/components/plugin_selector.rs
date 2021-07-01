@@ -56,9 +56,7 @@ impl Component for PluginSelector {
                 self.props.plugin.set_plugin(Some(&plugin_name)).unwrap();
                 false
             }
-            PluginSelectorMsg::PluginSelected(_plugin_name) => {
-                true
-            }
+            PluginSelectorMsg::PluginSelected(_plugin_name) => true,
         }
     }
 
@@ -79,7 +77,7 @@ impl Component for PluginSelector {
             <div id="plugin_selector_container">
                 <select id="plugin_selector" class="noselect" onchange=callback>{
                     for PLUGIN_REGISTRY.available_plugin_names().iter().map(|name| {
-                        let selected = match self.props.plugin.get_plugin() {
+                        let selected = match self.props.plugin.get_plugin(None) {
                             Ok(plugin) => plugin.name() == *name,
                             Err(_) => false
                         };

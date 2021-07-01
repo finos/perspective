@@ -152,6 +152,17 @@ class Row extends HTMLElement {
         }
     }
 
+    _set_default_aggregate() {
+        if (this.hasAttribute("type")) {
+            const aggregate = this.getAttribute("aggregate");
+            const type = this.getAttribute("type");
+            const def_aggregate = get_type_config(type).aggregate;
+            if (aggregate !== def_aggregate) {
+                this.setAttribute("aggregate", def_aggregate);
+            }
+        }
+    }
+
     set aggregate(a) {
         const agg_dropdown = this.shadowRoot.querySelector("#column_aggregate");
         const aggregate = this.getAttribute("aggregate");

@@ -8,6 +8,7 @@
 
 use crate::components::vieux::*;
 use crate::custom_elements::expression_editor::PerspectiveExpressionEditorElement;
+use crate::plugin::registry::*;
 use crate::plugin::*;
 use crate::session::Session;
 use crate::utils::perspective::*;
@@ -16,7 +17,9 @@ use crate::utils::*;
 use crate::*;
 
 use futures::channel::oneshot::*;
+use js_sys::*;
 use std::cell::RefCell;
+use std::iter::FromIterator;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -71,7 +74,7 @@ impl PerspectiveVieuxElement {
         let session = Session::new();
         let plugin = Plugin::new(session.clone(), {
             clone!(elem);
-            vec!(Box::new(move |plugin| update_plugin(&elem, plugin)))
+            vec![Box::new(move |plugin| update_plugin(&elem, plugin))]
         });
 
         let props = PerspectiveVieuxProps {
@@ -131,8 +134,23 @@ impl PerspectiveVieuxElement {
         })
     }
 
-    pub fn get_plugin(&self) -> Result<PerspectiveViewerJsPlugin, JsValue> {
-        self.plugin.get_plugin()
+    pub fn get_plugins(&self) -> Result<Array, JsValue> {
+        let plugins = Array::from_iter(
+            PLUGIN_REGISTRY
+                .available_plugin_names()
+                .iter()
+                .map(|name| self.get_plugin(Some(name.to_owned())))
+                .collect::<Result<Vec<PerspectiveViewerJsPlugin>, JsValue>>()?
+                .iter(),
+        );
+        Ok(plugins)
+    }
+
+    pub fn get_plugin(
+        &self,
+        name: Option<String>,
+    ) -> Result<PerspectiveViewerJsPlugin, JsValue> {
+        self.plugin.get_plugin(name)
     }
 
     pub fn set_plugin(&mut self, name: &str) -> Result<bool, JsValue> {

@@ -24,7 +24,7 @@ const DEFAULT_PLUGIN_SETTINGS = {
 };
 
 const styleWithD3FC = `${style}${getD3FCStyles()}`;
-const EXCLUDED_SETTINGS = ["crossValues", "mainValues", "splitValues", "filter", "data", "size", "colorStyles"];
+const EXCLUDED_SETTINGS = ["crossValues", "mainValues", "realValues", "splitValues", "filter", "data", "size", "colorStyles", "agg_paths"];
 
 function getD3FCStyles() {
     const headerStyles = document.querySelector("head").querySelectorAll("style");
@@ -195,7 +195,7 @@ export function register(...plugins) {
                     }
 
                     _draw() {
-                        if (this._settings.data) {
+                        if (this._settings.data && this.isConnected) {
                             const containerDiv = d3.select(this._container);
                             const chartClass = `chart ${name}`;
                             this._settings.size = this._container.getBoundingClientRect();
@@ -214,12 +214,12 @@ export function register(...plugins) {
                         }
                     }
 
-                    save() {
-                        return this.getSettings();
-                    }
-
-                    restore(settings) {
-                        this.setSettings(settings);
+                    async restyleElement(...args) {
+                        let settings = this._settings;
+                        if (settings) {
+                            delete settings["colorStyles"];
+                            await this.draw(...args);
+                        }
                     }
 
                     async delete() {
@@ -230,7 +230,7 @@ export function register(...plugins) {
                         return this._container;
                     }
 
-                    getSettings() {
+                    save() {
                         const settings = {...this._settings};
                         EXCLUDED_SETTINGS.forEach(s => {
                             delete settings[s];
@@ -238,8 +238,12 @@ export function register(...plugins) {
                         return settings;
                     }
 
-                    setSettings(settings) {
-                        this._settings = {...this._settings, ...settings};
+                    restore(settings) {
+                        const new_settings = {};
+                        for (const name of EXCLUDED_SETTINGS) {
+                            new_settings[name] = this._settings?.[name];
+                        }
+                        this._settings = {...new_settings, ...settings};
                         this._draw();
                     }
                 }

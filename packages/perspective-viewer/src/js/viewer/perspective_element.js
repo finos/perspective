@@ -541,10 +541,13 @@ export class PerspectiveElement extends StateElement {
         };
     }
 
-    _restyle_plugin() {
-        if (this._plugin.restyleElement) {
-            const task = (this._task = new CancelTask());
-            this._plugin.restyleElement(this._view, task);
+    async _restyle_plugin() {
+        const plugins = await this._vieux.get_plugins();
+        for (const plugin of plugins) {
+            if (plugin.restyleElement) {
+                const task = (this._task = new CancelTask());
+                await plugin.restyleElement(this._view, task);
+            }
         }
     }
 

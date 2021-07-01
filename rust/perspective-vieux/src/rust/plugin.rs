@@ -56,7 +56,7 @@ impl Plugin {
             plugins: PLUGIN_REGISTRY.create_plugins(),
             plugins_idx: None,
             _session,
-            on_plugin_changed, 
+            on_plugin_changed,
         })))
     }
 
@@ -70,12 +70,21 @@ impl Plugin {
             .push(Box::new(move |x| on_plugin_changed.emit(x)));
     }
 
-    pub fn get_plugin(&self) -> Result<PerspectiveViewerJsPlugin, JsValue> {
-        if self.0.borrow().plugins_idx.is_none() {
-            self.set_plugin(Some(&PLUGIN_REGISTRY.default_plugin_name()))?;
-        }
+    pub fn get_plugin(
+        &self,
+        name: Option<String>,
+    ) -> Result<PerspectiveViewerJsPlugin, JsValue> {
+        let idx = match self.find_plugin_idx(name.as_deref()) {
+            Some(idx) => idx,
+            None => {
+                if self.0.borrow().plugins_idx.is_none() {
+                    self.set_plugin(Some(&PLUGIN_REGISTRY.default_plugin_name()))?;
+                }
 
-        let idx = self.0.borrow().plugins_idx.unwrap_or(0);
+                self.0.borrow().plugins_idx.unwrap_or(0)
+            }
+        };
+
         self.0
             .borrow()
             .plugins
@@ -85,35 +94,36 @@ impl Plugin {
     }
 
     pub fn set_plugin(&self, name: Option<&str>) -> Result<bool, JsValue> {
-        let name = match name {
-            Some(name) => name.to_owned(),
-            None => PLUGIN_REGISTRY.default_plugin_name(),
-        };
+        let default_plugin_name = PLUGIN_REGISTRY.default_plugin_name();
+        let name = name.unwrap_or_else(|| default_plugin_name.as_str());
+        let idx = self
+            .find_plugin_idx(Some(name))
+            .ok_or_else(|| JsValue::from(format!("Unkown plugin '{}'", name)))?;
 
-        let short_name = make_short_name(&name);
-        let idx = {
-            let elements = &self.0.borrow().plugins;
-            elements
-                .iter()
-                .position(|elem| make_short_name(&elem.name()).contains(&short_name))
-        };
+        let changed = !matches!(
+            self.0.borrow().plugins_idx,
+            Some(selected_idx) if selected_idx == idx
+        );
 
-        match idx {
-            None => Err(JsValue::from(format!("Unkown plugin '{}'", name))),
-            Some(idx) => {
-                let changed = !matches!(
-                    self.0.borrow().plugins_idx,
-                    Some(selected_idx) if selected_idx == idx
-                );
+        if changed {
+            self.0.borrow_mut().plugins_idx = Some(idx);
+            for listener in self.0.borrow().on_plugin_changed.iter() {
+                (*listener)(self.get_plugin(None)?);
+            }
+        }
 
-                if changed {
-                    self.0.borrow_mut().plugins_idx = Some(idx);
-                    for listener in self.0.borrow().on_plugin_changed.iter() {
-                        (*listener)(self.get_plugin()?);
-                    }
-                }
-                
-                Ok(changed)
+        Ok(changed)
+    }
+
+    fn find_plugin_idx(&self, name: Option<&str>) -> Option<usize> {
+        match name {
+            None => self.0.borrow().plugins_idx,
+            Some(name) => {
+                let short_name = make_short_name(&name);
+                let elements = &self.0.borrow().plugins;
+                elements.iter().position(|elem| {
+                    make_short_name(&elem.name()).contains(&short_name)
+                })
             }
         }
     }

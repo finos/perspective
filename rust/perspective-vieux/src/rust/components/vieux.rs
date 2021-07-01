@@ -238,7 +238,7 @@ async fn toggle_config_task(
     on_toggle: Callback<()>,
 ) -> Result<JsValue, JsValue> {
     let element = find_custom_element(&props, &on_toggle).ok_or(JsValue::UNDEFINED)?;
-    let plugin = props.plugin.get_plugin()?;
+    let plugin = props.plugin.get_plugin(None)?;
     if open {
         dispatch_settings_event(element.clone(), open)?;
         on_toggle.emit(());

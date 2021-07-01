@@ -334,6 +334,8 @@ class PerspectiveViewer extends ActionElement {
             let agg = show[x.getAttribute("name")];
             if (agg) {
                 x.setAttribute("aggregate", Array.isArray(agg) ? JSON.stringify(agg) : agg);
+            } else {
+                x._set_default_aggregate();
             }
         });
         this.dispatchEvent(new Event("perspective-config-update"));
@@ -406,15 +408,15 @@ class PerspectiveViewer extends ActionElement {
      */
     set plugin(v) {
         if (v === "null" || v === null || v === undefined) {
-            this._vieux.set_plugin_default();
+            (this._vieux._instance || this._vieux).set_plugin_default();
             return;
         }
 
         if (this.hasAttribute("plugin")) {
             let plugin = this.getAttribute("plugin");
-            this._vieux.set_plugin(plugin);
+            (this._vieux._instance || this._vieux).set_plugin(plugin);
         } else {
-            this._vieux.set_plugin_default();
+            (this._vieux._instance || this._vieux).set_plugin_default();
             return;
         }
     }
@@ -651,8 +653,8 @@ class PerspectiveViewer extends ActionElement {
     /**
      * Restyles the elements and to pick up any style changes
      */
-    restyleElement() {
-        this._restyle_plugin();
+    async restyleElement() {
+        await this._restyle_plugin();
     }
 
     /**
@@ -746,6 +748,7 @@ class PerspectiveViewer extends ActionElement {
         this.removeAttribute("filters");
         this.removeAttribute("sort");
         this.removeAttribute("expressions");
+        this.removeAttribute("aggregates");
         if (this._initial_col_order) {
             this.setAttribute("columns", JSON.stringify(this._initial_col_order));
         } else {

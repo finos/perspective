@@ -21,6 +21,24 @@ import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
 import nearbyTip from "../tooltip/nearbyTip";
 
+/**
+ * Define a clamped scaling factor based on the container size for bubble plots.
+ *
+ * @param {Array} p1 a point as a tuple of `Number`
+ * @param {Array} p2 a second point as a tuple of `Number`
+ * @returns a function `container -> integer` which calculates a scaling factor
+ * from the linear function (clamped) defgined by the input points
+ */
+function interpolate_scale([x1, y1], [x2, y2]) {
+    const m = (y2 - y1) / (x2 - x1);
+    const b = y2 - m * x2;
+    return function(container) {
+        const node = container.node();
+        const shortest_axis = Math.min(node.clientWidth, node.clientHeight);
+        return Math.min(y2, Math.max(y1, m * shortest_axis + b));
+    };
+}
+
 function xyScatter(container, settings) {
     const data = pointData(settings, filterDataByGroup(settings));
     const symbols = symbolTypeFromGroups(settings);
@@ -42,10 +60,11 @@ function xyScatter(container, settings) {
 
     const size = settings.realValues[3] ? seriesLinearRange(settings, data, "size").range([10, 10000]) : null;
 
+    const scale_factor = interpolate_scale([600, 0.1], [1600, 1])(container);
     const series = fc
         .seriesCanvasMulti()
         .mapping((data, index) => data[index])
-        .series(data.map(series => pointSeriesCanvas(settings, series.key, size, color, symbols)));
+        .series(data.map(series => pointSeriesCanvas(settings, series.key, size, color, symbols, scale_factor)));
 
     const axisDefault = () =>
         axisFactory(settings)
@@ -77,6 +96,7 @@ function xyScatter(container, settings) {
         .canvas(true);
 
     const toolTip = nearbyTip()
+        .scaleFactor(scale_factor)
         .settings(settings)
         .canvas(true)
         .xScale(xAxis.scale)

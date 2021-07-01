@@ -6,8 +6,8 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::plugin::registry::*;
 use crate::components::plugin_selector::*;
+use crate::plugin::registry::*;
 use crate::plugin::*;
 use crate::session::*;
 use crate::utils::perspective_viewer::*;
@@ -16,10 +16,9 @@ use crate::*;
 
 use std::cell::RefCell;
 use std::rc::Rc;
+use wasm_bindgen::prelude::*;
 use wasm_bindgen_test::*;
 use yew::prelude::*;
-use wasm_bindgen::prelude::*;
-
 
 wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 
@@ -116,17 +115,13 @@ pub fn test_plugin_selected() {
     };
 
     let plugin_selector = link.borrow().clone().unwrap();
-    plugin_selector.send_message(PluginSelectorMsg::PluginSelected(
-        "Debug B".to_owned(),
-    ));
+    plugin_selector
+        .send_message(PluginSelectorMsg::PluginSelected("Debug B".to_owned()));
 
     assert_eq!(
         result.borrow().as_ref().map(|x| x.name()),
         Some("Debug A".to_owned())
     );
 
-    assert_eq!(
-        plugin.get_plugin().unwrap().name(),
-        "Debug A"
-    );
+    assert_eq!(plugin.get_plugin(None).unwrap().name(), "Debug A");
 }

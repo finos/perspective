@@ -61,8 +61,12 @@ class PerspectiveVieuxElement extends HTMLElement {
         return _await_index(() => this._instance.toggle_config(force));
     }
 
-    get_plugin() {
-        return _await_index(() => this._instance.get_plugin());
+    get_plugin(name) {
+        return _await_index(() => this._instance.get_plugin(name));
+    }
+
+    get_plugins() {
+        return _await_index(() => this._instance.get_plugins());
     }
 
     set_plugin(name) {

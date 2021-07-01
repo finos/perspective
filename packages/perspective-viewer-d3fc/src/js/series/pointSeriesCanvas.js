@@ -11,13 +11,13 @@ import {withOpacity, withoutOpacity} from "./seriesColors";
 import {groupFromKey} from "./seriesKey";
 import {fromDomain} from "./seriesSymbols";
 
-export function pointSeriesCanvas(settings, seriesKey, size, color, symbols) {
+export function pointSeriesCanvas(settings, seriesKey, size, color, symbols, scale_factor = 1) {
     let series = seriesCanvasPoint()
         .crossValue(d => d.x)
         .mainValue(d => d.y);
 
     if (size) {
-        series.size(d => size(d.size));
+        series.size(d => Math.round(scale_factor * size(d.size)));
     }
     if (symbols) {
         series.type(symbols(seriesKey));

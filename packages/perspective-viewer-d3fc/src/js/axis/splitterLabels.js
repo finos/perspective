@@ -43,8 +43,8 @@ export const splitterLabels = settings => {
 
     const redrawChart = selection => {
         const chartElement = getChartElement(selection.node());
-        chartElement.remove();
-        chartElement.draw();
+        chartElement._container.innerHTML = "";
+        chartElement._draw();
     };
 
     _render.labels = (...args) => {
