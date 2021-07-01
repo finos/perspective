@@ -183,7 +183,7 @@ parameters:
 jobs:
 - job: 'WebAssembly'
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: "ubuntu-latest"
 
   strategy:
     matrix:
@@ -274,7 +274,7 @@ jobs:
 
 - job: 'Linux'
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: "ubuntu-latest"
 
   strategy:
     matrix:
