@@ -495,9 +495,6 @@ jobs:
     - bash: jupyter labextension install $(System.DefaultWorkingDirectory)/packages/perspective-jupyterlab
       displayName: "Install perspective-jupyterlab labextension"
 
-    - bash: yarn jlab_link
-      displayName: "Link local Perspective to Jupyterlab"
-
     - bash: yarn test_js --jupyter --debug
       displayName: "Run Jupyterlab tests"
       env:
