@@ -41,6 +41,51 @@ var data_8 = {
     z: [new Date(1555126035065), new Date(1555126035065), new Date(1555026035065), new Date(1555026035065)]
 };
 
+const float_data = {
+    x: [
+        0.99098243,
+        0.36677191,
+        0.58926465,
+        0.95701263,
+        0.96904283,
+        0.50398721,
+        0.67424934,
+        0.32015379,
+        0.14877031,
+        0.16285932,
+        0.00597484,
+        0.90579728,
+        0.01338397,
+        0.66893083,
+        0.79209796,
+        0.41033256,
+        0.92328448,
+        0.20791236,
+        0.14874502,
+        0.1727802
+    ],
+    y: ["a", "b", "c", "d", "e", "a", "b", "c", "d", "e", "a", "b", "c", "d", "e", "a", "b", "c", "d", "e"]
+};
+
+const variance = nums => {
+    let k = 0,
+        m = 0,
+        s = 0;
+
+    for (const num of nums) {
+        k++;
+        const next_m = m + (num - m) / k;
+        s += (num - m) * (num - next_m);
+        m = next_m;
+    }
+
+    return s / nums.length;
+};
+
+const std = nums => {
+    return Math.sqrt(variance(nums));
+};
+
 module.exports = perspective => {
     describe("Aggregate", function() {
         it("old `aggregate` syntax is backwards compatible", async function() {
@@ -404,6 +449,168 @@ module.exports = perspective => {
             expect(result2).toEqual(answerAfterUpdate);
             view.delete();
             table.delete();
+        });
+
+        it("standard deviation", async function() {
+            const table = await perspective.table(float_data);
+            const view = await table.view({
+                row_pivots: ["y"],
+                columns: ["x"],
+                aggregates: {x: "standard deviation"}
+            });
+
+            const result = await view.to_columns();
+
+            // using np.std()
+            const expected = [0.33597085443953206, 0.35043269693156814, 0.22510197203101087, 0.20827220910070432, 0.3473746254711007, 0.3618418050868363];
+
+            // Check we are within 6 digits of the result from np.std()
+            for (let i = 0; i < result.x.length; i++) {
+                expect(result.x[i]).toBeCloseTo(expected[i], 6);
+            }
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("standard deviation multi-pivot", async function() {
+            const table = await perspective.table({
+                x: [0.62817744, 0.16903811, 0.77902867, 0.92330087, 0.10583306, 0.59794354],
+                y: ["a", "a", "b", "b", "c", "c"],
+                z: [1, 1, 1, 1, 1, 1]
+            });
+            const view = await table.view({
+                row_pivots: ["y", "z"],
+                columns: ["x"],
+                aggregates: {x: "standard deviation"}
+            });
+
+            const result = await view.to_columns();
+
+            // using np.std()
+            const expected = [0.3002988555851961, 0.22956966499999998, 0.22956966499999998, 0.07213610000000004, 0.07213610000000004, 0.24605524, 0.24605524];
+
+            // Check we are within 6 digits of the result from np.std()
+            for (let i = 0; i < result.x.length; i++) {
+                expect(result.x[i]).toBeCloseTo(expected[i], 6);
+            }
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("standard deviation append", async function() {
+            const table = await perspective.table(float_data);
+            const view = await table.view({
+                row_pivots: ["y"],
+                columns: ["x"],
+                aggregates: {x: "standard deviation"}
+            });
+
+            let result = await view.to_columns();
+
+            // using np.std()
+            const expected = [0.33597085443953206, 0.35043269693156814, 0.22510197203101087, 0.20827220910070432, 0.3473746254711007, 0.3618418050868363];
+
+            // Check we are within 6 digits of the result from np.std()
+            for (let i = 0; i < result.x.length; i++) {
+                expect(result.x[i]).toBeCloseTo(expected[i], 6);
+            }
+
+            table.update([{x: 0.64294039, y: "a"}]);
+            result = await view.to_columns();
+
+            const expected2 = [0.32935140956170517, 0.32031993493462224, 0.22510197203101087, 0.20827220910070432, 0.3473746254711007, 0.3618418050868363];
+            // Check we are within 6 digits of the result from np.std()
+            for (let i = 0; i < result.x.length; i++) {
+                expect(result.x[i]).toBeCloseTo(expected2[i], 6);
+            }
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("standard deviation partial update", async function() {
+            const table = await perspective.table(
+                {
+                    x: [0.99098243, 0.36677191, 0.58926465, 0.95701263, 0.96904283, 0.50398721],
+                    y: ["a", "a", "b", "b", "c", "c"],
+                    z: [1, 2, 3, 4, 5, 6]
+                },
+                {index: "z"}
+            );
+
+            const view = await table.view({
+                row_pivots: ["y"],
+                columns: ["x"],
+                aggregates: {x: "standard deviation"}
+            });
+
+            let result = await view.to_columns();
+
+            // using np.std()
+            const expected = [0.25153179517283897, 0.31210526, 0.18387399000000004, 0.23252781];
+
+            // Check we are within 6 digits of the result from np.std()
+            for (let i = 0; i < result.x.length; i++) {
+                expect(result.x[i]).toBeCloseTo(expected[i], 6);
+            }
+
+            table.update([{x: 0.284169685, z: 3}]);
+            result = await view.to_columns();
+
+            const expected2 = [0.3007643174035643, 0.31210526, 0.33642147250000004, 0.23252781];
+
+            // Check we are within 6 digits of the result from np.std()
+            for (let i = 0; i < result.x.length; i++) {
+                expect(result.x[i]).toBeCloseTo(expected2[i], 6);
+            }
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("standard deviation of range", async function() {
+            const float_data_copy = JSON.parse(JSON.stringify(float_data));
+            float_data_copy["y"] = Array(float_data_copy["x"].length).fill("a");
+
+            const table = await perspective.table(float_data_copy);
+            const view = await table.view({
+                row_pivots: ["y"],
+                columns: ["x"],
+                aggregates: {x: "standard deviation"}
+            });
+
+            const result = await view.to_columns();
+
+            // using np.std()
+            const expected = [0.33597085443953206, 0.33597085443953206];
+            expect(result.x).toEqual(expected);
+
+            // using `std` function
+            const expected2 = std(float_data["x"]);
+            expect(expected[0]).toEqual(expected2);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("standard deviation of size 1", async function() {
+            const table = await perspective.table({
+                x: [0.61801758],
+                y: ["a"]
+            });
+            const view = await table.view({
+                row_pivots: ["y"],
+                columns: ["x"],
+                aggregates: {x: "standard deviation"}
+            });
+
+            const result = await view.to_columns();
+            expect(result.x).toEqual([0, 0]);
+
+            await view.delete();
+            await table.delete();
         });
     });
 

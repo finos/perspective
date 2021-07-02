@@ -49,6 +49,7 @@ const NUMBER_AGGREGATES = [
     "median",
     "pct sum parent",
     "pct sum grand total",
+    "standard deviation",
     "sum",
     "sum abs",
     "sum not null",

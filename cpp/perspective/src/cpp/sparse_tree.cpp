@@ -1397,6 +1397,27 @@ t_stree::update_agg_table(
                 if (!skip)
                     dst->set_scalar(dst_ridx, new_value);
             } break;
+            case AGGTYPE_STANDARD_DEVIATION: {
+                old_value.set(dst->get_scalar(dst_ridx));
+
+                auto pkeys = get_pkeys(nidx);
+                std::vector<double> values;
+
+                read_column_from_gstate(
+                    gstate, expression_master_table, spec.get_dependencies()[0].name(), pkeys, values, false);
+
+                double count = 0, mean = 0, sum = 0;
+
+                for (double num : values) {
+                    count++;
+                    double next_mean = mean + (num - mean) / count;
+                    sum += (num - mean) * (num - next_mean);
+                    mean = next_mean;
+                }
+
+                new_value.set(std::sqrt(sum / values.size()));
+                dst->set_scalar(dst_ridx, new_value);
+            } break;
             default: { PSP_COMPLAIN_AND_ABORT("Not implemented"); }
         } // end switch
 

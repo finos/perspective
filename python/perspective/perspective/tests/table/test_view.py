@@ -12,7 +12,7 @@ import numpy as np
 from perspective import PerspectiveCppError
 from perspective.table import Table
 from datetime import date, datetime
-from pytest import mark, raises
+from pytest import approx, mark, raises
 
 
 def compare_delta(received, expected):
@@ -528,6 +528,23 @@ class TestView(object):
             {"__ROW_PATH__": [], "y": (1 * 200 + (-2) * 100) / (1 - 2)},
             {"__ROW_PATH__": ["a"], "y": (1 * 200 + (-2) * 100) / (1 - 2)}
         ]
+
+    def test_view_standard_deviation(self):
+        data = {
+            "x": list(np.random.rand(10)),
+            "y": ["a" for _ in range(10)]
+        }
+
+        table = Table(data)
+        view = table.view(
+            aggregates={"x": "standard deviation"},
+            row_pivots=["y"]
+        )
+
+        result = view.to_dict()
+        expected = np.std(data["x"])
+
+        assert result["x"] == approx([expected, expected])
 
     # sort
 

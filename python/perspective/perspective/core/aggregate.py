@@ -35,6 +35,7 @@ class Aggregate(Enum):
     OR = "or"
     PCT_SUM_PARENT = "pct sum parent"
     PCT_SUM_GRAND_TOTAL = "pct sum grand total"
+    STANDARD_DEVIATION = "standard deviation"
     SUM = "sum"
     SUM_ABS = "sum abs"
     ABS_SUM = "abs sum"
