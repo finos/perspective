@@ -10,26 +10,40 @@ import time
 
 from bench import PerspectiveTornadoBenchmark
 
-DOWNLOAD_ITERATIONS = 1
-ARROW_LENGTH = 250000
 
-
-async def make_view_arrow(client):
+async def bench_to_arrow(client):
     """Test how long it takes to create a view on the remote table and
     retrieve an arrow."""
     table = client.open_table("data_source_one")
-    view = table.view()
+    view = await table.view()
     start = time.time()
-    arrow = await view.to_arrow(end_row=ARROW_LENGTH)
+    arrow = await view.to_arrow()
     end = time.time() - start
     assert len(arrow) > 0
+    return [end]
+
+
+async def bench_stddev(client):
+    """Benchmark the standard deviation aggregate calculation."""
+    table = client.open_table("data_source_one")
+    start = time.time()
+    view = await table.view(
+        row_pivots=["State"],
+        aggregates={"Sales": "standard deviation"},
+        columns=["Sales"],
+    )
+    num_rows = await view.num_rows()
+    end = time.time() - start
+    assert num_rows > 0
     return [end]
 
 
 if __name__ == "__main__":
     """To allow your test script to run within the benchmark harness,
     import and create a `PerspectiveTornadoBenchmark`, and call its
-    `run()` method.
+    `run()` method. To run it against a local test server, start the
+    `tornado_python` example: `yarn start tornado_python`, or provide the
+    URL to an already-running perspective-python server.
 
     The `task` function you give to the benchmark must have `client` as
     an argument, and return a list of float times as the benchmark
@@ -43,6 +57,9 @@ if __name__ == "__main__":
     yarn bench test_benchmark.py -c10 -r5 ws://localhost:8080
     ```
     """
-    logging.info("Create view, request arrow length %d", ARROW_LENGTH)
-    runner = PerspectiveTornadoBenchmark(make_view_arrow)
-    runner.run()
+    benchmarks = [bench_to_arrow, bench_stddev]
+
+    for benchmark in benchmarks:
+        logging.info("Running {}".format(benchmark.__name__))
+        runner = PerspectiveTornadoBenchmark(benchmark)
+        runner.run()

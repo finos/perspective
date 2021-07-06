@@ -456,7 +456,7 @@ module.exports = perspective => {
             const view = await table.view({
                 row_pivots: ["y"],
                 columns: ["x"],
-                aggregates: {x: "standard deviation"}
+                aggregates: {x: "stddev"}
             });
 
             const result = await view.to_columns();
@@ -482,7 +482,7 @@ module.exports = perspective => {
             const view = await table.view({
                 row_pivots: ["y", "z"],
                 columns: ["x"],
-                aggregates: {x: "standard deviation"}
+                aggregates: {x: "stddev"}
             });
 
             const result = await view.to_columns();
@@ -504,7 +504,7 @@ module.exports = perspective => {
             const view = await table.view({
                 row_pivots: ["y"],
                 columns: ["x"],
-                aggregates: {x: "standard deviation"}
+                aggregates: {x: "stddev"}
             });
 
             let result = await view.to_columns();
@@ -543,7 +543,7 @@ module.exports = perspective => {
             const view = await table.view({
                 row_pivots: ["y"],
                 columns: ["x"],
-                aggregates: {x: "standard deviation"}
+                aggregates: {x: "stddev"}
             });
 
             let result = await view.to_columns();
@@ -578,7 +578,7 @@ module.exports = perspective => {
             const view = await table.view({
                 row_pivots: ["y"],
                 columns: ["x"],
-                aggregates: {x: "standard deviation"}
+                aggregates: {x: "stddev"}
             });
 
             const result = await view.to_columns();
@@ -603,7 +603,7 @@ module.exports = perspective => {
             const view = await table.view({
                 row_pivots: ["y"],
                 columns: ["x"],
-                aggregates: {x: "standard deviation"}
+                aggregates: {x: "stddev"}
             });
 
             const result = await view.to_columns();

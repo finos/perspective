@@ -194,7 +194,7 @@ t_aggspec::agg_str() const {
             return "pct_sum_grand_total";
         }
         case AGGTYPE_STANDARD_DEVIATION: {
-            return "standard_deviation";
+            return "stddev";
         }
         default: {
             PSP_COMPLAIN_AND_ABORT("Unknown agg type");

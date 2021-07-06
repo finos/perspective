@@ -537,7 +537,7 @@ class TestView(object):
 
         table = Table(data)
         view = table.view(
-            aggregates={"x": "standard deviation"},
+            aggregates={"x": "stddev"},
             row_pivots=["y"]
         )
 
@@ -545,6 +545,90 @@ class TestView(object):
         expected = np.std(data["x"])
 
         assert result["x"] == approx([expected, expected])
+
+    def test_view_standard_deviation_multi(self):
+        data = {
+            "a": [91.96, 258.576, 29.6, 243.16, 36.24, 25.248, 79.99, 206.1, 31.5, 55.6],
+            "b": [1 if i % 2 == 0 else 0 for i in range(10)]
+        }
+        table = Table(data)
+        view = table.view(
+            aggregates={"a": "stddev"},
+            row_pivots=["b"]
+        )
+
+        result = view.to_columns()
+        expected_total = np.std(data["a"])
+        expected_zero = np.std([data["a"][1], data["a"][3], data["a"][5], data["a"][7], data["a"][9]])
+        expected_one = np.std([data["a"][0], data["a"][2], data["a"][4], data["a"][6], data["a"][8]])
+
+        assert result["a"] == approx([expected_total, expected_zero, expected_one])
+
+
+    def test_view_standard_deviation_multi_update(self):
+        data = {
+            "a": [91.96, 258.576, 29.6, 243.16, 36.24, 25.248, 79.99, 206.1, 31.5, 55.6],
+            "b": [1 if i % 2 == 0 else 0 for i in range(10)]
+        }
+        table = Table(data)
+        view = table.view(
+            aggregates={"a": "stddev"},
+            row_pivots=["b"]
+        )
+
+        result = view.to_columns()
+        expected_total = data["a"]
+        expected_zero = [data["a"][1], data["a"][3], data["a"][5], data["a"][7], data["a"][9]]
+        expected_one = [data["a"][0], data["a"][2], data["a"][4], data["a"][6], data["a"][8]]
+
+        assert result["a"] == approx([np.std(expected_total), np.std(expected_zero), np.std(expected_one)])
+
+        # 2 here should result in null stddev because the group size is 1
+        update_data = {
+            "a": [15.12, 9.102, 0.99, 12.8],
+            "b": [1, 0, 1, 2]
+        }
+        table.update(update_data)
+
+        result = view.to_columns()
+        expected_total += update_data["a"]
+        expected_zero += [update_data["a"][1]]
+        expected_one += [update_data["a"][0], update_data["a"][2]]
+
+        assert result["__ROW_PATH__"] == [[], [0], [1], [2]]
+        assert result["a"][:-1] == approx([np.std(expected_total), np.std(expected_zero), np.std(expected_one)])
+        assert result["a"][-1] is None
+
+    def test_view_standard_deviation_less_than_two(self):
+        data = {
+            "a": list(np.random.rand(10)),
+            "b": [i for i in range(10)]
+        }
+
+        table = Table(data)
+        view = table.view(
+            aggregates={"a": "stddev"},
+            row_pivots=["b"]
+        )
+
+        result = view.to_columns()
+        assert result["a"][0] == approx(np.std(data["a"]))
+        assert result["a"][1:] == [None] * 10
+
+    def test_view_standard_deviation_normal_distribution(self):
+        data = {
+            "a": list(np.random.standard_normal(100)),
+            "b": [1] * 100
+        }
+
+        table = Table(data)
+        view = table.view(
+            aggregates={"a": "stddev"},
+            row_pivots=["b"]
+        )
+
+        result = view.to_columns()
+        assert result["a"] == approx([np.std(data["a"]), np.std(data["a"])])
 
     # sort
 
