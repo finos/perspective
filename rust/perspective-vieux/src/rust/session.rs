@@ -10,8 +10,11 @@ mod copy;
 mod download;
 mod view_subscription;
 
+use crate::config::*;
+use crate::js::perspective::*;
 use crate::session::view_subscription::*;
-use crate::utils::perspective::*;
+use crate::utils::*;
+
 pub use view_subscription::TableStats;
 
 use copy::*;
@@ -21,12 +24,15 @@ use std::iter::FromIterator;
 use std::ops::Deref;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
+use wasm_bindgen_futures::future_to_promise;
 use yew::prelude::*;
 
 /// The `Session` struct is the principal interface to the Perspective engine,
 /// the `Table` and `View` obejcts for this vieux, and all associated state.
 pub struct SessionData {
     table: Option<PerspectiveJsTable>,
+    view: Option<PerspectiveJsView>,
     view_sub: Option<ViewSubscription>,
     on_stats: Option<Callback<TableStats>>,
 }
@@ -45,6 +51,7 @@ impl Default for Session {
     fn default() -> Self {
         Session(Rc::new(RefCell::new(SessionData {
             table: None,
+            view: None,
             view_sub: None,
             on_stats: None,
         })))
@@ -125,16 +132,42 @@ impl Session {
         };
     }
 
+    pub fn get_view(&self) -> Option<PerspectiveJsView> {
+        self.borrow().view.clone()
+    }
+
+    pub async fn create_view(
+        self,
+        config: &ViewConfig,
+    ) -> Result<PerspectiveJsView, JsValue> {
+        let js_config = JsValue::from_serde(config)
+            .to_jserror()?
+            .unchecked_into::<PerspectiveJsViewConfig>();
+
+        let table = self.borrow().table.clone().unwrap();
+        let view = table.view(&js_config).await?;
+        self.set_view(view.clone());
+        Ok(view)
+    }
+
     pub fn clear_view(&self) {
+        if let Some(view) = self.borrow_mut().view.take() {
+            let _promise = future_to_promise(async move {
+                view.delete().await?;
+                Ok(JsValue::from(true))
+            });
+        }
+
         self.borrow_mut().view_sub = None;
     }
 
     /// Set a new `View` (derived from this `Session`'s `Table`), and create the
     /// `update()` subscription.
-    pub fn set_view(&mut self, view: PerspectiveJsView) {
+    fn set_view(&self, view: PerspectiveJsView) {
         let table = self.borrow().table.clone().unwrap();
         let on_stats = self.borrow().on_stats.clone();
-        let sub = ViewSubscription::new(table, view, on_stats.unwrap());
+        let sub = ViewSubscription::new(table, view.clone(), on_stats.unwrap());
+        self.borrow_mut().view = Some(view);
         self.borrow_mut().view_sub = Some(sub);
     }
 

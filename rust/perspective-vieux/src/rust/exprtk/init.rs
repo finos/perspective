@@ -6,12 +6,12 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use crate::js::monaco::*;
 use crate::js_object;
-use crate::utils::monaco::*;
 use crate::utils::*;
 
-use super::language::*;
 use super::completions::*;
+use super::language::*;
 
 use js_intern::*;
 use js_sys::Reflect;
@@ -22,7 +22,7 @@ use wasm_bindgen::JsCast;
 
 /// Initializes the `plang` language definition using Monaco's `Languages`
 /// module.
-/// 
+///
 /// # Arguments
 /// * `base` - the `monaco-editor` theme base to use.
 pub async fn init_language(base: &str) -> Result<Editor, error::Error> {
@@ -64,4 +64,3 @@ pub fn init_environment() -> Result<(), error::Error> {
     Reflect::set(&window, js_intern!("MonacoEnvironment"), &monaco_env).unwrap();
     Ok(())
 }
-

@@ -6,10 +6,18 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+// use crate::*;
+
 use js_sys::Array;
 use serde::Deserialize;
+// use std::collections::HashMap;
+// use std::iter::FromIterator;
+// use std::iter::IntoIterator;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
+
+// #[cfg(test)]
+// use wasm_bindgen_test::*;
 
 // `wasm-bindgen` only supports `JsValue` return types from `extern async fn`, so use
 // this macro to generate well-typed versions.
@@ -60,7 +68,7 @@ extern "C" {
     #[wasm_bindgen(method, catch, js_name = view)]
     pub async fn _view(
         this: &PerspectiveJsTable, 
-        config: js_sys::Object
+        config: &PerspectiveJsViewConfig
     ) -> Result<JsValue, JsValue>;
 
     #[derive(Clone)]
@@ -84,10 +92,18 @@ extern "C" {
     #[wasm_bindgen(method)]
     pub fn remove_update(this: &PerspectiveJsView, callback: &js_sys::Function);
 
+    #[wasm_bindgen(method, catch, js_name = schema)]
+    pub async fn _schema(this: &PerspectiveJsView) -> Result<JsValue, JsValue>;
+
+    #[wasm_bindgen(method, catch, js_name = num_columns)]
+    pub async fn _num_columns(this: &PerspectiveJsView) -> Result<JsValue, JsValue>;
+
     #[wasm_bindgen(method, catch, js_name = get_config)]
     pub async fn _get_config(this: &PerspectiveJsView) -> Result<JsValue, JsValue>;
 
     pub type PerspectiveJsViewConfig;
+
+    // TODO
 
     #[wasm_bindgen(method, getter)]
     pub fn row_pivots(this: &PerspectiveJsViewConfig) -> js_sys::Array;
@@ -110,13 +126,15 @@ impl PerspectiveJsTable {
     async_typed!(_columns, columns() -> js_sys::Array);
     async_typed!(_delete, delete() -> ());
     async_typed!(_validate_expressions, validate_expressions(exprs: Array) -> PerspectiveValidatedExpressions);
-    async_typed!(_view, view(config: js_sys::Object) -> PerspectiveJsView);
+    async_typed!(_view, view(config: &PerspectiveJsViewConfig) -> PerspectiveJsView);
     async_typed!(_size, size() -> f64);
 }
 
 impl PerspectiveJsView {
     async_typed!(_to_csv, to_csv(options: js_sys::Object) -> js_sys::JsString);
     async_typed!(_num_rows, num_rows() -> f64);
+    async_typed!(_num_columns, num_columns() -> f64);
+    async_typed!(_schema, schema() -> js_sys::Object);
     async_typed!(_delete, delete() -> ());
     async_typed!(_get_config, get_config() -> PerspectiveJsViewConfig);
 }

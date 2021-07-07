@@ -10,6 +10,7 @@ use crate::utils::*;
 use crate::*;
 
 use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
 use wasm_bindgen_test::*;
 
 wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
@@ -46,7 +47,7 @@ pub async fn test_table_validate_invalid_expressions() {
 #[wasm_bindgen_test]
 pub async fn test_view_to_csv() {
     let table = get_mock_table().await;
-    let view = table.view(js_object!()).await.unwrap();
+    let view = table.view(js_object!().unchecked_ref()).await.unwrap();
     let csv: String = view.to_csv(js_object!()).await.unwrap().into();
     assert_eq!(csv, "A\r\n1\r\n2\r\n3");
 }
@@ -54,7 +55,7 @@ pub async fn test_view_to_csv() {
 #[wasm_bindgen_test]
 pub async fn test_view_num_rows() {
     let table = get_mock_table().await;
-    let view = table.view(js_object!()).await.unwrap();
+    let view = table.view(js_object!().unchecked_ref()).await.unwrap();
     let num_rows = view.num_rows().await.unwrap();
     assert_eq!(num_rows, 3_f64);
 }
@@ -62,7 +63,7 @@ pub async fn test_view_num_rows() {
 #[wasm_bindgen_test]
 pub async fn test_view_get_config() {
     let table = get_mock_table().await;
-    let view = table.view(js_object!()).await.unwrap();
+    let view = table.view(js_object!().unchecked_ref()).await.unwrap();
     let config = view.get_config().await.unwrap();
     assert!(JsValue::is_object(&config));
     let row_pivot_len = config.row_pivots().length();

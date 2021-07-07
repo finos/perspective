@@ -456,6 +456,10 @@ export class DomElement extends PerspectiveElement {
         this.shadowRoot.querySelector("#columns_container").style.visibility = "visible";
     }
 
+    _show_top_panel() {
+        this.shadowRoot.querySelector("#top_panel").style.visibility = "visible";
+    }
+
     _show_side_panel_actions() {
         this.shadowRoot.querySelector("#side_panel__actions").style.visibility = "visible";
     }
@@ -560,9 +564,6 @@ export class DomElement extends PerspectiveElement {
         this._top_panel = this.shadowRoot.querySelector("#top_panel");
         this._sort = this.shadowRoot.querySelector("#sort");
         this._transpose_button = this.shadowRoot.querySelector("#transpose_button");
-        this._plugin_information = this.shadowRoot.querySelector(".plugin_information");
-        this._plugin_information_action = this.shadowRoot.querySelector(".plugin_information__action");
-        this._plugin_information_message = this.shadowRoot.querySelector("#plugin_information_count");
         this._columns_container = this.shadowRoot.querySelector("#columns_container");
     }
 

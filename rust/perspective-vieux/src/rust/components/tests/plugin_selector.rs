@@ -7,10 +7,10 @@
 // file.
 
 use crate::components::plugin_selector::*;
+use crate::js::perspective_viewer::*;
 use crate::plugin::registry::*;
 use crate::plugin::*;
 use crate::session::*;
-use crate::utils::perspective_viewer::*;
 use crate::utils::WeakComponentLink;
 use crate::*;
 
@@ -96,15 +96,13 @@ pub fn test_plugin_selected() {
     let result: Rc<RefCell<Option<PerspectiveViewerJsPlugin>>> =
         Rc::new(RefCell::new(None));
     let session = Session::new();
-    let plugin = Plugin::new(
-        session,
-        vec![Box::new({
-            clone!(result);
-            move |val| {
-                *result.borrow_mut() = Some(val);
-            }
-        })],
-    );
+    let plugin = Plugin::new(session);
+    plugin.add_on_plugin_changed({
+        clone!(result);
+        move |val| {
+            *result.borrow_mut() = Some(val);
+        }
+    });
 
     test_html! {
         <PluginSelector

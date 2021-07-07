@@ -49,12 +49,16 @@ class PerspectiveVieuxElement extends HTMLElement {
         _await_index(() => this._instance.load(table));
     }
 
-    set_view(view) {
-        _await_index(() => this._instance.set_view(view));
+    _draw(...args) {
+        return _await_index(() => this._instance._draw(...args));
     }
 
-    delete_view() {
-        return _await_index(() => this._instance.delete_view());
+    _create_view(config) {
+        return _await_index(() => this._instance._create_view(config));
+    }
+
+    _get_maxes(limit) {
+        return _await_index(() => this._instance._get_maxes(limit));
     }
 
     toggle_config(force) {
@@ -65,16 +69,12 @@ class PerspectiveVieuxElement extends HTMLElement {
         return _await_index(() => this._instance.get_plugin(name));
     }
 
-    get_plugins() {
-        return _await_index(() => this._instance.get_plugins());
+    get_all_plugins() {
+        return _await_index(() => this._instance.get_all_plugins());
     }
 
     set_plugin(name) {
         return _await_index(() => this._instance.set_plugin(name));
-    }
-
-    set_plugin_default() {
-        return _await_index(() => this._instance.set_plugin_default());
     }
 
     _open_expression_editor(target) {

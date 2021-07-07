@@ -6,25 +6,25 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-pub mod monaco;
-pub mod perspective;
-pub mod perspective_viewer;
-
 mod closure;
+mod debounce;
+mod errors;
+mod future_to_promise;
 mod js_object;
 mod request_animation_frame;
 mod testing;
 mod weak_component_link;
-mod future_to_promise;
 
 #[cfg(test)]
 mod tests;
 
-pub use closure::*;
-pub use request_animation_frame::*;
-pub use weak_component_link::*;
-pub use future_to_promise::*;
-pub use testing::*;
+pub use self::closure::*;
+pub use self::debounce::*;
+pub use self::errors::*;
+pub use self::future_to_promise::*;
+pub use self::request_animation_frame::*;
+pub use self::testing::*;
+pub use self::weak_component_link::*;
 
 #[macro_export]
 macro_rules! maybe {
@@ -44,9 +44,9 @@ macro_rules! maybe {
 #[macro_export]
 macro_rules! clone {
     ($($x:ident : $y:ident),*) => {
-        $(let $x = $y.clone();)*    
+        $(let $x = $y.clone();)*
     };
     ($($x:ident),*) => {
-        $(let $x = $x.clone();)*    
+        $(let $x = $x.clone();)*
     };
 }

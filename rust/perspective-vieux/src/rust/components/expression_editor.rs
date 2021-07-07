@@ -7,9 +7,9 @@
 // file.
 
 use crate::exprtk::*;
+use crate::js::monaco::*;
+use crate::js::perspective::*;
 use crate::session::Session;
-use crate::utils::monaco::*;
-use crate::utils::perspective::*;
 use crate::utils::*;
 
 use std::cell::RefCell;
@@ -58,10 +58,8 @@ impl Component for ExpressionEditor {
     type Properties = ExpressionEditorProps;
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let on_validate = Rc::new(
-            link.callback(ExpressionEditorMsg::Validate)
-                .to_closure(),
-        );
+        let on_validate =
+            Rc::new(link.callback(ExpressionEditorMsg::Validate).to_closure());
         let on_save = Rc::new(
             link.callback(|_| ExpressionEditorMsg::SaveExpr)
                 .to_closure(),

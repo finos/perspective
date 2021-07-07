@@ -395,10 +395,9 @@ impl Component for ColumnStyle {
                             id="fixed-param"
                             class="parameter indent"
                             type="number"
-                            disable=true
                             min="0"
                             step="1"
-                            value={ match self.props.config.fixed { None => self.props.default_config.fixed, Some(x) => x } }
+                            value={ format!("{}", match self.props.config.fixed { None => self.props.default_config.fixed, Some(x) => x }) }
                             oninput=fixed_oninput />
                     </div>
                     <div class="row">
@@ -411,7 +410,7 @@ impl Component for ColumnStyle {
                             id="color-param"
                             class="parameter"
                             type="color"
-                            value={ &self.pos_color }
+                            value={ self.pos_color.to_owned() }
                             disabled=!self.props.config.color_mode.is_enabled()
                             oninput=pos_color_oninput />
                         <span class="operator">{ " + / - " }</span>
@@ -419,7 +418,7 @@ impl Component for ColumnStyle {
                             id="neg-color-param"
                             class="parameter"
                             type="color"
-                            value={ &self.neg_color }
+                            value={ self.neg_color.to_owned() }
                             disabled=!self.props.config.color_mode.is_enabled()
                             oninput=neg_color_oninput />
                     </div>
@@ -438,7 +437,7 @@ impl Component for ColumnStyle {
                             <div class="row indent" style={ gradient_gradient_enabled }>
                                 <input
                                     id="gradient-param"
-                                    value={ self.gradient }
+                                    value={ format!("{}", self.gradient) }
                                     class="parameter"
                                     oninput={ &gradient_changed }
                                     type="number"
@@ -450,7 +449,7 @@ impl Component for ColumnStyle {
                             <div class="row indent" style={ bar_gradient_enabled }>
                                 <input
                                     id="gradient-param"
-                                    value={ self.gradient }
+                                    value={ format!("{}", self.gradient) }
                                     class="parameter"
                                     oninput={ &gradient_changed }
                                     type="number"

@@ -181,7 +181,7 @@ where
                     id={ format!("radio-list-{}", idx) }
                     name="radio-list"
                     type="radio"
-                    value={ self.props.values[idx].clone() }
+                    value={ format!("{}", self.props.values[idx]) }
                     class="parameter"
                     oninput={ on_change }
                     disabled=self.props.disabled

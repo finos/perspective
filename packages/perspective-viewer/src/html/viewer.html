@@ -19,7 +19,7 @@
         </div>
     </div>
 
-    <div slot="top_panel" id='top_panel'>
+    <div slot="top_panel" id='top_panel' style="visibility: hidden">
         <div class="rrow">
             <div id="row_pivots">
                 <div class="psp-text-field">
@@ -56,13 +56,7 @@
     </div>
 
     <div slot="main_panel" id="pivot_chart_container">
-        <div class="plugin_information plugin_information--warning hidden" id="plugin_information--size">
-            <span class="plugin_information__text" id="plugin_information_count">Estimated rendering</span>
-            <span class="plugin_information__actions">
-                <span class="plugin_information__action">Render all points</span>
-            </span>
-        </div>
-        <div id="pivot_chart">
+        <div id="pivot_chart"> 
             <slot></slot>
         </div>
     </div>

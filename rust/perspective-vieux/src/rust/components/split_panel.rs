@@ -185,7 +185,8 @@ impl Component for SplitPanel {
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
         assert!(validate(&props));
-        false
+        self.props = props;
+        true
     }
 
     fn view(&self) -> Html {
@@ -205,8 +206,8 @@ impl Component for SplitPanel {
         });
 
         html! {
-            <div id=&self.props.id class="split-panel">
-                <div class="split-panel-child" ref=_ref style?=style >
+            <div id=self.props.id.clone() class="split-panel">
+                <div class="split-panel-child" ref=_ref style=style >
                     { iter.next().unwrap() }
                 </div>
                 <div

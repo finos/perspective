@@ -8,16 +8,13 @@
 
 pub mod registry;
 
+use crate::js::perspective_viewer::*;
 use crate::session::Session;
-use crate::utils::perspective_viewer::*;
 
-use js_sys::*;
 use registry::*;
 use std::cell::RefCell;
-use std::iter::FromIterator;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
-use yew::prelude::*;
 
 pub struct PluginData {
     plugins: Vec<PerspectiveViewerJsPlugin>,
@@ -31,12 +28,6 @@ pub fn register_plugin(name: &str) {
     PLUGIN_REGISTRY.register_plugin(name);
 }
 
-#[wasm_bindgen]
-pub fn available_plugin_names() -> Array {
-    let names = PLUGIN_REGISTRY.available_plugin_names();
-    Array::from_iter(names.iter().map(JsValue::from))
-}
-
 #[derive(Clone)]
 pub struct Plugin(Rc<RefCell<PluginData>>);
 
@@ -48,31 +39,36 @@ fn make_short_name(name: &str) -> String {
 }
 
 impl Plugin {
-    pub fn new(
-        _session: Session,
-        on_plugin_changed: Vec<Box<dyn Fn(PerspectiveViewerJsPlugin)>>,
-    ) -> Plugin {
+    pub fn new(_session: Session) -> Plugin {
         Plugin(Rc::new(RefCell::new(PluginData {
             plugins: PLUGIN_REGISTRY.create_plugins(),
             plugins_idx: None,
             _session,
-            on_plugin_changed,
+            on_plugin_changed: vec![],
         })))
     }
 
-    pub fn add_on_plugin_changed(
-        &self,
-        on_plugin_changed: Callback<PerspectiveViewerJsPlugin>,
-    ) {
+    pub fn add_on_plugin_changed<T>(&self, on_plugin_changed: T)
+    where
+        T: Fn(PerspectiveViewerJsPlugin) + 'static,
+    {
+        if self.0.borrow().plugins_idx.is_some() {
+            (on_plugin_changed)(self.get_plugin(None).unwrap());
+        }
+
         self.0
             .borrow_mut()
             .on_plugin_changed
-            .push(Box::new(move |x| on_plugin_changed.emit(x)));
+            .insert(0, Box::new(on_plugin_changed));
+    }
+
+    pub fn get_all_plugins(&self) -> Vec<PerspectiveViewerJsPlugin> {
+        self.0.borrow().plugins.clone()
     }
 
     pub fn get_plugin(
         &self,
-        name: Option<String>,
+        name: Option<&str>,
     ) -> Result<PerspectiveViewerJsPlugin, JsValue> {
         let idx = match self.find_plugin_idx(name.as_deref()) {
             Some(idx) => idx,
@@ -91,6 +87,15 @@ impl Plugin {
             .get(idx)
             .cloned()
             .ok_or_else(|| JsValue::from("No Plugin"))
+    }
+
+    pub fn _trigger(&self) -> Result<(), JsValue> {
+        let plugin = self.get_plugin(None)?;
+        for listener in self.0.borrow().on_plugin_changed.iter() {
+            (*listener)(plugin.clone());
+        }
+
+        Ok(())
     }
 
     pub fn set_plugin(&self, name: Option<&str>) -> Result<bool, JsValue> {

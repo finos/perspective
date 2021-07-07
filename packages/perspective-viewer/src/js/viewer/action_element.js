@@ -254,7 +254,6 @@ export class ActionElement extends DomElement {
             this._setAttributeSafe("plugin", plugin.name);
         }
 
-        this._plugin_information.classList.add("hidden");
         this._active_columns.classList.remove("one_lock", "two_lock");
         const classname = ["one_lock", "two_lock"][plugin.initial?.count - 1];
         if (classname) {
@@ -300,12 +299,5 @@ export class ActionElement extends DomElement {
         this._vieux.addEventListener("perspective-vieux-reset", () => this.reset());
         this._vieux.addEventListener("-perspective-plugin-changed", ({detail}) => this._vis_selector_changed(detail));
         this._vieux.addEventListener("-perspective-add-expression", ({detail}) => this._save_expression(detail));
-
-        this._plugin_information_action.addEventListener("click", async () => {
-            let plugin = await this._vieux.get_plugin();
-            this._debounce_update({ignore_size_check: true, limit_points: false});
-            this._plugin_information.classList.add("hidden");
-            plugin.render_warning = false;
-        });
     }
 }

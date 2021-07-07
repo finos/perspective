@@ -7,11 +7,12 @@
 // file.
 
 use crate::components::plugin_selector::PluginSelector;
+use crate::components::render_warning::RenderWarning;
 use crate::components::split_panel::SplitPanel;
 use crate::components::status_bar::StatusBar;
+use crate::js::perspective::*;
 use crate::plugin::*;
 use crate::session::{Session, TableStats};
-use crate::utils::perspective::*;
 use crate::utils::*;
 
 use futures::channel::oneshot::*;
@@ -37,11 +38,10 @@ pub enum Msg {
     Reset,
     Export(bool),
     Copy(bool),
-    ViewLoaded(PerspectiveJsView),
-    ViewDeleted,
     TableStats(TableStats),
     ToggleConfig(Option<bool>, Option<Sender<Result<JsValue, JsValue>>>),
     ConfigToggled(bool, Option<Sender<Result<JsValue, JsValue>>>),
+    RenderDimensions(Option<(usize, usize, Option<usize>, Option<usize>)>),
 }
 
 pub struct PerspectiveVieux {
@@ -49,6 +49,7 @@ pub struct PerspectiveVieux {
     props: PerspectiveVieuxProps,
     stats: Option<TableStats>,
     config_open: bool,
+    dimensions: Option<(usize, usize, Option<usize>, Option<usize>)>,
     on_rendered: Option<Sender<Result<JsValue, JsValue>>>,
 }
 
@@ -65,6 +66,7 @@ impl Component for PerspectiveVieux {
             link,
             stats: None,
             config_open: false,
+            dimensions: None,
             on_rendered: None,
         }
     }
@@ -91,14 +93,6 @@ impl Component for PerspectiveVieux {
                 self.props.session.copy_to_clipboard(flat);
                 false
             }
-            Msg::ViewDeleted => {
-                self.props.session.clear_view();
-                false
-            }
-            Msg::ViewLoaded(view) => {
-                self.props.session.set_view(view);
-                false
-            }
             Msg::ToggleConfig(force, resolve) => {
                 self.toggle_config(force, resolve);
                 force.unwrap_or(self.config_open)
@@ -110,6 +104,10 @@ impl Component for PerspectiveVieux {
                     resolve.send(Ok(JsValue::UNDEFINED)).unwrap();
                 }
                 !is_open
+            }
+            Msg::RenderDimensions(dimensions) => {
+                self.dimensions = dimensions;
+                true
             }
             Msg::TableStats(stats) => {
                 self.stats = Some(stats);
@@ -151,13 +149,17 @@ impl Component for PerspectiveVieux {
                         <div id="main_column">
                             <slot name="top_panel"></slot>
                             <div id="main_panel_container">
+                                <RenderWarning
+                                    dimensions=self.dimensions
+                                    plugin=self.props.plugin.clone()>
+                                </RenderWarning>
                                 <slot name="main_panel"></slot>
                             </div>
                         </div>
                     </SplitPanel>
                     <StatusBar
                         id="status_bar"
-                        stats=&self.stats
+                        stats=self.stats.clone()
                         on_reset=self.link.callback(|_| Msg::Reset)
                         on_download=self.link.callback(Msg::Export)
                         on_copy=self.link.callback(Msg::Copy)>
@@ -169,6 +171,10 @@ impl Component for PerspectiveVieux {
             html! {
                 <>
                     <style>{ &CSS }</style>
+                    <RenderWarning
+                        dimensions=self.dimensions
+                        plugin=self.props.plugin.clone()>
+                    </RenderWarning>
                     <slot name="main_panel"></slot>
                     <div id="config_button" class="noselect button" onclick=config></div>
                 </>
@@ -214,7 +220,7 @@ impl PerspectiveVieux {
         };
     }
 
-    /// Helper to `await` the propvided `Table` and then trigger the resulting state
+    /// Helper to `await` the provided `Table` and then trigger the resulting state
     /// and UI changes.
     fn set_session_table(
         &mut self,

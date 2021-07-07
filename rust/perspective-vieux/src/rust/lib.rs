@@ -8,15 +8,16 @@
 
 // Required by yew's `html` macro.
 #![recursion_limit = "1024"]
-
 #![warn(clippy::all)]
 
 pub mod components;
-pub mod session;
-pub mod plugin;
-pub mod utils;
+pub mod config;
 pub mod custom_elements;
 pub mod exprtk;
+pub mod js;
+pub mod plugin;
+pub mod session;
+pub mod utils;
 
 use wasm_bindgen::prelude::*;
 
