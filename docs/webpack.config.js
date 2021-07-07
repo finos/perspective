@@ -13,11 +13,11 @@ module.exports = {
     plugins: [new PerspectivePlugin({})],
     module: {
         rules: [
-            // {
-            //     test: /\.js$/,
-            //     enforce: "pre",
-            //     use: ["source-map-loader"]
-            // },
+            {
+                test: /\.js$/,
+                enforce: "pre",
+                use: ["source-map-loader"]
+            },
             {
                 test: /\.less$/,
                 use: [{loader: "style-loader"}, {loader: "css-loader"}, {loader: "less-loader"}]

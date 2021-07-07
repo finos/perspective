@@ -82,7 +82,8 @@ class HomeSplash extends React.Component {
                     <perspective-viewer class="titleViewer nosuperstore" />
 
                     <PromoSection>
-                        <Button id="grid">Datagrid</Button>
+                        <Button id="grid">Sparkgrid</Button>
+                        <Button id="grid2">Datagrid</Button>
                         <Button id="cyclone">X Bar</Button>
                         <Button id="enhance">Y Line</Button>
                         <Button id="crosssect">XY Scatter</Button>
@@ -96,7 +97,7 @@ class HomeSplash extends React.Component {
 }
 
 const Block = props => (
-    <Container padding={["bottom", "top"]} id={props.id} background={props.background}>
+    <Container id={props.id} background={props.background}>
         <GridBlock contents={props.children} layout={props.layout} />
     </Container>
 );
@@ -118,7 +119,63 @@ const PerspectiveBlock = props => {
         );
     }
     return (
-        <Container padding={["bottom", "top"]} id={props.id} background={props.background}>
+        <Container padding={["top"]} id={props.id} background={props.background}>
+            <div
+                className={classNames({
+                    imageAlignRight: !!afterImage,
+                    imageAlignLeft: !!beforeImage,
+                    imageAlignSide: true
+                })}
+                key={block.title}
+            >
+                {beforeImage}
+                <div className="blockContent">
+                    <h2>
+                        <MarkdownBlock>{block.title}</MarkdownBlock>
+                    </h2>
+                    <MarkdownBlock layout="twoColumn">{block.content}</MarkdownBlock>
+                </div>
+                {afterImage}
+            </div>
+        </Container>
+    );
+};
+
+const GalleryBlock = props => {
+    const block = props.children[0];
+    let beforeImage, afterImage;
+
+    if ((siteConfig.users || []).length === 0) {
+        return null;
+    }
+
+    const showcase = siteConfig.users
+        .filter(user => {
+            return user.pinned;
+        })
+        .map((user, i) => {
+            return (
+                <a href={user.infoLink} key={i}>
+                    <img style={{width: "33.3%"}} src={user.image} alt={user.caption} title={user.caption} />
+                </a>
+            );
+        });
+
+    if (block.imageAlign === "right") {
+        afterImage = (
+            <div className="blockImage">
+                <div className="logos">{showcase}</div>
+            </div>
+        );
+    } else {
+        beforeImage = (
+            <div className="blockImage">
+                <div className="logos">{showcase}</div>
+            </div>
+        );
+    }
+    return (
+        <Container padding={["top"]} id={props.id} background={props.background}>
             <div
                 className={classNames({
                     imageAlignRight: !!afterImage,
@@ -162,7 +219,7 @@ const YoutubeBlock = props => {
         );
     }
     return (
-        <Container padding={["bottom", "top"]} id={props.id} background={props.background}>
+        <Container padding={["bottom"]} id={props.id} background={props.background}>
             <div
                 className={classNames({
                     imageAlignRight: !!afterImage,
@@ -247,14 +304,14 @@ library, Perspective provides both:
 `;
 
 const Description = props => (
-    <PerspectiveBlock id="demo1">
+    <GalleryBlock id="demo1">
         {[
             {
                 content: DESCRIPTION_TEXT,
                 imageAlign: "right"
             }
         ]}
-    </PerspectiveBlock>
+    </GalleryBlock>
 );
 
 const PYTHON_TEXT = `
@@ -406,6 +463,41 @@ const Showcase = props => {
     );
 };
 
+const ChartTypes = props => {
+    if ((siteConfig.users || []).length === 0) {
+        return null;
+    }
+
+    const showcase_light = Array.from(Array(74).keys()).map((user, i) => {
+        return (
+            <a className="feature" key={i} data-key={i}>
+                <img src={`features/feature_${i}.png`} />
+            </a>
+        );
+    });
+
+    const showcase_dark = Array.from(Array(74).keys()).map((user, i) => {
+        return (
+            <a className="feature" key={i} data-key={i}>
+                <img src={`features/feature_${i}_dark.png`} />
+            </a>
+        );
+    });
+
+    return (
+        <div className="productShowcaseSection paddingBottom">
+            <Button id="switch_theme">Switch to Dark Theme</Button>
+            <div id="light" className="logos">
+                {showcase_light}
+            </div>
+
+            <div id="dark" className="logos">
+                {showcase_dark}
+            </div>
+        </div>
+    );
+};
+
 class Index extends React.Component {
     render() {
         let language = this.props.language || "";
@@ -416,8 +508,9 @@ class Index extends React.Component {
                 <Description />
                 <Javascript />
                 <Jupyter />
-                <Showcase />
-                <GetStarted />
+                {/* <Showcase /> */}
+                <ChartTypes />
+                {/* <GetStarted /> */}
             </div>
         );
     }

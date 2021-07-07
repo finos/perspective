@@ -6,7 +6,12 @@ import "@finos/perspective-viewer-d3fc";
 import "./logo.js";
 import "./concepts.js";
 
-var SECURITIES = ["AAPL.N", "AMZN.N", "QQQ.N", "NVDA.N", "TSLA.N", "FB.N", "MSFT.N", "CSCO.N", "GOOGL.N", "PCLN.N"];
+import {EXAMPLES} from "./features.js";
+import {appendChild} from "domutils";
+import {div} from "prelude-ls";
+import {getEffectiveConstraintOfTypeParameter} from "typescript";
+
+var SECURITIES = ["AAPL.N", "MSFT.N", "AMZN.N", "GOOGL.N", "FB.N", "TSLA.N", "BABA.N", "TSM.N", "V.N", "NVDA.N", "JPM.N", "JNJ.N", "WMT.N", "UNH.N", "MA.N", "BAC.N"];
 var CLIENTS = ["Homer", "Marge", "Bart", "Lisa", "Maggie"];
 var id = 0;
 
@@ -19,7 +24,7 @@ function randn_bm() {
 }
 
 function newRow() {
-    id = id % 100;
+    id = id % 500;
     return {
         name: SECURITIES[Math.floor(Math.random() * SECURITIES.length)],
         client: CLIENTS[Math.floor(Math.random() * CLIENTS.length)],
@@ -55,16 +60,16 @@ function update(table) {
     if (viewport_height - window.scrollY > 0) {
         table.update([newRow(), newRow(), newRow()]);
     }
-    if (freq === 0) {
-        setTimeout(() => update(table), 3000);
-        freqdir = 1;
-    } else {
-        setTimeout(() => update(table), Math.max(20, 200 / freq));
-    }
-    if (freq > 60) {
-        freqdir = -1;
-    }
-    freq += freqdir;
+    // if (freq === 0) {
+    //     setTimeout(() => update(table), 3000);
+    //     // freqdir = 1;
+    // } else {
+    setTimeout(() => update(table), 100);
+    // }
+    // if (freq > 60) {
+    //     freqdir = -1;
+    // }
+    // freq += freqdir;
 }
 
 function select(id) {
@@ -74,6 +79,29 @@ function select(id) {
     viewer.restore(
         {
             "#grid": {
+                plugin: "Datagrid",
+                columns: ["chg (-)", "chg", "chg (+)"],
+                expressions: ['//chg (-)\nif("chg"<0){"chg"}else{0}', '//chg (+)\nif("chg">0){"chg"}else{0}'],
+                "row-pivots": ["name"],
+                "column-pivots": ["client"],
+                aggregates: {"chg (-)": "avg", "chg (+)": "avg", chg: "avg"},
+                sort: [["chg", "desc"]],
+                plugin_config: {
+                    "chg (-)": {
+                        color_mode: "bar",
+                        gradient: 10
+                    },
+                    "chg (+)": {
+                        color_mode: "bar",
+                        gradient: 10
+                    },
+                    chg: {
+                        color_mode: "gradient",
+                        gradient: 10
+                    }
+                }
+            },
+            "#grid2": {
                 plugin: "datagrid",
                 columns: ["ask", "bid", "chg"],
                 sort: [
@@ -82,7 +110,8 @@ function select(id) {
                 ],
                 aggregates: {name: "last", lastUpdate: "last"},
                 "row-pivots": ["name", "lastUpdate"],
-                "column-pivots": ["client"]
+                "column-pivots": ["client"],
+                plugin_config: {}
             },
             "#cyclone": {
                 columns: ["chg"],
@@ -102,7 +131,7 @@ function select(id) {
                 plugin: "X/Y Scatter",
                 "row-pivots": ["name"],
                 "column-pivots": [],
-                columns: ["bid", "ask", "vol", "id"],
+                columns: ["bid", "ask", "chg", "vol"],
                 aggregates: {bid: "avg", ask: "avg", vol: "avg"},
                 sort: []
             },
@@ -111,7 +140,7 @@ function select(id) {
                 "row-pivots": ["name", "client"],
                 "column-pivots": [],
                 columns: ["bid", "chg"],
-                aggregates: {bid: "sum", chg: "low", name: "last"},
+                aggregates: {bid: "sum", chg: "sum", name: "last"},
                 sort: [
                     ["name", "desc"],
                     ["chg", "desc"]
@@ -119,7 +148,7 @@ function select(id) {
             },
             "#enhance": {
                 plugin: "Y Line",
-                "row-pivots": [],
+                "row-pivots": ["lastUpdate"],
                 "column-pivots": [],
                 sort: [["lastUpdate", "desc"]],
                 "column-pivots": ["client"],
@@ -146,7 +175,7 @@ window.addEventListener("DOMContentLoaded", async function() {
     }
 
     var data = [];
-    for (var x = 0; x < 100; x++) {
+    for (var x = 0; x < 500; x++) {
         data.push(newRow());
     }
     elem = Array.prototype.slice.call(document.querySelectorAll("perspective-viewer"))[0];
@@ -160,6 +189,7 @@ window.addEventListener("DOMContentLoaded", async function() {
     });
 
     document.querySelector("#grid").addEventListener("mouseenter", () => select("#grid"));
+    document.querySelector("#grid2").addEventListener("mouseenter", () => select("#grid2"));
     document.querySelector("#cyclone").addEventListener("mouseenter", () => select("#cyclone"));
     document.querySelector("#pivot").addEventListener("mouseenter", () => select("#pivot"));
     document.querySelector("#crosssect").addEventListener("mouseenter", () => select("#crosssect"));
@@ -169,30 +199,63 @@ window.addEventListener("DOMContentLoaded", async function() {
     select("#grid");
 
     get_arrow(async function(arrow) {
-        const psp1 = document.querySelector("#demo1 perspective-viewer");
-        const tbl1 = await worker.table(arrow.slice());
-        psp1.load(tbl1);
-        psp1.restore({
-            "row-pivots": ["Sub-Category"],
-            "column-pivots": ["Segment"],
-            columns: ["Sales"],
-            plugin: "Y Bar"
+        const container = document.createElement("div");
+        container.classList.add("floating_example");
+        container.addEventListener("click", event => {
+            if (event.target === container) {
+                container.style.display = "none";
+            }
         });
 
-        const psp2 = document.querySelector("#get_started perspective-viewer");
-        const tbl2 = await worker.table(arrow.slice());
-        psp2.load(tbl2);
-        psp2.toggleConfig();
-        psp2.restore({
-            plugin: "Heatmap",
-            "column-pivots": ["Sub-Category"],
-            "row-pivots": ["State"],
-            sort: [
-                ["Sales", "desc"],
-                ["Profit", "col desc"]
-            ],
-            columns: ["Profit"],
-            aggregates: {Profit: "low"}
+        const psp1 = document.createElement("perspective-viewer");
+        container.style.display = "none";
+        container.appendChild(psp1);
+        document.body.appendChild(container);
+        const tbl1 = await worker.table(arrow.slice());
+        await psp1.load(tbl1);
+
+        const config_defaults = config => Object.assign({plugin_config: {}, plugin: "Datagrid", "row-pivots": [], columns: [], expression: [], "column-pivots": [], sort: [], aggregates: {}}, config);
+        let first_render = true;
+
+        for (const image of document.querySelectorAll("a.feature")) {
+            image.addEventListener("click", async event => {
+                event.preventDefault();
+                const key = parseInt(image.dataset.key);
+                container.style.opacity = 0;
+                container.style.pointerEvents = "none";
+                container.style.display = "flex";
+                await psp1.restore(config_defaults(EXAMPLES[key].config));
+                await psp1.toggleConfig(true);
+                await psp1.notifyResize();
+                container.style.opacity = 1;
+                container.style.pointerEvents = "";
+            });
+        }
+
+        document.querySelector("#switch_theme").addEventListener("click", async function() {
+            const button = this.querySelector(".button");
+            const section = document.querySelector(".productShowcaseSection");
+            const dark = document.querySelector(".productShowcaseSection #dark");
+            const light = document.querySelector(".productShowcaseSection #light");
+            if (button.innerText === "SWITCH TO DARK THEME") {
+                button.innerText = "Switch to Light Theme";
+                dark.style.display = "flex";
+                light.style.display = "none";
+                section.classList.toggle("dark", true);
+                container.classList.toggle("dark", true);
+            } else {
+                button.innerText = "Switch to Dark Theme";
+                dark.style.display = "none";
+                light.style.display = "flex";
+                section.classList.toggle("dark", false);
+                container.classList.toggle("dark", false);
+            }
+            await psp1.restore({
+                plugin: ["Y Bar"],
+                "row-pivots": ["State"],
+                columns: ["Sales"]
+            });
+            await psp1.restyleElement();
         });
     });
 });

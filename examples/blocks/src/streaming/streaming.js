@@ -5,7 +5,7 @@ var CLIENTS = ["Homer", "Marge", "Bart", "Lisa", "Maggie", "Moe", "Lenny", "Carl
 // Create 5 random rows of data.
 function newRows() {
     var rows = [];
-    for (var x = 0; x < 5; x++) {
+    for (var x = 0; x < 50; x++) {
         rows.push({
             name: SECURITIES[Math.floor(Math.random() * SECURITIES.length)],
             client: CLIENTS[Math.floor(Math.random() * CLIENTS.length)],
@@ -33,6 +33,29 @@ window.addEventListener("DOMContentLoaded", async function() {
 
     // Load the `table` in the `<perspective-viewer>` DOM reference.
     elem.load(table);
+    elem.restore({
+        plugin: "Datagrid",
+        columns: ["(-)chg", "chg", "(+)chg"],
+        expressions: ['//(-)chg\nif("chg"<0){"chg"}else{0}', '//(+)chg\nif("chg">0){"chg"}else{0}'],
+        "row-pivots": ["name"],
+        "column-pivots": ["client"],
+        aggregates: {"(-)chg": "avg", "(+)chg": "avg", chg: "avg"},
+        sort: [["chg", "desc"]],
+        plugin_config: {
+            "(-)chg": {
+                color_mode: "bar",
+                gradient: 10
+            },
+            "(+)chg": {
+                color_mode: "bar",
+                gradient: 10
+            },
+            chg: {
+                color_mode: "gradient",
+                gradient: 10
+            }
+        }
+    });
 
     // Add more rows every 50ms using the `update()` method on the `table` directly.
     (function postRow() {

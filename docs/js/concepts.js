@@ -8,11 +8,9 @@ async function main() {
 
     const viewers = document.querySelectorAll("perspective-viewer:not(.nosuperstore)");
     for (const viewer of viewers) {
-        console.log("test3");
         viewer.load(table);
         viewer.toggleConfig();
     }
-    console.log("test4");
 
     let state = localStorage.getItem("lang_pref") || "Python";
     let ICON = `<span style="font-family:'Material Icons';vertical-align:bottom">input</span>`;
@@ -54,8 +52,7 @@ async function main() {
         });
     }
 }
-console.log("test1");
+
 window.addEventListener("DOMContentLoaded", () => {
-    console.log("test2");
     main();
 });

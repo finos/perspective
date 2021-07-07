@@ -62,6 +62,12 @@ function styleListener(regularTable) {
             td.classList.toggle("psp-header-border", needs_border);
             td.classList.toggle("psp-header-group-corner", typeof metadata.x === "undefined");
             td.classList.toggle("psp-color-mode-bar", false);
+
+            td.classList.toggle("psp-header-sort-asc", false);
+            td.classList.toggle("psp-header-sort-desc", false);
+            td.classList.toggle("psp-header-sort-col-asc", false);
+            td.classList.toggle("psp-header-sort-col-desc", false);
+
             let cell = row.cells[x],
                 xx = x,
                 tx,
