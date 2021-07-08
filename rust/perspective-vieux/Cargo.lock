@@ -369,7 +369,7 @@ checksum = "13bd41f508810a131401606d54ac32a467c97172d74ba7662562ebba5ad07fa0"
 
 [[package]]
 name = "perspective_vieux"
-version = "0.9.0"
+version = "0.10.0"
 dependencies = [
  "console_error_panic_hook",
  "futures",

@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-vieux",
-    "version": "0.9.0",
+    "version": "0.10.0",
     "private": true,
     "description": "A regular `<table>`, for an async and virtual data model.",
     "repository": {
@@ -34,6 +34,6 @@
         "access": "public"
     },
     "dependencies": {
-        "@finos/perspective": "^0.9.0"
+        "@finos/perspective": "^0.10.0"
     }
 }
