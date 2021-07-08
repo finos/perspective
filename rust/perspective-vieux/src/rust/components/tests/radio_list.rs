@@ -19,8 +19,8 @@ wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
 pub fn test_change_u32() {
-    let link: WeakComponentLink<RadioList<u32>> = WeakComponentLink::default();
-    let result: Rc<RefCell<u32>> = Rc::new(RefCell::new(1000));
+    let link: WeakComponentLink<RadioList<String>> = WeakComponentLink::default();
+    let result: Rc<RefCell<String>> = Rc::new(RefCell::new("false".to_owned()));
     let on_change = {
         clone!(result);
         Callback::from(move |val| {
@@ -29,25 +29,25 @@ pub fn test_change_u32() {
     };
 
     test_html! {
-        <RadioList<u32>
+        <RadioList<String>
             disabled=false
-            selected=2
+            selected="2"
             on_change={ on_change }
-            values={ vec!(1, 2, 3) }
+            values={ vec!("1".to_owned(), "2".to_owned(), "3".to_owned()) }
             weak_link={ link.clone() }>
 
             <span>{ "One" }</span>
             <span>{ "Two" }</span>
             <span>{ "Three" }</span>
 
-        </RadioList<u32>>
+        </RadioList<String>>
     };
 
     let radio_list = link.borrow().clone().unwrap();
     radio_list.send_message(RadioListMsg::Change("2".to_owned()));
-    assert_eq!(*result.borrow(), 2);
+    assert_eq!(*result.borrow(), "2");
     radio_list.send_message(RadioListMsg::Change("3".to_owned()));
-    assert_eq!(*result.borrow(), 3);
+    assert_eq!(*result.borrow(), "3");
     radio_list.send_message(RadioListMsg::Change("1".to_owned()));
-    assert_eq!(*result.borrow(), 1);
+    assert_eq!(*result.borrow(), "1");
 }

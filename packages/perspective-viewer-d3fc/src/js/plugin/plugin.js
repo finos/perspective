@@ -91,11 +91,11 @@ export function register(...plugins) {
                         chart.plugin.max_columns = x;
                     }
 
-                    async draw(view, task, end_col, end_row) {
-                        await this.update(view, task, end_col, end_row, true);
+                    async draw(view, end_col, end_row) {
+                        await this.update(view, end_col, end_row, true);
                     }
 
-                    async update(view, task, end_col, end_row, clear = false) {
+                    async update(view, end_col, end_row, clear = false) {
                         if (!this.isConnected) {
                             return;
                         }
@@ -114,10 +114,6 @@ export function register(...plugins) {
                             jsonp = view.to_json({leaves_only});
                         }
                         metadata = await Promise.all([viewer._table.schema(false), view.expression_schema(false), view.schema(false), jsonp, view.get_config()]);
-
-                        if (task.cancelled) {
-                            return;
-                        }
 
                         let [table_schema, expression_schema, view_schema, json, config] = metadata;
 

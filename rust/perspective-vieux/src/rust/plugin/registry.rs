@@ -6,8 +6,8 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::utils::perspective_viewer::register_default_plugin_web_component;
-use crate::utils::perspective_viewer::*;
+use crate::js::perspective_viewer::register_default_plugin_web_component;
+use crate::js::perspective_viewer::*;
 
 use std::cell::RefCell;
 use std::rc::Rc;

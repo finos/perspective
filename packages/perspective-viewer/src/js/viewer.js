@@ -408,7 +408,7 @@ class PerspectiveViewer extends ActionElement {
      */
     set plugin(v) {
         if (v === "null" || v === null || v === undefined) {
-            (this._vieux._instance || this._vieux).set_plugin_default();
+            (this._vieux._instance || this._vieux).set_plugin();
             return;
         }
 
@@ -416,7 +416,7 @@ class PerspectiveViewer extends ActionElement {
             let plugin = this.getAttribute("plugin");
             (this._vieux._instance || this._vieux).set_plugin(plugin);
         } else {
-            (this._vieux._instance || this._vieux).set_plugin_default();
+            (this._vieux._instance || this._vieux).set_plugin();
             return;
         }
     }
@@ -747,7 +747,6 @@ class PerspectiveViewer extends ActionElement {
         this.removeAttribute("column-pivots");
         this.removeAttribute("filters");
         this.removeAttribute("sort");
-        this.removeAttribute("expressions");
         this.removeAttribute("aggregates");
         if (this._initial_col_order) {
             this.setAttribute("columns", JSON.stringify(this._initial_col_order));
@@ -755,6 +754,7 @@ class PerspectiveViewer extends ActionElement {
             this.removeAttribute("columns");
         }
 
+        this.removeAttribute("expressions");
         this.removeAttribute("plugin");
         this._vieux.get_plugin().then(plugin => {
             plugin.restore({});

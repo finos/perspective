@@ -6,7 +6,7 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::utils::perspective::*;
+use crate::js::perspective::*;
 use crate::*;
 
 use js_sys::{JsString, Promise};
@@ -23,7 +23,9 @@ pub fn copy_flat(table: &PerspectiveJsTable) -> Result<Promise, JsValue> {
     let csv_ref: Rc<RefCell<Option<String>>> = Rc::new(RefCell::new(None));
     poll(0, csv_ref.clone())?;
     Ok(future_to_promise(async move {
-        let view = table.view(js_object!()).await?;
+        let view = table
+            .view(&js_object!().unchecked_into::<PerspectiveJsViewConfig>())
+            .await?;
         let csv = copy_async(&view).await?;
         view.delete().await?;
         *csv_ref.borrow_mut() = Some(csv.as_string().unwrap());

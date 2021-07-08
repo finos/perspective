@@ -77,7 +77,7 @@ impl Component for StatusBar {
             .callback(|event: MouseEvent| StatusBarMsg::Copy(event.shift_key()));
 
         html! {
-            <div id=self.props.id>
+            <div id=self.props.id.clone()>
                 <div class="section">
                     <span id="status" class=class_name></span>
                 </div>
@@ -93,7 +93,7 @@ impl Component for StatusBar {
                     </span>
                 </div>
                 <div id="rows" class="section">
-                    <StatusBarRowsCounter stats=&self.props.stats />
+                    <StatusBarRowsCounter stats=self.props.stats.clone() />
                 </div>
             </div>
         }

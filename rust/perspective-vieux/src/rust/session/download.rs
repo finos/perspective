@@ -6,8 +6,8 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use crate::js::perspective::*;
 use crate::*;
-use crate::utils::perspective::*;
 
 use js_sys::*;
 use std::iter::FromIterator;
@@ -20,7 +20,9 @@ use wasm_bindgen_futures::future_to_promise;
 pub fn download_flat(table: &PerspectiveJsTable) -> Promise {
     clone!(table);
     future_to_promise(async move {
-        let view = table.view(js_object!()).await?;
+        let view = table
+            .view(&js_object!().unchecked_into::<PerspectiveJsViewConfig>())
+            .await?;
         download_async(&view).await?;
         view.delete().await?;
         Ok(JsValue::UNDEFINED)

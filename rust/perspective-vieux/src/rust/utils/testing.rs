@@ -6,15 +6,10 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-#[cfg(test)] 
+#[cfg(test)]
 use {
-    crate::utils::perspective::*,
-    crate::*,
-    wasm_bindgen_futures::JsFuture,
-    std::cell::RefCell,
-    std::iter::FromIterator,
-    wasm_bindgen::prelude::*,
-    wasm_bindgen::JsCast,
+    crate::js::perspective::*, crate::*, std::cell::RefCell, std::iter::FromIterator,
+    wasm_bindgen::prelude::*, wasm_bindgen::JsCast, wasm_bindgen_futures::JsFuture,
 };
 
 #[cfg(test)]

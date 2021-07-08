@@ -6,12 +6,13 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use std::rc::Rc;
-
 use crate::custom_elements::modal::*;
+use crate::*;
 use crate::{components::expression_editor::*, session::Session};
 
+use std::rc::Rc;
 use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
 use web_sys::*;
 use yew::prelude::*;
 
@@ -29,13 +30,38 @@ impl ResizableMessage for <ExpressionEditor as Component>::Message {
 
 impl PerspectiveExpressionEditorElement {
     pub fn new(
-        custom_element: HtmlElement,
         session: Session,
         on_save: Rc<dyn Fn(JsValue)>,
-        on_init: Rc<dyn Fn()>,
-        on_validate: Rc<dyn Fn(bool)>,
-        monaco_theme: String
+        monaco_theme: String,
     ) -> PerspectiveExpressionEditorElement {
+        let document = window().unwrap().document().unwrap();
+        let editor = document
+            .create_element("perspective-expression-editor")
+            .unwrap()
+            .unchecked_into::<HtmlElement>();
+
+        editor
+            .toggle_attribute_with_force("initializing", true)
+            .unwrap();
+
+        let on_init = {
+            clone!(editor);
+            Rc::new(move || {
+                editor
+                    .toggle_attribute_with_force("initializing", false)
+                    .unwrap();
+            })
+        };
+
+        let on_validate = {
+            clone!(editor);
+            Rc::new(move |valid| {
+                editor
+                    .toggle_attribute_with_force("validating", valid)
+                    .unwrap();
+            })
+        };
+
         let props = ExpressionEditorProps {
             on_save,
             on_init,
@@ -44,7 +70,7 @@ impl PerspectiveExpressionEditorElement {
             session,
         };
 
-        let modal = ModalElement::new(custom_element, props);
+        let modal = ModalElement::new(editor, props);
         PerspectiveExpressionEditorElement { modal }
     }
 

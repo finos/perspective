@@ -8,12 +8,10 @@
  */
 
 import isEqual from "lodash/isEqual";
-import {html, render} from "lit-html";
 
 import {throttlePromise} from "../utils.js";
 import * as perspective from "@finos/perspective/dist/esm/config/constants.js";
 import {get_type_config} from "@finos/perspective/dist/esm/config";
-import {CancelTask} from "./cancel_task.js";
 
 import {StateElement} from "./state_element.js";
 import {findExpressionByAlias, getExpressionAlias} from "../utils.js";
@@ -23,10 +21,6 @@ import {findExpressionByAlias, getExpressionAlias} from "../utils.js";
  *  Helpers
  *
  */
-
-function numberWithCommas(x) {
-    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
 
 let TYPE_ORDER = {integer: 2, string: 0, float: 3, boolean: 4, datetime: 1, date: 1};
 
@@ -90,32 +84,6 @@ function get_aggregates_with_defaults(aggregate_attribute, columns, schema, expr
 
     return aggregates;
 }
-
-const _total_template = args => {
-    if (args) {
-        const x = numberWithCommas(args[0]);
-        const y = numberWithCommas(args[1]);
-        const total = Math.floor((args[0] / args[1]) * 100);
-        return html`
-            <span title="${x} / ${y}" class="plugin_information--overflow-hint">&nbsp;<span class="plugin_information--overflow-hint-percent">${total}%</span>&nbsp;</span>
-        `;
-    }
-};
-
-const _nowrap_template = text => {
-    if (text !== "") {
-        return html`
-            <span style="white-space:nowrap">${text}</span>
-        `;
-    }
-};
-
-/**
- * Render warning template tagged literal.
- * @param {*} strings
- * @param  {...[n, m]} args tuples of rationals to be formatted.
- */
-const _warning = (strings, ...args) => strings.flatMap((str, idx) => [_nowrap_template(str), _total_template(args[idx])]).filter(x => x);
 
 /******************************************************************************
  *
@@ -237,6 +205,7 @@ export class PerspectiveElement extends StateElement {
         }
 
         this._show_column_container();
+        this._show_top_panel();
         this._show_side_panel_actions();
 
         // Filters need type information to populate e.g. the operator dropdown,
@@ -262,63 +231,6 @@ export class PerspectiveElement extends StateElement {
         }
 
         resolve();
-    }
-
-    async get_maxes() {
-        let plugin = await this._vieux.get_plugin();
-        // If the plugin is set to not render a warning, i.e. after the user
-        // selects "Render all points", then return null for max_cols/max_rows.
-        if (typeof plugin.max_columns !== "undefined" && plugin.render_warning === false) {
-            return {
-                max_cols: null,
-                max_rows: null
-            };
-        }
-
-        let max_cols, max_rows;
-        const [schema, num_columns] = await Promise.all([this._view.schema(), this._view.num_columns()]);
-        const schema_columns = Object.keys(schema || {}).length || 1;
-
-        if (typeof plugin.max_columns !== "undefined") {
-            const column_group_diff = plugin.max_columns % schema_columns;
-            const column_limit = plugin.max_columns + column_group_diff;
-            max_cols = column_limit < num_columns ? column_limit : undefined;
-        }
-
-        if (typeof plugin.max_cells !== "undefined") {
-            max_rows = Math.ceil(max_cols ? plugin.max_cells / max_cols : plugin.max_cells / (num_columns || 1));
-        }
-
-        return {max_cols, max_rows};
-    }
-
-    async _warn_render_size_exceeded(max_cols, max_rows) {
-        if (this._show_warnings && (max_cols || max_rows)) {
-            const num_columns = await this._view.num_columns();
-            const num_rows = await this._view.num_rows();
-            const count = num_columns * num_rows;
-            const columns_are_truncated = max_cols && max_cols < num_columns;
-            const rows_are_truncated = max_rows && max_rows < num_rows;
-            if (columns_are_truncated && rows_are_truncated) {
-                this._plugin_information.classList.remove("hidden");
-                const warning = _warning`Rendering ${[max_cols, num_columns]} of columns and ${[num_columns * max_rows, count]} of points.`;
-                render(warning, this._plugin_information_message);
-                return true;
-            } else if (columns_are_truncated) {
-                this._plugin_information.classList.remove("hidden");
-                const warning = _warning`Rendering ${[max_cols, num_columns]} of columns.`;
-                render(warning, this._plugin_information_message);
-                return true;
-            } else if (rows_are_truncated) {
-                this._plugin_information.classList.remove("hidden");
-                const warning = _warning`Rendering ${[num_columns * max_rows, count]} of points.`;
-                render(warning, this._plugin_information_message);
-                return true;
-            } else {
-                this._plugin_information.classList.add("hidden");
-            }
-        }
-        return false;
     }
 
     /**
@@ -355,25 +267,9 @@ export class PerspectiveElement extends StateElement {
             this._debounced = setTimeout(async () => {
                 this._debounced = undefined;
                 const timer = this._render_time();
-                if (this._task && !this._task.initial) {
-                    this._task.cancel();
-                }
-                const task = (this._task = new CancelTask());
-                let plugin = await this.pre_activate_plugin();
-                const updater = plugin.update || plugin.draw;
                 try {
-                    if (limit_points) {
-                        const {max_cols, max_rows} = await this.get_maxes();
-                        if (!task.cancelled) {
-                            await this._warn_render_size_exceeded(max_cols, max_rows);
-                            await updater.call(plugin, this._view, task, max_cols, max_rows);
-                        }
-                    } else {
-                        await updater.call(plugin, this._view, task);
-                    }
-                    await this.post_activate_plugin(plugin);
+                    await this._vieux._draw(limit_points, false, true);
                     timer();
-                    task.cancel();
                 } finally {
                     this.dispatchEvent(new Event("perspective-view-update"));
                 }
@@ -412,7 +308,7 @@ export class PerspectiveElement extends StateElement {
         }
     }
 
-    async _new_view({force_update = false, ignore_size_check = false, limit_points = true} = {}) {
+    async _new_view({force_update = false, limit_points = true} = {}) {
         if (!this._table) return;
         this._check_responsive_layout();
         const row_pivots = this._get_view_row_pivots();
@@ -449,18 +345,13 @@ export class PerspectiveElement extends StateElement {
             expressions: expressions
         };
 
-        if (this._task) {
-            this._task.cancel();
-        }
-
         if (this._view) {
             this._view.remove_update(this._view_updater);
-            this._vieux.delete_view();
-            this._view.delete();
+            // this._view.delete();
         }
 
         try {
-            this._view = await this._table.view(config);
+            this._view = await this._vieux._create_view(config);
             this._view_updater = () => this._view_on_update(limit_points);
             this._view.on_update(this._view_updater);
         } catch (e) {
@@ -472,27 +363,9 @@ export class PerspectiveElement extends StateElement {
             throw e;
         }
 
-        this._vieux.set_view(this._view);
-
         const timer = this._render_time();
-        const task = (this._task = new CancelTask(() => {}, true));
-
         try {
-            const {max_cols, max_rows} = await this.get_maxes();
-            if (task.cancelled) {
-                return;
-            }
-            if (!ignore_size_check) {
-                await this._warn_render_size_exceeded(max_cols, max_rows);
-            }
-            const plugin = await this.pre_activate_plugin();
-
-            if (limit_points) {
-                await plugin.draw(this._view, task, max_cols, max_rows, force_update);
-            } else {
-                await plugin.draw(this._view, task, undefined, undefined, force_update);
-            }
-            await this.post_activate_plugin(plugin);
+            await this._vieux._draw(limit_points, force_update, false);
         } catch (err) {
             console.warn(err);
         } finally {
@@ -502,25 +375,7 @@ export class PerspectiveElement extends StateElement {
             }
 
             timer();
-            task.cancel();
         }
-    }
-
-    async pre_activate_plugin() {
-        let plugin = await this._vieux.get_plugin();
-        if (this.children[0] !== plugin) {
-            plugin.style.opacity = 0;
-            this.appendChild(plugin);
-        }
-
-        return plugin;
-    }
-
-    post_activate_plugin(plugin) {
-        if (this.children[0] !== plugin) {
-            this.removeChild(this.children[0]);
-        }
-        plugin.style.opacity = 1;
     }
 
     _check_loaded_table() {
@@ -542,19 +397,15 @@ export class PerspectiveElement extends StateElement {
     }
 
     async _restyle_plugin() {
-        const plugins = await this._vieux.get_plugins();
+        const plugins = await this._vieux.get_all_plugins();
         for (const plugin of plugins) {
             if (plugin.restyleElement) {
-                const task = (this._task = new CancelTask());
-                await plugin.restyleElement(this._view, task);
+                await plugin.restyleElement(this._view);
             }
         }
     }
 
     _clear_state() {
-        if (this._task) {
-            this._task.cancel();
-        }
         const all = [];
         if (this._view) {
             const view = this._view;
@@ -578,15 +429,15 @@ export class PerspectiveElement extends StateElement {
     }
 
     @throttlePromise(true)
-    async _update(ignore_size_check, force_update, limit_points) {
+    async _update(force_update, limit_points) {
         await new Promise(setTimeout);
-        await this._new_view({ignore_size_check, force_update, limit_points});
+        await this._new_view({force_update, limit_points});
     }
 
-    async _debounce_update({force_update = false, ignore_size_check = false, limit_points = true} = {}) {
+    async _debounce_update({force_update = false, limit_points = true} = {}) {
         if (this._table) {
             let resolve = this._set_updating();
-            await this._update(ignore_size_check, force_update, limit_points);
+            await this._update(force_update, limit_points);
             resolve();
         }
     }

@@ -77,7 +77,7 @@ export function drop(ev) {
         if (filtering) {
             this.setAttribute(name, JSON.stringify(columns.concat([data])));
         } else if (name.indexOf("sort") > -1) {
-            this.setAttribute(name, JSON.stringify(columns.concat([[data[0]]])));
+            this.setAttribute(name, JSON.stringify(columns.concat([[data[0], "asc"]])));
         } else {
             this.setAttribute(name, JSON.stringify(columns.concat([data[0]])));
         }

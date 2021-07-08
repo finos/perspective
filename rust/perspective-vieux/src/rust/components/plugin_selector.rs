@@ -6,9 +6,9 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use crate::js::perspective_viewer::*;
 use crate::plugin::registry::*;
 use crate::plugin::*;
-use crate::utils::perspective_viewer::*;
 use crate::*;
 
 #[cfg(test)]
@@ -41,11 +41,12 @@ impl Component for PluginSelector {
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         enable_weak_link_test!(props, link);
-        props.plugin.add_on_plugin_changed(link.callback(
-            |plugin: PerspectiveViewerJsPlugin| {
+        props.plugin.add_on_plugin_changed({
+            let callback = link.callback(|plugin: PerspectiveViewerJsPlugin| {
                 PluginSelectorMsg::PluginSelected(plugin.name())
-            },
-        ));
+            });
+            move |x| callback.emit(x)
+        });
 
         PluginSelector { props, link }
     }
@@ -85,7 +86,7 @@ impl Component for PluginSelector {
                         html! {
                             <option
                                 selected=selected
-                                value=name>{ name }
+                                value=name.to_owned()>{ name }
                             </option>
                         }
                     })

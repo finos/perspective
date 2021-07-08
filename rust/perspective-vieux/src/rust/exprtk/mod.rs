@@ -6,11 +6,11 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-mod language;
 mod completions;
 mod init;
+mod language;
 
-use crate::utils::monaco::*;
+use crate::js::monaco::*;
 
 use init::*;
 use language::*;
@@ -34,7 +34,7 @@ pub fn set_global_completion_column_names(names: Vec<String>) {
 }
 
 /// Initialize the `ExprTK` language in `monaco`.  This should only be done once.
-/// 
+///
 /// # Arguments
 /// `base` - the `monaco-editor` base theme name.
 pub async fn init_monaco(base: &str) -> Result<Editor, error::Error> {

@@ -27,6 +27,10 @@ use super::perspective::PerspectiveJsView;
             return 'toggle';
         }
 
+        update(...args) {
+            return this.draw(...args);
+        }
+
         async draw(view) {
             this.style.backgroundColor = '#fff';
             let perspective_viewer = this.parentElement;
@@ -81,13 +85,40 @@ extern "C" {
     #[wasm_bindgen(method, getter)]
     pub fn name(this: &PerspectiveViewerJsPlugin) -> String;
 
+    #[wasm_bindgen(method, getter)]
+    pub fn max_columns(this: &PerspectiveViewerJsPlugin) -> Option<usize>;
+
+    #[wasm_bindgen(method, getter)]
+    pub fn max_cells(this: &PerspectiveViewerJsPlugin) -> Option<usize>;
+
+    #[wasm_bindgen(method, getter)]
+    pub fn render_warning(this: &PerspectiveViewerJsPlugin) -> Option<bool>;
+
+    #[wasm_bindgen(method, setter)]
+    pub fn set_render_warning(this: &PerspectiveViewerJsPlugin, val: bool);
+
+    #[wasm_bindgen(method)]
+    pub fn save(this: &PerspectiveViewerJsPlugin) -> JsValue;
+
+    #[wasm_bindgen(method)]
+    pub fn restore(this: &PerspectiveViewerJsPlugin, token: &JsValue);
+
     #[wasm_bindgen(method, catch)]
     pub async fn draw(
         this: &PerspectiveViewerJsPlugin,
         view: &PerspectiveJsView,
-        task: JsValue,
-        column_limit: Option<u32>,
-        row_limit: Option<u32>
+        column_limit: Option<usize>,
+        row_limit: Option<usize>,
+        force: bool
+    ) -> Result<JsValue, JsValue>;
+
+    #[wasm_bindgen(method, catch)]
+    pub async fn update(
+        this: &PerspectiveViewerJsPlugin,
+        view: &PerspectiveJsView,
+        column_limit: Option<usize>,
+        row_limit: Option<usize>,
+        force: bool
     ) -> Result<JsValue, JsValue>;
 
     #[wasm_bindgen(method, catch)]

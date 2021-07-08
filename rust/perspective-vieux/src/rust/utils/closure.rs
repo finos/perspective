@@ -23,7 +23,7 @@ impl<T, U, V> ToClosure<(U, V)> for T
 where
     T: Fn(U) -> V + 'static,
     U: FromWasmAbi + 'static,
-    V: IntoWasmAbi + 'static
+    V: IntoWasmAbi + 'static,
 {
     type Output = Closure<dyn Fn(U) -> V>;
     fn to_closure(self) -> Closure<dyn Fn(U) -> V + 'static> {
@@ -36,7 +36,7 @@ where
     T: Fn(U, V) -> W + 'static,
     U: FromWasmAbi + 'static,
     V: FromWasmAbi + 'static,
-    W: IntoWasmAbi + 'static
+    W: IntoWasmAbi + 'static,
 {
     type Output = Closure<dyn Fn(U, V) -> W>;
     fn to_closure(self) -> Closure<dyn Fn(U, V) -> W + 'static> {
@@ -50,7 +50,7 @@ where
     U: FromWasmAbi + 'static,
     V: FromWasmAbi + 'static,
     W: FromWasmAbi + 'static,
-    X: IntoWasmAbi + 'static
+    X: IntoWasmAbi + 'static,
 {
     type Output = Closure<dyn Fn(U, V, W) -> X>;
     fn to_closure(self) -> Closure<dyn Fn(U, V, W) -> X + 'static> {
@@ -59,7 +59,9 @@ where
 }
 
 impl<U> ToClosure<Callback<U>> for Callback<U>
-where U: FromWasmAbi + 'static {
+where
+    U: FromWasmAbi + 'static,
+{
     type Output = Closure<dyn Fn(U)>;
     fn to_closure(self) -> Closure<dyn Fn(U)> {
         Closure::wrap(Box::new(move |x: U| {
@@ -76,7 +78,7 @@ impl<T, U, V> ToClosureMut<T, V> for U
 where
     U: FnMut(T) -> V + 'static,
     T: FromWasmAbi + 'static,
-    V: IntoWasmAbi + 'static
+    V: IntoWasmAbi + 'static,
 {
     fn to_closure_mut(self) -> Closure<dyn FnMut(T) -> V + 'static> {
         Closure::wrap(Box::new(self) as Box<dyn FnMut(T) -> V>)
