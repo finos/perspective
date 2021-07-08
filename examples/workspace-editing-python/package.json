@@ -7,7 +7,7 @@
         "start": "yarn webpack && yarn start:server",
         "start:client": "webpack-dev-server --open",
         "start:server": "PYTHONPATH=../../python/perspective python3 src/server.py",
-        "webpack": "webpack --colour"
+        "webpack": "webpack --color"
     },
     "keywords": [],
     "license": "Apache-2.0",

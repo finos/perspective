@@ -33,7 +33,7 @@ const worker = perspective.shared_worker();
  * tables just as you would on a locally created table.
  */
 const server_table = websocket.open_table("data_source_one");
-const server_view = await server_table.view();
+let server_view;
 
 // All viewers are based on the same table, which then feed edits back to a
 // table on the server with a schema.
@@ -55,6 +55,7 @@ const PORTS = [];
  */
 const datasource = async function() {
     const load_start = performance.now();
+    server_view = await server_table.view();
 
     // The API of the remote table/view are symmetric.
     const arrow = await server_view.to_arrow();

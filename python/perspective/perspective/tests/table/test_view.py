@@ -564,6 +564,36 @@ class TestView(object):
 
         assert result["a"] == approx([expected_total, expected_zero, expected_one])
 
+    def test_view_standard_deviation_update_none(self):
+        data = {
+            "a": [0.1, 0.5, None, 0.8],
+            "b": [0, 1, 0, 1],
+            "c": [1, 2, 3, 4]
+        }
+        table = Table(data, index="c")
+        view = table.view(columns=["a"], row_pivots=["b"], aggregates={"a": "stddev"})
+        result = view.to_columns()
+        assert result["a"] == approx([np.std([0.1, 0.5, 0.8]), None, np.std([0.5, 0.8])])
+
+        table.update({
+            "a": [0.3],
+            "c": [3]
+        })
+
+        result = view.to_columns()
+        assert result["a"] == approx([np.std([0.1, 0.5, 0.3, 0.8]), np.std([0.1, 0.3]), np.std([0.5, 0.8])])
+
+        table.update({
+            "a": [None],
+            "c": [1]
+        })
+
+        result = view.to_columns()
+        assert result["a"] == approx([np.std([0.5, 0.3, 0.8]), None, np.std([0.5, 0.8])])
+
+
+
+
 
     def test_view_standard_deviation_multi_update(self):
         data = {
@@ -598,6 +628,158 @@ class TestView(object):
         assert result["__ROW_PATH__"] == [[], [0], [1], [2]]
         assert result["a"][:-1] == approx([np.std(expected_total), np.std(expected_zero), np.std(expected_one)])
         assert result["a"][-1] is None
+
+    def test_view_standard_deviation_multi_update_delta(self):
+        data = {
+            "a": [91.96, 258.576, 29.6, 243.16, 36.24, 25.248, 79.99, 206.1, 31.5, 55.6],
+            "b": [1 if i % 2 == 0 else 0 for i in range(10)]
+        }
+        table = Table(data)
+        view = table.view(
+            aggregates={"a": "stddev"},
+            row_pivots=["b"]
+        )
+
+        result = view.to_columns()
+        expected_total = data["a"]
+        expected_zero = [data["a"][1], data["a"][3], data["a"][5], data["a"][7], data["a"][9]]
+        expected_one = [data["a"][0], data["a"][2], data["a"][4], data["a"][6], data["a"][8]]
+
+        assert result["a"] == approx([np.std(expected_total), np.std(expected_zero), np.std(expected_one)])
+
+        # 2 here should result in null stddev because the group size is 1
+        update_data = {
+            "a": [15.12, 9.102, 0.99, 12.8],
+            "b": [1, 0, 1, 2]
+        }
+
+        def cb1(port_id, delta):
+            table2 = Table(delta)
+            view2 = table2.view()
+            result = view2.to_columns()
+
+            flat_view = table.view()
+            flat_data = flat_view.to_columns()
+            result = view.to_columns()
+
+            expected_total = flat_data["a"]
+            expected_zero = []
+            expected_one = []
+
+            for i, num in enumerate(expected_total):
+                if flat_data["b"][i] == 1:
+                    expected_one.append(num)
+                elif flat_data["b"][i] == 0:
+                    expected_zero.append(num)
+
+            assert result["a"] == approx([np.std(expected_total), np.std(expected_zero), np.std(expected_one), None])
+
+        view.on_update(cb1, mode="row")
+
+        table.update(update_data)
+
+
+    def test_view_standard_deviation_multi_update_indexed(self):
+        data = {
+            "a": [91.96, 258.576, 29.6, 243.16, 36.24, 25.248, 79.99, 206.1, 31.5, 55.6],
+            "b": [1 if i % 2 == 0 else 0 for i in range(10)],
+            "c": [i for i in range(10)]
+        }
+        table = Table(data, index="c")
+        view = table.view(
+            aggregates={"a": "stddev"},
+            row_pivots=["b"]
+        )
+
+        result = view.to_columns()
+        expected_total = data["a"]
+        expected_zero = [data["a"][1], data["a"][3], data["a"][5], data["a"][7], data["a"][9]]
+        expected_one = [data["a"][0], data["a"][2], data["a"][4], data["a"][6], data["a"][8]]
+
+        assert result["a"] == approx([np.std(expected_total), np.std(expected_zero), np.std(expected_one)])
+
+        # "b" = 2 here should result in null stddev because the group size is 1
+        update_data = {
+            "a": [15.12, 9.102, 0.99, 12.8],
+            "b": [1, 0, 1, 2],
+            "c": [1, 5, 2, 7]
+        }
+
+        table.update(update_data)
+
+        result = view.to_columns()
+
+        view2 = table.view()
+        flat_data = view2.to_columns()
+        expected_total = flat_data["a"]
+
+        expected_zero = []
+        expected_one = []
+
+        for i, val in enumerate(flat_data["a"]):
+            if flat_data["b"][i] == 1:
+                expected_one.append(val)
+            elif flat_data["b"][i] == 0:
+                expected_zero.append(val)
+
+        assert result["__ROW_PATH__"] == [[], [0], [1], [2]]
+        assert result["a"][:-1] == approx([np.std(expected_total), np.std(expected_zero), np.std(expected_one)])
+        assert result["a"][-1] is None
+
+    def test_view_standard_deviation_multi_update_indexed_delta(self):
+        data = {
+            "a": [91.96, 258.576, 29.6, 243.16, 36.24, 25.248, 79.99, 206.1, 31.5, 55.6],
+            "b": [1 if i % 2 == 0 else 0 for i in range(10)],
+            "c": [i for i in range(10)]
+        }
+        table = Table(data, index="c")
+        view = table.view(
+            aggregates={"a": "stddev", "b": "last", "c": "last"},
+            row_pivots=["b"]
+        )
+
+        result = view.to_columns()
+        expected_total = data["a"]
+        expected_zero = [data["a"][1], data["a"][3], data["a"][5], data["a"][7], data["a"][9]]
+        expected_one = [data["a"][0], data["a"][2], data["a"][4], data["a"][6], data["a"][8]]
+
+        assert result["a"] == approx([np.std(expected_total), np.std(expected_zero), np.std(expected_one)])
+
+        # 2 here should result in null stddev because the group size is 1
+        update_data = {
+            "a": [15.12, 9.102, 0.99, 12.8],
+            "b": [1, 0, 1, 2],
+            "c": [0, 4, 1, 6]
+        }
+
+        def cb1(port_id, delta):
+            table2 = Table(delta)
+            view2 = table2.view()
+            result = view2.to_columns()
+
+            flat_view = table.view()
+            flat_result = flat_view.to_columns()
+
+            new_a = flat_result["a"]
+            b = flat_result["b"]
+            expected_zero = []
+            expected_one = []
+
+            for i, num in enumerate(new_a):
+                if b[i] == 0:
+                    expected_zero.append(num)
+                elif b[i] == 1:
+                    expected_one.append(num)
+
+            assert result == {
+                "a": approx([np.std(new_a), np.std(expected_zero), np.std(expected_one), None]),
+                "b": [2, 0, 1, 2],
+                "c": [6, 9, 8, 6]
+            }
+
+        view.on_update(cb1, mode="row")
+
+        table.update(update_data)
 
     def test_view_standard_deviation_less_than_two(self):
         data = {

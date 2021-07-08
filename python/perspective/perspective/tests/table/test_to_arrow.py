@@ -496,3 +496,21 @@ class TestToArrow(object):
         tbl2 = Table(arr)
         assert tbl2.view().to_dict() == tbl.view().to_dict(
             start_col=1, end_col=2, end_row=2)
+
+    def test_to_arrow_one_mean(self):
+        data = {
+            "a": [1, 2, 3, 4],
+            "b": ["a", "a", "b", "b"]
+        }
+
+        table = Table(data)
+        view = table.view(row_pivots=["b"], columns=["a"], aggregates={"a": "mean"})
+        arrow = view.to_arrow()
+
+        table2 = Table(arrow)
+        view2 = table2.view()
+        result = view2.to_columns()
+        
+        assert result == {
+            "a": [2.5, 1.5, 3.5]
+        }

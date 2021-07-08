@@ -607,7 +607,25 @@ module.exports = perspective => {
             });
 
             const result = await view.to_columns();
-            expect(result.x).toEqual([0, 0]);
+            expect(result.x).toEqual([null, null]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("standard deviation of size 2", async function() {
+            const table = await perspective.table({
+                x: [0.61801758, 0.11283123],
+                y: ["a", "a"]
+            });
+            const view = await table.view({
+                row_pivots: ["y"],
+                columns: ["x"],
+                aggregates: {x: "stddev"}
+            });
+
+            const result = await view.to_columns();
+            expect(result.x).toEqual([0.252593175, 0.252593175]);
 
             await view.delete();
             await table.delete();
