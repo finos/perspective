@@ -24,7 +24,6 @@ export interface PerspectiveWidgetOptions extends PerspectiveViewerOptions {
     server?: boolean;
     title?: string;
     bindto?: HTMLElement;
-    plugin_config?: PerspectiveViewerOptions;
 
     // these shouldn't exist, PerspectiveViewerOptions should be sufficient e.g.
     // ["row-pivots"]
@@ -66,7 +65,7 @@ export class PerspectiveWidget extends Widget {
         const sort: Sort = options.sort || [];
         const filters: Filters = options.filters || [];
         const expressions: Expressions = options.expressions || options["expressions"] || [];
-        const plugin_config: PerspectiveViewerOptions = options.plugin_config || {};
+        const plugin_config: object = options.plugin_config || {};
         const dark: boolean = options.dark || false;
         const editable: boolean = options.editable || false;
         const server: boolean = options.server || false;
@@ -128,12 +127,18 @@ export class PerspectiveWidget extends Widget {
         }
     }
 
-    save(): PerspectiveViewerOptions {
-        return this.viewer.save();
+    async toggleConfig(): Promise<void> {
+        if (this.isVisible) {
+            await this.viewer.toggleConfig();
+        }
     }
 
-    restore(config: PerspectiveViewerOptions): Promise<void> {
-        return this.viewer.restore(config);
+    async save(): Promise<PerspectiveViewerOptions> {
+        return await this.viewer.save();
+    }
+
+    async restore(config: PerspectiveViewerOptions): Promise<void> {
+        return await this.viewer.restore(config);
     }
 
     /**
@@ -141,8 +146,8 @@ export class PerspectiveWidget extends Widget {
      *
      * @param table A `perspective.table` object.
      */
-    load(table: Table): void {
-        this.viewer.load(table);
+    async load(table: Table): Promise<void> {
+        await this.viewer.load(table);
     }
 
     /**
@@ -157,8 +162,8 @@ export class PerspectiveWidget extends Widget {
     /**
      * Removes all rows from the viewer's table. Does not reset viewer state.
      */
-    clear(): void {
-        this.viewer.table.clear();
+    async clear(): Promise<void> {
+        await this.viewer.table.clear();
     }
 
     /**
@@ -167,8 +172,8 @@ export class PerspectiveWidget extends Widget {
      *
      * @param data
      */
-    replace(data: TableData): void {
-        this.viewer.table.replace(data);
+    async replace(data: TableData): Promise<void> {
+        await this.viewer.table.replace(data);
     }
 
     /**
@@ -294,13 +299,20 @@ export class PerspectiveWidget extends Widget {
         }
     }
 
-    get plugin_config(): PerspectiveViewerOptions {
+    // `plugin_config` cannot be synchronously read from the viewer, as it is
+    // not part of the attribute API and only emitted from save(). Users can
+    // pass in a plugin config and have it applied to the viewer, but they
+    // cannot read the current `plugin_config` of the viewer if it has not
+    // already been set from Python.
+    get plugin_config(): object {
         return this._plugin_config;
     }
-    set plugin_config(plugin_config: PerspectiveViewerOptions) {
+    set plugin_config(plugin_config: object) {
         this._plugin_config = plugin_config;
+
+        // Allow plugin configs passed from Python to take effect on the viewer
         if (this._plugin_config) {
-            this.viewer.restore(this._plugin_config);
+            this.viewer.restore({plugin_config: this._plugin_config});
         }
     }
 
@@ -371,10 +383,6 @@ export class PerspectiveWidget extends Widget {
         }
     }
 
-    toggleConfig(): void {
-        this._viewer.toggleConfig();
-    }
-
     static createNode(node: HTMLDivElement): HTMLPerspectiveViewerElement {
         node.classList.add("p-Widget");
         node.classList.add(PSP_CONTAINER_CLASS);
@@ -405,13 +413,14 @@ export class PerspectiveWidget extends Widget {
                 }
             });
             resize_observer.observe(node, {attributes: true});
+            viewer.toggleConfig();
         }
 
         return viewer;
     }
 
     private _viewer: HTMLPerspectiveViewerElement;
-    private _plugin_config: PerspectiveViewerOptions;
+    private _plugin_config: object;
     private _client: boolean;
     private _server: boolean;
     private _dark: boolean;

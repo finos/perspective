@@ -52,6 +52,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         "expressions",
         "plugin",
         "editable",
+        "plugin_config",
     )
 
     def __init__(
@@ -93,7 +94,8 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
                 expressions which are applied to the view.
             plugin (:obj:`str`/:obj:`perspective.Plugin`): Which plugin to
                 select by default.
-            plugin_config (:obj:`dict`): Custom config for all plugins by name.
+            plugin_config (:obj:`dict`): A configuration for the plugin, i.e.
+                the datagrid plugin or a chart plugin.
             dark (:obj:`bool`): Whether to invert the color theme.
             editable (:obj:`bool`): Whether to allow editability using the grid.
 
@@ -265,6 +267,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         self.aggregates = {}
         self.columns = []
         self.plugin = "datagrid"
+        self.plugin_config = {}
         self.editable = False
 
     def delete(self, delete_table=True):

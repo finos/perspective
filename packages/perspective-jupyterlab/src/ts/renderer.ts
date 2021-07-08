@@ -103,6 +103,7 @@ export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget>
                         this.context.model.fromString(resultAsB64);
                         this.context.save();
                     } else if (this._type === "json") {
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         const result: any = await view.to_json();
                         this.context.model.fromJSON(result);
                         this.context.save();

@@ -12,15 +12,18 @@ import {Table, View} from "@finos/perspective";
 
 export interface HTMLPerspectiveViewerElement extends PerspectiveViewerOptions, HTMLElement {
     load(data: Table): void;
-    notifyResize(): void;
     delete(): Promise<void>;
     flush(): Promise<void>;
     getEditPort(): Promise<number>;
-    toggleConfig(): void;
-    save(): PerspectiveViewerOptions;
+    toggleConfig(): Promise<void>;
+    download(flat: boolean): Promise<any>;
+    copy(flat: boolean): Promise<void>;
+    save(): Promise<PerspectiveViewerOptions>;
+    restore(x: PerspectiveViewerOptions): Promise<void>;
     reset(): void;
-    restore(x: any): Promise<void>;
+    notifyResize(): void;
     restyleElement(): void;
+
     readonly table?: Table;
     readonly view?: View;
 }
@@ -33,15 +36,16 @@ export type Pivots = string[];
 export type Columns = string[];
 
 export interface PerspectiveViewerOptions {
-    aggregates?: Aggregates;
-    editable?: boolean;
     plugin?: string;
     columns?: Columns;
-    expressions?: Expressions;
     "row-pivots"?: Pivots;
     "column-pivots"?: Pivots;
+    aggregates?: Aggregates;
     filters?: Filters;
     sort?: Sort;
+    expressions?: Expressions;
+    plugin_config?: object;
+    editable?: boolean;
     selectable?: boolean;
 }
 

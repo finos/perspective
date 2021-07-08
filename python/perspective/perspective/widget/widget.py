@@ -14,7 +14,7 @@ import json
 
 from datetime import date, datetime
 from functools import partial
-from ipywidgets import Widget
+from ipywidgets import DOMWidget
 from traitlets import observe, Unicode
 
 from ..core.data import deconstruct_pandas
@@ -172,7 +172,7 @@ class _PerspectiveWidgetMessage(object):
         return {"id": self.id, "type": self.type, "data": self.data}
 
 
-class PerspectiveWidget(Widget, PerspectiveViewer):
+class PerspectiveWidget(DOMWidget, PerspectiveViewer):
     """:class`~perspective.PerspectiveWidget` allows for Perspective to be used
     in the form of a JupyterLab IPython widget.
 
