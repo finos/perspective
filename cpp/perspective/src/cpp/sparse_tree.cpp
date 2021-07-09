@@ -1397,6 +1397,43 @@ t_stree::update_agg_table(
                 if (!skip)
                     dst->set_scalar(dst_ridx, new_value);
             } break;
+            case AGGTYPE_VARIANCE:
+            case AGGTYPE_STANDARD_DEVIATION: {
+                old_value.set(dst->get_scalar(dst_ridx));
+
+                auto pkeys = get_pkeys(nidx);
+                std::vector<double> values;
+
+                read_column_from_gstate(
+                    gstate, expression_master_table, spec.get_dependencies()[0].name(), pkeys, values, false);
+
+                // Calculate the count, rolling mean, and sum of squares of
+                // differences from the current mean at each iteration.
+                double count = 0, mean = 0, m2 = 0;
+
+                for (double num : values) {
+                    count++;
+                    double next_mean = mean + (num - mean) / count;
+                    m2 += (num - mean) * (num - next_mean);
+                    mean = next_mean;
+                }
+
+                // Only calculate stddev for more than 1 element in the group.
+                if (count >= 2) {
+                    double value = m2 / count;
+
+                    if (spec.agg() == AGGTYPE_STANDARD_DEVIATION) {
+                        value = std::sqrt(value);
+                    }
+
+                    new_value.set(value);
+                    dst->set_scalar(dst_ridx, new_value);
+                    dst->set_valid(dst_ridx, true);
+                } else {
+                    dst->set_valid(dst_ridx, false);
+                }
+
+            } break;
             default: { PSP_COMPLAIN_AND_ABORT("Not implemented"); }
         } // end switch
 

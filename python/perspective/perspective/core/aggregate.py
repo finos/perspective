@@ -35,11 +35,13 @@ class Aggregate(Enum):
     OR = "or"
     PCT_SUM_PARENT = "pct sum parent"
     PCT_SUM_GRAND_TOTAL = "pct sum grand total"
+    STANDARD_DEVIATION = "stddev"
     SUM = "sum"
     SUM_ABS = "sum abs"
     ABS_SUM = "abs sum"
     SUM_NOT_NULL = "sum not null"
     UNIQUE = "unique"
+    VARIANCE = "var"
 
     @staticmethod
     def options():

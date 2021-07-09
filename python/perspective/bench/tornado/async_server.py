@@ -11,7 +11,6 @@ import asyncio
 import os
 import os.path
 import perspective
-import pprint
 import time
 import tornado
 import threading
@@ -36,28 +35,6 @@ file_path = os.path.join(
 
 
 # Client
-
-
-def least_sq(y):
-    y = numpy.sort(y)
-    n = len(y)
-    x = numpy.arange(1, n + 1)
-    x_mean = numpy.mean(x)
-    y_mean = numpy.mean(y)
-    numerator = 0
-    denominator = 0
-    for i in range(n):
-        numerator += (x[i] - x_mean) * (y[i] - y_mean)
-        denominator += (x[i] - x_mean) ** 2
-
-    m = numerator / denominator
-    b = y_mean - (m * x_mean)
-
-    pprint.pprint(list(map(lambda x: round(x, 2), y)))
-    print("Bias Coef {:.2f}".format(m))
-    print("Intercept {:.2f}".format(b))
-    print("Range {:.2f}".format(y[n - 1] - y[0]))
-    print("Mean {:.2f}".format(numpy.mean(y)))
 
 
 async def session(client):

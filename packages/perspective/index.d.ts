@@ -43,10 +43,12 @@ declare module "@finos/perspective" {
         MEDIAN = "median",
         PCT_SUM_PARENT = "pct sum parent",
         PCT_SUM_TOTAL = "pct sum grand total",
+        STANDARD_DEVIATION = "stddev",
         SUM = "sum",
         SUM_ABS = "sum abs",
         SUM_NOT_NULL = "sum not null",
-        UNIQUE = "unique"
+        UNIQUE = "unique",
+        VARIANCE = "var"
     }
 
     enum STRING_AGGREGATES {

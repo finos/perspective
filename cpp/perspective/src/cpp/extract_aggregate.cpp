@@ -68,7 +68,9 @@ extract_aggregate(
         case AGGTYPE_JOIN:
         case AGGTYPE_IDENTITY:
         case AGGTYPE_DISTINCT_COUNT:
-        case AGGTYPE_DISTINCT_LEAF: {
+        case AGGTYPE_DISTINCT_LEAF:
+        case AGGTYPE_VARIANCE:
+        case AGGTYPE_STANDARD_DEVIATION: {
             t_tscalar rval = aggcol->get_scalar(ridx);
             return rval;
         } break;

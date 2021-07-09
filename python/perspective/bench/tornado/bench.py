@@ -7,7 +7,6 @@
 #
 import logging
 import argparse
-import pprint
 import numpy
 import multiprocessing
 import asyncio
@@ -37,11 +36,11 @@ def least_sq(y):
     m = numerator / denominator
     b = y_mean - (m * x_mean)
 
-    pprint.pprint(list(map(lambda x: round(x, 2), y)))
-    print("Bias Coef {:.2f}".format(m))
-    print("Intercept {:.2f}".format(b))
-    print("Range {:.2f}".format(y[n - 1] - y[0]))
-    print("Mean {:.2f}".format(numpy.mean(y)))
+    print(
+        "Mean {:.2f}, Range: {:.2f}, Bias Coef: {:.2f}, Intercept: {:.2f}".format(
+            numpy.mean(y), y[n - 1] - y[0], m, b
+        )
+    )
 
 
 class PerspectiveTornadoBenchmark(object):
@@ -200,7 +199,6 @@ class PerspectiveTornadoBenchmark(object):
 
         for i in range(self.num_runs):
             result = await self.task(psp_client)
-            logging.info("Client {}, Run {}, Result: {}".format(client_id, i, result))
             results.append(result)
             if self.sleep_time > 0:
                 logging.info("Sleeping for {} seconds".format(self.sleep_time))

@@ -481,8 +481,14 @@ str_to_aggtype(const std::string& str) {
         return t_aggtype::AGGTYPE_UDF_COMBINER;
     } else if (str.find("udf_reducer_") != std::string::npos) {
         return t_aggtype::AGGTYPE_UDF_REDUCER;
+    } else if (str =="var" || str == "variance") {
+        return t_aggtype::AGGTYPE_VARIANCE;
+    } else if (str == "stddev" || str == "standard deviation") {
+        return t_aggtype::AGGTYPE_STANDARD_DEVIATION;
     } else {
-        PSP_COMPLAIN_AND_ABORT("Encountered unknown aggregate operation.");
+        std::stringstream ss;
+        ss << "Encountered unknown aggregate operation: '" << str << "'" << std::endl;
+        PSP_COMPLAIN_AND_ABORT(ss.str());
         // use any as default
         return t_aggtype::AGGTYPE_ANY;
     }

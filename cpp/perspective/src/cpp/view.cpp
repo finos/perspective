@@ -554,6 +554,16 @@ View<CTX_T>::data_slice_to_arrow(
     for (auto cidx = start_col; cidx < end_col; ++cidx) {
         std::vector<t_tscalar> col_path = names.at(cidx);
         t_dtype dtype = get_column_dtype(cidx);
+
+        // mean and weighted mean uses DTYPE_F64PAIR on the aggtable, which is
+        // the dtype returned by get_column_dtype. However, in the output data
+        // slice they are DTYPE_FLOAT64 and the f64 pair is not exposed outside
+        // of the sparse tree. Thus, treat f64 pair as DTYPE_FLOAT64 for arrow
+        // serialization.
+        if (dtype == DTYPE_F64PAIR) {
+            dtype = DTYPE_FLOAT64;
+        }
+
         std::string name;
 
         if (sides() > 1) {
@@ -918,7 +928,9 @@ View<CTX_T>::_map_aggregate_types(
                 case AGGTYPE_MEAN_BY_COUNT:
                 case AGGTYPE_WEIGHTED_MEAN:
                 case AGGTYPE_PCT_SUM_PARENT:
-                case AGGTYPE_PCT_SUM_GRAND_TOTAL: {
+                case AGGTYPE_PCT_SUM_GRAND_TOTAL:
+                case AGGTYPE_VARIANCE:
+                case AGGTYPE_STANDARD_DEVIATION: {
                     return "float";
                 } break;
                 default: { return typestring; } break;
