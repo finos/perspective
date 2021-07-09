@@ -481,6 +481,8 @@ str_to_aggtype(const std::string& str) {
         return t_aggtype::AGGTYPE_UDF_COMBINER;
     } else if (str.find("udf_reducer_") != std::string::npos) {
         return t_aggtype::AGGTYPE_UDF_REDUCER;
+    } else if (str =="var" || str == "variance") {
+        return t_aggtype::AGGTYPE_VARIANCE;
     } else if (str == "stddev" || str == "standard deviation") {
         return t_aggtype::AGGTYPE_STANDARD_DEVIATION;
     } else {

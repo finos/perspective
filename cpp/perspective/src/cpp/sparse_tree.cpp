@@ -1397,6 +1397,7 @@ t_stree::update_agg_table(
                 if (!skip)
                     dst->set_scalar(dst_ridx, new_value);
             } break;
+            case AGGTYPE_VARIANCE:
             case AGGTYPE_STANDARD_DEVIATION: {
                 old_value.set(dst->get_scalar(dst_ridx));
 
@@ -1419,7 +1420,13 @@ t_stree::update_agg_table(
 
                 // Only calculate stddev for more than 1 element in the group.
                 if (count >= 2) {
-                    new_value.set(std::sqrt(m2 / count));
+                    double value = m2 / count;
+
+                    if (spec.agg() == AGGTYPE_STANDARD_DEVIATION) {
+                        value = std::sqrt(value);
+                    }
+
+                    new_value.set(value);
                     dst->set_scalar(dst_ridx, new_value);
                     dst->set_valid(dst_ridx, true);
                 } else {

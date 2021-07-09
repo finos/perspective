@@ -195,6 +195,7 @@ t_config::setup(const std::vector<std::string>& detail_columns,
             case AGGTYPE_MUL:
             case AGGTYPE_DISTINCT_COUNT:
             case AGGTYPE_DISTINCT_LEAF:
+            case AGGTYPE_VARIANCE:
             case AGGTYPE_STANDARD_DEVIATION:
                 m_has_pkey_agg = true;
                 break;

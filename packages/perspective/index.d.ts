@@ -47,7 +47,8 @@ declare module "@finos/perspective" {
         SUM = "sum",
         SUM_ABS = "sum abs",
         SUM_NOT_NULL = "sum not null",
-        UNIQUE = "unique"
+        UNIQUE = "unique",
+        VARIANCE = "var"
     }
 
     enum STRING_AGGREGATES {

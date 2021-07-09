@@ -41,6 +41,7 @@ class Aggregate(Enum):
     ABS_SUM = "abs sum"
     SUM_NOT_NULL = "sum not null"
     UNIQUE = "unique"
+    VARIANCE = "var"
 
     @staticmethod
     def options():

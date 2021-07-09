@@ -929,6 +929,7 @@ View<CTX_T>::_map_aggregate_types(
                 case AGGTYPE_WEIGHTED_MEAN:
                 case AGGTYPE_PCT_SUM_PARENT:
                 case AGGTYPE_PCT_SUM_GRAND_TOTAL:
+                case AGGTYPE_VARIANCE:
                 case AGGTYPE_STANDARD_DEVIATION: {
                     return "float";
                 } break;

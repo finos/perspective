@@ -451,6 +451,173 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("variance", async function() {
+            const table = await perspective.table(float_data);
+            const view = await table.view({
+                row_pivots: ["y"],
+                columns: ["x"],
+                aggregates: {x: "var"}
+            });
+
+            const result = await view.to_columns();
+
+            const expected = [0.33597085443953206, 0.35043269693156814, 0.22510197203101087, 0.20827220910070432, 0.3473746254711007, 0.3618418050868363].map(x => Math.pow(x, 2));
+
+            for (let i = 0; i < result.x.length; i++) {
+                expect(result.x[i]).toBeCloseTo(expected[i], 6);
+            }
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("variance multi-pivot", async function() {
+            const table = await perspective.table({
+                x: [0.62817744, 0.16903811, 0.77902867, 0.92330087, 0.10583306, 0.59794354],
+                y: ["a", "a", "b", "b", "c", "c"],
+                z: [1, 1, 1, 1, 1, 1]
+            });
+            const view = await table.view({
+                row_pivots: ["y", "z"],
+                columns: ["x"],
+                aggregates: {x: "var"}
+            });
+
+            const result = await view.to_columns();
+            const expected = [0.3002988555851961, 0.22956966499999998, 0.22956966499999998, 0.07213610000000004, 0.07213610000000004, 0.24605524, 0.24605524].map(x => Math.pow(x, 2));
+
+            for (let i = 0; i < result.x.length; i++) {
+                expect(result.x[i]).toBeCloseTo(expected[i], 6);
+            }
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("variance append", async function() {
+            const table = await perspective.table(float_data);
+            const view = await table.view({
+                row_pivots: ["y"],
+                columns: ["x"],
+                aggregates: {x: "var"}
+            });
+
+            let result = await view.to_columns();
+
+            const expected = [0.33597085443953206, 0.35043269693156814, 0.22510197203101087, 0.20827220910070432, 0.3473746254711007, 0.3618418050868363].map(x => Math.pow(x, 2));
+
+            for (let i = 0; i < result.x.length; i++) {
+                expect(result.x[i]).toBeCloseTo(expected[i], 6);
+            }
+
+            table.update([{x: 0.64294039, y: "a"}]);
+            result = await view.to_columns();
+
+            const expected2 = [0.32935140956170517, 0.32031993493462224, 0.22510197203101087, 0.20827220910070432, 0.3473746254711007, 0.3618418050868363].map(x => Math.pow(x, 2));
+            for (let i = 0; i < result.x.length; i++) {
+                expect(result.x[i]).toBeCloseTo(expected2[i], 6);
+            }
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("variance partial update", async function() {
+            const table = await perspective.table(
+                {
+                    x: [0.99098243, 0.36677191, 0.58926465, 0.95701263, 0.96904283, 0.50398721],
+                    y: ["a", "a", "b", "b", "c", "c"],
+                    z: [1, 2, 3, 4, 5, 6]
+                },
+                {index: "z"}
+            );
+
+            const view = await table.view({
+                row_pivots: ["y"],
+                columns: ["x"],
+                aggregates: {x: "var"}
+            });
+
+            let result = await view.to_columns();
+
+            const expected = [0.25153179517283897, 0.31210526, 0.18387399000000004, 0.23252781].map(x => Math.pow(x, 2));
+
+            for (let i = 0; i < result.x.length; i++) {
+                expect(result.x[i]).toBeCloseTo(expected[i], 6);
+            }
+
+            table.update([{x: 0.284169685, z: 3}]);
+            result = await view.to_columns();
+
+            const expected2 = [0.3007643174035643, 0.31210526, 0.33642147250000004, 0.23252781].map(x => Math.pow(x, 2));
+
+            for (let i = 0; i < result.x.length; i++) {
+                expect(result.x[i]).toBeCloseTo(expected2[i], 6);
+            }
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("variance of range", async function() {
+            const float_data_copy = JSON.parse(JSON.stringify(float_data));
+            float_data_copy["y"] = Array(float_data_copy["x"].length).fill("a");
+
+            const table = await perspective.table(float_data_copy);
+            const view = await table.view({
+                row_pivots: ["y"],
+                columns: ["x"],
+                aggregates: {x: "var"}
+            });
+
+            const result = await view.to_columns();
+
+            const expected = [0.33597085443953206, 0.33597085443953206].map(x => Math.pow(x, 2));
+
+            for (let i = 0; i < result.x.length; i++) {
+                expect(result.x[i]).toBeCloseTo(expected[i], 6);
+            }
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("variance of size 1", async function() {
+            const table = await perspective.table({
+                x: [0.61801758],
+                y: ["a"]
+            });
+            const view = await table.view({
+                row_pivots: ["y"],
+                columns: ["x"],
+                aggregates: {x: "var"}
+            });
+
+            const result = await view.to_columns();
+            expect(result.x).toEqual([null, null]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("variance of size 2", async function() {
+            const table = await perspective.table({
+                x: [0.61801758, 0.11283123],
+                y: ["a", "a"]
+            });
+            const view = await table.view({
+                row_pivots: ["y"],
+                columns: ["x"],
+                aggregates: {x: "var"}
+            });
+
+            const result = await view.to_columns();
+            expect(result.x).toEqual([0.06380331205658062, 0.06380331205658062]);
+
+            await view.delete();
+            await table.delete();
+        });
+
         it("standard deviation", async function() {
             const table = await perspective.table(float_data);
             const view = await table.view({

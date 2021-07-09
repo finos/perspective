@@ -570,7 +570,7 @@ module.exports = perspective => {
             let result = await view2.to_columns();
 
             expect(result).toEqual({
-                float: [2.25, 1.75, 3.75],
+                float: [2.75, 1.75, 3.75],
                 string: [4, 2, 2]
             });
 

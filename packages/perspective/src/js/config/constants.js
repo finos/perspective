@@ -53,7 +53,8 @@ const NUMBER_AGGREGATES = [
     "sum",
     "sum abs",
     "sum not null",
-    "unique"
+    "unique",
+    "var"
 ];
 
 const STRING_AGGREGATES = ["any", "count", "distinct count", "distinct leaf", "dominant", "first by index", "join", "last by index", "last", "unique"];
