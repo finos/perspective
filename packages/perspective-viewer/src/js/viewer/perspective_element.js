@@ -7,8 +7,6 @@
  *
  */
 
-import isEqual from "lodash/isEqual";
-
 import {throttlePromise} from "../utils.js";
 import * as perspective from "@finos/perspective/dist/esm/config/constants.js";
 import {get_type_config} from "@finos/perspective/dist/esm/config";
@@ -233,50 +231,6 @@ export class PerspectiveElement extends StateElement {
         resolve();
     }
 
-    /**
-     * Calculates the optimal timeout in milliseconds for render events,
-     * calculated by 5 frame moving average of this component's render
-     * framerate, or explicit override attribute `"throttle"`.
-     *
-     * @private
-     * @returns
-     * @memberof PerspectiveElement
-     */
-    _calculate_throttle_timeout() {
-        let timeout;
-        const throttle = this.getAttribute("throttle");
-        if (throttle === undefined || throttle === "null" || !this.hasAttribute("throttle")) {
-            if (!this.__render_times || this.__render_times.length < 5) {
-                return 0;
-            }
-            timeout = this.__render_times.reduce((x, y) => x + y, 0) / this.__render_times.length;
-            timeout = Math.min(5000, timeout);
-        } else {
-            timeout = parseInt(throttle);
-            if (isNaN(timeout) || timeout < 0) {
-                console.warn(`Bad throttle attribute value "${throttle}".  Can be (non-negative integer) milliseconds.`);
-                this.removeAttribute("throttle");
-                return 0;
-            }
-        }
-        return Math.max(0, timeout);
-    }
-
-    async _view_on_update(limit_points) {
-        if (!this._debounced) {
-            this._debounced = setTimeout(async () => {
-                this._debounced = undefined;
-                const timer = this._render_time();
-                try {
-                    await this._vieux._draw(limit_points, false, true);
-                    timer();
-                } finally {
-                    this.dispatchEvent(new Event("perspective-view-update"));
-                }
-            }, this._calculate_throttle_timeout());
-        }
-    }
-
     async _validate_filters() {
         const filters = [];
         for (const node of this._get_view_filter_nodes()) {
@@ -297,18 +251,7 @@ export class PerspectiveElement extends StateElement {
         return filters;
     }
 
-    _is_config_changed(config) {
-        const plugin_name = this.getAttribute("plugin");
-        if (isEqual(config, this._previous_config) && plugin_name === this._previous_plugin_name) {
-            return false;
-        } else {
-            this._previous_config = config;
-            this._previous_plugin_name = plugin_name;
-            return true;
-        }
-    }
-
-    async _new_view({force_update = false, limit_points = true} = {}) {
+    async _new_view({force_update = false} = {}) {
         if (!this._table) return;
         this._check_responsive_layout();
         const row_pivots = this._get_view_row_pivots();
@@ -345,36 +288,12 @@ export class PerspectiveElement extends StateElement {
             expressions: expressions
         };
 
-        if (this._view) {
-            this._view.remove_update(this._view_updater);
-            // this._view.delete();
-        }
-
         try {
-            this._view = await this._vieux._create_view(config);
-            this._view_updater = () => this._view_on_update(limit_points);
-            this._view.on_update(this._view_updater);
-        } catch (e) {
-            // Delete the view handle only if it exists - if this._view is
-            // undefined, calling delete will throw its own "cannot read
-            // property of undefined" error and squash the original, more
-            // informative error message on why the view could not be created.
-            if (this._view) this._view.delete();
-            throw e;
-        }
-
-        const timer = this._render_time();
-        try {
-            await this._vieux._draw(limit_points, force_update, false);
+            this._view = await this._vieux._create_view(config, force_update);
         } catch (err) {
             console.warn(err);
         } finally {
-            if (!this.__render_times) {
-                this.__render_times = [];
-                this.dispatchEvent(new Event("perspective-view-update"));
-            }
-
-            timer();
+            this.dispatchEvent(new Event("perspective-view-update"));
         }
     }
 
@@ -386,14 +305,6 @@ export class PerspectiveElement extends StateElement {
             delete this._table_resolver;
             this._load_table(table, resolve);
         }
-    }
-
-    _render_time() {
-        const t = performance.now();
-        return () => {
-            this.__render_times.unshift(performance.now() - t);
-            this.__render_times = this.__render_times.slice(0, 5);
-        };
     }
 
     async _restyle_plugin() {
@@ -429,15 +340,15 @@ export class PerspectiveElement extends StateElement {
     }
 
     @throttlePromise(true)
-    async _update(force_update, limit_points) {
+    async _update(force_update) {
         await new Promise(setTimeout);
-        await this._new_view({force_update, limit_points});
+        await this._new_view({force_update});
     }
 
-    async _debounce_update({force_update = false, limit_points = true} = {}) {
+    async _debounce_update({force_update = false} = {}) {
         if (this._table) {
             let resolve = this._set_updating();
-            await this._update(force_update, limit_points);
+            await this._update(force_update);
             resolve();
         }
     }

@@ -23,3 +23,17 @@ pub async fn await_animation_frame() -> Result<(), JsValue> {
 
     receiver.await.to_jserror()
 }
+
+/// An `async` version of `set_timeout`, which resolves in `timeout` milliseconds
+pub async fn set_timeout(timeout: i32) -> Result<(), JsValue> {
+    let (sender, receiver) = channel::<()>();
+    let jsfun = Closure::once_into_js(move || sender.send(()).unwrap());
+    web_sys::window()
+        .unwrap()
+        .set_timeout_with_callback_and_timeout_and_arguments_0(
+            jsfun.unchecked_ref(),
+            timeout,
+        )?;
+
+    receiver.await.to_jserror()
+}

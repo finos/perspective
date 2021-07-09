@@ -7,7 +7,7 @@
 // file.
 
 use crate::components::status_bar_counter::StatusBarRowsCounter;
-use crate::session::TableStats;
+use crate::session::*;
 use crate::*;
 
 #[cfg(test)]
@@ -19,11 +19,7 @@ use yew::prelude::*;
 pub struct StatusBarProps {
     pub id: String,
     pub on_reset: Callback<()>,
-    pub on_download: Callback<bool>,
-    pub on_copy: Callback<bool>,
-
-    #[prop_or(None)]
-    pub stats: Option<TableStats>,
+    pub session: Session,
 
     #[cfg(test)]
     #[prop_or_default]
@@ -34,12 +30,13 @@ pub enum StatusBarMsg {
     Reset,
     Export(bool),
     Copy(bool),
+    TableStatsChanged,
 }
 
 /// A toolbar with buttons, and `Table` & `View` status information.
 pub struct StatusBar {
     link: ComponentLink<Self>,
-    pub props: StatusBarProps,
+    props: StatusBarProps,
 }
 
 impl Component for StatusBar {
@@ -48,26 +45,37 @@ impl Component for StatusBar {
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         enable_weak_link_test!(props, link);
+        let cb = link.callback(|_| StatusBarMsg::TableStatsChanged);
+        props.session.set_on_stats_callback(cb);
         Self { props, link }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
-            StatusBarMsg::Reset => self.props.on_reset.emit(()),
-            StatusBarMsg::Export(flat) => self.props.on_download.emit(flat),
-            StatusBarMsg::Copy(flat) => self.props.on_copy.emit(flat),
+            StatusBarMsg::TableStatsChanged => true,
+            StatusBarMsg::Reset => {
+                self.props.on_reset.emit(());
+                false
+            }
+            StatusBarMsg::Export(flat) => {
+                self.props.session.download_as_csv(flat);
+                false
+            }
+            StatusBarMsg::Copy(flat) => {
+                self.props.session.copy_to_clipboard(flat);
+                false
+            }
         }
-        false
     }
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        let should_render = props.stats != self.props.stats;
         self.props = props;
-        should_render
+        false
     }
 
     fn view(&self) -> Html {
-        let class_name = self.status_class_name();
+        let stats = self.props.session.get_table_stats();
+        let class_name = self.status_class_name(&stats);
         let reset = self.link.callback(|_| StatusBarMsg::Reset);
         let export = self
             .link
@@ -93,7 +101,7 @@ impl Component for StatusBar {
                     </span>
                 </div>
                 <div id="rows" class="section">
-                    <StatusBarRowsCounter stats=self.props.stats.clone() />
+                    <StatusBarRowsCounter stats=stats />
                 </div>
             </div>
         }
@@ -101,8 +109,8 @@ impl Component for StatusBar {
 }
 
 impl StatusBar {
-    fn status_class_name(&self) -> &'static str {
-        match &self.props.stats {
+    fn status_class_name(&self, stats: &Option<TableStats>) -> &'static str {
+        match stats {
             Some(TableStats {
                 num_rows: Some(_),
                 virtual_rows: Some(_),

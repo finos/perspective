@@ -9,7 +9,7 @@
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
-use super::perspective::PerspectiveJsView;
+use super::perspective::JsPerspectiveView;
 
 /// Perspective FFI
 #[wasm_bindgen(inline_js = "
@@ -36,9 +36,7 @@ use super::perspective::PerspectiveJsView;
             let perspective_viewer = this.parentElement;
             const csv = await view.to_csv({config: {delimiter: '|'}});
             const css = `margin:0;overflow:scroll;position:absolute;width:100%;height:100%`;
-            const timer = perspective_viewer._render_time();
             this.innerHTML = `<pre style='${css}'>${csv}</pre>`;
-            timer();
         }
 
         async clear() {
@@ -68,45 +66,45 @@ extern "C" {
     pub fn register_default_plugin_web_component() -> Result<(), JsValue>;
 
     #[derive(Clone)]
-    pub type PerspectiveViewerJs;
+    pub type JsPerspectiveViewer;
 
     #[wasm_bindgen(method, catch)]
-    pub fn _update_column_view(this: &PerspectiveViewerJs) -> Result<(), JsValue>;
+    pub fn _update_column_view(this: &JsPerspectiveViewer) -> Result<(), JsValue>;
 
     #[wasm_bindgen(method, catch)]
-    pub fn _set_row_styles(this: &PerspectiveViewerJs) -> Result<(), JsValue>;
+    pub fn _set_row_styles(this: &JsPerspectiveViewer) -> Result<(), JsValue>;
 
     #[wasm_bindgen(method, catch)]
-    pub fn _set_column_defaults(this: &PerspectiveViewerJs) -> Result<(), JsValue>;
+    pub fn _set_column_defaults(this: &JsPerspectiveViewer) -> Result<(), JsValue>;
 
     #[derive(Clone)]
-    pub type PerspectiveViewerJsPlugin;
+    pub type JsPerspectiveViewerPlugin;
 
     #[wasm_bindgen(method, getter)]
-    pub fn name(this: &PerspectiveViewerJsPlugin) -> String;
+    pub fn name(this: &JsPerspectiveViewerPlugin) -> String;
 
     #[wasm_bindgen(method, getter)]
-    pub fn max_columns(this: &PerspectiveViewerJsPlugin) -> Option<usize>;
+    pub fn max_columns(this: &JsPerspectiveViewerPlugin) -> Option<usize>;
 
     #[wasm_bindgen(method, getter)]
-    pub fn max_cells(this: &PerspectiveViewerJsPlugin) -> Option<usize>;
+    pub fn max_cells(this: &JsPerspectiveViewerPlugin) -> Option<usize>;
 
     #[wasm_bindgen(method, getter)]
-    pub fn render_warning(this: &PerspectiveViewerJsPlugin) -> Option<bool>;
+    pub fn render_warning(this: &JsPerspectiveViewerPlugin) -> Option<bool>;
 
     #[wasm_bindgen(method, setter)]
-    pub fn set_render_warning(this: &PerspectiveViewerJsPlugin, val: bool);
+    pub fn set_render_warning(this: &JsPerspectiveViewerPlugin, val: bool);
 
     #[wasm_bindgen(method)]
-    pub fn save(this: &PerspectiveViewerJsPlugin) -> JsValue;
+    pub fn save(this: &JsPerspectiveViewerPlugin) -> JsValue;
 
     #[wasm_bindgen(method)]
-    pub fn restore(this: &PerspectiveViewerJsPlugin, token: &JsValue);
+    pub fn restore(this: &JsPerspectiveViewerPlugin, token: &JsValue);
 
     #[wasm_bindgen(method, catch)]
     pub async fn draw(
-        this: &PerspectiveViewerJsPlugin,
-        view: &PerspectiveJsView,
+        this: &JsPerspectiveViewerPlugin,
+        view: &JsPerspectiveView,
         column_limit: Option<usize>,
         row_limit: Option<usize>,
         force: bool
@@ -114,21 +112,21 @@ extern "C" {
 
     #[wasm_bindgen(method, catch)]
     pub async fn update(
-        this: &PerspectiveViewerJsPlugin,
-        view: &PerspectiveJsView,
+        this: &JsPerspectiveViewerPlugin,
+        view: &JsPerspectiveView,
         column_limit: Option<usize>,
         row_limit: Option<usize>,
         force: bool
     ) -> Result<JsValue, JsValue>;
 
     #[wasm_bindgen(method, catch)]
-    pub async fn clear(this: &PerspectiveViewerJsPlugin) -> Result<JsValue, JsValue>;
+    pub async fn clear(this: &JsPerspectiveViewerPlugin) -> Result<JsValue, JsValue>;
 
     #[wasm_bindgen(method, catch)]
-    pub async fn resize(this: &PerspectiveViewerJsPlugin) -> Result<JsValue, JsValue>;
+    pub async fn resize(this: &JsPerspectiveViewerPlugin) -> Result<JsValue, JsValue>;
 }
 
-impl PerspectiveViewerJs {
+impl JsPerspectiveViewer {
     pub fn get_dimensions(&self) -> (String, String) {
         let width = self.unchecked_ref::<web_sys::HtmlElement>().client_width();
         let height = self.unchecked_ref::<web_sys::HtmlElement>().client_height();

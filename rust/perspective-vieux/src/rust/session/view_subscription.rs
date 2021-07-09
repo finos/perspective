@@ -25,9 +25,10 @@ pub struct TableStats {
 
 #[derive(Clone)]
 struct ViewSubscriptionData {
-    table: PerspectiveJsTable,
-    view: PerspectiveJsView,
+    table: JsPerspectiveTable,
+    view: JsPerspectiveView,
     on_stats: Callback<TableStats>,
+    on_update: Callback<()>,
 }
 
 /// A subscription to `on_update()` events from a Perspective `View()`, managing
@@ -38,6 +39,13 @@ pub struct ViewSubscription {
 }
 
 impl ViewSubscriptionData {
+    /// Main handler when underlying `View()` calls `on_update()`.
+    async fn on_view_update(self) -> Result<JsValue, JsValue> {
+        self.on_update.emit(());
+        self.clone().update_view_stats().await?;
+        Ok(JsValue::UNDEFINED)
+    }
+
     /// TODO Use serde to serialize the full view config, instead of calculating
     /// `is_pivot` here.
     async fn update_view_stats(self) -> Result<JsValue, JsValue> {
@@ -68,19 +76,21 @@ impl ViewSubscription {
     /// * `on_stats` - a callback for metadata notifications, from Perspective's
     ///   `View.on_update()`.
     pub fn new(
-        table: PerspectiveJsTable,
-        view: PerspectiveJsView,
+        table: JsPerspectiveTable,
+        view: JsPerspectiveView,
         on_stats: Callback<TableStats>,
+        on_update: Callback<()>,
     ) -> ViewSubscription {
         let data = ViewSubscriptionData {
             table,
             view,
             on_stats,
+            on_update,
         };
 
         let fun = {
             clone!(data);
-            move |_| promisify_ignore_view_delete(data.clone().update_view_stats())
+            move |_| promisify_ignore_view_delete(data.clone().on_view_update())
         };
 
         let closure = fun.to_closure();
@@ -90,14 +100,14 @@ impl ViewSubscription {
     }
 
     /// Getter for the underlying `View()`.
-    pub fn view(&self) -> &PerspectiveJsView {
+    pub fn view(&self) -> &JsPerspectiveView {
         &self.data.view
     }
 
     /// Getter for the underlying `Table()`.
     /// TODO this is un-used, but I'm leaving it as a reminder that the API
     /// intends this to be public.
-    pub fn _table(&self) -> &PerspectiveJsTable {
+    pub fn _table(&self) -> &JsPerspectiveTable {
         &self.data.table
     }
 }

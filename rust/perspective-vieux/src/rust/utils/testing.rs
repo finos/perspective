@@ -28,12 +28,12 @@ extern "C" {
 /// Generate a test `Table`, but only create teh webworker once or the tests will
 /// figuratively literally run forever.
 #[cfg(test)]
-pub async fn get_mock_table() -> PerspectiveJsTable {
+pub async fn get_mock_table() -> JsPerspectiveTable {
     thread_local! {
-        static WORKER: RefCell<Option<PerspectiveJsWorker>> = RefCell::new(None);
+        static WORKER: RefCell<Option<JsPerspectiveWorker>> = RefCell::new(None);
     }
 
-    let worker: PerspectiveJsWorker = match WORKER.with(|x| x.borrow().clone()) {
+    let worker: JsPerspectiveWorker = match WORKER.with(|x| x.borrow().clone()) {
         Some(x) => x,
         None => JsFuture::from(worker()).await.unwrap().unchecked_into(),
     };

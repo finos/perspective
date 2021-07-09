@@ -27,7 +27,7 @@ pub struct PluginRecord {
 
 /// A global registry of all plugins that have been registered.
 pub trait PluginRegistry {
-    fn create_plugins(&'static self) -> Vec<PerspectiveViewerJsPlugin>;
+    fn create_plugins(&'static self) -> Vec<JsPerspectiveViewerPlugin>;
     fn default_plugin_name(&'static self) -> String;
     fn available_plugin_names(&'static self) -> Vec<String>;
     fn register_plugin(&'static self, name: &str);
@@ -37,10 +37,10 @@ pub trait PluginRegistry {
 }
 
 impl PluginRegistry for LocalKey<Rc<RefCell<Vec<PluginRecord>>>> {
-    fn create_plugins(&'static self) -> Vec<PerspectiveViewerJsPlugin> {
+    fn create_plugins(&'static self) -> Vec<JsPerspectiveViewerPlugin> {
         register_default();
         self.with(
-            |plugins| -> Result<Vec<PerspectiveViewerJsPlugin>, JsValue> {
+            |plugins| -> Result<Vec<JsPerspectiveViewerPlugin>, JsValue> {
                 let mut elements = vec![];
                 for plugin in plugins.borrow().iter() {
                     let element = create_plugin(&plugin.tag_name);
@@ -117,7 +117,7 @@ fn register_default() {
     })
 }
 
-fn create_plugin(tag_name: &str) -> PerspectiveViewerJsPlugin {
+fn create_plugin(tag_name: &str) -> JsPerspectiveViewerPlugin {
     web_sys::window()
         .unwrap()
         .document()

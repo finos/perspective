@@ -512,9 +512,8 @@ class PerspectiveViewer extends ActionElement {
                 this.removeAttribute("throttle");
             }
         }
-        // Returns the throttle time, but also perform validaiton - we only want
-        // the latter here.
-        this._calculate_throttle_timeout();
+
+        this._vieux._set_render_time(this.getAttribute("throttle"));
     }
 
     /*
@@ -607,11 +606,10 @@ class PerspectiveViewer extends ActionElement {
      *
      */
     @throttlePromise
-    async notifyResize(immediate) {
+    async notifyResize() {
         const resized = await this._check_responsive_layout();
         if (!resized && !document.hidden && this.offsetParent) {
-            let plugin = await this._vieux.get_plugin();
-            await plugin.resize(immediate);
+            await this._vieux.resize();
         }
     }
 

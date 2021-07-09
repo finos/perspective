@@ -31,9 +31,9 @@ pub enum ExpressionEditorMsg {
 
 #[derive(Properties, Clone)]
 pub struct ExpressionEditorProps {
-    pub on_save: Rc<dyn Fn(JsValue)>,
-    pub on_init: Rc<dyn Fn()>,
-    pub on_validate: Rc<dyn Fn(bool)>,
+    pub on_save: Callback<JsValue>,
+    pub on_init: Callback<()>,
+    pub on_validate: Callback<bool>,
     pub session: Session,
     pub monaco_theme: String,
 }
@@ -45,7 +45,7 @@ pub struct ExpressionEditor {
     top: u32,
     left: u32,
     container: NodeRef,
-    editor: Rc<RefCell<Option<(Editor, MonacoEditor)>>>,
+    editor: Rc<RefCell<Option<(Editor, JsMonacoEditor)>>>,
     props: ExpressionEditorProps,
     link: ComponentLink<Self>,
     save_enabled: bool,
@@ -94,7 +94,7 @@ impl Component for ExpressionEditor {
                 false
             }
             ExpressionEditorMsg::EnableSave(x) => {
-                (self.props.on_validate)(false);
+                self.props.on_validate.emit(false);
                 self.save_enabled = x;
                 true
             }
@@ -104,7 +104,7 @@ impl Component for ExpressionEditor {
                         None => {}
                         Some((_, x)) => {
                             let expr = x.get_value();
-                            (self.props.on_save)(expr);
+                            self.props.on_save.emit(expr);
                             x.set_value("");
                         }
                     }
@@ -174,7 +174,7 @@ impl ExpressionEditor {
         *self.editor.borrow_mut() = Some((monaco, editor.clone()));
         await_animation_frame().await?;
         editor.focus();
-        (self.props.on_init)();
+        self.props.on_init.emit(());
         Ok(JsValue::UNDEFINED)
     }
 
@@ -183,7 +183,7 @@ impl ExpressionEditor {
     async fn validate_expr(self) -> Result<JsValue, JsValue> {
         let (monaco, editor) = self.editor.borrow().as_ref().unwrap().clone();
         let expr = editor.get_value();
-        (self.props.on_validate)(true);
+        self.props.on_validate.emit(true);
         let model = editor.get_model();
         let (msg, arr) = match self.props.session.validate_expr(expr).await? {
             None => (true, js_sys::Array::new()),
@@ -201,8 +201,8 @@ impl ExpressionEditor {
     }
 }
 
-fn error_to_market(err: PerspectiveValidationError) -> MonacoModelMarker<'static> {
-    MonacoModelMarker {
+fn error_to_market(err: PerspectiveValidationError) -> JsMonacoModelMarker<'static> {
+    JsMonacoModelMarker {
         code: "".to_owned(),
         start_line_number: err.line + 1,
         end_line_number: err.line + 1,

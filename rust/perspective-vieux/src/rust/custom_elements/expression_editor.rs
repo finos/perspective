@@ -6,11 +6,11 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use crate::components::expression_editor::*;
 use crate::custom_elements::modal::*;
+use crate::session::Session;
 use crate::*;
-use crate::{components::expression_editor::*, session::Session};
 
-use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::*;
@@ -31,7 +31,7 @@ impl ResizableMessage for <ExpressionEditor as Component>::Message {
 impl PerspectiveExpressionEditorElement {
     pub fn new(
         session: Session,
-        on_save: Rc<dyn Fn(JsValue)>,
+        on_save: Callback<JsValue>,
         monaco_theme: String,
     ) -> PerspectiveExpressionEditorElement {
         let document = window().unwrap().document().unwrap();
@@ -44,23 +44,23 @@ impl PerspectiveExpressionEditorElement {
             .toggle_attribute_with_force("initializing", true)
             .unwrap();
 
-        let on_init = {
+        let on_init = Callback::from({
             clone!(editor);
-            Rc::new(move || {
+            move |_| {
                 editor
                     .toggle_attribute_with_force("initializing", false)
                     .unwrap();
-            })
-        };
+            }
+        });
 
-        let on_validate = {
+        let on_validate = Callback::from({
             clone!(editor);
-            Rc::new(move |valid| {
+            move |valid| {
                 editor
                     .toggle_attribute_with_force("validating", valid)
                     .unwrap();
-            })
-        };
+            }
+        });
 
         let props = ExpressionEditorProps {
             on_save,

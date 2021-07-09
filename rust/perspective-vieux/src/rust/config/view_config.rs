@@ -23,6 +23,7 @@ pub enum Scalar {
     String(String),
     Bool(bool),
     DateTime(u64),
+    Null,
     // // Can only have one u64 representation ...
     // Date(u64)
     // Int(u32)

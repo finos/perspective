@@ -12,12 +12,13 @@ use crate::components::split_panel::SplitPanel;
 use crate::components::status_bar::StatusBar;
 use crate::js::perspective::*;
 use crate::plugin::*;
-use crate::session::{Session, TableStats};
+use crate::session::Session;
 use crate::utils::*;
 
 use futures::channel::oneshot::*;
 use wasm_bindgen::{prelude::*, JsCast};
-use wasm_bindgen_futures::future_to_promise;
+use wasm_bindgen_futures::spawn_local;
+use web_sys::*;
 use yew::prelude::*;
 
 pub static CSS: &str = include_str!("../../../dist/css/perspective-vieux.css");
@@ -34,23 +35,19 @@ pub struct PerspectiveVieuxProps {
 }
 
 pub enum Msg {
-    LoadTable(PerspectiveJsTable, Sender<Result<JsValue, JsValue>>),
+    LoadTable(JsPerspectiveTable, Sender<Result<JsValue, JsValue>>),
     Reset,
-    Export(bool),
-    Copy(bool),
-    TableStats(TableStats),
     ToggleConfig(Option<bool>, Option<Sender<Result<JsValue, JsValue>>>),
-    ConfigToggled(bool, Option<Sender<Result<JsValue, JsValue>>>),
+    ToggleConfigFinished(Sender<()>),
     RenderDimensions(Option<(usize, usize, Option<usize>, Option<usize>)>),
 }
 
 pub struct PerspectiveVieux {
     link: ComponentLink<Self>,
     props: PerspectiveVieuxProps,
-    stats: Option<TableStats>,
     config_open: bool,
     dimensions: Option<(usize, usize, Option<usize>, Option<usize>)>,
-    on_rendered: Option<Sender<Result<JsValue, JsValue>>>,
+    on_rendered: Option<Sender<()>>,
 }
 
 impl Component for PerspectiveVieux {
@@ -58,13 +55,9 @@ impl Component for PerspectiveVieux {
     type Properties = PerspectiveVieuxProps;
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         *props.weak_link.borrow_mut() = Some(link.clone());
-        props
-            .session
-            .set_on_stats_callback(link.callback(Msg::TableStats));
         Self {
             props,
             link,
-            stats: None,
             config_open: false,
             dimensions: None,
             on_rendered: None,
@@ -85,32 +78,16 @@ impl Component for PerspectiveVieux {
                 self.props.elem.dispatch_event(&event.unwrap()).unwrap();
                 false
             }
-            Msg::Export(flat) => {
-                self.props.session.download_as_csv(flat);
-                false
-            }
-            Msg::Copy(flat) => {
-                self.props.session.copy_to_clipboard(flat);
-                false
-            }
             Msg::ToggleConfig(force, resolve) => {
                 self.toggle_config(force, resolve);
-                force.unwrap_or(self.config_open)
+                false
             }
-            Msg::ConfigToggled(is_open, resolve) => {
-                if !is_open {
-                    self.on_rendered = resolve;
-                } else if let Some(resolve) = resolve {
-                    resolve.send(Ok(JsValue::UNDEFINED)).unwrap();
-                }
-                !is_open
+            Msg::ToggleConfigFinished(sender) => {
+                self.on_rendered = Some(sender);
+                true
             }
             Msg::RenderDimensions(dimensions) => {
                 self.dimensions = dimensions;
-                true
-            }
-            Msg::TableStats(stats) => {
-                self.stats = Some(stats);
                 true
             }
         }
@@ -127,13 +104,13 @@ impl Component for PerspectiveVieux {
     fn rendered(&mut self, _first_render: bool) {
         let resolve = self.on_rendered.take();
         if let Some(resolve) = resolve {
-            resolve.send(Ok(JsValue::UNDEFINED)).unwrap();
+            resolve.send(()).expect("Orphan render");
         }
     }
 
     /// `PerspectiveVieux` has two basic UI modes - "open" and "closed".
     // TODO these may be expensive to buil dbecause they will generate recursively from
-    // `PerspectiveJsConfig` - they may need caching as in the JavaScript version.
+    // `JsPerspectiveConfig` - they may need caching as in the JavaScript version.
     fn view(&self) -> Html {
         let config = self.link.callback(|_| Msg::ToggleConfig(None, None));
         if self.config_open {
@@ -159,10 +136,8 @@ impl Component for PerspectiveVieux {
                     </SplitPanel>
                     <StatusBar
                         id="status_bar"
-                        stats=self.stats.clone()
-                        on_reset=self.link.callback(|_| Msg::Reset)
-                        on_download=self.link.callback(Msg::Export)
-                        on_copy=self.link.callback(Msg::Copy)>
+                        session=self.props.session.clone()
+                        on_reset=self.link.callback(|_| Msg::Reset)>
                     </StatusBar>
                     <div id="config_button" class="noselect button" onclick=config></div>
                 </>
@@ -210,12 +185,23 @@ impl PerspectiveVieux {
             Some(_) | None => {
                 let force = !self.config_open;
                 self.config_open = force;
-                let callback = self
-                    .link
-                    .callback_once(move |_| Msg::ConfigToggled(force, sender));
+                let callback = self.link.callback_once(Msg::ToggleConfigFinished);
+                let task = toggle_config_task(
+                    force,
+                    self.props.elem.clone(),
+                    self.props.plugin.clone(),
+                    callback,
+                );
 
-                let task = toggle_config_task(force, self.props.clone(), callback);
-                let _promise = promisify_ignore_view_delete(task);
+                drop(promisify_ignore_view_delete(async move {
+                    let result = task.await;
+                    if let Some(sender) = sender {
+                        let msg = result.clone().or_else(ignore_view_delete);
+                        sender.send(msg).to_jserror()?;
+                    };
+
+                    result
+                }));
             }
         };
     }
@@ -225,14 +211,12 @@ impl PerspectiveVieux {
     fn set_session_table(
         &mut self,
         sender: Sender<Result<JsValue, JsValue>>,
-        table: PerspectiveJsTable,
+        table: JsPerspectiveTable,
     ) {
-        let msg = Msg::TableStats(TableStats::default());
-        self.link.send_message(msg);
         let session = self.props.session.clone();
-        let _promise = future_to_promise(async move {
+        session.reset_stats();
+        spawn_local(async move {
             sender.send(session.set_table(table).await).unwrap();
-            Ok(JsValue::UNDEFINED)
         });
     }
 }
@@ -240,35 +224,45 @@ impl PerspectiveVieux {
 /// An `async` task to pre-resize the `main_panel` to avoid screen shear.
 async fn toggle_config_task(
     open: bool,
-    props: PerspectiveVieuxProps,
-    on_toggle: Callback<()>,
+    vieux_elem: HtmlElement,
+    plugin: Plugin,
+    on_toggle: Callback<Sender<()>>,
 ) -> Result<JsValue, JsValue> {
-    let element = find_custom_element(&props, &on_toggle).ok_or(JsValue::UNDEFINED)?;
-    let plugin = props.plugin.get_plugin(None)?;
-    if open {
-        dispatch_settings_event(element.clone(), open)?;
-        on_toggle.emit(());
-        let _resize = plugin.resize().await;
-    } else {
-        let main_panel: web_sys::HtmlElement = props
-            .elem
-            .query_selector("[slot=main_panel]")
-            .unwrap()
-            .unwrap()
-            .unchecked_into();
+    let task = async {
+        let viewer_elem = match find_custom_element(&vieux_elem) {
+            Some(element) => element,
+            None => {
+                on_toggle.emit_and_render().await?;
+                return Ok(JsValue::UNDEFINED);
+            }
+        };
 
-        let new_width = format!("{}px", element.client_width());
-        let new_height = format!("{}px", element.client_height());
-        main_panel.style().set_property("width", &new_width)?;
-        main_panel.style().set_property("height", &new_height)?;
-        let _resize = plugin.resize().await;
-        main_panel.style().set_property("width", "")?;
-        main_panel.style().set_property("height", "")?;
-        dispatch_settings_event(element, open)?;
-        on_toggle.emit(());
-    }
+        let plugin = plugin.get_plugin(None)?;
+        if open {
+            dispatch_settings_event(viewer_elem.clone(), open)?;
+            on_toggle.emit_and_render().await?;
+            plugin.resize().await
+        } else {
+            let main_panel: web_sys::HtmlElement = vieux_elem
+                .query_selector("[slot=main_panel]")
+                .unwrap()
+                .unwrap()
+                .unchecked_into();
 
-    Ok(JsValue::UNDEFINED)
+            let new_width = format!("{}px", viewer_elem.client_width());
+            let new_height = format!("{}px", viewer_elem.client_height());
+            main_panel.style().set_property("width", &new_width)?;
+            main_panel.style().set_property("height", &new_height)?;
+            let resize = plugin.resize().await;
+            main_panel.style().set_property("width", "")?;
+            main_panel.style().set_property("height", "")?;
+            dispatch_settings_event(viewer_elem, open)?;
+            on_toggle.emit_and_render().await?;
+            resize
+        }
+    };
+
+    plugin.draw_lock().lock(task).await
 }
 
 /// Dispatch the "perspective-toggle-settings" event to notify external
@@ -291,13 +285,9 @@ fn dispatch_settings_event(
 
 /// Find the root `<perspective-viewer>` Custom Element from the embedded
 /// `<perspective-vieux>` element reference by piercing the parent Shadow Dom.
-fn find_custom_element(
-    props: &PerspectiveVieuxProps,
-    callback: &Callback<()>,
-) -> Option<web_sys::Element> {
-    let elem = props.elem.parent_node();
+fn find_custom_element(elem: &HtmlElement) -> Option<web_sys::Element> {
+    let elem = elem.parent_node();
     if elem.is_none() {
-        callback.emit(());
         None
     } else {
         elem.map(|elem| {
