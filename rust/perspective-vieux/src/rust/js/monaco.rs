@@ -6,19 +6,25 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+// `rustfmt` removes `async` from extern blocks in rust stable
+// [issue](https://github.com/rust-lang/rustfmt/issues/4288)
+
 use serde::Serialize;
 use wasm_bindgen::prelude::*;
 use web_sys::HtmlElement;
 
 pub enum KeyMod {
-    Shift = 1024
+    Shift = 1024,
 }
 
 pub enum KeyCode {
-    Enter = 3
+    Enter = 3,
 }
 
-#[cfg_attr(not(test), wasm_bindgen(module = "monaco-editor/esm/vs/editor/editor.worker"))]
+#[cfg_attr(
+    not(test),
+    wasm_bindgen(module = "monaco-editor/esm/vs/editor/editor.worker")
+)]
 #[cfg_attr(test, wasm_bindgen(inline_js = "export default function() {}"))]
 extern "C" {
     #[wasm_bindgen(js_name = "default")]
@@ -28,7 +34,9 @@ extern "C" {
     pub fn new() -> EditorWorker;
 }
 
-#[cfg_attr(not(test), wasm_bindgen(inline_js = "
+#[cfg_attr(
+    not(test),
+    wasm_bindgen(inline_js = "
     export async function monaco_module() {
         return import(
             /* webpackChunkName: \"perspective-viewer.monaco-exts\" */
@@ -36,14 +44,21 @@ extern "C" {
             '../../../src/js/monaco.js'
         ); 
     }
-"))]
-#[cfg_attr(test, wasm_bindgen(inline_js = "export async function monaco_module() {}"))]
+")
+)]
+#[cfg_attr(
+    test,
+    wasm_bindgen(inline_js = "export async function monaco_module() {}")
+)]
+#[rustfmt::skip]
 extern "C" {
     #[wasm_bindgen(js_name = "monaco_module")]
     pub async fn monaco_exts();
 }
 
-#[cfg_attr(not(test), wasm_bindgen(inline_js = "
+#[cfg_attr(
+    not(test),
+    wasm_bindgen(inline_js = "
     export async function monaco_module() { 
         return import(
             /* webpackChunkName: \"perspective-viewer.monaco\" */
@@ -51,8 +66,13 @@ extern "C" {
             'monaco-editor/esm/vs/editor/editor.api'
         ); 
     }
-"))]
-#[cfg_attr(test, wasm_bindgen(inline_js = "export async function monaco_module() {}"))]
+")
+)]
+#[cfg_attr(
+    test,
+    wasm_bindgen(inline_js = "export async function monaco_module() {}")
+)]
+#[rustfmt::skip]
 extern "C" {
     pub type MonacoModule;
 
@@ -69,13 +89,22 @@ extern "C" {
     pub type Editor;
 
     #[wasm_bindgen(method)]
-    pub fn create(this: &Editor, container: HtmlElement, options: JsValue) -> MonacoEditor;
+    pub fn create(
+        this: &Editor,
+        container: HtmlElement,
+        options: JsValue,
+    ) -> JsMonacoEditor;
 
     #[wasm_bindgen(method, js_name = "defineTheme")]
     pub fn define_theme(this: &Editor, id: &str, options: JsValue);
 
     #[wasm_bindgen(method, js_name = "setModelMarkers")]
-    pub fn set_model_markers(this: &Editor, model: &MonacoModel, id: &str, errors: &js_sys::Array);
+    pub fn set_model_markers(
+        this: &Editor,
+        model: &JsMonacoModel,
+        id: &str,
+        errors: &js_sys::Array,
+    );
 
     pub type Languages;
 
@@ -89,66 +118,73 @@ extern "C" {
     pub fn set_language_configuration(this: &Languages, id: &str, options: JsValue);
 
     #[wasm_bindgen(method, js_name = "registerCompletionItemProvider")]
-    pub fn register_completion_item_provider(this: &Languages, id: &str, options: JsValue);
+    pub fn register_completion_item_provider(
+        this: &Languages,
+        id: &str,
+        options: JsValue,
+    );
 
     #[derive(Clone)]
-    pub type MonacoEditor;
+    pub type JsMonacoEditor;
 
     #[wasm_bindgen(method, js_name = "getModel")]
-    pub fn get_model(this: &MonacoEditor) -> MonacoModel;
+    pub fn get_model(this: &JsMonacoEditor) -> JsMonacoModel;
 
     #[wasm_bindgen(method, js_name = "getValue")]
-    pub fn get_value(this: &MonacoEditor) -> JsValue;
+    pub fn get_value(this: &JsMonacoEditor) -> JsValue;
 
     #[wasm_bindgen(method, js_name = "setValue")]
-    pub fn set_value(this: &MonacoEditor, value: &str);
+    pub fn set_value(this: &JsMonacoEditor, value: &str);
 
     #[wasm_bindgen(method, js_name = "addCommand")]
-    pub fn add_command(this: &MonacoEditor, key_code: u32, value: &js_sys::Function);
+    pub fn add_command(this: &JsMonacoEditor, key_code: u32, value: &js_sys::Function);
 
     // #[wasm_bindgen(method, js_name = "getValue")]
-    // pub fn get_value_str(this: &MonacoEditor) -> String;
+    // pub fn get_value_str(this: &JsMonacoEditor) -> String;
 
     #[wasm_bindgen(method)]
-    pub fn focus(this: &MonacoEditor);
+    pub fn focus(this: &JsMonacoEditor);
 
-    pub type MonacoModel;
+    pub type JsMonacoModel;
 
     #[wasm_bindgen(method, js_name = "onDidChangeContent")]
-    pub fn on_did_change_content(this: &MonacoModel, callback: &js_sys::Function);
+    pub fn on_did_change_content(this: &JsMonacoModel, callback: &js_sys::Function);
 
     #[wasm_bindgen(method, js_name = "getWordUntilPosition")]
-    pub fn get_word_until_position(this: &MonacoModel, position: &MonacoPosition) -> JsValue;
+    pub fn get_word_until_position(
+        this: &JsMonacoModel,
+        position: &JsMonacoPosition,
+    ) -> JsValue;
 
     #[wasm_bindgen(method, js_name = "getLineTokens")]
-    pub fn get_line_tokens(this: &MonacoModel, line_number: u32) -> MonacoTokens;
+    pub fn get_line_tokens(this: &JsMonacoModel, line_number: u32) -> JsMonacoTokens;
 
-    pub type MonacoPosition;
+    pub type JsMonacoPosition;
 
     #[wasm_bindgen(method, getter, js_name = "lineNumber")]
-    pub fn line_number(this: &MonacoPosition) -> u32;
+    pub fn line_number(this: &JsMonacoPosition) -> u32;
 
     #[wasm_bindgen(method, getter, js_name = "column")]
-    pub fn column(this: &MonacoPosition) -> u32;
+    pub fn column(this: &JsMonacoPosition) -> u32;
 
-    pub type MonacoTokens;
+    pub type JsMonacoTokens;
 
     #[wasm_bindgen(method, js_name = "findTokenIndexAtOffset")]
-    pub fn find_token_index_at_offset(this: &MonacoTokens, offset: u32) -> u32;
+    pub fn find_token_index_at_offset(this: &JsMonacoTokens, offset: u32) -> u32;
 
     #[wasm_bindgen(method, js_name = "getClassName")]
-    pub fn get_class_name(this: &MonacoTokens, index: u32) -> JsValue;
+    pub fn get_class_name(this: &JsMonacoTokens, index: u32) -> JsValue;
 
     #[wasm_bindgen(method, js_name = "getStandardTokenType")]
-    pub fn get_standard_token_type(this: &MonacoTokens, index: u32) -> u32;
+    pub fn get_standard_token_type(this: &JsMonacoTokens, index: u32) -> u32;
 
-    pub type MonacoTriggerToken;
+    pub type JsMonacoTriggerToken;
 
     #[wasm_bindgen(method, getter, js_name = "triggerKind")]
-    pub fn trigger_kind(this: &MonacoTriggerToken) -> u32;
+    pub fn trigger_kind(this: &JsMonacoTriggerToken) -> u32;
 
     #[wasm_bindgen(method, getter, js_name = "triggerCharacter")]
-    pub fn trigger_character(this: &MonacoTriggerToken) -> String;
+    pub fn trigger_character(this: &JsMonacoTriggerToken) -> String;
 }
 
 // Serde does not support closures and wasm_bindgen does not support anonymous object
@@ -184,13 +220,13 @@ pub struct EditorArgs {
     pub value: &'static str,
     pub language: &'static str,
     pub automatic_layout: bool,
-    pub minimap: MinimapArgs
+    pub minimap: MinimapArgs,
 }
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MinimapArgs {
-    pub enabled: bool
+    pub enabled: bool,
 }
 
 #[derive(Serialize)]
@@ -203,7 +239,7 @@ pub struct RegisterArgs {
 #[serde(rename_all = "camelCase")]
 pub struct MonarchTokensProviderArgs<'a> {
     pub tokenizer: MonarchTokenizer<'a>,
-    pub brackets: Vec<Vec<&'a str>>
+    pub brackets: Vec<Vec<&'a str>>,
 }
 
 #[derive(Serialize)]
@@ -216,7 +252,7 @@ pub struct LanguageConfigurationArgs<'a> {
 #[serde(rename_all = "camelCase")]
 pub struct AutoClosingPairs<'a> {
     pub open: &'a str,
-    pub close: &'a str
+    pub close: &'a str,
 }
 
 #[derive(Serialize)]
@@ -243,12 +279,12 @@ pub struct DefineThemeToken<'a> {
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct MonacoModelMarker<'a> {
+pub struct JsMonacoModelMarker<'a> {
     pub code: String,
     pub start_line_number: u32,
     pub end_line_number: u32,
     pub start_column: u32,
     pub end_column: u32,
     pub severity: &'a str,
-    pub message: String
+    pub message: String,
 }

@@ -7,7 +7,7 @@
 // file.
 
 use crate::components::status_bar::*;
-use crate::session::TableStats;
+use crate::session::*;
 use crate::utils::*;
 use crate::*;
 
@@ -28,68 +28,60 @@ pub fn test_callbacks_invoked() {
         move |()| token.set(1)
     });
 
-    let on_download = Callback::from({
-        clone!(token);
-        move |_: bool| token.set(2)
-    });
-
-    let on_copy = Callback::from({
-        clone!(token);
-        move |_: bool| token.set(3)
-    });
+    let session = Session::default();
 
     test_html! {
         <StatusBar
             id="test"
             weak_link=link.clone()
-            on_reset=on_reset
-            on_download=on_download
-            on_copy=on_copy
-            stats=None>
+            session=session
+            on_reset=on_reset>
         </StatusBar>
     };
 
     assert_eq!(token.get(), 0);
     let status_bar = link.borrow().clone().unwrap();
-    status_bar.send_message(StatusBarMsg::Reset);
-    assert_eq!(token.get(), 1);
-    let status_bar = link.borrow().clone().unwrap();
     status_bar.send_message(StatusBarMsg::Export(false));
-    assert_eq!(token.get(), 2);
+    assert_eq!(token.get(), 0);
     let status_bar = link.borrow().clone().unwrap();
     status_bar.send_message(StatusBarMsg::Copy(false));
-    assert_eq!(token.get(), 3);
+    assert_eq!(token.get(), 0);
+    let status_bar = link.borrow().clone().unwrap();
+    status_bar.send_message(StatusBarMsg::Reset);
+    assert_eq!(token.get(), 1);
 }
 
-fn gen(stats: &Option<TableStats>) -> (WeakComponentLink<StatusBar>, HtmlElement) {
+fn gen(stats: &Option<TableStats>) -> (HtmlElement, Session) {
     let link: WeakComponentLink<StatusBar> = WeakComponentLink::default();
     let div = NodeRef::default();
     let on_reset = Callback::from(|()| ());
-    let on_download = Callback::from(|_: bool| ());
-    let on_copy = Callback::from(|_: bool| ());
+    let session = Session::default();
     test_html! {
         <StatusBar
             id="test"
             weak_link=link.clone()
             ref=div.clone()
-            on_reset=on_reset
-            on_download=on_download
-            on_copy=on_copy
-            stats=stats.clone()>
+            session=session.clone()
+            on_reset=on_reset>
         </StatusBar>
     };
 
-    (link, div.cast::<HtmlElement>().unwrap())
+    if let Some(stats) = stats.as_ref() {
+        session.set_stats(stats.clone());
+        link.borrow()
+            .as_ref()
+            .unwrap()
+            .send_message(StatusBarMsg::TableStatsChanged);
+    }
+
+    (div.cast::<HtmlElement>().unwrap(), session)
 }
 
 #[wasm_bindgen_test]
 pub fn test_status_uninitialized() {
     let stats = None;
-    let (link, div) = gen(&stats);
-    let status_bar = link.borrow().clone().unwrap();
-    let component = &status_bar.get_component();
-    let status_bar_props = &component.as_ref().unwrap().props;
-    assert_eq!(status_bar_props.stats, stats);
+    let (div, session) = gen(&stats);
+    assert_eq!(session.get_table_stats(), stats);
     let status_class = div.query_selector("#status").unwrap().unwrap().class_name();
     assert_eq!(status_class, "uninitialized");
 }
@@ -102,11 +94,8 @@ pub fn test_status_initializing() {
         virtual_rows: None,
     });
 
-    let (link, div) = gen(&stats);
-    let status_bar = link.borrow().clone().unwrap();
-    let component = &status_bar.get_component();
-    let status_bar_props = &component.as_ref().unwrap().props;
-    assert_eq!(status_bar_props.stats, stats);
+    let (div, session) = gen(&stats);
+    assert_eq!(session.get_table_stats(), stats);
     let status_class = div.query_selector("#status").unwrap().unwrap().class_name();
     assert_eq!(status_class, "initializing");
 }
@@ -119,11 +108,8 @@ pub fn test_status_table_loaded() {
         virtual_rows: None,
     });
 
-    let (link, div) = gen(&stats);
-    let status_bar = link.borrow().clone().unwrap();
-    let component = &status_bar.get_component();
-    let status_bar_props = &component.as_ref().unwrap().props;
-    assert_eq!(status_bar_props.stats, stats);
+    let (div, session) = gen(&stats);
+    assert_eq!(session.get_table_stats(), stats);
     let status_class = div.query_selector("#status").unwrap().unwrap().class_name();
     assert_eq!(status_class, "connected");
     let rows = div.query_selector("#rows").unwrap().unwrap().inner_html();
@@ -138,11 +124,8 @@ pub fn test_status_table_and_view_loaded() {
         virtual_rows: Some(54321),
     });
 
-    let (link, div) = gen(&stats);
-    let status_bar = link.borrow().clone().unwrap();
-    let component = &status_bar.get_component();
-    let status_bar_props = &component.as_ref().unwrap().props;
-    assert_eq!(status_bar_props.stats, stats);
+    let (div, session) = gen(&stats);
+    assert_eq!(session.get_table_stats(), stats);
     let status_class = div.query_selector("#status").unwrap().unwrap().class_name();
     assert_eq!(status_class, "connected");
     let rows = div.query_selector("#rows").unwrap().unwrap().inner_html();

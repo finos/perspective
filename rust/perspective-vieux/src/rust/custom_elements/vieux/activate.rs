@@ -6,7 +6,7 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::js::perspective_viewer::PerspectiveViewerJsPlugin;
+use crate::js::perspective_viewer::JsPerspectiveViewerPlugin;
 
 use std::future::Future;
 use wasm_bindgen::prelude::*;
@@ -24,7 +24,7 @@ use web_sys::*;
 /// - `task` an async task which renders the plugin.
 pub async fn activate_plugin(
     elem: &HtmlElement,
-    plugin: &PerspectiveViewerJsPlugin,
+    plugin: &JsPerspectiveViewerPlugin,
     task: impl Future<Output = Result<JsValue, JsValue>>,
 ) -> Result<JsValue, JsValue> {
     let elem = elem.parent_node().unwrap();

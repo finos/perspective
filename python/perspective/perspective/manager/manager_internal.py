@@ -176,7 +176,7 @@ class _PerspectiveManagerInternal(object):
             table_or_view = self._views.get(msg["name"], None)
             if table_or_view is None:
                 error_message = self._make_error_message(
-                    msg["id"], "View is not initialized"
+                    msg["id"], "View method cancelled"
                 )
                 post_callback(self._message_to_json(msg["id"], error_message))
         try:

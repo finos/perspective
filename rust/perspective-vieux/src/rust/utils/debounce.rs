@@ -7,14 +7,15 @@
 // file.
 
 use async_std::sync::Mutex;
-use async_std::sync::MutexGuard;
 
 use std::cell::Cell;
+use std::future::Future;
 use std::rc::Rc;
+use wasm_bindgen::*;
 
 pub struct DebounceMutexData {
     id: Cell<u64>,
-    mutex: Mutex<()>,
+    mutex: Mutex<u64>,
 }
 
 #[derive(Clone)]
@@ -24,26 +25,37 @@ impl Default for DebounceMutex {
     fn default() -> DebounceMutex {
         DebounceMutex(Rc::new(DebounceMutexData {
             id: Cell::new(0),
-            mutex: Mutex::new(()),
+            mutex: Mutex::new(0),
         }))
     }
 }
 
 impl DebounceMutex {
-    pub async fn lock(&self) -> MutexGuard<'_, ()> {
-        let guard = self.0.mutex.lock().await;
-        self.0.id.set(self.0.id.get() + 1);
-        guard
+    pub async fn lock<T>(&self, f: impl Future<Output = T>) -> T {
+        let mut last = self.0.mutex.lock().await;
+        let next = self.0.id.get();
+        let result = f.await;
+        *last = next;
+        result
     }
 
-    pub async fn debounce(&self) -> Option<MutexGuard<'_, ()>> {
-        let id = self.0.id.get() + 1;
-        let guard = self.0.mutex.lock().await;
-        if self.0.id.get() > id {
-            None
+    pub async fn debounce(
+        &self,
+        f: impl Future<Output = Result<JsValue, JsValue>>,
+    ) -> Result<JsValue, JsValue> {
+        let next = self.0.id.get() + 1;
+        let mut last = self.0.mutex.lock().await;
+        if *last <= next {
+            let next = self.0.id.get() + 1;
+            self.0.id.set(next);
+            let result = f.await;
+            if result.is_ok() {
+                *last = next;
+            }
+
+            result
         } else {
-            self.0.id.set(self.0.id.get() + 1);
-            Some(guard)
+            Ok(JsValue::from(false))
         }
     }
 }

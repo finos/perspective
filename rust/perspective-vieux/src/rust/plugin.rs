@@ -10,6 +10,7 @@ pub mod registry;
 
 use crate::js::perspective_viewer::*;
 use crate::session::Session;
+use crate::utils::DebounceMutex;
 
 use registry::*;
 use std::cell::RefCell;
@@ -17,10 +18,11 @@ use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 
 pub struct PluginData {
-    plugins: Vec<PerspectiveViewerJsPlugin>,
+    plugins: Vec<JsPerspectiveViewerPlugin>,
     plugins_idx: Option<usize>,
     _session: Session,
-    on_plugin_changed: Vec<Box<dyn Fn(PerspectiveViewerJsPlugin)>>,
+    draw_lock: DebounceMutex,
+    on_plugin_changed: Vec<Box<dyn Fn(JsPerspectiveViewerPlugin)>>,
 }
 
 #[wasm_bindgen]
@@ -45,15 +47,16 @@ impl Plugin {
             plugins_idx: None,
             _session,
             on_plugin_changed: vec![],
+            draw_lock: DebounceMutex::default(),
         })))
     }
 
     pub fn add_on_plugin_changed<T>(&self, on_plugin_changed: T)
     where
-        T: Fn(PerspectiveViewerJsPlugin) + 'static,
+        T: Fn(JsPerspectiveViewerPlugin) + 'static,
     {
         if self.0.borrow().plugins_idx.is_some() {
-            (on_plugin_changed)(self.get_plugin(None).unwrap());
+            on_plugin_changed(self.get_plugin(None).unwrap());
         }
 
         self.0
@@ -62,14 +65,14 @@ impl Plugin {
             .insert(0, Box::new(on_plugin_changed));
     }
 
-    pub fn get_all_plugins(&self) -> Vec<PerspectiveViewerJsPlugin> {
+    pub fn get_all_plugins(&self) -> Vec<JsPerspectiveViewerPlugin> {
         self.0.borrow().plugins.clone()
     }
 
     pub fn get_plugin(
         &self,
         name: Option<&str>,
-    ) -> Result<PerspectiveViewerJsPlugin, JsValue> {
+    ) -> Result<JsPerspectiveViewerPlugin, JsValue> {
         let idx = match self.find_plugin_idx(name.as_deref()) {
             Some(idx) => idx,
             None => {
@@ -87,6 +90,10 @@ impl Plugin {
             .get(idx)
             .cloned()
             .ok_or_else(|| JsValue::from("No Plugin"))
+    }
+
+    pub fn draw_lock(&self) -> DebounceMutex {
+        self.0.borrow().draw_lock.clone()
     }
 
     pub fn _trigger(&self) -> Result<(), JsValue> {
@@ -112,9 +119,7 @@ impl Plugin {
 
         if changed {
             self.0.borrow_mut().plugins_idx = Some(idx);
-            for listener in self.0.borrow().on_plugin_changed.iter() {
-                (*listener)(self.get_plugin(None)?);
-            }
+            self._trigger()?;
         }
 
         Ok(changed)

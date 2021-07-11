@@ -17,30 +17,30 @@ use wasm_bindgen_futures::future_to_promise;
 
 /// Download a flat (unpivoted with all columns) CSV.
 #[wasm_bindgen]
-pub fn download_flat(table: &PerspectiveJsTable) -> Promise {
+pub fn download_flat(table: &JsPerspectiveTable) -> Result<Promise, JsValue> {
     clone!(table);
-    future_to_promise(async move {
+    Ok(future_to_promise(async move {
         let view = table
-            .view(&js_object!().unchecked_into::<PerspectiveJsViewConfig>())
+            .view(&js_object!().unchecked_into::<JsPerspectiveViewConfig>())
             .await?;
         download_async(&view).await?;
         view.delete().await?;
         Ok(JsValue::UNDEFINED)
-    })
+    }))
 }
 
 /// Download a CSV
 #[wasm_bindgen]
-pub fn download(view: &PerspectiveJsView) -> Promise {
+pub fn download(view: &JsPerspectiveView) -> Result<Promise, JsValue> {
     clone!(view);
-    future_to_promise(async move {
+    Ok(future_to_promise(async move {
         download_async(&view).await?;
         Ok(JsValue::NULL)
-    })
+    }))
 }
 
 /// Download a CSV, but not a `Promise`.  Used to implement the public methods.
-async fn download_async(view: &PerspectiveJsView) -> Result<(), JsValue> {
+async fn download_async(view: &JsPerspectiveView) -> Result<(), JsValue> {
     let csv_fut = view.to_csv(js_object!("formatted", true));
     let window = web_sys::window().unwrap();
     let document = window.document().unwrap();

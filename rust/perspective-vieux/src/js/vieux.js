@@ -53,8 +53,20 @@ class PerspectiveVieuxElement extends HTMLElement {
         return _await_index(() => this._instance._draw(...args));
     }
 
-    _create_view(config) {
-        return _await_index(() => this._instance._create_view(config));
+    resize() {
+        return _await_index(() => this._instance.resize());
+    }
+
+    _get_render_time() {
+        return _await_index(() => this._instance._get_render_time());
+    }
+
+    _set_render_time(val) {
+        return _await_index(() => this._instance._set_render_time(val));
+    }
+
+    _create_view(...args) {
+        return _await_index(() => this._instance._create_view(...args));
     }
 
     _get_maxes(limit) {

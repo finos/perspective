@@ -17,9 +17,9 @@ use wasm_bindgen::prelude::*;
 /// & subtle bugs in monaco.
 /// https://github.com/microsoft/monaco-editor/issues/1510
 pub fn get_completions(
-    model: MonacoModel,
-    position: MonacoPosition,
-    token: MonacoTriggerToken,
+    model: JsMonacoModel,
+    position: JsMonacoPosition,
+    token: JsMonacoTriggerToken,
 ) -> JsValue {
     // Test the token stream until the cursor to distinguish opening from closing
     // quotes - otherwise the column completion popup will occur at the end of a column

@@ -52,9 +52,7 @@ wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
                 let perspective_viewer = this.parentElement;
                 const csv = await view.to_csv({config: {delimiter: '|'}});
                 const css = `margin:0;overflow:scroll;position:absolute;width:100%;height:100%`;
-                const timer = perspective_viewer._render_time();
                 this.innerHTML = `<pre style='${css}'>${csv}</pre>`;
-                timer();
             }
 
             async clear() {
@@ -93,9 +91,9 @@ pub fn test_plugin_selected() {
     PLUGIN_REGISTRY.register_plugin("perspective-viewer-debug4");
 
     let link: WeakComponentLink<PluginSelector> = WeakComponentLink::default();
-    let result: Rc<RefCell<Option<PerspectiveViewerJsPlugin>>> =
+    let result: Rc<RefCell<Option<JsPerspectiveViewerPlugin>>> =
         Rc::new(RefCell::new(None));
-    let session = Session::new();
+    let session = Session::default();
     let plugin = Plugin::new(session);
     plugin.add_on_plugin_changed({
         clone!(result);

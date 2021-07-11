@@ -7,7 +7,7 @@
 // file.
 
 use crate::js::perspective::*;
-use crate::js::perspective_viewer::PerspectiveViewerJsPlugin;
+use crate::js::perspective_viewer::JsPerspectiveViewerPlugin;
 use crate::*;
 
 #[cfg(test)]
@@ -17,43 +17,42 @@ use {
 };
 
 pub async fn get_row_and_col_limits(
-    view: &PerspectiveJsView,
-    plugin: &PerspectiveViewerJsPlugin,
-    limit: bool,
+    view: &JsPerspectiveView,
+    plugin: &JsPerspectiveViewerPlugin,
 ) -> Result<(usize, usize, Option<usize>, Option<usize>), JsValue> {
     let num_cols = view.num_columns().await? as usize;
     let num_rows = view.num_rows().await? as usize;
-    if !limit {
-        Ok((num_cols, num_rows, None, None))
-    } else {
-        match (plugin.max_columns(), plugin.render_warning()) {
-            (Some(_), Some(false)) => Ok((num_cols, num_rows, None, None)),
-            (max_columns, _) => {
-                let schema = view.schema().await?;
-                let num_schema_columns =
-                    std::cmp::max(1, js_sys::Object::keys(&schema).length() as usize);
-                let max_cols = max_columns.and_then(|max_columns| {
-                    let column_group_diff = max_columns % num_schema_columns;
-                    let column_limit = max_columns + column_group_diff;
-                    if column_limit < num_cols {
-                        Some(column_limit)
-                    } else {
-                        None
-                    }
-                });
+    // if !limit {
+    //     Ok((num_cols, num_rows, None, None))
+    // } else {
+    match (plugin.max_columns(), plugin.render_warning()) {
+        (Some(_), Some(false)) => Ok((num_cols, num_rows, None, None)),
+        (max_columns, _) => {
+            let schema = view.schema().await?;
+            let num_schema_columns =
+                std::cmp::max(1, js_sys::Object::keys(&schema).length() as usize);
+            let max_cols = max_columns.and_then(|max_columns| {
+                let column_group_diff = max_columns % num_schema_columns;
+                let column_limit = max_columns + column_group_diff;
+                if column_limit < num_cols {
+                    Some(column_limit)
+                } else {
+                    None
+                }
+            });
 
-                let max_rows = plugin.max_cells().map(|max_cells| {
-                    match max_cols {
-                        Some(max_cols) => max_cells as f64 / max_cols as f64,
-                        None => max_cells as f64 / num_cols as f64,
-                    }
-                    .ceil() as usize
-                });
+            let max_rows = plugin.max_cells().map(|max_cells| {
+                match max_cols {
+                    Some(max_cols) => max_cells as f64 / max_cols as f64,
+                    None => max_cells as f64 / num_cols as f64,
+                }
+                .ceil() as usize
+            });
 
-                Ok((num_cols, num_rows, max_cols, max_rows))
-            }
+            Ok((num_cols, num_rows, max_cols, max_rows))
         }
     }
+    // }
 }
 
 #[cfg(test)]
@@ -81,11 +80,11 @@ mod tests {
             "num_rows", closure.as_ref().unchecked_ref::<JsValue>();
             "schema", closure2.as_ref().unchecked_ref::<JsValue>()
         )
-        .unchecked_into::<PerspectiveJsView>();
+        .unchecked_into::<JsPerspectiveView>();
 
-        let plugin = js_object!().unchecked_into::<PerspectiveViewerJsPlugin>();
+        let plugin = js_object!().unchecked_into::<JsPerspectiveViewerPlugin>();
         let (_, _, max_cols, max_rows) =
-            get_row_and_col_limits(&view, &plugin, true).await.unwrap();
+            get_row_and_col_limits(&view, &plugin).await.unwrap();
         assert_eq!(max_cols, None);
         assert_eq!(max_rows, None);
     }
@@ -100,12 +99,12 @@ mod tests {
             "num_rows", closure2.as_ref().unchecked_ref::<JsValue>();
             "schema", closure3.as_ref().unchecked_ref::<JsValue>()
         )
-        .unchecked_into::<PerspectiveJsView>();
+        .unchecked_into::<JsPerspectiveView>();
 
         let plugin =
-            js_object!("max_columns", 2).unchecked_into::<PerspectiveViewerJsPlugin>();
+            js_object!("max_columns", 2).unchecked_into::<JsPerspectiveViewerPlugin>();
         let (_, _, max_cols, max_rows) =
-            get_row_and_col_limits(&view, &plugin, true).await.unwrap();
+            get_row_and_col_limits(&view, &plugin).await.unwrap();
         assert_eq!(max_cols, None);
         assert_eq!(max_rows, None);
     }
@@ -120,12 +119,12 @@ mod tests {
             "num_rows", closure2.as_ref().unchecked_ref::<JsValue>();
             "schema", closure3.as_ref().unchecked_ref::<JsValue>()
         )
-        .unchecked_into::<PerspectiveJsView>();
+        .unchecked_into::<JsPerspectiveView>();
 
         let plugin =
-            js_object!("max_columns", 1).unchecked_into::<PerspectiveViewerJsPlugin>();
+            js_object!("max_columns", 1).unchecked_into::<JsPerspectiveViewerPlugin>();
         let (_, _, max_cols, max_rows) =
-            get_row_and_col_limits(&view, &plugin, true).await.unwrap();
+            get_row_and_col_limits(&view, &plugin).await.unwrap();
         assert_eq!(max_cols, Some(1));
         assert_eq!(max_rows, None);
     }
@@ -140,12 +139,12 @@ mod tests {
             "num_rows", closure2.as_ref().unchecked_ref::<JsValue>();
             "schema", closure3.as_ref().unchecked_ref::<JsValue>()
         )
-        .unchecked_into::<PerspectiveJsView>();
+        .unchecked_into::<JsPerspectiveView>();
 
         let plugin =
-            js_object!("max_columns", 3).unchecked_into::<PerspectiveViewerJsPlugin>();
+            js_object!("max_columns", 3).unchecked_into::<JsPerspectiveViewerPlugin>();
         let (_, _, max_cols, max_rows) =
-            get_row_and_col_limits(&view, &plugin, true).await.unwrap();
+            get_row_and_col_limits(&view, &plugin).await.unwrap();
         assert_eq!(max_cols, Some(4));
         assert_eq!(max_rows, None);
     }
@@ -160,12 +159,12 @@ mod tests {
             "num_rows", closure2.as_ref().unchecked_ref::<JsValue>();
             "schema", closure3.as_ref().unchecked_ref::<JsValue>()
         )
-        .unchecked_into::<PerspectiveJsView>();
+        .unchecked_into::<JsPerspectiveView>();
 
         let plugin =
-            js_object!("max_cells", 2).unchecked_into::<PerspectiveViewerJsPlugin>();
+            js_object!("max_cells", 2).unchecked_into::<JsPerspectiveViewerPlugin>();
         let (_, _, max_cols, max_rows) =
-            get_row_and_col_limits(&view, &plugin, true).await.unwrap();
+            get_row_and_col_limits(&view, &plugin).await.unwrap();
         assert_eq!(max_cols, None);
         assert_eq!(max_rows, Some(2));
     }
@@ -180,12 +179,12 @@ mod tests {
             "num_rows", closure2.as_ref().unchecked_ref::<JsValue>();
             "schema", closure3.as_ref().unchecked_ref::<JsValue>()
         )
-        .unchecked_into::<PerspectiveJsView>();
+        .unchecked_into::<JsPerspectiveView>();
 
         let plugin = js_object!("max_cells", 10; "max_columns", 2)
-            .unchecked_into::<PerspectiveViewerJsPlugin>();
+            .unchecked_into::<JsPerspectiveViewerPlugin>();
         let (_, _, max_cols, max_rows) =
-            get_row_and_col_limits(&view, &plugin, true).await.unwrap();
+            get_row_and_col_limits(&view, &plugin).await.unwrap();
         assert_eq!(max_cols, Some(2));
         assert_eq!(max_rows, Some(5));
     }

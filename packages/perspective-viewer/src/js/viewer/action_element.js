@@ -12,34 +12,6 @@ import {DomElement} from "./dom_element.js";
 import {findExpressionByAlias, throttlePromise} from "../utils.js";
 
 export class ActionElement extends DomElement {
-    async _toggle_config(event) {
-        if (!event || event.button !== 2) {
-            this._show_config = !this._show_config;
-            const panel = this.shadowRoot.querySelector("#pivot_chart_container");
-            if (!this._show_config) {
-                await this._pre_resize(
-                    panel.clientWidth + this._side_panel().clientWidth,
-                    panel.clientHeight + this._top_panel.clientHeight,
-                    () => {
-                        this._app.classList.remove("settings-open");
-                        this.removeAttribute("settings");
-                    },
-                    () => this.dispatchEvent(new CustomEvent("perspective-toggle-settings", {detail: this._show_config}))
-                );
-            } else {
-                await this._post_resize(
-                    () => {
-                        this.toggleAttribute("settings", true);
-                    },
-                    () => {
-                        this._app.classList.add("settings-open");
-                        this.dispatchEvent(new CustomEvent("perspective-toggle-settings", {detail: this._show_config}));
-                    }
-                );
-            }
-        }
-    }
-
     /**
      * Given a targe `width` and `height`, pre-size the plugin before modifying
      * the HTML to reduce visual tearing.
@@ -58,25 +30,12 @@ export class ActionElement extends DomElement {
         this._datavis.style.height = `${height}px`;
         try {
             if (!document.hidden && this.offsetParent) {
-                let plugin = await this._vieux.get_plugin();
-                await plugin.resize();
+                await this._vieux.resize();
             }
         } finally {
             pre?.();
             this._datavis.style.width = "100%";
             this._datavis.style.height = "100%";
-            post();
-        }
-    }
-
-    async _post_resize(post, pre) {
-        pre?.();
-        try {
-            if (!document.hidden && this.offsetParent) {
-                let plugin = await this._vieux.get_plugin();
-                await plugin.resize();
-            }
-        } finally {
             post();
         }
     }

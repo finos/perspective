@@ -6,6 +6,7 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+mod async_callback;
 mod closure;
 mod debounce;
 mod errors;
@@ -18,6 +19,7 @@ mod weak_component_link;
 #[cfg(test)]
 mod tests;
 
+pub use self::async_callback::*;
 pub use self::closure::*;
 pub use self::debounce::*;
 pub use self::errors::*;

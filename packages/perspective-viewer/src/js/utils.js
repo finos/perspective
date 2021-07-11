@@ -19,7 +19,7 @@
  * A Template DOM object.
  */
 
-export function importTemplate(template) {
+function importTemplate(template) {
     const div = document.createElement("div");
     div.innerHTML = template;
     return Array.prototype.slice.call(div.children)[0];

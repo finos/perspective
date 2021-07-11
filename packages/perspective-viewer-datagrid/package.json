@@ -41,7 +41,7 @@
         "@finos/perspective": "^0.10.0",
         "@finos/perspective-viewer": "^0.10.0",
         "chroma-js": "^1.3.4",
-        "regular-table": "=0.4.0"
+        "regular-table": "=0.4.1"
     },
     "devDependencies": {
         "@finos/perspective-test": "^0.10.0"

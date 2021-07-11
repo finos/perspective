@@ -11,7 +11,7 @@ use crate::*;
 
 use std::cell::*;
 use std::rc::*;
-use wasm_bindgen_futures::future_to_promise;
+use wasm_bindgen_futures::spawn_local;
 use wasm_bindgen_test::*;
 
 #[wasm_bindgen_test]
@@ -23,12 +23,11 @@ async fn test_request_animation_frame_async() {
 #[wasm_bindgen_test]
 async fn test_async_in_correct_order() {
     let cell = Rc::new(RefCell::new(vec![]));
-    let _promise = future_to_promise({
+    spawn_local({
         clone!(cell);
         async move {
             await_animation_frame().await.unwrap();
             cell.borrow_mut().push("1");
-            Ok(JsValue::UNDEFINED)
         }
     });
 

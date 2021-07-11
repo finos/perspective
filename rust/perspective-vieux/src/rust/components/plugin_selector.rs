@@ -42,7 +42,7 @@ impl Component for PluginSelector {
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         enable_weak_link_test!(props, link);
         props.plugin.add_on_plugin_changed({
-            let callback = link.callback(|plugin: PerspectiveViewerJsPlugin| {
+            let callback = link.callback(|plugin: JsPerspectiveViewerPlugin| {
                 PluginSelectorMsg::PluginSelected(plugin.name())
             });
             move |x| callback.emit(x)

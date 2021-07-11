@@ -16,6 +16,7 @@ default = ["wee_alloc", "console_error_panic_hook"]
 
 [dependencies]
 async-std = "1.9.0"
+async-trait = "=0.1.42"
 futures = "0.3.12"
 js-intern = "0.3.1"
 num-format = "0.4.0"
@@ -66,6 +67,7 @@ features = [
     "Navigator",
     "Node",
     "NodeList",
+    'Performance', 
     # "TouchEvent",
     # "TouchList",
     # "Touch",

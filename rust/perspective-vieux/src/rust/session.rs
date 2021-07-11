@@ -25,19 +25,22 @@ use std::ops::Deref;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use wasm_bindgen_futures::future_to_promise;
+use wasm_bindgen_futures::spawn_local;
 use yew::prelude::*;
 
 /// The `Session` struct is the principal interface to the Perspective engine,
 /// the `Table` and `View` obejcts for this vieux, and all associated state.
+#[derive(Default)]
 pub struct SessionData {
-    table: Option<PerspectiveJsTable>,
-    view: Option<PerspectiveJsView>,
+    table: Option<JsPerspectiveTable>,
+    view: Option<JsPerspectiveView>,
     view_sub: Option<ViewSubscription>,
-    on_stats: Option<Callback<TableStats>>,
+    stats: Option<TableStats>,
+    on_stats: Option<Callback<()>>,
+    on_update: Vec<Box<dyn Fn()>>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct Session(Rc<RefCell<SessionData>>);
 
 impl Deref for Session {
@@ -47,36 +50,30 @@ impl Deref for Session {
     }
 }
 
-impl Default for Session {
-    fn default() -> Self {
-        Session(Rc::new(RefCell::new(SessionData {
-            table: None,
-            view: None,
-            view_sub: None,
-            on_stats: None,
-        })))
-    }
-}
-
 impl Session {
-    pub fn new() -> Session {
-        Self::default()
+    /// Set a callback for `TableStats` updates when this perspective table updates.
+    pub fn set_on_stats_callback(&self, on_stats: Callback<()>) {
+        if self.borrow().stats.as_ref().is_some() {
+            on_stats.emit(());
+        }
+
+        self.borrow_mut().on_stats = Some(on_stats);
     }
 
     /// Set a callback for `TableStats` updates when this perspective table updates.
-    pub fn set_on_stats_callback(&self, on_stats: Callback<TableStats>) {
-        self.borrow_mut().on_stats = Some(on_stats);
+    pub fn add_on_update_callback(&self, on_update: impl Fn() + 'static) {
+        self.borrow_mut().on_update.push(Box::new(on_update));
     }
 
     /// Reset this `Session`'s state with a new `Table`.  Implicitly calls
     /// `clear_view()`, which will need to be re-initialized later via `set_view()`.
     pub async fn set_table(
         self,
-        table: PerspectiveJsTable,
+        table: JsPerspectiveTable,
     ) -> Result<JsValue, JsValue> {
         self.clear_view();
         self.borrow_mut().table = Some(table);
-        self.update_table_stats().await?;
+        self.set_initial_stats().await?;
         Ok(JsValue::UNDEFINED)
     }
 
@@ -117,32 +114,29 @@ impl Session {
     }
 
     pub fn copy_to_clipboard(&self, flat: bool) {
-        let _ = if flat {
-            copy_flat(&self.borrow().table.clone().unwrap())
-        } else {
-            copy(self.borrow().view_sub.as_ref().unwrap().view())
-        };
+        self.flat_dispatch(flat, copy_flat, copy);
     }
 
     pub fn download_as_csv(&self, flat: bool) {
-        let _ = if flat {
-            download_flat(&self.borrow().table.clone().unwrap())
-        } else {
-            download(self.borrow().view_sub.as_ref().unwrap().view())
-        };
+        self.flat_dispatch(flat, download_flat, download);
     }
 
-    pub fn get_view(&self) -> Option<PerspectiveJsView> {
+    pub fn get_view(&self) -> Option<JsPerspectiveView> {
         self.borrow().view.clone()
+    }
+
+    pub fn get_table_stats(&self) -> Option<TableStats> {
+        self.borrow().stats.clone()
     }
 
     pub async fn create_view(
         self,
         config: &ViewConfig,
-    ) -> Result<PerspectiveJsView, JsValue> {
+    ) -> Result<JsPerspectiveView, JsValue> {
+        self.clear_view();
         let js_config = JsValue::from_serde(config)
             .to_jserror()?
-            .unchecked_into::<PerspectiveJsViewConfig>();
+            .unchecked_into::<JsPerspectiveViewConfig>();
 
         let table = self.borrow().table.clone().unwrap();
         let view = table.view(&js_config).await?;
@@ -152,34 +146,81 @@ impl Session {
 
     pub fn clear_view(&self) {
         if let Some(view) = self.borrow_mut().view.take() {
-            let _promise = future_to_promise(async move {
-                view.delete().await?;
-                Ok(JsValue::from(true))
+            spawn_local(async move {
+                view.delete().await.expect("Failed to delete View");
             });
         }
 
         self.borrow_mut().view_sub = None;
     }
 
+    pub fn reset_stats(&self) {
+        self.update_stats(TableStats::default());
+    }
+
     /// Set a new `View` (derived from this `Session`'s `Table`), and create the
     /// `update()` subscription.
-    fn set_view(&self, view: PerspectiveJsView) {
+    fn set_view(&self, view: JsPerspectiveView) {
         let table = self.borrow().table.clone().unwrap();
-        let on_stats = self.borrow().on_stats.clone();
-        let sub = ViewSubscription::new(table, view.clone(), on_stats.unwrap());
+        let on_stats = Callback::from({
+            let this = self.clone();
+            move |stats| this.update_stats(stats)
+        });
+
+        let on_update = Callback::from({
+            let this = self.clone();
+            move |_| this.on_update()
+        });
+
+        let sub = ViewSubscription::new(table, view.clone(), on_stats, on_update);
         self.borrow_mut().view = Some(view);
         self.borrow_mut().view_sub = Some(sub);
     }
 
+    fn on_update(&self) {
+        for callback in self.0.borrow().on_update.iter() {
+            callback();
+        }
+    }
+
     /// Update the this `Session`'s `TableStats` data from the `Table`.
-    async fn update_table_stats(self) -> Result<JsValue, JsValue> {
+    async fn set_initial_stats(self) -> Result<JsValue, JsValue> {
         let table = self.borrow().table.clone();
         let num_rows = table.unwrap().size().await? as u32;
-        self.borrow().on_stats.as_ref().unwrap().emit(TableStats {
+        let stats = TableStats {
             is_pivot: false,
             num_rows: Some(num_rows),
             virtual_rows: None,
-        });
+        };
+
+        self.update_stats(stats);
         Ok(JsValue::UNDEFINED)
+    }
+
+    #[cfg(test)]
+    pub fn set_stats(&self, stats: TableStats) {
+        self.update_stats(stats)
+    }
+
+    fn update_stats(&self, stats: TableStats) {
+        self.borrow_mut().stats = Some(stats);
+        if let Some(cb) = self.borrow().on_stats.as_ref() {
+            cb.emit(());
+        }
+    }
+
+    fn flat_dispatch(
+        &self,
+        flat: bool,
+        f1: fn(&JsPerspectiveTable) -> Result<js_sys::Promise, JsValue>,
+        f2: fn(&JsPerspectiveView) -> Result<js_sys::Promise, JsValue>,
+    ) {
+        if flat {
+            if let Some(table) = self.borrow().table.as_ref() {
+                let _ = f1(table).unwrap();
+            }
+        } else if let Some(view_sub) = self.borrow().view_sub.as_ref() {
+            let _ = f2(view_sub.view()).unwrap();
+        };
     }
 }

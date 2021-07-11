@@ -18,13 +18,13 @@ use wasm_bindgen_futures::future_to_promise;
 
 /// Copy a flat (unpivoted with all columns) CSV to the clipboard.
 #[wasm_bindgen]
-pub fn copy_flat(table: &PerspectiveJsTable) -> Result<Promise, JsValue> {
+pub fn copy_flat(table: &JsPerspectiveTable) -> Result<Promise, JsValue> {
     clone!(table);
     let csv_ref: Rc<RefCell<Option<String>>> = Rc::new(RefCell::new(None));
     poll(0, csv_ref.clone())?;
     Ok(future_to_promise(async move {
         let view = table
-            .view(&js_object!().unchecked_into::<PerspectiveJsViewConfig>())
+            .view(&js_object!().unchecked_into::<JsPerspectiveViewConfig>())
             .await?;
         let csv = copy_async(&view).await?;
         view.delete().await?;
@@ -33,9 +33,9 @@ pub fn copy_flat(table: &PerspectiveJsTable) -> Result<Promise, JsValue> {
     }))
 }
 
-/// Copy a `PerspectiveJsView` to the clipboard as a CSV.
+/// Copy a `JsPerspectiveView` to the clipboard as a CSV.
 #[wasm_bindgen]
-pub fn copy(view: &PerspectiveJsView) -> Result<Promise, JsValue> {
+pub fn copy(view: &JsPerspectiveView) -> Result<Promise, JsValue> {
     clone!(view);
     let csv_ref: Rc<RefCell<Option<String>>> = Rc::new(RefCell::new(None));
     poll(0, csv_ref.clone())?;
@@ -71,7 +71,7 @@ fn poll(count: u32, csv_ref: Rc<RefCell<Option<String>>>) -> Result<(), JsValue>
 }
 
 /// Copy a CSV, but not a `Promise`.  Used to implement the public methods.
-async fn copy_async(view: &PerspectiveJsView) -> Result<JsString, JsValue> {
+async fn copy_async(view: &JsPerspectiveView) -> Result<JsString, JsValue> {
     let csv = view.to_csv(js_object!("formatted", true));
     Ok(csv.await.unwrap())
 }
