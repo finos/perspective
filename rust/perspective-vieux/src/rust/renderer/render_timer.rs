@@ -48,7 +48,7 @@ impl MovingWindowRenderTimer {
         result
     }
 
-    pub fn set_render_time(&mut self, val: Option<f64>) {
+    pub fn set_throttle(&mut self, val: Option<f64>) {
         match val {
             None => {
                 *self.0.borrow_mut() = RenderTimerType::default();
@@ -59,17 +59,17 @@ impl MovingWindowRenderTimer {
         }
     }
 
-    pub fn get_avg(&self) -> f64 {
+    pub fn get_avg(&self) -> i32 {
         match &*self.0.borrow() {
-            RenderTimerType::Constant(constant) => *constant,
+            RenderTimerType::Constant(constant) => *constant as i32,
             RenderTimerType::Moving(timings) => {
                 let len = timings.len();
                 if len < 5 {
-                    0_f64
+                    0_i32
                 } else {
                     let sum = timings.iter().sum::<f64>();
                     let avg: f64 = sum / len as f64;
-                    f64::min(5000_f64, avg.floor())
+                    f64::min(5000_f64, avg.floor()) as i32
                 }
             }
         }

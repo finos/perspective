@@ -6,12 +6,13 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::components::plugin_selector::PluginSelector;
-use crate::components::render_warning::RenderWarning;
-use crate::components::split_panel::SplitPanel;
-use crate::components::status_bar::StatusBar;
+use super::plugin_selector::PluginSelector;
+use super::render_warning::RenderWarning;
+use super::split_panel::SplitPanel;
+use super::status_bar::StatusBar;
+
 use crate::js::perspective::*;
-use crate::plugin::*;
+use crate::renderer::*;
 use crate::session::Session;
 use crate::utils::*;
 
@@ -26,9 +27,9 @@ pub static CSS: &str = include_str!("../../../dist/css/perspective-vieux.css");
 #[derive(Properties, Clone)]
 pub struct PerspectiveVieuxProps {
     pub elem: web_sys::HtmlElement,
-    pub panels: (web_sys::HtmlElement, web_sys::HtmlElement),
+    // pub panels: (web_sys::HtmlElement, web_sys::HtmlElement),
     pub session: Session,
-    pub plugin: Plugin,
+    pub renderer: Renderer,
 
     #[prop_or_default]
     pub weak_link: WeakComponentLink<PerspectiveVieux>,
@@ -39,7 +40,7 @@ pub enum Msg {
     Reset,
     ToggleConfig(Option<bool>, Option<Sender<Result<JsValue, JsValue>>>),
     ToggleConfigFinished(Sender<()>),
-    RenderDimensions(Option<(usize, usize, Option<usize>, Option<usize>)>),
+    RenderLimits(Option<(usize, usize, Option<usize>, Option<usize>)>),
 }
 
 pub struct PerspectiveVieux {
@@ -83,12 +84,17 @@ impl Component for PerspectiveVieux {
                 false
             }
             Msg::ToggleConfigFinished(sender) => {
+                dispatch_settings_event(&self.props.elem, self.config_open).unwrap();
                 self.on_rendered = Some(sender);
                 true
             }
-            Msg::RenderDimensions(dimensions) => {
-                self.dimensions = dimensions;
-                true
+            Msg::RenderLimits(dimensions) => {
+                if self.dimensions != dimensions {
+                    self.dimensions = dimensions;
+                    true
+                } else {
+                    false
+                }
             }
         }
     }
@@ -119,7 +125,7 @@ impl Component for PerspectiveVieux {
                     <style>{ &CSS }</style>
                     <SplitPanel id="app_panel">
                         <div id="side_panel" class="column noselect">
-                            <PluginSelector plugin=self.props.plugin.clone()>
+                            <PluginSelector renderer=self.props.renderer.clone()>
                             </PluginSelector>
                             <slot name="side_panel"></slot>
                         </div>
@@ -128,7 +134,8 @@ impl Component for PerspectiveVieux {
                             <div id="main_panel_container">
                                 <RenderWarning
                                     dimensions=self.dimensions
-                                    plugin=self.props.plugin.clone()>
+                                    session=self.props.session.clone()
+                                    renderer=self.props.renderer.clone()>
                                 </RenderWarning>
                                 <slot name="main_panel"></slot>
                             </div>
@@ -148,9 +155,12 @@ impl Component for PerspectiveVieux {
                     <style>{ &CSS }</style>
                     <RenderWarning
                         dimensions=self.dimensions
-                        plugin=self.props.plugin.clone()>
+                        session=self.props.session.clone()
+                        renderer=self.props.renderer.clone()>
                     </RenderWarning>
-                    <slot name="main_panel"></slot>
+                    <div id="main_panel_container">
+                        <slot name="main_panel"></slot>
+                    </div>
                     <div id="config_button" class="noselect button" onclick=config></div>
                 </>
             }
@@ -186,15 +196,11 @@ impl PerspectiveVieux {
                 let force = !self.config_open;
                 self.config_open = force;
                 let callback = self.link.callback_once(Msg::ToggleConfigFinished);
-                let task = toggle_config_task(
-                    force,
-                    self.props.elem.clone(),
-                    self.props.plugin.clone(),
-                    callback,
-                );
-
+                let renderer = self.props.renderer.clone();
                 drop(promisify_ignore_view_delete(async move {
-                    let result = task.await;
+                    let result =
+                        renderer.presize(force, callback.emit_and_render()).await;
+
                     if let Some(sender) = sender {
                         let msg = result.clone().or_else(ignore_view_delete);
                         sender.send(msg).to_jserror()?;
@@ -221,65 +227,24 @@ impl PerspectiveVieux {
     }
 }
 
-/// An `async` task to pre-resize the `main_panel` to avoid screen shear.
-async fn toggle_config_task(
-    open: bool,
-    vieux_elem: HtmlElement,
-    plugin: Plugin,
-    on_toggle: Callback<Sender<()>>,
-) -> Result<JsValue, JsValue> {
-    let task = async {
-        let viewer_elem = match find_custom_element(&vieux_elem) {
-            Some(element) => element,
-            None => {
-                on_toggle.emit_and_render().await?;
-                return Ok(JsValue::UNDEFINED);
-            }
-        };
-
-        let plugin = plugin.get_plugin(None)?;
-        if open {
-            dispatch_settings_event(viewer_elem.clone(), open)?;
-            on_toggle.emit_and_render().await?;
-            plugin.resize().await
-        } else {
-            let main_panel: web_sys::HtmlElement = vieux_elem
-                .query_selector("[slot=main_panel]")
-                .unwrap()
-                .unwrap()
-                .unchecked_into();
-
-            let new_width = format!("{}px", viewer_elem.client_width());
-            let new_height = format!("{}px", viewer_elem.client_height());
-            main_panel.style().set_property("width", &new_width)?;
-            main_panel.style().set_property("height", &new_height)?;
-            let resize = plugin.resize().await;
-            main_panel.style().set_property("width", "")?;
-            main_panel.style().set_property("height", "")?;
-            dispatch_settings_event(viewer_elem, open)?;
-            on_toggle.emit_and_render().await?;
-            resize
-        }
-    };
-
-    plugin.draw_lock().lock(task).await
-}
-
 /// Dispatch the "perspective-toggle-settings" event to notify external
 /// listeners.
 fn dispatch_settings_event(
-    element: web_sys::Element,
+    vieux_elem: &web_sys::HtmlElement,
     open: bool,
 ) -> Result<(), JsValue> {
-    let mut event_init = web_sys::CustomEventInit::new();
-    event_init.detail(&JsValue::from(open));
-    let event = web_sys::CustomEvent::new_with_event_init_dict(
-        "perspective-toggle-settings",
-        &event_init,
-    );
+    if let Some(element) = find_custom_element(vieux_elem) {
+        let mut event_init = web_sys::CustomEventInit::new();
+        event_init.detail(&JsValue::from(open));
+        let event = web_sys::CustomEvent::new_with_event_init_dict(
+            "perspective-toggle-settings",
+            &event_init,
+        );
 
-    element.toggle_attribute_with_force("settings", open)?;
-    element.dispatch_event(&event.unwrap()).unwrap();
+        element.toggle_attribute_with_force("settings", open)?;
+        element.dispatch_event(&event.unwrap()).unwrap();
+    }
+
     Ok(())
 }
 

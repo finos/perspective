@@ -6,7 +6,7 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::plugin::*;
+use crate::renderer::*;
 use crate::utils::*;
 use crate::*;
 use crate::{components::vieux::*, session::Session};
@@ -25,18 +25,15 @@ fn set_up_html() -> (WeakComponentLink<PerspectiveVieux>, web_sys::ShadowRoot) {
     let root = NodeRef::default();
     let document = window().unwrap().document().unwrap();
     let elem: HtmlElement = document.create_element("div").unwrap().unchecked_into();
-    let div1: HtmlElement = document.create_element("div").unwrap().unchecked_into();
-    let div2: HtmlElement = document.create_element("div").unwrap().unchecked_into();
     let session = Session::default();
-    let plugin = Plugin::new(session.clone());
+    let renderer = Renderer::new(elem.clone(), session.clone());
     test_html! {
         <PerspectiveVieux
             weak_link=link.clone()
             ref=root.clone()
             elem=elem
-            plugin=plugin
-            session=session
-            panels=(div1, div2)>
+            renderer=renderer
+            session=session>
         </PerspectiveVieux>
     };
 
@@ -53,7 +50,7 @@ fn set_up_html() -> (WeakComponentLink<PerspectiveVieux>, web_sys::ShadowRoot) {
 #[wasm_bindgen_test]
 pub fn test_settings_closed() {
     let (_, root) = set_up_html();
-    for selector in ["slot[name=main_panel", "#config_button"].iter() {
+    for selector in ["slot[name=main_panel]", "#config_button"].iter() {
         assert!(root
             .query_selector(selector)
             .unwrap()
@@ -74,7 +71,7 @@ pub async fn test_settings_open() {
     receiver.await.unwrap();
     for selector in [
         "#app_panel",
-        "slot[name=main_panel",
+        "slot[name=main_panel]",
         "#config_button",
         "#status_bar",
     ]

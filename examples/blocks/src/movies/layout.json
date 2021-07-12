@@ -65,34 +65,18 @@
             "plugin_config": {
                 "IMDB Rating": {
                     "color_mode": "gradient",
-                    "pos_color": [
+                    "pos_color": 
                         "#b87ff0",
-                        184,
-                        127,
-                        240
-                    ],
-                    "neg_color": [
+                    "neg_color": 
                         "#FF9485",
-                        255,
-                        148,
-                        133
-                    ],
                     "gradient": 8.1
                 },
                 "US Gross": {
                     "color_mode": "gradient",
-                    "pos_color": [
+                    "pos_color": 
                         "#126e3a",
-                        18,
-                        110,
-                        58
-                    ],
-                    "neg_color": [
+                    "neg_color": 
                         "#FF9485",
-                        255,
-                        148,
-                        133
-                    ],
                     "gradient": 19729862602
                 }
             },

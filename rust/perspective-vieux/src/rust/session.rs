@@ -8,14 +8,16 @@
 
 mod copy;
 mod download;
+mod view;
 mod view_subscription;
 
 use crate::config::*;
 use crate::js::perspective::*;
-use crate::session::view_subscription::*;
 use crate::utils::*;
 
-pub use view_subscription::TableStats;
+use self::view::View;
+pub use self::view_subscription::TableStats;
+use self::view_subscription::*;
 
 use copy::*;
 use download::*;
@@ -24,20 +26,27 @@ use std::iter::FromIterator;
 use std::ops::Deref;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
-use wasm_bindgen_futures::spawn_local;
+
 use yew::prelude::*;
+
+#[derive(Default)]
+struct SessionMetadataCache {
+    column_names: Vec<String>,
+}
 
 /// The `Session` struct is the principal interface to the Perspective engine,
 /// the `Table` and `View` obejcts for this vieux, and all associated state.
 #[derive(Default)]
 pub struct SessionData {
     table: Option<JsPerspectiveTable>,
-    view: Option<JsPerspectiveView>,
+    metadata: Option<SessionMetadataCache>,
+    config: ViewConfig,
     view_sub: Option<ViewSubscription>,
     stats: Option<TableStats>,
     on_stats: Option<Callback<()>>,
-    on_update: Vec<Box<dyn Fn()>>,
+    on_update: PubSub<()>,
+    on_table_loaded: PubSub<()>,
+    on_view_created: PubSub<()>,
 }
 
 #[derive(Clone, Default)]
@@ -61,8 +70,31 @@ impl Session {
     }
 
     /// Set a callback for `TableStats` updates when this perspective table updates.
-    pub fn add_on_update_callback(&self, on_update: impl Fn() + 'static) {
-        self.borrow_mut().on_update.push(Box::new(on_update));
+    pub fn add_on_update_callback(
+        &self,
+        on_update: impl Fn(()) + 'static,
+    ) -> Subscription {
+        self.borrow().on_update.add_listener(on_update)
+    }
+
+    /// Set a callback for `TableStats` updates when this perspective table updates.
+    pub fn add_on_table_loaded(&self, on_table_loaded: Callback<()>) -> Subscription {
+        self.borrow().on_table_loaded.add_listener(on_table_loaded)
+    }
+
+    /// Set a callback for `TableStats` updates when this perspective table updates.
+    pub fn add_on_view_created(&self, on_view_created: Callback<()>) -> Subscription {
+        self.borrow().on_view_created.add_listener(on_view_created)
+    }
+
+    /// Reset this (presumably shared) `Session` to its initial state, returning a
+    /// bool indicating whether this `Session` had a table which was deleted.
+    /// TODO decide whether to delete the table.
+    pub fn reset(&self) -> bool {
+        self.clear_view();
+        self.borrow_mut().metadata = None;
+        self.borrow_mut().table = None;
+        false
     }
 
     /// Reset this `Session`'s state with a new `Table`.  Implicitly calls
@@ -71,28 +103,36 @@ impl Session {
         self,
         table: JsPerspectiveTable,
     ) -> Result<JsValue, JsValue> {
+        let column_names = {
+            let columns = table.columns().await?;
+            if columns.length() > 0 {
+                (0..columns.length())
+                    .map(|i| columns.get(i).as_string().unwrap())
+                    .collect::<Vec<String>>()
+            } else {
+                vec![]
+            }
+        };
+
         self.clear_view();
         self.borrow_mut().table = Some(table);
+        self.borrow_mut().metadata = Some(SessionMetadataCache { column_names });
+        self.0.borrow().on_table_loaded.emit_all(());
+
         self.set_initial_stats().await?;
         Ok(JsValue::UNDEFINED)
     }
 
+    pub fn get_table(&self) -> Option<JsPerspectiveTable> {
+        self.borrow().table.clone()
+    }
+
     /// The `table`'s unique column names.  This value is not
-    pub async fn get_column_names(self) -> Result<Vec<String>, JsValue> {
-        let table_opt = self.borrow().table.clone();
-        match table_opt {
-            None => Ok(vec![]),
-            Some(table) => {
-                let columns = table.columns().await?;
-                if columns.length() > 0 {
-                    Ok((0..columns.length())
-                        .map(|i| columns.get(i).as_string().unwrap())
-                        .collect::<Vec<String>>())
-                } else {
-                    Ok(vec![])
-                }
-            }
-        }
+    pub fn get_all_columns(&self) -> Option<Vec<String>> {
+        self.borrow()
+            .metadata
+            .as_ref()
+            .map(|meta| meta.column_names.clone())
     }
 
     /// Validate an expression string (as a JsValue since it comes from `monaco`),
@@ -113,55 +153,71 @@ impl Session {
         }
     }
 
-    pub fn copy_to_clipboard(&self, flat: bool) {
-        self.flat_dispatch(flat, copy_flat, copy);
+    pub async fn copy_to_clipboard(self, flat: bool) -> Result<(), JsValue> {
+        if flat {
+            let table = self.borrow().table.clone();
+            if let Some(table) = table {
+                copy_flat(&table).await?;
+            }
+        } else {
+            let view = self
+                .borrow()
+                .view_sub
+                .as_ref()
+                .map(|x| x.get_view().clone());
+
+            if let Some(view) = view {
+                copy(&view).await?;
+            }
+        };
+
+        Ok(())
     }
 
-    pub fn download_as_csv(&self, flat: bool) {
-        self.flat_dispatch(flat, download_flat, download);
+    pub async fn download_as_csv(self, flat: bool) -> Result<(), JsValue> {
+        if flat {
+            let table = self.borrow().table.clone();
+            if let Some(table) = table {
+                download_flat(&table).await?;
+            }
+        } else {
+            let view = self
+                .borrow()
+                .view_sub
+                .as_ref()
+                .map(|x| x.get_view().clone());
+
+            if let Some(view) = view {
+                download(&view).await?;
+            }
+        };
+
+        Ok(())
     }
 
-    pub fn get_view(&self) -> Option<JsPerspectiveView> {
-        self.borrow().view.clone()
+    pub fn get_view(&self) -> Option<View> {
+        self.borrow()
+            .view_sub
+            .as_ref()
+            .map(|sub| sub.get_view().clone())
     }
 
     pub fn get_table_stats(&self) -> Option<TableStats> {
         self.borrow().stats.clone()
     }
 
-    pub async fn create_view(
-        self,
-        config: &ViewConfig,
-    ) -> Result<JsPerspectiveView, JsValue> {
-        self.clear_view();
-        let js_config = JsValue::from_serde(config)
-            .to_jserror()?
-            .unchecked_into::<JsPerspectiveViewConfig>();
-
-        let table = self.borrow().table.clone().unwrap();
-        let view = table.view(&js_config).await?;
-        self.set_view(view.clone());
-        Ok(view)
-    }
-
-    pub fn clear_view(&self) {
-        if let Some(view) = self.borrow_mut().view.take() {
-            spawn_local(async move {
-                view.delete().await.expect("Failed to delete View");
-            });
-        }
-
-        self.borrow_mut().view_sub = None;
-    }
-
-    pub fn reset_stats(&self) {
-        self.update_stats(TableStats::default());
+    pub fn get_view_config(&self) -> ViewConfig {
+        self.borrow().config.clone()
     }
 
     /// Set a new `View` (derived from this `Session`'s `Table`), and create the
     /// `update()` subscription.
-    fn set_view(&self, view: JsPerspectiveView) {
+    pub async fn create_view(&self, config: ViewConfigUpdate) -> Result<View, JsValue> {
+        self.clear_view();
+        self.validate_and_apply_view_config(config).await?;
+        let js_config = self.borrow().config.as_jsvalue()?;
         let table = self.borrow().table.clone().unwrap();
+        let view = table.view(&js_config).await?;
         let on_stats = Callback::from({
             let this = self.clone();
             move |stats| this.update_stats(stats)
@@ -172,15 +228,34 @@ impl Session {
             move |_| this.on_update()
         });
 
-        let sub = ViewSubscription::new(table, view.clone(), on_stats, on_update);
-        self.borrow_mut().view = Some(view);
+        let sub = {
+            let config = self.borrow().config.clone();
+            ViewSubscription::new(table, view, config, on_stats, on_update)
+        };
+
         self.borrow_mut().view_sub = Some(sub);
+        self.0.borrow().on_view_created.emit_all(());
+
+        Ok(self
+            .0
+            .borrow()
+            .view_sub
+            .as_ref()
+            .unwrap()
+            .get_view()
+            .clone())
+    }
+
+    fn clear_view(&self) {
+        self.borrow_mut().view_sub = None;
+    }
+
+    pub fn reset_stats(&self) {
+        self.update_stats(TableStats::default());
     }
 
     fn on_update(&self) {
-        for callback in self.0.borrow().on_update.iter() {
-            callback();
-        }
+        self.0.borrow().on_update.emit_all(());
     }
 
     /// Update the this `Session`'s `TableStats` data from the `Table`.
@@ -209,18 +284,49 @@ impl Session {
         }
     }
 
-    fn flat_dispatch(
+    async fn validate_and_apply_view_config(
         &self,
-        flat: bool,
-        f1: fn(&JsPerspectiveTable) -> Result<js_sys::Promise, JsValue>,
-        f2: fn(&JsPerspectiveView) -> Result<js_sys::Promise, JsValue>,
-    ) {
-        if flat {
-            if let Some(table) = self.borrow().table.as_ref() {
-                let _ = f1(table).unwrap();
-            }
-        } else if let Some(view_sub) = self.borrow().view_sub.as_ref() {
-            let _ = f2(view_sub.view()).unwrap();
-        };
+        update: ViewConfigUpdate,
+    ) -> Result<(), JsValue> {
+        // let mut config = self.borrow().config.clone();
+        self.borrow_mut().config.apply_update(update);
+        // let all_columns: HashSet<String> = self
+        //     .borrow()
+        //     .metadata
+        //     .as_ref()
+        //     .unwrap()
+        //     .column_names
+        //     .iter()
+        //     .chain(config.expressions.iter())
+        //     .cloned()
+        //     .collect();
+
+        // let mut view_columns: HashSet<&str> = HashSet::new();
+
+        // // fix
+        // for column in config.columns.iter() {
+        //     if all_columns.contains(column) {
+        //         // TODO get real default
+        //         if !config.aggregates.contains_key(column) {
+        //             config.aggregates.insert(
+        //                 column.to_owned(),
+        //                 Aggregate::SingleAggregate(SingleAggregate::Count),
+        //             );
+        //         }
+        //         view_columns.insert(column);
+        //     } else {
+        //         return Err(JsValue::from(format!(
+        //             "Unknown \"{}\" in `columns`",
+        //             column
+        //         )));
+        //     }
+        // }
+
+        // config
+        //     .aggregates
+        //     .retain(|column, _| view_columns.contains(column.as_str()));
+
+        // self.borrow_mut().config = config;
+        Ok(())
     }
 }

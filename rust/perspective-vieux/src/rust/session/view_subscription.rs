@@ -6,9 +6,12 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use crate::config::*;
 use crate::js::perspective::*;
 use crate::utils::*;
 use crate::*;
+
+use super::view::*;
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -26,7 +29,8 @@ pub struct TableStats {
 #[derive(Clone)]
 struct ViewSubscriptionData {
     table: JsPerspectiveTable,
-    view: JsPerspectiveView,
+    view: View,
+    config: ViewConfig,
     on_stats: Callback<TableStats>,
     on_update: Callback<()>,
 }
@@ -49,15 +53,12 @@ impl ViewSubscriptionData {
     /// TODO Use serde to serialize the full view config, instead of calculating
     /// `is_pivot` here.
     async fn update_view_stats(self) -> Result<JsValue, JsValue> {
-        let config = self.view.get_config().await?;
         let num_rows = self.table.size().await? as u32;
         let virtual_rows = self.view.num_rows().await? as u32;
         let stats = TableStats {
             num_rows: Some(num_rows),
             virtual_rows: Some(virtual_rows),
-            is_pivot: config.row_pivots().length() > 0
-                || config.column_pivots().length() > 0
-                || virtual_rows != num_rows,
+            is_pivot: self.config.is_pivot() || virtual_rows != num_rows,
         };
 
         self.on_stats.emit(stats);
@@ -78,12 +79,14 @@ impl ViewSubscription {
     pub fn new(
         table: JsPerspectiveTable,
         view: JsPerspectiveView,
+        config: ViewConfig,
         on_stats: Callback<TableStats>,
         on_update: Callback<()>,
     ) -> ViewSubscription {
         let data = ViewSubscriptionData {
             table,
-            view,
+            view: View::new(view),
+            config,
             on_stats,
             on_update,
         };
@@ -100,7 +103,7 @@ impl ViewSubscription {
     }
 
     /// Getter for the underlying `View()`.
-    pub fn view(&self) -> &JsPerspectiveView {
+    pub fn get_view(&self) -> &View {
         &self.data.view
     }
 

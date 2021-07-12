@@ -153,9 +153,9 @@ impl ExpressionEditor {
     /// Initialize the `monaco-editor` for this `<perspective-expression-editor>`.
     /// This method should only be called once per element.
     async fn init_monaco_editor(self) -> Result<JsValue, JsValue> {
-        let column_names = self.props.session.get_column_names();
+        let column_names = self.props.session.get_all_columns();
         let monaco = init_monaco(&self.props.monaco_theme).await.unwrap();
-        set_global_completion_column_names(column_names.await?);
+        set_global_completion_column_names(column_names.to_jserror()?);
         let args = EditorArgs {
             theme: "exprtk-theme",
             value: "",

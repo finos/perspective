@@ -8,8 +8,8 @@
 
 use crate::components::plugin_selector::*;
 use crate::js::perspective_viewer::*;
-use crate::plugin::registry::*;
-use crate::plugin::*;
+use crate::renderer::registry::*;
+use crate::renderer::*;
 use crate::session::*;
 use crate::utils::WeakComponentLink;
 use crate::*;
@@ -17,7 +17,9 @@ use crate::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
 use wasm_bindgen_test::*;
+use web_sys::*;
 use yew::prelude::*;
 
 wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
@@ -64,6 +66,8 @@ wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
             save() {}
 
             restore() {}
+
+            delete() {}
         };
     }
 
@@ -93,9 +97,11 @@ pub fn test_plugin_selected() {
     let link: WeakComponentLink<PluginSelector> = WeakComponentLink::default();
     let result: Rc<RefCell<Option<JsPerspectiveViewerPlugin>>> =
         Rc::new(RefCell::new(None));
+    let document = window().unwrap().document().unwrap();
+    let elem: HtmlElement = document.create_element("div").unwrap().unchecked_into();
     let session = Session::default();
-    let plugin = Plugin::new(session);
-    plugin.add_on_plugin_changed({
+    let renderer = Renderer::new(elem, session);
+    let _sub = renderer.add_on_plugin_changed({
         clone!(result);
         move |val| {
             *result.borrow_mut() = Some(val);
@@ -104,7 +110,7 @@ pub fn test_plugin_selected() {
 
     test_html! {
         <PluginSelector
-            plugin=plugin.clone()
+            renderer=renderer.clone()
             weak_link=link.clone()>
 
         </PluginSelector>
@@ -119,5 +125,5 @@ pub fn test_plugin_selected() {
         Some("Debug A".to_owned())
     );
 
-    assert_eq!(plugin.get_plugin(None).unwrap().name(), "Debug A");
+    assert_eq!(renderer.get_active_plugin().unwrap().name(), "Debug A");
 }

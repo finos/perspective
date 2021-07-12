@@ -60,14 +60,14 @@ pub async fn test_view_num_rows() {
     assert_eq!(num_rows, 3_f64);
 }
 
-#[wasm_bindgen_test]
-pub async fn test_view_get_config() {
-    let table = get_mock_table().await;
-    let view = table.view(js_object!().unchecked_ref()).await.unwrap();
-    let config = view.get_config().await.unwrap();
-    assert!(JsValue::is_object(&config));
-    let row_pivot_len = config.row_pivots().length();
-    assert_eq!(row_pivot_len, 0);
-    let col_pivot_len = config.column_pivots().length();
-    assert_eq!(col_pivot_len, 0);
-}
+// #[wasm_bindgen_test]
+// pub async fn test_view_get_config() {
+//     let table = get_mock_table().await;
+//     let view = table.view(js_object!().unchecked_ref()).await.unwrap();
+//     let config = view.get_config().await.unwrap();
+//     assert!(JsValue::is_object(&config));
+//     let row_pivot_len = config.row_pivots().length();
+//     assert_eq!(row_pivot_len, 0);
+//     let col_pivot_len = config.column_pivots().length();
+//     assert_eq!(col_pivot_len, 0);
+// }

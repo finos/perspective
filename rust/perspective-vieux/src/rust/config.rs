@@ -8,10 +8,9 @@
 
 mod view_config;
 
-use crate::plugin::Plugin;
+use crate::renderer::Renderer;
 
-pub use view_config::ViewConfig;
-pub use view_config::ViewConfigUpdate;
+pub use view_config::*;
 
 use serde::Deserialize;
 use serde::Deserializer;
@@ -29,9 +28,9 @@ pub struct ViewerConfig {
 }
 
 impl ViewerConfig {
-    pub fn new(plugin: &Plugin) -> ViewerConfig {
+    pub fn new(renderer: &Renderer) -> ViewerConfig {
         ViewerConfig {
-            plugin: plugin.get_plugin(None).unwrap().name(),
+            plugin: renderer.get_active_plugin().unwrap().name(),
             view_config: ViewConfig::default(),
             plugin_config: Value::Null,
         }

@@ -6,14 +6,17 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::plugin::*;
+use crate::renderer::*;
+use crate::session::*;
 
+use wasm_bindgen_futures::future_to_promise;
 use yew::prelude::*;
 
 #[derive(Properties, Clone)]
 pub struct RenderWarningProps {
     pub dimensions: Option<(usize, usize, Option<usize>, Option<usize>)>,
-    pub plugin: Plugin,
+    pub renderer: Renderer,
+    pub session: Session,
 }
 
 pub enum RenderWarningMsg {
@@ -69,9 +72,12 @@ impl Component for RenderWarning {
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
             RenderWarningMsg::DismissWarning => {
-                let plugin = self.props.plugin.get_plugin(None).unwrap();
-                plugin.set_render_warning(false);
-                self.props.plugin._trigger().unwrap();
+                let renderer = self.props.renderer.clone();
+                let session = self.props.session.clone();
+                let _promise = future_to_promise(async move {
+                    renderer.disable_active_plugin_render_warning();
+                    renderer.update(&session).await
+                });
             }
         };
         true

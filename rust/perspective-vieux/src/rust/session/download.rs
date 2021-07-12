@@ -6,37 +6,27 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use crate::config::*;
 use crate::js::perspective::*;
 use crate::*;
+
+use super::view::*;
 
 use js_sys::*;
 use std::iter::FromIterator;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use wasm_bindgen_futures::future_to_promise;
 
 /// Download a flat (unpivoted with all columns) CSV.
-#[wasm_bindgen]
-pub fn download_flat(table: &JsPerspectiveTable) -> Result<Promise, JsValue> {
-    clone!(table);
-    Ok(future_to_promise(async move {
-        let view = table
-            .view(&js_object!().unchecked_into::<JsPerspectiveViewConfig>())
-            .await?;
-        download_async(&view).await?;
-        view.delete().await?;
-        Ok(JsValue::UNDEFINED)
-    }))
+pub async fn download_flat(table: &JsPerspectiveTable) -> Result<(), JsValue> {
+    let view = table.view(&ViewConfig::default().as_jsvalue()?).await?;
+    download_async(&view).await?;
+    view.delete().await
 }
 
 /// Download a CSV
-#[wasm_bindgen]
-pub fn download(view: &JsPerspectiveView) -> Result<Promise, JsValue> {
-    clone!(view);
-    Ok(future_to_promise(async move {
-        download_async(&view).await?;
-        Ok(JsValue::NULL)
-    }))
+pub async fn download(view: &View) -> Result<(), JsValue> {
+    download_async(&view).await
 }
 
 /// Download a CSV, but not a `Promise`.  Used to implement the public methods.

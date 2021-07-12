@@ -31,9 +31,9 @@ customElements.define(
             let viewer = this.parentElement;
             let table = viewer.table;
             if (!this._initialized) {
-                this.model = await createModel(this.datagrid, table, view);
                 this.innerHTML = "";
                 this.appendChild(this.datagrid);
+                this.model = await createModel(this.datagrid, table, view);
                 configureRegularTable(this.datagrid, this.model);
                 await configureRowSelectable.call(this.model, this.datagrid, viewer);
                 await configureClick.call(this.model, this.datagrid, viewer);
@@ -121,6 +121,13 @@ customElements.define(
 
             const datagrid = this.datagrid;
             datagrid[PLUGIN_SYMBOL] = token;
+        }
+
+        delete() {
+            if (this.datagrid.table_model) {
+                this.datagrid._resetAutoSize();
+            }
+            this.datagrid.clear();
         }
     }
 );

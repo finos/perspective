@@ -77,9 +77,6 @@
         };
 
         window.addEventListener("load", () => {
-            const plugin = window.getPlugin("Heatmap");
-            plugin.max_cells = 10000;
-            plugin.max_columns = 200;
             window.workspace.tables.set("olympics", datasource());
 
             window.workspace.restore({
@@ -117,9 +114,9 @@
                         },
                         sort: [["total", "desc"]],
                         columns: ["total", "gold", "bronze", "silver", "sport"],
-                        plugin_config: {
-                            selected: "Canada"
-                        },
+                        // plugin_config: {
+                        //     selected: "Canada"
+                        // },
                         master: true,
                         name: "Test Widget Two",
                         table: "olympics"
@@ -130,7 +127,7 @@
                         "column-pivots": ["age"],
                         sort: [["total"]],
                         columns: ["total"],
-                        filters: [["country", "==", "Canada"]],
+                        filters: [],
                         plugin_config: {
                             realValues: ["total"]
                         },
@@ -157,7 +154,7 @@
                             age: "avg"
                         },
                         filters: [
-                            ["country", "==", "Canada"],
+                            // ["country", "==", "Canada"],
                             ["year", "in", ["2002", "2006", "2010", ""]]
                         ],
                         columns: ["age", "total"],
@@ -177,7 +174,7 @@
                             age: "avg"
                         },
                         filters: [
-                            ["country", "==", "Canada"],
+                            // ["country", "==", "Canada"],
                             ["year", "in", ["2000", "2004", "2008", "2012", ""]]
                         ],
                         plugin_config: {

@@ -52,7 +52,6 @@
     "author": "",
     "license": "Apache-2.0",
     "dependencies": {
-        "@babel/runtime": "^7.8.4",
         "@finos/perspective": "^0.10.0",
         "@types/react": "^16.8.6",
         "awesomplete": "^1.1.2",

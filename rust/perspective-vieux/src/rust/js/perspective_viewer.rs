@@ -48,6 +48,8 @@ use super::perspective::JsPerspectiveView;
         save() {}
 
         restore() {}
+
+        delete() {}
     }
 
     export function register_default_plugin_web_component() {
@@ -100,6 +102,9 @@ extern "C" {
 
     #[wasm_bindgen(method)]
     pub fn restore(this: &JsPerspectiveViewerPlugin, token: &JsValue);
+
+    #[wasm_bindgen(method)]
+    pub fn delete(this: &JsPerspectiveViewerPlugin);
 
     #[wasm_bindgen(method, catch)]
     pub async fn draw(
