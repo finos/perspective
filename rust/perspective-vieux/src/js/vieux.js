@@ -46,51 +46,55 @@ class PerspectiveVieuxElement extends HTMLElement {
     }
 
     load(table) {
-        _await_index(() => this._instance.load(table));
-    }
-
-    _draw(...args) {
-        return _await_index(() => this._instance._draw(...args));
+        _await_index(() => this._instance.js_load(table));
     }
 
     resize() {
-        return _await_index(() => this._instance.resize());
+        return _await_index(() => this._instance.js_resize());
     }
 
-    _get_render_time() {
-        return _await_index(() => this._instance._get_render_time());
+    getTable() {
+        return _await_index(() => this._instance.js_get_table());
     }
 
-    _set_render_time(val) {
-        return _await_index(() => this._instance._set_render_time(val));
+    restore(...args) {
+        return _await_index(() => this._instance.js_restore(...args));
     }
 
-    _create_view(...args) {
-        return _await_index(() => this._instance._create_view(...args));
+    delete() {
+        return _await_index(() => this._instance.js_delete());
     }
 
-    _get_maxes(limit) {
-        return _await_index(() => this._instance._get_maxes(limit));
+    download(...args) {
+        return _await_index(() => this._instance.js_download(...args));
     }
 
-    toggle_config(force) {
-        return _await_index(() => this._instance.toggle_config(force));
+    copy(...args) {
+        return _await_index(() => this._instance.js_copy(...args));
+    }
+
+    setThrottle(...args) {
+        return _await_index(() => this._instance.js_set_throttle(...args));
+    }
+
+    toggleConfig(force) {
+        return _await_index(() => this._instance.js_toggle_config(force));
     }
 
     get_plugin(name) {
-        return _await_index(() => this._instance.get_plugin(name));
+        return _await_index(() => this._instance.js_get_plugin(name));
     }
 
     get_all_plugins() {
-        return _await_index(() => this._instance.get_all_plugins());
+        return _await_index(() => this._instance.js_get_all_plugins());
     }
 
-    set_plugin(name) {
-        return _await_index(() => this._instance.set_plugin(name));
+    js_set_plugin(name) {
+        return _await_index(() => this._instance.js_set_plugin(name));
     }
 
     _open_expression_editor(target) {
-        return _await_index(() => this._instance._open_expression_editor(target));
+        return _await_index(() => this._instance._js_open_expression_editor(target));
     }
 }
 

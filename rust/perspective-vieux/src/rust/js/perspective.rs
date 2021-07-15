@@ -77,7 +77,6 @@ extern "C" {
         config: &JsPerspectiveViewConfig
     ) -> Result<JsValue, JsValue>;
 
-    #[derive(Clone)]
     pub type JsPerspectiveView;
 
     #[wasm_bindgen(method, catch, js_name = delete)]
@@ -104,18 +103,18 @@ extern "C" {
     #[wasm_bindgen(method, catch, js_name = num_columns)]
     pub async fn _num_columns(this: &JsPerspectiveView) -> Result<JsValue, JsValue>;
 
-    #[wasm_bindgen(method, catch, js_name = get_config)]
-    pub async fn _get_config(this: &JsPerspectiveView) -> Result<JsValue, JsValue>;
+    // #[wasm_bindgen(method, catch, js_name = get_config)]
+    // pub async fn _get_config(this: &JsPerspectiveView) -> Result<JsValue, JsValue>;
 
     pub type JsPerspectiveViewConfig;
 
-    // TODO
+    pub type JsPerspectiveViewConfigUpdate;
 
-    #[wasm_bindgen(method, getter)]
-    pub fn row_pivots(this: &JsPerspectiveViewConfig) -> js_sys::Array;
+    // #[wasm_bindgen(method, getter)]
+    // pub fn row_pivots(this: &JsPerspectiveViewConfig) -> js_sys::Array;
 
-    #[wasm_bindgen(method, getter)]
-    pub fn column_pivots(this: &JsPerspectiveViewConfig) -> js_sys::Array;
+    // #[wasm_bindgen(method, getter)]
+    // pub fn column_pivots(this: &JsPerspectiveViewConfig) -> js_sys::Array;
 
     pub type JsPerspectiveValidatedExpressions;
 
@@ -142,7 +141,7 @@ impl JsPerspectiveView {
     async_typed!(_num_columns, num_columns(&self) -> f64);
     async_typed!(_schema, schema(&self) -> js_sys::Object);
     async_typed!(_delete, delete(self) -> ());
-    async_typed!(_get_config, get_config(&self) -> JsPerspectiveViewConfig);
+    // async_typed!(_get_config, get_config(&self) -> JsPerspectiveViewConfig);
 }
 
 #[derive(Deserialize)]

@@ -15,7 +15,7 @@ pub mod config;
 pub mod custom_elements;
 pub mod exprtk;
 pub mod js;
-pub mod plugin;
+pub mod renderer;
 pub mod session;
 pub mod utils;
 

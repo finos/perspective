@@ -6,23 +6,15 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-mod activate;
-mod limits;
-mod render_timer;
-
 use crate::components::vieux::*;
 use crate::config::*;
 use crate::custom_elements::expression_editor::PerspectiveExpressionEditorElement;
 use crate::js::perspective::*;
 use crate::js::perspective_viewer::JsPerspectiveViewerPlugin;
-use crate::plugin::*;
+use crate::renderer::*;
 use crate::session::Session;
 use crate::utils::*;
 use crate::*;
-
-use activate::activate_plugin;
-use limits::get_row_and_col_limits;
-use render_timer::MovingWindowRenderTimer;
 
 use futures::channel::oneshot::*;
 use js_sys::*;
@@ -43,67 +35,74 @@ pub struct PerspectiveVieuxElement {
     elem: HtmlElement,
     root: ComponentLink<PerspectiveVieux>,
     session: Session,
-    plugin: Plugin,
+    renderer: Renderer,
+    subscriptions: Rc<[Subscription; 3]>,
     expression_editor: Rc<RefCell<Option<PerspectiveExpressionEditorElement>>>,
     config: Rc<RefCell<ViewerConfig>>,
-    timer: MovingWindowRenderTimer,
 }
 
 #[wasm_bindgen]
 impl PerspectiveVieuxElement {
     #[wasm_bindgen(constructor)]
     pub fn new(elem: web_sys::HtmlElement) -> PerspectiveVieuxElement {
-        let children = elem.children();
         let init = web_sys::ShadowRootInit::new(web_sys::ShadowRootMode::Open);
         let shadow_root = elem
             .attach_shadow(&init)
             .unwrap()
             .unchecked_into::<web_sys::Element>();
 
+        // Application State
         let session = Session::default();
-        let plugin = Plugin::new(session.clone());
+        let renderer = Renderer::new(elem.clone(), session.clone());
+        let config = Rc::new(RefCell::new(ViewerConfig::new(&renderer)));
 
+        // Create Yew App
         let props = PerspectiveVieuxProps {
             elem: elem.clone(),
-            panels: (
-                children.item(0).unwrap().unchecked_into(),
-                children.item(1).unwrap().unchecked_into(),
-            ),
             session: session.clone(),
-            plugin: plugin.clone(),
+            renderer: renderer.clone(),
             weak_link: WeakComponentLink::default(),
         };
 
-        let config = Rc::new(RefCell::new(ViewerConfig::new(&plugin)));
         let app = App::<PerspectiveVieux>::new();
         let root = app.mount_with_props(shadow_root, props);
-        let pve = PerspectiveVieuxElement {
-            elem,
-            root,
-            session: session.clone(),
-            plugin: plugin.clone(),
-            expression_editor: Rc::new(RefCell::new(None)),
-            config,
-            timer: MovingWindowRenderTimer::default(),
+
+        // Create callbacks
+        let update_sub = session.add_on_update_callback({
+            clone!(renderer, session);
+            move |_| {
+                clone!(renderer, session);
+                drop(future_to_promise(
+                    async move { renderer.update(&session).await },
+                ))
+            }
+        });
+
+        let plugin_sub = renderer.add_on_plugin_changed({
+            clone!(elem);
+            move |plugin| dispatch_plugin_changed(&elem, &plugin)
+        });
+
+        let limit_sub = {
+            let callback = root.callback(|x| Msg::RenderLimits(Some(x)));
+            renderer.add_on_limits_changed(callback)
         };
 
-        plugin.add_on_plugin_changed({
-            clone!(pve);
-            move |plugin| pve.on_plugin_changed(plugin)
-        });
-
-        session.add_on_update_callback({
-            clone!(pve);
-            move || pve.on_update()
-        });
-
-        pve
+        PerspectiveVieuxElement {
+            elem,
+            root,
+            session,
+            renderer,
+            expression_editor: Rc::new(RefCell::new(None)),
+            subscriptions: Rc::new([plugin_sub, update_sub, limit_sub]),
+            config,
+        }
     }
 
     pub fn connected_callback(&self) {}
 
     /// Loads a promise to a `JsPerspectiveTable` in this viewer.
-    pub fn load(&self, table: js_sys::Promise) -> js_sys::Promise {
+    pub fn js_load(&self, table: js_sys::Promise) -> js_sys::Promise {
         assert!(!table.is_undefined());
         let (sender, receiver) = channel::<Result<JsValue, JsValue>>();
         let root = self.root.clone();
@@ -115,85 +114,74 @@ impl PerspectiveVieuxElement {
         })
     }
 
-    pub fn _create_view(&self, update: &JsValue, force: bool) -> js_sys::Promise {
-        future_to_promise(
-            self.clone()
-                .create_view(update.into_serde().unwrap(), force),
-        )
+    pub fn js_delete(&self) -> Result<bool, JsValue> {
+        let deleted = self.session.reset();
+        self.renderer.reset()?;
+        Ok(deleted)
     }
 
-    async fn create_view(
-        self,
-        update: ViewConfigUpdate,
-        force: bool,
-    ) -> Result<JsValue, JsValue> {
-        let _changed = self.config.borrow_mut().view_config.apply_update(update);
-        let config = self.config.borrow().view_config.clone();
-        self.session.clear_view();
-        self.session.clone().create_view(&config).await?;
-        let _ = self.clone().draw(force, false).await?;
-        Ok(self.session.get_view().unwrap().unchecked_into())
+    pub fn js_get_table(&self) -> Option<JsPerspectiveTable> {
+        self.session.get_table()
     }
 
-    pub fn resize(&self) -> js_sys::Promise {
-        let plugin = self.plugin.clone();
-        future_to_promise(async move {
-            plugin
-                .draw_lock()
-                .debounce(async {
-                    let jsplugin = plugin.get_plugin(None)?;
-                    jsplugin.resize().await?;
-                    Ok(JsValue::from(true))
-                })
-                .await
+    /// Restores this element to a full/partial `JsPerspectiveViewConfig`.
+    ///
+    /// # Arguments
+    /// - `update` The config to restore to, as returned by `.save()`.
+    pub fn js_restore(&self, update: JsPerspectiveViewConfigUpdate) -> js_sys::Promise {
+        future_to_promise({
+            let session = self.session.clone();
+            let renderer = self.renderer.clone();
+            async move {
+                let update = update.into_serde().to_jserror()?;
+                session.create_view(update).await?;
+                drop(renderer.draw(&session).await?);
+                Ok(session.get_view().as_ref().unwrap().as_jsvalue())
+            }
         })
     }
 
-    pub fn _get_render_time(&self) -> f64 {
-        self.timer.get_avg()
+    pub fn js_download(&self, flat: bool) -> js_sys::Promise {
+        let session = self.session.clone();
+        future_to_promise(async move {
+            session.download_as_csv(flat).await?;
+            Ok(JsValue::UNDEFINED)
+        })
     }
 
-    pub fn _set_render_time(&mut self, val: Option<f64>) {
-        self.timer.set_render_time(val);
+    pub fn js_copy(&self, flat: bool) -> js_sys::Promise {
+        let session = self.session.clone();
+        future_to_promise(async move {
+            session.copy_to_clipboard(flat).await?;
+            Ok(JsValue::UNDEFINED)
+        })
     }
 
-    pub fn _draw(&self, force: bool, is_update: bool) -> js_sys::Promise {
-        future_to_promise(self.clone().draw(force, is_update))
+    pub fn js_resize(&self) -> js_sys::Promise {
+        let renderer = self.renderer.clone();
+        future_to_promise(async move { renderer.resize().await })
     }
 
-    async fn draw(self, force: bool, is_update: bool) -> Result<JsValue, JsValue> {
-        self.plugin
-            .draw_lock()
-            .debounce(self.timer.capture_time(async {
-                if let Some(view) = self.session.get_view() {
-                    let plugin = self.plugin.get_plugin(None)?;
-                    let (num_cols, num_rows, max_cols, max_rows) =
-                        get_row_and_col_limits(&view, &plugin).await?;
-
-                    self.root.send_message(Msg::RenderDimensions(Some((
-                        num_cols, num_rows, max_cols, max_rows,
-                    ))));
-
-                    activate_plugin(&self.elem, &plugin, async {
-                        if is_update {
-                            plugin.update(&view, max_cols, max_rows, force).await
-                        } else {
-                            plugin.draw(&view, max_cols, max_rows, force).await
-                        }
-                    })
-                    .await
-                } else {
-                    Ok(JsValue::from(true))
-                }
-            }))
-            .await
+    /// Determines the render throttling behavior. Can be an integer, for
+    /// millisecond window to throttle render event; or, if `None`, adaptive throttling
+    /// will be calculated from the measured render time of the last 5 frames.
+    ///
+    /// # Examples
+    /// // Only draws at most 1 frame/sec.
+    /// vieux.js_set_throttle(Some(1000_f64));
+    ///
+    /// # Arguments
+    /// `throttle` - The throttle rate - milliseconds (f64), or `None` for adaptive
+    /// throttling.
+    pub fn js_set_throttle(&mut self, val: Option<f64>) {
+        self.renderer.set_throttle(val);
     }
 
     /// Toggle (or force) the config panel open/closed.
     ///
     /// # Arguments
     /// - `force` Force the state of the panel open or closed, or `None` to toggle.
-    pub fn toggle_config(&self, force: Option<bool>) -> js_sys::Promise {
+    pub fn js_toggle_config(&self, force: Option<bool>) -> js_sys::Promise {
         let this = self.clone();
         let (sender, receiver) = channel::<Result<JsValue, JsValue>>();
         let msg = Msg::ToggleConfig(force, Some(sender));
@@ -206,8 +194,8 @@ impl PerspectiveVieuxElement {
     /// Get an `Array` of all of the plugin custom elements registered for this element.
     /// This may not include plugins which called `registerPlugin()` after the host has
     /// rendered for the first time.
-    pub fn get_all_plugins(&self) -> Array {
-        Array::from_iter(self.plugin.get_all_plugins().iter())
+    pub fn js_get_all_plugins(&self) -> Array {
+        Array::from_iter(self.renderer.get_all_plugins().iter())
     }
 
     /// Gets a plugin Custom Element with the `name` field, or get the active plugin
@@ -216,11 +204,14 @@ impl PerspectiveVieuxElement {
     /// # Arguments
     /// - `name` The `name` property of a perspective plugin Custom Element, or `None`
     ///   for the active plugin's Custom Element.
-    pub fn get_plugin(
+    pub fn js_get_plugin(
         &self,
         name: Option<String>,
     ) -> Result<JsPerspectiveViewerPlugin, JsValue> {
-        self.plugin.get_plugin(name.as_deref())
+        match name {
+            None => self.renderer.get_active_plugin(),
+            Some(name) => self.renderer.get_plugin(&name),
+        }
     }
 
     /// Sets the active plugin to the plugin with the `name` field, or get the default
@@ -229,8 +220,8 @@ impl PerspectiveVieuxElement {
     /// # Arguments
     /// - `name` The `name` property of a perspective plugin Custom Element, or `None`
     ///   for the default plugin.
-    pub fn set_plugin(&mut self, name: Option<String>) -> Result<bool, JsValue> {
-        self.plugin.set_plugin(name.as_deref())
+    pub fn js_set_plugin(&mut self, name: Option<String>) -> Result<bool, JsValue> {
+        self.renderer.set_plugin(name.as_deref())
     }
 
     /// Opens an expression editor at the `target` position, by first creating a
@@ -238,20 +229,12 @@ impl PerspectiveVieuxElement {
     ///
     /// # Arguments
     /// - `target` The `HtmlElements` in the DOM to pin the floating editor modal to.
-    pub fn _open_expression_editor(&mut self, target: HtmlElement) {
+    pub fn _js_open_expression_editor(&mut self, target: HtmlElement) {
         let mut x = self.expression_editor.borrow_mut();
         match x.as_mut() {
             Some(x) => x.open(target).unwrap(),
             _ => *x = Some(self.create_expression_editor(target)),
         };
-    }
-
-    fn on_plugin_changed(&self, plugin: JsPerspectiveViewerPlugin) {
-        dispatch_plugin_changed(&self.elem, plugin);
-    }
-
-    fn on_update(&self) {
-        drop(self._draw(false, true))
     }
 
     fn create_expression_editor(
@@ -293,17 +276,6 @@ impl PerspectiveVieuxElement {
     }
 }
 
-fn dispatch_plugin_changed(elem: &HtmlElement, plugin: JsPerspectiveViewerPlugin) {
-    let mut event_init = web_sys::CustomEventInit::new();
-    event_init.detail(&plugin);
-    let event = web_sys::CustomEvent::new_with_event_init_dict(
-        "-perspective-plugin-changed",
-        &event_init,
-    );
-
-    elem.dispatch_event(&event.unwrap()).unwrap();
-}
-
 fn get_theme(elem: &HtmlElement) -> String {
     let styles = window().unwrap().get_computed_style(elem).unwrap().unwrap();
     match &styles.get_property_value("--monaco-theme") {
@@ -312,4 +284,15 @@ fn get_theme(elem: &HtmlElement) -> String {
         Ok(x) => x.trim(),
     }
     .to_owned()
+}
+
+fn dispatch_plugin_changed(elem: &HtmlElement, plugin: &JsPerspectiveViewerPlugin) {
+    let mut event_init = web_sys::CustomEventInit::new();
+    event_init.detail(plugin);
+    let event = web_sys::CustomEvent::new_with_event_init_dict(
+        "-perspective-plugin-changed",
+        &event_init,
+    );
+
+    elem.dispatch_event(&event.unwrap()).unwrap();
 }

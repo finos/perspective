@@ -155,7 +155,6 @@ function styleListener(regularTable) {
             td.classList.toggle("psp-color-mode-bar", plugin?.color_mode === "bar");
         }
     }
-    this._div_factory.clear();
 }
 
 function get_psp_type(metadata) {
@@ -359,7 +358,10 @@ async function dataListener(regularTable, x0, y0, x1, y1) {
             id: true
         });
         this._ids = columns.__ID__;
+    } else {
+        this._div_factory.clear();
     }
+
     const data = [],
         metadata = [];
     const column_headers = [];

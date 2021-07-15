@@ -8,7 +8,7 @@ module.exports = common({}, config => {
         },
         output: {
             filename: "[name].js",
-            webassemblyModuleFilename: "perspective-viewer.wasm",
+            chunkFilename: "perspective-viewer.[name].js",
             libraryTarget: "umd",
             path: path.resolve(__dirname, "../../dist/umd")
         },

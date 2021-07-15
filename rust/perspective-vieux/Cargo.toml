@@ -12,6 +12,7 @@ crate-type = ["cdylib", "rlib"]
 path = "src/rust/lib.rs"
 
 [features]
+new_column_selector = []
 default = ["wee_alloc", "console_error_panic_hook"]
 
 [dependencies]
@@ -22,7 +23,7 @@ js-intern = "0.3.1"
 num-format = "0.4.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0.59", features = ["raw_value"] }
-wasm-bindgen = { version = "=0.2.70" , features = ["serde-serialize"] }
+wasm-bindgen = { version = "=0.2.70", features = ["serde-serialize"] }
 wasm-bindgen-futures = "0.4.20"
 yew = "0.18.0" #{ git = "https://github.com/yewstack/yew", rev = "c51ab7f" } # "0.17.4"
 

@@ -18,6 +18,18 @@ export default () => {
                 dir: "dist/umd"
             },
             plugins: [
+                {
+                    name: "remove-js-after-hook",
+                    resolveId() {
+                        return null;
+                    },
+                    writeBundle: () => {
+                        fs.unlinkSync(path.resolve(__dirname, "..", "..", "dist", "umd", `${key}.js`));
+                    },
+                    load() {
+                        return null;
+                    }
+                },
                 postcss({
                     inject: false,
                     extract: path.resolve(`dist/umd/${key}.css`),

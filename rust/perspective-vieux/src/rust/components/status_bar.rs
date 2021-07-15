@@ -13,6 +13,7 @@ use crate::*;
 #[cfg(test)]
 use crate::utils::WeakComponentLink;
 
+use wasm_bindgen_futures::spawn_local;
 use yew::prelude::*;
 
 #[derive(Properties, Clone)]
@@ -58,11 +59,19 @@ impl Component for StatusBar {
                 false
             }
             StatusBarMsg::Export(flat) => {
-                self.props.session.download_as_csv(flat);
+                let session = self.props.session.clone();
+                spawn_local(async move {
+                    session.download_as_csv(flat).await.expect("Export failed");
+                });
+
                 false
             }
             StatusBarMsg::Copy(flat) => {
-                self.props.session.copy_to_clipboard(flat);
+                let session = self.props.session.clone();
+                spawn_local(async move {
+                    session.copy_to_clipboard(flat).await.expect("Copy failed");
+                });
+
                 false
             }
         }

@@ -7,7 +7,6 @@
  *
  */
 
-import {wasm} from "../../dist/esm/@finos/perspective-vieux";
 import "./plugins.js";
 import "./polyfill.js";
 
@@ -75,7 +74,6 @@ class PerspectiveViewer extends ActionElement {
         super();
         this._show_config = true;
         this._show_warnings = true;
-        this.__render_times = [];
         this._resize_handler = this.notifyResize.bind(this);
         this._edit_port = null;
         this._edit_port_lock = invertPromise();
@@ -408,15 +406,15 @@ class PerspectiveViewer extends ActionElement {
      */
     set plugin(v) {
         if (v === "null" || v === null || v === undefined) {
-            (this._vieux._instance || this._vieux).set_plugin();
+            (this._vieux._instance || this._vieux).js_set_plugin();
             return;
         }
 
         if (this.hasAttribute("plugin")) {
             let plugin = this.getAttribute("plugin");
-            (this._vieux._instance || this._vieux).set_plugin(plugin);
+            (this._vieux._instance || this._vieux).js_set_plugin(plugin);
         } else {
-            (this._vieux._instance || this._vieux).set_plugin();
+            (this._vieux._instance || this._vieux).js_set_plugin();
             return;
         }
     }
@@ -513,7 +511,7 @@ class PerspectiveViewer extends ActionElement {
             }
         }
 
-        this._vieux._set_render_time(this.getAttribute("throttle"));
+        this._vieux.setThrottle(this.getAttribute("throttle"));
     }
 
     /*
@@ -637,15 +635,9 @@ class PerspectiveViewer extends ActionElement {
      * underlying `perspective.table` actually being deleted.
      */
     delete() {
-        let x = this._clear_state();
-        this._vieux.get_plugin().then(plugin => {
-            if (plugin?.delete) {
-                plugin.delete();
-            }
-        });
-
+        let deleted = this._vieux.delete();
         window.removeEventListener("resize", this._resize_handler);
-        return x;
+        return deleted;
     }
 
     /**
@@ -769,12 +761,7 @@ class PerspectiveViewer extends ActionElement {
      * @memberof PerspectiveViewer
      */
     async download(flat = false) {
-        const {download_flat, download} = await wasm;
-        if (flat) {
-            await download_flat(this._table);
-        } else {
-            await download(this._view);
-        }
+        await this._vieux.download(flat);
     }
 
     /**
@@ -784,12 +771,7 @@ class PerspectiveViewer extends ActionElement {
      * {@link https://www.w3.org/TR/clipboard-apis/#allow-read-clipboard}.
      */
     async copy(flat = false) {
-        const {copy_flat, copy} = await wasm;
-        if (flat) {
-            await copy_flat(this._table);
-        } else {
-            await copy(this._view);
-        }
+        await this._vieux.copy(flat);
     }
 
     /**
@@ -798,7 +780,7 @@ class PerspectiveViewer extends ActionElement {
      * @async
      */
     async toggleConfig(force) {
-        await this._vieux.toggle_config(force);
+        await this._vieux.toggleConfig(force);
     }
 
     /**

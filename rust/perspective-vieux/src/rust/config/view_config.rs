@@ -6,9 +6,15 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use crate::js::perspective::JsPerspectiveViewConfig;
+use crate::utils::*;
+use std::fmt::Display;
+
 use serde::Deserialize;
 use serde::Serialize;
 use std::collections::HashMap;
+use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
 
 #[cfg(test)]
 use {crate::*, js_sys::Array, std::iter::FromIterator};
@@ -108,8 +114,8 @@ pub struct Filter(String, FilterOp, Scalar);
 #[serde()]
 pub struct Sort(String, SortDir);
 
-#[derive(Clone, Deserialize, Serialize)]
-#[cfg_attr(test, derive(Debug, PartialEq))]
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[cfg_attr(test, derive(PartialEq))]
 #[serde()]
 pub enum SingleAggregate {
     #[serde(rename = "sum")]
@@ -173,6 +179,23 @@ pub enum SingleAggregate {
     Low,
 }
 
+impl Display for SingleAggregate {
+    fn fmt(
+        &self,
+        fmt: &mut std::fmt::Formatter<'_>,
+    ) -> std::result::Result<(), std::fmt::Error> {
+        for char in format!("{:?}", self).chars() {
+            if char.is_lowercase() {
+                write!(fmt, "{}", char)?;
+            } else {
+                write!(fmt, " {}", char.to_lowercase().next().unwrap())?;
+            }
+        }
+
+        Ok(())
+    }
+}
+
 #[derive(Clone, Deserialize, Serialize)]
 #[cfg_attr(test, derive(Debug, PartialEq))]
 #[serde()]
@@ -189,6 +212,21 @@ pub enum Aggregate {
     MultiAggregate(MultiAggregate, String),
 }
 
+impl Display for Aggregate {
+    fn fmt(
+        &self,
+        fmt: &mut std::fmt::Formatter<'_>,
+    ) -> std::result::Result<(), std::fmt::Error> {
+        match self {
+            Aggregate::SingleAggregate(x) => write!(fmt, "{}", x)?,
+            Aggregate::MultiAggregate(MultiAggregate::WeightedMean, x) => {
+                write!(fmt, "mean by {}", x)?
+            }
+        };
+        Ok(())
+    }
+}
+
 #[derive(Clone, Deserialize, Default, Serialize)]
 #[cfg_attr(test, derive(Debug, PartialEq))]
 #[serde()]
@@ -200,7 +238,7 @@ pub struct ViewConfig {
     column_pivots: Vec<String>,
 
     #[serde(default)]
-    columns: Vec<String>,
+    pub columns: Vec<String>,
 
     #[serde(default)]
     filter: Vec<Filter>,
@@ -209,10 +247,10 @@ pub struct ViewConfig {
     sort: Vec<Sort>,
 
     #[serde(default)]
-    expressions: Vec<String>,
+    pub expressions: Vec<String>,
 
     #[serde(default)]
-    aggregates: HashMap<String, Aggregate>,
+    pub aggregates: HashMap<String, Aggregate>,
 }
 
 impl ViewConfig {
@@ -224,6 +262,16 @@ impl ViewConfig {
                 true
             }
         }
+    }
+
+    pub fn as_jsvalue(&self) -> Result<JsPerspectiveViewConfig, JsValue> {
+        JsValue::from_serde(&self)
+            .to_jserror()
+            .map(|x| x.unchecked_into())
+    }
+
+    pub fn is_pivot(&self) -> bool {
+        !self.row_pivots.is_empty() || !self.column_pivots.is_empty()
     }
 
     /// Apply `ViewConfigUpdate` to a `ViewConfig`, ignoring any fields in `update`

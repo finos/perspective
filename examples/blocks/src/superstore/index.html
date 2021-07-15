@@ -52,9 +52,6 @@
             };
 
             window.addEventListener("load", async () => {
-                const plugin = window.getPlugin("Heatmap");
-                plugin.max_cells = 10000;
-                plugin.max_columns = 200;
                 window.workspace.tables.set("superstore", datasource());
                 const layout = await get_layout();
                 window.workspace.restore(layout);

@@ -103,7 +103,6 @@ export class PerspectiveElement extends StateElement {
         let plugin = await this._vieux.get_plugin();
         this.shadowRoot.querySelector("#app").classList.add("hide_message");
 
-        this._clear_state();
         this._table = table;
 
         let [cols, schema] = await Promise.all([table.columns(), table.schema(true)]);
@@ -289,7 +288,7 @@ export class PerspectiveElement extends StateElement {
         };
 
         try {
-            this._view = await this._vieux._create_view(config, force_update);
+            this._view = await this._vieux.restore(config, force_update);
         } catch (err) {
             console.warn(err);
         } finally {
@@ -314,18 +313,6 @@ export class PerspectiveElement extends StateElement {
                 await plugin.restyleElement(this._view);
             }
         }
-    }
-
-    _clear_state() {
-        const all = [];
-        if (this._view) {
-            const view = this._view;
-            this._view = undefined;
-            all.push(view.delete());
-            view.remove_update(this._view_updater);
-            view.remove_delete();
-        }
-        return Promise.all(all);
     }
 
     _set_updating() {

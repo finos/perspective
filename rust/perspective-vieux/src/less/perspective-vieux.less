@@ -13,6 +13,7 @@
  @import "./render_warning.less";
 
 :host {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: stretch;
@@ -36,13 +37,14 @@
     #main_column {
         display: flex;
         flex-direction: column;
+    }
 
-        #main_panel_container {
-            flex: 1 1 auto;
-            position: relative;
-            box-shadow: var(--plugin--box-shadow, none);
-            overflow: hidden;
-        }
+    #main_panel_container {
+        flex: 1 1 auto;
+        position: relative;
+        box-shadow: var(--plugin--box-shadow, none);
+        background: var(--plugin--background, none);
+        overflow: hidden;
     }
 
     #side_panel {

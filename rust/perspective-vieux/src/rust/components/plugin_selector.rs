@@ -7,18 +7,16 @@
 // file.
 
 use crate::js::perspective_viewer::*;
-use crate::plugin::registry::*;
-use crate::plugin::*;
-use crate::*;
-
-#[cfg(test)]
+use crate::renderer::registry::*;
+use crate::renderer::*;
 use crate::utils::*;
+use crate::*;
 
 use yew::prelude::*;
 
 #[derive(Properties, Clone)]
 pub struct PluginSelectorProps {
-    pub plugin: Plugin,
+    pub renderer: Renderer,
 
     #[cfg(test)]
     #[prop_or_default]
@@ -32,6 +30,7 @@ pub enum PluginSelectorMsg {
 
 pub struct PluginSelector {
     props: PluginSelectorProps,
+    _plugin_sub: Subscription,
     link: ComponentLink<PluginSelector>,
 }
 
@@ -41,20 +40,24 @@ impl Component for PluginSelector {
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         enable_weak_link_test!(props, link);
-        props.plugin.add_on_plugin_changed({
+        let _plugin_sub = props.renderer.add_on_plugin_changed({
             let callback = link.callback(|plugin: JsPerspectiveViewerPlugin| {
                 PluginSelectorMsg::PluginSelected(plugin.name())
             });
             move |x| callback.emit(x)
         });
 
-        PluginSelector { props, link }
+        PluginSelector {
+            props,
+            link,
+            _plugin_sub,
+        }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
             PluginSelectorMsg::SelectPlugin(plugin_name) => {
-                self.props.plugin.set_plugin(Some(&plugin_name)).unwrap();
+                self.props.renderer.set_plugin(Some(&plugin_name)).unwrap();
                 false
             }
             PluginSelectorMsg::PluginSelected(_plugin_name) => true,
@@ -78,7 +81,7 @@ impl Component for PluginSelector {
             <div id="plugin_selector_container">
                 <select id="plugin_selector" class="noselect" onchange=callback>{
                     for PLUGIN_REGISTRY.available_plugin_names().iter().map(|name| {
-                        let selected = match self.props.plugin.get_plugin(None) {
+                        let selected = match self.props.renderer.get_active_plugin() {
                             Ok(plugin) => plugin.name() == *name,
                             Err(_) => false
                         };
