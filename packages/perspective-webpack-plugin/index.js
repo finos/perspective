@@ -38,7 +38,7 @@ class PerspectiveWebpackPlugin {
             type: "javascript/auto",
             include: this.options.workerPath,
             use: {
-                loader: "worker-loader",
+                loader: require.resolve("worker-loader"),
                 options: {
                     filename: this.options.workerName
                 }
@@ -50,7 +50,7 @@ class PerspectiveWebpackPlugin {
             type: "javascript/auto",
             include: /monaco\-editor/,
             use: {
-                loader: "worker-loader",
+                loader: require.resolve("worker-loader"),
                 options: {
                     filename: "editor.worker.js"
                 }
@@ -66,7 +66,7 @@ class PerspectiveWebpackPlugin {
                 include: /@finos\/perspective\-vieux/,
                 use: [
                     {
-                        loader: "string-replace-loader",
+                        loader: require.resolve("string-replace-loader"),
                         options: {
                             search: /webpackMode:\s*?"eager"/g,
                             replace: ""
@@ -82,7 +82,7 @@ class PerspectiveWebpackPlugin {
                 type: "javascript/auto",
                 include: this.options.wasmPath,
                 use: {
-                    loader: "file-loader",
+                    loader: require.resolve("file-loader"),
                     options: {
                         name: this.options.wasmName
                     }
@@ -93,7 +93,7 @@ class PerspectiveWebpackPlugin {
                 test: /\.wasm$/,
                 type: "javascript/auto",
                 include: this.options.wasmPath,
-                loader: "arraybuffer-loader"
+                loader: require.resolve("arraybuffer-loader")
             });
         }
 
@@ -101,9 +101,9 @@ class PerspectiveWebpackPlugin {
             test: /\.css$/,
             include: /monaco\-editor/,
             use: [
-                {loader: "css-loader", options: {sourceMap: false}},
+                {loader: require.resolve("css-loader"), options: {sourceMap: false}},
                 {
-                    loader: "postcss-loader",
+                    loader: require.resolve("postcss-loader"),
                     options: {
                         sourceMap: false,
                         postcssOptions: {
@@ -124,7 +124,7 @@ class PerspectiveWebpackPlugin {
         rules.push({
             test: /\.ttf$/,
             include: /monaco\-editor/,
-            use: ["file-loader"]
+            use: [require.resolve("file-loader")]
         });
 
         const perspective_config = get_config();
@@ -134,7 +134,7 @@ class PerspectiveWebpackPlugin {
                 include: /perspective[\\/].+?[\\/]config[\\/]index\.js$/,
                 use: [
                     {
-                        loader: "string-replace-loader",
+                        loader: require.resolve("string-replace-loader"),
                         options: {
                             search: "global.__TEMPLATE_CONFIG__",
                             replace: JSON.stringify(perspective_config, null, 4)

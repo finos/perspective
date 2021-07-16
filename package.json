@@ -82,7 +82,6 @@
         "rollup-plugin-sourcemaps": "^0.6.3",
         "rollup-plugin-string": "^3.0.0",
         "sinon": "^7.3.1",
-        "string-replace-loader": "^3.0.1",
         "style-loader": "^0.18.2",
         "term-img": "^4.1.0",
         "ts-jest": "^25.1.0",
