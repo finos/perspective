@@ -21,6 +21,10 @@ body {
     background: #242526;
 }
 
+.homeContainer .projectTitle {
+    font-family: "Open Sans";
+}
+
 .darkBackground, .darkBackground perspective-viewer {
     background-color: #242526 !important;
 }
@@ -84,7 +88,7 @@ body {
 }
 
 h2.headerTitle {
-    font-family: "Public Sans", Arial, Helvetica, sans-serif;
+    font-family: "Open Sans", Arial, Helvetica, sans-serif;
     color: #f9f9f9 !important;
     transition: opacity 0.1s ease-in;
 }
@@ -98,7 +102,7 @@ h2.headerTitle {
 }
 
 .logo {
-    font-family: "Public Sans", Arial, Helvetica, sans-serif;
+    font-family: "Open Sans", Arial, Helvetica, sans-serif;
     height: 50% !important;
     opacity: 0;
     transition: opacity 0.2s;
@@ -133,7 +137,7 @@ h2.headerTitle {
 
 .homeContainer .projectTitle {
     color: #f9f9f9;
-    font-family: "Public Sans";
+    font-family: "Open Sans";
 }
 
 .homeContainer .projectTitle i {
@@ -309,12 +313,12 @@ ol li::before {
     content: counter(list-counter) ".";
     font-weight: bold;
     margin-right: 0.5rem;
-    font-family: "Public Sans", Arial, Helvetica, sans-serif;
+    font-family: "Open Sans", Arial, Helvetica, sans-serif;
     line-height: 1;
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: "Public Sans", Arial, Helvetica, sans-serif;
+    font-family: "Open Sans", Arial, Helvetica, sans-serif;
 }
 
 h1, h2 {
@@ -322,7 +326,7 @@ h1, h2 {
 }
 
 p, span, oi, li {
-    font-family: "Public Sans", Arial, Helvetica, sans-serif;
+    font-family: "Open Sans", Arial, Helvetica, sans-serif;
 }
 
 code *, pre * {

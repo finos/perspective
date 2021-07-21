@@ -51,7 +51,7 @@ const SplashContainer = props => (
 
 const Logo = props => (
     <div className="projectLogo">
-        <img src={props.img_src} />
+        <img data-src={props.img_src} />
     </div>
 );
 
@@ -157,7 +157,7 @@ const GalleryBlock = props => {
         .map((user, i) => {
             return (
                 <a href={user.infoLink} key={i}>
-                    <img style={{width: "33.3%"}} src={user.image} alt={user.caption} title={user.caption} />
+                    <img style={{width: "33.3%"}} data-src={user.image} alt={user.caption} title={user.caption} />
                 </a>
             );
         });
@@ -451,7 +451,7 @@ const Showcase = props => {
             return (
                 <a href={user.infoLink} key={i}>
                     <h4>{user.caption}</h4>
-                    <img src={user.image} alt={user.caption} title={user.caption} />
+                    <img data-src={user.image} alt={user.caption} title={user.caption} />
                 </a>
             );
         });
@@ -472,7 +472,7 @@ const ChartTypes = props => {
     const showcase_light = Array.from(Array(75).keys()).map((user, i) => {
         return (
             <a className="feature" key={i} data-key={i}>
-                <img src={`features/feature_${i}.png`} />
+                <img data-src={`features/feature_${i}.png`} />
             </a>
         );
     });
@@ -480,7 +480,7 @@ const ChartTypes = props => {
     const showcase_dark = Array.from(Array(75).keys()).map((user, i) => {
         return (
             <a className="feature" key={i} data-key={i}>
-                <img src={`features/feature_${i}_dark.png`} />
+                <img data-src={`features/feature_${i}_dark.png`} />
             </a>
         );
     });

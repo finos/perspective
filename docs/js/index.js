@@ -177,6 +177,12 @@ function get_arrow(callback) {
 }
 
 window.addEventListener("DOMContentLoaded", async function() {
+    for (const img of document.querySelectorAll("img")) {
+        if (img.dataset.src) {
+            img.setAttribute("src", img.dataset.src);
+        }
+    }
+
     if (window.location.pathname !== "/" && window.location.pathname !== "/index.html") {
         return;
     }
