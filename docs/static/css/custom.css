@@ -21,6 +21,10 @@ body {
     background: #242526;
 }
 
+.homeContainer .projectTitle {
+    font-family: "Open Sans";
+}
+
 .darkBackground, .darkBackground perspective-viewer {
     background-color: #242526 !important;
 }
@@ -84,7 +88,7 @@ body {
 }
 
 h2.headerTitle {
-    font-family: "Public Sans", Arial, Helvetica, sans-serif;
+    font-family: "Open Sans", Arial, Helvetica, sans-serif;
     color: #f9f9f9 !important;
     transition: opacity 0.1s ease-in;
 }
@@ -98,7 +102,7 @@ h2.headerTitle {
 }
 
 .logo {
-    font-family: "Public Sans", Arial, Helvetica, sans-serif;
+    font-family: "Open Sans", Arial, Helvetica, sans-serif;
     height: 50% !important;
     opacity: 0;
     transition: opacity 0.2s;
@@ -133,7 +137,7 @@ h2.headerTitle {
 
 .homeContainer .projectTitle {
     color: #f9f9f9;
-    font-family: "Public Sans";
+    font-family: "Open Sans";
 }
 
 .homeContainer .projectTitle i {
@@ -161,6 +165,50 @@ h2.headerTitle {
 
 #get_started pre {
     border: 1px solid #333;
+}
+
+.homeContainer perspective-viewer, perspective-viewer {
+    box-shadow: none !important;
+    /* overflow: visible !important; */
+    --plugin--box-shadow:  0 2px 4px 0 rgb(0 0 0 / 10%);
+}
+
+.slider {
+    margin-top: 12px;
+    width: 200px;
+    -webkit-appearance: none;
+    height: 10px;
+    border-radius: 5px;  
+    background: rgba(0,0,0,0.5);
+    border-color: #f9f9f9;
+    border: 1px solid #666;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+  }
+  
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%; 
+    background: #242526;
+    border: 1px solid #666;
+    cursor: pointer;
+  }
+  
+  .slider::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: #04AA6D;
+    cursor: pointer;
+  }
+
+.homeContainer perspective-viewer {
+    background: none !important;
 }
 
 .homeContainer perspective-viewer, perspective-viewer {
@@ -265,12 +313,12 @@ ol li::before {
     content: counter(list-counter) ".";
     font-weight: bold;
     margin-right: 0.5rem;
-    font-family: "Public Sans", Arial, Helvetica, sans-serif;
+    font-family: "Open Sans", Arial, Helvetica, sans-serif;
     line-height: 1;
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: "Public Sans", Arial, Helvetica, sans-serif;
+    font-family: "Open Sans", Arial, Helvetica, sans-serif;
 }
 
 h1, h2 {
@@ -278,7 +326,7 @@ h1, h2 {
 }
 
 p, span, oi, li {
-    font-family: "Public Sans", Arial, Helvetica, sans-serif;
+    font-family: "Open Sans", Arial, Helvetica, sans-serif;
 }
 
 code *, pre * {

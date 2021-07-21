@@ -78,14 +78,14 @@ const siteConfig = {
     highlight: {
         theme: "atom-one-light"
     },
-    scripts: ["https://buttons.github.io/buttons.js", "js/index.js"],
-    stylesheets: [
-        "https://fonts.googleapis.com/css?family=Material+Icons",
-        "https://fonts.googleapis.com/css?family=Open+Sans",
-        "https://fonts.googleapis.com/css?family=Public+Sans",
-        "https://fonts.googleapis.com/css?family=Roboto+Mono",
-        "https://fonts.googleapis.com/css2?family=Orbitron:wght@900"
-    ],
+    scripts: ["js/fonts.js", "https://buttons.github.io/buttons.js", "js/index.js"],
+    // stylesheets: [
+    //     "https://fonts.googleapis.com/css?family=Material+Icons",
+    //     "https://fonts.googleapis.com/css?family=Open+Sans",
+    //     "https://fonts.googleapis.com/css?family=Public+Sans",
+    //     "https://fonts.googleapis.com/css?family=Roboto+Mono",
+    //     "https://fonts.googleapis.com/css2?family=Orbitron:wght@900"
+    // ],
     onPageNav: "separate",
     ogImage: "img/perspective.png",
     twitterImage: "img/perspective.png"
