@@ -123,11 +123,6 @@ async function focus_package() {
                     value: "perspective-viewer-d3fc"
                 },
                 {
-                    key: "r",
-                    name: "perspective-vieux",
-                    value: "perspective-vieux"
-                },
-                {
                     key: "l",
                     name: "perspective-jupyterlab",
                     value: "perspective-jupyterlab"

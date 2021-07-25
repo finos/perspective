@@ -169,20 +169,20 @@ junit.xml
 python/perspective/python_junit.xml
 python/perspective/coverage.xml
 python/perspective/bench/stresstest/results
-rust/perspective-view/target
-rust/perspective-view/pkg
-rust/perspective-view/target2
-rust/perspective-vieux/pkg
+rust/perspective-viewer/target
+rust/perspective-viewer/pkg
+rust/perspective-viewer/target2
+rust/perspective-viewer/pkg
 
-rust/perspective-vieux/target
-rust/perspective-vieux/target2
+rust/perspective-viewer/target
+rust/perspective-viewer/target2
 .emsdk
 
 docs/static/css/material.dark.css
 docs/i18n/en.json
 docs/static/js
 
-rust/perspective-vieux/target.vscode
+rust/perspective-viewer/target.vscode
 target.vscode
 
 # jupyterlab test artifacts
