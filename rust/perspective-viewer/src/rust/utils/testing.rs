@@ -8,8 +8,8 @@
 
 #[cfg(test)]
 use {
-    crate::js::perspective::*, crate::*, std::cell::RefCell, std::iter::FromIterator,
-    wasm_bindgen::prelude::*, wasm_bindgen::JsCast, wasm_bindgen_futures::JsFuture,
+    crate::js::perspective::*, crate::*, std::cell::RefCell, wasm_bindgen::prelude::*,
+    wasm_bindgen::JsCast, wasm_bindgen_futures::JsFuture,
 };
 
 #[cfg(test)]
@@ -45,9 +45,9 @@ pub async fn get_mock_table() -> JsPerspectiveTable {
     worker
         .table(js_object!(
             "A",
-            js_sys::Array::from_iter(
-                [JsValue::from(1), JsValue::from(2), JsValue::from(3)].iter()
-            )
+            [JsValue::from(1), JsValue::from(2), JsValue::from(3)]
+                .iter()
+                .collect::<js_sys::Array>()
         ))
         .await
         .unwrap()
@@ -72,7 +72,7 @@ macro_rules! enable_weak_link_test {
 #[macro_export]
 macro_rules! test_html {
     ($($html:tt)*) => {{
-        use crate::components::vieux::CSS;
+        use crate::components::viewer::CSS;
         use wasm_bindgen::JsCast;
         use yew::prelude::*;
 
@@ -128,7 +128,6 @@ macro_rules! test_html {
             .unwrap()
             .unchecked_into::<web_sys::Element>();
 
-        let app = App::<TestElement>::new();
-        app.mount_with_props(shadow_root, TestElementProps { html: html!{ $($html)* } })
+        yew::start_app_with_props_in_element::<TestElement>(shadow_root, TestElementProps { html: html!{ $($html)* } })
     }}
 }

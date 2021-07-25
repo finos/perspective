@@ -10,7 +10,7 @@ use wasm_bindgen_test::*;
 use web_sys::HtmlElement;
 use yew::prelude::*;
 
-use crate::components::split_panel::{SplitPanel, SplitPanelMsg};
+use super::super::split_panel::{SplitPanel, SplitPanelMsg};
 use crate::utils::WeakComponentLink;
 use crate::*;
 
@@ -21,8 +21,8 @@ pub fn test_resizes_larger() {
     let link: WeakComponentLink<SplitPanel> = WeakComponentLink::default();
     let panel_div = NodeRef::default();
     test_html! {
-        <SplitPanel id="test" weak_link=link.clone() >
-            <div ref=panel_div.clone() style="background-color: red"></div>
+        <SplitPanel id="test" weak_link={ link.clone() }>
+            <div ref={ panel_div.clone() } style="background-color: red"></div>
             <div style="background-color: green"></div>
         </SplitPanel>
     };
@@ -41,8 +41,8 @@ pub async fn test_resizes_narrower() {
     let link: WeakComponentLink<SplitPanel> = WeakComponentLink::default();
     let panel_div = NodeRef::default();
     test_html! {
-        <SplitPanel id="test" weak_link=link.clone() >
-            <div ref=panel_div.clone() style="background-color: red"></div>
+        <SplitPanel id="test" weak_link={ link.clone() }>
+            <div ref={ panel_div.clone() } style="background-color: red"></div>
             <div style="background-color: green"></div>
         </SplitPanel>
     };
@@ -64,8 +64,8 @@ pub async fn test_double_click_reset() {
     let link: WeakComponentLink<SplitPanel> = WeakComponentLink::default();
     let panel_div = NodeRef::default();
     test_html! {
-        <SplitPanel id="test" weak_link=link.clone() >
-            <div ref=panel_div.clone() style="background-color: red"></div>
+        <SplitPanel id="test" weak_link={ link.clone() }>
+            <div ref={ panel_div.clone() } style="background-color: red"></div>
             <div style="background-color: green"></div>
         </SplitPanel>
     };

@@ -96,7 +96,7 @@ impl ViewSubscription {
             move |_| promisify_ignore_view_delete(data.clone().on_view_update())
         };
 
-        let closure = fun.to_closure();
+        let closure = fun.into_closure();
         data.view.on_update(closure.as_ref().unchecked_ref());
         let _ = promisify_ignore_view_delete(data.clone().update_view_stats());
         ViewSubscription { data, closure }

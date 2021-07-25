@@ -10,9 +10,6 @@
 
 use js_sys::Array;
 use serde::Deserialize;
-// use std::collections::HashMap;
-// use std::iter::FromIterator;
-// use std::iter::IntoIterator;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
@@ -59,11 +56,16 @@ extern "C" {
     #[derive(Clone)]
     pub type JsPerspectiveTable;
 
+    pub type JsPerspectiveTableSchema;
+
     #[wasm_bindgen(method, catch, js_name = columns)]
     pub async fn _columns(this: &JsPerspectiveTable) -> Result<JsValue, JsValue>;
 
     #[wasm_bindgen(method, catch, js_name = delete)]
     pub async fn _delete(this: &JsPerspectiveTable) -> Result<JsValue, JsValue>;
+
+    #[wasm_bindgen(method, catch, js_name = schema)]
+    pub async fn _schema(this: &JsPerspectiveTable) -> Result<JsValue, JsValue>;
 
     #[wasm_bindgen(method, catch, js_name = size)]
     pub async fn _size(this: &JsPerspectiveTable) -> Result<JsValue, JsValue>;
@@ -78,6 +80,8 @@ extern "C" {
     ) -> Result<JsValue, JsValue>;
 
     pub type JsPerspectiveView;
+
+    pub type JsPerspectiveViewSchema;
 
     #[wasm_bindgen(method, catch, js_name = delete)]
     pub async fn _delete(this: &JsPerspectiveView) -> Result<JsValue, JsValue>;
@@ -120,6 +124,12 @@ extern "C" {
 
     #[wasm_bindgen(method, getter)]
     pub fn errors(this: &JsPerspectiveValidatedExpressions) -> js_sys::Object;
+
+    #[wasm_bindgen(method, getter)]
+    pub fn expression_schema(this: &JsPerspectiveValidatedExpressions) -> js_sys::Object;
+
+    #[wasm_bindgen(method, getter)]
+    pub fn expression_alias(this: &JsPerspectiveValidatedExpressions) -> js_sys::Object;
 }
 
 impl JsPerspectiveWorker {
@@ -129,8 +139,9 @@ impl JsPerspectiveWorker {
 
 impl JsPerspectiveTable {
     async_typed!(_columns, columns(&self) -> js_sys::Array);
-    async_typed!(_delete, delete(&self) -> ());
+    async_typed!(_delete, delete(self) -> ());
     async_typed!(_validate_expressions, validate_expressions(&self, exprs: Array) -> JsPerspectiveValidatedExpressions);
+    async_typed!(_schema, schema(&self) -> JsPerspectiveTableSchema);
     async_typed!(_view, view(&self, config: &JsPerspectiveViewConfig) -> JsPerspectiveView);
     async_typed!(_size, size(&self) -> f64);
 }
@@ -139,7 +150,7 @@ impl JsPerspectiveView {
     async_typed!(_to_csv, to_csv(&self, options: js_sys::Object) -> js_sys::JsString);
     async_typed!(_num_rows, num_rows(&self) -> f64);
     async_typed!(_num_columns, num_columns(&self) -> f64);
-    async_typed!(_schema, schema(&self) -> js_sys::Object);
+    async_typed!(_schema, schema(&self) -> JsPerspectiveViewSchema);
     async_typed!(_delete, delete(self) -> ());
     // async_typed!(_get_config, get_config(&self) -> JsPerspectiveViewConfig);
 }

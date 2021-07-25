@@ -33,7 +33,7 @@ pub async fn copy_flat(table: &JsPerspectiveTable) -> Result<(), JsValue> {
 pub async fn copy(view: &View) -> Result<(), JsValue> {
     let csv_ref: Rc<RefCell<Option<String>>> = Rc::new(RefCell::new(None));
     poll(0, csv_ref.clone())?;
-    let csv = copy_async(&view).await?;
+    let csv = copy_async(view).await?;
     *csv_ref.borrow_mut() = Some(csv.as_string().unwrap());
     Ok(())
 }

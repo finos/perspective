@@ -6,33 +6,49 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use derivative::Derivative;
 use std::cell::RefCell;
 use std::rc::Rc;
 use yew::prelude::*;
 
-#[derive(Clone)]
+/// A simple pub/sub struct which allows many listeners to subscribe to a single
+/// publisher, without leaking callbacks as listeners are dropped.
+#[derive(Derivative)]
+#[derivative(Default(bound = ""))]
 pub struct PubSub<T: Clone> {
     listeners: Rc<RefCell<Vec<Callback<T>>>>,
 }
 
 pub trait AddListener<T> {
+    /// Register a listener to this `PubSub<_>`, which will be automatically
+    /// deregistered when the return `Subscription` is dropped.
+    ///
+    /// # Arguments
+    /// - `f` The callback, presumably a function-like type.
     fn add_listener(&self, f: T) -> Subscription;
 }
 
-impl<T: Clone + 'static> Default for PubSub<T> {
-    fn default() -> Self {
-        PubSub {
-            listeners: Rc::new(RefCell::new(vec![])),
-        }
-    }
-}
-
 impl<T: Clone + 'static> PubSub<T> {
+    /// Emit a value to all listeners.
+    ///
+    /// # Arguments
+    /// - `val` The value to emit.
     pub fn emit_all(&self, val: T) {
         let listeners = self.listeners.borrow().clone();
         for listener in listeners.iter() {
             listener.emit(val.clone());
         }
+    }
+
+    /// Get this `PubSub<_>`'s `.emit_all()` method as a `Callback<T>`.
+    pub fn callback(&self) -> Callback<T> {
+        let listeners = self.listeners.clone();
+        Callback::from(move |val: T| {
+            let listeners = listeners.borrow().clone();
+            for listener in listeners.iter() {
+                listener.emit(val.clone());
+            }
+        })
     }
 }
 
@@ -57,6 +73,9 @@ where
     }
 }
 
+/// Manages the lifetime of a listener registered to a `PubSub<T>` by deregistering
+/// the associated listener when dropped.  The wrapped `Fn` of `Subscriptions` is
+/// the deregister closure provided by the issuing `PubSub<T>`.
 #[must_use]
 pub struct Subscription(Box<dyn Fn()>);
 

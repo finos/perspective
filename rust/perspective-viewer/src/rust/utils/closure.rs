@@ -16,7 +16,7 @@ pub trait ToClosure<T> {
     /// Convert `self` to a `Closure`.  This is mostly just for code cleanliness,
     /// as stable Rust does not yet supports specialization (which would support more
     /// types) nor `Unsize<_>` (which would elide more explicit type annotations).
-    fn to_closure(self) -> Self::Output;
+    fn into_closure(self) -> Self::Output;
 }
 
 impl<T, U, V> ToClosure<(U, V)> for T
@@ -26,7 +26,7 @@ where
     V: IntoWasmAbi + 'static,
 {
     type Output = Closure<dyn Fn(U) -> V>;
-    fn to_closure(self) -> Closure<dyn Fn(U) -> V + 'static> {
+    fn into_closure(self) -> Closure<dyn Fn(U) -> V + 'static> {
         Closure::wrap(Box::new(self) as Box<dyn Fn(U) -> V>)
     }
 }
@@ -39,7 +39,7 @@ where
     W: IntoWasmAbi + 'static,
 {
     type Output = Closure<dyn Fn(U, V) -> W>;
-    fn to_closure(self) -> Closure<dyn Fn(U, V) -> W + 'static> {
+    fn into_closure(self) -> Closure<dyn Fn(U, V) -> W + 'static> {
         Closure::wrap(Box::new(self) as Box<dyn Fn(U, V) -> W>)
     }
 }
@@ -53,7 +53,7 @@ where
     X: IntoWasmAbi + 'static,
 {
     type Output = Closure<dyn Fn(U, V, W) -> X>;
-    fn to_closure(self) -> Closure<dyn Fn(U, V, W) -> X + 'static> {
+    fn into_closure(self) -> Closure<dyn Fn(U, V, W) -> X + 'static> {
         Closure::wrap(Box::new(self) as Box<dyn Fn(U, V, W) -> X>)
     }
 }
@@ -63,7 +63,7 @@ where
     U: FromWasmAbi + 'static,
 {
     type Output = Closure<dyn Fn(U)>;
-    fn to_closure(self) -> Closure<dyn Fn(U)> {
+    fn into_closure(self) -> Closure<dyn Fn(U)> {
         Closure::wrap(Box::new(move |x: U| {
             self.emit(x);
         }) as Box<dyn Fn(U)>)
@@ -71,7 +71,7 @@ where
 }
 
 pub trait ToClosureMut<U, V> {
-    fn to_closure_mut(self) -> Closure<dyn FnMut(U) -> V>;
+    fn into_closure_mut(self) -> Closure<dyn FnMut(U) -> V>;
 }
 
 impl<T, U, V> ToClosureMut<T, V> for U
@@ -80,7 +80,7 @@ where
     T: FromWasmAbi + 'static,
     V: IntoWasmAbi + 'static,
 {
-    fn to_closure_mut(self) -> Closure<dyn FnMut(T) -> V + 'static> {
+    fn into_closure_mut(self) -> Closure<dyn FnMut(T) -> V + 'static> {
         Closure::wrap(Box::new(self) as Box<dyn FnMut(T) -> V>)
     }
 }

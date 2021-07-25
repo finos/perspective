@@ -6,10 +6,18 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+mod aggregates;
+mod column_type;
+mod filters;
+mod sort;
 mod view_config;
 
 use crate::renderer::Renderer;
 
+pub use aggregates::*;
+pub use column_type::*;
+pub use filters::*;
+pub use sort::*;
 pub use view_config::*;
 
 use serde::Deserialize;
@@ -18,10 +26,11 @@ use serde::Serialize;
 use serde_json::Value;
 
 #[derive(Serialize)]
-#[serde()]
+#[serde(deny_unknown_fields)]
 pub struct ViewerConfig {
     pub plugin: String,
     pub plugin_config: Value,
+    pub settings: bool,
 
     #[serde(flatten)]
     pub view_config: ViewConfig,
@@ -33,15 +42,19 @@ impl ViewerConfig {
             plugin: renderer.get_active_plugin().unwrap().name(),
             view_config: ViewConfig::default(),
             plugin_config: Value::Null,
+            settings: false,
         }
     }
 }
 
 #[derive(Deserialize)]
-#[serde()]
+#[serde(deny_unknown_fields)]
 pub struct ViewerConfigUpdate {
     #[serde(default)]
     pub plugin: PluginUpdate,
+
+    #[serde(default)]
+    pub settings: SettingsUpdate,
 
     #[serde(default)]
     pub plugin_config: Option<Value>,
@@ -50,20 +63,18 @@ pub struct ViewerConfigUpdate {
     pub view_config: ViewConfigUpdate,
 }
 
-/// The `PluginUpdate` enum must represent 3 possible states in a `ViewerConfigUpdate`:
-/// - `{plugin: null}` key is present but the value is `null` or `undefined`, which
-///   indicates we should update the `plugin` field to the default.
-/// - `{}`, the `plugin` key is missing and this field should be ignored.
-/// - `{plugin: val}` key is present and has a value, indicates we should update
-///   the `plugin` field to `val`.
-pub enum PluginUpdate {
+#[derive(Clone)]
+pub enum OptionalUpdate<T: Clone> {
     SetDefault,
     Missing,
-    Update(String),
+    Update(T),
 }
 
+pub type PluginUpdate = OptionalUpdate<String>;
+pub type SettingsUpdate = OptionalUpdate<bool>;
+
 /// Handles `{}` when included as a field with `#[serde(default)]`.
-impl Default for PluginUpdate {
+impl<T: Clone> Default for OptionalUpdate<T> {
     fn default() -> Self {
         Self::Missing
     }
@@ -71,17 +82,20 @@ impl Default for PluginUpdate {
 
 /// Handles `{plugin: null}` and `{plugin: val}` by treating this type as an
 /// option.
-impl From<Option<String>> for PluginUpdate {
-    fn from(opt: Option<String>) -> PluginUpdate {
+impl<T: Clone> From<Option<T>> for OptionalUpdate<T> {
+    fn from(opt: Option<T>) -> OptionalUpdate<T> {
         match opt {
-            Some(v) => PluginUpdate::Update(v),
-            None => PluginUpdate::SetDefault,
+            Some(v) => OptionalUpdate::<T>::Update(v),
+            None => OptionalUpdate::SetDefault,
         }
     }
 }
 
 /// Treats `PluginUpdate` enum as an `Option<T>` when present during deserialization.
-impl<'a> Deserialize<'a> for PluginUpdate {
+impl<'a, T> Deserialize<'a> for OptionalUpdate<T>
+where
+    T: Deserialize<'a> + Clone,
+{
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: Deserializer<'a>,

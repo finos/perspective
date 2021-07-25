@@ -7,30 +7,26 @@
 // file.
 
 use crate::js::perspective::*;
-use crate::js::perspective_viewer::JsPerspectiveViewerPlugin;
+use crate::js::plugin::*;
 use crate::*;
 
+use wasm_bindgen::JsCast;
+
 #[cfg(test)]
-use {
-    crate::utils::*, wasm_bindgen::JsCast, wasm_bindgen_futures::future_to_promise,
-    wasm_bindgen_test::*,
-};
+use {crate::utils::*, wasm_bindgen_futures::future_to_promise, wasm_bindgen_test::*};
 
 pub async fn get_row_and_col_limits(
     view: &JsPerspectiveView,
-    plugin: &JsPerspectiveViewerPlugin,
+    plugin_metadata: &ViewConfigRequirements,
 ) -> Result<(usize, usize, Option<usize>, Option<usize>), JsValue> {
     let num_cols = view.num_columns().await? as usize;
     let num_rows = view.num_rows().await? as usize;
-    // if !limit {
-    //     Ok((num_cols, num_rows, None, None))
-    // } else {
-    match (plugin.max_columns(), plugin.render_warning()) {
-        (Some(_), Some(false)) => Ok((num_cols, num_rows, None, None)),
+    match (plugin_metadata.max_columns, plugin_metadata.render_warning) {
+        (Some(_), false) => Ok((num_cols, num_rows, None, None)),
         (max_columns, _) => {
             let schema = view.schema().await?;
-            let num_schema_columns =
-                std::cmp::max(1, js_sys::Object::keys(&schema).length() as usize);
+            let keys = js_sys::Object::keys(schema.unchecked_ref::<js_sys::Object>());
+            let num_schema_columns = std::cmp::max(1, keys.length() as usize);
             let max_cols = max_columns.and_then(|max_columns| {
                 let column_group_diff = max_columns % num_schema_columns;
                 let column_limit = max_columns + column_group_diff;
@@ -41,7 +37,7 @@ pub async fn get_row_and_col_limits(
                 }
             });
 
-            let max_rows = plugin.max_cells().map(|max_cells| {
+            let max_rows = plugin_metadata.max_cells.map(|max_cells| {
                 match max_cols {
                     Some(max_cols) => max_cells as f64 / max_cols as f64,
                     None => max_cells as f64 / num_cols as f64,
@@ -68,7 +64,7 @@ mod tests {
             clone!(val);
             future_to_promise(async move { Ok(val.clone()) })
         })
-        .to_closure()
+        .into_closure()
     }
 
     #[wasm_bindgen_test]
@@ -82,9 +78,12 @@ mod tests {
         )
         .unchecked_into::<JsPerspectiveView>();
 
-        let plugin = js_object!().unchecked_into::<JsPerspectiveViewerPlugin>();
+        let reqs = ViewConfigRequirements {
+            render_warning: true,
+            ..ViewConfigRequirements::default()
+        };
         let (_, _, max_cols, max_rows) =
-            get_row_and_col_limits(&view, &plugin).await.unwrap();
+            get_row_and_col_limits(&view, &reqs).await.unwrap();
         assert_eq!(max_cols, None);
         assert_eq!(max_rows, None);
     }
@@ -101,10 +100,14 @@ mod tests {
         )
         .unchecked_into::<JsPerspectiveView>();
 
-        let plugin =
-            js_object!("max_columns", 2).unchecked_into::<JsPerspectiveViewerPlugin>();
+        let reqs = ViewConfigRequirements {
+            max_columns: Some(2),
+            render_warning: true,
+            ..ViewConfigRequirements::default()
+        };
+
         let (_, _, max_cols, max_rows) =
-            get_row_and_col_limits(&view, &plugin).await.unwrap();
+            get_row_and_col_limits(&view, &reqs).await.unwrap();
         assert_eq!(max_cols, None);
         assert_eq!(max_rows, None);
     }
@@ -121,10 +124,13 @@ mod tests {
         )
         .unchecked_into::<JsPerspectiveView>();
 
-        let plugin =
-            js_object!("max_columns", 1).unchecked_into::<JsPerspectiveViewerPlugin>();
+        let reqs = ViewConfigRequirements {
+            max_columns: Some(1),
+            render_warning: true,
+            ..ViewConfigRequirements::default()
+        };
         let (_, _, max_cols, max_rows) =
-            get_row_and_col_limits(&view, &plugin).await.unwrap();
+            get_row_and_col_limits(&view, &reqs).await.unwrap();
         assert_eq!(max_cols, Some(1));
         assert_eq!(max_rows, None);
     }
@@ -141,10 +147,13 @@ mod tests {
         )
         .unchecked_into::<JsPerspectiveView>();
 
-        let plugin =
-            js_object!("max_columns", 3).unchecked_into::<JsPerspectiveViewerPlugin>();
+        let reqs = ViewConfigRequirements {
+            max_columns: Some(3),
+            render_warning: true,
+            ..ViewConfigRequirements::default()
+        };
         let (_, _, max_cols, max_rows) =
-            get_row_and_col_limits(&view, &plugin).await.unwrap();
+            get_row_and_col_limits(&view, &reqs).await.unwrap();
         assert_eq!(max_cols, Some(4));
         assert_eq!(max_rows, None);
     }
@@ -161,10 +170,13 @@ mod tests {
         )
         .unchecked_into::<JsPerspectiveView>();
 
-        let plugin =
-            js_object!("max_cells", 2).unchecked_into::<JsPerspectiveViewerPlugin>();
+        let reqs = ViewConfigRequirements {
+            max_cells: Some(2),
+            render_warning: true,
+            ..ViewConfigRequirements::default()
+        };
         let (_, _, max_cols, max_rows) =
-            get_row_and_col_limits(&view, &plugin).await.unwrap();
+            get_row_and_col_limits(&view, &reqs).await.unwrap();
         assert_eq!(max_cols, None);
         assert_eq!(max_rows, Some(2));
     }
@@ -181,10 +193,15 @@ mod tests {
         )
         .unchecked_into::<JsPerspectiveView>();
 
-        let plugin = js_object!("max_cells", 10; "max_columns", 2)
-            .unchecked_into::<JsPerspectiveViewerPlugin>();
+        let reqs = ViewConfigRequirements {
+            max_columns: Some(2),
+            max_cells: Some(10),
+            render_warning: true,
+            ..ViewConfigRequirements::default()
+        };
+
         let (_, _, max_cols, max_rows) =
-            get_row_and_col_limits(&view, &plugin).await.unwrap();
+            get_row_and_col_limits(&view, &reqs).await.unwrap();
         assert_eq!(max_cols, Some(2));
         assert_eq!(max_rows, Some(5));
     }

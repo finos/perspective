@@ -17,6 +17,8 @@ use language::*;
 use serde_json::error;
 use wasm_bindgen::JsCast;
 
+pub use init::init_theme;
+
 /// Configure `monaco` for a set of column names, such that intellisense may complete
 /// available columns.  In the interest of simplification, this uses a static `RefCell`
 /// which must be set prior to completion events;  this is currently valid as
@@ -34,12 +36,9 @@ pub fn set_global_completion_column_names(names: Vec<String>) {
 }
 
 /// Initialize the `ExprTK` language in `monaco`.  This should only be done once.
-///
-/// # Arguments
-/// `base` - the `monaco-editor` base theme name.
-pub async fn init_monaco(base: &str) -> Result<Editor, error::Error> {
+pub async fn init_monaco() -> Result<Editor, error::Error> {
     if IS_REGISTERED.with(|x| !x.get()) {
-        let editor = init_language(base).await?;
+        let editor = init_language().await?;
         init_environment()?;
         IS_REGISTERED.with(|x| x.set(true));
         Ok(editor)

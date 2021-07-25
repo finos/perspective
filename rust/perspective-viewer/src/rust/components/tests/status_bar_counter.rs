@@ -20,7 +20,7 @@ wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 pub fn test_counter_none() {
     let div = NodeRef::default();
     test_html! {
-        <StatusBarRowsCounter stats=None ref=div.clone()>
+        <StatusBarRowsCounter stats={ None } ref={ div.clone() }>
         </StatusBarRowsCounter>
     };
 
@@ -38,7 +38,7 @@ pub fn test_counter_initializing() {
     });
 
     test_html! {
-        <StatusBarRowsCounter stats=stats ref=div.clone()>
+        <StatusBarRowsCounter stats={ stats } ref={ div.clone() }>
         </StatusBarRowsCounter>
     };
 
@@ -56,7 +56,7 @@ pub fn test_counter_some_connected_no_view() {
     });
 
     test_html! {
-        <StatusBarRowsCounter stats=stats ref=div.clone()>
+        <StatusBarRowsCounter stats={ stats } ref={ div.clone() }>
         </StatusBarRowsCounter>
     };
 
@@ -74,7 +74,7 @@ pub fn test_counter_some_connected_no_pivot() {
     });
 
     test_html! {
-        <StatusBarRowsCounter stats=stats ref=div.clone()>
+        <StatusBarRowsCounter stats={ stats } ref={ div.clone() }>
         </StatusBarRowsCounter>
     };
 
@@ -92,7 +92,7 @@ pub fn test_counter_some_connected_pivot() {
     });
 
     test_html! {
-        <StatusBarRowsCounter stats=stats ref=div.clone()>
+        <StatusBarRowsCounter stats={ stats } ref={ div.clone() }>
         </StatusBarRowsCounter>
     };
 

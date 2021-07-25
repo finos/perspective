@@ -13,6 +13,7 @@
 pub mod components;
 pub mod config;
 pub mod custom_elements;
+pub mod dragdrop;
 pub mod exprtk;
 pub mod js;
 pub mod renderer;
@@ -29,4 +30,10 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 pub fn set_panic_hook() {
     #[cfg(feature = "console_error_panic_hook")]
     console_error_panic_hook::set_once();
+}
+
+#[wasm_bindgen]
+pub fn register_plugin(name: &str) {
+    use crate::renderer::registry::*;
+    PLUGIN_REGISTRY.register_plugin(name);
 }

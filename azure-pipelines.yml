@@ -28,7 +28,7 @@ parameters:
     default:
       - task: NodeTool@0
         inputs:
-          versionSpec: '12.x'
+          versionSpec: '15.x'
     
       - bash: npm install -g yarn
         displayName: 'Install Yarn'
@@ -411,7 +411,7 @@ jobs:
     # don't use InitSteps because we don't want to cache local puppeteer
     - task: NodeTool@0
       inputs:
-        versionSpec: '12.x'
+        versionSpec: '15.x'
 
     - bash: npm install -g yarn
       displayName: 'Install Yarn'

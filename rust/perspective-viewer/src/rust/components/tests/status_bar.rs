@@ -33,9 +33,9 @@ pub fn test_callbacks_invoked() {
     test_html! {
         <StatusBar
             id="test"
-            weak_link=link.clone()
-            session=session
-            on_reset=on_reset>
+            weak_link={ link.clone() }
+            session={ session }
+            on_reset={ on_reset }>
         </StatusBar>
     };
 
@@ -59,10 +59,10 @@ fn gen(stats: &Option<TableStats>) -> (HtmlElement, Session) {
     test_html! {
         <StatusBar
             id="test"
-            weak_link=link.clone()
-            ref=div.clone()
-            session=session.clone()
-            on_reset=on_reset>
+            weak_link={ link.clone() }
+            ref={ div.clone() }
+            session={ session.clone() }
+            on_reset={ on_reset }>
         </StatusBar>
     };
 

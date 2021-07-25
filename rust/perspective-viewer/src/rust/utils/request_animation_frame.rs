@@ -21,7 +21,7 @@ pub async fn await_animation_frame() -> Result<(), JsValue> {
         .unwrap()
         .request_animation_frame(jsfun.unchecked_ref())?;
 
-    receiver.await.to_jserror()
+    receiver.await.into_jserror()
 }
 
 /// An `async` version of `set_timeout`, which resolves in `timeout` milliseconds
@@ -35,5 +35,5 @@ pub async fn set_timeout(timeout: i32) -> Result<(), JsValue> {
             timeout,
         )?;
 
-    receiver.await.to_jserror()
+    receiver.await.into_jserror()
 }

@@ -1,0 +1,49 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+:host {
+    position: absolute;
+    z-index: 10000;
+    outline: none;
+    font-family: "Open Sans";
+    font-size: 12px;
+    font-weight: 300;
+    border: inherit;
+    box-shadow: 0 2px 4px 0 rgb(0 0 0 / 10%);
+    user-select: none;
+    background-color: white;
+    padding: 6px;
+
+    display: flex;
+    flex-direction: column;
+
+    .selected {
+        background-color: rgba(0,0,0,0.05);
+    }
+
+    span {
+        cursor: pointer;
+    }
+
+    .no-results {
+        font-style: italics;
+        padding: 6px 24px;
+        color: #ccc;
+    }
+}
+
+:host(:hover) {
+    .selected {
+        background-color: transparent;
+    }
+
+    span:hover, span.selected:hover {
+        background-color: rgba(0,0,0,0.05);
+    }
+}

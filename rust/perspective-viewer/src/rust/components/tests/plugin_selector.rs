@@ -7,11 +7,11 @@
 // file.
 
 use crate::components::plugin_selector::*;
-use crate::js::perspective_viewer::*;
+use crate::js::plugin::*;
 use crate::renderer::registry::*;
 use crate::renderer::*;
 use crate::session::*;
-use crate::utils::WeakComponentLink;
+use crate::utils::*;
 use crate::*;
 
 use std::cell::RefCell;
@@ -44,11 +44,23 @@ wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
             get name() {
                 return 'Debug ' + name;
             }
-
-            get selectMode() {
+    
+            get select_mode() {
                 return 'toggle';
             }
-
+    
+            get min_config_columns() {
+                return undefined;
+            }
+    
+            get config_column_names() {
+                return undefined;
+            }
+    
+            update(...args) {
+                return this.draw(...args);
+            }
+    
             async draw(view) {
                 this.style.backgroundColor = '#fff';
                 let perspective_viewer = this.parentElement;
@@ -56,17 +68,17 @@ wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
                 const css = `margin:0;overflow:scroll;position:absolute;width:100%;height:100%`;
                 this.innerHTML = `<pre style='${css}'>${csv}</pre>`;
             }
-
+    
             async clear() {
                 this.innerHtml = '';
             }
-
+    
             async resize() {}
-
+    
             save() {}
-
+    
             restore() {}
-
+    
             delete() {}
         };
     }
@@ -87,7 +99,7 @@ extern "C" {
 }
 
 #[wasm_bindgen_test]
-pub fn test_plugin_selected() {
+pub async fn test_plugin_selected() {
     PLUGIN_REGISTRY.reset();
     register_test_components().unwrap();
     PLUGIN_REGISTRY.register_plugin("perspective-viewer-debug2");
@@ -100,8 +112,9 @@ pub fn test_plugin_selected() {
     let document = window().unwrap().document().unwrap();
     let elem: HtmlElement = document.create_element("div").unwrap().unchecked_into();
     let session = Session::default();
-    let renderer = Renderer::new(elem, session);
-    let _sub = renderer.add_on_plugin_changed({
+    session.set_table(get_mock_table().await).await.unwrap();
+    let renderer = Renderer::new(elem, session.clone());
+    let _sub = renderer.on_plugin_changed.add_listener({
         clone!(result);
         move |val| {
             *result.borrow_mut() = Some(val);
@@ -110,20 +123,22 @@ pub fn test_plugin_selected() {
 
     test_html! {
         <PluginSelector
-            renderer=renderer.clone()
-            weak_link=link.clone()>
+            renderer={ renderer.clone() }
+            session={ session.clone() }
+            weak_link={ link.clone() }>
 
         </PluginSelector>
     };
 
     let plugin_selector = link.borrow().clone().unwrap();
-    plugin_selector
-        .send_message(PluginSelectorMsg::PluginSelected("Debug B".to_owned()));
+    plugin_selector.send_message(PluginSelectorMsg::ComponentSelectPlugin(
+        "Debug B".to_owned(),
+    ));
 
     assert_eq!(
         result.borrow().as_ref().map(|x| x.name()),
-        Some("Debug A".to_owned())
+        Some("Debug B".to_owned())
     );
 
-    assert_eq!(renderer.get_active_plugin().unwrap().name(), "Debug A");
+    assert_eq!(renderer.get_active_plugin().unwrap().name(), "Debug B");
 }

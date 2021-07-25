@@ -8,98 +8,99 @@
 
 mod activate;
 mod limits;
-pub mod registry;
 mod render_timer;
 
-use crate::js::perspective::JsPerspectiveView;
-use crate::js::perspective_viewer::*;
-use crate::session::Session;
+pub mod registry;
+
+use crate::config::*;
+use crate::js::perspective::*;
+use crate::js::plugin::*;
+use crate::session::*;
 use crate::utils::*;
+use crate::*;
 
 use self::activate::*;
 use self::limits::*;
 use self::render_timer::*;
 
 use registry::*;
-use std::cell::RefCell;
+use std::cell::{Ref, RefCell};
 use std::future::Future;
+use std::ops::Deref;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
+use wasm_bindgen_futures::future_to_promise;
 use web_sys::*;
 use yew::prelude::*;
+
+#[derive(Clone)]
+pub struct Renderer(Rc<PluginHandle>);
+
+/// Immutable state
+pub struct PluginHandle {
+    plugin_data: RefCell<PluginData>,
+    draw_lock: DebounceMutex,
+    _session: Session,
+    pub on_plugin_changed: PubSub<JsPerspectiveViewerPlugin>,
+    pub on_limits_changed: PubSub<RenderLimits>,
+}
 
 type RenderLimits = (usize, usize, Option<usize>, Option<usize>);
 
 pub struct PluginData {
-    vieux_elem: HtmlElement,
+    viewer_elem: HtmlElement,
+    metadata: ViewConfigRequirements,
     plugins: Vec<JsPerspectiveViewerPlugin>,
     plugins_idx: Option<usize>,
-    _session: Session,
-    draw_lock: DebounceMutex,
     timer: MovingWindowRenderTimer,
-    on_plugin_changed: PubSub<JsPerspectiveViewerPlugin>,
-    on_limits_changed: PubSub<RenderLimits>,
 }
 
-#[wasm_bindgen]
-pub fn register_plugin(name: &str) {
-    PLUGIN_REGISTRY.register_plugin(name);
+impl Deref for Renderer {
+    type Target = PluginHandle;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
-#[derive(Clone)]
-pub struct Renderer(Rc<RefCell<PluginData>>);
+impl Deref for PluginHandle {
+    type Target = RefCell<PluginData>;
+    fn deref(&self) -> &Self::Target {
+        &self.plugin_data
+    }
+}
 
 impl Renderer {
-    pub fn new(vieux_elem: HtmlElement, _session: Session) -> Renderer {
-        Renderer(Rc::new(RefCell::new(PluginData {
-            vieux_elem,
-            plugins: PLUGIN_REGISTRY.create_plugins(),
-            plugins_idx: None,
+    pub fn new(viewer_elem: HtmlElement, _session: Session) -> Renderer {
+        Renderer(Rc::new(PluginHandle {
+            plugin_data: RefCell::new(PluginData {
+                viewer_elem,
+                metadata: ViewConfigRequirements::default(),
+                plugins: PLUGIN_REGISTRY.create_plugins(),
+                plugins_idx: None,
+                timer: MovingWindowRenderTimer::default(),
+            }),
             _session,
             draw_lock: Default::default(),
-            timer: MovingWindowRenderTimer::default(),
             on_plugin_changed: Default::default(),
             on_limits_changed: Default::default(),
-        })))
+        }))
     }
 
-    pub fn reset(&self) -> Result<(), JsValue> {
+    pub fn reset(&self) {
+        self.0.borrow_mut().plugins_idx = None;
+        if let Ok(plugin) = self.get_active_plugin() {
+            plugin.restore(&js_object!());
+        }
+    }
+
+    pub fn delete(&self) -> Result<(), JsValue> {
         self.get_active_plugin()?.delete();
         Ok(())
     }
 
-    /// Add a handler to notify when the active `JsPerspectiveViewerPlugin` has
-    /// changed.
-    ///
-    /// # Arguments
-    /// - `on_plugin_changed` A notification callback.
-    pub fn add_on_plugin_changed<T>(&self, on_plugin_changed: T) -> Subscription
-    where
-        T: Fn(JsPerspectiveViewerPlugin) + 'static,
-    {
-        if self.0.borrow().plugins_idx.is_some() {
-            on_plugin_changed(self.get_active_plugin().unwrap());
-        }
-
-        self.0
-            .borrow()
-            .on_plugin_changed
-            .add_listener(on_plugin_changed)
-    }
-
-    /// Add a handler to notify when the active `RenderLimits` have changed.
-    ///
-    /// # Arguments
-    /// - `on_limits_changed` A notification callback.
-    pub fn add_on_limits_changed(
-        &self,
-        on_limits_changed: Callback<RenderLimits>,
-    ) -> Subscription {
-        self.0
-            .borrow()
-            .on_limits_changed
-            .add_listener(on_limits_changed)
+    pub fn metadata(&self) -> Ref<'_, ViewConfigRequirements> {
+        Ref::map(self.borrow(), |x| &x.metadata)
     }
 
     /// Return all plugin instances, whether they are active or not.  Useful
@@ -137,7 +138,16 @@ impl Renderer {
     }
 
     pub fn disable_active_plugin_render_warning(&self) {
+        self.borrow_mut().metadata.render_warning = false;
         self.get_active_plugin().unwrap().set_render_warning(false);
+    }
+
+    pub fn update_plugin(&self, update: PluginUpdate) -> Result<bool, JsValue> {
+        match &update {
+            PluginUpdate::Missing => Ok(false),
+            PluginUpdate::SetDefault => self.set_plugin(None),
+            PluginUpdate::Update(plugin) => self.set_plugin(Some(plugin)),
+        }
     }
 
     /// Set the active plugin to the plugin registerd as `name`, or the default
@@ -158,8 +168,10 @@ impl Renderer {
         );
 
         if changed {
-            self.0.borrow_mut().plugins_idx = Some(idx);
-            self._trigger()?;
+            self.borrow_mut().plugins_idx = Some(idx);
+            let plugin: JsPerspectiveViewerPlugin = self.get_active_plugin()?;
+            self.borrow_mut().metadata = plugin.get_requirements()?;
+            self.on_plugin_changed.emit_all(plugin);
         }
 
         Ok(changed)
@@ -178,18 +190,18 @@ impl Renderer {
 
     pub async fn draw(
         &self,
-        session: impl Future<Output = &Session>,
+        session: impl Future<Output = Result<&Session, JsValue>>,
     ) -> Result<JsValue, JsValue> {
         self.draw_plugin(session, false).await
     }
 
     pub async fn update(&self, session: &Session) -> Result<JsValue, JsValue> {
-        self.draw_plugin(async { session }, true).await
+        self.draw_plugin(async { Ok(session) }, true).await
     }
 
     async fn draw_plugin(
         &self,
-        session: impl Future<Output = &Session>,
+        session: impl Future<Output = Result<&Session, JsValue>>,
         is_update: bool,
     ) -> Result<JsValue, JsValue> {
         let timer = self.render_timer();
@@ -198,7 +210,7 @@ impl Renderer {
                 set_timeout(timer.get_avg()).await?;
             }
 
-            if let Some(view) = session.await.get_view() {
+            if let Some(view) = session.await?.get_view() {
                 timer.capture_time(self.draw_view(&view, is_update)).await
             } else {
                 Ok(JsValue::from(true))
@@ -206,11 +218,7 @@ impl Renderer {
         };
 
         let draw_mutex = self.draw_lock();
-        if is_update {
-            draw_mutex.debounce(task).await
-        } else {
-            draw_mutex.lock(task).await
-        }
+        draw_mutex.debounce(task).await
     }
 
     async fn draw_view(
@@ -219,15 +227,16 @@ impl Renderer {
         is_update: bool,
     ) -> Result<JsValue, JsValue> {
         let plugin = self.get_active_plugin()?;
-        let limits = get_row_and_col_limits(&view, &plugin).await?;
-        self.0.borrow().on_limits_changed.emit_all(limits);
-        let vieux_elem = &self.0.borrow().vieux_elem.clone();
+        let meta = self.metadata().clone();
+        let limits = get_row_and_col_limits(view, &meta).await?;
+        self.on_limits_changed.emit_all(limits);
+        let viewer_elem = &self.0.borrow().viewer_elem.clone();
         if is_update {
-            let task = plugin.update(&view, limits.2, limits.3, false);
-            activate_plugin(&vieux_elem, &plugin, task).await
+            let task = plugin.update(view, limits.2, limits.3, false);
+            activate_plugin(viewer_elem, &plugin, task).await
         } else {
-            let task = plugin.draw(&view, limits.2, limits.3, false);
-            activate_plugin(&vieux_elem, &plugin, task).await
+            let task = plugin.draw(view, limits.2, limits.3, false);
+            activate_plugin(viewer_elem, &plugin, task).await
         }
     }
 
@@ -245,15 +254,15 @@ impl Renderer {
                 let main_panel: web_sys::HtmlElement = self
                     .0
                     .borrow()
-                    .vieux_elem
-                    .query_selector("[slot=main_panel]")
-                    .unwrap()
+                    .viewer_elem
+                    .children()
+                    .item(0)
                     .unwrap()
                     .unchecked_into();
                 let new_width =
-                    format!("{}px", &self.0.borrow().vieux_elem.client_width());
+                    format!("{}px", &self.0.borrow().viewer_elem.client_width());
                 let new_height =
-                    format!("{}px", &self.0.borrow().vieux_elem.client_height());
+                    format!("{}px", &self.0.borrow().viewer_elem.client_height());
                 main_panel.style().set_property("width", &new_width)?;
                 main_panel.style().set_property("height", &new_height)?;
                 let resize = plugin.resize().await;
@@ -267,21 +276,15 @@ impl Renderer {
     }
 
     fn draw_lock(&self) -> DebounceMutex {
-        self.0.borrow().draw_lock.clone()
+        self.draw_lock.clone()
     }
 
     fn render_timer(&self) -> MovingWindowRenderTimer {
         self.0.borrow().timer.clone()
     }
 
-    fn _trigger(&self) -> Result<(), JsValue> {
-        let plugin: JsPerspectiveViewerPlugin = self.get_active_plugin()?;
-        self.0.borrow().on_plugin_changed.emit_all(plugin);
-        Ok(())
-    }
-
     fn find_plugin_idx(&self, name: &str) -> Option<usize> {
-        let short_name = make_short_name(&name);
+        let short_name = make_short_name(name);
         let elements = &self.0.borrow().plugins;
         elements
             .iter()
@@ -294,4 +297,60 @@ fn make_short_name(name: &str) -> String {
         .chars()
         .filter(|x| x.is_alphabetic())
         .collect()
+}
+
+/// A `RenderableProps` is a `Properties` with `session` and `renderer` fields, as
+/// this method is boilerplate but has no other trait to live on currently.  As
+/// I'm too lazy to be bothered to implement a `proc-macro` crate, instead this
+/// trait can be conveniently derived via the `derive_renderable_props!()` macro
+/// on a suitable struct.
+pub trait RenderableProps: Properties {
+    fn update_and_render(&self, update: ViewConfigUpdate);
+    fn render(&self);
+}
+
+#[macro_export]
+macro_rules! derive_renderable_props {
+    ($key:ident) => {
+        impl crate::renderer::RenderableProps for $key {
+            fn update_and_render(&self, update: crate::config::ViewConfigUpdate) {
+                crate::renderer::update_and_render(
+                    &self.session,
+                    &self.renderer,
+                    update,
+                );
+            }
+
+            fn render(&self) {
+                crate::renderer::render(&self.session, &self.renderer);
+            }
+        }
+    };
+}
+
+pub fn update_and_render(
+    session: &Session,
+    renderer: &Renderer,
+    update: ViewConfigUpdate,
+) {
+    session.update_view_config(update);
+    let session = session.clone();
+    let renderer = renderer.clone();
+    let _ = future_to_promise(async move {
+        drop(
+            renderer
+                .draw(session.validate().await.create_view())
+                .await?,
+        );
+        Ok(JsValue::UNDEFINED)
+    });
+}
+
+pub fn render(session: &Session, renderer: &Renderer) {
+    let session = session.clone();
+    let renderer = renderer.clone();
+    let _ = future_to_promise(async move {
+        drop(renderer.draw(async { Ok(&session) }).await?);
+        Ok(JsValue::UNDEFINED)
+    });
 }

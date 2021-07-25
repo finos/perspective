@@ -23,6 +23,6 @@ impl<T> ToAsyncCallback<T> for Callback<Sender<T>> {
     async fn emit_and_render(&self) -> Result<T, JsValue> {
         let (sender, receiver) = channel::<T>();
         self.emit(sender);
-        receiver.await.to_jserror()
+        receiver.await.into_jserror()
     }
 }

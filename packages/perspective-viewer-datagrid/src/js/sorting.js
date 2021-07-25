@@ -10,6 +10,6 @@
 export async function configureSortable(table, viewer) {
     table.addEventListener("regular-table-psp-sort", event => {
         this._preserve_focus_state = true;
-        viewer.setAttribute("sort", JSON.stringify(event.detail.sort));
+        viewer.restore({sort: event.detail.sort});
     });
 }

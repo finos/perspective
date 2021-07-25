@@ -63,7 +63,7 @@ impl PerspectiveColumnStyleElement {
             default_config,
         };
 
-        let modal = ModalElement::new(elem, props.clone());
+        let modal = ModalElement::new(elem, props.clone(), true);
         PerspectiveColumnStyleElement {
             modal,
             weak_link,
@@ -93,13 +93,13 @@ impl PerspectiveColumnStyleElement {
     ///
     /// # Arguments
     /// `target` - the relative target to pin this `ModalElement` to.
-    pub fn open(&mut self, target: web_sys::HtmlElement) -> Result<(), JsValue> {
-        self.modal.open(target)
+    pub fn open(&mut self, target: web_sys::HtmlElement) {
+        self.modal.open(target);
     }
 
     /// Remove this `ModalElement` from the DOM.
     pub fn close(&mut self) -> Result<(), JsValue> {
-        self.modal.close()
+        self.modal.hide()
     }
 
     /// DOM lifecycle method when connected.  We don't use this, as it can fire during

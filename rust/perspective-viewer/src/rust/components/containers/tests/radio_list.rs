@@ -6,7 +6,7 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::components::radio_list::{RadioList, RadioListMsg};
+use super::super::radio_list::{RadioList, RadioListMsg};
 use crate::utils::WeakComponentLink;
 use crate::*;
 

@@ -8,7 +8,6 @@
  */
 
 import "./polyfills/index";
-import {registerPlugin} from "@finos/perspective-viewer/src/js/utils.js";
 import charts from "../charts/charts";
 import {initialiseStyles} from "../series/colorStyles";
 import style from "../../less/chart.less";
@@ -67,13 +66,22 @@ export function register(...plugins) {
                         return chart.plugin.name;
                     }
 
-                    get selectMode() {
+                    get select_mode() {
                         return chart.plugin.selectMode || "select";
                     }
 
-                    get initial() {
-                        return chart.plugin.initial || DEFAULT_PLUGIN_SETTINGS.initial;
+                    get min_config_columns() {
+                        return chart.plugin.initial?.count || DEFAULT_PLUGIN_SETTINGS.initial.count;
                     }
+
+                    get config_column_names() {
+                        return chart.plugin.initial?.names || DEFAULT_PLUGIN_SETTINGS.initial.names;
+                    }
+
+                    // get initial() {
+                    //     return chart.plugin.initial
+                    //        || DEFAULT_PLUGIN_SETTINGS.initial;
+                    // }
 
                     get max_cells() {
                         return chart.plugin.max_cells || 4000;
@@ -92,6 +100,7 @@ export function register(...plugins) {
                     }
 
                     async draw(view, end_col, end_row) {
+                        this.config = await this.parentElement.save();
                         await this.update(view, end_col, end_row, true);
                     }
 
@@ -102,7 +111,9 @@ export function register(...plugins) {
 
                         const viewer = this.parentElement;
                         let jsonp, metadata;
-                        const realValues = JSON.parse(viewer.getAttribute("columns"));
+                        // const realValues =
+                        //     JSON.parse(viewer.getAttribute("columns"));
+                        const realValues = this.config.columns;
                         const leaves_only = chart.plugin.name !== "Sunburst";
                         if (end_col && end_row) {
                             jsonp = view.to_json({end_row, end_col, leaves_only});
@@ -113,8 +124,8 @@ export function register(...plugins) {
                         } else {
                             jsonp = view.to_json({leaves_only});
                         }
-                        metadata = await Promise.all([viewer._table.schema(false), view.expression_schema(false), view.schema(false), jsonp, view.get_config()]);
 
+                        metadata = await Promise.all([viewer.getTable().then(table => table.schema(false)), view.expression_schema(false), view.schema(false), jsonp, view.get_config()]);
                         let [table_schema, expression_schema, view_schema, json, config] = metadata;
 
                         /**
@@ -245,7 +256,7 @@ export function register(...plugins) {
                 }
             );
 
-            registerPlugin(plugin_name);
+            customElements.get("perspective-viewer").registerPlugin(plugin_name);
         }
     });
 }

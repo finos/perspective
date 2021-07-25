@@ -14,18 +14,14 @@ use super::completions::*;
 use super::language::*;
 
 use js_intern::*;
-use js_sys::Reflect;
+use js_sys::*;
 use serde_json::error;
-use std::iter::FromIterator;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
 /// Initializes the `plang` language definition using Monaco's `Languages`
 /// module.
-///
-/// # Arguments
-/// * `base` - the `monaco-editor` theme base to use.
-pub async fn init_language(base: &str) -> Result<Editor, error::Error> {
+pub async fn init_language() -> Result<Editor, error::Error> {
     let exts = monaco_exts();
     let module = monaco_module().await.unchecked_into::<MonacoModule>();
     let languages = module.languages();
@@ -35,25 +31,31 @@ pub async fn init_language(base: &str) -> Result<Editor, error::Error> {
     languages.set_monarch_tokens_provider("exprtk", tokenizer);
     let lang_config = LANGUAGE_CONFIG.with(|x| JsValue::from_serde(&x))?;
     languages.set_language_configuration("exprtk", lang_config);
-    let provider = get_completions.to_closure();
+    let provider = get_completions.into_closure();
     let items = js_object!(
         "provideCompletionItems", provider.as_ref();
-        "triggerCharacters", js_sys::Array::from_iter([JsValue::from("\"")].iter());
+        "triggerCharacters", [JsValue::from("\"")].iter().collect::<Array>();
     );
 
     provider.forget();
     languages.register_completion_item_provider("exprtk", items.into());
-    editor.define_theme(
-        "exprtk-theme",
-        JsValue::from_serde(&DefineThemeArgs {
-            base,
-            inherit: true,
-            rules: vec![],
-        })?,
-    );
-
     exts.await;
     Ok(editor)
+}
+
+/// Sets the theme arguments globally, which should be fine since it is modal.
+///
+/// # Arguments
+/// * `theme` - the `monaco-editor` theme base to use.
+pub fn init_theme(theme: &str, editor: &Editor) {
+    let args = DefineThemeArgs {
+        base: theme,
+        inherit: true,
+        rules: vec![],
+    };
+
+    let theme_args = JsValue::from_serde(&args).unwrap();
+    editor.define_theme("exprtk-theme", theme_args)
 }
 
 /// Initializes the `MonacoEnvironment` global definition, which the monaco library

@@ -8,6 +8,7 @@
 
 use crate::utils::*;
 
+use derivative::Derivative;
 use std::cell::RefCell;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
@@ -20,28 +21,20 @@ type BlurHandlerType = Rc<RefCell<Option<Closure<dyn FnMut(FocusEvent)>>>>;
 /// A `ModalElement` wraps the parameterized yew `Component` in a Custom Element.
 /// Via the `open()` and `close()` methods, a `ModalElement` can be positioned next
 /// to any existing on-page elements, accounting for viewport, scroll position, etc.
+///
+///`#[derive(Clone)]` generates the trait bound `T: Clone`, which is not required
+/// because `ComponentLink<T>` implements Clone without this bound;  thus `Clone`
+/// must be implemented by the `derivative` crate's
+/// [custom bounds](https://mcarton.github.io/rust-derivative/latest/Debug.html#custom-bound)
+/// support.
+#[derive(Derivative)]
+#[derivative(Clone(bound = ""))]
 pub struct ModalElement<T: Component> {
-    root: ComponentLink<T>,
+    root: Rc<RefCell<Option<AppHandle<T>>>>,
     custom_element: HtmlElement,
     target: Rc<RefCell<Option<HtmlElement>>>,
     blurhandler: BlurHandlerType,
-}
-
-// `#[derive(Clone)]` generates the trait bound `T: Clone`, which is not required
-// because `ComponentLink<T>` implements Clone without this bound;  thus `Clone`
-// must be implemented by hand.
-impl<T> Clone for ModalElement<T>
-where
-    T: Component,
-{
-    fn clone(&self) -> Self {
-        ModalElement {
-            root: self.root.clone(),
-            custom_element: self.custom_element.clone(),
-            target: self.target.clone(),
-            blurhandler: self.blurhandler.clone(),
-        }
-    }
+    own_focus: bool,
 }
 
 /// Calculate the absolute coordinates (top, left) relative to `<body>` of a
@@ -135,6 +128,7 @@ where
     pub fn new(
         custom_element: web_sys::HtmlElement,
         props: T::Properties,
+        own_focus: bool,
     ) -> ModalElement<T> {
         custom_element.set_attribute("tabindex", "0").unwrap();
         let init = web_sys::ShadowRootInit::new(web_sys::ShadowRootMode::Open);
@@ -143,13 +137,17 @@ where
             .unwrap()
             .unchecked_into::<web_sys::Element>();
 
-        let app = App::<T>::new();
-        let root = app.mount_with_props(shadow_root, props);
+        let root = Rc::new(RefCell::new(Some(yew::start_app_with_props_in_element(
+            shadow_root,
+            props,
+        ))));
+
         let blurhandler = Rc::new(RefCell::new(None));
         ModalElement {
             root,
             custom_element,
             target: Rc::new(RefCell::new(None)),
+            own_focus,
             blurhandler,
         }
     }
@@ -162,7 +160,7 @@ where
 
         // Default, top left/bottom left
         let msg = T::Message::resize((top + height) as u32, left as u32);
-        self.root.send_message(msg);
+        self.root.borrow().as_ref().unwrap().send_message(msg);
 
         let window = web_sys::window().unwrap();
         window
@@ -177,25 +175,35 @@ where
             None => (),
             Some((top, left)) => {
                 let msg = T::Message::resize(top as u32, left as u32);
-                self.root.send_message(msg);
+                self.root.borrow().as_ref().unwrap().send_message(msg);
             }
         };
 
-        let mut this = self.clone();
-        *self.blurhandler.borrow_mut() =
-            Some((move |_| this.close().unwrap()).to_closure_mut());
+        if self.own_focus {
+            let mut this = Some(self.clone());
+            *self.blurhandler.borrow_mut() = Some(
+                (move |_| this.take().and_then(|x| x.hide().ok()).unwrap_or(()))
+                    .into_closure_mut(),
+            );
 
-        self.custom_element.add_event_listener_with_callback(
-            "blur",
-            self.blurhandler
-                .borrow()
-                .as_ref()
-                .unwrap()
-                .as_ref()
-                .unchecked_ref(),
-        )?;
+            self.custom_element.add_event_listener_with_callback(
+                "blur",
+                self.blurhandler
+                    .borrow()
+                    .as_ref()
+                    .unwrap()
+                    .as_ref()
+                    .unchecked_ref(),
+            )?;
 
-        self.custom_element.focus()
+            self.custom_element.focus()
+        } else {
+            Ok(())
+        }
+    }
+
+    pub fn send_message(&self, msg: T::Message) {
+        self.root.borrow().as_ref().unwrap().send_message(msg)
     }
 
     /// Open this modal by attaching directly to `document.body` with position
@@ -204,41 +212,61 @@ where
     ///
     /// Because the Custom Element has a `blur` handler, we must invoke this before
     /// attempting to re-parent the element.
-    pub fn open(&mut self, target: web_sys::HtmlElement) -> Result<(), JsValue> {
-        self.custom_element.blur().unwrap();
-        let window = web_sys::window().unwrap();
-        let mut this = self.clone();
-        window.request_animation_frame(
-            Closure::once_into_js(move || this.open_within_viewport(target))
-                .unchecked_ref(),
-        )?;
+    pub fn open(&self, target: web_sys::HtmlElement) {
+        if !self.is_open() {
+            self.custom_element.blur().unwrap();
+            let window = web_sys::window().unwrap();
+            let mut this = self.clone();
+            window
+                .request_animation_frame(
+                    Closure::once_into_js(move || this.open_within_viewport(target))
+                        .unchecked_ref(),
+                )
+                .unwrap();
+        }
+    }
+
+    pub fn is_open(&self) -> bool {
+        self.custom_element.is_connected()
+    }
+
+    /// Remove from document.
+    pub fn hide(&self) -> Result<(), JsValue> {
+        if self.is_open() {
+            if self.own_focus {
+                self.custom_element.remove_event_listener_with_callback(
+                    "blur",
+                    self.blurhandler
+                        .borrow()
+                        .as_ref()
+                        .unwrap()
+                        .as_ref()
+                        .unchecked_ref(),
+                )?;
+
+                *self.blurhandler.borrow_mut() = None;
+            }
+
+            web_sys::window()
+                .unwrap()
+                .document()
+                .unwrap()
+                .body()
+                .unwrap()
+                .remove_child(&self.custom_element)?;
+
+            let target = self.target.borrow_mut().take().unwrap();
+            let event = web_sys::CustomEvent::new("-perspective-close-expression")?;
+            target.dispatch_event(&event)?;
+        }
+
         Ok(())
     }
 
     /// Remove from document and cleanup.
-    pub fn close(&mut self) -> Result<(), JsValue> {
-        self.custom_element.remove_event_listener_with_callback(
-            "blur",
-            self.blurhandler
-                .borrow()
-                .as_ref()
-                .unwrap()
-                .as_ref()
-                .unchecked_ref(),
-        )?;
-
-        *self.blurhandler.borrow_mut() = None;
-        web_sys::window()
-            .unwrap()
-            .document()
-            .unwrap()
-            .body()
-            .unwrap()
-            .remove_child(&self.custom_element)?;
-
-        let target = self.target.borrow_mut().take().unwrap();
-        let event = web_sys::CustomEvent::new("-perspective-close-expression")?;
-        target.dispatch_event(&event)?;
+    pub fn destroy(self) -> Result<(), JsValue> {
+        self.hide()?;
+        self.root.borrow_mut().take().unwrap().destroy();
         Ok(())
     }
 }

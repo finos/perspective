@@ -294,7 +294,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         }
         this.getAllWidgets().forEach(widget => {
             if (widget.viewer.getAttribute("table") === name) {
-                widget.viewer.load(table);
+                widget.load(table);
             }
         });
     }
@@ -701,11 +701,13 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         widget.title.closable = true;
         this.element.appendChild(widget.viewer);
         if (table) {
-            widget.viewer.load(table);
+            widget.load(table);
         }
-        widget.restore(config).then(() => {
-            this._addWidgetEventListeners(widget);
-        });
+
+        widget.restore(config);
+        // .then(() => {
+        this._addWidgetEventListeners(widget);
+        // });
         return widget;
     }
 

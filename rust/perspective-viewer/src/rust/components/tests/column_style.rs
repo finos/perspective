@@ -25,8 +25,8 @@ pub fn test_set_pos() {
     let panel_div = NodeRef::default();
     test_html! {
         <ColumnStyle
-            ref=panel_div.clone()
-            weak_link=link.clone() >
+            ref={ panel_div.clone() }
+            weak_link={ link.clone() }>
         </ColumnStyle>
     };
 
@@ -66,8 +66,8 @@ pub fn test_initial_fixed() {
 
     test_html! {
         <ColumnStyle
-            config=config
-            ref=panel_div.clone() >
+            config={config}
+            ref={ panel_div.clone() }>
         </ColumnStyle>
     };
 
@@ -88,9 +88,9 @@ pub fn test_fixed_msg_overrides_default() {
 
     test_html! {
         <ColumnStyle
-            default_config=default_config
-            ref=panel_div.clone()
-            weak_link=link.clone() >
+            default_config={default_config}
+            ref={ panel_div.clone() }
+            weak_link={ link.clone() }>
         </ColumnStyle>
     };
 
@@ -116,8 +116,8 @@ pub fn test_fixed_is_0() {
     };
     test_html! {
         <ColumnStyle
-            config=config
-            ref=panel_div.clone() >
+            config={ config }
+            ref={ panel_div.clone() }>
         </ColumnStyle>
     };
 
@@ -141,8 +141,8 @@ pub fn test_color_enabled() {
 
     test_html! {
         <ColumnStyle
-            on_change=on_change
-            weak_link=link.clone() >
+            on_change={ on_change }
+            weak_link={ link.clone() }>
         </ColumnStyle>
     };
 
@@ -172,9 +172,9 @@ pub fn test_color_mode_changed() {
 
     test_html! {
         <ColumnStyle
-            default_config=default_config
-            on_change=on_change
-            weak_link=link.clone() >
+            default_config={ default_config }
+            on_change={ on_change }
+            weak_link={ link.clone() }>
         </ColumnStyle>
     };
 
@@ -188,7 +188,6 @@ pub fn test_color_mode_changed() {
     assert_eq!(result.borrow().color_mode, ColorMode::Background);
     assert_eq!(result.borrow().pos_color, None);
 }
-
 
 #[wasm_bindgen_test]
 pub fn test_pos_color_changed_override_defaults() {
@@ -210,9 +209,9 @@ pub fn test_pos_color_changed_override_defaults() {
 
     test_html! {
         <ColumnStyle
-            default_config=default_config
-            on_change=on_change
-            weak_link=link.clone() >
+            default_config={ default_config }
+            on_change={ on_change }
+            weak_link={ link.clone() }>
         </ColumnStyle>
     };
 
@@ -250,9 +249,9 @@ pub fn test_pos_color_and_mode_changed_override_defaults() {
 
     test_html! {
         <ColumnStyle
-            default_config=default_config
-            on_change=on_change
-            weak_link=link.clone() >
+            default_config={default_config}
+            on_change={on_change}
+            weak_link={ link.clone() }>
         </ColumnStyle>
     };
 
@@ -273,6 +272,3 @@ pub fn test_pos_color_and_mode_changed_override_defaults() {
     assert_eq!(result.borrow().pos_color, None);
     assert_eq!(result.borrow().neg_color, None);
 }
-
-
-

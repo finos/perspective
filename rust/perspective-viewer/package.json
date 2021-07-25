@@ -1,5 +1,5 @@
 {
-    "name": "@finos/perspective-vieux",
+    "name": "@finos/perspective-viewer",
     "version": "0.10.3",
     "private": true,
     "description": "A regular `<table>`, for an async and virtual data model.",
@@ -8,18 +8,23 @@
         "url": "https://github.com/finos/perspective"
     },
     "license": "Apache-2.0",
-    "main": "dist/esm/vieux.js",
-    "module": "dist/esm/vieux.js",
-    "browser": "dist/esm/vieux.js",
+    "main": "dist/esm/index.js",
+    "module": "dist/esm/index.js",
+    "browser": "dist/esm/index.js",
     "files": [
         "dist/**/*",
         "pkg/**/*",
         "src/**/*"
     ],
     "scripts": {
-        "build:wasm": "wasm-pack build --target web",
+        "build:wasm": "wasm-pack build --out-dir dist/pkg --target web && rm dist/pkg/package.json",
         "build:rollup": "rollup --config rollup.config.js",
-        "build": "npm-run-all build:rollup build:wasm && cpx 'src/less/*' dist/less",
+        "build:webpack": "webpack --color --config webpack.config.js",
+        "build": "npm-run-all build:rollup build:wasm build:webpack && cpx 'src/less/*' dist/less",
+        "watch:wasm": "cargo watch -i .gitignore -i \"pkg/*\" -i \"src/js/*\" -s \"yarn build:wasm\"",
+        "watch:rollup": "rollup --watch --config rollup.config.js",
+        "watch:webpack": "webpack --watch --color --config webpack.config.js",
+        "watch": "npm-run-all -p watch:rollup watch:wasm watch:webpack",
         "postbuild": "rimraf pkg/package.json pkg/.gitignore",
         "clean": "rimraf dist && rimraf pkg && rimraf target",
         "fix": "yarn lint --fix",
@@ -27,13 +32,15 @@
         "test:build": "cpx ../../packages/perspective/dist/umd/perspective.inline.js pkg/",
         "test:run": "echo 'No Jest tests'",
         "test:clean": "rm perspective.csv || true",
-        "test": "yarn test:build && wasm-pack test --chrome --headless && yarn test:clean",
-        "watch": "npm-run-all -p watch:*"
+        "test": "yarn test:build && wasm-pack test --chrome --headless && yarn test:clean"
     },
     "publishConfig": {
         "access": "public"
     },
     "dependencies": {
-        "@finos/perspective": "^0.10.3"
+        "@finos/perspective": "^0.10.3",
+        "mobile-drag-drop": "^2.3.0-rc.2",
+        "monaco-editor": "0.24.0",
+        "monaco-editor-webpack-plugin": "3.1.0"
     }
 }

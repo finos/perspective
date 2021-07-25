@@ -8,6 +8,7 @@
 
 use crate::components::status_bar_counter::StatusBarRowsCounter;
 use crate::session::*;
+use crate::utils::*;
 use crate::*;
 
 #[cfg(test)]
@@ -38,6 +39,7 @@ pub enum StatusBarMsg {
 pub struct StatusBar {
     link: ComponentLink<Self>,
     props: StatusBarProps,
+    _sub: Subscription,
 }
 
 impl Component for StatusBar {
@@ -47,8 +49,8 @@ impl Component for StatusBar {
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         enable_weak_link_test!(props, link);
         let cb = link.callback(|_| StatusBarMsg::TableStatsChanged);
-        props.session.set_on_stats_callback(cb);
-        Self { props, link }
+        let _sub = props.session.on_stats.add_listener(cb);
+        Self { link, props, _sub }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
@@ -94,23 +96,23 @@ impl Component for StatusBar {
             .callback(|event: MouseEvent| StatusBarMsg::Copy(event.shift_key()));
 
         html! {
-            <div id=self.props.id.clone()>
+            <div id={ self.props.id.clone() }>
                 <div class="section">
-                    <span id="status" class=class_name></span>
+                    <span id="status" class={ class_name }></span>
                 </div>
                 <div class="section">
-                    <span id="reset" class="button" onclick=reset>
+                    <span id="reset" class="button" onmousedown={ reset }>
                         <span>{ "Reset" }</span>
                     </span>
-                    <span id="export" class="button" onclick=export>
+                    <span id="export" class="button" onmousedown={ export }>
                         <span>{ "Export" }</span>
                     </span>
-                    <span id="copy" class="button" onclick=copy>
+                    <span id="copy" class="button" onmousedown={ copy }>
                         <span>{ "Copy" }</span>
                     </span>
                 </div>
                 <div id="rows" class="section">
-                    <StatusBarRowsCounter stats=stats />
+                    <StatusBarRowsCounter stats={ stats } />
                 </div>
             </div>
         }

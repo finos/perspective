@@ -9,10 +9,10 @@
 
 import style from "../less/workspace.less";
 import template from "../html/workspace.html";
-import {bindTemplate} from "@finos/perspective-viewer/src/js/utils";
 import {PerspectiveWorkspace, SIDE} from "./workspace";
 import {MessageLoop} from "@lumino/messaging";
 import {Widget} from "@lumino/widgets";
+import {bindTemplate} from "./workspace/utils.js";
 
 import injectedStyles from "../less/injected.less";
 

@@ -31,7 +31,7 @@ impl Drop for ResizingState {
     /// Without this, the `Closure` objects would not leak, but the document will
     /// continue to call them, causing runtime exceptions.
     fn drop(&mut self) {
-        maybe! {
+        let result = maybe! {
             let document = web_sys::window().unwrap().document().unwrap();
             let body = document.body().unwrap();
             let mousemove = self.mousemove.as_ref().unchecked_ref();
@@ -42,7 +42,9 @@ impl Drop for ResizingState {
 
             self.release_cursor()?;
             Ok(())
-        }
+        };
+
+        result.expect("Drop failed")
     }
 }
 
@@ -63,13 +65,13 @@ impl ResizingState {
             body_style: body.style(),
             mouseup: split_panel
                 .callback(|_| SplitPanelMsg::StopResizing)
-                .to_closure(),
+                .into_closure(),
             mousemove: split_panel
                 .callback(|event: MouseEvent| {
                     let client_x = event.client_x();
                     SplitPanelMsg::MoveResizing(client_x)
                 })
-                .to_closure(),
+                .into_closure(),
         };
 
         state.capture_cursor()?;
@@ -206,14 +208,14 @@ impl Component for SplitPanel {
         });
 
         html! {
-            <div id=self.props.id.clone() class="split-panel">
-                <div class="split-panel-child" ref=_ref style=style >
+            <div id={ self.props.id.clone() } class="split-panel">
+                <div class="split-panel-child" ref={ _ref } style={ style }>
                     { iter.next().unwrap() }
                 </div>
                 <div
                     class="split-panel-divider"
-                    onmousedown=onmousedown
-                    ondblclick=ondblclick>
+                    onmousedown={onmousedown}
+                    ondblclick={ondblclick}>
                 </div>
                 <div class="split-panel-child">
                     { iter.next().unwrap() }

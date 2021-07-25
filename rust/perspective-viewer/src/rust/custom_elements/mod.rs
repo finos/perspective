@@ -8,8 +8,9 @@
 
 pub mod column_style;
 pub mod expression_editor;
-pub mod vieux;
+pub mod filter_dropdown;
 pub mod modal;
+pub mod viewer;
 
 #[cfg(test)]
 mod tests;

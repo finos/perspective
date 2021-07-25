@@ -18,7 +18,7 @@ use yew::prelude::*;
 
 #[wasm_bindgen]
 #[derive(Clone)]
-pub struct PerspectiveExpressionEditorElement {
+pub struct ExpressionEditorElement {
     modal: ModalElement<ExpressionEditor>,
 }
 
@@ -28,12 +28,11 @@ impl ResizableMessage for <ExpressionEditor as Component>::Message {
     }
 }
 
-impl PerspectiveExpressionEditorElement {
+impl ExpressionEditorElement {
     pub fn new(
         session: Session,
         on_save: Callback<JsValue>,
-        monaco_theme: String,
-    ) -> PerspectiveExpressionEditorElement {
+    ) -> ExpressionEditorElement {
         let document = window().unwrap().document().unwrap();
         let editor = document
             .create_element("perspective-expression-editor")
@@ -66,21 +65,38 @@ impl PerspectiveExpressionEditorElement {
             on_save,
             on_init,
             on_validate,
-            monaco_theme,
             session,
         };
 
-        let modal = ModalElement::new(editor, props);
-        PerspectiveExpressionEditorElement { modal }
+        let modal = ModalElement::new(editor, props, true);
+        ExpressionEditorElement { modal }
     }
 
-    pub fn open(&mut self, target: HtmlElement) -> Result<(), JsValue> {
-        self.modal.open(target)
+    pub fn open(&mut self, target: HtmlElement) {
+        let monaco_theme = get_theme(&target);
+        self.modal
+            .send_message(ExpressionEditorMsg::SetTheme(monaco_theme));
+        self.modal.open(target);
     }
 
-    pub fn close(&mut self) -> Result<(), JsValue> {
-        self.modal.close()
+    pub fn destroy(self) -> Result<(), JsValue> {
+        self.modal.destroy()
+    }
+
+    pub fn set_content(&self, content: &str) {
+        self.modal
+            .send_message(ExpressionEditorMsg::SetContent(content.to_owned()));
     }
 
     pub fn connected_callback(&self) {}
+}
+
+fn get_theme(elem: &HtmlElement) -> String {
+    let styles = window().unwrap().get_computed_style(elem).unwrap().unwrap();
+    match &styles.get_property_value("--monaco-theme") {
+        Err(_) => "vs",
+        Ok(ref s) if s.trim() == "" => "vs",
+        Ok(x) => x.trim(),
+    }
+    .to_owned()
 }

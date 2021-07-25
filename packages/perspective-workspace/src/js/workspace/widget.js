@@ -72,16 +72,34 @@ export class PerspectiveViewerWidget extends Widget {
         return this.viewer.toggleConfig();
     }
 
-    restore(config) {
-        const {master, table, linked, name, ...viewerConfig} = config;
-        this.master = master;
-        this.name = name;
-        if (table) {
-            this.viewer.setAttribute("table", table);
+    async load(table) {
+        this._is_table_loaded = true;
+        let promises = [this.viewer.load(table)];
+        if (this._restore_config) {
+            promises.push(this._restore_config());
         }
-        this.linked = linked;
 
-        return this.viewer.restore({...viewerConfig});
+        await Promise.all(promises);
+    }
+
+    async restore(config) {
+        const restore_config = async () => {
+            const {master, table, linked, name, ...viewerConfig} = config;
+            this.master = master;
+            this.name = name;
+            if (table) {
+                this.viewer.setAttribute("table", table);
+            }
+
+            this.linked = linked;
+            await this.viewer.restore({...viewerConfig});
+        };
+
+        if (this._is_table_loaded) {
+            return restore_config();
+        } else {
+            this._restore_config = restore_config;
+        }
     }
 
     async save() {

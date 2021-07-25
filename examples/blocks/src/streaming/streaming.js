@@ -32,13 +32,14 @@ window.addEventListener("DOMContentLoaded", async function() {
     });
 
     // Load the `table` in the `<perspective-viewer>` DOM reference.
-    elem.load(table);
+    await elem.load(Promise.resolve(table));
+
     elem.restore({
         plugin: "Datagrid",
         columns: ["(-)chg", "chg", "(+)chg"],
         expressions: ['//(-)chg\nif("chg"<0){"chg"}else{0}', '//(+)chg\nif("chg">0){"chg"}else{0}'],
-        "row-pivots": ["name"],
-        "column-pivots": ["client"],
+        row_pivots: ["name"],
+        column_pivots: ["client"],
         aggregates: {"(-)chg": "avg", "(+)chg": "avg", chg: "avg"},
         sort: [["chg", "desc"]],
         plugin_config: {

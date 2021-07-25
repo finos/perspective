@@ -117,7 +117,7 @@ where
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         props.validate();
         enable_weak_link_test!(props, link);
-        Self { props, link }
+        Self { link, props }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
@@ -184,7 +184,7 @@ where
                     value={ format!("{}", self.props.values[idx]) }
                     class="parameter"
                     oninput={ on_change }
-                    disabled=self.props.disabled
+                    disabled={ self.props.disabled }
                     checked={ self.props.selected == self.props.values[idx] } />
                 { child }
             </div>

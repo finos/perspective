@@ -6,8 +6,9 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::components::radio_list::RadioList;
 use crate::utils::WeakComponentLink;
+
+use super::containers::radio_list::RadioList;
 
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
@@ -398,29 +399,29 @@ impl Component for ColumnStyle {
                             min="0"
                             step="1"
                             value={ format!("{}", match self.props.config.fixed { None => self.props.default_config.fixed, Some(x) => x }) }
-                            oninput=fixed_oninput />
+                            oninput={ fixed_oninput }/>
                     </div>
                     <div class="row">
                         <input
                             id="color-selected"
                             type="checkbox"
-                            oninput=color_enabled_oninput
+                            oninput={ color_enabled_oninput }
                             checked={ self.props.config.color_mode.is_enabled() } />
                         <input
                             id="color-param"
                             class="parameter"
                             type="color"
                             value={ self.pos_color.to_owned() }
-                            disabled=!self.props.config.color_mode.is_enabled()
-                            oninput=pos_color_oninput />
+                            disabled={ !self.props.config.color_mode.is_enabled() }
+                            oninput={ pos_color_oninput } />
                         <span class="operator">{ " + / - " }</span>
                         <input
                             id="neg-color-param"
                             class="parameter"
                             type="color"
                             value={ self.neg_color.to_owned() }
-                            disabled=!self.props.config.color_mode.is_enabled()
-                            oninput=neg_color_oninput />
+                            disabled={ !self.props.config.color_mode.is_enabled() }
+                            oninput={ neg_color_oninput }/>
                     </div>
 
                     <RadioList<ColorMode>

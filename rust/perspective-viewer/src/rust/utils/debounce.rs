@@ -13,22 +13,14 @@ use std::future::Future;
 use std::rc::Rc;
 use wasm_bindgen::*;
 
+#[derive(Default)]
 pub struct DebounceMutexData {
     id: Cell<u64>,
     mutex: Mutex<u64>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct DebounceMutex(Rc<DebounceMutexData>);
-
-impl Default for DebounceMutex {
-    fn default() -> DebounceMutex {
-        DebounceMutex(Rc::new(DebounceMutexData {
-            id: Cell::new(0),
-            mutex: Mutex::new(0),
-        }))
-    }
-}
 
 impl DebounceMutex {
     pub async fn lock<T>(&self, f: impl Future<Output = T>) -> T {

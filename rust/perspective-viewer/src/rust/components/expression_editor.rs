@@ -13,7 +13,6 @@ use crate::session::Session;
 use crate::utils::*;
 
 use std::cell::RefCell;
-use std::iter::FromIterator;
 use std::rc::Rc;
 use wasm_bindgen::{prelude::*, JsCast};
 use wasm_bindgen_futures::future_to_promise;
@@ -24,6 +23,8 @@ static CSS: &str = include_str!("../../../dist/css/expression-editor.css");
 
 pub enum ExpressionEditorMsg {
     SetPos(u32, u32),
+    SetContent(String),
+    SetTheme(String),
     Validate(JsValue),
     EnableSave(bool),
     SaveExpr,
@@ -35,7 +36,6 @@ pub struct ExpressionEditorProps {
     pub on_init: Callback<()>,
     pub on_validate: Callback<bool>,
     pub session: Session,
-    pub monaco_theme: String,
 }
 
 /// A label widget which displays a row count and a "projection" count, the number of
@@ -49,6 +49,7 @@ pub struct ExpressionEditor {
     props: ExpressionEditorProps,
     link: ComponentLink<Self>,
     save_enabled: bool,
+    expression: Rc<RefCell<Option<String>>>,
     on_validate: Rc<Closure<dyn Fn(JsValue)>>,
     on_save: Rc<Closure<dyn Fn(JsValue)>>,
 }
@@ -59,10 +60,10 @@ impl Component for ExpressionEditor {
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         let on_validate =
-            Rc::new(link.callback(ExpressionEditorMsg::Validate).to_closure());
+            Rc::new(link.callback(ExpressionEditorMsg::Validate).into_closure());
         let on_save = Rc::new(
             link.callback(|_| ExpressionEditorMsg::SaveExpr)
-                .to_closure(),
+                .into_closure(),
         );
 
         ExpressionEditor {
@@ -70,6 +71,7 @@ impl Component for ExpressionEditor {
             left: 0,
             container: NodeRef::default(),
             editor: Rc::new(RefCell::new(None)),
+            expression: Rc::new(RefCell::new(None)),
             props,
             link,
             save_enabled: false,
@@ -97,6 +99,22 @@ impl Component for ExpressionEditor {
                 self.props.on_validate.emit(false);
                 self.save_enabled = x;
                 true
+            }
+            ExpressionEditorMsg::SetContent(expr) => {
+                if let Some((_, ref editor)) = *self.editor.borrow() {
+                    editor.set_value(&expr);
+                } else {
+                    *self.expression.borrow_mut() = Some(expr);
+                }
+
+                false
+            }
+            ExpressionEditorMsg::SetTheme(theme) => {
+                if let Some((ref editor, _)) = *self.editor.borrow() {
+                    init_theme(theme.as_str(), editor);
+                }
+
+                false
             }
             ExpressionEditorMsg::SaveExpr => {
                 if self.save_enabled {
@@ -139,8 +157,8 @@ impl Component for ExpressionEditor {
                     <button
                         id="psp-expression-editor-button-save"
                         class="psp-expression-editor__button"
-                        onclick={ click }
-                        disabled=!self.save_enabled>
+                        onmousedown={ click }
+                        disabled={ !self.save_enabled }>
                         { "Save" }
                     </button>
                 </div>
@@ -153,9 +171,9 @@ impl ExpressionEditor {
     /// Initialize the `monaco-editor` for this `<perspective-expression-editor>`.
     /// This method should only be called once per element.
     async fn init_monaco_editor(self) -> Result<JsValue, JsValue> {
-        let column_names = self.props.session.get_all_columns();
-        let monaco = init_monaco(&self.props.monaco_theme).await.unwrap();
-        set_global_completion_column_names(column_names.to_jserror()?);
+        let column_names = self.props.session.metadata().get_table_columns();
+        let monaco = init_monaco().await.unwrap();
+        set_global_completion_column_names(column_names.into_jserror()?);
         let args = EditorArgs {
             theme: "exprtk-theme",
             value: "",
@@ -175,6 +193,10 @@ impl ExpressionEditor {
         await_animation_frame().await?;
         editor.focus();
         self.props.on_init.emit(());
+        if let Some(expr) = self.expression.borrow_mut().take() {
+            editor.set_value(&expr);
+        }
+
         Ok(JsValue::UNDEFINED)
     }
 
@@ -190,7 +212,7 @@ impl ExpressionEditor {
             Some(err) => {
                 let marker = error_to_market(err);
                 let args = JsValue::from_serde(&marker).unwrap();
-                let arr = js_sys::Array::from_iter([args].iter());
+                let arr = [args].iter().collect::<js_sys::Array>();
                 (false, arr)
             }
         };
