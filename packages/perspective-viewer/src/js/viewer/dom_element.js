@@ -103,9 +103,7 @@ export class DomElement extends PerspectiveElement {
 
                         if (nrows < 100000) {
                             // Autocomplete
-                            const json = await view.to_json({
-                                end_row: 10
-                            });
+                            const json = await view.to_json();
                             row.choices(this._autocomplete_choices(json, type));
                         } else {
                             console.warn(`perspective-viewer did not generate autocompletion results - ${nrows} is greater than limit of 100,000 rows.`);
