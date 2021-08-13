@@ -498,6 +498,24 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("Transitive arrow output 0-sided hidden sort", async function() {
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view({columns: ["float"], sort: [["string", "desc"]]});
+            let arrow = await view.to_arrow();
+            let json2 = await view.to_json();
+            //expect(arrow.byteLength).toEqual(1010);
+
+            let table2 = await perspective.table(arrow);
+            let view2 = await table2.view();
+            let json = await view2.to_json();
+            expect(json).toEqual(json2);
+
+            view2.delete();
+            table2.delete();
+            view.delete();
+            table.delete();
+        });
+
         it("Transitive arrow output 0-sided, with row range", async function() {
             let table = await perspective.table(int_float_string_data);
             let view = await table.view();
@@ -668,6 +686,28 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("Transitive arrow output 2-sided sorted", async function() {
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view({row_pivots: ["string"], column_pivots: ["int"], sort: [["int", "desc"]]});
+            let json = await view.to_json();
+            let arrow = await view.to_arrow();
+            let table2 = await perspective.table(arrow);
+            let view2 = await table2.view();
+            let json2 = await view2.to_json();
+
+            expect(json2).toEqual(
+                json.map(x => {
+                    delete x["__ROW_PATH__"];
+                    return x;
+                })
+            );
+
+            view2.delete();
+            table2.delete();
+            view.delete();
+            table.delete();
+        });
+
         it("Transitive arrow output 2-sided with row range", async function() {
             let table = await perspective.table(int_float_string_data);
             let view = await table.view({row_pivots: ["string"], column_pivots: ["int"]});
@@ -720,6 +760,54 @@ module.exports = perspective => {
             let table2 = await perspective.table(arrow);
             let view2 = await table2.view();
             let json2 = await view2.to_json();
+
+            expect(json2).toEqual(
+                json.map(x => {
+                    delete x["__ROW_PATH__"];
+                    return x;
+                })
+            );
+
+            view2.delete();
+            table2.delete();
+            view.delete();
+            table.delete();
+        });
+
+        it("Transitive arrow output 2-sided column only hidden sort", async function() {
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view({column_pivots: ["string"], columns: ["float"], sort: [["int", "desc"]]});
+            let json = await view.to_json();
+            let arrow = await view.to_arrow();
+            let table2 = await perspective.table(arrow);
+            let view2 = await table2.view();
+            let json2 = await view2.to_json();
+
+            console.log(json, json2);
+
+            expect(json2).toEqual(
+                json.map(x => {
+                    delete x["__ROW_PATH__"];
+                    return x;
+                })
+            );
+
+            view2.delete();
+            table2.delete();
+            view.delete();
+            table.delete();
+        });
+
+        it("Transitive arrow output 2-sided column only sorted", async function() {
+            let table = await perspective.table(int_float_string_data);
+            let view = await table.view({column_pivots: ["string"], sort: [["int", "desc"]]});
+            let json = await view.to_json();
+            let arrow = await view.to_arrow();
+            let table2 = await perspective.table(arrow);
+            let view2 = await table2.view();
+            let json2 = await view2.to_json();
+
+            console.log(json, json2);
 
             expect(json2).toEqual(
                 json.map(x => {

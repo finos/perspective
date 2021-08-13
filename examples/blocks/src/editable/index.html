@@ -43,23 +43,80 @@
     </perspective-viewer>
 
     <script>
-        const WORKER = window.perspective.worker();
-    
-        function on_load() {
-            var el = document.getElementsByTagName('perspective-viewer')[0];
-            WORKER.table(this.response).then(table => {
-                el.load(table);
-                el.toggleConfig();
-            });
-        }
+        window.addEventListener("DOMContentLoaded", async () => {
+            const WORKER = window.perspective.worker();
+            const table = await WORKER.table([
+                {x: 1, y: "a", z: true},
+                {x: 2, y: "b", z: false},
+                {x: 3, y: "c", z: true},
+                {x: 4, y: "d", z: false}
+            ], {index: "x"});
 
-        window.addEventListener('DOMContentLoaded', function () {
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', '/node_modules/superstore-arrow/superstore.arrow', true);
-            xhr.responseType = "arraybuffer"
-            xhr.onload = on_load.bind(xhr);
-            xhr.send(null);
+            // var el = document.getElementsByTagName('perspective-viewer')[0];
+            // el.load(table);
+
+            const view = await table.view({
+                column_pivots: ["x"],
+                sort: [["y", "desc"]],
+                columns: ["y"],
+                aggregates: {y: "last"}
+            });
+
+            console.log(await view.to_columns());
+            // await view.to_arrow();
+
+            console.log("updatinnng");
+            view.on_update(
+                async function(updated) {
+                    console.log("updated");
+                    const t2 = await WORKER.table(updated.delta);
+                    const v2 = await t2.view();
+                    console.log(await v2.to_json());
+                    await v2.delete();
+                    await t2.delete();
+                },
+                {mode: "row"}
+            );
+
+            console.log("sending");
+            table.update({x: [1, 3], y: ["HELLO", "WORLD"]});
         });
+
+        // function on_load() {
+        //     var el = document.getElementsByTagName('perspective-viewer')[0];
+        //     const arrow = this.response;
+        //     WORKER.table({
+        //         float: [1.25, 2.25, 3.25, 4.25],
+        //         string: ["a", "a", "b", "b"]
+        //     }).then(table => el.load(table));
+        //     // WORKER.table(arrow.slice()).then(table => {
+        //     //     for (let i = 0; i < 10; i++) {
+        //     //         table.update(arrow.slice());
+        //     //     }
+        //     //     table.view({
+        //     //         "row-pivots": [
+        //     //             // "Customer Name",
+        //     //             "State",
+        //     //             "City",
+        //     //             // "Sales"
+        //     //         ]
+        //     //     }).then(view => {
+        //     //         view.to_arrow({start_col: 5, end_col: 15}).then(arrow => {
+        //     //         WORKER.table(arrow).then(t2 => {
+        //     //             el.load(t2);
+        //     //         }) 
+        //     //         });
+        //     //     });
+        //     // });
+        // }
+
+        // window.addEventListener('DOMContentLoaded', function () {
+        //     var xhr = new XMLHttpRequest();
+        //     xhr.open('GET', '/node_modules/superstore-arrow/superstore.arrow', true);
+        //     xhr.responseType = "arraybuffer"
+        //     xhr.onload = on_load.bind(xhr);
+        //     xhr.send(null);
+        // });
     </script>
 
 </body>

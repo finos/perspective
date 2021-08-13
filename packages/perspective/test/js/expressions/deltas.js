@@ -178,23 +178,21 @@ module.exports = perspective => {
                 table.update({x: [1, 3], y: ["HELLO", "WORLD"]});
             });
 
-            it("Returns appended rows for normal and expression columns, 1-sided", async function(done) {
+            it("Returns appended rows for normal and expression columns, 1-sided hidden sorted", async function(done) {
                 const table = await perspective.table({
                     x: [1, 2, 3, 4],
                     y: ["A", "B", "C", "D"]
                 });
                 const view = await table.view({
                     row_pivots: ['lower("y")'],
-                    expressions: ['lower("y")']
+                    expressions: ['lower("y")'],
+                    sort: [['lower("y")', "desc"]],
+                    columns: ["x"]
                 });
 
                 view.on_update(
                     async function(updated) {
-                        const expected = [
-                            {x: 14, y: 6, 'lower("y")': 6},
-                            {x: 1, y: 1, 'lower("y")': 1},
-                            {x: 3, y: 1, 'lower("y")': 1}
-                        ];
+                        const expected = [{x: 14}, {x: 3}, {x: 1}];
                         await match_delta(perspective, updated.delta, expected);
                         await view.delete();
                         await table.delete();

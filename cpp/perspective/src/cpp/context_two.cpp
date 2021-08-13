@@ -372,18 +372,50 @@ t_ctx2::get_data(t_index start_row, t_index end_row, t_index start_col, t_index 
 std::vector<t_tscalar>
 t_ctx2::get_data(const std::vector<t_uindex>& rows) const {
     t_uindex nrows = rows.size();
-    t_uindex ncols = get_column_count();
+    t_uindex start_col = 0;
+    t_uindex end_col = get_column_count();
 
+    // TODO: the data output is still not right - I think we are off by
+    // one in sorted contexts?
+    // Perspective generates extra headers for columns in the sort, which
+    // needs to be skipped when generating row deltas.
+    bool should_skip_column_headers = m_sortby.size() > 0 && start_col < end_col;
+
+    if (should_skip_column_headers) {
+        auto depth = m_config.get_num_cpivots();
+
+        // find the first column that isn't a generated sort header, i.e.
+        // its column path has to be the same as the number of column pivots.
+        for (t_uindex i = 0; i < end_col; ++i) {
+            std::cout << i << ": " << unity_get_column_path(i + 1) << std::endl;
+            if (unity_get_column_path(i + 1).size() == depth) {
+                start_col = i + 1;
+                std::cout << "found at " << i << ": " << start_col << std::endl;
+                break;
+            }
+        }
+    }
+
+    t_uindex ncols = end_col - start_col;
+
+    std::cout << "get data start col at " << start_col << ", end col at " << end_col << std::endl;
+
+    // Get data out of the context at the specified row and column indices
     std::vector<std::pair<t_uindex, t_uindex>> cells;
     for (t_uindex idx = 0; idx < nrows; ++idx) {
         t_uindex ridx = rows[idx];
-        for (t_uindex cidx = 0; cidx < ncols; ++cidx) {
+        for (t_uindex cidx = start_col; cidx < end_col; ++cidx) {
+            std::cout << "going to get " << cidx << ":" << ridx << std::endl;
             cells.push_back(std::pair<t_index, t_index>(ridx, cidx));
         }
     }
 
     auto cells_info = resolve_cells(cells);
-    std::vector<t_tscalar> retval(nrows * ncols);
+    
+    // The returned slice is assumed to have a __ROW_PATH__ column which will be
+    // skipped, so we write into the slice as if we start from column 1.
+    std::vector<t_tscalar> rval(nrows * (ncols + 1));
+    std::cout << "numelems: " << rval.size() << std::endl;
 
     t_tscalar empty = mknone();
 
@@ -400,18 +432,26 @@ t_ctx2::get_data(const std::vector<t_uindex>& rows) const {
             const std::string& aggname = aggschema.m_columns[aggidx];
 
             aggmap[t_aggpair(treeidx, aggidx)] = aggtable->get_const_column(aggname).get();
+            std::cout << "treeidx: " << treeidx << ", aggidx: " << aggidx << ", colname: " << aggname << std::endl;
+            aggmap[t_aggpair(treeidx, aggidx)]->pprint();
         }
     }
 
     const std::vector<t_aggspec>& aggspecs = m_config.get_aggregates();
 
-    for (t_uindex idx = 0; idx < nrows; ++idx) {
-        for (t_uindex cidx = 1; cidx < ncols; ++cidx) {
-            t_uindex insert_idx = idx * ncols + cidx;
-            const t_cellinfo& cinfo = cells_info[insert_idx];
+    // Write each row sequentially starting from 0
+    for (t_uindex ridx = 0; ridx < nrows; ++ridx) {
+
+        // Write each column starting from 1 in order to skip __ROW_PATH__, and
+        // on sorted contexts in which we changed the start column, skip the
+        // column headers when we look for the cells.
+        for (t_uindex cidx = should_skip_column_headers ? 0 : 1; cidx < ncols; ++cidx) {
+            t_uindex lookup_idx = ridx * ncols + cidx;
+            t_uindex insert_idx = lookup_idx + (should_skip_column_headers ? 1 : 0);
+            const t_cellinfo& cinfo = cells_info[lookup_idx];
 
             if (cinfo.m_idx < 0) {
-                retval[insert_idx].set(empty);
+                rval[insert_idx].set(empty);
             } else {
                 auto aggcol = aggmap[t_aggpair(cinfo.m_treenum, cinfo.m_agg_index)];
 
@@ -426,15 +466,27 @@ t_ctx2::get_data(const std::vector<t_uindex>& rows) const {
                 auto value = extract_aggregate(
                     aggspecs[cinfo.m_agg_index], aggcol, agg_ridx, agg_pridx);
 
+                std::cout << "cell at idx: " << lookup_idx
+                    << ", cidx: " << cidx
+                    << ", ridx: " << ridx
+                    << ", m_idx: " << cinfo.m_idx
+                    << ", m_treenum: " << cinfo.m_treenum
+                    << ", m_agg_index: " << cinfo.m_agg_index
+                    << ", m_ridx: " << cinfo.m_ridx
+                    << ", m_cidx: " << cinfo.m_cidx
+                    << ", agg_ridx: " << agg_ridx
+                    << ", agg_pridx: " << agg_pridx
+                    << ", val: " << value.repr() << std::endl;
+
                 if (!value.is_valid())
                     value.set(empty);
 
-                retval[insert_idx].set(value);
+                rval[insert_idx].set(value);
             }
         }
     }
 
-    return retval;
+    return rval;
 }
 
 void

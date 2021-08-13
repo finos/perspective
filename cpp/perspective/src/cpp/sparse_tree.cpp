@@ -977,10 +977,13 @@ t_stree::update_agg_table(
                 if (new_value.m_type == DTYPE_STR) {
                     if (is_unique) {
                         new_value = m_symtable.get_interned_tscalar(new_value);
+                        dst->set_scalar(dst_ridx, new_value);
                     } else {
-                        new_value = m_symtable.get_interned_tscalar("-");
+                        // set the row to invalid but don't set new = old
+                        // because we need to unintern strings over and over
+                        // again if we set new = old.
+                        dst->set_valid(dst_ridx, false);
                     }
-                    dst->set_scalar(dst_ridx, new_value);
                 } else {
                     if (is_unique) {
                         dst->set_scalar(dst_ridx, new_value);
