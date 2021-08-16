@@ -708,7 +708,7 @@ module.exports = perspective => {
                     line: 0
                 },
                 computed5: {
-                    error_message: "Parser Error - Failed parameter type check for function 'datetime', Expected 'T'  call set: 'TT'",
+                    error_message: "Parser Error - Failed parameter type check for function 'datetime', Expected 'T' call set: 'TT'",
                     column: 21,
                     line: 1
                 }
