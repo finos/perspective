@@ -148,8 +148,8 @@ pub enum SingleAggregate {
     #[serde(rename = "median")]
     Median,
 
-    #[serde(rename = "first")]
-    First,
+    #[serde(rename = "first by index")]
+    FirstByIndex,
 
     #[serde(rename = "last by index")]
     LastByIndex,
@@ -177,6 +177,12 @@ pub enum SingleAggregate {
 
     #[serde(rename = "low")]
     Low,
+
+    #[serde(rename = "stddev")]
+    StdDev,
+
+    #[serde(rename = "var")]
+    Var,
 }
 
 impl Display for SingleAggregate {
