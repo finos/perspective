@@ -163,8 +163,6 @@ python/perspective/perspective/node/assets/*
 docs/static/js/logo.js
 docs/static/js/logo.js.map
 python/perspective/pip-wheel-metadata
-darwin.json
-darwin.interactive.json
 junit.xml
 python/perspective/python_junit.xml
 python/perspective/coverage.xml
@@ -189,3 +187,4 @@ target.vscode
 packages/perspective-jupyterlab/test/config/jupyter/lab
 packages/perspective-jupyterlab/test/config/jupyter/migrated
 docs/static/features
+results.debug.json

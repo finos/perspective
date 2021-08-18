@@ -123,7 +123,7 @@ pub struct ColumnStyleDefaultConfig {
 
 pub enum ColumnStyleMsg {
     Reset(ColumnStyleConfig, ColumnStyleDefaultConfig),
-    SetPos(u32, u32),
+    SetPos(i32, i32),
     FixedChanged(String),
     ColorEnabledChanged(bool),
     PosColorChanged(String),
@@ -191,8 +191,8 @@ impl ColumnStyleProps {
 /// JSON serializable config record and the defaults record).
 pub struct ColumnStyle {
     props: ColumnStyleProps,
-    top: u32,
-    left: u32,
+    top: i32,
+    left: i32,
     color_mode: ColorMode,
     pos_color: String,
     neg_color: String,

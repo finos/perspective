@@ -9,33 +9,32 @@
 
 <!DOCTYPE html>
 <html>
-    <head>
-        <script src="perspective.js"></script>
-        <script src="perspective-workspace.js"></script>
-        <script src="perspective-viewer-datagrid.js"></script>
 
-        <link rel='stylesheet' href="index.css">
-    </head>
-    <body>
-        <perspective-workspace id="workspace"></perspective-workspace>
-        <perspective-viewer id="viewer" style="display: none;"></perspective-viewer>
+<head>
+    <script src="perspective.js"></script>
+    <script src="perspective-workspace.js"></script>
+    <script src="perspective-viewer-datagrid.js"></script>
 
-        <script>
+    <link rel='stylesheet' href="material.css">
+    <link rel='stylesheet' href="index.css">
+</head>
 
-            const xhr = new XMLHttpRequest();
-            window.__WORKER__ = perspective.worker();
-            xhr.open('GET', 'superstore.csv', true);
-            xhr.onload = function () { 
-                window.__CSV__ = xhr.response;
-                window.__TABLE__ = window.__WORKER__.table(xhr.response);
-                window.__TABLE__.then(table => {
-                    window.__TABLE__ = table;
-                    document.getElementById("viewer").load(table);
-                    document.getElementById('workspace').tables.set("superstore", window.__TABLE__);
-                });
-            }
-            xhr.send(null);
+<body>
+    <perspective-workspace id="workspace"></perspective-workspace>
 
-        </script>
-    </body>
+    <script>
+
+        const xhr = new XMLHttpRequest();
+        window.__WORKER__ = perspective.worker();
+        xhr.open('GET', 'superstore.csv', true);
+        xhr.onload = function () {
+            window.__CSV__ = xhr.response;
+            window.__TABLE__ = window.__WORKER__.table(xhr.response);
+            document.getElementById('workspace').tables.set("superstore", window.__TABLE__);
+        }
+        xhr.send(null);
+
+    </script>
+</body>
+
 </html>

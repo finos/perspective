@@ -22,7 +22,7 @@
         "build:webpack": "npm-run-all build:webpack:cjs build:webpack:umd",
         "build": "npm-run-all --silent build:babel build:webpack:cjs build:webpack:umd build:styles",
         "clean": "rimraf dist",
-        "clean:screenshots": "rimraf \"screenshots/**/*.@(failed|diff).png\"",
+        "clean:screenshots": "rimraf \"test/screenshots/**/*.@(failed|diff).png\"",
         "test:run": "jest --rootDir=. --config=../perspective-test/jest.config.js  --color 2>&1",
         "test:unit": "jest  --color --config=./config/jest.unit.config.js 2>&1",
         "test:integration": "jest --color  --config=./config/jest.integration.config.js 2>&1",

@@ -11,11 +11,15 @@
     "main": "dist/esm/index.js",
     "module": "dist/esm/index.js",
     "browser": "dist/esm/index.js",
+    "unpkg": "dist/umd/perspective-viewer.js",
+    "jsdelvr": "dist/umd/perspective-viewer.js",
     "files": [
         "dist/**/*",
         "pkg/**/*",
-        "src/**/*"
+        "src/**/*",
+        "index.d.ts"
     ],
+    "typings": "index.d.ts",
     "scripts": {
         "build:wasm": "wasm-pack build --out-dir dist/pkg --target web && rm dist/pkg/package.json",
         "build:rollup": "rollup --config rollup.config.js",
@@ -27,12 +31,16 @@
         "watch": "npm-run-all -p watch:rollup watch:wasm watch:webpack",
         "postbuild": "rimraf pkg/package.json pkg/.gitignore",
         "clean": "rimraf dist && rimraf pkg && rimraf target",
+        "clean:screenshots": "rimraf \"test/screenshots/**/*.@(failed|diff).png\"",
         "fix": "yarn lint --fix",
         "lint": "eslint src examples/*.md examples/*.html",
-        "test:build": "cpx ../../packages/perspective/dist/umd/perspective.inline.js pkg/",
-        "test:run": "echo 'No Jest tests'",
+        "test:build:rust": "cpx ../../packages/perspective/dist/umd/perspective.inline.js pkg/",
+        "test:build:js": "cpx \"test/html/*\" dist/umd && cpx \"test/csv/*\" dist/umd && cpx \"test/css/*\" dist/umd",
+        "test:build": "npm-run-all test:build:*",
+        "test:run:rust": "wasm-pack test --chrome --headless",
+        "test:run": "jest --rootDir=. --config=../../packages/perspective-test/jest.config.js --color --noStackTrace 2>&1",
         "test:clean": "rm perspective.csv || true",
-        "test": "yarn test:build && wasm-pack test --chrome --headless && yarn test:clean"
+        "test": "yarn test:build && npm-run-all -p test:run:rust test:run && yarn test:clean"
     },
     "publishConfig": {
         "access": "public"

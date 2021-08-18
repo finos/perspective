@@ -336,7 +336,7 @@ pub fn update_and_render(
     session.update_view_config(update);
     let session = session.clone();
     let renderer = renderer.clone();
-    let _ = future_to_promise(async move {
+    let _ = promisify_ignore_view_delete(async move {
         drop(
             renderer
                 .draw(session.validate().await.create_view())
@@ -349,7 +349,7 @@ pub fn update_and_render(
 pub fn render(session: &Session, renderer: &Renderer) {
     let session = session.clone();
     let renderer = renderer.clone();
-    let _ = future_to_promise(async move {
+    let _ = promisify_ignore_view_delete(async move {
         drop(renderer.draw(async { Ok(&session) }).await?);
         Ok(JsValue::UNDEFINED)
     });

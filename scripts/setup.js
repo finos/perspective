@@ -88,7 +88,7 @@ async function focus_package() {
                 }
             },
             filter: answer => {
-                if (!answer || answer.length === 8) {
+                if (!answer || answer.length === 7) {
                     return "";
                 } else {
                     return answer;
@@ -147,23 +147,10 @@ async function focus_package() {
 }
 
 async function javascript_options() {
-    const new_config = await inquirer.prompt([
-        PROMPT_DEBUG,
-        PROMPT_DOCKER,
-        {
-            type: "confirm",
-            name: "PSP_DOCKER_PUPPETEER",
-            message: "Use docker for puppeteer tests?",
-            default: !CONFIG["PSP_DOCKER_PUPPETEER"]
-        }
-    ]);
-    new_config.PSP_DOCKER_PUPPETEER = !new_config.PSP_DOCKER_PUPPETEER;
+    const new_config = await inquirer.prompt([PROMPT_DEBUG, PROMPT_DOCKER]);
     const local_puppeteer = fs.existsSync("node_modules/puppeteer");
     CONFIG.add(new_config);
     CONFIG.write();
-    if (local_puppeteer !== new_config.PSP_DOCKER_PUPPETEER) {
-        require("./toggle_puppeteer");
-    }
 }
 
 async function python_options() {

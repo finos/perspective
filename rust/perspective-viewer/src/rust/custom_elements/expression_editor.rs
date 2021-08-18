@@ -23,7 +23,7 @@ pub struct ExpressionEditorElement {
 }
 
 impl ResizableMessage for <ExpressionEditor as Component>::Message {
-    fn resize(y: u32, x: u32) -> Self {
+    fn resize(y: i32, x: i32) -> Self {
         ExpressionEditorMsg::SetPos(y, x)
     }
 }

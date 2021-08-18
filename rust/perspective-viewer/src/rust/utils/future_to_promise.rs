@@ -44,18 +44,18 @@ pub fn ignore_view_delete(f: JsValue) -> Result<JsValue, JsValue> {
                 Ok(JsValue::from("View method cancelled"))
             }
             Some(_) => Err(f),
-            _ => match js_sys::Reflect::has(&f, js_intern!("message")) {
-                Ok(true)
-                    if js_sys::Reflect::get(&f, js_intern!("message"))
-                        .unwrap()
-                        .as_string()
-                        .unwrap_or_else(|| "".to_owned())
-                        == "View method cancelled" =>
+            _ => {
+                if js_sys::Reflect::get(&f, js_intern!("message"))
+                    .unwrap()
+                    .as_string()
+                    .unwrap_or_else(|| "".to_owned())
+                    == "View method cancelled"
                 {
                     Ok(JsValue::from("View method cancelled"))
+                } else {
+                    Err(f)
                 }
-                _ => Err(f),
-            },
+            }
         },
     }
 }

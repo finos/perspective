@@ -21,8 +21,8 @@
     "author": "",
     "license": "Apache-2.0",
     "dependencies": {
-        "@babel/runtime": "^7.8.4",
         "@finos/perspective": "^0.10.3",
-        "core-js": "^3.6.4"
+        "core-js": "^3.6.4",
+        "xml-formatter": "2.4.0"
     }
 }

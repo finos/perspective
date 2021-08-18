@@ -26,7 +26,7 @@
         "watch:webpack": "webpack --watch --color --config src/config/webpack.config.js",
         "watch": "npm-run-all -p watch:*",
         "clean": "rimraf dist",
-        "clean:screenshots": "rimraf \"screenshots/**/*.@(failed|diff).png\""
+        "clean:screenshots": "rimraf \"test/screenshots/**/*.@(failed|diff).png\""
     },
     "publishConfig": {
         "access": "public"

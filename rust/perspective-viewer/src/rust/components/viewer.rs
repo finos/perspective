@@ -38,7 +38,8 @@ pub struct PerspectiveViewerProps {
 }
 
 pub enum Msg {
-    Reset,
+    Reset(Option<Sender<()>>),
+    ApplySettings(Option<SettingsUpdate>),
     ToggleSettings(
         Option<SettingsUpdate>,
         Option<Sender<Result<JsValue, JsValue>>>,
@@ -72,19 +73,45 @@ impl Component for PerspectiveViewer {
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
-            Msg::Reset => {
+            Msg::Reset(sender) => {
                 let renderer = self.props.renderer.clone();
                 let session = self.props.session.clone();
-                let _ = future_to_promise(async move {
+                let _ = promisify_ignore_view_delete(async move {
                     session.reset();
                     renderer.reset();
-                    renderer.draw(session.validate().await.create_view()).await
+                    let result =
+                        renderer.draw(session.validate().await.create_view()).await;
+
+                    if let Some(sender) = sender {
+                        sender.send(()).unwrap();
+                    }
+
+                    result
                 });
 
                 false
             }
             Msg::QuerySettings(sender) => {
                 sender.send(self.settings_open).unwrap();
+                false
+            }
+            Msg::ApplySettings(force) => {
+                match force {
+                    Some(SettingsUpdate::Missing) => {}
+                    Some(SettingsUpdate::SetDefault) => {
+                        self.settings_open = false;
+                    }
+                    Some(SettingsUpdate::Update(force)) => {
+                        self.settings_open = force;
+                    }
+                    None => self.settings_open = !self.settings_open,
+                };
+
+                self.props
+                    .elem
+                    .toggle_attribute_with_force("settings", self.settings_open)
+                    .unwrap();
+
                 false
             }
             Msg::ToggleSettings(force, resolve) => {
@@ -172,7 +199,7 @@ impl Component for PerspectiveViewer {
                     <StatusBar
                         id="status_bar"
                         session={ self.props.session.clone() }
-                        on_reset={ self.link.callback(|_| Msg::Reset) }>
+                        on_reset={ self.link.callback(|_| Msg::Reset(None)) }>
                     </StatusBar>
                     <div
                         id="settings_button"
@@ -229,9 +256,14 @@ impl PerspectiveViewer {
                 self.settings_open = force;
                 let callback = self.link.callback_once(Msg::ToggleSettingsFinished);
                 let renderer = self.props.renderer.clone();
+                let session = self.props.session.clone();
                 drop(promisify_ignore_view_delete(async move {
-                    let result =
-                        renderer.presize(force, callback.emit_and_render()).await;
+                    let result = if session.js_get_table().is_some() {
+                        renderer.presize(force, callback.emit_and_render()).await
+                    } else {
+                        callback.emit_and_render().await?;
+                        Ok(JsValue::UNDEFINED)
+                    };
 
                     if let Some(sender) = sender {
                         let msg = result.clone().or_else(ignore_view_delete);

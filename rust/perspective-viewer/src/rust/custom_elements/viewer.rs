@@ -21,6 +21,7 @@ use flate2::read::ZlibDecoder;
 use flate2::write::ZlibEncoder;
 use flate2::Compression;
 use futures::channel::oneshot::*;
+use js_intern::*;
 use js_sys::*;
 use std::cell::RefCell;
 use std::io::Read;
@@ -77,9 +78,9 @@ impl PerspectiveViewerElement {
             clone!(renderer, session);
             move |_| {
                 clone!(renderer, session);
-                drop(future_to_promise(
-                    async move { renderer.update(&session).await },
-                ))
+                drop(promisify_ignore_view_delete(async move {
+                    renderer.update(&session).await
+                }))
             }
         });
 
@@ -139,10 +140,44 @@ impl PerspectiveViewerElement {
     }
 
     /// Get the underlying `Table` for this viewer.
-    pub fn js_get_table(&self) -> Result<JsValue, JsValue> {
-        self.session
-            .js_get_table()
-            .ok_or_else(|| "No table set".into())
+    pub fn js_get_table(&self) -> js_sys::Promise {
+        let session = self.session.clone();
+        future_to_promise(async move {
+            match session.js_get_table() {
+                Some(table) => Ok(table),
+                None => {
+                    let (sender, receiver) = channel::<()>();
+                    let sender = RefCell::new(Some(sender));
+                    let _sub = session.on_table_loaded.add_listener(move |x| {
+                        sender.borrow_mut().take().unwrap().send(x).unwrap()
+                    });
+
+                    receiver.await.into_jserror()?;
+                    session.js_get_table().ok_or_else(|| "No table set".into())
+                }
+            }
+        })
+    }
+
+    pub fn js_flush(&self) -> js_sys::Promise {
+        let session = self.session.clone();
+        let renderer = self.renderer.clone();
+        promisify_ignore_view_delete(async move {
+            if session.js_get_table().is_none() {
+                let (sender, receiver) = channel::<()>();
+                let sender = RefCell::new(Some(sender));
+                let _sub = session.on_table_loaded.add_listener(move |x| {
+                    sender.borrow_mut().take().unwrap().send(x).unwrap()
+                });
+
+                receiver.await.into_jserror()?;
+                let _ = session
+                    .js_get_table()
+                    .ok_or_else(|| js_intern!("No table set"))?;
+            };
+
+            renderer.draw(async { Ok(&session) }).await
+        })
     }
 
     /// Restores this element from a full/partial `JsPerspectiveViewConfig`.
@@ -154,7 +189,7 @@ impl PerspectiveViewerElement {
         let session = self.session.clone();
         let renderer = self.renderer.clone();
         let root = self.root.clone();
-        future_to_promise(async move {
+        promisify_ignore_view_delete(async move {
             let ViewerConfigUpdate {
                 plugin,
                 plugin_config,
@@ -187,14 +222,11 @@ impl PerspectiveViewerElement {
                     plugin.restore(&js_config.into_jserror()?);
                 }
 
+                root.send_message(Msg::ApplySettings(settings));
                 session.validate().await.create_view().await
             });
 
             drop(draw_task.await?);
-
-            // TODO need to do this immediately before draw call without triggering
-            // plugin resize ..
-            root.send_message(Msg::ToggleSettings(settings, None));
             Ok(session.get_view().as_ref().unwrap().as_jsvalue())
         })
     }
@@ -252,8 +284,8 @@ impl PerspectiveViewerElement {
         })
     }
 
-    /// Download this viewer's `View` or `Table` data as a `.csv` file. 
-    /// 
+    /// Download this viewer's `View` or `Table` data as a `.csv` file.
+    ///
     /// # Arguments
     /// - `flat` Whether to use the current `ViewConfig` to generate this data, or use
     ///   the default.
@@ -266,7 +298,7 @@ impl PerspectiveViewerElement {
     }
 
     /// Copy this viewer's `View` or `Table` data as CSV to the system clipboard.
-    /// 
+    ///
     /// # Arguments
     /// - `flat` Whether to use the current `ViewConfig` to generate this data, or use
     ///   the default.
@@ -279,14 +311,19 @@ impl PerspectiveViewerElement {
     }
 
     /// Reset the viewer's `ViewerConfig` to the default.
-    pub fn js_reset(&self) {
-        self.root.send_message(Msg::Reset);
+    pub fn js_reset(&self) -> js_sys::Promise {
+        let (sender, receiver) = channel::<()>();
+        self.root.send_message(Msg::Reset(Some(sender)));
+        promisify_ignore_view_delete(async move {
+            receiver.await.map_err(|_| JsValue::from("Cancelled"))?;
+            Ok(JsValue::UNDEFINED)
+        })
     }
 
     /// Recalculate the viewer's dimensions and redraw.
     pub fn js_resize(&self) -> js_sys::Promise {
         let renderer = self.renderer.clone();
-        future_to_promise(async move { renderer.resize().await })
+        promisify_ignore_view_delete(async move { renderer.resize().await })
     }
 
     /// Determines the render throttling behavior. Can be an integer, for
@@ -309,11 +346,10 @@ impl PerspectiveViewerElement {
     /// # Arguments
     /// - `force` Force the state of the panel open or closed, or `None` to toggle.
     pub fn js_toggle_config(&self, force: Option<bool>) -> js_sys::Promise {
-        let this = self.clone();
         let (sender, receiver) = channel::<Result<JsValue, JsValue>>();
         let msg = Msg::ToggleSettings(force.map(SettingsUpdate::Update), Some(sender));
-        this.root.send_message(msg);
-        future_to_promise(async move {
+        self.root.send_message(msg);
+        promisify_ignore_view_delete(async move {
             receiver.await.map_err(|_| JsValue::from("Cancelled"))?
         })
     }

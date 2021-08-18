@@ -15,12 +15,19 @@ const simple_tests = require("@finos/perspective-viewer/test/js/simple_tests.js"
 const {withTemplate} = require("./simple-template");
 withTemplate("area", "Y Area");
 
+async function get_contents(page) {
+    return await page.evaluate(async () => {
+        const viewer = document.querySelector("perspective-viewer perspective-viewer-d3fc-yarea").shadowRoot.querySelector("svg");
+        return viewer.outerHTML || "MISSING";
+    });
+}
+
 utils.with_server({}, () => {
     describe.page(
         "area.html",
         () => {
-            simple_tests.default();
+            simple_tests.default(get_contents);
         },
-        {reload_page: false, root: path.join(__dirname, "..", "..", "..")}
+        {root: path.join(__dirname, "..", "..", "..")}
     );
 });

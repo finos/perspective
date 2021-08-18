@@ -137,8 +137,12 @@ class PerspectiveWorkspaceElement extends HTMLElement {
      * // Add `Table` separately.
      * workspace.tables.set("superstore", await worker.table(data));
      */
-    restore(layout) {
-        this.workspace.restore(layout);
+    async restore(layout) {
+        await this.workspace.restore(layout);
+    }
+
+    async flush() {
+        await Promise.all(Array.from(this.querySelectorAll("perspective-viewer")).map(x => x.flush()));
     }
 
     addTable(name, table) {

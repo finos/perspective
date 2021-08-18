@@ -176,7 +176,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         return {...layout, viewers};
     }
 
-    restore(value) {
+    async restore(value) {
         const {sizes, master, detail, viewers: viewer_configs = [], mode = MODE.GLOBAL_FILTERS} = cloneDeep(value);
         this.mode = mode;
 
@@ -190,6 +190,8 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
             this.addWidget(this.detailPanel);
         }
 
+        let tasks = [];
+
         // Using ES generators as context managers ..
         for (const viewers of this._capture_viewers()) {
             for (const widgets of this._capture_widgets()) {
@@ -198,21 +200,27 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
                 if (detail) {
                     const detailLayout = PerspectiveDockPanel.mapWidgets(callback.bind(this, false), detail);
                     this.dockpanel.restoreLayout(detailLayout);
+                    tasks = tasks.concat(PerspectiveDockPanel.getWidgets(detailLayout).map(x => x.task));
                 }
 
                 if (master) {
                     if (this.mode === MODE.GLOBAL_FILTERS) {
-                        master.widgets.forEach(callback.bind(this, true));
+                        tasks = tasks.concat(master.widgets.map(x => callback.bind(this, true)(x).task));
                         master.sizes && this.masterPanel.setRelativeSizes(master.sizes);
                     } else {
-                        master.widgets.forEach(config => {
-                            const widget = callback.bind(this, undefined)(config);
-                            this.dockpanel.addWidget(widget);
-                        });
+                        tasks = tasks.concat(
+                            master.widgets.map(config => {
+                                const widget = callback.bind(this, undefined)(config);
+                                this.dockpanel.addWidget(widget);
+                                return widget.task;
+                            })
+                        );
                     }
                 }
             }
         }
+
+        await Promise.all(tasks);
     }
 
     *_capture_widgets() {
@@ -280,7 +288,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
     }
 
     _validate(table) {
-        if (!("view" in table) || typeof table?.view !== "function") {
+        if (!table || !("view" in table) || typeof table?.view !== "function") {
             throw new Error("Only `perspective.Table()` instances can be added to `tables`");
         }
         return table;
@@ -322,7 +330,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
                 console.warn(`Undocked ${viewer.outerHTML}, creating default layout`);
                 const widget = this._createWidget({
                     name: viewer.getAttribute("name"),
-                    table: this.tables.get(viewer.getAttribute("table")),
+                    table: viewer.getAttribute("table"),
                     config: {master: false},
                     viewer
                 });
@@ -366,6 +374,8 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         } else {
             this.dockpanel.addWidget(duplicate, {mode: "split-right", ref: widget});
         }
+
+        await duplicate.task;
     }
 
     toggleMasterDetail(widget) {
@@ -415,14 +425,15 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
 
     async _filterViewer(viewer, filters, candidates) {
         const config = await viewer.save();
-        const availableColumns = Object.keys(await viewer.table.schema());
+        const table = await viewer.getTable();
+        const availableColumns = Object.keys(await table.schema());
         const currentFilters = config.filters || [];
         const columnAvailable = filter => filter[0] && availableColumns.includes(filter[0]);
         const validFilters = filters.filter(columnAvailable);
 
         validFilters.push(...currentFilters.filter(x => !candidates.has(x[0])));
         const newFilters = uniqBy(validFilters, item => item[0]);
-        viewer.restore({filters: newFilters});
+        await viewer.restore({filters: newFilters});
     }
 
     onPerspectiveSelect = async event => {
@@ -496,7 +507,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
                 this.getAllWidgets().forEach(async widget => {
                     const config = await widget.viewer.save();
                     if (config["row-pivots"]) {
-                        widget.viewer.restore({selectable: true});
+                        await widget.viewer.restore({selectable: true});
                     }
                 });
             }
@@ -694,20 +705,21 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         }
         const table = this.tables.get(viewer.getAttribute("table") || config.table);
         const widget = new PerspectiveViewerWidget({node, viewer});
+        widget.task = (async () => {
+            if (table) {
+                widget.load(table);
+            }
+
+            await widget.restore(config);
+        })();
+
         const event = new CustomEvent("workspace-new-view", {
             detail: {config, widget}
         });
         this.element.dispatchEvent(event);
         widget.title.closable = true;
         this.element.appendChild(widget.viewer);
-        if (table) {
-            widget.load(table);
-        }
-
-        widget.restore(config);
-        // .then(() => {
         this._addWidgetEventListeners(widget);
-        // });
         return widget;
     }
 

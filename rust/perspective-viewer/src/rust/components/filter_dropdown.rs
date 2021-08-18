@@ -14,7 +14,7 @@ use yew::prelude::*;
 static CSS: &str = include_str!("../../../dist/css/filter-dropdown.css");
 
 pub enum FilterDropDownMsg {
-    SetPos(u32, u32),
+    SetPos(i32, i32),
     SetValues(Vec<String>),
     ItemDown,
     ItemUp,
@@ -28,8 +28,8 @@ pub struct FilterDropDownProps {
 }
 
 pub struct FilterDropDown {
-    top: u32,
-    left: u32,
+    top: i32,
+    left: i32,
     values: Option<Vec<String>>,
     selected: usize,
     props: FilterDropDownProps,

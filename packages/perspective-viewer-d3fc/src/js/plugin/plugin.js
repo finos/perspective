@@ -193,6 +193,8 @@ export function register(...plugins) {
                         }
 
                         this._draw();
+
+                        await new Promise(resolve => requestAnimationFrame(resolve));
                     }
 
                     async clear() {
@@ -215,8 +217,17 @@ export function register(...plugins) {
                         }
                     }
 
+                    /**
+                     * TODO we need to `clear()` here unnecessarily due to a bug in the tremap module which
+                     * causes non-cleared redraws duplicate column labels when calculating column name
+                     * resize/repositions - see `treemapLabel.js`.
+                     */
                     async resize() {
                         if (this.isConnected) {
+                            if (chart.plugin.name === "Treemap") {
+                                this.clear();
+                            }
+
                             this._draw();
                         }
                     }

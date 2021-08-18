@@ -59,10 +59,9 @@ export default () => {
                 })
             ]
         },
-
         {
             input: "src/js/index.js",
-            external: [/node_modules\/(?!mobile\-drag\-drop)/, /pkg/, /monaco\-editor/],
+            external: [/pkg/, /monaco\-editor/],
             output: {
                 sourcemap: true,
                 dir: "dist/esm/"
@@ -79,7 +78,7 @@ export default () => {
                     minimize: {mergeLonghand: false}
                 }),
                 sourcemaps()
-            ].filter(x => x),
+            ],
             watch: {
                 clearScreen: false
             }
@@ -104,7 +103,7 @@ function generate_themes() {
                         return null;
                     },
                     buildEnd: () => {
-                        fs.rm(path.resolve(__dirname, "dist", "umd", `${key}.js`), () => {});
+                        fs.rm(path.resolve(__dirname, "dist", "css", `${key}.js`), () => {});
                     },
                     load(id) {
                         return null;

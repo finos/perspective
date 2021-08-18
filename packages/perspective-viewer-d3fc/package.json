@@ -37,7 +37,7 @@
         "test:run": "jest --rootDir=. --config=../perspective-test/jest.config.js --color --noStackTrace 2>&1",
         "test": "npm-run-all test:build test:run",
         "clean": "rimraf dist",
-        "clean:screenshots": "rimraf \"screenshots/**/*.@(failed|diff).png\""
+        "clean:screenshots": "rimraf \"test/screenshots/**/*.@(failed|diff).png\""
     },
     "publishConfig": {
         "access": "public"

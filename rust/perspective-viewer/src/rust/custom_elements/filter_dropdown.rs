@@ -29,7 +29,7 @@ pub struct FilterDropDownElement {
 }
 
 impl ResizableMessage for <FilterDropDown as Component>::Message {
-    fn resize(y: u32, x: u32) -> Self {
+    fn resize(y: i32, x: i32) -> Self {
         FilterDropDownMsg::SetPos(y, x)
     }
 }

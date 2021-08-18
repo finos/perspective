@@ -22,7 +22,7 @@ use yew::prelude::*;
 static CSS: &str = include_str!("../../../dist/css/expression-editor.css");
 
 pub enum ExpressionEditorMsg {
-    SetPos(u32, u32),
+    SetPos(i32, i32),
     SetContent(String),
     SetTheme(String),
     Validate(JsValue),
@@ -42,8 +42,8 @@ pub struct ExpressionEditorProps {
 /// rows in the `View` which includes aggregate rows.
 #[derive(Clone)]
 pub struct ExpressionEditor {
-    top: u32,
-    left: u32,
+    top: i32,
+    left: i32,
     container: NodeRef,
     editor: Rc<RefCell<Option<(Editor, JsMonacoEditor)>>>,
     props: ExpressionEditorProps,

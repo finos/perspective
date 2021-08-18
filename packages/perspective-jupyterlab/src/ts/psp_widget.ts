@@ -59,12 +59,12 @@ export class PerspectiveWidget extends Widget {
     _set_attributes(options: PerspectiveViewerOptions & PerspectiveWidgetOptions): void {
         const plugin: string = options.plugin || "datagrid";
         const columns: Columns = options.columns || [];
-        const row_pivots: Pivots = options.row_pivots || options["row-pivots"] || [];
-        const column_pivots: Pivots = options.column_pivots || options["column-pivots"] || [];
+        const row_pivots: Pivots = options.row_pivots || options.row_pivots || [];
+        const column_pivots: Pivots = options.column_pivots || options.column_pivots || [];
         const aggregates: Aggregates = options.aggregates || {};
         const sort: Sort = options.sort || [];
-        const filters: Filters = options.filters || [];
-        const expressions: Expressions = options.expressions || options["expressions"] || [];
+        const filter: Filters = options.filter || [];
+        const expressions: Expressions = options.expressions || options.expressions || [];
         const plugin_config: object = options.plugin_config || {};
         const dark: boolean = options.dark || false;
         const editable: boolean = options.editable || false;
@@ -76,20 +76,20 @@ export class PerspectiveWidget extends Widget {
         this.client = client;
         this.dark = dark;
         this.editable = editable;
-        this.plugin = plugin;
-        this.plugin_config = plugin_config;
-        this.row_pivots = row_pivots;
-        this.column_pivots = column_pivots;
-        this.sort = sort;
-        this.columns = columns;
+        this._viewer_config = {
+            plugin,
+            plugin_config,
+            row_pivots,
+            column_pivots,
+            sort,
+            columns,
+            aggregates,
+            expressions,
+            filter
+        };
+
+        // this.plugin_config = plugin_config;
         this.selectable = selectable;
-
-        // do aggregates after columns
-        this.aggregates = aggregates;
-
-        // do expressions last
-        this.expressions = expressions;
-        this.filters = filters;
     }
 
     /**********************/
@@ -146,8 +146,9 @@ export class PerspectiveWidget extends Widget {
      *
      * @param table A `perspective.table` object.
      */
-    async load(table: Table): Promise<void> {
-        await this.viewer.load(table);
+    async load(table: Promise<Table>): Promise<void> {
+        this.viewer.load(table);
+        await this.viewer.restore(this._viewer_config);
     }
 
     /**
@@ -219,84 +220,6 @@ export class PerspectiveWidget extends Widget {
      */
     get name(): string {
         return this.title.label;
-    }
-
-    /**
-     * The name of the plugin which visualizes the data in `PerspectiveViewer`.
-     *
-     */
-    get plugin(): string {
-        return this.viewer.getAttribute("plugin");
-    }
-    set plugin(plugin: string) {
-        this.viewer.setAttribute("plugin", plugin);
-    }
-
-    /**
-     * The column names that are displayed in the viewer's grid/visualizations.
-     *
-     * If a column in the dataset is not in this array, it is not shown but can
-     * be used for aggregates, sort, and filter.
-     */
-    get columns(): Columns {
-        return JSON.parse(this.viewer.getAttribute("columns"));
-    }
-    set columns(columns: Columns) {
-        if (columns.length > 0) {
-            this.viewer.setAttribute("columns", JSON.stringify(columns));
-        } else {
-            this.viewer.removeAttribute("columns");
-        }
-    }
-
-    get row_pivots(): Pivots {
-        return JSON.parse(this.viewer.getAttribute("row-pivots"));
-    }
-    set row_pivots(row_pivots: Pivots) {
-        this.viewer.setAttribute("row-pivots", JSON.stringify(row_pivots));
-    }
-
-    get column_pivots(): Pivots {
-        return JSON.parse(this.viewer.getAttribute("column-pivots"));
-    }
-    set column_pivots(column_pivots: Pivots) {
-        this.viewer.setAttribute("column-pivots", JSON.stringify(column_pivots));
-    }
-
-    get aggregates(): Aggregates {
-        return JSON.parse(this.viewer.getAttribute("aggregates"));
-    }
-    set aggregates(aggregates: Aggregates) {
-        this.viewer.setAttribute("aggregates", JSON.stringify(aggregates));
-    }
-
-    get sort(): Sort {
-        return JSON.parse(this.viewer.getAttribute("sort"));
-    }
-    set sort(sort: Sort) {
-        this.viewer.setAttribute("sort", JSON.stringify(sort));
-    }
-
-    get expressions(): Expressions {
-        return JSON.parse(this.viewer.getAttribute("expressions"));
-    }
-    set expressions(expressions: Expressions) {
-        if (expressions.length > 0) {
-            this.viewer.setAttribute("expressions", JSON.stringify(expressions));
-        } else {
-            this.viewer.removeAttribute("expressions");
-        }
-    }
-
-    get filters(): Filters {
-        return JSON.parse(this.viewer.getAttribute("filters"));
-    }
-    set filters(filters: Filters) {
-        if (filters.length > 0) {
-            this.viewer.setAttribute("filters", JSON.stringify(filters));
-        } else {
-            this.viewer.removeAttribute("filters");
-        }
     }
 
     // `plugin_config` cannot be synchronously read from the viewer, as it is
@@ -425,4 +348,5 @@ export class PerspectiveWidget extends Widget {
     private _server: boolean;
     private _dark: boolean;
     private _editable: boolean;
+    private _viewer_config: PerspectiveViewerOptions;
 }

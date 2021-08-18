@@ -14,46 +14,42 @@ utils.with_server({}, () => {
     describe.page(
         "resize.html",
         () => {
-            test.capture(
-                "Config should show by default",
-                async page => {
-                    await page.waitForSelector("perspective-viewer:not([updating])");
-                    await page.waitForSelector("perspective-viewer[settings]");
-                },
-                {}
-            );
+            test.capture("Config should show by default", async page => {
+                await page.waitForFunction(() => !!window.__WIDGET__);
+                // await page.waitForSelector("perspective-viewer:not([updating])");
+                // await page.waitForSelector("perspective-viewer[settings]");
+                return await page.evaluate(async () => {
+                    await window.__WIDGET__.viewer.getTable();
+                    await window.__WIDGET__.viewer.flush();
+                    return window.__WIDGET__.viewer.innerHTML;
+                });
+            });
 
-            test.capture(
-                "Resize the container causes the widget to resize",
-                async page => {
-                    await page.waitForSelector("perspective-viewer:not([updating])");
-                    await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
-                    await page.waitForSelector("perspective-viewer:not([updating])");
-                    await page.evaluate(async () => {
-                        document.querySelector(".PSPContainer").style = "position:absolute;top:0;left:0;width:300px;height:300px";
-                        await document.querySelector("perspective-viewer").notifyResize();
-                    });
+            test.capture("Resize the container causes the widget to resize", async page => {
+                // await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
+                // await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(async () => {
+                    document.querySelector(".PSPContainer").style = "position:absolute;top:0;left:0;width:300px;height:300px";
+                    await document.querySelector("perspective-viewer").notifyResize();
+                });
 
-                    await page.evaluate(async () => {
-                        document.querySelector(".PSPContainer").style = "position:absolute;top:0;left:0;width:800px;height:600px";
-                        await document.querySelector("perspective-viewer").notifyResize();
-                    });
-                },
-                {}
-            );
+                return await page.evaluate(async () => {
+                    document.querySelector(".PSPContainer").style = "position:absolute;top:0;left:0;width:800px;height:600px";
+                    await document.querySelector("perspective-viewer").notifyResize();
+                    return window.__WIDGET__.viewer.innerHTML;
+                });
+            });
 
-            test.capture(
-                "row_pivots traitlet works",
-                async page => {
-                    await page.waitForSelector("perspective-viewer:not([updating])");
-                    await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
-                    await page.evaluate(() => {
-                        window.__WIDGET__.row_pivots = ["State"];
-                    });
-                    await page.waitForSelector("perspective-viewer:not([updating])");
-                },
-                {}
-            );
+            test.capture("row_pivots traitlet works", async page => {
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
+                return await page.evaluate(async () => {
+                    await window.__WIDGET__.restore({row_pivots: ["State"]});
+                    return window.__WIDGET__.viewer.innerHTML;
+                });
+                // await page.waitForSelector("perspective-viewer:not([updating])");
+            });
         },
         {root: path.join(__dirname, "..", "..")}
     );

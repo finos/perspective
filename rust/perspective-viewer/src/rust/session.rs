@@ -600,7 +600,13 @@ impl<'a> ValidSession<'a> {
     /// the original `&Session`.
     pub async fn create_view(self) -> Result<&'a Session, JsValue> {
         let js_config = self.0.borrow().config.as_jsvalue()?;
-        let table = self.0.borrow().table.clone().unwrap();
+        let table = self
+            .0
+            .borrow()
+            .table
+            .clone()
+            .ok_or("`restore()` called before `load()`")?;
+
         let view = table.view(&js_config).await?;
         let view_schema = view.schema().await?;
         self.0.metadata_mut().update_view_schema(&view_schema)?;
@@ -664,8 +670,13 @@ impl Session {
 
         let mut view_columns: HashSet<&str> = HashSet::new();
 
-        // fix
-        let table = self.borrow().table.as_ref().unwrap().clone();
+        let table = self
+            .borrow()
+            .table
+            .as_ref()
+            .ok_or("`restore()` called before `load()`")?
+            .clone();
+
         let arr = config
             .expressions
             .iter()

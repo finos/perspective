@@ -22,7 +22,16 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-import DRAG_DROP_STYLE from "mobile-drag-drop/default.css";
+const DRAG_DROP_STYLE = `
+.dnd-poly-drag-image {
+    opacity: .5 !important;
+}
+.dnd-poly-drag-image.dnd-poly-snapback {
+    transition-property: transform, -webkit-transform !important;
+    transition-duration: 250ms !important;
+    transition-timing-function: ease-out !important;
+}
+`;
 
 const style_elem = document.createElement("style");
 style_elem.textContent = DRAG_DROP_STYLE;
@@ -52,12 +61,12 @@ function supportsPassiveEventListener() {
     let supportsPassiveEventListeners = false;
     try {
         const opts = Object.defineProperty({}, "passive", {
-            get: function () {
+            get: function() {
                 supportsPassiveEventListeners = true;
             }
         });
         window.addEventListener("test", null, opts);
-    } catch (e) { }
+    } catch (e) {}
     return supportsPassiveEventListeners;
 }
 
@@ -69,7 +78,7 @@ function addDocumentListener(ev, handler, passive) {
     if (passive === void 0) {
         passive = true;
     }
-    document.addEventListener(ev, handler, supportsPassive ? { passive: passive } : false);
+    document.addEventListener(ev, handler, supportsPassive ? {passive: passive} : false);
 }
 function removeDocumentListener(ev, handler) {
     document.removeEventListener(ev, handler);
@@ -78,10 +87,10 @@ function onEvt(el, event, handler, capture) {
     if (capture === void 0) {
         capture = false;
     }
-    const options = supportsPassive ? { passive: true, capture: capture } : capture;
+    const options = supportsPassive ? {passive: true, capture: capture} : capture;
     el.addEventListener(event, handler, options);
     return {
-        off: function () {
+        off: function() {
             el.removeEventListener(event, handler, options);
         }
     };
@@ -120,7 +129,7 @@ function average(array) {
         return 0;
     }
     return (
-        array.reduce(function (s, v) {
+        array.reduce(function(s, v) {
             return v + s;
         }, 0) / array.length
     );
@@ -147,7 +156,7 @@ function updateCentroidCoordinatesOfTouchesIn(coordinateProp, event, outPoint) {
 }
 const TRANSFORM_CSS_VENDOR_PREFIXES = ["", "-webkit-"];
 function extractTransformStyles(sourceNode) {
-    return TRANSFORM_CSS_VENDOR_PREFIXES.map(function (prefix) {
+    return TRANSFORM_CSS_VENDOR_PREFIXES.map(function(prefix) {
         const transform = sourceNode.style[prefix + "transform"];
         if (!transform || transform === "none") {
             return "";
@@ -206,17 +215,17 @@ function applyDragImageSnapback(sourceEl, dragImage, dragImageTransforms, transi
     setTimeout(transitionEndCb, durationInMs);
 }
 
-const DataTransfer = (function () {
+const DataTransfer = (function() {
     function DataTransfer(_dataStore, _setDragImageHandler) {
         this._dataStore = _dataStore;
         this._setDragImageHandler = _setDragImageHandler;
         this._dropEffect = DROP_EFFECTS[0];
     }
     Object.defineProperty(DataTransfer.prototype, "dropEffect", {
-        get: function () {
+        get: function() {
             return this._dropEffect;
         },
-        set: function (value) {
+        set: function(value) {
             if (this._dataStore.mode !== 0 && ALLOWED_EFFECTS.indexOf(value) > -1) {
                 this._dropEffect = value;
             }
@@ -225,7 +234,7 @@ const DataTransfer = (function () {
         configurable: true
     });
     Object.defineProperty(DataTransfer.prototype, "types", {
-        get: function () {
+        get: function() {
             if (this._dataStore.mode !== 0) {
                 return Object.freeze(this._dataStore.types);
             }
@@ -234,10 +243,10 @@ const DataTransfer = (function () {
         configurable: true
     });
     Object.defineProperty(DataTransfer.prototype, "effectAllowed", {
-        get: function () {
+        get: function() {
             return this._dataStore.effectAllowed;
         },
-        set: function (value) {
+        set: function(value) {
             if (this._dataStore.mode === 2 && ALLOWED_EFFECTS.indexOf(value) > -1) {
                 this._dataStore.effectAllowed = value;
             }
@@ -245,7 +254,7 @@ const DataTransfer = (function () {
         enumerable: true,
         configurable: true
     });
-    DataTransfer.prototype.setData = function (type, data) {
+    DataTransfer.prototype.setData = function(type, data) {
         if (this._dataStore.mode === 2) {
             if (type.indexOf(" ") > -1) {
                 throw new Error("illegal arg: type contains space");
@@ -256,12 +265,12 @@ const DataTransfer = (function () {
             }
         }
     };
-    DataTransfer.prototype.getData = function (type) {
+    DataTransfer.prototype.getData = function(type) {
         if (this._dataStore.mode === 1 || this._dataStore.mode === 2) {
             return this._dataStore.data[type] || "";
         }
     };
-    DataTransfer.prototype.clearData = function (format) {
+    DataTransfer.prototype.clearData = function(format) {
         if (this._dataStore.mode === 2) {
             if (format && this._dataStore.data[format]) {
                 delete this._dataStore.data[format];
@@ -275,7 +284,7 @@ const DataTransfer = (function () {
             this._dataStore.types = [];
         }
     };
-    DataTransfer.prototype.setDragImage = function (image, x, y) {
+    DataTransfer.prototype.setDragImage = function(image, x, y) {
         if (this._dataStore.mode === 2) {
             this._setDragImageHandler(image, x, y);
         }
@@ -373,7 +382,7 @@ function determineDragOperation(effectAllowed, dropEffect) {
     return DROP_EFFECTS[0];
 }
 
-const DragOperationController = (function () {
+const DragOperationController = (function() {
     function DragOperationController(_initialEvent, _config, _sourceNode, _dragOperationEndedCb) {
         this._initialEvent = _initialEvent;
         this._config = _config;
@@ -391,7 +400,7 @@ const DragOperationController = (function () {
         addDocumentListener("touchend", this._touchEndOrCancelHandler, false);
         addDocumentListener("touchcancel", this._touchEndOrCancelHandler, false);
     }
-    DragOperationController.prototype._setup = function () {
+    DragOperationController.prototype._setup = function() {
         const _this = this;
         console.log("dnd-poly: starting drag and drop operation");
         this._dragOperationState = 1;
@@ -411,7 +420,7 @@ const DragOperationController = (function () {
             y: null
         };
         let dragImageSrc = this._sourceNode;
-        this._dataTransfer = new DataTransfer(this._dragDataStore, function (element, x, y) {
+        this._dataTransfer = new DataTransfer(this._dragDataStore, function(element, x, y) {
             dragImageSrc = element;
             if (typeof x === "number" || typeof y === "number") {
                 _this._dragImageOffset = {
@@ -461,7 +470,7 @@ const DragOperationController = (function () {
         }
         translateElementToPoint(this._dragImage, this._dragImagePageCoordinates, this._dragImageTransforms, this._dragImageOffset, this._config.dragImageCenterOnTouch);
         document.body.appendChild(this._dragImage);
-        this._iterationIntervalId = window.setInterval(function () {
+        this._iterationIntervalId = window.setInterval(function() {
             if (_this._iterationLock) {
                 console.log("dnd-poly: iteration skipped because previous iteration hast not yet finished.");
                 return;
@@ -472,7 +481,7 @@ const DragOperationController = (function () {
         }, this._config.iterationInterval);
         return true;
     };
-    DragOperationController.prototype._cleanup = function () {
+    DragOperationController.prototype._cleanup = function() {
         console.log("dnd-poly: cleanup");
         if (this._iterationIntervalId) {
             clearInterval(this._iterationIntervalId);
@@ -487,7 +496,7 @@ const DragOperationController = (function () {
         }
         this._dragOperationEndedCb(this._config, this._lastTouchEvent, this._dragOperationState);
     };
-    DragOperationController.prototype._onTouchMove = function (event) {
+    DragOperationController.prototype._onTouchMove = function(event) {
         const _this = this;
         if (isTouchIdentifierContainedInTouchEvent(event, this._initialTouch.identifier) === false) {
             return;
@@ -529,7 +538,7 @@ const DragOperationController = (function () {
                         y: this._currentHotspotCoordinates.y
                     },
                     this._immediateUserSelection,
-                    function (offsetX, offsetY) {
+                    function(offsetX, offsetY) {
                         if (!_this._dragImage) {
                             return;
                         }
@@ -550,13 +559,13 @@ const DragOperationController = (function () {
         }
         translateElementToPoint(this._dragImage, this._dragImagePageCoordinates, this._dragImageTransforms, this._dragImageOffset, this._config.dragImageCenterOnTouch);
     };
-    DragOperationController.prototype._onTouchEndOrCancel = function (event) {
+    DragOperationController.prototype._onTouchEndOrCancel = function(event) {
         if (isTouchIdentifierContainedInTouchEvent(event, this._initialTouch.identifier) === false) {
             return;
         }
         if (this._config.dragImageTranslateOverride) {
             try {
-                this._config.dragImageTranslateOverride(undefined, undefined, undefined, function () { });
+                this._config.dragImageTranslateOverride(undefined, undefined, undefined, function() {});
             } catch (e) {
                 console.log("dnd-poly: error in dragImageTranslateOverride hook: " + e);
             }
@@ -568,7 +577,7 @@ const DragOperationController = (function () {
         event.preventDefault();
         this._dragOperationState = event.type === "touchcancel" ? 3 : 2;
     };
-    DragOperationController.prototype._dragAndDropProcessModelIteration = function () {
+    DragOperationController.prototype._dragAndDropProcessModelIteration = function() {
         const _this = this;
         const previousDragOperation = this._currentDragOperation;
         this._dragDataStore.mode = 3;
@@ -581,7 +590,7 @@ const DragOperationController = (function () {
         if (dragCancelled || this._dragOperationState === 2 || this._dragOperationState === 3) {
             const dragFailed = this._dragOperationEnded(this._dragOperationState);
             if (dragFailed) {
-                applyDragImageSnapback(this._sourceNode, this._dragImage, this._dragImageTransforms, function () {
+                applyDragImageSnapback(this._sourceNode, this._dragImage, this._dragImageTransforms, function() {
                     _this._finishDragOperation();
                 });
                 return;
@@ -640,7 +649,7 @@ const DragOperationController = (function () {
         const currentDragOperationClass = CLASS_PREFIX + this._currentDragOperation;
         this._dragImage.classList.add(currentDragOperationClass);
     };
-    DragOperationController.prototype._dragOperationEnded = function (state) {
+    DragOperationController.prototype._dragOperationEnded = function(state) {
         console.log("dnd-poly: drag operation end detected with " + this._currentDragOperation);
         const dragFailed = this._currentDragOperation === DROP_EFFECTS[0] || this._currentDropTarget === null || state === 3;
         if (dragFailed) {
@@ -662,7 +671,7 @@ const DragOperationController = (function () {
         }
         return dragFailed;
     };
-    DragOperationController.prototype._finishDragOperation = function () {
+    DragOperationController.prototype._finishDragOperation = function() {
         console.log("dnd-poly: dragimage snap back transition ended");
         this._dragDataStore.mode = 3;
         this._dataTransfer.dropEffect = this._currentDragOperation;
@@ -677,7 +686,7 @@ const config = {
     iterationInterval: 150,
     tryFindDraggableTarget: tryFindDraggableTarget,
     dragImageSetup: createDragImage,
-    elementFromPoint: function (x, y) {
+    elementFromPoint: function(x, y) {
         return document.elementFromPoint(x, y);
     }
 };
@@ -704,7 +713,7 @@ function onDelayTouchstart(evt) {
     console.log("dnd-poly: setup delayed dragstart..");
     const el = evt.target;
     const composePath = evt.composedPath();
-    const heldItem = function () {
+    const heldItem = function() {
         console.log("dnd-poly: starting delayed drag..");
         end.off();
         cancel.off();
@@ -712,19 +721,19 @@ function onDelayTouchstart(evt) {
         scroll.off();
         onTouchstart(evt, composePath);
     };
-    const onReleasedItem = function (event) {
+    const onReleasedItem = function(event) {
         console.log("dnd-poly: aborting delayed drag because of " + event.type);
         end.off();
         cancel.off();
         move.off();
         scroll.off();
         if (el) {
-            el.dispatchEvent(new CustomEvent(EVENT_DRAG_DRAGSTART_CANCEL, { bubbles: true, cancelable: true }));
+            el.dispatchEvent(new CustomEvent(EVENT_DRAG_DRAGSTART_CANCEL, {bubbles: true, cancelable: true}));
         }
         clearTimeout(timer);
     };
     if (el) {
-        el.dispatchEvent(new CustomEvent(EVENT_DRAG_DRAGSTART_PENDING, { bubbles: true, cancelable: true }));
+        el.dispatchEvent(new CustomEvent(EVENT_DRAG_DRAGSTART_PENDING, {bubbles: true, cancelable: true}));
     }
     const timer = window.setTimeout(heldItem, config.holdToDrag);
     const end = onEvt(el, "touchend", onReleasedItem);
@@ -752,7 +761,7 @@ function dragOperationEnded(_config, event, state) {
 
 function polyfill(override) {
     if (override) {
-        Object.keys(override).forEach(function (key) {
+        Object.keys(override).forEach(function(key) {
             config[key] = override[key];
         });
     }
@@ -806,7 +815,7 @@ function dragStartConditionOverride(event) {
     return true;
 }
 
-window.addEventListener('touchmove', function () { });
+window.addEventListener("touchmove", function() {});
 
 polyfill({
     tryFindDraggableTarget: tryFindDraggableTarget_override,

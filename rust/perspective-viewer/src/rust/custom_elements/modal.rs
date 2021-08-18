@@ -39,7 +39,7 @@ pub struct ModalElement<T: Component> {
 
 /// Calculate the absolute coordinates (top, left) relative to `<body>` of a
 /// `target` element.
-fn calc_page_position(target: &HtmlElement) -> Result<(u32, u32), JsValue> {
+fn calc_page_position(target: &HtmlElement) -> Result<(i32, i32), JsValue> {
     let mut top = 0;
     let mut left = 0;
     let mut elem = target.clone().unchecked_into::<HtmlElement>();
@@ -59,7 +59,7 @@ fn calc_page_position(target: &HtmlElement) -> Result<(u32, u32), JsValue> {
         };
     }
 
-    Ok((top as u32, left as u32))
+    Ok((top as i32, left as i32))
 }
 
 /// Given the bounds of the target element as previous computed, as well as the
@@ -68,19 +68,19 @@ fn calc_page_position(target: &HtmlElement) -> Result<(u32, u32), JsValue> {
 /// coordinates that keeps the element on-screen.
 fn calc_relative_position(
     elem: &HtmlElement,
-    top: u32,
-    left: u32,
-    height: u32,
-    width: u32,
-) -> Option<(u32, u32)> {
+    top: i32,
+    left: i32,
+    height: i32,
+    width: i32,
+) -> Option<(i32, i32)> {
     let window = web_sys::window().unwrap();
     let rect = elem.get_bounding_client_rect();
-    let inner_width = window.inner_width().unwrap().as_f64().unwrap() as u32;
-    let inner_height = window.inner_height().unwrap().as_f64().unwrap() as u32;
-    let rect_top = rect.top() as u32;
-    let rect_height = rect.height() as u32;
-    let rect_width = rect.width() as u32;
-    let rect_left = rect.left() as u32;
+    let inner_width = window.inner_width().unwrap().as_f64().unwrap() as i32;
+    let inner_height = window.inner_height().unwrap().as_f64().unwrap() as i32;
+    let rect_top = rect.top() as i32;
+    let rect_height = rect.height() as i32;
+    let rect_width = rect.width() as i32;
+    let rect_left = rect.left() as i32;
 
     let elem_over_y = inner_height < rect_top + rect_height;
     let elem_over_x = inner_width < rect_left + rect_width;
@@ -97,8 +97,13 @@ fn calc_relative_position(
             Some((top - rect_height + height, left - rect_width))
         }
         (true, true, false, _) => {
-            // bottom right/top right
-            Some((top - rect_height, left + width - rect_width))
+            if left + width - rect_width > 0 {
+                // bottom right/top right
+                Some((top - rect_height, left + width - rect_width))
+            } else {
+                // bottom left/top left
+                Some((top - rect_height, left))
+            }
         }
         (true, false, false, _) => {
             // bottom left/top left
@@ -109,15 +114,19 @@ fn calc_relative_position(
             Some((top, left - rect_width))
         }
         (false, true, false, _) => {
-            // top right/bottom right
-            Some((top + height, left + width - rect_width))
+            if left + width - rect_width > 0 {
+                // top right/bottom right
+                Some((top + height, left + width - rect_width))
+            } else {
+                None
+            }
         }
         _ => None,
     }
 }
 
 pub trait ResizableMessage {
-    fn resize(y: u32, x: u32) -> Self;
+    fn resize(y: i32, x: i32) -> Self;
 }
 
 impl<T> ModalElement<T>
@@ -153,13 +162,13 @@ where
     }
 
     fn open_within_viewport(&mut self, target: HtmlElement) -> Result<(), JsValue> {
-        let height = target.offset_height() as u32;
-        let width = target.offset_width() as u32;
+        let height = target.offset_height() as i32;
+        let width = target.offset_width() as i32;
         let (top, left) = calc_page_position(&target)?;
         *self.target.borrow_mut() = Some(target);
 
         // Default, top left/bottom left
-        let msg = T::Message::resize((top + height) as u32, left as u32);
+        let msg = T::Message::resize((top + height) as i32, left as i32);
         self.root.borrow().as_ref().unwrap().send_message(msg);
 
         let window = web_sys::window().unwrap();
@@ -174,7 +183,7 @@ where
         match calc_relative_position(&self.custom_element, top, left, height, width) {
             None => (),
             Some((top, left)) => {
-                let msg = T::Message::resize(top as u32, left as u32);
+                let msg = T::Message::resize(top as i32, left as i32);
                 self.root.borrow().as_ref().unwrap().send_message(msg);
             }
         };

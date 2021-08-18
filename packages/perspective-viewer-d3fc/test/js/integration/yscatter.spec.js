@@ -16,13 +16,22 @@ const render_warning_tests = require("@finos/perspective-viewer/test/js/render_w
 const {withTemplate} = require("./simple-template");
 withTemplate("yscatter", "Y Scatter");
 
+function get_contents(temp) {
+    return async function(page) {
+        return await page.evaluate(async temp => {
+            const viewer = document.querySelector(`perspective-viewer perspective-viewer-d3fc-${temp}`).shadowRoot.querySelector("svg");
+            return viewer.outerHTML || "MISSING";
+        }, temp);
+    };
+}
+
 utils.with_server({}, () => {
     describe.page(
         "yscatter.html",
         () => {
-            simple_tests.default();
-            render_warning_tests.default("Y Scatter");
+            simple_tests.default(get_contents("yscatter"));
+            // render_warning_tests.default("Y Scatter");
         },
-        {reload_page: false, root: path.join(__dirname, "..", "..", "..")}
+        {root: path.join(__dirname, "..", "..", "..")}
     );
 });

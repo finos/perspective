@@ -5,7 +5,6 @@ let idx = 0;
 
 module.exports = common({}, config => {
     return Object.assign(config, {
-        mode: "development",
         entry: {
             "perspective-viewer": "./dist/esm/index.js"
         },
