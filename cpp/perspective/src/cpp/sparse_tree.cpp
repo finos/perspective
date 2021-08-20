@@ -170,8 +170,13 @@ t_stree::build_strand_table_phase_1(t_tscalar pkey, t_op op, t_uindex idx, t_uin
     const std::vector<std::string>& pivot_like) const {
     pivots_neq = false;
     std::set<std::string> pivmap;
-    bool all_eq_tt = true;
 
+    // if a row has been changed (value change, validity change, removed, etc.),
+    // will be false. 
+    bool no_new_rows = true;
+
+    // for each strand col, take out the value at row `idx` and use the
+    // transition to calculate whether the pivot has changed.
     for (t_uindex pidx = 0, ploop_end = pivot_like.size(); pidx < ploop_end; ++pidx) {
         const std::string& colname = pivot_like.at(pidx);
         if (pivmap.find(colname) != pivmap.end()) {
@@ -181,14 +186,26 @@ t_stree::build_strand_table_phase_1(t_tscalar pkey, t_op op, t_uindex idx, t_uin
         piv_scols[pidx]->push_back(piv_ccols[pidx]->get_scalar(idx));
         const std::uint8_t* trans_ = piv_tcols[pidx]->get_nth<std::uint8_t>(idx);
         t_value_transition trans = static_cast<t_value_transition>(*trans_);
-        if (trans != VALUE_TRANSITION_EQ_TT)
-            all_eq_tt = false;
+
+        // `no_new_rows` is used to calculate the strand count for the
+        // "count" aggregate. Previously we only checked if the column's
+        // value and validity did not change, which led to a long-running bug 
+        // where the "last" aggregate would increase the "count" of another
+        // column even when no new rows were added. Thus, we only need
+        // to check if new rows were added, not whether the row's value
+        // has changed.
+        if (trans != VALUE_TRANSITION_EQ_TT && trans != VALUE_TRANSITION_NEQ_TT)
+            no_new_rows = false;
 
         if (pidx < npivots) {
             pivots_neq = pivots_neq || pivots_changed(trans);
         }
     }
 
+    // For each aggregate col, except "psp_strand_count" as marked by
+    // "strand_count_idx" (the number of strands in the table), if the pivot
+    // has changed OR force_current_row is true, then use the aggregate
+    // from `current`, else use the `delta`.
     for (t_uindex aggidx = 0; aggidx < aggcolsize; ++aggidx) {
         if (aggidx != strand_count_idx) {
             if (pivots_neq || force_current_row) {
@@ -199,19 +216,16 @@ t_stree::build_strand_table_phase_1(t_tscalar pkey, t_op op, t_uindex idx, t_uin
         }
     }
 
-    std::int8_t cval;
+    std::int8_t strand_count;
 
     if (op == OP_DELETE) {
-        cval = -1;
+        // A row has been removed
+        strand_count = -1;
     } else {
-        if (t_env::backout_force_current_row()) {
-            cval = !all_eq_tt || pivots_neq ? 1 : 0;
-        } else {
-
-            cval = npivots == 0 || !all_eq_tt || pivots_neq || force_current_row ? 1 : 0;
-        }
+        strand_count = npivots == 0 || !no_new_rows || pivots_neq || force_current_row ? 1 : 0;
     }
-    agg_scount->push_back<std::int8_t>(cval);
+    
+    agg_scount->push_back<std::int8_t>(strand_count);
     spkey->push_back(pkey);
 
     ++insert_count;
