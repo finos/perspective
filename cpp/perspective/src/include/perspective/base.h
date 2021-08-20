@@ -280,14 +280,14 @@ enum t_ctx_type {
 enum t_op { OP_INSERT, OP_DELETE, OP_CLEAR };
 
 enum t_value_transition {
-    VALUE_TRANSITION_EQ_FF,
+    VALUE_TRANSITION_EQ_FF, // Value did not change, and row remains invalid
     // VALUE_TRANSITION_EQ_FT nonsensical
     // VALUE_TRANSITION_EQ_TF nonsensical
-    VALUE_TRANSITION_EQ_TT,
+    VALUE_TRANSITION_EQ_TT, // Value did not change, and row remains valid
     // VALUE_TRANSITION_NEQ_FF nonsensical
-    VALUE_TRANSITION_NEQ_FT,
-    VALUE_TRANSITION_NEQ_TF,
-    VALUE_TRANSITION_NEQ_TT,
+    VALUE_TRANSITION_NEQ_FT, // Value changed, and row changed from invalid to valid
+    VALUE_TRANSITION_NEQ_TF, // Value changed, and row changed from valid to invalid
+    VALUE_TRANSITION_NEQ_TT, // Value changed and row remans valid
     // VALUE_TRANSITION_EQ_FDF, nonsensical
     // VALUE_TRANSITION_EQ_FDT, nonsensical
     // VALUE_TRANSITION_EQ_TDF, nonsensical

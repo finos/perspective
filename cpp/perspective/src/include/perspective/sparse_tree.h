@@ -63,7 +63,7 @@ struct by_idx_lfidx {};
 
 PERSPECTIVE_EXPORT t_tscalar get_dominant(std::vector<t_tscalar>& values);
 
-struct t_build_strand_table_common_rval {
+struct t_build_strand_table_metadata {
     t_schema m_flattened_schema;
     t_schema m_strand_schema;
     t_schema m_aggschema;
@@ -302,8 +302,11 @@ protected:
 
     bool is_leaf(t_uindex nidx) const;
 
-    t_build_strand_table_common_rval build_strand_table_common(const t_data_table& flattened,
-        const std::vector<t_aggspec>& aggspecs, const t_config& config) const;
+    t_build_strand_table_metadata
+    build_strand_table_metadata(
+        const t_data_table& flattened,
+        const std::vector<t_aggspec>& aggspecs,
+        const t_config& config) const;
 
     void populate_pkey_idx(const t_dtree_ctx& ctx, const t_dtree& dtree, t_uindex dptidx,
         t_uindex sptidx, t_uindex ndepth, t_idxpkey& new_idx_pkey);

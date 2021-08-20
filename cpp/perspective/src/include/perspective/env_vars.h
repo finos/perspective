@@ -142,18 +142,6 @@ struct PERSPECTIVE_EXPORT t_env {
     }
 
     static inline bool
-    backout_invalid_neq_ft() {
-        static const bool rv = std::getenv("PSP_BACKOUT_INVALID_NEQ_FT") != 0;
-        return rv;
-    }
-
-    static inline bool
-    backout_force_current_row() {
-        static const bool rv = std::getenv("PSP_BACKOUT_FORCE_CURRENT_ROW") != 0;
-        return rv;
-    }
-
-    static inline bool
     backout_eq_invalid_invalid() {
         static const bool rv = std::getenv("PSP_BACKOUT_EQ_INVALID_INVALID") != 0;
         return rv;
