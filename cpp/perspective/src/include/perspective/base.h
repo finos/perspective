@@ -287,7 +287,7 @@ enum t_value_transition {
     // VALUE_TRANSITION_NEQ_FF nonsensical
     VALUE_TRANSITION_NEQ_FT, // Value changed, and row changed from invalid to valid
     VALUE_TRANSITION_NEQ_TF, // Value changed, and row changed from valid to invalid
-    VALUE_TRANSITION_NEQ_TT, // Value changed and row remans valid
+    VALUE_TRANSITION_NEQ_TT, // Value changed and row remains valid
     // VALUE_TRANSITION_EQ_FDF, nonsensical
     // VALUE_TRANSITION_EQ_FDT, nonsensical
     // VALUE_TRANSITION_EQ_TDF, nonsensical

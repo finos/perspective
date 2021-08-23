@@ -222,6 +222,8 @@ t_stree::build_strand_table_phase_1(t_tscalar pkey, t_op op, t_uindex idx, t_uin
         // A row has been removed
         strand_count = -1;
     } else {
+        // Strand count is 1 if there are no pivots, if new rows have been
+        // added, if pivots have been changed, or force_current_row is true.
         strand_count = npivots == 0 || !no_new_rows || pivots_neq || force_current_row ? 1 : 0;
     }
     
@@ -615,6 +617,8 @@ t_stree::populate_pkey_idx(const t_dtree_ctx& ctx, const t_dtree& dtree, t_uinde
             auto pkey = m_symtable.get_interned_tscalar(pkey_col->get_scalar(lfidx));
             auto strand_count = *(strand_count_col->get_nth<std::int8_t>(lfidx));
 
+            // Checks the strand count and adds a new primary key if it's
+            // increased.
             if (strand_count > 0) {
                 t_stpkey s(sptidx, pkey);
                 new_idx_pkey.insert(s);

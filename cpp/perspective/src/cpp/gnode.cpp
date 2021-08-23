@@ -154,7 +154,7 @@ t_gnode::calc_transition(
     bool prev_pkey_eq) {
     t_value_transition trans = VALUE_TRANSITION_EQ_FF;
 
-    if (!row_pre_existed && !cur_valid) {
+    if (!row_pre_existed && !cur_valid && !t_env::backout_invalid_neq_ft()) {
         trans = VALUE_TRANSITION_NEQ_FT;
     } else if (row_pre_existed && !prev_valid && !cur_valid
         && !t_env::backout_eq_invalid_invalid()) {
