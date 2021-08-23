@@ -2043,4 +2043,421 @@ module.exports = perspective => {
             table.update(data);
         });
     });
+
+    describe("Filtered update and remove", () => {
+        let table, flat_view, filtered_view;
+
+        beforeEach(async () => {
+            table = await perspective.table(
+                {
+                    x: "integer",
+                    y: "string"
+                },
+                {index: "x"}
+            );
+
+            flat_view = await table.view();
+            filtered_view = await table.view({filter: [["y", "==", "a"]]});
+        });
+
+        afterEach(async () => {
+            await filtered_view.delete();
+            await flat_view.delete();
+
+            filtered_view = null;
+            flat_view = null;
+        });
+
+        afterAll(async () => {
+            if (filtered_view) await filtered_view.delete();
+            if (flat_view) await flat_view.delete();
+            await table.delete();
+        });
+
+        it("View output should always be consistent with filter", async () => {
+            let i = 0,
+                op = 0,
+                update_idx = 1,
+                remove_idx = 0;
+
+            for (i; i < 90; i++) {
+                if (op > 2) op = 0;
+
+                switch (op) {
+                    case 0:
+                        {
+                            // insert
+                            table.update({
+                                x: [i],
+                                y: [i % 2 ? "a" : "b"]
+                            });
+                        }
+                        break;
+                    case 1:
+                        {
+                            // partial update
+                            table.update({
+                                x: [update_idx],
+                                y: [update_idx % 2 ? "b" : "a"]
+                            });
+
+                            update_idx++;
+                        }
+                        break;
+                    case 2:
+                        {
+                            // remove
+                            table.remove([remove_idx]);
+                            remove_idx++;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+
+                const flat = await flat_view.to_json();
+                expect(await filtered_view.to_json()).toEqual(flat.filter(row => row.y === "a"));
+                op++;
+            }
+        });
+
+        it("View output should always be consistent with filter, recreating views", async () => {
+            let i = 0,
+                op = 0,
+                update_idx = 1,
+                remove_idx = 0;
+
+            for (i; i < 90; i++) {
+                if (op > 3) op = 0;
+
+                switch (op) {
+                    case 0:
+                        {
+                            // insert
+                            table.update({
+                                x: [i],
+                                y: [i % 2 ? "a" : "b"]
+                            });
+                        }
+                        break;
+                    case 1:
+                        {
+                            // partial update
+                            table.update({
+                                x: [update_idx],
+                                y: [update_idx % 2 ? "b" : "a"]
+                            });
+
+                            update_idx++;
+                        }
+                        break;
+                    case 2:
+                        {
+                            // remove
+                            table.remove([remove_idx]);
+                            remove_idx++;
+                        }
+                        break;
+                    case 3: {
+                        // recreate views
+                        await flat_view.delete();
+                        flat_view = await table.view();
+
+                        await filtered_view.delete();
+                        filtered_view = await table.view({filter: [["y", "==", "a"]]});
+                    }
+                    default:
+                        break;
+                }
+
+                const flat = await flat_view.to_json();
+                expect(await filtered_view.to_json()).toEqual(flat.filter(row => row.y === "a"));
+                op++;
+            }
+        });
+
+        it("View output should always be consistent with filter, deterministic", async () => {
+            filtered_view = await table.view({filter: [["y", "==", "b"]]});
+
+            for (let i = 0; i < 10; i++) {
+                // append new rows
+                table.update([{x: i, y: "a"}]);
+                expect(await table.size()).toEqual(i + 1);
+
+                // make sure appended
+                const result = await flat_view.to_json();
+                expect(result[result.length - 1]).toEqual({x: i, y: "a"});
+
+                // filtering
+                expect(await filtered_view.to_json()).toEqual(result.filter(row => row.y === "b"));
+            }
+
+            await filtered_view.delete();
+
+            // new view with filter
+            filtered_view = await table.view({filter: [["y", "==", "a"]]});
+            let flat = await flat_view.to_json();
+            let filtered = await filtered_view.to_json();
+
+            expect(flat.length).toEqual(filtered.length);
+            expect(filtered).toEqual(flat);
+
+            for (let i = 0; i < 10; i++) {
+                // partial update rows
+                if (i % 2 == 0) {
+                    table.update([{x: i, y: "b"}]);
+
+                    flat = await flat_view.to_json();
+                    filtered = await filtered_view.to_json();
+                    expect(flat.length).toBeGreaterThan(filtered.length);
+                    expect(flat.filter(row => row.x === i)[0]).toEqual({x: i, y: "b"});
+                    expect(filtered).toEqual(flat.filter(row => row.y === "a"));
+
+                    // partial updates not appends
+                    expect(await table.size()).toEqual(10);
+                }
+            }
+
+            // Remove "b" rows
+            flat = await flat_view.to_json();
+            table.remove(flat.filter(row => row.y === "b").map(row => row.x));
+            expect(await flat_view.to_json()).toEqual([
+                {x: 1, y: "a"},
+                {x: 3, y: "a"},
+                {x: 5, y: "a"},
+                {x: 7, y: "a"},
+                {x: 9, y: "a"}
+            ]);
+        });
+
+        it("Output consistent with filter, out of order", async () => {
+            const tbl = await perspective.table(
+                {
+                    index: "string",
+                    x: "string"
+                },
+                {index: "index"}
+            );
+            const view = await tbl.view();
+
+            tbl.update({index: ["a", "d", "b"], x: ["abc", "def", "acc"]});
+            tbl.remove(["b"]);
+
+            const view2 = await tbl.view({filter: [["x", "==", "abc"]]});
+            await view.delete();
+
+            expect(await view2.to_json()).toEqual([{index: "a", x: "abc"}]);
+            console.log(await view2.to_json());
+
+            await view2.delete();
+            await tbl.delete();
+        });
+
+        it("Output consistent with filter, with null", async () => {
+            const tbl = await perspective.table(
+                {
+                    index: "string",
+                    x: "string"
+                },
+                {index: "index"}
+            );
+            const view = await tbl.view();
+
+            tbl.update({index: ["a", "d", "b", null], x: ["abc", "def", "acc", "abb"]});
+            tbl.remove(["b"]);
+
+            const view2 = await tbl.view({filter: [["x", "==", "abb"]]});
+            await view.delete();
+
+            expect(await view2.to_json()).toEqual([{index: null, x: "abb"}]);
+            console.log(await view2.to_json());
+
+            await view2.delete();
+            await tbl.delete();
+        });
+
+        it("Output consistent with filter, string small", async () => {
+            const tbl = await perspective.table(
+                {
+                    index: "string",
+                    x: "string"
+                },
+                {index: "index"}
+            );
+            const view = await tbl.view();
+
+            tbl.update({index: ["a", "c"], x: ["abc", "def"]});
+            tbl.remove(["c"]);
+
+            const view2 = await tbl.view({filter: [["x", "==", "abc"]]});
+            await view.delete();
+
+            expect(await view2.to_json()).toEqual([{index: "a", x: "abc"}]);
+            console.log(await view2.to_json());
+
+            await view2.delete();
+            await tbl.delete();
+        });
+
+        it("Output consistent with filter, ordered", async () => {
+            const tbl = await perspective.table(
+                {
+                    index: "string",
+                    x: "string"
+                },
+                {index: "index"}
+            );
+            const view = await tbl.view();
+
+            tbl.update({index: ["a", "b", "c"], x: ["abc", "def", "acc"]});
+            tbl.remove(["b"]);
+
+            const view2 = await tbl.view({filter: [["x", "==", "abc"]]});
+            await view.delete();
+
+            expect(await view2.to_json()).toEqual([{index: "a", x: "abc"}]);
+            console.log(await view2.to_json());
+
+            await view2.delete();
+            await tbl.delete();
+        });
+
+        it("Output consistent with filter, numeric index out of order", async () => {
+            const tbl = await perspective.table(
+                {
+                    index: "float",
+                    x: "string"
+                },
+                {index: "index"}
+            );
+            const view = await tbl.view();
+
+            tbl.update({index: [50, 1, 2], x: ["abc", "def", "acc"]});
+            tbl.remove([1]);
+
+            const view2 = await tbl.view({filter: [["x", "==", "acc"]]});
+            await view.delete();
+
+            expect(await view2.to_json()).toEqual([{index: 2, x: "acc"}]);
+            console.log(await view2.to_json());
+
+            await view2.delete();
+            await tbl.delete();
+        });
+
+        it("Output consistent with filter, numeric index ordered", async () => {
+            const tbl = await perspective.table(
+                {
+                    index: "float",
+                    x: "string"
+                },
+                {index: "index"}
+            );
+            const view = await tbl.view();
+
+            tbl.update({index: [1, 2, 3], x: ["abc", "def", "acc"]});
+            tbl.remove([3]);
+
+            const view2 = await tbl.view({filter: [["x", "==", "def"]]});
+            await view.delete();
+
+            expect(await view2.to_json()).toEqual([{index: 2, x: "def"}]);
+            console.log(await view2.to_json());
+
+            await view2.delete();
+            await tbl.delete();
+        });
+
+        it("Output consistent with filter, date index out of order", async () => {
+            const tbl = await perspective.table(
+                {
+                    index: "date",
+                    x: "string"
+                },
+                {index: "index"}
+            );
+            const view = await tbl.view();
+
+            tbl.update({index: [new Date(2021, 3, 15), new Date(2009, 1, 13), new Date(2015, 5, 10)], x: ["abc", "def", "acc"]});
+            tbl.remove([1]);
+
+            const view2 = await tbl.view({filter: [["x", "==", "acc"]]});
+            await view.delete();
+
+            expect(await view2.to_json()).toEqual([{index: new Date(2015, 5, 10).getTime(), x: "acc"}]);
+            console.log(await view2.to_json());
+
+            await view2.delete();
+            await tbl.delete();
+        });
+
+        it("Output consistent with filter, date index ordered", async () => {
+            const tbl = await perspective.table(
+                {
+                    index: "date",
+                    x: "string"
+                },
+                {index: "index"}
+            );
+            const view = await tbl.view();
+
+            tbl.update({index: [new Date(2009, 1, 13), new Date(2015, 5, 10), new Date(2021, 3, 15)], x: ["abc", "def", "acc"]});
+            tbl.remove([3]);
+
+            const view2 = await tbl.view({filter: [["x", "==", "def"]]});
+            await view.delete();
+
+            expect(await view2.to_json()).toEqual([{index: new Date(2015, 5, 10).getTime(), x: "def"}]);
+            console.log(await view2.to_json());
+
+            await view2.delete();
+            await tbl.delete();
+        });
+
+        it("Output consistent with filter, datetime index out of order", async () => {
+            const tbl = await perspective.table(
+                {
+                    index: "datetime",
+                    x: "string"
+                },
+                {index: "index"}
+            );
+            const view = await tbl.view();
+
+            tbl.update({index: [new Date(2021, 3, 15, 5, 10, 3), new Date(2009, 1, 13, 0, 0, 1), new Date(2015, 5, 10, 15, 10, 2)], x: ["abc", "def", "acc"]});
+            tbl.remove([1]);
+
+            const view2 = await tbl.view({filter: [["x", "==", "acc"]]});
+            await view.delete();
+
+            expect(await view2.to_json()).toEqual([{index: new Date(2015, 5, 10, 15, 10, 2).getTime(), x: "acc"}]);
+            console.log(await view2.to_json());
+
+            await view2.delete();
+            await tbl.delete();
+        });
+
+        it("Output consistent with filter, datetime index ordered", async () => {
+            const tbl = await perspective.table(
+                {
+                    index: "datetime",
+                    x: "string"
+                },
+                {index: "index"}
+            );
+            const view = await tbl.view();
+
+            tbl.update({index: [new Date(2009, 1, 13, 0, 0, 1), new Date(2015, 5, 10, 15, 10, 2), new Date(2021, 3, 15, 5, 10, 3)], x: ["abc", "def", "acc"]});
+            tbl.remove([3]);
+
+            const view2 = await tbl.view({filter: [["x", "==", "def"]]});
+            await view.delete();
+
+            expect(await view2.to_json()).toEqual([{index: new Date(2015, 5, 10, 15, 10, 2).getTime(), x: "def"}]);
+            console.log(await view2.to_json());
+
+            await view2.delete();
+            await tbl.delete();
+        });
+    });
 };
