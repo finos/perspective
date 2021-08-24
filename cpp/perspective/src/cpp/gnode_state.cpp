@@ -580,185 +580,44 @@ t_gstate::get_pkey_dtype() const {
 }
 
 std::shared_ptr<t_data_table>
-t_gstate::get_sorted_pkeyed_table() const {
-    std::map<t_tscalar, t_uindex> ordered(m_mapping.begin(), m_mapping.end());
-    auto sch = m_input_schema.drop({"psp_op"});
-    auto rv = std::make_shared<t_data_table>(sch, 0);
-    rv->init();
-    rv->reserve(mapping_size());
-
-    auto pkey_col = rv->get_column("psp_pkey");
-    std::vector<std::shared_ptr<t_column>> icolumns;
-    std::vector<std::shared_ptr<t_column>> ocolumns;
-
-    icolumns.reserve(m_output_schema.m_columns.size());
-    ocolumns.reserve(m_output_schema.m_columns.size());
-
-    for (const std::string& cname : m_output_schema.m_columns) {
-        ocolumns.push_back(rv->get_column(cname));
-        icolumns.push_back(m_table->get_column(cname));
-    }
-
-    for (auto it = ordered.begin(); it != ordered.end(); ++it) {
-        auto ridx = it->second;
-        pkey_col->push_back(it->first);
-        for (t_uindex cidx = 0, loop_end = m_output_schema.size(); cidx < loop_end; ++cidx) {
-            auto scalar = icolumns[cidx]->get_scalar(ridx);
-            ocolumns[cidx]->push_back(scalar);
-        }
-    }
-    rv->set_size(mapping_size());
-    return rv;
-}
-
-std::shared_ptr<t_data_table>
-t_gstate::get_pkeyed_table(const t_schema& schema) const {
-    return std::shared_ptr<t_data_table>(_get_pkeyed_table(schema));
-}
-
-std::shared_ptr<t_data_table>
 t_gstate::get_pkeyed_table() const {
-    if (m_mapping.size() == m_table->size())
-        return m_table;
-    return std::shared_ptr<t_data_table>(_get_pkeyed_table(m_input_schema));
-}
+    // If there are no removes, just return the gstate table. Removes would
+    // cause m_mapping to be smaller than m_table.
+    if (m_mapping.size() == m_table->size()) return m_table;
 
-t_data_table*
-t_gstate::_get_pkeyed_table() const {
-    return _get_pkeyed_table(m_input_schema);
-}
-
-t_data_table*
-t_gstate::_get_pkeyed_table(const std::vector<t_tscalar>& pkeys) const {
-    return _get_pkeyed_table(m_input_schema, pkeys);
-}
-
-t_data_table*
-t_gstate::_get_pkeyed_table(const t_schema& schema, const std::vector<t_tscalar>& pkeys) const {
-    t_mask mask(num_rows());
-
-    for (const auto& pkey : pkeys) {
-        auto lk = lookup(pkey);
-        if (lk.m_exists) {
-            mask.set(lk.m_idx, true);
-        }
-    }
-
-    return _get_pkeyed_table(schema, mask);
-}
-
-t_data_table*
-t_gstate::_get_pkeyed_table(const t_schema& schema) const {
+    // Otherwise mask out the removed rows and return the table.
     auto mask = get_cpp_mask();
-    return _get_pkeyed_table(schema, mask);
-}
 
-t_data_table*
-t_gstate::_get_pkeyed_table(const t_schema& schema, const t_mask& mask) const {
-    static bool const enable_pkeyed_table_mask_fix = true;
-    t_uindex o_ncols = schema.m_columns.size();
-    auto sz = enable_pkeyed_table_mask_fix ? mask.count() : mask.size();
-    auto rval = new t_data_table(schema, sz);
+    // count = total number of rows - number of removed rows
+    t_uindex table_size = mask.count();
+
+    const auto& schema_columns = m_input_schema.m_columns;
+    t_uindex num_columns = schema_columns.size();
+
+    // Clone from the gstate master table
+    const std::shared_ptr<t_data_table>& master_table = m_table;
+
+    std::shared_ptr<t_data_table> rval = std::make_shared<t_data_table>(m_input_schema, table_size);
     rval->init();
-    rval->set_size(sz);
+    rval->set_size(table_size);
 
-    const auto& sch_cols = schema.m_columns;
-
-    const t_data_table* tbl = m_table.get();
 
 #ifdef PSP_PARALLEL_FOR
-    tbb::parallel_for(0, int(o_ncols), 1,
-        [&sch_cols, rval, tbl, &mask](int colidx)
+    tbb::parallel_for(0, int(num_columns), 1,
+        [&schema_columns, rval, master_table, &mask](int colidx)
 #else
-    for (t_uindex colidx = 0; colidx < o_ncols; ++colidx)
+    for (t_uindex colidx = 0; colidx < num_columns; ++colidx)
 #endif
         {
-            const std::string& c = sch_cols[colidx];
-            if (c != "psp_op" && c != "psp_pkey") {
-                rval->set_column(c, tbl->get_const_column(c)->clone(mask));
-            }
+            const std::string& colname = schema_columns[colidx];
+            rval->set_column(colname, master_table->get_const_column(colname)->clone(mask));
         }
 
 #ifdef PSP_PARALLEL_FOR
     );
 #endif
-    auto pkey_col = rval->get_column("psp_pkey").get();
-    auto op_col = rval->get_column("psp_op").get();
 
-    op_col->raw_fill<std::uint8_t>(OP_INSERT);
-    op_col->valid_raw_fill();
-    pkey_col->valid_raw_fill();
-
-    std::vector<std::pair<t_tscalar, t_uindex>> order(
-        enable_pkeyed_table_mask_fix ? sz : m_mapping.size());
-    if (enable_pkeyed_table_mask_fix) {
-        std::vector<t_uindex> mapping;
-        mapping.resize(mask.size());
-        {
-            t_uindex mapped = 0;
-            for (t_uindex idx = 0; idx < mask.size(); ++idx) {
-                mapping[idx] = mapped;
-                if (mask.get(idx))
-                    ++mapped;
-            }
-        }
-
-        t_uindex oidx = 0;
-        for (const auto& kv : m_mapping) {
-            if (mask.get(kv.second)) {
-                order[oidx] = std::make_pair(kv.first, mapping[kv.second]);
-                ++oidx;
-            }
-        }
-    } else // enable_pkeyed_table_mask_fix
-    {
-        t_uindex oidx = 0;
-        for (const auto& kv : m_mapping) {
-            order[oidx] = kv;
-            ++oidx;
-        }
-    }
-
-    std::sort(order.begin(), order.end(),
-        [](const std::pair<t_tscalar, t_uindex>& a, const std::pair<t_tscalar, t_uindex>& b) {
-            return a.second < b.second;
-        });
-
-    if (get_pkey_dtype() == DTYPE_STR) {
-        static const t_tscalar empty = get_interned_tscalar("");
-        static bool const enable_pkeyed_table_vocab_reserve = true;
-
-        t_uindex offset = has_pkey(empty) ? 0 : 1;
-
-        size_t total_string_size = 0;
-
-        if (enable_pkeyed_table_vocab_reserve) {
-            total_string_size += offset;
-            for (t_uindex idx = 0, loop_end = order.size(); idx < loop_end; ++idx) {
-                total_string_size += strlen(order[idx].first.get_char_ptr()) + 1;
-            }
-        }
-
-        // if the m_mapping is empty, get_pkey_dtype() may lie about our pkeys being strings
-        // don't try to reserve in this case
-        if (!order.size())
-            total_string_size = 0;
-
-        pkey_col->set_vocabulary(order, total_string_size);
-        auto base = pkey_col->get_nth<t_uindex>(0);
-
-        for (t_uindex idx = 0, loop_end = order.size(); idx < loop_end; ++idx) {
-            base[idx] = idx + offset;
-        }
-    } else {
-        t_uindex ridx = 0;
-        for (const auto& e : order) {
-            pkey_col->set_scalar(ridx, e.first);
-            ++ridx;
-        }
-    }
-
-    return rval;
+    return rval;   
 }
 
 t_uindex

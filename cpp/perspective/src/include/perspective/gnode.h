@@ -176,10 +176,6 @@ public:
     void clear_input_ports();
     void clear_output_ports();
 
-    t_data_table* _get_pkeyed_table() const;
-    std::shared_ptr<t_data_table> get_pkeyed_table_sptr() const;
-    std::shared_ptr<t_data_table> get_sorted_pkeyed_table() const;
-
     bool has_pkey(t_tscalar pkey) const;
 
     std::vector<t_tscalar> get_row_data_pkeys(const std::vector<t_tscalar>& pkeys) const;

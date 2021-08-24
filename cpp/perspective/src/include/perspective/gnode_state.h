@@ -224,20 +224,7 @@ public:
 
     // Getters
     std::shared_ptr<t_data_table> get_table() const;
-
-    std::shared_ptr<t_data_table> get_pkeyed_table(const t_schema& schema) const;
     std::shared_ptr<t_data_table> get_pkeyed_table() const;
-
-    // Only for tests
-    std::shared_ptr<t_data_table> get_sorted_pkeyed_table() const;
-
-    t_data_table* _get_pkeyed_table() const;
-    t_data_table* _get_pkeyed_table(const std::vector<t_tscalar>& pkeys) const;
-    t_data_table* _get_pkeyed_table(
-        const t_schema& schema, const std::vector<t_tscalar>& pkeys) const;
-    t_data_table* _get_pkeyed_table(const t_schema& schema) const;
-    t_data_table* _get_pkeyed_table(
-        const t_schema& schema, const t_mask& mask) const;
 
     const t_schema& get_input_schema() const;
     const t_schema& get_output_schema() const;
