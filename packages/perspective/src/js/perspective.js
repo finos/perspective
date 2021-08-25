@@ -698,6 +698,7 @@ export default function(Module) {
      * integer/float type, the Promise returns undefined.
      */
     view.prototype.col_to_js_typed_array = function(col_name, options = {}) {
+        _call_process(this.table.get_id());
         const format_function = __MODULE__[`col_to_js_typed_array`];
         return column_to_format.call(this, col_name, options, format_function);
     };
@@ -751,6 +752,7 @@ export default function(Module) {
      * @returns {Promise<number>} The number of aggregated rows.
      */
     view.prototype.num_rows = function() {
+        _call_process(this.table.get_id());
         return this._View.num_rows();
     };
 

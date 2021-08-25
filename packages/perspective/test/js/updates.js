@@ -304,6 +304,132 @@ module.exports = perspective => {
             await view.delete();
             await table.delete();
         });
+
+        it("Removes out of order", async function() {
+            const table = await perspective.table(
+                {
+                    x: "string",
+                    y: "integer"
+                },
+                {index: "x"}
+            );
+
+            table.update({
+                x: ["b", "1", "a", "c"],
+                y: [3, 1, 2, 4]
+            });
+
+            const view = await table.view();
+            expect(await view.to_columns()).toEqual({
+                x: ["1", "a", "b", "c"],
+                y: [1, 2, 3, 4]
+            });
+
+            table.remove(["a", "c", "1", "b"]);
+
+            // num_rows should always reflect latest - we did not call_process
+            // in num_rows and I think the viewer covered that up because
+            // it would immediately serialize and thus flush the queue.
+            expect(await view.num_rows()).toEqual(0);
+            expect(await view.to_json()).toEqual([]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("No-op on pkeys not in the set", async function() {
+            const table = await perspective.table(
+                {
+                    x: "string",
+                    y: "integer"
+                },
+                {index: "x"}
+            );
+
+            table.update({
+                x: ["b", "1", "a", "c"],
+                y: [3, 1, 2, 4]
+            });
+
+            const view = await table.view();
+            expect(await view.to_columns()).toEqual({
+                x: ["1", "a", "b", "c"],
+                y: [1, 2, 3, 4]
+            });
+
+            table.remove(["z", "ff", "2312", "b"]);
+
+            expect(await view.to_columns()).toEqual({
+                x: ["1", "a", "c"],
+                y: [1, 2, 4]
+            });
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("conflation order is consistent", async function() {
+            const table = await perspective.table(
+                {
+                    x: "string",
+                    y: "integer"
+                },
+                {index: "x"}
+            );
+
+            table.update({
+                x: ["b", "1", "a", "c"],
+                y: [3, 1, 2, 4]
+            });
+            table.remove(["1", "c"]);
+
+            // removes applied after update
+            const view = await table.view();
+            expect(await view.to_columns()).toEqual({
+                x: ["a", "b"],
+                y: [2, 3]
+            });
+
+            table.update({
+                x: ["b"],
+                y: [103]
+            });
+            table.remove(["b"]);
+
+            expect(await view.to_columns()).toEqual({
+                x: ["a"],
+                y: [2]
+            });
+
+            table.update({
+                x: ["b"],
+                y: [100]
+            });
+
+            table.remove(["a"]);
+
+            expect(await view.to_columns()).toEqual({
+                x: ["b"],
+                y: [100]
+            });
+
+            // remove applied after update
+            for (let i = 0; i < 100; i++) {
+                table.update({
+                    x: ["c", "a"],
+                    y: [i + 1, i + 2]
+                });
+                table.remove(["c", "a"]);
+            }
+
+            expect(await view.to_columns()).toEqual({
+                x: ["b"],
+                y: [100]
+            });
+
+            await view.delete();
+            await table.delete();
+        });
     });
 
     describe("Schema", function() {
