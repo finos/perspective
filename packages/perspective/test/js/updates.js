@@ -87,7 +87,7 @@ module.exports = perspective => {
             expect(await view.num_rows()).toEqual(4);
             expect(result.length).toEqual(4);
             expect(result).toEqual(data);
-            // expect(await table.size()).toEqual(2);
+            expect(await table.size()).toEqual(4);
             view.delete();
             table.delete();
         });
@@ -101,7 +101,7 @@ module.exports = perspective => {
             expect(await view.num_rows()).toEqual(2);
             expect(result.length).toEqual(2);
             expect(result).toEqual(data.slice(2, 4));
-            // expect(await table.size()).toEqual(2);
+            expect(await table.size()).toEqual(2);
             view.delete();
             table.delete();
         });
@@ -114,7 +114,7 @@ module.exports = perspective => {
             expect(await view.num_rows()).toEqual(2);
             expect(result.length).toEqual(2);
             expect(result).toEqual(data.slice(2, 4));
-            // expect(await table.size()).toEqual(2);
+            expect(await table.size()).toEqual(2);
             view.delete();
             table.delete();
         });
@@ -128,7 +128,7 @@ module.exports = perspective => {
             expect(await view.num_rows()).toEqual(2);
             expect(result.length).toEqual(2);
             expect(result).toEqual(data.slice(2, 4));
-            // expect(await table.size()).toEqual(2);
+            expect(await table.size()).toEqual(2);
             view.delete();
             table.delete();
         });
@@ -141,7 +141,7 @@ module.exports = perspective => {
             expect(await view.num_rows()).toEqual(2);
             expect(result.length).toEqual(2);
             expect(result).toEqual(data.slice(2, 4));
-            // expect(await table.size()).toEqual(2);
+            expect(await table.size()).toEqual(2);
             view.delete();
             table.delete();
         });
@@ -199,7 +199,7 @@ module.exports = perspective => {
                 y: [1584230400000, 1586908800000],
                 z: [3.5, 4.5]
             });
-            // expect(await table.size()).toEqual(2);
+            expect(await table.size()).toEqual(2);
             view.delete();
             table.delete();
         });
@@ -223,7 +223,7 @@ module.exports = perspective => {
                 y: [1584230400000, 1586908800000],
                 z: [3.5, 4.5]
             });
-            // expect(await table.size()).toEqual(2);
+            expect(await table.size()).toEqual(2);
             view.delete();
             table.delete();
         });
@@ -240,7 +240,7 @@ module.exports = perspective => {
             const result = await view.to_json();
             expect(result).toEqual([{x: 0, y: "test", z: false}]);
             expect(result.length).toEqual(1);
-            // expect(await table.size()).toEqual(1);
+            expect(await table.size()).toEqual(1);
             view.delete();
             table.delete();
         });
@@ -428,6 +428,43 @@ module.exports = perspective => {
             });
 
             await view.delete();
+            await table.delete();
+        });
+
+        it("correct size", async function() {
+            const table = await perspective.table(
+                {
+                    x: "integer",
+                    y: "integer"
+                },
+                {index: "x"}
+            );
+
+            for (let i = 0; i < 100; i++) {
+                table.update([{x: i, y: i}]);
+            }
+
+            expect(await table.size()).toEqual(100);
+
+            for (let i = 0; i < 100; i++) {
+                table.remove([i]);
+                table.update([{x: i, y: i}]);
+            }
+
+            expect(await table.size()).toEqual(100);
+
+            for (let i = 0; i < 100; i++) {
+                table.update([{x: i, y: i}]);
+            }
+
+            expect(await table.size()).toEqual(100);
+
+            for (let i = 0; i < 100; i++) {
+                table.remove([i]);
+            }
+
+            expect(await table.size()).toEqual(0);
+
             await table.delete();
         });
     });
@@ -2379,29 +2416,6 @@ module.exports = perspective => {
             await tbl.delete();
         });
 
-        it("Output consistent with filter, with null", async () => {
-            const tbl = await perspective.table(
-                {
-                    index: "string",
-                    x: "string"
-                },
-                {index: "index"}
-            );
-            const view = await tbl.view();
-
-            tbl.update({index: ["a", "d", "b", null], x: ["abc", "def", "acc", "abb"]});
-            tbl.remove(["b"]);
-
-            const view2 = await tbl.view({filter: [["x", "==", "abb"]]});
-            await view.delete();
-
-            expect(await view2.to_json()).toEqual([{index: null, x: "abb"}]);
-            console.log(await view2.to_json());
-
-            await view2.delete();
-            await tbl.delete();
-        });
-
         it("Output consistent with filter, string small", async () => {
             const tbl = await perspective.table(
                 {
@@ -2581,6 +2595,135 @@ module.exports = perspective => {
 
             expect(await view2.to_json()).toEqual([{index: new Date(2015, 5, 10, 15, 10, 2).getTime(), x: "def"}]);
             console.log(await view2.to_json());
+
+            await view2.delete();
+            await tbl.delete();
+        });
+
+        it("Output consistent with filter, out of order updates", async () => {
+            const tbl = await perspective.table(
+                {
+                    index: "string",
+                    x: "string"
+                },
+                {index: "index"}
+            );
+            const view = await tbl.view();
+
+            tbl.update({index: ["a", "d", "b"], x: ["abc", "def", "acc"]});
+            tbl.remove(["b"]);
+
+            const view2 = await tbl.view({filter: [["x", "==", "abc"]]});
+            await view.delete();
+
+            expect(await view2.to_json()).toEqual([{index: "a", x: "abc"}]);
+
+            tbl.update([{index: "b", x: "abc"}]);
+
+            expect(await view2.to_json()).toEqual([
+                {index: "a", x: "abc"},
+                {index: "b", x: "abc"}
+            ]);
+
+            tbl.remove(["a"]);
+
+            expect(await view2.to_json()).toEqual([{index: "b", x: "abc"}]);
+
+            tbl.update([
+                {index: "a", x: "abc"},
+                {index: null, x: "abc"}
+            ]);
+
+            expect(await view2.to_json()).toEqual([
+                {index: null, x: "abc"},
+                {index: "a", x: "abc"},
+                {index: "b", x: "abc"}
+            ]);
+
+            const indices = "abcdefghijklmnopqrstuvwxyz".split("");
+
+            for (const idx of indices) {
+                tbl.update([{index: idx, x: "abc"}]);
+            }
+
+            let result = await view2.to_json();
+            expect(result[0]).toEqual({index: null, x: "abc"});
+
+            result = result.slice(1);
+
+            for (let i = 0; i < result.length; i++) {
+                expect(result[i]).toEqual({index: indices[i], x: "abc"});
+            }
+
+            await view2.delete();
+            await tbl.delete();
+        });
+
+        it("Output consistent with filter, out of order updates random", async () => {
+            const tbl = await perspective.table(
+                {
+                    index: "string",
+                    x: "string"
+                },
+                {index: "index"}
+            );
+            const view = await tbl.view();
+
+            tbl.update({index: ["a", "d", "b"], x: ["abc", "def", "acc"]});
+            tbl.remove(["b"]);
+
+            const view2 = await tbl.view({filter: [["x", "==", "abc"]]});
+            await view.delete();
+
+            expect(await view2.to_json()).toEqual([{index: "a", x: "abc"}]);
+
+            tbl.update([{index: "b", x: "abc"}]);
+
+            expect(await view2.to_json()).toEqual([
+                {index: "a", x: "abc"},
+                {index: "b", x: "abc"}
+            ]);
+
+            tbl.remove(["a"]);
+
+            expect(await view2.to_json()).toEqual([{index: "b", x: "abc"}]);
+
+            tbl.update([
+                {index: "a", x: "abc"},
+                {index: null, x: "abc"}
+            ]);
+
+            expect(await view2.to_json()).toEqual([
+                {index: null, x: "abc"},
+                {index: "a", x: "abc"},
+                {index: "b", x: "abc"}
+            ]);
+
+            // randomize
+            let indices = "abcdefghijklmnopqrstuvwxyz"
+                .split("")
+                .map(v => {
+                    return {value: v, key: Math.random()};
+                })
+                .sort((a, b) => a.key - b.key)
+                .map(v => v.value);
+
+            console.log(indices);
+
+            for (const idx of indices) {
+                tbl.update([{index: idx, x: "abc"}]);
+            }
+
+            let result = await view2.to_json();
+            expect(result[0]).toEqual({index: null, x: "abc"});
+
+            result = result.slice(1);
+
+            indices = indices.sort();
+
+            for (let i = 0; i < result.length; i++) {
+                expect(result[i]).toEqual({index: indices[i], x: "abc"});
+            }
 
             await view2.delete();
             await tbl.delete();

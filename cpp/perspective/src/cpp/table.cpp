@@ -57,7 +57,9 @@ Table::init(t_data_table& data_table, std::uint32_t row_count, const t_op op, co
 t_uindex
 Table::size() const {
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return m_gnode->get_table()->size();
+    // the gstate master table has all rows including removed ones; the mapping
+    // contains only the current rows in the table.
+    return m_gnode->mapping_size();
 }
 
 t_schema

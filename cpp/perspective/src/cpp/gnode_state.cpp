@@ -209,7 +209,8 @@ t_gstate::update_master_table(const t_data_table* flattened) {
                 m_pkcol->set_scalar(master_table_indexes[idx], pkey);
             } break;
             case OP_DELETE: {
-                // Actually erase the specified pkey from the master table here
+                // Erase the pkey from the master table, but this does not
+                // change the size as the row isn't removed, just cleared out.
                 erase(pkey);
             } break;
             default: { PSP_COMPLAIN_AND_ABORT("Unexpected OP"); } break;
@@ -610,12 +611,80 @@ t_gstate::get_pkeyed_table() const {
 #endif
         {
             const std::string& colname = schema_columns[colidx];
+            // if (colname != "psp_op" && colname != "psp_pkey") {
             rval->set_column(colname, master_table->get_const_column(colname)->clone(mask));
+            // }
         }
 
 #ifdef PSP_PARALLEL_FOR
     );
 #endif
+
+    // auto pkey_col = rval->get_column("psp_pkey").get();
+    // auto op_col = rval->get_column("psp_op").get();
+
+    // op_col->raw_fill<std::uint8_t>(OP_INSERT);
+    // op_col->valid_raw_fill();
+    // pkey_col->valid_raw_fill();
+
+    // std::vector<std::pair<t_tscalar, t_uindex>> order(table_size);
+    // std::vector<t_uindex> mapping;
+    // mapping.resize(mask.size());
+    // {
+    //     t_uindex mapped = 0;
+    //     for (t_uindex idx = 0; idx < mask.size(); ++idx) {
+    //         mapping[idx] = mapped;
+    //         if (mask.get(idx))
+    //             ++mapped;
+    //     }
+    // }
+
+    // t_uindex oidx = 0;
+    // for (const auto& kv : m_mapping) {
+    //     if (mask.get(kv.second)) {
+    //         order[oidx] = std::make_pair(kv.first, mapping[kv.second]);
+    //         ++oidx;
+    //     }
+    // }
+
+    // std::sort(order.begin(), order.end(),
+    //     [](const std::pair<t_tscalar, t_uindex>& a, const std::pair<t_tscalar, t_uindex>& b) {
+    //         return a.second < b.second;
+    //     });
+
+    // if (get_pkey_dtype() == DTYPE_STR) {
+    //     static const t_tscalar empty = get_interned_tscalar("");
+    //     static bool const enable_pkeyed_table_vocab_reserve = true;
+
+    //     t_uindex offset = has_pkey(empty) ? 0 : 1;
+
+    //     size_t total_string_size = 0;
+
+    //     if (enable_pkeyed_table_vocab_reserve) {
+    //         total_string_size += offset;
+    //         for (t_uindex idx = 0, loop_end = order.size(); idx < loop_end; ++idx) {
+    //             total_string_size += strlen(order[idx].first.get_char_ptr()) + 1;
+    //         }
+    //     }
+
+    //     // if the m_mapping is empty, get_pkey_dtype() may lie about our pkeys being strings
+    //     // don't try to reserve in this case
+    //     if (!order.size())
+    //         total_string_size = 0;
+
+    //     pkey_col->set_vocabulary(order, total_string_size);
+    //     auto base = pkey_col->get_nth<t_uindex>(0);
+
+    //     for (t_uindex idx = 0, loop_end = order.size(); idx < loop_end; ++idx) {
+    //         base[idx] = idx + offset;
+    //     }
+    // } else {
+    //     t_uindex ridx = 0;
+    //     for (const auto& e : order) {
+    //         pkey_col->set_scalar(ridx, e.first);
+    //         ++ridx;
+    //     }
+    // }
 
     return rval;   
 }
