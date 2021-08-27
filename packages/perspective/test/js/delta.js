@@ -1200,27 +1200,49 @@ module.exports = perspective => {
             });
 
             it("returns changed rows, col only agg", async function(done) {
-                let table = await perspective.table(data, {
+                const table = await perspective.table(data, {
                     index: "x"
                 });
-                let view = await table.view({
+
+                const view = await table.view({
                     column_pivots: ["x"],
                     sort: [["y", "desc"]],
                     columns: ["y"],
                     aggregates: {y: "last"}
                 });
+
                 view.on_update(
                     async function(updated) {
-                        const expected = [];
+                        // TODO: deltas return a total row for column only
+                        // which they probably shouldn't.
+                        const expected = [
+                            {
+                                "1|y": "string1",
+                                "2|y": "string2",
+                                "3|y": "c",
+                                "4|y": "d"
+                            },
+                            {
+                                "1|y": null,
+                                "2|y": "string2",
+                                "3|y": null,
+                                "4|y": null
+                            },
+                            {
+                                "1|y": "string1",
+                                "2|y": null,
+                                "3|y": null,
+                                "4|y": null
+                            }
+                        ];
                         await match_delta(perspective, updated.delta, expected);
-                        view.delete();
-                        table.delete();
+                        await view.delete();
+                        await table.delete();
                         done();
                     },
-                    {
-                        mode: "row"
-                    }
+                    {mode: "row"}
                 );
+
                 table.update(partial_change_y);
             });
 
@@ -1267,10 +1289,10 @@ module.exports = perspective => {
             });
 
             it("returns changed rows, col only sorted", async function(done) {
-                let table = await perspective.table(data, {
+                const table = await perspective.table(data, {
                     index: "x"
                 });
-                let view = await table.view({
+                const view = await table.view({
                     column_pivots: ["y"],
                     columns: ["x"],
                     sort: [["x", "desc"]]
@@ -1278,10 +1300,29 @@ module.exports = perspective => {
                 console.log(await view.to_json());
                 view.on_update(
                     async function(updated) {
-                        const expected = [{"101|x": 1}];
+                        const expected = [
+                            {
+                                "c|x": 3,
+                                "d|x": 4,
+                                "string1|x": 1,
+                                "string2|x": 2
+                            },
+                            {
+                                "c|x": null,
+                                "d|x": null,
+                                "string1|x": null,
+                                "string2|x": 2
+                            },
+                            {
+                                "c|x": null,
+                                "d|x": null,
+                                "string1|x": 1,
+                                "string2|x": null
+                            }
+                        ];
                         await match_delta(perspective, updated.delta, expected);
-                        view.delete();
-                        table.delete();
+                        await view.delete();
+                        await table.delete();
                         done();
                     },
                     {
@@ -1320,18 +1361,37 @@ module.exports = perspective => {
             });
 
             it("returns changed rows, col only hidden sort", async function(done) {
-                let table = await perspective.table(data, {index: "x"});
-                let view = await table.view({
+                const table = await perspective.table(data, {index: "x"});
+                const view = await table.view({
                     column_pivots: ["y"],
                     columns: ["x"],
                     sort: [["y", "desc"]]
                 });
                 view.on_update(
                     async function(updated) {
-                        const expected = [{x: 1}, {x: 2}];
+                        const expected = [
+                            {
+                                "c|x": 3,
+                                "d|x": 4,
+                                "string1|x": 1,
+                                "string2|x": 2
+                            },
+                            {
+                                "c|x": null,
+                                "d|x": null,
+                                "string1|x": null,
+                                "string2|x": 2
+                            },
+                            {
+                                "c|x": null,
+                                "d|x": null,
+                                "string1|x": 1,
+                                "string2|x": null
+                            }
+                        ];
                         await match_delta(perspective, updated.delta, expected);
-                        view.delete();
-                        table.delete();
+                        await view.delete();
+                        await table.delete();
                         done();
                     },
                     {mode: "row"}

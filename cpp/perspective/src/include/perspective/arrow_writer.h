@@ -153,9 +153,7 @@ namespace apachearrow {
 
         for (int ridx = extents.m_srow; ridx < extents.m_erow; ++ridx) {
             auto idx = get_idx(cidx, ridx, stride, extents);
-            std::cout << "idx: " << idx << ", cidx: ";
             t_tscalar scalar = data.operator[](idx);
-            std::cout << cidx << ":" << ridx << ", " << scalar.repr() << std::endl;
             if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
                 ArrowValueType val = get_scalar<ArrowValueType>(scalar);
                 array_builder.UnsafeAppend(val);

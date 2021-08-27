@@ -81,7 +81,6 @@ namespace apachearrow {
             std::int32_t ridx, 
             std::int32_t stride,
             t_get_data_extents extents) {
-        std::cout << "get_idx, cidx: " << cidx << ", ridx: " << ridx << ", stride: " << stride << ", scol: " << extents.m_scol << ", srow: " << extents.m_srow << std::endl;
         return (ridx - extents.m_srow) * stride + (cidx - extents.m_scol);
     }
 

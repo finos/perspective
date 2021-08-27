@@ -535,11 +535,9 @@ View<CTX_T>::data_slice_to_arrow(
     std::int32_t start_col = extents.m_scol;
     std::int32_t end_col = extents.m_ecol;
 
-    std::cout << "sc: " << start_col << ", ec: " << end_col << std::endl;
-
-    auto slice = data_slice->get_slice();
+    const std::vector<t_tscalar>& slice = data_slice->get_slice();
+    const std::vector<std::vector<t_tscalar>>& names = data_slice->get_column_names();
     auto stride = data_slice->get_stride();
-    auto names = data_slice->get_column_names();
     auto num_sides = sides();
 
     std::vector<std::shared_ptr<arrow::Array>> vectors;
@@ -556,14 +554,10 @@ View<CTX_T>::data_slice_to_arrow(
     // the number of hidden sorts, so we can skip hidden sorts.
     // t_uindex num_view_columns = num_columns - m_hidden_sort.size();
     t_uindex num_view_columns = m_columns.size();
-    std::cout << "num_columns: " << num_columns << "stride : " << stride << std::endl;
 
     for (auto cidx = start_col; cidx < end_col; ++cidx) {
-        std::cout << "cidx: " << cidx << ", num col: " << num_columns << ", num v col: " << num_view_columns << ", hs: " << m_hidden_sort.size() << std::endl;
-
         if (cidx == start_col && num_sides > 0) {
             // TODO: write row_paths
-            std::cout << "skipping row path..." << std::endl;
             continue;
         }
 
@@ -890,32 +884,30 @@ View<CTX_T>::get_row_delta() const {
     t_rowdelta delta = m_ctx->get_row_delta();
     const std::vector<t_tscalar>& data = delta.data;
     t_uindex num_rows_changed = delta.num_rows_changed;
-    
-    // Use column_names instead of column_paths, as column_names does not
-    // skip hidden sort columns. Skip the columns at levels which are row pivots,
-    // as it can mess up 2-sided contexts with hidden sorts.
+
     std::vector<std::vector<t_tscalar>> paths;
 
-    // num_columns needs to include __ROW_PATH__
+    // num_columns needs to include __ROW_PATH__ for all pivoted contexts
     t_uindex ncols = num_columns() + m_col_offset;
     t_uindex num_sides = sides();
 
     if (num_sides == 2 && m_sort.size() > 0) {
+        // Use column_names instead of column_paths, as column_names does not
+        // skip hidden sort columns whereas column_paths does, which causes
+        // issues later on.
         paths = column_names(true, m_column_pivots.size());
     } else {
         paths = column_paths();
     }
 
+    // Add __ROW_PATH__ to the beginning for column only or for 2-sided sorted
+    // contexts where we used `column_names`, which does not add __ROW_PATH__
+    // automatically.
     if (is_column_only() || (num_sides == 2 && m_sort.size() > 0)) {
-        // Hacky way to get column only slices working in `to_arrow`, which
-        // expects to skip the first column.
         t_tscalar row_path;
         row_path.set("__ROW_PATH__");
         paths.insert(paths.begin(), std::vector<t_tscalar>{row_path});
-        // ncols -= m_col_offset;
     }
-    std::cout << "paths " << paths << std::endl;
-    std::cout << "data " << data << std::endl;
 
     return std::make_shared<t_data_slice<CTX_T>>(
         m_ctx, 0, num_rows_changed, 0, ncols,

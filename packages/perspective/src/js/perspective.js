@@ -486,8 +486,8 @@ export default function(Module) {
                         }
                     }
                 } else if ((cidx - (num_sides > 0 ? 1 : 0)) % (this.config.columns.length + hidden) >= this.config.columns.length) {
-                    // Hidden columns are always at the end, so don't emit
-                    // these.co
+                    // Hidden columns are always at the end of the column names
+                    // list, and we need to skip them from the output.
                     continue;
                 } else {
                     let value = get_from_data_slice(slice, ridx, cidx);
