@@ -44,6 +44,9 @@ pub enum FilterOp {
     #[serde(rename = "in")]
     In,
 
+    #[serde(rename = "not in")]
+    NotIn,
+
     #[serde(rename = "begins with")]
     BeginsWith,
 
@@ -107,8 +110,16 @@ pub enum SortDir {
 }
 
 #[derive(Clone, Deserialize, Debug, PartialEq, Serialize)]
+#[serde(untagged)]
+pub enum FilterTerm {
+    Scalar(Scalar),
+    Array(Vec<Scalar>),
+}
+
+#[derive(Clone, Deserialize, Debug, PartialEq, Serialize)]
 #[serde()]
-pub struct Filter(String, FilterOp, Scalar);
+pub struct Filter(String, FilterOp, FilterTerm);
+
 
 #[derive(Clone, Deserialize, Debug, PartialEq, Serialize)]
 #[serde()]
@@ -379,7 +390,7 @@ mod tests {
             vec!(Filter(
                 "Test".to_owned(),
                 FilterOp::Contains,
-                Scalar::String("aaa".to_owned())
+                FilterTerm::Scalar(Scalar::String("aaa".to_owned()))
             ))
         );
     }
@@ -396,7 +407,7 @@ mod tests {
             vec!(Filter(
                 "Test".to_owned(),
                 FilterOp::LT,
-                Scalar::Float(4_f64)
+                FilterTerm::Scalar(Scalar::Float(4_f64))
             ))
         );
     }
