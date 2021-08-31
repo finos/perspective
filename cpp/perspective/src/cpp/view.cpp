@@ -456,7 +456,7 @@ View<t_ctx2>::get_data(
         t_uindex start_col_index = start_col;
         t_uindex end_col_index = end_col;
 
-        // Only construct column_indices if start_col > end_col - get_data will
+        // Only construct column_indices if start_col > end_col as get_data will
         // handle the incorrect data window properly, which is consistent
         // with the implementation for when the context is not sorted.
         if (start_col < end_col) {
@@ -480,7 +480,7 @@ View<t_ctx2>::get_data(
             // If start_col == end_col, then column_indices will be an empty
             // vector. Only try to access the first and last elements if the
             // vector is not empty. `get_data` correctly handles cases where
-            // start == end and start > end.
+            // start == end and start < end.
             if (column_indices.size() > 0) {
                 start_col_index = column_indices.front();
                 end_col_index = column_indices.back() + 1;
@@ -534,12 +534,11 @@ View<CTX_T>::data_slice_to_arrow(
     t_get_data_extents extents = data_slice->get_data_extents();
     std::int32_t start_col = extents.m_scol;
     std::int32_t end_col = extents.m_ecol;
-    std::int32_t col_offset = data_slice->get_col_offset();
-    start_col += col_offset;
 
-    auto slice = data_slice->get_slice();
+    const std::vector<t_tscalar>& slice = data_slice->get_slice();
+    const std::vector<std::vector<t_tscalar>>& names = data_slice->get_column_names();
     auto stride = data_slice->get_stride();
-    auto names = data_slice->get_column_names();
+    auto num_sides = sides();
 
     std::vector<std::shared_ptr<arrow::Array>> vectors;
     std::vector<std::shared_ptr<arrow::Field>> fields;
@@ -551,7 +550,23 @@ View<CTX_T>::data_slice_to_arrow(
         vectors.reserve(num_columns);
     }
 
+    // calculate the number of columns (including __ROW_PATH__) minus
+    // the number of hidden sorts, so we can skip hidden sorts.
+    // t_uindex num_view_columns = num_columns - m_hidden_sort.size();
+    t_uindex num_view_columns = m_columns.size();
+
     for (auto cidx = start_col; cidx < end_col; ++cidx) {
+        if (cidx == start_col && num_sides > 0) {
+            // TODO: write row_paths
+            continue;
+        }
+
+        // Do not output hidden sort columns - they are always at the end
+        // of the columns list.
+        if ((num_view_columns + m_hidden_sort.size()) > 0 && ((cidx - (num_sides > 0 ? 1 : 0)) % (num_view_columns + m_hidden_sort.size())) >= num_view_columns) {
+            continue;
+        }
+                
         std::vector<t_tscalar> col_path = names.at(cidx);
         t_dtype dtype = get_column_dtype(cidx);
 
@@ -566,7 +581,7 @@ View<CTX_T>::data_slice_to_arrow(
 
         std::string name;
 
-        if (sides() > 1) {
+        if (num_sides > 1) {
             name = join_column_names(col_path, m_separator);
         } else {
             name = col_path.at(col_path.size() - 1).to_string();
@@ -869,21 +884,33 @@ View<CTX_T>::get_row_delta() const {
     t_rowdelta delta = m_ctx->get_row_delta();
     const std::vector<t_tscalar>& data = delta.data;
     t_uindex num_rows_changed = delta.num_rows_changed;
-    
-    auto paths = column_paths();
-    if (is_column_only()) {
-        // Hacky way to get column only slices working in `to_arrow`, which
-        // expects to skip the first column.
+
+    std::vector<std::vector<t_tscalar>> paths;
+
+    // num_columns needs to include __ROW_PATH__ for all pivoted contexts
+    t_uindex ncols = num_columns() + m_col_offset;
+    t_uindex num_sides = sides();
+
+    if (num_sides == 2 && m_sort.size() > 0) {
+        // Use column_names instead of column_paths, as column_names does not
+        // skip hidden sort columns whereas column_paths does, which causes
+        // issues later on.
+        paths = column_names(true, m_column_pivots.size());
+    } else {
+        paths = column_paths();
+    }
+
+    // Add __ROW_PATH__ to the beginning for column only or for 2-sided sorted
+    // contexts where we used `column_names`, which does not add __ROW_PATH__
+    // automatically.
+    if (is_column_only() || (num_sides == 2 && m_sort.size() > 0)) {
         t_tscalar row_path;
         row_path.set("__ROW_PATH__");
         paths.insert(paths.begin(), std::vector<t_tscalar>{row_path});
     }
 
-    // Column count for row delta needs to include `__ROW_PATH__`
-    t_uindex num_columns = m_ctx->get_column_count();
-
     return std::make_shared<t_data_slice<CTX_T>>(
-        m_ctx, 0, num_rows_changed, 0, num_columns,
+        m_ctx, 0, num_rows_changed, 0, ncols,
         m_row_offset, m_col_offset, data, paths);
 }
 

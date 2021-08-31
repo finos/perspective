@@ -471,6 +471,7 @@ export default function(Module) {
                 const col_name = col_names[cidx];
                 const col_type = schema[col_name];
                 const type_config = get_type_config(col_type);
+
                 if (cidx === start_col && num_sides !== 0) {
                     if (!this.column_only) {
                         formatter.initColumnValue(data, row, "__ROW_PATH__");
@@ -485,8 +486,8 @@ export default function(Module) {
                         }
                     }
                 } else if ((cidx - (num_sides > 0 ? 1 : 0)) % (this.config.columns.length + hidden) >= this.config.columns.length) {
-                    // Hidden columns are always at the end, so don't emit
-                    // these.
+                    // Hidden columns are always at the end of the column names
+                    // list, and we need to skip them from the output.
                     continue;
                 } else {
                     let value = get_from_data_slice(slice, ridx, cidx);

@@ -1533,9 +1533,18 @@ operator<<(std::ostream& os, const perspective::t_tscalar& t) {
 
 std::ostream&
 operator<<(std::ostream& os, const std::vector<perspective::t_tscalar>& t) {
-    for (const auto& s : t) {
-        os << s << ", ";
+    os << "[";
+    auto length = t.size();
+
+    for (auto i = 0; i < length; ++i) {
+        os << t[i];
+
+        if (i != length - 1) {
+            os << ",";
+        }
     }
+
+    os << "]"; 
     return os;
 }
 

@@ -1126,6 +1126,60 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("unique", async function() {
+            const table = await perspective.table(
+                {
+                    x: [100, 200, 100, 200],
+                    y: [1, 2, 3, 4],
+                    z: ["a", "a", "a", "b"]
+                },
+                {index: "y"}
+            );
+
+            const view = await table.view({
+                row_pivots: ["x"],
+                aggregates: {
+                    x: "unique",
+                    y: "unique",
+                    z: "unique"
+                }
+            });
+
+            expect(await view.to_columns()).toEqual({
+                __ROW_PATH__: [[], [100], [200]],
+                x: [null, 100, 200],
+                y: [null, null, null],
+                z: [null, "a", null]
+            });
+
+            table.update({
+                y: [4],
+                z: ["a"]
+            });
+
+            expect(await view.to_columns()).toEqual({
+                __ROW_PATH__: [[], [100], [200]],
+                x: [null, 100, 200],
+                y: [null, null, null],
+                z: ["a", "a", "a"]
+            });
+
+            table.update({
+                y: [5],
+                z: ["x"]
+            });
+
+            expect(await view.to_columns()).toEqual({
+                __ROW_PATH__: [[], [null], [100], [200]],
+                x: [null, null, 100, 200],
+                y: [null, 5, null, null],
+                z: [null, "x", "a", "a"]
+            });
+
+            await view.delete();
+            await table.delete();
+        });
+
         it("variance", async function() {
             const table = await perspective.table(float_data);
             const view = await table.view({

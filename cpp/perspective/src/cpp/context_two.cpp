@@ -372,18 +372,39 @@ t_ctx2::get_data(t_index start_row, t_index end_row, t_index start_col, t_index 
 std::vector<t_tscalar>
 t_ctx2::get_data(const std::vector<t_uindex>& rows) const {
     t_uindex nrows = rows.size();
-    t_uindex ncols = get_column_count();
+    t_uindex start_col = 0;
+    t_uindex end_col = get_column_count();
 
+    // Perspective generates extra headers for columns in the sort, which
+    // needs to be skipped when generating row deltas.
+    bool should_skip_column_headers = m_sortby.size() > 0 && start_col < end_col;
+
+    if (should_skip_column_headers) {
+        auto depth = m_config.get_num_cpivots();
+
+        // find the first column that isn't a generated sort header, i.e.
+        // its column path has to be the same as the number of column pivots.
+        for (t_uindex i = 0; i < end_col; ++i) {
+            if (unity_get_column_path(i + 1).size() == depth) {
+                start_col = i;
+                break;
+            }
+        }
+    }
+
+    t_uindex ncols = end_col - start_col;
+
+    // Get data out of the context at the specified row and column indices
     std::vector<std::pair<t_uindex, t_uindex>> cells;
     for (t_uindex idx = 0; idx < nrows; ++idx) {
         t_uindex ridx = rows[idx];
-        for (t_uindex cidx = 0; cidx < ncols; ++cidx) {
+        for (t_uindex cidx = start_col; cidx < end_col; ++cidx) {
             cells.push_back(std::pair<t_index, t_index>(ridx, cidx));
         }
     }
 
     auto cells_info = resolve_cells(cells);
-    std::vector<t_tscalar> retval(nrows * ncols);
+    std::vector<t_tscalar> rval(nrows * ncols);
 
     t_tscalar empty = mknone();
 
@@ -405,13 +426,16 @@ t_ctx2::get_data(const std::vector<t_uindex>& rows) const {
 
     const std::vector<t_aggspec>& aggspecs = m_config.get_aggregates();
 
-    for (t_uindex idx = 0; idx < nrows; ++idx) {
+    // // Write each row sequentially starting from 0
+    for (t_uindex ridx = 0; ridx < nrows; ++ridx) {
+
+        // Write each column starting from 1 in order to skip __ROW_PATH__.
         for (t_uindex cidx = 1; cidx < ncols; ++cidx) {
-            t_uindex insert_idx = idx * ncols + cidx;
+            t_uindex insert_idx = ridx * ncols + cidx;
             const t_cellinfo& cinfo = cells_info[insert_idx];
 
             if (cinfo.m_idx < 0) {
-                retval[insert_idx].set(empty);
+                rval[insert_idx].set(empty);
             } else {
                 auto aggcol = aggmap[t_aggpair(cinfo.m_treenum, cinfo.m_agg_index)];
 
@@ -429,12 +453,12 @@ t_ctx2::get_data(const std::vector<t_uindex>& rows) const {
                 if (!value.is_valid())
                     value.set(empty);
 
-                retval[insert_idx].set(value);
+                rval[insert_idx].set(value);
             }
         }
     }
 
-    return retval;
+    return rval;
 }
 
 void
