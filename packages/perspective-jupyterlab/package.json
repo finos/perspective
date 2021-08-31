@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-jupyterlab",
-    "version": "0.10.1",
+    "version": "0.10.2",
     "description": "A Jupyterlab extension for the Perspective library, designed to be used with perspective-python.",
     "files": [
         "dist/*.d.ts",
@@ -35,17 +35,17 @@
         "version": "yarn build"
     },
     "dependencies": {
-        "@finos/perspective": "^0.10.1",
-        "@finos/perspective-viewer": "^0.10.1",
-        "@finos/perspective-viewer-d3fc": "^0.10.1",
-        "@finos/perspective-viewer-datagrid": "^0.10.1",
+        "@finos/perspective": "^0.10.2",
+        "@finos/perspective-viewer": "^0.10.2",
+        "@finos/perspective-viewer-d3fc": "^0.10.2",
+        "@finos/perspective-viewer-datagrid": "^0.10.2",
         "@jupyter-widgets/base": "^3.0.0 || ^4.0.0",
         "@jupyterlab/application": "^3.0.0",
         "@lumino/application": "^1.7.3",
         "@lumino/widgets": "^1.9.3"
     },
     "devDependencies": {
-        "@finos/perspective-test": "^0.10.1",
+        "@finos/perspective-test": "^0.10.2",
         "@jupyter-widgets/base-manager": "^1.0.0-alpha.0",
         "@types/jest": "^23.3.9",
         "@types/node": "^11.11.0",

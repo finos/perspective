@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-viewer",
-    "version": "0.10.1",
+    "version": "0.10.2",
     "description": "Perspective.js",
     "main": "dist/esm/viewer.js",
     "module": "dist/esm/viewer.js",
@@ -52,7 +52,7 @@
     "author": "",
     "license": "Apache-2.0",
     "dependencies": {
-        "@finos/perspective": "^0.10.1",
+        "@finos/perspective": "^0.10.2",
         "@types/react": "^16.8.6",
         "awesomplete": "^1.1.2",
         "core-js": "^3.6.4",
@@ -65,8 +65,8 @@
         "monaco-editor-webpack-plugin": "3.1.0"
     },
     "devDependencies": {
-        "@finos/perspective-test": "^0.10.1",
-        "@finos/perspective-vieux": "^0.10.1",
+        "@finos/perspective-test": "^0.10.2",
+        "@finos/perspective-vieux": "^0.10.2",
         "jsverify": "^0.8.4"
     }
 }

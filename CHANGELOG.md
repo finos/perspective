@@ -1,8 +1,20 @@
 # Changelog
 
+## [v0.10.2](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v0.10.1...HEAD)
+
+**Fixed bugs:**
+
+- Filtering using `in` operator doesn't work as expected [\#1520](https://github.com/finos/perspective/issues/1520)
+- Fix support for array-like filter terms [\#1524](https://github.com/finos/perspective/pull/1524) ([texodus](https://github.com/texodus))
+- Add new aggregates to ViewConfig enum [\#1516](https://github.com/finos/perspective/pull/1516) ([sc1f](https://github.com/sc1f))
+
+# Changelog
+
 ## [v0.10.1](https://github.com/finos/perspective/tree/HEAD)
 
-[Full Changelog](https://github.com/finos/perspective/compare/v0.10.0...HEAD)
+[Full Changelog](https://github.com/finos/perspective/compare/v0.10.0...v0.10.1)
 
 **Implemented enhancements:**
 
