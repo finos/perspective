@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-bench",
-    "version": "0.10.2",
+    "version": "0.10.3",
     "description": "Benchmark utility based on perspective",
     "private": true,
     "main": "src/js/bench.js",
@@ -29,9 +29,9 @@
     "license": "Apache-2.0",
     "dependencies": {
         "@babel/runtime": "^7.8.4",
-        "@finos/perspective": "^0.10.2",
-        "@finos/perspective-viewer": "^0.10.2",
-        "@finos/perspective-viewer-d3fc": "^0.10.2",
-        "@finos/perspective-viewer-datagrid": "^0.10.2"
+        "@finos/perspective": "^0.10.3",
+        "@finos/perspective-viewer": "^0.10.3",
+        "@finos/perspective-viewer-d3fc": "^0.10.3",
+        "@finos/perspective-viewer-datagrid": "^0.10.3"
     }
 }

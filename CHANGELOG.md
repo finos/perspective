@@ -1,8 +1,19 @@
 # Changelog
 
+## [v0.10.3](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v0.10.2...HEAD)
+
+**Fixed bugs:**
+
+- Refactor `to\_arrow`, fix row deltas for pivoted views [\#1519](https://github.com/finos/perspective/pull/1519) ([sc1f](https://github.com/sc1f))
+- Fix count aggregate when last aggregate and partial updates are applied [\#1518](https://github.com/finos/perspective/pull/1518) ([sc1f](https://github.com/sc1f))
+
+# Changelog
+
 ## [v0.10.2](https://github.com/finos/perspective/tree/HEAD)
 
-[Full Changelog](https://github.com/finos/perspective/compare/v0.10.1...HEAD)
+[Full Changelog](https://github.com/finos/perspective/compare/v0.10.1...v0.10.2)
 
 **Fixed bugs:**
 

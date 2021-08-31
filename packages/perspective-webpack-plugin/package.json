@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-webpack-plugin",
-    "version": "0.10.2",
+    "version": "0.10.3",
     "description": "Perspective.js Webpack Plugin",
     "main": "index.js",
     "publishConfig": {

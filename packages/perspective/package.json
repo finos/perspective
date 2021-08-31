@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective",
-    "version": "0.10.2",
+    "version": "0.10.3",
     "description": "Perspective.js",
     "main": "dist/cjs/perspective.node.js",
     "unpkg": "dist/umd/perspective.js",
@@ -64,7 +64,7 @@
         "ws": "^6.1.2"
     },
     "devDependencies": {
-        "@finos/perspective-cpp": "^0.10.2",
+        "@finos/perspective-cpp": "^0.10.3",
         "jsverify": "^0.8.4",
         "moment": "^2.19.1",
         "papaparse": "^5.2.0"
