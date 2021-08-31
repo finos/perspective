@@ -22,7 +22,16 @@ To switch your development toolchain between the two, use `yarn setup`. Once the
 setup script has been run, common commands like `yarn build` and `yarn test`
 automatically call the correct build and test tools.
 
-## Building
+### System Dependencies
+
+`Perspective.js` and `perspective-python` **require** the following system dependencies to be installed:
+
+- [CMake](https://cmake.org/) (version 3.15.4 or higher)
+- [Boost](https://www.boost.org/) (version 1.67 or higher, must be built - not header-only)
+- [Flatbuffers](https://google.github.io/flatbuffers/flatbuffers_guide_building.html)
+## Build
+
+Make sure you have the system dependencies installed. For specifics depending on your OS, check the [system-specific instructions](#system-specific-instructions) below.
 
 To run a build, use
 
@@ -43,21 +52,6 @@ packages, e.g. `examples/simple` like so:
 ```bash
 yarn start simple
 ```
-
-#### Docker
-
-[Docker](https://docs.docker.com/install/) images with pre-built development
-environments are provided for the Python libraries.
-
-To build Perspective using Docker, select the option in `yarn setup`.
-
-### System Dependencies
-
-`Perspective.js` and `perspective-python` **require** the following system dependencies to be installed:
-
-- [CMake](https://cmake.org/) (version 3.15.4 or higher)
-- [Boost](https://www.boost.org/) (version 1.67 or higher, must be built - not header-only)
-- [Flatbuffers](https://google.github.io/flatbuffers/flatbuffers_guide_building.html)
 
 ## `Perspective.js`
 
@@ -91,6 +85,8 @@ To install this specific version of Emscripten:
 ./emsdk install 2.0.6
 ```
 
+---
+
 ### `perspective-jupyterlab`
 
 To install the Jupyterlab plugin from your local working directory, give
@@ -119,9 +115,11 @@ when it looks for Perspective packages, instead of fetching them from NPM.
 5. Whenever you run `jupyter lab clean`, you will need to run `yarn jlab_link`
 again to re-register the symlinks.
 
+---
+
 ## `perspective-python`
 
-To build the Python library, first configure your project to Python via
+To build the Python library, first configure your project to build Python via
 `yarn setup`, then run:
 
 ```bash
@@ -130,6 +128,14 @@ yarn build
 
 `perspective-python` supports Python 3.7 and upwards.
 
+### Docker
+
+[Docker](https://docs.docker.com/install/) images with pre-built development
+environments are provided for the Python libraries.
+
+To build Perspective using Docker, select the option in `yarn setup`.
+
+---
 ## System-Specific Instructions
 
 ### MacOS/OSX
@@ -180,7 +186,9 @@ ln -s /usr/local/flatbuffers/flatc /usr/local/bin/flatc
 chmod +x /usr/local/flatbuffers/flatc
 ```
 
-## Testing
+---
+
+## Test
 
 You can run the test suite simply with the standard NPM command, which will both
 build the test suite for every package and run them.
@@ -277,7 +285,9 @@ correct this, run tests with the `TZ=UTC`, i.e.
 TZ=UTC yarn test --verbose
 ```
 
-## Benchmarking
+---
+
+## Benchmark
 
 You can generate benchmarks specific to your machine's OS and CPU architecture
 with Perspective's benchmark suite, which will generate a `report.html` file in
