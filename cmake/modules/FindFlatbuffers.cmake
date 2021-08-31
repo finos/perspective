@@ -42,13 +42,13 @@ if (WIN32)
 else()
   find_path(FLATBUFFERS_INCLUDE_DIR flatbuffers/flatbuffers.h
     PATHS ${FLATBUFFERS_ROOT}/include
-    HINTS /usr/local /usr/local/flatbuffers /usr/local/Homebrew /usr ~/homebrew/ /usr/local/include /usr/local/flatbuffers/include /usr/include ~/homebrew/include
+    HINTS /usr/local /usr/local/flatbuffers /usr/local/Homebrew /usr ~/homebrew/ /usr/local/include /usr/local/flatbuffers/include /usr/include ~/homebrew/include /opt/homebrew/include
     NO_CMAKE_SYSTEM_PATH
     NO_SYSTEM_ENVIRONMENT_PATH)
 
   find_program(FLATBUFFERS_COMPILER flatc
     PATHS ${FLATBUFFERS_ROOT}/bin
-    HINTS /usr/local/bin /usr/bin /usr/local/Homebrew/bin ~/homebrew/bin
+    HINTS /usr/local/bin /usr/bin /usr/local/Homebrew/bin ~/homebrew/bin /opt/homebrew/bin
     NO_CMAKE_SYSTEM_PATH
     NO_SYSTEM_ENVIRONMENT_PATH)
 

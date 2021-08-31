@@ -76,6 +76,14 @@ try {
     PYTHON = "python";
 }
 
+// Check that the `PYTHON` command is valid, else default to `python`.
+try {
+    execute_throw`${PYTHON} --version`;
+} catch (e) {
+    console.warn(`\`${PYTHON}\` not found - using \`python\` instead.`);
+    PYTHON = "python";
+}
+
 try {
     execute(pytest_client_mode(IS_DOCKER));
     execute(pytest(IS_DOCKER));

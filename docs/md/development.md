@@ -128,12 +128,7 @@ To build the Python library, first configure your project to Python via
 yarn build
 ```
 
-`perspective-python` supports Python 3.7 and upwards, as well as Python 2.7.17.
-To build the Python 2 version of the library, use the `--python2` flag:
-
-```bash
-yarn build --python2
-```
+`perspective-python` supports Python 3.7 and upwards.
 
 ## System-Specific Instructions
 
@@ -143,19 +138,12 @@ Install system dependencies through Homebrew:
 
 ```bash
 brew install cmake
-brew install boost@1.67
+brew install boost
 brew install flatbuffers
 ```
 
-#### `perspective-python`
-
-If you're building the Python 2 version of the library, make sure your version
-of Python 2 is the latest version (`2.7.17`) supplied by Homebrew, and not the
-earlier version that ships with MacOS. To install Python 2 using Homebrew:
-
-```bash
-brew install python2
-```
+On M1 (Apple Silicon) systems, make sure your brew-installed dependencies are in
+`/opt/homebrew` (the default location), and that `/opt/homebrew/bin` is on the `PATH`.
 
 ### Windows 10
 
