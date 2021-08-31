@@ -10,8 +10,7 @@ const {execute, docker, resolve, getarg, python_image} = require("./script_utils
 
 const IS_DOCKER = process.env.PSP_DOCKER;
 const IS_PY2 = getarg("--python2");
-const PYTHON = IS_PY2 ? "python2" : getarg("--python38") ? "python3.8" : getarg("--python36") ? "python3.6" : "python3.7";
-
+let PYTHON = IS_PY2 ? "python2" : getarg("--python38") ? "python3.8" : getarg("--python36") ? "python3.6" : "python3.7";
 let IMAGE = "manylinux2014";
 
 if (IS_DOCKER) {
@@ -25,6 +24,14 @@ if (IS_DOCKER) {
 }
 
 const IS_FIX = getarg("--fix");
+
+// Check that the `PYTHON` command is valid, else default to `python`.
+try {
+    execute_throw`${PYTHON} --version`;
+} catch (e) {
+    console.warn(`\`${PYTHON}\` not found - using \`python\` instead.`);
+    PYTHON = "python";
+}
 
 try {
     let cmd;
