@@ -7,13 +7,12 @@
  *
  */
 
-const {bash, execute, getarg, docker, execute_throw} = require("./script_utils.js");
+const {bash, execute, getarg, execute_throw} = require("./script_utils.js");
 const minimatch = require("minimatch");
 const fs = require("fs");
 
 const PACKAGE = process.env.PACKAGE;
 const DEBUG_FLAG = getarg("--debug") ? "" : "--silent";
-const IS_INSIDE_PUPPETEER = !!getarg("--private-puppeteer");
 const IS_WRITE = !!getarg("--write") || process.env.WRITE_TESTS;
 const IS_LOCAL_PUPPETEER = fs.existsSync("node_modules/puppeteer");
 
@@ -106,64 +105,47 @@ function get_regex() {
 }
 
 try {
-    if (!IS_INSIDE_PUPPETEER && !IS_LOCAL_PUPPETEER) {
-        if (IS_JUPYTER) {
-            throw new Error("Error: Jupyterlab tests must be run against local puppeteer!");
-        }
+    execute`yarn --silent clean --screenshots`;
+    execute`node_modules/.bin/lerna exec -- mkdir -p dist/umd`;
 
-        execute`node_modules/.bin/lerna exec -- mkdir -p dist/umd`;
+    if (!IS_JUPYTER) {
+        // test:build irrelevant for jupyter tests
         execute`node_modules/.bin/lerna run test:build --stream --scope="@finos/${PACKAGE}"`;
-        execute`yarn --silent clean --screenshots`;
-
-        if (!PACKAGE || minimatch("perspective-vieux", PACKAGE)) {
-            console.log("-- Running Rust tests");
-            execute`yarn lerna --scope=@finos/perspective-vieux exec yarn test`;
-        }
-
-        execute`${docker("puppeteer")} node scripts/test_js.js --private-puppeteer ${getarg()}`;
-    } else {
-        if (!IS_INSIDE_PUPPETEER && (!PACKAGE || minimatch("perspective-vieux", PACKAGE))) {
-            console.log("-- Running Rust tests");
-            execute`yarn lerna --scope=@finos/perspective-vieux exec yarn test`;
-        }
-
-        if (IS_LOCAL_PUPPETEER) {
-            execute`yarn --silent clean --screenshots`;
-            execute`node_modules/.bin/lerna exec -- mkdir -p dist/umd`;
-
-            if (!IS_JUPYTER) {
-                // test:build irrelevant for jupyter tests
-                execute`node_modules/.bin/lerna run test:build --stream --scope="@finos/${PACKAGE}"`;
-            }
-        }
-
-        if (getarg("--quiet")) {
-            // Run all tests with suppressed output.
-            console.log("-- Running jest in quiet mode");
-            execute(silent(jest_timezone()));
-            execute(silent(jest_all()));
-        } else if (process.env.PACKAGE) {
-            // Run tests for a single package.
-            if (IS_JUPYTER) {
-                // Jupyterlab is guaranteed to have started at this point, so
-                // copy the test files over and run the tests.
-                execute`node_modules/.bin/lerna run test:jupyter:build --stream --scope="@finos/${PACKAGE}"`;
-                execute_throw(jest_single("test:jupyter:run"));
-                return;
-            }
-
-            if (minimatch("perspective", PACKAGE)) {
-                execute(jest_timezone());
-            }
-
-            execute(jest_single());
-        } else {
-            // Run all tests with full output.
-            console.log("-- Running jest in fast mode");
-            execute(jest_timezone());
-            execute(jest_all());
-        }
     }
+
+    if (!PACKAGE || minimatch("perspective-viewer", PACKAGE)) {
+        console.log("-- Running Rust tests");
+        execute`yarn lerna --scope=@finos/perspective-viewer exec yarn test:run:rust`;
+    }
+
+    if (getarg("--quiet")) {
+        // Run all tests with suppressed output.
+        console.log("-- Running jest in quiet mode");
+        execute(silent(jest_timezone()));
+        execute(silent(jest_all()));
+    } else if (process.env.PACKAGE) {
+        // Run tests for a single package.
+
+        if (IS_JUPYTER) {
+            // Jupyterlab is guaranteed to have started at this point, so
+            // copy the test files over and run the tests.
+            execute`node_modules/.bin/lerna run test:jupyter:build --stream --scope="@finos/${PACKAGE}"`;
+            execute_throw(jest_single("test:jupyter:run"));
+            return;
+        }
+
+        if (minimatch("perspective", PACKAGE)) {
+            execute(jest_timezone());
+        }
+
+        execute(jest_single());
+    } else {
+        // Run all tests with full output.
+        console.log("-- Running jest in fast mode");
+        execute(jest_timezone());
+        execute(jest_all());
+    }
+    // }
 } catch (e) {
     console.log(e.message);
     process.exit(1);

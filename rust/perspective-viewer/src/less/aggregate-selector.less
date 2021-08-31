@@ -1,0 +1,30 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+:host {
+
+    // Wrapper prevents the width of the selector options from increasing the width of
+    // the container it is embedded in.
+    .aggregate-selector-wrapper {
+        height: 21px;
+
+        .aggregate-selector {
+            position: absolute;
+            font-size: 10px;
+            margin-left: 28px;
+            border-bottom-width: 0px;
+            margin-top: 0px;
+            width: calc(100% - 28px);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding-right: 12px;
+        }
+    }
+}

@@ -1,0 +1,100 @@
+[package]
+name = "perspective-viewer"
+version = "0.10.0"
+authors = ["Andrew Stein <steinlink@gmail.com>"]
+edition = "2018"
+description = "A frontend for Perspective"
+repository = "https://github.com/finos/perspective"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+path = "src/rust/lib.rs"
+
+[features]
+new_column_selector = []
+default = ["console_error_panic_hook", "new_column_selector"]
+
+[dependencies]
+async-std = "1.9.0"
+async-trait = "=0.1.42"
+base64 = "0.13.0"
+chrono = "0.4"
+derivative = "2.2.0"
+flate2 = "1.0.20"
+futures = "0.3.12"
+itertools = "0.10.1"
+js-intern = "0.3.1"
+num-format = "0.4.0"
+rmp-serde = "0.15.5"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0.59", features = ["raw_value"] }
+wasm-bindgen = { version = "=0.2.74", features = ["serde-serialize"] }
+wasm-bindgen-futures = "0.4.20"
+yew = { git = "https://github.com/yewstack/yew", rev = "f94487364f6eb1c7862e48f7c82ee4122ae8e845" }
+
+# The `console_error_panic_hook` crate provides better debugging of panics by
+# logging them with `console.error`. This is great for development, but requires
+# all the `std::fmt` and `std::panicking` infrastructure, so isn't great for
+# code size when deploying.
+console_error_panic_hook = { version = "0.1.6", optional = true }
+
+# `wee_alloc` is a tiny allocator for wasm that is only ~1K in code size
+# compared to the default allocator's ~10K. It is slower than the default
+# allocator, however.
+#
+# Unfortunately, `wee_alloc` requires nightly Rust when targeting wasm for now.
+wee_alloc = { version = "0.4.5", optional = true }
+
+[dependencies.web-sys]
+version = "0.3.46"
+features = [
+    # "Performance",
+    "Blob",
+    "Clipboard",
+    "CssStyleDeclaration", 
+    "CustomEvent",
+    "CustomEventInit",
+    "DataTransfer",
+    "Document",
+    "DomRect",
+    "DomStringMap",
+    "Element",
+    # "DomTokenList",
+    "Event",
+    "EventTarget",
+    "EventListener",
+    # "DocumentFragment",
+    "HtmlCollection",
+    "HtmlElement",
+    "HtmlTextAreaElement",
+    "KeyboardEvent",
+    # "MouseEvent",
+    "MutationObserver",
+    "MutationObserverInit",
+    "MutationRecord",
+    "Navigator",
+    "Node",
+    "NodeList",
+    'Performance', 
+    # "TouchEvent",
+    # "TouchList",
+    # "Touch",
+    # "WheelEvent",
+    "ShadowRoot",
+    "ShadowRootMode",
+    "ShadowRootInit",
+    "Url",
+    "Window"
+]
+
+
+[dependencies.js-sys]
+version = "0.3"
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3.13"
+
+[profile.release]
+opt-level = "z"
+codegen-units = 1
+lto = true

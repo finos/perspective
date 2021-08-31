@@ -33,11 +33,11 @@
     "viewers": {
         "PERSPECTIVE_GENERATED_ID_0": {
             "plugin": "datagrid",
-            "row-pivots": [
+            "row_pivots": [
                 "Region",
                 "State"
             ],
-            "column-pivots": [
+            "column_pivots": [
                 "Category",
                 "Sub-Category"
             ],
@@ -82,7 +82,7 @@
         },
         "PERSPECTIVE_GENERATED_ID_2": {
             "plugin": "Treemap",
-            "row-pivots": [
+            "row_pivots": [
                 "State"
             ],
             "columns": [

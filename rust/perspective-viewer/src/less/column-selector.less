@@ -1,0 +1,308 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+ @import "./aggregate-selector.less";
+
+:host {
+    #side_panel {
+        & > :not(:last-child) {
+            margin-bottom: 6px;
+        }
+
+        .psp-icon {
+            &:hover {
+                cursor: pointer;
+            }
+        }
+
+        .psp-icon__add {
+            display: flex;
+            width: 20px;
+            min-width: 20px;
+            margin-top: -2px;
+            height: 0px;
+            font-family: var(--column-add--font-family, inherit);
+            &:before {
+                font-feature-settings: "liga";
+                content: var(--column-add--before, "+");
+            }
+        }
+
+        .psp-title__columnName {
+            display: flex;
+            margin-left: 24px;
+            margin-top: 3px;
+            font-size: 12px;
+            font-weight: 300;
+        }
+        #add-expression {
+            padding: 6px 0px;
+            margin: -6px 0 0 0;
+            &.expr_editor_open {
+                background: rgba(0,0,0,0.05);
+            }
+        }
+
+        .side_panel-action:hover {
+            cursor: pointer;
+        }
+
+        .column-selector-column {
+            display: flex;
+            flex-direction: row;
+            align-items: stretch;
+            font-size: 12px;
+
+            &:last-child {
+                .column_selector_draggable {
+                    border-color: transparent;
+                }
+            }
+
+            // Expression column toolbar buttons
+            span.expression-edit-button, span.expression-delete-button  {
+                padding-left: 6px;
+                padding-right: 4px;
+                background: #F2F4F6;
+                position: absolute;
+                // width: 24px;
+                font-family: "Material Icons";
+                cursor: pointer;
+                opacity: 1;
+                color: #999;
+
+                &:hover {
+                    opacity: 1;
+                    color: var(--active--color, #000);
+                }
+            }
+
+            span.expression-edit-button {
+                right: 0px;
+            }
+
+            span.expression-delete-button {
+                right: 18px;
+            }
+            
+            // Need a bottom margin to prevent drag/drop jitter on borders
+            .column_selector_draggable {
+                min-height: 21px;
+                // margin-bottom: 1px;
+            }
+
+            .column_selector_draggable {
+                display: flex;
+                align-items: start;
+                cursor: move;
+                border-style: solid;
+                border-width: 0 0 1px 0;
+                border-color: var(--inactive--color, #C5C9D0);
+                font-size: 12px;
+                flex-grow: 1;
+                color: inherit;
+                transition: height 0.2s;
+                box-sizing: border-box;
+                flex-direction: column;
+                justify-content: space-evenly;
+                position: relative;
+
+                // Need a bottom margin to prevent drag/drop jitter on borders,
+                // and needs to be a multiple of non-`.show-aggregate` height so
+                // adding/removing does not drift the column position y offset.
+                &.show-aggregate {
+                    min-height: 43px;
+                    // margin-bottom: 1px;
+                }
+
+                .column_name {
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    width: 100%;
+                }
+                
+                .column_name:before {
+                    font-family: var(--interface-monospace--font-family, monospace);
+                    width: var(--column_type--width, auto);
+                    min-width: 18px;
+                    font-size: 12px;
+                    font-weight: 200;
+                    padding: 0 5px 0 0;
+                }
+                
+                .integer:before, .float:before {
+                    content: var(
+                        --float--column-type--content,
+                        var(--column-type--content, "123")
+                    );
+                    color: var(
+                        --float--column-type--color,
+                        var(--column-type--color, #016bc6)
+                    );
+                }
+            
+                .string:before {
+                    content: var(
+                        --string--column-type--content,
+                        var(--column-type--content, "abc")
+                    );
+                    color: var(
+                        --string--column-type--color,
+                        var(--column-type--color, #fe9292)
+                    );
+                }
+            
+                .boolean:before {
+                    content: var(
+                        --boolean--column-type--content,
+                        var(--column-type--content, "t/f")
+                    );
+                    color: var(
+                        --boolean--column-type--color,
+                        var(--column-type--color, #999999)
+                    );
+                }
+            
+                .date:before, .datetime:before {
+                    content: var(
+                        --date--column-type--content,
+                        var(--column-type--content, "mdy")
+                    );
+                    color: var(
+                        --date--column-type--color,
+                        var(--column-type--color, #999999)
+                    );
+                }
+            }
+        }
+
+        .is_column_active {
+            // color: var(--column-selector--color, #999);
+            font-family: var(--column-selector--font-family, Arial) !important;
+            width: var(--column_selector--width, 20px);
+            min-width: var(--column_selector--width, 20px);
+            height: var(--is_visible--height, auto);
+            cursor: pointer;
+            font-size: var(--column_selector--font-size, 14px);
+        }
+
+        #active-columns, #sub-columns {
+            flex: 0 1 auto;
+            overflow: scroll;
+        }
+
+        #active-columns.collapse {
+            max-height: min(calc(100% - 95px), 60%);
+        }
+
+        #sub-columns {
+            flex: 0 100 auto
+        }
+
+        #active-columns {
+            .is_column_active {
+                color: var(--active--color, #999);
+                &:before {
+                    content: var(--active-column-selector--content, none);
+                }
+
+                &.required {
+                    color: var(--inactive--color, #ccc);
+                    cursor: initial;
+                }
+
+                &.inactive:before {
+                    content: "";
+                }
+            }
+
+            .column-selector-column {
+                margin-bottom: 1px;
+                .column_selector_draggable {
+                    width: calc(100% - 24px);
+                    // transition: box-shadow 0.3s;
+                }
+
+                &:before {
+                    font-size: 10px;
+                    margin-left: 34px; //var(--column_selector--width, 20px);
+                    left: 1px;
+                    padding: var(--column_type--padding, 0px 0px 0px 5px);
+                    color: var(--inactive--color, #666);
+                    position: absolute;
+                    margin-top: -15px;
+                    content: attr(data-label);
+                }
+
+                &[data-label] {
+                    margin-top: 22px;
+                }
+            }
+        }
+
+        // "Empty" slotted columns in the active column list.
+        .dragover, .empty-named {
+            pointer-events: none;
+            border: 1px dashed var(--inactive--color,#ddd) !important;
+            margin-left: -2px;
+            
+            & > * { 
+                opacity: 0;
+                // filter: saturate(0);
+            }
+        }
+
+        .dragover {
+            border-style: solid !important;
+        }
+
+        .dragover {
+            box-shadow: inset 0 0 15px rgb(0 0 0 / 5%);
+
+        }
+
+        // // correct for column separator borders which are not on the last column.
+        // .column-selector-column:not(:first-child) .dragover {
+        //     border-top-width: 0px !important;
+        // }
+
+        // Inactive Columns are the columns in the column selector not currently 
+        // selected for the `columns` field of the `ViewConfig`.
+        #inactive-columns, #expression-columns {
+            margin-bottom: 6px;
+            &:empty {
+                display: none;
+                margin: 0px;
+            }
+
+            .is_column_active {
+                color: var(--inactive--color, #999);
+                &:before {
+                    content: var(--inactive-column-selector--content, none);
+                }
+            }
+
+            .column-selector-column {
+                opacity: 0.3;
+                transition: opacity 0.3s;
+                margin-bottom: 1px;
+
+                &:hover {
+                    opacity: 1;
+                    transition: none;
+                }
+
+                .column_selector_draggable {
+                    border-bottom-color: transparent;
+                }
+            }
+        }
+    }
+}

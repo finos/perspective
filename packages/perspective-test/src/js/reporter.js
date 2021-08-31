@@ -25,8 +25,8 @@ module.exports = class ImageViewerReporter {
         if (fs.existsSync(filename)) {
             process.stdout.write(`\n    ${ancestors.join(" > ")} > ${title}\n\n    `);
             termimg(filename, {
-                width: "320px",
-                height: "240px",
+                width: "640px",
+                height: "480px",
                 fallback: () => this.write_img_fallback(filename)
             });
             process.stdout.write("\n");
@@ -43,12 +43,12 @@ module.exports = class ImageViewerReporter {
                 let desc = test.fullName.replace(".html", "").replace(/ /g, "_");
                 desc = desc.slice(0, desc.length - name.length - 1);
                 const candidates = [
-                    `${testRunConfig.path.split("/test")[0]}/screenshots/${paths.RESULTS_TAGNAME}/${desc}/${name}.diff.png`,
-                    `screenshots/${desc}/${name}.diff.png`,
-                    `${testRunConfig.path.split("/test")[0]}/screenshots/${paths.RESULTS_TAGNAME}/${desc}/${name}.failed.png`,
-                    `screenshots/${desc}/${name}.failed.png`,
-                    `${testRunConfig.path.split("/test")[0]}/screenshots/${paths.RESULTS_TAGNAME}/${desc}/${name}.png`,
-                    `screenshots/${desc}/${name}.png`
+                    `${testRunConfig.path.split("/test")[0]}/test/screenshots/${paths.RESULTS_TAGNAME}/${desc}/${name}.diff.png`,
+                    `test/screenshots/${desc}/${name}.diff.png`,
+                    `${testRunConfig.path.split("/test")[0]}/test/screenshots/${paths.RESULTS_TAGNAME}/${desc}/${name}.failed.png`,
+                    `test/screenshots/${desc}/${name}.failed.png`,
+                    `${testRunConfig.path.split("/test")[0]}/test/screenshots/${paths.RESULTS_TAGNAME}/${desc}/${name}.png`,
+                    `test/screenshots/${desc}/${name}.png`
                 ];
 
                 for (const filename of candidates) {

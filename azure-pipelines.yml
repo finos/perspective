@@ -28,7 +28,7 @@ parameters:
     default:
       - task: NodeTool@0
         inputs:
-          versionSpec: '12.x'
+          versionSpec: '15.x'
     
       - bash: npm install -g yarn
         displayName: 'Install Yarn'
@@ -205,25 +205,25 @@ jobs:
     - task: PublishPipelineArtifact@1
       condition: failed()
       inputs:
-        targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-viewer/screenshots/'
+        targetPath: '$(System.DefaultWorkingDirectory)/rust/perspective-viewer/test/screenshots/'
         artifactName: "perspective-viewer-$(Build.BuildNumber)"
 
     - task: PublishPipelineArtifact@1
       condition: failed()
       inputs:
-        targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-viewer-datagrid/screenshots/'
+        targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-viewer-datagrid/test/screenshots/'
         artifactName: "perspective-viewer-datagrid-$(Build.BuildNumber)"
 
     - task: PublishPipelineArtifact@1
       condition: failed()
       inputs:
-        targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-viewer-d3fc/screenshots/'
+        targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-viewer-d3fc/test/screenshots/'
         artifactName: "perspective-viewer-d3fc-$(Build.BuildNumber)"
 
     - task: PublishPipelineArtifact@1
       condition: failed()
       inputs:
-        targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-workspace/screenshots/'
+        targetPath: '$(System.DefaultWorkingDirectory)/packages/perspective-workspace/test/screenshots/'
         artifactName: "perspective-workspace-$(Build.BuildNumber)"
 
     # `yarn pack` the public packages so the Jupyterlab tests can use the
@@ -233,7 +233,7 @@ jobs:
     - bash: cd $(System.DefaultWorkingDirectory)/packages/perspective && yarn pack --filename=perspective-dist.tgz
       displayName: "yarn pack perspective"
 
-    - bash: cd $(System.DefaultWorkingDirectory)/packages/perspective-viewer && yarn pack --filename=perspective-viewer-dist.tgz
+    - bash: cd $(System.DefaultWorkingDirectory)/rust/perspective-viewer && yarn pack --filename=perspective-viewer-dist.tgz
       displayName: "yarn pack perspective-viewer"
 
     - bash: cd $(System.DefaultWorkingDirectory)/packages/perspective-viewer-datagrid && yarn pack --filename=perspective-viewer-datagrid-dist.tgz
@@ -253,7 +253,7 @@ jobs:
 
     - task: PublishPipelineArtifact@1
       inputs:
-        targetPath: "$(System.DefaultWorkingDirectory)/packages/perspective-viewer/perspective-viewer-dist.tgz"
+        targetPath: "$(System.DefaultWorkingDirectory)/rust/perspective-viewer/perspective-viewer-dist.tgz"
         artifactName: "perspective-viewer-dist"
 
     - task: PublishPipelineArtifact@1
@@ -411,7 +411,7 @@ jobs:
     # don't use InitSteps because we don't want to cache local puppeteer
     - task: NodeTool@0
       inputs:
-        versionSpec: '12.x'
+        versionSpec: '15.x'
 
     - bash: npm install -g yarn
       displayName: 'Install Yarn'
@@ -480,7 +480,7 @@ jobs:
     - bash: tar --strip-components=1 -xvf $(System.DefaultWorkingDirectory)/perspective-dist.tgz -C $(System.DefaultWorkingDirectory)/packages/perspective package
       displayName: "Install perspective dist"
 
-    - bash: tar --strip-components=1 -xvf $(System.DefaultWorkingDirectory)/perspective-viewer-dist.tgz -C $(System.DefaultWorkingDirectory)/packages/perspective-viewer package
+    - bash: tar --strip-components=1 -xvf $(System.DefaultWorkingDirectory)/perspective-viewer-dist.tgz -C $(System.DefaultWorkingDirectory)/rust/perspective-viewer package
       displayName: "Install perspective-viewer dist"
 
     - bash: tar --strip-components=1 -xvf $(System.DefaultWorkingDirectory)/perspective-viewer-datagrid-dist.tgz -C $(System.DefaultWorkingDirectory)/packages/perspective-viewer-datagrid package

@@ -18,7 +18,7 @@ const IS_SCREENSHOTS = args.indexOf("--screenshots") !== -1;
 function clean_screenshots(scope) {
     if (args.indexOf("--all") !== -1) {
         try {
-            execute`lerna exec --scope="@finos/${scope}" -- yarn rimraf screenshots`;
+            execute`lerna exec --scope="@finos/${scope}" -- yarn rimraf test/screenshots`;
         } catch (e) {}
     } else {
         execute`lerna run clean:screenshots --scope="@finos/${scope}"`;

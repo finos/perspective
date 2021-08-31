@@ -112,7 +112,7 @@
                     Two: {
                         selectable: true,
                         plugin: "datagrid",
-                        "row-pivots": ["country"],
+                        "row_pivots": ["country"],
                         aggregates: {
                             sport: "dominant"
                         },
@@ -127,11 +127,11 @@
                     },
                     Three: {
                         plugin: "Heatmap",
-                        "row-pivots": ["sport"],
-                        "column-pivots": ["age"],
-                        sort: [["total"]],
+                        "row_pivots": ["sport"],
+                        "column_pivots": ["age"],
+                        sort: [["total", "desc"]],
                         columns: ["total"],
-                        filters: [],
+                        filter: [],
                         plugin_config: {
                             realValues: ["total"]
                         },
@@ -141,14 +141,14 @@
                     PERSPECTIVE_GENERATED_ID_1: {
                         plugin: "datagrid",
                         columns: ["total", "sport", "country", "age", "gold", "silver", "bronze"],
-                        "row-pivots": ["athlete"],
+                        "row_pivots": ["athlete"],
                         sort: [["total", "desc"]],
                         aggregates: {
                             sport: "dominant",
                             age: "high",
                             country: "dominant"
                         },
-                        filters: [["country", "==", "Canada"]],
+                        filter: [["country", "==", "Canada"]],
                         name: "Athlete by Sport",
                         table: "olympics"
                     },
@@ -157,12 +157,12 @@
                         aggregates: {
                             age: "avg"
                         },
-                        filters: [
+                        filter: [
                             // ["country", "==", "Canada"],
                             ["year", "in", ["2002", "2006", "2010", ""]]
                         ],
                         columns: ["age", "total"],
-                        "row-pivots": ["year"],
+                        "row_pivots": ["year"],
                         plugin_config: {
                             realValues: ["age", "total"],
                             splitMainValues: ["age"]
@@ -173,11 +173,11 @@
                     PERSPECTIVE_GENERATED_ID_0: {
                         plugin: "Y Line",
                         columns: ["age", "total"],
-                        "row-pivots": ["year"],
+                        "row_pivots": ["year"],
                         aggregates: {
                             age: "avg"
                         },
-                        filters: [
+                        filter: [
                             // ["country", "==", "Canada"],
                             ["year", "in", ["2000", "2004", "2008", "2012", ""]]
                         ],

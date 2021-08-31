@@ -1,0 +1,167 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms
+ * of the Apache License 2.0.  The full license can be found in the LICENSE
+ * file.
+ *
+ */
+
+ @import "./split-panel.less";
+ @import "./status-bar.less";
+ @import "./render-warning.less";
+ @import "./column-selector.less";
+ @import "./config-selector.less";
+
+:host {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    * {
+        box-sizing: border-box;
+        line-height: 1.25;
+    }
+
+    #app_panel {
+        position: absolute;
+        bottom: 36px;
+        left: 0 ;
+        right: 0;
+        top: 0;
+    }
+
+    #status_bar {
+        position: absolute;
+        bottom: 0;
+        left:0 ;
+        right: 0;
+        height: 36px;
+    }
+
+    #main_column {
+        display: flex;
+        flex-direction: column;
+    }
+
+    #main_panel_container {
+        flex: 1 1 auto;
+        position: relative;
+        box-shadow: var(--plugin--box-shadow, none);
+        background: var(--plugin--background, none);
+        overflow: hidden;
+        border: var(--plugin--border, none);
+
+        &.settings-closed {
+            position: absolute;
+            inset: 0px;
+        }
+    }
+
+    #side_panel {
+        position: relative;
+        flex: 0 0 auto;
+        padding: var(--side_panel--padding, 10px 2px 0px 11px);
+        box-sizing: border-box;
+        width: 100%;
+        
+        #plugin_selector_container {
+            min-height: 29px;
+            margin-left: var(--column_selector--width, 20px);
+            overflow: hidden;
+            display: flex;
+        }
+
+        #plugin_selector {
+            flex-grow: 1;
+        }
+    }
+
+    .noselect {
+        -webkit-touch-callout: none;
+        /* iOS Safari */
+        -webkit-user-select: none;
+        /* Safari */
+        -khtml-user-select: none;
+        /* Konqueror HTML */
+        -moz-user-select: none;
+        /* Firefox */
+        -ms-user-select: none;
+        /* Internet Explorer/Edge */
+        user-select: none;
+        /* Non-prefixed version, currently supported by Chrome and Opera */
+    }
+
+    .column {
+        display: flex;
+        list-style: none;
+        flex-direction: column;
+        flex: 1;
+    }
+
+    select {
+        border-radius: 0;
+        border-width: 0px;
+        outline: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        -ms-appearance: none;
+        appearance: none;
+        color: inherit;
+        height: 21px;
+        padding: var(--select--padding, 0px 0px 0px 6px);
+        font-size: 12px;
+        font-weight: 300;
+        font-family: inherit;
+        background-color: var(--select--background-color, white);
+        background: var(
+            --select--background,
+            url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB2ZXJzaW9uPSIxLjEiIGlkPSJMYXllcl8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCIKCSB2aWV3Qm94PSIwIDAgNC45IDEwIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA0LjkgMTA7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4KPHN0eWxlIHR5cGU9InRleHQvY3NzIj4KCS5zdDB7ZmlsbDojQUFBQUFBO30KPC9zdHlsZT4KPHRpdGxlPmFycm93czwvdGl0bGU+Cjxwb2x5Z29uIGNsYXNzPSJzdDAiIHBvaW50cz0iMS40LDQuNyAyLjUsMy4yIDMuNSw0LjcgIi8+Cjxwb2x5Z29uIGNsYXNzPSJzdDAiIHBvaW50cz0iMy41LDUuMyAyLjUsNi44IDEuNCw1LjMgIi8+Cjwvc3ZnPg==)
+                no-repeat 95% 50%
+        );
+        option {
+            background: var(--select--background-color, #ffffff);  
+        }
+    }
+
+    #plugin_selector {
+        margin-top: 3px;
+        border-bottom-width: 1px;
+        border-style: solid;
+        border-color: var(--inactive--color, #C5C9D0);
+        border-top-width: 0px;
+        border-left-width: 0px;
+        border-right-width: 0px;
+
+    }
+
+    #settings_button {
+        position: absolute;
+        top: 0;
+        left: 0;
+        padding: var(--button--padding, 12px 14px 24px 8px);
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+
+        background: none;
+        color: var(--inactive--color, #999);
+        font-family: var(--button--font-family, Arial);
+        font-size: var(--button--font-size, 16px);
+        font-weight: normal;
+        transition: opacity 0.3s;
+
+        &:hover {
+            color: var(--active--color, inherit);
+            cursor: pointer;
+        }
+        &:before {
+            font-feature-settings: "liga";
+            content: var(--settings-button--content, "\1f527");
+        }
+    }
+}

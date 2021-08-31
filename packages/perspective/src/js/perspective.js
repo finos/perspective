@@ -1371,6 +1371,7 @@ export default function(Module) {
     table.prototype.validate_expressions = function(expressions, override = true) {
         const validated = {
             expression_schema: {},
+            expression_alias: {},
             errors: {}
         };
 
@@ -1387,6 +1388,7 @@ export default function(Module) {
                 inner.push_back(val);
             }
             vector.push_back(inner);
+            validated.expression_alias[expression[0]] = expression[1];
         }
 
         const validation_results = __MODULE__.validate_expressions(this._Table, vector);

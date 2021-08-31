@@ -13,6 +13,7 @@ const puppeteer = require("puppeteer");
 const path = require("path");
 const execSync = require("child_process").execSync;
 const {track_mouse} = require("./mouse_helper.js");
+const format = require("xml-formatter");
 
 const readline = require("readline");
 
@@ -22,7 +23,7 @@ const cp = require("child_process");
 
 const {WebSocketServer} = require("@finos/perspective");
 
-const {IS_LOCAL_PUPPETEER, RESULTS_TAGNAME, RESULTS_FILENAME} = require("./paths.js");
+const {IS_LOCAL_PUPPETEER, RESULTS_DEBUG_FILENAME, RESULTS_FILENAME} = require("./paths.js");
 
 let __PORT__;
 
@@ -51,10 +52,11 @@ exports.with_jupyterlab = function with_jupyterlab(port, body) {
     body();
 };
 
-let results;
+let results, results_debug;
 const seen_results = new Set();
 
-const new_results = {};
+const new_results = {},
+    new_debug_results = {};
 
 let browser,
     page,
@@ -204,21 +206,24 @@ async function get_new_page() {
     return page;
 }
 
+function get_results(filename) {
+    const dir_name = path.join(test_root, "test", "results", filename);
+    if (fs.existsSync(dir_name)) {
+        return JSON.parse(fs.readFileSync(dir_name));
+    } else if (fs.existsSync(dir_name)) {
+    } else {
+        return {};
+    }
+}
+
 beforeAll(async done => {
     try {
         browser = await puppeteer.connect({browserWSEndpoint: process.env.PSP_BROWSER_ENDPOINT});
 
         page = await get_new_page();
 
-        results = (() => {
-            const dir_name = path.join(test_root, "test", "results", RESULTS_FILENAME);
-            if (fs.existsSync(dir_name)) {
-                return JSON.parse(fs.readFileSync(dir_name));
-            } else if (fs.existsSync(dir_name)) {
-            } else {
-                return {};
-            }
-        })();
+        results = get_results(RESULTS_FILENAME);
+        results_debug = get_results(RESULTS_DEBUG_FILENAME);
 
         if (results.__GIT_COMMIT__) {
             const hash = execSync(`git cat-file -e ${results.__GIT_COMMIT__}`);
@@ -233,24 +238,29 @@ beforeAll(async done => {
     }
 }, 30000);
 
+function write_results(updated, filename) {
+    const dir_name = path.join(test_root, "test", "results", filename);
+    const results2 = (() => {
+        if (fs.existsSync(dir_name)) {
+            return JSON.parse(fs.readFileSync(dir_name));
+        } else {
+            return {};
+        }
+    })();
+    for (let key of Object.keys(updated)) {
+        results2[key] = updated[key];
+    }
+    results2.__GIT_COMMIT__ = execSync("git rev-parse HEAD")
+        .toString()
+        .trim();
+    fs.writeFileSync(dir_name, JSON.stringify(results2, null, 4));
+}
+
 afterAll(() => {
     try {
         if (process.env.WRITE_TESTS) {
-            const dir_name = path.join(test_root, "test", "results", RESULTS_FILENAME);
-            const results2 = (() => {
-                if (fs.existsSync(dir_name)) {
-                    return JSON.parse(fs.readFileSync(dir_name));
-                } else {
-                    return {};
-                }
-            })();
-            for (let key of Object.keys(new_results)) {
-                results2[key] = new_results[key];
-            }
-            results2.__GIT_COMMIT__ = execSync("git rev-parse HEAD")
-                .toString()
-                .trim();
-            fs.writeFileSync(dir_name, JSON.stringify(results2, null, 4));
+            write_results(new_results, RESULTS_FILENAME);
+            write_results(new_debug_results, RESULTS_DEBUG_FILENAME);
         }
         if (page) {
             page.close();
@@ -273,7 +283,7 @@ function mkdirSyncRec(targetDir) {
     }, initDir);
 }
 
-describe.page = (url, body, {reload_page = true, check_results = true, name, root} = {}) => {
+describe.page = (url, body, {reload_page = false, check_results = true, name, root} = {}) => {
     let _url = url ? url : page_url;
     test_root = root ? root : test_root;
 
@@ -337,8 +347,33 @@ test.run = function run(name, body, {url = page_url, timeout = 60000, viewport =
     );
 };
 
-test.capture = function capture(name, body, {url = page_url, timeout = 60000, viewport = null, wait_for_update = true, fail_on_errors = true, preserve_hover = false} = {}) {
-    const _reload_page = page_reload;
+function format_and_clean_xml(result) {
+    try {
+        return format(result, {
+            filter(x) {
+                if (x) {
+                    if (x.attributes?.dx) {
+                        delete x.attributes["dx"];
+                    }
+
+                    if (x.attributes?.dy) {
+                        delete x.attributes["dy"];
+                    }
+
+                    if (x.attributes?.style) {
+                        delete x.attributes["style"];
+                    }
+                }
+
+                return true;
+            }
+        });
+    } catch (e) {
+        return result;
+    }
+}
+
+test.capture = function capture(name, body, {url = page_url, timeout = 60000, viewport = null, fail_on_errors = true} = {}) {
     const spec = test(
         name,
         async () => {
@@ -354,7 +389,7 @@ test.capture = function capture(name, body, {url = page_url, timeout = 60000, vi
 
             const test_name = `${name.replace(/[ \.']/g, "_")}`;
             const path_name = `${spec.result.fullName.replace(".html", "").replace(/[ \.']/g, "_")}`;
-            let dir_name = path.join(test_root, "screenshots", RESULTS_TAGNAME, path_name);
+            let dir_name = path.join(test_root, "test", "screenshots", path_name);
             dir_name = dir_name.slice(0, dir_name.length - test_name.length - 1);
             const filename = path.join(dir_name, test_name);
             if (!fs.existsSync(dir_name)) {
@@ -362,47 +397,47 @@ test.capture = function capture(name, body, {url = page_url, timeout = 60000, vi
             }
 
             for (let x = 0; x < iterations; x++) {
-                if (_reload_page) {
+                if (!OLD_SETTINGS[test_root + url]) {
                     await page.close();
                     page = await get_new_page();
                     await page.goto(`http://127.0.0.1:${__PORT__}/${url}#test=${encodeURIComponent(name)}`, {waitUntil: "domcontentloaded"});
                 } else {
-                    if (!OLD_SETTINGS[test_root + url]) {
-                        await page.close();
-                        page = await get_new_page();
-                        await page.goto(`http://127.0.0.1:${__PORT__}/${url}#test=${encodeURIComponent(name)}`, {waitUntil: "domcontentloaded"});
-                    } else {
-                        await page.evaluate(async x => {
+                    await page.evaluate(async x => {
+                        const workspace = document.querySelector("perspective-workspace");
+                        if (workspace) {
+                            await workspace.restore(x);
+                        } else {
                             const viewer = document.querySelector("perspective-viewer");
-                            viewer.restore(x);
-                            await viewer.notifyResize();
-                            await viewer.toggleConfig(false);
-                        }, OLD_SETTINGS[test_root + url]);
-                    }
+                            if (viewer) {
+                                viewer.restore(x);
+                                await viewer.notifyResize?.();
+                                await viewer.toggleConfig?.(false);
+                            }
+                        }
+                    }, OLD_SETTINGS[test_root + url]);
                 }
 
-                if (wait_for_update) {
-                    await page.waitFor(() => {
-                        const elem = document.getElementsByTagName("perspective-viewer");
-                        return elem.length > 0 && elem[0].view !== undefined;
-                    });
-                    await page.waitForSelector("perspective-viewer:not([updating])");
-                } else {
-                    await page.waitForSelector("perspective-viewer");
-                }
-
-                if (!_reload_page && !OLD_SETTINGS[test_root + url]) {
-                    await page.waitForSelector("perspective-viewer:not([updating])");
-                    OLD_SETTINGS[test_root + url] = await page.evaluate(() => {
-                        const viewer = document.querySelector("perspective-viewer");
-                        return viewer.save();
+                if (!OLD_SETTINGS[test_root + url]) {
+                    OLD_SETTINGS[test_root + url] = await page.evaluate(async () => {
+                        const workspace = document.querySelector("perspective-workspace");
+                        if (workspace) {
+                            return await workspace.save();
+                        } else {
+                            const viewer = document.querySelector("perspective-viewer");
+                            if (viewer) {
+                                await viewer.getTable();
+                                await viewer.restore({});
+                                return await viewer.save();
+                            }
+                        }
                     });
                 }
 
                 // Move the mouse offscreen so prev tests dont get hover effects
                 await page.mouse.move(10000, 10000);
+                let result;
                 try {
-                    await body(page);
+                    result = await body(page);
                 } catch (e) {
                     if (process.env.PSP_PAUSE_ON_FAILURE) {
                         if (!process.env.WRITE_TESTS) {
@@ -412,27 +447,22 @@ test.capture = function capture(name, body, {url = page_url, timeout = 60000, vi
                     }
                     throw e;
                 }
-                if (!preserve_hover) {
-                    await page.mouse.move(10000, 10000);
-                }
 
-                if (wait_for_update) {
-                    await page.waitForSelector("perspective-viewer:not([updating])");
-                    await page.evaluate(async () => {
-                        await new Promise(requestAnimationFrame);
-                    });
-                }
+                result = format_and_clean_xml(result);
 
-                const screenshot = await page.screenshot({captureBeyondViewport: false, fullPage: true});
                 // await page.close();
                 const hash = crypto
                     .createHash("md5")
-                    .update(screenshot)
+                    .update(result)
                     .digest("hex");
 
                 if (hash === results[path_name]) {
-                    fs.writeFileSync(filename + ".png", screenshot);
+                    if (!fs.existsSync(filename + ".png")) {
+                        const screenshot = await page.screenshot({captureBeyondViewport: false, fullPage: true});
+                        fs.writeFileSync(filename + ".png", screenshot);
+                    }
                 } else {
+                    const screenshot = await page.screenshot({captureBeyondViewport: false, fullPage: true});
                     fs.writeFileSync(filename + ".failed.png", screenshot);
                     if (fs.existsSync(filename + ".png")) {
                         try {
@@ -441,12 +471,18 @@ test.capture = function capture(name, body, {url = page_url, timeout = 60000, vi
                             // exits 1
                         }
                     }
+
+                    if (process.env.WRITE_TESTS) {
+                        const screenshot = await page.screenshot({captureBeyondViewport: false, fullPage: true});
+                        fs.writeFileSync(filename + ".png", screenshot);
+                    }
                 }
 
                 if (process.env.WRITE_TESTS) {
                     new_results[path_name] = hash;
                 }
 
+                new_debug_results[path_name] = result;
                 if (process.env.PSP_PAUSE_ON_FAILURE) {
                     if (!process.env.WRITE_TESTS && (hash !== results[path_name] || errors.length > 0)) {
                         private_console.error(`Failed ${name}, pausing`);
@@ -456,6 +492,11 @@ test.capture = function capture(name, body, {url = page_url, timeout = 60000, vi
                 if (fail_on_errors) {
                     expect(errors).toNotError();
                 }
+
+                if (results_debug[path_name]) {
+                    expect(new_debug_results[path_name]).toBe(results_debug[path_name]);
+                }
+
                 expect(hash).toBe(results[path_name]);
                 expect(seen_results.has(path_name)).toBeFalsy();
             }

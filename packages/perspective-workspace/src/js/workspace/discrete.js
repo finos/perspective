@@ -139,17 +139,15 @@ export class DiscreteSplitPanel extends extend(SplitPanel, "p-SplitPanel-handle"
         super(...args);
         this.layoutModified = new Signal(this);
     }
-
     onUpdateRequest(...args) {
         super.onUpdateRequest(...args);
         this.layoutModified.emit();
     }
-
     onResize(msg) {
-        for (const widget of toArray(this.widgets)) {
-            widget.node.style.minWidth = `300px`;
-            widget.node.style.minHeight = `200px`;
-        }
+        // for (const widget of toArray(this.widgets)) {
+        //     widget.node.style.minWidth = `300px`;
+        //     widget.node.style.minHeight = `200px`;
+        // }
         super.onResize(msg);
     }
 }

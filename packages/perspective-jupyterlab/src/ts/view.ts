@@ -17,7 +17,7 @@ import {PerspectiveJupyterWidget} from "./widget";
 import {PerspectiveJupyterClient, PerspectiveJupyterMessage} from "./client";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const perspective = require("@finos/perspective");
+const perspective = require("@finos/perspective").default;
 
 /**
  * `PerspectiveView` defines the plugin's DOM and how the plugin interacts with
@@ -46,7 +46,7 @@ export class PerspectiveView extends DOMWidgetView {
             column_pivots: this.model.get("column_pivots"),
             aggregates: this.model.get("aggregates"),
             sort: this.model.get("sort"),
-            filters: this.model.get("filters"),
+            filter: this.model.get("filter"),
             expressions: this.model.get("expressions"),
             plugin_config: this.model.get("plugin_config"),
             server: this.model.get("server"),
@@ -263,9 +263,7 @@ export class PerspectiveView extends DOMWidgetView {
              */
             const data = msg.data["data"];
             const client_table: Promise<Table> = this.client_worker.table(data, table_options);
-            client_table.then(table => {
-                this.pWidget.load(table);
-            });
+            this.pWidget.load(client_table);
         } else {
             if (this.pWidget.server && msg.data["table_name"]) {
                 /**
@@ -280,53 +278,56 @@ export class PerspectiveView extends DOMWidgetView {
                 const kernel_table: Table = this.perspective_client.open_table(msg.data["table_name"]);
                 const kernel_view: Promise<View> = kernel_table.view();
                 kernel_view.then(kernel_view => {
-                    kernel_view.to_arrow().then((arrow: ArrayBuffer) => {
+                    kernel_view.to_arrow().then(async (arrow: ArrayBuffer) => {
                         // Create a client side table
-                        this.client_worker.table(arrow, table_options).then(client_table => {
-                            if (this.pWidget.editable) {
-                                // Set up client/server editing
-                                client_table.view().then(client_view => {
-                                    let client_edit_port: number, server_edit_port: number;
+                        const client_table = this.client_worker.table(arrow, table_options); //.then(client_table => {
+                        const client_table2 = await client_table;
+                        if (this.pWidget.editable) {
+                            // Set up client/server editing
 
-                                    // Create ports on the client and kernel.
-                                    Promise.all([this.pWidget.load(client_table), this.pWidget.getEditPort(), kernel_table.make_port()]).then(outs => {
-                                        client_edit_port = outs[1];
-                                        server_edit_port = outs[2];
-                                    });
+                            const client_view = await client_table2.view();
+                            // table.view().then(client_view => {
+                            let client_edit_port: number, server_edit_port: number;
 
-                                    // When the client updates, if the update
-                                    // comes through the edit port then forward
-                                    // it to the server.
-                                    client_view.on_update(
-                                        updated => {
-                                            if (updated.port_id === client_edit_port) {
-                                                kernel_table.update(updated.delta, {
-                                                    port_id: server_edit_port
-                                                });
-                                            }
-                                        },
-                                        {mode: "row"}
-                                    );
+                            // Create ports on the client and kernel.
+                            Promise.all([this.pWidget.load(client_table), this.pWidget.getEditPort(), kernel_table.make_port()]).then(outs => {
+                                client_edit_port = outs[1];
+                                server_edit_port = outs[2];
+                            });
 
-                                    // If the server updates, and the edit is
-                                    // not coming from the server edit port,
-                                    // then synchronize state with the client.
-                                    kernel_view.on_update(
-                                        updated => {
-                                            if (updated.port_id !== server_edit_port) {
-                                                client_table.update(updated.delta); // any port, we dont care
-                                            }
-                                        },
-                                        {mode: "row"}
-                                    );
-                                });
-                            } else {
-                                // Load the table and mirror updates from the
-                                // kernel.
-                                this.pWidget.load(client_table);
-                                kernel_view.on_update(updated => client_table.update(updated.delta), {mode: "row"});
-                            }
-                        });
+                            // When the client updates, if the update
+                            // comes through the edit port then forward
+                            // it to the server.
+                            client_view.on_update(
+                                updated => {
+                                    if (updated.port_id === client_edit_port) {
+                                        kernel_table.update(updated.delta, {
+                                            port_id: server_edit_port
+                                        });
+                                    }
+                                },
+                                {mode: "row"}
+                            );
+
+                            // If the server updates, and the edit is
+                            // not coming from the server edit port,
+                            // then synchronize state with the client.
+                            kernel_view.on_update(
+                                updated => {
+                                    if (updated.port_id !== server_edit_port) {
+                                        client_table2.update(updated.delta); // any port, we dont care
+                                    }
+                                },
+                                {mode: "row"}
+                            );
+                            // });
+                        } else {
+                            // Load the table and mirror updates from the
+                            // kernel.
+                            this.pWidget.load(client_table);
+                            kernel_view.on_update(updated => client_table2.update(updated.delta), {mode: "row"});
+                        }
+                        // });
                     });
                 });
             } else {
@@ -356,35 +357,35 @@ export class PerspectiveView extends DOMWidgetView {
      * are not properties in `<perspective-viewer>`.
      */
     plugin_changed(): void {
-        this.pWidget.plugin = this.model.get("plugin");
+        this.pWidget.restore({plugin: this.model.get("plugin")});
     }
 
     columns_changed(): void {
-        this.pWidget.columns = this.model.get("columns");
+        this.pWidget.restore({columns: this.model.get("columns")});
     }
 
     row_pivots_changed(): void {
-        this.pWidget.row_pivots = this.model.get("row_pivots");
+        this.pWidget.restore({row_pivots: this.model.get("row_pivots")});
     }
 
     column_pivots_changed(): void {
-        this.pWidget.column_pivots = this.model.get("column_pivots");
+        this.pWidget.restore({column_pivots: this.model.get("column_pivots")});
     }
 
     aggregates_changed(): void {
-        this.pWidget.aggregates = this.model.get("aggregates");
+        this.pWidget.restore({aggregates: this.model.get("aggregates")});
     }
 
     sort_changed(): void {
-        this.pWidget.sort = this.model.get("sort");
+        this.pWidget.restore({sort: this.model.get("sort")});
     }
 
     filters_changed(): void {
-        this.pWidget.filters = this.model.get("filters");
+        this.pWidget.restore({filter: this.model.get("filter")});
     }
 
     expressions_changed(): void {
-        this.pWidget.expressions = this.model.get("expressions");
+        this.pWidget.restore({expressions: this.model.get("expressions")});
     }
 
     plugin_config_changed(): void {

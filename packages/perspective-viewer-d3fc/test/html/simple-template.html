@@ -9,35 +9,56 @@
 
 <!DOCTYPE html>
 <html>
-    <head>
 
-        <script src="perspective.js"></script>
-        <script src="perspective-viewer.js"></script>
-        <script src="perspective-viewer-d3fc.js"></script>
-    
-        <link rel='stylesheet' href="demo.css">
+<head>
 
-    </head>
-    <body>
+    <script src="perspective.js"></script>
+    <script src="perspective-viewer.js"></script>
+    <script src="perspective-viewer-d3fc.js"></script>
 
-        <perspective-viewer
-            plugin="{view-name}"
-            columns='{columns}'>
-  
-        </perspective-viewer>
+    <link rel='stylesheet' href="material-dense.css" is="custom-style">
 
-        <script>
+    <style>
+        perspective-expression-editor {
+            --monaco-cursor--visibility: hidden;
+            --monaco-container--appearance: none;
+        }
 
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'superstore.csv', true);
-            xhr.onload = function () { 
-                perspective.worker().table(xhr.response).then(table => {
-                    document.getElementsByTagName('perspective-viewer')[0].load(table); 
-                });
-            }
-            xhr.send(null);
+        perspective-viewer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
 
-        </script>
+        perspective-viewer table {
+            font-family: Arial;
+        }
+    </style>
 
-    </body>
+</head>
+
+<body>
+
+    <perspective-viewer>
+
+    </perspective-viewer>
+
+    <script>
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'superstore.csv', true);
+        xhr.onload = async function () {
+            const viewer =
+                document.getElementsByTagName('perspective-viewer')[0];
+            viewer.load(perspective.worker().table(xhr.response));
+            await viewer.restore({ plugin: "__view_name", columns: __columns });
+        }
+        xhr.send(null);
+
+    </script>
+
+</body>
+
 </html>

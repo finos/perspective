@@ -9,7 +9,7 @@
 const {execute} = require("./script_utils.js");
 
 // Packages listed as dependencies & dev dependencies inside Jupyterlab plugin
-const packages = ["perspective", "perspective-viewer", "perspective-viewer-datagrid", "perspective-viewer-d3fc"];
+const packages = ["./packages/perspective", "./rust/perspective-viewer", "./packages/perspective-viewer-datagrid", "./packages/perspective-viewer-d3fc"];
 
 /**
  * In order for Jupyterlab to pick up changes to @finos/perspective-* in the
@@ -30,7 +30,7 @@ const packages = ["perspective", "perspective-viewer", "perspective-viewer-datag
  */
 (async function() {
     try {
-        execute`jupyter labextension link ${packages.map(x => `./packages/${x}`).join(" ")}`;
+        execute`jupyter labextension link ${packages.join(" ")}`;
         console.log("Jupyterlab should now have all changes from the current working directory. To pick up new changes, run `yarn build` and `jupyter lab build`.");
     } catch (e) {
         console.error(e);

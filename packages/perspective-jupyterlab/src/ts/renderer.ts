@@ -14,7 +14,7 @@ import {ABCWidgetFactory, DocumentRegistry, IDocumentWidget, DocumentWidget} fro
 import {PerspectiveWidget} from "./psp_widget";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const perspective = require("@finos/perspective");
+const perspective = require("@finos/perspective").default;
 
 /**
  * The name of the factories that creates widgets.
@@ -85,10 +85,11 @@ export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget>
 
             if (this._psp.viewer.table === undefined) {
                 // construct new table
-                const table = await WORKER.table(data);
+                const table_promise = WORKER.table(data);
 
                 // load data
-                this._psp.viewer.load(table);
+                await this._psp.viewer.load(table_promise);
+                const table = await this._psp.viewer.getTable();
 
                 // create a flat view
                 const view = await table.view();

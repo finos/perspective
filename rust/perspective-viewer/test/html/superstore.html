@@ -1,0 +1,51 @@
+<!--
+   
+   Copyright (c) 2017, the Perspective Authors.
+   
+   This file is part of the Perspective library, distributed under the terms of
+   the Apache License 2.0.  The full license can be found in the LICENSE file.
+
+-->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <script src="perspective.js"></script>
+    <script src="perspective-viewer.js"></script>
+
+    <link rel='stylesheet' href="demo.css">
+
+    <style>
+        perspective-expression-editor {
+            --monaco-cursor--visibility: hidden;
+            --monaco-container--appearance: none;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <perspective-viewer>
+
+    </perspective-viewer>
+
+    <script>
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'superstore.csv', true);
+        xhr.onload = function () {
+            window.__CSV__ = xhr.response;
+            window.__WORKER__ = perspective.worker();
+            const table = perspective.worker().table(xhr.response);
+            document.getElementsByTagName('perspective-viewer')[0].load(table);
+        }
+        xhr.send(null);
+
+    </script>
+
+</body>
+
+</html>

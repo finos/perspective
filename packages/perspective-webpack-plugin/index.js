@@ -21,6 +21,7 @@ class PerspectiveWebpackPlugin {
                 inlineWasm: false,
                 inlineWorker: false,
                 wasmPath: path.dirname(require.resolve("@finos/perspective/package.json")),
+                viewerPath: path.dirname(require.resolve("@finos/perspective-viewer/package.json")),
                 workerPath: path.dirname(require.resolve("@finos/perspective/package.json")),
                 wasmName: "[name].wasm",
                 workerName: "[name].js"
@@ -63,7 +64,7 @@ class PerspectiveWebpackPlugin {
         } else {
             rules.push({
                 test: /\.js$/,
-                include: /@finos\/perspective\-vieux/,
+                include: /@finos\/perspective\-viewer/,
                 use: [
                     {
                         loader: require.resolve("string-replace-loader"),
@@ -80,7 +81,7 @@ class PerspectiveWebpackPlugin {
             rules.push({
                 test: /\.wasm$/,
                 type: "javascript/auto",
-                include: this.options.wasmPath,
+                include: [this.options.wasmPath, this.options.viewerPath],
                 use: {
                     loader: require.resolve("file-loader"),
                     options: {
@@ -92,7 +93,7 @@ class PerspectiveWebpackPlugin {
             rules.push({
                 test: /\.wasm$/,
                 type: "javascript/auto",
-                include: this.options.wasmPath,
+                include: [this.options.wasmPath, this.options.viewerPath],
                 loader: require.resolve("arraybuffer-loader")
             });
         }

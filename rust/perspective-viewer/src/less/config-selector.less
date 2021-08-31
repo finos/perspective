@@ -1,0 +1,354 @@
+
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+@import "./variables.less";
+
+:host {
+
+    #top_panel {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        padding: var(--top_panel--padding, 5px 0px 10px 0px);
+        max-width: 1000px;
+        z-index: 1;
+
+        .row_close {
+            display: inline;
+            font-family: "Material Icons";
+            cursor: pointer;
+            min-width: 5px;
+            margin-right: 3px;
+            flex-grow: 0;
+            font-size: 12px;
+            margin-top: 2px;
+            margin-left: 3px;
+            margin-right: 0px;
+            &:before {
+                content: "close";
+            }
+        }
+
+        .pivot-column {
+            display: inline-flex;
+            align-items: center;
+            min-height: 24px;
+            &:not(.config-drop) {
+                padding: 12px 9px 0 0;
+                margin-top: -12px;
+            }
+
+            span {
+                white-space: nowrap;
+            }
+
+            // Column is being dragged-over, e.g. this is the drop indicator.
+            &.config-drop {
+                display: inline;
+                width: 0px;
+                height: 14px;
+                min-height: 14px;
+                margin-top: 5px;
+                overflow: visible;
+                border-left: 2px solid rgba(0,0,0,0.5);
+                margin-right: 2px;
+                margin-left: -4px;
+
+                &:first-child {
+                    margin-right: -2px;
+                    margin-left: 0px;
+                }
+
+                & > * {
+                    color: transparent;
+                }
+            }
+        }
+
+        label.pivot-selector-label {
+            pointer-events: none;
+        }
+
+        #row_pivots label.pivot-selector-label:before {
+            content: var(--row_pivots--before, "Row Pivots");
+        }
+
+        #column_pivots label.pivot-selector-label:before {
+            content: var(--column_pivots--before, "Column Pivots");
+        }
+
+        #sort label.pivot-selector-label:before {
+            content: "Order By";
+        }
+
+        #filter label.pivot-selector-label:before {
+            content: "Where";
+        }
+
+        .highlight-drop {
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .rrow {
+            display: flex;
+            min-height: 24px;
+            align-items: center;
+            max-width: 400px;
+            list-style: none;
+            min-width: 140px;
+            padding: 12px 12px 12px 0px;
+            // flex: 1 1 auto;
+
+
+            .input-sizer {
+                display: inline-grid;
+                align-items: center;
+                position: relative;
+                margin-top: 1px;
+                font-family: "Open Sans";
+                font-size: 12px;
+                
+                &::after,
+                input,
+                textarea {
+                    width: auto;
+                    grid-area: 1 / 1;
+                }
+
+                &.num-filter {
+                    input, textarea {
+                        width: 80px;
+                    }
+                }
+
+                input, textarea {
+                    grid-area: 1 / 1;
+                    padding: 0;
+                    border: none;
+                    border-bottom: 1px solid #ccc;
+                    background: transparent;
+                    font-family: "Open Sans";
+                    font-size: 12px;
+                }
+                
+                &::after {
+                    content: attr(data-value) ' ';
+                    visibility: hidden;
+                    white-space: nowrap;
+                    padding-right: 12px;
+                    font-family: "Open Sans";
+                }
+
+                input.date-filter {
+                    width: 120px;
+                }
+
+                input.time-filter {
+                    grid-area: 1/2;
+                }
+                
+                &:focus-within {
+                    textarea:focus,
+                    input:focus {
+                        outline: none;
+                    }
+                }
+            }
+
+            span[draggable] {
+                cursor: move;
+            }
+        }
+
+        .rrow > div {
+            display: flex;
+            min-height: 24px;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .rrow > * {
+            width: 100%;
+            padding: 12px 0px 0px 0px;
+            margin: -12px 0px -12px 0px;
+        }
+
+        .psp-text-field ul {
+            min-height: 20px;
+        }
+
+        .psp-text-field {
+            position: relative;
+            background-color: var(--column-drop-container--background, white);
+            border-width: 0;
+            border-bottom-width: 1px;
+            border-style: solid;
+            border-color: var(--inactive--color, #ccc);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            min-height: 24px;
+            // background is nor transitionable ...
+            transition: border-color 0.3s ease-out, background-size 0.3s ease-out;
+            background-size: 100% 200%;
+        }
+
+        // :host(.dragging) .psp-text-field.dropping {
+        //     border-bottom-width: 2px;
+        //     border-style: solid;
+        //     border-color: var(--active--color, @blue500);
+        // }
+
+        // :host(.dragging) .psp-text-field {
+        //     border-bottom-width: 1px;
+        //     border-style: solid;
+        //     border-color: var(--active--color, @blue500);
+        //     background: var(--input-dragover--background, linear-gradient(to top, rgb(203, 231, 249), transparent 25%));
+        //     background-size: 100% 100%;
+        // }
+
+        .psp-text-field > .psp-text-field__input {
+            flex-wrap: wrap;
+            border: 0px;
+            line-height: 20px;
+            vertical-align: bottom;
+            padding-bottom: 0px;
+            display: none;
+            margin: 0;
+            padding: 0 48px 0 0;
+            font-size: 12px;
+            min-height: 24px;
+            margin-bottom: -1px;
+
+            // Comma separators
+            & > :not(.config-drop)::after {
+                width: 0px;
+                content: ",";
+            }
+
+            & > :last-child::after {
+                display: none;
+                content: "" !important;
+            }
+        }
+
+        .psp-text-field__input + label {
+            width: 0px;
+            height: var(--column--height, auto);
+            line-height: 17px;
+            box-sizing: border-box;
+            font-weight: 300;
+            color: var(--inactive--color, #B4B7BE);
+            white-space: nowrap;
+            padding: var(--column-drop-container--padding, 0px 0px 2px 10px);
+            font-size: 12px;
+            display: inline-block;
+            // TODO animate?
+            // transition: font-size 0.3s, margin 0.3s;
+        }
+
+        // .dropping .psp-text-field__input,
+        .psp-text-field__input:not(:empty) {
+            display: flex!important;
+        }
+
+        // .dropping .psp-text-field__input::after {
+        //     content: "|";
+        //     width: 0px;
+        //     overflow: visible;
+        //     margin-top: -1px;
+        //     position: absolute;
+        // }
+
+        // .dropping * {
+        //     pointer-events: none;
+        // }
+
+        // .dropping .psp-text-field label,
+        .psp-text-field__input:not(:empty) + label {
+            position: absolute;
+            top: 0px;
+            margin: var(--column-drop-label--margin, 0);
+            font-size: var(--column-drop-label--font-size, 12px);
+            display: var(--column-drop-label--display, none);
+        }
+
+        #transpose_button {
+            cursor: pointer;
+            min-width: 5px;
+            max-width: 5px;
+            flex-grow: 0;
+            color: var(--inactive--color, inherit);
+            font-family: Arial;
+            font-size: 12px;
+            user-select: none;
+            padding: 12px 24px 0 0;
+            &:hover {
+                color: var(--active--color, inherit);
+            }
+        }
+
+        #filter {
+            min-width: 300px;
+
+            .pivot-column {
+                select {
+                    font-family: var(--interface-monospace--font-family, monospace);
+                    padding-right: 12px;
+                    padding-left: 4px;
+                    max-width: 100%;
+                }
+            }
+        }
+    }
+
+
+    .sort-icon {
+        margin-left: 4px;
+        cursor: pointer;
+        font-family: "Material Icons";
+
+        &.desc:before {
+            content: var(--sort-order-desc--before, "\2193");
+        }
+
+        &.asc:before {
+            content: var(--sort-order-asc--before, "\2191");
+        }
+
+        &.none:before {
+            content: var(--sort-order-none--before, "-");
+        }
+
+        &.asc.abs:before {
+            content: var(--sort-order-asc-abs--before, "\21E7");
+        }
+
+        &.desc.abs:before {
+            content: var(--sort-order-desc-abs--before, "\21E9");
+        }
+
+        &.col.asc:before {
+            content: var(--sort-order-col-asc--before, "\2192");
+        }
+
+        &.col.desc:before {
+            content: var(--sort-order-col-desc--before, "\2190");
+        }
+
+        &.col.asc.abs:before {
+            content: var(--sort-order-col-asc-abs--before, "\21E8");
+        }
+
+        &.col.desc.abs:before {
+            content: var(--sort-order-col-desc-abs--before, "\21E6");
+        }
+    }
+}

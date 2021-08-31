@@ -16,12 +16,21 @@ const render_warning_tests = require("@finos/perspective-viewer/test/js/render_w
 const {withTemplate} = require("./simple-template");
 withTemplate("heatmap", "Heatmap");
 
+function get_contents(temp) {
+    return async function(page) {
+        return await page.evaluate(async temp => {
+            const viewer = document.querySelector(`perspective-viewer perspective-viewer-d3fc-${temp}`).shadowRoot.querySelector("svg");
+            return viewer.outerHTML || "MISSING";
+        }, temp);
+    };
+}
+
 utils.with_server({}, () => {
     describe.page(
         "heatmap.html",
         () => {
-            simple_tests.default();
-            render_warning_tests.default("Heatmap");
+            simple_tests.default(get_contents("heatmap"));
+            // render_warning_tests.default("Heatmap");
         },
         {reload_page: false, root: path.join(__dirname, "..", "..", "..")}
     );

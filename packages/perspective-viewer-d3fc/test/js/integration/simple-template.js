@@ -16,7 +16,7 @@ const DEFAULT_COLUMNS = ["Sales"];
 const withTemplate = (name, view, {template = SIMPLE_TEMPLATE, columns = DEFAULT_COLUMNS} = {}) => {
     const dir_name = path.join(__dirname, "..", "..", "..", "dist", "umd");
     const templateContent = fs.readFileSync(path.join(dir_name, `${template}.html`), "utf8");
-    const content = templateContent.replace("{view-name}", view).replace("{columns}", JSON.stringify(columns));
+    const content = templateContent.replace("__view_name", view).replace("__columns", JSON.stringify(columns));
     fs.writeFileSync(path.join(dir_name, `${name}.html`), content);
 };
 

@@ -32,9 +32,7 @@
         var xhr = new XMLHttpRequest();
         xhr.open('GET', 'shares.csv', true);
         xhr.onload = function () {
-            perspective.worker().table(xhr.response).then(table => {
-                document.getElementsByTagName('perspective-viewer')[0].load(table); 
-            });
+            document.getElementsByTagName('perspective-viewer')[0].load(perspective.worker().table(xhr.response));
         }
         xhr.send(null);
 

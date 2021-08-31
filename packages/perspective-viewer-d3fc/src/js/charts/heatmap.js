@@ -60,8 +60,8 @@ function heatmapChart(container, settings) {
 }
 heatmapChart.plugin = {
     name: "Heatmap",
-    max_cells: 1000,
-    max_columns: 50,
+    max_cells: 5000,
+    max_columns: 100,
     render_warning: true
 };
 

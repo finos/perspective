@@ -8,6 +8,7 @@
  */
 
 const path = require("path");
+const PerspectivePlugin = require("@finos/perspective-webpack-plugin");
 
 module.exports = {
     mode: process.env.PSP_NO_MINIFY || process.env.PSP_DEBUG ? "development" : process.env.NODE_ENV || "production",
@@ -22,6 +23,7 @@ module.exports = {
             crypto: false
         }
     },
+    plugins: [new PerspectivePlugin({})],
     performance: {
         hints: false,
         maxEntrypointSize: 512000,
@@ -32,20 +34,17 @@ module.exports = {
         rules: [
             {
                 test: /\.less$/,
+                exclude: /node_modules/,
                 use: [{loader: "style-loader"}, {loader: "css-loader"}, {loader: "less-loader"}]
             },
             {
                 test: /\.css$/,
-                include: /monaco\-editor/,
+                exclude: /node_modules/,
                 use: [{loader: "css-loader"}]
             },
             {
-                test: /\.ttf$/,
-                include: /monaco\-editor/,
-                use: ["file-loader"]
-            },
-            {
                 test: /\.(html)$/,
+                exclude: /node_modules/,
                 use: {
                     loader: "html-loader",
                     options: {}
@@ -55,20 +54,6 @@ module.exports = {
                 test: /\.ts$/,
                 exclude: /node_modules/,
                 loader: "ts-loader"
-            },
-            {
-                test: /\.wasm$/,
-                type: "javascript/auto",
-                include: path.dirname(require.resolve("@finos/perspective-viewer")),
-                loader: "arraybuffer-loader"
-            },
-            {
-                test: /editor\.worker/,
-                type: "javascript/auto",
-                loader: "worker-loader",
-                options: {
-                    inline: "no-fallback"
-                }
             }
         ]
     },
