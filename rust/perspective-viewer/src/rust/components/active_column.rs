@@ -171,8 +171,13 @@ impl Component for ActiveColumn {
             ActiveColumnState::Required(label) => (label.clone(), None),
         };
 
-        match name {
-            (label, None) => {
+        let col_type = name
+            .1
+            .as_ref()
+            .and_then(|x| self.props.session.metadata().get_column_table_type(x));
+
+        match (name, col_type) {
+            ((label, None), _) => {
                 classes.push("empty-named");
                 html! {
                     <div
@@ -190,14 +195,7 @@ impl Component for ActiveColumn {
                     </div>
                 }
             }
-            (label, Some(name)) => {
-                let col_type = self
-                    .props
-                    .session
-                    .metadata()
-                    .get_column_table_type(&name)
-                    .expect("Unknown column");
-
+            ((label, Some(name)), Some(col_type)) => {
                 let min_cols = self
                     .props
                     .renderer
@@ -308,6 +306,9 @@ impl Component for ActiveColumn {
                         </div>
                     </div>
                 }
+            }
+            _ => {
+                html! {}
             }
         }
     }
