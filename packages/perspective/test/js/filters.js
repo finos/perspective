@@ -196,6 +196,21 @@ module.exports = perspective => {
                 table.delete();
             });
 
+            it("empty, pivoted", async function() {
+                var table = await perspective.table(data);
+                var view = await table.view({
+                    row_pivots: ["y"],
+                    filter: [["x", "==", 100]]
+                });
+                let json = await view.to_json();
+                expect(json).toEqual([
+                    // empty sum
+                    {__ROW_PATH__: [], w: 0, x: null, y: 0, z: 0}
+                ]);
+                view.delete();
+                table.delete();
+            });
+
             it("x == 1, rolling updates", async function() {
                 var table = await perspective.table(data);
                 var view = await table.view({

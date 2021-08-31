@@ -170,8 +170,13 @@ t_stree::build_strand_table_phase_1(t_tscalar pkey, t_op op, t_uindex idx, t_uin
     const std::vector<std::string>& pivot_like) const {
     pivots_neq = false;
     std::set<std::string> pivmap;
-    bool all_eq_tt = true;
 
+    // if a row has been changed (value change, validity change, removed, etc.),
+    // will be false. 
+    bool no_new_rows = true;
+
+    // for each strand col, take out the value at row `idx` and use the
+    // transition to calculate whether the pivot has changed.
     for (t_uindex pidx = 0, ploop_end = pivot_like.size(); pidx < ploop_end; ++pidx) {
         const std::string& colname = pivot_like.at(pidx);
         if (pivmap.find(colname) != pivmap.end()) {
@@ -181,14 +186,26 @@ t_stree::build_strand_table_phase_1(t_tscalar pkey, t_op op, t_uindex idx, t_uin
         piv_scols[pidx]->push_back(piv_ccols[pidx]->get_scalar(idx));
         const std::uint8_t* trans_ = piv_tcols[pidx]->get_nth<std::uint8_t>(idx);
         t_value_transition trans = static_cast<t_value_transition>(*trans_);
-        if (trans != VALUE_TRANSITION_EQ_TT)
-            all_eq_tt = false;
+
+        // `no_new_rows` is used to calculate the strand count for the
+        // "count" aggregate. Previously we only checked if the column's
+        // value and validity did not change, which led to a long-running bug 
+        // where the "last" aggregate would increase the "count" of another
+        // column even when no new rows were added. Thus, we only need
+        // to check if new rows were added, not whether the row's value
+        // has changed.
+        if (trans != VALUE_TRANSITION_EQ_TT && trans != VALUE_TRANSITION_NEQ_TT)
+            no_new_rows = false;
 
         if (pidx < npivots) {
             pivots_neq = pivots_neq || pivots_changed(trans);
         }
     }
 
+    // For each aggregate col, except "psp_strand_count" as marked by
+    // "strand_count_idx" (the number of strands in the table), if the pivot
+    // has changed OR force_current_row is true, then use the aggregate
+    // from `current`, else use the `delta`.
     for (t_uindex aggidx = 0; aggidx < aggcolsize; ++aggidx) {
         if (aggidx != strand_count_idx) {
             if (pivots_neq || force_current_row) {
@@ -199,19 +216,18 @@ t_stree::build_strand_table_phase_1(t_tscalar pkey, t_op op, t_uindex idx, t_uin
         }
     }
 
-    std::int8_t cval;
+    std::int8_t strand_count;
 
     if (op == OP_DELETE) {
-        cval = -1;
+        // A row has been removed
+        strand_count = -1;
     } else {
-        if (t_env::backout_force_current_row()) {
-            cval = !all_eq_tt || pivots_neq ? 1 : 0;
-        } else {
-
-            cval = npivots == 0 || !all_eq_tt || pivots_neq || force_current_row ? 1 : 0;
-        }
+        // Strand count is 1 if there are no pivots, if new rows have been
+        // added, if pivots have been changed, or force_current_row is true.
+        strand_count = npivots == 0 || !no_new_rows || pivots_neq || force_current_row ? 1 : 0;
     }
-    agg_scount->push_back<std::int8_t>(cval);
+    
+    agg_scount->push_back<std::int8_t>(strand_count);
     spkey->push_back(pkey);
 
     ++insert_count;
@@ -225,6 +241,8 @@ t_stree::build_strand_table_phase_2(t_tscalar pkey, t_uindex idx, t_uindex npivo
     std::vector<t_column*>& agg_acols, t_column* agg_scount, t_column* spkey,
     t_uindex& insert_count, const std::vector<std::string>& pivot_like) const {
     std::set<std::string> pivmap;
+
+    // For each column, insert the prev value to the strand
     for (t_uindex pidx = 0, ploop_end = pivot_like.size(); pidx < ploop_end; ++pidx) {
         const std::string& colname = pivot_like.at(pidx);
         if (pivmap.find(colname) != pivmap.end()) {
@@ -245,24 +263,24 @@ t_stree::build_strand_table_phase_2(t_tscalar pkey, t_uindex idx, t_uindex npivo
     ++insert_count;
 }
 
-t_build_strand_table_common_rval
-t_stree::build_strand_table_common(const t_data_table& flattened,
+t_build_strand_table_metadata
+t_stree::build_strand_table_metadata(const t_data_table& flattened,
     const std::vector<t_aggspec>& aggspecs, const t_config& config) const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
-    t_build_strand_table_common_rval rv;
+    t_build_strand_table_metadata metadata;
 
-    rv.m_flattened_schema = flattened.get_schema();
+    metadata.m_flattened_schema = flattened.get_schema();
     std::set<std::string> sschema_colset;
 
     for (const auto& piv : m_pivots) {
         const std::string& colname = piv.colname();
         std::string sortby_colname = config.get_sort_by(colname);
-        auto add_col = [&sschema_colset, &rv](const std::string& cname) {
+        auto add_col = [&sschema_colset, &metadata](const std::string& cname) {
             if (sschema_colset.find(cname) == sschema_colset.end()) {
-                rv.m_pivot_like_columns.push_back(cname);
-                rv.m_strand_schema.add_column(cname, rv.m_flattened_schema.get_dtype(cname));
+                metadata.m_pivot_like_columns.push_back(cname);
+                metadata.m_strand_schema.add_column(cname, metadata.m_flattened_schema.get_dtype(cname));
                 sschema_colset.insert(cname);
             }
         };
@@ -271,7 +289,7 @@ t_stree::build_strand_table_common(const t_data_table& flattened,
         add_col(sortby_colname);
     }
 
-    rv.m_pivsize = sschema_colset.size();
+    metadata.m_pivsize = sschema_colset.size();
 
     std::set<std::string> aggcolset;
     for (const auto& aggspec : aggspecs) {
@@ -282,29 +300,40 @@ t_stree::build_strand_table_common(const t_data_table& flattened,
 
                 if (aggspec.is_non_delta()
                     && sschema_colset.find(depname) == sschema_colset.end()) {
-                    rv.m_pivot_like_columns.push_back(depname);
-                    rv.m_strand_schema.add_column(
-                        depname, rv.m_flattened_schema.get_dtype(depname));
+                    metadata.m_pivot_like_columns.push_back(depname);
+                    metadata.m_strand_schema.add_column(
+                        depname, metadata.m_flattened_schema.get_dtype(depname));
                     sschema_colset.insert(depname);
                 }
             }
         }
     }
 
-    rv.m_npivotlike = sschema_colset.size();
-    rv.m_strand_schema.add_column(
+    metadata.m_npivotlike = sschema_colset.size();
+    metadata.m_strand_schema.add_column(
         "psp_pkey", flattened.get_const_column("psp_pkey")->get_dtype());
 
     for (const auto& aggcol : aggcolset) {
-        rv.m_aggschema.add_column(aggcol, rv.m_flattened_schema.get_dtype(aggcol));
+        metadata.m_aggschema.add_column(aggcol, metadata.m_flattened_schema.get_dtype(aggcol));
     }
 
-    rv.m_aggschema.add_column("psp_strand_count", DTYPE_INT8);
-    return rv;
+    metadata.m_aggschema.add_column("psp_strand_count", DTYPE_INT8);
+    return metadata;
 }
 
-// can contain additional rows
-// notably pivot changed rows will be added
+/**
+ * @brief Builds the strand table for all subsequent updates after the first
+ * update to the table.
+ * 
+ * @param flattened 
+ * @param delta 
+ * @param prev 
+ * @param current 
+ * @param transitions 
+ * @param aggspecs 
+ * @param config 
+ * @return std::pair<std::shared_ptr<t_data_table>, std::shared_ptr<t_data_table>> 
+ */
 std::pair<std::shared_ptr<t_data_table>, std::shared_ptr<t_data_table>>
 t_stree::build_strand_table(const t_data_table& flattened, const t_data_table& delta,
     const t_data_table& prev, const t_data_table& current, const t_data_table& transitions,
@@ -313,20 +342,20 @@ t_stree::build_strand_table(const t_data_table& flattened, const t_data_table& d
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
-    auto rv = build_strand_table_common(flattened, aggspecs, config);
+    auto metadata = build_strand_table_metadata(flattened, aggspecs, config);
 
     // strand table
-    std::shared_ptr<t_data_table> strands = std::make_shared<t_data_table>(rv.m_strand_schema);
+    std::shared_ptr<t_data_table> strands = std::make_shared<t_data_table>(metadata.m_strand_schema);
     strands->init();
 
     // strand table
-    std::shared_ptr<t_data_table> aggs = std::make_shared<t_data_table>(rv.m_aggschema);
+    std::shared_ptr<t_data_table> aggs = std::make_shared<t_data_table>(metadata.m_aggschema);
     aggs->init();
 
     std::shared_ptr<const t_column> pkey_col = flattened.get_const_column("psp_pkey");
     std::shared_ptr<const t_column> op_col = flattened.get_const_column("psp_op");
 
-    t_uindex npivotlike = rv.m_npivotlike;
+    t_uindex npivotlike = metadata.m_npivotlike;
     std::vector<const t_column*> piv_pcols(npivotlike);
     std::vector<const t_column*> piv_ccols(npivotlike);
     std::vector<const t_column*> piv_tcols(npivotlike);
@@ -334,15 +363,18 @@ t_stree::build_strand_table(const t_data_table& flattened, const t_data_table& d
 
     t_uindex insert_count = 0;
 
+    // Get each intermediate column, including columns aggregated by
+    // last, high, and low as they were added to m_strand_schema in
+    // the construction method.
     for (t_uindex pidx = 0; pidx < npivotlike; ++pidx) {
-        const std::string& piv = rv.m_strand_schema.m_columns[pidx];
+        const std::string& piv = metadata.m_strand_schema.m_columns[pidx];
         piv_pcols[pidx] = prev.get_const_column(piv).get();
         piv_ccols[pidx] = current.get_const_column(piv).get();
         piv_tcols[pidx] = transitions.get_const_column(piv).get();
         piv_scols[pidx] = strands->get_column(piv).get();
     }
 
-    t_uindex aggcolsize = rv.m_aggschema.m_columns.size();
+    t_uindex aggcolsize = metadata.m_aggschema.m_columns.size();
     std::vector<const t_column*> agg_ccols(aggcolsize);
     std::vector<const t_column*> agg_pcols(aggcolsize);
     std::vector<const t_column*> agg_dcols(aggcolsize);
@@ -351,7 +383,7 @@ t_stree::build_strand_table(const t_data_table& flattened, const t_data_table& d
     t_uindex strand_count_idx = 0;
 
     for (t_uindex aggidx = 0; aggidx < aggcolsize; ++aggidx) {
-        const std::string& aggcol = rv.m_aggschema.m_columns[aggidx];
+        const std::string& aggcol = metadata.m_aggschema.m_columns[aggidx];
         if (aggcol == "psp_strand_count") {
             agg_dcols[aggidx] = 0;
             agg_ccols[aggidx] = 0;
@@ -394,29 +426,29 @@ t_stree::build_strand_table(const t_data_table& flattened, const t_data_table& d
                 continue;
             } else if (!filter_prev && filter_curr) {
                 // apply current row
-                build_strand_table_phase_1(pkey, op, idx, rv.m_pivsize, strand_count_idx,
+                build_strand_table_phase_1(pkey, op, idx, metadata.m_pivsize, strand_count_idx,
                     aggcolsize, true, piv_ccols, piv_tcols, agg_ccols, agg_dcols, piv_scols,
                     agg_acols, agg_scount, spkey, insert_count, pivots_neq,
-                    rv.m_pivot_like_columns);
+                    metadata.m_pivot_like_columns);
             } else if (filter_prev && !filter_curr) {
                 // reverse prev row
-                build_strand_table_phase_2(pkey, idx, rv.m_pivsize, strand_count_idx,
+                build_strand_table_phase_2(pkey, idx, metadata.m_pivsize, strand_count_idx,
                     aggcolsize, piv_pcols, agg_pcols, piv_scols, agg_acols, agg_scount, spkey,
-                    insert_count, rv.m_pivot_like_columns);
+                    insert_count, metadata.m_pivot_like_columns);
             } else if (filter_prev && filter_curr) {
                 // should be handled as normal
-                build_strand_table_phase_1(pkey, op, idx, rv.m_pivsize, strand_count_idx,
+                build_strand_table_phase_1(pkey, op, idx, metadata.m_pivsize, strand_count_idx,
                     aggcolsize, false, piv_ccols, piv_tcols, agg_ccols, agg_dcols, piv_scols,
                     agg_acols, agg_scount, spkey, insert_count, pivots_neq,
-                    rv.m_pivot_like_columns);
+                    metadata.m_pivot_like_columns);
 
                 if (op == OP_DELETE || !pivots_neq) {
                     continue;
                 }
 
-                build_strand_table_phase_2(pkey, idx, rv.m_pivsize, strand_count_idx,
+                build_strand_table_phase_2(pkey, idx, metadata.m_pivsize, strand_count_idx,
                     aggcolsize, piv_pcols, agg_pcols, piv_scols, agg_acols, agg_scount, spkey,
-                    insert_count, rv.m_pivot_like_columns);
+                    insert_count, metadata.m_pivot_like_columns);
             }
         }
     } else {
@@ -427,18 +459,23 @@ t_stree::build_strand_table(const t_data_table& flattened, const t_data_table& d
             t_op op = static_cast<t_op>(op_);
             bool pivots_neq;
 
-            build_strand_table_phase_1(pkey, op, idx, rv.m_pivsize, strand_count_idx,
+            // FOR EVERY ROW,
+            // piv_ccols: current strand col, piv_tcols: current transition
+            // col for strand
+            build_strand_table_phase_1(pkey, op, idx, metadata.m_pivsize, strand_count_idx,
                 aggcolsize, false, piv_ccols, piv_tcols, agg_ccols, agg_dcols, piv_scols,
                 agg_acols, agg_scount, spkey, insert_count, pivots_neq,
-                rv.m_pivot_like_columns);
+                metadata.m_pivot_like_columns);
 
             if (op == OP_DELETE || !pivots_neq) {
                 continue;
             }
 
-            build_strand_table_phase_2(pkey, idx, rv.m_pivsize, strand_count_idx, aggcolsize,
+            // FOR EVERY ROW,
+            // piv_pcols: prev, piv_scols: strands? final data?
+            build_strand_table_phase_2(pkey, idx, metadata.m_pivsize, strand_count_idx, aggcolsize,
                 piv_pcols, agg_pcols, piv_scols, agg_acols, agg_scount, spkey, insert_count,
-                rv.m_pivot_like_columns);
+                metadata.m_pivot_like_columns);
         }
     }
 
@@ -451,48 +488,56 @@ t_stree::build_strand_table(const t_data_table& flattened, const t_data_table& d
         strands, aggs);
 }
 
-// can contain additional rows
-// notably pivot changed rows will be added
+/**
+ * @brief Builds the strand table immediately after a view's creation, where
+ * the only table that matters is `flattened` which contains the dataset
+ * from the gnode_state.
+ * 
+ * @param flattened 
+ * @param aggspecs 
+ * @param config 
+ * @return std::pair<std::shared_ptr<t_data_table>, std::shared_ptr<t_data_table>> 
+ */
 std::pair<std::shared_ptr<t_data_table>, std::shared_ptr<t_data_table>>
 t_stree::build_strand_table(const t_data_table& flattened,
     const std::vector<t_aggspec>& aggspecs, const t_config& config) const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
-    auto rv = build_strand_table_common(flattened, aggspecs, config);
+    auto metadata = build_strand_table_metadata(flattened, aggspecs, config);
 
     // strand table
-    std::shared_ptr<t_data_table> strands = std::make_shared<t_data_table>(rv.m_strand_schema);
+    std::shared_ptr<t_data_table> strands = std::make_shared<t_data_table>(metadata.m_strand_schema);
     strands->init();
 
     // strand table
-    std::shared_ptr<t_data_table> aggs = std::make_shared<t_data_table>(rv.m_aggschema);
+    std::shared_ptr<t_data_table> aggs = std::make_shared<t_data_table>(metadata.m_aggschema);
     aggs->init();
 
     std::shared_ptr<const t_column> pkey_col = flattened.get_const_column("psp_pkey");
 
     std::shared_ptr<const t_column> op_col = flattened.get_const_column("psp_op");
 
-    t_uindex npivotlike = rv.m_npivotlike;
+    t_uindex npivotlike = metadata.m_npivotlike;
     std::vector<const t_column*> piv_fcols(npivotlike);
     std::vector<t_column*> piv_scols(npivotlike);
 
     t_uindex insert_count = 0;
 
     for (t_uindex pidx = 0; pidx < npivotlike; ++pidx) {
-        const std::string& piv = rv.m_strand_schema.m_columns[pidx];
+        const std::string& piv = metadata.m_strand_schema.m_columns[pidx];
         piv_fcols[pidx] = flattened.get_const_column(piv).get();
         piv_scols[pidx] = strands->get_column(piv).get();
     }
 
-    t_uindex aggcolsize = rv.m_aggschema.m_columns.size();
+    t_uindex aggcolsize = metadata.m_aggschema.m_columns.size();
     std::vector<const t_column*> agg_fcols(aggcolsize);
     std::vector<t_column*> agg_acols(aggcolsize);
 
     t_uindex strand_count_idx = 0;
 
     for (t_uindex aggidx = 0; aggidx < aggcolsize; ++aggidx) {
-        const std::string& aggcol = rv.m_aggschema.m_columns[aggidx];
+        const std::string& aggcol = metadata.m_aggschema.m_columns[aggidx];
         if (aggcol == "psp_strand_count") {
             agg_fcols[aggidx] = 0;
             strand_count_idx = aggidx;
@@ -526,7 +571,7 @@ t_stree::build_strand_table(const t_data_table& flattened,
             continue;
         }
 
-        for (t_uindex pidx = 0, ploop_end = rv.m_pivot_like_columns.size(); pidx < ploop_end;
+        for (t_uindex pidx = 0, ploop_end = metadata.m_pivot_like_columns.size(); pidx < ploop_end;
              ++pidx) {
             piv_scols[pidx]->push_back(piv_fcols[pidx]->get_scalar(idx));
         }
@@ -572,6 +617,8 @@ t_stree::populate_pkey_idx(const t_dtree_ctx& ctx, const t_dtree& dtree, t_uinde
             auto pkey = m_symtable.get_interned_tscalar(pkey_col->get_scalar(lfidx));
             auto strand_count = *(strand_count_col->get_nth<std::int8_t>(lfidx));
 
+            // Checks the strand count and adds a new primary key if it's
+            // increased.
             if (strand_count > 0) {
                 t_stpkey s(sptidx, pkey);
                 new_idx_pkey.insert(s);
@@ -605,6 +652,8 @@ t_stree::update_shape_from_static(const t_dtree_ctx& ctx) {
     // update root
     auto root_iter = m_nodes->get<by_idx>().find(0);
     auto root_node = *root_iter;
+
+    // scount = summed strand count
     t_index root_nstrands = *(scount->get_nth<t_index>(0)) + root_node.m_nstrands;
     root_node.set_nstrands(std::max(root_nstrands, (t_index)1));
     m_nodes->get<by_idx>().replace(root_iter, root_node);

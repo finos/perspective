@@ -244,6 +244,66 @@ module.exports = perspective => {
             view.delete();
             table.delete();
         });
+
+        it("remove while pivoted, last and count", async function() {
+            const table = await perspective.table(
+                {
+                    x: ["a"],
+                    y: ["A"],
+                    idx: [1]
+                },
+                {index: "idx"}
+            );
+
+            const view = await table.view({
+                aggregates: {
+                    x: "last",
+                    y: "count"
+                },
+                row_pivots: ["y"]
+            });
+
+            expect(await view.to_columns()).toEqual({
+                __ROW_PATH__: [[], ["A"]],
+                x: ["a", "a"],
+                y: [1, 1],
+                idx: [1, 1]
+            });
+
+            table.update({
+                x: ["b"],
+                y: ["B"],
+                idx: [2]
+            });
+
+            expect(await view.to_columns()).toEqual({
+                __ROW_PATH__: [[], ["A"], ["B"]],
+                x: ["b", "a", "b"],
+                y: [2, 1, 1],
+                idx: [3, 1, 2]
+            });
+
+            table.remove([1]);
+
+            expect(await view.to_columns()).toEqual({
+                __ROW_PATH__: [[], ["B"]],
+                x: ["b", "b"],
+                y: [1, 1],
+                idx: [2, 2]
+            });
+
+            table.remove([2]);
+
+            expect(await view.to_columns()).toEqual({
+                __ROW_PATH__: [[]],
+                x: [""],
+                y: [0],
+                idx: [0]
+            });
+
+            await view.delete();
+            await table.delete();
+        });
     });
 
     describe("Schema", function() {

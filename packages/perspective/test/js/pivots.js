@@ -357,6 +357,681 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("last with count and partial update", async () => {
+            const table = await perspective.table(
+                {
+                    x: ["a"],
+                    y: ["A"],
+                    index: [1]
+                },
+                {index: "index"}
+            );
+
+            const view = await table.view({
+                aggregates: {
+                    x: "last",
+                    y: "count"
+                },
+                row_pivots: ["y"]
+            });
+
+            expect(await view.to_columns()).toEqual({
+                __ROW_PATH__: [[], ["A"]],
+                x: ["a", "a"],
+                y: [1, 1],
+                index: [1, 1]
+            });
+
+            for (let i = 0; i < 5; i++) {
+                table.update({
+                    x: ["a"],
+                    index: [1]
+                });
+            }
+
+            let result = await view.to_columns();
+            expect(result["y"]).toEqual([1, 1]);
+
+            table.update({
+                x: ["b"],
+                y: ["A"],
+                index: [1]
+            });
+
+            result = await view.to_columns();
+            expect(result["x"]).toEqual(["b", "b"]);
+            expect(result["y"]).toEqual([1, 1]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("high with count and partial update", async () => {
+            const table = await perspective.table(
+                {
+                    x: ["a"],
+                    y: [100],
+                    index: [1]
+                },
+                {index: "index"}
+            );
+
+            const view = await table.view({
+                aggregates: {
+                    x: "count",
+                    y: "high"
+                },
+                row_pivots: ["x"]
+            });
+
+            expect(await view.to_columns()).toEqual({
+                __ROW_PATH__: [[], ["a"]],
+                x: [1, 1],
+                y: [100, 100],
+                index: [1, 1]
+            });
+
+            for (let i = 0; i < 5; i++) {
+                table.update({
+                    x: ["a"],
+                    y: [100],
+                    index: [1]
+                });
+            }
+
+            let result = await view.to_columns();
+            expect(result["y"]).toEqual([100, 100]);
+
+            table.update({
+                x: ["b"],
+                y: [101],
+                index: [1]
+            });
+
+            result = await view.to_columns();
+            expect(result["x"]).toEqual([1, 1]);
+            expect(result["y"]).toEqual([101, 101]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("low with count and partial update", async () => {
+            const table = await perspective.table(
+                {
+                    x: ["a"],
+                    y: [100],
+                    index: [1]
+                },
+                {index: "index"}
+            );
+
+            const view = await table.view({
+                aggregates: {
+                    x: "count",
+                    y: "low"
+                },
+                row_pivots: ["x"]
+            });
+
+            expect(await view.to_columns()).toEqual({
+                __ROW_PATH__: [[], ["a"]],
+                x: [1, 1],
+                y: [100, 100],
+                index: [1, 1]
+            });
+
+            for (let i = 0; i < 5; i++) {
+                table.update({
+                    x: ["a"],
+                    y: [100],
+                    index: [1]
+                });
+            }
+
+            let result = await view.to_columns();
+            expect(result["y"]).toEqual([100, 100]);
+
+            table.update({
+                x: ["b"],
+                y: [101],
+                index: [1]
+            });
+
+            result = await view.to_columns();
+            expect(result["x"]).toEqual([1, 1]);
+            expect(result["y"]).toEqual([100, 101]);
+
+            table.update({
+                x: ["b"],
+                y: [99],
+                index: [1]
+            });
+
+            result = await view.to_columns();
+            expect(result["x"]).toEqual([1, 1]);
+            expect(result["y"]).toEqual([99, 99]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("low with count and multiple partial updates", async () => {
+            const table = await perspective.table(
+                {
+                    x: ["a"],
+                    y: [100],
+                    index: [1]
+                },
+                {index: "index"}
+            );
+
+            const view = await table.view({
+                aggregates: {
+                    x: "count",
+                    y: "low"
+                },
+                row_pivots: ["x"]
+            });
+
+            expect(await view.to_columns()).toEqual({
+                __ROW_PATH__: [[], ["a"]],
+                x: [1, 1],
+                y: [100, 100],
+                index: [1, 1]
+            });
+
+            for (let i = 0; i < 100; i++) {
+                table.update({
+                    x: ["a"],
+                    y: [99],
+                    index: [1]
+                });
+            }
+
+            let result = await view.to_columns();
+            expect(result["y"]).toEqual([99, 99]);
+
+            table.update({
+                y: [101],
+                index: [1]
+            });
+
+            result = await view.to_columns();
+            expect(result["x"]).toEqual([1, 1]);
+
+            // FIXME: my assumption of the `low` aggregate is that it should
+            // be the low of the group according to current data, but this seems
+            // like it's storing a "global" low?
+            expect(result["y"]).toEqual([99, 99]);
+
+            table.update({
+                x: ["b"],
+                y: [100],
+                index: [1]
+            });
+
+            result = await view.to_columns();
+            expect(result["x"]).toEqual([1, 1]);
+            expect(result["y"]).toEqual([99, 100]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("last with count and multiple partial updates", async () => {
+            const table = await perspective.table(
+                {
+                    x: ["a"],
+                    y: ["A"],
+                    index: [1]
+                },
+                {index: "index"}
+            );
+
+            const view = await table.view({
+                aggregates: {
+                    x: "last",
+                    y: "count"
+                },
+                row_pivots: ["y"]
+            });
+
+            expect(await view.to_columns()).toEqual({
+                __ROW_PATH__: [[], ["A"]],
+                x: ["a", "a"],
+                y: [1, 1],
+                index: [1, 1]
+            });
+
+            for (let i = 0; i < 100; i++) {
+                table.update({
+                    x: ["a"],
+                    index: [1]
+                });
+            }
+
+            let result = await view.to_columns();
+            expect(result["y"]).toEqual([1, 1]);
+
+            for (let i = 0; i < 100; i++) {
+                table.update({
+                    x: ["b"],
+                    index: [1]
+                });
+            }
+
+            result = await view.to_columns();
+            expect(result["x"]).toEqual(["b", "b"]);
+            expect(result["y"]).toEqual([1, 1]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("last with multiple aggs, count, and multiple partial updates", async () => {
+            const table = await perspective.table(
+                {
+                    x: ["a"],
+                    y: ["A"],
+                    z: [1],
+                    index: [1]
+                },
+                {index: "index"}
+            );
+
+            const view = await table.view({
+                aggregates: {
+                    x: "last",
+                    y: "count"
+                },
+                row_pivots: ["y", "z"]
+            });
+
+            expect(await view.to_columns()).toEqual({
+                __ROW_PATH__: [[], ["A"], ["A", 1]],
+                x: ["a", "a", "a"],
+                y: [1, 1, 1],
+                z: [1, 1, 1],
+                index: [1, 1, 1]
+            });
+
+            for (let i = 0; i < 100; i++) {
+                table.update({
+                    x: ["a"],
+                    index: [1]
+                });
+            }
+
+            let result = await view.to_columns();
+            expect(result["y"]).toEqual([1, 1, 1]);
+
+            for (let i = 0; i < 100; i++) {
+                table.update({
+                    x: ["b"],
+                    index: [1]
+                });
+            }
+
+            result = await view.to_columns();
+            expect(result["x"]).toEqual(["b", "b", "b"]);
+            expect(result["y"]).toEqual([1, 1, 1]);
+
+            for (let i = 2; i < 6; i++) {
+                table.update({
+                    x: [i.toString()],
+                    y: [i.toString()],
+                    z: [i],
+                    index: [i]
+                });
+            }
+
+            expect(await view.to_columns()).toEqual({
+                __ROW_PATH__: [[], ["2"], ["2", 2], ["3"], ["3", 3], ["4"], ["4", 4], ["5"], ["5", 5], ["A"], ["A", 1]],
+                x: ["5", "2", "2", "3", "3", "4", "4", "5", "5", "b", "b"],
+                y: [5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                z: [15, 2, 2, 3, 3, 4, 4, 5, 5, 1, 1],
+                index: [15, 2, 2, 3, 3, 4, 4, 5, 5, 1, 1]
+            });
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("last with count and invalid to valid", async () => {
+            // y[0] is invalid
+            const table = await perspective.table(
+                {
+                    x: ["a"],
+                    y: [null],
+                    index: [1]
+                },
+                {index: "index"}
+            );
+
+            const view = await table.view({
+                aggregates: {
+                    x: "last",
+                    y: "count"
+                },
+                row_pivots: ["x"]
+            });
+
+            expect(await view.to_columns()).toEqual({
+                __ROW_PATH__: [[], ["a"]],
+                x: ["a", "a"],
+                y: [1, 1], // null is still a value for count
+                index: [1, 1]
+            });
+
+            const view2 = await table.view({
+                aggregates: {
+                    x: "last",
+                    y: "last"
+                },
+                row_pivots: ["x"]
+            });
+
+            expect(await view2.to_columns()).toEqual({
+                __ROW_PATH__: [[], ["a"]],
+                x: ["a", "a"],
+                y: [null, null],
+                index: [1, 1]
+            });
+
+            for (let i = 0; i < 100; i++) {
+                table.update({
+                    x: ["a"],
+                    index: [1]
+                });
+            }
+
+            let result = await view.to_columns();
+            expect(result["y"]).toEqual([1, 1]);
+
+            // y[0] becomes valid
+            table.update({
+                x: ["b"],
+                y: ["B"],
+                index: [1]
+            });
+
+            result = await view.to_columns();
+            let result2 = await view2.to_columns();
+            expect(result["x"]).toEqual(["b", "b"]);
+            expect(result["y"]).toEqual([1, 1]);
+            expect(result2["y"]).toEqual(["B", "B"]);
+
+            // and invalid
+            table.update({
+                y: [null],
+                index: [1]
+            });
+
+            result = await view.to_columns();
+            result2 = await view2.to_columns();
+            expect(result["y"]).toEqual([1, 1]);
+            expect(result2["y"]).toEqual([null, null]);
+
+            await view2.delete();
+            await view.delete();
+            await table.delete();
+        });
+
+        it("last with count and partial update 2-sided", async () => {
+            const table = await perspective.table(
+                {
+                    x: ["a"],
+                    y: ["A"],
+                    index: [1]
+                },
+                {index: "index"}
+            );
+
+            const view = await table.view({
+                aggregates: {
+                    x: "last",
+                    y: "count"
+                },
+                row_pivots: ["y"],
+                column_pivots: ["x"]
+            });
+
+            expect(await view.to_columns()).toEqual({
+                __ROW_PATH__: [[], ["A"]],
+                "a|x": ["a", "a"],
+                "a|y": [1, 1],
+                "a|index": [1, 1]
+            });
+
+            for (let i = 0; i < 5; i++) {
+                table.update({
+                    x: ["a"],
+                    index: [1]
+                });
+            }
+
+            let result = await view.to_columns();
+            expect(result["a|y"]).toEqual([1, 1]);
+
+            table.update({
+                x: ["b"],
+                y: ["A"],
+                index: [1]
+            });
+
+            result = await view.to_columns();
+            expect(result["b|x"]).toEqual(["b", "b"]);
+            expect(result["b|y"]).toEqual([1, 1]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("last with count and partial update flip", async () => {
+            const table = await perspective.table(
+                {
+                    x: ["a"],
+                    y: ["A"],
+                    index: [1]
+                },
+                {index: "index"}
+            );
+
+            const view = await table.view({
+                aggregates: {
+                    x: "last",
+                    y: "count"
+                },
+                row_pivots: ["y"]
+            });
+
+            expect(await view.to_columns()).toEqual({
+                __ROW_PATH__: [[], ["A"]],
+                x: ["a", "a"],
+                y: [1, 1],
+                index: [1, 1]
+            });
+
+            table.update({
+                x: ["b"],
+                index: [1]
+            });
+
+            // x should flip, y should remain the same
+            expect(await view.to_columns()).toEqual({
+                __ROW_PATH__: [[], ["A"]],
+                x: ["b", "b"],
+                y: [1, 1],
+                index: [1, 1]
+            });
+
+            table.update({
+                x: ["c"],
+                index: [1]
+            });
+
+            // and again
+            expect(await view.to_columns()).toEqual({
+                __ROW_PATH__: [[], ["A"]],
+                x: ["c", "c"],
+                y: [1, 1],
+                index: [1, 1]
+            });
+
+            table.update({
+                x: ["d"],
+                y: ["B"],
+                index: [2]
+            });
+
+            // another row
+            expect(await view.to_columns()).toEqual({
+                __ROW_PATH__: [[], ["A"], ["B"]],
+                x: ["d", "c", "d"],
+                y: [2, 1, 1],
+                index: [3, 1, 2]
+            });
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("last with count and partial update flip, filtered", async () => {
+            const table = await perspective.table(
+                {
+                    x: ["a"],
+                    y: ["A"],
+                    index: [1]
+                },
+                {index: "index"}
+            );
+
+            const view = await table.view({
+                aggregates: {
+                    x: "last",
+                    y: "count"
+                },
+                row_pivots: ["y"],
+                filter: [["x", "==", "a"]]
+            });
+
+            expect(await view.to_columns()).toEqual({
+                __ROW_PATH__: [[], ["A"]],
+                x: ["a", "a"],
+                y: [1, 1],
+                index: [1, 1]
+            });
+
+            table.update({
+                x: ["b"],
+                index: [1]
+            });
+
+            // x should flip, y should remain the same
+            expect(await view.to_columns()).toEqual({
+                __ROW_PATH__: [[]],
+                x: [""],
+                y: [0],
+                index: [0]
+            });
+
+            table.update({
+                x: ["a"],
+                index: [1]
+            });
+
+            // and again
+            expect(await view.to_columns()).toEqual({
+                __ROW_PATH__: [[], ["A"]],
+                x: ["a", "a"],
+                y: [1, 1],
+                index: [1, 1]
+            });
+
+            table.update({
+                x: ["a"],
+                y: ["B"],
+                index: [2]
+            });
+
+            // another row
+            expect(await view.to_columns()).toEqual({
+                __ROW_PATH__: [[], ["A"], ["B"]],
+                x: ["a", "a", "a"],
+                y: [2, 1, 1],
+                index: [3, 1, 2]
+            });
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("last with count and append flip", async () => {
+            const table = await perspective.table({
+                x: ["a"],
+                y: ["A"],
+                index: [1]
+            });
+
+            const view = await table.view({
+                aggregates: {
+                    x: "last",
+                    y: "count"
+                },
+                row_pivots: ["y"]
+            });
+
+            expect(await view.to_columns()).toEqual({
+                __ROW_PATH__: [[], ["A"]],
+                x: ["a", "a"],
+                y: [1, 1],
+                index: [1, 1]
+            });
+
+            table.update({
+                x: ["b"],
+                index: [1]
+            });
+
+            expect(await view.to_columns()).toEqual({
+                __ROW_PATH__: [[], [null], ["A"]],
+                x: ["b", "b", "a"],
+                y: [2, 1, 1],
+                index: [2, 1, 1]
+            });
+
+            table.update({
+                x: ["c"],
+                index: [1]
+            });
+
+            // and again
+            expect(await view.to_columns()).toEqual({
+                __ROW_PATH__: [[], [null], ["A"]],
+                x: ["c", "c", "a"],
+                y: [3, 2, 1],
+                index: [3, 2, 1]
+            });
+
+            table.update({
+                x: ["d"],
+                y: ["B"],
+                index: [2]
+            });
+
+            // another row
+            expect(await view.to_columns()).toEqual({
+                __ROW_PATH__: [[], [null], ["A"], ["B"]],
+                x: ["d", "c", "a", "d"],
+                y: [4, 2, 1, 1],
+                index: [5, 2, 1, 2]
+            });
+
+            await view.delete();
+            await table.delete();
+        });
+
         it("['z'], last by index", async function() {
             var table = await perspective.table(data);
             var view = await table.view({
