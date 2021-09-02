@@ -63,10 +63,16 @@ const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
     chart.decorate((container, data) => {
         const plotArea = container.select("d3fc-svg.plot-area");
 
-        plotArea
-            .select("svg")
-            .node()
-            .setAttribute("viewBox", `0 0 ${plotArea.node().clientWidth} ${plotArea.node().clientHeight}`);
+        const node = plotArea.select("svg").node();
+        node.setAttribute("viewBox", `0 0 ${plotArea.node().clientWidth} ${plotArea.node().clientHeight}`);
+        node.setAttribute("preserveAspectRatio", "none");
+
+        for (const axis of ["x-axis", "y-axis"]) {
+            container
+                .select(`d3fc-svg.${axis} svg`)
+                .node()
+                .setAttribute("preserveAspectRatio", "none");
+        }
 
         oldDecorate(container, data);
         if (!axisSplitter) return;
@@ -108,7 +114,8 @@ const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
                     if (d === "left") {
                         d3.select(nodes[i])
                             .select("svg")
-                            .attr("viewBox", `${-width} 0 ${width} ${height}`);
+                            .attr("viewBox", `${-width} 0 ${width} ${height}`)
+                            .attr("preserveAspectRatio", "none");
                     }
                     y2Scale.range([height, 0]);
                 })
