@@ -1380,6 +1380,34 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it.skip("multiple updates on str {index: 'y'} with new, old, null in dataset", async function() {
+            // FIXME: this is an engine bug
+            const table = await perspective.table(
+                {
+                    x: [1, 2, 3],
+                    y: ["a", null, "c"]
+                },
+                {index: "y"}
+            );
+
+            const view = await table.view();
+
+            table.update([{x: 12345, y: "a"}]);
+            table.update([{x: 100, y: null}]);
+            table.update([{x: 123, y: "abc"}]);
+
+            const result = await view.to_json();
+            expect(result).toEqual([
+                {x: 100, y: null},
+                {x: 12345, y: "a"},
+                {x: 123, y: "abc"},
+                {x: 3, y: "c"}
+            ]);
+
+            await view.delete();
+            await table.delete();
+        });
+
         it("{index: 'x'} with overlap", async function() {
             var table = await perspective.table(data, {index: "x"});
             var view = await table.view();
