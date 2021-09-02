@@ -21,7 +21,6 @@ use crate::utils::*;
 
 use futures::channel::oneshot::*;
 use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::future_to_promise;
 use yew::prelude::*;
 
 pub static CSS: &str = include_str!("../../../dist/css/viewer.css");
@@ -112,7 +111,8 @@ impl Component for PerspectiveViewer {
                     .toggle_attribute_with_force("settings", self.settings_open)
                     .unwrap();
 
-                false
+                dispatch_settings_event(&self.props.elem, self.settings_open).unwrap();
+                true
             }
             Msg::ToggleSettings(force, resolve) => {
                 match force {

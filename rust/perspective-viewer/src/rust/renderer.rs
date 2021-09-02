@@ -30,7 +30,6 @@ use std::ops::Deref;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use wasm_bindgen_futures::future_to_promise;
 use web_sys::*;
 use yew::prelude::*;
 
