@@ -1253,16 +1253,6 @@ t_gnode::clear_output_ports() {
     }
 }
 
-t_data_table*
-t_gnode::_get_pkeyed_table() const {
-    return m_gstate->_get_pkeyed_table();
-}
-
-std::shared_ptr<t_data_table>
-t_gnode::get_pkeyed_table_sptr() const {
-    return m_gstate->get_pkeyed_table();
-}
-
 void
 t_gnode::set_pool_cleanup(std::function<void()> cleanup) {
     m_pool_cleanup = cleanup;
@@ -1281,11 +1271,6 @@ t_gnode::was_updated() const {
 void
 t_gnode::clear_updated() {
     m_was_updated = false;
-}
-
-std::shared_ptr<t_data_table>
-t_gnode::get_sorted_pkeyed_table() const {
-    return m_gstate->get_sorted_pkeyed_table();
 }
 
 std::string
