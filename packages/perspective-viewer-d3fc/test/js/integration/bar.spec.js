@@ -11,7 +11,7 @@ const path = require("path");
 
 const utils = require("@finos/perspective-test");
 const simple_tests = require("@finos/perspective-viewer/test/js/simple_tests.js");
-const render_warning_tests = require("@finos/perspective-viewer/test/js/render_warning_tests.js");
+// const render_warning_tests = require("@finos/perspective-viewer/test/js/render_warning_tests.js");
 
 const {withTemplate} = require("./simple-template");
 

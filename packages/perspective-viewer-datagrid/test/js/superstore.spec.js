@@ -125,18 +125,18 @@ utils.with_server({}, () => {
     );
 });
 
-const click_details = async (page, x = 310, y = 300) => {
-    const viewer = await page.$("perspective-viewer");
+// const click_details = async (page, x = 310, y = 300) => {
+//     const viewer = await page.$("perspective-viewer");
 
-    const click_event = page.evaluate(
-        element =>
-            new Promise(resolve => {
-                element.addEventListener("perspective-click", e => {
-                    resolve(e.detail);
-                });
-            }),
-        viewer
-    );
-    await page.mouse.click(x, y);
-    return await click_event;
-};
+//     const click_event = page.evaluate(
+//         element =>
+//             new Promise(resolve => {
+//                 element.addEventListener("perspective-click", e => {
+//                     resolve(e.detail);
+//                 });
+//             }),
+//         viewer
+//     );
+//     await page.mouse.click(x, y);
+//     return await click_event;
+// };

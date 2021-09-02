@@ -41,12 +41,6 @@ utils.with_jupyterlab(process.env.__JUPYTERLAB_PORT__, () => {
                     expect(num_rows).toEqual(5);
                 }
             );
-
-
-
-
-
-
         },
         {name: "Simple", root: path.join(__dirname, "..", "..")}
     );

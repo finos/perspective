@@ -8,7 +8,6 @@
  */
 
 import {DockPanel, SplitPanel} from "@lumino/widgets";
-import {toArray} from "@lumino/algorithm";
 import {Signal} from "@lumino/signaling";
 
 const DISCRETE_STEP_SIZE = 1;
