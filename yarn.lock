@@ -2864,6 +2864,14 @@
     is-module "^1.0.0"
     resolve "^1.19.0"
 
+"@rollup/plugin-typescript@^8.2.5":
+  version "8.2.5"
+  resolved "https://registry.yarnpkg.com/@rollup/plugin-typescript/-/plugin-typescript-8.2.5.tgz#e0319761b2b5105615e5a0c371ae05bc2984b7de"
+  integrity sha512-QL/LvDol/PAGB2O0S7/+q2HpSUNodpw7z6nGn9BfoVCPOZ0r4EALrojFU29Bkoi2Hr2jgTocTejJ5GGWZfOxbQ==
+  dependencies:
+    "@rollup/pluginutils" "^3.1.0"
+    resolve "^1.17.0"
+
 "@rollup/pluginutils@^3.0.9", "@rollup/pluginutils@^3.1.0":
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@rollup/pluginutils/-/pluginutils-3.1.0.tgz#706b4524ee6dc8b103b3c995533e5ad680c02b9b"
@@ -11844,10 +11852,10 @@ mkdirp@0.x, mkdirp@^0.5.0, mkdirp@^0.5.1, mkdirp@^0.5.5, mkdirp@~0.5.1:
   dependencies:
     minimist "^1.2.5"
 
-mobile-drag-drop@^2.3.0-rc.2:
-  version "2.3.0-rc.2"
-  resolved "https://registry.yarnpkg.com/mobile-drag-drop/-/mobile-drag-drop-2.3.0-rc.2.tgz#00d6e85e04512a620fd5357366e8786bd29aa7aa"
-  integrity sha512-4rHP0PUeWkSp0O3waNHPQZCHeZnLu8bE59MerWOnZJ249BCyICXL1WWp3xqkMKXEDFYuhfk3bS42bKB9IeN9uw==
+mobile-drag-drop-shadow-dom@3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/mobile-drag-drop-shadow-dom/-/mobile-drag-drop-shadow-dom-3.0.0.tgz#f91014af66a0331338d4dfef30ecc5ddcb5a0687"
+  integrity sha512-cNDH83lfYhllESH+ddjyxXdnjunLec0ldnygm3nWY1zMtfeA1tHoVsAasZy63QhnRuN4ps0pGuL8TolUK/sYjA==
 
 modify-values@^1.0.0:
   version "1.0.1"

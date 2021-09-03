@@ -1,7 +1,7 @@
-import babel from "@rollup/plugin-babel";
 import filesize from "rollup-plugin-filesize";
 import postcss from "rollup-plugin-postcss";
 import sourcemaps from "rollup-plugin-sourcemaps";
+import typescript from "@rollup/plugin-typescript";
 import path from "path";
 import fs from "fs";
 
@@ -59,17 +59,20 @@ export default () => {
                 })
             ]
         },
-        {
-            input: "src/js/index.js",
-            external: [/pkg/, /monaco\-editor/],
+        ...["index", "monaco"].map(name => ({
+            input: `src/ts/${name}.ts`,
+            external: [/pkg/, /node_modules/, /monaco\-editor/],
             output: {
                 sourcemap: true,
                 dir: "dist/esm/"
             },
             plugins: [
-                babel({
-                    exclude: "node_modules/**",
-                    babelHelpers: "bundled"
+                typescript({
+                    target: "es2018", 
+                    declaration: true, 
+                    outDir: "dist/esm",
+                    rootDir: "src/ts",
+                    allowSyntheticDefaultImports: true
                 }),
                 filesize(),
                 postcss({
@@ -82,7 +85,7 @@ export default () => {
             watch: {
                 clearScreen: false
             }
-        },
+        })),
         ...generate_themes()
     ];
 };

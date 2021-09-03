@@ -19,7 +19,8 @@
         "src/**/*",
         "index.d.ts"
     ],
-    "typings": "index.d.ts",
+    "types": "dist/esm/index.d.ts",
+    "typings": "dist/esm/index.d.ts",
     "scripts": {
         "build:wasm": "wasm-pack build --out-dir dist/pkg --target web && rm dist/pkg/package.json",
         "build:rollup": "rollup --config rollup.config.js",
