@@ -8,6 +8,7 @@
  *
  */
 
+import "mobile-drag-drop-shadow-dom";
 import init, * as internal from "../../dist/pkg/perspective_viewer.js";
 import * as perspective from "@finos/perspective";
 
