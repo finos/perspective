@@ -10,7 +10,7 @@
 import {Message} from "@lumino/messaging";
 import {DOMWidgetView} from "@jupyter-widgets/base";
 
-import {PerspectiveViewerOptions} from "@finos/perspective-viewer";
+import {PerspectiveViewerConfig} from "@finos/perspective-viewer";
 import {PerspectiveWidget, PerspectiveWidgetOptions} from "./psp_widget";
 
 export type PerspectiveJupyterWidgetOptions = {
@@ -21,7 +21,7 @@ export type PerspectiveJupyterWidgetOptions = {
  * PerspectiveJupyterWidget is the ipywidgets front-end for the Perspective Jupyterlab plugin.
  */
 export class PerspectiveJupyterWidget extends PerspectiveWidget {
-    constructor(name = "Perspective", options: PerspectiveViewerOptions & PerspectiveJupyterWidgetOptions & PerspectiveWidgetOptions) {
+    constructor(name = "Perspective", options: PerspectiveViewerConfig & PerspectiveJupyterWidgetOptions & PerspectiveWidgetOptions) {
         const view = options.view;
         delete options.view;
         super(name, options);

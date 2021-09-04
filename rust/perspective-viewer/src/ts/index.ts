@@ -57,6 +57,7 @@ async function init_wasm({default: wasm_module}) {
 export type PerspectiveViewerConfig = perspective.ViewConfig & {
     plugin?: string;
     settings?: boolean;
+    plugin_config?: object;
 };
 
 export class PerspectiveViewerElement extends HTMLElement {
@@ -185,6 +186,10 @@ export class PerspectiveViewerElement extends HTMLElement {
      * to infer format.
      * @returns {object} a serialized element.
      */
+    async save(): Promise<PerspectiveViewerConfig>;
+    async save(format: "json"): Promise<PerspectiveViewerConfig>;
+    async save(format: "arraybuffer"): Promise<ArrayBuffer>;
+    async save(format: "string"): Promise<string>;
     async save(format?: "json" | "arraybuffer" | "string"): Promise<PerspectiveViewerConfig | string | ArrayBuffer> {
         await this.load_wasm();
         const config = await this.instance.js_save(format);
@@ -270,7 +275,7 @@ export class PerspectiveViewerElement extends HTMLElement {
      * @param force If supplied, explicitly set the config state to "open" (`true`)
      * or "closed" (`false`).
      */
-    async toggleConfig(force): Promise<void> {
+    async toggleConfig(force?: boolean): Promise<void> {
         await this.load_wasm();
         await this.instance.js_toggle_config(force);
     }

@@ -14,9 +14,10 @@ import * as perspective from "@finos/perspective";
 import "@finos/perspective-viewer";
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
-import "./index.css";
+import {PerspectiveViewerConfig, PerspectiveViewerElement} from "@finos/perspective-viewer";
+
 import "@finos/perspective-viewer/dist/umd/material-dense.css";
-import {PerspectiveViewerElement} from "@finos/perspective-viewer";
+import "./index.css";
 
 const worker = perspective.default.shared_worker();
 
@@ -27,7 +28,7 @@ const getTable = async (): Promise<perspective.Table> => {
     return await worker.table(buffer as any);
 };
 
-const config = {
+const config: PerspectiveViewerConfig = {
     row_pivots: ["State"]
 };
 
@@ -44,7 +45,7 @@ const App = (): React.ReactElement => {
     }, []);
 
     // You can also the use the stringified config values as attributes
-    return <perspective-viewer ref={ viewer } ></perspective-viewer>;
+    return <perspective-viewer ref={viewer}></perspective-viewer>;
 };
 
 window.addEventListener("load", () => {

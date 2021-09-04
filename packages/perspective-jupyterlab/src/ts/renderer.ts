@@ -83,7 +83,10 @@ export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget>
                 throw "Not handled";
             }
 
-            if (this._psp.viewer.table === undefined) {
+            try {
+                const table = await this._psp.viewer.getTable();
+                table.replace(data);
+            } catch (e) {
                 // construct new table
                 const table_promise = WORKER.table(data);
 
@@ -109,10 +112,7 @@ export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget>
                         this.context.model.fromJSON(result);
                         this.context.save();
                     }
-                });
-            } else {
-                // replace existing table for whatever reason
-                this._psp.replace(data);
+                });               
             }
         } catch (e) {
             baddialog();

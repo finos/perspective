@@ -1,85 +1,39 @@
 declare module "@finos/perspective" {
     import * as ws from "ws";
 
-    /**** object types ****/
-    export enum TypeNames {
-        STRING = "string",
-        FLOAT = "float",
-        INTEGER = "integer",
-        BOOLEAN = "boolean",
-        DATE = "date",
-        DATETIME = "datetime",
-        OBJECT = "object"
-    }
+    export type Type = "string" | "float" | "integer" | "boolean" | "date" | "datetime" | "object";
 
-    export type ValuesByType = {
-        [key in TypeNames]: Array<string>;
-    };
+    export type SortDir = "asc" | "asc abs" | "desc" | "desc abs" | "col asc" | "col asc abs" | "col desc" | "col desc abs";
 
-    export type ValueByType = {
-        TypeNames: Array<string>;
-    };
+    export type Aggregate =
+        | "abs sum"
+        | "and"
+        | "any"
+        | "avg"
+        | "count"
+        | "distinct count"
+        | "distinct leaf"
+        | "dominant"
+        | "first"
+        | "high"
+        | "last"
+        | "low"
+        | "or"
+        | "median"
+        | "pct sum parent"
+        | "pct sum grand total"
+        | "stddev"
+        | "sum"
+        | "sum abs"
+        | "sum not null"
+        | "unique"
+        | "var"
+        | ["weighted mean", ColumnName];
 
-    export enum SortOrders {
-        ASC = "asc",
-        ASC_ABS = "asc abs",
-        DESC = "desc",
-        DESC_ABS = "desc abs",
-        NONE = "none"
-    }
-
-    enum NUMBER_AGGREGATES {
-        ABS_SUM = "abs sum",
-        ANY = "any",
-        AVERAGE = "avg",
-        COUNT = "count",
-        DISTINCT_COUNT = "distinct count",
-        DOMINANT = "dominant",
-        FIRST = "first",
-        LAST = "last",
-        HIGH = "high",
-        LOW = "low",
-        MEAN = "mean",
-        MEDIAN = "median",
-        PCT_SUM_PARENT = "pct sum parent",
-        PCT_SUM_TOTAL = "pct sum grand total",
-        STANDARD_DEVIATION = "stddev",
-        SUM = "sum",
-        SUM_ABS = "sum abs",
-        SUM_NOT_NULL = "sum not null",
-        UNIQUE = "unique",
-        VARIANCE = "var"
-    }
-
-    enum STRING_AGGREGATES {
-        ANY = "any",
-        COUNT = "count",
-        DISTINCT_COUNT = "distinct count",
-        DISTINCT_LEAF = "distinct leaf",
-        DOMINANT = "dominant",
-        FIRST = "first",
-        LAST = "last",
-        UNIQUE = "unique"
-    }
-
-    enum BOOLEAN_AGGREGATES {
-        AND = "and",
-        ANY = "any",
-        COUNT = "count",
-        DISTINCT_COUNT = "distinct count",
-        DISTINCT_LEAF = "distinct leaf",
-        DOMINANT = "dominant",
-        FIRST = "first",
-        LAST = "last",
-        OR = "or",
-        UNIQUE = "unique"
-    }
-
-    /**** Schema ****/
-    type SchemaType = TypeNames | NUMBER_AGGREGATES | STRING_AGGREGATES | BOOLEAN_AGGREGATES;
+    export type FilterOp = "<" | ">" | "<=" | ">=" | "==" | "!=" | "is null" | "is not null" | "in" | "not in" | "begins with" | "contains";
 
     export type Schema = {
-        [key: string]: TypeNames;
+        [key: ColumnName]: Type;
     };
 
     export interface SerializeConfig {
@@ -127,14 +81,19 @@ declare module "@finos/perspective" {
         limit?: number;
     };
 
+    export type ColumnName = string;
+    export type Expression = string;
+    export type Filter = [ColumnName, FilterOp, string | number | Date | boolean | Array<string | number | Date | boolean>];
+    export type Sort = [ColumnName, SortDir];
+
     export type ViewConfig = {
-        columns?: Array<string>;
-        row_pivots?: Array<string>;
-        column_pivots?: Array<string>;
-        aggregates?: {[column_name: string]: string};
-        sort?: Array<Array<string>>;
-        filter?: Array<Array<string>>;
-        expressions?: Array<string>;
+        columns?: Array<ColumnName>;
+        row_pivots?: Array<ColumnName>;
+        column_pivots?: Array<ColumnName>;
+        aggregates?: {[column_name: string]: Aggregate};
+        sort?: Array<Sort>;
+        filter?: Array<Filter>;
+        expressions?: Array<Expression>;
     };
 
     export type Table = {
@@ -192,9 +151,6 @@ declare module "@finos/perspective" {
     export function perspective_assets(assets: string[], host_psp: boolean): (request: any, response: any) => void;
 
     type perspective = {
-        TYPE_AGGREGATES: ValuesByType;
-        TYPE_FILTERS: ValuesByType;
-        SORT_ORDERS: SortOrders;
         table(data_or_schema: TableData | Schema, options?: TableOptions): Promise<Table>;
         worker(): PerspectiveWorker;
         shared_worker(): PerspectiveWorker;
@@ -206,16 +162,3 @@ declare module "@finos/perspective" {
 
     export default impl;
 }
-
-declare module "@finos/perspective/build/psp.async.wasm" {
-    const impl: ArrayBuffer;
-    export default impl;
-}
-
-declare module "@finos/perspective/build/psp.sync.wasm" {
-    const impl: ArrayBuffer;
-    export default impl;
-}
-
-declare module "@finos/perspective/build/perspective.wasm.worker.js" {}
-declare module "@finos/perspective/build/perspective.asmjs.worker.js" {}

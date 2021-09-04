@@ -46,6 +46,9 @@ pub enum FilterOp {
     #[serde(rename = "contains")]
     Contains,
 
+    #[serde(rename = "not in")]
+    NotIn,
+
     #[serde(rename = "in")]
     In,
 
@@ -88,6 +91,7 @@ impl Display for FilterOp {
         let op = match self {
             FilterOp::Contains => "contains",
             FilterOp::In => "in",
+            FilterOp::NotIn => "not in",
             FilterOp::BeginsWith => "begins with",
             FilterOp::EndsWith => "ends with",
             FilterOp::IsNull => "is null",
@@ -112,6 +116,7 @@ impl FromStr for FilterOp {
         match input {
             "contains" => Ok(FilterOp::Contains),
             "in" => Ok(FilterOp::In),
+            "not in" => Ok(FilterOp::NotIn),
             "begins with" => Ok(FilterOp::BeginsWith),
             "ends with" => Ok(FilterOp::EndsWith),
             "is null" => Ok(FilterOp::IsNull),
