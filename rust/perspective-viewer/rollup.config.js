@@ -67,13 +67,7 @@ export default () => {
                 dir: "dist/esm/"
             },
             plugins: [
-                typescript({
-                    target: "es2018", 
-                    declaration: true, 
-                    outDir: "dist/esm",
-                    rootDir: "src/ts",
-                    allowSyntheticDefaultImports: true
-                }),
+                typescript({tsconfig: "./tsconfig.json"}),
                 filesize(),
                 postcss({
                     inject: false,

@@ -22,7 +22,6 @@
         "@types/react": "^16.8.6",
         "@types/react-dom": "^16.9.4",
         "source-map-loader": "^0.2.4",
-        "ts-loader": "^6.2.1",
-        "typescript": "^3.7.4"
+        "ts-loader": "^6.2.1"
     }
 }

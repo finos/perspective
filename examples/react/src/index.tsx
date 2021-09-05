@@ -16,7 +16,6 @@ import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
 import {PerspectiveViewerConfig, PerspectiveViewerElement} from "@finos/perspective-viewer";
 
-import "@finos/perspective-viewer/dist/umd/material-dense.css";
 import "./index.css";
 
 const worker = perspective.default.shared_worker();
@@ -44,7 +43,6 @@ const App = (): React.ReactElement => {
         });
     }, []);
 
-    // You can also the use the stringified config values as attributes
     return <perspective-viewer ref={viewer}></perspective-viewer>;
 };
 

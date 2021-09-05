@@ -6,12 +6,14 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+
+ @import "~@finos/perspective-viewer/dist/umd/material-dense.css";
  
- perspective-viewer { 
+perspective-viewer { 
     position: absolute; 
     top: 0; 
     left: 0; 
     right: 0; 
     bottom: 0; 
-   }
+}
  

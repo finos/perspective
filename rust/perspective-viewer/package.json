@@ -20,7 +20,6 @@
         "index.d.ts"
     ],
     "types": "dist/esm/index.d.ts",
-    "typings": "dist/esm/index.d.ts",
     "scripts": {
         "build:wasm": "wasm-pack build --out-dir dist/pkg --target web && rm dist/pkg/package.json",
         "build:rollup": "rollup --config rollup.config.js",
@@ -33,6 +32,10 @@
         "postbuild": "rimraf pkg/package.json pkg/.gitignore",
         "clean": "rimraf dist && rimraf pkg && rimraf target",
         "clean:screenshots": "rimraf \"test/screenshots/**/*.@(failed|diff).png\"",
+        "docs": "npm-run-all docs:build docs:concat docs:deploy",
+        "docs:build": "typedoc --hideBreadcrumbs --out dist/docs --readme none --excludePrivate src/ts/index.ts",
+        "docs:concat": "node ./concat-md.js",
+        "docs:deploy": "(echo \"---\nid: perspective\ntitle: perspective-viewer API\n---\n\n\"; cat README.md) > ../../docs/obj/perspective-viewer.md",
         "fix": "yarn lint --fix",
         "lint": "eslint src examples/*.md examples/*.html",
         "test:build:rust": "cpx ../../packages/perspective/dist/umd/perspective.inline.js pkg/",

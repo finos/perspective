@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "module": "esnext",
+        "target": "es2018",
+        "declaration": true,
+        "outDir": "dist/esm",
+        "rootDir": "src/ts",
+        "allowSyntheticDefaultImports": true,
+        "moduleResolution": "node"
+    },
+    "files": [
+        "src/ts/index.ts", 
+        "src/ts/monaco.ts"
+    ]
+}

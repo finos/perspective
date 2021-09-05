@@ -8,21 +8,17 @@
  *
  */
 
-import "mobile-drag-drop-shadow-dom";
-import init, * as internal from "../../dist/pkg/perspective_viewer.js";
-import * as perspective from "@finos/perspective";
-
 /**
- * Module for the `<perspective-viewer>` custom element.  Though
- * `<perspective-viewer>` is written mostly in Rust, the nature of WebAssembly's
- * compilation makes it a dynamic module;  in order to guarantee that the
- * Custom Elements extension methods are registered synchronously with this
- * package's import, we need perform said registration within this wrapper module.
+ * Module for the `<perspective-viewer>` custom element.  This module has no
+ * (real) exports, but importing it has a side effect: the
+ * `PerspectiveViewerElement`class is registered as a custom element, after
+ * which it can be used as a standard DOM element.
  *
- * This module has no (real) exports, but importing it has a side
- * effect: the {@link module:perspective_viewer~PerspectiveViewer} class is
- * registered as a custom element, after which it can be used as a standard DOM
- * element.
+ * Though `<perspective-viewer>` is written mostly in Rust, the nature
+ * of WebAssembly's compilation makes it a dynamic module;  in order to
+ * guarantee that the Custom Elements extension methods are registered
+ * synchronously with this package's import, we need perform said registration
+ * within this wrapper module.
  *
  * The documentation in this module defines the instance structure of a
  * `<perspective-viewer>` DOM object instantiated typically, through HTML or any
@@ -32,6 +28,9 @@ import * as perspective from "@finos/perspective";
  * @module perspective-viewer
  */
 
+import "mobile-drag-drop-shadow-dom";
+import init, * as internal from "../../dist/pkg/perspective_viewer.js";
+import * as perspective from "@finos/perspective";
 
 // There is no way to provide a default rejection handler within a promise and
 // also not lock the await-er, so this module attaches a global handler to
@@ -42,17 +41,17 @@ window.addEventListener("unhandledrejection", event => {
     }
 });
 
+async function init_wasm({default: wasm_module}): Promise<typeof internal> {
+    await init(wasm_module);
+    internal.set_panic_hook();
+    return internal;
+}
+
 const WASM_MODULE = import(
     /* webpackChunkName: "perspective-viewer.custom-element" */
     /* webpackMode: "eager" */
     "../../dist/pkg/perspective_viewer_bg.wasm"
 ).then(init_wasm);
-
-async function init_wasm({default: wasm_module}) {
-    await init(wasm_module);
-    internal.set_panic_hook();
-    return internal;
-}
 
 export type PerspectiveViewerConfig = perspective.ViewConfig & {
     plugin?: string;
@@ -60,15 +59,41 @@ export type PerspectiveViewerConfig = perspective.ViewConfig & {
     plugin_config?: object;
 };
 
+/**
+ * The Custom Elements implementation for `<perspective-viewer>`, as well at its
+ * API.  `PerspectiveViewerElement` should not be constructed directly (like its
+ * parent class `HTMLElement`);  instead, use `document.createElement()` or
+ * declare your `<perspective-viewer>` element in HTML.  Once instantiated,
+ * `<perspective-viewer>` works just like a standard `HTMLElement`, with a few
+ * extra perspective-specific methods.
+ *
+ * @example
+ * ```javascript
+ * const viewer = document.createElement("perspective-viewer");
+ * ```
+ * @example
+ * ```javascript
+ * document.body.innerHTML = `
+ *     <perspective-viewer id="viewer"></perspective-viewer>
+ * `;
+ * const viewer = document.body.querySelector("#viewer");
+ * ```
+ * @noInheritDoc
+ */
 export class PerspectiveViewerElement extends HTMLElement {
     private instance: internal.PerspectiveViewerElement;
 
+    /**
+     * Should not be called directly (will throw `TypeError: Illegal
+     * constructor`).
+     * @ignore
+     */
     constructor() {
         super();
         this.load_wasm();
     }
 
-    private async load_wasm() {
+    private async load_wasm(): Promise<void> {
         const module = await WASM_MODULE;
         if (!this.instance) {
             this.instance = new module.PerspectiveViewerElement(this);
@@ -76,54 +101,74 @@ export class PerspectiveViewerElement extends HTMLElement {
     }
 
     /**
-     * Part of the Custom Elements API.  This method is called by the browser, and 
-     * should not be called directly by applications.
+     * Part of the Custom Elements API.  This method is called by the browser,
+     * and should not be called directly by applications.
+     *
+     * @ignore
      */
-    async connectedCallback() {
+    async connectedCallback(): Promise<void> {
         await this.load_wasm();
         this.instance.connected_callback();
     }
 
     /**
      * Register a new plugin via its custom element name.  This method is called
-     * automatically as a side effect of importing a plugin module, so this method
-     * should only typically be called by plugin authors.
+     * automatically as a side effect of importing a plugin module, so this
+     * method should only typically be called by plugin authors.
      *
-     * @param name The `name` of the custom element to register
+     * @category Plugin
+     * @param name The `name` of the custom element to register, as supplied
+     * to the `customElements.define(name)` method.
      */
-    static async registerPlugin(name) {
+    static async registerPlugin(name): Promise<void> {
         const module = await WASM_MODULE;
         module.register_plugin(name);
     }
 
     /**
-     * Load a `perspective.Table`.  If `load` or `update` have already been called
-     * on this element, its internal `perspective.Table` will _not_ be deleted.
+     * Load a `perspective.Table`.  If `load` or `update` have already been
+     * called on this element, its internal `perspective.Table` will _not_ be
+     * deleted, but it will bed de-referenced by this `<perspective-viewer>`.
      *
-     * @async
+     * @category Data
      * @param data A `Promise` which resolves to the `perspective.Table`
-     * @returns {Promise<void>} A promise which resolves once the data is loaded,
-     * a `perspective.View` has been created, and the active plugin has rendered.
+     * @returns {Promise<void>} A promise which resolves once the data is
+     * loaded, a `perspective.View` has been created, and the active plugin has
+     * rendered.
      * @example <caption>Load perspective.table</caption>
+     * ```javascript
      * const my_viewer = document.getElementById('#my_viewer');
      * const tbl = perspective.table("x,y\n1,a\n2,b");
      * my_viewer.load(tbl);
+     * ```
      * @example <caption>Load Promise<perspective.table></caption>
+     * ```javascript
      * const my_viewer = document.getElementById('#my_viewer');
      * const tbl = perspective.table("x,y\n1,a\n2,b");
      * my_viewer.load(tbl);
+     * ```
      */
-    async load(table: Promise<perspective.Table>) {
+    async load(table: Promise<perspective.Table>): Promise<void> {
         await this.load_wasm();
         await this.instance.js_load(table);
     }
 
     /**
-     * Redraw this `<perspective-viewer>` and plugin when its dimensions or visibility
-     * have been updated.
+     * Redraw this `<perspective-viewer>` and plugin when its dimensions or
+     * visibility have been updated.  This method _must_ be called in these
+     * cases, and will not by default respond to dimension or style changes to
+     * its parent container.  `notifyResize()` does not recalculate the current
+     * `View`, but all plugins will re-request the data window (which itself
+     * may be smaller or larger due to resize).
      *
-     * @returns A `Promise<void>` which resolves when this resize event has finished
-     * rendering.
+     * @category Util
+     * @returns A `Promise<void>` which resolves when this resize event has
+     * finished rendering.
+     * @example <caption>Bind `notfyResize()` to browser dimensions</caption>
+     * ```javascript
+     * const viewer = document.querySelector("perspective-viewer");
+     * window.addEventListener("resize", () => viewer.notifyResize());
+     * ```
      */
     async notifyResize(): Promise<void> {
         await this.load_wasm();
@@ -131,12 +176,20 @@ export class PerspectiveViewerElement extends HTMLElement {
     }
 
     /**
-     * Returns the `perspective.Table()` which was supplied to `load()`.  If `load()`
-     * has been called but the supplied `Promise<perspective.Table>` has not resolved,
-     * `getTable()` will `await`;  if `load()` has not yet been called, an `Error`
-     * will be thrown.
+     * Returns the `perspective.Table()` which was supplied to `load()`.  If
+     * `load()` has been called but the supplied `Promise<perspective.Table>`
+     * has not resolved, `getTable()` will `await`;  if `load()` has not yet
+     * been called, an `Error` will be thrown.
      *
+     * @category Data
      * @returns A `Promise` which resolves to a `perspective.Table`
+     * @example <caption>Share a `Table`</caption>
+     * ```javascript
+     * const viewers = document.querySelectorAll("perspective-viewer");
+     * const [viewer1, viewer2] = Array.from(viewers);
+     * const table = await viewer1.getTable();
+     * await viewer2.load(table);
+     * ```
      */
     async getTable(): Promise<perspective.Table> {
         await this.load_wasm();
@@ -146,11 +199,40 @@ export class PerspectiveViewerElement extends HTMLElement {
 
     /**
      * Restore this element to a state as generated by a reciprocal call to
-     * `save`.
+     * `save`.  In `json` (default) format, `PerspectiveViewerConfig`'s fields
+     * have specific semantics:
      *
-     * @param config returned by `save()`.
+     *  - When a key is missing, this field is ignored;  `<perspective-viewer>`
+     *    will maintain whatever settings for this field is currently applied.
+     *  - When the key is supplied, but the value is `undefined`, the field is
+     *    reset to its default value for this current `View`, i.e. the state it
+     *    would be in after `load()` resolves.
+     *  - When the key is defined to a value, the value is applied for this
+     *    field.
+     *
+     * This behavior is convenient for explicitly controlling current vs desired
+     * UI state in a single request, but it does make it a bit inconvenient to
+     * use `restore()` to reset a `<perspective-viewer>` to default as you must
+     * do so explicitly for each key;  for this case, use `reset()` instead of
+     * restore.
+     *
+     * As noted in `save()`, this configuration state does not include the
+     * `Table` or its `Schema`.  In order for `restore()` to work correctly, it
+     * must be called on a `<perspective-viewer>` that has a `Table already
+     * `load()`-ed, with the same (or a type-compatible superset) `Schema`.
+     * It does not need have the same rows, or even be populated.
+     *
+     * @category Persistence
+     * @param config returned by `save()`.  This can be any format returned by
+     * `save()`; the specific deserialization is chosen by `typeof config`.
      * @returns A promise which resolves when the changes have been applied and
      * rendered.
+     * @example <caption>Restore a viewer from `localStorage`</caption>
+     * ```javascript
+     * const viewer = document.querySelector("perspective-viewer");
+     * const token = localStorage.getItem("viewer_state");
+     * await viewer.restore(token);
+     * ```
      */
     async restore(config: PerspectiveViewerConfig | string | ArrayBuffer): Promise<void> {
         await this.load_wasm();
@@ -158,33 +240,24 @@ export class PerspectiveViewerElement extends HTMLElement {
     }
 
     /**
-     * Flush any pending modifications to this `<perspective-viewer>`.
+     * Serialize this element's attribute/interaction state, but _not_ the
+     * `perspective.Table` or its `Schema`.  `save()` is designed to be used in
+     * conjunction with `restore()` to persist user settings and bookmarks, but
+     * the `PerspectiveViewerConfig` object returned in `json` format can also
+     * be written by hand quite easily, which is useful for authoring
+     * pre-conceived configs.
      *
-     * @returns {Promise<void>} A promise which resolves when the current pending
-     * state changes have been applied and rendered.
-     */
-    async flush(): Promise<void> {
-        await this.load_wasm();
-        await this.instance.js_flush();
-    }
-
-    /**
-     * Reset's this element's view state and attributes to default.  Does not
-     * delete this element's `perspective.table` or otherwise modify the data
-     * state.
-     */
-    async reset(): Promise<void> {
-        await this.load_wasm();
-        await this.instance.js_reset();
-    }
-
-    /**
-     * Serialize this element's attribute/interaction state.
-     *
+     * @category Persistence
      * @param format The serialization format - `json` (JavaScript object),
      * `arraybuffer` or `string`.  `restore()` uses the returned config's type
      * to infer format.
-     * @returns {object} a serialized element.
+     * @returns a serialized element in the chosen format.
+     * @example <caption>Save a viewer to `localStorage`</caption>
+     * ```javascript
+     * const viewer = document.querySelector("perspective-viewer");
+     * const token = await viewer.save("string");
+     * localStorage.setItem("viewer_state", token);
+     * ```
      */
     async save(): Promise<PerspectiveViewerConfig>;
     async save(format: "json"): Promise<PerspectiveViewerConfig>;
@@ -197,11 +270,54 @@ export class PerspectiveViewerElement extends HTMLElement {
     }
 
     /**
+     * Flush any pending modifications to this `<perspective-viewer>`.  Since
+     * `<perspective-viewer>`'s API is almost entirely `async`, it may take
+     * some milliseconds before any method call such as `restore()` affects
+     * the rendered element.  If you want to make sure any invoked method which
+     * affects the rendered has had its results rendered, call and await
+     * `flush()`
+     *
+     * @category Util
+     * @returns {Promise<void>} A promise which resolves when the current
+     * pending state changes have been applied and rendered.
+     * @example <caption>Flush an unawaited `restore()`</caption>
+     * ```javascript
+     * const viewer = document.querySelector("perspective-viewer");
+     * viewer.restore({row_pivots: ["State"]});
+     * await viewer.flush();
+     * console.log("Viewer has been rendered with a pivot!");
+     * ```
+     */
+    async flush(): Promise<void> {
+        await this.load_wasm();
+        await this.instance.js_flush();
+    }
+
+    /**
+     * Reset's this element's view state and attributes to default.  Does not
+     * delete this element's `perspective.table` or otherwise modify the data
+     * state.
+     *
+     * @category Persistence
+     * @example
+     * ```javascript
+     * const viewer = document.querySelector("perspective-viewer");
+     * await viewer.reset();
+     * ```
+     */
+    async reset(): Promise<void> {
+        await this.load_wasm();
+        await this.instance.js_reset();
+    }
+
+    /**
      * Deletes this element and clears it's internal state (but not its
      * user state).  This (or the underlying `perspective.view`'s equivalent
      * method) must be called in order for its memory to be reclaimed, as well
      * as the reciprocal method on the `perspective.table` which this viewer is
      * bound to.
+     *
+     * @category Util
      */
     async delete(): Promise<void> {
         await this.load_wasm();
@@ -211,6 +327,7 @@ export class PerspectiveViewerElement extends HTMLElement {
     /**
      * Download this element's data as a CSV file.
      *
+     * @category UI Action
      * @param flat Whether to use the element's current view
      * config, or to use a default "flat" view.
      */
@@ -225,8 +342,17 @@ export class PerspectiveViewerElement extends HTMLElement {
      * restrictions on clipboard access.  See
      * {@link https://www.w3.org/TR/clipboard-apis/#allow-read-clipboard}.
      *
+     * @category UI Action
      * @param flat Whether to use the element's current view
      * config, or to use a default "flat" view.
+     * @example
+     * ```javascript
+     * const viewer = document.querySelector("perspective-viewer");
+     * const button = document.querySelector("button");
+     * button.addEventListener("click", async () => {
+     *     await viewer.copy();
+     * });
+     * ```
      */
     async copy(flat: boolean): Promise<void> {
         await this.load_wasm();
@@ -234,7 +360,13 @@ export class PerspectiveViewerElement extends HTMLElement {
     }
 
     /**
-     * Restyles the elements and to pick up any style changes
+     * Restyles the elements and to pick up any style changes.  While most of
+     * perspective styling is plain CSS and can be updated at any time, some
+     * CSS rules are read and cached, e.g. the series colors for
+     * `@finos/perspective-viewer-d3fc` which are read from CSS then reapplied
+     * as SVG and Canvas attributes.
+     *
+     * @category Util
      */
     async restyleElement(): Promise<void> {
         console.error("Not Implemented");
@@ -242,9 +374,25 @@ export class PerspectiveViewerElement extends HTMLElement {
 
     /**
      * Gets the edit port, the port number for which `Table` updates from this
-     * `<perspective-viewer>` are generated.
+     * `<perspective-viewer>` are generated.  This port number will be present
+     * in the options object for a `View.on_update()` callback for any update
+     * which was originated by the `<perspective-viewer>`/user, which can be
+     * used to distinguish server-originated updates from user edits.
      *
+     * @category Util
      * @returns A promise which resolves to the current edit port.
+     * @example
+     * ```javascript
+     * const viewer = document.querySelector("perspective-viewer");
+     * const editport = await viewer.getEditPort();
+     * const table = await viewer.getTable();
+     * const view = await table.view();
+     * view.on_update(obj => {
+     *     if (obj.port_id = editport) {
+     *         console.log("User edit detected");
+     *     }
+     * });
+     * ```
      */
     async getEditPort(): Promise<number> {
         console.error("Not Implemented");
@@ -257,12 +405,14 @@ export class PerspectiveViewerElement extends HTMLElement {
      * will try to determine the optimal throttle time from this component's
      * render framerate.
      *
+     * @category Util
      * @param value an optional throttle rate in milliseconds (integer).  If not
-     * supplied, adaptive throttling is calculated from the average plugin render
-     * time.
-     * @example
-     * // Only draws at most 1 frame/sec.
+     * supplied, adaptive throttling is calculated from the average plugin
+     * render time.
+     * @example <caption>Limit FPS to 1 frame per second</caption>
+     * ```javascript
      * await viewer.setThrottle(1000);
+     * ```
      */
     async setThrottle(value?: number): Promise<void> {
         await this.load_wasm();
@@ -270,10 +420,23 @@ export class PerspectiveViewerElement extends HTMLElement {
     }
 
     /**
-     * Opens/closes the element's config menu.
+     * Opens/closes the element's config menu, equivalent to clicking the
+     * settings button in the UI.  This method is equivalent to
+     * `viewer.restore({settings: force})` when `force` is present, but
+     * `restore()` cannot toggle as `toggleConfig()` can, you would need to
+     * first read the settings state from `save()` otherwise.
      *
-     * @param force If supplied, explicitly set the config state to "open" (`true`)
-     * or "closed" (`false`).
+     * Calling `toggleConfig()` may be delayed if an async render is currently
+     * in process, and it may only partially render the UI if `load()` has not
+     * yet resolved.
+     *
+     * @category UI Action
+     * @param force If supplied, explicitly set the config state to "open"
+     * (`true`) or "closed" (`false`).
+     * @example
+     * ```javascript
+     * await viewer.toggleConfig();
+     * ```
      */
     async toggleConfig(force?: boolean): Promise<void> {
         await this.load_wasm();
@@ -282,14 +445,15 @@ export class PerspectiveViewerElement extends HTMLElement {
 
     /**
      * Get the currently active plugin custom element instance, or a specific
-     * named instance if requested.  `getPlugin(name)` does not activate the plugin
-     * requested, so if this plugin is not active the returned `HTMLElement` will
-     * not have a `parentElement`.
+     * named instance if requested.  `getPlugin(name)` does not activate the
+     * plugin requested, so if this plugin is not active the returned
+     * `HTMLElement` will not have a `parentElement`.
      *
      * If no plugins have been registered (via `registerPlugin()`), calling
      * `getPlugin()` will cause `perspective-viewer-debug` to be registered as a
      * side effect.
      *
+     * @category Plugin
      * @param name Optionally a specific plugin name, defaulting to the current
      * active plugin.
      * @returns The active or requested plugin instance.
@@ -304,10 +468,12 @@ export class PerspectiveViewerElement extends HTMLElement {
      * Get all plugin custom element instances, in order of registration.
      *
      * If no plugins have been registered (via `registerPlugin()`), calling
-     * `getAllPlugins()` will cause `perspective-viewer-debug` to be registered as
-     * a side effect.
+     * `getAllPlugins()` will cause `perspective-viewer-debug` to be registered
+     * as a side effect.
      *
-     * @returns An `Array` of the plugin instances for this `<perspective-viewer>`.
+     * @category Plugin
+     * @returns An `Array` of the plugin instances for this
+     * `<perspective-viewer>`.
      */
     async getAllPlugins(): Promise<Array<HTMLElement>> {
         await this.load_wasm();
@@ -327,7 +493,7 @@ class PerspectiveColumnStyleElement extends HTMLElement {
         super();
     }
 
-    async open(target, config, default_config) {
+    async open(target: HTMLElement, config: any, default_config: any): Promise<void> {
         if (this.instance) {
             this.instance.reset(config, default_config);
         } else {
@@ -342,11 +508,12 @@ if (document.createElement("perspective-column-style").constructor === HTMLEleme
     window.customElements.define("perspective-column-style", PerspectiveColumnStyleElement);
 }
 
-interface ReactPerspectiveViewerAttributes<T> extends React.HTMLAttributes<T> {}
+type ReactPerspectiveViewerAttributes<T> = React.HTMLAttributes<T>;
 
 type JsxPerspectiveViewerElement = {class?: string} & React.DetailedHTMLProps<ReactPerspectiveViewerAttributes<PerspectiveViewerElement>, PerspectiveViewerElement>;
 
 declare global {
+    // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace JSX {
         interface IntrinsicElements {
             "perspective-viewer": JsxPerspectiveViewerElement;

@@ -33,7 +33,7 @@ declare module "@finos/perspective" {
     export type FilterOp = "<" | ">" | "<=" | ">=" | "==" | "!=" | "is null" | "is not null" | "in" | "not in" | "begins with" | "contains";
 
     export type Schema = {
-        [key: ColumnName]: Type;
+        [key: string]: Type;
     };
 
     export interface SerializeConfig {
