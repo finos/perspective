@@ -3,7 +3,7 @@
     "superstore.html/doesn't leak elements.": "d0fd18b3d4d7c183c5ed155b4bf37972",
     "superstore.html/doesn't leak views when setting row pivots.": "54daaa4bbbe59f6ed4acc301ba871bab",
     "superstore.html/doesn't leak views when setting filters.": "6dfc1e505f1428424c3265f0236f22fc",
-    "__GIT_COMMIT__": "a3256b28c3261b64d89ddc993298a8d049c39886",
+    "__GIT_COMMIT__": "9a0427a1de46d2da89ee3d5290d0baba3fd31aa2",
     "blank.html/Handles reloading with a schema.": "e58c62f6e0ff16dc4d753f99e0fc39c3",
     "superstore_shows_a_grid_without_any_settings_applied_": "ae1c4690d978598ca14c8669244ce604",
     "superstore_Responsive_Layout_shows_horizontal_columns_on_small_vertical_viewports_": "57ba3ad341cf8a0e4df6ab96715ff2a0",

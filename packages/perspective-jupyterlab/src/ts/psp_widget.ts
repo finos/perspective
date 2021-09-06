@@ -9,16 +9,16 @@
 
 import "@finos/perspective-viewer";
 
-import {Table, TableData} from "@finos/perspective";
+import {Table, TableData, Aggregate, Sort, Expression, Filter, ColumnName} from "@finos/perspective";
 import {Message} from "@lumino/messaging";
 import {Widget} from "@lumino/widgets";
 import {MIME_TYPE, PSP_CLASS, PSP_CONTAINER_CLASS, PSP_CONTAINER_CLASS_DARK} from "./utils";
 
-import {HTMLPerspectiveViewerElement, Pivots, Aggregates, Sort, Expressions, PerspectiveViewerOptions, Filters, Columns} from "@finos/perspective-viewer";
+import {PerspectiveViewerElement, PerspectiveViewerConfig} from "@finos/perspective-viewer";
 
 let _increment = 0;
 
-export interface PerspectiveWidgetOptions extends PerspectiveViewerOptions {
+export interface PerspectiveWidgetOptions extends PerspectiveViewerConfig {
     dark?: boolean;
     client?: boolean;
     server?: boolean;
@@ -27,9 +27,9 @@ export interface PerspectiveWidgetOptions extends PerspectiveViewerOptions {
 
     // these shouldn't exist, PerspectiveViewerOptions should be sufficient e.g.
     // ["row-pivots"]
-    column_pivots?: Pivots;
-    row_pivots?: Pivots;
-    expressions?: Expressions;
+    column_pivots?: Array<ColumnName>;
+    row_pivots?: Array<ColumnName>;
+    expressions?: Array<Expression>;
     editable?: boolean;
 }
 
@@ -56,21 +56,21 @@ export class PerspectiveWidget extends Widget {
      *
      * @param options
      */
-    _set_attributes(options: PerspectiveViewerOptions & PerspectiveWidgetOptions): void {
+    _set_attributes(options: PerspectiveViewerConfig & PerspectiveWidgetOptions): void {
         const plugin: string = options.plugin || "datagrid";
-        const columns: Columns = options.columns || [];
-        const row_pivots: Pivots = options.row_pivots || options.row_pivots || [];
-        const column_pivots: Pivots = options.column_pivots || options.column_pivots || [];
-        const aggregates: Aggregates = options.aggregates || {};
-        const sort: Sort = options.sort || [];
-        const filter: Filters = options.filter || [];
-        const expressions: Expressions = options.expressions || options.expressions || [];
+        const columns: ColumnName[] = options.columns || [];
+        const row_pivots: ColumnName[] = options.row_pivots || options.row_pivots || [];
+        const column_pivots: ColumnName[] = options.column_pivots || options.column_pivots || [];
+        const aggregates: {[column: string]: Aggregate} = options.aggregates || {};
+        const sort: Sort[] = options.sort || [];
+        const filter: Filter[] = options.filter || [];
+        const expressions: Expression[] = options.expressions || options.expressions || [];
         const plugin_config: object = options.plugin_config || {};
         const dark: boolean = options.dark || false;
         const editable: boolean = options.editable || false;
         const server: boolean = options.server || false;
         const client: boolean = options.client || false;
-        const selectable: boolean = options.selectable || false;
+        // const selectable: boolean = options.selectable || false;
 
         this.server = server;
         this.client = client;
@@ -89,7 +89,7 @@ export class PerspectiveWidget extends Widget {
         };
 
         // this.plugin_config = plugin_config;
-        this.selectable = selectable;
+        // this.selectable = selectable;
     }
 
     /**********************/
@@ -122,22 +122,18 @@ export class PerspectiveWidget extends Widget {
     }
 
     async notifyResize(): Promise<void> {
-        if (this.isVisible) {
-            await this.viewer.notifyResize();
-        }
+        await this.viewer.notifyResize();
     }
 
     async toggleConfig(): Promise<void> {
-        if (this.isVisible) {
-            await this.viewer.toggleConfig();
-        }
+        await this.viewer.toggleConfig();
     }
 
-    async save(): Promise<PerspectiveViewerOptions> {
+    async save(): Promise<PerspectiveViewerConfig> {
         return await this.viewer.save();
     }
 
-    async restore(config: PerspectiveViewerOptions): Promise<void> {
+    async restore(config: PerspectiveViewerConfig): Promise<void> {
         return await this.viewer.restore(config);
     }
 
@@ -156,15 +152,17 @@ export class PerspectiveWidget extends Widget {
      *
      * @param data
      */
-    _update(data: TableData): void {
-        this.viewer.table.update(data);
+    async _update(data: TableData): Promise<void> {
+        const table = await this.viewer.getTable();
+        await table.update(data);
     }
 
     /**
      * Removes all rows from the viewer's table. Does not reset viewer state.
      */
     async clear(): Promise<void> {
-        await this.viewer.table.clear();
+        const table = await this.viewer.getTable();
+        await table.clear();
     }
 
     /**
@@ -174,7 +172,8 @@ export class PerspectiveWidget extends Widget {
      * @param data
      */
     async replace(data: TableData): Promise<void> {
-        await this.viewer.table.replace(data);
+        const table = await this.viewer.getTable();
+        await table.replace(data);
     }
 
     /**
@@ -194,8 +193,8 @@ export class PerspectiveWidget extends Widget {
         return await this.viewer.getEditPort();
     }
 
-    get table(): Table {
-        return this.viewer.table;
+    async getTable(): Promise<Table> {
+        return await this.viewer.getTable();
     }
 
     /***************************************************************************
@@ -209,7 +208,7 @@ export class PerspectiveWidget extends Widget {
      *
      * @returns {PerspectiveViewer} The widget's viewer instance.
      */
-    get viewer(): HTMLPerspectiveViewerElement {
+    get viewer(): PerspectiveViewerElement {
         return this._viewer;
     }
 
@@ -306,7 +305,7 @@ export class PerspectiveWidget extends Widget {
         }
     }
 
-    static createNode(node: HTMLDivElement): HTMLPerspectiveViewerElement {
+    static createNode(node: HTMLDivElement): PerspectiveViewerElement {
         node.classList.add("p-Widget");
         node.classList.add(PSP_CONTAINER_CLASS);
         const viewer = document.createElement("perspective-viewer");
@@ -342,11 +341,11 @@ export class PerspectiveWidget extends Widget {
         return viewer;
     }
 
-    private _viewer: HTMLPerspectiveViewerElement;
+    private _viewer: PerspectiveViewerElement;
     private _plugin_config: object;
     private _client: boolean;
     private _server: boolean;
     private _dark: boolean;
     private _editable: boolean;
-    private _viewer_config: PerspectiveViewerOptions;
+    private _viewer_config: PerspectiveViewerConfig;
 }

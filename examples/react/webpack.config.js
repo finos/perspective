@@ -35,12 +35,12 @@ module.exports = {
             },
             {
                 test: /\.css$/,
+                exclude: /node_modules/,
                 use: [{loader: "style-loader"}, {loader: "css-loader"}]
             }
         ]
     },
     devServer: {
-        // superstore.arrow is served from here
         contentBase: [path.join(__dirname, "dist"), path.join(__dirname, "../../node_modules/superstore-arrow")]
     }
 };

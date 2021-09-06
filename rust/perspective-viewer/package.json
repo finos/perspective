@@ -19,7 +19,7 @@
         "src/**/*",
         "index.d.ts"
     ],
-    "typings": "index.d.ts",
+    "types": "dist/esm/index.d.ts",
     "scripts": {
         "build:wasm": "wasm-pack build --out-dir dist/pkg --target web && rm dist/pkg/package.json",
         "build:rollup": "rollup --config rollup.config.js",
@@ -32,6 +32,10 @@
         "postbuild": "rimraf pkg/package.json pkg/.gitignore",
         "clean": "rimraf dist && rimraf pkg && rimraf target",
         "clean:screenshots": "rimraf \"test/screenshots/**/*.@(failed|diff).png\"",
+        "docs": "npm-run-all docs:build docs:concat docs:deploy",
+        "docs:build": "typedoc --hideBreadcrumbs --out dist/docs --readme none --excludePrivate src/ts/index.ts",
+        "docs:concat": "node ./concat-md.js",
+        "docs:deploy": "(echo \"---\nid: perspective\ntitle: perspective-viewer API\n---\n\n\"; cat README.md) > ../../docs/obj/perspective-viewer.md",
         "fix": "yarn lint --fix",
         "lint": "eslint src examples/*.md examples/*.html",
         "test:build:rust": "cpx ../../packages/perspective/dist/umd/perspective.inline.js pkg/",
@@ -47,7 +51,7 @@
     },
     "dependencies": {
         "@finos/perspective": "^0.10.3",
-        "mobile-drag-drop": "^2.3.0-rc.2",
+        "mobile-drag-drop-shadow-dom": "3.0.0",
         "monaco-editor": "0.24.0",
         "monaco-editor-webpack-plugin": "3.1.0"
     }

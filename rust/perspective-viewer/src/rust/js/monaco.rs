@@ -41,7 +41,7 @@ extern "C" {
         return import(
             /* webpackChunkName: \"monaco-exts\" */
             /* webpackMode: \"eager\" */
-            '../../../../src/js/monaco.js'
+            '../../../../dist/esm/monaco.js'
         ); 
     }
 ")

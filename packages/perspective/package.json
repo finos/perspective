@@ -18,7 +18,7 @@
         "index.d.ts",
         "babel.config.js"
     ],
-    "typings": "index.d.ts",
+    "types": "index.d.ts",
     "scripts": {
         "build:babel:esm": "babel src/js --source-maps --out-dir dist/esm",
         "build:babel:cjs": "BABEL_MODULE=auto babel dist/esm --source-maps --out-dir dist/cjs",
