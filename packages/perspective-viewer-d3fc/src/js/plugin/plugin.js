@@ -232,7 +232,7 @@ export function register(...plugins) {
                         }
                     }
 
-                    async restyleElement(...args) {
+                    async restyle(...args) {
                         let settings = this._settings;
                         if (settings) {
                             delete settings["colorStyles"];

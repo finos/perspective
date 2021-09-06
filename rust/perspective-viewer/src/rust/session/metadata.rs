@@ -27,6 +27,7 @@ pub struct SessionMetadata(Option<SessionMetadataState>);
 pub struct SessionMetadataState {
     column_names: Vec<String>,
     table_schema: HashMap<String, Type>,
+    edit_port: f64,
     view_schema: Option<HashMap<String, Type>>,
     view_expression_schema: Option<HashMap<String, Type>>,
     view_expression_alias: Option<HashMap<String, String>>,
@@ -54,9 +55,12 @@ impl SessionMetadata {
             .into_serde::<HashMap<String, Type>>()
             .into_jserror()?;
 
+        let edit_port = table.make_port().await?;
+
         Ok(SessionMetadata(Some(SessionMetadataState {
             column_names,
             table_schema,
+            edit_port,
             ..SessionMetadataState::default()
         })))
     }
@@ -166,6 +170,10 @@ impl SessionMetadata {
                     .map(|schema| schema.contains_key(name))
             })
             .unwrap_or(false)
+    }
+
+    pub fn get_edit_port(&self) -> Option<f64> {
+        self.0.as_ref().map(|meta| meta.edit_port)
     }
 
     /// Returns the type of a column name relative to the `Table`.  Despite the name,

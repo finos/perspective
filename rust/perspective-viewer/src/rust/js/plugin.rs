@@ -55,6 +55,8 @@ use super::perspective::JsPerspectiveView;
 
         async resize() {}
 
+        async restyle() {}
+
         save() {}
 
         restore() {}
@@ -113,6 +115,12 @@ extern "C" {
 
     #[wasm_bindgen(method)]
     pub fn delete(this: &JsPerspectiveViewerPlugin);
+
+    #[wasm_bindgen(method, catch)]
+    pub async fn restyle(
+        this: &JsPerspectiveViewerPlugin, 
+        view: &JsPerspectiveView
+    ) -> Result<JsValue, JsValue>;
 
     #[wasm_bindgen(method, catch)]
     pub async fn draw(

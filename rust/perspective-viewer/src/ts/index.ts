@@ -369,7 +369,8 @@ export class PerspectiveViewerElement extends HTMLElement {
      * @category Util
      */
     async restyleElement(): Promise<void> {
-        console.error("Not Implemented");
+        await this.load_wasm();
+        await this.instance.js_restyle_element();
     }
 
     /**
@@ -395,8 +396,9 @@ export class PerspectiveViewerElement extends HTMLElement {
      * ```
      */
     async getEditPort(): Promise<number> {
-        console.error("Not Implemented");
-        return -1;
+        await this.load_wasm();
+        const port = await this.instance.js_get_edit_port();
+        return port;
     }
 
     /**

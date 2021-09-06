@@ -130,6 +130,8 @@ customElements.define(
             datagrid[PLUGIN_SYMBOL] = token;
         }
 
+        async restyle() {}
+
         delete() {
             if (this.datagrid.table_model) {
                 this.datagrid._resetAutoSize();
