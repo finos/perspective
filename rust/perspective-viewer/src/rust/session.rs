@@ -151,7 +151,7 @@ impl Session {
             DragEffect::Move(DropAction::Active) => {
                 // match requirements.mode {
                 // ColumnSelectMode::Toggle => {
-                if !is_swap {
+                if !is_swap && config.columns.len() > 1 {
                     config.columns.retain(|x| x.as_ref() != Some(&column));
                     update.columns = Some(config.columns.clone());
                 }
