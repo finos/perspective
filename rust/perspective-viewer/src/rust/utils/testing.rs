@@ -16,7 +16,7 @@ use {
 #[wasm_bindgen(inline_js = "
 
     export async function worker() {
-        await import('/pkg/perspective.inline.js');
+        await import('/dist/pkg/perspective.inline.js');
         return window.perspective.worker();
     }
 

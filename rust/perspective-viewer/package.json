@@ -15,9 +15,7 @@
     "jsdelvr": "dist/umd/perspective-viewer.js",
     "files": [
         "dist/**/*",
-        "pkg/**/*",
-        "src/**/*",
-        "index.d.ts"
+        "src/**/*"
     ],
     "types": "dist/esm/index.d.ts",
     "scripts": {
@@ -38,7 +36,7 @@
         "docs:deploy": "(echo \"---\nid: perspective\ntitle: perspective-viewer API\n---\n\n\"; cat README.md) > ../../docs/obj/perspective-viewer.md",
         "fix": "yarn lint --fix",
         "lint": "eslint src examples/*.md examples/*.html",
-        "test:build:rust": "cpx ../../packages/perspective/dist/umd/perspective.inline.js pkg/",
+        "test:build:rust": "cpx ../../packages/perspective/dist/umd/perspective.inline.js dist/pkg/",
         "test:build:js": "cpx \"test/html/*\" dist/umd && cpx \"test/csv/*\" dist/umd && cpx \"test/css/*\" dist/umd",
         "test:build": "npm-run-all test:build:*",
         "test:run:rust": "wasm-pack test --chrome --headless",
