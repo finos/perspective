@@ -21,6 +21,7 @@ use flate2::read::ZlibDecoder;
 use flate2::write::ZlibEncoder;
 use flate2::Compression;
 use futures::channel::oneshot::*;
+use futures::future::join_all;
 use js_intern::*;
 use js_sys::*;
 use std::cell::RefCell;
@@ -324,6 +325,34 @@ impl PerspectiveViewerElement {
     pub fn js_resize(&self) -> js_sys::Promise {
         let renderer = self.renderer.clone();
         promisify_ignore_view_delete(async move { renderer.resize().await })
+    }
+
+    /// Get this viewer's edit port for the currently loaded `Table`.
+    pub fn js_get_edit_port(&self) -> Result<f64, JsValue> {
+        self.session
+            .metadata()
+            .get_edit_port()
+            .ok_or_else(|| "No `Table` loaded".into())
+    }
+
+    /// Restyle all plugins from current document.
+    pub fn js_restyle_element(&self) -> js_sys::Promise {
+        let renderer = self.renderer.clone();
+        let session = self.session.clone();
+        promisify_ignore_view_delete(async move {
+            let view = session.get_view().into_jserror()?;
+            let plugins = renderer.get_all_plugins();
+            let tasks = plugins.iter().map(|plugin| {
+                let view = &view;
+                async move { plugin.restyle(view).await }
+            });
+
+            join_all(tasks)
+                .await
+                .into_iter()
+                .collect::<Result<Vec<_>, _>>()
+                .map(|_| JsValue::UNDEFINED)
+        })
     }
 
     /// Determines the render throttling behavior. Can be an integer, for
