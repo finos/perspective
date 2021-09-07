@@ -19,6 +19,7 @@ use super::inactive_column::*;
 
 use itertools::Itertools;
 use std::cmp::Ordering;
+use std::iter::*;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::*;
@@ -101,15 +102,42 @@ impl Component for ColumnSelector {
         match msg {
             ColumnSelectorMsg::TableLoaded => true,
             ColumnSelectorMsg::ViewCreated => true,
-            ColumnSelectorMsg::HoverActiveIndex(index) => match index {
-                Some(index) => {
-                    self.props.dragdrop.drag_enter(DropAction::Active, index)
+            ColumnSelectorMsg::HoverActiveIndex(index) => {
+                let min_cols = self.props.renderer.metadata().min;
+                match index {
+                    Some(to_index) => {
+                        let config = self.props.session.get_view_config();
+                        let is_to_empty = !config
+                            .columns
+                            .get(to_index)
+                            .map(|x| x.is_some())
+                            .unwrap_or_default();
+
+                        let from_index =
+                            self.props.dragdrop.get_drag_column().and_then(|x| {
+                                config
+                                    .columns
+                                    .iter()
+                                    .position(|z| z.as_ref() == Some(&x))
+                            });
+
+                        if min_cols
+                            .and_then(|x| from_index.map(|from_index| from_index < x))
+                            .unwrap_or_default()
+                            && is_to_empty
+                        {
+                            self.props.dragdrop.drag_leave(DropAction::Active);
+                            true
+                        } else {
+                            self.props.dragdrop.drag_enter(DropAction::Active, to_index)
+                        }
+                    }
+                    _ => {
+                        self.props.dragdrop.drag_leave(DropAction::Active);
+                        true
+                    }
                 }
-                None => {
-                    self.props.dragdrop.drag_leave(DropAction::Active);
-                    true
-                }
-            },
+            }
             ColumnSelectorMsg::Drop((column, DropAction::Active, effect, index)) => {
                 let update = self.props.session.create_drag_drop_update(
                     column,
@@ -179,7 +207,7 @@ impl Component for ColumnSelector {
             });
 
             let dragover = Callback::from(|_event: DragEvent| _event.prevent_default());
-            let dragenter = self.link.callback(|event: DragEvent| {
+            let dragenter = self.link.callback(move |event: DragEvent| {
                 // Safari does not set `relatedTarget` so this event must be allowed to
                 // bubble so we can count entry/exit stacks to determine true
                 // `"dragleave"`.
@@ -352,36 +380,81 @@ impl<'a> ColumnsIterator<'a> {
         let min_cols = named_columns.len();
 
         match self.is_dragover_column {
-            Some((index, column)) => {
-                let is_swap = self.renderer.metadata().is_swap(*index);
-                if is_swap {
+            Some((to_index, from_column)) => {
+                let is_to_swap = self.renderer.metadata().is_swap(*to_index);
+
+                let is_to_empty = self
+                    .config
+                    .columns
+                    .get(*to_index)
+                    .map(|x| x.is_none())
+                    .unwrap_or_default();
+
+                let is_from_required = self
+                    .config
+                    .columns
+                    .iter()
+                    .position(|x| x.as_ref() == Some(from_column))
+                    .and_then(|x| self.renderer.metadata().min.map(|y| x < y))
+                    .unwrap_or_default();
+
+                let is_from_swap = self
+                    .config
+                    .columns
+                    .iter()
+                    .position(|x| x.as_ref() == Some(from_column))
+                    .map(|x| self.renderer.metadata().is_swap(x))
+                    .unwrap_or_default();
+
+                let offset = match self.config.columns.get(*to_index) {
+                    Some(Some(_)) => *to_index,
+                    _ => *to_index + 1,
+                };
+
+                if is_to_swap || is_from_required {
                     Box::new(
                         self.config
                             .columns
                             .iter()
-                            .map(move |x| match x {
-                                Some(x) if x == column => {
-                                    &self.config.columns.get(*index).unwrap_or(&None)
+                            .filter_map(move |x| match x {
+                                Some(x) if x == from_column => {
+                                    if is_to_empty {
+                                        None
+                                    } else {
+                                        Some(
+                                            self.config
+                                                .columns
+                                                .get(*to_index)
+                                                .unwrap_or(&None),
+                                        )
+                                    }
                                 }
-                                x => x,
+                                x => Some(x),
                             })
                             .pad_using(min_cols, |_| &None)
-                            .take(*index)
+                            .take(*to_index)
                             .map(Some)
                             .chain([None].iter().cloned())
                             .chain({
                                 self.config
                                     .columns
                                     .iter()
-                                    .map(move |x| match x {
-                                        Some(x) if x == column => self
-                                            .config
-                                            .columns
-                                            .get(*index)
-                                            .unwrap_or(&None),
-                                        x => x,
+                                    .filter_map(move |x| match x {
+                                        Some(x) if x == from_column => {
+                                            if is_to_empty && !is_from_swap {
+                                                None
+                                            } else {
+                                                Some(
+                                                    self.config
+                                                        .columns
+                                                        .get(*to_index)
+                                                        .unwrap_or(&None),
+                                                )
+                                            }
+                                        }
+                                        x => Some(x),
                                     })
-                                    .skip(*index + 1)
+                                    .skip(*to_index + 1)
                                     .map(Some)
                             })
                             .pad_using(min_cols, |_| Some(&None))
@@ -402,26 +475,38 @@ impl<'a> ColumnsIterator<'a> {
                         .config
                         .columns
                         .iter()
-                        .filter(move |x| match x {
-                            Some(x) => x != column,
-                            None => true,
+                        .filter_map(move |x| match x {
+                            Some(x) if x == from_column => {
+                                if !is_from_swap {
+                                    None
+                                } else {
+                                    Some(&None)
+                                }
+                            }
+                            x => Some(x),
                         })
                         .pad_using(min_cols, |_| &None)
-                        .take(*index)
+                        .take(*to_index)
                         .map(Some);
 
                     Box::new(
                         filtered_cols
-                            .chain([None].iter().cloned())
+                            .chain([None].iter().cloned()) // index
                             .chain(
                                 self.config
                                     .columns
                                     .iter()
-                                    .filter(move |x| match x {
-                                        Some(x) => x != column,
-                                        None => true,
+                                    .filter_map(move |x| match x {
+                                        Some(x) if x == from_column => {
+                                            if !is_from_swap {
+                                                None
+                                            } else {
+                                                Some(&None)
+                                            }
+                                        }
+                                        x => Some(x),
                                     })
-                                    .skip(*index)
+                                    .skip(offset)
                                     .map(Some),
                             )
                             .pad_using(min_cols, |_| Some(&None))

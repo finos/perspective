@@ -145,19 +145,47 @@ impl Session {
     ) -> ViewConfigUpdate {
         let mut config = self.get_view_config();
         let mut update = ViewConfigUpdate::default();
-        let is_swap = requirements.is_swap(index);
+        let is_to_swap = requirements.is_swap(index);
+        let from_index = config
+            .columns
+            .iter()
+            .position(|x| x.as_ref() == Some(&column));
+
+        let is_from_required = from_index
+            .and_then(|x| requirements.min.map(|z| x < z))
+            .unwrap_or_default();
+
+        let is_from_swap = from_index
+            .map(|x| requirements.is_swap(x))
+            .unwrap_or_default();
+
+        let is_to_empty = config
+            .columns
+            .get(index)
+            .map(|x| x.is_none())
+            .unwrap_or_default();
+
         match drag {
             DragEffect::Copy => (),
             DragEffect::Move(DropAction::Active) => {
-                // match requirements.mode {
-                // ColumnSelectMode::Toggle => {
-                if !is_swap {
-                    config.columns.retain(|x| x.as_ref() != Some(&column));
+                if ((!is_to_swap && is_from_swap)
+                    || (is_to_swap && !is_from_swap && is_to_empty))
+                    && config.columns.len() > 1
+                    && !is_from_required
+                {
+                    // Is not a swap
+                    if !is_to_swap {
+                        config.columns.iter_mut().for_each(|x| {
+                            if x.as_ref() == Some(&column) {
+                                *x = None;
+                            }
+                        });
+                    } else {
+                        config.columns.retain(|x| x.as_ref() != Some(&column));
+                    }
+
                     update.columns = Some(config.columns.clone());
                 }
-                // }
-                // ColumnSelectMode::Select => {}
-                // }
             }
             DragEffect::Move(DropAction::RowPivots) => {
                 config.row_pivots.retain(|x| x != &column);
@@ -179,7 +207,7 @@ impl Session {
 
         match drop {
             DropAction::Active => {
-                if is_swap {
+                if is_to_swap || is_from_required {
                     let column = Some(column);
                     config.columns.extend(std::iter::repeat(None).take(
                         if index >= (config.columns.len() - 1) {
@@ -205,7 +233,11 @@ impl Session {
                         },
                     ));
 
-                    config.columns.insert(index, Some(column));
+                    if is_to_empty {
+                        config.columns[index] = Some(column)
+                    } else {
+                        config.columns.insert(index, Some(column));
+                    }
                 }
 
                 update.columns = Some(config.columns);
