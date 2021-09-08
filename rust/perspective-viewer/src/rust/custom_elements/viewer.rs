@@ -223,12 +223,13 @@ impl PerspectiveViewerElement {
                     plugin.restore(&js_config.into_jserror()?);
                 }
 
+                let result = session.validate().await.create_view().await;
                 root.send_message(Msg::ApplySettings(settings));
-                session.validate().await.create_view().await
+                result
             });
 
             drop(draw_task.await?);
-            Ok(session.get_view().as_ref().unwrap().as_jsvalue())
+            Ok(JsValue::UNDEFINED)
         })
     }
 

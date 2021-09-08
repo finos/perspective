@@ -586,7 +586,15 @@ impl Session {
                 {
                     columns = columns
                         .into_iter()
+                        .enumerate()
+                        .filter(|(idx, x)| *idx < names.len() || x.is_some())
+                        .map(|(_, x)| x)
                         .pad_using(names.len(), |_| None)
+                        .collect::<Vec<_>>();
+                } else {
+                    columns = columns
+                        .into_iter()
+                        .filter(|x| x.is_some())
                         .collect::<Vec<_>>();
                 }
 

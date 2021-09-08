@@ -56,6 +56,24 @@ impl PartialEq for ActiveColumnProps {
     }
 }
 
+impl ActiveColumnProps {
+    fn get_name(&self) -> Option<String> {
+        match &self.name {
+            ActiveColumnState::DragOver(_) => {
+                Some(self.dragdrop.get_drag_column().unwrap())
+            }
+            ActiveColumnState::Column(_, name) => Some(name.to_owned()),
+            ActiveColumnState::Required(_) => None,
+        }
+    }
+
+    fn get_type(&self) -> Option<Type> {
+        self.get_name()
+            .as_ref()
+            .and_then(|x| self.session.metadata().get_column_table_type(x))
+    }
+}
+
 derive_renderable_props!(ActiveColumnProps);
 
 impl ActiveColumnProps {
@@ -118,6 +136,7 @@ pub struct ActiveColumn {
     link: ComponentLink<ActiveColumn>,
     props: ActiveColumnProps,
     add_expression_ref: NodeRef,
+    column_type: Option<Type>,
 }
 
 impl Component for ActiveColumn {
@@ -128,15 +147,20 @@ impl Component for ActiveColumn {
         props: <Self as yew::Component>::Properties,
         link: ComponentLink<Self>,
     ) -> Self {
+        let add_expression_ref = NodeRef::default();
+        let column_type = props.get_type();
         ActiveColumn {
             link,
             props,
-            add_expression_ref: NodeRef::default(),
+            add_expression_ref,
+            column_type,
         }
     }
 
     fn change(&mut self, props: <Self as yew::Component>::Properties) -> ShouldRender {
-        let should_render = self.props != props;
+        let should_render =
+            self.props != props || (self.column_type != props.get_type());
+        self.column_type = props.get_type();
         self.props = props;
         should_render
     }
@@ -171,10 +195,7 @@ impl Component for ActiveColumn {
             ActiveColumnState::Required(label) => (label.clone(), None),
         };
 
-        let col_type = name
-            .1
-            .as_ref()
-            .and_then(|x| self.props.session.metadata().get_column_table_type(x));
+        let col_type = self.column_type;
 
         match (name, col_type) {
             ((label, None), _) => {
@@ -308,7 +329,26 @@ impl Component for ActiveColumn {
                 }
             }
             _ => {
-                html! {}
+                // Expression columns are the only UI element which requires the
+                // `View` (for its expression type), we may need to stub these
+                // columns out until the new View forces a re-render (and the
+                // `change()` method on this component checks for this).
+
+                let class = Itertools::intersperse(classes.iter().cloned(), " ")
+                    .collect::<String>();
+
+                html! {
+                    <div
+                        class="column-selector-column">
+
+                        <span class="is_column_active inactive">
+                        </span>
+                        <div
+                            class={ class }>
+
+                        </div>
+                    </div>
+                }
             }
         }
     }
