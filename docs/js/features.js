@@ -6,51 +6,51 @@ exports.EXAMPLES = [
     {
         name: "Row Pivots 1",
         config: {
-            "row-pivots": ["Sub-Category"]
+            row_pivots: ["Sub-Category"]
         },
         aggregates: "dominant"
     },
     {
         name: "Row Pivots 2",
         config: {
-            "row-pivots": ["Category", "Sub-Category"]
+            row_pivots: ["Category", "Sub-Category"]
         }
     },
     {
         name: "Column Pivots",
         config: {
-            "column-pivots": ["Category"],
+            column_pivots: ["Category"],
             columns: ["Sales", "Quantity", "Discount", "Profit"]
         }
     },
     {
         name: "Column Pivots 2",
         config: {
-            "column-pivots": ["Category", "Sub-Category"],
+            column_pivots: ["Category", "Sub-Category"],
             columns: ["Sales", "Quantity", "Discount", "Profit"]
         }
     },
     {
         name: "Both",
         config: {
-            "row-pivots": ["Region"],
-            "column-pivots": ["Category"],
+            row_pivots: ["Region"],
+            column_pivots: ["Category"],
             columns: ["Sales", "Quantity", "Discount", "Profit"]
         }
     },
     {
         name: "Both 2",
         config: {
-            "row-pivots": ["Region", "State"],
-            "column-pivots": ["Category", "Sub-Category"],
+            row_pivots: ["Region", "State"],
+            column_pivots: ["Category", "Sub-Category"],
             columns: ["Sales", "Quantity", "Discount", "Profit"]
         }
     },
     {
         name: "Background Row And Column Pivots",
         config: {
-            "row-pivots": ["State"],
-            "column-pivots": ["Sub-Category"],
+            row_pivots: ["State"],
+            column_pivots: ["Sub-Category"],
             columns: ["Profit"],
             sort: [["Profit", "col asc"]],
             plugin_config: {
@@ -64,8 +64,8 @@ exports.EXAMPLES = [
     {
         name: "Gradient Row And Column Pivots",
         config: {
-            "row-pivots": ["State"],
-            "column-pivots": ["Sub-Category"],
+            row_pivots: ["State"],
+            column_pivots: ["Sub-Category"],
             columns: ["Profit"],
             sort: [["Profit", "col asc"]],
             plugin_config: {
@@ -79,8 +79,8 @@ exports.EXAMPLES = [
     {
         name: "BackgBarround Row And Column Pivots",
         config: {
-            "row-pivots": ["State"],
-            "column-pivots": ["Sub-Category"],
+            row_pivots: ["State"],
+            column_pivots: ["Sub-Category"],
             columns: ["Sales"],
             aggregates: {Sales: "avg"},
             plugin_config: {
@@ -194,7 +194,7 @@ exports.EXAMPLES = [
     {
         name: "Thermometer",
         config: {
-            "row-pivots": ["State"],
+            row_pivots: ["State"],
             columns: ["Profit (-)", "Profit", "Profit (+)"],
             plugin_config: {
                 "Profit (-)": {
@@ -220,7 +220,7 @@ exports.EXAMPLES = [
         name: "Y Bar",
         config: {
             plugin: "Y Bar",
-            "row-pivots": ["Sub-Category"],
+            row_pivots: ["Sub-Category"],
             columns: ["Sales"]
         }
     },
@@ -228,7 +228,7 @@ exports.EXAMPLES = [
         name: "Y Bar, Sorted Desc By Y-Axis",
         config: {
             plugin: "Y Bar",
-            "row-pivots": ["Sub-Category"],
+            row_pivots: ["Sub-Category"],
             columns: ["Sales"],
             sort: [["Sales", "desc"]]
         }
@@ -237,8 +237,8 @@ exports.EXAMPLES = [
         name: "Y Bar - Row And Column Pivots",
         config: {
             plugin: "Y Bar",
-            "row-pivots": ["Sub-Category"],
-            "column-pivots": ["Ship Mode"],
+            row_pivots: ["Sub-Category"],
+            column_pivots: ["Ship Mode"],
             columns: ["Sales"]
         }
     },
@@ -247,7 +247,7 @@ exports.EXAMPLES = [
         name: "Y Bar - Row Pivots 2 Sorted",
         config: {
             plugin: "Y Bar",
-            "row-pivots": ["Category", "Sub-Category"],
+            row_pivots: ["Category", "Sub-Category"],
             columns: ["Sales"],
             sort: [["Sales", "desc"]]
         }
@@ -256,8 +256,8 @@ exports.EXAMPLES = [
         name: "Y Bar - Row Pivots 2 And Column Pivots Sorted",
         config: {
             plugin: "Y Bar",
-            "row-pivots": ["Category", "Sub-Category"],
-            "column-pivots": ["Category"],
+            row_pivots: ["Category", "Sub-Category"],
+            column_pivots: ["Category"],
             columns: ["Sales"],
             sort: [["Sales", "desc"]]
         }
@@ -266,8 +266,8 @@ exports.EXAMPLES = [
         name: "Y Bar - Row Pivots 2 And 2 Column Pivots Sorted",
         config: {
             plugin: "Y Bar",
-            "row-pivots": ["Category", "Sub-Category"],
-            "column-pivots": ["Category", "Region"],
+            row_pivots: ["Category", "Sub-Category"],
+            column_pivots: ["Category", "Region"],
             columns: ["Sales"],
             sort: [["Sales", "desc"]]
         }
@@ -276,8 +276,8 @@ exports.EXAMPLES = [
         name: "Y Bar - Row Pivots 2 And 2 Column Pivots Sorted 2",
         config: {
             plugin: "Y Bar",
-            "row-pivots": ["State"],
-            "column-pivots": ["Profit (-/+)"],
+            row_pivots: ["State"],
+            column_pivots: ["Profit (-/+)"],
             columns: ["Profit"],
             expressions: [`//Profit (-/+)\nif("Profit"<0){1}else{0}`],
             sort: [["Profit", "desc"]]
@@ -291,7 +291,7 @@ exports.EXAMPLES = [
         name: "Y Bar Multi Axis",
         config: {
             plugin: "Y Bar",
-            "row-pivots": ["Sub-Category"],
+            row_pivots: ["Sub-Category"],
             columns: ["Quantity", "Sales"],
             aggregates: {Sales: "avg"},
             sort: [["Sales", "desc"]]
@@ -301,7 +301,7 @@ exports.EXAMPLES = [
         name: "Y Bar Multi Axis - SPlit",
         config: {
             plugin: "Y Bar",
-            "row-pivots": ["Sub-Category"],
+            row_pivots: ["Sub-Category"],
             columns: ["Quantity", "Sales"],
             sort: [["Sales", "desc"]],
             aggregates: {Sales: "avg"},
@@ -315,7 +315,7 @@ exports.EXAMPLES = [
         name: "X Bar",
         config: {
             plugin: "X Bar",
-            "row-pivots": ["Sub-Category"],
+            row_pivots: ["Sub-Category"],
             columns: ["Sales"]
         }
     },
@@ -323,7 +323,7 @@ exports.EXAMPLES = [
         name: "X Bar",
         config: {
             plugin: "X Bar",
-            "row-pivots": ["Sub-Category"],
+            row_pivots: ["Sub-Category"],
             columns: ["Quantity", "Profit"]
         }
     },
@@ -331,7 +331,7 @@ exports.EXAMPLES = [
         name: "X Bar, Sorted Desc By X-Axis",
         config: {
             plugin: "X Bar",
-            "row-pivots": ["Sub-Category"],
+            row_pivots: ["Sub-Category"],
             columns: ["Sales"],
             sort: [["Sales", "asc"]]
         }
@@ -340,8 +340,8 @@ exports.EXAMPLES = [
         name: "X Bar - Row And Column Pivots",
         config: {
             plugin: "X Bar",
-            "row-pivots": ["Sub-Category"],
-            "column-pivots": ["Region"],
+            row_pivots: ["Sub-Category"],
+            column_pivots: ["Region"],
             columns: ["Sales"]
         }
     },
@@ -349,8 +349,8 @@ exports.EXAMPLES = [
         name: "X Bar - Row And Column Pivots",
         config: {
             plugin: "X Bar",
-            "row-pivots": ["Sub-Category"],
-            "column-pivots": ["Region"],
+            row_pivots: ["Sub-Category"],
+            column_pivots: ["Region"],
             columns: ["Sales"],
             sort: [["Sales", "asc"]]
         }
@@ -362,7 +362,7 @@ exports.EXAMPLES = [
         name: "Y Line - Datetime Axis",
         config: {
             plugin: "Y Line",
-            "row-pivots": ["Order Date"],
+            row_pivots: ["Order Date"],
             columns: ["Sales"]
         }
     },
@@ -370,8 +370,8 @@ exports.EXAMPLES = [
         name: "Y Line - Datetime Axis",
         config: {
             plugin: "Y Line",
-            "row-pivots": ["Order Date"],
-            "column-pivots": ["Segment"],
+            row_pivots: ["Order Date"],
+            column_pivots: ["Segment"],
             columns: ["Sales"]
         }
     },
@@ -379,7 +379,7 @@ exports.EXAMPLES = [
         name: "Y Line - Datetime Axis Computed",
         config: {
             plugin: "Y Line",
-            "row-pivots": ["bucket(\"Order Date\", 'M')"],
+            row_pivots: ["bucket(\"Order Date\", 'M')"],
             expressions: ["bucket(\"Order Date\", 'M')"],
             columns: ["Sales"]
         }
@@ -388,8 +388,8 @@ exports.EXAMPLES = [
         name: "Y Line - Datetime Axis",
         config: {
             plugin: "Y Line",
-            "row-pivots": ["bucket(\"Order Date\", 'M')"],
-            "column-pivots": ["bucket(\"Order Date\", 'Y')"],
+            row_pivots: ["bucket(\"Order Date\", 'M')"],
+            column_pivots: ["bucket(\"Order Date\", 'Y')"],
             expressions: ["bucket(\"Order Date\", 'M')", "bucket(\"Order Date\", 'Y')"],
             columns: ["Sales"]
         }
@@ -398,8 +398,8 @@ exports.EXAMPLES = [
         name: "Y Line - Datetime Axis And Column Pivots",
         config: {
             plugin: "Y Line",
-            "row-pivots": ["bucket(\"Order Date\", 'M')"],
-            "column-pivots": ["Region"],
+            row_pivots: ["bucket(\"Order Date\", 'M')"],
+            column_pivots: ["Region"],
             expressions: ["bucket(\"Order Date\", 'M')"],
             columns: ["Sales"]
         }
@@ -408,7 +408,7 @@ exports.EXAMPLES = [
         name: "Y Line - Category Axis",
         config: {
             plugin: "Y Line",
-            "row-pivots": ["State"],
+            row_pivots: ["State"],
             columns: ["Sales"]
         },
         viewport: {width: 600, height: 450}
@@ -417,7 +417,7 @@ exports.EXAMPLES = [
         name: "Y Line - Category Axis",
         config: {
             plugin: "Y Line",
-            "row-pivots": ["State"],
+            row_pivots: ["State"],
             columns: ["Sales"],
             sort: [["Sales", "desc"]]
         },
@@ -427,8 +427,8 @@ exports.EXAMPLES = [
         name: "Y Line - Row and Column Pivots",
         config: {
             plugin: "Y Line",
-            "row-pivots": ["State"],
-            "column-pivots": ["Segment"],
+            row_pivots: ["State"],
+            column_pivots: ["Segment"],
             columns: ["Sales"],
             sort: [["Sales", "desc"]]
         },
@@ -438,7 +438,7 @@ exports.EXAMPLES = [
         name: "Y Line - Multi Axis Split",
         config: {
             plugin: "Y Line",
-            "row-pivots": ["State"],
+            row_pivots: ["State"],
             columns: ["Sales", "Profit"],
             plugin_config: {splitMainValues: ["Sales"]},
             sort: [["Sales", "desc"]]
@@ -449,8 +449,8 @@ exports.EXAMPLES = [
         name: "Y Line - Multi Axis Split",
         config: {
             plugin: "Y Line",
-            "row-pivots": ["State"],
-            "column-pivots": ["Segment"],
+            row_pivots: ["State"],
+            column_pivots: ["Segment"],
             columns: ["Sales", "Profit"],
             plugin_config: {splitMainValues: ["Sales"]},
             sort: [["Sales", "desc"]]
@@ -464,7 +464,7 @@ exports.EXAMPLES = [
         name: "Y Area - Datetime Axis Computed",
         config: {
             plugin: "Y Area",
-            "row-pivots": ["bucket(\"Order Date\", 'M')"],
+            row_pivots: ["bucket(\"Order Date\", 'M')"],
             expressions: ["bucket(\"Order Date\", 'M')"],
             columns: ["Sales"]
         }
@@ -473,8 +473,8 @@ exports.EXAMPLES = [
         name: "Y Area - Datetime Axis",
         config: {
             plugin: "Y Area",
-            "row-pivots": ["bucket(\"Order Date\", 'M')"],
-            "column-pivots": ["bucket(\"Order Date\", 'Y')"],
+            row_pivots: ["bucket(\"Order Date\", 'M')"],
+            column_pivots: ["bucket(\"Order Date\", 'Y')"],
             expressions: ["bucket(\"Order Date\", 'M')", "bucket(\"Order Date\", 'Y')"],
             columns: ["Sales"]
         }
@@ -483,8 +483,8 @@ exports.EXAMPLES = [
         name: "Y Area - Datetime Axis And Column Pivots",
         config: {
             plugin: "Y Area",
-            "row-pivots": ["bucket(\"Order Date\", 'M')"],
-            "column-pivots": ["Region"],
+            row_pivots: ["bucket(\"Order Date\", 'M')"],
+            column_pivots: ["Region"],
             expressions: ["bucket(\"Order Date\", 'M')"],
             columns: ["Sales"]
         }
@@ -493,7 +493,7 @@ exports.EXAMPLES = [
         name: "Y Area - Category Axis",
         config: {
             plugin: "Y Area",
-            "row-pivots": ["State"],
+            row_pivots: ["State"],
             columns: ["Sales"]
         },
         viewport: {width: 600, height: 450}
@@ -502,8 +502,8 @@ exports.EXAMPLES = [
         name: "Y Area - Row and Column Pivots",
         config: {
             plugin: "Y Area",
-            "row-pivots": ["State"],
-            "column-pivots": ["Ship Mode"],
+            row_pivots: ["State"],
+            column_pivots: ["Ship Mode"],
             columns: ["Sales"]
         },
         viewport: {width: 600, height: 450}
@@ -512,7 +512,7 @@ exports.EXAMPLES = [
         name: "Y Area - 2 Row Pivots",
         config: {
             plugin: "Y Area",
-            "row-pivots": ["Region", "State"],
+            row_pivots: ["Region", "State"],
             columns: ["Sales"],
             sort: [["Sales", "desc"]]
         },
@@ -522,8 +522,8 @@ exports.EXAMPLES = [
         name: "Y Area - Row and Column Pivots",
         config: {
             plugin: "Y Area",
-            "row-pivots": ["Region", "State"],
-            "column-pivots": ["Region"],
+            row_pivots: ["Region", "State"],
+            column_pivots: ["Region"],
             columns: ["Sales"],
             sort: [["Sales", "desc"]]
         },
@@ -533,8 +533,8 @@ exports.EXAMPLES = [
         name: "Y Area - Row and Column Pivots 2",
         config: {
             plugin: "Y Area",
-            "row-pivots": ["Region", "State"],
-            "column-pivots": ["Ship Mode"],
+            row_pivots: ["Region", "State"],
+            column_pivots: ["Ship Mode"],
             columns: ["Sales"],
             sort: [["Sales", "desc"]]
         },
@@ -547,7 +547,7 @@ exports.EXAMPLES = [
         name: "X/Y Scatter",
         config: {
             plugin: "X/Y Scatter",
-            "row-pivots": ["City"],
+            row_pivots: ["City"],
             columns: ["Sales", "Quantity"],
             aggregates: {Sales: "avg", Profit: "avg", Quantity: "avg"}
         }
@@ -556,8 +556,8 @@ exports.EXAMPLES = [
         name: "X/Y Scatter - Column Pivots",
         config: {
             plugin: "X/Y Scatter",
-            "row-pivots": ["City"],
-            "column-pivots": ["Region"],
+            row_pivots: ["City"],
+            column_pivots: ["Region"],
             columns: ["Sales", "Quantity"],
             aggregates: {Sales: "avg", Profit: "avg", Quantity: "avg"}
         }
@@ -566,7 +566,7 @@ exports.EXAMPLES = [
         name: "X/Y Scatter - Color By Float",
         config: {
             plugin: "X/Y Scatter",
-            "row-pivots": ["State"],
+            row_pivots: ["State"],
             columns: ["Sales", "Quantity", "Profit"],
             aggregates: {Sales: "avg", Profit: "avg", Quantity: "avg"},
             sort: [["Profit", "desc"]]
@@ -576,7 +576,7 @@ exports.EXAMPLES = [
         name: "X/Y Scatter - Bubble",
         config: {
             plugin: "X/Y Scatter",
-            "row-pivots": ["Sub-Category"],
+            row_pivots: ["Sub-Category"],
             columns: ["Sales", "Quantity", null, "Profit"],
             aggregates: {Sales: "avg", Profit: "avg", Quantity: "avg"}
         },
@@ -586,8 +586,8 @@ exports.EXAMPLES = [
         name: "X/Y Scatter - Bubble",
         config: {
             plugin: "X/Y Scatter",
-            "row-pivots": ["Sub-Category"],
-            "column-pivots": ["Category"],
+            row_pivots: ["Sub-Category"],
+            column_pivots: ["Category"],
             columns: ["Sales", "Quantity", null, "Profit"],
             aggregates: {Sales: "avg", Profit: "avg", Quantity: "avg"}
         },
@@ -597,7 +597,7 @@ exports.EXAMPLES = [
         name: "X/Y Scatter - Bubble",
         config: {
             plugin: "X/Y Scatter",
-            "row-pivots": ["Sub-Category"],
+            row_pivots: ["Sub-Category"],
             columns: ["Sales", "Quantity", "Profit", "Row ID"],
             sort: [["Profit", "desc"]],
             aggregates: {Sales: "avg", Profit: "sum", Quantity: "avg", "Row ID": "avg"}
@@ -610,7 +610,7 @@ exports.EXAMPLES = [
         config: {
             plugin: "X/Y Scatter",
             columns: ["Profit", "State", null, "Quantity"],
-            "row-pivots": ["City"],
+            row_pivots: ["City"],
             aggregates: {
                 State: "dominant"
             }
@@ -623,7 +623,7 @@ exports.EXAMPLES = [
         config: {
             plugin: "X/Y Scatter",
             columns: ["State", "Sub-Category", "Quantity", "Sales", null],
-            "row-pivots": ["State", "Sub-Category"],
+            row_pivots: ["State", "Sub-Category"],
             aggregates: {
                 State: "dominant",
                 "Sub-Category": "dominant",
@@ -645,9 +645,12 @@ exports.EXAMPLES = [
                 Sales: "avg",
                 Profit: "avg"
             },
-            "row-pivots": ["State"],
-            sort: [["Profit"], ["Sales"]],
-            "column-pivots": ["Region"]
+            row_pivots: ["State"],
+            sort: [
+                ["Profit", "desc"],
+                ["Sales", "desc"]
+            ],
+            column_pivots: ["Region"]
         }
     },
 
@@ -657,7 +660,7 @@ exports.EXAMPLES = [
         name: "Treemap",
         config: {
             plugin: "Treemap",
-            "row-pivots": ["Sub-Category"],
+            row_pivots: ["Sub-Category"],
             columns: ["Sales"]
         }
     },
@@ -665,7 +668,7 @@ exports.EXAMPLES = [
         name: "Treemap - 2 Row Pivots",
         config: {
             plugin: "Treemap",
-            "row-pivots": ["Category", "Sub-Category", "Segment"],
+            row_pivots: ["Category", "Sub-Category", "Segment"],
             columns: ["Sales"]
         }
     },
@@ -673,7 +676,7 @@ exports.EXAMPLES = [
         name: "Treemap - Float Color",
         config: {
             plugin: "Treemap",
-            "row-pivots": ["Category", "Sub-Category"],
+            row_pivots: ["Category", "Sub-Category"],
             columns: ["Sales", "Quantity"],
             sort: [["Quantity", "desc"]]
         }
@@ -682,7 +685,7 @@ exports.EXAMPLES = [
         name: "Treemap - Category Color",
         config: {
             plugin: "Treemap",
-            "row-pivots": ["Category", "Sub-Category"],
+            row_pivots: ["Category", "Sub-Category"],
             columns: ["Sales", "Category"],
             aggregates: {Category: "dominant"}
         }
@@ -691,8 +694,8 @@ exports.EXAMPLES = [
         name: "Treemap - Row And Column Pivots Float Color",
         config: {
             plugin: "Treemap",
-            "row-pivots": ["Category", "Sub-Category"],
-            "column-pivots": ["Region"],
+            row_pivots: ["Category", "Sub-Category"],
+            column_pivots: ["Region"],
             columns: ["Sales", "Quantity"],
             sort: [["Quantity", "desc"]]
         },
@@ -702,8 +705,8 @@ exports.EXAMPLES = [
         name: "Treemap - Row And Column Pivots Category Color",
         config: {
             plugin: "Treemap",
-            "row-pivots": ["Category", "Sub-Category"],
-            "column-pivots": ["Region"],
+            row_pivots: ["Category", "Sub-Category"],
+            column_pivots: ["Region"],
             columns: ["Sales", "Region"],
             aggregates: {Region: "dominant"}
         },
@@ -713,8 +716,8 @@ exports.EXAMPLES = [
         name: "Treemap - Row And Column Pivots Category Color 2",
         config: {
             plugin: "Treemap",
-            "row-pivots": ["Category", "Sub-Category"],
-            "column-pivots": ["Region"],
+            row_pivots: ["Category", "Sub-Category"],
+            column_pivots: ["Region"],
             columns: ["Sales", "Category"],
             aggregates: {Category: "dominant"}
         },
@@ -726,7 +729,7 @@ exports.EXAMPLES = [
         name: "Sunburst",
         config: {
             plugin: "Sunburst",
-            "row-pivots": ["Sub-Category"],
+            row_pivots: ["Sub-Category"],
             columns: ["Sales"]
         }
     },
@@ -734,7 +737,7 @@ exports.EXAMPLES = [
         name: "Sunburst - 2 Row Pivots",
         config: {
             plugin: "Sunburst",
-            "row-pivots": ["Category", "Sub-Category", "Segment"],
+            row_pivots: ["Category", "Sub-Category", "Segment"],
             columns: ["Sales"]
         }
     },
@@ -742,7 +745,7 @@ exports.EXAMPLES = [
         name: "Sunburst - Float Color",
         config: {
             plugin: "Sunburst",
-            "row-pivots": ["Category", "Sub-Category"],
+            row_pivots: ["Category", "Sub-Category"],
             columns: ["Quantity", "Sales"],
             sort: [["Quantity", "desc"]]
         }
@@ -751,7 +754,7 @@ exports.EXAMPLES = [
         name: "Sunburst - Category Color",
         config: {
             plugin: "Sunburst",
-            "row-pivots": ["Category", "Sub-Category"],
+            row_pivots: ["Category", "Sub-Category"],
             columns: ["Sales", "Category"],
             aggregates: {Category: "dominant"}
         }
@@ -760,8 +763,8 @@ exports.EXAMPLES = [
         name: "Sunburst - Row And Column Pivots",
         config: {
             plugin: "Sunburst",
-            "row-pivots": ["Category", "Sub-Category"],
-            "column-pivots": ["Region"],
+            row_pivots: ["Category", "Sub-Category"],
+            column_pivots: ["Region"],
             columns: ["Sales"]
         },
         viewport: {width: 600, height: 450}
@@ -770,8 +773,8 @@ exports.EXAMPLES = [
         name: "Sunburst - Row And Column Pivots Float Color",
         config: {
             plugin: "Sunburst",
-            "row-pivots": ["Category", "Sub-Category"],
-            "column-pivots": ["Region"],
+            row_pivots: ["Category", "Sub-Category"],
+            column_pivots: ["Region"],
             columns: ["Sales", "Quantity"]
         },
         viewport: {width: 600, height: 450}
@@ -780,8 +783,8 @@ exports.EXAMPLES = [
         name: "Sunburst - Row And Column Pivots Category Color",
         config: {
             plugin: "Sunburst",
-            "row-pivots": ["Category", "Sub-Category"],
-            "column-pivots": ["Region"],
+            row_pivots: ["Category", "Sub-Category"],
+            column_pivots: ["Region"],
             columns: ["Sales", "Region"],
             aggregates: {Region: "dominant"}
         },
@@ -791,8 +794,8 @@ exports.EXAMPLES = [
         name: "Sunburst - Row And Column Pivots Category Color 2",
         config: {
             plugin: "Sunburst",
-            "row-pivots": ["Category", "Sub-Category"],
-            "column-pivots": ["Region"],
+            row_pivots: ["Category", "Sub-Category"],
+            column_pivots: ["Region"],
             columns: ["Sales", "Category"],
             aggregates: {Category: "dominant"}
         },
@@ -805,8 +808,8 @@ exports.EXAMPLES = [
         name: "Heatmap",
         config: {
             plugin: "Heatmap",
-            "row-pivots": ["Sub-Category"],
-            "column-pivots": ["Region"],
+            row_pivots: ["Sub-Category"],
+            column_pivots: ["Region"],
             columns: ["Profit"],
             sort: [
                 ["Profit", "desc"],
@@ -820,8 +823,8 @@ exports.EXAMPLES = [
         name: "Heatmap 2",
         config: {
             plugin: "Heatmap",
-            "row-pivots": ["State"],
-            "column-pivots": ["Sub-Category"],
+            row_pivots: ["State"],
+            column_pivots: ["Sub-Category"],
             columns: ["Profit"],
             sort: [
                 ["Profit", "desc"],
@@ -841,8 +844,8 @@ exports.EXAMPLES = [
                 "Order Date": "dominant",
                 Sales: "avg"
             },
-            "column-pivots": ["Sub-Category"],
-            "row-pivots": ["bucket(\"Order Date\", 'M')"],
+            column_pivots: ["Sub-Category"],
+            row_pivots: ["bucket(\"Order Date\", 'M')"],
             sort: [["Discount", "col asc"]]
         },
         viewport: {width: 600, height: 450}
@@ -853,8 +856,8 @@ exports.EXAMPLES = [
             plugin: "Heatmap",
             columns: ["Profit"],
             expressions: ['bucket("Profit", 100)', "bucket(\"Order Date\", 'M')"],
-            "row-pivots": ["bucket(\"Order Date\", 'M')"],
-            "column-pivots": ['bucket("Profit", 100)'],
+            row_pivots: ["bucket(\"Order Date\", 'M')"],
+            column_pivots: ['bucket("Profit", 100)'],
             plugin_config: {}
         },
         viewport: {width: 600, height: 450}

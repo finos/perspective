@@ -11,7 +11,7 @@ import {seriesColorRange} from "../seriesRange";
 import {seriesColorsFromDistinct} from "../seriesColors";
 
 export function treeColor(settings, data) {
-    if (settings.realValues.length < 1 || settings.realValues[1] === null) return;
+    if (settings.realValues.length < 1 || settings.realValues[1] === null || settings.realValues[1] === undefined) return;
     const color_column = settings.realValues[1];
     const colors = data
         .filter(x => x.height > 0)

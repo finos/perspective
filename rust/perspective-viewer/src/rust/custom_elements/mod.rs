@@ -11,6 +11,3 @@ pub mod expression_editor;
 pub mod filter_dropdown;
 pub mod modal;
 pub mod viewer;
-
-#[cfg(test)]
-mod tests;

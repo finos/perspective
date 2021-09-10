@@ -37,12 +37,11 @@ async function run_with_theme(page, is_dark = false) {
         const WORKER = window.perspective.worker();
         async function on_load() {
             var el = document.getElementsByTagName('perspective-viewer')[0];
-            const plugin = await el._vieux.get_plugin("Heatmap");
+            const plugin = await el.getPlugin("Heatmap");
             plugin.render_warning = false;
-            WORKER.table(this.response).then(table => {
-                el.load(table);
-                el.toggleConfig();
-            });
+            const table = WORKER.table(this.response);
+            el.load(table);
+            el.toggleConfig();
         }
         window.addEventListener('DOMContentLoaded', function () {
             var xhr = new XMLHttpRequest();
@@ -55,21 +54,24 @@ async function run_with_theme(page, is_dark = false) {
 </body>
 </html>`);
     await page.setViewport(DEFAULT_VIEWPORT);
-    await page.waitForSelector("perspective-viewer:not([updating])");
-    await page.evaluate(async () => {
+    await page.evaluate(async function() {
         const viewer = document.querySelector("perspective-viewer");
+        await viewer.flush();
         await viewer.toggleConfig();
     });
 
-    await page.waitFor(3000);
+    // await page.waitFor(3000);
     // let html = [];
     for (const idx in EXAMPLES) {
         const {config, viewport} = EXAMPLES[idx];
         await await page.setViewport(viewport || DEFAULT_VIEWPORT);
+        const new_config = Object.assign({plugin: "Datagrid", row_pivots: [], expressions: [], column_pivots: [], sort: [], aggregates: {}}, config);
+        console.log(JSON.stringify(new_config));
         await page.evaluate(async config => {
             const viewer = document.querySelector("perspective-viewer");
+            await viewer.reset();
             await viewer.restore(config);
-        }, Object.assign({plugin: "Datagrid", "row-pivots": [], expression: [], "column-pivots": [], sort: [], aggregates: {}}, config));
+        }, new_config);
 
         await page.waitForSelector("perspective-viewer:not([updating])");
         const screenshot = await page.screenshot({
@@ -87,7 +89,7 @@ async function run_with_theme(page, is_dark = false) {
 }
 
 async function run() {
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({headless: false});
     const page = await browser.newPage();
     await run_with_theme(page);
     await run_with_theme(page, true);

@@ -217,7 +217,11 @@ impl Renderer {
         };
 
         let draw_mutex = self.draw_lock();
-        draw_mutex.debounce(task).await
+        if is_update {
+            draw_mutex.debounce(task).await
+        } else {
+            draw_mutex.lock(task).await
+        }
     }
 
     async fn draw_view(

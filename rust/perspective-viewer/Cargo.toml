@@ -84,6 +84,7 @@ features = [
     "ShadowRootMode",
     "ShadowRootInit",
     "Url",
+    "VisibilityState",
     "Window"
 ]
 

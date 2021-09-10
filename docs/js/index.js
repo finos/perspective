@@ -7,9 +7,6 @@ import "./logo.js";
 import "./concepts.js";
 
 import {EXAMPLES} from "./features.js";
-import {appendChild} from "domutils";
-import {div} from "prelude-ls";
-import {getEffectiveConstraintOfTypeParameter} from "typescript";
 
 var SECURITIES = [
     "AAPL.N",
@@ -89,8 +86,8 @@ function select(id) {
                 plugin: "Datagrid",
                 columns: ["chg (-)", "chg", "chg (+)"],
                 expressions: ['//chg (-)\nif("chg"<0){"chg"}else{0}', '//chg (+)\nif("chg">0){"chg"}else{0}'],
-                "row-pivots": ["name"],
-                "column-pivots": ["client"],
+                row_pivots: ["name"],
+                column_pivots: ["client"],
                 aggregates: {"chg (-)": "avg", "chg (+)": "avg", chg: "avg"},
                 sort: [["chg", "desc"]],
                 plugin_config: {
@@ -116,36 +113,36 @@ function select(id) {
                     ["lastUpdate", "desc"]
                 ],
                 aggregates: {name: "last", lastUpdate: "last"},
-                "row-pivots": ["name", "lastUpdate"],
-                "column-pivots": ["client"],
+                row_pivots: ["name", "lastUpdate"],
+                column_pivots: ["client"],
                 plugin_config: {}
             },
             "#cyclone": {
                 columns: ["chg"],
                 plugin: "X Bar",
                 sort: [["chg", "asc"]],
-                "row-pivots": ["name"],
-                "column-pivots": ["client"]
+                row_pivots: ["name"],
+                column_pivots: ["client"]
             },
             "#pivot": {
                 columns: ["vol"],
                 plugin: "Heatmap",
                 sort: [["vol", "asc"]],
-                "row-pivots": ["name"],
-                "column-pivots": ["client"]
+                row_pivots: ["name"],
+                column_pivots: ["client"]
             },
             "#crosssect": {
                 plugin: "X/Y Scatter",
-                "row-pivots": ["name"],
-                "column-pivots": [],
+                row_pivots: ["name"],
+                column_pivots: [],
                 columns: ["bid", "ask", "chg", "vol"],
                 aggregates: {bid: "avg", ask: "avg", vol: "avg"},
                 sort: []
             },
             "#intersect": {
                 plugin: "Treemap",
-                "row-pivots": ["name", "client"],
-                "column-pivots": [],
+                row_pivots: ["name", "client"],
+                column_pivots: [],
                 columns: ["bid", "chg"],
                 aggregates: {bid: "sum", chg: "sum", name: "last"},
                 sort: [
@@ -155,10 +152,10 @@ function select(id) {
             },
             "#enhance": {
                 plugin: "Y Line",
-                "row-pivots": ["lastUpdate"],
-                "column-pivots": [],
+                row_pivots: ["lastUpdate"],
+                column_pivots: [],
                 sort: [["lastUpdate", "desc"]],
-                "column-pivots": ["client"],
+                column_pivots: ["client"],
                 columns: ["bid"],
                 aggregates: {bid: "avg", chg: "avg", name: "last"}
             }
@@ -193,25 +190,26 @@ window.addEventListener("DOMContentLoaded", async function() {
     }
     elem = Array.prototype.slice.call(document.querySelectorAll("perspective-viewer"))[0];
     var worker = perspective.shared_worker();
-    var tbl = await worker.table(data, {index: "id"});
+    var tbl = worker.table(data, {index: "id"});
     elem.load(tbl);
     elem.toggleConfig();
 
-    setTimeout(function() {
-        update(tbl, 0);
+    setTimeout(async function() {
+        let table = await tbl;
+        update(table, 0);
     });
 
     document.querySelector("#velocity").addEventListener("input", function(event) {
         freq = (-9 / 5) * this.value + 190;
     });
 
-    document.querySelector("#grid").addEventListener("mousedown", () => select("#grid"));
-    document.querySelector("#grid2").addEventListener("mousedown", () => select("#grid2"));
-    document.querySelector("#cyclone").addEventListener("mousedown", () => select("#cyclone"));
-    document.querySelector("#pivot").addEventListener("mousedown", () => select("#pivot"));
-    document.querySelector("#crosssect").addEventListener("mousedown", () => select("#crosssect"));
-    document.querySelector("#intersect").addEventListener("mousedown", () => select("#intersect"));
-    document.querySelector("#enhance").addEventListener("mousedown", () => select("#enhance"));
+    document.querySelector("#grid").addEventListener("mouseenter", () => select("#grid"));
+    document.querySelector("#grid2").addEventListener("mouseenter", () => select("#grid2"));
+    document.querySelector("#cyclone").addEventListener("mouseenter", () => select("#cyclone"));
+    document.querySelector("#pivot").addEventListener("mouseenter", () => select("#pivot"));
+    document.querySelector("#crosssect").addEventListener("mouseenter", () => select("#crosssect"));
+    document.querySelector("#intersect").addEventListener("mouseenter", () => select("#intersect"));
+    document.querySelector("#enhance").addEventListener("mouseenter", () => select("#enhance"));
 
     select("#grid");
 
@@ -228,11 +226,11 @@ window.addEventListener("DOMContentLoaded", async function() {
         container.style.display = "none";
         container.appendChild(psp1);
         document.body.appendChild(container);
-        const tbl1 = await worker.table(arrow.slice());
+        const tbl1 = worker.table(arrow.slice());
         await psp1.load(tbl1);
 
-        const config_defaults = config => Object.assign({plugin_config: {}, plugin: "Datagrid", "row-pivots": [], columns: [], expression: [], "column-pivots": [], sort: [], aggregates: {}}, config);
-        let first_render = true;
+        const config_defaults = config => Object.assign({plugin_config: {}, plugin: "Datagrid", row_pivots: [], columns: [], expressions: [], column_pivots: [], sort: [], aggregates: {}}, config);
+        // let first_render = true;
 
         for (const image of document.querySelectorAll("a.feature")) {
             image.addEventListener("click", async event => {
@@ -269,7 +267,7 @@ window.addEventListener("DOMContentLoaded", async function() {
             }
             await psp1.restore({
                 plugin: ["Y Bar"],
-                "row-pivots": ["State"],
+                row_pivots: ["State"],
                 columns: ["Sales"]
             });
             await psp1.restyleElement();

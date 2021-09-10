@@ -10,3 +10,4 @@ mod column_style;
 mod plugin_selector;
 mod status_bar;
 mod status_bar_counter;
+mod viewer;
