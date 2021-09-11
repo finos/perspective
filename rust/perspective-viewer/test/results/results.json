@@ -58,5 +58,8 @@
     "superstore_doesn_t_leak_views_when_setting_row_pivots": "deab7074572ff5b98fd876f8a34bd97e",
     "superstore_doesn_t_leak_views_when_setting_filters": "4e40181b71c5a1588589e4c7bc2dc57a",
     "superstore_opens_settings_when_field_is_set_to_true": "731b9a3bd47f4e36ef78a86474d22695",
-    "superstore_opens_settings_when_field_is_set_to_false": "10d1208b485425756fcc932229386b02"
+    "superstore_opens_settings_when_field_is_set_to_false": "10d1208b485425756fcc932229386b02",
+    "superstore_save()_returns_the_current_config": "0466ee870162e9007024a44231faf08b",
+    "superstore_restore()_restores_a_config_from_save()": "0466ee870162e9007024a44231faf08b",
+    "superstore_restore()_fires_the__perspective-config-update__event": "0466ee870162e9007024a44231faf08b"
 }
