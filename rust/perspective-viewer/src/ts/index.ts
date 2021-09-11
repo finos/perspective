@@ -35,7 +35,7 @@ import * as perspective from "@finos/perspective";
 // There is no way to provide a default rejection handler within a promise and
 // also not lock the await-er, so this module attaches a global handler to
 // filter out cancelled query messages.
-window.addEventListener("unhandledrejection", event => {
+window.addEventListener("unhandledrejection", (event) => {
     if (event.reason?.message === "View method cancelled") {
         event.preventDefault();
     }
@@ -56,7 +56,7 @@ const WASM_MODULE = import(
 export type PerspectiveViewerConfig = perspective.ViewConfig & {
     plugin?: string;
     settings?: boolean;
-    plugin_config?: object;
+    plugin_config?: any;
 };
 
 /**
@@ -120,7 +120,7 @@ export class PerspectiveViewerElement extends HTMLElement {
      * @param name The `name` of the custom element to register, as supplied
      * to the `customElements.define(name)` method.
      */
-    static async registerPlugin(name): Promise<void> {
+    static async registerPlugin(name: string): Promise<void> {
         const module = await WASM_MODULE;
         module.register_plugin(name);
     }
@@ -460,7 +460,7 @@ export class PerspectiveViewerElement extends HTMLElement {
      * active plugin.
      * @returns The active or requested plugin instance.
      */
-    async getPlugin(name): Promise<HTMLElement> {
+    async getPlugin(name?: string): Promise<HTMLElement> {
         await this.load_wasm();
         const plugin = await this.instance.js_get_plugin(name);
         return plugin;
