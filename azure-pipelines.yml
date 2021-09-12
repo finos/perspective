@@ -87,6 +87,9 @@ parameters:
   - name: webassemblySteps
     type: stepList
     default:
+      - bash: yarn lint_js
+        displayName: "Lint"
+
       - bash: yarn build_js --ci
         displayName: "Build"
 
@@ -104,6 +107,9 @@ parameters:
   - name: pythonBuildDockerSteps
     type: stepList
     default:
+      - bash: yarn lint_python
+        displayName: "Lint"
+
       - bash: yarn build_python  --ci $(python_flag) $(manylinux_flag)
         displayName: 'build'
         env:
