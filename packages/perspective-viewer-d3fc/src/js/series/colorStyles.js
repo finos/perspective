@@ -21,7 +21,7 @@ export const initialiseStyles = (container, settings) => {
             scheme: [],
             gradient: {},
             interpolator: {},
-            grid: {}
+            grid: {},
         };
 
         const computed = computedStyle(container);
@@ -37,7 +37,7 @@ export const initialiseStyles = (container, settings) => {
         styles.grid.gridLineColor = computed`--d3fc-gridline--color`;
 
         const gradients = ["full", "positive", "negative"];
-        gradients.forEach(g => {
+        gradients.forEach((g) => {
             const gradient = computed(`--d3fc-${g}--gradient`);
             styles.gradient[g] = parseGradient(gradient, styles.opacity);
         });
@@ -46,7 +46,7 @@ export const initialiseStyles = (container, settings) => {
     }
 };
 
-const getOpacityFromColor = color => {
+const getOpacityFromColor = (color) => {
     return d3.color(color).opacity;
 };
 
@@ -56,16 +56,21 @@ const stepAsColor = (value, opacity) => {
     return color + "";
 };
 
-const computedStyle = container => {
+const computedStyle = (container) => {
     if (window.ShadyCSS) {
-        return d => window.ShadyCSS.getComputedStyleValue(container, d);
+        return (d) => window.ShadyCSS.getComputedStyleValue(container, d);
     } else {
         const containerStyles = getComputedStyle(container);
-        return d => containerStyles.getPropertyValue(d);
+        return (d) => containerStyles.getPropertyValue(d);
     }
 };
 
 const parseGradient = (gradient, opacity) => {
     const parsed = gparser.parse(gradient)[0].colorStops;
-    return parsed.map((g, i) => [g.length ? g.length.value / 100 : i / (parsed.length - 1), stepAsColor(g.value, opacity)]).sort((a, b) => a[0] - b[0]);
+    return parsed
+        .map((g, i) => [
+            g.length ? g.length.value / 100 : i / (parsed.length - 1),
+            stepAsColor(g.value, opacity),
+        ])
+        .sort((a, b) => a[0] - b[0]);
 };

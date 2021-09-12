@@ -20,7 +20,7 @@ export const tooltip = () => {
     let settings = null;
     let centered = false;
 
-    const _tooltip = selection => {
+    const _tooltip = (selection) => {
         const node = selection.node();
 
         if (!node || !node.isConnected) {
@@ -94,7 +94,12 @@ function showTooltip(containerNode, node, tooltipDiv, centered) {
     let left = rect.left + rect.width / 2 - containerRect.left;
     let top = rect.top - containerRect.top + containerNode.scrollTop;
 
-    if (centered) top = rect.top + rect.height / 2 - containerRect.top + containerNode.scrollTop;
+    if (centered)
+        top =
+            rect.top +
+            rect.height / 2 -
+            containerRect.top +
+            containerNode.scrollTop;
 
     tooltipDiv
         .style("left", `${left}px`)
@@ -121,7 +126,13 @@ function centerTip(tooltipDiv, containerRect) {
     return [newLeft, newTop];
 }
 
-function shiftIfOverflowingChartArea(tooltipDiv, containerRect, left, top, centered = false) {
+function shiftIfOverflowingChartArea(
+    tooltipDiv,
+    containerRect,
+    left,
+    top,
+    centered = false
+) {
     const tooltipDivRect = tooltipDiv.node().getBoundingClientRect();
 
     if (isElementOverflowing(containerRect, tooltipDivRect)) {

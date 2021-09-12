@@ -83,7 +83,8 @@ export class PerspectiveViewerWidget extends Widget {
     }
 
     restore(config) {
-        const {master, table, linked, name, selectable, ...viewerConfig} = config;
+        const {master, table, linked, name, selectable, ...viewerConfig} =
+            config;
         this.master = master;
         this.name = name;
         this.linked = linked;
@@ -110,7 +111,7 @@ export class PerspectiveViewerWidget extends Widget {
             master: this.master,
             name: this.viewer.getAttribute("name"),
             table: this.viewer.getAttribute("table"),
-            linked: this.linked
+            linked: this.linked,
         };
     }
 

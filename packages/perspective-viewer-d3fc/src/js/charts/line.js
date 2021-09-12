@@ -27,9 +27,7 @@ function lineChart(container, settings) {
     const data = splitData(settings, filterData(settings));
     const color = seriesColors(settings);
 
-    const legend = colorLegend()
-        .settings(settings)
-        .scale(color);
+    const legend = colorLegend().settings(settings).scale(color);
 
     const series = fc
         .seriesSvgRepeat()
@@ -57,7 +55,9 @@ function lineChart(container, settings) {
     const yAxis1 = yAxisFactory(splitter.data());
 
     // No grid lines if splitting y-axis
-    const plotSeries = splitter.haveSplit() ? series : withGridLines(series, settings).orient("vertical");
+    const plotSeries = splitter.haveSplit()
+        ? series
+        : withGridLines(series, settings).orient("vertical");
     const chart = chartSvgFactory(xAxis, yAxis1)
         .axisSplitter(splitter)
         .plotArea(plotSeries);
@@ -82,7 +82,9 @@ function lineChart(container, settings) {
         chart.altAxis(yAxis2);
         // Give the tooltip the information (i.e. 2 datasets with different
         // scales)
-        toolTip.data(splitter.data()).altDataWithScale({yScale: yAxis2.scale, data: splitter.altData()});
+        toolTip
+            .data(splitter.data())
+            .altDataWithScale({yScale: yAxis2.scale, data: splitter.altData()});
     }
 
     const transposed_data = splitter.data();
@@ -97,7 +99,7 @@ lineChart.plugin = {
     name: "Y Line",
     max_cells: 4000,
     max_columns: 50,
-    render_warning: true
+    render_warning: true,
 };
 
 export default lineChart;

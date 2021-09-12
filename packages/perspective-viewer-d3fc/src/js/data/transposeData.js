@@ -7,7 +7,7 @@
  *
  */
 
-export const transposeData = function(x) {
+export const transposeData = function (x) {
     const columns = [];
     for (const row of x) {
         for (let col = 0; col < row.length; col++) {

@@ -10,7 +10,10 @@
 const {execute} = require("./script_utils.js");
 
 try {
-    let scope = process.env.PACKAGE && process.env.PACKAGE !== "" ? `${process.env.PACKAGE}` : "*";
+    let scope =
+        process.env.PACKAGE && process.env.PACKAGE !== ""
+            ? `${process.env.PACKAGE}`
+            : "*";
 
     execute`lerna exec --scope="@finos/${scope}" -- yarn build`;
 } catch (e) {

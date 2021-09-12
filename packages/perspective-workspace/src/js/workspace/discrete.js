@@ -46,7 +46,9 @@ class DiscreteContext {
         const old = this._offset_drag_current[key];
         const method = client < old ? "ceil" : "floor";
         const diff = client - val;
-        return Math[method](diff / DISCRETE_STEP_SIZE) * DISCRETE_STEP_SIZE + val;
+        return (
+            Math[method](diff / DISCRETE_STEP_SIZE) * DISCRETE_STEP_SIZE + val
+        );
     }
 
     _check_prev(clientX, clientY) {
@@ -63,8 +65,14 @@ class DiscreteContext {
         clientY -= this._rect.top;
         const blockX = this._block_move("x", clientX);
         const blockY = this._block_move("y", clientY);
-        clientX = this._clamp("width", clientX) || this._clamp("width", blockX) || blockX;
-        clientY = this._clamp("height", clientY) || this._clamp("height", blockY) || blockY;
+        clientX =
+            this._clamp("width", clientX) ||
+            this._clamp("width", blockX) ||
+            blockX;
+        clientY =
+            this._clamp("height", clientY) ||
+            this._clamp("height", blockY) ||
+            blockY;
         if (this._check_prev(clientX, clientY)) {
             return {x: clientX + this._rect.left, y: clientY + this._rect.top};
         }
@@ -74,7 +82,7 @@ class DiscreteContext {
         this._rect = rect;
         this._offset_drag_start = this._offset_drag_current = {
             x: x - rect.left,
-            y: y - rect.top
+            y: y - rect.top,
         };
     }
 }
@@ -89,7 +97,13 @@ function extend(base, handle) {
                         if (!elem.classList.contains(handle)) {
                             break;
                         }
-                        if ([elem, elem.parentElement].some(x => x.getAttribute("data-orientation") === "horizontal")) {
+                        if (
+                            [elem, elem.parentElement].some(
+                                (x) =>
+                                    x.getAttribute("data-orientation") ===
+                                    "horizontal"
+                            )
+                        ) {
                             this.addClass("ew");
                         } else {
                             this.addClass("ns");
@@ -98,7 +112,11 @@ function extend(base, handle) {
                         const {clientX, clientY} = event;
                         this._offset_target = elem;
                         this._offset_target.classList.add("resizing");
-                        this.context = new DiscreteContext(clientX, clientY, this.node.getBoundingClientRect());
+                        this.context = new DiscreteContext(
+                            clientX,
+                            clientY,
+                            this.node.getBoundingClientRect()
+                        );
                     }
                     break;
                 case "mousemove":
@@ -109,7 +127,11 @@ function extend(base, handle) {
                         event.stopPropagation();
                         const update = this.context.calculate_move(event);
                         if (update) {
-                            const new_event = cloneMouseEvent(update.x, update.y, event);
+                            const new_event = cloneMouseEvent(
+                                update.x,
+                                update.y,
+                                event
+                            );
                             super.handleEvent(new_event);
                         }
                         return;
@@ -132,8 +154,14 @@ function extend(base, handle) {
     };
 }
 
-export class DiscreteDockPanel extends extend(DockPanel, "p-DockPanel-handle") {}
-export class DiscreteSplitPanel extends extend(SplitPanel, "p-SplitPanel-handle") {
+export class DiscreteDockPanel extends extend(
+    DockPanel,
+    "p-DockPanel-handle"
+) {}
+export class DiscreteSplitPanel extends extend(
+    SplitPanel,
+    "p-SplitPanel-handle"
+) {
     constructor(...args) {
         super(...args);
         this.layoutModified = new Signal(this);

@@ -58,7 +58,7 @@ module.exports.track_mouse = function track_mouse() {
         document.body.appendChild(box);
         document.addEventListener(
             "mousemove",
-            event => {
+            (event) => {
                 box.style.left = event.pageX + "px";
                 box.style.top = event.pageY + "px";
                 updateButtons(event.buttons);
@@ -67,7 +67,7 @@ module.exports.track_mouse = function track_mouse() {
         );
         document.addEventListener(
             "mousedown",
-            event => {
+            (event) => {
                 updateButtons(event.buttons);
                 box.classList.add("button-" + event.which);
             },
@@ -75,14 +75,15 @@ module.exports.track_mouse = function track_mouse() {
         );
         document.addEventListener(
             "mouseup",
-            event => {
+            (event) => {
                 updateButtons(event.buttons);
                 box.classList.remove("button-" + event.which);
             },
             true
         );
         function updateButtons(buttons) {
-            for (let i = 0; i < 5; i++) box.classList.toggle("button-" + i, buttons & (1 << i));
+            for (let i = 0; i < 5; i++)
+                box.classList.toggle("button-" + i, buttons & (1 << i));
         }
     });
 };

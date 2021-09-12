@@ -11,10 +11,13 @@ const path = require("path");
 const utils = require("@finos/perspective-test");
 const {execute_all_cells} = require("./utils");
 
-const default_body = async page => {
+const default_body = async (page) => {
     await execute_all_cells(page);
-    const viewer = await page.waitForSelector(".jp-OutputArea-output perspective-viewer", {visible: true});
-    await viewer.evaluate(async viewer => await viewer.flush());
+    const viewer = await page.waitForSelector(
+        ".jp-OutputArea-output perspective-viewer",
+        {visible: true}
+    );
+    await viewer.evaluate(async (viewer) => await viewer.flush());
     return viewer;
 };
 
@@ -23,17 +26,26 @@ utils.with_jupyterlab(process.env.__JUPYTERLAB_PORT__, () => {
         () => {
             test.jupyterlab(
                 "Loads a table",
-                [["table = perspective.Table(arrow_data)", "w = perspective.PerspectiveWidget(table, columns=['f64', 'str', 'datetime'])"].join("\n"), "w"],
-                async page => {
+                [
+                    [
+                        "table = perspective.Table(arrow_data)",
+                        "w = perspective.PerspectiveWidget(table, columns=['f64', 'str', 'datetime'])",
+                    ].join("\n"),
+                    "w",
+                ],
+                async (page) => {
                     const viewer = await default_body(page);
-                    const num_columns = await viewer.evaluate(async viewer => {
-                        const tbl = viewer.querySelector("regular-table");
-                        return tbl.querySelector("thead tr").childElementCount;
-                    });
+                    const num_columns = await viewer.evaluate(
+                        async (viewer) => {
+                            const tbl = viewer.querySelector("regular-table");
+                            return tbl.querySelector("thead tr")
+                                .childElementCount;
+                        }
+                    );
 
                     expect(num_columns).toEqual(3);
 
-                    const num_rows = await viewer.evaluate(async viewer => {
+                    const num_rows = await viewer.evaluate(async (viewer) => {
                         const tbl = viewer.querySelector("regular-table");
                         return tbl.querySelectorAll("tbody tr").length;
                     });

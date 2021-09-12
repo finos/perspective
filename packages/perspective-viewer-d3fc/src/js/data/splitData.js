@@ -13,12 +13,12 @@ export function splitData(settings, data) {
 
     return data.map((col, i) => {
         return Object.keys(col)
-            .filter(key => key !== "__ROW_PATH__")
-            .map(key => ({
+            .filter((key) => key !== "__ROW_PATH__")
+            .map((key) => ({
                 key,
                 crossValue: labelfn(col, i),
                 mainValue: col[key],
-                row: col
+                row: col,
             }));
     });
 }

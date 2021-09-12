@@ -25,7 +25,7 @@ export function enforceContainerBoundaries(innerNode, offsetX, offsetY) {
         top: innerNodeRect.top + offsetY - margin,
         right: innerNodeRect.right + offsetX + margin,
         bottom: innerNodeRect.bottom + offsetY + margin,
-        left: innerNodeRect.left + offsetX - margin
+        left: innerNodeRect.left + offsetX - margin,
     };
 
     const adjustedOffsets = {x: offsetX, y: offsetY};
@@ -33,13 +33,21 @@ export function enforceContainerBoundaries(innerNode, offsetX, offsetY) {
         {edge: "right", dimension: "x"},
         {edge: "left", dimension: "x"},
         {edge: "top", dimension: "y"},
-        {edge: "bottom", dimension: "y"}
+        {edge: "bottom", dimension: "y"},
     ];
 
-    boundaries.forEach(bound => {
-        if (isElementOverflowing(chartNodeRect, draggedInnerNodeRect, bound.edge)) {
-            const adjustment = draggedInnerNodeRect[bound.edge] - chartNodeRect[bound.edge];
-            adjustedOffsets[bound.dimension] = adjustedOffsets[bound.dimension] - adjustment;
+    boundaries.forEach((bound) => {
+        if (
+            isElementOverflowing(
+                chartNodeRect,
+                draggedInnerNodeRect,
+                bound.edge
+            )
+        ) {
+            const adjustment =
+                draggedInnerNodeRect[bound.edge] - chartNodeRect[bound.edge];
+            adjustedOffsets[bound.dimension] =
+                adjustedOffsets[bound.dimension] - adjustment;
         }
     });
 

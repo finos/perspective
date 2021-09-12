@@ -14,7 +14,9 @@ import {PerspectiveTabBarRenderer} from "./tabbarrenderer";
 
 class PerspectiveDockPanelRenderer extends DockPanel.Renderer {
     createTabBar() {
-        const tabbar = new PerspectiveTabBar({renderer: new PerspectiveTabBarRenderer()});
+        const tabbar = new PerspectiveTabBar({
+            renderer: new PerspectiveTabBarRenderer(),
+        });
         tabbar.addClass("p-DockPanel-tabBar");
         return tabbar;
     }
@@ -43,7 +45,9 @@ export class PerspectiveDockPanel extends DiscreteDockPanel {
         if (layout?.hasOwnProperty("main")) {
             return PerspectiveDockPanel.getWidgets(layout.main);
         } else if (layout?.children) {
-            return layout.children.flatMap(widget => PerspectiveDockPanel.getWidgets(widget));
+            return layout.children.flatMap((widget) =>
+                PerspectiveDockPanel.getWidgets(widget)
+            );
         } else if (layout?.widgets) {
             return layout.widgets;
         }
@@ -52,16 +56,22 @@ export class PerspectiveDockPanel extends DiscreteDockPanel {
 
     static mapWidgets(widgetFunc, layout) {
         if (layout.main) {
-            layout.main = PerspectiveDockPanel.mapWidgets(widgetFunc, layout.main);
+            layout.main = PerspectiveDockPanel.mapWidgets(
+                widgetFunc,
+                layout.main
+            );
         } else if (layout.children) {
-            layout.children = layout.children.map(widget => PerspectiveDockPanel.mapWidgets(widgetFunc, widget));
+            layout.children = layout.children.map((widget) =>
+                PerspectiveDockPanel.mapWidgets(widgetFunc, widget)
+            );
         } else if (layout.widgets) {
-            layout.widgets = layout.widgets.map(widget => widgetFunc(widget));
+            layout.widgets = layout.widgets.map((widget) => widgetFunc(widget));
         }
         return layout;
     }
 
     onAfterAttach() {
-        this.spacing = parseInt(window.getComputedStyle(this.node).padding) || 0;
+        this.spacing =
+            parseInt(window.getComputedStyle(this.node).padding) || 0;
     }
 }

@@ -15,11 +15,13 @@ const args = process.argv.slice(2);
 if (process.env.PSP_PROJECT === undefined || process.env.PSP_PROJECT === "js") {
     function docker() {
         console.log("Creating puppeteer docker image");
-        let cmd = "docker run -it --rm --shm-size=2g --cap-add=SYS_NICE -u root -e PACKAGE=${PACKAGE} -e HTTPS_PROXY -e HTTPS_PROXY -v $(pwd):/src -w /src";
+        let cmd =
+            "docker run -it --rm --shm-size=2g --cap-add=SYS_NICE -u root -e PACKAGE=${PACKAGE} -e HTTPS_PROXY -e HTTPS_PROXY -v $(pwd):/src -w /src";
         if (process.env.PSP_CPU_COUNT) {
             cmd += ` --cpus="${parseInt(process.env.PSP_CPU_COUNT)}.0"`;
         }
-        cmd += " perspective/puppeteer nice -n -20 node_modules/.bin/lerna exec --scope=@finos/perspective-bench -- yarn bench";
+        cmd +=
+            " perspective/puppeteer nice -n -20 node_modules/.bin/lerna exec --scope=@finos/perspective-bench -- yarn bench";
 
         return cmd;
     }
@@ -28,7 +30,9 @@ if (process.env.PSP_PROJECT === undefined || process.env.PSP_PROJECT === "js") {
         if (!process.env.PSP_DOCKER_PUPPETEER) {
             execute(docker());
         } else {
-            execute(`nice -n -20 node_modules/.bin/lerna exec --scope=@finos/perspective-bench -- yarn bench`);
+            execute(
+                `nice -n -20 node_modules/.bin/lerna exec --scope=@finos/perspective-bench -- yarn bench`
+            );
         }
     } catch (e) {
         process.exit(1);

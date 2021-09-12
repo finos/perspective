@@ -26,19 +26,24 @@ exports.kill_jlab = kill_jlab;
 /**
  * Block until the Jupyterlab server is ready.
  */
-const wait_for_jlab = async function() {
+const wait_for_jlab = async function () {
     let num_errors = 0;
     let loaded = false;
 
     while (!loaded) {
-        get(`http://127.0.0.1:${process.env.__JUPYTERLAB_PORT__}/lab?`, res => {
-            if (res.statusCode !== 200) {
-                throw new Error(`${res.statusCode} not 200!`);
-            }
+        get(
+            `http://127.0.0.1:${process.env.__JUPYTERLAB_PORT__}/lab?`,
+            (res) => {
+                if (res.statusCode !== 200) {
+                    throw new Error(`${res.statusCode} not 200!`);
+                }
 
-            console.log(`Jupyterlab server has started on ${process.env.__JUPYTERLAB_PORT__}`);
-            loaded = true;
-        }).on("error", err => {
+                console.log(
+                    `Jupyterlab server has started on ${process.env.__JUPYTERLAB_PORT__}`
+                );
+                loaded = true;
+            }
+        ).on("error", (err) => {
             if (num_errors > 50) {
                 kill_jlab();
                 throw new Error(`Could not launch Jupyterlab: ${err}`);
@@ -47,18 +52,29 @@ const wait_for_jlab = async function() {
             num_errors++;
         });
 
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 500));
     }
 };
 
-exports.start_jlab = function() {
+exports.start_jlab = function () {
     /*
      * Spawn the Jupyterlab server.
      */
     try {
         // Does not alter the global env, only the env for this process
-        process.env.JUPYTER_CONFIG_DIR = path.join(PACKAGE_ROOT, "test", "config", "jupyter");
-        process.env.JUPYTERLAB_SETTINGS_DIR = path.join(PACKAGE_ROOT, "test", "config", "jupyter", "user_settings");
+        process.env.JUPYTER_CONFIG_DIR = path.join(
+            PACKAGE_ROOT,
+            "test",
+            "config",
+            "jupyter"
+        );
+        process.env.JUPYTERLAB_SETTINGS_DIR = path.join(
+            PACKAGE_ROOT,
+            "test",
+            "config",
+            "jupyter",
+            "user_settings"
+        );
 
         // Start jupyterlab with a root to dist/umd where the notebooks will be.
         process.chdir(path.join(PACKAGE_ROOT, "dist", "umd"));
@@ -68,12 +84,21 @@ exports.start_jlab = function() {
         // Jupyterlab is spawned with the default $PYTHONPATH of the shell it
         // is running in. For local testing during devlopment you may need to
         // run it with the $PYTHONPATH set to ./python/perspective
-        const proc = spawn("jupyter", ["lab", "--no-browser", `--port=${process.env.__JUPYTERLAB_PORT__}`, `--config=${process.env.JUPYTER_CONFIG_DIR}/jupyter_notebook_config.json`], {
-            env: {
-                ...process.env
-            },
-            stdio: "inherit"
-        });
+        const proc = spawn(
+            "jupyter",
+            [
+                "lab",
+                "--no-browser",
+                `--port=${process.env.__JUPYTERLAB_PORT__}`,
+                `--config=${process.env.JUPYTER_CONFIG_DIR}/jupyter_notebook_config.json`,
+            ],
+            {
+                env: {
+                    ...process.env,
+                },
+                stdio: "inherit",
+            }
+        );
 
         // Wait for Jupyterlab to start up
         return wait_for_jlab().then(() => {

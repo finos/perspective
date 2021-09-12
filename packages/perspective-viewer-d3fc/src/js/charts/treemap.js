@@ -26,7 +26,7 @@ function treemap(container, settings) {
     const data = treeData(settings);
     const color = treeColor(
         settings,
-        data.map(d => d.data)
+        data.map((d) => d.data)
     );
 
     if (color) {
@@ -37,10 +37,11 @@ function treemap(container, settings) {
     container.datum(data).call(treemapGrid);
     if (color) {
         const color_column = settings.realValues[1];
-        if (settings.mainValues.find(x => x.name === color_column)?.type === "string") {
-            const legend = colorLegend()
-                .settings(settings)
-                .scale(color);
+        if (
+            settings.mainValues.find((x) => x.name === color_column)?.type ===
+            "string"
+        ) {
+            const legend = colorLegend().settings(settings).scale(color);
             container.call(legend);
         } else {
             const legend = colorRangeLegend().scale(color);
@@ -57,7 +58,7 @@ function treemap(container, settings) {
         .merge(treemapDiv)
         .select("svg")
         .select("g.treemap")
-        .each(function({split, data}) {
+        .each(function ({split, data}) {
             const treemapSvg = d3.select(this);
 
             if (!settings.treemaps[split]) settings.treemaps[split] = {};
@@ -65,12 +66,14 @@ function treemap(container, settings) {
             treemapSeries()
                 .settings(settings.treemaps[split])
                 .data(data)
-                .container(d3.select(d3.select(this.parentNode).node().parentNode))
+                .container(
+                    d3.select(d3.select(this.parentNode).node().parentNode)
+                )
                 .color(color)(treemapSvg);
 
-            tooltip()
-                .settings(settings)
-                .centered(true)(treemapSvg.selectAll("g"));
+            tooltip().settings(settings).centered(true)(
+                treemapSvg.selectAll("g")
+            );
         });
 }
 
@@ -83,7 +86,7 @@ treemap.plugin = {
     initial: {
         type: "number",
         count: 1,
-        names: ["Size", "Color", "Tooltip"]
-    }
+        names: ["Size", "Color", "Tooltip"],
+    },
 };
 export default treemap;

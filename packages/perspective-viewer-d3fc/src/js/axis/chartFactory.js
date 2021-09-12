@@ -9,8 +9,10 @@
 import * as d3 from "d3";
 import * as fc from "d3fc";
 
-export const chartSvgFactory = (xAxis, yAxis) => chartFactory(xAxis, yAxis, fc.chartSvgCartesian, false);
-export const chartCanvasFactory = (xAxis, yAxis) => chartFactory(xAxis, yAxis, fc.chartCanvasCartesian, true);
+export const chartSvgFactory = (xAxis, yAxis) =>
+    chartFactory(xAxis, yAxis, fc.chartSvgCartesian, false);
+export const chartCanvasFactory = (xAxis, yAxis) =>
+    chartFactory(xAxis, yAxis, fc.chartCanvasCartesian, true);
 
 const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
     let axisSplitter = null;
@@ -20,7 +22,7 @@ const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
         xScale: xAxis.scale,
         yScale: yAxis.scale,
         xAxis: xAxis.component,
-        yAxis: yAxis.component
+        yAxis: yAxis.component,
     })
         .xDomain(xAxis.domain)
         .xLabel(xAxis.label)
@@ -64,7 +66,10 @@ const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
         const plotArea = container.select("d3fc-svg.plot-area");
 
         const node = plotArea.select("svg").node();
-        node.setAttribute("viewBox", `0 0 ${plotArea.node().clientWidth} ${plotArea.node().clientHeight}`);
+        node.setAttribute(
+            "viewBox",
+            `0 0 ${plotArea.node().clientWidth} ${plotArea.node().clientHeight}`
+        );
         node.setAttribute("preserveAspectRatio", "none");
 
         for (const axis of ["x-axis", "y-axis"]) {
@@ -81,8 +86,10 @@ const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
             // Render a second axis on the right of the chart
             const altData = axisSplitter.altData();
 
-            const y2AxisDataJoin = fc.dataJoin("d3fc-svg", "y2-axis").key(d => d);
-            const ySeriesDataJoin = fc.dataJoin("g", "y-series").key(d => d);
+            const y2AxisDataJoin = fc
+                .dataJoin("d3fc-svg", "y2-axis")
+                .key((d) => d);
+            const ySeriesDataJoin = fc.dataJoin("g", "y-series").key((d) => d);
 
             // Column 5 of the grid
             container
@@ -108,7 +115,7 @@ const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
 
             // Render the axis
             y2AxisDataJoin(container, ["right"])
-                .attr("class", d => `y-axis ${d}-axis`)
+                .attr("class", (d) => `y-axis ${d}-axis`)
                 .on("measure", (d, i, nodes) => {
                     const {width, height} = d3.event.detail;
                     if (d === "left") {
@@ -120,17 +127,17 @@ const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
                     y2Scale.range([height, 0]);
                 })
                 .on("draw", (d, i, nodes) => {
-                    d3.select(nodes[i])
-                        .select("svg")
-                        .call(yAxisComponent);
+                    d3.select(nodes[i]).select("svg").call(yAxisComponent);
                 });
 
             // Render all the series using either the primary or alternate
             // y-scales
             if (canvas) {
-                const drawMultiCanvasSeries = selection => {
+                const drawMultiCanvasSeries = (selection) => {
                     const canvasPlotArea = chart.plotArea();
-                    canvasPlotArea.context(selection.node().getContext("2d")).xScale(xAxis.scale);
+                    canvasPlotArea
+                        .context(selection.node().getContext("2d"))
+                        .xScale(xAxis.scale);
 
                     const yScales = [yAxis.scale, y2Scale];
                     [data, altData].forEach((d, i) => {
@@ -139,26 +146,32 @@ const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
                     });
                 };
 
-                container.select("d3fc-canvas.plot-area").on("draw", (d, i, nodes) => {
-                    drawMultiCanvasSeries(d3.select(nodes[i]).select("canvas"));
-                });
+                container
+                    .select("d3fc-canvas.plot-area")
+                    .on("draw", (d, i, nodes) => {
+                        drawMultiCanvasSeries(
+                            d3.select(nodes[i]).select("canvas")
+                        );
+                    });
             } else {
-                const drawMultiSvgSeries = selection => {
+                const drawMultiSvgSeries = (selection) => {
                     const svgPlotArea = chart.plotArea();
                     svgPlotArea.xScale(xAxis.scale);
 
                     const yScales = [yAxis.scale, y2Scale];
-                    ySeriesDataJoin(selection, [data, altData]).each((d, i, nodes) => {
-                        svgPlotArea.yScale(yScales[i]);
-                        d3.select(nodes[i])
-                            .datum(d)
-                            .call(svgPlotArea);
-                    });
+                    ySeriesDataJoin(selection, [data, altData]).each(
+                        (d, i, nodes) => {
+                            svgPlotArea.yScale(yScales[i]);
+                            d3.select(nodes[i]).datum(d).call(svgPlotArea);
+                        }
+                    );
                 };
 
-                container.select("d3fc-svg.plot-area").on("draw", (d, i, nodes) => {
-                    drawMultiSvgSeries(d3.select(nodes[i]).select("svg"));
-                });
+                container
+                    .select("d3fc-svg.plot-area")
+                    .on("draw", (d, i, nodes) => {
+                        drawMultiSvgSeries(d3.select(nodes[i]).select("svg"));
+                    });
             }
         }
 

@@ -14,13 +14,13 @@ describe("findBestFromData should", () => {
 
     test("find the right value using the compareFn", () => {
         const array = [1, 2, 3, 4, 5];
-        const result = findBestFromData(array, d => d, compareFn);
+        const result = findBestFromData(array, (d) => d, compareFn);
         expect(result).toEqual(5);
     });
 
     test("work for stacked arrays", () => {
         const array = [[1, 2, 3], 4, 5, [6, [7, 8]]];
-        const result = findBestFromData(array, d => d, compareFn);
+        const result = findBestFromData(array, (d) => d, compareFn);
         expect(result).toEqual(8);
     });
 });

@@ -21,17 +21,21 @@ import {colorScale, setOpacity} from "../series/seriesColors";
 import {colorLegend} from "../legend/legend";
 
 function ohlcCandle(seriesCanvas) {
-    return function(container, settings) {
+    return function (container, settings) {
         const srcData = ohlcData(settings, filterDataByGroup(settings));
 
-        const bollinger = fc.indicatorBollingerBands().value(d => d.openValue);
-        const data = srcData.map(seriesData => {
+        const bollinger = fc
+            .indicatorBollingerBands()
+            .value((d) => d.openValue);
+        const data = srcData.map((seriesData) => {
             const bollingerData = bollinger(seriesData);
-            return seriesData.map((d, i) => Object.assign({bollinger: bollingerData[i]}, d));
+            return seriesData.map((d, i) =>
+                Object.assign({bollinger: bollingerData[i]}, d)
+            );
         });
 
         const keys = srcData
-            .map(k => k.key)
+            .map((k) => k.key)
             .concat(settings.hideKeys ? settings.hideKeys : [])
             .sort();
 
@@ -65,9 +69,7 @@ function ohlcCandle(seriesCanvas) {
             .paddingStrategy(paddingStrategy)(data);
 
         const chart = chartCanvasFactory(xAxis, yAxis).plotArea(
-            withGridLines(multi, settings)
-                .orient("vertical")
-                .canvas(true)
+            withGridLines(multi, settings).orient("vertical").canvas(true)
         );
 
         chart.yNice && chart.yNice();
@@ -76,8 +78,14 @@ function ohlcCandle(seriesCanvas) {
             .chart(chart)
             .settings(settings)
             .xScale(xAxis.scale)
-            .onChange(zoom => {
-                const zoomedData = data.map(series => series.filter(d => d.crossValue >= zoom.xDomain[0] && d.crossValue <= zoom.xDomain[1]));
+            .onChange((zoom) => {
+                const zoomedData = data.map((series) =>
+                    series.filter(
+                        (d) =>
+                            d.crossValue >= zoom.xDomain[0] &&
+                            d.crossValue <= zoom.xDomain[1]
+                    )
+                );
                 chart.yDomain(yAxis.domainFunction(zoomedData));
             })
             .canvas(true);

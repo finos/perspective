@@ -9,5 +9,5 @@
 
 module.exports = {
     verbose: true,
-    globalSetup: "<rootDir>/test/config/timezone/set_timezone.js"
+    globalSetup: "<rootDir>/test/config/timezone/set_timezone.js",
 };

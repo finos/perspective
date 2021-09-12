@@ -234,7 +234,9 @@ export class PerspectiveViewerElement extends HTMLElement {
      * await viewer.restore(token);
      * ```
      */
-    async restore(config: PerspectiveViewerConfig | string | ArrayBuffer): Promise<void> {
+    async restore(
+        config: PerspectiveViewerConfig | string | ArrayBuffer
+    ): Promise<void> {
         await this.load_wasm();
         await this.instance.js_restore(config);
     }
@@ -263,7 +265,9 @@ export class PerspectiveViewerElement extends HTMLElement {
     async save(format: "json"): Promise<PerspectiveViewerConfig>;
     async save(format: "arraybuffer"): Promise<ArrayBuffer>;
     async save(format: "string"): Promise<string>;
-    async save(format?: "json" | "arraybuffer" | "string"): Promise<PerspectiveViewerConfig | string | ArrayBuffer> {
+    async save(
+        format?: "json" | "arraybuffer" | "string"
+    ): Promise<PerspectiveViewerConfig | string | ArrayBuffer> {
         await this.load_wasm();
         const config = await this.instance.js_save(format);
         return config;
@@ -485,7 +489,10 @@ export class PerspectiveViewerElement extends HTMLElement {
 }
 
 if (document.createElement("perspective-viewer").constructor === HTMLElement) {
-    window.customElements.define("perspective-viewer", PerspectiveViewerElement);
+    window.customElements.define(
+        "perspective-viewer",
+        PerspectiveViewerElement
+    );
 }
 
 class PerspectiveColumnStyleElement extends HTMLElement {
@@ -495,24 +502,41 @@ class PerspectiveColumnStyleElement extends HTMLElement {
         super();
     }
 
-    async open(target: HTMLElement, config: any, default_config: any): Promise<void> {
+    async open(
+        target: HTMLElement,
+        config: any,
+        default_config: any
+    ): Promise<void> {
         if (this.instance) {
             this.instance.reset(config, default_config);
         } else {
-            this.instance = new internal.PerspectiveColumnStyleElement(this, config, default_config);
+            this.instance = new internal.PerspectiveColumnStyleElement(
+                this,
+                config,
+                default_config
+            );
         }
 
         this.instance.open(target);
     }
 }
 
-if (document.createElement("perspective-column-style").constructor === HTMLElement) {
-    window.customElements.define("perspective-column-style", PerspectiveColumnStyleElement);
+if (
+    document.createElement("perspective-column-style").constructor ===
+    HTMLElement
+) {
+    window.customElements.define(
+        "perspective-column-style",
+        PerspectiveColumnStyleElement
+    );
 }
 
 type ReactPerspectiveViewerAttributes<T> = React.HTMLAttributes<T>;
 
-type JsxPerspectiveViewerElement = {class?: string} & React.DetailedHTMLProps<ReactPerspectiveViewerAttributes<PerspectiveViewerElement>, PerspectiveViewerElement>;
+type JsxPerspectiveViewerElement = {class?: string} & React.DetailedHTMLProps<
+    ReactPerspectiveViewerAttributes<PerspectiveViewerElement>,
+    PerspectiveViewerElement
+>;
 
 declare global {
     // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -523,6 +547,9 @@ declare global {
     }
 
     interface Document {
-        createElement(tagName: "perspective-viewer", options?: ElementCreationOptions): PerspectiveViewerElement;
+        createElement(
+            tagName: "perspective-viewer",
+            options?: ElementCreationOptions
+        ): PerspectiveViewerElement;
     }
 }

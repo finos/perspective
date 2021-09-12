@@ -9,22 +9,26 @@
 
 regular-table {
     tbody {
-        tr:hover th.psp-tree-leaf:not(.psp-row-selected):not(.psp-row-subselected), 
-        tr:hover th.psp-tree-label:not(.psp-row-selected):not(.psp-row-subselected), 
-        tr:hover td:not(.psp-row-selected):not(.psp-row-subselected)  {
-            border-color: var(--rt-hover--border-color, #C5C9D080) !important;
+        tr:hover
+            th.psp-tree-leaf:not(.psp-row-selected):not(.psp-row-subselected),
+        tr:hover
+            th.psp-tree-label:not(.psp-row-selected):not(.psp-row-subselected),
+        tr:hover td:not(.psp-row-selected):not(.psp-row-subselected) {
+            border-color: var(--rt-hover--border-color, #c5c9d080) !important;
             background-color: transparent;
-            box-shadow:
-                // 0px -2px 0px rgba(0,0,0,0.05),
+            box-shadow: // 0px -2px 0px rgba(0,0,0,0.05),
                 // 0px -4px 0px rgba(0,0,0,0.01),
-                0px 1px 0px var(--rt-hover--border-color, #C5C9D080),
-                0px 3px 0px rgba(0,0,0,0.05),
-                0px 5px 0px rgba(0,0,0,0.01);
+                0px 1px 0px var(--rt-hover--border-color, #c5c9d080),
+                0px 3px 0px rgba(0, 0, 0, 0.05), 0px 5px 0px rgba(0, 0, 0, 0.01);
         }
 
-        tr:hover + tr th.psp-tree-leaf:not(.psp-row-selected):not(.psp-row-subselected), 
-        tr:hover + tr th.psp-tree-label:not(.psp-row-selected):not(.psp-row-subselected), 
-        tr:hover + tr td:not(.psp-row-selected):not(.psp-row-subselected)  {
+        tr:hover
+            + tr
+            th.psp-tree-leaf:not(.psp-row-selected):not(.psp-row-subselected),
+        tr:hover
+            + tr
+            th.psp-tree-label:not(.psp-row-selected):not(.psp-row-subselected),
+        tr:hover + tr td:not(.psp-row-selected):not(.psp-row-subselected) {
             border-top-color: transparent;
         }
 
@@ -37,7 +41,8 @@ regular-table {
                 border-left-color: transparent;
             }
 
-            th:last-child, td:last-child {
+            th:last-child,
+            td:last-child {
                 border-right-width: 1px;
                 border-right-color: transparent;
             }
@@ -49,13 +54,19 @@ regular-table {
             th:first-child:empty + th:not(:empty),
             th:first-child:empty ~ th:empty + th:not(:empty),
             td:first-child {
-                border-left-color: var(--rt-hover--border-color, #C5C9D080) !important;
+                border-left-color: var(
+                    --rt-hover--border-color,
+                    #c5c9d080
+                ) !important;
             }
 
-            th:last-child, td:last-child {
-                border-right-color: var(--rt-hover--border-color, #C5C9D080) !important;
+            th:last-child,
+            td:last-child {
+                border-right-color: var(
+                    --rt-hover--border-color,
+                    #c5c9d080
+                ) !important;
             }
         }
     }
 }
-

@@ -17,7 +17,9 @@ withTemplate("area", "Y Area");
 
 async function get_contents(page) {
     return await page.evaluate(async () => {
-        const viewer = document.querySelector("perspective-viewer perspective-viewer-d3fc-yarea").shadowRoot.querySelector("svg");
+        const viewer = document
+            .querySelector("perspective-viewer perspective-viewer-d3fc-yarea")
+            .shadowRoot.querySelector("svg");
         return viewer.outerHTML || "MISSING";
     });
 }

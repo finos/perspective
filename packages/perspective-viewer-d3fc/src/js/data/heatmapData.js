@@ -21,14 +21,17 @@ export function heatmapData(settings, data) {
     data.forEach((col, i) => {
         const crossValue = labelfn(col, i);
         Object.keys(col)
-            .filter(key => key !== "__ROW_PATH__")
-            .forEach(key => {
+            .filter((key) => key !== "__ROW_PATH__")
+            .forEach((key) => {
                 const mainValue = getMainValues(key);
                 heatmapData.push({
                     crossValue: crossValue,
-                    mainValue: mainType === AXIS_TYPES.time ? new Date(mainValue) : mainValue,
+                    mainValue:
+                        mainType === AXIS_TYPES.time
+                            ? new Date(mainValue)
+                            : mainValue,
                     colorValue: col[key],
-                    row: col
+                    row: col,
                 });
             });
     });

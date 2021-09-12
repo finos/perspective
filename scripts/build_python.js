@@ -7,12 +7,26 @@
  *
  */
 
-const {execute, execute_throw, docker, resolve, getarg, bash, python_image} = require("./script_utils.js");
+const {
+    execute,
+    execute_throw,
+    docker,
+    resolve,
+    getarg,
+    bash,
+    python_image,
+} = require("./script_utils.js");
 const fs = require("fs-extra");
 
 const IS_PY2 = getarg("--python2");
 
-let PYTHON = IS_PY2 ? "python2" : getarg("--python38") ? "python3.8" : getarg("--python36") ? "python3.6" : "python3.7";
+let PYTHON = IS_PY2
+    ? "python2"
+    : getarg("--python38")
+    ? "python3.8"
+    : getarg("--python36")
+    ? "python3.6"
+    : "python3.7";
 let IMAGE = "manylinux2010";
 const IS_DOCKER = process.env.PSP_DOCKER;
 
@@ -21,7 +35,12 @@ if (IS_DOCKER) {
     let MANYLINUX_VERSION = "manylinux2010";
     if (!IS_PY2) {
         // switch to 2014 only on python3
-        (MANYLINUX_VERSION = getarg("--manylinux2010") ? "manylinux2010" : getarg("--manylinux2014") ? "manylinux2014" : "manylinux2010"), PYTHON;
+        (MANYLINUX_VERSION = getarg("--manylinux2010")
+            ? "manylinux2010"
+            : getarg("--manylinux2014")
+            ? "manylinux2014"
+            : "manylinux2010"),
+            PYTHON;
     }
     IMAGE = python_image(MANYLINUX_VERSION, PYTHON);
 }
@@ -47,7 +66,9 @@ try {
     const dlic = resolve`${dist}/LICENSE`;
 
     fs.mkdirpSync(dist);
-    fs.copySync(cmakelists, resolve`${dist}/CMakeLists.txt`, {preserveTimestamps: true});
+    fs.copySync(cmakelists, resolve`${dist}/CMakeLists.txt`, {
+        preserveTimestamps: true,
+    });
     fs.copySync(cpp, resolve`${dist}/src`, {preserveTimestamps: true});
     fs.copySync(lic, dlic, {preserveTimestamps: true});
     fs.copySync(cmake, dcmake, {preserveTimestamps: true});

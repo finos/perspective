@@ -26,7 +26,9 @@ export function get_column_type(val) {
     } else if (val === 13) {
         return "date";
     } else {
-        console.warn(`Unknown type for value ${val} with JS type ${typeof val}`);
+        console.warn(
+            `Unknown type for value ${val} with JS type ${typeof val}`
+        );
     }
 }
 
@@ -86,7 +88,13 @@ export function detectChrome() {
 
     if (isIOSChrome) {
         return true;
-    } else if (isChromium !== null && typeof isChromium !== "undefined" && vendorName === "Google Inc." && isOpera === false && isIEedge === false) {
+    } else if (
+        isChromium !== null &&
+        typeof isChromium !== "undefined" &&
+        vendorName === "Google Inc." &&
+        isOpera === false &&
+        isIEedge === false
+    ) {
         return true;
     } else {
         return false;
@@ -102,7 +110,7 @@ export function detect_iphone() {
  * String.includes() polyfill
  */
 if (!String.prototype.includes) {
-    String.prototype.includes = function(search, start) {
+    String.prototype.includes = function (search, start) {
         if (typeof start !== "number") {
             start = 0;
         }
@@ -119,7 +127,7 @@ if (!String.prototype.includes) {
 // from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/includes
 if (!Array.prototype.includes) {
     Object.defineProperty(Array.prototype, "includes", {
-        value: function(searchElement, fromIndex) {
+        value: function (searchElement, fromIndex) {
             if (this == null) {
                 throw new TypeError('"this" is null or not defined');
             }
@@ -144,7 +152,13 @@ if (!Array.prototype.includes) {
             var k = Math.max(n >= 0 ? n : len - Math.abs(n), 0);
 
             function sameValueZero(x, y) {
-                return x === y || (typeof x === "number" && typeof y === "number" && isNaN(x) && isNaN(y));
+                return (
+                    x === y ||
+                    (typeof x === "number" &&
+                        typeof y === "number" &&
+                        isNaN(x) &&
+                        isNaN(y))
+                );
             }
 
             // 7. Repeat, while k < len
@@ -161,6 +175,6 @@ if (!Array.prototype.includes) {
 
             // 8. Return false
             return false;
-        }
+        },
     });
 }

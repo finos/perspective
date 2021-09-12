@@ -23,7 +23,7 @@ function addDataValues(tooltipDiv, values) {
         .selectAll("li")
         .data(values)
         .join("li")
-        .each(function(d) {
+        .each(function (d) {
             select(this)
                 .text(`${d.name}: `)
                 .append("b")
@@ -31,11 +31,11 @@ function addDataValues(tooltipDiv, values) {
         });
 }
 
-const formatNumber = value =>
+const formatNumber = (value) =>
     value === null
         ? "-"
         : value.toLocaleString(undefined, {
               style: "decimal",
               minimumFractionDigits: get_type_config("float").precision,
-              maximumFractionDigits: get_type_config("float").precision
+              maximumFractionDigits: get_type_config("float").precision,
           });

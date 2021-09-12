@@ -24,14 +24,19 @@ automatically call the correct build and test tools.
 
 ### System Dependencies
 
-`Perspective.js` and `perspective-python` **require** the following system dependencies to be installed:
+`Perspective.js` and `perspective-python` **require** the following system
+dependencies to be installed:
 
 - [CMake](https://cmake.org/) (version 3.15.4 or higher)
-- [Boost](https://www.boost.org/) (version 1.67 or higher, must be built - not header-only)
+- [Boost](https://www.boost.org/) (version 1.67 or higher, must be built - not
+  header-only)
 - [Flatbuffers](https://google.github.io/flatbuffers/flatbuffers_guide_building.html)
+
 ## Build
 
-Make sure you have the system dependencies installed. For specifics depending on your OS, check the [system-specific instructions](#system-specific-instructions) below.
+Make sure you have the system dependencies installed. For specifics depending on
+your OS, check the [system-specific instructions](#system-specific-instructions)
+below.
 
 To run a build, use
 
@@ -65,8 +70,8 @@ dependencies by running `yarn`.
 
 #### Building via local EMSDK
 
-To build using an Emscripten install on your local system and not the
-Emscripten bundled with Perspective in its `package.json`,
+To build using an Emscripten install on your local system and not the Emscripten
+bundled with Perspective in its `package.json`,
 [install](https://emscripten.org/docs/getting_started/downloads.html) the
 Emscripten SDK, then activate and export the latest `emsdk` environment via
 [`emsdk_env.sh`](https://github.com/juj/emsdk):
@@ -90,8 +95,7 @@ To install this specific version of Emscripten:
 ### `perspective-jupyterlab`
 
 To install the Jupyterlab plugin from your local working directory, give
-`jupyter labextension install` the path to the `perspective-jupyterlab`
-package:
+`jupyter labextension install` the path to the `perspective-jupyterlab` package:
 
 ```bash
 jupyter labextension install ./packages/perspective-jupyterlab
@@ -101,19 +105,20 @@ Afterwards, you should see it listed as a "local extension" when you run
 `jupyter labextension list`.
 
 Because we do not inline Perspective into the Jupyterlab plugin, your local
-changes will not show up in Jupyterlab **unless** you use `yarn link`
-according to the directions below:
+changes will not show up in Jupyterlab **unless** you use `yarn link` according
+to the directions below:
 
 1. Ensure that your Jupyterlab is built by running `jupyter lab build`.
-2. Inside each directory in `packages`, run [`yarn link`](https://classic.yarnpkg.com/en/docs/cli/link).
-This will create a symlink to your local build that we will use inside Jupyterlab.
+2. Inside each directory in `packages`, run
+   [`yarn link`](https://classic.yarnpkg.com/en/docs/cli/link). This will create
+   a symlink to your local build that we will use inside Jupyterlab.
 3. From the Perspective root, run `yarn jlab_link`. This is a script that will
-find your Jupyterlab installation and tell Jupyterlab to use these symlinks
-when it looks for Perspective packages, instead of fetching them from NPM.
+   find your Jupyterlab installation and tell Jupyterlab to use these symlinks
+   when it looks for Perspective packages, instead of fetching them from NPM.
 4. When you make a local change, make sure you run `yarn build` **and**
-`jupyter lab build` so that it fetches the newest changes.
+   `jupyter lab build` so that it fetches the newest changes.
 5. Whenever you run `jupyter lab clean`, you will need to run `yarn jlab_link`
-again to re-register the symlinks.
+   again to re-register the symlinks.
 
 ---
 
@@ -136,6 +141,7 @@ environments are provided for the Python libraries.
 To build Perspective using Docker, select the option in `yarn setup`.
 
 ---
+
 ## System-Specific Instructions
 
 ### MacOS/OSX
@@ -149,7 +155,8 @@ brew install flatbuffers
 ```
 
 On M1 (Apple Silicon) systems, make sure your brew-installed dependencies are in
-`/opt/homebrew` (the default location), and that `/opt/homebrew/bin` is on the `PATH`.
+`/opt/homebrew` (the default location), and that `/opt/homebrew/bin` is on the
+`PATH`.
 
 ### Windows 10
 
@@ -261,8 +268,8 @@ Verbosity in the tests can be enabled with the `--verbose` flag.
 
 ### Troubleshooting installation from source
 
-If you are installing from a source distribution (sdist), make sure you have
-the [System Dependencies](#system-dependencies) installed.
+If you are installing from a source distribution (sdist), make sure you have the
+[System Dependencies](#system-dependencies) installed.
 
 Try installing in verbose mode:
 
@@ -275,11 +282,12 @@ The most common culprits are:
 - CMake version too old
 - Boost headers are missing or too old
 - Flatbuffers not installed prior to installing Perspective
+
 #### Timezones in Python Tests
 
-Python tests are configured to use the `UTC` time zone. If running tests locally,
-you might find that datetime-related tests fail to assert the correct values. To
-correct this, run tests with the `TZ=UTC`, i.e.
+Python tests are configured to use the `UTC` time zone. If running tests
+locally, you might find that datetime-related tests fail to assert the correct
+values. To correct this, run tests with the `TZ=UTC`, i.e.
 
 ```bash
 TZ=UTC yarn test --verbose

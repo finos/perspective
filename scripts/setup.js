@@ -8,7 +8,7 @@
  */
 
 const execSync = require("child_process").execSync;
-const execute = cmd => execSync(cmd, {stdio: "inherit"});
+const execute = (cmd) => execSync(cmd, {stdio: "inherit"});
 
 const inquirer = require("inquirer");
 const fs = require("fs");
@@ -17,9 +17,14 @@ const CONFIG = new Proxy(
     new (class {
         constructor() {
             this.config = [];
-            this._values = require("dotenv").config({path: "./.perspectiverc"}).parsed || {};
+            this._values =
+                require("dotenv").config({path: "./.perspectiverc"}).parsed ||
+                {};
             if (this._values.PACKAGE && this._values.PACKAGE.startsWith("@")) {
-                this._values.PACKAGE = this._values.PACKAGE.slice(2, this._values.PACKAGE.length - 1).replace(/\|/g, ",");
+                this._values.PACKAGE = this._values.PACKAGE.slice(
+                    2,
+                    this._values.PACKAGE.length - 1
+                ).replace(/\|/g, ",");
             }
         }
 
@@ -41,16 +46,16 @@ const CONFIG = new Proxy(
         }
     })(),
     {
-        set: function(target, name, val) {
+        set: function (target, name, val) {
             target.add({[name]: val});
         },
-        get: function(target, name) {
+        get: function (target, name) {
             if (name in target._values) {
                 return target._values[name];
             } else {
                 return target[name];
             }
-        }
+        },
     }
 );
 
@@ -58,14 +63,14 @@ const PROMPT_DEBUG = {
     type: "confirm",
     name: "PSP_DEBUG",
     message: "Run debug build?",
-    default: CONFIG["PSP_DEBUG"] || false
+    default: CONFIG["PSP_DEBUG"] || false,
 };
 
 const PROMPT_DOCKER = {
     type: "confirm",
     name: "PSP_DOCKER",
     message: "Use docker for build env?",
-    default: CONFIG["PSP_DOCKER"] || false
+    default: CONFIG["PSP_DOCKER"] || false,
 };
 
 async function choose_docker() {
@@ -87,7 +92,7 @@ async function focus_package() {
                     return [""];
                 }
             },
-            filter: answer => {
+            filter: (answer) => {
                 if (!answer || answer.length === 7) {
                     return "";
                 } else {
@@ -100,40 +105,40 @@ async function focus_package() {
                 {
                     key: "c",
                     name: "perspective-cpp",
-                    value: "perspective-cpp"
+                    value: "perspective-cpp",
                 },
                 {
                     key: "p",
                     name: "perspective",
-                    value: "perspective"
+                    value: "perspective",
                 },
                 {
                     key: "v",
                     name: "perspective-viewer",
-                    value: "perspective-viewer"
+                    value: "perspective-viewer",
                 },
                 {
                     key: "e",
                     name: "perspective-viewer-datagrid",
-                    value: "perspective-viewer-datagrid"
+                    value: "perspective-viewer-datagrid",
                 },
                 {
                     key: "d",
                     name: "perspective-viewer-d3fc",
-                    value: "perspective-viewer-d3fc"
+                    value: "perspective-viewer-d3fc",
                 },
                 {
                     key: "l",
                     name: "perspective-jupyterlab",
-                    value: "perspective-jupyterlab"
+                    value: "perspective-jupyterlab",
                 },
                 {
                     key: "w",
                     name: "perspective-workspace",
-                    value: "perspective-workspace"
-                }
-            ]
-        }
+                    value: "perspective-workspace",
+                },
+            ],
+        },
     ]);
     if (Array.isArray(new_config.PACKAGE)) {
         if (new_config.PACKAGE.length > 0) {
@@ -170,15 +175,15 @@ async function choose_project() {
                 {
                     key: "j",
                     name: "Javascript",
-                    value: "js"
+                    value: "js",
                 },
                 {
                     key: "p",
                     name: "python",
-                    value: "python"
-                }
-            ]
-        }
+                    value: "python",
+                },
+            ],
+        },
     ]);
     CONFIG.add(answers);
     CONFIG.write();

@@ -9,50 +9,51 @@
 
 <!DOCTYPE html>
 <html>
+    <head>
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
+        />
+        <script src="perspective-viewer.js"></script>
+        <script src="perspective-viewer-datagrid.js"></script>
+        <script src="perspective-viewer-d3fc.js"></script>
+        <script src="perspective.js"></script>
+        <link rel="stylesheet" href="material.css" />
 
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
-    <script src="perspective-viewer.js"></script>
-    <script src="perspective-viewer-datagrid.js"></script>
-    <script src="perspective-viewer-d3fc.js"></script>
-    <script src="perspective.js"></script>
-    <link rel='stylesheet' href="material.css">
-
-    <style>
-        perspective-viewer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-        }
-
-        @media (max-width: 600px) {
-            html {
-                overflow: hidden;
+        <style>
+            perspective-viewer {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
             }
 
-            body {
-                position: fixed;
-                height: 100%;
-                width: 100%;
-                margin: 0;
-                overflow: hidden;
-                touch-action: none;
+            @media (max-width: 600px) {
+                html {
+                    overflow: hidden;
+                }
+
+                body {
+                    position: fixed;
+                    height: 100%;
+                    width: 100%;
+                    margin: 0;
+                    overflow: hidden;
+                    touch-action: none;
+                }
             }
-        }
-    </style>
-</head>
+        </style>
+    </head>
 
-<body>
-    <perspective-viewer id="view1"></perspective-viewer>
-    <script>
-        window.addEventListener('DOMContentLoaded', function () {
-            var elem = document.getElementById('view1');
-            var worker = perspective.websocket();
-            elem.load(worker.open_table('data_source_one'));
-        });
-    </script>
-</body>
-
+    <body>
+        <perspective-viewer id="view1"></perspective-viewer>
+        <script>
+            window.addEventListener("DOMContentLoaded", function () {
+                var elem = document.getElementById("view1");
+                var worker = perspective.websocket();
+                elem.load(worker.open_table("data_source_one"));
+            });
+        </script>
+    </body>
 </html>

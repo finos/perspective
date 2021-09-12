@@ -9,7 +9,12 @@
 
 import "regular-table";
 
-import {createModel, configureRegularTable, formatters, create_color_record} from "./regular_table_handlers.js";
+import {
+    createModel,
+    configureRegularTable,
+    formatters,
+    create_color_record,
+} from "./regular_table_handlers.js";
 import MATERIAL_STYLE from "../less/regular_table.less";
 import {configureRowSelectable, deselect} from "./row_selection.js";
 import {configureClick} from "./click.js";
@@ -34,7 +39,11 @@ customElements.define(
                 this.appendChild(this.datagrid);
                 this.model = await createModel(this.datagrid, table, view);
                 configureRegularTable(this.datagrid, this.model);
-                await configureRowSelectable.call(this.model, this.datagrid, viewer);
+                await configureRowSelectable.call(
+                    this.model,
+                    this.datagrid,
+                    viewer
+                );
                 await configureClick.call(this.model, this.datagrid, viewer);
                 await configureEditable.call(this.model, this.datagrid, viewer);
                 await configureSortable.call(this.model, this.datagrid, viewer);
@@ -102,7 +111,10 @@ customElements.define(
                 if (datagrid[PLUGIN_SYMBOL]) {
                     const token = {};
                     for (const col of Object.keys(datagrid[PLUGIN_SYMBOL])) {
-                        const config = Object.assign({}, datagrid[PLUGIN_SYMBOL][col]);
+                        const config = Object.assign(
+                            {},
+                            datagrid[PLUGIN_SYMBOL][col]
+                        );
                         if (config?.pos_color) {
                             config.pos_color = config.pos_color[0];
                             config.neg_color = config.neg_color[0];
@@ -158,5 +170,7 @@ function _register_global_styles() {
  *
  */
 
-customElements.get("perspective-viewer").registerPlugin("perspective-viewer-datagrid");
+customElements
+    .get("perspective-viewer")
+    .registerPlugin("perspective-viewer-datagrid");
 _register_global_styles();

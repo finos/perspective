@@ -22,7 +22,7 @@ export class WebSocketClient extends Client {
         this._ws.onopen = () => {
             this.send({
                 id: -1,
-                cmd: "init"
+                cmd: "init",
             });
         };
 
@@ -33,7 +33,7 @@ export class WebSocketClient extends Client {
 
         setTimeout(ping, PING_TIMEOUT);
 
-        this._ws.onmessage = msg => {
+        this._ws.onmessage = (msg) => {
             if (msg.data === "pong") {
                 return;
             }
@@ -44,7 +44,10 @@ export class WebSocketClient extends Client {
                 // chunk.
                 let binary_msg = msg.data;
 
-                this._full_binary.set(new Uint8Array(binary_msg), this._total_chunk_length);
+                this._full_binary.set(
+                    new Uint8Array(binary_msg),
+                    this._total_chunk_length
+                );
                 this._total_chunk_length += binary_msg.byteLength;
 
                 // Use the total length of the binary from the pre-message
@@ -62,8 +65,8 @@ export class WebSocketClient extends Client {
                 let result = {
                     data: {
                         id: this._pending_binary,
-                        data: binary_msg
-                    }
+                        data: binary_msg,
+                    },
                 };
 
                 // make sure on_update callbacks are called with a `port_id`
@@ -71,7 +74,7 @@ export class WebSocketClient extends Client {
                 if (this._pending_port_id !== undefined) {
                     const new_data_with_port_id = {
                         port_id: this._pending_port_id,
-                        delta: binary_msg
+                        delta: binary_msg,
                     };
                     result.data.data = new_data_with_port_id;
                 }
@@ -107,10 +110,12 @@ export class WebSocketClient extends Client {
 
                     // Create an empty ArrayBuffer to hold the binary, as it
                     // will be sent in n >= 1 chunks.
-                    this._full_binary = new Uint8Array(this._pending_binary_length);
+                    this._full_binary = new Uint8Array(
+                        this._pending_binary_length
+                    );
                 } else {
                     this._handle({
-                        data: msg
+                        data: msg,
                     });
                 }
             }
@@ -129,7 +134,12 @@ export class WebSocketClient extends Client {
      * receiver.
      */
     send(msg) {
-        if (msg.args && msg.args.length > 0 && msg.args[0] instanceof ArrayBuffer && msg.args[0].byteLength !== undefined) {
+        if (
+            msg.args &&
+            msg.args.length > 0 &&
+            msg.args[0] instanceof ArrayBuffer &&
+            msg.args[0].byteLength !== undefined
+        ) {
             const pre_msg = msg;
             msg.binary_length = msg.args[0].byteLength;
             this._ws.send(JSON.stringify(pre_msg));
@@ -140,7 +150,7 @@ export class WebSocketClient extends Client {
     }
 
     terminate() {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
             this._ws.onclose = resolve;
             this._ws.close();
         });

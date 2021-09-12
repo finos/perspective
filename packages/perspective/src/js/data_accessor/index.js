@@ -15,7 +15,7 @@ export class DataAccessor {
         this.data_formats = {
             row: 0,
             column: 1,
-            schema: 2
+            schema: 2,
         };
         this.format = undefined;
         this.data = undefined;
@@ -29,10 +29,15 @@ export class DataAccessor {
             return this.data_formats.row;
         } else if (Array.isArray(data[Object.keys(data)[0]])) {
             return this.data_formats.column;
-        } else if (typeof data[Object.keys(data)[0]] === "string" || typeof data[Object.keys(data)[0]] === "function") {
+        } else if (
+            typeof data[Object.keys(data)[0]] === "string" ||
+            typeof data[Object.keys(data)[0]] === "function"
+        ) {
             return this.data_formats.schema;
         } else {
-            throw `Could not determine data format for ${JSON.stringify(data)}, with JS typeof ${typeof data}`;
+            throw `Could not determine data format for ${JSON.stringify(
+                data
+            )}, with JS typeof ${typeof data}`;
         }
     }
 
@@ -152,7 +157,9 @@ export class DataAccessor {
             for (const name of this.names) {
                 const new_type = get_type_config(data[name]);
                 if (new_type.type) {
-                    console.debug(`Converting "${data[name]}" to "${new_type.type}"`);
+                    console.debug(
+                        `Converting "${data[name]}" to "${new_type.type}"`
+                    );
                     overridden_types[name] = data[name];
                     data[name] = new_type.type;
                 }

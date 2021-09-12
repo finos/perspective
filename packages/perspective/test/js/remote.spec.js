@@ -12,7 +12,7 @@ const perspective = require("../../dist/cjs/perspective.node.js");
 let server;
 let port;
 
-describe("WebSocketManager", function() {
+describe("WebSocketManager", function () {
     beforeAll(() => {
         server = new perspective.WebSocketServer({port: 0});
         port = server._server.address().port;
@@ -47,8 +47,10 @@ describe("WebSocketManager", function() {
         const client = perspective.websocket(`ws://localhost:${port}`);
         const client_table = client.open_table("test");
 
-        client_table.view({columns: ["z"]}).catch(error => {
-            expect(error.message).toBe("Abort(): Invalid column 'z' found in View columns.\n");
+        client_table.view({columns: ["z"]}).catch((error) => {
+            expect(error.message).toBe(
+                "Abort(): Invalid column 'z' found in View columns.\n"
+            );
         });
 
         const client_view = await client_table.view();
@@ -97,8 +99,10 @@ describe("WebSocketManager", function() {
         const client_1_table = client_1.open_table("test");
         const client_2_table = client_2.open_table("test");
 
-        client_1_table.view({columns: ["z"]}).catch(error => {
-            expect(error.message).toBe("Abort(): Invalid column 'z' found in View columns.\n");
+        client_1_table.view({columns: ["z"]}).catch((error) => {
+            expect(error.message).toBe(
+                "Abort(): Invalid column 'z' found in View columns.\n"
+            );
         });
 
         const client_1_view = await client_1_table.view();
@@ -116,7 +120,7 @@ describe("WebSocketManager", function() {
         server.eject_table("test");
     });
 
-    it("sends updates to client on subscribe", async done => {
+    it("sends updates to client on subscribe", async (done) => {
         const data = [{x: 1}];
         const table = await perspective.table(data);
         server.host_table("test", table);
@@ -127,7 +131,7 @@ describe("WebSocketManager", function() {
         const client_view = await client_table.view();
         // eslint-disable-next-line no-unused-vars
         const on_update = () => {
-            client_view.to_json().then(async updated_data => {
+            client_view.to_json().then(async (updated_data) => {
                 server.eject_table("test");
                 expect(updated_data).toEqual([{x: 1}, {x: 2}]);
                 await client.terminate();
@@ -136,7 +140,7 @@ describe("WebSocketManager", function() {
         };
 
         client_view.on_update(on_update);
-        client_view.to_json().then(client_data => {
+        client_view.to_json().then((client_data) => {
             expect(client_data).toEqual(data);
             table.update([{x: 2}]);
         });
@@ -186,7 +190,7 @@ describe("WebSocketManager", function() {
         server.eject_table("test");
     });
 
-    it("Calls `update` and sends arraybuffers using `on_update`", async done => {
+    it("Calls `update` and sends arraybuffers using `on_update`", async (done) => {
         const data = [{x: 1}];
         const table = await perspective.table(data);
         const view = await table.view();
@@ -194,7 +198,7 @@ describe("WebSocketManager", function() {
 
         let update_port;
 
-        const updater = async updated => {
+        const updater = async (updated) => {
             expect(updated.port_id).toEqual(update_port);
             expect(updated.delta instanceof ArrayBuffer).toEqual(true);
             expect(updated.delta.byteLength).toBeGreaterThan(0);

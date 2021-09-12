@@ -18,13 +18,16 @@ const execSync = require("child_process").execSync;
 chalk.enabled = true;
 chalk.level = 1;
 
-const BROWSER_RUNTIME = arg1 =>
+const BROWSER_RUNTIME = (arg1) =>
     fs
         .readFileSync(path.join(__dirname, "browser_runtime.js"))
         .toString()
         .replace("__PLACEHOLDER__", arg1);
 
-const to_url = (arg1, arg2) => `<html><head><script>${BROWSER_RUNTIME(arg1)};${arg2}</script></head><body></body></html>`;
+const to_url = (arg1, arg2) =>
+    `<html><head><script>${BROWSER_RUNTIME(
+        arg1
+    )};${arg2}</script></head><body></body></html>`;
 
 function color(string) {
     string = [string];
@@ -35,15 +38,17 @@ function color(string) {
 async function run_version(browser, args, run_test) {
     let page = await browser.newPage();
     // TODO silence these
-    page.on("console", msg => {
+    page.on("console", (msg) => {
         if (msg.type() !== "warning") {
             console.log(color(msg.text()));
         }
     });
-    page.on("pageerror", msg => console.log(` -> ${msg.message}`));
+    page.on("pageerror", (msg) => console.log(` -> ${msg.message}`));
     await page.setContent(to_url(JSON.stringify(args), run_test));
 
-    let results = await page.evaluate(async () => await window.PerspectiveBench.run());
+    let results = await page.evaluate(
+        async () => await window.PerspectiveBench.run()
+    );
     await page.close();
 
     return results;
@@ -51,7 +56,7 @@ async function run_version(browser, args, run_test) {
 
 async function run_node_version(args, run_test) {
     const script = BROWSER_RUNTIME(JSON.stringify(args));
-    console.warn = function() {};
+    console.warn = function () {};
     const old_log = console.log;
     console.log = (...args) => old_log(...args.map(color));
     const js = eval(`"use strict";${script};${run_test};PerspectiveBench`);
@@ -64,7 +69,9 @@ exports.run = async function run(version, benchmark, ...cmdArgs) {
 
     let benchmark_name = options.output || "benchmark";
 
-    console.log(chalk`\n{whiteBright Running v.${version} (${cmdArgs.join(",")})}`);
+    console.log(
+        chalk`\n{whiteBright Running v.${version} (${cmdArgs.join(",")})}`
+    );
 
     let version_index = 1;
     let table = undefined;
@@ -95,8 +102,8 @@ exports.run = async function run(version, benchmark, ...cmdArgs) {
                 '--proxy-server="direct://"',
                 "--proxy-bypass-list=*",
                 "--disable-web-security",
-                "--allow-file-access"
-            ]
+                "--allow-file-access",
+            ],
         });
 
         execSync(`renice -n -20 ${browser.process().pid}`, {stdio: "inherit"});
@@ -105,11 +112,13 @@ exports.run = async function run(version, benchmark, ...cmdArgs) {
 
         await browser.close();
 
-        console.log(`Benchmark suite has finished running - results are in ${benchmark_name}.html.`);
+        console.log(
+            `Benchmark suite has finished running - results are in ${benchmark_name}.html.`
+        );
     } else {
         bins = await run_node_version(cmdArgs, RUN_TEST);
     }
-    bins = bins.map(result => ({...result, version, version_index}));
+    bins = bins.map((result) => ({...result, version, version_index}));
     version_index++;
     if (table === undefined) {
         table = await perspective.table(bins);
@@ -119,18 +128,41 @@ exports.run = async function run(version, benchmark, ...cmdArgs) {
     const view = await table.view();
     const arrow = await view.to_arrow();
     view.delete();
-    fs.writeFileSync(path.join(process.cwd(), `${benchmark_name}.arrow`), new Buffer(arrow), "binary");
-    fs.writeFileSync(path.join(process.cwd(), `${benchmark_name}.html`), fs.readFileSync(path.join(__dirname, "..", "html", `benchmark.html`)).toString());
+    fs.writeFileSync(
+        path.join(process.cwd(), `${benchmark_name}.arrow`),
+        new Buffer(arrow),
+        "binary"
+    );
+    fs.writeFileSync(
+        path.join(process.cwd(), `${benchmark_name}.html`),
+        fs
+            .readFileSync(path.join(__dirname, "..", "html", `benchmark.html`))
+            .toString()
+    );
 };
 
 exports.registerCmd = function registerCmd() {
     program
-        .version(JSON.parse(fs.readFileSync(path.join(__dirname, "..", "..", "package.json")).toString()).version)
+        .version(
+            JSON.parse(
+                fs
+                    .readFileSync(
+                        path.join(__dirname, "..", "..", "package.json")
+                    )
+                    .toString()
+            ).version
+        )
         .arguments("[suite] [...cmdArgs]")
         .description("Run the benchmark suite")
-        .option("-o, --output <filename>", "Filename to write to, defaults to `benchmark`")
+        .option(
+            "-o, --output <filename>",
+            "Filename to write to, defaults to `benchmark`"
+        )
         .option("-r, --read", "Read from disk or overwrite")
-        .option("-p, --puppeteer", "Should run the suite in Puppeteer (Headless)")
+        .option(
+            "-p, --puppeteer",
+            "Should run the suite in Puppeteer (Headless)"
+        )
         .action((...args) => {
             const options = args.splice(args.length - 1, 1)[0];
 

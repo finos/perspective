@@ -11,7 +11,10 @@ const path = require("path");
 const PerspectivePlugin = require("@finos/perspective-webpack-plugin");
 
 module.exports = {
-    mode: process.env.PSP_NO_MINIFY || process.env.PSP_DEBUG ? "development" : process.env.NODE_ENV || "production",
+    mode:
+        process.env.PSP_NO_MINIFY || process.env.PSP_DEBUG
+            ? "development"
+            : process.env.NODE_ENV || "production",
     entry: {
         index: "./src/js/psp_widget.js",
     },
@@ -20,45 +23,55 @@ module.exports = {
         fallback: {
             path: false,
             fs: false,
-            crypto: false
-        }
+            crypto: false,
+        },
     },
     plugins: [new PerspectivePlugin({})],
     performance: {
         hints: false,
         maxEntrypointSize: 512000,
-        maxAssetSize: 512000
+        maxAssetSize: 512000,
     },
-    stats: {modules: false, hash: false, version: false, builtAt: false, entrypoints: false},
+    stats: {
+        modules: false,
+        hash: false,
+        version: false,
+        builtAt: false,
+        entrypoints: false,
+    },
     module: {
         rules: [
             {
                 test: /\.less$/,
                 exclude: /node_modules/,
-                use: [{loader: "style-loader"}, {loader: "css-loader"}, {loader: "less-loader"}]
+                use: [
+                    {loader: "style-loader"},
+                    {loader: "css-loader"},
+                    {loader: "less-loader"},
+                ],
             },
             {
                 test: /\.css$/,
                 exclude: /node_modules/,
-                use: [{loader: "css-loader"}]
+                use: [{loader: "css-loader"}],
             },
             {
                 test: /\.(html)$/,
                 exclude: /node_modules/,
                 use: {
                     loader: "html-loader",
-                    options: {}
-                }
+                    options: {},
+                },
             },
         ],
     },
     experiments: {
-        syncWebAssembly: true
+        syncWebAssembly: true,
     },
     output: {
         filename: "lumino.js",
         libraryTarget: "umd",
         library: "PerspectiveLumino",
-        path: path.resolve(__dirname, "../../dist/umd")
-    }
+        path: path.resolve(__dirname, "../../dist/umd"),
+    },
 };

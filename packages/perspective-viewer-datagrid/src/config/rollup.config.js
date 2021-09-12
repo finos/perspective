@@ -11,31 +11,34 @@ export default () => {
     return [
         {
             input: "src/js/plugin.js",
-            external: id => {
-                let include = id.startsWith(".") || require.resolve(id).indexOf(PROJECT_PATH) === 0 || id.endsWith(".less");
+            external: (id) => {
+                let include =
+                    id.startsWith(".") ||
+                    require.resolve(id).indexOf(PROJECT_PATH) === 0 ||
+                    id.endsWith(".less");
                 return !include;
             },
             output: {
                 sourcemap: true,
-                file: "dist/esm/perspective-viewer-datagrid.js"
+                file: "dist/esm/perspective-viewer-datagrid.js",
             },
             plugins: [
                 nodeResolve(),
                 babel({
                     exclude: "node_modules/**",
-                    babelHelpers: "bundled"
+                    babelHelpers: "bundled",
                 }),
                 filesize(),
                 postcss({
                     inject: false,
                     sourceMap: false,
-                    minimize: {preset: "lite"}
+                    minimize: {preset: "lite"},
                 }),
-                sourcemaps()
-            ].filter(x => x),
+                sourcemaps(),
+            ].filter((x) => x),
             watch: {
-                clearScreen: false
-            }
-        }
+                clearScreen: false,
+            },
+        },
     ];
 };

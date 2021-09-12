@@ -16,21 +16,23 @@ utils.with_server({}, () => {
         () => {
             test.capture(
                 "doesn't leak elements",
-                async page => {
+                async (page) => {
                     let viewer = await page.$("perspective-viewer");
-                    await page.evaluate(async viewer => {
+                    await page.evaluate(async (viewer) => {
                         window.__TABLE__ = await viewer.getTable();
                         await viewer.reset();
                     }, viewer);
 
                     for (var i = 0; i < 500; i++) {
-                        await page.evaluate(async element => {
+                        await page.evaluate(async (element) => {
                             await element.delete();
-                            await element.load(Promise.resolve(window.__TABLE__));
+                            await element.load(
+                                Promise.resolve(window.__TABLE__)
+                            );
                         }, viewer);
                     }
 
-                    return await page.evaluate(async viewer => {
+                    return await page.evaluate(async (viewer) => {
                         await viewer.toggleConfig();
                         return viewer.innerHTML;
                     }, viewer);
@@ -40,24 +42,37 @@ utils.with_server({}, () => {
 
             test.capture(
                 "doesn't leak views when setting row pivots",
-                async page => {
+                async (page) => {
                     let viewer = await page.$("perspective-viewer");
-                    await page.evaluate(async viewer => {
+                    await page.evaluate(async (viewer) => {
                         window.__TABLE__ = await viewer.getTable();
                         await viewer.reset();
                     }, viewer);
 
                     for (var i = 0; i < 500; i++) {
-                        await page.evaluate(async element => {
+                        await page.evaluate(async (element) => {
                             await element.reset();
-                            let pivots = ["State", "City", "Segment", "Ship Mode", "Region", "Category"];
-                            let start = Math.floor(Math.random() * pivots.length);
-                            let length = Math.ceil(Math.random() * (pivots.length - start));
-                            await element.restore({row_pivots: pivots.slice(start, length)});
+                            let pivots = [
+                                "State",
+                                "City",
+                                "Segment",
+                                "Ship Mode",
+                                "Region",
+                                "Category",
+                            ];
+                            let start = Math.floor(
+                                Math.random() * pivots.length
+                            );
+                            let length = Math.ceil(
+                                Math.random() * (pivots.length - start)
+                            );
+                            await element.restore({
+                                row_pivots: pivots.slice(start, length),
+                            });
                         }, viewer);
                     }
 
-                    return await page.evaluate(async viewer => {
+                    return await page.evaluate(async (viewer) => {
                         await viewer.restore({row_pivots: ["State"]});
                         await viewer.toggleConfig();
                         return viewer.innerHTML;
@@ -68,21 +83,25 @@ utils.with_server({}, () => {
 
             test.capture(
                 "doesn't leak views when setting filters",
-                async page => {
+                async (page) => {
                     let viewer = await page.$("perspective-viewer");
-                    await page.evaluate(async viewer => {
+                    await page.evaluate(async (viewer) => {
                         window.__TABLE__ = await viewer.getTable();
                         await viewer.reset();
                     }, viewer);
 
                     for (var i = 0; i < 500; i++) {
-                        await page.evaluate(async element => {
+                        await page.evaluate(async (element) => {
                             await element.reset();
-                            await element.restore({filter: [["Sales", ">", Math.random() * 100 + 100]]});
+                            await element.restore({
+                                filter: [
+                                    ["Sales", ">", Math.random() * 100 + 100],
+                                ],
+                            });
                         }, viewer);
                     }
 
-                    return await page.evaluate(async viewer => {
+                    return await page.evaluate(async (viewer) => {
                         await viewer.restore({filter: [["Sales", "<", 10]]});
                         await viewer.toggleConfig();
                         return viewer.innerHTML;

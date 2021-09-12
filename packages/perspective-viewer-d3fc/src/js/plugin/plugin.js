@@ -17,18 +17,30 @@ import * as d3 from "d3";
 const DEFAULT_PLUGIN_SETTINGS = {
     initial: {
         type: "number",
-        count: 1
+        count: 1,
     },
-    selectMode: "select"
+    selectMode: "select",
 };
 
 const styleWithD3FC = `${style}${getD3FCStyles()}`;
-const EXCLUDED_SETTINGS = ["crossValues", "mainValues", "realValues", "splitValues", "filter", "data", "size", "colorStyles", "agg_paths"];
+const EXCLUDED_SETTINGS = [
+    "crossValues",
+    "mainValues",
+    "realValues",
+    "splitValues",
+    "filter",
+    "data",
+    "size",
+    "colorStyles",
+    "agg_paths",
+];
 
 function getD3FCStyles() {
-    const headerStyles = document.querySelector("head").querySelectorAll("style");
+    const headerStyles = document
+        .querySelector("head")
+        .querySelectorAll("style");
     const d3fcStyles = [];
-    headerStyles.forEach(s => {
+    headerStyles.forEach((s) => {
         if (s.innerText.indexOf("d3fc-") !== -1) {
             d3fcStyles.push(s.innerText);
         }
@@ -37,10 +49,14 @@ function getD3FCStyles() {
 }
 
 export function register(...plugins) {
-    plugins = new Set(plugins.length > 0 ? plugins : charts.map(chart => chart.plugin.name));
-    charts.forEach(chart => {
+    plugins = new Set(
+        plugins.length > 0 ? plugins : charts.map((chart) => chart.plugin.name)
+    );
+    charts.forEach((chart) => {
         if (plugins.has(chart.plugin.name)) {
-            const name = chart.plugin.name.toLowerCase().replace(/[ \t\r\n\/]*/g, "");
+            const name = chart.plugin.name
+                .toLowerCase()
+                .replace(/[ \t\r\n\/]*/g, "");
             const plugin_name = `perspective-viewer-d3fc-${name}`;
             customElements.define(
                 plugin_name,
@@ -57,7 +73,8 @@ export function register(...plugins) {
                             this.attachShadow({mode: "open"});
                             this.shadowRoot.innerHTML = `<style>${styleWithD3FC}</style>`;
                             this.shadowRoot.innerHTML += `<div id="container" class="chart"></div>`;
-                            this._container = this.shadowRoot.querySelector(".chart");
+                            this._container =
+                                this.shadowRoot.querySelector(".chart");
                             this._initialized = true;
                         }
                     }
@@ -71,11 +88,17 @@ export function register(...plugins) {
                     }
 
                     get min_config_columns() {
-                        return chart.plugin.initial?.count || DEFAULT_PLUGIN_SETTINGS.initial.count;
+                        return (
+                            chart.plugin.initial?.count ||
+                            DEFAULT_PLUGIN_SETTINGS.initial.count
+                        );
                     }
 
                     get config_column_names() {
-                        return chart.plugin.initial?.names || DEFAULT_PLUGIN_SETTINGS.initial.names;
+                        return (
+                            chart.plugin.initial?.names ||
+                            DEFAULT_PLUGIN_SETTINGS.initial.names
+                        );
                     }
 
                     // get initial() {
@@ -116,7 +139,11 @@ export function register(...plugins) {
                         const realValues = this.config.columns;
                         const leaves_only = chart.plugin.name !== "Sunburst";
                         if (end_col && end_row) {
-                            jsonp = view.to_json({end_row, end_col, leaves_only});
+                            jsonp = view.to_json({
+                                end_row,
+                                end_col,
+                                leaves_only,
+                            });
                         } else if (end_col) {
                             jsonp = view.to_json({end_col, leaves_only});
                         } else if (end_row) {
@@ -125,8 +152,22 @@ export function register(...plugins) {
                             jsonp = view.to_json({leaves_only});
                         }
 
-                        metadata = await Promise.all([viewer.getTable().then(table => table.schema(false)), view.expression_schema(false), view.schema(false), jsonp, view.get_config()]);
-                        let [table_schema, expression_schema, view_schema, json, config] = metadata;
+                        metadata = await Promise.all([
+                            viewer
+                                .getTable()
+                                .then((table) => table.schema(false)),
+                            view.expression_schema(false),
+                            view.schema(false),
+                            jsonp,
+                            view.get_config(),
+                        ]);
+                        let [
+                            table_schema,
+                            expression_schema,
+                            view_schema,
+                            json,
+                            config,
+                        ] = metadata;
 
                         /**
                          * Retrieve a tree axis column from the table and
@@ -134,7 +175,7 @@ export function register(...plugins) {
                          * `undefined`.
                          * @param {String} column a column name
                          */
-                        const get_pivot_column_type = function(column) {
+                        const get_pivot_column_type = function (column) {
                             let type = table_schema[column];
                             if (!type) {
                                 type = expression_schema[column];
@@ -142,35 +183,60 @@ export function register(...plugins) {
                             return type;
                         };
 
-                        const {columns, row_pivots, column_pivots, filter} = config;
+                        const {columns, row_pivots, column_pivots, filter} =
+                            config;
                         const filtered =
                             row_pivots.length > 0
                                 ? json.reduce(
                                       (acc, col) => {
-                                          if (col.__ROW_PATH__ && col.__ROW_PATH__.length == row_pivots.length) {
-                                              acc.agg_paths.push(acc.aggs.slice());
+                                          if (
+                                              col.__ROW_PATH__ &&
+                                              col.__ROW_PATH__.length ==
+                                                  row_pivots.length
+                                          ) {
+                                              acc.agg_paths.push(
+                                                  acc.aggs.slice()
+                                              );
                                               acc.rows.push(col);
                                           } else {
-                                              const len = col.__ROW_PATH__.filter(x => x !== undefined).length;
+                                              const len =
+                                                  col.__ROW_PATH__.filter(
+                                                      (x) => x !== undefined
+                                                  ).length;
                                               acc.aggs[len] = col;
-                                              acc.aggs = acc.aggs.slice(0, len + 1);
+                                              acc.aggs = acc.aggs.slice(
+                                                  0,
+                                                  len + 1
+                                              );
                                           }
                                           return acc;
                                       },
                                       {rows: [], aggs: [], agg_paths: []}
                                   )
                                 : {rows: json};
-                        const dataMap = (col, i) => (!row_pivots.length ? {...col, __ROW_PATH__: [i]} : col);
+                        const dataMap = (col, i) =>
+                            !row_pivots.length
+                                ? {...col, __ROW_PATH__: [i]}
+                                : col;
                         const mapped = filtered.rows.map(dataMap);
 
                         let settings = {
                             realValues,
-                            crossValues: row_pivots.map(r => ({name: r, type: get_pivot_column_type(r)})),
-                            mainValues: columns.map(a => ({name: a, type: view_schema[a]})),
-                            splitValues: column_pivots.map(r => ({name: r, type: get_pivot_column_type(r)})),
+                            crossValues: row_pivots.map((r) => ({
+                                name: r,
+                                type: get_pivot_column_type(r),
+                            })),
+                            mainValues: columns.map((a) => ({
+                                name: a,
+                                type: view_schema[a],
+                            })),
+                            splitValues: column_pivots.map((r) => ({
+                                name: r,
+                                type: get_pivot_column_type(r),
+                            })),
                             filter,
                             data: mapped,
-                            agg_paths: filtered.agg_paths
+                            agg_paths: filtered.agg_paths,
                         };
 
                         this._chart = chart;
@@ -178,14 +244,23 @@ export function register(...plugins) {
                         const handler = {
                             set: (obj, prop, value) => {
                                 if (!EXCLUDED_SETTINGS.includes(prop)) {
-                                    this._container && this._container.dispatchEvent(new Event("perspective-plugin-update", {bubbles: true, composed: true}));
+                                    this._container &&
+                                        this._container.dispatchEvent(
+                                            new Event(
+                                                "perspective-plugin-update",
+                                                {bubbles: true, composed: true}
+                                            )
+                                        );
                                 }
                                 obj[prop] = value;
                                 return true;
-                            }
+                            },
                         };
 
-                        this._settings = new Proxy({...this._settings, ...settings}, handler);
+                        this._settings = new Proxy(
+                            {...this._settings, ...settings},
+                            handler
+                        );
                         initialiseStyles(this._container, this._settings);
 
                         if (clear) {
@@ -194,7 +269,9 @@ export function register(...plugins) {
 
                         this._draw();
 
-                        await new Promise(resolve => requestAnimationFrame(resolve));
+                        await new Promise((resolve) =>
+                            requestAnimationFrame(resolve)
+                        );
                     }
 
                     async clear() {
@@ -207,12 +284,19 @@ export function register(...plugins) {
                         if (this._settings.data && this.isConnected) {
                             const containerDiv = d3.select(this._container);
                             const chartClass = `chart ${name}`;
-                            this._settings.size = this._container.getBoundingClientRect();
+                            this._settings.size =
+                                this._container.getBoundingClientRect();
 
                             if (this._settings.data.length > 0) {
-                                this._chart(containerDiv.attr("class", chartClass), this._settings);
+                                this._chart(
+                                    containerDiv.attr("class", chartClass),
+                                    this._settings
+                                );
                             } else {
-                                containerDiv.attr("class", `${chartClass} disabled`);
+                                containerDiv.attr(
+                                    "class",
+                                    `${chartClass} disabled`
+                                );
                             }
                         }
                     }
@@ -250,7 +334,7 @@ export function register(...plugins) {
 
                     save() {
                         const settings = {...this._settings};
-                        EXCLUDED_SETTINGS.forEach(s => {
+                        EXCLUDED_SETTINGS.forEach((s) => {
                             delete settings[s];
                         });
                         return settings;
@@ -267,7 +351,9 @@ export function register(...plugins) {
                 }
             );
 
-            customElements.get("perspective-viewer").registerPlugin(plugin_name);
+            customElements
+                .get("perspective-viewer")
+                .registerPlugin(plugin_name);
         }
     });
 }

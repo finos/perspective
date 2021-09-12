@@ -12,7 +12,7 @@ import {override_config} from "../config";
 function error_to_json(error) {
     const obj = {};
     if (typeof error !== "string") {
-        Object.getOwnPropertyNames(error).forEach(key => {
+        Object.getOwnPropertyNames(error).forEach((key) => {
             obj[key] = error[key];
         }, error);
     } else {
@@ -88,7 +88,7 @@ export class Server {
             case "memory_usage":
                 this.post({
                     id: msg.id,
-                    data: this.perspective.memory_usage()
+                    data: this.perspective.memory_usage(),
                 });
                 break;
             case "init":
@@ -104,14 +104,17 @@ export class Server {
                 } else {
                     try {
                         const msgs = this._tables[msg.name];
-                        const table = this.perspective.table(msg.args[0], msg.options);
+                        const table = this.perspective.table(
+                            msg.args[0],
+                            msg.options
+                        );
 
                         // When using the Node server, the `table()` constructor
                         // returns a Promise, but in the Web Worker version,
                         // table() synchronously returns an instance of a Table.
                         if (table && table.then) {
                             table
-                                .then(table => {
+                                .then((table) => {
                                     this._tables[msg.name] = table;
 
                                     // Process cached messages for this table.
@@ -124,10 +127,12 @@ export class Server {
                                     // Resolve the promise to return a Table.
                                     this.post({
                                         id: msg.id,
-                                        data: msg.name
+                                        data: msg.name,
                                     });
                                 })
-                                .catch(error => this.process_error(msg, error));
+                                .catch((error) =>
+                                    this.process_error(msg, error)
+                                );
                         } else {
                             this._tables[msg.name] = table;
 
@@ -141,7 +146,7 @@ export class Server {
                             // Resolve the promise to return a Table.
                             this.post({
                                 id: msg.id,
-                                data: msg.name
+                                data: msg.name,
                             });
                         }
                     } catch (error) {
@@ -153,11 +158,11 @@ export class Server {
             case "table_generate":
                 let g;
                 eval("g = " + msg.args);
-                g(function(tbl) {
+                g(function (tbl) {
                     this._tables[msg.name] = tbl;
                     this.post({
                         id: msg.id,
-                        data: "created!"
+                        data: "created!",
                     });
                 });
                 break;
@@ -189,12 +194,15 @@ export class Server {
                         // When using the Node server, the `view()` constructor
                         // returns a Promise, but in the Web Worker version,
                         // view() synchronously returns an instance of a View.
-                        const view = this._tables[msg.table_name].view(msg.config);
+                        const view = this._tables[msg.table_name].view(
+                            msg.config
+                        );
 
                         if (view && view.then) {
-                            view.then(view => {
+                            view.then((view) => {
                                 this._views[msg.view_name] = view;
-                                this._views[msg.view_name].client_id = client_id;
+                                this._views[msg.view_name].client_id =
+                                    client_id;
 
                                 // Process cached messages for the view.
                                 if (msgs) {
@@ -205,9 +213,9 @@ export class Server {
 
                                 this.post({
                                     id: msg.id,
-                                    data: msg.view_name
+                                    data: msg.view_name,
                                 });
-                            }).catch(error => this.process_error(msg, error));
+                            }).catch((error) => this.process_error(msg, error));
                         } else {
                             this._views[msg.view_name] = view;
                             this._views[msg.view_name].client_id = client_id;
@@ -221,7 +229,7 @@ export class Server {
 
                             this.post({
                                 id: msg.id,
-                                data: msg.view_name
+                                data: msg.view_name,
                             });
                         }
                     } catch (error) {
@@ -241,15 +249,18 @@ export class Server {
         try {
             let callback;
             if (msg.method.slice(0, 2) === "on") {
-                callback = ev => {
+                callback = (ev) => {
                     let result = {
                         id: msg.id,
-                        data: ev
+                        data: ev,
                     };
                     try {
                         // post transferable data for arrow
                         if (msg.args && msg.args[0]) {
-                            if (msg.method === "on_update" && msg.args[0]["mode"] === "row") {
+                            if (
+                                msg.method === "on_update" &&
+                                msg.args[0]["mode"] === "row"
+                            ) {
                                 // actual arrow is in the `delta`
                                 this.post(result, [ev.delta]);
                                 return;
@@ -258,7 +269,9 @@ export class Server {
 
                         this.post(result);
                     } catch (e) {
-                        console.error(`Removing failed callback to \`${msg.method}()\` (presumably due to failed connection)`);
+                        console.error(
+                            `Removing failed callback to \`${msg.method}()\` (presumably due to failed connection)`
+                        );
                         const remove_method = msg.method.substring(3);
                         obj[`remove_${remove_method}`](callback);
                     }
@@ -273,7 +286,11 @@ export class Server {
             if (callback) {
                 obj[msg.method](callback, ...msg.args);
             } else {
-                console.error(`Callback not found for remote call "${JSON.stringify(msg)}"`);
+                console.error(
+                    `Callback not found for remote call "${JSON.stringify(
+                        msg
+                    )}"`
+                );
             }
         } catch (error) {
             this.process_error(msg, error);
@@ -291,7 +308,9 @@ export class Server {
     process_method_call(msg) {
         let obj, result;
         const name = msg.view_name || msg.name;
-        msg.cmd === "table_method" ? (obj = this._tables[name]) : (obj = this._views[name]);
+        msg.cmd === "table_method"
+            ? (obj = this._tables[name])
+            : (obj = this._views[name]);
 
         if (!obj && msg.cmd === "view_method") {
             // cannot have a host without a table, but can have a host without a
@@ -312,7 +331,11 @@ export class Server {
             } else {
                 result = obj[msg.method].apply(obj, msg.args);
                 if (result instanceof Promise) {
-                    result.then(result => this.process_method_call_response(msg, result)).catch(error => this.process_error(msg, error));
+                    result
+                        .then((result) =>
+                            this.process_method_call_response(msg, result)
+                        )
+                        .catch((error) => this.process_error(msg, error));
                 } else {
                     this.process_method_call_response(msg, result);
                 }
@@ -337,14 +360,14 @@ export class Server {
             this.post(
                 {
                     id: msg.id,
-                    data: result
+                    data: result,
                 },
                 [result]
             );
         } else {
             this.post({
                 id: msg.id,
-                data: result
+                data: result,
             });
         }
     }
@@ -355,7 +378,7 @@ export class Server {
     process_error(msg, error) {
         this.post({
             id: msg.id,
-            error: error_to_json(error)
+            error: error_to_json(error),
         });
     }
 

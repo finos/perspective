@@ -11,13 +11,21 @@ import {seriesColorRange} from "../seriesRange";
 import {seriesColorsFromDistinct} from "../seriesColors";
 
 export function treeColor(settings, data) {
-    if (settings.realValues.length < 1 || settings.realValues[1] === null || settings.realValues[1] === undefined) return;
+    if (
+        settings.realValues.length < 1 ||
+        settings.realValues[1] === null ||
+        settings.realValues[1] === undefined
+    )
+        return;
     const color_column = settings.realValues[1];
     const colors = data
-        .filter(x => x.height > 0)
-        .map(x => getColors(x))
+        .filter((x) => x.height > 0)
+        .map((x) => getColors(x))
         .reduce((a, b) => a.concat(b));
-    if (settings.mainValues.find(x => x.name === color_column)?.type === "string") {
+    if (
+        settings.mainValues.find((x) => x.name === color_column)?.type ===
+        "string"
+    ) {
         return seriesColorsFromDistinct(settings, colors);
     } else {
         let min = Math.min(...colors);
@@ -28,6 +36,10 @@ export function treeColor(settings, data) {
 
 // only get the colors from the bottom level (e.g. nodes with no children)
 function getColors(nodes, colors = []) {
-    nodes.children && nodes.children.length > 0 ? nodes.children.forEach(child => colors.concat(getColors(child, colors))) : nodes.data.color && colors.push(nodes.data.color);
+    nodes.children && nodes.children.length > 0
+        ? nodes.children.forEach((child) =>
+              colors.concat(getColors(child, colors))
+          )
+        : nodes.data.color && colors.push(nodes.data.color);
     return colors;
 }

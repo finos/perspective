@@ -7,45 +7,44 @@
  *
  */
 
-import { DOMWidgetModel } from "@jupyter-widgets/base";
-import { PERSPECTIVE_VERSION } from "./version";
+import {DOMWidgetModel} from "@jupyter-widgets/base";
+import {PERSPECTIVE_VERSION} from "./version";
 
 /**
  * TODO: document
  */
 export class PerspectiveModel extends DOMWidgetModel {
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 
-  defaults() {
-    return {
-      ...super.defaults(),
-      _model_name: PerspectiveModel.model_name,
-      _model_module: PerspectiveModel.model_module,
-      _model_module_version: PerspectiveModel.model_module_version,
-      _view_name: PerspectiveModel.view_name,
-      _view_module: PerspectiveModel.view_module,
-      _view_module_version: PerspectiveModel.view_module_version,
-      plugin: "datagrid",
-      columns: [],
-      row_pivots: [],
-      column_pivots: [],
-      aggregates: {},
-      sort: [],
-      filters: [],
-      expressions: [],
-      plugin_config: {},
-      dark: false,
-      editable: false,
-      server: false,
-      client: false,
-    };
-  }
-
+    defaults() {
+        return {
+            ...super.defaults(),
+            _model_name: PerspectiveModel.model_name,
+            _model_module: PerspectiveModel.model_module,
+            _model_module_version: PerspectiveModel.model_module_version,
+            _view_name: PerspectiveModel.view_name,
+            _view_module: PerspectiveModel.view_module,
+            _view_module_version: PerspectiveModel.view_module_version,
+            plugin: "datagrid",
+            columns: [],
+            row_pivots: [],
+            column_pivots: [],
+            aggregates: {},
+            sort: [],
+            filters: [],
+            expressions: [],
+            plugin_config: {},
+            dark: false,
+            editable: false,
+            server: false,
+            client: false,
+        };
+    }
 }
 
 PerspectiveModel.serializers = {
-  ...DOMWidgetModel.serializers,
-// Add any extra serializers here
+    ...DOMWidgetModel.serializers,
+    // Add any extra serializers here
 };
 
 PerspectiveModel.model_name = "PerspectiveModel";

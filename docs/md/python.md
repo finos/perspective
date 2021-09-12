@@ -5,8 +5,8 @@ title: Python User Guide
 
 Perspective for Python uses the exact same C++ data engine used by the
 [WebAssembly version](https://perspective.finos.org/docs/md/js.html). The
-library consists of many of the same abstractions and API as in JavaScript,
-as well as Python-specific data loading support for [NumPy](https://numpy.org/),
+library consists of many of the same abstractions and API as in JavaScript, as
+well as Python-specific data loading support for [NumPy](https://numpy.org/),
 [Pandas](https://pandas.pydata.org/) (and
 [Apache Arrow](https://arrow.apache.org/), as in JavaScript).
 
@@ -31,21 +31,23 @@ The `perspective` module exports several tools:
 - `Table`, the table constructor for Perspective, which implements the `table`
   and `view` API in the same manner as the JavaScript library.
 - `PerspectiveWidget` the JupyterLab widget for interactive visualization.
-- `PerspectiveTornadoHandler`, an integration with [Tornado](https://www.tornadoweb.org/)
-that interfaces seamlessly with `<perspective-viewer>` in JavaScript.
+- `PerspectiveTornadoHandler`, an integration with
+  [Tornado](https://www.tornadoweb.org/) that interfaces seamlessly with
+  `<perspective-viewer>` in JavaScript.
 - `PerspectiveManager` the session manager for a shared server deployment of
-`perspective-python`.
+  `perspective-python`.
 
 This user's guide provides an overview of the most common ways to use
 Perspective in Python: the `Table` API, the JupyterLab widget, and the Tornado
 handler.
 
 For an understanding of Perspective's core concepts, see the
-[Table](/docs/md/table.html), [View](/docs/md/view.html), and [Data Binding](/docs/md/server.html) documentation. For API documentation, see the
-[Python API](/docs/obj/perspective-python.html).
+[Table](/docs/md/table.html), [View](/docs/md/view.html), and
+[Data Binding](/docs/md/server.html) documentation. For API documentation, see
+the [Python API](/docs/obj/perspective-python.html).
 
-[More Examples](https://github.com/finos/perspective/tree/master/examples)
-are available on GitHub.
+[More Examples](https://github.com/finos/perspective/tree/master/examples) are
+available on GitHub.
 
 ## Installation
 
@@ -77,7 +79,9 @@ Jupyter lab extension directory:
 jupyter labextension install @finos/perspective-jupyterlab
 ```
 
-If the widget does not display, you might be missing the [ipywidgets extension](https://ipywidgets.readthedocs.io/en/latest/user_install.html#installing-the-jupyterlab-extension). Install it from the extension directory:
+If the widget does not display, you might be missing the
+[ipywidgets extension](https://ipywidgets.readthedocs.io/en/latest/user_install.html#installing-the-jupyterlab-extension).
+Install it from the extension directory:
 
 ```bash
 jupyter labextension install @jupyter-widgets/jupyterlab-manager
@@ -138,8 +142,8 @@ its `index` treated as another column (through the
 [`reset_index()`](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.reset_index.html)
 method).
 
-If the dataframe does not have an index set, an integer-typed column
-named `"index"` is created. If you want to preserve the indexing behavior of the
+If the dataframe does not have an index set, an integer-typed column named
+`"index"` is created. If you want to preserve the indexing behavior of the
 dataframe passed into Perspective, simply create the `Table` with
 `index="index"` as a keyword argument. This tells Perspective to once again
 treat the index as a primary key:
@@ -153,7 +157,7 @@ table = perspective.Table(data, index="index")
 
 Unlike JavaScript, where schemas must be created using string representations of
 their types, `perspective-python` leverages Python's type system for schema
-creation.  A schema can be created with the following types:
+creation. A schema can be created with the following types:
 
 - `int` (and `long` in Python 2)
 - `float`
@@ -165,16 +169,18 @@ creation.  A schema can be created with the following types:
 
 #### Loading Custom Objects
 
-Custom objects can also be loaded into Perspective by using `object` in the schema, or
-implementing `_psp_repr_` to return `object`. Perspective stores a reference
-to your object as an unsigned 64-bit integer (e.g. a pointer), and uses  `__repr__`
-(or `_psp_repr` if implemented) to represent the object.
+Custom objects can also be loaded into Perspective by using `object` in the
+schema, or implementing `_psp_repr_` to return `object`. Perspective stores a
+reference to your object as an unsigned 64-bit integer (e.g. a pointer), and
+uses `__repr__` (or `_psp_repr` if implemented) to represent the object.
 
-You can customize how Perspective extracts data from your objects by implementing these
-two methods into your object:
+You can customize how Perspective extracts data from your objects by
+implementing these two methods into your object:
 
-- `_psp_repr_`: Since `__repr__` can only return strings, this lets you return other values
-- `_psp_dtype_`: Perpspective will look at this to determine how to cast your objects' repr.
+- `_psp_repr_`: Since `__repr__` can only return strings, this lets you return
+  other values
+- `_psp_dtype_`: Perpspective will look at this to determine how to cast your
+  objects' repr.
 
 #### Time Zone Handling
 
@@ -187,8 +193,9 @@ All `datetime` columns (regardless of input time zone) are output to the user as
 `datetime.datetime` objects in _local time_ according to the Python runtime.
 
 This behavior is consistent with Perspective's behavior in JavaScript. For more
-details, see this in-depth [explanation](https://github.com/finos/perspective/pull/867)
-of `perspective-python` semantics around time zone handling.
+details, see this in-depth
+[explanation](https://github.com/finos/perspective/pull/867) of
+`perspective-python` semantics around time zone handling.
 
 ##### Pandas Timestamps
 
@@ -235,32 +242,31 @@ have no identifier.
 ## `PerspectiveManager`
 
 `PerspectiveManager` offers an interface for hosting multiple
-`perspective.Table` and `perspective.View` instances, extending their
-interfaces to operate with the [JavaScript library](/docs/md/js.html) over a
-websocket connection.  `PerspectiveManager` is required to enable
-`perspective-python` to
+`perspective.Table` and `perspective.View` instances, extending their interfaces
+to operate with the [JavaScript library](/docs/md/js.html) over a websocket
+connection. `PerspectiveManager` is required to enable `perspective-python` to
 [operate remotely](/docs/md/js.html#remote-perspective-via-perspective-python-and-tornado)
 using a websocket API.
 
 ### Async Mode
 
-By default, `perspective` will run with a synchronous interface.  Using the
+By default, `perspective` will run with a synchronous interface. Using the
 `PerspectiveManager.set_loop_callback()` method, `perspective` can be configured
 to defer the application of side-effectful calls like `update()` to an event
-loop, such as `tornado.ioloop.IOLoop`.  When running in Async mode, Perspective
+loop, such as `tornado.ioloop.IOLoop`. When running in Async mode, Perspective
 will release the GIL for some operations, enabling better parallelism and
-overall better server performance.  There are a few important differences when
+overall better server performance. There are a few important differences when
 running `PerspectiveManager` in this mode:
 
-  * Calls to methods like `update()` will return immediately, and the reciprocal 
-    `on_update()` callbacks will be invoked on an event later scheduled.  Calls
-    to other methods which require an up-to-date object, but will still
-    synchronously apply the pending update.
-  * Updates will be _conflated_ when multiple calls to `update()` occur before
-    the scheduled application.  In such cases, you may receive a single
-    `on_update()` notification for multiple `update()` calls.
-  * Once `set_loop_callback()` has been called, you may not call Perspective
-    functions from any other thread.
+- Calls to methods like `update()` will return immediately, and the reciprocal
+  `on_update()` callbacks will be invoked on an event later scheduled. Calls to
+  other methods which require an up-to-date object, but will still synchronously
+  apply the pending update.
+- Updates will be _conflated_ when multiple calls to `update()` occur before the
+  scheduled application. In such cases, you may receive a single `on_update()`
+  notification for multiple `update()` calls.
+- Once `set_loop_callback()` has been called, you may not call Perspective
+  functions from any other thread.
 
 For example, using Tornado `IOLoop` you can create a dedicated thread for a
 `PerspectiveManager`:
@@ -281,14 +287,14 @@ thread.start()
 ### Hosting `Table` and `View` instances
 
 `PerspectiveManager` has the ability to "host" `perspective.Table` and
-`perspective.View` instances. Hosted tables/views can have their methods
-called from other sources than the Python server, i.e. by a `perspective-viewer` running
-in a JavaScript client over the network, interfacing with `perspective-python` through
-the websocket API.
+`perspective.View` instances. Hosted tables/views can have their methods called
+from other sources than the Python server, i.e. by a `perspective-viewer`
+running in a JavaScript client over the network, interfacing with
+`perspective-python` through the websocket API.
 
-The server has full control of all hosted `Table` and `View`
-instances, and can call any public API method on hosted instances. This makes
-it extremely easy to stream data to a hosted `Table` using `.update()`:
+The server has full control of all hosted `Table` and `View` instances, and can
+call any public API method on hosted instances. This makes it extremely easy to
+stream data to a hosted `Table` using `.update()`:
 
 ```python
 manager = PerspectiveManager()
@@ -300,9 +306,9 @@ for i in range(10):
     table.update(new_data)
 ```
 
-In situations where clients should only be able to view the table and
-not modify it through `update`, `delete`, etc., initialize the `PerspectiveManager`
-with `lock=True`, or call the `lock()` method on a manager instance:
+In situations where clients should only be able to view the table and not modify
+it through `update`, `delete`, etc., initialize the `PerspectiveManager` with
+`lock=True`, or call the `lock()` method on a manager instance:
 
 ```python
 # lock prevents clients from calling methods that may mutate the state
@@ -315,8 +321,8 @@ manager.host_table("data_source", table)
 A `PerspectiveManager` instance can host as many `Table`s and `View`s as
 necessary, but each `Table` should only be hosted by _one_ `PerspectiveManager`.
 
-To host a `Table` or a `View`, call the corresponding method on an instance
-of `PerspectiveManager` with a string name and the instance to be hosted:
+To host a `Table` or a `View`, call the corresponding method on an instance of
+`PerspectiveManager` with a string name and the instance to be hosted:
 
 ```python
 manager = PerspectiveManager()
@@ -324,25 +330,27 @@ table = Table(data)
 manager.host_table("data_source", table)
 ```
 
-The `name` provided is important, as it enables Perspective in JavaScript to look
-up a `Table` and get a handle to it over the network. This enables
-several powerful server/client implementations of Perspective, as explained in
-the next section.
+The `name` provided is important, as it enables Perspective in JavaScript to
+look up a `Table` and get a handle to it over the network. This enables several
+powerful server/client implementations of Perspective, as explained in the next
+section.
 
 ### Client/Server Replicated Mode
 
-Using Tornado and [`PerspectiveTornadoHandler`](/docs/md/python.html#perspectivetornadohandler),
+Using Tornado and
+[`PerspectiveTornadoHandler`](/docs/md/python.html#perspectivetornadohandler),
 as well as `Perspective`'s JavaScript library, we can set up "distributed"
-Perspective instances that allows multiple browser `perspective-viewer`
-clients to read from a common `perspective-python` server, as in the 
+Perspective instances that allows multiple browser `perspective-viewer` clients
+to read from a common `perspective-python` server, as in the
 [Tornado Example Project](https://github.com/finos/perspective/tree/master/examples/tornado-python).
 
 This architecture works by maintaining two `Tables`—one on the server, and one
 on the client that mirrors the server's `Table` automatically using `on_update`.
 All updates to the table on the server are automatically applied to each client,
 which makes this architecture a natural fit for streaming dashboards and other
-distributed use-cases.  In conjunction with [Async Mode](#async-mode), distributed Perspective offers consistently high performance over large numbers of clients
-and large datasets.
+distributed use-cases. In conjunction with [Async Mode](#async-mode),
+distributed Perspective offers consistently high performance over large numbers
+of clients and large datasets.
 
 _*server.py*_
 
@@ -400,16 +408,17 @@ _*index.html*_
 ```
 
 For a more complex example that offers distributed editing of the server
-dataset, see [client_server_editing.html](https://github.com/finos/perspective/blob/master/examples/tornado-python/client_server_editing.html).
+dataset, see
+[client_server_editing.html](https://github.com/finos/perspective/blob/master/examples/tornado-python/client_server_editing.html).
 
 ### Server-only Mode
 
 The server setup is identical to [Distributed Mode](#distributed-mode) above,
-but instead of creating a view, the client calls `load(server_table)`:
-In Python, use `PerspectiveManager` and `PerspectiveTornadoHandler` to create
-a websocket server that exposes a `Table`.  In this example, `table` is a proxy
-for the `Table` we created on the server.  All API methods are available on
-_proxies_, the.g.us calling `view()`, `schema()`, `update()`  on `table` will
+but instead of creating a view, the client calls `load(server_table)`: In
+Python, use `PerspectiveManager` and `PerspectiveTornadoHandler` to create a
+websocket server that exposes a `Table`. In this example, `table` is a proxy for
+the `Table` we created on the server. All API methods are available on
+_proxies_, the.g.us calling `view()`, `schema()`, `update()` on `table` will
 pass those operations to the Python `Table`, execute the commands, and return
 the result back to Javascript.
 
@@ -429,9 +438,10 @@ Building on top of the API provided by `perspective.Table`, the
 `PerspectiveWidget` is a JupyterLab plugin that offers the entire functionality
 of Perspective within the Jupyter environment. It supports the same API
 semantics of `<perspective-viewer>`, along with the additional data types
-supported by `perspective.Table`.   `PerspectiveWidget` takes keyword arguments
-for the managed `View`;  additioanl arguments `index` and `limit`  will be
-passed to the `Table`.  For convenience are the [`Aggregate`](https://github.com/finos/perspective/blob/master/python/perspective/perspective/core/aggregate.py),
+supported by `perspective.Table`. `PerspectiveWidget` takes keyword arguments
+for the managed `View`; additioanl arguments `index` and `limit` will be passed
+to the `Table`. For convenience are the
+[`Aggregate`](https://github.com/finos/perspective/blob/master/python/perspective/perspective/core/aggregate.py),
 [`Sort`](https://github.com/finos/perspective/blob/master/python/perspective/perspective/core/sort.py),
 and
 [`Plugin`](https://github.com/finos/perspective/blob/master/python/perspective/perspective/core/plugin.py)
@@ -441,7 +451,7 @@ enums, which can be used as replacements to string values in the API:
 from perspective import PerspectiveWidget, Aggregate, Sort, Plugin
 w = perspective.PerspectiveWidget(
     data,
-    plugin=Plugin.XBAR, 
+    plugin=Plugin.XBAR,
     aggregates={"datetime": Aggregate.ANY},
     sort=[["date", Sort.DESC]]
 )
@@ -454,7 +464,7 @@ its first, required parameter a `perspective.Table`, a dataset, a schema, or
 `None`, which serves as a special value that tells the Widget to defer loading
 any data until later. In maintaining consistency with the Javascript API,
 Widgets cannot be created with empty dictionaries or lists—`None` should be used
-if the intention is to await data for loading later on.  A widget can be
+if the intention is to await data for loading later on. A widget can be
 constructed from a dataset:
 
 ```python
@@ -483,14 +493,18 @@ PerspectiveWidget(None)
 
 ## `PerspectiveRenderer`
 
-Perspective also exposes a JS-only `mimerender-extension`. This lets you view `csv`, `json`, and `arrow` files directly from the file browser. You can see this by right clicking one of these files and `Open With->CSVPerspective` (or `JSONPerspective` or `ArrowPerspective`). Perspective will also install itself as the default handler for opening `.arrow` files.
+Perspective also exposes a JS-only `mimerender-extension`. This lets you view
+`csv`, `json`, and `arrow` files directly from the file browser. You can see
+this by right clicking one of these files and `Open With->CSVPerspective` (or
+`JSONPerspective` or `ArrowPerspective`). Perspective will also install itself
+as the default handler for opening `.arrow` files.
 
 ## `PerspectiveTornadoHandler`
 
 Perspective ships with a pre-built Tornado handler that makes integration with
 `tornado.websockets` extremely easy. This allows you to run an instance of
 `Perspective` on a server using Python, open a websocket to a `Table`, and
-access the `Table` in JavaScript and through `<perspective-viewer>`.  All
+access the `Table` in JavaScript and through `<perspective-viewer>`. All
 instructions sent to the `Table` are processed in Python, which executes the
 commands, and returns its output through the websocket back to Javascript.
 
@@ -567,8 +581,8 @@ viewer.load(table);
 
 `perspective.websocket` expects a Websocket URL where it will send instructions.
 When `open_table` is called, the name to a hosted Table is passed through, and a
-request is sent through the socket to fetch the Table. No actual `Table` instance
-is passed inbetween the runtimes; all instructions are proxied through
+request is sent through the socket to fetch the Table. No actual `Table`
+instance is passed inbetween the runtimes; all instructions are proxied through
 websockets.
 
 This provides for great flexibility — while `Perspective.js` is full of

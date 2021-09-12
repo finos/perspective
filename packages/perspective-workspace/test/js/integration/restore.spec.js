@@ -16,26 +16,26 @@ const PATHS = [
     path.join(TEST_ROOT, "dist", "theme"),
     path.join(TEST_ROOT, "test", "html"),
     path.join(TEST_ROOT, "test", "css"),
-    path.join(TEST_ROOT, "test", "csv")
+    path.join(TEST_ROOT, "test", "csv"),
 ];
 
 function tests(extract) {
-    test.capture("restore workspace with detail only", async page => {
+    test.capture("restore workspace with detail only", async (page) => {
         await page.waitForFunction(() => !!window.__TABLE__);
         const config = {
             viewers: {
-                One: {table: "superstore", name: "One"}
+                One: {table: "superstore", name: "One"},
             },
             detail: {
                 main: {
                     currentIndex: 0,
                     type: "tab-area",
-                    widgets: ["One"]
-                }
-            }
+                    widgets: ["One"],
+                },
+            },
         };
 
-        await page.evaluate(async config => {
+        await page.evaluate(async (config) => {
             const workspace = document.getElementById("workspace");
             await workspace.restore(config);
         }, config);
@@ -43,25 +43,30 @@ function tests(extract) {
         return extract(page);
     });
 
-    test.capture("restore workspace with master and detail", async page => {
+    test.capture("restore workspace with master and detail", async (page) => {
         const config = {
             viewers: {
-                One: {table: "superstore", name: "Test", row_pivots: ["State"], columns: ["Sales", "Profit"]},
-                Two: {table: "superstore", name: "One"}
+                One: {
+                    table: "superstore",
+                    name: "Test",
+                    row_pivots: ["State"],
+                    columns: ["Sales", "Profit"],
+                },
+                Two: {table: "superstore", name: "One"},
             },
             master: {
-                widgets: ["One"]
+                widgets: ["One"],
             },
             detail: {
                 main: {
                     currentIndex: 0,
                     type: "tab-area",
-                    widgets: ["Two"]
-                }
-            }
+                    widgets: ["Two"],
+                },
+            },
         };
 
-        await page.evaluate(async config => {
+        await page.evaluate(async (config) => {
             const workspace = document.getElementById("workspace");
             await workspace.restore(config);
         }, config);
@@ -69,33 +74,42 @@ function tests(extract) {
         return extract(page);
     });
 
-    test.capture("restore workspace with viewers with generated slotids", async page => {
-        const config = {
-            viewers: {
-                PERSPECTIVE_GENERATED_ID_0: {table: "superstore", name: "Test", row_pivots: ["State"], columns: ["Sales", "Profit"]}
-            },
-            detail: {
-                main: {
-                    currentIndex: 0,
-                    type: "tab-area",
-                    widgets: ["PERSPECTIVE_GENERATED_ID_0"]
-                }
-            }
-        };
+    test.capture(
+        "restore workspace with viewers with generated slotids",
+        async (page) => {
+            const config = {
+                viewers: {
+                    PERSPECTIVE_GENERATED_ID_0: {
+                        table: "superstore",
+                        name: "Test",
+                        row_pivots: ["State"],
+                        columns: ["Sales", "Profit"],
+                    },
+                },
+                detail: {
+                    main: {
+                        currentIndex: 0,
+                        type: "tab-area",
+                        widgets: ["PERSPECTIVE_GENERATED_ID_0"],
+                    },
+                },
+            };
 
-        await page.evaluate(async config => {
-            const workspace = document.getElementById("workspace");
-            await workspace.restore(config);
-        }, config);
+            await page.evaluate(async (config) => {
+                const workspace = document.getElementById("workspace");
+                await workspace.restore(config);
+            }, config);
 
-        await page.evaluate(async () => {
-            const workspace = document.getElementById("workspace").workspace;
-            const widget = workspace.getAllWidgets()[0];
-            await workspace.duplicate(widget);
-        });
+            await page.evaluate(async () => {
+                const workspace =
+                    document.getElementById("workspace").workspace;
+                const widget = workspace.getAllWidgets()[0];
+                await workspace.duplicate(widget);
+            });
 
-        return extract(page);
-    });
+            return extract(page);
+        }
+    );
 }
 
 utils.with_server({paths: PATHS}, () => {
@@ -103,11 +117,24 @@ utils.with_server({paths: PATHS}, () => {
         "index.html",
         () => {
             describe("Light DOM", () => {
-                tests(page => page.evaluate(async () => document.getElementById("workspace").outerHTML));
+                tests((page) =>
+                    page.evaluate(
+                        async () =>
+                            document.getElementById("workspace").outerHTML
+                    )
+                );
             });
 
             describe("Shadow DOM", () => {
-                tests(page => page.evaluate(async () => document.getElementById("workspace").shadowRoot.querySelector("#container").innerHTML));
+                tests((page) =>
+                    page.evaluate(
+                        async () =>
+                            document
+                                .getElementById("workspace")
+                                .shadowRoot.querySelector("#container")
+                                .innerHTML
+                    )
+                );
             });
         },
         {root: TEST_ROOT}

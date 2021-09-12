@@ -10,7 +10,7 @@
 const exec = require("child_process").exec;
 const {table} = require("@finos/perspective");
 
-const OPEN = port => `
+const OPEN = (port) => `
 if which xdg-open > /dev/null
 then
     xdg-open http://localhost:${port}/
@@ -42,16 +42,16 @@ function infer_table(buffer) {
 module.exports.read_stdin = function read_stdin() {
     const ret = [];
     let len = 0;
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
         process.stdin
-            .on("readable", function() {
+            .on("readable", function () {
                 let chunk;
                 while ((chunk = process.stdin.read())) {
                     ret.push(Buffer.from(chunk));
                     len += chunk.length;
                 }
             })
-            .on("end", function() {
+            .on("end", function () {
                 const buffer = Buffer.concat(ret, len);
                 resolve(infer_table(buffer));
             });
@@ -59,7 +59,7 @@ module.exports.read_stdin = function read_stdin() {
 };
 
 module.exports.execute = function execute(command, callback) {
-    exec(command, function(error, stdout) {
+    exec(command, function (error, stdout) {
         if (callback) {
             callback(stdout);
         }

@@ -17,7 +17,6 @@ utils.with_server({}, () => {
         "superstore.html",
         () => {
             simple_tests.default();
-
         },
         {reload_page: false, root: path.join(__dirname, "..", "..")}
     );

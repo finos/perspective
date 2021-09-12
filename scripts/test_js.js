@@ -18,7 +18,8 @@ const IS_LOCAL_PUPPETEER = fs.existsSync("node_modules/puppeteer");
 
 // Unfortunately we have to handle parts of the Jupyter test case here,
 // as the Jupyter server needs to be run outside of the main Jest process.
-const IS_JUPYTER = getarg("--jupyter") && minimatch("perspective-jupyterlab", PACKAGE);
+const IS_JUPYTER =
+    getarg("--jupyter") && minimatch("perspective-jupyterlab", PACKAGE);
 
 if (IS_WRITE) {
     console.log("-- Running the test suite in Write mode");
@@ -29,7 +30,9 @@ if (getarg("--saturate")) {
 }
 
 if (getarg("--debug")) {
-    console.log("-- Running tests in debug mode - all console.log statements are preserved.");
+    console.log(
+        "-- Running tests in debug mode - all console.log statements are preserved."
+    );
 }
 
 function silent(x) {
@@ -62,7 +65,8 @@ function jest_all() {
  */
 function jest_single(cmd) {
     console.log(`-- Running "${PACKAGE}" test suite`);
-    const RUN_IN_BAND = getarg("--interactive") || IS_JUPYTER ? "--runInBand" : "";
+    const RUN_IN_BAND =
+        getarg("--interactive") || IS_JUPYTER ? "--runInBand" : "";
     return bash`
         PSP_SATURATE=${!!getarg("--saturate")}
         PSP_PAUSE_ON_FAILURE=${!!getarg("--interactive")}

@@ -15,8 +15,8 @@ export function splitAndBaseData(settings, data) {
         const baseValues = {};
 
         return Object.keys(col)
-            .filter(key => key !== "__ROW_PATH__")
-            .map(key => {
+            .filter((key) => key !== "__ROW_PATH__")
+            .map((key) => {
                 // Keys are of the form "split1|split2|aggregate"
                 const labels = key.split("|");
                 // label="aggregate"
@@ -30,7 +30,7 @@ export function splitAndBaseData(settings, data) {
                     crossValue: labelfn(col, i),
                     mainValue: value,
                     baseValue: baseValue,
-                    row: col
+                    row: col,
                 };
             });
     });

@@ -35,7 +35,7 @@ const WARNED_KEYS = new Set();
  *
  * @module perspective
  */
-export default function(Module) {
+export default function (Module) {
     let __MODULE__ = Module;
     let accessor = new DataAccessor();
     const SIDES = ["zero", "one", "two"];
@@ -68,7 +68,15 @@ export default function(Module) {
     }
 
     function memory_usage() {
-        const mem = performance.memory ? JSON.parse(JSON.stringify(performance.memory, ["totalJSHeapSize", "usedJSHeapSize", "jsHeapSizeLimit"])) : process.memoryUsage();
+        const mem = performance.memory
+            ? JSON.parse(
+                  JSON.stringify(performance.memory, [
+                      "totalJSHeapSize",
+                      "usedJSHeapSize",
+                      "jsHeapSizeLimit",
+                  ])
+              )
+            : process.memoryUsage();
         mem.wasmHeap = __MODULE__.HEAP8.length;
         return mem;
     }
@@ -94,7 +102,17 @@ export default function(Module) {
      * @private
      * @returns {Table} An `std::shared_ptr<Table>` to a `Table` inside C++.
      */
-    function make_table(accessor, _Table, index, limit, op, is_update, is_arrow, is_csv, port_id) {
+    function make_table(
+        accessor,
+        _Table,
+        index,
+        limit,
+        op,
+        is_update,
+        is_arrow,
+        is_csv,
+        port_id
+    ) {
         // C++ constructor cannot take null values - use default values if
         // index or limit are null.
         if (!index) {
@@ -105,7 +123,17 @@ export default function(Module) {
             limit = 4294967295;
         }
 
-        _Table = __MODULE__.make_table(_Table, accessor, limit, index, op, is_update, is_arrow, is_csv, port_id);
+        _Table = __MODULE__.make_table(
+            _Table,
+            accessor,
+            limit,
+            index,
+            op,
+            is_update,
+            is_arrow,
+            is_csv,
+            port_id
+        );
 
         const pool = _Table.get_pool();
         const table_id = _Table.get_id();
@@ -163,13 +191,37 @@ export default function(Module) {
             this.view_config.expressions.length === 0;
 
         if (this.is_unit_context) {
-            this._View = __MODULE__.make_view_unit(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.view_config, null);
+            this._View = __MODULE__.make_view_unit(
+                table._Table,
+                name,
+                defaults.COLUMN_SEPARATOR_STRING,
+                this.view_config,
+                null
+            );
         } else if (sides === 0) {
-            this._View = __MODULE__.make_view_zero(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.view_config, null);
+            this._View = __MODULE__.make_view_zero(
+                table._Table,
+                name,
+                defaults.COLUMN_SEPARATOR_STRING,
+                this.view_config,
+                null
+            );
         } else if (sides === 1) {
-            this._View = __MODULE__.make_view_one(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.view_config, null);
+            this._View = __MODULE__.make_view_one(
+                table._Table,
+                name,
+                defaults.COLUMN_SEPARATOR_STRING,
+                this.view_config,
+                null
+            );
         } else if (sides === 2) {
-            this._View = __MODULE__.make_view_two(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.view_config, null);
+            this._View = __MODULE__.make_view_two(
+                table._Table,
+                name,
+                defaults.COLUMN_SEPARATOR_STRING,
+                this.view_config,
+                null
+            );
         }
 
         this.ctx = this._View.get_context();
@@ -187,7 +239,7 @@ export default function(Module) {
      * @returns {Promise<object>} Shared the same key/values properties as
      * {@link module:perspective~view}
      */
-    view.prototype.get_config = function() {
+    view.prototype.get_config = function () {
         return JSON.parse(JSON.stringify(this.config));
     };
 
@@ -199,7 +251,7 @@ export default function(Module) {
      *
      * @async
      */
-    view.prototype.delete = function() {
+    view.prototype.delete = function () {
         _remove_process(this.table.get_id());
         this._View.delete();
         this.ctx.delete();
@@ -216,7 +268,7 @@ export default function(Module) {
             i++;
         }
         this.update_callbacks.length = j;
-        this._delete_callbacks.forEach(cb => cb());
+        this._delete_callbacks.forEach((cb) => cb());
     };
 
     /**
@@ -226,7 +278,7 @@ export default function(Module) {
      * @returns {number} sides The number of sides of this
      * {@link module:perspective~view}.
      */
-    view.prototype.sides = function() {
+    view.prototype.sides = function () {
         return this._View.sides();
     };
 
@@ -238,7 +290,7 @@ export default function(Module) {
      * @returns {number} sides The number of hidden columns in this
      * {@link module:perspective~view}.
      */
-    view.prototype._num_hidden = function() {
+    view.prototype._num_hidden = function () {
         // Count hidden columns.
         let hidden = 0;
         for (const sort of this.config.sort) {
@@ -260,7 +312,7 @@ export default function(Module) {
         return extracted;
     }
 
-    const extract_vector_scalar = function(vector) {
+    const extract_vector_scalar = function (vector) {
         // handles deletion already - do not call delete() on the input vector
         // again
         let extracted = [];
@@ -293,13 +345,17 @@ export default function(Module) {
      * @returns {Promise<Object>} A Promise of this
      * {@link module:perspective~view}'s schema.
      */
-    view.prototype.schema = function(override = true) {
+    view.prototype.schema = function (override = true) {
         const schema = extract_map(this._View.schema());
         if (override) {
             for (const key of Object.keys(schema)) {
                 let colname = key.split(defaults.COLUMN_SEPARATOR_STRING);
                 colname = colname[colname.length - 1];
-                if (this.overridden_types[colname] && get_type_config(this.overridden_types[colname]).type === schema[key]) {
+                if (
+                    this.overridden_types[colname] &&
+                    get_type_config(this.overridden_types[colname]).type ===
+                        schema[key]
+                ) {
                     schema[key] = this.overridden_types[colname];
                 }
             }
@@ -330,13 +386,17 @@ export default function(Module) {
      * @returns {Promise<Object>} A Promise of this
      * {@link module:perspective~view}'s expression schema.
      */
-    view.prototype.expression_schema = function(override = true) {
+    view.prototype.expression_schema = function (override = true) {
         const schema = extract_map(this._View.expression_schema());
         if (override) {
             for (const key of Object.keys(schema)) {
                 let colname = key.split(defaults.COLUMN_SEPARATOR_STRING);
                 colname = colname[colname.length - 1];
-                if (this.overridden_types[colname] && get_type_config(this.overridden_types[colname]).type === schema[key]) {
+                if (
+                    this.overridden_types[colname] &&
+                    get_type_config(this.overridden_types[colname]).type ===
+                        schema[key]
+                ) {
                     schema[key] = this.overridden_types[colname];
                 }
             }
@@ -344,8 +404,10 @@ export default function(Module) {
         return schema;
     };
 
-    view.prototype._column_names = function(skip = false, depth = 0) {
-        return extract_vector_scalar(this._View.column_names(skip, depth)).map(x => x.join(defaults.COLUMN_SEPARATOR_STRING));
+    view.prototype._column_names = function (skip = false, depth = 0) {
+        return extract_vector_scalar(this._View.column_names(skip, depth)).map(
+            (x) => x.join(defaults.COLUMN_SEPARATOR_STRING)
+        );
     };
 
     /**
@@ -357,17 +419,36 @@ export default function(Module) {
      *
      * @returns {Array<String>} an Array of Strings containing the column paths.
      */
-    view.prototype.column_paths = function() {
-        return extract_vector_scalar(this._View.column_paths()).map(x => x.join(defaults.COLUMN_SEPARATOR_STRING));
+    view.prototype.column_paths = function () {
+        return extract_vector_scalar(this._View.column_paths()).map((x) =>
+            x.join(defaults.COLUMN_SEPARATOR_STRING)
+        );
     };
 
-    view.prototype.get_data_slice = function(start_row, end_row, start_col, end_col) {
+    view.prototype.get_data_slice = function (
+        start_row,
+        end_row,
+        start_col,
+        end_col
+    ) {
         if (this.is_unit_context) {
-            return __MODULE__.get_data_slice_unit(this._View, start_row, end_row, start_col, end_col);
+            return __MODULE__.get_data_slice_unit(
+                this._View,
+                start_row,
+                end_row,
+                start_col,
+                end_col
+            );
         } else {
             const num_sides = this.sides();
             const nidx = SIDES[num_sides];
-            return __MODULE__[`get_data_slice_${nidx}`](this._View, start_row, end_row, start_col, end_col);
+            return __MODULE__[`get_data_slice_${nidx}`](
+                this._View,
+                start_row,
+                end_row,
+                start_col,
+                end_col
+            );
         }
     };
 
@@ -379,18 +460,36 @@ export default function(Module) {
      * @param {Object} options User-provided options for `to_format`.
      * @returns {Object} an Object containing the parsed options.
      */
-    const _parse_format_options = function(options) {
+    const _parse_format_options = function (options) {
         options = options || {};
-        const max_cols = this._View.num_columns() + (this.sides() === 0 ? 0 : 1);
+        const max_cols =
+            this._View.num_columns() + (this.sides() === 0 ? 0 : 1);
         const max_rows = this._View.num_rows();
         const hidden = this._num_hidden();
         const psp_offset = this.sides() > 0 || this.column_only ? 1 : 0;
 
         const viewport = this.config.viewport ? this.config.viewport : {};
-        const start_row = options.start_row || (viewport.top ? viewport.top : 0);
-        const end_row = Math.min(max_rows, options.end_row !== undefined ? options.end_row : viewport.height ? start_row + viewport.height : max_rows);
-        const start_col = options.start_col || (viewport.left ? viewport.left : 0);
-        const end_col = Math.min(max_cols, (options.end_col !== undefined ? options.end_col + psp_offset : viewport.width ? start_col + viewport.width : max_cols) * (hidden + 1));
+        const start_row =
+            options.start_row || (viewport.top ? viewport.top : 0);
+        const end_row = Math.min(
+            max_rows,
+            options.end_row !== undefined
+                ? options.end_row
+                : viewport.height
+                ? start_row + viewport.height
+                : max_rows
+        );
+        const start_col =
+            options.start_col || (viewport.left ? viewport.left : 0);
+        const end_col = Math.min(
+            max_cols,
+            (options.end_col !== undefined
+                ? options.end_col + psp_offset
+                : viewport.width
+                ? start_col + viewport.width
+                : max_cols) *
+                (hidden + 1)
+        );
 
         // Return the calculated values
         options.start_row = Math.floor(start_row);
@@ -408,7 +507,7 @@ export default function(Module) {
      * @returns {Array<Object>} A tuple of [min, max], whose types are column
      * and aggregate dependent.
      */
-    view.prototype.get_min_max = function(colname) {
+    view.prototype.get_min_max = function (colname) {
         if (this.is_unit_context) {
             return __MODULE__.get_min_max_unit(this._View, colname);
         } else {
@@ -423,7 +522,7 @@ export default function(Module) {
      *
      * @private
      */
-    const to_format = function(options, formatter) {
+    const to_format = function (options, formatter) {
         _call_process(this.table.get_id());
         options = _parse_format_options.bind(this)(options);
         const start_row = options.start_row;
@@ -448,16 +547,27 @@ export default function(Module) {
             get_from_data_slice = __MODULE__[`get_from_data_slice_${nidx}`];
         }
 
-        const slice = this.get_data_slice(start_row, end_row, start_col, end_col);
+        const slice = this.get_data_slice(
+            start_row,
+            end_row,
+            start_col,
+            end_col
+        );
         const ns = slice.get_column_names();
-        const col_names = extract_vector_scalar(ns).map(x => x.join(defaults.COLUMN_SEPARATOR_STRING));
+        const col_names = extract_vector_scalar(ns).map((x) =>
+            x.join(defaults.COLUMN_SEPARATOR_STRING)
+        );
         const schema = this.schema();
 
         let data = formatter.initDataValue();
 
         for (let ridx = start_row; ridx < end_row; ridx++) {
             let row_path = has_row_path ? slice.get_row_path(ridx) : undefined;
-            if (has_row_path && leaves_only && row_path.size() < this.config.row_pivots.length) {
+            if (
+                has_row_path &&
+                leaves_only &&
+                row_path.size() < this.config.row_pivots.length
+            ) {
                 row_path.delete();
                 continue;
             }
@@ -477,15 +587,33 @@ export default function(Module) {
                         formatter.initColumnValue(data, row, "__ROW_PATH__");
                         for (let i = 0; i < row_path.size(); i++) {
                             const s = row_path.get(i);
-                            const value = __MODULE__.scalar_to_val(s, false, false);
+                            const value = __MODULE__.scalar_to_val(
+                                s,
+                                false,
+                                false
+                            );
                             s.delete();
-                            formatter.addColumnValue(data, row, "__ROW_PATH__", value);
+                            formatter.addColumnValue(
+                                data,
+                                row,
+                                "__ROW_PATH__",
+                                value
+                            );
                             if (get_ids) {
-                                formatter.addColumnValue(data, row, "__ID__", value);
+                                formatter.addColumnValue(
+                                    data,
+                                    row,
+                                    "__ID__",
+                                    value
+                                );
                             }
                         }
                     }
-                } else if ((cidx - (num_sides > 0 ? 1 : 0)) % (this.config.columns.length + hidden) >= this.config.columns.length) {
+                } else if (
+                    (cidx - (num_sides > 0 ? 1 : 0)) %
+                        (this.config.columns.length + hidden) >=
+                    this.config.columns.length
+                ) {
                     // Hidden columns are always at the end of the column names
                     // list, and we need to skip them from the output.
                     continue;
@@ -498,7 +626,10 @@ export default function(Module) {
                             // e.g., 10000 will format as CSV `"10,000.00"
                             // Otherwise, this would not need to be conditional.
                             value = new Date(value);
-                            value = value.toLocaleString("en-us", type_config.format);
+                            value = value.toLocaleString(
+                                "en-us",
+                                type_config.format
+                            );
                         }
                     }
                     formatter.setColumnValue(data, row, col_name, value);
@@ -547,7 +678,7 @@ export default function(Module) {
      *
      * @private
      */
-    const column_to_format = function(col_name, options, format_function) {
+    const column_to_format = function (col_name, options, format_function) {
         const num_rows = this.num_rows();
         const start_row = options.start_row || 0;
         const end_row = options.end_row || num_rows;
@@ -612,7 +743,7 @@ export default function(Module) {
      * supplied, the keys of this object will be comma-prepended with their
      * comma-separated column paths.
      */
-    view.prototype.to_columns = function(options) {
+    view.prototype.to_columns = function (options) {
         return to_format.call(this, options, formatters.jsonTableFormatter);
     };
 
@@ -640,7 +771,7 @@ export default function(Module) {
      * supplied, the keys of this object will be comma-prepended with their
      * comma-separated column paths.
      */
-    view.prototype.to_json = function(options) {
+    view.prototype.to_json = function (options) {
         return to_format.call(this, options, formatters.jsonFormatter);
     };
 
@@ -667,7 +798,7 @@ export default function(Module) {
      * supplied, the keys of this object will be comma-prepended with their
      * comma-separated column paths.
      */
-    view.prototype.to_csv = function(options) {
+    view.prototype.to_csv = function (options) {
         return to_format.call(this, options, formatters.csvFormatter);
     };
 
@@ -697,7 +828,7 @@ export default function(Module) {
      * or Float64Array. If the column cannot be found, or is not of an
      * integer/float type, the Promise returns undefined.
      */
-    view.prototype.col_to_js_typed_array = function(col_name, options = {}) {
+    view.prototype.col_to_js_typed_array = function (col_name, options = {}) {
         _call_process(this.table.get_id());
         const format_function = __MODULE__[`col_to_js_typed_array`];
         return column_to_format.call(this, col_name, options, format_function);
@@ -722,7 +853,7 @@ export default function(Module) {
      * @returns {Promise<ArrayBuffer>} An `ArrayBuffer` in the Apache Arrow
      * format containing data from the view.
      */
-    view.prototype.to_arrow = function(options = {}) {
+    view.prototype.to_arrow = function (options = {}) {
         _call_process(this.table.get_id());
         options = _parse_format_options.bind(this)(options);
         const start_row = options.start_row;
@@ -732,13 +863,37 @@ export default function(Module) {
         const sides = this.sides();
 
         if (this.is_unit_context) {
-            return __MODULE__.to_arrow_unit(this._View, start_row, end_row, start_col, end_col);
+            return __MODULE__.to_arrow_unit(
+                this._View,
+                start_row,
+                end_row,
+                start_col,
+                end_col
+            );
         } else if (sides === 0) {
-            return __MODULE__.to_arrow_zero(this._View, start_row, end_row, start_col, end_col);
+            return __MODULE__.to_arrow_zero(
+                this._View,
+                start_row,
+                end_row,
+                start_col,
+                end_col
+            );
         } else if (sides === 1) {
-            return __MODULE__.to_arrow_one(this._View, start_row, end_row, start_col, end_col);
+            return __MODULE__.to_arrow_one(
+                this._View,
+                start_row,
+                end_row,
+                start_col,
+                end_col
+            );
         } else if (sides === 2) {
-            return __MODULE__.to_arrow_two(this._View, start_row, end_row, start_col, end_col);
+            return __MODULE__.to_arrow_two(
+                this._View,
+                start_row,
+                end_row,
+                start_col,
+                end_col
+            );
         }
     };
 
@@ -751,7 +906,7 @@ export default function(Module) {
      *
      * @returns {Promise<number>} The number of aggregated rows.
      */
-    view.prototype.num_rows = function() {
+    view.prototype.num_rows = function () {
         _call_process(this.table.get_id());
         return this._View.num_rows();
     };
@@ -765,10 +920,12 @@ export default function(Module) {
      *
      * @returns {Promise<number>} The number of aggregated columns.
      */
-    view.prototype.num_columns = function() {
+    view.prototype.num_columns = function () {
         const ncols = this._View.num_columns();
         const nhidden = this._num_hidden();
-        return ncols - (ncols / (this.config.columns.length + nhidden)) * nhidden;
+        return (
+            ncols - (ncols / (this.config.columns.length + nhidden)) * nhidden
+        );
     };
 
     /**
@@ -778,7 +935,7 @@ export default function(Module) {
      *
      * @returns {Promise<bool>} Whether this row is expanded.
      */
-    view.prototype.get_row_expanded = function(idx) {
+    view.prototype.get_row_expanded = function (idx) {
         return this._View.get_row_expanded(idx);
     };
 
@@ -789,7 +946,7 @@ export default function(Module) {
      *
      * @returns {Promise<void>}
      */
-    view.prototype.expand = function(idx) {
+    view.prototype.expand = function (idx) {
         return this._View.expand(idx, this.config.row_pivots.length);
     };
 
@@ -800,7 +957,7 @@ export default function(Module) {
      *
      * @returns {Promise<void>}
      */
-    view.prototype.collapse = function(idx) {
+    view.prototype.collapse = function (idx) {
         return this._View.collapse(idx);
     };
 
@@ -808,7 +965,7 @@ export default function(Module) {
      * Set expansion `depth` of the pivot tree.
      *
      */
-    view.prototype.set_depth = function(depth) {
+    view.prototype.set_depth = function (depth) {
         return this._View.set_depth(depth, this.config.row_pivots.length);
     };
 
@@ -817,7 +974,7 @@ export default function(Module) {
      * contexts the entire dataset of the view.
      * @private
      */
-    view.prototype._get_step_delta = async function() {
+    view.prototype._get_step_delta = async function () {
         let delta = this._View.get_step_delta(0, 2147483647);
         let data;
         if (delta.cells.size() === 0) {
@@ -829,10 +986,10 @@ export default function(Module) {
                 rows[delta.cells.get(x).row] = true;
             }
             rows = Object.keys(rows);
-            const results = rows.map(row =>
+            const results = rows.map((row) =>
                 this.to_json({
                     start_row: Number.parseInt(row),
-                    end_row: Number.parseInt(row) + 1
+                    end_row: Number.parseInt(row) + 1,
                 })
             );
             data = [].concat.apply([], results);
@@ -849,7 +1006,7 @@ export default function(Module) {
      *
      * @private
      */
-    view.prototype._get_row_delta = async function() {
+    view.prototype._get_row_delta = async function () {
         if (this.is_unit_context) {
             return __MODULE__.get_row_delta_unit(this._View);
         } else {
@@ -881,11 +1038,13 @@ export default function(Module) {
      *     - "none" (default): `delta` is `undefined`.
      *     - "row": `delta` is an Arrow of the updated rows.
      */
-    view.prototype.on_update = function(callback, {mode = "none"} = {}) {
+    view.prototype.on_update = function (callback, {mode = "none"} = {}) {
         _call_process(this.table.get_id());
 
         if (["none", "row"].indexOf(mode) === -1) {
-            throw new Error(`Invalid update mode "${mode}" - valid modes are "none" and "row".`);
+            throw new Error(
+                `Invalid update mode "${mode}" - valid modes are "none" and "row".`
+            );
         }
 
         if (mode === "row") {
@@ -910,7 +1069,8 @@ export default function(Module) {
 
                 if (mode === "row") {
                     if (cache[port_id]["row_delta"] === undefined) {
-                        cache[port_id]["row_delta"] = await this._get_row_delta();
+                        cache[port_id]["row_delta"] =
+                            await this._get_row_delta();
                     }
                     updated.delta = cache[port_id]["row_delta"];
                 }
@@ -918,7 +1078,7 @@ export default function(Module) {
                 // Call the callback with the updated object containing
                 // `port_id` and `delta`.
                 callback(updated);
-            }
+            },
         });
     };
 
@@ -947,11 +1107,17 @@ export default function(Module) {
      *
      * @param {function} callback A update callback function to be removed
      */
-    view.prototype.remove_update = function(callback) {
+    view.prototype.remove_update = function (callback) {
         _call_process(this.table.get_id());
         const total = this.update_callbacks.length;
-        filterInPlace(this.update_callbacks, x => x.orig_callback !== callback);
-        console.assert(total > this.update_callbacks.length, `"callback" does not match a registered updater`);
+        filterInPlace(
+            this.update_callbacks,
+            (x) => x.orig_callback !== callback
+        );
+        console.assert(
+            total > this.update_callbacks.length,
+            `"callback" does not match a registered updater`
+        );
     };
 
     /**
@@ -965,7 +1131,7 @@ export default function(Module) {
      *
      * @param {function} callback A callback function invoked on delete.
      */
-    view.prototype.on_delete = function(callback) {
+    view.prototype.on_delete = function (callback) {
         this._delete_callbacks.push(callback);
     };
 
@@ -980,10 +1146,13 @@ export default function(Module) {
      *
      * @param {function} callback A delete callback function to be removed
      */
-    view.prototype.remove_delete = function(callback) {
+    view.prototype.remove_delete = function (callback) {
         const initial_length = this._delete_callbacks.length;
-        filterInPlace(this._delete_callbacks, cb => cb !== callback);
-        console.assert(initial_length > this._delete_callbacks.length, `"callback" does not match a registered delete callbacks`);
+        filterInPlace(this._delete_callbacks, (cb) => cb !== callback);
+        console.assert(
+            initial_length > this._delete_callbacks.length,
+            `"callback" does not match a registered delete callbacks`
+        );
     };
 
     /**
@@ -1026,22 +1195,22 @@ export default function(Module) {
      *
      * @private
      */
-    view_config.prototype.get_row_pivots = function() {
+    view_config.prototype.get_row_pivots = function () {
         let vector = __MODULE__.make_string_vector();
         return fill_vector(vector, this.row_pivots);
     };
 
-    view_config.prototype.get_column_pivots = function() {
+    view_config.prototype.get_column_pivots = function () {
         let vector = __MODULE__.make_string_vector();
         return fill_vector(vector, this.column_pivots);
     };
 
-    view_config.prototype.get_columns = function() {
+    view_config.prototype.get_columns = function () {
         let vector = __MODULE__.make_string_vector();
         return fill_vector(vector, this.columns);
     };
 
-    view_config.prototype.get_filter = function() {
+    view_config.prototype.get_filter = function () {
         let vector = __MODULE__.make_2d_val_vector();
         for (let filter of this.filter) {
             let filter_vector = __MODULE__.make_val_vector();
@@ -1051,7 +1220,7 @@ export default function(Module) {
         return vector;
     };
 
-    view_config.prototype.get_sort = function() {
+    view_config.prototype.get_sort = function () {
         let vector = __MODULE__.make_2d_string_vector();
         for (let sort of this.sort) {
             let sort_vector = __MODULE__.make_string_vector();
@@ -1061,7 +1230,7 @@ export default function(Module) {
         return vector;
     };
 
-    view_config.prototype.get_expressions = function() {
+    view_config.prototype.get_expressions = function () {
         let vector = __MODULE__.make_2d_val_vector();
         for (let expression of this.expressions) {
             let inner = __MODULE__.make_val_vector();
@@ -1107,23 +1276,23 @@ export default function(Module) {
         bindall(this);
     }
 
-    table.prototype.get_id = function() {
+    table.prototype.get_id = function () {
         return this._Table.get_id();
     };
 
-    table.prototype.get_pool = function() {
+    table.prototype.get_pool = function () {
         return this._Table.get_pool();
     };
 
-    table.prototype.make_port = function() {
+    table.prototype.make_port = function () {
         return this._Table.make_port();
     };
 
-    table.prototype.remove_port = function() {
+    table.prototype.remove_port = function () {
         this._Table.remove_port();
     };
 
-    table.prototype._update_callback = function(port_id) {
+    table.prototype._update_callback = function (port_id) {
         let cache = {};
         for (let e in this.update_callbacks) {
             this.update_callbacks[e].callback(port_id, cache);
@@ -1134,7 +1303,7 @@ export default function(Module) {
      * Returns the user-specified index column for this
      * {@link module:perspective~table} or null if an index is not set.
      */
-    table.prototype.get_index = function() {
+    table.prototype.get_index = function () {
         return this.index;
     };
 
@@ -1142,7 +1311,7 @@ export default function(Module) {
      * Returns the user-specified limit column for this
      * {@link module:perspective~table} or null if an limit is not set.
      */
-    table.prototype.get_limit = function() {
+    table.prototype.get_limit = function () {
         return this.limit;
     };
 
@@ -1150,7 +1319,7 @@ export default function(Module) {
      * Remove all rows in this {@link module:perspective~table} while preserving
      * the schema and construction options.
      */
-    table.prototype.clear = function() {
+    table.prototype.clear = function () {
         _remove_process(this.get_id());
         this._Table.reset_gnode(this.gnode_id);
     };
@@ -1158,7 +1327,7 @@ export default function(Module) {
     /**
      * Replace all rows in this {@link module:perspective~table} the input data.
      */
-    table.prototype.replace = function(data) {
+    table.prototype.replace = function (data) {
         _remove_process(this.get_id());
         this._Table.reset_gnode(this.gnode_id);
         this.update(data);
@@ -1171,7 +1340,7 @@ export default function(Module) {
      * processing updates when they are garbage collected - you must call this
      * method to reclaim these.
      */
-    table.prototype.delete = function() {
+    table.prototype.delete = function () {
         if (this.views.length > 0) {
             throw `Cannot delete Table as it still has ${this.views.length} registered View(s).`;
         }
@@ -1193,7 +1362,7 @@ export default function(Module) {
      * @param {function} callback A callback function with no parameters
      *      that will be invoked on `delete()`.
      */
-    table.prototype.on_delete = function(callback) {
+    table.prototype.on_delete = function (callback) {
         this._delete_callbacks.push(callback);
     };
 
@@ -1203,10 +1372,13 @@ export default function(Module) {
      *
      * @param {function} callback A delete callback function to be removed
      */
-    table.prototype.remove_delete = function(callback) {
+    table.prototype.remove_delete = function (callback) {
         const initial_length = this._delete_callbacks.length;
-        filterInPlace(this._delete_callbacks, cb => cb !== callback);
-        console.assert(initial_length > this._delete_callbacks.length, `"callback" does not match a registered delete callbacks`);
+        filterInPlace(this._delete_callbacks, (cb) => cb !== callback);
+        console.assert(
+            initial_length > this._delete_callbacks.length,
+            `"callback" does not match a registered delete callbacks`
+        );
     };
 
     /**
@@ -1219,7 +1391,7 @@ export default function(Module) {
      *
      * @returns {Promise<number>} The number of accumulated rows.
      */
-    table.prototype.size = function() {
+    table.prototype.size = function () {
         _call_process(this._Table.get_id());
         return this._Table.size();
     };
@@ -1234,7 +1406,7 @@ export default function(Module) {
      * @returns {Promise<Object>} A Promise of this
      * {@link module:perspective~table}'s schema.
      */
-    table.prototype.schema = function(override = true) {
+    table.prototype.schema = function (override = true) {
         let schema = this._Table.get_schema();
         let columns = schema.columns();
         let types = schema.types();
@@ -1276,7 +1448,9 @@ export default function(Module) {
 
         for (let expression_string of expressions) {
             if (expression_string.includes('""')) {
-                console.error(`Skipping expression '${expression_string}', as it cannot reference an empty column!`);
+                console.error(
+                    `Skipping expression '${expression_string}', as it cannot reference an empty column!`
+                );
                 continue;
             }
 
@@ -1293,44 +1467,61 @@ export default function(Module) {
             // on the first line of the expression.
             let expression_alias;
 
-            let parsed_expression_string = expression_string.replace(/\/\/(.+?)$/m, (_, alias) => {
-                expression_alias = alias.trim();
-                return "";
-            });
+            let parsed_expression_string = expression_string.replace(
+                /\/\/(.+?)$/m,
+                (_, alias) => {
+                    expression_alias = alias.trim();
+                    return "";
+                }
+            );
 
             // If an alias does not exist, the alias is the expression itself.
             if (!expression_alias || expression_alias.length == 0) {
                 expression_alias = expression_string;
             }
 
-            parsed_expression_string = parsed_expression_string.replace(/\"(.*?[^\\])\"/g, (_, cname) => {
-                // If the column name contains escaped double quotes, replace
-                // them and assume that they escape one double quote. If there
-                // are multiple double quotes being escaped, i.e. \""...well?
-                cname = cname.replace(/\\"/g, '"');
+            parsed_expression_string = parsed_expression_string.replace(
+                /\"(.*?[^\\])\"/g,
+                (_, cname) => {
+                    // If the column name contains escaped double quotes, replace
+                    // them and assume that they escape one double quote. If there
+                    // are multiple double quotes being escaped, i.e. \""...well?
+                    cname = cname.replace(/\\"/g, '"');
 
-                if (column_name_map[cname] === undefined) {
-                    let column_id = `COLUMN${running_cidx}`;
-                    column_name_map[cname] = column_id;
-                    column_id_map[column_id] = cname;
+                    if (column_name_map[cname] === undefined) {
+                        let column_id = `COLUMN${running_cidx}`;
+                        column_name_map[cname] = column_id;
+                        column_id_map[column_id] = cname;
+                    }
+
+                    running_cidx++;
+                    return column_name_map[cname];
                 }
-
-                running_cidx++;
-                return column_name_map[cname];
-            });
+            );
 
             // Replace single quote string literals and wrap them in a call to
             // intern() which makes sure they don't leak
-            parsed_expression_string = parsed_expression_string.replace(/'(.*?[^\\])'/g, match => `intern(${match})`);
+            parsed_expression_string = parsed_expression_string.replace(
+                /'(.*?[^\\])'/g,
+                (match) => `intern(${match})`
+            );
 
             // Replace intern() for bucket, as it takes a string literal
             // parameter and does not work if that param is interned. TODO:
             // this is clumsy and we should have a better way of handling it.
-            parsed_expression_string = parsed_expression_string.replace(/bucket\(.*?, (intern\(\'([smhDWMY])\'\))\)/g, (match, full, value) => {
-                return `${match.substr(0, match.indexOf(full))}'${value}')`;
-            });
+            parsed_expression_string = parsed_expression_string.replace(
+                /bucket\(.*?, (intern\(\'([smhDWMY])\'\))\)/g,
+                (match, full, value) => {
+                    return `${match.substr(0, match.indexOf(full))}'${value}')`;
+                }
+            );
 
-            const validated = [expression_alias, expression_string, parsed_expression_string, column_id_map];
+            const validated = [
+                expression_alias,
+                expression_string,
+                parsed_expression_string,
+                column_id_map,
+            ];
 
             // Check if this expression is already in the array, if so then
             // we need to replace the expression so the last expression tagged
@@ -1340,7 +1531,8 @@ export default function(Module) {
                 validated_expressions[idx] = validated;
             } else {
                 validated_expressions.push(validated);
-                expression_idx_map[expression_alias] = validated_expressions.length - 1;
+                expression_idx_map[expression_alias] =
+                    validated_expressions.length - 1;
             }
         }
 
@@ -1370,11 +1562,14 @@ export default function(Module) {
      * // {"invalid": "unknown token!", "1 + 'string'": "TypeError"}
      * console.log(results.errors);
      */
-    table.prototype.validate_expressions = function(expressions, override = true) {
+    table.prototype.validate_expressions = function (
+        expressions,
+        override = true
+    ) {
         const validated = {
             expression_schema: {},
             expression_alias: {},
-            errors: {}
+            errors: {},
         };
 
         if (!expressions || expressions.length === 0) return validated;
@@ -1393,7 +1588,10 @@ export default function(Module) {
             validated.expression_alias[expression[0]] = expression[1];
         }
 
-        const validation_results = __MODULE__.validate_expressions(this._Table, vector);
+        const validation_results = __MODULE__.validate_expressions(
+            this._Table,
+            vector
+        );
         const expression_schema = validation_results.get_expression_schema();
         const expression_errors = validation_results.get_expression_errors();
 
@@ -1436,10 +1634,13 @@ export default function(Module) {
      * @async
      * @param {Array<string>} [filter] a filter configuration to test.
      */
-    table.prototype.is_valid_filter = function(filter) {
+    table.prototype.is_valid_filter = function (filter) {
         // isNull and isNotNull filter operators are always valid and apply to
         // all schema types
-        if (filter[1] === perspective.FILTER_OPERATORS.isNull || filter[1] === perspective.FILTER_OPERATORS.isNotNull) {
+        if (
+            filter[1] === perspective.FILTER_OPERATORS.isNull ||
+            filter[1] === perspective.FILTER_OPERATORS.isNotNull
+        ) {
             return true;
         }
 
@@ -1450,7 +1651,10 @@ export default function(Module) {
 
         const schema = this.schema();
         const exists = schema[filter[0]];
-        if (exists && (schema[filter[0]] === "date" || schema[filter[0]] === "datetime")) {
+        if (
+            exists &&
+            (schema[filter[0]] === "date" || schema[filter[0]] === "datetime")
+        ) {
             return __MODULE__.is_valid_datetime(filter[2]);
         }
 
@@ -1500,23 +1704,29 @@ export default function(Module) {
      * {@link module:perspective~view} object for the supplied configuration,
      * bound to this table.
      */
-    table.prototype.view = function(_config = {}) {
+    table.prototype.view = function (_config = {}) {
         _call_process(this._Table.get_id());
         let config = {};
         for (const key of Object.keys(_config)) {
             if (defaults.CONFIG_ALIASES[key]) {
                 if (!config[defaults.CONFIG_ALIASES[key]]) {
                     if (!WARNED_KEYS.has(key)) {
-                        console.warn(`Deprecated: "${key}" config parameter, please use "${defaults.CONFIG_ALIASES[key]}" instead`);
+                        console.warn(
+                            `Deprecated: "${key}" config parameter, please use "${defaults.CONFIG_ALIASES[key]}" instead`
+                        );
                         WARNED_KEYS.add(key);
                     }
                     config[defaults.CONFIG_ALIASES[key]] = _config[key];
                 } else {
-                    throw new Error(`Duplicate configuration parameter "${key}"`);
+                    throw new Error(
+                        `Duplicate configuration parameter "${key}"`
+                    );
                 }
             } else if (key === "aggregate") {
                 if (!WARNED_KEYS.has("aggregate")) {
-                    console.warn(`Deprecated: "aggregate" config parameter has been replaced by "aggregates" and "columns"`);
+                    console.warn(
+                        `Deprecated: "aggregate" config parameter has been replaced by "aggregates" and "columns"`
+                    );
                     WARNED_KEYS.add("aggregate");
                 }
                 // backwards compatibility: deconstruct `aggregate` into
@@ -1564,7 +1774,9 @@ export default function(Module) {
             for (let filter of config.filter) {
                 // TODO: this does not work for expressions
                 const dtype = table_schema[filter[0]];
-                const is_compare = filter[1] !== perspective.FILTER_OPERATORS.isNull && filter[1] !== perspective.FILTER_OPERATORS.isNotNull;
+                const is_compare =
+                    filter[1] !== perspective.FILTER_OPERATORS.isNull &&
+                    filter[1] !== perspective.FILTER_OPERATORS.isNotNull;
                 if (is_compare && (dtype === "date" || dtype === "datetime")) {
                     // new Date() accepts strings and new Date() objects, so no
                     // need to type check here.
@@ -1602,7 +1814,9 @@ export default function(Module) {
             let start = performance.now();
             setTimeout(function poll() {
                 let now = performance.now();
-                console.log(`${((1000 * _msgs) / (now - start)).toFixed(2)} msgs/sec`);
+                console.log(
+                    `${((1000 * _msgs) / (now - start)).toFixed(2)} msgs/sec`
+                );
                 _msgs = 0;
                 start = now;
                 setTimeout(poll, 5000);
@@ -1627,7 +1841,7 @@ export default function(Module) {
      *
      * @see {@link module:perspective~table}
      */
-    table.prototype.update = function(data, options) {
+    table.prototype.update = function (data, options) {
         options = options || {};
         options.port_id = options.port_id || 0;
 
@@ -1652,7 +1866,9 @@ export default function(Module) {
             pdata = data;
         } else {
             accessor.init(data);
-            accessor.names = cols.concat(accessor.names.filter(x => x === "__INDEX__"));
+            accessor.names = cols.concat(
+                accessor.names.filter((x) => x === "__INDEX__")
+            );
             accessor.types = extract_vector(types).slice(0, cols.length);
 
             if (meter) {
@@ -1672,7 +1888,9 @@ export default function(Module) {
                 const explicit_index = !!this.index;
                 if (explicit_index) {
                     // find the type of the index column
-                    accessor.types.push(accessor.types[accessor.names.indexOf(this.index)]);
+                    accessor.types.push(
+                        accessor.types[accessor.names.indexOf(this.index)]
+                    );
                 } else {
                     // default index is an integer
                     accessor.types.push(__MODULE__.t_dtype.DTYPE_INT32);
@@ -1684,7 +1902,17 @@ export default function(Module) {
             const op = __MODULE__.t_op.OP_INSERT;
             // update the Table in C++, but don't keep the returned C++ Table
             // reference as it is identical
-            make_table(pdata, this._Table, this.index, this.limit, op, true, is_arrow, is_csv, options.port_id);
+            make_table(
+                pdata,
+                this._Table,
+                this.index,
+                this.limit,
+                op,
+                true,
+                is_arrow,
+                is_csv,
+                options.port_id
+            );
             this.initialized = true;
         } catch (e) {
             console.error(`Update failed: ${e}`);
@@ -1701,9 +1929,11 @@ export default function(Module) {
      *
      * @see {@link module:perspective~table}
      */
-    table.prototype.remove = function(data, options) {
+    table.prototype.remove = function (data, options) {
         if (!this.index) {
-            console.error("Cannot call `remove()` on a Table without a user-specified index.");
+            console.error(
+                "Cannot call `remove()` on a Table without a user-specified index."
+            );
             return;
         }
 
@@ -1715,7 +1945,7 @@ export default function(Module) {
         let types = schema.types();
         let is_arrow = false;
 
-        data = data.map(idx => ({[this.index]: idx}));
+        data = data.map((idx) => ({[this.index]: idx}));
 
         if (data instanceof ArrayBuffer) {
             pdata = new Uint8Array(data);
@@ -1731,7 +1961,17 @@ export default function(Module) {
             const op = __MODULE__.t_op.OP_DELETE;
             // update the Table in C++, but don't keep the returned Table
             // reference as it is identical
-            make_table(pdata, this._Table, this.index, this.limit, op, false, is_arrow, false, options.port_id);
+            make_table(
+                pdata,
+                this._Table,
+                this.index,
+                this.limit,
+                op,
+                false,
+                is_arrow,
+                false,
+                options.port_id
+            );
             this.initialized = true;
         } catch (e) {
             console.error(`Remove failed`, e);
@@ -1747,7 +1987,7 @@ export default function(Module) {
      * @returns {Promise<Array<string>>} An array of column names for this
      * table.
      */
-    table.prototype.columns = function() {
+    table.prototype.columns = function () {
         let schema = this._Table.get_schema();
         let cols = schema.columns();
         let names = [];
@@ -1762,7 +2002,7 @@ export default function(Module) {
         return names;
     };
 
-    table.prototype.execute = function(f) {
+    table.prototype.execute = function (f) {
         f(this);
     };
 
@@ -1777,7 +2017,7 @@ export default function(Module) {
 
         Server,
 
-        worker: function() {
+        worker: function () {
             return this;
         },
 
@@ -1820,7 +2060,7 @@ export default function(Module) {
          * {@link module:perspective~table} object, or be rejected if an error
          * happens during Table construction.
          */
-        table: function(data, options) {
+        table: function (data, options) {
             options = options || {};
 
             // Always store index and limit as user-provided values or `null`.
@@ -1832,7 +2072,10 @@ export default function(Module) {
             let overridden_types = {};
             let is_csv = false;
 
-            if (data instanceof ArrayBuffer || (typeof Buffer !== "undefined" && data instanceof Buffer)) {
+            if (
+                data instanceof ArrayBuffer ||
+                (typeof Buffer !== "undefined" && data instanceof Buffer)
+            ) {
                 data_accessor = new Uint8Array(data);
                 is_arrow = true;
             } else if (typeof data === "string") {
@@ -1861,11 +2104,26 @@ export default function(Module) {
                 // and limit, so `make_table` will convert null to default
                 // values of "" for index and 4294967295 for limit. Tables
                 // must be created on port 0.
-                _Table = make_table(data_accessor, undefined, options.index, options.limit, op, false, is_arrow, is_csv, 0);
+                _Table = make_table(
+                    data_accessor,
+                    undefined,
+                    options.index,
+                    options.limit,
+                    op,
+                    false,
+                    is_arrow,
+                    is_csv,
+                    0
+                );
 
                 // Pass through user-provided values or `null` to the
                 // Javascript Table constructor.
-                return new table(_Table, options.index, options.limit, overridden_types);
+                return new table(
+                    _Table,
+                    options.index,
+                    options.limit,
+                    overridden_types
+                );
             } catch (e) {
                 if (_Table) {
                     _Table.delete();
@@ -1873,7 +2131,7 @@ export default function(Module) {
                 console.error(`Table initialization failed: ${e}`);
                 throw e;
             }
-        }
+        },
     };
 
     for (let prop of Object.keys(defaults)) {
@@ -1902,7 +2160,11 @@ export default function(Module) {
          */
         constructor(perspective) {
             super(perspective);
-            self.addEventListener("message", e => this.process(e.data), false);
+            self.addEventListener(
+                "message",
+                (e) => this.process(e.data),
+                false
+            );
         }
 
         /**
@@ -1930,8 +2192,8 @@ export default function(Module) {
             } else {
                 __MODULE__({
                     wasmBinary: msg.buffer,
-                    wasmJSMethod: "native-wasm"
-                }).then(mod => {
+                    wasmJSMethod: "native-wasm",
+                }).then((mod) => {
                     __MODULE__ = mod;
                     super.init(msg);
                 });

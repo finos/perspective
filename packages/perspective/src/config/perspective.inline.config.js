@@ -1,7 +1,7 @@
 const path = require("path");
 const common = require("./common.config.js");
 
-module.exports = common({inline: true}, config =>
+module.exports = common({inline: true}, (config) =>
     Object.assign(config, {
         entry: "./dist/esm/perspective.parallel.js",
         devtool: undefined,
@@ -11,7 +11,7 @@ module.exports = common({inline: true}, config =>
             libraryTarget: "umd",
             libraryExport: "default",
             chunkFilename: "perspective.inline.chunk_[id].js",
-            path: path.resolve(__dirname, "../../dist/umd")
-        }
+            path: path.resolve(__dirname, "../../dist/umd"),
+        },
     })
 );

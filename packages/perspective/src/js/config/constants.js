@@ -14,7 +14,7 @@ export const DATA_TYPES = {
     boolean: "boolean",
     date: "date",
     datetime: "datetime",
-    object: "object"
+    object: "object",
 };
 
 export const CONFIG_ALIASES = {
@@ -27,10 +27,22 @@ export const CONFIG_ALIASES = {
     "column-pivot": "column_pivots",
     "column-pivots": "column_pivots",
     filters: "filter",
-    sorts: "sort"
+    sorts: "sort",
 };
 
-export const CONFIG_VALID_KEYS = ["viewport", "row_pivots", "column_pivots", "aggregates", "columns", "filter", "sort", "computed_columns", "expressions", "row_pivot_depth", "filter_op"];
+export const CONFIG_VALID_KEYS = [
+    "viewport",
+    "row_pivots",
+    "column_pivots",
+    "aggregates",
+    "columns",
+    "filter",
+    "sort",
+    "computed_columns",
+    "expressions",
+    "row_pivot_depth",
+    "filter_op",
+];
 
 const NUMBER_AGGREGATES = [
     "any",
@@ -54,14 +66,45 @@ const NUMBER_AGGREGATES = [
     "sum abs",
     "sum not null",
     "unique",
-    "var"
+    "var",
 ];
 
-const STRING_AGGREGATES = ["any", "count", "distinct count", "distinct leaf", "dominant", "first by index", "join", "last by index", "last", "unique"];
+const STRING_AGGREGATES = [
+    "any",
+    "count",
+    "distinct count",
+    "distinct leaf",
+    "dominant",
+    "first by index",
+    "join",
+    "last by index",
+    "last",
+    "unique",
+];
 
-const BOOLEAN_AGGREGATES = ["any", "count", "distinct count", "distinct leaf", "dominant", "first by index", "last by index", "last", "unique"];
+const BOOLEAN_AGGREGATES = [
+    "any",
+    "count",
+    "distinct count",
+    "distinct leaf",
+    "dominant",
+    "first by index",
+    "last by index",
+    "last",
+    "unique",
+];
 
-export const SORT_ORDERS = ["none", "asc", "desc", "col asc", "col desc", "asc abs", "desc abs", "col asc abs", "col desc abs"];
+export const SORT_ORDERS = [
+    "none",
+    "asc",
+    "desc",
+    "col asc",
+    "col desc",
+    "asc abs",
+    "desc abs",
+    "col asc abs",
+    "col desc abs",
+];
 
 export const SORT_ORDER_IDS = [2, 0, 1, 0, 1, 3, 4, 3, 4];
 
@@ -71,7 +114,7 @@ export const TYPE_AGGREGATES = {
     integer: NUMBER_AGGREGATES,
     boolean: BOOLEAN_AGGREGATES,
     datetime: STRING_AGGREGATES,
-    date: STRING_AGGREGATES
+    date: STRING_AGGREGATES,
 };
 
 export const FILTER_OPERATORS = {
@@ -91,7 +134,7 @@ export const FILTER_OPERATORS = {
     and: "and",
     or: "or",
     beginsWith: "begins with",
-    endsWith: "ends with"
+    endsWith: "ends with",
 };
 
 const BOOLEAN_FILTERS = [
@@ -102,7 +145,7 @@ const BOOLEAN_FILTERS = [
     FILTER_OPERATORS.or,
     FILTER_OPERATORS.and,
     FILTER_OPERATORS.isNull,
-    FILTER_OPERATORS.isNotNull
+    FILTER_OPERATORS.isNotNull,
 ];
 
 const NUMBER_FILTERS = [
@@ -113,7 +156,7 @@ const NUMBER_FILTERS = [
     FILTER_OPERATORS.greaterThanOrEquals,
     FILTER_OPERATORS.doesNotEqual,
     FILTER_OPERATORS.isNull,
-    FILTER_OPERATORS.isNotNull
+    FILTER_OPERATORS.isNotNull,
 ];
 
 const STRING_FILTERS = [
@@ -125,7 +168,7 @@ const STRING_FILTERS = [
     FILTER_OPERATORS.beginsWith,
     FILTER_OPERATORS.endsWith,
     FILTER_OPERATORS.isNull,
-    FILTER_OPERATORS.isNotNull
+    FILTER_OPERATORS.isNotNull,
 ];
 
 const DATETIME_FILTERS = [
@@ -136,7 +179,7 @@ const DATETIME_FILTERS = [
     FILTER_OPERATORS.greaterThanOrEquals,
     FILTER_OPERATORS.doesNotEqual,
     FILTER_OPERATORS.isNull,
-    FILTER_OPERATORS.isNotNull
+    FILTER_OPERATORS.isNotNull,
 ];
 
 export const COLUMN_SEPARATOR_STRING = "|";
@@ -147,5 +190,5 @@ export const TYPE_FILTERS = {
     integer: NUMBER_FILTERS,
     boolean: BOOLEAN_FILTERS,
     datetime: DATETIME_FILTERS,
-    date: DATETIME_FILTERS
+    date: DATETIME_FILTERS,
 };

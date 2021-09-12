@@ -12,7 +12,9 @@ const main_config = require("../../../perspective-test/jest.config.js");
 // and works with the main `perspective-test` Jest config.
 module.exports = Object.assign(main_config, {
     transform: Object.assign(main_config.transform, {
-        "^.+\\.ts?$": "ts-jest"
+        "^.+\\.ts?$": "ts-jest",
     }),
-    transformIgnorePatterns: ["/node_modules/(?!(lit-html|@jupyter-widgets)/).+\\.js"]
+    transformIgnorePatterns: [
+        "/node_modules/(?!(lit-html|@jupyter-widgets)/).+\\.js",
+    ],
 });

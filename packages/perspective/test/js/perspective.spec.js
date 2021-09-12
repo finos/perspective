@@ -10,7 +10,7 @@
 const node_perspective = require("../../dist/cjs/perspective.node.js");
 
 const RUNTIMES = {
-    NODE: node_perspective
+    NODE: node_perspective,
 };
 
 const clear_tests = require("./clear.js");
@@ -28,9 +28,11 @@ const expression_tests = require("./expressions.js");
 const delete_tests = require("./delete.js");
 const port_tests = require("./ports.js");
 
-describe("perspective.js", function() {
-    Object.keys(RUNTIMES).forEach(function(mode) {
-        (typeof WebAssembly === "undefined" && mode === "WASM" ? xdescribe : describe)(mode, function() {
+describe("perspective.js", function () {
+    Object.keys(RUNTIMES).forEach(function (mode) {
+        (typeof WebAssembly === "undefined" && mode === "WASM"
+            ? xdescribe
+            : describe)(mode, function () {
             clear_tests(RUNTIMES[mode]);
             constructor_tests(RUNTIMES[mode]);
             pivot_tests(RUNTIMES[mode]);

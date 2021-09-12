@@ -31,19 +31,19 @@ export function table(worker, data, options) {
                 cmd: "table",
                 name: this._name,
                 args: [],
-                options: options || {}
+                options: options || {},
             });
-            data.to_arrow().then(arrow => {
+            data.to_arrow().then((arrow) => {
                 this._worker.post(
                     {
                         cmd: "table",
                         name: this._name,
                         args: [arrow],
-                        options: options || {}
+                        options: options || {},
                     },
                     () => {
                         data.on_update(
-                            updated => {
+                            (updated) => {
                                 this.update(updated.delta);
                             },
                             {mode: "row"}
@@ -59,7 +59,7 @@ export function table(worker, data, options) {
                     cmd: "table",
                     name: this._name,
                     args: [data],
-                    options: options || {}
+                    options: options || {},
                 },
                 () => {
                     resolve(this);
@@ -68,7 +68,10 @@ export function table(worker, data, options) {
             );
         }
 
-        if (this._worker._initialized === true && !this._worker._features?.wait_for_response) {
+        if (
+            this._worker._initialized === true &&
+            !this._worker._features?.wait_for_response
+        ) {
             resolve(this);
         }
     });
@@ -91,7 +94,7 @@ export function proxy_table(worker, name) {
 proxy_table.prototype = table.prototype;
 
 // Dispatch table methods that create new objects to the worker
-table.prototype.view = function(config) {
+table.prototype.view = function (config) {
     return new view(this._worker, this._name, config);
 };
 
@@ -107,9 +110,15 @@ table.prototype.remove_port = async_queue("remove_port", "table_method");
 
 table.prototype.schema = async_queue("schema", "table_method");
 
-table.prototype.validate_expressions = async_queue("validate_expressions", "table_method");
+table.prototype.validate_expressions = async_queue(
+    "validate_expressions",
+    "table_method"
+);
 
-table.prototype.is_valid_filter = async_queue("is_valid_filter", "table_method");
+table.prototype.is_valid_filter = async_queue(
+    "is_valid_filter",
+    "table_method"
+);
 
 table.prototype.size = async_queue("size", "table_method");
 
@@ -125,16 +134,20 @@ table.prototype.on_delete = subscribe("on_delete", "table_method", true);
 
 table.prototype.remove = async_queue("remove", "table_method");
 
-table.prototype.remove_delete = unsubscribe("remove_delete", "table_method", true);
+table.prototype.remove_delete = unsubscribe(
+    "remove_delete",
+    "table_method",
+    true
+);
 
-table.prototype.update = function(data, options) {
+table.prototype.update = function (data, options) {
     return new Promise((resolve, reject) => {
         this._worker.post(
             {
                 name: this._name,
                 cmd: "table_method",
                 method: "update",
-                args: [data, options || {}]
+                args: [data, options || {}],
             },
             resolve,
             reject,
@@ -143,10 +156,10 @@ table.prototype.update = function(data, options) {
     });
 };
 
-table.prototype.execute = function(f) {
+table.prototype.execute = function (f) {
     this._worker.post({
         cmd: "table_execute",
         name: this._name,
-        f: f.toString()
+        f: f.toString(),
     });
 };

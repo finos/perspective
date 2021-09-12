@@ -30,10 +30,11 @@ function sunburst(container, settings) {
 
     if (color) {
         const color_column = settings.realValues[1];
-        if (settings.mainValues.find(x => x.name === color_column)?.type === "string") {
-            const legend = colorLegend()
-                .settings(settings)
-                .scale(color);
+        if (
+            settings.mainValues.find((x) => x.name === color_column)?.type ===
+            "string"
+        ) {
+            const legend = colorLegend().settings(settings).scale(color);
             container.call(legend);
         } else {
             const legend = colorRangeLegend().scale(color);
@@ -59,13 +60,18 @@ function sunburst(container, settings) {
         .merge(sunburstDiv)
         .select("svg")
         .select("g.sunburst")
-        .attr("transform", `translate(${containerSize.width / 2}, ${containerSize.height / 2})`)
-        .each(function({split, data}) {
+        .attr(
+            "transform",
+            `translate(${containerSize.width / 2}, ${containerSize.height / 2})`
+        )
+        .each(function ({split, data}) {
             const sunburstElement = select(this);
             const svgNode = this.parentNode;
             const {width, height} = svgNode.getBoundingClientRect();
 
-            const radius = (Math.min(width, height) - 24) / (settings.crossValues.length * 2);
+            const radius =
+                (Math.min(width, height) - 24) /
+                (settings.crossValues.length * 2);
             sunburstSeries()
                 .settings(settings)
                 .split(split)
@@ -73,7 +79,9 @@ function sunburst(container, settings) {
                 .color(color)
                 .radius(radius)(sunburstElement);
 
-            tooltip().settings(settings)(sunburstElement.selectAll("g.segment"));
+            tooltip().settings(settings)(
+                sunburstElement.selectAll("g.segment")
+            );
         });
 }
 
@@ -85,8 +93,8 @@ sunburst.plugin = {
     initial: {
         type: "number",
         count: 1,
-        names: ["Size", "Color", "Tooltip"]
-    }
+        names: ["Size", "Color", "Tooltip"],
+    },
 };
 
 export default sunburst;

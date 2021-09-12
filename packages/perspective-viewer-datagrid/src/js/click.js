@@ -23,8 +23,8 @@ async function clickListener(table, viewer, event) {
             detail: {
                 row,
                 column_names,
-                config
-            }
+                config,
+            },
         })
     );
 }

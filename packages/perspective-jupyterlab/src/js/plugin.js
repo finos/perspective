@@ -7,10 +7,10 @@
  *
  */
 
-import { IJupyterWidgetRegistry } from "@jupyter-widgets/base";
-import { PerspectiveModel } from "./model";
-import { PerspectiveView } from "./view";
-import { PERSPECTIVE_VERSION } from "./version";
+import {IJupyterWidgetRegistry} from "@jupyter-widgets/base";
+import {PerspectiveModel} from "./model";
+import {PerspectiveView} from "./view";
+import {PERSPECTIVE_VERSION} from "./version";
 const EXTENSION_ID = "@finos/perspective-jupyterlab";
 
 /**
@@ -18,18 +18,18 @@ const EXTENSION_ID = "@finos/perspective-jupyterlab";
  * to be called on initialization.
  */
 export const PerspectiveJupyterPlugin = {
-  id: EXTENSION_ID,
-  // @ts-ignore
-  requires: [IJupyterWidgetRegistry],
-  activate: (app, registry) => {
-    registry.registerWidget({
-      name: EXTENSION_ID,
-      version: PERSPECTIVE_VERSION,
-      exports: {
-        PerspectiveModel: PerspectiveModel,
-        PerspectiveView: PerspectiveView,
-      },
-    });
-  },
-  autoStart: true,
+    id: EXTENSION_ID,
+    // @ts-ignore
+    requires: [IJupyterWidgetRegistry],
+    activate: (app, registry) => {
+        registry.registerWidget({
+            name: EXTENSION_ID,
+            version: PERSPECTIVE_VERSION,
+            exports: {
+                PerspectiveModel: PerspectiveModel,
+                PerspectiveView: PerspectiveView,
+            },
+        });
+    },
+    autoStart: true,
 };

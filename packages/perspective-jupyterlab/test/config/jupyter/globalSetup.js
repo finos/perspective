@@ -8,7 +8,7 @@
  */
 const {start_jlab, kill_jlab} = require("./jlab_start");
 
-module.exports = async function() {
+module.exports = async function () {
     await start_jlab();
 
     // At this point, Jupyterlab has already been started by the main test

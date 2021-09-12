@@ -1,11 +1,25 @@
 import {select, line} from "d3";
-import {axisOrdinalTop, axisOrdinalBottom, axisOrdinalLeft, axisOrdinalRight, dataJoin, rebindAll, exclude} from "d3fc";
+import {
+    axisOrdinalTop,
+    axisOrdinalBottom,
+    axisOrdinalLeft,
+    axisOrdinalRight,
+    dataJoin,
+    rebindAll,
+    exclude,
+} from "d3fc";
 import store from "./store";
 
 const multiAxis = (orient, baseAxis, scale) => {
     let tickSizeOuter = 6;
     let tickSizeInner = 6;
-    let axisStore = store("tickFormat", "ticks", "tickArguments", "tickValues", "tickPadding");
+    let axisStore = store(
+        "tickFormat",
+        "ticks",
+        "tickArguments",
+        "tickValues",
+        "tickPadding"
+    );
     let decorate = () => {};
 
     let groups = null;
@@ -13,13 +27,15 @@ const multiAxis = (orient, baseAxis, scale) => {
     const groupDataJoin = dataJoin("g", "group");
     const domainPathDataJoin = dataJoin("path", "domain");
 
-    const translate = (x, y) => (isVertical() ? `translate(${y}, ${x})` : `translate(${x}, ${y})`);
+    const translate = (x, y) =>
+        isVertical() ? `translate(${y}, ${x})` : `translate(${x}, ${y})`;
 
-    const pathTranspose = arr => (isVertical() ? arr.map(d => [d[1], d[0]]) : arr);
+    const pathTranspose = (arr) =>
+        isVertical() ? arr.map((d) => [d[1], d[0]]) : arr;
 
     const isVertical = () => orient === "left" || orient === "right";
 
-    const multiAxis = selection => {
+    const multiAxis = (selection) => {
         if (!groups) {
             axisStore(baseAxis(scale).decorate(decorate))(selection);
             return;
@@ -43,7 +59,7 @@ const multiAxis = (orient, baseAxis, scale) => {
                 [range[0], sign * tickSizeOuter],
                 [range[0], 0],
                 [range[1], 0],
-                [range[1], sign * tickSizeOuter]
+                [range[1], sign * tickSizeOuter],
             ]);
 
             const domainLine = domainPathDataJoin(container, [data]);
@@ -54,8 +70,9 @@ const multiAxis = (orient, baseAxis, scale) => {
 
             const g = groupDataJoin(container, groups);
 
-            const getAxisSize = i => (Array.isArray(tickSizeInner) ? tickSizeInner[i] : tickSizeInner);
-            const getAxisOffset = i => {
+            const getAxisSize = (i) =>
+                Array.isArray(tickSizeInner) ? tickSizeInner[i] : tickSizeInner;
+            const getAxisOffset = (i) => {
                 let sum = 0;
                 for (let n = 0; n < i; n++) {
                     sum += getAxisSize(n);
@@ -63,20 +80,24 @@ const multiAxis = (orient, baseAxis, scale) => {
                 return sum;
             };
 
-            g.attr("transform", (d, i) => translate(0, sign * getAxisOffset(i))).each((group, i, nodes) => {
+            g.attr("transform", (d, i) =>
+                translate(0, sign * getAxisOffset(i))
+            ).each((group, i, nodes) => {
                 const groupElement = select(nodes[i]);
                 const groupScale = scaleFromGroup(scale, group);
                 const useAxis = axisStore(baseAxis(groupScale))
                     .decorate((s, data) => decorate(s, data, i))
                     .tickSizeInner(getAxisSize(i))
-                    .tickOffset(d => groupScale.step(d) / 2);
+                    .tickOffset((d) => groupScale.step(d) / 2);
                 useAxis(groupElement);
 
                 groupElement.select("path.domain").attr("visibility", "hidden");
             });
 
             // exit
-            g.exit().attr("transform", (d, i) => translate(0, sign * getAxisOffset(i)));
+            g.exit().attr("transform", (d, i) =>
+                translate(0, sign * getAxisOffset(i))
+            );
         });
     };
 
@@ -89,12 +110,12 @@ const multiAxis = (orient, baseAxis, scale) => {
         customScale.ticks = () => {
             return group;
         };
-        customScale.tickFormat = () => d => {
+        customScale.tickFormat = () => (d) => {
             return d.text;
         };
         customScale.copy = () => scaleFromGroup(scale, group);
 
-        customScale.step = value => value.domain.length * scale.step();
+        customScale.step = (value) => value.domain.length * scale.step();
 
         rebindAll(customScale, scale, exclude("ticks", "step", "copy"));
         return customScale;
@@ -145,10 +166,13 @@ const multiAxis = (orient, baseAxis, scale) => {
     return multiAxis;
 };
 
-export const multiAxisTop = scale => multiAxis("top", axisOrdinalTop, scale);
+export const multiAxisTop = (scale) => multiAxis("top", axisOrdinalTop, scale);
 
-export const multiAxisBottom = scale => multiAxis("bottom", axisOrdinalBottom, scale);
+export const multiAxisBottom = (scale) =>
+    multiAxis("bottom", axisOrdinalBottom, scale);
 
-export const multiAxisLeft = scale => multiAxis("left", axisOrdinalLeft, scale);
+export const multiAxisLeft = (scale) =>
+    multiAxis("left", axisOrdinalLeft, scale);
 
-export const multiAxisRight = scale => multiAxis("right", axisOrdinalRight, scale);
+export const multiAxisRight = (scale) =>
+    multiAxis("right", axisOrdinalRight, scale);

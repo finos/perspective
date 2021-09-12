@@ -11,9 +11,9 @@ import {groupFromKey} from "../series/seriesKey";
 export function filterData(settings, data) {
     const useData = data || settings.data;
     if (settings.hideKeys && settings.hideKeys.length > 0) {
-        return useData.map(col => {
+        return useData.map((col) => {
             const clone = {...col};
-            settings.hideKeys.forEach(k => {
+            settings.hideKeys.forEach((k) => {
                 delete clone[k];
             });
             return clone;
@@ -25,9 +25,9 @@ export function filterData(settings, data) {
 export function filterDataByGroup(settings, data) {
     const useData = data || settings.data;
     if (settings.hideKeys && settings.hideKeys.length > 0) {
-        return useData.map(col => {
+        return useData.map((col) => {
             const clone = {};
-            Object.keys(col).map(key => {
+            Object.keys(col).map((key) => {
                 if (!settings.hideKeys.includes(groupFromKey(key))) {
                     clone[key] = col[key];
                 }

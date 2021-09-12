@@ -17,7 +17,7 @@ let __CALLBACK_INDEX__ = 0;
  * @param {*} cmd
  */
 export function unsubscribe(method, cmd) {
-    return function() {
+    return function () {
         let resolve;
         let reject = () => {};
         let args = Array.prototype.slice.call(arguments, 0, arguments.length);
@@ -34,7 +34,7 @@ export function unsubscribe(method, cmd) {
             method: method,
             args: args,
             subscribe: true,
-            callback_id
+            callback_id,
         };
         this._worker.post(msg, resolve, reject);
         this._worker.unsubscribe(cmd, resolve);
@@ -48,7 +48,7 @@ export function unsubscribe(method, cmd) {
  * @param {*} cmd
  */
 export function subscribe(method, cmd) {
-    return function() {
+    return function () {
         let resolve;
         let reject = () => {};
         let args = Array.prototype.slice.call(arguments, 0, arguments.length);
@@ -65,7 +65,7 @@ export function subscribe(method, cmd) {
             method: method,
             args: args,
             subscribe: true,
-            callback_id: __CALLBACK_INDEX__
+            callback_id: __CALLBACK_INDEX__,
         };
         this._worker.post(msg, resolve, reject, true);
     };
@@ -80,16 +80,16 @@ export function subscribe(method, cmd) {
  * @param {*} cmd
  */
 export function async_queue(method, cmd) {
-    return function() {
+    return function () {
         var args = Array.prototype.slice.call(arguments, 0, arguments.length);
         return new Promise(
-            function(resolve, reject) {
+            function (resolve, reject) {
                 var msg = {
                     cmd: cmd || "view_method",
                     name: this._name,
                     method: method,
                     args: args,
-                    subscribe: false
+                    subscribe: false,
                 };
                 this._worker.post(msg, resolve, reject);
             }.bind(this)

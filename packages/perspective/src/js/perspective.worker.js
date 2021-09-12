@@ -16,8 +16,8 @@ if (global.document !== undefined && typeof WebAssembly !== "undefined") {
     _perspective_instance = global.perspective = perspective(
         load_perspective({
             wasmJSMethod: "native-wasm",
-            printErr: x => console.error(x),
-            print: x => console.log(x)
+            printErr: (x) => console.error(x),
+            print: (x) => console.log(x),
         })
     );
 } else {

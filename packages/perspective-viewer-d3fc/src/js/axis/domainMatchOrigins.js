@@ -11,6 +11,10 @@ export default (domain1, domain2) => {
     }
 };
 
-const isMatchable = domain => domain.length === 2 && !isNaN(domain[0]) && !isNaN(domain[1]) && domain[0] !== domain[1];
-const originRatio = domain => (0 - domain[0]) / (domain[1] - domain[0]);
+const isMatchable = (domain) =>
+    domain.length === 2 &&
+    !isNaN(domain[0]) &&
+    !isNaN(domain[1]) &&
+    domain[0] !== domain[1];
+const originRatio = (domain) => (0 - domain[0]) / (domain[1] - domain[0]);
 const adjustLowerBound = (domain, ratio) => (ratio * domain[1]) / (ratio - 1);

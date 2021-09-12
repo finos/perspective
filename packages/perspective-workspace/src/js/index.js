@@ -142,7 +142,11 @@ class PerspectiveWorkspaceElement extends HTMLElement {
     }
 
     async flush() {
-        await Promise.all(Array.from(this.querySelectorAll("perspective-viewer")).map(x => x.flush()));
+        await Promise.all(
+            Array.from(this.querySelectorAll("perspective-viewer")).map((x) =>
+                x.flush()
+            )
+        );
     }
 
     addTable(name, table) {
@@ -183,7 +187,11 @@ class PerspectiveWorkspaceElement extends HTMLElement {
     _light_dom_changed() {
         const viewers = Array.from(this.childNodes);
         for (const viewer of viewers) {
-            if ([Node.TEXT_NODE, document.COMMENT_NODE].indexOf(viewer.nodeType) > -1) {
+            if (
+                [Node.TEXT_NODE, document.COMMENT_NODE].indexOf(
+                    viewer.nodeType
+                ) > -1
+            ) {
                 continue;
             }
             this.workspace.update_widget_for_viewer(viewer);

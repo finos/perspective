@@ -6,11 +6,24 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-const {execute, docker, resolve, getarg, python_image} = require("./script_utils.js");
+const {
+    execute,
+    execute_throw,
+    docker,
+    resolve,
+    getarg,
+    python_image,
+} = require("./script_utils.js");
 
 const IS_DOCKER = process.env.PSP_DOCKER;
 const IS_PY2 = getarg("--python2");
-let PYTHON = IS_PY2 ? "python2" : getarg("--python38") ? "python3.8" : getarg("--python36") ? "python3.6" : "python3.7";
+let PYTHON = IS_PY2
+    ? "python2"
+    : getarg("--python38")
+    ? "python3.8"
+    : getarg("--python36")
+    ? "python3.6"
+    : "python3";
 let IMAGE = "manylinux2014";
 
 if (IS_DOCKER) {
@@ -18,7 +31,11 @@ if (IS_DOCKER) {
     let MANYLINUX_VERSION = "manylinux2010";
     if (!IS_PY2) {
         // switch to 2014 only on python3
-        MANYLINUX_VERSION = getarg("--manylinux2010") ? "manylinux2010" : getarg("--manylinux2014") ? "manylinux2014" : "manylinux2014";
+        MANYLINUX_VERSION = getarg("--manylinux2010")
+            ? "manylinux2010"
+            : getarg("--manylinux2014")
+            ? "manylinux2014"
+            : "manylinux2014";
     }
     IMAGE = python_image(MANYLINUX_VERSION, PYTHON);
 }

@@ -1,7 +1,7 @@
 export default (...names) => {
     const data = {};
 
-    const store = target => {
+    const store = (target) => {
         for (const key of Object.keys(data)) {
             target[key](data[key]);
         }

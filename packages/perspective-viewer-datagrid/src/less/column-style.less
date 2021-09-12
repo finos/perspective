@@ -7,7 +7,7 @@
  *
  */
 
- :host {
+:host {
     position: absolute;
     padding: 6px;
     outline: none;
@@ -28,7 +28,9 @@
     outline: none;
 }
 
-:host input[type=radio], :host input[type=checkbox], :host > div > div > span:first-child {
+:host input[type="radio"],
+:host input[type="checkbox"],
+:host > div > div > span:first-child {
     width: 24px;
     margin: 0;
 }
@@ -43,13 +45,13 @@
     margin-bottom: 8px;
 }
 
-:host input[type=color] {
+:host input[type="color"] {
     width: 24px;
 }
 
 :host .operator {
     font-family: "Roboto Mono", monospace;
-    white-space:pre;
+    white-space: pre;
 }
 
 :host input.parameter[disabled] {

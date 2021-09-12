@@ -11,12 +11,12 @@ import * as fc from "d3fc";
 export function areaSeries(settings, color) {
     let series = fc.seriesSvgArea();
 
-    series = series.decorate(selection => {
-        selection.style("fill", d => color(d[0].key));
+    series = series.decorate((selection) => {
+        selection.style("fill", (d) => color(d[0].key));
     });
 
     return series
-        .crossValue(d => d.crossValue)
-        .mainValue(d => d.mainValue)
-        .baseValue(d => d.baseValue);
+        .crossValue((d) => d.crossValue)
+        .mainValue((d) => d.mainValue)
+        .baseValue((d) => d.baseValue);
 }

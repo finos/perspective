@@ -24,11 +24,16 @@ const path = require("path");
  */
 function load_arrow(arrow_path) {
     const data = fs.readFileSync(arrow_path);
-    return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
+    return data.buffer.slice(
+        data.byteOffset,
+        data.byteOffset + data.byteLength
+    );
 }
 
-const int_float_str_arrow = load_arrow(path.join(__dirname, "..", "arrow", "int_float_str.arrow"));
+const int_float_str_arrow = load_arrow(
+    path.join(__dirname, "..", "arrow", "int_float_str.arrow")
+);
 
 module.exports = {
-    int_float_str_arrow
+    int_float_str_arrow,
 };

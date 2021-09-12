@@ -9,7 +9,7 @@
 import * as fc from "d3fc";
 import {colorScale, setOpacity} from "../series/seriesColors";
 
-const isUp = d => d.closeValue >= d.openValue;
+const isUp = (d) => d.closeValue >= d.openValue;
 
 export function ohlcCandleSeries(settings, seriesCanvas, upColor) {
     const domain = upColor.domain();
@@ -18,16 +18,14 @@ export function ohlcCandleSeries(settings, seriesCanvas, upColor) {
         .settings(settings)
         .defaultColors([settings.colorStyles["series-2"]])
         .mapFunction(setOpacity(0.5))();
-    const avgColor = colorScale()
-        .settings(settings)
-        .domain(domain)();
+    const avgColor = colorScale().settings(settings).domain(domain)();
 
     const series = seriesCanvas()
-        .crossValue(d => d.crossValue)
-        .openValue(d => d.openValue)
-        .highValue(d => d.highValue)
-        .lowValue(d => d.lowValue)
-        .closeValue(d => d.closeValue)
+        .crossValue((d) => d.crossValue)
+        .openValue((d) => d.openValue)
+        .highValue((d) => d.highValue)
+        .lowValue((d) => d.lowValue)
+        .closeValue((d) => d.closeValue)
         .decorate((context, d) => {
             const color = isUp(d) ? upColor(d.key) : downColor(d.key);
             context.fillStyle = color;
@@ -36,20 +34,22 @@ export function ohlcCandleSeries(settings, seriesCanvas, upColor) {
 
     const bollingerAverageSeries = fc
         .seriesCanvasLine()
-        .mainValue(d => d.bollinger.average)
-        .crossValue(d => d.crossValue)
+        .mainValue((d) => d.bollinger.average)
+        .crossValue((d) => d.crossValue)
         .decorate((context, d) => {
             context.strokeStyle = avgColor(d[0].key);
         });
 
     const bollingerAreaSeries = fc
         .seriesCanvasArea()
-        .mainValue(d => d.bollinger.upper)
-        .baseValue(d => d.bollinger.lower)
-        .crossValue(d => d.crossValue)
+        .mainValue((d) => d.bollinger.upper)
+        .baseValue((d) => d.bollinger.lower)
+        .crossValue((d) => d.crossValue)
         .decorate((context, d) => {
             context.fillStyle = setOpacity(0.25)(avgColor(d[0].key));
         });
 
-    return fc.seriesCanvasMulti().series([bollingerAreaSeries, series, bollingerAverageSeries]);
+    return fc
+        .seriesCanvasMulti()
+        .series([bollingerAreaSeries, series, bollingerAverageSeries]);
 }

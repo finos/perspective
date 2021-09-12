@@ -13,58 +13,165 @@
  *
  */
 
-const CSV = "https://unpkg.com/@jpmorganchase/perspective-examples@0.2.0-beta.2/build/superstore.csv";
-const ARROW = "https://unpkg.com/@jpmorganchase/perspective-examples@0.2.0-beta.2/build/superstore.arrow";
+const CSV =
+    "https://unpkg.com/@jpmorganchase/perspective-examples@0.2.0-beta.2/build/superstore.csv";
+const ARROW =
+    "https://unpkg.com/@jpmorganchase/perspective-examples@0.2.0-beta.2/build/superstore.arrow";
 
-const AGG_OPTIONS = [[{column: "Sales", op: "sum"}], [{column: "State", op: "dominant"}], [{column: "Order Date", op: "dominant"}]];
+const AGG_OPTIONS = [
+    [{column: "Sales", op: "sum"}],
+    [{column: "State", op: "dominant"}],
+    [{column: "Order Date", op: "dominant"}],
+];
 const COLUMN_PIVOT_OPTIONS = [[], ["Sub-Category"]];
 const ROW_PIVOT_OPTIONS = [[], ["State"], ["State", "City"]];
-const COLUMN_TYPES = {Sales: "number", "Order Date": "datetime", State: "string"};
+const COLUMN_TYPES = {
+    Sales: "number",
+    "Order Date": "datetime",
+    State: "string",
+};
 
-const COMPUTED_FUNCS = ["+", "-", "*", "/", "pow2", "sqrt", "uppercase", "concat_comma", "week_bucket"];
+const COMPUTED_FUNCS = [
+    "+",
+    "-",
+    "*",
+    "/",
+    "pow2",
+    "sqrt",
+    "uppercase",
+    "concat_comma",
+    "week_bucket",
+];
 
-const COMPUTED_CONFIG = {computed_function_name: "+", column: "computed", inputs: ["Sales", "Profit"]};
+const COMPUTED_CONFIG = {
+    computed_function_name: "+",
+    column: "computed",
+    inputs: ["Sales", "Profit"],
+};
 
 const COMPLEX_COMPUTED_CONFIGS = {
     numeric: [
-        {computed_function_name: "*", column: "computed", inputs: ["Sales", "Profit"]},
-        {computed_function_name: "sqrt", column: "computed2", inputs: ["computed"]},
-        {computed_function_name: "+", column: "computed3", inputs: ["computed2", "Sales"]},
-        {computed_function_name: "*", column: "computed4", inputs: ["Profit", "Quantity"]},
-        {computed_function_name: "abs", column: "computed5", inputs: ["computed4"]},
-        {computed_function_name: "-", column: "computed6", inputs: ["computed5", "computed"]}
+        {
+            computed_function_name: "*",
+            column: "computed",
+            inputs: ["Sales", "Profit"],
+        },
+        {
+            computed_function_name: "sqrt",
+            column: "computed2",
+            inputs: ["computed"],
+        },
+        {
+            computed_function_name: "+",
+            column: "computed3",
+            inputs: ["computed2", "Sales"],
+        },
+        {
+            computed_function_name: "*",
+            column: "computed4",
+            inputs: ["Profit", "Quantity"],
+        },
+        {
+            computed_function_name: "abs",
+            column: "computed5",
+            inputs: ["computed4"],
+        },
+        {
+            computed_function_name: "-",
+            column: "computed6",
+            inputs: ["computed5", "computed"],
+        },
     ],
     string: [
-        {computed_function_name: "uppercase", column: "computed", inputs: ["City"]},
-        {computed_function_name: "lowercase", column: "computed2", inputs: ["Customer ID"]},
-        {computed_function_name: "lowercase", column: "computed3", inputs: ["Order ID"]},
-        {computed_function_name: "is", column: "computed4", inputs: ["computed", "computed2"]},
-        {computed_function_name: "concat_comma", column: "computed5", inputs: ["computed2", "computed3"]},
-        {computed_function_name: "concat_space", column: "computed6", inputs: ["State", "City"]}
+        {
+            computed_function_name: "uppercase",
+            column: "computed",
+            inputs: ["City"],
+        },
+        {
+            computed_function_name: "lowercase",
+            column: "computed2",
+            inputs: ["Customer ID"],
+        },
+        {
+            computed_function_name: "lowercase",
+            column: "computed3",
+            inputs: ["Order ID"],
+        },
+        {
+            computed_function_name: "is",
+            column: "computed4",
+            inputs: ["computed", "computed2"],
+        },
+        {
+            computed_function_name: "concat_comma",
+            column: "computed5",
+            inputs: ["computed2", "computed3"],
+        },
+        {
+            computed_function_name: "concat_space",
+            column: "computed6",
+            inputs: ["State", "City"],
+        },
     ],
     datetime: [
-        {computed_function_name: "day_bucket", column: "computed", inputs: ["Order Date"]},
-        {computed_function_name: "second_bucket", column: "computed2", inputs: ["Order Date"]},
-        {computed_function_name: "day_of_week", column: "computed3", inputs: ["Order Date"]},
-        {computed_function_name: "month_of_year", column: "computed4", inputs: ["Ship Date"]},
-        {computed_function_name: "year_bucket", column: "computed5", inputs: ["Ship Date"]},
-        {computed_function_name: "minute_bucket", column: "computed6", inputs: ["Ship Date"]}
-    ]
+        {
+            computed_function_name: "day_bucket",
+            column: "computed",
+            inputs: ["Order Date"],
+        },
+        {
+            computed_function_name: "second_bucket",
+            column: "computed2",
+            inputs: ["Order Date"],
+        },
+        {
+            computed_function_name: "day_of_week",
+            column: "computed3",
+            inputs: ["Order Date"],
+        },
+        {
+            computed_function_name: "month_of_year",
+            column: "computed4",
+            inputs: ["Ship Date"],
+        },
+        {
+            computed_function_name: "year_bucket",
+            column: "computed5",
+            inputs: ["Ship Date"],
+        },
+        {
+            computed_function_name: "minute_bucket",
+            column: "computed6",
+            inputs: ["Ship Date"],
+        },
+    ],
 };
 
 const SIMPLE_EXPRESSION = ['// computed \n "Sales" + "Profit"'];
 
 const COMPLEX_EXPRESSIONS = {
-    numeric: ['sqrt("Sales" * "Profit") + "Sales"', 'abs("Profit" * "Quantity")', 'abs("Profit" * "Quantity") - (sqrt("Sales" * "Profit") + "Sales")'],
+    numeric: [
+        'sqrt("Sales" * "Profit") + "Sales"',
+        'abs("Profit" * "Quantity")',
+        'abs("Profit" * "Quantity") - (sqrt("Sales" * "Profit") + "Sales")',
+    ],
     string: [
         'upper("City")',
         'lower("Customer ID")',
         'lower("Order ID")',
         'upper("City") == lower("Customer ID")',
         `concat(lower("Customer ID"), ', ', lower("Order ID"))`,
-        `concat("State", ' ', "City")`
+        `concat("State", ' ', "City")`,
     ],
-    datetime: [`bucket("Order Date", 'D')`, `bucket("Order Date", 's')`, `day_of_week("Order Date")`, `month_of_year("Ship Date")`, `bucket("Ship Date", 'Y')`, `bucket("Ship Date", 'm')`]
+    datetime: [
+        `bucket("Order Date", 'D')`,
+        `bucket("Order Date", 's')`,
+        `day_of_week("Order Date")`,
+        `month_of_year("Ship Date")`,
+        `bucket("Ship Date", 'Y')`,
+        `bucket("Ship Date", 'm')`,
+    ],
 };
 
 /******************************************************************************
@@ -103,7 +210,9 @@ describe("Table", async () => {
             describe("table", () => {
                 benchmark(name, async () => {
                     let test = data[name];
-                    table = await worker.table(test.slice ? test.slice() : test);
+                    table = await worker.table(
+                        test.slice ? test.slice() : test
+                    );
                     await table.size();
                 });
             });
@@ -135,7 +244,9 @@ describe("Update", async () => {
                 let test_data = await static_view[`to_${name}`]({end_row: 500});
                 benchmark(name, async () => {
                     for (let i = 0; i < 5; i++) {
-                        table.update(test_data.slice ? test_data.slice() : test_data);
+                        table.update(
+                            test_data.slice ? test_data.slice() : test_data
+                        );
                         await table.size();
                     }
                 });
@@ -145,11 +256,15 @@ describe("Update", async () => {
                 table = await worker.table(data.arrow.slice());
                 view = await table.view();
 
-                const test_data = await static_view[`to_${name}`]({end_row: 500});
+                const test_data = await static_view[`to_${name}`]({
+                    end_row: 500,
+                });
 
                 benchmark(name, async () => {
                     for (let i = 0; i < 5; i++) {
-                        table.update(test_data.slice ? test_data.slice() : test_data);
+                        table.update(
+                            test_data.slice ? test_data.slice() : test_data
+                        );
                         await view.num_rows();
                     }
                 });
@@ -158,14 +273,18 @@ describe("Update", async () => {
             describe("ctx0 sorted", async () => {
                 table = await worker.table(data.arrow.slice());
                 view = await table.view({
-                    sort: [["Customer Name", "desc"]]
+                    sort: [["Customer Name", "desc"]],
                 });
 
-                const test_data = await static_view[`to_${name}`]({end_row: 500});
+                const test_data = await static_view[`to_${name}`]({
+                    end_row: 500,
+                });
 
                 benchmark(name, async () => {
                     for (let i = 0; i < 5; i++) {
-                        table.update(test_data.slice ? test_data.slice() : test_data);
+                        table.update(
+                            test_data.slice ? test_data.slice() : test_data
+                        );
                         await view.num_rows();
                     }
                 });
@@ -177,14 +296,18 @@ describe("Update", async () => {
                 view = await table.view({
                     sort: [
                         ["Customer Name", "desc"],
-                        ["Order Date", "asc"]
-                    ]
+                        ["Order Date", "asc"],
+                    ],
                 });
 
-                const test_data = await static_view[`to_${name}`]({end_row: 500});
+                const test_data = await static_view[`to_${name}`]({
+                    end_row: 500,
+                });
                 benchmark(name, async () => {
                     for (let i = 0; i < 5; i++) {
-                        table.update(test_data.slice ? test_data.slice() : test_data);
+                        table.update(
+                            test_data.slice ? test_data.slice() : test_data
+                        );
                         await view.num_rows();
                     }
                 });
@@ -193,13 +316,15 @@ describe("Update", async () => {
             describe("ctx1", async () => {
                 table = await worker.table(data.arrow.slice());
                 view = await table.view({
-                    row_pivots: ["State"]
+                    row_pivots: ["State"],
                 });
 
                 let test_data = await static_view[`to_${name}`]({end_row: 500});
                 benchmark(name, async () => {
                     for (let i = 0; i < 5; i++) {
-                        table.update(test_data.slice ? test_data.slice() : test_data);
+                        table.update(
+                            test_data.slice ? test_data.slice() : test_data
+                        );
                         await view.num_rows();
                     }
                 });
@@ -208,12 +333,14 @@ describe("Update", async () => {
             describe("ctx1 deep", async () => {
                 table = await worker.table(data.arrow.slice());
                 view = await table.view({
-                    row_pivots: ["State", "City"]
+                    row_pivots: ["State", "City"],
                 });
                 let test_data = await static_view[`to_${name}`]({end_row: 500});
                 benchmark(name, async () => {
                     for (let i = 0; i < 5; i++) {
-                        table.update(test_data.slice ? test_data.slice() : test_data);
+                        table.update(
+                            test_data.slice ? test_data.slice() : test_data
+                        );
                         await view.num_rows();
                     }
                 });
@@ -223,12 +350,14 @@ describe("Update", async () => {
                 table = await worker.table(data.arrow.slice());
                 view = await table.view({
                     row_pivots: ["State"],
-                    column_pivots: ["Sub-Category"]
+                    column_pivots: ["Sub-Category"],
                 });
                 let test_data = await static_view[`to_${name}`]({end_row: 500});
                 benchmark(name, async () => {
                     for (let i = 0; i < 5; i++) {
-                        table.update(test_data.slice ? test_data.slice() : test_data);
+                        table.update(
+                            test_data.slice ? test_data.slice() : test_data
+                        );
                         await view.num_rows();
                     }
                 });
@@ -238,12 +367,14 @@ describe("Update", async () => {
                 table = await worker.table(data.arrow.slice());
                 view = await table.view({
                     row_pivots: ["State", "City"],
-                    column_pivots: ["Sub-Category"]
+                    column_pivots: ["Sub-Category"],
                 });
                 let test_data = await static_view[`to_${name}`]({end_row: 500});
                 benchmark(name, async () => {
                     for (let i = 0; i < 5; i++) {
-                        table.update(test_data.slice ? test_data.slice() : test_data);
+                        table.update(
+                            test_data.slice ? test_data.slice() : test_data
+                        );
                         await view.num_rows();
                     }
                 });
@@ -252,12 +383,14 @@ describe("Update", async () => {
             describe("ctx1.5", async () => {
                 table = await worker.table(data.arrow.slice());
                 view = await table.view({
-                    column_pivots: ["Sub-Category"]
+                    column_pivots: ["Sub-Category"],
                 });
                 let test_data = await static_view[`to_${name}`]({end_row: 500});
                 benchmark(name, async () => {
                     for (let i = 0; i < 5; i++) {
-                        table.update(test_data.slice ? test_data.slice() : test_data);
+                        table.update(
+                            test_data.slice ? test_data.slice() : test_data
+                        );
                         await view.num_rows();
                     }
                 });
@@ -415,7 +548,7 @@ describe("View", async () => {
                                 aggregate,
                                 row_pivot,
                                 column_pivot,
-                                sort: [["Sales", "asc"]]
+                                sort: [["Sales", "asc"]],
                             });
                             await view.schema();
                         });
@@ -425,7 +558,7 @@ describe("View", async () => {
                                 aggregate,
                                 row_pivot,
                                 column_pivot,
-                                sort: [["Sales", "asc"]]
+                                sort: [["Sales", "asc"]],
                             });
                             await view.schema();
                         });
@@ -435,7 +568,7 @@ describe("View", async () => {
                                 aggregate,
                                 row_pivot,
                                 column_pivot,
-                                sort: [["Customer Name", "asc"]]
+                                sort: [["Customer Name", "asc"]],
                             });
                             await view.schema();
                         });
@@ -445,7 +578,7 @@ describe("View", async () => {
                                 aggregate,
                                 row_pivot,
                                 column_pivot,
-                                sort: [["Customer Name", "desc"]]
+                                sort: [["Customer Name", "desc"]],
                             });
                             await view.schema();
                         });
@@ -541,7 +674,7 @@ describe("Expression/Computed Column", async () => {
 
                 benchmark(`sort computed: \`${computed_func}\``, async () => {
                     let config = {
-                        sort: [["computed", "desc"]]
+                        sort: [["computed", "desc"]],
                     };
 
                     if (table.validate_expressions) {
@@ -569,23 +702,26 @@ describe("Expression/Computed Column", async () => {
 
                 table = await worker.table(data.arrow.slice());
 
-                benchmark(`row pivot computed: \`${computed_func}\``, async () => {
-                    let config = {
-                        row_pivots: ["computed"]
-                    };
+                benchmark(
+                    `row pivot computed: \`${computed_func}\``,
+                    async () => {
+                        let config = {
+                            row_pivots: ["computed"],
+                        };
 
-                    if (table.validate_expressions) {
-                        // New expressions API
-                        config.expressions = SIMPLE_EXPRESSION;
-                    } else {
-                        // Old computed_columns API
-                        config.computed_columns = [COMPUTED_CONFIG];
+                        if (table.validate_expressions) {
+                            // New expressions API
+                            config.expressions = SIMPLE_EXPRESSION;
+                        } else {
+                            // Old computed_columns API
+                            config.computed_columns = [COMPUTED_CONFIG];
+                        }
+
+                        view = await table.view(config);
+
+                        await table.size();
                     }
-
-                    view = await table.view(config);
-
-                    await table.size();
-                });
+                );
             });
 
             describe("ctx2", async () => {
@@ -599,24 +735,27 @@ describe("Expression/Computed Column", async () => {
 
                 table = await worker.table(data.arrow.slice());
 
-                benchmark(`row and column pivot computed: \`${computed_func}\``, async () => {
-                    let config = {
-                        row_pivots: ["computed"],
-                        column_pivots: ["computed"]
-                    };
+                benchmark(
+                    `row and column pivot computed: \`${computed_func}\``,
+                    async () => {
+                        let config = {
+                            row_pivots: ["computed"],
+                            column_pivots: ["computed"],
+                        };
 
-                    if (table.validate_expressions) {
-                        // New expressions API
-                        config.expressions = SIMPLE_EXPRESSION;
-                    } else {
-                        // Old computed_columns API
-                        config.computed_columns = [COMPUTED_CONFIG];
+                        if (table.validate_expressions) {
+                            // New expressions API
+                            config.expressions = SIMPLE_EXPRESSION;
+                        } else {
+                            // Old computed_columns API
+                            config.computed_columns = [COMPUTED_CONFIG];
+                        }
+
+                        view = await table.view(config);
+
+                        await table.size();
                     }
-
-                    view = await table.view(config);
-
-                    await table.size();
-                });
+                );
             });
 
             describe("ctx1.5", async () => {
@@ -630,23 +769,26 @@ describe("Expression/Computed Column", async () => {
 
                 table = await worker.table(data.arrow.slice());
 
-                benchmark(`column pivot computed: \`${computed_func}\``, async () => {
-                    let config = {
-                        column_pivots: ["computed"]
-                    };
+                benchmark(
+                    `column pivot computed: \`${computed_func}\``,
+                    async () => {
+                        let config = {
+                            column_pivots: ["computed"],
+                        };
 
-                    if (table.validate_expressions) {
-                        // New expressions API
-                        config.expressions = SIMPLE_EXPRESSION;
-                    } else {
-                        // Old computed_columns API
-                        config.computed_columns = [COMPUTED_CONFIG];
+                        if (table.validate_expressions) {
+                            // New expressions API
+                            config.expressions = SIMPLE_EXPRESSION;
+                        } else {
+                            // Old computed_columns API
+                            config.computed_columns = [COMPUTED_CONFIG];
+                        }
+
+                        view = await table.view(config);
+
+                        await table.size();
                     }
-
-                    view = await table.view(config);
-
-                    await table.size();
-                });
+                );
             });
         });
     }
@@ -680,7 +822,8 @@ describe("Expression/Computed Column", async () => {
                         config.expressions = COMPLEX_EXPRESSIONS[data_type];
                     } else {
                         // Old computed_columns API
-                        config.computed_columns = COMPLEX_COMPUTED_CONFIGS[data_type];
+                        config.computed_columns =
+                            COMPLEX_COMPUTED_CONFIGS[data_type];
                     }
 
                     view = await table.view(config);
@@ -688,23 +831,29 @@ describe("Expression/Computed Column", async () => {
                     await table.size();
                 });
 
-                benchmark(`sort computed complex: \`${data_type}\``, async () => {
-                    let config = {};
+                benchmark(
+                    `sort computed complex: \`${data_type}\``,
+                    async () => {
+                        let config = {};
 
-                    if (table.validate_expressions) {
-                        // New expressions API
-                        config.expressions = COMPLEX_EXPRESSIONS[data_type];
-                        config.sort = [[COMPLEX_EXPRESSIONS[data_type][0], "desc"]];
-                    } else {
-                        // Old computed_columns API
-                        config.computed_columns = COMPLEX_COMPUTED_CONFIGS[data_type];
-                        config.sort = [["computed", "desc"]];
+                        if (table.validate_expressions) {
+                            // New expressions API
+                            config.expressions = COMPLEX_EXPRESSIONS[data_type];
+                            config.sort = [
+                                [COMPLEX_EXPRESSIONS[data_type][0], "desc"],
+                            ];
+                        } else {
+                            // Old computed_columns API
+                            config.computed_columns =
+                                COMPLEX_COMPUTED_CONFIGS[data_type];
+                            config.sort = [["computed", "desc"]];
+                        }
+
+                        view = await table.view(config);
+
+                        await table.size();
                     }
-
-                    view = await table.view(config);
-
-                    await table.size();
-                });
+                );
             });
 
             describe("ctx1", async () => {
@@ -718,22 +867,28 @@ describe("Expression/Computed Column", async () => {
 
                 table = await worker.table(data.arrow.slice());
 
-                benchmark(`row pivot computed complex: \`${data_type}\``, async () => {
-                    let config = {};
+                benchmark(
+                    `row pivot computed complex: \`${data_type}\``,
+                    async () => {
+                        let config = {};
 
-                    if (table.validate_expressions) {
-                        // New expressions API
-                        config.expressions = COMPLEX_EXPRESSIONS[data_type];
-                        config.row_pivots = [COMPLEX_EXPRESSIONS[data_type][0]];
-                    } else {
-                        // Old computed_columns API
-                        config.computed_columns = COMPLEX_COMPUTED_CONFIGS[data_type];
-                        config.row_pivots = ["computed"];
+                        if (table.validate_expressions) {
+                            // New expressions API
+                            config.expressions = COMPLEX_EXPRESSIONS[data_type];
+                            config.row_pivots = [
+                                COMPLEX_EXPRESSIONS[data_type][0],
+                            ];
+                        } else {
+                            // Old computed_columns API
+                            config.computed_columns =
+                                COMPLEX_COMPUTED_CONFIGS[data_type];
+                            config.row_pivots = ["computed"];
+                        }
+
+                        view = await table.view(config);
+                        await table.size();
                     }
-
-                    view = await table.view(config);
-                    await table.size();
-                });
+                );
             });
 
             describe("ctx2", async () => {
@@ -747,24 +902,32 @@ describe("Expression/Computed Column", async () => {
 
                 table = await worker.table(data.arrow.slice());
 
-                benchmark(`row and column pivot computed complex: \`${data_type}\``, async () => {
-                    let config = {};
+                benchmark(
+                    `row and column pivot computed complex: \`${data_type}\``,
+                    async () => {
+                        let config = {};
 
-                    if (table.validate_expressions) {
-                        // New expressions API
-                        config.expressions = COMPLEX_EXPRESSIONS[data_type];
-                        config.row_pivots = [COMPLEX_EXPRESSIONS[data_type][0]];
-                        config.column_pivots = [COMPLEX_EXPRESSIONS[data_type][1]];
-                    } else {
-                        // Old computed_columns API
-                        config.computed_columns = COMPLEX_COMPUTED_CONFIGS[data_type];
-                        config.row_pivots = ["computed"];
-                        config.column_pivots = ["computed2"];
+                        if (table.validate_expressions) {
+                            // New expressions API
+                            config.expressions = COMPLEX_EXPRESSIONS[data_type];
+                            config.row_pivots = [
+                                COMPLEX_EXPRESSIONS[data_type][0],
+                            ];
+                            config.column_pivots = [
+                                COMPLEX_EXPRESSIONS[data_type][1],
+                            ];
+                        } else {
+                            // Old computed_columns API
+                            config.computed_columns =
+                                COMPLEX_COMPUTED_CONFIGS[data_type];
+                            config.row_pivots = ["computed"];
+                            config.column_pivots = ["computed2"];
+                        }
+
+                        view = await table.view(config);
+                        await table.size();
                     }
-
-                    view = await table.view(config);
-                    await table.size();
-                });
+                );
             });
 
             describe("ctx1.5", async () => {
@@ -778,22 +941,28 @@ describe("Expression/Computed Column", async () => {
 
                 table = await worker.table(data.arrow.slice());
 
-                benchmark(`column pivot computed complex: \`${data_type}\``, async () => {
-                    let config = {};
+                benchmark(
+                    `column pivot computed complex: \`${data_type}\``,
+                    async () => {
+                        let config = {};
 
-                    if (table.validate_expressions) {
-                        // New expressions API
-                        config.expressions = COMPLEX_EXPRESSIONS[data_type];
-                        config.column_pivots = [COMPLEX_EXPRESSIONS[data_type][0]];
-                    } else {
-                        // Old computed_columns API
-                        config.computed_columns = COMPLEX_COMPUTED_CONFIGS[data_type];
-                        config.column_pivots = ["computed"];
+                        if (table.validate_expressions) {
+                            // New expressions API
+                            config.expressions = COMPLEX_EXPRESSIONS[data_type];
+                            config.column_pivots = [
+                                COMPLEX_EXPRESSIONS[data_type][0],
+                            ];
+                        } else {
+                            // Old computed_columns API
+                            config.computed_columns =
+                                COMPLEX_COMPUTED_CONFIGS[data_type];
+                            config.column_pivots = ["computed"];
+                        }
+
+                        view = await table.view(config);
+                        await table.size();
                     }
-
-                    view = await table.view(config);
-                    await table.size();
-                });
+                );
             });
         });
     }
@@ -805,31 +974,34 @@ describe("Expression/Computed Column", async () => {
  *
  */
 
-const wait_for_perspective = () => new Promise(resolve => window.addEventListener("perspective-ready", resolve));
+const wait_for_perspective = () =>
+    new Promise((resolve) =>
+        window.addEventListener("perspective-ready", resolve)
+    );
 
 function to_name({aggregate, row_pivot, column_pivot}) {
     const type = COLUMN_TYPES[aggregate[0].column];
     const sides = {
         "00": "ctx0",
-        "10": "ctx1",
-        "20": "ctx1 deep",
-        "21": "ctx2 deep",
-        "11": "ctx2",
-        "01": "ctx1.5"
+        10: "ctx1",
+        20: "ctx1 deep",
+        21: "ctx2 deep",
+        11: "ctx2",
+        "01": "ctx1.5",
     }[row_pivot.length.toString() + column_pivot.length.toString()];
     return [`${sides}`, type];
     //    return `${COLUMN_TYPES[aggregate[0].column]},${row_pivot.join("/") || "-"}*${column_pivot.join("/") || "-"}`;
 }
 
-const load_dynamic_node = name => {
-    return new Promise(resolve => {
+const load_dynamic_node = (name) => {
+    return new Promise((resolve) => {
         window.perspective = require("@finos/perspective");
         resolve();
     });
 };
 
 const load_dynamic_browser = (name, url) => {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
         const existingScript = document.getElementById(name);
         if (!existingScript) {
             const script = document.createElement("script");
@@ -872,7 +1044,10 @@ async function get_data_node(worker) {
     const fs = require("fs");
     const path = require("path");
 
-    const ARROW_FILE = path.resolve(__dirname, "../../../../examples/simple/superstore.arrow");
+    const ARROW_FILE = path.resolve(
+        __dirname,
+        "../../../../examples/simple/superstore.arrow"
+    );
     console.log("Loading Arrow");
     const arrow = fs.readFileSync(ARROW_FILE, null).buffer;
 

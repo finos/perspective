@@ -10,61 +10,61 @@ export default () => {
         {
             input: `src/less/viewer.less`,
             output: {
-                dir: "dist/css"
+                dir: "dist/css",
             },
             plugins: [
                 postcss({
                     inject: false,
                     extract: path.resolve(`dist/css/viewer.css`),
-                    minimize: {preset: "lite"}
-                })
-            ]
+                    minimize: {preset: "lite"},
+                }),
+            ],
         },
         {
             input: `src/less/column-style.less`,
             output: {
-                dir: "dist/css"
+                dir: "dist/css",
             },
             plugins: [
                 postcss({
                     inject: false,
                     extract: path.resolve(`dist/css/column-style.css`),
-                    minimize: {preset: "lite"}
-                })
-            ]
+                    minimize: {preset: "lite"},
+                }),
+            ],
         },
         {
             input: `src/less/filter-dropdown.less`,
             output: {
-                dir: "dist/css"
+                dir: "dist/css",
             },
             plugins: [
                 postcss({
                     inject: false,
                     extract: path.resolve(`dist/css/filter-dropdown.css`),
-                    minimize: {preset: "lite"}
-                })
-            ]
+                    minimize: {preset: "lite"},
+                }),
+            ],
         },
         {
             input: `src/less/expression-editor.less`,
             output: {
-                dir: "dist/css"
+                dir: "dist/css",
             },
             plugins: [
                 postcss({
                     inject: false,
                     extract: path.resolve(`dist/css/expression-editor.css`),
-                    minimize: {preset: "lite"}
-                })
-            ]
+                    minimize: {preset: "lite"},
+                }),
+            ],
         },
-        ...["index", "monaco"].map(name => ({
+        ...["index", "monaco"].map((name) => ({
             input: `src/ts/${name}.ts`,
             external: [/pkg/, /node_modules/, /monaco\-editor/],
             output: {
                 sourcemap: true,
-                dir: "dist/esm/"
+                dir: "dist/esm/",
             },
             plugins: [
                 typescript({tsconfig: "./tsconfig.json"}),
@@ -72,15 +72,15 @@ export default () => {
                 postcss({
                     inject: false,
                     sourceMap: true,
-                    minimize: {mergeLonghand: false}
+                    minimize: {mergeLonghand: false},
                 }),
-                sourcemaps()
+                sourcemaps(),
             ],
             watch: {
-                clearScreen: false
-            }
+                clearScreen: false,
+            },
         })),
-        ...generate_themes()
+        ...generate_themes(),
     ];
 };
 
@@ -91,7 +91,7 @@ function generate_themes() {
         return {
             input: `${val}`,
             output: {
-                dir: "dist/umd"
+                dir: "dist/umd",
             },
             plugins: [
                 {
@@ -100,21 +100,29 @@ function generate_themes() {
                         return null;
                     },
                     buildEnd: () => {
-                        fs.rm(path.resolve(__dirname, "dist", "css", `${key}.js`), () => {});
+                        fs.rm(
+                            path.resolve(__dirname, "dist", "css", `${key}.js`),
+                            () => {}
+                        );
                     },
                     load(id) {
                         return null;
-                    }
+                    },
                 },
                 postcss({
                     inject: false,
                     extract: path.resolve(`dist/umd/${key}.css`),
                     sourceMap: false,
-                    minimize: false
-                })
-            ]
+                    minimize: false,
+                }),
+            ],
         };
     }
 
-    return THEMES.map(theme => reducer(theme.replace(".less", ""), path.resolve(__dirname, "src", "themes", theme)));
+    return THEMES.map((theme) =>
+        reducer(
+            theme.replace(".less", ""),
+            path.resolve(__dirname, "src", "themes", theme)
+        )
+    );
 }

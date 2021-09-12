@@ -8,7 +8,7 @@
  */
 const puppeteer = require("puppeteer");
 
-module.exports = async function() {
+module.exports = async function () {
     let args = [
         `--window-size=1280,1024`,
         "--disable-accelerated-2d-canvas",
@@ -18,7 +18,7 @@ module.exports = async function() {
         "--disable-dev-shm-usage",
         "--font-render-hinting=medium",
         '--proxy-server="direct://"',
-        "--proxy-bypass-list=*"
+        "--proxy-bypass-list=*",
     ];
 
     global.__BROWSER__ = await puppeteer.launch({
@@ -27,7 +27,7 @@ module.exports = async function() {
 
         // https://github.com/puppeteer/puppeteer/issues/1183
         defaultViewport: null,
-        args
+        args,
     });
     process.env.PSP_BROWSER_ENDPOINT = global.__BROWSER__.wsEndpoint();
 };

@@ -9,56 +9,49 @@
 
 <!DOCTYPE html>
 <html>
+    <head>
+        <script src="perspective.js"></script>
+        <script src="perspective-viewer.js"></script>
+        <script src="perspective-viewer-d3fc.js"></script>
 
-<head>
+        <link rel="stylesheet" href="material-dense.css" is="custom-style" />
 
-    <script src="perspective.js"></script>
-    <script src="perspective-viewer.js"></script>
-    <script src="perspective-viewer-d3fc.js"></script>
+        <style>
+            perspective-expression-editor {
+                --monaco-cursor--visibility: hidden;
+                --monaco-container--appearance: none;
+            }
 
-    <link rel='stylesheet' href="material-dense.css" is="custom-style">
+            perspective-viewer {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+            }
 
-    <style>
-        perspective-expression-editor {
-            --monaco-cursor--visibility: hidden;
-            --monaco-container--appearance: none;
-        }
+            perspective-viewer table {
+                font-family: Arial;
+            }
+        </style>
+    </head>
 
-        perspective-viewer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-        }
+    <body>
+        <perspective-viewer> </perspective-viewer>
 
-        perspective-viewer table {
-            font-family: Arial;
-        }
-    </style>
-
-</head>
-
-<body>
-
-    <perspective-viewer>
-
-    </perspective-viewer>
-
-    <script>
-
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'superstore.csv', true);
-        xhr.onload = async function () {
-            const viewer =
-                document.getElementsByTagName('perspective-viewer')[0];
-            viewer.load(perspective.worker().table(xhr.response));
-            await viewer.restore({ plugin: "__view_name", columns: __columns });
-        }
-        xhr.send(null);
-
-    </script>
-
-</body>
-
+        <script>
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "superstore.csv", true);
+            xhr.onload = async function () {
+                const viewer =
+                    document.getElementsByTagName("perspective-viewer")[0];
+                viewer.load(perspective.worker().table(xhr.response));
+                await viewer.restore({
+                    plugin: "__view_name",
+                    columns: __columns,
+                });
+            };
+            xhr.send(null);
+        </script>
+    </body>
 </html>

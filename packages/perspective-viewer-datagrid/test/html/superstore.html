@@ -9,54 +9,46 @@
 
 <!DOCTYPE html>
 <html>
+    <head>
+        <script src="perspective.js"></script>
+        <script src="perspective-viewer.js"></script>
+        <script src="perspective-viewer-datagrid.js"></script>
 
-<head>
+        <style>
+            perspective-expression-editor {
+                --monaco-cursor--visibility: hidden;
+                --monaco-container--appearance: none;
+            }
 
-    <script src="perspective.js"></script>
-    <script src="perspective-viewer.js"></script>
-    <script src="perspective-viewer-datagrid.js"></script>
+            perspective-viewer {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+            }
 
-    <style>
-        perspective-expression-editor {
-            --monaco-cursor--visibility: hidden;
-            --monaco-container--appearance: none;
-        }
+            perspective-viewer table {
+                font-family: Arial;
+            }
+        </style>
+    </head>
 
-        perspective-viewer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-        }
+    <body>
+        <perspective-viewer> </perspective-viewer>
 
-        perspective-viewer table {
-            font-family: Arial;
-        }
-    </style>
-
-</head>
-
-<body>
-
-    <perspective-viewer>
-
-    </perspective-viewer>
-
-    <script>
-
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'superstore.csv', true);
-        xhr.onload = function () {
-            window.__CSV__ = xhr.response;
-            window.__WORKER__ = perspective.worker();
-            const table = perspective.worker().table(xhr.response);
-            document.getElementsByTagName('perspective-viewer')[0].load(table);
-        }
-        xhr.send(null);
-
-    </script>
-
-</body>
-
+        <script>
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "superstore.csv", true);
+            xhr.onload = function () {
+                window.__CSV__ = xhr.response;
+                window.__WORKER__ = perspective.worker();
+                const table = perspective.worker().table(xhr.response);
+                document
+                    .getElementsByTagName("perspective-viewer")[0]
+                    .load(table);
+            };
+            xhr.send(null);
+        </script>
+    </body>
 </html>

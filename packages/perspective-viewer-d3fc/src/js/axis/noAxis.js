@@ -17,12 +17,14 @@ export const domain = () => {
     let valueNames = ["crossValue"];
     let orient = "horizontal";
 
-    const _domain = data => {
+    const _domain = (data) => {
         const flattenedData = flattenArray(data);
-        return transformDomain([...new Set(flattenedData.map(d => d[valueNames[0]]))]);
+        return transformDomain([
+            ...new Set(flattenedData.map((d) => d[valueNames[0]])),
+        ]);
     };
 
-    const transformDomain = d => (orient == "vertical" ? d.reverse() : d);
+    const transformDomain = (d) => (orient == "vertical" ? d.reverse() : d);
 
     _domain.valueName = (...args) => {
         if (!args.length) {
@@ -50,4 +52,4 @@ export const domain = () => {
     return _domain;
 };
 
-export const labelFunction = valueName => d => d[valueName].join("|");
+export const labelFunction = (valueName) => (d) => d[valueName].join("|");

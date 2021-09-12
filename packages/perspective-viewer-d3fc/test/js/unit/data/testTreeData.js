@@ -2,28 +2,28 @@ export const data = [
     {
         __ROW_PATH__: ["Central", "Furniture"],
         Sales: 163797.16380000004,
-        Quantity: 1827
+        Quantity: 1827,
     },
     {
         __ROW_PATH__: ["Central", "Technology"],
         Sales: 170416.31200000003,
-        Quantity: 1544
+        Quantity: 1544,
     },
     {
         __ROW_PATH__: ["East", "Furniture"],
         Sales: 208291.20400000017,
-        Quantity: 2214
+        Quantity: 2214,
     },
     {
         __ROW_PATH__: ["East", "Technology"],
         Sales: 264973.9810000004,
-        Quantity: 1942
-    }
+        Quantity: 1942,
+    },
 ];
 
 const item = {
     __ROW_PATH__: ["East"],
-    Quantity: 4156
+    Quantity: 4156,
 };
 
 export const agg_paths = [
@@ -32,7 +32,7 @@ export const agg_paths = [
     [item, item, item],
     [item, item, item],
     [item, item, item],
-    [item, item, item]
+    [item, item, item],
 ];
 
 export const splitData = [
@@ -45,7 +45,7 @@ export const splitData = [
         "Second Class|Sales": 31187.1234,
         "Second Class|Quantity": 343,
         "Standard Class|Sales": 102729.92900000002,
-        "Standard Class|Quantity": 1118
+        "Standard Class|Quantity": 1118,
     },
     {
         __ROW_PATH__: ["Central", "Office Supplies"],
@@ -56,7 +56,7 @@ export const splitData = [
         "Second Class|Sales": 34307.253,
         "Second Class|Quantity": 1063,
         "Standard Class|Sales": 107510.43999999997,
-        "Standard Class|Quantity": 3446
+        "Standard Class|Quantity": 3446,
     },
     {
         __ROW_PATH__: ["Central", "Technology"],
@@ -67,7 +67,7 @@ export const splitData = [
         "Second Class|Sales": 38055.629,
         "Second Class|Quantity": 389,
         "Standard Class|Sales": 108287.191,
-        "Standard Class|Quantity": 873
+        "Standard Class|Quantity": 873,
     },
     {
         __ROW_PATH__: ["East", "Furniture"],
@@ -78,7 +78,7 @@ export const splitData = [
         "Second Class|Sales": 44035.93700000001,
         "Second Class|Quantity": 433,
         "Standard Class|Sales": 121992.05199999994,
-        "Standard Class|Quantity": 1268
+        "Standard Class|Quantity": 1268,
     },
     {
         __ROW_PATH__: ["East", "Office Supplies"],
@@ -89,7 +89,7 @@ export const splitData = [
         "Second Class|Sales": 43205.097,
         "Second Class|Quantity": 1249,
         "Standard Class|Sales": 116703.0659999999,
-        "Standard Class|Quantity": 3776
+        "Standard Class|Quantity": 3776,
     },
     {
         __ROW_PATH__: ["East", "Technology"],
@@ -100,19 +100,19 @@ export const splitData = [
         "Second Class|Sales": 29304.48999999999,
         "Second Class|Quantity": 344,
         "Standard Class|Sales": 166626.71300000005,
-        "Standard Class|Quantity": 1170
-    }
+        "Standard Class|Quantity": 1170,
+    },
 ];
 
 export const mainValues = [
     {
         name: "Sales",
-        type: "float"
+        type: "float",
     },
     {
         name: "Quantity",
-        type: "integer"
-    }
+        type: "integer",
+    },
 ];
 
 export const realValues = ["Sales", "Quantity"];
@@ -120,10 +120,10 @@ export const realValues = ["Sales", "Quantity"];
 export const crossValues = [
     {
         name: "Region",
-        type: "string"
+        type: "string",
     },
     {
         name: "Category",
-        type: "string"
-    }
+        type: "string",
+    },
 ];

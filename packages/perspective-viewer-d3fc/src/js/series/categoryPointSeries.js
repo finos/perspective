@@ -18,15 +18,22 @@ export function categoryPointSeries(settings, seriesKey, color, symbols) {
         series.type(symbols(seriesKey));
     }
 
-    series.decorate(selection => {
-        selection.style("stroke", d => withoutOpacity(color(d.colorValue || seriesKey))).style("fill", d => withOpacity(color(d.colorValue || seriesKey), opacity));
+    series.decorate((selection) => {
+        selection
+            .style("stroke", (d) =>
+                withoutOpacity(color(d.colorValue || seriesKey))
+            )
+            .style("fill", (d) =>
+                withOpacity(color(d.colorValue || seriesKey), opacity)
+            );
     });
 
-    return series.crossValue(d => d.crossValue).mainValue(d => d.mainValue);
+    return series.crossValue((d) => d.crossValue).mainValue((d) => d.mainValue);
 }
 
 export function symbolType(settings) {
-    const col = settings.data && settings.data.length > 0 ? settings.data[0] : {};
-    const domain = Object.keys(col).filter(k => k !== "__ROW_PATH__");
+    const col =
+        settings.data && settings.data.length > 0 ? settings.data[0] : {};
+    const domain = Object.keys(col).filter((k) => k !== "__ROW_PATH__");
     return fromDomain(domain);
 }

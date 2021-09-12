@@ -15,23 +15,20 @@ export function colorRangeLegend() {
     let scale = null;
 
     function legend(container) {
-        const legendSelection = getOrCreateElement(container, "div.legend-container", () =>
-            container
-                .append("div")
-                .attr("class", "legend-container legend-color")
-                .style("z-index", "2")
+        const legendSelection = getOrCreateElement(
+            container,
+            "div.legend-container",
+            () =>
+                container
+                    .append("div")
+                    .attr("class", "legend-container legend-color")
+                    .style("z-index", "2")
         );
         const {width, height} = legendSelection.node().getBoundingClientRect();
 
-        const xScale = d3
-            .scaleBand()
-            .domain([0, 1])
-            .range([0, width]);
+        const xScale = d3.scaleBand().domain([0, 1]).range([0, width]);
 
-        const domain = scale
-            .copy()
-            .nice()
-            .domain();
+        const domain = scale.copy().nice().domain();
         const paddedDomain = fc
             .extentLinear()
             .pad([0.1, 0.1])
@@ -39,10 +36,7 @@ export function colorRangeLegend() {
         const [min, max] = paddedDomain;
         const expandedDomain = d3.range(min, max, (max - min) / height);
 
-        const yScale = d3
-            .scaleLinear()
-            .domain(paddedDomain)
-            .range([height, 0]);
+        const yScale = d3.scaleLinear().domain(paddedDomain).range([height, 0]);
 
         const svgBar = fc
             .autoBandwidth(fc.seriesSvgBar())
@@ -50,29 +44,38 @@ export function colorRangeLegend() {
             .yScale(yScale)
             .crossValue(0)
             .baseValue((_, i) => expandedDomain[Math.max(0, i - 1)])
-            .mainValue(d => d)
-            .decorate(selection => {
-                selection.selectAll("path").style("fill", d => scale(d));
+            .mainValue((d) => d)
+            .decorate((selection) => {
+                selection.selectAll("path").style("fill", (d) => scale(d));
             });
 
-        const middle = domain[0] < 0 && domain[1] > 0 ? 0 : Math.round((domain[1] + domain[0]) / 2);
+        const middle =
+            domain[0] < 0 && domain[1] > 0
+                ? 0
+                : Math.round((domain[1] + domain[0]) / 2);
         const tickValues = [...domain, middle];
 
         const axisLabel = fc
             .axisRight(yScale)
             .tickValues(tickValues)
             .tickSizeOuter(0)
-            .tickFormat(d => valueformatter(d));
+            .tickFormat((d) => valueformatter(d));
 
-        const legendSvg = getOrCreateElement(legendSelection, "svg", () => legendSelection.append("svg"))
+        const legendSvg = getOrCreateElement(legendSelection, "svg", () =>
+            legendSelection.append("svg")
+        )
             .style("width", width)
             .style("height", height);
-        const legendBar = getOrCreateElement(legendSvg, "g", () => legendSvg.append("g"))
+        const legendBar = getOrCreateElement(legendSvg, "g", () =>
+            legendSvg.append("g")
+        )
             .datum(expandedDomain)
             .call(svgBar);
 
         const barWidth = Math.abs(legendBar.node().getBBox().x);
-        getOrCreateElement(legendSvg, "#legend-axis", () => legendSvg.append("g").attr("id", "legend-axis"))
+        getOrCreateElement(legendSvg, "#legend-axis", () =>
+            legendSvg.append("g").attr("id", "legend-axis")
+        )
             .attr("transform", `translate(${barWidth})`)
             .datum(expandedDomain)
             .call(axisLabel)

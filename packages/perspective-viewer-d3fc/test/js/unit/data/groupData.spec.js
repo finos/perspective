@@ -22,10 +22,10 @@ describe("groupAndStackData should", () => {
             data: [
                 {value1: 10, __ROW_PATH__: ["CROSS1.1"]},
                 {value1: 20, __ROW_PATH__: ["CROSS1.2"]},
-                {value1: 30, __ROW_PATH__: ["CROSS1.1"]}
+                {value1: 30, __ROW_PATH__: ["CROSS1.1"]},
             ],
             mainValues: [{name: "value1", type: "integer"}],
-            splitValues: []
+            splitValues: [],
         };
 
         const groupedResult = groupAndStackData(settings);
@@ -36,18 +36,18 @@ describe("groupAndStackData should", () => {
         const suppliedData = [
             {value1: 10, __ROW_PATH__: ["CROSS1.1"]},
             {value1: 20, __ROW_PATH__: ["CROSS1.2"]},
-            {value1: 30, __ROW_PATH__: ["CROSS1.1"]}
+            {value1: 30, __ROW_PATH__: ["CROSS1.1"]},
         ];
         const settings = {
             crossValues: [{name: "cross1", type: "string"}],
             data: suppliedData,
             mainValues: [{name: "value1", type: "integer"}],
-            splitValues: []
+            splitValues: [],
         };
 
         const extraData = suppliedData.concat([
             {value1: 40, __ROW_PATH__: ["CROSS1.3"]},
-            {value1: 50, __ROW_PATH__: ["CROSS1.3"]}
+            {value1: 50, __ROW_PATH__: ["CROSS1.3"]},
         ]);
         const groupedResult = groupAndStackData(settings, extraData);
 
