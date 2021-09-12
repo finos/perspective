@@ -10,7 +10,7 @@
 async function get_contents_default(page) {
     return await page.evaluate(async () => {
         const viewer = document.querySelector(
-            "perspective-viewer perspective-viewer-debug"
+            "perspective-viewer perspective-viewer-plugin"
         );
         return viewer.innerHTML;
     });

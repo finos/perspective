@@ -8,6 +8,11 @@
  *
  */
 
+// Monaco extensions are compiled separately into a single bundle via this file,
+// such that the can conveniently be downloaded asynchronously while not
+// delaying initial `<perspective-viewer>` loading.  Don't import this file
+// directly!
+
 import "monaco-editor/esm/vs/editor/browser/controller/coreCommands.js";
 import "monaco-editor/esm/vs/editor/browser/widget/codeEditorWidget.js";
 import "monaco-editor/esm/vs/editor/browser/widget/diffEditorWidget.js";

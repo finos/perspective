@@ -28,10 +28,45 @@
  * @module perspective-viewer
  */
 
-export {IPerspectiveViewerPlugin} from "./plugin";
-export {PerspectiveViewerPluginElement} from "./plugin";
-export {PerspectiveViewerElement} from "./viewer";
-export {PerspectiveViewerConfig} from "./viewer";
-export * from "./extensions";
+import {PerspectiveViewerElement} from "./viewer";
+import {PerspectiveViewerPluginElement} from "./plugin";
 
-import "mobile-drag-drop-shadow-dom";
+// JSX / React extensions
+
+type ReactPerspectiveViewerAttributes<T> = React.HTMLAttributes<T>;
+
+type JsxPerspectiveViewerElement = {class?: string} & React.DetailedHTMLProps<
+    ReactPerspectiveViewerAttributes<PerspectiveViewerElement>,
+    PerspectiveViewerElement
+>;
+
+declare global {
+    // eslint-disable-next-line @typescript-eslint/no-namespace
+    namespace JSX {
+        interface IntrinsicElements {
+            "perspective-viewer": JsxPerspectiveViewerElement;
+        }
+    }
+}
+
+// Custom Elements extensions
+
+declare global {
+    interface Document {
+        createElement(
+            tagName: "perspective-viewer",
+            options?: ElementCreationOptions
+        ): PerspectiveViewerElement;
+        createElement(
+            tagName: "perspective-viewer-plugin",
+            options?: ElementCreationOptions
+        ): PerspectiveViewerPluginElement;
+    }
+
+    interface CustomElementRegistry {
+        get(tagName: "perspective-viewer"): typeof PerspectiveViewerElement;
+        get(
+            tagName: "perspective-viewer-plugin"
+        ): typeof PerspectiveViewerPluginElement;
+    }
+}
