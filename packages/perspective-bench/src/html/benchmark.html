@@ -9,48 +9,48 @@
 
 <!DOCTYPE html>
 <html>
+    <head>
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
+        />
 
-<head>
+        <script src="perspective.js"></script>
+        <script src="perspective-viewer.js"></script>
+        <script src="perspective-viewer-datagrid.js"></script>
+        <script src="perspective-viewer-d3fc.js"></script>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+        <link rel="stylesheet" href="material.css" is="custom-style" />
 
-    <script src="perspective.js"></script>
-    <script src="perspective-viewer.js"></script>
-    <script src="perspective-viewer-datagrid.js"></script>
-    <script src="perspective-viewer-d3fc.js"></script>
+        <style>
+            perspective-viewer {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+            }
+        </style>
+    </head>
 
-    <link rel='stylesheet' href="material.css" is="custom-style">
+    <body>
+        <perspective-viewer></perspective-viewer>
 
-    <style>
-        perspective-viewer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-        }
-    </style>
-
-</head>
-
-<body>
-
-    <perspective-viewer></perspective-viewer>
-
-    <script>
-        window.addEventListener('DOMContentLoaded', async () => {
-            const el = document.getElementsByTagName('perspective-viewer')[0];
-            el.addEventListener("perspective-config-update", () => localStorage.setItem("layout", JSON.stringify(el.save())));
-            el.restore(JSON.parse(localStorage.getItem("layout")));
-            const req = await fetch("benchmark.arrow");
-            const arrow = await req.arrayBuffer();
-            const worker = perspective.worker();
-            const table = await worker.table(arrow);
-            el.load(table);
-            el.toggleConfig();
-        });
-    </script>
-
-</body>
-
+        <script>
+            window.addEventListener("DOMContentLoaded", async () => {
+                const el =
+                    document.getElementsByTagName("perspective-viewer")[0];
+                el.addEventListener("perspective-config-update", () =>
+                    localStorage.setItem("layout", JSON.stringify(el.save()))
+                );
+                el.restore(JSON.parse(localStorage.getItem("layout")));
+                const req = await fetch("benchmark.arrow");
+                const arrow = await req.arrayBuffer();
+                const worker = perspective.worker();
+                const table = await worker.table(arrow);
+                el.load(table);
+                el.toggleConfig();
+            });
+        </script>
+    </body>
 </html>

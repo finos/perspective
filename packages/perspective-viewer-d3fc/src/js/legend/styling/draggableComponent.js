@@ -17,7 +17,7 @@ export function draggableComponent() {
     let pinned = true;
     let settings = null;
 
-    const draggable = element => {
+    const draggable = (element) => {
         const node = element.node();
         node.style.cursor = "move";
         if (settings.legend) {
@@ -25,13 +25,17 @@ export function draggableComponent() {
             node.style.top = settings.legend.top;
         }
 
-        const drag = d3.drag().on("drag", function() {
-            const offsets = enforceContainerBoundaries(this, d3.event.dx, d3.event.dy);
+        const drag = d3.drag().on("drag", function () {
+            const offsets = enforceContainerBoundaries(
+                this,
+                d3.event.dx,
+                d3.event.dy
+            );
             this.style.left = `${this.offsetLeft + offsets.x}px`;
             this.style.top = `${this.offsetTop + offsets.y}px`;
             const position = {
                 left: this.style.left,
-                top: this.style.top
+                top: this.style.top,
             };
             settings.legend = {...settings.legend, ...position};
 
@@ -62,7 +66,7 @@ function unpinNodeFromTopRight(node, pinned) {
         // Default behaviour for the legend is to remain pinned to the top right
         // hand corner with a specific margin. Once the legend has moved we
         // cannot continue to use that css based approach.
-        d3.select(window).on(resizeForDraggingEvent, function() {
+        d3.select(window).on(resizeForDraggingEvent, function () {
             const offsets = enforceContainerBoundaries(node, 0, 0);
             node.style.left = `${node.offsetLeft + offsets.x}px`;
             node.style.top = `${node.offsetTop + offsets.y}px`;
@@ -86,5 +90,8 @@ function isNodeInTopRight(node) {
 
     const fuzz = 5;
 
-    return nodeRect.right + margin + fuzz >= containerRect.right && nodeRect.top - margin - fuzz <= containerRect.top;
+    return (
+        nodeRect.right + margin + fuzz >= containerRect.right &&
+        nodeRect.top - margin - fuzz <= containerRect.top
+    );
 }

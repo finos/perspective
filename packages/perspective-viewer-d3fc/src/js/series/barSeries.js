@@ -10,22 +10,25 @@ import * as fc from "d3fc";
 import {tooltip} from "../tooltip/tooltip";
 
 export function barSeries(settings, color) {
-    let series = settings.mainValues.length > 1 ? fc.seriesSvgGrouped(fc.seriesSvgBar()) : fc.seriesSvgBar();
+    let series =
+        settings.mainValues.length > 1
+            ? fc.seriesSvgGrouped(fc.seriesSvgBar())
+            : fc.seriesSvgBar();
 
-    series = series.decorate(selection => {
+    series = series.decorate((selection) => {
         tooltip().settings(settings)(selection);
-        selection.style("fill", d => color(d.key));
+        selection.style("fill", (d) => color(d.key));
     });
 
     return fc
         .autoBandwidth(minBandwidth(series))
-        .crossValue(d => d.crossValue)
-        .mainValue(d => d.mainValue)
-        .baseValue(d => d.baseValue);
+        .crossValue((d) => d.crossValue)
+        .mainValue((d) => d.mainValue)
+        .baseValue((d) => d.baseValue);
 }
 
-const minBandwidth = adaptee => {
-    const min = arg => {
+const minBandwidth = (adaptee) => {
+    const min = (arg) => {
         return adaptee(arg);
     };
 

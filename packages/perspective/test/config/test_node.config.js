@@ -7,11 +7,11 @@ module.exports = Object.assign({}, common({no_minify: true}), {
     externals: [/^([a-z0-9]|\@(?!apache\-arrow)).*?(?!wasm)$/g],
     node: {
         __dirname: false,
-        __filename: false
+        __filename: false,
     },
     output: {
         filename: "perspective.spec.js",
         path: path.resolve(__dirname, "../../build"),
-        libraryTarget: "umd"
-    }
+        libraryTarget: "umd",
+    },
 });

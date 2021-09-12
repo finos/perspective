@@ -8,30 +8,15 @@
  */
 
 import "@finos/perspective-viewer";
-
-import {Table, TableData, Aggregate, Sort, Expression, Filter, ColumnName} from "@finos/perspective";
-import {Message} from "@lumino/messaging";
 import {Widget} from "@lumino/widgets";
-import {MIME_TYPE, PSP_CLASS, PSP_CONTAINER_CLASS, PSP_CONTAINER_CLASS_DARK} from "./utils";
-
-import {PerspectiveViewerElement, PerspectiveViewerConfig} from "@finos/perspective-viewer";
+import {
+    MIME_TYPE,
+    PSP_CLASS,
+    PSP_CONTAINER_CLASS,
+    PSP_CONTAINER_CLASS_DARK,
+} from "./utils";
 
 let _increment = 0;
-
-export interface PerspectiveWidgetOptions extends PerspectiveViewerConfig {
-    dark?: boolean;
-    client?: boolean;
-    server?: boolean;
-    title?: string;
-    bindto?: HTMLElement;
-
-    // these shouldn't exist, PerspectiveViewerOptions should be sufficient e.g.
-    // ["row-pivots"]
-    column_pivots?: Array<ColumnName>;
-    row_pivots?: Array<ColumnName>;
-    expressions?: Array<Expression>;
-    editable?: boolean;
-}
 
 /**
  * Class for perspective lumino widget.
@@ -39,15 +24,15 @@ export interface PerspectiveWidgetOptions extends PerspectiveViewerConfig {
  * @class PerspectiveWidget (name) TODO: document
  */
 export class PerspectiveWidget extends Widget {
-    constructor(name = "Perspective", options: PerspectiveWidgetOptions = {}) {
-        super({node: options.bindto || document.createElement("div")});
-        this._viewer = PerspectiveWidget.createNode(this.node as HTMLDivElement);
-
+    constructor(name = "Perspective", options = {}) {
+        super({
+            node: options.bindto || document.createElement("div"),
+        });
+        this._viewer = PerspectiveWidget.createNode(this.node);
         this.title.label = name;
         this.title.caption = `${name}`;
         this.id = `${name}-` + _increment;
         _increment += 1;
-
         this._set_attributes(options);
     }
 
@@ -56,22 +41,23 @@ export class PerspectiveWidget extends Widget {
      *
      * @param options
      */
-    _set_attributes(options: PerspectiveViewerConfig & PerspectiveWidgetOptions): void {
-        const plugin: string = options.plugin || "datagrid";
-        const columns: ColumnName[] = options.columns || [];
-        const row_pivots: ColumnName[] = options.row_pivots || options.row_pivots || [];
-        const column_pivots: ColumnName[] = options.column_pivots || options.column_pivots || [];
-        const aggregates: {[column: string]: Aggregate} = options.aggregates || {};
-        const sort: Sort[] = options.sort || [];
-        const filter: Filter[] = options.filter || [];
-        const expressions: Expression[] = options.expressions || options.expressions || [];
-        const plugin_config: object = options.plugin_config || {};
-        const dark: boolean = options.dark || false;
-        const editable: boolean = options.editable || false;
-        const server: boolean = options.server || false;
-        const client: boolean = options.client || false;
-        // const selectable: boolean = options.selectable || false;
 
+    _set_attributes(options) {
+        const plugin = options.plugin || "datagrid";
+        const columns = options.columns || [];
+        const row_pivots = options.row_pivots || options.row_pivots || [];
+        const column_pivots =
+            options.column_pivots || options.column_pivots || [];
+        const aggregates = options.aggregates || {};
+        const sort = options.sort || [];
+        const filter = options.filter || [];
+        const expressions = options.expressions || options.expressions || [];
+        const plugin_config = options.plugin_config || {};
+        const dark = options.dark || false;
+        const editable = options.editable || false;
+        const server = options.server || false;
+        const client = options.client || false;
+        // const selectable: boolean = options.selectable || false;
         this.server = server;
         this.client = client;
         this.dark = dark;
@@ -85,9 +71,8 @@ export class PerspectiveWidget extends Widget {
             columns,
             aggregates,
             expressions,
-            filter
+            filter,
         };
-
         // this.plugin_config = plugin_config;
         // this.selectable = selectable;
     }
@@ -95,12 +80,12 @@ export class PerspectiveWidget extends Widget {
     /**********************/
     /* Lumino Overrides */
     /**********************/
-
     /**
      * Lumino: after visible
      *
      */
-    onAfterShow(msg: Message): void {
+
+    onAfterShow(msg) {
         this.notifyResize();
         super.onAfterShow(msg);
     }
@@ -109,31 +94,32 @@ export class PerspectiveWidget extends Widget {
      * Lumino: widget resize
      *
      */
-    onResize(msg: Widget.ResizeMessage): void {
+
+    onResize(msg) {
         this.notifyResize();
         super.onResize(msg);
     }
 
-    protected onActivateRequest(msg: Message): void {
+    onActivateRequest(msg) {
         if (this.isAttached) {
             this.viewer.focus();
         }
         super.onActivateRequest(msg);
     }
 
-    async notifyResize(): Promise<void> {
+    async notifyResize() {
         await this.viewer.notifyResize();
     }
 
-    async toggleConfig(): Promise<void> {
+    async toggleConfig() {
         await this.viewer.toggleConfig();
     }
 
-    async save(): Promise<PerspectiveViewerConfig> {
+    async save() {
         return await this.viewer.save();
     }
 
-    async restore(config: PerspectiveViewerConfig): Promise<void> {
+    async restore(config) {
         return await this.viewer.restore(config);
     }
 
@@ -142,7 +128,8 @@ export class PerspectiveWidget extends Widget {
      *
      * @param table A `perspective.table` object.
      */
-    async load(table: Promise<Table>): Promise<void> {
+
+    async load(table) {
         this.viewer.load(table);
         await this.viewer.restore(this._viewer_config);
     }
@@ -152,7 +139,8 @@ export class PerspectiveWidget extends Widget {
      *
      * @param data
      */
-    async _update(data: TableData): Promise<void> {
+
+    async _update(data) {
         const table = await this.viewer.getTable();
         await table.update(data);
     }
@@ -160,7 +148,8 @@ export class PerspectiveWidget extends Widget {
     /**
      * Removes all rows from the viewer's table. Does not reset viewer state.
      */
-    async clear(): Promise<void> {
+
+    async clear() {
         const table = await this.viewer.getTable();
         await table.clear();
     }
@@ -171,7 +160,8 @@ export class PerspectiveWidget extends Widget {
      *
      * @param data
      */
-    async replace(data: TableData): Promise<void> {
+
+    async replace(data) {
         const table = await this.viewer.getTable();
         await table.replace(data);
     }
@@ -181,7 +171,8 @@ export class PerspectiveWidget extends Widget {
      * user state). This (or the underlying `perspective.table`'s equivalent
      * method) must be called in order for its memory to be reclaimed.
      */
-    delete(): void {
+
+    delete() {
         this.viewer.delete();
     }
 
@@ -189,11 +180,12 @@ export class PerspectiveWidget extends Widget {
      * Returns a promise that resolves to the element's edit port ID, used
      * internally when edits are made using datagrid in client/server mode.
      */
-    async getEditPort(): Promise<number> {
+
+    async getEditPort() {
         return await this.viewer.getEditPort();
     }
 
-    async getTable(): Promise<Table> {
+    async getTable() {
         return await this.viewer.getTable();
     }
 
@@ -202,13 +194,13 @@ export class PerspectiveWidget extends Widget {
      * Getters
      *
      */
-
     /**
      * Returns the underlying `PerspectiveViewer` instance.
      *
      * @returns {PerspectiveViewer} The widget's viewer instance.
      */
-    get viewer(): PerspectiveViewerElement {
+
+    get viewer() {
         return this._viewer;
     }
 
@@ -217,7 +209,8 @@ export class PerspectiveWidget extends Widget {
      *
      * @returns {string} the widget name - "Perspective" if not set by the user.
      */
-    get name(): string {
+
+    get name() {
         return this.title.label;
     }
 
@@ -226,15 +219,19 @@ export class PerspectiveWidget extends Widget {
     // pass in a plugin config and have it applied to the viewer, but they
     // cannot read the current `plugin_config` of the viewer if it has not
     // already been set from Python.
-    get plugin_config(): object {
+
+    get plugin_config() {
         return this._plugin_config;
     }
-    set plugin_config(plugin_config: object) {
+
+    set plugin_config(plugin_config) {
         this._plugin_config = plugin_config;
 
         // Allow plugin configs passed from Python to take effect on the viewer
         if (this._plugin_config) {
-            this.viewer.restore({plugin_config: this._plugin_config});
+            this.viewer.restore({
+                plugin_config: this._plugin_config,
+            });
         }
     }
 
@@ -242,10 +239,12 @@ export class PerspectiveWidget extends Widget {
      * True if the widget is in client-only mode, i.e. the browser has ownership
      * of the widget's data.
      */
-    get client(): boolean {
+
+    get client() {
         return this._client;
     }
-    set client(client: boolean) {
+
+    set client(client) {
         this._client = client;
     }
 
@@ -254,20 +253,24 @@ export class PerspectiveWidget extends Widget {
      * full ownership of the widget's data, and the widget does not have a
      * `perspective.Table` of its own.
      */
-    get server(): boolean {
+
+    get server() {
         return this._server;
     }
-    set server(server: boolean) {
+
+    set server(server) {
         this._server = server;
     }
 
     /**
      * Enable or disable dark mode by re-rendering the viewer.
      */
-    get dark(): boolean {
+
+    get dark() {
         return this._dark;
     }
-    set dark(dark: boolean) {
+
+    set dark(dark) {
         this._dark = dark;
         if (this._dark) {
             this.node.classList.add(PSP_CONTAINER_CLASS_DARK);
@@ -281,10 +284,11 @@ export class PerspectiveWidget extends Widget {
         }
     }
 
-    get editable(): boolean {
+    get editable() {
         return this._editable;
     }
-    set editable(editable: boolean) {
+
+    set editable(editable) {
         this._editable = editable;
         if (this._editable) {
             this.viewer.setAttribute("editable", "");
@@ -293,11 +297,11 @@ export class PerspectiveWidget extends Widget {
         }
     }
 
-    get selectable(): boolean {
+    get selectable() {
         return this.viewer.hasAttribute("selectable");
     }
 
-    set selectable(row_selection: boolean) {
+    set selectable(row_selection) {
         if (row_selection) {
             this.viewer.setAttribute("selectable", "");
         } else {
@@ -305,13 +309,12 @@ export class PerspectiveWidget extends Widget {
         }
     }
 
-    static createNode(node: HTMLDivElement): PerspectiveViewerElement {
+    static createNode(node) {
         node.classList.add("p-Widget");
         node.classList.add(PSP_CONTAINER_CLASS);
         const viewer = document.createElement("perspective-viewer");
         viewer.classList.add(PSP_CLASS);
         viewer.setAttribute("type", MIME_TYPE);
-
         while (node.lastChild) {
             node.removeChild(node.lastChild);
         }
@@ -319,33 +322,31 @@ export class PerspectiveWidget extends Widget {
         node.appendChild(viewer);
 
         // allow perspective's event handlers to do their work
-        viewer.addEventListener("contextmenu", event => event.stopPropagation(), false);
+        viewer.addEventListener(
+            "contextmenu",
+            (event) => event.stopPropagation(),
+            false
+        );
 
         const div = document.createElement("div");
         div.style.setProperty("display", "flex");
         div.style.setProperty("flex-direction", "row");
         node.appendChild(div);
-
         if (!viewer.notifyResize) {
             console.warn("Warning: not bound to real element");
         } else {
-            const resize_observer = new MutationObserver(mutations => {
-                if (mutations.some(x => x.attributeName === "style")) {
+            const resize_observer = new MutationObserver((mutations) => {
+                if (mutations.some((x) => x.attributeName === "style")) {
                     viewer.notifyResize.call(viewer);
                 }
             });
-            resize_observer.observe(node, {attributes: true});
+
+            resize_observer.observe(node, {
+                attributes: true,
+            });
             viewer.toggleConfig();
         }
 
         return viewer;
     }
-
-    private _viewer: PerspectiveViewerElement;
-    private _plugin_config: object;
-    private _client: boolean;
-    private _server: boolean;
-    private _dark: boolean;
-    private _editable: boolean;
-    private _viewer_config: PerspectiveViewerConfig;
 }

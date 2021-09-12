@@ -9,35 +9,35 @@
 
 <!DOCTYPE html>
 <html>
+    <head>
+        <script src="perspective.js"></script>
+        <script src="perspective-viewer.js"></script>
+        <script src="perspective-viewer-d3fc.js"></script>
 
-<head>
+        <link rel="stylesheet" href="demo.css" />
+    </head>
 
-    <script src="perspective.js"></script>
-    <script src="perspective-viewer.js"></script>
-    <script src="perspective-viewer-d3fc.js"></script>
+    <body>
+        <perspective-viewer
+            plugin="{view-name}"
+            row-pivots='["Date"]'
+            column-pivots="[]"
+            filters="[]"
+            sort="[]"
+            columns='["Open","Close","High","Low"]'
+            aggregates='{"Date":"distinct count","Change %":"sum","High":"sum","Low":"sum","Open":"sum","Close":"sum","Vol.":"sum"}'
+        >
+        </perspective-viewer>
 
-    <link rel='stylesheet' href="demo.css">
-</head>
-
-<body>
-
-    <perspective-viewer plugin="{view-name}" row-pivots='["Date"]' column-pivots='[]' filters='[]' sort='[]'
-        columns='["Open","Close","High","Low"]'
-        aggregates='{"Date":"distinct count","Change %":"sum","High":"sum","Low":"sum","Open":"sum","Close":"sum","Vol.":"sum"}'>
-
-    </perspective-viewer>
-
-    <script>
-
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'shares.csv', true);
-        xhr.onload = function () {
-            document.getElementsByTagName('perspective-viewer')[0].load(perspective.worker().table(xhr.response));
-        }
-        xhr.send(null);
-
-    </script>
-
-</body>
-
+        <script>
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "shares.csv", true);
+            xhr.onload = function () {
+                document
+                    .getElementsByTagName("perspective-viewer")[0]
+                    .load(perspective.worker().table(xhr.response));
+            };
+            xhr.send(null);
+        </script>
+    </body>
 </html>

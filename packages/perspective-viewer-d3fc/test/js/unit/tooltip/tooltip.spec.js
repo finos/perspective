@@ -15,8 +15,8 @@ describe("tooltip with", () => {
     let settings = null;
     const data = [{mainValue: 101}];
 
-    const awaitTransition = selection => {
-        return new Promise(resolve => {
+    const awaitTransition = (selection) => {
+        return new Promise((resolve) => {
             const transition = selection.transition();
             let n = transition.size();
             if (n === 0) {
@@ -51,7 +51,7 @@ describe("tooltip with", () => {
         settings = {
             crossValues: [],
             splitValues: [],
-            mainValues: [{name: "main-1", type: "integer"}]
+            mainValues: [{name: "main-1", type: "integer"}],
         };
     });
     afterEach(() => {
@@ -82,9 +82,7 @@ describe("tooltip with", () => {
         let tooltipDiv;
         let tooltipComponent;
         beforeEach(async () => {
-            tooltipComponent = tooltip()
-                .settings(settings)
-                .alwaysShow(true);
+            tooltipComponent = tooltip().settings(settings).alwaysShow(true);
 
             tooltipComponent(testElement);
             tooltipDiv = container.select("div.tooltip");
@@ -98,7 +96,9 @@ describe("tooltip with", () => {
         test("hide a tooltip if no element", async () => {
             tooltipComponent(container.select("div.notexists"));
             await awaitTransition(tooltipDiv);
-            expect(Math.floor(parseFloat(tooltipDiv.style("opacity")))).toEqual(0);
+            expect(Math.floor(parseFloat(tooltipDiv.style("opacity")))).toEqual(
+                0
+            );
         });
     });
 });

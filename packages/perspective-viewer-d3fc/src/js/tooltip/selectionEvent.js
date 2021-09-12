@@ -8,10 +8,10 @@
  */
 import {getGroupValues, getSplitValues, getDataValues} from "./selectionData";
 
-const mapToFilter = d => [d.name, "==", d.value];
+const mapToFilter = (d) => [d.name, "==", d.value];
 
 export const raiseEvent = (node, data, settings) => {
-    const column_names = getDataValues(data, settings).map(d => d.name);
+    const column_names = getDataValues(data, settings).map((d) => d.name);
     const groupFilters = getGroupValues(data, settings).map(mapToFilter);
     const splitFilters = getSplitValues(data, settings).map(mapToFilter);
 
@@ -24,8 +24,8 @@ export const raiseEvent = (node, data, settings) => {
             detail: {
                 column_names,
                 config: {filters},
-                row: data.row
-            }
+                row: data.row,
+            },
         })
     );
 };
@@ -33,9 +33,9 @@ export const raiseEvent = (node, data, settings) => {
 export const selectionEvent = () => {
     let settings = null;
 
-    const _event = selection => {
+    const _event = (selection) => {
         const node = selection.node();
-        selection.on("click", data => raiseEvent(node, data, settings));
+        selection.on("click", (data) => raiseEvent(node, data, settings));
     };
 
     _event.settings = (...args) => {

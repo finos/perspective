@@ -9,33 +9,34 @@
 
 <!DOCTYPE html>
 <html>
+    <head>
+        <link
+            rel="shortcut icon"
+            href="data:image/x-icon;,"
+            type="image/x-icon"
+        />
+        <script src="lumino.js"></script>
+        <script src="perspective.js"></script>
+        <script src="perspective-viewer-datagrid.js"></script>
 
-<head>
+        <link rel="stylesheet" href="demo.css" />
+    </head>
 
-    <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
-    <script src="lumino.js"></script>
-    <script src="perspective.js"></script>
-    <script src="perspective-viewer-datagrid.js"></script>
+    <body>
+        <div id="container"></div>
 
-    <link rel='stylesheet' href="demo.css">
-
-</head>
-
-<body>
-
-    <div id="container"></div>
-
-    <script>
-        window.__WIDGET__ = new PerspectiveLumino.PerspectiveWidget();
-        document.getElementById("container").appendChild(window.__WIDGET__.node);
-        const worker = perspective.worker();
-        (async () => {
-            const req = await fetch("superstore.csv");
-            const csv = await req.text();
-            const table = worker.table(csv);
-            window.__WIDGET__.load(table);
-        })();
-    </script>
-</body>
-
+        <script>
+            window.__WIDGET__ = new PerspectiveLumino.PerspectiveWidget();
+            document
+                .getElementById("container")
+                .appendChild(window.__WIDGET__.node);
+            const worker = perspective.worker();
+            (async () => {
+                const req = await fetch("superstore.csv");
+                const csv = await req.text();
+                const table = worker.table(csv);
+                window.__WIDGET__.load(table);
+            })();
+        </script>
+    </body>
 </html>

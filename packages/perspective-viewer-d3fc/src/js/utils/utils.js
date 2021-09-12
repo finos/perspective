@@ -12,19 +12,32 @@ export function getOrCreateElement(container, selector, createCallback) {
     return element.size() > 0 ? element : createCallback();
 }
 
-export function isElementOverflowing(containerRect, innerElementRect, direction = "right") {
+export function isElementOverflowing(
+    containerRect,
+    innerElementRect,
+    direction = "right"
+) {
     if (direction === "right" || direction === "bottom") {
-        return containerRect[direction] < innerElementRect[direction] ? true : false;
+        return containerRect[direction] < innerElementRect[direction]
+            ? true
+            : false;
     }
 
     if (direction === "left" || direction === "top") {
-        return containerRect[direction] > innerElementRect[direction] ? true : false;
+        return containerRect[direction] > innerElementRect[direction]
+            ? true
+            : false;
     }
 
     throw `Direction being checked for overflow is invalid: ${direction}`;
 }
 
-export function isElementOverlapping(axis, immovableRect, elementRect, fuzz = 0) {
+export function isElementOverlapping(
+    axis,
+    immovableRect,
+    elementRect,
+    fuzz = 0
+) {
     const dimension = axis === "x" ? "width" : "height";
 
     const immovableInnerPoint = immovableRect[axis];
@@ -33,9 +46,15 @@ export function isElementOverlapping(axis, immovableRect, elementRect, fuzz = 0)
     const elementInnerPoint = elementRect[axis];
     const elementOuterPoint = elementRect[axis] + elementRect[dimension];
 
-    const innerPointInside = elementInnerPoint + fuzz > immovableInnerPoint && elementInnerPoint - fuzz < immovableOuterPoint;
-    const outerPointInside = elementOuterPoint + fuzz > immovableInnerPoint && elementOuterPoint - fuzz < immovableOuterPoint;
-    const pointsEitherSide = elementInnerPoint + fuzz < immovableInnerPoint && elementOuterPoint - fuzz > immovableOuterPoint;
+    const innerPointInside =
+        elementInnerPoint + fuzz > immovableInnerPoint &&
+        elementInnerPoint - fuzz < immovableOuterPoint;
+    const outerPointInside =
+        elementOuterPoint + fuzz > immovableInnerPoint &&
+        elementOuterPoint - fuzz < immovableOuterPoint;
+    const pointsEitherSide =
+        elementInnerPoint + fuzz < immovableInnerPoint &&
+        elementOuterPoint - fuzz > immovableOuterPoint;
 
     return innerPointInside || outerPointInside || pointsEitherSide;
 }

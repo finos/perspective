@@ -9,7 +9,8 @@
 
 import {select} from "d3";
 
-export const labelVisible = d => d.y1 <= 3 && d.y0 >= 1 && (d.y1 - d.y0) * (d.x1 - d.x0) > 0.06;
+export const labelVisible = (d) =>
+    d.y1 <= 3 && d.y0 >= 1 && (d.y1 - d.y0) * (d.x1 - d.x0) > 0.06;
 
 export function labelTransform(d, radius) {
     const x = (((d.x0 + d.x1) / 2) * 180) / Math.PI;
@@ -27,6 +28,11 @@ export function cropLabel(d, targetWidth) {
             textSelection.text(() => labelText);
             actualWidth = this.getBBox().width;
         }
-        textSelection.text(() => `${labelText.substring(0, labelText.length - 3).replace(/\s+$/, "")}...`);
+        textSelection.text(
+            () =>
+                `${labelText
+                    .substring(0, labelText.length - 3)
+                    .replace(/\s+$/, "")}...`
+        );
     }
 }

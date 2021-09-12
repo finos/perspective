@@ -18,8 +18,10 @@ export function sunburstSeries() {
     let color = null;
     let radius = null;
 
-    const _sunburstSeries = sunburstElement => {
-        const segment = sunburstElement.selectAll("g.segment").data(data.descendants().slice(1));
+    const _sunburstSeries = (sunburstElement) => {
+        const segment = sunburstElement
+            .selectAll("g.segment")
+            .data(data.descendants().slice(1));
         const segmentEnter = segment
             .enter()
             .append("g")
@@ -34,18 +36,22 @@ export function sunburstSeries() {
 
         const path = segmentMerge
             .select("path")
-            .attr("fill-opacity", d => (arcVisible(d.current) ? 1 : 0))
-            .attr("user-select", d => (arcVisible(d.current) ? "initial" : "none"))
-            .attr("pointer-events", d => (arcVisible(d.current) ? "initial" : "none"))
-            .attr("d", d => drawArc(radius)(d.current));
-        color && path.style("fill", d => color(d.data.color));
+            .attr("fill-opacity", (d) => (arcVisible(d.current) ? 1 : 0))
+            .attr("user-select", (d) =>
+                arcVisible(d.current) ? "initial" : "none"
+            )
+            .attr("pointer-events", (d) =>
+                arcVisible(d.current) ? "initial" : "none"
+            )
+            .attr("d", (d) => drawArc(radius)(d.current));
+        color && path.style("fill", (d) => color(d.data.color));
 
         const label = segmentMerge
             .select("text")
-            .attr("fill-opacity", d => +labelVisible(d.current))
-            .attr("transform", d => labelTransform(d.current, radius))
-            .text(d => d.label)
-            .each(function(d) {
+            .attr("fill-opacity", (d) => +labelVisible(d.current))
+            .attr("transform", (d) => labelTransform(d.current, radius))
+            .text((d) => d.label)
+            .each(function (d) {
                 cropLabel.call(this, d, radius);
             });
 
@@ -55,17 +61,29 @@ export function sunburstSeries() {
             .attr("r", radius)
             .datum(data);
 
-        const onClick = clickHandler(data, sunburstElement, parent, parentTitle, path, label, radius, split, settings);
+        const onClick = clickHandler(
+            data,
+            sunburstElement,
+            parent,
+            parentTitle,
+            path,
+            label,
+            radius,
+            split,
+            settings
+        );
         if (settings.sunburstLevel) {
-            const currentLevel = data.descendants().find(d => d.data.name === settings.sunburstLevel[split]);
+            const currentLevel = data
+                .descendants()
+                .find((d) => d.data.name === settings.sunburstLevel[split]);
             currentLevel && onClick(currentLevel, true);
         } else {
             settings.sunburstLevel = {};
         }
-        parent.on("click", d => onClick(d, false));
-        path.filter(d => d.children)
+        parent.on("click", (d) => onClick(d, false));
+        path.filter((d) => d.children)
             .style("cursor", "pointer")
-            .on("click", d => onClick(d, false));
+            .on("click", (d) => onClick(d, false));
     };
 
     _sunburstSeries.settings = (...args) => {

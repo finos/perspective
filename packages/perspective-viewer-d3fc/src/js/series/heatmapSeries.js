@@ -12,16 +12,16 @@ import {tooltip} from "../tooltip/tooltip";
 export function heatmapSeries(settings, color) {
     let series = fc.seriesSvgHeatmap();
 
-    series.decorate(selection => {
+    series.decorate((selection) => {
         tooltip().settings(settings)(selection);
-        selection.select("path").attr("fill", d => color(d.colorValue));
+        selection.select("path").attr("fill", (d) => color(d.colorValue));
     });
 
     return fc
         .autoBandwidth(series)
-        .xValue(d => d.crossValue)
-        .yValue(d => d.mainValue)
-        .colorValue(d => d.colorValue)
+        .xValue((d) => d.crossValue)
+        .yValue((d) => d.mainValue)
+        .colorValue((d) => d.colorValue)
         .colorInterpolate(color.interpolator())
         .widthFraction(1.0);
 }

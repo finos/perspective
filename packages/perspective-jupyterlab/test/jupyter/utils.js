@@ -39,8 +39,14 @@ const generate_notebook = (notebook_name, cells) => {
             execution_count: null,
             metadata: {},
             outputs: [],
-            source: ["import perspective\n", "import pandas as pd\n", "import numpy as np\n", "arrow_data = None\n", "with open('test.arrow', 'rb') as arrow: \n    arrow_data = arrow.read()"]
-        }
+            source: [
+                "import perspective\n",
+                "import pandas as pd\n",
+                "import numpy as np\n",
+                "arrow_data = None\n",
+                "with open('test.arrow', 'rb') as arrow: \n    arrow_data = arrow.read()",
+            ],
+        },
     ];
 
     // Cells defined in the test as an array of arrays - each inner array
@@ -51,7 +57,7 @@ const generate_notebook = (notebook_name, cells) => {
             execution_count: null,
             metadata: {},
             outputs: [],
-            source: cell
+            source: cell,
         });
     }
 
@@ -71,7 +77,11 @@ describe.jupyter = (body, {name, root} = {}) => {
 
     // URL is null because each test.capture_jupyterlab will have its own
     // unique notebook generated.
-    return describe.page(null, body, {check_results: false, name: name, root: root});
+    return describe.page(null, body, {
+        check_results: false,
+        name: name,
+        root: root,
+    });
 };
 
 /**
@@ -85,17 +95,19 @@ test.jupyterlab = async (name, cells, body, args = {}) => {
     const notebook_name = `${name.replace(/[ \.']/g, "_")}.ipynb`;
     generate_notebook(notebook_name, cells);
     args = Object.assign(args, {
-        url: `doc/tree/${notebook_name}`
+        url: `doc/tree/${notebook_name}`,
     });
 
     await test.run(name, body, args);
 };
 
 module.exports = {
-    execute_all_cells: async page => {
+    execute_all_cells: async (page) => {
         await page.waitForFunction(async () => !!document.title);
         await page.waitForSelector(".p-Widget", {visible: true});
-        await page.waitForSelector(".jp-NotebookPanel-toolbar", {visible: true});
+        await page.waitForSelector(".jp-NotebookPanel-toolbar", {
+            visible: true,
+        });
         await page.waitForTimeout(1000);
 
         // Use our custom keyboard shortcut to run all cells
@@ -103,5 +115,5 @@ module.exports = {
         await page.keyboard.press("R");
 
         await page.evaluate(() => (document.scrollTop = 0));
-    }
+    },
 };

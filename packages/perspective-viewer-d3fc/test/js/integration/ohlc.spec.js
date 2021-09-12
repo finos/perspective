@@ -18,20 +18,49 @@ utils.with_server({}, () => {
     describe.page(
         "ohlc.html",
         () => {
-            test.skip("filter by a single instrument.", async page => {
+            test.skip("filter by a single instrument.", async (page) => {
                 const viewer = await page.$("perspective-viewer");
-                await page.evaluate(element => element.setAttribute("filters", '[["Name", "==", "BARC"]]'), viewer);
-                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(
+                    (element) =>
+                        element.setAttribute(
+                            "filters",
+                            '[["Name", "==", "BARC"]]'
+                        ),
+                    viewer
+                );
+                await page.waitForSelector(
+                    "perspective-viewer:not([updating])"
+                );
                 await page.shadow_blur();
             });
 
-            test.skip("filter to date range.", async page => {
+            test.skip("filter to date range.", async (page) => {
                 const viewer = await page.$("perspective-viewer");
-                await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
-                await page.evaluate(element => element.setAttribute("column-pivots", '["Name"]'), viewer);
-                await page.waitForSelector("perspective-viewer:not([updating])");
-                await page.evaluate(element => element.setAttribute("filters", '[["Date", ">", "2019-01-01"]]'), viewer);
-                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(
+                    async () =>
+                        await document
+                            .querySelector("perspective-viewer")
+                            .toggleConfig()
+                );
+                await page.evaluate(
+                    (element) =>
+                        element.setAttribute("column-pivots", '["Name"]'),
+                    viewer
+                );
+                await page.waitForSelector(
+                    "perspective-viewer:not([updating])"
+                );
+                await page.evaluate(
+                    (element) =>
+                        element.setAttribute(
+                            "filters",
+                            '[["Date", ">", "2019-01-01"]]'
+                        ),
+                    viewer
+                );
+                await page.waitForSelector(
+                    "perspective-viewer:not([updating])"
+                );
                 await page.shadow_blur();
             });
         },

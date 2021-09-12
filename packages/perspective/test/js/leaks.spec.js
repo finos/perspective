@@ -11,7 +11,12 @@ const perspective = require("../../dist/cjs/perspective.node.js");
 const fs = require("fs");
 const path = require("path");
 
-const arr = fs.readFileSync(path.join(__dirname, "../../../../node_modules/superstore-arrow/superstore.arrow")).buffer;
+const arr = fs.readFileSync(
+    path.join(
+        __dirname,
+        "../../../../node_modules/superstore-arrow/superstore.arrow"
+    )
+).buffer;
 
 /**
  * Run a function in a loop, comparing before-and-after wasm heap for leaks.
@@ -44,7 +49,9 @@ function generate_expressions() {
     const expressions = ["concat('abcd', \"c\", 'efg')"];
 
     for (const op of ["+", "-", "*", "/", "^", "%"]) {
-        expressions.push(`("a" ${op} "b") + ${Math.floor(Math.random() * 100)}`);
+        expressions.push(
+            `("a" ${op} "b") + ${Math.floor(Math.random() * 100)}`
+        );
     }
 
     for (const fn of ["sqrt", "log10", "deg2rad"]) {
@@ -62,13 +69,13 @@ function generate_expressions() {
     return expressions;
 }
 
-describe("leaks", function() {
-    describe("view", function() {
-        describe("1-sided", function() {
+describe("leaks", function () {
+    describe("view", function () {
+        describe("1-sided", function () {
             it("to_json does not leak", async () => {
                 const table = await perspective.table(arr.slice());
                 const view = await table.view({row_pivots: ["State"]});
-                await leak_test(async function() {
+                await leak_test(async function () {
                     let json = await view.to_json();
                     expect(json.length).toEqual(50);
                 });
@@ -78,16 +85,19 @@ describe("leaks", function() {
         });
     });
 
-    describe("table", function() {
+    describe("table", function () {
         it("update does not leak", async () => {
-            const table = await perspective.table({x: "integer", y: "string"}, {index: "x"});
+            const table = await perspective.table(
+                {x: "integer", y: "string"},
+                {index: "x"}
+            );
             let count = 0;
             const view = await table.view();
-            view.on_update(function() {
+            view.on_update(function () {
                 count += 1;
             });
 
-            await leak_test(async function() {
+            await leak_test(async function () {
                 await table.update([{x: 1, y: "TestTestTest"}]);
                 expect(await table.size()).toEqual(1);
             });
@@ -98,20 +108,24 @@ describe("leaks", function() {
         });
     });
 
-    describe("expression columns", function() {
+    describe("expression columns", function () {
         it("0 sided does not leak", async () => {
             const table = await perspective.table({
                 a: [1, 2, 3, 4],
                 b: [1.5, 2.5, 3.5, 4.5],
                 c: ["a", "b", "c", "d"],
-                d: [new Date(), new Date(), new Date(), new Date()]
+                d: [new Date(), new Date(), new Date(), new Date()],
             });
 
             const expressions = generate_expressions();
 
             await leak_test(async () => {
                 const view = await table.view({
-                    expressions: [expressions[Math.floor(Math.random() * expressions.length)]]
+                    expressions: [
+                        expressions[
+                            Math.floor(Math.random() * expressions.length)
+                        ],
+                    ],
                 });
                 const expression_schema = await view.expression_schema();
                 expect(Object.keys(expression_schema).length).toEqual(1);
@@ -126,7 +140,7 @@ describe("leaks", function() {
                 a: [1, 2, 3, 4],
                 b: [1.5, 2.5, 3.5, 4.5],
                 c: ["a", "b", "c", "d"],
-                d: [new Date(), new Date(), new Date(), new Date()]
+                d: [new Date(), new Date(), new Date(), new Date()],
             });
 
             const columns = ["a", "b", "c", "d"];
@@ -134,8 +148,14 @@ describe("leaks", function() {
 
             await leak_test(async () => {
                 const view = await table.view({
-                    row_pivots: [columns[Math.floor(Math.random() * columns.length)]],
-                    expressions: [expressions[Math.floor(Math.random() * expressions.length)]]
+                    row_pivots: [
+                        columns[Math.floor(Math.random() * columns.length)],
+                    ],
+                    expressions: [
+                        expressions[
+                            Math.floor(Math.random() * expressions.length)
+                        ],
+                    ],
                 });
                 const expression_schema = await view.expression_schema();
                 expect(Object.keys(expression_schema).length).toEqual(1);
@@ -150,7 +170,7 @@ describe("leaks", function() {
                 a: [1, 2, 3, 4],
                 b: [1.5, 2.5, 3.5, 4.5],
                 c: ["a", "b", "c", "d"],
-                d: [new Date(), new Date(), new Date(), new Date()]
+                d: [new Date(), new Date(), new Date(), new Date()],
             });
 
             const columns = ["a", "b", "c", "d"];
@@ -158,9 +178,17 @@ describe("leaks", function() {
 
             await leak_test(async () => {
                 const view = await table.view({
-                    row_pivots: [columns[Math.floor(Math.random() * columns.length)]],
-                    column_pivots: [columns[Math.floor(Math.random() * columns.length)]],
-                    expressions: [expressions[Math.floor(Math.random() * expressions.length)]]
+                    row_pivots: [
+                        columns[Math.floor(Math.random() * columns.length)],
+                    ],
+                    column_pivots: [
+                        columns[Math.floor(Math.random() * columns.length)],
+                    ],
+                    expressions: [
+                        expressions[
+                            Math.floor(Math.random() * expressions.length)
+                        ],
+                    ],
                 });
                 const expression_schema = await view.expression_schema();
                 expect(Object.keys(expression_schema).length).toEqual(1);

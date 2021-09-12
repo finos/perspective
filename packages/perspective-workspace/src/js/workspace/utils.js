@@ -50,9 +50,13 @@ export function registerElement(templateString, styleString, proto) {
     const template = importTemplate(templateString);
     setTemplateContent(template);
     if (styleString) {
-        template.innerHTML = `<style>${styleString.toString()}</style>` + template.innerHTML;
+        template.innerHTML =
+            `<style>${styleString.toString()}</style>` + template.innerHTML;
     }
-    template.innerHTML = `<style id="psp_styles" scope="${template.getAttribute("id")}">test{}</style>` + template.innerHTML;
+    template.innerHTML =
+        `<style id="psp_styles" scope="${template.getAttribute(
+            "id"
+        )}">test{}</style>` + template.innerHTML;
 
     let is_locked = 0;
     const _perspective_element = class extends proto {
@@ -65,7 +69,11 @@ export function registerElement(templateString, styleString, proto) {
                 value = "null";
             }
 
-            if (name[0] !== "_" && old != value && !!Object.getOwnPropertyDescriptor(proto.prototype, name).set) {
+            if (
+                name[0] !== "_" &&
+                old != value &&
+                !!Object.getOwnPropertyDescriptor(proto.prototype, name).set
+            ) {
                 this[name] = value;
             }
         }
@@ -100,7 +108,12 @@ export function registerElement(templateString, styleString, proto) {
             // Call all attributes bound to setters on the proto
             for (let key of Object.getOwnPropertyNames(proto.prototype)) {
                 if (key !== "connectedCallback") {
-                    if (this.hasAttribute(key) && key[0] !== "_" && !!Object.getOwnPropertyDescriptor(proto.prototype, key).set) {
+                    if (
+                        this.hasAttribute(key) &&
+                        key[0] !== "_" &&
+                        !!Object.getOwnPropertyDescriptor(proto.prototype, key)
+                            .set
+                    ) {
                         this[key] = this.getAttribute(key);
                     }
                 }
@@ -118,7 +131,7 @@ export function registerElement(templateString, styleString, proto) {
         let descriptor = Object.getOwnPropertyDescriptor(proto.prototype, key);
         if (descriptor && descriptor.set) {
             let old = descriptor.set;
-            descriptor.set = function(val) {
+            descriptor.set = function (val) {
                 if (!this.hasAttribute(key) || this.getAttribute(key) !== val) {
                     this.setAttribute(key, val);
                     return;
@@ -139,8 +152,8 @@ export function registerElement(templateString, styleString, proto) {
 }
 
 export function bindTemplate(template, ...styleStrings) {
-    const style = styleStrings.map(x => x.toString()).join("\n");
-    return function(cls) {
+    const style = styleStrings.map((x) => x.toString()).join("\n");
+    return function (cls) {
         return registerElement(template, {toString: () => style}, cls);
     };
 }

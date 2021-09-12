@@ -20,9 +20,9 @@ describe("tables", () => {
                 main: {
                     currentIndex: 0,
                     type: "tab-area",
-                    widgets: ["One"]
-                }
-            }
+                    widgets: ["One"],
+                },
+            },
         };
 
         const workspace = new PerspectiveWorkspace(document.body);
@@ -56,9 +56,9 @@ describe("tables", () => {
                 main: {
                     currentIndex: 0,
                     type: "tab-area",
-                    widgets: ["One"]
-                }
-            }
+                    widgets: ["One"],
+                },
+            },
         };
 
         const workspace = new PerspectiveWorkspace(document.body);

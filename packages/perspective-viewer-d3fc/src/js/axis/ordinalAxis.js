@@ -10,7 +10,12 @@ import * as d3 from "d3";
 import * as fc from "d3fc";
 import minBandwidth from "./minBandwidth";
 import {flattenArray} from "./flatten";
-import {multiAxisBottom, multiAxisLeft, multiAxisTop, multiAxisRight} from "../d3fc/axis/multi-axis";
+import {
+    multiAxisBottom,
+    multiAxisLeft,
+    multiAxisTop,
+    multiAxisRight,
+} from "../d3fc/axis/multi-axis";
 import {getChartContainer} from "../plugin/root";
 
 export const scale = () => minBandwidth(d3.scaleBand()).padding(0.5);
@@ -19,12 +24,14 @@ export const domain = () => {
     let valueNames = ["crossValue"];
     let orient = "horizontal";
 
-    const _domain = data => {
+    const _domain = (data) => {
         const flattenedData = flattenArray(data);
-        return transformDomain([...new Set(flattenedData.map(d => d[valueNames[0]]))]);
+        return transformDomain([
+            ...new Set(flattenedData.map((d) => d[valueNames[0]])),
+        ]);
     };
 
-    const transformDomain = d => (orient == "vertical" ? d.reverse() : d);
+    const transformDomain = (d) => (orient == "vertical" ? d.reverse() : d);
 
     _domain.valueName = (...args) => {
         if (!args.length) {
@@ -52,9 +59,9 @@ export const domain = () => {
     return _domain;
 };
 
-export const labelFunction = valueName => d => d[valueName].join("|");
+export const labelFunction = (valueName) => (d) => d[valueName].join("|");
 
-export const component = settings => {
+export const component = (settings) => {
     let orient = "horizontal";
     let settingName = "crossValues";
     let domain = null;
@@ -66,10 +73,12 @@ export const component = settings => {
         const levelGroups = axisGroups(domain);
         const groupTickLayout = levelGroups.map(getGroupTickLayout);
 
-        const tickSizeInner = multiLevel ? groupTickLayout.map(l => l.size) : groupTickLayout[0].size;
+        const tickSizeInner = multiLevel
+            ? groupTickLayout.map((l) => l.size)
+            : groupTickLayout[0].size;
         const tickSizeOuter = groupTickLayout.reduce((s, v) => s + v.size, 0);
 
-        const createAxis = base => scale => {
+        const createAxis = (base) => (scale) => {
             const axis = base(scale);
 
             if (multiLevel) {
@@ -94,7 +103,7 @@ export const component = settings => {
             right: createAxis(axisSet.right),
             top: createAxis(axisSet.top),
             size: `${tickSizeOuter + 10}px`,
-            decorate
+            decorate,
         };
     };
 
@@ -107,27 +116,27 @@ export const component = settings => {
     //                 fc.axisOrdinalBottom : fc.axisOrdinalLeft;
     // };
 
-    const getAxisSet = multiLevel => {
+    const getAxisSet = (multiLevel) => {
         if (multiLevel) {
             return {
                 bottom: multiAxisBottom,
                 left: multiAxisLeft,
                 top: multiAxisTop,
-                right: multiAxisRight
+                right: multiAxisRight,
             };
         } else {
             return {
                 bottom: fc.axisOrdinalBottom,
                 left: fc.axisOrdinalLeft,
                 top: fc.axisOrdinalTop,
-                right: fc.axisOrdinalRight
+                right: fc.axisOrdinalRight,
             };
         }
     };
 
-    const axisGroups = domain => {
+    const axisGroups = (domain) => {
         const groups = [];
-        domain.forEach(tick => {
+        domain.forEach((tick) => {
             const split = tick && tick.split ? tick.split("|") : [tick];
             split.forEach((s, i) => {
                 while (groups.length <= i) groups.push([]);
@@ -143,54 +152,69 @@ export const component = settings => {
         return groups.reverse();
     };
 
-    const getGroupTickLayout = group => {
+    const getGroupTickLayout = (group) => {
         const width = settings.size.width;
-        const maxLength = Math.max(...group.map(g => (g.text ? g.text.length : 0)));
+        const maxLength = Math.max(
+            ...group.map((g) => (g.text ? g.text.length : 0))
+        );
 
         if (orient === "horizontal") {
             // x-axis may rotate labels and expand the available height
             if (group && group.length * 16 > width - 100) {
                 return {
                     size: maxLength * 5 + 10,
-                    rotation: 90
+                    rotation: 90,
                 };
-            } else if (group && group.length * (maxLength * 6 + 10) > width - 100) {
+            } else if (
+                group &&
+                group.length * (maxLength * 6 + 10) > width - 100
+            ) {
                 return {
                     size: maxLength * 3 + 20,
-                    rotation: 45
+                    rotation: 45,
                 };
             }
             return {
                 size: 25,
-                rotation: 0
+                rotation: 0,
             };
         } else {
             // y-axis size always based on label size
             return {
                 size: maxLength * 5 + 10,
-                rotation: 0
+                rotation: 0,
             };
         }
     };
 
     const hideOverlappingLabels = (s, rotated) => {
-        const getTransformCoords = transform => {
+        const getTransformCoords = (transform) => {
             const splitOn = transform.indexOf(",") !== -1 ? "," : " ";
             const coords = transform
                 .substring(transform.indexOf("(") + 1, transform.indexOf(")"))
                 .split(splitOn)
-                .map(c => parseInt(c));
+                .map((c) => parseInt(c));
             while (coords.length < 2) coords.push(0);
             return coords;
         };
 
-        const rectanglesOverlap = (r1, r2) => r1.x <= r2.x + r2.width && r2.x <= r1.x + r1.width && r1.y <= r2.y + r2.height && r2.y <= r1.y + r1.height;
-        const rotatedLabelsOverlap = (r1, r2) => r1.x + r1.width + 14 > r2.x + r2.width;
+        const rectanglesOverlap = (r1, r2) =>
+            r1.x <= r2.x + r2.width &&
+            r2.x <= r1.x + r1.width &&
+            r1.y <= r2.y + r2.height &&
+            r2.y <= r1.y + r1.height;
+        const rotatedLabelsOverlap = (r1, r2) =>
+            r1.x + r1.width + 14 > r2.x + r2.width;
         const isOverlap = rotated ? rotatedLabelsOverlap : rectanglesOverlap;
 
-        const rectangleContained = (r1, r2) => r1.x >= r2.x && r1.x + r1.width <= r2.x + r2.width && r1.y >= r2.y && r1.y + r1.height <= r2.y + r2.height;
+        const rectangleContained = (r1, r2) =>
+            r1.x >= r2.x &&
+            r1.x + r1.width <= r2.x + r2.width &&
+            r1.y >= r2.y &&
+            r1.y + r1.height <= r2.y + r2.height;
         // The bounds rect is the available screen space a label can fit into
-        const boundsRect = orient == "horizontal" ? getXAxisBoundsRect(s) : null;
+        const boundsRect =
+            orient == "horizontal" ? getXAxisBoundsRect(s) : null;
 
         const previousRectangles = [];
         s.each((d, i, nodes) => {
@@ -201,12 +225,19 @@ export const component = settings => {
 
             // Work out the actual rectanble the label occupies
             const tickRect = tick.node().getBBox();
-            const rect = {x: tickRect.x + transformCoords[0], y: tickRect.y + transformCoords[1], width: tickRect.width, height: tickRect.height};
+            const rect = {
+                x: tickRect.x + transformCoords[0],
+                y: tickRect.y + transformCoords[1],
+                width: tickRect.width,
+                height: tickRect.height,
+            };
 
-            const overlap = previousRectangles.some(r => isOverlap(r, rect));
+            const overlap = previousRectangles.some((r) => isOverlap(r, rect));
 
             // Test that it also fits into the screen space
-            const hidden = overlap || (boundsRect && !rectangleContained(rect, boundsRect));
+            const hidden =
+                overlap ||
+                (boundsRect && !rectangleContained(rect, boundsRect));
 
             tick.attr("visibility", hidden ? "hidden" : "");
             if (!hidden) {
@@ -215,7 +246,7 @@ export const component = settings => {
         });
     };
 
-    const getXAxisBoundsRect = s => {
+    const getXAxisBoundsRect = (s) => {
         const container = getChartContainer(s.node());
         if (container === null) {
             return;
@@ -229,11 +260,11 @@ export const component = settings => {
             x: chartRect.left - axisRect.left,
             width: chartRect.width,
             y: chartRect.top - axisRect.top,
-            height: chartRect.height
+            height: chartRect.height,
         };
     };
 
-    const getLabelTransform = rotation => {
+    const getLabelTransform = (rotation) => {
         if (!rotation) {
             return "translate(0, 8)";
         }

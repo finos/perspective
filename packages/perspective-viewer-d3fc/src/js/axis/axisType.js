@@ -11,31 +11,39 @@ export const AXIS_TYPES = {
     none: "none",
     ordinal: "ordinal",
     time: "time",
-    linear: "linear"
+    linear: "linear",
 };
 
-export const axisType = settings => {
+export const axisType = (settings) => {
     let settingName = "crossValues";
     let settingValue = null;
     let excludeType = null;
 
     const getType = () => {
-        const checkTypes = types => {
-            const list = settingValue ? settings[settingName].filter(s => settingValue == s.name) : settings[settingName];
+        const checkTypes = (types) => {
+            const list = settingValue
+                ? settings[settingName].filter((s) => settingValue == s.name)
+                : settings[settingName];
 
             if (settingName == "crossValues" && list.length > 1) {
                 // can't do multiple values on non-ordinal cross-axis
                 return false;
             }
 
-            return list.some(s => types.includes(s.type));
+            return list.some((s) => types.includes(s.type));
         };
 
         if (settings[settingName].length === 0) {
             return AXIS_TYPES.none;
-        } else if (excludeType != AXIS_TYPES.time && checkTypes(["datetime", "date"])) {
+        } else if (
+            excludeType != AXIS_TYPES.time &&
+            checkTypes(["datetime", "date"])
+        ) {
             return AXIS_TYPES.time;
-        } else if (excludeType != AXIS_TYPES.linear && checkTypes(["integer", "float"])) {
+        } else if (
+            excludeType != AXIS_TYPES.linear &&
+            checkTypes(["integer", "float"])
+        ) {
             return AXIS_TYPES.linear;
         }
 

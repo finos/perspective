@@ -24,12 +24,12 @@ $ yarn add @finos/perspective-viewer @finos/perspective-viewer-d3fc @finos/persp
 
 All uses of Perspective from NPM require the browser to have access to
 Perspective's `.worker.*.js` and `.wasm` assets _in addition_ to the bundled
-`.js` scripts. By default, Perspective [inlines](https://github.com/finos/perspective/pull/870)
-these assets into the `.js` scripts, and delivers them in one file. This has no
-performance impact, but does increase asset load time. Any non-trivial application
-should make use of `@finos/perspective-webpack-plugin`, which automatically
-splits the assets into separate files and downloads them when the bundling
-step runs.
+`.js` scripts. By default, Perspective
+[inlines](https://github.com/finos/perspective/pull/870) these assets into the
+`.js` scripts, and delivers them in one file. This has no performance impact,
+but does increase asset load time. Any non-trivial application should make use
+of `@finos/perspective-webpack-plugin`, which automatically splits the assets
+into separate files and downloads them when the bundling step runs.
 
 ### Webpack Plugin
 
@@ -42,12 +42,12 @@ Perspective's additional assets, and is easy to set up in your `webpack.config`:
 const PerspectivePlugin = require("@finos/perspective-webpack-plugin");
 
 module.exports = {
-    entry: "./in.js",
-    output: {
-        filename: "out.js",
-        path: "build"
-    },
-    plugins: [new PerspectivePlugin()]
+  entry: "./in.js",
+  output: {
+    filename: "out.js",
+    path: "build",
+  },
+  plugins: [new PerspectivePlugin()],
 };
 ```
 
@@ -55,9 +55,10 @@ module.exports = {
 
 Perspective can be loaded directly from
 [unpkg.com](https://unpkg.com/@finos/perspective-viewer), which is the easiest
-way to get started with Perspective in the browser, and absolutely perfect
-for spinning up quick instances of `perspective-viewer`. An example is
-demonstrated in [`superstore-arrow.html`](https://github.com/finos/perspective/blob/master/examples/simple/superstore-arrow.html),
+way to get started with Perspective in the browser, and absolutely perfect for
+spinning up quick instances of `perspective-viewer`. An example is demonstrated
+in
+[`superstore-arrow.html`](https://github.com/finos/perspective/blob/master/examples/simple/superstore-arrow.html),
 which loads a dataset stored in the Apache Arrow format using the `Fetch` API.
 
 Add these scripts to your `.html`'s `<head>` section:
@@ -74,19 +75,20 @@ Once added to your page, you can access the Javascript API through the
 
 ```javascript
 const worker = perspective.worker();
-const table = await worker.table({A: [1, 2, 3]});
-const view = await table.view({sort: [["A", "desc"]]});
+const table = await worker.table({ A: [1, 2, 3] });
+const view = await table.view({ sort: [["A", "desc"]] });
 ```
 
 Or create a `<perspective-viewer>` in HTML:
 
 ```html
-<perspective-viewer columns="['Sales', 'Profit']">`
+<perspective-viewer columns="['Sales', 'Profit']"
+  >`
   <script>
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
       const data = {
         Sales: [500, 1000, 1500],
-        Profit: [100.25, 200.5, 300.75]
+        Profit: [100.25, 200.5, 300.75],
       };
       // The `<perspective-viewer>` HTML element exposes the viewer API
       const el = document.getElementsByTagName("perspective-viewer")[0];
@@ -99,8 +101,8 @@ Or create a `<perspective-viewer>` in HTML:
 You may choose to wait for the document's `DOMContentLoaded` event to fire,
 which indicates that all page DOM content is available.
 
-This makes it extremely easy to spin up Perspective locally without depending
-on a build chain or other tooling. For production usage, you should incorporate
+This makes it extremely easy to spin up Perspective locally without depending on
+a build chain or other tooling. For production usage, you should incorporate
 Perspective into your application's bundled scripts using `NPM` and `Webpack`.
 
 ## Python
@@ -139,11 +141,18 @@ The most common culprits are:
 - Boost headers are missing or too old
 - PyArrow not installed prior to installing perspective
 
-Additionally, due to PEP-518 and build isolation, its possible that the version of PyArrow that pip uses to build perspective-python is different from the one you have installed. To disable this, pass the `--no-build-isolation` flag to pip.
+Additionally, due to PEP-518 and build isolation, its possible that the version
+of PyArrow that pip uses to build perspective-python is different from the one
+you have installed. To disable this, pass the `--no-build-isolation` flag to
+pip.
 
 #### Wheels PyArrow linkage
 
-Because we compile Apache Arrow from source to webassembly via Emscripten, we have a tight coupling on the specific version of Apache Arrow that must be used. As such, we link against a specific Apache Arrow version which must be present. Currently, our wheels build against PyArrow==0.17.1 for Python 3.* and PyArrow==0.16.0 for Python 2.7.
+Because we compile Apache Arrow from source to webassembly via Emscripten, we
+have a tight coupling on the specific version of Apache Arrow that must be used.
+As such, we link against a specific Apache Arrow version which must be present.
+Currently, our wheels build against PyArrow==0.17.1 for Python 3.\* and
+PyArrow==0.16.0 for Python 2.7.
 
 To ignore compiled wheels and install from source with pip, install via
 
@@ -166,7 +175,9 @@ and then install the extension from the Jupyter lab extension directory:
 jupyter labextension install @finos/perspective-jupyterlab
 ```
 
-If the widget does not display, you might be missing the [ipywidgets extension](https://ipywidgets.readthedocs.io/en/latest/user_install.html#installing-the-jupyterlab-extension). Install it from the extension directory:
+If the widget does not display, you might be missing the
+[ipywidgets extension](https://ipywidgets.readthedocs.io/en/latest/user_install.html#installing-the-jupyterlab-extension).
+Install it from the extension directory:
 
 ```bash
 jupyter labextension install @jupyter-widgets/jupyterlab-manager

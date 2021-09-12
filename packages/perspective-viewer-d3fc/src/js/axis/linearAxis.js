@@ -15,33 +15,35 @@ import valueformatter from "./valueFormatter";
 export const scale = () => d3.scaleLinear();
 
 export const domain = () => {
-    const base = customExtent()
-        .pad([0, 0.1])
-        .padUnit("percent");
+    const base = customExtent().pad([0, 0.1]).padUnit("percent");
 
     let valueNames = ["crossValue"];
 
-    const _domain = data => {
-        base.accessors(valueNames.map(v => d => parseFloat(d[v])));
+    const _domain = (data) => {
+        base.accessors(valueNames.map((v) => (d) => parseFloat(d[v])));
 
         return getDataExtent(flattenArray(data));
     };
 
     fc.rebindAll(_domain, base);
 
-    const getMinimumGap = data => {
-        const gaps = valueNames.map(valueName =>
+    const getMinimumGap = (data) => {
+        const gaps = valueNames.map((valueName) =>
             data
-                .map(d => d[valueName])
+                .map((d) => d[valueName])
                 .sort((a, b) => a - b)
                 .filter((d, i, a) => i === 0 || d !== a[i - 1])
-                .reduce((acc, d, i, src) => (i === 0 || acc <= d - src[i - 1] ? acc : Math.abs(d - src[i - 1])))
+                .reduce((acc, d, i, src) =>
+                    i === 0 || acc <= d - src[i - 1]
+                        ? acc
+                        : Math.abs(d - src[i - 1])
+                )
         );
 
         return Math.min(...gaps);
     };
 
-    const getDataExtent = data => {
+    const getDataExtent = (data) => {
         if (base.padUnit() == "domain") {
             const dataWidth = getMinimumGap(data);
             return base.pad([dataWidth / 2, dataWidth / 2])(data);
@@ -68,6 +70,6 @@ export const domain = () => {
     return _domain;
 };
 
-export const labelFunction = valueName => d => d[valueName][0];
+export const labelFunction = (valueName) => (d) => d[valueName][0];
 
 export const tickFormatFunction = valueformatter;

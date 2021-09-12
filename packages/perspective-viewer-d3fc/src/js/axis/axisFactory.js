@@ -17,10 +17,10 @@ const axisTypes = {
     none,
     ordinal,
     time,
-    linear
+    linear,
 };
 
-export const axisFactory = settings => {
+export const axisFactory = (settings) => {
     let excludeType = null;
     let orient = "horizontal";
     let settingName = "crossValues";
@@ -30,7 +30,7 @@ export const axisFactory = settings => {
     const optionalParams = ["include", "paddingStrategy", "pad"];
     const optional = {};
 
-    const _factory = data => {
+    const _factory = (data) => {
         const useType = axisType(settings)
             .excludeType(excludeType)
             .settingName(settingName)
@@ -39,13 +39,16 @@ export const axisFactory = settings => {
         const axis = axisTypes[useType];
         const domainFunction = axis.domain().valueNames(valueNames);
 
-        optionalParams.forEach(p => {
-            if (optional[p] && domainFunction[p]) domainFunction[p](optional[p]);
+        optionalParams.forEach((p) => {
+            if (optional[p] && domainFunction[p])
+                domainFunction[p](optional[p]);
         });
         if (domainFunction.orient) domainFunction.orient(orient);
 
         const domain = domainFunction(data);
-        const component = axis.component ? createComponent(axis, domain, data) : defaultComponent();
+        const component = axis.component
+            ? createComponent(axis, domain, data)
+            : defaultComponent();
 
         return {
             scale: axis.scale(),
@@ -56,12 +59,12 @@ export const axisFactory = settings => {
                 bottom: component.bottom,
                 left: component.left,
                 top: component.top,
-                right: component.right
+                right: component.right,
             },
             size: component.size,
             decorate: component.decorate,
-            label: settings[settingName].map(v => v.name).join(", "),
-            tickFormatFunction: axis.tickFormatFunction
+            label: settings[settingName].map((v) => v.name).join(", "),
+            tickFormatFunction: axis.tickFormatFunction,
         };
     };
 
@@ -77,7 +80,7 @@ export const axisFactory = settings => {
         left: fc.axisLeft,
         top: fc.axisTop,
         right: fc.axisRight,
-        decorate: () => {}
+        decorate: () => {},
     });
 
     _factory.excludeType = (...args) => {
@@ -128,7 +131,7 @@ export const axisFactory = settings => {
         return _factory;
     };
 
-    optionalParams.forEach(p => {
+    optionalParams.forEach((p) => {
         _factory[p] = (...args) => {
             if (!args.length) {
                 return optional[p];

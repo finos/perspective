@@ -23,7 +23,9 @@ import zoomableChart from "../zoom/zoomableChart";
 import nearbyTip from "../tooltip/nearbyTip";
 
 function xyLine(container, settings) {
-    const data = transposeData(xySplitData(settings, filterDataByGroup(settings)));
+    const data = transposeData(
+        xySplitData(settings, filterDataByGroup(settings))
+    );
 
     const color = seriesColorsFromGroups(settings);
     const symbols = symbolTypeFromGroups(settings);
@@ -99,9 +101,9 @@ xyLine.plugin = {
     initial: {
         type: "number",
         count: 2,
-        names: ["X Axis", "Y Axis"]
+        names: ["X Axis", "Y Axis"],
     },
-    selectMode: "toggle"
+    selectMode: "toggle",
 };
 
 export default xyLine;

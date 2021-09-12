@@ -17,7 +17,7 @@ const invariant = require("./expressions/invariant");
 const multiple_views = require("./expressions/multiple_views");
 const conversions = require("./expressions/conversions");
 
-module.exports = perspective => {
+module.exports = (perspective) => {
     functionality(perspective);
     numeric(perspective);
     string(perspective);

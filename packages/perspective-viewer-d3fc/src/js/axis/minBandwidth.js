@@ -10,8 +10,8 @@ import {rebindAll} from "d3fc";
 
 const MIN_BANDWIDTH = 1;
 
-export default adaptee => {
-    const minBandwidth = arg => {
+export default (adaptee) => {
+    const minBandwidth = (arg) => {
         return adaptee(arg);
     };
 

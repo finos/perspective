@@ -41,7 +41,7 @@ function quotechalk(x) {
 }
 
 function to_table(col_lengths, padding = 0) {
-    return function(...row) {
+    return function (...row) {
         try {
             let result = "".padStart(padding - 2, " ");
             for (let c = 0; c < row.length; ++c) {
@@ -63,7 +63,8 @@ function to_table(col_lengths, padding = 0) {
                     col_length = real_cell.length;
                     col_lengths[c] = [method, col_length];
                 }
-                const cell_length = cell.length + Math.max(0, col_length - real_cell.length);
+                const cell_length =
+                    cell.length + Math.max(0, col_length - real_cell.length);
                 result += "  " + cell[method].call(cell, cell_length, " ");
             }
             console.log(result);
@@ -76,7 +77,17 @@ function to_table(col_lengths, padding = 0) {
 let PRINTER, LAST_PATH;
 
 class Benchmark {
-    constructor(desc, path, body, indent, categories, after_each, iterations, timeout, toss) {
+    constructor(
+        desc,
+        path,
+        body,
+        indent,
+        categories,
+        after_each,
+        iterations,
+        timeout,
+        toss
+    ) {
         this._desc = quotechalk(desc);
         this._body = body;
         this._path = path.slice(0, path.length - 2);
@@ -93,12 +104,14 @@ class Benchmark {
             PRINTER ||
             to_table(
                 [
-                    ...(OUTPUT_MODE === "tree" ? [...path.map(() => undefined), undefined] : []),
+                    ...(OUTPUT_MODE === "tree"
+                        ? [...path.map(() => undefined), undefined]
+                        : []),
                     ["padStart", iter_length],
                     ["padStart", per_length],
                     ["padStart", undefined],
                     ["padStart", undefined],
-                    ["padStart", undefined]
+                    ["padStart", undefined],
                 ],
                 OUTPUT_MODE === "grouped" ? (indent - 1) * INDENT_LEVEL : "  "
             );
@@ -107,14 +120,31 @@ class Benchmark {
     log(reps, totals) {
         const t = totals.reduce((x, y) => x + y);
         const mean = t / reps;
-        const stddev = Math.sqrt(totals.map(x => Math.pow(x - mean, 2)).reduce((x, y) => x + y) / reps) / mean;
+        const stddev =
+            Math.sqrt(
+                totals
+                    .map((x) => Math.pow(x - mean, 2))
+                    .reduce((x, y) => x + y) / reps
+            ) / mean;
         const completed = reps;
         const total = this._iterations();
         const time = t / 1000;
         const completed_per = completed / total;
         const time_per = time / completed;
-        const color = completed_per >= 1 ? "white" : completed_per < 0.33 ? "redBright" : completed_per < 0.66 ? "yellowBright" : "greenBright";
-        const stddev_color = stddev < 0.25 ? "greenBright" : stddev < 0.5 ? "yellowBright" : "redBright";
+        const color =
+            completed_per >= 1
+                ? "white"
+                : completed_per < 0.33
+                ? "redBright"
+                : completed_per < 0.66
+                ? "yellowBright"
+                : "greenBright";
+        const stddev_color =
+            stddev < 0.25
+                ? "greenBright"
+                : stddev < 0.5
+                ? "yellowBright"
+                : "redBright";
         const path = [...this._path.reverse(), this._desc];
         const last_path = path.slice();
         if (LAST_PATH) {
@@ -136,7 +166,9 @@ class Benchmark {
             `{${color} ${(100 * completed_per).toFixed(2)}}{whiteBright %)}`,
             `{whiteBright ${time.toFixed(3)}}s`,
             `{whiteBright ${time_per.toFixed(2)}}secs/op`,
-            `{${stddev_color} ${(100 * stddev).toFixed(2)}}{whiteBright %} σ/mean`,
+            `{${stddev_color} ${(100 * stddev).toFixed(
+                2
+            )}}{whiteBright %} σ/mean`,
             ...(OUTPUT_MODE === "flat" ? this._path : []),
             ...(OUTPUT_MODE === "tree" ? [] : [`{whiteBright ${this._desc}}`])
         );
@@ -144,7 +176,13 @@ class Benchmark {
 
     *case_iter() {
         let x, start, now;
-        for (x = 0; !start || performance.now() - start < MIN_TIMEOUT || x < this._iterations() + this._toss(); x++) {
+        for (
+            x = 0;
+            !start ||
+            performance.now() - start < MIN_TIMEOUT ||
+            x < this._iterations() + this._toss();
+            x++
+        ) {
             if (x >= this._toss() && start == undefined) {
                 start = performance.now();
             }
@@ -172,7 +210,7 @@ class Benchmark {
                     yield {
                         test: this._desc,
                         time: stop,
-                        ...categories
+                        ...categories,
                     };
                 }
                 if (this._after_each) {
@@ -196,7 +234,15 @@ function unwind(stack) {
 }
 
 class Suite {
-    constructor(name, body, context, indent = 0, iterations = ITERATIONS, timeout = ITERATION_TIME, toss = TOSS_ITERATIONS) {
+    constructor(
+        name,
+        body,
+        context,
+        indent = 0,
+        iterations = ITERATIONS,
+        timeout = ITERATION_TIME,
+        toss = TOSS_ITERATIONS
+    ) {
         this._benchmarks = [];
         this._indent = indent;
         this._promises = [];
@@ -215,7 +261,7 @@ class Suite {
         context._benchmarks.push(
             new Benchmark(
                 desc,
-                this._context.map(x => x._name),
+                this._context.map((x) => x._name),
                 body,
                 context._indent,
                 () => unwind(stack),
@@ -257,7 +303,15 @@ class Suite {
 
     describe(description, body) {
         // todo closures here like Benchmark
-        const suite = new Suite(description, body, this._context, this._context[0]._indent + INDENT_LEVEL, this._context[0]._iterations, this._context[0]._timeout, this._context[0]._toss);
+        const suite = new Suite(
+            description,
+            body,
+            this._context,
+            this._context[0]._indent + INDENT_LEVEL,
+            this._context[0]._iterations,
+            this._context[0]._timeout,
+            this._context[0]._toss
+        );
         this._context[0]._benchmarks.push(suite);
     }
 
@@ -269,7 +323,9 @@ class Suite {
     async *run_all_cases() {
         this._context.unshift(this);
         if (this._name && OUTPUT_MODE === "grouped") {
-            console.log(`${" ".repeat(this._indent)}{whiteBright ${this._name}}`);
+            console.log(
+                `${" ".repeat(this._indent)}{whiteBright ${this._name}}`
+            );
         }
         if (this._body) {
             await this._body();
@@ -301,12 +357,12 @@ class Suite {
         try {
             for await (let c of this.run_all_cases()) {
                 results.push(c);
-                Object.keys(c).map(x => columns.add(x));
+                Object.keys(c).map((x) => columns.add(x));
             }
         } catch (e) {
             console.error(e.message);
         }
-        return results.map(x => {
+        return results.map((x) => {
             // TODO perspective bug :(
             for (const col of columns) {
                 x[col] = x[col] === undefined ? "-" : x[col];
@@ -318,6 +374,12 @@ class Suite {
 
 window = window || global || {};
 const mod = (window.PerspectiveBench = new Suite("perspective"));
-for (const key of ["beforeAll", "afterAll", "afterEach", "describe", "benchmark"]) {
+for (const key of [
+    "beforeAll",
+    "afterAll",
+    "afterEach",
+    "describe",
+    "benchmark",
+]) {
     window[key] = mod[key].bind(mod);
 }

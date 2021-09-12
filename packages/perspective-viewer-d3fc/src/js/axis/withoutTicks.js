@@ -8,14 +8,14 @@
  */
 import {rebindAll} from "d3fc";
 
-export default adaptee => {
-    const withoutTicks = arg => {
+export default (adaptee) => {
+    const withoutTicks = (arg) => {
         return adaptee(arg);
     };
 
     rebindAll(withoutTicks, adaptee);
 
-    withoutTicks.ticks = function() {
+    withoutTicks.ticks = function () {
         return [];
     };
 

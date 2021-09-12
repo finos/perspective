@@ -20,5 +20,7 @@ export function rgbaToRgb([r, g, b, a], source = [255, 255, 255]) {
 // Chroma does this but why bother?
 export function infer_foreground_from_background([r, g, b]) {
     // TODO Implement dark/light themes.
-    return Math.sqrt(r * r * 0.299 + g * g * 0.587 + b * b * 0.114) > 130 ? "#161616" : "#ffffff";
+    return Math.sqrt(r * r * 0.299 + g * g * 0.587 + b * b * 0.114) > 130
+        ? "#161616"
+        : "#ffffff";
 }

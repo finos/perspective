@@ -11,7 +11,7 @@ export const defaultPadding = () => {
     let pad = [0, 0];
     let padUnit = "percent";
 
-    const padding = extent => {
+    const padding = (extent) => {
         switch (padUnit) {
             case "domain": {
                 extent[0] -= pad[0];
@@ -30,7 +30,7 @@ export const defaultPadding = () => {
         return extent;
     };
 
-    padding.pad = function() {
+    padding.pad = function () {
         if (!arguments.length) {
             return pad;
         }
@@ -38,7 +38,7 @@ export const defaultPadding = () => {
         return padding;
     };
 
-    padding.padUnit = function() {
+    padding.padUnit = function () {
         if (!arguments.length) {
             return padUnit;
         }

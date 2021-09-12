@@ -8,13 +8,17 @@
  */
 
 export const findBestFromData = (array, valueFn, compareFn = Math.min) => {
-    const findBestFromArray = array => {
+    const findBestFromArray = (array) => {
         return array.reduce((best, v) => {
             const thisValue = findBestFromItem(v, valueFn);
-            return thisValue && (!best || compareFn(best.value, thisValue.value) === thisValue.value) ? thisValue : best;
+            return thisValue &&
+                (!best ||
+                    compareFn(best.value, thisValue.value) === thisValue.value)
+                ? thisValue
+                : best;
         }, null);
     };
-    const findBestFromItem = item => {
+    const findBestFromItem = (item) => {
         if (Array.isArray(item)) {
             return findBestFromArray(item, valueFn);
         }
@@ -22,7 +26,7 @@ export const findBestFromData = (array, valueFn, compareFn = Math.min) => {
         return value !== null
             ? {
                   item,
-                  value
+                  value,
               }
             : null;
     };

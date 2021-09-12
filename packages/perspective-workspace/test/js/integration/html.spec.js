@@ -16,7 +16,7 @@ const PATHS = [
     path.join(TEST_ROOT, "dist", "theme"),
     path.join(TEST_ROOT, "test", "html"),
     path.join(TEST_ROOT, "test", "css"),
-    path.join(TEST_ROOT, "test", "csv")
+    path.join(TEST_ROOT, "test", "csv"),
 ];
 
 utils.with_server({paths: PATHS}, () => {
@@ -24,11 +24,25 @@ utils.with_server({paths: PATHS}, () => {
         "index.html",
         () => {
             describe("Light DOM", () => {
-                tests(page => page.evaluate(async () => document.querySelector("perspective-workspace").outerHTML));
+                tests((page) =>
+                    page.evaluate(
+                        async () =>
+                            document.querySelector("perspective-workspace")
+                                .outerHTML
+                    )
+                );
             });
 
             describe("Shadow DOM", () => {
-                tests(page => page.evaluate(async () => document.querySelector("perspective-workspace").shadowRoot.querySelector("#container").innerHTML));
+                tests((page) =>
+                    page.evaluate(
+                        async () =>
+                            document
+                                .querySelector("perspective-workspace")
+                                .shadowRoot.querySelector("#container")
+                                .innerHTML
+                    )
+                );
             });
         },
         {root: TEST_ROOT}
@@ -36,7 +50,7 @@ utils.with_server({paths: PATHS}, () => {
 });
 
 function tests(extract) {
-    test.capture("Create One", async page => {
+    test.capture("Create One", async (page) => {
         await page.waitForFunction(() => !!window.__TABLE__);
         await page.evaluate(async () => {
             document.body.innerHTML = `
@@ -44,7 +58,9 @@ function tests(extract) {
                     <perspective-viewer table="superstore"></perspective-viewer>
                 </perspective-workspace>
             `;
-            const workspace = document.body.querySelector("perspective-workspace");
+            const workspace = document.body.querySelector(
+                "perspective-workspace"
+            );
             workspace.tables.set("superstore", window.__TABLE__);
             await workspace.flush();
         });
@@ -52,7 +68,7 @@ function tests(extract) {
         return extract(page);
     });
 
-    test.capture("Create Multiple", async page => {
+    test.capture("Create Multiple", async (page) => {
         await page.evaluate(async () => {
             document.body.innerHTML = `
                 <perspective-workspace>
@@ -60,7 +76,9 @@ function tests(extract) {
                     <perspective-viewer table="superstore"></perspective-viewer>
                 </perspective-workspace>
             `;
-            const workspace = document.body.querySelector("perspective-workspace");
+            const workspace = document.body.querySelector(
+                "perspective-workspace"
+            );
             workspace.tables.set("superstore", window.__TABLE__);
             await workspace.flush();
         });
@@ -68,7 +86,7 @@ function tests(extract) {
         return extract(page);
     });
 
-    test.capture("Create multiple with names", async page => {
+    test.capture("Create multiple with names", async (page) => {
         await page.evaluate(async () => {
             document.body.innerHTML = `
                 <perspective-workspace>
@@ -76,7 +94,9 @@ function tests(extract) {
                     <perspective-viewer name="Table 2" table="superstore"></perspective-viewer>
                 </perspective-workspace>
             `;
-            const workspace = document.body.querySelector("perspective-workspace");
+            const workspace = document.body.querySelector(
+                "perspective-workspace"
+            );
             workspace.tables.set("superstore", window.__TABLE__);
             await workspace.flush();
         });

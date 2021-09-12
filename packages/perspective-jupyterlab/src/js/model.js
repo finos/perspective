@@ -7,7 +7,7 @@
  *
  */
 
-import {DOMWidgetModel, ISerializers} from "@jupyter-widgets/base";
+import {DOMWidgetModel} from "@jupyter-widgets/base";
 import {PERSPECTIVE_VERSION} from "./version";
 
 /**
@@ -15,6 +15,7 @@ import {PERSPECTIVE_VERSION} from "./version";
  */
 export class PerspectiveModel extends DOMWidgetModel {
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+
     defaults() {
         return {
             ...super.defaults(),
@@ -24,7 +25,6 @@ export class PerspectiveModel extends DOMWidgetModel {
             _view_name: PerspectiveModel.view_name,
             _view_module: PerspectiveModel.view_module,
             _view_module_version: PerspectiveModel.view_module_version,
-
             plugin: "datagrid",
             columns: [],
             row_pivots: [],
@@ -37,19 +37,19 @@ export class PerspectiveModel extends DOMWidgetModel {
             dark: false,
             editable: false,
             server: false,
-            client: false
+            client: false,
         };
     }
-
-    static serializers: ISerializers = {
-        ...DOMWidgetModel.serializers
-        // Add any extra serializers here
-    };
-
-    static model_name = "PerspectiveModel";
-    static model_module = "@finos/perspective-jupyterlab";
-    static model_module_version = PERSPECTIVE_VERSION;
-    static view_name = "PerspectiveView";
-    static view_module = "@finos/perspective-jupyterlab";
-    static view_module_version = PERSPECTIVE_VERSION;
 }
+
+PerspectiveModel.serializers = {
+    ...DOMWidgetModel.serializers,
+    // Add any extra serializers here
+};
+
+PerspectiveModel.model_name = "PerspectiveModel";
+PerspectiveModel.model_module = "@finos/perspective-jupyterlab";
+PerspectiveModel.model_module_version = PERSPECTIVE_VERSION;
+PerspectiveModel.view_name = "PerspectiveView";
+PerspectiveModel.view_module = "@finos/perspective-jupyterlab";
+PerspectiveModel.view_module_version = PERSPECTIVE_VERSION;

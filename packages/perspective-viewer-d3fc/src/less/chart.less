@@ -6,10 +6,10 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
- 
- @import "~@finos/perspective-viewer/src/less/variables.less";
- 
- @sans-serif-fonts: Arial, sans-serif;
+
+@import "~@finos/perspective-viewer/src/less/variables.less";
+
+@sans-serif-fonts: Arial, sans-serif;
 
 :host {
     .chart {
@@ -93,8 +93,6 @@
         }
 
         &.treemap {
-           
-
             & .treemap-container {
                 position: relative;
 
@@ -202,7 +200,8 @@
             line-height: 1em !important;
         }
 
-        & .x-label, & .y-label {
+        & .x-label,
+        & .y-label {
             color: var(--d3fc-label--color, inherit);
             font-size: 14px;
         }
@@ -355,7 +354,7 @@
             &:hover {
                 background-color: var(--d3fc-legend--background, #ffffff);
                 box-shadow: @elevation1;
-                transition: box-shadow 0.2s,  background-color 0.2s;
+                transition: box-shadow 0.2s, background-color 0.2s;
             }
         }
 

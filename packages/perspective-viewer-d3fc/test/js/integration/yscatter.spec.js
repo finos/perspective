@@ -17,9 +17,13 @@ const {withTemplate} = require("./simple-template");
 withTemplate("yscatter", "Y Scatter");
 
 function get_contents(temp) {
-    return async function(page) {
-        return await page.evaluate(async temp => {
-            const viewer = document.querySelector(`perspective-viewer perspective-viewer-d3fc-${temp}`).shadowRoot.querySelector("svg");
+    return async function (page) {
+        return await page.evaluate(async (temp) => {
+            const viewer = document
+                .querySelector(
+                    `perspective-viewer perspective-viewer-d3fc-${temp}`
+                )
+                .shadowRoot.querySelector("svg");
             return viewer.outerHTML || "MISSING";
         }, temp);
     };

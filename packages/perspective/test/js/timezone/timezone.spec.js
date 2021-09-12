@@ -14,7 +14,7 @@ const date_data = [
     {x: new Date(2020, 2, 8)}, // 2020/03/08
     {x: new Date(2020, 9, 1)}, // 2020/10/01
     {x: new Date(2020, 10, 1)}, // 2020/11/01
-    {x: new Date(2020, 11, 31)} // 2020/12/31
+    {x: new Date(2020, 11, 31)}, // 2020/12/31
 ];
 
 const date_data_local = [
@@ -22,7 +22,7 @@ const date_data_local = [
     {x: new Date(2020, 2, 8).toLocaleDateString()}, // 2020/03/08
     {x: new Date(2020, 9, 1).toLocaleDateString()}, // 2020/10/01
     {x: new Date(2020, 10, 1).toLocaleDateString()}, // 2020/11/01
-    {x: new Date(2020, 11, 31).toLocaleDateString()} // 2020/12/31
+    {x: new Date(2020, 11, 31).toLocaleDateString()}, // 2020/12/31
 ];
 
 const datetime_data = [
@@ -32,7 +32,7 @@ const datetime_data = [
     {x: new Date(2020, 2, 8, 2, 0, 1)}, // 2020/03/8 02:00:01 GMT-0500
     {x: new Date(2020, 9, 1, 15, 11, 55)}, // 2020/10/01 15:30:55 GMT-0400
     {x: new Date(2020, 10, 1, 19, 29, 55)}, // 2020/11/01 19:30:55 GMT-0400
-    {x: new Date(2020, 11, 31, 7, 42, 55)} // 2020/12/31 07:30:55 GMT-0500
+    {x: new Date(2020, 11, 31, 7, 42, 55)}, // 2020/12/31 07:30:55 GMT-0500
 ];
 
 const datetime_data_local = [
@@ -42,7 +42,7 @@ const datetime_data_local = [
     {x: new Date(2020, 2, 8, 2, 0, 1).toLocaleString()}, // 2020/03/8 02:00:01 GMT-0500
     {x: new Date(2020, 9, 1, 15, 11, 55).toLocaleString()}, // 2020/10/01 15:30:55 GMT-0400
     {x: new Date(2020, 10, 1, 19, 29, 55).toLocaleString()}, // 2020/11/01 19:30:55 GMT-0400
-    {x: new Date(2020, 11, 31, 7, 42, 55).toLocaleString()} // 2020/12/31 07:30:55 GMT-0500
+    {x: new Date(2020, 11, 31, 7, 42, 55).toLocaleString()}, // 2020/12/31 07:30:55 GMT-0500
 ];
 
 /**
@@ -56,8 +56,12 @@ const check_datetime = (output, expected) => {
     expect(output.length).toEqual(expected.length);
     for (let i = 0; i < output.length; i++) {
         let date = new Date(output[i]["x"]);
-        expect(date.toLocaleString()).toEqual(expected[i]["x"].toLocaleString());
-        expect(date.getTimezoneOffset()).toEqual(expected[i]["x"].getTimezoneOffset());
+        expect(date.toLocaleString()).toEqual(
+            expected[i]["x"].toLocaleString()
+        );
+        expect(date.getTimezoneOffset()).toEqual(
+            expected[i]["x"].getTimezoneOffset()
+        );
     }
 };
 
@@ -69,7 +73,10 @@ describe("Timezone Tests", () => {
         // offset is 240 during DST and 300 during non-DST, since we manually
         // set the timezone here just assert the timezone string
 
-        if (now.toString().includes("GMT-0400") || now.toString().includes("Eastern Daylight Time")) {
+        if (
+            now.toString().includes("GMT-0400") ||
+            now.toString().includes("Eastern Daylight Time")
+        ) {
             expect(new Date().getTimezoneOffset()).toBe(240);
         } else {
             expect(new Date().getTimezoneOffset()).toBe(300);
@@ -94,7 +101,9 @@ describe("Timezone Tests", () => {
         it("== filters date correctly from Date()", async () => {
             const table = await perspective.table(date_data);
             expect(await table.schema()).toEqual({x: "date"});
-            const view = await table.view({filter: [["x", "==", date_data[2]["x"]]]});
+            const view = await table.view({
+                filter: [["x", "==", date_data[2]["x"]]],
+            });
             let data = await view.to_json();
             check_datetime(data, [date_data[2]]);
         });
@@ -102,7 +111,9 @@ describe("Timezone Tests", () => {
         it("> filters date correctly from Date()", async () => {
             const table = await perspective.table(date_data);
             expect(await table.schema()).toEqual({x: "date"});
-            const view = await table.view({filter: [["x", ">", date_data[2]["x"]]]});
+            const view = await table.view({
+                filter: [["x", ">", date_data[2]["x"]]],
+            });
             let data = await view.to_json();
             check_datetime(data, date_data.slice(3));
         });
@@ -110,7 +121,9 @@ describe("Timezone Tests", () => {
         it("< filters date correctly from Date()", async () => {
             const table = await perspective.table(date_data);
             expect(await table.schema()).toEqual({x: "date"});
-            const view = await table.view({filter: [["x", "<", date_data[2]["x"]]]});
+            const view = await table.view({
+                filter: [["x", "<", date_data[2]["x"]]],
+            });
             let data = await view.to_json();
             check_datetime(data, date_data.slice(0, 2));
         });
@@ -118,7 +131,9 @@ describe("Timezone Tests", () => {
         it(">= filters date correctly from Date()", async () => {
             const table = await perspective.table(date_data);
             expect(await table.schema()).toEqual({x: "date"});
-            const view = await table.view({filter: [["x", ">=", date_data[2]["x"]]]});
+            const view = await table.view({
+                filter: [["x", ">=", date_data[2]["x"]]],
+            });
             let data = await view.to_json();
             check_datetime(data, date_data.slice(2));
         });
@@ -126,7 +141,9 @@ describe("Timezone Tests", () => {
         it("< filters date correctly from Date()", async () => {
             const table = await perspective.table(date_data);
             expect(await table.schema()).toEqual({x: "date"});
-            const view = await table.view({filter: [["x", "<=", date_data[2]["x"]]]});
+            const view = await table.view({
+                filter: [["x", "<=", date_data[2]["x"]]],
+            });
             let data = await view.to_json();
             check_datetime(data, date_data.slice(0, 3));
         });
@@ -147,7 +164,7 @@ describe("Timezone Tests", () => {
             // Converts automatically to ISO-formatted string
             const deepcopy = JSON.parse(JSON.stringify(date_data));
             const table = await perspective.table({
-                x: "date"
+                x: "date",
             });
             table.update(deepcopy);
             const view = await table.view();
@@ -167,18 +184,22 @@ describe("Timezone Tests", () => {
 
             for (let i = 0; i < data.length; i++) {
                 let date = new Date(data[i]["x"]);
-                expect(date.toLocaleDateString()).toEqual(date_data_local[i]["x"]);
+                expect(date.toLocaleDateString()).toEqual(
+                    date_data_local[i]["x"]
+                );
             }
         });
 
         it("== filters date correctly from ISO date string", async () => {
             const deepcopy = JSON.parse(JSON.stringify(date_data));
             const table = await perspective.table({
-                x: "date"
+                x: "date",
             });
             table.update(deepcopy);
             expect(await table.schema()).toEqual({x: "date"});
-            const view = await table.view({filter: [["x", "==", deepcopy[2]["x"]]]});
+            const view = await table.view({
+                filter: [["x", "==", deepcopy[2]["x"]]],
+            });
             let data = await view.to_json();
             check_datetime(data, [date_data[2]]);
         });
@@ -186,11 +207,13 @@ describe("Timezone Tests", () => {
         it("> filters date correctly from ISO date string", async () => {
             const deepcopy = JSON.parse(JSON.stringify(date_data));
             const table = await perspective.table({
-                x: "date"
+                x: "date",
             });
             table.update(deepcopy);
             expect(await table.schema()).toEqual({x: "date"});
-            const view = await table.view({filter: [["x", ">", deepcopy[2]["x"]]]});
+            const view = await table.view({
+                filter: [["x", ">", deepcopy[2]["x"]]],
+            });
             let data = await view.to_json();
             check_datetime(data, date_data.slice(3));
         });
@@ -198,11 +221,13 @@ describe("Timezone Tests", () => {
         it("< filters date correctly from ISO date string", async () => {
             const deepcopy = JSON.parse(JSON.stringify(date_data));
             const table = await perspective.table({
-                x: "date"
+                x: "date",
             });
             table.update(deepcopy);
             expect(await table.schema()).toEqual({x: "date"});
-            const view = await table.view({filter: [["x", "<", deepcopy[2]["x"]]]});
+            const view = await table.view({
+                filter: [["x", "<", deepcopy[2]["x"]]],
+            });
             let data = await view.to_json();
             check_datetime(data, date_data.slice(0, 2));
         });
@@ -210,11 +235,13 @@ describe("Timezone Tests", () => {
         it(">= filters date correctly from ISO date string", async () => {
             const deepcopy = JSON.parse(JSON.stringify(date_data));
             const table = await perspective.table({
-                x: "date"
+                x: "date",
             });
             table.update(deepcopy);
             expect(await table.schema()).toEqual({x: "date"});
-            const view = await table.view({filter: [["x", ">=", deepcopy[2]["x"]]]});
+            const view = await table.view({
+                filter: [["x", ">=", deepcopy[2]["x"]]],
+            });
             let data = await view.to_json();
             check_datetime(data, date_data.slice(2));
         });
@@ -222,11 +249,13 @@ describe("Timezone Tests", () => {
         it("< filters date correctly from ISO date string", async () => {
             const deepcopy = JSON.parse(JSON.stringify(date_data));
             const table = await perspective.table({
-                x: "date"
+                x: "date",
             });
             table.update(deepcopy);
             expect(await table.schema()).toEqual({x: "date"});
-            const view = await table.view({filter: [["x", "<=", deepcopy[2]["x"]]]});
+            const view = await table.view({
+                filter: [["x", "<=", deepcopy[2]["x"]]],
+            });
             let data = await view.to_json();
             check_datetime(data, date_data.slice(0, 3));
         });
@@ -248,7 +277,9 @@ describe("Timezone Tests", () => {
         it("== filters datetime correctly from Date()", async () => {
             const table = await perspective.table(datetime_data);
             expect(await table.schema()).toEqual({x: "datetime"});
-            const view = await table.view({filter: [["x", "==", datetime_data[2]["x"]]]});
+            const view = await table.view({
+                filter: [["x", "==", datetime_data[2]["x"]]],
+            });
             let data = await view.to_json();
             check_datetime(data, [datetime_data[2]]);
         });
@@ -256,7 +287,9 @@ describe("Timezone Tests", () => {
         it("> filters datetime correctly from Date()", async () => {
             const table = await perspective.table(datetime_data);
             expect(await table.schema()).toEqual({x: "datetime"});
-            const view = await table.view({filter: [["x", ">", datetime_data[2]["x"]]]});
+            const view = await table.view({
+                filter: [["x", ">", datetime_data[2]["x"]]],
+            });
             let data = await view.to_json();
             check_datetime(data, datetime_data.slice(3));
         });
@@ -264,7 +297,9 @@ describe("Timezone Tests", () => {
         it("< filters datetime correctly from Date()", async () => {
             const table = await perspective.table(datetime_data);
             expect(await table.schema()).toEqual({x: "datetime"});
-            const view = await table.view({filter: [["x", "<", datetime_data[2]["x"]]]});
+            const view = await table.view({
+                filter: [["x", "<", datetime_data[2]["x"]]],
+            });
             let data = await view.to_json();
             check_datetime(data, datetime_data.slice(0, 2));
         });
@@ -272,7 +307,9 @@ describe("Timezone Tests", () => {
         it(">= filters datetime correctly from Date()", async () => {
             const table = await perspective.table(datetime_data);
             expect(await table.schema()).toEqual({x: "datetime"});
-            const view = await table.view({filter: [["x", ">=", datetime_data[2]["x"]]]});
+            const view = await table.view({
+                filter: [["x", ">=", datetime_data[2]["x"]]],
+            });
             let data = await view.to_json();
             check_datetime(data, datetime_data.slice(2));
         });
@@ -280,7 +317,9 @@ describe("Timezone Tests", () => {
         it("< filters datetime correctly from Date()", async () => {
             const table = await perspective.table(datetime_data);
             expect(await table.schema()).toEqual({x: "datetime"});
-            const view = await table.view({filter: [["x", "<=", datetime_data[2]["x"]]]});
+            const view = await table.view({
+                filter: [["x", "<=", datetime_data[2]["x"]]],
+            });
             let data = await view.to_json();
             check_datetime(data, datetime_data.slice(0, 3));
         });
@@ -309,7 +348,9 @@ describe("Timezone Tests", () => {
 
             for (let i = 0; i < data.length; i++) {
                 let date = new Date(data[i]["x"]);
-                expect(date.toLocaleString()).toEqual(" " + datetime_data_local[i]["x"]);
+                expect(date.toLocaleString()).toEqual(
+                    " " + datetime_data_local[i]["x"]
+                );
             }
         });
 
@@ -317,7 +358,9 @@ describe("Timezone Tests", () => {
             const deepcopy = JSON.parse(JSON.stringify(datetime_data));
             const table = await perspective.table(deepcopy);
             expect(await table.schema()).toEqual({x: "datetime"});
-            const view = await table.view({filter: [["x", "==", deepcopy[2]["x"]]]});
+            const view = await table.view({
+                filter: [["x", "==", deepcopy[2]["x"]]],
+            });
             let data = await view.to_json();
             check_datetime(data, [datetime_data[2]]);
         });
@@ -326,7 +369,9 @@ describe("Timezone Tests", () => {
             const deepcopy = JSON.parse(JSON.stringify(datetime_data));
             const table = await perspective.table(deepcopy);
             expect(await table.schema()).toEqual({x: "datetime"});
-            const view = await table.view({filter: [["x", ">", deepcopy[2]["x"]]]});
+            const view = await table.view({
+                filter: [["x", ">", deepcopy[2]["x"]]],
+            });
             let data = await view.to_json();
             check_datetime(data, datetime_data.slice(3));
         });
@@ -335,7 +380,9 @@ describe("Timezone Tests", () => {
             const deepcopy = JSON.parse(JSON.stringify(datetime_data));
             const table = await perspective.table(deepcopy);
             expect(await table.schema()).toEqual({x: "datetime"});
-            const view = await table.view({filter: [["x", "<", deepcopy[2]["x"]]]});
+            const view = await table.view({
+                filter: [["x", "<", deepcopy[2]["x"]]],
+            });
             let data = await view.to_json();
             check_datetime(data, datetime_data.slice(0, 2));
         });
@@ -344,7 +391,9 @@ describe("Timezone Tests", () => {
             const deepcopy = JSON.parse(JSON.stringify(datetime_data));
             const table = await perspective.table(deepcopy);
             expect(await table.schema()).toEqual({x: "datetime"});
-            const view = await table.view({filter: [["x", ">=", deepcopy[2]["x"]]]});
+            const view = await table.view({
+                filter: [["x", ">=", deepcopy[2]["x"]]],
+            });
             let data = await view.to_json();
             check_datetime(data, datetime_data.slice(2));
         });
@@ -353,7 +402,9 @@ describe("Timezone Tests", () => {
             const deepcopy = JSON.parse(JSON.stringify(datetime_data));
             const table = await perspective.table(deepcopy);
             expect(await table.schema()).toEqual({x: "datetime"});
-            const view = await table.view({filter: [["x", "<=", deepcopy[2]["x"]]]});
+            const view = await table.view({
+                filter: [["x", "<=", deepcopy[2]["x"]]],
+            });
             let data = await view.to_json();
             check_datetime(data, datetime_data.slice(0, 3));
         });

@@ -11,7 +11,7 @@
  * Tests the correctness of each datetime computation function in various
  * environments and parameters - different types, nulls, undefined, etc.
  */
-module.exports = perspective => {
+module.exports = (perspective) => {
     describe("string()", () => {
         it("Should create string from all column types", async () => {
             const table = await perspective.table({
@@ -20,7 +20,7 @@ module.exports = perspective => {
                 c: "integer",
                 d: "float",
                 e: "string",
-                f: "boolean"
+                f: "boolean",
             });
 
             const view = await table.view({
@@ -31,17 +31,20 @@ module.exports = perspective => {
                     '// computed4\n string("d")',
                     '// computed5\n string("e")',
                     '// computed6\n string("f")',
-                    "// computed7\n string(1234.5678)"
-                ]
+                    "// computed7\n string(1234.5678)",
+                ],
             });
 
             table.update({
                 a: [new Date(2020, 4, 30), new Date(2021, 6, 13)],
-                b: [new Date(2015, 10, 29, 23, 59, 59), new Date(2016, 10, 29, 23, 59, 59)],
+                b: [
+                    new Date(2015, 10, 29, 23, 59, 59),
+                    new Date(2016, 10, 29, 23, 59, 59),
+                ],
                 c: [12345678, 1293879852],
                 d: [1.2792013981, 19.218975981],
                 e: ["abcdefghijklmnop", "def"],
-                f: [false, true]
+                f: [false, true],
             });
 
             expect(await view.expression_schema()).toEqual({
@@ -51,13 +54,16 @@ module.exports = perspective => {
                 computed4: "string",
                 computed5: "string",
                 computed6: "string",
-                computed7: "string"
+                computed7: "string",
             });
 
             const result = await view.to_columns();
 
             expect(result["computed"]).toEqual(["2020-05-30", "2021-07-13"]);
-            expect(result["computed2"]).toEqual(["2015-11-29 23:59:59.000", "2016-11-29 23:59:59.000"]);
+            expect(result["computed2"]).toEqual([
+                "2015-11-29 23:59:59.000",
+                "2016-11-29 23:59:59.000",
+            ]);
             expect(result["computed3"]).toEqual(["12345678", "1293879852"]);
             expect(result["computed4"]).toEqual(["1.2792", "19.219"]);
             expect(result["computed5"]).toEqual(["abcdefghijklmnop", "def"]);
@@ -70,7 +76,7 @@ module.exports = perspective => {
 
         it("Should create string from scalars", async () => {
             const table = await perspective.table({
-                x: [1]
+                x: [1],
             });
 
             const view = await table.view({
@@ -78,15 +84,19 @@ module.exports = perspective => {
                 aggregates: {
                     computed: "last",
                     computed2: "last",
-                    computed3: "last"
+                    computed3: "last",
                 },
-                expressions: ["// computed\n string('abcdefg')", "// computed2\n string(1234)", "// computed3\n string(1234.5678)"]
+                expressions: [
+                    "// computed\n string('abcdefg')",
+                    "// computed2\n string(1234)",
+                    "// computed3\n string(1234.5678)",
+                ],
             });
 
             expect(await view.expression_schema()).toEqual({
                 computed: "string",
                 computed2: "string",
-                computed3: "string"
+                computed3: "string",
             });
 
             const result = await view.to_columns();
@@ -118,8 +128,8 @@ module.exports = perspective => {
                     `//computed11\ninteger('1234abcd')`,
                     `//computed12\ninteger('abcdefg1234')`,
                     `//computed13\ninteger('2147483648')`,
-                    `//computed14\ninteger('-2147483649')`
-                ]
+                    `//computed14\ninteger('-2147483649')`,
+                ],
             });
 
             const result = await view.to_columns();
@@ -150,15 +160,22 @@ module.exports = perspective => {
             const table = await perspective.table({x: "integer"});
 
             const view = await table.view({
-                expressions: [`//computed\ninteger("x")`]
+                expressions: [`//computed\ninteger("x")`],
             });
 
             table.update({
-                x: [100, -17238.8123, 0.890798, -1.1295, null, 12836215.128937]
+                x: [100, -17238.8123, 0.890798, -1.1295, null, 12836215.128937],
             });
 
             const result = await view.to_columns();
-            expect(result["computed"]).toEqual([100, -17238, 0, -1, null, 12836215]);
+            expect(result["computed"]).toEqual([
+                100,
+                -17238,
+                0,
+                -1,
+                null,
+                12836215,
+            ]);
 
             await view.delete();
             await table.delete();
@@ -168,15 +185,29 @@ module.exports = perspective => {
             const table = await perspective.table({x: "float"});
 
             const view = await table.view({
-                expressions: [`//computed\ninteger("x")`]
+                expressions: [`//computed\ninteger("x")`],
             });
 
             table.update({
-                x: [100.9999999, -17238.8123, 0.890798, -1.1295, null, 12836215.128937]
+                x: [
+                    100.9999999,
+                    -17238.8123,
+                    0.890798,
+                    -1.1295,
+                    null,
+                    12836215.128937,
+                ],
             });
 
             const result = await view.to_columns();
-            expect(result["computed"]).toEqual([100, -17238, 0, -1, null, 12836215]);
+            expect(result["computed"]).toEqual([
+                100,
+                -17238,
+                0,
+                -1,
+                null,
+                12836215,
+            ]);
 
             await view.delete();
             await table.delete();
@@ -186,13 +217,13 @@ module.exports = perspective => {
             const table = await perspective.table({x: "date"});
 
             const view = await table.view({
-                expressions: [`//computed\ninteger("x")`]
+                expressions: [`//computed\ninteger("x")`],
             });
 
             const value = new Date(2020, 5, 30);
 
             table.update({
-                x: [value]
+                x: [value],
             });
 
             const result = await view.to_columns();
@@ -219,26 +250,39 @@ module.exports = perspective => {
             const table = await perspective.table({x: "datetime"});
 
             const view = await table.view({
-                expressions: [`//computed\ninteger("x")`]
+                expressions: [`//computed\ninteger("x")`],
             });
 
             // first will not overflow, second will
             table.update({
-                x: [new Date(1970, 0, 1, 1), new Date(2020, 0, 1, 1)]
+                x: [new Date(1970, 0, 1, 1), new Date(2020, 0, 1, 1)],
             });
 
             const result = await view.to_columns();
-            expect(result["computed"]).toEqual([new Date(1970, 0, 1, 1).getTime(), null]);
+            expect(result["computed"]).toEqual([
+                new Date(1970, 0, 1, 1).getTime(),
+                null,
+            ]);
 
             await view.delete();
             await table.delete();
         });
 
         it("Should create integers from string columns", async () => {
-            const table = await perspective.table({x: ["1", "2", "3", "abc", "4.5", "0.101928317581729083", "-123456"]});
+            const table = await perspective.table({
+                x: [
+                    "1",
+                    "2",
+                    "3",
+                    "abc",
+                    "4.5",
+                    "0.101928317581729083",
+                    "-123456",
+                ],
+            });
 
             const view = await table.view({
-                expressions: [`//computed\ninteger("x")`]
+                expressions: [`//computed\ninteger("x")`],
             });
 
             const result = await view.to_columns();
@@ -271,8 +315,8 @@ module.exports = perspective => {
                     `//computed15\n float('inf')`,
                     `//computed16\n float('-inf')`,
                     `//computed17\n float(inf)`,
-                    `//computed18\n float(-inf)`
-                ]
+                    `//computed18\n float(-inf)`,
+                ],
             });
 
             expect(await view.expression_schema()).toEqual({
@@ -293,7 +337,7 @@ module.exports = perspective => {
                 computed15: "float",
                 computed16: "float",
                 computed17: "float",
-                computed18: "float"
+                computed18: "float",
             });
 
             const result = await view.to_columns();
@@ -324,15 +368,22 @@ module.exports = perspective => {
             const table = await perspective.table({x: "integer"});
 
             const view = await table.view({
-                expressions: [`//computed\nfloat("x")`]
+                expressions: [`//computed\nfloat("x")`],
             });
 
             table.update({
-                x: [100, -17238.8123, 0.890798, -1.1295, null, 12836215.128937]
+                x: [100, -17238.8123, 0.890798, -1.1295, null, 12836215.128937],
             });
 
             const result = await view.to_columns();
-            expect(result["computed"]).toEqual([100, -17238, 0, -1, null, 12836215]);
+            expect(result["computed"]).toEqual([
+                100,
+                -17238,
+                0,
+                -1,
+                null,
+                12836215,
+            ]);
 
             await view.delete();
             await table.delete();
@@ -342,15 +393,29 @@ module.exports = perspective => {
             const table = await perspective.table({x: "float"});
 
             const view = await table.view({
-                expressions: [`//computed\n float("x")`]
+                expressions: [`//computed\n float("x")`],
             });
 
             table.update({
-                x: [100.9999999, -17238.8123, 0.890798, -1.1295, null, 12836215.128937]
+                x: [
+                    100.9999999,
+                    -17238.8123,
+                    0.890798,
+                    -1.1295,
+                    null,
+                    12836215.128937,
+                ],
             });
 
             const result = await view.to_columns();
-            expect(result["computed"]).toEqual([100.9999999, -17238.8123, 0.890798, -1.1295, null, 12836215.128937]);
+            expect(result["computed"]).toEqual([
+                100.9999999,
+                -17238.8123,
+                0.890798,
+                -1.1295,
+                null,
+                12836215.128937,
+            ]);
 
             await view.delete();
             await table.delete();
@@ -360,13 +425,13 @@ module.exports = perspective => {
             const table = await perspective.table({x: "date"});
 
             const view = await table.view({
-                expressions: [`//computed\nfloat("x")`]
+                expressions: [`//computed\nfloat("x")`],
             });
 
             const value = new Date(2020, 5, 30);
 
             table.update({
-                x: [value]
+                x: [value],
             });
 
             const result = await view.to_columns();
@@ -393,15 +458,18 @@ module.exports = perspective => {
             const table = await perspective.table({x: "datetime"});
 
             const view = await table.view({
-                expressions: [`//computed\nfloat("x")`]
+                expressions: [`//computed\nfloat("x")`],
             });
 
             table.update({
-                x: [new Date(2020, 0, 1, 1), new Date(2020, 0, 1, 1, 50)]
+                x: [new Date(2020, 0, 1, 1), new Date(2020, 0, 1, 1, 50)],
             });
 
             const result = await view.to_columns();
-            expect(result["computed"]).toEqual([new Date(2020, 0, 1, 1).getTime(), new Date(2020, 0, 1, 1, 50).getTime()]);
+            expect(result["computed"]).toEqual([
+                new Date(2020, 0, 1, 1).getTime(),
+                new Date(2020, 0, 1, 1, 50).getTime(),
+            ]);
 
             await view.delete();
             await table.delete();
@@ -409,15 +477,31 @@ module.exports = perspective => {
 
         it("Should create floats from string columns", async () => {
             const table = await perspective.table({
-                x: ["1.1238757869112321", "2.0000001", "abcdefg1234.12878591", "12354.1827389abc", "4.555555555", "0.101928317581729083", "-123456.21831729054781"]
+                x: [
+                    "1.1238757869112321",
+                    "2.0000001",
+                    "abcdefg1234.12878591",
+                    "12354.1827389abc",
+                    "4.555555555",
+                    "0.101928317581729083",
+                    "-123456.21831729054781",
+                ],
             });
 
             const view = await table.view({
-                expressions: [`//computed\n float("x")`]
+                expressions: [`//computed\n float("x")`],
             });
 
             const result = await view.to_columns();
-            expect(result["computed"]).toEqual([1.1238757869112321, 2.0000001, null, null, 4.555555555, 0.101928317581729083, -123456.21831729054781]);
+            expect(result["computed"]).toEqual([
+                1.1238757869112321,
+                2.0000001,
+                null,
+                null,
+                4.555555555,
+                0.101928317581729083,
+                -123456.21831729054781,
+            ]);
 
             await view.delete();
             await table.delete();
@@ -427,16 +511,24 @@ module.exports = perspective => {
     describe("date()", () => {
         it("Should create a date from scalars", async () => {
             const table = await perspective.table({
-                x: [1, 2, 3, 4]
+                x: [1, 2, 3, 4],
             });
 
             const view = await table.view({
-                expressions: [`//computed \n date(2020, 7, 15)`, `//computed2 \n date(1970, 10, 29)`, `//computed3\n date(2020, 1, "x")`]
+                expressions: [
+                    `//computed \n date(2020, 7, 15)`,
+                    `//computed2 \n date(1970, 10, 29)`,
+                    `//computed3\n date(2020, 1, "x")`,
+                ],
             });
 
             const result = await view.to_columns();
-            expect(result["computed"]).toEqual(Array(4).fill(new Date(2020, 6, 15).getTime()));
-            expect(result["computed2"]).toEqual(Array(4).fill(new Date(1970, 9, 29).getTime()));
+            expect(result["computed"]).toEqual(
+                Array(4).fill(new Date(2020, 6, 15).getTime())
+            );
+            expect(result["computed2"]).toEqual(
+                Array(4).fill(new Date(1970, 9, 29).getTime())
+            );
             expect(result["computed3"]).toEqual(
                 Array(4)
                     .fill(true)
@@ -450,21 +542,27 @@ module.exports = perspective => {
             const table = await perspective.table({
                 y: "integer",
                 m: "integer",
-                d: "integer"
+                d: "integer",
             });
 
             const view = await table.view({
-                expressions: [`//computed \n date("y", "m", "d")`]
+                expressions: [`//computed \n date("y", "m", "d")`],
             });
 
             table.update({
                 y: [0, 2020, 1776, 2018, 2020, 2020],
                 m: [1, 2, 5, 2, 12, null],
-                d: [1, 29, 31, 29, 31, 1]
+                d: [1, 29, 31, 29, 31, 1],
             });
 
             const result = await view.to_columns();
-            const expected = [new Date(1900, 0, 1), new Date(2020, 1, 29), new Date(1776, 4, 31), new Date(2018, 1, 29), new Date(2020, 11, 31)].map(x => x.getTime());
+            const expected = [
+                new Date(1900, 0, 1),
+                new Date(2020, 1, 29),
+                new Date(1776, 4, 31),
+                new Date(2018, 1, 29),
+                new Date(2020, 11, 31),
+            ].map((x) => x.getTime());
             expected.push(null);
             expect(result["computed"]).toEqual(expected);
             await view.delete();
@@ -475,21 +573,27 @@ module.exports = perspective => {
             const table = await perspective.table({
                 y: "float",
                 m: "float",
-                d: "float"
+                d: "float",
             });
 
             const view = await table.view({
-                expressions: [`//computed \n date("y", "m", "d")`]
+                expressions: [`//computed \n date("y", "m", "d")`],
             });
 
             table.update({
                 y: [0, 2020, 1776, 2018, 2020, 2020],
                 m: [1, 2, 5, 2, 12, null],
-                d: [1, 29, 31, 29, 31, 1]
+                d: [1, 29, 31, 29, 31, 1],
             });
 
             const result = await view.to_columns();
-            const expected = [new Date(1900, 0, 1), new Date(2020, 1, 29), new Date(1776, 4, 31), new Date(2018, 1, 29), new Date(2020, 11, 31)].map(x => x.getTime());
+            const expected = [
+                new Date(1900, 0, 1),
+                new Date(2020, 1, 29),
+                new Date(1776, 4, 31),
+                new Date(2018, 1, 29),
+                new Date(2020, 11, 31),
+            ].map((x) => x.getTime());
             expected.push(null);
             expect(result["computed"]).toEqual(expected);
             await view.delete();
@@ -500,30 +604,44 @@ module.exports = perspective => {
             const table = await perspective.table({
                 y: [-100, 0, 2000, 3000],
                 m: [12, 0, 12, 11],
-                d: [1, 10, 32, 10]
+                d: [1, 10, 32, 10],
             });
 
             const view = await table.view({
-                expressions: [`//computed \n date("y", "m", "d")`]
+                expressions: [`//computed \n date("y", "m", "d")`],
             });
 
             const result = await view.to_columns();
-            expect(result["computed"]).toEqual([null, null, null, new Date(3000, 10, 10).getTime()]);
+            expect(result["computed"]).toEqual([
+                null,
+                null,
+                null,
+                new Date(3000, 10, 10).getTime(),
+            ]);
             await view.delete();
             await table.delete();
         });
 
         it("Should create a date from variables inside expression", async () => {
             const table = await perspective.table({
-                x: [20200101, 20090531, 19801220, 20200229]
+                x: [20200101, 20090531, 19801220, 20200229],
             });
 
             const view = await table.view({
-                expressions: [`//computed \n var year := floor("x" / 10000); var month := floor("x" % 10000 / 100); var day := floor("x" % 100); date(year, month, day)`]
+                expressions: [
+                    `//computed \n var year := floor("x" / 10000); var month := floor("x" % 10000 / 100); var day := floor("x" % 100); date(year, month, day)`,
+                ],
             });
 
             const result = await view.to_columns();
-            expect(result["computed"]).toEqual([new Date(2020, 0, 1), new Date(2009, 4, 31), new Date(1980, 11, 20), new Date(2020, 1, 29)].map(x => x.getTime()));
+            expect(result["computed"]).toEqual(
+                [
+                    new Date(2020, 0, 1),
+                    new Date(2009, 4, 31),
+                    new Date(1980, 11, 20),
+                    new Date(2020, 1, 29),
+                ].map((x) => x.getTime())
+            );
             await view.delete();
             await table.delete();
         });
@@ -532,26 +650,32 @@ module.exports = perspective => {
             const table = await perspective.table({
                 y: [-100, 0, 2000, 3000],
                 m: [12, 0, 12, 11],
-                d: [1, 10, 32, 10]
+                d: [1, 10, 32, 10],
             });
 
-            const validated = await table.validate_expressions([`//computed \n date()`, `//computed2 \n date('abc', 'def', '123')`, `//computed3\ndate("y", "m", "d")`]);
+            const validated = await table.validate_expressions([
+                `//computed \n date()`,
+                `//computed2 \n date('abc', 'def', '123')`,
+                `//computed3\ndate("y", "m", "d")`,
+            ]);
 
             expect(validated.expression_schema).toEqual({
-                computed3: "date"
+                computed3: "date",
             });
 
             expect(validated.errors).toEqual({
                 computed: {
                     column: 8,
-                    error_message: "Parser Error - Zero parameter call to generic function: date not allowed",
-                    line: 1
+                    error_message:
+                        "Parser Error - Zero parameter call to generic function: date not allowed",
+                    line: 1,
                 },
                 computed2: {
                     column: 0,
-                    error_message: "Type Error - inputs do not resolve to a valid expression.",
-                    line: 0
-                }
+                    error_message:
+                        "Type Error - inputs do not resolve to a valid expression.",
+                    line: 0,
+                },
             });
 
             await table.delete();
@@ -561,19 +685,22 @@ module.exports = perspective => {
     describe("datetime()", () => {
         it("Should create a datetime from scalars", async () => {
             const table = await perspective.table({
-                x: [1, 2, 3, 4]
+                x: [1, 2, 3, 4],
             });
 
             const a = new Date(2005, 6, 31, 11, 59, 32).getTime();
             const b = new Date(2005, 6, 31, 11, 59, 32).getTime();
 
             const view = await table.view({
-                expressions: [`//computed \n datetime(${a})`, `//computed2 \n datetime(${b})`]
+                expressions: [
+                    `//computed \n datetime(${a})`,
+                    `//computed2 \n datetime(${b})`,
+                ],
             });
 
             expect(await view.expression_schema()).toEqual({
                 computed: "datetime",
-                computed2: "datetime"
+                computed2: "datetime",
             });
 
             const result = await view.to_columns();
@@ -585,37 +712,44 @@ module.exports = perspective => {
 
         it("Should create a datetime from a float()", async () => {
             const table = await perspective.table({
-                x: [new Date(2005, 6, 31, 11, 59, 32)]
+                x: [new Date(2005, 6, 31, 11, 59, 32)],
             });
 
             const view = await table.view({
-                expressions: [`//computed \n datetime(float("x"))`]
+                expressions: [`//computed \n datetime(float("x"))`],
             });
 
             expect(await view.expression_schema()).toEqual({
-                computed: "datetime"
+                computed: "datetime",
             });
 
             const result = await view.to_columns();
-            expect(result["computed"]).toEqual([new Date(2005, 6, 31, 11, 59, 32).getTime()]);
+            expect(result["computed"]).toEqual([
+                new Date(2005, 6, 31, 11, 59, 32).getTime(),
+            ]);
             await view.delete();
             await table.delete();
         });
 
         it("Should not create a datetime from int columns as int32 is too small", async () => {
             const table = await perspective.table({
-                x: "integer"
+                x: "integer",
             });
 
             const view = await table.view({
-                expressions: [`//computed \n datetime("x")`]
+                expressions: [`//computed \n datetime("x")`],
             });
 
-            const data = [new Date(2020, 1, 29, 5, 1, 2), new Date(1776, 4, 31, 13, 23, 18), new Date(2018, 1, 29, 19, 39, 43), new Date(2020, 11, 31, 23, 59, 59)].map(x => x.getTime());
+            const data = [
+                new Date(2020, 1, 29, 5, 1, 2),
+                new Date(1776, 4, 31, 13, 23, 18),
+                new Date(2018, 1, 29, 19, 39, 43),
+                new Date(2020, 11, 31, 23, 59, 59),
+            ].map((x) => x.getTime());
             data.push(null);
 
             table.update({
-                x: data
+                x: data,
             });
 
             let result = await view.to_columns();
@@ -627,18 +761,23 @@ module.exports = perspective => {
 
         it("Should create a datetime from float columns", async () => {
             const table = await perspective.table({
-                x: "float"
+                x: "float",
             });
 
             const view = await table.view({
-                expressions: [`//computed \n datetime("x")`]
+                expressions: [`//computed \n datetime("x")`],
             });
 
-            const data = [new Date(2020, 1, 29, 5, 1, 2), new Date(1776, 4, 31, 13, 23, 18), new Date(2018, 1, 29, 19, 39, 43), new Date(2020, 11, 31, 23, 59, 59)].map(x => x.getTime());
+            const data = [
+                new Date(2020, 1, 29, 5, 1, 2),
+                new Date(1776, 4, 31, 13, 23, 18),
+                new Date(2018, 1, 29, 19, 39, 43),
+                new Date(2020, 11, 31, 23, 59, 59),
+            ].map((x) => x.getTime());
             data.push(null);
 
             table.update({
-                x: data
+                x: data,
             });
 
             const result = await view.to_columns();
@@ -649,31 +788,44 @@ module.exports = perspective => {
 
         it("Should create a datetime from numeric scalars < 0", async () => {
             const table = await perspective.table({
-                x: [1]
+                x: [1],
             });
 
             const view = await table.view({
-                expressions: [`//computed1 \n datetime(-1)`, `//computed2 \n datetime(0)`, `//computed3 \n datetime(${new Date(2002, 11, 12, 13, 14, 15).getTime()})`]
+                expressions: [
+                    `//computed1 \n datetime(-1)`,
+                    `//computed2 \n datetime(0)`,
+                    `//computed3 \n datetime(${new Date(
+                        2002,
+                        11,
+                        12,
+                        13,
+                        14,
+                        15
+                    ).getTime()})`,
+                ],
             });
 
             expect(await view.expression_schema()).toEqual({
                 computed1: "datetime",
                 computed2: "datetime",
-                computed3: "datetime"
+                computed3: "datetime",
             });
 
             const result = await view.to_columns();
 
             expect(result["computed1"]).toEqual([-1]);
             expect(result["computed2"]).toEqual([0]);
-            expect(result["computed3"]).toEqual([new Date(2002, 11, 12, 13, 14, 15).getTime()]);
+            expect(result["computed3"]).toEqual([
+                new Date(2002, 11, 12, 13, 14, 15).getTime(),
+            ]);
             await view.delete();
             await table.delete();
         });
 
         it("Should validate inputs", async () => {
             const table = await perspective.table({
-                x: [1]
+                x: [1],
             });
 
             const validated = await table.validate_expressions([
@@ -681,7 +833,7 @@ module.exports = perspective => {
                 `//computed2 \n datetime('abcd')`,
                 `//computed3 \n datetime(today())`,
                 `//computed4 \n datetime(now())`,
-                `//computed5 \n datetime(123456, 7)`
+                `//computed5 \n datetime(123456, 7)`,
             ]);
 
             expect(validated.expression_schema).toEqual({});
@@ -689,29 +841,34 @@ module.exports = perspective => {
             expect(validated.errors).toEqual({
                 computed1: {
                     column: 12,
-                    error_message: "Parser Error - Zero parameter call to generic function: datetime not allowed",
-                    line: 1
+                    error_message:
+                        "Parser Error - Zero parameter call to generic function: datetime not allowed",
+                    line: 1,
                 },
                 computed2: {
-                    error_message: "Type Error - inputs do not resolve to a valid expression.",
+                    error_message:
+                        "Type Error - inputs do not resolve to a valid expression.",
                     column: 0,
-                    line: 0
+                    line: 0,
                 },
                 computed3: {
-                    error_message: "Type Error - inputs do not resolve to a valid expression.",
+                    error_message:
+                        "Type Error - inputs do not resolve to a valid expression.",
                     column: 0,
-                    line: 0
+                    line: 0,
                 },
                 computed4: {
-                    error_message: "Type Error - inputs do not resolve to a valid expression.",
+                    error_message:
+                        "Type Error - inputs do not resolve to a valid expression.",
                     column: 0,
-                    line: 0
+                    line: 0,
                 },
                 computed5: {
-                    error_message: "Parser Error - Failed parameter type check for function 'datetime', Expected 'T' call set: 'TT'",
+                    error_message:
+                        "Parser Error - Failed parameter type check for function 'datetime', Expected 'T' call set: 'TT'",
                     column: 21,
-                    line: 1
-                }
+                    line: 1,
+                },
             });
 
             await table.delete();

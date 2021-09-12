@@ -31,49 +31,79 @@ export default () => {
                 settings.zoom = {
                     k: transform.k,
                     x: transform.x,
-                    y: transform.y
+                    y: transform.y,
                 };
 
                 applyTransform(transform);
 
                 selection.call(chart);
 
-                const noZoom = transform.k === 1 && transform.x === 0 && transform.y === 0;
+                const noZoom =
+                    transform.k === 1 && transform.x === 0 && transform.y === 0;
 
-                const zoomControls = getZoomControls(selection).style("display", noZoom ? "none" : "");
-                zoomControls.select("#zoom-reset").on("click", () => selection.select(chartPlotArea).call(zoom.transform, d3.zoomIdentity));
+                const zoomControls = getZoomControls(selection).style(
+                    "display",
+                    noZoom ? "none" : ""
+                );
+                zoomControls
+                    .select("#zoom-reset")
+                    .on("click", () =>
+                        selection
+                            .select(chartPlotArea)
+                            .call(zoom.transform, d3.zoomIdentity)
+                    );
 
-                const oneYear = zoomControls.select("#one-year").style("display", dateAxis ? "" : "none");
-                const sixMonths = zoomControls.select("#six-months").style("display", dateAxis ? "" : "none");
-                const oneMonth = zoomControls.select("#one-month").style("display", dateAxis ? "" : "none");
+                const oneYear = zoomControls
+                    .select("#one-year")
+                    .style("display", dateAxis ? "" : "none");
+                const sixMonths = zoomControls
+                    .select("#six-months")
+                    .style("display", dateAxis ? "" : "none");
+                const oneMonth = zoomControls
+                    .select("#one-month")
+                    .style("display", dateAxis ? "" : "none");
                 if (dateAxis) {
-                    const dateClick = endCalculation => () => {
+                    const dateClick = (endCalculation) => () => {
                         const start = new Date(xScale.domain()[0]);
                         const end = new Date(start);
                         endCalculation(start, end);
 
                         const xRange = xCopy.range();
-                        const k = (xRange[1] - xRange[0]) / (xCopy(end) - xCopy(start));
+                        const k =
+                            (xRange[1] - xRange[0]) /
+                            (xCopy(end) - xCopy(start));
                         const x = -xCopy(start) * k;
                         let y = 0;
                         if (yScale) {
-                            const yMiddle = yScale.domain().reduce((a, b) => a + b) / 2;
+                            const yMiddle =
+                                yScale.domain().reduce((a, b) => a + b) / 2;
                             y = -yCopy(yMiddle) * k + yScale(yMiddle);
                         }
-                        selection.select(chartPlotArea).call(zoom.transform, d3.zoomIdentity.translate(x, y).scale(k));
+                        selection
+                            .select(chartPlotArea)
+                            .call(
+                                zoom.transform,
+                                d3.zoomIdentity.translate(x, y).scale(k)
+                            );
                     };
 
                     oneYear.on(
                         "click",
-                        dateClick((start, end) => end.setYear(start.getFullYear() + 1))
+                        dateClick((start, end) =>
+                            end.setYear(start.getFullYear() + 1)
+                        )
                     );
                     sixMonths.on(
                         "click",
-                        dateClick((start, end) => end.setMonth(start.getMonth() + 6))
+                        dateClick((start, end) =>
+                            end.setMonth(start.getMonth() + 6)
+                        )
                     );
                     oneMonth.on(
                         "click",
-                        dateClick((start, end) => end.setMonth(start.getMonth() + 1))
+                        dateClick((start, end) =>
+                            end.setMonth(start.getMonth() + 1)
+                        )
                     );
                 }
             });
@@ -92,7 +122,9 @@ export default () => {
                             if (yCopy) yCopy.range([0, d3.event.detail.height]);
 
                             if (settings.zoom) {
-                                const initialTransform = d3.zoomIdentity.translate(settings.zoom.x, settings.zoom.y).scale(settings.zoom.k);
+                                const initialTransform = d3.zoomIdentity
+                                    .translate(settings.zoom.x, settings.zoom.y)
+                                    .scale(settings.zoom.k);
                                 plotArea.call(zoom.transform, initialTransform);
                             }
                         })
@@ -158,7 +190,7 @@ export default () => {
         return zoomableChart;
     };
 
-    const applyTransform = transform => {
+    const applyTransform = (transform) => {
         const changeArgs = {...transform};
         if (xScale) {
             xScale.domain(transform.rescaleX(xCopy).domain());
@@ -174,7 +206,7 @@ export default () => {
         onChange(changeArgs);
     };
 
-    const getZoomControls = container =>
+    const getZoomControls = (container) =>
         getOrCreateElement(container, ".zoom-controls", () =>
             container
                 .append("div")
@@ -183,7 +215,7 @@ export default () => {
                 .html(template)
         );
 
-    const zoomableScale = scale => {
+    const zoomableScale = (scale) => {
         if (scale && scale.nice) {
             return scale;
         }

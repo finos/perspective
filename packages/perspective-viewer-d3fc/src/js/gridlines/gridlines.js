@@ -8,15 +8,21 @@
  */
 import * as fc from "d3fc";
 
-const mainGridSvg = settings => x => x.style("stroke-width", "1.0").style("stroke", settings ? settings.colorStyles.grid.gridLineColor : "#bbb");
+const mainGridSvg = (settings) => (x) =>
+    x
+        .style("stroke-width", "1.0")
+        .style(
+            "stroke",
+            settings ? settings.colorStyles.grid.gridLineColor : "#bbb"
+        );
 
-const mainGridCanvas = settings => c => {
+const mainGridCanvas = (settings) => (c) => {
     c.strokeStyle = settings ? settings.colorStyles.grid.gridLineColor : "#bbb";
     c.lineWidth = 1;
 };
 
-const crossGridSvg = x => x.style("display", "none");
-const crossGridCanvas = settings => c => {
+const crossGridSvg = (x) => x.style("display", "none");
+const crossGridCanvas = (settings) => (c) => {
     c.lineWidth = 1;
     c.strokeStyle = settings ? settings.colorStyles.grid.gridLineColor : "#bbb";
 };
@@ -33,7 +39,7 @@ export default (series, settings) => {
     let mainGrid = mainGridSvg(settings);
     let crossGrid = crossGridSvg;
 
-    const _withGridLines = function(...args) {
+    const _withGridLines = function (...args) {
         if (canvas) {
             seriesMulti = fc.seriesCanvasMulti().context(context);
             annotationGridline = fc.annotationCanvasGridline();
@@ -46,7 +52,9 @@ export default (series, settings) => {
         const xStyle = orient === "vertical" ? crossGrid : mainGrid;
         const yStyle = orient === "horizontal" ? crossGrid : mainGrid;
 
-        const gridlines = annotationGridline.xDecorate(xStyle).yDecorate(yStyle);
+        const gridlines = annotationGridline
+            .xDecorate(xStyle)
+            .yDecorate(yStyle);
 
         return multi.series([gridlines, series])(...args);
     };

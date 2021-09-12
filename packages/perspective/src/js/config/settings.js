@@ -38,21 +38,21 @@ module.exports.default = {
             format: {
                 style: "decimal",
                 minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }
+                maximumFractionDigits: 2,
+            },
         },
         string: {
             filter_operator: "==",
-            aggregate: "count"
+            aggregate: "count",
         },
         integer: {
             filter_operator: "==",
             aggregate: "sum",
-            format: {}
+            format: {},
         },
         boolean: {
             filter_operator: "==",
-            aggregate: "count"
+            aggregate: "count",
         },
         datetime: {
             filter_operator: "==",
@@ -64,9 +64,9 @@ module.exports.default = {
                 day: "numeric",
                 hour: "numeric",
                 minute: "numeric",
-                second: "numeric"
+                second: "numeric",
             },
-            null_value: -1
+            null_value: -1,
         },
         date: {
             filter_operator: "==",
@@ -75,9 +75,9 @@ module.exports.default = {
                 week: "numeric",
                 year: "numeric",
                 month: "numeric",
-                day: "numeric"
+                day: "numeric",
             },
-            null_value: -1
-        }
-    }
+            null_value: -1,
+        },
+    },
 };

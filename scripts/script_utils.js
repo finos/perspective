@@ -48,20 +48,17 @@ function cut_last(f) {
 }
 
 function cut_first(f) {
-    return f
-        .split(" ")
-        .slice(1)
-        .join(" ");
+    return f.split(" ").slice(1).join(" ");
 }
 
-const execute_throw = cmd => {
+const execute_throw = (cmd) => {
     if (process.argv.indexOf("--debug") > -1) {
         console.log(`$ ${cmd}`);
     }
     execSync(cmd, {stdio: "inherit"});
 };
 
-const execute = cmd => {
+const execute = (cmd) => {
     try {
         execute_throw(cmd);
     } catch (e) {
@@ -70,7 +67,7 @@ const execute = cmd => {
     }
 };
 
-const execute_return = async cmd => {
+const execute_return = async (cmd) => {
     if (process.argv.indexOf("--debug") > -1) {
         console.log(`$ ${cmd}`);
     }
@@ -182,7 +179,8 @@ const bash = (exports.bash = function bash(strings, ...args) {
  * @example
  * execute`run -t${1} -u"${undefined}" task`;
  */
-exports.execute = (strings, ...args) => execute(Array.isArray(strings) ? bash(strings, ...args) : strings);
+exports.execute = (strings, ...args) =>
+    execute(Array.isArray(strings) ? bash(strings, ...args) : strings);
 
 /**
  * Just like `execute`, except it throws anddoes not exit the child process
@@ -193,7 +191,8 @@ exports.execute = (strings, ...args) => execute(Array.isArray(strings) ? bash(st
  * @example
  * execute`run -t${1} -u"${undefined}" task`;
  */
-exports.execute_throw = (strings, ...args) => execute_throw(Array.isArray(strings) ? bash(strings, ...args) : strings);
+exports.execute_throw = (strings, ...args) =>
+    execute_throw(Array.isArray(strings) ? bash(strings, ...args) : strings);
 
 /**
  * Just like `execute`, except it will return the output of the command
@@ -205,7 +204,10 @@ exports.execute_throw = (strings, ...args) => execute_throw(Array.isArray(string
  * @example
  * execute`run -t${1} -u"${undefined}" task`;
  */
-exports.execute_return = async (strings, ...args) => await execute_return(Array.isArray(strings) ? bash(strings, ...args) : strings);
+exports.execute_return = async (strings, ...args) =>
+    await execute_return(
+        Array.isArray(strings) ? bash(strings, ...args) : strings
+    );
 
 /**
  * Returns the value after this command-line flag, or `true` if it is the last
@@ -221,7 +223,7 @@ exports.execute_return = async (strings, ...args) => await execute_return(Array.
  * @example
  * console.assert(getarg`--debug`);
  */
-const getarg = (exports.getarg = function(flag, ...args) {
+const getarg = (exports.getarg = function (flag, ...args) {
     if (Array.isArray(flag)) {
         flag = flag.map((x, i) => x + (args[i] || "")).join("");
     }
@@ -238,7 +240,7 @@ const getarg = (exports.getarg = function(flag, ...args) {
         }
     } else {
         return argv
-            .map(function(arg) {
+            .map(function (arg) {
                 return "'" + arg.replace(/'/g, "'\\''") + "'";
             })
             .join(" ");
@@ -287,7 +289,9 @@ exports.docker = function docker(image = "puppeteer") {
  * @returns {string} The docker image to use
  */
 exports.python_image = function python_image(image = "", python = "") {
-    console.log(`-- Getting image for image: '${image}' and python: '${python}'`);
+    console.log(
+        `-- Getting image for image: '${image}' and python: '${python}'`
+    );
     if (python == "python2") {
         if (image == "manylinux2014") {
             throw "Python2 not supported for manylinux2014";
@@ -305,7 +309,10 @@ exports.python_image = function python_image(image = "", python = "") {
 
 function run_suite(tests) {
     for (const [actual, expected] of tests) {
-        console.assert(actual === expected, `"${actual}" received, expected: "${expected}"`);
+        console.assert(
+            actual === expected,
+            `"${actual}" received, expected: "${expected}"`
+        );
     }
 }
 
@@ -313,22 +320,94 @@ if (false) {
     if (isWin) {
         run_suite([
             [resolve`a/b/c`, `${process.cwd()}\\a\\b\\c`],
-            [resolve`${__dirname}/../cpp/perspective`, `${process.cwd()}\\cpp\\perspective`],
-            [resolve`${__dirname}/../python/perspective/dist`, _path.resolve(__dirname, "..", "python", "perspective", "dist")],
-            [resolve`${__dirname}/../cpp/perspective`, _path.resolve(__dirname, "..", "cpp", "perspective")],
-            [resolve`${__dirname}/../cmake`, _path.resolve(__dirname, "..", "cmake")],
-            [resolve`${resolve`${__dirname}/../python/perspective/dist`}/cmake`, _path.resolve(_path.resolve(__dirname, "..", "python", "perspective", "dist"), "cmake")],
-            [resolve`${resolve`${__dirname}/../python/perspective/dist`}/obj`, _path.resolve(_path.resolve(__dirname, "..", "python", "perspective", "dist"), "obj")]
+            [
+                resolve`${__dirname}/../cpp/perspective`,
+                `${process.cwd()}\\cpp\\perspective`,
+            ],
+            [
+                resolve`${__dirname}/../python/perspective/dist`,
+                _path.resolve(__dirname, "..", "python", "perspective", "dist"),
+            ],
+            [
+                resolve`${__dirname}/../cpp/perspective`,
+                _path.resolve(__dirname, "..", "cpp", "perspective"),
+            ],
+            [
+                resolve`${__dirname}/../cmake`,
+                _path.resolve(__dirname, "..", "cmake"),
+            ],
+            [
+                resolve`${resolve`${__dirname}/../python/perspective/dist`}/cmake`,
+                _path.resolve(
+                    _path.resolve(
+                        __dirname,
+                        "..",
+                        "python",
+                        "perspective",
+                        "dist"
+                    ),
+                    "cmake"
+                ),
+            ],
+            [
+                resolve`${resolve`${__dirname}/../python/perspective/dist`}/obj`,
+                _path.resolve(
+                    _path.resolve(
+                        __dirname,
+                        "..",
+                        "python",
+                        "perspective",
+                        "dist"
+                    ),
+                    "obj"
+                ),
+            ],
         ]);
     } else {
         run_suite([
             [resolve`a/b/c`, `${process.cwd()}/a/b/c`],
-            [resolve`${__dirname}/../cpp/perspective`, `${process.cwd()}/cpp/perspective`],
-            [resolve`${__dirname}/../python/perspective/dist`, _path.resolve(__dirname, "..", "python", "perspective", "dist")],
-            [resolve`${__dirname}/../cpp/perspective`, _path.resolve(__dirname, "..", "cpp", "perspective")],
-            [resolve`${__dirname}/../cmake`, _path.resolve(__dirname, "..", "cmake")],
-            [resolve`${resolve`${__dirname}/../python/perspective/dist`}/cmake`, _path.resolve(_path.resolve(__dirname, "..", "python", "perspective", "dist"), "cmake")],
-            [resolve`${resolve`${__dirname}/../python/perspective/dist`}/obj`, _path.resolve(_path.resolve(__dirname, "..", "python", "perspective", "dist"), "obj")]
+            [
+                resolve`${__dirname}/../cpp/perspective`,
+                `${process.cwd()}/cpp/perspective`,
+            ],
+            [
+                resolve`${__dirname}/../python/perspective/dist`,
+                _path.resolve(__dirname, "..", "python", "perspective", "dist"),
+            ],
+            [
+                resolve`${__dirname}/../cpp/perspective`,
+                _path.resolve(__dirname, "..", "cpp", "perspective"),
+            ],
+            [
+                resolve`${__dirname}/../cmake`,
+                _path.resolve(__dirname, "..", "cmake"),
+            ],
+            [
+                resolve`${resolve`${__dirname}/../python/perspective/dist`}/cmake`,
+                _path.resolve(
+                    _path.resolve(
+                        __dirname,
+                        "..",
+                        "python",
+                        "perspective",
+                        "dist"
+                    ),
+                    "cmake"
+                ),
+            ],
+            [
+                resolve`${resolve`${__dirname}/../python/perspective/dist`}/obj`,
+                _path.resolve(
+                    _path.resolve(
+                        __dirname,
+                        "..",
+                        "python",
+                        "perspective",
+                        "dist"
+                    ),
+                    "obj"
+                ),
+            ],
         ]);
     }
 
@@ -356,6 +435,6 @@ if (false) {
         [bash`TEST=${undefined}`, ``],
         [bash`this is a test`, `this is a test`],
         [bash`this is a test `, `this is a test `],
-        [bash`--test="${undefined}.0" ${1}`, `1`]
+        [bash`--test="${undefined}.0" ${1}`, `1`],
     ]);
 }

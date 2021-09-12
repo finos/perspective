@@ -34,7 +34,11 @@ function yScatter(container, settings) {
     const series = fc
         .seriesSvgMulti()
         .mapping((data, index) => data[index])
-        .series(data.map(series => categoryPointSeries(settings, series.key, color, symbols)));
+        .series(
+            data.map((series) =>
+                categoryPointSeries(settings, series.key, color, symbols)
+            )
+        );
 
     const paddingStrategy = hardLimitZeroPadding()
         .pad([0.05, 0.05])
@@ -56,7 +60,9 @@ function yScatter(container, settings) {
     const yAxis1 = yAxisFactory(splitter.data());
 
     // No grid lines if splitting y-axis
-    const plotSeries = splitter.haveSplit() ? series : withGridLines(series, settings).orient("vertical");
+    const plotSeries = splitter.haveSplit()
+        ? series
+        : withGridLines(series, settings).orient("vertical");
 
     const chart = chartSvgFactory(xAxis, yAxis1)
         .axisSplitter(splitter)
@@ -82,7 +88,9 @@ function yScatter(container, settings) {
         chart.altAxis(yAxis2);
         // Give the tooltip the information (i.e. 2 datasets with different
         // scales)
-        toolTip.data(splitter.data()).altDataWithScale({yScale: yAxis2.scale, data: splitter.altData()});
+        toolTip
+            .data(splitter.data())
+            .altDataWithScale({yScale: yAxis2.scale, data: splitter.altData()});
     }
 
     // render
@@ -97,7 +105,7 @@ yScatter.plugin = {
     name: "Y Scatter",
     max_cells: 4000,
     max_columns: 50,
-    render_warning: true
+    render_warning: true,
 };
 
 export default yScatter;

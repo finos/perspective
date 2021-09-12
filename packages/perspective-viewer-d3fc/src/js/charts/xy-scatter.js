@@ -9,7 +9,10 @@
 import * as fc from "d3fc";
 import {axisFactory} from "../axis/axisFactory";
 import {chartCanvasFactory} from "../axis/chartFactory";
-import {pointSeriesCanvas, symbolTypeFromGroups} from "../series/pointSeriesCanvas";
+import {
+    pointSeriesCanvas,
+    symbolTypeFromGroups,
+} from "../series/pointSeriesCanvas";
 import {pointData} from "../data/pointData";
 import {seriesColorsFromGroups} from "../series/seriesColors";
 import {seriesLinearRange, seriesColorRange} from "../series/seriesRange";
@@ -32,7 +35,7 @@ import nearbyTip from "../tooltip/nearbyTip";
 function interpolate_scale([x1, y1], [x2, y2]) {
     const m = (y2 - y1) / (x2 - x1);
     const b = y2 - m * x2;
-    return function(container) {
+    return function (container) {
         const node = container.node();
         const shortest_axis = Math.min(node.clientWidth, node.clientHeight);
         return Math.min(y2, Math.max(y1, m * shortest_axis + b));
@@ -42,7 +45,8 @@ function interpolate_scale([x1, y1], [x2, y2]) {
 function xyScatter(container, settings) {
     const data = pointData(settings, filterDataByGroup(settings));
     const symbols = symbolTypeFromGroups(settings);
-    const useGroupColors = settings.realValues.length <= 2 || settings.realValues[2] === null;
+    const useGroupColors =
+        settings.realValues.length <= 2 || settings.realValues[2] === null;
     let color = null;
     let legend = null;
 
@@ -58,13 +62,26 @@ function xyScatter(container, settings) {
         legend = colorRangeLegend().scale(color);
     }
 
-    const size = settings.realValues[3] ? seriesLinearRange(settings, data, "size").range([10, 10000]) : null;
+    const size = settings.realValues[3]
+        ? seriesLinearRange(settings, data, "size").range([10, 10000])
+        : null;
 
     const scale_factor = interpolate_scale([600, 0.1], [1600, 1])(container);
     const series = fc
         .seriesCanvasMulti()
         .mapping((data, index) => data[index])
-        .series(data.map(series => pointSeriesCanvas(settings, series.key, size, color, symbols, scale_factor)));
+        .series(
+            data.map((series) =>
+                pointSeriesCanvas(
+                    settings,
+                    series.key,
+                    size,
+                    color,
+                    symbols,
+                    scale_factor
+                )
+            )
+        );
 
     const axisDefault = () =>
         axisFactory(settings)
@@ -121,9 +138,9 @@ xyScatter.plugin = {
     initial: {
         type: "number",
         count: 2,
-        names: ["X Axis", "Y Axis", "Color", "Size", "Tooltip"]
+        names: ["X Axis", "Y Axis", "Color", "Size", "Tooltip"],
     },
-    selectMode: "toggle"
+    selectMode: "toggle",
 };
 
 export default xyScatter;

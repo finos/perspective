@@ -13,7 +13,12 @@ export function cropCellContents(legendDiv) {
     const legendCells = legendDiv.select("g.legendCells");
     const legendDivRect = legendDiv.node().getBoundingClientRect();
 
-    if (!isElementOverflowing(legendDivRect, legendCells.node().getBoundingClientRect())) {
+    if (
+        !isElementOverflowing(
+            legendDivRect,
+            legendCells.node().getBoundingClientRect()
+        )
+    ) {
         return;
     }
 
@@ -22,7 +27,11 @@ export function cropCellContents(legendDiv) {
     legendCells.selectAll(".label").text((d, i, nodes) => {
         const cell = nodes[i];
         if (isElementOverflowing(legendDivRect, cell.getBoundingClientRect())) {
-            const cutoffCharIndex = getCutoffCharacterIndex(cell, svg, legendDivRect);
+            const cutoffCharIndex = getCutoffCharacterIndex(
+                cell,
+                svg,
+                legendDivRect
+            );
             return `${d.substring(0, cutoffCharIndex - 3)}...`;
         } else {
             return d;

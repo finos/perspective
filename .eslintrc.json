@@ -35,14 +35,7 @@
 
         }
     }, {
-        "files": ["**/test/**/*.js"],
-        "rules": {
-            "max-len": ["warn", {
-                "code": 200,
-                "comments": 200,
-                "ignoreTrailingComments": true
-            }]
-        }
+        "files": ["**/test/**/*.js"]
     }, {
         "files": ["**/*.md"],
         "rules": {
@@ -54,24 +47,11 @@
     }],
     "rules": {
         "prettier/prettier": ["error", {
-            "printWidth": 200,
             "tabWidth": 4,
             "bracketSpacing": false
         }],
-        "max-len": ["warn", {
-            "code": 200,
-            "comments": 80,
-            "ignoreTrailingComments": true
-        }],
         "@typescript-eslint/camelcase": "off",
         "linebreak-style": ["error","unix"],
-        "camelcase": "off",
-        "no-const-assign": "error",
-        "no-this-before-super": "error",
-        "no-undef": "error",
-        "no-unreachable": "error",
-        "no-unused-vars": "error",
-        "constructor-super": "error",
-        "valid-typeof": "error"
+        "camelcase": "off"
     }
 }

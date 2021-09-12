@@ -11,13 +11,13 @@ const selected_position_map = new WeakMap();
 
 function lock(body) {
     let lock;
-    return async function(...args) {
+    return async function (...args) {
         if (!!lock && (await lock) && !!lock) {
             return;
         }
 
         let resolve;
-        lock = new Promise(x => (resolve = x));
+        lock = new Promise((x) => (resolve = x));
         await body.apply(this, args);
         lock = undefined;
         resolve();
@@ -56,7 +56,7 @@ function write(table, model, active_cell) {
 
         const msg = {
             __INDEX__: id,
-            [model._column_paths[meta.x]]: text
+            [model._column_paths[meta.x]]: text,
         };
 
         model._table.update([msg], {port_id: model._edit_port});
@@ -65,13 +65,15 @@ function write(table, model, active_cell) {
 }
 
 function isEditable(viewer) {
-    const has_pivots = this._config.row_pivots.length === 0 && this._config.column_pivots.length === 0;
+    const has_pivots =
+        this._config.row_pivots.length === 0 &&
+        this._config.column_pivots.length === 0;
     const selectable = viewer.hasAttribute("selectable");
     const editable = viewer.hasAttribute("editable");
     return has_pivots && !selectable && editable;
 }
 
-const moveSelection = lock(async function(table, active_cell, dx, dy) {
+const moveSelection = lock(async function (table, active_cell, dx, dy) {
     const meta = table.getMeta(active_cell);
     const num_columns = this._column_paths.length;
     const num_rows = this._num_rows;
@@ -94,7 +96,13 @@ const moveSelection = lock(async function(table, active_cell, dx, dy) {
     const ymax = Math.min(meta.y0 + 10, num_rows);
     let x = meta.x0 + dx,
         y = meta.y0 + dy;
-    while (!focusStyleListener(table) && x >= xmin && x < xmax && y >= ymin && y < ymax) {
+    while (
+        !focusStyleListener(table) &&
+        x >= xmin &&
+        x < xmax &&
+        y >= ymin &&
+        y < ymax
+    ) {
         await table.scrollToCell(x, y, num_columns, num_rows);
         selected_position_map.set(table, selected_position);
         x += dx;
@@ -118,20 +126,26 @@ function editableStyleListener(table, viewer) {
     }
 }
 
-const focusStyleListener = table => {
+const focusStyleListener = (table) => {
     const tds = table.querySelectorAll("td");
     const selected_position = selected_position_map.get(table);
     if (selected_position) {
         for (const td of tds) {
             const meta = table.getMeta(td);
-            if (meta.x === selected_position.x && meta.y === selected_position.y) {
+            if (
+                meta.x === selected_position.x &&
+                meta.y === selected_position.y
+            ) {
                 if (document.activeElement !== td) {
                     td.focus({preventScroll: true});
                 }
                 return true;
             }
         }
-        if (document.activeElement !== document.body && table.contains(document.activeElement)) {
+        if (
+            document.activeElement !== document.body &&
+            table.contains(document.activeElement)
+        ) {
             document.activeElement.blur();
         }
     }
@@ -196,7 +210,11 @@ function focusoutListener(table, viewer, event) {
 function focusinListener(table, viewer, event) {
     const meta = table.getMeta(event.target);
     if (meta) {
-        const new_state = {x: meta.x, y: meta.y, content: event.target.textContent};
+        const new_state = {
+            x: meta.x,
+            y: meta.y,
+            content: event.target.textContent,
+        };
         selected_position_map.set(table, new_state);
     }
 }
@@ -207,7 +225,16 @@ export async function configureEditable(table, viewer) {
     this._edit_port = await viewer.getEditPort();
     table.addStyleListener(editableStyleListener.bind(this, table, viewer));
     table.addStyleListener(focusStyleListener.bind(this, table, viewer));
-    table.addEventListener("focusin", focusinListener.bind(this, table, viewer));
-    table.addEventListener("focusout", focusoutListener.bind(this, table, viewer));
-    table.addEventListener("keydown", keydownListener.bind(this, table, viewer));
+    table.addEventListener(
+        "focusin",
+        focusinListener.bind(this, table, viewer)
+    );
+    table.addEventListener(
+        "focusout",
+        focusoutListener.bind(this, table, viewer)
+    );
+    table.addEventListener(
+        "keydown",
+        keydownListener.bind(this, table, viewer)
+    );
 }

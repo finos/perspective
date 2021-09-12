@@ -12,9 +12,11 @@ import {withoutOpacity} from "./seriesColors.js";
 export function lineSeries(settings, color) {
     let series = fc.seriesSvgLine();
 
-    series = series.decorate(selection => {
-        selection.style("stroke", d => withoutOpacity(color(d[0] && d[0].key)));
+    series = series.decorate((selection) => {
+        selection.style("stroke", (d) =>
+            withoutOpacity(color(d[0] && d[0].key))
+        );
     });
 
-    return series.crossValue(d => d.crossValue).mainValue(d => d.mainValue);
+    return series.crossValue((d) => d.crossValue).mainValue((d) => d.mainValue);
 }

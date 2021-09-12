@@ -25,7 +25,9 @@ if (!fs.existsSync("./.perspectiverc")) {
     require("./test_python");
     require("./test_cpp");
 } else {
-    console.error(`Invalid project "${process.env.PSP_PROJECT}" selected, running setup`);
+    console.error(
+        `Invalid project "${process.env.PSP_PROJECT}" selected, running setup`
+    );
     process.env.PSP_BUILD_IMMEDIATELY = 1;
     require("./setup");
 }

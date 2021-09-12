@@ -18,9 +18,9 @@ ohlc.plugin = {
     initial: {
         type: "number",
         count: 4,
-        names: ["Open", "Close", "High", "Low"]
+        names: ["Open", "Close", "High", "Low"],
     },
-    selectMode: "toggle"
+    selectMode: "toggle",
 };
 
 export default ohlc;

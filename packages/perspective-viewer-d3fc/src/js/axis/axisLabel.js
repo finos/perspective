@@ -17,10 +17,10 @@ const labelFunctions = {
     none: noLabel,
     ordinal: ordinalLabel,
     time: timeLabel,
-    linear: linearLabel
+    linear: linearLabel,
 };
 
-export const labelFunction = settings => {
+export const labelFunction = (settings) => {
     const base = axisType(settings);
     let valueName = "__ROW_PATH__";
 

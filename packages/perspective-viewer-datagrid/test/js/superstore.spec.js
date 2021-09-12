@@ -14,7 +14,9 @@ const simple_tests = require("@finos/perspective-viewer/test/js/simple_tests.js"
 
 async function get_contents(page) {
     return await page.evaluate(async () => {
-        const viewer = document.querySelector("perspective-viewer perspective-viewer-datagrid regular-table");
+        const viewer = document.querySelector(
+            "perspective-viewer perspective-viewer-datagrid regular-table"
+        );
         return viewer.innerHTML || "MISSING";
     });
 }

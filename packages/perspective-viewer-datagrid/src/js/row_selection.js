@@ -25,8 +25,11 @@ async function selectionListener(regularTable, viewer, event) {
     const id = this._ids[meta.y - meta.y0];
     if (meta && meta.y >= 0) {
         const selected = selected_rows_map.get(regularTable);
-        const key_match = !!selected && selected.reduce((agg, x, i) => agg && x === id[i], true);
-        const is_deselect = !!selected && id.length === selected.length && key_match;
+        const key_match =
+            !!selected &&
+            selected.reduce((agg, x, i) => agg && x === id[i], true);
+        const is_deselect =
+            !!selected && id.length === selected.length && key_match;
         let filters = [];
         if (is_deselect) {
             selected_rows_map.delete(regularTable);
@@ -44,8 +47,8 @@ async function selectionListener(regularTable, viewer, event) {
                 composed: true,
                 detail: {
                     selected: !is_deselect,
-                    config: {filters}
-                }
+                    config: {filters},
+                },
             })
         );
     }
@@ -62,9 +65,18 @@ function selectionStyleListener(regularTable, viewer) {
         } else {
             const meta = regularTable.getMeta(td);
             const id = this._ids[meta.y - meta.y0];
-            const key_match = selected.reduce((agg, x, i) => agg && x === id[i], true);
-            td.classList.toggle("psp-row-selected", id.length === selected.length && key_match);
-            td.classList.toggle("psp-row-subselected", id.length !== selected.length && key_match);
+            const key_match = selected.reduce(
+                (agg, x, i) => agg && x === id[i],
+                true
+            );
+            td.classList.toggle(
+                "psp-row-selected",
+                id.length === selected.length && key_match
+            );
+            td.classList.toggle(
+                "psp-row-subselected",
+                id.length !== selected.length && key_match
+            );
         }
     }
 
@@ -75,16 +87,28 @@ function selectionStyleListener(regularTable, viewer) {
             th.classList.toggle("psp-row-selected", false);
             th.classList.toggle("psp-row-subselected", false);
         } else {
-            const key_match = selected.reduce((agg, x, i) => agg && x === id[i], true);
-            th.classList.toggle("psp-row-selected", id.length === selected.length && key_match);
-            th.classList.toggle("psp-row-subselected", id.length !== selected.length && key_match);
+            const key_match = selected.reduce(
+                (agg, x, i) => agg && x === id[i],
+                true
+            );
+            th.classList.toggle(
+                "psp-row-selected",
+                id.length === selected.length && key_match
+            );
+            th.classList.toggle(
+                "psp-row-subselected",
+                id.length !== selected.length && key_match
+            );
         }
     }
 }
 
 export function configureRowSelectable(table, viewer) {
     table.addStyleListener(selectionStyleListener.bind(this, table, viewer));
-    table.addEventListener("mousedown", selectionListener.bind(this, table, viewer));
+    table.addEventListener(
+        "mousedown",
+        selectionListener.bind(this, table, viewer)
+    );
 }
 
 export async function deselect(regularTable) {

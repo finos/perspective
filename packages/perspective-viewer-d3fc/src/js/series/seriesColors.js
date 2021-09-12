@@ -10,24 +10,22 @@ import * as d3 from "d3";
 import {groupFromKey} from "./seriesKey";
 
 export function seriesColors(settings) {
-    const col = settings.data && settings.data.length > 0 ? settings.data[0] : {};
-    const domain = Object.keys(col).filter(k => k !== "__ROW_PATH__");
-    return colorScale()
-        .settings(settings)
-        .domain(domain)();
+    const col =
+        settings.data && settings.data.length > 0 ? settings.data[0] : {};
+    const domain = Object.keys(col).filter((k) => k !== "__ROW_PATH__");
+    return colorScale().settings(settings).domain(domain)();
 }
 
 export function seriesColorsFromDistinct(settings, data) {
     let domain = Array.from(new Set(data));
-    return colorScale()
-        .settings(settings)
-        .domain(domain)();
+    return colorScale().settings(settings).domain(domain)();
 }
 
 export function seriesColorsFromGroups(settings) {
-    const col = settings.data && settings.data.length > 0 ? settings.data[0] : {};
+    const col =
+        settings.data && settings.data.length > 0 ? settings.data[0] : {};
     const domain = [];
-    Object.keys(col).forEach(key => {
+    Object.keys(col).forEach((key) => {
         if (key !== "__ROW_PATH__") {
             const group = groupFromKey(key);
             if (!domain.includes(group)) {
@@ -35,16 +33,15 @@ export function seriesColorsFromGroups(settings) {
             }
         }
     });
-    return colorScale()
-        .settings(settings)
-        .domain(domain)();
+    return colorScale().settings(settings).domain(domain)();
 }
 
 export function colorScale() {
     let domain = null;
     let defaultColors = null;
     let settings = {};
-    let mapFunction = d => withOpacity(d, settings.colorStyles && settings.colorStyles.opacity);
+    let mapFunction = (d) =>
+        withOpacity(d, settings.colorStyles && settings.colorStyles.opacity);
 
     const colors = () => {
         const styles = settings.colorStyles;
@@ -100,7 +97,7 @@ export function withOpacity(color, opacity = 0.5) {
 }
 
 export function setOpacity(opacity) {
-    return color => {
+    return (color) => {
         const decoded = d3.color(color);
         decoded.opacity = opacity;
         return decoded + "";

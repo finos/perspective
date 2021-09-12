@@ -13,7 +13,9 @@ const path = require("path");
 
 async function get_contents(page) {
     return await page.evaluate(async () => {
-        const viewer = document.querySelector("perspective-viewer").shadowRoot.querySelector("#app_panel");
+        const viewer = document
+            .querySelector("perspective-viewer")
+            .shadowRoot.querySelector("#app_panel");
         return viewer ? viewer.innerHTML : "MISSING";
     });
 }
@@ -22,25 +24,33 @@ utils.with_server({}, () => {
     describe.page(
         "superstore.html",
         () => {
-            test.capture("opens settings when field is set to true", async page => {
-                await page.evaluate(async () => {
-                    const viewer = document.querySelector("perspective-viewer");
-                    await viewer.getTable();
-                    await viewer.restore({settings: true});
-                });
+            test.capture(
+                "opens settings when field is set to true",
+                async (page) => {
+                    await page.evaluate(async () => {
+                        const viewer =
+                            document.querySelector("perspective-viewer");
+                        await viewer.getTable();
+                        await viewer.restore({settings: true});
+                    });
 
-                return await get_contents(page);
-            });
+                    return await get_contents(page);
+                }
+            );
 
-            test.capture("opens settings when field is set to false", async page => {
-                await page.evaluate(async () => {
-                    const viewer = document.querySelector("perspective-viewer");
-                    await viewer.getTable();
-                    await viewer.restore({settings: false});
-                });
+            test.capture(
+                "opens settings when field is set to false",
+                async (page) => {
+                    await page.evaluate(async () => {
+                        const viewer =
+                            document.querySelector("perspective-viewer");
+                        await viewer.getTable();
+                        await viewer.restore({settings: false});
+                    });
 
-                return await get_contents(page);
-            });
+                    return await get_contents(page);
+                }
+            );
         },
         {root: path.join(__dirname, "..", "..")}
     );

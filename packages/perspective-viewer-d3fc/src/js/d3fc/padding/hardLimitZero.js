@@ -13,7 +13,7 @@ import * as fc from "d3fc";
 export const hardLimitZeroPadding = () => {
     const _defaultPadding = defaultPadding();
 
-    const padding = extent => {
+    const padding = (extent) => {
         let pad = _defaultPadding.pad();
         let padUnit = _defaultPadding.padUnit();
 
@@ -35,8 +35,10 @@ export const hardLimitZeroPadding = () => {
 
         // If datapoints are exclusively negative or exclusively positive hard
         // limit extent to 0.
-        extent[0] = extent[0] >= 0 && paddedLowerExtent < 0 ? 0 : paddedLowerExtent;
-        extent[1] = extent[1] <= 0 && paddedUpperExtent > 0 ? 0 : paddedUpperExtent;
+        extent[0] =
+            extent[0] >= 0 && paddedLowerExtent < 0 ? 0 : paddedLowerExtent;
+        extent[1] =
+            extent[1] <= 0 && paddedUpperExtent > 0 ? 0 : paddedUpperExtent;
         return extent;
     };
 

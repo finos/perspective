@@ -10,11 +10,11 @@
 import * as d3Array from "d3-array";
 import {defaultPadding} from "../padding/default";
 
-export const extentLinear = function() {
+export const extentLinear = function () {
     let accessors = [
-        function(d) {
+        function (d) {
             return d;
-        }
+        },
     ];
     let symmetricalAbout = null;
     let include = [];
@@ -28,7 +28,11 @@ export const extentLinear = function() {
 
         let _iterator = accessors[Symbol.iterator]();
         try {
-            for (let _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            for (
+                let _step;
+                !(_iteratorNormalCompletion = (_step = _iterator.next()).done);
+                _iteratorNormalCompletion = true
+            ) {
                 let accessor = _step.value;
 
                 for (let i = 0; i < data.length; i++) {
@@ -57,11 +61,24 @@ export const extentLinear = function() {
 
         let extent$$1 = [d3Array.min(values), d3Array.max(values)];
 
-        extent$$1[0] = extent$$1[0] == null ? d3Array.min(include) : d3Array.min([extent$$1[0]].concat(toConsumableArray(include)));
-        extent$$1[1] = extent$$1[1] == null ? d3Array.max(include) : d3Array.max([extent$$1[1]].concat(toConsumableArray(include)));
+        extent$$1[0] =
+            extent$$1[0] == null
+                ? d3Array.min(include)
+                : d3Array.min(
+                      [extent$$1[0]].concat(toConsumableArray(include))
+                  );
+        extent$$1[1] =
+            extent$$1[1] == null
+                ? d3Array.max(include)
+                : d3Array.max(
+                      [extent$$1[1]].concat(toConsumableArray(include))
+                  );
 
         if (symmetricalAbout != null) {
-            let halfRange = Math.max(Math.abs(extent$$1[1] - symmetricalAbout), Math.abs(extent$$1[0] - symmetricalAbout));
+            let halfRange = Math.max(
+                Math.abs(extent$$1[1] - symmetricalAbout),
+                Math.abs(extent$$1[0] - symmetricalAbout)
+            );
             extent$$1[0] = symmetricalAbout - halfRange;
             extent$$1[1] = symmetricalAbout + halfRange;
         }
@@ -69,7 +86,7 @@ export const extentLinear = function() {
         return paddingStrategy(extent$$1);
     };
 
-    instance.accessors = function() {
+    instance.accessors = function () {
         if (!arguments.length) {
             return accessors;
         }
@@ -79,7 +96,7 @@ export const extentLinear = function() {
 
     //This function points directly at the paddingStrategy child object's
     //properties for backwards-compatibility. DEPRECATED.
-    instance.pad = function() {
+    instance.pad = function () {
         if (!arguments.length) {
             return paddingStrategy.pad;
         }
@@ -89,15 +106,17 @@ export const extentLinear = function() {
 
     //This function points directly at the paddingStrategy child object's
     //properties for backwards-compatibility. DEPRECATED.
-    instance.padUnit = function() {
+    instance.padUnit = function () {
         if (!arguments.length) {
             return paddingStrategy.padUnit;
         }
-        paddingStrategy.padUnit(arguments.length <= 0 ? undefined : arguments[0]);
+        paddingStrategy.padUnit(
+            arguments.length <= 0 ? undefined : arguments[0]
+        );
         return instance;
     };
 
-    instance.include = function() {
+    instance.include = function () {
         if (!arguments.length) {
             return include;
         }
@@ -105,7 +124,7 @@ export const extentLinear = function() {
         return instance;
     };
 
-    instance.symmetricalAbout = function() {
+    instance.symmetricalAbout = function () {
         if (!arguments.length) {
             return symmetricalAbout;
         }
@@ -113,7 +132,7 @@ export const extentLinear = function() {
         return instance;
     };
 
-    instance.paddingStrategy = function() {
+    instance.paddingStrategy = function () {
         if (!arguments.length) {
             return paddingStrategy;
         }
@@ -124,7 +143,7 @@ export const extentLinear = function() {
     return instance;
 };
 
-let toConsumableArray = function(arr) {
+let toConsumableArray = function (arr) {
     if (Array.isArray(arr)) {
         let arr2 = Array(arr.length);
         for (let i = 0; i < arr.length; i++) {

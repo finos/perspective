@@ -7,13 +7,13 @@ module.exports = {
                     chrome: "70",
                     node: "12",
                     ios: "13",
-                    firefox: "68.5.0"
+                    firefox: "68.5.0",
                 },
                 modules: process.env.BABEL_MODULE || false,
                 useBuiltIns: "usage",
-                corejs: 3
-            }
-        ]
+                corejs: 3,
+            },
+        ],
     ],
     sourceType: "unambiguous",
     plugins: [
@@ -21,6 +21,6 @@ module.exports = {
         ["@babel/plugin-proposal-decorators", {legacy: true}],
         "transform-custom-element-classes",
         "@babel/plugin-proposal-class-properties",
-        "@babel/plugin-proposal-optional-chaining"
-    ]
+        "@babel/plugin-proposal-optional-chaining",
+    ],
 };

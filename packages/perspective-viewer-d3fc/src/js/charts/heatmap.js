@@ -35,7 +35,9 @@ function heatmapChart(container, settings) {
         .valueName("mainValue")
         .orient("vertical")(data);
 
-    const chart = chartSvgFactory(xAxis, yAxis).plotArea(withGridLines(series, settings));
+    const chart = chartSvgFactory(xAxis, yAxis).plotArea(
+        withGridLines(series, settings)
+    );
 
     if (chart.xPaddingInner) {
         chart.xPaddingInner(0);
@@ -62,7 +64,7 @@ heatmapChart.plugin = {
     name: "Heatmap",
     max_cells: 5000,
     max_columns: 100,
-    render_warning: true
+    render_warning: true,
 };
 
 export default heatmapChart;

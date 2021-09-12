@@ -10,7 +10,9 @@ import {labelFunction} from "../axis/axisLabel";
 import {splitIntoMultiSeries} from "./splitIntoMultiSeries";
 
 export function pointData(settings, data) {
-    return splitIntoMultiSeries(settings, data, {excludeEmpty: true}).map(data => seriesToPoints(settings, data));
+    return splitIntoMultiSeries(settings, data, {excludeEmpty: true}).map(
+        (data) => seriesToPoints(settings, data)
+    );
 }
 
 function seriesToPoints(settings, data) {
@@ -18,13 +20,15 @@ function seriesToPoints(settings, data) {
 
     const mappedSeries = data.map((col, i) => ({
         crossValue: labelfn(col, i),
-        mainValues: settings.mainValues.map(v => col[v.name]),
+        mainValues: settings.mainValues.map((v) => col[v.name]),
         x: col[settings.mainValues[0].name],
         y: col[settings.mainValues[1].name],
-        colorValue: settings.realValues[2] ? col[settings.realValues[2]] : undefined,
+        colorValue: settings.realValues[2]
+            ? col[settings.realValues[2]]
+            : undefined,
         size: settings.realValues[3] ? col[settings.realValues[3]] : undefined,
         key: data.key,
-        row: col
+        row: col,
     }));
 
     mappedSeries.key = data.key;

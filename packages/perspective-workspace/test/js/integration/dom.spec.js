@@ -16,7 +16,7 @@ const PATHS = [
     path.join(TEST_ROOT, "dist", "theme"),
     path.join(TEST_ROOT, "test", "html"),
     path.join(TEST_ROOT, "test", "css"),
-    path.join(TEST_ROOT, "test", "csv")
+    path.join(TEST_ROOT, "test", "csv"),
 ];
 
 utils.with_server({paths: PATHS}, () => {
@@ -24,11 +24,24 @@ utils.with_server({paths: PATHS}, () => {
         "index.html",
         () => {
             describe("Light DOM", () => {
-                tests(page => page.evaluate(async () => document.getElementById("workspace").outerHTML));
+                tests((page) =>
+                    page.evaluate(
+                        async () =>
+                            document.getElementById("workspace").outerHTML
+                    )
+                );
             });
 
             describe("Shadow DOM", () => {
-                tests(page => page.evaluate(async () => document.getElementById("workspace").shadowRoot.querySelector("#container").innerHTML));
+                tests((page) =>
+                    page.evaluate(
+                        async () =>
+                            document
+                                .getElementById("workspace")
+                                .shadowRoot.querySelector("#container")
+                                .innerHTML
+                    )
+                );
             });
         },
         {root: TEST_ROOT}
@@ -37,7 +50,7 @@ utils.with_server({paths: PATHS}, () => {
 
 function tests(extract) {
     describe("removeChild", () => {
-        test.capture("Remove One", async page => {
+        test.capture("Remove One", async (page) => {
             await page.waitForFunction(() => !!window.__TABLE__);
             await page.evaluate(async () => {
                 const viewer = document.createElement("perspective-viewer");
@@ -55,7 +68,9 @@ function tests(extract) {
             });
 
             await page.evaluate(async () => {
-                const viewer = document.body.querySelector('perspective-viewer[name="one"]');
+                const viewer = document.body.querySelector(
+                    'perspective-viewer[name="one"]'
+                );
                 const workspace = document.getElementById("workspace");
                 workspace.removeChild(viewer);
                 await workspace.flush();

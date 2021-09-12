@@ -20,19 +20,22 @@ const WebSocket = require("ws");
 const process = require("process");
 const path = require("path");
 
-const load_perspective = require("./@finos/perspective-cpp/dist/cjs/perspective.cpp.js").default;
+const load_perspective =
+    require("./@finos/perspective-cpp/dist/cjs/perspective.cpp.js").default;
 
 // eslint-disable-next-line no-undef
 
 const LOCAL_PATH = path.join(process.cwd(), "node_modules");
-const buffer = fs.readFileSync(require.resolve("./@finos/perspective-cpp/dist/cjs/perspective.cpp.wasm")).buffer;
+const buffer = fs.readFileSync(
+    require.resolve("./@finos/perspective-cpp/dist/cjs/perspective.cpp.wasm")
+).buffer;
 
 const SYNC_SERVER = new (class extends Server {
     init(msg) {
         load_perspective({
             wasmBinary: buffer,
-            wasmJSMethod: "native-wasm"
-        }).then(core => {
+            wasmJSMethod: "native-wasm",
+        }).then((core) => {
             this.perspective = perspective(core);
             super.init(msg);
         });
@@ -61,7 +64,7 @@ const DEFAULT_ASSETS = [
     "@finos/perspective-viewer-datagrid/dist/umd",
     "@finos/perspective-viewer-d3fc/dist/umd",
     "@finos/perspective-workspace/dist/umd",
-    "@finos/perspective-jupyterlab/dist/umd"
+    "@finos/perspective-jupyterlab/dist/umd",
 ];
 
 const CONTENT_TYPES = {
@@ -69,12 +72,12 @@ const CONTENT_TYPES = {
     ".css": "text/css",
     ".json": "application/json",
     ".arrow": "arraybuffer",
-    ".wasm": "application/wasm"
+    ".wasm": "application/wasm",
 };
 
 function read_promise(filePath) {
     return new Promise((resolve, reject) => {
-        fs.readFile(filePath, function(error, content) {
+        fs.readFile(filePath, function (error, content) {
             if (error && error.code !== "ENOENT") {
                 reject(error);
             } else {
@@ -88,7 +91,7 @@ function read_promise(filePath) {
  * Host a Perspective server that hosts data, code files, etc.
  */
 function perspective_assets(assets, host_psp) {
-    return async function(request, response) {
+    return async function (request, response) {
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Access-Control-Request-Method", "*");
         response.setHeader("Access-Control-Allow-Methods", "OPTIONS,GET");
@@ -114,7 +117,10 @@ function perspective_assets(assets, host_psp) {
                 if (typeof content !== "undefined") {
                     console.log(`200 ${url}`);
                     response.writeHead(200, {"Content-Type": contentType});
-                    response.end(content, extname === ".arrow" ? undefined : "utf-8");
+                    response.end(
+                        content,
+                        extname === ".arrow" ? undefined : "utf-8"
+                    );
                     return;
                 }
             }
@@ -122,13 +128,22 @@ function perspective_assets(assets, host_psp) {
                 for (let rootDir of DEFAULT_ASSETS) {
                     try {
                         let paths = require.resolve.paths(rootDir + url);
-                        paths = [...paths, ...assets.map(x => path.join(x, "node_modules")), LOCAL_PATH];
+                        paths = [
+                            ...paths,
+                            ...assets.map((x) => path.join(x, "node_modules")),
+                            LOCAL_PATH,
+                        ];
                         let filePath = require.resolve(rootDir + url, {paths});
                         let content = await read_promise(filePath);
                         if (typeof content !== "undefined") {
                             console.log(`200 ${url}`);
-                            response.writeHead(200, {"Content-Type": contentType});
-                            response.end(content, extname === ".arrow" ? undefined : "utf-8");
+                            response.writeHead(200, {
+                                "Content-Type": contentType,
+                            });
+                            response.end(
+                                content,
+                                extname === ".arrow" ? undefined : "utf-8"
+                            );
                             return;
                         }
                     } catch (e) {}
@@ -162,14 +177,19 @@ class WebSocketServer extends WebSocketManager {
         this._server = http.createServer(perspective_assets(assets, host_psp));
 
         // Serve Worker API through WebSockets
-        this._wss = new WebSocket.Server({noServer: true, perMessageDeflate: true});
+        this._wss = new WebSocket.Server({
+            noServer: true,
+            perMessageDeflate: true,
+        });
 
         // When the server starts, define how to handle messages
-        this._wss.on("connection", ws => this.add_connection(ws));
+        this._wss.on("connection", (ws) => this.add_connection(ws));
 
         this._server.on("upgrade", (request, socket, head) => {
             console.log("200    *** websocket upgrade ***");
-            this._wss.handleUpgrade(request, socket, head, sock => this._wss.emit("connection", sock, request));
+            this._wss.handleUpgrade(request, socket, head, (sock) =>
+                this._wss.emit("connection", sock, request)
+            );
         });
 
         this._server.listen(port, () => {
@@ -190,7 +210,7 @@ class WebSocketServer extends WebSocketManager {
  * a Perspective server and Perspective client to communicate.
  * @param {*} url
  */
-const websocket = url => {
+const websocket = (url) => {
     return new WebSocketClient(new WebSocket(url));
 };
 

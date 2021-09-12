@@ -4,12 +4,12 @@ title: JavaScript User Guide
 ---
 
 Perspective's JavaScript library offers a flexible, intuitive UI on top of a
-fast, powerful streaming data engine. Developers are able to pick and
-choose the modules they require for their use case, and users are presented
-with a clean user interface through which to analyze data.
+fast, powerful streaming data engine. Developers are able to pick and choose the
+modules they require for their use case, and users are presented with a clean
+user interface through which to analyze data.
 
-[More Examples](https://github.com/finos/perspective/tree/master/examples)
-are available on GitHub.
+[More Examples](https://github.com/finos/perspective/tree/master/examples) are
+available on GitHub.
 
 ## Installation
 
@@ -28,13 +28,13 @@ via NPM:
 $ yarn add @finos/perspective-viewer @finos/perspective-viewer-d3fc @finos/perspective-viewer-datagrid
 ```
 
-Perspective requires the browser to have access to
-Perspective's `.worker.js` and `.wasm` assets _in addition_ to the bundled
-`.js` scripts. By default, Perspective <a href="https://github.com/finos/perspective/pull/870">inlines</a>
+Perspective requires the browser to have access to Perspective's `.worker.js`
+and `.wasm` assets _in addition_ to the bundled `.js` scripts. By default,
+Perspective <a href="https://github.com/finos/perspective/pull/870">inlines</a>
 these assets into the `.js` scripts, and delivers them in one file. This has no
-runtime performance impact, but does increase asset load time. Most apps
-should make use of `@finos/perspective-webpack-plugin` which will package
-these files correctly form your existing Webpack configuration.
+runtime performance impact, but does increase asset load time. Most apps should
+make use of `@finos/perspective-webpack-plugin` which will package these files
+correctly form your existing Webpack configuration.
 
 ### Webpack Plugin
 
@@ -47,43 +47,43 @@ Perspective's additional assets, and is easy to set up in your `webpack.config`:
 const PerspectivePlugin = require("@finos/perspective-webpack-plugin");
 
 module.exports = {
-    entry: "./in.js",
-    output: {
-        filename: "out.js",
-        path: "build"
-    },
-    plugins: [new PerspectivePlugin()]
+  entry: "./in.js",
+  output: {
+    filename: "out.js",
+    path: "build",
+  },
+  plugins: [new PerspectivePlugin()],
 };
 ```
 
 Otherwise, you'll need to configure your `webpack.config.js` to handle these
-`perspective` assets correctly.  ~`@finos/perspective-webpack-plugin` itself
-uses a combination of `worker-loader` and `file-loader` (or `arraybuffer-loader`
-to inline the contents of this file as a base64-encoded string), which can be
+`perspective` assets correctly. ~`@finos/perspective-webpack-plugin` itself uses
+a combination of `worker-loader` and `file-loader` (or `arraybuffer-loader` to
+inline the contents of this file as a base64-encoded string), which can be
 easily modified as needed:
 
 ```javascript
 module.exports = {
-    rules: [
-        {
-            test: /perspective\.worker\.js$/,
-            type: "javascript/auto",
-            include: path.dirname(require.resolve("@finos/perspective")),
-            loader: "worker-loader"
-        },
-        {
-            test: /perspective\.wasm$/,
-            type: "javascript/auto",
-            include: path.dirname(require.resolve("@finos/perspective")),
-            loader: "file-loader" // or "arraybuffer-loader"
-        },
-        {
-            test: /perspective-viewer\.wasm$/,
-            type: "javascript/auto",
-            include: path.dirname(require.resolve("@finos/perspective-viewer")),
-            loader: "file-loader" // or "arraybuffer-loader"
-        }
-    ]
+  rules: [
+    {
+      test: /perspective\.worker\.js$/,
+      type: "javascript/auto",
+      include: path.dirname(require.resolve("@finos/perspective")),
+      loader: "worker-loader",
+    },
+    {
+      test: /perspective\.wasm$/,
+      type: "javascript/auto",
+      include: path.dirname(require.resolve("@finos/perspective")),
+      loader: "file-loader", // or "arraybuffer-loader"
+    },
+    {
+      test: /perspective-viewer\.wasm$/,
+      type: "javascript/auto",
+      include: path.dirname(require.resolve("@finos/perspective-viewer")),
+      loader: "file-loader", // or "arraybuffer-loader"
+    },
+  ],
 };
 ```
 
@@ -91,9 +91,10 @@ module.exports = {
 
 Perspective can be loaded directly from
 [unpkg.com](https://unpkg.com/@finos/perspective-viewer), which is the easiest
-way to get started with Perspective in the browser, and absolutely perfect
-for spinning up quick instances of `perspective-viewer`. An example is
-demonstrated in [`superstore-arrow.html`](https://github.com/finos/perspective/blob/master/examples/simple/superstore-arrow.html),
+way to get started with Perspective in the browser, and absolutely perfect for
+spinning up quick instances of `perspective-viewer`. An example is demonstrated
+in
+[`superstore-arrow.html`](https://github.com/finos/perspective/blob/master/examples/simple/superstore-arrow.html),
 which loads a dataset stored in the Apache Arrow format using the `Fetch` API.
 
 Add these scripts to your `.html`'s `<head>` section:
@@ -110,19 +111,20 @@ Once added to your page, you can access the Javascript API through the
 
 ```javascript
 const worker = perspective.worker();
-const table = await worker.table({A: [1, 2, 3]});
-const view = await table.view({sort: [["A", "desc"]]});
+const table = await worker.table({ A: [1, 2, 3] });
+const view = await table.view({ sort: [["A", "desc"]] });
 ```
 
 Or create a `<perspective-viewer>` in HTML:
 
 ```html
-<perspective-viewer columns="['Sales', 'Profit']">`
+<perspective-viewer columns="['Sales', 'Profit']"
+  >`
   <script>
-    document.addEventListener("DOMContentLoaded", async function() {
+    document.addEventListener("DOMContentLoaded", async function () {
       const data = {
         Sales: [500, 1000, 1500],
-        Profit: [100.25, 200.5, 300.75]
+        Profit: [100.25, 200.5, 300.75],
       };
       // The `<perspective-viewer>` HTML element exposes the viewer API
       const worker = perspective.worker();
@@ -134,10 +136,9 @@ Or create a `<perspective-viewer>` in HTML:
 </perspective-viewer>
 ```
 
-This makes it easy to spin up Perspective locally without depending
-on a build chain or other tooling. For production usage, you should incorporate
-Perspective into your application's bundled scripts using `NPM` and `Webpack`.
-
+This makes it easy to spin up Perspective locally without depending on a build
+chain or other tooling. For production usage, you should incorporate Perspective
+into your application's bundled scripts using `NPM` and `Webpack`.
 
 ## Module Structure
 
@@ -177,26 +178,28 @@ licensing for these dependencies as needed.
 ### Which modules should I import?
 
 Depending on your requirements, you may need just one, or all, Perspective
-modules. Here are some basic guidelines to help you decide what is most appropriate
-for your project:
+modules. Here are some basic guidelines to help you decide what is most
+appropriate for your project:
 
 - For Perspective's high-performance streaming data engine (in WebAssembly), or
   for a purely Node.js based application, import:
 
   - `@finos/perspective`, as detailed [here](#perspective-library)
 
-- For Perspective as a simple, browser-based data visualization widget, you
-  will need to import:
+- For Perspective as a simple, browser-based data visualization widget, you will
+  need to import:
 
   - `@finos/perspective`, detailed [here](#perspective-library)
-  - `@finos/perspective-viewer`, detailed [here](#perspective-viewer-web-component)
+  - `@finos/perspective-viewer`, detailed
+    [here](#perspective-viewer-web-component)
   - `@finos/perspective-viewer-datagrid` for data grids
   - `@finos/perspective-viewer-d3fc` for charting
 
 - For more complex cases, such as
   [sharing tables between viewers](#sharing-a-table-between-multiple-perspective-viewers)
   and
-  [binding a viewer to a remote view in Node.js](#remote-perspective-via-workerhost), you will likely need all Perspective modules.
+  [binding a viewer to a remote view in Node.js](#remote-perspective-via-workerhost),
+  you will likely need all Perspective modules.
 
 ## `perspective` library
 
@@ -217,9 +220,9 @@ It exports Perspective's data interfaces:
   - A single `table()` may have many `view()`s attached at once.
 
 `@finos/perspective` also exports process management functions, such as
-`worker()` and `websocket()` (in the browser) and `WebSocketServer()`
-(in Node.js). See the [API documentation](/obj/perspective.html) for a complete
-reference on all exported methods.  This module is a dependency of 
+`worker()` and `websocket()` (in the browser) and `WebSocketServer()` (in
+Node.js). See the [API documentation](/obj/perspective.html) for a complete
+reference on all exported methods. This module is a dependency of
 `@finos/perspective-viewer`, and is not needed if you only intend to use
 `<perspective-viewer>` to visualize simple data.
 
@@ -249,9 +252,9 @@ const perspective = require("@finos/perspective");
 #### Instantiating a new `worker()`
 
 Once imported, you'll need to instantiate a `perspective` engine via the
-`worker()` method. This will create a new Web Worker (browser) or
-Process (Node.js) and load the WebAssembly binary; all calculation and data
-accumulation will occur in this separate process.
+`worker()` method. This will create a new Web Worker (browser) or Process
+(Node.js) and load the WebAssembly binary; all calculation and data accumulation
+will occur in this separate process.
 
 ```javascript
 const worker = perspective.worker();
@@ -276,36 +279,36 @@ const perspective = require("@finos/perspective");
 ### Serializing data using `to_*()`
 
 The `view()` allows for serialization of data to the user through the
-`to_json()`, `to_columns()`, `to_csv()`, and `to_arrow()` methods. These
-methods return a `promise` for the calculated data:
+`to_json()`, `to_columns()`, `to_csv()`, and `to_arrow()` methods. These methods
+return a `promise` for the calculated data:
 
 Via `Promise`
 
 ```javascript
-view.to_json().then(json => console.log(json));
-view.to_columns().then(json => console.log(json));
-view.to_csv().then(csv => console.log(csv));
-view.to_arrow().then(arrow => console.log(arrow));
+view.to_json().then((json) => console.log(json));
+view.to_columns().then((json) => console.log(json));
+view.to_csv().then((csv) => console.log(csv));
+view.to_arrow().then((arrow) => console.log(arrow));
 ```
 
 Via ES6 `await`/`async`
 
 ```javascript
 async function print_data() {
-    console.log(await view.to_json());
-    console.log(await view.to_columns());
-    console.log(await view.to_csv());
-    console.log(await view.to_arrow());
+  console.log(await view.to_json());
+  console.log(await view.to_columns());
+  console.log(await view.to_csv());
+  console.log(await view.to_arrow());
 }
 ```
 
 ### Deleting a `table()` or `view()`
 
 Unlike standard JavaScript objects, Perspective objects such as `table()` and
-`view()` store their associated data in the WebAssembly heap. Because of this, as
-well as the current lack of a hook into the JavaScript runtime's garbage collector from
-WebAssembly, the memory allocated to these Perspective objects does not
-automatically get cleaned up when the object falls out of scope.
+`view()` store their associated data in the WebAssembly heap. Because of this,
+as well as the current lack of a hook into the JavaScript runtime's garbage
+collector from WebAssembly, the memory allocated to these Perspective objects
+does not automatically get cleaned up when the object falls out of scope.
 
 In order to prevent memory leaks and reclaim the memory associated with a
 Perspective `table()` or `view()`, you must call the `delete()` method:
@@ -323,13 +326,14 @@ table.delete();
 For ease of configuration synchronization between the Node.js, WebWorker and
 Browser, Perspective supports configuration statically.
 
-You may override Perspective's [default settings](https://github.com/finos/perspective/blob/master/packages/perspective/src/js/config/settings.js)
+You may override Perspective's
+[default settings](https://github.com/finos/perspective/blob/master/packages/perspective/src/js/config/settings.js)
 via a `perspective.config.js` or `perspective.config.json` file in your
 project's root or parent path, or via the `"perspective"` key in your project's
 `package.json`.
 
-Note that, while in Node.js, this config file is read at runtime; for the browser,
-this file must be read at compile time (handled automatically via
+Note that, while in Node.js, this config file is read at runtime; for the
+browser, this file must be read at compile time (handled automatically via
 [`@finos/perspective-webpack-plugin`](https://github.com/finos/perspective/tree/master/packages/perspective-webpack-plugin)).
 
 Thus, to update it, you must either rebuild your code, or supply the JSON
@@ -337,32 +341,32 @@ configuration object to the `worker()` constructor on initialization.
 
 ```javascript
 module.exports = {
-    types: {
-        string: {
-            aggregate: "dominant"
-        },
-        float: {
-            format: {
-                style: "decimal",
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }
-        }
-    }
+  types: {
+    string: {
+      aggregate: "dominant",
+    },
+    float: {
+      format: {
+        style: "decimal",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      },
+    },
+  },
 };
 ```
 
 #### Creating new types
 
 For customizing the behavior or style of specific columns, Perspective supports
-the definition of new types that derive from an existing built-in type.
-First, add a new type and declare its base in your `perspective.config.js`:
+the definition of new types that derive from an existing built-in type. First,
+add a new type and declare its base in your `perspective.config.js`:
 
 ```javascript
 module.exports = {
-    types: {
-        price: {type: "float"}
-    }
+  types: {
+    price: { type: "float" },
+  },
 };
 ```
 
@@ -370,8 +374,8 @@ Perspective will not infer these types for you, so you'll need to create your
 table [from a schema](#loading-data-with-table) to use them:
 
 ```javascript
-const table = await worker.table({volume: "integer", price: "price"});
-table.update([{volume: 10, price: 100.75}]);
+const table = await worker.table({ volume: "integer", price: "price" });
+table.update([{ volume: 10, price: 100.75 }]);
 ```
 
 #### Formatting data types
@@ -381,16 +385,16 @@ Default and user-created types can be styled using the `format` key in
 
 ```javascript
 module.exports = {
-    types: {
-        price: {
-            type: float,
-            format: {
-                style: "decimal",
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }
-        }
-    }
+  types: {
+    price: {
+      type: float,
+      format: {
+        style: "decimal",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      },
+    },
+  },
 };
 ```
 
@@ -429,10 +433,10 @@ standard HTML on your site. A simple example:
 
 ### Theming
 
-Theming is supported in `perspective-viewer` and its accompanying plugins.
-A number of themes come bundled with `perspective-viewer`; you can import
-any of these themes directly into your app, and the `perspective-viewer`s
-will be themed accordingly:
+Theming is supported in `perspective-viewer` and its accompanying plugins. A
+number of themes come bundled with `perspective-viewer`; you can import any of
+these themes directly into your app, and the `perspective-viewer`s will be
+themed accordingly:
 
 ```javascript
 //Themes based on Google's Material Design Language
@@ -445,12 +449,12 @@ import "@finos/perspective-viewer/themes/material-dense.dark.css";
 import "@finos/perspective-viewer/themes/vaporwave.css";
 ```
 
-***Note that importing multiple themes may override each other***
+**_Note that importing multiple themes may override each other_**
 
-Alternatively, you may use `all-themes.css`, which exposes all available
-themes as CSS classes. This allows you to trivially apply different themes
-to multiple `perspective-viewer`s by simply setting the `class`
-attribute on each `perspective-viewer`:
+Alternatively, you may use `all-themes.css`, which exposes all available themes
+as CSS classes. This allows you to trivially apply different themes to multiple
+`perspective-viewer`s by simply setting the `class` attribute on each
+`perspective-viewer`:
 
 _*index.js*_
 
@@ -463,14 +467,20 @@ _*index.html*_
 
 ```html
 <perspective-viewer class="perspective-viewer-material"></perspective-viewer>
-<perspective-viewer class="perspective-viewer-material-dark"></perspective-viewer>
-<perspective-viewer class="perspective-viewer-material-dense"></perspective-viewer>
-<perspective-viewer class="perspective-viewer-material-dense-dark"></perspective-viewer>
+<perspective-viewer
+  class="perspective-viewer-material-dark"
+></perspective-viewer>
+<perspective-viewer
+  class="perspective-viewer-material-dense"
+></perspective-viewer>
+<perspective-viewer
+  class="perspective-viewer-material-dense-dark"
+></perspective-viewer>
 <perspective-viewer class="perspective-viewer-vaporwave"></perspective-viewer>
 ```
 
-If you choose not to bundle the themes yourself, they are available through
-the [unpkg.com](https://unpkg.com/@finos/perspective-viewer/dist/umd/).
+If you choose not to bundle the themes yourself, they are available through the
+[unpkg.com](https://unpkg.com/@finos/perspective-viewer/dist/umd/).
 
 These can be directly linked in your HTML file:
 
@@ -516,7 +526,7 @@ view1.load(table);
 view2.load(table);
 
 // Both `view1` and `view2` will reflect this update
-table.update([{x: 5, y: "e", z: true}]);
+table.update([{ x: 5, y: "e", z: true }]);
 ```
 
 ### Server-only via `WebSocketServer()` and Node.js
@@ -530,13 +540,13 @@ footprint.
 In Node.js:
 
 ```javascript
-const {WebSocketServer, table} = require("@finos/perspective");
+const { WebSocketServer, table } = require("@finos/perspective");
 const fs = require("fs");
 
 // Start a WS/HTTP host on port 8080.  The `assets` property allows
 // the `WebSocketServer()` to also serves the file structure rooted in this
 // module's directory.
-const host = new WebSocketServer({assets: [__dirname], port: 8080});
+const host = new WebSocketServer({ assets: [__dirname], port: 8080 });
 
 // Read an arrow file from the file system and host it as a named table.
 const arr = fs.readFileSync(__dirname + "/superstore.arrow");
@@ -550,7 +560,9 @@ In the browser:
 const elem = document.getElementsByTagName("perspective-viewer")[0];
 
 // Bind to the server's worker instead of instantiating a Web Worker.
-const websocket = perspective.websocket(window.location.origin.replace("http", "ws"));
+const websocket = perspective.websocket(
+  window.location.origin.replace("http", "ws")
+);
 
 // Bind the viewer to the preloaded data source.  `table` and `view` objects
 // live on the server.
@@ -578,7 +590,8 @@ it is over a websocket.
 and `perspective-viewer` libraries. Similar to `WebsocketServer` in Node.js,
 `perspective-python` runs on the server without any memory limits, reducing
 resource usage in the browser. For more detailed documentation on the Python
-API, see the [Python user guide](/docs/md/python.html) or the [Python API documentation](/docs/obj/perspective-python.html).
+API, see the [Python user guide](/docs/md/python.html) or the
+[Python API documentation](/docs/obj/perspective-python.html).
 
 The simplest implementation uses Tornado as a websocket server in Python,
 hosting an endpoint at which a `table()` can be accessed:
@@ -646,10 +659,10 @@ state, by reading JSON encoded properties from attributes for each `perspective`
 configuration property.
 
 For example, this HTML will apply `row_pivot` and `filter` configuration to the
-initial `view()` created when data is loaded via the `load()` method, as well
-as set the UI controls to reflect this config. See the
-[full Attribute API documentation](/docs/obj/perspective-viewer.html)
-for a full description of the available attributes.
+initial `view()` created when data is loaded via the `load()` method, as well as
+set the UI controls to reflect this config. See the
+[full Attribute API documentation](/docs/obj/perspective-viewer.html) for a full
+description of the available attributes.
 
 ```html
 <perspective-viewer
@@ -660,9 +673,9 @@ for a full description of the available attributes.
 ```
 
 Attributes on a `<perspective-viewer>` are reactive. When the user interacts
-with the viewer, the attributes update to reflect the current viewer state,
-and these can be read with the standard DOM API method `getAttribute()`;
-likewise, the `setAttribute()` method will update the `view()` and UI state.
+with the viewer, the attributes update to reflect the current viewer state, and
+these can be read with the standard DOM API method `getAttribute()`; likewise,
+the `setAttribute()` method will update the `view()` and UI state.
 
 ```javascript
 // Gets  `elem`'s pivot state
@@ -693,17 +706,17 @@ Similarly, `view()` updates instigated either through the Attribute API or
 through user interaction will fire a `perspective-config-update` event:
 
 ```javascript
-elem.addEventListener("perspective-config-update", function(event) {
-    var config = elem.save();
-    console.log("The view() config has changed to " + JSON.stringify(config));
+elem.addEventListener("perspective-config-update", function (event) {
+  var config = elem.save();
+  console.log("The view() config has changed to " + JSON.stringify(config));
 });
 ```
 
 Once an update has finished, a `perspective-update-complete` DOM event is fired.
 
 ```javascript
-elem.addEventListener("perspective-update-complete", function(event) {
-    console.log("Update is now complete");
+elem.addEventListener("perspective-update-complete", function (event) {
+  console.log("Update is now complete");
 });
 ```
 
@@ -721,8 +734,8 @@ The `column_names` property contains an array of matching columns, and the `row`
 property returns the associated row data.
 
 ```javascript
-elem.addEventListener("perspective-click", function(event) {
-    var config = event.detail.config;
-    elem.restore(config);
+elem.addEventListener("perspective-click", function (event) {
+  var config = event.detail.config;
+  elem.restore(config);
 });
 ```

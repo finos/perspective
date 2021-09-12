@@ -23,7 +23,11 @@ const cp = require("child_process");
 
 const {WebSocketServer} = require("@finos/perspective");
 
-const {IS_LOCAL_PUPPETEER, RESULTS_DEBUG_FILENAME, RESULTS_FILENAME} = require("./paths.js");
+const {
+    IS_LOCAL_PUPPETEER,
+    RESULTS_DEBUG_FILENAME,
+    RESULTS_FILENAME,
+} = require("./paths.js");
 
 let __PORT__;
 
@@ -38,7 +42,7 @@ exports.with_server = function with_server({paths}, body) {
             port: 0,
             on_start: () => {
                 __PORT__ = server._server.address().port;
-            }
+            },
         });
     });
 
@@ -69,12 +73,14 @@ async function get_new_page() {
     page = await browser.newPage();
 
     // https://github.com/puppeteer/puppeteer/issues/1718
-    await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36");
+    await page.setUserAgent(
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36"
+    );
     await page.setRequestInterception(true);
 
     // Webfonts cause tests to render inconcistently (or block) when run in a
     // firewalled environment, so for consistency abort these requests.
-    page.on("request", interceptedRequest => {
+    page.on("request", (interceptedRequest) => {
         if (interceptedRequest.url().indexOf("googleapis") > -1) {
             interceptedRequest.abort();
         } else {
@@ -84,13 +90,13 @@ async function get_new_page() {
 
     // Disable all alerts and dialogs, as Jupyterlab alerts when trying to
     // navigate off the page, which will block test completion.
-    page.on("dialog", async dialog => {
+    page.on("dialog", async (dialog) => {
         await dialog.accept();
     });
 
     page.track_mouse = track_mouse.bind(page);
-    page.shadow_click = async function(...path) {
-        await this.evaluate(path => {
+    page.shadow_click = async function (...path) {
+        await this.evaluate((path) => {
             let elem = document;
             while (path.length > 0) {
                 if (elem.shadowRoot) {
@@ -112,7 +118,7 @@ async function get_new_page() {
         }, path);
     };
 
-    page.shadow_type = async function(content, is_incremental, ...path) {
+    page.shadow_type = async function (content, is_incremental, ...path) {
         if (typeof is_incremental !== "boolean") {
             path.unshift(is_incremental);
             is_incremental = false;
@@ -133,7 +139,7 @@ async function get_new_page() {
                 function triggerInputEvent(element) {
                     const event = new Event("input", {
                         bubbles: true,
-                        cancelable: true
+                        cancelable: true,
                     });
 
                     element.dispatchEvent(event);
@@ -157,7 +163,7 @@ async function get_new_page() {
         );
     };
 
-    page.shadow_blur = async function() {
+    page.shadow_blur = async function () {
         await this.evaluate(() => {
             let elem = document.activeElement;
             while (elem) {
@@ -167,8 +173,8 @@ async function get_new_page() {
         });
     };
 
-    page.shadow_focus = async function(...path) {
-        await this.evaluate(path => {
+    page.shadow_focus = async function (...path) {
+        await this.evaluate((path) => {
             let elem = document;
             while (path.length > 0) {
                 if (elem.shadowRoot) {
@@ -184,23 +190,25 @@ async function get_new_page() {
     // CSS Animations break our screenshot tests, so set the
     // animation playback rate to something extreme.
     await page._client.send("Animation.setPlaybackRate", {playbackRate: 100.0});
-    page.on("console", async msg => {
+    page.on("console", async (msg) => {
         if (msg.type() === "error" || msg.type() === "warn") {
             const args = await msg.args();
-            args.forEach(async arg => {
+            args.forEach(async (arg) => {
                 const val = await arg.jsonValue();
                 // value is serializable
-                if (JSON.stringify(val) !== JSON.stringify({})) console.log(val);
+                if (JSON.stringify(val) !== JSON.stringify({}))
+                    console.log(val);
                 // value is unserializable (or an empty oject)
                 else {
                     const {type, subtype, description} = arg._remoteObject;
                     private_console.log(`${subtype}: ${description}`);
-                    if (msg.type() === "error") errors.push(`${type}/${subtype}: ${description}`);
+                    if (msg.type() === "error")
+                        errors.push(`${type}/${subtype}: ${description}`);
                 }
             });
         }
     });
-    page.on("pageerror", msg => {
+    page.on("pageerror", (msg) => {
         errors.push(msg.message);
     });
     return page;
@@ -216,9 +224,11 @@ function get_results(filename) {
     }
 }
 
-beforeAll(async done => {
+beforeAll(async (done) => {
     try {
-        browser = await puppeteer.connect({browserWSEndpoint: process.env.PSP_BROWSER_ENDPOINT});
+        browser = await puppeteer.connect({
+            browserWSEndpoint: process.env.PSP_BROWSER_ENDPOINT,
+        });
 
         page = await get_new_page();
 
@@ -228,7 +238,9 @@ beforeAll(async done => {
         if (results.__GIT_COMMIT__) {
             const hash = execSync(`git cat-file -e ${results.__GIT_COMMIT__}`);
             if (!hash || hash.toString().length != 0) {
-                private_console.error(`-- WARNING - Test results generated from non-existent commit ${results.__GIT_COMMIT__}.`);
+                private_console.error(
+                    `-- WARNING - Test results generated from non-existent commit ${results.__GIT_COMMIT__}.`
+                );
             }
         }
     } catch (e) {
@@ -250,9 +262,7 @@ function write_results(updated, filename) {
     for (let key of Object.keys(updated)) {
         results2[key] = updated[key];
     }
-    results2.__GIT_COMMIT__ = execSync("git rev-parse HEAD")
-        .toString()
-        .trim();
+    results2.__GIT_COMMIT__ = execSync("git rev-parse HEAD").toString().trim();
     fs.writeFileSync(dir_name, JSON.stringify(results2, null, 4));
 }
 
@@ -283,7 +293,11 @@ function mkdirSyncRec(targetDir) {
     }, initDir);
 }
 
-describe.page = (url, body, {reload_page = false, check_results = true, name, root} = {}) => {
+describe.page = (
+    url,
+    body,
+    {reload_page = false, check_results = true, name, root} = {}
+) => {
     let _url = url ? url : page_url;
     test_root = root ? root : test_root;
 
@@ -298,7 +312,14 @@ describe.page = (url, body, {reload_page = false, check_results = true, name, ro
         return result;
     });
 
-    if (IS_LOCAL_PUPPETEER && !fs.existsSync(path.join(test_root, "test", "results", RESULTS_FILENAME)) && !process.env.WRITE_TESTS && check_results) {
+    if (
+        IS_LOCAL_PUPPETEER &&
+        !fs.existsSync(
+            path.join(test_root, "test", "results", RESULTS_FILENAME)
+        ) &&
+        !process.env.WRITE_TESTS &&
+        check_results
+    ) {
         throw new Error(`
         
 ERROR: Running in puppeteer tests without "${RESULTS_FILENAME}"
@@ -316,31 +337,40 @@ expect.extend({
     toNotError(received) {
         if (received.length > 0) {
             return {
-                message: () => `Errors emitted during evaluation: \n${received.map(x => `    ${x}`).join("\n")}`,
-                pass: false
+                message: () =>
+                    `Errors emitted during evaluation: \n${received
+                        .map((x) => `    ${x}`)
+                        .join("\n")}`,
+                pass: false,
             };
         }
         return {
             message: () => ``,
-            pass: true
+            pass: true,
         };
-    }
+    },
 });
 
-test.run = function run(name, body, {url = page_url, timeout = 60000, viewport = null}) {
+test.run = function run(
+    name,
+    body,
+    {url = page_url, timeout = 60000, viewport = null}
+) {
     test(
         name,
         async () => {
             if (viewport !== null) {
                 await page.setViewport({
                     width: viewport.width,
-                    height: viewport.height
+                    height: viewport.height,
                 });
             }
             await new Promise(setTimeout);
             await page.close();
             page = await get_new_page();
-            await page.goto(`http://127.0.0.1:${__PORT__}/${url}`, {waitUntil: "domcontentloaded"});
+            await page.goto(`http://127.0.0.1:${__PORT__}/${url}`, {
+                waitUntil: "domcontentloaded",
+            });
             await body(page);
         },
         timeout
@@ -366,14 +396,23 @@ function format_and_clean_xml(result) {
                 }
 
                 return true;
-            }
+            },
         });
     } catch (e) {
         return result;
     }
 }
 
-test.capture = function capture(name, body, {url = page_url, timeout = 60000, viewport = null, fail_on_errors = true} = {}) {
+test.capture = function capture(
+    name,
+    body,
+    {
+        url = page_url,
+        timeout = 60000,
+        viewport = null,
+        fail_on_errors = true,
+    } = {}
+) {
     const spec = test(
         name,
         async () => {
@@ -382,15 +421,25 @@ test.capture = function capture(name, body, {url = page_url, timeout = 60000, vi
             if (viewport !== null)
                 await page.setViewport({
                     width: viewport.width,
-                    height: viewport.height
+                    height: viewport.height,
                 });
 
             const iterations = process.env.PSP_SATURATE ? 10 : 1;
 
             const test_name = `${name.replace(/[ \.']/g, "_")}`;
-            const path_name = `${spec.result.fullName.replace(".html", "").replace(/[ \.']/g, "_")}`;
-            let dir_name = path.join(test_root, "test", "screenshots", path_name);
-            dir_name = dir_name.slice(0, dir_name.length - test_name.length - 1);
+            const path_name = `${spec.result.fullName
+                .replace(".html", "")
+                .replace(/[ \.']/g, "_")}`;
+            let dir_name = path.join(
+                test_root,
+                "test",
+                "screenshots",
+                path_name
+            );
+            dir_name = dir_name.slice(
+                0,
+                dir_name.length - test_name.length - 1
+            );
             const filename = path.join(dir_name, test_name);
             if (!fs.existsSync(dir_name)) {
                 mkdirSyncRec(dir_name);
@@ -400,14 +449,22 @@ test.capture = function capture(name, body, {url = page_url, timeout = 60000, vi
                 if (!OLD_SETTINGS[test_root + url]) {
                     await page.close();
                     page = await get_new_page();
-                    await page.goto(`http://127.0.0.1:${__PORT__}/${url}#test=${encodeURIComponent(name)}`, {waitUntil: "domcontentloaded"});
+                    await page.goto(
+                        `http://127.0.0.1:${__PORT__}/${url}#test=${encodeURIComponent(
+                            name
+                        )}`,
+                        {waitUntil: "domcontentloaded"}
+                    );
                 } else {
-                    await page.evaluate(async x => {
-                        const workspace = document.querySelector("perspective-workspace");
+                    await page.evaluate(async (x) => {
+                        const workspace = document.querySelector(
+                            "perspective-workspace"
+                        );
                         if (workspace) {
                             await workspace.restore(x);
                         } else {
-                            const viewer = document.querySelector("perspective-viewer");
+                            const viewer =
+                                document.querySelector("perspective-viewer");
                             if (viewer) {
                                 viewer.restore(x);
                                 await viewer.notifyResize?.();
@@ -418,19 +475,26 @@ test.capture = function capture(name, body, {url = page_url, timeout = 60000, vi
                 }
 
                 if (!OLD_SETTINGS[test_root + url]) {
-                    OLD_SETTINGS[test_root + url] = await page.evaluate(async () => {
-                        const workspace = document.querySelector("perspective-workspace");
-                        if (workspace) {
-                            return await workspace.save();
-                        } else {
-                            const viewer = document.querySelector("perspective-viewer");
-                            if (viewer) {
-                                await viewer.getTable();
-                                await viewer.restore({});
-                                return await viewer.save();
+                    OLD_SETTINGS[test_root + url] = await page.evaluate(
+                        async () => {
+                            const workspace = document.querySelector(
+                                "perspective-workspace"
+                            );
+                            if (workspace) {
+                                return await workspace.save();
+                            } else {
+                                const viewer =
+                                    document.querySelector(
+                                        "perspective-viewer"
+                                    );
+                                if (viewer) {
+                                    await viewer.getTable();
+                                    await viewer.restore({});
+                                    return await viewer.save();
+                                }
                             }
                         }
-                    });
+                    );
                 }
 
                 // Move the mouse offscreen so prev tests dont get hover effects
@@ -442,7 +506,9 @@ test.capture = function capture(name, body, {url = page_url, timeout = 60000, vi
                     if (process.env.PSP_PAUSE_ON_FAILURE) {
                         if (!process.env.WRITE_TESTS) {
                             private_console.error(`Failed ${name}, pausing`);
-                            await prompt(`Failed ${name}, pausing.  Press enter to continue ..`);
+                            await prompt(
+                                `Failed ${name}, pausing.  Press enter to continue ..`
+                            );
                         }
                     }
                     throw e;
@@ -458,22 +524,33 @@ test.capture = function capture(name, body, {url = page_url, timeout = 60000, vi
 
                 if (hash === results[path_name]) {
                     if (!fs.existsSync(filename + ".png")) {
-                        const screenshot = await page.screenshot({captureBeyondViewport: false, fullPage: true});
+                        const screenshot = await page.screenshot({
+                            captureBeyondViewport: false,
+                            fullPage: true,
+                        });
                         fs.writeFileSync(filename + ".png", screenshot);
                     }
                 } else {
-                    const screenshot = await page.screenshot({captureBeyondViewport: false, fullPage: true});
+                    const screenshot = await page.screenshot({
+                        captureBeyondViewport: false,
+                        fullPage: true,
+                    });
                     fs.writeFileSync(filename + ".failed.png", screenshot);
                     if (fs.existsSync(filename + ".png")) {
                         try {
-                            cp.execSync(`compare ${filename}.png ${filename}.failed.png  ${filename}.diff.png`);
+                            cp.execSync(
+                                `compare ${filename}.png ${filename}.failed.png  ${filename}.diff.png`
+                            );
                         } catch (e) {
                             // exits 1
                         }
                     }
 
                     if (process.env.WRITE_TESTS) {
-                        const screenshot = await page.screenshot({captureBeyondViewport: false, fullPage: true});
+                        const screenshot = await page.screenshot({
+                            captureBeyondViewport: false,
+                            fullPage: true,
+                        });
                         fs.writeFileSync(filename + ".png", screenshot);
                     }
                 }
@@ -484,9 +561,14 @@ test.capture = function capture(name, body, {url = page_url, timeout = 60000, vi
 
                 new_debug_results[path_name] = result;
                 if (process.env.PSP_PAUSE_ON_FAILURE) {
-                    if (!process.env.WRITE_TESTS && (hash !== results[path_name] || errors.length > 0)) {
+                    if (
+                        !process.env.WRITE_TESTS &&
+                        (hash !== results[path_name] || errors.length > 0)
+                    ) {
                         private_console.error(`Failed ${name}, pausing`);
-                        await prompt(`Failed ${name}, pausing.  Press enter to continue ..`);
+                        await prompt(
+                            `Failed ${name}, pausing.  Press enter to continue ..`
+                        );
                     }
                 }
                 if (fail_on_errors) {
@@ -494,7 +576,9 @@ test.capture = function capture(name, body, {url = page_url, timeout = 60000, vi
                 }
 
                 if (results_debug[path_name]) {
-                    expect(new_debug_results[path_name]).toBe(results_debug[path_name]);
+                    expect(new_debug_results[path_name]).toBe(
+                        results_debug[path_name]
+                    );
                 }
 
                 expect(hash).toBe(results[path_name]);
@@ -509,11 +593,11 @@ test.capture = function capture(name, body, {url = page_url, timeout = 60000, vi
 function prompt(query) {
     const rl = readline.createInterface({
         input: process.stdin,
-        output: process.stdout
+        output: process.stdout,
     });
 
-    return new Promise(resolve =>
-        rl.question(query, ans => {
+    return new Promise((resolve) =>
+        rl.question(query, (ans) => {
             rl.close();
             resolve(ans);
         })
@@ -527,9 +611,13 @@ exports.drag_drop = async function drag_drop(page, origin, target) {
     const element2 = await page.$(target);
     const box2 = await element2.boundingBox();
     process.stdout.write(element2, box2);
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, {steps: 100});
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, {
+        steps: 100,
+    });
     await page.mouse.down();
     await page.waitFor(1000);
-    await page.mouse.move(box2.x + box2.width / 2, box2.y + box2.height / 2, {steps: 100});
+    await page.mouse.move(box2.x + box2.width / 2, box2.y + box2.height / 2, {
+        steps: 100,
+    });
     await page.mouse.up();
 };

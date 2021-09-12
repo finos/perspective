@@ -30,7 +30,13 @@ export class PerspectiveTabBar extends TabBar {
     }
 
     _check_shade() {
-        if (Array.from(this.contentNode.children).filter(x => x.classList.contains("settings_open") && x.classList.contains("p-mod-current")).length > 0) {
+        if (
+            Array.from(this.contentNode.children).filter(
+                (x) =>
+                    x.classList.contains("settings_open") &&
+                    x.classList.contains("p-mod-current")
+            ).length > 0
+        ) {
             this.contentNode.classList.add("inactive-blur");
         } else {
             this.contentNode.classList.remove("inactive-blur");
@@ -57,8 +63,12 @@ export class PerspectiveTabBar extends TabBar {
                     const tabs = this.contentNode.children;
 
                     // Find the index of the released tab.
-                    const index = ArrayExt.findFirstIndex(tabs, tab => {
-                        return ElementExt.hitTest(tab, event.clientX, event.clientY);
+                    const index = ArrayExt.findFirstIndex(tabs, (tab) => {
+                        return ElementExt.hitTest(
+                            tab,
+                            event.clientX,
+                            event.clientY
+                        );
                     });
 
                     if (index < 0) {
@@ -77,7 +87,7 @@ export class PerspectiveTabBar extends TabBar {
     onTitleChangeRequest(event) {
         const oldValue = event.target.value;
 
-        const stopEvents = event => event.stopPropagation();
+        const stopEvents = (event) => event.stopPropagation();
 
         const onCancel = () => {
             this.title.label = oldValue;
@@ -86,7 +96,7 @@ export class PerspectiveTabBar extends TabBar {
             removeEventListeners();
         };
 
-        const onEnter = event => {
+        const onEnter = (event) => {
             if (event.keyCode === 13) {
                 removeEventListeners();
                 this.currentTitle.owner.name = event.target.value;
@@ -101,12 +111,15 @@ export class PerspectiveTabBar extends TabBar {
             mousedown: stopEvents,
             mouseup: stopEvents,
             keydown: onEnter,
-            blur: onCancel
+            blur: onCancel,
         };
 
         const removeEventListeners = () => {
             for (let eventName in listeners) {
-                event.target.removeEventListener(eventName, listeners[eventName]);
+                event.target.removeEventListener(
+                    eventName,
+                    listeners[eventName]
+                );
             }
         };
 
@@ -129,7 +142,9 @@ export class PerspectiveTabBar extends TabBar {
     }
 
     checkCondensed(msg) {
-        const approxWidth = (msg ? msg.width : this.node.offsetWidth) / this.contentNode.children.length;
+        const approxWidth =
+            (msg ? msg.width : this.node.offsetWidth) /
+            this.contentNode.children.length;
         if (approxWidth < 400) {
             this.node.classList.add("condensed");
         } else {
@@ -144,7 +159,10 @@ export class PerspectiveTabBar extends TabBar {
      *
      */
     retargetEvent(event) {
-        Object.defineProperty(event, "target", {value: event.composedPath()[0], enumerable: true});
+        Object.defineProperty(event, "target", {
+            value: event.composedPath()[0],
+            enumerable: true,
+        });
         return event;
     }
 

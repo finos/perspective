@@ -12,5 +12,5 @@ module.exports = Object.assign(main_config, {
     globalSetup: "<rootDir>/test/config/jupyter/globalSetup.js",
     setupFilesAfterEnv: ["<rootDir>/test/config/jupyter/teardown.js"],
     testMatch: ["<rootDir>/test/jupyter/*.spec.js"],
-    roots: ["test"]
+    roots: ["test"],
 });

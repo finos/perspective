@@ -24,9 +24,7 @@ function barChart(container, settings) {
     const data = groupAndStackData(settings, filterData(settings));
     const color = seriesColors(settings);
 
-    const legend = colorLegend()
-        .settings(settings)
-        .scale(color);
+    const legend = colorLegend().settings(settings).scale(color);
 
     const bars = barSeries(settings, color).orient("horizontal");
     const series = fc
@@ -46,7 +44,9 @@ function barChart(container, settings) {
         .valueName("crossValue")
         .orient("vertical")(data);
 
-    const chart = chartSvgFactory(xAxis, yAxis).plotArea(withGridLines(series, settings).orient("horizontal"));
+    const chart = chartSvgFactory(xAxis, yAxis).plotArea(
+        withGridLines(series, settings).orient("horizontal")
+    );
 
     if (chart.yPaddingInner) {
         chart.yPaddingInner(0.5);
@@ -68,7 +68,7 @@ barChart.plugin = {
     name: "X Bar",
     max_cells: 1000,
     max_columns: 50,
-    render_warning: true
+    render_warning: true,
 };
 
 export default barChart;

@@ -9,11 +9,11 @@
 
 const DEFAULT_CONFIG = require("./settings.js").default;
 
-module.exports.get_types = function() {
+module.exports.get_types = function () {
     return Object.keys(module.exports.get_config().types);
 };
 
-module.exports.get_type_config = function(type) {
+module.exports.get_type_config = function (type) {
     const config = {};
     if (module.exports.get_config().types[type]) {
         Object.assign(config, module.exports.get_config().types[type]);
@@ -51,7 +51,7 @@ function mergeDeep(target, ...sources) {
 
 global.__PERSPECTIVE_CONFIG__ = undefined;
 
-module.exports.override_config = function(config) {
+module.exports.override_config = function (config) {
     if (global.__PERSPECTIVE_CONFIG__) {
         console.warn("Config already initialized!");
     }
@@ -60,7 +60,10 @@ module.exports.override_config = function(config) {
 
 module.exports.get_config = function get_config() {
     if (!global.__PERSPECTIVE_CONFIG__) {
-        global.__PERSPECTIVE_CONFIG__ = mergeDeep(DEFAULT_CONFIG, global.__TEMPLATE_CONFIG__ || {});
+        global.__PERSPECTIVE_CONFIG__ = mergeDeep(
+            DEFAULT_CONFIG,
+            global.__TEMPLATE_CONFIG__ || {}
+        );
     }
     return global.__PERSPECTIVE_CONFIG__;
 };

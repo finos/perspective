@@ -19,9 +19,9 @@ describe("workspace", () => {
                 main: {
                     currentIndex: 0,
                     type: "tab-area",
-                    widgets: ["One"]
-                }
-            }
+                    widgets: ["One"],
+                },
+            },
         };
 
         const workspace = new PerspectiveWorkspace(document.body);
@@ -29,7 +29,12 @@ describe("workspace", () => {
 
         const widgets = toArray(workspace.dockpanel.widgets());
 
-        const expected = {table: "superstore", name: "One", master: false, linked: false};
+        const expected = {
+            table: "superstore",
+            name: "One",
+            master: false,
+            linked: false,
+        };
         expect(widgets.length).toBe(1);
         expect(await widgets[0].save()).toStrictEqual(expected);
     });
@@ -39,8 +44,8 @@ describe("workspace", () => {
         const config = {
             viewers,
             master: {
-                widgets: ["One"]
-            }
+                widgets: ["One"],
+            },
         };
 
         const workspace = new PerspectiveWorkspace(document.body);
@@ -48,25 +53,33 @@ describe("workspace", () => {
 
         const widgets = workspace.masterPanel.widgets;
 
-        const expected = {table: "superstore", name: "One", master: true, linked: false};
+        const expected = {
+            table: "superstore",
+            name: "One",
+            master: true,
+            linked: false,
+        };
         expect(widgets.length).toBe(1);
         expect(await widgets[0].save()).toStrictEqual(expected);
     });
 
     test("restores master to masterpanel and detail to dockpanel", async () => {
-        const viewers = {One: {table: "superstore", name: "One"}, Two: {table: "superstore", name: "Two"}};
+        const viewers = {
+            One: {table: "superstore", name: "One"},
+            Two: {table: "superstore", name: "Two"},
+        };
         const config = {
             viewers,
             master: {
-                widgets: ["One"]
+                widgets: ["One"],
             },
             detail: {
                 main: {
                     currentIndex: 0,
                     type: "tab-area",
-                    widgets: ["Two"]
-                }
-            }
+                    widgets: ["Two"],
+                },
+            },
         };
 
         const workspace = new PerspectiveWorkspace(document.body);
@@ -75,8 +88,18 @@ describe("workspace", () => {
         const masterWidgets = workspace.masterPanel.widgets;
         const detailWidgets = toArray(workspace.dockpanel.widgets());
 
-        const master = {table: "superstore", name: "One", master: true, linked: false};
-        const detail = {table: "superstore", name: "Two", master: false, linked: false};
+        const master = {
+            table: "superstore",
+            name: "One",
+            master: true,
+            linked: false,
+        };
+        const detail = {
+            table: "superstore",
+            name: "Two",
+            master: false,
+            linked: false,
+        };
 
         expect(masterWidgets.length).toBe(1);
         expect(await masterWidgets[0].save()).toStrictEqual(master);

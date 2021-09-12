@@ -53,7 +53,7 @@ export class WebSocketManager extends Server {
         ws.id = CLIENT_ID_GEN++;
 
         // Parse incoming messages
-        ws.on("message", msg => {
+        ws.on("message", (msg) => {
             ws.isAlive = true;
 
             if (msg === "ping") {
@@ -94,7 +94,7 @@ export class WebSocketManager extends Server {
                 msg.id = compoundId;
                 this.requests[msg.id] = {
                     ws,
-                    msg
+                    msg,
                 };
                 this.process(msg, ws.id);
             } catch (e) {
@@ -132,7 +132,13 @@ export class WebSocketManager extends Server {
             const binary_msg = transferable[0];
             msg.binary_length = binary_msg.byteLength;
             req.ws.send(JSON.stringify(msg));
-            this._post_chunked(req, binary_msg, 0, this.chunk_size, binary_msg.byteLength);
+            this._post_chunked(
+                req,
+                binary_msg,
+                0,
+                this.chunk_size,
+                binary_msg.byteLength
+            );
         } else {
             req.ws.send(JSON.stringify(msg));
         }

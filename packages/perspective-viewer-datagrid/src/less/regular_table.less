@@ -12,22 +12,28 @@
 @import (less) "./row-hover.less";
 @import (less) "./column-plugin.less";
 
-@positive: #338DCD; // @blue300
-@negative: #FF5942; // @red300
+@positive: #338dcd; // @blue300
+@negative: #ff5942; // @red300
 
 // Row Selection
 
-.psp-row-selected, :hover .psp-row-selected, :hover th.psp-tree-leaf.psp-row-selected, :hover th.psp-tree-label.psp-row-selected {
+.psp-row-selected,
+:hover .psp-row-selected,
+:hover th.psp-tree-leaf.psp-row-selected,
+:hover th.psp-tree-label.psp-row-selected {
     color: white !important;
-    background-color: #EA7319 !important;
-    border-color: #EA7319 !important;
+    background-color: #ea7319 !important;
+    border-color: #ea7319 !important;
 }
 
 .psp-row-selected.psp-tree-label:not(:hover):before {
     color: white;
 }
 
-.psp-row-subselected, :hover .psp-row-subselected, :hover th.psp-tree-leaf.psp-row-subselected, :hover th.psp-tree-label.psp-row-subselected  {
+.psp-row-subselected,
+:hover .psp-row-subselected,
+:hover th.psp-tree-leaf.psp-row-subselected,
+:hover th.psp-tree-label.psp-row-subselected {
     background: rgba(234, 115, 25, 0.2) !important;
 }
 
@@ -52,22 +58,22 @@ perspective-viewer.dragging regular-table {
 .psp-header-sort-desc:after {
     font-family: "Material Icons";
     font-size: 10px;
-    content: "arrow_downward"
+    content: "arrow_downward";
 }
 .psp-header-sort-asc:after {
     font-family: "Material Icons";
     font-size: 10px;
-    content: "arrow_upward"
+    content: "arrow_upward";
 }
 .psp-header-sort-col-desc:after {
     font-family: "Material Icons";
     font-size: 10px;
-    content: "arrow_back"
+    content: "arrow_back";
 }
 .psp-header-sort-col-asc:after {
     font-family: "Material Icons";
     font-size: 10px;
-    content: "arrow_forward"
+    content: "arrow_forward";
 }
 
 tbody th:last-of-type {
@@ -76,7 +82,12 @@ tbody th:last-of-type {
     text-overflow: ellipsis;
 }
 tbody th:empty {
-    background-image: linear-gradient(to right, transparent 9px, #eee 10px, transparent 11px);
+    background-image: linear-gradient(
+        to right,
+        transparent 9px,
+        #eee 10px,
+        transparent 11px
+    );
     background-repeat: no-repeat;
     min-width: 20px;
     max-width: 20px;
@@ -93,10 +104,10 @@ tbody th:empty {
     vertical-align: -1px;
 }
 .psp-tree-label-expand:before {
-    content: "add"
+    content: "add";
 }
 .psp-tree-label-collapse:before {
-    content: "remove"
+    content: "remove";
 }
 
 .psp-tree-label:hover:before {
@@ -138,7 +149,8 @@ regular-table table {
         font-weight: 400;
     }
 
-    td, th {
+    td,
+    th {
         border-color: #eaedef;
         height: 23px;
     }
@@ -147,7 +159,11 @@ regular-table table {
         border-bottom-width: 0px;
     }
 
-    td, th.psp-tree-label, th.psp-tree-label, th.psp-tree-leaf, tbody tr:first-child th {
+    td,
+    th.psp-tree-label,
+    th.psp-tree-label,
+    th.psp-tree-leaf,
+    tbody tr:first-child th {
         border-style: solid;
         border-width: 0px;
         border-top-width: 1px;

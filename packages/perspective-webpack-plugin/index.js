@@ -20,11 +20,17 @@ class PerspectiveWebpackPlugin {
                 inline: false,
                 inlineWasm: false,
                 inlineWorker: false,
-                wasmPath: path.dirname(require.resolve("@finos/perspective/package.json")),
-                viewerPath: path.dirname(require.resolve("@finos/perspective-viewer/package.json")),
-                workerPath: path.dirname(require.resolve("@finos/perspective/package.json")),
+                wasmPath: path.dirname(
+                    require.resolve("@finos/perspective/package.json")
+                ),
+                viewerPath: path.dirname(
+                    require.resolve("@finos/perspective-viewer/package.json")
+                ),
+                workerPath: path.dirname(
+                    require.resolve("@finos/perspective/package.json")
+                ),
                 wasmName: "[name].wasm",
-                workerName: "[name].js"
+                workerName: "[name].js",
             },
             options
         );
@@ -32,7 +38,8 @@ class PerspectiveWebpackPlugin {
 
     apply(compiler) {
         const compilerOptions = compiler.options;
-        const moduleOptions = compilerOptions.module || (compilerOptions.module = {});
+        const moduleOptions =
+            compilerOptions.module || (compilerOptions.module = {});
         const rules = [];
         rules.push({
             test: /perspective\.worker\.js$/,
@@ -41,9 +48,9 @@ class PerspectiveWebpackPlugin {
             use: {
                 loader: require.resolve("worker-loader"),
                 options: {
-                    filename: this.options.workerName
-                }
-            }
+                    filename: this.options.workerName,
+                },
+            },
         });
 
         rules.push({
@@ -53,9 +60,9 @@ class PerspectiveWebpackPlugin {
             use: {
                 loader: require.resolve("worker-loader"),
                 options: {
-                    filename: "editor.worker.js"
-                }
-            }
+                    filename: "editor.worker.js",
+                },
+            },
         });
 
         if (this.options.inline || this.options.inlineWorker) {
@@ -70,10 +77,10 @@ class PerspectiveWebpackPlugin {
                         loader: require.resolve("string-replace-loader"),
                         options: {
                             search: /webpackMode:\s*?"eager"/g,
-                            replace: ""
-                        }
-                    }
-                ]
+                            replace: "",
+                        },
+                    },
+                ],
             });
         }
 
@@ -85,16 +92,16 @@ class PerspectiveWebpackPlugin {
                 use: {
                     loader: require.resolve("file-loader"),
                     options: {
-                        name: this.options.wasmName
-                    }
-                }
+                        name: this.options.wasmName,
+                    },
+                },
             });
         } else {
             rules.push({
                 test: /\.wasm$/,
                 type: "javascript/auto",
                 include: [this.options.wasmPath, this.options.viewerPath],
-                loader: require.resolve("arraybuffer-loader")
+                loader: require.resolve("arraybuffer-loader"),
             });
         }
 
@@ -102,7 +109,10 @@ class PerspectiveWebpackPlugin {
             test: /\.css$/,
             include: /monaco\-editor/,
             use: [
-                {loader: require.resolve("css-loader"), options: {sourceMap: false}},
+                {
+                    loader: require.resolve("css-loader"),
+                    options: {sourceMap: false},
+                },
                 {
                     loader: require.resolve("postcss-loader"),
                     options: {
@@ -113,19 +123,19 @@ class PerspectiveWebpackPlugin {
                             plugins: [
                                 cssnano({
                                     preset: "lite",
-                                    discardComments: {removeAll: true}
-                                })
-                            ]
-                        }
-                    }
-                }
-            ]
+                                    discardComments: {removeAll: true},
+                                }),
+                            ],
+                        },
+                    },
+                },
+            ],
         });
 
         rules.push({
             test: /\.ttf$/,
             include: /monaco\-editor/,
-            use: [require.resolve("file-loader")]
+            use: [require.resolve("file-loader")],
         });
 
         const perspective_config = get_config();
@@ -138,14 +148,21 @@ class PerspectiveWebpackPlugin {
                         loader: require.resolve("string-replace-loader"),
                         options: {
                             search: "global.__TEMPLATE_CONFIG__",
-                            replace: JSON.stringify(perspective_config, null, 4)
-                        }
-                    }
-                ]
+                            replace: JSON.stringify(
+                                perspective_config,
+                                null,
+                                4
+                            ),
+                        },
+                    },
+                ],
             });
         }
 
-        const plugin_replace = new webpack.NormalModuleReplacementPlugin(/@finos\/perspective$/, "@finos/perspective/dist/esm/perspective.parallel.js");
+        const plugin_replace = new webpack.NormalModuleReplacementPlugin(
+            /@finos\/perspective$/,
+            "@finos/perspective/dist/esm/perspective.parallel.js"
+        );
         plugin_replace.apply(compiler);
 
         moduleOptions.rules = (moduleOptions.rules || []).concat(rules);

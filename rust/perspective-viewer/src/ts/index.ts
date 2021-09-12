@@ -35,7 +35,7 @@ import * as perspective from "@finos/perspective";
 // There is no way to provide a default rejection handler within a promise and
 // also not lock the await-er, so this module attaches a global handler to
 // filter out cancelled query messages.
-window.addEventListener("unhandledrejection", event => {
+window.addEventListener("unhandledrejection", (event) => {
     if (event.reason?.message === "View method cancelled") {
         event.preventDefault();
     }
@@ -56,7 +56,7 @@ const WASM_MODULE = import(
 export type PerspectiveViewerConfig = perspective.ViewConfig & {
     plugin?: string;
     settings?: boolean;
-    plugin_config?: object;
+    plugin_config?: any;
 };
 
 /**
@@ -120,7 +120,7 @@ export class PerspectiveViewerElement extends HTMLElement {
      * @param name The `name` of the custom element to register, as supplied
      * to the `customElements.define(name)` method.
      */
-    static async registerPlugin(name): Promise<void> {
+    static async registerPlugin(name: string): Promise<void> {
         const module = await WASM_MODULE;
         module.register_plugin(name);
     }
@@ -234,7 +234,9 @@ export class PerspectiveViewerElement extends HTMLElement {
      * await viewer.restore(token);
      * ```
      */
-    async restore(config: PerspectiveViewerConfig | string | ArrayBuffer): Promise<void> {
+    async restore(
+        config: PerspectiveViewerConfig | string | ArrayBuffer
+    ): Promise<void> {
         await this.load_wasm();
         await this.instance.js_restore(config);
     }
@@ -263,7 +265,9 @@ export class PerspectiveViewerElement extends HTMLElement {
     async save(format: "json"): Promise<PerspectiveViewerConfig>;
     async save(format: "arraybuffer"): Promise<ArrayBuffer>;
     async save(format: "string"): Promise<string>;
-    async save(format?: "json" | "arraybuffer" | "string"): Promise<PerspectiveViewerConfig | string | ArrayBuffer> {
+    async save(
+        format?: "json" | "arraybuffer" | "string"
+    ): Promise<PerspectiveViewerConfig | string | ArrayBuffer> {
         await this.load_wasm();
         const config = await this.instance.js_save(format);
         return config;
@@ -460,7 +464,7 @@ export class PerspectiveViewerElement extends HTMLElement {
      * active plugin.
      * @returns The active or requested plugin instance.
      */
-    async getPlugin(name): Promise<HTMLElement> {
+    async getPlugin(name?: string): Promise<HTMLElement> {
         await this.load_wasm();
         const plugin = await this.instance.js_get_plugin(name);
         return plugin;
@@ -485,7 +489,10 @@ export class PerspectiveViewerElement extends HTMLElement {
 }
 
 if (document.createElement("perspective-viewer").constructor === HTMLElement) {
-    window.customElements.define("perspective-viewer", PerspectiveViewerElement);
+    window.customElements.define(
+        "perspective-viewer",
+        PerspectiveViewerElement
+    );
 }
 
 class PerspectiveColumnStyleElement extends HTMLElement {
@@ -495,24 +502,41 @@ class PerspectiveColumnStyleElement extends HTMLElement {
         super();
     }
 
-    async open(target: HTMLElement, config: any, default_config: any): Promise<void> {
+    async open(
+        target: HTMLElement,
+        config: any,
+        default_config: any
+    ): Promise<void> {
         if (this.instance) {
             this.instance.reset(config, default_config);
         } else {
-            this.instance = new internal.PerspectiveColumnStyleElement(this, config, default_config);
+            this.instance = new internal.PerspectiveColumnStyleElement(
+                this,
+                config,
+                default_config
+            );
         }
 
         this.instance.open(target);
     }
 }
 
-if (document.createElement("perspective-column-style").constructor === HTMLElement) {
-    window.customElements.define("perspective-column-style", PerspectiveColumnStyleElement);
+if (
+    document.createElement("perspective-column-style").constructor ===
+    HTMLElement
+) {
+    window.customElements.define(
+        "perspective-column-style",
+        PerspectiveColumnStyleElement
+    );
 }
 
 type ReactPerspectiveViewerAttributes<T> = React.HTMLAttributes<T>;
 
-type JsxPerspectiveViewerElement = {class?: string} & React.DetailedHTMLProps<ReactPerspectiveViewerAttributes<PerspectiveViewerElement>, PerspectiveViewerElement>;
+type JsxPerspectiveViewerElement = {class?: string} & React.DetailedHTMLProps<
+    ReactPerspectiveViewerAttributes<PerspectiveViewerElement>,
+    PerspectiveViewerElement
+>;
 
 declare global {
     // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -523,6 +547,9 @@ declare global {
     }
 
     interface Document {
-        createElement(tagName: "perspective-viewer", options?: ElementCreationOptions): PerspectiveViewerElement;
+        createElement(
+            tagName: "perspective-viewer",
+            options?: ElementCreationOptions
+        ): PerspectiveViewerElement;
     }
 }

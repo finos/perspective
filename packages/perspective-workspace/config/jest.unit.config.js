@@ -1,6 +1,6 @@
 module.exports = {
     transform: {
-        ".js$": "@finos/perspective-test/src/js/transform.js"
+        ".js$": "@finos/perspective-test/src/js/transform.js",
     },
-    rootDir: "../test/js/unit/"
+    rootDir: "../test/js/unit/",
 };

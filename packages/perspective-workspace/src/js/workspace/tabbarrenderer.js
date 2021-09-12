@@ -12,7 +12,7 @@ import {TabBar} from "@lumino/widgets";
 
 export const TabBarItems = {
     Config: "config",
-    Label: "label"
+    Label: "label",
 };
 
 export const DEFAULT_TITLE = "[untitled]";
@@ -24,7 +24,12 @@ export class PerspectiveTabBarRenderer extends TabBar.Renderer {
     }
 
     renderLabel(data) {
-        return h.input({className: "p-TabBar-tabLabel", readonly: true, id: TabBarItems.Label, value: data.title.label || DEFAULT_TITLE});
+        return h.input({
+            className: "p-TabBar-tabLabel",
+            readonly: true,
+            id: TabBarItems.Label,
+            value: data.title.label || DEFAULT_TITLE,
+        });
     }
 
     renderTab(data) {
@@ -45,6 +50,9 @@ export class PerspectiveTabBarRenderer extends TabBar.Renderer {
     }
 
     renderConfigIcon() {
-        return h.div({className: "p-TabBar-tabConfigIcon", id: TabBarItems.Config});
+        return h.div({
+            className: "p-TabBar-tabConfigIcon",
+            id: TabBarItems.Config,
+        });
     }
 }

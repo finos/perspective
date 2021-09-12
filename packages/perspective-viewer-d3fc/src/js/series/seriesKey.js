@@ -8,8 +8,5 @@
  */
 
 export function groupFromKey(key) {
-    return key
-        .split("|")
-        .slice(0, -1)
-        .join("|");
+    return key.split("|").slice(0, -1).join("|");
 }

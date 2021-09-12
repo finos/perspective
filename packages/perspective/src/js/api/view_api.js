@@ -27,7 +27,7 @@ export function view(worker, table_name, config) {
                 cmd: "view",
                 view_name: this._name,
                 table_name: table_name,
-                config: config
+                config: config,
             },
             () => {
                 // Resolve the Promise with this function, which is a proxy
@@ -41,7 +41,10 @@ export function view(worker, table_name, config) {
             reject
         );
 
-        if (this._worker._initialized === true && !this._worker._features?.wait_for_response) {
+        if (
+            this._worker._initialized === true &&
+            !this._worker._features?.wait_for_response
+        ) {
             resolve(this);
         }
     });
@@ -99,8 +102,16 @@ view.prototype.col_to_js_typed_array = async_queue("col_to_js_typed_array");
 
 view.prototype.on_update = subscribe("on_update", "view_method", true);
 
-view.prototype.remove_update = unsubscribe("remove_update", "view_method", true);
+view.prototype.remove_update = unsubscribe(
+    "remove_update",
+    "view_method",
+    true
+);
 
 view.prototype.on_delete = subscribe("on_delete", "view_method", true);
 
-view.prototype.remove_delete = unsubscribe("remove_delete", "view_method", true);
+view.prototype.remove_delete = unsubscribe(
+    "remove_delete",
+    "view_method",
+    true
+);

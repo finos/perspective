@@ -51,16 +51,19 @@ class ConvertLinksToAnchors extends Transform {
     }
 }
 
-const inPaths = ["./dist/docs/README.md", "./dist/docs/classes/PerspectiveViewerElement.md"];
+const inPaths = [
+    "./dist/docs/README.md",
+    "./dist/docs/classes/PerspectiveViewerElement.md",
+];
 
 const outPath = "./README.md";
-const inputs = inPaths.map(x => fs.createReadStream(x));
+const inputs = inPaths.map((x) => fs.createReadStream(x));
 const output = fs.createWriteStream(outPath);
 
 concatStreams(inputs)
     .pipe(new AddEndOfLine())
     .pipe(new ConvertLinksToAnchors())
     .pipe(output)
-    .on("finish", function() {
+    .on("finish", function () {
         console.log("Done merging!");
     });

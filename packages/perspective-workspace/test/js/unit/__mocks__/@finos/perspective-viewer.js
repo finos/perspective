@@ -9,16 +9,18 @@
 
 const originalCreateElement = document.createElement;
 
-document.createElement = name => {
+document.createElement = (name) => {
     const element = originalCreateElement.call(document, name);
-    return name === "perspective-viewer" ? patchUnknownElement(element) : element;
+    return name === "perspective-viewer"
+        ? patchUnknownElement(element)
+        : element;
 };
 
-const patchUnknownElement = element => {
+const patchUnknownElement = (element) => {
     let config = {};
     element.load = jest.fn();
     element.save = async () => config;
-    element.restore = value => {
+    element.restore = (value) => {
         config = {...config, ...value};
         return Promise.resolve();
     };

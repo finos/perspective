@@ -14,7 +14,7 @@ const expressions_common = require("./common.js");
  * existing column/view semantics (pivots, aggregates, columns, sorts, filters)
  * continue to be functional on expressions.
  */
-module.exports = perspective => {
+module.exports = (perspective) => {
     const validate_delta = async (colname, delta, expected) => {
         const t = await perspective.table(delta.slice());
         const v = await t.view();
@@ -30,14 +30,14 @@ module.exports = perspective => {
                 const table = await perspective.table({
                     x: "integer",
                     y: "string",
-                    z: "boolean"
+                    z: "boolean",
                 });
 
                 const v1 = await table.view({
-                    expressions: [`// column \n"x" + 10`]
+                    expressions: [`// column \n"x" + 10`],
                 });
                 const v2 = await table.view({
-                    expressions: [`// column \n upper("y")`]
+                    expressions: [`// column \n upper("y")`],
                 });
 
                 let result = await v1.to_columns();
@@ -63,15 +63,15 @@ module.exports = perspective => {
                 const table = await perspective.table({
                     x: "integer",
                     y: "string",
-                    z: "boolean"
+                    z: "boolean",
                 });
 
                 const v1 = await table.view({
-                    expressions: [`// column \n"x" * 2`]
+                    expressions: [`// column \n"x" * 2`],
                 });
 
                 const v2 = await table.view({
-                    expressions: [`// column \n upper(concat("y", 'bcd'))`]
+                    expressions: [`// column \n upper(concat("y", 'bcd'))`],
                 });
 
                 let result = await v1.to_columns();
@@ -86,7 +86,7 @@ module.exports = perspective => {
                 for (let i = 1; i < 10; i++) {
                     table.update({
                         x: [i],
-                        y: [`${i}`]
+                        y: [`${i}`],
                     });
 
                     result = await v1.to_columns();
@@ -108,17 +108,17 @@ module.exports = perspective => {
                 const table = await perspective.table({
                     x: "integer",
                     y: "string",
-                    z: "boolean"
+                    z: "boolean",
                 });
 
                 const v1 = await table.view({
                     expressions: [`// column \n"x" * 2`],
-                    filter: [["column", ">", 5]]
+                    filter: [["column", ">", 5]],
                 });
 
                 const v2 = await table.view({
                     expressions: [`// column \n upper(concat("y", 'bcd'))`],
-                    filter: [["column", "contains", "A"]]
+                    filter: [["column", "contains", "A"]],
                 });
 
                 let result = await v1.to_columns();
@@ -133,7 +133,7 @@ module.exports = perspective => {
                 for (let i = 1; i < 10; i++) {
                     table.update({
                         x: [i],
-                        y: [`A${i}`]
+                        y: [`A${i}`],
                     });
 
                     result = await v1.to_columns();
@@ -159,17 +159,17 @@ module.exports = perspective => {
                 const table = await perspective.table({
                     x: "integer",
                     y: "string",
-                    z: "boolean"
+                    z: "boolean",
                 });
 
                 const v1 = await table.view({
                     expressions: [`// column \n"x" * 2`],
-                    sort: [["column", "desc"]]
+                    sort: [["column", "desc"]],
                 });
 
                 const v2 = await table.view({
                     expressions: [`// column \n upper(concat("y", 'bcd'))`],
-                    sort: [["column", "asc"]]
+                    sort: [["column", "asc"]],
                 });
 
                 let result = await v1.to_columns();
@@ -185,7 +185,7 @@ module.exports = perspective => {
                 for (let i = 5; i < 9; i++) {
                     table.update({
                         x: [i],
-                        y: [`${i}`]
+                        y: [`${i}`],
                     });
 
                     result = await v1.to_columns();
@@ -209,16 +209,16 @@ module.exports = perspective => {
                     {
                         x: "integer",
                         y: "string",
-                        z: "boolean"
+                        z: "boolean",
                     },
                     {index: "x"}
                 );
 
                 const v1 = await table.view({
-                    expressions: [`// column \n"x" * 2`]
+                    expressions: [`// column \n"x" * 2`],
                 });
                 const v2 = await table.view({
-                    expressions: [`// column \n upper("y")`]
+                    expressions: [`// column \n upper("y")`],
                 });
 
                 let result = await v1.to_columns();
@@ -229,14 +229,20 @@ module.exports = perspective => {
 
                 table.update({
                     x: [2, 4, 3, 10, null],
-                    y: ["X", "Y", "Z", "ABC", "DEF"]
+                    y: ["X", "Y", "Z", "ABC", "DEF"],
                 });
 
                 result = await v1.to_columns();
                 result2 = await v2.to_columns();
 
                 expect(result["column"]).toEqual([null, 4, 6, 8, 20]);
-                expect(result2["column"]).toEqual(["DEF", "X", "Z", "Y", "ABC"]);
+                expect(result2["column"]).toEqual([
+                    "DEF",
+                    "X",
+                    "Z",
+                    "Y",
+                    "ABC",
+                ]);
 
                 await v2.delete();
                 await v1.delete();
@@ -248,18 +254,18 @@ module.exports = perspective => {
                     {
                         x: "integer",
                         y: "string",
-                        z: "boolean"
+                        z: "boolean",
                     },
                     {index: "x"}
                 );
 
                 const v1 = await table.view({
                     expressions: [`// column \n"x" * 2`],
-                    filter: [["column", "==", 8]]
+                    filter: [["column", "==", 8]],
                 });
                 const v2 = await table.view({
                     expressions: [`// column \n upper("y")`],
-                    filter: [["column", "==", "Z"]]
+                    filter: [["column", "==", "Z"]],
                 });
 
                 let result = await v1.to_columns();
@@ -270,7 +276,7 @@ module.exports = perspective => {
 
                 table.update({
                     x: [2, 4, 3, 10, null],
-                    y: ["X", "Y", "Z", "ABC", "DEF"]
+                    y: ["X", "Y", "Z", "ABC", "DEF"],
                 });
 
                 result = await v1.to_columns();
@@ -289,18 +295,18 @@ module.exports = perspective => {
                     {
                         x: "integer",
                         y: "string",
-                        z: "boolean"
+                        z: "boolean",
                     },
                     {index: "x"}
                 );
 
                 const v1 = await table.view({
                     expressions: [`// column \n"x" * 2`],
-                    sort: [["column", "desc"]]
+                    sort: [["column", "desc"]],
                 });
                 const v2 = await table.view({
                     expressions: [`// column \n upper("y")`],
-                    sort: [["column", "desc"]]
+                    sort: [["column", "desc"]],
                 });
 
                 let result = await v1.to_columns();
@@ -311,18 +317,24 @@ module.exports = perspective => {
 
                 table.update({
                     x: [2, 4, 3, 10, null],
-                    y: ["X", "Y", "Z", "ABC", "DEF"]
+                    y: ["X", "Y", "Z", "ABC", "DEF"],
                 });
 
                 result = await v1.to_columns();
                 result2 = await v2.to_columns();
 
                 expect(result["column"]).toEqual([20, 8, 6, 4, null]);
-                expect(result2["column"]).toEqual(["Z", "Y", "X", "DEF", "ABC"]);
+                expect(result2["column"]).toEqual([
+                    "Z",
+                    "Y",
+                    "X",
+                    "DEF",
+                    "ABC",
+                ]);
 
                 table.update({
                     x: [2, 10],
-                    y: ["XYZ", "DEF"]
+                    y: ["XYZ", "DEF"],
                 });
 
                 result = await v1.to_columns();
@@ -330,7 +342,13 @@ module.exports = perspective => {
 
                 expect(result["column"]).toEqual([20, 8, 6, 4, null]);
                 expect(result2["x"]).toEqual([3, 4, 2, null, 10]);
-                expect(result2["column"]).toEqual(["Z", "Y", "XYZ", "DEF", "DEF"]);
+                expect(result2["column"]).toEqual([
+                    "Z",
+                    "Y",
+                    "XYZ",
+                    "DEF",
+                    "DEF",
+                ]);
 
                 await v2.delete();
                 await v1.delete();
@@ -342,16 +360,16 @@ module.exports = perspective => {
                     {
                         x: "integer",
                         y: "string",
-                        z: "boolean"
+                        z: "boolean",
                     },
                     {limit: 2}
                 );
 
                 const v1 = await table.view({
-                    expressions: [`// column \n"x" * 2`]
+                    expressions: [`// column \n"x" * 2`],
                 });
                 const v2 = await table.view({
-                    expressions: [`// column \n upper("y")`]
+                    expressions: [`// column \n upper("y")`],
                 });
 
                 let result = await v1.to_columns();
@@ -362,7 +380,7 @@ module.exports = perspective => {
 
                 table.update({
                     x: [2, 4, 3, 10, null],
-                    y: ["X", "Y", "Z", "ABC", "DEF"]
+                    y: ["X", "Y", "Z", "ABC", "DEF"],
                 });
 
                 result = await v1.to_columns();
@@ -382,10 +400,10 @@ module.exports = perspective => {
                 const table = await perspective.table(expressions_common.data);
 
                 const v1 = await table.view({
-                    expressions: [`// column \n"x" + 10`]
+                    expressions: [`// column \n"x" + 10`],
                 });
                 const v2 = await table.view({
-                    expressions: [`// column \n upper("y")`]
+                    expressions: [`// column \n upper("y")`],
                 });
 
                 let result = await v1.to_columns();
@@ -399,8 +417,19 @@ module.exports = perspective => {
                 result = await v1.to_columns();
                 result2 = await v2.to_columns();
 
-                expect(result["column"]).toEqual([11, 12, 13, 14, 11, 12, 13, 14]);
-                expect(result2["column"]).toEqual(["A", "B", "C", "D", "A", "B", "C", "D"]);
+                expect(result["column"]).toEqual([
+                    11, 12, 13, 14, 11, 12, 13, 14,
+                ]);
+                expect(result2["column"]).toEqual([
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                ]);
 
                 await v2.delete();
                 await v1.delete();
@@ -411,18 +440,23 @@ module.exports = perspective => {
                 const table = await perspective.table(expressions_common.data);
 
                 const v1 = await table.view({
-                    expressions: [`// column \n"x" * 2`]
+                    expressions: [`// column \n"x" * 2`],
                 });
 
                 const v2 = await table.view({
-                    expressions: [`// column \n upper(concat("y", 'bcd'))`]
+                    expressions: [`// column \n upper(concat("y", 'bcd'))`],
                 });
 
                 let result = await v1.to_columns();
                 let result2 = await v2.to_columns();
 
                 expect(result["column"]).toEqual([2, 4, 6, 8]);
-                expect(result2["column"]).toEqual(["ABCD", "BBCD", "CBCD", "DBCD"]);
+                expect(result2["column"]).toEqual([
+                    "ABCD",
+                    "BBCD",
+                    "CBCD",
+                    "DBCD",
+                ]);
 
                 const expected = [2, 4, 6, 8];
                 const expected2 = ["ABCD", "BBCD", "CBCD", "DBCD"];
@@ -430,7 +464,7 @@ module.exports = perspective => {
                 for (let i = 0; i < 10; i++) {
                     table.update({
                         x: [i + 4],
-                        y: [`${i + 4}`]
+                        y: [`${i + 4}`],
                     });
 
                     result = await v1.to_columns();
@@ -453,12 +487,12 @@ module.exports = perspective => {
 
                 const v1 = await table.view({
                     expressions: [`// column \n"x" * 2`],
-                    filter: [["column", ">", 5]]
+                    filter: [["column", ">", 5]],
                 });
 
                 const v2 = await table.view({
                     expressions: [`// column \n upper(concat("y", 'bcd'))`],
-                    filter: [["column", "contains", "A"]]
+                    filter: [["column", "contains", "A"]],
                 });
 
                 let result = await v1.to_columns();
@@ -472,7 +506,7 @@ module.exports = perspective => {
                 for (let i = 0; i < 10; i++) {
                     table.update({
                         x: [i + 4],
-                        y: [`${i + 4}`]
+                        y: [`${i + 4}`],
                     });
 
                     result = await v1.to_columns();
@@ -494,12 +528,12 @@ module.exports = perspective => {
 
                 const v1 = await table.view({
                     expressions: [`// column \n"x" * 2`],
-                    sort: [["column", "desc"]]
+                    sort: [["column", "desc"]],
                 });
 
                 const v2 = await table.view({
                     expressions: [`// column \n upper(concat("y", 'bcd'))`],
-                    sort: [["column", "asc"]]
+                    sort: [["column", "asc"]],
                 });
 
                 let result = await v1.to_columns();
@@ -515,7 +549,7 @@ module.exports = perspective => {
                 for (let i = 5; i < 9; i++) {
                     table.update({
                         x: [i],
-                        y: [`${i}`]
+                        y: [`${i}`],
                     });
 
                     result = await v1.to_columns();
@@ -535,13 +569,15 @@ module.exports = perspective => {
             });
 
             it("Partial update", async () => {
-                const table = await perspective.table(expressions_common.data, {index: "x"});
+                const table = await perspective.table(expressions_common.data, {
+                    index: "x",
+                });
 
                 const v1 = await table.view({
-                    expressions: [`// column \n"x" * 2`]
+                    expressions: [`// column \n"x" * 2`],
                 });
                 const v2 = await table.view({
-                    expressions: [`// column \n upper("y")`]
+                    expressions: [`// column \n upper("y")`],
                 });
 
                 let result = await v1.to_columns();
@@ -552,14 +588,21 @@ module.exports = perspective => {
 
                 table.update({
                     x: [2, 4, 3, 10, null],
-                    y: ["X", "Y", "Z", "ABC", "DEF"]
+                    y: ["X", "Y", "Z", "ABC", "DEF"],
                 });
 
                 result = await v1.to_columns();
                 result2 = await v2.to_columns();
 
                 expect(result["column"]).toEqual([null, 2, 4, 6, 8, 20]);
-                expect(result2["column"]).toEqual(["DEF", "A", "X", "Z", "Y", "ABC"]);
+                expect(result2["column"]).toEqual([
+                    "DEF",
+                    "A",
+                    "X",
+                    "Z",
+                    "Y",
+                    "ABC",
+                ]);
 
                 await v2.delete();
                 await v1.delete();
@@ -567,15 +610,17 @@ module.exports = perspective => {
             });
 
             it("Partial update, filtered", async () => {
-                const table = await perspective.table(expressions_common.data, {index: "x"});
+                const table = await perspective.table(expressions_common.data, {
+                    index: "x",
+                });
 
                 const v1 = await table.view({
                     expressions: [`// column \n"x" * 2`],
-                    filter: [["column", "==", 8]]
+                    filter: [["column", "==", 8]],
                 });
                 const v2 = await table.view({
                     expressions: [`// column \n upper("y")`],
-                    filter: [["column", "==", "B"]]
+                    filter: [["column", "==", "B"]],
                 });
 
                 let result = await v1.to_columns();
@@ -586,7 +631,7 @@ module.exports = perspective => {
 
                 table.update({
                     x: [2, 4, 3, 10, null],
-                    y: ["X", "Y", "Z", "ABC", "DEF"]
+                    y: ["X", "Y", "Z", "ABC", "DEF"],
                 });
 
                 result = await v1.to_columns();
@@ -603,15 +648,17 @@ module.exports = perspective => {
             });
 
             it("Partial update, sorted", async () => {
-                const table = await perspective.table(expressions_common.data, {index: "x"});
+                const table = await perspective.table(expressions_common.data, {
+                    index: "x",
+                });
 
                 const v1 = await table.view({
                     expressions: [`// column \n"x" * 2`],
-                    sort: [["column", "desc"]]
+                    sort: [["column", "desc"]],
                 });
                 const v2 = await table.view({
                     expressions: [`// column \n upper("y")`],
-                    sort: [["column", "desc"]]
+                    sort: [["column", "desc"]],
                 });
 
                 let result = await v1.to_columns();
@@ -622,18 +669,25 @@ module.exports = perspective => {
 
                 table.update({
                     x: [2, 4, 3, 10, null],
-                    y: ["X", "Y", "Z", "ABC", "DEF"]
+                    y: ["X", "Y", "Z", "ABC", "DEF"],
                 });
 
                 result = await v1.to_columns();
                 result2 = await v2.to_columns();
 
                 expect(result["column"]).toEqual([20, 8, 6, 4, 2, null]);
-                expect(result2["column"]).toEqual(["Z", "Y", "X", "DEF", "ABC", "A"]);
+                expect(result2["column"]).toEqual([
+                    "Z",
+                    "Y",
+                    "X",
+                    "DEF",
+                    "ABC",
+                    "A",
+                ]);
 
                 table.update({
                     x: [2, 10],
-                    y: ["XYZ", "DEF"]
+                    y: ["XYZ", "DEF"],
                 });
 
                 result = await v1.to_columns();
@@ -641,7 +695,14 @@ module.exports = perspective => {
 
                 expect(result["column"]).toEqual([20, 8, 6, 4, 2, null]);
                 expect(result2["x"]).toEqual([3, 4, 2, null, 10, 1]);
-                expect(result2["column"]).toEqual(["Z", "Y", "XYZ", "DEF", "DEF", "A"]);
+                expect(result2["column"]).toEqual([
+                    "Z",
+                    "Y",
+                    "XYZ",
+                    "DEF",
+                    "DEF",
+                    "A",
+                ]);
 
                 await v2.delete();
                 await v1.delete();
@@ -649,13 +710,15 @@ module.exports = perspective => {
             });
 
             it("Limit", async () => {
-                const table = await perspective.table(expressions_common.data, {limit: 2});
+                const table = await perspective.table(expressions_common.data, {
+                    limit: 2,
+                });
 
                 const v1 = await table.view({
-                    expressions: [`// column \n"x" * 2`]
+                    expressions: [`// column \n"x" * 2`],
                 });
                 const v2 = await table.view({
-                    expressions: [`// column \n upper("y")`]
+                    expressions: [`// column \n upper("y")`],
                 });
 
                 let result = await v1.to_columns();
@@ -666,7 +729,7 @@ module.exports = perspective => {
 
                 table.update({
                     x: [2, 4, 3, 10, null],
-                    y: ["X", "Y", "Z", "ABC", "DEF"]
+                    y: ["X", "Y", "Z", "ABC", "DEF"],
                 });
 
                 result = await v1.to_columns();
@@ -682,17 +745,17 @@ module.exports = perspective => {
         });
 
         describe("Deltas", () => {
-            it("Appends delta", async done => {
+            it("Appends delta", async (done) => {
                 expect.assertions(6);
 
                 const table = await perspective.table(expressions_common.data);
 
                 const v1 = await table.view({
-                    expressions: [`// column \n"x" + 10`]
+                    expressions: [`// column \n"x" + 10`],
                 });
 
                 const v2 = await table.view({
-                    expressions: [`// column \n upper("y")`]
+                    expressions: [`// column \n upper("y")`],
                 });
 
                 const result = await v1.to_columns();
@@ -702,19 +765,39 @@ module.exports = perspective => {
                 expect(result2["column"]).toEqual(["A", "B", "C", "D"]);
 
                 v1.on_update(
-                    async updated => {
-                        await validate_delta("column", updated.delta, [11, 12, 13, 14]);
+                    async (updated) => {
+                        await validate_delta(
+                            "column",
+                            updated.delta,
+                            [11, 12, 13, 14]
+                        );
                         const result = await v1.to_columns();
-                        expect(result["column"]).toEqual([11, 12, 13, 14, 11, 12, 13, 14]);
+                        expect(result["column"]).toEqual([
+                            11, 12, 13, 14, 11, 12, 13, 14,
+                        ]);
                     },
                     {mode: "row"}
                 );
 
                 v2.on_update(
-                    async updated => {
-                        await validate_delta("column", updated.delta, ["A", "B", "C", "D"]);
+                    async (updated) => {
+                        await validate_delta("column", updated.delta, [
+                            "A",
+                            "B",
+                            "C",
+                            "D",
+                        ]);
                         const result2 = await v2.to_columns();
-                        expect(result2["column"]).toEqual(["A", "B", "C", "D", "A", "B", "C", "D"]);
+                        expect(result2["column"]).toEqual([
+                            "A",
+                            "B",
+                            "C",
+                            "D",
+                            "A",
+                            "B",
+                            "C",
+                            "D",
+                        ]);
                         await v2.delete();
                         await v1.delete();
                         await table.delete();
@@ -726,17 +809,19 @@ module.exports = perspective => {
                 table.update(expressions_common.data);
             });
 
-            it("Partial update delta", async done => {
+            it("Partial update delta", async (done) => {
                 expect.assertions(6);
 
-                const table = await perspective.table(expressions_common.data, {index: "x"});
+                const table = await perspective.table(expressions_common.data, {
+                    index: "x",
+                });
 
                 const v1 = await table.view({
-                    expressions: [`// column \n"x" * 2`]
+                    expressions: [`// column \n"x" * 2`],
                 });
 
                 const v2 = await table.view({
-                    expressions: [`// column \n upper("y")`]
+                    expressions: [`// column \n upper("y")`],
                 });
 
                 const result = await v1.to_columns();
@@ -746,19 +831,45 @@ module.exports = perspective => {
                 expect(result2["column"]).toEqual(["A", "B", "C", "D"]);
 
                 v1.on_update(
-                    async updated => {
-                        await validate_delta("column", updated.delta, [null, 4, 6, 8, 20]);
+                    async (updated) => {
+                        await validate_delta("column", updated.delta, [
+                            null,
+                            4,
+                            6,
+                            8,
+                            20,
+                        ]);
                         const result = await v1.to_columns();
-                        expect(result["column"]).toEqual([null, 2, 4, 6, 8, 20]);
+                        expect(result["column"]).toEqual([
+                            null,
+                            2,
+                            4,
+                            6,
+                            8,
+                            20,
+                        ]);
                     },
                     {mode: "row"}
                 );
 
                 v2.on_update(
-                    async updated => {
-                        await validate_delta("column", updated.delta, ["DEF", "X", "Z", "Y", "ABC"]);
+                    async (updated) => {
+                        await validate_delta("column", updated.delta, [
+                            "DEF",
+                            "X",
+                            "Z",
+                            "Y",
+                            "ABC",
+                        ]);
                         const result = await v2.to_columns();
-                        expect(result["column"]).toEqual(["DEF", "A", "X", "Z", "Y", "ABC"]);
+                        expect(result["column"]).toEqual([
+                            "DEF",
+                            "A",
+                            "X",
+                            "Z",
+                            "Y",
+                            "ABC",
+                        ]);
                         await v2.delete();
                         await v1.delete();
                         await table.delete();
@@ -769,21 +880,23 @@ module.exports = perspective => {
 
                 table.update({
                     x: [2, 4, 3, 10, null],
-                    y: ["X", "Y", "Z", "ABC", "DEF"]
+                    y: ["X", "Y", "Z", "ABC", "DEF"],
                 });
             });
 
-            it("Partial update, sorted delta", async done => {
+            it("Partial update, sorted delta", async (done) => {
                 expect.assertions(6);
-                const table = await perspective.table(expressions_common.data, {index: "x"});
+                const table = await perspective.table(expressions_common.data, {
+                    index: "x",
+                });
 
                 const v1 = await table.view({
                     expressions: [`// column \n"x" * 2`],
-                    sort: [["column", "desc"]]
+                    sort: [["column", "desc"]],
                 });
                 const v2 = await table.view({
                     expressions: [`// column \n upper("y")`],
-                    sort: [["column", "desc"]]
+                    sort: [["column", "desc"]],
                 });
 
                 const result = await v1.to_columns();
@@ -793,19 +906,45 @@ module.exports = perspective => {
                 expect(result2["column"]).toEqual(["D", "C", "B", "A"]);
 
                 v1.on_update(
-                    async updated => {
-                        await validate_delta("column", updated.delta, [20, 8, 6, 4, null]);
+                    async (updated) => {
+                        await validate_delta("column", updated.delta, [
+                            20,
+                            8,
+                            6,
+                            4,
+                            null,
+                        ]);
                         const result = await v1.to_columns();
-                        expect(result["column"]).toEqual([20, 8, 6, 4, 2, null]);
+                        expect(result["column"]).toEqual([
+                            20,
+                            8,
+                            6,
+                            4,
+                            2,
+                            null,
+                        ]);
                     },
                     {mode: "row"}
                 );
 
                 v2.on_update(
-                    async updated => {
-                        await validate_delta("column", updated.delta, ["Z", "Y", "X", "DEF", "ABC"]);
+                    async (updated) => {
+                        await validate_delta("column", updated.delta, [
+                            "Z",
+                            "Y",
+                            "X",
+                            "DEF",
+                            "ABC",
+                        ]);
                         const result2 = await v2.to_columns();
-                        expect(result2["column"]).toEqual(["Z", "Y", "X", "DEF", "ABC", "A"]);
+                        expect(result2["column"]).toEqual([
+                            "Z",
+                            "Y",
+                            "X",
+                            "DEF",
+                            "ABC",
+                            "A",
+                        ]);
                         await v2.delete();
                         await v1.delete();
                         await table.delete();
@@ -816,7 +955,7 @@ module.exports = perspective => {
 
                 table.update({
                     x: [2, 4, 3, 10, null],
-                    y: ["X", "Y", "Z", "ABC", "DEF"]
+                    y: ["X", "Y", "Z", "ABC", "DEF"],
                 });
             });
         });
@@ -828,26 +967,32 @@ module.exports = perspective => {
                 const table = await perspective.table({
                     x: [1, 2, 3, 4],
                     y: ["a", "b", "c", "d"],
-                    z: [now, now, now, now]
+                    z: [now, now, now, now],
                 });
 
                 const v1 = await table.view({
                     columns: ["column", "column2"],
-                    expressions: [`// column \n"x" + 10`, `// column2 \n concat('a', 'b', 'c')`]
+                    expressions: [
+                        `// column \n"x" + 10`,
+                        `// column2 \n concat('a', 'b', 'c')`,
+                    ],
                 });
                 const v2 = await table.view({
                     columns: ["column2", "column"],
-                    expressions: [`// column \n upper("y")`, `// column2 \n bucket("z", 'Y')`]
+                    expressions: [
+                        `// column \n upper("y")`,
+                        `// column2 \n bucket("z", 'Y')`,
+                    ],
                 });
 
                 expect(await v1.expression_schema()).toEqual({
                     column: "float",
-                    column2: "string"
+                    column2: "string",
                 });
 
                 expect(await v2.expression_schema()).toEqual({
                     column: "string",
-                    column2: "date"
+                    column2: "date",
                 });
 
                 let result = await v1.to_columns();
@@ -880,26 +1025,32 @@ module.exports = perspective => {
                 const table = await perspective.table({
                     x: [1, 2, 3, 4],
                     y: ["a", "b", "c", "d"],
-                    z: [now, now, now, now]
+                    z: [now, now, now, now],
                 });
 
                 const v1 = await table.view({
                     columns: ["column", "column2"],
-                    expressions: [`// column \n"x" + 10`, `// column2 \n concat('a', 'b', 'c')`]
+                    expressions: [
+                        `// column \n"x" + 10`,
+                        `// column2 \n concat('a', 'b', 'c')`,
+                    ],
                 });
                 const v2 = await table.view({
                     columns: ["column2", "column"],
-                    expressions: [`// column \n upper("y")`, `// column2 \n bucket("z", 'Y')`]
+                    expressions: [
+                        `// column \n upper("y")`,
+                        `// column2 \n bucket("z", 'Y')`,
+                    ],
                 });
 
                 expect(await v1.expression_schema()).toEqual({
                     column: "float",
-                    column2: "string"
+                    column2: "string",
                 });
 
                 expect(await v2.expression_schema()).toEqual({
                     column: "string",
-                    column2: "date"
+                    column2: "date",
                 });
 
                 let result = await v1.to_columns();
@@ -913,7 +1064,7 @@ module.exports = perspective => {
                 await table.replace({
                     x: [100, 300],
                     y: ["x", "y"],
-                    z: [now, now]
+                    z: [now, now],
                 });
 
                 expect(await v1.num_rows()).toEqual(2);
@@ -941,28 +1092,34 @@ module.exports = perspective => {
                     {
                         x: [1, 2, 3, 4],
                         y: ["a", "b", "c", "d"],
-                        z: [now, now, now, now]
+                        z: [now, now, now, now],
                     },
                     {index: "x"}
                 );
 
                 const v1 = await table.view({
                     columns: ["column", "column2"],
-                    expressions: [`// column \n"x" + 10`, `// column2 \n concat('a', 'b', 'c')`]
+                    expressions: [
+                        `// column \n"x" + 10`,
+                        `// column2 \n concat('a', 'b', 'c')`,
+                    ],
                 });
                 const v2 = await table.view({
                     columns: ["column2", "column"],
-                    expressions: [`// column \n upper("y")`, `// column2 \n bucket("z", 'Y')`]
+                    expressions: [
+                        `// column \n upper("y")`,
+                        `// column2 \n bucket("z", 'Y')`,
+                    ],
                 });
 
                 expect(await v1.expression_schema()).toEqual({
                     column: "float",
-                    column2: "string"
+                    column2: "string",
                 });
 
                 expect(await v2.expression_schema()).toEqual({
                     column: "string",
-                    column2: "date"
+                    column2: "date",
                 });
 
                 let result = await v1.to_columns();
@@ -1000,26 +1157,32 @@ module.exports = perspective => {
             const table = await perspective.table({
                 x: [1, 2, 3, 4],
                 y: ["a", "b", "c", "d"],
-                z: [now, now, now, now]
+                z: [now, now, now, now],
             });
 
             const v1 = await table.view({
                 columns: ["column", "column2"],
-                expressions: [`// column \n"x" + 10`, `// column2 \n concat('a', 'b', 'c')`]
+                expressions: [
+                    `// column \n"x" + 10`,
+                    `// column2 \n concat('a', 'b', 'c')`,
+                ],
             });
             const v2 = await table.view({
                 columns: ["column2", "column"],
-                expressions: [`// column \n upper("y")`, `// column2 \n bucket("z", 'Y')`]
+                expressions: [
+                    `// column \n upper("y")`,
+                    `// column2 \n bucket("z", 'Y')`,
+                ],
             });
 
             expect(await v1.expression_schema()).toEqual({
                 column: "float",
-                column2: "string"
+                column2: "string",
             });
 
             expect(await v2.expression_schema()).toEqual({
                 column: "string",
-                column2: "date"
+                column2: "date",
             });
 
             const result = await v1.to_columns();
@@ -1039,10 +1202,10 @@ module.exports = perspective => {
             const table = await perspective.table(expressions_common.data);
 
             const v1 = await table.view({
-                expressions: [`// column \n"x" + 10`]
+                expressions: [`// column \n"x" + 10`],
             });
             const v2 = await table.view({
-                expressions: [`// column \n upper("y")`]
+                expressions: [`// column \n upper("y")`],
             });
 
             let result = await v1.to_columns();
@@ -1077,11 +1240,11 @@ module.exports = perspective => {
 
             const v1 = await table.view({
                 expressions: [`// column \n"x" + 10`],
-                filter: [["column", "==", 12]]
+                filter: [["column", "==", 12]],
             });
             const v2 = await table.view({
                 expressions: [`// column \n upper("y")`],
-                filter: [["column", "==", "D"]]
+                filter: [["column", "==", "D"]],
             });
 
             const result = await v1.to_columns();
@@ -1101,15 +1264,15 @@ module.exports = perspective => {
             const v1 = await table.view({
                 row_pivots: ["y"],
                 column_pivots: ["x"],
-                expressions: [`// column \n"x" + 10`]
+                expressions: [`// column \n"x" + 10`],
             });
             const v2 = await table.view({
                 row_pivots: ["x"],
                 column_pivots: ["y"],
                 expressions: [`// column \n upper("y")`],
                 aggregates: {
-                    column: "last"
-                }
+                    column: "last",
+                },
             });
 
             const result = await v1.to_columns();
@@ -1134,31 +1297,31 @@ module.exports = perspective => {
             const table = await perspective.table({
                 x: [10, 10, 20, 20],
                 y: ["A", "B", "C", "D"],
-                z: [1.5, 2.5, 3.5, 4.5]
+                z: [1.5, 2.5, 3.5, 4.5],
             });
 
             const v1 = await table.view({
                 row_pivots: ["x"],
                 expressions: [`// column \n"z" + 10`],
                 aggregates: {
-                    column: "avg"
-                }
+                    column: "avg",
+                },
             });
 
             const v2 = await table.view({
                 row_pivots: ["x"],
                 expressions: [`// column \n upper("y")`],
                 aggregates: {
-                    column: "last"
-                }
+                    column: "last",
+                },
             });
 
             const v3 = await table.view({
                 row_pivots: ["x"],
                 expressions: [`// column \n 2"z"`],
                 aggregates: {
-                    column: ["weighted mean", "z"]
-                }
+                    column: ["weighted mean", "z"],
+                },
             });
 
             const result = await v1.to_columns();
@@ -1179,7 +1342,7 @@ module.exports = perspective => {
             const table = await perspective.table({
                 x: [10, 10, 20, 20],
                 y: ["A", "B", "C", "D"],
-                z: [1.5, 2.5, 3.5, 4.5]
+                z: [1.5, 2.5, 3.5, 4.5],
             });
 
             const v1 = await table.view({
@@ -1187,8 +1350,8 @@ module.exports = perspective => {
                 column_pivots: ["y"],
                 expressions: [`// column \n"z" + 10`],
                 aggregates: {
-                    column: "avg"
-                }
+                    column: "avg",
+                },
             });
 
             const v2 = await table.view({
@@ -1196,8 +1359,8 @@ module.exports = perspective => {
                 column_pivots: ["y"],
                 expressions: [`// column \n upper("y")`],
                 aggregates: {
-                    column: "last"
-                }
+                    column: "last",
+                },
             });
 
             const v3 = await table.view({
@@ -1205,8 +1368,8 @@ module.exports = perspective => {
                 column_pivots: ["y"],
                 expressions: [`// column \n 2"z"`],
                 aggregates: {
-                    column: ["weighted mean", "z"]
-                }
+                    column: ["weighted mean", "z"],
+                },
             });
 
             const result = await v1.to_columns();
@@ -1230,7 +1393,7 @@ module.exports = perspective => {
                 "D|x": [20, null, 20],
                 "D|y": [1, null, 1],
                 "D|z": [4.5, null, 4.5],
-                "D|column": [14.5, null, 14.5]
+                "D|column": [14.5, null, 14.5],
             });
             expect(result2).toEqual({
                 __ROW_PATH__: [[], [10], [20]],
@@ -1249,7 +1412,7 @@ module.exports = perspective => {
                 "D|x": [20, null, 20],
                 "D|y": [1, null, 1],
                 "D|z": [4.5, null, 4.5],
-                "D|column": ["D", null, "D"]
+                "D|column": ["D", null, "D"],
             });
             expect(result3).toEqual({
                 __ROW_PATH__: [[], [10], [20]],
@@ -1268,7 +1431,7 @@ module.exports = perspective => {
                 "D|x": [20, null, 20],
                 "D|y": [1, null, 1],
                 "D|z": [4.5, null, 4.5],
-                "D|column": [9, null, 9]
+                "D|column": [9, null, 9],
             });
 
             await v3.delete();

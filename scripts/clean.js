@@ -43,15 +43,33 @@ try {
     }
 
     if (!process.env.PSP_PROJECT || args.indexOf("--deps") > -1) {
-        clean("cpp/perspective/dist", "cpp/perspective/build", "packages/perspective/build");
+        clean(
+            "cpp/perspective/dist",
+            "cpp/perspective/build",
+            "packages/perspective/build"
+        );
     }
 
-    let scope = process.env.PACKAGE && process.env.PACKAGE !== "" ? `${process.env.PACKAGE}` : "*";
+    let scope =
+        process.env.PACKAGE && process.env.PACKAGE !== ""
+            ? `${process.env.PACKAGE}`
+            : "*";
 
     if (!IS_SCREENSHOTS) {
-        if (!process.env.PACKAGE || minimatch("perspective", process.env.PACKAGE)) {
-            const files = ["CMakeFiles", "build", "cmake_install.cmake", "CMakeCache.txt", "compile_commands.json", "libpsp.a", "Makefile"];
-            clean(...files.map(x => `cpp/perspective/obj/${x}`));
+        if (
+            !process.env.PACKAGE ||
+            minimatch("perspective", process.env.PACKAGE)
+        ) {
+            const files = [
+                "CMakeFiles",
+                "build",
+                "cmake_install.cmake",
+                "CMakeCache.txt",
+                "compile_commands.json",
+                "libpsp.a",
+                "Makefile",
+            ];
+            clean(...files.map((x) => `cpp/perspective/obj/${x}`));
         }
 
         execute`lerna exec --scope="@finos/${scope}" -- yarn clean`;

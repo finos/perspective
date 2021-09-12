@@ -8,13 +8,13 @@ module.exports = {
                     node: "8",
                     ios: "12",
                     safari: "12",
-                    edge: "44"
+                    edge: "44",
                 },
                 modules: false,
                 useBuiltIns: "usage",
-                corejs: 3
-            }
-        ]
+                corejs: 3,
+            },
+        ],
     ],
     sourceType: "unambiguous",
     plugins: [
@@ -22,6 +22,6 @@ module.exports = {
         ["@babel/plugin-proposal-decorators", {legacy: true}],
         "transform-custom-element-classes",
         "@babel/plugin-proposal-optional-chaining",
-        "@babel/plugin-proposal-class-properties"
-    ]
+        "@babel/plugin-proposal-class-properties",
+    ],
 };

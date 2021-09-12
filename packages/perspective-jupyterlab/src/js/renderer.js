@@ -8,13 +8,20 @@
  */
 
 import {ActivityMonitor} from "@jupyterlab/coreutils";
-import {ILayoutRestorer, JupyterFrontEnd, JupyterFrontEndPlugin} from "@jupyterlab/application";
-import {IThemeManager, WidgetTracker, Dialog, showDialog} from "@jupyterlab/apputils";
-import {ABCWidgetFactory, DocumentRegistry, IDocumentWidget, DocumentWidget} from "@jupyterlab/docregistry";
+import {ILayoutRestorer} from "@jupyterlab/application";
+import {
+    IThemeManager,
+    WidgetTracker,
+    Dialog,
+    showDialog,
+} from "@jupyterlab/apputils";
+
+import {ABCWidgetFactory, DocumentWidget} from "@jupyterlab/docregistry";
 import {PerspectiveWidget} from "./psp_widget";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const perspective = require("@finos/perspective").default;
+// const perspective = require("@finos/perspective").default;
+import perspective from "@finos/perspective";
 
 /**
  * The name of the factories that creates widgets.
@@ -22,42 +29,48 @@ const perspective = require("@finos/perspective").default;
 const FACTORY_CSV = "CSVPerspective";
 const FACTORY_JSON = "JSONPerspective";
 const FACTORY_ARROW = "ArrowPerspective";
-
 const RENDER_TIMEOUT = 1000;
 
-type IPerspectiveDocumentType = "csv" | "json" | "arrow";
-
 // create here to reuse for exception handling
-const baddialog = (): void => {
+const baddialog = () => {
     showDialog({
         body: "Perspective could not render the data",
-        buttons: [Dialog.okButton({label: "Dismiss"})],
+        buttons: [
+            Dialog.okButton({
+                label: "Dismiss",
+            }),
+        ],
         focusNodeSelector: "input",
-        title: "Error"
+        title: "Error",
     });
 };
 
 const WORKER = perspective.worker();
+export class PerspectiveDocumentWidget extends DocumentWidget {
+    constructor(options, type = "csv") {
+        super({
+            content: new PerspectiveWidget("Perspective", {
+                editable: true,
+            }),
+            context: options.context,
+            reveal: options.reveal,
+        });
 
-export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget> {
-    constructor(options: DocumentWidget.IOptionsOptionalContent<PerspectiveWidget>, type: IPerspectiveDocumentType = "csv") {
-        super({content: new PerspectiveWidget("Perspective", {editable: true}), context: options.context, reveal: options.reveal});
-
+        this._monitor = null;
         this._psp = this.content;
         this._type = type;
         this._context = options.context;
-
         this._context.ready.then(() => {
             this._update();
             this._monitor = new ActivityMonitor({
                 signal: this.context.model.contentChanged,
-                timeout: RENDER_TIMEOUT
+                timeout: RENDER_TIMEOUT,
             });
             this._monitor.activityStopped.connect(this._update, this);
         });
     }
 
-    private async _update(): Promise<void> {
+    async _update() {
         try {
             let data;
             if (this._type === "csv") {
@@ -65,12 +78,15 @@ export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget>
                 data = this._context.model.toString();
             } else if (this._type === "arrow") {
                 // load arrow directly
-                data = Uint8Array.from(atob(this._context.model.toString()), c => c.charCodeAt(0)).buffer;
+                data = Uint8Array.from(
+                    atob(this._context.model.toString()),
+                    (c) => c.charCodeAt(0)
+                ).buffer;
             } else if (this._type === "json") {
                 data = this._context.model.toJSON();
                 if (Array.isArray(data) && data.length > 0) {
                     // already is records form, load directly
-                    data = data as Array<object>;
+                    data = data;
                 } else {
                     // Column-oriented or single records JSON
                     // don't handle for now, just need to implement
@@ -82,7 +98,6 @@ export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget>
                 // don't handle other mimetypes for now
                 throw "Not handled";
             }
-
             try {
                 const table = await this._psp.viewer.getTable();
                 table.replace(data);
@@ -98,21 +113,29 @@ export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget>
                 const view = await table.view();
                 view.on_update(async () => {
                     if (this._type === "csv") {
-                        const result: string = await view.to_csv();
+                        const result = await view.to_csv();
                         this.context.model.fromString(result);
                         this.context.save();
                     } else if (this._type === "arrow") {
-                        const result: ArrayBuffer = await view.to_arrow();
-                        const resultAsB64 = btoa(new Uint8Array(result).reduce((acc, i) => (acc += String.fromCharCode.apply(null, [i])), ""));
+                        const result = await view.to_arrow();
+                        const resultAsB64 = btoa(
+                            new Uint8Array(result).reduce(
+                                (acc, i) =>
+                                    (acc += String.fromCharCode.apply(null, [
+                                        i,
+                                    ])),
+                                ""
+                            )
+                        );
                         this.context.model.fromString(resultAsB64);
                         this.context.save();
                     } else if (this._type === "json") {
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        const result: any = await view.to_json();
+                        const result = await view.to_json();
                         this.context.model.fromJSON(result);
                         this.context.save();
                     }
-                });               
+                });
             }
         } catch (e) {
             baddialog();
@@ -120,10 +143,11 @@ export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget>
         }
 
         // pickup theme from env
-        this._psp.dark = document.body.getAttribute("data-jp-theme-light") === "false";
+        this._psp.dark =
+            document.body.getAttribute("data-jp-theme-light") === "false";
     }
 
-    dispose(): void {
+    dispose() {
         if (this._monitor) {
             this._monitor.dispose();
         }
@@ -131,59 +155,70 @@ export class PerspectiveDocumentWidget extends DocumentWidget<PerspectiveWidget>
         super.dispose();
     }
 
-    public get psp(): PerspectiveWidget {
+    get psp() {
         return this._psp;
     }
-
-    private _type: IPerspectiveDocumentType;
-    private _context: DocumentRegistry.Context;
-    private _psp: PerspectiveWidget;
-    private _monitor: ActivityMonitor<DocumentRegistry.IModel, void> | null = null;
 }
 
 /**
  * A widget factory for CSV widgets.
  */
-export class PerspectiveCSVFactory extends ABCWidgetFactory<IDocumentWidget<PerspectiveWidget>> {
-    protected createNewWidget(context: DocumentRegistry.Context): IDocumentWidget<PerspectiveWidget> {
-        return new PerspectiveDocumentWidget({context}, "csv");
+export class PerspectiveCSVFactory extends ABCWidgetFactory {
+    createNewWidget(context) {
+        return new PerspectiveDocumentWidget(
+            {
+                context,
+            },
+            "csv"
+        );
     }
 }
 
 /**
  * A widget factory for JSON widgets.
  */
-export class PerspectiveJSONFactory extends ABCWidgetFactory<IDocumentWidget<PerspectiveWidget>> {
-    protected createNewWidget(context: DocumentRegistry.Context): IDocumentWidget<PerspectiveWidget> {
-        return new PerspectiveDocumentWidget({context}, "json");
+export class PerspectiveJSONFactory extends ABCWidgetFactory {
+    createNewWidget(context) {
+        return new PerspectiveDocumentWidget(
+            {
+                context,
+            },
+            "json"
+        );
     }
 }
 
 /**
  * A widget factory for arrow widgets.
  */
-export class PerspectiveArrowFactory extends ABCWidgetFactory<IDocumentWidget<PerspectiveWidget>> {
-    protected createNewWidget(context: DocumentRegistry.Context): IDocumentWidget<PerspectiveWidget> {
-        return new PerspectiveDocumentWidget({context}, "arrow");
+export class PerspectiveArrowFactory extends ABCWidgetFactory {
+    createNewWidget(context) {
+        return new PerspectiveDocumentWidget(
+            {
+                context,
+            },
+            "arrow"
+        );
     }
 }
 
 /**
  * Activate cssviewer extension for CSV files
  */
-function activate(app: JupyterFrontEnd, restorer: ILayoutRestorer | null, themeManager: IThemeManager | null): void {
+
+function activate(app, restorer, themeManager) {
     const factorycsv = new PerspectiveCSVFactory({
         name: FACTORY_CSV,
         fileTypes: ["csv"],
         defaultFor: ["csv"],
-        readOnly: true
+        readOnly: true,
     });
 
     const factoryjson = new PerspectiveJSONFactory({
         name: FACTORY_JSON,
         fileTypes: ["json", "jsonl"],
         defaultFor: ["json", "jsonl"],
-        readOnly: true
+        readOnly: true,
     });
 
     try {
@@ -193,9 +228,9 @@ function activate(app: JupyterFrontEnd, restorer: ILayoutRestorer | null, themeM
             extensions: [".arrow"],
             mimeTypes: ["application/octet-stream"],
             contentType: "file",
-            fileFormat: "base64"
+            fileFormat: "base64",
         });
-    } catch {
+    } catch (_a) {
         // do nothing
     }
 
@@ -204,50 +239,57 @@ function activate(app: JupyterFrontEnd, restorer: ILayoutRestorer | null, themeM
         fileTypes: ["arrow"],
         defaultFor: ["arrow"],
         readOnly: true,
-        modelName: "base64"
+        modelName: "base64",
     });
 
-    const trackercsv = new WidgetTracker<IDocumentWidget<PerspectiveWidget>>({
-        namespace: "csvperspective"
+    const trackercsv = new WidgetTracker({
+        namespace: "csvperspective",
     });
 
-    const trackerjson = new WidgetTracker<IDocumentWidget<PerspectiveWidget>>({
-        namespace: "jsonperspective"
+    const trackerjson = new WidgetTracker({
+        namespace: "jsonperspective",
     });
 
-    const trackerarrow = new WidgetTracker<IDocumentWidget<PerspectiveWidget>>({
-        namespace: "arrowperspective"
+    const trackerarrow = new WidgetTracker({
+        namespace: "arrowperspective",
     });
 
     if (restorer) {
         // Handle state restoration.
         void restorer.restore(trackercsv, {
             command: "docmanager:open",
-            args: widget => ({path: widget.context.path, factory: FACTORY_CSV}),
-            name: widget => widget.context.path
+            args: (widget) => ({
+                path: widget.context.path,
+                factory: FACTORY_CSV,
+            }),
+            name: (widget) => widget.context.path,
         });
 
         void restorer.restore(trackerjson, {
             command: "docmanager:open",
-            args: widget => ({path: widget.context.path, factory: FACTORY_JSON}),
-            name: widget => widget.context.path
+            args: (widget) => ({
+                path: widget.context.path,
+                factory: FACTORY_JSON,
+            }),
+            name: (widget) => widget.context.path,
         });
 
         void restorer.restore(trackerarrow, {
             command: "docmanager:open",
-            args: widget => ({path: widget.context.path, factory: FACTORY_ARROW}),
-            name: widget => widget.context.path
+            args: (widget) => ({
+                path: widget.context.path,
+                factory: FACTORY_ARROW,
+            }),
+            name: (widget) => widget.context.path,
         });
     }
 
     app.docRegistry.addWidgetFactory(factorycsv);
     app.docRegistry.addWidgetFactory(factoryjson);
     app.docRegistry.addWidgetFactory(factoryarrow);
-
     const ftcsv = app.docRegistry.getFileType("csv");
     const ftjson = app.docRegistry.getFileType("json");
     const ftarrow = app.docRegistry.getFileType("arrow");
-
     factorycsv.widgetCreated.connect((sender, widget) => {
         // Track the widget.
         void trackercsv.add(widget);
@@ -294,15 +336,21 @@ function activate(app: JupyterFrontEnd, restorer: ILayoutRestorer | null, themeM
     });
 
     // Keep the themes up-to-date.
-    const updateThemes = (): void => {
-        const isLight = themeManager && themeManager.theme ? themeManager.isLight(themeManager.theme) : true;
-        trackercsv.forEach((pspDocWidget: PerspectiveDocumentWidget) => {
+    const updateThemes = () => {
+        const isLight =
+            themeManager && themeManager.theme
+                ? themeManager.isLight(themeManager.theme)
+                : true;
+
+        trackercsv.forEach((pspDocWidget) => {
             pspDocWidget.psp.dark = !isLight;
         });
-        trackerjson.forEach((pspDocWidget: PerspectiveDocumentWidget) => {
+
+        trackerjson.forEach((pspDocWidget) => {
             pspDocWidget.psp.dark = !isLight;
         });
-        trackerarrow.forEach((pspDocWidget: PerspectiveDocumentWidget) => {
+
+        trackerarrow.forEach((pspDocWidget) => {
             pspDocWidget.psp.dark = !isLight;
         });
     };
@@ -315,10 +363,10 @@ function activate(app: JupyterFrontEnd, restorer: ILayoutRestorer | null, themeM
 /**
  * The perspective extension for files
  */
-export const perspectiveRenderers: JupyterFrontEndPlugin<void> = {
+export const perspectiveRenderers = {
     activate: activate,
     id: "@finos/perspective-jupyterlab:renderers",
     requires: [],
     optional: [ILayoutRestorer, IThemeManager],
-    autoStart: true
+    autoStart: true,
 };
