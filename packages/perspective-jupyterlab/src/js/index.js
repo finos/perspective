@@ -15,12 +15,10 @@ export * from "./widget";
 
 /* css */
 import "!!style-loader!css-loader!less-loader!../less/index.less";
-
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
-
-import {perspectiveRenderers} from "./renderer";
-import {PerspectiveJupyterPlugin} from "./plugin";
+import { perspectiveRenderers } from "./renderer";
+import { PerspectiveJupyterPlugin } from "./plugin";
 
 /**
  * Export the renderer as default.

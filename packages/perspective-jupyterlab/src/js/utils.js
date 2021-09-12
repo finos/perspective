@@ -7,7 +7,7 @@
  *
  */
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const pkg_json = require("../../package.json");
-
-export const PERSPECTIVE_VERSION = pkg_json.version;
+export const MIME_TYPE = "application/psp+json";
+export const PSP_CLASS = "PSPViewer";
+export const PSP_CONTAINER_CLASS = "PSPContainer";
+export const PSP_CONTAINER_CLASS_DARK = "PSPContainer-dark";

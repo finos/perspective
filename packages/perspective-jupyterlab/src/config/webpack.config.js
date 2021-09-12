@@ -13,7 +13,7 @@ const PerspectivePlugin = require("@finos/perspective-webpack-plugin");
 module.exports = {
     mode: process.env.PSP_NO_MINIFY || process.env.PSP_DEBUG ? "development" : process.env.NODE_ENV || "production",
     entry: {
-        index: "./src/ts/psp_widget.ts"
+        index: "./src/js/psp_widget.js",
     },
     resolve: {
         extensions: [".ts", ".js"],
@@ -50,12 +50,7 @@ module.exports = {
                     options: {}
                 }
             },
-            {
-                test: /\.ts$/,
-                exclude: /node_modules/,
-                loader: "ts-loader"
-            }
-        ]
+        ],
     },
     experiments: {
         syncWebAssembly: true
