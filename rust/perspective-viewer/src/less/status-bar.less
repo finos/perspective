@@ -18,7 +18,7 @@
             box-shadow: 8px 0px 0px -7px var(--pv-divider--color, #ccc);
             display: flex;
             align-items: center;
-        
+
             &:nth-child(2) {
                 flex: 1;
             }
@@ -70,7 +70,9 @@
                 content: "circle";
             }
 
-            &.connected, &.error, &.initializing {
+            &.connected,
+            &.error,
+            &.initializing {
                 opacity: 1;
             }
 
@@ -133,41 +135,37 @@
 
                 min-width: 75px;
                 cursor: pointer;
-                background-color: rgba(0,0,0,0.05);
+                background-color: rgba(0, 0, 0, 0.05);
                 transition: none;
             }
         }
     }
 }
 
-:host-context(:host-context([updating])) {
-    #status_bar {
-        span#status {
-            animation: pulse 2s infinite;
-        }
-    }
+#status_bar.updating span#status {
+    animation: pulse 2s infinite;
 }
 
 @keyframes pulse {
-	0% {
-		opacity: 1;
-	}
+    0% {
+        opacity: 1;
+    }
 
-	50% {
-		opacity: 0.5;
-	}
+    50% {
+        opacity: 0.5;
+    }
 
-	100% {
-		opacity: 1;
-	}
+    100% {
+        opacity: 1;
+    }
 }
 
 @keyframes twinkle {
-	0% {
-		filter: saturate(4);
-	}
+    0% {
+        filter: saturate(4);
+    }
 
-	100% {
-		filter: saturate(1);
-	}
+    100% {
+        filter: saturate(1);
+    }
 }
