@@ -54,6 +54,7 @@ class ConvertLinksToAnchors extends Transform {
 const inPaths = [
     "./dist/docs/README.md",
     "./dist/docs/classes/PerspectiveViewerElement.md",
+    "./dist/docs/interfaces/IPerspectiveViewerPlugin.md",
 ];
 
 const outPath = "./README.md";

@@ -217,14 +217,7 @@ impl Component for ActiveColumn {
                 }
             }
             ((label, Some(name)), Some(col_type)) => {
-                let min_cols = self
-                    .props
-                    .renderer
-                    .get_active_plugin()
-                    .unwrap()
-                    .min_config_columns()
-                    .unwrap_or(0);
-
+                let min_cols = self.props.renderer.metadata().min.unwrap_or(0);
                 let remove_column = if self.props.idx < min_cols {
                     None
                 } else {

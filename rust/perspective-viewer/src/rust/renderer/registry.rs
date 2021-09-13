@@ -6,7 +6,6 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::js::plugin::register_default_plugin_web_component;
 use crate::js::plugin::*;
 
 use std::cell::RefCell;
@@ -108,10 +107,9 @@ impl PluginRegistry for LocalKey<Rc<RefCell<Vec<PluginRecord>>>> {
 fn register_default() {
     PLUGIN_REGISTRY.with(|plugins| {
         if plugins.borrow().len() == 0 {
-            register_default_plugin_web_component().unwrap();
             plugins.borrow_mut().push(PluginRecord {
                 name: "Debug".to_owned(),
-                tag_name: "perspective-viewer-debug".to_owned(),
+                tag_name: "perspective-viewer-plugin".to_owned(),
             })
         }
     })

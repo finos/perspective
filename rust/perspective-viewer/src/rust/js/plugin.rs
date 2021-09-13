@@ -14,71 +14,9 @@ use wasm_bindgen::prelude::*;
 use super::perspective::JsPerspectiveView;
 
 /// Perspective FFI
-#[wasm_bindgen(inline_js = "
-
-    class DebugPlugin extends HTMLElement {
-        constructor() {
-            super();
-        }
-
-        get name() {
-            return 'Debug';
-        }
-
-        get select_mode() {
-            return 'select';
-        }
-
-        get min_config_columns() {
-            return undefined;
-        }
-
-        get config_column_names() {
-            return undefined;
-        }
-
-        update(...args) {
-            return this.draw(...args);
-        }
-
-        async draw(view) {
-            this.style.backgroundColor = '#fff';
-            let perspective_viewer = this.parentElement;
-            const csv = await view.to_csv({config: {delimiter: '|'}});
-            const css = `margin:0;overflow:scroll;position:absolute;width:100%;height:100%`;
-            this.innerHTML = `<pre style='${css}'>${csv}</pre>`;
-        }
-
-        async clear() {
-            this.innerHtml = '';
-        }
-
-        async resize() {}
-
-        async restyle() {}
-
-        save() {}
-
-        restore() {}
-
-        delete() {}
-    }
-
-    export function register_default_plugin_web_component() {
-        if (!window.__test_plugin__) {
-            window.__test_plugin__ = true;
-            customElements.define('perspective-viewer-debug', DebugPlugin);
-        }
-    }
-        
-
-")]
+#[wasm_bindgen]
 #[rustfmt::skip]
 extern "C" {
-
-    #[wasm_bindgen(js_name = "register_default_plugin_web_component", catch)]
-    pub fn register_default_plugin_web_component() -> Result<(), JsValue>;
-
     #[derive(Clone)]
     pub type JsPerspectiveViewerPlugin;
 

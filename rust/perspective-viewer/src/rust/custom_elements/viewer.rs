@@ -43,7 +43,7 @@ pub struct PerspectiveViewerElement {
     root: Rc<AppHandle<PerspectiveViewer>>,
     session: Session,
     renderer: Renderer,
-    subscriptions: Rc<[Subscription; 3]>,
+    subscriptions: Rc<[Subscription; 4]>,
     expression_editor: Rc<RefCell<Option<ExpressionEditorElement>>>,
     config: Rc<RefCell<ViewerConfig>>,
 }
@@ -90,6 +90,11 @@ impl PerspectiveViewerElement {
             move |plugin| dispatch_plugin_changed(&elem, &plugin)
         });
 
+        let view_sub = session.on_view_created.add_listener({
+            clone!(elem, session);
+            move |_| dispatch_config_update(&elem, &session)
+        });
+
         let limit_sub = {
             let callback = root.callback(|x| Msg::RenderLimits(Some(x)));
             renderer.on_limits_changed.add_listener(callback)
@@ -101,7 +106,7 @@ impl PerspectiveViewerElement {
             session,
             renderer,
             expression_editor: Rc::new(RefCell::new(None)),
-            subscriptions: Rc::new([plugin_sub, update_sub, limit_sub]),
+            subscriptions: Rc::new([plugin_sub, update_sub, limit_sub, view_sub]),
             config,
         }
     }
@@ -412,9 +417,22 @@ fn dispatch_plugin_changed(elem: &HtmlElement, plugin: &JsPerspectiveViewerPlugi
     let mut event_init = web_sys::CustomEventInit::new();
     event_init.detail(plugin);
     let event = web_sys::CustomEvent::new_with_event_init_dict(
-        "-perspective-plugin-changed",
+        "perspective-plugin-update",
         &event_init,
     );
 
     elem.dispatch_event(&event.unwrap()).unwrap();
 }
+
+fn dispatch_config_update(elem: &HtmlElement, session: &Session) {
+    let mut event_init = web_sys::CustomEventInit::new();
+    let config = JsValue::from_serde(&session.get_view_config()).unwrap();
+    event_init.detail(&config);
+    let event = web_sys::CustomEvent::new_with_event_init_dict(
+        "perspective-config-update",
+        &event_init,
+    );
+
+    elem.dispatch_event(&event.unwrap()).unwrap();
+}
+

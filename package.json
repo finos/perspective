@@ -133,7 +133,7 @@
         "start": "lerna run start --stream --scope",
         "precommit": "npm-run-all lint_js lint_python",
         "lint_js": "npm-run-all lint:*",
-        "lint:eslint": "eslint \"scripts/*.js\" \"rust/**/*.ts\" \"rust/**/*.js\" \"packages/**/*.js\" \"cpp/**/*.js\"",
+        "lint:eslint": "eslint \"scripts/*.js\" \"rust/**/*.ts\" \"rust/**/*.js\" \"packages/**/*.js\" \"packages/**/*.ts\" \"cpp/**/*.js\"",
         "lint_python": "node scripts/lint_python.js",
         "fix:es": "npm run lint:eslint -- --fix",
         "fix:md": "prettier docs/md/*.md --prose-wrap=always --write",
