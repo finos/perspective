@@ -410,7 +410,7 @@ function _format(parts, val, plugins = {}, use_table_schema = false) {
             "style",
             `width:${(a * 100).toFixed(
                 2
-            )}%;position:absolute;${anchor}:0;height:80%;top:10%;`
+            )}%;position:absolute;${anchor}:0;height:80%;top:10%;pointer-events:none;`
         );
         return div;
     } else {

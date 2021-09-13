@@ -1,8 +1,5 @@
 {
-    "sizes": [
-        0.350418410041841,
-        0.649581589958159
-    ],
+    "sizes": [0.350418410041841, 0.649581589958159],
     "detail": {
         "main": {
             "type": "split-area",
@@ -18,65 +15,42 @@
                 },
                 {
                     "type": "tab-area",
-                    "widgets": [
-                        "PERSPECTIVE_GENERATED_ID_1"
-                    ],
+                    "widgets": ["PERSPECTIVE_GENERATED_ID_1"],
                     "currentIndex": 0
                 }
             ],
-            "sizes": [
-                0.5,
-                0.5
-            ]
+            "sizes": [0.5, 0.5]
         }
     },
     "mode": "globalFilters",
     "master": {
-        "widgets": [
-            "PERSPECTIVE_GENERATED_ID_2"
-        ],
-        "sizes": [
-            1
-        ]
+        "widgets": ["PERSPECTIVE_GENERATED_ID_2"],
+        "sizes": [1]
     },
     "viewers": {
         "PERSPECTIVE_GENERATED_ID_2": {
             "selectable": true,
             "plugin": "Datagrid",
-            "row-pivots": [
-                "Distributor"
-            ],
+            "row_pivots": ["Distributor"],
             "aggregates": {
                 "IMDB Rating": "avg"
             },
-            "sort": [
-                [
-                    "US Gross",
-                    "desc"
-                ]
-            ],
-            "columns": [
-                "US Gross"
-            ],
-            "editable": null,
+            "sort": [["US Gross", "desc"]],
+            "columns": ["US Gross"],
             "expressions": null,
-            "column-pivots": null,
-            "filters": null,
+            "column_pivots": null,
+            "filter": null,
             "plugin_config": {
                 "IMDB Rating": {
                     "color_mode": "gradient",
-                    "pos_color": 
-                        "#b87ff0",
-                    "neg_color": 
-                        "#FF9485",
+                    "pos_color": "#b87ff0",
+                    "neg_color": "#FF9485",
                     "gradient": 8.1
                 },
                 "US Gross": {
                     "color_mode": "gradient",
-                    "pos_color": 
-                        "#126e3a",
-                    "neg_color": 
-                        "#FF9485",
+                    "pos_color": "#126e3a",
+                    "neg_color": "#FF9485",
                     "gradient": 19729862602
                 }
             },
@@ -87,9 +61,7 @@
         },
         "PERSPECTIVE_GENERATED_ID_0": {
             "plugin": "X/Y Scatter",
-            "row-pivots": [
-                "Title"
-            ],
+            "row_pivots": ["Title"],
             "aggregates": {
                 "IMDB Rating": "avg",
                 "Rotten Tomatoes Rating": "avg",
@@ -97,11 +69,7 @@
                 "Release Date": "last",
                 "MPAA Rating": "last"
             },
-            "sort": [
-                [
-                    "US Gross"
-                ]
-            ],
+            "sort": [["US Gross", "asc"]],
             "columns": [
                 "Rotten Tomatoes Rating",
                 "IMDB Rating",
@@ -112,10 +80,10 @@
                 "MPAA Rating"
             ],
             "selectable": null,
-            "editable": null,
+
             "expressions": null,
-            "column-pivots": null,
-            "filters": null,
+            "column_pivots": null,
+            "filter": null,
             "plugin_config": {
                 "realValues": [
                     "Rotten Tomatoes Rating",
@@ -139,29 +107,19 @@
         },
         "PERSPECTIVE_GENERATED_ID_3": {
             "plugin": "Y Area",
-            "expressions": [
-                "bucket(\"Release Date\", 'Y')"
-            ],
-            "row-pivots": [
-                "bucket(\"Release Date\", 'Y')"
-            ],
+            "expressions": ["bucket(\"Release Date\", 'Y')"],
+            "row_pivots": ["bucket(\"Release Date\", 'Y')"],
             "aggregates": {
                 "Rotten Tomatoes Rating": "avg"
             },
-            "columns": [
-                "US Gross"
-            ],
-            "column-pivots": [
-                "Major Genre"
-            ],
+            "columns": ["US Gross"],
+            "column_pivots": ["Major Genre"],
             "selectable": null,
-            "editable": null,
-            "filters": null,
+
+            "filter": null,
             "sort": null,
             "plugin_config": {
-                "realValues": [
-                    "US Gross"
-                ],
+                "realValues": ["US Gross"],
                 "legend": {
                     "left": "91px",
                     "top": "25px"
@@ -174,12 +132,8 @@
         },
         "PERSPECTIVE_GENERATED_ID_1": {
             "plugin": "Y Line",
-            "expressions": [
-                "bucket(\"Release Date\", 'Y')"
-            ],
-            "row-pivots": [
-                "bucket(\"Release Date\", 'Y')"
-            ],
+            "expressions": ["bucket(\"Release Date\", 'Y')"],
+            "row_pivots": ["bucket(\"Release Date\", 'Y')"],
             "aggregates": {
                 "Rotten Tomatoes Rating": "avg"
             },
@@ -191,9 +145,8 @@
                 "US DVD Sales"
             ],
             "selectable": null,
-            "editable": null,
-            "column-pivots": null,
-            "filters": null,
+            "column_pivots": null,
+            "filter": null,
             "sort": null,
             "plugin_config": {
                 "realValues": [
@@ -203,9 +156,7 @@
                     "Worldwide Gross",
                     "US DVD Sales"
                 ],
-                "splitMainValues": [
-                    "Rotten Tomatoes Rating"
-                ],
+                "splitMainValues": ["Rotten Tomatoes Rating"],
                 "legend": {
                     "left": "79px",
                     "top": "174px"

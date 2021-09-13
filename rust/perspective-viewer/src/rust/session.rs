@@ -52,6 +52,7 @@ pub struct SessionHandle {
     pub on_update: PubSub<()>,
     pub on_table_loaded: PubSub<()>,
     pub on_view_created: PubSub<()>,
+    pub on_view_config_updated: PubSub<()>,
     pub on_stats: PubSub<()>,
 }
 
@@ -610,6 +611,7 @@ impl Session {
     pub fn update_view_config(&self, config_update: ViewConfigUpdate) {
         self.borrow_mut().view_sub = None;
         self.borrow_mut().config.apply_update(config_update);
+        self.on_view_config_updated.emit_all(());
     }
 
     /// In order to create a new view in this session, the session must first be

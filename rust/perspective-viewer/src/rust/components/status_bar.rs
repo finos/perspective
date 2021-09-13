@@ -33,13 +33,15 @@ pub enum StatusBarMsg {
     Export(bool),
     Copy(bool),
     TableStatsChanged,
+    SetIsUpdating(bool),
 }
 
 /// A toolbar with buttons, and `Table` & `View` status information.
 pub struct StatusBar {
     link: ComponentLink<Self>,
     props: StatusBarProps,
-    _sub: Subscription,
+    is_updating: bool,
+    _sub: [Subscription; 3],
 }
 
 impl Component for StatusBar {
@@ -49,12 +51,31 @@ impl Component for StatusBar {
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         enable_weak_link_test!(props, link);
         let cb = link.callback(|_| StatusBarMsg::TableStatsChanged);
-        let _sub = props.session.on_stats.add_listener(cb);
-        Self { link, props, _sub }
+        let _sub = [
+            props.session.on_stats.add_listener(cb),
+            props
+                .session
+                .on_view_config_updated
+                .add_listener(link.callback(|_| StatusBarMsg::SetIsUpdating(true))),
+            props
+                .session
+                .on_view_created
+                .add_listener(link.callback(|_| StatusBarMsg::SetIsUpdating(false))),
+        ];
+        Self {
+            link,
+            props,
+            _sub,
+            is_updating: false,
+        }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
+            StatusBarMsg::SetIsUpdating(is_updating) => {
+                self.is_updating = is_updating;
+                true
+            }
             StatusBarMsg::TableStatsChanged => true,
             StatusBarMsg::Reset => {
                 self.props.on_reset.emit(());
@@ -87,6 +108,7 @@ impl Component for StatusBar {
     fn view(&self) -> Html {
         let stats = self.props.session.get_table_stats();
         let class_name = self.status_class_name(&stats);
+        let is_updating_class_name = if self.is_updating { "updating" } else { " " };
         let reset = self.link.callback(|_| StatusBarMsg::Reset);
         let export = self
             .link
@@ -96,7 +118,7 @@ impl Component for StatusBar {
             .callback(|event: MouseEvent| StatusBarMsg::Copy(event.shift_key()));
 
         html! {
-            <div id={ self.props.id.clone() }>
+            <div id={ self.props.id.clone() } class={ is_updating_class_name }>
                 <div class="section">
                     <span id="status" class={ class_name }></span>
                 </div>

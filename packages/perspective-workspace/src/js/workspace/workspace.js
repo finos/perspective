@@ -493,7 +493,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         const config = await viewer.save();
         const table = await viewer.getTable();
         const availableColumns = Object.keys(await table.schema());
-        const currentFilters = config.filters || [];
+        const currentFilters = config.filter || [];
         const columnAvailable = (filter) =>
             filter[0] && availableColumns.includes(filter[0]);
         const validFilters = filters.filter(columnAvailable);
@@ -502,7 +502,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
             ...currentFilters.filter((x) => !candidates.has(x[0]))
         );
         const newFilters = uniqBy(validFilters, (item) => item[0]);
-        await viewer.restore({filters: newFilters});
+        await viewer.restore({filter: newFilters});
     }
 
     onPerspectiveSelect = async (event) => {
@@ -516,11 +516,11 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
             return;
         }
         const candidates = new Set([
-            ...(config["row-pivots"] || []),
-            ...(config["column-pivots"] || []),
-            ...(config.filters || []).map((x) => x[0]),
+            ...(config["row_pivots"] || []),
+            ...(config["column_pivots"] || []),
+            ...(config.filter || []).map((x) => x[0]),
         ]);
-        const filters = [...event.detail.config.filters];
+        const filters = [...event.detail.config.filter];
 
         if (this.mode === MODE.LINKED) {
             this._linkedViewers.forEach((viewer) => {
@@ -596,7 +596,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
             if (this._linkedViewers.length === 1) {
                 this.getAllWidgets().forEach(async (widget) => {
                     const config = await widget.viewer.save();
-                    if (config["row-pivots"]) {
+                    if (config["row_pivots"]) {
                         await widget.viewer.restore({selectable: true});
                     }
                 });
@@ -850,7 +850,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
                 if (config) {
                     const selectable =
                         this._linkedViewers.length > 0 &&
-                        !!config["row-pivots"];
+                        !!config["row_pivots"];
                     if (selectable !== !!config.selectable) {
                         event.target.restore({selectable});
                     }
