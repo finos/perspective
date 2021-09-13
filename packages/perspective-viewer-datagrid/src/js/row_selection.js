@@ -30,13 +30,13 @@ async function selectionListener(regularTable, viewer, event) {
             selected.reduce((agg, x, i) => agg && x === id[i], true);
         const is_deselect =
             !!selected && id.length === selected.length && key_match;
-        let filters = [];
+        let filter = [];
         if (is_deselect) {
             selected_rows_map.delete(regularTable);
         } else {
             selected_rows_map.set(regularTable, id);
-            filters = await getCellConfig(this, meta.y, meta.x);
-            filters = filters.config.filters;
+            filter = await getCellConfig(this, meta.y, meta.x);
+            filter = filter.config.filter;
         }
 
         await regularTable.draw();
@@ -47,7 +47,7 @@ async function selectionListener(regularTable, viewer, event) {
                 composed: true,
                 detail: {
                     selected: !is_deselect,
-                    config: {filters},
+                    config: {filter},
                 },
             })
         );

@@ -44,7 +44,7 @@ export default async function getCellConfig(
             .filter(([, , value]) => value !== "__ROW_PATH__");
     }
 
-    const filters = _config.filter.concat(row_filters).concat(column_filters);
-    result.config = {filters};
+    const filter = _config.filter.concat(row_filters).concat(column_filters);
+    result.config = {filter};
     return result;
 }

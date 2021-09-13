@@ -7,7 +7,7 @@
  *
  */
 
- @import "./aggregate-selector.less";
+@import "./aggregate-selector.less";
 
 :host {
     #side_panel {
@@ -45,7 +45,7 @@
             padding: 6px 0px;
             margin: -6px 0 0 0;
             &.expr_editor_open {
-                background: rgba(0,0,0,0.05);
+                background: rgba(0, 0, 0, 0.05);
             }
         }
 
@@ -66,7 +66,8 @@
             }
 
             // Expression column toolbar buttons
-            span.expression-edit-button, span.expression-delete-button  {
+            span.expression-edit-button,
+            span.expression-delete-button {
                 padding-left: 6px;
                 padding-right: 4px;
                 position: absolute;
@@ -89,7 +90,7 @@
             span.expression-delete-button {
                 right: 18px;
             }
-            
+
             // Need a bottom margin to prevent drag/drop jitter on borders
             .column_selector_draggable {
                 min-height: 21px;
@@ -102,7 +103,7 @@
                 cursor: move;
                 border-style: solid;
                 border-width: 0 0 1px 0;
-                border-color: var(--inactive--color, #C5C9D0);
+                border-color: var(--inactive--color, #c5c9d0);
                 font-size: 12px;
                 flex-grow: 1;
                 color: inherit;
@@ -126,17 +127,21 @@
                     text-overflow: ellipsis;
                     width: 100%;
                 }
-                
+
                 .column_name:before {
-                    font-family: var(--interface-monospace--font-family, monospace);
+                    font-family: var(
+                        --interface-monospace--font-family,
+                        monospace
+                    );
                     width: var(--column_type--width, auto);
                     min-width: 18px;
                     font-size: 12px;
                     font-weight: 200;
                     padding: 0 5px 0 0;
                 }
-                
-                .integer:before, .float:before {
+
+                .integer:before,
+                .float:before {
                     content: var(
                         --float--column-type--content,
                         var(--column-type--content, "123")
@@ -146,7 +151,7 @@
                         var(--column-type--color, #016bc6)
                     );
                 }
-            
+
                 .string:before {
                     content: var(
                         --string--column-type--content,
@@ -157,7 +162,7 @@
                         var(--column-type--color, #fe9292)
                     );
                 }
-            
+
                 .boolean:before {
                     content: var(
                         --boolean--column-type--content,
@@ -168,8 +173,9 @@
                         var(--column-type--color, #999999)
                     );
                 }
-            
-                .date:before, .datetime:before {
+
+                .date:before,
+                .datetime:before {
                     content: var(
                         --date--column-type--content,
                         var(--column-type--content, "mdy")
@@ -192,7 +198,8 @@
             font-size: var(--column_selector--font-size, 14px);
         }
 
-        #active-columns, #sub-columns {
+        #active-columns,
+        #sub-columns {
             flex: 0 1 auto;
             overflow: scroll;
         }
@@ -202,7 +209,7 @@
         }
 
         #sub-columns {
-            flex: 0 100 auto
+            flex: 0 100 auto;
         }
 
         #active-columns {
@@ -223,6 +230,7 @@
             }
 
             .column-selector-column {
+                position: relative;
                 margin-bottom: 1px;
                 .column_selector_draggable {
                     width: calc(100% - 24px);
@@ -231,7 +239,7 @@
 
                 &:before {
                     font-size: 10px;
-                    margin-left: 34px; //var(--column_selector--width, 20px);
+                    margin-left: 22px; //var(--column_selector--width, 20px);
                     left: 1px;
                     padding: var(--column_type--padding, 0px 0px 0px 5px);
                     color: var(--inactive--color, #666);
@@ -247,12 +255,13 @@
         }
 
         // "Empty" slotted columns in the active column list.
-        .dragover, .empty-named {
+        .dragover,
+        .empty-named {
             pointer-events: none;
-            border: 1px dashed var(--inactive--color,#ddd) !important;
+            border: 1px dashed var(--inactive--color, #ddd) !important;
             margin-left: -2px;
-            
-            & > * { 
+
+            & > * {
                 opacity: 0;
                 // filter: saturate(0);
             }
@@ -264,7 +273,6 @@
 
         .dragover {
             box-shadow: inset 0 0 15px rgb(0 0 0 / 5%);
-
         }
 
         // // correct for column separator borders which are not on the last column.
@@ -272,9 +280,10 @@
         //     border-top-width: 0px !important;
         // }
 
-        // Inactive Columns are the columns in the column selector not currently 
+        // Inactive Columns are the columns in the column selector not currently
         // selected for the `columns` field of the `ViewConfig`.
-        #inactive-columns, #expression-columns {
+        #inactive-columns,
+        #expression-columns {
             margin-bottom: 6px;
             &:empty {
                 display: none;

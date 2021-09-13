@@ -15,7 +15,7 @@ export const raiseEvent = (node, data, settings) => {
     const groupFilters = getGroupValues(data, settings).map(mapToFilter);
     const splitFilters = getSplitValues(data, settings).map(mapToFilter);
 
-    const filters = settings.filter.concat(groupFilters).concat(splitFilters);
+    const filter = settings.filter.concat(groupFilters).concat(splitFilters);
 
     node.dispatchEvent(
         new CustomEvent("perspective-click", {
@@ -23,7 +23,7 @@ export const raiseEvent = (node, data, settings) => {
             composed: true,
             detail: {
                 column_names,
-                config: {filters},
+                config: {filter},
                 row: data.row,
             },
         })

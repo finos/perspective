@@ -217,8 +217,11 @@ impl PerspectiveViewerElement {
                 update.into_serde().into_jserror()?
             };
 
-            renderer.update_plugin(plugin)?;
-            session.set_update_column_defaults(&mut view_config, &renderer.metadata());
+            let plugin_changed = renderer.update_plugin(plugin)?;
+            if plugin_changed {
+                session.set_update_column_defaults(&mut view_config, &renderer.metadata());
+            }
+            
             session.update_view_config(view_config);
             let settings = Some(settings.clone());
             let draw_task = renderer.draw(async {
