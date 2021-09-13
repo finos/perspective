@@ -226,17 +226,7 @@ if (PSP_WASM_BUILD)
 		--source-map-base ./build/ \
 		--memory-init-file 0 \
 		-Wall \
-		-s NO_EXIT_RUNTIME=1 \
 		-fcolor-diagnostics \
-		-s NO_FILESYSTEM=1 \
-		-s ALLOW_MEMORY_GROWTH=1 \
-		-s MODULARIZE=1 \
-		-s EXPORT_NAME=\"load_perspective\" \
-		-s EXPORT_ES6=1 \
-		-s MAXIMUM_MEMORY=4gb \
-		-s WASM_BIGINT=1 \
-		-s USE_ES6_IMPORT_META=0 \
-		-s EXPORTED_FUNCTIONS=\"['_main']\" \
 		")
 
 	if(CMAKE_BUILD_TYPE_LOWER STREQUAL debug)
@@ -247,15 +237,11 @@ if (PSP_WASM_BUILD)
 			-s WARN_UNALIGNED=1 \
 			-Wcast-align \
 			-Wover-aligned \
-			-s DISABLE_EXCEPTION_CATCHING=0 \
-			-s ASSERTIONS=2 \
-			-s DEMANGLE_SUPPORT=1 \
 			")
 	else()
 		set(OPT_FLAGS " \
 			-O3 \
 			-g0 \
-			-s AGGRESSIVE_VARIABLE_ELIMINATION=1 \
 			")
 
 		# TODO: -flto
@@ -579,6 +565,19 @@ endif()
 message("${BUILD_MESSAGE}\n")
 
 if (PSP_WASM_BUILD)
+	set(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} \
+		-s EXPORT_ES6=1 \
+		-s NO_EXIT_RUNTIME=1 \
+		-s NO_FILESYSTEM=1 \
+		-s ALLOW_MEMORY_GROWTH=1 \
+		-s MODULARIZE=1 \
+		-s EXPORT_NAME=\"load_perspective\" \
+		-s MAXIMUM_MEMORY=4gb \
+		-s WASM_BIGINT=1 \
+		-s USE_ES6_IMPORT_META=0 \
+		-s EXPORTED_FUNCTIONS=\"['_main']\" \
+	")
+
 	add_library(psp ${WASM_SOURCE_FILES})
 	target_compile_definitions(psp PRIVATE PSP_ENABLE_WASM=1)
 	set_target_properties(psp PROPERTIES COMPILE_FLAGS "")
@@ -586,17 +585,17 @@ if (PSP_WASM_BUILD)
 
 	# "esm/erspective.cpp.js" from CMAKE_EXECUTABLE_SYNTAX
 	add_executable(perspective_esm src/cpp/emscripten.cpp)
-	target_link_libraries(perspective_esm psp "-s ENVIRONMENT=worker -s EXPORT_ES6=1")
+	target_link_libraries(perspective_esm psp)
+	target_link_options(perspective_esm PRIVATE -s ENVIRONMENT=worker)
 	target_compile_definitions(perspective_esm PRIVATE PSP_ENABLE_WASM=1)
-	set_target_properties(perspective_esm PROPERTIES COMPILE_FLAGS "-s ENVIRONMENT=worker -s EXPORT_ES6=1")
 	set_target_properties(perspective_esm PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./esm/")
 	set_target_properties(perspective_esm PROPERTIES OUTPUT_NAME "perspective.cpp")
 
 	# "cjs/perspective.cpp.js" from CMAKE_EXECUTABLE_SYNTAX
 	add_executable(perspective_cjs src/cpp/emscripten.cpp)
-	target_link_libraries(perspective_cjs psp "-s ENVIRONMENT=node")
+	target_link_libraries(perspective_cjs psp)
+	target_link_options(perspective_cjs PRIVATE -s ENVIRONMENT=node)
 	target_compile_definitions(perspective_cjs PRIVATE PSP_ENABLE_WASM=1)
-	set_target_properties(perspective_cjs PROPERTIES COMPILE_FLAGS "-s ENVIRONMENT=node")
 	set_target_properties(perspective_cjs PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./cjs/")
 	set_target_properties(perspective_cjs PROPERTIES OUTPUT_NAME "perspective.cpp")
 elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)

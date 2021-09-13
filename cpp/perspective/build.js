@@ -6,6 +6,8 @@ const stdio = "inherit";
 const env = process.PSP_DEBUG ? "debug" : "release";
 const cwd = path.join(process.cwd(), "dist", env);
 
+delete process.env.NODE;
+
 try {
     execSync(`mkdirp ${cwd}`, {stdio});
     process.env.CLICOLOR_FORCE = 1;
