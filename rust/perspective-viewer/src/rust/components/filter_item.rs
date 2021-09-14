@@ -16,7 +16,7 @@ use crate::*;
 use super::containers::dragdrop_list::*;
 use super::containers::dropdown::*;
 
-use chrono::{Local, NaiveDate, TimeZone};
+use chrono::{Local, NaiveDate, NaiveDateTime, TimeZone, Utc};
 use web_sys::*;
 use yew::prelude::*;
 
@@ -69,6 +69,27 @@ impl FilterItemProperties {
             .unwrap()
     }
 
+    // Get the string value, suitable for the `value` field of a `FilterItems`'s
+    // `<input>`.
+    fn get_filter_input(&self) -> String {
+        let filter_type = self.get_filter_type();
+        match (&filter_type, &self.filter.2) {
+            (Type::Date, FilterTerm::Scalar(Scalar::Float(x)))
+            | (Type::Date, FilterTerm::Scalar(Scalar::DateTime(x))) => Utc
+                .timestamp(*x as i64 / 1000, (*x as u32 % 1000) * 1000)
+                .with_timezone(&Local)
+                .format("%Y-%m-%d")
+                .to_string(),
+            (Type::Datetime, FilterTerm::Scalar(Scalar::Float(x)))
+            | (Type::Datetime, FilterTerm::Scalar(Scalar::DateTime(x))) => Utc
+                .timestamp(*x as i64 / 1000, ((*x as i64 % 1000) * 1000000) as u32)
+                .with_timezone(&Local)
+                .format("%Y-%m-%dT%H:%M:%S%.3f")
+                .to_string(),
+            (_, x) => format!("{}", x),
+        }
+    }
+
     /// Get the allowed `FilterOp`s for this filter.
     fn get_filter_ops(&self) -> Vec<FilterOp> {
         match self.get_filter_type() {
@@ -115,7 +136,7 @@ impl FilterItemProperties {
         self.update_and_render(update);
     }
 
-    /// Update the filter Value.
+    /// Update the filter value from the string input read from the DOM.
     ///
     /// # Arguments
     /// - `val` The new filter value.
@@ -153,11 +174,27 @@ impl FilterItemProperties {
                         &val, "%Y-%m-%d",
                     ) {
                         Ok(ref posix) => match posix.and_hms_opt(0, 0, 0) {
-                            Some(x) => Scalar::DateTime(x.timestamp_millis() as u64),
+                            Some(x) => Scalar::DateTime(x.timestamp_millis() as f64),
                             None => Scalar::Null,
                         },
                         _ => Scalar::Null,
                     })
+                }
+                Type::Datetime => {
+                    filter_item.2 = FilterTerm::Scalar(
+                        match NaiveDateTime::parse_from_str(
+                            &val,
+                            "%Y-%m-%dT%H:%M:%S%.3f",
+                        ) {
+                            Ok(ref posix) => Scalar::DateTime(
+                                Utc.from_local_datetime(posix)
+                                    .unwrap()
+                                    .timestamp_millis()
+                                    as f64,
+                            ),
+                            _ => Scalar::Null,
+                        },
+                    )
                 }
                 _ => {}
             },
@@ -179,17 +216,7 @@ impl Component for FilterItem {
     type Properties = FilterItemProperties;
 
     fn create(props: FilterItemProperties, link: ComponentLink<Self>) -> Self {
-        let input = match &props.filter.2 {
-            FilterTerm::Scalar(Scalar::DateTime(x)) => {
-                let time = Local
-                    .timestamp(*x as i64 / 1000, (*x as u32 % 1000) * 1000)
-                    .format("%Y-%m-%d")
-                    .to_string();
-                time
-            }
-            x => format!("{}", x),
-        };
-
+        let input = props.get_filter_input();
         FilterItem { props, link, input }
     }
 
@@ -247,21 +274,7 @@ impl Component for FilterItem {
     }
 
     fn change(&mut self, props: FilterItemProperties) -> bool {
-        match &props.filter.2 {
-            FilterTerm::Scalar(Scalar::DateTime(x)) => {
-                let rescaled = *x as i64;
-                if rescaled > 0 {
-                    if let chrono::LocalResult::Single(x) = Local.timestamp_opt(
-                        rescaled / 1000,
-                        ((rescaled % 1000) * 1000) as u32,
-                    ) {
-                        self.input = x.format("%Y-%m-%d").to_string();
-                    }
-                }
-            }
-            x => self.input = format!("{}", x),
-        };
-
+        self.input = props.get_filter_input();
         self.props = props;
         true
     }
@@ -378,29 +391,17 @@ impl Component for FilterItem {
                     oninput={ input }/>
             },
             Type::Datetime => html! {
-                <>
-                    <input
-                        type="date"
-                        placeholder="Value"
-                        class="date-filter"
-                        ref={ noderef.clone() }
-                        onkeydown={ keydown.clone() }
-                        onfocus={ focus.clone() }
-                        onblur={ blur.clone() }
-                        // value={ self.input.clone() }
-                        oninput={ input.clone() }/>
-
-                    <input
-                        type="time"
-                        placeholder="Value"
-                        class="time-filter"
-                        // ref={ noderef.clone() }
-                        onkeydown={ keydown }
-                        onfocus={ focus }
-                        onblur={ blur }
-                        // value={ self.input.clone() }
-                        oninput={ input }/>
-                </>
+                <input
+                    type="datetime-local"
+                    placeholder="Value"
+                    class="datetime-filter"
+                    step="0.001"
+                    ref={ noderef.clone() }
+                    onkeydown={ keydown }
+                    onfocus={ focus }
+                    onblur={ blur }
+                    value={ self.input.clone() }
+                    oninput={ input }/>
             },
             _ => {
                 html! {}
@@ -424,13 +425,20 @@ impl Component for FilterItem {
                     selected={ filter.1 }
                     on_select={ select }>
                 </FilterOpSelector>
-                <label
-                    class={ format!("input-sizer {}", type_class) }
-                    data-value={ format!("{}", filter.2) }>
-                    {
-                        input_elem
+                {
+                    match &filter.1 {
+                        FilterOp::IsNull | FilterOp::IsNotNull => html! {},
+                        _ => html! {
+                            <label
+                                class={ format!("input-sizer {}", type_class) }
+                                data-value={ format!("{}", filter.2) }>
+                                {
+                                    input_elem
+                                }
+                            </label>
+                        }
                     }
-                </label>
+                }
             </>
         }
     }
