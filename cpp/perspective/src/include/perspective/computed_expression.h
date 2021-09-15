@@ -32,8 +32,8 @@ namespace perspective {
  */
 struct PERSPECTIVE_EXPORT t_expression_error {
     std::string m_error_message;
-    t_uindex m_line;
-    t_uindex m_column;
+    t_index m_line;
+    t_index m_column;
 };
 
 /**

@@ -11,7 +11,7 @@
             "internal": "Internal"
         }
     },
-    "emscripten": "2.0.6",
+    "emscripten": "2.0.29",
     "engines": {
         "node": ">=8.12.0"
     },

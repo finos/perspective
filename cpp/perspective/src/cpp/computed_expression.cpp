@@ -384,15 +384,16 @@ t_computed_expression_parser::get_dtype(
     }
 
     t_tscalar v = expr_definition.value();
+    t_dtype dtype = v.get_dtype();
 
-    if (v.m_status == STATUS_CLEAR) {
+    if (v.m_status == STATUS_CLEAR || dtype == DTYPE_NONE) {
         error.m_error_message = "Type Error - inputs do not resolve to a valid expression.";
         error.m_line = 0;
         error.m_column = 0;
         return DTYPE_NONE;
     }
 
-    return v.get_dtype();
+    return dtype;
 }
 
 t_validated_expression_map::t_validated_expression_map() {}
