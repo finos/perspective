@@ -896,6 +896,59 @@ module.exports = (perspective) => {
             table.delete();
         });
 
+        it("multiple updates change validity", async function () {
+            const table = await perspective.table(
+                {
+                    a: "float",
+                    b: "float",
+                    c: "string",
+                    index: "integer",
+                },
+                {index: "index"}
+            );
+
+            table.update({
+                a: [null, null, 1.5, null],
+                b: [null, 2.5, null, null],
+                c: ["a", "b", "b", "a"],
+                index: [1, 2, 3, 4],
+            });
+
+            const view = await table.view({
+                expressions: ['// computed\n"a" + "b"'],
+            });
+
+            let result = await view.to_columns();
+            expect(result["computed"]).toEqual([null, null, null, null]);
+
+            table.update({
+                index: [4],
+                a: [100],
+            });
+
+            result = await view.to_columns();
+            expect(result["computed"]).toEqual([null, null, null, null]);
+
+            table.update({
+                index: [4],
+                b: [100],
+            });
+
+            result = await view.to_columns();
+            expect(result["computed"]).toEqual([null, null, null, 200]);
+
+            table.update({
+                index: [3],
+                b: [100],
+            });
+
+            result = await view.to_columns();
+            expect(result["computed"]).toEqual([null, null, 101.5, 200]);
+
+            await view.delete();
+            await table.delete();
+        });
+
         it("multiple partial update on single computed source column", async function () {
             const table = await perspective.table(data);
             const view = await table.view({

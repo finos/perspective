@@ -25,6 +25,10 @@ SUPPRESS_WARNINGS_VC(4800)
 
 namespace perspective {
 
+bool operator>(const std::size_t& lhs, const t_tscalar& rhs) {
+   return rhs.operator<(lhs);
+}
+
 #define BINARY_OPERATOR_BODY(OP)                                               \
     t_tscalar rval;                                                            \
     rval.clear();                                                              \
@@ -867,7 +871,8 @@ t_tscalar::is_signed() const {
         || m_type == DTYPE_INT16 || m_type == DTYPE_INT8);
 }
 
-t_tscalar::operator bool() const {
+bool
+t_tscalar::as_bool() const {
     if (m_status != STATUS_VALID)
         return false;
 
