@@ -24,14 +24,6 @@ use yew::prelude::*;
 
 wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 
-////////////////////////////////////////////////////////////////////////////////
-//
-// Copyright (c) 2018, the Perspective Authors.
-//
-// This file is part of the Perspective library, distributed under the terms
-// of the Apache License 2.0.  The full license can be found in the LICENSE
-// file.
-
 /// Perspective FFI
 #[wasm_bindgen(inline_js = "
 
@@ -83,16 +75,19 @@ wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
         };
     }
 
-    export function register_test_components() {
-        customElements.define('perspective-viewer-debug2', generatePlugin('A'));
-        customElements.define('perspective-viewer-debug3', generatePlugin('B'));
-        customElements.define('perspective-viewer-debug4', generatePlugin('C'));
-    }        
+    customElements.define('perspective-viewer-plugin', generatePlugin('Default'));
+    customElements.define('perspective-viewer-debug2', generatePlugin('A'));
+    customElements.define('perspective-viewer-debug3', generatePlugin('B'));
+    customElements.define('perspective-viewer-debug4', generatePlugin('C'));
 
+    export function register_test_components() {}
 ")]
 #[rustfmt::skip]
 extern "C" {
 
+    // With `cargo test`, the TypeScript container is not loaded, so the
+    // `<perspective-viewer-plugin>` element does not exist.  Without a stub
+    // export, the accompanying snippet will be DCE'd.
     #[wasm_bindgen(js_name = "register_test_components", catch)]
     pub fn register_test_components() -> Result<(), JsValue>;
 
@@ -100,7 +95,6 @@ extern "C" {
 
 #[wasm_bindgen_test]
 pub async fn test_plugin_selected() {
-    PLUGIN_REGISTRY.reset();
     register_test_components().unwrap();
     PLUGIN_REGISTRY.register_plugin("perspective-viewer-debug2");
     PLUGIN_REGISTRY.register_plugin("perspective-viewer-debug3");
