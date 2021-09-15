@@ -36,13 +36,15 @@ module.exports = (perspective) => {
                 expect(validate.errors).toEqual({
                     'if ("w" > 1) 5': {
                         column: 0,
-                        error_message: "",
-                        line: 8,
+                        error_message:
+                            "Type Error - inputs do not resolve to a valid expression.",
+                        line: 0,
                     },
                     'if ("w" > 1) 5;': {
                         column: 0,
-                        error_message: "",
-                        line: 8,
+                        error_message:
+                            "Type Error - inputs do not resolve to a valid expression.",
+                        line: 0,
                     },
                 });
 

@@ -92,7 +92,10 @@ Table::validate_expressions(
         const std::string& expression_alias = std::get<0>(expr);
         const std::string& expression_string = std::get<1>(expr);
         const std::string& parsed_expression_string = std::get<2>(expr);
+
         t_expression_error error;
+        error.m_line = -1;
+        error.m_column = -1;
 
         // Cannot overwrite a "real" column with an expression column
         if (gnode_schema.has_column(expression_alias)) {
