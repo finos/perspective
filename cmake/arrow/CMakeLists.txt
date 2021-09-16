@@ -25,6 +25,7 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/buffer.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/chunked_array.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compare.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/datum.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/device.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/extension_type.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/memory_pool.cc
@@ -45,6 +46,7 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/column_decoder.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/options.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/parser.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/reader.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/filesystem/filesystem.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/filesystem/localfs.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/filesystem/mockfs.cc
@@ -57,6 +59,7 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/json/parser.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/json/reader.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/buffered.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/caching.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/compressed.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/interfaces.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/memory.cc
@@ -66,14 +69,16 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/bit_util.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/bitmap_builders.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/bitmap_ops.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/cancel.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/compression.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/cpu_info.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/decimal.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/future.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/formatting.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/delimiting.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/int_util.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/io_util.cc
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/iterator.cc
+    # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/iterator.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/logging.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/key_value_metadata.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/memory.cc
@@ -104,13 +109,12 @@ set(ARROW_SRCS
 if (PSP_PYTHON_BUILD)
     set(ARROW_SRCS
         ${ARROW_SRCS}
-        ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/reader.cc
-        ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/datum.cc
+        # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/datum.cc
         ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/file.cc
         ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/tensor/coo_converter.cc
         ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/tensor/csf_converter.cc
         ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/tensor/csx_converter.cc
-        ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/formatting.cc
+        # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/formatting.cc
         ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/time.cc
         ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/vendored/double-conversion/bignum-dtoa.cc
         ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/vendored/double-conversion/fast-dtoa.cc
