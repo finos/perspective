@@ -246,7 +246,9 @@ impl Component for ColumnSelector {
                 .callback(|_| ColumnSelectorMsg::OpenExpressionEditor);
 
             let select = self.link.callback(|()| ColumnSelectorMsg::ViewCreated);
-            let active_columns_class = if config.columns.len() == all_columns.len() {
+            let active_columns_class = if config.columns.len()
+                == all_columns.len() + config.expressions.len()
+            {
                 ""
             } else {
                 "collapse"
