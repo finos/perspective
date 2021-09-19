@@ -1,4 +1,3 @@
-
 /******************************************************************************
  *
  * Copyright (c) 2017, the Perspective Authors.
@@ -11,7 +10,6 @@
 @import "./variables.less";
 
 :host {
-
     #top_panel {
         display: flex;
         flex-wrap: wrap;
@@ -57,7 +55,7 @@
                 min-height: 14px;
                 margin-top: 5px;
                 overflow: visible;
-                border-left: 2px solid rgba(0,0,0,0.5);
+                border-left: 2px solid rgba(0, 0, 0, 0.5);
                 margin-right: 2px;
                 margin-left: -4px;
 
@@ -93,7 +91,7 @@
         }
 
         .highlight-drop {
-            background-color: rgba(0,0,0,0.5);
+            background-color: rgba(0, 0, 0, 0.5);
         }
 
         .rrow {
@@ -106,7 +104,6 @@
             padding: 12px 12px 12px 0px;
             // flex: 1 1 auto;
 
-
             .input-sizer {
                 display: inline-grid;
                 align-items: center;
@@ -114,7 +111,7 @@
                 margin-top: 1px;
                 font-family: "Open Sans";
                 font-size: 12px;
-                
+
                 &::after,
                 input,
                 textarea {
@@ -123,12 +120,14 @@
                 }
 
                 &.num-filter {
-                    input, textarea {
+                    input,
+                    textarea {
                         width: 80px;
                     }
                 }
 
-                input, textarea {
+                input,
+                textarea {
                     grid-area: 1 / 1;
                     padding: 0;
                     border: none;
@@ -137,9 +136,9 @@
                     font-family: "Open Sans";
                     font-size: 12px;
                 }
-                
+
                 &::after {
-                    content: attr(data-value) ' ';
+                    content: attr(data-value) " ";
                     visibility: hidden;
                     white-space: nowrap;
                     padding-right: 12px;
@@ -157,7 +156,7 @@
                 input.time-filter {
                     grid-area: 1/2;
                 }
-                
+
                 &:focus-within {
                     textarea:focus,
                     input:focus {
@@ -200,7 +199,8 @@
             justify-content: flex-end;
             min-height: 24px;
             // background is nor transitionable ...
-            transition: border-color 0.3s ease-out, background-size 0.3s ease-out;
+            transition: border-color 0.3s ease-out,
+                background-size 0.3s ease-out;
             background-size: 100% 200%;
         }
 
@@ -249,7 +249,7 @@
             line-height: 17px;
             box-sizing: border-box;
             font-weight: 300;
-            color: var(--inactive--color, #B4B7BE);
+            color: var(--inactive--color, #b4b7be);
             white-space: nowrap;
             padding: var(--column-drop-container--padding, 0px 0px 2px 10px);
             font-size: 12px;
@@ -260,7 +260,7 @@
 
         // .dropping .psp-text-field__input,
         .psp-text-field__input:not(:empty) {
-            display: flex!important;
+            display: flex !important;
         }
 
         // .dropping .psp-text-field__input::after {
@@ -304,15 +304,14 @@
 
             .pivot-column {
                 select {
-                    font-family: var(--interface-monospace--font-family, monospace);
                     padding-right: 12px;
                     padding-left: 4px;
                     max-width: 100%;
+                    position: initial;
                 }
             }
         }
     }
-
 
     .sort-icon {
         margin-left: 4px;

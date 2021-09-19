@@ -14,7 +14,9 @@ use serde::Serialize;
 use std::fmt::Display;
 use wasm_bindgen::*;
 
-#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(
+    Clone, Copy, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize,
+)]
 #[serde()]
 pub enum SingleAggregate {
     #[serde(rename = "sum")]
@@ -146,7 +148,7 @@ impl FromStr for SingleAggregate {
     }
 }
 
-#[derive(Clone, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
 #[cfg_attr(test, derive(Debug))]
 #[serde()]
 pub enum MultiAggregate {
@@ -154,7 +156,7 @@ pub enum MultiAggregate {
     WeightedMean,
 }
 
-#[derive(Clone, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
 #[cfg_attr(test, derive(Debug))]
 #[serde(untagged)]
 pub enum Aggregate {
@@ -170,57 +172,68 @@ impl Display for Aggregate {
         match self {
             Aggregate::SingleAggregate(x) => write!(fmt, "{}", x)?,
             Aggregate::MultiAggregate(MultiAggregate::WeightedMean, x) => {
-                write!(fmt, "mean by {}", x)?
+                write!(fmt, "weighted mean by {}", x)?
             }
         };
         Ok(())
     }
 }
 
+impl FromStr for Aggregate {
+    type Err = JsValue;
+    fn from_str(input: &str) -> std::result::Result<Self, JsValue> {
+        Ok(
+            if let Some(stripped) = input.strip_prefix("weighted mean by ") {
+                Aggregate::MultiAggregate(
+                    MultiAggregate::WeightedMean,
+                    stripped.to_owned(),
+                )
+            } else {
+                Aggregate::SingleAggregate(SingleAggregate::from_str(input)?)
+            },
+        )
+    }
+}
+
 const STRING_AGGREGATES: &[SingleAggregate] = &[
-    SingleAggregate::Count,
     SingleAggregate::Any,
-    SingleAggregate::Unique,
-    SingleAggregate::Dominant,
-    SingleAggregate::Median,
-    SingleAggregate::First,
-    SingleAggregate::LastByIndex,
-    SingleAggregate::Last,
+    SingleAggregate::Count,
     SingleAggregate::DistinctCount,
+    SingleAggregate::Dominant,
+    SingleAggregate::First,
     SingleAggregate::Join,
+    SingleAggregate::Last,
+    SingleAggregate::LastByIndex,
+    SingleAggregate::Median,
+    SingleAggregate::Unique,
 ];
 
 const NUMBER_AGGREGATES: &[SingleAggregate] = &[
+    SingleAggregate::AbsSum,
+    SingleAggregate::Any,
+    SingleAggregate::Avg,
+    SingleAggregate::Count,
+    SingleAggregate::DistinctCount,
+    SingleAggregate::Dominant,
+    SingleAggregate::First,
+    SingleAggregate::High,
+    SingleAggregate::Low,
+    SingleAggregate::LastByIndex,
+    SingleAggregate::Last,
+    SingleAggregate::Mean,
+    SingleAggregate::Median,
+    SingleAggregate::PctSumParent,
+    SingleAggregate::PctSumGrandTotal,
+    SingleAggregate::StdDev,
     SingleAggregate::Sum,
     SingleAggregate::SumAbs,
     SingleAggregate::SumNotNull,
-    SingleAggregate::AbsSum,
-    SingleAggregate::PctSumParent,
-    SingleAggregate::PctSumGrandTotal,
-    SingleAggregate::Any,
     SingleAggregate::Unique,
-    SingleAggregate::Dominant,
-    SingleAggregate::Median,
-    SingleAggregate::First,
-    SingleAggregate::LastByIndex,
-    SingleAggregate::Last,
-    SingleAggregate::Count,
-    SingleAggregate::DistinctCount,
-    SingleAggregate::Avg,
-    SingleAggregate::Mean,
-    SingleAggregate::Join,
-    SingleAggregate::High,
-    SingleAggregate::Low,
-    SingleAggregate::StdDev,
     SingleAggregate::Var,
 ];
 
-pub trait AggregatesIter {
-    fn aggregates_iter(&self) -> Box<dyn Iterator<Item = Aggregate>>;
-}
-
-impl AggregatesIter for Type {
-    fn aggregates_iter(&self) -> Box<dyn Iterator<Item = Aggregate>> {
+impl Type {
+    pub fn aggregates_iter(&self) -> Box<dyn Iterator<Item = Aggregate>> {
         match self {
             Type::Bool | Type::Date | Type::Datetime | Type::String => Box::new(
                 STRING_AGGREGATES
@@ -232,6 +245,17 @@ impl AggregatesIter for Type {
                     .iter()
                     .map(|x| Aggregate::SingleAggregate(*x)),
             ),
+        }
+    }
+
+    pub fn default_aggregate(&self) -> Aggregate {
+        match self {
+            Type::Bool | Type::Date | Type::Datetime | Type::String => {
+                Aggregate::SingleAggregate(SingleAggregate::Count)
+            }
+            Type::Integer | Type::Float => {
+                Aggregate::SingleAggregate(SingleAggregate::Sum)
+            }
         }
     }
 }

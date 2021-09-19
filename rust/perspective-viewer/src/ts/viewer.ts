@@ -79,6 +79,10 @@ export class PerspectiveViewerElement extends HTMLElement {
      * @category Plugin
      * @param name The `name` of the custom element to register, as supplied
      * to the `customElements.define(name)` method.
+     * @example
+     * ```javascript
+     * customElements.get("perspective-viewer").registerPlugin("my-plugin");
+     * ```
      */
     static async registerPlugin(name: string): Promise<void> {
         const module = await WASM_MODULE;

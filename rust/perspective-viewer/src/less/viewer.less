@@ -8,11 +8,12 @@
  *
  */
 
- @import "./split-panel.less";
- @import "./status-bar.less";
- @import "./render-warning.less";
- @import "./column-selector.less";
- @import "./config-selector.less";
+@import "./dropdown.less";
+@import "./split-panel.less";
+@import "./status-bar.less";
+@import "./render-warning.less";
+@import "./column-selector.less";
+@import "./config-selector.less";
 
 :host {
     position: relative;
@@ -28,7 +29,7 @@
     #app_panel {
         position: absolute;
         bottom: 36px;
-        left: 0 ;
+        left: 0;
         right: 0;
         top: 0;
     }
@@ -36,7 +37,7 @@
     #status_bar {
         position: absolute;
         bottom: 0;
-        left:0 ;
+        left: 0;
         right: 0;
         height: 36px;
     }
@@ -56,7 +57,10 @@
 
         &.settings-closed {
             position: absolute;
-            inset: 0px;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
         }
     }
 
@@ -66,7 +70,7 @@
         padding: var(--side_panel--padding, 10px 2px 0px 11px);
         box-sizing: border-box;
         width: 100%;
-        
+
         #plugin_selector_container {
             min-height: 29px;
             margin-left: var(--column_selector--width, 20px);
@@ -119,10 +123,10 @@
         background: var(
             --select--background,
             url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB2ZXJzaW9uPSIxLjEiIGlkPSJMYXllcl8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCIKCSB2aWV3Qm94PSIwIDAgNC45IDEwIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA0LjkgMTA7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4KPHN0eWxlIHR5cGU9InRleHQvY3NzIj4KCS5zdDB7ZmlsbDojQUFBQUFBO30KPC9zdHlsZT4KPHRpdGxlPmFycm93czwvdGl0bGU+Cjxwb2x5Z29uIGNsYXNzPSJzdDAiIHBvaW50cz0iMS40LDQuNyAyLjUsMy4yIDMuNSw0LjcgIi8+Cjxwb2x5Z29uIGNsYXNzPSJzdDAiIHBvaW50cz0iMy41LDUuMyAyLjUsNi44IDEuNCw1LjMgIi8+Cjwvc3ZnPg==)
-                no-repeat 95% 50%
+                no-repeat right 2px center
         );
         option {
-            background: var(--select--background-color, #ffffff);  
+            background: var(--select--background-color, #ffffff);
         }
     }
 
@@ -130,11 +134,10 @@
         margin-top: 3px;
         border-bottom-width: 1px;
         border-style: solid;
-        border-color: var(--inactive--color, #C5C9D0);
+        border-color: var(--inactive--color, #c5c9d0);
         border-top-width: 0px;
         border-left-width: 0px;
         border-right-width: 0px;
-
     }
 
     #settings_button {

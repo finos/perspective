@@ -408,6 +408,13 @@ impl Component for FilterItem {
             }
         };
 
+        let filter_ops = self
+            .props
+            .get_filter_ops()
+            .into_iter()
+            .map(DropDownItem::Option)
+            .collect::<Vec<_>>();
+
         html! {
             <>
                 <span
@@ -421,7 +428,7 @@ impl Component for FilterItem {
                 <FilterOpSelector
                     class="filter-op-selector"
                     auto_resize=true
-                    values={ self.props.get_filter_ops() }
+                    values={ filter_ops }
                     selected={ filter.1 }
                     on_select={ select }>
                 </FilterOpSelector>
