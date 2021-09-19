@@ -55,7 +55,8 @@
                 min-height: 14px;
                 margin-top: 5px;
                 overflow: visible;
-                border-left: 2px solid rgba(0, 0, 0, 0.5);
+                border-left: 2px solid
+                    var(--inactive--color, rgba(0, 0, 0, 0.5));
                 margin-right: 2px;
                 margin-left: -4px;
 
@@ -135,6 +136,7 @@
                     background: transparent;
                     font-family: "Open Sans";
                     font-size: 12px;
+                    color: inherit;
                 }
 
                 &::after {
