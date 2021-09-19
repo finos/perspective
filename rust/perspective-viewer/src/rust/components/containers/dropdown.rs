@@ -93,12 +93,9 @@ where
     }
 
     // Annoyingly, `<select>` cannot be updated from its HTML alone.
-    fn rendered(&mut self, first_render: bool) {
-        if first_render {
-            self.select_ref
-                .cast::<web_sys::HtmlSelectElement>()
-                .expect("Turtlebait")
-                .set_value(&format!("{}", self.props.selected));
+    fn rendered(&mut self, _first_render: bool) {
+        if let Some(elem) = self.select_ref.cast::<web_sys::HtmlSelectElement>() {
+            elem.set_value(&format!("{}", self.props.selected))
         }
     }
 
