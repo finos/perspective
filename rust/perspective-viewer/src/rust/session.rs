@@ -573,7 +573,14 @@ impl Session {
                             .collect::<Vec<_>>(),
                     );
                 } else {
-                    config_update.columns = Some(vec![]);
+                    config_update.columns = Some(
+                        self.metadata()
+                            .iter_columns()
+                            .take(*min_cols)
+                            .cloned()
+                            .map(Some)
+                            .collect::<Vec<_>>(),
+                    );
                 }
             }
         } else if config_update.columns.is_none() {
