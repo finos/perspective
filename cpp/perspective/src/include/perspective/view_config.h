@@ -22,9 +22,10 @@
 namespace perspective {
 
 /**
- * @brief The `t_view_config` API provides a unified view configuration object, which specifies
- * how the `View` transforms the underlying `Table`. By storing configuration values in native
- * C++ types, we allow easy integration with binding languages.
+ * @brief The `t_view_config` API provides a unified view configuration object,
+ * which specifies how the `View` transforms the underlying `Table`. By storing
+ * configuration values in native C++ types, we allow easy integration with
+ * binding languages.
  *
  */
 class PERSPECTIVE_EXPORT t_view_config {
@@ -39,20 +40,20 @@ public:
      * @param filter
      * @param sort
      */
-    t_view_config(
-        const std::vector<std::string>& row_pivots,
+    t_view_config(const std::vector<std::string>& row_pivots,
         const std::vector<std::string>& column_pivots,
-        const tsl::ordered_map<std::string, std::vector<std::string>>& aggregates,
+        const tsl::ordered_map<std::string, std::vector<std::string>>&
+            aggregates,
         const std::vector<std::string>& columns,
-        const std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>>& filter,
+        const std::vector<std::tuple<std::string, std::string,
+            std::vector<t_tscalar>>>& filter,
         const std::vector<std::vector<std::string>>& sort,
         const std::vector<std::shared_ptr<t_computed_expression>>& expressions,
-        const std::string& filter_op,
-        bool column_only);
+        const std::string& filter_op, bool column_only);
 
     /**
-     * @brief Given a `t_schema` specifying the underlying `Table`'s columns, construct the
-     * abstractions necessary for the core engine.
+     * @brief Given a `t_schema` specifying the underlying `Table`'s columns,
+     * construct the abstractions necessary for the core engine.
      *
      * @param schema
      */
@@ -67,12 +68,13 @@ public:
     void validate(std::shared_ptr<t_schema> schema);
 
     /**
-     * @brief Add filter terms manually, as the filter term must be calculated from the value
-     * passed through the binding.
+     * @brief Add filter terms manually, as the filter term must be calculated
+     * from the value passed through the binding.
      *
      * @param term
      */
-    void add_filter_term(std::tuple<std::string, std::string, std::vector<t_tscalar>> term);
+    void add_filter_term(
+        std::tuple<std::string, std::string, std::vector<t_tscalar>> term);
 
     /**
      * @brief Set the number of pivot levels the engine should generate.
@@ -109,18 +111,18 @@ private:
     bool m_init;
 
     /**
-     * @brief Fill the `m_aggspecs` vector with `t_aggspec` objects which define the view's
-     * aggregate settings.
+     * @brief Fill the `m_aggspecs` vector with `t_aggspec` objects which define
+     * the view's aggregate settings.
      *
-     * The method calculates aggregates using the columns marked for display (in `m_columns`),
-     * user-provided aggregates (in `m_aggregates`), and if sorts are applied using a column
-     * that is not displayed.
+     * The method calculates aggregates using the columns marked for display (in
+     * `m_columns`), user-provided aggregates (in `m_aggregates`), and if sorts
+     * are applied using a column that is not displayed.
      *
-     * At the same time, the method fills the `m_aggregate_names` vector with each column that
-     * has an aggregate applied.
+     * At the same time, the method fills the `m_aggregate_names` vector with
+     * each column that has an aggregate applied.
      *
-     * See documentation for the `m_aggregate_names` vector below for details regarding its
-     * logic.
+     * See documentation for the `m_aggregate_names` vector below for details
+     * regarding its logic.
      *
      * @param schema
      * @return void
@@ -128,41 +130,45 @@ private:
     void fill_aggspecs(std::shared_ptr<t_schema> schema);
 
     /**
-     * @brief Fill the `m_fterm` vector with `t_fterm` objects which define the view's filters.
+     * @brief Fill the `m_fterm` vector with `t_fterm` objects which define the
+     * view's filters.
      *
      * @return void
      */
     void fill_fterm();
 
     /**
-     * @brief Fill the `m_sortspec` vectors with `t_sortspec` objects which define the view's
-     * sorting.
+     * @brief Fill the `m_sortspec` vectors with `t_sortspec` objects which
+     * define the view's sorting.
      *
-     * The method fills both the `m_sortspec` and `m_col_sortspec` vectors. The former is used
-     * in all views, and the latter refers to sorting based on a column when column pivots are
-     * applied; it is only used in 2-sided views.
+     * The method fills both the `m_sortspec` and `m_col_sortspec` vectors. The
+     * former is used in all views, and the latter refers to sorting based on a
+     * column when column pivots are applied; it is only used in 2-sided views.
      *
      * @return void
      */
     void fill_sortspec();
 
     /**
-     * @brief Given a column name, find its position in `m_aggregate_names`. Used for
-     * determining sort specifications.
+     * @brief Given a column name, find its position in `m_aggregate_names`.
+     * Used for determining sort specifications.
      *
      * @param column
      * @return t_index
      */
     t_index get_aggregate_index(const std::string& column) const;
 
-    void make_aggspec(const std::string& column, const std::vector<std::string>& aggregate, t_dtype dtype);
+    void make_aggspec(const std::string& column,
+        const std::vector<std::string>& aggregate, t_dtype dtype);
 
-    // containers for primitive data that does not need transformation into abstractions
+    // containers for primitive data that does not need transformation into
+    // abstractions
     std::vector<std::string> m_row_pivots;
     std::vector<std::string> m_column_pivots;
     tsl::ordered_map<std::string, std::vector<std::string>> m_aggregates;
     std::vector<std::string> m_columns;
-    std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>> m_filter;
+    std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>>
+        m_filter;
     std::vector<std::vector<std::string>> m_sort;
     std::vector<std::shared_ptr<t_computed_expression>> m_expressions;
 
@@ -171,7 +177,8 @@ private:
      *
      * 1. all columns marked as "shown" by the user in `m_columns`
      * 2. all specified aggregates from `m_aggregates`
-     * 3. all "hidden sorts", i.e. columns to sort by that do not appear in `m_columns`
+     * 3. all "hidden sorts", i.e. columns to sort by that do not appear in
+     * `m_columns`
      *
      */
     std::vector<std::string> m_aggregate_names;
@@ -186,7 +193,8 @@ private:
     std::vector<t_sortspec> m_col_sortspec;
 
     /**
-     * @brief If specified, the number of pivot levels the engine should generate.
+     * @brief If specified, the number of pivot levels the engine should
+     * generate.
      *
      * Used in `expand` and `collapse` tree operations, and in the grid.
      */
@@ -194,15 +202,17 @@ private:
     std::int32_t m_column_pivot_depth;
 
     /**
-     * @brief the `t_filter_op` used to return data in the case of multiple filters being applied.
+     * @brief the `t_filter_op` used to return data in the case of multiple
+     * filters being applied.
      *
-     * Defaults to "and", which returns data that satisfies all the filters provided by the user. 
+     * Defaults to "and", which returns data that satisfies all the filters
+     * provided by the user.
      */
     std::string m_filter_op;
 
     /**
-     * @brief whether the view is `column_only`, i.e. having > 1 `column_pivots` without any
-     * `row_pivots`.
+     * @brief whether the view is `column_only`, i.e. having > 1 `column_pivots`
+     * without any `row_pivots`.
      *
      */
     bool m_column_only;

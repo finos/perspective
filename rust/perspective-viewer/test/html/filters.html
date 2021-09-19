@@ -10,31 +10,48 @@
 <!DOCTYPE html>
 <html>
     <head>
- 
         <script src="perspective.js"></script>
         <script src="perspective-viewer.js"></script>
 
-        <link rel='stylesheet' href="demo.css">
-
+        <link rel="stylesheet" href="demo.css" />
     </head>
     <body>
-
-        <perspective-viewer>
-  
-        </perspective-viewer>
+        <perspective-viewer> </perspective-viewer>
 
         <script>
-
             window.WORKER = perspective.worker();
             const datetime_range_data = [
-                {v: new Date(2020, 2, 1), w: new Date(2020, 2, 1, 12, 30, 55), x: 1, y: "a", z: true}, // 2020/03/01 12:30:55 GMT-0400
-                {v: new Date(2020, 9, 1), w: new Date(2020, 9, 1, 15, 30, 55), x: 2, y: "b", z: false}, // 2020/10/01 15:30:55 GMT-0400
-                {v: new Date(2020, 10, 1), w: new Date(2020, 10, 1, 19, 30, 55), x: 3, y: "c", z: true}, // 2020/11/01 19:30:55 GMT-0500
-                {v: new Date(2020, 11, 1), w: new Date(2020, 11, 1, 23, 30, 55), x: 4, y: "d", z: false} // 2020/12/01 23:30:55 GMT-0500
+                {
+                    v: new Date(2020, 2, 1),
+                    w: new Date(2020, 2, 1, 12, 30, 55),
+                    x: 1,
+                    y: "a",
+                    z: true,
+                }, // 2020/03/01 12:30:55 GMT-0400
+                {
+                    v: new Date(2020, 9, 1),
+                    w: new Date(2020, 9, 1, 15, 30, 55),
+                    x: 2,
+                    y: "b",
+                    z: false,
+                }, // 2020/10/01 15:30:55 GMT-0400
+                {
+                    v: new Date(2020, 10, 1),
+                    w: new Date(2020, 10, 1, 19, 30, 55),
+                    x: 3,
+                    y: "c",
+                    z: true,
+                }, // 2020/11/01 19:30:55 GMT-0500
+                {
+                    v: new Date(2020, 11, 1),
+                    w: new Date(2020, 11, 1, 23, 30, 55),
+                    x: 4,
+                    y: "d",
+                    z: false,
+                }, // 2020/12/01 23:30:55 GMT-0500
             ];
             const table = window.WORKER.table(datetime_range_data);
             document.querySelector("perspective-viewer").load(table);
         </script>
-
     </body>
 </html>

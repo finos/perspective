@@ -12,36 +12,43 @@
 namespace perspective {
 namespace apachearrow {
 
-    void 
-    load_stream(const uintptr_t ptr, const uint32_t length, std::shared_ptr<arrow::Table>& table) {
-        arrow::io::BufferReader buffer_reader(reinterpret_cast<const std::uint8_t*>(ptr), length);
-#if ARROW_VERSION_MAJOR < 1        
+    void
+    load_stream(const uintptr_t ptr, const uint32_t length,
+        std::shared_ptr<arrow::Table>& table) {
+        arrow::io::BufferReader buffer_reader(
+            reinterpret_cast<const std::uint8_t*>(ptr), length);
+#if ARROW_VERSION_MAJOR < 1
         std::shared_ptr<arrow::ipc::RecordBatchReader> batch_reader;
-        arrow::Status status = arrow::ipc::RecordBatchStreamReader::Open(&buffer_reader, &batch_reader); 
+        arrow::Status status = arrow::ipc::RecordBatchStreamReader::Open(
+            &buffer_reader, &batch_reader);
         if (!status.ok()) {
             std::stringstream ss;
-            ss << "Failed to open RecordBatchStreamReader: " << status.message() << std::endl;
+            ss << "Failed to open RecordBatchStreamReader: " << status.message()
+               << std::endl;
             PSP_COMPLAIN_AND_ABORT(ss.str());
-        } else { 
+        } else {
             status = batch_reader->ReadAll(&table);
             if (!status.ok()) {
                 std::stringstream ss;
-                ss << "Failed to read stream record batch: " << status.message() << std::endl;
+                ss << "Failed to read stream record batch: " << status.message()
+                   << std::endl;
                 PSP_COMPLAIN_AND_ABORT(ss.str());
             };
         }
 #else
-        auto status = arrow::ipc::RecordBatchStreamReader::Open(&buffer_reader); 
+        auto status = arrow::ipc::RecordBatchStreamReader::Open(&buffer_reader);
         if (!status.ok()) {
             std::stringstream ss;
-            ss << "Failed to open RecordBatchStreamReader: " << status.status().ToString() << std::endl;
+            ss << "Failed to open RecordBatchStreamReader: "
+               << status.status().ToString() << std::endl;
             PSP_COMPLAIN_AND_ABORT(ss.str());
-        } else { 
+        } else {
             auto batch_reader = *status;
             auto status5 = batch_reader->ReadAll(&table);
             if (!status5.ok()) {
                 std::stringstream ss;
-                ss << "Failed to read stream record batch: " << status5.ToString() << std::endl;
+                ss << "Failed to read stream record batch: "
+                   << status5.ToString() << std::endl;
                 PSP_COMPLAIN_AND_ABORT(ss.str());
             };
         }
@@ -49,14 +56,18 @@ namespace apachearrow {
     }
 
     void
-    load_file(const uintptr_t ptr, const uint32_t length, std::shared_ptr<arrow::Table>& table) {
-        arrow::io::BufferReader buffer_reader(reinterpret_cast<const std::uint8_t*>(ptr), length);
+    load_file(const uintptr_t ptr, const uint32_t length,
+        std::shared_ptr<arrow::Table>& table) {
+        arrow::io::BufferReader buffer_reader(
+            reinterpret_cast<const std::uint8_t*>(ptr), length);
 #if ARROW_VERSION_MAJOR < 1
         std::shared_ptr<arrow::ipc::RecordBatchFileReader> batch_reader;
-        arrow::Status status = arrow::ipc::RecordBatchFileReader::Open(&buffer_reader, &batch_reader);        
+        arrow::Status status = arrow::ipc::RecordBatchFileReader::Open(
+            &buffer_reader, &batch_reader);
         if (!status.ok()) {
             std::stringstream ss;
-            ss << "Failed to open RecordBatchFileReader: " << status.message() << std::endl;
+            ss << "Failed to open RecordBatchFileReader: " << status.message()
+               << std::endl;
             PSP_COMPLAIN_AND_ABORT(ss.str());
         } else {
             std::vector<std::shared_ptr<arrow::RecordBatch>> batches;
@@ -65,8 +76,8 @@ namespace apachearrow {
                 std::shared_ptr<arrow::RecordBatch> chunk;
                 status = batch_reader->ReadRecordBatch(i, &chunk);
                 if (!status.ok()) {
-                    PSP_COMPLAIN_AND_ABORT(
-                        "Failed to read file record batch: " + status.message());
+                    PSP_COMPLAIN_AND_ABORT("Failed to read file record batch: "
+                        + status.message());
                 }
                 batches.push_back(chunk);
             }
@@ -74,26 +85,28 @@ namespace apachearrow {
             if (!status.ok()) {
                 std::stringstream ss;
                 ss << "Failed to create Table from RecordBatches: "
-                    << status.message() << std::endl;
+                   << status.message() << std::endl;
                 PSP_COMPLAIN_AND_ABORT(ss.str());
             };
         };
 #else
-        auto status = arrow::ipc::RecordBatchFileReader::Open(&buffer_reader);        
+        auto status = arrow::ipc::RecordBatchFileReader::Open(&buffer_reader);
         if (!status.ok()) {
             std::stringstream ss;
-            ss << "Failed to open RecordBatchFileReader: " << status.status().ToString() << std::endl;
+            ss << "Failed to open RecordBatchFileReader: "
+               << status.status().ToString() << std::endl;
             PSP_COMPLAIN_AND_ABORT(ss.str());
         } else {
-            std::shared_ptr<arrow::ipc::RecordBatchFileReader> batch_reader = *status;
+            std::shared_ptr<arrow::ipc::RecordBatchFileReader> batch_reader
+                = *status;
             std::vector<std::shared_ptr<arrow::RecordBatch>> batches;
             auto num_batches = batch_reader->num_record_batches();
             for (int i = 0; i < num_batches; ++i) {
-                
+
                 auto status2 = batch_reader->ReadRecordBatch(i);
                 if (!status2.ok()) {
-                    PSP_COMPLAIN_AND_ABORT(
-                        "Failed to read file record batch: " + status2.status().ToString());
+                    PSP_COMPLAIN_AND_ABORT("Failed to read file record batch: "
+                        + status2.status().ToString());
                 }
                 std::shared_ptr<arrow::RecordBatch> chunk = *status2;
                 batches.push_back(chunk);
@@ -102,7 +115,7 @@ namespace apachearrow {
             if (!status3.ok()) {
                 std::stringstream ss;
                 ss << "Failed to create Table from RecordBatches: "
-                    << status3.status().ToString() << std::endl;
+                   << status3.status().ToString() << std::endl;
                 PSP_COMPLAIN_AND_ABORT(ss.str());
             };
             table = *status3;
@@ -114,7 +127,7 @@ namespace apachearrow {
 
     ArrowLoader::ArrowLoader() {}
     ArrowLoader::~ArrowLoader() {}
-    
+
     t_dtype
     convert_type(const std::string& src) {
         if (src == "dictionary" || src == "utf8" || src == "binary") {
@@ -140,7 +153,7 @@ namespace apachearrow {
         } else if (src == "float") {
             return DTYPE_FLOAT32;
         } else if (src == "double") {
-            return DTYPE_FLOAT64; 
+            return DTYPE_FLOAT64;
         } else if (src == "timestamp") {
             return DTYPE_TIME;
         } else if (src == "date32" || src == "date64") {
@@ -149,15 +162,17 @@ namespace apachearrow {
             return DTYPE_STR;
         }
         std::stringstream ss;
-        ss << "Could not load arrow column of type `" << src << "`" << std::endl;
+        ss << "Could not load arrow column of type `" << src << "`"
+           << std::endl;
         PSP_COMPLAIN_AND_ABORT(ss.str());
         return DTYPE_STR;
     }
 
     void
     ArrowLoader::initialize(const uintptr_t ptr, const uint32_t length) {
-        arrow::io::BufferReader buffer_reader(reinterpret_cast<const std::uint8_t*>(ptr), length);
-        if (std::memcmp("ARROW1", (const void *)ptr, 6) == 0) {
+        arrow::io::BufferReader buffer_reader(
+            reinterpret_cast<const std::uint8_t*>(ptr), length);
+        if (std::memcmp("ARROW1", (const void*)ptr, 6) == 0) {
             load_file(ptr, length, m_table);
         } else {
             load_stream(ptr, length, m_table);
@@ -173,7 +188,9 @@ namespace apachearrow {
     }
 
     void
-    ArrowLoader::init_csv(std::string& csv, bool is_update, std::unordered_map<std::string, std::shared_ptr<arrow::DataType>>& psp_schema) {        
+    ArrowLoader::init_csv(std::string& csv, bool is_update,
+        std::unordered_map<std::string, std::shared_ptr<arrow::DataType>>&
+            psp_schema) {
         m_table = csvToTable(csv, is_update, psp_schema);
 
         std::shared_ptr<arrow::Schema> schema = m_table->schema();
@@ -186,12 +203,8 @@ namespace apachearrow {
     }
 
     void
-    ArrowLoader::fill_table(
-        t_data_table& tbl, 
-        const t_schema& input_schema,
-        const std::string& index,
-        std::uint32_t offset,
-        std::uint32_t limit,
+    ArrowLoader::fill_table(t_data_table& tbl, const t_schema& input_schema,
+        const std::string& index, std::uint32_t offset, std::uint32_t limit,
         bool is_update) {
         bool implicit_index = false;
         std::shared_ptr<arrow::Schema> schema = m_table->schema();
@@ -202,7 +215,7 @@ namespace apachearrow {
             t_dtype type = m_types[cidx];
 
             if (!input_schema.has_column(name)) {
-                // Skip columns that are defined in the arrow but not 
+                // Skip columns that are defined in the arrow but not
                 // in the Table's input schema.
                 continue;
             }
@@ -213,7 +226,8 @@ namespace apachearrow {
                 implicit_index = true;
                 std::shared_ptr<t_column> pkey_col_sptr
                     = tbl.add_column_sptr("psp_pkey", type, true);
-                fill_column(tbl, pkey_col_sptr, "psp_pkey", cidx, type, raw_type, is_update);
+                fill_column(tbl, pkey_col_sptr, "psp_pkey", cidx, type,
+                    raw_type, is_update);
                 tbl.clone_column("psp_pkey", "psp_okey");
                 continue;
             } else {
@@ -225,19 +239,24 @@ namespace apachearrow {
         // Fill index column - recreated every time a `t_data_table` is created.
         if (!implicit_index) {
             if (index == "") {
-                // Use row number as index if not explicitly provided or provided with
+                // Use row number as index if not explicitly provided or
+                // provided with
                 // `__INDEX__`
                 auto key_col = tbl.add_column("psp_pkey", DTYPE_INT32, true);
                 auto okey_col = tbl.add_column("psp_okey", DTYPE_INT32, true);
 
                 for (std::uint32_t ridx = 0; ridx < tbl.size(); ++ridx) {
-                    key_col->set_nth<std::int32_t>(ridx, (ridx + offset) % limit);
-                    okey_col->set_nth<std::int32_t>(ridx, (ridx + offset) % limit);
+                    key_col->set_nth<std::int32_t>(
+                        ridx, (ridx + offset) % limit);
+                    okey_col->set_nth<std::int32_t>(
+                        ridx, (ridx + offset) % limit);
                 }
             } else {
                 if (!input_schema.has_column(index)) {
                     std::stringstream ss;
-                    ss << "Specified index `" << index << "` is invalid as it does not appear in the Table." << std::endl;
+                    ss << "Specified index `" << index
+                       << "` is invalid as it does not appear in the Table."
+                       << std::endl;
                     PSP_COMPLAIN_AND_ABORT(ss.str());
                 }
 
@@ -249,8 +268,9 @@ namespace apachearrow {
 
     template <typename T, typename V>
     void
-    iter_col_copy(std::shared_ptr<t_column> dest, std::shared_ptr<arrow::Array> src,
-        const int64_t offset, const int64_t len) {
+    iter_col_copy(std::shared_ptr<t_column> dest,
+        std::shared_ptr<arrow::Array> src, const int64_t offset,
+        const int64_t len) {
         std::shared_ptr<T> scol = std::static_pointer_cast<T>(src);
         const typename T::value_type* vals = scol->raw_values();
         for (uint32_t i = 0; i < len; i++) {
@@ -259,17 +279,20 @@ namespace apachearrow {
     }
 
     void
-    copy_array(std::shared_ptr<t_column> dest, std::shared_ptr<arrow::Array> src,
-        const int64_t offset, const int64_t len) {
+    copy_array(std::shared_ptr<t_column> dest,
+        std::shared_ptr<arrow::Array> src, const int64_t offset,
+        const int64_t len) {
         switch (src->type()->id()) {
             case arrow::DictionaryType::type_id: {
                 // If there are duplicate values in the dictionary at different
                 // indices, i.e. [0 => a, 1 => b, 2 => a], tables with
                 // explicit indexes on a string column created from a dictionary
                 // array may have duplicate primary keys.
-                auto scol = std::static_pointer_cast<arrow::DictionaryArray>(src);
+                auto scol
+                    = std::static_pointer_cast<arrow::DictionaryArray>(src);
                 std::shared_ptr<arrow::StringArray> dict
-                    = std::static_pointer_cast<arrow::StringArray>(scol->dictionary());
+                    = std::static_pointer_cast<arrow::StringArray>(
+                        scol->dictionary());
                 const int32_t* offsets = dict->raw_value_offsets();
                 const uint8_t* values = dict->value_data()->data();
                 const std::uint64_t dsize = dict->length();
@@ -280,38 +303,47 @@ namespace apachearrow {
                 for (std::uint64_t i = 0; i < dsize; ++i) {
                     std::int32_t bidx = offsets[i];
                     std::size_t es = offsets[i + 1] - bidx;
-                    elem.assign(reinterpret_cast<const char*>(values) + bidx, es);
+                    elem.assign(
+                        reinterpret_cast<const char*>(values) + bidx, es);
                     vocab->get_interned(elem);
                 }
                 auto indices = scol->indices();
                 switch (indices->type()->id()) {
                     case arrow::Int8Type::type_id: {
-                        iter_col_copy<::arrow::Int8Array, t_uindex>(dest, indices, offset, len);                    
+                        iter_col_copy<::arrow::Int8Array, t_uindex>(
+                            dest, indices, offset, len);
                     } break;
                     case ::arrow::UInt8Type::type_id: {
-                        iter_col_copy<::arrow::UInt8Array, t_uindex>(dest, indices, offset, len);
+                        iter_col_copy<::arrow::UInt8Array, t_uindex>(
+                            dest, indices, offset, len);
                     } break;
                     case ::arrow::Int16Type::type_id: {
-                        iter_col_copy<::arrow::Int16Array, t_uindex>(dest, indices, offset, len);
+                        iter_col_copy<::arrow::Int16Array, t_uindex>(
+                            dest, indices, offset, len);
                     } break;
                     case ::arrow::UInt16Type::type_id: {
-                        iter_col_copy<::arrow::UInt16Array, t_uindex>(dest, indices, offset, len);
+                        iter_col_copy<::arrow::UInt16Array, t_uindex>(
+                            dest, indices, offset, len);
                     } break;
                     case ::arrow::Int32Type::type_id: {
-                        iter_col_copy<::arrow::Int32Array, t_uindex>(dest, indices, offset, len);
+                        iter_col_copy<::arrow::Int32Array, t_uindex>(
+                            dest, indices, offset, len);
                     } break;
                     case ::arrow::UInt32Type::type_id: {
-                        iter_col_copy<::arrow::UInt32Array, t_uindex>(dest, indices, offset, len);
+                        iter_col_copy<::arrow::UInt32Array, t_uindex>(
+                            dest, indices, offset, len);
                     } break;
                     case ::arrow::Int64Type::type_id: {
-                        iter_col_copy<::arrow::Int64Array, t_uindex>(dest, indices, offset, len);
+                        iter_col_copy<::arrow::Int64Array, t_uindex>(
+                            dest, indices, offset, len);
                     } break;
                     case ::arrow::UInt64Type::type_id: {
-                        iter_col_copy<::arrow::UInt64Array, t_uindex>(dest, indices, offset, len);
+                        iter_col_copy<::arrow::UInt64Array, t_uindex>(
+                            dest, indices, offset, len);
                     } break;
                     default: {
                         std::stringstream ss;
-                        ss << "Could not copy dictionary array indices of type'" 
+                        ss << "Could not copy dictionary array indices of type'"
                            << indices->type()->name() << "'" << std::endl;
                         PSP_COMPLAIN_AND_ABORT(ss.str());
                     }
@@ -329,55 +361,67 @@ namespace apachearrow {
                 for (std::uint32_t i = 0; i < len; ++i) {
                     std::int32_t bidx = offsets[i];
                     std::size_t es = offsets[i + 1] - bidx;
-                    elem.assign(reinterpret_cast<const char*>(values) + bidx, es);
+                    elem.assign(
+                        reinterpret_cast<const char*>(values) + bidx, es);
                     dest->set_nth(offset + i, elem);
                 }
             } break;
             case arrow::Int8Type::type_id: {
                 auto scol = std::static_pointer_cast<arrow::Int8Array>(src);
-                std::memcpy(dest->get_nth<std::int8_t>(offset), (void*)scol->raw_values(), len);
+                std::memcpy(dest->get_nth<std::int8_t>(offset),
+                    (void*)scol->raw_values(), len);
             } break;
             case arrow::UInt8Type::type_id: {
                 auto scol = std::static_pointer_cast<arrow::UInt8Array>(src);
-                std::memcpy(dest->get_nth<std::uint8_t>(offset), (void*)scol->raw_values(), len);
+                std::memcpy(dest->get_nth<std::uint8_t>(offset),
+                    (void*)scol->raw_values(), len);
             } break;
             case arrow::Int16Type::type_id: {
                 auto scol = std::static_pointer_cast<arrow::Int16Array>(src);
-                std::memcpy(dest->get_nth<std::int16_t>(offset), (void*)scol->raw_values(), len * 2);
+                std::memcpy(dest->get_nth<std::int16_t>(offset),
+                    (void*)scol->raw_values(), len * 2);
             } break;
             case arrow::UInt16Type::type_id: {
                 auto scol = std::static_pointer_cast<arrow::UInt16Array>(src);
-                std::memcpy(dest->get_nth<std::uint16_t>(offset), (void*)scol->raw_values(), len * 2);
+                std::memcpy(dest->get_nth<std::uint16_t>(offset),
+                    (void*)scol->raw_values(), len * 2);
             } break;
             case arrow::Int32Type::type_id: {
                 auto scol = std::static_pointer_cast<arrow::Int32Array>(src);
-                std::memcpy(dest->get_nth<std::int32_t>(offset), (void*)scol->raw_values(), len * 4);
+                std::memcpy(dest->get_nth<std::int32_t>(offset),
+                    (void*)scol->raw_values(), len * 4);
             } break;
             case arrow::UInt32Type::type_id: {
                 auto scol = std::static_pointer_cast<arrow::UInt32Array>(src);
-                std::memcpy(dest->get_nth<std::uint32_t>(offset), (void*)scol->raw_values(), len * 4);
+                std::memcpy(dest->get_nth<std::uint32_t>(offset),
+                    (void*)scol->raw_values(), len * 4);
             } break;
             case arrow::Int64Type::type_id: {
                 auto scol = std::static_pointer_cast<arrow::Int64Array>(src);
-                std::memcpy(dest->get_nth<std::int64_t>(offset), (void*)scol->raw_values(), len * 8);
+                std::memcpy(dest->get_nth<std::int64_t>(offset),
+                    (void*)scol->raw_values(), len * 8);
             } break;
             case arrow::UInt64Type::type_id: {
                 auto scol = std::static_pointer_cast<arrow::UInt64Array>(src);
-                std::memcpy(dest->get_nth<std::uint64_t>(offset), (void*)scol->raw_values(), len * 8);
+                std::memcpy(dest->get_nth<std::uint64_t>(offset),
+                    (void*)scol->raw_values(), len * 8);
             } break;
             case arrow::TimestampType::type_id: {
                 std::shared_ptr<arrow::TimestampType> tunit
-                    = std::static_pointer_cast<arrow::TimestampType>(src->type());
-                auto scol = std::static_pointer_cast<arrow::TimestampArray>(src);
+                    = std::static_pointer_cast<arrow::TimestampType>(
+                        src->type());
+                auto scol
+                    = std::static_pointer_cast<arrow::TimestampArray>(src);
                 switch (tunit->unit()) {
                     case arrow::TimeUnit::MILLI: {
-                        std::memcpy(
-                            dest->get_nth<double>(offset), (void*)scol->raw_values(), len * 8);
+                        std::memcpy(dest->get_nth<double>(offset),
+                            (void*)scol->raw_values(), len * 8);
                     } break;
                     case arrow::TimeUnit::NANO: {
                         const int64_t* vals = scol->raw_values();
                         for (uint32_t i = 0; i < len; i++) {
-                            dest->set_nth<int64_t>(offset + i, vals[i] / 1000000);
+                            dest->set_nth<int64_t>(
+                                offset + i, vals[i] / 1000000);
                         }
                     } break;
                     case arrow::TimeUnit::MICRO: {
@@ -404,7 +448,8 @@ namespace apachearrow {
                     date::sys_days days(date::floor<date::days>(timestamp));
                     auto ymd = date::year_month_day{days};
                     std::int32_t year = static_cast<std::int32_t>(ymd.year());
-                    std::uint32_t month = static_cast<std::uint32_t>(ymd.month());
+                    std::uint32_t month
+                        = static_cast<std::uint32_t>(ymd.month());
                     std::uint32_t day = static_cast<std::uint32_t>(ymd.day());
                     // Decrement month by 1, as date::month is [1-12] but
                     // t_date::month() is [0-11]
@@ -418,12 +463,11 @@ namespace apachearrow {
                 const int32_t* vals = scol->raw_values();
                 for (uint32_t i = 0; i < len; i++) {
                     date::days days{vals[i]};
-                    auto ymd = date::year_month_day{
-                        date::sys_days{days}
-                    };
+                    auto ymd = date::year_month_day{date::sys_days{days}};
                     // years are signed, month/day are unsigned
                     std::int32_t year = static_cast<std::int32_t>(ymd.year());
-                    std::uint32_t month = static_cast<std::uint32_t>(ymd.month());
+                    std::uint32_t month
+                        = static_cast<std::uint32_t>(ymd.month());
                     std::uint32_t day = static_cast<std::uint32_t>(ymd.day());
                     // Decrement month by 1, as date::month is [1-12] but
                     // t_date::month() is [0-11]
@@ -432,20 +476,26 @@ namespace apachearrow {
             } break;
             case arrow::FloatType::type_id: {
                 auto scol = std::static_pointer_cast<arrow::FloatArray>(src);
-                std::memcpy(dest->get_nth<float>(offset), (void*)scol->raw_values(), len * 4);
+                std::memcpy(dest->get_nth<float>(offset),
+                    (void*)scol->raw_values(), len * 4);
             } break;
             case arrow::DoubleType::type_id: {
                 auto scol = std::static_pointer_cast<arrow::DoubleArray>(src);
-                std::memcpy(dest->get_nth<double>(offset), (void*)scol->raw_values(), len * 8);
+                std::memcpy(dest->get_nth<double>(offset),
+                    (void*)scol->raw_values(), len * 8);
             } break;
             case arrow::Decimal128Type::type_id:
             case arrow::DecimalType::type_id: {
-                std::shared_ptr<arrow::Decimal128Array> scol = std::static_pointer_cast<arrow::DecimalArray>(src);
-                auto vals = (arrow::Decimal128 *)scol->raw_values();
+                std::shared_ptr<arrow::Decimal128Array> scol
+                    = std::static_pointer_cast<arrow::DecimalArray>(src);
+                auto vals = (arrow::Decimal128*)scol->raw_values();
                 for (uint32_t i = 0; i < len; ++i) {
-                    arrow::Status status = vals[i].ToInteger(dest->get_nth<int64_t>(offset + i));
+                    arrow::Status status
+                        = vals[i].ToInteger(dest->get_nth<int64_t>(offset + i));
                     if (!status.ok()) {
-                        PSP_COMPLAIN_AND_ABORT("Could not write Decimal to column: " + status.message());
+                        PSP_COMPLAIN_AND_ABORT(
+                            "Could not write Decimal to column: "
+                            + status.message());
                     };
                 }
             } break;
@@ -466,59 +516,62 @@ namespace apachearrow {
             default: {
                 std::stringstream ss;
                 std::string arrow_type = src->type()->ToString();
-                ss << "Could not load Arrow column of type `" << arrow_type << "`." << std::endl;
+                ss << "Could not load Arrow column of type `" << arrow_type
+                   << "`." << std::endl;
                 PSP_COMPLAIN_AND_ABORT(ss.str());
             }
         }
     }
 
-    // Defines the full matrix of type interactions between arrow arrays and
-    // schema-defined tables.
-    #define FILL_COLUMN_ITER(ARRAY_TYPE) \
-        switch (column_dtype) { \
-            case DTYPE_INT8: { \
-                iter_col_copy<ARRAY_TYPE, std::int8_t>(col, array, offset, len); \
-            } break; \
-            case DTYPE_UINT8: { \
-                iter_col_copy<ARRAY_TYPE, std::uint8_t>(col, array, offset, len); \
-            } break; \
-            case DTYPE_INT16: { \
-                iter_col_copy<ARRAY_TYPE, std::int16_t>(col, array, offset, len); \
-            } break; \
-            case DTYPE_UINT16: { \
-                iter_col_copy<ARRAY_TYPE, std::uint16_t>(col, array, offset, len); \
-            } break; \
-            case DTYPE_INT32: { \
-                iter_col_copy<ARRAY_TYPE, std::int32_t>(col, array, offset, len); \
-            } break; \
-            case DTYPE_UINT32: { \
-                iter_col_copy<ARRAY_TYPE, std::uint32_t>(col, array, offset, len); \
-            } break; \
-            case DTYPE_INT64: { \
-                iter_col_copy<ARRAY_TYPE, std::int64_t>(col, array, offset, len); \
-            } break; \
-            case DTYPE_UINT64: { \
-                iter_col_copy<ARRAY_TYPE, std::uint64_t>(col, array, offset, len); \
-            } break; \
-            case DTYPE_FLOAT32: { \
-                iter_col_copy<ARRAY_TYPE, float>(col, array, offset, len); \
-            } break; \
-            case DTYPE_FLOAT64: { \
-                iter_col_copy<ARRAY_TYPE, double>(col, array, offset, len); \
-            } break; \
-            default: { \
-                PSP_COMPLAIN_AND_ABORT("Could not fill arrow column iteratively due to mismatched types."); \
-            } \
-        } \
+// Defines the full matrix of type interactions between arrow arrays and
+// schema-defined tables.
+#define FILL_COLUMN_ITER(ARRAY_TYPE)                                           \
+    switch (column_dtype) {                                                    \
+        case DTYPE_INT8: {                                                     \
+            iter_col_copy<ARRAY_TYPE, std::int8_t>(col, array, offset, len);   \
+        } break;                                                               \
+        case DTYPE_UINT8: {                                                    \
+            iter_col_copy<ARRAY_TYPE, std::uint8_t>(col, array, offset, len);  \
+        } break;                                                               \
+        case DTYPE_INT16: {                                                    \
+            iter_col_copy<ARRAY_TYPE, std::int16_t>(col, array, offset, len);  \
+        } break;                                                               \
+        case DTYPE_UINT16: {                                                   \
+            iter_col_copy<ARRAY_TYPE, std::uint16_t>(col, array, offset, len); \
+        } break;                                                               \
+        case DTYPE_INT32: {                                                    \
+            iter_col_copy<ARRAY_TYPE, std::int32_t>(col, array, offset, len);  \
+        } break;                                                               \
+        case DTYPE_UINT32: {                                                   \
+            iter_col_copy<ARRAY_TYPE, std::uint32_t>(col, array, offset, len); \
+        } break;                                                               \
+        case DTYPE_INT64: {                                                    \
+            iter_col_copy<ARRAY_TYPE, std::int64_t>(col, array, offset, len);  \
+        } break;                                                               \
+        case DTYPE_UINT64: {                                                   \
+            iter_col_copy<ARRAY_TYPE, std::uint64_t>(col, array, offset, len); \
+        } break;                                                               \
+        case DTYPE_FLOAT32: {                                                  \
+            iter_col_copy<ARRAY_TYPE, float>(col, array, offset, len);         \
+        } break;                                                               \
+        case DTYPE_FLOAT64: {                                                  \
+            iter_col_copy<ARRAY_TYPE, double>(col, array, offset, len);        \
+        } break;                                                               \
+        default: {                                                             \
+            PSP_COMPLAIN_AND_ABORT("Could not fill arrow column iteratively "  \
+                                   "due to mismatched types.");                \
+        }                                                                      \
+    }
 
     void
     ArrowLoader::fill_column(t_data_table& tbl, std::shared_ptr<t_column> col,
-        const std::string& name, std::int32_t cidx, t_dtype type, std::string& raw_type,
-        bool is_update) {
+        const std::string& name, std::int32_t cidx, t_dtype type,
+        std::string& raw_type, bool is_update) {
         int64_t offset = 0;
-        std::shared_ptr<arrow::ChunkedArray> carray = m_table->GetColumnByName(name);
+        std::shared_ptr<arrow::ChunkedArray> carray
+            = m_table->GetColumnByName(name);
 
-        for(auto i = 0; i < carray->num_chunks(); ++i) {
+        for (auto i = 0; i < carray->num_chunks(); ++i) {
             std::shared_ptr<arrow::Array> array = carray->chunk(i);
             int64_t len = array->length();
 
@@ -563,8 +616,10 @@ namespace apachearrow {
                     default: {
                         std::stringstream ss;
                         ss << "Could not fill column `" << name << "` with "
-                           << "t_dtype: `" << get_dtype_descr(column_dtype) << "`, "
-                           << "array type: `" << get_dtype_descr(type) << "`" << std::endl;
+                           << "t_dtype: `" << get_dtype_descr(column_dtype)
+                           << "`, "
+                           << "array type: `" << get_dtype_descr(type) << "`"
+                           << std::endl;
                         PSP_COMPLAIN_AND_ABORT(ss.str());
                     };
                 }
@@ -615,5 +670,5 @@ namespace apachearrow {
         return m_types;
     }
 
-} // namespace arrow
+} // namespace apachearrow
 } // namespace perspective

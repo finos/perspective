@@ -9,7 +9,7 @@
 const fs = require("fs");
 const {WebSocketServer} = require("@finos/perspective");
 
-const template = body => `
+const template = (body) => `
 <!DOCTYPE html>
 <html>
 <head>
@@ -23,7 +23,7 @@ const template = body => `
 </html>
 `;
 
-const prod_template = name => `
+const prod_template = (name) => `
 <li>
     <a href="src/${name}/index.html">local</a>
     <a href="dist/${name}/index.html">dist</a>
@@ -31,7 +31,7 @@ const prod_template = name => `
 </li>
 `;
 
-const dev_template = name => `
+const dev_template = (name) => `
 <li>
     <a href="src/${name}/index.html">local</a>
     ${name}

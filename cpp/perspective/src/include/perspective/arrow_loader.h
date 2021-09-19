@@ -32,36 +32,34 @@ namespace apachearrow {
 
         /**
          * @brief Initialize the arrow loader with a pointer to a binary.
-         * 
-         * @param ptr 
+         *
+         * @param ptr
          */
         void initialize(uintptr_t ptr, std::uint32_t);
 
         /**
          * @brief Initialize the arrow loader with a CSV.
-         * 
-         * @param ptr 
+         *
+         * @param ptr
          */
-        void init_csv(std::string& csv, bool is_update, std::unordered_map<std::string, std::shared_ptr<arrow::DataType>>& schema);
+        void init_csv(std::string& csv, bool is_update,
+            std::unordered_map<std::string, std::shared_ptr<arrow::DataType>>&
+                schema);
 
         /**
          * @brief Given an arrow binary and a data table, load the arrow into
          * Perspective. If updating an existing table, use the `input_schema`
          * of the table and respect it as much as possible.
-         * 
+         *
          * @param tbl
          * @param input_schema
          * @param index
          * @param offset
          * @param limit
-         * @param is_update 
+         * @param is_update
          */
-        void fill_table(
-            t_data_table& tbl,
-            const t_schema& input_schema,
-            const std::string& index,
-            std::uint32_t offset,
-            std::uint32_t limit, 
+        void fill_table(t_data_table& tbl, const t_schema& input_schema,
+            const std::string& index, std::uint32_t offset, std::uint32_t limit,
             bool is_update);
 
         std::vector<std::string> names() const;
@@ -69,14 +67,9 @@ namespace apachearrow {
         std::uint32_t row_count() const;
 
     private:
-        void fill_column(
-            t_data_table& tbl, 
-            std::shared_ptr<t_column> col,
-            const std::string& name, 
-            std::int32_t cidx, 
-            t_dtype type, 
-            std::string& raw_type,
-            bool is_update);
+        void fill_column(t_data_table& tbl, std::shared_ptr<t_column> col,
+            const std::string& name, std::int32_t cidx, t_dtype type,
+            std::string& raw_type, bool is_update);
 
         std::shared_ptr<arrow::Table> m_table;
         std::vector<std::string> m_names;
@@ -84,19 +77,13 @@ namespace apachearrow {
     };
 
     template <typename T, typename V>
-    void
-    iter_col_copy(
-        std::shared_ptr<t_column> dest,
-        std::shared_ptr<arrow::Array> src,
-        const int64_t offset,
+    void iter_col_copy(std::shared_ptr<t_column> dest,
+        std::shared_ptr<arrow::Array> src, const int64_t offset,
         const int64_t len);
 
-    void
-    copy_array(
-        std::shared_ptr<t_column> dest,
-        std::shared_ptr<arrow::Array> src,
-        const int64_t offset,
+    void copy_array(std::shared_ptr<t_column> dest,
+        std::shared_ptr<arrow::Array> src, const int64_t offset,
         const int64_t len);
 
-} // namespace arrow
+} // namespace apachearrow
 } // namespace perspective

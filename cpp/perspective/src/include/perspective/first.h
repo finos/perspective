@@ -71,4 +71,3 @@ namespace py = pybind11;
 // TODO javascript
 #define PSP_OBJECT_TYPE std::uint64_t
 #endif
-

@@ -53,7 +53,7 @@ const PORTS = [];
  * table is created from a view, and so we can set up `on_update` callbacks in a
  * custom way.
  */
-const datasource = async function() {
+const datasource = async function () {
     const load_start = performance.now();
     server_view = await server_table.view();
 
@@ -97,14 +97,16 @@ const setup_handlers = async () => {
     // Updates back from the server, however, should not be sent `back` to the
     // server (as it would create an infinite loop of updates).
     client_view.on_update(
-        updated => {
-            const client_ports = Object.keys(PORTS).map(viewer => PORTS[viewer]);
+        (updated) => {
+            const client_ports = Object.keys(PORTS).map(
+                (viewer) => PORTS[viewer]
+            );
 
             if (client_ports.includes(updated.port_id)) {
                 server_table.update(updated.delta, {
                     // Call update using the server port we were given, so that
                     // other workspaces can receive our update.
-                    port_id: server_edit_port
+                    port_id: server_edit_port,
                 });
             }
         },
@@ -116,7 +118,7 @@ const setup_handlers = async () => {
     // through that port, we know that this workspace created it and there is
     // no need to double apply.
     server_view.on_update(
-        updated => {
+        (updated) => {
             if (updated.port_id !== server_edit_port) {
                 // Update on port 0, as that will never trigger a send back to
                 // the server.
@@ -176,30 +178,30 @@ window.addEventListener("load", async () => {
                     {
                         type: "tab-area",
                         currentIndex: 0,
-                        widgets: ["main_widget"]
+                        widgets: ["main_widget"],
                     },
                     {
                         type: "tab-area",
                         currentIndex: 0,
-                        widgets: ["second_widget"]
-                    }
+                        widgets: ["second_widget"],
+                    },
                 ],
-                sizes: [0.5, 0.5]
-            }
+                sizes: [0.5, 0.5],
+            },
         },
         viewers: {
             main_widget: {
                 table: "datasource",
                 name: "Superstore",
                 plugin: "datagrid",
-                editable: true
+                editable: true,
             },
             second_widget: {
                 table: "datasource",
                 name: "Superstore 2",
                 plugin: "datagrid",
-                editable: true
-            }
-        }
+                editable: true,
+            },
+        },
     });
 });

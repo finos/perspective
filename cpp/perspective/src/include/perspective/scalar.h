@@ -71,8 +71,8 @@ struct PERSPECTIVE_EXPORT t_tscalar {
      * @brief A functional-style cast from int to `t_tscalar` used widely
      * by Exprtk. The scalar returned is of DTYPE_FLOAT64, so we don't have
      * to promote from int to float later on.
-     * 
-     * @param v 
+     *
+     * @param v
      */
     t_tscalar(int v);
 
@@ -124,12 +124,17 @@ struct PERSPECTIVE_EXPORT t_tscalar {
     t_tscalar operator/(const t_tscalar& other) const;
     t_tscalar operator%(const t_tscalar& other) const;
 
-    template <typename T> t_tscalar operator+(T other) const;
-    template <typename T> t_tscalar operator-(T other) const;
-    template <typename T> t_tscalar operator*(T other) const;
-    template <typename T> t_tscalar operator/(T other) const;
-    template <typename T> t_tscalar operator%(T other) const;
-    
+    template <typename T>
+    t_tscalar operator+(T other) const;
+    template <typename T>
+    t_tscalar operator-(T other) const;
+    template <typename T>
+    t_tscalar operator*(T other) const;
+    template <typename T>
+    t_tscalar operator/(T other) const;
+    template <typename T>
+    t_tscalar operator%(T other) const;
+
     t_tscalar& operator+=(const t_tscalar& rhs);
     t_tscalar& operator-=(const t_tscalar& rhs);
     t_tscalar& operator*=(const t_tscalar& rhs);
@@ -369,8 +374,8 @@ t_tscalar::compare_common(const t_tscalar& rhs) const {
         } break;
         default: {
 #ifdef PSP_DEBUG
-            std::cout << __FILE__ << ":" << __LINE__ << " Reached unknown type " << m_type
-                      << std::endl;
+            std::cout << __FILE__ << ":" << __LINE__ << " Reached unknown type "
+                      << m_type << std::endl;
 #endif
             return false;
         }
@@ -416,26 +421,29 @@ struct hash<perspective::t_tscalar> {
     }
 };
 
-PERSPECTIVE_EXPORT std::ostream& operator<<(std::ostream& os, const perspective::t_tscalar& t);
+PERSPECTIVE_EXPORT std::ostream& operator<<(
+    std::ostream& os, const perspective::t_tscalar& t);
 PERSPECTIVE_EXPORT std::ostream& operator<<(
     std::ostream& os, const std::vector<perspective::t_tscalar>& t);
 
 /**
  * exprtk uses std::numeric_limits<T>::quiet_NaN() and min_exponent10.
  */
-template<>
+template <>
 class numeric_limits<perspective::t_tscalar> {
-    public:
-        static perspective::t_tscalar quiet_NaN() {
-            // TODO: could stop allocating all those nans and fallback to
-            // a static nan value?
-            return perspective::mknone();
-        }
+public:
+    static perspective::t_tscalar
+    quiet_NaN() {
+        // TODO: could stop allocating all those nans and fallback to
+        // a static nan value?
+        return perspective::mknone();
+    }
 
-        static perspective::t_tscalar infinity() {
-            perspective::t_tscalar rval;
-            rval.set(std::numeric_limits<double>::infinity());
-            return rval;
-        }
+    static perspective::t_tscalar
+    infinity() {
+        perspective::t_tscalar rval;
+        rval.set(std::numeric_limits<double>::infinity());
+        return rval;
+    }
 };
 } // namespace std

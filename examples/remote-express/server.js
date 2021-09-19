@@ -17,11 +17,13 @@ expressWs(app);
 
 // create Perspective WebSocketManager and host table
 const manager = new WebSocketManager();
-securities().then(table => manager.host_table("remote_table", table));
+securities().then((table) => manager.host_table("remote_table", table));
 
 // add connection to manager whenever a new client connects
-app.ws("/subscribe", ws => manager.add_connection(ws));
+app.ws("/subscribe", (ws) => manager.add_connection(ws));
 
 app.use("/", perspective_assets([__dirname], true));
 
-const server = app.listen(8080, () => console.log(`Listening on port ${server.address().port}`));
+const server = app.listen(8080, () =>
+    console.log(`Listening on port ${server.address().port}`)
+);

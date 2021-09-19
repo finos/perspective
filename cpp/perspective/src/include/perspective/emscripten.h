@@ -15,7 +15,8 @@
 
 #ifdef PSP_ENABLE_WASM
 #include <emscripten/val.h>
-// for WASM builds, typedef all data structures for binding languages to emscripten::val
+// for WASM builds, typedef all data structures for binding languages to
+// emscripten::val
 typedef t_val t_data_accessor;
 typedef emscripten::val t_val;
 #endif
@@ -32,14 +33,15 @@ namespace binding {
     std::vector<T> make_vector();
 
     /**
-     * @brief namespace `js_typed_array` contains utility bindings that initialize typed arrays
-     * using Emscripten.
+     * @brief namespace `js_typed_array` contains utility bindings that
+     * initialize typed arrays using Emscripten.
      *
      */
     namespace js_typed_array {} // namespace js_typed_array
 
     /**
-     * @brief Given a vector of scalar data objects, write it into a typed array.
+     * @brief Given a vector of scalar data objects, write it into a typed
+     * array.
      *
      * @tparam T
      * @tparam T
@@ -54,7 +56,7 @@ namespace binding {
 
     template <>
     t_val scalar_to(const t_tscalar& scalar);
-    t_val scalar_to_val(
-        const t_tscalar& scalar, bool cast_double = false, bool cast_string = false);
+    t_val scalar_to_val(const t_tscalar& scalar, bool cast_double = false,
+        bool cast_string = false);
 } // namespace binding
 } // namespace perspective

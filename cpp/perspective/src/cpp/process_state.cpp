@@ -11,7 +11,7 @@
 
 namespace perspective {
 
-t_process_state::t_process_state() {};
+t_process_state::t_process_state(){};
 
 void
 t_process_state::clear_transitional_data_tables() {
@@ -40,4 +40,4 @@ t_process_state::set_size_transitional_data_tables(t_uindex size) {
     m_existed_data_table->set_size(size);
 };
 
-} // end namespace persective
+} // namespace perspective

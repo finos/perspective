@@ -31,15 +31,15 @@ struct t_expression_tables {
 
     t_expression_tables(
         const std::vector<std::shared_ptr<t_computed_expression>>& expressions);
-    
+
     /**
      * @brief Reserve space on each transitional table - reserve is important
      * because it also reserves space on each underlying column, whereas
      * `set_capacity` only affects the table, and can lead to a situation where
      * the table's capacity and the capacity of underlying columns grow out
      * of sync, which causes memory errors.
-     * 
-     * @param size 
+     *
+     * @param size
      */
     void reserve_transitional_table_size(t_uindex size);
 
@@ -54,7 +54,7 @@ struct t_expression_tables {
 
     // master table is calculated from t_gstate's master table
     std::shared_ptr<t_data_table> m_master;
-    
+
     // flattened, prev, current, delta, transitions calculated from the
     // tables stored on the gnode's output ports.
     std::shared_ptr<t_data_table> m_flattened;

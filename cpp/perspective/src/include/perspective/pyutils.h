@@ -16,13 +16,13 @@
 namespace perspective {
 
 class PERSPECTIVE_EXPORT PerspectiveScopedGILRelease {
-    public:
-        PerspectiveScopedGILRelease(std::thread::id event_loop_thread_id);
-        ~PerspectiveScopedGILRelease();
-    private:
-        PyThreadState* m_thread_state;
-};
+public:
+    PerspectiveScopedGILRelease(std::thread::id event_loop_thread_id);
+    ~PerspectiveScopedGILRelease();
 
+private:
+    PyThreadState* m_thread_state;
+};
 
 void _set_event_loop();
 

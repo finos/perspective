@@ -12,8 +12,8 @@
 
 namespace perspective {
 /**
- * @brief `t_data_accessor` allows for value retrieval from multiple data formats (row, column,
- * etc.) without copying the underlying dataset.
+ * @brief `t_data_accessor` allows for value retrieval from multiple data
+ * formats (row, column, etc.) without copying the underlying dataset.
  *
  * For WASM builds, `t_data_accessor` is replaced by t_val through a `typedef`.
  *

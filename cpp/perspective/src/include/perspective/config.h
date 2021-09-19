@@ -21,8 +21,9 @@
 namespace perspective {
 
 /**
- * @brief `t_config` contains metadata for the `View` and `t_ctx*` structures, containing
- * specifications for how pivots, columns, filters, and sorts should be constructed.
+ * @brief `t_config` contains metadata for the `View` and `t_ctx*` structures,
+ * containing specifications for how pivots, columns, filters, and sorts should
+ * be constructed.
  *
  */
 class PERSPECTIVE_EXPORT t_config {
@@ -41,15 +42,13 @@ public:
      * @param combiner
      * @param fterms specifications for filtering down the context
      */
-    t_config(
-        const std::vector<std::string>& detail_columns,
-        const std::vector<t_fterm>& fterms,
-        t_filter_op combiner,
+    t_config(const std::vector<std::string>& detail_columns,
+        const std::vector<t_fterm>& fterms, t_filter_op combiner,
         const std::vector<std::shared_ptr<t_computed_expression>>& expressions);
 
     /**
-     * @brief Construct a new config for a `t_ctx1` object, which has 1 or more `row_pivot`s
-     * applied.
+     * @brief Construct a new config for a `t_ctx1` object, which has 1 or more
+     * `row_pivot`s applied.
      *
      * @param row_pivots
      * @param aggregates
@@ -58,13 +57,12 @@ public:
      */
     t_config(const std::vector<std::string>& row_pivots,
         const std::vector<t_aggspec>& aggregates,
-        const std::vector<t_fterm>& fterms,
-        t_filter_op combiner,
+        const std::vector<t_fterm>& fterms, t_filter_op combiner,
         const std::vector<std::shared_ptr<t_computed_expression>>& expressions);
 
     /**
-     * @brief Construct a new config for a `t_ctx2` object, which has 1 or more `row_pivot`s and
-     * 1 or more `col_pivot`s applied.
+     * @brief Construct a new config for a `t_ctx2` object, which has 1 or more
+     * `row_pivot`s and 1 or more `col_pivot`s applied.
      *
      * @param row_pivots
      * @param col_pivots
@@ -74,13 +72,10 @@ public:
      * @param fterms
      * @param column_only
      */
-    t_config(
-        const std::vector<std::string>& row_pivots,
+    t_config(const std::vector<std::string>& row_pivots,
         const std::vector<std::string>& col_pivots,
-        const std::vector<t_aggspec>& aggregates,
-        const t_totals totals,
-        const std::vector<t_fterm>& fterms,
-        t_filter_op combiner,
+        const std::vector<t_aggspec>& aggregates, const t_totals totals,
+        const std::vector<t_fterm>& fterms, t_filter_op combiner,
         const std::vector<std::shared_ptr<t_computed_expression>>& expressions,
         bool column_only);
 
@@ -89,24 +84,27 @@ public:
 
     // Constructors used for C++ tests, not exposed to other parts of the engine
     t_config(const std::vector<std::string>& row_pivots,
-        const std::vector<std::string>& col_pivots, const std::vector<t_aggspec>& aggregates);
+        const std::vector<std::string>& col_pivots,
+        const std::vector<t_aggspec>& aggregates);
 
     t_config(const std::vector<std::string>& row_pivots,
-        const std::vector<std::string>& col_pivots, const std::vector<t_aggspec>& aggregates,
-        const t_totals totals, t_filter_op combiner, const std::vector<t_fterm>& fterms);
+        const std::vector<std::string>& col_pivots,
+        const std::vector<t_aggspec>& aggregates, const t_totals totals,
+        t_filter_op combiner, const std::vector<t_fterm>& fterms);
 
-    t_config(const std::vector<t_pivot>& row_pivots, const std::vector<t_aggspec>& aggregates);
+    t_config(const std::vector<t_pivot>& row_pivots,
+        const std::vector<t_aggspec>& aggregates);
 
-    t_config(
-        const std::vector<std::string>& row_pivots, const std::vector<t_aggspec>& aggregates);
+    t_config(const std::vector<std::string>& row_pivots,
+        const std::vector<t_aggspec>& aggregates);
 
     t_config(const std::vector<std::string>& row_pivots, const t_aggspec& agg);
-    
+
     /**
      * @brief For each column in the config's `detail_columns` (i.e. visible
      * columns), add it to the internal map tracking column indices.
-     * 
-     * @param detail_columns 
+     *
+     * @param detail_columns
      */
     void setup(const std::vector<std::string>& detail_columns);
 
@@ -119,9 +117,9 @@ public:
      * filter terms, or expressions. This allows a context_zero to
      * skip creating a traversal and simply read from its gnode state for
      * a performance boost.
-     * 
-     * @return true 
-     * @return false 
+     *
+     * @return true
+     * @return false
      */
     bool is_trivial_config();
 
@@ -161,8 +159,7 @@ public:
 
     const std::vector<t_fterm>& get_fterms() const;
 
-    std::vector<std::shared_ptr<t_computed_expression>>
-    get_expressions() const;
+    std::vector<std::shared_ptr<t_computed_expression>> get_expressions() const;
 
     t_totals get_totals() const;
 

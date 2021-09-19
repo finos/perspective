@@ -34,21 +34,34 @@ window.addEventListener("DOMContentLoaded", async () => {
                     {
                         type: "tab-area",
                         widgets: ["One"],
-                        currentIndex: 0
+                        currentIndex: 0,
                     },
                     {
                         type: "tab-area",
                         widgets: ["Two"],
-                        currentIndex: 0
-                    }
+                        currentIndex: 0,
+                    },
                 ],
-                sizes: [0.5, 0.5]
-            }
+                sizes: [0.5, 0.5],
+            },
         },
         viewers: {
-            One: {table: "securities", name: "Heat Map", plugin: "heatmap", "row-pivots": ["client"], columns: ["chg"], "column-pivots": '["name"]'},
-            Two: {table: "securities", name: "Bar Chart", plugin: "X Bar", "row-pivots": ["client"], columns: ["chg"]}
-        }
+            One: {
+                table: "securities",
+                name: "Heat Map",
+                plugin: "heatmap",
+                "row-pivots": ["client"],
+                columns: ["chg"],
+                "column-pivots": '["name"]',
+            },
+            Two: {
+                table: "securities",
+                name: "Bar Chart",
+                plugin: "X Bar",
+                "row-pivots": ["client"],
+                columns: ["chg"],
+            },
+        },
     });
 
     window.workspace = workspace;

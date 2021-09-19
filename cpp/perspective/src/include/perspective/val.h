@@ -15,23 +15,24 @@
 namespace perspective {
 
 /**
- * @brief `t_val` acts as an interface layer between value types in the binding language and
- * functionality in the core C++ library which acts on those value types. The implementation of
- * `t_val` differs based on the build:
+ * @brief `t_val` acts as an interface layer between value types in the binding
+ * language and functionality in the core C++ library which acts on those value
+ * types. The implementation of `t_val` differs based on the build:
  *
  * WASM builds using Emscripten treat `t_val` as an alias for `emscripten::val`.
  *
  * Python builds implement `t_val` on top of `py::object`.
  *
- * Regardless of the language, the public API presented by `t_val` is symmetrical and is based
- * on Emscripten's `val` API.
+ * Regardless of the language, the public API presented by `t_val` is
+ * symmetrical and is based on Emscripten's `val` API.
  *
  */
 template <typename T>
 class t_val {
 public:
     /**
-     * A `t_val` can be constructed from another `t_val` or from instances of the underlying
+     * A `t_val` can be constructed from another `t_val` or from instances of
+     * the underlying
      * `_val` type.
      */
     t_val(t_val&& v);
@@ -86,8 +87,8 @@ public:
     t_val operator()(Args&&... args) const;
 
     /**
-     * @brief Call a method on a `t_val` object by key, passing in a variable number of
-     * arguments.
+     * @brief Call a method on a `t_val` object by key, passing in a variable
+     * number of arguments.
      *
      * @tparam ReturnType
      * @tparam Args
@@ -124,7 +125,8 @@ public:
     bool isArray() const;
 
     /**
-     * A `t_val` can be compared to another `t_val` instance or an instance of its underlying
+     * A `t_val` can be compared to another `t_val` instance or an instance of
+     * its underlying
      * `_val` type.
      */
     bool equals(const T& v) const;

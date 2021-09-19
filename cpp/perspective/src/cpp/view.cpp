@@ -12,7 +12,6 @@
 #include <perspective/arrow_writer.h>
 #include <sstream>
 
-
 namespace perspective {
 
 std::string
@@ -35,12 +34,9 @@ join_column_names(
 }
 
 template <typename CTX_T>
-View<CTX_T>::View(
-        std::shared_ptr<Table> table,
-        std::shared_ptr<CTX_T> ctx,
-        const std::string& name,
-        const std::string& separator,
-        std::shared_ptr<t_view_config> view_config)
+View<CTX_T>::View(std::shared_ptr<Table> table, std::shared_ptr<CTX_T> ctx,
+    const std::string& name, const std::string& separator,
+    std::shared_ptr<t_view_config> view_config)
     : m_table(table)
     , m_ctx(ctx)
     , m_name(name)
@@ -67,7 +63,8 @@ View<CTX_T>::View(
     // configure data window for `get_data` and `row_delta`
     is_column_only() ? m_row_offset = 1 : m_row_offset = 0;
 
-    // TODO: make sure is 0 for column only - right now get_data returns row path for everything
+    // TODO: make sure is 0 for column only - right now get_data returns row
+    // path for everything
     sides() > 0 ? m_col_offset = 1 : m_col_offset = 0;
 
     // TODO: add index shifting ability
@@ -164,7 +161,8 @@ View<CTX_T>::column_names(bool skip, std::int32_t depth) const {
         aggregate_names[i] = aggs[i].name();
     }
 
-    for (t_uindex key = 0, max = m_ctx->unity_get_column_count(); key != max; ++key) {
+    for (t_uindex key = 0, max = m_ctx->unity_get_column_count(); key != max;
+         ++key) {
         std::string name = aggregate_names[key % aggregate_names.size()];
 
         if (name == "psp_okey") {
@@ -180,7 +178,8 @@ View<CTX_T>::column_names(bool skip, std::int32_t depth) const {
         for (auto path = col_path.rbegin(); path != col_path.rend(); ++path) {
             new_path.push_back(*path);
         }
-        new_path.push_back(m_ctx->get_aggregate_name(key % aggregate_names.size()));
+        new_path.push_back(
+            m_ctx->get_aggregate_name(key % aggregate_names.size()));
         names.push_back(new_path);
     }
 
@@ -192,7 +191,8 @@ std::vector<std::vector<t_tscalar>>
 View<t_ctx0>::column_names(bool skip, std::int32_t depth) const {
     std::vector<std::vector<t_tscalar>> names;
 
-    for (t_uindex key = 0, max = m_ctx->unity_get_column_count(); key != max; ++key) {
+    for (t_uindex key = 0, max = m_ctx->unity_get_column_count(); key != max;
+         ++key) {
         t_tscalar name = m_ctx->get_column_name(key);
         if (name.to_string() == "psp_okey") {
             continue;
@@ -210,7 +210,8 @@ std::vector<std::vector<t_tscalar>>
 View<t_ctxunit>::column_names(bool skip, std::int32_t depth) const {
     std::vector<std::vector<t_tscalar>> names;
 
-    for (t_uindex key = 0, max = m_ctx->unity_get_column_count(); key != max; ++key) {
+    for (t_uindex key = 0, max = m_ctx->unity_get_column_count(); key != max;
+         ++key) {
         t_tscalar name = m_ctx->get_column_name(key);
         if (name.to_string() == "psp_okey") {
             continue;
@@ -243,13 +244,13 @@ View<CTX_T>::column_paths() const {
         for (const auto& column : names) {
             // Remove undisplayed column names used to sort
             std::string name = column.back().to_string();
-            if (std::find(m_hidden_sort.begin(), m_hidden_sort.end(), name) == m_hidden_sort.end()) {
+            if (std::find(m_hidden_sort.begin(), m_hidden_sort.end(), name)
+                == m_hidden_sort.end()) {
                 visible_column_paths.push_back(column);
             }
         }
 
         return visible_column_paths;
-        
     }
 
     return names;
@@ -278,7 +279,8 @@ View<CTX_T>::schema() const {
         new_schema[agg_name] = type_string;
 
         if (m_row_pivots.size() > 0 && !is_column_only()) {
-            new_schema[agg_name] = _map_aggregate_types(agg_name, new_schema[agg_name]);
+            new_schema[agg_name]
+                = _map_aggregate_types(agg_name, new_schema[agg_name]);
         }
     }
 
@@ -356,13 +358,13 @@ View<CTX_T>::expression_schema() const {
         new_schema[expression_alias] = dtype_to_str(expr->get_dtype());
 
         if (m_row_pivots.size() > 0 && !is_column_only()) {
-            new_schema[expression_alias] = _map_aggregate_types(expression_alias, new_schema[expression_alias]);
+            new_schema[expression_alias] = _map_aggregate_types(
+                expression_alias, new_schema[expression_alias]);
         }
     }
 
     return new_schema;
 }
-
 
 template <>
 std::map<std::string, std::string>
@@ -393,51 +395,57 @@ View<t_ctx0>::expression_schema() const {
 }
 
 template <typename T>
-std::pair<t_tscalar, t_tscalar> 
+std::pair<t_tscalar, t_tscalar>
 View<T>::get_min_max(const std::string& colname) const {
     return m_ctx->get_min_max(colname);
 }
 
 template <>
 std::shared_ptr<t_data_slice<t_ctxunit>>
-View<t_ctxunit>::get_data(
-    t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col) const {
-    std::vector<t_tscalar> slice = m_ctx->get_data(start_row, end_row, start_col, end_col);
+View<t_ctxunit>::get_data(t_uindex start_row, t_uindex end_row,
+    t_uindex start_col, t_uindex end_col) const {
+    std::vector<t_tscalar> slice
+        = m_ctx->get_data(start_row, end_row, start_col, end_col);
     auto col_names = column_names();
-    auto data_slice_ptr = std::make_shared<t_data_slice<t_ctxunit>>(m_ctx, start_row, end_row,
-        start_col, end_col, m_row_offset, m_col_offset, slice, col_names);
+    auto data_slice_ptr
+        = std::make_shared<t_data_slice<t_ctxunit>>(m_ctx, start_row, end_row,
+            start_col, end_col, m_row_offset, m_col_offset, slice, col_names);
     return data_slice_ptr;
 }
 
 template <>
 std::shared_ptr<t_data_slice<t_ctx0>>
-View<t_ctx0>::get_data(
-    t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col) const {
-    std::vector<t_tscalar> slice = m_ctx->get_data(start_row, end_row, start_col, end_col);
+View<t_ctx0>::get_data(t_uindex start_row, t_uindex end_row, t_uindex start_col,
+    t_uindex end_col) const {
+    std::vector<t_tscalar> slice
+        = m_ctx->get_data(start_row, end_row, start_col, end_col);
     auto col_names = column_names();
-    auto data_slice_ptr = std::make_shared<t_data_slice<t_ctx0>>(m_ctx, start_row, end_row,
-        start_col, end_col, m_row_offset, m_col_offset, slice, col_names);
+    auto data_slice_ptr
+        = std::make_shared<t_data_slice<t_ctx0>>(m_ctx, start_row, end_row,
+            start_col, end_col, m_row_offset, m_col_offset, slice, col_names);
     return data_slice_ptr;
 }
 
 template <>
 std::shared_ptr<t_data_slice<t_ctx1>>
-View<t_ctx1>::get_data(
-    t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col) const {
-    std::vector<t_tscalar> slice = m_ctx->get_data(start_row, end_row, start_col, end_col);
+View<t_ctx1>::get_data(t_uindex start_row, t_uindex end_row, t_uindex start_col,
+    t_uindex end_col) const {
+    std::vector<t_tscalar> slice
+        = m_ctx->get_data(start_row, end_row, start_col, end_col);
     auto col_names = column_names();
     t_tscalar row_path;
     row_path.set("__ROW_PATH__");
     col_names.insert(col_names.begin(), std::vector<t_tscalar>{row_path});
-    auto data_slice_ptr = std::make_shared<t_data_slice<t_ctx1>>(m_ctx, start_row, end_row,
-        start_col, end_col, m_row_offset, m_col_offset, slice, col_names);
+    auto data_slice_ptr
+        = std::make_shared<t_data_slice<t_ctx1>>(m_ctx, start_row, end_row,
+            start_col, end_col, m_row_offset, m_col_offset, slice, col_names);
     return data_slice_ptr;
 }
 
 template <>
 std::shared_ptr<t_data_slice<t_ctx2>>
-View<t_ctx2>::get_data(
-    t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col) const {
+View<t_ctx2>::get_data(t_uindex start_row, t_uindex end_row, t_uindex start_col,
+    t_uindex end_col) const {
     std::vector<t_tscalar> slice;
     std::vector<t_uindex> column_indices;
     std::vector<std::vector<t_tscalar>> cols;
@@ -472,10 +480,10 @@ View<t_ctx2>::get_data(
             cols = column_names(true, depth);
 
             // Filter down column indices by user-provided start/end columns
-            column_indices = std::vector<t_uindex>(
-                column_indices.begin() + start_col,
-                column_indices.begin() + std::min(end_col, (t_uindex)column_indices.size())
-            );
+            column_indices
+                = std::vector<t_uindex>(column_indices.begin() + start_col,
+                    column_indices.begin()
+                        + std::min(end_col, (t_uindex)column_indices.size()));
 
             // If start_col == end_col, then column_indices will be an empty
             // vector. Only try to access the first and last elements if the
@@ -493,7 +501,8 @@ View<t_ctx2>::get_data(
         auto iter = slice_with_headers.begin();
         while (iter != slice_with_headers.end()) {
             t_uindex prev = column_indices.front();
-            for (auto idx = column_indices.begin(); idx != column_indices.end(); idx++) {
+            for (auto idx = column_indices.begin(); idx != column_indices.end();
+                 idx++) {
                 t_uindex col_num = *idx;
                 iter += col_num - prev;
                 prev = col_num;
@@ -506,13 +515,14 @@ View<t_ctx2>::get_data(
         cols = column_names();
         slice = m_ctx->get_data(start_row, end_row, start_col, end_col);
     }
-    // TODO: we need to just use column_paths everywhere instead of row path insertion manually,
-    // this causes issues with needing to skip row paths
+    // TODO: we need to just use column_paths everywhere instead of row path
+    // insertion manually, this causes issues with needing to skip row paths
     t_tscalar row_path;
     row_path.set("__ROW_PATH__");
     cols.insert(cols.begin(), std::vector<t_tscalar>{row_path});
-    auto data_slice_ptr = std::make_shared<t_data_slice<t_ctx2>>(m_ctx, start_row, end_row,
-        start_col, end_col, m_row_offset, m_col_offset, slice, cols, column_indices);
+    auto data_slice_ptr = std::make_shared<t_data_slice<t_ctx2>>(m_ctx,
+        start_row, end_row, start_col, end_col, m_row_offset, m_col_offset,
+        slice, cols, column_indices);
     return data_slice_ptr;
 }
 
@@ -520,9 +530,8 @@ template <typename CTX_T>
 std::shared_ptr<std::string>
 View<CTX_T>::to_arrow(std::int32_t start_row, std::int32_t end_row,
     std::int32_t start_col, std::int32_t end_col) const {
-    std::shared_ptr<t_data_slice<CTX_T>> data_slice = get_data(
-        start_row, end_row, start_col, end_col
-    );
+    std::shared_ptr<t_data_slice<CTX_T>> data_slice
+        = get_data(start_row, end_row, start_col, end_col);
     return data_slice_to_arrow(data_slice);
 };
 
@@ -536,7 +545,8 @@ View<CTX_T>::data_slice_to_arrow(
     std::int32_t end_col = extents.m_ecol;
 
     const std::vector<t_tscalar>& slice = data_slice->get_slice();
-    const std::vector<std::vector<t_tscalar>>& names = data_slice->get_column_names();
+    const std::vector<std::vector<t_tscalar>>& names
+        = data_slice->get_column_names();
     auto stride = data_slice->get_stride();
     auto num_sides = sides();
 
@@ -563,10 +573,13 @@ View<CTX_T>::data_slice_to_arrow(
 
         // Do not output hidden sort columns - they are always at the end
         // of the columns list.
-        if ((num_view_columns + m_hidden_sort.size()) > 0 && ((cidx - (num_sides > 0 ? 1 : 0)) % (num_view_columns + m_hidden_sort.size())) >= num_view_columns) {
+        if ((num_view_columns + m_hidden_sort.size()) > 0
+            && ((cidx - (num_sides > 0 ? 1 : 0))
+                   % (num_view_columns + m_hidden_sort.size()))
+                >= num_view_columns) {
             continue;
         }
-                
+
         std::vector<t_tscalar> col_path = names.at(cidx);
         t_dtype dtype = get_column_dtype(cidx);
 
@@ -591,70 +604,86 @@ View<CTX_T>::data_slice_to_arrow(
         switch (dtype) {
             case DTYPE_INT8: {
                 fields.push_back(arrow::field(name, arrow::int8()));
-                arr = apachearrow::numeric_col_to_array<arrow::Int8Type, std::int8_t>(slice, cidx, stride, extents);
+                arr = apachearrow::numeric_col_to_array<arrow::Int8Type,
+                    std::int8_t>(slice, cidx, stride, extents);
             } break;
             case DTYPE_UINT8: {
                 fields.push_back(arrow::field(name, arrow::uint8()));
-                arr = apachearrow::numeric_col_to_array<arrow::UInt8Type, std::uint8_t>(slice, cidx, stride, extents);
+                arr = apachearrow::numeric_col_to_array<arrow::UInt8Type,
+                    std::uint8_t>(slice, cidx, stride, extents);
             } break;
             case DTYPE_INT16: {
                 fields.push_back(arrow::field(name, arrow::int16()));
-                arr = apachearrow::numeric_col_to_array<arrow::Int16Type, std::int16_t>(slice, cidx, stride, extents);
+                arr = apachearrow::numeric_col_to_array<arrow::Int16Type,
+                    std::int16_t>(slice, cidx, stride, extents);
             } break;
             case DTYPE_UINT16: {
                 fields.push_back(arrow::field(name, arrow::uint16()));
-                arr = apachearrow::numeric_col_to_array<arrow::UInt16Type, std::uint16_t>(slice, cidx, stride, extents);
+                arr = apachearrow::numeric_col_to_array<arrow::UInt16Type,
+                    std::uint16_t>(slice, cidx, stride, extents);
             } break;
             case DTYPE_INT32: {
                 fields.push_back(arrow::field(name, arrow::int32()));
-                arr = apachearrow::numeric_col_to_array<arrow::Int32Type, std::int32_t>(slice, cidx, stride, extents);
+                arr = apachearrow::numeric_col_to_array<arrow::Int32Type,
+                    std::int32_t>(slice, cidx, stride, extents);
             } break;
             case DTYPE_UINT32: {
                 fields.push_back(arrow::field(name, arrow::uint32()));
-                arr = apachearrow::numeric_col_to_array<arrow::UInt32Type, std::uint32_t>(slice, cidx, stride, extents);
+                arr = apachearrow::numeric_col_to_array<arrow::UInt32Type,
+                    std::uint32_t>(slice, cidx, stride, extents);
             } break;
             case DTYPE_INT64: {
                 fields.push_back(arrow::field(name, arrow::int64()));
-                arr = apachearrow::numeric_col_to_array<arrow::Int64Type, std::int64_t>(slice, cidx, stride, extents);
+                arr = apachearrow::numeric_col_to_array<arrow::Int64Type,
+                    std::int64_t>(slice, cidx, stride, extents);
             } break;
             case DTYPE_UINT64: {
                 fields.push_back(arrow::field(name, arrow::uint64()));
-                arr = apachearrow::numeric_col_to_array<arrow::UInt64Type, std::uint64_t>(slice, cidx, stride, extents);
+                arr = apachearrow::numeric_col_to_array<arrow::UInt64Type,
+                    std::uint64_t>(slice, cidx, stride, extents);
             } break;
             case DTYPE_FLOAT32: {
                 fields.push_back(arrow::field(name, arrow::float32()));
-                arr = apachearrow::numeric_col_to_array<arrow::FloatType, float>(slice, cidx, stride, extents);
+                arr = apachearrow::numeric_col_to_array<arrow::FloatType,
+                    float>(slice, cidx, stride, extents);
             } break;
             case DTYPE_FLOAT64: {
                 fields.push_back(arrow::field(name, arrow::float64()));
-                arr = apachearrow::numeric_col_to_array<arrow::DoubleType, double>(slice, cidx, stride, extents);
+                arr = apachearrow::numeric_col_to_array<arrow::DoubleType,
+                    double>(slice, cidx, stride, extents);
             } break;
             case DTYPE_DATE: {
                 fields.push_back(arrow::field(name, arrow::date32()));
-                arr = apachearrow::date_col_to_array(slice, cidx, stride, extents);
+                arr = apachearrow::date_col_to_array(
+                    slice, cidx, stride, extents);
             } break;
             case DTYPE_TIME: {
-                fields.push_back(arrow::field(name, arrow::timestamp(arrow::TimeUnit::MILLI)));
-                arr = apachearrow::timestamp_col_to_array(slice, cidx, stride, extents);
+                fields.push_back(arrow::field(
+                    name, arrow::timestamp(arrow::TimeUnit::MILLI)));
+                arr = apachearrow::timestamp_col_to_array(
+                    slice, cidx, stride, extents);
             } break;
             case DTYPE_BOOL: {
                 fields.push_back(arrow::field(name, arrow::boolean()));
-                arr = apachearrow::boolean_col_to_array(slice, cidx, stride, extents);
+                arr = apachearrow::boolean_col_to_array(
+                    slice, cidx, stride, extents);
             } break;
             case DTYPE_STR: {
-                fields.push_back(arrow::field(name, arrow::dictionary(arrow::int32(), arrow::utf8())));
-                arr = apachearrow::string_col_to_dictionary_array(slice, cidx, stride, extents);
+                fields.push_back(arrow::field(
+                    name, arrow::dictionary(arrow::int32(), arrow::utf8())));
+                arr = apachearrow::string_col_to_dictionary_array(
+                    slice, cidx, stride, extents);
             } break;
             case DTYPE_OBJECT: {
                 fields.push_back(arrow::field(name, arrow::uint64()));
-                arr = apachearrow::numeric_col_to_array<arrow::UInt64Type, std::uint64_t>(slice, cidx, stride, extents);
+                arr = apachearrow::numeric_col_to_array<arrow::UInt64Type,
+                    std::uint64_t>(slice, cidx, stride, extents);
             } break;
             default: {
                 std::stringstream ss;
-                ss << "Cannot serialize column `" 
-                   << name << "` of type `"
-                   << get_dtype_descr(dtype)
-                   << "` to Arrow format." << std::endl;
+                ss << "Cannot serialize column `" << name << "` of type `"
+                   << get_dtype_descr(dtype) << "` to Arrow format."
+                   << std::endl;
                 PSP_COMPLAIN_AND_ABORT(ss.str());
             }
         }
@@ -663,8 +692,8 @@ View<CTX_T>::data_slice_to_arrow(
 
     auto arrow_schema = arrow::schema(fields);
     auto num_rows = data_slice->num_rows();
-    std::shared_ptr<arrow::RecordBatch> batches = 
-        arrow::RecordBatch::Make(arrow_schema, num_rows, vectors);
+    std::shared_ptr<arrow::RecordBatch> batches
+        = arrow::RecordBatch::Make(arrow_schema, num_rows, vectors);
     auto valid = batches->Validate();
     if (!valid.ok()) {
         std::stringstream ss;
@@ -682,19 +711,22 @@ View<CTX_T>::data_slice_to_arrow(
         PSP_COMPLAIN_AND_ABORT(ss.str());
     }
 
-    arrow::io::BufferOutputStream sink(buffer);        
+    arrow::io::BufferOutputStream sink(buffer);
     auto options = arrow::ipc::IpcOptions::Defaults();
-    auto res = arrow::ipc::RecordBatchStreamWriter::Open(&sink, arrow_schema, options);
+    auto res = arrow::ipc::RecordBatchStreamWriter::Open(
+        &sink, arrow_schema, options);
 #else
-    arrow::Result<std::shared_ptr<arrow::ResizableBuffer>> allocated = arrow::AllocateResizableBuffer(0);
+    arrow::Result<std::shared_ptr<arrow::ResizableBuffer>> allocated
+        = arrow::AllocateResizableBuffer(0);
     if (!allocated.ok()) {
         std::stringstream ss;
-        ss << "Failed to allocate buffer: " << allocated.status().message() << std::endl;
+        ss << "Failed to allocate buffer: " << allocated.status().message()
+           << std::endl;
         PSP_COMPLAIN_AND_ABORT(ss.str());
     }
-   
-    buffer = *allocated;    
-    arrow::io::BufferOutputStream sink(buffer);    
+
+    buffer = *allocated;
+    arrow::io::BufferOutputStream sink(buffer);
     auto options = arrow::ipc::IpcWriteOptions::Defaults();
     auto res = arrow::ipc::NewStreamWriter(&sink, arrow_schema, options);
 #endif
@@ -791,7 +823,8 @@ View<t_ctx1>::set_depth(std::int32_t depth, std::int32_t row_pivot_length) {
     if (row_pivot_length >= depth) {
         m_ctx->set_depth(depth);
     } else {
-        std::cout << "Cannot expand past " << std::to_string(row_pivot_length) << std::endl;
+        std::cout << "Cannot expand past " << std::to_string(row_pivot_length)
+                  << std::endl;
     }
 }
 
@@ -801,7 +834,8 @@ View<t_ctx2>::set_depth(std::int32_t depth, std::int32_t row_pivot_length) {
     if (row_pivot_length >= depth) {
         m_ctx->set_depth(t_header::HEADER_ROW, depth);
     } else {
-        std::cout << "Cannot expand past " << std::to_string(row_pivot_length) << std::endl;
+        std::cout << "Cannot expand past " << std::to_string(row_pivot_length)
+                  << std::endl;
     }
 }
 
@@ -909,9 +943,8 @@ View<CTX_T>::get_row_delta() const {
         paths.insert(paths.begin(), std::vector<t_tscalar>{row_path});
     }
 
-    return std::make_shared<t_data_slice<CTX_T>>(
-        m_ctx, 0, num_rows_changed, 0, ncols,
-        m_row_offset, m_col_offset, data, paths);
+    return std::make_shared<t_data_slice<CTX_T>>(m_ctx, 0, num_rows_changed, 0,
+        ncols, m_row_offset, m_col_offset, data, paths);
 }
 
 template <typename CTX_T>
@@ -928,7 +961,7 @@ View<CTX_T>::is_column_only() const {
 
 #ifdef PSP_ENABLE_PYTHON
 template <typename CTX_T>
-std::thread::id 
+std::thread::id
 View<CTX_T>::get_event_loop_thread_id() const {
     return m_table->get_pool()->get_event_loop_thread_id();
 };
@@ -960,7 +993,9 @@ View<CTX_T>::_map_aggregate_types(
                 case AGGTYPE_STANDARD_DEVIATION: {
                     return "float";
                 } break;
-                default: { return typestring; } break;
+                default: {
+                    return typestring;
+                } break;
             }
         }
     }
@@ -972,7 +1007,8 @@ template <typename CTX_T>
 void
 View<CTX_T>::_find_hidden_sort(const std::vector<t_sortspec>& sort) {
     for (const t_sortspec& s : sort) {
-        bool hidden = std::find(m_columns.begin(), m_columns.end(), s.m_colname) == m_columns.end();
+        bool hidden = std::find(m_columns.begin(), m_columns.end(), s.m_colname)
+            == m_columns.end();
         if (hidden) {
             // Store the actual column, not the composite column path
             m_hidden_sort.push_back(s.m_colname);

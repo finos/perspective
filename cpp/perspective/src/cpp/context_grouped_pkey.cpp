@@ -39,7 +39,8 @@ t_ctx_grouped_pkey::~t_ctx_grouped_pkey() {}
 void
 t_ctx_grouped_pkey::init() {
     auto pivots = m_config.get_row_pivots();
-    m_tree = std::make_shared<t_stree>(pivots, m_config.get_aggregates(), m_schema, m_config);
+    m_tree = std::make_shared<t_stree>(
+        pivots, m_config.get_aggregates(), m_schema, m_config);
     m_tree->init();
     m_traversal = std::shared_ptr<t_traversal>(new t_traversal(m_tree));
 
@@ -59,7 +60,6 @@ std::shared_ptr<t_expression_tables>
 t_ctx_grouped_pkey::get_expression_tables() const {
     return m_expression_tables;
 }
-
 
 t_index
 t_ctx_grouped_pkey::get_row_count() const {
@@ -122,14 +122,14 @@ t_ctx_grouped_pkey::close(t_index idx) {
 }
 
 std::vector<t_tscalar>
-t_ctx_grouped_pkey::get_data(
-    t_index start_row, t_index end_row, t_index start_col, t_index end_col) const {
+t_ctx_grouped_pkey::get_data(t_index start_row, t_index end_row,
+    t_index start_col, t_index end_col) const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     t_uindex ctx_nrows = get_row_count();
     t_uindex ncols = get_column_count();
-    auto ext
-        = sanitize_get_data_extents(ctx_nrows, ncols, start_row, end_row, start_col, end_col);
+    auto ext = sanitize_get_data_extents(
+        ctx_nrows, ncols, start_row, end_row, start_col, end_col);
 
     t_index nrows = ext.m_erow - ext.m_srow;
     t_index stride = ext.m_ecol - ext.m_scol;
@@ -144,35 +144,40 @@ t_ctx_grouped_pkey::get_data(
     auto aggtable = m_tree->get_aggtable();
     t_schema aggschema = aggtable->get_schema();
 
-    for (t_uindex aggidx = 0, loop_end = aggcols.size(); aggidx < loop_end; ++aggidx) {
+    for (t_uindex aggidx = 0, loop_end = aggcols.size(); aggidx < loop_end;
+         ++aggidx) {
         const std::string& aggname = aggschema.m_columns[aggidx];
         aggcols[aggidx] = aggtable->get_const_column(aggname).get();
     }
 
     const std::vector<t_aggspec>& aggspecs = m_config.get_aggregates();
 
-    const std::string& grouping_label_col = m_config.get_grouping_label_column();
+    const std::string& grouping_label_col
+        = m_config.get_grouping_label_column();
 
     for (t_index ridx = ext.m_srow; ridx < ext.m_erow; ++ridx) {
         t_index nidx = m_traversal->get_tree_index(ridx);
         t_index pnidx = m_tree->get_parent_idx(nidx);
 
         t_uindex agg_ridx = m_tree->get_aggidx(nidx);
-        t_index agg_pridx = pnidx == INVALID_INDEX ? INVALID_INDEX : m_tree->get_aggidx(pnidx);
+        t_index agg_pridx = pnidx == INVALID_INDEX ? INVALID_INDEX
+                                                   : m_tree->get_aggidx(pnidx);
 
         t_tscalar tree_value = m_tree->get_value(nidx);
 
         if (m_has_label && ridx > 0) {
             // Get pkey
             auto iters = m_tree->get_pkeys_for_leaf(nidx);
-            tree_value.set(get_value_from_gstate(grouping_label_col, iters.first->m_pkey));
+            tree_value.set(
+                get_value_from_gstate(grouping_label_col, iters.first->m_pkey));
         }
 
         tmpvalues[(ridx - ext.m_srow) * ncols] = tree_value;
 
-        for (t_index aggidx = 0, loop_end = aggcols.size(); aggidx < loop_end; ++aggidx) {
-            t_tscalar value
-                = extract_aggregate(aggspecs[aggidx], aggcols[aggidx], agg_ridx, agg_pridx);
+        for (t_index aggidx = 0, loop_end = aggcols.size(); aggidx < loop_end;
+             ++aggidx) {
+            t_tscalar value = extract_aggregate(
+                aggspecs[aggidx], aggcols[aggidx], agg_ridx, agg_pridx);
 
             tmpvalues[(ridx - ext.m_srow) * ncols + 1 + aggidx].set(value);
         }
@@ -189,8 +194,9 @@ t_ctx_grouped_pkey::get_data(
 }
 
 void
-t_ctx_grouped_pkey::notify(const t_data_table& flattened, const t_data_table& delta,
-    const t_data_table& prev, const t_data_table& current, const t_data_table& transitions,
+t_ctx_grouped_pkey::notify(const t_data_table& flattened,
+    const t_data_table& delta, const t_data_table& prev,
+    const t_data_table& current, const t_data_table& transitions,
     const t_data_table& existed) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
@@ -274,7 +280,8 @@ std::vector<t_ftreenode>
 t_ctx_grouped_pkey::get_flattened_tree(t_index idx, t_depth stop_depth) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return ctx_get_flattened_tree(idx, stop_depth, *(m_traversal.get()), m_config, m_sortby);
+    return ctx_get_flattened_tree(
+        idx, stop_depth, *(m_traversal.get()), m_config, m_sortby);
 }
 
 std::shared_ptr<const t_traversal>
@@ -288,20 +295,20 @@ void
 t_ctx_grouped_pkey::sort_by(const std::vector<t_sortspec>& sortby) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    
+
     m_sortby = sortby;
     if (m_sortby.empty()) {
         return;
     }
     m_traversal->sort_by(m_config, sortby, *this);
-    
 }
 
 void
 t_ctx_grouped_pkey::set_depth(t_depth depth) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    t_depth final_depth = std::min<t_depth>(m_config.get_num_rpivots() - 1, depth);
+    t_depth final_depth
+        = std::min<t_depth>(m_config.get_num_rpivots() - 1, depth);
     t_index retval = 0;
     retval = m_traversal->set_depth(m_sortby, final_depth);
     m_rows_changed = (retval > 0);
@@ -310,7 +317,8 @@ t_ctx_grouped_pkey::set_depth(t_depth depth) {
 }
 
 std::vector<t_tscalar>
-t_ctx_grouped_pkey::get_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
+t_ctx_grouped_pkey::get_pkeys(
+    const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
@@ -377,7 +385,8 @@ t_ctx_grouped_pkey::get_step_delta(t_index bidx, t_index eidx) {
     bidx = std::min(bidx, t_index(m_traversal->size()));
     eidx = std::min(eidx, t_index(m_traversal->size()));
 
-    t_stepdelta rval(m_rows_changed, m_columns_changed, get_cell_delta(bidx, eidx));
+    t_stepdelta rval(
+        m_rows_changed, m_columns_changed, get_cell_delta(bidx, eidx));
     m_tree->clear_deltas();
     return rval;
 }
@@ -393,8 +402,8 @@ t_ctx_grouped_pkey::get_cell_delta(t_index bidx, t_index eidx) const {
         t_index ptidx = m_traversal->get_tree_index(idx);
         auto iterators = deltas->get<by_tc_nidx_aggidx>().equal_range(ptidx);
         for (auto iter = iterators.first; iter != iterators.second; ++iter) {
-            rval.push_back(
-                t_cellupd(idx, iter->m_aggidx + 1, iter->m_old_value, iter->m_new_value));
+            rval.push_back(t_cellupd(
+                idx, iter->m_aggidx + 1, iter->m_old_value, iter->m_new_value));
         }
     }
     return rval;
@@ -403,12 +412,14 @@ t_ctx_grouped_pkey::get_cell_delta(t_index bidx, t_index eidx) const {
 void
 t_ctx_grouped_pkey::reset(bool reset_expressions) {
     auto pivots = m_config.get_row_pivots();
-    m_tree = std::make_shared<t_stree>(pivots, m_config.get_aggregates(), m_schema, m_config);
+    m_tree = std::make_shared<t_stree>(
+        pivots, m_config.get_aggregates(), m_schema, m_config);
     m_tree->init();
     m_tree->set_deltas_enabled(get_feature_state(CTX_FEAT_DELTA));
     m_traversal = std::shared_ptr<t_traversal>(new t_traversal(m_tree));
 
-    if (reset_expressions) m_expression_tables->reset();
+    if (reset_expressions)
+        m_expression_tables->reset();
 }
 
 void
@@ -416,7 +427,8 @@ t_ctx_grouped_pkey::reset_step_state() {
     m_rows_changed = false;
     m_columns_changed = false;
     if (t_env::log_progress()) {
-        std::cout << "t_ctx_grouped_pkey.reset_step_state " << repr() << std::endl;
+        std::cout << "t_ctx_grouped_pkey.reset_step_state " << repr()
+                  << std::endl;
     }
 }
 
@@ -451,13 +463,16 @@ t_ctx_grouped_pkey::rebuild() {
 
     std::string child_col_name = m_config.get_child_pkey_column();
 
-    std::shared_ptr<const t_column> child_col_sptr = tbl->get_const_column(child_col_name);
+    std::shared_ptr<const t_column> child_col_sptr
+        = tbl->get_const_column(child_col_name);
 
     const t_column* child_col = child_col_sptr.get();
     auto expansion_state = get_expansion_state();
 
     std::sort(expansion_state.begin(), expansion_state.end(),
-        [](const t_path& a, const t_path& b) { return a.path().size() < b.path().size(); });
+        [](const t_path& a, const t_path& b) {
+            return a.path().size() < b.path().size();
+        });
 
     for (auto& p : expansion_state) {
         std::reverse(p.path().begin(), p.path().end());
@@ -480,9 +495,11 @@ t_ctx_grouped_pkey::rebuild() {
         t_uindex m_idx;
     };
 
-    auto sortby_col = tbl->get_const_column(m_config.get_sort_by(child_col_name)).get();
+    auto sortby_col
+        = tbl->get_const_column(m_config.get_sort_by(child_col_name)).get();
 
-    auto parent_col = tbl->get_const_column(m_config.get_parent_pkey_column()).get();
+    auto parent_col
+        = tbl->get_const_column(m_config.get_parent_pkey_column()).get();
 
     auto pkey_col = tbl->get_const_column("psp_pkey").get();
 
@@ -505,7 +522,8 @@ t_ctx_grouped_pkey::rebuild() {
 
         data[idx].m_is_rchild
             = !ppkey.is_valid() || data[idx].m_child == ppkey || missing_parent;
-        data[idx].m_pidx = data[idx].m_is_rchild ? 0 : child_ridx_map.at(data[idx].m_parent);
+        data[idx].m_pidx
+            = data[idx].m_is_rchild ? 0 : child_ridx_map.at(data[idx].m_parent);
         data[idx].m_idx = idx;
     }
 
@@ -535,13 +553,16 @@ t_ctx_grouped_pkey::rebuild() {
 
     t_uindex brange = nroot_children;
     for (t_uindex idx = nroot_children; idx < nrows; ++idx) {
-        if (data[idx].m_parent != data[idx - 1].m_parent && idx > nroot_children) {
-            p_range_map[data[idx - 1].m_parent] = std::pair<t_uindex, t_uindex>(brange, idx);
+        if (data[idx].m_parent != data[idx - 1].m_parent
+            && idx > nroot_children) {
+            p_range_map[data[idx - 1].m_parent]
+                = std::pair<t_uindex, t_uindex>(brange, idx);
             brange = idx;
         }
     }
 
-    p_range_map[data.back().m_parent] = std::pair<t_uindex, t_uindex>(brange, nrows);
+    p_range_map[data.back().m_parent]
+        = std::pair<t_uindex, t_uindex>(brange, nrows);
 
     // map from unsorted space to sorted space
     tsl::hopscotch_map<t_uindex, t_uindex> sortidx_map;
@@ -558,7 +579,8 @@ t_ctx_grouped_pkey::rebuild() {
         const t_datum& rec = data[ridx];
         t_uindex pridx = rec.m_is_rchild ? 0 : sortidx_map.at(rec.m_pidx);
 
-        auto sortby_value = m_symtable.get_interned_tscalar(sortby_col->get_scalar(rec.m_idx));
+        auto sortby_value = m_symtable.get_interned_tscalar(
+            sortby_col->get_scalar(rec.m_idx));
 
         t_uindex nidx = ridx + 1;
         t_uindex pidx = rec.m_is_rchild ? 0 : pridx + 1;
@@ -567,7 +589,8 @@ t_ctx_grouped_pkey::rebuild() {
 
         auto value = m_symtable.get_interned_tscalar(rec.m_child);
 
-        t_stnode node(nidx, pidx, value, pnode.m_depth + 1, sortby_value, 1, nidx);
+        t_stnode node(
+            nidx, pidx, value, pnode.m_depth + 1, sortby_value, 1, nidx);
 
         m_tree->insert_node(node);
         m_tree->add_pkey(nidx, m_symtable.get_interned_tscalar(rec.m_pkey));
@@ -585,7 +608,6 @@ t_ctx_grouped_pkey::rebuild() {
         }
     }
 
-    
     auto aggtable = m_tree->_get_aggtable();
     aggtable->extend(nrows + 1);
 
@@ -607,9 +629,11 @@ t_ctx_grouped_pkey::rebuild() {
         {
             const t_aggspec& spec = aggspecs[aggnum];
             if (spec.agg() == AGGTYPE_IDENTITY) {
-                auto scol = aggtable->get_column(spec.get_first_depname()).get();
+                auto scol
+                    = aggtable->get_column(spec.get_first_depname()).get();
                 scol->copy(
-                    tbl->get_const_column(spec.get_first_depname()).get(), aggindices, 1);
+                    tbl->get_const_column(spec.get_first_depname()).get(),
+                    aggindices, 1);
             }
         }
 #ifdef PSP_PARALLEL_FOR
@@ -620,11 +644,9 @@ t_ctx_grouped_pkey::rebuild() {
 
     set_expansion_state(expansion_state);
 
-    
     if (!m_sortby.empty()) {
         m_traversal->sort_by(m_config, m_sortby, *this);
     }
-    
 }
 
 void
@@ -636,9 +658,8 @@ void
 t_ctx_grouped_pkey::notify(const t_data_table& flattened) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    
+
     rebuild();
-    
 }
 
 // aggregates should be presized to be same size
@@ -647,7 +668,8 @@ void
 t_ctx_grouped_pkey::get_aggregates_for_sorting(t_uindex nidx,
     const std::vector<t_index>& agg_indices, std::vector<t_tscalar>& aggregates,
     t_ctx2*) const {
-    for (t_uindex idx = 0, loop_end = agg_indices.size(); idx < loop_end; ++idx) {
+    for (t_uindex idx = 0, loop_end = agg_indices.size(); idx < loop_end;
+         ++idx) {
         auto which_agg = agg_indices[idx];
 
         if (which_agg < 0) {
@@ -668,12 +690,14 @@ t_ctx_grouped_pkey::get_column_dtype(t_uindex idx) const {
 }
 
 void
-t_ctx_grouped_pkey::compute_expressions(std::shared_ptr<t_data_table> flattened_masked) {
+t_ctx_grouped_pkey::compute_expressions(
+    std::shared_ptr<t_data_table> flattened_masked) {
     // Clear the transitional expression tables on the context so they are
     // ready for the next update.
     m_expression_tables->clear_transitional_tables();
 
-    std::shared_ptr<t_data_table> master_expression_table = m_expression_tables->m_master;
+    std::shared_ptr<t_data_table> master_expression_table
+        = m_expression_tables->m_master;
 
     // Set the master table to the right size.
     master_expression_table->reserve(flattened_masked->size());
@@ -682,16 +706,15 @@ t_ctx_grouped_pkey::compute_expressions(std::shared_ptr<t_data_table> flattened_
     const auto& expressions = m_config.get_expressions();
     for (const auto& expr : expressions) {
         // Compute the expressions on the master table.
-        expr->compute(flattened_masked, master_expression_table, m_expression_vocab);
+        expr->compute(
+            flattened_masked, master_expression_table, m_expression_vocab);
     }
 }
 
 void
-t_ctx_grouped_pkey::compute_expressions(
-    std::shared_ptr<t_data_table> master,
+t_ctx_grouped_pkey::compute_expressions(std::shared_ptr<t_data_table> master,
     std::shared_ptr<t_data_table> flattened,
-    std::shared_ptr<t_data_table> delta,
-    std::shared_ptr<t_data_table> prev,
+    std::shared_ptr<t_data_table> delta, std::shared_ptr<t_data_table> prev,
     std::shared_ptr<t_data_table> current,
     std::shared_ptr<t_data_table> transitions,
     std::shared_ptr<t_data_table> existed) {
@@ -711,10 +734,12 @@ t_ctx_grouped_pkey::compute_expressions(
     const auto& expressions = m_config.get_expressions();
     for (const auto& expr : expressions) {
         // master: compute based on latest state of the gnode state table
-        expr->compute(master, m_expression_tables->m_master, m_expression_vocab);
+        expr->compute(
+            master, m_expression_tables->m_master, m_expression_vocab);
 
         // flattened: compute based on the latest update dataset
-        expr->compute(flattened, m_expression_tables->m_flattened, m_expression_vocab);
+        expr->compute(
+            flattened, m_expression_tables->m_flattened, m_expression_vocab);
 
         // delta: for each numerical column, the numerical delta between the
         // previous value and the current value in the row.
@@ -724,7 +749,8 @@ t_ctx_grouped_pkey::compute_expressions(
         expr->compute(prev, m_expression_tables->m_prev, m_expression_vocab);
 
         // current: the current values of the updated rows
-        expr->compute(current, m_expression_tables->m_current, m_expression_vocab);
+        expr->compute(
+            current, m_expression_tables->m_current, m_expression_vocab);
     }
 
     // Calculate the transitions now that the intermediate tables are computed
@@ -745,10 +771,10 @@ t_ctx_grouped_pkey::is_expression_column(const std::string& colname) const {
 
 t_tscalar
 t_ctx_grouped_pkey::get_value_from_gstate(
-    const std::string& colname,
-    const t_tscalar& pkey) const {
+    const std::string& colname, const t_tscalar& pkey) const {
     if (is_expression_column(colname)) {
-        return m_gstate->get_value(*(m_expression_tables->m_master), colname, pkey);
+        return m_gstate->get_value(
+            *(m_expression_tables->m_master), colname, pkey);
     } else {
         std::shared_ptr<t_data_table> master_table = m_gstate->get_table();
         return m_gstate->get_value(*master_table, colname, pkey);

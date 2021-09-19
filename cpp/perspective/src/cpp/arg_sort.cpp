@@ -60,8 +60,8 @@ t_argsort_comparator::operator()(t_index a, t_index b) const {
 }
 
 void
-simple_argsort(
-    std::vector<t_tscalar>& v, std::vector<t_index>& output, const t_sorttype& sort_type) {
+simple_argsort(std::vector<t_tscalar>& v, std::vector<t_index>& output,
+    const t_sorttype& sort_type) {
     // Output should be the same size is v
     for (t_index i = 0, loop_end = output.size(); i != loop_end; ++i)
         output[i] = i;

@@ -13,7 +13,7 @@ import express from "express";
 import expressWs from "express-ws";
 import {AddressInfo} from "net";
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import {securities} from "../../datasources";
 
@@ -22,7 +22,9 @@ const app = expressWs(express()).app;
 const manager = new WebSocketManager();
 securities().then((table: Table) => manager.host_table("remote_table", table));
 
-app.ws("/subscribe", ws => manager.add_connection(ws));
+app.ws("/subscribe", (ws) => manager.add_connection(ws));
 app.use("/", perspective_assets([path.resolve(__dirname, "../assets")], true));
 
-const server = app.listen(8080, () => console.log(`Listening on port ${(server.address() as AddressInfo).port}`));
+const server = app.listen(8080, () =>
+    console.log(`Listening on port ${(server.address() as AddressInfo).port}`)
+);

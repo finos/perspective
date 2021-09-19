@@ -12,8 +12,9 @@
 
 namespace perspective {
 
-t_stnode::t_stnode(t_uindex idx, t_uindex pidx, const t_tscalar& value, std::uint8_t depth,
-    const t_tscalar& sort_value, t_uindex nstrands, t_uindex aggidx)
+t_stnode::t_stnode(t_uindex idx, t_uindex pidx, const t_tscalar& value,
+    std::uint8_t depth, const t_tscalar& sort_value, t_uindex nstrands,
+    t_uindex aggidx)
     : m_idx(idx)
     , m_pidx(pidx)
     , m_depth(depth)
@@ -49,8 +50,8 @@ t_stleaves::t_stleaves() {}
 
 t_cellinfo::t_cellinfo() {}
 
-t_cellinfo::t_cellinfo(
-    t_index idx, t_depth treenum, t_index agg_index, t_uindex ridx, t_uindex cidx)
+t_cellinfo::t_cellinfo(t_index idx, t_depth treenum, t_index agg_index,
+    t_uindex ridx, t_uindex cidx)
     : m_idx(idx)
     , m_treenum(treenum)
     , m_agg_index(agg_index)
@@ -63,9 +64,9 @@ namespace std {
 std::ostream&
 operator<<(std::ostream& os, const perspective::t_stnode& node) {
     os << "t_stnode<"
-       << "idx: " << node.m_idx << " pidx: " << node.m_pidx << " value: " << node.m_value
-       << " sort_value: " << node.m_sort_value << " aggidx: " << node.m_aggidx
-       << " nstrands: " << node.m_nstrands
+       << "idx: " << node.m_idx << " pidx: " << node.m_pidx
+       << " value: " << node.m_value << " sort_value: " << node.m_sort_value
+       << " aggidx: " << node.m_aggidx << " nstrands: " << node.m_nstrands
        << " depth: " << static_cast<perspective::t_uindex>(node.m_depth) << ">";
     return os;
 }

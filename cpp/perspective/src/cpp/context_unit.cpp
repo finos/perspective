@@ -22,8 +22,7 @@ t_ctxunit::t_ctxunit() {}
 
 t_ctxunit::t_ctxunit(const t_schema& schema, const t_config& config)
     : t_ctxbase<t_ctxunit>(schema, config)
-    , m_has_delta(false)
-{}
+    , m_has_delta(false) {}
 
 t_ctxunit::~t_ctxunit() {}
 
@@ -48,22 +47,24 @@ t_ctxunit::step_end() {}
 /**
  * @brief Notify the context with new data when the `t_gstate` master table is
  * not empty, and being updated with new data.
- * 
- * @param flattened 
- * @param delta 
- * @param prev 
- * @param curr 
- * @param transitions 
- * @param existed 
+ *
+ * @param flattened
+ * @param delta
+ * @param prev
+ * @param curr
+ * @param transitions
+ * @param existed
  */
 void
 t_ctxunit::notify(const t_data_table& flattened, const t_data_table& delta,
-    const t_data_table& prev, const t_data_table& curr, const t_data_table& transitions,
-    const t_data_table& existed) {
+    const t_data_table& prev, const t_data_table& curr,
+    const t_data_table& transitions, const t_data_table& existed) {
     t_uindex nrecs = flattened.size();
 
-    std::shared_ptr<const t_column> pkey_sptr = flattened.get_const_column("psp_pkey");
-    std::shared_ptr<const t_column> op_sptr = flattened.get_const_column("psp_op");
+    std::shared_ptr<const t_column> pkey_sptr
+        = flattened.get_const_column("psp_pkey");
+    std::shared_ptr<const t_column> op_sptr
+        = flattened.get_const_column("psp_op");
     const t_column* pkey_col = pkey_sptr.get();
     const t_column* op_col = op_sptr.get();
 
@@ -77,12 +78,14 @@ t_ctxunit::notify(const t_data_table& flattened, const t_data_table& delta,
         t_op op = static_cast<t_op>(op_);
 
         switch (op) {
-            case OP_INSERT: {}
-                break;
+            case OP_INSERT: {
+            } break;
             case OP_DELETE: {
                 delete_encountered = true;
             } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unexpected OP"); } break;
+            default: {
+                PSP_COMPLAIN_AND_ABORT("Unexpected OP");
+            } break;
         }
 
         // add the pkey for row delta
@@ -95,13 +98,14 @@ t_ctxunit::notify(const t_data_table& flattened, const t_data_table& delta,
 /**
  * @brief Notify the context with new data after the `t_gstate`'s master table
  * has been updated for the first time with data.
- * 
- * @param flattened 
+ *
+ * @param flattened
  */
 void
 t_ctxunit::notify(const t_data_table& flattened) {
     t_uindex nrecs = flattened.size();
-    std::shared_ptr<const t_column> pkey_sptr = flattened.get_const_column("psp_pkey");
+    std::shared_ptr<const t_column> pkey_sptr
+        = flattened.get_const_column("psp_pkey");
     const t_column* pkey_col = pkey_sptr.get();
 
     m_has_delta = true;
@@ -119,7 +123,7 @@ t_ctxunit::notify(const t_data_table& flattened) {
     }
 }
 
-std::pair<t_tscalar, t_tscalar> 
+std::pair<t_tscalar, t_tscalar>
 t_ctxunit::get_min_max(const std::string& colname) const {
     auto col = m_gstate->get_table()->get_const_column(colname);
     auto rval = std::make_pair(mknone(), mknone());
@@ -151,10 +155,7 @@ t_ctxunit::get_min_max(const std::string& colname) const {
  * @return std::vector<t_tscalar>
  */
 std::vector<t_tscalar>
-t_ctxunit::get_data(
-    t_index start_row,
-    t_index end_row,
-    t_index start_col,
+t_ctxunit::get_data(t_index start_row, t_index end_row, t_index start_col,
     t_index end_col) const {
     t_uindex ctx_nrows = get_row_count();
     t_uindex ctx_ncols = get_column_count();
@@ -177,7 +178,8 @@ t_ctxunit::get_data(
 
         // Read directly from the row indices on the table - they will
         // always correspond exactly.
-        m_gstate->read_column(master_table, colname, start_row, end_row, out_data);
+        m_gstate->read_column(
+            master_table, colname, start_row, end_row, out_data);
 
         for (t_index ridx = ext.m_srow; ridx < ext.m_erow; ++ridx) {
             auto v = out_data[ridx - ext.m_srow];
@@ -220,7 +222,7 @@ t_ctxunit::get_data(const std::vector<t_uindex>& rows) const {
             if (!v.is_valid())
                 v.set(none);
 
-            values[(ridx) * stride + (cidx)] = v;
+            values[(ridx)*stride + (cidx)] = v;
         }
     }
 
@@ -248,7 +250,7 @@ t_ctxunit::get_data(const std::vector<t_tscalar>& pkeys) const {
             if (!v.is_valid())
                 v.set(none);
 
-            values[(ridx) * stride + (cidx)] = v;
+            values[(ridx)*stride + (cidx)] = v;
         }
     }
 
@@ -258,12 +260,13 @@ t_ctxunit::get_data(const std::vector<t_tscalar>& pkeys) const {
 /**
  * @brief Returns a vector of primary keys for the specified cells,
  * reading from the gnode_state's master table instead of from a traversal.
- * 
- * @param cells 
- * @return std::vector<t_tscalar> 
+ *
+ * @param cells
+ * @return std::vector<t_tscalar>
  */
 std::vector<t_tscalar>
-t_ctxunit::get_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
+t_ctxunit::get_pkeys(
+    const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
     // Validate cells
     t_index num_rows = get_row_count();
 
@@ -280,7 +283,8 @@ t_ctxunit::get_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells) co
     }
 
     const t_data_table& master_table = *(m_gstate->get_table());
-    std::shared_ptr<const t_column> pkey_sptr = master_table.get_const_column("psp_pkey");
+    std::shared_ptr<const t_column> pkey_sptr
+        = master_table.get_const_column("psp_pkey");
 
     std::vector<t_tscalar> rval(all_rows.size());
 
@@ -295,9 +299,9 @@ t_ctxunit::get_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells) co
 
 /**
  * @brief Returns a string column name using the context's config.
- * 
- * @param idx 
- * @return t_tscalar 
+ *
+ * @param idx
+ * @return t_tscalar
  */
 t_tscalar
 t_ctxunit::get_column_name(t_index idx) {
@@ -318,7 +322,8 @@ t_ctxunit::get_column_name(t_index idx) {
 t_rowdelta
 t_ctxunit::get_row_delta() {
     bool rows_changed = m_rows_changed;
-    std::vector<t_tscalar> pkey_vector(m_delta_pkeys.begin(), m_delta_pkeys.end());
+    std::vector<t_tscalar> pkey_vector(
+        m_delta_pkeys.begin(), m_delta_pkeys.end());
 
     // Sort pkeys - they will always be integers >= 0, as the table has
     // no index set.

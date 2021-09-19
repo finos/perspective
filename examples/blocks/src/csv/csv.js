@@ -1,4 +1,4 @@
-window.addEventListener("DOMContentLoaded", function() {
+window.addEventListener("DOMContentLoaded", function () {
     const worker = window.perspective.worker();
 
     // Get `dropArea` element from the DOM.
@@ -11,10 +11,10 @@ window.addEventListener("DOMContentLoaded", function() {
     dropArea.addEventListener("dragenter", () => {}, false);
     dropArea.addEventListener("dragleave", () => {}, false);
     dropArea.addEventListener("dragover", () => {}, false);
-    dropArea.addEventListener("drop", x => console.log(x), false);
+    dropArea.addEventListener("drop", (x) => console.log(x), false);
 
     // Prevent defaults for drag / drop events.
-    ["dragenter", "dragover", "dragleave", "drop"].forEach(eventName => {
+    ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
         dropArea.addEventListener(eventName, preventDefaults, false);
     });
 
@@ -24,12 +24,12 @@ window.addEventListener("DOMContentLoaded", function() {
     }
 
     // Highlight `dropArea` on drag enter and over.
-    ["dragenter", "dragover"].forEach(function(eventName) {
+    ["dragenter", "dragover"].forEach(function (eventName) {
         dropArea.addEventListener(eventName, highlight, false);
     });
 
     // Remove highlight `dropArea` on drag leave and drop.
-    ["dragleave", "drop"].forEach(function(eventName) {
+    ["dragleave", "drop"].forEach(function (eventName) {
         dropArea.addEventListener(eventName, unhighlight, false);
     });
 
@@ -47,7 +47,7 @@ window.addEventListener("DOMContentLoaded", function() {
     dropArea.addEventListener("drop", handleDrop, false);
 
     // Add event listener for file change on `input`.
-    input.addEventListener("change", function() {
+    input.addEventListener("change", function () {
         handleFiles(this.files);
     });
 
@@ -67,7 +67,7 @@ window.addEventListener("DOMContentLoaded", function() {
     // On file load, remove the `dropArea` and replace it with a `<perspective-viewer>`.
     function uploadFile(file) {
         let reader = new FileReader();
-        reader.onload = function(fileLoadedEvent) {
+        reader.onload = function (fileLoadedEvent) {
             let txt = fileLoadedEvent.target.result;
 
             // Remove the `dropArea` from the DOM.

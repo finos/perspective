@@ -24,25 +24,40 @@ const datasource = async () => {
 
 const DEFAULT_LAYOUT = {
     master: {
-        widgets: ["Four", "Three"]
+        widgets: ["Four", "Three"],
     },
     detail: {
         main: {
             currentIndex: 0,
             type: "tab-area",
-            widgets: ["One", "Two"]
-        }
+            widgets: ["One", "Two"],
+        },
     },
     viewers: {
         One: {table: "superstore", editable: true},
-        Three: {table: "superstore", name: "Test Widget III (modified)", "row-pivots": ["State"], columns: ["Sales", "Profit"]},
-        Four: {table: "superstore", name: "Test Widget IV (modified)", "row-pivots": ["Category", "Sub-Category"], columns: ["Sales", "Profit"]}
-    }
+        Three: {
+            table: "superstore",
+            name: "Test Widget III (modified)",
+            "row-pivots": ["State"],
+            columns: ["Sales", "Profit"],
+        },
+        Four: {
+            table: "superstore",
+            name: "Test Widget IV (modified)",
+            "row-pivots": ["Category", "Sub-Category"],
+            columns: ["Sales", "Profit"],
+        },
+    },
 };
 
 window.workspace.tables.set("superstore", datasource());
 const savedLayout = localStorage.getItem("layout");
-window.workspace.restore(savedLayout ? JSON.parse(savedLayout) : DEFAULT_LAYOUT);
+window.workspace.restore(
+    savedLayout ? JSON.parse(savedLayout) : DEFAULT_LAYOUT
+);
 window.workspace.addEventListener("workspace-layout-update", async () => {
-    localStorage.setItem("layout", JSON.stringify(await window.workspace.save()));
+    localStorage.setItem(
+        "layout",
+        JSON.stringify(await window.workspace.save())
+    );
 });

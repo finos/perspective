@@ -25,24 +25,24 @@ SUPPRESS_WARNINGS_VC(4800)
 
 namespace perspective {
 
-#define BINARY_OPERATOR_BODY(OP) \
-    t_tscalar rval;                                 \
-    rval.clear();                                   \
-    rval.m_type = DTYPE_FLOAT64;                    \
-    if (!is_numeric() || !other.is_numeric()) {     \
-        rval.m_status = STATUS_CLEAR;               \
-    }                                               \
-    if (!other.is_valid() || !is_valid()) {         \
-        return rval;                                \
-    }                                               \
-    rval.set(to_double() OP other.to_double());     \
-    return rval; \
+#define BINARY_OPERATOR_BODY(OP)                                               \
+    t_tscalar rval;                                                            \
+    rval.clear();                                                              \
+    rval.m_type = DTYPE_FLOAT64;                                               \
+    if (!is_numeric() || !other.is_numeric()) {                                \
+        rval.m_status = STATUS_CLEAR;                                          \
+    }                                                                          \
+    if (!other.is_valid() || !is_valid()) {                                    \
+        return rval;                                                           \
+    }                                                                          \
+    rval.set(to_double() OP other.to_double());                                \
+    return rval;
 
 /**
  * @brief A function-style cast used by exprtk. Because we want the numeric
  * type that can accomodate the most values without retyping, the scalar
  * here is set as DTYPE_FLOAT64.
- * 
+ *
  * @param value
  */
 t_tscalar::t_tscalar(int v) {
@@ -118,7 +118,7 @@ t_tscalar::operator+() const {
         return rval;
     }
 
-    switch (m_type) { 
+    switch (m_type) {
         case DTYPE_INT64: {
             rval.set(+(m_data.m_int64));
         } break;
@@ -149,7 +149,8 @@ t_tscalar::operator+() const {
         case DTYPE_FLOAT32: {
             rval.set(+(m_data.m_float32));
         } break;
-        default: return mknone();
+        default:
+            return mknone();
     }
 
     return rval;
@@ -169,7 +170,7 @@ t_tscalar::operator-() const {
         return rval;
     }
 
-    switch (m_type) { 
+    switch (m_type) {
         case DTYPE_INT64: {
             rval.set(-m_data.m_int64);
         } break;
@@ -200,29 +201,23 @@ t_tscalar::operator-() const {
         case DTYPE_FLOAT32: {
             rval.set(-m_data.m_float32);
         } break;
-        default: return mknone();
+        default:
+            return mknone();
     }
 
     return rval;
 }
 
 t_tscalar
-t_tscalar::operator+(const t_tscalar& other) const {
-    BINARY_OPERATOR_BODY(+)
-}
+t_tscalar::operator+(const t_tscalar& other) const {BINARY_OPERATOR_BODY(+)}
 
-t_tscalar
-t_tscalar::operator-(const t_tscalar& other) const {
-    BINARY_OPERATOR_BODY(-)
-}
+t_tscalar t_tscalar::operator-(const t_tscalar& other) const {
+    BINARY_OPERATOR_BODY(-)}
 
-t_tscalar
-t_tscalar::operator*(const t_tscalar& other) const {
-    BINARY_OPERATOR_BODY(*)
-}
+t_tscalar t_tscalar::operator*(const t_tscalar& other) const {
+    BINARY_OPERATOR_BODY(*)}
 
-t_tscalar
-t_tscalar::operator/(const t_tscalar& other) const {
+t_tscalar t_tscalar::operator/(const t_tscalar& other) const {
     t_tscalar rval;
     rval.clear();
     rval.m_type = DTYPE_FLOAT64;
@@ -466,7 +461,9 @@ t_tscalar::canonical(t_dtype dtype) {
         case DTYPE_OBJECT: {
             rval.set(nullptr);
         } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Found unknown dtype."); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Found unknown dtype.");
+        }
     }
 
     return rval;
@@ -849,8 +846,8 @@ t_tscalar::mul(const t_tscalar& other) const {
 std::string
 t_tscalar::repr() const {
     std::stringstream ss;
-    ss << get_dtype_descr(static_cast<t_dtype>(m_type)) << ":" << get_status_descr(m_status)
-       << ":" << to_string();
+    ss << get_dtype_descr(static_cast<t_dtype>(m_type)) << ":"
+       << get_status_descr(m_status) << ":" << to_string();
     return ss.str();
 }
 
@@ -866,8 +863,8 @@ t_tscalar::is_floating_point() const {
 
 bool
 t_tscalar::is_signed() const {
-    return (m_type == DTYPE_INT64 || m_type == DTYPE_INT32 || m_type == DTYPE_INT16
-        || m_type == DTYPE_INT8);
+    return (m_type == DTYPE_INT64 || m_type == DTYPE_INT32
+        || m_type == DTYPE_INT16 || m_type == DTYPE_INT8);
 }
 
 t_tscalar::operator bool() const {
@@ -925,8 +922,8 @@ t_tscalar::operator bool() const {
         } break;
         default: {
 #ifdef PSP_DEBUG
-            std::cout << __FILE__ << ":" << __LINE__ << " Reached unknown type " << m_type
-                      << std::endl;
+            std::cout << __FILE__ << ":" << __LINE__ << " Reached unknown type "
+                      << m_type << std::endl;
 #endif
         }
     }
@@ -981,7 +978,8 @@ t_tscalar::to_string(bool for_expr) const {
         case DTYPE_DATE: {
             if (for_expr) {
                 auto d = get<t_date>();
-                ss << "date(" << d.year() << ", " << d.month() << ", " << d.day() << ")";
+                ss << "date(" << d.year() << ", " << d.month() << ", "
+                   << d.day() << ")";
             } else {
                 ss << get<t_date>();
             }
@@ -1012,14 +1010,16 @@ t_tscalar::to_string(bool for_expr) const {
             // use a mix of strftime and date::format
             std::string buffer;
             buffer.resize(64);
-            
+
             // write y-m-d h:m in local time into buffer, and if successful
             // write the rest of the date, otherwise print the date in UTC.
-            std::size_t len = strftime(&buffer[0], buffer.size(), "%Y-%m-%d %H:%M:", t);
+            std::size_t len
+                = strftime(&buffer[0], buffer.size(), "%Y-%m-%d %H:%M:", t);
             if (len > 0) {
                 buffer.resize(len);
                 ss << buffer;
-                ss << date::format("%S", ts); // represent second and millisecond
+                ss << date::format(
+                    "%S", ts); // represent second and millisecond
             } else {
                 std::cerr << to_int64() << " failed strftime" << std::endl;
                 ss << date::format("%Y-%m-%d %H:%M:%S UTC", ts);
@@ -1046,7 +1046,9 @@ t_tscalar::to_string(bool for_expr) const {
             }
             return ss.str();
         } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Unrecognized dtype"); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Unrecognized dtype");
+        }
     }
     return std::string("null");
 }
@@ -1094,7 +1096,9 @@ t_tscalar::to_double() const {
             return get<bool>();
         } break;
         case DTYPE_NONE:
-        default: { return 0; }
+        default: {
+            return 0;
+        }
     }
 
     return 0;
@@ -1136,7 +1140,9 @@ t_tscalar::coerce_numeric_dtype(t_dtype dtype) const {
         case DTYPE_BOOL: {
             return coerce_numeric<bool>();
         } break;
-        default: { return *this; }
+        default: {
+            return *this;
+        }
     }
 
     return mknone();
@@ -1185,7 +1191,9 @@ t_tscalar::to_int64() const {
             return get<bool>();
         } break;
         case DTYPE_NONE:
-        default: { return 0; }
+        default: {
+            return 0;
+        }
     }
 
     return 0;
@@ -1234,11 +1242,13 @@ t_tscalar::to_uint64() const {
             return get<bool>();
         } break;
         case DTYPE_OBJECT: {
-            //Interpret pointer as 64bit unsigned int
+            // Interpret pointer as 64bit unsigned int
             return get<std::uint64_t>();
         } break;
         case DTYPE_NONE:
-        default: { return 0; }
+        default: {
+            return 0;
+        }
     }
 
     return 0;
@@ -1246,7 +1256,8 @@ t_tscalar::to_uint64() const {
 
 bool
 t_tscalar::begins_with(const t_tscalar& other) const {
-    if (m_status != STATUS_VALID || m_type != DTYPE_STR || other.m_type != DTYPE_STR)
+    if (m_status != STATUS_VALID || m_type != DTYPE_STR
+        || other.m_type != DTYPE_STR)
         return false;
     std::string sstr = to_string();
     std::string ostr = other.to_string();
@@ -1257,7 +1268,8 @@ t_tscalar::begins_with(const t_tscalar& other) const {
 
 bool
 t_tscalar::ends_with(const t_tscalar& other) const {
-    if (m_status != STATUS_VALID || m_type != DTYPE_STR || other.m_type != DTYPE_STR)
+    if (m_status != STATUS_VALID || m_type != DTYPE_STR
+        || other.m_type != DTYPE_STR)
         return false;
     std::string sstr = to_string();
     std::string ostr = other.to_string();
@@ -1269,7 +1281,8 @@ t_tscalar::ends_with(const t_tscalar& other) const {
 
 bool
 t_tscalar::contains(const t_tscalar& other) const {
-    if (m_status != STATUS_VALID || m_type != DTYPE_STR || other.m_type != DTYPE_STR)
+    if (m_status != STATUS_VALID || m_type != DTYPE_STR
+        || other.m_type != DTYPE_STR)
         return false;
     std::string sstr = to_string();
     std::string ostr = other.to_string();
@@ -1440,7 +1453,9 @@ t_tscalar::cmp(t_filter_op op, const t_tscalar& other) const {
         case FILTER_OP_IS_NOT_NULL: {
             return m_status == STATUS_VALID;
         } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Invalid filter op"); } break;
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Invalid filter op");
+        } break;
     }
 
     return false;
@@ -1544,7 +1559,7 @@ operator<<(std::ostream& os, const std::vector<perspective::t_tscalar>& t) {
         }
     }
 
-    os << "]"; 
+    os << "]";
     return os;
 }
 

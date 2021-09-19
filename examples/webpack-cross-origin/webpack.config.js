@@ -16,29 +16,29 @@ module.exports = {
     mode: "development",
     output: {
         filename: "cdn/bundle.js",
-        publicPath: "http://localhost:5150/"
+        publicPath: "http://localhost:5150/",
     },
     plugins: [
         new HtmlWebPackPlugin({
             title: "Perspective Webpack Cross-Origin Example",
             template: "./src/index.html",
             filename: "app/index.html",
-            inject: "head"
+            inject: "head",
         }),
         new PerspectivePlugin({
             wasmName: "cdn/test.[hash].wasm",
             workerName: "cdn/test.[hash].worker.js",
-            inlineWorker: true
-        })
+            inlineWorker: true,
+        }),
     ],
     module: {
         rules: [
             {
                 test: /\.css$/,
                 exclude: [/packages/, /node_modules/],
-                use: [{loader: "style-loader"}, {loader: "css-loader"}]
-            }
-        ]
+                use: [{loader: "style-loader"}, {loader: "css-loader"}],
+            },
+        ],
     },
     devtool: "source-map",
     devServer: {
@@ -46,8 +46,10 @@ module.exports = {
         watchOptions: {aggregateTimeout: 300, poll: 1000},
         headers: {
             "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-            "Access-Control-Allow-Headers": "X-Requested-With, content-type, Authorization"
-        }
-    }
+            "Access-Control-Allow-Methods":
+                "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+            "Access-Control-Allow-Headers":
+                "X-Requested-With, content-type, Authorization",
+        },
+    },
 };

@@ -11,16 +11,15 @@
 
 namespace perspective {
 
-t_view_config::t_view_config(
-        const std::vector<std::string>& row_pivots,
-        const std::vector<std::string>& column_pivots,
-        const tsl::ordered_map<std::string, std::vector<std::string>>& aggregates,
-        const std::vector<std::string>& columns,
-        const std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>>& filter,
-        const std::vector<std::vector<std::string>>& sort,
-        const std::vector<std::shared_ptr<t_computed_expression>>& expressions,
-        const std::string& filter_op,
-        bool column_only)
+t_view_config::t_view_config(const std::vector<std::string>& row_pivots,
+    const std::vector<std::string>& column_pivots,
+    const tsl::ordered_map<std::string, std::vector<std::string>>& aggregates,
+    const std::vector<std::string>& columns,
+    const std::vector<
+        std::tuple<std::string, std::string, std::vector<t_tscalar>>>& filter,
+    const std::vector<std::vector<std::string>>& sort,
+    const std::vector<std::shared_ptr<t_computed_expression>>& expressions,
+    const std::string& filter_op, bool column_only)
     : m_init(false)
     , m_row_pivots(row_pivots)
     , m_column_pivots(column_pivots)
@@ -56,7 +55,8 @@ t_view_config::validate(std::shared_ptr<t_schema> schema) {
     for (const std::string& col : m_columns) {
         if (!schema->has_column(col) && expression_aliases.count(col) == 0) {
             std::stringstream ss;
-            ss << "Invalid column '" << col << "' found in View columns." << std::endl;
+            ss << "Invalid column '" << col << "' found in View columns."
+               << std::endl;
             PSP_COMPLAIN_AND_ABORT(ss.str());
         }
     }
@@ -65,7 +65,8 @@ t_view_config::validate(std::shared_ptr<t_schema> schema) {
         const std::string& col = agg.first;
         if (!schema->has_column(col) && expression_aliases.count(col) == 0) {
             std::stringstream ss;
-            ss << "Invalid column '" << col << "' found in View aggregates." << std::endl;
+            ss << "Invalid column '" << col << "' found in View aggregates."
+               << std::endl;
             PSP_COMPLAIN_AND_ABORT(ss.str());
         }
     }
@@ -73,7 +74,8 @@ t_view_config::validate(std::shared_ptr<t_schema> schema) {
     for (const std::string& col : m_row_pivots) {
         if (!schema->has_column(col) && expression_aliases.count(col) == 0) {
             std::stringstream ss;
-            ss << "Invalid column '" << col << "' found in View row_pivots." << std::endl;
+            ss << "Invalid column '" << col << "' found in View row_pivots."
+               << std::endl;
             PSP_COMPLAIN_AND_ABORT(ss.str());
         }
     }
@@ -81,7 +83,8 @@ t_view_config::validate(std::shared_ptr<t_schema> schema) {
     for (const std::string& col : m_column_pivots) {
         if (!schema->has_column(col) && expression_aliases.count(col) == 0) {
             std::stringstream ss;
-            ss << "Invalid column '" << col << "' found in View column_pivots." << std::endl;
+            ss << "Invalid column '" << col << "' found in View column_pivots."
+               << std::endl;
             PSP_COMPLAIN_AND_ABORT(ss.str());
         }
     }
@@ -90,7 +93,8 @@ t_view_config::validate(std::shared_ptr<t_schema> schema) {
         const std::string& col = std::get<0>(filter);
         if (!schema->has_column(col) && expression_aliases.count(col) == 0) {
             std::stringstream ss;
-            ss << "Invalid column '" << col << "' found in View filters." << std::endl;
+            ss << "Invalid column '" << col << "' found in View filters."
+               << std::endl;
             PSP_COMPLAIN_AND_ABORT(ss.str());
         }
     }
@@ -99,7 +103,8 @@ t_view_config::validate(std::shared_ptr<t_schema> schema) {
         const std::string& col = sort[0];
         if (!schema->has_column(col) && expression_aliases.count(col) == 0) {
             std::stringstream ss;
-            ss << "Invalid column '" << col << "' found in View sorts." << std::endl;
+            ss << "Invalid column '" << col << "' found in View sorts."
+               << std::endl;
             PSP_COMPLAIN_AND_ABORT(ss.str());
         }
     }
@@ -172,7 +177,6 @@ t_view_config::get_expressions() const {
     return m_expressions;
 }
 
-
 t_filter_op
 t_view_config::get_filter_op() const {
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
@@ -222,7 +226,8 @@ t_view_config::fill_aggspecs(std::shared_ptr<t_schema> schema) {
             // Generate a default aggregate based on the column type.
             std::vector<t_dep> dependencies{t_dep(column, DEPTYPE_COLUMN)};
             t_aggtype agg_type;
-            m_column_only ? agg_type = AGGTYPE_ANY : agg_type = _get_default_aggregate(dtype);
+            m_column_only ? agg_type = AGGTYPE_ANY
+                          : agg_type = _get_default_aggregate(dtype);
             m_aggspecs.push_back(t_aggspec(column, agg_type, dependencies));
             m_aggregate_names.push_back(column);
         }
@@ -233,11 +238,16 @@ t_view_config::fill_aggspecs(std::shared_ptr<t_schema> schema) {
         std::string column = sort[0];
 
         bool is_hidden_column
-            = std::find(m_columns.begin(), m_columns.end(), column) == m_columns.end();
+            = std::find(m_columns.begin(), m_columns.end(), column)
+            == m_columns.end();
 
         if (is_hidden_column) {
-            bool is_row_pivot = std::find(m_row_pivots.begin(), m_row_pivots.end(), column) != m_row_pivots.end();
-            bool is_column_pivot = std::find(m_column_pivots.begin(), m_column_pivots.end(), column) != m_column_pivots.end();
+            bool is_row_pivot
+                = std::find(m_row_pivots.begin(), m_row_pivots.end(), column)
+                != m_row_pivots.end();
+            bool is_column_pivot = std::find(m_column_pivots.begin(),
+                                       m_column_pivots.end(), column)
+                != m_column_pivots.end();
             bool is_column_only = m_row_pivots.size() == 0 || m_column_only;
 
             std::vector<t_dep> dependencies{t_dep(column, DEPTYPE_COLUMN)};
@@ -248,7 +258,7 @@ t_view_config::fill_aggspecs(std::shared_ptr<t_schema> schema) {
                 agg_type = t_aggtype::AGGTYPE_ANY;
             } else if (is_row_pivot || is_column_pivot) {
                 // Otherwise if the hidden column is in pivots, use `UNIQUE`
-                agg_type = t_aggtype::AGGTYPE_UNIQUE;      
+                agg_type = t_aggtype::AGGTYPE_UNIQUE;
             } else if (m_aggregates.count(column) > 0) {
                 auto col = m_aggregates.at(column);
                 if (col.at(0) == "weighted mean") {
@@ -275,13 +285,13 @@ t_view_config::fill_fterm() {
         switch (op) {
             case FILTER_OP_NOT_IN:
             case FILTER_OP_IN: {
-                m_fterm.push_back(
-                    t_fterm(std::get<0>(filter), op, mktscalar(0), std::get<2>(filter)));
+                m_fterm.push_back(t_fterm(std::get<0>(filter), op, mktscalar(0),
+                    std::get<2>(filter)));
             } break;
             default: {
                 t_tscalar filter_term = std::get<2>(filter)[0];
-                m_fterm.push_back(
-                    t_fterm(std::get<0>(filter), op, filter_term, std::vector<t_tscalar>()));
+                m_fterm.push_back(t_fterm(std::get<0>(filter), op, filter_term,
+                    std::vector<t_tscalar>()));
             }
         }
     }
@@ -306,7 +316,8 @@ t_view_config::fill_sortspec() {
 
 t_index
 t_view_config::get_aggregate_index(const std::string& column) const {
-    auto it = std::find(m_aggregate_names.begin(), m_aggregate_names.end(), column);
+    auto it
+        = std::find(m_aggregate_names.begin(), m_aggregate_names.end(), column);
     if (it != m_aggregate_names.end()) {
         return t_index(std::distance(m_aggregate_names.begin(), it));
     }
@@ -314,8 +325,8 @@ t_view_config::get_aggregate_index(const std::string& column) const {
 }
 
 void
-t_view_config::make_aggspec(
-    const std::string& column, const std::vector<std::string>& aggregate, t_dtype dtype) {
+t_view_config::make_aggspec(const std::string& column,
+    const std::vector<std::string>& aggregate, t_dtype dtype) {
     t_aggtype agg_type;
     t_aggspec aggspec;
 

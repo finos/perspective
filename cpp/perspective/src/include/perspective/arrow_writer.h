@@ -31,12 +31,12 @@ namespace apachearrow {
 
     /**
      * @brief Return a value from a `t_scalar` cast to `T`.
-     * 
+     *
      * @tparam DataType
      * @tparam ArrowDataType
      * @tparam ArrowValueType
-     * @param t 
-     * @return ArrowValueType 
+     * @param t
+     * @return ArrowValueType
      */
     template <typename T>
     T get_scalar(t_tscalar& t);
@@ -45,32 +45,26 @@ namespace apachearrow {
      * @brief Retrieve the correct index into the data slice for the given
      * column and row. This is a redefinition of the method in `t_data_slice`,
      * except it does not rely on any instance variables.
-     * 
-     * @param cidx 
-     * @param ridx 
-     * @param stride 
-     * @param extents 
-     * @return std::int32_t 
+     *
+     * @param cidx
+     * @param ridx
+     * @param stride
+     * @param extents
+     * @return std::int32_t
      */
-    std::int32_t
-    get_idx(std::int32_t cidx,
-            std::int32_t ridx, 
-            std::int32_t stride,
-            t_get_data_extents extents);
+    std::int32_t get_idx(std::int32_t cidx, std::int32_t ridx,
+        std::int32_t stride, t_get_data_extents extents);
 
     /**
      * @brief Build an `arrow::Array` from a column typed as `DTYPE_BOOL.`
-     * 
-     * @param data 
-     * @param offset 
-     * @param stride 
+     *
+     * @param data
+     * @param offset
+     * @param stride
      */
-    std::shared_ptr<arrow::Array>
-    boolean_col_to_array(
-        const std::vector<t_tscalar>& data,
-        std::int32_t cidx,
-        std::int32_t stride,
-        t_get_data_extents extents);
+    std::shared_ptr<arrow::Array> boolean_col_to_array(
+        const std::vector<t_tscalar>& data, std::int32_t cidx,
+        std::int32_t stride, t_get_data_extents extents);
 
     /**
      * @brief Build an `arrow::Array` from a column typed as `DTYPE_DATE.`
@@ -78,48 +72,39 @@ namespace apachearrow {
      * `uint32_t` that needs to be written into the `arrow::Array` as an
      * `int32_t`.
      *
-     * @param data 
-     * @param offset 
-     * @param stride 
+     * @param data
+     * @param offset
+     * @param stride
      */
-    std::shared_ptr<arrow::Array>
-    date_col_to_array(
-        const std::vector<t_tscalar>& data,
-        std::int32_t cidx,
-        std::int32_t stride,
-        t_get_data_extents extents);
+    std::shared_ptr<arrow::Array> date_col_to_array(
+        const std::vector<t_tscalar>& data, std::int32_t cidx,
+        std::int32_t stride, t_get_data_extents extents);
 
     /**
      * @brief Build an `arrow::Array` from a column typed as `DTYPE_TIME`.
      * Separated out from the main templated `col_to_array` as
      * `arrow::timestamp()` has parameters that need to be filled.
      *
-     * @param data 
-     * @param offset 
-     * @param stride 
+     * @param data
+     * @param offset
+     * @param stride
      */
-    std::shared_ptr<arrow::Array>
-    timestamp_col_to_array(
-        const std::vector<t_tscalar>& data,
-        std::int32_t cidx,
-        std::int32_t stride,
-        t_get_data_extents extents);
+    std::shared_ptr<arrow::Array> timestamp_col_to_array(
+        const std::vector<t_tscalar>& data, std::int32_t cidx,
+        std::int32_t stride, t_get_data_extents extents);
 
     /**
      * @brief Build an `arrow::Array` from a column typed as `DTYPE_STR`, using
      * arrow's `DictionaryArray` constructors.
-     * 
-     * @param data 
-     * @param offset 
-     * @param stride 
-     * @return std::shared_ptr<arrow::Array> 
+     *
+     * @param data
+     * @param offset
+     * @param stride
+     * @return std::shared_ptr<arrow::Array>
      */
-    std::shared_ptr<arrow::Array>
-    string_col_to_dictionary_array(
-        const std::vector<t_tscalar>& data,
-        std::int32_t cidx,
-        std::int32_t stride,
-        t_get_data_extents extents);
+    std::shared_ptr<arrow::Array> string_col_to_dictionary_array(
+        const std::vector<t_tscalar>& data, std::int32_t cidx,
+        std::int32_t stride, t_get_data_extents extents);
 
     /**
      * @brief Build an `arrow::Array` from a column contained in `data`. Column
@@ -128,22 +113,19 @@ namespace apachearrow {
      * to avoid template hell.
      *
      * @tparam ArrowDataType
-     * @param data 
-     * @param offset 
-     * @param stride 
-     * @return std::shared_ptr<arrow::Array> 
+     * @param data
+     * @param offset
+     * @param stride
+     * @return std::shared_ptr<arrow::Array>
      */
     template <typename ArrowDataType, typename ArrowValueType>
     std::shared_ptr<arrow::Array>
-    numeric_col_to_array(
-        const std::vector<t_tscalar>& data,
-        std::int32_t cidx,
-        std::int32_t stride,
-        t_get_data_extents extents) {
+    numeric_col_to_array(const std::vector<t_tscalar>& data, std::int32_t cidx,
+        std::int32_t stride, t_get_data_extents extents) {
         // NumericBuilder encompasses the most types (int/float/datetime)
         arrow::NumericBuilder<ArrowDataType> array_builder;
-        auto reserve_status = array_builder.Reserve(
-            extents.m_erow - extents.m_srow);
+        auto reserve_status
+            = array_builder.Reserve(extents.m_erow - extents.m_srow);
         if (!reserve_status.ok()) {
             std::stringstream ss;
             ss << "Failed to allocate buffer for column: "
@@ -161,7 +143,7 @@ namespace apachearrow {
                 array_builder.UnsafeAppendNull();
             }
         }
-        
+
         // Point to base `arrow::Array` instead of derived, so we don't have to
         // template the caller.
         std::shared_ptr<arrow::Array> array;
@@ -172,5 +154,5 @@ namespace apachearrow {
         return array;
     }
 
-} // namespace arrow
+} // namespace apachearrow
 } // namespace perspective

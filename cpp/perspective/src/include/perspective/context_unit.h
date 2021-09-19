@@ -24,18 +24,18 @@ namespace perspective {
  * @brief A context that does not maintain its own traversal, instead
  * reading directly from the underlying master table of the context's
  * gnode state.
- * 
+ *
  * This context can be created when the table does not have an explicit index
  * set, as the order of rows in the master table will be exactly the same as
  * the primary key order (using PSP_PKEY). If the table has an explicit index,
  * a context's traversal contains the sorted order of primary keys and thus
  * the order in which the table is meant to be read.
- * 
+ *
  * Additionally, to create a unit context, the context must have no pivots,
  * sorts, filters, or expressions applied. It can have any number of
  * columns in any order. See implementations in the binding language to see
  * how a unit context is created.
- * 
+ *
  * Benchmarking shows a 5-10x improvement in View construction time compared
  * to a regular ctx_0.
  */
@@ -51,12 +51,13 @@ public:
 
     perspective::t_index get_column_count() const;
 
-    std::pair<t_tscalar, t_tscalar> get_min_max(const std::string& colname) const;
+    std::pair<t_tscalar, t_tscalar> get_min_max(
+        const std::string& colname) const;
 
     using t_ctxbase<t_ctxunit>::get_data;
 
-    std::vector<t_tscalar> get_data(
-        t_index start_row, t_index end_row, t_index start_col, t_index end_col) const;
+    std::vector<t_tscalar> get_data(t_index start_row, t_index end_row,
+        t_index start_col, t_index end_col) const;
 
     std::vector<t_tscalar> get_data(const std::vector<t_uindex>& rows) const;
 
@@ -65,8 +66,9 @@ public:
     // will only work on empty contexts
     void notify(const t_data_table& flattened);
 
-    void notify(const t_data_table& flattened, const t_data_table& delta, const t_data_table& prev,
-        const t_data_table& current, const t_data_table& transitions, const t_data_table& existed);
+    void notify(const t_data_table& flattened, const t_data_table& delta,
+        const t_data_table& prev, const t_data_table& current,
+        const t_data_table& transitions, const t_data_table& existed);
 
     void step_begin();
 
@@ -83,7 +85,8 @@ public:
     bool get_deltas_enabled() const;
     void set_deltas_enabled(bool enabled_state);
 
-    std::vector<t_tscalar> get_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const;
+    std::vector<t_tscalar> get_pkeys(
+        const std::vector<std::pair<t_uindex, t_uindex>>& cells) const;
 
     t_stepdelta get_step_delta(t_index bidx, t_index eidx);
 
@@ -130,11 +133,11 @@ public:
 
 protected:
     void add_delta_pkey(t_tscalar pkey);
-    
+
     void add_row(t_tscalar pkey, t_uindex idx);
 
     void update_row(t_tscalar pkey);
-    
+
     void delete_row(t_tscalar pkey);
 
 private:

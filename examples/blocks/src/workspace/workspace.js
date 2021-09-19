@@ -14,7 +14,7 @@ const datasource = async () => {
     return await worker.table(buffer);
 };
 
-window.addEventListener("DOMContentLoaded", async function() {
+window.addEventListener("DOMContentLoaded", async function () {
     const workspace = document.getElementsByTagName("perspective-workspace")[0];
     workspace.addTable("superstore", await datasource());
 
@@ -23,9 +23,9 @@ window.addEventListener("DOMContentLoaded", async function() {
             main: {
                 currentIndex: 0,
                 type: "tab-area",
-                widgets: [{table: "superstore"}]
-            }
-        }
+                widgets: [{table: "superstore"}],
+            },
+        },
     };
     workspace.restore(config);
 });

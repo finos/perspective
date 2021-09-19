@@ -13,12 +13,10 @@
 static perspective::t_uindex GLOBAL_TABLE_ID = 0;
 
 namespace perspective {
-Table::Table(
-        std::shared_ptr<t_pool> pool,
-        const std::vector<std::string>& column_names,
-        const std::vector<t_dtype>& data_types,
-        std::uint32_t limit,
-        const std::string& index)
+Table::Table(std::shared_ptr<t_pool> pool,
+    const std::vector<std::string>& column_names,
+    const std::vector<t_dtype>& data_types, std::uint32_t limit,
+    const std::string& index)
     : m_init(false)
     , m_id(GLOBAL_TABLE_ID++)
     , m_pool(pool)
@@ -28,15 +26,17 @@ Table::Table(
     , m_limit(limit)
     , m_index(index)
     , m_gnode_set(false) {
-        validate_columns(m_column_names);
-    }
+    validate_columns(m_column_names);
+}
 
 void
-Table::init(t_data_table& data_table, std::uint32_t row_count, const t_op op, const t_uindex port_id) {
+Table::init(t_data_table& data_table, std::uint32_t row_count, const t_op op,
+    const t_uindex port_id) {
     /**
-     * For the Table to be initialized correctly, make sure that the operation and index columns are
-     * processed before the new offset is calculated. Calculating the offset before the `process_op_column`
-     * and `process_index_column` causes primary keys to be misaligned.
+     * For the Table to be initialized correctly, make sure that the operation
+     * and index columns are processed before the new offset is calculated.
+     * Calculating the offset before the `process_op_column` and
+     * `process_index_column` causes primary keys to be misaligned.
      */
     process_op_column(data_table, op);
     calculate_offset(row_count);
@@ -70,11 +70,8 @@ Table::get_schema() const {
 
 t_validated_expression_map
 Table::validate_expressions(
-    const std::vector<std::tuple<
-            std::string,
-            std::string,
-            std::string,
-            std::vector<std::pair<std::string, std::string>>>>& expressions) const {
+    const std::vector<std::tuple<std::string, std::string, std::string,
+        std::vector<std::pair<std::string, std::string>>>>& expressions) const {
     t_validated_expression_map rval = t_validated_expression_map();
 
     // Expression columns live on the `t_gstate` master table, so this
@@ -99,7 +96,8 @@ Table::validate_expressions(
 
         // Cannot overwrite a "real" column with an expression column
         if (gnode_schema.has_column(expression_alias)) {
-            error.m_error_message = "Value Error - expression \"" + expression_alias + "\" cannot overwrite an existing column.";
+            error.m_error_message = "Value Error - expression \""
+                + expression_alias + "\" cannot overwrite an existing column.";
             error.m_line = 0;
             error.m_column = 0;
             rval.add_error(expression_alias, error);
@@ -109,12 +107,8 @@ Table::validate_expressions(
         const auto& column_ids = std::get<3>(expr);
 
         t_dtype expression_dtype = t_computed_expression_parser::get_dtype(
-            expression_alias,
-            expression_string,
-            parsed_expression_string,
-            column_ids,
-            gnode_schema,
-            error);
+            expression_alias, expression_string, parsed_expression_string,
+            column_ids, gnode_schema, error);
 
         if (expression_dtype == DTYPE_NONE) {
             // extract the error from the stream and set it in the returned map
@@ -130,7 +124,7 @@ Table::validate_expressions(
 
 std::shared_ptr<t_gnode>
 Table::make_gnode(const t_schema& in_schema) {
-    t_schema out_schema = in_schema.drop({"psp_pkey", "psp_op"}); 
+    t_schema out_schema = in_schema.drop({"psp_pkey", "psp_op"});
     auto gnode = std::make_shared<t_gnode>(in_schema, out_schema);
     gnode->init();
     return gnode;
@@ -158,14 +152,16 @@ Table::reset_gnode(t_uindex id) {
 t_uindex
 Table::make_port() {
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    PSP_VERBOSE_ASSERT(m_gnode_set, "Cannot make input port on a gnode that does not exist.");
+    PSP_VERBOSE_ASSERT(
+        m_gnode_set, "Cannot make input port on a gnode that does not exist.");
     return m_gnode->make_input_port();
 }
 
 void
 Table::remove_port(t_uindex port_id) {
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    PSP_VERBOSE_ASSERT(m_gnode_set, "Cannot remove input port on a gnode that does not exist.");
+    PSP_VERBOSE_ASSERT(m_gnode_set,
+        "Cannot remove input port on a gnode that does not exist.");
     m_gnode->remove_input_port(port_id);
 }
 
@@ -221,13 +217,13 @@ Table::get_limit() const {
     return m_limit;
 }
 
-void 
+void
 Table::set_column_names(const std::vector<std::string>& column_names) {
     validate_columns(column_names);
     m_column_names = column_names;
 }
 
-void 
+void
 Table::set_data_types(const std::vector<t_dtype>& data_types) {
     m_data_types = data_types;
 }
@@ -237,7 +233,8 @@ Table::validate_columns(const std::vector<std::string>& column_names) {
     if (m_index != "") {
         // Check if index is valid after getting column names
         bool explicit_index
-            = std::find(column_names.begin(), column_names.end(), m_index) != column_names.end();
+            = std::find(column_names.begin(), column_names.end(), m_index)
+            != column_names.end();
         if (!explicit_index) {
             PSP_COMPLAIN_AND_ABORT(
                 "Specified index `" + m_index + "` does not exist in dataset.");
@@ -252,7 +249,9 @@ Table::process_op_column(t_data_table& data_table, const t_op op) {
         case OP_DELETE: {
             op_col->raw_fill<std::uint8_t>(OP_DELETE);
         } break;
-        default: { op_col->raw_fill<std::uint8_t>(OP_INSERT); }
+        default: {
+            op_col->raw_fill<std::uint8_t>(OP_INSERT);
+        }
     }
 }
 

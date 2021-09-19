@@ -31,7 +31,8 @@ t_ftrav::init() {
 }
 
 std::vector<t_tscalar>
-t_ftrav::get_all_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
+t_ftrav::get_all_pkeys(
+    const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
     // assumes the code calling this has already validated
     // cells
     std::vector<t_tscalar> rval;
@@ -44,7 +45,8 @@ t_ftrav::get_all_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells) 
 }
 
 std::vector<t_tscalar>
-t_ftrav::get_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
+t_ftrav::get_pkeys(
+    const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
     tsl::hopscotch_set<t_tscalar> all_pkeys;
 
     std::set<t_index> all_rows;
@@ -96,12 +98,9 @@ t_ftrav::get_pkey(t_index idx) const {
 }
 
 void
-t_ftrav::fill_sort_elem(
-    const t_gstate& gstate,
-    const t_data_table& expression_master_table,
-    const t_config& config,
-    t_tscalar pkey,
-    t_mselem& out_elem) {
+t_ftrav::fill_sort_elem(const t_gstate& gstate,
+    const t_data_table& expression_master_table, const t_config& config,
+    t_tscalar pkey, t_mselem& out_elem) {
     t_index sortby_size = m_sortby.size();
     out_elem.m_row.reserve(sortby_size);
     out_elem.m_pkey = pkey;
@@ -119,19 +118,14 @@ t_ftrav::fill_sort_elem(
         const std::string& sortby_colname = config.get_sort_by(colname);
 
         out_elem.m_row.push_back(
-            m_symtable.get_interned_tscalar(
-                get_from_gstate(gstate, expression_master_table, sortby_colname, pkey)
-            )
-        );
+            m_symtable.get_interned_tscalar(get_from_gstate(
+                gstate, expression_master_table, sortby_colname, pkey)));
     }
 }
 
 void
-t_ftrav::fill_sort_elem(
-    const t_gstate& gstate,
-    const t_config& config,
-    const std::vector<t_tscalar>& row,
-    t_mselem& out_elem) const {
+t_ftrav::fill_sort_elem(const t_gstate& gstate, const t_config& config,
+    const std::vector<t_tscalar>& row, t_mselem& out_elem) const {
     t_index sortby_size = m_sortby.size();
     out_elem.m_row.reserve(sortby_size);
     out_elem.m_pkey = mknone();
@@ -153,16 +147,15 @@ t_ftrav::fill_sort_elem(
 }
 
 void
-t_ftrav::sort_by(
-    const t_gstate& gstate,
-    const t_data_table& expression_master_table,
-    const t_config& config,
+t_ftrav::sort_by(const t_gstate& gstate,
+    const t_data_table& expression_master_table, const t_config& config,
     const std::vector<t_sortspec>& sortby) {
     if (sortby.empty())
         return;
     t_multisorter sorter(get_sort_orders(sortby));
     t_index size = m_index->size();
-    auto sort_elems = std::make_shared<std::vector<t_mselem>>(static_cast<size_t>(size));
+    auto sort_elems
+        = std::make_shared<std::vector<t_mselem>>(static_cast<size_t>(size));
     m_sortby = sortby;
 
     for (t_index idx = 0; idx < size; ++idx) {
@@ -196,7 +189,8 @@ t_ftrav::get_row_indices(const tsl::hopscotch_set<t_tscalar>& pkeys,
 }
 
 void
-t_ftrav::get_row_indices(t_index bidx, t_index eidx, const tsl::hopscotch_set<t_tscalar>& pkeys,
+t_ftrav::get_row_indices(t_index bidx, t_index eidx,
+    const tsl::hopscotch_set<t_tscalar>& pkeys,
     tsl::hopscotch_map<t_tscalar, t_index>& out_map) const {
     for (t_index idx = bidx; idx < eidx; ++idx) {
         const t_tscalar& pkey = (*m_index)[idx].m_pkey;
@@ -235,7 +229,8 @@ t_ftrav::check_size() {
     tsl::hopscotch_set<t_tscalar> pkey_set;
     for (t_index idx = 0, loop_end = m_index->size(); idx < loop_end; ++idx) {
         if (pkey_set.find((*m_index)[idx].m_pkey) != pkey_set.end()) {
-            std::cout << "Duplicate entry for " << (*m_index)[idx].m_pkey << std::endl;
+            std::cout << "Duplicate entry for " << (*m_index)[idx].m_pkey
+                      << std::endl;
             PSP_COMPLAIN_AND_ABORT("Exiting");
         }
 
@@ -244,7 +239,8 @@ t_ftrav::check_size() {
 }
 
 bool
-t_ftrav::validate_cells(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
+t_ftrav::validate_cells(
+    const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
     t_index trav_size = size();
 
     for (t_index idx = 0, loop_end = cells.size(); idx < loop_end; ++idx) {
@@ -276,10 +272,9 @@ t_ftrav::step_end() {
     std::vector<t_mselem> new_rows;
     new_rows.reserve(m_new_elems.size());
 
-    for (
-        tsl::hopscotch_map<t_tscalar, t_mselem>::const_iterator pkelem_iter = m_new_elems.begin();
-        pkelem_iter != m_new_elems.end();
-        ++pkelem_iter) {
+    for (tsl::hopscotch_map<t_tscalar, t_mselem>::const_iterator pkelem_iter
+         = m_new_elems.begin();
+         pkelem_iter != m_new_elems.end(); ++pkelem_iter) {
         new_rows.push_back(pkelem_iter->second);
     }
 
@@ -316,7 +311,7 @@ t_ftrav::step_end() {
     // reconcile old rows that are marked as removed or updated.
     while (i < m_index->size()) {
         const t_mselem& old_elem = (*m_index)[i++];
-        
+
         if (old_elem.m_deleted) {
             m_pkeyidx.erase(old_elem.m_pkey);
         } else if (!old_elem.m_updated) {
@@ -331,10 +326,8 @@ t_ftrav::step_end() {
 }
 
 void
-t_ftrav::add_row(
-    const t_gstate& gstate, 
-    const t_data_table& expression_master_table,
-    const t_config& config,
+t_ftrav::add_row(const t_gstate& gstate,
+    const t_data_table& expression_master_table, const t_config& config,
     t_tscalar pkey) {
     t_mselem mselem;
     fill_sort_elem(gstate, expression_master_table, config, pkey, mselem);
@@ -343,10 +336,8 @@ t_ftrav::add_row(
 }
 
 void
-t_ftrav::update_row(
-    const t_gstate& gstate,
-    const t_data_table& expression_master_table,
-    const t_config& config,
+t_ftrav::update_row(const t_gstate& gstate,
+    const t_data_table& expression_master_table, const t_config& config,
     t_tscalar pkey) {
     if (m_sortby.empty())
         return;
@@ -396,7 +387,8 @@ t_ftrav::lower_bound_row_idx(const t_gstate& gstate, const t_config& config,
 
     fill_sort_elem(gstate, config, row, target_val);
 
-    auto iter = std::lower_bound(m_index->begin(), m_index->end(), target_val, sorter);
+    auto iter = std::lower_bound(
+        m_index->begin(), m_index->end(), target_val, sorter);
 
     return std::distance(m_index->begin(), iter);
 }
@@ -409,13 +401,10 @@ t_ftrav::get_row_idx(t_tscalar pkey) const {
     return pkiter->second;
 }
 
-t_tscalar 
-t_ftrav::get_from_gstate(
-    const t_gstate& gstate,
-    const t_data_table& expression_master_table,
-    const std::string& colname,
-    t_tscalar pkey
-) const {
+t_tscalar
+t_ftrav::get_from_gstate(const t_gstate& gstate,
+    const t_data_table& expression_master_table, const std::string& colname,
+    t_tscalar pkey) const {
     const t_schema& expression_schema = expression_master_table.get_schema();
 
     if (expression_schema.has_column(colname)) {

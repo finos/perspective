@@ -31,11 +31,8 @@ namespace perspective {
 template <typename CTX_T>
 class PERSPECTIVE_EXPORT View {
 public:
-    View(
-        std::shared_ptr<Table> table,
-        std::shared_ptr<CTX_T> ctx,
-        const std::string& name,
-        const std::string& separator,
+    View(std::shared_ptr<Table> table, std::shared_ptr<CTX_T> ctx,
+        const std::string& name, const std::string& separator,
         std::shared_ptr<t_view_config> view_config);
 
     ~View();
@@ -86,9 +83,9 @@ public:
     std::map<std::string, std::string> schema() const;
 
     /**
-     * @brief The expression schema of this View. An expression schema is an 
-     * std::map, the keys of which are the columns of this View, and the values 
-     * are their string type names. If this View is aggregated, these will be 
+     * @brief The expression schema of this View. An expression schema is an
+     * std::map, the keys of which are the columns of this View, and the values
+     * are their string type names. If this View is aggregated, these will be
      * the aggregated types; otherwise these types will be the same as the
      * columns in the underlying Table.
      *
@@ -105,7 +102,7 @@ public:
      */
     std::vector<std::vector<t_tscalar>> column_names(
         bool skip = false, std::int32_t depth = 0) const;
-    
+
     /**
      * @brief The aggregated column names of this View, showing the columns that
      * have been composed through the addition of a pivot as they appear in the
@@ -123,12 +120,13 @@ public:
      *
      * @return std::pair<t_tscalar, t_tscalar>
      */
-    std::pair<t_tscalar, t_tscalar> get_min_max(const std::string& colname) const;
+    std::pair<t_tscalar, t_tscalar> get_min_max(
+        const std::string& colname) const;
 
     /**
-     * @brief Returns shared pointer to a t_data_slice object, which contains the
-     * underlying slice of data as well as the metadata required to interface
-     * with it.
+     * @brief Returns shared pointer to a t_data_slice object, which contains
+     * the underlying slice of data as well as the metadata required to
+     * interface with it.
      *
      * @tparam
      * @param start_row
@@ -137,43 +135,36 @@ public:
      * @param end_col
      * @return std::shared_ptr<t_data_slice<t_ctx0>>
      */
-    std::shared_ptr<t_data_slice<CTX_T>>
-    get_data(
-        t_uindex start_row,
-        t_uindex end_row,
-        t_uindex start_col,
-        t_uindex end_col) const;
+    std::shared_ptr<t_data_slice<CTX_T>> get_data(t_uindex start_row,
+        t_uindex end_row, t_uindex start_col, t_uindex end_col) const;
 
     /**
-     * @brief Serializes the `View`'s data into the Apache Arrow format 
+     * @brief Serializes the `View`'s data into the Apache Arrow format
      * as a bytestring. Using start/end row and column, retrieve a data
      * slice from the view and serialize it using `to_arrow_helper`.
-     * 
+     *
      * @param start_row
      * @param end_row
-     * @param start_col 
-     * @param end_col 
+     * @param start_col
+     * @param end_col
      * @return std::shared_ptr<std::string>
      */
-    std::shared_ptr<std::string> to_arrow(
-        std::int32_t start_row,
-        std::int32_t end_row,
-        std::int32_t start_col,
+    std::shared_ptr<std::string> to_arrow(std::int32_t start_row,
+        std::int32_t end_row, std::int32_t start_col,
         std::int32_t end_col) const;
 
     /**
      * @brief Serializes a given data slice into the Apache Arrow format. Can
      * be directly called with a pointer to a data slice in order to serialize
      * it to Arrow.
-     * 
+     *
      * @param start_row
      * @param end_row
-     * @param start_col 
-     * @param end_col 
+     * @param start_col
+     * @param end_col
      * @return std::shared_ptr<std::string>
      */
-    std::shared_ptr<std::string>
-    data_slice_to_arrow(
+    std::shared_ptr<std::string> data_slice_to_arrow(
         std::shared_ptr<t_data_slice<CTX_T>> data_slice) const;
 
     // Delta calculation
@@ -218,7 +209,7 @@ public:
     /**
      * @brief Returns a data slice that contains the dataset from the rows
      * that have been changed by a call to `update()`.
-     * 
+     *
      * @return std::shared_ptr<t_data_slice<CTX_T>>
      */
     std::shared_ptr<t_data_slice<CTX_T>> get_row_delta() const;

@@ -13,9 +13,10 @@
 namespace perspective {
 
 template <typename CTX_T>
-t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx, t_uindex start_row,
-    t_uindex end_row, t_uindex start_col, t_uindex end_col, t_uindex row_offset,
-    t_uindex col_offset, const std::vector<t_tscalar>& slice,
+t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx,
+    t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col,
+    t_uindex row_offset, t_uindex col_offset,
+    const std::vector<t_tscalar>& slice,
     const std::vector<std::vector<t_tscalar>>& column_names)
     : m_ctx(ctx)
     , m_start_row(start_row)
@@ -30,9 +31,10 @@ t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx, t_uindex start_row
 }
 
 template <typename CTX_T>
-t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx, t_uindex start_row,
-    t_uindex end_row, t_uindex start_col, t_uindex end_col, t_uindex row_offset,
-    t_uindex col_offset, const std::vector<t_tscalar>& slice,
+t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx,
+    t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col,
+    t_uindex row_offset, t_uindex col_offset,
+    const std::vector<t_tscalar>& slice,
     const std::vector<std::vector<t_tscalar>>& column_names,
     const std::vector<t_uindex>& column_indices)
     : m_ctx(ctx)

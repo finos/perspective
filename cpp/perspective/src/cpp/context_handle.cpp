@@ -41,7 +41,9 @@ t_ctx_handle::get_type_descr() const {
         case GROUPED_COLUMNS_CONTEXT: {
             return "GROUPED_COLUMNS_CONTEXT";
         }
-        default: { PSP_COMPLAIN_AND_ABORT("Invalid context"); } break;
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Invalid context");
+        } break;
     }
     return "ZERO_SIDED_CONTEXT";
 }

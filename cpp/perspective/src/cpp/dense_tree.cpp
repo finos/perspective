@@ -39,8 +39,8 @@ t_dtree::get_level_markers(t_uindex idx) const {
     return m_levels[idx];
 }
 
-t_dtree::t_dtree(const std::string& dirname, t_dssptr ds, const std::vector<t_pivot>& pivots,
-    t_backing_store backing_store,
+t_dtree::t_dtree(const std::string& dirname, t_dssptr ds,
+    const std::vector<t_pivot>& pivots, t_backing_store backing_store,
     const std::vector<std::pair<std::string, std::string>>& sortby_colvec)
     : m_dirname(dirname)
     , m_levels_pivoted(0)
@@ -53,11 +53,13 @@ t_dtree::t_dtree(const std::string& dirname, t_dssptr ds, const std::vector<t_pi
 
 void
 t_dtree::init() {
-    t_lstore_recipe leaf_args(m_dirname, leaves_colname(), DEFAULT_CAPACITY, m_backing_store);
+    t_lstore_recipe leaf_args(
+        m_dirname, leaves_colname(), DEFAULT_CAPACITY, m_backing_store);
     m_leaves = t_column(DTYPE_UINT64, false, leaf_args, DEFAULT_CAPACITY);
     m_leaves.init();
 
-    t_lstore_recipe node_args(m_dirname, nodes_colname(), DEFAULT_CAPACITY, m_backing_store);
+    t_lstore_recipe node_args(
+        m_dirname, nodes_colname(), DEFAULT_CAPACITY, m_backing_store);
 
     m_values = std::vector<t_column>(m_pivots.size() + 1);
 
@@ -65,8 +67,10 @@ t_dtree::init() {
     m_has_sortby[0] = false;
 
     m_sortby_columns.clear();
-    for (t_uindex sidx = 0, loop_end = m_sortby_colvec.size(); sidx < loop_end; ++sidx) {
-        m_sortby_columns[m_sortby_colvec[sidx].first] = m_sortby_colvec[sidx].second;
+    for (t_uindex sidx = 0, loop_end = m_sortby_colvec.size(); sidx < loop_end;
+         ++sidx) {
+        m_sortby_columns[m_sortby_colvec[sidx].first]
+            = m_sortby_colvec[sidx].second;
     }
 
     t_lstore_recipe root_args(
@@ -79,11 +83,12 @@ t_dtree::init() {
 
     for (t_uindex idx = 0, loop_end = m_pivots.size(); idx < loop_end; ++idx) {
         auto colname = m_pivots[idx].colname();
-        t_lstore_recipe leaf_args(
-            m_dirname, values_colname(colname), DEFAULT_CAPACITY, m_backing_store);
+        t_lstore_recipe leaf_args(m_dirname, values_colname(colname),
+            DEFAULT_CAPACITY, m_backing_store);
 
         auto siter = m_sortby_columns.find(colname);
-        bool has_sortby = siter != m_sortby_columns.end() && siter->second != colname;
+        bool has_sortby
+            = siter != m_sortby_columns.end() && siter->second != colname;
         m_has_sortby[idx + 1] = has_sortby;
         std::string sortby_column = has_sortby ? siter->second : colname;
         m_sortby_dpthcol.push_back(sortby_column);
@@ -122,7 +127,8 @@ t_dtree::check_pivot(const t_filter& filter, t_uindex level) {
     if (level <= m_levels_pivoted)
         return;
 
-    PSP_VERBOSE_ASSERT(level <= m_pivots.size() + 1, "Erroneous level passed in");
+    PSP_VERBOSE_ASSERT(
+        level <= m_pivots.size() + 1, "Erroneous level passed in");
 
     pivot(filter, level);
 }
@@ -132,7 +138,8 @@ t_dtree::pivot(const t_filter& filter, t_uindex level) {
     if (level <= m_levels_pivoted)
         return;
 
-    PSP_VERBOSE_ASSERT(level <= m_pivots.size() + 1, "Erroneous level passed in");
+    PSP_VERBOSE_ASSERT(
+        level <= m_pivots.size() + 1, "Erroneous level passed in");
 
     t_uindex ncols = m_pivots.size();
 
@@ -188,63 +195,79 @@ t_dtree::pivot(const t_filter& filter, t_uindex level) {
 
             switch (piv_dtype) {
                 case DTYPE_STR: {
-                    next_neidx = t_pivot_processor<DTYPE_STR>()(
-                        pivcol, &m_nodes, &(m_values[pidx]), &m_leaves, nbidx, neidx, mask);
+                    next_neidx
+                        = t_pivot_processor<DTYPE_STR>()(pivcol, &m_nodes,
+                            &(m_values[pidx]), &m_leaves, nbidx, neidx, mask);
                 } break;
                 case DTYPE_INT64: {
-                    next_neidx = t_pivot_processor<DTYPE_INT64>()(
-                        pivcol, &m_nodes, &(m_values[pidx]), &m_leaves, nbidx, neidx, mask);
+                    next_neidx
+                        = t_pivot_processor<DTYPE_INT64>()(pivcol, &m_nodes,
+                            &(m_values[pidx]), &m_leaves, nbidx, neidx, mask);
                 } break;
                 case DTYPE_INT32: {
-                    next_neidx = t_pivot_processor<DTYPE_INT32>()(
-                        pivcol, &m_nodes, &(m_values[pidx]), &m_leaves, nbidx, neidx, mask);
+                    next_neidx
+                        = t_pivot_processor<DTYPE_INT32>()(pivcol, &m_nodes,
+                            &(m_values[pidx]), &m_leaves, nbidx, neidx, mask);
                 } break;
                 case DTYPE_INT16: {
-                    next_neidx = t_pivot_processor<DTYPE_INT16>()(
-                        pivcol, &m_nodes, &(m_values[pidx]), &m_leaves, nbidx, neidx, mask);
+                    next_neidx
+                        = t_pivot_processor<DTYPE_INT16>()(pivcol, &m_nodes,
+                            &(m_values[pidx]), &m_leaves, nbidx, neidx, mask);
                 } break;
                 case DTYPE_INT8: {
-                    next_neidx = t_pivot_processor<DTYPE_INT8>()(
-                        pivcol, &m_nodes, &(m_values[pidx]), &m_leaves, nbidx, neidx, mask);
+                    next_neidx
+                        = t_pivot_processor<DTYPE_INT8>()(pivcol, &m_nodes,
+                            &(m_values[pidx]), &m_leaves, nbidx, neidx, mask);
                 } break;
                 case DTYPE_UINT64: {
-                    next_neidx = t_pivot_processor<DTYPE_UINT64>()(
-                        pivcol, &m_nodes, &(m_values[pidx]), &m_leaves, nbidx, neidx, mask);
+                    next_neidx
+                        = t_pivot_processor<DTYPE_UINT64>()(pivcol, &m_nodes,
+                            &(m_values[pidx]), &m_leaves, nbidx, neidx, mask);
                 } break;
                 case DTYPE_UINT32: {
-                    next_neidx = t_pivot_processor<DTYPE_UINT32>()(
-                        pivcol, &m_nodes, &(m_values[pidx]), &m_leaves, nbidx, neidx, mask);
+                    next_neidx
+                        = t_pivot_processor<DTYPE_UINT32>()(pivcol, &m_nodes,
+                            &(m_values[pidx]), &m_leaves, nbidx, neidx, mask);
                 } break;
                 case DTYPE_UINT16: {
-                    next_neidx = t_pivot_processor<DTYPE_UINT16>()(
-                        pivcol, &m_nodes, &(m_values[pidx]), &m_leaves, nbidx, neidx, mask);
+                    next_neidx
+                        = t_pivot_processor<DTYPE_UINT16>()(pivcol, &m_nodes,
+                            &(m_values[pidx]), &m_leaves, nbidx, neidx, mask);
                 } break;
                 case DTYPE_UINT8: {
-                    next_neidx = t_pivot_processor<DTYPE_UINT8>()(
-                        pivcol, &m_nodes, &(m_values[pidx]), &m_leaves, nbidx, neidx, mask);
+                    next_neidx
+                        = t_pivot_processor<DTYPE_UINT8>()(pivcol, &m_nodes,
+                            &(m_values[pidx]), &m_leaves, nbidx, neidx, mask);
                 } break;
                 case DTYPE_FLOAT64: {
-                    next_neidx = t_pivot_processor<DTYPE_FLOAT64>()(
-                        pivcol, &m_nodes, &(m_values[pidx]), &m_leaves, nbidx, neidx, mask);
+                    next_neidx
+                        = t_pivot_processor<DTYPE_FLOAT64>()(pivcol, &m_nodes,
+                            &(m_values[pidx]), &m_leaves, nbidx, neidx, mask);
                 } break;
                 case DTYPE_FLOAT32: {
-                    next_neidx = t_pivot_processor<DTYPE_FLOAT32>()(
-                        pivcol, &m_nodes, &(m_values[pidx]), &m_leaves, nbidx, neidx, mask);
+                    next_neidx
+                        = t_pivot_processor<DTYPE_FLOAT32>()(pivcol, &m_nodes,
+                            &(m_values[pidx]), &m_leaves, nbidx, neidx, mask);
                 } break;
                 case DTYPE_BOOL: {
 
-                    next_neidx = t_pivot_processor<DTYPE_BOOL>()(
-                        pivcol, &m_nodes, &(m_values[pidx]), &m_leaves, nbidx, neidx, mask);
+                    next_neidx
+                        = t_pivot_processor<DTYPE_BOOL>()(pivcol, &m_nodes,
+                            &(m_values[pidx]), &m_leaves, nbidx, neidx, mask);
                 } break;
                 case DTYPE_TIME: {
-                    next_neidx = t_pivot_processor<DTYPE_INT64>()(
-                        pivcol, &m_nodes, &(m_values[pidx]), &m_leaves, nbidx, neidx, mask);
+                    next_neidx
+                        = t_pivot_processor<DTYPE_INT64>()(pivcol, &m_nodes,
+                            &(m_values[pidx]), &m_leaves, nbidx, neidx, mask);
                 } break;
                 case DTYPE_DATE: {
-                    next_neidx = t_pivot_processor<DTYPE_UINT32>()(
-                        pivcol, &m_nodes, &(m_values[pidx]), &m_leaves, nbidx, neidx, mask);
+                    next_neidx
+                        = t_pivot_processor<DTYPE_UINT32>()(pivcol, &m_nodes,
+                            &(m_values[pidx]), &m_leaves, nbidx, neidx, mask);
                 } break;
-                default: { PSP_COMPLAIN_AND_ABORT("Not supported yet"); } break;
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Not supported yet");
+                } break;
             }
             nbidx = neidx;
             neidx = next_neidx;
@@ -275,9 +298,10 @@ t_dtree::pprint(const t_filter& filter) const {
 
         const t_dense_tnode* node = get_node_ptr(idx);
 
-        std::cout << get_value(filter, idx) << " idx => " << node->m_idx << " pidx => "
-                  << node->m_pidx << " fcidx => " << node->m_fcidx << " nchild => "
-                  << node->m_nchild << " flidx => " << node->m_flidx << " nleaves => "
+        std::cout << get_value(filter, idx) << " idx => " << node->m_idx
+                  << " pidx => " << node->m_pidx << " fcidx => "
+                  << node->m_fcidx << " nchild => " << node->m_nchild
+                  << " flidx => " << node->m_flidx << " nleaves => "
                   << node->m_nleaves << std::endl;
     }
 }
@@ -293,7 +317,8 @@ t_dtree::get_node_ptr(t_index nidx) const {
 }
 
 t_tscalar
-t_dtree::_get_value(const t_filter& filter, t_index nidx, bool sort_value) const {
+t_dtree::_get_value(
+    const t_filter& filter, t_index nidx, bool sort_value) const {
 
     std::pair<t_uindex, t_uindex> spi = get_span_index(nidx);
     t_index dpth = spi.first;
@@ -365,7 +390,8 @@ t_dtree::get_pivots() const {
 void
 t_dtree::get_child_indices(t_index nidx, std::vector<t_index>& v) const {
     auto nptr = get_node_ptr(nidx);
-    for (t_index idx = nptr->m_fcidx + nptr->m_nchild - 1, loop_end = nptr->m_fcidx;
+    for (t_index idx = nptr->m_fcidx + nptr->m_nchild - 1,
+                 loop_end = nptr->m_fcidx;
          idx >= loop_end; --idx) {
         v.push_back(idx);
     }

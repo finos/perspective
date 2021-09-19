@@ -8,8 +8,7 @@
  *
  */
 
- :host {
-
+:host {
     .radio-list-item {
         display: flex;
         flex-wrap: wrap;
@@ -17,15 +16,14 @@
         padding-top: 6px;
         width: 110px;
 
-        // Fix radio buttons 
-        input[type=radio] {
+        // Fix radio buttons
+        input[type="radio"] {
             width: 24px;
             margin: 0;
         }
 
-        input[type=radio][disabled] ~ * {
+        input[type="radio"][disabled] ~ * {
             opacity: 0.5;
         }
     }
-
 }

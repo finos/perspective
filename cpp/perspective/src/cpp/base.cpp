@@ -25,11 +25,13 @@ psp_abort(const std::string& message) {
     std::string error = "Abort(): " + message;
     const char* error_cstr = error.c_str();
 
-    EM_ASM({
-        // copy string out from heap
-        // https://emscripten.org/docs/api_reference/emscripten.h.html#c.EM_ASM
-        throw new Error(UTF8ToString($0));
-    }, error_cstr);
+    EM_ASM(
+        {
+            // copy string out from heap
+            // https://emscripten.org/docs/api_reference/emscripten.h.html#c.EM_ASM
+            throw new Error(UTF8ToString($0));
+        },
+        error_cstr);
 #else
     throw PerspectiveException(message.c_str());
 #endif
@@ -50,7 +52,9 @@ is_numeric_type(t_dtype dtype) {
         case DTYPE_FLOAT64: {
             return true;
         } break;
-        default: { return false; }
+        default: {
+            return false;
+        }
     }
 }
 
@@ -72,7 +76,9 @@ is_linear_order_type(t_dtype dtype) {
         case DTYPE_BOOL: {
             return true;
         } break;
-        default: { return false; }
+        default: {
+            return false;
+        }
     }
 }
 
@@ -102,7 +108,9 @@ is_deterministic_sized(t_dtype dtype) {
         case DTYPE_F64PAIR: {
             return true;
         }
-        default: { return false; }
+        default: {
+            return false;
+        }
     }
 
     PSP_COMPLAIN_AND_ABORT("Reached unreachable");
@@ -151,7 +159,9 @@ get_dtype_size(t_dtype dtype) {
         case DTYPE_F64PAIR: {
             return sizeof(std::pair<double, double>);
         }
-        default: { PSP_COMPLAIN_AND_ABORT("Unknown dtype"); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Unknown dtype");
+        }
     }
 
     PSP_COMPLAIN_AND_ABORT("Reached unreachable");
@@ -234,7 +244,9 @@ get_dtype_descr(t_dtype dtype) {
         case DTYPE_OBJECT: {
             return "object";
         }
-        default: { PSP_COMPLAIN_AND_ABORT("Encountered unknown dtype"); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Encountered unknown dtype");
+        }
     }
     return std::string("dummy");
 }
@@ -253,7 +265,7 @@ dtype_to_str(t_dtype dtype) {
         case DTYPE_UINT64:
         case DTYPE_INT8:
         case DTYPE_INT16:
-        case DTYPE_INT32: 
+        case DTYPE_INT32:
         case DTYPE_INT64: {
             ss << "integer";
         } break;
@@ -275,7 +287,9 @@ dtype_to_str(t_dtype dtype) {
         case DTYPE_NONE: {
             ss << "none";
         } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Cannot convert unknown dtype to string!"); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Cannot convert unknown dtype to string!");
+        }
     }
 
     return ss.str();
@@ -297,8 +311,8 @@ str_to_dtype(const std::string& typestring) {
     } else if (typestring == "string") {
         return DTYPE_STR;
     } else {
-        PSP_COMPLAIN_AND_ABORT(
-            "Could not convert unknown type string `" + typestring + "` to dtype.");
+        PSP_COMPLAIN_AND_ABORT("Could not convert unknown type string `"
+            + typestring + "` to dtype.");
         return DTYPE_NONE;
     }
 }
@@ -481,13 +495,14 @@ str_to_aggtype(const std::string& str) {
         return t_aggtype::AGGTYPE_UDF_COMBINER;
     } else if (str.find("udf_reducer_") != std::string::npos) {
         return t_aggtype::AGGTYPE_UDF_REDUCER;
-    } else if (str =="var" || str == "variance") {
+    } else if (str == "var" || str == "variance") {
         return t_aggtype::AGGTYPE_VARIANCE;
     } else if (str == "stddev" || str == "standard deviation") {
         return t_aggtype::AGGTYPE_STANDARD_DEVIATION;
     } else {
         std::stringstream ss;
-        ss << "Encountered unknown aggregate operation: '" << str << "'" << std::endl;
+        ss << "Encountered unknown aggregate operation: '" << str << "'"
+           << std::endl;
         PSP_COMPLAIN_AND_ABORT(ss.str());
         // use any as default
         return t_aggtype::AGGTYPE_ANY;
@@ -510,7 +525,9 @@ _get_default_aggregate(t_dtype dtype) {
         case DTYPE_INT64: {
             agg_op = t_aggtype::AGGTYPE_SUM;
         } break;
-        default: { agg_op = t_aggtype::AGGTYPE_COUNT; }
+        default: {
+            agg_op = t_aggtype::AGGTYPE_COUNT;
+        }
     }
     return agg_op;
 }
@@ -531,7 +548,9 @@ _get_default_aggregate_string(t_dtype dtype) {
         case DTYPE_INT64: {
             agg_op_str = "sum";
         } break;
-        default: { agg_op_str = "count"; }
+        default: {
+            agg_op_str = "count";
+        }
     }
     return agg_op_str;
 }
@@ -548,7 +567,9 @@ get_status_descr(t_status status) {
         case STATUS_CLEAR: {
             return "c";
         }
-        default: { PSP_COMPLAIN_AND_ABORT("Unexpected status found"); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Unexpected status found");
+        }
     }
     return "";
 }
@@ -566,15 +587,24 @@ is_neq_transition(t_value_transition t) {
 std::string
 value_transition_to_str(t_value_transition t) {
     switch (t) {
-        case VALUE_TRANSITION_EQ_FF: return "VALUE_TRANSITION_EQ_FF";
-        case VALUE_TRANSITION_EQ_TT: return "VALUE_TRANSITION_EQ_TT";
-        case VALUE_TRANSITION_NEQ_FT: return "VALUE_TRANSITION_NEQ_FT";
-        case VALUE_TRANSITION_NEQ_TF: return "VALUE_TRANSITION_NEQ_TF";
-        case VALUE_TRANSITION_NEQ_TT: return "VALUE_TRANSITION_NEQ_TT";
-        case VALUE_TRANSITION_NEQ_TDF: return "VALUE_TRANSITION_NEQ_TDF";
-        case VALUE_TRANSITION_NEQ_TDT: return "VALUE_TRANSITION_NEQ_TDT";
-        case VALUE_TRANSITION_NVEQ_FT: return "VALUE_TRANSITION_NVEQ_FT";
-        default: break;
+        case VALUE_TRANSITION_EQ_FF:
+            return "VALUE_TRANSITION_EQ_FF";
+        case VALUE_TRANSITION_EQ_TT:
+            return "VALUE_TRANSITION_EQ_TT";
+        case VALUE_TRANSITION_NEQ_FT:
+            return "VALUE_TRANSITION_NEQ_FT";
+        case VALUE_TRANSITION_NEQ_TF:
+            return "VALUE_TRANSITION_NEQ_TF";
+        case VALUE_TRANSITION_NEQ_TT:
+            return "VALUE_TRANSITION_NEQ_TT";
+        case VALUE_TRANSITION_NEQ_TDF:
+            return "VALUE_TRANSITION_NEQ_TDF";
+        case VALUE_TRANSITION_NEQ_TDT:
+            return "VALUE_TRANSITION_NEQ_TDT";
+        case VALUE_TRANSITION_NVEQ_FT:
+            return "VALUE_TRANSITION_NVEQ_FT";
+        default:
+            break;
     }
 
     PSP_COMPLAIN_AND_ABORT("Unexpected value transition.");
@@ -683,7 +713,7 @@ type_to_dtype<std::string>() {
 
 template <>
 t_dtype
-type_to_dtype<void *>() {
+type_to_dtype<void*>() {
     return DTYPE_OBJECT;
 }
 

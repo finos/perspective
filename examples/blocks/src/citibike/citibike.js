@@ -1,7 +1,6 @@
-
 // Quick wrapper function for making a GET call.
 function get(url) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
         const xhr = new XMLHttpRequest();
         xhr.open("GET", url, true);
         xhr.responseType = "json";
@@ -13,7 +12,10 @@ function get(url) {
 // Fetch feed data from NYC Citibike, if a callback is provided do it again every 1s asynchronously.
 async function get_feed(feedname, callback) {
     const url = `https://gbfs.citibikenyc.com/gbfs/en/${feedname}.json`;
-    const {data: {stations}, ttl} = await get(url);
+    const {
+        data: {stations},
+        ttl,
+    } = await get(url);
     if (typeof callback === "function") {
         callback(stations);
         setTimeout(() => get_feed(feedname, callback), ttl * 1000);
@@ -58,7 +60,7 @@ async function main() {
         table.update(feed);
     }
 
-    // Start a recurring asyn call to `get_feed` and update the `table` with the response.  
+    // Start a recurring asyn call to `get_feed` and update the `table` with the response.
     get_feed("station_status", table.update);
 
     window.workspace.tables.set("citibike", table);
