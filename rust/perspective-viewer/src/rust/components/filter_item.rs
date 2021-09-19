@@ -71,22 +71,39 @@ impl FilterItemProperties {
 
     // Get the string value, suitable for the `value` field of a `FilterItems`'s
     // `<input>`.
-    fn get_filter_input(&self) -> String {
+    fn get_filter_input(&self) -> Option<String> {
         let filter_type = self.get_filter_type();
         match (&filter_type, &self.filter.2) {
             (Type::Date, FilterTerm::Scalar(Scalar::Float(x)))
-            | (Type::Date, FilterTerm::Scalar(Scalar::DateTime(x))) => Utc
-                .timestamp(*x as i64 / 1000, (*x as u32 % 1000) * 1000)
-                .with_timezone(&Local)
-                .format("%Y-%m-%d")
-                .to_string(),
+            | (Type::Date, FilterTerm::Scalar(Scalar::DateTime(x))) => {
+                if *x > 0_f64 {
+                    Some(
+                        Utc.timestamp(*x as i64 / 1000, (*x as u32 % 1000) * 1000)
+                            .with_timezone(&Local)
+                            .format("%Y-%m-%d")
+                            .to_string(),
+                    )
+                } else {
+                    None
+                }
+            }
             (Type::Datetime, FilterTerm::Scalar(Scalar::Float(x)))
-            | (Type::Datetime, FilterTerm::Scalar(Scalar::DateTime(x))) => Utc
-                .timestamp(*x as i64 / 1000, ((*x as i64 % 1000) * 1000000) as u32)
-                .with_timezone(&Local)
-                .format("%Y-%m-%dT%H:%M:%S%.3f")
-                .to_string(),
-            (_, x) => format!("{}", x),
+            | (Type::Datetime, FilterTerm::Scalar(Scalar::DateTime(x))) => {
+                if *x > 0_f64 {
+                    Some(
+                        Utc.timestamp(
+                            *x as i64 / 1000,
+                            ((*x as i64 % 1000) * 1000000) as u32,
+                        )
+                        .with_timezone(&Local)
+                        .format("%Y-%m-%dT%H:%M:%S%.3f")
+                        .to_string(),
+                    )
+                } else {
+                    None
+                }
+            }
+            (_, x) => Some(format!("{}", x)),
         }
     }
 
@@ -216,7 +233,7 @@ impl Component for FilterItem {
     type Properties = FilterItemProperties;
 
     fn create(props: FilterItemProperties, link: ComponentLink<Self>) -> Self {
-        let input = props.get_filter_input();
+        let input = props.get_filter_input().unwrap_or_else(|| "".to_owned());
         FilterItem { props, link, input }
     }
 
@@ -274,9 +291,13 @@ impl Component for FilterItem {
     }
 
     fn change(&mut self, props: FilterItemProperties) -> bool {
-        self.input = props.get_filter_input();
         self.props = props;
-        true
+        if let Some(input) = self.props.get_filter_input() {
+            self.input = input;
+            true
+        } else {
+            false
+        }
     }
 
     fn view(&self) -> Html {
