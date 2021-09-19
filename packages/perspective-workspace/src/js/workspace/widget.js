@@ -83,8 +83,15 @@ export class PerspectiveViewerWidget extends Widget {
     }
 
     restore(config) {
-        const {master, table, linked, name, selectable, ...viewerConfig} =
-            config;
+        const {
+            master,
+            table,
+            linked,
+            name,
+            editable,
+            selectable,
+            ...viewerConfig
+        } = config;
         this.master = master;
         this.name = name;
         this.linked = linked;
@@ -94,6 +101,10 @@ export class PerspectiveViewerWidget extends Widget {
 
         if (typeof selectable !== "undefined") {
             this.viewer.setAttribute("selectable", selectable);
+        }
+
+        if (typeof editable !== "undefined") {
+            this.viewer.setAttribute("editable", editable);
         }
 
         const restore_config = () => this.viewer.restore({...viewerConfig});
@@ -111,6 +122,7 @@ export class PerspectiveViewerWidget extends Widget {
             master: this.master,
             name: this.viewer.getAttribute("name"),
             table: this.viewer.getAttribute("table"),
+            editable: this.viewer.getAttribute("editable"),
             linked: this.linked,
         };
     }
