@@ -52,6 +52,7 @@ pub struct ExpressionEditor {
     expression: Rc<RefCell<Option<String>>>,
     on_validate: Rc<Closure<dyn Fn(JsValue)>>,
     on_save: Rc<Closure<dyn Fn(JsValue)>>,
+    theme: Rc<RefCell<Option<String>>>,
 }
 
 impl Component for ExpressionEditor {
@@ -77,6 +78,7 @@ impl Component for ExpressionEditor {
             save_enabled: false,
             on_validate,
             on_save,
+            theme: Rc::new(RefCell::new(None)),
         }
     }
 
@@ -114,6 +116,7 @@ impl Component for ExpressionEditor {
                     init_theme(theme.as_str(), editor);
                 }
 
+                *self.theme.borrow_mut() = Some(theme);
                 false
             }
             ExpressionEditorMsg::SaveExpr => {
@@ -173,6 +176,10 @@ impl ExpressionEditor {
     async fn init_monaco_editor(self) -> Result<JsValue, JsValue> {
         let column_names = self.props.session.metadata().get_table_columns();
         let monaco = init_monaco().await.unwrap();
+        if let Some(ref theme) = *self.theme.borrow() {
+            init_theme(theme.as_str(), &monaco);
+        }
+
         set_global_completion_column_names(column_names.into_jserror()?);
         let args = EditorArgs {
             theme: "exprtk-theme",

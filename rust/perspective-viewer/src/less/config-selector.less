@@ -132,7 +132,7 @@
                     grid-area: 1 / 1;
                     padding: 0;
                     border: none;
-                    border-bottom: 1px solid #ccc;
+                    border-bottom: 1px solid var(--inactive--color, #ccc);
                     background: transparent;
                     font-family: "Open Sans";
                     font-size: 12px;
@@ -141,6 +141,7 @@
 
                 &::after {
                     content: attr(data-value) " ";
+                    color: var(--inactive--color, inherit);
                     visibility: hidden;
                     white-space: nowrap;
                     padding-right: 12px;
