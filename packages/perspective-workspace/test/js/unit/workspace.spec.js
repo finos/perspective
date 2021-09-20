@@ -57,6 +57,7 @@ describe("workspace", () => {
             table: "superstore",
             name: "One",
             master: true,
+            selectable: "",
             linked: false,
         };
         expect(widgets.length).toBe(1);
@@ -92,6 +93,7 @@ describe("workspace", () => {
             table: "superstore",
             name: "One",
             master: true,
+            selectable: "",
             linked: false,
         };
         const detail = {

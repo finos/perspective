@@ -24,18 +24,29 @@ utils.with_server({}, () => {
                     }, viewer);
 
                     for (var i = 0; i < 500; i++) {
-                        await page.evaluate(async (element) => {
+                        await page.evaluate(async () => {
+                            const element =
+                                document.querySelector("perspective-viewer");
+
                             await element.delete();
-                            await element.load(
+                            document.body.innerHTML =
+                                "<perspective-viewer></perspective-viewer>";
+
+                            const new_element =
+                                document.querySelector("perspective-viewer");
+
+                            await new_element.load(
                                 Promise.resolve(window.__TABLE__)
                             );
-                        }, viewer);
+                        });
                     }
 
-                    return await page.evaluate(async (viewer) => {
-                        await viewer.toggleConfig();
-                        return viewer.innerHTML;
-                    }, viewer);
+                    return await page.evaluate(async () => {
+                        const element =
+                            document.querySelector("perspective-viewer");
+                        await element.toggleConfig();
+                        return element.innerHTML;
+                    });
                 },
                 {timeout: 60000}
             );

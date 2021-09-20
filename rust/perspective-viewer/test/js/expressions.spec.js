@@ -164,6 +164,7 @@ utils.with_server({}, () => {
                     return page.evaluate(async () => {
                         const elem =
                             document.querySelector("perspective-viewer");
+                        await elem.flush();
                         return elem.shadowRoot.querySelector(
                             "#expression-columns"
                         ).innerHTML;

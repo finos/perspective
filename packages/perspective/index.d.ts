@@ -176,7 +176,7 @@ declare module "@finos/perspective" {
     };
 
     export class WebSocketClient {
-        open_table(name: string): Table;
+        open_table(name: string): Promise<Table>;
         terminate(): void;
         initialize_profile_thread(): void;
         send(msg: unknown): void;

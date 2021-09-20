@@ -99,11 +99,11 @@ export class PerspectiveViewerWidget extends Widget {
             this.viewer.setAttribute("table", table);
         }
 
-        if (typeof selectable !== "undefined") {
+        if (selectable) {
             this.viewer.setAttribute("selectable", selectable);
         }
 
-        if (typeof editable !== "undefined") {
+        if (editable) {
             this.viewer.setAttribute("editable", editable);
         }
 
@@ -117,14 +117,23 @@ export class PerspectiveViewerWidget extends Widget {
     }
 
     async save() {
-        return {
+        let config = {
             ...(await this.viewer.save()),
             master: this.master,
             name: this.viewer.getAttribute("name"),
             table: this.viewer.getAttribute("table"),
-            editable: this.viewer.getAttribute("editable"),
             linked: this.linked,
         };
+
+        if (this.viewer.hasAttribute("selectable")) {
+            config.selectable = this.viewer.getAttribute("selectable");
+        }
+
+        if (this.viewer.hasAttribute("editable")) {
+            config.editable = this.viewer.getAttribute("editable");
+        }
+
+        return config;
     }
 
     removeClass(name) {
