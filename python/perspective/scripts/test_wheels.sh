@@ -4,6 +4,8 @@
 #
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
+set -e
+
 # 
 # Creates a new virtual environment and installs Perspective from a wheel,
 # testing whether C++ bindings are imported properly.
