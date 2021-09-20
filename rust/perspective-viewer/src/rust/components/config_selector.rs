@@ -27,6 +27,7 @@ pub struct ConfigSelectorProps {
     pub session: Session,
     pub renderer: Renderer,
     pub dragdrop: DragDrop,
+    pub filter_dropdown: FilterDropDownElement,
 }
 
 derive_renderable_props!(ConfigSelectorProps);
@@ -54,7 +55,6 @@ pub enum ConfigSelectorMsg {
 pub struct ConfigSelector {
     props: ConfigSelectorProps,
     link: ComponentLink<ConfigSelector>,
-    filter_dropdown: FilterDropDownElement,
     subscriptions: [Rc<Subscription>; 2],
 }
 
@@ -103,11 +103,6 @@ impl Component for ConfigSelector {
     type Properties = ConfigSelectorProps;
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let filter_dropdown = FilterDropDownElement::new(
-            props.session.clone(),
-            link.callback(|(idx, input)| ConfigSelectorMsg::SetFilterValue(idx, input)),
-        );
-
         let cb = link.callback(|x: (String, DropAction, DragEffect, usize)| {
             ConfigSelectorMsg::Drop(x.0, x.1, x.2, x.3)
         });
@@ -120,7 +115,6 @@ impl Component for ConfigSelector {
         ConfigSelector {
             props,
             link,
-            filter_dropdown,
             subscriptions,
         }
     }
@@ -193,7 +187,7 @@ impl Component for ConfigSelector {
                 true
             }
             ConfigSelectorMsg::CloseFilter(index) => {
-                self.filter_dropdown.hide().unwrap();
+                self.props.filter_dropdown.hide().unwrap();
                 let ViewConfig { mut filter, .. } =
                     self.props.session.get_view_config();
                 filter.remove(index as usize);
@@ -354,7 +348,7 @@ impl Component for ConfigSelector {
                             html_nested! {
                                 <FilterItem
                                     idx={ idx }
-                                    filter_dropdown={ self.filter_dropdown.clone() }
+                                    filter_dropdown={ self.props.filter_dropdown.clone() }
                                     session={ self.props.session.clone() }
                                     renderer={ self.props.renderer.clone() }
                                     dragdrop={ self.props.dragdrop.clone() }

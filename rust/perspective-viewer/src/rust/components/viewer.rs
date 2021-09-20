@@ -14,6 +14,7 @@ use super::render_warning::RenderWarning;
 use super::status_bar::StatusBar;
 
 use crate::config::*;
+use crate::custom_elements::filter_dropdown::FilterDropDownElement;
 use crate::dragdrop::*;
 use crate::renderer::*;
 use crate::session::Session;
@@ -54,6 +55,7 @@ pub struct PerspectiveViewer {
     settings_open: bool,
     dimensions: Option<(usize, usize, Option<usize>, Option<usize>)>,
     on_rendered: Option<Sender<()>>,
+    filter_dropdown: FilterDropDownElement,
 }
 
 impl Component for PerspectiveViewer {
@@ -61,12 +63,14 @@ impl Component for PerspectiveViewer {
     type Properties = PerspectiveViewerProps;
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         *props.weak_link.borrow_mut() = Some(link.clone());
+        let filter_dropdown = FilterDropDownElement::new(props.session.clone());
         Self {
             props,
             link,
             settings_open: false,
             dimensions: None,
             on_rendered: None,
+            filter_dropdown,
         }
     }
 
@@ -184,7 +188,8 @@ impl Component for PerspectiveViewer {
                             <ConfigSelector
                                 dragdrop={ self.props.dragdrop.clone() }
                                 session={ self.props.session.clone() }
-                                renderer={ self.props.renderer.clone() }>
+                                renderer={ self.props.renderer.clone() }
+                                filter_dropdown={ self.filter_dropdown.clone() }>
                             </ConfigSelector>
                             <div id="main_panel_container">
                                 <RenderWarning
