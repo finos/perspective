@@ -94,9 +94,9 @@ t_port::release_or_clear()
 
 void
 t_port::clear() {
-     if (!m_table.get())
+    if (!m_table.get())
         return;
-    
+
     m_table->clear();
 }
 

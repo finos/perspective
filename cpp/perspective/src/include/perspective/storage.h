@@ -17,7 +17,6 @@
 #include <perspective/debug_helpers.h>
 #include <cmath>
 
-
 /*
 TODO.
 
@@ -37,15 +36,16 @@ struct PERSPECTIVE_EXPORT t_lstore_recipe {
     t_lstore_recipe();
     t_lstore_recipe(t_uindex capacity);
 
-    t_lstore_recipe(const std::string& dirname, const std::string& colname, t_uindex capacity,
+    t_lstore_recipe(const std::string& dirname, const std::string& colname,
+        t_uindex capacity, t_backing_store backing_store);
+
+    t_lstore_recipe(const std::string& dirname, const std::string& colname,
+        t_uindex capacity, t_fflag fflags, t_fflag fmode,
+        t_fflag creation_disposition, t_fflag mprot, t_fflag mflags,
         t_backing_store backing_store);
 
-    t_lstore_recipe(const std::string& dirname, const std::string& colname, t_uindex capacity,
-        t_fflag fflags, t_fflag fmode, t_fflag creation_disposition, t_fflag mprot,
-        t_fflag mflags, t_backing_store backing_store);
-
-    t_lstore_recipe(const std::string& colname, t_uindex capacity, t_fflag mprot,
-        t_fflag mflags, t_backing_store backing_store);
+    t_lstore_recipe(const std::string& colname, t_uindex capacity,
+        t_fflag mprot, t_fflag mflags, t_backing_store backing_store);
 
     std::string m_dirname;
     std::string m_colname;
@@ -73,13 +73,14 @@ typedef std::vector<t_lstore_recipe> t_lstore_argvec;
 #endif
 
 #ifdef PSP_STORAGE_VERIFY
-#define STORAGE_CHECK_ACCESS_GET(idx)                                                          \
-    PSP_VERBOSE_ASSERT(sizeof(T) * idx < (m_capacity + sizeof(T)), "Invalid access");
-#define PSP_CHECK_CAPACITY()                                                                   \
-    PSP_VERBOSE_ASSERT(m_size <= m_capacity,                                                   \
-        "Size capacity "                                                                       \
+#define STORAGE_CHECK_ACCESS_GET(idx)                                          \
+    PSP_VERBOSE_ASSERT(                                                        \
+        sizeof(T) * idx < (m_capacity + sizeof(T)), "Invalid access");
+#define PSP_CHECK_CAPACITY()                                                   \
+    PSP_VERBOSE_ASSERT(m_size <= m_capacity,                                   \
+        "Size capacity "                                                       \
         "mismatch")
-#define STORAGE_CHECK_ACCESS(idx)                                                              \
+#define STORAGE_CHECK_ACCESS(idx)                                              \
     PSP_VERBOSE_ASSERT(sizeof(T) * idx < m_capacity, "Invalid access");
 #else
 #define STORAGE_CHECK_ACCESS(idx)
@@ -276,10 +277,11 @@ template <typename T>
 void
 t_lstore::push_back(T value) {
     if (m_size + sizeof(T) >= m_capacity)
-        reserve(static_cast<t_uindex>(std::ceil(
-            m_capacity + m_size + sizeof(T)))); // reserve will multiply by m_resize_factor
+        reserve(static_cast<t_uindex>(std::ceil(m_capacity + m_size
+            + sizeof(T)))); // reserve will multiply by m_resize_factor
 
-    PSP_VERBOSE_ASSERT(m_size + sizeof(T) < m_capacity, "Insufficient capacity.");
+    PSP_VERBOSE_ASSERT(
+        m_size + sizeof(T) < m_capacity, "Insufficient capacity.");
     T* ptr = reinterpret_cast<T*>(static_cast<unsigned char*>(m_base) + m_size);
     *ptr = value;
     {

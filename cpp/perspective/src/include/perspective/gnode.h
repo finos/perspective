@@ -56,9 +56,9 @@ class t_ctx_grouped_pkey;
 /**
  * @brief The struct returned from `_process_table`, which contains a
  * pointer to the flattened and processed `t_data_table`, and a boolean showing
- * whether the user's `on_update` callbacks should be called, i.e. whether the 
+ * whether the user's `on_update` callbacks should be called, i.e. whether the
  * update contained new data or not.
- * 
+ *
  * Given that `_process_table` may be called multiple times, as is `_process`,
  * `t_update_task` will accumulate the values of `m_should_notify_userspace`
  * over multiple calls and only consider an update a no-op if all values of
@@ -75,18 +75,18 @@ public:
      * internal state of a `Table` - it handles updates, calculates the
      * transition state between each `update()` call, and manages/notifies
      * contexts (`View`s) created from the `Table`.
-     * 
+     *
      * A `t_gnode` is created with two `t_schema`s:
-     * 
+     *
      * `input_schema`: the canonical `t_schema` for the `Table`, which cannot
      * be mutated after creation. This schema contains the `psp_pkey` and
      * `psp_op` columns, which are used internally.
-     * 
+     *
      * `output_schema`: the `t_schema` that contains all columns provided
      * by the dataset, excluding `psp_pkey` and `psp_op`.
-     * 
-     * @param input_schema 
-     * @param output_schema 
+     *
+     * @param input_schema
+     * @param output_schema
      */
     t_gnode(const t_schema& input_schema, const t_schema& output_schema);
     ~t_gnode();
@@ -97,9 +97,9 @@ public:
     /**
      * @brief Send a t_data_table with a schema that matches the gnode's
      * input schema to the input port at `port_id`.
-     * 
-     * @param port_id 
-     * @param fragments 
+     *
+     * @param port_id
+     * @param fragments
      */
     void send(t_uindex port_id, const t_data_table& fragments);
 
@@ -108,42 +108,43 @@ public:
      * reconciling all queued calls to `update` and `remove` on that port.
      * Returns a boolean indicating whether the update was valid and whether
      * contexts were notified.
-     * 
-     * @param port_id 
+     *
+     * @param port_id
      */
     bool process(t_uindex port_id);
 
     /**
      * @brief Create a new input port, store it in `m_input_ports`, and
      * return the integer ID that references the new port.
-     * 
-     * @return t_uindex 
+     *
+     * @return t_uindex
      */
     t_uindex make_input_port();
 
     /**
      * @brief Given a port ID, remove the input port that belongs to that
      * input ID and clean up its associated table.
-     * 
-     * @param port_id 
+     *
+     * @param port_id
      */
     void remove_input_port(t_uindex port_id);
 
     /**
      * @brief Given a new context, register it with the gnode, compute and
      * add its expression columns.
-     * 
-     * @param name 
-     * @param type 
-     * @param ptr 
+     *
+     * @param name
+     * @param type
+     * @param ptr
      */
-    void _register_context(const std::string& name, t_ctx_type type, std::int64_t ptr);
+    void _register_context(
+        const std::string& name, t_ctx_type type, std::int64_t ptr);
 
     /**
      * @brief Remove a context by name from the gnode, and remove its
      * computed expression columns.
-     * 
-     * @param name 
+     *
+     * @param name
      */
     void _unregister_context(const std::string& name);
 
@@ -178,7 +179,8 @@ public:
 
     bool has_pkey(t_tscalar pkey) const;
 
-    std::vector<t_tscalar> get_row_data_pkeys(const std::vector<t_tscalar>& pkeys) const;
+    std::vector<t_tscalar> get_row_data_pkeys(
+        const std::vector<t_tscalar>& pkeys) const;
     std::vector<t_tscalar> has_pkeys(const std::vector<t_tscalar>& pkeys) const;
     std::vector<t_tscalar> get_pkeys() const;
 
@@ -192,11 +194,13 @@ public:
     void promote_column(const std::string& name, t_dtype new_type);
 
     // Gnode will steal a reference to the context
-    void register_context(const std::string& name, std::shared_ptr<t_ctxunit> ctx);
+    void register_context(
+        const std::string& name, std::shared_ptr<t_ctxunit> ctx);
     void register_context(const std::string& name, std::shared_ptr<t_ctx0> ctx);
     void register_context(const std::string& name, std::shared_ptr<t_ctx1> ctx);
     void register_context(const std::string& name, std::shared_ptr<t_ctx2> ctx);
-    void register_context(const std::string& name, std::shared_ptr<t_ctx_grouped_pkey> ctx);
+    void register_context(
+        const std::string& name, std::shared_ptr<t_ctx_grouped_pkey> ctx);
 
     void pprint() const;
     std::string repr() const;
@@ -208,37 +212,35 @@ public:
 protected:
     /**
      * @brief Given `tbl`, notify each registered context with `tbl`.
-     * 
-     * @param tbl 
+     *
+     * @param tbl
      */
     void _update_contexts_from_state(std::shared_ptr<t_data_table> tbl);
 
     /**
      * @brief Notify a single registered `ctx` with `tbl`.
-     * 
-     * @tparam CTX_T 
-     * @param ctx 
-     * @param tbl 
-     * @param flattened 
-     * @param delta 
-     * @param prev 
-     * @param current 
-     * @param transitions 
-     * @param changed_rows 
+     *
+     * @tparam CTX_T
+     * @param ctx
+     * @param tbl
+     * @param flattened
+     * @param delta
+     * @param prev
+     * @param current
+     * @param transitions
+     * @param changed_rows
      */
     template <typename CTX_T>
-    void update_context_from_state(
-        CTX_T* ctx,
-        const std::string& name,
+    void update_context_from_state(CTX_T* ctx, const std::string& name,
         std::shared_ptr<t_data_table> flattened);
 
     /**
      * @brief Provide the registered `t_ctx*` with a pointer to this gnode's
      * `m_gstate` object. `t_ctx*` are assumed to access/mutate this state
      * object arbitrarily at runtime.
-     * 
-     * @tparam CTX_T 
-     * @param ptr 
+     *
+     * @tparam CTX_T
+     * @param ptr
      */
     template <typename CTX_T>
     void set_ctx_state(void* ptr);
@@ -247,17 +249,15 @@ protected:
     void notify_contexts(std::shared_ptr<t_data_table> flattened);
 
     template <typename CTX_T>
-    void notify_context(
-        std::shared_ptr<t_data_table> flattened,
-        const t_ctx_handle& ctxh,
-        const std::string& name);
+    void notify_context(std::shared_ptr<t_data_table> flattened,
+        const t_ctx_handle& ctxh, const std::string& name);
 
     /**
      * @brief Given the process state, create a `t_mask` bitset set to true for
      * all rows in `flattened`, UNLESS the row is an `OP_DELETE`.
-     * 
+     *
      * Mutates the `t_process_state` object that is passed in.
-     * 
+     *
      * @param process_state
      */
     t_mask _process_mask_existed_rows(t_process_state& process_state);
@@ -266,36 +266,38 @@ protected:
      * @brief Given a flattened column, the master column from `m_gstate`, and
      * all transitional columns containing metadata, process and calculate
      * transitional values.
-     * 
-     * @tparam DATA_T 
-     * @param fcolumn 
-     * @param scolumn 
-     * @param dcolumn 
-     * @param pcolumn 
-     * @param ccolumn 
-     * @param tcolumn 
-     * @param process_state 
+     *
+     * @tparam DATA_T
+     * @param fcolumn
+     * @param scolumn
+     * @param dcolumn
+     * @param pcolumn
+     * @param ccolumn
+     * @param tcolumn
+     * @param process_state
      */
     template <typename T>
-    void _process_column(const t_column* fcolumn, const t_column* scolumn, t_column* dcolumn,
-        t_column* pcolumn, t_column* ccolumn, t_column* tcolumn, const t_process_state& process_state);
+    void _process_column(const t_column* fcolumn, const t_column* scolumn,
+        t_column* dcolumn, t_column* pcolumn, t_column* ccolumn,
+        t_column* tcolumn, const t_process_state& process_state);
 
     /**
      * @brief Calculate the transition state for a single cell, which depends
      * on whether the cell is/was valid, existed, or is new.
-     * 
-     * @param prev_existed 
-     * @param row_pre_existed 
-     * @param exists 
-     * @param prev_valid 
-     * @param cur_valid 
-     * @param prev_cur_eq 
-     * @param prev_pkey_eq 
-     * @return t_value_transition 
+     *
+     * @param prev_existed
+     * @param row_pre_existed
+     * @param exists
+     * @param prev_valid
+     * @param cur_valid
+     * @param prev_cur_eq
+     * @param prev_pkey_eq
+     * @return t_value_transition
      */
-    t_value_transition calc_transition(bool prev_existed, bool row_pre_existed, bool exists,
-        bool prev_valid, bool cur_valid, bool prev_cur_eq, bool prev_pkey_eq);
-    
+    t_value_transition calc_transition(bool prev_existed, bool row_pre_existed,
+        bool exists, bool prev_valid, bool cur_valid, bool prev_cur_eq,
+        bool prev_pkey_eq);
+
     /******************************************************************************
      *
      * Expression Column Operations
@@ -313,15 +315,14 @@ protected:
      * data and transition tables. This method is called on all subsequent
      * updates applied after the first update.
      */
-    void _compute_expressions(
-        std::shared_ptr<t_data_table> master,
+    void _compute_expressions(std::shared_ptr<t_data_table> master,
         std::shared_ptr<t_data_table> flattened);
 
 private:
     /**
      * @brief Process the input data table by flattening it, calculating
      * transitional values, and returning a new masked version.
-     * 
+     *
      * @return t_process_table_result
      */
     t_process_table_result _process_table(t_uindex port_id);
@@ -363,8 +364,9 @@ private:
 };
 
 /**
- * @brief Given a t_data_table and a context handler, construct the t_tables relating to delta
- * calculation and notify the context with the constructed tables.
+ * @brief Given a t_data_table and a context handler, construct the t_tables
+ * relating to delta calculation and notify the context with the constructed
+ * tables.
  *
  * @tparam CTX_T
  * @param flattened
@@ -372,17 +374,17 @@ private:
  */
 template <typename CTX_T>
 void
-t_gnode::notify_context(
-    std::shared_ptr<t_data_table> flattened,
-    const t_ctx_handle& ctxh,
-    const std::string& name) {
+t_gnode::notify_context(std::shared_ptr<t_data_table> flattened,
+    const t_ctx_handle& ctxh, const std::string& name) {
     CTX_T* ctx = ctxh.get<CTX_T>();
-    
+
     // Tables from the gnode which do not have the expressions applied yet
     std::shared_ptr<t_data_table> delta = m_oports[PSP_PORT_DELTA]->get_table();
     std::shared_ptr<t_data_table> prev = m_oports[PSP_PORT_PREV]->get_table();
-    std::shared_ptr<t_data_table> current = m_oports[PSP_PORT_CURRENT]->get_table();
-    std::shared_ptr<t_data_table> transitions = m_oports[PSP_PORT_TRANSITIONS]->get_table();
+    std::shared_ptr<t_data_table> current
+        = m_oports[PSP_PORT_CURRENT]->get_table();
+    std::shared_ptr<t_data_table> transitions
+        = m_oports[PSP_PORT_TRANSITIONS]->get_table();
 
     // Existed is special - it will never have any expression columns and can
     // be used as-is from the gnode.
@@ -391,35 +393,27 @@ t_gnode::notify_context(
     ctx->step_begin();
 
     if (ctx->num_expressions() > 0) {
-        // Join expression tables on the context with gnode tables and pass those
-        // into the context so there is no distinction between expression and real
-        // columns for the context.
-        std::shared_ptr<t_expression_tables> ctx_expression_tables = ctx->get_expression_tables();
+        // Join expression tables on the context with gnode tables and pass
+        // those into the context so there is no distinction between expression
+        // and real columns for the context.
+        std::shared_ptr<t_expression_tables> ctx_expression_tables
+            = ctx->get_expression_tables();
 
-        auto joined_flattened = flattened->join(ctx_expression_tables->m_flattened);
+        auto joined_flattened
+            = flattened->join(ctx_expression_tables->m_flattened);
         auto joined_delta = delta->join(ctx_expression_tables->m_delta);
         auto joined_prev = prev->join(ctx_expression_tables->m_prev);
         auto joined_current = current->join(ctx_expression_tables->m_current);
-        auto joined_transitions = transitions->join(ctx_expression_tables->m_transitions);
+        auto joined_transitions
+            = transitions->join(ctx_expression_tables->m_transitions);
 
         // pass the tables as const references - the destructors for all of the
         // joined tables will be called after this function finishes executing,
         // as the contexts do not retain a reference to these tables.
-        ctx->notify(
-            *joined_flattened,
-            *joined_delta,
-            *joined_prev,
-            *joined_current,
-            *joined_transitions,
-            existed);
+        ctx->notify(*joined_flattened, *joined_delta, *joined_prev,
+            *joined_current, *joined_transitions, existed);
     } else {
-        ctx->notify(
-            *flattened,
-            *delta,
-            *prev,
-            *current,
-            *transitions,
-            existed);
+        ctx->notify(*flattened, *delta, *prev, *current, *transitions, existed);
     }
 
     ctx->step_end();
@@ -436,16 +430,15 @@ t_gnode::notify_context(
  */
 template <typename CTX_T>
 void
-t_gnode::update_context_from_state(
-    CTX_T* ctx,
-    const std::string& name,
+t_gnode::update_context_from_state(CTX_T* ctx, const std::string& name,
     std::shared_ptr<t_data_table> flattened) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    PSP_VERBOSE_ASSERT(
-        m_mode == NODE_PROCESSING_SIMPLE_DATAFLOW, "Only simple dataflows supported currently")
+    PSP_VERBOSE_ASSERT(m_mode == NODE_PROCESSING_SIMPLE_DATAFLOW,
+        "Only simple dataflows supported currently")
 
-    if (flattened->size() == 0) return;
+    if (flattened->size() == 0)
+        return;
 
     ctx->step_begin();
 
@@ -460,8 +453,10 @@ t_gnode::update_context_from_state(
         // If the context has expression columns, it has already been computed
         // in `process_table` and we can join the "real" and expression columns
         // together and pass it to the context.
-        std::shared_ptr<t_expression_tables> ctx_expression_tables = ctx->get_expression_tables();
-        std::shared_ptr<t_data_table> joined_flattened = flattened->join(ctx_expression_tables->m_master);
+        std::shared_ptr<t_expression_tables> ctx_expression_tables
+            = ctx->get_expression_tables();
+        std::shared_ptr<t_data_table> joined_flattened
+            = flattened->join(ctx_expression_tables->m_master);
         ctx->notify(*joined_flattened);
     } else {
         // Just use the table from the gnode
@@ -472,25 +467,14 @@ t_gnode::update_context_from_state(
 }
 
 template <>
-void
-t_gnode::_process_column<std::string>(
-    const t_column* fcolumn,
-    const t_column* scolumn,
-    t_column* dcolumn,
-    t_column* pcolumn,
-    t_column* ccolumn,
-    t_column* tcolumn,
-    const t_process_state& process_state);
+void t_gnode::_process_column<std::string>(const t_column* fcolumn,
+    const t_column* scolumn, t_column* dcolumn, t_column* pcolumn,
+    t_column* ccolumn, t_column* tcolumn, const t_process_state& process_state);
 
 template <typename DATA_T>
 void
-t_gnode::_process_column(
-    const t_column* fcolumn,
-    const t_column* scolumn,
-    t_column* dcolumn,
-    t_column* pcolumn,
-    t_column* ccolumn,
-    t_column* tcolumn,
+t_gnode::_process_column(const t_column* fcolumn, const t_column* scolumn,
+    t_column* dcolumn, t_column* pcolumn, t_column* ccolumn, t_column* tcolumn,
     const t_process_state& process_state) {
     for (t_uindex idx = 0, loop_end = fcolumn->size(); idx < loop_end; ++idx) {
         std::uint8_t op_ = process_state.m_op_base[idx];
@@ -521,44 +505,47 @@ t_gnode::_process_column(
                 bool prev_existed = row_pre_existed && prev_valid;
                 bool prev_cur_eq = prev_value == cur_value;
 
-                auto trans = calc_transition(prev_existed, row_pre_existed, exists, prev_valid,
-                    cur_valid, prev_cur_eq, prev_pkey_eq);
+                auto trans = calc_transition(prev_existed, row_pre_existed,
+                    exists, prev_valid, cur_valid, prev_cur_eq, prev_pkey_eq);
 
-                if (dcolumn->get_dtype() == DTYPE_OBJECT){
+                if (dcolumn->get_dtype() == DTYPE_OBJECT) {
                     // unsigned types, dates, etc don't make sense
                     // TODO remove dcolumn?
-                    dcolumn->set_nth<DATA_T>(
-                        added_count, DATA_T(0));
+                    dcolumn->set_nth<DATA_T>(added_count, DATA_T(0));
                 } else {
-                    dcolumn->set_nth<DATA_T>(
-                        added_count, cur_valid ? cur_value - prev_value : DATA_T(0));
+                    dcolumn->set_nth<DATA_T>(added_count,
+                        cur_valid ? cur_value - prev_value : DATA_T(0));
                 }
                 dcolumn->set_valid(added_count, true);
 
                 pcolumn->set_nth<DATA_T>(added_count, prev_value);
                 pcolumn->set_valid(added_count, prev_valid);
 
-                ccolumn->set_nth<DATA_T>(added_count, cur_valid ? cur_value : prev_value);
-                ccolumn->set_valid(added_count, cur_valid ? cur_valid : prev_valid);
+                ccolumn->set_nth<DATA_T>(
+                    added_count, cur_valid ? cur_value : prev_value);
+                ccolumn->set_valid(
+                    added_count, cur_valid ? cur_valid : prev_valid);
 
                 tcolumn->set_nth<std::uint8_t>(idx, trans);
 
                 // if object type and its a duplicate, decrement
                 // the ref count to account for the increment in
                 // fill.cpp
-                if(ccolumn->get_dtype() == DTYPE_OBJECT) {
+                if (ccolumn->get_dtype() == DTYPE_OBJECT) {
                     if (cur_valid && prev_cur_eq) {
                         fcolumn->notify_object_cleared(idx);
                     }
 
-                    if ((!cur_valid && prev_valid) || (cur_valid && prev_valid && !prev_cur_eq)) {
+                    if ((!cur_valid && prev_valid)
+                        || (cur_valid && prev_valid && !prev_cur_eq)) {
                         pcolumn->notify_object_cleared(added_count);
                     }
                 }
             } break;
             case OP_DELETE: {
                 if (row_pre_existed) {
-                    DATA_T prev_value = *(scolumn->get_nth<DATA_T>(rlookup.m_idx));
+                    DATA_T prev_value
+                        = *(scolumn->get_nth<DATA_T>(rlookup.m_idx));
                     bool prev_valid = scolumn->is_valid(rlookup.m_idx);
 
                     pcolumn->set_nth<DATA_T>(added_count, prev_value);
@@ -567,7 +554,7 @@ t_gnode::_process_column(
                     ccolumn->set_nth<DATA_T>(added_count, prev_value);
                     ccolumn->set_valid(added_count, prev_valid);
 
-                    if(ccolumn->get_dtype() == DTYPE_OBJECT) {
+                    if (ccolumn->get_dtype() == DTYPE_OBJECT) {
                         if (prev_valid)
                             pcolumn->notify_object_cleared(added_count);
                     }
@@ -576,11 +563,14 @@ t_gnode::_process_column(
                     dcolumn->set_nth<DATA_T>(added_count, -prev_value);
                     RESTORE_WARNINGS_VC()
                     dcolumn->set_valid(added_count, true);
-                    
-                    tcolumn->set_nth<std::uint8_t>(added_count, VALUE_TRANSITION_NEQ_TDF);
+
+                    tcolumn->set_nth<std::uint8_t>(
+                        added_count, VALUE_TRANSITION_NEQ_TDF);
                 }
             } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unknown OP"); }
+            default: {
+                PSP_COMPLAIN_AND_ABORT("Unknown OP");
+            }
         }
     }
 }

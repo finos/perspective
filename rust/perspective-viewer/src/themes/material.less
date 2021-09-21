@@ -10,39 +10,32 @@
 @import "../less/fonts";
 @import "../less/variables";
 
-perspective-viewer, .perspective-viewer-material {
+perspective-viewer,
+.perspective-viewer-material {
     .perspective-viewer-material-base();
     --active--color: @blue500;
 }
 
-perspective-column-style, perspective-expression-editor {
-    background-color: #FFFFFF;
+perspective-column-style,
+perspective-expression-editor {
+    background-color: #ffffff;
     color: #161616;
-    border: 1px solid #E0E4E9;
-    --input--border-color: #E0E4E9;
+    border: 1px solid #e0e4e9;
+    --input--border-color: #e0e4e9;
     --active-color: @blue500;
 }
 
 .perspective-viewer-material-base() {
-    background-color: #F2F4F6;
+    background-color: #f2f4f6;
     font-family: "Open Sans";
 
     --rt-pos-cell--color: @blue300;
     --rt-neg-cell--color: @red300;
 
-    --interface--font-family: "Open Sans";
     --interface-monospace--font-family: "Roboto Mono";
     --inactive-column-selector--content: "\E835";
     --active-column-selector--content: "\E834";
-    --column--background: #F2F4F6;
-    --plugin--background: #FFFFFF;
-    --column--height: 21px;
-    --active-column--height: 51px;
-    --inactive-column--height: 24px;
-    --active-columns--justify-content: space-evenly;
-    --inactive-column--opacity: 0.3;
-    --null--background: rgba(0,0,0,0.02);
-    --null--box-shadow: @elevationinset1;
+    --plugin--background: #ffffff;
 
     --float--column-type--color: @blue500;
     --string--column-type--color: @red500;
@@ -51,11 +44,9 @@ perspective-column-style, perspective-expression-editor {
     --button--font-family: "Material Icons";
     --overflow_hint--before: "error_outline";
     --overflow_hint--font-family: "Material Icons";
-    --overflow_hint--color: rgba(0,0,0,0.2);
+    --overflow_hint--color: rgba(0, 0, 0, 0.2);
     --overflow_hint--padding: 0 12px 0 6px;
 
-    --row_draggable-last-child-border-color: transparent;
-                
     --row_pivots--before: "Group By";
     --column_pivots--before: "Split By";
 
@@ -100,9 +91,9 @@ perspective-column-style, perspective-expression-editor {
     --button--padding: 24px 17px 0px 17px;
     --button--font-size: 16px;
 
-    --top_panel--padding: 0px 0px 24px 0px;
+    --top_panel--padding: 12px 0px 24px 0px;
     --top-panel-row--display: inline-flex;
-   
+
     --d3fc-treedata-axis--lines: none;
 
     --d3fc-y1-label--font-family: "Material Icons";
@@ -110,14 +101,14 @@ perspective-column-style, perspective-expression-editor {
 
     --d3fc-y2-label--font-family: "Material Icons";
     --d3fc-y2-label--content: "arrow_downward";
-    --d3fc-tooltip--background--color: rgba(155,155,155,0.8);
+    --d3fc-tooltip--background--color: rgba(155, 155, 155, 0.8);
     --d3fc-tooltip--color: @grey900;
     --d3fc-tooltip--border-color: #fff;
     --d3fc-tooltip--box-shadow: @elevation1;
     --d3fc-gridline--color: #eaedef;
     --d3fc-axis--ticks: #161616; //@grey500; //rgb(187, 187, 187);
     --d3fc-axis--lines: @grey60; //@grey500; //rgb(85, 85, 85);
-    --d3fc-legend--background: rgba(255,255,255,0.8);
+    --d3fc-legend--background: rgba(255, 255, 255, 0.8);
 
     --d3fc-series: rgba(31, 119, 180, 0.5);
     --d3fc-series-1: #0366d6;
@@ -151,12 +142,11 @@ perspective-column-style, perspective-expression-editor {
     );
 
     regular-table::-webkit-scrollbar-thumb {
-        background-color: #E0E4E9;
+        background-color: #e0e4e9;
     }
 
     regular-table {
-        -webkit-mask-image:
-            ~"linear-gradient(black, black)",
+        -webkit-mask-image: ~"linear-gradient(black, black)",
             ~"linear-gradient(to top, transparent 10%, black 90%)",
             ~"linear-gradient(to left, transparent 10%, black 90%)";
         -webkit-mask-position: ~"-12px -12px", ~"bottom right", ~"bottom right";

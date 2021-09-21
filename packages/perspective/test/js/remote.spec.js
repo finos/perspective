@@ -28,7 +28,7 @@ describe("WebSocketManager", function () {
         server.host_table("test", table);
 
         const client = perspective.websocket(`ws://localhost:${port}`);
-        const client_table = client.open_table("test");
+        const client_table = await client.open_table("test");
         const client_view = await client_table.view();
         const client_data = await client_view.to_json();
         expect(client_data).toEqual(data);
@@ -45,7 +45,7 @@ describe("WebSocketManager", function () {
         server.host_table("test", table);
 
         const client = perspective.websocket(`ws://localhost:${port}`);
-        const client_table = client.open_table("test");
+        const client_table = await client.open_table("test");
 
         client_table.view({columns: ["z"]}).catch((error) => {
             expect(error.message).toBe(
@@ -69,8 +69,8 @@ describe("WebSocketManager", function () {
         const client_1 = perspective.websocket(`ws://localhost:${port}`);
         const client_2 = perspective.websocket(`ws://localhost:${port}`);
 
-        const client_1_table = client_1.open_table("test");
-        const client_2_table = client_2.open_table("test");
+        const client_1_table = await client_1.open_table("test");
+        const client_2_table = await client_2.open_table("test");
 
         const client_1_view = await client_1_table.view();
         const client_2_view = await client_2_table.view();
@@ -96,8 +96,8 @@ describe("WebSocketManager", function () {
         const client_1 = perspective.websocket(`ws://localhost:${port}`);
         const client_2 = perspective.websocket(`ws://localhost:${port}`);
 
-        const client_1_table = client_1.open_table("test");
-        const client_2_table = client_2.open_table("test");
+        const client_1_table = await client_1.open_table("test");
+        const client_2_table = await client_2.open_table("test");
 
         client_1_table.view({columns: ["z"]}).catch((error) => {
             expect(error.message).toBe(
@@ -126,7 +126,7 @@ describe("WebSocketManager", function () {
         server.host_table("test", table);
 
         const client = perspective.websocket(`ws://localhost:${port}`);
-        const client_table = client.open_table("test");
+        const client_table = await client.open_table("test");
 
         const client_view = await client_table.view();
         // eslint-disable-next-line no-unused-vars
@@ -155,7 +155,7 @@ describe("WebSocketManager", function () {
         server.host_table("test", table);
 
         const client = perspective.websocket(`ws://localhost:${port}`);
-        const client_table = client.open_table("test");
+        const client_table = await client.open_table("test");
 
         client_table.update(arrow);
 
@@ -176,7 +176,7 @@ describe("WebSocketManager", function () {
         server.host_table("test", table);
 
         const client = perspective.websocket(`ws://localhost:${port}`);
-        const client_table = client.open_table("test");
+        const client_table = await client.open_table("test");
 
         client_table.update(arrow);
         client_table.update(arrow);
@@ -212,7 +212,7 @@ describe("WebSocketManager", function () {
         server.host_table("test", table);
 
         const client = perspective.websocket(`ws://localhost:${port}`);
-        const client_table = client.open_table("test");
+        const client_table = await client.open_table("test");
 
         for (let i = 0; i < 5; i++) {
             // take up some ports on the remote table

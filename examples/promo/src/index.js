@@ -21,9 +21,19 @@ import SYMBOLS from "./symbols.json";
 
 const worker = perspective.shared_worker();
 
-var CLIENTS = ["Homer", "Marge", "Bart", "Lisa", "Maggie", "Moe", "Lenny", "Carl", "Krusty"];
+var CLIENTS = [
+    "Homer",
+    "Marge",
+    "Bart",
+    "Lisa",
+    "Maggie",
+    "Moe",
+    "Lenny",
+    "Carl",
+    "Krusty",
+];
 
-const choose = x => x[Math.floor(Math.random() * x.length)];
+const choose = (x) => x[Math.floor(Math.random() * x.length)];
 const date = (() => {
     const start = new Date();
     let x = 0;
@@ -45,7 +55,7 @@ function newRows(n = 5) {
             chg: Math.random() * 20 - 10,
             vol: Math.random() * 10 + 100,
             symbol: ticker.symbol,
-            name: ticker.name
+            name: ticker.name,
         });
     }
     return rows;
@@ -66,12 +76,12 @@ window.addEventListener("load", async () => {
             main: {
                 currentIndex: 0,
                 type: "tab-area",
-                widgets: ["One"]
-            }
+                widgets: ["One"],
+            },
         },
         viewers: {
-            One: {table: "rtdata"}
-        }
+            One: {table: "rtdata"},
+        },
     });
 
     (function postRow() {

@@ -49,11 +49,17 @@ const states = {
     Washington: "WA",
     "West Virginia": "WV",
     Wisconsin: "WI",
-    Wyoming: "WY"
+    Wyoming: "WY",
 };
 
 function hue(value, min, max) {
-    const norm = "0" + Math.abs(Math.round(255 * (Math.min(Math.max(value, min), max) / (max - min)))).toString(16);
+    const norm =
+        "0" +
+        Math.abs(
+            Math.round(
+                255 * (Math.min(Math.max(value, min), max) / (max - min))
+            )
+        ).toString(16);
     return norm.slice(norm.length - 2, norm.length);
 }
 
@@ -71,13 +77,29 @@ function make_led_cell(td, metadata) {
     if (metadata.value < 0) {
         const fg = hue(Math.min(metadata.value, -50), -100, 0);
         td.style.color = `#${fg}${fg}${fg}`;
-        td.style.background = `radial-gradient(#${hue(Math.min(metadata.value, -20), -100, 0)}3136, #243136`;
-        td.style.border = `1px solid #${hue(Math.min(metadata.value / 3, -20), -100, 0)}3136`;
+        td.style.background = `radial-gradient(#${hue(
+            Math.min(metadata.value, -20),
+            -100,
+            0
+        )}3136, #243136`;
+        td.style.border = `1px solid #${hue(
+            Math.min(metadata.value / 3, -20),
+            -100,
+            0
+        )}3136`;
     } else if (metadata.value > 0) {
         const fg = hue(Math.max(metadata.value, 50), 0, 100);
         td.style.color = `#${fg}${fg}${fg}`;
-        td.style.background = `radial-gradient(#24${hue(Math.max(20, metadata.value), 0, 100)}36, #243136`;
-        td.style.border = `1px solid #24${hue(Math.max(metadata.value / 3, 20), 0, 100)}36`;
+        td.style.background = `radial-gradient(#24${hue(
+            Math.max(20, metadata.value),
+            0,
+            100
+        )}36, #243136`;
+        td.style.border = `1px solid #24${hue(
+            Math.max(metadata.value / 3, 20),
+            0,
+            100
+        )}36`;
     } else {
         td.style.color = "#000";
         td.style.background = "";
@@ -92,7 +114,9 @@ function make_bar_chart(td, metadata, max) {
     } else {
         max = Math.max(max, metadata.value || 0);
         let v = (metadata.value || 0) / max;
-        td.innerHTML = `<div style="height:13px;width:${v * 100}%;background:linear-gradient(90deg, #2bb0af 0, #23a7d7);"><div>`;
+        td.innerHTML = `<div style="height:13px;width:${
+            v * 100
+        }%;background:linear-gradient(90deg, #2bb0af 0, #23a7d7);"><div>`;
     }
     return max;
 }
@@ -114,7 +138,12 @@ function make_flag(td, metadata, cache, clean_name) {
             img.src = data;
         };
         img.setAttribute("crossorigin", "anonymous");
-        img.setAttribute("src", `http://perspective.finos.org/img/flags/${states[clean_name].toLowerCase()}.png`);
+        img.setAttribute(
+            "src",
+            `http://perspective.finos.org/img/flags/${states[
+                clean_name
+            ].toLowerCase()}.png`
+        );
 
         td.textContent = "";
         span.appendChild(img);
@@ -138,7 +167,9 @@ function clone_img_cache() {
     }, {});
 }
 
-class CustomDatagridPlugin extends customElements.get("perspective-viewer-datagrid") {
+class CustomDatagridPlugin extends customElements.get(
+    "perspective-viewer-datagrid"
+) {
     get name() {
         return "Custom Datagrid";
     }
@@ -158,13 +189,20 @@ class CustomDatagridPlugin extends customElements.get("perspective-viewer-datagr
             if (metadata.x >= 0) {
                 const column_path = this._column_paths[metadata.x];
                 const column_path_parts = column_path.split("|");
-                type = this._schema[column_path_parts[column_path_parts.length - 1]];
+                type =
+                    this._schema[
+                        column_path_parts[column_path_parts.length - 1]
+                    ];
             } else {
                 const column_path = this._row_pivots[metadata.row_header_x - 1];
                 type = this._table_schema[column_path];
             }
-            const clean_name = metadata.value && metadata.value.trim && metadata.value.trim();
-            td.classList.toggle("orbitron", type === "integer" || type === "float");
+            const clean_name =
+                metadata.value && metadata.value.trim && metadata.value.trim();
+            td.classList.toggle(
+                "orbitron",
+                type === "integer" || type === "float"
+            );
             if (type === "float") {
                 make_led_cell(td, metadata);
             } else if (type === "integer") {
@@ -204,5 +242,8 @@ class CustomDatagridPlugin extends customElements.get("perspective-viewer-datagr
     }
 }
 
-customElements.define("perspective-viewer-custom-datagrid", CustomDatagridPlugin);
+customElements.define(
+    "perspective-viewer-custom-datagrid",
+    CustomDatagridPlugin
+);
 window.registerPlugin("perspective-viewer-custom-datagrid");

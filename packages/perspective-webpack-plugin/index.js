@@ -71,7 +71,9 @@ class PerspectiveWebpackPlugin {
         } else {
             rules.push({
                 test: /\.js$/,
-                include: /@finos\/perspective\-viewer/,
+                include: path.dirname(
+                    require.resolve("@finos/perspective-viewer/package.json")
+                ),
                 use: [
                     {
                         loader: require.resolve("string-replace-loader"),

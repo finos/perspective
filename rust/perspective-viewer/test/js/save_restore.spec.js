@@ -25,7 +25,7 @@ utils.with_server({}, () => {
     describe.page(
         "superstore.html",
         () => {
-            test.capture("save() returns the current config", async (page) => {
+            test.capture("save returns the current config", async (page) => {
                 const config = await page.evaluate(async () => {
                     const viewer = document.querySelector("perspective-viewer");
                     await viewer.getTable();
@@ -54,7 +54,7 @@ utils.with_server({}, () => {
             });
 
             test.capture(
-                "restore() restores a config from save()",
+                "restore restores a config from save",
                 async (page) => {
                     const config = await page.evaluate(async () => {
                         const viewer =

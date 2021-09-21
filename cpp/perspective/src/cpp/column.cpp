@@ -92,11 +92,13 @@ t_column::operator=(const t_column& c) {
     return *this;
 }
 
-t_column::t_column(t_dtype dtype, bool missing_enabled, const t_lstore_recipe& a)
-    : t_column(dtype, missing_enabled, a, a.m_capacity / get_dtype_size(dtype)) {}
-
 t_column::t_column(
-    t_dtype dtype, bool missing_enabled, const t_lstore_recipe& a, t_uindex row_capacity)
+    t_dtype dtype, bool missing_enabled, const t_lstore_recipe& a)
+    : t_column(
+        dtype, missing_enabled, a, a.m_capacity / get_dtype_size(dtype)) {}
+
+t_column::t_column(t_dtype dtype, bool missing_enabled,
+    const t_lstore_recipe& a, t_uindex row_capacity)
     : m_dtype(dtype)
     , m_init(false)
     , m_size(0)
@@ -306,7 +308,9 @@ t_column::push_back<t_tscalar>(t_tscalar elem) {
         case DTYPE_OBJECT: {
             push_back(elem.get<std::uint64_t>(), elem.m_status);
         } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Unexpected type"); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Unexpected type");
+        }
     }
     ++m_size;
 }
@@ -341,19 +345,23 @@ t_column::reserve(t_uindex size) {
         m_status->reserve(get_dtype_size(DTYPE_UINT8) * size);
 }
 
-//object storage, specialize only for std::uint64_t
+// object storage, specialize only for std::uint64_t
 template <>
-void t_column::object_copied<std::uint64_t>(std::uint64_t ptr) const {}
+void
+t_column::object_copied<std::uint64_t>(std::uint64_t ptr) const {}
 
-void t_column::notify_object_copied(std::uint64_t idx) const {
+void
+t_column::notify_object_copied(std::uint64_t idx) const {
     if (*get_nth_status(idx) == STATUS_VALID)
         object_copied<PSP_OBJECT_TYPE>(*(get_nth<std::uint64_t>(idx)));
 }
 
 template <>
-void t_column::object_cleared<std::uint64_t>(std::uint64_t ptr) const {}
+void
+t_column::object_cleared<std::uint64_t>(std::uint64_t ptr) const {}
 
-void t_column::notify_object_cleared(std::uint64_t idx) const {
+void
+t_column::notify_object_cleared(std::uint64_t idx) const {
     if (*get_nth_status(idx) == STATUS_VALID)
         object_cleared<PSP_OBJECT_TYPE>(*(get_nth<std::uint64_t>(idx)));
 }
@@ -418,11 +426,13 @@ t_column::get_scalar(t_uindex idx) const {
             rv.set(*(m_data->get_nth<bool>(idx)));
         } break;
         case DTYPE_TIME: {
-            const t_time::t_rawtype* v = m_data->get_nth<t_time::t_rawtype>(idx);
+            const t_time::t_rawtype* v
+                = m_data->get_nth<t_time::t_rawtype>(idx);
             rv.set(t_time(*v));
         } break;
         case DTYPE_DATE: {
-            const t_date::t_rawtype* v = m_data->get_nth<t_date::t_rawtype>(idx);
+            const t_date::t_rawtype* v
+                = m_data->get_nth<t_date::t_rawtype>(idx);
             rv.set(t_date(*v));
         } break;
         case DTYPE_STR: {
@@ -442,7 +452,9 @@ t_column::get_scalar(t_uindex idx) const {
             // Maintain DTYPE info
             rv.m_type = DTYPE_OBJECT;
         } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Unexpected type"); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Unexpected type");
+        }
     }
 
     if (is_status_enabled())
@@ -497,7 +509,9 @@ t_column::clear(t_uindex idx, t_status status) {
         case DTYPE_OBJECT: {
             set_nth<std::uint64_t>(idx, 0, status);
         } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Unexpected type"); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Unexpected type");
+        }
     }
 }
 
@@ -559,14 +573,16 @@ t_column::set_nth<std::string>(t_uindex idx, std::string elem) {
 
 template <>
 void
-t_column::set_nth<const char*>(t_uindex idx, const char* elem, t_status status) {
+t_column::set_nth<const char*>(
+    t_uindex idx, const char* elem, t_status status) {
     COLUMN_CHECK_STRCOL();
     set_nth_body(idx, elem, status);
 }
 
 template <>
 void
-t_column::set_nth<std::string>(t_uindex idx, std::string elem, t_status status) {
+t_column::set_nth<std::string>(
+    t_uindex idx, std::string elem, t_status status) {
     COLUMN_CHECK_STRCOL();
     set_nth(idx, elem.c_str(), status);
 }
@@ -647,8 +663,8 @@ t_column::set_scalar(t_uindex idx, t_tscalar value) {
             std::string empty;
 
             if (tgt) {
-                PSP_VERBOSE_ASSERT(
-                    value.m_type == DTYPE_STR, "Setting non string scalar on string column");
+                PSP_VERBOSE_ASSERT(value.m_type == DTYPE_STR,
+                    "Setting non string scalar on string column");
                 set_nth<const char*>(idx, tgt, value.m_status);
             } else {
                 set_nth<const char*>(idx, empty.c_str(), value.m_status);
@@ -658,7 +674,9 @@ t_column::set_scalar(t_uindex idx, t_tscalar value) {
             std::uint64_t tgt = value.get<std::uint64_t>();
             set_nth<std::uint64_t>(idx, tgt, value.m_status);
         }
-        default: { PSP_COMPLAIN_AND_ABORT("Unexpected type"); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Unexpected type");
+        }
     }
 }
 
@@ -679,13 +697,14 @@ t_column::append(const t_column& other) {
                 m_status->fill(*other.m_status);
             }
 
-            m_vocab->fill(*(other.m_vocab->get_vlendata()), *(other.m_vocab->get_extents()),
-                other.m_vocab->get_vlenidx());
+            m_vocab->fill(*(other.m_vocab->get_vlendata()),
+                *(other.m_vocab->get_extents()), other.m_vocab->get_vlenidx());
 
             set_size(other.size());
             m_vocab->rebuild_map();
         } else {
-            for (t_uindex idx = 0, loop_end = other.size(); idx < loop_end; ++idx) {
+            for (t_uindex idx = 0, loop_end = other.size(); idx < loop_end;
+                 ++idx) {
                 const char* s = other.get_nth<const char>(idx);
                 push_back(s);
             }
@@ -722,7 +741,6 @@ t_column::clear_objects() {
         notify_object_cleared(idx);
     }
 }
-
 
 void
 t_column::pprint() const {
@@ -827,8 +845,10 @@ t_column::invalid_raw_fill() {
 }
 
 void
-t_column::copy(const t_column* other, const std::vector<t_uindex>& indices, t_uindex offset) {
-    PSP_VERBOSE_ASSERT(m_dtype == other->get_dtype(), "Cannot copy from diff dtype");
+t_column::copy(const t_column* other, const std::vector<t_uindex>& indices,
+    t_uindex offset) {
+    PSP_VERBOSE_ASSERT(
+        m_dtype == other->get_dtype(), "Cannot copy from diff dtype");
 
     switch (m_dtype) {
         case DTYPE_NONE: {
@@ -879,15 +899,18 @@ t_column::copy(const t_column* other, const std::vector<t_uindex>& indices, t_ui
         case DTYPE_OBJECT: {
             copy_helper<std::uint64_t>(other, indices, offset);
         } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Unexpected type"); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Unexpected type");
+        }
     }
 }
 
 template <>
 void
-t_column::copy_helper<const char>(
-    const t_column* other, const std::vector<t_uindex>& indices, t_uindex offset) {
-    t_uindex eidx = std::min(other->size(), static_cast<t_uindex>(indices.size()));
+t_column::copy_helper<const char>(const t_column* other,
+    const std::vector<t_uindex>& indices, t_uindex offset) {
+    t_uindex eidx
+        = std::min(other->size(), static_cast<t_uindex>(indices.size()));
     reserve(eidx + offset);
 
     for (t_uindex idx = 0; idx < eidx; ++idx) {
@@ -898,8 +921,8 @@ t_column::copy_helper<const char>(
 
 template <>
 void
-t_column::fill(
-    std::vector<const char*>& vec, const t_uindex* bidx, const t_uindex* eidx) const {
+t_column::fill(std::vector<const char*>& vec, const t_uindex* bidx,
+    const t_uindex* eidx) const {
 
     PSP_VERBOSE_ASSERT(eidx - bidx > 0, "Invalid pointers passed in");
 
@@ -932,7 +955,8 @@ t_column::verify_size(t_uindex idx) const {
         "Not enough space reserved for column");
 
     if (is_status_enabled()) {
-        PSP_VERBOSE_ASSERT(idx * get_dtype_size(DTYPE_UINT8) <= m_status->capacity(),
+        PSP_VERBOSE_ASSERT(
+            idx * get_dtype_size(DTYPE_UINT8) <= m_status->capacity(),
             "Not enough space reserved for column");
     }
 

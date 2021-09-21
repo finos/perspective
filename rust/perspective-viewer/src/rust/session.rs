@@ -169,13 +169,17 @@ impl Session {
         match drag {
             DragEffect::Copy => (),
             DragEffect::Move(DropAction::Active) => {
+                let is_to_group_or_split =
+                    matches!(drop, DropAction::RowPivots | DropAction::ColumnPivots);
+
                 if ((!is_to_swap && is_from_swap)
-                    || (is_to_swap && !is_from_swap && is_to_empty))
+                    || (is_to_swap && !is_from_swap && is_to_empty)
+                    || is_to_group_or_split)
                     && config.columns.len() > 1
                     && !is_from_required
                 {
                     // Is not a swap
-                    if !is_to_swap {
+                    if !is_to_swap && !is_to_group_or_split {
                         config.columns.iter_mut().for_each(|x| {
                             if x.as_ref() == Some(&column) {
                                 *x = None;
@@ -573,7 +577,14 @@ impl Session {
                             .collect::<Vec<_>>(),
                     );
                 } else {
-                    config_update.columns = Some(vec![]);
+                    config_update.columns = Some(
+                        self.metadata()
+                            .iter_columns()
+                            .take(*min_cols)
+                            .cloned()
+                            .map(Some)
+                            .collect::<Vec<_>>(),
+                    );
                 }
             }
         } else if config_update.columns.is_none() {

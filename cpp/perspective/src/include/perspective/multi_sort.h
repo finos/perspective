@@ -40,8 +40,8 @@ namespace std {
 
 inline std::ostream&
 operator<<(std::ostream& os, const perspective::t_mselem& t) {
-    os << "mse<pkey => " << t.m_pkey << " row => " << t.m_row << " deleted => " << t.m_deleted
-       << " order => " << t.m_order << ">";
+    os << "mse<pkey => " << t.m_pkey << " row => " << t.m_row << " deleted => "
+       << t.m_deleted << " order => " << t.m_order << ">";
     return os;
 }
 
@@ -81,10 +81,12 @@ PERSPECTIVE_EXPORT t_nancmp nan_compare(
     t_sorttype order, const t_tscalar& a, const t_tscalar& b);
 
 inline PERSPECTIVE_EXPORT bool
-cmp_mselem(const t_mselem& a, const t_mselem& b, const std::vector<t_sorttype>& sort_order) {
+cmp_mselem(const t_mselem& a, const t_mselem& b,
+    const std::vector<t_sorttype>& sort_order) {
     typedef std::pair<double, t_tscalar> dpair;
 
-    if (a.m_row.size() != b.m_row.size() || a.m_row.size() != sort_order.size()) {
+    if (a.m_row.size() != b.m_row.size()
+        || a.m_row.size() != sort_order.size()) {
         std::cout << "ERROR detected in MultiSort." << std::endl;
         return false;
     }
@@ -109,7 +111,9 @@ cmp_mselem(const t_mselem& a, const t_mselem& b, const std::vector<t_sorttype>& 
                     return false;
                 } break;
                 case CMP_OP_EQ:
-                default: { continue; } break;
+                default: {
+                    continue;
+                } break;
             }
         }
 
@@ -126,12 +130,14 @@ cmp_mselem(const t_mselem& a, const t_mselem& b, const std::vector<t_sorttype>& 
             case SORTTYPE_ASCENDING_ABS: {
                 double val_a = first.to_double();
                 double val_b = second.to_double();
-                return dpair(std::abs(val_a), first_pkey) < dpair(std::abs(val_b), second_pkey);
+                return dpair(std::abs(val_a), first_pkey)
+                    < dpair(std::abs(val_b), second_pkey);
             } break;
             case SORTTYPE_DESCENDING_ABS: {
                 double val_a = first.to_double();
                 double val_b = second.to_double();
-                return dpair(std::abs(val_a), first_pkey) > dpair(std::abs(val_b), second_pkey);
+                return dpair(std::abs(val_a), first_pkey)
+                    > dpair(std::abs(val_b), second_pkey);
             } break;
             case SORTTYPE_NONE: {
                 return first_pkey < second_pkey;
@@ -147,7 +153,8 @@ cmp_mselem(const t_mselem& a, const t_mselem& b, const std::vector<t_sorttype>& 
 }
 
 inline PERSPECTIVE_EXPORT bool
-cmp_mselem(const t_mselem* a, const t_mselem* b, const std::vector<t_sorttype>& sort_order) {
+cmp_mselem(const t_mselem* a, const t_mselem* b,
+    const std::vector<t_sorttype>& sort_order) {
     return cmp_mselem(*a, *b, sort_order);
 }
 

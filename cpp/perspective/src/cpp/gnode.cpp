@@ -62,11 +62,12 @@ t_gnode::t_gnode(const t_schema& input_schema, const t_schema& output_schema)
     }
 
     t_schema trans_schema(m_output_schema.columns(), trans_types);
-    t_schema existed_schema(
-        std::vector<std::string>{"psp_existed"}, std::vector<t_dtype>{DTYPE_BOOL});
+    t_schema existed_schema(std::vector<std::string>{"psp_existed"},
+        std::vector<t_dtype>{DTYPE_BOOL});
 
-    m_transitional_schemas = std::vector<t_schema>{
-        m_input_schema, m_output_schema, m_output_schema, m_output_schema, trans_schema, existed_schema};
+    m_transitional_schemas
+        = std::vector<t_schema>{m_input_schema, m_output_schema,
+            m_output_schema, m_output_schema, trans_schema, existed_schema};
     m_epoch = std::chrono::high_resolution_clock::now();
 }
 
@@ -85,17 +86,19 @@ t_gnode::init() {
 
     // Create and store the main input port, which is always port 0. The next
     // input port will be port 1, and so on
-    std::shared_ptr<t_port> input_port = 
-        std::make_shared<t_port>(PORT_MODE_PKEYED, m_input_schema);
+    std::shared_ptr<t_port> input_port
+        = std::make_shared<t_port>(PORT_MODE_PKEYED, m_input_schema);
 
     input_port->init();
 
     m_input_ports[0] = input_port;
 
-    for (t_uindex idx = 0, loop_end = m_transitional_schemas.size(); idx < loop_end; ++idx) {
+    for (t_uindex idx = 0, loop_end = m_transitional_schemas.size();
+         idx < loop_end; ++idx) {
         t_port_mode mode = idx == 0 ? PORT_MODE_PKEYED : PORT_MODE_RAW;
 
-        std::shared_ptr<t_port> port = std::make_shared<t_port>(mode, m_transitional_schemas[idx]);
+        std::shared_ptr<t_port> port
+            = std::make_shared<t_port>(mode, m_transitional_schemas[idx]);
 
         port->init();
         m_oports.push_back(port);
@@ -111,9 +114,10 @@ t_gnode::init() {
 
 t_uindex
 t_gnode::make_input_port() {
-    PSP_VERBOSE_ASSERT(m_init, "Cannot `make_input_port` on an uninited gnode.");
-    std::shared_ptr<t_port> input_port = 
-        std::make_shared<t_port>(PORT_MODE_PKEYED, m_input_schema);
+    PSP_VERBOSE_ASSERT(
+        m_init, "Cannot `make_input_port` on an uninited gnode.");
+    std::shared_ptr<t_port> input_port
+        = std::make_shared<t_port>(PORT_MODE_PKEYED, m_input_schema);
     input_port->init();
 
     t_uindex port_id = m_last_input_port_id + 1;
@@ -127,10 +131,12 @@ t_gnode::make_input_port() {
 
 void
 t_gnode::remove_input_port(t_uindex port_id) {
-    PSP_VERBOSE_ASSERT(m_init, "Cannot `remove_input_port` on an uninited gnode.");
+    PSP_VERBOSE_ASSERT(
+        m_init, "Cannot `remove_input_port` on an uninited gnode.");
 
     if (m_input_ports.count(port_id) == 0) {
-        std::cerr << "Input port `" << port_id << "` cannot be removed, as it does not exist.";
+        std::cerr << "Input port `" << port_id
+                  << "` cannot be removed, as it does not exist.";
         return;
     }
 
@@ -144,14 +150,8 @@ t_gnode::remove_input_port(t_uindex port_id) {
 }
 
 t_value_transition
-t_gnode::calc_transition(
-    bool prev_existed,
-    bool row_pre_existed,
-    bool exists,
-    bool prev_valid,
-    bool cur_valid,
-    bool prev_cur_eq,
-    bool prev_pkey_eq) {
+t_gnode::calc_transition(bool prev_existed, bool row_pre_existed, bool exists,
+    bool prev_valid, bool cur_valid, bool prev_cur_eq, bool prev_pkey_eq) {
     t_value_transition trans = VALUE_TRANSITION_EQ_FF;
 
     if (!row_pre_existed && !cur_valid && !t_env::backout_invalid_neq_ft()) {
@@ -187,12 +187,12 @@ t_gnode::_process_mask_existed_rows(t_process_state& process_state) {
     auto flattened_num_rows = process_state.m_flattened_data_table->num_rows();
     process_state.m_existed_data_table->set_size(flattened_num_rows);
 
-    std::shared_ptr<t_column> op_col = 
-        process_state.m_flattened_data_table->get_column("psp_op");
+    std::shared_ptr<t_column> op_col
+        = process_state.m_flattened_data_table->get_column("psp_op");
     process_state.m_op_base = op_col->get_nth<std::uint8_t>(0);
-    t_column* pkey_col = 
-        process_state.m_flattened_data_table->get_column("psp_pkey").get();
-    
+    t_column* pkey_col
+        = process_state.m_flattened_data_table->get_column("psp_pkey").get();
+
     process_state.m_added_offset.resize(flattened_num_rows);
     process_state.m_prev_pkey_eq_vec.resize(flattened_num_rows);
 
@@ -201,15 +201,16 @@ t_gnode::_process_mask_existed_rows(t_process_state& process_state) {
     t_tscalar prev_pkey;
     prev_pkey.clear();
 
-    t_column* existed_column = 
-        process_state.m_existed_data_table->get_column("psp_existed").get();
+    t_column* existed_column
+        = process_state.m_existed_data_table->get_column("psp_existed").get();
 
     for (t_uindex idx = 0; idx < flattened_num_rows; ++idx) {
         t_tscalar pkey = pkey_col->get_scalar(idx);
         std::uint8_t op_ = process_state.m_op_base[idx];
         t_op op = static_cast<t_op>(op_);
 
-        PSP_VERBOSE_ASSERT(idx < process_state.m_lookup.size(), "process_state.m_lookup[idx] out of bounds");
+        PSP_VERBOSE_ASSERT(idx < process_state.m_lookup.size(),
+            "process_state.m_lookup[idx] out of bounds");
         bool row_pre_existed = process_state.m_lookup[idx].m_exists;
         process_state.m_prev_pkey_eq_vec[idx] = pkey == prev_pkey;
 
@@ -217,7 +218,8 @@ t_gnode::_process_mask_existed_rows(t_process_state& process_state) {
 
         switch (op) {
             case OP_INSERT: {
-                row_pre_existed = row_pre_existed && !process_state.m_prev_pkey_eq_vec[idx];
+                row_pre_existed
+                    = row_pre_existed && !process_state.m_prev_pkey_eq_vec[idx];
                 mask.set(idx, true);
                 existed_column->set_nth(added_count, row_pre_existed);
                 ++added_count;
@@ -231,7 +233,9 @@ t_gnode::_process_mask_existed_rows(t_process_state& process_state) {
                     mask.set(idx, false);
                 }
             } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unknown OP"); }
+            default: {
+                PSP_COMPLAIN_AND_ABORT("Unknown OP");
+            }
         }
 
         prev_pkey = pkey;
@@ -252,7 +256,8 @@ t_gnode::_process_table(t_uindex port_id) {
     std::shared_ptr<t_data_table> flattened = nullptr;
 
     if (m_input_ports.count(port_id) == 0) {
-        std::cerr << "Cannot process table on port `" << port_id << "` as it does not exist." << std::endl;
+        std::cerr << "Cannot process table on port `" << port_id
+                  << "` as it does not exist." << std::endl;
         return result;
     }
 
@@ -272,7 +277,7 @@ t_gnode::_process_table(t_uindex port_id) {
 
     std::vector<t_rlookup> row_lookup(flattened_num_rows);
     t_column* pkey_col = flattened->get_column("psp_pkey").get();
-    
+
     for (t_uindex idx = 0; idx < flattened_num_rows; ++idx) {
         // See if each primary key in flattened already exist in the dataset
         t_tscalar pkey = pkey_col->get_scalar(idx);
@@ -292,10 +297,10 @@ t_gnode::_process_table(t_uindex port_id) {
         input_port->release();
         release_outputs();
 
-    #ifdef PSP_GNODE_VERIFY
+#ifdef PSP_GNODE_VERIFY
         auto state_table = get_table();
         PSP_GNODE_VERIFY_TABLE(state_table);
-    #endif
+#endif
         // Make sure user is notified after first update.
         result.m_should_notify_userspace = true;
         return result;
@@ -313,9 +318,12 @@ t_gnode::_process_table(t_uindex port_id) {
     // Get data tables for process state
     _process_state.m_delta_data_table = m_oports[PSP_PORT_DELTA]->get_table();
     _process_state.m_prev_data_table = m_oports[PSP_PORT_PREV]->get_table();
-    _process_state.m_current_data_table = m_oports[PSP_PORT_CURRENT]->get_table();
-    _process_state.m_transitions_data_table = m_oports[PSP_PORT_TRANSITIONS]->get_table();
-    _process_state.m_existed_data_table = m_oports[PSP_PORT_EXISTED]->get_table();
+    _process_state.m_current_data_table
+        = m_oports[PSP_PORT_CURRENT]->get_table();
+    _process_state.m_transitions_data_table
+        = m_oports[PSP_PORT_TRANSITIONS]->get_table();
+    _process_state.m_existed_data_table
+        = m_oports[PSP_PORT_EXISTED]->get_table();
 
     // Clear delta, prev, current, transitions, existed on EACH call.
     _process_state.clear_transitional_data_tables();
@@ -330,7 +338,8 @@ t_gnode::_process_table(t_uindex port_id) {
     _process_state.set_size_transitional_data_tables(mask_count);
 
     // Only real columns from the gstate table here
-    const std::vector<std::string>& column_names = get_output_schema().m_columns;
+    const std::vector<std::string>& column_names
+        = get_output_schema().m_columns;
     t_uindex ncols = column_names.size();
 
 #ifdef PSP_PARALLEL_FOR
@@ -341,62 +350,87 @@ t_gnode::_process_table(t_uindex port_id) {
 #endif
         {
             const std::string& cname = column_names[colidx];
-            auto fcolumn = _process_state.m_flattened_data_table->get_column(cname).get();
-            auto scolumn = _process_state.m_state_data_table->get_column(cname).get();
-            auto dcolumn = _process_state.m_delta_data_table->get_column(cname).get();
-            auto pcolumn = _process_state.m_prev_data_table->get_column(cname).get();
-            auto ccolumn = _process_state.m_current_data_table->get_column(cname).get();
-            auto tcolumn = _process_state.m_transitions_data_table->get_column(cname).get();
+            auto fcolumn
+                = _process_state.m_flattened_data_table->get_column(cname)
+                      .get();
+            auto scolumn
+                = _process_state.m_state_data_table->get_column(cname).get();
+            auto dcolumn
+                = _process_state.m_delta_data_table->get_column(cname).get();
+            auto pcolumn
+                = _process_state.m_prev_data_table->get_column(cname).get();
+            auto ccolumn
+                = _process_state.m_current_data_table->get_column(cname).get();
+            auto tcolumn
+                = _process_state.m_transitions_data_table->get_column(cname)
+                      .get();
 
             t_dtype col_dtype = fcolumn->get_dtype();
 
             switch (col_dtype) {
                 case DTYPE_INT64: {
-                    _process_column<std::int64_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::int64_t>(fcolumn, scolumn, dcolumn,
+                        pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_INT32: {
-                    _process_column<std::int32_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::int32_t>(fcolumn, scolumn, dcolumn,
+                        pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_INT16: {
-                    _process_column<std::int16_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::int16_t>(fcolumn, scolumn, dcolumn,
+                        pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_INT8: {
-                    _process_column<std::int8_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::int8_t>(fcolumn, scolumn, dcolumn,
+                        pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_UINT64: {
-                    _process_column<std::uint64_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::uint64_t>(fcolumn, scolumn, dcolumn,
+                        pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_UINT32: {
-                    _process_column<std::uint32_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::uint32_t>(fcolumn, scolumn, dcolumn,
+                        pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_UINT16: {
-                    _process_column<std::uint16_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::uint16_t>(fcolumn, scolumn, dcolumn,
+                        pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_UINT8: {
-                    _process_column<std::uint8_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::uint8_t>(fcolumn, scolumn, dcolumn,
+                        pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_FLOAT64: {
-                    _process_column<double>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<double>(fcolumn, scolumn, dcolumn, pcolumn,
+                        ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_FLOAT32: {
-                    _process_column<float>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<float>(fcolumn, scolumn, dcolumn, pcolumn,
+                        ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_BOOL: {
-                    _process_column<std::uint8_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::uint8_t>(fcolumn, scolumn, dcolumn,
+                        pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_TIME: {
-                    _process_column<std::int64_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::int64_t>(fcolumn, scolumn, dcolumn,
+                        pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_DATE: {
-                    _process_column<std::uint32_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::uint32_t>(fcolumn, scolumn, dcolumn,
+                        pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_STR: {
-                    _process_column<std::string>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::string>(fcolumn, scolumn, dcolumn,
+                        pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
                 case DTYPE_OBJECT: {
-                    _process_column<std::uint64_t>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn, tcolumn, _process_state);
+                    _process_column<std::uint64_t>(fcolumn, scolumn, dcolumn,
+                        pcolumn, ccolumn, tcolumn, _process_state);
                 } break;
-                default: { PSP_COMPLAIN_AND_ABORT("Unsupported column dtype"); }
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Unsupported column dtype");
+                }
             }
         }
 #ifdef PSP_PARALLEL_FOR
@@ -408,7 +442,7 @@ t_gnode::_process_table(t_uindex port_id) {
      * `_process_state.m_flattened_data_table` contains the accumulated state
      * of the dataset that updates the master table on `m_gstate`, including
      * added rows, updated in-place rows, and rows to be removed.
-     * 
+     *
      * `existed_mask` is a bitset marked true for `OP_INSERT`, and false for
      * `OP_DELETE`. If there are any `OP_DELETE`s, the next step returns a
      * new `t_data_table` with the deleted rows masked out.
@@ -418,27 +452,27 @@ t_gnode::_process_table(t_uindex port_id) {
     if (existed_mask.count() == _process_state.m_flattened_data_table->size()) {
         flattened_masked = _process_state.m_flattened_data_table;
     } else {
-        flattened_masked = 
-            _process_state.m_flattened_data_table->clone(existed_mask);
+        flattened_masked
+            = _process_state.m_flattened_data_table->clone(existed_mask);
     }
 
     PSP_GNODE_VERIFY_TABLE(flattened_masked);
 
-    #ifdef PSP_GNODE_VERIFY
+#ifdef PSP_GNODE_VERIFY
     {
         auto updated_table = get_table();
         PSP_GNODE_VERIFY_TABLE(updated_table);
     }
-    #endif
+#endif
 
     m_gstate->update_master_table(flattened_masked.get());
 
-    #ifdef PSP_GNODE_VERIFY
+#ifdef PSP_GNODE_VERIFY
     {
         auto updated_table = get_table();
         PSP_GNODE_VERIFY_TABLE(updated_table);
     }
-    #endif
+#endif
 
     m_oports[PSP_PORT_FLATTENED]->set_table(flattened_masked);
 
@@ -452,13 +486,9 @@ t_gnode::_process_table(t_uindex port_id) {
 
 template <>
 void
-t_gnode::_process_column<std::string>(
-    const t_column* fcolumn,
-    const t_column* scolumn,
-    t_column* dcolumn,
-    t_column* pcolumn,
-    t_column* ccolumn,
-    t_column* tcolumn,
+t_gnode::_process_column<std::string>(const t_column* fcolumn,
+    const t_column* scolumn, t_column* dcolumn, t_column* pcolumn,
+    t_column* ccolumn, t_column* tcolumn,
     const t_process_state& process_state) {
     pcolumn->borrow_vocabulary(*scolumn);
 
@@ -490,15 +520,15 @@ t_gnode::_process_column<std::string>(
 
                 bool exists = cur_valid;
                 bool prev_existed = row_pre_existed && prev_valid;
-                bool prev_cur_eq
-                    = prev_value && cur_value && strcmp(prev_value, cur_value) == 0;
+                bool prev_cur_eq = prev_value && cur_value
+                    && strcmp(prev_value, cur_value) == 0;
 
-                auto trans = calc_transition(prev_existed, row_pre_existed, exists, prev_valid,
-                    cur_valid, prev_cur_eq, prev_pkey_eq);
+                auto trans = calc_transition(prev_existed, row_pre_existed,
+                    exists, prev_valid, cur_valid, prev_cur_eq, prev_pkey_eq);
 
                 if (prev_valid) {
-                    pcolumn->set_nth<t_uindex>(
-                        added_count, *(scolumn->get_nth<t_uindex>(rlookup.m_idx)));
+                    pcolumn->set_nth<t_uindex>(added_count,
+                        *(scolumn->get_nth<t_uindex>(rlookup.m_idx)));
                 }
 
                 pcolumn->set_valid(added_count, prev_valid);
@@ -511,13 +541,15 @@ t_gnode::_process_column<std::string>(
                     ccolumn->set_nth<const char*>(added_count, prev_value);
                 }
 
-                ccolumn->set_valid(added_count, cur_valid ? cur_valid : prev_valid);
+                ccolumn->set_valid(
+                    added_count, cur_valid ? cur_valid : prev_valid);
 
                 tcolumn->set_nth<std::uint8_t>(idx, trans);
             } break;
             case OP_DELETE: {
                 if (row_pre_existed) {
-                    auto prev_value = scolumn->get_nth<const char>(rlookup.m_idx);
+                    auto prev_value
+                        = scolumn->get_nth<const char>(rlookup.m_idx);
 
                     bool prev_valid = scolumn->is_valid(rlookup.m_idx);
 
@@ -529,10 +561,13 @@ t_gnode::_process_column<std::string>(
 
                     ccolumn->set_valid(added_count, prev_valid);
 
-                    tcolumn->set_nth<std::uint8_t>(added_count, VALUE_TRANSITION_NEQ_TDF);
+                    tcolumn->set_nth<std::uint8_t>(
+                        added_count, VALUE_TRANSITION_NEQ_TDF);
                 }
             } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unknown OP"); }
+            default: {
+                PSP_COMPLAIN_AND_ABORT("Unknown OP");
+            }
         }
     }
 }
@@ -543,7 +578,8 @@ t_gnode::send(t_uindex port_id, const t_data_table& fragments) {
     PSP_VERBOSE_ASSERT(m_init, "Cannot `send` to an uninited gnode.");
 
     if (m_input_ports.count(port_id) == 0) {
-        std::cerr << "Cannot send table to port `" << port_id << "`, which does not exist." << std::endl;
+        std::cerr << "Cannot send table to port `" << port_id
+                  << "`, which does not exist." << std::endl;
         return;
     }
 
@@ -587,7 +623,8 @@ t_data_table*
 t_gnode::_get_itable(t_uindex port_id) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "Cannot `_get_itable` on an uninited gnode.");
-    PSP_VERBOSE_ASSERT(m_input_ports.count(port_id) != 0, "Invalid port number");
+    PSP_VERBOSE_ASSERT(
+        m_input_ports.count(port_id) != 0, "Invalid port number");
     return m_input_ports[port_id]->get_table().get();
 }
 
@@ -651,24 +688,22 @@ t_gnode::set_ctx_state(void* ptr) {
     ctx->set_state(m_gstate);
 }
 
-
 template <>
 void
-t_gnode::update_context_from_state(
-    t_ctxunit* ctx,
-    const std::string& name,
+t_gnode::update_context_from_state(t_ctxunit* ctx, const std::string& name,
     std::shared_ptr<t_data_table> flattened) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    PSP_VERBOSE_ASSERT(
-        m_mode == NODE_PROCESSING_SIMPLE_DATAFLOW, "Only simple dataflows supported currently")
+    PSP_VERBOSE_ASSERT(m_mode == NODE_PROCESSING_SIMPLE_DATAFLOW,
+        "Only simple dataflows supported currently")
 
-    if (flattened->size() == 0) return;
+    if (flattened->size() == 0)
+        return;
 
     // Need to cast shared ptr to a const reference before passing to notify,
     // reference is valid as `notify` is not async
-    const t_data_table& const_flattened = 
-        const_cast<const t_data_table&>(*flattened);
+    const t_data_table& const_flattened
+        = const_cast<const t_data_table&>(*flattened);
 
     ctx->step_begin();
     ctx->notify(const_flattened);
@@ -694,8 +729,8 @@ t_gnode::_update_contexts_from_state(std::shared_ptr<t_data_table> tbl) {
         count++;
     }
 
-    auto update_contexts_helper = 
-        [this, &context_names, &context_handles, &tbl](t_index ctx_idx) {
+    auto update_contexts_helper = [this, &context_names, &context_handles,
+                                      &tbl](t_index ctx_idx) {
         const std::string& name = context_names[ctx_idx];
         const t_ctx_handle& ctxh = context_handles[ctx_idx];
 
@@ -727,63 +762,58 @@ t_gnode::_update_contexts_from_state(std::shared_ptr<t_data_table> tbl) {
                 ctx->reset(false);
                 update_context_from_state<t_ctx_grouped_pkey>(ctx, name, tbl);
             } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
+            default: {
+                PSP_COMPLAIN_AND_ABORT("Unexpected context type");
+            } break;
         }
     };
 
-    #ifdef PSP_PARALLEL_FOR
+#ifdef PSP_PARALLEL_FOR
     tbb::parallel_for(0, int(num_contexts), 1,
         [&update_contexts_helper](int ctx_idx)
-    #else
+#else
     for (t_index ctx_idx = 0; ctx_idx < num_contexts; ++ctx_idx)
-    #endif
+#endif
         { update_contexts_helper(ctx_idx); }
-    #ifdef PSP_PARALLEL_FOR
-        );
-    #endif
+#ifdef PSP_PARALLEL_FOR
+    );
+#endif
 }
-
 
 /**
  * @brief Separate `notify_context` for `t_ctxunit` as it does not need to
  * compute any expressions.
- * 
- * @tparam  
- * @param flattened 
- * @param ctxh 
- * @param name 
+ *
+ * @tparam
+ * @param flattened
+ * @param ctxh
+ * @param name
  */
 template <>
 void
-t_gnode::notify_context<t_ctxunit>(
-    std::shared_ptr<t_data_table> flattened,
-    const t_ctx_handle& ctxh,
-    const std::string& name) {
+t_gnode::notify_context<t_ctxunit>(std::shared_ptr<t_data_table> flattened,
+    const t_ctx_handle& ctxh, const std::string& name) {
     t_ctxunit* ctx = ctxh.get<t_ctxunit>();
-    
+
     std::shared_ptr<t_data_table> delta = m_oports[PSP_PORT_DELTA]->get_table();
     std::shared_ptr<t_data_table> prev = m_oports[PSP_PORT_PREV]->get_table();
-    std::shared_ptr<t_data_table> current = m_oports[PSP_PORT_CURRENT]->get_table();
-    std::shared_ptr<t_data_table> transitions = m_oports[PSP_PORT_TRANSITIONS]->get_table();
-    const t_data_table& existed = *(m_oports[PSP_PORT_EXISTED]->get_table().get());
+    std::shared_ptr<t_data_table> current
+        = m_oports[PSP_PORT_CURRENT]->get_table();
+    std::shared_ptr<t_data_table> transitions
+        = m_oports[PSP_PORT_TRANSITIONS]->get_table();
+    const t_data_table& existed
+        = *(m_oports[PSP_PORT_EXISTED]->get_table().get());
 
     ctx->step_begin();
 
     // pass the tables as const references - the destructors for all of the
     // joined tables will be called after this function finishes executing,
     // as the contexts do not retain a reference to these tables.
-    ctx->notify(
-        *(flattened.get()),
-        *(delta.get()),
-        *(prev.get()),
-        *(current.get()),
-        *(transitions.get()),
-        existed
-    );
+    ctx->notify(*(flattened.get()), *(delta.get()), *(prev.get()),
+        *(current.get()), *(transitions.get()), existed);
 
     ctx->step_end();
 }
-
 
 std::vector<std::string>
 t_gnode::get_registered_contexts() const {
@@ -816,7 +846,9 @@ t_gnode::get_registered_contexts() const {
                 auto ctx = static_cast<const t_ctx_grouped_pkey*>(ctxh.m_ctx);
                 ss << ctx->repr() << ")";
             } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
+            default: {
+                PSP_COMPLAIN_AND_ABORT("Unexpected context type");
+            } break;
         }
 
         rval.push_back(ss.str());
@@ -826,7 +858,8 @@ t_gnode::get_registered_contexts() const {
 }
 
 void
-t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_t ptr) {
+t_gnode::_register_context(
+    const std::string& name, t_ctx_type type, std::int64_t ptr) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     void* ptr_ = reinterpret_cast<void*>(ptr);
@@ -888,10 +921,13 @@ t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_
 
             if (should_update) {
                 ctx->compute_expressions(pkeyed_table);
-                update_context_from_state<t_ctx_grouped_pkey>(ctx, name, pkeyed_table);
+                update_context_from_state<t_ctx_grouped_pkey>(
+                    ctx, name, pkeyed_table);
             }
         } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Unexpected context type");
+        } break;
     }
 }
 
@@ -908,7 +944,7 @@ void
 t_gnode::notify_contexts(std::shared_ptr<t_data_table> flattened) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    
+
     t_index num_contexts = m_contexts.size();
     std::vector<std::string> context_names(num_contexts);
     std::vector<t_ctx_handle> ctxhvec(num_contexts);
@@ -921,40 +957,43 @@ t_gnode::notify_contexts(std::shared_ptr<t_data_table> flattened) {
         ctxh_count++;
     }
 
-    auto notify_context_helper = [this, &context_names, &ctxhvec, &flattened](t_index ctx_idx) {
-        const std::string& name = context_names[ctx_idx];
-        const t_ctx_handle& ctxh = ctxhvec[ctx_idx];
+    auto notify_context_helper
+        = [this, &context_names, &ctxhvec, &flattened](t_index ctx_idx) {
+              const std::string& name = context_names[ctx_idx];
+              const t_ctx_handle& ctxh = ctxhvec[ctx_idx];
 
-        switch (ctxh.get_type()) {
-            case TWO_SIDED_CONTEXT: {
-                notify_context<t_ctx2>(flattened, ctxh, name);
-            } break;
-            case ONE_SIDED_CONTEXT: {
-                notify_context<t_ctx1>(flattened, ctxh, name);
-            } break;
-            case ZERO_SIDED_CONTEXT: {
-                notify_context<t_ctx0>(flattened, ctxh, name);
-            } break;
-            case UNIT_CONTEXT: {
-                notify_context<t_ctxunit>(flattened, ctxh, name);
-            } break;
-            case GROUPED_PKEY_CONTEXT: {
-                notify_context<t_ctx_grouped_pkey>(flattened, ctxh, name);
-            } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
-        }
-    };
+              switch (ctxh.get_type()) {
+                  case TWO_SIDED_CONTEXT: {
+                      notify_context<t_ctx2>(flattened, ctxh, name);
+                  } break;
+                  case ONE_SIDED_CONTEXT: {
+                      notify_context<t_ctx1>(flattened, ctxh, name);
+                  } break;
+                  case ZERO_SIDED_CONTEXT: {
+                      notify_context<t_ctx0>(flattened, ctxh, name);
+                  } break;
+                  case UNIT_CONTEXT: {
+                      notify_context<t_ctxunit>(flattened, ctxh, name);
+                  } break;
+                  case GROUPED_PKEY_CONTEXT: {
+                      notify_context<t_ctx_grouped_pkey>(flattened, ctxh, name);
+                  } break;
+                  default: {
+                      PSP_COMPLAIN_AND_ABORT("Unexpected context type");
+                  } break;
+              }
+          };
 
-    #ifdef PSP_PARALLEL_FOR
+#ifdef PSP_PARALLEL_FOR
     tbb::parallel_for(0, int(num_contexts), 1,
         [&notify_context_helper](int ctx_idx)
-    #else
+#else
     for (t_index ctx_idx = 0; ctx_idx < num_contexts; ++ctx_idx)
-    #endif
+#endif
         { notify_context_helper(ctx_idx); }
-    #ifdef PSP_PARALLEL_FOR
-        );
-    #endif
+#ifdef PSP_PARALLEL_FOR
+    );
+#endif
 }
 
 /******************************************************************************
@@ -980,24 +1019,30 @@ t_gnode::_compute_expressions(std::shared_ptr<t_data_table> flattened_masked) {
                 ctx->compute_expressions(flattened_masked);
             } break;
             case GROUPED_PKEY_CONTEXT: {
-                t_ctx_grouped_pkey* ctx = static_cast<t_ctx_grouped_pkey*>(ctxh.m_ctx);
+                t_ctx_grouped_pkey* ctx
+                    = static_cast<t_ctx_grouped_pkey*>(ctxh.m_ctx);
                 ctx->compute_expressions(flattened_masked);
             } break;
-            case UNIT_CONTEXT: break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
+            case UNIT_CONTEXT:
+                break;
+            default: {
+                PSP_COMPLAIN_AND_ABORT("Unexpected context type");
+            } break;
         }
     }
 }
 
 void
-t_gnode::_compute_expressions(
-    std::shared_ptr<t_data_table> master,
+t_gnode::_compute_expressions(std::shared_ptr<t_data_table> master,
     std::shared_ptr<t_data_table> flattened) {
     std::shared_ptr<t_data_table> delta = m_oports[PSP_PORT_DELTA]->get_table();
     std::shared_ptr<t_data_table> prev = m_oports[PSP_PORT_PREV]->get_table();
-    std::shared_ptr<t_data_table> current = m_oports[PSP_PORT_CURRENT]->get_table();
-    std::shared_ptr<t_data_table> transitions = m_oports[PSP_PORT_TRANSITIONS]->get_table();
-    std::shared_ptr<t_data_table> existed = m_oports[PSP_PORT_EXISTED]->get_table();
+    std::shared_ptr<t_data_table> current
+        = m_oports[PSP_PORT_CURRENT]->get_table();
+    std::shared_ptr<t_data_table> transitions
+        = m_oports[PSP_PORT_TRANSITIONS]->get_table();
+    std::shared_ptr<t_data_table> existed
+        = m_oports[PSP_PORT_EXISTED]->get_table();
 
     for (const auto& iter : m_contexts) {
         const t_ctx_handle& ctxh = iter.second;
@@ -1005,26 +1050,30 @@ t_gnode::_compute_expressions(
         switch (ctxh.get_type()) {
             case TWO_SIDED_CONTEXT: {
                 t_ctx2* ctx = static_cast<t_ctx2*>(ctxh.m_ctx);
-                ctx->compute_expressions(
-                    master, flattened, delta, prev, current, transitions, existed);
+                ctx->compute_expressions(master, flattened, delta, prev,
+                    current, transitions, existed);
             } break;
             case ONE_SIDED_CONTEXT: {
                 t_ctx1* ctx = static_cast<t_ctx1*>(ctxh.m_ctx);
-                ctx->compute_expressions(
-                    master, flattened, delta, prev, current, transitions, existed);
+                ctx->compute_expressions(master, flattened, delta, prev,
+                    current, transitions, existed);
             } break;
             case ZERO_SIDED_CONTEXT: {
                 t_ctx0* ctx = static_cast<t_ctx0*>(ctxh.m_ctx);
-                ctx->compute_expressions(
-                    master, flattened, delta, prev, current, transitions, existed);
+                ctx->compute_expressions(master, flattened, delta, prev,
+                    current, transitions, existed);
             } break;
             case GROUPED_PKEY_CONTEXT: {
-                t_ctx_grouped_pkey* ctx = static_cast<t_ctx_grouped_pkey*>(ctxh.m_ctx);
-                ctx->compute_expressions(
-                    master, flattened, delta, prev, current, transitions, existed);
+                t_ctx_grouped_pkey* ctx
+                    = static_cast<t_ctx_grouped_pkey*>(ctxh.m_ctx);
+                ctx->compute_expressions(master, flattened, delta, prev,
+                    current, transitions, existed);
             } break;
-            case UNIT_CONTEXT: break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
+            case UNIT_CONTEXT:
+                break;
+            default: {
+                PSP_COMPLAIN_AND_ABORT("Unexpected context type");
+            } break;
         }
     }
 }
@@ -1053,19 +1102,23 @@ t_gnode::get_pivots() const {
             case TWO_SIDED_CONTEXT: {
                 const t_ctx2* ctx = static_cast<const t_ctx2*>(ctxh.m_ctx);
                 auto pivots = ctx->get_pivots();
-                rval.insert(std::end(rval), std::begin(pivots), std::end(pivots));
+                rval.insert(
+                    std::end(rval), std::begin(pivots), std::end(pivots));
             } break;
             case ONE_SIDED_CONTEXT: {
                 const t_ctx1* ctx = static_cast<const t_ctx1*>(ctxh.m_ctx);
                 auto pivots = ctx->get_pivots();
-                rval.insert(std::end(rval), std::begin(pivots), std::end(pivots));
+                rval.insert(
+                    std::end(rval), std::begin(pivots), std::end(pivots));
             } break;
             case UNIT_CONTEXT:
             case ZERO_SIDED_CONTEXT:
             case GROUPED_PKEY_CONTEXT: {
                 // no pivots
             } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
+            default: {
+                PSP_COMPLAIN_AND_ABORT("Unexpected context type");
+            } break;
         }
     }
 
@@ -1086,7 +1139,8 @@ t_gnode::get_trees() {
         switch (ctxh.m_ctx_type) {
             // `get_trees()` not implemented, as unit contexts have no
             // traversal of their own.
-            case UNIT_CONTEXT: break;
+            case UNIT_CONTEXT:
+                break;
             case TWO_SIDED_CONTEXT: {
                 auto ctx = reinterpret_cast<t_ctx2*>(ctxh.m_ctx);
                 auto trees = ctx->get_trees();
@@ -1107,7 +1161,9 @@ t_gnode::get_trees() {
                 auto trees = ctx->get_trees();
                 rval.insert(rval.end(), std::begin(trees), std::end(trees));
             } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
+            default: {
+                PSP_COMPLAIN_AND_ABORT("Unexpected context type");
+            } break;
         }
     }
     return rval;
@@ -1185,7 +1241,9 @@ t_gnode::get_contexts_last_updated() const {
                     rval.push_back(kv.first);
                 }
             } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
+            default: {
+                PSP_COMPLAIN_AND_ABORT("Unexpected context type");
+            } break;
         }
     }
 
@@ -1231,7 +1289,9 @@ t_gnode::reset() {
                 auto ctx = reinterpret_cast<t_ctx_grouped_pkey*>(ctxh.m_ctx);
                 ctx->reset();
             } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
+            default: {
+                PSP_COMPLAIN_AND_ABORT("Unexpected context type");
+            } break;
         }
     }
 
@@ -1281,34 +1341,44 @@ t_gnode::repr() const {
 }
 
 #ifdef PSP_ENABLE_PYTHON
-void 
+void
 t_gnode::set_event_loop_thread_id(std::thread::id id) {
     m_event_loop_thread_id = id;
 }
 #endif
 
 void
-t_gnode::register_context(const std::string& name, std::shared_ptr<t_ctxunit> ctx) {
-    _register_context(name, UNIT_CONTEXT, reinterpret_cast<std::int64_t>(ctx.get()));
+t_gnode::register_context(
+    const std::string& name, std::shared_ptr<t_ctxunit> ctx) {
+    _register_context(
+        name, UNIT_CONTEXT, reinterpret_cast<std::int64_t>(ctx.get()));
 }
 
 void
-t_gnode::register_context(const std::string& name, std::shared_ptr<t_ctx0> ctx) {
-    _register_context(name, ZERO_SIDED_CONTEXT, reinterpret_cast<std::int64_t>(ctx.get()));
+t_gnode::register_context(
+    const std::string& name, std::shared_ptr<t_ctx0> ctx) {
+    _register_context(
+        name, ZERO_SIDED_CONTEXT, reinterpret_cast<std::int64_t>(ctx.get()));
 }
 
 void
-t_gnode::register_context(const std::string& name, std::shared_ptr<t_ctx1> ctx) {
-    _register_context(name, ONE_SIDED_CONTEXT, reinterpret_cast<std::int64_t>(ctx.get()));
+t_gnode::register_context(
+    const std::string& name, std::shared_ptr<t_ctx1> ctx) {
+    _register_context(
+        name, ONE_SIDED_CONTEXT, reinterpret_cast<std::int64_t>(ctx.get()));
 }
 
 void
-t_gnode::register_context(const std::string& name, std::shared_ptr<t_ctx2> ctx) {
-    _register_context(name, TWO_SIDED_CONTEXT, reinterpret_cast<std::int64_t>(ctx.get()));
+t_gnode::register_context(
+    const std::string& name, std::shared_ptr<t_ctx2> ctx) {
+    _register_context(
+        name, TWO_SIDED_CONTEXT, reinterpret_cast<std::int64_t>(ctx.get()));
 }
 void
-t_gnode::register_context(const std::string& name, std::shared_ptr<t_ctx_grouped_pkey> ctx) {
-    _register_context(name, GROUPED_PKEY_CONTEXT, reinterpret_cast<std::int64_t>(ctx.get()));
+t_gnode::register_context(
+    const std::string& name, std::shared_ptr<t_ctx_grouped_pkey> ctx) {
+    _register_context(
+        name, GROUPED_PKEY_CONTEXT, reinterpret_cast<std::int64_t>(ctx.get()));
 }
 
 } // end namespace perspective

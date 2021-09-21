@@ -15,15 +15,15 @@ module.exports = {
     mode: "development",
     devtool: "source-map",
     resolve: {
-        extensions: [".ts", ".tsx", ".js"]
+        extensions: [".ts", ".tsx", ".js"],
     },
 
     plugins: [
         new HtmlWebPackPlugin({
             title: "Perspective React Example",
-            template: "./src/index.html"
+            template: "./src/index.html",
         }),
-        new PerspectivePlugin()
+        new PerspectivePlugin(),
     ],
 
     module: {
@@ -31,16 +31,19 @@ module.exports = {
             {
                 test: /\.ts(x?)$/,
                 exclude: /node_modules/,
-                loader: "ts-loader"
+                loader: "ts-loader",
             },
             {
                 test: /\.css$/,
                 exclude: /node_modules/,
-                use: [{loader: "style-loader"}, {loader: "css-loader"}]
-            }
-        ]
+                use: [{loader: "style-loader"}, {loader: "css-loader"}],
+            },
+        ],
     },
     devServer: {
-        contentBase: [path.join(__dirname, "dist"), path.join(__dirname, "../../node_modules/superstore-arrow")]
-    }
+        contentBase: [
+            path.join(__dirname, "dist"),
+            path.join(__dirname, "../../node_modules/superstore-arrow"),
+        ],
+    },
 };

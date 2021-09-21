@@ -28,8 +28,8 @@ fop_apply(const t_data_table& tbl, const std::string& colname, t_mask& mask,
 
 template <typename CTYPE_T, int DTYPE_T>
 void
-apply_filters_helper(const t_data_table& tbl, const std::string& column, t_mask& mask,
-    t_tscalar threshold, const t_fterm& filter) {
+apply_filters_helper(const t_data_table& tbl, const std::string& column,
+    t_mask& mask, t_tscalar threshold, const t_fterm& filter) {
     CTYPE_T thr = threshold.get<CTYPE_T>();
 
     switch (filter.m_op) {
@@ -95,10 +95,13 @@ apply_filters_helper(const t_data_table& tbl, const std::string& column, t_mask&
 
                 tbl, column, mask, values);
         } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Unknown filter_op detected"); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Unknown filter_op detected");
+        }
     };
 }
 
-t_mask apply_filters(const t_data_table& tbl, const std::vector<t_fterm>& filters);
+t_mask apply_filters(
+    const t_data_table& tbl, const std::vector<t_fterm>& filters);
 
 } // end namespace perspective

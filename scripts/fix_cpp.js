@@ -15,10 +15,8 @@ function lint(dir) {
 }
 
 try {
-    if (!process.env.PACKAGE || minimatch("perspective", process.env.PACKAGE)) {
-        lint(path`./cpp/perspective/src/cpp/*.cpp`);
-        lint(path`./cpp/perspective/src/include/perspective/*.h`);
-    }
+    lint(path`./cpp/perspective/src/cpp/*.cpp`);
+    lint(path`./cpp/perspective/src/include/perspective/*.h`);
 } catch (e) {
     console.error(e.message);
     process.exit(1);

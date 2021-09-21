@@ -32,8 +32,8 @@ t_expression_tables::t_expression_tables(
         "", "", schema, DEFAULT_EMPTY_CAPACITY, BACKING_STORE_MEMORY);
     m_delta = std::make_shared<t_data_table>(
         "", "", schema, DEFAULT_EMPTY_CAPACITY, BACKING_STORE_MEMORY);
-    m_transitions = std::make_shared<t_data_table>(
-        "", "", transitions_schema, DEFAULT_EMPTY_CAPACITY, BACKING_STORE_MEMORY);
+    m_transitions = std::make_shared<t_data_table>("", "", transitions_schema,
+        DEFAULT_EMPTY_CAPACITY, BACKING_STORE_MEMORY);
 
     m_master->init();
     m_flattened->init();
@@ -44,10 +44,12 @@ t_expression_tables::t_expression_tables(
 }
 
 void
-t_expression_tables::calculate_transitions(std::shared_ptr<t_data_table> existed) {
+t_expression_tables::calculate_transitions(
+    std::shared_ptr<t_data_table> existed) {
     const t_schema& schema = m_transitions->get_schema();
     const std::vector<std::string>& column_names = schema.m_columns;
-    const t_column& existed_column = *(existed->get_const_column("psp_existed"));
+    const t_column& existed_column
+        = *(existed->get_const_column("psp_existed"));
 
     auto num_cols = column_names.size();
 
@@ -60,9 +62,11 @@ t_expression_tables::calculate_transitions(std::shared_ptr<t_data_table> existed
         {
             const std::string& cname = column_names[cidx];
             const t_column& prev_column = *(m_prev->get_const_column(cname));
-            const t_column& current_column = *(m_current->get_const_column(cname));
-            std::shared_ptr<t_column> transition_column = m_transitions->get_column(cname);
-            
+            const t_column& current_column
+                = *(m_current->get_const_column(cname));
+            std::shared_ptr<t_column> transition_column
+                = m_transitions->get_column(cname);
+
             for (t_uindex ridx = 0; ridx < transition_column->size(); ++ridx) {
                 bool row_existed = existed_column.get_nth<bool>(ridx);
 
@@ -71,7 +75,8 @@ t_expression_tables::calculate_transitions(std::shared_ptr<t_data_table> existed
 
                 bool prev_valid = prev_column.is_valid(ridx);
                 bool curr_valid = current_column.is_valid(ridx);
-                bool prev_curr_eq = prev_valid && curr_value && prev_value == curr_value;
+                bool prev_curr_eq
+                    = prev_valid && curr_value && prev_value == curr_value;
 
                 t_value_transition transition;
 

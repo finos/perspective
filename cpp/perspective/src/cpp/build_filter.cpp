@@ -61,7 +61,9 @@ apply_filters(const t_data_table& tbl, const std::vector<t_fterm>& filters) {
                     apply_filters_helper<std::int64_t, DTYPE_TIME>(
                         tbl, column, mask, threshold, filter);
                 } break;
-                default: { PSP_COMPLAIN_AND_ABORT("Unknown dtype"); }
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Unknown dtype");
+                }
             }
         }
     }

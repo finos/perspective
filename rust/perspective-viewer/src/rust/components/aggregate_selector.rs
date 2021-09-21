@@ -12,7 +12,8 @@ use crate::session::*;
 
 use crate::*;
 
-use std::str::FromStr;
+use super::containers::dropdown::*;
+
 use yew::prelude::*;
 
 #[derive(Properties, Clone)]
@@ -32,13 +33,44 @@ impl PartialEq for AggregateSelectorProps {
 }
 
 impl AggregateSelectorProps {
-    pub fn set_aggregate(&self, aggregate: Aggregate) {
+    pub fn set_aggregate(&mut self, aggregate: Aggregate) {
+        self.aggregate = Some(aggregate.clone());
         let ViewConfig { mut aggregates, .. } = self.session.get_view_config();
         aggregates.insert(self.column.clone(), aggregate);
         self.update_and_render(ViewConfigUpdate {
             aggregates: Some(aggregates),
             ..ViewConfigUpdate::default()
         });
+    }
+
+    pub fn get_dropdown_aggregates(&self) -> Vec<DropDownItem<Aggregate>> {
+        let aggregates = self
+            .session
+            .metadata()
+            .get_column_aggregates(&self.column)
+            .expect("Bad Aggs")
+            .collect::<Vec<_>>();
+
+        let multi_aggregates = aggregates
+            .iter()
+            .filter(|x| matches!(x, Aggregate::MultiAggregate(_, _)))
+            .cloned()
+            .collect::<Vec<_>>();
+
+        let multi_aggregates2 = if !multi_aggregates.is_empty() {
+            vec![DropDownItem::OptGroup("weighted mean", multi_aggregates)]
+        } else {
+            vec![]
+        };
+
+        let s = aggregates
+            .iter()
+            .filter(|x| matches!(x, Aggregate::SingleAggregate(_)))
+            .cloned()
+            .map(DropDownItem::Option)
+            .chain(multi_aggregates2);
+
+        s.collect::<Vec<_>>()
     }
 }
 
@@ -49,6 +81,7 @@ pub enum AggregateSelectorMsg {
 pub struct AggregateSelector {
     props: AggregateSelectorProps,
     link: ComponentLink<AggregateSelector>,
+    aggregates: Vec<DropDownItem<Aggregate>>,
 }
 
 impl Component for AggregateSelector {
@@ -56,7 +89,12 @@ impl Component for AggregateSelector {
     type Properties = AggregateSelectorProps;
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        AggregateSelector { props, link }
+        let aggregates = props.get_dropdown_aggregates();
+        AggregateSelector {
+            props,
+            link,
+            aggregates,
+        }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
@@ -70,55 +108,40 @@ impl Component for AggregateSelector {
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
         let should_render = self.props != props;
-        self.props = props;
+        if should_render {
+            self.props = props;
+            self.aggregates = self.props.get_dropdown_aggregates();
+        }
+
         should_render
     }
 
     fn view(&self) -> Html {
-        let callback = self.link.callback(|data: ChangeData| match data {
-            ChangeData::Select(e) => {
-                AggregateSelectorMsg::SetAggregate(Aggregate::SingleAggregate(
-                    SingleAggregate::from_str(e.value().as_str()).unwrap(),
-                ))
-            }
-            ChangeData::Value(x) => {
-                AggregateSelectorMsg::SetAggregate(Aggregate::SingleAggregate(
-                    SingleAggregate::from_str(x.as_str()).unwrap(),
-                ))
-            }
-            ChangeData::Files(_) => panic!("No idea ..."),
-        });
-
-        let session = &self.props.session;
-        let coltype = session
-            .metadata()
-            .get_column_table_type(&self.props.column)
+        let callback = self.link.callback(AggregateSelectorMsg::SetAggregate);
+        let selected_agg = self
+            .props
+            .aggregate
+            .clone()
+            .or_else(|| {
+                self.props
+                    .session
+                    .metadata()
+                    .get_column_table_type(&self.props.column)
+                    .map(|x| x.default_aggregate())
+            })
             .unwrap();
-        let aggregates = coltype.aggregates_iter();
+
+        let values = self.aggregates.clone();
 
         html! {
             <div class="aggregate-selector-wrapper">
-                <select
-                    class="aggregate-selector noselect"
-                    onchange={ callback }>
+                <DropDown<Aggregate>
+                    class={ "aggregate-selector" }
+                    values={ values }
+                    selected={ selected_agg }
+                    on_select={ callback }>
 
-                    {
-                        for aggregates.map(|value| {
-                            let selected = value == self.props.aggregate.clone().unwrap_or_else(|| {
-                                coltype.aggregates_iter().next().unwrap()
-                            });
-
-                            html! {
-                                <option
-                                    selected={ selected }
-                                    value={ format!("{}", value) }>
-
-                                    { format!("{}", value) }
-                                </option>
-                            }
-                        })
-                    }
-                </select>
+                </DropDown<Aggregate>>
             </div>
         }
     }

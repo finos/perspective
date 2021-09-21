@@ -62,8 +62,9 @@ t_lstore_recipe::t_lstore_recipe(t_uindex capacity)
     LOG_CONSTRUCTOR("t_lstore_recipe");
 }
 
-t_lstore_recipe::t_lstore_recipe(const std::string& dirname, const std::string& colname,
-    t_uindex capacity, t_backing_store backing_store)
+t_lstore_recipe::t_lstore_recipe(const std::string& dirname,
+    const std::string& colname, t_uindex capacity,
+    t_backing_store backing_store)
     : m_dirname(dirname)
     , m_colname(colname)
     , m_capacity(capacity)
@@ -80,9 +81,10 @@ t_lstore_recipe::t_lstore_recipe(const std::string& dirname, const std::string& 
     LOG_CONSTRUCTOR("t_lstore_recipe");
 }
 
-t_lstore_recipe::t_lstore_recipe(const std::string& dirname, const std::string& colname,
-    t_uindex capacity, t_fflag fflags, t_fflag fmode, t_fflag creation_disposition,
-    t_fflag mprot, t_fflag mflags, t_backing_store backing_store)
+t_lstore_recipe::t_lstore_recipe(const std::string& dirname,
+    const std::string& colname, t_uindex capacity, t_fflag fflags,
+    t_fflag fmode, t_fflag creation_disposition, t_fflag mprot, t_fflag mflags,
+    t_backing_store backing_store)
     : m_dirname(dirname)
     , m_colname(colname)
     , m_capacity(capacity)
@@ -99,8 +101,8 @@ t_lstore_recipe::t_lstore_recipe(const std::string& dirname, const std::string& 
     LOG_CONSTRUCTOR("t_lstore_recipe");
 }
 
-t_lstore_recipe::t_lstore_recipe(const std::string& colname, t_uindex capacity, t_fflag mprot,
-    t_fflag mflags, t_backing_store backing_store)
+t_lstore_recipe::t_lstore_recipe(const std::string& colname, t_uindex capacity,
+    t_fflag mprot, t_fflag mflags, t_backing_store backing_store)
     : m_dirname("")
     , m_colname(colname)
     , m_capacity(capacity)
@@ -131,7 +133,8 @@ t_lstore::t_lstore()
     PSP_TRACE_SENTINEL();
     LOG_CONSTRUCTOR("t_lstore");
 #ifdef PSP_MPROTECT
-    PSP_VERBOSE_ASSERT(sizeof(t_lstore) == get_page_size(), "Bad lstore sizeof");
+    PSP_VERBOSE_ASSERT(
+        sizeof(t_lstore) == get_page_size(), "Bad lstore sizeof");
 #endif
 }
 
@@ -151,7 +154,8 @@ t_lstore::t_lstore(const t_lstore& s, t_lstore_tmp_init_tag t) {
     init();
     set_size(s.size());
 #ifdef PSP_MPROTECT
-    PSP_VERBOSE_ASSERT(sizeof(t_lstore) == get_page_size(), "Bad lstore sizeof");
+    PSP_VERBOSE_ASSERT(
+        sizeof(t_lstore) == get_page_size(), "Bad lstore sizeof");
     freeze_impl();
 #endif
 }
@@ -247,7 +251,9 @@ t_lstore::~t_lstore() {
             unfreeze_impl();
 #endif
         } break;
-        default: { PSP_VERBOSE_ASSERT(false, "Unknown backing store"); } break;
+        default: {
+            PSP_VERBOSE_ASSERT(false, "Unknown backing store");
+        } break;
     }
 }
 
@@ -278,8 +284,8 @@ t_lstore::init() {
             m_base = create_mapping();
         } break;
         case BACKING_STORE_MEMORY: {
-            size_t const alloc_size
-                = std::max(std::max(size_t(m_alignment), size_t(8u)), size_t(capacity()));
+            size_t const alloc_size = std::max(
+                std::max(size_t(m_alignment), size_t(8u)), size_t(capacity()));
 
             if (m_alignment < 2) {
                 m_base = calloc(alloc_size, 1);
@@ -291,20 +297,23 @@ t_lstore::init() {
 #ifdef _MSC_VER
                 m_base = _aligned_malloc(alloc_size, size_t(m_alignment));
 #else
-                int result = posix_memalign(
-                    &m_base, std::max(sizeof(void*), size_t(m_alignment)), alloc_size);
+                int result = posix_memalign(&m_base,
+                    std::max(sizeof(void*), size_t(m_alignment)), alloc_size);
                 if (result != 0)
                     m_base = nullptr;
 #endif
 
                 PSP_VERBOSE_ASSERT(m_base,
-                    "MALLOC_FAILED"); // ensure we check before trying to memset() in this case
+                    "MALLOC_FAILED"); // ensure we check before trying to
+                                      // memset() in this case
                 memset(m_base, 0, alloc_size);
             }
 
             PSP_VERBOSE_ASSERT(m_base, "MALLOC_FAILED");
         } break;
-        default: { PSP_VERBOSE_ASSERT(false, "Unknown backing store"); } break;
+        default: {
+            PSP_VERBOSE_ASSERT(false, "Unknown backing store");
+        } break;
     }
 
     m_init = true;
@@ -327,7 +336,8 @@ t_lstore::reserve_impl(t_uindex capacity, bool allow_shrink) {
     if ((capacity < m_capacity) && !allow_shrink)
         return;
 
-    PSP_VERBOSE_ASSERT(capacity >= m_size, "reduce size before reducing capacity!");
+    PSP_VERBOSE_ASSERT(
+        capacity >= m_size, "reduce size before reducing capacity!");
     capacity = std::max(capacity, m_size);
 
     capacity = 4 * std::uint64_t(ceil(double(capacity * m_resize_factor) / 4));
@@ -337,7 +347,8 @@ t_lstore::reserve_impl(t_uindex capacity, bool allow_shrink) {
     t_uindex ocapacity = m_capacity;
 
     if (t_env::log_storage_resize()) {
-        std::cout << repr() << " ocap => " << ocapacity << " ncap => " << capacity << std::endl;
+        std::cout << repr() << " ocap => " << ocapacity << " ncap => "
+                  << capacity << std::endl;
     }
 
     switch (m_backing_store) {
@@ -349,7 +360,8 @@ t_lstore::reserve_impl(t_uindex capacity, bool allow_shrink) {
             } else {
 // nontrivial alignment
 #if _MSC_VER
-                base = _aligned_realloc(m_base, size_t(capacity), size_t(m_alignment));
+                base = _aligned_realloc(
+                    m_base, size_t(capacity), size_t(m_alignment));
 #else
                 base = realloc(m_base, size_t(capacity));
 
@@ -361,7 +373,8 @@ t_lstore::reserve_impl(t_uindex capacity, bool allow_shrink) {
 
                     void* aligned_base = nullptr;
                     int result = posix_memalign(&aligned_base,
-                        std::max(sizeof(void*), size_t(m_alignment)), size_t(capacity));
+                        std::max(sizeof(void*), size_t(m_alignment)),
+                        size_t(capacity));
                     PSP_VERBOSE_ASSERT(result, == 0, "posix_memalign failed");
 
                     memcpy(aligned_base, base, ocapacity);
@@ -386,12 +399,14 @@ t_lstore::reserve_impl(t_uindex capacity, bool allow_shrink) {
             resize_mapping(capacity);
             ++m_version;
         } break;
-        default: { PSP_COMPLAIN_AND_ABORT("unknown backing medium"); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("unknown backing medium");
+        }
     }
 
     if (capacity > ocapacity) {
-        memset(
-            static_cast<unsigned char*>(m_base) + ocapacity, 0, size_t(capacity - ocapacity));
+        memset(static_cast<unsigned char*>(m_base) + ocapacity, 0,
+            size_t(capacity - ocapacity));
     }
 }
 
@@ -463,8 +478,8 @@ void
 t_lstore::push_back(const void* ptr, t_uindex len) {
     PSP_TRACE_SENTINEL();
     if (m_size + len >= m_capacity) {
-        reserve(static_cast<t_uindex>(
-            m_size + len)); // reserve() will multiply by m_resize_factor internally
+        reserve(static_cast<t_uindex>(m_size
+            + len)); // reserve() will multiply by m_resize_factor internally
     }
 
     PSP_VERBOSE_ASSERT(m_size + len < m_capacity, "Insufficient capacity.");
@@ -524,9 +539,10 @@ t_lstore::clear() {
 
 t_lstore_recipe
 t_lstore::get_recipe() const {
-    t_lstore_recipe rval(m_dirname, m_colname, m_capacity, PSP_DEFAULT_SHARED_RO_FFLAGS,
-        PSP_DEFAULT_SHARED_RO_FMODE, PSP_DEFAULT_SHARED_RO_CREATION_DISPOSITION,
-        PSP_DEFAULT_SHARED_RO_MPROT, PSP_DEFAULT_SHARED_RO_MFLAGS, m_backing_store);
+    t_lstore_recipe rval(m_dirname, m_colname, m_capacity,
+        PSP_DEFAULT_SHARED_RO_FFLAGS, PSP_DEFAULT_SHARED_RO_FMODE,
+        PSP_DEFAULT_SHARED_RO_CREATION_DISPOSITION, PSP_DEFAULT_SHARED_RO_MPROT,
+        PSP_DEFAULT_SHARED_RO_MFLAGS, m_backing_store);
     rval.m_fname = m_fname;
     rval.m_from_recipe = true;
     rval.m_size = m_size;
@@ -549,7 +565,8 @@ t_lstore::fill(const t_lstore& other, const t_mask& mask, t_uindex elem_size) {
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     reserve(mask.size() * elem_size);
 
-    PSP_VERBOSE_ASSERT(mask.size() * elem_size <= m_size, "Not enough space to fill");
+    PSP_VERBOSE_ASSERT(
+        mask.size() * elem_size <= m_size, "Not enough space to fill");
 
     t_uindex offset = 0;
 
@@ -558,7 +575,8 @@ t_lstore::fill(const t_lstore& other, const t_mask& mask, t_uindex elem_size) {
 
     for (t_uindex idx = 0, loop_end = mask.size(); idx < loop_end; ++idx) {
         if (mask.get(idx)) {
-            memcpy(dst_base + offset, src_base + idx * elem_size, size_t(elem_size));
+            memcpy(dst_base + offset, src_base + idx * elem_size,
+                size_t(elem_size));
             offset += elem_size;
         }
     }
@@ -572,7 +590,8 @@ t_lstore::pprint() const {
     t_uindex nelems = size() / sizeof(std::uint8_t);
     for (t_uindex idx = 0; idx < size() / nelems; ++idx) {
 
-        std::cout << idx << " => " << static_cast<t_uindex>(*(get_nth<std::uint8_t>(idx)))
+        std::cout << idx << " => "
+                  << static_cast<t_uindex>(*(get_nth<std::uint8_t>(idx)))
                   << std::endl;
     }
 }
@@ -592,7 +611,8 @@ py::array
 t_lstore::_as_numpy(t_dtype dtype) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    PSP_VERBOSE_ASSERT(dtype != DTYPE_STR, "as_numpy not implemented for string columns yet");
+    PSP_VERBOSE_ASSERT(
+        dtype != DTYPE_STR, "as_numpy not implemented for string columns yet");
 
     // TODO
     py::array result;

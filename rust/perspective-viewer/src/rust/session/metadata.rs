@@ -10,6 +10,8 @@ use crate::config::*;
 use crate::js::perspective::*;
 use crate::utils::*;
 
+use crate::*;
+
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::iter::IntoIterator;
@@ -209,5 +211,38 @@ impl SessionMetadata {
             .and_then(|meta| meta.view_schema.as_ref())
             .and_then(|schema| schema.get(name))
             .cloned()
+    }
+
+    pub fn get_column_aggregates<'a>(
+        &'a self,
+        name: &str,
+    ) -> Option<Box<dyn Iterator<Item = Aggregate> + 'a>> {
+        optionally! {
+            let coltype = self.get_column_table_type(name)?;
+            let aggregates = coltype.aggregates_iter();
+            Some(match coltype {
+                Type::Float | Type::Integer => {
+                    let num_cols = self
+                        .get_expression_columns()
+                        .into_iter()
+                        .chain(self.get_table_columns()?.into_iter())
+                        .map(move |name| {
+                            self.get_column_table_type(&name).map(|coltype|
+                                (name, coltype)
+                            )
+                        })
+                        .collect::<Option<Vec<_>>>()?
+                        .into_iter()
+                        .filter(|(_, coltype)| {
+                            *coltype == Type::Integer || *coltype == Type::Float
+                        })
+                        .map(|(name, _)| {
+                            Aggregate::MultiAggregate(MultiAggregate::WeightedMean, name)
+                        });
+                    Box::new(aggregates.chain(num_cols))
+                }
+                _ => aggregates,
+            })
+        }
     }
 }

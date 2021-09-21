@@ -44,22 +44,21 @@ class PERSPECTIVE_EXPORT t_computed_expression {
 public:
     PSP_NON_COPYABLE(t_computed_expression);
 
-    t_computed_expression(
-        const std::string& expression_alias,
+    t_computed_expression(const std::string& expression_alias,
         const std::string& expression_string,
         const std::string& parsed_expression_string,
         const std::vector<std::pair<std::string, std::string>>& column_ids,
         t_dtype dtype);
 
-    void compute(
-        std::shared_ptr<t_data_table> source_table,
+    void compute(std::shared_ptr<t_data_table> source_table,
         std::shared_ptr<t_data_table> destination_table,
         std::shared_ptr<t_vocab> vocab) const;
 
     const std::string& get_expression_alias() const;
     const std::string& get_expression_string() const;
     const std::string& get_parsed_expression_string() const;
-    const std::vector<std::pair<std::string, std::string>>& get_column_ids() const;
+    const std::vector<std::pair<std::string, std::string>>&
+    get_column_ids() const;
     t_dtype get_dtype() const;
 
 private:
@@ -80,7 +79,7 @@ public:
      * return a shared pointer to a new `t_computed_expression`. This method
      * will abort() if an input column is invalid or the expression cannot be
      * parsed.
-     * 
+     *
      * @param expression_alias an alias for the expression, which will become
      * the name of the new expression column on the table.
      * @param expression_string the expression, as the user typed it.
@@ -89,16 +88,15 @@ public:
      * intern(), etc.
      * @param column_ids A map of column IDs to column names, which is used to
      * properly access column names from the symbol table.
-     * @param schema 
-     * @return std::shared_ptr<t_computed_expression> 
+     * @param schema
+     * @return std::shared_ptr<t_computed_expression>
      */
     static std::shared_ptr<t_computed_expression> precompute(
         const std::string& expression_alias,
         const std::string& expression_string,
         const std::string& parsed_expression_string,
         const std::vector<std::pair<std::string, std::string>>& column_ids,
-        std::shared_ptr<t_schema> schema
-    );
+        std::shared_ptr<t_schema> schema);
 
     /**
      * @brief Returns the dtype of the given expression, or `DTYPE_NONE`
@@ -107,7 +105,7 @@ public:
      * to return a value, even if the expression cannot be parsed. If the
      * expression has an error in it, this function will return `DTYPE_NONE`
      * and the `error_string` will have an error message set.
-     * 
+     *
      * @param expression_alias an alias for the expression, which will become
      * the name of the new expression column on the table.
      * @param expression_string the expression, as the user typed it.
@@ -118,15 +116,13 @@ public:
      * properly access column names from the symbol table.
      * @param schema
      * @param error_string
-     * @return t_dtype 
+     * @return t_dtype
      */
-    static t_dtype get_dtype(
-        const std::string& expression_alias,
+    static t_dtype get_dtype(const std::string& expression_alias,
         const std::string& expression_string,
         const std::string& parsed_expression_string,
         const std::vector<std::pair<std::string, std::string>>& column_ids,
-        const t_schema& schema,
-        t_expression_error& error);
+        const t_schema& schema, t_expression_error& error);
 
     static std::shared_ptr<exprtk::parser<t_tscalar>> PARSER;
 
@@ -160,8 +156,10 @@ public:
 struct PERSPECTIVE_EXPORT t_validated_expression_map {
     t_validated_expression_map();
 
-    void add_expression(const std::string& expression_alias, const std::string& type_string);
-    void add_error(const std::string& expression_alias, t_expression_error& error);
+    void add_expression(
+        const std::string& expression_alias, const std::string& type_string);
+    void add_error(
+        const std::string& expression_alias, t_expression_error& error);
 
     std::map<std::string, std::string> get_expression_schema() const;
     std::map<std::string, t_expression_error> get_expression_errors() const;

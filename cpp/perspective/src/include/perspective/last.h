@@ -8,12 +8,11 @@
  */
 #pragma once
 
-
 #ifdef PSP_ENABLE_PYTHON
 
 /*
    Due to a very silly #define in python, this file needs
-   to come after any other perspective includes, which 
+   to come after any other perspective includes, which
    themselves have to precede any arrow includes.
 
    The preprocessor is fun.
@@ -23,7 +22,7 @@
 
 #ifdef WIN32
 #if _MSC_VER >= 1900
-  #undef timezone
+#undef timezone
 #endif
 #endif // win32
 

@@ -22,7 +22,6 @@
 #include <cmath>
 #include <tsl/hopscotch_map.h>
 
-
 /*
 TODO -
 1. Implement implicit typepunning based on cardinality.
@@ -36,9 +35,11 @@ namespace perspective {
 class t_column;
 
 #ifdef PSP_COLUMN_VERIFY
-#define COLUMN_CHECK_ACCESS(idx) PSP_VERBOSE_ASSERT((idx) <= m_size, "Invalid column access")
+#define COLUMN_CHECK_ACCESS(idx)                                               \
+    PSP_VERBOSE_ASSERT((idx) <= m_size, "Invalid column access")
 #define COLUMN_CHECK_VALUES() verify()
-#define COLUMN_CHECK_STRCOL() PSP_VERBOSE_ASSERT(m_isvlen, "Expected to use string column")
+#define COLUMN_CHECK_STRCOL()                                                  \
+    PSP_VERBOSE_ASSERT(m_isvlen, "Expected to use string column")
 #else
 #define COLUMN_CHECK_ACCESS(idx)
 #define COLUMN_CHECK_VALUES()
@@ -53,8 +54,8 @@ public:
     t_column();
     t_column(const t_column_recipe& recipe);
     t_column(t_dtype dtype, bool missing_enabled, const t_lstore_recipe& a);
-    t_column(
-        t_dtype dtype, bool missing_enabled, const t_lstore_recipe& a, t_uindex row_capacity);
+    t_column(t_dtype dtype, bool missing_enabled, const t_lstore_recipe& a,
+        t_uindex row_capacity);
     ~t_column();
 
     void column_copy_helper(const t_column& other);
@@ -116,7 +117,7 @@ public:
 
     void reserve(t_uindex idx);
 
-    //object storage
+    // object storage
     template <typename T>
     void object_copied(std::uint64_t ptr) const;
     void notify_object_copied(std::uint64_t ptr) const;
@@ -186,10 +187,11 @@ public:
     void invalid_raw_fill();
 
     template <typename DATA_T>
-    void copy_helper(
-        const t_column* other, const std::vector<t_uindex>& indices, t_uindex offset);
+    void copy_helper(const t_column* other,
+        const std::vector<t_uindex>& indices, t_uindex offset);
 
-    void copy(const t_column* other, const std::vector<t_uindex>& indices, t_uindex offset);
+    void copy(const t_column* other, const std::vector<t_uindex>& indices,
+        t_uindex offset);
 
     void clear(t_uindex idx);
     void clear(t_uindex idx, t_status status);
@@ -242,10 +244,12 @@ template <>
 PERSPECTIVE_EXPORT void t_column::push_back<t_tscalar>(t_tscalar elem);
 
 template <>
-PERSPECTIVE_EXPORT void t_column::set_nth<const char*>(t_uindex idx, const char* elem);
+PERSPECTIVE_EXPORT void t_column::set_nth<const char*>(
+    t_uindex idx, const char* elem);
 
 template <>
-PERSPECTIVE_EXPORT void t_column::set_nth<std::string>(t_uindex idx, std::string elem);
+PERSPECTIVE_EXPORT void t_column::set_nth<std::string>(
+    t_uindex idx, std::string elem);
 
 template <>
 PERSPECTIVE_EXPORT void t_column::set_nth<const char*>(
@@ -256,7 +260,8 @@ PERSPECTIVE_EXPORT void t_column::set_nth<std::string>(
     t_uindex idx, std::string elem, t_status status);
 
 template <>
-PERSPECTIVE_EXPORT const char* t_column::get_nth<const char>(t_uindex idx) const;
+PERSPECTIVE_EXPORT const char* t_column::get_nth<const char>(
+    t_uindex idx) const;
 
 template <typename T>
 T*
@@ -339,8 +344,8 @@ t_column::set_nth(t_uindex idx, T v, t_status status) {
 }
 
 template <>
-void t_column::fill<std::vector<const char*>>(
-    std::vector<const char*>& vec, const t_uindex* bidx, const t_uindex* eidx) const;
+void t_column::fill<std::vector<const char*>>(std::vector<const char*>& vec,
+    const t_uindex* bidx, const t_uindex* eidx) const;
 
 template <typename VEC_T>
 void
@@ -368,7 +373,7 @@ t_column::set_nth_body(t_uindex idx, DATA_T elem, t_status status) {
     }
 }
 
-//object storage, specialize only for std::uint64_t
+// object storage, specialize only for std::uint64_t
 template <>
 void t_column::object_copied<std::uint64_t>(std::uint64_t ptr) const;
 
@@ -392,15 +397,16 @@ t_column::set_vocabulary(const VOCAB_T& vocab, size_t total_size) {
 }
 
 template <>
-void t_column::copy_helper<const char>(
-    const t_column* other, const std::vector<t_uindex>& indices, t_uindex offset);
+void t_column::copy_helper<const char>(const t_column* other,
+    const std::vector<t_uindex>& indices, t_uindex offset);
 
 template <typename DATA_T>
 void
-t_column::copy_helper(
-    const t_column* other, const std::vector<t_uindex>& indices, t_uindex offset) {
+t_column::copy_helper(const t_column* other,
+    const std::vector<t_uindex>& indices, t_uindex offset) {
 
-    t_uindex eidx = std::min(other->size(), static_cast<t_uindex>(indices.size()));
+    t_uindex eidx
+        = std::min(other->size(), static_cast<t_uindex>(indices.size()));
     reserve(eidx + offset);
 
     const DATA_T* o_base = other->get_nth<DATA_T>(0);

@@ -20,11 +20,11 @@
 #endif
 
 #if defined PSP_ENABLE_WASM
-    #include <emscripten/val.h>
-    typedef emscripten::val t_val;
+#include <emscripten/val.h>
+typedef emscripten::val t_val;
 #elif defined PSP_ENABLE_PYTHON
-    #include <pybind11/pybind11.h>
-    typedef py::object t_val;
+#include <pybind11/pybind11.h>
+typedef py::object t_val;
 #endif
 
 namespace perspective {
@@ -54,11 +54,11 @@ public:
 #endif
 
 #ifdef PSP_ENABLE_WASM
-    void register_context(
-        t_uindex gnode_id, const std::string& name, t_ctx_type type, std::int32_t ptr);
+    void register_context(t_uindex gnode_id, const std::string& name,
+        t_ctx_type type, std::int32_t ptr);
 #else
-    void register_context(
-        t_uindex gnode_id, const std::string& name, t_ctx_type type, std::int64_t ptr);
+    void register_context(t_uindex gnode_id, const std::string& name,
+        t_ctx_type type, std::int64_t ptr);
 #endif
 
 #ifdef PSP_ENABLE_PYTHON
@@ -69,8 +69,8 @@ public:
     /**
      * @brief Call the binding language's `update_callback` method,
      * set at initialize time.
-     * 
-     * @param port_id 
+     *
+     * @param port_id
      */
     void notify_userspace(t_uindex port_id);
 
@@ -101,7 +101,6 @@ public:
     t_gnode* get_gnode(t_uindex gnode_id);
 
 protected:
-
     // Unused methods
     std::vector<t_tscalar> get_row_data_pkeys(
         t_uindex gnode_id, const std::vector<t_tscalar>& pkeys);

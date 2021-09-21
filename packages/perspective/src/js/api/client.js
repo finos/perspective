@@ -110,7 +110,7 @@ export class Client {
      *
      * @param {string} name
      */
-    open_table(name) {
+    async open_table(name) {
         return new proxy_table(this, name);
     }
 

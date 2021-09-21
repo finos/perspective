@@ -215,6 +215,10 @@ where
         self.root.borrow().as_ref().unwrap().send_message(msg)
     }
 
+    pub fn send_message_batch(&self, msg: Vec<T::Message>) {
+        self.root.borrow().as_ref().unwrap().send_message_batch(msg)
+    }
+
     /// Open this modal by attaching directly to `document.body` with position
     /// absolutely positioned relative to an alread-connected `target`
     /// element.

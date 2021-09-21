@@ -116,6 +116,11 @@ impl ActiveColumnProps {
         self.apply_columns(columns);
     }
 
+    fn get_is_required(&self) -> bool {
+        let min_cols = self.renderer.metadata().min.unwrap_or(0);
+        self.idx < min_cols
+    }
+
     fn apply_columns(&self, columns: Vec<Option<String>>) {
         self.update_and_render(ViewConfigUpdate {
             columns: Some(columns),
@@ -137,6 +142,7 @@ pub struct ActiveColumn {
     props: ActiveColumnProps,
     add_expression_ref: NodeRef,
     column_type: Option<Type>,
+    is_required: bool,
 }
 
 impl Component for ActiveColumn {
@@ -149,18 +155,24 @@ impl Component for ActiveColumn {
     ) -> Self {
         let add_expression_ref = NodeRef::default();
         let column_type = props.get_type();
+        let is_required = props.get_is_required();
         ActiveColumn {
             link,
             props,
             add_expression_ref,
             column_type,
+            is_required,
         }
     }
 
     fn change(&mut self, props: <Self as yew::Component>::Properties) -> ShouldRender {
-        let should_render =
-            self.props != props || (self.column_type != props.get_type());
-        self.column_type = props.get_type();
+        let is_required = props.get_is_required();
+        let coltype = props.get_type();
+        let should_render = self.props != props
+            || self.column_type != coltype
+            || is_required != self.is_required;
+        self.column_type = coltype;
+        self.is_required = is_required;
         self.props = props;
         should_render
     }
@@ -217,8 +229,7 @@ impl Component for ActiveColumn {
                 }
             }
             ((label, Some(name)), Some(col_type)) => {
-                let min_cols = self.props.renderer.metadata().min.unwrap_or(0);
-                let remove_column = if self.props.idx < min_cols {
+                let remove_column = if self.is_required {
                     None
                 } else {
                     Some(self.link.callback({
@@ -250,7 +261,7 @@ impl Component for ActiveColumn {
                 let is_expression =
                     self.props.session.metadata().is_column_expression(&name);
 
-                let class = if self.props.idx < min_cols {
+                let class = if self.is_required {
                     "is_column_active required"
                 } else {
                     "is_column_active"

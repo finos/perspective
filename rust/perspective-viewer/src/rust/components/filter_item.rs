@@ -25,10 +25,12 @@ pub struct FilterItem {
     props: FilterItemProperties,
     link: ComponentLink<FilterItem>,
     input: String,
+    input_ref: NodeRef,
 }
 
+#[derive(Debug)]
 pub enum FilterItemMsg {
-    FilterInput((usize, String), String, HtmlElement),
+    FilterInput((usize, String), String),
     Close,
     FilterOpSelect(FilterOp),
     FilterKeyDown(u32),
@@ -58,7 +60,8 @@ impl DragDropListItemProps for FilterItemProperties {
 impl FilterItemProperties {
     /// Does this filter item get a "suggestions" auto-complete modal?
     fn is_suggestable(&self) -> bool {
-        self.filter.1 == FilterOp::EQ && self.get_filter_type() == Type::String
+        (self.filter.1 == FilterOp::EQ || self.filter.1 == FilterOp::NE)
+            && self.get_filter_type() == Type::String
     }
 
     /// Get this filter's type, e.g. the type of the column.
@@ -71,22 +74,39 @@ impl FilterItemProperties {
 
     // Get the string value, suitable for the `value` field of a `FilterItems`'s
     // `<input>`.
-    fn get_filter_input(&self) -> String {
+    fn get_filter_input(&self) -> Option<String> {
         let filter_type = self.get_filter_type();
         match (&filter_type, &self.filter.2) {
             (Type::Date, FilterTerm::Scalar(Scalar::Float(x)))
-            | (Type::Date, FilterTerm::Scalar(Scalar::DateTime(x))) => Utc
-                .timestamp(*x as i64 / 1000, (*x as u32 % 1000) * 1000)
-                .with_timezone(&Local)
-                .format("%Y-%m-%d")
-                .to_string(),
+            | (Type::Date, FilterTerm::Scalar(Scalar::DateTime(x))) => {
+                if *x > 0_f64 {
+                    Some(
+                        Utc.timestamp(*x as i64 / 1000, (*x as u32 % 1000) * 1000)
+                            .with_timezone(&Local)
+                            .format("%Y-%m-%d")
+                            .to_string(),
+                    )
+                } else {
+                    None
+                }
+            }
             (Type::Datetime, FilterTerm::Scalar(Scalar::Float(x)))
-            | (Type::Datetime, FilterTerm::Scalar(Scalar::DateTime(x))) => Utc
-                .timestamp(*x as i64 / 1000, ((*x as i64 % 1000) * 1000000) as u32)
-                .with_timezone(&Local)
-                .format("%Y-%m-%dT%H:%M:%S%.3f")
-                .to_string(),
-            (_, x) => format!("{}", x),
+            | (Type::Datetime, FilterTerm::Scalar(Scalar::DateTime(x))) => {
+                if *x > 0_f64 {
+                    Some(
+                        Utc.timestamp(
+                            *x as i64 / 1000,
+                            ((*x as i64 % 1000) * 1000000) as u32,
+                        )
+                        .with_timezone(&Local)
+                        .format("%Y-%m-%dT%H:%M:%S%.3f")
+                        .to_string(),
+                    )
+                } else {
+                    None
+                }
+            }
+            (_, x) => Some(format!("{}", x)),
         }
     }
 
@@ -216,19 +236,22 @@ impl Component for FilterItem {
     type Properties = FilterItemProperties;
 
     fn create(props: FilterItemProperties, link: ComponentLink<Self>) -> Self {
-        let input = props.get_filter_input();
-        FilterItem { props, link, input }
+        let input = props.get_filter_input().unwrap_or_else(|| "".to_owned());
+        let input_ref = NodeRef::default();
+        FilterItem { props, link, input, input_ref }
     }
 
     fn update(&mut self, msg: FilterItemMsg) -> bool {
         match msg {
-            FilterItemMsg::FilterInput(column, input, target) => {
+            FilterItemMsg::FilterInput(column, input) => {
                 self.input = input.clone();
+                let target = self.input_ref.cast::<HtmlElement>().unwrap();
                 if self.props.is_suggestable() {
                     self.props.filter_dropdown.autocomplete(
                         column,
                         input.clone(),
                         target,
+                        self.props.on_keydown.clone(),
                     );
                 }
 
@@ -274,9 +297,13 @@ impl Component for FilterItem {
     }
 
     fn change(&mut self, props: FilterItemProperties) -> bool {
-        self.input = props.get_filter_input();
         self.props = props;
-        true
+        if let Some(input) = self.props.get_filter_input() {
+            self.input = input;
+            true
+        } else {
+            false
+        }
     }
 
     fn view(&self) -> Html {
@@ -292,22 +319,18 @@ impl Component for FilterItem {
 
         let select = self.link.callback(FilterItemMsg::FilterOpSelect);
 
-        let noderef = NodeRef::default();
+        let noderef = &self.input_ref;
         let input = self.link.callback({
-            let noderef = noderef.clone();
             let column = column.clone();
             move |input: InputData| {
-                let target = noderef.cast::<HtmlElement>().unwrap();
-                FilterItemMsg::FilterInput((idx, column.clone()), input.value, target)
+                FilterItemMsg::FilterInput((idx, column.clone()), input.value)
             }
         });
 
         let focus = self.link.callback({
-            let noderef = noderef.clone();
             let input = self.input.clone();
             move |_: FocusEvent| {
-                let target = noderef.cast::<HtmlElement>().unwrap();
-                FilterItemMsg::FilterInput((idx, column.clone()), input.clone(), target)
+                FilterItemMsg::FilterInput((idx, column.clone()), input.clone())
             }
         });
 
@@ -408,6 +431,13 @@ impl Component for FilterItem {
             }
         };
 
+        let filter_ops = self
+            .props
+            .get_filter_ops()
+            .into_iter()
+            .map(DropDownItem::Option)
+            .collect::<Vec<_>>();
+
         html! {
             <>
                 <span
@@ -421,7 +451,7 @@ impl Component for FilterItem {
                 <FilterOpSelector
                     class="filter-op-selector"
                     auto_resize=true
-                    values={ self.props.get_filter_ops() }
+                    values={ filter_ops }
                     selected={ filter.1 }
                     on_select={ select }>
                 </FilterOpSelector>

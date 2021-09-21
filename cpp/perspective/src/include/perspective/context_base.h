@@ -45,7 +45,8 @@ public:
     typedef DERIVED_T t_derived;
 
     t_ctxbase();
-    static std::shared_ptr<DERIVED_T> build(const t_schema& schema, const t_config& config);
+    static std::shared_ptr<DERIVED_T> build(
+        const t_schema& schema, const t_config& config);
     t_ctxbase(const t_schema& schema, const t_config& config);
 
     void set_name(const std::string& name);
@@ -75,7 +76,8 @@ public:
     void unity_populate_slice_column(
         t_slice& s, const std::vector<t_fetch>& fvec, t_uindex idx) const;
 
-    t_slice unity_get_data(const t_range& rng, const std::vector<t_fetch>& fvec) const;
+    t_slice unity_get_data(
+        const t_range& rng, const std::vector<t_fetch>& fvec) const;
 
     std::vector<t_tscalar> get_data() const;
 
@@ -199,20 +201,24 @@ t_ctxbase<DERIVED_T>::unity_populate_slice_column(
         switch (f) {
             case FETCH_COLUMN_DEPTH: {
                 s.column_depth().push_back(
-                    reinterpret_cast<const DERIVED_T*>(this)->unity_get_column_depth(idx));
+                    reinterpret_cast<const DERIVED_T*>(this)
+                        ->unity_get_column_depth(idx));
             } break;
             case FETCH_COLUMN_PATHS: {
                 s.column_paths().push_back(
-                    reinterpret_cast<const DERIVED_T*>(this)->unity_get_column_path(idx));
+                    reinterpret_cast<const DERIVED_T*>(this)
+                        ->unity_get_column_path(idx));
             } break;
             case FETCH_COLUMN_INDICES: {
                 s.column_indices().push_back(idx);
             } break;
             case FETCH_IS_COLUMN_EXPANDED: {
                 s.is_column_expanded().push_back(
-                    reinterpret_cast<const DERIVED_T*>(this)->unity_get_column_expanded(idx));
+                    reinterpret_cast<const DERIVED_T*>(this)
+                        ->unity_get_column_expanded(idx));
             } break;
-            default: {}
+            default: {
+            }
         }
     }
 }
@@ -234,12 +240,14 @@ t_ctxbase<DERIVED_T>::unity_populate_slice_row(
                 s.row_data().push_back(cptr->unity_get_row_data(idx));
             } break;
             case FETCH_IS_ROW_EXPANDED: {
-                s.is_row_expanded().push_back(cptr->unity_get_row_expanded(idx));
+                s.is_row_expanded().push_back(
+                    cptr->unity_get_row_expanded(idx));
             } break;
             case FETCH_ROW_DEPTH: {
                 s.row_depth().push_back(cptr->unity_get_row_depth(idx));
             } break;
-            default: {}
+            default: {
+            }
         }
     }
 }
@@ -262,7 +270,8 @@ t_ctxbase<DERIVED_T>::unity_get_data(
             eridx = row_count;
         } break;
         default: {
-            std::cout << "Unexpected mode encountered => " << rng.get_mode() << std::endl;
+            std::cout << "Unexpected mode encountered => " << rng.get_mode()
+                      << std::endl;
             return t_slice();
         }
     }
@@ -290,7 +299,8 @@ template <typename DERIVED_T>
 std::vector<t_tscalar>
 t_ctxbase<DERIVED_T>::get_data() const {
     auto cptr = reinterpret_cast<const DERIVED_T*>(this);
-    return cptr->get_data(0, cptr->get_row_count(), 0, cptr->get_column_count());
+    return cptr->get_data(
+        0, cptr->get_row_count(), 0, cptr->get_column_count());
 }
 
 } // end namespace perspective

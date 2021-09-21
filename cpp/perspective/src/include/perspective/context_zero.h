@@ -42,7 +42,8 @@ public:
     void sort_by();
     std::vector<t_sortspec> get_sort_by() const;
 
-    std::pair<t_tscalar, t_tscalar> get_min_max(const std::string& colname) const;
+    std::pair<t_tscalar, t_tscalar> get_min_max(
+        const std::string& colname) const;
 
     using t_ctxbase<t_ctx0>::get_data;
 
@@ -55,8 +56,8 @@ protected:
      * with data for the first time (prev, curr, and transitions tables are
      * empty), take all added rows in the traversal and store them in
      * `m_deltas`.
-     * 
-     * @param flattened 
+     *
+     * @param flattened
      */
     void calc_step_delta(const t_data_table& flattened);
 
@@ -64,14 +65,15 @@ protected:
      * @brief During a call to `notify` when the master table has data,
      * calculate the deltas - both changed and added cells, and write them
      * to `m_deltas`.
-     * 
-     * @param flattened 
-     * @param prev 
-     * @param curr 
-     * @param transitions 
+     *
+     * @param flattened
+     * @param prev
+     * @param curr
+     * @param transitions
      */
-    void calc_step_delta(const t_data_table& flattened, const t_data_table& prev,
-        const t_data_table& curr, const t_data_table& transitions);
+    void calc_step_delta(const t_data_table& flattened,
+        const t_data_table& prev, const t_data_table& curr,
+        const t_data_table& transitions);
 
     void add_delta_pkey(t_tscalar pkey);
 
@@ -79,13 +81,12 @@ protected:
      * @brief Read the specified column using the gnode's mapping - if the
      * column is an expression column, uses the expression master table,
      * otherwise use the gstate master table.
-     * 
-     * @param colname 
-     * @param pkeys 
-     * @param out_data 
+     *
+     * @param colname
+     * @param pkeys
+     * @param out_data
      */
-    void read_column_from_gstate(
-        const std::string& colname,
+    void read_column_from_gstate(const std::string& colname,
         const std::vector<t_tscalar>& pkeys,
         std::vector<t_tscalar>& out_data) const;
 

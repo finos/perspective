@@ -35,11 +35,11 @@ async function get_layout() {
     return json;
 }
 
-window.addEventListener("DOMContentLoaded", async function() {
+window.addEventListener("DOMContentLoaded", async function () {
     const workspace = document.getElementsByTagName("perspective-workspace")[0];
     const input = document.getElementById("ticker");
 
-    input.addEventListener("keydown", async ev => {
+    input.addEventListener("keydown", async (ev) => {
         input.style.color = "inherit";
         if (ev.keyCode === 13) {
             try {
@@ -56,17 +56,24 @@ window.addEventListener("DOMContentLoaded", async function() {
     workspace.addTable("query2", run(input, QUERY2, true));
     workspace.addTable("query3", run(input, QUERY3, false, "balancesheet"));
 
-    const to_span = x => `<span style='color:#666'>${x}</span>`;
+    const to_span = (x) => `<span style='color:#666'>${x}</span>`;
 
-    workspace.addEventListener("perspective-datagrid-after-update", event => {
+    workspace.addEventListener("perspective-datagrid-after-update", (event) => {
         const form = new Intl.NumberFormat("en-us", {});
         const datagrid = event.detail;
         for (const td of datagrid.get_tds()) {
             const metadata = datagrid.get_meta(td);
             if (metadata.column.endsWith("Percent")) {
-                td.innerHTML = form.format(Math.round(metadata.value * 100)) + to_span(" %");
-            } else if (metadata.type === "float" && (metadata.value < -1000000 || metadata.value > 1000000)) {
-                td.innerHTML = form.format(Math.round(metadata.value / 1000000)) + to_span(" mm");
+                td.innerHTML =
+                    form.format(Math.round(metadata.value * 100)) +
+                    to_span(" %");
+            } else if (
+                metadata.type === "float" &&
+                (metadata.value < -1000000 || metadata.value > 1000000)
+            ) {
+                td.innerHTML =
+                    form.format(Math.round(metadata.value / 1000000)) +
+                    to_span(" mm");
             }
         }
     });

@@ -43,6 +43,19 @@ macro_rules! maybe {
     }};
 }
 
+#[macro_export]
+macro_rules! optionally {
+    ($($exp:stmt);* $(;)*) => {{
+        #[must_use]
+        let x: Option<_> = (|| {
+            $(
+                $exp
+            )*
+        })();
+        x
+    }};
+}
+
 /// A helper to for the pattern `let x2 = x;` necessary to clone structs destined
 /// for an `async` or `'static` closure stack.  This is like `move || { .. }` or
 /// `move async { .. }`, but for clone semantics.

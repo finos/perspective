@@ -11,13 +11,23 @@ use std::fmt::Display;
 use std::str::FromStr;
 use yew::prelude::*;
 
+#[derive(Clone, PartialEq)]
+pub enum DropDownItem<T> {
+    Option(T),
+    OptGroup(&'static str, Vec<T>),
+}
+
+pub enum DropDownMsg<T> {
+    SelectedChanged(T),
+}
+
 #[derive(Properties, Clone)]
 pub struct DropDownProps<T>
 where
     T: Clone + Display + FromStr + PartialEq + 'static,
     T::Err: Clone + Debug + 'static,
 {
-    pub values: Vec<T>,
+    pub values: Vec<DropDownItem<T>>,
     pub selected: T,
     pub on_select: Callback<T>,
 
@@ -50,6 +60,7 @@ where
 {
     props: DropDownProps<T>,
     select_ref: NodeRef,
+    link: ComponentLink<Self>,
 }
 
 impl<T> Component for DropDown<T>
@@ -57,18 +68,22 @@ where
     T: Clone + Display + FromStr + PartialEq + 'static,
     T::Err: Clone + Debug + 'static,
 {
-    type Message = ();
+    type Message = DropDownMsg<T>;
     type Properties = DropDownProps<T>;
 
-    fn create(props: Self::Properties, _link: ComponentLink<Self>) -> Self {
+    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         DropDown {
             props,
+            link,
             select_ref: NodeRef::default(),
         }
     }
 
-    fn update(&mut self, _msg: Self::Message) -> ShouldRender {
-        false
+    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+        let DropDownMsg::SelectedChanged(x) = msg;
+        self.props.selected = x;
+        self.props.on_select.emit(self.props.selected.clone());
+        true
     }
 
     fn change(&mut self, props: Self::Properties) -> ShouldRender {
@@ -79,17 +94,18 @@ where
 
     // Annoyingly, `<select>` cannot be updated from its HTML alone.
     fn rendered(&mut self, _first_render: bool) {
-        self.select_ref
-            .cast::<web_sys::HtmlSelectElement>()
-            .unwrap()
-            .set_value(&format!("{}", self.props.selected));
+        if let Some(elem) = self.select_ref.cast::<web_sys::HtmlSelectElement>() {
+            elem.set_value(&format!("{}", self.props.selected))
+        }
     }
 
     fn view(&self) -> Html {
-        let callback = self.props.on_select.reform(|data: ChangeData| match data {
-            ChangeData::Select(e) => T::from_str(e.value().as_str()).unwrap(),
-            ChangeData::Value(x) => T::from_str(x.as_str()).unwrap(),
-            ChangeData::Files(_) => panic!("No idea ..."),
+        let callback = self.link.callback(|data: ChangeData| {
+            DropDownMsg::SelectedChanged(match data {
+                ChangeData::Select(e) => T::from_str(e.value().as_str()).unwrap(),
+                ChangeData::Value(x) => T::from_str(x.as_str()).unwrap(),
+                ChangeData::Files(_) => panic!("No idea ..."),
+            })
         });
 
         let style = if self.props.auto_resize {
@@ -105,7 +121,12 @@ where
             "noselect".to_owned()
         };
 
-        html! {
+        let is_group_selected =
+            !self.props.values.iter().any(
+                |x| matches!(x, DropDownItem::Option(y) if *y == self.props.selected),
+            );
+
+        let select = html! {
             <select
                 id={ self.props.id }
                 class={ class }
@@ -113,19 +134,61 @@ where
                 ref={ self.select_ref.clone() }
                 onchange={callback}>
                 {
-                    for self.props.values.iter().map(|value| {
-                        let selected = *value == self.props.selected;
-                        html! {
-                            <option
-                                selected={ selected }
-                                value={ format!("{}", value) }>
+                    for self.props.values.iter().map(|value| match value {
+                        DropDownItem::Option(value) => {
+                            let selected = *value == self.props.selected;
+                            html! {
+                                <option
+                                    selected={ selected }
+                                    value={ format!("{}", value) }>
+                                    { format!("{}", value) }
+                                </option>
+                            }
+                        },
+                        DropDownItem::OptGroup(name, group) => html! {
+                            <optgroup label={ name.to_owned() }>
+                            {
+                                for group.iter().map(|value| {
+                                    let selected =
+                                        *value == self.props.selected;
 
-                                { format!("{}", value) }
-                            </option>
+                                    let label = format!("{}", value)
+                                        .strip_prefix(name)
+                                        .unwrap()
+                                        .trim()
+                                        .to_owned();
+
+                                    html! {
+                                        <option
+                                            selected={ selected }
+                                            value={ format!("{}", value) }>
+                                            { label }
+                                        </option>
+                                    }
+                                })
+                            }
+                            </optgroup>
                         }
                     })
                 }
             </select>
+        };
+
+        if is_group_selected {
+            html! {
+                <>
+                    <label>{ "weighted mean" }</label>
+                    <div class="dropdown-width-container">
+                        { select }
+                    </div>
+                </>
+            }
+        } else {
+            html! {
+                <div class="dropdown-width-container">
+                    { select }
+                </div>
+            }
         }
     }
 }

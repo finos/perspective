@@ -15,8 +15,8 @@
 namespace perspective {
 
 template <typename DATA_T>
-class t_iter : public std::iterator<std::random_access_iterator_tag, DATA_T, std::ptrdiff_t,
-                   DATA_T*, DATA_T&> {
+class t_iter : public std::iterator<std::random_access_iterator_tag, DATA_T,
+                   std::ptrdiff_t, DATA_T*, DATA_T&> {
 public:
     t_iter(DATA_T* ptr = nullptr) { m_ptr = ptr; }
 
@@ -111,11 +111,20 @@ public:
         return std::distance(other.get_ptr(), this->get_ptr());
     }
 
-    DATA_T& operator*() { return *m_ptr; }
+    DATA_T&
+    operator*() {
+        return *m_ptr;
+    }
 
-    const DATA_T& operator*() const { return *m_ptr; }
+    const DATA_T&
+    operator*() const {
+        return *m_ptr;
+    }
 
-    DATA_T* operator->() { return m_ptr; }
+    DATA_T*
+    operator->() {
+        return m_ptr;
+    }
 
     DATA_T*
     get_ptr() const {

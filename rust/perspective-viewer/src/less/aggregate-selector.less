@@ -8,19 +8,27 @@
  */
 
 :host {
-
     // Wrapper prevents the width of the selector options from increasing the width of
     // the container it is embedded in.
     .aggregate-selector-wrapper {
-        height: 21px;
+        height: 19px;
+        display: flex;
+        padding-left: 28px;
+        width: 100%;
+
+        label {
+            font-size: 10px;
+            white-space: nowrap;
+            height: 21px;
+            display: flex;
+            align-items: center;
+            margin-right: 3px;
+        }
 
         .aggregate-selector {
-            position: absolute;
             font-size: 10px;
-            margin-left: 28px;
             border-bottom-width: 0px;
             margin-top: 0px;
-            width: calc(100% - 28px);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;

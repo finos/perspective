@@ -137,7 +137,8 @@ namespace std {
 std::ostream&
 operator<<(std::ostream& os, const perspective::t_mask& mask) {
     std::cout << "t_mask<\n";
-    for (perspective::t_uindex idx = 0, loop_end = mask.size(); idx < loop_end; ++idx) {
+    for (perspective::t_uindex idx = 0, loop_end = mask.size(); idx < loop_end;
+         ++idx) {
         std::cout << "\t" << idx << ". " << mask.get(idx) << std::endl;
     }
     std::cout << ">\n";

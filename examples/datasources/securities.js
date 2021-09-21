@@ -9,7 +9,9 @@
 
 const perspective = require("@finos/perspective");
 
-const worker = perspective.shared_worker ? perspective.shared_worker() : perspective;
+const worker = perspective.shared_worker
+    ? perspective.shared_worker()
+    : perspective;
 
 // Cache updates for faster update rates (but less data diversity)>
 const CACHE_INPUT = false;
@@ -26,8 +28,32 @@ const TICK_RATE = 20;
 // Size limit of the server-side table
 const TABLE_SIZE = 10000;
 
-const SECURITIES = ["AAPL.N", "AMZN.N", "QQQ.N", "NVDA.N", "TSLA.N", "FB.N", "MSFT.N", "TLT.N", "XIV.N", "YY.N", "CSCO.N", "GOOGL.N", "PCLN.N"];
-const CLIENTS = ["Homer", "Marge", "Bart", "Lisa", "Maggie", "Moe", "Lenny", "Carl", "Krusty"];
+const SECURITIES = [
+    "AAPL.N",
+    "AMZN.N",
+    "QQQ.N",
+    "NVDA.N",
+    "TSLA.N",
+    "FB.N",
+    "MSFT.N",
+    "TLT.N",
+    "XIV.N",
+    "YY.N",
+    "CSCO.N",
+    "GOOGL.N",
+    "PCLN.N",
+];
+const CLIENTS = [
+    "Homer",
+    "Marge",
+    "Bart",
+    "Lisa",
+    "Maggie",
+    "Moe",
+    "Lenny",
+    "Carl",
+    "Krusty",
+];
 
 const __CACHE__ = [];
 
@@ -52,7 +78,7 @@ function newRows(total_rows) {
             chg: Math.random() * 20 - 10,
             bid: Math.random() * 10 + 90,
             ask: Math.random() * 10 + 100,
-            vol: Math.random() * 10 + 100
+            vol: Math.random() * 10 + 100,
         });
     }
     return rows;
@@ -105,7 +131,15 @@ async function init_cached({table_size, tick_rate, cache_entries}) {
     return table;
 }
 
-const getTable = (config = {cached: CACHE_INPUT, tick_rate: TICK_RATE, update_size: UPDATE_SIZE, table_size: TABLE_SIZE, cache_entries: CACHE_ENTRIES}) => {
+const getTable = (
+    config = {
+        cached: CACHE_INPUT,
+        tick_rate: TICK_RATE,
+        update_size: UPDATE_SIZE,
+        table_size: TABLE_SIZE,
+        cache_entries: CACHE_ENTRIES,
+    }
+) => {
     if (config.cached) {
         return init_cached(config);
     } else {

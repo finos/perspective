@@ -31,15 +31,15 @@ struct t_process_state {
 
     /**
      * @brief Reserve `size` elements for each transitional table in the state.
-     * 
-     * @param size 
+     *
+     * @param size
      */
     void reserve_transitional_data_tables(t_uindex size);
 
     /**
      * @brief For each transitional table in the state, set its size to `size`.
-     * 
-     * @param size 
+     *
+     * @param size
      */
     void set_size_transitional_data_tables(t_uindex size);
 

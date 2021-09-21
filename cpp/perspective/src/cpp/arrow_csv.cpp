@@ -13,11 +13,11 @@
 #include <arrow/io/memory.h>
 
 #ifdef PSP_ENABLE_WASM
-    // This causes build warnings
-    // https://github.com/emscripten-core/emscripten/issues/8574
-    #include <perspective/vendor/arrow_single_threaded_reader.h>
+// This causes build warnings
+// https://github.com/emscripten-core/emscripten/issues/8574
+#include <perspective/vendor/arrow_single_threaded_reader.h>
 #else
-    #include <arrow/csv/reader.h>
+#include <arrow/csv/reader.h>
 #endif
 
 namespace perspective {
@@ -30,7 +30,8 @@ namespace apachearrow {
             int64_t* out) const override {
             size_t endptr;
             std::string val(s, s + length);
-            int64_t value = std::stoll(static_cast<std::string>(val), &endptr, 10);
+            int64_t value
+                = std::stoll(static_cast<std::string>(val), &endptr, 10);
             if (endptr != length) {
                 return false;
             } else {
@@ -51,7 +52,8 @@ namespace apachearrow {
         if (ARROW_PREDICT_FALSE(s[0] != '.')) {
             return false;
         }
-        if (ARROW_PREDICT_FALSE(!arrow::internal::ParseUnsigned(s + 1, 3, &millis))) {
+        if (ARROW_PREDICT_FALSE(
+                !arrow::internal::ParseUnsigned(s + 1, 3, &millis))) {
             return false;
         }
 
@@ -66,10 +68,12 @@ namespace apachearrow {
     ParseTZ(const char* s, std::chrono::hours* out) {
         uint8_t hours = 0;
 
-        if (ARROW_PREDICT_FALSE(s[0] != '+') && ARROW_PREDICT_FALSE(s[0] != '-')) {
+        if (ARROW_PREDICT_FALSE(s[0] != '+')
+            && ARROW_PREDICT_FALSE(s[0] != '-')) {
             return false;
         }
-        if (ARROW_PREDICT_FALSE(!arrow::internal::ParseUnsigned(s + 1, 2, &hours))) {
+        if (ARROW_PREDICT_FALSE(
+                !arrow::internal::ParseUnsigned(s + 1, 2, &hours))) {
             return false;
         }
 
@@ -97,12 +101,14 @@ namespace apachearrow {
                     // "YYYY-MM-DD[ T]hh:mm:ss.sss"
                     arrow_vendored::date::year_month_day ymd;
                     if (ARROW_PREDICT_FALSE(
-                            !arrow::internal::detail::ParseYYYY_MM_DD(s, &ymd))) {
+                            !arrow::internal::detail::ParseYYYY_MM_DD(
+                                s, &ymd))) {
                         return false;
                     }
                     std::chrono::seconds seconds;
-                    if (ARROW_PREDICT_FALSE(!arrow::internal::detail::ParseHH_MM_SS(
-                            s + 11, &seconds))) {
+                    if (ARROW_PREDICT_FALSE(
+                            !arrow::internal::detail::ParseHH_MM_SS(
+                                s + 11, &seconds))) {
                         return false;
                     }
                     std::chrono::milliseconds millis;
@@ -111,18 +117,21 @@ namespace apachearrow {
                     }
 
                     *out = arrow::internal::detail::ConvertTimePoint(
-                        arrow_vendored::date::sys_days(ymd) + seconds + millis, unit);
+                        arrow_vendored::date::sys_days(ymd) + seconds + millis,
+                        unit);
                     return true;
                 } else if (length == 25) {
                     // "2008-09-15[ T]15:53:00+05:00"
                     arrow_vendored::date::year_month_day ymd;
                     if (ARROW_PREDICT_FALSE(
-                            !arrow::internal::detail::ParseYYYY_MM_DD(s, &ymd))) {
+                            !arrow::internal::detail::ParseYYYY_MM_DD(
+                                s, &ymd))) {
                         return false;
                     }
                     std::chrono::seconds seconds;
-                    if (ARROW_PREDICT_FALSE(!arrow::internal::detail::ParseHH_MM_SS(
-                            s + 11, &seconds))) {
+                    if (ARROW_PREDICT_FALSE(
+                            !arrow::internal::detail::ParseHH_MM_SS(
+                                s + 11, &seconds))) {
                         return false;
                     }
                     std::chrono::hours tz;
@@ -131,7 +140,8 @@ namespace apachearrow {
                     }
 
                     *out = arrow::internal::detail::ConvertTimePoint(
-                        arrow_vendored::date::sys_days(ymd) + tz + seconds, unit);
+                        arrow_vendored::date::sys_days(ymd) + tz + seconds,
+                        unit);
                     return true;
                 }
                 return false;
@@ -148,7 +158,8 @@ namespace apachearrow {
     std::vector<std::shared_ptr<arrow::TimestampParser>> DATE_PARSERS{
         std::make_shared<CustomISO8601Parser>(),
         arrow::TimestampParser::MakeStrptime("%Y-%m-%d\\D%H:%M:%S.%f"),
-        arrow::TimestampParser::MakeStrptime("%m/%d/%Y, %I:%M:%S %p"), // US locale string
+        arrow::TimestampParser::MakeStrptime(
+            "%m/%d/%Y, %I:%M:%S %p"), // US locale string
         arrow::TimestampParser::MakeStrptime("%m-%d-%Y"),
         arrow::TimestampParser::MakeStrptime("%m/%d/%Y"),
         arrow::TimestampParser::MakeStrptime("%d %m %Y"),
@@ -159,7 +170,8 @@ namespace apachearrow {
         std::make_shared<UnixTimestampParser>(),
         std::make_shared<CustomISO8601Parser>(),
         arrow::TimestampParser::MakeStrptime("%Y-%m-%d\\D%H:%M:%S.%f"),
-        arrow::TimestampParser::MakeStrptime("%m/%d/%Y, %I:%M:%S %p"), // US locale string
+        arrow::TimestampParser::MakeStrptime(
+            "%m/%d/%Y, %I:%M:%S %p"), // US locale string
         arrow::TimestampParser::MakeStrptime("%m-%d-%Y"),
         arrow::TimestampParser::MakeStrptime("%m/%d/%Y"),
         arrow::TimestampParser::MakeStrptime("%d %m %Y"),
@@ -169,8 +181,8 @@ namespace apachearrow {
     parseAsArrowTimestamp(const std::string& input) {
         for (auto candidate : DATE_PARSERS) {
             int64_t datetime;
-            if (candidate->operator()(
-                    input.c_str(), input.size(), arrow::TimeUnit::MILLI, &datetime)) {
+            if (candidate->operator()(input.c_str(), input.size(),
+                    arrow::TimeUnit::MILLI, &datetime)) {
                 return datetime;
             }
         }

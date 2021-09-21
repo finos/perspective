@@ -1,6 +1,30 @@
-var SECURITIES = ["AAPL.N", "AMZN.N", "QQQ.N", "NVDA.N", "TSLA.N", "FB.N", "MSFT.N", "TLT.N", "XIV.N", "YY.N", "CSCO.N", "GOOGL.N", "PCLN.N"];
+var SECURITIES = [
+    "AAPL.N",
+    "AMZN.N",
+    "QQQ.N",
+    "NVDA.N",
+    "TSLA.N",
+    "FB.N",
+    "MSFT.N",
+    "TLT.N",
+    "XIV.N",
+    "YY.N",
+    "CSCO.N",
+    "GOOGL.N",
+    "PCLN.N",
+];
 
-var CLIENTS = ["Homer", "Marge", "Bart", "Lisa", "Maggie", "Moe", "Lenny", "Carl", "Krusty"];
+var CLIENTS = [
+    "Homer",
+    "Marge",
+    "Bart",
+    "Lisa",
+    "Maggie",
+    "Moe",
+    "Lenny",
+    "Carl",
+    "Krusty",
+];
 
 // Create 5 random rows of data.
 function newRows() {
@@ -13,13 +37,13 @@ function newRows() {
             chg: Math.random() * 20 - 10,
             bid: Math.random() * 10 + 90,
             ask: Math.random() * 10 + 100,
-            vol: Math.random() * 10 + 100
+            vol: Math.random() * 10 + 100,
         });
     }
     return rows;
 }
 
-window.addEventListener("DOMContentLoaded", async function() {
+window.addEventListener("DOMContentLoaded", async function () {
     // Get element from the DOM.
     var elem = document.getElementsByTagName("perspective-viewer")[0];
 
@@ -28,7 +52,7 @@ window.addEventListener("DOMContentLoaded", async function() {
 
     // Create a new Perspective table in our `worker`, and limit it it 500 rows.
     var table = await worker.table(newRows(), {
-        limit: 500
+        limit: 500,
     });
 
     // Load the `table` in the `<perspective-viewer>` DOM reference.
@@ -37,7 +61,10 @@ window.addEventListener("DOMContentLoaded", async function() {
     elem.restore({
         plugin: "Datagrid",
         columns: ["(-)chg", "chg", "(+)chg"],
-        expressions: ['//(-)chg\nif("chg"<0){"chg"}else{0}', '//(+)chg\nif("chg">0){"chg"}else{0}'],
+        expressions: [
+            '//(-)chg\nif("chg"<0){"chg"}else{0}',
+            '//(+)chg\nif("chg">0){"chg"}else{0}',
+        ],
         row_pivots: ["name"],
         column_pivots: ["client"],
         aggregates: {"(-)chg": "avg", "(+)chg": "avg", chg: "avg"},
@@ -45,17 +72,17 @@ window.addEventListener("DOMContentLoaded", async function() {
         plugin_config: {
             "(-)chg": {
                 color_mode: "bar",
-                gradient: 10
+                gradient: 10,
             },
             "(+)chg": {
                 color_mode: "bar",
-                gradient: 10
+                gradient: 10,
             },
             chg: {
                 color_mode: "gradient",
-                gradient: 10
-            }
-        }
+                gradient: 10,
+            },
+        },
     });
 
     // Add more rows every 50ms using the `update()` method on the `table` directly.

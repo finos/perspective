@@ -14,7 +14,8 @@ namespace perspective {
 
 t_schema::t_schema() {}
 
-t_schema::t_schema(const std::vector<std::string>& columns, const std::vector<t_dtype>& types)
+t_schema::t_schema(
+    const std::vector<std::string>& columns, const std::vector<t_dtype>& types)
     : m_columns(columns)
     , m_types(types)
     , m_status_enabled(columns.size())
@@ -27,8 +28,8 @@ t_schema::t_schema(const std::vector<std::string>& columns, const std::vector<t_
 
     std::string pkey_str("psp_pkey");
     std::string op_str("psp_op");
-    for (std::vector<std::string>::size_type idx = 0, loop_end = types.size(); idx < loop_end;
-         ++idx) {
+    for (std::vector<std::string>::size_type idx = 0, loop_end = types.size();
+         idx < loop_end; ++idx) {
         m_colidx_map[columns[idx]] = idx;
         m_coldt_map[columns[idx]] = types[idx];
         m_status_enabled[idx] = true;
@@ -61,7 +62,7 @@ t_schema::get_colidx(const std::string& colname) const {
     auto iter = m_colidx_map.find(colname);
     if (iter == m_colidx_map.end()) {
         std::stringstream ss;
-        ss << "Could not find column index for `" << colname 
+        ss << "Could not find column index for `" << colname
            << "` as it does not exist in the schema." << std::endl;
         PSP_COMPLAIN_AND_ABORT(ss.str());
     }
@@ -77,13 +78,12 @@ t_schema::get_colidx_safe(const std::string& colname) const {
     return iter->second;
 }
 
-
 t_dtype
 t_schema::get_dtype(const std::string& colname) const {
     auto iter = m_coldt_map.find(colname);
     if (iter == m_coldt_map.end()) {
         std::stringstream ss;
-        ss << "Could not get dtype for column `" << colname 
+        ss << "Could not get dtype for column `" << colname
            << "` as it does not exist in the schema." << std::endl;
         PSP_COMPLAIN_AND_ABORT(ss.str());
     }
@@ -123,8 +123,10 @@ t_schema::add_column(const std::string& colname, t_dtype dtype) {
 
 void
 t_schema::retype_column(const std::string& colname, t_dtype dtype) {
-    if (colname == std::string("psp_pkey") || colname == std::string("psp_op")) {
-        PSP_COMPLAIN_AND_ABORT("Cannot retype primary key or operation columns.");
+    if (colname == std::string("psp_pkey")
+        || colname == std::string("psp_op")) {
+        PSP_COMPLAIN_AND_ABORT(
+            "Cannot retype primary key or operation columns.");
     }
     if (!has_column(colname)) {
         std::stringstream ss;
@@ -179,7 +181,8 @@ t_schema::drop(const std::set<std::string>& columns) const {
 t_schema
 t_schema::operator+(const t_schema& o) const {
     t_schema rv(m_columns, m_types);
-    for (t_uindex idx = 0, loop_end = o.m_columns.size(); idx < loop_end; ++idx) {
+    for (t_uindex idx = 0, loop_end = o.m_columns.size(); idx < loop_end;
+         ++idx) {
         rv.add_column(o.m_columns[idx], o.m_types[idx]);
     }
     return rv;
@@ -197,8 +200,8 @@ operator<<(std::ostream& os, const perspective::t_schema& s) {
 
     os << "t_schema<\n";
     for (size_t idx = 0, loop_end = cols.size(); idx < loop_end; ++idx) {
-        os << "\t" << idx << ". " << cols[idx] << ", " << get_dtype_descr(types[idx])
-           << std::endl;
+        os << "\t" << idx << ". " << cols[idx] << ", "
+           << get_dtype_descr(types[idx]) << std::endl;
     }
     os << ">\n";
     return os;

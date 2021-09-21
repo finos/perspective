@@ -26,7 +26,7 @@ utils.with_server({}, () => {
         "superstore.html",
         () => {
             test.capture(
-                "restore() fires the 'perspective-config-update' event",
+                "restore fires the 'perspective-config-update' event",
                 async (page) => {
                     const config = await page.evaluate(async () => {
                         const viewer =
@@ -66,7 +66,7 @@ utils.with_server({}, () => {
             // TODO Only one plugin registered ...
             // need the ability to register plugins after a viewer is already
             // loaded to enable this test.
-            test.skip("restore() with a 'plugin' field fires the 'perspective-plugin-update' event", async (page) => {
+            test.skip("restore with a 'plugin' field fires the 'perspective-plugin-update' event", async (page) => {
                 const config = await page.evaluate(async () => {
                     const viewer = document.querySelector("perspective-viewer");
                     await viewer.getTable();

@@ -31,7 +31,8 @@ t_ctx1::~t_ctx1() {}
 void
 t_ctx1::init() {
     auto pivots = m_config.get_row_pivots();
-    m_tree = std::make_shared<t_stree>(pivots, m_config.get_aggregates(), m_schema, m_config);
+    m_tree = std::make_shared<t_stree>(
+        pivots, m_config.get_aggregates(), m_schema, m_config);
     m_tree->init();
     m_traversal = std::shared_ptr<t_traversal>(new t_traversal(m_tree));
 
@@ -107,7 +108,7 @@ t_ctx1::close(t_index idx) {
     return retval;
 }
 
-std::pair<t_tscalar, t_tscalar> 
+std::pair<t_tscalar, t_tscalar>
 t_ctx1::get_min_max(const std::string& colname) const {
     auto rval = std::make_pair(mknone(), mknone());
     auto aggtable = m_tree->get_aggtable();
@@ -126,7 +127,9 @@ t_ctx1::get_min_max(const std::string& colname) const {
             }
 
             t_uindex agg_ridx = m_tree->get_aggidx(nidx);
-            t_index agg_pridx = pnidx == INVALID_INDEX ? INVALID_INDEX : m_tree->get_aggidx(pnidx);
+            t_index agg_pridx = pnidx == INVALID_INDEX
+                ? INVALID_INDEX
+                : m_tree->get_aggidx(pnidx);
             t_tscalar val
                 = extract_aggregate(aggspecs[colidx], col, agg_ridx, agg_pridx);
 
@@ -151,13 +154,14 @@ t_ctx1::get_min_max(const std::string& colname) const {
 }
 
 std::vector<t_tscalar>
-t_ctx1::get_data(t_index start_row, t_index end_row, t_index start_col, t_index end_col) const {
+t_ctx1::get_data(t_index start_row, t_index end_row, t_index start_col,
+    t_index end_col) const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     t_uindex ctx_nrows = get_row_count();
     t_uindex ncols = get_column_count();
-    auto ext
-        = sanitize_get_data_extents(ctx_nrows, ncols, start_row, end_row, start_col, end_col);
+    auto ext = sanitize_get_data_extents(
+        ctx_nrows, ncols, start_row, end_row, start_col, end_col);
 
     t_index nrows = ext.m_erow - ext.m_srow;
     t_index stride = ext.m_ecol - ext.m_scol;
@@ -171,7 +175,8 @@ t_ctx1::get_data(t_index start_row, t_index end_row, t_index start_col, t_index 
     t_schema aggschema = aggtable->get_schema();
     auto none = mknone();
 
-    for (t_uindex aggidx = 0, loop_end = aggcols.size(); aggidx < loop_end; ++aggidx) {
+    for (t_uindex aggidx = 0, loop_end = aggcols.size(); aggidx < loop_end;
+         ++aggidx) {
         const std::string& aggname = aggschema.m_columns[aggidx];
         aggcols[aggidx] = aggtable->get_const_column(aggname).get();
     }
@@ -183,14 +188,16 @@ t_ctx1::get_data(t_index start_row, t_index end_row, t_index start_col, t_index 
         t_index pnidx = m_tree->get_parent_idx(nidx);
 
         t_uindex agg_ridx = m_tree->get_aggidx(nidx);
-        t_index agg_pridx = pnidx == INVALID_INDEX ? INVALID_INDEX : m_tree->get_aggidx(pnidx);
+        t_index agg_pridx = pnidx == INVALID_INDEX ? INVALID_INDEX
+                                                   : m_tree->get_aggidx(pnidx);
 
         t_tscalar tree_value = m_tree->get_value(nidx);
         tmpvalues[(ridx - ext.m_srow) * ncols] = tree_value;
 
-        for (t_index aggidx = 0, loop_end = aggcols.size(); aggidx < loop_end; ++aggidx) {
-            t_tscalar value
-                = extract_aggregate(aggspecs[aggidx], aggcols[aggidx], agg_ridx, agg_pridx);
+        for (t_index aggidx = 0, loop_end = aggcols.size(); aggidx < loop_end;
+             ++aggidx) {
+            t_tscalar value = extract_aggregate(
+                aggspecs[aggidx], aggcols[aggidx], agg_ridx, agg_pridx);
             if (!value.is_valid())
                 value.set(none); // todo: fix null handling
             tmpvalues[(ridx - ext.m_srow) * ncols + 1 + aggidx].set(value);
@@ -223,28 +230,32 @@ t_ctx1::get_data(const std::vector<t_uindex>& rows) const {
     t_schema aggschema = aggtable->get_schema();
     auto none = mknone();
 
-    for (t_uindex aggidx = 0, loop_end = aggcols.size(); aggidx < loop_end; ++aggidx) {
+    for (t_uindex aggidx = 0, loop_end = aggcols.size(); aggidx < loop_end;
+         ++aggidx) {
         const std::string& aggname = aggschema.m_columns[aggidx];
         aggcols[aggidx] = aggtable->get_const_column(aggname).get();
     }
 
     const std::vector<t_aggspec>& aggspecs = m_config.get_aggregates();
 
-    // access data for changed rows, but write them into the slice as if we start from 0
+    // access data for changed rows, but write them into the slice as if we
+    // start from 0
     for (t_uindex idx = 0; idx < nrows; ++idx) {
         t_uindex ridx = rows[idx];
         t_index nidx = m_traversal->get_tree_index(ridx);
         t_index pnidx = m_tree->get_parent_idx(nidx);
 
         t_uindex agg_ridx = m_tree->get_aggidx(nidx);
-        t_index agg_pridx = pnidx == INVALID_INDEX ? INVALID_INDEX : m_tree->get_aggidx(pnidx);
+        t_index agg_pridx = pnidx == INVALID_INDEX ? INVALID_INDEX
+                                                   : m_tree->get_aggidx(pnidx);
 
         t_tscalar tree_value = m_tree->get_value(nidx);
         tmpvalues[idx * ncols] = tree_value;
 
-        for (t_index aggidx = 0, loop_end = aggcols.size(); aggidx < loop_end; ++aggidx) {
-            t_tscalar value
-                = extract_aggregate(aggspecs[aggidx], aggcols[aggidx], agg_ridx, agg_pridx);
+        for (t_index aggidx = 0, loop_end = aggcols.size(); aggidx < loop_end;
+             ++aggidx) {
+            t_tscalar value = extract_aggregate(
+                aggspecs[aggidx], aggcols[aggidx], agg_ridx, agg_pridx);
             if (!value.is_valid())
                 value.set(none); // todo: fix null handling
             tmpvalues[idx * ncols + 1 + aggidx].set(value);
@@ -266,41 +277,21 @@ t_ctx1::notify(const t_data_table& flattened) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
-    notify_sparse_tree(
-        m_tree,
-        m_traversal,
-        true,
-        m_config.get_aggregates(),
-        m_config.get_sortby_pairs(),
-        m_sortby,
-        flattened,
-        m_config,
-        *m_gstate,
+    notify_sparse_tree(m_tree, m_traversal, true, m_config.get_aggregates(),
+        m_config.get_sortby_pairs(), m_sortby, flattened, m_config, *m_gstate,
         *(m_expression_tables->m_master));
 }
 
 void
 t_ctx1::notify(const t_data_table& flattened, const t_data_table& delta,
-    const t_data_table& prev, const t_data_table& current, const t_data_table& transitions,
-    const t_data_table& existed) {
+    const t_data_table& prev, const t_data_table& current,
+    const t_data_table& transitions, const t_data_table& existed) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    
-    notify_sparse_tree(
-        m_tree,
-        m_traversal,
-        true,
-        m_config.get_aggregates(),
-        m_config.get_sortby_pairs(),
-        m_sortby,
-        flattened,
-        delta,
-        prev,
-        current,
-        transitions,
-        existed,
-        m_config,
-        *m_gstate,
+
+    notify_sparse_tree(m_tree, m_traversal, true, m_config.get_aggregates(),
+        m_config.get_sortby_pairs(), m_sortby, flattened, delta, prev, current,
+        transitions, existed, m_config, *m_gstate,
         *(m_expression_tables->m_master));
 }
 
@@ -390,7 +381,8 @@ t_ctx1::set_depth(t_depth depth) {
 }
 
 std::vector<t_tscalar>
-t_ctx1::get_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
+t_ctx1::get_pkeys(
+    const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
@@ -446,7 +438,8 @@ t_ctx1::get_step_delta(t_index bidx, t_index eidx) {
     bidx = std::min(bidx, t_index(m_traversal->size()));
     eidx = std::min(eidx, t_index(m_traversal->size()));
 
-    t_stepdelta rval(m_rows_changed, m_columns_changed, get_cell_delta(bidx, eidx));
+    t_stepdelta rval(
+        m_rows_changed, m_columns_changed, get_cell_delta(bidx, eidx));
     m_tree->clear_deltas();
     return rval;
 }
@@ -479,7 +472,8 @@ t_ctx1::get_rows_changed() {
         t_index ptidx = m_traversal->get_tree_index(idx);
         // Retrieve delta from storage and check if the row has been changed
         auto iterators = deltas->get<by_tc_nidx_aggidx>().equal_range(ptidx);
-        bool unique_ridx = std::find(rows.begin(), rows.end(), idx) == rows.end();
+        bool unique_ridx
+            = std::find(rows.begin(), rows.end(), idx) == rows.end();
         if ((iterators.first != iterators.second) && unique_ridx)
             rows.push_back(idx);
     }
@@ -499,8 +493,8 @@ t_ctx1::get_cell_delta(t_index bidx, t_index eidx) const {
         t_index ptidx = m_traversal->get_tree_index(idx);
         auto iterators = deltas->get<by_tc_nidx_aggidx>().equal_range(ptidx);
         for (auto iter = iterators.first; iter != iterators.second; ++iter) {
-            rval.push_back(
-                t_cellupd(idx, iter->m_aggidx + 1, iter->m_old_value, iter->m_new_value));
+            rval.push_back(t_cellupd(
+                idx, iter->m_aggidx + 1, iter->m_old_value, iter->m_new_value));
         }
     }
     return rval;
@@ -509,12 +503,14 @@ t_ctx1::get_cell_delta(t_index bidx, t_index eidx) const {
 void
 t_ctx1::reset(bool reset_expressions) {
     auto pivots = m_config.get_row_pivots();
-    m_tree = std::make_shared<t_stree>(pivots, m_config.get_aggregates(), m_schema, m_config);
+    m_tree = std::make_shared<t_stree>(
+        pivots, m_config.get_aggregates(), m_schema, m_config);
     m_tree->init();
     m_tree->set_deltas_enabled(get_feature_state(CTX_FEAT_DELTA));
     m_traversal = std::shared_ptr<t_traversal>(new t_traversal(m_tree));
 
-    if (reset_expressions) m_expression_tables->reset();
+    if (reset_expressions)
+        m_expression_tables->reset();
 }
 
 void
@@ -559,7 +555,8 @@ t_ctx1::pprint() const {
     t_schema aggschema = aggtable->get_schema();
     auto none = mknone();
 
-    for (t_uindex aggidx = 0, loop_end = aggcols.size(); aggidx < loop_end; ++aggidx) {
+    for (t_uindex aggidx = 0, loop_end = aggcols.size(); aggidx < loop_end;
+         ++aggidx) {
         const std::string& aggname = aggschema.m_columns[aggidx];
         aggcols[aggidx] = aggtable->get_const_column(aggname).get();
     }
@@ -571,12 +568,14 @@ t_ctx1::pprint() const {
         t_index pnidx = m_tree->get_parent_idx(nidx);
 
         t_uindex agg_ridx = m_tree->get_aggidx(nidx);
-        t_index agg_pridx = pnidx == INVALID_INDEX ? INVALID_INDEX : m_tree->get_aggidx(pnidx);
+        t_index agg_pridx = pnidx == INVALID_INDEX ? INVALID_INDEX
+                                                   : m_tree->get_aggidx(pnidx);
 
         std::cout << get_row_path(ridx) << " => ";
-        for (t_index aggidx = 0, loop_end = aggcols.size(); aggidx < loop_end; ++aggidx) {
-            t_tscalar value
-                = extract_aggregate(aggspecs[aggidx], aggcols[aggidx], agg_ridx, agg_pridx);
+        for (t_index aggidx = 0, loop_end = aggcols.size(); aggidx < loop_end;
+             ++aggidx) {
+            t_tscalar value = extract_aggregate(
+                aggspecs[aggidx], aggcols[aggidx], agg_ridx, agg_pridx);
             if (!value.is_valid())
                 value.set(none); // todo: fix null handling
 
@@ -617,7 +616,8 @@ t_ctx1::compute_expressions(std::shared_ptr<t_data_table> flattened_masked) {
     // ready for the next update.
     m_expression_tables->clear_transitional_tables();
 
-    std::shared_ptr<t_data_table> master_expression_table = m_expression_tables->m_master;
+    std::shared_ptr<t_data_table> master_expression_table
+        = m_expression_tables->m_master;
 
     // Set the master table to the right size.
     t_uindex num_rows = flattened_masked->size();
@@ -627,16 +627,15 @@ t_ctx1::compute_expressions(std::shared_ptr<t_data_table> flattened_masked) {
     const auto& expressions = m_config.get_expressions();
     for (const auto& expr : expressions) {
         // Compute the expressions on the master table.
-        expr->compute(flattened_masked, master_expression_table, m_expression_vocab);
+        expr->compute(
+            flattened_masked, master_expression_table, m_expression_vocab);
     }
 }
 
 void
-t_ctx1::compute_expressions(
-    std::shared_ptr<t_data_table> master,
+t_ctx1::compute_expressions(std::shared_ptr<t_data_table> master,
     std::shared_ptr<t_data_table> flattened,
-    std::shared_ptr<t_data_table> delta,
-    std::shared_ptr<t_data_table> prev,
+    std::shared_ptr<t_data_table> delta, std::shared_ptr<t_data_table> prev,
     std::shared_ptr<t_data_table> current,
     std::shared_ptr<t_data_table> transitions,
     std::shared_ptr<t_data_table> existed) {
@@ -656,10 +655,12 @@ t_ctx1::compute_expressions(
     const auto& expressions = m_config.get_expressions();
     for (const auto& expr : expressions) {
         // master: compute based on latest state of the gnode state table
-        expr->compute(master, m_expression_tables->m_master, m_expression_vocab);
+        expr->compute(
+            master, m_expression_tables->m_master, m_expression_vocab);
 
         // flattened: compute based on the latest update dataset
-        expr->compute(flattened, m_expression_tables->m_flattened, m_expression_vocab);
+        expr->compute(
+            flattened, m_expression_tables->m_flattened, m_expression_vocab);
 
         // delta: for each numerical column, the numerical delta between the
         // previous value and the current value in the row.
@@ -669,7 +670,8 @@ t_ctx1::compute_expressions(
         expr->compute(prev, m_expression_tables->m_prev, m_expression_vocab);
 
         // current: the current values of the updated rows
-        expr->compute(current, m_expression_tables->m_current, m_expression_vocab);
+        expr->compute(
+            current, m_expression_tables->m_current, m_expression_vocab);
     }
 
     // Calculate the transitions now that the intermediate tables are computed
@@ -742,7 +744,8 @@ std::vector<std::string>
 t_ctx1::unity_get_column_names() const {
     std::vector<std::string> rv;
 
-    for (t_uindex idx = 0, loop_end = unity_get_column_count(); idx < loop_end; ++idx) {
+    for (t_uindex idx = 0, loop_end = unity_get_column_count(); idx < loop_end;
+         ++idx) {
         rv.push_back(unity_get_column_name(idx));
     }
     return rv;
@@ -752,7 +755,8 @@ std::vector<std::string>
 t_ctx1::unity_get_column_display_names() const {
     std::vector<std::string> rv;
 
-    for (t_uindex idx = 0, loop_end = unity_get_column_count(); idx < loop_end; ++idx) {
+    for (t_uindex idx = 0, loop_end = unity_get_column_count(); idx < loop_end;
+         ++idx) {
         rv.push_back(unity_get_column_display_name(idx));
     }
     return rv;
@@ -800,7 +804,8 @@ t_ctx1::get_table() const {
 
     std::stringstream ss;
     for (const auto& c : pivots) {
-        pivcols.push_back(tbl->add_column(c.colname(), m_schema.get_dtype(c.colname()), true));
+        pivcols.push_back(tbl->add_column(
+            c.colname(), m_schema.get_dtype(c.colname()), true));
     }
 
     auto idx = 0;

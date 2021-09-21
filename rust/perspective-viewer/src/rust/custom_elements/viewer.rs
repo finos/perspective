@@ -40,7 +40,7 @@ use yew::prelude::*;
 #[derive(Clone)]
 pub struct PerspectiveViewerElement {
     elem: HtmlElement,
-    root: Rc<AppHandle<PerspectiveViewer>>,
+    root: Rc<RefCell<Option<AppHandle<PerspectiveViewer>>>>,
     session: Session,
     renderer: Renderer,
     subscriptions: Rc<[Subscription; 4]>,
@@ -72,7 +72,10 @@ impl PerspectiveViewerElement {
             weak_link: WeakComponentLink::default(),
         };
 
-        let root = Rc::new(yew::start_app_with_props_in_element(shadow_root, props));
+        let root = Rc::new(RefCell::new(Some(yew::start_app_with_props_in_element(
+            shadow_root,
+            props,
+        ))));
 
         // Create callbacks
         let update_sub = session.on_update.add_listener({
@@ -96,7 +99,11 @@ impl PerspectiveViewerElement {
         });
 
         let limit_sub = {
-            let callback = root.callback(|x| Msg::RenderLimits(Some(x)));
+            let callback = root
+                .borrow()
+                .as_ref()
+                .unwrap()
+                .callback(|x| Msg::RenderLimits(Some(x)));
             renderer.on_limits_changed.add_listener(callback)
         };
 
@@ -137,12 +144,20 @@ impl PerspectiveViewerElement {
         })
     }
 
-    /// Delete the `View` and all associated state, returning this viewer to its
-    /// initialization state.  Does not delete the supplied `Table` (as this is
-    /// constructed by the callee).
-    pub fn js_delete(&self) -> Result<bool, JsValue> {
+    /// Delete the `View` and all associated state, rendering this
+    /// `<perspective-viewer>` unusable and freeing all associated resources.
+    /// Does not delete the supplied `Table` (as this is constructed by the
+    /// callee).  Allowing a `<perspective-viewer>` to be garbage-collected
+    /// without calling `delete()` will leak WASM memory.
+    pub fn js_delete(&mut self) -> Result<bool, JsValue> {
         self.renderer.delete()?;
-        Ok(self.session.delete())
+        let result = self.session.delete();
+        self.root
+            .borrow_mut()
+            .take()
+            .ok_or("Already deleted!")?
+            .destroy();
+        Ok(result)
     }
 
     /// Get the underlying `Table` for this viewer.
@@ -219,9 +234,9 @@ impl PerspectiveViewerElement {
 
             let plugin_changed = renderer.update_plugin(plugin)?;
             if plugin_changed {
-                session.set_update_column_defaults(&mut view_config, &renderer.metadata());
+                session
+                    .set_update_column_defaults(&mut view_config, &renderer.metadata());
             }
-            
             session.update_view_config(view_config);
             let settings = Some(settings.clone());
             let draw_task = renderer.draw(async {
@@ -232,7 +247,10 @@ impl PerspectiveViewerElement {
                 }
 
                 let result = session.validate().await.create_view().await;
-                root.send_message(Msg::ApplySettings(settings));
+                root.borrow()
+                    .as_ref()
+                    .ok_or("Already deleted!")?
+                    .send_message(Msg::ApplySettings(settings));
                 result
             });
 
@@ -248,11 +266,16 @@ impl PerspectiveViewerElement {
     /// - `format` Supports "json" (default), "arraybuffer" or "string".
     pub fn js_save(&self, format: Option<String>) -> js_sys::Promise {
         let (sender, receiver) = channel::<bool>();
-        let msg = Msg::QuerySettings(sender);
-        self.root.send_message(msg);
+        let root = self.root.clone();
         let view_config = self.session.get_view_config();
         let js_plugin = self.renderer.get_active_plugin();
         future_to_promise(async move {
+            let msg = Msg::QuerySettings(sender);
+            root.borrow()
+                .as_ref()
+                .ok_or(js_intern!("Already deleted!"))?
+                .send_message(msg);
+
             let settings = receiver.await.into_jserror()?;
             let js_plugin = js_plugin?;
             let plugin = js_plugin.name();
@@ -323,8 +346,12 @@ impl PerspectiveViewerElement {
     /// Reset the viewer's `ViewerConfig` to the default.
     pub fn js_reset(&self) -> js_sys::Promise {
         let (sender, receiver) = channel::<()>();
-        self.root.send_message(Msg::Reset(Some(sender)));
+        let root = self.root.clone();
         promisify_ignore_view_delete(async move {
+            root.borrow()
+                .as_ref()
+                .ok_or("Already deleted!")?
+                .send_message(Msg::Reset(Some(sender)));
             receiver.await.map_err(|_| JsValue::from("Cancelled"))?;
             Ok(JsValue::UNDEFINED)
         })
@@ -386,8 +413,12 @@ impl PerspectiveViewerElement {
     pub fn js_toggle_config(&self, force: Option<bool>) -> js_sys::Promise {
         let (sender, receiver) = channel::<Result<JsValue, JsValue>>();
         let msg = Msg::ToggleSettings(force.map(SettingsUpdate::Update), Some(sender));
-        self.root.send_message(msg);
+        let root = self.root.clone();
         promisify_ignore_view_delete(async move {
+            root.borrow()
+                .as_ref()
+                .expect("Already deleted!")
+                .send_message(msg);
             receiver.await.map_err(|_| JsValue::from("Cancelled"))?
         })
     }
@@ -438,4 +469,3 @@ fn dispatch_config_update(elem: &HtmlElement, session: &Session) {
 
     elem.dispatch_event(&event.unwrap()).unwrap();
 }
-

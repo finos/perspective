@@ -5,8 +5,10 @@ const hashes = JSON.parse(fs.readFileSync("gists.json"));
 
 const replacements = {
     "/node_modules/": "https://unpkg.com/",
-    "perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js": "perspective-viewer-datagrid",
-    "perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js": "perspective-viewer-d3fc"
+    "perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js":
+        "perspective-viewer-datagrid",
+    "perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js":
+        "perspective-viewer-d3fc",
 
     // TODO jsdelivr has slightly different logic for trailing '/' that causes
     // the wasm assets to not load correctly when using aliases ..
@@ -30,9 +32,14 @@ for (const name of Object.keys(hashes)) {
         for (const filename of fs.readdirSync(`src/${name}`)) {
             execute`mkdir -p dist/${name}`;
             if (filename.endsWith(".js") || filename.endsWith(".html")) {
-                let filecontents = fs.readFileSync(`src/${name}/${filename}`).toString();
+                let filecontents = fs
+                    .readFileSync(`src/${name}/${filename}`)
+                    .toString();
                 for (const pattern of Object.keys(replacements)) {
-                    filecontents = filecontents.replace(new RegExp(pattern, "g"), replacements[pattern]);
+                    filecontents = filecontents.replace(
+                        new RegExp(pattern, "g"),
+                        replacements[pattern]
+                    );
                 }
                 fs.writeFileSync(`dist/${name}/${filename}`, filecontents);
             } else if (filename !== ".git") {

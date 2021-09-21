@@ -11,12 +11,17 @@
 
 namespace perspective {
 
-class PerspectiveException: public std::exception {
+class PerspectiveException : public std::exception {
 public:
-    explicit PerspectiveException(const char* m) : message{m} {}
-    virtual const char* what() const noexcept override {return message.c_str();}
+    explicit PerspectiveException(const char* m)
+        : message{m} {}
+    virtual const char*
+    what() const noexcept override {
+        return message.c_str();
+    }
+
 private:
     std::string message = "";
 };
 
-}
+} // namespace perspective
