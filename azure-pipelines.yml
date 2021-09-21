@@ -365,8 +365,8 @@ jobs:
 
   steps:
     - ${{ parameters.initSteps }}
-    # - ${{ parameters.linuxInitSteps }}
-    # - ${{ parameters.pythonBuildSteps }}
+    - ${{ parameters.linuxInitSteps }}
+    - ${{ parameters.pythonBuildSteps }}
     - ${{ parameters.pythonSDistSteps }}
 
 
