@@ -133,7 +133,7 @@ parameters:
     type: stepList
     default:
       # Build a python sdist
-      - bash: export SDIST_PUBLISH_NAME=perspective-python-$(Build.SourceBranchName)-$(Build.BuildId)-$(pipeline.startTime).tar.gz && cd $(System.DefaultWorkingDirectory)/python/perspective && ./scripts/build_sdist.sh
+      - bash: export SDIST_PUBLISH_NAME=perspective-python-$(Build.SourceBranchName)-$(Build.BuildId).tar.gz && cd $(System.DefaultWorkingDirectory)/python/perspective && ./scripts/build_sdist.sh
         displayName: 'Build sdist'
 
 
@@ -141,7 +141,7 @@ parameters:
       - task: PublishPipelineArtifact@1
         inputs:
           targetPath: '$(System.DefaultWorkingDirectory)/python/perspective/dist/'
-          artifactName: 'perspective-python-$(Build.SourceBranchName)-$(Build.BuildId)-$(pipeline.startTime).tar.gz'
+          artifactName: 'perspective-python-$(Build.SourceBranchName)-$(Build.BuildId).tar.gz'
 
   - name: pythonMacWheelSteps
     type: stepList
