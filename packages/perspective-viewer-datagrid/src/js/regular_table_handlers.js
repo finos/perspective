@@ -22,47 +22,53 @@ function styleListener(regularTable) {
     let group_headers = Array.from(
         regularTable.children[0].children[0].children
     );
-    let [col_headers] = group_headers.splice(group_headers.length - 1, 1);
+
     const plugins = regularTable[PLUGIN_SYMBOL] || {};
+    if (group_headers.length > 0) {
+        let [col_headers] = group_headers.splice(group_headers.length - 1, 1);
 
-    for (const td of col_headers?.children) {
-        const metadata = regularTable.getMeta(td);
-        const column_name =
-            metadata.column_header?.[metadata.column_header?.length - 1];
-        const sort = this._config.sort.find((x) => x[0] === column_name);
-        let needs_border = metadata.row_header_x === header_depth;
-        const is_corner = typeof metadata.x === "undefined";
-        needs_border =
-            needs_border ||
-            (metadata.x + 1) % this._config.columns.length === 0;
-        td.classList.toggle("psp-header-border", needs_border);
-        td.classList.toggle("psp-header-group", false);
-        td.classList.toggle("psp-header-leaf", true);
-        td.classList.toggle("psp-is-top", false);
-        td.classList.toggle("psp-header-corner", is_corner);
-        td.classList.toggle("psp-header-sort-asc", !!sort && sort[1] === "asc");
-        td.classList.toggle(
-            "psp-header-sort-desc",
-            !!sort && sort[1] === "desc"
-        );
-        td.classList.toggle(
-            "psp-header-sort-col-asc",
-            !!sort && sort[1] === "col asc"
-        );
-        td.classList.toggle(
-            "psp-header-sort-col-desc",
-            !!sort && sort[1] === "col desc"
-        );
+        for (const td of col_headers?.children) {
+            const metadata = regularTable.getMeta(td);
+            const column_name =
+                metadata.column_header?.[metadata.column_header?.length - 1];
+            const sort = this._config.sort.find((x) => x[0] === column_name);
+            let needs_border = metadata.row_header_x === header_depth;
+            const is_corner = typeof metadata.x === "undefined";
+            needs_border =
+                needs_border ||
+                (metadata.x + 1) % this._config.columns.length === 0;
+            td.classList.toggle("psp-header-border", needs_border);
+            td.classList.toggle("psp-header-group", false);
+            td.classList.toggle("psp-header-leaf", true);
+            td.classList.toggle("psp-is-top", false);
+            td.classList.toggle("psp-header-corner", is_corner);
+            td.classList.toggle(
+                "psp-header-sort-asc",
+                !!sort && sort[1] === "asc"
+            );
+            td.classList.toggle(
+                "psp-header-sort-desc",
+                !!sort && sort[1] === "desc"
+            );
+            td.classList.toggle(
+                "psp-header-sort-col-asc",
+                !!sort && sort[1] === "col asc"
+            );
+            td.classList.toggle(
+                "psp-header-sort-col-desc",
+                !!sort && sort[1] === "col desc"
+            );
 
-        let type = get_psp_type.call(this, metadata);
-        const is_numeric = type === "integer" || type === "float";
-        td.classList.toggle("psp-align-right", is_numeric);
-        td.classList.toggle("psp-align-left", !is_numeric);
-        td.classList.toggle(
-            "psp-menu-open",
-            this._open_column_styles_menu[0] === metadata._virtual_x
-        );
-        td.classList.toggle("psp-menu-enabled", is_numeric && !is_corner);
+            let type = get_psp_type.call(this, metadata);
+            const is_numeric = type === "integer" || type === "float";
+            td.classList.toggle("psp-align-right", is_numeric);
+            td.classList.toggle("psp-align-left", !is_numeric);
+            td.classList.toggle(
+                "psp-menu-open",
+                this._open_column_styles_menu[0] === metadata._virtual_x
+            );
+            td.classList.toggle("psp-menu-enabled", is_numeric && !is_corner);
+        }
     }
 
     const m = [];
