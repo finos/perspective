@@ -274,17 +274,17 @@ export class PerspectiveView extends DOMWidgetView {
             } else if (msg.data["table_name"]) {
                 // Get a remote table handle from the Jupyter kernel, and mirror
                 // the table on the client, setting up editing if necessary.
-                const kernel_table = this.perspective_client.open_table(
-                    msg.data["table_name"]
-                );
-                const kernel_view = kernel_table.view();
-                kernel_view.then((kernel_view) => {
-                    kernel_view.to_arrow().then(async (arrow) => {
+                this.perspective_client
+                    .open_table(msg.data["table_name"])
+                    .then((kernel_table) => kernel_table.view())
+                    .then((kernel_view) => kernel_view.to_arrow())
+                    .then(async (arrow) => {
                         // Create a client side table
                         const client_table = this.client_worker.table(
                             arrow,
                             table_options
-                        ); //.then(client_table => {
+                        );
+
                         const client_table2 = await client_table;
                         if (this.pWidget.editable) {
                             // Set up client/server editing
@@ -328,7 +328,6 @@ export class PerspectiveView extends DOMWidgetView {
                                     mode: "row",
                                 }
                             );
-                            // });
                         } else {
                             // Load the table and mirror updates from the
                             // kernel.
@@ -341,9 +340,7 @@ export class PerspectiveView extends DOMWidgetView {
                                 }
                             );
                         }
-                        // });
                     });
-                });
             } else {
                 throw new Error(
                     `PerspectiveWidget cannot load data from kernel message: ${JSON.stringify(
