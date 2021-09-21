@@ -10,7 +10,6 @@ SDIST_NAME=perspective-python
 SDIST_VERSION=`git describe --abbrev=0 --tags  | cut -c2-`
 SDIST_FULL_NAME=$SDIST_NAME-$SDIST_VERSION
 SDIST_FULL_NAME_TAR=$SDIST_FULL_NAME.tar.gz
-SDIST_PUBLISH_NAME=$SDIST_PUBLISH_NAME.tar.gz
 
 # Remove build assets
 rm -rf perspective/table/*.{so,dll}
@@ -38,13 +37,6 @@ echo "-----------------------"
 echo "Testing sdist-built assets"
 
 python3 -c "import perspective;print(perspective.is_libpsp())"
-
-# rename asset to be uploaded
-echo "-----------------------"
-echo "Renaming assets for CI publish"
-
-cd ../../
-mv ./dist/$SDIST_FULL_NAME_TAR ./dist/$SDIST_PUBLISH_NAME 
 
 echo "-----------------------"
 echo "Done.."
