@@ -27,6 +27,44 @@ class TestViewExpression(object):
         assert view.to_columns() == {"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]}
         assert view.expression_schema() == {}
 
+    def test_view_expression_schema_all_types(self):
+        table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
+        view = table.view(expressions=[
+            '"a"',
+            '"b" * 0.5',
+            "'abcdefg'",
+            "True and False",
+            'float("a") > 2 ? null : 1',
+            "today()",
+            "now()",
+            "length('abcd')"
+        ])
+        assert view.expression_schema() == {
+            '"a"': int,
+            '"b" * 0.5': float,
+            "'abcdefg'": str,
+            "True and False": bool,
+            'float("a") > 2 ? null : 1': float,
+            "today()": date,
+            "now()": datetime,
+            "length('abcd')": float
+        }
+
+        result = view.to_columns()
+        today = datetime(date.today().year, date.today().month, date.today().day)
+        del result["now()"]  # no need to match datetime.now()
+        assert result == {
+            "a": [1, 2, 3, 4],
+            "b": [5, 6, 7, 8],
+            '"a"': [1, 2, 3, 4],
+            '"b" * 0.5': [2.5, 3, 3.5, 4],
+            "'abcdefg'": ['abcdefg' for _ in range(4)],
+            "True and False": [False for _ in range(4)],
+            'float("a") > 2 ? null : 1': [1, 1, None, None],
+            "today()": [today for _ in range(4)],
+            "length('abcd')": [4 for _ in range(4)]
+        }
+
     def test_table_validate_expressions_with_errors(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         validate = table.validate_expressions(
@@ -66,7 +104,6 @@ class TestViewExpression(object):
         }
         assert view.expression_schema() == {"computed": float}
 
-
     def test_view_streaming_expression(self):
         def data():
             return [{"a": random()} for _ in range(50)]
@@ -74,7 +111,7 @@ class TestViewExpression(object):
         table = Table(data())
         view = table.view(expressions=["123"])
 
-        for i in range(5):
+        for _ in range(5):
             table.update(data())
         
         assert table.size() == 300
@@ -88,7 +125,7 @@ class TestViewExpression(object):
         table = Table(data(), limit=50)
         view = table.view(expressions=["123"])
 
-        for i in range(5):
+        for _ in range(5):
             table.update(data())
         
         assert table.size() == 50
@@ -102,10 +139,13 @@ class TestViewExpression(object):
         table = Table(data())
         view = table.view(row_pivots=["c0"], expressions=['//c0\n"a" * 2'])
 
-        for i in range(5):
+        for _ in range(5):
             table.update(data())
         
         assert table.size() == 300
+        assert view.expression_schema() == {
+            "c0": float
+        }
 
     def test_view_streaming_expression_two(self):
         def data():
@@ -118,6 +158,9 @@ class TestViewExpression(object):
             table.update(data())
         
         assert table.size() == 300
+        assert view.expression_schema() == {
+            "c0": float
+        }
 
     def test_view_expression_create_no_alias(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})

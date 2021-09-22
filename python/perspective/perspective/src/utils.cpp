@@ -127,7 +127,7 @@ scalar_to_py(const t_tscalar& scalar, bool cast_double, bool cast_string) {
     
     switch (scalar.get_dtype()) {
         case DTYPE_BOOL: {
-            if (scalar) {
+            if (scalar.as_bool()) {
                 return py::cast(true);
             } else {
                 return py::cast(false);
