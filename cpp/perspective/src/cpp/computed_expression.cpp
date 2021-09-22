@@ -59,6 +59,9 @@ computed_function::to_integer t_computed_expression_parser::TO_INTEGER_FN
 computed_function::to_float t_computed_expression_parser::TO_FLOAT_FN
     = computed_function::to_float();
 
+computed_function::to_boolean t_computed_expression_parser::TO_BOOLEAN_FN
+    = computed_function::to_boolean();
+
 computed_function::make_datetime t_computed_expression_parser::MAKE_DATETIME_FN
     = computed_function::make_datetime();
 
@@ -142,6 +145,8 @@ t_computed_expression_parser::FALSE_SCALAR = mktscalar(false);
     sym_table.add_function(                                                    \
         "float", t_computed_expression_parser::TO_FLOAT_FN);                   \
     sym_table.add_function(                                                    \
+        "boolean", t_computed_expression_parser::TO_BOOLEAN_FN);               \
+    sym_table.add_function(                                                    \
         "date", t_computed_expression_parser::MAKE_DATE_FN);                   \
     sym_table.add_function(                                                    \
         "datetime", t_computed_expression_parser::MAKE_DATETIME_FN);
@@ -184,6 +189,8 @@ t_computed_expression_parser::FALSE_SCALAR = mktscalar(false);
         "integer", t_computed_expression_parser::TO_INTEGER_FN);               \
     sym_table.add_function(                                                    \
         "float", t_computed_expression_parser::TO_FLOAT_FN);                   \
+    sym_table.add_function(                                                    \
+        "boolean", t_computed_expression_parser::TO_BOOLEAN_FN);               \
     sym_table.add_function(                                                    \
         "date", t_computed_expression_parser::MAKE_DATE_FN);                   \
     sym_table.add_function(                                                    \

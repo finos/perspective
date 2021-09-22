@@ -159,7 +159,8 @@ class TestViewExpression(object):
         
         assert table.size() == 300
         assert view.expression_schema() == {
-            "c0": float
+            "c0": float,
+            "c1": int  # pivoted
         }
 
     def test_view_expression_create_no_alias(self):
