@@ -19,6 +19,7 @@ use super::containers::dropdown::*;
 use chrono::{Local, NaiveDate, NaiveDateTime, TimeZone, Utc};
 use web_sys::*;
 use yew::prelude::*;
+use wasm_bindgen::JsCast;
 
 /// A control for a single filter condition.
 pub struct FilterItem {
@@ -105,6 +106,12 @@ impl FilterItemProperties {
                 } else {
                     None
                 }
+            }
+            (Type::Bool, FilterTerm::Scalar(Scalar::Bool(x))) => {
+                Some((if *x { "true" } else { "false" }).to_owned())
+            }
+            (Type::Bool, _) => {
+                Some("true".to_owned())
             }
             (_, x) => Some(format!("{}", x)),
         }
@@ -216,7 +223,13 @@ impl FilterItemProperties {
                         },
                     )
                 }
-                _ => {}
+                Type::Bool => {
+                    filter_item.1 = FilterOp::EQ;
+                    filter_item.2 = FilterTerm::Scalar(match val.as_str() {
+                        "true" => Scalar::Bool(true),
+                        _ => Scalar::Bool(false),
+                    });
+                }
             },
         }
 
@@ -238,19 +251,32 @@ impl Component for FilterItem {
     fn create(props: FilterItemProperties, link: ComponentLink<Self>) -> Self {
         let input = props.get_filter_input().unwrap_or_else(|| "".to_owned());
         let input_ref = NodeRef::default();
+        if props.get_filter_type() == Type::Bool {
+            props.update_filter_value(input.clone());
+        }
+
         FilterItem { props, link, input, input_ref }
     }
 
     fn update(&mut self, msg: FilterItemMsg) -> bool {
         match msg {
             FilterItemMsg::FilterInput(column, input) => {
-                self.input = input.clone();
-                let target = self.input_ref.cast::<HtmlElement>().unwrap();
+                let target = self.input_ref.cast::<HtmlInputElement>().unwrap();
+                let input = if self.props.get_filter_type() == Type::Bool {
+                    if target.checked() {
+                        "true".to_owned()
+                    } else {
+                        "false".to_owned()
+                    }
+                } else {
+                    input
+                };
+                
                 if self.props.is_suggestable() {
                     self.props.filter_dropdown.autocomplete(
                         column,
                         input.clone(),
-                        target,
+                        target.unchecked_into(),
                         self.props.on_keydown.clone(),
                     );
                 }
@@ -426,9 +452,15 @@ impl Component for FilterItem {
                     value={ self.input.clone() }
                     oninput={ input }/>
             },
-            _ => {
-                html! {}
-            }
+            Type::Bool => {
+                html! {
+                    <input
+                        type="checkbox"
+                        ref={ noderef.clone() }
+                        checked={ self.input == "true" }
+                        oninput={ input }/>
+                }
+            },
         };
 
         let filter_ops = self
@@ -448,24 +480,39 @@ impl Component for FilterItem {
                         filter.0.to_owned()
                     }
                 </span>
-                <FilterOpSelector
-                    class="filter-op-selector"
-                    auto_resize=true
-                    values={ filter_ops }
-                    selected={ filter.1 }
-                    on_select={ select }>
-                </FilterOpSelector>
                 {
-                    match &filter.1 {
-                        FilterOp::IsNull | FilterOp::IsNotNull => html! {},
-                        _ => html! {
-                            <label
-                                class={ format!("input-sizer {}", type_class) }
-                                data-value={ format!("{}", filter.2) }>
-                                {
-                                    input_elem
-                                }
-                            </label>
+                    if col_type == Type::Bool {
+                        html! {
+                            { input_elem }
+                        }
+                    } else if matches!(&filter.1, FilterOp::IsNotNull | FilterOp::IsNull) {
+                        html! {
+                            <FilterOpSelector
+                                class="filter-op-selector"
+                                auto_resize=true
+                                values={ filter_ops }
+                                selected={ filter.1 }
+                                on_select={ select }>
+                            </FilterOpSelector>
+                        }
+                    } else {
+                        html! {
+                            <>
+                                <FilterOpSelector
+                                    class="filter-op-selector"
+                                    auto_resize=true
+                                    values={ filter_ops }
+                                    selected={ filter.1 }
+                                    on_select={ select }>
+                                </FilterOpSelector>
+                                <label
+                                    class={ format!("input-sizer {}", type_class) }
+                                    data-value={ format!("{}", filter.2) }>
+                                    {
+                                        input_elem
+                                    }
+                                </label>
+                            </>
                         }
                     }
                 }
