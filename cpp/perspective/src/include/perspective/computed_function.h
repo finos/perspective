@@ -224,6 +224,15 @@ namespace computed_function {
     FUNCTION_HEADER(make_date)
 
     /**
+     * @brief Convert a column or scalar to a boolean, which returns True if the
+     * value is truthy or False otherwise.
+     * 
+     * boolean(1)
+     * boolean(null)
+     */
+    FUNCTION_HEADER(to_boolean)
+
+    /**
      * @brief Given a POSIX timestamp of milliseconds since epoch, create a
      * new datetime value.
      */

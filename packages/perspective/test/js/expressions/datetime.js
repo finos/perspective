@@ -47,8 +47,20 @@ module.exports = (perspective) => {
             });
 
             let result = await view.to_columns();
-            expect(result['"a" == "b"']).toEqual([1, 1, 1, 1, 0]);
-            expect(result['"a" != "b"']).toEqual([0, 0, 0, 0, 1]);
+            expect(result['"a" == "b"']).toEqual([
+                true,
+                true,
+                true,
+                true,
+                false,
+            ]);
+            expect(result['"a" != "b"']).toEqual([
+                false,
+                false,
+                false,
+                false,
+                true,
+            ]);
             expect(result['"a" == "b" ? 100 : 0']).toEqual([
                 100, 100, 100, 100, 0,
             ]);
@@ -88,8 +100,20 @@ module.exports = (perspective) => {
             });
 
             let result = await view.to_columns();
-            expect(result['"a" > "b"']).toEqual([0, 0, 1, 1, 0]);
-            expect(result['"a" >= "b"']).toEqual([0, 0, 1, 1, 1]);
+            expect(result['"a" > "b"']).toEqual([
+                false,
+                false,
+                true,
+                true,
+                false,
+            ]);
+            expect(result['"a" >= "b"']).toEqual([
+                false,
+                false,
+                true,
+                true,
+                true,
+            ]);
             expect(result['"a" >= "b" ? 100 : 0']).toEqual([
                 0, 0, 100, 100, 100,
             ]);
@@ -129,8 +153,20 @@ module.exports = (perspective) => {
             });
 
             let result = await view.to_columns();
-            expect(result['"a" < "b"']).toEqual([1, 1, 0, 0, 0]);
-            expect(result['"a" <= "b"']).toEqual([1, 1, 0, 0, 1]);
+            expect(result['"a" < "b"']).toEqual([
+                true,
+                true,
+                false,
+                false,
+                false,
+            ]);
+            expect(result['"a" <= "b"']).toEqual([
+                true,
+                true,
+                false,
+                false,
+                true,
+            ]);
             expect(result['"a" <= "b" ? 100 : 0']).toEqual([
                 100, 100, 0, 0, 100,
             ]);
@@ -154,7 +190,7 @@ module.exports = (perspective) => {
             });
 
             let result = await view.to_columns();
-            expect(result['today() == "a"']).toEqual([1, 1, 1]);
+            expect(result['today() == "a"']).toEqual([true, true, true]);
             view.delete();
             table.delete();
         });

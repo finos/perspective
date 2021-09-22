@@ -524,7 +524,13 @@ module.exports = (perspective) => {
             let result = await view.to_columns();
 
             // null == null is true here
-            expect(result['"a" == "b"']).toEqual([1, 0, 1, 1, 1]);
+            expect(result['"a" == "b"']).toEqual([
+                true,
+                false,
+                true,
+                true,
+                true,
+            ]);
             view.delete();
             table.delete();
         });
@@ -544,7 +550,7 @@ module.exports = (perspective) => {
             let result = await view.to_columns();
             expect(
                 result[`concat("a", ', ', "b") == concat("a", ', ', "b")`]
-            ).toEqual([1, 1, 1, 1, 1]);
+            ).toEqual([true, true, true, true, true]);
             view.delete();
             table.delete();
         });
@@ -560,7 +566,13 @@ module.exports = (perspective) => {
             });
 
             let result = await view.to_columns();
-            expect(result['"a" == "b"']).toEqual([1, 0, 0, 0, 1]);
+            expect(result['"a" == "b"']).toEqual([
+                true,
+                false,
+                false,
+                false,
+                true,
+            ]);
             view.delete();
             table.delete();
         });
@@ -588,8 +600,13 @@ module.exports = (perspective) => {
             });
 
             let result = await view.to_columns();
-            console.log(result);
-            expect(result['"a" == "b"']).toEqual([1, 1, 1, 0, 1]);
+            expect(result['"a" == "b"']).toEqual([
+                true,
+                true,
+                true,
+                false,
+                true,
+            ]);
             view.delete();
             table.delete();
         });
@@ -605,7 +622,13 @@ module.exports = (perspective) => {
             });
 
             let result = await view.to_columns();
-            expect(result['"a" == "b"']).toEqual([0, 1, 0, 1, 1]);
+            expect(result['"a" == "b"']).toEqual([
+                false,
+                true,
+                false,
+                true,
+                true,
+            ]);
             view.delete();
             table.delete();
         });
@@ -633,7 +656,13 @@ module.exports = (perspective) => {
             });
 
             let result = await view.to_columns();
-            expect(result['"a" == "b"']).toEqual([0, 0, 0, 0, 0]);
+            expect(result['"a" == "b"']).toEqual([
+                false,
+                false,
+                false,
+                false,
+                false,
+            ]);
             view.delete();
             table.delete();
         });
@@ -659,7 +688,13 @@ module.exports = (perspective) => {
                 expressions: ['"a" == "b"'],
             });
             let result = await view.to_columns();
-            expect(result['"a" == "b"']).toEqual([1, 1, 1, 1, 0]);
+            expect(result['"a" == "b"']).toEqual([
+                true,
+                true,
+                true,
+                true,
+                false,
+            ]);
             view.delete();
             table.delete();
         });
@@ -685,7 +720,13 @@ module.exports = (perspective) => {
                 expressions: ['"a" == "b"'],
             });
             let result = await view.to_columns();
-            expect(result['"a" == "b"']).toEqual([1, 1, 1, 1, 0]);
+            expect(result['"a" == "b"']).toEqual([
+                true,
+                true,
+                true,
+                true,
+                false,
+            ]);
             view.delete();
             table.delete();
         });

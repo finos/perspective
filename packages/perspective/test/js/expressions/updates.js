@@ -99,14 +99,19 @@ module.exports = (perspective) => {
                 // don't work as of yet.
                 expressions: [
                     'if ("x" > 4) 10; else 100',
-                    `"y" == 'A' ? true : false`,
+                    `"y" == 'A' ? True : False`,
                 ],
             });
             const before = await view.to_columns();
             expect(before['if ("x" > 4) 10; else 100']).toEqual([
                 100, 100, 100, 10,
             ]);
-            expect(before[`"y" == 'A' ? true : false`]).toEqual([1, 0, 0, 0]);
+            expect(before[`"y" == 'A' ? True : False`]).toEqual([
+                true,
+                false,
+                false,
+                false,
+            ]);
 
             table.update({x: [5, 6, 7], y: ["A", "A", "B"]});
 
@@ -114,8 +119,14 @@ module.exports = (perspective) => {
             expect(after['if ("x" > 4) 10; else 100']).toEqual([
                 100, 100, 100, 10, 10, 10, 10,
             ]);
-            expect(after[`"y" == 'A' ? true : false`]).toEqual([
-                1, 0, 0, 0, 1, 1, 0,
+            expect(after[`"y" == 'A' ? True : False`]).toEqual([
+                true,
+                false,
+                false,
+                false,
+                true,
+                true,
+                false,
             ]);
 
             view.delete();
@@ -287,14 +298,19 @@ module.exports = (perspective) => {
             const view = await table.view({
                 expressions: [
                     'if ("x" > 4) 10; else 100',
-                    `"z" == 'a' ? true : false`,
+                    `"z" == 'a' ? True : False`,
                 ],
             });
             const before = await view.to_columns();
             expect(before['if ("x" > 4) 10; else 100']).toEqual([
                 100, 100, 100, 10,
             ]);
-            expect(before[`"z" == 'a' ? true : false`]).toEqual([1, 0, 0, 0]);
+            expect(before[`"z" == 'a' ? True : False`]).toEqual([
+                true,
+                false,
+                false,
+                false,
+            ]);
             table.update({
                 x: [5, 6, 7],
                 y: ["A", "C", "D"],
@@ -305,7 +321,12 @@ module.exports = (perspective) => {
             expect(after['if ("x" > 4) 10; else 100']).toEqual([
                 10, 100, 10, 10,
             ]);
-            expect(after[`"z" == 'a' ? true : false`]).toEqual([1, 0, 1, 1]);
+            expect(after[`"z" == 'a' ? True : False`]).toEqual([
+                true,
+                false,
+                true,
+                true,
+            ]);
             view.delete();
             table.delete();
         });

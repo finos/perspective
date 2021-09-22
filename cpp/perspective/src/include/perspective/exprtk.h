@@ -162,8 +162,8 @@ namespace details {
 // called, but enabling this ifdef creates a litany of compiler warnings
 // about misleading indentation inside exprtk.hpp. Considering that the UI
 // will not allow while/continue to be used, this should be ok.
-
 // #define exprtk_disable_break_continue
+
 #define exprtk_disable_return_statement
 #define exprtk_disable_rtl_io_file
 #include <exprtk.hpp>
@@ -983,8 +983,7 @@ namespace details {
 
                 // booleans need to return numeric scalars, otherwise they will
                 // not work inside a conditional for some reason.
-                rval.set(static_cast<double>(
-                    static_cast<bool>(v0) && static_cast<bool>(v1)));
+                rval.set(v0.as_bool() && v1.as_bool());
                 return rval;
             }
 
@@ -993,8 +992,7 @@ namespace details {
             or_impl(
                 const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
                 t_tscalar rval;
-                rval.set(static_cast<double>(
-                    static_cast<bool>(v0) || static_cast<bool>(v1)));
+                rval.set(v0.as_bool() || v1.as_bool());
                 return rval;
             }
 
@@ -1003,7 +1001,7 @@ namespace details {
             xor_impl(
                 const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
                 t_tscalar rval;
-                rval.set(static_cast<double>(!v0 != !v1));
+                rval.set(!v0.as_bool() != !v1.as_bool());
                 return rval;
             }
 
@@ -1012,8 +1010,7 @@ namespace details {
             nand_impl(
                 const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
                 t_tscalar rval;
-                rval.set(static_cast<double>(
-                    !(static_cast<bool>(v0) && static_cast<bool>(v1))));
+                rval.set(!(v0.as_bool() && v1.as_bool()));
                 return rval;
             }
 
@@ -1022,8 +1019,7 @@ namespace details {
             nor_impl(
                 const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
                 t_tscalar rval;
-                rval.set(static_cast<double>(
-                    !(static_cast<bool>(v0) || static_cast<bool>(v1))));
+                rval.set(!(v0.as_bool() || v1.as_bool()));
                 return rval;
             }
 
@@ -1032,8 +1028,7 @@ namespace details {
             xnor_impl(
                 const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
                 t_tscalar rval;
-                rval.set(static_cast<double>(
-                    static_cast<bool>(v0) == static_cast<bool>(v1)));
+                rval.set(v0.as_bool() == v1.as_bool());
                 return rval;
             }
 
@@ -1066,7 +1061,7 @@ namespace details {
 
     inline bool
     is_true(const t_tscalar& v) {
-        return static_cast<bool>(v);
+        return v.as_bool();
     }
 
     inline bool

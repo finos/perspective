@@ -126,6 +126,9 @@ public:
 
     static std::shared_ptr<exprtk::parser<t_tscalar>> PARSER;
 
+    // Applied to the parser
+    static std::size_t PARSER_COMPILE_OPTIONS;
+
     // Instances of Exprtk functions
     static computed_function::bucket BUCKET_FN;
     static computed_function::hour_of_day HOUR_OF_DAY_FN;
@@ -147,6 +150,10 @@ public:
     static computed_function::to_float TO_FLOAT_FN;
     static computed_function::make_date MAKE_DATE_FN;
     static computed_function::make_datetime MAKE_DATETIME_FN;
+
+    // constants for True and False as DTYPE_BOOL scalars
+    static t_tscalar TRUE_SCALAR;
+    static t_tscalar FALSE_SCALAR;
 };
 
 /**

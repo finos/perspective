@@ -50,8 +50,11 @@ bool operator>(const std::size_t& lhs, const t_tscalar& rhs) {
  * @param value
  */
 t_tscalar::t_tscalar(int v) {
-    // set<double>() returns a scalar with DTYPE_FLOAT64.
-    this->set(static_cast<double>(v));
+    if (v == 0 || v == 1) {
+        this->set(static_cast<bool>(v));
+    } else {
+        this->set(static_cast<double>(v));
+    }
 }
 
 bool

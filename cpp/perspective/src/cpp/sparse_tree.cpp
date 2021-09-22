@@ -1231,21 +1231,17 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info,
                 old_value.set(dst->get_scalar(dst_ridx));
                 auto pkeys = get_pkeys(nidx);
 
-                new_value.set(
-                    reduce_from_gstate<std::function<t_tscalar(std::vector<t_tscalar>&)>>(
-                        gstate,
-                        expression_master_table,
-                        spec.get_dependencies()[0].name(),
-                        pkeys,
-                        [](std::vector<t_tscalar>& values) {
-                            t_tscalar rval;
-                            rval.set(true);
+                new_value.set(reduce_from_gstate<
+                    std::function<t_tscalar(std::vector<t_tscalar>&)>>(gstate,
+                    expression_master_table, spec.get_dependencies()[0].name(),
+                    pkeys, [](std::vector<t_tscalar>& values) {
+                        t_tscalar rval;
+                        rval.set(true);
 
-                            for (const auto& v : values) {
-                                if (!v.as_bool()) {
-                                    rval.set(false);
-                                    break;
-                                }
+                        for (const auto& v : values) {
+                            if (!v.as_bool()) {
+                                rval.set(false);
+                                break;
                             }
                         }
                         return rval;

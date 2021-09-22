@@ -1196,17 +1196,13 @@ namespace computed_function {
 
         t_tscalar rval;
         rval.clear();
-
-        // Return a float so we can use it in conditionals
-        rval.m_type = DTYPE_FLOAT64;
+        rval.m_type = DTYPE_BOOL;
 
         t_generic_type& gt = parameters[0];
         t_scalar_view temp(gt);
         val.set(temp());
 
-        // Return a double so we can use it in conditionals
-        rval.set(static_cast<double>(val.is_none() || !val.is_valid()));
-
+        rval.set(val.is_none() || !val.is_valid());
         return rval;
     }
 
@@ -1221,15 +1217,12 @@ namespace computed_function {
 
         t_tscalar rval;
         rval.clear();
-
-        // Return a float so we can use it in conditionals
-        rval.m_type = DTYPE_FLOAT64;
+        rval.m_type = DTYPE_BOOL;
 
         t_generic_type& gt = parameters[0];
         t_scalar_view temp(gt);
         val.set(temp());
-
-        rval.set(static_cast<double>(!val.is_none() && val.is_valid()));
+        rval.set(!val.is_none() && val.is_valid());
 
         return rval;
     }
@@ -1372,6 +1365,31 @@ namespace computed_function {
         }
 
         rval.set(number);
+        return rval;
+    }
+
+    to_boolean::to_boolean()
+    : exprtk::igeneric_function<t_tscalar>("T") {}
+
+    to_boolean::~to_boolean() {}
+
+    t_tscalar to_boolean::operator()(t_parameter_list parameters) {
+        t_tscalar val;
+        t_tscalar rval;
+        rval.clear();
+        rval.m_type = DTYPE_BOOL;
+
+        const t_generic_type& gt = parameters[0];
+        t_scalar_view temp(gt);
+        val.set(temp());
+
+        // handles STATUS_VALID, so no need to check separately
+        rval.set(val.as_bool());
+
+        if (!val.is_valid()) {
+            return rval;
+        }
+
         return rval;
     }
 

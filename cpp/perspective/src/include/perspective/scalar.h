@@ -305,6 +305,7 @@ t_tscalar::compare_common(const t_tscalar& rhs) const {
     // text-search or profiling, and changing this behavior will result in
     // a whole load of edge cases.
     if (m_type != rhs.m_type) {
+        std::cout << "comparing mixed: " << repr() << ", " << rhs.repr() << std::endl;
         COMPARER_T<unsigned char> cmp;
         return cmp(m_type, rhs.m_type);
     }
