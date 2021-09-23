@@ -557,9 +557,9 @@ test.capture = function capture(
 
                 if (process.env.WRITE_TESTS) {
                     new_results[path_name] = hash;
+                    new_debug_results[path_name] = result;
                 }
 
-                new_debug_results[path_name] = result;
                 if (process.env.PSP_PAUSE_ON_FAILURE) {
                     if (
                         !process.env.WRITE_TESTS &&
@@ -575,10 +575,8 @@ test.capture = function capture(
                     expect(errors).toNotError();
                 }
 
-                if (results_debug[path_name]) {
-                    expect(new_debug_results[path_name]).toBe(
-                        results_debug[path_name]
-                    );
+                if (results_debug[path_name] && hash !== results[path_name]) {
+                    expect(result).toBe(results_debug[path_name]);
                 }
 
                 expect(hash).toBe(results[path_name]);
