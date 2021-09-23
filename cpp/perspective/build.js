@@ -15,7 +15,10 @@ try {
         cwd,
         stdio,
     });
-    execSync(`emmake make -j${os.cpus().length}`, {cwd, stdio});
+    execSync(`emmake make -j${process.env.PSP_NUM_CPUS || os.cpus().length}`, {
+        cwd,
+        stdio,
+    });
     execSync(`cpx esm/**/* ../esm`, {cwd, stdio});
     execSync(`cpx cjs/**/* ../cjs`, {cwd, stdio});
 } catch (e) {

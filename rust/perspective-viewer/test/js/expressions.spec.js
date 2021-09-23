@@ -28,7 +28,21 @@ utils.with_server({}, () => {
                         "perspective-viewer",
                         "#add-expression"
                     );
-                    const monaco = await page.waitFor(async () => {
+
+                    // monaco asynchronously validates the input and adds a
+                    // squiggly line (term of art) when it fails.
+                    await page.waitForFunction(() => {
+                        const root = document.querySelector(
+                            "perspective-expression-editor"
+                        )?.shadowRoot;
+
+                        return (
+                            root?.querySelector(".cdr.squiggly-error") &&
+                            root?.querySelector(".rename-label")
+                        );
+                    });
+
+                    const monaco = await page.waitForFunction(async () => {
                         const elem = document.querySelector(
                             "perspective-expression-editor"
                         );

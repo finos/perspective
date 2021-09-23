@@ -42,7 +42,7 @@ impl Display for Type {
                 Type::String => "string",
                 Type::Integer => "integer",
                 Type::Float => "float",
-                Type::Bool => "bool",
+                Type::Bool => "boolean",
                 Type::Date => "date",
                 Type::Datetime => "datetime",
             }

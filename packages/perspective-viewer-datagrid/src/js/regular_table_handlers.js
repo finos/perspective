@@ -192,8 +192,9 @@ function styleListener(regularTable) {
             const is_th = td.tagName === "TH";
             if (is_th) {
                 const is_not_empty =
-                    !!metadata.value &&
-                    metadata.value.toString().trim().length > 0;
+                    typeof metadata.value != undefined &&
+                    typeof metadata.value != null &&
+                    metadata.value?.toString()?.trim().length > 0;
                 const is_leaf =
                     metadata.row_header_x >= this._config.row_pivots.length;
                 const next = regularTable.getMeta({
@@ -389,6 +390,11 @@ const FORMATTER_CONS = {
     date: Intl.DateTimeFormat,
     integer: Intl.NumberFormat,
     float: Intl.NumberFormat,
+    boolean: class {
+        format(val) {
+            return val.toString();
+        }
+    },
 };
 
 export const formatters = FORMATTERS;
@@ -436,7 +442,7 @@ function _format(parts, val, plugins = {}, use_table_schema = false) {
                     "en-us",
                     opts
                 );
-            } else if (FORMATTER_CONS[type] && type_config.format) {
+            } else if (FORMATTER_CONS[type]) {
                 FORMATTERS[formatter_key] = new FORMATTER_CONS[type](
                     "en-us",
                     type_config.format

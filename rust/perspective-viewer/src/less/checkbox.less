@@ -1,0 +1,31 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms
+ * of the Apache License 2.0.  The full license can be found in the LICENSE
+ * file.
+ *
+ */
+
+:host {
+    input[type="checkbox"] {
+        appearance: none;
+        height: 20px;
+        margin: 0px;
+        cursor: pointer;
+        outline: none;
+
+        &:before {
+            font-family: "Material Icons";
+            color: var(--inactive--color, #ccc);
+            content: var(--inactive-column-selector--content, none);
+            font-size: var(--column_selector--font-size, 14px);
+        }
+
+        &:checked:before {
+            color: var(--active--color, blue);
+            content: var(--active-column-selector--content, none);
+        }
+    }
+}
