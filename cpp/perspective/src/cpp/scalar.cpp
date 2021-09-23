@@ -46,14 +46,9 @@ bool operator>(const std::size_t& lhs, const t_tscalar& rhs) {
  * @brief A function-style cast used only by ExprTk. Because ExprTk was
  * designed to be used with numeric inputs or numeric-like inputs, it makes
  * various assertions of its input type, which include calling this
- * function-style cast through `T(0)`, `T(1)` etc. This includes the built-in
- * comparison operators such as `==`, `>`, `<`, which passes the returned
- * bool from t_tscalar::operator< (etc.) into a new scalar that will carry
- * either 0 or 1. Having audited `exprtk.hpp` and made sure that this
- * constructor is not accessible from the user, i.e. a user-typed expression of
- * "1 + 0" does not result in 2 boolean scalars being added to one another,
- * treat values of 0 and 1 as BOOLEAN, and all other values as DOUBLE, which
- * will prevent overflows.
+ * function-style cast through `T(0)`, `T(1)` etc. Because we can't guarantee
+ * what int this function is called with, we treat it as a double to
+ * prevent overflow.
  * 
  * DO NOT USE THIS CONSTRUCTOR IN PERSPECTIVE - all `t_tscalar` objects
  * should be constructed without initializer and then `set` should be called:
@@ -64,11 +59,7 @@ bool operator>(const std::size_t& lhs, const t_tscalar& rhs) {
  * @param v 
  */
 t_tscalar::t_tscalar(int v) {
-    if (v == 0 || v == 1) {
-        this->set(static_cast<bool>(v));
-    } else {
-        this->set(static_cast<double>(v));
-    }
+    this->set(static_cast<double>(v));
 }
 
 bool

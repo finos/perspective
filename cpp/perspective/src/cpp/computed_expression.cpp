@@ -35,6 +35,9 @@ computed_function::bucket t_computed_expression_parser::BUCKET_FN
 computed_function::hour_of_day t_computed_expression_parser::HOUR_OF_DAY_FN
     = computed_function::hour_of_day();
 
+computed_function::inrange_fn t_computed_expression_parser::INRANGE_FN
+    = computed_function::inrange_fn();
+
 computed_function::min_fn t_computed_expression_parser::MIN_FN
     = computed_function::min_fn();
 
@@ -131,6 +134,8 @@ t_computed_expression_parser::FALSE_SCALAR = mktscalar(false);
     sym_table.add_function("length", length_fn);                               \
     sym_table.add_function("string", to_string_fn);                            \
     sym_table.add_reserved_function(                                           \
+        "inrange", t_computed_expression_parser::INRANGE_FN);                  \
+    sym_table.add_reserved_function(                                           \
         "min", t_computed_expression_parser::MIN_FN);                          \
     sym_table.add_reserved_function(                                           \
         "max", t_computed_expression_parser::MAX_FN);                          \
@@ -173,6 +178,8 @@ t_computed_expression_parser::FALSE_SCALAR = mktscalar(false);
         "lower", t_computed_expression_parser::LOWER_VALIDATOR_FN);            \
     sym_table.add_function(                                                    \
         "length", t_computed_expression_parser::LENGTH_VALIDATOR_FN);          \
+    sym_table.add_reserved_function(                                           \
+        "inrange", t_computed_expression_parser::INRANGE_FN);                  \
     sym_table.add_reserved_function(                                           \
         "min", t_computed_expression_parser::MIN_FN);                          \
     sym_table.add_reserved_function(                                           \
@@ -323,6 +330,8 @@ t_computed_expression_parser::init() {
     t_computed_expression_parser::PARSER->settings()
         .disable_control_structure(
             exprtk::parser<t_tscalar>::settings_store::e_ctrl_repeat_loop)
+        .disable_base_function(
+            exprtk::parser<t_tscalar>::settings_store::e_bf_inrange)
         .disable_base_function(
             exprtk::parser<t_tscalar>::settings_store::e_bf_min)
         .disable_base_function(

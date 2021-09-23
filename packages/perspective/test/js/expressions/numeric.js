@@ -1216,27 +1216,56 @@ module.exports = (perspective) => {
                 const view = await table.view({
                     expressions: [
                         'mand("u" and "u", "u" and "z", "z" and "z")',
-                        "mand(1, 2, 3)",
                         "mand(True, True, True, True)",
+                        "mand(is_null(null), is_not_null(null))",
                     ],
                 });
                 const result = await view.to_columns();
+
                 expect(
                     result['mand("u" and "u", "u" and "z", "z" and "z")']
-                ).toEqual([false, false, false, false]);
-                expect(result["mand(1, 2, 3)"]).toEqual([
-                    true,
-                    true,
-                    true,
-                    true,
-                ]);
-                expect(result["mand(True, True, True, True)"]).toEqual([
-                    true,
-                    true,
-                    true,
-                    true,
-                ]);
+                ).toEqual(Array(4).fill(false));
+
+                expect(
+                    result["mand(is_null(null), is_not_null(null))"]
+                ).toEqual(Array(4).fill(false));
+
+                expect(result["mand(True, True, True, True)"]).toEqual(
+                    Array(4).fill(true)
+                );
+
                 await view.delete();
+                await table.delete();
+            });
+
+            it("mand should fail validation for non boolean inputs", async function () {
+                const table = await perspective.table(common.comparison_data);
+                const validated = await table.validate_expressions([
+                    'mand("w", "x", "y")',
+                    "mand(100, 200, 300)",
+                    "mand('a', 'b', 'cdef')",
+                ]);
+
+                expect(validated.expression_schema).toEqual({});
+                expect(validated.errors['mand("w", "x", "y")']).toEqual({
+                    column: 0,
+                    line: 0,
+                    error_message:
+                        "Type Error - inputs do not resolve to a valid expression.",
+                });
+                expect(validated.errors["mand(100, 200, 300)"]).toEqual({
+                    column: 0,
+                    line: 0,
+                    error_message:
+                        "Type Error - inputs do not resolve to a valid expression.",
+                });
+                expect(validated.errors["mand('a', 'b', 'cdef')"]).toEqual({
+                    column: 0,
+                    line: 0,
+                    error_message:
+                        "Type Error - inputs do not resolve to a valid expression.",
+                });
+
                 await table.delete();
             });
 
@@ -1292,7 +1321,6 @@ module.exports = (perspective) => {
                 const view = await table.view({
                     expressions: [
                         'mor("u" and "u", "u" and "z", "z" and "z")',
-                        "mor(0, 0, 0)",
                         "mor(False, False, False)",
                         "mor(False, True, False)",
                     ],
@@ -1301,14 +1329,6 @@ module.exports = (perspective) => {
                 expect(
                     result['mor("u" and "u", "u" and "z", "z" and "z")']
                 ).toEqual([true, true, true, true]);
-
-                // the number 0 is a float, and is true
-                expect(result["mor(0, 0, 0)"]).toEqual([
-                    true,
-                    true,
-                    true,
-                    true,
-                ]);
 
                 // The boolean False is a False
                 expect(result["mor(False, False, False)"]).toEqual([
@@ -1326,6 +1346,37 @@ module.exports = (perspective) => {
                 ]);
 
                 await view.delete();
+                await table.delete();
+            });
+
+            it("mor should fail validation for non boolean inputs", async function () {
+                const table = await perspective.table(common.comparison_data);
+                const validated = await table.validate_expressions([
+                    'mor("w", "x", "y")',
+                    "mor(100, 200, 300)",
+                    "mor('a', 'b', 'cdef')",
+                ]);
+
+                expect(validated.expression_schema).toEqual({});
+                expect(validated.errors['mor("w", "x", "y")']).toEqual({
+                    column: 0,
+                    line: 0,
+                    error_message:
+                        "Type Error - inputs do not resolve to a valid expression.",
+                });
+                expect(validated.errors["mor(100, 200, 300)"]).toEqual({
+                    column: 0,
+                    line: 0,
+                    error_message:
+                        "Type Error - inputs do not resolve to a valid expression.",
+                });
+                expect(validated.errors["mor('a', 'b', 'cdef')"]).toEqual({
+                    column: 0,
+                    line: 0,
+                    error_message:
+                        "Type Error - inputs do not resolve to a valid expression.",
+                });
+
                 await table.delete();
             });
 

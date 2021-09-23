@@ -169,6 +169,12 @@ namespace computed_function {
     t_tscalar today();
 
     /**
+     * @brief inrange(range_low, value, range_high) returns whether value
+     * is inside of the range (inclusive of range_low and range_high).
+     */
+    FUNCTION_HEADER(inrange_fn)
+
+    /**
      * @brief Get the minimum of all the inputs.
      */
     FUNCTION_HEADER(min_fn)

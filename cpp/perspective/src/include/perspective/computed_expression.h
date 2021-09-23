@@ -141,6 +141,7 @@ public:
     static computed_function::lower LOWER_VALIDATOR_FN;
     static computed_function::length LENGTH_VALIDATOR_FN;
     static computed_function::percent_of PERCENT_OF_FN;
+    static computed_function::inrange_fn INRANGE_FN;
     static computed_function::min_fn MIN_FN;
     static computed_function::max_fn MAX_FN;
     static computed_function::is_null IS_NULL_FN;

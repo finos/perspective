@@ -980,9 +980,6 @@ namespace details {
             and_impl(
                 const t_tscalar v0, const t_tscalar v1, t_tscalar_type_tag) {
                 t_tscalar rval;
-
-                // booleans need to return numeric scalars, otherwise they will
-                // not work inside a conditional for some reason.
                 rval.set(v0.as_bool() && v1.as_bool());
                 return rval;
             }
@@ -1055,10 +1052,504 @@ namespace details {
 
 #undef UNARY_STD_FUNCTION_BODY
 #undef UNARY_STD_INT_FUNCTION_BODY
+            
+            /**
+             * @brief Get the result of applying the given operator to
+             * two scalars. Explicitly specialize the template here so
+             * we return scalars of DTYPE_BOOL instead of the default
+             * DTYPE_FLOAT64 from the function-style cast.
+             *
+             * @tparam
+             * @param operation
+             * @param arg0
+             * @param arg1
+             * @return t_tscalar
+             */
+            template <>
+            inline t_tscalar
+            process_impl(const operator_type operation, const t_tscalar arg0,
+                const t_tscalar arg1) {
+                // use the scalar type tag to dispatch to the right fns
+                t_tscalar_type_tag scalar_type_tag;
+
+                switch (operation) {
+                    case e_add:
+                        return (arg0 + arg1);
+                    case e_sub:
+                        return (arg0 - arg1);
+                    case e_mul:
+                        return (arg0 * arg1);
+                    case e_div:
+                        return (arg0 / arg1);
+                    case e_mod:
+                        return modulus_impl<t_tscalar>(
+                            arg0, arg1, scalar_type_tag);
+                    case e_pow:
+                        return pow_impl<t_tscalar>(arg0, arg1, scalar_type_tag);
+                    case e_atan2:
+                        return atan2_impl<t_tscalar>(
+                            arg0, arg1, scalar_type_tag);
+                    case e_min:
+                        return min_impl<t_tscalar>(arg0, arg1, scalar_type_tag);
+                    case e_max:
+                        return max_impl<t_tscalar>(arg0, arg1, scalar_type_tag);
+                    case e_logn:
+                        return logn_impl<t_tscalar>(
+                            arg0, arg1, scalar_type_tag);
+                    case e_lt: {
+                        perspective::t_tscalar rval;
+                        rval.set(arg0 < arg1);
+                        return rval;
+                    };
+                    case e_lte: {
+                        perspective::t_tscalar rval;
+                        rval.set(arg0 <= arg1);
+                        return rval;
+                    };
+                    case e_eq: {
+                        perspective::t_tscalar rval;
+                        rval.set(std::equal_to<t_tscalar>()(arg0, arg1));
+                        return rval;
+                    };
+                    case e_ne: {
+                        perspective::t_tscalar rval;
+                        rval.set(std::not_equal_to<t_tscalar>()(arg0, arg1));
+                        return rval;
+                    };
+                    case e_gte: {
+                        perspective::t_tscalar rval;
+                        rval.set(arg0 >= arg1);
+                        return rval;
+                    };
+                    case e_gt: {
+                        perspective::t_tscalar rval;
+                        rval.set(arg0 > arg1);
+                        return rval;
+                    };
+                    case e_and:
+                        return and_impl<t_tscalar>(arg0, arg1, scalar_type_tag);
+                    case e_nand:
+                        return nand_impl<t_tscalar>(
+                            arg0, arg1, scalar_type_tag);
+                    case e_or:
+                        return or_impl<t_tscalar>(arg0, arg1, scalar_type_tag);
+                    case e_nor:
+                        return nor_impl<t_tscalar>(arg0, arg1, scalar_type_tag);
+                    case e_xor:
+                        return xor_impl<t_tscalar>(arg0, arg1, scalar_type_tag);
+                    case e_xnor:
+                        return xnor_impl<t_tscalar>(
+                            arg0, arg1, scalar_type_tag);
+                    case e_root:
+                        return root_impl<t_tscalar>(
+                            arg0, arg1, scalar_type_tag);
+                    case e_roundn:
+                        return roundn_impl<t_tscalar>(
+                            arg0, arg1, scalar_type_tag);
+                    case e_equal:
+                        return equal_impl(arg0, arg1, scalar_type_tag);
+                    case e_nequal:
+                        return nequal_impl(arg0, arg1, scalar_type_tag);
+                    case e_hypot:
+                        return hypot_impl<t_tscalar>(
+                            arg0, arg1, scalar_type_tag);
+                    case e_shr:
+                        return shr_impl<t_tscalar>(arg0, arg1, scalar_type_tag);
+                    case e_shl:
+                        return shl_impl<t_tscalar>(arg0, arg1, scalar_type_tag);
+                    default:
+                        // return scalar of DTYPE_NONE
+                        return std::numeric_limits<t_tscalar>::quiet_NaN();
+                }
+            }
 
         } // end namespace details
-    }     // end namespace numeric
+    } // end namespace numeric
+        
+    /**
+     * Override the comparison operators to return a `t_tscalar` of DTYPE_BOOL
+     * instead of the default DTYPE_FLOAT64 from the function-style cast.
+     */
+    template <>
+    struct lt_op<t_tscalar> : public opr_base<t_tscalar> {
+        typedef typename opr_base<t_tscalar>::Type Type;
 
+        static inline t_tscalar process(Type t1, Type t2) {
+            t_tscalar rval;
+            rval.set(t1 < t2);
+            return rval;
+        }
+
+        static inline t_tscalar process(const std::string& t1, const std::string& t2) {
+            t_tscalar rval;
+            rval.set(t1 < t2);
+            return rval;
+        }
+
+        static inline typename expression_node<t_tscalar>::node_type type() { return expression_node<t_tscalar>::e_lt; }
+        static inline details::operator_type operation() { return details::e_lt; }
+    };
+
+    template <>
+    struct lte_op<t_tscalar> : public opr_base<t_tscalar> {
+        typedef typename opr_base<t_tscalar>::Type Type;
+
+        static inline t_tscalar process(Type t1, Type t2) {
+            t_tscalar rval;
+            rval.set(t1 <= t2);
+            return rval;
+        }
+        static inline t_tscalar process(const std::string& t1, const std::string& t2) {
+            t_tscalar rval;
+            rval.set(t1 <= t2);
+            return rval;
+        }
+        static inline typename expression_node<t_tscalar>::node_type type() { return expression_node<t_tscalar>::e_lte; }
+        static inline details::operator_type operation() { return details::e_lte; }
+    };
+
+    template <>
+    struct gt_op<t_tscalar> : public opr_base<t_tscalar> {
+        typedef typename opr_base<t_tscalar>::Type Type;
+
+        static inline t_tscalar process(Type t1, Type t2) {
+            t_tscalar rval;
+            rval.set(t1 > t2);
+            return rval;
+        }
+
+        static inline t_tscalar process(const std::string& t1, const std::string& t2) {
+            t_tscalar rval;
+            rval.set(t1 > t2);
+            return rval;
+        }
+
+        static inline typename expression_node<t_tscalar>::node_type type() { return expression_node<t_tscalar>::e_gt; }
+        static inline details::operator_type operation() { return details::e_gt; }
+    };
+
+    template <>
+    struct gte_op<t_tscalar> : public opr_base<t_tscalar> {
+        typedef typename opr_base<t_tscalar>::Type Type;
+
+        static inline t_tscalar process(Type t1, Type t2) {
+            t_tscalar rval;
+            rval.set(t1 >= t2);
+            return rval;
+        }
+
+        static inline t_tscalar process(const std::string& t1, const std::string& t2) {
+            t_tscalar rval;
+            rval.set(t1 >= t2);
+            return rval;
+        }
+
+        static inline typename expression_node<t_tscalar>::node_type type() { return expression_node<t_tscalar>::e_gte; }
+        static inline details::operator_type operation() { return details::e_gte; }
+    };
+
+    template <>
+    struct eq_op<t_tscalar> : public opr_base<t_tscalar> {
+        typedef typename opr_base<t_tscalar>::Type Type;
+        static inline t_tscalar process(Type t1, Type t2) {
+            t_tscalar rval;
+            rval.set(std::equal_to<t_tscalar>()(t1, t2));
+            return rval;
+        }
+        static inline t_tscalar process(const std::string& t1, const std::string& t2) {
+            t_tscalar rval;
+            rval.set(t1 == t2);
+            return rval;
+        }
+        static inline typename expression_node<t_tscalar>::node_type type() { return expression_node<t_tscalar>::e_eq; }
+        static inline details::operator_type operation() { return details::e_eq; }
+    };
+
+    template <>
+    struct equal_op<t_tscalar> : public opr_base<t_tscalar> {
+        typedef typename opr_base<t_tscalar>::Type Type;
+
+        static inline t_tscalar process(Type t1, Type t2) {
+            t_tscalar rval;
+            rval.set(std::equal_to<t_tscalar>()(t1, t2));
+            return rval;
+        }
+        static inline t_tscalar process(const std::string& t1, const std::string& t2) {
+            t_tscalar rval;
+            rval.set(t1 == t2);
+            return rval;
+        }
+        static inline typename expression_node<t_tscalar>::node_type type() { return expression_node<t_tscalar>::e_eq; }
+        static inline details::operator_type operation() { return details::e_equal; }
+    };
+
+    template <>
+    struct ne_op<t_tscalar> : public opr_base<t_tscalar> {
+        typedef typename opr_base<t_tscalar>::Type Type;
+
+        static inline t_tscalar process(Type t1, Type t2) {
+            t_tscalar rval;
+            rval.set(std::not_equal_to<t_tscalar>()(t1, t2));
+            return rval;
+        }
+        static inline t_tscalar process(const std::string& t1, const std::string& t2) {
+            t_tscalar rval;
+            rval.set(t1 != t2);
+            return rval;
+        }
+        static inline typename expression_node<t_tscalar>::node_type type() { return expression_node<t_tscalar>::e_ne; }
+        static inline details::operator_type operation() { return details::e_ne; }
+    };
+
+    template <>
+    struct and_op<t_tscalar> : public opr_base<t_tscalar> {
+        typedef typename opr_base<t_tscalar>::Type Type;
+
+        static inline t_tscalar process(Type t1, Type t2) {
+            t_tscalar rval;
+            rval.set(is_true(t1) && is_true(t2));
+            return rval;
+        }
+        static inline typename expression_node<t_tscalar>::node_type type() { return expression_node<t_tscalar>::e_and; }
+        static inline details::operator_type operation() { return details::e_and; }
+    };
+
+    template <>
+    struct nand_op<t_tscalar> : public opr_base<t_tscalar> {
+        typedef typename opr_base<t_tscalar>::Type Type;
+
+        static inline t_tscalar process(Type t1, Type t2) {
+            t_tscalar rval;
+            rval.set(!(is_true(t1) && is_true(t2)));
+            return rval;
+        }
+        static inline typename expression_node<t_tscalar>::node_type type() { return expression_node<t_tscalar>::e_nand; }
+        static inline details::operator_type operation() { return details::e_nand; }
+    };
+
+    template <>
+    struct or_op<t_tscalar> : public opr_base<t_tscalar> {
+        typedef typename opr_base<t_tscalar>::Type Type;
+
+        static inline t_tscalar process(Type t1, Type t2) {
+            t_tscalar rval;
+            rval.set(is_true(t1) || is_true(t2));
+            return rval;
+        }
+        static inline typename expression_node<t_tscalar>::node_type type() { return expression_node<t_tscalar>::e_or; }
+        static inline details::operator_type operation() { return details::e_or; }
+    };
+
+    template <>
+    struct nor_op<t_tscalar> : public opr_base<t_tscalar> {
+        typedef typename opr_base<t_tscalar>::Type Type;
+
+        static inline t_tscalar process(Type t1, Type t2) {
+            t_tscalar rval;
+            rval.set(!(is_true(t1) || is_true(t2)));
+            return rval;
+        }
+        static inline typename expression_node<t_tscalar>::node_type type() { return expression_node<t_tscalar>::e_nor; }
+        static inline details::operator_type operation() { return details::e_nor; }
+    };
+
+    template <>
+    struct xor_op<t_tscalar> : public opr_base<t_tscalar> {
+        typedef typename opr_base<t_tscalar>::Type Type;
+
+        static inline t_tscalar process(Type t1, Type t2) {
+             return numeric::xor_opr<t_tscalar>(t1, t2);
+        }
+
+        static inline typename expression_node<t_tscalar>::node_type type() { return expression_node<t_tscalar>::e_nor; }
+        static inline details::operator_type operation() { return details::e_xor; }
+    };
+
+    template <>
+    struct xnor_op<t_tscalar> : public opr_base<t_tscalar> {
+        typedef typename opr_base<t_tscalar>::Type Type;
+
+        static inline t_tscalar process(Type t1, Type t2) {
+            return numeric::xnor_opr<t_tscalar>(t1, t2);
+        }
+        static inline typename expression_node<t_tscalar>::node_type type() { return expression_node<t_tscalar>::e_nor; }
+        static inline details::operator_type operation() { return details::e_xnor; }
+    };
+
+    /**
+     * We don't use ExprTk std::string literals (strings are passed into
+     * intern() automatically), so disable the string literal comparison
+     * operations. The only time we use string literals explicitly are in
+     * the parameter of the `bucket` operation, but that doesn't use these
+     * comparison operators.
+     */
+    template <>
+    struct in_op<t_tscalar> : public opr_base<t_tscalar> {
+        typedef typename opr_base<t_tscalar>::Type Type;
+
+        static inline t_tscalar process(const t_tscalar&, const t_tscalar&) { return std::numeric_limits<t_tscalar>::quiet_NaN(); }
+        static inline t_tscalar process(const std::string& t1, const std::string& t2) { return std::numeric_limits<t_tscalar>::quiet_NaN(); }
+        static inline typename expression_node<t_tscalar>::node_type type() { return expression_node<t_tscalar>::e_in; }
+        static inline details::operator_type operation() { return details::e_in; }
+    };
+
+    template <>
+    struct like_op<t_tscalar> : public opr_base<t_tscalar>
+    {
+        typedef typename opr_base<t_tscalar>::Type Type;
+
+        static inline t_tscalar process(const t_tscalar&, const t_tscalar&) { return std::numeric_limits<t_tscalar>::quiet_NaN(); }
+        static inline t_tscalar process(const std::string& t1, const std::string& t2) { return std::numeric_limits<t_tscalar>::quiet_NaN(); }
+        static inline typename expression_node<t_tscalar>::node_type type() { return expression_node<t_tscalar>::e_like; }
+        static inline details::operator_type operation() { return details::e_like; }
+    };
+
+    template <>
+    struct ilike_op<t_tscalar> : public opr_base<t_tscalar> {
+        typedef typename opr_base<t_tscalar>::Type Type;
+
+        static inline t_tscalar process(const t_tscalar&, const t_tscalar&) { return std::numeric_limits<t_tscalar>::quiet_NaN(); }
+        static inline t_tscalar process(const std::string& t1, const std::string& t2) { return std::numeric_limits<t_tscalar>::quiet_NaN(); }
+        static inline typename expression_node<t_tscalar>::node_type type() { return expression_node<t_tscalar>::e_ilike; }
+        static inline details::operator_type operation() { return details::e_ilike; }
+    };
+
+    template <>
+    struct inrange_op<t_tscalar> : public opr_base<t_tscalar> {
+        typedef typename opr_base<t_tscalar>::Type Type;
+
+        static inline t_tscalar process(const t_tscalar& t0, const t_tscalar& t1, const t_tscalar& t2) {
+            t_tscalar rval;
+            rval.set((t0 <= t1) && (t1 <= t2));
+            return rval;
+        }
+        static inline t_tscalar process(const std::string& t0, const std::string& t1, const std::string& t2) {
+            t_tscalar rval;
+            rval.set((t0 <= t1) && (t1 <= t2));
+            return rval;
+        }
+        static inline typename expression_node<t_tscalar>::node_type type() { return expression_node<t_tscalar>::e_inranges; }
+        static inline details::operator_type operation() { return details::e_inrange; }
+    };
+
+    /**
+     * @brief mand(a, b, c, ...) returns true if all arguments evaluate to
+     * true, else false. All parameters should be of DTYPE_BOOL, or the
+     * function will return a scalar of DTYPE_NONE indicating an invalid
+     * operation.
+     */
+    template <>
+    struct vararg_mand_op<t_tscalar> : public opr_base<t_tscalar> {
+        typedef typename opr_base<t_tscalar>::Type Type;
+
+        template <typename Type, typename Allocator, template <typename, typename> class Sequence>
+        static inline t_tscalar process(const Sequence<Type, Allocator>& arg_list) {
+            t_tscalar rval = mktscalar(false);
+
+            // Originally, there was specific implementations for up to 5 args
+            // that did not use a for loop, but since we do type-checking
+            // centralize all the logic here instead.
+            for (std::size_t i = 0; i < arg_list.size(); ++i) {
+                t_tscalar val = value(arg_list[i]);
+
+                // If scalar is invalid or not a bool, return bool but
+                // with STATUS_CLEAR to poison the type-checker.
+                if (!val.is_valid() || val.get_dtype() != perspective::t_dtype::DTYPE_BOOL) {
+                    rval.m_status = perspective::t_status::STATUS_CLEAR;
+                    return rval;
+                }
+
+                // if value is equal to False, return False
+                if (std::equal_to<t_tscalar>()(rval, val)) {
+                    return rval;
+                }
+            }
+
+            // True if all values are true
+            rval.set(true);
+            return rval;
+        }
+    };
+
+    // /**
+    //  * @brief mor(a, b, c, ...) returns True if any parameter evalutes to
+    //  * True, and False otherwise. All parameters should be scalars of
+    //  * `DTYPE_BOOL`.
+    //  * 
+    //  * @tparam T 
+    //  */
+    template <>
+    struct vararg_mor_op<t_tscalar> : public opr_base<t_tscalar> {
+        typedef typename opr_base<t_tscalar>::Type Type;
+
+        template <typename Type, typename Allocator, template <typename, typename> class Sequence>
+        static inline t_tscalar process(const Sequence<Type,Allocator>& arg_list) {
+            t_tscalar rval = mktscalar(false);
+
+            // Originally, there was specific implementations for up to 5 args
+            // that did not use a for loop, but since we do type-checking
+            // centralize all the logic here instead.
+            for (std::size_t i = 0; i < arg_list.size(); ++i) {
+                t_tscalar val = value(arg_list[i]);
+
+                // If scalar is invalid or not a bool, return bool but
+                // with STATUS_CLEAR to poison the type-checker.
+                if (!val.is_valid() || val.get_dtype() != perspective::t_dtype::DTYPE_BOOL) {
+                    rval.m_status = perspective::t_status::STATUS_CLEAR;
+                    return rval;
+                }
+
+                // if any value is True, return True
+                if (std::not_equal_to<t_tscalar>()(rval, val)) {
+                    rval.set(true);
+                    return rval;
+                }
+            }
+
+            // False if all values are false
+            return rval;
+        }
+    };
+
+    /**
+     * @brief Evaluates the truthiness of an expression node that returns a
+     * `t_tscalar`. The `t_tscalar` returned must be of type bool.
+     * 
+     * @tparam  
+     * @param node 
+     * @return true 
+     * @return false 
+     */
+    template <>
+    inline bool is_true(const expression_node<t_tscalar>* node) {
+        return std::not_equal_to<t_tscalar>()(mktscalar(false), node->value());
+    }
+
+    template <>
+    inline bool is_true(const std::pair<expression_node<t_tscalar>*,bool>& node)
+    {
+        return std::not_equal_to<t_tscalar>()(mktscalar(false),node.first->value());
+    }
+
+    template <>
+    inline bool is_false(const expression_node<t_tscalar>* node)
+    {
+        return std::equal_to<t_tscalar>()(mktscalar(false), node->value());
+    }
+
+    template <>
+    inline bool is_false(const std::pair<expression_node<t_tscalar>*, bool>& node)
+    {
+        return std::equal_to<t_tscalar>()(mktscalar(false), node.first->value());
+    }
+
+    /**
+     * @brief Evaluates the truthiness of a single scalar value.
+     * 
+     * @param v 
+     * @return true 
+     * @return false 
+     */
     inline bool
     is_true(const t_tscalar& v) {
         return v.as_bool();
