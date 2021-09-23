@@ -22,7 +22,7 @@
             display: inline;
             font-family: "Material Icons";
             cursor: pointer;
-            min-width: 5px;
+            min-width: 12px;
             margin-right: 3px;
             flex-grow: 0;
             font-size: 12px;
@@ -39,8 +39,7 @@
             align-items: center;
             min-height: 24px;
             &:not(.config-drop) {
-                padding: 12px 9px 0 0;
-                margin-top: -12px;
+                padding: 0px 9px 0 0;
             }
 
             span {
@@ -105,69 +104,7 @@
             padding: 12px 12px 12px 0px;
             // flex: 1 1 auto;
 
-            .input-sizer {
-                display: inline-grid;
-                align-items: center;
-                position: relative;
-                margin-top: 1px;
-                font-family: "Open Sans";
-                font-size: 12px;
-
-                &::after,
-                input,
-                textarea {
-                    width: auto;
-                    grid-area: 1 / 1;
-                }
-
-                &.num-filter {
-                    input,
-                    textarea {
-                        width: 80px;
-                    }
-                }
-
-                input,
-                textarea {
-                    grid-area: 1 / 1;
-                    padding: 0;
-                    border: none;
-                    border-bottom: 1px solid var(--inactive--color, #ccc);
-                    background: transparent;
-                    font-family: "Open Sans";
-                    font-size: 12px;
-                    color: inherit;
-                }
-
-                &::after {
-                    content: attr(data-value) " ";
-                    color: var(--inactive--color, inherit);
-                    visibility: hidden;
-                    white-space: nowrap;
-                    padding-right: 12px;
-                    font-family: "Open Sans";
-                }
-
-                input.date-filter {
-                    width: 120px;
-                }
-
-                input.datetime-filter {
-                    width: 230px;
-                }
-
-                input.time-filter {
-                    grid-area: 1/2;
-                }
-
-                &:focus-within {
-                    textarea:focus,
-                    input:focus {
-                        outline: none;
-                    }
-                }
-            }
-
+            
             span[draggable] {
                 cursor: move;
             }
@@ -302,18 +239,6 @@
             }
         }
 
-        #filter {
-            min-width: 300px;
-
-            .pivot-column {
-                select {
-                    padding-right: 12px;
-                    padding-left: 4px;
-                    max-width: 100%;
-                    position: initial;
-                }
-            }
-        }
     }
 
     .sort-icon {

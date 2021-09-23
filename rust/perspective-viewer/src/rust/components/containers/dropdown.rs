@@ -35,9 +35,6 @@ where
     pub id: Option<&'static str>,
 
     #[prop_or_default]
-    pub auto_resize: bool,
-
-    #[prop_or_default]
     pub class: Option<String>,
 }
 
@@ -108,13 +105,6 @@ where
             })
         });
 
-        let style = if self.props.auto_resize {
-            let estimate = format!("{}", self.props.selected).len() * 8 + 18;
-            Some(format!("width:{}px", estimate))
-        } else {
-            None
-        };
-
         let class = if let Some(class) = &self.props.class {
             format!("noselect {}", class)
         } else {
@@ -130,7 +120,6 @@ where
             <select
                 id={ self.props.id }
                 class={ class }
-                style = { style }
                 ref={ self.select_ref.clone() }
                 onchange={callback}>
                 {
@@ -178,14 +167,18 @@ where
             html! {
                 <>
                     <label>{ "weighted mean" }</label>
-                    <div class="dropdown-width-container">
+                    <div 
+                        class="dropdown-width-container"
+                        data-value={ format!("{}", self.props.selected) }>
                         { select }
                     </div>
                 </>
             }
         } else {
             html! {
-                <div class="dropdown-width-container">
+                <div 
+                    class="dropdown-width-container"
+                    data-value={ format!("{}", self.props.selected) }>
                     { select }
                 </div>
             }

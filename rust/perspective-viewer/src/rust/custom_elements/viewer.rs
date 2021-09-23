@@ -240,6 +240,11 @@ impl PerspectiveViewerElement {
             session.update_view_config(view_config);
             let settings = Some(settings.clone());
             let draw_task = renderer.draw(async {
+                root.borrow()
+                    .as_ref()
+                    .ok_or("Already deleted!")?
+                    .send_message(Msg::ApplySettings(settings));
+
                 let plugin = renderer.get_active_plugin()?;
                 if let Some(plugin_config) = &plugin_config {
                     let js_config = JsValue::from_serde(plugin_config);
@@ -247,10 +252,6 @@ impl PerspectiveViewerElement {
                 }
 
                 let result = session.validate().await.create_view().await;
-                root.borrow()
-                    .as_ref()
-                    .ok_or("Already deleted!")?
-                    .send_message(Msg::ApplySettings(settings));
                 result
             });
 

@@ -10,11 +10,18 @@
 :host {
     .dropdown-width-container {
         position: relative;
-        flex: 1 1 100%;
+        flex: 1 1 auto;
+        &:after {
+            content: attr(data-value) " ";
+            visibility: hidden;
+            white-space: nowrap;
+            padding-right: 17px;
+        }
 
         select {
             position: absolute;
             width: 100%;
+            cursor: pointer;
         }
     }
 }

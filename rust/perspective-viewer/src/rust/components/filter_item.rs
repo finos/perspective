@@ -134,6 +134,11 @@ impl FilterItemProperties {
                 FilterOp::IsNotNull,
                 FilterOp::IsNull,
             ],
+            Type::Bool => vec![
+                FilterOp::EQ,
+                FilterOp::IsNull,
+                FilterOp::IsNotNull
+            ],
             _ => vec![
                 FilterOp::EQ,
                 FilterOp::NE,
@@ -167,7 +172,7 @@ impl FilterItemProperties {
     ///
     /// # Arguments
     /// - `val` The new filter value.
-    fn update_filter_value(&self, val: String) {
+    fn update_filter_input(&self, val: String) {
         let ViewConfig { mut filter, .. } = self.session.get_view_config();
         let filter_item = &mut filter.get_mut(self.idx).expect("Filter on no column");
         match filter_item.1 {
@@ -224,7 +229,6 @@ impl FilterItemProperties {
                     )
                 }
                 Type::Bool => {
-                    filter_item.1 = FilterOp::EQ;
                     filter_item.2 = FilterTerm::Scalar(match val.as_str() {
                         "true" => Scalar::Bool(true),
                         _ => Scalar::Bool(false),
@@ -252,7 +256,7 @@ impl Component for FilterItem {
         let input = props.get_filter_input().unwrap_or_else(|| "".to_owned());
         let input_ref = NodeRef::default();
         if props.get_filter_type() == Type::Bool {
-            props.update_filter_value(input.clone());
+            props.update_filter_input(input.clone());
         }
 
         FilterItem { props, link, input, input_ref }
@@ -281,7 +285,7 @@ impl Component for FilterItem {
                     );
                 }
 
-                self.props.update_filter_value(input);
+                self.props.update_filter_input(input);
                 false
             }
             FilterItemMsg::FilterKeyDown(40) => {
@@ -317,7 +321,7 @@ impl Component for FilterItem {
             }
             FilterItemMsg::FilterOpSelect(op) => {
                 self.props.update_filter_op(op);
-                false
+                true
             }
         }
     }
@@ -480,41 +484,30 @@ impl Component for FilterItem {
                         filter.0.to_owned()
                     }
                 </span>
+                <FilterOpSelector
+                    class="filterop-selector"
+                    values={ filter_ops }
+                    selected={ filter.1 }
+                    on_select={ select }>
+                </FilterOpSelector>
                 {
-                    if col_type == Type::Bool {
+                    if matches!(&filter.1, FilterOp::IsNotNull | FilterOp::IsNull) {
+                        html! {}
+                    } else if col_type == Type::Bool {
                         html! {
                             { input_elem }
                         }
-                    } else if matches!(&filter.1, FilterOp::IsNotNull | FilterOp::IsNull) {
-                        html! {
-                            <FilterOpSelector
-                                class="filter-op-selector"
-                                auto_resize=true
-                                values={ filter_ops }
-                                selected={ filter.1 }
-                                on_select={ select }>
-                            </FilterOpSelector>
-                        }
                     } else {
                         html! {
-                            <>
-                                <FilterOpSelector
-                                    class="filter-op-selector"
-                                    auto_resize=true
-                                    values={ filter_ops }
-                                    selected={ filter.1 }
-                                    on_select={ select }>
-                                </FilterOpSelector>
-                                <label
-                                    class={ format!("input-sizer {}", type_class) }
-                                    data-value={ format!("{}", filter.2) }>
-                                    {
-                                        input_elem
-                                    }
-                                </label>
-                            </>
+                            <label
+                                class={ format!("input-sizer {}", type_class) }
+                                data-value={ format!("{}", filter.2) }>
+                                {
+                                    input_elem
+                                }
+                            </label>
                         }
-                    }
+                    } 
                 }
             </>
         }

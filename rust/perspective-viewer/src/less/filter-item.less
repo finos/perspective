@@ -1,0 +1,108 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+@import "./variables.less";
+
+:host {
+
+    ::-webkit-calendar-picker-indicator {
+        filter: var(--calendar--filter, none);
+    }
+
+    #top_panel {
+        .rrow {
+            .input-sizer {
+                display: inline-grid;
+                align-items: center;
+                position: relative;
+                margin-top: 1px;
+                font-family: "Open Sans";
+                font-size: 12px;
+                min-width: 45px;
+
+                &::after,
+                input,
+                textarea {
+                    width: auto;
+                    grid-area: 1 / 1;
+                }
+
+
+                input,
+                textarea {
+                    grid-area: 1 / 1;
+                    padding: 0;
+                    border: none;
+                    border-bottom: 1px solid var(--inactive--color, #ccc);
+                    background: transparent;
+                    font-family: "Open Sans";
+                    font-size: 12px;
+                    color: inherit;
+                }
+
+                &::after {
+                    content: attr(data-value) " ";
+                    color: var(--inactive--color, inherit);
+                    visibility: hidden;
+                    white-space: nowrap;
+                    padding-right: 12px;
+                    font-family: "Open Sans";
+                }
+
+                &.num-filter {
+                    input,
+                    textarea {
+                        width: 100%;
+                        position: absolute;
+                    }
+                }
+
+                &.num-filter::after {
+                    padding-right: 25px;
+                }
+
+                input.date-filter {
+                    width: 120px;
+                }
+
+                input.datetime-filter {
+                    width: 230px;
+                }
+
+                input.time-filter {
+                    grid-area: 1/2;
+                }
+
+                &:focus-within {
+                    textarea:focus,
+                    input:focus {
+                        outline: none;
+                    }
+                }
+            }
+        }
+
+        #filter {
+            min-width: 300px;
+
+            .pivot-column {
+                .dropdown-width-container {
+                    height: 100%;
+                    select {
+                        padding-right: 12px;
+                        padding-left: 4px;
+                        max-width: 100%;
+                        position: absolute;
+                        height: 100%;
+                    }
+                }
+            }
+        }
+    }
+}
