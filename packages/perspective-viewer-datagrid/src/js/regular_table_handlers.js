@@ -68,6 +68,11 @@ function styleListener(regularTable) {
                 this._open_column_styles_menu[0] === metadata._virtual_x
             );
             td.classList.toggle("psp-menu-enabled", is_numeric && !is_corner);
+            td.classList.toggle(
+                "psp-is-width-override",
+                regularTable._column_sizes?.override[metadata.size_key] !==
+                    undefined
+            );
         }
     }
 
