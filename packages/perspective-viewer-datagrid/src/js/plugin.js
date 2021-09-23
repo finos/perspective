@@ -69,11 +69,8 @@ customElements.define(
             return undefined;
         }
 
-        // get deselectMode() {
-        //     return "pivots";
-        // }
-
         async draw(view) {
+            const old_sizes = this._save_column_size_overrides();
             await this.activate(view);
             let viewer = this.parentElement;
             const draw = this.datagrid.draw({invalid_columns: true});
@@ -86,6 +83,7 @@ customElements.define(
                 this.model._preserve_focus_state = false;
             }
 
+            this._restore_column_size_overrides(old_sizes);
             await draw;
         }
 
@@ -108,37 +106,60 @@ customElements.define(
         save() {
             if (this.datagrid) {
                 const datagrid = this.datagrid;
-                if (datagrid[PLUGIN_SYMBOL]) {
-                    const token = {};
-                    for (const col of Object.keys(datagrid[PLUGIN_SYMBOL])) {
-                        const config = Object.assign(
-                            {},
-                            datagrid[PLUGIN_SYMBOL][col]
-                        );
-                        if (config?.pos_color) {
-                            config.pos_color = config.pos_color[0];
-                            config.neg_color = config.neg_color[0];
-                        }
-                        token[col] = config;
+                const token = {};
+
+                for (const col of Object.keys(datagrid[PLUGIN_SYMBOL] || {})) {
+                    const config = Object.assign(
+                        {},
+                        datagrid[PLUGIN_SYMBOL][col]
+                    );
+                    if (config?.pos_color) {
+                        config.pos_color = config.pos_color[0];
+                        config.neg_color = config.neg_color[0];
+                    }
+                    token[col] = config;
+                }
+
+                const column_size_overrides =
+                    this._save_column_size_overrides();
+
+                for (const col of Object.keys(column_size_overrides || {})) {
+                    if (!token[col]) {
+                        token[col] = {};
                     }
 
-                    return JSON.parse(JSON.stringify(token));
+                    token[col].column_size_override =
+                        column_size_overrides[col];
                 }
+
+                return JSON.parse(JSON.stringify(token));
             }
             return {};
         }
 
         restore(token) {
             token = JSON.parse(JSON.stringify(token));
+            const overrides = {};
             for (const col of Object.keys(token)) {
                 const config = token[col];
+                if (config.column_size_override !== undefined) {
+                    overrides[col] = config.column_size_override;
+                    delete config["column_size_override"];
+                }
+
                 if (config?.pos_color) {
                     config.pos_color = create_color_record(config.pos_color);
                     config.neg_color = create_color_record(config.neg_color);
                 }
+
+                if (Object.keys(config).length === 0) {
+                    delete token[col];
+                }
             }
 
             const datagrid = this.datagrid;
+            datagrid._resetAutoSize();
+            this._restore_column_size_overrides(overrides, true);
             datagrid[PLUGIN_SYMBOL] = token;
         }
 
@@ -149,6 +170,77 @@ customElements.define(
                 this.datagrid._resetAutoSize();
             }
             this.datagrid.clear();
+        }
+
+        // Private
+
+        /**
+         * Extract the current user-overriden column widths from
+         * `regular-table`.  This functiond depends on the internal
+         * implementation of `regular-table` and may break!
+         *
+         * @returns An Object-as-dictionary keyed by column_path string, and
+         * valued by the column's user-overridden pixel width.
+         */
+        _save_column_size_overrides() {
+            if (!this._initialized) {
+                return [];
+            }
+
+            if (this._cached_column_sizes) {
+                const x = this._cached_column_sizes;
+                this._cached_column_sizes = undefined;
+                return x;
+            }
+
+            const overrides = this.datagrid._column_sizes.override;
+            const {row_pivots, columns} = this.model._config;
+            const tree_header_offset =
+                row_pivots?.length > 0 ? row_pivots.length + 1 : 0;
+
+            const old_sizes = {};
+            for (const key of Object.keys(overrides)) {
+                if (overrides[key] !== undefined) {
+                    const index = key - tree_header_offset;
+                    if (index > -1) {
+                        old_sizes[this.model._column_paths[index]] =
+                            overrides[key];
+                    }
+                }
+            }
+
+            return old_sizes;
+        }
+
+        /**
+         * Restore a saved column width override token.
+         *
+         * @param {*} token An object previously returned by a call to
+         * `_save_column_size_overrides()`
+         * @param {*} [cache=false] A flag indicating whether this value should
+         * be cached so a future `resetAutoSize()` call does not clear it.
+         * @returns
+         */
+        _restore_column_size_overrides(old_sizes, cache = false) {
+            if (!this._initialized) {
+                return;
+            }
+
+            if (cache) {
+                this._cached_column_sizes = old_sizes;
+            }
+
+            const overrides = {};
+            const {row_pivots, columns} = this.model._config;
+            const tree_header_offset =
+                row_pivots?.length > 0 ? row_pivots.length + 1 : 0;
+
+            for (const key of Object.keys(old_sizes)) {
+                const index = this.model._column_paths.indexOf(key);
+                overrides[index + tree_header_offset] = old_sizes[key];
+            }
+
+            this.datagrid._column_sizes.override = overrides;
         }
     }
 );
