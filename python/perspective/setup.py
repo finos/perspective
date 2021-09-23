@@ -161,6 +161,7 @@ class PSPBuild(build_ext):
         ]
 
         build_args = ["--config", cfg]
+        env = os.environ.copy()
 
         if platform.system() == "Windows":
             import distutils.msvccompiler as dm
@@ -194,10 +195,11 @@ class PSPBuild(build_ext):
             cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
             build_args += [
                 "--",
-                "-j2" if os.environ.get("DOCKER", "") else "-j{}".format(CPU_COUNT),
+                "-j2"
+                if os.environ.get("DOCKER", "")
+                else "-j{}".format(env.get("PSP_NUM_CPUS", CPU_COUNT)),
             ]
 
-        env = os.environ.copy()
         env["PSP_ENABLE_PYTHON"] = "1"
         env["OSX_DEPLOYMENT_TARGET"] = "10.9"
 
