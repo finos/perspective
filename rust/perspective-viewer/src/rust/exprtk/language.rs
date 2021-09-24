@@ -506,6 +506,13 @@ thread_local! {
                 insert_text_rules: 4,
                 documentation: "Given a POSIX timestamp of milliseconds since epoch, create a new datetime".to_owned(),
             },
+            CompletionItemSuggestion {
+                label: "boolean".to_owned(),
+                kind: 1,
+                insert_text: "boolean(${1:x})".to_owned(),
+                insert_text_rules: 4,
+                documentation: "Converts the given argument to a boolean".to_owned(),
+            },
         ]
     };
 }
