@@ -14,7 +14,7 @@ from .libbinding import t_dtype
 ALIAS_REGEX = re.compile(r"//(.+)\n")
 EXPRESSION_COLUMN_NAME_REGEX = re.compile(r"\"(.*?[^\\])\"")
 STRING_LITERAL_REGEX = re.compile(r"'(.*?[^\\])'")
-BUCKET_LITERAL_REGEX = re.compile(r"bucket\(.*?, (intern\(\'([smhDWMY])\'\))\)")
+BUCKET_LITERAL_REGEX = re.compile(r"bucket\(.*?,\s*(intern\(\'([smhDWMY])\'\))\s*\)")
 
 
 def _extract_type(type, typemap):

@@ -1509,8 +1509,9 @@ export default function (Module) {
             // Replace intern() for bucket, as it takes a string literal
             // parameter and does not work if that param is interned. TODO:
             // this is clumsy and we should have a better way of handling it.
+            // TODO I concur  -- texodus
             parsed_expression_string = parsed_expression_string.replace(
-                /bucket\(.*?, (intern\(\'([smhDWMY])\'\))\)/g,
+                /bucket\(.*?,\s*(intern\(\'([smhDWMY])\'\))\s*\)/g,
                 (match, full, value) => {
                     return `${match.substr(0, match.indexOf(full))}'${value}')`;
                 }
