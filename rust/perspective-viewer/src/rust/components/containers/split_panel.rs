@@ -207,9 +207,15 @@ impl Component for SplitPanel {
             SplitPanelMsg::Reset
         });
 
+        let class = if style.is_some() {
+            "split-panel-child is-width-override"
+        } else {
+            "split-panel-child"
+        };
+
         html! {
             <div id={ self.props.id.clone() } class="split-panel">
-                <div class="split-panel-child" ref={ _ref } style={ style }>
+                <div class={ class } ref={ _ref } style={ style }>
                     { iter.next().unwrap() }
                 </div>
                 <div

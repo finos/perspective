@@ -170,7 +170,7 @@ impl Component for InactiveColumn {
                     onmousedown={ add_column }>
                 </span>
                 <div
-                    class="column_selector_draggable"
+                    class="column_selector_draggable column-selector-column-title"
                     draggable="true"
                     ref={ self.add_expression_ref.clone() }
                     ondragstart={ dragstart }
