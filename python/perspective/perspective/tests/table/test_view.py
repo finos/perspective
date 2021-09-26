@@ -573,7 +573,9 @@ class TestView(object):
         table = Table(data, index="c")
         view = table.view(columns=["a"], row_pivots=["b"], aggregates={"a": "var"})
         result = view.to_columns()
-        assert result["a"] == approx([np.var([0.1, 0.5, 0.8]), None, np.var([0.5, 0.8])])
+        assert result["a"][0] == approx(np.var([0.1, 0.5, 0.8]))
+        assert result["a"][1] is None
+        assert result["a"][2] == approx(np.var([0.5, 0.8]))
 
         table.update({
             "a": [0.3],
@@ -589,8 +591,9 @@ class TestView(object):
         })
 
         result = view.to_columns()
-        assert result["a"] == approx([np.var([0.5, 0.3, 0.8]), None, np.var([0.5, 0.8])])
-
+        assert result["a"][0] == approx(np.var([0.5, 0.3, 0.8]))
+        assert result["a"][1] is None
+        assert result["a"][2] == approx(np.var([0.5, 0.8]))
 
     def test_view_variance_multi_update(self):
         data = {
@@ -669,7 +672,10 @@ class TestView(object):
                 elif flat_data["b"][i] == 0:
                     expected_zero.append(num)
 
-            assert result["a"] == approx([np.var(expected_total), np.var(expected_zero), np.var(expected_one), None])
+            assert result["a"][0] == approx(np.var(expected_total))
+            assert result["a"][1] == approx(np.var(expected_zero))
+            assert result["a"][2] == approx(np.var(expected_one))
+            assert result["a"][3] is None
 
         view.on_update(cb1, mode="row")
 
@@ -768,11 +774,12 @@ class TestView(object):
                 elif b[i] == 1:
                     expected_one.append(num)
 
-            assert result == {
-                "a": approx([np.var(new_a), np.var(expected_zero), np.var(expected_one), None]),
-                "b": [2, 0, 1, 2],
-                "c": [6, 9, 8, 6]
-            }
+            assert result["a"][0] == approx(np.var(new_a))
+            assert result["a"][1] == approx(np.var(expected_zero))
+            assert result["a"][2] == approx(np.var(expected_one))
+            assert result["a"][3] is None
+            assert result["b"] == [2, 0, 1, 2]
+            assert result["c"] == [6, 9, 8, 6]
 
         view.on_update(cb1, mode="row")
 
@@ -853,7 +860,9 @@ class TestView(object):
         table = Table(data, index="c")
         view = table.view(columns=["a"], row_pivots=["b"], aggregates={"a": "stddev"})
         result = view.to_columns()
-        assert result["a"] == approx([np.std([0.1, 0.5, 0.8]), None, np.std([0.5, 0.8])])
+        assert result["a"][0] == approx(np.std([0.1, 0.5, 0.8]))
+        assert result["a"][1] is None
+        assert result["a"][2] == approx(np.std([0.5, 0.8]))
 
         table.update({
             "a": [0.3],
@@ -869,11 +878,9 @@ class TestView(object):
         })
 
         result = view.to_columns()
-        assert result["a"] == approx([np.std([0.5, 0.3, 0.8]), None, np.std([0.5, 0.8])])
-
-
-
-
+        assert result["a"][0] == approx(np.std([0.5, 0.3, 0.8]))
+        assert result["a"][1] is None
+        assert result["a"][2] == approx(np.std([0.5, 0.8]))
 
     def test_view_standard_deviation_multi_update(self):
         data = {
@@ -952,7 +959,10 @@ class TestView(object):
                 elif flat_data["b"][i] == 0:
                     expected_zero.append(num)
 
-            assert result["a"] == approx([np.std(expected_total), np.std(expected_zero), np.std(expected_one), None])
+            assert result["a"][0] == approx(np.std(expected_total))
+            assert result["a"][1] == approx(np.std(expected_zero))
+            assert result["a"][2] == approx(np.std(expected_one))
+            assert result["a"][3] is None
 
         view.on_update(cb1, mode="row")
 
@@ -1051,11 +1061,12 @@ class TestView(object):
                 elif b[i] == 1:
                     expected_one.append(num)
 
-            assert result == {
-                "a": approx([np.std(new_a), np.std(expected_zero), np.std(expected_one), None]),
-                "b": [2, 0, 1, 2],
-                "c": [6, 9, 8, 6]
-            }
+            assert result["a"][0] == approx(np.std(new_a))
+            assert result["a"][1] == approx(np.std(expected_zero))
+            assert result["a"][2] == approx(np.std(expected_one))
+            assert result["a"][3] is None
+            assert result["b"] == [2, 0, 1, 2]
+            assert result["c"] == [6, 9, 8, 6]
 
         view.on_update(cb1, mode="row")
 

@@ -120,8 +120,8 @@ get_minmax_idx(const std::vector<t_tscalar>& vec, t_sorttype stype) {
             for (t_index idx = 0, loop_end = vec.size(); idx < loop_end;
                  ++idx) {
                 double val = std::abs(vec[idx].to_double());
-                double mindbl = std::abs(double(min_max.first));
-                double maxdbl = std::abs(double(min_max.second));
+                double mindbl = std::abs(double(min_max.first.as_bool()));
+                double maxdbl = std::abs(double(min_max.second.as_bool()));
 
                 if (val <= mindbl) {
                     min_max.first.set(val);

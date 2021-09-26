@@ -111,11 +111,7 @@ namespace binding {
         }
         switch (scalar.get_dtype()) {
             case DTYPE_BOOL: {
-                if (scalar) {
-                    return t_val(true);
-                } else {
-                    return t_val(false);
-                }
+                return t_val(scalar.as_bool());
             }
             case DTYPE_TIME: {
                 if (cast_double) {

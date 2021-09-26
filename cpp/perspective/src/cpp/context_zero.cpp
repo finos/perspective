@@ -798,7 +798,7 @@ t_ctx0::unity_get_column_data(t_uindex idx) const {
 
 std::vector<t_tscalar>
 t_ctx0::unity_get_row_path(t_uindex idx) const {
-    return std::vector<t_tscalar>(mktscalar(idx));
+    return {};
 }
 
 std::vector<t_tscalar>

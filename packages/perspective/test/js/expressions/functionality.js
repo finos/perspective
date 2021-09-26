@@ -438,20 +438,65 @@ module.exports = (perspective) => {
                 const table = await perspective.table(
                     expressions_common.int_float_data
                 );
+
+                // 2 ^ 10 = 1024
                 const view = await table.view({
                     expressions: [
-                        `var x := 1; var y := 0; while (y < 10) { x := x * 2; y += 1; } x`,
+                        `var x := 1; var y := 0; while (y < 10) { x := x * 2; y += 1; }; x`,
                     ],
                 });
 
                 const results = await view.to_columns();
                 expect(
                     results[
-                        `var x := 1; var y := 0; while (y < 10) { x := x * 2; y += 1; } x`
+                        `var x := 1; var y := 0; while (y < 10) { x := x * 2; y += 1; }; x`
                     ]
-                ).toEqual([10240, 10240, 10240, 10240]);
+                ).toEqual([1024, 1024, 1024, 1024]);
 
                 await view.delete();
+                await table.delete();
+            });
+
+            it("Scalar while 2", async function () {
+                const table = await perspective.table(
+                    expressions_common.int_float_data
+                );
+
+                // 2 * 2 = 4, 4 * 4 = 16, 16 * 16 = 256
+                const view = await table.view({
+                    expressions: [
+                        `var x := 2; var y := 0; while (y < 3) { x := x * x; y += 1; }; x`,
+                    ],
+                });
+
+                const results = await view.to_columns();
+                expect(
+                    results[
+                        `var x := 2; var y := 0; while (y < 3) { x := x * x; y += 1; }; x`
+                    ]
+                ).toEqual([256, 256, 256, 256]);
+
+                await view.delete();
+                await table.delete();
+            });
+
+            it("While without semicolon should not validate", async function () {
+                const table = await perspective.table(
+                    expressions_common.int_float_data
+                );
+
+                const schema = await table.validate_expressions([
+                    `//expr\nvar x := 2; var y := 0; while (y < 3) { x := x * x; y += 1; } x`,
+                ]);
+
+                expect(schema.expression_schema["expr"]).toBeUndefined();
+                expect(schema.errors["expr"]).toEqual({
+                    column: 63,
+                    line: 1,
+                    error_message:
+                        "Parser Error - Invalid expression encountered",
+                });
+
                 await table.delete();
             });
 
@@ -461,37 +506,35 @@ module.exports = (perspective) => {
                 );
                 const view = await table.view({
                     expressions: [
-                        `var x := 0; var y := 0; while (y < 10) { x := "w" * 2; y += 1; } x`,
+                        `var x := 0; var y := 0; while (y < 10) { x := "w" * 2; y += 1; }; x`,
                     ],
                 });
 
                 const results = await view.to_columns();
                 expect(
                     results[
-                        `var x := 0; var y := 0; while (y < 10) { x := "w" * 2; y += 1; } x`
+                        `var x := 0; var y := 0; while (y < 10) { x := "w" * 2; y += 1; }; x`
                     ]
-                ).toEqual([30, 50, 70, 90]);
+                ).toEqual([3, 5, 7, 9]);
 
                 await view.delete();
                 await table.delete();
             });
 
             it.skip("Column while with break", async function () {
-                // FIXME: this can be parsed but the call to expression.value()
-                // throws an error or aborts with an empty message.
                 const table = await perspective.table(
                     expressions_common.int_float_data
                 );
                 const view = await table.view({
                     expressions: [
-                        `var x := 0; var y := 0; while (y < 10) { if (y % 2 == 0) { break; }; x := "w" * 2; y += 1; } x`,
+                        `var x := 0; var y := 0; while (y < 10) { if (y % 2 == 0) { break; }; x := "w" * 2; y += 1; }; x`,
                     ],
                 });
 
                 const results = await view.to_columns();
                 expect(
                     results[
-                        `var x := 0; var y := 0; while (y < 10) { if (y % 2 == 0) { break; }; x := "w" * 2; y += 1; } x`
+                        `var x := 0; var y := 0; while (y < 10) { if (y % 2 == 0) { break; }; x := "w" * 2; y += 1; }; x`
                     ]
                 ).toEqual([16.5, 30, 42, 54]);
 
@@ -501,6 +544,22 @@ module.exports = (perspective) => {
         });
 
         describe("For loop", function () {
+            it("For loop", async () => {
+                const expr = `// expression\nvar x := 0; for (var i := 0; i < 3; i += 1) { x += 1; }; x`;
+                const table = await perspective.table(
+                    expressions_common.int_float_data
+                );
+                const view = await table.view({
+                    expressions: [expr],
+                });
+
+                const results = await view.to_columns();
+                expect(results["expression"]).toEqual([3, 3, 3, 3]);
+
+                await view.delete();
+                await table.delete();
+            });
+
             it("Scalar for", async function () {
                 const table = await perspective.table(
                     expressions_common.int_float_data
@@ -679,6 +738,31 @@ module.exports = (perspective) => {
             await table.delete();
         });
 
+        it("Declare numeric var 0 and 1", async function () {
+            const table = await perspective.table(
+                expressions_common.int_float_data
+            );
+            const expressions = ["1", "0", "var x := 1; x", "var x := 0; x"];
+            const view = await table.view({
+                expressions,
+            });
+
+            const schema = await view.expression_schema();
+
+            for (const expr of expressions) {
+                expect(schema[expr]).toEqual("float");
+            }
+
+            const results = await view.to_columns();
+            expect(results["1"]).toEqual(Array(4).fill(1));
+            expect(results["0"]).toEqual(Array(4).fill(0));
+            expect(results["var x := 1; x"]).toEqual(Array(4).fill(1));
+            expect(results["var x := 0; x"]).toEqual(Array(4).fill(0));
+
+            await view.delete();
+            await table.delete();
+        });
+
         it("Declare string var", async function () {
             const table = await perspective.table(
                 expressions_common.int_float_data
@@ -752,13 +836,22 @@ module.exports = (perspective) => {
                 expressions_common.int_float_data
             );
             const view = await table.view({
-                expressions: [`var x := true; var y := false; x and y ? 1 : 0`],
+                expressions: [
+                    `var x := true; var y := false; x and y ? 1 : 0`,
+                    `var x := true; var y := false; x or y`,
+                ],
             });
 
             const results = await view.to_columns();
             expect(
                 results[`var x := true; var y := false; x and y ? 1 : 0`]
             ).toEqual([0, 0, 0, 0]);
+            expect(results["var x := true; var y := false; x or y"]).toEqual([
+                true,
+                true,
+                true,
+                true,
+            ]);
 
             await view.delete();
             await table.delete();
@@ -1021,19 +1114,59 @@ module.exports = (perspective) => {
                 expressions_common.int_float_data
             );
             const view = await table.view({
-                expressions: ["0 and 1", "0 or 1"],
+                expressions: [
+                    "0 and 1",
+                    "0 or 1",
+                    "true and true",
+                    "false or true",
+                ],
             });
             expect(await view.schema()).toEqual({
                 w: "float",
                 x: "integer",
                 y: "string",
                 z: "boolean",
-                "0 and 1": "float",
-                "0 or 1": "float",
+                "0 and 1": "boolean",
+                "0 or 1": "boolean",
+                "true and true": "boolean",
+                "false or true": "boolean",
             });
             const result = await view.to_columns();
-            expect(result["0 and 1"]).toEqual([0, 0, 0, 0]);
-            expect(result["0 or 1"]).toEqual([1, 1, 1, 1]);
+            expect(result["0 and 1"]).toEqual([false, false, false, false]);
+            expect(result["0 or 1"]).toEqual([true, true, true, true]);
+            expect(result["true and true"]).toEqual([true, true, true, true]);
+            expect(result["false or true"]).toEqual([true, true, true, true]);
+            view.delete();
+            table.delete();
+        });
+
+        it("Boolean scalars should not compare to numeric scalars", async function () {
+            const table = await perspective.table(
+                expressions_common.int_float_data
+            );
+            const view = await table.view({
+                expressions: [
+                    "0 and 1",
+                    "0 or 1",
+                    "true and true",
+                    "false or true",
+                ],
+            });
+            expect(await view.schema()).toEqual({
+                w: "float",
+                x: "integer",
+                y: "string",
+                z: "boolean",
+                "0 and 1": "boolean",
+                "0 or 1": "boolean",
+                "true and true": "boolean",
+                "false or true": "boolean",
+            });
+            const result = await view.to_columns();
+            expect(result["0 and 1"]).toEqual([false, false, false, false]);
+            expect(result["0 or 1"]).toEqual([true, true, true, true]);
+            expect(result["true and true"]).toEqual([true, true, true, true]);
+            expect(result["false or true"]).toEqual([true, true, true, true]);
             view.delete();
             table.delete();
         });
@@ -1059,19 +1192,39 @@ module.exports = (perspective) => {
                 expressions_common.int_float_data
             );
             const view = await table.view({
-                expressions: ['"x" and 1', '"x" or 1'],
+                expressions: [
+                    '"x" and 1',
+                    '"x" or 1',
+                    '"x" and true',
+                    '"x" and false',
+                    '"x" or true',
+                    '"x" or false',
+                ],
             });
             expect(await view.schema()).toEqual({
                 w: "float",
                 x: "integer",
                 y: "string",
                 z: "boolean",
-                '"x" and 1': "float",
-                '"x" or 1': "float",
+                '"x" and 1': "boolean",
+                '"x" or 1': "boolean",
+                '"x" and true': "boolean",
+                '"x" and false': "boolean",
+                '"x" or true': "boolean",
+                '"x" or false': "boolean",
             });
             const result = await view.to_columns();
-            expect(result['"x" and 1']).toEqual([1, 1, 1, 1]);
-            expect(result['"x" or 1']).toEqual([1, 1, 1, 1]);
+            expect(result['"x" and 1']).toEqual([true, true, true, true]);
+            expect(result['"x" or 1']).toEqual([true, true, true, true]);
+            expect(result['"x" and true']).toEqual([true, true, true, true]);
+            expect(result['"x" and false']).toEqual([
+                false,
+                false,
+                false,
+                false,
+            ]);
+            expect(result['"x" or true']).toEqual([true, true, true, true]);
+            expect(result['"x" or false']).toEqual([true, true, true, true]);
             view.delete();
             table.delete();
         });
@@ -2374,8 +2527,8 @@ module.exports = (perspective) => {
                     '"a" ^ 2': "float",
                     "sqrt(144)": "float",
                     '-"a"': "integer",
-                    "0 and 1": "float",
-                    "0 or 1": "float",
+                    "0 and 1": "boolean",
+                    "0 or 1": "boolean",
                     'upper("c")': "string",
                     "bucket(\"b\", 'M')": "date",
                     "bucket(\"b\", 's')": "datetime",
@@ -2571,8 +2724,8 @@ module.exports = (perspective) => {
                     '"a" ^ 2': "float",
                     "sqrt(144)": "float",
                     '-"a"': "integer",
-                    "0 and 1": "float",
-                    "0 or 1": "float",
+                    "0 and 1": "boolean",
+                    "0 or 1": "boolean",
                     'upper("c")': "string",
                     "bucket(\"b\", 'M')": "date",
                     "bucket(\"b\", 's')": "datetime",
@@ -2604,8 +2757,8 @@ module.exports = (perspective) => {
                     '"a" ^ 2': "float",
                     "sqrt(144)": "float",
                     '-"a"': "integer",
-                    "0 and 1": "float",
-                    "0 or 1": "float",
+                    "0 and 1": "boolean",
+                    "0 or 1": "boolean",
                     'upper("c")': "string",
                     "bucket(\"b\", 'M')": "date",
                     "bucket(\"b\", 's')": "datetime",
@@ -2638,8 +2791,8 @@ module.exports = (perspective) => {
                     '"a" ^ 2': "float",
                     "sqrt(144)": "float",
                     '-"a"': "integer",
-                    "0 and 1": "float",
-                    "0 or 1": "float",
+                    "0 and 1": "boolean",
+                    "0 or 1": "boolean",
                     'upper("c")': "string",
                     "bucket(\"b\", 'M')": "date",
                     "bucket(\"b\", 's')": "datetime",
@@ -2672,8 +2825,8 @@ module.exports = (perspective) => {
                     '"a" ^ 2': "float",
                     "sqrt(144)": "float",
                     '-"a"': "integer",
-                    "0 and 1": "float",
-                    "0 or 1": "float",
+                    "0 and 1": "integer",
+                    "0 or 1": "integer",
                     'upper("c")': "integer",
                     "bucket(\"b\", 'M')": "integer",
                     "bucket(\"b\", 's')": "integer",
@@ -2711,8 +2864,8 @@ module.exports = (perspective) => {
                     '"a" ^ 2': "float",
                     "sqrt(144)": "float",
                     '-"a"': "integer",
-                    "0 and 1": "float",
-                    "0 or 1": "float",
+                    "0 and 1": "boolean",
+                    "0 or 1": "boolean",
                     'upper("c")': "integer",
                     "bucket(\"b\", 'M')": "integer",
                     "bucket(\"b\", 's')": "datetime",
@@ -2746,8 +2899,8 @@ module.exports = (perspective) => {
                     '"a" ^ 2': "float",
                     "sqrt(144)": "float",
                     '-"a"': "integer",
-                    "0 and 1": "float",
-                    "0 or 1": "float",
+                    "0 and 1": "integer", // aggregated bool = count
+                    "0 or 1": "integer",
                     'upper("c")': "integer",
                     "bucket(\"b\", 'M')": "integer",
                     "bucket(\"b\", 's')": "integer",
@@ -2786,8 +2939,8 @@ module.exports = (perspective) => {
                     '"a" ^ 2': "float",
                     "sqrt(144)": "float",
                     '-"a"': "integer",
-                    "0 and 1": "float",
-                    "0 or 1": "float",
+                    "0 and 1": "boolean",
+                    "0 or 1": "boolean",
                     'upper("c")': "integer",
                     "bucket(\"b\", 'M')": "integer",
                     "bucket(\"b\", 's')": "datetime",

@@ -11,8 +11,22 @@
 
 namespace perspective {
 
-std::shared_ptr<exprtk::parser<t_tscalar>> t_computed_expression_parser::PARSER
-    = std::make_shared<exprtk::parser<t_tscalar>>();
+// Change ExprTk's default compilation options to only check for correctness
+// of brackets and sequences. ExprTk defaults will replace "true" and "false"
+// with 1 and 0, which we don't want. Using the tokens "true" and "false"
+// will raise a syntax error, which is the correct behavior.
+std::size_t
+t_computed_expression_parser::PARSER_COMPILE_OPTIONS = 
+    exprtk::parser<t_tscalar>::settings_t::e_joiner +
+    exprtk::parser<t_tscalar>::settings_t::e_numeric_check +
+    exprtk::parser<t_tscalar>::settings_t::e_bracket_check +
+    exprtk::parser<t_tscalar>::settings_t::e_sequence_check;
+    // exprtk::parser<t_tscalar>::settings_t::e_commutative_check;
+    // exprtk::parser<t_tscalar>::settings_t::e_strength_reduction;
+
+std::shared_ptr<exprtk::parser<t_tscalar>>
+t_computed_expression_parser::PARSER = 
+    std::make_shared<exprtk::parser<t_tscalar>>(t_computed_expression_parser::PARSER_COMPILE_OPTIONS);
 
 // Exprtk functions without any state can be initialized statically
 computed_function::bucket t_computed_expression_parser::BUCKET_FN
@@ -20,6 +34,9 @@ computed_function::bucket t_computed_expression_parser::BUCKET_FN
 
 computed_function::hour_of_day t_computed_expression_parser::HOUR_OF_DAY_FN
     = computed_function::hour_of_day();
+
+computed_function::inrange_fn t_computed_expression_parser::INRANGE_FN
+    = computed_function::inrange_fn();
 
 computed_function::min_fn t_computed_expression_parser::MIN_FN
     = computed_function::min_fn();
@@ -44,6 +61,9 @@ computed_function::to_integer t_computed_expression_parser::TO_INTEGER_FN
 
 computed_function::to_float t_computed_expression_parser::TO_FLOAT_FN
     = computed_function::to_float();
+
+computed_function::to_boolean t_computed_expression_parser::TO_BOOLEAN_FN
+    = computed_function::to_boolean();
 
 computed_function::make_datetime t_computed_expression_parser::MAKE_DATETIME_FN
     = computed_function::make_datetime();
@@ -80,6 +100,12 @@ computed_function::to_string
     t_computed_expression_parser::TO_STRING_VALIDATOR_FN
     = computed_function::to_string(nullptr);
 
+t_tscalar
+t_computed_expression_parser::TRUE_SCALAR = mktscalar(true);
+
+t_tscalar
+t_computed_expression_parser::FALSE_SCALAR = mktscalar(false);
+
 #define REGISTER_COMPUTE_FUNCTIONS(vocab)                                      \
     computed_function::day_of_week day_of_week_fn                              \
         = computed_function::day_of_week(vocab);                               \
@@ -108,6 +134,8 @@ computed_function::to_string
     sym_table.add_function("length", length_fn);                               \
     sym_table.add_function("string", to_string_fn);                            \
     sym_table.add_reserved_function(                                           \
+        "inrange", t_computed_expression_parser::INRANGE_FN);                  \
+    sym_table.add_reserved_function(                                           \
         "min", t_computed_expression_parser::MIN_FN);                          \
     sym_table.add_reserved_function(                                           \
         "max", t_computed_expression_parser::MAX_FN);                          \
@@ -121,6 +149,8 @@ computed_function::to_string
         "integer", t_computed_expression_parser::TO_INTEGER_FN);               \
     sym_table.add_function(                                                    \
         "float", t_computed_expression_parser::TO_FLOAT_FN);                   \
+    sym_table.add_function(                                                    \
+        "boolean", t_computed_expression_parser::TO_BOOLEAN_FN);               \
     sym_table.add_function(                                                    \
         "date", t_computed_expression_parser::MAKE_DATE_FN);                   \
     sym_table.add_function(                                                    \
@@ -149,6 +179,8 @@ computed_function::to_string
     sym_table.add_function(                                                    \
         "length", t_computed_expression_parser::LENGTH_VALIDATOR_FN);          \
     sym_table.add_reserved_function(                                           \
+        "inrange", t_computed_expression_parser::INRANGE_FN);                  \
+    sym_table.add_reserved_function(                                           \
         "min", t_computed_expression_parser::MIN_FN);                          \
     sym_table.add_reserved_function(                                           \
         "max", t_computed_expression_parser::MAX_FN);                          \
@@ -165,9 +197,15 @@ computed_function::to_string
     sym_table.add_function(                                                    \
         "float", t_computed_expression_parser::TO_FLOAT_FN);                   \
     sym_table.add_function(                                                    \
+        "boolean", t_computed_expression_parser::TO_BOOLEAN_FN);               \
+    sym_table.add_function(                                                    \
         "date", t_computed_expression_parser::MAKE_DATE_FN);                   \
     sym_table.add_function(                                                    \
         "datetime", t_computed_expression_parser::MAKE_DATETIME_FN);
+
+#define REGISTER_SCALAR_CONSTANTS()                                                         \
+    sym_table.add_constant("True", t_computed_expression_parser::TRUE_SCALAR);              \
+    sym_table.add_constant("False", t_computed_expression_parser::FALSE_SCALAR);            \
 
 /******************************************************************************
  *
@@ -192,10 +230,16 @@ t_computed_expression::compute(std::shared_ptr<t_data_table> source_table,
     std::shared_ptr<t_vocab> vocab) const {
     // TODO: share symtables across pre/re/compute
     exprtk::symbol_table<t_tscalar> sym_table;
+
+    // pi, infinity, etc.
     sym_table.add_constants();
 
-    REGISTER_COMPUTE_FUNCTIONS(vocab)
+    // "True" and "False" as boolean scalars
+    REGISTER_SCALAR_CONSTANTS()
 
+    // Custom functions from computed_functions.cpp
+    REGISTER_COMPUTE_FUNCTIONS(vocab)
+    
     exprtk::expression<t_tscalar> expr_definition;
     std::vector<std::pair<std::string, t_tscalar>> values;
     tsl::hopscotch_map<std::string, std::shared_ptr<t_column>> columns;
@@ -287,6 +331,8 @@ t_computed_expression_parser::init() {
         .disable_control_structure(
             exprtk::parser<t_tscalar>::settings_store::e_ctrl_repeat_loop)
         .disable_base_function(
+            exprtk::parser<t_tscalar>::settings_store::e_bf_inrange)
+        .disable_base_function(
             exprtk::parser<t_tscalar>::settings_store::e_bf_min)
         .disable_base_function(
             exprtk::parser<t_tscalar>::settings_store::e_bf_max);
@@ -301,6 +347,7 @@ t_computed_expression_parser::precompute(const std::string& expression_alias,
     exprtk::symbol_table<t_tscalar> sym_table;
     sym_table.add_constants();
 
+    REGISTER_SCALAR_CONSTANTS()
     REGISTER_VALIDATION_FUNCTIONS()
 
     std::vector<t_tscalar> values;
@@ -352,6 +399,7 @@ t_computed_expression_parser::get_dtype(const std::string& expression_alias,
 
     std::vector<t_tscalar> values;
 
+    REGISTER_SCALAR_CONSTANTS()
     REGISTER_VALIDATION_FUNCTIONS()
 
     auto num_input_columns = column_ids.size();

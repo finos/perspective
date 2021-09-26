@@ -1041,6 +1041,43 @@ namespace computed_function {
         return rval;
     }
 
+    inrange_fn::inrange_fn()
+        : exprtk::igeneric_function<t_tscalar>("TTT") {}
+
+    inrange_fn::~inrange_fn() {}
+
+    t_tscalar
+    inrange_fn::operator()(t_parameter_list parameters) {
+        t_tscalar rval;
+        rval.clear();
+        rval.m_type = DTYPE_BOOL;
+        
+        t_scalar_view _low(parameters[0]);
+        t_scalar_view _val(parameters[1]);
+        t_scalar_view _high(parameters[2]);
+
+        t_tscalar low = _low();
+        t_tscalar val = _val();
+        t_tscalar high = _high();
+
+        // make sure we are comparing items of the same type, otherwise
+        // comparisons will fail.
+        t_dtype val_dtype = val.get_dtype();
+
+        if (!(low.get_dtype() == val_dtype && val_dtype == high.get_dtype())) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        // no need to type check - just check validity
+        if (!low.is_valid() || !val.is_valid() || !high.is_valid()) {
+            return rval;
+        }
+        
+        rval.set((low <= val) && (val <= high));
+        return rval;
+    }
+
     min_fn::min_fn() {}
 
     min_fn::~min_fn() {}
@@ -1196,17 +1233,13 @@ namespace computed_function {
 
         t_tscalar rval;
         rval.clear();
-
-        // Return a float so we can use it in conditionals
-        rval.m_type = DTYPE_FLOAT64;
+        rval.m_type = DTYPE_BOOL;
 
         t_generic_type& gt = parameters[0];
         t_scalar_view temp(gt);
         val.set(temp());
 
-        // Return a double so we can use it in conditionals
-        rval.set(static_cast<double>(val.is_none() || !val.is_valid()));
-
+        rval.set(val.is_none() || !val.is_valid());
         return rval;
     }
 
@@ -1221,15 +1254,12 @@ namespace computed_function {
 
         t_tscalar rval;
         rval.clear();
-
-        // Return a float so we can use it in conditionals
-        rval.m_type = DTYPE_FLOAT64;
+        rval.m_type = DTYPE_BOOL;
 
         t_generic_type& gt = parameters[0];
         t_scalar_view temp(gt);
         val.set(temp());
-
-        rval.set(static_cast<double>(!val.is_none() && val.is_valid()));
+        rval.set(!val.is_none() && val.is_valid());
 
         return rval;
     }
@@ -1372,6 +1402,31 @@ namespace computed_function {
         }
 
         rval.set(number);
+        return rval;
+    }
+
+    to_boolean::to_boolean()
+    : exprtk::igeneric_function<t_tscalar>("T") {}
+
+    to_boolean::~to_boolean() {}
+
+    t_tscalar to_boolean::operator()(t_parameter_list parameters) {
+        t_tscalar val;
+        t_tscalar rval;
+        rval.clear();
+        rval.m_type = DTYPE_BOOL;
+
+        const t_generic_type& gt = parameters[0];
+        t_scalar_view temp(gt);
+        val.set(temp());
+
+        // handles STATUS_VALID, so no need to check separately
+        rval.set(val.as_bool());
+
+        if (!val.is_valid()) {
+            return rval;
+        }
+
         return rval;
     }
 

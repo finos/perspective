@@ -14,6 +14,7 @@ use crate::utils::*;
 
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::convert::TryFrom;
 use wasm_bindgen::{prelude::*, JsCast};
 use wasm_bindgen_futures::future_to_promise;
 use web_sys::*;
@@ -233,10 +234,10 @@ impl ExpressionEditor {
 fn error_to_market(err: PerspectiveValidationError) -> JsMonacoModelMarker<'static> {
     JsMonacoModelMarker {
         code: "".to_owned(),
-        start_line_number: err.line + 1,
-        end_line_number: err.line + 1,
-        start_column: err.column,
-        end_column: err.column,
+        start_line_number: u32::try_from(err.line + 1).unwrap_or(0),
+        end_line_number: u32::try_from(err.line + 1).unwrap_or(0),
+        start_column: u32::try_from(err.column).unwrap_or(0),
+        end_column: u32::try_from(err.column).unwrap_or(0),
         severity: "error",
         message: err.error_message,
     }

@@ -946,8 +946,6 @@ module.exports = (perspective) => {
             let view2 = await table2.view();
             let json2 = await view2.to_json();
 
-            console.log(json, json2);
-
             expect(json2).toEqual(
                 json.map((x) => {
                     delete x["__ROW_PATH__"];
@@ -972,8 +970,6 @@ module.exports = (perspective) => {
             let table2 = await perspective.table(arrow);
             let view2 = await table2.view();
             let json2 = await view2.to_json();
-
-            console.log(json, json2);
 
             expect(json2).toEqual(
                 json.map((x) => {

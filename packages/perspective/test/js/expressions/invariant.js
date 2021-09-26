@@ -226,7 +226,7 @@ module.exports = (perspective) => {
                     const result = await view.to_columns();
                     const expected = array_equals(
                         result['"a" == "a"'],
-                        Array(data["a"].length).fill(1)
+                        Array(data["a"].length).fill(true)
                     );
                     view.delete();
                     table.delete();
@@ -247,7 +247,7 @@ module.exports = (perspective) => {
                     const result = await view.to_columns();
                     const expected = array_equals(
                         result['"a" > "a"'],
-                        Array(data["a"].length).fill(0)
+                        Array(data["a"].length).fill(false)
                     );
                     view.delete();
                     table.delete();
@@ -268,7 +268,7 @@ module.exports = (perspective) => {
                     const result = await view.to_columns();
                     const expected = array_equals(
                         result['"a" < "a"'],
-                        Array(data["a"].length).fill(0)
+                        Array(data["a"].length).fill(false)
                     );
                     view.delete();
                     table.delete();
@@ -297,7 +297,7 @@ module.exports = (perspective) => {
                     const result = await view.to_columns();
                     const expected = array_equals(
                         result['"c" == "c"'],
-                        Array(data["c"].length).fill(1)
+                        Array(data["c"].length).fill(true)
                     );
                     view.delete();
                     table.delete();
@@ -326,7 +326,7 @@ module.exports = (perspective) => {
                     const result = await view.to_columns();
                     const expected = array_equals(
                         result['"d" == "d"'],
-                        Array(data["d"].length).fill(1)
+                        Array(data["d"].length).fill(true)
                     );
                     view.delete();
                     table.delete();
@@ -355,7 +355,7 @@ module.exports = (perspective) => {
                     const result = await view.to_columns();
                     const expected = array_equals(
                         result['"d" == "d"'],
-                        Array(data["d"].length).fill(1)
+                        Array(data["d"].length).fill(true)
                     );
                     view.delete();
                     table.delete();

@@ -446,14 +446,14 @@ thread_local! {
             CompletionItemSuggestion {
                 label: "true".to_owned(),
                 kind: 1,
-                insert_text: "true(${1:x})".to_owned(),
+                insert_text: "true".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Boolean value true".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "false".to_owned(),
                 kind: 1,
-                insert_text: "false(${1:x})".to_owned(),
+                insert_text: "false".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Boolean value false".to_owned(),
             },
@@ -462,7 +462,7 @@ thread_local! {
                 kind: 17,
                 insert_text: "if (${1:condition}) {} else if (${2:condition}) {} else {}".to_owned(),
                 insert_text_rules: 4,
-                documentation: "An if/else if/else conditional, which evaluates a condition such as:\n if (\"Sales\" > 100) { true } else { false }".to_owned(),
+                documentation: "An if/else conditional, which evaluates a condition such as:\n if (\"Sales\" > 100) { true } else { false }".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "for".to_owned(),
@@ -505,6 +505,13 @@ thread_local! {
                 insert_text: "datetime(${1:timestamp})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Given a POSIX timestamp of milliseconds since epoch, create a new datetime".to_owned(),
+            },
+            CompletionItemSuggestion {
+                label: "boolean".to_owned(),
+                kind: 1,
+                insert_text: "boolean(${1:x})".to_owned(),
+                insert_text_rules: 4,
+                documentation: "Converts the given argument to a boolean".to_owned(),
             },
         ]
     };

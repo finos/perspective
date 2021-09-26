@@ -126,6 +126,9 @@ public:
 
     static std::shared_ptr<exprtk::parser<t_tscalar>> PARSER;
 
+    // Applied to the parser
+    static std::size_t PARSER_COMPILE_OPTIONS;
+
     // Instances of Exprtk functions
     static computed_function::bucket BUCKET_FN;
     static computed_function::hour_of_day HOUR_OF_DAY_FN;
@@ -138,6 +141,7 @@ public:
     static computed_function::lower LOWER_VALIDATOR_FN;
     static computed_function::length LENGTH_VALIDATOR_FN;
     static computed_function::percent_of PERCENT_OF_FN;
+    static computed_function::inrange_fn INRANGE_FN;
     static computed_function::min_fn MIN_FN;
     static computed_function::max_fn MAX_FN;
     static computed_function::is_null IS_NULL_FN;
@@ -145,8 +149,13 @@ public:
     static computed_function::to_string TO_STRING_VALIDATOR_FN;
     static computed_function::to_integer TO_INTEGER_FN;
     static computed_function::to_float TO_FLOAT_FN;
+    static computed_function::to_boolean TO_BOOLEAN_FN;
     static computed_function::make_date MAKE_DATE_FN;
     static computed_function::make_datetime MAKE_DATETIME_FN;
+
+    // constants for True and False as DTYPE_BOOL scalars
+    static t_tscalar TRUE_SCALAR;
+    static t_tscalar FALSE_SCALAR;
 };
 
 /**

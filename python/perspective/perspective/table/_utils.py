@@ -15,6 +15,7 @@ ALIAS_REGEX = re.compile(r"//(.+)\n")
 EXPRESSION_COLUMN_NAME_REGEX = re.compile(r"\"(.*?[^\\])\"")
 STRING_LITERAL_REGEX = re.compile(r"'(.*?[^\\])'")
 BUCKET_LITERAL_REGEX = re.compile(r"bucket\(.*?,\s*(intern\(\'([smhDWMY])\'\))\s*\)")
+BOOLEAN_LITERAL_REGEX = re.compile(r"([a-zA-Z_]+[a-zA-Z0-9_]*)")
 
 
 def _extract_type(type, typemap):
@@ -181,6 +182,14 @@ def _parse_expression_strings(expressions):
             column_name_map,
             column_id_map,
             running_cidx,
+        )
+
+        parsed = re.sub(
+            BOOLEAN_LITERAL_REGEX,
+            lambda match: "True"
+            if match.group(0) == "true"
+            else ("False" if match.group(0) == "false" else match.group(0)),
+            parsed,
         )
 
         parsed = re.sub(EXPRESSION_COLUMN_NAME_REGEX, replacer_fn, parsed)

@@ -69,6 +69,18 @@ function calc_binary(operator, left, right) {
             return left % right;
         case "^":
             return Math.pow(left, right);
+        case "==":
+            return left == right ? 1 : 0;
+        case "!=":
+            return left != right ? 1 : 0;
+        case ">":
+            return left > right ? 1 : 0;
+        case "<":
+            return left < right ? 1 : 0;
+        case ">=":
+            return left >= right ? 1 : 0;
+        case "<=":
+            return left <= right ? 1 : 0;
         default:
             throw new Error("Unknown operator");
     }
@@ -83,10 +95,13 @@ function validate_unary_operations(output, expressions, operator) {
     for (const expr of expressions) {
         const output_col = output[expr];
         const input = expr.substr(2, expr.length - 3);
-        console.log(input);
-        expect(output_col).toEqual(
-            output[input].map((v) => calc_unary(operator, v))
-        );
+        expect({
+            expr,
+            result: output_col,
+        }).toEqual({
+            expr,
+            result: output[input].map((v) => calc_unary(operator, v)),
+        });
     }
 }
 
@@ -101,11 +116,16 @@ function validate_binary_operations(output, expressions, operator) {
         const inputs = expr.split(` ${operator} `);
         const left = inputs[0].substr(1, inputs[0].length - 2);
         const right = inputs[1].substr(1, inputs[1].length - 2);
-        expect(output_col).toEqual(
-            output[left].map((v, idx) =>
+        console.error(left, right, output[left], output[right]);
+        expect({
+            expr,
+            result: output_col,
+        }).toEqual({
+            expr,
+            result: output[left].map((v, idx) =>
                 calc_binary(operator, v, output[right][idx])
-            )
-        );
+            ),
+        });
     }
 }
 /**
@@ -294,8 +314,8 @@ module.exports = (perspective) => {
                         const left = inputs[0].substr(1, inputs[0].length - 2);
                         const right = inputs[1].substr(1, inputs[1].length - 2);
                         expect(output_col).toEqual(
-                            result[left].map((v, idx) =>
-                                v == result[right][idx] ? 1 : 0
+                            result[left].map(
+                                (v, idx) => v == result[right][idx]
                             )
                         );
                     }
@@ -330,8 +350,8 @@ module.exports = (perspective) => {
                         const left = inputs[0].substr(1, inputs[0].length - 2);
                         const right = inputs[1].substr(1, inputs[1].length - 2);
                         expect(output_col).toEqual(
-                            result[left].map((v, idx) =>
-                                v != result[right][idx] ? 1 : 0
+                            result[left].map(
+                                (v, idx) => v != result[right][idx]
                             )
                         );
                     }
@@ -366,9 +386,7 @@ module.exports = (perspective) => {
                         const left = inputs[0].substr(1, inputs[0].length - 2);
                         const right = inputs[1].substr(1, inputs[1].length - 2);
                         expect(output_col).toEqual(
-                            result[left].map((v, idx) =>
-                                v > result[right][idx] ? 1 : 0
-                            )
+                            result[left].map((v, idx) => v > result[right][idx])
                         );
                     }
                 });
@@ -402,9 +420,7 @@ module.exports = (perspective) => {
                         const left = inputs[0].substr(1, inputs[0].length - 2);
                         const right = inputs[1].substr(1, inputs[1].length - 2);
                         expect(output_col).toEqual(
-                            result[left].map((v, idx) =>
-                                v < result[right][idx] ? 1 : 0
-                            )
+                            result[left].map((v, idx) => v < result[right][idx])
                         );
                     }
                 });
@@ -438,8 +454,8 @@ module.exports = (perspective) => {
                         const left = inputs[0].substr(1, inputs[0].length - 2);
                         const right = inputs[1].substr(1, inputs[1].length - 2);
                         expect(output_col).toEqual(
-                            result[left].map((v, idx) =>
-                                v >= result[right][idx] ? 1 : 0
+                            result[left].map(
+                                (v, idx) => v >= result[right][idx]
                             )
                         );
                     }
@@ -474,8 +490,8 @@ module.exports = (perspective) => {
                         const left = inputs[0].substr(1, inputs[0].length - 2);
                         const right = inputs[1].substr(1, inputs[1].length - 2);
                         expect(output_col).toEqual(
-                            result[left].map((v, idx) =>
-                                v <= result[right][idx] ? 1 : 0
+                            result[left].map(
+                                (v, idx) => v <= result[right][idx]
                             )
                         );
                     }
@@ -498,12 +514,18 @@ module.exports = (perspective) => {
                         d: [1.0, 0, 3.0, 0.0],
                     });
                     const result = await view.to_columns();
-                    expect(result['"a" == "b"']).toEqual(
-                        [false, false, false, false].map((x) => (x ? 1 : 0))
-                    );
-                    expect(result['"a" != "b"']).toEqual(
-                        [true, true, true, true].map((x) => (x ? 1 : 0))
-                    );
+                    expect(result['"a" == "b"']).toEqual([
+                        false,
+                        false,
+                        false,
+                        false,
+                    ]);
+                    expect(result['"a" != "b"']).toEqual([
+                        true,
+                        true,
+                        true,
+                        true,
+                    ]);
                     await view.delete();
                     await table.delete();
                 });
@@ -530,18 +552,30 @@ module.exports = (perspective) => {
                         d: [1.0, 0, 3.0, 0.0],
                     });
                     const result = await view.to_columns();
-                    expect(result['"a" == "c"']).toEqual(
-                        [true, false, false, false].map((x) => (x ? 1 : 0))
-                    );
-                    expect(result['"a" != "c"']).toEqual(
-                        [false, true, true, true].map((x) => (x ? 1 : 0))
-                    );
-                    expect(result['"b" == "d"']).toEqual(
-                        [true, false, true, false].map((x) => (x ? 1 : 0))
-                    );
-                    expect(result['"b" != "d"']).toEqual(
-                        [false, true, false, true].map((x) => (x ? 1 : 0))
-                    );
+                    expect(result['"a" == "c"']).toEqual([
+                        true,
+                        false,
+                        false,
+                        false,
+                    ]);
+                    expect(result['"a" != "c"']).toEqual([
+                        false,
+                        true,
+                        true,
+                        true,
+                    ]);
+                    expect(result['"b" == "d"']).toEqual([
+                        true,
+                        false,
+                        true,
+                        false,
+                    ]);
+                    expect(result['"b" != "d"']).toEqual([
+                        false,
+                        true,
+                        false,
+                        true,
+                    ]);
                     await view.delete();
                     await table.delete();
                 });
@@ -719,7 +753,12 @@ module.exports = (perspective) => {
                 });
 
                 const result = await view.to_columns();
-                expect(result['inrange(9, "b", 20)']).toEqual([1, 1, 0, 0]);
+                expect(result['inrange(9, "b", 20)']).toEqual([
+                    true,
+                    true,
+                    false,
+                    false,
+                ]);
                 await view.delete();
                 await table.delete();
             });
@@ -992,8 +1031,18 @@ module.exports = (perspective) => {
                 });
 
                 const result = await view.to_columns();
-                expect(result['is_null("a")']).toEqual([0, 1, 1, 0]);
-                expect(result['is_null("b")']).toEqual([1, 0, 1, 0]);
+                expect(result['is_null("a")']).toEqual([
+                    false,
+                    true,
+                    true,
+                    false,
+                ]);
+                expect(result['is_null("b")']).toEqual([
+                    true,
+                    false,
+                    true,
+                    false,
+                ]);
                 expect(result['if(is_null("a")) 100; else 0;']).toEqual([
                     0, 100, 100, 0,
                 ]);
@@ -1025,8 +1074,18 @@ module.exports = (perspective) => {
                 });
 
                 const result = await view.to_columns();
-                expect(result['is_not_null("a")']).toEqual([1, 0, 0, 1]);
-                expect(result['is_not_null("b")']).toEqual([0, 1, 0, 1]);
+                expect(result['is_not_null("a")']).toEqual([
+                    true,
+                    false,
+                    false,
+                    true,
+                ]);
+                expect(result['is_not_null("b")']).toEqual([
+                    false,
+                    true,
+                    false,
+                    true,
+                ]);
                 expect(result['if(is_not_null("a")) 100; else 0;']).toEqual([
                     100, 0, 0, 100,
                 ]);
@@ -1121,27 +1180,33 @@ module.exports = (perspective) => {
                     ],
                 });
                 const result = await view.to_columns();
-                expect(result['"u" and "u"']).toEqual(
-                    [false, true, false, true].map((x) => (x ? 1 : 0))
-                );
-                expect(result['"u" and "z"']).toEqual(
-                    [false, false, false, false].map((x) => (x ? 1 : 0))
-                );
-                expect(result['"u" and "z"']).toEqual(
-                    [false, false, false, false].map((x) => (x ? 1 : 0))
-                );
-                expect(result["0 and 0"]).toEqual(
-                    [false, false, false, false].map((x) => (x ? 1 : 0))
-                );
-                expect(result["1 and 1"]).toEqual(
-                    [true, true, true, true].map((x) => (x ? 1 : 0))
-                );
-                expect(result["1 and 100"]).toEqual(
-                    [true, true, true, true].map((x) => (x ? 1 : 0))
-                );
-                expect(result["true and false"]).toEqual(
-                    [false, false, false, false].map((x) => (x ? 1 : 0))
-                );
+                expect(result['"u" and "u"']).toEqual([
+                    false,
+                    true,
+                    false,
+                    true,
+                ]);
+                expect(result['"u" and "z"']).toEqual([
+                    false,
+                    false,
+                    false,
+                    false,
+                ]);
+                expect(result['"u" and "z"']).toEqual([
+                    false,
+                    false,
+                    false,
+                    false,
+                ]);
+                expect(result["0 and 0"]).toEqual([false, false, false, false]);
+                expect(result["1 and 1"]).toEqual([true, true, true, true]);
+                expect(result["1 and 100"]).toEqual([true, true, true, true]);
+                expect(result["true and false"]).toEqual([
+                    false,
+                    false,
+                    false,
+                    false,
+                ]);
                 await view.delete();
                 await table.delete();
             });
@@ -1151,21 +1216,56 @@ module.exports = (perspective) => {
                 const view = await table.view({
                     expressions: [
                         'mand("u" and "u", "u" and "z", "z" and "z")',
-                        "mand(1, 2, 3)",
                         "mand(true, true, true, true)",
+                        "mand(is_null(null), is_not_null(null))",
                     ],
                 });
                 const result = await view.to_columns();
+
                 expect(
                     result['mand("u" and "u", "u" and "z", "z" and "z")']
-                ).toEqual([false, false, false, false].map((x) => (x ? 1 : 0)));
-                expect(result["mand(1, 2, 3)"]).toEqual(
-                    [true, true, true, true].map((x) => (x ? 1 : 0))
-                );
+                ).toEqual(Array(4).fill(false));
+
+                expect(
+                    result["mand(is_null(null), is_not_null(null))"]
+                ).toEqual(Array(4).fill(false));
+
                 expect(result["mand(true, true, true, true)"]).toEqual(
-                    [true, true, true, true].map((x) => (x ? 1 : 0))
+                    Array(4).fill(true)
                 );
+
                 await view.delete();
+                await table.delete();
+            });
+
+            it("mand should fail validation for non boolean inputs", async function () {
+                const table = await perspective.table(common.comparison_data);
+                const validated = await table.validate_expressions([
+                    'mand("w", "x", "y")',
+                    "mand(100, 200, 300)",
+                    "mand('a', 'b', 'cdef')",
+                ]);
+
+                expect(validated.expression_schema).toEqual({});
+                expect(validated.errors['mand("w", "x", "y")']).toEqual({
+                    column: 0,
+                    line: 0,
+                    error_message:
+                        "Type Error - inputs do not resolve to a valid expression.",
+                });
+                expect(validated.errors["mand(100, 200, 300)"]).toEqual({
+                    column: 0,
+                    line: 0,
+                    error_message:
+                        "Type Error - inputs do not resolve to a valid expression.",
+                });
+                expect(validated.errors["mand('a', 'b', 'cdef')"]).toEqual({
+                    column: 0,
+                    line: 0,
+                    error_message:
+                        "Type Error - inputs do not resolve to a valid expression.",
+                });
+
                 await table.delete();
             });
 
@@ -1190,25 +1290,28 @@ module.exports = (perspective) => {
                     ],
                 });
                 const result = await view.to_columns();
-                expect(result['"a" or "b"']).toEqual(
-                    [false, true, false, true].map((x) => (x ? 1 : 0))
-                );
-                expect(result['"c" or "d"']).toEqual(
-                    [true, true, true, true].map((x) => (x ? 1 : 0))
-                );
-                expect(result['"e" or "f"']).toEqual(
-                    [true, true, true, true].map((x) => (x ? 1 : 0))
-                );
-                expect(result["0 or 1"]).toEqual(
-                    [true, true, true, true].map((x) => (x ? 1 : 0))
-                );
-                expect(result["true or false"]).toEqual(
-                    [true, true, true, true].map((x) => (x ? 1 : 0))
-                );
-                expect(result["false or false"]).toEqual(
-                    [false, false, false, false].map((x) => (x ? 1 : 0))
-                );
-                expect(result["filtered"]).toEqual([1, 1, 1, 1]);
+                expect(result['"a" or "b"']).toEqual([
+                    false,
+                    true,
+                    false,
+                    true,
+                ]);
+                expect(result['"c" or "d"']).toEqual([true, true, true, true]);
+                expect(result['"e" or "f"']).toEqual([true, true, true, true]);
+                expect(result["0 or 1"]).toEqual([true, true, true, true]);
+                expect(result["true or false"]).toEqual([
+                    true,
+                    true,
+                    true,
+                    true,
+                ]);
+                expect(result["false or false"]).toEqual([
+                    false,
+                    false,
+                    false,
+                    false,
+                ]);
+                expect(result["filtered"]).toEqual([true, true, true, true]);
                 await view.delete();
                 await table.delete();
             });
@@ -1218,21 +1321,62 @@ module.exports = (perspective) => {
                 const view = await table.view({
                     expressions: [
                         'mor("u" and "u", "u" and "z", "z" and "z")',
-                        "mor(0, 0, 0)",
+                        "mor(false, false, false)",
                         "mor(false, true, false)",
                     ],
                 });
                 const result = await view.to_columns();
                 expect(
                     result['mor("u" and "u", "u" and "z", "z" and "z")']
-                ).toEqual([true, true, true, true].map((x) => (x ? 1 : 0)));
-                expect(result["mor(0, 0, 0)"]).toEqual(
-                    [false, false, false, false].map((x) => (x ? 1 : 0))
-                );
-                expect(result["mor(false, true, false)"]).toEqual(
-                    [true, true, true, true].map((x) => (x ? 1 : 0))
-                );
+                ).toEqual([true, true, true, true]);
+
+                // The boolean false is a false
+                expect(result["mor(false, false, false)"]).toEqual([
+                    false,
+                    false,
+                    false,
+                    false,
+                ]);
+
+                expect(result["mor(false, true, false)"]).toEqual([
+                    true,
+                    true,
+                    true,
+                    true,
+                ]);
+
                 await view.delete();
+                await table.delete();
+            });
+
+            it("mor should fail validation for non boolean inputs", async function () {
+                const table = await perspective.table(common.comparison_data);
+                const validated = await table.validate_expressions([
+                    'mor("w", "x", "y")',
+                    "mor(100, 200, 300)",
+                    "mor('a', 'b', 'cdef')",
+                ]);
+
+                expect(validated.expression_schema).toEqual({});
+                expect(validated.errors['mor("w", "x", "y")']).toEqual({
+                    column: 0,
+                    line: 0,
+                    error_message:
+                        "Type Error - inputs do not resolve to a valid expression.",
+                });
+                expect(validated.errors["mor(100, 200, 300)"]).toEqual({
+                    column: 0,
+                    line: 0,
+                    error_message:
+                        "Type Error - inputs do not resolve to a valid expression.",
+                });
+                expect(validated.errors["mor('a', 'b', 'cdef')"]).toEqual({
+                    column: 0,
+                    line: 0,
+                    error_message:
+                        "Type Error - inputs do not resolve to a valid expression.",
+                });
+
                 await table.delete();
             });
 
@@ -1250,27 +1394,43 @@ module.exports = (perspective) => {
                     ],
                 });
                 const result = await view.to_columns();
-                expect(result['"u" nand "u"']).toEqual(
-                    [true, false, true, false].map((x) => (x ? 1 : 0))
-                );
-                expect(result['"u" nand "z"']).toEqual(
-                    [true, true, true, true].map((x) => (x ? 1 : 0))
-                );
-                expect(result['"u" nand "z"']).toEqual(
-                    [true, true, true, true].map((x) => (x ? 1 : 0))
-                );
-                expect(result["0 nand 0"]).toEqual(
-                    [true, true, true, true].map((x) => (x ? 1 : 0))
-                );
-                expect(result["1 nand 1"]).toEqual(
-                    [false, false, false, false].map((x) => (x ? 1 : 0))
-                );
-                expect(result["1 nand 100"]).toEqual(
-                    [false, false, false, false].map((x) => (x ? 1 : 0))
-                );
-                expect(result["true nand true"]).toEqual(
-                    [false, false, false, false].map((x) => (x ? 1 : 0))
-                );
+                expect(result['"u" nand "u"']).toEqual([
+                    true,
+                    false,
+                    true,
+                    false,
+                ]);
+                expect(result['"u" nand "z"']).toEqual([
+                    true,
+                    true,
+                    true,
+                    true,
+                ]);
+                expect(result['"u" nand "z"']).toEqual([
+                    true,
+                    true,
+                    true,
+                    true,
+                ]);
+                expect(result["0 nand 0"]).toEqual([true, true, true, true]);
+                expect(result["1 nand 1"]).toEqual([
+                    false,
+                    false,
+                    false,
+                    false,
+                ]);
+                expect(result["1 nand 100"]).toEqual([
+                    false,
+                    false,
+                    false,
+                    false,
+                ]);
+                expect(result["true nand true"]).toEqual([
+                    false,
+                    false,
+                    false,
+                    false,
+                ]);
                 await view.delete();
                 await table.delete();
             });
@@ -1294,21 +1454,31 @@ module.exports = (perspective) => {
                     ],
                 });
                 const result = await view.to_columns();
-                expect(result['"a" nor "b"']).toEqual(
-                    [true, false, true, false].map((x) => (x ? 1 : 0))
-                );
-                expect(result['"c" nor "d"']).toEqual(
-                    [false, false, false, false].map((x) => (x ? 1 : 0))
-                );
-                expect(result['"e" nor "f"']).toEqual(
-                    [false, false, false, false].map((x) => (x ? 1 : 0))
-                );
-                expect(result["0 nor 1"]).toEqual(
-                    [false, false, false, false].map((x) => (x ? 1 : 0))
-                );
-                expect(result["false nor false"]).toEqual(
-                    [true, true, true, true].map((x) => (x ? 1 : 0))
-                );
+                expect(result['"a" nor "b"']).toEqual([
+                    true,
+                    false,
+                    true,
+                    false,
+                ]);
+                expect(result['"c" nor "d"']).toEqual([
+                    false,
+                    false,
+                    false,
+                    false,
+                ]);
+                expect(result['"e" nor "f"']).toEqual([
+                    false,
+                    false,
+                    false,
+                    false,
+                ]);
+                expect(result["0 nor 1"]).toEqual([false, false, false, false]);
+                expect(result["false nor false"]).toEqual([
+                    true,
+                    true,
+                    true,
+                    true,
+                ]);
                 await view.delete();
                 await table.delete();
             });
@@ -1332,21 +1502,21 @@ module.exports = (perspective) => {
                     ],
                 });
                 const result = await view.to_columns();
-                expect(result['"a" xor "b"']).toEqual(
-                    [false, false, false, false].map((x) => (x ? 1 : 0))
-                );
-                expect(result['"c" xor "d"']).toEqual(
-                    [true, true, true, true].map((x) => (x ? 1 : 0))
-                );
-                expect(result['"e" xor "f"']).toEqual(
-                    [true, true, true, true].map((x) => (x ? 1 : 0))
-                );
-                expect(result["0 xor 1"]).toEqual(
-                    [true, true, true, true].map((x) => (x ? 1 : 0))
-                );
-                expect(result["false xor false"]).toEqual(
-                    [false, false, false, false].map((x) => (x ? 1 : 0))
-                );
+                expect(result['"a" xor "b"']).toEqual([
+                    false,
+                    false,
+                    false,
+                    false,
+                ]);
+                expect(result['"c" xor "d"']).toEqual([true, true, true, true]);
+                expect(result['"e" xor "f"']).toEqual([true, true, true, true]);
+                expect(result["0 xor 1"]).toEqual([true, true, true, true]);
+                expect(result["false xor false"]).toEqual([
+                    false,
+                    false,
+                    false,
+                    false,
+                ]);
                 await view.delete();
                 await table.delete();
             });

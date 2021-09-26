@@ -164,7 +164,15 @@ struct PERSPECTIVE_EXPORT t_tscalar {
     bool ends_with(const t_tscalar& other) const;
     bool contains(const t_tscalar& other) const;
     bool is_valid() const;
-    operator bool() const;
+
+    /**
+     * @brief Identical to operator bool(), but less ambiguous.
+     * 
+     * @return true 
+     * @return false 
+     */
+    bool as_bool() const;
+
     void clear();
     t_dtype get_dtype() const;
     const char* get_char_ptr() const;
@@ -407,6 +415,17 @@ mktscalar(const T& v) {
 }
 
 t_tscalar mktscalar();
+
+/**
+ * @brief Overload comparisons between size_t and t_tscalar as the comparison
+ * is used in exprtk for scalar initialization.
+ * 
+ * @param lhs 
+ * @param rhs 
+ * @return true 
+ * @return false 
+ */
+bool operator>(const std::size_t& lhs, const t_tscalar& rhs);
 
 } // end namespace perspective
 

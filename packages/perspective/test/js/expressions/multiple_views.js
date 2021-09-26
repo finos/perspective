@@ -1318,7 +1318,7 @@ module.exports = (perspective) => {
 
             const v3 = await table.view({
                 row_pivots: ["x"],
-                expressions: [`// column \n 2"z"`],
+                expressions: [`// column \n 2 * "z"`],
                 aggregates: {
                     column: ["weighted mean", "z"],
                 },
@@ -1366,7 +1366,7 @@ module.exports = (perspective) => {
             const v3 = await table.view({
                 row_pivots: ["x"],
                 column_pivots: ["y"],
-                expressions: [`// column \n 2"z"`],
+                expressions: [`// column \n 2 * "z"`],
                 aggregates: {
                     column: ["weighted mean", "z"],
                 },

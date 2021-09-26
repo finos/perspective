@@ -169,6 +169,12 @@ namespace computed_function {
     t_tscalar today();
 
     /**
+     * @brief inrange(range_low, value, range_high) returns whether value
+     * is inside of the range (inclusive of range_low and range_high).
+     */
+    FUNCTION_HEADER(inrange_fn)
+
+    /**
      * @brief Get the minimum of all the inputs.
      */
     FUNCTION_HEADER(min_fn)
@@ -222,6 +228,15 @@ namespace computed_function {
      * it is registered using "date").
      */
     FUNCTION_HEADER(make_date)
+
+    /**
+     * @brief Convert a column or scalar to a boolean, which returns True if the
+     * value is truthy or False otherwise.
+     * 
+     * boolean(1)
+     * boolean(null)
+     */
+    FUNCTION_HEADER(to_boolean)
 
     /**
      * @brief Given a POSIX timestamp of milliseconds since epoch, create a

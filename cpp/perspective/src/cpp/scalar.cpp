@@ -25,6 +25,10 @@ SUPPRESS_WARNINGS_VC(4800)
 
 namespace perspective {
 
+bool operator>(const std::size_t& lhs, const t_tscalar& rhs) {
+   return rhs.operator<(lhs);
+}
+
 #define BINARY_OPERATOR_BODY(OP)                                               \
     t_tscalar rval;                                                            \
     rval.clear();                                                              \
@@ -39,14 +43,22 @@ namespace perspective {
     return rval;
 
 /**
- * @brief A function-style cast used by exprtk. Because we want the numeric
- * type that can accomodate the most values without retyping, the scalar
- * here is set as DTYPE_FLOAT64.
- *
- * @param value
+ * @brief A function-style cast used only by ExprTk. Because ExprTk was
+ * designed to be used with numeric inputs or numeric-like inputs, it makes
+ * various assertions of its input type, which include calling this
+ * function-style cast through `T(0)`, `T(1)` etc. Because we can't guarantee
+ * what int this function is called with, we treat it as a double to
+ * prevent overflow.
+ * 
+ * DO NOT USE THIS CONSTRUCTOR IN PERSPECTIVE - all `t_tscalar` objects
+ * should be constructed without initializer and then `set` should be called:
+ * 
+ * t_tscalar x;
+ * x.set(1.2345);
+ * 
+ * @param v 
  */
 t_tscalar::t_tscalar(int v) {
-    // set<double>() returns a scalar with DTYPE_FLOAT64.
     this->set(static_cast<double>(v));
 }
 
@@ -867,7 +879,8 @@ t_tscalar::is_signed() const {
         || m_type == DTYPE_INT16 || m_type == DTYPE_INT8);
 }
 
-t_tscalar::operator bool() const {
+bool
+t_tscalar::as_bool() const {
     if (m_status != STATUS_VALID)
         return false;
 

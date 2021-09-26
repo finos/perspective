@@ -508,6 +508,125 @@ module.exports = (perspective) => {
         });
     });
 
+    describe("boolean()", () => {
+        it("Should create a boolean value", async () => {
+            const table = await perspective.table({
+                x: [1, 2, null, 4],
+            });
+
+            const view = await table.view({
+                expressions: ['boolean("x")'],
+            });
+
+            expect(await view.expression_schema()).toEqual({
+                'boolean("x")': "boolean",
+            });
+
+            expect(await view.to_columns()).toEqual({
+                x: [1, 2, null, 4],
+                'boolean("x")': [true, true, false, true],
+            });
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Empty strings and nulls", async () => {
+            const table = await perspective.table({
+                x: ["abcd", "", null, "abc"],
+            });
+
+            const view = await table.view({
+                expressions: ['boolean("x")'],
+            });
+
+            expect(await view.expression_schema()).toEqual({
+                'boolean("x")': "boolean",
+            });
+
+            expect(await view.to_columns()).toEqual({
+                x: ["abcd", "", null, "abc"],
+                'boolean("x")': [true, false, false, true],
+            });
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Should respond to updates", async () => {
+            const table = await perspective.table(
+                {
+                    idx: [1, 2, 3, 4],
+                    x: [1, 2, null, 4],
+                },
+                {index: "idx"}
+            );
+
+            const view = await table.view({
+                expressions: ['boolean("x")'],
+            });
+
+            expect(await view.expression_schema()).toEqual({
+                'boolean("x")': "boolean",
+            });
+
+            expect(await view.to_columns()).toEqual({
+                idx: [1, 2, 3, 4],
+                x: [1, 2, null, 4],
+                'boolean("x")': [true, true, false, true],
+            });
+
+            table.update({
+                idx: [3, 2],
+                x: [100, null],
+            });
+
+            expect(await view.to_columns()).toEqual({
+                idx: [1, 2, 3, 4],
+                x: [1, null, 100, 4],
+                'boolean("x")': [true, false, true, true],
+            });
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Should respond to removes", async () => {
+            const table = await perspective.table(
+                {
+                    idx: [1, 2, 3, 4],
+                    x: [1, 2, null, 4],
+                },
+                {index: "idx"}
+            );
+
+            const view = await table.view({
+                expressions: ['boolean("x")'],
+            });
+
+            expect(await view.expression_schema()).toEqual({
+                'boolean("x")': "boolean",
+            });
+
+            expect(await view.to_columns()).toEqual({
+                idx: [1, 2, 3, 4],
+                x: [1, 2, null, 4],
+                'boolean("x")': [true, true, false, true],
+            });
+
+            table.remove([1, 4]);
+
+            expect(await view.to_columns()).toEqual({
+                idx: [2, 3],
+                x: [2, null],
+                'boolean("x")': [true, false],
+            });
+
+            await view.delete();
+            await table.delete();
+        });
+    });
+
     describe("date()", () => {
         it("Should create a date from scalars", async () => {
             const table = await perspective.table({
