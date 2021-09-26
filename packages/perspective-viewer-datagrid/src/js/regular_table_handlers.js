@@ -189,10 +189,25 @@ function styleListener(regularTable) {
                     td.style.backgroundColor = "";
                     td.style.color = hex;
                 }
+            } else if (type === "boolean") {
+                const [hex] =
+                    metadata.user === true
+                        ? this._pos_color
+                        : metadata.user === false
+                        ? this._neg_color
+                        : ["", 0, 0, 0, ""];
+
+                td.style.backgroundColor = "";
+                td.style.color = hex;
             } else {
                 td.style.backgroundColor = "";
                 td.style.color = "";
             }
+
+            td.classList.toggle(
+                "psp-bool-type",
+                type === "boolean" && metadata.user !== null
+            );
 
             const is_th = td.tagName === "TH";
             if (is_th) {
@@ -230,17 +245,6 @@ function styleListener(regularTable) {
                 plugin?.color_mode === "bar"
             );
         }
-    }
-}
-
-function get_psp_type(metadata) {
-    if (metadata.x >= 0) {
-        const column_path = this._column_paths[metadata.x];
-        const column_path_parts = column_path.split("|");
-        return this._schema[column_path_parts[column_path_parts.length - 1]];
-    } else {
-        const column_path = this._config.row_pivots[metadata.row_header_x - 1];
-        return this._table_schema[column_path];
     }
 }
 
@@ -397,7 +401,7 @@ const FORMATTER_CONS = {
     float: Intl.NumberFormat,
     boolean: class {
         format(val) {
-            return val.toString();
+            return val ? "check" : "close";
         }
     },
 };
@@ -498,8 +502,9 @@ async function dataListener(regularTable, x0, y0, x1, y1) {
     }
 
     const data = [],
-        metadata = [];
-    const column_headers = [];
+        metadata = [],
+        column_headers = [];
+
     for (const path of this._column_paths.slice(x0, x1)) {
         const path_parts = path.split("|");
         const column = columns[path] || new Array(y1 - y0).fill(null);
@@ -598,24 +603,44 @@ export async function createModel(regular, table, view, extend = {}) {
     const _neg_color = create_color_record(
         get_rule(regular, "--rt-neg-cell--color", "#FF5942")
     );
+    const _schema = {...schema, ...expression_schema};
+    const _table_schema = {
+        ...table_schema,
+        ...validated_expressions.expression_schema,
+    };
+
+    const _column_paths = column_paths.filter((path) => {
+        return path !== "__ROW_PATH__" && path !== "__ID__";
+    });
+
+    const _is_editable = [];
+    const _column_types = [];
+    for (const column_path of _column_paths) {
+        const column_path_parts = column_path.split("|");
+        const column = column_path_parts[column_path_parts.length - 1];
+        _column_types.push(_schema[column]);
+        _is_editable.push(!!table_schema[column]);
+    }
+
     const model = Object.assign(extend, {
         _view: view,
         _table: table,
-        _table_schema: {
-            ...table_schema,
-            ...validated_expressions.expression_schema,
-        },
+        _table_schema,
         _config: config,
         _num_rows: num_rows,
-        _schema: {...schema, ...expression_schema},
+        _schema,
         _ids: [],
         _open_column_styles_menu: [],
         _plugin_background,
         _pos_color,
         _neg_color,
-        _column_paths: column_paths.filter((path) => {
-            return path !== "__ROW_PATH__" && path !== "__ID__";
+        _column_paths,
+        _column_types,
+        _is_editable,
+        _row_header_types: config.row_pivots.map((column_path) => {
+            return _table_schema[column_path];
         }),
+        get_psp_type,
     });
 
     // Re-use div factory
@@ -623,6 +648,14 @@ export async function createModel(regular, table, view, extend = {}) {
 
     regular.setDataListener(dataListener.bind(model, regular));
     return model;
+}
+
+function get_psp_type(metadata) {
+    if (metadata.x >= 0) {
+        return this._column_types[metadata.x];
+    } else {
+        return this._row_header_types[metadata.row_header_x - 1];
+    }
 }
 
 export async function configureRegularTable(regular, model) {
