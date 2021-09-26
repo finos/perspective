@@ -16,6 +16,7 @@ const deltas = require("./expressions/deltas");
 const invariant = require("./expressions/invariant");
 const multiple_views = require("./expressions/multiple_views");
 const conversions = require("./expressions/conversions");
+const parsing = require("./expressions/parsing");
 
 module.exports = (perspective) => {
     functionality(perspective);
@@ -27,4 +28,5 @@ module.exports = (perspective) => {
     invariant(perspective);
     multiple_views(perspective);
     conversions(perspective);
+    parsing(perspective);
 };
