@@ -10,6 +10,17 @@
 @import "./aggregate-selector.less";
 
 :host {
+
+    .column-selector-column-title {
+        display: flex;
+        width: 100%;
+        flex-direction: row !important;
+    }
+
+    #expression-columns .column-selector-column-title {
+        width: calc(100% - 24px);
+    }
+
     #side_panel {
         & > :not(:last-child) {
             margin-bottom: 6px;
@@ -70,8 +81,7 @@
             span.expression-edit-button,
             span.expression-delete-button {
                 padding-left: 6px;
-                padding-right: 4px;
-                position: absolute;
+                padding-right: 0px;
                 font-family: "Material Icons";
                 cursor: pointer;
                 opacity: 1;
@@ -81,14 +91,6 @@
                     opacity: 1;
                     color: var(--active--color, #000);
                 }
-            }
-
-            span.expression-edit-button {
-                right: 0px;
-            }
-
-            span.expression-delete-button {
-                right: 18px;
             }
 
             .column_selector_draggable {
@@ -120,6 +122,7 @@
                     overflow: hidden;
                     text-overflow: ellipsis;
                     width: 100%;
+                    flex: 1 1 250px;
                 }
 
                 .column_name:before {
@@ -226,6 +229,11 @@
                 position: relative;
                 .column_selector_draggable {
                     width: calc(100% - 24px);
+
+                    span.expression-edit-button {
+                        margin-left: 18px;
+                    }
+             
                 }
 
                 &:before {
@@ -293,6 +301,7 @@
 
                 .column_selector_draggable {
                     border-bottom-color: transparent;
+                    align-items: center;
                 }
             }
         }

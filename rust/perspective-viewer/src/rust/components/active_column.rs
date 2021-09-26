@@ -285,7 +285,7 @@ impl Component for ActiveColumn {
                             ondragstart={ dragstart }
                             ondragend={ self.props.ondragend.clone() }>
 
-                            <span>
+                            <span class="column-selector-column-title">
                                 <span
                                     ref={ noderef.clone() }
                                     class={ format!("column_name {}", col_type) }>

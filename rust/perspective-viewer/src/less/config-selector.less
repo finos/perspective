@@ -46,6 +46,12 @@
                 white-space: nowrap;
             }
 
+            span:first-child {
+                text-overflow: ellipsis;
+                max-width: 250px;
+                overflow: hidden;
+            }
+
             // Column is being dragged-over, e.g. this is the drop indicator.
             &.config-drop {
                 display: inline;

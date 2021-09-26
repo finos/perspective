@@ -169,4 +169,12 @@
             content: var(--settings-button--content, "\1f527");
         }
     }
+
+    .split-panel {
+        .split-panel-child {
+            &:first-child:not(.is-width-override) {
+                max-width: 250px;
+            }
+        }
+    }
 }
