@@ -52,6 +52,8 @@ function write(table, model, active_cell) {
             if (isNaN(text)) {
                 return false;
             }
+        } else if (type === "boolean") {
+            text = text === "check" ? false : text === "close" ? true : null;
         }
 
         const msg = {
@@ -122,7 +124,20 @@ function editableStyleListener(table, viewer) {
     }
     const edit = isEditable.call(this, viewer);
     for (const td of table.querySelectorAll("td")) {
-        td.toggleAttribute("contenteditable", edit);
+        const meta = table.getMeta(td);
+        const type = this.get_psp_type(meta);
+        if (this._is_editable[meta.x]) {
+            if (type === "boolean") {
+                td.toggleAttribute("contenteditable", false);
+                td.classList.toggle("boolean-editable", meta.user !== null);
+            } else {
+                td.toggleAttribute("contenteditable", edit);
+                td.classList.toggle("boolean-editable", false);
+            }
+        } else {
+            td.toggleAttribute("contenteditable", false);
+            td.classList.toggle("boolean-editable", false);
+        }
     }
 }
 
@@ -219,12 +234,25 @@ function focusinListener(table, viewer, event) {
     }
 }
 
+function clickListener(table, _viewer, event) {
+    const meta = table.getMeta(event.target);
+    if (typeof meta?.x !== "undefined") {
+        const is_editable = this._is_editable[meta.x];
+        const is_bool = this.get_psp_type(meta) === "boolean";
+        const is_null = event.target.textContent === "-";
+        if (is_editable && is_bool && !is_null) {
+            write(table, this, event.target);
+        }
+    }
+}
+
 // Plugin
 
 export async function configureEditable(table, viewer) {
     this._edit_port = await viewer.getEditPort();
     table.addStyleListener(editableStyleListener.bind(this, table, viewer));
     table.addStyleListener(focusStyleListener.bind(this, table, viewer));
+    table.addEventListener("click", clickListener.bind(this, table, viewer));
     table.addEventListener(
         "focusin",
         focusinListener.bind(this, table, viewer)
