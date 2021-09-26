@@ -792,6 +792,32 @@ module.exports = (perspective) => {
                 table.delete();
             });
 
+            it("row pivot ['x'], column pivot ['y'], hidden sorted on row pivot", async function () {
+                const table = await perspective.table({
+                    x: ["a", "a", "b", "c"],
+                    y: ["x", "x", "y", "x"],
+                    z: [1, 2, 3, 4],
+                });
+                const view = await table.view({
+                    columns: ["z"],
+                    row_pivots: ["y"],
+                    column_pivots: ["x"],
+                    sort: [["x", "desc"]],
+                });
+                const paths = await view.column_paths();
+                expect(paths).toEqual(["__ROW_PATH__", "a|z", "b|z", "c|z"]);
+                const expected = {
+                    __ROW_PATH__: [[], ["x"], ["y"]],
+                    "a|z": [3, 3, null],
+                    "b|z": [3, null, 3],
+                    "c|z": [4, 4, null],
+                };
+                const result = await view.to_columns();
+                expect(result).toEqual(expected);
+                view.delete();
+                table.delete();
+            });
+
             it("column pivot ['y'] has correct # of columns", async function () {
                 var table = await perspective.table(data);
                 var view = await table.view({

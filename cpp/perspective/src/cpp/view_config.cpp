@@ -249,6 +249,7 @@ t_view_config::fill_aggspecs(std::shared_ptr<t_schema> schema) {
                                        m_column_pivots.end(), column)
                 != m_column_pivots.end();
             bool is_column_only = m_row_pivots.size() == 0 || m_column_only;
+            bool is_row_sort = sort[1].rfind("col", 0) != 0;
 
             std::vector<t_dep> dependencies{t_dep(column, DEPTYPE_COLUMN)};
             t_aggtype agg_type;
@@ -256,8 +257,9 @@ t_view_config::fill_aggspecs(std::shared_ptr<t_schema> schema) {
             if (is_column_only) {
                 // Always sort by `ANY` in column only views
                 agg_type = t_aggtype::AGGTYPE_ANY;
-            } else if (is_row_pivot || is_column_pivot) {
-                // Otherwise if the hidden column is in pivots, use `UNIQUE`
+            } else if ((is_row_pivot && is_row_sort) || (is_column_pivot && !is_row_sort)) {
+                // Otherwise if the hidden column is in pivot on the same axis,
+                // use `UNIQUE`
                 agg_type = t_aggtype::AGGTYPE_UNIQUE;
             } else if (m_aggregates.count(column) > 0) {
                 auto col = m_aggregates.at(column);
