@@ -189,10 +189,25 @@ function styleListener(regularTable) {
                     td.style.backgroundColor = "";
                     td.style.color = hex;
                 }
+            } else if (type === "boolean") {
+                const [hex] =
+                    metadata.user === true
+                        ? this._pos_color
+                        : metadata.user === false
+                        ? this._neg_color
+                        : ["", 0, 0, 0, ""];
+
+                td.style.backgroundColor = "";
+                td.style.color = hex;
             } else {
                 td.style.backgroundColor = "";
                 td.style.color = "";
             }
+
+            td.classList.toggle(
+                "psp-bool-type",
+                type === "boolean" && metadata.user !== null
+            );
 
             const is_th = td.tagName === "TH";
             if (is_th) {
@@ -397,7 +412,7 @@ const FORMATTER_CONS = {
     float: Intl.NumberFormat,
     boolean: class {
         format(val) {
-            return val.toString();
+            return val ? "check" : "close";
         }
     },
 };
@@ -498,8 +513,9 @@ async function dataListener(regularTable, x0, y0, x1, y1) {
     }
 
     const data = [],
-        metadata = [];
-    const column_headers = [];
+        metadata = [],
+        column_headers = [];
+
     for (const path of this._column_paths.slice(x0, x1)) {
         const path_parts = path.split("|");
         const column = columns[path] || new Array(y1 - y0).fill(null);
