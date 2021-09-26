@@ -163,6 +163,6 @@ impl JsPerspectiveView {
 #[serde()]
 pub struct PerspectiveValidationError {
     pub error_message: String,
-    pub line: u32,
-    pub column: u32,
+    pub line: i32,
+    pub column: i32,
 }

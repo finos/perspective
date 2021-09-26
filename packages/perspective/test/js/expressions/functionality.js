@@ -837,16 +837,16 @@ module.exports = (perspective) => {
             );
             const view = await table.view({
                 expressions: [
-                    `var x := True; var y := False; x and y ? 1 : 0`,
-                    `var x := True; var y := False; x or y`,
+                    `var x := true; var y := false; x and y ? 1 : 0`,
+                    `var x := true; var y := false; x or y`,
                 ],
             });
 
             const results = await view.to_columns();
             expect(
-                results[`var x := True; var y := False; x and y ? 1 : 0`]
+                results[`var x := true; var y := false; x and y ? 1 : 0`]
             ).toEqual([0, 0, 0, 0]);
-            expect(results["var x := True; var y := False; x or y"]).toEqual([
+            expect(results["var x := true; var y := false; x or y"]).toEqual([
                 true,
                 true,
                 true,
@@ -1117,8 +1117,8 @@ module.exports = (perspective) => {
                 expressions: [
                     "0 and 1",
                     "0 or 1",
-                    "True and True",
-                    "False or True",
+                    "true and true",
+                    "false or true",
                 ],
             });
             expect(await view.schema()).toEqual({
@@ -1128,14 +1128,14 @@ module.exports = (perspective) => {
                 z: "boolean",
                 "0 and 1": "boolean",
                 "0 or 1": "boolean",
-                "True and True": "boolean",
-                "False or True": "boolean",
+                "true and true": "boolean",
+                "false or true": "boolean",
             });
             const result = await view.to_columns();
             expect(result["0 and 1"]).toEqual([false, false, false, false]);
             expect(result["0 or 1"]).toEqual([true, true, true, true]);
-            expect(result["True and True"]).toEqual([true, true, true, true]);
-            expect(result["False or True"]).toEqual([true, true, true, true]);
+            expect(result["true and true"]).toEqual([true, true, true, true]);
+            expect(result["false or true"]).toEqual([true, true, true, true]);
             view.delete();
             table.delete();
         });
@@ -1148,8 +1148,8 @@ module.exports = (perspective) => {
                 expressions: [
                     "0 and 1",
                     "0 or 1",
-                    "True and True",
-                    "False or True",
+                    "true and true",
+                    "false or true",
                 ],
             });
             expect(await view.schema()).toEqual({
@@ -1159,14 +1159,14 @@ module.exports = (perspective) => {
                 z: "boolean",
                 "0 and 1": "boolean",
                 "0 or 1": "boolean",
-                "True and True": "boolean",
-                "False or True": "boolean",
+                "true and true": "boolean",
+                "false or true": "boolean",
             });
             const result = await view.to_columns();
             expect(result["0 and 1"]).toEqual([false, false, false, false]);
             expect(result["0 or 1"]).toEqual([true, true, true, true]);
-            expect(result["True and True"]).toEqual([true, true, true, true]);
-            expect(result["False or True"]).toEqual([true, true, true, true]);
+            expect(result["true and true"]).toEqual([true, true, true, true]);
+            expect(result["false or true"]).toEqual([true, true, true, true]);
             view.delete();
             table.delete();
         });
@@ -1195,10 +1195,10 @@ module.exports = (perspective) => {
                 expressions: [
                     '"x" and 1',
                     '"x" or 1',
-                    '"x" and True',
-                    '"x" and False',
-                    '"x" or True',
-                    '"x" or False',
+                    '"x" and true',
+                    '"x" and false',
+                    '"x" or true',
+                    '"x" or false',
                 ],
             });
             expect(await view.schema()).toEqual({
@@ -1208,23 +1208,23 @@ module.exports = (perspective) => {
                 z: "boolean",
                 '"x" and 1': "boolean",
                 '"x" or 1': "boolean",
-                '"x" and True': "boolean",
-                '"x" and False': "boolean",
-                '"x" or True': "boolean",
-                '"x" or False': "boolean",
+                '"x" and true': "boolean",
+                '"x" and false': "boolean",
+                '"x" or true': "boolean",
+                '"x" or false': "boolean",
             });
             const result = await view.to_columns();
             expect(result['"x" and 1']).toEqual([true, true, true, true]);
             expect(result['"x" or 1']).toEqual([true, true, true, true]);
-            expect(result['"x" and True']).toEqual([true, true, true, true]);
-            expect(result['"x" and False']).toEqual([
+            expect(result['"x" and true']).toEqual([true, true, true, true]);
+            expect(result['"x" and false']).toEqual([
                 false,
                 false,
                 false,
                 false,
             ]);
-            expect(result['"x" or True']).toEqual([true, true, true, true]);
-            expect(result['"x" or False']).toEqual([true, true, true, true]);
+            expect(result['"x" or true']).toEqual([true, true, true, true]);
+            expect(result['"x" or false']).toEqual([true, true, true, true]);
             view.delete();
             table.delete();
         });

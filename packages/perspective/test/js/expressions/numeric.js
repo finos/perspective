@@ -1176,7 +1176,7 @@ module.exports = (perspective) => {
                         "0 and 0",
                         "1 and 1",
                         "1 and 100",
-                        "True and False",
+                        "true and false",
                     ],
                 });
                 const result = await view.to_columns();
@@ -1201,7 +1201,7 @@ module.exports = (perspective) => {
                 expect(result["0 and 0"]).toEqual([false, false, false, false]);
                 expect(result["1 and 1"]).toEqual([true, true, true, true]);
                 expect(result["1 and 100"]).toEqual([true, true, true, true]);
-                expect(result["True and False"]).toEqual([
+                expect(result["true and false"]).toEqual([
                     false,
                     false,
                     false,
@@ -1216,7 +1216,7 @@ module.exports = (perspective) => {
                 const view = await table.view({
                     expressions: [
                         'mand("u" and "u", "u" and "z", "z" and "z")',
-                        "mand(True, True, True, True)",
+                        "mand(true, true, true, true)",
                         "mand(is_null(null), is_not_null(null))",
                     ],
                 });
@@ -1230,7 +1230,7 @@ module.exports = (perspective) => {
                     result["mand(is_null(null), is_not_null(null))"]
                 ).toEqual(Array(4).fill(false));
 
-                expect(result["mand(True, True, True, True)"]).toEqual(
+                expect(result["mand(true, true, true, true)"]).toEqual(
                     Array(4).fill(true)
                 );
 
@@ -1284,8 +1284,8 @@ module.exports = (perspective) => {
                         '"c" or "d"',
                         '"e" or "f"',
                         "0 or 1",
-                        "True or False",
-                        "False or False",
+                        "true or false",
+                        "false or false",
                         '// filtered\n"a" > 0.5 or "d" < 0.5',
                     ],
                 });
@@ -1299,13 +1299,13 @@ module.exports = (perspective) => {
                 expect(result['"c" or "d"']).toEqual([true, true, true, true]);
                 expect(result['"e" or "f"']).toEqual([true, true, true, true]);
                 expect(result["0 or 1"]).toEqual([true, true, true, true]);
-                expect(result["True or False"]).toEqual([
+                expect(result["true or false"]).toEqual([
                     true,
                     true,
                     true,
                     true,
                 ]);
-                expect(result["False or False"]).toEqual([
+                expect(result["false or false"]).toEqual([
                     false,
                     false,
                     false,
@@ -1321,8 +1321,8 @@ module.exports = (perspective) => {
                 const view = await table.view({
                     expressions: [
                         'mor("u" and "u", "u" and "z", "z" and "z")',
-                        "mor(False, False, False)",
-                        "mor(False, True, False)",
+                        "mor(false, false, false)",
+                        "mor(false, true, false)",
                     ],
                 });
                 const result = await view.to_columns();
@@ -1330,15 +1330,15 @@ module.exports = (perspective) => {
                     result['mor("u" and "u", "u" and "z", "z" and "z")']
                 ).toEqual([true, true, true, true]);
 
-                // The boolean False is a False
-                expect(result["mor(False, False, False)"]).toEqual([
+                // The boolean false is a false
+                expect(result["mor(false, false, false)"]).toEqual([
                     false,
                     false,
                     false,
                     false,
                 ]);
 
-                expect(result["mor(False, True, False)"]).toEqual([
+                expect(result["mor(false, true, false)"]).toEqual([
                     true,
                     true,
                     true,
@@ -1390,7 +1390,7 @@ module.exports = (perspective) => {
                         "0 nand 0",
                         "1 nand 1",
                         "1 nand 100",
-                        "True nand True",
+                        "true nand true",
                     ],
                 });
                 const result = await view.to_columns();
@@ -1425,7 +1425,7 @@ module.exports = (perspective) => {
                     false,
                     false,
                 ]);
-                expect(result["True nand True"]).toEqual([
+                expect(result["true nand true"]).toEqual([
                     false,
                     false,
                     false,
@@ -1450,7 +1450,7 @@ module.exports = (perspective) => {
                         '"c" nor "d"',
                         '"e" nor "f"',
                         "0 nor 1",
-                        "False nor False",
+                        "false nor false",
                     ],
                 });
                 const result = await view.to_columns();
@@ -1473,7 +1473,7 @@ module.exports = (perspective) => {
                     false,
                 ]);
                 expect(result["0 nor 1"]).toEqual([false, false, false, false]);
-                expect(result["False nor False"]).toEqual([
+                expect(result["false nor false"]).toEqual([
                     true,
                     true,
                     true,
@@ -1498,7 +1498,7 @@ module.exports = (perspective) => {
                         '"c" xor "d"',
                         '"e" xor "f"',
                         "0 xor 1",
-                        "False xor False",
+                        "false xor false",
                     ],
                 });
                 const result = await view.to_columns();
@@ -1511,7 +1511,7 @@ module.exports = (perspective) => {
                 expect(result['"c" xor "d"']).toEqual([true, true, true, true]);
                 expect(result['"e" xor "f"']).toEqual([true, true, true, true]);
                 expect(result["0 xor 1"]).toEqual([true, true, true, true]);
-                expect(result["False xor False"]).toEqual([
+                expect(result["false xor false"]).toEqual([
                     false,
                     false,
                     false,

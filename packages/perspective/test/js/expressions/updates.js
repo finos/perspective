@@ -99,14 +99,14 @@ module.exports = (perspective) => {
                 // don't work as of yet.
                 expressions: [
                     'if ("x" > 4) 10; else 100',
-                    `"y" == 'A' ? True : False`,
+                    `"y" == 'A' ? true : false`,
                 ],
             });
             const before = await view.to_columns();
             expect(before['if ("x" > 4) 10; else 100']).toEqual([
                 100, 100, 100, 10,
             ]);
-            expect(before[`"y" == 'A' ? True : False`]).toEqual([
+            expect(before[`"y" == 'A' ? true : false`]).toEqual([
                 true,
                 false,
                 false,
@@ -119,7 +119,7 @@ module.exports = (perspective) => {
             expect(after['if ("x" > 4) 10; else 100']).toEqual([
                 100, 100, 100, 10, 10, 10, 10,
             ]);
-            expect(after[`"y" == 'A' ? True : False`]).toEqual([
+            expect(after[`"y" == 'A' ? true : false`]).toEqual([
                 true,
                 false,
                 false,
@@ -298,14 +298,14 @@ module.exports = (perspective) => {
             const view = await table.view({
                 expressions: [
                     'if ("x" > 4) 10; else 100',
-                    `"z" == 'a' ? True : False`,
+                    `"z" == 'a' ? true : false`,
                 ],
             });
             const before = await view.to_columns();
             expect(before['if ("x" > 4) 10; else 100']).toEqual([
                 100, 100, 100, 10,
             ]);
-            expect(before[`"z" == 'a' ? True : False`]).toEqual([
+            expect(before[`"z" == 'a' ? true : false`]).toEqual([
                 true,
                 false,
                 false,
@@ -321,7 +321,7 @@ module.exports = (perspective) => {
             expect(after['if ("x" > 4) 10; else 100']).toEqual([
                 10, 100, 10, 10,
             ]);
-            expect(after[`"z" == 'a' ? True : False`]).toEqual([
+            expect(after[`"z" == 'a' ? true : false`]).toEqual([
                 true,
                 false,
                 true,

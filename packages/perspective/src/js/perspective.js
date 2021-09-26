@@ -1480,6 +1480,20 @@ export default function (Module) {
                 expression_alias = expression_string;
             }
 
+            // Replace `true` and `false` reserved words with symbols
+            parsed_expression_string = parsed_expression_string.replace(
+                /([a-zA-Z_]+[a-zA-Z0-9_]*)/g,
+                (match) => {
+                    if (match == "true") {
+                        return "True";
+                    } else if (match == "false") {
+                        return "False";
+                    } else {
+                        return match;
+                    }
+                }
+            );
+
             parsed_expression_string = parsed_expression_string.replace(
                 /\"(.*?[^\\])\"/g,
                 (_, cname) => {
