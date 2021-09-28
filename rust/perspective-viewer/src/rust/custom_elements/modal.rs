@@ -37,31 +37,6 @@ pub struct ModalElement<T: Component> {
     own_focus: bool,
 }
 
-/// Calculate the absolute coordinates (top, left) relative to `<body>` of a
-/// `target` element.
-fn calc_page_position(target: &HtmlElement) -> Result<(i32, i32), JsValue> {
-    let mut top = 0;
-    let mut left = 0;
-    let mut elem = target.clone().unchecked_into::<HtmlElement>();
-    while !elem.is_undefined() {
-        top += elem.offset_top();
-        left += elem.offset_left();
-        elem = match elem.offset_parent() {
-            Some(elem) => {
-                top -= elem.scroll_top();
-                left -= elem.scroll_left();
-                elem.unchecked_into::<HtmlElement>()
-            }
-            None => match elem.dyn_into::<ShadowRoot>() {
-                Ok(root) => root.host().unchecked_into::<HtmlElement>(),
-                Err(_) => JsValue::UNDEFINED.unchecked_into::<HtmlElement>(),
-            },
-        };
-    }
-
-    Ok((top as i32, left as i32))
-}
-
 /// Given the bounds of the target element as previous computed, as well as the
 /// browser's viewport and the bounds of the already-connected
 /// `<perspectuve-style-menu>` element itself, determine a new (top, left)
@@ -87,36 +62,37 @@ fn calc_relative_position(
     let target_over_x = inner_width < rect_left + width;
     let target_over_y = inner_height < rect_top + height;
 
+    // target/moadl
     match (elem_over_y, elem_over_x, target_over_x, target_over_y) {
         (true, _, true, true) => {
             // bottom right/top left
-            Some((top - rect_height, left - rect_width))
+            Some((top - rect_height, left - rect_width + 1))
         }
         (true, _, true, false) => {
             // bottom right, bottom left
-            Some((top - rect_height + height, left - rect_width))
+            Some((top - rect_height + height, left - rect_width + 1))
         }
         (true, true, false, _) => {
             if left + width - rect_width > 0 {
                 // bottom right/top right
-                Some((top - rect_height, left + width - rect_width))
+                Some((top - rect_height + 1, left + width - rect_width))
             } else {
                 // bottom left/top left
-                Some((top - rect_height, left))
+                Some((top - rect_height + 1, left))
             }
         }
         (true, false, false, _) => {
             // bottom left/top left
-            Some((top - rect_height, left))
+            Some((top - rect_height + 1, left))
         }
         (false, true, true, _) => {
             // top right/top left
-            Some((top, left - rect_width))
+            Some((top, left - rect_width + 1))
         }
         (false, true, false, _) => {
             if left + width - rect_width > 0 {
                 // top right/bottom right
-                Some((top + height, left + width - rect_width))
+                Some((top + height - 1, left + width - rect_width))
             } else {
                 None
             }
@@ -164,11 +140,15 @@ where
     fn open_within_viewport(&mut self, target: HtmlElement) -> Result<(), JsValue> {
         let height = target.offset_height() as i32;
         let width = target.offset_width() as i32;
-        let (top, left) = calc_page_position(&target)?;
+        let elem = target.clone().unchecked_into::<HtmlElement>();
+        let rect = elem.get_bounding_client_rect();
+        let top = rect.top() as i32;
+        let left = rect.left() as i32;
+
         *self.target.borrow_mut() = Some(target);
 
         // Default, top left/bottom left
-        let msg = T::Message::resize((top + height) as i32, left as i32);
+        let msg = T::Message::resize((top + height - 1) as i32, left as i32);
         self.root.borrow().as_ref().unwrap().send_message(msg);
 
         let window = web_sys::window().unwrap();
@@ -232,8 +212,17 @@ where
             let mut this = self.clone();
             window
                 .request_animation_frame(
-                    Closure::once_into_js(move || this.open_within_viewport(target))
-                        .unchecked_ref(),
+                    Closure::once_into_js(move || {
+                        target.class_list().add_1("modal-target")?;
+                        let theme = get_theme(&target);
+                        this.open_within_viewport(target)?;
+                        if let Some(theme) = theme {
+                            this.custom_element.class_list().add_1(&theme)?;
+                        }
+
+                        Ok(())
+                    })
+                    .unchecked_ref(),
                 )
                 .unwrap();
         }
@@ -270,6 +259,11 @@ where
 
             let target = self.target.borrow_mut().take().unwrap();
             let event = web_sys::CustomEvent::new("-perspective-close-expression")?;
+            target.class_list().remove_1("modal-target").unwrap();
+            if let Some(theme) = get_theme(&target) {
+                self.custom_element.class_list().remove_1(&theme)?;
+            }
+
             target.dispatch_event(&event)?;
         }
 
@@ -282,4 +276,19 @@ where
         self.root.borrow_mut().take().unwrap().destroy();
         Ok(())
     }
+}
+
+fn get_theme(elem: &HtmlElement) -> Option<String> {
+    let styles = window().unwrap().get_computed_style(elem).unwrap().unwrap();
+    styles
+        .get_property_value("--modal--class")
+        .ok()
+        .and_then(|x| {
+            let trimmed = x.trim();
+            if !trimmed.is_empty() {
+                Some(trimmed.to_owned())
+            } else {
+                None
+            }
+        })
 }

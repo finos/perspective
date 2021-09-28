@@ -106,8 +106,11 @@
                 align-items: start;
                 cursor: move;
                 border-style: solid;
-                border-width: 0 0 1px 0;
+                border-width: 1px;
                 border-color: var(--inactive--color, #c5c9d0);
+                border-left-color: transparent;
+                border-right-color: transparent;
+                border-top-color: transparent;
                 font-size: 12px;
                 flex-grow: 1;
                 color: inherit;
@@ -131,6 +134,10 @@
                     text-overflow: ellipsis;
                     width: 100%;
                     flex: 1 1 250px;
+
+                    &:only-child {
+                        padding-right: 6px;
+                    }
                 }
 
                 .column_name:before {
@@ -273,6 +280,7 @@
         .empty-named {
             pointer-events: none;
             border: 1px dashed var(--inactive--color, #ddd) !important;
+            // margin-left: -2px;
 
             & > * {
                 opacity: 0;
