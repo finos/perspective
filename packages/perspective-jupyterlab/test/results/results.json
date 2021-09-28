@@ -1,6 +1,6 @@
 {
-    "__GIT_COMMIT__": "dce4742a444f90b9847769dc15bfc6cc4ace211a",
+    "__GIT_COMMIT__": "21eb6e6303888b41ec49891317c4302f93515335",
     "resize_Config_should_show_by_default": "b8bc3ea0c100cbd12f2b6364d13ad2cc",
     "resize_Resize_the_container_causes_the_widget_to_resize": "b8bc3ea0c100cbd12f2b6364d13ad2cc",
-    "resize_row_pivots_traitlet_works": "f3f5294cbe02d84ab7c18fffa28e017f"
+    "resize_row_pivots_traitlet_works": "52d03e6b2e62254a8135c0450d6ef1f2"
 }

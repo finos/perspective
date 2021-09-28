@@ -1,6 +1,16 @@
 *.ipynb linguist-documentation
-docs/* linguist-documentation
+docs/**/* linguist-documentation
 python/perspective/notebooks/* linguist-documentation
 python/perspective/docs/* linguist-documentation
 results/*.json linguist-documentation
 *.js text eol=lf
+**/test/**/* linguist-documentation
+**/tests/**/* linguist-documentation
+examples/**/* linguist-documentation
+scripts/* linguist-documentation
+packages/perspective-bench/**/* linguist-documentation
+packages/perspective-test/**/* linguist-documentation
+cmake/** linguist-documentation
+CMakeLists.txt linguist-documentation
+docker/** linguist-documentation
+**/*.sh linguist-documentation
