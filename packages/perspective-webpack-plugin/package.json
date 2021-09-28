@@ -32,5 +32,8 @@
         "postcss-loader": "^4.1.0",
         "string-replace-loader": "^3.0.1",
         "worker-loader": "^3.0.7"
+    },
+    "peerDependencies": {
+        "webpack": "^5.0.0"
     }
 }

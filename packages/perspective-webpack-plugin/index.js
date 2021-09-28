@@ -167,6 +167,12 @@ class PerspectiveWebpackPlugin {
         );
         plugin_replace.apply(compiler);
 
+        const plugin_replace2 = new webpack.NormalModuleReplacementPlugin(
+            /@finos\/perspective\-viewer$/,
+            "@finos/perspective-viewer/dist/esm/index.js"
+        );
+        plugin_replace2.apply(compiler);
+
         moduleOptions.rules = (moduleOptions.rules || []).concat(rules);
     }
 }
