@@ -13,8 +13,8 @@ use crate::session::Session;
 use crate::utils::*;
 
 use std::cell::RefCell;
-use std::rc::Rc;
 use std::convert::TryFrom;
+use std::rc::Rc;
 use wasm_bindgen::{prelude::*, JsCast};
 use wasm_bindgen_futures::future_to_promise;
 use web_sys::*;
@@ -88,10 +88,7 @@ impl Component for ExpressionEditor {
             ExpressionEditorMsg::SetPos(top, left) => {
                 self.top = top;
                 self.left = left;
-                if let Some((_, x)) = self.editor.borrow().as_ref() {
-                    x.set_value("");
-                }
-
+                self.set_default_content();
                 true
             }
             ExpressionEditorMsg::Validate(_val) => {
@@ -203,9 +200,32 @@ impl ExpressionEditor {
         self.props.on_init.emit(());
         if let Some(expr) = self.expression.borrow_mut().take() {
             editor.set_value(&expr);
+        } else {
+            self.set_default_content();
         }
 
         Ok(JsValue::UNDEFINED)
+    }
+
+    fn set_default_content(&self) {
+        if let Some((_, x)) = self.editor.borrow().as_ref() {
+            let mut i = 1;
+            let mut name = "New Column 1".to_owned();
+            let config = self.props.session.metadata();
+            while config.get_column_table_type(&name).is_some() {
+                i += 1;
+                name = format!("New Column {}", i);
+            }
+
+            x.set_value(&format!("// {}\n", name));
+            x.set_position(
+                &JsValue::from_serde(&PositionArgs {
+                    column: 1,
+                    line_number: 2,
+                })
+                .unwrap(),
+            );
+        }
     }
 
     /// Validate the editor's current value, and toggle the Save button state

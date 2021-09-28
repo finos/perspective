@@ -136,6 +136,9 @@ extern "C" {
     #[wasm_bindgen(method, js_name = "setValue")]
     pub fn set_value(this: &JsMonacoEditor, value: &str);
 
+    #[wasm_bindgen(method, js_name = "setPosition")]
+    pub fn set_position(this: &JsMonacoEditor, value: &JsValue);
+
     #[wasm_bindgen(method, js_name = "addCommand")]
     pub fn add_command(this: &JsMonacoEditor, key_code: u32, value: &js_sys::Function);
 
@@ -211,6 +214,13 @@ pub struct CompletionItemSuggestion {
     pub insert_text: String,
     pub insert_text_rules: u32,
     pub documentation: String,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PositionArgs {
+    pub column: u32,
+    pub line_number: u32,
 }
 
 #[derive(Serialize)]
