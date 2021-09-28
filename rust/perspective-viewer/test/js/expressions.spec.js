@@ -38,7 +38,10 @@ utils.with_server({}, () => {
 
                         return (
                             root?.querySelector(".cdr.squiggly-error") &&
-                            root?.querySelector(".rename-label")
+                            root?.querySelector(".rename-label") &&
+                            root?.querySelector(
+                                ".invisible.scrollbar.vertical.fade"
+                            )
                         );
                     });
 
