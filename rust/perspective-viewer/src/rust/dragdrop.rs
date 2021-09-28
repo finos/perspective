@@ -43,6 +43,8 @@ pub struct DragState {
 pub struct DragDropState {
     drag_state: Option<DragState>,
     on_drop_action: PubSub<(String, DropAction, DragEffect, usize)>,
+    on_drag_action: PubSub<DragEffect>,
+    on_dragend_action: PubSub<()>,
 }
 
 /// The `<perspective-viewer>` drag-drop service, which manages drag/drop user
@@ -67,6 +69,21 @@ impl DragDrop {
         callback: Callback<(String, DropAction, DragEffect, usize)>,
     ) -> Subscription {
         self.borrow().on_drop_action.add_listener(callback)
+    }
+
+    pub fn add_on_drag_action(
+        &self,
+        callback: Callback<DragEffect>,
+    ) -> Subscription {
+        self.borrow().on_drag_action.add_listener(callback)
+    }
+
+
+    pub fn add_on_dragend_action(
+        &self,
+        callback: Callback<()>,
+    ) -> Subscription {
+        self.borrow().on_dragend_action.add_listener(callback)
     }
 
     pub fn notify_drop(&self) {
@@ -99,11 +116,16 @@ impl DragDrop {
             effect,
             state: None,
         });
+
+        self.borrow().on_drag_action.emit_all(effect)
     }
 
     /// End the drag/drop action by resetting the state to default.
     pub fn drag_end(&self) {
-        self.borrow_mut().drag_state = None;
+        let should_notify = self.borrow_mut().drag_state.take().is_some();
+        if should_notify {
+            self.borrow().on_dragend_action.emit_all(());
+        }
     }
 
     /// Leave the `action` zone.

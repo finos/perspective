@@ -3,7 +3,7 @@
     "superstore.html/doesn't leak elements.": "d0fd18b3d4d7c183c5ed155b4bf37972",
     "superstore.html/doesn't leak views when setting row pivots.": "54daaa4bbbe59f6ed4acc301ba871bab",
     "superstore.html/doesn't leak views when setting filters.": "6dfc1e505f1428424c3265f0236f22fc",
-    "__GIT_COMMIT__": "04ab695006097bdbf45a97b2bfad0db62d9e0246",
+    "__GIT_COMMIT__": "564651306a91bcb1b924cde262fc8a3f165d45de",
     "blank.html/Handles reloading with a schema.": "e58c62f6e0ff16dc4d753f99e0fc39c3",
     "superstore_shows_a_grid_without_any_settings_applied_": "ae1c4690d978598ca14c8669244ce604",
     "superstore_Responsive_Layout_shows_horizontal_columns_on_small_vertical_viewports_": "57ba3ad341cf8a0e4df6ab96715ff2a0",
@@ -57,12 +57,12 @@
     "superstore_doesn_t_leak_elements": "f6e373a8a214d80c2c73b435180c6b82",
     "superstore_doesn_t_leak_views_when_setting_row_pivots": "c236bf5afc0ce51d8e2427fe1c29380a",
     "superstore_doesn_t_leak_views_when_setting_filters": "ca6f56a35f4844e69125ab36c9727a69",
-    "superstore_opens_settings_when_field_is_set_to_true": "ea4012b1828f562c905a95fbf206e31e",
+    "superstore_opens_settings_when_field_is_set_to_true": "45222f231253b639336eafb6bb688700",
     "superstore_opens_settings_when_field_is_set_to_false": "10d1208b485425756fcc932229386b02",
     "superstore_save()_returns_the_current_config": "ded04b5d6cb96a3651578334f189b20e",
     "superstore_restore()_restores_a_config_from_save()": "ded04b5d6cb96a3651578334f189b20e",
     "superstore_restore()_fires_the__perspective-config-update__event": "ded04b5d6cb96a3651578334f189b20e",
-    "superstore_restore_fires_the__perspective-config-update__event": "94207660854a9e203ad7f8051333611f",
-    "superstore_save_returns_the_current_config": "94207660854a9e203ad7f8051333611f",
-    "superstore_restore_restores_a_config_from_save": "94207660854a9e203ad7f8051333611f"
+    "superstore_restore_fires_the__perspective-config-update__event": "a2b7aac3c25e901de78a351acf7319ec",
+    "superstore_save_returns_the_current_config": "a2b7aac3c25e901de78a351acf7319ec",
+    "superstore_restore_restores_a_config_from_save": "a2b7aac3c25e901de78a351acf7319ec"
 }

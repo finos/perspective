@@ -386,6 +386,11 @@ impl Component for FilterItem {
             }
         });
 
+        let dragend = Callback::from({
+            let dragdrop = self.props.dragdrop.clone();
+            move |_event| dragdrop.drag_end()
+        });
+
         let type_class = match col_type {
             Some(Type::Float) | Some(Type::Integer) => "num-filter",
             Some(Type::String) => "string-filter",
@@ -484,7 +489,8 @@ impl Component for FilterItem {
                 <span
                     draggable="true"
                     ref={ dragref }
-                    ondragstart={ dragstart }>
+                    ondragstart={ dragstart }
+                    ondragend={ dragend }>
                     {
                         filter.0.to_owned()
                     }

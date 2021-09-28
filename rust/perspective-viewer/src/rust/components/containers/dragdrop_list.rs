@@ -187,24 +187,29 @@ where
                 .props
                 .children
                 .iter()
-                .map(Some)
+                .map(|x| (true, Some(x)))
                 .enumerate()
-                .collect::<Vec<(usize, Option<yew::virtual_dom::VChild<U>>)>>();
+                .collect::<Vec<(usize, (bool, Option<yew::virtual_dom::VChild<U>>))>>();
 
             if let Some((x, column)) = &self.props.is_dragover {
                 let index = *x as usize;
+                let col_vchild = columns
+                    .iter()
+                    .map(|z| z.1 .1.as_ref().unwrap())
+                    .find(|x| x.props.get_item() == *column)
+                    .cloned();
+
                 if !self.props.allow_duplicates {
-                    columns
-                        .retain(|x| x.1.as_ref().unwrap().props.get_item() != *column);
+                    columns.retain(|x| x.1 .1.as_ref().unwrap().props.get_item() != *column);
                 }
 
                 // If inserting into the middle of the list, use
                 // the length of the existing element to prevent
                 // jitter as the underlying dragover zone moves.
                 if index < columns.len() {
-                    columns.insert(index, (index, None));
+                    columns.insert(index, (index, (false, col_vchild)));
                 } else {
-                    columns.push((index, None));
+                    columns.push((index, (false, col_vchild)));
                 }
             }
 
@@ -222,13 +227,21 @@ where
                         }
                     });
 
-                    if let Some(column) = column {
+                    if let (true, Some(column)) = column {
                         html! {
                             <div class="pivot-column" ondragenter={ dragenter }>
                                 {
                                     Html::from(column)
                                 }
                                 <span class="row_close" onmousedown={ close }></span>
+                            </div>
+                        }
+                    } else if let (_, Some(column)) = column {
+                        html! {
+                            <div class="pivot-column config-drop" ondragenter={ dragenter }>
+                                {
+                                    Html::from(column)
+                                }
                             </div>
                         }
                     } else {
