@@ -61,7 +61,7 @@ export default () => {
         },
         ...["index", "monaco"].map((name) => ({
             input: `src/ts/${name}.ts`,
-            external: [/pkg/, /node_modules/, /monaco\-editor/],
+            external: [/pkg/, /node_modules/, /monaco\-editor/, /^[a-zA-Z\@]/],
             output: {
                 sourcemap: true,
                 dir: "dist/esm/",
