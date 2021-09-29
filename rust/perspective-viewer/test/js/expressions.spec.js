@@ -38,7 +38,10 @@ utils.with_server({}, () => {
 
                         return (
                             root?.querySelector(".cdr.squiggly-error") &&
-                            root?.querySelector(".rename-label")
+                            root?.querySelector(".rename-label") &&
+                            root?.querySelector(
+                                ".invisible.scrollbar.vertical.fade"
+                            )
                         );
                     });
 
@@ -169,7 +172,7 @@ utils.with_server({}, () => {
                         await elem.toggleConfig(true);
                     });
 
-                    await type_expression_test(page, "// abc2 \n 4 + 5");
+                    await type_expression_test(page, "4 + 5");
                     await page.shadow_click(
                         "perspective-expression-editor",
                         "button"
@@ -195,11 +198,11 @@ utils.with_server({}, () => {
                             document.querySelector("perspective-viewer");
                         await elem.toggleConfig(true);
                         await elem.restore({
-                            expressions: ["// abc \n3 + 4"],
+                            expressions: ["// 4 + 5 \n3 + 4"],
                         });
                     });
 
-                    await type_expression_test(page, "// abc \n 4 + 5");
+                    await type_expression_test(page, "4 + 5");
                     await page.shadow_click(
                         "perspective-expression-editor",
                         "button"

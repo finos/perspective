@@ -12,7 +12,7 @@ const HtmlWebPackPlugin = require("html-webpack-plugin");
 const path = require("path");
 
 module.exports = {
-    mode: process.env.NODE_ENV || "development",
+    mode: process.env.NODE_ENV || "production",
     entry: "./src/index.js",
     output: {
         filename: "index.js",
@@ -27,6 +27,7 @@ module.exports = {
         rules: [
             {
                 test: /\.css$/,
+                exclude: /node_modules/,
                 use: [{loader: "style-loader"}, {loader: "css-loader"}],
             },
         ],

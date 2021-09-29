@@ -299,6 +299,7 @@ impl Component for ActiveColumn {
                                             <ExpressionToolbar
                                                 session={ self.props.session.clone() }
                                                 renderer={ self.props.renderer.clone() }
+                                                dragdrop={ self.props.dragdrop.clone() }
                                                 name={ name.clone() }
                                                 add_expression_ref={ self.add_expression_ref.clone() }>
                                             </ExpressionToolbar>

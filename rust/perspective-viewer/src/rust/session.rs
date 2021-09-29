@@ -476,9 +476,11 @@ impl Session {
         &self,
         column: String,
     ) -> Result<Vec<String>, JsValue> {
+        let expressions = self.borrow().config.expressions.clone();
         let config = ViewConfig {
             row_pivots: vec![column],
             columns: vec![],
+            expressions,
             ..ViewConfig::default()
         };
 

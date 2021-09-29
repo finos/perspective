@@ -10,7 +10,6 @@
 @import "./aggregate-selector.less";
 
 :host {
-
     .column-selector-column-title {
         display: flex;
         width: 100%;
@@ -54,7 +53,7 @@
             white-space: nowrap;
         }
         #add-expression {
-            padding: 6px 0 0 0;
+            padding: 6px 0 6px 0;
             margin: -6px 0 0 0;
             &.expr_editor_open {
                 background: rgba(0, 0, 0, 0.05);
@@ -80,8 +79,7 @@
             // Expression column toolbar buttons
             span.expression-edit-button,
             span.expression-delete-button {
-                padding-left: 6px;
-                padding-right: 0px;
+                padding-top: 1px;
                 font-family: "Material Icons";
                 cursor: pointer;
                 opacity: 1;
@@ -93,13 +91,26 @@
                 }
             }
 
+            span.expression-delete-button {
+                padding-right: 1.5px;
+                padding-left: 5px;
+            }
+
+            span.expression-edit-button {
+                padding-left: 1.5px;
+                padding-right: 3px;
+            }
+
             .column_selector_draggable {
                 display: flex;
                 align-items: start;
                 cursor: move;
                 border-style: solid;
-                border-width: 0 0 1px 0;
+                border-width: 1px;
                 border-color: var(--inactive--color, #c5c9d0);
+                border-left-color: transparent;
+                border-right-color: transparent;
+                border-top-color: transparent;
                 font-size: 12px;
                 flex-grow: 1;
                 color: inherit;
@@ -123,6 +134,10 @@
                     text-overflow: ellipsis;
                     width: 100%;
                     flex: 1 1 250px;
+
+                    &:only-child {
+                        padding-right: 6px;
+                    }
                 }
 
                 .column_name:before {
@@ -197,7 +212,19 @@
         #active-columns,
         #sub-columns {
             flex: 0 1 auto;
-            overflow: scroll;
+            overflow-x: hidden;
+            overflow-y: scroll;
+
+            &::-webkit-scrollbar-thumb {
+                background-color: rgba(0, 0, 0, 0.1);
+                border-radius: 4px;
+            }
+
+            &::-webkit-scrollbar,
+            &::-webkit-scrollbar-corner {
+                background-color: transparent;
+                width: 6px;
+            }
         }
 
         #active-columns.collapse {
@@ -229,11 +256,6 @@
                 position: relative;
                 .column_selector_draggable {
                     width: calc(100% - 24px);
-
-                    span.expression-edit-button {
-                        margin-left: 18px;
-                    }
-             
                 }
 
                 &:before {
@@ -258,7 +280,7 @@
         .empty-named {
             pointer-events: none;
             border: 1px dashed var(--inactive--color, #ddd) !important;
-            margin-left: -2px;
+            // margin-left: -2px;
 
             & > * {
                 opacity: 0;
@@ -302,6 +324,7 @@
                 .column_selector_draggable {
                     border-bottom-color: transparent;
                     align-items: center;
+                    width: calc(100% - 24px);
                 }
             }
         }

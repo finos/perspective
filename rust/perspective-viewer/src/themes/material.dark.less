@@ -11,8 +11,8 @@
 @import "../less/variables";
 @import (reference) "material";
 
-perspective-column-style,
-perspective-expression-editor {
+perspective-column-style.dark,
+perspective-expression-editor.dark {
     background-color: @grey700;
     color: #ffffff;
     border: 1px solid @grey300;
@@ -27,6 +27,7 @@ perspective-viewer,
     background-color: @grey800;
     color: white;
     --plugin--background: @grey700;
+    --modal-target--background: @grey700;
     --select--background-color: @grey800;
     --inactive--color: @grey300;
     --pv-divider--color: @grey300;
@@ -45,6 +46,7 @@ perspective-viewer,
         transparent 50%
     );
     --monaco-theme: vs-dark;
+    --modal--class: dark;
     --calendar--filter: invert(1);
 
     table {

@@ -50,6 +50,23 @@ function common({no_minify, inline} = {}) {
                     exclude: /node_modules\/(?!regular-table)/,
                     loader: "source-map-loader",
                 },
+                inline
+                    ? undefined
+                    : {
+                          test: /\.js$/,
+                          exclude: /node_modules/,
+                          use: [
+                              {
+                                  loader: require.resolve(
+                                      "string-replace-loader"
+                                  ),
+                                  options: {
+                                      search: /webpackMode:\s*?"eager"/g,
+                                      replace: "",
+                                  },
+                              },
+                          ],
+                      },
                 {
                     test: /\.(arrow)$/,
                     type: "javascript/auto",
@@ -108,11 +125,13 @@ function common({no_minify, inline} = {}) {
                     test: /editor\.worker/,
                     type: "javascript/auto",
                     loader: "worker-loader",
-                    options: {
-                        inline: "no-fallback",
-                    },
+                    options: inline
+                        ? {
+                              inline: "no-fallback",
+                          }
+                        : {},
                 },
-            ],
+            ].filter((x) => !!x),
         },
         resolve: {
             fallback: {

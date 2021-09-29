@@ -10,6 +10,7 @@ use crate::config::*;
 use crate::custom_elements::expression_editor::ExpressionEditorElement;
 use crate::renderer::*;
 use crate::session::*;
+use crate::dragdrop::*;
 use crate::*;
 
 use wasm_bindgen_futures::spawn_local;
@@ -22,6 +23,7 @@ pub struct ExpressionToolbarProps {
     pub add_expression_ref: NodeRef,
     pub session: Session,
     pub renderer: Renderer,
+    pub dragdrop: DragDrop,
 }
 
 derive_renderable_props!(ExpressionToolbarProps);
@@ -48,6 +50,10 @@ impl ExpressionToolbarProps {
             ..ViewConfigUpdate::default()
         });
     }
+
+    fn is_closable(&self) -> bool {
+        !self.session.is_column_expression_in_use(&self.name) && !self.dragdrop.get_drag_column().map(|x| x == self.name).unwrap_or_default()
+    }
 }
 
 pub enum ExpressionToolbarMsg {
@@ -71,7 +77,7 @@ impl Component for ExpressionToolbar {
         props: <Self as yew::Component>::Properties,
         link: ComponentLink<Self>,
     ) -> Self {
-        let is_closable = !props.session.is_column_expression_in_use(&props.name);
+        let is_closable = props.is_closable();
         ExpressionToolbar {
             link,
             props,
@@ -81,7 +87,7 @@ impl Component for ExpressionToolbar {
     }
 
     fn change(&mut self, props: <Self as yew::Component>::Properties) -> ShouldRender {
-        let is_closable = !props.session.is_column_expression_in_use(&props.name);
+        let is_closable = props.is_closable();
         let should_render =
             self.props.name != props.name || self.is_closable != is_closable;
         self.props = props;
@@ -146,7 +152,15 @@ impl Component for ExpressionToolbar {
                             </span>
                         }
                     } else {
-                        html! {}
+                        html! {
+                            <span
+                                class="expression-delete-button"
+                                style="opacity:0">
+                                {
+                                    "close"
+                                }
+                            </span>
+                        }
                     }
                 }
                 <span

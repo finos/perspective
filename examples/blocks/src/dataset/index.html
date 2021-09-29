@@ -16,13 +16,13 @@
         name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
 
-        <script src="perspective-viewer.js"></script>
-        <script src="perspective-viewer-datagrid.js"></script>
-        <script src="perspective-viewer-d3fc.js"></script>
+        <script src="/node_modules/@finos/perspective-viewer/dist/umd/perspective-viewer.js"></script>
+        <script src="/node_modules/@finos/perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js"></script>
+        <script src="/node_modules/@finos/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js"></script>
     
-        <script src="perspective.js"></script>
+        <script src="/node_modules/@finos/perspective/dist/umd/perspective.js"></script>
     
-        <link rel='stylesheet' href="material.css" is="custom-style">
+        <link rel='stylesheet' href="/node_modules/@finos/perspective-viewer/dist/umd/material-dense.css" is="custom-style">
     
     <style>
     
@@ -43,7 +43,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: #eee
+            background-color: #f2f4f6;
         }
 
         #controls {
@@ -145,9 +145,14 @@
                 <span>Datetime columns</span>
                 <input id="num_datetime" min="0" max="50" type="number" placeholder="#" value="5"></input>
             </div>
+            <div class="range">
+                <span>Bool columns</span>
+                <input id="num_boolean" min="0" max="50" type="number" placeholder="#" value="1"></input>
+            </div>
         </div>
 
         <perspective-viewer 
+            editable
             id="viewer">
 
         </perspective-viewer>
@@ -164,7 +169,7 @@
         const colname = (name, x) => `${name.charAt(0).toUpperCase() + name.slice(1)} ${x}`;
 
         function* col_iter() {
-            for (const name of ["float", "integer", "string", "datetime"]) {
+            for (const name of ["float", "integer", "string", "datetime", "boolean"]) {
                 const ncols = window[`num_${name}`].value;
                 for (let x = 0; x < ncols; x ++) {
                     yield [name, x];;
@@ -198,7 +203,8 @@
             "float": () => range(-10, 10),
             "integer": () => Math.floor(range(-10, 10)),
             "string" : xs => choose(get_dict(xs)),
-            "datetime": () => new Date()
+            "datetime": () => new Date(),
+            "boolean": () => choose([true, false, null])
         };
 
         const new_row = () => assign((name, x) => CELL_ARGS[name](x));
@@ -226,13 +232,17 @@
 
         // GUI
 
-        const make_run_click_callback = (state) => async () => {
-            const old_table = state.table;
-            state.table = await gen_data();
-            window.viewer.load(state.table);
+        const make_run_click_callback = (state) => async () => {            
+            const old_table = state.table
+            state.table = gen_data();
+            await window.viewer.load(state.table);
             if (old_table) {
-                old_table.delete();
-            }
+                old_table.then(old_table => {
+                    if (old_table) {
+                        old_table.delete();
+                    }
+                });
+            }            
         }
 
         // Main

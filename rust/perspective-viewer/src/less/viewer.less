@@ -73,7 +73,20 @@
         box-sizing: border-box;
         width: 100%;
 
+        .modal-target {
+            border: 1px dashed var(--inactive--color, #ccc) !important;
+            background-color: var(
+                --modal-target--background,
+                rgba(255, 255, 255, 0.5)
+            );
+        }
+
+        #add-expression.modal-target {
+            margin: -7px 0 0 -1px !important;
+        }
+
         #plugin_selector_container {
+            margin-right: 6px;
             min-height: 29px;
             margin-left: var(--column_selector--width, 20px);
             overflow: hidden;
@@ -151,7 +164,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        z-index: 10;
+        z-index: 10000;
 
         background: none;
         color: var(--inactive--color, #999);
