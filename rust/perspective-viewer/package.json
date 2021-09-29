@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-viewer",
-    "version": "1.0.0-rc.0",
+    "version": "1.0.0-rc.1",
     "description": "A regular `<table>`, for an async and virtual data model.",
     "repository": {
         "type": "git",
@@ -48,7 +48,7 @@
         "access": "public"
     },
     "dependencies": {
-        "@finos/perspective": "^1.0.0-rc.0",
+        "@finos/perspective": "^1.0.0-rc.1",
         "mobile-drag-drop-shadow-dom": "3.0.0",
         "monaco-editor": "0.24.0",
         "monaco-editor-webpack-plugin": "3.1.0"
