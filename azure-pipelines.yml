@@ -353,21 +353,21 @@ jobs:
     - ${{ parameters.pythonCoverageSteps }}
     - ${{ parameters.pythonLinuxWheelSteps }}
 
-- job: 'Linux_Python_SDist'
-  pool:
-    vmImage: 'ubuntu-18.04'
+# - job: 'Linux_Python_SDist'
+#   pool:
+#     vmImage: 'ubuntu-18.04'
 
-  strategy:
-    matrix:
-      Python37:
-        python.version: '3.7'
-        python_flag: ''
+#   strategy:
+#     matrix:
+#       Python37:
+#         python.version: '3.7'
+#         python_flag: ''
 
-  steps:
-    - ${{ parameters.initSteps }}
-    - ${{ parameters.linuxInitSteps }}
-    - ${{ parameters.pythonBuildSteps }}
-    - ${{ parameters.pythonSDistSteps }}
+#   steps:
+#     - ${{ parameters.initSteps }}
+#     - ${{ parameters.linuxInitSteps }}
+#     - ${{ parameters.pythonBuildSteps }}
+#     - ${{ parameters.pythonSDistSteps }}
 
 
 - job: 'Windows'
