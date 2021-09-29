@@ -7,7 +7,7 @@
 set -e
 
 SDIST_NAME=perspective-python
-SDIST_VERSION=`git describe --abbrev=0 --tags  | cut -c2-`
+SDIST_VERSION=`git describe --abbrev=0 --tags  | cut -c2- | sed 's/-rc\./rc/g'`
 SDIST_FULL_NAME=$SDIST_NAME-$SDIST_VERSION
 SDIST_FULL_NAME_TAR=$SDIST_FULL_NAME.tar.gz
 
