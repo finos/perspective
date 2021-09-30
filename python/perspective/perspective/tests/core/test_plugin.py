@@ -16,7 +16,7 @@ class TestPlugin:
     def test_plugin_widget_load_grid(self):
         data = {"a": [1, 2, 3], "b": ["a", "b", "c"]}
         widget = PerspectiveWidget(data, plugin=Plugin.GRID)
-        assert widget.plugin == "datagrid"
+        assert widget.plugin == "Datagrid"
 
     def test_plugin_widget_load(self):
         data = {"a": [1, 2, 3], "b": ["a", "b", "c"]}

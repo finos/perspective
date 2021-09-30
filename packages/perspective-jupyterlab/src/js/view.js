@@ -110,25 +110,7 @@ export class PerspectiveView extends DOMWidgetView {
         this.model.on("change:plugin_config", this.plugin_config_changed, this);
         this.model.on("change:dark", this.dark_changed, this);
         this.model.on("change:editable", this.editable_changed, this);
-        // Watch the viewer DOM so that widget state is always synchronized with
-        // DOM attributes.
-        const observer = new MutationObserver(
-            this._synchronize_state.bind(this)
-        );
-        observer.observe(this.pWidget.viewer, {
-            attributes: true,
-            attributeFilter: [
-                "plugin",
-                "columns",
-                "row-pivots",
-                "column-pivots",
-                "aggregates",
-                "sort",
-                "filters",
-                "expressions",
-            ],
-            subtree: false,
-        });
+
         /**
          * Request a table from the manager. If a table has been loaded, proxy
          * it and kick off subsequent operations.
@@ -239,7 +221,7 @@ export class PerspectiveView extends DOMWidgetView {
 
     get client_worker() {
         if (!this._client_worker) {
-            this._client_worker = perspective.worker();
+            this._client_worker = perspective.shared_worker();
         }
         return this._client_worker;
     }
@@ -276,30 +258,33 @@ export class PerspectiveView extends DOMWidgetView {
                 // the table on the client, setting up editing if necessary.
                 this.perspective_client
                     .open_table(msg.data["table_name"])
-                    .then((kernel_table) => kernel_table.view())
-                    .then((kernel_view) => kernel_view.to_arrow())
-                    .then(async (arrow) => {
+                    .then(async (kernel_table) => {
+                        const kernel_view = await kernel_table.view();
+                        const arrow = await kernel_view.to_arrow();
+
                         // Create a client side table
-                        const client_table = this.client_worker.table(
+                        let client_table = this.client_worker.table(
                             arrow,
                             table_options
                         );
 
+                        // Need to await the table and get the instance
+                        // separately as load() only takes a promise
+                        // to a table and not the instance itself.
                         const client_table2 = await client_table;
+
                         if (this.pWidget.editable) {
-                            // Set up client/server editing
+                            await this.pWidget.load(client_table);
+
+                            // Allow edits from the client Perspective to
+                            // feed back to the kernel.
+                            const client_edit_port =
+                                await this.pWidget.getEditPort();
+                            const kernel_edit_port =
+                                await kernel_table.make_port();
+
                             const client_view = await client_table2.view();
-                            // table.view().then(client_view => {
-                            let client_edit_port, server_edit_port;
-                            // Create ports on the client and kernel.
-                            Promise.all([
-                                this.pWidget.load(client_table),
-                                this.pWidget.getEditPort(),
-                                kernel_table.make_port(),
-                            ]).then((outs) => {
-                                client_edit_port = outs[1];
-                                server_edit_port = outs[2];
-                            });
+
                             // When the client updates, if the update
                             // comes through the edit port then forward
                             // it to the server.
@@ -307,7 +292,7 @@ export class PerspectiveView extends DOMWidgetView {
                                 (updated) => {
                                     if (updated.port_id === client_edit_port) {
                                         kernel_table.update(updated.delta, {
-                                            port_id: server_edit_port,
+                                            port_id: kernel_edit_port,
                                         });
                                     }
                                 },
@@ -315,12 +300,13 @@ export class PerspectiveView extends DOMWidgetView {
                                     mode: "row",
                                 }
                             );
+
                             // If the server updates, and the edit is
                             // not coming from the server edit port,
                             // then synchronize state with the client.
                             kernel_view.on_update(
                                 (updated) => {
-                                    if (updated.port_id !== server_edit_port) {
+                                    if (updated.port_id !== kernel_edit_port) {
                                         client_table2.update(updated.delta); // any port, we dont care
                                     }
                                 },
@@ -331,7 +317,7 @@ export class PerspectiveView extends DOMWidgetView {
                         } else {
                             // Load the table and mirror updates from the
                             // kernel.
-                            this.pWidget.load(client_table);
+                            await this.pWidget.load(client_table);
                             kernel_view.on_update(
                                 (updated) =>
                                     client_table2.update(updated.delta),
@@ -362,8 +348,9 @@ export class PerspectiveView extends DOMWidgetView {
      */
 
     remove() {
+        // Delete the <perspective-viewer> but do not terminate the shared
+        // worker as it is shared across other widgets.
         this.pWidget.delete();
-        this.client_worker.terminate();
     }
 
     /**

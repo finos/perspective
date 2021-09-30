@@ -189,7 +189,7 @@ class TestViewer:
         viewer.load(table)
         assert viewer.filters == [["a", "==", 2]]
         viewer.reset()
-        assert viewer.plugin == "datagrid"
+        assert viewer.plugin == "Datagrid"
         assert viewer.filters == []
 
     # delete
@@ -229,7 +229,7 @@ class TestViewer:
 
         # reset configuration
         viewer.reset()
-        assert viewer.plugin == "datagrid"
+        assert viewer.plugin == "Datagrid"
         assert viewer.filters == []
         assert viewer.editable is False
         assert viewer.expressions == []
@@ -242,7 +242,7 @@ class TestViewer:
         assert viewer.expressions == ['"a" * 2']
 
     def test_save_restore_plugin_config(self):
-        viewer = PerspectiveViewer(plugin="datagrid", plugin_config={"a": {"fixed": 4}})
+        viewer = PerspectiveViewer(plugin="Datagrid", plugin_config={"a": {"fixed": 4}})
         config = viewer.save()
 
         assert config["plugin_config"] == {

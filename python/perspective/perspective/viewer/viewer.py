@@ -57,7 +57,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
 
     def __init__(
         self,
-        plugin="datagrid",
+        plugin="Datagrid",
         columns=None,
         row_pivots=None,
         column_pivots=None,
@@ -266,7 +266,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         self.expressions = []
         self.aggregates = {}
         self.columns = []
-        self.plugin = "datagrid"
+        self.plugin = "Datagrid"
         self.plugin_config = {}
         self.editable = False
 
