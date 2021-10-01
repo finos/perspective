@@ -332,7 +332,10 @@ class TestPerspectiveManager(object):
                 "expression_schema": {
                     "abc": "float"
                 },
-                "errors": {}
+                "errors": {},
+                "expression_alias": {
+                    "abc": '// abc \n "a" + "a"'
+                }
             }
         })
 

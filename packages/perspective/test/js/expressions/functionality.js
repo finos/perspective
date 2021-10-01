@@ -2614,6 +2614,26 @@ module.exports = (perspective) => {
                     'max(100, "a")': "float",
                     "more columns": "string",
                 });
+
+                let i = 0;
+                for (const alias of [
+                    "abc",
+                    "def",
+                    expressions[2],
+                    "new column",
+                    expressions[4],
+                    expressions[5],
+                    "more columns",
+                    expressions[7],
+                    expressions[8],
+                    expressions[9],
+                    expressions[10],
+                ]) {
+                    expect(results.expression_alias[alias]).toEqual(
+                        expressions[i]
+                    );
+                    i++;
+                }
                 table.delete();
             });
 
@@ -2638,6 +2658,7 @@ module.exports = (perspective) => {
                     'max(100, "a")', // valid
                 ];
                 const results = await table.validate_expressions(expressions);
+
                 expect(results.expression_schema).toEqual({
                     '"a" + "d"': "float",
                     '"c"': "string",
@@ -2646,6 +2667,11 @@ module.exports = (perspective) => {
                     'max(100, "a")': "float",
                     "concat(\"c\", ' ', \"c\", 'abc')": "string",
                 });
+
+                for (const expr of expressions) {
+                    expect(results.expression_alias[expr]).toEqual(expr);
+                }
+
                 table.delete();
             });
 
@@ -2672,6 +2698,11 @@ module.exports = (perspective) => {
                     "bucket(\"b\", 'M')": "date",
                     'upper("c")': "string",
                 });
+
+                for (const expr of expressions) {
+                    expect(results.expression_alias[expr]).toEqual(expr);
+                }
+
                 table.delete();
             });
 
