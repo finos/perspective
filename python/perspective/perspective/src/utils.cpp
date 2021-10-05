@@ -13,6 +13,10 @@
 #include <perspective/python/base.h>
 #include <perspective/python/utils.h>
 
+#if TBB_VERSION_MAJOR >= 2021 && TBB_VERSION_MINOR >= 1
+#define USE_ONETBB_INTERFACE
+#endif
+
 #ifdef PSP_PARALLEL_FOR
 #ifndef TBB_PREVIEW_GLOBAL_CONTROL
 #define TBB_PREVIEW_GLOBAL_CONTROL 1
@@ -27,7 +31,11 @@ namespace binding {
 std::shared_ptr<tbb::global_control> control = 
     std::make_shared<tbb::global_control>(
         tbb::global_control::max_allowed_parallelism,
+#ifdef USE_ONETBB_INTERFACE
+        oneapi::tbb::info::default_concurrency() 
+#else
         tbb::task_scheduler_init::default_num_threads()
+#endif
     );
 #endif
 
@@ -35,7 +43,13 @@ void _set_nthreads(int nthreads) {
 #ifdef PSP_PARALLEL_FOR
 	control = std::make_shared<tbb::global_control>(
         tbb::global_control::max_allowed_parallelism, 
-        nthreads == -1 ? tbb::task_scheduler_init::default_num_threads() : nthreads
+        nthreads == -1 ?
+#ifdef USE_ONETBB_INTERFACE
+        oneapi::tbb::info::default_concurrency() 
+#else
+        tbb::task_scheduler_init::default_num_threads()
+#endif
+        : nthreads
     );
 #endif
 }
