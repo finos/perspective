@@ -61,10 +61,10 @@ RUN cd boost_1_71_0 && ./bootstrap.sh
 RUN cd boost_1_71_0 && ./b2 -j8 --with-program_options --with-filesystem --with-system install 
 
 RUN python2.7 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0' 'pyarrow>=0.16.0' git+https://chromium.googlesource.com/external/gyp
-RUN python3.6 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0' 'pyarrow>=2.0.0'
-RUN python3.7 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0' 'pyarrow>=2.0.0'
-RUN python3.8 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0' 'pyarrow>=2.0.0'
-RUN python3.9 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0' 'pyarrow>=2.0.0'
+RUN python3.6 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0' 'pyarrow>=5.0.0'
+RUN python3.7 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0' 'pyarrow>=5.0.0'
+RUN python3.8 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0' 'pyarrow>=5.0.0'
+RUN python3.9 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0' 'pyarrow>=5.0.0'
 
 # install node
 RUN curl -sL https://rpm.nodesource.com/setup_10.x | sudo bash -
