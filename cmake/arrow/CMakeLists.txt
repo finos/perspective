@@ -82,6 +82,7 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/logging.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/key_value_metadata.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/memory.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/mutex.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/string.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/string_builder.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/task_group.cc
