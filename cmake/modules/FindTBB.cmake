@@ -182,9 +182,18 @@ if(NOT TBB_FOUND)
   ##################################
   # Set version strings
   ##################################
-
   if(TBB_INCLUDE_DIRS)
-    file(READ "${TBB_INCLUDE_DIRS}/tbb/tbb_stddef.h" _tbb_version_file)
+    set(TBB_VERSION_FILE_PRIOR_TO_TBB_2021_1 "${TBB_INCLUDE_DIRS}/tbb/tbb_stddef.h")
+    set(TBB_VERSION_FILE_AFTER_TBB_2021_1 "${TBB_INCLUDE_DIRS}/oneapi/tbb/version.h")
+    if (EXISTS "${TBB_VERSION_FILE_PRIOR_TO_TBB_2021_1}")
+      set(TBB_VERSION_FILE "${TBB_VERSION_FILE_PRIOR_TO_TBB_2021_1}")
+    elseif (EXISTS "${TBB_VERSION_FILE_AFTER_TBB_2021_1}")
+      set(TBB_VERSION_FILE "${TBB_VERSION_FILE_AFTER_TBB_2021_1}")
+    else()
+      message(FATAL_ERROR "Found TBB installation: ${TBB_INCLUDE_DIRS} missing version header.")
+    endif()
+
+    file(READ "${TBB_VERSION_FILE}" _tbb_version_file)
     string(REGEX REPLACE ".*#define TBB_VERSION_MAJOR ([0-9]+).*" "\\1"
         TBB_VERSION_MAJOR "${_tbb_version_file}")
     string(REGEX REPLACE ".*#define TBB_VERSION_MINOR ([0-9]+).*" "\\1"
