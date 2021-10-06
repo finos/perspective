@@ -23,7 +23,7 @@ export function barSeries(settings, color) {
     return fc
         .autoBandwidth(minBandwidth(series))
         .crossValue((d) => d.crossValue)
-        .mainValue((d) => d.mainValue)
+        .mainValue((d) => (d.mainValue ? d.mainValue : 0))
         .baseValue((d) => d.baseValue);
 }
 
