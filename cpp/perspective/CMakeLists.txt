@@ -232,9 +232,9 @@ if (PSP_WASM_BUILD)
 	if(CMAKE_BUILD_TYPE_LOWER STREQUAL debug)
 		set(OPT_FLAGS " \
 			-O0 \
-			-g4 \
+			-g3 \
+			-gsource-map \
 			--profiling \
-			-s WARN_UNALIGNED=1 \
 			-Wcast-align \
 			-Wover-aligned \
 			")

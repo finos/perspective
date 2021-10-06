@@ -185,7 +185,7 @@ class Table(object):
             as_string (:obj:`bool`): If True, returns the data types as string
                 representations so they can be serialized.
         """
-        validated = {"expression_schema": {}, "errors": {}}
+        validated = {"expression_schema": {}, "errors": {}, "expression_alias": {}}
 
         if len(expressions) == 0:
             return validated
@@ -195,9 +195,15 @@ class Table(object):
         expression_schema = validation_results.get_expression_schema()
         expression_errors = validation_results.get_expression_errors()
 
+        for expression in expressions:
+            # expression_alias can be used to map the alias to the
+            # full expression string in the UI.
+            validated["expression_alias"][expression[0]] = expression[1]
+
         for (alias, dtype) in iteritems(expression_schema):
             if not as_string:
                 dtype = _str_to_pythontype(dtype)
+
             validated["expression_schema"][alias] = expression_schema[alias]
 
         for (alias, error) in iteritems(expression_errors):

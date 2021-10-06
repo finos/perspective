@@ -19,6 +19,7 @@ class TestViewExpression(object):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         validate = table.validate_expressions([])
         assert validate["expression_schema"] == {}
+        assert validate["expression_alias"] == {}
         assert validate["errors"] == {}
 
     def test_view_expression_schema_empty(self):
@@ -27,9 +28,50 @@ class TestViewExpression(object):
         assert view.to_columns() == {"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]}
         assert view.expression_schema() == {}
 
+    def test_view_validate_expressions_alias_map_errors(self):
+        table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
+        expressions = [
+            '// x\n"a"',
+            '// y\n"b" * 0.5',
+            "// c\n'abcdefg'",
+            "// d\ntrue and false",
+            '// e\nfloat("a") > 2 ? null : 1',
+            "// f\ntoday()",
+            "// g\nnow()",
+            "// h\nlength(123)",
+        ]
+
+        validated = table.validate_expressions(expressions)
+
+        aliases = ["x", "y", "c", "d", "e", "f", "g", "h"]
+
+        # Errored should also be in aliases
+        for idx, alias in enumerate(aliases):
+            assert validated["expression_alias"][alias] == expressions[idx]
+
+    def test_view_validate_expressions_alias_map(self):
+        table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
+        expressions = [
+            '// x\n"a"',
+            '// y\n"b" * 0.5',
+            "// c\n'abcdefg'",
+            "// d\ntrue and false",
+            '// e\nfloat("a") > 2 ? null : 1',
+            "// f\ntoday()",
+            "// g\nnow()",
+            "// h\nlength('abcd')",
+        ]
+
+        validated = table.validate_expressions(expressions)
+
+        aliases = ["x", "y", "c", "d", "e", "f", "g", "h"]
+
+        for idx, alias in enumerate(aliases):
+            assert validated["expression_alias"][alias] == expressions[idx]
+
     def test_view_expression_schema_all_types(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
-        view = table.view(expressions=[
+        expressions = [
             '"a"',
             '"b" * 0.5',
             "'abcdefg'",
@@ -37,8 +79,10 @@ class TestViewExpression(object):
             'float("a") > 2 ? null : 1',
             "today()",
             "now()",
-            "length('abcd')"
-        ])
+            "length('abcd')",
+        ]
+
+        view = table.view(expressions=expressions)
         assert view.expression_schema() == {
             '"a"': int,
             '"b" * 0.5': float,
@@ -47,12 +91,13 @@ class TestViewExpression(object):
             'float("a") > 2 ? null : 1': float,
             "today()": date,
             "now()": datetime,
-            "length('abcd')": float
+            "length('abcd')": float,
         }
 
         result = view.to_columns()
         today = datetime(date.today().year, date.today().month, date.today().day)
         del result["now()"]  # no need to match datetime.now()
+
         assert result == {
             "a": [1, 2, 3, 4],
             "b": [5, 6, 7, 8],
@@ -65,12 +110,17 @@ class TestViewExpression(object):
             "length('abcd')": [4 for _ in range(4)]
         }
 
+        validated = table.validate_expressions(expressions)
+
+        for expr in expressions:
+            assert validated["expression_alias"][expr] == expr
+
     def test_table_validate_expressions_with_errors(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
-        validate = table.validate_expressions(
-            ['"Sales" + "Profit"', "datetime()", "string()", "for () {}"]
-        )
+        expressions = ['"Sales" + "Profit"', "datetime()", "string()", "for () {}"]
+        validate = table.validate_expressions(expressions)
         assert validate["expression_schema"] == {}
+        assert validate["expression_alias"] == {expr: expr for expr in expressions}
         assert validate["errors"] == {
             '"Sales" + "Profit"': {
                 "column": 0,
