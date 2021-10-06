@@ -18,7 +18,7 @@ class TestValidate:
         assert validate.validate_plugin(Plugin.XBAR) == "X Bar"
 
     def test_validate_plugin_valid_instance_datagrid(self):
-        assert validate.validate_plugin(Plugin.GRID) == "datagrid"
+        assert validate.validate_plugin(Plugin.GRID) == "Datagrid"
 
     def test_validate_plugin_valid_string(self):
         assert validate.validate_plugin("X Bar") == "X Bar"

@@ -53,6 +53,64 @@ utils.with_jupyterlab(process.env.__JUPYTERLAB_PORT__, () => {
                     expect(num_rows).toEqual(5);
                 }
             );
+
+            test.jupyterlab(
+                "Loads data",
+                [
+                    "w = perspective.PerspectiveWidget(arrow_data, columns=['f64', 'str', 'datetime'])",
+                    "w",
+                ],
+                async (page) => {
+                    const viewer = await default_body(page);
+                    const num_columns = await viewer.evaluate(
+                        async (viewer) => {
+                            const tbl = viewer.querySelector("regular-table");
+                            return tbl.querySelector("thead tr")
+                                .childElementCount;
+                        }
+                    );
+
+                    expect(num_columns).toEqual(3);
+
+                    const num_rows = await viewer.evaluate(async (viewer) => {
+                        const tbl = viewer.querySelector("regular-table");
+                        return tbl.querySelectorAll("tbody tr").length;
+                    });
+
+                    expect(num_rows).toEqual(5);
+                }
+            );
+
+            test.jupyterlab(
+                "Loads updates",
+                [
+                    [
+                        "table = perspective.Table(arrow_data)",
+                        "w = perspective.PerspectiveWidget(table, columns=['f64', 'str', 'datetime'])",
+                    ].join("\n"),
+                    "w",
+                    "table.update(arrow_data)",
+                ],
+                async (page) => {
+                    const viewer = await default_body(page);
+                    const num_columns = await viewer.evaluate(
+                        async (viewer) => {
+                            const tbl = viewer.querySelector("regular-table");
+                            return tbl.querySelector("thead tr")
+                                .childElementCount;
+                        }
+                    );
+
+                    expect(num_columns).toEqual(3);
+
+                    const num_rows = await viewer.evaluate(async (viewer) => {
+                        const tbl = viewer.querySelector("regular-table");
+                        return tbl.querySelectorAll("tbody tr").length;
+                    });
+
+                    expect(num_rows).toEqual(10);
+                }
+            );
         },
         {name: "Simple", root: path.join(__dirname, "..", "..")}
     );

@@ -35,7 +35,7 @@ class PerspectiveTraitlets(HasTraits):
     """
 
     # `perspective-viewer` options
-    plugin = Unicode("datagrid").tag(sync=True)
+    plugin = Unicode("Datagrid").tag(sync=True)
     columns = List(default_value=[]).tag(sync=True)
     row_pivots = List(trait=Unicode(), default_value=[]).tag(sync=True, o=True)
     column_pivots = List(trait=Unicode(), default_value=[]).tag(sync=True)

@@ -1,4 +1,4 @@
 ipywidgets==7.5.1
-jupyterlab==3.0.14
+jupyterlab==3.1.14
 pandas==0.25.3
 pyarrow==3.0.0
