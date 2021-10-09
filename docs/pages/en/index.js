@@ -58,9 +58,8 @@ const Logo = props => (
 const ProjectTitle = props => (
     <h2 className="projectTitle">
         <perspective-logo />
-        <small>
-            Streaming Analytics <i>via</i> WebAssembly
-        </small>
+        {/* <small>
+        </small> */}
     </h2>
 );
 
@@ -283,25 +282,36 @@ const Features = props => (
 
 const DESCRIPTION_TEXT = `
 # What is Perspective?
-Perspective is an <i>interactive</i> visualization component for <i>large</i>, <i>real-time</i>
-datasets. Originally developed at J.P. Morgan,  Perspective
-makes it simple to build real-time & user configurable analytics entirely in the
-browser, or in concert with Python and/or
+Perspective is an <i>interactive</i> analytics and data visualization component, 
+which is especially well-suited for <i>large</i> and/or <i>streaming</i> datasets.
+Originally developed at J.P. Morgan and open-sourced through the
+[Fintech Open Source Foundation (FINOS)](https://www.finos.org/), 
+Perspective makes it simple to build user-configurable
+analytics entirely in the browser, or in concert with Python and/or
 [Jupyterlab](https://jupyterlab.readthedocs.io/en/stable/).
 Use it to create reports, dashboards, notebooks and applications, with static
-data or streaming updates via [Apache Arrow](https://arrow.apache.org/).  As a
-library, Perspective provides both:
+data or streaming updates via [Apache Arrow](https://arrow.apache.org/).
 
+### Features
 * A fast, memory efficient streaming query engine, written in
   C++ and compiled for both [WebAssembly](https://webassembly.org/) and
-  [Python](https://www.python.org/), with read/write/stream/virtual support for
-  [Apache Arrow](https://arrow.apache.org/).
+  [Python](https://www.python.org/). read/write/streaming for
+  [Apache Arrow](https://arrow.apache.org/), and a high-performance columnar
+  expression language based on [ExprTK](https://github.com/ArashPartow/exprtk).
 
 * A framework-agnostic User Interface
-  [Custom Element](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_custom_elements)
-  and [Jupyterlab](https://jupyterlab.readthedocs.io/en/stable/) Widget, via
-  WebWorker (WebAssembly) or virtually via WebSocket (Python/Node), and a suite of
-  Datagrid and [D3FC](https://d3fc.io/) Chart plugins.
+  [Custom Element](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_custom_elements),
+  powered either in-browser via WebWorker (WebAssembly) or virtually via
+  WebSocket server (Python/Node), as well as a suite of Datagrid and 
+  [D3FC](https://d3fc.io/) Chart plugins.
+
+* A [JupyterLab](https://jupyter.org/) widget and Python client library, for
+  interactive data analysis in a notebook, as well as _scalable_ production
+  [Voila](https://github.com/voila-dashboards/voila) and
+  [Holoviz](https://panel.holoviz.org/) applications.
+
+  
+
 `;
 
 const Description = props => (
@@ -347,14 +357,14 @@ const Jupyter = props => (
 );
 
 const JS_TEXT = `
-## Web Browser
-Query-driven dashboards built on Perspective
+## Web Browser (JavaScript)
+Query-driven web dashboards built on Perspective.js
 [Custom Elements](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_custom_elements)
-of JavaScript are completely user-configurable, and easy to integrate into any
+are completely user-configurable, and easy to integrate into any
 web application framework.
 
 Using Perspective's simple _relational_ grammar, elements like 
-\`<perspective-workspace>\` can be _symmetrically_ configured, by API or
+\`<perspective-viewer>\` can be _symmetrically_ configured, by API or
 through the User Interface, and emit dataset-aware Events for scriptable
 interactivity.  Web Applications built in JavaScript with Perspective
 Custom Elements can be re-hydrated from their serialized state, driven
@@ -363,7 +373,7 @@ virtual, server-side Python data with in-browser client data seamlessly, and
 independent data Views can be cross-filtered, duplicated, exported, stacked
 and saved.
 
-To achieve Desktop-like performance in the Browser, Perspective for JavaScript
+To achieve Desktop-like performance in the Browser, Perspective.js
 relies on [WebAssembly](https://webassembly.org/) for excellent
 _query calculation_ time, and [Apache Arrow](https://arrow.apache.org/)
 for its conservative _memory footprint_ and efficient _data serialization_.
@@ -373,7 +383,7 @@ const Javascript = props => (
         {[
             {
                 content: JS_TEXT,
-                image: imgUrl("demo_small.gif"),
+                image: imgUrl("demo_large.gif"),
                 imageAlign: "left"
             }
         ]}

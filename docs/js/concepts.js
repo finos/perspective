@@ -3,16 +3,29 @@ import perspective from "@finos/perspective";
 const worker = perspective.shared_worker();
 
 async function main() {
-    if (window.location.pathname === "/" || window.location.pathname === "/index.html") {
+    if (
+        window.location.pathname === "/" ||
+        window.location.pathname === "/index.html"
+    ) {
         return;
     }
 
     const arrow = await fetch("../../arrow/superstore.arrow");
     const table = await worker.table(await arrow.arrayBuffer());
 
-    const viewers = document.querySelectorAll("perspective-viewer:not(.nosuperstore)");
+    const viewers = document.querySelectorAll(
+        "perspective-viewer:not(.nosuperstore)"
+    );
     for (const viewer of viewers) {
         viewer.load(table);
+        const token = {};
+        for (const attribute of viewer.attributes) {
+            if (attribute.name !== "settings") {
+                token[attribute.name] = JSON.parse(attribute.nodeValue);
+            }
+        }
+
+        viewer.restore(token);
         viewer.toggleConfig();
     }
 
@@ -24,11 +37,14 @@ async function main() {
         if (code.classList.contains("language-html")) {
             continue;
         }
-        const name = code.classList.contains("language-javascript") ? "Javascript" : "Python";
+        const name = code.classList.contains("language-javascript")
+            ? "Javascript"
+            : "Python";
         const next = name === "Javascript" ? "Python" : "Javascript";
 
         pre.innerHTML =
-            `<a class="toggle-language" href="#" title="Toggle to ${next}">${ICON} <span class="language">${name}</span> <span class="next">${ARROW_ICON} ${next}</span></a>` + pre.innerHTML;
+            `<a class="toggle-language" href="#" title="Toggle to ${next}">${ICON} <span class="language">${name}</span> <span class="next">${ARROW_ICON} ${next}</span></a>` +
+            pre.innerHTML;
         if (name !== state) {
             pre.style.display = "none";
         } else {
@@ -37,7 +53,7 @@ async function main() {
     }
 
     for (const link of document.querySelectorAll("pre a")) {
-        link.addEventListener("click", event => {
+        link.addEventListener("click", (event) => {
             event.preventDefault();
             state = state === "Python" ? "Javascript" : "Python";
             localStorage.setItem("lang_pref", state);
@@ -46,7 +62,9 @@ async function main() {
                 if (!code || code.classList.contains("language-html")) {
                     continue;
                 }
-                const name = code.classList.contains("language-javascript") ? "Javascript" : "Python";
+                const name = code.classList.contains("language-javascript")
+                    ? "Javascript"
+                    : "Python";
                 if (name !== state) {
                     pre.style.display = "none";
                 } else if (name !== "html") {

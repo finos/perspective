@@ -1,4 +1,7 @@
 import perspective from "@finos/perspective";
+
+perspective.shared_worker();
+
 import "@finos/perspective-viewer";
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";

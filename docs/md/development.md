@@ -31,6 +31,11 @@ dependencies to be installed:
 - [Boost](https://www.boost.org/) (version 1.67 or higher, must be built - not
   header-only)
 - [Flatbuffers](https://google.github.io/flatbuffers/flatbuffers_guide_building.html)
+- [wasm-pack](https://github.com/rustwasm/wasm-pack)
+
+**_This list may be non-exhaustive depending on your OS/environment; please open
+a thread in [Discussions](https://github.com/finos/perspective/discussions) if
+you have any questions_**
 
 ## Build
 
@@ -52,10 +57,10 @@ yarn setup
 ```
 
 If everything is successful, you should be able to run any of the `examples/`
-packages, e.g. `examples/simple` like so:
+packages, e.g. `examples/blocks` like so:
 
 ```bash
-yarn start simple
+yarn start blocks
 ```
 
 ## `Perspective.js`
