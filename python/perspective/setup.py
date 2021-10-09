@@ -52,6 +52,7 @@ requires = [
     "six>=1.11.0",
     "tornado>=4.5.3",
     "traitlets>=4.3.2",
+    "starlette"
 ]
 
 if sys.version_info.major < 3:
