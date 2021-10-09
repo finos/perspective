@@ -81,11 +81,10 @@ impl SessionMetadata {
 
     pub(super) fn update_expressions(
         &mut self,
-        // table: &JsPerspectiveTable,
         valid_recs: &JsPerspectiveValidatedExpressions,
     ) -> Result<HashSet<String>, JsValue> {
         if js_sys::Object::keys(&valid_recs.errors()).length() > 0 {
-            panic!("Wormfood!");
+            return Err(JsValue::from("Expressions invalid"));
         }
 
         let expression_alias = valid_recs

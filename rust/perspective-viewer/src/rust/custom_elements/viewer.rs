@@ -121,8 +121,14 @@ impl PerspectiveViewerElement {
     pub fn connected_callback(&self) {}
 
     /// Loads a promise to a `JsPerspectiveTable` in this viewer.
-    pub fn js_load(&self, table: js_sys::Promise) -> js_sys::Promise {
+    pub fn js_load(&self, table: JsValue) -> js_sys::Promise {
         assert!(!table.is_undefined());
+        let table = if let Ok(table) = table.clone().dyn_into::<js_sys::Promise>() {
+            table
+        } else {
+            js_sys::Promise::resolve(&table)
+        };
+
         let mut config = ViewConfigUpdate::default();
         self.session
             .set_update_column_defaults(&mut config, &self.renderer.metadata());

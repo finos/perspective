@@ -62,21 +62,20 @@ impl FilterItemProperties {
     /// Does this filter item get a "suggestions" auto-complete modal?
     fn is_suggestable(&self) -> bool {
         (self.filter.1 == FilterOp::EQ || self.filter.1 == FilterOp::NE)
-            && self.get_filter_type() == Type::String
+            && self.get_filter_type() == Some(Type::String)
     }
 
     /// Get this filter's type, e.g. the type of the column.
-    fn get_filter_type(&self) -> Type {
+    fn get_filter_type(&self) -> Option<Type> {
         self.session
             .metadata()
             .get_column_table_type(&self.filter.0)
-            .unwrap()
     }
 
     // Get the string value, suitable for the `value` field of a `FilterItems`'s
     // `<input>`.
     fn get_filter_input(&self) -> Option<String> {
-        let filter_type = self.get_filter_type();
+        let filter_type = self.get_filter_type()?;
         match (&filter_type, &self.filter.2) {
             (Type::Date, FilterTerm::Scalar(Scalar::Float(x)))
             | (Type::Date, FilterTerm::Scalar(Scalar::DateTime(x))) => {
@@ -120,7 +119,7 @@ impl FilterItemProperties {
     /// Get the allowed `FilterOp`s for this filter.
     fn get_filter_ops(&self) -> Vec<FilterOp> {
         match self.get_filter_type() {
-            Type::String => vec![
+            Some(Type::String) => vec![
                 FilterOp::EQ,
                 FilterOp::NE,
                 FilterOp::GT,
@@ -134,12 +133,12 @@ impl FilterItemProperties {
                 FilterOp::IsNotNull,
                 FilterOp::IsNull,
             ],
-            Type::Bool => vec![
+            Some(Type::Bool) => vec![
                 FilterOp::EQ,
                 FilterOp::IsNull,
                 FilterOp::IsNotNull
             ],
-            _ => vec![
+            Some(_) => vec![
                 FilterOp::EQ,
                 FilterOp::NE,
                 FilterOp::GT,
@@ -149,6 +148,7 @@ impl FilterItemProperties {
                 FilterOp::IsNotNull,
                 FilterOp::IsNull,
             ],
+            _ => vec![]
         }
     }
 
@@ -184,24 +184,24 @@ impl FilterItemProperties {
                 );
             }
             _ => match self.get_filter_type() {
-                Type::String => {
+                Some(Type::String) => {
                     filter_item.2 = FilterTerm::Scalar(Scalar::String(val));
                 }
-                Type::Integer => {
+                Some(Type::Integer) => {
                     if val.is_empty() {
                         filter_item.2 = FilterTerm::Scalar(Scalar::Null);
                     } else if let Ok(num) = val.parse::<f64>() {
                         filter_item.2 = FilterTerm::Scalar(Scalar::Float(num.floor()));
                     }
                 }
-                Type::Float => {
+                Some(Type::Float) => {
                     if val.is_empty() {
                         filter_item.2 = FilterTerm::Scalar(Scalar::Null);
                     } else if let Ok(num) = val.parse::<f64>() {
                         filter_item.2 = FilterTerm::Scalar(Scalar::Float(num));
                     }
                 }
-                Type::Date => {
+                Some(Type::Date) => {
                     filter_item.2 = FilterTerm::Scalar(match NaiveDate::parse_from_str(
                         &val, "%Y-%m-%d",
                     ) {
@@ -212,7 +212,7 @@ impl FilterItemProperties {
                         _ => Scalar::Null,
                     })
                 }
-                Type::Datetime => {
+                Some(Type::Datetime) => {
                     filter_item.2 = FilterTerm::Scalar(
                         match NaiveDateTime::parse_from_str(
                             &val,
@@ -228,12 +228,15 @@ impl FilterItemProperties {
                         },
                     )
                 }
-                Type::Bool => {
+                Some(Type::Bool) => {
                     filter_item.2 = FilterTerm::Scalar(match val.as_str() {
                         "true" => Scalar::Bool(true),
                         _ => Scalar::Bool(false),
                     });
                 }
+
+                // shouldn't be reachable ..
+                _ => {}
             },
         }
 
@@ -255,7 +258,7 @@ impl Component for FilterItem {
     fn create(props: FilterItemProperties, link: ComponentLink<Self>) -> Self {
         let input = props.get_filter_input().unwrap_or_else(|| "".to_owned());
         let input_ref = NodeRef::default();
-        if props.get_filter_type() == Type::Bool {
+        if let Some(Type::Bool) = props.get_filter_type() {
             props.update_filter_input(input.clone());
         }
 
@@ -266,7 +269,7 @@ impl Component for FilterItem {
         match msg {
             FilterItemMsg::FilterInput(column, input) => {
                 let target = self.input_ref.cast::<HtmlInputElement>().unwrap();
-                let input = if self.props.get_filter_type() == Type::Bool {
+                let input = if let Some(Type::Bool) = self.props.get_filter_type() {
                     if target.checked() {
                         "true".to_owned()
                     } else {
@@ -344,8 +347,7 @@ impl Component for FilterItem {
             .props
             .session
             .metadata()
-            .get_column_table_type(&column)
-            .unwrap();
+            .get_column_table_type(&column);
 
         let select = self.link.callback(FilterItemMsg::FilterOpSelect);
 
@@ -385,13 +387,13 @@ impl Component for FilterItem {
         });
 
         let type_class = match col_type {
-            Type::Float | Type::Integer => "num-filter",
-            Type::String => "string-filter",
+            Some(Type::Float) | Some(Type::Integer) => "num-filter",
+            Some(Type::String) => "string-filter",
             _ => "",
         };
 
         let input_elem = match col_type {
-            Type::Integer => html! {
+            Some(Type::Integer) => html! {
                 <input
                     type="number"
                     placeholder="Value"
@@ -404,7 +406,7 @@ impl Component for FilterItem {
                     value={ self.input.clone() }
                     oninput={ input }/>
             },
-            Type::Float => html! {
+            Some(Type::Float) => html! {
                 <input
                     type="number"
                     placeholder="Value"
@@ -416,7 +418,7 @@ impl Component for FilterItem {
                     value={ self.input.clone() }
                     oninput={ input }/>
             },
-            Type::String => html! {
+            Some(Type::String) => html! {
                 <input
                     type="text"
                     size="4"
@@ -431,7 +433,7 @@ impl Component for FilterItem {
                     value={ self.input.clone() }
                     oninput={ input }/>
             },
-            Type::Date => html! {
+            Some(Type::Date) => html! {
                 <input
                     type="date"
                     placeholder="Value"
@@ -443,7 +445,7 @@ impl Component for FilterItem {
                     value={ self.input.clone() }
                     oninput={ input }/>
             },
-            Type::Datetime => html! {
+            Some(Type::Datetime) => html! {
                 <input
                     type="datetime-local"
                     placeholder="Value"
@@ -456,7 +458,7 @@ impl Component for FilterItem {
                     value={ self.input.clone() }
                     oninput={ input }/>
             },
-            Type::Bool => {
+            Some(Type::Bool) => {
                 html! {
                     <input
                         type="checkbox"
@@ -465,6 +467,9 @@ impl Component for FilterItem {
                         oninput={ input }/>
                 }
             },
+            None => {
+                html! {}
+            }
         };
 
         let filter_ops = self
@@ -493,7 +498,7 @@ impl Component for FilterItem {
                 {
                     if matches!(&filter.1, FilterOp::IsNotNull | FilterOp::IsNull) {
                         html! {}
-                    } else if col_type == Type::Bool {
+                    } else if let Some(Type::Bool) = col_type {
                         html! {
                             { input_elem }
                         }

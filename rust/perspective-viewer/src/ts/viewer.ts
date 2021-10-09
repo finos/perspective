@@ -112,7 +112,9 @@ export class PerspectiveViewerElement extends HTMLElement {
      * my_viewer.load(tbl);
      * ```
      */
-    async load(table: Promise<perspective.Table>): Promise<void> {
+    async load(
+        table: Promise<perspective.Table> | perspective.Table
+    ): Promise<void> {
         await this.load_wasm();
         await this.instance.js_load(table);
     }
