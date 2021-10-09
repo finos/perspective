@@ -14,7 +14,7 @@ from datetime import datetime
 
 from ...table import Table
 from ...manager import PerspectiveManager
-from ...tornado_handler import PerspectiveTornadoHandler, websocket
+from ...handlers.tornado import PerspectiveTornadoHandler, websocket
 
 
 data = {

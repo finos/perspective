@@ -9,6 +9,8 @@
 import datetime
 import json
 import logging
+
+from collections import deque
 from functools import partial
 
 from ..core.exception import PerspectiveError
@@ -48,7 +50,11 @@ class _PerspectiveManagerInternal(object):
         # Perspective sends binary messages in two messages - a JSON
         # pre-message and the binary itself. Set up flags to handle that
         # special message flow.
-        self._pending_binary = None
+        #
+        # It is assumed that pre-messages and data messages are ordered:
+        # e.g. you can send premessage1 and premessage2, but it is
+        # assumed the data will then come as data1 followed by data2
+        self._pending_binary = deque()
 
     def _get_view(self, name):
         """Return a view under management by name."""
@@ -74,10 +80,10 @@ class _PerspectiveManagerInternal(object):
     def __process(self, msg, post_callback, client_id=None):
         """Process the message through the Perspective engine, handling the
         special flow for binary messages along the way."""
-        if self._pending_binary is not None:
+        if len(self._pending_binary) >= 0 and isinstance(msg, bytes):
             # The message is an ArrayBuffer, and it needs to be combined with
             # the previous message to reconsitute metadata before processing.
-            full_message = self._pending_binary
+            full_message = self._pending_binary.popleft()
             full_message.pop("binary_length")
 
             # msg is the binary
@@ -92,8 +98,6 @@ class _PerspectiveManagerInternal(object):
             full_message["args"] = new_args
             msg = full_message
 
-            self._pending_binary = None
-
         if isinstance(msg, str):
             msg = json.loads(msg)
 
@@ -106,7 +110,7 @@ class _PerspectiveManagerInternal(object):
         if msg.get("binary_length", None):
             # cache the message and wait for the ArrayBuffer that will
             # follow immediately after.
-            self._pending_binary = msg
+            self._pending_binary.append(msg)
             return
 
         cmd = msg["cmd"]

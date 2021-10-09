@@ -8,10 +8,12 @@
 
 from perspective import Table, set_threadpool_size
 
+
 def compare_delta(received, expected):
     """Compare an arrow-serialized row delta by constructing a Table."""
     tbl = Table(received)
     assert tbl.view().to_dict() == expected
+
 
 class TestThreadpool(object):
     def test_set_threadpool_size(self):
@@ -21,10 +23,7 @@ class TestThreadpool(object):
         view = tbl.view()
         assert view.num_rows() == 2
         assert view.num_columns() == 2
-        assert view.schema() == {
-            "a": int,
-            "b": int
-        }
+        assert view.schema() == {"a": int, "b": int}
         assert view.to_records() == data
 
     def test_set_threadpool_size_max(self):
@@ -34,8 +33,5 @@ class TestThreadpool(object):
         view = tbl.view()
         assert view.num_rows() == 2
         assert view.num_columns() == 2
-        assert view.schema() == {
-            "a": int,
-            "b": int
-        }
+        assert view.schema() == {"a": int, "b": int}
         assert view.to_records() == data

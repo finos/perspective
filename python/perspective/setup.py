@@ -34,36 +34,8 @@ here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read().replace("\r\n", "\n")
 
-requires = [
-    "ipywidgets>=7.5.1",
-    "future>=0.16.0",
-    "numpy>=1.13.1",
-    "pandas>=0.22.0",
-    "python-dateutil>=2.8.0",
-    "tornado>=4.5.3",
-    "traitlets>=4.3.2",
-]
-
 if sys.version_info.major < 3:
     raise Exception("Requires Python 3.6 or later")
-
-requires_dev = [
-    "black==20.8b1",
-    "Faker>=1.0.0",
-    "flake8>=3.7.8",
-    "flake8-black>=0.2.0",
-    "mock",
-    "psutil",
-    "pybind11>=2.4.0",
-    "pytest>=4.3.0",
-    "pytest-cov>=2.6.1",
-    "pytest-check-links",
-    "pytest-tornado",
-    "pytz>=2018.9",
-    "Sphinx>=1.8.4",
-    "sphinx-markdown-builder>=0.5.2",
-    "wheel",
-] + requires
 
 
 def get_version(file, name="__version__"):
@@ -78,6 +50,44 @@ def get_version(file, name="__version__"):
 
 
 version = get_version(os.path.join(here, "perspective", "core", "_version.py"))
+
+requires = [
+    "ipywidgets>=7.5.1",
+    "future>=0.16.0",
+    "numpy>=1.13.1",
+    "pandas>=0.22.0",
+    "python-dateutil>=2.8.0",
+    "traitlets>=4.3.2",
+]
+
+requires_tornado = ["tornado>=4.5.3"]
+
+requires_starlette = ["aiohttp", "fastapi", "starlette"]
+
+requires_dev = (
+    [
+        "black==20.8b1",
+        "Faker>=1.0.0",
+        "flake8>=3.7.8",
+        "flake8-black>=0.2.0",
+        "mock",
+        "psutil",
+        "pybind11>=2.4.0",
+        "pyarrow>=0.16.0",
+        "pytest>=4.3.0",
+        "pytest-asyncio",
+        "pytest-cov>=2.6.1",
+        "pytest-check-links",
+        "pytest-tornado",
+        "pytz>=2018.9",
+        "Sphinx>=1.8.4",
+        "sphinx-markdown-builder>=0.5.2",
+        "wheel",
+    ]
+    + requires
+    + requires_tornado
+    + requires_starlette
+)
 
 
 class PSPExtension(Extension):
@@ -260,7 +270,13 @@ setup(
     zip_safe=False,
     python_requires=">=3.6",
     install_requires=requires,
-    extras_require={"dev": requires_dev},
+    extras_require={
+        "aiohttp": requires_starlette,
+        "dev": requires_dev,
+        "fastapi": requires_starlette,
+        "starlette": requires_starlette,
+        "tornado": requires_tornado,
+    },
     ext_modules=[PSPExtension("perspective")],
     cmdclass=dict(build_ext=PSPBuild, sdist=PSPCheckSDist),
 )

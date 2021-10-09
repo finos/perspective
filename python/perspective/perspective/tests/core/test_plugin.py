@@ -7,12 +7,10 @@
 #
 
 from pytest import raises
-from perspective import PerspectiveError, PerspectiveViewer,\
-                        PerspectiveWidget, Plugin
+from perspective import PerspectiveError, PerspectiveViewer, PerspectiveWidget, Plugin
 
 
 class TestPlugin:
-
     def test_plugin_widget_load_grid(self):
         data = {"a": [1, 2, 3], "b": ["a", "b", "c"]}
         widget = PerspectiveWidget(data, plugin=Plugin.GRID)
@@ -36,7 +34,7 @@ class TestPlugin:
 
     def test_plugin_widget_setattr_invalid(self):
         data = {"a": [1, 2, 3], "b": ["a", "b", "c"]}
-        widget = PerspectiveWidget(data) 
+        widget = PerspectiveWidget(data)
         with raises(PerspectiveError):
             widget.plugin = "?"
 

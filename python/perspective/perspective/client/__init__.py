@@ -6,6 +6,14 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-from .client import PerspectiveClient  # noqa: F401
+from .client import PerspectiveClient
 
-__all__ = ["PerspectiveClient"]
+try:
+    from .aiohttp import PerspectiveAIOHTTPClient, websocket as aiohttp_websocket
+except ImportError:
+    ...
+
+try:
+    from .tornado import PerspectiveTornadoClient, websocket as tornado_websocket
+except ImportError:
+    ...

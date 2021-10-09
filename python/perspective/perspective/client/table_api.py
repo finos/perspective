@@ -6,7 +6,7 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-import tornado
+import asyncio
 
 from functools import partial
 from .dispatch import async_queue, subscribe, unsubscribe
@@ -27,7 +27,7 @@ def table(client, data, name, index=None, limit=None):
 
     msg = {"cmd": "table", "name": name, "args": [data], "options": options}
 
-    future = tornado.concurrent.Future()
+    future = asyncio.Future()
     client.post(msg, future)
     return future
 
@@ -128,7 +128,7 @@ class PerspectiveTableProxy(object):
             "args": [data, {"port_id": port_id}],
             "subscribe": False,
         }
-        self._client.post(msg)
+        return self._client.post(msg)
 
     def remove(self, pkeys, port_id=0):
         msg = {
@@ -138,4 +138,4 @@ class PerspectiveTableProxy(object):
             "args": [pkeys, {"port_id": port_id}],
             "subscribe": False,
         }
-        self._client.post(msg)
+        return self._client.post(msg)

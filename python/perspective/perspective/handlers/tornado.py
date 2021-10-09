@@ -6,11 +6,13 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-from functools import partial
 import tornado.locks
 import tornado.websocket
+
+from functools import partial
 from tornado.gen import coroutine
 from tornado.ioloop import IOLoop
+
 from ..core.exception import PerspectiveError
 
 

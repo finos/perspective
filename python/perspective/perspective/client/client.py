@@ -5,6 +5,7 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+import asyncio
 
 from random import random
 
@@ -52,7 +53,6 @@ class PerspectiveClient(object):
             return
 
         handler = self._handlers.get(msg["data"].get("id"))
-
         if handler:
             future = handler.get("future", None)
             keep_alive = handler.get("keep_alive", False)
@@ -124,7 +124,7 @@ class PerspectiveClient(object):
 
         msg["id"] = self._msg_id
 
-        self.send(msg)
+        return asyncio.ensure_future(self.send(msg))
 
     def table(self, data, index=None, limit=None, name=None):
         """Create a new `Table` in the server implementation, and return
