@@ -12,21 +12,19 @@
 
 <head>
 
-    <meta 
-        name="viewport"
+    <meta name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
 
-        <script src="/node_modules/@finos/perspective-viewer"></script>
-        <script src="/node_modules/@finos/perspective-viewer-datagrid"></script>
-        <script src="/node_modules/@finos/perspective-viewer-d3fc"></script>
-    
-        <script src="/node_modules/@finos/perspective"></script>
-    
-        <link rel='stylesheet' href="/node_modules/@finos/perspective-viewer/dist/umd/material.css" is="custom-style">
-    
+    <script src="/node_modules/@finos/perspective-viewer/dist/umd/perspective-viewer.js"></script>
+    <script src="/node_modules/@finos/perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js"></script>
+    <script src="/node_modules/@finos/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js"></script>
+
+    <script src="/node_modules/@finos/perspective/dist/umd/perspective.js"></script>
+
+    <link rel='stylesheet' href="/node_modules/@finos/perspective-viewer/dist/umd/material-dense.css" is="custom-style">
+
 
     <style>
-    
         perspective-viewer {
             flex: 1;
             margin: 24px;
@@ -35,34 +33,30 @@
             --plugin--box-shadow: 0px 4px 3px rgba(0, 0, 0, 0.1);
             --plugin--border: 1px solid #ddd;
 
-            --d3fc-positive--gradient: linear-gradient(
-                #94D0FF,
-                #8795E8,
-                #966bff,
-                #AD8CFF,
-                #C774E8,
-                #c774a9,
-                #FF6AD5,
-                #ff6a8b,
-                #ff8b8b,
-                #ffa58b,
-                #ffde8b,
-                #cdde8b,
-                #8bde8b,
-                #20de8b
-            );
+            --d3fc-positive--gradient: linear-gradient(#94D0FF,
+                    #8795E8,
+                    #966bff,
+                    #AD8CFF,
+                    #C774E8,
+                    #c774a9,
+                    #FF6AD5,
+                    #ff6a8b,
+                    #ff8b8b,
+                    #ffa58b,
+                    #ffde8b,
+                    #cdde8b,
+                    #8bde8b,
+                    #20de8b);
 
         }
 
         perspective-viewer.macsoft {
-            --d3fc-positive--gradient: linear-gradient(
-                #1b4247,
-                #09979b,
-                #75d8d5,
-                #ffc0cb,
-                #fe7f9d,
-                #65323e
-            );
+            --d3fc-positive--gradient: linear-gradient(#1b4247,
+                    #09979b,
+                    #75d8d5,
+                    #ffc0cb,
+                    #fe7f9d,
+                    #65323e);
 
         }
 
@@ -89,7 +83,9 @@
             margin-right: 24px;
         }
 
-        span, input, button {
+        span,
+        input,
+        button {
             font-family: "Open Sans";
             font-size: 12px;
             background: none;
@@ -123,7 +119,7 @@
         input::placeholder {
             color: #ccc;
         }
-        
+
         button {
             border: 1px solid #ccc;
             text-transform: uppercase;
@@ -145,7 +141,6 @@
             height: 83px;
             width: 80px;
         }
-
     </style>
 </head>
 
@@ -171,7 +166,7 @@
             </div>
             <div class="range">
                 <span>Iterations</span>
-                <input id="iterations" min="1" max="1000"type="number" placeholder="Iterations" value="60"></input>
+                <input id="iterations" min="1" max="1000" type="number" placeholder="Iterations" value="60"></input>
                 <input id="batch" min="1" max="1000" type="number" placeholder="Batch Size" value="1"></input>
             </div>
             <div class="range">
@@ -180,14 +175,7 @@
             </div>
         </div>
 
-        <perspective-viewer 
-            id="viewer"
-            class="macsoft"
-            plugin="Heatmap" 
-            row-pivots='["x"]' 
-            column-pivots='["y"]' 
-            columns='["c"]'>
-
+        <perspective-viewer id="viewer" class="macsoft">
         </perspective-viewer>
     </div>
 
@@ -203,7 +191,7 @@
             args.vxy = args.vxy || 0;
             args.c = args.c || iterations;
         }
-        
+
         function iter_args(cx, cy, iterations, args = {}) {
             if (args.vxx + args.vyy <= 4) {
                 args.vxy = args.vx * args.vy;
@@ -228,14 +216,14 @@
             json[index] = new_args;
         }
 
-        function *mandel_iter(width, height, batch) {           
+        function* mandel_iter(width, height, batch) {
             for (let bi = 0; bi < batch; ++bi) {
                 for (let ix = 0; ix < width; ++ix) {
                     for (let iy = 0; iy < height; ++iy) {
                         yield [ix, iy];
                     }
                 }
-            }                   
+            }
         }
 
         async function mandelbrot(table, view, xmin, xmax, ymin, ymax, width, height, iterations, batch) {
@@ -251,7 +239,7 @@
                     run.innerHTML = `Stop (${ii * batch}/${iterations})`;
                 }
             } finally {
-                run.innerHTML = `Run`;                
+                run.innerHTML = `Run`;
             }
             view.delete();
         }
@@ -270,17 +258,17 @@
         };
 
         function make_range(x, y, range, name) {
-            const title = () => 
-                name + " [" + 
-                x.valueAsNumber.toFixed(1) + ", " + 
+            const title = () =>
+                name + " [" +
+                x.valueAsNumber.toFixed(1) + ", " +
                 y.valueAsNumber.toFixed(1) + "]";
 
-            x.addEventListener("input", () => { 
+            x.addEventListener("input", () => {
                 x.value = Math.min(x.valueAsNumber, y.valueAsNumber - 0.1);
                 range.innerHTML = title();
             });
-            
-            y.addEventListener("input", () => { 
+
+            y.addEventListener("input", () => {
                 y.value = Math.max(x.valueAsNumber + 0.1, y.valueAsNumber);
                 range.innerHTML = title();
             });
@@ -310,16 +298,23 @@
             state.table = await worker.table(SCHEMA);
             state.view = await state.table.view();
             mandelbrot(state.table, state.view, ...[
-                "xmin", 
-                "xmax", 
-                "ymin", 
-                "ymax", 
-                "width", 
+                "xmin",
+                "xmax",
+                "ymin",
+                "ymax",
+                "width",
                 "height",
-                "iterations", 
+                "iterations",
                 "batch"
             ].map(x => window[x].valueAsNumber));
-            window.viewer.load(state.table);
+            window.viewer.load(Promise.resolve(state.table));
+            window.viewer.restore({
+                plugin: "Heatmap",
+                row_pivots: ["x"],
+                column_pivots: ["y"],
+                columns: ["c"]
+            });
+
             if (old_table) {
                 old_table.delete();
             }
@@ -328,6 +323,9 @@
         // Main
 
         window.addEventListener("DOMContentLoaded", async function () {
+            const heatmap_plugin = await window.viewer.getPlugin("Heatmap");
+            heatmap_plugin.max_cells = 10000;
+
             make_range(xmin, xmax, xrange, "X");
             make_range(ymin, ymax, yrange, "Y");
 

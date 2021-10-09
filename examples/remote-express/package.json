@@ -4,7 +4,7 @@
     "version": "1.0.0-rc.2",
     "description": "An example of 2 Perspectives, one client and one server, streaming via Apache Arrow.",
     "scripts": {
-        "start": "node server.js"
+        "start": "tsc && node dist/server.js"
     },
     "keywords": [],
     "license": "Apache-2.0",
@@ -12,8 +12,10 @@
         "@finos/perspective": "^1.0.0-rc.2",
         "@finos/perspective-viewer": "^1.0.0-rc.2",
         "@finos/perspective-viewer-d3fc": "^1.0.0-rc.2",
-        "@finos/perspective-viewer-datagrid": "^1.0.0-rc.2",
-        "express": "^4.17.1",
-        "express-ws": "^4.0.0"
+        "@finos/perspective-viewer-datagrid": "^1.0.0-rc.2"
+    },
+    "devDependencies": {
+        "@types/express": "^4.17.3",
+        "@types/express-ws": "^3.0.0"
     }
 }

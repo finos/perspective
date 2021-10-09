@@ -55,6 +55,8 @@ window.addEventListener("DOMContentLoaded", async function () {
     workspace.addTable("query1", run(input, QUERY1));
     workspace.addTable("query2", run(input, QUERY2, true));
     workspace.addTable("query3", run(input, QUERY3, false, "balancesheet"));
+    customElements.get("perspective-viewer-datagrid").prototype.virtual_mode =
+        "none";
 
     const to_span = (x) => `<span style='color:#666'>${x}</span>`;
 

@@ -117,7 +117,7 @@
                 "high",
                 "low"
             ],
-            "row-pivots": [
+            "row_pivots": [
                 "date"
             ],
             "plugin_config": {

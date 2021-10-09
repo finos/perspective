@@ -8,17 +8,17 @@
  */
 
 import perspective from "@finos/perspective";
+import "@finos/perspective-workspace";
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
-import "@finos/perspective-workspace";
 
 import "./index.less";
 
 window.addEventListener("DOMContentLoaded", async () => {
     const websocket = perspective.websocket("ws://localhost:8081");
     const worker = perspective.shared_worker();
-    const server_table = websocket.open_table("securities_table");
-    const table = await worker.table(await server_table.view(), {limit: 10000});
+    const server_table = await websocket.open_table("securities_table");
+    const table = worker.table(await server_table.view(), {limit: 10000});
 
     const workspace = document.createElement("perspective-workspace");
     document.body.appendChild(workspace);
@@ -50,15 +50,15 @@ window.addEventListener("DOMContentLoaded", async () => {
                 table: "securities",
                 name: "Heat Map",
                 plugin: "heatmap",
-                "row-pivots": ["client"],
+                row_pivots: ["client"],
                 columns: ["chg"],
-                "column-pivots": '["name"]',
+                column_pivots: '["name"]',
             },
             Two: {
                 table: "securities",
                 name: "Bar Chart",
                 plugin: "X Bar",
-                "row-pivots": ["client"],
+                row_pivots: ["client"],
                 columns: ["chg"],
             },
         },

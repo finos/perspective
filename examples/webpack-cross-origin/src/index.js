@@ -15,7 +15,7 @@ import "@finos/perspective-viewer-d3fc";
 
 window.addEventListener("DOMContentLoaded", async () => {
     const worker = perspective.worker();
-    const table = await worker.table([
+    const table = worker.table([
         {x: 1, y: 2},
         {x: 2, y: 2},
     ]);
