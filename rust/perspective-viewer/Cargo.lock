@@ -737,7 +737,6 @@ dependencies = [
  "async-trait",
  "base64",
  "chrono",
- "console_error_panic_hook",
  "derivative",
  "flate2",
  "futures",

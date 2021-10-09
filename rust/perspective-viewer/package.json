@@ -1,7 +1,7 @@
 {
     "name": "@finos/perspective-viewer",
     "version": "1.0.0-rc.2",
-    "description": "A regular `<table>`, for an async and virtual data model.",
+    "description": "The `<perspective-viewer>` Custom Element, frontend for Perspective.js",
     "repository": {
         "type": "git",
         "url": "https://github.com/finos/perspective"
@@ -19,10 +19,13 @@
     "types": "dist/esm/index.d.ts",
     "scripts": {
         "build:wasm": "wasm-pack build --out-dir dist/pkg --target web && rm dist/pkg/package.json && rm dist/pkg/.gitignore",
-        "build:rollup": "rollup --config rollup.config.js",
+        "build:rollup:js": "rollup --config rollup.config.js",
+        "build:rollup:css": "rollup --config rollup.config.js --config-inline-css",
         "build:webpack:inline": "webpack --color --config webpack.inline.config.js",
         "build:webpack:umd": "webpack --color --config webpack.config.js",
-        "build": "npm-run-all build:rollup build:wasm build:webpack:* && cpx 'src/less/*' dist/less",
+        "build:webpack": "npm-run-all -p build:webpack:umd build:webpack:inline",
+        "build:less": "cpx 'src/less/*' dist/less",
+        "build": "npm-run-all build:rollup:css build:wasm build:rollup:js build:webpack build:less",
         "watch:wasm": "cargo watch -i .gitignore -i \"pkg/*\" -i \"src/js/*\" -s \"yarn build:wasm\"",
         "watch:rollup": "rollup --watch --config rollup.config.js",
         "watch:webpack": "webpack --watch --color --config webpack.config.js",
@@ -33,7 +36,7 @@
         "docs": "npm-run-all docs:build docs:concat docs:deploy",
         "docs:build": "typedoc --hideBreadcrumbs --out dist/docs --readme none --excludePrivate src/ts/index.ts",
         "docs:concat": "node ./docs.js",
-        "docs:deploy": "(echo \"---\nid: perspective\ntitle: perspective-viewer API\n---\n\n\"; cat README.md) > ../../docs/obj/perspective-viewer.md",
+        "docs:deploy": "(echo \"---\nid: perspective-viewer\ntitle: perspective-viewer API\n---\n\n\"; cat README.md) > ../../docs/obj/perspective-viewer.md",
         "fix": "yarn lint --fix && cargo fmt",
         "lint": "eslint src/ts",
         "test:build:rust": "cpx ../../packages/perspective/dist/umd/perspective.inline.js dist/pkg/",
