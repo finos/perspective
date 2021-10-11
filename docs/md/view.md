@@ -320,8 +320,6 @@ view = table.view(filter=[["a", "<", 100]])
 
 #### Example
 
-Use the `filters` attribute on `<perspective-viewer>` instead of `filter`.
-
 ```javascript
 const elem = document.querySelector("perspective-viewer");
 await elem.restore({
@@ -345,7 +343,7 @@ widget.restore(
 
 ## Expressions
 
-The `expressions` attribute specifies _new_ columns in Perspective that are
+The `expressions` property specifies _new_ columns in Perspective that are
 created using existing column values or arbitary scalar values defined within
 the expression. In `<perspective-viewer>`, expressions are added using the "New
 Column" button in the side panel.

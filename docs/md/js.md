@@ -41,7 +41,7 @@ correctly form your existing Webpack configuration.
 When importing `perspective` from NPM modules for a browser application, you
 should use `@finos/perspective-webpack-plugin` to manage the `.worker.js` and
 `.wasm` assets for you. Doing so will improve your application's initial load
-performance, the plugin-compiled version of Perspective ..
+performance, the plugin-compiled version of Perspective:
 
 - Downloads `.wasm` and `.js` assets in parallel.
 - Compiles `.wasm` incrementally via [streaming instantiation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WebAssembly/instantiateStreaming).
@@ -65,7 +65,7 @@ module.exports = {
 ```
 
 `@finos/perspective-viewer` has a dependence on [`monaco-editor`](https://microsoft.github.io/monaco-editor/),
-which itself depends on severl CSS assets.  If your webpack config uses a
+which itself depends on several CSS assets.  If your webpack config uses a
 loader for `"*.css"` or similar, you may need to exclude `monaco-editor` from
 this loader to prevent double-encoding:
 
@@ -286,9 +286,16 @@ return a `promise` for the calculated data:
 Via `Promise`
 
 ```javascript
+// an array of objects representing each row
 view.to_json().then((json) => console.log(json));
+
+// an object of arrays representing each column
 view.to_columns().then((json) => console.log(json));
+
+// a CSV-formatted string
 view.to_csv().then((csv) => console.log(csv));
+
+// an Arrow binary serialized to ArrayBuffer
 view.to_arrow().then((arrow) => console.log(arrow));
 ```
 
@@ -315,11 +322,11 @@ In order to prevent memory leaks and reclaim the memory associated with a
 Perspective `table()` or `view()`, you must call the `delete()` method:
 
 ```javascript
-view.delete();
+await view.delete();
 
 // This method will throw an exception if there are still `view()`s depending
 // on this `table()`!
-table.delete();
+await table.delete();
 ```
 
 ## `perspective-viewer` web component
@@ -393,7 +400,7 @@ _*index.html*_
 ></perspective-viewer>
 ```
 
-If you choose not to bundle the themes yourself, they are available through the
+If you choose not to bundle the themes yourself, they are available through 
 [unpkg.com](https://unpkg.com/@finos/perspective-viewer/dist/umd/).
 
 These can be directly linked in your HTML file:
@@ -426,20 +433,20 @@ when the underlying `table()` is updated, but `table.delete()` will fail until
 all `perspective-viewer` instances referencing it are also deleted:
 
 ```javascript
-var view1 = document.getElementById("view1");
-var view2 = document.getElementById("view2");
+const viewer1 = document.getElementById("viewer1");
+const viewer2 = document.getElementById("viewer2");
 
-// Create a new Web Worker
-var worker = perspective.worker();
+// Create a new WebWorker
+const worker = perspective.worker();
 
 // Create a table in this worker
-var table = await worker.table(data);
+const table = await worker.table(data);
 
-// Load the same table in 2 different <perspective-viewer>s
-view1.load(table);
-view2.load(table);
+// Load the same table in 2 different <perspective-viewer> elements
+viewer1.load(table);
+viewer2.load(table);
 
-// Both `view1` and `view2` will reflect this update
+// Both `viewer1` and `viewer2` will reflect this update
 table.update([{ x: 5, y: "e", z: true }]);
 ```
 
@@ -640,7 +647,7 @@ await elem.restore({
   expressions: ['"Sales" + 100'],
 });
 
-// ERROR if the column does not exist in the schema or expressions ..
+// ERROR if the column does not exist in the schema or expressions
 // await elem.restore({columns: ["\"Sales\" + 100"], expressions: []});
 
 // Add a filter
@@ -661,7 +668,7 @@ to simply copy the token returned from `save()` after settings the view manually
 in the browser. The JSON format is human-readable and should be quite easy to
 tweak once generated, as `save()` will return even the default settings for all
 properties. You can call `save()` in your application code, or e.g. through the
-Chrome developer console
+Chrome developer console:
 
 ```javascript
 // Copy to clipboard
