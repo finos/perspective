@@ -24,9 +24,9 @@ view.delete();
 ```
 
 ```python
-const table = perspective.Table({
-    "id": [1, 2, 3, 4],
-    "name": ["a", "b", "c", "d"]
+table = perspective.Table({
+  "id": [1, 2, 3, 4],
+  "name": ["a", "b", "c", "d"]
 });
 
 view = table.view(columns=["name"]);
@@ -57,17 +57,17 @@ power multiple `view()`s concurrently:
 const view = await table.view({
   columns: ["Sales"],
   aggregates: { Sales: "sum" },
-  row_pivot: ["Region", "Country"],
+  row_pivots: ["Region", "Country"],
   filter: [["Category", "in", ["Furniture", "Technology"]]],
 });
 ```
 
 ```python
 view = table.view(
-    columns=["Sales"],
-    aggregates={"Sales": "sum"},
-    row_pivot=["Region", "Country"],
-    filter=[["Category", "in", ["Furniture", "Technology"]]]
+  columns=["Sales"],
+  aggregates={"Sales": "sum"},
+  row_pivot=["Region", "Country"],
+  filter=[["Category", "in", ["Furniture", "Technology"]]]
 )
 ```
 
@@ -83,8 +83,8 @@ value (e.g. `sum`) of the column. Row pivots are useful for hierarchies,
 categorizing data and attributing values, i.e. showing the number of units sold
 based on State and City. In Perspective, row pivots are represented as an array
 of string column names to pivot, are applied in the order provided; For example,
-a row pivot of `["State", "City", "Neighborhood"]` shows the values for each
-neighborhood, which are grouped by City, which are in turn grouped by State.
+a row pivot of `["State", "City", "Postal Code"]` shows the values for each
+Postal Code, which are grouped by City, which are in turn grouped by State.
 
 ```javascript
 const view = await table.view({ row_pivots: ["a", "c"] });
@@ -96,16 +96,22 @@ view = table.view(row_pivots=["a", "c"])
 
 #### Example
 
-```html
-<perspective-viewer
-  row-pivots='["State", "City"]'
-  columns='["Sales", "Profit"]'
->
-</perspective-viewer>
+```javascript
+const elem = document.querySelector("perspective-viewer");
+await elem.restore({
+  row_pivots: ["State", "City"],
+});
+```
+
+```python
+widget = PerspectiveWidget()
+widget.restore(
+  row_pivots=["State", "City"]
+)
 ```
 
 <div>
-<perspective-viewer row-pivots='["State", "City"]' columns='["Sales", "Profit"]'>
+<perspective-viewer row_pivots='["State", "City"]' columns='["Sales", "Profit"]'>
 </perspective-viewer>
 </div>
 
@@ -129,17 +135,26 @@ view = table.view(column_pivots=["a", "c"])
 
 #### Example
 
-```html
-<perspective-viewer
-  row-pivots='["Category"]'
-  column-pivots='["Region"]'
-  columns='["Sales", "Profit"]'
->
-</perspective-viewer>
+```javascript
+const elem = document.querySelector("perspective-viewer");
+await elem.restore({
+  row_pivots: ["Category"],
+  column_pivots: ["Region"],
+  columns: ["Sales", "Profit"],
+});
+```
+
+```python
+widget = PerspectiveWidget()
+widget.restore(
+  row_pivots=["Category"],
+  column_pivots=["Region"],
+  columns=["Sales", "Profit"]
+)
 ```
 
 <div>
-<perspective-viewer row-pivots='["Category"]' column-pivots='["Region"]' columns='["Sales", "Profit"]'>
+<perspective-viewer row_pivots='["Category"]' column_pivots='["Region"]' columns='["Sales", "Profit"]'>
 </perspective-viewer>
 </div>
 
@@ -168,26 +183,35 @@ const view = await table.view({
 
 ```python
 view = table.view(
-    aggregates={
-        "a": "avg",
-        "b": "distinct count"
-    }
+  aggregates={
+    "a": "avg",
+    "b": "distinct count"
+  }
 )
 ```
 
 #### Example
 
-```html
-<perspective-viewer
-  aggregates='{"Sales": "avg", "Profit", "median"}'
-  row-pivots='["State", "City"]'
-  columns='["Sales", "Profit"]'
->
-</perspective-viewer>
+```javascript
+const elem = document.querySelector("perspective-viewer");
+await elem.restore({
+  aggregates: {"Sales": "avg", "Profit", "median"},
+  row_pivots: ["State", "City"],
+  columns: ["Sales", "Profit"]
+});
+```
+
+```python
+widget = PerspectiveWidget()
+widget.restore(
+  aggregates={"Sales": "avg", "Profit", "median"},
+  row_pivots=["State", "City"],
+  columns=["Sales", "Profit"]
+)
 ```
 
 <div>
-<perspective-viewer aggregates='{"Sales": "avg", "Profit": "median"}' row-pivots='["State", "City"]' columns='["Sales", "Profit"]'>
+<perspective-viewer aggregates='{"Sales": "avg", "Profit": "median"}' row_pivots='["State", "City"]' columns='["Sales", "Profit"]'>
 </perspective-viewer>
 </div>
 
@@ -210,13 +234,22 @@ view = table.view(columns=["a"])
 
 #### Example
 
-```html
-<perspective-viewer columns='["Sales", "Profit", "Segment"]'>
-</perspective-viewer>
+```javascript
+const elem = document.querySelector("perspective-viewer");
+await elem.restore({
+  columns: ["Sales", "Profit", "Segment"],
+});
+```
+
+```python
+widget = PerspectiveWidget()
+widget.restore(
+  columns=["Sales", "Profit", "Segment"]
+)
 ```
 
 <div>
-<perspective-viewer columns='["Sales", "Profit", "Segment"]'>
+<perspective-viewer columns='["Sales", "Profit"]'>
 </perspective-viewer>
 </div>
 
@@ -242,9 +275,20 @@ view = table.view(sort=[["a", "asc"]])
 
 #### Example
 
-```html
-<perspective-viewer columns='["Sales", "Profit"]' sort='[["Sales", "desc"]]'>
-</perspective-viewer>
+```javascript
+const elem = document.querySelector("perspective-viewer");
+await elem.restore({
+  sort: [["Sales", "desc"]],
+  columns: ["Sales", "Profit"],
+});
+```
+
+```python
+widget = PerspectiveWidget()
+widget.restore(
+  sort=[["Sales", "desc"]],
+  columns=["Sales", "Profit"]
+)
 ```
 
 <div>
@@ -276,24 +320,30 @@ view = table.view(filter=[["a", "<", 100]])
 
 #### Example
 
-Use the `filters` attribute on `<perspective-viewer>` instead of `filter`.
+```javascript
+const elem = document.querySelector("perspective-viewer");
+await elem.restore({
+  columns: ["State", "Sales", "Profit"],
+  filter: [["State", "==", "Texas"]],
+});
+```
 
-```html
-<perspective-viewer
-  columns='["Sales", "Profit"]'
-  filters='[["State", "==", "Texas"]]'
->
-</perspective-viewer>
+```python
+widget = PerspectiveWidget()
+widget.restore(
+  columns=["Sales", "Profit"],
+  filter=[["State", "==", "Texas"]]
+)
 ```
 
 <div>
-<perspective-viewer columns='["Sales", "Profit"]' filters='[["State","==","Texas"]]'>
+<perspective-viewer columns='["State", "Sales", "Profit"]' filter='[["State","==","Texas"]]'>
 </perspective-viewer>
 </div>
 
 ## Expressions
 
-The `expressions` attribute specifies _new_ columns in Perspective that are
+The `expressions` property specifies _new_ columns in Perspective that are
 created using existing column values or arbitary scalar values defined within
 the expression. In `<perspective-viewer>`, expressions are added using the "New
 Column" button in the side panel.
@@ -301,24 +351,35 @@ Column" button in the side panel.
 A custom name can be added to an expression by making the first line a comment:
 
 ```javascript
-// new column
-"Sales" * "Profit" - 15;
+const view = await table.view({
+  expressions: ['"a" + "b"'],
+});
 ```
 
-To add expressions using the API:
+```python
+view = table.view(expressions=['"a" + "b"'])
+```
 
 #### Example
 
-```html
-<perspective-viewer
-  columns='["new expression"]'
-  expressions='["//new expression\n"\"Sales\" + \"Profit\" * 50 / sqrt(\"Sales\")"]'
->
-</perspective-viewer>
+```javascript
+const elem = document.querySelector("perspective-viewer");
+await elem.restore({
+  columns: ["new expression"],
+  expressions: ['//new expression\n"Sales" + "Profit" * 50 / sqrt("Sales")'],
+});
+```
+
+```python
+widget = PerspectiveWidget()
+widget.restore(
+  columns=["new_expression"],
+  expressions=["//new expression\n\"Sales\" + \"Profit\" * 50 / sqrt(\"Sales\")"]
+)
 ```
 
 <div>
-<perspective-viewer columns='["new expression"]' expressions='["//new expression\n"\"Sales\" + \"Profit\" * 50 / sqrt(\"Sales\")"]'>
+<perspective-viewer columns='["new expression"]' expressions='["//new expression\n\"Sales\" + \"Profit\" * 50 / sqrt(\"Sales\")"]'>
 </perspective-viewer>
 </div>
 

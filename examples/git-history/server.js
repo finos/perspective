@@ -18,10 +18,19 @@ function execute(command, callback) {
 
 const server = new WebSocketServer({assets: [__dirname]});
 
+const schema = {
+    Hash: "string",
+    Name: "string",
+    Date: "integer",
+    Message: "string",
+    Email: "string",
+};
+
 execute(
-    `git log --date=iso --pretty=format:'"%h","%an","%aD","%s","%ae"'`,
-    (log) => {
-        const tbl = table("Hash,Name,Date,Message,Email\n" + log);
+    `git log --date=unix --pretty=format:'^^^^%h^^^^,^^^^%an^^^^,%ad,^^^^%s^^^^,^^^^%ae^^^^' | sed 's/"//g' | sed 's/\\^^^^/"/g'`,
+    async (log) => {
+        const tbl = await table(schema);
+        await tbl.update("Hash,Name,Date,Message,Email\n" + log);
         server.host_table("data_source_one", tbl);
     }
 );

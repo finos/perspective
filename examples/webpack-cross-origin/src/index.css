@@ -8,6 +8,8 @@
  *
  */
 
+@import "~@finos/perspective-viewer/dist/umd/material-dense.css";
+
 perspective-viewer { 
     position: absolute; 
     top: 0; 

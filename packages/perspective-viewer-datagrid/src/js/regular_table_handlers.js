@@ -646,7 +646,10 @@ export async function createModel(regular, table, view, extend = {}) {
     // Re-use div factory
     model._div_factory = model._div_factory || new ElemFactory("div");
 
-    regular.setDataListener(dataListener.bind(model, regular));
+    regular.setDataListener(dataListener.bind(model, regular), {
+        virtual_mode: regular.parentElement.virtual_mode || "both",
+    });
+
     return model;
 }
 

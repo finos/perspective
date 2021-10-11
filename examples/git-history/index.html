@@ -9,42 +9,47 @@
 
 <!DOCTYPE html>
 <html>
+    <head>
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
+        />
 
-<head>
+        <script src="perspective-viewer.js"></script>
+        <script src="perspective-viewer-datagrid.js"></script>
+        <script src="perspective-viewer-d3fc.js"></script>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+        <script src="perspective.js"></script>
 
-    <script src="perspective-viewer.js"></script>
-    <script src="perspective-viewer-datagrid.js"></script>
-    <script src="perspective-viewer-d3fc.js"></script>
+        <link rel="stylesheet" href="index.css" />
+        <link rel="stylesheet" href="material-dense.css" />
+    </head>
 
-    <script src="perspective.js"></script>
+    <body>
+        <perspective-viewer id="view1"> </perspective-viewer>
 
-    <link rel='stylesheet' href="index.css">
-    <link rel='stylesheet' href="material.css">
+        <script>
 
-</head>
+            window.addEventListener("DOMContentLoaded", async function () {
+                const elem = document.getElementById("view1");
+                const plugin = await elem.getPlugin("Y Area")
+                plugin.max_columns = 100;
 
-<body>
-
-    
-    <perspective-viewer 
-        id="view1" 
-        plugin="Y Area" 
-        columns='["Hash"]'' 
-        computed-columns='["week_bucket(\"Date\")"]''
-        row-pivots='["week_bucket(Date)"]' 
-        column-pivots='["Email"]'>
-    </perspective-viewer>
-
-    <script>
-        window.addEventListener('DOMContentLoaded', function () {
-            var elem = document.getElementById('view1');
-            var client = perspective.websocket();
-            elem.load(client.open_table('data_source_one'));
-        });
-    </script>
-
-</body>
-
+                const client = perspective.websocket();
+                elem.load(client.open_table("data_source_one"));
+                elem.restore({
+                    plugin: "Y Area",
+                    row_pivots: [
+                        "var d := 1000 * float(\"Date\");\nbucket(datetime(d), 'M')",
+                    ],
+                    column_pivots: ["Name"],
+                    columns: ["Hash"],
+                    sort: [["Hash", "col desc"]],
+                    expressions: [
+                        "var d := 1000 * float(\"Date\");\nbucket(datetime(d), 'M')",
+                    ],
+                });
+            });
+        </script>
+    </body>
 </html>

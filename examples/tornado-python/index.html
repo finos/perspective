@@ -63,7 +63,7 @@
              * server. All public API methods are available through this
              * proxied table.
              */
-            const server_table = websocket.open_table("data_source_one");
+            const server_table = await websocket.open_table("data_source_one");
 
             /**
              * Create a `View` on the server.
@@ -88,7 +88,7 @@
              * synchronization between server and client, see
              * `client_server_editing.html`.
              */
-            const table = await worker.table(server_view, {
+            const table = worker.table(server_view, {
                 index: await server_table.get_index()
             });
             

@@ -16,9 +16,7 @@
 </head>
 
 <body>
-    <perspective-viewer 
-        plugin="Custom Datagrid" 
-        columns='["Profit","Sub-Category","State","Sales","Category","Order Date","Quantity"]'>
+    <perspective-viewer>
     </perspective-viewer>
 
     <script>
@@ -28,7 +26,11 @@
             const data = await fetch("/node_modules/superstore-arrow/superstore.arrow");
             const arr = await data.arrayBuffer();
             const table = perspective.worker().table(arr.slice());
-            await viewer.load(table);
+            viewer.load(table);
+            viewer.restore({
+                plugin: "Custom Datagrid",
+                columns: ["Profit","Sub-Category","State","Sales","Category","Order Date"]
+            });
             viewer.toggleConfig();
         });
 

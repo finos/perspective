@@ -8,9 +8,9 @@
  */
 
 import perspective from "@finos/perspective";
+import "@finos/perspective-workspace";
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
-import "@finos/perspective-workspace";
 
 import "./index.less";
 
@@ -32,7 +32,7 @@ const worker = perspective.shared_worker();
  * `open_table` allows you to call API methods on remotely hosted Perspective
  * tables just as you would on a locally created table.
  */
-const server_table = websocket.open_table("data_source_one");
+const server_table_promise = websocket.open_table("data_source_one");
 let server_view;
 
 // All viewers are based on the same table, which then feed edits back to a
@@ -55,6 +55,7 @@ const PORTS = [];
  */
 const datasource = async function () {
     const load_start = performance.now();
+    const server_table = await server_table_promise;
     server_view = await server_table.view();
 
     // The API of the remote table/view are symmetric.
@@ -166,7 +167,7 @@ window.addEventListener("load", async () => {
     });
 
     // Register the client-side table we just created.
-    window.workspace.tables.set("datasource", table);
+    window.workspace.tables.set("datasource", Promise.resolve(table));
 
     // Give the workspace a layout to display.
     window.workspace.restore({

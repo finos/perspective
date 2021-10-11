@@ -21,7 +21,6 @@ window.addEventListener("unhandledrejection", (event) => {
 
 async function init_wasm({default: wasm_module}): Promise<typeof internal> {
     await init(wasm_module);
-    internal.set_panic_hook();
     return internal;
 }
 

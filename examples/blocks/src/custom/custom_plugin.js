@@ -107,20 +107,6 @@ function make_led_cell(td, metadata) {
     }
 }
 
-function make_bar_chart(td, metadata, max) {
-    td.style.background = "";
-    td.style.border = ``;
-    if (!metadata.value) {
-    } else {
-        max = Math.max(max, metadata.value || 0);
-        let v = (metadata.value || 0) / max;
-        td.innerHTML = `<div style="height:13px;width:${
-            v * 100
-        }%;background:linear-gradient(90deg, #2bb0af 0, #23a7d7);"><div>`;
-    }
-    return max;
-}
-
 function make_flag(td, metadata, cache, clean_name) {
     td.style.background = "";
     td.style.border = ``;
@@ -178,7 +164,7 @@ class CustomDatagridPlugin extends customElements.get(
         const viewer = this.parentElement;
         const datagrid = this.datagrid;
         if (this._dirty) {
-            await this.refresh_cache(viewer.view);
+            await this.refresh_cache();
         }
 
         const cache = clone_img_cache();
@@ -205,8 +191,6 @@ class CustomDatagridPlugin extends customElements.get(
             );
             if (type === "float") {
                 make_led_cell(td, metadata);
-            } else if (type === "integer") {
-                this._max = make_bar_chart(td, metadata, this._max);
             } else if (clean_name in states) {
                 make_flag(td, metadata, cache, clean_name);
             } else {
@@ -215,7 +199,8 @@ class CustomDatagridPlugin extends customElements.get(
         }
     }
 
-    async refresh_cache(view) {
+    async refresh_cache() {
+        const view = this._view;
         this._column_paths = await view.column_paths();
         this._row_pivots = await view.get_config()["row_pivots"];
         this._schema = await view.schema();
@@ -224,13 +209,15 @@ class CustomDatagridPlugin extends customElements.get(
 
     async activate(view) {
         await super.activate(view);
+        this._view = view;
         this._dirty = true;
         if (!this._custom_initialized) {
             const viewer = this.parentElement;
             const datagrid = this.datagrid;
             this._max = -Infinity;
             await this.refresh_cache(view);
-            this._table_schema = await viewer.table.schema();
+            const table = await viewer.getTable();
+            this._table_schema = await table.schema();
             viewer.addEventListener("perspective-config-update", async () => {
                 this._max = -Infinity;
                 this._dirty = true;
@@ -246,4 +233,7 @@ customElements.define(
     "perspective-viewer-custom-datagrid",
     CustomDatagridPlugin
 );
-window.registerPlugin("perspective-viewer-custom-datagrid");
+
+customElements
+    .get("perspective-viewer")
+    .registerPlugin("perspective-viewer-custom-datagrid");

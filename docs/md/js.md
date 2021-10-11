@@ -36,12 +36,20 @@ runtime performance impact, but does increase asset load time. Most apps should
 make use of `@finos/perspective-webpack-plugin` which will package these files
 correctly form your existing Webpack configuration.
 
-### Webpack Plugin
+### Webpack Plugin (optional)
 
 When importing `perspective` from NPM modules for a browser application, you
 should use `@finos/perspective-webpack-plugin` to manage the `.worker.js` and
-`.wasm` assets for you. The plugin handles downloading and packaging
-Perspective's additional assets, and is easy to set up in your `webpack.config`:
+`.wasm` assets for you. Doing so will improve your application's initial load
+performance, the plugin-compiled version of Perspective:
+
+- Downloads `.wasm` and `.js` assets in parallel.
+- Compiles `.wasm` incrementally via [streaming instantiation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WebAssembly/instantiateStreaming).
+- Lazily downloads large features only when used such as `monaco-editor`.
+- overall bundle size is ~20% smaller (due to bas64 encoding overhead).
+
+The plugin handles downloading and packaging Perspective's additional assets,
+and is easy to set up in your `webpack.config`:
 
 ```javascript
 const PerspectivePlugin = require("@finos/perspective-webpack-plugin");
@@ -56,34 +64,27 @@ module.exports = {
 };
 ```
 
-Otherwise, you'll need to configure your `webpack.config.js` to handle these
-`perspective` assets correctly. ~`@finos/perspective-webpack-plugin` itself uses
-a combination of `worker-loader` and `file-loader` (or `arraybuffer-loader` to
-inline the contents of this file as a base64-encoded string), which can be
-easily modified as needed:
+`@finos/perspective-viewer` has a dependence on [`monaco-editor`](https://microsoft.github.io/monaco-editor/),
+which itself depends on several CSS assets.  If your webpack config uses a
+loader for `"*.css"` or similar, you may need to exclude `monaco-editor` from
+this loader to prevent double-encoding:
 
 ```javascript
 module.exports = {
-  rules: [
-    {
-      test: /perspective\.worker\.js$/,
-      type: "javascript/auto",
-      include: path.dirname(require.resolve("@finos/perspective")),
-      loader: "worker-loader",
-    },
-    {
-      test: /perspective\.wasm$/,
-      type: "javascript/auto",
-      include: path.dirname(require.resolve("@finos/perspective")),
-      loader: "file-loader", // or "arraybuffer-loader"
-    },
-    {
-      test: /perspective-viewer\.wasm$/,
-      type: "javascript/auto",
-      include: path.dirname(require.resolve("@finos/perspective-viewer")),
-      loader: "file-loader", // or "arraybuffer-loader"
-    },
-  ],
+  // ...
+
+  module: {
+    rules: [
+      {
+        test: /\.css$/,
+        exclude: [/monaco-editor/], // <- Exclude `monaco-editor`
+        use: [
+          {loader: "style-loader"},
+          {loader: "css-loader"},
+        ],
+      }
+    ]
+  }
 };
 ```
 
@@ -128,7 +129,7 @@ Or create a `<perspective-viewer>` in HTML:
       };
       // The `<perspective-viewer>` HTML element exposes the viewer API
       const worker = perspective.worker();
-      const table = await worker.table(data);
+      const table = worker.table(data);
       const el = document.getElementsByTagName("perspective-viewer")[0];
       el.load(table);
     });
@@ -285,9 +286,16 @@ return a `promise` for the calculated data:
 Via `Promise`
 
 ```javascript
+// an array of objects representing each row
 view.to_json().then((json) => console.log(json));
+
+// an object of arrays representing each column
 view.to_columns().then((json) => console.log(json));
+
+// a CSV-formatted string
 view.to_csv().then((csv) => console.log(csv));
+
+// an Arrow binary serialized to ArrayBuffer
 view.to_arrow().then((arrow) => console.log(arrow));
 ```
 
@@ -314,88 +322,11 @@ In order to prevent memory leaks and reclaim the memory associated with a
 Perspective `table()` or `view()`, you must call the `delete()` method:
 
 ```javascript
-view.delete();
+await view.delete();
 
 // This method will throw an exception if there are still `view()`s depending
 // on this `table()`!
-table.delete();
-```
-
-### Customizing behavior with `perspective.config.js`
-
-For ease of configuration synchronization between the Node.js, WebWorker and
-Browser, Perspective supports configuration statically.
-
-You may override Perspective's
-[default settings](https://github.com/finos/perspective/blob/master/packages/perspective/src/js/config/settings.js)
-via a `perspective.config.js` or `perspective.config.json` file in your
-project's root or parent path, or via the `"perspective"` key in your project's
-`package.json`.
-
-Note that, while in Node.js, this config file is read at runtime; for the
-browser, this file must be read at compile time (handled automatically via
-[`@finos/perspective-webpack-plugin`](https://github.com/finos/perspective/tree/master/packages/perspective-webpack-plugin)).
-
-Thus, to update it, you must either rebuild your code, or supply the JSON
-configuration object to the `worker()` constructor on initialization.
-
-```javascript
-module.exports = {
-  types: {
-    string: {
-      aggregate: "dominant",
-    },
-    float: {
-      format: {
-        style: "decimal",
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      },
-    },
-  },
-};
-```
-
-#### Creating new types
-
-For customizing the behavior or style of specific columns, Perspective supports
-the definition of new types that derive from an existing built-in type. First,
-add a new type and declare its base in your `perspective.config.js`:
-
-```javascript
-module.exports = {
-  types: {
-    price: { type: "float" },
-  },
-};
-```
-
-Perspective will not infer these types for you, so you'll need to create your
-table [from a schema](#loading-data-with-table) to use them:
-
-```javascript
-const table = await worker.table({ volume: "integer", price: "price" });
-table.update([{ volume: 10, price: 100.75 }]);
-```
-
-#### Formatting data types
-
-Default and user-created types can be styled using the `format` key in
-`perspective.config.js`:
-
-```javascript
-module.exports = {
-  types: {
-    price: {
-      type: float,
-      format: {
-        style: "decimal",
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      },
-    },
-  },
-};
+await table.delete();
 ```
 
 ## `perspective-viewer` web component
@@ -415,15 +346,6 @@ import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
 ```
 
-While each plugin module by default will register all of its visualization
-types, you may choose to import these individually as well:
-
-```javascript
-import "@finos/perspective-viewer-d3fc/bar";
-import "@finos/perspective-viewer-d3fc/column";
-import "@finos/perspective-viewer-d3fc/xy-scatter";
-```
-
 Once imported, the `<perspective-viewer>` Web Component will be available in any
 standard HTML on your site. A simple example:
 
@@ -440,13 +362,10 @@ themed accordingly:
 
 ```javascript
 //Themes based on Google's Material Design Language
-import "@finos/perspective-viewer/themes/material.css";
-import "@finos/perspective-viewer/themes/material.dark.css";
-import "@finos/perspective-viewer/themes/material-dense.css";
-import "@finos/perspective-viewer/themes/material-dense.dark.css";
-
-//Vaporwave theme
-import "@finos/perspective-viewer/themes/vaporwave.css";
+import "@finos/perspective-viewer/dist/umd/material.css";
+import "@finos/perspective-viewer/dist/umd/material.dark.css";
+import "@finos/perspective-viewer/dist/umd/material-dense.css";
+import "@finos/perspective-viewer/dist/umd/material-dense.dark.css";
 ```
 
 **_Note that importing multiple themes may override each other_**
@@ -466,20 +385,22 @@ import "@finos/perspective-viewer/themes/all-themes.css";
 _*index.html*_
 
 ```html
-<perspective-viewer class="perspective-viewer-material"></perspective-viewer>
+<perspective-viewer class="perspective-viewer-material"> </perspective-viewer>
+
 <perspective-viewer
   class="perspective-viewer-material-dark"
 ></perspective-viewer>
+
 <perspective-viewer
   class="perspective-viewer-material-dense"
 ></perspective-viewer>
+
 <perspective-viewer
   class="perspective-viewer-material-dense-dark"
 ></perspective-viewer>
-<perspective-viewer class="perspective-viewer-vaporwave"></perspective-viewer>
 ```
 
-If you choose not to bundle the themes yourself, they are available through the
+If you choose not to bundle the themes yourself, they are available through 
 [unpkg.com](https://unpkg.com/@finos/perspective-viewer/dist/umd/).
 
 These can be directly linked in your HTML file:
@@ -493,11 +414,11 @@ These can be directly linked in your HTML file:
 
 ### Loading data into `<perspective-viewer>`
 
-Data can be loaded into `<perspective-viewer>` in the form of a `Table()` via
-the `load()` method.
+Data can be loaded into `<perspective-viewer>` in the form of a `Table()` or a
+`Promise<Table>` via the `load()` method.
 
 ```javascript
-// Create a new worker, then a new table on that worker.
+// Create a new worker, then a new table promise on that worker.
 const table = await perspective.worker().table(data);
 
 // Bind a viewer element to this table.
@@ -512,20 +433,20 @@ when the underlying `table()` is updated, but `table.delete()` will fail until
 all `perspective-viewer` instances referencing it are also deleted:
 
 ```javascript
-var view1 = document.getElementById("view1");
-var view2 = document.getElementById("view2");
+const viewer1 = document.getElementById("viewer1");
+const viewer2 = document.getElementById("viewer2");
 
-// Create a new Web Worker
-var worker = perspective.worker();
+// Create a new WebWorker
+const worker = perspective.worker();
 
 // Create a table in this worker
-var table = await worker.table(data);
+const table = await worker.table(data);
 
-// Load the same table in 2 different <perspective-viewer>s
-view1.load(table);
-view2.load(table);
+// Load the same table in 2 different <perspective-viewer> elements
+viewer1.load(table);
+viewer2.load(table);
 
-// Both `view1` and `view2` will reflect this update
+// Both `viewer1` and `viewer2` will reflect this update
 table.update([{ x: 5, y: "e", z: true }]);
 ```
 
@@ -550,8 +471,9 @@ const host = new WebSocketServer({ assets: [__dirname], port: 8080 });
 
 // Read an arrow file from the file system and host it as a named table.
 const arr = fs.readFileSync(__dirname + "/superstore.arrow");
-const tbl = table(arr);
-host.host_table("table_one", tbl);
+table(arr).then((table) => {
+  host.host_table("table_one", table);
+});
 ```
 
 In the browser:
@@ -566,7 +488,7 @@ const websocket = perspective.websocket(
 
 // Bind the viewer to the preloaded data source.  `table` and `view` objects
 // live on the server.
-const server_table = websocket.open_table("table_one");
+const server_table = await websocket.open_table("table_one");
 elem.load(server_table);
 
 // Or load data from a table using a view. The browser now also has a copy of
@@ -574,7 +496,7 @@ elem.load(server_table);
 // browser using Apache Arrow.
 const worker = perspective.worker();
 const server_view = await server_table.view();
-const client_table = await worker.table(server_view);
+const client_table = worker.table(server_view);
 elem.load(client_table);
 ```
 
@@ -652,50 +574,105 @@ Any operation performed on the `<perspective-viewer>` instance or on
 `const table` will be forwarded to Python, which will execute the operation and
 return the results back to JavaScript.
 
-### Setting & reading `perspective-viewer` configuration via attributes
+### Persistent `<perspective-viewer>` configuration via `save()`/`restore()`.
 
-`<perspective-viewer>` uses the DOM's regular attribute API to set it's initial
-state, by reading JSON encoded properties from attributes for each `perspective`
-configuration property.
+`<perspective-viewer>` is _persistent_, in that its entire state (sans the data
+itself) can be serialized or deserialized. This include all column, filter,
+pivot, expressions, etc. properties, as well as datagrid style settings, config
+panel visibility, and more. This overloaded feature covers a range of use cases:
 
-For example, this HTML will apply `row_pivot` and `filter` configuration to the
-initial `view()` created when data is loaded via the `load()` method, as well as
-set the UI controls to reflect this config. See the
-[full Attribute API documentation](/docs/obj/perspective-viewer.html) for a full
-description of the available attributes.
+- Setting a `<perspective-viewer>`'s initial state after a `load()` call.
+- Updating a single or subset of properties, without modifying others.
+- Resetting some or all properties to their data-relative default.
+- Persisting a user's configuration to `localStorage` or a server.
 
-```html
-<perspective-viewer
-  row-pivots='["Category","Sub-Category"]'
-  filters='[["State","==","Texas"]]'
->
-</perspective-viewer>
-```
+#### Serializing and deserializing the viewer state
 
-Attributes on a `<perspective-viewer>` are reactive. When the user interacts
-with the viewer, the attributes update to reflect the current viewer state, and
-these can be read with the standard DOM API method `getAttribute()`; likewise,
-the `setAttribute()` method will update the `view()` and UI state.
+To retrieve the entire state as a JSON-ready JavaScript object, use the `save()`
+method. `save()` also supports a few other formats such as `"arraybuffer"` and
+`"string"` (base64, not JSON), which you may choose for size at the expense of
+easy migration/manual-editing.
 
 ```javascript
-// Gets  `elem`'s pivot state
-var pivots = elem.getAttribute("row-pivots");
-
-// Set `elems`'s sort state
-elem.setAttribute("sort", JSON.stringify([["Sales", "desc"]]));
+const json_token = await elem.save();
+const string_token = await elem.save("string");
 ```
 
-Alternatively, the `save()` and `restore()` methods allow you to read and write,
-respectively, all `view()` configuration properties at once.
+For any format, the serialized token can be restored to any
+`<perspective-viewer>` with a `Table` of identical schema, via the `restore()`
+method. Note that while the data for a token returned from `save()` may differ,
+generally its schema may not, as many other settings depend on column names and
+types.
 
 ```javascript
-// Get the current elem config
-var state = elem.save();
+await elem.restore(json_token);
+await elem.restore(string_token);
+```
 
-// ... later
+As `restore()` dispatches on the token's type, it is important to make sure that
+these types match! A common source of error occurs when passing a
+JSON-stringified token to `restore()`, which will assume base64-encoded msgpack
+when a string token is used.
 
-// Restore the previously saved state
-elem.restore(state);
+```javascript
+// This will error!
+await elem.restore(JSON.stringify(json_token));
+```
+
+#### Updating individual properties
+
+Using the JSON format, every facet of a `<perspective-viewer>`'s configuration
+can be manipulated from JavaScript using the `restore()` method. The valid
+structure of properties is described via the
+[`ViewerConfig`](https://github.com/finos/perspective/blob/ebced4caa/rust/perspective-viewer/src/ts/viewer.ts#L16)
+and embedded
+[`ViewConfig`](https://github.com/finos/perspective/blob/ebced4caa19435a2a57d4687be7e428a4efc759b/packages/perspective/index.d.ts#L140)
+type declarations, and [`View`](perspective.finos.org/docs/md/view.html) chapter
+of the documentation which has several interactive examples for each
+`ViewConfig` property.
+
+```javascript
+// Set the plugin (will also update `columns` to plugin-defaults)
+await elem.restore({ plugin: "X Bar" });
+
+// Update plugin and columns (only draws once)
+await elem.restore({ plugin: "X Bar", columns: ["Sales"] });
+
+// Open the config panel
+await elem.restore({ settings: true });
+
+// Create an expression
+await elem.restore({
+  columns: ['"Sales" + 100'],
+  expressions: ['"Sales" + 100'],
+});
+
+// ERROR if the column does not exist in the schema or expressions
+// await elem.restore({columns: ["\"Sales\" + 100"], expressions: []});
+
+// Add a filter
+await elem.restore({ filter: [["Sales", "<", 100]] });
+
+// Add a sort, don't remove filter
+await elem.restore({ sort: [["Prodit", "desc"]] });
+
+// Reset just filter, preserve sort
+await elem.restore({ filter: undefined });
+
+// Reset all properties to default e.g. after `load()`
+await elem.reset();
+```
+
+Another effective way to quickly create a token for a desired configuration is
+to simply copy the token returned from `save()` after settings the view manually
+in the browser. The JSON format is human-readable and should be quite easy to
+tweak once generated, as `save()` will return even the default settings for all
+properties. You can call `save()` in your application code, or e.g. through the
+Chrome developer console:
+
+```javascript
+// Copy to clipboard
+copy(await document.querySelector("perspective-viewer").save());
 ```
 
 ### Update events
