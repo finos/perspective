@@ -13,11 +13,46 @@
  */
 module.exports = (perspective) => {
     describe("String functions", function () {
+        it("Comparisons", async function () {
+            const table = await perspective.table({
+                x: ["abc", "deeeeef", "fg", "hhs", "abcdefghijk"],
+                y: ["ABC", "DEF", "EfG", "HIjK", "lMNoP"],
+            });
+            const view = await table.view({
+                expressions: [
+                    `// a \n 'abcdefghijklmnopqrstuvwxyz' == 'abcdefghijklmnopqrstuvwxyz'`,
+                    `// b \n "x" == lower("y")`,
+                    `// c \n if("x" == 'abc', 100, 0)`,
+                    `// d \n if("x" != 'abc', 'new string 1', 'new string 2')`,
+                    `// e \n 'd' > 'a'`,
+                    `// f \n 'efz' > 'efy'`, // lexicographic
+                ],
+            });
+
+            let result = await view.to_columns();
+
+            expect(result["a"]).toEqual(Array(5).fill(true));
+            expect(result["b"]).toEqual([true, false, false, false, false]);
+            expect(result["c"]).toEqual([100, 0, 0, 0, 0]);
+            expect(result["d"]).toEqual([
+                "new string 2",
+                "new string 1",
+                "new string 1",
+                "new string 1",
+                "new string 1",
+            ]);
+            expect(result["e"]).toEqual(Array(5).fill(true));
+            expect(result["f"]).toEqual(Array(5).fill(true));
+
+            view.delete();
+            table.delete();
+        });
+
         it("Pivoted", async function () {
             const table = await perspective.table({
                 a: ["abc", "deeeeef", "fg", "hhs", "abcdefghijk"],
                 b: ["ABC", "DEF", "EfG", "HIjK", "lMNoP"],
-                c: [2, 2, 4, 4],
+                c: [2, 2, 4, 4, 5],
             });
             const view = await table.view({
                 aggregates: {column: "last"},
@@ -45,7 +80,7 @@ module.exports = (perspective) => {
             const table = await perspective.table({
                 a: ["abc", "deeeeef", "fg", "hhs", "abcdefghijk"],
                 b: ["ABC", "DEF", "EfG", "HIjK", "lMNoP"],
-                c: [2, 2, 4, 4],
+                c: [2, 2, 4, 4, 5],
             });
             const view = await table.view({
                 filter: [["column", "==", "hhs, here is a long string, HIjK"]],

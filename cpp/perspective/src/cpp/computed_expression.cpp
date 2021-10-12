@@ -254,6 +254,7 @@ t_computed_expression::compute(std::shared_ptr<t_data_table> source_table,
         columns[column_id] = source_table->get_column(column_name);
 
         t_tscalar rval;
+        // rval.clear();
         rval.m_type = columns[column_id]->get_dtype();
 
         values[cidx] = std::pair<std::string, t_tscalar>(column_id, rval);
@@ -362,8 +363,8 @@ t_computed_expression_parser::precompute(const std::string& expression_alias,
         const std::string& column_name = column_ids[cidx].second;
 
         t_tscalar rval;
+        rval.clear();
         rval.m_type = schema->get_dtype(column_name);
-        rval.m_status = STATUS_INVALID;
         values[cidx] = rval;
 
         sym_table.add_variable(column_id, values[cidx]);
@@ -420,8 +421,11 @@ t_computed_expression_parser::get_dtype(const std::string& expression_alias,
         }
 
         t_tscalar rval;
+        // clear() is important as it sets the status to valid and the
+        // underlying union value to 0, which prevents any reading of
+        // uninitialized values out of the union.
+        rval.clear();
         rval.m_type = schema.get_dtype(column_name);
-        rval.m_status = STATUS_INVALID;
         values[cidx] = rval;
 
         sym_table.add_variable(column_id, values[cidx]);

@@ -154,6 +154,58 @@ class TestViewExpression(object):
         }
         assert view.expression_schema() == {"computed": float}
 
+    def test_view_expression_string_literal_compare(self):
+        table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
+        validated = table.validate_expressions(['// computed \n \'a\' == \'a\''])
+
+        assert validated["expression_schema"] == {
+            "computed": "boolean"
+        }
+
+        view = table.view(expressions=['// computed \n \'a\' == \'a\''])
+
+        assert view.to_columns() == {
+            "a": [1, 2, 3, 4],
+            "b": [5, 6, 7, 8],
+            "computed": [True, True, True, True],
+        }
+
+        assert view.expression_schema() == {"computed": bool}
+
+    def test_view_expression_string_literal_compare_column(self):
+        table = Table({"a": ["a", "a", "b", "c"]})
+        validated = table.validate_expressions(['// computed \n "a" == \'a\''])
+
+        assert validated["expression_schema"] == {
+            "computed": "boolean"
+        }
+
+        view = table.view(expressions=['// computed \n "a" == \'a\''])
+
+        assert view.to_columns() == {
+            "a": ["a", "a", "b", "c"],
+            "computed": [True, True, False, False],
+        }
+
+        assert view.expression_schema() == {"computed": bool}
+
+    def test_view_expression_string_literal_compare_if(self):
+        table = Table({"a": ["a", "a", "b", "c"]})
+        validated = table.validate_expressions(['// computed \n if("a" == \'a\', 1, 2)'])
+
+        assert validated["expression_schema"] == {
+            "computed": "float"
+        }
+
+        view = table.view(expressions=['// computed \n if("a" == \'a\', 1, 2)'])
+
+        assert view.to_columns() == {
+            "a": ["a", "a", "b", "c"],
+            "computed": [1, 1, 2, 2],
+        }
+
+        assert view.expression_schema() == {"computed": float}
+
     def test_view_streaming_expression(self):
         def data():
             return [{"a": random()} for _ in range(50)]

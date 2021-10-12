@@ -44,18 +44,14 @@ namespace computed_function {
         t_tscalar rval;
         rval.clear();
         rval.m_type = DTYPE_STR;
-
-        std::string temp_str;
-
         t_generic_type& gt = parameters[0];
 
         // intern('abc') - with a scalar string
         t_string_view temp_string(gt);
-        temp_str = std::string(temp_string.begin(), temp_string.end()).c_str();
+        std::string temp_str = std::string(temp_string.begin(), temp_string.end());
 
         // Don't allow empty strings
-        if (temp_str == "")
-            return rval;
+        if (temp_str == "") return rval;
 
         // If the vocab is a nullptr, we are in type checking mode - TODO might
         // be better to make this explicit so that we never fall into an invalid
@@ -67,7 +63,6 @@ namespace computed_function {
         // Intern the string into the vocabulary, and return the index of the
         // string inside the vocabulary.
         t_uindex interned = m_expression_vocab->get_interned(temp_str);
-
         rval.set(m_expression_vocab->unintern_c(interned));
         return rval;
     }

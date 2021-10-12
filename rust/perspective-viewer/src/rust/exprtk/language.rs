@@ -395,6 +395,13 @@ thread_local! {
                 documentation: "Lowercase of x".to_owned(),
             },
             CompletionItemSuggestion {
+                label: "hour_of_day".to_owned(),
+                kind: 1,
+                insert_text: "hour_of_day(${1:x})".to_owned(),
+                insert_text_rules: 4,
+                documentation: "Return a datetime's hour of the day as a string".to_owned(),
+            },
+            CompletionItemSuggestion {
                 label: "month_of_year".to_owned(),
                 kind: 1,
                 insert_text: "month_of_year(${1:x})".to_owned(),
