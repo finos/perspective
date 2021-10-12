@@ -31,6 +31,12 @@ const siteConfig = {
         },
         {
             pinned: true,
+            image: "https://sc1f.github.io/pudgy-penguin-perspective/meta.png",
+            infoLink: "https://sc1f.github.io/pudgy-penguin-perspective/",
+            caption: "NFT"
+        },
+        {
+            pinned: true,
             image: "https://perspective.finos.org/img/mtg_thumbnail.png",
             infoLink: "https://texodus.github.io/mtg-perspective/?seasons-in-the-abyss-67",
             caption: "Magic"
@@ -47,13 +53,6 @@ const siteConfig = {
             infoLink: "https://bl.ocks.org/texodus/efd4a857aca9a52ab6cddbb6e1f701c9",
             caption: "Olympics"
         },
-        {
-            pinned: true,
-            image: "https://bl.ocks.org/texodus/raw/c42f3189699bd29cf20bbe7dce767b07/62d75a47e049602312ba2597bfd37eb032b156f0/thumbnail.png",
-            infoLink: "https://bl.ocks.org/texodus/c42f3189699bd29cf20bbe7dce767b07",
-            caption: "Styled"
-        },
-
         {
             pinned: true,
             image: "https://bl.ocks.org/texodus/raw/45b868833c9f456bd39a51e606412c5d/e590d237a5237790694946018680719c9fef56cb/thumbnail.png ",

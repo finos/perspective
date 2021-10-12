@@ -1,5 +1,74 @@
 # Changelog
 
+## [v1.0.0](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.0.0-rc.2...HEAD)
+
+**Breaking changes:**
+
+- New `\<perspective-viewer\>` [\#1488](https://github.com/finos/perspective/pull/1488) ([texodus](https://github.com/texodus))
+
+**Implemented enhancements:**
+
+- toggleConfig\(\) via attribute and part of save\(\) \(for perspective-viewer\) [\#879](https://github.com/finos/perspective/issues/879)
+- Boolean datagrid columns [\#1553](https://github.com/finos/perspective/pull/1553) ([texodus](https://github.com/texodus))
+- Persistent column widths [\#1549](https://github.com/finos/perspective/pull/1549) ([texodus](https://github.com/texodus))
+- Return booleans from expression comparisons, allow for vectors to be defined in expressions [\#1548](https://github.com/finos/perspective/pull/1548) ([sc1f](https://github.com/sc1f))
+- Boolean column filter controls for `\<perspective-viewer\>` [\#1547](https://github.com/finos/perspective/pull/1547) ([texodus](https://github.com/texodus))
+- Fix M1 \(Apple Silicon\) build for `perspective-python` and improve developer docs [\#1525](https://github.com/finos/perspective/pull/1525) ([sc1f](https://github.com/sc1f))
+
+**Fixed bugs:**
+
+- `save` on a `perspective-viewer` emits `plugin: null` if the attribute hasnt been set, instead of using the active plugin \(e.g. datagrid\) [\#1501](https://github.com/finos/perspective/issues/1501)
+- Scrolling in the Olympics example grids expands the table continuosly [\#1302](https://github.com/finos/perspective/issues/1302)
+- table.replace + unique aggregate incorrectly sets values to 0 in datagrid [\#1175](https://github.com/finos/perspective/issues/1175)
+- Heatmap doesn't work when dates are used in columns [\#1132](https://github.com/finos/perspective/issues/1132)
+- Inconsistent UI when transposing Pivots [\#1021](https://github.com/finos/perspective/issues/1021)
+- Fix \#1566, remove deprecated flags from WASM debug build [\#1567](https://github.com/finos/perspective/pull/1567) ([sc1f](https://github.com/sc1f))
+- Fix \#1562, fix regressions in PerspectiveWidget [\#1565](https://github.com/finos/perspective/pull/1565) ([sc1f](https://github.com/sc1f))
+- Fix python wheel CI [\#1552](https://github.com/finos/perspective/pull/1552) ([texodus](https://github.com/texodus))
+- Long expressions block edit and delete buttons [\#1546](https://github.com/finos/perspective/issues/1546)
+- Perspective Viewer does not type tag or filter for booleans [\#1544](https://github.com/finos/perspective/issues/1544)
+- Incorrect type for Filters in Typescript perspective-viewer/index.d.ts [\#1517](https://github.com/finos/perspective/issues/1517)
+- Perspective-viewer compilation error due to missing loader. [\#1497](https://github.com/finos/perspective/issues/1497)
+- table.size\(\) incorrect after remove\(\) [\#1225](https://github.com/finos/perspective/issues/1225)
+- `table.remove\(keys\)` from node seems to corrupt indexing? [\#998](https://github.com/finos/perspective/issues/998)
+- Fix examples [\#1556](https://github.com/finos/perspective/pull/1556) ([texodus](https://github.com/texodus))
+- Fix expression column button toolbar styling [\#1555](https://github.com/finos/perspective/pull/1555) ([texodus](https://github.com/texodus))
+- Fix hidden sort aggregate as `unique` only when sorted on the same axis [\#1554](https://github.com/finos/perspective/pull/1554) ([texodus](https://github.com/texodus))
+- Fixes `bucket\(\)` computed function validation [\#1551](https://github.com/finos/perspective/pull/1551) ([texodus](https://github.com/texodus))
+- Fix 'weighted mean' aggregate support in \<perspective-viewer\> [\#1543](https://github.com/finos/perspective/pull/1543) ([texodus](https://github.com/texodus))
+- Fix column section collapse with expressions [\#1542](https://github.com/finos/perspective/pull/1542) ([texodus](https://github.com/texodus))
+- Fix `is \(not\) null`, `date`, `datetime` filters [\#1541](https://github.com/finos/perspective/pull/1541) ([texodus](https://github.com/texodus))
+- Fix workspace filter events [\#1540](https://github.com/finos/perspective/pull/1540) ([texodus](https://github.com/texodus))
+- Fix `docs` site and NPM artifact for `\<perspective-viewer\>` update [\#1533](https://github.com/finos/perspective/pull/1533) ([texodus](https://github.com/texodus))
+- Fix drag/drop exclusive cases [\#1532](https://github.com/finos/perspective/pull/1532) ([texodus](https://github.com/texodus))
+- Re-add `getEditPort\(\)` and `restyleElement\(\)` methods [\#1531](https://github.com/finos/perspective/pull/1531) ([texodus](https://github.com/texodus))
+- Use TypeScript for `@finos/perspective-viewer` [\#1530](https://github.com/finos/perspective/pull/1530) ([texodus](https://github.com/texodus))
+- Fix `settings` key to trigger redraw + container redraw [\#1529](https://github.com/finos/perspective/pull/1529) ([texodus](https://github.com/texodus))
+- Fix \#1505, \#998, \#1225 - results after remove are correct [\#1528](https://github.com/finos/perspective/pull/1528) ([sc1f](https://github.com/sc1f))
+- Fix D3FC chart resize via `preserveAspectRatio` [\#1526](https://github.com/finos/perspective/pull/1526) ([texodus](https://github.com/texodus))
+
+**Closed issues:**
+
+- Segfault with python 3.9 expressions [\#1572](https://github.com/finos/perspective/issues/1572)
+- Loading remote table from Python breaks the viewer [\#1566](https://github.com/finos/perspective/issues/1566)
+- PerspectiveWidget should init a shared\_worker and not a worker-per-widget [\#1562](https://github.com/finos/perspective/issues/1562)
+- Perspective Viewer does not work in Custom Element Examples remote\_express and remote-express-typescript  [\#1536](https://github.com/finos/perspective/issues/1536)
+- Perspective refuses to work with React with webpack 4.x [\#1512](https://github.com/finos/perspective/issues/1512)
+- `bucket\(\)` expression doesn't validate when 0 or more than 1 space separate arguments [\#1550](https://github.com/finos/perspective/issues/1550)
+- Records added via table.update do not appear in perspective viewer filter values [\#1535](https://github.com/finos/perspective/issues/1535)
+- Inconsistent view output under frequent insert&delete [\#1505](https://github.com/finos/perspective/issues/1505)
+
+**Merged pull requests:**
+
+- `docs` for updated `perspective-viewer` [\#1574](https://github.com/finos/perspective/pull/1574) ([texodus](https://github.com/texodus))
+- Make `/node\_modules` external to TS [\#1557](https://github.com/finos/perspective/pull/1557) ([texodus](https://github.com/texodus))
+- Upgrade emscripten to 2.0.29 [\#1539](https://github.com/finos/perspective/pull/1539) ([texodus](https://github.com/texodus))
+- Add docs for `\<perspective-viewer-plugin\>` [\#1538](https://github.com/finos/perspective/pull/1538) ([texodus](https://github.com/texodus))
+- Lint upgrade and remove TypeScript for `@finos/perspective-jupyterlab` [\#1537](https://github.com/finos/perspective/pull/1537) ([texodus](https://github.com/texodus))
+- add some light sdist tests and upload sdist in CI [\#1433](https://github.com/finos/perspective/pull/1433) ([timkpaine](https://github.com/timkpaine))
+
 ## [v0.10.3](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v0.10.2...HEAD)
@@ -8,8 +77,6 @@
 
 - Refactor `to\_arrow`, fix row deltas for pivoted views [\#1519](https://github.com/finos/perspective/pull/1519) ([sc1f](https://github.com/sc1f))
 - Fix count aggregate when last aggregate and partial updates are applied [\#1518](https://github.com/finos/perspective/pull/1518) ([sc1f](https://github.com/sc1f))
-
-# Changelog
 
 ## [v0.10.2](https://github.com/finos/perspective/tree/HEAD)
 
@@ -20,8 +87,6 @@
 - Filtering using `in` operator doesn't work as expected [\#1520](https://github.com/finos/perspective/issues/1520)
 - Fix support for array-like filter terms [\#1524](https://github.com/finos/perspective/pull/1524) ([texodus](https://github.com/texodus))
 - Add new aggregates to ViewConfig enum [\#1516](https://github.com/finos/perspective/pull/1516) ([sc1f](https://github.com/sc1f))
-
-# Changelog
 
 ## [v0.10.1](https://github.com/finos/perspective/tree/HEAD)
 
@@ -49,8 +114,6 @@
 
 - Preload fonts [\#1481](https://github.com/finos/perspective/pull/1481) ([texodus](https://github.com/texodus))
 - Refactoring [\#1471](https://github.com/finos/perspective/pull/1471) ([texodus](https://github.com/texodus))
-
-# Changelog
 
 ## [v0.10.0](https://github.com/finos/perspective/tree/HEAD)
 
@@ -82,8 +145,6 @@
 - New website [\#1470](https://github.com/finos/perspective/pull/1470) ([texodus](https://github.com/texodus))
 - Add Jupyterlab tests to CI [\#1460](https://github.com/finos/perspective/pull/1460) ([texodus](https://github.com/texodus))
 - Build Windows wheel, limit wheel builds to scheduled and tagged builds [\#1453](https://github.com/finos/perspective/pull/1453) ([sc1f](https://github.com/sc1f))
-
-# Changelog
 
 ## [v0.9.0](https://github.com/finos/perspective/tree/HEAD)
 
@@ -129,8 +190,6 @@
 - Optional lazy-load `monaco-editor` [\#1435](https://github.com/finos/perspective/pull/1435) ([texodus](https://github.com/texodus))
 - Expose `join` aggregate [\#1434](https://github.com/finos/perspective/pull/1434) ([texodus](https://github.com/texodus))
 - organize azure pipelines file [\#1381](https://github.com/finos/perspective/pull/1381) ([timkpaine](https://github.com/timkpaine))
-
-# Changelog
 
 ## [v0.8.3](https://github.com/finos/perspective/tree/HEAD)
 
@@ -2306,6 +2365,9 @@
 - Jest [\#2](https://github.com/finos/perspective/pull/2) ([texodus](https://github.com/texodus))
 - README corrections [\#1](https://github.com/finos/perspective/pull/1) ([neilslinger](https://github.com/neilslinger))
 
+
+
+\* *This Changelog was automatically generated by [github_changelog_generator](https://github.com/github-changelog-generator/github-changelog-generator)*
 
 
 \* *This Changelog was automatically generated by [github_changelog_generator](https://github.com/github-changelog-generator/github-changelog-generator)*
