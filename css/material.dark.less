@@ -1,8 +1,8 @@
 
-@import "../../../packages/perspective-viewer/src/themes/material-dense.less";
-@import "../../../packages/perspective-viewer/src/less/variables.less";
+@import "../../../rust/perspective-viewer/src/themes/material-dense.less";
+@import "../../../rust/perspective-viewer/src/less/variables.less";
 
-perspective-column-style, perspective-expression-editor {
+perspective-column-style.dark, perspective-expression-editor.dark {
   background-color: @grey700;
   color: #FFFFFF;
   border: 1px solid @grey500;
@@ -12,13 +12,9 @@ perspective-column-style, perspective-expression-editor {
 }
 
 .homeContainer, #get_started, .dark {
-    @import "../../../packages/perspective-viewer/src/themes/material-dense.dark.less";
-   
+    @import "../../../rust/perspective-viewer/src/themes/material-dense.dark.less";
 }
 
-.docsContainer {
-    @import "../../../packages/perspective-viewer/src/themes/material-dense.less";
-}
 
 td, th, table, tbody, thead {
   border: 0;
