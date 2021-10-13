@@ -335,7 +335,7 @@ JupyterLab Widget for Research.
 
 For Application Developers, virtualized \`<perspective-viewer>\` will only
 consume the  data necessary to render the current screen, enabling _ludicrous_ _size_
-datasets with instant-load after they've been server initialzed.  Or - Clone
+datasets with instant-load after they've been server initialized.  Or - Clone
 the entire dataset to the WebAssembly runtime via efficiently via Arrow, and
 give your server a break!
 
