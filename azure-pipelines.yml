@@ -51,7 +51,7 @@ parameters:
           architecture: 'x64'
         displayName: 'Use Python $(python.version)'
   
-      - bash: python -m pip install --upgrade pip wheel setuptools "jupyterlab>=3.0.14" numpy "pyarrow>=2" "black==20.8b1" flake8-black
+      - bash: python -m pip install --upgrade pip wheel setuptools "jupyterlab>=3.0.14" numpy "pyarrow>=5" "black==20.8b1" flake8-black
         displayName: 'Install Python base dependencies'
         condition: and(succeeded(), ne(variables['python.version'], '2.7'))
   
@@ -462,7 +462,7 @@ jobs:
         architecture: 'x64'
       displayName: 'Use Python $(python.version)'
 
-    - bash: python -m pip install --upgrade pip wheel setuptools jupyterlab numpy "pyarrow>=2" "black==20.8b1" flake8-black
+    - bash: python -m pip install --upgrade pip wheel setuptools jupyterlab numpy "pyarrow>=5" "black==20.8b1" flake8-black
       displayName: 'Install Python base dependencies'
       condition: and(succeeded(), ne(variables['python.version'], '2.7'))
 
