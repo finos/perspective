@@ -26,17 +26,7 @@ try:
 
     CPU_COUNT = os.cpu_count()
 except ImportError:
-    # Python2
-    try:
-        from backports.shutil_which import which
-    except ImportError:
-        # just rely on path
-        def which(x):
-            return x
-
-    import multiprocessing
-
-    CPU_COUNT = multiprocessing.cpu_count()
+    raise Exception("Requires Python 3.7 or later")
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -54,17 +44,14 @@ requires = [
     "traitlets>=4.3.2",
 ]
 
-if sys.version_info.major < 3:
-    requires += ["backports.shutil-which"]
+if sys.version_info.major < 3 or sys.version_info.minor < 7:
+    raise Exception("Requires Python 3.7 or later")
 
-if (sys.version_info.major == 2 and sys.version_info.minor < 7) or (
-    sys.version_info.major == 3 and sys.version_info.minor < 6
-):
-    raise Exception("Requires Python 2.7/3.6 or later")
-
-requires_dev_py2 = [
+requires_dev = [
+    "black==20.8b1",
     "Faker>=1.0.0",
     "flake8>=3.7.8",
+    "flake8-black>=0.2.0",
     "mock",
     "pybind11>=2.4.0",
     "pyarrow>=0.16.0",
@@ -77,12 +64,6 @@ requires_dev_py2 = [
     "sphinx-markdown-builder>=0.5.2",
     "wheel",
 ] + requires
-
-requires_dev = [
-    "flake8-black>=0.2.0",
-    "black==20.8b1",
-] + requires_dev_py2  # for development, remember to install black and flake8-black
-
 
 def get_version(file, name="__version__"):
     """Get the version of the package from the given file by
@@ -249,8 +230,6 @@ setup(
     license="Apache 2.0",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
-        "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
