@@ -148,17 +148,17 @@ parameters:
     default:
       # Build a python wheel for Mac 10.14
       - bash: yarn _wheel_python $(python_flag) --macos
-        condition: and(succeeded(), or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule')))
+        condition: and(succeeded(), or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')))
         displayName: 'Build wheel'
 
       # Test the wheel
       - bash: cd $(System.DefaultWorkingDirectory)/python/perspective/scripts && ./test_wheels.sh $(python_flag) --macos
-        condition: and(succeeded(), or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule')))
+        condition: and(succeeded(), or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')))
         displayName: 'Test Mac Wheel'
 
       # Save the artifact to Azure storage
       - task: PublishPipelineArtifact@1
-        condition: and(succeeded(), or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule')))
+        condition: and(succeeded(), or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')))
         inputs:
           targetPath: '$(System.DefaultWorkingDirectory)/python/perspective/dist/'
           artifactName: '$(artifact_name)'
@@ -190,12 +190,12 @@ parameters:
     default:
       # Build a python wheel for Windows
       - bash: yarn _wheel_python $(python_flag)
-        condition: and(succeeded(), or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule')))
+        condition: and(succeeded(), or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')))
         displayName: 'Build Windows Wheel'
 
       # Save the artifact to Azure storage
       - task: PublishPipelineArtifact@1
-        condition: and(succeeded(), or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule')))
+        condition: and(succeeded(), or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')))
         inputs:
           targetPath: '$(System.DefaultWorkingDirectory)/python/perspective/dist/'
           artifactName: '$(artifact_name)'
@@ -304,7 +304,7 @@ jobs:
         manylinux_flag: '--manylinux2010'
         artifact_name: 'cp37-cp37m-manylinux2010_x86_64'
 
-      ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule')) }}:
+      ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')) }}:
         Python36ManyLinux2010:
           python.version: '3.6'
           python_flag: '--python36'
@@ -375,7 +375,7 @@ jobs:
         python_flag: ''
         artifact_name: 'cp37-cp37m-win64_amd'
 
-      ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule')) }}:
+      ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')) }}:
         Python38:
           python.version: '3.8'
           python_flag: '--python38'
@@ -404,7 +404,7 @@ jobs:
         python_flag: '--python39'
         artifact_name: 'cp39-cp39-macosx_10_15_x86_64'
 
-      ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule')) }}:
+      ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')) }}:
         Python36:
           python.version: '3.6'
           python_flag: '--python36'
