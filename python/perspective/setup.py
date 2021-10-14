@@ -26,7 +26,7 @@ try:
 
     CPU_COUNT = os.cpu_count()
 except ImportError:
-    raise Exception("Requires Python 3.7 or later")
+    raise Exception("Requires Python 3.6 or later")
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -44,8 +44,8 @@ requires = [
     "traitlets>=4.3.2",
 ]
 
-if sys.version_info.major < 3 or sys.version_info.minor < 7:
-    raise Exception("Requires Python 3.7 or later")
+if sys.version_info.major < 3:
+    raise Exception("Requires Python 3.6 or later")
 
 requires_dev = [
     "black==20.8b1",
@@ -240,6 +240,7 @@ setup(
     packages=find_packages(exclude=["bench", "bench.*"]),
     include_package_data=True,
     zip_safe=False,
+    python_requires=">=3.6",
     install_requires=requires,
     extras_require={"dev": requires_dev},
     ext_modules=[PSPExtension("perspective")],
