@@ -65,6 +65,7 @@ requires_dev = [
     "wheel",
 ] + requires
 
+
 def get_version(file, name="__version__"):
     """Get the version of the package from the given file by
     executing it and extracting the given `name`.
