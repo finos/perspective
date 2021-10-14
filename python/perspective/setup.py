@@ -240,7 +240,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=requires,
-    extras_require={"dev": requires_dev, "devpy2": requires_dev_py2},
+    extras_require={"dev": requires_dev},
     ext_modules=[PSPExtension("perspective")],
     cmdclass=dict(build_ext=PSPBuild, sdist=PSPCheckSDist),
 )
