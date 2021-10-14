@@ -24,16 +24,19 @@ namespace computed_function {
     using float32 = float;
     using float64 = double;
 
-    intern::intern(std::shared_ptr<t_vocab> expression_vocab)
+    intern::intern(t_vocab& expression_vocab, bool is_type_validator)
         : exprtk::igeneric_function<t_tscalar>("S")
-        , m_expression_vocab(expression_vocab) {
+        , m_expression_vocab(expression_vocab)
+        , m_is_type_validator(is_type_validator) {
+        // The sentinel is a string scalar pointing to an empty string
+        // that is stored in `expression_vocab`. Previously we were using
+        // string scalars with nullptrs to type check, which caused nullptr
+        // errors in strcmp().
         t_tscalar sentinel;
         sentinel.clear();
+        sentinel.set(m_expression_vocab.unintern_c(0));
+        sentinel.m_status = STATUS_INVALID;
 
-        // The sentinel is a string scalar that is returned to indicate a
-        // valid call to the function without actually computing any values.
-        sentinel.m_type = DTYPE_STR;
-        sentinel.m_data.m_charptr = nullptr;
         m_sentinel = sentinel;
     }
 
@@ -50,32 +53,33 @@ namespace computed_function {
         t_string_view temp_string(gt);
         std::string temp_str = std::string(temp_string.begin(), temp_string.end());
 
-        // Don't allow empty strings
+        // Don't allow empty strings from the user
         if (temp_str == "") return rval;
 
-        // If the vocab is a nullptr, we are in type checking mode - TODO might
-        // be better to make this explicit so that we never fall into an invalid
-        // mode or try to deref a nullptr, maybe with an enum or something.
-        if (m_expression_vocab == nullptr) {
+        if (m_is_type_validator) {
+            // Return the sentinel value which indicates a valid output from
+            // type checking, as the output value is not STATUS_CLEAR
             return m_sentinel;
         }
-
+    
         // Intern the string into the vocabulary, and return the index of the
         // string inside the vocabulary.
-        t_uindex interned = m_expression_vocab->get_interned(temp_str);
-        rval.set(m_expression_vocab->unintern_c(interned));
+        t_uindex interned = m_expression_vocab.get_interned(temp_str);
+        const char* ptr = m_expression_vocab.unintern_c(interned);
+        rval.set(ptr);
+
+        std::cout << "just interned: '" << ptr << "' at addr: " << &ptr << std::endl;
         return rval;
     }
 
-    concat::concat(std::shared_ptr<t_vocab> expression_vocab)
-        : m_expression_vocab(expression_vocab) {
+    concat::concat(t_vocab& expression_vocab, bool is_type_validator)
+        : m_expression_vocab(expression_vocab)
+        , m_is_type_validator(is_type_validator) {
         t_tscalar sentinel;
         sentinel.clear();
+        sentinel.set(m_expression_vocab.unintern_c(0));
+        sentinel.m_status = STATUS_INVALID;
 
-        // The sentinel is a string scalar that is returned to indicate a
-        // valid call to the function without actually computing any values.
-        sentinel.m_type = DTYPE_STR;
-        sentinel.m_data.m_charptr = nullptr;
         m_sentinel = sentinel;
     }
 
@@ -87,6 +91,8 @@ namespace computed_function {
         t_tscalar rval;
         rval.clear();
         rval.m_type = DTYPE_STR;
+
+        m_expression_vocab.pprint_vocabulary();
 
         if (parameters.size() == 0)
             return rval;
@@ -107,7 +113,7 @@ namespace computed_function {
 
                 // current param is the right type and we are type checking,
                 // so move on to the next param
-                if (m_expression_vocab == nullptr) {
+                if (m_is_type_validator) {
                     continue;
                 }
 
@@ -117,36 +123,37 @@ namespace computed_function {
                 }
 
                 // Read the string out from the scalar
-                result += temp_scalar.to_string();
+                std::cout << "ts scalar: " << temp_scalar.repr() << std::endl;
+                std::string ts = temp_scalar.to_string();
+                std::cout << "ts: '" << ts << "'" << std::endl;
+                result += ts;
             } else {
                 // An invalid call.
                 return rval;
             }
         }
 
-        // don't try to intern an empty string as it will throw an error, but
-        // by this point we know the params are valid - so return the sentinel
-        // string value.
-        if (result == "" || m_expression_vocab == nullptr) {
+        // We know the params are valid - so return the sentinel string value.
+        if (result == "" || m_is_type_validator) {
             return m_sentinel;
         }
 
-        t_uindex interned = m_expression_vocab->get_interned(result);
-        rval.set(m_expression_vocab->unintern_c(interned));
+        std::cout << "result: " << result << std::endl;
+        t_uindex interned = m_expression_vocab.get_interned(result);
+        rval.set(m_expression_vocab.unintern_c(interned));
 
         return rval;
     }
 
-    upper::upper(std::shared_ptr<t_vocab> expression_vocab)
+    upper::upper(t_vocab& expression_vocab, bool is_type_validator)
         : exprtk::igeneric_function<t_tscalar>("T")
-        , m_expression_vocab(expression_vocab) {
+        , m_expression_vocab(expression_vocab)
+        , m_is_type_validator(is_type_validator) {
         t_tscalar sentinel;
         sentinel.clear();
+        sentinel.set(m_expression_vocab.unintern_c(0));
+        sentinel.m_status = STATUS_INVALID;
 
-        // The sentinel is a string scalar that is returned to indicate a
-        // valid call to the function without actually computing any values.
-        sentinel.m_type = DTYPE_STR;
-        sentinel.m_data.m_charptr = nullptr;
         m_sentinel = sentinel;
     }
 
@@ -182,27 +189,26 @@ namespace computed_function {
         // don't try to intern an empty string as it will throw an error, but
         // by this point we know the params are valid - so return the sentinel
         // string value.
-        if (temp_str == "" || m_expression_vocab == nullptr) {
+        if (temp_str == "" || m_is_type_validator) {
             return m_sentinel;
         }
 
         boost::to_upper(temp_str);
 
-        t_uindex interned = m_expression_vocab->get_interned(temp_str);
-        rval.set(m_expression_vocab->unintern_c(interned));
+        t_uindex interned = m_expression_vocab.get_interned(temp_str);
+        rval.set(m_expression_vocab.unintern_c(interned));
         return rval;
     }
 
-    lower::lower(std::shared_ptr<t_vocab> expression_vocab)
+    lower::lower(t_vocab& expression_vocab, bool is_type_validator)
         : exprtk::igeneric_function<t_tscalar>("T")
-        , m_expression_vocab(expression_vocab) {
+        , m_expression_vocab(expression_vocab)
+        , m_is_type_validator(is_type_validator) {
         t_tscalar sentinel;
         sentinel.clear();
+        sentinel.set(m_expression_vocab.unintern_c(0));
+        sentinel.m_status = STATUS_INVALID;
 
-        // The sentinel is a string scalar that is returned to indicate a
-        // valid call to the function without actually computing any values.
-        sentinel.m_type = DTYPE_STR;
-        sentinel.m_data.m_charptr = nullptr;
         m_sentinel = sentinel;
     }
 
@@ -237,28 +243,19 @@ namespace computed_function {
         // don't try to intern an empty string as it will throw an error, but
         // by this point we know the params are valid - so return the sentinel
         // string value.
-        if (temp_str == "" || m_expression_vocab == nullptr) {
+        if (temp_str == "" || m_is_type_validator) {
             return m_sentinel;
         }
 
         boost::to_lower(temp_str);
 
-        t_uindex interned = m_expression_vocab->get_interned(temp_str);
-        rval.set(m_expression_vocab->unintern_c(interned));
+        t_uindex interned = m_expression_vocab.get_interned(temp_str);
+        rval.set(m_expression_vocab.unintern_c(interned));
         return rval;
     }
 
-    length::length(std::shared_ptr<t_vocab> expression_vocab)
-        : exprtk::igeneric_function<t_tscalar>("T")
-        , m_expression_vocab(expression_vocab) {
-        t_tscalar sentinel;
-        sentinel.clear();
-
-        // The sentinel is a string scalar that is returned to indicate a
-        // valid call to the function without actually computing any values.
-        sentinel.m_type = DTYPE_FLOAT64;
-        m_sentinel = sentinel;
-    }
+    length::length()
+        : exprtk::igeneric_function<t_tscalar>("T") {}
 
     length::~length() {}
 
@@ -293,24 +290,16 @@ namespace computed_function {
         }
 
         temp_str = temp_scalar.to_string();
-
-        if (m_expression_vocab == nullptr) {
-            return m_sentinel;
-        }
-
-        rval.set(static_cast<double>(temp_str.size()));
+        rval.set(static_cast<double>(temp_str.length()));
         return rval;
     }
 
-    order::order(std::shared_ptr<t_vocab> expression_vocab)
+    order::order(bool is_type_validator)
         : m_order_map({})
         , m_order_idx(0)
-        , m_expression_vocab(expression_vocab) {
+        , m_is_type_validator(is_type_validator) {
         t_tscalar sentinel;
         sentinel.clear();
-
-        // The sentinel is a string scalar that is returned to indicate a
-        // valid call to the function without actually computing any values.
         sentinel.m_type = DTYPE_FLOAT64;
         m_sentinel = sentinel;
     }
@@ -327,18 +316,45 @@ namespace computed_function {
         // uint comparisons to numeric literals and other numeric columns would
         // always be false, as comparisons are False across types.
         rval.m_type = DTYPE_FLOAT64;
-        std::string temp_str;
 
         if (parameters.size() <= 1) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        // Validate that the input column is of string type
+        const t_generic_type& input_scalar_gt = parameters[0];
+        
+        // if input is not scalar, return
+        if (input_scalar_gt.type != t_generic_type::e_scalar) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        t_scalar_view input_scalar_view(input_scalar_gt);
+        t_tscalar input_scalar = input_scalar_view();
+
+        // Invalid type
+        if (input_scalar.get_dtype() != DTYPE_STR
+            || input_scalar.m_status == STATUS_CLEAR) {
+            rval.m_status = STATUS_CLEAR;
             return rval;
         }
 
         // generate the map if not generated
         if (m_order_map.size() == 0) {
-            for (auto i = 0; i < parameters.size(); ++i) {
+            // Validate order parameters
+            for (auto i = 1; i < parameters.size(); ++i) {
                 // Because all strings are interned, there should be no string
                 // literals passed to any functions.
-                t_generic_type& gt = parameters[i];
+                const t_generic_type& gt = parameters[i];
+
+                // Make sure all params are scalars too
+                if (gt.type != t_generic_type::e_scalar) {
+                    rval.m_status = STATUS_CLEAR;
+                    return rval;
+                }
+
                 t_scalar_view temp(gt);
                 t_tscalar temp_scalar = temp();
 
@@ -351,7 +367,7 @@ namespace computed_function {
 
                 // current param is the right type and we are type checking,
                 // so move on to the next param
-                if (m_expression_vocab == nullptr) {
+                if (m_is_type_validator) {
                     continue;
                 }
 
@@ -371,10 +387,8 @@ namespace computed_function {
             }
         }
 
-        // don't try to intern an empty string as it will throw an error, but
-        // by this point we know the params are valid - so return the sentinel
-        // string value.
-        if (m_expression_vocab == nullptr) {
+        // We know the params are valid - so return the sentinel float value.
+        if (m_is_type_validator) {
             return m_sentinel;
         }
 
@@ -400,6 +414,12 @@ namespace computed_function {
         }
 
         return rval;
+    }
+
+    void
+    order::clear_order_map() {
+        m_order_map.clear();
+        m_order_idx = 0;
     }
 
     hour_of_day::hour_of_day()
@@ -465,16 +485,15 @@ namespace computed_function {
         "03 March", "04 April", "05 May", "06 June", "07 July", "08 August",
         "09 September", "10 October", "11 November", "12 December"};
 
-    day_of_week::day_of_week(std::shared_ptr<t_vocab> expression_vocab)
+    day_of_week::day_of_week(t_vocab& expression_vocab, bool is_type_validator)
         : exprtk::igeneric_function<t_tscalar>("T")
-        , m_expression_vocab(expression_vocab) {
+        , m_expression_vocab(expression_vocab)
+        , m_is_type_validator(is_type_validator) {
         t_tscalar sentinel;
         sentinel.clear();
+        sentinel.set(m_expression_vocab.unintern_c(0));
+        sentinel.m_status = STATUS_INVALID;
 
-        // The sentinel is a string scalar that is returned to indicate a
-        // valid call to the function without actually computing any values.
-        sentinel.m_type = DTYPE_STR;
-        sentinel.m_data.m_charptr = nullptr;
         m_sentinel = sentinel;
     }
 
@@ -503,7 +522,7 @@ namespace computed_function {
 
         val.set(temp_scalar);
 
-        if (m_expression_vocab == nullptr) {
+        if (m_is_type_validator) {
             return m_sentinel;
         }
 
@@ -545,21 +564,20 @@ namespace computed_function {
 
         // Intern the string pointer so it does not fall out of reference and
         // cause a memory error.
-        t_uindex interned = m_expression_vocab->get_interned(result);
-        rval.set(m_expression_vocab->unintern_c(interned));
+        t_uindex interned = m_expression_vocab.get_interned(result);
+        rval.set(m_expression_vocab.unintern_c(interned));
         return rval;
     }
 
-    month_of_year::month_of_year(std::shared_ptr<t_vocab> expression_vocab)
+    month_of_year::month_of_year(t_vocab& expression_vocab, bool is_type_validator)
         : exprtk::igeneric_function<t_tscalar>("T")
-        , m_expression_vocab(expression_vocab) {
+        , m_expression_vocab(expression_vocab)
+        , m_is_type_validator(is_type_validator) {
         t_tscalar sentinel;
         sentinel.clear();
+        sentinel.set(m_expression_vocab.unintern_c(0));
+        sentinel.m_status = STATUS_INVALID;
 
-        // The sentinel is a string scalar that is returned to indicate a
-        // valid call to the function without actually computing any values.
-        sentinel.m_type = DTYPE_STR;
-        sentinel.m_data.m_charptr = nullptr;
         m_sentinel = sentinel;
     }
 
@@ -589,7 +607,7 @@ namespace computed_function {
 
         val.set(temp_scalar);
 
-        if (m_expression_vocab == nullptr) {
+        if (m_is_type_validator) {
             return m_sentinel;
         }
 
@@ -622,8 +640,8 @@ namespace computed_function {
 
         // Intern the string pointer so it does not fall out of reference and
         // cause a memory error.
-        t_uindex interned = m_expression_vocab->get_interned(result);
-        rval.set(m_expression_vocab->unintern_c(interned));
+        t_uindex interned = m_expression_vocab.get_interned(result);
+        rval.set(m_expression_vocab.unintern_c(interned));
         return rval;
     }
 
@@ -1259,16 +1277,14 @@ namespace computed_function {
         return rval;
     }
 
-    to_string::to_string(std::shared_ptr<t_vocab> expression_vocab)
+    to_string::to_string(t_vocab& expression_vocab, bool is_type_validator)
         : exprtk::igeneric_function<t_tscalar>("T")
-        , m_expression_vocab(expression_vocab) {
+        , m_expression_vocab(expression_vocab)
+        , m_is_type_validator(is_type_validator) {
         t_tscalar sentinel;
         sentinel.clear();
-
-        // The sentinel is a string scalar that is returned to indicate a
-        // valid call to the function without actually computing any values.
-        sentinel.m_type = DTYPE_STR;
-        sentinel.m_data.m_charptr = nullptr;
+        sentinel.set(m_expression_vocab.unintern_c(0));
+        sentinel.m_status = STATUS_INVALID;
         m_sentinel = sentinel;
     }
 
@@ -1295,12 +1311,12 @@ namespace computed_function {
         // don't try to intern an empty string as it will throw an error, but
         // by this point we know the params are valid - so return the sentinel
         // string value.
-        if (temp_str == "" || m_expression_vocab == nullptr) {
+        if (temp_str == "" || m_is_type_validator) {
             return m_sentinel;
         }
 
-        t_uindex interned = m_expression_vocab->get_interned(temp_str);
-        rval.set(m_expression_vocab->unintern_c(interned));
+        t_uindex interned = m_expression_vocab.get_interned(temp_str);
+        rval.set(m_expression_vocab.unintern_c(interned));
         return rval;
     }
 

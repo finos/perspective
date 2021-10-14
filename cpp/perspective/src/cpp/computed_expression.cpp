@@ -28,184 +28,53 @@ std::shared_ptr<exprtk::parser<t_tscalar>>
 t_computed_expression_parser::PARSER = 
     std::make_shared<exprtk::parser<t_tscalar>>(t_computed_expression_parser::PARSER_COMPILE_OPTIONS);
 
-// Exprtk functions without any state can be initialized statically
-computed_function::bucket t_computed_expression_parser::BUCKET_FN
-    = computed_function::bucket();
+computed_function::bucket
+    t_computed_expression_parser::BUCKET_FN = computed_function::bucket();
 
-computed_function::hour_of_day t_computed_expression_parser::HOUR_OF_DAY_FN
-    = computed_function::hour_of_day();
+computed_function::hour_of_day
+    t_computed_expression_parser::HOUR_OF_DAY_FN = computed_function::hour_of_day();
 
-computed_function::inrange_fn t_computed_expression_parser::INRANGE_FN
-    = computed_function::inrange_fn();
+computed_function::percent_of
+t_computed_expression_parser::PERCENT_OF_FN = computed_function::percent_of();
 
-computed_function::min_fn t_computed_expression_parser::MIN_FN
-    = computed_function::min_fn();
+computed_function::inrange_fn
+t_computed_expression_parser::INRANGE_FN = computed_function::inrange_fn();
 
-computed_function::max_fn t_computed_expression_parser::MAX_FN
-    = computed_function::max_fn();
+computed_function::min_fn
+t_computed_expression_parser::MIN_FN = computed_function::min_fn();
 
-computed_function::percent_of t_computed_expression_parser::PERCENT_OF_FN
-    = computed_function::percent_of();
+computed_function::max_fn
+t_computed_expression_parser::MAX_FN = computed_function::max_fn();
 
-computed_function::is_null t_computed_expression_parser::IS_NULL_FN
-    = computed_function::is_null();
+computed_function::length
+t_computed_expression_parser::LENGTH_FN = computed_function::length();
 
-computed_function::is_not_null t_computed_expression_parser::IS_NOT_NULL_FN
-    = computed_function::is_not_null();
+computed_function::is_null
+t_computed_expression_parser::IS_NULL_FN = computed_function::is_null();
 
-computed_function::make_date t_computed_expression_parser::MAKE_DATE_FN
-    = computed_function::make_date();
+computed_function::is_not_null
+t_computed_expression_parser::IS_NOT_NULL_FN = computed_function::is_not_null();
 
-computed_function::to_integer t_computed_expression_parser::TO_INTEGER_FN
-    = computed_function::to_integer();
+computed_function::to_integer
+t_computed_expression_parser::TO_INTEGER_FN = computed_function::to_integer();
 
-computed_function::to_float t_computed_expression_parser::TO_FLOAT_FN
-    = computed_function::to_float();
+computed_function::to_float
+t_computed_expression_parser::TO_FLOAT_FN = computed_function::to_float();
 
-computed_function::to_boolean t_computed_expression_parser::TO_BOOLEAN_FN
-    = computed_function::to_boolean();
+computed_function::to_boolean
+t_computed_expression_parser::TO_BOOLEAN_FN = computed_function::to_boolean();
 
-computed_function::make_datetime t_computed_expression_parser::MAKE_DATETIME_FN
-    = computed_function::make_datetime();
+computed_function::make_date
+t_computed_expression_parser::MAKE_DATE_FN = computed_function::make_date();
 
-// As well as functions used for validation that have state but don't
-// need it to validate input types.
-computed_function::day_of_week
-    t_computed_expression_parser::DAY_OF_WEEK_VALIDATOR_FN
-    = computed_function::day_of_week(nullptr);
-
-computed_function::month_of_year
-    t_computed_expression_parser::MONTH_OF_YEAR_VALIDATOR_FN
-    = computed_function::month_of_year(nullptr);
-
-computed_function::intern t_computed_expression_parser::INTERN_VALIDATOR_FN
-    = computed_function::intern(nullptr);
-
-computed_function::concat t_computed_expression_parser::CONCAT_VALIDATOR_FN
-    = computed_function::concat(nullptr);
-
-computed_function::order t_computed_expression_parser::ORDER_VALIDATOR_FN
-    = computed_function::order(nullptr);
-
-computed_function::upper t_computed_expression_parser::UPPER_VALIDATOR_FN
-    = computed_function::upper(nullptr);
-
-computed_function::lower t_computed_expression_parser::LOWER_VALIDATOR_FN
-    = computed_function::lower(nullptr);
-
-computed_function::length t_computed_expression_parser::LENGTH_VALIDATOR_FN
-    = computed_function::length(nullptr);
-
-computed_function::to_string
-    t_computed_expression_parser::TO_STRING_VALIDATOR_FN
-    = computed_function::to_string(nullptr);
+computed_function::make_datetime
+t_computed_expression_parser::MAKE_DATETIME_FN = computed_function::make_datetime();
 
 t_tscalar
 t_computed_expression_parser::TRUE_SCALAR = mktscalar(true);
 
 t_tscalar
 t_computed_expression_parser::FALSE_SCALAR = mktscalar(false);
-
-#define REGISTER_COMPUTE_FUNCTIONS(vocab)                                      \
-    computed_function::day_of_week day_of_week_fn                              \
-        = computed_function::day_of_week(vocab);                               \
-    computed_function::month_of_year month_of_year_fn                          \
-        = computed_function::month_of_year(vocab);                             \
-    computed_function::intern intern_fn = computed_function::intern(vocab);    \
-    computed_function::concat concat_fn = computed_function::concat(vocab);    \
-    computed_function::order order_fn = computed_function::order(vocab);       \
-    computed_function::upper upper_fn = computed_function::upper(vocab);       \
-    computed_function::lower lower_fn = computed_function::lower(vocab);       \
-    computed_function::length length_fn = computed_function::length(vocab);    \
-    computed_function::to_string to_string_fn                                  \
-        = computed_function::to_string(vocab);                                 \
-    sym_table.add_function("today", computed_function::today);                 \
-    sym_table.add_function("now", computed_function::now);                     \
-    sym_table.add_function("bucket", t_computed_expression_parser::BUCKET_FN); \
-    sym_table.add_function(                                                    \
-        "hour_of_day", t_computed_expression_parser::HOUR_OF_DAY_FN);          \
-    sym_table.add_function("day_of_week", day_of_week_fn);                     \
-    sym_table.add_function("month_of_year", month_of_year_fn);                 \
-    sym_table.add_function("intern", intern_fn);                               \
-    sym_table.add_function("concat", concat_fn);                               \
-    sym_table.add_function("order", order_fn);                                 \
-    sym_table.add_function("upper", upper_fn);                                 \
-    sym_table.add_function("lower", lower_fn);                                 \
-    sym_table.add_function("length", length_fn);                               \
-    sym_table.add_function("string", to_string_fn);                            \
-    sym_table.add_reserved_function(                                           \
-        "inrange", t_computed_expression_parser::INRANGE_FN);                  \
-    sym_table.add_reserved_function(                                           \
-        "min", t_computed_expression_parser::MIN_FN);                          \
-    sym_table.add_reserved_function(                                           \
-        "max", t_computed_expression_parser::MAX_FN);                          \
-    sym_table.add_function(                                                    \
-        "percent_of", t_computed_expression_parser::PERCENT_OF_FN);            \
-    sym_table.add_function(                                                    \
-        "is_null", t_computed_expression_parser::IS_NULL_FN);                  \
-    sym_table.add_function(                                                    \
-        "is_not_null", t_computed_expression_parser::IS_NOT_NULL_FN);          \
-    sym_table.add_function(                                                    \
-        "integer", t_computed_expression_parser::TO_INTEGER_FN);               \
-    sym_table.add_function(                                                    \
-        "float", t_computed_expression_parser::TO_FLOAT_FN);                   \
-    sym_table.add_function(                                                    \
-        "boolean", t_computed_expression_parser::TO_BOOLEAN_FN);               \
-    sym_table.add_function(                                                    \
-        "date", t_computed_expression_parser::MAKE_DATE_FN);                   \
-    sym_table.add_function(                                                    \
-        "datetime", t_computed_expression_parser::MAKE_DATETIME_FN);
-
-#define REGISTER_VALIDATION_FUNCTIONS()                                        \
-    sym_table.add_function("today", computed_function::today);                 \
-    sym_table.add_function("now", computed_function::now);                     \
-    sym_table.add_function("bucket", t_computed_expression_parser::BUCKET_FN); \
-    sym_table.add_function(                                                    \
-        "hour_of_day", t_computed_expression_parser::HOUR_OF_DAY_FN);          \
-    sym_table.add_function("day_of_week",                                      \
-        t_computed_expression_parser::DAY_OF_WEEK_VALIDATOR_FN);               \
-    sym_table.add_function("month_of_year",                                    \
-        t_computed_expression_parser::MONTH_OF_YEAR_VALIDATOR_FN);             \
-    sym_table.add_function(                                                    \
-        "intern", t_computed_expression_parser::INTERN_VALIDATOR_FN);          \
-    sym_table.add_function(                                                    \
-        "concat", t_computed_expression_parser::CONCAT_VALIDATOR_FN);          \
-    sym_table.add_function(                                                    \
-        "order", t_computed_expression_parser::ORDER_VALIDATOR_FN);            \
-    sym_table.add_function(                                                    \
-        "upper", t_computed_expression_parser::UPPER_VALIDATOR_FN);            \
-    sym_table.add_function(                                                    \
-        "lower", t_computed_expression_parser::LOWER_VALIDATOR_FN);            \
-    sym_table.add_function(                                                    \
-        "length", t_computed_expression_parser::LENGTH_VALIDATOR_FN);          \
-    sym_table.add_reserved_function(                                           \
-        "inrange", t_computed_expression_parser::INRANGE_FN);                  \
-    sym_table.add_reserved_function(                                           \
-        "min", t_computed_expression_parser::MIN_FN);                          \
-    sym_table.add_reserved_function(                                           \
-        "max", t_computed_expression_parser::MAX_FN);                          \
-    sym_table.add_function(                                                    \
-        "percent_of", t_computed_expression_parser::PERCENT_OF_FN);            \
-    sym_table.add_function(                                                    \
-        "is_null", t_computed_expression_parser::IS_NULL_FN);                  \
-    sym_table.add_function(                                                    \
-        "is_not_null", t_computed_expression_parser::IS_NOT_NULL_FN);          \
-    sym_table.add_function(                                                    \
-        "string", t_computed_expression_parser::TO_STRING_VALIDATOR_FN);       \
-    sym_table.add_function(                                                    \
-        "integer", t_computed_expression_parser::TO_INTEGER_FN);               \
-    sym_table.add_function(                                                    \
-        "float", t_computed_expression_parser::TO_FLOAT_FN);                   \
-    sym_table.add_function(                                                    \
-        "boolean", t_computed_expression_parser::TO_BOOLEAN_FN);               \
-    sym_table.add_function(                                                    \
-        "date", t_computed_expression_parser::MAKE_DATE_FN);                   \
-    sym_table.add_function(                                                    \
-        "datetime", t_computed_expression_parser::MAKE_DATETIME_FN);
-
-#define REGISTER_SCALAR_CONSTANTS()                                                         \
-    sym_table.add_constant("True", t_computed_expression_parser::TRUE_SCALAR);              \
-    sym_table.add_constant("False", t_computed_expression_parser::FALSE_SCALAR);            \
 
 /******************************************************************************
  *
@@ -221,24 +90,23 @@ t_computed_expression::t_computed_expression(
     , m_expression_string(expression_string)
     , m_parsed_expression_string(parsed_expression_string)
     , m_column_ids(std::move(column_ids))
-    , m_expression_vocab(nullptr)
     , m_dtype(dtype) {}
 
 void
 t_computed_expression::compute(std::shared_ptr<t_data_table> source_table,
     std::shared_ptr<t_data_table> destination_table,
-    std::shared_ptr<t_vocab> vocab) const {
+    t_vocab& vocab) const {
     // TODO: share symtables across pre/re/compute
     exprtk::symbol_table<t_tscalar> sym_table;
+    std::cout << "COMPUTE" << std::endl;
 
     // pi, infinity, etc.
     sym_table.add_constants();
 
-    // "True" and "False" as boolean scalars
-    REGISTER_SCALAR_CONSTANTS()
-
-    // Custom functions from computed_functions.cpp
-    REGISTER_COMPUTE_FUNCTIONS(vocab)
+    // Create a function store, with is_type_validator set to false as we
+    // are calculating values, not type-checking.
+    t_computed_function_store function_store(vocab, false);
+    function_store.register_computed_functions(sym_table);
     
     exprtk::expression<t_tscalar> expr_definition;
     std::vector<std::pair<std::string, t_tscalar>> values;
@@ -254,7 +122,7 @@ t_computed_expression::compute(std::shared_ptr<t_data_table> source_table,
         columns[column_id] = source_table->get_column(column_name);
 
         t_tscalar rval;
-        // rval.clear();
+        rval.clear();
         rval.m_type = columns[column_id]->get_dtype();
 
         values[cidx] = std::pair<std::string, t_tscalar>(column_id, rval);
@@ -294,6 +162,9 @@ t_computed_expression::compute(std::shared_ptr<t_data_table> source_table,
 
         output_column->set_scalar(ridx, value);
     }
+
+    function_store.clear_computed_function_state();
+    std::cout << "finished COMPUTE" << std::endl;
 };
 
 const std::string&
@@ -344,12 +215,15 @@ t_computed_expression_parser::precompute(const std::string& expression_alias,
     const std::string& expression_string,
     const std::string& parsed_expression_string,
     const std::vector<std::pair<std::string, std::string>>& column_ids,
-    std::shared_ptr<t_schema> schema) {
+    std::shared_ptr<t_schema> schema,
+    t_vocab& vocab) {
     exprtk::symbol_table<t_tscalar> sym_table;
     sym_table.add_constants();
 
-    REGISTER_SCALAR_CONSTANTS()
-    REGISTER_VALIDATION_FUNCTIONS()
+    // Create a function store, with is_type_validator set to true as we are
+    // just getting the output types.
+    t_computed_function_store function_store(vocab, true);
+    function_store.register_computed_functions(sym_table);
 
     std::vector<t_tscalar> values;
 
@@ -372,6 +246,7 @@ t_computed_expression_parser::precompute(const std::string& expression_alias,
 
     exprtk::expression<t_tscalar> expr_definition;
     expr_definition.register_symbol_table(sym_table);
+    std::cout << "started precompute" << std::endl;
 
     if (!t_computed_expression_parser::PARSER->compile(
             parsed_expression_string, expr_definition)) {
@@ -384,6 +259,9 @@ t_computed_expression_parser::precompute(const std::string& expression_alias,
     }
 
     t_tscalar v = expr_definition.value();
+    function_store.clear_computed_function_state();
+
+    std::cout << "finished precompute" << std::endl;
 
     return std::make_shared<t_computed_expression>(expression_alias,
         expression_string, parsed_expression_string, column_ids, v.get_dtype());
@@ -394,14 +272,17 @@ t_computed_expression_parser::get_dtype(const std::string& expression_alias,
     const std::string& expression_string,
     const std::string& parsed_expression_string,
     const std::vector<std::pair<std::string, std::string>>& column_ids,
-    const t_schema& schema, t_expression_error& error) {
+    const t_schema& schema, t_expression_error& error,
+    t_vocab& vocab) {
     exprtk::symbol_table<t_tscalar> sym_table;
     sym_table.add_constants();
 
     std::vector<t_tscalar> values;
 
-    REGISTER_SCALAR_CONSTANTS()
-    REGISTER_VALIDATION_FUNCTIONS()
+    // Create a function store, with is_type_validator set to true as we are
+    // just validating the output types.
+    t_computed_function_store function_store(vocab, true);
+    function_store.register_computed_functions(sym_table);
 
     auto num_input_columns = column_ids.size();
     values.resize(num_input_columns);
@@ -470,6 +351,8 @@ t_computed_expression_parser::get_dtype(const std::string& expression_alias,
     t_tscalar v = expr_definition.value();
     t_dtype dtype = v.get_dtype();
 
+    function_store.clear_computed_function_state();
+
     if (v.m_status == STATUS_CLEAR || dtype == DTYPE_NONE) {
         error.m_error_message
             = "Type Error - inputs do not resolve to a valid expression.";
@@ -526,5 +409,57 @@ std::map<std::string, t_expression_error>
 t_validated_expression_map::get_expression_errors() const {
     return m_expression_errors;
 }
+
+t_computed_function_store::t_computed_function_store(
+    t_vocab& vocab, bool is_type_validator)
+    : m_day_of_week_fn(computed_function::day_of_week(vocab, is_type_validator))
+    , m_month_of_year_fn(computed_function::month_of_year(vocab, is_type_validator))
+    , m_intern_fn(computed_function::intern(vocab, is_type_validator))
+    , m_concat_fn(computed_function::concat(vocab, is_type_validator))
+    , m_order_fn(computed_function::order(is_type_validator))
+    , m_upper_fn(computed_function::upper(vocab, is_type_validator))
+    , m_lower_fn(computed_function::lower(vocab, is_type_validator))
+    , m_to_string_fn(computed_function::to_string(vocab, is_type_validator)) {}
+
+void
+t_computed_function_store::register_computed_functions(
+    exprtk::symbol_table<t_tscalar>& sym_table) {
+    sym_table.add_function("bucket", t_computed_expression_parser::BUCKET_FN);
+    sym_table.add_reserved_function("inrange", t_computed_expression_parser::INRANGE_FN);
+    sym_table.add_reserved_function("min", t_computed_expression_parser::MIN_FN);
+    sym_table.add_reserved_function("max", t_computed_expression_parser::MAX_FN);
+    sym_table.add_function("hour_of_day", t_computed_expression_parser::HOUR_OF_DAY_FN);
+    sym_table.add_function("day_of_week", m_day_of_week_fn);
+    sym_table.add_function("month_of_year", m_month_of_year_fn);
+    sym_table.add_function("intern", m_intern_fn);
+    sym_table.add_function("concat", m_concat_fn);
+    sym_table.add_function("order", m_order_fn);
+    sym_table.add_function("upper", m_upper_fn);
+    sym_table.add_function("lower", m_lower_fn);
+    sym_table.add_function("length", t_computed_expression_parser::LENGTH_FN);
+    sym_table.add_function("string", m_to_string_fn);
+    sym_table.add_function("percent_of", t_computed_expression_parser::PERCENT_OF_FN);
+    sym_table.add_function("is_null", t_computed_expression_parser::IS_NULL_FN);
+    sym_table.add_function("is_not_null", t_computed_expression_parser::IS_NOT_NULL_FN);
+    sym_table.add_function("integer", t_computed_expression_parser::TO_INTEGER_FN);
+    sym_table.add_function("float", t_computed_expression_parser::TO_FLOAT_FN);
+    sym_table.add_function("boolean", t_computed_expression_parser::TO_BOOLEAN_FN);
+    sym_table.add_function("date", t_computed_expression_parser::MAKE_DATE_FN);
+    sym_table.add_function("datetime", t_computed_expression_parser::MAKE_DATETIME_FN);
+
+    // Register static free functions as well
+    sym_table.add_function("today", computed_function::today);
+    sym_table.add_function("now", computed_function::now);
+
+    // And scalar constants
+    sym_table.add_constant("True", t_computed_expression_parser::TRUE_SCALAR);
+    sym_table.add_constant("False", t_computed_expression_parser::FALSE_SCALAR);
+}
+
+void
+t_computed_function_store::clear_computed_function_state() {
+    m_order_fn.clear_order_map();
+}
+
 
 } // end namespace perspective

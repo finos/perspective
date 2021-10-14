@@ -109,6 +109,12 @@ t_gnode::init() {
         input_port->get_table()->flatten();
     }
 
+    m_expression_vocab = std::make_shared<t_vocab>();
+    m_expression_vocab->init(false);
+    
+    // String at index 0 is always "" empty string
+    m_expression_vocab->get_interned("");
+
     m_init = true;
 }
 
@@ -873,6 +879,8 @@ t_gnode::_register_context(
         pkeyed_table = m_gstate->get_pkeyed_table();
     }
 
+    t_vocab& expression_vocab = *(m_expression_vocab);
+
     switch (type) {
         case TWO_SIDED_CONTEXT: {
             set_ctx_state<t_ctx2>(ptr_);
@@ -880,7 +888,7 @@ t_gnode::_register_context(
             ctx->reset();
 
             if (should_update) {
-                ctx->compute_expressions(pkeyed_table);
+                ctx->compute_expressions(pkeyed_table, expression_vocab);
                 update_context_from_state<t_ctx2>(ctx, name, pkeyed_table);
             }
         } break;
@@ -890,7 +898,7 @@ t_gnode::_register_context(
             ctx->reset();
 
             if (should_update) {
-                ctx->compute_expressions(pkeyed_table);
+                ctx->compute_expressions(pkeyed_table, expression_vocab);
                 update_context_from_state<t_ctx1>(ctx, name, pkeyed_table);
             }
         } break;
@@ -900,7 +908,7 @@ t_gnode::_register_context(
             ctx->reset();
 
             if (should_update) {
-                ctx->compute_expressions(pkeyed_table);
+                ctx->compute_expressions(pkeyed_table, expression_vocab);
                 update_context_from_state<t_ctx0>(ctx, name, pkeyed_table);
             }
         } break;
@@ -920,7 +928,7 @@ t_gnode::_register_context(
             ctx->reset();
 
             if (should_update) {
-                ctx->compute_expressions(pkeyed_table);
+                ctx->compute_expressions(pkeyed_table, expression_vocab);
                 update_context_from_state<t_ctx_grouped_pkey>(
                     ctx, name, pkeyed_table);
             }
@@ -1003,25 +1011,27 @@ t_gnode::notify_contexts(std::shared_ptr<t_data_table> flattened) {
 
 void
 t_gnode::_compute_expressions(std::shared_ptr<t_data_table> flattened_masked) {
+    t_vocab& expression_vocab = *(m_expression_vocab);
+
     for (const auto& iter : m_contexts) {
         const t_ctx_handle& ctxh = iter.second;
         switch (ctxh.get_type()) {
             case TWO_SIDED_CONTEXT: {
                 t_ctx2* ctx = static_cast<t_ctx2*>(ctxh.m_ctx);
-                ctx->compute_expressions(flattened_masked);
+                ctx->compute_expressions(flattened_masked, expression_vocab);
             } break;
             case ONE_SIDED_CONTEXT: {
                 t_ctx1* ctx = static_cast<t_ctx1*>(ctxh.m_ctx);
-                ctx->compute_expressions(flattened_masked);
+                ctx->compute_expressions(flattened_masked, expression_vocab);
             } break;
             case ZERO_SIDED_CONTEXT: {
                 t_ctx0* ctx = static_cast<t_ctx0*>(ctxh.m_ctx);
-                ctx->compute_expressions(flattened_masked);
+                ctx->compute_expressions(flattened_masked, expression_vocab);
             } break;
             case GROUPED_PKEY_CONTEXT: {
                 t_ctx_grouped_pkey* ctx
                     = static_cast<t_ctx_grouped_pkey*>(ctxh.m_ctx);
-                ctx->compute_expressions(flattened_masked);
+                ctx->compute_expressions(flattened_masked, expression_vocab);
             } break;
             case UNIT_CONTEXT:
                 break;
@@ -1044,6 +1054,8 @@ t_gnode::_compute_expressions(std::shared_ptr<t_data_table> master,
     std::shared_ptr<t_data_table> existed
         = m_oports[PSP_PORT_EXISTED]->get_table();
 
+    t_vocab& expression_vocab = *(m_expression_vocab);
+
     for (const auto& iter : m_contexts) {
         const t_ctx_handle& ctxh = iter.second;
 
@@ -1051,23 +1063,23 @@ t_gnode::_compute_expressions(std::shared_ptr<t_data_table> master,
             case TWO_SIDED_CONTEXT: {
                 t_ctx2* ctx = static_cast<t_ctx2*>(ctxh.m_ctx);
                 ctx->compute_expressions(master, flattened, delta, prev,
-                    current, transitions, existed);
+                    current, transitions, existed, expression_vocab);
             } break;
             case ONE_SIDED_CONTEXT: {
                 t_ctx1* ctx = static_cast<t_ctx1*>(ctxh.m_ctx);
                 ctx->compute_expressions(master, flattened, delta, prev,
-                    current, transitions, existed);
+                    current, transitions, existed, expression_vocab);
             } break;
             case ZERO_SIDED_CONTEXT: {
                 t_ctx0* ctx = static_cast<t_ctx0*>(ctxh.m_ctx);
                 ctx->compute_expressions(master, flattened, delta, prev,
-                    current, transitions, existed);
+                    current, transitions, existed, expression_vocab);
             } break;
             case GROUPED_PKEY_CONTEXT: {
                 t_ctx_grouped_pkey* ctx
                     = static_cast<t_ctx_grouped_pkey*>(ctxh.m_ctx);
                 ctx->compute_expressions(master, flattened, delta, prev,
-                    current, transitions, existed);
+                    current, transitions, existed, expression_vocab);
             } break;
             case UNIT_CONTEXT:
                 break;
@@ -1082,6 +1094,11 @@ t_gnode::_compute_expressions(std::shared_ptr<t_data_table> master,
  *
  * Getters
  */
+
+std::shared_ptr<t_vocab>
+t_gnode::get_expression_vocab() const {
+    return m_expression_vocab;
+}
 
 t_schema
 t_gnode::get_output_schema() const {
@@ -1296,6 +1313,13 @@ t_gnode::reset() {
     }
 
     m_gstate->reset();
+
+    // Reset expression map
+    m_expression_vocab = std::make_shared<t_vocab>();
+    m_expression_vocab->init(false);
+    
+    // String at index 0 is always "" empty string
+    m_expression_vocab->get_interned("");
 }
 
 void

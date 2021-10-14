@@ -10,6 +10,8 @@
 /**
  * Tests the correctness of each string computation function in various
  * environments and parameters - different types, nulls, undefined, etc.
+ *
+ * TODO: add tests for shared vocab after clear()
  */
 module.exports = (perspective) => {
     describe("String functions", function () {
@@ -130,19 +132,71 @@ module.exports = (perspective) => {
             const table = await perspective.table({
                 a: ["abc", "deeeeef", "fg", "hhs", "abcdefghijk"],
             });
+
+            const validate = await table.validate_expressions([
+                `// col\norder("a", 'deeeeef', 'fg', 'abcdefghijk', 'hhs', 'abc')`,
+            ]);
+
+            expect(validate.expression_schema).toEqual({
+                col: "float",
+            });
+
             const view = await table.view({
                 expressions: [
                     `order("a", 'deeeeef', 'fg', 'abcdefghijk', 'hhs', 'abc')`,
                 ],
             });
+
             let result = await view.to_columns();
             expect(
                 result[
                     `order("a", 'deeeeef', 'fg', 'abcdefghijk', 'hhs', 'abc')`
                 ]
             ).toEqual([4, 0, 1, 3, 2]);
+
             view.delete();
             table.delete();
+        });
+
+        it("Order type validates", async function () {
+            const table = await perspective.table({
+                a: ["abc", "deeeeef", "fg", "hhs", "abcdefghijk"],
+                b: [1, 2, 3, 4, 5],
+            });
+
+            const validate = await table.validate_expressions([
+                `// col\norder("a", 'deeeeef', 'fg', 'abcdefghijk', 'hhs', 'abc')`,
+                `//col2\norder('a', 'b', today())`,
+                `//col3\norder("b")`,
+                `//col4\norder()`,
+            ]);
+
+            expect(validate.expression_schema).toEqual({
+                col: "float",
+            });
+
+            expect(validate.errors).toEqual({
+                col2: {
+                    column: 0,
+                    error_message:
+                        "Type Error - inputs do not resolve to a valid expression.",
+                    line: 0,
+                },
+                col3: {
+                    column: 0,
+                    error_message:
+                        "Type Error - inputs do not resolve to a valid expression.",
+                    line: 0,
+                },
+                col4: {
+                    column: 8,
+                    error_message:
+                        "Parser Error - Zero parameter call to generic function: order not allowed",
+                    line: 1,
+                },
+            });
+
+            await table.delete();
         });
 
         it("Order with partial specification", async function () {

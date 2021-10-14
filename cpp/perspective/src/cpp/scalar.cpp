@@ -88,16 +88,7 @@ t_tscalar::operator==(const t_tscalar& rhs) const {
     if (m_type != DTYPE_STR)
         return m_data.m_uint64 == rhs.m_data.m_uint64;
 
-    // Prevent null and uninitialized values from being read in strcmp
-    const char* left_char_ptr = get_char_ptr();
-    const char* right_char_ptr = rhs.get_char_ptr();
-
-    // Satisfies equality - if both ptrs are nullptr, true, else false
-    if (left_char_ptr == nullptr || right_char_ptr == nullptr) {
-        return left_char_ptr == right_char_ptr;
-    }
-
-    return strcmp(left_char_ptr, right_char_ptr) == 0;
+    return strcmp(get_char_ptr(), rhs.get_char_ptr()) == 0;
 }
 
 bool
@@ -1485,8 +1476,12 @@ t_tscalar::cmp(t_filter_op op, const t_tscalar& other) const {
 
 const char*
 t_tscalar::get_char_ptr() const {
-    if (is_inplace())
+    std::cout << "getting charptr, is inplace? " << std::boolalpha << is_inplace() << std::endl;
+    if (is_inplace()) {
+        std::cout << "inplace char: '" << m_data.m_inplace_char << "'" << std::endl;
         return m_data.m_inplace_char;
+    }
+    std::cout << "charptr: '" << m_data.m_charptr << "', at " << &m_data.m_charptr << std::endl;
     return m_data.m_charptr;
 }
 
