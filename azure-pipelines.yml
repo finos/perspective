@@ -53,7 +53,7 @@ parameters:
   
       - bash: python -m pip install --upgrade pip wheel setuptools "jupyterlab>=3.0.14" numpy "pyarrow>=5" "black==20.8b1" flake8-black
         displayName: 'Install Python base dependencies'
-        condition: and(succeeded(), ne(variables['python.version'], '2.7'))
+        condition: succeeded()
   
       - bash: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
         displayName: "Install wasm-pack"
@@ -298,11 +298,6 @@ jobs:
 
   strategy:
     matrix:
-      # Python27ManyLinux2010:
-      #   python.version: '2.7'
-      #   python_flag: '--python2'
-      #   manylinux_flag: '--manylinux2010'
-      #   artifact_name: 'cp27-cp27m-manylinux2010_x86_64'
       Python37ManyLinux2010:
         python.version: '3.7'
         python_flag: ''
@@ -352,23 +347,6 @@ jobs:
     - ${{ parameters.pythonBuildDockerSteps }}
     - ${{ parameters.pythonCoverageSteps }}
     - ${{ parameters.pythonLinuxWheelSteps }}
-
-# - job: 'Linux_Python_SDist'
-#   pool:
-#     vmImage: 'ubuntu-18.04'
-
-#   strategy:
-#     matrix:
-#       Python37:
-#         python.version: '3.7'
-#         python_flag: ''
-
-#   steps:
-#     - ${{ parameters.initSteps }}
-#     - ${{ parameters.linuxInitSteps }}
-#     - ${{ parameters.pythonBuildSteps }}
-#     - ${{ parameters.pythonSDistSteps }}
-
 
 - job: 'Windows'
   pool:
@@ -464,7 +442,7 @@ jobs:
 
     - bash: python -m pip install --upgrade pip wheel setuptools jupyterlab numpy "pyarrow>=5" "black==20.8b1" flake8-black
       displayName: 'Install Python base dependencies'
-      condition: and(succeeded(), ne(variables['python.version'], '2.7'))
+      condition: succeeded()
 
     - bash: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
       displayName: "Install wasm-pack"
