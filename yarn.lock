@@ -2531,7 +2531,7 @@
     npmlog "^4.1.2"
     write-file-atomic "^2.3.0"
 
-"@lumino/algorithm@^1.2.0", "@lumino/algorithm@^1.3.3", "@lumino/messaging@^1.2.1", "@lumino/messaging@^1.3.3":
+"@lumino/algorithm@1.3.3", "@lumino/algorithm@^1.3.3", "@lumino/messaging@^1.2.1", "@lumino/messaging@^1.3.3":
   name "@lumino/algorithm"
   version "1.3.3"
   resolved "https://registry.yarnpkg.com/@lumino/algorithm/-/algorithm-1.3.3.tgz#fdf4daa407a1ce6f233e173add6a2dda0c99eef4"
@@ -2558,7 +2558,7 @@
   dependencies:
     "@lumino/algorithm" "^1.3.3"
 
-"@lumino/commands@^1.10.1", "@lumino/commands@^1.12.0", "@lumino/commands@^1.7.2":
+"@lumino/commands@1.12.0", "@lumino/commands@^1.10.1", "@lumino/commands@^1.12.0":
   version "1.12.0"
   resolved "https://registry.yarnpkg.com/@lumino/commands/-/commands-1.12.0.tgz#63a744d034d8bc524455e47f06c0ac5f2eb6ec38"
   integrity sha512-5TFlhDzZk1X8rCBjhh0HH3j6CcJ03mx2Pd/1rGa7MB5R+3+yYYk+gTlfHRqsxdehNRmiISaHRSrMnW8bynW7ZQ==
@@ -2597,7 +2597,7 @@
     "@lumino/algorithm" "^1.3.3"
     "@lumino/signaling" "^1.4.3"
 
-"@lumino/domutils@^1.1.4", "@lumino/domutils@^1.2.3":
+"@lumino/domutils@1.2.3", "@lumino/domutils@^1.2.3":
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/@lumino/domutils/-/domutils-1.2.3.tgz#7e8e549a97624bfdbd4dd95ae4d1e30b87799822"
   integrity sha512-SEi8WZSy+DWMkL5CfAY78MHbi3x83AVmRFxjs9+A6qsFPde+Hr1I4DNtLsSDmfAWsobHHgBnjyNp2ZkQEq0IEA==
@@ -2615,7 +2615,7 @@
   resolved "https://registry.yarnpkg.com/@lumino/keyboard/-/keyboard-1.2.3.tgz#594c73233636d85ed035b1a37a095acf956cfe8c"
   integrity sha512-ibS0sz0VABeuJXx2JVSz36sUBMUOcQNCNPybVhwzN/GkJFs0dnDKluMu+3Px0tkB2y33bGPZU/RLZY1Xj/faEA==
 
-"@lumino/messaging@^1.3.0", "@lumino/messaging@^1.4.3":
+"@lumino/messaging@1.4.3", "@lumino/messaging@^1.4.3":
   version "1.4.3"
   resolved "https://registry.yarnpkg.com/@lumino/messaging/-/messaging-1.4.3.tgz#75a1901f53086c7c0e978a63cb784eae5cc59f3f"
   integrity sha512-wa2Pj2KOuLNLS2n0wVBzUVFGbvjL1FLbuCOAUEYfN6xXVleqqtGGzd08uTF7ebu01KCO3VQ38+dkvoaM/C2qPw==
@@ -2644,14 +2644,14 @@
   dependencies:
     "@lumino/algorithm" "^1.3.3"
 
-"@lumino/virtualdom@^1.2.0", "@lumino/virtualdom@^1.8.0":
+"@lumino/virtualdom@1.8.0", "@lumino/virtualdom@^1.8.0":
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/@lumino/virtualdom/-/virtualdom-1.8.0.tgz#42ea5778e3870e4961ea36697b28aab997c75fa6"
   integrity sha512-X/1b8b7TxB9tb4+xQiS8oArcA/AK7NBZrsg2dzu/gHa3JC45R8nzQ+0tObD8Nd0gF/e9w9Ps9M62rLfefcbbKw==
   dependencies:
     "@lumino/algorithm" "^1.3.3"
 
-"@lumino/widgets@^1.16.1", "@lumino/widgets@^1.17.0", "@lumino/widgets@^1.3.0", "@lumino/widgets@^1.9.3":
+"@lumino/widgets@1.17.0", "@lumino/widgets@^1.16.1", "@lumino/widgets@^1.17.0", "@lumino/widgets@^1.3.0", "@lumino/widgets@^1.9.3":
   version "1.17.0"
   resolved "https://registry.yarnpkg.com/@lumino/widgets/-/widgets-1.17.0.tgz#32e82042b99d2d3372b472c4c244f1ae12bc8f82"
   integrity sha512-4MBIaYPTRmpAczXe1s7jg1f1pZ5iOnswLsjex32Debctvc2TnB3gAHm6GLKZ6ptiIGKp0N+WJbQyT+cpmNfSyA==
