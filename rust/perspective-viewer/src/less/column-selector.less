@@ -64,6 +64,17 @@
             cursor: pointer;
         }
 
+        .dragdrop-highlight {
+            .column_selector_draggable.dragover,
+            .column-selector-column:not(:last-child) .column_selector_draggable {
+                border-bottom-color: var(--active--color) !important;
+            }
+
+            .column-selector-column:not(:first-child):not([data-label]) .column_selector_draggable.dragover {
+                border-top-color: rgb(0 0 0 / 5%) !important;
+            }
+        }
+
         .column-selector-column {
             display: flex;
             flex-direction: row;
@@ -114,7 +125,6 @@
                 font-size: 12px;
                 flex-grow: 1;
                 color: inherit;
-                transition: height 0.2s;
                 box-sizing: border-box;
                 flex-direction: column;
                 justify-content: space-evenly;
@@ -279,12 +289,17 @@
         .dragover,
         .empty-named {
             pointer-events: none;
-            border: 1px dashed var(--inactive--color, #ddd) !important;
-            // margin-left: -2px;
-
             & > * {
                 opacity: 0;
             }
+        }
+
+        .empty-named {
+            border: 1px dashed var(--inactive--color, #ddd) !important;
+        }
+
+        .dragover {
+            border: 1px dashed var(--active--color, #666) !important;
         }
 
         .dragover {
@@ -293,6 +308,11 @@
 
         .dragover {
             box-shadow: inset 0 0 15px rgb(0 0 0 / 5%);
+        }
+
+        .dragdrop-highlight .empty-named {
+            border-color: var(--active--color) !important;
+            border-bottom-color: var(--active--color) !important;
         }
 
         // Inactive Columns are the columns in the column selector not currently

@@ -196,6 +196,10 @@ impl Component for ActiveColumn {
         let name = match &self.props.name {
             ActiveColumnState::DragOver(label) => {
                 classes.push("dragover");
+                if label.is_some() && !self.is_required {
+                    classes.push("empty-named");
+                }
+
                 (
                     label.clone(),
                     Some(self.props.dragdrop.get_drag_column().unwrap()),

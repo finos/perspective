@@ -54,6 +54,8 @@ pub enum ColumnSelectorMsg {
     TableLoaded,
     ViewCreated,
     HoverActiveIndex(Option<usize>),
+    Drag(DragEffect),
+    DragEnd,
     Drop((String, DropAction, DragEffect, usize)),
     OpenExpressionEditor,
     SaveExpression(JsValue),
@@ -64,7 +66,7 @@ pub enum ColumnSelectorMsg {
 pub struct ColumnSelector {
     props: ColumnSelectorProps,
     link: ComponentLink<ColumnSelector>,
-    _subscriptions: [Subscription; 3],
+    _subscriptions: [Subscription; 5],
     add_expression_ref: NodeRef,
     expression_editor: Option<ExpressionEditorElement>,
 }
@@ -89,10 +91,20 @@ impl Component for ColumnSelector {
             props.dragdrop.add_on_drop_action(cb)
         };
 
+        let drag_sub = {
+            let cb = link.callback(ColumnSelectorMsg::Drag);
+            props.dragdrop.add_on_drag_action(cb)
+        };
+
+        let dragend_sub = {
+            let cb = link.callback(|_| ColumnSelectorMsg::DragEnd);
+            props.dragdrop.add_on_dragend_action(cb)
+        };
+
         ColumnSelector {
             props,
             link,
-            _subscriptions: [table_sub, view_sub, drop_sub],
+            _subscriptions: [table_sub, view_sub, drop_sub, drag_sub, dragend_sub],
             add_expression_ref: NodeRef::default(),
             expression_editor: None,
         }
@@ -100,6 +112,9 @@ impl Component for ColumnSelector {
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
+            ColumnSelectorMsg::Drag(DragEffect::Move(DropAction::Active)) => false,
+            ColumnSelectorMsg::Drag(_) => true,
+            ColumnSelectorMsg::DragEnd => true,
             ColumnSelectorMsg::TableLoaded => true,
             ColumnSelectorMsg::ViewCreated => true,
             ColumnSelectorMsg::HoverActiveIndex(index) => {
@@ -246,20 +261,20 @@ impl Component for ColumnSelector {
                 .callback(|_| ColumnSelectorMsg::OpenExpressionEditor);
 
             let select = self.link.callback(|()| ColumnSelectorMsg::ViewCreated);
-            let active_columns_class = if config.columns.len()
-                == all_columns.len() + config.expressions.len()
-            {
-                ""
-            } else {
-                "collapse"
+            let mut active_classes = vec![];
+            if self.props.dragdrop.get_drag_column().is_some() {
+                active_classes.push("dragdrop-highlight");
+            };
+
+            if config.columns.len() == all_columns.len() + config.expressions.len() {
+                active_classes.push("collapse");
             }
-            .to_owned();
 
             html! {
                 <>
                     <div
                         id="active-columns"
-                        class={ active_columns_class }
+                        class={ active_classes.join(" ") }
                         ondragover={ dragover }
                         ondragenter={ Callback::from(dragenter_helper) }
                         ondragleave={ dragleave }
@@ -570,9 +585,14 @@ impl<'a> ColumnsIterator<'a> {
             .table_columns
             .iter()
             .filter(move |name| {
-                let mut str_cols = self.config.columns.iter().flatten();
-                !str_cols.any(|x| x == *name)
-                    && dragover_col.map_or(true, |x| &x.1 != *name)
+                let cols = &self.config.columns;
+                let is_active = cols.iter().flatten().any(|x| x == *name);
+                let is_drag = dragover_col.map_or(false, |(_, x)| x == *name);
+                let is_swap = dragover_col.map_or(false, |(i, _)| {
+                    self.renderer.metadata().is_swap(*i)
+                        && cols.get(*i).map(|z| z.as_ref()).flatten() == Some(*name)
+                });
+                (!is_active || is_swap) && !is_drag
             })
             .collect::<Vec<_>>();
 

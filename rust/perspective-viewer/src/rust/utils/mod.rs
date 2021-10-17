@@ -68,11 +68,3 @@ macro_rules! clone {
         $(let $x = $x.clone();)*
     };
 }
-
-#[macro_export]
-macro_rules! js_log {
-    ($x:expr $(, $y:expr)*) => {
-        web_sys::console::log_1(&format!($x $(, $y)*).into());
-    };
-}
-

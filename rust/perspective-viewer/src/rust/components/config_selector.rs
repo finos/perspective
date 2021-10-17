@@ -33,6 +33,8 @@ pub struct ConfigSelectorProps {
 derive_renderable_props!(ConfigSelectorProps);
 
 pub enum ConfigSelectorMsg {
+    DragStart(DragEffect),
+    DragEnd,
     DragOverRowPivots(usize),
     DragOverColumnPivots(usize),
     DragOverSort(usize),
@@ -55,7 +57,7 @@ pub enum ConfigSelectorMsg {
 pub struct ConfigSelector {
     props: ConfigSelectorProps,
     link: ComponentLink<ConfigSelector>,
-    subscriptions: [Rc<Subscription>; 2],
+    subscriptions: [Rc<Subscription>; 4],
 }
 
 derive_dragdrop_list!(
@@ -103,6 +105,12 @@ impl Component for ConfigSelector {
     type Properties = ConfigSelectorProps;
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
+        let cb = link.callback(ConfigSelectorMsg::DragStart);
+        let drag_sub = Rc::new(props.dragdrop.add_on_drag_action(cb));
+
+        let cb = link.callback(|_| ConfigSelectorMsg::DragEnd);
+        let dragend_sub = Rc::new(props.dragdrop.add_on_dragend_action(cb));
+
         let cb = link.callback(|x: (String, DropAction, DragEffect, usize)| {
             ConfigSelectorMsg::Drop(x.0, x.1, x.2, x.3)
         });
@@ -111,7 +119,7 @@ impl Component for ConfigSelector {
         let cb = link.callback(|_| ConfigSelectorMsg::ViewCreated);
         let view_sub = Rc::new(props.session.on_view_created.add_listener(cb));
 
-        let subscriptions = [drop_sub, view_sub];
+        let subscriptions = [drop_sub, view_sub, drag_sub, dragend_sub];
         ConfigSelector {
             props,
             link,
@@ -121,7 +129,9 @@ impl Component for ConfigSelector {
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
-            ConfigSelectorMsg::ViewCreated => true,
+            ConfigSelectorMsg::DragStart(_)
+            | ConfigSelectorMsg::ViewCreated => true,
+            ConfigSelectorMsg::DragEnd => true,
             ConfigSelectorMsg::DragOverRowPivots(index) => {
                 self.props.dragdrop.drag_enter(DropAction::RowPivots, index)
             }
@@ -260,8 +270,22 @@ impl Component for ConfigSelector {
         let config = self.props.session.get_view_config();
         let transpose = self.link.callback(|_| ConfigSelectorMsg::TransposePivots);
 
+        let class = if self.props.dragdrop.get_drag_column().is_some() {
+            "dragdrop-highlight"
+        } else {
+            ""
+        };
+
+        // web_sys::console::log_1(&"redraw".into());
+        let dragend = Callback::from({
+            let dragdrop = self.props.dragdrop.clone();
+            move |_event| {
+                dragdrop.drag_end()
+            }
+        });
+
         html! {
-            <div slot="top_panel" id="top_panel">
+            <div slot="top_panel" id="top_panel" class={ class } ondragend={ dragend }>
 
                 <RowPivotSelector
                     name="row_pivots"

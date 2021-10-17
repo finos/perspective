@@ -10,6 +10,12 @@
 @import "./variables.less";
 
 :host {
+    #top_panel.dragdrop-highlight {
+        .psp-text-field {
+            border-bottom-color: var(--active--color) !important;
+        }
+    }
+
     #top_panel {
         display: flex;
         flex-wrap: wrap;
@@ -60,8 +66,7 @@
                 min-height: 14px;
                 margin-top: 5px;
                 overflow: visible;
-                border-left: 2px solid
-                    var(--inactive--color, rgba(0, 0, 0, 0.5));
+                border-left: 2px solid var(--active--color, rgba(0, 0, 0, 0.5));
                 margin-right: 2px;
                 margin-left: -4px;
 
@@ -143,25 +148,8 @@
             flex-direction: column;
             justify-content: flex-end;
             min-height: 24px;
-            // background is nor transitionable ...
-            transition: border-color 0.3s ease-out,
-                background-size 0.3s ease-out;
             background-size: 100% 200%;
         }
-
-        // :host(.dragging) .psp-text-field.dropping {
-        //     border-bottom-width: 2px;
-        //     border-style: solid;
-        //     border-color: var(--active--color, @blue500);
-        // }
-
-        // :host(.dragging) .psp-text-field {
-        //     border-bottom-width: 1px;
-        //     border-style: solid;
-        //     border-color: var(--active--color, @blue500);
-        //     background: var(--input-dragover--background, linear-gradient(to top, rgb(203, 231, 249), transparent 25%));
-        //     background-size: 100% 100%;
-        // }
 
         .psp-text-field > .psp-text-field__input {
             flex-wrap: wrap;
@@ -199,28 +187,12 @@
             padding: var(--column-drop-container--padding, 0px 0px 2px 10px);
             font-size: 12px;
             display: inline-block;
-            // TODO animate?
-            // transition: font-size 0.3s, margin 0.3s;
         }
 
-        // .dropping .psp-text-field__input,
         .psp-text-field__input:not(:empty) {
             display: flex !important;
         }
 
-        // .dropping .psp-text-field__input::after {
-        //     content: "|";
-        //     width: 0px;
-        //     overflow: visible;
-        //     margin-top: -1px;
-        //     position: absolute;
-        // }
-
-        // .dropping * {
-        //     pointer-events: none;
-        // }
-
-        // .dropping .psp-text-field label,
         .psp-text-field__input:not(:empty) + label {
             position: absolute;
             top: 0px;

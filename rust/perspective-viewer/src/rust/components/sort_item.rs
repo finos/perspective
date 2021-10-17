@@ -104,12 +104,18 @@ impl Component for SortItem {
             }
         });
 
+        let dragend = Callback::from({
+            let dragdrop = self.props.dragdrop.clone();
+            move |_event| dragdrop.drag_end()
+        });
+
         html! {
             <>
                 <span
                     draggable="true"
                     ref={ noderef.clone() }
-                    ondragstart={ dragstart }>
+                    ondragstart={ dragstart }
+                    ondragend={ dragend }>
                     {
                         self.props.sort.0.to_owned()
                     }
