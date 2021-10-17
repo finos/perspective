@@ -585,9 +585,14 @@ impl<'a> ColumnsIterator<'a> {
             .table_columns
             .iter()
             .filter(move |name| {
-                let mut str_cols = self.config.columns.iter().flatten();
-                !str_cols.any(|x| x == *name)
-                    && dragover_col.map_or(true, |x| &x.1 != *name)
+                let cols = &self.config.columns;
+                let is_active = cols.iter().flatten().any(|x| x == *name);
+                let is_drag = dragover_col.map_or(false, |(_, x)| x == *name);
+                let is_swap = dragover_col.map_or(false, |(i, _)| {
+                    self.renderer.metadata().is_swap(*i)
+                        && cols.get(*i).map(|z| z.as_ref()).flatten() == Some(*name)
+                });
+                (!is_active || is_swap) && !is_drag
             })
             .collect::<Vec<_>>();
 
