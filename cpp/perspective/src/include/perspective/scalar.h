@@ -167,9 +167,9 @@ struct PERSPECTIVE_EXPORT t_tscalar {
 
     /**
      * @brief Identical to operator bool(), but less ambiguous.
-     * 
-     * @return true 
-     * @return false 
+     *
+     * @return true
+     * @return false
      */
     bool as_bool() const;
 
@@ -419,11 +419,11 @@ t_tscalar mktscalar();
 /**
  * @brief Overload comparisons between size_t and t_tscalar as the comparison
  * is used in exprtk for scalar initialization.
- * 
- * @param lhs 
- * @param rhs 
- * @return true 
- * @return false 
+ *
+ * @param lhs
+ * @param rhs
+ * @return true
+ * @return false
  */
 bool operator>(const std::size_t& lhs, const t_tscalar& rhs);
 

@@ -25,8 +25,9 @@ SUPPRESS_WARNINGS_VC(4800)
 
 namespace perspective {
 
-bool operator>(const std::size_t& lhs, const t_tscalar& rhs) {
-   return rhs.operator<(lhs);
+bool
+operator>(const std::size_t& lhs, const t_tscalar& rhs) {
+    return rhs.operator<(lhs);
 }
 
 #define BINARY_OPERATOR_BODY(OP)                                               \
@@ -49,18 +50,16 @@ bool operator>(const std::size_t& lhs, const t_tscalar& rhs) {
  * function-style cast through `T(0)`, `T(1)` etc. Because we can't guarantee
  * what int this function is called with, we treat it as a double to
  * prevent overflow.
- * 
+ *
  * DO NOT USE THIS CONSTRUCTOR IN PERSPECTIVE - all `t_tscalar` objects
  * should be constructed without initializer and then `set` should be called:
- * 
+ *
  * t_tscalar x;
  * x.set(1.2345);
- * 
- * @param v 
+ *
+ * @param v
  */
-t_tscalar::t_tscalar(int v) {
-    this->set(static_cast<double>(v));
-}
+t_tscalar::t_tscalar(int v) { this->set(static_cast<double>(v)); }
 
 bool
 t_tscalar::is_none() const {
@@ -1476,12 +1475,8 @@ t_tscalar::cmp(t_filter_op op, const t_tscalar& other) const {
 
 const char*
 t_tscalar::get_char_ptr() const {
-    std::cout << "getting charptr, is inplace? " << std::boolalpha << is_inplace() << std::endl;
-    if (is_inplace()) {
-        std::cout << "inplace char: '" << m_data.m_inplace_char << "'" << std::endl;
+    if (is_inplace())
         return m_data.m_inplace_char;
-    }
-    std::cout << "charptr: '" << m_data.m_charptr << "', at " << &m_data.m_charptr << std::endl;
     return m_data.m_charptr;
 }
 

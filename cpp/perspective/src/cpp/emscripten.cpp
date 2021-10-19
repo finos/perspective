@@ -1426,11 +1426,8 @@ namespace binding {
 
     template <>
     std::shared_ptr<t_view_config>
-    make_view_config(
-        const t_gnode& gnode,
-        std::shared_ptr<t_schema> schema,
-        t_val date_parser,
-        t_val config) {
+    make_view_config(const t_gnode& gnode, std::shared_ptr<t_schema> schema,
+        t_val date_parser, t_val config) {
         // extract vectors from JS, where they were created
         auto row_pivots
             = config.call<std::vector<std::string>>("get_row_pivots");

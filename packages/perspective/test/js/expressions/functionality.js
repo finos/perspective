@@ -845,55 +845,96 @@ module.exports = (perspective) => {
             await table.delete();
         });
 
-        it.skip("Clear() and Declare string var", async function () {
+        it("Declare string var one long one short", async function () {
             const table = await perspective.table(
                 expressions_common.int_float_data
             );
             const view = await table.view({
                 expressions: [
-                    `var x := 'long literal string here'; var y := 'long literal string here'; x == y ? concat('strings: ', x, ', ', y) : 'nope'`,
-                    `var x := 'hello'; var y := upper(x); lower(y);`,
+                    `var x := 'abcdefghijklmnop'; var y := '123'; concat(x, y)`,
                 ],
             });
 
             const results = await view.to_columns();
             expect(
                 results[
-                    `var x := 'long literal string here'; var y := 'long literal string here'; x == y ? concat('strings: ', x, ', ', y) : 'nope'`
+                    `var x := 'abcdefghijklmnop'; var y := '123'; concat(x, y)`
                 ]
             ).toEqual([
-                "strings: long literal string here, long literal string here",
-                "strings: long literal string here, long literal string here",
-                "strings: long literal string here, long literal string here",
-                "strings: long literal string here, long literal string here",
+                "abcdefghijklmnop123",
+                "abcdefghijklmnop123",
+                "abcdefghijklmnop123",
+                "abcdefghijklmnop123",
             ]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Declare string var short", async function () {
+            const table = await perspective.table(
+                expressions_common.int_float_data
+            );
+            const view = await table.view({
+                expressions: [`var x := 'abc'; var y := '123'; concat(x, y)`],
+            });
+
+            const results = await view.to_columns();
             expect(
-                results[`var x := 'hello'; var y := upper(x); lower(y);`]
-            ).toEqual(["hello", "hello", "hello", "hello"]);
+                results[`var x := 'abc'; var y := '123'; concat(x, y)`]
+            ).toEqual(["abc123", "abc123", "abc123", "abc123"]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Clear() and Declare string var", async function () {
+            const table = await perspective.table(
+                expressions_common.int_float_data
+            );
+            const view = await table.view({
+                expressions: [
+                    "var x := 'Eabcdefghijklmn'; var y := '0123456789'; var z := 'ABCD'; var zz := 'EFG'; concat(x, y, z, zz)",
+                ],
+            });
+
+            const results = await view.to_columns();
+            expect(
+                results[
+                    "var x := 'Eabcdefghijklmn'; var y := '0123456789'; var z := 'ABCD'; var zz := 'EFG'; concat(x, y, z, zz)"
+                ]
+            ).toEqual([
+                "Eabcdefghijklmn0123456789ABCDEFG",
+                "Eabcdefghijklmn0123456789ABCDEFG",
+                "Eabcdefghijklmn0123456789ABCDEFG",
+                "Eabcdefghijklmn0123456789ABCDEFG",
+            ]);
 
             await view.delete();
 
             await table.clear();
+
             table.update([expressions_common.int_float_data[0]]);
 
             const view2 = await table.view({
                 expressions: [
-                    `var x := '2 long literal string here'; var y := '2 long literal string here'; x == y ? concat('strings: ', x, ', ', y) : 'nope'`,
-                    `var x := 'hello'; var y := upper(x); lower(y);`,
+                    "var x := 'Eabcdefghijklmn'; var y := '0123456789'; var z := 'ABCD'; var zz := 'EFG'; concat(x, y, z, zz)",
+                    "var x := 'abcdefghijklmn'; var y := 'ABCDEFG123456789'; x",
                 ],
             });
 
             const results2 = await view2.to_columns();
             expect(
                 results2[
-                    `var x := '2 long literal string here'; var y := '2 long literal string here'; x == y ? concat('strings: ', x, ', ', y) : 'nope'`
+                    "var x := 'Eabcdefghijklmn'; var y := '0123456789'; var z := 'ABCD'; var zz := 'EFG'; concat(x, y, z, zz)"
                 ]
-            ).toEqual([
-                "strings: 2 long literal string here, 2 long literal string here",
-            ]);
+            ).toEqual(["Eabcdefghijklmn0123456789ABCDEFG"]);
+
             expect(
-                results2[`var x := 'hello'; var y := upper(x); lower(y);`]
-            ).toEqual(["hello"]);
+                results2[
+                    "var x := 'abcdefghijklmn'; var y := 'ABCDEFG123456789'; x"
+                ]
+            ).toEqual(["abcdefghijklmn"]);
 
             await view2.delete();
             await table.delete();

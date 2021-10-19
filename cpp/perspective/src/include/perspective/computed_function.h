@@ -245,7 +245,7 @@ namespace computed_function {
     /**
      * @brief Convert a column or scalar to a boolean, which returns True if the
      * value is truthy or False otherwise.
-     * 
+     *
      * boolean(1)
      * boolean(null)
      */

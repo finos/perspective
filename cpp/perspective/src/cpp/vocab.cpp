@@ -186,8 +186,6 @@ t_vocab::pprint_vocabulary() const {
                   << std::endl;
     }
 
-    m_vlendata->pprint();
-    // m_extents->pprint();
     std::cout << "end vocabulary =========\n";
 }
 

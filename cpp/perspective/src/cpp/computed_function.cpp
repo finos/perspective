@@ -36,7 +36,6 @@ namespace computed_function {
         sentinel.clear();
         sentinel.set(m_expression_vocab.unintern_c(0));
         sentinel.m_status = STATUS_INVALID;
-
         m_sentinel = sentinel;
     }
 
@@ -51,24 +50,23 @@ namespace computed_function {
 
         // intern('abc') - with a scalar string
         t_string_view temp_string(gt);
-        std::string temp_str = std::string(temp_string.begin(), temp_string.end());
+        std::string temp_str
+            = std::string(temp_string.begin(), temp_string.end());
 
         // Don't allow empty strings from the user
-        if (temp_str == "") return rval;
+        if (temp_str == "")
+            return rval;
 
         if (m_is_type_validator) {
             // Return the sentinel value which indicates a valid output from
             // type checking, as the output value is not STATUS_CLEAR
             return m_sentinel;
         }
-    
+
         // Intern the string into the vocabulary, and return the index of the
         // string inside the vocabulary.
         t_uindex interned = m_expression_vocab.get_interned(temp_str);
-        const char* ptr = m_expression_vocab.unintern_c(interned);
-        rval.set(ptr);
-
-        std::cout << "just interned: '" << ptr << "' at addr: " << &ptr << std::endl;
+        rval.set(m_expression_vocab.unintern_c(interned));
         return rval;
     }
 
@@ -92,15 +90,13 @@ namespace computed_function {
         rval.clear();
         rval.m_type = DTYPE_STR;
 
-        m_expression_vocab.pprint_vocabulary();
-
         if (parameters.size() == 0)
             return rval;
 
         for (auto i = 0; i < parameters.size(); ++i) {
             t_generic_type& gt = parameters[i];
 
-            if (t_generic_type::e_scalar == gt.type) {
+            if (gt.type == t_generic_type::e_scalar) {
                 t_scalar_view temp(gt);
                 t_tscalar temp_scalar = temp();
 
@@ -123,12 +119,10 @@ namespace computed_function {
                 }
 
                 // Read the string out from the scalar
-                std::cout << "ts scalar: " << temp_scalar.repr() << std::endl;
-                std::string ts = temp_scalar.to_string();
-                std::cout << "ts: '" << ts << "'" << std::endl;
-                result += ts;
+                result += temp_scalar.to_string();
             } else {
                 // An invalid call.
+                rval.m_status = STATUS_CLEAR;
                 return rval;
             }
         }
@@ -138,7 +132,6 @@ namespace computed_function {
             return m_sentinel;
         }
 
-        std::cout << "result: " << result << std::endl;
         t_uindex interned = m_expression_vocab.get_interned(result);
         rval.set(m_expression_vocab.unintern_c(interned));
 
@@ -324,8 +317,8 @@ namespace computed_function {
 
         // Validate that the input column is of string type
         const t_generic_type& input_scalar_gt = parameters[0];
-        
-        // if input is not scalar, return
+
+        // if first input is not scalar, return
         if (input_scalar_gt.type != t_generic_type::e_scalar) {
             rval.m_status = STATUS_CLEAR;
             return rval;
@@ -569,7 +562,8 @@ namespace computed_function {
         return rval;
     }
 
-    month_of_year::month_of_year(t_vocab& expression_vocab, bool is_type_validator)
+    month_of_year::month_of_year(
+        t_vocab& expression_vocab, bool is_type_validator)
         : exprtk::igeneric_function<t_tscalar>("T")
         , m_expression_vocab(expression_vocab)
         , m_is_type_validator(is_type_validator) {
@@ -1064,7 +1058,7 @@ namespace computed_function {
         t_tscalar rval;
         rval.clear();
         rval.m_type = DTYPE_BOOL;
-        
+
         t_scalar_view _low(parameters[0]);
         t_scalar_view _val(parameters[1]);
         t_scalar_view _high(parameters[2]);
@@ -1086,7 +1080,7 @@ namespace computed_function {
         if (!low.is_valid() || !val.is_valid() || !high.is_valid()) {
             return rval;
         }
-        
+
         rval.set((low <= val) && (val <= high));
         return rval;
     }
@@ -1108,7 +1102,7 @@ namespace computed_function {
         for (auto i = 0; i < parameters.size(); ++i) {
             t_generic_type& gt = parameters[i];
 
-            if (t_generic_type::e_scalar == gt.type) {
+            if (gt.type == t_generic_type::e_scalar) {
                 t_scalar_view _temp(gt);
                 t_tscalar temp = _temp();
 
@@ -1121,8 +1115,8 @@ namespace computed_function {
                     continue;
                 }
             } else {
-                std::cerr << "[min_fn] Invalid parameter in min_fn()"
-                          << std::endl;
+                // An invalid call - needs to fail at the type check.
+                rval.m_status = STATUS_CLEAR;
                 return rval;
             }
         }
@@ -1161,7 +1155,7 @@ namespace computed_function {
         for (auto i = 0; i < parameters.size(); ++i) {
             t_generic_type& gt = parameters[i];
 
-            if (t_generic_type::e_scalar == gt.type) {
+            if (gt.type == t_generic_type::e_scalar) {
                 t_scalar_view _temp(gt);
                 t_tscalar temp = _temp();
 
@@ -1174,8 +1168,8 @@ namespace computed_function {
                     continue;
                 }
             } else {
-                std::cerr << "[max_fn] Invalid parameter in max_fn()"
-                          << std::endl;
+                // An invalid call - needs to fail at the type check.
+                rval.m_status = STATUS_CLEAR;
                 return rval;
             }
         }
@@ -1417,11 +1411,12 @@ namespace computed_function {
     }
 
     to_boolean::to_boolean()
-    : exprtk::igeneric_function<t_tscalar>("T") {}
+        : exprtk::igeneric_function<t_tscalar>("T") {}
 
     to_boolean::~to_boolean() {}
 
-    t_tscalar to_boolean::operator()(t_parameter_list parameters) {
+    t_tscalar
+    to_boolean::operator()(t_parameter_list parameters) {
         t_tscalar val;
         t_tscalar rval;
         rval.clear();

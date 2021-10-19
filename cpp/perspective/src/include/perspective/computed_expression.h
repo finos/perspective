@@ -51,8 +51,7 @@ public:
         t_dtype dtype);
 
     void compute(std::shared_ptr<t_data_table> source_table,
-        std::shared_ptr<t_data_table> destination_table,
-        t_vocab& vocab) const;
+        std::shared_ptr<t_data_table> destination_table, t_vocab& vocab) const;
 
     const std::string& get_expression_alias() const;
     const std::string& get_expression_string() const;
@@ -95,8 +94,7 @@ public:
         const std::string& expression_string,
         const std::string& parsed_expression_string,
         const std::vector<std::pair<std::string, std::string>>& column_ids,
-        std::shared_ptr<t_schema> schema,
-        t_vocab& vocab);
+        std::shared_ptr<t_schema> schema, t_vocab& vocab);
 
     /**
      * @brief Returns the dtype of the given expression, or `DTYPE_NONE`
@@ -122,9 +120,7 @@ public:
         const std::string& expression_string,
         const std::string& parsed_expression_string,
         const std::vector<std::pair<std::string, std::string>>& column_ids,
-        const t_schema& schema,
-        t_expression_error& error,
-        t_vocab& vocab);
+        const t_schema& schema, t_expression_error& error, t_vocab& vocab);
 
     static std::shared_ptr<exprtk::parser<t_tscalar>> PARSER;
 
@@ -182,7 +178,8 @@ struct PERSPECTIVE_EXPORT t_computed_function_store {
 
     t_computed_function_store(t_vocab& vocab, bool is_type_validator);
 
-    void register_computed_functions(exprtk::symbol_table<t_tscalar>& sym_table);
+    void register_computed_functions(
+        exprtk::symbol_table<t_tscalar>& sym_table);
 
     /**
      * @brief Clear any intermediate state that may be used by functions, such

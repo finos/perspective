@@ -15,66 +15,63 @@ namespace perspective {
 // of brackets and sequences. ExprTk defaults will replace "true" and "false"
 // with 1 and 0, which we don't want. Using the tokens "true" and "false"
 // will raise a syntax error, which is the correct behavior.
-std::size_t
-t_computed_expression_parser::PARSER_COMPILE_OPTIONS = 
-    exprtk::parser<t_tscalar>::settings_t::e_joiner +
-    exprtk::parser<t_tscalar>::settings_t::e_numeric_check +
-    exprtk::parser<t_tscalar>::settings_t::e_bracket_check +
-    exprtk::parser<t_tscalar>::settings_t::e_sequence_check;
-    // exprtk::parser<t_tscalar>::settings_t::e_commutative_check;
-    // exprtk::parser<t_tscalar>::settings_t::e_strength_reduction;
+std::size_t t_computed_expression_parser::PARSER_COMPILE_OPTIONS
+    = exprtk::parser<t_tscalar>::settings_t::e_joiner
+    + exprtk::parser<t_tscalar>::settings_t::e_numeric_check
+    + exprtk::parser<t_tscalar>::settings_t::e_bracket_check
+    + exprtk::parser<t_tscalar>::settings_t::e_sequence_check;
+// exprtk::parser<t_tscalar>::settings_t::e_commutative_check;
+// exprtk::parser<t_tscalar>::settings_t::e_strength_reduction;
 
-std::shared_ptr<exprtk::parser<t_tscalar>>
-t_computed_expression_parser::PARSER = 
-    std::make_shared<exprtk::parser<t_tscalar>>(t_computed_expression_parser::PARSER_COMPILE_OPTIONS);
+std::shared_ptr<exprtk::parser<t_tscalar>> t_computed_expression_parser::PARSER
+    = std::make_shared<exprtk::parser<t_tscalar>>(
+        t_computed_expression_parser::PARSER_COMPILE_OPTIONS);
 
-computed_function::bucket
-    t_computed_expression_parser::BUCKET_FN = computed_function::bucket();
+computed_function::bucket t_computed_expression_parser::BUCKET_FN
+    = computed_function::bucket();
 
-computed_function::hour_of_day
-    t_computed_expression_parser::HOUR_OF_DAY_FN = computed_function::hour_of_day();
+computed_function::hour_of_day t_computed_expression_parser::HOUR_OF_DAY_FN
+    = computed_function::hour_of_day();
 
-computed_function::percent_of
-t_computed_expression_parser::PERCENT_OF_FN = computed_function::percent_of();
+computed_function::percent_of t_computed_expression_parser::PERCENT_OF_FN
+    = computed_function::percent_of();
 
-computed_function::inrange_fn
-t_computed_expression_parser::INRANGE_FN = computed_function::inrange_fn();
+computed_function::inrange_fn t_computed_expression_parser::INRANGE_FN
+    = computed_function::inrange_fn();
 
-computed_function::min_fn
-t_computed_expression_parser::MIN_FN = computed_function::min_fn();
+computed_function::min_fn t_computed_expression_parser::MIN_FN
+    = computed_function::min_fn();
 
-computed_function::max_fn
-t_computed_expression_parser::MAX_FN = computed_function::max_fn();
+computed_function::max_fn t_computed_expression_parser::MAX_FN
+    = computed_function::max_fn();
 
-computed_function::length
-t_computed_expression_parser::LENGTH_FN = computed_function::length();
+computed_function::length t_computed_expression_parser::LENGTH_FN
+    = computed_function::length();
 
-computed_function::is_null
-t_computed_expression_parser::IS_NULL_FN = computed_function::is_null();
+computed_function::is_null t_computed_expression_parser::IS_NULL_FN
+    = computed_function::is_null();
 
-computed_function::is_not_null
-t_computed_expression_parser::IS_NOT_NULL_FN = computed_function::is_not_null();
+computed_function::is_not_null t_computed_expression_parser::IS_NOT_NULL_FN
+    = computed_function::is_not_null();
 
-computed_function::to_integer
-t_computed_expression_parser::TO_INTEGER_FN = computed_function::to_integer();
+computed_function::to_integer t_computed_expression_parser::TO_INTEGER_FN
+    = computed_function::to_integer();
 
-computed_function::to_float
-t_computed_expression_parser::TO_FLOAT_FN = computed_function::to_float();
+computed_function::to_float t_computed_expression_parser::TO_FLOAT_FN
+    = computed_function::to_float();
 
-computed_function::to_boolean
-t_computed_expression_parser::TO_BOOLEAN_FN = computed_function::to_boolean();
+computed_function::to_boolean t_computed_expression_parser::TO_BOOLEAN_FN
+    = computed_function::to_boolean();
 
-computed_function::make_date
-t_computed_expression_parser::MAKE_DATE_FN = computed_function::make_date();
+computed_function::make_date t_computed_expression_parser::MAKE_DATE_FN
+    = computed_function::make_date();
 
-computed_function::make_datetime
-t_computed_expression_parser::MAKE_DATETIME_FN = computed_function::make_datetime();
+computed_function::make_datetime t_computed_expression_parser::MAKE_DATETIME_FN
+    = computed_function::make_datetime();
 
-t_tscalar
-t_computed_expression_parser::TRUE_SCALAR = mktscalar(true);
+t_tscalar t_computed_expression_parser::TRUE_SCALAR = mktscalar(true);
 
-t_tscalar
-t_computed_expression_parser::FALSE_SCALAR = mktscalar(false);
+t_tscalar t_computed_expression_parser::FALSE_SCALAR = mktscalar(false);
 
 /******************************************************************************
  *
@@ -94,11 +91,9 @@ t_computed_expression::t_computed_expression(
 
 void
 t_computed_expression::compute(std::shared_ptr<t_data_table> source_table,
-    std::shared_ptr<t_data_table> destination_table,
-    t_vocab& vocab) const {
+    std::shared_ptr<t_data_table> destination_table, t_vocab& vocab) const {
     // TODO: share symtables across pre/re/compute
     exprtk::symbol_table<t_tscalar> sym_table;
-    std::cout << "COMPUTE" << std::endl;
 
     // pi, infinity, etc.
     sym_table.add_constants();
@@ -107,7 +102,7 @@ t_computed_expression::compute(std::shared_ptr<t_data_table> source_table,
     // are calculating values, not type-checking.
     t_computed_function_store function_store(vocab, false);
     function_store.register_computed_functions(sym_table);
-    
+
     exprtk::expression<t_tscalar> expr_definition;
     std::vector<std::pair<std::string, t_tscalar>> values;
     tsl::hopscotch_map<std::string, std::shared_ptr<t_column>> columns;
@@ -164,7 +159,6 @@ t_computed_expression::compute(std::shared_ptr<t_data_table> source_table,
     }
 
     function_store.clear_computed_function_state();
-    std::cout << "finished COMPUTE" << std::endl;
 };
 
 const std::string&
@@ -215,8 +209,7 @@ t_computed_expression_parser::precompute(const std::string& expression_alias,
     const std::string& expression_string,
     const std::string& parsed_expression_string,
     const std::vector<std::pair<std::string, std::string>>& column_ids,
-    std::shared_ptr<t_schema> schema,
-    t_vocab& vocab) {
+    std::shared_ptr<t_schema> schema, t_vocab& vocab) {
     exprtk::symbol_table<t_tscalar> sym_table;
     sym_table.add_constants();
 
@@ -239,6 +232,15 @@ t_computed_expression_parser::precompute(const std::string& expression_alias,
         t_tscalar rval;
         rval.clear();
         rval.m_type = schema->get_dtype(column_name);
+
+        // If we are accessing string columns, the scalar CANNOT have a
+        // nullptr as a string - use the empty string that we interned
+        // in the gnode's expression vocab in t_gnode::init() at idx 0
+        if (rval.m_type == DTYPE_STR) {
+            rval.set(vocab.unintern_c(0));
+            rval.m_status = STATUS_INVALID;
+        }
+
         values[cidx] = rval;
 
         sym_table.add_variable(column_id, values[cidx]);
@@ -246,7 +248,6 @@ t_computed_expression_parser::precompute(const std::string& expression_alias,
 
     exprtk::expression<t_tscalar> expr_definition;
     expr_definition.register_symbol_table(sym_table);
-    std::cout << "started precompute" << std::endl;
 
     if (!t_computed_expression_parser::PARSER->compile(
             parsed_expression_string, expr_definition)) {
@@ -261,8 +262,6 @@ t_computed_expression_parser::precompute(const std::string& expression_alias,
     t_tscalar v = expr_definition.value();
     function_store.clear_computed_function_state();
 
-    std::cout << "finished precompute" << std::endl;
-
     return std::make_shared<t_computed_expression>(expression_alias,
         expression_string, parsed_expression_string, column_ids, v.get_dtype());
 }
@@ -272,8 +271,7 @@ t_computed_expression_parser::get_dtype(const std::string& expression_alias,
     const std::string& expression_string,
     const std::string& parsed_expression_string,
     const std::vector<std::pair<std::string, std::string>>& column_ids,
-    const t_schema& schema, t_expression_error& error,
-    t_vocab& vocab) {
+    const t_schema& schema, t_expression_error& error, t_vocab& vocab) {
     exprtk::symbol_table<t_tscalar> sym_table;
     sym_table.add_constants();
 
@@ -302,11 +300,21 @@ t_computed_expression_parser::get_dtype(const std::string& expression_alias,
         }
 
         t_tscalar rval;
+
         // clear() is important as it sets the status to valid and the
         // underlying union value to 0, which prevents any reading of
         // uninitialized values out of the union.
         rval.clear();
         rval.m_type = schema.get_dtype(column_name);
+
+        // If we are accessing string columns, the scalar CANNOT have a
+        // nullptr as a string - use the empty string that we interned
+        // in the gnode's expression vocab in t_gnode::init() at idx 0
+        if (rval.m_type == DTYPE_STR) {
+            rval.set(vocab.unintern_c(0));
+            rval.m_status = STATUS_INVALID;
+        }
+
         values[cidx] = rval;
 
         sym_table.add_variable(column_id, values[cidx]);
@@ -413,7 +421,8 @@ t_validated_expression_map::get_expression_errors() const {
 t_computed_function_store::t_computed_function_store(
     t_vocab& vocab, bool is_type_validator)
     : m_day_of_week_fn(computed_function::day_of_week(vocab, is_type_validator))
-    , m_month_of_year_fn(computed_function::month_of_year(vocab, is_type_validator))
+    , m_month_of_year_fn(
+          computed_function::month_of_year(vocab, is_type_validator))
     , m_intern_fn(computed_function::intern(vocab, is_type_validator))
     , m_concat_fn(computed_function::concat(vocab, is_type_validator))
     , m_order_fn(computed_function::order(is_type_validator))
@@ -425,10 +434,14 @@ void
 t_computed_function_store::register_computed_functions(
     exprtk::symbol_table<t_tscalar>& sym_table) {
     sym_table.add_function("bucket", t_computed_expression_parser::BUCKET_FN);
-    sym_table.add_reserved_function("inrange", t_computed_expression_parser::INRANGE_FN);
-    sym_table.add_reserved_function("min", t_computed_expression_parser::MIN_FN);
-    sym_table.add_reserved_function("max", t_computed_expression_parser::MAX_FN);
-    sym_table.add_function("hour_of_day", t_computed_expression_parser::HOUR_OF_DAY_FN);
+    sym_table.add_reserved_function(
+        "inrange", t_computed_expression_parser::INRANGE_FN);
+    sym_table.add_reserved_function(
+        "min", t_computed_expression_parser::MIN_FN);
+    sym_table.add_reserved_function(
+        "max", t_computed_expression_parser::MAX_FN);
+    sym_table.add_function(
+        "hour_of_day", t_computed_expression_parser::HOUR_OF_DAY_FN);
     sym_table.add_function("day_of_week", m_day_of_week_fn);
     sym_table.add_function("month_of_year", m_month_of_year_fn);
     sym_table.add_function("intern", m_intern_fn);
@@ -438,14 +451,19 @@ t_computed_function_store::register_computed_functions(
     sym_table.add_function("lower", m_lower_fn);
     sym_table.add_function("length", t_computed_expression_parser::LENGTH_FN);
     sym_table.add_function("string", m_to_string_fn);
-    sym_table.add_function("percent_of", t_computed_expression_parser::PERCENT_OF_FN);
+    sym_table.add_function(
+        "percent_of", t_computed_expression_parser::PERCENT_OF_FN);
     sym_table.add_function("is_null", t_computed_expression_parser::IS_NULL_FN);
-    sym_table.add_function("is_not_null", t_computed_expression_parser::IS_NOT_NULL_FN);
-    sym_table.add_function("integer", t_computed_expression_parser::TO_INTEGER_FN);
+    sym_table.add_function(
+        "is_not_null", t_computed_expression_parser::IS_NOT_NULL_FN);
+    sym_table.add_function(
+        "integer", t_computed_expression_parser::TO_INTEGER_FN);
     sym_table.add_function("float", t_computed_expression_parser::TO_FLOAT_FN);
-    sym_table.add_function("boolean", t_computed_expression_parser::TO_BOOLEAN_FN);
+    sym_table.add_function(
+        "boolean", t_computed_expression_parser::TO_BOOLEAN_FN);
     sym_table.add_function("date", t_computed_expression_parser::MAKE_DATE_FN);
-    sym_table.add_function("datetime", t_computed_expression_parser::MAKE_DATETIME_FN);
+    sym_table.add_function(
+        "datetime", t_computed_expression_parser::MAKE_DATETIME_FN);
 
     // Register static free functions as well
     sym_table.add_function("today", computed_function::today);
@@ -460,6 +478,5 @@ void
 t_computed_function_store::clear_computed_function_state() {
     m_order_fn.clear_order_map();
 }
-
 
 } // end namespace perspective

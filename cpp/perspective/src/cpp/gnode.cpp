@@ -111,7 +111,7 @@ t_gnode::init() {
 
     m_expression_vocab = std::make_shared<t_vocab>();
     m_expression_vocab->init(false);
-    
+
     // String at index 0 is always "" empty string
     m_expression_vocab->get_interned("");
 
@@ -1314,10 +1314,10 @@ t_gnode::reset() {
 
     m_gstate->reset();
 
-    // Reset expression map
+    // Reset expression vocab as well
     m_expression_vocab = std::make_shared<t_vocab>();
     m_expression_vocab->init(false);
-    
+
     // String at index 0 is always "" empty string
     m_expression_vocab->get_interned("");
 }

@@ -586,18 +586,14 @@ t_lstore::fill(const t_lstore& other, const t_mask& mask, t_uindex elem_size) {
 
 void
 t_lstore::pprint() const {
-    // std::cout << repr() << std::endl;
-    // t_uindex nelems = size() / sizeof(std::uint8_t);
+    std::cout << repr() << std::endl;
+    t_uindex nelems = size() / sizeof(std::uint8_t);
+    for (t_uindex idx = 0; idx < size() / nelems; ++idx) {
 
-    std::string bp = std::string((const char*) m_base, m_capacity);
-    std::cout << "pprint vocab storage " << bp << std::endl;
-
-    // for (t_uindex idx = 0; idx < size() / nelems; ++idx) {
-
-    //     std::cout << idx << " => "
-    //               << static_cast<t_uindex>(*(get_nth<std::uint8_t>(idx)))
-    //               << std::endl;
-    // }
+        std::cout << idx << " => "
+                  << static_cast<t_uindex>(*(get_nth<std::uint8_t>(idx)))
+                  << std::endl;
+    }
 }
 
 std::shared_ptr<t_lstore>
