@@ -17,6 +17,7 @@
 #include <perspective/column.h>
 #include <perspective/data_table.h>
 #include <perspective/exprtk.h>
+#include <perspective/expression_vocab.h>
 #include <boost/algorithm/string.hpp>
 #include <type_traits>
 #include <date/date.h>
@@ -44,10 +45,10 @@ namespace computed_function {
 // those invocations, we can store a reference to the vocab.
 #define STRING_FUNCTION_HEADER(NAME)                                           \
     struct NAME : public exprtk::igeneric_function<t_tscalar> {                \
-        NAME(t_vocab& expression_vocab, bool is_type_validator);               \
+        NAME(t_expression_vocab& expression_vocab, bool is_type_validator);    \
         ~NAME();                                                               \
         t_tscalar operator()(t_parameter_list parameters);                     \
-        t_vocab& m_expression_vocab;                                           \
+        t_expression_vocab& m_expression_vocab;                                \
         bool m_is_type_validator;                                              \
         t_tscalar m_sentinel;                                                  \
     };

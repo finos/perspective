@@ -1470,7 +1470,7 @@ namespace binding {
         std::vector<std::shared_ptr<t_computed_expression>> expressions;
         expressions.reserve(js_expressions.size());
 
-        t_vocab& expression_vocab = *(gnode.get_expression_vocab());
+        t_expression_vocab& expression_vocab = *(gnode.get_expression_vocab());
 
         // Will either abort() or succeed completely, and this isn't a public
         // API so we can directly index for speed.

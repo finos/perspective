@@ -17,6 +17,7 @@
 #include <perspective/path.h>
 #include <perspective/sym_table.h>
 #include <perspective/expression_tables.h>
+#include <perspective/expression_vocab.h>
 
 namespace perspective {
 

@@ -157,6 +157,74 @@ class TestViewExpression(object):
         }
         assert view.expression_schema() == {"computed": float}
 
+    def test_view_expression_string_per_page(self):
+        table = Table({"a": [i for i in range(100)]})
+        big_strings = [randstr(6400) for _ in range(4)]
+        view = table.view(
+            expressions=[
+                "//computed{}\nvar x := '{}'; lower(x)".format(i, big_strings[i]) for i in range(4)
+            ]
+        )
+
+        result = view.to_columns()
+        schema = view.expression_schema()
+
+        for i in range(4):
+            name = "computed{}".format(i)
+            res = big_strings[i].lower()
+            assert schema[name] == str
+            assert result[name] == [res for _ in range(100)]
+
+    def test_view_expression_new_vocab_page(self):
+        table = Table({"a": [randstr(100) for _ in range(100)]})
+
+        def make_expression(idx):
+            expr = ["//computed{}".format(idx)]
+            num_vars = randint(1, 26)
+            concat_cols = []
+            concat_result = []
+
+            for i in range(num_vars):
+                name = ascii_letters[i]
+                string_literal = randstr(randint(100, 1000))
+
+                if random() > 0.5:
+                    result = string_literal.upper()
+                    string_literal = "upper('{}')".format(string_literal)
+                else:
+                    result = string_literal.lower()
+                    string_literal = "lower('{}')".format(string_literal)
+
+                concat_cols.append(name)
+                concat_result.append(result)
+
+                expr.append("var {} := {};".format(name, string_literal))
+
+            expr.append("concat(\"a\", {})".format(", ".join(concat_cols)))
+
+            return {
+                "expression_name": expr[0][2:],
+                "expression": "\n".join(expr),
+                "output": "".join(concat_result)
+            }
+
+        expressions = [make_expression(i) for i in range(10)]
+
+        view = table.view(
+            expressions=[expr["expression"] for expr in expressions]
+        )
+
+        result = view.to_columns()
+        schema = view.expression_schema()
+
+        for expr in expressions:
+            name = expr["expression_name"]
+            assert schema[name] == str
+
+            for i in range(100):
+                val = result["a"][i]
+                assert result[name][i] == val + expr["output"]
+
     def test_view_expression_collide_local_var(self):
         """Make sure that strings declared under the same var name in
         different expressions do not collide."""

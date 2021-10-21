@@ -205,7 +205,7 @@ public:
     void pprint() const;
     std::string repr() const;
 
-    std::shared_ptr<t_vocab> get_expression_vocab() const;
+    std::shared_ptr<t_expression_vocab> get_expression_vocab() const;
 
 #ifdef PSP_PARALLEL_FOR
     void set_event_loop_thread_id(std::thread::id id);
@@ -360,10 +360,7 @@ private:
     std::function<void()> m_pool_cleanup;
     bool m_was_updated;
 
-    // A shared vocabulary that is used for expression validation and creation
-    // to store all intermediate and output strings created inside computed
-    // functions.
-    std::shared_ptr<t_vocab> m_expression_vocab;
+    std::shared_ptr<t_expression_vocab> m_expression_vocab;
 
 #ifdef PSP_ENABLE_PYTHON
     std::thread::id m_event_loop_thread_id;

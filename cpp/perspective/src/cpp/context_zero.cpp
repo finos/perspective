@@ -617,7 +617,7 @@ t_ctx0::get_step_delta(t_index bidx, t_index eidx) {
 
 void
 t_ctx0::compute_expressions(
-    std::shared_ptr<t_data_table> flattened_masked, t_vocab& expression_vocab) {
+    std::shared_ptr<t_data_table> flattened_masked, t_expression_vocab& expression_vocab) {
     // Clear the transitional expression tables on the context so they are
     // ready for the next update.
     m_expression_tables->clear_transitional_tables();
@@ -645,7 +645,7 @@ t_ctx0::compute_expressions(std::shared_ptr<t_data_table> master,
     std::shared_ptr<t_data_table> delta, std::shared_ptr<t_data_table> prev,
     std::shared_ptr<t_data_table> current,
     std::shared_ptr<t_data_table> transitions,
-    std::shared_ptr<t_data_table> existed, t_vocab& expression_vocab) {
+    std::shared_ptr<t_data_table> existed, t_expression_vocab& expression_vocab) {
     // Clear the tables so they are ready for this round of updates
     m_expression_tables->clear_transitional_tables();
 

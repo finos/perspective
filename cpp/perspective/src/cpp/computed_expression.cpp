@@ -91,7 +91,7 @@ t_computed_expression::t_computed_expression(
 
 void
 t_computed_expression::compute(std::shared_ptr<t_data_table> source_table,
-    std::shared_ptr<t_data_table> destination_table, t_vocab& vocab) const {
+    std::shared_ptr<t_data_table> destination_table, t_expression_vocab& vocab) const {
     // TODO: share symtables across pre/re/compute
     exprtk::symbol_table<t_tscalar> sym_table;
 
@@ -209,7 +209,7 @@ t_computed_expression_parser::precompute(const std::string& expression_alias,
     const std::string& expression_string,
     const std::string& parsed_expression_string,
     const std::vector<std::pair<std::string, std::string>>& column_ids,
-    std::shared_ptr<t_schema> schema, t_vocab& vocab) {
+    std::shared_ptr<t_schema> schema, t_expression_vocab& vocab) {
     exprtk::symbol_table<t_tscalar> sym_table;
     sym_table.add_constants();
 
@@ -237,7 +237,7 @@ t_computed_expression_parser::precompute(const std::string& expression_alias,
         // nullptr as a string - use the empty string that we interned
         // in the gnode's expression vocab in t_gnode::init() at idx 0
         if (rval.m_type == DTYPE_STR) {
-            rval.set(vocab.unintern_c(0));
+            rval.set(vocab.get_empty_string());
             rval.m_status = STATUS_INVALID;
         }
 
@@ -271,7 +271,7 @@ t_computed_expression_parser::get_dtype(const std::string& expression_alias,
     const std::string& expression_string,
     const std::string& parsed_expression_string,
     const std::vector<std::pair<std::string, std::string>>& column_ids,
-    const t_schema& schema, t_expression_error& error, t_vocab& vocab) {
+    const t_schema& schema, t_expression_error& error, t_expression_vocab& vocab) {
     exprtk::symbol_table<t_tscalar> sym_table;
     sym_table.add_constants();
 
@@ -311,7 +311,7 @@ t_computed_expression_parser::get_dtype(const std::string& expression_alias,
         // nullptr as a string - use the empty string that we interned
         // in the gnode's expression vocab in t_gnode::init() at idx 0
         if (rval.m_type == DTYPE_STR) {
-            rval.set(vocab.unintern_c(0));
+            rval.set(vocab.get_empty_string());
             rval.m_status = STATUS_INVALID;
         }
 
@@ -419,7 +419,7 @@ t_validated_expression_map::get_expression_errors() const {
 }
 
 t_computed_function_store::t_computed_function_store(
-    t_vocab& vocab, bool is_type_validator)
+    t_expression_vocab& vocab, bool is_type_validator)
     : m_day_of_week_fn(computed_function::day_of_week(vocab, is_type_validator))
     , m_month_of_year_fn(
           computed_function::month_of_year(vocab, is_type_validator))

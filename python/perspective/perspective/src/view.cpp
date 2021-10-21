@@ -144,7 +144,7 @@ make_view_config(
     expressions.reserve(p_expressions.size());
 
     // Validate expressions using the vocab
-    t_vocab& expression_vocab = *(gnode.get_expression_vocab());
+    t_expression_vocab& expression_vocab = *(gnode.get_expression_vocab());
 
     // Will either abort() or succeed completely, and this isn't a public
     // API so we can directly index for speed.

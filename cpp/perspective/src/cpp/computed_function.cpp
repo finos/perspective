@@ -24,7 +24,7 @@ namespace computed_function {
     using float32 = float;
     using float64 = double;
 
-    intern::intern(t_vocab& expression_vocab, bool is_type_validator)
+    intern::intern(t_expression_vocab& expression_vocab, bool is_type_validator)
         : exprtk::igeneric_function<t_tscalar>("S")
         , m_expression_vocab(expression_vocab)
         , m_is_type_validator(is_type_validator) {
@@ -34,7 +34,7 @@ namespace computed_function {
         // errors in strcmp().
         t_tscalar sentinel;
         sentinel.clear();
-        sentinel.set(m_expression_vocab.unintern_c(0));
+        sentinel.set(m_expression_vocab.get_empty_string());
         sentinel.m_status = STATUS_INVALID;
         m_sentinel = sentinel;
     }
@@ -63,19 +63,17 @@ namespace computed_function {
             return m_sentinel;
         }
 
-        // Intern the string into the vocabulary, and return the index of the
-        // string inside the vocabulary.
-        t_uindex interned = m_expression_vocab.get_interned(temp_str);
-        rval.set(m_expression_vocab.unintern_c(interned));
+        // Intern the string into the vocabulary.
+        rval.set(m_expression_vocab.intern(temp_str));
         return rval;
     }
 
-    concat::concat(t_vocab& expression_vocab, bool is_type_validator)
+    concat::concat(t_expression_vocab& expression_vocab, bool is_type_validator)
         : m_expression_vocab(expression_vocab)
         , m_is_type_validator(is_type_validator) {
         t_tscalar sentinel;
         sentinel.clear();
-        sentinel.set(m_expression_vocab.unintern_c(0));
+        sentinel.set(m_expression_vocab.get_empty_string());
         sentinel.m_status = STATUS_INVALID;
 
         m_sentinel = sentinel;
@@ -132,19 +130,17 @@ namespace computed_function {
             return m_sentinel;
         }
 
-        t_uindex interned = m_expression_vocab.get_interned(result);
-        rval.set(m_expression_vocab.unintern_c(interned));
-
+        rval.set(m_expression_vocab.intern(result));
         return rval;
     }
 
-    upper::upper(t_vocab& expression_vocab, bool is_type_validator)
+    upper::upper(t_expression_vocab& expression_vocab, bool is_type_validator)
         : exprtk::igeneric_function<t_tscalar>("T")
         , m_expression_vocab(expression_vocab)
         , m_is_type_validator(is_type_validator) {
         t_tscalar sentinel;
         sentinel.clear();
-        sentinel.set(m_expression_vocab.unintern_c(0));
+        sentinel.set(m_expression_vocab.get_empty_string());
         sentinel.m_status = STATUS_INVALID;
 
         m_sentinel = sentinel;
@@ -188,18 +184,18 @@ namespace computed_function {
 
         boost::to_upper(temp_str);
 
-        t_uindex interned = m_expression_vocab.get_interned(temp_str);
-        rval.set(m_expression_vocab.unintern_c(interned));
+
+        rval.set(m_expression_vocab.intern(temp_str));
         return rval;
     }
 
-    lower::lower(t_vocab& expression_vocab, bool is_type_validator)
+    lower::lower(t_expression_vocab& expression_vocab, bool is_type_validator)
         : exprtk::igeneric_function<t_tscalar>("T")
         , m_expression_vocab(expression_vocab)
         , m_is_type_validator(is_type_validator) {
         t_tscalar sentinel;
         sentinel.clear();
-        sentinel.set(m_expression_vocab.unintern_c(0));
+        sentinel.set(m_expression_vocab.get_empty_string());
         sentinel.m_status = STATUS_INVALID;
 
         m_sentinel = sentinel;
@@ -242,8 +238,7 @@ namespace computed_function {
 
         boost::to_lower(temp_str);
 
-        t_uindex interned = m_expression_vocab.get_interned(temp_str);
-        rval.set(m_expression_vocab.unintern_c(interned));
+        rval.set(m_expression_vocab.intern(temp_str));
         return rval;
     }
 
@@ -478,13 +473,13 @@ namespace computed_function {
         "03 March", "04 April", "05 May", "06 June", "07 July", "08 August",
         "09 September", "10 October", "11 November", "12 December"};
 
-    day_of_week::day_of_week(t_vocab& expression_vocab, bool is_type_validator)
+    day_of_week::day_of_week(t_expression_vocab& expression_vocab, bool is_type_validator)
         : exprtk::igeneric_function<t_tscalar>("T")
         , m_expression_vocab(expression_vocab)
         , m_is_type_validator(is_type_validator) {
         t_tscalar sentinel;
         sentinel.clear();
-        sentinel.set(m_expression_vocab.unintern_c(0));
+        sentinel.set(m_expression_vocab.get_empty_string());
         sentinel.m_status = STATUS_INVALID;
 
         m_sentinel = sentinel;
@@ -555,21 +550,18 @@ namespace computed_function {
             result = days_of_week[(weekday - date::Sunday).count()];
         }
 
-        // Intern the string pointer so it does not fall out of reference and
-        // cause a memory error.
-        t_uindex interned = m_expression_vocab.get_interned(result);
-        rval.set(m_expression_vocab.unintern_c(interned));
+        rval.set(m_expression_vocab.intern(result));
         return rval;
     }
 
     month_of_year::month_of_year(
-        t_vocab& expression_vocab, bool is_type_validator)
+        t_expression_vocab& expression_vocab, bool is_type_validator)
         : exprtk::igeneric_function<t_tscalar>("T")
         , m_expression_vocab(expression_vocab)
         , m_is_type_validator(is_type_validator) {
         t_tscalar sentinel;
         sentinel.clear();
-        sentinel.set(m_expression_vocab.unintern_c(0));
+        sentinel.set(m_expression_vocab.get_empty_string());
         sentinel.m_status = STATUS_INVALID;
 
         m_sentinel = sentinel;
@@ -634,8 +626,7 @@ namespace computed_function {
 
         // Intern the string pointer so it does not fall out of reference and
         // cause a memory error.
-        t_uindex interned = m_expression_vocab.get_interned(result);
-        rval.set(m_expression_vocab.unintern_c(interned));
+        rval.set(m_expression_vocab.intern(result));
         return rval;
     }
 
@@ -1271,13 +1262,13 @@ namespace computed_function {
         return rval;
     }
 
-    to_string::to_string(t_vocab& expression_vocab, bool is_type_validator)
+    to_string::to_string(t_expression_vocab& expression_vocab, bool is_type_validator)
         : exprtk::igeneric_function<t_tscalar>("T")
         , m_expression_vocab(expression_vocab)
         , m_is_type_validator(is_type_validator) {
         t_tscalar sentinel;
         sentinel.clear();
-        sentinel.set(m_expression_vocab.unintern_c(0));
+        sentinel.set(m_expression_vocab.get_empty_string());
         sentinel.m_status = STATUS_INVALID;
         m_sentinel = sentinel;
     }
@@ -1309,8 +1300,7 @@ namespace computed_function {
             return m_sentinel;
         }
 
-        t_uindex interned = m_expression_vocab.get_interned(temp_str);
-        rval.set(m_expression_vocab.unintern_c(interned));
+        rval.set(m_expression_vocab.intern(temp_str));
         return rval;
     }
 

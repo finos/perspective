@@ -87,7 +87,7 @@ Table::validate_expressions(
 
     // Use the gnode's expression vocab to validate expressions so we never
     // have string-typed scalars with nullptr.
-    t_vocab& expression_vocab = *(m_gnode->get_expression_vocab());
+    t_expression_vocab& expression_vocab = *(m_gnode->get_expression_vocab());
 
     for (const auto& expr : expressions) {
         const std::string& expression_alias = std::get<0>(expr);

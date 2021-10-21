@@ -18,6 +18,7 @@
 #include <perspective/mask.h>
 #include <perspective/tracing.h>
 #include <perspective/env_vars.h>
+#include <perspective/expression_vocab.h>
 
 #include <perspective/utils.h>
 
@@ -109,11 +110,7 @@ t_gnode::init() {
         input_port->get_table()->flatten();
     }
 
-    m_expression_vocab = std::make_shared<t_vocab>();
-    m_expression_vocab->init(false);
-
-    // String at index 0 is always "" empty string
-    m_expression_vocab->get_interned("");
+    m_expression_vocab = std::make_shared<t_expression_vocab>();
 
     m_init = true;
 }
@@ -879,7 +876,7 @@ t_gnode::_register_context(
         pkeyed_table = m_gstate->get_pkeyed_table();
     }
 
-    t_vocab& expression_vocab = *(m_expression_vocab);
+    t_expression_vocab& expression_vocab = *(m_expression_vocab);
 
     switch (type) {
         case TWO_SIDED_CONTEXT: {
@@ -1011,7 +1008,7 @@ t_gnode::notify_contexts(std::shared_ptr<t_data_table> flattened) {
 
 void
 t_gnode::_compute_expressions(std::shared_ptr<t_data_table> flattened_masked) {
-    t_vocab& expression_vocab = *(m_expression_vocab);
+    t_expression_vocab& expression_vocab = *(m_expression_vocab);
 
     for (const auto& iter : m_contexts) {
         const t_ctx_handle& ctxh = iter.second;
@@ -1054,7 +1051,7 @@ t_gnode::_compute_expressions(std::shared_ptr<t_data_table> master,
     std::shared_ptr<t_data_table> existed
         = m_oports[PSP_PORT_EXISTED]->get_table();
 
-    t_vocab& expression_vocab = *(m_expression_vocab);
+    t_expression_vocab& expression_vocab = *(m_expression_vocab);
 
     for (const auto& iter : m_contexts) {
         const t_ctx_handle& ctxh = iter.second;
@@ -1095,7 +1092,7 @@ t_gnode::_compute_expressions(std::shared_ptr<t_data_table> master,
  * Getters
  */
 
-std::shared_ptr<t_vocab>
+std::shared_ptr<t_expression_vocab>
 t_gnode::get_expression_vocab() const {
     return m_expression_vocab;
 }
@@ -1314,12 +1311,8 @@ t_gnode::reset() {
 
     m_gstate->reset();
 
-    // Reset expression vocab as well
-    m_expression_vocab = std::make_shared<t_vocab>();
-    m_expression_vocab->init(false);
-
-    // String at index 0 is always "" empty string
-    m_expression_vocab->get_interned("");
+    // Clear the expression vocab
+    m_expression_vocab->clear();
 }
 
 void

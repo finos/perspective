@@ -51,7 +51,8 @@ public:
         t_dtype dtype);
 
     void compute(std::shared_ptr<t_data_table> source_table,
-        std::shared_ptr<t_data_table> destination_table, t_vocab& vocab) const;
+        std::shared_ptr<t_data_table> destination_table,
+        t_expression_vocab& vocab) const;
 
     const std::string& get_expression_alias() const;
     const std::string& get_expression_string() const;
@@ -94,7 +95,7 @@ public:
         const std::string& expression_string,
         const std::string& parsed_expression_string,
         const std::vector<std::pair<std::string, std::string>>& column_ids,
-        std::shared_ptr<t_schema> schema, t_vocab& vocab);
+        std::shared_ptr<t_schema> schema, t_expression_vocab& vocab);
 
     /**
      * @brief Returns the dtype of the given expression, or `DTYPE_NONE`
@@ -120,7 +121,8 @@ public:
         const std::string& expression_string,
         const std::string& parsed_expression_string,
         const std::vector<std::pair<std::string, std::string>>& column_ids,
-        const t_schema& schema, t_expression_error& error, t_vocab& vocab);
+        const t_schema& schema, t_expression_error& error,
+        t_expression_vocab& vocab);
 
     static std::shared_ptr<exprtk::parser<t_tscalar>> PARSER;
 
@@ -176,7 +178,8 @@ struct PERSPECTIVE_EXPORT t_validated_expression_map {
 struct PERSPECTIVE_EXPORT t_computed_function_store {
     PSP_NON_COPYABLE(t_computed_function_store);
 
-    t_computed_function_store(t_vocab& vocab, bool is_type_validator);
+    t_computed_function_store(
+        t_expression_vocab& vocab, bool is_type_validator);
 
     void register_computed_functions(
         exprtk::symbol_table<t_tscalar>& sym_table);
@@ -188,7 +191,7 @@ struct PERSPECTIVE_EXPORT t_computed_function_store {
     void clear_computed_function_state();
 
     // Member functions are instances that must be initialized per-method call,
-    // as they have references to a `t_vocab`.
+    // as they have references to a `t_expression_vocab`.
     computed_function::day_of_week m_day_of_week_fn;
     computed_function::month_of_year m_month_of_year_fn;
     computed_function::intern m_intern_fn;

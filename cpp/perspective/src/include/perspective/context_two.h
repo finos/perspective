@@ -18,6 +18,7 @@
 #include <perspective/traversal.h>
 #include <perspective/data_table.h>
 #include <perspective/expression_tables.h>
+#include <perspective/expression_vocab.h>
 
 namespace perspective {
 
