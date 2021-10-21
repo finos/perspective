@@ -45,7 +45,7 @@ public:
 private:
     void allocate_new_vocab();
 
-    std::vector<std::shared_ptr<t_vocab>> m_vocabs;
+    std::vector<t_vocab> m_vocabs;
 
     // The number of strings to store in each page of the vocab.
     // t_vocab::reserve(byte_length, num_strings) takes both the bytelength
@@ -55,11 +55,9 @@ private:
     // EXPRESSION_VOCAB_CAPACITY * 64 bytes, allocate a new page.
     // TODO: this leaves edge cases where we allocate new pages too eagerly,
     // or we aren't using the allocated space as efficiently as possible.
-    std::size_t m_max_vocab_num_strings;
     std::size_t m_max_vocab_size;
 
     std::size_t m_current_vocab_size;
-    std::size_t m_current_vocab_num_strings;
     
     // An empty string for validation functions to use. 
     std::string m_empty_string;
