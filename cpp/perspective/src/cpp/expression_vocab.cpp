@@ -15,7 +15,7 @@ t_expression_vocab::t_expression_vocab()
     : m_empty_string("") {
     // at an assumed 64 bytes per string, we will either hit 1000 unique strings
     // or 6400 bytes per vocab, whichever comes first.
-    m_max_vocab_num_strings = 1000;
+    m_max_vocab_num_strings = 100;
     m_max_vocab_size = m_max_vocab_num_strings * 64;
 
     // Always start with one vocab
