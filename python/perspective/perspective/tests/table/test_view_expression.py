@@ -175,6 +175,26 @@ class TestViewExpression(object):
             assert schema[name] == str
             assert result[name] == [res for _ in range(100)]
 
+    def test_view_expression_string_page_stress(self):
+        table = Table({"a": [i for i in range(100)]})
+        big_strings = [
+            "".join(["a" for _ in range(640)]),
+            "".join(["b" for _ in range(640)]),
+            "".join(["c" for _ in range(640)]),
+            "".join(["d" for _ in range(640)]),
+        ]
+
+        view = table.view(
+            expressions=[
+                "//computed\nvar a := '{}'; var b := '{}'; var c := '{}'; var d := '{}'; concat(a, b, c, d)".format(*big_strings)
+            ]
+        )
+
+        result = view.to_columns()
+        schema = view.expression_schema()
+        assert schema == {"computed": str}
+        assert result["computed"] == ["".join(big_strings) for _ in range(100)]
+
     def test_view_expression_new_vocab_page(self):
         table = Table({"a": [randstr(100) for _ in range(100)]})
 
