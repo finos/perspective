@@ -13,8 +13,7 @@
 #include <perspective/data_table.h>
 
 #ifdef PSP_PARALLEL_FOR
-#include <tbb/parallel_sort.h>
-#include <tbb/tbb.h>
+#include <perspective/parallel_for.h>
 #endif
 
 namespace perspective {

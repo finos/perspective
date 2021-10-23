@@ -19,9 +19,6 @@
 namespace perspective {
 namespace binding {
 
-
-void _set_nthreads(int nthreads);
-
 /******************************************************************************
  *
  * Helper functions

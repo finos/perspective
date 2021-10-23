@@ -23,6 +23,7 @@
 
 #ifdef PSP_ENABLE_PYTHON
 #include <perspective/pyutils.h>
+#include <perspective/parallel_for.h>
 #endif
 
 namespace perspective {
@@ -343,7 +344,7 @@ t_gnode::_process_table(t_uindex port_id) {
     t_uindex ncols = column_names.size();
 
 #ifdef PSP_PARALLEL_FOR
-    tbb::parallel_for(0, int(ncols), 1,
+    parallel_for(int(ncols),
         [&_process_state, &column_names, this](int colidx)
 #else
     for (t_uindex colidx = 0; colidx < ncols; ++colidx)
@@ -717,7 +718,7 @@ t_gnode::_update_contexts_from_state(std::shared_ptr<t_data_table> tbl) {
 
     t_index num_contexts = m_contexts.size();
 
-    // Iterate over contexts in parallel using TBB
+    // Iterate over contexts in parallel
     std::vector<std::string> context_names(num_contexts);
     std::vector<t_ctx_handle> context_handles(num_contexts);
 
@@ -769,7 +770,7 @@ t_gnode::_update_contexts_from_state(std::shared_ptr<t_data_table> tbl) {
     };
 
 #ifdef PSP_PARALLEL_FOR
-    tbb::parallel_for(0, int(num_contexts), 1,
+    parallel_for(int(num_contexts),
         [&update_contexts_helper](int ctx_idx)
 #else
     for (t_index ctx_idx = 0; ctx_idx < num_contexts; ++ctx_idx)
@@ -985,7 +986,7 @@ t_gnode::notify_contexts(std::shared_ptr<t_data_table> flattened) {
           };
 
 #ifdef PSP_PARALLEL_FOR
-    tbb::parallel_for(0, int(num_contexts), 1,
+    parallel_for(int(num_contexts),
         [&notify_context_helper](int ctx_idx)
 #else
     for (t_index ctx_idx = 0; ctx_idx < num_contexts; ++ctx_idx)

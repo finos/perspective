@@ -108,7 +108,7 @@ t_data_table::init(bool make_columns) {
 
     if (make_columns) {
 #ifdef PSP_PARALLEL_FOR
-        tbb::parallel_for(0, int(m_schema.size()), 1,
+        parallel_for(int(m_schema.size()),
             [this](int idx)
 #else
         for (t_uindex idx = 0, loop_end = m_schema.size(); idx < loop_end;
@@ -454,7 +454,7 @@ t_data_table::append(const t_data_table& other) {
     }
 
 #ifdef PSP_PARALLEL_FOR
-    tbb::parallel_for(0, int(src_cols.size()), 1,
+    parallel_for(int(src_cols.size()),
         [&src_cols, dst_cols](int colidx)
 #else
     for (t_uindex colidx = 0, loop_end = src_cols.size(); colidx < loop_end;

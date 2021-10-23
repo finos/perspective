@@ -26,8 +26,7 @@
 #include <tsl/ordered_map.h>
 #ifdef PSP_PARALLEL_FOR
 #include <thread>
-#include <tbb/parallel_sort.h>
-#include <tbb/tbb.h>
+#include <perspective/parallel_for.h>
 #endif
 #include <chrono>
 
