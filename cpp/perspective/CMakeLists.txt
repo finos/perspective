@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.7.2)
 project(psp)
+include(CheckCCompilerFlag)
 
 set(CMAKE_BUILD_TYPE "Release")
 set(CMAKE_CXX_STANDARD 14)
@@ -371,6 +372,16 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 			# https://blog.tim-smith.us/2015/09/python-extension-modules-os-x/
 			set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -undefined dynamic_lookup")
 
+			set(CMAKE_REQUIRED_LINK_OPTIONS "-arch;x86_64")
+			check_c_compiler_flag("-arch x86_64" x86_64Supported)
+	
+			set(CMAKE_REQUIRED_LINK_OPTIONS "-arch;arm64")
+			check_c_compiler_flag("-arch arm64" arm64Supported)
+
+			if(x86_64Supported AND arm64Supported)
+				set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "Build universal architecture for OSX" FORCE)
+			endif()
+	
 			# on mac, use the vanilla pybind11 finder
 			find_package(pybind11)
 			if(pybind11_FOUND)
@@ -606,6 +617,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
         set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
         set(CMAKE_INSTALL_NAME_DIR "@rpath/")
+		SET(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "Build architectures for Mac OS X" FORCE)
 
 		# module_origin_path is the location of the binary
         if(MACOS)
