@@ -152,8 +152,7 @@ async function focus_package() {
 }
 
 async function javascript_options() {
-    const new_config = await inquirer.prompt([PROMPT_DEBUG, PROMPT_DOCKER]);
-    const local_puppeteer = fs.existsSync("node_modules/puppeteer");
+    const new_config = await inquirer.prompt([PROMPT_DEBUG]);
     CONFIG.add(new_config);
     CONFIG.write();
 }

@@ -15,7 +15,7 @@ from .validate import (
     validate_column_pivots,
     validate_aggregates,
     validate_sort,
-    validate_filters,
+    validate_filter,
     validate_expressions,
     validate_plugin_config,
 )
@@ -45,7 +45,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
     PERSISTENT_ATTRIBUTES = (
         "row_pivots",
         "column_pivots",
-        "filters",
+        "filter",
         "sort",
         "aggregates",
         "columns",
@@ -63,7 +63,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         column_pivots=None,
         aggregates=None,
         sort=None,
-        filters=None,
+        filter=None,
         expressions=None,
         plugin_config=None,
         dark=None,
@@ -125,7 +125,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         self.column_pivots = validate_column_pivots(column_pivots) or []
         self.aggregates = validate_aggregates(aggregates) or {}
         self.sort = validate_sort(sort) or []
-        self.filters = validate_filters(filters) or []
+        self.filter = validate_filter(filter) or []
         self.expressions = validate_expressions(expressions) or []
         self.plugin_config = validate_plugin_config(plugin_config) or {}
         self.dark = dark
@@ -261,7 +261,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         """
         self.row_pivots = []
         self.column_pivots = []
-        self.filters = []
+        self.filter = []
         self.sort = []
         self.expressions = []
         self.aggregates = {}

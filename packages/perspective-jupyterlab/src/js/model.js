@@ -31,7 +31,7 @@ export class PerspectiveModel extends DOMWidgetModel {
             column_pivots: [],
             aggregates: {},
             sort: [],
-            filters: [],
+            filter: [],
             expressions: [],
             plugin_config: {},
             dark: false,

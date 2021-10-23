@@ -14,7 +14,7 @@ from .validate import (
     validate_column_pivots,
     validate_aggregates,
     validate_sort,
-    validate_filters,
+    validate_filter,
     validate_expressions,
     validate_plugin_config,
 )
@@ -41,7 +41,7 @@ class PerspectiveTraitlets(HasTraits):
     column_pivots = List(trait=Unicode(), default_value=[]).tag(sync=True)
     aggregates = Dict(default_value={}).tag(sync=True)
     sort = List(default_value=[]).tag(sync=True)
-    filters = List(default_value=[]).tag(sync=True)
+    filter = List(default_value=[]).tag(sync=True)
     expressions = List(default_value=[]).tag(sync=True)
     plugin_config = Dict(default_value={}).tag(sync=True)
     dark = Bool(None, allow_none=True).tag(sync=True)
@@ -73,9 +73,9 @@ class PerspectiveTraitlets(HasTraits):
     def _validate_sort(self, proposal):
         return validate_sort(proposal.value)
 
-    @validate("filters")
-    def _validate_filters(self, proposal):
-        return validate_filters(proposal.value)
+    @validate("filter")
+    def _validate_filter(self, proposal):
+        return validate_filter(proposal.value)
 
     @validate("expressions")
     def _validate_expressions(self, proposal):

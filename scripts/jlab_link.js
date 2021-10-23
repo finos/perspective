@@ -14,6 +14,7 @@ const packages = [
     "./rust/perspective-viewer",
     "./packages/perspective-viewer-datagrid",
     "./packages/perspective-viewer-d3fc",
+    "./packages/perspective-jupyterlab",
 ];
 
 /**
