@@ -592,6 +592,6 @@ general suffers when the dataset itself is too large to download to the client
 in full.
 
 The Python runtime does not suffer from memory limitations, utilizes
-[TBB](https://github.com/intel/tbb) for threading and parallel processing, and
+Apache Arrow internal threadpools for threading and parallel processing, and
 generates architecture optimized code, which currently makes it more suitable as
 a server-side runtime than `node.js`.
