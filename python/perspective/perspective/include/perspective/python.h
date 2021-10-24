@@ -445,7 +445,6 @@ PYBIND11_MODULE(libbinding, m)
     m.def("validate_expressions", &validate_expressions_py);
     m.def("init_expression_parser", &init_expression_parser);
     m.def("scalar_to_py", &scalar_to_py);
-    m.def("_set_nthreads", &_set_nthreads);
 }
 
 #endif

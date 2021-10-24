@@ -6,6 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+
 #ifdef PSP_ENABLE_PYTHON
 
 #include <perspective/base.h>
@@ -13,32 +14,8 @@
 #include <perspective/python/base.h>
 #include <perspective/python/utils.h>
 
-#ifdef PSP_PARALLEL_FOR
-#ifndef TBB_PREVIEW_GLOBAL_CONTROL
-#define TBB_PREVIEW_GLOBAL_CONTROL 1
-#endif
-
-#include <tbb/global_control.h>
-#endif
 namespace perspective {
 namespace binding {
-
-#ifdef PSP_PARALLEL_FOR
-std::shared_ptr<tbb::global_control> control = 
-    std::make_shared<tbb::global_control>(
-        tbb::global_control::max_allowed_parallelism,
-        tbb::task_scheduler_init::default_num_threads()
-    );
-#endif
-
-void _set_nthreads(int nthreads) {
-#ifdef PSP_PARALLEL_FOR
-	control = std::make_shared<tbb::global_control>(
-        tbb::global_control::max_allowed_parallelism, 
-        nthreads == -1 ? tbb::task_scheduler_init::default_num_threads() : nthreads
-    );
-#endif
-}
 
 t_dtype type_string_to_t_dtype(std::string value, std::string name) {
     auto type = t_dtype::DTYPE_STR;

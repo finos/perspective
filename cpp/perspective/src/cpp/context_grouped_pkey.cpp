@@ -535,7 +535,7 @@ t_ctx_grouped_pkey::rebuild() {
 
     t_datumcmp cmp;
 
-    PSP_PSORT(data.begin(), data.end(), cmp);
+    std::sort(data.begin(), data.end(), cmp);
 
     std::vector<t_uindex> root_children;
 
@@ -618,7 +618,7 @@ t_ctx_grouped_pkey::rebuild() {
     }
 
 #ifdef PSP_PARALLEL_FOR
-    tbb::parallel_for(0, int(naggs), 1,
+    parallel_for(int(naggs),
         [&aggtable, &aggindices, &aggspecs, &tbl](int aggnum)
 #else
     for (t_uindex aggnum = 0; aggnum < naggs; ++aggnum)

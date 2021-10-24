@@ -307,18 +307,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		include_directories( ${Boost_INCLUDE_DIRS} )
 	endif()
 
-	# TBB is a dependency that we can build as part of our build process, so it
-	# does not necessarily have to be present before Perspective is built.
-	find_package(TBB)
-
-	if(NOT TBB_FOUND)
-		psp_build_message("${Red}TBB could not be located - building TBB from external source ${ColorReset}")
-		psp_build_dep("tbb" "${PSP_CMAKE_MODULE_PATH}/TBB.txt.in")
-	else()
-		psp_build_message("${Cyan}Found TBB: TBB_INCLUDE_DIRS - ${TBB_INCLUDE_DIRS}, TBB_LIBRARY_DIRS - ${TBB_LIBRARY_DIRS} ${ColorReset}")
-		include_directories( ${TBB_INCLUDE_DIRS} )
-	endif()
-
 	if(WIN32)
 		foreach(warning 4244 4251 4267 4275 4290 4786 4305 4996)
 			SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd${warning}")
@@ -666,9 +654,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		# Link against minimal arrow static library
 		target_link_libraries(psp arrow)
 
-		target_link_libraries(psp tbb)
-		target_link_libraries(binding tbb)
-
 		target_link_libraries(binding psp)
 
 		# The compiled libraries will be put in CMAKE_LIBRARY_OUTPUT_DIRECTORY by default. In the
@@ -678,11 +663,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		add_custom_command(TARGET psp POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:psp> ${PSP_PYTHON_SRC}/table/)
 		add_custom_command(TARGET binding POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:binding> ${PSP_PYTHON_SRC}/table/)
 
-		if(WIN32)
-			if(NOT TBB_FOUND)
-				add_custom_command(TARGET binding POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:tbb> ${PSP_PYTHON_SRC}/table/)
-			endif()
-		endif()
 		########################
 	else()
 		add_library(psp SHARED ${WASM_SOURCE_FILES})

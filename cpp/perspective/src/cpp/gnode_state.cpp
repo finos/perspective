@@ -16,7 +16,7 @@
 #include <perspective/mask.h>
 #include <perspective/sym_table.h>
 #ifdef PSP_PARALLEL_FOR
-#include <tbb/tbb.h>
+#include <perspective/parallel_for.h>
 #endif
 
 namespace perspective {
@@ -127,7 +127,7 @@ t_gstate::fill_master_table(const t_data_table* flattened) {
     auto master_table = m_table.get();
 
 #ifdef PSP_PARALLEL_FOR
-    tbb::parallel_for(0, int(ncols), 1,
+    parallel_for(int(ncols),
         [&master_table, &master_table_schema, &flattened](int idx)
 #else
     for (t_uindex idx = 0; idx < ncols; ++idx)
@@ -234,7 +234,7 @@ t_gstate::update_master_table(const t_data_table* flattened) {
     const t_schema& master_schema = m_table->get_schema();
     t_uindex ncols = master_table->num_columns();
 #ifdef PSP_PARALLEL_FOR
-    tbb::parallel_for(0, int(ncols), 1,
+    parallel_for(int(ncols),
         [flattened, flattened_op_col, &master_schema, &master_table,
             &master_table_indexes, this](int idx)
 #else
@@ -596,7 +596,7 @@ t_gstate::get_pkeyed_table() const {
     rval->set_size(table_size);
 
 #ifdef PSP_PARALLEL_FOR
-    tbb::parallel_for(0, int(num_columns), 1,
+    parallel_for(int(num_columns),
         [&schema_columns, rval, master_table, &mask](int colidx)
 #else
     for (t_uindex colidx = 0; colidx < num_columns; ++colidx)

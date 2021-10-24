@@ -38,7 +38,6 @@
 #endif
 
 // Remove once we are c++11 everywhere
-#define TBB_DEPRECATED_MUTEX_COPYING 1
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #define _GLIBCXX_USE_NANOSLEEP 1
 #include <string>
