@@ -6,13 +6,16 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-from random import random
+from random import random, randint, choices
+from string import ascii_letters
 from pytest import raises
 from datetime import date, datetime
 from time import mktime
 from perspective import Table, PerspectiveCppError
 from .test_view import compare_delta
 
+def randstr(length):
+    return "".join(choices(ascii_letters, k=length))
 
 class TestViewExpression(object):
     def test_table_validate_expressions_empty(self):
@@ -153,6 +156,281 @@ class TestViewExpression(object):
             "computed": [6, 8, 10, 12],
         }
         assert view.expression_schema() == {"computed": float}
+
+    def test_view_expression_string_per_page(self):
+        table = Table({"a": [i for i in range(100)]})
+        big_strings = [randstr(6400) for _ in range(4)]
+        view = table.view(
+            expressions=[
+                "//computed{}\nvar x := '{}'; lower(x)".format(i, big_strings[i]) for i in range(4)
+            ]
+        )
+
+        result = view.to_columns()
+        schema = view.expression_schema()
+
+        for i in range(4):
+            name = "computed{}".format(i)
+            res = big_strings[i].lower()
+            assert schema[name] == str
+            assert result[name] == [res for _ in range(100)]
+
+    def test_view_expression_string_page_stress(self):
+        table = Table({"a": [i for i in range(100)]})
+        big_strings = [
+            "".join(["a" for _ in range(640)]),
+            "".join(["b" for _ in range(640)]),
+            "".join(["c" for _ in range(640)]),
+            "".join(["d" for _ in range(640)]),
+        ]
+
+        view = table.view(
+            expressions=[
+                "//computed\nvar a := '{}'; var b := '{}'; var c := '{}'; var d := '{}'; concat(a, b, c, d)".format(*big_strings)
+            ]
+        )
+
+        result = view.to_columns()
+        schema = view.expression_schema()
+        assert schema == {"computed": str}
+        assert result["computed"] == ["".join(big_strings) for _ in range(100)]
+
+    def test_view_expression_new_vocab_page(self):
+        table = Table({"a": [randstr(100) for _ in range(100)]})
+
+        def make_expression(idx):
+            expr = ["//computed{}".format(idx)]
+            num_vars = randint(1, 26)
+            concat_cols = []
+            concat_result = []
+
+            for i in range(num_vars):
+                name = ascii_letters[i]
+                string_literal = randstr(randint(100, 1000))
+
+                if random() > 0.5:
+                    result = string_literal.upper()
+                    string_literal = "upper('{}')".format(string_literal)
+                else:
+                    result = string_literal.lower()
+                    string_literal = "lower('{}')".format(string_literal)
+
+                concat_cols.append(name)
+                concat_result.append(result)
+
+                expr.append("var {} := {};".format(name, string_literal))
+
+            expr.append("concat(\"a\", {})".format(", ".join(concat_cols)))
+
+            return {
+                "expression_name": expr[0][2:],
+                "expression": "\n".join(expr),
+                "output": "".join(concat_result)
+            }
+
+        expressions = [make_expression(i) for i in range(10)]
+
+        view = table.view(
+            expressions=[expr["expression"] for expr in expressions]
+        )
+
+        result = view.to_columns()
+        schema = view.expression_schema()
+
+        for expr in expressions:
+            name = expr["expression_name"]
+            assert schema[name] == str
+
+            for i in range(100):
+                val = result["a"][i]
+                assert result[name][i] == val + expr["output"]
+
+    def test_view_expression_collide_local_var(self):
+        """Make sure that strings declared under the same var name in
+        different expressions do not collide."""
+        table = Table({"a": [1, 2, 3, 4]})
+        strings = [randstr(50) for _ in range(8)]
+
+        view = table.view(
+            expressions=[
+                "// computed \n var w := '{}'; var x := '{}'; var y := '{}'; var z := '{}'; concat(w, x, y, z)".format(*strings[:4]),
+                "// computed2 \n var w := '{}'; var x := '{}'; var y := '{}'; var z := '{}'; concat(w, x, y, z)".format(*strings[4:]),
+            ]
+        )
+
+        result = view.to_columns()
+        schema = view.expression_schema()
+
+        assert schema == {
+            "computed": str,
+            "computed2": str
+        }
+
+        assert result["computed"] == ["".join(strings[:4]) for _ in range(4)]
+        assert result["computed2"] == ["".join(strings[4:]) for _ in range(4)]
+
+    def test_view_random_expressions(self):
+        def make_expression():
+            """Create a random expression with a few local string vars that
+            are too long to be stored in-place."""
+            expression_name = randstr(10)
+            expression = ["// {}\n".format(expression_name)]
+            num_vars = randint(1, 26)
+            output_var_name = ""
+            output_str = ""
+
+            for i in range(num_vars):
+                name = ascii_letters[i]
+                string_literal = randstr(randint(15, 100))
+                expression.append("var {} := '{}';\n".format(name, string_literal))
+
+                if i == num_vars - 1:
+                    output_var_name = name
+                    output_str = string_literal
+
+            expression.append(output_var_name)
+            return {
+                "expression_name": expression_name,
+                "expression": "".join(expression),
+                "output": output_str
+            }
+
+        table = Table({"a": [1, 2, 3, 4]})
+
+        for _ in range(5):
+            exprs = [make_expression() for _ in range(5)]
+            output_map = {expr["expression_name"]: expr["output"] for expr in exprs}
+            view = table.view(expressions=[expr["expression"] for expr in exprs])
+            expression_schema = view.expression_schema()
+            result = view.to_columns()
+
+            for expr in output_map.keys():
+                assert expression_schema[expr] == str
+                assert result[expr] == [output_map[expr] for _ in range(4)]
+
+    def test_view_expression_string_literal_compare(self):
+        table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
+        validated = table.validate_expressions(['// computed \n \'a\' == \'a\''])
+
+        assert validated["expression_schema"] == {
+            "computed": "boolean"
+        }
+
+        view = table.view(expressions=['// computed \n \'a\' == \'a\''])
+
+        assert view.to_columns() == {
+            "a": [1, 2, 3, 4],
+            "b": [5, 6, 7, 8],
+            "computed": [True, True, True, True],
+        }
+
+        assert view.expression_schema() == {"computed": bool}
+
+    def test_view_expression_string_literal_compare_null(self):
+        table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
+        validated = table.validate_expressions(['// computed \n \'a\' == null'])
+
+        assert validated["expression_schema"] == {
+            "computed": "float"
+        }
+
+        view = table.view(expressions=['// computed \n \'a\' == null'])
+
+        assert view.to_columns() == {
+            "a": [1, 2, 3, 4],
+            "b": [5, 6, 7, 8],
+            "computed": [0, 0, 0, 0],
+        }
+
+        assert view.expression_schema() == {"computed": float}
+
+    def test_view_expression_string_literal_compare_column(self):
+        table = Table({"a": ["a", "a", "b", "c"]})
+        validated = table.validate_expressions(['// computed \n "a" == \'a\''])
+
+        assert validated["expression_schema"] == {
+            "computed": "boolean"
+        }
+
+        view = table.view(expressions=['// computed \n "a" == \'a\''])
+
+        assert view.to_columns() == {
+            "a": ["a", "a", "b", "c"],
+            "computed": [True, True, False, False],
+        }
+
+        assert view.expression_schema() == {"computed": bool}
+
+    def test_view_expression_string_literal_compare_column_null(self):
+        table = Table({"a": ["a", None, "b", "c", None]})
+        validated = table.validate_expressions(['// computed \n "a" == \'a\''])
+
+        assert validated["expression_schema"] == {
+            "computed": "boolean"
+        }
+
+        view = table.view(expressions=['// computed \n "a" == \'a\''])
+
+        assert view.to_columns() == {
+            "a": ["a", None, "b", "c", None],
+            "computed": [True, False, False, False, False],
+        }
+
+        assert view.expression_schema() == {"computed": bool}
+
+    def test_view_expression_string_literal_compare_column_null_long(self):
+        table = Table({"a": ["abcdefghijklmnopqrstuvwxyz", None, "abcdefghijklmnopqrstuvwxyz", "aabcdefghijklmnopqrstuvwxyz", None]})
+        validated = table.validate_expressions(['// computed \n "a" == \'abcdefghijklmnopqrstuvwxyz\''])
+
+        assert validated["expression_schema"] == {
+            "computed": "boolean"
+        }
+
+        view = table.view(expressions=['// computed \n "a" == \'abcdefghijklmnopqrstuvwxyz\''])
+        result = view.to_columns()
+        assert result["computed"] == [True, False, True, False, False]
+
+        assert view.expression_schema() == {"computed": bool}
+
+    def test_view_expression_string_literal_compare_column_null_long_var(self):
+        table = Table({"a": ["abcdefghijklmnopqrstuvwxyz", None, "abcdefghijklmnopqrstuvwxyz", "aabcdefghijklmnopqrstuvwxyz", None]})
+        validated = table.validate_expressions(['// computed \n var xyz := \'abcdefghijklmnopqrstuvwxyz\'; "a" == xyz'])
+
+        assert validated["expression_schema"] == {
+            "computed": "boolean"
+        }
+
+        view = table.view(expressions=['// computed \n var xyz := \'abcdefghijklmnopqrstuvwxyz\'; "a" == xyz'])
+        result = view.to_columns()
+        assert result["computed"] == [True, False, True, False, False]
+        assert view.expression_schema() == {"computed": bool}
+
+    def test_view_expression_string_literal_compare_if(self):
+        table = Table({"a": ["a", "a", "b", "c"]})
+        validated = table.validate_expressions(['// computed \n if("a" == \'a\', 1, 2)'])
+
+        assert validated["expression_schema"] == {
+            "computed": "float"
+        }
+
+        view = table.view(expressions=['// computed \n if("a" == \'a\', 1, 2)'])
+
+        assert view.to_columns() == {
+            "a": ["a", "a", "b", "c"],
+            "computed": [1, 1, 2, 2],
+        }
+
+        assert view.expression_schema() == {"computed": float}
+
+    def test_view_expression_string_literal_var(self):
+        table = Table({"a": [1, 2, 3]})
+
+        for _ in range(10):
+            view = table.view(expressions=["var x := 'Eabcdefghijklmn'; var y := '0123456789'; concat(x, y)"])
+            assert view.to_columns() == {
+                "a": [1, 2, 3],
+                "var x := 'Eabcdefghijklmn'; var y := '0123456789'; concat(x, y)": ["Eabcdefghijklmn0123456789", "Eabcdefghijklmn0123456789", "Eabcdefghijklmn0123456789"]
+            }
 
     def test_view_streaming_expression(self):
         def data():

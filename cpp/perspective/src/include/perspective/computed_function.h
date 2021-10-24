@@ -17,6 +17,7 @@
 #include <perspective/column.h>
 #include <perspective/data_table.h>
 #include <perspective/exprtk.h>
+#include <perspective/expression_vocab.h>
 #include <boost/algorithm/string.hpp>
 #include <type_traits>
 #include <date/date.h>
@@ -33,14 +34,26 @@ namespace computed_function {
     typedef typename t_generic_type::scalar_view t_scalar_view;
     typedef typename t_generic_type::string_view t_string_view;
 
+// A function that returns a new string that is not part of the original
+// input column. To prevent the new strings from going out of scope and causing
+// memory errors, store the strings in the expression_vocab of the gnode
+// that is the parent of the view. String functions MUST NOT BE STATIC;
+// because Exprtk is the caller of the function (using operator()), the only
+// place we can provide a reference to the vocab is through the constructor.
+// As string functions are constructed per-invocation of compute/precompute/
+// get_dtype, and because the gnode is guaranteed to be valid for all of
+// those invocations, we can store a reference to the vocab.
 #define STRING_FUNCTION_HEADER(NAME)                                           \
     struct NAME : public exprtk::igeneric_function<t_tscalar> {                \
-        NAME(std::shared_ptr<t_vocab> expression_vocab);                       \
+        NAME(t_expression_vocab& expression_vocab, bool is_type_validator);    \
         ~NAME();                                                               \
         t_tscalar operator()(t_parameter_list parameters);                     \
-        std::shared_ptr<t_vocab> m_expression_vocab;                           \
+        t_expression_vocab& m_expression_vocab;                                \
+        bool m_is_type_validator;                                              \
         t_tscalar m_sentinel;                                                  \
     };
+
+    // TODO PSP_NON_COPYABLE all functions
 
     // Place string literals into `expression_vocab` so they do not go out
     // of scope and remain valid for the lifetime of the table.
@@ -54,9 +67,6 @@ namespace computed_function {
 
     // Lowercase a string
     STRING_FUNCTION_HEADER(lower)
-
-    // Length of the string
-    STRING_FUNCTION_HEADER(length)
 
     /**
      * @brief Given a string column and 1...n string parameters, generate a
@@ -72,14 +82,15 @@ namespace computed_function {
      * the end.
      */
     struct order : public exprtk::igeneric_function<t_tscalar> {
-        order(std::shared_ptr<t_vocab> expression_vocab);
+        order(bool is_type_validator);
         ~order();
+
         t_tscalar operator()(t_parameter_list parameters);
+        void clear_order_map();
 
         tsl::hopscotch_map<std::string, double> m_order_map;
         double m_order_idx;
-
-        std::shared_ptr<t_vocab> m_expression_vocab;
+        bool m_is_type_validator;
         t_tscalar m_sentinel;
     };
 
@@ -95,6 +106,9 @@ namespace computed_function {
         ~NAME();                                                               \
         t_tscalar operator()(t_parameter_list parameters);                     \
     };
+
+    // Length of the string
+    FUNCTION_HEADER(length)
 
     /**
      * @brief Return the hour of the day the date/datetime belongs to.
@@ -232,7 +246,7 @@ namespace computed_function {
     /**
      * @brief Convert a column or scalar to a boolean, which returns True if the
      * value is truthy or False otherwise.
-     * 
+     *
      * boolean(1)
      * boolean(null)
      */

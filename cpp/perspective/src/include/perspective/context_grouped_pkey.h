@@ -17,6 +17,7 @@
 #include <perspective/path.h>
 #include <perspective/sym_table.h>
 #include <perspective/expression_tables.h>
+#include <perspective/expression_vocab.h>
 
 namespace perspective {
 
@@ -69,7 +70,6 @@ private:
     bool m_has_label;
     t_depth m_depth;
     bool m_depth_set;
-    std::shared_ptr<t_vocab> m_expression_vocab;
     std::shared_ptr<t_expression_tables> m_expression_tables;
 };
 

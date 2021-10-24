@@ -44,9 +44,6 @@ t_ctx_grouped_pkey::init() {
     m_tree->init();
     m_traversal = std::shared_ptr<t_traversal>(new t_traversal(m_tree));
 
-    m_expression_vocab = std::make_shared<t_vocab>();
-    m_expression_vocab->init(false);
-
     // Each context stores its own expression columns in separate
     // `t_data_table`s so that each context's expressions are isolated
     // and do not affect other contexts when they are calculated.
@@ -691,7 +688,7 @@ t_ctx_grouped_pkey::get_column_dtype(t_uindex idx) const {
 
 void
 t_ctx_grouped_pkey::compute_expressions(
-    std::shared_ptr<t_data_table> flattened_masked) {
+    std::shared_ptr<t_data_table> flattened_masked, t_expression_vocab& expression_vocab) {
     // Clear the transitional expression tables on the context so they are
     // ready for the next update.
     m_expression_tables->clear_transitional_tables();
@@ -707,7 +704,7 @@ t_ctx_grouped_pkey::compute_expressions(
     for (const auto& expr : expressions) {
         // Compute the expressions on the master table.
         expr->compute(
-            flattened_masked, master_expression_table, m_expression_vocab);
+            flattened_masked, master_expression_table, expression_vocab);
     }
 }
 
@@ -717,7 +714,7 @@ t_ctx_grouped_pkey::compute_expressions(std::shared_ptr<t_data_table> master,
     std::shared_ptr<t_data_table> delta, std::shared_ptr<t_data_table> prev,
     std::shared_ptr<t_data_table> current,
     std::shared_ptr<t_data_table> transitions,
-    std::shared_ptr<t_data_table> existed) {
+    std::shared_ptr<t_data_table> existed, t_expression_vocab& expression_vocab) {
     // Clear the tables so they are ready for this round of updates
     m_expression_tables->clear_transitional_tables();
 
@@ -734,23 +731,22 @@ t_ctx_grouped_pkey::compute_expressions(std::shared_ptr<t_data_table> master,
     const auto& expressions = m_config.get_expressions();
     for (const auto& expr : expressions) {
         // master: compute based on latest state of the gnode state table
-        expr->compute(
-            master, m_expression_tables->m_master, m_expression_vocab);
+        expr->compute(master, m_expression_tables->m_master, expression_vocab);
 
         // flattened: compute based on the latest update dataset
         expr->compute(
-            flattened, m_expression_tables->m_flattened, m_expression_vocab);
+            flattened, m_expression_tables->m_flattened, expression_vocab);
 
         // delta: for each numerical column, the numerical delta between the
         // previous value and the current value in the row.
-        expr->compute(delta, m_expression_tables->m_delta, m_expression_vocab);
+        expr->compute(delta, m_expression_tables->m_delta, expression_vocab);
 
         // prev: the values of the updated rows before this update was applied
-        expr->compute(prev, m_expression_tables->m_prev, m_expression_vocab);
+        expr->compute(prev, m_expression_tables->m_prev, expression_vocab);
 
         // current: the current values of the updated rows
         expr->compute(
-            current, m_expression_tables->m_current, m_expression_vocab);
+            current, m_expression_tables->m_current, expression_vocab);
     }
 
     // Calculate the transitions now that the intermediate tables are computed

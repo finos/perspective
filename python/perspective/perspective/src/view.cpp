@@ -106,6 +106,7 @@ make_filter_term(t_dtype column_type, t_val date_parser, const std::string& colu
 template <>
 std::shared_ptr<t_view_config>
 make_view_config(
+    const t_gnode& gnode,
     std::shared_ptr<t_schema> schema, t_val date_parser, t_val config) {
     auto row_pivots = config.attr("get_row_pivots")().cast<std::vector<std::string>>();
     auto column_pivots = config.attr("get_column_pivots")().cast<std::vector<std::string>>();
@@ -142,6 +143,9 @@ make_view_config(
     std::vector<std::shared_ptr<t_computed_expression>> expressions;
     expressions.reserve(p_expressions.size());
 
+    // Validate expressions using the vocab
+    t_expression_vocab& expression_vocab = *(gnode.get_expression_vocab());
+
     // Will either abort() or succeed completely, and this isn't a public
     // API so we can directly index for speed.
     for (t_uindex idx = 0; idx < p_expressions.size(); ++idx) {
@@ -175,7 +179,7 @@ make_view_config(
 
         // If the expression cannot be parsed, it will abort() here.
         std::shared_ptr<t_computed_expression> expression = t_computed_expression_parser::precompute(
-            expression_alias, expression_string, parsed_expression_string, column_ids, schema);
+            expression_alias, expression_string, parsed_expression_string, column_ids, schema, expression_vocab);
 
         expressions.push_back(expression);
         schema->add_column(expression_alias, expression->get_dtype());
@@ -241,9 +245,14 @@ std::shared_ptr<View<CTX_T>>
 make_view(std::shared_ptr<Table> table, const std::string& name, const std::string& separator,
     t_val view_config, t_val date_parser) {
     // Use a copy of the table schema that we can freely mutate during
-    // `make_view_config`.
+    // `make_view_config` and pass into the context constructors.
     std::shared_ptr<t_schema> schema = std::make_shared<t_schema>(table->get_schema());
-    std::shared_ptr<t_view_config> config = make_view_config<t_val>(schema, date_parser, view_config);
+
+    // Pass the gnode into `make_view_config` so we can use its vocab to
+    // validate expressions.
+    const t_gnode& gnode = *(table->get_gnode());
+
+    std::shared_ptr<t_view_config> config = make_view_config<t_val>(gnode, schema, date_parser, view_config);
     {
         PerspectiveScopedGILRelease acquire(table->get_pool()->get_event_loop_thread_id());
         auto ctx = make_context<CTX_T>(table, schema, config, name);

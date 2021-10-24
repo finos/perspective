@@ -75,7 +75,8 @@ t_expression_tables::calculate_transitions(
 
                 bool prev_valid = prev_column.is_valid(ridx);
                 bool curr_valid = current_column.is_valid(ridx);
-                bool prev_curr_eq = prev_valid && curr_valid && (prev_value == curr_value);
+                bool prev_curr_eq
+                    = prev_valid && curr_valid && (prev_value == curr_value);
 
                 t_value_transition transition;
 

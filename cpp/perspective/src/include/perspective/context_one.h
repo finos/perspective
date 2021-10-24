@@ -16,6 +16,7 @@
 #include <perspective/traversal.h>
 #include <perspective/data_table.h>
 #include <perspective/expression_tables.h>
+#include <perspective/expression_vocab.h>
 
 namespace perspective {
 
@@ -52,7 +53,6 @@ private:
     std::shared_ptr<t_traversal> m_traversal;
     std::shared_ptr<t_stree> m_tree;
     std::vector<t_sortspec> m_sortby;
-    std::shared_ptr<t_vocab> m_expression_vocab;
     std::shared_ptr<t_expression_tables> m_expression_tables;
     t_depth m_depth;
     bool m_depth_set;

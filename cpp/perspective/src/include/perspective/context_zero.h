@@ -18,6 +18,7 @@
 #include <perspective/flat_traversal.h>
 #include <perspective/data_table.h>
 #include <perspective/expression_tables.h>
+#include <perspective/expression_vocab.h>
 #include <tsl/hopscotch_set.h>
 
 namespace perspective {
@@ -94,7 +95,6 @@ private:
     std::shared_ptr<t_ftrav> m_traversal;
     std::shared_ptr<t_zcdeltas> m_deltas;
     tsl::hopscotch_set<t_tscalar> m_delta_pkeys;
-    std::shared_ptr<t_vocab> m_expression_vocab;
     std::shared_ptr<t_expression_tables> m_expression_tables;
     t_symtable m_symtable;
     bool m_has_delta;

@@ -1426,8 +1426,8 @@ namespace binding {
 
     template <>
     std::shared_ptr<t_view_config>
-    make_view_config(
-        std::shared_ptr<t_schema> schema, t_val date_parser, t_val config) {
+    make_view_config(const t_gnode& gnode, std::shared_ptr<t_schema> schema,
+        t_val date_parser, t_val config) {
         // extract vectors from JS, where they were created
         auto row_pivots
             = config.call<std::vector<std::string>>("get_row_pivots");
@@ -1470,6 +1470,8 @@ namespace binding {
         std::vector<std::shared_ptr<t_computed_expression>> expressions;
         expressions.reserve(js_expressions.size());
 
+        t_expression_vocab& expression_vocab = *(gnode.get_expression_vocab());
+
         // Will either abort() or succeed completely, and this isn't a public
         // API so we can directly index for speed.
         for (t_uindex idx = 0; idx < js_expressions.size(); ++idx) {
@@ -1509,7 +1511,7 @@ namespace binding {
             std::shared_ptr<t_computed_expression> expression
                 = t_computed_expression_parser::precompute(expression_alias,
                     expression_string, parsed_expression_string, column_ids,
-                    schema);
+                    schema, expression_vocab);
 
             schema->add_column(expression_alias, expression->get_dtype());
             expressions.push_back(expression);
@@ -1573,8 +1575,13 @@ namespace binding {
         // `make_view_config`.
         std::shared_ptr<t_schema> schema
             = std::make_shared<t_schema>(table->get_schema());
+
+        // Pass the gnode into `make_view_config` so we can use its vocab to
+        // validate expressions.
+        const t_gnode& gnode = *(table->get_gnode());
+
         std::shared_ptr<t_view_config> config
-            = make_view_config<t_val>(schema, date_parser, view_config);
+            = make_view_config<t_val>(gnode, schema, date_parser, view_config);
 
         auto ctx = make_context<CTX_T>(table, schema, config, name);
 

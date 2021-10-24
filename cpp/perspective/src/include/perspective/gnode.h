@@ -205,6 +205,8 @@ public:
     void pprint() const;
     std::string repr() const;
 
+    std::shared_ptr<t_expression_vocab> get_expression_vocab() const;
+
 #ifdef PSP_PARALLEL_FOR
     void set_event_loop_thread_id(std::thread::id id);
 #endif
@@ -357,6 +359,8 @@ private:
     std::chrono::high_resolution_clock::time_point m_epoch;
     std::function<void()> m_pool_cleanup;
     bool m_was_updated;
+
+    std::shared_ptr<t_expression_vocab> m_expression_vocab;
 
 #ifdef PSP_ENABLE_PYTHON
     std::thread::id m_event_loop_thread_id;

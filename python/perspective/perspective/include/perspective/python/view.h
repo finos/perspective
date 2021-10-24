@@ -36,6 +36,7 @@ make_filter_term(t_dtype column_type, t_val date_parser, const std::string& colu
 
 template <>
 std::shared_ptr<t_view_config> make_view_config(
+    const t_gnode& gnode,
     std::shared_ptr<t_schema> schema, t_val date_parser, t_val config);
 
 template <typename CTX_T>

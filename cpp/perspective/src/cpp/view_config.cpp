@@ -257,7 +257,8 @@ t_view_config::fill_aggspecs(std::shared_ptr<t_schema> schema) {
             if (is_column_only) {
                 // Always sort by `ANY` in column only views
                 agg_type = t_aggtype::AGGTYPE_ANY;
-            } else if ((is_row_pivot && is_row_sort) || (is_column_pivot && !is_row_sort)) {
+            } else if ((is_row_pivot && is_row_sort)
+                || (is_column_pivot && !is_row_sort)) {
                 // Otherwise if the hidden column is in pivot on the same axis,
                 // use `UNIQUE`
                 agg_type = t_aggtype::AGGTYPE_UNIQUE;

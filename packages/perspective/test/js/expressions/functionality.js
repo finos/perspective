@@ -717,6 +717,58 @@ module.exports = (perspective) => {
             await table.delete();
         });
 
+        it("Clear() and declare string", async function () {
+            const table = await perspective.table(
+                expressions_common.int_float_data
+            );
+
+            const view = await table.view({
+                expressions: [
+                    "'hello'",
+                    "'very long string that is very long and has many characters'",
+                ],
+            });
+
+            const results = await view.to_columns();
+            expect(results["'hello'"]).toEqual([
+                "hello",
+                "hello",
+                "hello",
+                "hello",
+            ]);
+            expect(
+                results[
+                    "'very long string that is very long and has many characters'"
+                ]
+            ).toEqual([
+                "very long string that is very long and has many characters",
+                "very long string that is very long and has many characters",
+                "very long string that is very long and has many characters",
+                "very long string that is very long and has many characters",
+            ]);
+
+            await view.delete();
+            await table.clear();
+
+            table.update([expressions_common.int_float_data[0]]);
+
+            const view2 = await table.view({
+                expressions: [
+                    "'hello'",
+                    "'another very long string with many characters'",
+                ],
+            });
+
+            const results2 = await view2.to_columns();
+            expect(results2["'hello'"]).toEqual(["hello"]);
+            expect(
+                results2["'another very long string with many characters'"]
+            ).toEqual(["another very long string with many characters"]);
+
+            await view2.delete();
+            await table.delete();
+        });
+
         it("Declare numeric var", async function () {
             const table = await perspective.table(
                 expressions_common.int_float_data
@@ -790,6 +842,101 @@ module.exports = (perspective) => {
             ).toEqual(["hello", "hello", "hello", "hello"]);
 
             await view.delete();
+            await table.delete();
+        });
+
+        it("Declare string var one long one short", async function () {
+            const table = await perspective.table(
+                expressions_common.int_float_data
+            );
+            const view = await table.view({
+                expressions: [
+                    `var x := 'abcdefghijklmnop'; var y := '123'; concat(x, y)`,
+                ],
+            });
+
+            const results = await view.to_columns();
+            expect(
+                results[
+                    `var x := 'abcdefghijklmnop'; var y := '123'; concat(x, y)`
+                ]
+            ).toEqual([
+                "abcdefghijklmnop123",
+                "abcdefghijklmnop123",
+                "abcdefghijklmnop123",
+                "abcdefghijklmnop123",
+            ]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Declare string var short", async function () {
+            const table = await perspective.table(
+                expressions_common.int_float_data
+            );
+            const view = await table.view({
+                expressions: [`var x := 'abc'; var y := '123'; concat(x, y)`],
+            });
+
+            const results = await view.to_columns();
+            expect(
+                results[`var x := 'abc'; var y := '123'; concat(x, y)`]
+            ).toEqual(["abc123", "abc123", "abc123", "abc123"]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Clear() and Declare string var", async function () {
+            const table = await perspective.table(
+                expressions_common.int_float_data
+            );
+            const view = await table.view({
+                expressions: [
+                    "var x := 'Eabcdefghijklmn'; var y := '0123456789'; var z := 'ABCD'; var zz := 'EFG'; concat(x, y, z, zz)",
+                ],
+            });
+
+            const results = await view.to_columns();
+            expect(
+                results[
+                    "var x := 'Eabcdefghijklmn'; var y := '0123456789'; var z := 'ABCD'; var zz := 'EFG'; concat(x, y, z, zz)"
+                ]
+            ).toEqual([
+                "Eabcdefghijklmn0123456789ABCDEFG",
+                "Eabcdefghijklmn0123456789ABCDEFG",
+                "Eabcdefghijklmn0123456789ABCDEFG",
+                "Eabcdefghijklmn0123456789ABCDEFG",
+            ]);
+
+            await view.delete();
+
+            await table.clear();
+
+            table.update([expressions_common.int_float_data[0]]);
+
+            const view2 = await table.view({
+                expressions: [
+                    "var x := 'Eabcdefghijklmn'; var y := '0123456789'; var z := 'ABCD'; var zz := 'EFG'; concat(x, y, z, zz)",
+                    "var x := 'abcdefghijklmn'; var y := 'ABCDEFG123456789'; x",
+                ],
+            });
+
+            const results2 = await view2.to_columns();
+            expect(
+                results2[
+                    "var x := 'Eabcdefghijklmn'; var y := '0123456789'; var z := 'ABCD'; var zz := 'EFG'; concat(x, y, z, zz)"
+                ]
+            ).toEqual(["Eabcdefghijklmn0123456789ABCDEFG"]);
+
+            expect(
+                results2[
+                    "var x := 'abcdefghijklmn'; var y := 'ABCDEFG123456789'; x"
+                ]
+            ).toEqual(["abcdefghijklmn"]);
+
+            await view2.delete();
             await table.delete();
         });
 

@@ -488,6 +488,7 @@ set (SOURCE_FILES
 	${PSP_CPP_SRC}/src/cpp/dense_tree.cpp
 	${PSP_CPP_SRC}/src/cpp/dependency.cpp
 	${PSP_CPP_SRC}/src/cpp/expression_tables.cpp
+	${PSP_CPP_SRC}/src/cpp/expression_vocab.cpp
 	${PSP_CPP_SRC}/src/cpp/extract_aggregate.cpp
 	${PSP_CPP_SRC}/src/cpp/filter.cpp
 	${PSP_CPP_SRC}/src/cpp/flat_traversal.cpp
