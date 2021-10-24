@@ -1,4 +1,16 @@
+include(CheckCCompilerFlag)
+
 set(CMAKE_SHARED_LIBRARY_SUFFIX .so)
+
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set(CMAKE_REQUIRED_LINK_OPTIONS "-arch;x86_64")
+    check_c_compiler_flag("-arch x86_64" x86_64Supported)
+    set(CMAKE_REQUIRED_LINK_OPTIONS "-arch;arm64")
+    check_c_compiler_flag("-arch arm64" arm64Supported)
+    if(x86_64Supported AND arm64Supported)
+        set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "Build universal architecture for OSX" FORCE)
+    endif()
+endif()
 
 set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/builder.cc

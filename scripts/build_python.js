@@ -22,7 +22,10 @@ let PYTHON = getarg("--python38")
     ? "python3.8"
     : getarg("--python36")
     ? "python3.6"
-    : "python3.7";
+    : getarg("--python37")
+    ? "python3.7"
+    : "python3";
+
 let IMAGE = "manylinux2010";
 const IS_DOCKER = process.env.PSP_DOCKER;
 

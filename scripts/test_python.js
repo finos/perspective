@@ -16,11 +16,13 @@ const {
     python_image,
 } = require("./script_utils.js");
 
-let PYTHON = getarg("--python2")
-    ? "python2"
-    : getarg("--python38")
+let PYTHON = getarg("--python38")
     ? "python3.8"
-    : "python3.7";
+    : getarg("--python36")
+    ? "python3.6"
+    : getarg("--python37")
+    ? "python3.7"
+    : "python3";
 
 const COVERAGE = getarg("--coverage");
 const VERBOSE = getarg("--debug");
