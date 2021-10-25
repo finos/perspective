@@ -214,13 +214,19 @@ impl Session {
             DropAction::Active => {
                 if is_to_swap || is_from_required {
                     let column = Some(column);
-                    config.columns.extend(std::iter::repeat(None).take(
-                        if index >= (config.columns.len() - 1) {
-                            index + (1 - config.columns.len())
+                    config.columns.extend(std::iter::repeat(None).take({
+                        let fill_to = requirements
+                            .names
+                            .as_ref()
+                            .map(|x| std::cmp::max(x.len() - 1, index))
+                            .unwrap_or(index);
+
+                        if fill_to >= (config.columns.len() - 1) {
+                            fill_to + 1 - config.columns.len()
                         } else {
                             0
-                        },
-                    ));
+                        }
+                    }));
 
                     if let Some(prev) = config.columns.iter().position(|x| *x == column)
                     {

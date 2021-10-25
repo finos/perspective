@@ -43,6 +43,6 @@ macro_rules! js_log {
     }};
     ($x:expr $(, $y:expr)*) => {{
         const DEBUG_ONLY_WARNING: &str = $x;
-        web_sys::console::log_1(&format!($x, $($y)*).into());
+        web_sys::console::log_1(&format!($x, $($y),*).into());
     }};
 }
