@@ -1471,6 +1471,8 @@ namespace binding {
         expressions.reserve(js_expressions.size());
 
         t_expression_vocab& expression_vocab = *(gnode.get_expression_vocab());
+        t_regex_mapping& regex_mapping
+            = *(gnode.get_expression_regex_mapping());
 
         // Will either abort() or succeed completely, and this isn't a public
         // API so we can directly index for speed.
@@ -1511,7 +1513,7 @@ namespace binding {
             std::shared_ptr<t_computed_expression> expression
                 = t_computed_expression_parser::precompute(expression_alias,
                     expression_string, parsed_expression_string, column_ids,
-                    schema, expression_vocab);
+                    schema, expression_vocab, regex_mapping);
 
             schema->add_column(expression_alias, expression->get_dtype());
             expressions.push_back(expression);

@@ -7,6 +7,28 @@
  *
  */
 
+const {string} = require("jsverify");
+
+const CHARS = ` !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_\`abcdefghijklmnopqrstuvwxyz{|}~`;
+const randint = (min, max) => Math.floor(Math.random() * (max - min + 1)) + 1;
+/**
+ * Generate a random string for testing. If `is_null` is true, randomly returns
+ * null with a 50% chance.
+ *
+ * @param {*} is_null
+ */
+const random_string = (max_length = 100, is_null = false) => {
+    if (is_null && Math.random() > 0.5) return null;
+    const length = randint(1, max_length);
+    const output = [];
+
+    for (let i = 0; i < length; i++) {
+        output.push(CHARS[randint(0, CHARS.length)]);
+    }
+
+    return output.join("");
+};
+
 /**
  * Tests the correctness of each string computation function in various
  * environments and parameters - different types, nulls, undefined, etc.
@@ -818,6 +840,596 @@ module.exports = (perspective) => {
             ]);
             view.delete();
             table.delete();
+        });
+    });
+
+    describe("Regular Expressions", () => {
+        it("Match string with string", async () => {
+            const table = await perspective.table({
+                a: "string",
+                b: "string",
+                c: "string",
+            });
+
+            table.update({
+                a: ["ABC", "DEF", "cbA", "HIjK", "lMNoP"],
+                b: ["ABC", "ad", "asudfh", "HIjK", "lMNoP"],
+                c: [
+                    "1234567890",
+                    "123x4567",
+                    "abcdefg123",
+                    "4567123",
+                    "1?2?3?",
+                ],
+            });
+
+            const expressions = [
+                `match("a", 'ABC')`,
+                "match('aBc', '[aAbBcC]{3}')",
+                `match("a", 'A')`,
+                `match("c", '[0-9]{3}')`,
+                `match("c", '4567')`,
+            ];
+
+            const view = await table.view({
+                expressions,
+            });
+
+            const schema = await view.expression_schema();
+
+            for (const expr of expressions) {
+                expect(schema[expr]).toEqual("boolean");
+            }
+
+            const results = await view.to_columns();
+            expect(results[expressions[0]]).toEqual([
+                true,
+                false,
+                false,
+                false,
+                false,
+            ]);
+            expect(results[expressions[1]]).toEqual(Array(5).fill(true));
+            expect(results[expressions[2]]).toEqual([
+                true,
+                false,
+                true,
+                false,
+                false,
+            ]);
+            expect(results[expressions[3]]).toEqual([
+                true,
+                true,
+                true,
+                true,
+                false,
+            ]);
+            expect(results[expressions[4]]).toEqual([
+                true,
+                true,
+                false,
+                true,
+                false,
+            ]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("fullmatch string with string", async () => {
+            const table = await perspective.table({
+                a: "string",
+                b: "string",
+                c: "string",
+            });
+
+            table.update({
+                a: ["ABC", "DEF", "cbA", "HIjK", "lMNoP"],
+                b: ["ABC", "ad", "asudfh", "HIjK", "lMNoP"],
+                c: ["1234567890", "123x4567", "abcdefg123", "4567123", "123"],
+            });
+
+            const expressions = [
+                `fullmatch("a", 'ABC')`,
+                "fullmatch('aBc', '[aAbBcC]{3}')",
+                `fullmatch("a", 'A')`,
+                `fullmatch("c", '[0-9]{3}')`,
+                `fullmatch("c", '4567')`,
+                `fullmatch("c", '4567123')`,
+                `fullmatch("c", '[0-9]+')`,
+            ];
+
+            const view = await table.view({
+                expressions,
+            });
+
+            const schema = await view.expression_schema();
+
+            for (const expr of expressions) {
+                expect(schema[expr]).toEqual("boolean");
+            }
+
+            const results = await view.to_columns();
+            expect(results[expressions[0]]).toEqual([
+                true,
+                false,
+                false,
+                false,
+                false,
+            ]);
+            expect(results[expressions[1]]).toEqual(Array(5).fill(true));
+            expect(results[expressions[2]]).toEqual(Array(5).fill(false));
+            expect(results[expressions[3]]).toEqual([
+                false,
+                false,
+                false,
+                false,
+                true,
+            ]);
+            expect(results[expressions[4]]).toEqual(Array(5).fill(false));
+            expect(results[expressions[5]]).toEqual([
+                false,
+                false,
+                false,
+                true,
+                false,
+            ]);
+            expect(results[expressions[6]]).toEqual([
+                true,
+                false,
+                false,
+                true,
+                true,
+            ]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Match string with bad regex should fail type-checking", async () => {
+            const table = await perspective.table({
+                a: ["ABC", "DEF", "cbA", "HIjK", "lMNoP"],
+                b: ["ABC", "ad", "asudfh", "HIjK", "lMNoP"],
+            });
+
+            const expressions = [
+                `match("a", '*.')`,
+                "match('abc', '(?=a)')",
+                `match("a", '?')`,
+            ];
+
+            const validated = await table.validate_expressions(expressions);
+            expect(validated.expression_schema).toEqual({});
+
+            for (const expr of expressions) {
+                expect(validated.expression_schema[expr]).toBeUndefined();
+                expect(validated.errors[expr]).toEqual({
+                    line: 0,
+                    column: 0,
+                    error_message:
+                        "Type Error - inputs do not resolve to a valid expression.",
+                });
+            }
+
+            // Because a bad regex does not raise a parse error, it is still
+            // valid to create a view from them.
+            const view = await table.view({
+                expressions,
+            });
+
+            const schema = await view.expression_schema();
+            const results = await view.to_columns();
+
+            for (const expr of expressions) {
+                expect(schema[expr]).toEqual("boolean");
+                expect(results[expr]).toEqual(Array(5).fill(null));
+            }
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("fullmatch string with bad regex should fail type-checking", async () => {
+            const table = await perspective.table({
+                a: ["ABC", "DEF", "cbA", "HIjK", "lMNoP"],
+                b: ["ABC", "ad", "asudfh", "HIjK", "lMNoP"],
+            });
+
+            const expressions = [
+                `fullmatch("a", '*.')`,
+                "fullmatch('abc', '(?=a)')",
+                `fullmatch("a", '?')`,
+                `fullmatch("a", '+.')`,
+            ];
+
+            const validated = await table.validate_expressions(expressions);
+            expect(validated.expression_schema).toEqual({});
+
+            for (const expr of expressions) {
+                expect(validated.expression_schema[expr]).toBeUndefined();
+                expect(validated.errors[expr]).toEqual({
+                    line: 0,
+                    column: 0,
+                    error_message:
+                        "Type Error - inputs do not resolve to a valid expression.",
+                });
+            }
+
+            // FIXME: because a bad regex does not raise a parser error,
+            // it is still valid to create a view from them without validation,
+            // but this path is only accessible through the View API and
+            // not the viewer.
+            const view = await table.view({
+                expressions,
+            });
+
+            const schema = await view.expression_schema();
+            const results = await view.to_columns();
+
+            for (const expr of expressions) {
+                expect(schema[expr]).toEqual("boolean");
+                expect(results[expr]).toEqual(Array(5).fill(null));
+            }
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Match should only work on strings", async () => {
+            const table = await perspective.table({
+                a: ["ABC", "DEF", "cbA", "HIjK", "lMNoP"],
+                b: ["abc123", "abc567", "abc56", "1234567", "aaa000"],
+            });
+
+            const expressions = [
+                `match("a", 123)`,
+                `match(today(), '[a-z]{3}[0-9]{3}')`,
+                `match(False, '[0-9]{7}')`,
+            ];
+
+            const validated = await table.validate_expressions(expressions);
+
+            for (const expr of expressions) {
+                expect(validated.expression_schema[expr]).toBeUndefined();
+            }
+
+            expect(validated.errors[expressions[0]].error_message).toEqual(
+                "Parser Error - Failed parameter type check for function 'match', Expected 'TS' call set: 'TT'"
+            );
+
+            expect(validated.errors[expressions[1]]).toEqual({
+                line: 0,
+                column: 0,
+                error_message:
+                    "Type Error - inputs do not resolve to a valid expression.",
+            });
+
+            expect(validated.errors[expressions[2]]).toEqual({
+                line: 0,
+                column: 0,
+                error_message:
+                    "Type Error - inputs do not resolve to a valid expression.",
+            });
+
+            await table.delete();
+        });
+
+        it("fullmatch should only work on strings", async () => {
+            const table = await perspective.table({
+                a: ["ABC", "DEF", "cbA", "HIjK", "lMNoP"],
+                b: ["abc123", "abc567", "abc56", "1234567", "aaa000"],
+            });
+
+            const expressions = [
+                `fullmatch("a", 123)`,
+                `fullmatch(today(), '[a-z]{3}[0-9]{3}')`,
+                `fullmatch(False, '[0-9]{7}')`,
+            ];
+
+            const validated = await table.validate_expressions(expressions);
+
+            for (const expr of expressions) {
+                expect(validated.expression_schema[expr]).toBeUndefined();
+            }
+
+            expect(validated.errors[expressions[0]].error_message).toEqual(
+                "Parser Error - Failed parameter type check for function 'fullmatch', Expected 'TS' call set: 'TT'"
+            );
+
+            expect(validated.errors[expressions[1]]).toEqual({
+                line: 0,
+                column: 0,
+                error_message:
+                    "Type Error - inputs do not resolve to a valid expression.",
+            });
+
+            expect(validated.errors[expressions[2]]).toEqual({
+                line: 0,
+                column: 0,
+                error_message:
+                    "Type Error - inputs do not resolve to a valid expression.",
+            });
+
+            await table.delete();
+        });
+
+        it("Match string with regex", async () => {
+            const table = await perspective.table({
+                a: ["ABC", "DEF", "cbA", "HIjK", "lMNoP"],
+                b: ["abc123", "abc567", "abc56", "1234567", "aaa000"],
+            });
+
+            const expressions = [
+                `match("a", '.*')`,
+                `match("b", '[a-z]{3}[0-9]{3}')`,
+                `match("b", '[0-9]{7}')`,
+            ];
+
+            const view = await table.view({
+                expressions,
+            });
+
+            const schema = await view.expression_schema();
+
+            for (const expr of expressions) {
+                expect(schema[expr]).toEqual("boolean");
+            }
+
+            const results = await view.to_columns();
+            expect(results[expressions[0]]).toEqual(Array(5).fill(true));
+            expect(results[expressions[1]]).toEqual([
+                true,
+                true,
+                false,
+                false,
+                true,
+            ]);
+            expect(results[expressions[2]]).toEqual([
+                false,
+                false,
+                false,
+                true,
+                false,
+            ]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("fullmatch string with regex", async () => {
+            const table = await perspective.table({
+                a: ["ABC", "DEF", "cbA", "HIjK", "lMNoP"],
+                b: ["abc123", "abc567", "abc56", "1234567", "aaa0001234"],
+            });
+
+            const expressions = [
+                `fullmatch("a", '.*')`,
+                `fullmatch("b", '[a-z]{3}[0-9]{3}')`,
+                `fullmatch("b", '[0-9]{7}')`,
+            ];
+
+            const view = await table.view({
+                expressions,
+            });
+
+            const schema = await view.expression_schema();
+
+            for (const expr of expressions) {
+                expect(schema[expr]).toEqual("boolean");
+            }
+
+            const results = await view.to_columns();
+            expect(results[expressions[0]]).toEqual(Array(5).fill(true));
+            expect(results[expressions[1]]).toEqual([
+                true,
+                true,
+                false,
+                false,
+                false,
+            ]);
+            expect(results[expressions[2]]).toEqual([
+                false,
+                false,
+                false,
+                true,
+                false,
+            ]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Match string with regex, randomized", async () => {
+            const data = {a: []};
+
+            for (let i = 0; i < 500; i++) {
+                data.a.push(random_string(100, true));
+            }
+
+            const table = await perspective.table(data);
+
+            const expressions = [
+                `match("a", '.*')`, // should match everything
+                `match("a", '.{100}')`, // should match strings the size of max
+            ];
+
+            const view = await table.view({
+                expressions,
+            });
+
+            const schema = await view.expression_schema();
+
+            for (const expr of expressions) {
+                expect(schema[expr]).toEqual("boolean");
+            }
+
+            const results = await view.to_columns();
+
+            for (let i = 0; i < 500; i++) {
+                const a = results[expressions[0]][i];
+                const b = results[expressions[1]][i];
+                const source = data.a[i];
+
+                if (source === null) {
+                    expect(a).toEqual(null);
+                    expect(b).toEqual(null);
+                } else {
+                    expect(a).toEqual(true);
+                    expect(b).toEqual(source.length === 100);
+                }
+            }
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("fullmatch string with regex, randomized", async () => {
+            const data = {a: []};
+
+            for (let i = 0; i < 500; i++) {
+                data.a.push(random_string(100, true));
+            }
+
+            const table = await perspective.table(data);
+
+            const expressions = [
+                `fullmatch("a", '.*')`, // should match everything
+                `fullmatch("a", '.{100}')`, // should match strings the size of max
+            ];
+
+            const view = await table.view({
+                expressions,
+            });
+
+            const schema = await view.expression_schema();
+
+            for (const expr of expressions) {
+                expect(schema[expr]).toEqual("boolean");
+            }
+
+            const results = await view.to_columns();
+
+            for (let i = 0; i < 500; i++) {
+                const a = results[expressions[0]][i];
+                const b = results[expressions[1]][i];
+                const source = data.a[i];
+
+                if (source === null) {
+                    expect(a).toEqual(null);
+                    expect(b).toEqual(null);
+                } else {
+                    expect(a).toEqual(true);
+                    expect(b).toEqual(source.length === 100);
+                }
+            }
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Match string and null with regex", async () => {
+            const table = await perspective.table({
+                a: ["ABC", "abc", null, "AbC", "12345"],
+            });
+
+            console.error(await table.schema());
+
+            const expressions = [
+                `match("a", '.*')`,
+                `match("a", '[aAbBcC]{3}')`,
+                `match("a", '[0-9]{5}')`,
+            ];
+
+            const view = await table.view({
+                expressions,
+            });
+
+            const schema = await view.expression_schema();
+
+            for (const expr of expressions) {
+                expect(schema[expr]).toEqual("boolean");
+            }
+
+            const results = await view.to_columns();
+            console.error(results);
+            expect(results[expressions[0]]).toEqual([
+                true,
+                true,
+                null,
+                true,
+                true,
+            ]);
+            expect(results[expressions[1]]).toEqual([
+                true,
+                true,
+                null,
+                true,
+                false,
+            ]);
+            expect(results[expressions[2]]).toEqual([
+                false,
+                false,
+                null,
+                false,
+                true,
+            ]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("fullmatch string and null with regex", async () => {
+            const table = await perspective.table({
+                a: ["ABC", "abc", null, "AbC", "12345", "123456"],
+            });
+
+            console.error(await table.schema());
+
+            const expressions = [
+                `fullmatch("a", '.*')`,
+                `fullmatch("a", '[aAbBcC]{3}')`,
+                `fullmatch("a", '[0-9]{5}')`,
+            ];
+
+            const view = await table.view({
+                expressions,
+            });
+
+            const schema = await view.expression_schema();
+
+            for (const expr of expressions) {
+                expect(schema[expr]).toEqual("boolean");
+            }
+
+            const results = await view.to_columns();
+            console.error(results);
+            expect(results[expressions[0]]).toEqual([
+                true,
+                true,
+                null,
+                true,
+                true,
+                true,
+            ]);
+            expect(results[expressions[1]]).toEqual([
+                true,
+                true,
+                null,
+                true,
+                false,
+                false,
+            ]);
+            expect(results[expressions[2]]).toEqual([
+                false,
+                false,
+                null,
+                false,
+                true,
+                false,
+            ]);
+
+            await view.delete();
+            await table.delete();
         });
     });
 };

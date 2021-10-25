@@ -53,6 +53,10 @@ thread_local! {
                 open: "[",
                 close: "]"
             },
+            AutoClosingPairs {
+                open: "{",
+                close: "}"
+            },
         ]
     };
 
@@ -519,6 +523,20 @@ thread_local! {
                 insert_text: "boolean(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Converts the given argument to a boolean".to_owned(),
+            },
+            CompletionItemSuggestion {
+                label: "match".to_owned(),
+                kind: 1,
+                insert_text: "match(${1:string}, ${2:pattern})".to_owned(),
+                insert_text_rules: 4,
+                documentation: "Returns True if any part of string matches pattern, and False otherwise.".to_owned(),
+            },
+            CompletionItemSuggestion {
+                label: "fullmatch".to_owned(),
+                kind: 1,
+                insert_text: "fullmatch(${1:string}, ${2:pattern})".to_owned(),
+                insert_text_rules: 4,
+                documentation: "Returns True if the whole string matches pattern, and False otherwise.".to_owned(),
             },
         ]
     };

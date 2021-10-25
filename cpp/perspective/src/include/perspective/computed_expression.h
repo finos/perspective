@@ -52,7 +52,7 @@ public:
 
     void compute(std::shared_ptr<t_data_table> source_table,
         std::shared_ptr<t_data_table> destination_table,
-        t_expression_vocab& vocab) const;
+        t_expression_vocab& vocab, t_regex_mapping& regex_mapping) const;
 
     const std::string& get_expression_alias() const;
     const std::string& get_expression_string() const;
@@ -95,7 +95,8 @@ public:
         const std::string& expression_string,
         const std::string& parsed_expression_string,
         const std::vector<std::pair<std::string, std::string>>& column_ids,
-        std::shared_ptr<t_schema> schema, t_expression_vocab& vocab);
+        std::shared_ptr<t_schema> schema, t_expression_vocab& vocab,
+        t_regex_mapping& regex_mapping);
 
     /**
      * @brief Returns the dtype of the given expression, or `DTYPE_NONE`
@@ -122,7 +123,7 @@ public:
         const std::string& parsed_expression_string,
         const std::vector<std::pair<std::string, std::string>>& column_ids,
         const t_schema& schema, t_expression_error& error,
-        t_expression_vocab& vocab);
+        t_expression_vocab& vocab, t_regex_mapping& regex_mapping);
 
     static std::shared_ptr<exprtk::parser<t_tscalar>> PARSER;
 
@@ -178,8 +179,8 @@ struct PERSPECTIVE_EXPORT t_validated_expression_map {
 struct PERSPECTIVE_EXPORT t_computed_function_store {
     PSP_NON_COPYABLE(t_computed_function_store);
 
-    t_computed_function_store(
-        t_expression_vocab& vocab, bool is_type_validator);
+    t_computed_function_store(t_expression_vocab& vocab,
+        t_regex_mapping& regex_mapping, bool is_type_validator);
 
     void register_computed_functions(
         exprtk::symbol_table<t_tscalar>& sym_table);
@@ -200,6 +201,8 @@ struct PERSPECTIVE_EXPORT t_computed_function_store {
     computed_function::upper m_upper_fn;
     computed_function::lower m_lower_fn;
     computed_function::to_string m_to_string_fn;
+    computed_function::match m_match_fn;
+    computed_function::fullmatch m_fullmatch_fn;
 };
 
 } // end namespace perspective

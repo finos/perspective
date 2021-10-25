@@ -91,7 +91,8 @@ t_computed_expression::t_computed_expression(
 
 void
 t_computed_expression::compute(std::shared_ptr<t_data_table> source_table,
-    std::shared_ptr<t_data_table> destination_table, t_expression_vocab& vocab) const {
+    std::shared_ptr<t_data_table> destination_table, t_expression_vocab& vocab,
+    t_regex_mapping& regex_mapping) const {
     // TODO: share symtables across pre/re/compute
     exprtk::symbol_table<t_tscalar> sym_table;
 
@@ -100,7 +101,7 @@ t_computed_expression::compute(std::shared_ptr<t_data_table> source_table,
 
     // Create a function store, with is_type_validator set to false as we
     // are calculating values, not type-checking.
-    t_computed_function_store function_store(vocab, false);
+    t_computed_function_store function_store(vocab, regex_mapping, false);
     function_store.register_computed_functions(sym_table);
 
     exprtk::expression<t_tscalar> expr_definition;
@@ -209,13 +210,14 @@ t_computed_expression_parser::precompute(const std::string& expression_alias,
     const std::string& expression_string,
     const std::string& parsed_expression_string,
     const std::vector<std::pair<std::string, std::string>>& column_ids,
-    std::shared_ptr<t_schema> schema, t_expression_vocab& vocab) {
+    std::shared_ptr<t_schema> schema, t_expression_vocab& vocab,
+    t_regex_mapping& regex_mapping) {
     exprtk::symbol_table<t_tscalar> sym_table;
     sym_table.add_constants();
 
     // Create a function store, with is_type_validator set to true as we are
     // just getting the output types.
-    t_computed_function_store function_store(vocab, true);
+    t_computed_function_store function_store(vocab, regex_mapping, true);
     function_store.register_computed_functions(sym_table);
 
     std::vector<t_tscalar> values;
@@ -271,7 +273,8 @@ t_computed_expression_parser::get_dtype(const std::string& expression_alias,
     const std::string& expression_string,
     const std::string& parsed_expression_string,
     const std::vector<std::pair<std::string, std::string>>& column_ids,
-    const t_schema& schema, t_expression_error& error, t_expression_vocab& vocab) {
+    const t_schema& schema, t_expression_error& error,
+    t_expression_vocab& vocab, t_regex_mapping& regex_mapping) {
     exprtk::symbol_table<t_tscalar> sym_table;
     sym_table.add_constants();
 
@@ -279,7 +282,7 @@ t_computed_expression_parser::get_dtype(const std::string& expression_alias,
 
     // Create a function store, with is_type_validator set to true as we are
     // just validating the output types.
-    t_computed_function_store function_store(vocab, true);
+    t_computed_function_store function_store(vocab, regex_mapping, true);
     function_store.register_computed_functions(sym_table);
 
     auto num_input_columns = column_ids.size();
@@ -418,8 +421,8 @@ t_validated_expression_map::get_expression_errors() const {
     return m_expression_errors;
 }
 
-t_computed_function_store::t_computed_function_store(
-    t_expression_vocab& vocab, bool is_type_validator)
+t_computed_function_store::t_computed_function_store(t_expression_vocab& vocab,
+    t_regex_mapping& regex_mapping, bool is_type_validator)
     : m_day_of_week_fn(computed_function::day_of_week(vocab, is_type_validator))
     , m_month_of_year_fn(
           computed_function::month_of_year(vocab, is_type_validator))
@@ -428,7 +431,9 @@ t_computed_function_store::t_computed_function_store(
     , m_order_fn(computed_function::order(is_type_validator))
     , m_upper_fn(computed_function::upper(vocab, is_type_validator))
     , m_lower_fn(computed_function::lower(vocab, is_type_validator))
-    , m_to_string_fn(computed_function::to_string(vocab, is_type_validator)) {}
+    , m_to_string_fn(computed_function::to_string(vocab, is_type_validator))
+    , m_match_fn(computed_function::match(regex_mapping))
+    , m_fullmatch_fn(computed_function::fullmatch(regex_mapping)) {}
 
 void
 t_computed_function_store::register_computed_functions(
@@ -451,6 +456,8 @@ t_computed_function_store::register_computed_functions(
     sym_table.add_function("lower", m_lower_fn);
     sym_table.add_function("length", t_computed_expression_parser::LENGTH_FN);
     sym_table.add_function("string", m_to_string_fn);
+    sym_table.add_function("match", m_match_fn);
+    sym_table.add_function("fullmatch", m_fullmatch_fn);
     sym_table.add_function(
         "percent_of", t_computed_expression_parser::PERCENT_OF_FN);
     sym_table.add_function("is_null", t_computed_expression_parser::IS_NULL_FN);

@@ -145,6 +145,7 @@ make_view_config(
 
     // Validate expressions using the vocab
     t_expression_vocab& expression_vocab = *(gnode.get_expression_vocab());
+    t_regex_mapping& regex_mapping = *(gnode.get_expression_regex_mapping());
 
     // Will either abort() or succeed completely, and this isn't a public
     // API so we can directly index for speed.
@@ -178,8 +179,10 @@ make_view_config(
         }
 
         // If the expression cannot be parsed, it will abort() here.
-        std::shared_ptr<t_computed_expression> expression = t_computed_expression_parser::precompute(
-            expression_alias, expression_string, parsed_expression_string, column_ids, schema, expression_vocab);
+        std::shared_ptr<t_computed_expression> expression =
+            t_computed_expression_parser::precompute(
+                expression_alias, expression_string, parsed_expression_string,
+                column_ids, schema, expression_vocab, regex_mapping);
 
         expressions.push_back(expression);
         schema->add_column(expression_alias, expression->get_dtype());

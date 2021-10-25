@@ -88,6 +88,7 @@ Table::validate_expressions(
     // Use the gnode's expression vocab to validate expressions so we never
     // have string-typed scalars with nullptr.
     t_expression_vocab& expression_vocab = *(m_gnode->get_expression_vocab());
+    t_regex_mapping& regex_mapping = *(m_gnode->get_expression_regex_mapping());
 
     for (const auto& expr : expressions) {
         const std::string& expression_alias = std::get<0>(expr);
@@ -112,7 +113,7 @@ Table::validate_expressions(
 
         t_dtype expression_dtype = t_computed_expression_parser::get_dtype(
             expression_alias, expression_string, parsed_expression_string,
-            column_ids, gnode_schema, error, expression_vocab);
+            column_ids, gnode_schema, error, expression_vocab, regex_mapping);
 
         // FIXME: none == bad type? what about clear
         if (expression_dtype == DTYPE_NONE) {

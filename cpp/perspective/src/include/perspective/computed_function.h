@@ -18,6 +18,7 @@
 #include <perspective/data_table.h>
 #include <perspective/exprtk.h>
 #include <perspective/expression_vocab.h>
+#include <perspective/regex.h>
 #include <boost/algorithm/string.hpp>
 #include <type_traits>
 #include <date/date.h>
@@ -32,7 +33,36 @@ namespace computed_function {
     typedef typename exprtk::igeneric_function<t_tscalar>::generic_type
         t_generic_type;
     typedef typename t_generic_type::scalar_view t_scalar_view;
+    typedef typename t_generic_type::vector_view t_vector_view;
     typedef typename t_generic_type::string_view t_string_view;
+
+// A function that uses `t_regex_mapping` to cache repeated invocations
+// of a parsed RE2 regex over a column. The `t_regex_mapping` is passed in
+// from the `t_computed_expression` object, so each expression that is created
+// has its own map. In benchmarks, this leads to a sustained 40-50% improvement
+// in the performance of regex functions as the map is initialized and the
+// regex object cached inside the first call to precompute(), and all
+// subsequent calls will use the cached object instead of initializing a new
+// boost::regex.
+#define REGEX_FUNCTION_HEADER(NAME)                                            \
+    struct NAME : public exprtk::igeneric_function<t_tscalar> {                \
+        NAME(t_regex_mapping& regex_mapping);                                  \
+        ~NAME();                                                               \
+        t_tscalar operator()(t_parameter_list parameters);                     \
+        t_regex_mapping& m_regex_mapping;                                      \
+    };
+
+// A regex function that returns a string stored in the expression vocab.
+#define REGEX_STRING_FUNCTION_HEADER(NAME)                                     \
+    struct NAME : public exprtk::igeneric_function<t_tscalar> {                \
+        NAME(t_expression_vocab& expression_vocab,                             \
+            t_regex_mapping& regex_mapping, bool is_type_validator);           \
+        ~NAME();                                                               \
+        t_tscalar operator()(t_parameter_list parameters);                     \
+        bool m_is_type_validator;                                              \
+        t_expression_vocab& m_expression_vocab;                                \
+        t_regex_mapping& m_regex_mapping;                                      \
+    };
 
 // A function that returns a new string that is not part of the original
 // input column. To prevent the new strings from going out of scope and causing
@@ -99,6 +129,45 @@ namespace computed_function {
      * whether each row in the string column contains the string literal.
      */
     STRING_FUNCTION_HEADER(contains)
+
+    /**
+     * @brief match(string, pattern) => True if the string or a substring
+     * partially matches pattern, and False otherwise.
+     */
+    REGEX_FUNCTION_HEADER(match)
+
+    /**
+     * @brief fullmatch(string, pattern) => True if the string fully matches
+     * pattern, and False otherwise.
+     */
+    REGEX_FUNCTION_HEADER(fullmatch)
+
+    /**
+     * @brief search(string, pattern) => The
+     */
+    REGEX_STRING_FUNCTION_HEADER(search)
+
+    /**
+     * @brief indexof(string, pattern) => the start index of the first match,
+     * partial or full, inside string for pattern, or null if the string
+     * does not match the pattern at all.
+     */
+    REGEX_FUNCTION_HEADER(indexof)
+
+    /**
+     * @brief substr(string, start_idx, end_idx) => the substring of string
+     * at start_idx (inclusive) and end_idx (exclusive). If end_idx is not
+     * provided, defaults to string.length(). Equivalent to the string slice
+     * operator (str[bidx:eidx]) in Python. If bidx > eidx, returns null.
+     */
+    STRING_FUNCTION_HEADER(substring)
+
+    /**
+     * @brief replace(string, pattern, replace_str) => string with all matches
+     * of pattern replaced with replace_str, or the original string without
+     * any replacements if the string does not match pattern.
+     */
+    REGEX_STRING_FUNCTION_HEADER(replace)
 
 #define FUNCTION_HEADER(NAME)                                                  \
     struct NAME : public exprtk::igeneric_function<t_tscalar> {                \

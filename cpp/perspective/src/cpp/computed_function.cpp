@@ -184,7 +184,6 @@ namespace computed_function {
 
         boost::to_upper(temp_str);
 
-
         rval.set(m_expression_vocab.intern(temp_str));
         return rval;
     }
@@ -410,6 +409,96 @@ namespace computed_function {
         m_order_idx = 0;
     }
 
+    match::match(t_regex_mapping& regex_mapping)
+        : exprtk::igeneric_function<t_tscalar>("TS")
+        , m_regex_mapping(regex_mapping) {}
+
+    match::~match() {}
+
+    t_tscalar
+    match::operator()(t_parameter_list parameters) {
+        t_tscalar rval;
+        rval.clear();
+        rval.m_type = DTYPE_BOOL;
+
+        // Parameters already validated
+        t_scalar_view str_view(parameters[0]);
+        t_string_view pattern_view(parameters[1]);
+
+        t_tscalar str = str_view();
+        std::string match_pattern
+            = std::string(pattern_view.begin(), pattern_view.end());
+
+        // Type-check: only operate on strings, and pattern must be > size 0
+        if (str.get_dtype() != DTYPE_STR || str.m_status == STATUS_CLEAR
+            || match_pattern.size() == 0) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        RE2* compiled_pattern = m_regex_mapping.intern(match_pattern);
+
+        if (compiled_pattern == nullptr) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        if (!str.is_valid())
+            return rval;
+
+        const std::string& match_string = str.to_string();
+
+        // Get the pattern from the map and perform the match.
+        rval.set(RE2::PartialMatch(match_string, *compiled_pattern));
+
+        return rval;
+    }
+
+    fullmatch::fullmatch(t_regex_mapping& regex_mapping)
+        : exprtk::igeneric_function<t_tscalar>("TS")
+        , m_regex_mapping(regex_mapping) {}
+
+    fullmatch::~fullmatch() {}
+
+    t_tscalar
+    fullmatch::operator()(t_parameter_list parameters) {
+        t_tscalar rval;
+        rval.clear();
+        rval.m_type = DTYPE_BOOL;
+
+        // Parameters already validated
+        t_scalar_view str_view(parameters[0]);
+        t_string_view pattern_view(parameters[1]);
+
+        t_tscalar str = str_view();
+        std::string match_pattern
+            = std::string(pattern_view.begin(), pattern_view.end());
+
+        // Type-check: only operate on strings, and pattern must be > size 0
+        if (str.get_dtype() != DTYPE_STR || str.m_status == STATUS_CLEAR
+            || match_pattern.size() == 0) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        RE2* compiled_pattern = m_regex_mapping.intern(match_pattern);
+
+        if (compiled_pattern == nullptr) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        if (!str.is_valid())
+            return rval;
+
+        const std::string& match_string = str.to_string();
+
+        // Get the pattern from the map and perform the match.
+        rval.set(RE2::FullMatch(match_string, *compiled_pattern));
+
+        return rval;
+    }
+
     hour_of_day::hour_of_day()
         : exprtk::igeneric_function<t_tscalar>("T") {}
 
@@ -473,7 +562,8 @@ namespace computed_function {
         "03 March", "04 April", "05 May", "06 June", "07 July", "08 August",
         "09 September", "10 October", "11 November", "12 December"};
 
-    day_of_week::day_of_week(t_expression_vocab& expression_vocab, bool is_type_validator)
+    day_of_week::day_of_week(
+        t_expression_vocab& expression_vocab, bool is_type_validator)
         : exprtk::igeneric_function<t_tscalar>("T")
         , m_expression_vocab(expression_vocab)
         , m_is_type_validator(is_type_validator) {
@@ -1262,7 +1352,8 @@ namespace computed_function {
         return rval;
     }
 
-    to_string::to_string(t_expression_vocab& expression_vocab, bool is_type_validator)
+    to_string::to_string(
+        t_expression_vocab& expression_vocab, bool is_type_validator)
         : exprtk::igeneric_function<t_tscalar>("T")
         , m_expression_vocab(expression_vocab)
         , m_is_type_validator(is_type_validator) {
