@@ -88,7 +88,7 @@ impl Session {
         std::cell::Ref::map(self.borrow(), |x| &x.metadata)
     }
 
-    fn metadata_mut(&self) -> MetadataMutRef<'_> {
+    pub fn metadata_mut(&self) -> MetadataMutRef<'_> {
         std::cell::RefMut::map(self.borrow_mut(), |x| &mut x.metadata)
     }
 
@@ -283,7 +283,7 @@ impl Session {
         column: &str,
         expression: &JsValue,
     ) -> ViewConfigUpdate {
-        let old_expression = self.metadata().get_alias_expression(column);
+        let old_expression = self.metadata().get_expression_by_alias(column).unwrap();
         let new_name = self
             .get_validated_expression_name(expression)
             .await
@@ -375,10 +375,21 @@ impl Session {
         }
     }
 
+    async fn get_validated_expression_name(
+        &self,
+        expr: &JsValue,
+    ) -> Result<String, JsValue> {
+        let arr = [expr].iter().collect::<js_sys::Array>();
+        let table = self.borrow().table.as_ref().unwrap().clone();
+        let schema = table.validate_expressions(arr).await?.expression_schema();
+        let schema_keys = js_sys::Object::keys(&schema);
+        schema_keys.get(0).as_string().into_jserror()
+    }
+
     /// Validate an expression string (as a JsValue since it comes from `monaco`),
     /// and marshall the results.
     pub async fn validate_expr(
-        self,
+        &self,
         expr: JsValue,
     ) -> Result<Option<PerspectiveValidationError>, JsValue> {
         let arr = [expr].iter().collect::<js_sys::Array>();
@@ -391,17 +402,6 @@ impl Session {
         } else {
             Ok(None)
         }
-    }
-
-    pub async fn get_validated_expression_name(
-        &self,
-        expr: &JsValue,
-    ) -> Result<String, JsValue> {
-        let arr = [expr].iter().collect::<js_sys::Array>();
-        let table = self.borrow().table.as_ref().unwrap().clone();
-        let schema = table.validate_expressions(arr).await?.expression_schema();
-        let schema_keys = js_sys::Object::keys(&schema);
-        schema_keys.get(0).as_string().into_jserror()
     }
 
     pub async fn copy_to_clipboard(self, flat: bool) -> Result<(), JsValue> {

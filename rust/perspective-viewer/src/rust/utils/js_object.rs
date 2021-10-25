@@ -37,13 +37,12 @@ macro_rules! js_object {
 
 #[macro_export]
 macro_rules! js_log {
-    ($x:expr) => {
+    ($x:expr) => {{
         const DEBUG_ONLY_WARNING: &str = $x;
-        web_sys::console::log_1(&JsValue::from(&$x));
-    };
-    ($x:expr $(, $y:expr)*) => {
+        web_sys::console::log_1(&JsValue::from($x));
+    }};
+    ($x:expr $(, $y:expr)*) => {{
         const DEBUG_ONLY_WARNING: &str = $x;
         web_sys::console::log_1(&format!($x, $($y)*).into());
-    };
+    }};
 }
-

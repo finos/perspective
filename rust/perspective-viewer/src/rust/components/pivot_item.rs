@@ -52,9 +52,7 @@ impl Component for PivotItem {
 
         let dragend = Callback::from({
             let dragdrop = self.props.dragdrop.clone();
-            move |_event| {
-                dragdrop.drag_end()
-            }
+            move |_event| dragdrop.drag_end()
         });
 
         html! {

@@ -71,18 +71,11 @@ impl DragDrop {
         self.borrow().on_drop_action.add_listener(callback)
     }
 
-    pub fn add_on_drag_action(
-        &self,
-        callback: Callback<DragEffect>,
-    ) -> Subscription {
+    pub fn add_on_drag_action(&self, callback: Callback<DragEffect>) -> Subscription {
         self.borrow().on_drag_action.add_listener(callback)
     }
 
-
-    pub fn add_on_dragend_action(
-        &self,
-        callback: Callback<()>,
-    ) -> Subscription {
+    pub fn add_on_dragend_action(&self, callback: Callback<()>) -> Subscription {
         self.borrow().on_dragend_action.add_listener(callback)
     }
 

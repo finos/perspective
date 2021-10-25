@@ -167,7 +167,7 @@ where
             html! {
                 <>
                     <label>{ "weighted mean" }</label>
-                    <div 
+                    <div
                         class="dropdown-width-container"
                         data-value={ format!("{}", self.props.selected) }>
                         { select }
@@ -176,7 +176,7 @@ where
             }
         } else {
             html! {
-                <div 
+                <div
                     class="dropdown-width-container"
                     data-value={ format!("{}", self.props.selected) }>
                     { select }

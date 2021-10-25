@@ -32,22 +32,9 @@ pub use self::weak_component_link::*;
 
 #[macro_export]
 macro_rules! maybe {
-    ($($exp:stmt);* $(;)*) => {{
+    ($($exp:stmt);*) => {{
         #[must_use]
-        let x: Result<_, JsValue> = (|| {
-            $(
-                $exp
-            )*
-        })();
-        x
-    }};
-}
-
-#[macro_export]
-macro_rules! optionally {
-    ($($exp:stmt);* $(;)*) => {{
-        #[must_use]
-        let x: Option<_> = (|| {
+        let x = (|| {
             $(
                 $exp
             )*
