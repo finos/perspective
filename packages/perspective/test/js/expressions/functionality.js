@@ -1206,6 +1206,23 @@ module.exports = (perspective) => {
             table.delete();
         });
 
+        it("Should only parse first comment as an alias", async () => {
+            const table = await perspective.table({a: [1, 2, 3]});
+            const view = await table.view({
+                expressions: [
+                    `// abc
+                    var x := 1 + 2; // another comment
+                    x + 3 + 4 # comment`,
+                ],
+            });
+            const schema = await view.expression_schema();
+            expect(schema).toEqual({abc: "float"});
+            const result = await view.to_columns();
+            expect(result["abc"]).toEqual(Array(3).fill(10));
+            await view.delete();
+            await table.delete();
+        });
+
         it("Should be able to alias a real column in `view()`", async function () {
             const table = await perspective.table(
                 expressions_common.all_types_arrow.slice()

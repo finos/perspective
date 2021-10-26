@@ -15,7 +15,7 @@ ALIAS_REGEX = re.compile(r"//(.+)\n")
 EXPRESSION_COLUMN_NAME_REGEX = re.compile(r"\"(.*?[^\\])\"")
 STRING_LITERAL_REGEX = re.compile(r"'(.*?[^\\])'")
 FUNCTION_LITERAL_REGEX = re.compile(
-    r"(bucket|match|fullmatch|find|indexof)\(.*?,\s*(intern\(\'(.+)\'\)).*\)"
+    r"(bucket|match|fullmatch|search|indexof)\(.*?,\s*(intern\(\'(.+)\'\)).*\)"
 )
 BOOLEAN_LITERAL_REGEX = re.compile(r"([a-zA-Z_]+[a-zA-Z0-9_]*)")
 
@@ -133,11 +133,15 @@ def _replace_interned_param(match_obj):
     literal, because the unit determines the return type of the column and the
     function would not be able to validate a unit if it was interned."""
     full = match_obj.group(0)
-    interned = match_obj.group(1)
-    unit = match_obj.group(2)
+    intern_fn = match_obj.group(2)
+    value = match_obj.group(3)
+    intern_idx = full.index(intern_fn)
 
-    # from "bucket(col, intern('unit'))" to "bucket(col, 'unit')"
-    return "{0}'{1}')".format(full[0 : full.index(interned)], unit)
+    # from fn(param, intern('string'), param, param...) to
+    # fn (param, 'string', ...)
+    return "{}'{}'{}".format(
+        full[0:intern_idx], value, full[intern_idx + len(intern_fn) :]
+    )
 
 
 def _parse_expression_strings(expressions):
@@ -170,7 +174,7 @@ def _parse_expression_strings(expressions):
             alias = alias_match.group(1).strip()
 
             # Remove the alias from the expression
-            parsed = re.sub(ALIAS_REGEX, "", expression)
+            parsed = re.sub(ALIAS_REGEX, "", expression, count=1)
         else:
             # Expression itself is the alias
             alias = expression
@@ -201,7 +205,8 @@ def _parse_expression_strings(expressions):
             parsed,
         )
 
-        # remove the `intern()` in bucket - TODO: this is messy
+        # remove the `intern()` in bucket and regex functions that take
+        # string literal parameters.
         parsed = re.sub(FUNCTION_LITERAL_REGEX, _replace_interned_param, parsed)
 
         validated = [alias, expression, parsed, column_id_map]

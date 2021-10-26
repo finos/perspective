@@ -538,6 +538,13 @@ thread_local! {
                 insert_text_rules: 4,
                 documentation: "Returns True if the whole string matches pattern, and False otherwise.".to_owned(),
             },
+            CompletionItemSuggestion {
+                label: "search".to_owned(),
+                kind: 1,
+                insert_text: "search(${1:string}, ${2:pattern})".to_owned(),
+                insert_text_rules: 4,
+                documentation: "Returns the substring that matches the first capturing group in pattern, or null if there are no capturing groups in the pattern or if there are no matches.".to_owned(),
+            },
         ]
     };
 }

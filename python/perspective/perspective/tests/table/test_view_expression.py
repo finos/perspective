@@ -6,6 +6,7 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
+import re
 from random import random, randint, choices
 from string import ascii_letters
 from pytest import raises
@@ -14,8 +15,8 @@ from time import mktime
 from perspective import Table, PerspectiveCppError
 from .test_view import compare_delta
 
-def randstr(length):
-    return "".join(choices(ascii_letters, k=length))
+def randstr(length, input=ascii_letters):
+    return "".join(choices(input, k=length))
 
 class TestViewExpression(object):
     def test_table_validate_expressions_empty(self):
@@ -1669,3 +1670,111 @@ class TestViewExpression(object):
         assert result["computed5"] == ["abcdefghijklmnop", "def"]
         assert result["computed6"] == ["false", "true"]
         assert result["computed7"] == ["1234.57"] * 2
+
+    def test_view_expession_multicomment(self):
+        table = Table({"a": [1, 2, 3, 4]})
+        view = table.view(expressions=["//abc\nvar x := 1 + 2; // def\nx + 100 // cdefghijk"])
+        assert view.expression_schema() == {"abc": float}
+        assert view.to_columns() == {
+            "abc": [103, 103, 103, 103],
+            "a": [1, 2, 3, 4]
+        }
+    
+    def test_view_regex_email(self):
+        endings = ["com", "net", "co.uk", "ie", "me", "io", "co"]
+        data = ["{}@{}.{}".format(randstr(30, ascii_letters + "0123456789" + "._-"), randstr(10), choices(endings, k=1)[0]) for _ in range(100)]
+        table = Table({"a": data})
+        expressions = [
+            "// address\nsearch(\"a\", '^([a-zA-Z0-9._-]+)@')",
+            "// domain\nsearch(\"a\", '@([a-zA-Z.]+)$')",
+            "//is_email?\nfullmatch(\"a\", '^([a-zA-Z0-9._-]+)@([a-zA-Z.]+)$')",
+            "//has_at?\nmatch(\"a\", '@')"
+        ]
+
+        view = table.view(expressions=expressions)
+        schema = view.expression_schema()
+        assert schema == {
+            "address": str,
+            "domain": str,
+            "is_email?": bool,
+            "has_at?": bool
+        }
+
+        results = view.to_columns()
+
+        for i in range(100):
+            source = results["a"][i]
+            expected_address = re.match(r"^([a-zA-Z0-9._-]+)@", source).group(1)
+            expected_domain = re.search(r"@([a-zA-Z.]+)$", source).group(1)
+            assert results["address"][i] == expected_address
+            assert results["domain"][i] == expected_domain
+            assert results["is_email?"][i] == True
+            assert results["has_at?"][i] == True
+
+    def test_view_expression_number(self):
+        def digits():
+            return randstr(4, "0123456789")
+        
+        data = []
+
+        for _ in range(1000):
+            separator = "-" if random() > 0.5 else " "
+            data.append("{}{}{}{}{}{}{}".format(digits(), separator, digits(), separator, digits(), separator, digits()))
+        
+        table = Table({"a": data})
+        view = table.view(expressions=["""// parsed\n
+        var parts[4];
+        parts[0] := search("a", '^([0-9]{4})[ -][0-9]{4}[ -][0-9]{4}[ -][0-9]{4}');
+        parts[1] := search("a", '^[0-9]{4}[ -]([0-9]{4})[ -][0-9]{4}[ -][0-9]{4}');
+        parts[2] := search("a", '^[0-9]{4}[ -][0-9]{4}[ -]([0-9]{4})[ -][0-9]{4}');
+        parts[3] := search("a", '^[0-9]{4}[ -][0-9]{4}[ -][0-9]{4}[ -]([0-9]{4})');
+        concat(parts[0], parts[1], parts[2], parts[3])
+        """, "//is_number?\nfullmatch(\"a\", '^[0-9]{4}[ -][0-9]{4}[ -][0-9]{4}[ -][0-9]{4}')"])
+        schema = view.expression_schema()
+        assert schema == {"parsed": str, "is_number?": bool}
+        results = view.to_columns()
+        
+        for i in range(1000):
+            source = results["a"][i]
+            expected = re.sub(r"[ -]", "", source)
+            assert results["parsed"][i] == expected
+            assert results["is_number?"][i] == True
+
+
+    def test_view_expression_newlines(self):
+        table = Table({"a": [
+            "abc\ndef",
+            "\n\n\n\nabc\ndef",
+            "abc\n\n\n\n\n\nabc\ndef\n\n\n\n",
+            None,
+            "def",
+        ],
+        "b": [
+            "hello\tworld",
+            "\n\n\n\n\nhello\n\n\n\n\n\tworld",
+            "\tworld",
+            "world",
+            None,
+        ]})
+
+        view = table.view(
+            expressions=[
+                "//c1\nsearch(\"a\", '(\ndef)')",
+                "//c2\nsearch(\"b\", '(\tworld)')",
+                "//c3\nmatch(\"a\", '\\n')",
+                "//c4\nmatch(\"b\", '\\n')"
+            ]
+        )
+
+        assert view.expression_schema() == {
+            "c1": str,
+            "c2": str,
+            "c3": bool,
+            "c4": bool
+        }
+
+        results = view.to_columns()
+        assert results["c1"] == ["\ndef", "\ndef", "\ndef", None, None]
+        assert results["c2"] == ["\tworld", "\tworld", "\tworld", None, None]
+        assert results["c3"] == [True, True, True, None, False]
+        assert results["c4"] == [False, True, False, False, None]

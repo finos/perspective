@@ -36,14 +36,7 @@ namespace computed_function {
     typedef typename t_generic_type::vector_view t_vector_view;
     typedef typename t_generic_type::string_view t_string_view;
 
-// A function that uses `t_regex_mapping` to cache repeated invocations
-// of a parsed RE2 regex over a column. The `t_regex_mapping` is passed in
-// from the `t_computed_expression` object, so each expression that is created
-// has its own map. In benchmarks, this leads to a sustained 40-50% improvement
-// in the performance of regex functions as the map is initialized and the
-// regex object cached inside the first call to precompute(), and all
-// subsequent calls will use the cached object instead of initializing a new
-// boost::regex.
+// A regex function that caches its parsed regex objects.
 #define REGEX_FUNCTION_HEADER(NAME)                                            \
     struct NAME : public exprtk::igeneric_function<t_tscalar> {                \
         NAME(t_regex_mapping& regex_mapping);                                  \
@@ -59,9 +52,9 @@ namespace computed_function {
             t_regex_mapping& regex_mapping, bool is_type_validator);           \
         ~NAME();                                                               \
         t_tscalar operator()(t_parameter_list parameters);                     \
-        bool m_is_type_validator;                                              \
         t_expression_vocab& m_expression_vocab;                                \
         t_regex_mapping& m_regex_mapping;                                      \
+        bool m_is_type_validator;                                              \
     };
 
 // A function that returns a new string that is not part of the original
@@ -79,8 +72,8 @@ namespace computed_function {
         ~NAME();                                                               \
         t_tscalar operator()(t_parameter_list parameters);                     \
         t_expression_vocab& m_expression_vocab;                                \
-        bool m_is_type_validator;                                              \
         t_tscalar m_sentinel;                                                  \
+        bool m_is_type_validator;                                              \
     };
 
     // TODO PSP_NON_COPYABLE all functions
@@ -143,7 +136,9 @@ namespace computed_function {
     REGEX_FUNCTION_HEADER(fullmatch)
 
     /**
-     * @brief search(string, pattern) => The
+     * @brief search(string, pattern) => Returns the substring in the first
+     * capturing group that matches pattern. If the regex does not have any
+     * capturing groups, fails type checking and returns null.
      */
     REGEX_STRING_FUNCTION_HEADER(search)
 

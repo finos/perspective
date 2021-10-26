@@ -7,23 +7,26 @@
  *
  */
 
-const {string} = require("jsverify");
-
 const CHARS = ` !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_\`abcdefghijklmnopqrstuvwxyz{|}~`;
-const randint = (min, max) => Math.floor(Math.random() * (max - min + 1)) + 1;
-/**
- * Generate a random string for testing. If `is_null` is true, randomly returns
- * null with a 50% chance.
- *
- * @param {*} is_null
- */
-const random_string = (max_length = 100, is_null = false) => {
+const ALPHA = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const NUMERIC = "0123456789";
+const ALPHANUMERIC = ALPHA + NUMERIC;
+const randint = (min, max) =>
+    Math.floor(Math.random() * (Math.floor(max) - Math.ceil(min) + 1)) +
+    Math.ceil(min);
+const randchoice = (collection) =>
+    collection[randint(0, collection.length - 1)];
+const random_string = (
+    max_length = 100,
+    is_null = false,
+    input_values = CHARS
+) => {
     if (is_null && Math.random() > 0.5) return null;
     const length = randint(1, max_length);
     const output = [];
 
     for (let i = 0; i < length; i++) {
-        output.push(CHARS[randint(0, CHARS.length)]);
+        output.push(randchoice(input_values));
     }
 
     return output.join("");
@@ -1082,6 +1085,7 @@ module.exports = (perspective) => {
             });
 
             const expressions = [
+                `match("a", "b")`,
                 `match("a", 123)`,
                 `match(today(), '[a-z]{3}[0-9]{3}')`,
                 `match(False, '[0-9]{7}')`,
@@ -1097,14 +1101,18 @@ module.exports = (perspective) => {
                 "Parser Error - Failed parameter type check for function 'match', Expected 'TS' call set: 'TT'"
             );
 
-            expect(validated.errors[expressions[1]]).toEqual({
+            expect(validated.errors[expressions[1]].error_message).toEqual(
+                "Parser Error - Failed parameter type check for function 'match', Expected 'TS' call set: 'TT'"
+            );
+
+            expect(validated.errors[expressions[2]]).toEqual({
                 line: 0,
                 column: 0,
                 error_message:
                     "Type Error - inputs do not resolve to a valid expression.",
             });
 
-            expect(validated.errors[expressions[2]]).toEqual({
+            expect(validated.errors[expressions[3]]).toEqual({
                 line: 0,
                 column: 0,
                 error_message:
@@ -1121,6 +1129,7 @@ module.exports = (perspective) => {
             });
 
             const expressions = [
+                `fullmatch("a", "b")`,
                 `fullmatch("a", 123)`,
                 `fullmatch(today(), '[a-z]{3}[0-9]{3}')`,
                 `fullmatch(False, '[0-9]{7}')`,
@@ -1136,14 +1145,18 @@ module.exports = (perspective) => {
                 "Parser Error - Failed parameter type check for function 'fullmatch', Expected 'TS' call set: 'TT'"
             );
 
-            expect(validated.errors[expressions[1]]).toEqual({
+            expect(validated.errors[expressions[1]].error_message).toEqual(
+                "Parser Error - Failed parameter type check for function 'fullmatch', Expected 'TS' call set: 'TT'"
+            );
+
+            expect(validated.errors[expressions[2]]).toEqual({
                 line: 0,
                 column: 0,
                 error_message:
                     "Type Error - inputs do not resolve to a valid expression.",
             });
 
-            expect(validated.errors[expressions[2]]).toEqual({
+            expect(validated.errors[expressions[3]]).toEqual({
                 line: 0,
                 column: 0,
                 error_message:
@@ -1331,9 +1344,6 @@ module.exports = (perspective) => {
             const table = await perspective.table({
                 a: ["ABC", "abc", null, "AbC", "12345"],
             });
-
-            console.error(await table.schema());
-
             const expressions = [
                 `match("a", '.*')`,
                 `match("a", '[aAbBcC]{3}')`,
@@ -1351,7 +1361,6 @@ module.exports = (perspective) => {
             }
 
             const results = await view.to_columns();
-            console.error(results);
             expect(results[expressions[0]]).toEqual([
                 true,
                 true,
@@ -1426,6 +1435,222 @@ module.exports = (perspective) => {
                 false,
                 true,
                 false,
+            ]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Search with string", async () => {
+            const table = await perspective.table({
+                a: ["ABC", "DEF", "cbA", "HIjK", "lMNoP"],
+                b: ["abc123", "abc567", "DEF56", "1234567", "AAA000"],
+            });
+
+            const expressions = [
+                `search("a", '(ABC)')`,
+                `search("b", '(.*)')`,
+                `search("a", '([A-Za-z]{3})')`,
+                `search("b", '([A-Z]{3})')`,
+                `search("b", '([0-9]{7})')`,
+                `search("b", '([A-Za-z]{3})')`,
+            ];
+
+            const view = await table.view({expressions});
+
+            const schema = await view.expression_schema();
+
+            for (const expr of expressions) {
+                expect(schema[expr]).toEqual("string");
+            }
+
+            const results = await view.to_columns();
+
+            expect(results[expressions[0]]).toEqual([
+                "ABC",
+                null,
+                null,
+                null,
+                null,
+            ]);
+            expect(results[expressions[1]]).toEqual([
+                "abc123",
+                "abc567",
+                "DEF56",
+                "1234567",
+                "AAA000",
+            ]);
+            expect(results[expressions[2]]).toEqual([
+                "ABC",
+                "DEF",
+                "cbA",
+                "HIj",
+                "lMN",
+            ]);
+            expect(results[expressions[3]]).toEqual([
+                null,
+                null,
+                "DEF",
+                null,
+                "AAA",
+            ]);
+            expect(results[expressions[4]]).toEqual([
+                null,
+                null,
+                null,
+                "1234567",
+                null,
+            ]);
+            expect(results[expressions[5]]).toEqual([
+                "abc",
+                "abc",
+                "DEF",
+                null,
+                "AAA",
+            ]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Search - extract email", async () => {
+            const endings = ["com", "net", "org", "co.uk", "ie", "me", "io"];
+            const valid_address_chars = ALPHANUMERIC + "._-";
+            const get_data = (num_rows) => {
+                const data = [];
+
+                for (let i = 0; i < num_rows; i++) {
+                    const email = `${random_string(
+                        30,
+                        false,
+                        valid_address_chars
+                    )}@${random_string(10, false, ALPHA)}.${randchoice(
+                        endings
+                    )}`;
+                    data.push(email);
+                }
+
+                return data;
+            };
+
+            const table = await perspective.table({a: get_data(100)});
+            const expressions = [
+                `// address
+            search("a", '^([a-zA-Z0-9._-]+)@');`,
+                `// domain
+            search("a", '@([a-zA-Z.]+)$')`,
+            ];
+
+            const view = await table.view({expressions});
+            const schema = await view.expression_schema();
+            expect(schema).toEqual({
+                address: "string",
+                domain: "string",
+            });
+
+            const result = await view.to_columns();
+
+            for (let i = 0; i < 100; i++) {
+                const source = result["a"][i];
+                const expected_address = source.match(/^([a-zA-Z0-9._-]+)@/)[1];
+                const expected_domain = source.match(/@([a-zA-Z.]+)$/)[1];
+                expect(result["address"][i]).toEqual(expected_address);
+                expect(result["domain"][i]).toEqual(expected_domain);
+            }
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Search - extract card number", async () => {
+            const digits = () => {
+                const output = [];
+                for (let i = 0; i < 4; i++) {
+                    output.push(randchoice(NUMERIC));
+                }
+                return output.join("");
+            };
+
+            const get_data = (num_rows) => {
+                const data = [];
+
+                for (let i = 0; i < num_rows; i++) {
+                    const separator = Math.random() > 0.5 ? " " : "-";
+                    const num = `${digits()}${separator}${digits()}${separator}${digits()}${separator}${digits()}`;
+                    data.push(num);
+                }
+
+                return data;
+            };
+
+            const table = await perspective.table({a: get_data(1000)});
+            const expression = `// parsed
+            var parts[4];
+            parts[0] := search("a", '^([0-9]{4})[ -][0-9]{4}[ -][0-9]{4}[ -][0-9]{4}');
+            parts[1] := search("a", '^[0-9]{4}[ -]([0-9]{4})[ -][0-9]{4}[ -][0-9]{4}');
+            parts[2] := search("a", '^[0-9]{4}[ -][0-9]{4}[ -]([0-9]{4})[ -][0-9]{4}');
+            parts[3] := search("a", '^[0-9]{4}[ -][0-9]{4}[ -][0-9]{4}[ -]([0-9]{4})');
+            concat(parts[0], parts[1], parts[2], parts[3])`;
+
+            const view = await table.view({expressions: [expression]});
+            const schema = await view.expression_schema();
+            expect(schema).toEqual({parsed: "string"});
+            const result = await view.to_columns();
+
+            for (let i = 0; i < 100; i++) {
+                const source = result["a"][i];
+                const expected = source.replace(/[ -]/g, "");
+                expect(result.parsed[i]).toEqual(expected);
+            }
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Search - newlines", async () => {
+            const table = await perspective.table({
+                a: [
+                    "abc\ndef",
+                    "\n\n\n\nabc\ndef",
+                    "abc\n\n\n\n\n\nabc\ndef\n\n\n\n",
+                    null,
+                    "def",
+                ],
+                b: [
+                    "hello\tworld",
+                    "\n\n\n\n\nhello\n\n\n\n\n\tworld",
+                    "\tworld",
+                    "world",
+                    null,
+                ],
+            });
+            const view = await table.view({
+                expressions: [
+                    "//c1\nsearch(\"a\", '(\ndef)')",
+                    "//c2\nsearch(\"b\", '(\tworld)')",
+                ],
+            });
+
+            const schema = await view.expression_schema();
+            expect(schema).toEqual({
+                c1: "string",
+                c2: "string",
+            });
+
+            const result = await view.to_columns();
+            expect(result["c1"]).toEqual([
+                "\ndef",
+                "\ndef",
+                "\ndef",
+                null,
+                null,
+            ]);
+            expect(result["c2"]).toEqual([
+                "\tworld",
+                "\tworld",
+                "\tworld",
+                null,
+                null,
             ]);
 
             await view.delete();

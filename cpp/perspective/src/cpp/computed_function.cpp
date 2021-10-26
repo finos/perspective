@@ -499,6 +499,63 @@ namespace computed_function {
         return rval;
     }
 
+    search::search(t_expression_vocab& expression_vocab,
+        t_regex_mapping& regex_mapping, bool is_type_validator)
+        : exprtk::igeneric_function<t_tscalar>("TS")
+        , m_expression_vocab(expression_vocab)
+        , m_regex_mapping(regex_mapping)
+        , m_is_type_validator(is_type_validator) {}
+
+    search::~search() {}
+
+    t_tscalar
+    search::operator()(t_parameter_list parameters) {
+        t_tscalar rval;
+        rval.clear();
+        rval.m_type = DTYPE_STR;
+
+        // Parameters already validated
+        t_scalar_view str_view(parameters[0]);
+        t_string_view pattern_view(parameters[1]);
+
+        t_tscalar str = str_view();
+        std::string match_pattern
+            = std::string(pattern_view.begin(), pattern_view.end());
+
+        // Type-check: only operate on strings, and pattern must be > size 0
+        if (str.get_dtype() != DTYPE_STR || str.m_status == STATUS_CLEAR
+            || match_pattern.size() == 0) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        RE2* compiled_pattern = m_regex_mapping.intern(match_pattern);
+
+        if (compiled_pattern == nullptr
+            || compiled_pattern->NumberOfCapturingGroups() < 1) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        if (!str.is_valid() || m_is_type_validator)
+            return rval;
+
+        re2::StringPiece result;
+        const std::string& match_string = str.to_string();
+        bool found
+            = RE2::PartialMatch(match_string, *compiled_pattern, &result);
+
+        // Return null if no match, or if the match is size 0 - don't allow
+        // empty strings back out.
+        if (!found || result.size() == 0) {
+            return rval;
+        }
+
+        rval.set(m_expression_vocab.intern(result.ToString()));
+
+        return rval;
+    }
+
     hour_of_day::hour_of_day()
         : exprtk::igeneric_function<t_tscalar>("T") {}
 
