@@ -109,6 +109,9 @@ pub struct SplitPanelProps {
     pub id: String,
     pub children: Children,
 
+    #[prop_or_default]
+    pub on_resize: Option<Callback<(i32, i32)>>,
+
     #[cfg(test)]
     #[prop_or_default]
     pub weak_link: WeakComponentLink<SplitPanel>,
@@ -178,6 +181,10 @@ impl Component for SplitPanel {
             SplitPanelMsg::MoveResizing(client_x) => {
                 self.style = self.resize_state.as_ref().map(|state| {
                     let width = max(0, state.width + (client_x - state.start));
+                    if let Some(ref cb) = self.props.on_resize {
+                        cb.emit((std::cmp::max(0, width), 400));
+                    }
+
                     format!("width: {}px", width)
                 })
             }
