@@ -438,7 +438,8 @@ t_computed_function_store::t_computed_function_store(t_expression_vocab& vocab,
     , m_match_fn(computed_function::match(regex_mapping))
     , m_fullmatch_fn(computed_function::fullmatch(regex_mapping))
     , m_search_fn(
-          computed_function::search(vocab, regex_mapping, is_type_validator)) {}
+          computed_function::search(vocab, regex_mapping, is_type_validator))
+    , m_indexof_fn(computed_function::indexof(regex_mapping)) {}
 
 void
 t_computed_function_store::register_computed_functions(
@@ -490,6 +491,7 @@ t_computed_function_store::register_computed_functions(
     sym_table.add_function("match", m_match_fn);
     sym_table.add_function("fullmatch", m_fullmatch_fn);
     sym_table.add_function("search", m_search_fn);
+    sym_table.add_function("indexof", m_indexof_fn);
 
     // And scalar constants
     sym_table.add_constant("True", t_computed_expression_parser::TRUE_SCALAR);

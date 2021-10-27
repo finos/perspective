@@ -546,6 +546,13 @@ thread_local! {
                 documentation: "Returns the substring that matches the first capturing group in pattern, or null if there are no capturing groups in the pattern or if there are no matches.".to_owned(),
             },
             CompletionItemSuggestion {
+                label: "indexof".to_owned(),
+                kind: 1,
+                insert_text: "indexof(${1:string}, ${2:pattern}, ${3:output_vector})".to_owned(),
+                insert_text_rules: 4,
+                documentation: "Writes into index 0 and 1 of output_vector the start and end indices of the substring that matches the first capturing group in pattern.\n\nReturns true if there is a match and output was written, or false if there are no capturing groups in the pattern, if there are no matches, or if the indices are invalid.".to_owned(),
+            },
+            CompletionItemSuggestion {
                 label: "random".to_owned(),
                 kind: 1,
                 insert_text: "random()".to_owned(),

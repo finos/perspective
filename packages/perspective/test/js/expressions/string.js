@@ -1541,24 +1541,29 @@ module.exports = (perspective) => {
             search("a", '@([a-zA-Z.]+)$')`,
             ];
 
-            const view = await table.view({expressions});
-            const schema = await view.expression_schema();
-            expect(schema).toEqual({
-                address: "string",
-                domain: "string",
-            });
+            // Make the same regex 10x - make sure it's ok to cache the regex
+            for (let i = 0; i < 10; i++) {
+                const view = await table.view({expressions});
+                const schema = await view.expression_schema();
+                expect(schema).toEqual({
+                    address: "string",
+                    domain: "string",
+                });
 
-            const result = await view.to_columns();
+                const result = await view.to_columns();
 
-            for (let i = 0; i < 100; i++) {
-                const source = result["a"][i];
-                const expected_address = source.match(/^([a-zA-Z0-9._-]+)@/)[1];
-                const expected_domain = source.match(/@([a-zA-Z.]+)$/)[1];
-                expect(result["address"][i]).toEqual(expected_address);
-                expect(result["domain"][i]).toEqual(expected_domain);
+                for (let i = 0; i < 100; i++) {
+                    const source = result["a"][i];
+                    const expected_address =
+                        source.match(/^([a-zA-Z0-9._-]+)@/)[1];
+                    const expected_domain = source.match(/@([a-zA-Z.]+)$/)[1];
+                    expect(result["address"][i]).toEqual(expected_address);
+                    expect(result["domain"][i]).toEqual(expected_domain);
+                }
+
+                await view.delete();
             }
 
-            await view.delete();
             await table.delete();
         });
 
@@ -1652,6 +1657,94 @@ module.exports = (perspective) => {
                 null,
                 null,
             ]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("indexof", async () => {
+            const table = await perspective.table({
+                x: "string",
+                y: "string",
+            });
+
+            table.update({
+                x: ["15 02 1997", "31 11 2021", "01 01 2020", "31 12 2029"],
+                y: ["$300", "$123.58", "$0.99", "$1.99"],
+            });
+
+            const expressions = [
+                `// parsed date
+            var year_vec[2];
+            indexof("x", '([0-9]{4})$', year_vec);
+            year_vec[1] - year_vec[0];
+            `,
+                `// parsed date2
+            var year_vec[2];
+            indexof("x", '([0-9]{4})$', year_vec);
+            `,
+                "// parsed dollars\nvar dollar_vec[2];indexof(\"y\", '^[$]([0-9.]+)', dollar_vec); dollar_vec[0] + dollar_vec[1];",
+            ];
+
+            const view = await table.view({expressions});
+            const schema = await view.expression_schema();
+            expect(schema).toEqual({
+                "parsed date": "float",
+                "parsed date2": "boolean",
+                "parsed dollars": "float",
+            });
+
+            const result = await view.to_columns();
+            expect(result["parsed date"]).toEqual(Array(4).fill(3));
+            expect(result["parsed date2"]).toEqual(Array(4).fill(true));
+            expect(result["parsed dollars"]).toEqual([4, 7, 5, 5]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("indexof various vectors", async () => {
+            const table = await perspective.table({
+                x: "string",
+                y: "string",
+            });
+
+            table.update({
+                x: ["15 02 1997", "31 11 2021", "01 01 2020", "31 12 2029"],
+                y: ["$300", "$123.58", "$0.99", "$1.99"],
+            });
+
+            const expressions = [
+                `// parsed date
+            var year_vec[1]; // vector too small
+            indexof("x", '([0-9]{4})$', year_vec);
+            `,
+                `// parsed date2
+            var year_vec[2];
+            indexof("x", '([a-z])', year_vec); // should not match
+            `,
+                "// parsed dollars\nvar dollar_vec[2] := {100, 200};indexof(\"y\", '^[$]([0-9.]+)', dollar_vec); dollar_vec[0] + dollar_vec[1];",
+                `// parsed dollars2
+            var dollar_vec[2] := {100, 200};
+            indexof("y", '^([a-z])', dollar_vec); // should not match
+            dollar_vec[0] + dollar_vec[1]; // should not overwrite vector
+            `,
+            ];
+
+            const view = await table.view({expressions});
+            const schema = await view.expression_schema();
+            expect(schema).toEqual({
+                "parsed date": "boolean",
+                "parsed date2": "boolean",
+                "parsed dollars": "float",
+                "parsed dollars2": "float",
+            });
+
+            const result = await view.to_columns();
+            expect(result["parsed date"]).toEqual(Array(4).fill(null));
+            expect(result["parsed date2"]).toEqual(Array(4).fill(false));
+            expect(result["parsed dollars"]).toEqual([4, 7, 5, 5]);
+            expect(result["parsed dollars2"]).toEqual(Array(4).fill(300));
 
             await view.delete();
             await table.delete();

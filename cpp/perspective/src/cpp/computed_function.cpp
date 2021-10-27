@@ -545,6 +545,81 @@ namespace computed_function {
         return rval;
     }
 
+    indexof::indexof(t_regex_mapping& regex_mapping)
+        : exprtk::igeneric_function<t_tscalar>("TSV")
+        , m_regex_mapping(regex_mapping) {}
+
+    indexof::~indexof() {}
+
+    t_tscalar
+    indexof::operator()(t_parameter_list parameters) {
+        t_tscalar rval;
+        rval.clear();
+        rval.m_type = DTYPE_BOOL;
+
+        // Parameters already validated
+        t_scalar_view str_view(parameters[0]);
+        t_string_view pattern_view(parameters[1]);
+        t_vector_view output_vector(parameters[2]);
+
+        t_tscalar str = str_view();
+        std::string match_pattern
+            = std::string(pattern_view.begin(), pattern_view.end());
+
+        // Type-check: only operate on strings, and pattern must be > size 0,
+        // and output vector must be big enough to hold the output
+        if (str.get_dtype() != DTYPE_STR || str.m_status == STATUS_CLEAR
+            || match_pattern.size() == 0 || output_vector.size() < 2) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        RE2* compiled_pattern = m_regex_mapping.intern(match_pattern);
+
+        if (compiled_pattern == nullptr
+            || compiled_pattern->NumberOfCapturingGroups() < 1) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        if (!str.is_valid())
+            return rval;
+
+
+        re2::StringPiece result;
+        const std::string& match_string = str.to_string();
+        bool found
+            = RE2::PartialMatch(match_string, *compiled_pattern, &result);
+
+        if (!found) {
+            // no-op on the input vector
+            rval.set(false);
+            return rval;
+        }
+
+        // re2::StringPiece::data is a ptr into the string being matched,
+        // so we can pointer math the start and end index of the match
+        std::size_t start_idx = result.data() - match_string.data();
+        std::size_t end_idx = start_idx + result.size() - 1;
+
+        if (start_idx < 0 || end_idx < 0 || end_idx >= match_string.size() || (start_idx > end_idx)) {
+            rval.set(false);
+            return rval;
+        }
+
+        t_tscalar start_scalar;
+        t_tscalar end_scalar;
+
+        start_scalar.set(static_cast<double>(start_idx));
+        end_scalar.set(static_cast<double>(end_idx));
+
+        output_vector[0] = start_scalar;
+        output_vector[1] = end_scalar;
+
+        rval.set(true);
+        return rval;
+    }
+
     hour_of_day::hour_of_day()
         : exprtk::igeneric_function<t_tscalar>("T") {}
 

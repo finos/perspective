@@ -1740,7 +1740,6 @@ class TestViewExpression(object):
             assert results["parsed"][i] == expected
             assert results["is_number?"][i] == True
 
-
     def test_view_expression_newlines(self):
         table = Table({"a": [
             "abc\ndef",
