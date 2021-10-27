@@ -9,7 +9,7 @@
 import re
 from random import random, randint, choices
 from string import ascii_letters
-from pytest import raises
+from pytest import raises, mark
 from datetime import date, datetime
 from time import mktime
 from perspective import Table, PerspectiveCppError
@@ -1777,3 +1777,30 @@ class TestViewExpression(object):
         assert results["c2"] == ["\tworld", "\tworld", "\tworld", None, None]
         assert results["c3"] == [True, True, True, None, False]
         assert results["c4"] == [False, True, False, False, None]
+
+    @mark.skip
+    def test_view_regex_email_substr(self):
+        endings = ["com", "net", "co.uk", "ie", "me", "io", "co"]
+        data = ["{}@{}.{}".format(randstr(30, ascii_letters + "0123456789" + "._-"), randstr(10), choices(endings, k=1)[0]) for _ in range(100)]
+        table = Table({"a": data})
+        expressions = [
+            "// address\nvar vec[2]; indexof(\"a\", '^([a-zA-Z0-9._-]+)@', vec) ? substring(\"a\", vec[0], vec[1]) : null",
+            "// ending\nvar domain := search(\"a\", '@([a-zA-Z.]+)$'); length(domain) > 0 ? search(domain, '[.](.*)$') : null"
+        ]
+
+        view = table.view(expressions=expressions)
+        schema = view.expression_schema()
+        assert schema == {
+            "address": str,
+            "ending": str,
+        }
+
+        results = view.to_columns()
+
+        for i in range(100):
+            source = results["a"][i]
+            address = re.match(r"^([a-zA-Z0-9._-]+)@", source).group(1)
+            domain = re.search(r"@([a-zA-Z.]+)$", source).group(1)
+            ending = re.search(r"[.](.*)$", domain).group(1)
+            assert results["address"][i] == address
+            assert results["ending"][i] == ending

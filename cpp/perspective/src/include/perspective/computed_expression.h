@@ -206,6 +206,7 @@ struct PERSPECTIVE_EXPORT t_computed_function_store {
     computed_function::fullmatch m_fullmatch_fn;
     computed_function::search m_search_fn;
     computed_function::indexof m_indexof_fn;
+    computed_function::substring m_substring_fn;
 };
 
 } // end namespace perspective

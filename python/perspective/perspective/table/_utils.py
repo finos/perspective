@@ -137,6 +137,7 @@ def _replace_interned_param(match_obj):
     value = match_obj.group(3)
     intern_idx = full.index(intern_fn)
 
+    print(full, intern_fn, value, intern_idx, match_obj.group(1))
     # from fn(param, intern('string'), param, param...) to
     # fn (param, 'string', ...)
     return "{}'{}'{}".format(
@@ -205,9 +206,12 @@ def _parse_expression_strings(expressions):
             parsed,
         )
 
+        print(parsed)
+
         # remove the `intern()` in bucket and regex functions that take
         # string literal parameters.
         parsed = re.sub(FUNCTION_LITERAL_REGEX, _replace_interned_param, parsed)
+        print(parsed)
 
         validated = [alias, expression, parsed, column_id_map]
 

@@ -553,6 +553,13 @@ thread_local! {
                 documentation: "Writes into index 0 and 1 of output_vector the start and end indices of the substring that matches the first capturing group in pattern.\n\nReturns true if there is a match and output was written, or false if there are no capturing groups in the pattern, if there are no matches, or if the indices are invalid.".to_owned(),
             },
             CompletionItemSuggestion {
+                label: "substring".to_owned(),
+                kind: 1,
+                insert_text: "substring(${1:string}, ${2:start_idx}, ${3:end_idx})".to_owned(),
+                insert_text_rules: 4,
+                documentation: "Returns a substring of string starting from start_idx and ending at end_idx. If end_idx is not passed in, returns substring from start_idx to the end of the string. Returns null if the string or any indices are invalid.".to_owned(),
+            },
+            CompletionItemSuggestion {
                 label: "random".to_owned(),
                 kind: 1,
                 insert_text: "random()".to_owned(),

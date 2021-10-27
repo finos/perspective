@@ -620,6 +620,104 @@ namespace computed_function {
         return rval;
     }
 
+    substring::substring(t_expression_vocab& expression_vocab, bool is_type_validator)
+        : m_expression_vocab(expression_vocab)
+        , m_is_type_validator(is_type_validator) {}
+
+    substring::~substring() {}
+
+    t_tscalar
+    substring::operator()(t_parameter_list parameters) {
+        t_tscalar rval;
+        rval.clear();
+        rval.m_type = DTYPE_STR;
+
+        // substring(string, start_idx) or substring(string, start_idx, end_idx)
+        if (parameters.size() != 2 && parameters.size() != 3) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        std::string search_string;
+
+        // Must be able to check for negative indices from the user -
+        // std::size_t is unsigned so a user passing in -1 is automatically
+        // cast to 0, which is incorrect as we want to detect the -1 and return
+        // null.
+        std::int64_t start_idx;
+
+        // npos == all chars until end of the string
+        std::int64_t end_idx = std::string::npos;
+
+        for (auto i = 0; i < parameters.size(); ++i) {
+            const t_generic_type& gt = parameters[i];
+
+            if (gt.type == t_generic_type::e_scalar) {
+                t_scalar_view temp_scalar_view(gt);
+                t_tscalar temp_scalar = temp_scalar_view();
+                
+                // type check - first param must be string, 2nd and 3rd param
+                // must be numeric, all must be valid
+                t_dtype dtype = temp_scalar.get_dtype();
+                if ((i == 0 && dtype != DTYPE_STR)
+                    || (i != 0 && !temp_scalar.is_numeric())
+                    || temp_scalar.m_status == STATUS_CLEAR) {
+                    rval.m_status = STATUS_CLEAR;
+                    return rval;
+                }
+
+                // Only check for types - bad indices will always return null
+                // but be valid expressions.
+                if (m_is_type_validator || !temp_scalar.is_valid()) {
+                    return rval;
+                }
+
+                // Passed type checking, assign values
+                if (i == 0 && !m_is_type_validator) {
+                    search_string = temp_scalar.to_string();
+                } else if (i == 1) {
+                    start_idx = temp_scalar.to_double();
+                } else if (i == 2) {
+                    end_idx = temp_scalar.to_double();
+                }
+            } else {
+                // called with invalid params - exit
+                rval.m_status = STATUS_CLEAR;
+                return rval;
+            }
+        }
+
+        std::size_t length = search_string.length();
+
+        // Value check: strings cannot be 0 length, indices must be valid
+        if ((!m_is_type_validator && length == 0) || start_idx < 0 || end_idx < 0
+            || start_idx >= length
+            || (end_idx != std::string::npos && end_idx >= length)
+            || end_idx < start_idx) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        if (m_is_type_validator) {
+            return rval;
+        }
+
+
+        if (end_idx != std::string::npos) {
+            // std::string::substr takes start_idx and num of characters, so
+            // we need to convert the end index to num of chars instead
+            end_idx = (end_idx - start_idx) + 1;
+
+            // but if our substr len > length, we need to set it to all chars
+            if (start_idx + end_idx > length) end_idx = std::string::npos;
+        }
+
+        rval.set(m_expression_vocab.intern(
+            search_string.substr(start_idx, end_idx)));
+
+        return rval;
+    }
+
     hour_of_day::hour_of_day()
         : exprtk::igeneric_function<t_tscalar>("T") {}
 
