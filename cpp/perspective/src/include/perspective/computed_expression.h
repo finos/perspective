@@ -145,6 +145,7 @@ public:
     static computed_function::to_boolean TO_BOOLEAN_FN;
     static computed_function::make_date MAKE_DATE_FN;
     static computed_function::make_datetime MAKE_DATETIME_FN;
+    static computed_function::random RANDOM_FN;
 
     // constants for True and False as DTYPE_BOOL scalars
     static t_tscalar TRUE_SCALAR;

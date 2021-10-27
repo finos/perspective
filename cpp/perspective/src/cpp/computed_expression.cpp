@@ -69,6 +69,9 @@ computed_function::make_date t_computed_expression_parser::MAKE_DATE_FN
 computed_function::make_datetime t_computed_expression_parser::MAKE_DATETIME_FN
     = computed_function::make_datetime();
 
+computed_function::random t_computed_expression_parser::RANDOM_FN
+    = computed_function::random();
+
 t_tscalar t_computed_expression_parser::TRUE_SCALAR = mktscalar(true);
 
 t_tscalar t_computed_expression_parser::FALSE_SCALAR = mktscalar(false);
@@ -453,12 +456,16 @@ t_computed_function_store::register_computed_functions(
     sym_table.add_function("is_null", t_computed_expression_parser::IS_NULL_FN);
     sym_table.add_function(
         "is_not_null", t_computed_expression_parser::IS_NOT_NULL_FN);
+    sym_table.add_function(
+        "random", t_computed_expression_parser::RANDOM_FN);
 
     // Date/datetime functions
     sym_table.add_function(
         "hour_of_day", t_computed_expression_parser::HOUR_OF_DAY_FN);
     sym_table.add_function("day_of_week", m_day_of_week_fn);
     sym_table.add_function("month_of_year", m_month_of_year_fn);
+    sym_table.add_function("today", computed_function::today);
+    sym_table.add_function("now", computed_function::now);
 
     // String functions
     sym_table.add_function("intern", m_intern_fn);
@@ -483,10 +490,6 @@ t_computed_function_store::register_computed_functions(
     sym_table.add_function("match", m_match_fn);
     sym_table.add_function("fullmatch", m_fullmatch_fn);
     sym_table.add_function("search", m_search_fn);
-
-    // Register static free functions as well
-    sym_table.add_function("today", computed_function::today);
-    sym_table.add_function("now", computed_function::now);
 
     // And scalar constants
     sym_table.add_constant("True", t_computed_expression_parser::TRUE_SCALAR);

@@ -13,17 +13,6 @@ namespace perspective {
 
 namespace computed_function {
 
-    using int8 = std::int8_t;
-    using int16 = std::int16_t;
-    using int32 = std::int32_t;
-    using int64 = std::int64_t;
-    using uint8 = std::uint8_t;
-    using uint16 = std::uint16_t;
-    using uint32 = std::uint32_t;
-    using uint64 = std::uint64_t;
-    using float32 = float;
-    using float64 = double;
-
     intern::intern(t_expression_vocab& expression_vocab, bool is_type_validator)
         : exprtk::igeneric_function<t_tscalar>("S")
         , m_expression_vocab(expression_vocab)
@@ -1651,5 +1640,23 @@ namespace computed_function {
         return rval;
     }
 
+    // Set up random number generator
+    std::default_random_engine random::RANDOM_ENGINE
+        = std::default_random_engine();
+    std::uniform_real_distribution<double> random::DISTRIBUTION
+        = std::uniform_real_distribution<double>(0, 1);
+
+    random::random()
+        : exprtk::igeneric_function<t_tscalar>("Z") {}
+
+    random::~random() {}
+
+    t_tscalar
+    random::operator()(t_parameter_list parameters) {
+        t_tscalar rval;
+        rval.clear();
+        rval.set(random::DISTRIBUTION(random::RANDOM_ENGINE));
+        return rval;
+    }
 } // end namespace computed_function
 } // end namespace perspective

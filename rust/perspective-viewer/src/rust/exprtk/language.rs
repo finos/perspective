@@ -545,6 +545,13 @@ thread_local! {
                 insert_text_rules: 4,
                 documentation: "Returns the substring that matches the first capturing group in pattern, or null if there are no capturing groups in the pattern or if there are no matches.".to_owned(),
             },
+            CompletionItemSuggestion {
+                label: "random".to_owned(),
+                kind: 1,
+                insert_text: "random()".to_owned(),
+                insert_text_rules: 4,
+                documentation: "Returns a random float between 0 and 1, inclusive.".to_owned(),
+            },
         ]
     };
 }

@@ -20,6 +20,7 @@
 #include <perspective/expression_vocab.h>
 #include <perspective/regex.h>
 #include <boost/algorithm/string.hpp>
+#include <random>
 #include <type_traits>
 #include <date/date.h>
 #include <tsl/hopscotch_set.h>
@@ -321,6 +322,21 @@ namespace computed_function {
      * new datetime value.
      */
     FUNCTION_HEADER(make_datetime)
+
+    /**
+     * @brief Return a random float between 0.0 and 1.0, inclusive.
+     */
+    struct random : public exprtk::igeneric_function<t_tscalar> {
+        random();
+        ~random();
+
+        t_tscalar operator()(t_parameter_list parameters);
+
+        // faster unit lookups, since we are calling this lookup in a tight
+        // loop.
+        static std::default_random_engine RANDOM_ENGINE;
+        static std::uniform_real_distribution<double> DISTRIBUTION;
+    };
 
 } // end namespace computed_function
 } // end namespace perspective
