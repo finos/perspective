@@ -143,7 +143,7 @@ describe("leaks", function () {
         it.skip("0 sided regex does not leak", async () => {
             const expressions = [
                 "match(\"a\", '.{1}')",
-                "fullmatch(\"a\", '[a-z]{1}')",
+                "match_all(\"a\", '[a-z]{1}')",
                 "search(\"a\", '.')",
             ];
 

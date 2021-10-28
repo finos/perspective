@@ -42,10 +42,6 @@ namespace computed_function {
         std::string temp_str
             = std::string(temp_string.begin(), temp_string.end());
 
-        // Don't allow empty strings from the user
-        if (temp_str == "")
-            return rval;
-
         if (m_is_type_validator) {
             // Return the sentinel value which indicates a valid output from
             // type checking, as the output value is not STATUS_CLEAR
@@ -443,14 +439,14 @@ namespace computed_function {
         return rval;
     }
 
-    fullmatch::fullmatch(t_regex_mapping& regex_mapping)
+    match_all::match_all(t_regex_mapping& regex_mapping)
         : exprtk::igeneric_function<t_tscalar>("TS")
         , m_regex_mapping(regex_mapping) {}
 
-    fullmatch::~fullmatch() {}
+    match_all::~match_all() {}
 
     t_tscalar
-    fullmatch::operator()(t_parameter_list parameters) {
+    match_all::operator()(t_parameter_list parameters) {
         t_tscalar rval;
         rval.clear();
         rval.m_type = DTYPE_BOOL;
@@ -673,7 +669,7 @@ namespace computed_function {
                 }
 
                 // Passed type checking, assign values
-                if (i == 0 && !m_is_type_validator) {
+                if (i == 0) {
                     search_string = temp_scalar.to_string();
                 } else if (i == 1) {
                     start_idx = temp_scalar.to_double();
@@ -685,6 +681,11 @@ namespace computed_function {
                 rval.m_status = STATUS_CLEAR;
                 return rval;
             }
+        }
+        
+        // done type checking
+        if (m_is_type_validator) {
+            return rval;
         }
 
         std::size_t length = search_string.length();
@@ -714,6 +715,194 @@ namespace computed_function {
 
         rval.set(m_expression_vocab.intern(
             search_string.substr(start_idx, end_idx)));
+
+        return rval;
+    }
+
+    replace::replace(t_expression_vocab& expression_vocab,
+        t_regex_mapping& regex_mapping, bool is_type_validator)
+        : exprtk::igeneric_function<t_tscalar>("TS?")
+        , m_expression_vocab(expression_vocab)
+        , m_regex_mapping(regex_mapping)
+        , m_is_type_validator(is_type_validator) {}
+
+    replace::~replace() {}
+
+    t_tscalar
+    replace::operator()(t_parameter_list parameters) {
+        t_tscalar rval;
+        rval.clear();
+        rval.m_type = DTYPE_STR;
+
+        // the string to be replaced
+        t_scalar_view string_scalar_view(parameters[0]);
+        t_tscalar string_scalar = string_scalar_view();
+
+        // the replace pattern
+        t_string_view pattern_view(parameters[1]);
+        std::string match_pattern =
+            std::string(pattern_view.begin(), pattern_view.end());
+
+        // replacer can be a string literal, for the string '' as intern does
+        // not pick up on empty strings but we need to be able to replace
+        // with empty string. Thus, type-check replacer before continuing.
+        const t_generic_type& gt(parameters[2]);
+        t_tscalar replacer_scalar;
+
+        if (gt.type == t_generic_type::e_scalar) {
+            t_scalar_view replacer_view(gt);
+            replacer_scalar = replacer_view();
+        } else if (gt.type == t_generic_type::e_string) {
+            t_string_view replacer_view(gt);
+            std::string replacer_str =
+                std::string(replacer_view.begin(), replacer_view.end());
+
+            // only the empty string should be passed in as a string literal,
+            // all other strings must be interned first.
+            if (replacer_str.size() != 0) {
+                rval.m_status = STATUS_CLEAR;
+                return rval;
+            }
+
+            // use the empty string from vocab
+            replacer_scalar.set(m_expression_vocab.get_empty_string());
+        } else {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        if (string_scalar.m_type != DTYPE_STR
+            || replacer_scalar.m_type != DTYPE_STR
+            || match_pattern.size() == 0)  {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+        
+        // typecheck the regex
+        RE2* compiled_pattern = m_regex_mapping.intern(match_pattern);
+
+        if (compiled_pattern == nullptr) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        // done with type_checking
+        if (m_is_type_validator) return rval;
+
+        // make a copy of search_str, as replace() will mutate it and we
+        // don't want to mutate the string in the vocab
+        std::string search_string = string_scalar.to_string();
+
+        if (search_string.size() == 0) return rval;
+
+        // but we can take a reference to the replacer
+        const std::string& replacer_string = replacer_scalar.to_string();
+        re2::StringPiece replacer(replacer_string);
+
+        bool replaced = RE2::Replace(
+            &(search_string), *(compiled_pattern), replacer);
+
+        if (!replaced) {
+            // Return the original result if the replacement didn't happen
+            return string_scalar;
+        }
+
+        // Or the string with the replacement set
+        rval.set(m_expression_vocab.intern(search_string));
+
+        return rval;
+    }
+
+    replace_all::replace_all(t_expression_vocab& expression_vocab,
+        t_regex_mapping& regex_mapping, bool is_type_validator)
+        : exprtk::igeneric_function<t_tscalar>("TS?")
+        , m_expression_vocab(expression_vocab)
+        , m_regex_mapping(regex_mapping)
+        , m_is_type_validator(is_type_validator) {}
+
+    replace_all::~replace_all() {}
+
+    t_tscalar
+    replace_all::operator()(t_parameter_list parameters) {
+        t_tscalar rval;
+        rval.clear();
+        rval.m_type = DTYPE_STR;
+
+        // the string to be replaced
+        t_scalar_view string_scalar_view(parameters[0]);
+        t_tscalar string_scalar = string_scalar_view();
+
+        // the replace pattern
+        t_string_view pattern_view(parameters[1]);
+        std::string match_pattern =
+            std::string(pattern_view.begin(), pattern_view.end());
+
+        // replacer can be a string literal, for the string '' as intern does
+        // not pick up on empty strings but we need to be able to replace
+        // with empty string. Thus, type-check replacer before continuing.
+        const t_generic_type& gt(parameters[2]);
+        t_tscalar replacer_scalar;
+
+        if (gt.type == t_generic_type::e_scalar) {
+            t_scalar_view replacer_view(gt);
+            replacer_scalar = replacer_view();
+        } else if (gt.type == t_generic_type::e_string) {
+            t_string_view replacer_view(gt);
+            std::string replacer_str =
+                std::string(replacer_view.begin(), replacer_view.end());
+
+            // only the empty string should be passed in as a string literal,
+            // all other strings must be interned first.
+            if (replacer_str.size() != 0) {
+                rval.m_status = STATUS_CLEAR;
+                return rval;
+            }
+
+            // use the empty string from vocab
+            replacer_scalar.set(m_expression_vocab.get_empty_string());
+        } else {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        if (string_scalar.m_type != DTYPE_STR
+            || replacer_scalar.m_type != DTYPE_STR
+            || match_pattern.size() == 0)  {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+        
+        // typecheck the regex
+        RE2* compiled_pattern = m_regex_mapping.intern(match_pattern);
+
+        if (compiled_pattern == nullptr) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        // done with type_checking
+        if (m_is_type_validator) return rval;
+
+        // make a copy of search_str, as replace() will mutate it and we
+        // don't want to mutate the string in the vocab
+        std::string search_string = string_scalar.to_string();
+
+        if (search_string.size() == 0) return rval;
+
+        // but we can take a reference to the replacer
+        const std::string& replacer_string = replacer_scalar.to_string();
+        re2::StringPiece replacer(replacer_string);
+
+        std::size_t replaced = RE2::GlobalReplace(
+            &(search_string), *(compiled_pattern), replacer);
+
+        if (replaced == 0) {
+            // Return the original result if the replacement didn't happen
+            return string_scalar;
+        }
+
+        // Or the string with the replacement set
+        rval.set(m_expression_vocab.intern(search_string));
 
         return rval;
     }

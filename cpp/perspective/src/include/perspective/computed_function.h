@@ -131,10 +131,10 @@ namespace computed_function {
     REGEX_FUNCTION_HEADER(match)
 
     /**
-     * @brief fullmatch(string, pattern) => True if the string fully matches
+     * @brief match_all(string, pattern) => True if the string fully matches
      * pattern, and False otherwise.
      */
-    REGEX_FUNCTION_HEADER(fullmatch)
+    REGEX_FUNCTION_HEADER(match_all)
 
     /**
      * @brief search(string, pattern) => Returns the substring in the first
@@ -159,11 +159,18 @@ namespace computed_function {
     STRING_FUNCTION_HEADER(substring)
 
     /**
-     * @brief replace(string, pattern, replace_str) => string with all matches
-     * of pattern replaced with replace_str, or the original string without
-     * any replacements if the string does not match pattern.
+     * @brief replace(string, replace_str, pattern) => Replaces the first match
+     * of pattern inside string with replace_str, or returns the original
+     * string if no replacements were made.
      */
     REGEX_STRING_FUNCTION_HEADER(replace)
+
+    /**
+     * @brief replace_all(string, replace_str, pattern) => Replaces all matches
+     * of pattern inside string with replace_str, or returns the original
+     * string if no replacements were made.
+     */
+    REGEX_STRING_FUNCTION_HEADER(replace_all)
 
 #define FUNCTION_HEADER(NAME)                                                  \
     struct NAME : public exprtk::igeneric_function<t_tscalar> {                \

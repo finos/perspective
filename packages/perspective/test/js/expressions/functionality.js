@@ -491,7 +491,7 @@ module.exports = (perspective) => {
 
                 expect(schema.expression_schema["expr"]).toBeUndefined();
                 expect(schema.errors["expr"]).toEqual({
-                    column: 63,
+                    column: 62,
                     line: 1,
                     error_message:
                         "Parser Error - Invalid expression encountered",

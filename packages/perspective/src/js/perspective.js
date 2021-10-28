@@ -1466,14 +1466,11 @@ export default function (Module) {
             // First, look for a column alias, which is a // style comment
             // on the first line of the expression.
             let expression_alias;
+            let alias_match = expression_string.match(/^\/\/(?<alias>.+?)$/m);
 
-            let parsed_expression_string = expression_string.replace(
-                /\/\/(.+?)$/m,
-                (_, alias) => {
-                    expression_alias = alias.trim();
-                    return "";
-                }
-            );
+            if (alias_match?.groups?.alias) {
+                expression_alias = alias_match.groups.alias.trim();
+            }
 
             // If an alias does not exist, the alias is the expression itself.
             if (!expression_alias || expression_alias.length == 0) {
@@ -1481,7 +1478,7 @@ export default function (Module) {
             }
 
             // Replace `true` and `false` reserved words with symbols
-            parsed_expression_string = parsed_expression_string.replace(
+            let parsed_expression_string = expression_string.replace(
                 /([a-zA-Z_]+[a-zA-Z0-9_]*)/g,
                 (match) => {
                     if (match == "true") {
@@ -1526,7 +1523,26 @@ export default function (Module) {
             // way of handling it.
             // TODO I concur  -- texodus
             parsed_expression_string = parsed_expression_string.replace(
-                /(bucket|match|fullmatch|search|indexof)\(.*?,\s*(intern\(\'(.+)\'\)).*\)/g,
+                /(bucket|match|match_all|search|indexof)\(.*?,\s*(intern\(\'(.+)\'\)).*\)/g,
+                (match, _, intern_fn, value) => {
+                    // Takes a string of the form fn(x, intern('y'))
+                    // and removes intern() to create fn(x, 'y')
+                    const intern_idx = match.indexOf(intern_fn);
+                    return `${match.substring(
+                        0,
+                        intern_idx
+                    )}'${value}'${match.substring(
+                        intern_idx + intern_fn.length
+                    )}`;
+                }
+            );
+
+            // replace and replace_all have multiple string params, only one of
+            // which needs to be interned - the regex differs from the one
+            // above as it asserts the middle parameter is the one to be
+            // replaced.
+            parsed_expression_string = parsed_expression_string.replace(
+                /(replace_all|replace)\(.*?,\s*(intern\(\'(.*)\'\)),.*\)/g,
                 (match, _, intern_fn, value) => {
                     // Takes a string of the form fn(x, intern('y'), z)
                     // and removes intern() to create fn(x, 'y', z)

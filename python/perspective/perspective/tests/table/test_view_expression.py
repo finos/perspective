@@ -1687,7 +1687,7 @@ class TestViewExpression(object):
         expressions = [
             "// address\nsearch(\"a\", '^([a-zA-Z0-9._-]+)@')",
             "// domain\nsearch(\"a\", '@([a-zA-Z.]+)$')",
-            "//is_email?\nfullmatch(\"a\", '^([a-zA-Z0-9._-]+)@([a-zA-Z.]+)$')",
+            "//is_email?\nmatch_all(\"a\", '^([a-zA-Z0-9._-]+)@([a-zA-Z.]+)$')",
             "//has_at?\nmatch(\"a\", '@')"
         ]
 
@@ -1729,7 +1729,7 @@ class TestViewExpression(object):
         parts[2] := search("a", '^[0-9]{4}[ -][0-9]{4}[ -]([0-9]{4})[ -][0-9]{4}');
         parts[3] := search("a", '^[0-9]{4}[ -][0-9]{4}[ -][0-9]{4}[ -]([0-9]{4})');
         concat(parts[0], parts[1], parts[2], parts[3])
-        """, "//is_number?\nfullmatch(\"a\", '^[0-9]{4}[ -][0-9]{4}[ -][0-9]{4}[ -][0-9]{4}')"])
+        """, "//is_number?\nmatch_all(\"a\", '^[0-9]{4}[ -][0-9]{4}[ -][0-9]{4}[ -][0-9]{4}')"])
         schema = view.expression_schema()
         assert schema == {"parsed": str, "is_number?": bool}
         results = view.to_columns()

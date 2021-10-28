@@ -436,11 +436,15 @@ t_computed_function_store::t_computed_function_store(t_expression_vocab& vocab,
     , m_lower_fn(computed_function::lower(vocab, is_type_validator))
     , m_to_string_fn(computed_function::to_string(vocab, is_type_validator))
     , m_match_fn(computed_function::match(regex_mapping))
-    , m_fullmatch_fn(computed_function::fullmatch(regex_mapping))
+    , m_match_all_fn(computed_function::match_all(regex_mapping))
     , m_search_fn(
           computed_function::search(vocab, regex_mapping, is_type_validator))
     , m_indexof_fn(computed_function::indexof(regex_mapping))
-    , m_substring_fn(computed_function::substring(vocab, is_type_validator)) {}
+    , m_substring_fn(computed_function::substring(vocab, is_type_validator))
+    , m_replace_fn(
+          computed_function::replace(vocab, regex_mapping, is_type_validator))
+    , m_replace_all_fn(
+          computed_function::replace_all(vocab, regex_mapping, is_type_validator)) {}
 
 void
 t_computed_function_store::register_computed_functions(
@@ -490,10 +494,12 @@ t_computed_function_store::register_computed_functions(
 
     // Regex functions
     sym_table.add_function("match", m_match_fn);
-    sym_table.add_function("fullmatch", m_fullmatch_fn);
+    sym_table.add_function("match_all", m_match_all_fn);
     sym_table.add_function("search", m_search_fn);
     sym_table.add_function("indexof", m_indexof_fn);
     sym_table.add_function("substring", m_substring_fn);
+    sym_table.add_function("replace", m_replace_fn);
+    sym_table.add_function("replace_all", m_replace_all_fn);
 
     // And scalar constants
     sym_table.add_constant("True", t_computed_expression_parser::TRUE_SCALAR);

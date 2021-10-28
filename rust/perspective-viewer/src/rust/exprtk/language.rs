@@ -525,6 +525,13 @@ thread_local! {
                 documentation: "Converts the given argument to a boolean".to_owned(),
             },
             CompletionItemSuggestion {
+                label: "random".to_owned(),
+                kind: 1,
+                insert_text: "random()".to_owned(),
+                insert_text_rules: 4,
+                documentation: "Returns a random float between 0 and 1, inclusive.".to_owned(),
+            },
+            CompletionItemSuggestion {
                 label: "match".to_owned(),
                 kind: 1,
                 insert_text: "match(${1:string}, ${2:pattern})".to_owned(),
@@ -532,9 +539,9 @@ thread_local! {
                 documentation: "Returns True if any part of string matches pattern, and False otherwise.".to_owned(),
             },
             CompletionItemSuggestion {
-                label: "fullmatch".to_owned(),
+                label: "match_all".to_owned(),
                 kind: 1,
-                insert_text: "fullmatch(${1:string}, ${2:pattern})".to_owned(),
+                insert_text: "match_all(${1:string}, ${2:pattern})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Returns True if the whole string matches pattern, and False otherwise.".to_owned(),
             },
@@ -560,11 +567,18 @@ thread_local! {
                 documentation: "Returns a substring of string starting from start_idx and ending at end_idx. If end_idx is not passed in, returns substring from start_idx to the end of the string. Returns null if the string or any indices are invalid.".to_owned(),
             },
             CompletionItemSuggestion {
-                label: "random".to_owned(),
+                label: "replace".to_owned(),
                 kind: 1,
-                insert_text: "random()".to_owned(),
+                insert_text: "replace(${1:string}, ${2:pattern}, ${3:replacer})".to_owned(),
                 insert_text_rules: 4,
-                documentation: "Returns a random float between 0 and 1, inclusive.".to_owned(),
+                documentation: "Replaces the first match of pattern in string with replacer, or return the original string if no replaces were made.".to_owned(),
+            },
+            CompletionItemSuggestion {
+                label: "replace_all".to_owned(),
+                kind: 1,
+                insert_text: "replace(${1:string}, ${2:pattern}, ${3:replacer})".to_owned(),
+                insert_text_rules: 4,
+                documentation: "Replaces all non-overlapping matches of pattern in string with replacer, or return the original string if no replaces were made.".to_owned(),
             },
         ]
     };

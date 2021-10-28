@@ -15,7 +15,7 @@ ALIAS_REGEX = re.compile(r"//(.+)\n")
 EXPRESSION_COLUMN_NAME_REGEX = re.compile(r"\"(.*?[^\\])\"")
 STRING_LITERAL_REGEX = re.compile(r"'(.*?[^\\])'")
 FUNCTION_LITERAL_REGEX = re.compile(
-    r"(bucket|match|fullmatch|search|indexof)\(.*?,\s*(intern\(\'(.+)\'\)).*\)"
+    r"(bucket|match|match_all|search|indexof)\(.*?,\s*(intern\(\'(.+)\'\)).*\)"
 )
 BOOLEAN_LITERAL_REGEX = re.compile(r"([a-zA-Z_]+[a-zA-Z0-9_]*)")
 
@@ -206,8 +206,7 @@ def _parse_expression_strings(expressions):
             parsed,
         )
 
-        print(parsed)
-
+        # TODO fix this regex for replace and replace_all
         # remove the `intern()` in bucket and regex functions that take
         # string literal parameters.
         parsed = re.sub(FUNCTION_LITERAL_REGEX, _replace_interned_param, parsed)

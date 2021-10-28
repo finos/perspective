@@ -203,10 +203,12 @@ struct PERSPECTIVE_EXPORT t_computed_function_store {
     computed_function::lower m_lower_fn;
     computed_function::to_string m_to_string_fn;
     computed_function::match m_match_fn;
-    computed_function::fullmatch m_fullmatch_fn;
+    computed_function::match_all m_match_all_fn;
     computed_function::search m_search_fn;
     computed_function::indexof m_indexof_fn;
     computed_function::substring m_substring_fn;
+    computed_function::replace m_replace_fn;
+    computed_function::replace_all m_replace_all_fn;
 };
 
 } // end namespace perspective

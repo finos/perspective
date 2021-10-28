@@ -214,7 +214,7 @@ module.exports = (perspective) => {
                     line: 0,
                 },
                 col4: {
-                    column: 8,
+                    column: 7,
                     error_message:
                         "Parser Error - Zero parameter call to generic function: order not allowed",
                     line: 1,
@@ -919,7 +919,7 @@ module.exports = (perspective) => {
             await table.delete();
         });
 
-        it("fullmatch string with string", async () => {
+        it("match_all string with string", async () => {
             const table = await perspective.table({
                 a: "string",
                 b: "string",
@@ -933,13 +933,13 @@ module.exports = (perspective) => {
             });
 
             const expressions = [
-                `fullmatch("a", 'ABC')`,
-                "fullmatch('aBc', '[aAbBcC]{3}')",
-                `fullmatch("a", 'A')`,
-                `fullmatch("c", '[0-9]{3}')`,
-                `fullmatch("c", '4567')`,
-                `fullmatch("c", '4567123')`,
-                `fullmatch("c", '[0-9]+')`,
+                `match_all("a", 'ABC')`,
+                "match_all('aBc', '[aAbBcC]{3}')",
+                `match_all("a", 'A')`,
+                `match_all("c", '[0-9]{3}')`,
+                `match_all("c", '4567')`,
+                `match_all("c", '4567123')`,
+                `match_all("c", '[0-9]+')`,
             ];
 
             const view = await table.view({
@@ -1032,17 +1032,17 @@ module.exports = (perspective) => {
             await table.delete();
         });
 
-        it("fullmatch string with bad regex should fail type-checking", async () => {
+        it("match_all string with bad regex should fail type-checking", async () => {
             const table = await perspective.table({
                 a: ["ABC", "DEF", "cbA", "HIjK", "lMNoP"],
                 b: ["ABC", "ad", "asudfh", "HIjK", "lMNoP"],
             });
 
             const expressions = [
-                `fullmatch("a", '*.')`,
-                "fullmatch('abc', '(?=a)')",
-                `fullmatch("a", '?')`,
-                `fullmatch("a", '+.')`,
+                `match_all("a", '*.')`,
+                "match_all('abc', '(?=a)')",
+                `match_all("a", '?')`,
+                `match_all("a", '+.')`,
             ];
 
             const validated = await table.validate_expressions(expressions);
@@ -1122,17 +1122,17 @@ module.exports = (perspective) => {
             await table.delete();
         });
 
-        it("fullmatch should only work on strings", async () => {
+        it("match_all should only work on strings", async () => {
             const table = await perspective.table({
                 a: ["ABC", "DEF", "cbA", "HIjK", "lMNoP"],
                 b: ["abc123", "abc567", "abc56", "1234567", "aaa000"],
             });
 
             const expressions = [
-                `fullmatch("a", "b")`,
-                `fullmatch("a", 123)`,
-                `fullmatch(today(), '[a-z]{3}[0-9]{3}')`,
-                `fullmatch(False, '[0-9]{7}')`,
+                `match_all("a", "b")`,
+                `match_all("a", 123)`,
+                `match_all(today(), '[a-z]{3}[0-9]{3}')`,
+                `match_all(False, '[0-9]{7}')`,
             ];
 
             const validated = await table.validate_expressions(expressions);
@@ -1142,11 +1142,11 @@ module.exports = (perspective) => {
             }
 
             expect(validated.errors[expressions[0]].error_message).toEqual(
-                "Parser Error - Failed parameter type check for function 'fullmatch', Expected 'TS' call set: 'TT'"
+                "Parser Error - Failed parameter type check for function 'match_all', Expected 'TS' call set: 'TT'"
             );
 
             expect(validated.errors[expressions[1]].error_message).toEqual(
-                "Parser Error - Failed parameter type check for function 'fullmatch', Expected 'TS' call set: 'TT'"
+                "Parser Error - Failed parameter type check for function 'match_all', Expected 'TS' call set: 'TT'"
             );
 
             expect(validated.errors[expressions[2]]).toEqual({
@@ -1209,16 +1209,16 @@ module.exports = (perspective) => {
             await table.delete();
         });
 
-        it("fullmatch string with regex", async () => {
+        it("match_all string with regex", async () => {
             const table = await perspective.table({
                 a: ["ABC", "DEF", "cbA", "HIjK", "lMNoP"],
                 b: ["abc123", "abc567", "abc56", "1234567", "aaa0001234"],
             });
 
             const expressions = [
-                `fullmatch("a", '.*')`,
-                `fullmatch("b", '[a-z]{3}[0-9]{3}')`,
-                `fullmatch("b", '[0-9]{7}')`,
+                `match_all("a", '.*')`,
+                `match_all("b", '[a-z]{3}[0-9]{3}')`,
+                `match_all("b", '[0-9]{7}')`,
             ];
 
             const view = await table.view({
@@ -1296,7 +1296,7 @@ module.exports = (perspective) => {
             await table.delete();
         });
 
-        it("fullmatch string with regex, randomized", async () => {
+        it("match_all string with regex, randomized", async () => {
             const data = {a: []};
 
             for (let i = 0; i < 500; i++) {
@@ -1306,8 +1306,8 @@ module.exports = (perspective) => {
             const table = await perspective.table(data);
 
             const expressions = [
-                `fullmatch("a", '.*')`, // should match everything
-                `fullmatch("a", '.{100}')`, // should match strings the size of max
+                `match_all("a", '.*')`, // should match everything
+                `match_all("a", '.{100}')`, // should match strings the size of max
             ];
 
             const view = await table.view({
@@ -1387,15 +1387,15 @@ module.exports = (perspective) => {
             await table.delete();
         });
 
-        it("fullmatch string and null with regex", async () => {
+        it("match_all string and null with regex", async () => {
             const table = await perspective.table({
                 a: ["ABC", "abc", null, "AbC", "12345", "123456"],
             });
 
             const expressions = [
-                `fullmatch("a", '.*')`,
-                `fullmatch("a", '[aAbBcC]{3}')`,
-                `fullmatch("a", '[0-9]{5}')`,
+                `match_all("a", '.*')`,
+                `match_all("a", '[aAbBcC]{3}')`,
+                `match_all("a", '[0-9]{5}')`,
             ];
 
             const view = await table.view({
@@ -1667,7 +1667,7 @@ module.exports = (perspective) => {
             const pattern = "(.*)";
             const fns = [
                 "match",
-                "fullmatch",
+                "match_all",
                 "search",
                 "indexof",
                 "substring",
@@ -1724,7 +1724,7 @@ module.exports = (perspective) => {
             const pattern = "(.*)";
             const fns = [
                 "match",
-                "fullmatch",
+                "match_all",
                 "search",
                 "indexof",
                 "substring",
@@ -2205,6 +2205,148 @@ module.exports = (perspective) => {
 
                 await view.delete();
             }
+
+            await table.delete();
+        });
+
+        it("replace", async () => {
+            const digits = () => {
+                const output = [];
+                for (let i = 0; i < 4; i++) {
+                    output.push(randchoice(NUMERIC));
+                }
+                return output.join("");
+            };
+
+            const data = [];
+            const index = [];
+
+            for (let i = 0; i < 1000; i++) {
+                const separator = Math.random() > 0.5 ? " " : "-";
+                const num = `${digits()}${separator}${digits()}${separator}${digits()}${separator}${digits()}`;
+                data.push(num);
+                index.push(i);
+            }
+
+            const table = await perspective.table({a: "string", b: "string"});
+            table.update({a: data, b: index});
+            const expressions = [
+                `//w\nreplace('abc-def-hijk', '-', '')`,
+                `//x\nreplace("a", '[0-9]{4}$', "b")`,
+                `//y\nreplace("a", '[a-z]{4}$', "b")`,
+                `//z\nvar x := 'long string, very cool!'; replace("a", '^[0-9]{4}', x)`,
+            ];
+            const validate = await table.validate_expressions(expressions);
+            expect(validate.expression_schema).toEqual({
+                w: "string",
+                x: "string",
+                y: "string",
+                z: "string",
+            });
+
+            const view = await table.view({expressions});
+            const result = await view.to_columns();
+
+            for (let i = 0; i < 100; i++) {
+                const source = result["a"][i];
+                const idx = result["b"][i];
+                expect(result["w"][i]).toEqual("abcdef-hijk");
+                expect(result["x"][i]).toEqual(
+                    source.replace(/[0-9]{4}$/, idx)
+                );
+                expect(result["y"][i]).toEqual(source);
+                expect(result["z"][i]).toEqual(
+                    source.replace(/^[0-9]{4}/, "long string, very cool!")
+                );
+            }
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("replace invalid", async () => {
+            const table = await perspective.table({a: "string", b: "string"});
+
+            const expressions = [
+                `//v\nreplace('abc-def-hijk', '-', 123)`,
+                `//w\nreplace('', '-', today())`,
+                `//x\nreplace("a", '[0-9]{4}$', today())`,
+                `//y\nreplace("a", '[a-z]{4}$', null)`,
+                `//z\nvar x := 123; replace("a", '^[0-9]{4}', x)`,
+            ];
+            const validate = await table.validate_expressions(expressions);
+            expect(validate.expression_schema).toEqual({});
+
+            await table.delete();
+        });
+
+        it("replace all", async () => {
+            const digits = () => {
+                const output = [];
+                for (let i = 0; i < 4; i++) {
+                    output.push(randchoice(NUMERIC));
+                }
+                return output.join("");
+            };
+
+            const data = [];
+            const index = [];
+
+            for (let i = 0; i < 1000; i++) {
+                const separator = Math.random() > 0.5 ? " " : "-";
+                const num = `${digits()}${separator}${digits()}${separator}${digits()}${separator}${digits()}`;
+                data.push(num);
+                index.push(i);
+            }
+
+            const table = await perspective.table({a: "string", b: "string"});
+            table.update({a: data, b: index});
+            const expressions = [
+                `//w\nreplace_all('abc-def-hijk', '-', '')`,
+                `//x\nreplace_all("a", '[0-9]{4}', "b")`,
+                `//y\nreplace_all("a", '[a-z]{4}', "b")`,
+                `//z\nvar x := 'long string, very cool!'; replace_all("a", '[0-9]{4}', x)`,
+            ];
+            const validate = await table.validate_expressions(expressions);
+            expect(validate.expression_schema).toEqual({
+                w: "string",
+                x: "string",
+                y: "string",
+                z: "string",
+            });
+
+            const view = await table.view({expressions});
+            const result = await view.to_columns();
+
+            for (let i = 0; i < 100; i++) {
+                const source = result["a"][i];
+                const idx = result["b"][i];
+                expect(result["w"][i]).toEqual("abcdefhijk");
+                expect(result["x"][i]).toEqual(
+                    source.replace(/[0-9]{4}/g, () => idx)
+                );
+                expect(result["y"][i]).toEqual(source);
+                expect(result["z"][i]).toEqual(
+                    source.replace(/[0-9]{4}/g, () => "long string, very cool!")
+                );
+            }
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("replace all invalid", async () => {
+            const table = await perspective.table({a: "string", b: "string"});
+
+            const expressions = [
+                `//v\nreplace_all('abc-def-hijk', '-', 123)`,
+                `//w\nreplace_all('', '-', today())`,
+                `//x\nreplace_all("a", '[0-9]{4}$', today())`,
+                `//y\nreplace_all("a", '[a-z]{4}$', null)`,
+                `//z\nvar x := 123; replace_all("a", '^[0-9]{4}', x)`,
+            ];
+            const validate = await table.validate_expressions(expressions);
+            expect(validate.expression_schema).toEqual({});
 
             await table.delete();
         });
