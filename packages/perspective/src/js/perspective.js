@@ -1517,6 +1517,16 @@ export default function (Module) {
                 (match) => `intern(${match})`
             );
 
+            const replace_interned_param = (match, _, intern_fn, value) => {
+                // Takes a string of the form fn(x, intern('y'))
+                // and removes intern() to create fn(x, 'y')
+                const intern_idx = match.indexOf(intern_fn);
+                return `${match.substring(
+                    0,
+                    intern_idx
+                )}'${value}'${match.substring(intern_idx + intern_fn.length)}`;
+            };
+
             // Replace intern() for bucket and regex functions that take
             // a string literal parameter and does not work if that param is
             // interned. TODO: this is clumsy and we should have a better
@@ -1524,17 +1534,7 @@ export default function (Module) {
             // TODO I concur  -- texodus
             parsed_expression_string = parsed_expression_string.replace(
                 /(bucket|match|match_all|search|indexof)\(.*?,\s*(intern\(\'(.+)\'\)).*\)/g,
-                (match, _, intern_fn, value) => {
-                    // Takes a string of the form fn(x, intern('y'))
-                    // and removes intern() to create fn(x, 'y')
-                    const intern_idx = match.indexOf(intern_fn);
-                    return `${match.substring(
-                        0,
-                        intern_idx
-                    )}'${value}'${match.substring(
-                        intern_idx + intern_fn.length
-                    )}`;
-                }
+                replace_interned_param
             );
 
             // replace and replace_all have multiple string params, only one of
@@ -1543,17 +1543,7 @@ export default function (Module) {
             // replaced.
             parsed_expression_string = parsed_expression_string.replace(
                 /(replace_all|replace)\(.*?,\s*(intern\(\'(.*)\'\)),.*\)/g,
-                (match, _, intern_fn, value) => {
-                    // Takes a string of the form fn(x, intern('y'), z)
-                    // and removes intern() to create fn(x, 'y', z)
-                    const intern_idx = match.indexOf(intern_fn);
-                    return `${match.substring(
-                        0,
-                        intern_idx
-                    )}'${value}'${match.substring(
-                        intern_idx + intern_fn.length
-                    )}`;
-                }
+                replace_interned_param
             );
 
             const validated = [

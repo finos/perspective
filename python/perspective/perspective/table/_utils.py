@@ -17,6 +17,9 @@ STRING_LITERAL_REGEX = re.compile(r"'(.*?[^\\])'")
 FUNCTION_LITERAL_REGEX = re.compile(
     r"(bucket|match|match_all|search|indexof)\(.*?,\s*(intern\(\'(.+)\'\)).*\)"
 )
+REPLACE_FN_REGEX = re.compile(
+    r"(replace_all|replace)\(.*?,\s*(intern\(\'(.*)\'\)),.*\)"
+)
 BOOLEAN_LITERAL_REGEX = re.compile(r"([a-zA-Z_]+[a-zA-Z0-9_]*)")
 
 
@@ -137,7 +140,6 @@ def _replace_interned_param(match_obj):
     value = match_obj.group(3)
     intern_idx = full.index(intern_fn)
 
-    print(full, intern_fn, value, intern_idx, match_obj.group(1))
     # from fn(param, intern('string'), param, param...) to
     # fn (param, 'string', ...)
     return "{}'{}'{}".format(
@@ -173,9 +175,6 @@ def _parse_expression_strings(expressions):
 
         if alias_match:
             alias = alias_match.group(1).strip()
-
-            # Remove the alias from the expression
-            parsed = re.sub(ALIAS_REGEX, "", expression, count=1)
         else:
             # Expression itself is the alias
             alias = expression
@@ -206,11 +205,11 @@ def _parse_expression_strings(expressions):
             parsed,
         )
 
-        # TODO fix this regex for replace and replace_all
         # remove the `intern()` in bucket and regex functions that take
-        # string literal parameters.
+        # string literal parameters. TODO this logic should be centralized
+        # in C++ instead of being duplicated.
         parsed = re.sub(FUNCTION_LITERAL_REGEX, _replace_interned_param, parsed)
-        print(parsed)
+        parsed = re.sub(REPLACE_FN_REGEX, _replace_interned_param, parsed)
 
         validated = [alias, expression, parsed, column_id_map]
 

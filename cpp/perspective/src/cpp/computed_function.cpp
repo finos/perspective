@@ -627,9 +627,10 @@ namespace computed_function {
         t_tscalar rval;
         rval.clear();
         rval.m_type = DTYPE_STR;
+        auto num_params = parameters.size();
 
         // substring(string, start_idx) or substring(string, start_idx, length)
-        if (parameters.size() != 2 && parameters.size() != 3) {
+        if (num_params != 2 && num_params != 3) {
             rval.m_status = STATUS_CLEAR;
             return rval;
         }
@@ -645,7 +646,7 @@ namespace computed_function {
         // npos == all chars until end of the string
         std::int64_t substring_length = std::string::npos;
 
-        for (auto i = 0; i < parameters.size(); ++i) {
+        for (auto i = 0; i < num_params; ++i) {
             const t_generic_type& gt = parameters[i];
 
             if (gt.type == t_generic_type::e_scalar) {
@@ -655,6 +656,7 @@ namespace computed_function {
                 // type check - first param must be string, 2nd and 3rd param
                 // must be numeric, all must be valid
                 t_dtype dtype = temp_scalar.get_dtype();
+
                 if ((i == 0 && dtype != DTYPE_STR)
                     || (i != 0 && !temp_scalar.is_numeric())
                     || temp_scalar.m_status == STATUS_CLEAR) {
@@ -691,16 +693,11 @@ namespace computed_function {
         std::size_t length = search_string.length();
 
         // Value check: strings cannot be 0 length, indices must be valid
-        if ((!m_is_type_validator && length == 0) || start_idx < 0
-            || substring_length < 0
+        if (length == 0 || start_idx < 0
+            || (num_params == 3 && substring_length < 0)
             || start_idx >= length
             || (substring_length != std::string::npos 
                 && start_idx + substring_length > length)) {
-            rval.m_status = STATUS_CLEAR;
-            return rval;
-        }
-
-        if (m_is_type_validator) {
             return rval;
         }
 

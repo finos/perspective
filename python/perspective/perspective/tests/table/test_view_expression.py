@@ -9,7 +9,7 @@
 import re
 from random import random, randint, choices
 from string import ascii_letters
-from pytest import raises, mark
+from pytest import raises
 from datetime import date, datetime
 from time import mktime
 from perspective import Table, PerspectiveCppError
@@ -1778,14 +1778,46 @@ class TestViewExpression(object):
         assert results["c3"] == [True, True, True, None, False]
         assert results["c4"] == [False, True, False, False, None]
 
-    @mark.skip
+    def test_view_regex_substring(self):
+        data = ["abc, def", "efg", "", None, "aaaaaaaaaaaaa"]
+        table = Table({
+            "x": data
+        })
+        view = table.view(expressions=[
+            '//a\nsubstring(\'abcdef\', 0)',
+            '//abc\nsubstring(\'abcdef\', 3)',
+            '//b\nsubstring("x", 0)',
+            '//c\nsubstring("x", 5, 1)',
+            '//d\nsubstring("x", 100)',
+            '//e\nsubstring("x", 0, 10000)',
+            '//f\nsubstring("x", 5, 0)',
+        ])
+        results = view.to_columns()
+
+        assert results["a"] == ['abcdef' for _ in data]
+        assert results["abc"] == ['def' for _ in data]
+        assert results["b"] == [d if d else None for d in data]
+        assert results["c"] == ["d", None, None, None, "a"]
+        assert results["d"] == [None for _ in data]
+        assert results["e"] == [None for _ in data]
+        assert results["f"] == ["", None, None, None, ""]
+
+    # FIXME: // ending\nvar domain := search(\"a\", '@([a-zA-Z.]+)$'); length(domain) > 0 ? search(domain, '[.](.*)$') : null
+    # is a broken expression without the newline after var domain
     def test_view_regex_email_substr(self):
         endings = ["com", "net", "co.uk", "ie", "me", "io", "co"]
         data = ["{}@{}.{}".format(randstr(30, ascii_letters + "0123456789" + "._-"), randstr(10), choices(endings, k=1)[0]) for _ in range(100)]
         table = Table({"a": data})
         expressions = [
-            "// address\nvar vec[2]; indexof(\"a\", '^([a-zA-Z0-9._-]+)@', vec) ? substring(\"a\", vec[0], vec[1]) : null",
-            "// ending\nvar domain := search(\"a\", '@([a-zA-Z.]+)$'); length(domain) > 0 ? search(domain, '[.](.*)$') : null"
+            "// address\nvar vec[2]; indexof(\"a\", '^([a-zA-Z0-9._-]+)@', vec) ? substring(\"a\", vec[0], vec[1] - vec[0] + 1) : null",
+            """// ending
+            var domain := search(\"a\", '@([a-zA-Z.]+)$');
+            var len := length(domain);
+            if (len > 0 and is_not_null(domain)) {
+                search(domain, '[.](.*)$');
+            } else {
+                'not found';
+            }"""
         ]
 
         view = table.view(expressions=expressions)
@@ -1804,3 +1836,134 @@ class TestViewExpression(object):
             ending = re.search(r"[.](.*)$", domain).group(1)
             assert results["address"][i] == address
             assert results["ending"][i] == ending
+
+    def test_view_expressions_replace(self):
+        def digits():
+            return randstr(4, "0123456789")
+        
+        data = []
+
+        for _ in range(1000):
+            separator = "-" if random() > 0.5 else " "
+            data.append("{}{}{}{}{}{}{}".format(digits(), separator, digits(), separator, digits(), separator, digits()))
+        
+        table = Table({"a": data, "b": [str(i) for i in range(1000)]})
+        expressions = [
+            """//w
+            replace('abc-def-hijk', '-', '')""",
+            """//x
+            replace("a", '[0-9]{4}$', "b")""",
+            """//y
+            replace("a", '[a-z]{4}$', "b")""",
+            """//z
+            var x := 'long string, very cool!'; replace("a", '^[0-9]{4}', x)"""
+        ]
+
+        validate = table.validate_expressions(expressions)
+        assert validate["expression_schema"] == {
+            "w": "string",
+            "x": "string",
+            "y": "string",
+            "z": "string",
+        }
+
+        view = table.view(expressions=expressions)
+        schema = view.expression_schema()
+        assert schema == {
+            "w": str,
+            "x": str,
+            "y": str,
+            "z": str,
+        }
+        results = view.to_columns()
+        
+        for i in range(1000):
+            source = results["a"][i]
+            idx = results["b"][i]
+            assert results["w"][i] == "abcdef-hijk";
+            assert results["x"][i] == re.sub(r"[0-9]{4}$", idx, source, 1)
+            assert results["y"][i] == source
+            assert results["z"][i] == re.sub(r"^[0-9]{4}", "long string, very cool!", source, 1)
+
+    def test_view_replace_invalid(self):
+        table = Table({"a": "string", "b": "string"});
+        expressions = [
+            """//v
+            replace('abc-def-hijk', '-', 123)""",
+            """//w
+            replace('', '-', today())""",
+            """//x
+            replace("a", '[0-9]{4}$', today())""",
+            """//y
+            replace("a", '[a-z]{4}$', null)""",
+            """//z
+            var x := 123; replace("a", '^[0-9]{4}', x)""",
+        ]
+        validate = table.validate_expressions(expressions)
+        assert validate["expression_schema"] == {}
+
+    def test_view_expressions_replace_all(self):
+        def digits():
+            return randstr(4, "0123456789")
+        
+        data = []
+
+        for _ in range(1000):
+            separator = "-" if random() > 0.5 else " "
+            data.append("{}{}{}{}{}{}{}".format(digits(), separator, digits(), separator, digits(), separator, digits()))
+        
+        table = Table({"a": data, "b": [str(i) for i in range(1000)]})
+        expressions = [
+            """//w
+            replace_all('abc-def-hijk', '-', '')""",
+            """//x
+            replace_all("a", '[0-9]{4}$', "b")""",
+            """//y
+            replace_all("a", '[a-z]{4}$', "b")""",
+            """//z
+            var x := 'long string, very cool!'; replace_all("a", '^[0-9]{4}', x)"""
+        ]
+
+        validate = table.validate_expressions(expressions)
+        assert validate["expression_schema"] == {
+            "w": "string",
+            "x": "string",
+            "y": "string",
+            "z": "string",
+        }
+
+        view = table.view(expressions=expressions)
+        schema = view.expression_schema()
+        assert schema == {
+            "w": str,
+            "x": str,
+            "y": str,
+            "z": str,
+        }
+
+        results = view.to_columns()
+        
+        for i in range(1000):
+            source = results["a"][i]
+            idx = results["b"][i]
+            assert results["w"][i] == "abcdefhijk";
+            assert results["x"][i] == re.sub(r"[0-9]{4}$", idx, source)
+            assert results["y"][i] == source
+            assert results["z"][i] == re.sub(r"^[0-9]{4}", "long string, very cool!", source)
+
+    def test_view_replace_invalid(self):
+        table = Table({"a": "string", "b": "string"});
+        expressions = [
+            """//v
+            replace_all('abc-def-hijk', '-', 123)""",
+            """//w
+            replace_all('', '-', today())""",
+            """//x
+            replace_all("a", '[0-9]{4}$', today())""",
+            """//y
+            replace_all("a", '[a-z]{4}$', null)""",
+            """//z
+            var x := 123; replace_all("a", '^[0-9]{4}', x)""",
+        ]
+        validate = table.validate_expressions(expressions)
+        assert validate["expression_schema"] == {}

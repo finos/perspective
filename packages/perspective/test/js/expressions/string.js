@@ -1966,6 +1966,8 @@ module.exports = (perspective) => {
             });
             const view = await table.view({
                 expressions: [
+                    "substring('abcdef', 0)",
+                    "substring('abcdef', 3)",
                     'substring("x", 3)',
                     'substring("x", -1)',
                     'substring("x", 1, 10000)',
@@ -1979,6 +1981,12 @@ module.exports = (perspective) => {
                 ],
             });
             const results = await view.to_columns();
+            expect(results["substring('abcdef', 0)"]).toEqual(
+                Array(5).fill("abcdef")
+            );
+            expect(results["substring('abcdef', 3)"]).toEqual(
+                Array(5).fill("def")
+            );
             expect(results['substring("x", 3)']).toEqual([
                 ", def, efg",
                 "def",
