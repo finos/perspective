@@ -562,9 +562,9 @@ thread_local! {
             CompletionItemSuggestion {
                 label: "substring".to_owned(),
                 kind: 1,
-                insert_text: "substring(${1:string}, ${2:start_idx}, ${3:end_idx})".to_owned(),
+                insert_text: "substring(${1:string}, ${2:start_idx}, ${3:length})".to_owned(),
                 insert_text_rules: 4,
-                documentation: "Returns a substring of string starting from start_idx and ending at end_idx. If end_idx is not passed in, returns substring from start_idx to the end of the string. Returns null if the string or any indices are invalid.".to_owned(),
+                documentation: "Returns a substring of string from start_idx with the given length. If length is not passed in, returns substring from start_idx to the end of the string. Returns null if the string or any indices are invalid.".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "replace".to_owned(),

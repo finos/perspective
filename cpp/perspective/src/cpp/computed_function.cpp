@@ -628,7 +628,7 @@ namespace computed_function {
         rval.clear();
         rval.m_type = DTYPE_STR;
 
-        // substring(string, start_idx) or substring(string, start_idx, end_idx)
+        // substring(string, start_idx) or substring(string, start_idx, length)
         if (parameters.size() != 2 && parameters.size() != 3) {
             rval.m_status = STATUS_CLEAR;
             return rval;
@@ -643,7 +643,7 @@ namespace computed_function {
         std::int64_t start_idx;
 
         // npos == all chars until end of the string
-        std::int64_t end_idx = std::string::npos;
+        std::int64_t substring_length = std::string::npos;
 
         for (auto i = 0; i < parameters.size(); ++i) {
             const t_generic_type& gt = parameters[i];
@@ -674,7 +674,7 @@ namespace computed_function {
                 } else if (i == 1) {
                     start_idx = temp_scalar.to_double();
                 } else if (i == 2) {
-                    end_idx = temp_scalar.to_double();
+                    substring_length = temp_scalar.to_double();
                 }
             } else {
                 // called with invalid params - exit
@@ -691,10 +691,11 @@ namespace computed_function {
         std::size_t length = search_string.length();
 
         // Value check: strings cannot be 0 length, indices must be valid
-        if ((!m_is_type_validator && length == 0) || start_idx < 0 || end_idx < 0
+        if ((!m_is_type_validator && length == 0) || start_idx < 0
+            || substring_length < 0
             || start_idx >= length
-            || (end_idx != std::string::npos && end_idx >= length)
-            || end_idx < start_idx) {
+            || (substring_length != std::string::npos 
+                && start_idx + substring_length > length)) {
             rval.m_status = STATUS_CLEAR;
             return rval;
         }
@@ -703,18 +704,8 @@ namespace computed_function {
             return rval;
         }
 
-
-        if (end_idx != std::string::npos) {
-            // std::string::substr takes start_idx and num of characters, so
-            // we need to convert the end index to num of chars instead
-            end_idx = (end_idx - start_idx) + 1;
-
-            // but if our substr len > length, we need to set it to all chars
-            if (start_idx + end_idx > length) end_idx = std::string::npos;
-        }
-
         rval.set(m_expression_vocab.intern(
-            search_string.substr(start_idx, end_idx)));
+            search_string.substr(start_idx, substring_length)));
 
         return rval;
     }

@@ -1921,22 +1921,22 @@ module.exports = (perspective) => {
             var year_vec[2];
             indexof("x", '([0-9]{4})$', year_vec);
             var start := year_vec[0];
-            var end := year_vec[1];
-            substring("x", start, end);`,
+            var len := year_vec[1] - start + 1;
+            substring("x", start, len);`,
                 `// year int
             var year_vec[2];
             indexof("x", '([0-9]{4})$', year_vec);
             var start := year_vec[0];
-            var end := year_vec[1];
-            integer(substring("x", start, end));`,
+            var len := year_vec[1] - start + 1;
+            integer(substring("x", start, len));`,
                 `// dollars
             var out[2];
             indexof("y", '^[$]([0-9.]+)', out);
-            substring("y", out[0], out[1])`,
+            substring("y", out[0], out[1] - out[0] + 1)`,
                 `// dollars float
             var out[2];
             indexof("y", '^[$]([0-9.]+)', out);
-            float(substring("y", out[0], out[1]))`,
+            float(substring("y", out[0], out[1] - out[0] + 1))`,
             ];
 
             const view = await table.view({expressions});
@@ -1971,10 +1971,11 @@ module.exports = (perspective) => {
                     'substring("x", 1, 10000)',
                     'substring("x", 10000)',
                     'substring("x", 5, 4)',
-                    'substring("y", 0, 2)',
-                    'substring("y", 0, 2)',
+                    'substring("y", 0, 3)',
+                    'substring("y", 0)',
                     'substring("y", 1, 2)',
                     'substring("y", 2, 2)',
+                    'substring("y", 1, 1)',
                 ],
             });
             const results = await view.to_columns();
@@ -1985,13 +1986,17 @@ module.exports = (perspective) => {
                 null,
                 "45678",
             ]);
-            expect(results['substring("y", 0, 2)']).toEqual(
+            expect(results['substring("y", 0, 3)']).toEqual(
                 Array(5).fill("abc")
             );
             expect(results['substring("y", 1, 2)']).toEqual(
                 Array(5).fill("bc")
             );
-            expect(results['substring("y", 2, 2)']).toEqual(Array(5).fill("c"));
+            expect(results['substring("y", 0)']).toEqual(results["y"]);
+            expect(results['substring("y", 2, 2)']).toEqual(
+                Array(5).fill(null)
+            );
+            expect(results['substring("y", 1, 1)']).toEqual(Array(5).fill("b"));
             expect(results['substring("x", -1)']).toEqual(Array(5).fill(null));
             expect(results['substring("x", 1, 10000)']).toEqual(
                 Array(5).fill(null)
@@ -1999,9 +2004,13 @@ module.exports = (perspective) => {
             expect(results['substring("x", 10000)']).toEqual(
                 Array(5).fill(null)
             );
-            expect(results['substring("x", 5, 4)']).toEqual(
-                Array(5).fill(null)
-            );
+            expect(results['substring("x", 5, 4)']).toEqual([
+                "def,",
+                null,
+                null,
+                null,
+                null,
+            ]);
 
             // substring() with invalid indices will pass type checking but
             // will return null.
@@ -2151,6 +2160,56 @@ module.exports = (perspective) => {
             ]);
 
             await view2.delete();
+            await table.delete();
+        });
+
+        it("substr more invalid indices", async () => {
+            const table = await perspective.table(
+                {
+                    x: ["abc, def, efg", "abcdef", null, "", "12345678"],
+                    y: [1, 2, 3, 4, 5],
+                },
+                {index: "y"}
+            );
+
+            const view = await table.view({
+                expressions: [
+                    'substring("x", 100)',
+                    'substring("x", 1, 300)',
+                    'substring("x", -100)',
+                ],
+            });
+
+            let results = await view.to_columns();
+
+            expect(results['substring("x", 100)']).toEqual(Array(5).fill(null));
+            expect(results['substring("x", 1, 300)']).toEqual(
+                Array(5).fill(null)
+            );
+            expect(results['substring("x", -100)']).toEqual(
+                Array(5).fill(null)
+            );
+
+            table.remove([1, 2, 3, 4, 5]);
+
+            const str = Array(100).fill("abcde").join("");
+            table.update({
+                x: [str],
+                y: [1],
+            });
+
+            results = await view.to_columns();
+            expect(results['substring("x", 100)']).toEqual([
+                str.substring(100),
+            ]);
+            expect(results['substring("x", 1, 300)']).toEqual([
+                str.substr(1, 300),
+            ]);
+            expect(results['substring("x", -100)']).toEqual(
+                Array(1).fill(null)
+            );
+
+            await view.delete();
             await table.delete();
         });
 
