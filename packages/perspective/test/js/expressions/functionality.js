@@ -1210,15 +1210,20 @@ module.exports = (perspective) => {
             const table = await perspective.table({a: [1, 2, 3]});
             const view = await table.view({
                 expressions: [
-                    `// abc
-                    var x := 1 + 2; // another comment
-                    x + 3 + 4 # comment`,
+                    "var x := 1 + 2;\n// another comment\nx + 3 + 4 # comment",
                 ],
             });
             const schema = await view.expression_schema();
-            expect(schema).toEqual({abc: "float"});
+            expect(schema).toEqual({
+                "var x := 1 + 2;\n// another comment\nx + 3 + 4 # comment":
+                    "float",
+            });
             const result = await view.to_columns();
-            expect(result["abc"]).toEqual(Array(3).fill(10));
+            expect(
+                result[
+                    "var x := 1 + 2;\n// another comment\nx + 3 + 4 # comment"
+                ]
+            ).toEqual(Array(3).fill(10));
             await view.delete();
             await table.delete();
         });

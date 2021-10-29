@@ -1466,7 +1466,7 @@ export default function (Module) {
             // First, look for a column alias, which is a // style comment
             // on the first line of the expression.
             let expression_alias;
-            let alias_match = expression_string.match(/^\/\/(?<alias>.+?)$/m);
+            let alias_match = expression_string.match(/^\/\/(?<alias>.+?)\n/);
 
             if (alias_match?.groups?.alias) {
                 expression_alias = alias_match.groups.alias.trim();

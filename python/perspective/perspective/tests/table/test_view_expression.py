@@ -1673,10 +1673,10 @@ class TestViewExpression(object):
 
     def test_view_expession_multicomment(self):
         table = Table({"a": [1, 2, 3, 4]})
-        view = table.view(expressions=["//abc\nvar x := 1 + 2; // def\nx + 100 // cdefghijk"])
-        assert view.expression_schema() == {"abc": float}
+        view = table.view(expressions=["var x := 1 + 2;\n// def\nx + 100 // cdefghijk"])
+        assert view.expression_schema() == {"var x := 1 + 2;\n// def\nx + 100 // cdefghijk": float}
         assert view.to_columns() == {
-            "abc": [103, 103, 103, 103],
+            "var x := 1 + 2;\n// def\nx + 100 // cdefghijk": [103, 103, 103, 103],
             "a": [1, 2, 3, 4]
         }
     
