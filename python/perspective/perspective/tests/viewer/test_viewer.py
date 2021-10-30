@@ -185,43 +185,43 @@ class TestViewer:
 
     def test_viewer_reset(self):
         table = Table({"a": [1, 2, 3]})
-        viewer = PerspectiveViewer(plugin="X Bar", filters=[["a", "==", 2]])
+        viewer = PerspectiveViewer(plugin="X Bar", filter=[["a", "==", 2]])
         viewer.load(table)
-        assert viewer.filters == [["a", "==", 2]]
+        assert viewer.filter == [["a", "==", 2]]
         viewer.reset()
         assert viewer.plugin == "Datagrid"
-        assert viewer.filters == []
+        assert viewer.filter == []
 
     # delete
 
     def test_viewer_delete(self):
         table = Table({"a": [1, 2, 3]})
-        viewer = PerspectiveViewer(plugin="X Bar", filters=[["a", "==", 2]])
+        viewer = PerspectiveViewer(plugin="X Bar", filter=[["a", "==", 2]])
         viewer.load(table)
-        assert viewer.filters == [["a", "==", 2]]
+        assert viewer.filter == [["a", "==", 2]]
         viewer.delete()
         assert viewer.table_name is None
         assert viewer.table is None
 
     def test_viewer_delete_without_table(self):
         table = Table({"a": [1, 2, 3]})
-        viewer = PerspectiveViewer(plugin="X Bar", filters=[["a", "==", 2]])
+        viewer = PerspectiveViewer(plugin="X Bar", filter=[["a", "==", 2]])
         viewer.load(table)
-        assert viewer.filters == [["a", "==", 2]]
+        assert viewer.filter == [["a", "==", 2]]
         viewer.delete(delete_table=False)
         assert viewer.table_name is not None
         assert viewer.table is not None
-        assert viewer.filters == []
+        assert viewer.filter == []
 
     def test_save_restore(self):
         table = Table({"a": [1, 2, 3]})
-        viewer = PerspectiveViewer(plugin="X Bar", filters=[["a", "==", 2]], editable=True, expressions=['"a" * 2'])
+        viewer = PerspectiveViewer(plugin="X Bar", filter=[["a", "==", 2]], editable=True, expressions=['"a" * 2'])
         viewer.load(table)
 
         # Save config
         config = viewer.save()
-        assert viewer.filters == [["a", "==", 2]]
-        assert config["filters"] == [["a", "==", 2]]
+        assert viewer.filter == [["a", "==", 2]]
+        assert config["filter"] == [["a", "==", 2]]
         assert viewer.plugin == "X Bar"
         assert config["plugin"] == "X Bar"
         assert config["editable"] is True
@@ -230,13 +230,13 @@ class TestViewer:
         # reset configuration
         viewer.reset()
         assert viewer.plugin == "Datagrid"
-        assert viewer.filters == []
+        assert viewer.filter == []
         assert viewer.editable is False
         assert viewer.expressions == []
 
         # restore configuration
         viewer.restore(**config)
-        assert viewer.filters == [["a", "==", 2]]
+        assert viewer.filter == [["a", "==", 2]]
         assert viewer.plugin == "X Bar"
         assert viewer.editable is True
         assert viewer.expressions == ['"a" * 2']

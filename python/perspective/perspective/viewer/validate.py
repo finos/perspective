@@ -107,7 +107,7 @@ def validate_sort(sort):
         raise PerspectiveError("Cannot parse sort type: %s", str(type(sort)))
 
 
-def validate_filters(filters):
+def validate_filter(filters):
     if filters is None:
         return []
 
@@ -122,7 +122,7 @@ def validate_filters(filters):
     if isinstance(filters, list):
         for f in filters:
             if not isinstance(f, list):
-                raise PerspectiveError("`filters` kwarg must be a list!")
+                raise PerspectiveError("`filter` kwarg must be a list!")
 
             for i, item in enumerate(f):
                 if i == 1:
@@ -145,7 +145,7 @@ def validate_filters(filters):
         return filters
     else:
         raise PerspectiveError(
-            "Cannot parse filters type: {}".format(str(type(filters)))
+            "Cannot parse filter type: {}".format(str(type(filters)))
         )
 
 

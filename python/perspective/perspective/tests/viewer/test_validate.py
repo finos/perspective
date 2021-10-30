@@ -31,22 +31,22 @@ class TestValidate:
         with raises(PerspectiveError):
             validate.validate_plugin("hypergrid")
 
-    def test_validate_filters_valid(self):
+    def test_validate_filter_valid(self):
         filters = [["a", ">", 1], ["b", "==", "abc"]]
-        assert validate.validate_filters(filters) == filters
+        assert validate.validate_filter(filters) == filters
 
-    def test_validate_filters_invalid(self):
+    def test_validate_filter_invalid(self):
         with raises(PerspectiveError):
             filters = [["a", ">"], ["b", "invalid" "abc"]]
-            validate.validate_filters(filters)
+            validate.validate_filter(filters)
 
-    def test_validate_filters_is_null(self):
+    def test_validate_filter_is_null(self):
         filters = [["a", "is null"]]
-        assert validate.validate_filters(filters) == filters
+        assert validate.validate_filter(filters) == filters
 
-    def test_validate_filters_is_not_null(self):
+    def test_validate_filter_is_not_null(self):
         filters = [["a", "is not null"]]
-        assert validate.validate_filters(filters) == filters
+        assert validate.validate_filter(filters) == filters
 
     def test_validate_expressions(self):
         computed = ["// expression1 \n 'Hello'"]

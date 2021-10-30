@@ -105,7 +105,7 @@ export class PerspectiveView extends DOMWidgetView {
         this.model.on("change:column_pivots", this.column_pivots_changed, this);
         this.model.on("change:aggregates", this.aggregates_changed, this);
         this.model.on("change:sort", this.sort_changed, this);
-        this.model.on("change:filters", this.filters_changed, this);
+        this.model.on("change:filter", this.filter_changed, this);
         this.model.on("change:expressions", this.expressions_changed, this);
         this.model.on("change:plugin_config", this.plugin_config_changed, this);
         this.model.on("change:dark", this.dark_changed, this);
@@ -395,7 +395,7 @@ export class PerspectiveView extends DOMWidgetView {
         });
     }
 
-    filters_changed() {
+    filter_changed() {
         this.pWidget.restore({
             filter: this.model.get("filter"),
         });
