@@ -46,10 +46,10 @@ export const axisSplitter = (
         const labeller = () => splitterLabels(settings).color(color);
 
         selection
-            .select(".y-label-container>.y-label")
+            .select(".y-label.left-label")
             .call(labeller().labels(mainLabels));
         selection
-            .select(".y2-label-container>.y-label")
+            .select(".y-label.right-label")
             .call(labeller().labels(altLabels).alt(true));
     };
 

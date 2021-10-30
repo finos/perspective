@@ -22,7 +22,7 @@ module.exports = {
     // perspective-jupyterlab tests mock `@jupyter-widgets`, which is in
     // Typescript.
     transformIgnorePatterns: [
-        "/node_modules/(?!(lit-html|@jupyter-widgets)/).+$",
+        "/node_modules/(?!(d3|internmap|delaunator|robust-predicates|@jupyter-widgets)).+\\.js",
     ],
     automock: false,
     setupFiles: ["@finos/perspective-test/src/js/beforeEachSpec.js"],

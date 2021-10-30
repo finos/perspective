@@ -32,7 +32,7 @@ export const splitterLabels = (settings) => {
             .style("color", (d) =>
                 coloured ? withoutOpacity(color(d.name)) : undefined
             )
-            .on("click", (d) => {
+            .on("click", (_event, d) => {
                 if (disabled) return;
 
                 if (alt) {

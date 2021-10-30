@@ -25,11 +25,11 @@ export function draggableComponent() {
             node.style.top = settings.legend.top;
         }
 
-        const drag = d3.drag().on("drag", function () {
+        const drag = d3.drag().on("drag", function (event) {
             const offsets = enforceContainerBoundaries(
                 this,
-                d3.event.dx,
-                d3.event.dy
+                event.dx,
+                event.dy
             );
             this.style.left = `${this.offsetLeft + offsets.x}px`;
             this.style.top = `${this.offsetTop + offsets.y}px`;

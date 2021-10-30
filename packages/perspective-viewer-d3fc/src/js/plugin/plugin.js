@@ -261,6 +261,17 @@ export function register(...plugins) {
                             {...this._settings, ...settings},
                             handler
                         );
+
+                        // If only a right-axis Y axis remains, reset the alt
+                        // axis list to default.
+                        if (
+                            this._settings.splitMainValues &&
+                            this._settings.splitMainValues.length >=
+                                columns.length
+                        ) {
+                            this._settings.splitMainValues = [];
+                        }
+
                         initialiseStyles(this._container, this._settings);
 
                         if (clear) {

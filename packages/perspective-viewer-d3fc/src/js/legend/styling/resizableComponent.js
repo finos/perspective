@@ -38,45 +38,45 @@ export function resizableComponent() {
         }
 
         const dragHelper = {
-            left: () =>
+            left: (event) =>
                 executeCallbacks(resizeEvent, {
-                    horizontal: dragLeft(d3.event),
+                    horizontal: dragLeft(event),
                     vertical: false,
                 }),
-            top: () =>
+            top: (event) =>
                 executeCallbacks(resizeEvent, {
                     horizontal: false,
-                    vertical: dragTop(d3.event),
+                    vertical: dragTop(event),
                 }),
-            right: () =>
+            right: (event) =>
                 executeCallbacks(resizeEvent, {
-                    horizontal: dragRight(d3.event),
+                    horizontal: dragRight(event),
                     vertical: false,
                 }),
-            bottom: () =>
+            bottom: (event) =>
                 executeCallbacks(resizeEvent, {
                     horizontal: false,
-                    vertical: dragBottom(d3.event),
+                    vertical: dragBottom(event),
                 }),
-            topleft: () =>
+            topleft: (event) =>
                 executeCallbacks(resizeEvent, {
-                    horizontal: dragLeft(d3.event),
-                    vertical: dragTop(d3.event),
+                    horizontal: dragLeft(event),
+                    vertical: dragTop(event),
                 }),
-            topright: () =>
+            topright: (event) =>
                 executeCallbacks(resizeEvent, {
-                    horizontal: dragRight(d3.event),
-                    vertical: dragTop(d3.event),
+                    horizontal: dragRight(event),
+                    vertical: dragTop(event),
                 }),
-            bottomright: () =>
+            bottomright: (event) =>
                 executeCallbacks(resizeEvent, {
-                    horizontal: dragRight(d3.event),
-                    vertical: dragBottom(d3.event),
+                    horizontal: dragRight(event),
+                    vertical: dragBottom(event),
                 }),
-            bottomleft: () =>
+            bottomleft: (event) =>
                 executeCallbacks(resizeEvent, {
-                    horizontal: dragLeft(d3.event),
-                    vertical: dragBottom(d3.event),
+                    horizontal: dragLeft(event),
+                    vertical: dragBottom(event),
                 }),
         };
 

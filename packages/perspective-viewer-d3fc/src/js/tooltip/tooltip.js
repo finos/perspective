@@ -31,18 +31,25 @@ export const tooltip = () => {
         const container = select(getChartContainer(node));
         tooltipDiv = getTooltipDiv(container);
 
-        const showTip = (data, i, nodes) => {
+        const showTip = function (_event, data) {
             generateHtml(tooltipDiv, data, settings);
+            const nodes = selection.nodes();
+            const i = nodes.indexOf(this);
             showTooltip(container.node(), nodes[i], tooltipDiv, centered);
             select(nodes[i]).style("opacity", "0.7");
         };
-        const hideTip = (data, i, nodes) => {
+
+        const hideTip = function (_event, _data) {
             hideTooltip(tooltipDiv);
+            const nodes = selection.nodes();
+            const i = nodes.indexOf(this);
             if (nodes) select(nodes[i]).style("opacity", "1");
         };
 
         if (alwaysShow) {
-            selection.each(showTip);
+            selection.each(function (data) {
+                return showTip.call(this, undefined, data);
+            });
         } else {
             selection.on("mouseover", showTip).on("mouseout", hideTip);
             selectionEvent().settings(settings)(selection);

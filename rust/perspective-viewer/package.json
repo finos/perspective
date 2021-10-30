@@ -42,7 +42,7 @@
         "test:build:rust": "cpx ../../packages/perspective/dist/umd/perspective.inline.js dist/pkg/",
         "test:build:js": "cpx \"test/html/*\" dist/umd && cpx \"test/csv/*\" dist/umd && cpx \"test/css/*\" dist/umd",
         "test:build": "npm-run-all test:build:*",
-        "test:run:rust": "DBUS_SESSION_BUS_ADDRESS=/dev/null wasm-pack test --chrome --headless",
+        "test:run:rust": "HEADLESS_TIMEOUT=40 wasm-pack test --chrome --headless",
         "test:run": "jest --rootDir=. --config=../../packages/perspective-test/jest.config.js --color --noStackTrace 2>&1",
         "test:clean": "rm perspective.csv || true",
         "test": "yarn test:build && npm-run-all -p test:run:rust test:run && yarn test:clean"

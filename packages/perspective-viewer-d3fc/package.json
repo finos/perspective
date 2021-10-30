@@ -54,9 +54,9 @@
         "babel-runtime": "^6.26.0",
         "chroma-js": "^1.3.4",
         "core-js": "^3.6.4",
-        "d3": "^5.7.0",
+        "d3": "^7.1.1",
         "d3-svg-legend": "^2.25.6",
-        "d3fc": "14.0.40",
+        "d3fc": "15.2.4",
         "gradient-parser": "0.1.5"
     },
     "devDependencies": {
