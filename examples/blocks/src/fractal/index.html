@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <script src="https://cdn.jsdelivr.net/npm/webfontloader"></script>
+    <script>WebFont.load({google:{families:["Roboto Mono:200,400","Material Icons","Open Sans:300,400"]}})</script>
+    <script src="/node_modules/@finos/perspective/dist/umd/perspective.js"></script>
+    <script src="/node_modules/@finos/perspective-viewer/dist/umd/perspective-viewer.js"></script>
+    <script src="/node_modules/@finos/perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js"></script>
+    <script src="/node_modules/@finos/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js"></script>
+    <link rel='stylesheet' href="/node_modules/@finos/perspective-viewer/dist/umd/material-dense.css">
+    <link rel='stylesheet' href="index.css">
+</head>
+<body>
+    <div id="app">
+        <div id="controls">
+            <button id="run" disabled>Run</button>
+            <div class="range">
+                <span>Size</span>
+                <input id="width" min="25" max="700" type="number" placeholder="Width" value="200"></input>
+                <input id="height" min="25" max="500" type="number" placeholder="Height" value="200"></input>
+            </div>
+            <div class="range">
+                <span id="xrange">X [-0.4 , -0.3]</span>
+                <input id="xmin" min="-2" max="1.0" step="0.1" value="-0.4" type="range"></input>
+                <input id="xmax" min="-2" max="1.0" step="0.1" value="-0.3" type="range"></input>
+            </div>
+            <div class="range">
+                <span id="yrange">Y [-0.7 , -0.6]</span>
+                <input id="ymin" min="-1" max="1.0" step="0.1" value="-0.7" type="range"></input>
+                <input id="ymax" min="-1" max="1.0" step="0.1" value="-0.6" type="range"></input>
+            </div>
+            <div class="range">
+                <span>Iterations</span>
+                <input id="iterations" min="1" max="1000" type="number" placeholder="Iterations" value="100"></input>
+            </div>
+        </div>
+        <perspective-viewer id="viewer"></perspective-viewer>
+    </div>
+    <script src="index.js"></script>
+</body>
+</html>
