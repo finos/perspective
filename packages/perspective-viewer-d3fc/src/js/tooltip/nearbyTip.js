@@ -79,7 +79,7 @@ export default () => {
                     )})`
             )
             .style("stroke", "none")
-            .style("fill", (d) => color && withOpacity(color(d.key)));
+            .style("fill", (d) => color && d.key && withOpacity(color(d.key)));
 
         base(tips);
     };

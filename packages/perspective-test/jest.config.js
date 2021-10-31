@@ -15,7 +15,9 @@ module.exports = {
         ".js$": "@finos/perspective-test/src/js/transform.js",
         ".html$": "html-loader-jest",
     },
-    transformIgnorePatterns: ["/node_modules/(?!lit-html).+\\.js"],
+    transformIgnorePatterns: [
+        "/node_modules/(?!(d3|internmap|delaunator|robust-predicates)).+\\.js",
+    ],
     automock: false,
     setupFiles: ["@finos/perspective-test/src/js/beforeEachSpec.js"],
     reporters: ["default", "@finos/perspective-test/src/js/reporter.js"],

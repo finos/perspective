@@ -8,7 +8,7 @@
  */
 import {axisFactory} from "../axis/axisFactory";
 import {AXIS_TYPES} from "../axis/axisType";
-import {chartSvgFactory} from "../axis/chartFactory";
+import {chartCanvasFactory} from "../axis/chartFactory";
 import {heatmapSeries} from "../series/heatmapSeries";
 import {seriesColorRange} from "../series/seriesRange";
 import {heatmapData} from "../data/heatmapData";
@@ -16,6 +16,7 @@ import {filterData} from "../legend/filter";
 import withGridLines from "../gridlines/gridlines";
 import {colorRangeLegend} from "../legend/colorRangeLegend";
 import zoomableChart from "../zoom/zoomableChart";
+import nearbyTip from "../tooltip/nearbyTip";
 
 function heatmapChart(container, settings) {
     const data = heatmapData(settings, filterData(settings));
@@ -35,8 +36,8 @@ function heatmapChart(container, settings) {
         .valueName("mainValue")
         .orient("vertical")(data);
 
-    const chart = chartSvgFactory(xAxis, yAxis).plotArea(
-        withGridLines(series, settings)
+    const chart = chartCanvasFactory(xAxis, yAxis).plotArea(
+        withGridLines(series, settings).canvas(true)
     );
 
     if (chart.xPaddingInner) {
@@ -54,16 +55,35 @@ function heatmapChart(container, settings) {
         .chart(chart)
         .settings(settings)
         .xScale(xAxis.scale)
-        .yScale(yAxis.scale);
+        .yScale(yAxis.scale)
+        .canvas(true);
+
+    // const tp = tooltip().settings(settings);
+
+    const toolTip = nearbyTip()
+        // .scaleFactor(scale_factor)
+        .settings(settings)
+        .canvas(true)
+        .xScale(xAxis.scale)
+        // .xValueName("x")
+        // .yValueName("y")
+        .yScale(yAxis.scale)
+        .color(color)
+        // .size(size)
+        .data(data);
+
+    // // render
+    // container.datum(data).call(zoomChart);
 
     // render
     container.datum(data).call(zoomChart);
     container.call(legend);
+    container.call(toolTip);
 }
 heatmapChart.plugin = {
     name: "Heatmap",
-    max_cells: 5000,
-    max_columns: 100,
+    max_cells: 50000,
+    max_columns: 500,
     render_warning: true,
 };
 
