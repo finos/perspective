@@ -1520,14 +1520,23 @@ export default function (Module) {
                 (match) => `intern(${match})`
             );
 
-            // Replace intern() for bucket, as it takes a string literal
-            // parameter and does not work if that param is interned. TODO:
-            // this is clumsy and we should have a better way of handling it.
+            // Replace intern() for bucket and regex functions that take
+            // a string literal parameter and does not work if that param is
+            // interned. TODO: this is clumsy and we should have a better
+            // way of handling it.
             // TODO I concur  -- texodus
             parsed_expression_string = parsed_expression_string.replace(
-                /bucket\(.*?,\s*(intern\(\'([smhDWMY])\'\))\s*\)/g,
-                (match, full, value) => {
-                    return `${match.substr(0, match.indexOf(full))}'${value}')`;
+                /(bucket|match|fullmatch|search|indexof)\(.*?,\s*(intern\(\'(.+)\'\)).*\)/g,
+                (match, _, intern_fn, value) => {
+                    // Takes a string of the form fn(x, intern('y'), z)
+                    // and removes intern() to create fn(x, 'y', z)
+                    const intern_idx = match.indexOf(intern_fn);
+                    return `${match.substring(
+                        0,
+                        intern_idx
+                    )}'${value}'${match.substring(
+                        intern_idx + intern_fn.length
+                    )}`;
                 }
             );
 
@@ -1574,7 +1583,10 @@ export default function (Module) {
      * // {'"Sales" + "Profit"': "float"}
      * console.log(results.expression_schema);
      *
-     * // {"invalid": "unknown token!", "1 + 'string'": "TypeError"}
+     * // {
+     * //   "invalid": {column: 0, line: 0, error_message: "unknown token!"},
+     * //   "1 + 'string'": {column: 0, line: 0, error_message: "Type Error"}
+     * // }
      * console.log(results.errors);
      */
     table.prototype.validate_expressions = function (

@@ -17,26 +17,26 @@ public:
     PSP_NON_COPYABLE(t_expression_vocab);
 
     t_expression_vocab();
-    
+
     /**
      * @brief Given a const char* to a string, intern it into the current
      * vocab page, and return the pointer to the string that has been
      * interned into the vocab. The returned pointer is guaranteed to be
      * valid for the lifetime of the `t_expression_vocab` instance.
-     * 
-     * @param str 
-     * @return const char* 
+     *
+     * @param str
+     * @return const char*
      */
     const char* intern(const char* str);
     const char* intern(const std::string& str);
 
     void clear();
-    
+
     /**
      * @brief Returns the empty string owned by the vocab, which will be valid
      * as long as the vocab is alive.
-     * 
-     * @return const char* 
+     *
+     * @return const char*
      */
     const char* get_empty_string() const;
 
@@ -58,8 +58,8 @@ private:
     std::size_t m_max_vocab_size;
 
     std::size_t m_current_vocab_size;
-    
-    // An empty string for validation functions to use. 
+
+    // An empty string for validation functions to use.
     std::string m_empty_string;
 };
 

@@ -23,6 +23,7 @@
 #include <perspective/computed_expression.h>
 #include <perspective/computed_function.h>
 #include <perspective/expression_tables.h>
+#include <perspective/regex.h>
 #include <tsl/ordered_map.h>
 #ifdef PSP_PARALLEL_FOR
 #include <thread>
@@ -205,6 +206,7 @@ public:
     std::string repr() const;
 
     std::shared_ptr<t_expression_vocab> get_expression_vocab() const;
+    std::shared_ptr<t_regex_mapping> get_expression_regex_mapping() const;
 
 #ifdef PSP_PARALLEL_FOR
     void set_event_loop_thread_id(std::thread::id id);
@@ -360,6 +362,7 @@ private:
     bool m_was_updated;
 
     std::shared_ptr<t_expression_vocab> m_expression_vocab;
+    std::shared_ptr<t_regex_mapping> m_expression_regex_mapping;
 
 #ifdef PSP_ENABLE_PYTHON
     std::thread::id m_event_loop_thread_id;

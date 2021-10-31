@@ -19,6 +19,7 @@
 #include <perspective/data_table.h>
 #include <perspective/expression_tables.h>
 #include <perspective/expression_vocab.h>
+#include <perspective/regex.h>
 
 namespace perspective {
 

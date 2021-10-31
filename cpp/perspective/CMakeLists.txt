@@ -323,6 +323,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		#########################
 		# PYTHON BINDINGS BUILD #
 		#########################
+		set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 		include_directories("${PSP_PYTHON_SRC}/perspective/include")
 
 		# Set CMP0094 to NEW - find the first version that matches constraints,
@@ -426,6 +427,9 @@ endif()
 # Build minimal arrow itself
 psp_build_dep("arrow" "${PSP_CMAKE_MODULE_PATH}/arrow.txt.in")
 
+# Build re2 as our regex library
+psp_build_dep("re2" "${PSP_CMAKE_MODULE_PATH}/re2.txt.in")
+
 find_package(Flatbuffers)
 if(NOT FLATBUFFERS_FOUND)
 	message(FATAL_ERROR"${Red}Flatbuffers could not be located${ColorReset}")
@@ -508,6 +512,7 @@ set (SOURCE_FILES
 	${PSP_CPP_SRC}/src/cpp/raii_impl_osx.cpp
 	${PSP_CPP_SRC}/src/cpp/raii_impl_win.cpp
 	${PSP_CPP_SRC}/src/cpp/range.cpp
+	${PSP_CPP_SRC}/src/cpp/regex.cpp
 	${PSP_CPP_SRC}/src/cpp/rlookup.cpp
 	${PSP_CPP_SRC}/src/cpp/scalar.cpp
 	${PSP_CPP_SRC}/src/cpp/schema_column.cpp
@@ -580,7 +585,7 @@ if (PSP_WASM_BUILD)
 	add_library(psp ${WASM_SOURCE_FILES})
 	target_compile_definitions(psp PRIVATE PSP_ENABLE_WASM=1)
 	set_target_properties(psp PROPERTIES COMPILE_FLAGS "")
-	target_link_libraries(psp arrow)
+	target_link_libraries(psp arrow re2)
 
 	# "esm/erspective.cpp.js" from CMAKE_EXECUTABLE_SYNTAX
 	add_executable(perspective_esm src/cpp/emscripten.cpp)
@@ -652,7 +657,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		endif()
 
 		# Link against minimal arrow static library
-		target_link_libraries(psp arrow)
+		target_link_libraries(psp arrow re2)
 
 		target_link_libraries(binding psp)
 

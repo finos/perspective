@@ -1050,8 +1050,8 @@ t_ctx2::get_column_dtype(t_uindex idx) const {
 }
 
 void
-t_ctx2::compute_expressions(
-    std::shared_ptr<t_data_table> flattened_masked, t_expression_vocab& expression_vocab) {
+t_ctx2::compute_expressions(std::shared_ptr<t_data_table> flattened_masked,
+    t_expression_vocab& expression_vocab, t_regex_mapping& regex_mapping) {
     // Clear the transitional expression tables on the context so they are
     // ready for the next update.
     m_expression_tables->clear_transitional_tables();
@@ -1067,8 +1067,8 @@ t_ctx2::compute_expressions(
     const auto& expressions = m_config.get_expressions();
     for (const auto& expr : expressions) {
         // Compute the expressions on the master table.
-        expr->compute(
-            flattened_masked, master_expression_table, expression_vocab);
+        expr->compute(flattened_masked, master_expression_table,
+            expression_vocab, regex_mapping);
     }
 }
 
@@ -1078,7 +1078,8 @@ t_ctx2::compute_expressions(std::shared_ptr<t_data_table> master,
     std::shared_ptr<t_data_table> delta, std::shared_ptr<t_data_table> prev,
     std::shared_ptr<t_data_table> current,
     std::shared_ptr<t_data_table> transitions,
-    std::shared_ptr<t_data_table> existed, t_expression_vocab& expression_vocab) {
+    std::shared_ptr<t_data_table> existed, t_expression_vocab& expression_vocab,
+    t_regex_mapping& regex_mapping) {
     // Clear the tables so they are ready for this round of updates
     m_expression_tables->clear_transitional_tables();
 
@@ -1095,22 +1096,25 @@ t_ctx2::compute_expressions(std::shared_ptr<t_data_table> master,
     const auto& expressions = m_config.get_expressions();
     for (const auto& expr : expressions) {
         // master: compute based on latest state of the gnode state table
-        expr->compute(master, m_expression_tables->m_master, expression_vocab);
+        expr->compute(master, m_expression_tables->m_master, expression_vocab,
+            regex_mapping);
 
         // flattened: compute based on the latest update dataset
-        expr->compute(
-            flattened, m_expression_tables->m_flattened, expression_vocab);
+        expr->compute(flattened, m_expression_tables->m_flattened,
+            expression_vocab, regex_mapping);
 
         // delta: for each numerical column, the numerical delta between the
         // previous value and the current value in the row.
-        expr->compute(delta, m_expression_tables->m_delta, expression_vocab);
+        expr->compute(delta, m_expression_tables->m_delta, expression_vocab,
+            regex_mapping);
 
         // prev: the values of the updated rows before this update was applied
-        expr->compute(prev, m_expression_tables->m_prev, expression_vocab);
+        expr->compute(
+            prev, m_expression_tables->m_prev, expression_vocab, regex_mapping);
 
         // current: the current values of the updated rows
-        expr->compute(
-            current, m_expression_tables->m_current, expression_vocab);
+        expr->compute(current, m_expression_tables->m_current, expression_vocab,
+            regex_mapping);
     }
 
     // Calculate the transitions now that the intermediate tables are computed
