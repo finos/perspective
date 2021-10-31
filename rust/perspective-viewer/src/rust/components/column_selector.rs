@@ -183,8 +183,11 @@ impl Component for ColumnSelector {
             }
             ColumnSelectorMsg::OpenExpressionEditor => {
                 let on_save = self.link.callback(ColumnSelectorMsg::SaveExpression);
-                let mut element =
-                    ExpressionEditorElement::new(self.props.session.clone(), on_save);
+                let mut element = ExpressionEditorElement::new(
+                    self.props.session.clone(),
+                    on_save,
+                    None,
+                );
 
                 let target = self.add_expression_ref.cast::<HtmlElement>().unwrap();
                 element.open(target);

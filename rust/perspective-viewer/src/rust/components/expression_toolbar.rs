@@ -8,9 +8,9 @@
 
 use crate::config::*;
 use crate::custom_elements::expression_editor::ExpressionEditorElement;
+use crate::dragdrop::*;
 use crate::renderer::*;
 use crate::session::*;
-use crate::dragdrop::*;
 use crate::*;
 
 use wasm_bindgen_futures::spawn_local;
@@ -39,7 +39,12 @@ impl ExpressionToolbarProps {
     }
 
     pub fn close_expr(&self) {
-        let expression = self.session.metadata().get_alias_expression(&self.name);
+        let expression = self
+            .session
+            .metadata()
+            .get_expression_by_alias(&self.name)
+            .unwrap();
+
         let ViewConfig {
             mut expressions, ..
         } = self.session.get_view_config();
@@ -52,7 +57,12 @@ impl ExpressionToolbarProps {
     }
 
     fn is_closable(&self) -> bool {
-        !self.session.is_column_expression_in_use(&self.name) && !self.dragdrop.get_drag_column().map(|x| x == self.name).unwrap_or_default()
+        !self.session.is_column_expression_in_use(&self.name)
+            && !self
+                .dragdrop
+                .get_drag_column()
+                .map(|x| x == self.name)
+                .unwrap_or_default()
     }
 }
 
@@ -118,16 +128,13 @@ impl Component for ExpressionToolbar {
                 let target =
                     self.props.add_expression_ref.cast::<HtmlElement>().unwrap();
 
-                let expr = self
-                    .props
-                    .session
-                    .metadata()
-                    .get_alias_expression(&self.props.name);
-                let mut element =
-                    ExpressionEditorElement::new(self.props.session.clone(), on_save);
+                let mut element = ExpressionEditorElement::new(
+                    self.props.session.clone(),
+                    on_save,
+                    Some(self.props.name.to_owned()),
+                );
 
                 element.open(target);
-                element.set_content(&expr);
                 self.expression_editor = Some(element);
                 false
             }

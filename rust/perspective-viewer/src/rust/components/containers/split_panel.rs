@@ -31,7 +31,7 @@ impl Drop for ResizingState {
     /// Without this, the `Closure` objects would not leak, but the document will
     /// continue to call them, causing runtime exceptions.
     fn drop(&mut self) {
-        let result = maybe! {
+        let result: Result<(), JsValue> = maybe! {
             let document = web_sys::window().unwrap().document().unwrap();
             let body = document.body().unwrap();
             let mousemove = self.mousemove.as_ref().unchecked_ref();

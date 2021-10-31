@@ -148,16 +148,14 @@ impl FromStr for SingleAggregate {
     }
 }
 
-#[derive(Clone, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
-#[cfg_attr(test, derive(Debug))]
+#[derive(Clone, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
 #[serde()]
 pub enum MultiAggregate {
     #[serde(rename = "weighted mean")]
     WeightedMean,
 }
 
-#[derive(Clone, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
-#[cfg_attr(test, derive(Debug))]
+#[derive(Clone, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
 #[serde(untagged)]
 pub enum Aggregate {
     SingleAggregate(SingleAggregate),

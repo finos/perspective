@@ -129,8 +129,7 @@ impl Component for ConfigSelector {
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
-            ConfigSelectorMsg::DragStart(_)
-            | ConfigSelectorMsg::ViewCreated => true,
+            ConfigSelectorMsg::DragStart(_) | ConfigSelectorMsg::ViewCreated => true,
             ConfigSelectorMsg::DragEnd => true,
             ConfigSelectorMsg::DragOverRowPivots(index) => {
                 self.props.dragdrop.drag_enter(DropAction::RowPivots, index)
@@ -279,9 +278,7 @@ impl Component for ConfigSelector {
         // web_sys::console::log_1(&"redraw".into());
         let dragend = Callback::from({
             let dragdrop = self.props.dragdrop.clone();
-            move |_event| {
-                dragdrop.drag_end()
-            }
+            move |_event| dragdrop.drag_end()
         });
 
         html! {

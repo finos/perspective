@@ -200,7 +200,9 @@ where
                     .cloned();
 
                 if !self.props.allow_duplicates {
-                    columns.retain(|x| x.1 .1.as_ref().unwrap().props.get_item() != *column);
+                    columns.retain(|x| {
+                        x.1 .1.as_ref().unwrap().props.get_item() != *column
+                    });
                 }
 
                 // If inserting into the middle of the list, use

@@ -11,9 +11,11 @@ use crate::js::monaco::*;
 use crate::js::perspective::*;
 use crate::session::Session;
 use crate::utils::*;
+use crate::*;
 
 use std::cell::RefCell;
 use std::convert::TryFrom;
+use std::ops::Deref;
 use std::rc::Rc;
 use wasm_bindgen::{prelude::*, JsCast};
 use wasm_bindgen_futures::future_to_promise;
@@ -24,8 +26,8 @@ static CSS: &str = include_str!("../../../dist/css/expression-editor.css");
 
 pub enum ExpressionEditorMsg {
     SetPos(i32, i32),
-    SetContent(String),
     SetTheme(String),
+    Reset,
     Validate(JsValue),
     EnableSave(bool),
     SaveExpr,
@@ -37,23 +39,16 @@ pub struct ExpressionEditorProps {
     pub on_init: Callback<()>,
     pub on_validate: Callback<bool>,
     pub session: Session,
+    pub alias: Option<String>,
 }
 
-/// A label widget which displays a row count and a "projection" count, the number of
-/// rows in the `View` which includes aggregate rows.
-#[derive(Clone)]
+/// Expression editor component wraps `monaco-editor` and a button toolbar.
 pub struct ExpressionEditor {
     top: i32,
     left: i32,
-    container: NodeRef,
-    editor: Rc<RefCell<Option<(Editor, JsMonacoEditor)>>>,
-    props: ExpressionEditorProps,
-    link: ComponentLink<Self>,
     save_enabled: bool,
-    expression: Rc<RefCell<Option<String>>>,
-    on_validate: Rc<Closure<dyn Fn(JsValue)>>,
-    on_save: Rc<Closure<dyn Fn(JsValue)>>,
-    theme: Rc<RefCell<Option<String>>>,
+    edit_enabled: bool,
+    state: ExpressionEditorState,
 }
 
 impl Component for ExpressionEditor {
@@ -61,25 +56,13 @@ impl Component for ExpressionEditor {
     type Properties = ExpressionEditorProps;
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let on_validate =
-            Rc::new(link.callback(ExpressionEditorMsg::Validate).into_closure());
-        let on_save = Rc::new(
-            link.callback(|_| ExpressionEditorMsg::SaveExpr)
-                .into_closure(),
-        );
-
+        let state = ExpressionEditorState::new(link, props);
         ExpressionEditor {
             top: 0,
             left: 0,
-            container: NodeRef::default(),
-            editor: Rc::new(RefCell::new(None)),
-            expression: Rc::new(RefCell::new(None)),
-            props,
-            link,
             save_enabled: false,
-            on_validate,
-            on_save,
-            theme: Rc::new(RefCell::new(None)),
+            edit_enabled: false,
+            state,
         }
     }
 
@@ -88,44 +71,57 @@ impl Component for ExpressionEditor {
             ExpressionEditorMsg::SetPos(top, left) => {
                 self.top = top;
                 self.left = left;
-                self.set_default_content();
                 true
             }
             ExpressionEditorMsg::Validate(_val) => {
-                let _promise = future_to_promise(self.clone().validate_expr());
+                drop(future_to_promise(self.state.clone().validate_expr()));
                 false
             }
-            ExpressionEditorMsg::EnableSave(x) => {
-                self.props.on_validate.emit(false);
-                self.save_enabled = x;
+            ExpressionEditorMsg::Reset => {
+                self.edit_enabled = false;
+                self.save_enabled = false;
+                maybe!({
+                    let alias = self.state.props.alias.as_ref()?;
+                    let session = &self.state.props.session;
+                    let old = session.metadata().get_expression_by_alias(alias)?;
+                    self.state.editor.borrow().as_ref()?.1.set_value(&old);
+                    Some(())
+                })
+                .unwrap_or_default();
+
                 true
             }
-            ExpressionEditorMsg::SetContent(expr) => {
-                if let Some((_, ref editor)) = *self.editor.borrow() {
-                    editor.set_value(&expr);
-                } else {
-                    *self.expression.borrow_mut() = Some(expr);
-                }
+            ExpressionEditorMsg::EnableSave(x) => {
+                self.state.props.on_validate.emit(false);
+                let is_edited = maybe!({
+                    let alias = self.state.props.alias.as_ref()?;
+                    let session = &self.state.props.session;
+                    let old = session.metadata().get_expression_by_alias(alias)?;
+                    let value = self.state.editor.borrow().as_ref()?.1.get_value();
+                    let new = value.as_string()?;
+                    let is_edited = new != old;
+                    session.metadata_mut().set_edit_by_alias(alias, new);
+                    Some(is_edited)
+                });
 
-                false
+                self.edit_enabled = is_edited.unwrap_or_default();
+                self.save_enabled = x && is_edited.unwrap_or(true);
+                true
             }
             ExpressionEditorMsg::SetTheme(theme) => {
-                if let Some((ref editor, _)) = *self.editor.borrow() {
+                if let Some((ref editor, _)) = *self.state.editor.borrow() {
                     init_theme(theme.as_str(), editor);
                 }
 
-                *self.theme.borrow_mut() = Some(theme);
+                *self.state.theme.borrow_mut() = Some(theme);
                 false
             }
             ExpressionEditorMsg::SaveExpr => {
                 if self.save_enabled {
-                    match self.editor.borrow().as_ref() {
-                        None => {}
-                        Some((_, x)) => {
-                            let expr = x.get_value();
-                            self.props.on_save.emit(expr);
-                            x.set_value("");
-                        }
+                    if let Some((_, x)) = self.state.editor.borrow().as_ref() {
+                        let expr = x.get_value();
+                        self.state.props.on_save.emit(expr);
+                        x.set_value("");
                     }
                 }
                 false
@@ -134,31 +130,44 @@ impl Component for ExpressionEditor {
     }
 
     fn change(&mut self, _props: Self::Properties) -> ShouldRender {
-        true
+        web_sys::console::warn_1(&"Unreachable".into());
+        false
     }
 
     fn rendered(&mut self, first_render: bool) {
         if first_render {
-            let _promise = future_to_promise(self.clone().init_monaco_editor());
-        } else if self.editor.borrow().is_some() {
-            self.editor.borrow().as_ref().unwrap().1.focus();
+            drop(future_to_promise(self.state.clone().init_monaco_editor()));
+        } else if self.state.0.editor.borrow().is_some() {
+            self.state.editor.borrow().as_ref().unwrap().1.focus();
         }
     }
 
     fn view(&self) -> Html {
-        let click = self.link.callback_once(|_| ExpressionEditorMsg::SaveExpr);
+        let reset = self.state.link.callback(|_| ExpressionEditorMsg::Reset);
+        let save = self
+            .state
+            .link
+            .callback_once(|_| ExpressionEditorMsg::SaveExpr);
+
         html! {
             <>
                 <style>
                     { &CSS }
                     { format!(":host{{left:{}px;top:{}px;}}", self.left, self.top) }
                 </style>
-                <div id="monaco-container" ref={ self.container.clone() } style=""></div>
+                <div id="monaco-container" ref={ self.state.container.clone() } style=""></div>
                 <div id="psp-expression-editor-actions">
+                    <button
+                        id="psp-expression-editor-button-reset"
+                        class="psp-expression-editor__button"
+                        onmousedown={ reset }
+                        disabled={ !self.edit_enabled }>
+                        { "Reset" }
+                    </button>
                     <button
                         id="psp-expression-editor-button-save"
                         class="psp-expression-editor__button"
-                        onmousedown={ click }
+                        onmousedown={ save }
                         disabled={ !self.save_enabled }>
                         { "Save" }
                     </button>
@@ -168,7 +177,49 @@ impl Component for ExpressionEditor {
     }
 }
 
-impl ExpressionEditor {
+struct ExpressionEditorStateImpl {
+    editor: RefCell<Option<(Editor, JsMonacoEditor)>>,
+    props: ExpressionEditorProps,
+    on_validate: Closure<dyn Fn(JsValue)>,
+    on_save: Closure<dyn Fn(JsValue)>,
+    link: ComponentLink<ExpressionEditor>,
+    theme: RefCell<Option<String>>,
+    container: NodeRef,
+}
+
+/// `ExpressionEditorState` is useful to separate from `ExpressionEditor` to
+/// group async-needed state together and minimize ref counting.
+#[derive(Clone)]
+struct ExpressionEditorState(Rc<ExpressionEditorStateImpl>);
+
+impl Deref for ExpressionEditorState {
+    type Target = ExpressionEditorStateImpl;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl ExpressionEditorState {
+    fn new(
+        link: ComponentLink<ExpressionEditor>,
+        props: ExpressionEditorProps,
+    ) -> Self {
+        let on_validate = link.callback(ExpressionEditorMsg::Validate).into_closure();
+        let on_save = link
+            .callback(|_| ExpressionEditorMsg::SaveExpr)
+            .into_closure();
+
+        ExpressionEditorState(Rc::new(ExpressionEditorStateImpl {
+            container: NodeRef::default(),
+            editor: RefCell::new(None),
+            link,
+            props,
+            on_save,
+            on_validate,
+            theme: RefCell::new(None),
+        }))
+    }
+
     /// Initialize the `monaco-editor` for this `<perspective-expression-editor>`.
     /// This method should only be called once per element.
     async fn init_monaco_editor(self) -> Result<JsValue, JsValue> {
@@ -193,17 +244,26 @@ impl ExpressionEditor {
         let cmd = (KeyMod::Shift as u32) | (KeyCode::Enter as u32);
         editor.add_command(cmd, self.on_save.as_ref().as_ref().unchecked_ref());
         let cb = self.on_validate.as_ref().as_ref().unchecked_ref();
-        editor.get_model().on_did_change_content(cb);
         *self.editor.borrow_mut() = Some((monaco, editor.clone()));
         await_animation_frame().await?;
         editor.focus();
         self.props.on_init.emit(());
-        if let Some(expr) = self.expression.borrow_mut().take() {
-            editor.set_value(&expr);
+        let expression = maybe!({
+            let alias = self.props.alias.as_ref()?;
+            let edit = self.props.session.metadata().get_edit_by_alias(alias);
+            edit.or_else(|| {
+                self.props.session.metadata().get_expression_by_alias(alias)
+            })
+        });
+
+        if let Some(expr) = expression.as_ref() {
+            editor.set_value(expr);
+            drop(self.clone().validate_expr().await?);
         } else {
             self.set_default_content();
         }
 
+        editor.get_model().on_did_change_content(cb);
         Ok(JsValue::UNDEFINED)
     }
 
@@ -238,7 +298,7 @@ impl ExpressionEditor {
         let (msg, arr) = match self.props.session.validate_expr(expr).await? {
             None => (true, js_sys::Array::new()),
             Some(err) => {
-                let marker = error_to_market(err);
+                let marker = error_to_marker(err);
                 let args = JsValue::from_serde(&marker).unwrap();
                 let arr = [args].iter().collect::<js_sys::Array>();
                 (false, arr)
@@ -251,7 +311,7 @@ impl ExpressionEditor {
     }
 }
 
-fn error_to_market(err: PerspectiveValidationError) -> JsMonacoModelMarker<'static> {
+fn error_to_marker(err: PerspectiveValidationError) -> JsMonacoModelMarker<'static> {
     JsMonacoModelMarker {
         code: "".to_owned(),
         start_line_number: u32::try_from(err.line + 1).unwrap_or(0),

@@ -15,7 +15,7 @@ utils.with_server({}, () => {
         "superstore.html",
         () => {
             test.capture(
-                "click on add column button opens the expression UI.",
+                "Click on add column button opens the expression UI.",
                 async (page) => {
                     await page.evaluate(async () => {
                         const elem =
@@ -37,7 +37,6 @@ utils.with_server({}, () => {
                         )?.shadowRoot;
 
                         return (
-                            root?.querySelector(".cdr.squiggly-error") &&
                             root?.querySelector(".rename-label") &&
                             root?.querySelector(
                                 ".invisible.scrollbar.vertical.fade"

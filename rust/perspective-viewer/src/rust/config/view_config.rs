@@ -25,8 +25,8 @@ use {crate::*, js_sys::Array};
 #[cfg(test)]
 use wasm_bindgen_test::*;
 
-#[derive(Clone, Deserialize, Default, Serialize)]
-#[cfg_attr(test, derive(Debug, PartialEq))]
+#[derive(Clone, Debug, Deserialize, Default, Serialize)]
+#[cfg_attr(test, derive(PartialEq))]
 #[serde(deny_unknown_fields)]
 pub struct ViewConfig {
     #[serde(default)]

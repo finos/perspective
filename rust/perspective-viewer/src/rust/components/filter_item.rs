@@ -17,9 +17,9 @@ use super::containers::dragdrop_list::*;
 use super::containers::dropdown::*;
 
 use chrono::{Local, NaiveDate, NaiveDateTime, TimeZone, Utc};
+use wasm_bindgen::JsCast;
 use web_sys::*;
 use yew::prelude::*;
-use wasm_bindgen::JsCast;
 
 /// A control for a single filter condition.
 pub struct FilterItem {
@@ -109,9 +109,7 @@ impl FilterItemProperties {
             (Type::Bool, FilterTerm::Scalar(Scalar::Bool(x))) => {
                 Some((if *x { "true" } else { "false" }).to_owned())
             }
-            (Type::Bool, _) => {
-                Some("true".to_owned())
-            }
+            (Type::Bool, _) => Some("true".to_owned()),
             (_, x) => Some(format!("{}", x)),
         }
     }
@@ -133,11 +131,9 @@ impl FilterItemProperties {
                 FilterOp::IsNotNull,
                 FilterOp::IsNull,
             ],
-            Some(Type::Bool) => vec![
-                FilterOp::EQ,
-                FilterOp::IsNull,
-                FilterOp::IsNotNull
-            ],
+            Some(Type::Bool) => {
+                vec![FilterOp::EQ, FilterOp::IsNull, FilterOp::IsNotNull]
+            }
             Some(_) => vec![
                 FilterOp::EQ,
                 FilterOp::NE,
@@ -148,7 +144,7 @@ impl FilterItemProperties {
                 FilterOp::IsNotNull,
                 FilterOp::IsNull,
             ],
-            _ => vec![]
+            _ => vec![],
         }
     }
 
@@ -262,7 +258,12 @@ impl Component for FilterItem {
             props.update_filter_input(input.clone());
         }
 
-        FilterItem { props, link, input, input_ref }
+        FilterItem {
+            props,
+            link,
+            input,
+            input_ref,
+        }
     }
 
     fn update(&mut self, msg: FilterItemMsg) -> bool {
@@ -278,7 +279,7 @@ impl Component for FilterItem {
                 } else {
                     input
                 };
-                
+
                 if self.props.is_suggestable() {
                     self.props.filter_dropdown.autocomplete(
                         column,
@@ -343,11 +344,7 @@ impl Component for FilterItem {
         let idx = self.props.idx;
         let filter = self.props.filter.clone();
         let column = filter.0.to_owned();
-        let col_type = self
-            .props
-            .session
-            .metadata()
-            .get_column_table_type(&column);
+        let col_type = self.props.session.metadata().get_column_table_type(&column);
 
         let select = self.link.callback(FilterItemMsg::FilterOpSelect);
 
@@ -471,7 +468,7 @@ impl Component for FilterItem {
                         checked={ self.input == "true" }
                         oninput={ input }/>
                 }
-            },
+            }
             None => {
                 html! {}
             }
@@ -518,7 +515,7 @@ impl Component for FilterItem {
                                 }
                             </label>
                         }
-                    } 
+                    }
                 }
             </>
         }

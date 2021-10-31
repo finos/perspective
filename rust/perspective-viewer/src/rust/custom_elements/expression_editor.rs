@@ -32,6 +32,7 @@ impl ExpressionEditorElement {
     pub fn new(
         session: Session,
         on_save: Callback<JsValue>,
+        alias: Option<String>,
     ) -> ExpressionEditorElement {
         let document = window().unwrap().document().unwrap();
         let editor = document
@@ -66,6 +67,7 @@ impl ExpressionEditorElement {
             on_init,
             on_validate,
             session,
+            alias,
         };
 
         let modal = ModalElement::new(editor, props, true);
@@ -81,11 +83,6 @@ impl ExpressionEditorElement {
 
     pub fn destroy(self) -> Result<(), JsValue> {
         self.modal.destroy()
-    }
-
-    pub fn set_content(&self, content: &str) {
-        self.modal
-            .send_message(ExpressionEditorMsg::SetContent(content.to_owned()));
     }
 
     pub fn connected_callback(&self) {}
