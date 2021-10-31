@@ -19,8 +19,8 @@ try {
         cwd,
         stdio,
     });
-    execSync(`cpx esm/**/* ../esm`, {cwd, stdio});
-    execSync(`cpx cjs/**/* ../cjs`, {cwd, stdio});
+    execSync(`cpy esm/**/* ../esm`, {cwd, stdio});
+    execSync(`cpy cjs/**/* ../cjs`, {cwd, stdio});
 } catch (e) {
     console.error(e);
     process.exit(1);

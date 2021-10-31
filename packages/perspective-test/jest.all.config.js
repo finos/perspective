@@ -12,8 +12,6 @@ module.exports = {
     transform: {
         ".js$": "@finos/perspective-test/src/js/transform.js",
         ".html$": "html-loader-jest",
-        // Transform typescript for perspective-jupyterlab
-        ".ts": "ts-jest",
     },
     collectCoverage: true,
     collectCoverageFrom: ["packages/perspective/dist/cjs/**"],

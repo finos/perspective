@@ -11,6 +11,7 @@ module.exports = common({}, (config) =>
             libraryExport: "default",
             chunkFilename: "perspective.chunk_[id].js",
             path: path.resolve(__dirname, "../../dist/umd"),
+            assetModuleFilename: "[name][ext][query]",
         },
     })
 );

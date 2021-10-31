@@ -19,7 +19,7 @@
         "build:rollup:esm": "rollup --config src/config/rollup.config.js",
         "build:webpack:umd": "webpack --color --config src/config/webpack.config.js",
         "build": "npm-run-all build:rollup:esm build:webpack:umd",
-        "test:build": "cpx \"test/html/*\" dist/umd",
+        "test:build": "cpy \"test/html/*\" dist/umd",
         "test:run": "jest --rootDir=. --config=../perspective-test/jest.config.js --color",
         "test": "npm-run-all test:build test:run",
         "watch:rollup": "rollup --watch --config src/config/rollup.config.js",

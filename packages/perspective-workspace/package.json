@@ -15,7 +15,7 @@
         "bench": "npm-run-all bench:build bench:run",
         "bench:build": "echo \"No Benchmarks\"",
         "bench:run": "echo \"No Benchmarks\"",
-        "build:babel": "cpx \"src/**/*\" dist && babel src/js --source-maps --out-dir dist/esm",
+        "build:babel": "cpy --parents --cwd src \"**/*\" ../dist && babel src/js --source-maps --out-dir dist/esm",
         "build:styles": "webpack --color --config config/theme.config.js",
         "build:webpack:cjs": "webpack --color --config config/cjs.config.js",
         "build:webpack:umd": "webpack --color --config config/umd.config.js",
@@ -45,13 +45,9 @@
         "@lumino/messaging": "1.4.3",
         "@lumino/virtualdom": "1.8.0",
         "@lumino/widgets": "1.17.0",
-        "core-js": "^3.6.4",
         "lodash": "^4.17.4"
     },
     "devDependencies": {
-        "@finos/perspective-test": "^1.0.1",
-        "babel-loader": "^8.0.6",
-        "babel-runtime": "^6.26.0",
-        "lodash.clonedeep": "^4.5.0"
+        "@finos/perspective-test": "^1.0.1"
     }
 }

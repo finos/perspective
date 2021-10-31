@@ -89,14 +89,8 @@ class PerspectiveWebpackPlugin {
         if (!(this.options.inline || this.options.inlineWasm)) {
             rules.push({
                 test: /\.wasm$/,
-                type: "javascript/auto",
                 include: [this.options.wasmPath, this.options.viewerPath],
-                use: {
-                    loader: require.resolve("file-loader"),
-                    options: {
-                        name: this.options.wasmName,
-                    },
-                },
+                type: "asset/resource",
             });
         } else {
             rules.push({
@@ -137,7 +131,7 @@ class PerspectiveWebpackPlugin {
         rules.push({
             test: /\.ttf$/,
             include: /monaco\-editor/,
-            use: [require.resolve("file-loader")],
+            type: "asset/resource",
         });
 
         const perspective_config = get_config();

@@ -54,11 +54,9 @@
     "license": "Apache-2.0",
     "dependencies": {
         "@babel/runtime": "^7.8.4",
-        "core-js": "^3.6.4",
         "d3-array": "^1.2.1",
         "detectie": "1.0.0",
         "flatbuffers": "^1.10.2",
-        "lodash": "^4.17.4",
         "text-encoding-utf-8": "^1.0.2",
         "tslib": "^1.9.3",
         "ws": "^6.1.2"
@@ -66,6 +64,7 @@
     "devDependencies": {
         "@finos/perspective-cpp": "^1.0.1",
         "jsverify": "^0.8.4",
+        "lodash": "^4.17.4",
         "moment": "^2.19.1",
         "papaparse": "^5.2.0"
     }

@@ -1,5 +1,5 @@
 {
-    "name": "webpack",
+    "name": "webpack-example",
     "private": true,
     "version": "1.0.1",
     "description": "An example app built using `@finos/perspective-viewer`.",
@@ -17,7 +17,6 @@
     "devDependencies": {
         "@finos/perspective-webpack-plugin": "^1.0.1",
         "css-loader": "^0.28.7",
-        "file-loader": "^4.2.0",
         "style-loader": "^0.18.2",
         "webpack": "^5.14.0",
         "webpack-cli": "^4.3.1",

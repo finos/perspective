@@ -22,7 +22,6 @@
     "license": "Apache-2.0",
     "dependencies": {
         "@finos/perspective": "^1.0.1",
-        "core-js": "^3.6.4",
         "xml-formatter": "2.4.0"
     }
 }

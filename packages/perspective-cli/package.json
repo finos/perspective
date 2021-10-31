@@ -14,7 +14,7 @@
     "typings": "index.d.ts",
     "scripts": {
         "prebuild": "mkdirp build",
-        "build": "babel src/js --source-maps --out-dir build && cpx \"src/html/*\" build/html",
+        "build": "babel src/js --source-maps --out-dir build && cpy \"src/html/*\" build/html",
         "clean": "rimraf build"
     },
     "repository": {
@@ -31,7 +31,6 @@
         "@finos/perspective-viewer": "^1.0.1",
         "@finos/perspective-viewer-d3fc": "^1.0.1",
         "@finos/perspective-viewer-datagrid": "^1.0.1",
-        "commander": "^2.19.0",
-        "core-js": "^3.6.4"
+        "commander": "^2.19.0"
     }
 }
