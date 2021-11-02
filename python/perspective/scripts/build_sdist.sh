@@ -39,4 +39,12 @@ echo "Testing sdist-built assets"
 python3 -c "import perspective;print(perspective.is_libpsp())"
 
 echo "-----------------------"
+echo "Cleaning tmp"
+
+cd ../..
+rm -rf tmp
+
+echo $(pwd)
+
+echo "-----------------------"
 echo "Done.."
