@@ -10,7 +10,19 @@
 const {execute, clean} = require("./script_utils.js");
 const fs = require("fs");
 
+const clean_and_build = () => {
+    execute`yarn clean --deps`;
+    execute`rm -rf node_modules`;
+    execute`yarn`;
+    execute`yarn build`;
+};
+
+// publish is run after version, so any package.json has the right version
+const pkg_json = require("./packages/perspective/package.json");
+const PERSPECTIVE_VERSION = pkg_json.version;
+
 try {
+    // NPM publish
     execute`
         github_changelog_generator
         --token=${process.env.GITHUB_TOKEN}
@@ -26,12 +38,23 @@ try {
 
     execute`git add CHANGELOG.md`;
     fs.writeFileSync("./.perspectiverc", `PSP_PROJECT=js`);
-    execute`yarn clean --deps`;
-    execute`rm -rf node_modules`;
-    execute`yarn`;
-    execute`yarn build`;
+    clean_and_build();
 
     execute`yarn lerna publish --force-publish --no-push`;
+
+    // Python publish
+    console.log(`--- Building "perspective-python" ---`);
+    fs.writeFileSync("./.perspectiverc", `PSP_PROJECT=python`);
+    clean_and_build();
+
+    // sdist into `python/perspective/dist`, and test the sdist as well.
+    execute`cd ./python/perspective && ./scripts/build_sdist.sh`;
+    const sdist_name = `perspective-python-${PERSPECTIVE_VERSION}.tar.gz`;
+
+    console.log(
+        `--- Uploading source distribution "${sdist_name}" to PyPi" ---`
+    );
+    execute`python3 -m twine upload ${sdist_name}`;
 } catch (e) {
     console.error(e.message);
     process.exit(1);
