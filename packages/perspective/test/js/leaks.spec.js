@@ -135,6 +135,62 @@ describe("leaks", function () {
             await table.delete();
         });
 
+        /**
+         * Because the expression vocab and the regex cache is per-table and
+         * not per-view, we should be able to leak test the table creation
+         * and view creation.
+         */
+        it.skip("0 sided regex does not leak", async () => {
+            const expressions = [
+                "match(\"a\", '.{1}')",
+                "match_all(\"a\", '[a-z]{1}')",
+                "search(\"a\", '.')",
+            ];
+
+            await leak_test(async () => {
+                const table = await perspective.table({
+                    a: "abcdefghijklmnopqrstuvwxyz".split(""),
+                });
+                const view = await table.view({
+                    expressions: [
+                        expressions[
+                            Math.floor(Math.random() * expressions.length)
+                        ],
+                    ],
+                });
+                const expression_schema = await view.expression_schema();
+                expect(Object.keys(expression_schema).length).toEqual(1);
+                await view.delete();
+                await table.delete();
+            });
+        });
+
+        it.skip("0 sided string does not leak", async () => {
+            const table = await perspective.table({
+                a: "abcdefghijklmnopqrstuvwxyz".split(""),
+            });
+
+            const expressions = [
+                "var x := 'abcdefghijklmnopqrstuvwxyz'; concat(\"a\", x, 'abc')",
+                "var x := 'abcdefghijklmnopqrstuvwxyz'; var y := 'defhijklmnopqrst'; concat(\"a\", x, 'abc', y)",
+            ];
+
+            await leak_test(async () => {
+                const view = await table.view({
+                    expressions: [
+                        expressions[
+                            Math.floor(Math.random() * expressions.length)
+                        ],
+                    ],
+                });
+                const expression_schema = await view.expression_schema();
+                expect(Object.keys(expression_schema).length).toEqual(1);
+                await view.delete();
+            });
+
+            await table.delete();
+        });
+
         it("1 sided does not leak", async () => {
             const table = await perspective.table({
                 a: [1, 2, 3, 4],

@@ -525,6 +525,13 @@ thread_local! {
                 documentation: "Converts the given argument to a boolean".to_owned(),
             },
             CompletionItemSuggestion {
+                label: "random".to_owned(),
+                kind: 1,
+                insert_text: "random()".to_owned(),
+                insert_text_rules: 4,
+                documentation: "Returns a random float between 0 and 1, inclusive.".to_owned(),
+            },
+            CompletionItemSuggestion {
                 label: "match".to_owned(),
                 kind: 1,
                 insert_text: "match(${1:string}, ${2:pattern})".to_owned(),
@@ -532,9 +539,9 @@ thread_local! {
                 documentation: "Returns True if any part of string matches pattern, and False otherwise.".to_owned(),
             },
             CompletionItemSuggestion {
-                label: "fullmatch".to_owned(),
+                label: "match_all".to_owned(),
                 kind: 1,
-                insert_text: "fullmatch(${1:string}, ${2:pattern})".to_owned(),
+                insert_text: "match_all(${1:string}, ${2:pattern})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Returns True if the whole string matches pattern, and False otherwise.".to_owned(),
             },
@@ -544,6 +551,34 @@ thread_local! {
                 insert_text: "search(${1:string}, ${2:pattern})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Returns the substring that matches the first capturing group in pattern, or null if there are no capturing groups in the pattern or if there are no matches.".to_owned(),
+            },
+            CompletionItemSuggestion {
+                label: "indexof".to_owned(),
+                kind: 1,
+                insert_text: "indexof(${1:string}, ${2:pattern}, ${3:output_vector})".to_owned(),
+                insert_text_rules: 4,
+                documentation: "Writes into index 0 and 1 of output_vector the start and end indices of the substring that matches the first capturing group in pattern.\n\nReturns true if there is a match and output was written, or false if there are no capturing groups in the pattern, if there are no matches, or if the indices are invalid.".to_owned(),
+            },
+            CompletionItemSuggestion {
+                label: "substring".to_owned(),
+                kind: 1,
+                insert_text: "substring(${1:string}, ${2:start_idx}, ${3:length})".to_owned(),
+                insert_text_rules: 4,
+                documentation: "Returns a substring of string from start_idx with the given length. If length is not passed in, returns substring from start_idx to the end of the string. Returns null if the string or any indices are invalid.".to_owned(),
+            },
+            CompletionItemSuggestion {
+                label: "replace".to_owned(),
+                kind: 1,
+                insert_text: "replace(${1:string}, ${2:pattern}, ${3:replacer})".to_owned(),
+                insert_text_rules: 4,
+                documentation: "Replaces the first match of pattern in string with replacer, or return the original string if no replaces were made.".to_owned(),
+            },
+            CompletionItemSuggestion {
+                label: "replace_all".to_owned(),
+                kind: 1,
+                insert_text: "replace(${1:string}, ${2:pattern}, ${3:replacer})".to_owned(),
+                insert_text_rules: 4,
+                documentation: "Replaces all non-overlapping matches of pattern in string with replacer, or return the original string if no replaces were made.".to_owned(),
             },
         ]
     };

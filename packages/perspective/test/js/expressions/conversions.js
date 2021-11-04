@@ -784,7 +784,7 @@ module.exports = (perspective) => {
 
             expect(validated.errors).toEqual({
                 computed: {
-                    column: 8,
+                    column: 7,
                     error_message:
                         "Parser Error - Zero parameter call to generic function: date not allowed",
                     line: 1,
@@ -959,7 +959,7 @@ module.exports = (perspective) => {
 
             expect(validated.errors).toEqual({
                 computed1: {
-                    column: 12,
+                    column: 11,
                     error_message:
                         "Parser Error - Zero parameter call to generic function: datetime not allowed",
                     line: 1,
@@ -985,7 +985,7 @@ module.exports = (perspective) => {
                 computed5: {
                     error_message:
                         "Parser Error - Failed parameter type check for function 'datetime', Expected 'T' call set: 'TT'",
-                    column: 21,
+                    column: 20,
                     line: 1,
                 },
             });

@@ -20,6 +20,7 @@
 #include <perspective/expression_vocab.h>
 #include <perspective/regex.h>
 #include <boost/algorithm/string.hpp>
+#include <random>
 #include <type_traits>
 #include <date/date.h>
 #include <tsl/hopscotch_set.h>
@@ -130,10 +131,10 @@ namespace computed_function {
     REGEX_FUNCTION_HEADER(match)
 
     /**
-     * @brief fullmatch(string, pattern) => True if the string fully matches
+     * @brief match_all(string, pattern) => True if the string fully matches
      * pattern, and False otherwise.
      */
-    REGEX_FUNCTION_HEADER(fullmatch)
+    REGEX_FUNCTION_HEADER(match_all)
 
     /**
      * @brief search(string, pattern) => Returns the substring in the first
@@ -158,11 +159,18 @@ namespace computed_function {
     STRING_FUNCTION_HEADER(substring)
 
     /**
-     * @brief replace(string, pattern, replace_str) => string with all matches
-     * of pattern replaced with replace_str, or the original string without
-     * any replacements if the string does not match pattern.
+     * @brief replace(string, replace_str, pattern) => Replaces the first match
+     * of pattern inside string with replace_str, or returns the original
+     * string if no replacements were made.
      */
     REGEX_STRING_FUNCTION_HEADER(replace)
+
+    /**
+     * @brief replace_all(string, replace_str, pattern) => Replaces all matches
+     * of pattern inside string with replace_str, or returns the original
+     * string if no replacements were made.
+     */
+    REGEX_STRING_FUNCTION_HEADER(replace_all)
 
 #define FUNCTION_HEADER(NAME)                                                  \
     struct NAME : public exprtk::igeneric_function<t_tscalar> {                \
@@ -321,6 +329,21 @@ namespace computed_function {
      * new datetime value.
      */
     FUNCTION_HEADER(make_datetime)
+
+    /**
+     * @brief Return a random float between 0.0 and 1.0, inclusive.
+     */
+    struct random : public exprtk::igeneric_function<t_tscalar> {
+        random();
+        ~random();
+
+        t_tscalar operator()(t_parameter_list parameters);
+
+        // faster unit lookups, since we are calling this lookup in a tight
+        // loop.
+        static std::default_random_engine RANDOM_ENGINE;
+        static std::uniform_real_distribution<double> DISTRIBUTION;
+    };
 
 } // end namespace computed_function
 } // end namespace perspective
