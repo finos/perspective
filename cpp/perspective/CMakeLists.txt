@@ -100,7 +100,6 @@ option(PSP_WASM_BUILD "Build the WebAssembly Project" ON)
 option(PSP_CPP_BUILD "Build the C++ Project" OFF)
 option(PSP_PYTHON_BUILD "Build the Python Bindings" OFF)
 option(PSP_CPP_BUILD_STRICT "Build the C++ with strict warnings" OFF)
-option(PSP_BUILD_DOCS "Build the Perspective documentation" OFF)
 
 if (NOT DEFINED PSP_WASM_BUILD)
 	set(PSP_WASM_BUILD ON)
@@ -182,12 +181,6 @@ if(CMAKE_BUILD_TYPE_LOWER STREQUAL debug)
 	add_definitions(-DPSP_DEBUG)
 else()
 	set(BUILD_MESSAGE "${BUILD_MESSAGE}\n${Cyan}Building RELEASE${ColorReset}")
-endif()
-
-if(PSP_BUILD_DOCS)
-	set(BUILD_MESSAGE "${BUILD_MESSAGE}\n${Cyan}Building Perspective Documentation${ColorReset}")
-else()
-	set(BUILD_MESSAGE "${BUILD_MESSAGE}\n${Cyan}Skipping Perspective Documentation${ColorReset}")
 endif()
 
 
@@ -686,33 +679,3 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		target_compile_definitions(psp PRIVATE _WIN32=1)
 	endif()
 endif()
-
-########
-# Docs #
-########
-if(PSP_BUILD_DOCS)
-	add_custom_target(doxygen)
-	add_custom_command(TARGET doxygen
-	    COMMAND doxygen doxygen.conf
-	    WORKING_DIRECTORY ../../docs
-	    COMMENT "Build doxygen xml files used by sphinx/breathe."
-	)
-
-	add_custom_target(docs-html ALL)
-	add_custom_command(TARGET docs-html
-		COMMAND sphinx-build -b html . build/html
-			WORKING_DIRECTORY ../../docs
-			COMMENT "Build html documentation"
-		)
-	add_dependencies(docs-html doxygen)
-
-	# add_custom_target(docs-markdown ALL)
-	# add_custom_command(TARGET docs-html
-	# 	COMMAND sphinx-build -M markdown . build/
-	# 		WORKING_DIRECTORY ../../docs
-	# 		COMMENT "Build markdown documentation"
-	# 	)
-	# add_dependencies(docs-html doxygen)
-
-endif()
-##########

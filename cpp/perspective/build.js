@@ -11,7 +11,7 @@ delete process.env.NODE;
 try {
     execSync(`mkdirp ${cwd}`, {stdio});
     process.env.CLICOLOR_FORCE = 1;
-    execSync(`emcmake cmake ${__dirname} -DCMAKE_BUILD_TYPE=${env}`, {
+    execSync(`emcmake cmake ${__dirname} -Wno-dev -DCMAKE_BUILD_TYPE=${env}`, {
         cwd,
         stdio,
     });
