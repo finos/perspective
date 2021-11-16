@@ -8,7 +8,6 @@
 
 use crate::config::*;
 use crate::js::plugin::*;
-use crate::renderer::registry::*;
 use crate::renderer::*;
 use crate::session::*;
 use crate::utils::*;
@@ -86,8 +85,10 @@ impl Component for PluginSelector {
     fn view(&self) -> Html {
         let callback = self.link.callback(PluginSelectorMsg::ComponentSelectPlugin);
         let plugin_name = self.props.renderer.get_active_plugin().unwrap().name();
-        let options = PLUGIN_REGISTRY
-            .available_plugin_names()
+        let options = self
+            .props
+            .renderer
+            .get_all_plugin_names()
             .into_iter()
             .map(DropDownItem::Option)
             .collect::<Vec<_>>();
