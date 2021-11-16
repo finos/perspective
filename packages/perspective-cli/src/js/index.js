@@ -66,7 +66,7 @@ async function convert(filename, options) {
  * @param {*} options
  */
 async function host(filename, options) {
-    let files = [path.join(__dirname, "html")];
+    let files = [path.join(__dirname, "..", "html")];
     if (options.assets) {
         files = [options.assets, ...files];
     }
@@ -87,7 +87,7 @@ program
     .version(
         JSON.parse(
             fs
-                .readFileSync(path.join(__dirname, "..", "package.json"))
+                .readFileSync(path.join(__dirname, "..", "..", "package.json"))
                 .toString()
         ).version
     )

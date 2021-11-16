@@ -2,19 +2,17 @@
     "name": "@finos/perspective-cli",
     "version": "1.0.1",
     "description": "Perspective.js CLI",
-    "main": "build/index.js",
+    "main": "src/js/index.js",
     "publishConfig": {
         "access": "public"
     },
     "files": [
-        "build/**/*",
-        "perspective",
-        "babel.config.js"
+        "src/**/*",
+        "perspective"
     ],
     "typings": "index.d.ts",
     "scripts": {
-        "prebuild": "mkdirp build",
-        "build": "babel src/js --source-maps --out-dir build && cpy \"src/html/*\" build/html",
+        "build": ":",
         "clean": "rimraf build"
     },
     "repository": {
