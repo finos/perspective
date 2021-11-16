@@ -10,11 +10,11 @@
     ],
     "repository": {
         "type": "git",
-        "url": "https://github.com/finos/perspective/packages/perspective-test"
+        "url": "https://github.com/finos/perspective/tools/perspective-test"
     },
     "scripts": {
-        "build": "echo 'No build'",
-        "clean": "echo 'No clean'",
+        "build": ":",
+        "clean": ":",
         "prebench": "mkdirp build",
         "bench": "node bench/versions.js"
     },

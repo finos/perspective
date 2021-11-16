@@ -21,7 +21,10 @@ const cons = require("console");
 const private_console = new cons.Console(process.stdout, process.stderr);
 const cp = require("child_process");
 
-const {WebSocketServer} = require("@finos/perspective");
+// Jest does not resolve `exports` field so we must link directly to the file.
+const {
+    WebSocketServer,
+} = require("@finos/perspective/dist/cjs/perspective.node.js");
 
 const {
     IS_LOCAL_PUPPETEER,

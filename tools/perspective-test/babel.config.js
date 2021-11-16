@@ -9,14 +9,8 @@ module.exports = {
                     ios: "13",
                 },
                 modules: false,
-                // useBuiltIns: "usage",
-                // corejs: "3.19",
             },
         ],
     ],
     sourceType: "unambiguous",
-    plugins: [
-        ["@babel/plugin-proposal-decorators", {legacy: true}],
-        "@babel/plugin-proposal-optional-chaining",
-    ],
 };

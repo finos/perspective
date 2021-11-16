@@ -18,15 +18,14 @@
         "url": "https://github.com/finos/perspective/packages/perspective-bench"
     },
     "scripts": {
-        "build": "echo 'No build'",
-        "clean": "echo 'No clean'",
+        "build": ":",
+        "clean": ":",
         "prebench": "mkdirp build",
         "bench": "node bench/versions.js"
     },
     "author": "",
     "license": "Apache-2.0",
     "dependencies": {
-        "@babel/runtime": "^7.8.4",
         "@finos/perspective": "^1.0.1",
         "@finos/perspective-viewer": "^1.0.1",
         "@finos/perspective-viewer-d3fc": "^1.0.1",
