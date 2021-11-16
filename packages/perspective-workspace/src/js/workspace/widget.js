@@ -7,7 +7,7 @@
  *
  */
 
-import "@finos/perspective-viewer";
+import "@finos/perspective-viewer/dist/esm/perspective-viewer.js";
 import {Widget} from "@lumino/widgets";
 
 export class PerspectiveViewerWidget extends Widget {
