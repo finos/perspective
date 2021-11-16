@@ -11,6 +11,7 @@ const {Client} = require("./api/client.js");
 const {Server} = require("./api/server.js");
 const {WebSocketManager} = require("./websocket/manager");
 const {WebSocketClient} = require("./websocket/client");
+const {get_config, get_type_config} = require("./config/index.js");
 
 const perspective = require("./perspective.js").default;
 
@@ -21,14 +22,11 @@ const process = require("process");
 const path = require("path");
 
 const load_perspective =
-    require("./@finos/perspective-cpp/dist/cjs/perspective.cpp.js").default;
-
-// eslint-disable-next-line no-undef
+    require("../../dist/pkg/cjs/perspective.cpp.js").default;
 
 const LOCAL_PATH = path.join(process.cwd(), "node_modules");
-const buffer = fs.readFileSync(
-    require.resolve("./@finos/perspective-cpp/dist/cjs/perspective.cpp.wasm")
-).buffer;
+const buffer = require("@finos/perspective/pkg/cjs/perspective.cpp.wasm")
+    .default.buffer;
 
 const SYNC_SERVER = new (class extends Server {
     init(msg) {
@@ -214,6 +212,8 @@ const websocket = (url) => {
     return new WebSocketClient(new WebSocket(url));
 };
 
+module.exports.get_type_config = get_type_config;
+module.exports.get_config = get_config;
 module.exports.worker = () => module.exports;
 module.exports.websocket = websocket;
 module.exports.perspective_assets = perspective_assets;

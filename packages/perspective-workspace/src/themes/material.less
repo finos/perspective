@@ -1,0 +1,60 @@
+@import "../../../../rust/perspective-viewer/src/less/fonts.less";
+@import (reference)
+    "../../../../rust/perspective-viewer/src/themes/material-dense.less";
+
+perspective-workspace {
+    .perspective-workspace-material-base();
+}
+
+perspective-viewer.workspace-detail-widget {
+    .perspective-viewer-material-dense();
+    background-color: #f2f4f6;
+}
+
+perspective-viewer.workspace-master-widget {
+    .perspective-viewer-material-dense();
+    background-color: #f2f4f6;
+    --plugin--background: #f2f4f6;
+    regular-table {
+        --pv-divider--color: #e0e4e9 !important;
+        td,
+        th {
+            border-color: #e0e4e9;
+        }
+    }
+}
+
+perspective-column-style,
+perspective-expression-editor {
+    background-color: #ffffff;
+    color: #161616;
+    border: 1px solid #e0e4e9;
+    --input--border-color: #e0e4e9;
+    --active-color: @blue500;
+}
+
+.perspective-workspace-material-base() {
+    --open-settings-button--content: "expand_more";
+    --close-settings-button--content: "expand_less";
+    --close-button--content: "close";
+    --settings--font-family: "Material Icons";
+
+    --master-divider--background-color: #243136;
+
+    --menu-maximize--content: "fullscreen";
+    --menu-minimize--content: "fullscreen_exit";
+    --menu-duplicate--content: "call_split";
+    --menu-master--content: "cast";
+    --menu-detail--content: "notes";
+    --menu-export--content: "file_download";
+    --menu-copy--content: "file_copy";
+    --menu-reset--content: "autorenew";
+    --menu-link--content: "link";
+    --menu-unlink--content: "link_off";
+}
+
+.p-Menu {
+    font-family: "Open Sans", Arial;
+    font-weight: 300;
+    color: #161616;
+}

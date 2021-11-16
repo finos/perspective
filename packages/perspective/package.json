@@ -2,11 +2,28 @@
     "name": "@finos/perspective",
     "version": "1.0.1",
     "description": "Perspective.js",
-    "main": "dist/cjs/perspective.node.js",
-    "unpkg": "dist/umd/perspective.js",
-    "jsdelivr": "dist/umd/perspective.js",
-    "browser": "dist/umd/perspective.inline.js",
-    "module": "dist/umd/perspective.inline.js",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/finos/perspective"
+    },
+    "author": "",
+    "license": "Apache-2.0",
+    "unpkg": "dist/cdn/perspective.js",
+    "jsdelivr": "dist/cdn/perspective.js",
+    "exports": {
+        ".": {
+            "node": "./dist/cjs/perspective.node.js",
+            "require": "./dist/umd/perspective.js",
+            "import": "./dist/umd/perspective.js"
+        },
+        "./dist/": "./dist/",
+        "./cjs/": "./dist/cjs/",
+        "./esm/": "./dist/esm/",
+        "./cdn/": "./dist/cdn/",
+        "./src/": "./src/",
+        "./pkg/": "./dist/pkg/",
+        "./package.json": "./package.json"
+    },
     "publishConfig": {
         "access": "public"
     },
@@ -15,17 +32,12 @@
     },
     "files": [
         "dist/**/*",
-        "index.d.ts",
-        "babel.config.js"
+        "src/**/*",
+        "index.d.ts"
     ],
     "types": "index.d.ts",
     "scripts": {
-        "build:babel:esm": "babel src/js --source-maps --out-dir dist/esm",
-        "build:babel:cjs": "BABEL_MODULE=auto babel dist/esm --source-maps --out-dir dist/cjs",
-        "build:internal": "npm-pack-here -t ../../cpp/perspective -d dist/esm -d dist/cjs --updateRelativeNodeModulesDirectory=false",
-        "build": "npm-run-all build:internal build:babel:* build:webpack:*",
-        "build:webpack:outline": "webpack --color --config src/config/perspective.config.js",
-        "build:webpack:inline": "webpack --color --config src/config/perspective.inline.config.js",
+        "build": "node build.js",
         "docs": "npm-run-all docs:jsdoc docs:deploy",
         "docs:jsdoc": "jsdoc2md src/js/perspective.js -p list --separators --no-gfm > README.md",
         "docs:deploy": "(echo \"---\nid: perspective\ntitle: perspective API\n---\n\n\"; cat README.md) > ../../docs/obj/perspective.md",
@@ -46,23 +58,13 @@
         "testURL": "http://localhost/",
         "automock": false
     },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/finos/perspective"
-    },
-    "author": "",
-    "license": "Apache-2.0",
     "dependencies": {
-        "@babel/runtime": "^7.8.4",
-        "d3-array": "^1.2.1",
-        "detectie": "1.0.0",
-        "flatbuffers": "^1.10.2",
-        "text-encoding-utf-8": "^1.0.2",
         "tslib": "^1.9.3",
         "ws": "^6.1.2"
     },
     "devDependencies": {
         "@finos/perspective-cpp": "^1.0.1",
+        "@finos/perspective-build": "^1.0.1",
         "jsverify": "^0.8.4",
         "lodash": "^4.17.4",
         "moment": "^2.19.1",

@@ -8,14 +8,14 @@
  */
 
 import * as defaults from "./config/constants.js";
-import {get_config} from "./config";
+import {get_config, get_type_config as _get_type_config} from "./config";
 import {Client} from "./api/client.js";
-const {WebSocketClient} = require("./websocket/client");
+import {WebSocketClient} from "./websocket/client";
 
-import {override_config} from "../../dist/esm/config/index.js";
+import {override_config} from "./config/index.js";
 
-import wasm_worker from "./perspective.worker.js";
-import wasm from "./@finos/perspective-cpp/dist/esm/perspective.cpp.wasm";
+import wasm_worker from "@finos/perspective/src/js/perspective.worker.js";
+import wasm from "@finos/perspective/dist/pkg/esm/perspective.cpp.wasm";
 
 // eslint-disable-next-line max-len
 const INLINE_WARNING = `Perspective has been compiled in INLINE mode.  While \
@@ -27,21 +27,31 @@ https://perspective.finos.org/docs/md/js.html`;
 /**
  * Singleton WASM file download cache.
  */
-const override = new (class {
-    worker() {
-        return wasm_worker();
-    }
+const _override = /* @__PURE__ */ (function () {
+    let _instance;
+    return function () {
+        if (!_instance) {
+            _instance = new (class {
+                worker() {
+                    return wasm_worker();
+                }
 
-    async wasm() {
-        if (wasm instanceof ArrayBuffer) {
-            console.warn(INLINE_WARNING);
-            this._wasm = wasm;
-        } else {
-            const req = await fetch(wasm);
-            this._wasm = await req.arrayBuffer();
+                async wasm() {
+                    const _wasm = wasm;
+                    if (_wasm.buffer && _wasm.buffer instanceof ArrayBuffer) {
+                        console.warn(INLINE_WARNING);
+                        this._wasm = _wasm;
+                    } else {
+                        const req = await fetch(_wasm);
+                        this._wasm = await req.arrayBuffer();
+                    }
+                    return this._wasm;
+                }
+            })();
         }
-        return this._wasm;
-    }
+
+        return _instance;
+    };
 })();
 
 /**
@@ -74,8 +84,8 @@ class WebWorkerClient extends Client {
             );
         } else {
             [_worker, msg.buffer] = await Promise.all([
-                override.worker(),
-                override.wasm(),
+                _override().worker(),
+                _override().wasm(),
             ]);
         }
         for (var key in this._worker) {
@@ -127,7 +137,7 @@ class WebWorkerClient extends Client {
  *
  */
 
-const WORKER_SINGLETON = (function () {
+const WORKER_SINGLETON = /* @__PURE__ */ (function () {
     let __WORKER__, __CONFIG__;
     return {
         getInstance: function (config) {
@@ -137,7 +147,7 @@ const WORKER_SINGLETON = (function () {
             const config_str = JSON.stringify(config);
             if (__CONFIG__ && config_str !== __CONFIG__) {
                 throw new Error(
-                    `Confiuration object for shared_worker() has changed - this is probably a bug in your application.`
+                    `Configuration object for shared_worker() has changed - this is probably a bug in your application.`
                 );
             }
             __CONFIG__ = config_str;
@@ -154,34 +164,38 @@ if (document.currentScript && document.currentScript.hasAttribute("preload")) {
     WORKER_SINGLETON.getInstance();
 }
 
-const mod = {
-    override: (x) => override.set(x),
+export const get_type_config = _get_type_config;
 
-    /**
-     * Create a new WebWorkerClient instance. s
-     * @param {*} [config] An optional perspective config object override
-     */
-    worker(config) {
-        return new WebWorkerClient(config);
-    },
-
-    /**
-     * Create a new WebSocketClient instance. The `url` parameter is provided,
-     * load the worker at `url` using a WebSocket. s
-     * @param {*} url Defaults to `window.location.origin`
-     * @param {*} [config] An optional perspective config object override
-     */
-    websocket(url = window.location.origin.replace("http", "ws")) {
-        return new WebSocketClient(new WebSocket(url));
-    },
-
-    shared_worker(config) {
-        return WORKER_SINGLETON.getInstance(config);
-    },
-};
-
-for (let prop of Object.keys(defaults)) {
-    mod[prop] = defaults[prop];
+export function override(x) {
+    return _override().set(x);
 }
 
-export default mod;
+/**
+ * Create a new WebWorkerClient instance. s
+ * @param {*} [config] An optional perspective config object override
+ */
+export function worker(config) {
+    return new WebWorkerClient(config);
+}
+
+/**
+ * Create a new WebSocketClient instance. The `url` parameter is provided,
+ * load the worker at `url` using a WebSocket. s
+ * @param {*} url Defaults to `window.location.origin`
+ * @param {*} [config] An optional perspective config object override
+ */
+export function websocket(url = window.location.origin.replace("http", "ws")) {
+    return new WebSocketClient(new WebSocket(url));
+}
+
+export function shared_worker(config) {
+    return WORKER_SINGLETON.getInstance(config);
+}
+
+export default {
+    override,
+    worker,
+    websocket,
+    shared_worker,
+    ...Object.keys(defaults),
+};

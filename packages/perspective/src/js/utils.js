@@ -63,15 +63,6 @@ export function detectNode() {
 }
 
 /**
- * Detect Internet Explorer.
- *
- * Returns
- * -------
- * True if the current script is running in Internet Explorer.
- */
-export const detectIE = require("detectie");
-
-/**
  * Detect Chrome.
  *
  * Returns
