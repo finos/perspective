@@ -14,7 +14,7 @@ import {PerspectiveJupyterWidget} from "./widget";
 import {PerspectiveJupyterClient} from "./client";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const perspective = require("@finos/perspective").default;
+import perspective from "@finos/perspective/dist/esm/perspective.js";
 
 /**
  * `PerspectiveView` defines the plugin's DOM and how the plugin interacts with

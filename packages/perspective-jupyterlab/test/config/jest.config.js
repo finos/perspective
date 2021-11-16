@@ -6,7 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-const main_config = require("../../../perspective-test/jest.config.js");
+const main_config = require("@finos/perspective-test/jest.config.js");
 
 // Define a custom Jest config that properly transforms Typescript source files
 // and works with the main `perspective-test` Jest config.

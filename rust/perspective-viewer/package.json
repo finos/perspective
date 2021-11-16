@@ -19,6 +19,7 @@
         "./esm/": "./dist/esm/",
         "./umd/": "./dist/umd/",
         "./pkg/": "./dist/pkg/",
+        "./src/": "./src/",
         "./package.json": "./package.json"
     },
     "files": [
