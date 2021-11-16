@@ -6,8 +6,8 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import {select} from "d3";
-import {tooltip} from "../../../../src/js/tooltip/tooltip";
+const {select} = require("d3");
+const {tooltip} = require("../../../../src/js/tooltip/tooltip");
 
 describe("tooltip with", () => {
     let container = null;

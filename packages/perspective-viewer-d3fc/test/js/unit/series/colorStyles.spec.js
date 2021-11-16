@@ -6,9 +6,9 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import {select} from "d3";
-import {initialiseStyles} from "../../../../src/js/series/colorStyles";
-import * as sinon from "sinon";
+const {select} = require("d3");
+const {initialiseStyles} = require("../../../../src/js/series/colorStyles");
+const sinon = require("sinon");
 
 const styleVariables = {
     "--d3fc-series": "rgba(31, 119, 180, 0.5)",
