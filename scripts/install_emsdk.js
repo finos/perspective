@@ -44,7 +44,8 @@ function upgrade() {
 
 function check() {
     try {
-        execute_throw`emcc --version`;
+        const emsdkdir = path.join(__dirname, "..", ".emsdk");
+        execute_throw`. ${emsdkdir}/emsdk_env.sh && emcc --version`;
         return true;
     } catch (e) {
         return fs.existsSync(path.join(__dirname, "..", ".emsdk"));

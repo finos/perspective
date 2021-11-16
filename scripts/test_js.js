@@ -50,7 +50,7 @@ function jest_all() {
         TZ=UTC 
         node_modules/.bin/jest 
         --rootDir=.
-        --config=packages/perspective-test/jest.all.config.js 
+        --config=tools/perspective-test/jest.all.config.js 
         --color
         --verbose 
         --maxWorkers=50%
