@@ -7,7 +7,7 @@
  *
  */
 
-const {get_config} = require("@finos/perspective/dist/esm/config");
+const {get_config} = require("@finos/perspective");
 const path = require("path");
 const webpack = require("webpack");
 const cssnano = require("cssnano");
@@ -157,15 +157,21 @@ class PerspectiveWebpackPlugin {
 
         const plugin_replace = new webpack.NormalModuleReplacementPlugin(
             /@finos\/perspective$/,
-            "@finos/perspective/dist/esm/perspective.parallel.js"
+            "@finos/perspective/dist/esm/perspective.js"
         );
         plugin_replace.apply(compiler);
 
         const plugin_replace2 = new webpack.NormalModuleReplacementPlugin(
             /@finos\/perspective\-viewer$/,
-            "@finos/perspective-viewer/dist/esm/index.js"
+            "@finos/perspective-viewer/dist/esm/perspective-viewer.js"
         );
         plugin_replace2.apply(compiler);
+
+        const plugin_replace3 = new webpack.NormalModuleReplacementPlugin(
+            /@finos\/perspective\-workspace$/,
+            "@finos/perspective-workspace/dist/esm/perspective-workspace.js"
+        );
+        plugin_replace3.apply(compiler);
 
         moduleOptions.rules = (moduleOptions.rules || []).concat(rules);
     }
