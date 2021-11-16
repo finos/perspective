@@ -29,11 +29,12 @@
         <script>
             var xhr = new XMLHttpRequest();
             xhr.open("GET", "superstore.csv", true);
-            xhr.onload = function () {
+            xhr.onload = async function () {
                 window.__CSV__ = xhr.response;
                 window.__WORKER__ = perspective.worker();
-                const table = perspective.worker().table(xhr.response);
-                document
+                const table = window.__WORKER__.table(xhr.response);
+                const t = await table;
+                await document
                     .getElementsByTagName("perspective-viewer")[0]
                     .load(table);
             };

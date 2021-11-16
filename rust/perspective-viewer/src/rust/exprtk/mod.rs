@@ -38,8 +38,8 @@ pub fn set_global_completion_column_names(names: Vec<String>) {
 /// Initialize the `ExprTK` language in `monaco`.  This should only be done once.
 pub async fn init_monaco() -> Result<Editor, error::Error> {
     if IS_REGISTERED.with(|x| !x.get()) {
-        let editor = init_language().await?;
         init_environment()?;
+        let editor = init_language().await?;
         IS_REGISTERED.with(|x| x.set(true));
         Ok(editor)
     } else {

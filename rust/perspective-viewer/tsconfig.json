@@ -8,8 +8,5 @@
         "allowSyntheticDefaultImports": true,
         "moduleResolution": "node"
     },
-    "files": [
-        "src/ts/index.ts", 
-        "src/ts/monaco.ts"
-    ]
+    "files": ["src/ts/perspective-viewer.ts"]
 }

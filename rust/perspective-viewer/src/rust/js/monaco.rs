@@ -23,7 +23,7 @@ pub enum KeyCode {
 
 #[cfg_attr(
     not(test),
-    wasm_bindgen(module = "monaco-editor/esm/vs/editor/editor.worker")
+    wasm_bindgen(module = "monaco-editor/esm/vs/editor/editor.worker.js")
 )]
 #[cfg_attr(test, wasm_bindgen(inline_js = "export default function() {}"))]
 extern "C" {
@@ -39,31 +39,9 @@ extern "C" {
     wasm_bindgen(inline_js = "
     export async function monaco_module() {
         return import(
-            /* webpackChunkName: \"monaco-exts\" */
-            /* webpackMode: \"eager\" */
-            '../../../../dist/esm/monaco.js'
-        ); 
-    }
-")
-)]
-#[cfg_attr(
-    test,
-    wasm_bindgen(inline_js = "export async function monaco_module() {}")
-)]
-#[rustfmt::skip]
-extern "C" {
-    #[wasm_bindgen(js_name = "monaco_module")]
-    pub async fn monaco_exts();
-}
-
-#[cfg_attr(
-    not(test),
-    wasm_bindgen(inline_js = "
-    export async function monaco_module() { 
-        return import(
             /* webpackChunkName: \"monaco\" */
             /* webpackMode: \"eager\" */
-            'monaco-editor/esm/vs/editor/editor.api'
+            'monaco-editor/esm/vs/editor/edcore.main.js'
         ); 
     }
 ")

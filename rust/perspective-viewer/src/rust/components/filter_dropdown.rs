@@ -9,7 +9,7 @@
 use web_sys::*;
 use yew::prelude::*;
 
-static CSS: &str = include_str!("../../../dist/css/filter-dropdown.css");
+static CSS: &str = include_str!("../../../build/css/filter-dropdown.css");
 
 pub enum FilterDropDownMsg {
     SetPos(i32, i32),

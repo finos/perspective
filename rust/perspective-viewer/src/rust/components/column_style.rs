@@ -19,7 +19,7 @@ use yew::prelude::*;
 #[cfg(test)]
 use wasm_bindgen_test::*;
 
-pub static CSS: &str = include_str!("../../../dist/css/column-style.css");
+pub static CSS: &str = include_str!("../../../build/css/column-style.css");
 
 #[derive(PartialEq, Clone, Copy, Debug, Serialize, Deserialize)]
 pub enum ColorMode {

@@ -8,7 +8,7 @@
  *
  */
 
-import * as internal from "../../dist/pkg/perspective_viewer.js";
+import * as internal from "@finos/perspective-viewer/dist/pkg/perspective_viewer.js";
 
 class PerspectiveColumnStyleElement extends HTMLElement {
     private instance: internal.PerspectiveColumnStyleElement;

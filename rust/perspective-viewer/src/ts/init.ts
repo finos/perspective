@@ -27,5 +27,5 @@ async function init_wasm({default: wasm_module}): Promise<typeof internal> {
 export const WASM_MODULE = import(
     /* webpackChunkName: "perspective-viewer.custom-element" */
     /* webpackMode: "eager" */
-    "../../dist/pkg/perspective_viewer_bg.wasm"
+    "@finos/perspective-viewer/dist/pkg/perspective_viewer_bg.wasm"
 ).then(init_wasm);

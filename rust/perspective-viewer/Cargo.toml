@@ -1,6 +1,6 @@
 [package]
 name = "perspective-viewer"
-version = "0.10.0"
+version = "1.0.1"
 authors = ["Andrew Stein <steinlink@gmail.com>"]
 edition = "2018"
 description = "A frontend for Perspective"
