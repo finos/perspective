@@ -68,10 +68,10 @@
             total: "integer"
         };
 
-        const URL = "https://raw.githubusercontent.com/ag-grid/ag-grid/master/packages/ag-grid-docs/src/olympicWinnersSmall.json";
+        const CSV_URL = "https://raw.githubusercontent.com/ag-grid/ag-grid/master/packages/ag-grid-docs/src/olympicWinnersSmall.json";
 
         const datasource = async () => {
-            const request = fetch(URL);
+            const request = fetch(CSV_URL);
             const worker = perspective.worker();
             const table = await worker.table(SCHEMA);
             const response = await request;

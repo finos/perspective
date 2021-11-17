@@ -5,7 +5,7 @@
     "description": "An example app built using `@finos/perspective-workspace`.",
     "scripts": {
         "start": "webpack serve --open",
-        "webpack": "webpack --colour"
+        "webpack": "webpack --color"
     },
     "keywords": [],
     "license": "Apache-2.0",

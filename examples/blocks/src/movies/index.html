@@ -7,10 +7,10 @@
 
         <link rel='stylesheet' href="/node_modules/@finos/perspective-workspace/dist/umd/material.dark.css">
       
-        <script src="/node_modules/@finos/perspective-workspace/dist/umd/perspective-workspace.js"></script>
-        <script src="/node_modules/@finos/perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js"></script>
-        <script src="/node_modules/@finos/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js"></script>
-        <script src="/node_modules/@finos/perspective/dist/umd/perspective.js"></script>
+        <script type="module" src="/node_modules/@finos/perspective-workspace/dist/cdn/perspective-workspace.js"></script>
+        <script type="module" src="/node_modules/@finos/perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js"></script>
+        <script type="module" src="/node_modules/@finos/perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js"></script>
+        <script type="module" src="/node_modules/@finos/perspective/dist/cdn/perspective.js"></script>
         
         <style>
 
@@ -89,7 +89,9 @@
             <perspective-viewer table="movies"></perspective-viewer>
         </perspective-workspace>
       
-        <script>
+        <script type="module">
+
+        import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
 
         const SCHEMA = {
             "Title": "string",
@@ -110,10 +112,10 @@
             "IMDB Votes": "integer"
         };
 
-        const URL = "https://vega.github.io/editor/data/movies.json";
+        const MOVIES_URL = "https://vega.github.io/editor/data/movies.json";
 
         const datasource = async () => {
-            const request = fetch(URL);
+            const request = fetch(MOVIES_URL);
             const worker = perspective.worker();
             const response = await request;
             const json = await response.json();
