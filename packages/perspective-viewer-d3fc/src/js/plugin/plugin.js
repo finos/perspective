@@ -48,6 +48,10 @@ function getD3FCStyles() {
     return d3fcStyles.join("");
 }
 
+function register_element(plugin_name) {
+    customElements.get("perspective-viewer").registerPlugin(plugin_name);
+}
+
 export function register(...plugins) {
     plugins = new Set(
         plugins.length > 0 ? plugins : charts.map((chart) => chart.plugin.name)
@@ -363,8 +367,8 @@ export function register(...plugins) {
             );
 
             customElements
-                .get("perspective-viewer")
-                .registerPlugin(plugin_name);
+                .whenDefined("perspective-viewer")
+                .then(() => register_element(plugin_name));
         }
     });
 }

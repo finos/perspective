@@ -6,16 +6,15 @@
         "theme": "lessc static/css/material.dark.less > static/css/material.dark.css",
         "examples": "docusaurus-examples",
         "start": "npm run build:arrow && npm run theme && docusaurus-start",
-        "build": "echo 'No build'",
+        "build": ":",
         "clean": "rimraf dist",
-        "build:arrow": "cpx ../node_modules/superstore-arrow/superstore.arrow static/arrow/",
+        "build:arrow": "cpy ../node_modules/superstore-arrow/superstore.arrow static/arrow/",
         "build:webpack": "webpack --config webpack.config.js --color",
         "docs": "npm run build:webpack && npm run theme && docusaurus-build",
         "publish-gh-pages": "npm run theme && docusaurus-publish",
         "write-translations": "docusaurus-write-translations"
     },
     "devDependencies": {
-        "@babel/plugin-proposal-class-properties": "^7.8.3",
         "@finos/perspective": "^1.0.1",
         "@finos/perspective-viewer": "^1.0.1",
         "@finos/perspective-viewer-d3fc": "^1.0.1",

@@ -47,10 +47,39 @@ pub struct PluginHandle {
 
 type RenderLimits = (usize, usize, Option<usize>, Option<usize>);
 
+#[derive(Default)]
+struct LazyPluginStore {
+    plugins: Option<Vec<JsPerspectiveViewerPlugin>>,
+    plugin_records: Option<Vec<String>>,
+}
+
+impl LazyPluginStore {
+    fn init_lazy(&mut self) {
+        self.plugins = Some(PLUGIN_REGISTRY.create_plugins());
+        self.plugin_records = Some(PLUGIN_REGISTRY.available_plugin_names());
+    }
+
+    pub fn plugins(&mut self) -> &Vec<JsPerspectiveViewerPlugin> {
+        if self.plugins.is_none() {
+            self.init_lazy();
+        }
+
+        self.plugins.as_ref().unwrap()
+    }
+
+    pub fn plugin_records(&mut self) -> &Vec<String> {
+        if self.plugins.is_none() {
+            self.init_lazy();
+        }
+
+        self.plugin_records.as_ref().unwrap()
+    }
+}
+
 pub struct PluginData {
     viewer_elem: HtmlElement,
     metadata: ViewConfigRequirements,
-    plugins: Vec<JsPerspectiveViewerPlugin>,
+    plugin_store: LazyPluginStore,
     plugins_idx: Option<usize>,
     timer: MovingWindowRenderTimer,
 }
@@ -75,7 +104,7 @@ impl Renderer {
             plugin_data: RefCell::new(PluginData {
                 viewer_elem,
                 metadata: ViewConfigRequirements::default(),
-                plugins: PLUGIN_REGISTRY.create_plugins(),
+                plugin_store: LazyPluginStore::default(),
                 plugins_idx: None,
                 timer: MovingWindowRenderTimer::default(),
             }),
@@ -105,7 +134,12 @@ impl Renderer {
     /// Return all plugin instances, whether they are active or not.  Useful
     /// for configuring all or specific plugins at application init.
     pub fn get_all_plugins(&self) -> Vec<JsPerspectiveViewerPlugin> {
-        self.0.borrow().plugins.clone()
+        self.0.borrow_mut().plugin_store.plugins().clone()
+    }
+
+    /// Return all plugin names, whether they are active or not.
+    pub fn get_all_plugin_names(&self) -> Vec<String> {
+        self.0.borrow_mut().plugin_store.plugin_records().clone()
     }
 
     /// Gets the currently active plugin.  Calling this method before a plugin has
@@ -117,7 +151,7 @@ impl Renderer {
         }
 
         let idx = self.0.borrow().plugins_idx.unwrap_or(0);
-        let result = self.0.borrow().plugins.get(idx).cloned();
+        let result = self.0.borrow_mut().plugin_store.plugins().get(idx).cloned();
         result.ok_or_else(|| JsValue::from("No Plugin"))
     }
 
@@ -128,7 +162,7 @@ impl Renderer {
     pub fn get_plugin(&self, name: &str) -> Result<JsPerspectiveViewerPlugin, JsValue> {
         let idx = self.find_plugin_idx(name);
         let idx = idx.ok_or_else(|| JsValue::from(format!("No Plugin `{}`", name)))?;
-        let result = self.0.borrow().plugins.get(idx).cloned();
+        let result = self.0.borrow_mut().plugin_store.plugins().get(idx).cloned();
         Ok(result.unwrap())
     }
 
@@ -288,8 +322,10 @@ impl Renderer {
 
     fn find_plugin_idx(&self, name: &str) -> Option<usize> {
         let short_name = make_short_name(name);
-        let elements = &self.0.borrow().plugins;
-        elements
+        self.0
+            .borrow_mut()
+            .plugin_store
+            .plugins()
             .iter()
             .position(|elem| make_short_name(&elem.name()).contains(&short_name))
     }

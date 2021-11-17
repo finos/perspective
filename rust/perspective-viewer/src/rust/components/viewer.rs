@@ -24,7 +24,7 @@ use futures::channel::oneshot::*;
 use wasm_bindgen::prelude::*;
 use yew::prelude::*;
 
-pub static CSS: &str = include_str!("../../../dist/css/viewer.css");
+pub static CSS: &str = include_str!("../../../build/css/viewer.css");
 
 #[derive(Properties, Clone)]
 pub struct PerspectiveViewerProps {

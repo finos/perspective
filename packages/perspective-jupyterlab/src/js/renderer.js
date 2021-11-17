@@ -21,8 +21,7 @@ import {PerspectiveWidget} from "./psp_widget";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 // const perspective = require("@finos/perspective").default;
-import perspective from "@finos/perspective";
-
+import perspective from "@finos/perspective/dist/esm/perspective.js";
 /**
  * The name of the factories that creates widgets.
  */

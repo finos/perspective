@@ -2,28 +2,29 @@
     "name": "@finos/perspective-workspace",
     "version": "1.0.1",
     "description": "Perspective Workspace",
-    "main": "./dist/cjs/perspective-workspace.js",
-    "module": "./dist/cjs/perspective-workspace.js",
-    "browser": "dist/cjs/perspective-workspace.js",
     "files": [
         "dist/**/*",
         "index.d.ts"
     ],
+    "exports": {
+        ".": {
+            "import": "./dist/umd/perspective-workspace.js",
+            "require": "./dist/umd/perspective-workspace.js"
+        },
+        "./esm/": "./dist/esm/",
+        "./dist/": "./dist/",
+        "./package.json": "./package.json"
+    },
     "unpkg": "./dist/umd/perspective-workspace.js",
     "jsdelivr": "./dist/umd/perspective-workspace.js",
     "scripts": {
         "bench": "npm-run-all bench:build bench:run",
         "bench:build": "echo \"No Benchmarks\"",
         "bench:run": "echo \"No Benchmarks\"",
-        "build:babel": "cpx \"src/**/*\" dist && babel src/js --source-maps --out-dir dist/esm",
-        "build:styles": "webpack --color --config config/theme.config.js",
-        "build:webpack:cjs": "webpack --color --config config/cjs.config.js",
-        "build:webpack:umd": "webpack --color --config config/umd.config.js",
-        "build:webpack": "npm-run-all build:webpack:cjs build:webpack:umd",
-        "build": "npm-run-all --silent build:babel build:webpack:cjs build:webpack:umd build:styles",
+        "build": "node ./build.js",
         "clean": "rimraf dist",
         "clean:screenshots": "rimraf \"test/screenshots/**/*.@(failed|diff).png\"",
-        "test:run": "jest --rootDir=. --config=../perspective-test/jest.config.js  --color 2>&1",
+        "test:run": "jest --rootDir=. --config=../../tools/perspective-test/jest.config.js  --color",
         "test:unit": "jest  --color --config=./config/jest.unit.config.js 2>&1",
         "test:integration": "jest --color  --config=./config/jest.integration.config.js 2>&1",
         "watch": "PSP_DEBUG=1 webpack --color --watch --config config/watch.config.js"
@@ -45,13 +46,10 @@
         "@lumino/messaging": "1.4.3",
         "@lumino/virtualdom": "1.8.0",
         "@lumino/widgets": "1.17.0",
-        "core-js": "^3.6.4",
         "lodash": "^4.17.4"
     },
     "devDependencies": {
         "@finos/perspective-test": "^1.0.1",
-        "babel-loader": "^8.0.6",
-        "babel-runtime": "^6.26.0",
-        "lodash.clonedeep": "^4.5.0"
+        "@finos/perspective-build": "^1.0.1"
     }
 }

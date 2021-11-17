@@ -22,7 +22,7 @@ use wasm_bindgen_futures::future_to_promise;
 use web_sys::*;
 use yew::prelude::*;
 
-static CSS: &str = include_str!("../../../dist/css/expression-editor.css");
+static CSS: &str = include_str!("../../../build/css/expression-editor.css");
 
 pub enum ExpressionEditorMsg {
     SetPos(i32, i32),

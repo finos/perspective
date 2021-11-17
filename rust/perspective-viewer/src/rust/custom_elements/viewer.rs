@@ -45,7 +45,6 @@ pub struct PerspectiveViewerElement {
     renderer: Renderer,
     subscriptions: Rc<[Subscription; 4]>,
     expression_editor: Rc<RefCell<Option<ExpressionEditorElement>>>,
-    config: Rc<RefCell<ViewerConfig>>,
 }
 
 #[wasm_bindgen]
@@ -61,7 +60,6 @@ impl PerspectiveViewerElement {
         // Application State
         let session = Session::default();
         let renderer = Renderer::new(elem.clone(), session.clone());
-        let config = Rc::new(RefCell::new(ViewerConfig::new(&renderer)));
 
         // Create Yew App
         let props = PerspectiveViewerProps {
@@ -114,7 +112,6 @@ impl PerspectiveViewerElement {
             renderer,
             expression_editor: Rc::new(RefCell::new(None)),
             subscriptions: Rc::new([plugin_sub, update_sub, limit_sub, view_sub]),
-            config,
         }
     }
 

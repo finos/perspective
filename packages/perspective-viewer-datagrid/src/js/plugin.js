@@ -259,7 +259,7 @@ customElements.define(
 function _register_global_styles() {
     const style = document.createElement("style");
     style.textContent = MATERIAL_STYLE;
-    document.head.appendChild(style);
+    document.head.insertBefore(style, document.head.firstChild);
 }
 
 /******************************************************************************
@@ -268,7 +268,11 @@ function _register_global_styles() {
  *
  */
 
-customElements
-    .get("perspective-viewer")
-    .registerPlugin("perspective-viewer-datagrid");
+function register_element() {
+    customElements
+        .get("perspective-viewer")
+        .registerPlugin("perspective-viewer-datagrid");
+}
+
+customElements.whenDefined("perspective-viewer").then(register_element);
 _register_global_styles();

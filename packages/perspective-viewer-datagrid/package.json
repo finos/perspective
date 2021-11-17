@@ -1,29 +1,27 @@
 {
     "name": "@finos/perspective-viewer-datagrid",
     "version": "1.0.1",
-    "description": "Perspective.js",
-    "main": "dist/esm/perspective-viewer-datagrid.js",
-    "module": "dist/esm/perspective-viewer-datagrid.js",
-    "browser": "dist/esm/perspective-viewer-datagrid.js",
-    "unpkg": "dist/umd/perspective-viewer-datagrid.js",
-    "jsdelivr": "dist/umd/perspective-viewer-datagrid.js",
+    "description": "Perspective datagrid plugin based on `regular-table`",
+    "unpkg": "dist/cdn/perspective-viewer-datagrid.js",
+    "jsdelivr": "dist/cdn/perspective-viewer-datagrid.js",
+    "exports": {
+        ".": {
+            "require": "./dist/umd/perspective-viewer-datagrid.js",
+            "import": "./dist/esm/perspective-viewer-datagrid.js"
+        },
+        "./package.json": "./package.json"
+    },
     "files": [
-        "dist/**/*",
-        "babel.config.js"
+        "dist/**/*"
     ],
     "scripts": {
         "bench": "npm-run-all bench:build bench:run",
-        "bench:build": "echo \"No Benchmarks\"",
-        "bench:run": "echo \"No Benchmarks\"",
-        "prebuild": "mkdirp dist/esm",
-        "build:rollup:esm": "rollup --config src/config/rollup.config.js",
-        "build:webpack:umd": "webpack --color --config src/config/webpack.config.js",
-        "build": "npm-run-all build:rollup:esm build:webpack:umd",
-        "test:build": "cpx \"test/html/*\" dist/umd",
-        "test:run": "jest --rootDir=. --config=../perspective-test/jest.config.js --color",
+        "bench:build": ":",
+        "bench:run": ":",
+        "build": "node build.js",
+        "test:build": "cpy \"test/html/*\" dist/umd",
+        "test:run": "jest --rootDir=. --config=../../tools/perspective-test/jest.config.js --color",
         "test": "npm-run-all test:build test:run",
-        "watch:rollup": "rollup --watch --config src/config/rollup.config.js",
-        "watch:webpack": "webpack --watch --color --config src/config/webpack.config.js",
         "watch": "npm-run-all -p watch:*",
         "clean": "rimraf dist",
         "clean:screenshots": "rimraf \"test/screenshots/**/*.@(failed|diff).png\""
@@ -44,6 +42,7 @@
         "regular-table": "=0.4.1"
     },
     "devDependencies": {
-        "@finos/perspective-test": "^1.0.1"
+        "@finos/perspective-test": "^1.0.1",
+        "@finos/perspective-build": "^1.0.1"
     }
 }

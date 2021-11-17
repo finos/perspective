@@ -7,15 +7,15 @@
  *
  */
 
-import {treeData} from "../../../../src/js/data/treeData";
-import {
+const {treeData} = require("../../../../src/js/data/treeData");
+const {
     data,
     splitData,
     mainValues,
     crossValues,
     realValues,
     agg_paths,
-} from "./testTreeData";
+} = require("./testTreeData");
 
 describe("treeData should", () => {
     test("create a structure with the right number of levels", () => {

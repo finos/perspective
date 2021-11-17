@@ -11,7 +11,7 @@
 // jsdom 5.x - even importing this dependency fails.  Upgrading causes havoc,
 // so re-enable these post upgrade.
 
-// import {groupAndStackData} from "../../../../src/js/data/groupData";
+// const {groupAndStackData} = require("../../../../src/js/data/groupData");
 
 describe.skip("groupAndStackData should", () => {
     test("include globals", () => {

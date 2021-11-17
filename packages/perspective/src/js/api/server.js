@@ -156,8 +156,7 @@ export class Server {
                 }
                 break;
             case "table_generate":
-                let g;
-                eval("g = " + msg.args);
+                let g = (0, eval)(msg.args);
                 g(function (tbl) {
                     this._tables[msg.name] = tbl;
                     this.post({
@@ -167,8 +166,7 @@ export class Server {
                 });
                 break;
             case "table_execute":
-                let f;
-                eval("f = " + msg.f);
+                let f = (0, eval)(msg.f);
                 f(this._tables[msg.name]);
                 break;
             case "table_method":

@@ -7,7 +7,9 @@
  *
  */
 
-import {get_type_config} from "@finos/perspective/dist/esm/config/index.js";
+// Import this directly due to overly-sensitive tree shaking
+import {get_type_config} from "../../../perspective/src/js/config/index.js";
+
 import {
     activate_plugin_menu,
     PLUGIN_SYMBOL,

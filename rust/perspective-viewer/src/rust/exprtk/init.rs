@@ -22,7 +22,6 @@ use wasm_bindgen::JsCast;
 /// Initializes the `plang` language definition using Monaco's `Languages`
 /// module.
 pub async fn init_language() -> Result<Editor, error::Error> {
-    let exts = monaco_exts();
     let module = monaco_module().await.unchecked_into::<MonacoModule>();
     let languages = module.languages();
     let editor = module.editor();
@@ -39,7 +38,6 @@ pub async fn init_language() -> Result<Editor, error::Error> {
 
     provider.forget();
     languages.register_completion_item_provider("exprtk", items.into());
-    exts.await;
     Ok(editor)
 }
 

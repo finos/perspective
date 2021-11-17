@@ -10,7 +10,7 @@
 
 import type * as perspective from "@finos/perspective";
 
-import * as internal from "../../dist/pkg/perspective_viewer.js";
+import * as internal from "@finos/perspective-viewer/dist/pkg/perspective_viewer.js";
 import {WASM_MODULE} from "./init.js";
 
 export type PerspectiveViewerConfig = perspective.ViewConfig & {

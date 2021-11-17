@@ -9,60 +9,56 @@
 
 <!DOCTYPE html>
 <html>
+    <head>
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
+        />
 
-<head>
+        <script type="module" src="perspective-viewer.js"></script>
+        <script src="perspective-viewer-datagrid.js"></script>
+        <script src="perspective-viewer-d3fc.js"></script>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+        <script src="perspective.js"></script>
 
-    <script src="perspective-viewer.js"></script>
-    <script src="perspective-viewer-datagrid.js"></script>
-    <script src="perspective-viewer-d3fc.js"></script>
+        <link rel="stylesheet" href="index.css" />
+        <link rel="stylesheet" href="material-dense.dark.css" />
+    </head>
 
-    <script src="perspective.js"></script>
+    <body>
+        <perspective-viewer
+            id="view1"
+            plugin="Heatmap"
+            row-pivots='["client"]'
+            columns='["chg"]'
+            column-pivots='["name"]'
+        >
+        </perspective-viewer>
 
-    <link rel='stylesheet' href="index.css">
-    <link rel='stylesheet' href="material.dark.css">
+        <script>
+            window.addEventListener("DOMContentLoaded", async function () {
+                // Create two perspective interfaces, one remotely via WebSocket,
+                // and one local via WebWorker.
 
-</head>
+                const websocket = perspective.websocket(
+                    `${window.location.origin.replace("http", "ws")}/subscribe`
+                );
+                const worker = perspective.worker();
+                worker.initialize_profile_thread();
 
-<body>
+                // Open a `Table` that is hosted on the server. All instructions
+                // will be proxied to the server `Table` - no calculations are
+                // done on the client.
+                const table = websocket.open_table("remote_table");
 
-    <perspective-viewer 
-        id="view1"
-        plugin="Heatmap"
-        row-pivots='["client"]'
-        columns='["chg"]'
-        column-pivots='["name"]'>
-    
-    </perspective-viewer>
+                // Create a `table` from this, owned by the local WebWorker.
+                // Data is transferred from `view` to the local WebWorker, both
+                // the current state and all future updates, as Arrows.
+                // const table = await worker.table(view, {limit: 10000});
 
-    <script>
-
-        window.addEventListener('DOMContentLoaded', async function () {
-
-            // Create two perspective interfaces, one remotely via WebSocket, 
-            // and one local via WebWorker.
-            
-            const websocket = perspective.websocket(`${window.location.origin.replace("http", "ws")}/subscribe`);
-            const worker = perspective.worker();
-            worker.initialize_profile_thread();
-
-            // Open a `Table` that is hosted on the server. All instructions
-            // will be proxied to the server `Table` - no calculations are
-            // done on the client.
-            const table = websocket.open_table('remote_table');
-
-            // Create a `table` from this, owned by the local WebWorker.
-            // Data is transferred from `view` to the local WebWorker, both
-            // the current state and all future updates, as Arrows.
-            // const table = await worker.table(view, {limit: 10000});
-            
-            // Load this in the `<perspective-viewer>`.
-            document.getElementById('view1').load(table);
-        });
-
-    </script>
-
-</body>
-
+                // Load this in the `<perspective-viewer>`.
+                document.getElementById("view1").load(table);
+            });
+        </script>
+    </body>
 </html>

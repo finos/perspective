@@ -7,7 +7,7 @@
  *
  */
 
-import {Client} from "@finos/perspective/dist/esm/api/client";
+import {Client} from "@finos/perspective/src/js/api/client";
 
 /**
  * `PerspectiveJupyterClient` acts as a message bus between the frontend and

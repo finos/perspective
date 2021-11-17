@@ -1,0 +1,17 @@
+{
+    "name": "@finos/perspective-build",
+    "version": "1.0.1",
+    "description": "Workspace-wide scripts for Perspective build, mainly esbuild and webpack configuration",
+    "private": true,
+    "author": "",
+    "license": "Apache-2.0",
+    "scripts": {
+        "build": "echo",
+        "test": "echo",
+        "clean": "echo"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/finos/perspective/packages/perspective-build"
+    }
+}

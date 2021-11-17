@@ -3,15 +3,11 @@
     "version": "1.0.1",
     "description": "A Jupyterlab extension for the Perspective library, designed to be used with perspective-python.",
     "files": [
-        "dist/*.d.ts",
-        "dist/*.js.map",
-        "dist/*.js",
-        "dist/*.wasm",
-        "src/css/*.css",
-        "babel.config.js"
+        "dist/**/*",
+        "src/**/*"
     ],
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
+    "main": "dist/umd/perspective-jupyterlab.js",
+    "style": "dist/umd/perspective-jupyterlab.css",
     "directories": {
         "dist": "dist/"
     },
@@ -24,13 +20,13 @@
         "bench:build": "echo \"No Benchmarks\"",
         "bench:run": "echo \"No Benchmarks\"",
         "clean:screenshots": "rimraf \"screenshots/**/*.@(failed|diff).png\"",
-        "test:build": "cpx \"test/html/*\" dist/umd && cpx \"test/csv/*\" dist/umd && cpx \"test/css/*\" dist/umd && webpack --color --config src/config/webpack.config.js",
+        "test:build": "cpy \"test/html/*\" dist/umd && cpy \"test/csv/*\" dist/umd && cpy \"test/css/*\" dist/umd && node build.js --test",
         "test:run": "jest --rootDir=. --config=test/config/jest.config.js --color --verbose",
-        "test:jupyter:build": "cpx \"test/html/*\" dist/umd && cpx \"test/arrow/*\" dist/umd && cpx \"test/css/*\" dist/umd",
+        "test:jupyter:build": "cpy  \"test/html/*\" dist/umd && cpy \"test/arrow/*\" dist/umd && cpy \"test/css/*\" dist/umd",
         "test:jupyter:run": "__JUPYTERLAB_PORT__=6538 jest --rootDir=. --config=test/config/jupyter/jest.config.js --color --verbose",
         "test": "npm-run-all test:build test:run",
         "test:jupyter": "npm-run-all test:jupyter:build test:jupyter:run",
-        "build": "webpack --color --config src/config/plugin.config.js",
+        "build": "node build.js",
         "clean": "rimraf dist",
         "version": "yarn build"
     },
@@ -46,11 +42,8 @@
     },
     "devDependencies": {
         "@finos/perspective-test": "^1.0.1",
-        "@jupyter-widgets/base-manager": "^1.0.0-alpha.0",
-        "identity-obj-proxy": "^3.0.0",
-        "isomorphic-fetch": "^2.2.1",
-        "jest-transform-css": "^2.0.0",
-        "source-map-support": "^0.5.9"
+        "@finos/perspective-build": "^1.0.1",
+        "@jupyter-widgets/base-manager": "^1.0.0-alpha.0"
     },
     "jupyterlab": {
         "extension": true

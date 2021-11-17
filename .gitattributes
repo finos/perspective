@@ -8,8 +8,7 @@ results/*.json linguist-documentation
 **/tests/**/* linguist-documentation
 examples/**/* linguist-documentation
 scripts/* linguist-documentation
-packages/perspective-bench/**/* linguist-documentation
-packages/perspective-test/**/* linguist-documentation
+tools/**/* linguist-documentation
 cmake/** linguist-documentation
 CMakeLists.txt linguist-documentation
 docker/** linguist-documentation

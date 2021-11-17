@@ -12,11 +12,16 @@ use {
     wasm_bindgen::JsCast, wasm_bindgen_futures::JsFuture,
 };
 
+// Must use inline build because the test runner does not import itself in
+// the browser with `type=module` which causes `import.meta` calls to fail,
+// and `currentScript` does not resolve dynamic imports so the polyfill
+// for `import.meta` does not work either.
 #[cfg(test)]
 #[wasm_bindgen(inline_js = "
 
     export async function worker() {
-        await import('/dist/pkg/perspective.inline.js');
+        await import('/dist/pkg/perspective.js');
+        console.log(window.perspective);
         return window.perspective.worker();
     }
 

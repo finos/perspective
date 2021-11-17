@@ -7,9 +7,9 @@
  *
  */
 
-// import * as linearAxis from "../../../../src/js/axis/linearAxis";
-// import * as seriesRange from "../../../../src/js/series/seriesRange";
-// import * as sinon from "sinon";
+// const * as linearAxis = require("../../../../src/js/axis/linearAxis");
+// const * as seriesRange = require("../../../../src/js/series/seriesRange");
+// const * as sinon = require("sinon");
 
 const settings = {
     colorStyles: {

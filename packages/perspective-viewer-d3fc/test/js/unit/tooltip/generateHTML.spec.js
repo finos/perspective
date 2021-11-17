@@ -6,9 +6,11 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import {select} from "d3";
-import {generateHtml} from "../../../../src/js/tooltip/generateHTML";
-import {get_type_config} from "@finos/perspective/dist/esm/config";
+const {select} = require("d3");
+const {generateHtml} = require("../../../../src/js/tooltip/generateHTML");
+const {
+    get_type_config,
+} = require("@finos/perspective/dist/cjs/perspective.node.js");
 
 describe("tooltip generateHTML should", () => {
     let tooltip = null;

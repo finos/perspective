@@ -27,35 +27,3 @@ module.exports = {
     plugins: [new PerspectivePlugin()]
 };
 ```
-## Configuration _without_ `@finos/perspective-webpack-plugin`
-
-As of version `0.6.1`, the equivalent webpack config is quite simple:
-
-```javascript
-module.exports = {
-    // ...
-
-    rules: [
-        // ...
-
-        {
-            test: /perspective\.worker\.js$/,
-            type: "javascript/auto",
-            include: path.dirname(require.resolve("@finos/perspective")),
-            loader: "worker-loader"
-        },
-        {
-            test: /perspective\.cpp\.wasm$/,
-            type: "javascript/auto",
-            include: path.dirname(require.resolve("@finos/perspective-cpp")),
-            loader: "file-loader"
-        }
-    ]
-};
-```
-
-## `0.4.4` and below
-
-These versions pre-date In order to use Perspective via webpack, so this
-plugin is a requirement.
-
