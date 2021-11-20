@@ -1,5 +1,29 @@
 # Changelog
 
+## [v1.0.2](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.0.2...HEAD)
+
+**Implemented enhancements:**
+
+- More regex functions - find, substring, replace [\#1598](https://github.com/finos/perspective/pull/1598) ([sc1f](https://github.com/sc1f))
+- Add Regex functions using Exprtk and RE2 [\#1596](https://github.com/finos/perspective/pull/1596) ([sc1f](https://github.com/sc1f))
+- Persist edited expressions and add 'Reset' button [\#1594](https://github.com/finos/perspective/pull/1594) ([texodus](https://github.com/texodus))
+
+**Closed issues:**
+
+- Can't install perspective javascript libraries with yarn/npm [\#1605](https://github.com/finos/perspective/issues/1605)
+- Can't install perspective-python on python3.9, macOS Big Sur [\#1603](https://github.com/finos/perspective/issues/1603)
+
+**Merged pull requests:**
+
+- Fix D3 alt-axis regression [\#1617](https://github.com/finos/perspective/pull/1617) ([texodus](https://github.com/texodus))
+- New example [\#1615](https://github.com/finos/perspective/pull/1615) ([texodus](https://github.com/texodus))
+- Publish script for Python [\#1613](https://github.com/finos/perspective/pull/1613) ([texodus](https://github.com/texodus))
+- Port to `esbuild` [\#1611](https://github.com/finos/perspective/pull/1611) ([texodus](https://github.com/texodus))
+- Upgrade `d3fc` to `15.2.4` and switch "Heatmap" to use canvas renderer [\#1599](https://github.com/finos/perspective/pull/1599) ([texodus](https://github.com/texodus))
+- Add ExprTK example fractal [\#1595](https://github.com/finos/perspective/pull/1595) ([texodus](https://github.com/texodus))
+
 ## [v1.0.1](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.0.0...HEAD)

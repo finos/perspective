@@ -41,8 +41,8 @@ try {
 
     console.log(`-- Building "@finos/perspective(-*)"`);
     fs.writeFileSync("./.perspectiverc", `PSP_PROJECT=js`);
-    execute`rm -rf node_modules`;
     execute`yarn clean --deps`;
+    execute`rm -rf node_modules`;
     execute`yarn`;
     execute`yarn build`;
 
