@@ -32,8 +32,8 @@ const _override = /* @__PURE__ */ (function () {
     return function () {
         if (!_instance) {
             _instance = new (class {
-                worker() {
-                    return wasm_worker();
+                async worker() {
+                    return await wasm_worker();
                 }
 
                 async wasm() {
