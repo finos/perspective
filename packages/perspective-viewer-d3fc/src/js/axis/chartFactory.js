@@ -129,7 +129,7 @@ const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
 
             // Column 5 of the grid
             container
-                .enter()
+                // .enter()
                 .append("div")
                 .attr("class", "y-label right-label")
                 .style("grid-column", 5)
