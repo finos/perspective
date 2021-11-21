@@ -25,13 +25,11 @@ pub enum KeyCode {
     not(test),
     wasm_bindgen(module = "monaco-editor/esm/vs/editor/editor.worker.js")
 )]
-#[cfg_attr(test, wasm_bindgen(inline_js = "export default function() {}"))]
+#[cfg_attr(test, wasm_bindgen(inline_js = "export default async function() {}"))]
 extern "C" {
-    #[wasm_bindgen(js_name = "default")]
-    pub type EditorWorker;
 
-    #[wasm_bindgen(constructor, js_class = "default")]
-    pub fn new() -> EditorWorker;
+    #[wasm_bindgen(js_name = "default")]
+    pub async fn new_worker() -> JsValue;
 }
 
 #[cfg_attr(
