@@ -33,7 +33,7 @@ customElements.define(
 
         async activate(view) {
             let viewer = this.parentElement;
-            let table = await viewer.getTable();
+            let table = await viewer.getTable(true);
             if (!this._initialized) {
                 this.innerHTML = "";
                 this.appendChild(this.datagrid);

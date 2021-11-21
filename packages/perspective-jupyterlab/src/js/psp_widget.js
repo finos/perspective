@@ -141,7 +141,7 @@ export class PerspectiveWidget extends Widget {
      */
 
     async _update(data) {
-        const table = await this.viewer.getTable();
+        const table = await this.viewer.getTable(true);
         await table.update(data);
     }
 
@@ -150,7 +150,7 @@ export class PerspectiveWidget extends Widget {
      */
 
     async clear() {
-        const table = await this.viewer.getTable();
+        const table = await this.viewer.getTable(true);
         await table.clear();
     }
 
@@ -162,7 +162,7 @@ export class PerspectiveWidget extends Widget {
      */
 
     async replace(data) {
-        const table = await this.viewer.getTable();
+        const table = await this.viewer.getTable(true);
         await table.replace(data);
     }
 

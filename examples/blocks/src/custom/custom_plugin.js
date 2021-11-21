@@ -216,7 +216,7 @@ class CustomDatagridPlugin extends customElements.get(
             const datagrid = this.datagrid;
             this._max = -Infinity;
             await this.refresh_cache(view);
-            const table = await viewer.getTable();
+            const table = await viewer.getTable(true);
             this._table_schema = await table.schema();
             viewer.addEventListener("perspective-config-update", async () => {
                 this._max = -Infinity;
