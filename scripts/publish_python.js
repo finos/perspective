@@ -104,24 +104,26 @@ try {
 
             fs.rmdirSync(artifact, {recursive: true, force: true});
         }
+
+        // publish is run after version, so any package.json has the right version
+        const pkg_json = require("@finos/perspective/package.json");
+        const PERSPECTIVE_VERSION = pkg_json.version;
+
+        // Python publish
+        console.log(`-- Building "perspective-python" ${PERSPECTIVE_VERSION}`);
+        fs.writeFileSync("./.perspectiverc", `PSP_PROJECT=python`);
+        execute`yarn clean --deps`;
+        execute`yarn build`;
+
+        // sdist into `python/perspective/dist`, and test the sdist as well.
+        execute`cd ./python/perspective && ./scripts/build_sdist.sh`;
+        const sdist_name = `perspective-python-${PERSPECTIVE_VERSION}.tar.gz`;
+
+        console.log(
+            `-- Uploading source distribution "${sdist_name}" to PyPi"`
+        );
+        execute`cd python/perspective && python3 -m twine upload ./dist/${sdist_name}`;
     })();
-
-    // publish is run after version, so any package.json has the right version
-    const pkg_json = require("@finos/perspective/package.json");
-    const PERSPECTIVE_VERSION = pkg_json.version;
-
-    // Python publish
-    console.log(`-- Building "perspective-python" ${PERSPECTIVE_VERSION}`);
-    fs.writeFileSync("./.perspectiverc", `PSP_PROJECT=python`);
-    execute`yarn clean --deps`;
-    execute`yarn build`;
-
-    // sdist into `python/perspective/dist`, and test the sdist as well.
-    execute`cd ./python/perspective && ./scripts/build_sdist.sh`;
-    const sdist_name = `perspective-python-${PERSPECTIVE_VERSION}.tar.gz`;
-
-    console.log(`-- Uploading source distribution "${sdist_name}" to PyPi"`);
-    execute`cd python/perspective && python3 -m twine upload ./dist/${sdist_name}`;
 } catch (e) {
     console.error(e.message);
     process.exit(1);
