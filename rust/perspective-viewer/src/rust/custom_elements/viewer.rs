@@ -164,11 +164,16 @@ impl PerspectiveViewerElement {
     }
 
     /// Get the underlying `Table` for this viewer.
-    pub fn js_get_table(&self) -> js_sys::Promise {
+    ///
+    /// # Arguments
+    /// - `wait_for_table` whether to wait for `load()` to be called, or fail
+    ///   immediately if `load()` has not yet been called.  
+    pub fn js_get_table(&self, wait_for_table: bool) -> js_sys::Promise {
         let session = self.session.clone();
         future_to_promise(async move {
             match session.js_get_table() {
                 Some(table) => Ok(table),
+                None if !wait_for_table => Err(JsValue::from("No table set")),
                 None => {
                     let (sender, receiver) = channel::<()>();
                     let sender = RefCell::new(Some(sender));

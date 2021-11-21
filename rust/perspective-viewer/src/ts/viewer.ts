@@ -142,12 +142,10 @@ export class PerspectiveViewerElement extends HTMLElement {
     }
 
     /**
-     * Returns the `perspective.Table()` which was supplied to `load()`.  If
-     * `load()` has been called but the supplied `Promise<perspective.Table>`
-     * has not resolved, `getTable()` will `await`;  if `load()` has not yet
-     * been called, an `Error` will be thrown.
-     *
+     * Returns the `perspective.Table()` which was supplied to `load()`
      * @category Data
+     * @param wait_for_table Whether to await `load()` if it has not yet been
+     * invoked, or fail immediately.
      * @returns A `Promise` which resolves to a `perspective.Table`
      * @example <caption>Share a `Table`</caption>
      * ```javascript
@@ -157,9 +155,9 @@ export class PerspectiveViewerElement extends HTMLElement {
      * await viewer2.load(table);
      * ```
      */
-    async getTable(): Promise<perspective.Table> {
+    async getTable(wait_for_table?: boolean): Promise<perspective.Table> {
         await this.load_wasm();
-        const table = await this.instance.js_get_table();
+        const table = await this.instance.js_get_table(!!wait_for_table);
         return table;
     }
 

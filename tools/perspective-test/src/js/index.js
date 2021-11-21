@@ -491,7 +491,7 @@ test.capture = function capture(
                                         "perspective-viewer"
                                     );
                                 if (viewer) {
-                                    await viewer.getTable();
+                                    await viewer.getTable(true);
                                     await viewer.restore({});
                                     return await viewer.save();
                                 }
