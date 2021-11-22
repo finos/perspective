@@ -196,7 +196,7 @@ parameters:
           targetPath: "$(System.DefaultWorkingDirectory)/python/perspective/wheelhouse/"
           artifactName: "$(artifact_name)"
 
-  - name: pythonWindowsWheelSteps
+  - name: pythonWindowsWheelVS2019Steps
     type: stepList
     default:
       # Build a python wheel for Windows
