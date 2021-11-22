@@ -147,7 +147,19 @@ class PSPBuild(build_ext):
 
         if platform.system() == "Windows":
             import distutils.msvccompiler as dm
-
+            print(dm.get_build_version())
+            print(dm.get_build_version())
+            print(dm.get_build_version())
+            print(dm.get_build_version())
+            print(dm.get_build_version())
+            print(dm.get_build_version())
+            print(dm.get_build_version())
+            print(dm.get_build_version())
+            print(dm.get_build_version())
+            print(dm.get_build_version())
+            print(dm.get_build_version())
+            print(dm.get_build_version())
+            print(dm.get_build_version())
             msvc = {
                 "12": "Visual Studio 12 2013",
                 "14": "Visual Studio 14 2015",
