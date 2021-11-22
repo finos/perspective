@@ -104,6 +104,15 @@ parameters:
       - script: yarn build_python  --ci $(python_flag) $(manylinux_flag)
         displayName: "build"
 
+  - name: pythonBuildVS2019Steps
+    type: stepList
+    default:
+      - script: yarn build_python  --ci $(python_flag) $(manylinux_flag)
+        displayName: "build"
+        env:
+          # azure pipelines are bad, so force windows-2019 to use VS2019
+          PSP_GENERATOR: Visual Studio 16 2019
+      
   - name: pythonBuildDockerSteps
     type: stepList
     default:
@@ -149,6 +158,9 @@ parameters:
       - bash: yarn _wheel_python $(python_flag) --macos
         condition: and(succeeded(), or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')))
         displayName: "Build wheel"
+        env:
+          # azure pipelines are bad, so force windows-2019 to use VS2019
+          PSP_GENERATOR: Visual Studio 16 2019
 
       # Test the wheel
       - bash: cd $(System.DefaultWorkingDirectory)/python/perspective/scripts && ./test_wheels.sh $(python_flag) --macos
@@ -386,8 +398,8 @@ jobs:
     steps:
       - ${{ parameters.initSteps }}
       - ${{ parameters.windowsInitSteps }}
-      - ${{ parameters.pythonBuildSteps }}
-      - ${{ parameters.pythonWindowsWheelSteps }}
+      - ${{ parameters.pythonBuildVS2019Steps }}
+      - ${{ parameters.pythonWindowsWheelVS2019Steps }}
 
   - job: "MacOS_Catalina"
     pool:
