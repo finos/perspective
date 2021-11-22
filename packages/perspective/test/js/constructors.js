@@ -1423,6 +1423,38 @@ module.exports = (perspective) => {
             });
         });
 
+        describe("Limit table constructors", function () {
+            it("Should not apply partial updates on limit tables when index wraps", async function () {
+                const table = await perspective.table(
+                    {a: "float", b: "float"},
+                    {
+                        limit: 3,
+                    }
+                );
+
+                table.update([{a: 10}, {b: 1}, {a: 20}, {a: null, b: 2}]);
+                const view = await table.view();
+                const records = await view.to_json();
+                await view.delete();
+                await table.delete();
+
+                const table2 = await perspective.table(
+                    {a: "float", b: "float"},
+                    {
+                        limit: 3,
+                    }
+                );
+
+                table2.update([{a: 10}, {b: 1}, {a: 20}, {b: 2}]);
+                const view2 = await table2.view();
+                const records2 = await view2.to_json();
+                await view2.delete();
+                await table2.delete();
+
+                expect(records).toEqual(records2);
+            });
+        });
+
         describe("Indexed table constructors", function () {
             it("Should index on an integer column", async function () {
                 const table = await perspective.table(all_types_data, {

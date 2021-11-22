@@ -740,15 +740,17 @@ namespace binding {
 
     void
     _fill_col_time(t_data_accessor accessor, std::shared_ptr<t_column> col,
-        std::string name, std::int32_t cidx, t_dtype type, bool is_update) {
+        std::string name, std::int32_t cidx, t_dtype type, bool is_update,
+        bool is_limit) {
         t_uindex nrows = col->size();
         for (auto i = 0; i < nrows; ++i) {
             t_val item = accessor.call<t_val>("marshal", cidx, i, type);
+            bool is_undefined = item.isUndefined();
 
-            if (item.isUndefined())
+            if (is_undefined && !is_limit)
                 continue;
 
-            if (item.isNull()) {
+            if (item.isNull() || is_undefined) {
                 if (is_update) {
                     col->unset(i);
                 } else {
@@ -771,15 +773,16 @@ namespace binding {
     void
     _fill_col_date(t_data_accessor accessor, std::shared_ptr<t_column> col,
         const std::string& name, std::int32_t cidx, t_dtype type,
-        bool is_update) {
+        bool is_update, bool is_limit) {
         t_uindex nrows = col->size();
         for (auto i = 0; i < nrows; ++i) {
             t_val item = accessor.call<t_val>("marshal", cidx, i, type);
+            bool is_undefined = item.isUndefined();
 
-            if (item.isUndefined())
+            if (is_undefined && !is_limit)
                 continue;
 
-            if (item.isNull()) {
+            if (item.isNull() || is_undefined) {
                 if (is_update) {
                     col->unset(i);
                 } else {
@@ -802,15 +805,16 @@ namespace binding {
     void
     _fill_col_bool(t_data_accessor accessor, std::shared_ptr<t_column> col,
         const std::string& name, std::int32_t cidx, t_dtype type,
-        bool is_update) {
+        bool is_update, bool is_limit) {
         t_uindex nrows = col->size();
         for (auto i = 0; i < nrows; ++i) {
             t_val item = accessor.call<t_val>("marshal", cidx, i, type);
+            bool is_undefined = item.isUndefined();
 
-            if (item.isUndefined())
+            if (is_undefined && !is_limit)
                 continue;
 
-            if (item.isNull()) {
+            if (item.isNull() || is_undefined) {
                 if (is_update) {
                     col->unset(i);
                 } else {
@@ -827,15 +831,16 @@ namespace binding {
     void
     _fill_col_string(t_data_accessor accessor, std::shared_ptr<t_column> col,
         const std::string& name, std::int32_t cidx, t_dtype type,
-        bool is_update) {
+        bool is_update, bool is_limit) {
         t_uindex nrows = col->size();
         for (auto i = 0; i < nrows; ++i) {
             t_val item = accessor.call<t_val>("marshal", cidx, i, type);
+            bool is_undefined = item.isUndefined();
 
-            if (item.isUndefined())
+            if (is_undefined && !is_limit)
                 continue;
 
-            if (item.isNull()) {
+            if (item.isNull() || is_undefined) {
                 if (is_update) {
                     col->unset(i);
                 } else {
@@ -851,15 +856,16 @@ namespace binding {
     void
     _fill_col_int64(t_data_accessor accessor, t_data_table& tbl,
         std::shared_ptr<t_column> col, const std::string& name,
-        std::int32_t cidx, t_dtype type, bool is_update) {
+        std::int32_t cidx, t_dtype type, bool is_update, bool is_limit) {
         t_uindex nrows = col->size();
         for (auto i = 0; i < nrows; ++i) {
             t_val item = accessor.call<t_val>("marshal", cidx, i, type);
+            bool is_undefined = item.isUndefined();
 
-            if (item.isUndefined())
+            if (is_undefined && !is_limit)
                 continue;
 
-            if (item.isNull()) {
+            if (item.isNull() || is_undefined) {
                 if (is_update) {
                     col->unset(i);
                 } else {
@@ -876,7 +882,7 @@ namespace binding {
                 tbl.promote_column(name, DTYPE_STR, i, false);
                 col = tbl.get_column(name);
                 _fill_col_string(
-                    accessor, col, name, cidx, DTYPE_STR, is_update);
+                    accessor, col, name, cidx, DTYPE_STR, is_update, is_limit);
                 return;
             } else {
                 col->set_nth(i, static_cast<std::int64_t>(fval));
@@ -887,15 +893,16 @@ namespace binding {
     void
     _fill_col_numeric(t_data_accessor accessor, t_data_table& tbl,
         std::shared_ptr<t_column> col, const std::string& name,
-        std::int32_t cidx, t_dtype type, bool is_update) {
+        std::int32_t cidx, t_dtype type, bool is_update, bool is_limit) {
         t_uindex nrows = col->size();
         for (auto i = 0; i < nrows; ++i) {
             t_val item = accessor.call<t_val>("marshal", cidx, i, type);
+            bool is_undefined = item.isUndefined();
 
-            if (item.isUndefined())
+            if (is_undefined && !is_limit)
                 continue;
 
-            if (item.isNull()) {
+            if (item.isNull() || is_undefined) {
                 if (is_update) {
                     col->unset(i);
                 } else {
@@ -931,7 +938,8 @@ namespace binding {
                         tbl.promote_column(name, DTYPE_STR, i, false);
                         col = tbl.get_column(name);
                         _fill_col_string(
-                            accessor, col, name, cidx, DTYPE_STR, is_update);
+                            accessor, col, name, cidx, DTYPE_STR, is_update,
+                            is_limit);
                         return;
                     } else {
                         col->set_nth(i, static_cast<std::int32_t>(fval));
@@ -1025,30 +1033,30 @@ namespace binding {
     void
     _fill_data_helper(t_data_accessor accessor, t_data_table& tbl,
         std::shared_ptr<t_column> col, const std::string& name,
-        std::int32_t cidx, t_dtype type, bool is_update) {
+        std::int32_t cidx, t_dtype type, bool is_update, bool is_limit) {
         switch (type) {
             case DTYPE_INT64: {
                 _fill_col_int64(
-                    accessor, tbl, col, name, cidx, type, is_update);
+                    accessor, tbl, col, name, cidx, type, is_update, is_limit);
             } break;
             case DTYPE_BOOL: {
-                _fill_col_bool(accessor, col, name, cidx, type, is_update);
+                _fill_col_bool(accessor, col, name, cidx, type, is_update, is_limit);
             } break;
             case DTYPE_DATE: {
-                _fill_col_date(accessor, col, name, cidx, type, is_update);
+                _fill_col_date(accessor, col, name, cidx, type, is_update, is_limit);
             } break;
             case DTYPE_TIME: {
-                _fill_col_time(accessor, col, name, cidx, type, is_update);
+                _fill_col_time(accessor, col, name, cidx, type, is_update, is_limit);
             } break;
             case DTYPE_STR: {
-                _fill_col_string(accessor, col, name, cidx, type, is_update);
+                _fill_col_string(accessor, col, name, cidx, type, is_update, is_limit);
             } break;
             case DTYPE_NONE: {
                 break;
             }
             default:
                 _fill_col_numeric(
-                    accessor, tbl, col, name, cidx, type, is_update);
+                    accessor, tbl, col, name, cidx, type, is_update, is_limit);
         }
     }
 
@@ -1057,6 +1065,7 @@ namespace binding {
         const t_schema& input_schema, const std::string& index,
         std::uint32_t offset, std::uint32_t limit, bool is_update) {
         bool implicit_index = false;
+        bool is_limit = limit != UINT32_MAX;
         std::vector<std::string> col_names(input_schema.columns());
         std::vector<t_dtype> data_types(input_schema.types());
 
@@ -1069,13 +1078,13 @@ namespace binding {
                 std::shared_ptr<t_column> pkey_col_sptr
                     = tbl.add_column_sptr("psp_pkey", type, true);
                 _fill_data_helper(dcol, tbl, pkey_col_sptr, "psp_pkey", cidx,
-                    type, is_update);
+                    type, is_update, is_limit);
                 tbl.clone_column("psp_pkey", "psp_okey");
                 continue;
             }
 
             auto col = tbl.get_column(name);
-            _fill_data_helper(dcol, tbl, col, name, cidx, type, is_update);
+            _fill_data_helper(dcol, tbl, col, name, cidx, type, is_update, is_limit);
         }
 
         // Fill index column - recreated every time a `t_data_table` is created.
