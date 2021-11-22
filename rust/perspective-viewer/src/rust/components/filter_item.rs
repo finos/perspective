@@ -11,12 +11,13 @@ use crate::custom_elements::filter_dropdown::*;
 use crate::dragdrop::*;
 use crate::renderer::*;
 use crate::session::*;
+use crate::utils::{posix_to_utc_str, str_to_utc_posix};
 use crate::*;
 
 use super::containers::dragdrop_list::*;
 use super::containers::dropdown::*;
 
-use chrono::{Local, NaiveDate, NaiveDateTime, TimeZone, Utc};
+use chrono::{NaiveDate, TimeZone, Utc};
 use wasm_bindgen::JsCast;
 use web_sys::*;
 use yew::prelude::*;
@@ -82,7 +83,6 @@ impl FilterItemProperties {
                 if *x > 0_f64 {
                     Some(
                         Utc.timestamp(*x as i64 / 1000, (*x as u32 % 1000) * 1000)
-                            .with_timezone(&Local)
                             .format("%Y-%m-%d")
                             .to_string(),
                     )
@@ -92,19 +92,7 @@ impl FilterItemProperties {
             }
             (Type::Datetime, FilterTerm::Scalar(Scalar::Float(x)))
             | (Type::Datetime, FilterTerm::Scalar(Scalar::DateTime(x))) => {
-                if *x > 0_f64 {
-                    Some(
-                        Utc.timestamp(
-                            *x as i64 / 1000,
-                            ((*x as i64 % 1000) * 1000000) as u32,
-                        )
-                        .with_timezone(&Local)
-                        .format("%Y-%m-%dT%H:%M:%S%.3f")
-                        .to_string(),
-                    )
-                } else {
-                    None
-                }
+                posix_to_utc_str(*x).ok()
             }
             (Type::Bool, FilterTerm::Scalar(Scalar::Bool(x))) => {
                 Some((if *x { "true" } else { "false" }).to_owned())
@@ -209,20 +197,10 @@ impl FilterItemProperties {
                     })
                 }
                 Some(Type::Datetime) => {
-                    filter_item.2 = FilterTerm::Scalar(
-                        match NaiveDateTime::parse_from_str(
-                            &val,
-                            "%Y-%m-%dT%H:%M:%S%.3f",
-                        ) {
-                            Ok(ref posix) => Scalar::DateTime(
-                                Utc.from_local_datetime(posix)
-                                    .unwrap()
-                                    .timestamp_millis()
-                                    as f64,
-                            ),
-                            _ => Scalar::Null,
-                        },
-                    )
+                    let posix = str_to_utc_posix(&val)
+                        .map(Scalar::DateTime)
+                        .unwrap_or(Scalar::Null);
+                    filter_item.2 = FilterTerm::Scalar(posix);
                 }
                 Some(Type::Bool) => {
                     filter_item.2 = FilterTerm::Scalar(match val.as_str() {
