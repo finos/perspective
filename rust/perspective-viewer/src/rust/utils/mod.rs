@@ -8,6 +8,7 @@
 
 mod async_callback;
 mod closure;
+mod datetime;
 mod debounce;
 mod errors;
 mod future_to_promise;
@@ -22,6 +23,7 @@ mod tests;
 
 pub use self::async_callback::*;
 pub use self::closure::*;
+pub use self::datetime::*;
 pub use self::debounce::*;
 pub use self::errors::*;
 pub use self::future_to_promise::*;

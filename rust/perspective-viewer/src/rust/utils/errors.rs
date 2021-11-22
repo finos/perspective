@@ -77,3 +77,9 @@ impl<T> ToJsValueError<T> for Result<T, std::io::Error> {
         self.map_err(|x: std::io::Error| JsValue::from(&format!("{}", x)))
     }
 }
+
+impl<T> ToJsValueError<T> for Result<T, chrono::ParseError> {
+    fn into_jserror(self) -> Result<T, JsValue> {
+        self.map_err(|x: chrono::ParseError| JsValue::from(&format!("{}", x)))
+    }
+}
