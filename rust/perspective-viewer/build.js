@@ -54,7 +54,6 @@ const BUILD = [
     },
     {
         entryPoints: ["src/ts/perspective-viewer.ts"],
-        // metafile: false,
         plugins: [
             IgnoreCSSPlugin(),
             IgnoreFontsPlugin(),
@@ -66,7 +65,6 @@ const BUILD = [
     {
         entryPoints: ["src/ts/perspective-viewer.ts"],
         format: "esm",
-        metafile: false,
         plugins: [
             IgnoreCSSPlugin(),
             IgnoreFontsPlugin(),
