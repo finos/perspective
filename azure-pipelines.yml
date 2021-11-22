@@ -364,7 +364,7 @@ jobs:
 
   - job: "Windows"
     pool:
-      vmImage: "vs2017-win2016"
+      vmImage: "windows-2019"
 
     strategy:
       matrix:
@@ -415,6 +415,24 @@ jobs:
             python.version: "3.8"
             python_flag: "--python38"
             artifact_name: "cp38-cp38-macosx_10_15_x86_64"
+
+    steps:
+      - ${{ parameters.initSteps }}
+      - ${{ parameters.macInitSteps }}
+      - ${{ parameters.pythonBuildSteps }}
+      - ${{ parameters.pythonCoverageSteps }}
+      - ${{ parameters.pythonMacWheelSteps }}
+
+  - job: "MacOS_BigSur"
+    pool:
+      vmImage: "macos-11"
+
+    strategy:
+      matrix:
+        Python39:
+          python.version: "3.9"
+          python_flag: "--python39"
+          artifact_name: "cp39-cp39-macosx_11_0_x86_64"
 
     steps:
       - ${{ parameters.initSteps }}
