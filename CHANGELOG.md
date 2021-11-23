@@ -1,5 +1,33 @@
 # Changelog
 
+## [v1.0.3](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.0.2...HEAD)
+
+**Fixed bugs:**
+
+- Missing data not properly handled when "limit" is set [\#1616](https://github.com/finos/perspective/issues/1616)
+- JupyterLab CSV widget not working anymore [\#1612](https://github.com/finos/perspective/issues/1612)
+- Precision Display Window on Dark Background [\#1609](https://github.com/finos/perspective/issues/1609)
+- DateTime Uses GMT instead of Local Time [\#1606](https://github.com/finos/perspective/issues/1606)
+- Fix partial-updates on tables with `limit` set for javascript [\#1624](https://github.com/finos/perspective/pull/1624) ([texodus](https://github.com/texodus))
+- Fix partial-updates on tables with `limit` set for python [\#1623](https://github.com/finos/perspective/pull/1623) ([texodus](https://github.com/texodus))
+- Fix `datetime` filter timezone bug [\#1622](https://github.com/finos/perspective/pull/1622) ([texodus](https://github.com/texodus))
+- `PerspectiveWidget()` dialog theme fix [\#1621](https://github.com/finos/perspective/pull/1621) ([texodus](https://github.com/texodus))
+- Add `wait_for_table` flag to `getTable()` [\#1619](https://github.com/finos/perspective/pull/1619) ([texodus](https://github.com/texodus))
+- Fix `worker.js` cross-origin workaround for CDN [\#1618](https://github.com/finos/perspective/pull/1618) ([texodus](https://github.com/texodus))
+
+**Closed issues:**
+
+- Customized types are not support perspective 1.0.1 [\#1602](https://github.com/finos/perspective/issues/1602)
+- Update `windows-2016` to `windows-latest` and set up Visual Studio 2019 build [\#1601](https://github.com/finos/perspective/issues/1601)
+
+**Merged pull requests:**
+
+- bump windows build for vc 14.2 / vs 16 2019, add macos 11 build for py3.9 [\#1626](https://github.com/finos/perspective/pull/1626) ([timkpaine](https://github.com/timkpaine))
+- add threads explicit on mac [\#1625](https://github.com/finos/perspective/pull/1625) ([timkpaine](https://github.com/timkpaine))
+- Fix publish through practice [\#1620](https://github.com/finos/perspective/pull/1620) ([texodus](https://github.com/texodus))
+
 ## [v1.0.2](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.0.2...HEAD)

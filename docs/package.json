@@ -1,7 +1,7 @@
 {
     "name": "@finos/docs",
     "private": true,
-    "version": "1.0.2",
+    "version": "1.0.3",
     "scripts": {
         "theme": "lessc static/css/material.dark.less > static/css/material.dark.css",
         "examples": "docusaurus-examples",
@@ -15,11 +15,11 @@
         "write-translations": "docusaurus-write-translations"
     },
     "devDependencies": {
-        "@finos/perspective": "^1.0.2",
-        "@finos/perspective-viewer": "^1.0.2",
-        "@finos/perspective-viewer-d3fc": "^1.0.2",
-        "@finos/perspective-viewer-datagrid": "^1.0.2",
-        "@finos/perspective-workspace": "^1.0.2",
+        "@finos/perspective": "^1.0.3",
+        "@finos/perspective-viewer": "^1.0.3",
+        "@finos/perspective-viewer-d3fc": "^1.0.3",
+        "@finos/perspective-viewer-datagrid": "^1.0.3",
+        "@finos/perspective-workspace": "^1.0.3",
         "docusaurus": "^1.8.0",
         "less": "^3.9.0"
     },
