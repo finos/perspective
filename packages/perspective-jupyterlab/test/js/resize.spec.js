@@ -41,7 +41,7 @@ utils.with_server({}, () => {
                             "position:absolute;top:0;left:0;width:300px;height:300px";
                         await document
                             .querySelector("perspective-viewer")
-                            .notifyResize();
+                            .notifyResize(true);
                     });
 
                     return await page.evaluate(async () => {
@@ -49,7 +49,7 @@ utils.with_server({}, () => {
                             "position:absolute;top:0;left:0;width:800px;height:600px";
                         await document
                             .querySelector("perspective-viewer")
-                            .notifyResize();
+                            .notifyResize(true);
                         return window.__WIDGET__.viewer.innerHTML;
                     });
                 }

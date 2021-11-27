@@ -472,7 +472,6 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         this._maximizedWidget = widget;
         this.dockpanel.mode = "single-document";
         this.dockpanel.activateWidget(widget);
-        widget.notifyResize();
     }
 
     _unmaximize() {

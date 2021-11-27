@@ -86,18 +86,8 @@ export class PerspectiveWidget extends Widget {
      */
 
     onAfterShow(msg) {
-        this.notifyResize();
+        this.viewer.notifyResize(true);
         super.onAfterShow(msg);
-    }
-
-    /**
-     * Lumino: widget resize
-     *
-     */
-
-    onResize(msg) {
-        this.notifyResize();
-        super.onResize(msg);
     }
 
     onActivateRequest(msg) {
@@ -105,10 +95,6 @@ export class PerspectiveWidget extends Widget {
             this.viewer.focus();
         }
         super.onActivateRequest(msg);
-    }
-
-    async notifyResize() {
-        await this.viewer.notifyResize();
     }
 
     async toggleConfig() {
@@ -332,20 +318,7 @@ export class PerspectiveWidget extends Widget {
         div.style.setProperty("display", "flex");
         div.style.setProperty("flex-direction", "row");
         node.appendChild(div);
-        if (!viewer.notifyResize) {
-            console.warn("Warning: not bound to real element");
-        } else {
-            const resize_observer = new MutationObserver((mutations) => {
-                if (mutations.some((x) => x.attributeName === "style")) {
-                    viewer.notifyResize.call(viewer);
-                }
-            });
-
-            resize_observer.observe(node, {
-                attributes: true,
-            });
-            viewer.toggleConfig();
-        }
+        viewer.toggleConfig(true);
 
         return viewer;
     }

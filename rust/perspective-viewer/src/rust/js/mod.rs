@@ -10,3 +10,4 @@ pub mod monaco;
 pub mod perspective;
 // pub mod perspective_viewer;
 pub mod plugin;
+pub mod resize_observer;

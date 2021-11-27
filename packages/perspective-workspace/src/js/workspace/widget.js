@@ -148,15 +148,4 @@ export class PerspectiveViewerWidget extends Widget {
         }
         await this.viewer.delete();
     }
-
-    onResize(msg) {
-        this.notifyResize();
-        super.onResize(msg);
-    }
-
-    async notifyResize() {
-        if (this.isVisible) {
-            await this.viewer.notifyResize();
-        }
-    }
 }
