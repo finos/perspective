@@ -167,6 +167,15 @@ class PSPBuild(build_ext):
                 ]
             )
 
+            vcpkg_toolchain_file = os.path.abspath(
+                os.path.join("..", "..", "vcpkg\\scripts\\buildsystems\\vcpkg.cmake")
+            )
+
+            if os.path.exists(vcpkg_toolchain_file):
+                cmake_args.append(
+                    "-DCMAKE_TOOLCHAIN_FILE={}".format(vcpkg_toolchain_file)
+                )
+
             if sys.maxsize > 2 ** 32:
                 # build 64 bit to match python
                 cmake_args += ["-A", "x64"]

@@ -3,7 +3,7 @@
 # PYTHON_PYBIND_FOUND
 # will be set by this script
 
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.7.2)
 
 if(NOT Python_EXECUTABLE)
   if(PyArrow_FIND_QUIETLY)
