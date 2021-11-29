@@ -7,8 +7,10 @@
  *
  */
 
-import perspective from "@finos/perspective/dist/esm/perspective.parallel.js";
 import "./index.css";
+
+import perspective from "@finos/perspective";
+
 import "@finos/perspective-viewer";
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";

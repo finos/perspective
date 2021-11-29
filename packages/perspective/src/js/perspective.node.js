@@ -25,18 +25,22 @@ const load_perspective =
     require("../../dist/pkg/cjs/perspective.cpp.js").default;
 
 const LOCAL_PATH = path.join(process.cwd(), "node_modules");
-const buffer = require("@finos/perspective/pkg/cjs/perspective.cpp.wasm")
-    .default.buffer;
+const buffer =
+    require("@finos/perspective/pkg/cjs/perspective.cpp.wasm").default;
 
 const SYNC_SERVER = new (class extends Server {
     init(msg) {
-        load_perspective({
-            wasmBinary: buffer,
-            wasmJSMethod: "native-wasm",
-        }).then((core) => {
-            this.perspective = perspective(core);
-            super.init(msg);
-        });
+        buffer
+            .then((buffer) =>
+                load_perspective({
+                    wasmBinary: buffer,
+                    wasmJSMethod: "native-wasm",
+                })
+            )
+            .then((core) => {
+                this.perspective = perspective(core);
+                super.init(msg);
+            });
     }
 
     post(msg) {

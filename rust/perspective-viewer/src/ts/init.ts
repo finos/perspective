@@ -20,4 +20,8 @@ window.addEventListener("unhandledrejection", (event) => {
     }
 });
 
-export const WASM_MODULE = init_wasm(wasm);
+async function load_wasm() {
+    return await init_wasm(await wasm);
+}
+
+export const WASM_MODULE = load_wasm();

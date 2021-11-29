@@ -17,7 +17,6 @@ exports.WorkerPlugin = function WorkerPlugin(inline) {
                     define: {
                         global: "self",
                     },
-                    format: "esm",
                     entryNames: "[name]",
                     chunkNames: "[name]",
                     assetNames: "[name]",
@@ -59,10 +58,16 @@ exports.WorkerPlugin = function WorkerPlugin(inline) {
             return {
                 contents: `
                     import worker from ${JSON.stringify(args.path)};
-                    export default async function () {
+                    async function get_worker_code() {
                         const url = new URL(worker, import.meta.url);
                         const req = await fetch(url);
                         const code = await req.text();
+                        return code;
+                    }
+
+                    const code_promise = get_worker_code();
+                    export default async function () {
+                        const code = await code_promise;
                         const blob = new Blob([code], {type: 'application/javascript'});
                         const url2 = URL.createObjectURL(blob);
                         return new Worker(url2, {type: "module"});
