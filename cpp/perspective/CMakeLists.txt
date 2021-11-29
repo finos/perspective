@@ -187,6 +187,16 @@ else()
 	set(BUILD_MESSAGE "${BUILD_MESSAGE}\n${Cyan}Building RELEASE${ColorReset}")
 endif()
 
+# fix for threads on osx 
+
+if (PSP_PYTHON_BUILD AND MACOS)
+    # assume built-in pthreads on MacOS
+    set(CMAKE_THREAD_LIBS_INIT "-lpthread")
+    set(CMAKE_HAVE_THREADS_LIBRARY 1)
+    set(CMAKE_USE_WIN32_THREADS_INIT 0)
+    set(CMAKE_USE_PTHREADS_INIT 1)
+    set(THREADS_PREFER_PTHREAD_FLAG ON)
+endif()
 
 
 #######################
@@ -613,14 +623,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		# module_origin_path is the location of the binary
         if(MACOS)
             set(module_origin_path "@loader_path/")
-
-			# assume built-in pthreads on MacOS
-			set(CMAKE_THREAD_LIBS_INIT "-lpthread")
-			set(CMAKE_HAVE_THREADS_LIBRARY 1)
-			set(CMAKE_USE_WIN32_THREADS_INIT 0)
-			set(CMAKE_USE_PTHREADS_INIT 1)
-			set(THREADS_PREFER_PTHREAD_FLAG ON)
-
 	    else()
             set(module_origin_path "\$ORIGIN")
 		endif()
@@ -640,7 +642,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		target_compile_definitions(psp PRIVATE PSP_ENABLE_PYTHON=1)
 		target_compile_definitions(binding PRIVATE PSP_ENABLE_PYTHON=1)
 
-        if (WIN32)
+        	if (WIN32)
 			target_compile_definitions(binding PRIVATE WIN32=1)
 			target_compile_definitions(binding PRIVATE _WIN32=1)
 
