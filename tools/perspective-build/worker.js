@@ -11,22 +11,24 @@ exports.WorkerPlugin = function WorkerPlugin(inline) {
                     `dist/umd/` + crypto.randomBytes(4).readUInt32LE(0);
 
                 const subbuild = esbuild.build({
+                    target: ["es2021"],
                     entryPoints: [require.resolve(args.path)],
                     outfile,
                     define: {
                         global: "self",
                     },
+                    format: "esm",
                     entryNames: "[name]",
                     chunkNames: "[name]",
                     assetNames: "[name]",
                     minify: !process.env.PSP_DEBUG,
                     bundle: true,
+                    sourcemap: true,
                 });
 
                 return {
                     path: args.path,
                     namespace: "worker",
-                    // external: true,
                     pluginData: {
                         outfile,
                         subbuild,
