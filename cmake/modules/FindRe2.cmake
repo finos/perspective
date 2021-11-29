@@ -50,7 +50,7 @@ message(STATUS ${RE2_INCLUDE_DIR})
 if (NOT RE2_INCLUDE_DIR OR NOT RE2_LIBS OR
     NOT RE2_STATIC_LIB)
   set(RE2_FOUND FALSE)
-  message(FATAL_ERROR "Re2 includes and libraries NOT found. "
+  message(STATUS "Re2 includes and libraries NOT found. "
     "Looked for headers in ${RE2_SEARCH_HEADER_PATH}, "
     "and for libs in ${RE2_SEARCH_LIB_PATH}")
 else()

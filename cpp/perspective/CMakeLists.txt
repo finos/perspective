@@ -425,7 +425,7 @@ psp_build_dep("arrow" "${PSP_CMAKE_MODULE_PATH}/arrow.txt.in")
 
 # Build re2 as our regex library
 find_package(re2)
-if(NOT re2_FOUND)
+if(NOT RE2_FOUND)
     psp_build_dep("re2" "${PSP_CMAKE_MODULE_PATH}/re2.txt.in")
 else()
     psp_build_message("${Cyan}Found re2 in ${RE2_INCLUDE_DIR}${ColorReset}")
@@ -631,7 +631,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
         # module_origin_path is the location of the binary
         if(MACOS)
             set(module_origin_path "@loader_path/")
-	    else()
+        else()
             set(module_origin_path "\$ORIGIN")
         endif()
     else()
@@ -650,54 +650,54 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
         target_compile_definitions(psp PRIVATE PSP_ENABLE_PYTHON=1)
         target_compile_definitions(binding PRIVATE PSP_ENABLE_PYTHON=1)
 
-        	if (WIN32)
-			target_compile_definitions(binding PRIVATE WIN32=1)
-			target_compile_definitions(binding PRIVATE _WIN32=1)
+        if (WIN32)
+            target_compile_definitions(binding PRIVATE WIN32=1)
+            target_compile_definitions(binding PRIVATE _WIN32=1)
 
-			# .dll not importable
-			set_property(TARGET binding PROPERTY SUFFIX .pyd)
-		elseif (MACOS OR NOT MANYLINUX)
-			target_compile_options(binding PRIVATE -Wdeprecated-declarations)
-			set_property(TARGET psp PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path})
-			set_property(TARGET binding PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path})
-		else()
-			target_compile_options(binding PRIVATE -Wdeprecated-declarations)
-		endif()
+            # .dll not importable
+            set_property(TARGET binding PROPERTY SUFFIX .pyd)
+        elseif (MACOS OR NOT MANYLINUX)
+            target_compile_options(binding PRIVATE -Wdeprecated-declarations)
+            set_property(TARGET psp PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path})
+            set_property(TARGET binding PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path})
+        else()
+            target_compile_options(binding PRIVATE -Wdeprecated-declarations)
+        endif()
 
-		# python 2.7 build on manylinux needs -lrt for access to time functions,
-		# otherwise we get an "undefined symbol: clock_gettime" error when
-		# building minimal arrow.
-		if (PSP_PYTHON_BUILD AND MANYLINUX AND PSP_PYTHON_VERSION STREQUAL "2.7")
-			target_link_libraries(psp rt)
-		endif()
+        # python 2.7 build on manylinux needs -lrt for access to time functions,
+        # otherwise we get an "undefined symbol: clock_gettime" error when
+        # building minimal arrow.
+        if (PSP_PYTHON_BUILD AND MANYLINUX AND PSP_PYTHON_VERSION STREQUAL "2.7")
+            target_link_libraries(psp rt)
+        endif()
 
-		# Link against minimal arrow static library
-		target_link_libraries(psp arrow re2)
+        # Link against minimal arrow static library
+        target_link_libraries(psp arrow re2)
 
-		target_link_libraries(binding psp)
+        target_link_libraries(binding psp)
 
-		# The compiled libraries will be put in CMAKE_LIBRARY_OUTPUT_DIRECTORY by default. In the
-		# setup.py file, we designate this to be in the build/lib.<platform> directory. However,
-		# since we want to be able to test perspective in-source, we also copy the libraries into
-		# the source folder. These two commands do that.
-		add_custom_command(TARGET psp POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:psp> ${PSP_PYTHON_SRC}/table/)
-		add_custom_command(TARGET binding POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:binding> ${PSP_PYTHON_SRC}/table/)
+        # The compiled libraries will be put in CMAKE_LIBRARY_OUTPUT_DIRECTORY by default. In the
+        # setup.py file, we designate this to be in the build/lib.<platform> directory. However,
+        # since we want to be able to test perspective in-source, we also copy the libraries into
+        # the source folder. These two commands do that.
+        add_custom_command(TARGET psp POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:psp> ${PSP_PYTHON_SRC}/table/)
+        add_custom_command(TARGET binding POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:binding> ${PSP_PYTHON_SRC}/table/)
 
-		########################
-	else()
-		add_library(psp SHARED ${WASM_SOURCE_FILES})
-		target_link_libraries(psp arrow)
-	endif()
+        ########################
+    else()
+        add_library(psp SHARED ${WASM_SOURCE_FILES})
+        target_link_libraries(psp arrow)
+    endif()
 
-	if(PSP_CPP_BUILD_STRICT AND NOT WIN32)
-		target_compile_options(psp PRIVATE -Wall -Werror)
-		target_compile_options(psp PRIVATE $<$<CONFIG:DEBUG>:-fPIC -O0>)
-		if(PSP_PYTHON_BUILD)
-			target_compile_options(binding PRIVATE $<$<CONFIG:DEBUG>:-fPIC -O0>)
-		endif()
-	elseif(WIN32)
-		target_compile_definitions(psp PRIVATE PERSPECTIVE_EXPORTS=1)
-		target_compile_definitions(psp PRIVATE WIN32=1)
-		target_compile_definitions(psp PRIVATE _WIN32=1)
-	endif()
+    if(PSP_CPP_BUILD_STRICT AND NOT WIN32)
+        target_compile_options(psp PRIVATE -Wall -Werror)
+        target_compile_options(psp PRIVATE $<$<CONFIG:DEBUG>:-fPIC -O0>)
+        if(PSP_PYTHON_BUILD)
+            target_compile_options(binding PRIVATE $<$<CONFIG:DEBUG>:-fPIC -O0>)
+        endif()
+    elseif(WIN32)
+        target_compile_definitions(psp PRIVATE PERSPECTIVE_EXPORTS=1)
+        target_compile_definitions(psp PRIVATE WIN32=1)
+        target_compile_definitions(psp PRIVATE _WIN32=1)
+    endif()
 endif()
