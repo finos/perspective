@@ -449,6 +449,7 @@ set (SOURCE_FILES
 	${PSP_CPP_SRC}/src/cpp/aggregate.cpp
 	${PSP_CPP_SRC}/src/cpp/aggspec.cpp
 	${PSP_CPP_SRC}/src/cpp/arg_sort.cpp
+	${PSP_CPP_SRC}/src/cpp/arrow_csv.cpp
 	${PSP_CPP_SRC}/src/cpp/arrow_loader.cpp
 	${PSP_CPP_SRC}/src/cpp/arrow_writer.cpp
 	${PSP_CPP_SRC}/src/cpp/base.cpp
@@ -525,12 +526,11 @@ set (SOURCE_FILES
 	${PSP_CPP_SRC}/src/cpp/traversal.cpp
 	${PSP_CPP_SRC}/src/cpp/traversal_nodes.cpp
 	${PSP_CPP_SRC}/src/cpp/tree_context_common.cpp
-	${PSP_CPP_SRC}/src/cpp/utils.cpp
 	${PSP_CPP_SRC}/src/cpp/update_task.cpp
+	${PSP_CPP_SRC}/src/cpp/utils.cpp
 	${PSP_CPP_SRC}/src/cpp/view.cpp
 	${PSP_CPP_SRC}/src/cpp/view_config.cpp
 	${PSP_CPP_SRC}/src/cpp/vocab.cpp
-	${PSP_CPP_SRC}/src/cpp/arrow_csv.cpp
 	)
 
 set(PYTHON_SOURCE_FILES ${SOURCE_FILES}

@@ -78,6 +78,7 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/testing/util.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/basic_decimal.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/bit_block_counter.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/bit_run_reader.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/bit_util.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/bitmap_builders.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/bitmap_ops.cc
@@ -100,6 +101,7 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/task_group.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/thread_pool.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/trie.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/unreachable.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/utf8.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/value_parsing.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/vendored/double-conversion/double-conversion.cc
