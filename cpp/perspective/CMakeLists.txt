@@ -77,7 +77,7 @@ function (psp_build_dep name cmake_file)
 	elseif(${name} STREQUAL exprtk)
 		# no cmakelists - just include the header
 		include_directories(${CMAKE_BINARY_DIR}/${name}-src)
-    elseif(${name} STREQUAL exprtk)
+    elseif(${name} STREQUAL re2)
         # Overwrite re2's CMakeLists with our custom CMakeLists.
         configure_file(${PSP_CMAKE_MODULE_PATH}/${name}/CMakeLists.txt ${CMAKE_BINARY_DIR}/${name}-src/ COPYONLY)
         include_directories(${CMAKE_BINARY_DIR}/${name}-src)
