@@ -12,9 +12,6 @@
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"/>
 
-        <script src="https://cdn.jsdelivr.net/npm/webfontloader"></script>
-        <script>WebFont.load({google: {families: ["Roboto Mono:200,400","Material Icons","Open Sans:300,400"]}});</script>
-
         <script type="module" src="/node_modules/@finos/perspective/dist/cdn/perspective.js"></script>
         <script type="module" src="/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.js"></script>
         <script type="module" src="/node_modules/@finos/perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js"></script>
@@ -37,17 +34,14 @@
                 el.toggleConfig();
             }
 
-            window.addEventListener("DOMContentLoaded", load);
+            load();
 
         </script>
 
         <style>
             perspective-viewer {
                 position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
+                inset: 0;
             }
         </style>
     </head>

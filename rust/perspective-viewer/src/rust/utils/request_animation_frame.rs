@@ -24,10 +24,28 @@ pub async fn await_animation_frame() -> Result<(), JsValue> {
     receiver.await.into_jserror()
 }
 
+/// An `async` which awaits the browser's `load` event, which is automatically
+/// bypassed if `document.readyState` indicates this has already occurred.
+pub async fn await_dom_loaded() -> Result<(), JsValue> {
+    let window = web_sys::window().unwrap();
+    let state = window.document().unwrap().ready_state();
+    if state == "complete" || state == "loaded" {
+        Ok(())
+    } else {
+        let (sender, receiver) = channel::<()>();
+        let jsfun = Closure::once_into_js(move || sender.send(()).unwrap());
+        window.add_event_listener_with_callback("load", jsfun.unchecked_ref())?;
+        receiver.await.into_jserror()
+    }
+}
+
 /// An `async` version of `set_timeout`, which resolves in `timeout` milliseconds
 pub async fn set_timeout(timeout: i32) -> Result<(), JsValue> {
     let (sender, receiver) = channel::<()>();
-    let jsfun = Closure::once_into_js(move || sender.send(()).unwrap());
+    let jsfun = Closure::once_into_js(move || {
+        let _ = sender.send(());
+    });
+
     web_sys::window()
         .unwrap()
         .set_timeout_with_callback_and_timeout_and_arguments_0(
@@ -35,5 +53,6 @@ pub async fn set_timeout(timeout: i32) -> Result<(), JsValue> {
             timeout,
         )?;
 
-    receiver.await.into_jserror()
+    let x = receiver.await;
+    x.into_jserror()
 }
