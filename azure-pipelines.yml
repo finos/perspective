@@ -41,6 +41,7 @@ parameters:
             yarn
           path: $(YARN_CACHE_FOLDER)
         displayName: Cache Yarn packages
+        condition: not(eq($(Agent.OS), "Windows_NT"))
 
       - bash: yarn --frozen-lockfile
         displayName: "Install Deps"
