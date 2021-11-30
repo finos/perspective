@@ -446,14 +446,14 @@ endif()
 # Chocolatey for our Azure Windows job.
 if (WIN32)
     psp_build_dep("flatbuffers" "${PSP_CMAKE_MODULE_PATH}/flatbuffers.txt.in")
-endif()
-
-find_package(Flatbuffers)
-if(NOT FLATBUFFERS_FOUND)
-    message(FATAL_ERROR"${Red}Flatbuffers could not be located${ColorReset}")
 else()
-    psp_build_message("${Cyan}Found Flatbuffers in ${FLATBUFFERS_INCLUDE_DIR}${ColorReset}")
-    include_directories( ${FLATBUFFERS_INCLUDE_DIR} )
+    find_package(Flatbuffers)
+    if(NOT FLATBUFFERS_FOUND)
+        message(FATAL_ERROR"${Red}Flatbuffers could not be located${ColorReset}")
+    else()
+        psp_build_message("${Cyan}Found Flatbuffers in ${FLATBUFFERS_INCLUDE_DIR}${ColorReset}")
+        include_directories( ${FLATBUFFERS_INCLUDE_DIR} )
+    endif()
 endif()
 #####################
 
