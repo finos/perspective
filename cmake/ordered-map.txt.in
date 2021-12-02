@@ -5,7 +5,7 @@ project(ordered-map-download NONE)
 include(ExternalProject)
 ExternalProject_Add(ordered-map
   GIT_REPOSITORY    https://github.com/Tessil/ordered-map.git
-  GIT_TAG           master
+  GIT_TAG           v1.0.0
   SOURCE_DIR        "${CMAKE_BINARY_DIR}/ordered-map-src"
   BINARY_DIR        "${CMAKE_BINARY_DIR}/ordered-map-build"
   CONFIGURE_COMMAND ""
