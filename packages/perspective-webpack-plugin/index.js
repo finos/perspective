@@ -68,22 +68,6 @@ class PerspectiveWebpackPlugin {
         if (this.options.inline || this.options.inlineWorker) {
             rules[rules.length - 2].use.options.inline = "no-fallback";
             rules[rules.length - 1].use.options.inline = "no-fallback";
-        } else {
-            rules.push({
-                test: /\.js$/,
-                include: path.dirname(
-                    require.resolve("@finos/perspective-viewer/package.json")
-                ),
-                use: [
-                    {
-                        loader: require.resolve("string-replace-loader"),
-                        options: {
-                            search: /webpackMode:\s*?"eager"/g,
-                            replace: "",
-                        },
-                    },
-                ],
-            });
         }
 
         if (!(this.options.inline || this.options.inlineWasm)) {
