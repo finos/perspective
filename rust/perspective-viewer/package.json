@@ -20,13 +20,14 @@
         "./umd/": "./dist/umd/",
         "./pkg/": "./dist/pkg/",
         "./src/": "./src/",
-        "./package.json": "./package.json"
+        "./package.json": "./package.json",
+        "./tsconfig.json": "./tsconfig.json"
     },
     "files": [
         "dist/**/*",
         "src/**/*"
     ],
-    "types": "dist/esm/index.d.ts",
+    "types": "dist/esm/perspective-viewer.d.ts",
     "scripts": {
         "build": "node ./build.js",
         "clean": "rimraf dist && rimraf pkg && rimraf build",

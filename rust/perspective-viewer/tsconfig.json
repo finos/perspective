@@ -3,6 +3,7 @@
         "module": "esnext",
         "target": "es2018",
         "declaration": true,
+        "emitDeclarationOnly": true,
         "outDir": "dist/esm",
         "rootDir": "src/ts",
         "allowSyntheticDefaultImports": true,

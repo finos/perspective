@@ -15,7 +15,7 @@ import "@finos/perspective-viewer";
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
 import {
-    HTMLPerspectiveViewerConfig,
+    PerspectiveViewerConfig,
     HTMLPerspectiveViewerElement,
 } from "@finos/perspective-viewer";
 
@@ -30,7 +30,7 @@ const getTable = async (): Promise<perspective.Table> => {
     return await worker.table(buffer as any);
 };
 
-const config: HTMLPerspectiveViewerConfig = {
+const config: PerspectiveViewerConfig = {
     row_pivots: ["State"],
 };
 
