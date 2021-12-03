@@ -234,9 +234,6 @@ if (PSP_WASM_BUILD)
     include_directories("/boost_includes")
 
     set(EXTENDED_FLAGS " \
-        --bind \
-        --source-map-base ./build/ \
-        --memory-init-file 0 \
         -Wall \
         -fcolor-diagnostics \
         ")
@@ -582,6 +579,9 @@ message("${BUILD_MESSAGE}\n")
 
 if (PSP_WASM_BUILD)
     set(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} \
+        --bind \
+        --source-map-base=\"\" \
+        --memory-init-file 0 \
         -s EXPORT_ES6=1 \
         -s NO_EXIT_RUNTIME=1 \
         -s NO_FILESYSTEM=1 \

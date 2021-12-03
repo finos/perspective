@@ -18,7 +18,8 @@
  * of WebAssembly's compilation makes it a dynamic module;  in order to
  * guarantee that the Custom Elements extension methods are registered
  * synchronously with this package's import, we need perform said registration
- * within this wrapper module.
+ * within this wrapper module.  As a result, the API methods of the Custom
+ * Elements are all `async` (as they must await the wasm module instance).
  *
  * The documentation in this module defines the instance structure of a
  * `<perspective-viewer>` DOM object instantiated typically, through HTML or any
@@ -29,9 +30,8 @@
  */
 
 export {IPerspectiveViewerPlugin} from "./plugin";
-export {PerspectiveViewerPluginElement} from "./plugin";
-export {PerspectiveViewerElement} from "./viewer";
-export {PerspectiveViewerConfig} from "./viewer";
+export {HTMLPerspectiveViewerPluginElement} from "./plugin";
+export {HTMLPerspectiveViewerElement, PerspectiveViewerConfig} from "./viewer";
 export * from "./extensions";
 
 import "./style";

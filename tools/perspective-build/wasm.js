@@ -24,7 +24,7 @@ exports.WasmPlugin = function WasmPlugin(inline) {
             async (args) => ({
                 contents: `
                     import wasm from ${JSON.stringify(args.path)};
-                    export default wasm;
+                    export default Promise.resolve(wasm);
                 `,
             })
         );
@@ -32,7 +32,13 @@ exports.WasmPlugin = function WasmPlugin(inline) {
         build.onLoad({filter: /.*/, namespace: "wasm-stub"}, async (args) => ({
             contents: `
                 import wasm from ${JSON.stringify(args.path)};
-                export default new URL(wasm, import.meta.url);
+                async function get_wasm() {
+                    const req = await fetch(new URL(wasm, import.meta.url));
+                    const buffer = await req.arrayBuffer();
+                    return buffer;
+                }
+
+                export default get_wasm();
             `,
         }));
 

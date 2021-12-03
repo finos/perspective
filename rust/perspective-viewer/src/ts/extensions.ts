@@ -8,36 +8,16 @@
  *
  */
 
-/**
- * Module for the `<perspective-viewer>` custom element.  This module has no
- * (real) exports, but importing it has a side effect: the
- * `PerspectiveViewerElement`class is registered as a custom element, after
- * which it can be used as a standard DOM element.
- *
- * Though `<perspective-viewer>` is written mostly in Rust, the nature
- * of WebAssembly's compilation makes it a dynamic module;  in order to
- * guarantee that the Custom Elements extension methods are registered
- * synchronously with this package's import, we need perform said registration
- * within this wrapper module.
- *
- * The documentation in this module defines the instance structure of a
- * `<perspective-viewer>` DOM object instantiated typically, through HTML or any
- * relevent DOM method e.g. `document.createElement("perspective-viewer")` or
- * `document.getElementsByTagName("perspective-viewer")`.
- *
- * @module perspective-viewer
- */
-
-import {PerspectiveViewerElement} from "./viewer";
-import {PerspectiveViewerPluginElement} from "./plugin";
+import type {HTMLPerspectiveViewerElement} from "./viewer";
+import type {HTMLPerspectiveViewerPluginElement} from "./plugin";
 
 // JSX / React extensions
 
 type ReactPerspectiveViewerAttributes<T> = React.HTMLAttributes<T>;
 
 type JsxPerspectiveViewerElement = {class?: string} & React.DetailedHTMLProps<
-    ReactPerspectiveViewerAttributes<PerspectiveViewerElement>,
-    PerspectiveViewerElement
+    ReactPerspectiveViewerAttributes<HTMLPerspectiveViewerElement>,
+    HTMLPerspectiveViewerElement
 >;
 
 declare global {
@@ -56,17 +36,17 @@ declare global {
         createElement(
             tagName: "perspective-viewer",
             options?: ElementCreationOptions
-        ): PerspectiveViewerElement;
+        ): HTMLPerspectiveViewerElement;
         createElement(
             tagName: "perspective-viewer-plugin",
             options?: ElementCreationOptions
-        ): PerspectiveViewerPluginElement;
+        ): HTMLPerspectiveViewerPluginElement;
     }
 
     interface CustomElementRegistry {
-        get(tagName: "perspective-viewer"): typeof PerspectiveViewerElement;
+        get(tagName: "perspective-viewer"): typeof HTMLPerspectiveViewerElement;
         get(
             tagName: "perspective-viewer-plugin"
-        ): typeof PerspectiveViewerPluginElement;
+        ): typeof HTMLPerspectiveViewerPluginElement;
     }
 }

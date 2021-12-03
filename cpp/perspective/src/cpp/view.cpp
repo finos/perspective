@@ -728,7 +728,7 @@ View<CTX_T>::data_slice_to_arrow(
     buffer = *allocated;
     arrow::io::BufferOutputStream sink(buffer);
     auto options = arrow::ipc::IpcWriteOptions::Defaults();
-    auto res = arrow::ipc::NewStreamWriter(&sink, arrow_schema, options);
+    auto res = arrow::ipc::MakeStreamWriter(&sink, arrow_schema, options);
 #endif
 
     std::shared_ptr<arrow::ipc::RecordBatchWriter> writer = *res;

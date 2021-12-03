@@ -8,7 +8,8 @@
  *
  */
 
-import init, * as internal from "../../dist/pkg/perspective_viewer.js";
+import init_wasm from "@finos/perspective-viewer/dist/pkg/perspective_viewer.js";
+import wasm from "@finos/perspective-viewer/dist/pkg/perspective_viewer_bg.wasm";
 
 // There is no way to provide a default rejection handler within a promise and
 // also not lock the await-er, so this module attaches a global handler to
@@ -19,13 +20,8 @@ window.addEventListener("unhandledrejection", (event) => {
     }
 });
 
-async function init_wasm({default: wasm_module}): Promise<typeof internal> {
-    await init(wasm_module);
-    return internal;
+async function load_wasm() {
+    return await init_wasm(await wasm);
 }
 
-export const WASM_MODULE = import(
-    /* webpackChunkName: "perspective-viewer.custom-element" */
-    /* webpackMode: "eager" */
-    "@finos/perspective-viewer/dist/pkg/perspective_viewer_bg.wasm"
-).then(init_wasm);
+export const WASM_MODULE = load_wasm();

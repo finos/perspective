@@ -10,7 +10,11 @@
 
 import type * as perspective from "@finos/perspective";
 
-import * as internal from "@finos/perspective-viewer/dist/pkg/perspective_viewer.js";
+import {
+    PerspectiveViewerElement,
+    register_plugin,
+} from "@finos/perspective-viewer/dist/pkg/perspective_viewer.js";
+
 import {WASM_MODULE} from "./init.js";
 
 export type PerspectiveViewerConfig = perspective.ViewConfig & {
@@ -40,8 +44,8 @@ export type PerspectiveViewerConfig = perspective.ViewConfig & {
  * ```
  * @noInheritDoc
  */
-export class PerspectiveViewerElement extends HTMLElement {
-    private instance: internal.PerspectiveViewerElement;
+export class HTMLPerspectiveViewerElement extends HTMLElement {
+    private instance: PerspectiveViewerElement;
 
     /**
      * Should not be called directly (will throw `TypeError: Illegal
@@ -54,9 +58,9 @@ export class PerspectiveViewerElement extends HTMLElement {
     }
 
     private async load_wasm(): Promise<void> {
-        const module = await WASM_MODULE;
+        await WASM_MODULE;
         if (!this.instance) {
-            this.instance = new module.PerspectiveViewerElement(this);
+            this.instance = new PerspectiveViewerElement(this);
         }
     }
 
@@ -85,8 +89,8 @@ export class PerspectiveViewerElement extends HTMLElement {
      * ```
      */
     static async registerPlugin(name: string): Promise<void> {
-        const module = await WASM_MODULE;
-        module.register_plugin(name);
+        await WASM_MODULE;
+        register_plugin(name);
     }
 
     /**
@@ -480,6 +484,6 @@ export class PerspectiveViewerElement extends HTMLElement {
 if (document.createElement("perspective-viewer").constructor === HTMLElement) {
     window.customElements.define(
         "perspective-viewer",
-        PerspectiveViewerElement
+        HTMLPerspectiveViewerElement
     );
 }

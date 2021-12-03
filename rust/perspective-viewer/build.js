@@ -1,6 +1,6 @@
 const {lessLoader} = require("esbuild-plugin-less");
-const execSync = require("child_process").execSync;
-const esbuild = require("esbuild");
+const {execSync} = require("child_process");
+const fs = require("fs");
 
 const {IgnoreCSSPlugin} = require("@finos/perspective-build/ignore_css");
 const {IgnoreFontsPlugin} = require("@finos/perspective-build/ignore_fonts");
@@ -76,6 +76,22 @@ const BUILD = [
     },
 ];
 
+// This is dumb.  `splitting` param for `esbuild` outputs a `__require`/
+// `__exports`/`__esModule` polyfill and does not tree-shake it;  this <1kb
+// file blocks downloading of the wasm asset until after alot of JavaScript has
+// parsed due to this multi-step download+eval.  Luckily `esbuild` is quite fast
+// enough to just run another build to inline this one file `chunk.js`.
+const POSTBUILD = [
+    {
+        entryPoints: ["dist/cdn/perspective-viewer.js"],
+        format: "esm",
+        plugins: [NodeModulesExternal()],
+        external: ["*.wasm", "*.worker.js", "*.main.js"],
+        outdir: "dist/cdn",
+        allowOverwrite: true,
+    },
+];
+
 async function build_all() {
     await Promise.all(PREBUILD.map(build)).catch(() => process.exit(1));
 
@@ -89,6 +105,7 @@ async function build_all() {
     );
 
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
+    await Promise.all(POSTBUILD.map(build)).catch(() => process.exit(1));
 
     // legacy compat
     execSync("cpy dist/css/* dist/umd");

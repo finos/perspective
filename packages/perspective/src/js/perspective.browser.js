@@ -37,9 +37,11 @@ const _override = /* @__PURE__ */ (function () {
                 }
 
                 async wasm() {
-                    const _wasm = wasm;
+                    const _wasm = await wasm;
                     if (_wasm.buffer && _wasm.buffer instanceof ArrayBuffer) {
                         console.warn(INLINE_WARNING);
+                        this._wasm = _wasm;
+                    } else if (_wasm instanceof ArrayBuffer) {
                         this._wasm = _wasm;
                     } else {
                         const req = await fetch(_wasm);
@@ -156,14 +158,6 @@ const WORKER_SINGLETON = /* @__PURE__ */ (function () {
     };
 })();
 
-/**
- * If Perspective is loaded with the `preload` attribute, pre-initialize the
- * worker so it is available at page render.
- */
-if (document.currentScript && document.currentScript.hasAttribute("preload")) {
-    WORKER_SINGLETON.getInstance();
-}
-
 export const get_type_config = _get_type_config;
 
 export function override(x) {
@@ -171,7 +165,7 @@ export function override(x) {
 }
 
 /**
- * Create a new WebWorkerClient instance. s
+ * Create a new WebWorkerClient instance.
  * @param {*} [config] An optional perspective config object override
  */
 export function worker(config) {
@@ -188,6 +182,11 @@ export function websocket(url = window.location.origin.replace("http", "ws")) {
     return new WebSocketClient(new WebSocket(url));
 }
 
+/**
+ * Return the shared worker, the original WebWorkerClient created during module
+ * load.
+ * @param {*} [config] An optional perspective config object override
+ */
 export function shared_worker(config) {
     return WORKER_SINGLETON.getInstance(config);
 }

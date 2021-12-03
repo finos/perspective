@@ -9,6 +9,7 @@
 use super::column_selector::ColumnSelector;
 use super::config_selector::ConfigSelector;
 use super::containers::split_panel::SplitPanel;
+use super::font_loader::{FontLoader, FontLoaderProps};
 use super::plugin_selector::PluginSelector;
 use super::render_warning::RenderWarning;
 use super::status_bar::StatusBar;
@@ -44,6 +45,7 @@ pub enum Msg {
         Option<SettingsUpdate>,
         Option<Sender<Result<JsValue, JsValue>>>,
     ),
+    PreloadFontsUpdate,
     QuerySettings(Sender<bool>),
     ToggleSettingsFinished(Sender<()>),
     RenderLimits(Option<(usize, usize, Option<usize>, Option<usize>)>),
@@ -56,6 +58,7 @@ pub struct PerspectiveViewer {
     dimensions: Option<(usize, usize, Option<usize>, Option<usize>)>,
     on_rendered: Option<Sender<()>>,
     filter_dropdown: FilterDropDownElement,
+    fonts: FontLoaderProps,
 }
 
 impl Component for PerspectiveViewer {
@@ -64,6 +67,9 @@ impl Component for PerspectiveViewer {
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         *props.weak_link.borrow_mut() = Some(link.clone());
         let filter_dropdown = FilterDropDownElement::new(props.session.clone());
+
+        let elem = props.elem.clone();
+        let callback = link.callback(|()| Msg::PreloadFontsUpdate);
         Self {
             props,
             link,
@@ -71,11 +77,13 @@ impl Component for PerspectiveViewer {
             dimensions: None,
             on_rendered: None,
             filter_dropdown,
+            fonts: FontLoaderProps::new(&elem, callback),
         }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
+            Msg::PreloadFontsUpdate => true,
             Msg::Reset(sender) => {
                 let renderer = self.props.renderer.clone();
                 let session = self.props.session.clone();
@@ -211,6 +219,7 @@ impl Component for PerspectiveViewer {
                         class="noselect button"
                         onmousedown={ settings }>
                     </div>
+                    <FontLoader with self.fonts.clone()></FontLoader>
                 </>
             }
         } else {
@@ -226,6 +235,7 @@ impl Component for PerspectiveViewer {
                         <slot></slot>
                     </div>
                     <div id="settings_button" class="noselect button" onmousedown={ settings }></div>
+                    <FontLoader with self.fonts.clone()></FontLoader>
                 </>
             }
         }

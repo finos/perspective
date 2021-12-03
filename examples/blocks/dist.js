@@ -4,16 +4,18 @@ const fs = require("fs");
 const hashes = JSON.parse(fs.readFileSync("gists.json"));
 
 const replacements = {
-    "/node_modules/": "https://unpkg.com/",
-    "perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js":
-        "perspective-viewer-datagrid",
-    "perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js":
-        "perspective-viewer-d3fc",
+    "/node_modules/": "https://cdn.jsdelivr.net/npm/",
 
     // TODO jsdelivr has slightly different logic for trailing '/' that causes
     // the wasm assets to not load correctly when using aliases ..
 
     // "perspective/dist/umd/perspective.js": "perspective"
+    "perspective/dist/cdn/perspective.js": "perspective",
+    "perspective-viewer/dist/cdn/perspective-viewer.js": "perspective-viewer",
+    "perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js":
+        "perspective-viewer-datagrid",
+    "perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js":
+        "perspective-viewer-d3fc",
 };
 
 execute`mkdir -p dist`;

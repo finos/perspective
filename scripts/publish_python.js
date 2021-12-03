@@ -77,6 +77,7 @@ try {
         "cp38-cp38-manylinux2014_x86_64",
         "cp38-cp38m-win64_amd",
         "cp39-cp39-macosx_10_15_x86_64",
+        "cp39-cp39-macosx_11_0_x86_64",
         "cp39-cp39-manylinux2010_x86_64",
         "cp39-cp39-manylinux2014_x86_64",
         "cp39-cp39m-win64_amd",

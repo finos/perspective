@@ -11,6 +11,7 @@ exports.WorkerPlugin = function WorkerPlugin(inline) {
                     `dist/umd/` + crypto.randomBytes(4).readUInt32LE(0);
 
                 const subbuild = esbuild.build({
+                    target: ["es2021"],
                     entryPoints: [require.resolve(args.path)],
                     outfile,
                     define: {
@@ -21,12 +22,12 @@ exports.WorkerPlugin = function WorkerPlugin(inline) {
                     assetNames: "[name]",
                     minify: !process.env.PSP_DEBUG,
                     bundle: true,
+                    sourcemap: true,
                 });
 
                 return {
                     path: args.path,
                     namespace: "worker",
-                    // external: true,
                     pluginData: {
                         outfile,
                         subbuild,
@@ -57,10 +58,16 @@ exports.WorkerPlugin = function WorkerPlugin(inline) {
             return {
                 contents: `
                     import worker from ${JSON.stringify(args.path)};
-                    export default async function () {
+                    async function get_worker_code() {
                         const url = new URL(worker, import.meta.url);
                         const req = await fetch(url);
                         const code = await req.text();
+                        return code;
+                    }
+
+                    const code_promise = get_worker_code();
+                    export default async function () {
+                        const code = await code_promise;
                         const blob = new Blob([code], {type: 'application/javascript'});
                         const url2 = URL.createObjectURL(blob);
                         return new Worker(url2, {type: "module"});
