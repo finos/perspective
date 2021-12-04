@@ -106,11 +106,16 @@ const POSTBUILD = [
     },
 ];
 
+const INHERIT = {
+    stdio: "inherit",
+    stderr: "inherit",
+};
+
 async function build_all() {
     // generate declaration in parallel because tsc is sloooow.
     let tsc;
     if (fs.existsSync("dist/pkg/perspective_viewer.js")) {
-        tsc = exec("yarn tsc --emitDeclarationOnly --outDir dist/esm");
+        tsc = exec("yarn tsc --emitDeclarationOnly --outDir dist/esm", INHERIT);
     }
 
     await Promise.all(PREBUILD.map(build)).catch(() => process.exit(1));
@@ -118,14 +123,16 @@ async function build_all() {
     const debug = process.env.PSP_DEBUG ? "--debug" : "";
     execSync(
         `CARGO_TARGET_DIR=./build wasm-pack build ${debug} --out-dir dist/pkg --target web`,
-        {
-            stdio: "inherit",
-            stderr: "inherit",
-        }
+        INHERIT
     );
 
+    // Remove wasm-pack artifacts
+    fs.rmSync("dist/pkg/package.json");
+    fs.rmSync("dist/pkg/.gitignore");
+    fs.rmSync("dist/pkg/README.md");
+
     if (typeof tsc === "undefined") {
-        tsc = exec("yarn tsc --emitDeclarationOnly --outDir dist/esm");
+        tsc = exec("yarn tsc --emitDeclarationOnly --outDir dist/esm", INHERIT);
     }
 
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
@@ -134,8 +141,7 @@ async function build_all() {
     // legacy compat
     execSync("cpy dist/css/* dist/umd");
 
-    const {stdout} = await tsc;
-    console.log(stdout);
+    await tsc;
 }
 
 build_all();
