@@ -96,7 +96,7 @@ export function treemapSeries() {
             settings.treemapRoute.push(rootNode.crossValue);
         rects
             .filter((d) => d.children)
-            .on("click", (d) =>
+            .on("click", (_event, d) =>
                 changeLevel(
                     d,
                     rects,
