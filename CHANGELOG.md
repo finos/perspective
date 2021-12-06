@@ -1,5 +1,17 @@
 # Changelog
 
+## [v1.0.5](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.0.4...HEAD)
+
+**Fixed bugs:**
+
+- DateTime Comparison Blanks out when the milliseconds is 0 [\#1645](https://github.com/finos/perspective/issues/1645)
+- Treemap zoom-out misrenders and does not fire `perspective-click` event [\#1628](https://github.com/finos/perspective/issues/1628)
+- Treemap zoom broken in `1.0.1` [\#1627](https://github.com/finos/perspective/issues/1627)
+- Fix `datetime`/`date`/`integer`/`float` filter occasionally resetting while typing [\#1653](https://github.com/finos/perspective/pull/1653) ([texodus](https://github.com/texodus))
+- D3FC Treemap bug fixes [\#1652](https://github.com/finos/perspective/pull/1652) ([texodus](https://github.com/texodus))
+
 ## [v1.0.4](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.0.3...HEAD)
