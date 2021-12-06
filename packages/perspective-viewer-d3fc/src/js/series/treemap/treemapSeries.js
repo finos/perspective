@@ -34,6 +34,7 @@ const nodeLevelHelper = (maxDepth, d) =>
 
 export function treemapSeries() {
     let settings = null;
+    let root_settings = null;
     let data = null;
     let color = null;
     let treemapDiv = null;
@@ -106,7 +107,8 @@ export function treemapSeries() {
                     treemapDiv,
                     treemapSvg,
                     rootNode,
-                    parentCtrls
+                    parentCtrls,
+                    root_settings
                 )
             );
 
@@ -118,7 +120,8 @@ export function treemapSeries() {
             treemapDiv,
             treemapSvg,
             rootNode,
-            parentCtrls
+            parentCtrls,
+            root_settings
         );
     };
 
@@ -127,6 +130,7 @@ export function treemapSeries() {
             return settings;
         }
         settings = args[0];
+        root_settings = args[1];
         return _treemapSeries;
     };
 
