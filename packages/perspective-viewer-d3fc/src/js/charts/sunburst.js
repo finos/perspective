@@ -53,7 +53,7 @@ function sunburst(container, settings) {
     sunburstContainer
         .append("circle")
         .attr("fill", "none")
-        .attr("pointer-events", "all");
+        .style("pointer-events", "all");
 
     sunburstContainer.append("text").attr("class", "parent");
     sunburstEnter

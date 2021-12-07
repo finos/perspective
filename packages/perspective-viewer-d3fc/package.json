@@ -9,6 +9,7 @@
             "require": "./dist/umd/perspective-viewer-d3fc.js",
             "import": "./dist/esm/perspective-viewer-d3fc.js"
         },
+        "./src/": "./src/",
         "./dist/": "./dist/",
         "./cdn/": "./dist/cdn/",
         "./esm/": "./dist/esm/",
@@ -25,7 +26,8 @@
         "./package.json": "./package.json"
     },
     "files": [
-        "dist/**/*"
+        "dist/**/*",
+        "src/**/*"
     ],
     "scripts": {
         "bench": "npm-run-all bench:build bench:run",
