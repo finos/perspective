@@ -234,6 +234,16 @@ impl PerspectiveViewerElement {
         Ok(result)
     }
 
+    /// Get the underlying `View` for thie viewer.
+    pub fn js_get_view(&self) -> js_sys::Promise {
+        let session = self.session.clone();
+        future_to_promise(async move {
+            session
+                .js_get_view()
+                .ok_or_else(|| JsValue::from("No table set"))
+        })
+    }
+
     /// Get the underlying `Table` for this viewer.
     ///
     /// # Arguments

@@ -132,6 +132,10 @@ impl Session {
             .map(|x| x.unchecked_into::<JsValue>())
     }
 
+    pub fn js_get_view(&self) -> Option<JsValue> {
+        Some(self.borrow().view_sub.as_ref()?.get_view().as_jsvalue())
+    }
+
     pub fn is_column_expression_in_use(&self, name: &str) -> bool {
         self.borrow().config.is_column_expression_in_use(name)
     }
