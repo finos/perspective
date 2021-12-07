@@ -35,5 +35,12 @@ export {HTMLPerspectiveViewerElement, PerspectiveViewerConfig} from "./viewer";
 export * from "./extensions";
 
 import "./style";
-
 import "mobile-drag-drop-shadow-dom";
+
+import {HTMLPerspectiveViewerPluginElement} from "./plugin";
+import {HTMLPerspectiveViewerElement} from "./viewer";
+
+export default {
+    HTMLPerspectiveViewerElement,
+    HTMLPerspectiveViewerPluginElement,
+};
