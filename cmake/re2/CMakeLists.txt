@@ -50,7 +50,7 @@ if(WIN32)
 # TKP NOTE: THIS SECTION IS CUSTOM
 # ************************************
 elseif(APPLE)
-  add_definitions(TARGET_OS_OSX)
+  add_definitions(-DTARGET_OS_OSX=1)
   # assume built-in pthreads on MacOS
   set(CMAKE_THREAD_LIBS_INIT "-lpthread")
   set(CMAKE_HAVE_THREADS_LIBRARY 1)
