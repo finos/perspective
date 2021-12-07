@@ -28,6 +28,7 @@ export function toValue(type, value) {
 
 export function getGroupValues(data, settings) {
     if (settings.crossValues.length === 0) return [];
+    if (data.crossValue.length === 0) return [];
     const groupValues = (data.crossValue.split
         ? data.crossValue.split("|")
         : [data.crossValue]) || [data.key];

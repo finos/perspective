@@ -244,7 +244,7 @@ window.addEventListener("DOMContentLoaded", async function() {
                 container.style.display = "flex";
                 await psp1.restore(config_defaults(EXAMPLES[key].config));
                 await psp1.toggleConfig(true);
-                await psp1.notifyResize();
+                await psp1.notifyResize(true);
                 container.style.opacity = 1;
                 container.style.pointerEvents = "";
             });

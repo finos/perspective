@@ -64,7 +64,7 @@ function treemap(container, settings) {
             if (!settings.treemaps[split]) settings.treemaps[split] = {};
 
             treemapSeries()
-                .settings(settings.treemaps[split])
+                .settings(settings.treemaps[split], settings)
                 .data(data)
                 .container(
                     d3.select(d3.select(this.parentNode).node().parentNode)

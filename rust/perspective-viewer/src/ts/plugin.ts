@@ -175,7 +175,7 @@ export interface IPerspectiveViewerPlugin extends HTMLElement {
  * ```
  * @noInheritDoc
  */
-export class PerspectiveViewerPluginElement
+export class HTMLPerspectiveViewerPluginElement
     extends HTMLElement
     implements IPerspectiveViewerPlugin
 {
@@ -241,6 +241,6 @@ if (
 ) {
     window.customElements.define(
         "perspective-viewer-plugin",
-        PerspectiveViewerPluginElement
+        HTMLPerspectiveViewerPluginElement
     );
 }

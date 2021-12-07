@@ -96,7 +96,8 @@ exports.default = function (get_contents = get_contents_default) {
                     column_pivots: ["Category", "Sub-Category"],
                     settings: true,
                 });
-                await viewer.notifyResize();
+
+                await viewer.notifyResize(true);
             });
 
             return await get_contents(page);

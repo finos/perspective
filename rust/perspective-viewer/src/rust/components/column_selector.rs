@@ -269,7 +269,7 @@ impl Component for ColumnSelector {
                 active_classes.push("dragdrop-highlight");
             };
 
-            if config.columns.len() == all_columns.len() + config.expressions.len() {
+            if config.columns.len() != all_columns.len() + config.expressions.len() {
                 active_classes.push("collapse");
             }
 

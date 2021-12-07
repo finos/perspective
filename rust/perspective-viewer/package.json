@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-viewer",
-    "version": "1.0.3",
+    "version": "1.0.5",
     "description": "The `<perspective-viewer>` Custom Element, frontend for Perspective.js",
     "repository": {
         "type": "git",
@@ -8,7 +8,7 @@
     },
     "license": "Apache-2.0",
     "unpkg": "dist/cdn/perspective-viewer.js",
-    "jsdelvr": "dist/cdn/perspective-viewer.js",
+    "jsdelivr": "dist/cdn/perspective-viewer.js",
     "exports": {
         ".": {
             "require": "./dist/umd/perspective-viewer.js",
@@ -20,13 +20,14 @@
         "./umd/": "./dist/umd/",
         "./pkg/": "./dist/pkg/",
         "./src/": "./src/",
-        "./package.json": "./package.json"
+        "./package.json": "./package.json",
+        "./tsconfig.json": "./tsconfig.json"
     },
     "files": [
         "dist/**/*",
         "src/**/*"
     ],
-    "types": "dist/esm/index.d.ts",
+    "types": "dist/esm/perspective-viewer.d.ts",
     "scripts": {
         "build": "node ./build.js",
         "clean": "rimraf dist && rimraf pkg && rimraf build",
@@ -49,7 +50,7 @@
         "access": "public"
     },
     "dependencies": {
-        "@finos/perspective": "^1.0.3",
+        "@finos/perspective": "^1.0.5",
         "mobile-drag-drop-shadow-dom": "3.0.0",
         "monaco-editor": "0.24.0"
     },
@@ -57,6 +58,6 @@
         "monaco-editor-webpack-plugin": "3.1.0"
     },
     "devDependencies": {
-        "@finos/perspective-test": "^1.0.3"
+        "@finos/perspective-test": "^1.0.5"
     }
 }

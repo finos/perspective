@@ -1,5 +1,41 @@
 # Changelog
 
+## [v1.0.5](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.0.4...HEAD)
+
+**Fixed bugs:**
+
+- DateTime Comparison Blanks out when the milliseconds is 0 [\#1645](https://github.com/finos/perspective/issues/1645)
+- Treemap zoom-out misrenders and does not fire `perspective-click` event [\#1628](https://github.com/finos/perspective/issues/1628)
+- Treemap zoom broken in `1.0.1` [\#1627](https://github.com/finos/perspective/issues/1627)
+- Fix `datetime`/`date`/`integer`/`float` filter occasionally resetting while typing [\#1653](https://github.com/finos/perspective/pull/1653) ([texodus](https://github.com/texodus))
+- D3FC Treemap bug fixes [\#1652](https://github.com/finos/perspective/pull/1652) ([texodus](https://github.com/texodus))
+
+## [v1.0.4](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.0.3...HEAD)
+
+**Implemented enhancements:**
+
+- Parallelized `.wasm` download and deferred font loading [\#1647](https://github.com/finos/perspective/pull/1647) ([texodus](https://github.com/texodus))
+- Add auto-resizing to `<perspective-viewer>` [\#1633](https://github.com/finos/perspective/pull/1633) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- build errors after upgrade to 1.0.3 [\#1646](https://github.com/finos/perspective/issues/1646)
+- Remove wasm-pack artifacts which interfere with perspective packaging [\#1651](https://github.com/finos/perspective/pull/1651) ([texodus](https://github.com/texodus))
+- Fix column-selector collapse \(inverted\) [\#1650](https://github.com/finos/perspective/pull/1650) ([texodus](https://github.com/texodus))
+- Emit `.d.ts` declaration files for `@finos/perspective-viewer` [\#1649](https://github.com/finos/perspective/pull/1649) ([texodus](https://github.com/texodus))
+
+**Merged pull requests:**
+
+- \[Formatting\] force line-feed line endings for all text files for easier windows development [\#1635](https://github.com/finos/perspective/pull/1635) ([timkpaine](https://github.com/timkpaine))
+- Overload re2 cmakelists to fix cmake/threads detection issue on conda-forge mac builds, and pin C++ dependency versions [\#1634](https://github.com/finos/perspective/pull/1634) ([timkpaine](https://github.com/timkpaine))
+- Update CMakeLists.txt for more thread help on mac for conda [\#1631](https://github.com/finos/perspective/pull/1631) ([timkpaine](https://github.com/timkpaine))
+- \[Formatting\] Fix mixed tabs/spaces in C++ CMakeLists.txt  [\#1630](https://github.com/finos/perspective/pull/1630) ([timkpaine](https://github.com/timkpaine))
+- Fix Azure windows wheel step [\#1629](https://github.com/finos/perspective/pull/1629) ([texodus](https://github.com/texodus))
+
 ## [v1.0.3](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.0.2...HEAD)

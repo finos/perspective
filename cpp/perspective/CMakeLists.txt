@@ -67,16 +67,24 @@ function (psp_build_dep name cmake_file)
 
     if(${name} STREQUAL arrow)
         # Overwrite arrow's CMakeLists with our custom, minimal CMakeLists.
-        configure_file(${PSP_CMAKE_MODULE_PATH}/arrow/CMakeLists.txt ${CMAKE_BINARY_DIR}/arrow-src/cpp/ COPYONLY)
-        configure_file(${PSP_CMAKE_MODULE_PATH}/arrow/config.h ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/ COPYONLY)
-        add_subdirectory(${CMAKE_BINARY_DIR}/arrow-src/cpp/
-            ${CMAKE_BINARY_DIR}/arrow-build
+        configure_file(${PSP_CMAKE_MODULE_PATH}/${name}/CMakeLists.txt ${CMAKE_BINARY_DIR}/${name}-src/cpp/ COPYONLY)
+        configure_file(${PSP_CMAKE_MODULE_PATH}/${name}/config.h ${CMAKE_BINARY_DIR}/${name}-src/cpp/src/arrow/util/ COPYONLY)
+        add_subdirectory(${CMAKE_BINARY_DIR}/${name}-src/cpp/
+            ${CMAKE_BINARY_DIR}/${name}-build
             EXCLUDE_FROM_ALL)
 
-        include_directories(${CMAKE_BINARY_DIR}/arrow-src/cpp/src/)
+        include_directories(${CMAKE_BINARY_DIR}/${name}-src/cpp/src/)
     elseif(${name} STREQUAL exprtk)
         # no cmakelists - just include the header
         include_directories(${CMAKE_BINARY_DIR}/${name}-src)
+    elseif(${name} STREQUAL re2)
+        # Overwrite re2's CMakeLists with our custom CMakeLists.
+        configure_file(${PSP_CMAKE_MODULE_PATH}/${name}/CMakeLists.txt ${CMAKE_BINARY_DIR}/${name}-src/ COPYONLY)
+        include_directories(${CMAKE_BINARY_DIR}/${name}-src)
+
+        add_subdirectory(${CMAKE_BINARY_DIR}/${name}-src
+            ${CMAKE_BINARY_DIR}/${name}-build
+            EXCLUDE_FROM_ALL)
     else()
         add_subdirectory(${CMAKE_BINARY_DIR}/${name}-src
             ${CMAKE_BINARY_DIR}/${name}-build
@@ -226,9 +234,6 @@ if (PSP_WASM_BUILD)
     include_directories("/boost_includes")
 
     set(EXTENDED_FLAGS " \
-        --bind \
-        --source-map-base ./build/ \
-        --memory-init-file 0 \
         -Wall \
         -fcolor-diagnostics \
         ")
@@ -586,6 +591,9 @@ message("${BUILD_MESSAGE}\n")
 
 if (PSP_WASM_BUILD)
     set(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} \
+        --bind \
+        --source-map-base=\"\" \
+        --memory-init-file 0 \
         -s EXPORT_ES6=1 \
         -s NO_EXIT_RUNTIME=1 \
         -s NO_FILESYSTEM=1 \
