@@ -427,6 +427,21 @@ message("${Cyan}Building minimal Apache Arrow${ColorReset}")
 psp_build_dep("rapidjson" "${PSP_CMAKE_MODULE_PATH}/rapidjson.txt.in")
 psp_build_dep("double-conversion" "${PSP_CMAKE_MODULE_PATH}/double-conversion.txt.in")
 
+# FIXME: this is a hack to get Flatbuffers working on Azure Win64 by making the
+# headers accessible. The actual flatc executable is installed using
+# Chocolatey for our Azure Windows job.
+if (WIN32)
+    psp_build_dep("flatbuffers" "${PSP_CMAKE_MODULE_PATH}/flatbuffers.txt.in")
+endif()
+
+find_package(Flatbuffers)
+if(NOT FLATBUFFERS_FOUND)
+    message(FATAL_ERROR"${Red}Flatbuffers could not be located${ColorReset}")
+else()
+    psp_build_message("${Cyan}Found Flatbuffers in ${FLATBUFFERS_INCLUDE_DIR}${ColorReset}")
+    include_directories( ${FLATBUFFERS_INCLUDE_DIR} )
+endif()
+
 # Build minimal arrow itself
 psp_build_dep("arrow" "${PSP_CMAKE_MODULE_PATH}/arrow.txt.in")
 
@@ -447,21 +462,6 @@ if(NOT exprtk_FOUND)
 else()
     psp_build_message("${Cyan}Found exprtk in ${EXPRTK_INCLUDE_DIR}${ColorReset}")
     include_directories( ${EXPRTK_INCLUDE_DIR} )
-endif()
-
-# FIXME: this is a hack to get Flatbuffers working on Azure Win64 by making the
-# headers accessible. The actual flatc executable is installed using
-# Chocolatey for our Azure Windows job.
-if (WIN32)
-    psp_build_dep("flatbuffers" "${PSP_CMAKE_MODULE_PATH}/flatbuffers.txt.in")
-endif()
-
-find_package(Flatbuffers)
-if(NOT FLATBUFFERS_FOUND)
-    message(FATAL_ERROR"${Red}Flatbuffers could not be located${ColorReset}")
-else()
-    psp_build_message("${Cyan}Found Flatbuffers in ${FLATBUFFERS_INCLUDE_DIR}${ColorReset}")
-    include_directories( ${FLATBUFFERS_INCLUDE_DIR} )
 endif()
 
 #####################
