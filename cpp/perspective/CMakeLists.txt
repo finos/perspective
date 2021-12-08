@@ -191,9 +191,9 @@ else()
     set(BUILD_MESSAGE "${BUILD_MESSAGE}\n${Cyan}Building RELEASE${ColorReset}")
 endif()
 
-# fix for threads on osx 
 
 if (PSP_PYTHON_BUILD AND MACOS)
+    # fix for threads on osx 
     # assume built-in pthreads on MacOS
     set(CMAKE_THREAD_LIBS_INIT "-lpthread")
     set(CMAKE_HAVE_THREADS_LIBRARY 1)
@@ -205,14 +205,17 @@ if (PSP_PYTHON_BUILD AND MACOS)
     # https://blog.tim-smith.us/2015/09/python-extension-modules-os-x/
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -undefined dynamic_lookup")
 
-    set(CMAKE_REQUIRED_LINK_OPTIONS "-arch;x86_64")
     check_c_compiler_flag("-arch x86_64" x86_64Supported)
-
-    set(CMAKE_REQUIRED_LINK_OPTIONS "-arch;arm64")
     check_c_compiler_flag("-arch arm64" arm64Supported)
 
     if(x86_64Supported AND arm64Supported)
         set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "Build universal architecture for OSX" FORCE)
+    elseif(x86_64Supported)
+        set(CMAKE_REQUIRED_LINK_OPTIONS "-arch;x86_64")
+        set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "Build universal architecture for OSX" FORCE)
+    elseif(arm64Supported)
+        set(CMAKE_REQUIRED_LINK_OPTIONS "-arch;arm64")
+        set(CMAKE_OSX_ARCHITECTURES "arm64" CACHE STRING "Build universal architecture for OSX" FORCE)
     endif()
 endif()
 
@@ -414,21 +417,6 @@ message("${Cyan}Building minimal Apache Arrow${ColorReset}")
 psp_build_dep("rapidjson" "${PSP_CMAKE_MODULE_PATH}/rapidjson.txt.in")
 psp_build_dep("double-conversion" "${PSP_CMAKE_MODULE_PATH}/double-conversion.txt.in")
 
-# FIXME: this is a hack to get Flatbuffers working on Azure Win64 by making the
-# headers accessible. The actual flatc executable is installed using
-# Chocolatey for our Azure Windows job.
-if (WIN32)
-    psp_build_dep("flatbuffers" "${PSP_CMAKE_MODULE_PATH}/flatbuffers.txt.in")
-endif()
-
-find_package(Flatbuffers)
-if(NOT FLATBUFFERS_FOUND)
-    message(FATAL_ERROR"${Red}Flatbuffers could not be located${ColorReset}")
-else()
-    psp_build_message("${Cyan}Found Flatbuffers in ${FLATBUFFERS_INCLUDE_DIR}${ColorReset}")
-    include_directories( ${FLATBUFFERS_INCLUDE_DIR} )
-endif()
-
 # Build minimal arrow itself
 psp_build_dep("arrow" "${PSP_CMAKE_MODULE_PATH}/arrow.txt.in")
 
@@ -443,7 +431,28 @@ else()
 endif()
 
 # Build exprtk for expression parsing
-psp_build_dep("exprtk" "${PSP_CMAKE_MODULE_PATH}/exprtk.txt.in")
+find_package(exprtk)
+if(NOT exprtk_FOUND)
+    psp_build_dep("exprtk" "${PSP_CMAKE_MODULE_PATH}/exprtk.txt.in")
+else()
+    psp_build_message("${Cyan}Found exprtk in ${EXPRTK_INCLUDE_DIR}${ColorReset}")
+    include_directories( ${EXPRTK_INCLUDE_DIR} )
+endif()
+
+# FIXME: this is a hack to get Flatbuffers working on Azure Win64 by making the
+# headers accessible. The actual flatc executable is installed using
+# Chocolatey for our Azure Windows job.
+if (WIN32)
+    psp_build_dep("flatbuffers" "${PSP_CMAKE_MODULE_PATH}/flatbuffers.txt.in")
+endif()
+
+find_package(Flatbuffers)
+if(NOT FLATBUFFERS_FOUND)
+    message(FATAL_ERROR"${Red}Flatbuffers could not be located${ColorReset}")
+else()
+    psp_build_message("${Cyan}Found Flatbuffers in ${FLATBUFFERS_INCLUDE_DIR}${ColorReset}")
+    include_directories( ${FLATBUFFERS_INCLUDE_DIR} )
+endif()
 
 #####################
 
@@ -569,7 +578,7 @@ set (PYTHON_BINDING_SOURCE_FILES
 if (WIN32)
     set(CMAKE_CXX_FLAGS " /EHsc /MP /bigobj")
 else()
-    set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS}")
 endif()
 
 message("${BUILD_MESSAGE}\n")
@@ -619,7 +628,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
         set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
         set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
         set(CMAKE_INSTALL_NAME_DIR "@rpath/")
-        SET(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "Build architectures for Mac OS X" FORCE)
 
         # module_origin_path is the location of the binary
         if(MACOS)
