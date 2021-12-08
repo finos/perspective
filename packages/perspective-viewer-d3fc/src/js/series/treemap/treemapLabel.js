@@ -109,28 +109,31 @@ const centerText = (d) => {
     nodeSelect.attr("dx", 0 - rect.width / 2).attr("dy", 0 + rect.height / 4);
 };
 
+// WOuld be ideal to use IntersectionObserver here, but it does not support SVG
 const shrinkOrHideText = (d) => {
     const parent = d.parentNode;
     const rect = parent.childNodes[0];
 
-    const textRect = d.getBoundingClientRect();
-    const rectRect = rect.getBoundingClientRect();
+    const textRect = d.getBBox();
+    const rectRect = rect.getBBox();
 
-    if (
-        !needsToShrinkOrHide(d, rectRect, textRect, "left") &&
-        !needsToShrinkOrHide(d, rectRect, textRect, "bottom")
-    ) {
+    if (!needsToShrinkOrHide(d, rectRect, textRect)) {
         select(d).attr("class", select(d).attr("class"));
     }
 };
 
-const needsToShrinkOrHide = (d, rectRect, textRect, direction) => {
-    if (isElementOverflowing(rectRect, textRect, direction)) {
+const needsToShrinkOrHide = (d, rectRect, textRect) => {
+    const resize_factor = Math.min(
+        rectRect.height / textRect.height,
+        rectRect.width / textRect.width
+    );
+
+    if (resize_factor < 1) {
         const fontSize = parseInt(select(d).style("font-size"));
-        if (fontSize > minTextSize) {
-            select(d).style("font-size", `${fontSize - 1}px`);
+        const newFontSize = Math.floor(fontSize * resize_factor);
+        if (fontSize > minTextSize && newFontSize > minTextSize) {
+            select(d).style("font-size", `${newFontSize}px`);
             centerText(d);
-            shrinkOrHideText(d);
         } else {
             select(d).style("font-size", null);
             select(d).attr("class", textVisability.zero);
