@@ -50,13 +50,14 @@ if(WIN32)
 # TKP NOTE: THIS SECTION IS CUSTOM
 # ************************************
 elseif(APPLE)
-    # assume built-in pthreads on MacOS
-    set(CMAKE_THREAD_LIBS_INIT "-lpthread")
-    set(CMAKE_HAVE_THREADS_LIBRARY 1)
-    set(CMAKE_USE_WIN32_THREADS_INIT 0)
-    set(CMAKE_USE_PTHREADS_INIT 1)
-    set(THREADS_PREFER_PTHREAD_FLAG ON)
-    find_package(Threads REQUIRED)
+  add_definitions(-DTARGET_OS_OSX=1)
+  # assume built-in pthreads on MacOS
+  set(CMAKE_THREAD_LIBS_INIT "-lpthread")
+  set(CMAKE_HAVE_THREADS_LIBRARY 1)
+  set(CMAKE_USE_WIN32_THREADS_INIT 0)
+  set(CMAKE_USE_PTHREADS_INIT 1)
+  set(THREADS_PREFER_PTHREAD_FLAG ON)
+  find_package(Threads REQUIRED)
 # ************************************
 elseif(UNIX)
   set(THREADS_PREFER_PTHREAD_FLAG ON)

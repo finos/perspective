@@ -191,15 +191,32 @@ else()
     set(BUILD_MESSAGE "${BUILD_MESSAGE}\n${Cyan}Building RELEASE${ColorReset}")
 endif()
 
-# fix for threads on osx 
 
 if (PSP_PYTHON_BUILD AND MACOS)
+    # fix for threads on osx 
     # assume built-in pthreads on MacOS
     set(CMAKE_THREAD_LIBS_INIT "-lpthread")
     set(CMAKE_HAVE_THREADS_LIBRARY 1)
     set(CMAKE_USE_WIN32_THREADS_INIT 0)
     set(CMAKE_USE_PTHREADS_INIT 1)
     set(THREADS_PREFER_PTHREAD_FLAG ON)
+
+    # don't link against build python
+    # https://blog.tim-smith.us/2015/09/python-extension-modules-os-x/
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -undefined dynamic_lookup")
+
+    check_c_compiler_flag("-arch x86_64" x86_64Supported)
+    check_c_compiler_flag("-arch arm64" arm64Supported)
+
+    if(x86_64Supported AND arm64Supported)
+        set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "Build universal architecture for OSX" FORCE)
+    elseif(x86_64Supported)
+        set(CMAKE_REQUIRED_LINK_OPTIONS "-arch;x86_64")
+        set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "Build universal architecture for OSX" FORCE)
+    elseif(arm64Supported)
+        set(CMAKE_REQUIRED_LINK_OPTIONS "-arch;arm64")
+        set(CMAKE_OSX_ARCHITECTURES "arm64" CACHE STRING "Build universal architecture for OSX" FORCE)
+    endif()
 endif()
 
 
@@ -365,20 +382,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
         include_directories( ${Python_INCLUDE_DIRS} )
 
         if(MACOS)
-            # don't link against build python
-            # https://blog.tim-smith.us/2015/09/python-extension-modules-os-x/
-            set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -undefined dynamic_lookup")
-
-            set(CMAKE_REQUIRED_LINK_OPTIONS "-arch;x86_64")
-            check_c_compiler_flag("-arch x86_64" x86_64Supported)
-    
-            set(CMAKE_REQUIRED_LINK_OPTIONS "-arch;arm64")
-            check_c_compiler_flag("-arch arm64" arm64Supported)
-
-            if(x86_64Supported AND arm64Supported)
-                set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "Build universal architecture for OSX" FORCE)
-            endif()
-    
             # on mac, use the vanilla pybind11 finder
             find_package(pybind11)
             if(pybind11_FOUND)
@@ -388,7 +391,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
                 # Check if pip installed PyBind is available
                 find_package(Pybind)
             endif()
-
         else()
             # On Linux/Docker, look for pip installed PyBind only
             find_package(Pybind)
@@ -432,12 +434,6 @@ if (WIN32)
     psp_build_dep("flatbuffers" "${PSP_CMAKE_MODULE_PATH}/flatbuffers.txt.in")
 endif()
 
-# Build minimal arrow itself
-psp_build_dep("arrow" "${PSP_CMAKE_MODULE_PATH}/arrow.txt.in")
-
-# Build re2 as our regex library
-psp_build_dep("re2" "${PSP_CMAKE_MODULE_PATH}/re2.txt.in")
-
 find_package(Flatbuffers)
 if(NOT FLATBUFFERS_FOUND)
     message(FATAL_ERROR"${Red}Flatbuffers could not be located${ColorReset}")
@@ -446,8 +442,28 @@ else()
     include_directories( ${FLATBUFFERS_INCLUDE_DIR} )
 endif()
 
+# Build minimal arrow itself
+psp_build_dep("arrow" "${PSP_CMAKE_MODULE_PATH}/arrow.txt.in")
+
+# Build re2 as our regex library
+find_package(re2)
+if(NOT re2_FOUND)
+  add_definitions(-DTARGET_OS_OSX=1)
+  psp_build_dep("re2" "${PSP_CMAKE_MODULE_PATH}/re2.txt.in")
+else()
+  psp_build_message("${Cyan}Found re2 in ${RE2_INCLUDE_DIR}${ColorReset}")
+  include_directories( ${RE2_INCLUDE_DIR} )
+endif()
+
 # Build exprtk for expression parsing
-psp_build_dep("exprtk" "${PSP_CMAKE_MODULE_PATH}/exprtk.txt.in")
+find_package(exprtk)
+if(NOT exprtk_FOUND)
+    psp_build_dep("exprtk" "${PSP_CMAKE_MODULE_PATH}/exprtk.txt.in")
+else()
+    psp_build_message("${Cyan}Found exprtk in ${EXPRTK_INCLUDE_DIR}${ColorReset}")
+    include_directories( ${EXPRTK_INCLUDE_DIR} )
+endif()
+
 #####################
 
 set(CMAKE_C_FLAGS " \
@@ -572,7 +588,7 @@ set (PYTHON_BINDING_SOURCE_FILES
 if (WIN32)
     set(CMAKE_CXX_FLAGS " /EHsc /MP /bigobj")
 else()
-    set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS}")
 endif()
 
 message("${BUILD_MESSAGE}\n")
@@ -622,7 +638,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
         set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
         set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
         set(CMAKE_INSTALL_NAME_DIR "@rpath/")
-        SET(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "Build architectures for Mac OS X" FORCE)
 
         # module_origin_path is the location of the binary
         if(MACOS)
@@ -646,7 +661,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
         target_compile_definitions(psp PRIVATE PSP_ENABLE_PYTHON=1)
         target_compile_definitions(binding PRIVATE PSP_ENABLE_PYTHON=1)
 
-            if (WIN32)
+        if (WIN32)
             target_compile_definitions(binding PRIVATE WIN32=1)
             target_compile_definitions(binding PRIVATE _WIN32=1)
 
