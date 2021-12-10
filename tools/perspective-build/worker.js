@@ -46,11 +46,13 @@ exports.WorkerPlugin = function WorkerPlugin(inline) {
                 return {
                     contents: `
                         import worker from ${JSON.stringify(args.path)};
-                        export default async function () {
+                        export const initialize = async function () {
                             const blob = new Blob([worker], {type: 'application/javascript'});
                             const url = URL.createObjectURL(blob);
                             return new Worker(url, {type: "module"});
-                        }
+                        };
+
+                        export default initialize;
                     `,
                 };
             }
@@ -63,15 +65,17 @@ exports.WorkerPlugin = function WorkerPlugin(inline) {
                         const req = await fetch(url);
                         const code = await req.text();
                         return code;
-                    }
+                    };
 
                     const code_promise = get_worker_code();
-                    export default async function () {
+                    export const initialize = async function () {
                         const code = await code_promise;
                         const blob = new Blob([code], {type: 'application/javascript'});
                         const url2 = URL.createObjectURL(blob);
                         return new Worker(url2, {type: "module"});
-                    }
+                    };
+
+                    export default initialize;
                 `,
             };
         });
