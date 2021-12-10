@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "moduleResolution": "node",
+        "target": "es2020",
+        "lib": ["es6", "dom"],
+        "module": "esnext",
+        "strict": true,
+        "alwaysStrict": true,
+        "skipLibCheck": true,
+        "jsx": "react",
+        "esModuleInterop": true,
+        "sourceMap": true,
+        "emitDecoratorMetadata": false,
+        "pretty": true
+    },
+    "exclude": ["node_modules"]
+}
