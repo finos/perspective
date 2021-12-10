@@ -112,12 +112,6 @@ const INHERIT = {
 };
 
 async function build_all() {
-    // generate declaration in parallel because tsc is sloooow.
-    let tsc;
-    if (fs.existsSync("dist/pkg/perspective_viewer.js")) {
-        tsc = exec("yarn tsc --emitDeclarationOnly --outDir dist/esm", INHERIT);
-    }
-
     await Promise.all(PREBUILD.map(build)).catch(() => process.exit(1));
 
     const debug = process.env.PSP_DEBUG ? "--debug" : "";
@@ -131,17 +125,13 @@ async function build_all() {
     fs.rmSync("dist/pkg/.gitignore");
     fs.rmSync("dist/pkg/README.md");
 
-    if (typeof tsc === "undefined") {
-        tsc = exec("yarn tsc --emitDeclarationOnly --outDir dist/esm", INHERIT);
-    }
+    execSync("yarn tsc --project tsconfig.json", INHERIT);
 
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
     await Promise.all(POSTBUILD.map(build)).catch(() => process.exit(1));
 
     // legacy compat
     execSync("cpy dist/css/* dist/umd");
-
-    await tsc;
 }
 
 build_all();

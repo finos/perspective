@@ -3,11 +3,13 @@
         "module": "esnext",
         "target": "es2018",
         "declaration": true,
+        "diagnostics": true,
         "emitDeclarationOnly": true,
         "outDir": "dist/esm",
         "rootDir": "src/ts",
         "allowSyntheticDefaultImports": true,
-        "moduleResolution": "node"
+        "moduleResolution": "node",
+        "skipLibCheck": true
     },
-    "files": ["src/ts/perspective-viewer.ts"]
+    "files": ["src/ts/perspective-viewer.ts"],
 }
