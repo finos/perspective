@@ -82,6 +82,8 @@ parameters:
           which python$(python.version)
         displayName: "Which python"
 
+      # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/utility/command-line?view=azure-devops&tabs=yaml
+      # When you want to run a batch file from another batch file in Windows CMD, you must use the call command, otherwise the first batch file is terminated.
       - script: |
           set VCPKG_DEFAULT_TRIPLET=x64-windows
           set VCPKG_PLATFORM_TOOLSET=v142
