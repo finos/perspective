@@ -21,13 +21,18 @@ pub enum KeyCode {
     Enter = 3,
 }
 
+// Handle `MonacoWebpackPlugin` and esbuild
 #[cfg_attr(
     not(test),
-    wasm_bindgen(module = "monaco-editor/esm/vs/editor/editor.worker.js")
+    wasm_bindgen(inline_js = "
+    import * as monaco from 'monaco-editor/esm/vs/editor/editor.worker.js';
+    export default async function () {
+        return await monaco.initialize();
+    }
+")
 )]
 #[cfg_attr(test, wasm_bindgen(inline_js = "export default async function() {}"))]
 extern "C" {
-
     #[wasm_bindgen(js_name = "default")]
     pub async fn new_worker() -> JsValue;
 }
@@ -36,9 +41,8 @@ extern "C" {
     not(test),
     wasm_bindgen(inline_js = "
     export async function monaco_module() {
-        return import(
+        return await import(
             /* webpackChunkName: \"monaco\" */
-            /* webpackMode: \"eager\" */
             'monaco-editor/esm/vs/editor/edcore.main.js'
         ); 
     }
@@ -102,6 +106,9 @@ extern "C" {
 
     #[derive(Clone)]
     pub type JsMonacoEditor;
+
+    #[wasm_bindgen(method, js_name = "layout")]
+    pub fn layout(this: &JsMonacoEditor, arg: &JsValue);
 
     #[wasm_bindgen(method, js_name = "getModel")]
     pub fn get_model(this: &JsMonacoEditor) -> JsMonacoModel;
@@ -175,6 +182,12 @@ extern "C" {
 // pub struct RegisterCompletionItemProviderArgs {
 //     pub provider_completion_items: Closure< ... >,
 // }
+
+#[derive(Serialize)]
+pub struct ResizeArgs {
+    pub width: u32,
+    pub height: u32,
+}
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]

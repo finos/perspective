@@ -7,7 +7,7 @@
  *
  */
 
-import "@finos/perspective-viewer/dist/esm/perspective-viewer.js";
+import "@finos/perspective-viewer";
 import {Widget} from "@lumino/widgets";
 
 export class PerspectiveViewerWidget extends Widget {
@@ -147,16 +147,5 @@ export class PerspectiveViewerWidget extends Widget {
             this.viewer.parentElement.removeChild(this.viewer);
         }
         await this.viewer.delete();
-    }
-
-    onResize(msg) {
-        this.notifyResize();
-        super.onResize(msg);
-    }
-
-    async notifyResize() {
-        if (this.isVisible) {
-            await this.viewer.notifyResize();
-        }
     }
 }

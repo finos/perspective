@@ -12,6 +12,7 @@ use crate::custom_elements::expression_editor::ExpressionEditorElement;
 use crate::dragdrop::*;
 use crate::js::perspective::*;
 use crate::js::plugin::JsPerspectiveViewerPlugin;
+use crate::js::resize_observer::*;
 use crate::renderer::*;
 use crate::session::Session;
 use crate::utils::*;
@@ -35,6 +36,73 @@ use wasm_bindgen_futures::JsFuture;
 use web_sys::*;
 use yew::prelude::*;
 
+struct ResizeObserverHandle {
+    elem: HtmlElement,
+    observer: ResizeObserver,
+    _callback: Closure<dyn FnMut(js_sys::Array)>,
+}
+
+impl ResizeObserverHandle {
+    fn new(elem: &HtmlElement, renderer: &Renderer) -> ResizeObserverHandle {
+        let mut state = ResizeObserverState {
+            elem: elem.clone(),
+            renderer: renderer.clone(),
+            width: elem.offset_width(),
+            height: elem.offset_height(),
+        };
+
+        let _callback = (move |xs| state.on_resize(&xs)).into_closure_mut();
+        let func = _callback.as_ref().unchecked_ref::<js_sys::Function>();
+        let observer = ResizeObserver::new(func);
+        observer.observe(elem);
+        ResizeObserverHandle {
+            elem: elem.clone(),
+            _callback,
+            observer,
+        }
+    }
+}
+
+impl Drop for ResizeObserverHandle {
+    fn drop(&mut self) {
+        self.observer.unobserve(&self.elem);
+    }
+}
+
+struct ResizeObserverState {
+    elem: HtmlElement,
+    renderer: Renderer,
+    width: i32,
+    height: i32,
+}
+
+impl ResizeObserverState {
+    fn on_resize(&mut self, entries: &js_sys::Array) {
+        let is_visible = self
+            .elem
+            .offset_parent()
+            .map(|x| !x.is_null())
+            .unwrap_or(false);
+
+        for y in entries.iter() {
+            let entry: ResizeObserverEntry = y.unchecked_into();
+            let content = entry.content_rect();
+            let content_width = content.width().floor() as i32;
+            let content_height = content.height().floor() as i32;
+            let resized = self.width != content_width || self.height != content_height;
+            if resized && is_visible {
+                let renderer = self.renderer.clone();
+                let _ = promisify_ignore_view_delete(
+                    async move { renderer.resize().await },
+                );
+            }
+
+            self.width = content_width;
+            self.height = content_height;
+        }
+    }
+}
+
 /// A `customElements` external API.
 #[wasm_bindgen]
 #[derive(Clone)]
@@ -45,6 +113,7 @@ pub struct PerspectiveViewerElement {
     renderer: Renderer,
     subscriptions: Rc<[Subscription; 4]>,
     expression_editor: Rc<RefCell<Option<ExpressionEditorElement>>>,
+    resize_handle: Rc<RefCell<Option<ResizeObserverHandle>>>,
 }
 
 #[wasm_bindgen]
@@ -105,6 +174,7 @@ impl PerspectiveViewerElement {
             renderer.on_limits_changed.add_listener(callback)
         };
 
+        let resize_handle = ResizeObserverHandle::new(&elem, &renderer);
         PerspectiveViewerElement {
             elem,
             root,
@@ -112,6 +182,7 @@ impl PerspectiveViewerElement {
             renderer,
             expression_editor: Rc::new(RefCell::new(None)),
             subscriptions: Rc::new([plugin_sub, update_sub, limit_sub, view_sub]),
+            resize_handle: Rc::new(RefCell::new(Some(resize_handle))),
         }
     }
 
@@ -161,6 +232,16 @@ impl PerspectiveViewerElement {
             .ok_or("Already deleted!")?
             .destroy();
         Ok(result)
+    }
+
+    /// Get the underlying `View` for thie viewer.
+    pub fn js_get_view(&self) -> js_sys::Promise {
+        let session = self.session.clone();
+        future_to_promise(async move {
+            session
+                .js_get_view()
+                .ok_or_else(|| JsValue::from("No table set"))
+        })
     }
 
     /// Get the underlying `Table` for this viewer.
@@ -245,6 +326,7 @@ impl PerspectiveViewerElement {
                 session
                     .set_update_column_defaults(&mut view_config, &renderer.metadata());
             }
+
             session.update_view_config(view_config);
             let settings = Some(settings.clone());
             let draw_task = renderer.draw(async {
@@ -367,9 +449,31 @@ impl PerspectiveViewerElement {
     }
 
     /// Recalculate the viewer's dimensions and redraw.
-    pub fn js_resize(&self) -> js_sys::Promise {
+    pub fn js_resize(&self, force: bool) -> js_sys::Promise {
+        if !force && self.resize_handle.borrow().is_some() {
+            let msg: JsValue = "`notifyResize(false)` called, disabling auto-size.  It can be re-enabled with `setAutoSize(true)`.".into();
+            web_sys::console::warn_1(&msg);
+            *self.resize_handle.borrow_mut() = None;
+        }
+
         let renderer = self.renderer.clone();
         promisify_ignore_view_delete(async move { renderer.resize().await })
+    }
+
+    /// Sets the auto-size behavior of this component.  When `true`, this
+    /// `<perspective-viewer>` will register a `ResizeObserver` on itself and
+    /// call `resize()` whenever its own dimensions change.
+    ///
+    /// # Arguments
+    /// - `autosize` Whether to register a `ResizeObserver` on this element or
+    ///   not.
+    pub fn js_set_auto_size(&mut self, autosize: bool) {
+        if autosize {
+            let handle = Some(ResizeObserverHandle::new(&self.elem, &self.renderer));
+            *self.resize_handle.borrow_mut() = handle;
+        } else {
+            *self.resize_handle.borrow_mut() = None;
+        }
     }
 
     /// Get this viewer's edit port for the currently loaded `Table`.

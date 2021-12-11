@@ -5,12 +5,12 @@ project(rapidjson-download NONE)
 include(ExternalProject)
 ExternalProject_Add(rapidjson
   GIT_REPOSITORY    https://github.com/tencent/rapidjson.git
-  GIT_TAG           master
+  GIT_TAG           v1.1.0
   SOURCE_DIR        "${CMAKE_BINARY_DIR}/rapidjson-src"
   BINARY_DIR        "${CMAKE_BINARY_DIR}/rapidjson-build"
   CONFIGURE_COMMAND ""
   BUILD_COMMAND     ""
   INSTALL_COMMAND   ""
   TEST_COMMAND      ""
-  CMAKE_ARGS        "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}"
+  CMAKE_ARGS        "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE} -DRAPIDJSON_BUILD_DOC=off -DRAPIDJSON_BUILD_EXAMPLES=off -DRAPIDJSON_BUILD_TESTS=off"
 )

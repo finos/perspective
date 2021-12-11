@@ -40,7 +40,7 @@ export function sunburstSeries() {
             .attr("user-select", (d) =>
                 arcVisible(d.current) ? "initial" : "none"
             )
-            .attr("pointer-events", (d) =>
+            .style("pointer-events", (d) =>
                 arcVisible(d.current) ? "initial" : "none"
             )
             .attr("d", (d) => drawArc(radius)(d.current));

@@ -10,7 +10,11 @@
 
 import type * as perspective from "@finos/perspective";
 
-import * as internal from "@finos/perspective-viewer/dist/pkg/perspective_viewer.js";
+import {
+    PerspectiveViewerElement,
+    register_plugin,
+} from "@finos/perspective-viewer/dist/pkg/perspective_viewer.js";
+
 import {WASM_MODULE} from "./init.js";
 
 export type PerspectiveViewerConfig = perspective.ViewConfig & {
@@ -40,8 +44,8 @@ export type PerspectiveViewerConfig = perspective.ViewConfig & {
  * ```
  * @noInheritDoc
  */
-export class PerspectiveViewerElement extends HTMLElement {
-    private instance: internal.PerspectiveViewerElement;
+export class HTMLPerspectiveViewerElement extends HTMLElement {
+    private instance: PerspectiveViewerElement;
 
     /**
      * Should not be called directly (will throw `TypeError: Illegal
@@ -54,9 +58,9 @@ export class PerspectiveViewerElement extends HTMLElement {
     }
 
     private async load_wasm(): Promise<void> {
-        const module = await WASM_MODULE;
+        await WASM_MODULE;
         if (!this.instance) {
-            this.instance = new module.PerspectiveViewerElement(this);
+            this.instance = new PerspectiveViewerElement(this);
         }
     }
 
@@ -85,8 +89,8 @@ export class PerspectiveViewerElement extends HTMLElement {
      * ```
      */
     static async registerPlugin(name: string): Promise<void> {
-        const module = await WASM_MODULE;
-        module.register_plugin(name);
+        await WASM_MODULE;
+        register_plugin(name);
     }
 
     /**
@@ -121,24 +125,49 @@ export class PerspectiveViewerElement extends HTMLElement {
 
     /**
      * Redraw this `<perspective-viewer>` and plugin when its dimensions or
-     * visibility have been updated.  This method _must_ be called in these
-     * cases, and will not by default respond to dimension or style changes to
-     * its parent container.  `notifyResize()` does not recalculate the current
-     * `View`, but all plugins will re-request the data window (which itself
-     * may be smaller or larger due to resize).
+     * visibility has been updated.  By default, `<perspective-viewer>` will
+     * auto-size when its own dimensions change, so this method need not be
+     * called;  when disabled via `setAutoSize(false)` however, this method
+     * _must_ be called, and will not respond to dimension or style changes to
+     * its parent container otherwise.  `notifyResize()` does not recalculate
+     * the current `View`, but all plugins will re-request the data window
+     * (which itself may be smaller or larger due to resize).
      *
      * @category Util
+     * @param force Whether to re-render, even if the dimenions have not
+     * changed.  When set to `false` and auto-size is enabled (the defaults),
+     * calling this method will automatically disable auto-size.
      * @returns A `Promise<void>` which resolves when this resize event has
      * finished rendering.
      * @example <caption>Bind `notfyResize()` to browser dimensions</caption>
      * ```javascript
      * const viewer = document.querySelector("perspective-viewer");
+     * viewer.setAutoSize(false);
      * window.addEventListener("resize", () => viewer.notifyResize());
      * ```
      */
-    async notifyResize(): Promise<void> {
+    async notifyResize(force = false): Promise<void> {
         await this.load_wasm();
-        await this.instance.js_resize();
+        await this.instance.js_resize(force);
+    }
+
+    /**
+     * Determines the auto-size behavior.  When `true` (the default), this
+     * element will re-render itself whenever its own dimensions change,
+     * utilizing a `ResizeObserver`;  when `false`, you must explicitly call
+     * `notifyResize()` when the element's dimensions have changed.
+     *
+     * @category Util
+     * @param autosize Whether to re-render when this element's dimensions
+     * change.
+     * @example <caption>Disable auto-size</caption>
+     * ```javascript
+     * await viewer.setAutoSize(false);
+     * ```
+     */
+    async setAutoSize(autosize = true): Promise<void> {
+        await this.load_wasm();
+        await this.instance.js_set_auto_size(autosize);
     }
 
     /**
@@ -159,6 +188,30 @@ export class PerspectiveViewerElement extends HTMLElement {
         await this.load_wasm();
         const table = await this.instance.js_get_table(!!wait_for_table);
         return table;
+    }
+
+    /**
+     * Returns the underlying `perspective.View` currently configured for this
+     * `<perspective-viewer>`.  Because ownership of the `perspective.View` is
+     * mainainted by the `<perspective-viewer>` it was created by, this `View`
+     * may become deleted (invalidated by calling `delete()`) at any time -
+     * specifically, it will be deleted whenever the `PerspectiveViewConfig`
+     * changes.  Because of this, when using this API, prefer calling
+     * `getView()` repeatedly over caching the returned `perspective.View`,
+     * especially in `async` contexts.
+     * @category Data
+     * @returns A `Promise` which ressolves to a `perspective.View`.
+     * @example <caption>Collapse grid to root</caption>
+     * ```javascript
+     * const viewer = document.querySelector("perspective-viewer");
+     * const view = await viewer.getView();
+     * await view.set_depth(0);
+     * ```
+     */
+    async getView(): Promise<perspective.View> {
+        await this.load_wasm();
+        const view = await this.instance.js_get_view();
+        return view;
     }
 
     /**
@@ -455,6 +508,6 @@ export class PerspectiveViewerElement extends HTMLElement {
 if (document.createElement("perspective-viewer").constructor === HTMLElement) {
     window.customElements.define(
         "perspective-viewer",
-        PerspectiveViewerElement
+        HTMLPerspectiveViewerElement
     );
 }

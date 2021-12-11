@@ -35,7 +35,9 @@ export const selectionEvent = () => {
 
     const _event = (selection) => {
         const node = selection.node();
-        selection.on("click", (data) => raiseEvent(node, data, settings));
+        selection.on("click", (_event, data) =>
+            raiseEvent(node, data, settings)
+        );
     };
 
     _event.settings = (...args) => {

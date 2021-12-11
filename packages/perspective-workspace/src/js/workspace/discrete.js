@@ -36,7 +36,7 @@ function cloneMouseEvent(x, y, event) {
 
 class DiscreteContext {
     _clamp(orient, client) {
-        const margin = {width: 300, height: 200}[orient];
+        const margin = {width: 100, height: 200}[orient];
         const [min, max] = [margin, this._rect[orient] - margin];
         return client < min ? min : client > max ? max : undefined;
     }

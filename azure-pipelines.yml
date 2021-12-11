@@ -28,7 +28,7 @@ parameters:
     default:
       - task: NodeTool@0
         inputs:
-          versionSpec: "15.x"
+          versionSpec: "16.x"
 
       - bash: npm install -g yarn
         displayName: "Install Yarn"
@@ -41,6 +41,7 @@ parameters:
             yarn
           path: $(YARN_CACHE_FOLDER)
         displayName: Cache Yarn packages
+        condition: not(eq(variables['Agent.OS'], 'Windows_NT'))
 
       - bash: yarn --frozen-lockfile
         displayName: "Install Deps"
@@ -198,7 +199,6 @@ parameters:
     default:
       # Build a python wheel for Windows
       - bash: yarn _wheel_python $(python_flag)
-        condition: and(succeeded(), or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')))
         displayName: "Build Windows Wheel"
         env:
           # azure pipelines are bad, so force windows-2019 to use VS2019
@@ -467,7 +467,7 @@ jobs:
       # don't use InitSteps because we don't want to cache local puppeteer
       - task: NodeTool@0
         inputs:
-          versionSpec: "15.x"
+          versionSpec: "16.x"
 
       - bash: npm install -g yarn
         displayName: "Install Yarn"
@@ -497,8 +497,6 @@ jobs:
       - bash: python -m pip install $(System.DefaultWorkingDirectory)/wheel/*.whl
         displayName: "Install perspective-python from wheel"
 
-      - bash: jupyter labextension install @jupyter-widgets/jupyterlab-manager
-        displayName: "Install Labextensions"
 
       - bash: yarn add -W --dev puppeteer@9.0.0
         displayName: "Install Puppeteer"

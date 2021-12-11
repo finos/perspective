@@ -212,8 +212,10 @@ impl Renderer {
 
     pub async fn resize(&self) -> Result<JsValue, JsValue> {
         let draw_mutex = self.draw_lock();
+        let timer = self.render_timer();
         draw_mutex
             .debounce(async {
+                set_timeout(timer.get_avg()).await?;
                 let jsplugin = self.get_active_plugin()?;
                 jsplugin.resize().await?;
                 Ok(JsValue::from(true))
