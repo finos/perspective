@@ -63,13 +63,13 @@ parameters:
     type: stepList
     default:
       - bash: sudo node scripts/install_tools.js
-        displayName: "Linux System deps"
+        displayName: "Install Linux System dependencies"
 
   - name: macInitSteps
     type: stepList
     default:
       - bash: brew install boost flatbuffers
-        displayName: "Mac System deps"
+        displayName: "Install Mac System dependencies"
 
   - name: windowsInitSteps
     type: stepList
@@ -86,21 +86,21 @@ parameters:
           git clone https://github.com/Microsoft/vcpkg
           cd vcpkg
           .\bootstrap-vcpkg.bat
-          .\vcpkg integrate install
-          .\vcpkg install boost flatbuffers
-        displayName: "System deps"
+          .\vcpkg.exe integrate install
+          .\vcpkg.exe install boost flatbuffers
+        displayName: "Install Windows System dependencies"
 
   - name: webassemblySteps
     type: stepList
     default:
       - bash: yarn lint_js
-        displayName: "Lint"
+        displayName: "Lint Javascript"
 
       - bash: yarn build_js --ci
-        displayName: "Build"
+        displayName: "Build Javascript"
 
       - bash: yarn test_js --quiet --ci
-        displayName: "Test"
+        displayName: "Test Javascript"
         env:
           PSP_DOCKER: 1
 
@@ -108,13 +108,13 @@ parameters:
     type: stepList
     default:
       - script: yarn build_python  --ci $(python_flag) $(manylinux_flag)
-        displayName: "build"
+        displayName: "Build Python"
 
   - name: pythonBuildVS2019Steps
     type: stepList
     default:
       - script: yarn build_python  --ci $(python_flag) $(manylinux_flag)
-        displayName: "build"
+        displayName: "Build Python"
         env:
           # azure pipelines are bad, so force windows-2019 to use VS2019
           PSP_GENERATOR: Visual Studio 16 2019
@@ -123,10 +123,10 @@ parameters:
     type: stepList
     default:
       - bash: yarn lint_python
-        displayName: "Lint"
+        displayName: "Lint Python"
 
       - bash: yarn build_python  --ci $(python_flag) $(manylinux_flag)
-        displayName: "build"
+        displayName: "Build Python"
         env:
           PSP_DOCKER: 1
 
@@ -149,7 +149,7 @@ parameters:
     default:
       # Build a python sdist
       - bash: export SDIST_PUBLISH_NAME=perspective-python-$(Build.SourceBranchName)-$(Build.BuildId).tar.gz && cd $(System.DefaultWorkingDirectory)/python/perspective && ./scripts/build_sdist.sh
-        displayName: "Build sdist"
+        displayName: "Build Python SDist"
 
       # Save the artifact to Azure storage
       - task: PublishPipelineArtifact@1
@@ -163,7 +163,7 @@ parameters:
       # Build a python wheel for Mac 10.14
       - bash: yarn _wheel_python $(python_flag) --macos
         condition: and(succeeded(), or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')))
-        displayName: "Build wheel"
+        displayName: "Build Mac wheel"
 
       # Test the wheel
       - bash: cd $(System.DefaultWorkingDirectory)/python/perspective/scripts && ./test_wheels.sh $(python_flag) --macos
@@ -478,7 +478,7 @@ jobs:
         displayName: "Install Yarn"
 
       - bash: yarn --frozen-lockfile
-        displayName: "Install Deps"
+        displayName: "Install Javascript Dependencies"
 
       - task: UsePythonVersion@0
         inputs:
