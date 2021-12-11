@@ -44,7 +44,7 @@ parameters:
         condition: not(eq(variables['Agent.OS'], 'Windows_NT'))
 
       - bash: yarn --frozen-lockfile
-        displayName: "Install Deps"
+        displayName: "Install Javascript Dependencies"
 
       - task: UsePythonVersion@0
         inputs:
@@ -87,6 +87,10 @@ parameters:
           cd vcpkg
           .\bootstrap-vcpkg.bat
           .\vcpkg.exe integrate install
+        displayName: "Clone and initialize vcpkg"
+
+      - script: |
+          cd vcpkg
           .\vcpkg.exe install boost flatbuffers
         displayName: "Install Windows System dependencies"
 
