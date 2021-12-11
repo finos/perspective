@@ -28,7 +28,7 @@ parameters:
     default:
       - task: NodeTool@0
         inputs:
-          versionSpec: "15.x"
+          versionSpec: "16.x"
 
       - bash: npm install -g yarn
         displayName: "Install Yarn"
@@ -468,7 +468,7 @@ jobs:
       # don't use InitSteps because we don't want to cache local puppeteer
       - task: NodeTool@0
         inputs:
-          versionSpec: "15.x"
+          versionSpec: "16.x"
 
       - bash: npm install -g yarn
         displayName: "Install Yarn"
@@ -498,8 +498,6 @@ jobs:
       - bash: python -m pip install $(System.DefaultWorkingDirectory)/wheel/*.whl
         displayName: "Install perspective-python from wheel"
 
-      - bash: jupyter labextension install @jupyter-widgets/jupyterlab-manager
-        displayName: "Install Labextensions"
 
       - bash: yarn add -W --dev puppeteer@9.0.0
         displayName: "Install Puppeteer"
