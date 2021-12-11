@@ -33,29 +33,21 @@
 
 # this might fail
 # https://gitlab.kitware.com/cmake/cmake/issues/19120
-if (WIN32)
-  find_path(FLATBUFFERS_INCLUDE_DIR flatbuffers/flatbuffers.h
-    PATHS ${FLATBUFFERS_ROOT}/include)
+find_path(FLATBUFFERS_INCLUDE_DIR flatbuffers/flatbuffers.h
+  PATHS ${FLATBUFFERS_ROOT}/include
+  HINTS /usr/local /usr/local/flatbuffers /usr/local/Homebrew /usr ~/homebrew/ /usr/local/include /usr/local/flatbuffers/include /usr/include ~/homebrew/include /opt/homebrew/include  ${CMAKE_SOURCE_DIR}/../../vcpkg/installed/x64-windows/include
+  NO_CMAKE_SYSTEM_PATH
+  NO_SYSTEM_ENVIRONMENT_PATH)
 
-  find_program(FLATBUFFERS_COMPILER flatc
-    PATHS ${FLATBUFFERS_ROOT}/bin)
-else()
-  find_path(FLATBUFFERS_INCLUDE_DIR flatbuffers/flatbuffers.h
-    PATHS ${FLATBUFFERS_ROOT}/include
-    HINTS /usr/local /usr/local/flatbuffers /usr/local/Homebrew /usr ~/homebrew/ /usr/local/include /usr/local/flatbuffers/include /usr/include ~/homebrew/include /opt/homebrew/include
-    NO_CMAKE_SYSTEM_PATH
-    NO_SYSTEM_ENVIRONMENT_PATH)
+find_program(FLATBUFFERS_COMPILER flatc
+  PATHS ${FLATBUFFERS_ROOT}/bin
+  HINTS /usr/local/bin /usr/bin /usr/local/Homebrew/bin ~/homebrew/bin /opt/homebrew/bin ${CMAKE_SOURCE_DIR}/../../vcpkg/installed/x64-windows/tools/flatbuffers
+  NO_CMAKE_SYSTEM_PATH
+  NO_SYSTEM_ENVIRONMENT_PATH)
 
-  find_program(FLATBUFFERS_COMPILER flatc
-    PATHS ${FLATBUFFERS_ROOT}/bin
-    HINTS /usr/local/bin /usr/bin /usr/local/Homebrew/bin ~/homebrew/bin /opt/homebrew/bin
-    NO_CMAKE_SYSTEM_PATH
-    NO_SYSTEM_ENVIRONMENT_PATH)
-
-  if(NOT ${FLATBUFFERS_INCLUDE_DIR})
-    # HACK
-    set(FLATBUFFERS_INCLUDE_DIR /usr/local/include)
-  endif()
+if(NOT ${FLATBUFFERS_INCLUDE_DIR})
+  # HACK
+  set(FLATBUFFERS_INCLUDE_DIR /usr/local/include)
 endif()
 
 include(FindPackageHandleStandardArgs)

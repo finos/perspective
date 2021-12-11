@@ -174,7 +174,9 @@ rust/perspective-viewer/pkg
 
 rust/perspective-viewer/target
 rust/perspective-viewer/target2
+
 .emsdk
+vcpkg
 
 docs/static/css/material.dark.css
 docs/i18n/en.json
