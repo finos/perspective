@@ -381,8 +381,6 @@ impl Component for FilterItem {
                     step="1"
                     ref={ noderef.clone() }
                     onkeydown={ keydown }
-                    onfocus={ focus }
-                    onblur={ blur }
                     value={ self.input.clone() }
                     oninput={ input }/>
             },
@@ -393,8 +391,6 @@ impl Component for FilterItem {
                     class="num-filter"
                     ref={ noderef.clone() }
                     onkeydown={ keydown }
-                    onfocus={ focus }
-                    onblur={ blur }
                     value={ self.input.clone() }
                     oninput={ input }/>
             },
@@ -420,8 +416,6 @@ impl Component for FilterItem {
                     class="date-filter"
                     ref={ noderef.clone() }
                     onkeydown={ keydown }
-                    onfocus={ focus }
-                    onblur={ blur }
                     value={ self.input.clone() }
                     oninput={ input }/>
             },
@@ -433,8 +427,6 @@ impl Component for FilterItem {
                     step="0.001"
                     ref={ noderef.clone() }
                     onkeydown={ keydown }
-                    onfocus={ focus }
-                    onblur={ blur }
                     value={ self.input.clone() }
                     oninput={ input }/>
             },

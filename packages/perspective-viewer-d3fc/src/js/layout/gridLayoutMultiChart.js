@@ -32,11 +32,13 @@ export function gridLayoutMultiChart() {
 
         const minSize = 300;
         const data = container.datum();
-        const cols = Math.min(
-            data.length,
-            Math.floor(containerWidth / minSize)
+
+        const cols = Math.max(
+            1,
+            Math.min(data.length, Math.floor(containerWidth / minSize))
         );
         const rows = Math.ceil(data.length / cols);
+
         containerSize = {
             width: containerWidth / Math.max(cols, 1),
             height: Math.min(
@@ -47,18 +49,24 @@ export function gridLayoutMultiChart() {
                 )
             ),
         };
+
         if (containerHeight / rows > containerSize.height * 0.75) {
             containerSize.height = containerHeight / rows;
         }
 
-        innerContainer.style(
-            "grid-template-columns",
-            `repeat(${cols}, ${containerSize.width}px)`
-        );
-        innerContainer.style(
-            "grid-template-rows",
-            `repeat(${rows}, ${containerSize.height}px)`
-        );
+        if (data.length > 1) {
+            innerContainer.style(
+                "grid-template-columns",
+                `repeat(${cols}, ${100 / cols}%)`
+            );
+            innerContainer.style(
+                "grid-template-rows",
+                `repeat(${rows}, ${containerSize.height}px)`
+            );
+        } else {
+            innerContainer.style("grid-template-columns", `repeat(1, 100%)`);
+            innerContainer.style("grid-template-rows", `repeat(1, 100%)`);
+        }
 
         chartDiv = innerContainer
             .selectAll(`div.${elementsPrefix}-container`)

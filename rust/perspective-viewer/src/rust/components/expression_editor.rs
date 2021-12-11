@@ -6,6 +6,7 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use crate::components::containers::split_panel::*;
 use crate::exprtk::*;
 use crate::js::monaco::*;
 use crate::js::perspective::*;
@@ -28,6 +29,7 @@ pub enum ExpressionEditorMsg {
     SetPos(i32, i32),
     SetTheme(String),
     Reset,
+    Resize(i32, i32),
     Validate(JsValue),
     EnableSave(bool),
     SaveExpr,
@@ -75,6 +77,11 @@ impl Component for ExpressionEditor {
             }
             ExpressionEditorMsg::Validate(_val) => {
                 drop(future_to_promise(self.state.clone().validate_expr()));
+                false
+            }
+
+            ExpressionEditorMsg::Resize(width, height) => {
+                self.state.set_dimensions(width, height);
                 false
             }
             ExpressionEditorMsg::Reset => {
@@ -149,29 +156,41 @@ impl Component for ExpressionEditor {
             .link
             .callback_once(|_| ExpressionEditorMsg::SaveExpr);
 
+        let resize = self
+            .state
+            .link
+            .callback(|(width, height)| ExpressionEditorMsg::Resize(width, height));
+
         html! {
             <>
                 <style>
                     { &CSS }
                     { format!(":host{{left:{}px;top:{}px;}}", self.left, self.top) }
                 </style>
-                <div id="monaco-container" ref={ self.state.container.clone() } style=""></div>
-                <div id="psp-expression-editor-actions">
-                    <button
-                        id="psp-expression-editor-button-reset"
-                        class="psp-expression-editor__button"
-                        onmousedown={ reset }
-                        disabled={ !self.edit_enabled }>
-                        { "Reset" }
-                    </button>
-                    <button
-                        id="psp-expression-editor-button-save"
-                        class="psp-expression-editor__button"
-                        onmousedown={ save }
-                        disabled={ !self.save_enabled }>
-                        { "Save" }
-                    </button>
-                </div>
+                <SplitPanel id="expression-editor-split-panel" on_resize={ resize }>
+                    <div id="editor-container">
+                        <div id="monaco-container" ref={ self.state.container.clone() } style=""></div>
+                        <div id="psp-expression-editor-actions">
+                            <button
+                                id="psp-expression-editor-button-reset"
+                                class="psp-expression-editor__button"
+                                onmousedown={ reset }
+                                disabled={ !self.edit_enabled }>
+                                { if self.edit_enabled { "Reset" } else { "" } }
+                            </button>
+                            <button
+                                id="psp-expression-editor-button-save"
+                                class="psp-expression-editor__button"
+                                onmousedown={ save }
+                                disabled={ !self.save_enabled }>
+                                { if self.save_enabled { "Save" } else { "" } }
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+
+                    </div>
+                </SplitPanel>
             </>
         }
     }
@@ -308,6 +327,22 @@ impl ExpressionEditorState {
         monaco.set_model_markers(&model, "exprtk", &arr);
         self.link.send_message(ExpressionEditorMsg::EnableSave(msg));
         Ok(JsValue::UNDEFINED)
+    }
+
+    // Ideally we'd set the monaco dimension explicitly, but the API
+    // does not provide independent width/height updates, nor a
+    // convenient way to get the current dimensions (need to select the
+    // underlying element from the DOM).  Luckily `.layout()` will
+    // determine these automatically if no arguments are supplied, but
+    // it may not always be the case that we want the editor to fill
+    // just its container.
+    fn set_dimensions(&self, _width: i32, _height: i32) {
+        if let Some((_, ref editor)) = *self.editor.borrow() {
+            editor.layout(
+                &JsValue::UNDEFINED,
+                // &JsValue::from_serde(&ResizeArgs { width, height }).unwrap(),
+            );
+        };
     }
 }
 

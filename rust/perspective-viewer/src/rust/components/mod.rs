@@ -21,6 +21,7 @@ mod config_selector;
 mod containers;
 mod expression_toolbar;
 mod filter_item;
+mod font_loader;
 mod inactive_column;
 mod pivot_item;
 mod plugin_selector;

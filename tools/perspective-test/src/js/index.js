@@ -469,8 +469,7 @@ test.capture = function capture(
                             const viewer =
                                 document.querySelector("perspective-viewer");
                             if (viewer) {
-                                viewer.restore(x);
-                                await viewer.notifyResize?.();
+                                await viewer.restore(x);
                                 await viewer.toggleConfig?.(false);
                             }
                         }

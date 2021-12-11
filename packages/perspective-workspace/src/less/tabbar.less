@@ -99,7 +99,6 @@
     position: absolute;
     right: 14px;
     display: none;
-    transition: background-color 0.2s ease-out, width 0.2s ease-out;
 
     height: 1px;
     background-color: var(--workspace-tabbar--border-color, #eaeaea);
@@ -169,21 +168,17 @@
 
 .p-TabBar-content > .p-TabBar-tab,
 .p-TabBar-content > .p-TabBar-tab.p-mod-current.settings_open {
-    background-color: #f2f4f6;
+    background-color: var(--workspace-master--background-color, #f2f4f6);
 }
 
 .p-TabBar-content.inactive-blur > .p-TabBar-tab {
     background-color: var(
         --workspace-inactive-blur--background-color,
-        rgba(0, 0, 0, 0.05)
+        transparent
     );
 }
 
 .condensed .p-TabBar-content {
-    & > .p-TabBar-tab .p-TabBar-tabConfigIcon {
-        display: none;
-    }
-
     & > .p-TabBar-tab.p-mod-current .p-TabBar-tabConfigIcon {
         display: block;
     }
@@ -197,15 +192,14 @@
 
 .p-TabBar-content > .p-TabBar-tab.p-mod-current.settings_open {
     border-width: 1px !important;
-    border-color: transparent;
+    border-color: var(--workspace-tabbar--border-color, #ddd);
     .p-TabBar-tabToolbar {
         display: flex;
     }
     .divider {
         height: 1px;
         margin-bottom: 0px;
-        left: 10px;
-        right: 10px;
+        background-color: var(--workspace-tabbar--border-color, #ddd);
     }
     &:last-child:first-child .divider {
         background: none;
@@ -223,10 +217,6 @@
     }
 }
 
-.p-TabBar-content > .p-TabBar-tab.p-mod-current.settings_open {
-    background-color: transparent !important;
-}
-
 .p-TabBar-content > .p-TabBar-tab {
     max-width: 100000px !important;
     flex: 0 1 100000px !important;
@@ -236,8 +226,8 @@
     border-style: solid;
     border-width: 1px;
     border-color: transparent;
-    height: 24px !important;
-    max-height: 24px !important;
+    height: 26px !important;
+    max-height: 26px !important;
     transform: none !important;
     transition: color 0.2s ease-out;
 }
@@ -271,7 +261,7 @@
     font-weight: 400;
     font-size: 12px;
     line-height: 22px;
-    text-align: center;
+    text-align: start;
     white-space: normal !important;
     word-break: break-all;
 }
@@ -285,6 +275,7 @@
 
 .p-TabBar-tabConfigIcon {
     padding-left: 8px;
+    padding-right: 4px !important;
 }
 
 .p-TabBar-tabLoadingIcon {
@@ -299,7 +290,7 @@
 
 .p-TabBar-content > .p-TabBar-tab.p-mod-current {
     color: var(--workspace-tabbar--color, #666) !important;
-    border: var(--workspace-tabbar--border, @border-color);
+    border: var(--workspace-tabbar--border, 1px solid #ddd);
     background-color: var(--workspace-tabbar--background-color, white);
     height: 26px !important;
     max-height: 26px !important;
@@ -317,6 +308,10 @@
     opacity: 1;
 }
 
-.perspective-workspace.context-menu * .p-TabBar {
+.perspective-workspace.context-menu * .p-TabBar,
+.perspective-workspace.context-menu
+    .p-DockPanel
+    .p-Widget:not(.context-focus)
+    .viewer-container {
     opacity: 0.2;
 }

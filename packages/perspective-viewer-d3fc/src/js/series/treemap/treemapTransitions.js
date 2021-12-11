@@ -21,6 +21,7 @@ import {
     restoreLabels,
 } from "./treemapLabel";
 import {calculateSubTreeMap, saveLabelMap} from "./treemapLevelCalculation";
+import {raiseEvent} from "../../tooltip/selectionEvent";
 
 export function returnToLevel(
     rects,
@@ -30,7 +31,8 @@ export function returnToLevel(
     treemapDiv,
     treemapSvg,
     rootNode,
-    parentCtrls
+    parentCtrls,
+    root_settings
 ) {
     if (settings.treemapLevel > 0) {
         const crossValues = rootNode.crossValue.split("|");
@@ -46,6 +48,7 @@ export function returnToLevel(
             0,
             crossValues,
             parentCtrls,
+            root_settings,
             1,
             false
         );
@@ -75,6 +78,7 @@ export function returnToLevel(
                     d.depth,
                     crossValues,
                     parentCtrls,
+                    root_settings,
                     1,
                     false
                 );
@@ -91,7 +95,8 @@ export function changeLevel(
     treemapDiv,
     treemapSvg,
     rootNode,
-    parentCtrls
+    parentCtrls,
+    root_settings
 ) {
     if (!d.children) return;
 
@@ -129,7 +134,8 @@ export function changeLevel(
         rootNode,
         settings.treemapLevel,
         crossValues,
-        parentCtrls
+        parentCtrls,
+        root_settings
     );
 }
 
@@ -145,6 +151,7 @@ function executeTransition(
     treemapLevel,
     crossValues,
     parentCtrls,
+    root_settings,
     duration = 500,
     recordLabelMap = true
 ) {
@@ -217,7 +224,7 @@ function executeTransition(
         parentCtrls
             .hide(false)
             .text(d.label)
-            .onClick(() =>
+            .onClick(() => {
                 changeLevel(
                     parent,
                     rects,
@@ -228,9 +235,13 @@ function executeTransition(
                     treemapSvg,
                     rootNode,
                     parentCtrls,
-                    duration
-                )
-            )();
+                    root_settings
+                    // duration
+                );
+                const viewer = treemapDiv.node().getRootNode()
+                    .host.parentElement;
+                raiseEvent(viewer, parent, root_settings);
+            })();
     } else {
         parentCtrls.hide(true)();
     }
@@ -269,7 +280,7 @@ const preventUserInteraction = (nodes, parentCtrls) => {
 
     nodes.each((_, i, nodes) => {
         const rect = d3.select(nodes[i]).selectAll("rect");
-        rect.attr("pointer-events", "none");
+        rect.style("pointer-events", "none");
     });
 };
 
@@ -278,6 +289,6 @@ const enableUserInteraction = (nodes, parentCtrls) => {
 
     nodes.each((_, i, nodes) => {
         const rect = d3.select(nodes[i]).selectAll("rect");
-        rect.attr("pointer-events", null);
+        rect.style("pointer-events", null);
     });
 };
