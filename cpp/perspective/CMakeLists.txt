@@ -430,12 +430,13 @@ psp_build_dep("double-conversion" "${PSP_CMAKE_MODULE_PATH}/double-conversion.tx
 # FIXME: this is a hack to get Flatbuffers working on Azure Win64 by making the
 # headers accessible. The actual flatc executable is installed using
 # Chocolatey for our Azure Windows job.
-if (WIN32)
-    psp_build_dep("flatbuffers" "${PSP_CMAKE_MODULE_PATH}/flatbuffers.txt.in")
-else()
-    find_package(Flatbuffers)
+find_package(Flatbuffers)
     if(NOT FLATBUFFERS_FOUND)
-        message(FATAL_ERROR"${Red}Flatbuffers could not be located${ColorReset}")
+        if (WIN32)
+            psp_build_dep("flatbuffers" "${PSP_CMAKE_MODULE_PATH}/flatbuffers.txt.in")
+        else()
+            message(FATAL_ERROR"${Red}Flatbuffers could not be located${ColorReset}")
+        endif()
     else()
         psp_build_message("${Cyan}Found Flatbuffers in ${FLATBUFFERS_INCLUDE_DIR}${ColorReset}")
         include_directories( ${FLATBUFFERS_INCLUDE_DIR} )
