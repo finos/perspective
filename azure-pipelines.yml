@@ -91,7 +91,7 @@ parameters:
 
       - script: |
           cd vcpkg
-          .\vcpkg.exe install boost flatbuffers
+          .\vcpkg.exe install boost-program-options boost-system boost-filesystem flatbuffers
         displayName: "Install Windows System dependencies"
 
   - name: webassemblySteps
