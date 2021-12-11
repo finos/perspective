@@ -431,16 +431,11 @@ psp_build_dep("double-conversion" "${PSP_CMAKE_MODULE_PATH}/double-conversion.tx
 # headers accessible. The actual flatc executable is installed using
 # Chocolatey for our Azure Windows job.
 find_package(Flatbuffers)
-    if(NOT FLATBUFFERS_FOUND)
-        if (WIN32)
-            psp_build_dep("flatbuffers" "${PSP_CMAKE_MODULE_PATH}/flatbuffers.txt.in")
-        else()
-            message(FATAL_ERROR"${Red}Flatbuffers could not be located${ColorReset}")
-        endif()
-    else()
-        psp_build_message("${Cyan}Found Flatbuffers in ${FLATBUFFERS_INCLUDE_DIR}${ColorReset}")
-        include_directories( ${FLATBUFFERS_INCLUDE_DIR} )
-    endif()
+if(NOT FLATBUFFERS_FOUND)
+    psp_build_dep("flatbuffers" "${PSP_CMAKE_MODULE_PATH}/flatbuffers.txt.in")
+else()
+    psp_build_message("${Cyan}Found Flatbuffers in ${FLATBUFFERS_INCLUDE_DIR}${ColorReset}")
+    include_directories( ${FLATBUFFERS_INCLUDE_DIR} )
 endif()
 
 # Build minimal arrow itself
