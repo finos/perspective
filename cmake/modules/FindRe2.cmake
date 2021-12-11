@@ -27,12 +27,15 @@ if(TARGET re2::re2)
   return()
 endif()
 
-find_package(PkgConfig REQUIRED)
-# TODO(junyer): Use the IMPORTED_TARGET option whenever CMake 3.6 (or newer)
-# becomes the minimum required: that will take care of the add_library() and
-# set_property() calls; then we can simply alias PkgConfig::RE2 as re2::re2.
-# For now, we can only set INTERFACE_* properties that existed in CMake 3.5.
-pkg_check_modules(RE2 QUIET re2)
+find_package(PkgConfig QUIET)
+if (PKG_CONFIG_FOUND)
+  # TODO(junyer): Use the IMPORTED_TARGET option whenever CMake 3.6 (or newer)
+  # becomes the minimum required: that will take care of the add_library() and
+  # set_property() calls; then we can simply alias PkgConfig::RE2 as re2::re2.
+  # For now, we can only set INTERFACE_* properties that existed in CMake 3.5.
+  pkg_check_modules(RE2 QUIET re2)
+endif()
+
 if(RE2_FOUND)
   set(re2_FOUND true)
   add_library(re2::re2 INTERFACE IMPORTED)
