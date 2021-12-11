@@ -89,10 +89,10 @@ parameters:
           .\vcpkg.exe integrate install
         displayName: "Clone and initialize vcpkg"
 
-      - script: |
+      - script: 
           set VCPKG_DEFAULT_TRIPLET=x64-windows
           cd vcpkg
-          .\vcpkg.exe install boost-algorithm boost-filesystem boost-multi-index boost-multiprecision boost-program-options boost-system boost-unordered  flatbuffers
+          .\vcpkg.exe install boost-algorithm boost-filesystem boost-multi-index boost-multiprecision boost-program-options boost-system boost-unordered boost-uuid flatbuffers
         displayName: "Install Windows System dependencies"
 
   - name: webassemblySteps

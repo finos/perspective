@@ -329,6 +329,10 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     else()
         psp_build_message("${Cyan}Found Boost: `Boost_INCLUDE_DIRS`: ${Boost_INCLUDE_DIRS}, `Boost_LIBRARY_DIRS` - ${Boost_LIBRARY_DIRS} ${ColorReset}")
         include_directories( ${Boost_INCLUDE_DIRS} )
+
+        if (WIN32) 
+            add_definitions(-DBOOST_UUID_FORCE_AUTO_LINK)
+        endif()
     endif()
 
     if(WIN32)
