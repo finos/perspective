@@ -199,7 +199,6 @@ parameters:
     default:
       # Build a python wheel for Windows
       - bash: yarn _wheel_python $(python_flag)
-        condition: and(succeeded(), or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')))
         displayName: "Build Windows Wheel"
         env:
           # azure pipelines are bad, so force windows-2019 to use VS2019
