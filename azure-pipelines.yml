@@ -90,6 +90,7 @@ parameters:
 
       - script: 
           set VCPKG_DEFAULT_TRIPLET=x64-windows
+          set VCPKG_PLATFORM_TOOLSET=v142
           cd vcpkg
           .\vcpkg.exe install boost-algorithm boost-filesystem boost-multi-index boost-multiprecision boost-program-options boost-system boost-unordered boost-uuid flatbuffers
           .\vcpkg.exe integrate install
