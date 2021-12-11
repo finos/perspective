@@ -400,7 +400,7 @@ jobs:
       - ${{ parameters.initSteps }}
       - ${{ parameters.windowsInitSteps }}
       - ${{ parameters.pythonBuildVS2019Steps }}
-      - ${{ parameters.pythonWindowsWheelVS2019Steps }}
+      # - ${{ parameters.pythonWindowsWheelVS2019Steps }}
 
   - job: "MacOS_Catalina"
     pool:
