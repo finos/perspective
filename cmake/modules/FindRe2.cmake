@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.7.2)
+
 # Copyright 2017 gRPC authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");

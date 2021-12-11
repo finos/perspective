@@ -3,7 +3,7 @@
 # PYTHON_NUMPY_FOUND
 # will be set by this script
 
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.7.2)
 
 find_package( PythonInterp ${PSP_PYTHON_VERSION} EXACT REQUIRED )
 

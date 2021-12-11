@@ -6,6 +6,23 @@ set(CMAKE_BUILD_TYPE "Release")
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# CMAKE POLICIES
+# option() should use new cmake behavior wrt variable clobbering
+cmake_policy(SET CMP0077 NEW)
+
+# BOOST_ROOT has been removed on Windows VMs in Azure:
+#
+# - https://github.com/actions/virtual-environments/issues/687
+# - https://github.com/actions/virtual-environments/issues/319
+# 
+# `BOOST_ROOT` must be set in the environment, and policy CMP0074
+# must be set to `NEW` to allow BOOST_ROOT to be defined by env var
+cmake_policy(SET CMP0074 NEW)
+
+# Set CMP0094 to NEW - find the first version that matches constraints,
+# instead of the latest version installed.
+cmake_policy(SET CMP0094 NEW)
+
 if(NOT DEFINED PSP_CMAKE_MODULE_PATH)
     set(PSP_CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../../cmake/")
 endif()
@@ -103,6 +120,7 @@ endfunction()
 #######################
 find_package(Color)
 
+# OPTIONS
 option(CMAKE_BUILD_TYPE "Release/Debug build" RELEASE)
 option(PSP_WASM_BUILD "Build the WebAssembly Project" ON)
 option(PSP_CPP_BUILD "Build the C++ Project" OFF)
@@ -303,25 +321,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     endif()
     set(ASYNC_MODE_FLAGS "")
 
-    if (WIN32)
-        # BOOST_ROOT has been removed on Windows VMs in Azure:
-        #
-        # - https://github.com/actions/virtual-environments/issues/687
-        # - https://github.com/actions/virtual-environments/issues/319
-        # 
-        # `BOOST_ROOT` must be set in the environment, and policy CMP0074
-        # must be set to `NEW` to allow BOOST_ROOT to be defined by env var
-        cmake_policy(SET CMP0074 NEW)
-
-        if(DEFINED ENV{BOOST_ROOT})
-            set(Boost_NO_BOOST_CMAKE TRUE)
-
-            psp_build_message("${Cyan}BOOST_ROOT: $ENV{BOOST_ROOT} ${ColorReset}")
-            psp_build_message("${Cyan}BOOST_INCLUDEDIR: $ENV{BOOST_INCLUDEDIR} ${ColorReset}")
-            psp_build_message("${Cyan}BOOST_LIBRARYDIR: $ENV{BOOST_LIBRARYDIR} ${ColorReset}")
-        endif()
-    endif()
-
     # Boost is a system dependency and must be present and built on the system.
     find_package(Boost REQUIRED)
 
@@ -350,10 +349,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
         #########################
         set(CMAKE_POSITION_INDEPENDENT_CODE ON)
         include_directories("${PSP_PYTHON_SRC}/perspective/include")
-
-        # Set CMP0094 to NEW - find the first version that matches constraints,
-        # instead of the latest version installed.
-        cmake_policy(SET CMP0094 NEW)
 
         if(MANYLINUX)
             # Manylinux docker images have no shared libraries
@@ -432,6 +427,7 @@ psp_build_dep("double-conversion" "${PSP_CMAKE_MODULE_PATH}/double-conversion.tx
 # Chocolatey for our Azure Windows job.
 find_package(Flatbuffers)
 if(NOT FLATBUFFERS_FOUND)
+    psp_build_message("${Cyan}Could not find Flatbuffers${ColorReset}")
     psp_build_dep("flatbuffers" "${PSP_CMAKE_MODULE_PATH}/flatbuffers.txt.in")
 else()
     psp_build_message("${Cyan}Found Flatbuffers in ${FLATBUFFERS_INCLUDE_DIR}${ColorReset}")
@@ -444,6 +440,7 @@ psp_build_dep("arrow" "${PSP_CMAKE_MODULE_PATH}/arrow.txt.in")
 # Build re2 as our regex library
 find_package(re2)
 if(NOT re2_FOUND)
+    psp_build_message("${Cyan}Could not find Re2${ColorReset}")
     # this is a workaround for some re2-specific weirdness
     add_definitions(-DTARGET_OS_OSX=1)
     psp_build_dep("re2" "${PSP_CMAKE_MODULE_PATH}/re2.txt.in")
@@ -455,6 +452,7 @@ endif()
 # Build exprtk for expression parsing
 find_package(exprtk)
 if(NOT exprtk_FOUND)
+    psp_build_message("${Cyan}Could not find exprtk${ColorReset}")
     psp_build_dep("exprtk" "${PSP_CMAKE_MODULE_PATH}/exprtk.txt.in")
 else()
     psp_build_message("${Cyan}Found exprtk in ${EXPRTK_INCLUDE_DIR}${ColorReset}")

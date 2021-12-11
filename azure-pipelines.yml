@@ -92,7 +92,7 @@ parameters:
       - script: |
           set VCPKG_DEFAULT_TRIPLET=x64-windows
           cd vcpkg
-          .\vcpkg.exe install boost-program-options boost-system boost-filesystem flatbuffers
+          .\vcpkg.exe install boost-algorithm boost-filesystem boost-multiprecision boost-program-options boost-system boost-unordered  flatbuffers
         displayName: "Install Windows System dependencies"
 
   - name: webassemblySteps
