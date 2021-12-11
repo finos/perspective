@@ -37,15 +37,15 @@
 
 .workspace-detail-widget {
     --settings-button--content: "" !important;
-    --plugin--border: 1px solid #eaeaea;
 }
 
 .context-menu > perspective-viewer.context-focus {
     opacity: 1;
+    filter: none;
 }
 
 .context-menu > perspective-viewer {
-    opacity: 0.2;
+    filter: saturate(0);
 }
 
 perspective-viewer {
@@ -61,6 +61,6 @@ perspective-viewer {
     font-family: "Open Sans", Arial, sans-serif;
 }
 
-.lm-mod-override-cursor perspective-viewer regular-table {
+.lm-mod-override-cursor perspective-viewer > * {
     pointer-events: none;
 }

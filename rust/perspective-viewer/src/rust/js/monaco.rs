@@ -21,12 +21,13 @@ pub enum KeyCode {
     Enter = 3,
 }
 
+// Handle `MonacoWebpackPlugin` and esbuild
 #[cfg_attr(
     not(test),
     wasm_bindgen(inline_js = "
-    import monaco from 'monaco-editor/esm/vs/editor/editor.worker.js';
+    import * as monaco from 'monaco-editor/esm/vs/editor/editor.worker.js';
     export default async function () {
-        return await monaco();
+        return await monaco.initialize();
     }
 ")
 )]

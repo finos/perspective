@@ -15,6 +15,8 @@
             "import": "./dist/umd/perspective-viewer.js"
         },
         "./dist/": "./dist/",
+        "./dist/theme/": "./src/themes/",
+        "./dist/themes/": "./src/themes/",
         "./cdn/": "./dist/cdn/",
         "./esm/": "./dist/esm/",
         "./umd/": "./dist/umd/",
@@ -25,7 +27,8 @@
     },
     "files": [
         "dist/**/*",
-        "src/**/*"
+        "src/**/*",
+        "tsconfig.json"
     ],
     "types": "dist/esm/perspective-viewer.d.ts",
     "scripts": {

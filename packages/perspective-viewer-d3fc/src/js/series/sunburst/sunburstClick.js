@@ -61,7 +61,7 @@ export const clickHandler =
             .attr("user-select", (d) =>
                 arcVisible(d.target) ? "initial" : "none"
             )
-            .attr("pointer-events", (d) =>
+            .style("pointer-events", (d) =>
                 arcVisible(d.target) ? "initial" : "none"
             )
             .attrTween("d", (d) => () => drawArc(radius)(d.current));

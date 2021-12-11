@@ -4,6 +4,7 @@
     "description": "Perspective Workspace",
     "files": [
         "dist/**/*",
+        "src/**/*",
         "index.d.ts"
     ],
     "exports": {
@@ -12,7 +13,9 @@
             "require": "./dist/umd/perspective-workspace.js"
         },
         "./esm/": "./dist/esm/",
+        "./src/": "./src/",
         "./dist/": "./dist/",
+        "./dist/themes/": "./src/themes/",
         "./package.json": "./package.json"
     },
     "unpkg": "./dist/umd/perspective-workspace.js",

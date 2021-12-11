@@ -2,7 +2,7 @@ const fs = require("fs");
 
 exports.ReplacePlugin = function ReplacePlugin(regex, replacement) {
     function setup(build) {
-        build.onLoad({filter: /.*/, namespace: "file"}, async (args) => {
+        build.onLoad({filter: /\.[tj]s$/, namespace: "file"}, async (args) => {
             let contents = await fs.promises.readFile(args.path, "utf8");
             contents = contents.replace(regex, replacement);
             return {
