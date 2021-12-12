@@ -389,13 +389,12 @@ jobs:
 
     strategy:
       matrix:
-        Python37:
-          python.version: "3.7"
-          python_flag: ""
-          artifact_name: "cp37-cp37m-win64_amd"
-
         ? ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')) }}
-        : Python38:
+        : Python37:
+            python.version: "3.7"
+            python_flag: ""
+            artifact_name: "cp37-cp37m-win64_amd"
+          Python38:
             python.version: "3.8"
             python_flag: "--python38"
             artifact_name: "cp38-cp38m-win64_amd"
@@ -443,11 +442,6 @@ jobs:
 
     strategy:
       matrix:
-        Python39:
-          python.version: "3.9"
-          python_flag: "--python39"
-          artifact_name: "cp39-cp39-macosx_10_15_x86_64"
-
         ? ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')) }}
         : Python36:
             python.version: "3.6"
@@ -463,6 +457,12 @@ jobs:
             python.version: "3.8"
             python_flag: "--python38"
             artifact_name: "cp38-cp38-macosx_10_15_x86_64"
+            
+          Python39:
+            python.version: "3.9"
+            python_flag: "--python39"
+            artifact_name: "cp39-cp39-macosx_10_15_x86_64"
+          
 
     steps:
       - ${{ parameters.initSteps }}
