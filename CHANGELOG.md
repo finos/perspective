@@ -1,5 +1,26 @@
 # Changelog
 
+## [v1.0.6](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.0.5...HEAD)
+
+**Implemented enhancements:**
+
+- Fix `perspective-workspace` and add `monaco-editor-webpack-plugin` compatibility to `perspective-webpack-plugin` [\#1662](https://github.com/finos/perspective/pull/1662) ([texodus](https://github.com/texodus))
+- D3FC fast `Treemap`, fix for non-POSIX time axis, better resize [\#1660](https://github.com/finos/perspective/pull/1660) ([texodus](https://github.com/texodus))
+- Resizable expression editor [\#1643](https://github.com/finos/perspective/pull/1643) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- perspective-view collapse / expand functions returning error [\#1656](https://github.com/finos/perspective/issues/1656)
+- Themes moved causing build errors [\#1648](https://github.com/finos/perspective/issues/1648)
+- Fix `position: sticky` Chrome render bug in `perspective-viewer-datagrid` [\#1661](https://github.com/finos/perspective/pull/1661) ([texodus](https://github.com/texodus))
+- Implement `getView()` [\#1657](https://github.com/finos/perspective/pull/1657) ([texodus](https://github.com/texodus))
+
+**Merged pull requests:**
+
+- add missing definition for re2 on os x to reenable conda builds [\#1654](https://github.com/finos/perspective/pull/1654) ([timkpaine](https://github.com/timkpaine))
+
 ## [v1.0.5](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.0.4...HEAD)

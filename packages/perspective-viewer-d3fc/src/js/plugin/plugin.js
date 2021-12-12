@@ -323,10 +323,6 @@ export function register(...plugins) {
                      */
                     async resize() {
                         if (this.isConnected) {
-                            if (chart.plugin.name === "Treemap") {
-                                this.clear();
-                            }
-
                             this._draw();
                         }
                     }

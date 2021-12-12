@@ -1,64 +1,65 @@
-##############################################################################
-# Licensed to the Apache Software Foundation (ASF) under one
-# or more contributor license agreements.  See the NOTICE file
-# distributed with this work for additional information
-# regarding copyright ownership.  The ASF licenses this file
-# to you under the Apache License, Version 2.0 (the
-# "License"); you may not use this file except in compliance
-# with the License.  You may obtain a copy of the License at
+# Copyright 2017 gRPC authors.
 #
-#   http://www.apache.org/licenses/LICENSE-2.0
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# Unless required by applicable law or agreed to in writing,
-# software distributed under the License is distributed on an
-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied.  See the License for the
-# specific language governing permissions and limitations
-# under the License.
-##############################################################################
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-# - Find re2 headers and lib.
-# RE2_ROOT hints the location
-# This module defines
-#  RE2_INCLUDE_DIR, directory containing headers
-#  RE2_STATIC_LIB, path to libsnappy.a
+find_package(re2 QUIET CONFIG)
+if(re2_FOUND)
+  message(STATUS "Found RE2 via CMake.")
+  return()
+endif()
 
-set(RE2_SEARCH_HEADER_PATHS ${RE2_ROOT}/include)
+# As per https://github.com/grpc/grpc/issues/25434, idempotence is necessary
+# because CMake fails when another target with the same name already exists.
+if(TARGET re2::re2)
+  message(STATUS "Found RE2 via pkg-config already?")
+  return()
+endif()
 
-set(RE2_SEARCH_LIB_PATHS ${RE2_ROOT}/lib)
+find_package(PkgConfig REQUIRED)
+# TODO(junyer): Use the IMPORTED_TARGET option whenever CMake 3.6 (or newer)
+# becomes the minimum required: that will take care of the add_library() and
+# set_property() calls; then we can simply alias PkgConfig::RE2 as re2::re2.
+# For now, we can only set INTERFACE_* properties that existed in CMake 3.5.
+pkg_check_modules(RE2 QUIET re2)
+if(RE2_FOUND)
+  set(re2_FOUND true)
+  add_library(re2::re2 INTERFACE IMPORTED)
+  if(RE2_INCLUDE_DIRS)
+    set_property(TARGET re2::re2 PROPERTY
+                 INTERFACE_INCLUDE_DIRECTORIES "${RE2_INCLUDE_DIRS}")
+  endif()
+  if(RE2_CFLAGS_OTHER)
+    # Filter out the -std flag, which is handled by CMAKE_CXX_STANDARD.
+    # TODO(junyer): Use the FILTER option whenever CMake 3.6 (or newer)
+    # becomes the minimum required: that will allow this to be concise.
+    foreach(flag IN LISTS RE2_CFLAGS_OTHER)
+      if("${flag}" MATCHES "^-std=")
+        list(REMOVE_ITEM RE2_CFLAGS_OTHER "${flag}")
+      endif()
+    endforeach()
+    set_property(TARGET re2::re2 PROPERTY
+                 INTERFACE_COMPILE_OPTIONS "${RE2_CFLAGS_OTHER}")
+  endif()
 
-find_path(RE2_INCLUDE_DIR re2/re2.h
-  PATHS ${RE2_SEARCH_HEADER_PATHS}
-        NO_DEFAULT_PATH
-  DOC  "Google's re2 regex header path"
-)
+  if(RE2_LDFLAGS)
+    set_property(TARGET re2::re2 PROPERTY
+                 INTERFACE_LINK_LIBRARIES "${RE2_LDFLAGS}")
+  endif()
 
-find_library(RE2_LIBS NAMES re2
-  PATHS ${RE2_SEARCH_LIB_PATHS}
-        NO_DEFAULT_PATH
-  DOC   "Google's re2 regex library"
-)
+  message(STATUS "Found RE2 via pkg-config.")
+  return()
+endif()
 
-find_library(RE2_STATIC_LIB NAMES libre2.a
-  PATHS ${RE2_SEARCH_LIB_PATHS}
-        NO_DEFAULT_PATH
-  DOC   "Google's re2 regex static library"
-)
-
-message(STATUS ${RE2_INCLUDE_DIR})
-
-if (NOT RE2_INCLUDE_DIR OR NOT RE2_LIBS OR
-    NOT RE2_STATIC_LIB)
-  set(RE2_FOUND FALSE)
-  message(STATUS "Re2 includes and libraries NOT found. "
-    "Looked for headers in ${RE2_SEARCH_HEADER_PATH}, "
-    "and for libs in ${RE2_SEARCH_LIB_PATH}")
-else()
-  set(RE2_FOUND TRUE)
-endif ()
-
-mark_as_advanced(
-  RE2_INCLUDE_DIR
-  RE2_LIBS
-  RE2_STATIC_LIB
-)
+if(re2_FIND_REQUIRED)
+  message(WARNING "Failed to find RE2.")
+endif()

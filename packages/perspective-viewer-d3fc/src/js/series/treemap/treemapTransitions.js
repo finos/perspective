@@ -280,7 +280,7 @@ const preventUserInteraction = (nodes, parentCtrls) => {
 
     nodes.each((_, i, nodes) => {
         const rect = d3.select(nodes[i]).selectAll("rect");
-        rect.attr("pointer-events", "none");
+        rect.style("pointer-events", "none");
     });
 };
 
@@ -289,6 +289,6 @@ const enableUserInteraction = (nodes, parentCtrls) => {
 
     nodes.each((_, i, nodes) => {
         const rect = d3.select(nodes[i]).selectAll("rect");
-        rect.attr("pointer-events", null);
+        rect.style("pointer-events", null);
     });
 };

@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-viewer-datagrid",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "description": "Perspective datagrid plugin based on `regular-table`",
     "unpkg": "dist/cdn/perspective-viewer-datagrid.js",
     "jsdelivr": "dist/cdn/perspective-viewer-datagrid.js",
@@ -36,13 +36,13 @@
     "author": "",
     "license": "Apache-2.0",
     "dependencies": {
-        "@finos/perspective": "^1.0.5",
-        "@finos/perspective-viewer": "^1.0.5",
+        "@finos/perspective": "^1.0.6",
+        "@finos/perspective-viewer": "^1.0.6",
         "chroma-js": "^1.3.4",
-        "regular-table": "=0.4.1"
+        "regular-table": "=0.4.2"
     },
     "devDependencies": {
-        "@finos/perspective-build": "^1.0.5",
-        "@finos/perspective-test": "^1.0.5"
+        "@finos/perspective-build": "^1.0.6",
+        "@finos/perspective-test": "^1.0.6"
     }
 }

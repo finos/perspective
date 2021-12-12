@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-viewer",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "description": "The `<perspective-viewer>` Custom Element, frontend for Perspective.js",
     "repository": {
         "type": "git",
@@ -15,6 +15,8 @@
             "import": "./dist/umd/perspective-viewer.js"
         },
         "./dist/": "./dist/",
+        "./dist/theme/": "./src/themes/",
+        "./dist/themes/": "./src/themes/",
         "./cdn/": "./dist/cdn/",
         "./esm/": "./dist/esm/",
         "./umd/": "./dist/umd/",
@@ -25,7 +27,8 @@
     },
     "files": [
         "dist/**/*",
-        "src/**/*"
+        "src/**/*",
+        "tsconfig.json"
     ],
     "types": "dist/esm/perspective-viewer.d.ts",
     "scripts": {
@@ -50,7 +53,7 @@
         "access": "public"
     },
     "dependencies": {
-        "@finos/perspective": "^1.0.5",
+        "@finos/perspective": "^1.0.6",
         "mobile-drag-drop-shadow-dom": "3.0.0",
         "monaco-editor": "0.24.0"
     },
@@ -58,6 +61,6 @@
         "monaco-editor-webpack-plugin": "3.1.0"
     },
     "devDependencies": {
-        "@finos/perspective-test": "^1.0.5"
+        "@finos/perspective-test": "^1.0.6"
     }
 }

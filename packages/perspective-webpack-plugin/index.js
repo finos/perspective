@@ -17,6 +17,7 @@ class PerspectiveWebpackPlugin {
         this.options = Object.assign(
             {},
             {
+                monaco: true,
                 inline: false,
                 inlineWasm: false,
                 inlineWorker: false,
@@ -53,21 +54,34 @@ class PerspectiveWebpackPlugin {
             },
         });
 
-        rules.push({
-            test: /editor\.worker\.js$/,
-            type: "javascript/auto",
-            include: /monaco\-editor/,
-            use: {
-                loader: require.resolve("worker-loader"),
-                options: {
-                    filename: "editor.worker.js",
-                },
-            },
-        });
-
         if (this.options.inline || this.options.inlineWorker) {
-            rules[rules.length - 2].use.options.inline = "no-fallback";
             rules[rules.length - 1].use.options.inline = "no-fallback";
+        }
+
+        if (this.options.monaco) {
+            rules.push({
+                test: /editor\.worker\.js$/,
+                type: "javascript/auto",
+                include: /monaco\-editor/,
+                use: [
+                    {
+                        loader: "exports-loader",
+                        options: {
+                            exports: "named Worker_fn initialize",
+                        },
+                    },
+                    {
+                        loader: require.resolve("worker-loader"),
+                        options: {
+                            filename: "editor.worker.js",
+                        },
+                    },
+                ],
+            });
+
+            if (this.options.inline || this.options.inlineWorker) {
+                rules[rules.length - 1].use.options.inline = "no-fallback";
+            }
         }
 
         if (!(this.options.inline || this.options.inlineWasm)) {
@@ -85,38 +99,40 @@ class PerspectiveWebpackPlugin {
             });
         }
 
-        rules.push({
-            test: /\.css$/,
-            include: /monaco\-editor/,
-            use: [
-                {
-                    loader: require.resolve("css-loader"),
-                    options: {sourceMap: false},
-                },
-                {
-                    loader: require.resolve("postcss-loader"),
-                    options: {
-                        sourceMap: false,
-                        postcssOptions: {
-                            map: {annotation: false},
-                            minimize: true,
-                            plugins: [
-                                cssnano({
-                                    preset: "lite",
-                                    discardComments: {removeAll: true},
-                                }),
-                            ],
+        if (this.options.monaco) {
+            rules.push({
+                test: /\.css$/,
+                include: /monaco\-editor/,
+                use: [
+                    {
+                        loader: require.resolve("css-loader"),
+                        options: {sourceMap: false},
+                    },
+                    {
+                        loader: require.resolve("postcss-loader"),
+                        options: {
+                            sourceMap: false,
+                            postcssOptions: {
+                                map: {annotation: false},
+                                minimize: true,
+                                plugins: [
+                                    cssnano({
+                                        preset: "lite",
+                                        discardComments: {removeAll: true},
+                                    }),
+                                ],
+                            },
                         },
                     },
-                },
-            ],
-        });
+                ],
+            });
 
-        rules.push({
-            test: /\.ttf$/,
-            include: /monaco\-editor/,
-            type: "asset/resource",
-        });
+            rules.push({
+                test: /\.ttf$/,
+                include: /monaco\-editor/,
+                type: "asset/resource",
+            });
+        }
 
         const perspective_config = get_config();
         if (perspective_config) {

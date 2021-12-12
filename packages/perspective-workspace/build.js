@@ -7,6 +7,7 @@ const {IgnoreCSSPlugin} = require("@finos/perspective-build/ignore_css");
 const {IgnoreFontsPlugin} = require("@finos/perspective-build/ignore_fonts");
 const {WasmPlugin} = require("@finos/perspective-build/wasm");
 const {WorkerPlugin} = require("@finos/perspective-build/worker");
+const {ResolvePlugin} = require("@finos/perspective-build/resolve");
 const {build} = require("@finos/perspective-build/build");
 
 const BUILD = [
@@ -28,7 +29,6 @@ const BUILD = [
             InlineCSSPlugin(),
             IgnoreCSSPlugin(),
             IgnoreFontsPlugin(),
-            WorkerPlugin(false),
             NodeModulesExternal(),
         ],
         loader: {
@@ -61,6 +61,12 @@ const BUILD = [
             global: "window",
         },
         plugins: [
+            ResolvePlugin({
+                "@finos/perspective":
+                    "@finos/perspective/dist/esm/perspective.js",
+                "@finos/perspective-viewer":
+                    "@finos/perspective-viewer/dist/esm/perspective-viewer.js",
+            }),
             InlineCSSPlugin(),
             IgnoreCSSPlugin(),
             IgnoreFontsPlugin(),

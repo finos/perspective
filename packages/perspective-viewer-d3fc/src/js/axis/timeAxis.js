@@ -32,8 +32,8 @@ export const domain = () => {
                 .sort((a, b) => a - b)
                 .filter((d, i, a) => i === 0 || d !== a[i - 1])
                 .reduce((acc, d, i, src) =>
-                    i === 0 || acc <= d - src[i - 1]
-                        ? acc
+                    i === 0 || Math.abs(acc) <= Math.abs(d - src[i - 1])
+                        ? Math.abs(acc)
                         : Math.abs(d - src[i - 1])
                 )
         );
@@ -42,7 +42,7 @@ export const domain = () => {
     };
 
     const getDataExtent = (data) => {
-        const dataWidth = getMinimumGap(data);
+        const dataWidth = Math.abs(getMinimumGap(data));
         return base.padUnit("domain").pad([dataWidth / 2, dataWidth / 2])(data);
     };
 

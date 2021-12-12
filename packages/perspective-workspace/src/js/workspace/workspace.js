@@ -82,6 +82,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         this.layoutModified.connect(() => this.workspaceUpdated());
 
         this.addWidget(this.detailPanel);
+        this.spacing = 8;
 
         this.element = element;
         this._side = options.side || SIDE.LEFT;
@@ -130,6 +131,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
             const newSizes = this.relativeSizes().slice().reverse();
 
             this.detailPanel.close();
+            this.detailPanel.removeClass("has-master-panel");
             this.masterPanel.close();
 
             if (value === SIDE.LEFT) {
@@ -200,6 +202,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
             this.setupMasterPanel(sizes || DEFAULT_WORKSPACE_SIZE);
         } else {
             if (this.masterPanel.isAttached) {
+                this.detailPanel.removeClass("has-master-panel");
                 this.masterPanel.close();
             }
 
@@ -568,6 +571,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         if (this.masterPanel.widgets.length === 0) {
             this.detailPanel.close();
             this.masterPanel.close();
+            this.detailPanel.removeClass("has-master-panel");
             this.addWidget(this.detailPanel);
         }
 
@@ -705,11 +709,13 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         this._linkedViewers = [];
 
         if (this.masterPanel.isAttached) {
+            this.detailPanel.removeClass("has-master-panel");
             this.masterPanel.close();
         }
     }
 
     setupMasterPanel(sizes) {
+        this.detailPanel.addClass("has-master-panel");
         if (this.side === SIDE.RIGHT) {
             this.addWidget(this.detailPanel);
             this.addWidget(this.masterPanel);
