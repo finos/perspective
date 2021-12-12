@@ -386,11 +386,11 @@ jobs:
   - job: "Windows"
     pool:
       vmImage: "windows-2019"
+    condition: or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual'))
 
     strategy:
       matrix:
-        ? ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')) }}
-        : Python37:
+          Python37:
             python.version: "3.7"
             python_flag: ""
             artifact_name: "cp37-cp37m-win64_amd"
@@ -439,11 +439,11 @@ jobs:
   - job: "MacOS_Catalina"
     pool:
       vmImage: "macos-10.15"
+    condition: or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual'))
 
     strategy:
       matrix:
-        ? ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')) }}
-        : Python36:
+          Python36:
             python.version: "3.6"
             python_flag: "--python36"
             artifact_name: "cp36-cp36m-macosx_10_15_x86_64"
