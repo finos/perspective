@@ -386,7 +386,6 @@ jobs:
   - job: "Windows"
     pool:
       vmImage: "windows-2019"
-    condition: or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual'))
 
     strategy:
       matrix:
@@ -394,7 +393,8 @@ jobs:
             python.version: "3.7"
             python_flag: ""
             artifact_name: "cp37-cp37m-win64_amd"
-          Python38:
+        ? ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')) }}
+        : Python38:
             python.version: "3.8"
             python_flag: "--python38"
             artifact_name: "cp38-cp38m-win64_amd"
@@ -413,6 +413,7 @@ jobs:
   - job: "Windows_Wheels"
     pool:
       vmImage: "windows-2019"
+    condition: or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual'))
 
     strategy:
       matrix:
@@ -420,16 +421,14 @@ jobs:
           python.version: "3.7"
           python_flag: ""
           artifact_name: "cp37-cp37m-win64_amd"
-
-        ? ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')) }}
-        : Python38:
-            python.version: "3.8"
-            python_flag: "--python38"
-            artifact_name: "cp38-cp38m-win64_amd"
-          Python39:
-            python.version: "3.9"
-            python_flag: "--python39"
-            artifact_name: "cp39-cp39m-win64_amd"
+        Python38:
+          python.version: "3.8"
+          python_flag: "--python38"
+          artifact_name: "cp38-cp38m-win64_amd"
+        Python39:
+          python.version: "3.9"
+          python_flag: "--python39"
+          artifact_name: "cp39-cp39m-win64_amd"
 
     steps:
       - ${{ parameters.initSteps }}
