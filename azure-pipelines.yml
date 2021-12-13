@@ -389,10 +389,10 @@ jobs:
 
     strategy:
       matrix:
-          Python37:
-            python.version: "3.7"
-            python_flag: ""
-            artifact_name: "cp37-cp37m-win64_amd"
+        Python37:
+          python.version: "3.7"
+          python_flag: ""
+          artifact_name: "cp37-cp37m-win64_amd"
         ? ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')) }}
         : Python38:
             python.version: "3.8"
