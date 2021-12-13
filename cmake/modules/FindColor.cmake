@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.7.2)
+
 if(NOT WIN32)
   string(ASCII 27 Esc)
   set(ColorReset "${Esc}[m")
