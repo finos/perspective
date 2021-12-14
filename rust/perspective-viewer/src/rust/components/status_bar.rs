@@ -20,7 +20,7 @@ use yew::prelude::*;
 #[derive(Properties, Clone)]
 pub struct StatusBarProps {
     pub id: String,
-    pub on_reset: Callback<()>,
+    pub on_reset: Callback<bool>,
     pub session: Session,
 
     #[cfg(test)]
@@ -29,7 +29,7 @@ pub struct StatusBarProps {
 }
 
 pub enum StatusBarMsg {
-    Reset,
+    Reset(bool),
     Export(bool),
     Copy(bool),
     TableStatsChanged,
@@ -77,8 +77,8 @@ impl Component for StatusBar {
                 true
             }
             StatusBarMsg::TableStatsChanged => true,
-            StatusBarMsg::Reset => {
-                self.props.on_reset.emit(());
+            StatusBarMsg::Reset(all) => {
+                self.props.on_reset.emit(all);
                 false
             }
             StatusBarMsg::Export(flat) => {
@@ -109,7 +109,9 @@ impl Component for StatusBar {
         let stats = self.props.session.get_table_stats();
         let class_name = self.status_class_name(&stats);
         let is_updating_class_name = if self.is_updating { "updating" } else { " " };
-        let reset = self.link.callback(|_| StatusBarMsg::Reset);
+        let reset = self
+            .link
+            .callback(|event: MouseEvent| StatusBarMsg::Reset(event.shift_key()));
         let export = self
             .link
             .callback(|event: MouseEvent| StatusBarMsg::Export(event.shift_key()));

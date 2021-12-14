@@ -223,15 +223,19 @@ impl PerspectiveViewerElement {
     /// Does not delete the supplied `Table` (as this is constructed by the
     /// callee).  Allowing a `<perspective-viewer>` to be garbage-collected
     /// without calling `delete()` will leak WASM memory.
-    pub fn js_delete(&mut self) -> Result<bool, JsValue> {
-        self.renderer.delete()?;
-        let result = self.session.delete();
-        self.root
-            .borrow_mut()
-            .take()
-            .ok_or("Already deleted!")?
-            .destroy();
-        Ok(result)
+    pub fn js_delete(&mut self) -> js_sys::Promise {
+        let renderer = self.renderer.clone();
+        let session = self.session.clone();
+        let root = self.root.clone();
+        future_to_promise(self.renderer.clone().with_lock(async move {
+            renderer.delete()?;
+            let result = session.delete();
+            root.borrow_mut()
+                .take()
+                .ok_or("Already deleted!")?
+                .destroy();
+            Ok(JsValue::from(result))
+        }))
     }
 
     /// Get the underlying `View` for thie viewer.
@@ -435,14 +439,18 @@ impl PerspectiveViewerElement {
     }
 
     /// Reset the viewer's `ViewerConfig` to the default.
-    pub fn js_reset(&self) -> js_sys::Promise {
+    ///
+    /// # Arguments
+    /// - `all` Whether to clear `expressions` also.
+    pub fn js_reset(&self, reset_expressions: JsValue) -> js_sys::Promise {
         let (sender, receiver) = channel::<()>();
         let root = self.root.clone();
+        let all = reset_expressions.as_bool().unwrap_or_default();
         promisify_ignore_view_delete(async move {
             root.borrow()
                 .as_ref()
                 .ok_or("Already deleted!")?
-                .send_message(Msg::Reset(Some(sender)));
+                .send_message(Msg::Reset(all, Some(sender)));
             receiver.await.map_err(|_| JsValue::from("Cancelled"))?;
             Ok(JsValue::UNDEFINED)
         })
@@ -491,10 +499,7 @@ impl PerspectiveViewerElement {
         promisify_ignore_view_delete(async move {
             let view = session.get_view().into_jserror()?;
             let plugins = renderer.get_all_plugins();
-            let tasks = plugins.iter().map(|plugin| {
-                let view = &view;
-                async move { plugin.restyle(view).await }
-            });
+            let tasks = plugins.iter().map(|plugin| plugin.restyle(&view));
 
             join_all(tasks)
                 .await

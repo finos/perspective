@@ -1,5 +1,22 @@
 # Changelog
 
+## [v1.0.7](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.0.6...HEAD)
+
+**Implemented enhancements:**
+
+- Preserve `expressions` on reset \(shift+ to force\) [\#1673](https://github.com/finos/perspective/pull/1673) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- Some expressions are available in Perspective-Python but not in the Monaco editor [\#1671](https://github.com/finos/perspective/issues/1671)
+- Fix `perspective-workspace` errors [\#1675](https://github.com/finos/perspective/pull/1675) ([texodus](https://github.com/texodus))
+
+**Merged pull requests:**
+
+- Build windows wheel every time so its tested [\#1672](https://github.com/finos/perspective/pull/1672) ([timkpaine](https://github.com/timkpaine))
+
 ## [v1.0.6](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.0.5...HEAD)
