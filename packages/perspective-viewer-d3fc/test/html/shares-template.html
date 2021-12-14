@@ -10,9 +10,9 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <script src="perspective.js"></script>
-        <script src="perspective-viewer.js"></script>
-        <script src="perspective-viewer-d3fc.js"></script>
+        <script type="module" src="perspective.js"></script>
+        <script type="module" src="perspective-viewer.js"></script>
+        <script type="module" src="perspective-viewer-d3fc.js"></script>
 
         <link rel="stylesheet" href="demo.css" />
     </head>
@@ -29,7 +29,8 @@
         >
         </perspective-viewer>
 
-        <script>
+        <script type="module">
+            import perspective from "./perspective.js";
             var xhr = new XMLHttpRequest();
             xhr.open("GET", "shares.csv", true);
             xhr.onload = function () {

@@ -10,8 +10,8 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <script src="perspective.js"></script>
-        <script src="perspective-viewer.js"></script>
+        <script type="module" src="perspective.js"></script>
+        <script type="module" src="perspective-viewer.js"></script>
 
         <link rel="stylesheet" href="demo.css" />
 
@@ -26,7 +26,8 @@
     <body>
         <perspective-viewer> </perspective-viewer>
 
-        <script>
+        <script type="module">
+            import perspective from "./perspective.js";
             var xhr = new XMLHttpRequest();
             xhr.open("GET", "superstore.csv", true);
             xhr.onload = async function () {

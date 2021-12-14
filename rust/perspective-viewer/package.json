@@ -42,7 +42,7 @@
         "fix": "yarn lint --fix && cargo fmt",
         "lint": "eslint src/ts",
         "test:build:rust": "cpy ../../packages/perspective/dist/umd/perspective.js dist/pkg/",
-        "test:build:js": "cpy \"test/html/*\" dist/umd && cpy \"test/csv/*\" dist/umd && cpy \"test/css/*\" dist/umd",
+        "test:build:js": "cpy \"test/html/*\" dist/cdn && cpy \"test/csv/*\" dist/cdn && cpy \"test/css/*\" dist/cdn",
         "test:build": "npm-run-all test:build:*",
         "test:run:rust": "HEADLESS_TIMEOUT=40 wasm-pack test --chrome --headless",
         "test:run": "jest --rootDir=. --config=../../tools/perspective-test/jest.config.js --color --noStackTrace 2>&1",
