@@ -439,14 +439,18 @@ impl PerspectiveViewerElement {
     }
 
     /// Reset the viewer's `ViewerConfig` to the default.
-    pub fn js_reset(&self) -> js_sys::Promise {
+    ///
+    /// # Arguments
+    /// - `all` Whether to clear `expressions` also.
+    pub fn js_reset(&self, reset_expressions: JsValue) -> js_sys::Promise {
         let (sender, receiver) = channel::<()>();
         let root = self.root.clone();
+        let all = reset_expressions.as_bool().unwrap_or_default();
         promisify_ignore_view_delete(async move {
             root.borrow()
                 .as_ref()
                 .ok_or("Already deleted!")?
-                .send_message(Msg::Reset(Some(sender)));
+                .send_message(Msg::Reset(all, Some(sender)));
             receiver.await.map_err(|_| JsValue::from("Cancelled"))?;
             Ok(JsValue::UNDEFINED)
         })
@@ -495,10 +499,7 @@ impl PerspectiveViewerElement {
         promisify_ignore_view_delete(async move {
             let view = session.get_view().into_jserror()?;
             let plugins = renderer.get_all_plugins();
-            let tasks = plugins.iter().map(|plugin| {
-                let view = &view;
-                async move { plugin.restyle(view).await }
-            });
+            let tasks = plugins.iter().map(|plugin| plugin.restyle(&view));
 
             join_all(tasks)
                 .await

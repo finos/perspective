@@ -3,7 +3,7 @@
     "superstore.html/doesn't leak elements.": "d0fd18b3d4d7c183c5ed155b4bf37972",
     "superstore.html/doesn't leak views when setting row pivots.": "54daaa4bbbe59f6ed4acc301ba871bab",
     "superstore.html/doesn't leak views when setting filters.": "6dfc1e505f1428424c3265f0236f22fc",
-    "__GIT_COMMIT__": "dc176eb138833bf0ff7c6c0520f6c2162e932b38",
+    "__GIT_COMMIT__": "b2b42a3e843a25e2ca0c9c39838aab6375f760e0",
     "blank.html/Handles reloading with a schema.": "e58c62f6e0ff16dc4d753f99e0fc39c3",
     "superstore_shows_a_grid_without_any_settings_applied_": "ae1c4690d978598ca14c8669244ce604",
     "superstore_Responsive_Layout_shows_horizontal_columns_on_small_vertical_viewports_": "57ba3ad341cf8a0e4df6ab96715ff2a0",
@@ -65,5 +65,7 @@
     "superstore_restore_fires_the__perspective-config-update__event": "94207660854a9e203ad7f8051333611f",
     "superstore_save_returns_the_current_config": "94207660854a9e203ad7f8051333611f",
     "superstore_restore_restores_a_config_from_save": "94207660854a9e203ad7f8051333611f",
-    "Expressions_Click_on_add_column_button_opens_the_expression_UI_": "41eab73e5a1831116702e9a03f579eb9"
+    "Expressions_Click_on_add_column_button_opens_the_expression_UI_": "41eab73e5a1831116702e9a03f579eb9",
+    "Expressions_Resetting_the_viewer_partially_should_not_delete_all_expressions": "0c15f7064c3299a7dba47477c7028d1d",
+    "Expressions_Resetting_the_viewer_partially_when_expression_as_in_columns_field,_should_not_delete_all_expressions": "0c15f7064c3299a7dba47477c7028d1d"
 }
