@@ -9,8 +9,8 @@ const DEFAULT_BUILD = {
     sourcemap: true,
     metafile: true,
     entryNames: "[name]",
-    chunkNames: "[name]",
-    assetNames: "[name]",
+    chunkNames: "[name]-[hash]",
+    assetNames: "[name]-[hash]",
 };
 
 exports.build = async function build(config) {

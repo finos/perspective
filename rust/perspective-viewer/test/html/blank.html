@@ -10,15 +10,16 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <script src="perspective.js"></script>
-        <script src="perspective-viewer.js"></script>
+        <script type="module" src="perspective.js"></script>
+        <script type="module" src="perspective-viewer.js"></script>
 
         <link rel="stylesheet" href="demo.css" />
     </head>
     <body>
         <perspective-viewer> </perspective-viewer>
 
-        <script>
+        <script type="module">
+            import perspective from "./perspective.js";
             window.WORKER = perspective.worker();
         </script>
     </body>
