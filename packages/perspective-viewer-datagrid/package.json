@@ -9,6 +9,7 @@
             "require": "./dist/umd/perspective-viewer-datagrid.js",
             "import": "./dist/esm/perspective-viewer-datagrid.js"
         },
+        "./dist/*": "./dist/*",
         "./package.json": "./package.json"
     },
     "files": [

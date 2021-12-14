@@ -223,15 +223,19 @@ impl PerspectiveViewerElement {
     /// Does not delete the supplied `Table` (as this is constructed by the
     /// callee).  Allowing a `<perspective-viewer>` to be garbage-collected
     /// without calling `delete()` will leak WASM memory.
-    pub fn js_delete(&mut self) -> Result<bool, JsValue> {
-        self.renderer.delete()?;
-        let result = self.session.delete();
-        self.root
-            .borrow_mut()
-            .take()
-            .ok_or("Already deleted!")?
-            .destroy();
-        Ok(result)
+    pub fn js_delete(&mut self) -> js_sys::Promise {
+        let renderer = self.renderer.clone();
+        let session = self.session.clone();
+        let root = self.root.clone();
+        future_to_promise(self.renderer.clone().with_lock(async move {
+            renderer.delete()?;
+            let result = session.delete();
+            root.borrow_mut()
+                .take()
+                .ok_or("Already deleted!")?
+                .destroy();
+            Ok(JsValue::from(result))
+        }))
     }
 
     /// Get the underlying `View` for thie viewer.
