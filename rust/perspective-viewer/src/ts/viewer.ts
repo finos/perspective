@@ -320,15 +320,16 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
      * state.
      *
      * @category Persistence
+     * @param all Should `expressions` param be reset as well, defaults to
      * @example
      * ```javascript
      * const viewer = document.querySelector("perspective-viewer");
      * await viewer.reset();
      * ```
      */
-    async reset(): Promise<void> {
+    async reset(all = false): Promise<void> {
         await this.load_wasm();
-        await this.instance.js_reset();
+        await this.instance.js_reset(all);
     }
 
     /**

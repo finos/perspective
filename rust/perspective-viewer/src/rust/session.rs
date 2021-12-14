@@ -93,16 +93,19 @@ impl Session {
     }
 
     /// Reset this `Session`'s `View` state, but preserve the `Table`.
-    pub fn reset(&self) {
+    ///
+    /// # Arguments
+    /// - `keep_expressions` Whether to reset the `expressions` property.
+    pub fn reset(&self, reset_expressions: bool) {
         self.borrow_mut().view_sub = None;
-        self.borrow_mut().config.reset();
+        self.borrow_mut().config.reset(reset_expressions);
     }
 
     /// Reset this (presumably shared) `Session` to its initial state, returning a
     /// bool indicating whether this `Session` had a table which was deleted.
     /// TODO Table should be an immutable constructor parameter to `Session`.
     pub fn delete(&self) -> bool {
-        self.reset();
+        self.reset(false);
         self.borrow_mut().metadata = SessionMetadata::default();
         self.borrow_mut().table = None;
         false

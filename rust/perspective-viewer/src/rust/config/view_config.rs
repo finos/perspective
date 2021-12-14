@@ -74,8 +74,13 @@ impl ViewConfig {
         !self.row_pivots.is_empty() || !self.column_pivots.is_empty()
     }
 
-    pub fn reset(&mut self) {
-        std::mem::swap(self, &mut ViewConfig::default());
+    pub fn reset(&mut self, reset_expressions: bool) {
+        let mut config = ViewConfig::default();
+        if !reset_expressions {
+            config.expressions = self.expressions.clone();
+        }
+        std::mem::swap(self, &mut config);
+        web_sys::console::log_1(&format!("{:?}", &self).into());
     }
 
     /// Apply `ViewConfigUpdate` to a `ViewConfig`, ignoring any fields in `update`

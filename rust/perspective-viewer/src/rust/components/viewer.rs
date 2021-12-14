@@ -39,7 +39,7 @@ pub struct PerspectiveViewerProps {
 }
 
 pub enum Msg {
-    Reset(Option<Sender<()>>),
+    Reset(bool, Option<Sender<()>>),
     ApplySettings(Option<SettingsUpdate>),
     ToggleSettings(
         Option<SettingsUpdate>,
@@ -84,11 +84,11 @@ impl Component for PerspectiveViewer {
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
             Msg::PreloadFontsUpdate => true,
-            Msg::Reset(sender) => {
+            Msg::Reset(all, sender) => {
                 let renderer = self.props.renderer.clone();
                 let session = self.props.session.clone();
                 let _ = promisify_ignore_view_delete(async move {
-                    session.reset();
+                    session.reset(all);
                     renderer.reset();
                     let result =
                         renderer.draw(session.validate().await.create_view()).await;
@@ -212,7 +212,7 @@ impl Component for PerspectiveViewer {
                     <StatusBar
                         id="status_bar"
                         session={ self.props.session.clone() }
-                        on_reset={ self.link.callback(|_| Msg::Reset(None)) }>
+                        on_reset={ self.link.callback(|all| Msg::Reset(all, None)) }>
                     </StatusBar>
                     <div
                         id="settings_button"
