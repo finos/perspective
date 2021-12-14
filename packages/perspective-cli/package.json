@@ -29,6 +29,7 @@
         "@finos/perspective-viewer": "^1.0.6",
         "@finos/perspective-viewer-d3fc": "^1.0.6",
         "@finos/perspective-viewer-datagrid": "^1.0.6",
-        "commander": "^2.19.0"
+        "commander": "^2.19.0",
+        "puppeteer": "^10.2.0"
     }
 }

@@ -60,13 +60,15 @@ module.exports = SYNC_CLIENT;
 module.exports.sync_module = () => SYNC_SERVER.perspective;
 
 const DEFAULT_ASSETS = [
-    "@finos/perspective/dist/umd",
-    "@finos/perspective-bench/dist",
-    "@finos/perspective-viewer/dist/umd",
-    "@finos/perspective-viewer-datagrid/dist/umd",
-    "@finos/perspective-viewer-d3fc/dist/umd",
-    "@finos/perspective-workspace/dist/umd",
-    "@finos/perspective-jupyterlab/dist/umd",
+    "@finos/perspective/dist/cdn",
+    "@finos/perspective-bench/cdn",
+    "@finos/perspective-viewer/dist/cdn",
+    "@finos/perspective-viewer/dist/css",
+    "@finos/perspective-viewer-datagrid/dist/cdn",
+    "@finos/perspective-viewer-d3fc/dist/cdn",
+    "@finos/perspective-workspace/dist/cdn",
+    "@finos/perspective-workspace/dist/css",
+    "@finos/perspective-jupyterlab/dist/cdn",
 ];
 
 const CONTENT_TYPES = {
@@ -148,7 +150,9 @@ function perspective_assets(assets, host_psp) {
                             );
                             return;
                         }
-                    } catch (e) {}
+                    } catch (e) {
+                        // console.log(e);
+                    }
                 }
             }
             if (url.indexOf("favicon.ico") > -1) {
