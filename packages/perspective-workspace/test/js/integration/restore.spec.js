@@ -107,6 +107,10 @@ function tests(extract) {
                 await workspace.duplicate(widget);
             });
 
+            await page.evaluate(async () => {
+                await workspace.notifyResize(true);
+            });
+
             return extract(page);
         }
     );
