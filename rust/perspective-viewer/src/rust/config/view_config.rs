@@ -80,7 +80,6 @@ impl ViewConfig {
             config.expressions = self.expressions.clone();
         }
         std::mem::swap(self, &mut config);
-        web_sys::console::log_1(&format!("{:?}", &self).into());
     }
 
     /// Apply `ViewConfigUpdate` to a `ViewConfig`, ignoring any fields in `update`

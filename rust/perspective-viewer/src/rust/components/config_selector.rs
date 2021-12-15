@@ -275,7 +275,6 @@ impl Component for ConfigSelector {
             ""
         };
 
-        // web_sys::console::log_1(&"redraw".into());
         let dragend = Callback::from({
             let dragdrop = self.props.dragdrop.clone();
             move |_event| dragdrop.drag_end()
