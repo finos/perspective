@@ -86,7 +86,7 @@ export function treemapSeries() {
             .attr("y", (d) => d.y0 + calcHeight(d) / 2)
             .text((d) => d.label);
 
-        const rootNode = rects.filter((d) => d.crossValue === "").datum();
+        const rootNode = rects.filter((d) => d.crossValue.length === 0).datum();
         calculateRootLevelMap(nodesMerge, rootNode);
 
         toggleLabels(nodesMerge, 0, []);

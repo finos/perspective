@@ -13,7 +13,7 @@ import treemapLayout from "./treemapLayout";
 import {textOpacity} from "./treemapLabel";
 
 const includesAllCrossValues = (d, crossValues) =>
-    crossValues.every((val) => d.crossValue.split("|").includes(val));
+    crossValues.every((val) => d.crossValue.includes(val));
 
 export function calculateSubTreeMap(
     d,
@@ -103,7 +103,7 @@ function approximateAttributesForAllNodes(
         const height = calcHeight(d) * dimensionMultiplier.height;
         const visible =
             includesAllCrossValues(d, crossValues) &&
-            d.data.name != crossValues[treemapLevel - 1];
+            d.data.name !== crossValues[treemapLevel - 1];
 
         d.mapLevel[treemapLevel] = {
             x0,
