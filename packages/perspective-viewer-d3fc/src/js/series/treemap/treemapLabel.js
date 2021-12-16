@@ -147,7 +147,7 @@ const textLevelHelper = (d, treemapLevel, crossValues) => {
     if (
         !crossValues
             .filter((x) => x !== "")
-            .every((x) => d.crossValue.split("|").includes(x))
+            .every((x) => d.crossValue.includes(x))
     )
         return textVisability.zero;
     switch (d.depth) {

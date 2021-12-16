@@ -89,12 +89,13 @@ export function treeData(settings) {
                     : [d.value, d.data.color]
                           .concat(d.data.tooltip || [])
                           .filter((x) => x !== undefined);
+
             d.crossValue = d
                 .ancestors()
                 .slice(0, -1)
                 .reverse()
-                .map((cross) => cross.data.name)
-                .join("|");
+                .map((cross) => cross.data.name);
+
             d.key = set[0];
             d.label = toValue(
                 settings.crossValues[d.depth - 1 < 0 ? 0 : d.depth - 1].type,

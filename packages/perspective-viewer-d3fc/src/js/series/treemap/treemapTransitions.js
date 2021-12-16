@@ -35,7 +35,7 @@ export function returnToLevel(
     root_settings
 ) {
     if (settings.treemapLevel > 0) {
-        const crossValues = rootNode.crossValue.split("|");
+        const crossValues = rootNode.crossValue;
         executeTransition(
             rootNode,
             rects,
@@ -57,7 +57,7 @@ export function returnToLevel(
             .slice(1, settings.treemapRoute.length)
             .forEach((cv) => {
                 const d = nodesMerge.filter((d) => d.crossValue === cv).datum();
-                const crossValues = d.crossValue.split("|");
+                const crossValues = d.crossValue;
                 calculateSubTreeMap(
                     d,
                     crossValues,
@@ -108,7 +108,8 @@ export function changeLevel(
 
     settings.treemapLevel = d.depth;
 
-    const crossValues = d.crossValue.split("|");
+    const crossValues = d.crossValue;
+
     if (
         !d.mapLevel[settings.treemapLevel] ||
         !d.mapLevel[settings.treemapLevel].levelRoot
