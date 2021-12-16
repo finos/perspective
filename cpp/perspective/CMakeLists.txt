@@ -7,8 +7,6 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # CMAKE POLICIES
-# option() should use new cmake behavior wrt variable clobbering
-cmake_policy(SET CMP0077 NEW)
 
 # BOOST_ROOT has been removed on Windows VMs in Azure:
 #
@@ -121,7 +119,6 @@ endfunction()
 find_package(Color)
 
 # OPTIONS
-option(CMAKE_BUILD_TYPE "Release/Debug build" RELEASE)
 option(PSP_WASM_BUILD "Build the WebAssembly Project" ON)
 option(PSP_CPP_BUILD "Build the C++ Project" OFF)
 option(PSP_PYTHON_BUILD "Build the Python Bindings" OFF)
@@ -241,11 +238,6 @@ endif()
 #######################
 include_directories("${CMAKE_SOURCE_DIR}/src/include")
 
-if(NOT WIN32)
-    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
-    set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG")
-endif()
-
 if (PSP_WASM_BUILD)
     ####################
     # EMSCRIPTEN BUILD #
@@ -293,7 +285,12 @@ if (PSP_WASM_BUILD)
 
     set(ASYNC_MODE_FLAGS "")
 elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
+
     if(WIN32)
+        foreach(warning 4244 4251 4267 4275 4290 4786 4305 4996)
+            SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd${warning}")
+        endforeach(warning)
+
         if(CMAKE_BUILD_TYPE_LOWER STREQUAL debug)
             set(OPT_FLAGS " \
                 /DEBUG \
@@ -306,7 +303,12 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
                 /O2 \
                 ")
         endif()
-    else()
+
+        set(CMAKE_CXX_FLAGS " /EHsc /MP /bigobj")
+        set(CMAKE_SHARED_LIBRARY_PREFIX lib)
+        else()
+        include_directories("/usr/local/include")
+
         if(CMAKE_BUILD_TYPE_LOWER STREQUAL debug)
             set(OPT_FLAGS " \
                 -O0 \
@@ -318,7 +320,23 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
                 -g0 \
                 ")
         endif()
+
+        set(CMAKE_SHARED_LIBRARY_SUFFIX .so)
+        # Look for the binary using @loader_path (relative to binary location)
+        set(CMAKE_MACOSX_RPATH TRUE)
+        set(CMAKE_SKIP_BUILD_RPATH FALSE)
+        set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+        set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+        set(CMAKE_INSTALL_NAME_DIR "@rpath/")
+
+        # module_origin_path is the location of the binary
+        if(MACOS)
+            set(module_origin_path "@loader_path/")
+        else()
+            set(module_origin_path "\$ORIGIN")
+        endif()
     endif()
+
     set(ASYNC_MODE_FLAGS "")
 
     # Boost is a system dependency and must be present and built on the system.
@@ -330,21 +348,12 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
         psp_build_message("${Cyan}Found Boost: `Boost_INCLUDE_DIRS`: ${Boost_INCLUDE_DIRS}, `Boost_LIBRARY_DIRS` - ${Boost_LIBRARY_DIRS} ${ColorReset}")
         include_directories( ${Boost_INCLUDE_DIRS} )
 
-        if (WIN32) 
+        if (WIN32)
+            # When linking against Boost on Azure, bcrypt fails to link:
+            # - https://github.com/microsoft/vcpkg/issues/4481
+            # - https://github.com/boostorg/uuid/issues/68
             add_definitions(-DBOOST_UUID_FORCE_AUTO_LINK)
         endif()
-    endif()
-
-    if(WIN32)
-        foreach(warning 4244 4251 4267 4275 4290 4786 4305 4996)
-            SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd${warning}")
-        endforeach(warning)
-        # When linking against Boost on Azure, bcrypt fails to link:
-        # - https://github.com/microsoft/vcpkg/issues/4481
-        # - https://github.com/boostorg/uuid/issues/68
-        #add_definitions("-DBOOST_UUID_FORCE_AUTO_LINK")
-    else()
-        include_directories("/usr/local/include")
     endif()
 
     if(PSP_PYTHON_BUILD)
@@ -584,12 +593,6 @@ set (PYTHON_BINDING_SOURCE_FILES
     ${PSP_PYTHON_SRC}/src/view.cpp
 )
 
-if (WIN32)
-    set(CMAKE_CXX_FLAGS " /EHsc /MP /bigobj")
-else()
-    set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS}")
-endif()
-
 message("${BUILD_MESSAGE}\n")
 
 if (PSP_WASM_BUILD)
@@ -629,25 +632,6 @@ if (PSP_WASM_BUILD)
     set_target_properties(perspective_cjs PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./cjs/")
     set_target_properties(perspective_cjs PROPERTIES OUTPUT_NAME "perspective.cpp")
 elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
-    if(NOT WIN32)
-        set(CMAKE_SHARED_LIBRARY_SUFFIX .so)
-        # Look for the binary using @loader_path (relative to binary location)
-        set(CMAKE_MACOSX_RPATH TRUE)
-        set(CMAKE_SKIP_BUILD_RPATH FALSE)
-        set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-        set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-        set(CMAKE_INSTALL_NAME_DIR "@rpath/")
-
-        # module_origin_path is the location of the binary
-        if(MACOS)
-            set(module_origin_path "@loader_path/")
-        else()
-            set(module_origin_path "\$ORIGIN")
-        endif()
-    else()
-        set(CMAKE_SHARED_LIBRARY_PREFIX lib)
-    endif()
-
     if(PSP_PYTHON_BUILD)
         ########################
         # Python extra targets #
@@ -661,8 +645,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
         target_compile_definitions(binding PRIVATE PSP_ENABLE_PYTHON=1)
 
         if (WIN32)
-            target_compile_definitions(binding PRIVATE WIN32=1)
-            target_compile_definitions(binding PRIVATE _WIN32=1)
+            target_compile_definitions(binding PRIVATE WIN32=1 _WIN32=1)
 
             # .dll not importable
             set_property(TARGET binding PROPERTY SUFFIX .pyd)
@@ -700,14 +683,11 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     endif()
 
     if(PSP_CPP_BUILD_STRICT AND NOT WIN32)
-        target_compile_options(psp PRIVATE -Wall -Werror)
-        target_compile_options(psp PRIVATE $<$<CONFIG:DEBUG>:-fPIC -O0>)
+        target_compile_options(psp PRIVATE -Wall -Werror $<$<CONFIG:DEBUG>:-fPIC -O0>)
         if(PSP_PYTHON_BUILD)
             target_compile_options(binding PRIVATE $<$<CONFIG:DEBUG>:-fPIC -O0>)
         endif()
     elseif(WIN32)
-        target_compile_definitions(psp PRIVATE PERSPECTIVE_EXPORTS=1)
-        target_compile_definitions(psp PRIVATE WIN32=1)
-        target_compile_definitions(psp PRIVATE _WIN32=1)
+        target_compile_definitions(psp PRIVATE PERSPECTIVE_EXPORTS=1 WIN32=1 _WIN32=1)
     endif()
 endif()
