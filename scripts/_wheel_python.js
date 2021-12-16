@@ -78,7 +78,7 @@ try {
         cmd += `rm -rf build/ &&`;
 
         // now build the wheel in place
-        cmd += `${PYTHON} setup.py bdist_wheel`;
+        cmd += `${PYTHON} setup.py build_ext bdist_wheel`;
 
         // Use auditwheel on Linux - repaired wheels are in
         // `python/perspective/wheelhouse`.
@@ -87,11 +87,11 @@ try {
     } else if (IS_MACOS) {
         // Don't need to do any cleaning here since we will reuse the cmake
         // cache and numpy paths from the pep-517/518 build in build_python.js
-        cmd += `${PYTHON} setup.py bdist_wheel`;
+        cmd += `${PYTHON} setup.py build_ext bdist_wheel`;
         cmd += " && mkdir -p ./wheelhouse && cp -v ./dist/*.whl ./wheelhouse";
     } else {
         // Windows
-        cmd += `${PYTHON} setup.py bdist_wheel`;
+        cmd += `${PYTHON} setup.py build_ext bdist_wheel`;
     }
 
     // TODO: MacOS wheel processed with delocate segfaults on

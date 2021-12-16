@@ -8,10 +8,7 @@ include Makefile
 
 # Source files for perspective-python
 graft perspective
-include perspective/table/*.so
-include perspective/table/*.dll
-include perspective/table/*.dylib
-include perspective/table/*.pyd
+recursive-include perspective/table/
 
 graft perspective/tests
 
