@@ -56,9 +56,6 @@ parameters:
         displayName: "Install Python base dependencies"
         condition: succeeded()
 
-      - bash: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-        displayName: "Install wasm-pack"
-
   - name: linuxInitSteps
     type: stepList
     default:
@@ -97,6 +94,9 @@ parameters:
   - name: webassemblySteps
     type: stepList
     default:
+      - bash: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+        displayName: "Install wasm-pack"
+
       - bash: yarn lint_js
         displayName: "Lint Javascript"
 
@@ -519,9 +519,6 @@ jobs:
       - bash: python -m pip install --upgrade pip wheel setuptools jupyterlab numpy "pyarrow>=5" "black==20.8b1" flake8-black
         displayName: "Install Python base dependencies"
         condition: succeeded()
-
-      - bash: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-        displayName: "Install wasm-pack"
 
       - task: DownloadPipelineArtifact@2
         displayName: "Download Python 3.7 Perspective Wheel"
