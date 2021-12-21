@@ -1,179 +1,192 @@
-/******************************************************************************
- *
- * Copyright (c) 2017, the Perspective Authors.
- *
- * This file is part of the Perspective library, distributed under the terms of
- * the Apache License 2.0.  The full license can be found in the LICENSE file.
- *
- */
-
 const fs = require("fs");
+const microtime = require("microtime");
+const psp = require("@finos/perspective");
 const path = require("path");
-const perspective = require("@finos/perspective");
-const chalk = require("chalk");
-const program = require("commander");
 
-const execSync = require("child_process").execSync;
+const VERSIONS = [
+    "@finos/perspective",
+    ...Object.keys(
+        JSON.parse(fs.readFileSync(path.join(__dirname, "../../package.json")))
+            .dependencies
+    ),
+];
 
-chalk.enabled = true;
-chalk.level = 1;
+function load_version(path) {
+    const module = require(path);
+    const {version} = JSON.parse(
+        fs.readFileSync(require.resolve(`${path}/package.json`))
+    );
 
-const BROWSER_RUNTIME = (arg1) =>
-    fs
-        .readFileSync(path.join(__dirname, "browser_runtime.js"))
-        .toString()
-        .replace("__PLACEHOLDER__", arg1);
-
-const to_url = (arg1, arg2) =>
-    `<html><head><script>${BROWSER_RUNTIME(
-        arg1
-    )};${arg2}</script></head><body></body></html>`;
-
-function color(string) {
-    string = [string];
-    string.raw = string;
-    return chalk(string);
+    return {version, perspective: module.default || module};
 }
 
-async function run_version(browser, args, run_test) {
-    let page = await browser.newPage();
-    // TODO silence these
-    page.on("console", (msg) => {
-        if (msg.type() !== "warning") {
-            console.log(color(msg.text()));
+const MODULES = VERSIONS.map(load_version);
+
+const SUPERSTORE_ARROW = fs.readFileSync(
+    require.resolve("superstore-arrow/superstore.arrow")
+).buffer;
+
+const ITERATIONS = 10;
+const WARM_UP_ITERATIONS = 1;
+
+Object.defineProperty(Array.prototype, "push_if", {
+    value: function (x) {
+        if (x !== undefined) {
+            this.push(x);
         }
-    });
-    page.on("pageerror", (msg) => console.log(` -> ${msg.message}`));
-    await page.setContent(to_url(JSON.stringify(args), run_test));
+    },
+});
 
-    let results = await page.evaluate(
-        async () => await window.PerspectiveBench.run()
-    );
-    await page.close();
+Object.defineProperty(Array.prototype, "sum", {
+    value: function () {
+        return this.reduce((x, y) => x + y, 0);
+    },
+});
 
-    return results;
-}
+async function benchmark({name, before, before_all, test, after, after_all}) {
+    let obs_records = [];
+    for (const {version, perspective} of MODULES) {
+        const args = [];
+        args.push_if(await before_all?.(perspective));
+        const observations = [];
+        for (let i = 0; i < ITERATIONS + WARM_UP_ITERATIONS; i++) {
+            const args2 = args.slice();
+            args2.push_if(await before?.(perspective, ...args2));
+            const start = microtime.now();
+            args2.push_if(await test(perspective, ...args2));
+            if (i >= WARM_UP_ITERATIONS) {
+                observations.push(microtime.now() - start);
+            }
 
-async function run_node_version(args, run_test) {
-    const script = BROWSER_RUNTIME(JSON.stringify(args));
-    console.warn = function () {};
-    const old_log = console.log;
-    console.log = (...args) => old_log(...args.map(color));
-    const js = eval(`"use strict";${script};${run_test};PerspectiveBench`);
-    console.log = old_log;
-    return await js.run();
-}
+            await after?.(perspective, ...args2);
+        }
 
-exports.run = async function run(version, benchmark, ...cmdArgs) {
-    const options = cmdArgs.splice(cmdArgs.length - 1, 1)[0];
+        const avg = observations.sum() / observations.length / 1000;
+        console.log(`${version} ${avg.toFixed(3)}ms`);
+        await after_all?.(perspective, ...args);
 
-    let benchmark_name = options.output || "benchmark";
-
-    console.log(
-        chalk`\n{whiteBright Running v.${version} (${cmdArgs.join(",")})}`
-    );
-
-    let version_index = 1;
-    let table = undefined;
-    if (options.read && fs.existsSync(`${benchmark_name}.arrow`)) {
-        const buffer = fs.readFileSync(`${benchmark_name}.arrow`, null).buffer;
-        table = await perspective.table(buffer);
-        const view = await table.view({row_pivots: ["version"], columns: []});
-        const json = await view.to_json();
-        version_index = json.length;
-    }
-
-    const RUN_TEST = fs.readFileSync(path.resolve(benchmark)).toString();
-    let bins;
-
-    if (options.puppeteer) {
-        const puppeteer = require("puppeteer");
-        let browser = await puppeteer.launch({
-            headless: true,
-            args: [
-                "--no-sandbox",
-                "--allow-file-access-from-files",
-                `--window-size=1280,1024`,
-                "--disable-accelerated-2d-canvas",
-                "--disable-gpu",
-                "--no-sandbox",
-                "--disable-setuid-sandbox",
-                "--disable-dev-shm-usage",
-                '--proxy-server="direct://"',
-                "--proxy-bypass-list=*",
-                "--disable-web-security",
-                "--allow-file-access",
-            ],
-        });
-
-        execSync(`renice -n -20 ${browser.process().pid}`, {stdio: "inherit"});
-
-        bins = await run_version(browser, cmdArgs, RUN_TEST);
-
-        await browser.close();
-
-        console.log(
-            `Benchmark suite has finished running - results are in ${benchmark_name}.html.`
+        obs_records = obs_records.concat(
+            observations.map((obs) => ({
+                version: version,
+                time: obs,
+                benchmark: name,
+            }))
         );
-    } else {
-        bins = await run_node_version(cmdArgs, RUN_TEST);
     }
-    bins = bins.map((result) => ({...result, version, version_index}));
-    version_index++;
-    if (table === undefined) {
-        table = await perspective.table(bins);
-    } else {
-        table.update(bins);
-    }
-    const view = await table.view();
+
+    const table = await OBS_TABLE;
+    const view = await OBS_VIEW;
+    await table.update(obs_records);
     const arrow = await view.to_arrow();
-    view.delete();
     fs.writeFileSync(
-        path.join(process.cwd(), `${benchmark_name}.arrow`),
-        new Buffer(arrow),
+        path.join(__dirname, "../../dist/benchmark.arrow"),
+        Buffer.from(arrow),
         "binary"
     );
-    fs.writeFileSync(
-        path.join(process.cwd(), `${benchmark_name}.html`),
-        fs
-            .readFileSync(path.join(__dirname, "..", "html", `benchmark.html`))
-            .toString()
-    );
-};
+}
 
-exports.registerCmd = function registerCmd() {
-    program
-        .version(
-            JSON.parse(
-                fs
-                    .readFileSync(
-                        path.join(__dirname, "..", "..", "package.json")
-                    )
-                    .toString()
-            ).version
-        )
-        .arguments("[suite] [...cmdArgs]")
-        .description("Run the benchmark suite")
-        .option(
-            "-o, --output <filename>",
-            "Filename to write to, defaults to `benchmark`"
-        )
-        .option("-r, --read", "Read from disk or overwrite")
-        .option(
-            "-p, --puppeteer",
-            "Should run the suite in Puppeteer (Headless)"
-        )
-        .action((...args) => {
-            const options = args.splice(args.length - 1, 1)[0];
+const OBS_TABLE = psp.table({
+    version: "string",
+    time: "float",
+    benchmark: "string",
+});
 
-            exports.run(...args, options);
-        });
+const OBS_VIEW = OBS_TABLE.then((table) => table.view());
 
-    program.parse(process.argv);
-
-    if (!process.argv.slice(2).length) {
-        program.help();
+async function to_data_suite() {
+    async function before_all(perspective) {
+        const table = await perspective.table(SUPERSTORE_ARROW.slice());
+        const view = await table.view();
+        return {table, view};
     }
-};
 
-exports.default = exports;
+    async function after_all(perspective, {table, view}) {
+        await view.delete();
+        await table.delete();
+    }
+
+    await benchmark({
+        name: `.to_arrow()`,
+        before_all,
+        after_all,
+        async test(_perspective, {view}) {
+            const _arrow = await view.to_arrow();
+        },
+    });
+
+    await benchmark({
+        name: `.to_csv()`,
+        before_all,
+        after_all,
+        async test(_perspective, {view}) {
+            const _csv = await view.to_csv();
+        },
+    });
+
+    await benchmark({
+        name: `.to_columns()`,
+        before_all,
+        after_all,
+        async test(_perspective, {view}) {
+            const _columns = await view.to_columns();
+        },
+    });
+
+    await benchmark({
+        name: `.to_json()`,
+        before_all,
+        after_all,
+        async test(_perspective, {view}) {
+            const _json = await view.to_json();
+        },
+    });
+}
+
+async function view_suite() {
+    async function before_all(perspective) {
+        const table = await perspective.table(SUPERSTORE_ARROW.slice());
+        for (let i = 0; i < 4; i++) {
+            await table.update(SUPERSTORE_ARROW.slice());
+        }
+
+        return table;
+    }
+
+    async function after_all(perspective, table) {
+        await table.delete();
+    }
+
+    async function after(perspective, table, view) {
+        await view.delete();
+    }
+
+    await benchmark({
+        name: `.view()`,
+        before_all,
+        after_all,
+        after,
+        async test(_perspective, table) {
+            return await table.view();
+        },
+    });
+}
+
+async function table_suite() {
+    await benchmark({
+        name: `.table(arrow)`,
+        async after(_perspective, table) {
+            await table.delete();
+        },
+        async test(perspective) {
+            return await perspective.table(SUPERSTORE_ARROW.slice());
+        },
+    });
+}
+
+async function bench_all() {
+    await to_data_suite();
+    await view_suite();
+    await table_suite();
+}
+
+bench_all();

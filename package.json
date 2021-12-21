@@ -19,7 +19,8 @@
         "rust/*",
         "packages/*",
         "examples/*",
-        "tools/*",
+        "tools/perspective-build",
+        "tools/perspective-test",
         "docs",
         "cpp/perspective",
         "python/perspective"

@@ -4,10 +4,6 @@
     "description": "Benchmark utility based on perspective",
     "private": true,
     "main": "src/js/bench.js",
-    "unpkg": "src/js/browser_runtime.js",
-    "jsdelivr": "src/js/browser_runtime.js",
-    "browser": "src/js/browser_runtime.js",
-    "module": "src/js/bench.js",
     "files": [
         "src/**/*",
         "perspective-bench"
@@ -20,15 +16,21 @@
     "scripts": {
         "build": ":",
         "clean": ":",
-        "prebench": "mkdirp build",
-        "bench": "node bench/versions.js"
+        "bench": "node src/js/bench.js"
     },
     "author": "",
     "license": "Apache-2.0",
+    "devDependencies": {
+        "microtime": "^3.0.0"
+    },
     "dependencies": {
-        "@finos/perspective": "^1.0.7",
-        "@finos/perspective-viewer": "^1.0.7",
-        "@finos/perspective-viewer-d3fc": "^1.0.7",
-        "@finos/perspective-viewer-datagrid": "^1.0.7"
+        "perspective-1-0-0": "npm:@finos/perspective@1.0.0",
+        "perspective-0-10-0": "npm:@finos/perspective@0.10.0",
+        "perspective-0-9-0": "npm:@finos/perspective@0.9.0",
+        "perspective-0-8-0": "npm:@finos/perspective@0.8.0",
+        "perspective-0-7-0": "npm:@finos/perspective@0.7.0",
+        "perspective-0-6-0": "npm:@finos/perspective@0.6.0",
+        "perspective-0-5-0": "npm:@finos/perspective@0.5.0",
+        "perspective-0-4-0": "npm:@finos/perspective@0.4.0"
     }
 }
