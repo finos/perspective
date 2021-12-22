@@ -360,6 +360,16 @@ jobs:
             python_flag: "--python39"
             manylinux_flag: "--manylinux2014"
             artifact_name: "cp39-cp39-manylinux2014_x86_64"
+          Python310ManyLinux2010:
+            python.version: "3.10"
+            python_flag: "--python310"
+            manylinux_flag: "--manylinux2010"
+            artifact_name: "cp310-cp310-manylinux2010_x86_64"
+          Python310ManyLinux2014:
+            python.version: "3.10"
+            python_flag: "--python310"
+            manylinux_flag: "--manylinux2014"
+            artifact_name: "cp310-cp310-manylinux2014_x86_64"
 
     steps:
       - ${{ parameters.initSteps }}
@@ -402,6 +412,10 @@ jobs:
             python.version: "3.9"
             python_flag: "--python39"
             artifact_name: "cp39-cp39m-win64_amd"
+          Python310:
+            python.version: "3.10"
+            python_flag: "--python310"
+            artifact_name: "cp310-cp310m-win64_amd"
 
     steps:
       - ${{ parameters.initSteps }}
@@ -429,6 +443,10 @@ jobs:
           python.version: "3.9"
           python_flag: "--python39"
           artifact_name: "cp39-cp39m-win64_amd"
+        Python310:
+          python.version: "3.10"
+          python_flag: "--python310"
+          artifact_name: "cp310-cp310m-win64_amd"          
 
     steps:
       - ${{ parameters.initSteps }}
@@ -461,7 +479,6 @@ jobs:
             python.version: "3.9"
             python_flag: "--python39"
             artifact_name: "cp39-cp39-macosx_10_15_x86_64"
-          
 
     steps:
       - ${{ parameters.initSteps }}
@@ -480,7 +497,11 @@ jobs:
           python.version: "3.9"
           python_flag: "--python39"
           artifact_name: "cp39-cp39-macosx_11_0_x86_64"
-
+        Python310:
+          python.version: "3.10"
+          python_flag: "--python310"
+          artifact_name: "cp310-cp310-macosx_11_0_x86_64"
+  
     steps:
       - ${{ parameters.initSteps }}
       - ${{ parameters.macInitSteps }}
