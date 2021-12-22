@@ -33,9 +33,7 @@ exports.WasmPlugin = function WasmPlugin(inline) {
             contents: `
                 import wasm from ${JSON.stringify(args.path)};
                 async function get_wasm() {
-                    const req = await fetch(new URL(wasm, import.meta.url));
-                    const buffer = await req.arrayBuffer();
-                    return buffer;
+                    return new URL(wasm, import.meta.url);
                 }
 
                 export default get_wasm();

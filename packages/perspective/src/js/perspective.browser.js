@@ -13,15 +13,16 @@ import {Client} from "./api/client.js";
 import {WebSocketClient} from "./websocket/client";
 
 import {override_config} from "./config/index.js";
+import {decompressSync} from "fflate";
 
 import wasm_worker from "@finos/perspective/src/js/perspective.worker.js";
 import wasm from "@finos/perspective/dist/pkg/esm/perspective.cpp.wasm";
 
 // eslint-disable-next-line max-len
-const INLINE_WARNING = `Perspective has been compiled in INLINE mode.  While \
+const INLINE_WARNING = `Perspective has been compiled in "inline" mode.  While \
 Perspective's runtime performance is not affected, you may see smaller assets \
-size and faster engine initial load time using "file-loader" to build your
-application.
+size and faster engine initial load time using \
+"@finos/perspective-webpack-plugin" to build your application.
 https://perspective.finos.org/docs/md/js.html`;
 
 /**
@@ -47,6 +48,18 @@ const _override = /* @__PURE__ */ (function () {
                         const req = await fetch(_wasm);
                         this._wasm = await req.arrayBuffer();
                     }
+
+                    // Unzip if needed
+                    if (
+                        new Uint32Array(
+                            (this._wasm.buffer || this._wasm).slice(0, 4)
+                        )[0] == 559903
+                    ) {
+                        this._wasm = decompressSync(
+                            new Uint8Array(this._wasm)
+                        ).buffer;
+                    }
+
                     return this._wasm;
                 }
             })();

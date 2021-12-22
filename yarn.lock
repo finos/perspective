@@ -7613,6 +7613,11 @@ feed@^4.0.0:
   dependencies:
     xml-js "^1.6.11"
 
+fflate@^0.7.2:
+  version "0.7.2"
+  resolved "https://registry.yarnpkg.com/fflate/-/fflate-0.7.2.tgz#1db42c416d7b2845d2883050aa4eef516c63f246"
+  integrity sha512-h/YiXnc37yYaGe61h3A4ZdsBzBqKG5hhrmopFizTru8xrfOiJuYX5oLnatBwNEpf9biOJrZVscuEQsUzIUAhpQ==
+
 figgy-pudding@^3.4.1, figgy-pudding@^3.5.1:
   version "3.5.2"
   resolved "https://registry.yarnpkg.com/figgy-pudding/-/figgy-pudding-3.5.2.tgz#b4eee8148abb01dcf1d1ac34367d59e12fa61d6e"
