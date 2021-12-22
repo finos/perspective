@@ -59,8 +59,8 @@
         "automock": false
     },
     "dependencies": {
-        "tslib": "^1.9.3",
-        "ws": "^6.1.2"
+        "ws": "^6.1.2",
+        "fflate": "^0.7.2"
     },
     "devDependencies": {
         "@finos/perspective-build": "^1.0.7",

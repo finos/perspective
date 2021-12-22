@@ -1,6 +1,8 @@
 const {execSync} = require("child_process");
 const os = require("os");
 const path = require("path");
+const fflate = require("fflate");
+const fs = require("fs");
 
 const stdio = "inherit";
 const env = process.PSP_DEBUG ? "debug" : "release";
@@ -21,6 +23,10 @@ try {
     });
     execSync(`cpy esm/**/* ../esm`, {cwd, stdio});
     execSync(`cpy cjs/**/* ../cjs`, {cwd, stdio});
+
+    const wasm = fs.readFileSync("dist/esm/perspective.cpp.wasm");
+    const compressed = fflate.compressSync(wasm);
+    fs.writeFileSync("dist/esm/perspective.cpp.wasm", compressed);
 } catch (e) {
     console.error(e);
     process.exit(1);

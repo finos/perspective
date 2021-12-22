@@ -13,16 +13,21 @@ import {Client} from "./api/client.js";
 import {WebSocketClient} from "./websocket/client";
 
 import {override_config} from "./config/index.js";
+import {Decompress} from "fflate";
 
 import wasm_worker from "@finos/perspective/src/js/perspective.worker.js";
 import wasm from "@finos/perspective/dist/pkg/esm/perspective.cpp.wasm";
 
 // eslint-disable-next-line max-len
-const INLINE_WARNING = `Perspective has been compiled in INLINE mode.  While \
+const INLINE_WARNING = `Perspective has been compiled in "inline" mode.  While \
 Perspective's runtime performance is not affected, you may see smaller assets \
-size and faster engine initial load time using "file-loader" to build your
-application.
+size and faster engine initial load time using \
+"@finos/perspective-webpack-plugin" to build your application.
 https://perspective.finos.org/docs/md/js.html`;
+
+function is_gzip(buffer) {
+    return new Uint32Array(buffer.slice(0, 4))[0] == 559903;
+}
 
 /**
  * Singleton WASM file download cache.
@@ -38,15 +43,56 @@ const _override = /* @__PURE__ */ (function () {
 
                 async wasm() {
                     const _wasm = await wasm;
+
+                    let parts = [];
+                    let length = 0;
+                    const decompressor = new Decompress((chunk) => {
+                        if (chunk) {
+                            length += chunk.byteLength;
+                            parts.push(chunk);
+                        }
+                    });
+
                     if (_wasm.buffer && _wasm.buffer instanceof ArrayBuffer) {
                         console.warn(INLINE_WARNING);
-                        this._wasm = _wasm;
+                        if (is_gzip(_wasm.buffer)) {
+                            decompressor.push(_wasm, true);
+                        } else {
+                            length = _wasm.byteLength;
+                            parts = [_wasm];
+                        }
                     } else if (_wasm instanceof ArrayBuffer) {
-                        this._wasm = _wasm;
+                        length = _wasm.byteLength;
+                        parts = [new Uint8Array(_wasm)];
                     } else {
-                        const req = await fetch(_wasm);
-                        this._wasm = await req.arrayBuffer();
+                        const resp = await fetch(_wasm);
+                        const reader = resp.body.getReader();
+                        let state = 0;
+                        while (true) {
+                            const {value, done} = await reader.read();
+                            if (done) break;
+                            if (
+                                (state === 0 && is_gzip(value.buffer)) ||
+                                state === 1
+                            ) {
+                                state = 1;
+                                decompressor.push(value, done);
+                            } else {
+                                state = 2;
+                                length += value.byteLength;
+                                parts.push(value);
+                            }
+                        }
                     }
+
+                    let offset = 0;
+                    const buffer = new Uint8Array(length);
+                    for (const part of parts) {
+                        buffer.set(part, offset);
+                        offset += part.byteLength;
+                    }
+
+                    this._wasm = buffer.buffer;
                     return this._wasm;
                 }
             })();

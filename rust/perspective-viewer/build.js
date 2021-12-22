@@ -1,8 +1,8 @@
 const {lessLoader} = require("esbuild-plugin-less");
 const {execSync} = require("child_process");
 const util = require("util");
-const exec = util.promisify(require("child_process").exec);
 const fs = require("fs");
+const fflate = require("fflate");
 
 const {IgnoreCSSPlugin} = require("@finos/perspective-build/ignore_css");
 const {IgnoreFontsPlugin} = require("@finos/perspective-build/ignore_fonts");
@@ -119,6 +119,10 @@ async function build_all() {
         `CARGO_TARGET_DIR=./build wasm-pack build ${debug} --out-dir dist/pkg --target web`,
         INHERIT
     );
+
+    const wasm = fs.readFileSync("dist/pkg/perspective_viewer_bg.wasm");
+    const compressed = fflate.compressSync(wasm);
+    fs.writeFileSync("dist/pkg/perspective_viewer_bg.wasm", compressed);
 
     // Remove wasm-pack artifacts
     fs.rmSync("dist/pkg/package.json");
