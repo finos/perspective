@@ -46,6 +46,9 @@ parameters:
       - bash: yarn --frozen-lockfile
         displayName: "Install Javascript Dependencies"
 
+  - name: pythonInitSteps
+    type: stepList
+    default:
       - task: UsePythonVersion@0
         inputs:
           versionSpec: "$(python.version)"
@@ -55,6 +58,12 @@ parameters:
       - bash: python -m pip install --upgrade pip wheel setuptools "jupyterlab>=3.0.14" numpy "pyarrow>=5" "black==20.8b1" flake8-black
         displayName: "Install Python base dependencies"
         condition: succeeded()
+
+  - name: wasmInitSteps
+    type: stepList
+    default:
+      - bash: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+        displayName: "Install wasm-pack"
 
   - name: linuxInitSteps
     type: stepList
@@ -233,6 +242,7 @@ jobs:
 
     steps:
       - ${{ parameters.initSteps }}
+      - ${{ parameters.wasmInitSteps }}
       - ${{ parameters.linuxInitSteps }}
       - ${{ parameters.webassemblySteps }}
 
@@ -363,6 +373,7 @@ jobs:
 
     steps:
       - ${{ parameters.initSteps }}
+      - ${{ parameters.pythonInitSteps }}
       - ${{ parameters.pythonBuildDockerSteps }}
       - ${{ parameters.pythonCoverageSteps }}
       - ${{ parameters.pythonLinuxWheelSteps }}
@@ -405,6 +416,7 @@ jobs:
 
     steps:
       - ${{ parameters.initSteps }}
+      - ${{ parameters.pythonInitSteps }}
       - ${{ parameters.windowsInitSteps }}
       - ${{ parameters.pythonBuildVS2019Steps }}
 
@@ -432,6 +444,7 @@ jobs:
 
     steps:
       - ${{ parameters.initSteps }}
+      - ${{ parameters.pythonInitSteps }}
       - ${{ parameters.windowsInitSteps }}
       - ${{ parameters.pythonWindowsWheelVS2019Steps }}
 
@@ -465,6 +478,7 @@ jobs:
 
     steps:
       - ${{ parameters.initSteps }}
+      - ${{ parameters.pythonInitSteps }}
       - ${{ parameters.macInitSteps }}
       - ${{ parameters.pythonBuildSteps }}
       - ${{ parameters.pythonCoverageSteps }}
@@ -483,6 +497,7 @@ jobs:
 
     steps:
       - ${{ parameters.initSteps }}
+      - ${{ parameters.pythonInitSteps }}
       - ${{ parameters.macInitSteps }}
       - ${{ parameters.pythonBuildSteps }}
       - ${{ parameters.pythonCoverageSteps }}
@@ -510,15 +525,8 @@ jobs:
       - bash: yarn --frozen-lockfile
         displayName: "Install Javascript Dependencies"
 
-      - task: UsePythonVersion@0
-        inputs:
-          versionSpec: "$(python.version)"
-          architecture: "x64"
-        displayName: "Use Python $(python.version)"
-
-      - bash: python -m pip install --upgrade pip wheel setuptools jupyterlab numpy "pyarrow>=5" "black==20.8b1" flake8-black
-        displayName: "Install Python base dependencies"
-        condition: succeeded()
+      - ${{ parameters.pythonInitSteps }}
+      - ${{ parameters.wasmInitSteps }}
 
       - task: DownloadPipelineArtifact@2
         displayName: "Download Python 3.7 Perspective Wheel"
