@@ -159,67 +159,63 @@ impl FilterItemProperties {
     fn update_filter_input(&self, val: String) {
         let ViewConfig { mut filter, .. } = self.session.get_view_config();
         let filter_item = &mut filter.get_mut(self.idx).expect("Filter on no column");
-        match filter_item.1 {
-            FilterOp::In => {
-                filter_item.2 = FilterTerm::Array(
-                    val.split(',')
-                        .map(|x| Scalar::String(x.trim().to_owned()))
-                        .collect(),
-                );
-            }
+        let filter_input = match filter_item.1 {
+            FilterOp::In => Some(FilterTerm::Array(
+                val.split(',')
+                    .map(|x| Scalar::String(x.trim().to_owned()))
+                    .collect(),
+            )),
             _ => match self.get_filter_type() {
-                Some(Type::String) => {
-                    filter_item.2 = FilterTerm::Scalar(Scalar::String(val));
-                }
+                Some(Type::String) => Some(FilterTerm::Scalar(Scalar::String(val))),
                 Some(Type::Integer) => {
                     if val.is_empty() {
-                        filter_item.2 = FilterTerm::Scalar(Scalar::Null);
+                        None
                     } else if let Ok(num) = val.parse::<f64>() {
-                        filter_item.2 = FilterTerm::Scalar(Scalar::Float(num.floor()));
+                        Some(FilterTerm::Scalar(Scalar::Float(num.floor())))
+                    } else {
+                        None
                     }
                 }
                 Some(Type::Float) => {
                     if val.is_empty() {
-                        filter_item.2 = FilterTerm::Scalar(Scalar::Null);
+                        None
                     } else if let Ok(num) = val.parse::<f64>() {
-                        filter_item.2 = FilterTerm::Scalar(Scalar::Float(num));
+                        Some(FilterTerm::Scalar(Scalar::Float(num)))
+                    } else {
+                        None
                     }
                 }
-                Some(Type::Date) => {
-                    filter_item.2 = FilterTerm::Scalar(match NaiveDate::parse_from_str(
-                        &val, "%Y-%m-%d",
-                    ) {
-                        Ok(ref posix) => match posix.and_hms_opt(0, 0, 0) {
-                            Some(x) => Scalar::DateTime(x.timestamp_millis() as f64),
-                            None => Scalar::Null,
-                        },
-                        _ => Scalar::Null,
-                    })
-                }
-                Some(Type::Datetime) => {
-                    let posix = str_to_utc_posix(&val)
-                        .map(Scalar::DateTime)
-                        .unwrap_or(Scalar::Null);
-                    filter_item.2 = FilterTerm::Scalar(posix);
-                }
-                Some(Type::Bool) => {
-                    filter_item.2 = FilterTerm::Scalar(match val.as_str() {
-                        "true" => Scalar::Bool(true),
-                        _ => Scalar::Bool(false),
-                    });
-                }
+                Some(Type::Date) => match NaiveDate::parse_from_str(&val, "%Y-%m-%d") {
+                    Ok(ref posix) => posix.and_hms_opt(0, 0, 0).map(|x| {
+                        FilterTerm::Scalar(
+                            Scalar::DateTime(x.timestamp_millis() as f64),
+                        )
+                    }),
+                    _ => None,
+                },
+                Some(Type::Datetime) => match str_to_utc_posix(&val) {
+                    Ok(x) => Some(FilterTerm::Scalar(Scalar::DateTime(x))),
+                    _ => None,
+                },
+                Some(Type::Bool) => Some(FilterTerm::Scalar(match val.as_str() {
+                    "true" => Scalar::Bool(true),
+                    _ => Scalar::Bool(false),
+                })),
 
                 // shouldn't be reachable ..
-                _ => {}
+                _ => None,
             },
-        }
-
-        let update = ViewConfigUpdate {
-            filter: Some(filter),
-            ..ViewConfigUpdate::default()
         };
 
-        self.update_and_render(update);
+        if let Some(input) = filter_input {
+            filter_item.2 = input;
+            let update = ViewConfigUpdate {
+                filter: Some(filter),
+                ..ViewConfigUpdate::default()
+            };
+
+            self.update_and_render(update);
+        }
     }
 }
 
