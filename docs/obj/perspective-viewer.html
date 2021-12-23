@@ -1,0 +1,874 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>perspective-viewer API · Perspective</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="# @finos/perspective-viewer"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="perspective-viewer API · Perspective"/><meta property="og:type" content="website"/><meta property="og:url" content="https://perspective.finos.org//index.html"/><meta property="og:description" content="# @finos/perspective-viewer"/><meta property="og:image" content="https://perspective.finos.org/img/perspective.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://perspective.finos.org/img/perspective.png"/><link rel="shortcut icon" href="/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-light.min.css"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Material+Icons"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Public+Sans"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono"/><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900"/><script type="text/javascript" src="js/fonts.js"></script><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="js/index.js"></script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/logo.png" alt="Perspective"/><h2 class="headerTitleWithLogo">Perspective</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/docs/md/js.html" target="_self">Docs</a></li><li class=""><a href="https://github.com/finos/perspective/" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>API</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Guides</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/md/js.html">JavaScript User Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/md/python.html">Python User Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/md/table.html">Table</a></li><li class="navListItem"><a class="navItem" href="/docs/md/view.html">View</a></li><li class="navListItem"><a class="navItem" href="/docs/md/server.html">Data Binding</a></li><li class="navListItem"><a class="navItem" href="/docs/md/development.html">Developer Guide</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">API</h3><ul class=""><li class="navListItem navListItemActive"><a class="navItem" href="/docs/obj/perspective-viewer.html">perspective-viewer API</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">perspective-viewer API</h1></header><article><div><span><h1><a class="anchor" aria-hidden="true" id="finosperspective-viewer"></a><a href="#finosperspective-viewer" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>@finos/perspective-viewer</h1>
+<p>Module for the <code>&lt;perspective-viewer&gt;</code> custom element.  This module has no
+(real) exports, but importing it has a side effect: the
+<code>PerspectiveViewerElement</code>class is registered as a custom element, after
+which it can be used as a standard DOM element.</p>
+<p>Though <code>&lt;perspective-viewer&gt;</code> is written mostly in Rust, the nature
+of WebAssembly's compilation makes it a dynamic module;  in order to
+guarantee that the Custom Elements extension methods are registered
+synchronously with this package's import, we need perform said registration
+within this wrapper module.  As a result, the API methods of the Custom
+Elements are all <code>async</code> (as they must await the wasm module instance).</p>
+<p>The documentation in this module defines the instance structure of a
+<code>&lt;perspective-viewer&gt;</code> DOM object instantiated typically, through HTML or any
+relevent DOM method e.g. <code>document.createElement(&quot;perspective-viewer&quot;)</code> or
+<code>document.getElementsByTagName(&quot;perspective-viewer&quot;)</code>.</p>
+<h2><a class="anchor" aria-hidden="true" id="table-of-contents"></a><a href="#table-of-contents" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Table of contents</h2>
+<h3><a class="anchor" aria-hidden="true" id="classes"></a><a href="#classes" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Classes</h3>
+<ul>
+<li><a href="#HTMLPerspectiveViewerElement">HTMLPerspectiveViewerElement</a></li>
+<li><a href="#HTMLPerspectiveViewerPluginElement">HTMLPerspectiveViewerPluginElement</a></li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="interfaces"></a><a href="#interfaces" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Interfaces</h3>
+<ul>
+<li><a href="#IPerspectiveViewerPlugin">IPerspectiveViewerPlugin</a></li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="type-aliases"></a><a href="#type-aliases" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Type aliases</h3>
+<ul>
+<li><a href="#perspectiveviewerconfig">PerspectiveViewerConfig</a></li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="properties"></a><a href="#properties" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Properties</h3>
+<ul>
+<li><a href="#default">default</a></li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="type-aliases-1"></a><a href="#type-aliases-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Type aliases</h2>
+<h3><a class="anchor" aria-hidden="true" id="perspectiveviewerconfig"></a><a href="#perspectiveviewerconfig" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>PerspectiveViewerConfig</h3>
+<p>Ƭ <strong>PerspectiveViewerConfig</strong>: <code>perspective.ViewConfig</code> &amp; { <code>plugin?</code>: <code>string</code> ; <code>plugin_config?</code>: <code>any</code> ; <code>settings?</code>: <code>boolean</code>  }</p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in"></a><a href="#defined-in" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/viewer.ts#L20">rust/perspective-viewer/src/ts/viewer.ts:20</a></p>
+<h2><a class="anchor" aria-hidden="true" id="properties-1"></a><a href="#properties-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Properties</h2>
+<h3><a class="anchor" aria-hidden="true" id="default"></a><a href="#default" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>default</h3>
+<p>• <strong>default</strong>: <code>Object</code></p>
+<h4><a class="anchor" aria-hidden="true" id="type-declaration"></a><a href="#type-declaration" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Type declaration</h4>
+<table>
+<thead>
+<tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>HTMLPerspectiveViewerElement</code></td><td style="text-align:left">typeof <a href="#`HTMLPerspectiveViewerElement`"><code>HTMLPerspectiveViewerElement</code></a></td></tr>
+<tr><td style="text-align:left"><code>HTMLPerspectiveViewerPluginElement</code></td><td style="text-align:left">typeof <a href="#`HTMLPerspectiveViewerPluginElement`"><code>HTMLPerspectiveViewerPluginElement</code></a></td></tr>
+</tbody>
+</table>
+<h1><a class="anchor" aria-hidden="true" id="class-htmlperspectiveviewerelement"></a><a href="#class-htmlperspectiveviewerelement" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Class: HTMLPerspectiveViewerElement</h1>
+<p>The Custom Elements implementation for <code>&lt;perspective-viewer&gt;</code>, as well at its
+API.  <code>PerspectiveViewerElement</code> should not be constructed directly (like its
+parent class <code>HTMLElement</code>);  instead, use <code>document.createElement()</code> or
+declare your <code>&lt;perspective-viewer&gt;</code> element in HTML.  Once instantiated,
+<code>&lt;perspective-viewer&gt;</code> works just like a standard <code>HTMLElement</code>, with a few
+extra perspective-specific methods.</p>
+<p><strong><code>example</code></strong></p>
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">const</span> viewer = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">"perspective-viewer"</span>);
+</code></pre>
+<p><strong><code>example</code></strong></p>
+<pre><code class="hljs css language-javascript"><span class="hljs-built_in">document</span>.body.innerHTML = <span class="hljs-string">`
+    &lt;perspective-viewer id="viewer"&gt;&lt;/perspective-viewer&gt;
+`</span>;
+<span class="hljs-keyword">const</span> viewer = <span class="hljs-built_in">document</span>.body.querySelector(<span class="hljs-string">"#viewer"</span>);
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="hierarchy"></a><a href="#hierarchy" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Hierarchy</h2>
+<ul>
+<li><p><code>HTMLElement</code></p>
+<p>↳ <strong><code>HTMLPerspectiveViewerElement</code></strong></p></li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="table-of-contents-1"></a><a href="#table-of-contents-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Table of contents</h2>
+<h3><a class="anchor" aria-hidden="true" id="data-methods"></a><a href="#data-methods" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Data Methods</h3>
+<ul>
+<li><a href="#gettable">getTable</a></li>
+<li><a href="#getview">getView</a></li>
+<li><a href="#load">load</a></li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="persistence-methods"></a><a href="#persistence-methods" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Persistence Methods</h3>
+<ul>
+<li><a href="#reset">reset</a></li>
+<li><a href="#restore">restore</a></li>
+<li><a href="#save">save</a></li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="plugin-methods"></a><a href="#plugin-methods" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Plugin Methods</h3>
+<ul>
+<li><a href="#getallplugins">getAllPlugins</a></li>
+<li><a href="#getplugin">getPlugin</a></li>
+<li><a href="#registerplugin">registerPlugin</a></li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="ui-action-methods"></a><a href="#ui-action-methods" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>UI Action Methods</h3>
+<ul>
+<li><a href="#copy">copy</a></li>
+<li><a href="#download">download</a></li>
+<li><a href="#toggleconfig">toggleConfig</a></li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="util-methods"></a><a href="#util-methods" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Util Methods</h3>
+<ul>
+<li><a href="#delete">delete</a></li>
+<li><a href="#flush">flush</a></li>
+<li><a href="#geteditport">getEditPort</a></li>
+<li><a href="#notifyresize">notifyResize</a></li>
+<li><a href="#restyleelement">restyleElement</a></li>
+<li><a href="#setautosize">setAutoSize</a></li>
+<li><a href="#setthrottle">setThrottle</a></li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="data-methods-1"></a><a href="#data-methods-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Data Methods</h2>
+<h3><a class="anchor" aria-hidden="true" id="gettable"></a><a href="#gettable" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>getTable</h3>
+<p>▸ <strong>getTable</strong>(<code>wait_for_table?</code>): <code>Promise</code>&lt;<code>Table</code>&gt;</p>
+<p>Returns the <code>perspective.Table()</code> which was supplied to <code>load()</code></p>
+<p><strong><code>example</code></strong> Share a <code>Table</code></p>
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">const</span> viewers = <span class="hljs-built_in">document</span>.querySelectorAll(<span class="hljs-string">"perspective-viewer"</span>);
+<span class="hljs-keyword">const</span> [viewer1, viewer2] = <span class="hljs-built_in">Array</span>.from(viewers);
+<span class="hljs-keyword">const</span> table = <span class="hljs-keyword">await</span> viewer1.getTable();
+<span class="hljs-keyword">await</span> viewer2.load(table);
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="parameters"></a><a href="#parameters" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Parameters</h4>
+<table>
+<thead>
+<tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th><th style="text-align:left">Description</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>wait_for_table?</code></td><td style="text-align:left"><code>boolean</code></td><td style="text-align:left">Whether to await <code>load()</code> if it has not yet been invoked, or fail immediately.</td></tr>
+</tbody>
+</table>
+<h4><a class="anchor" aria-hidden="true" id="returns"></a><a href="#returns" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>Promise</code>&lt;<code>Table</code>&gt;</p>
+<p>A <code>Promise</code> which resolves to a <code>perspective.Table</code></p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-1"></a><a href="#defined-in-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/viewer.ts#L187">rust/perspective-viewer/src/ts/viewer.ts:187</a></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="getview"></a><a href="#getview" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>getView</h3>
+<p>▸ <strong>getView</strong>(): <code>Promise</code>&lt;<code>View</code>&gt;</p>
+<p>Returns the underlying <code>perspective.View</code> currently configured for this
+<code>&lt;perspective-viewer&gt;</code>.  Because ownership of the <code>perspective.View</code> is
+mainainted by the <code>&lt;perspective-viewer&gt;</code> it was created by, this <code>View</code>
+may become deleted (invalidated by calling <code>delete()</code>) at any time -
+specifically, it will be deleted whenever the <code>PerspectiveViewConfig</code>
+changes.  Because of this, when using this API, prefer calling
+<code>getView()</code> repeatedly over caching the returned <code>perspective.View</code>,
+especially in <code>async</code> contexts.</p>
+<p><strong><code>example</code></strong> Collapse grid to root</p>
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">const</span> viewer = <span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">"perspective-viewer"</span>);
+<span class="hljs-keyword">const</span> view = <span class="hljs-keyword">await</span> viewer.getView();
+<span class="hljs-keyword">await</span> view.set_depth(<span class="hljs-number">0</span>);
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="returns-1"></a><a href="#returns-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>Promise</code>&lt;<code>View</code>&gt;</p>
+<p>A <code>Promise</code> which ressolves to a <code>perspective.View</code>.</p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-2"></a><a href="#defined-in-2" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/viewer.ts#L211">rust/perspective-viewer/src/ts/viewer.ts:211</a></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="load"></a><a href="#load" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>load</h3>
+<p>▸ <strong>load</strong>(<code>table</code>): <code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>Load a <code>perspective.Table</code>.  If <code>load</code> or <code>update</code> have already been
+called on this element, its internal <code>perspective.Table</code> will <em>not</em> be
+deleted, but it will bed de-referenced by this <code>&lt;perspective-viewer&gt;</code>.</p>
+<p><strong><code>example</code></strong> Load perspective.table</p>
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">const</span> my_viewer = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'#my_viewer'</span>);
+<span class="hljs-keyword">const</span> tbl = perspective.table(<span class="hljs-string">"x,y\n1,a\n2,b"</span>);
+my_viewer.load(tbl);
+</code></pre>
+<p><strong><code>example</code></strong> Load Promise&lt;perspective.table&gt;</p>
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">const</span> my_viewer = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'#my_viewer'</span>);
+<span class="hljs-keyword">const</span> tbl = perspective.table(<span class="hljs-string">"x,y\n1,a\n2,b"</span>);
+my_viewer.load(tbl);
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="parameters-1"></a><a href="#parameters-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Parameters</h4>
+<table>
+<thead>
+<tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>table</code></td><td style="text-align:left"><code>Table</code> \</td><td><code>Promise</code>&lt;<code>Table</code>&gt;</td></tr>
+</tbody>
+</table>
+<h4><a class="anchor" aria-hidden="true" id="returns-2"></a><a href="#returns-2" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>A promise which resolves once the data is
+loaded, a <code>perspective.View</code> has been created, and the active plugin has
+rendered.</p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-3"></a><a href="#defined-in-3" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/viewer.ts#L119">rust/perspective-viewer/src/ts/viewer.ts:119</a></p>
+<hr>
+<h2><a class="anchor" aria-hidden="true" id="persistence-methods-1"></a><a href="#persistence-methods-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Persistence Methods</h2>
+<h3><a class="anchor" aria-hidden="true" id="reset"></a><a href="#reset" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>reset</h3>
+<p>▸ <strong>reset</strong>(<code>all?</code>): <code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>Reset's this element's view state and attributes to default.  Does not
+delete this element's <code>perspective.table</code> or otherwise modify the data
+state.</p>
+<p><strong><code>example</code></strong></p>
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">const</span> viewer = <span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">"perspective-viewer"</span>);
+<span class="hljs-keyword">await</span> viewer.reset();
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="parameters-2"></a><a href="#parameters-2" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Parameters</h4>
+<table>
+<thead>
+<tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th><th style="text-align:left">Default value</th><th style="text-align:left">Description</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>all</code></td><td style="text-align:left"><code>boolean</code></td><td style="text-align:left"><code>false</code></td><td style="text-align:left">Should <code>expressions</code> param be reset as well, defaults to</td></tr>
+</tbody>
+</table>
+<h4><a class="anchor" aria-hidden="true" id="returns-3"></a><a href="#returns-3" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>Promise</code>&lt;<code>void</code>&gt;</p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-4"></a><a href="#defined-in-4" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/viewer.ts#L330">rust/perspective-viewer/src/ts/viewer.ts:330</a></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="restore"></a><a href="#restore" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>restore</h3>
+<p>▸ <strong>restore</strong>(<code>config</code>): <code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>Restore this element to a state as generated by a reciprocal call to
+<code>save</code>.  In <code>json</code> (default) format, <code>PerspectiveViewerConfig</code>'s fields
+have specific semantics:</p>
+<ul>
+<li>When a key is missing, this field is ignored;  <code>&lt;perspective-viewer&gt;</code>
+will maintain whatever settings for this field is currently applied.</li>
+<li>When the key is supplied, but the value is <code>undefined</code>, the field is
+reset to its default value for this current <code>View</code>, i.e. the state it
+would be in after <code>load()</code> resolves.</li>
+<li>When the key is defined to a value, the value is applied for this
+field.</li>
+</ul>
+<p>This behavior is convenient for explicitly controlling current vs desired
+UI state in a single request, but it does make it a bit inconvenient to
+use <code>restore()</code> to reset a <code>&lt;perspective-viewer&gt;</code> to default as you must
+do so explicitly for each key;  for this case, use <code>reset()</code> instead of
+restore.</p>
+<p>As noted in <code>save()</code>, this configuration state does not include the
+<code>Table</code> or its <code>Schema</code>.  In order for <code>restore()</code> to work correctly, it
+must be called on a <code>&lt;perspective-viewer&gt;</code> that has a <code>Table already</code>load()<code>-ed, with the same (or a type-compatible superset)</code>Schema`.
+It does not need have the same rows, or even be populated.</p>
+<p><strong><code>example</code></strong> Restore a viewer from <code>localStorage</code></p>
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">const</span> viewer = <span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">"perspective-viewer"</span>);
+<span class="hljs-keyword">const</span> token = localStorage.getItem(<span class="hljs-string">"viewer_state"</span>);
+<span class="hljs-keyword">await</span> viewer.restore(token);
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="parameters-3"></a><a href="#parameters-3" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Parameters</h4>
+<table>
+<thead>
+<tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th><th style="text-align:left">Description</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>config</code></td><td style="text-align:left"><code>string</code> \</td><td style="text-align:left"><a href="#perspectiveviewerconfig"><code>PerspectiveViewerConfig</code></a> \</td><td><code>ArrayBuffer</code></td><td>returned by <code>save()</code>.  This can be any format returned by <code>save()</code>; the specific deserialization is chosen by <code>typeof config</code>.</td></tr>
+</tbody>
+</table>
+<h4><a class="anchor" aria-hidden="true" id="returns-4"></a><a href="#returns-4" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>A promise which resolves when the changes have been applied and
+rendered.</p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-5"></a><a href="#defined-in-5" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/viewer.ts#L254">rust/perspective-viewer/src/ts/viewer.ts:254</a></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="save"></a><a href="#save" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>save</h3>
+<p>▸ <strong>save</strong>(): <code>Promise</code>&lt;<a href="#perspectiveviewerconfig"><code>PerspectiveViewerConfig</code></a>&gt;</p>
+<p>Serialize this element's attribute/interaction state, but <em>not</em> the
+<code>perspective.Table</code> or its <code>Schema</code>.  <code>save()</code> is designed to be used in
+conjunction with <code>restore()</code> to persist user settings and bookmarks, but
+the <code>PerspectiveViewerConfig</code> object returned in <code>json</code> format can also
+be written by hand quite easily, which is useful for authoring
+pre-conceived configs.</p>
+<p><strong><code>example</code></strong> Save a viewer to <code>localStorage</code></p>
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">const</span> viewer = <span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">"perspective-viewer"</span>);
+<span class="hljs-keyword">const</span> token = <span class="hljs-keyword">await</span> viewer.save(<span class="hljs-string">"string"</span>);
+localStorage.setItem(<span class="hljs-string">"viewer_state"</span>, token);
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="returns-5"></a><a href="#returns-5" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>Promise</code>&lt;<a href="#perspectiveviewerconfig"><code>PerspectiveViewerConfig</code></a>&gt;</p>
+<p>a serialized element in the chosen format.</p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-6"></a><a href="#defined-in-6" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/viewer.ts#L281">rust/perspective-viewer/src/ts/viewer.ts:281</a></p>
+<p>▸ <strong>save</strong>(<code>format</code>): <code>Promise</code>&lt;<a href="#perspectiveviewerconfig"><code>PerspectiveViewerConfig</code></a>&gt;</p>
+<h4><a class="anchor" aria-hidden="true" id="parameters-4"></a><a href="#parameters-4" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Parameters</h4>
+<table>
+<thead>
+<tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>format</code></td><td style="text-align:left"><code>&quot;json&quot;</code></td></tr>
+</tbody>
+</table>
+<h4><a class="anchor" aria-hidden="true" id="returns-6"></a><a href="#returns-6" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>Promise</code>&lt;<a href="#perspectiveviewerconfig"><code>PerspectiveViewerConfig</code></a>&gt;</p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-7"></a><a href="#defined-in-7" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/viewer.ts#L282">rust/perspective-viewer/src/ts/viewer.ts:282</a></p>
+<p>▸ <strong>save</strong>(<code>format</code>): <code>Promise</code>&lt;<code>ArrayBuffer</code>&gt;</p>
+<h4><a class="anchor" aria-hidden="true" id="parameters-5"></a><a href="#parameters-5" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Parameters</h4>
+<table>
+<thead>
+<tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>format</code></td><td style="text-align:left"><code>&quot;arraybuffer&quot;</code></td></tr>
+</tbody>
+</table>
+<h4><a class="anchor" aria-hidden="true" id="returns-7"></a><a href="#returns-7" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>Promise</code>&lt;<code>ArrayBuffer</code>&gt;</p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-8"></a><a href="#defined-in-8" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/viewer.ts#L283">rust/perspective-viewer/src/ts/viewer.ts:283</a></p>
+<p>▸ <strong>save</strong>(<code>format</code>): <code>Promise</code>&lt;<code>string</code>&gt;</p>
+<h4><a class="anchor" aria-hidden="true" id="parameters-6"></a><a href="#parameters-6" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Parameters</h4>
+<table>
+<thead>
+<tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>format</code></td><td style="text-align:left"><code>&quot;string&quot;</code></td></tr>
+</tbody>
+</table>
+<h4><a class="anchor" aria-hidden="true" id="returns-8"></a><a href="#returns-8" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>Promise</code>&lt;<code>string</code>&gt;</p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-9"></a><a href="#defined-in-9" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/viewer.ts#L284">rust/perspective-viewer/src/ts/viewer.ts:284</a></p>
+<hr>
+<h2><a class="anchor" aria-hidden="true" id="plugin-methods-1"></a><a href="#plugin-methods-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Plugin Methods</h2>
+<h3><a class="anchor" aria-hidden="true" id="getallplugins"></a><a href="#getallplugins" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>getAllPlugins</h3>
+<p>▸ <strong>getAllPlugins</strong>(): <code>Promise</code>&lt;<code>HTMLElement</code>[]&gt;</p>
+<p>Get all plugin custom element instances, in order of registration.</p>
+<p>If no plugins have been registered (via <code>registerPlugin()</code>), calling
+<code>getAllPlugins()</code> will cause <code>perspective-viewer-plugin</code> to be registered
+as a side effect.</p>
+<h4><a class="anchor" aria-hidden="true" id="returns-9"></a><a href="#returns-9" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>Promise</code>&lt;<code>HTMLElement</code>[]&gt;</p>
+<p>An <code>Array</code> of the plugin instances for this
+<code>&lt;perspective-viewer&gt;</code>.</p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-10"></a><a href="#defined-in-10" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/viewer.ts#L502">rust/perspective-viewer/src/ts/viewer.ts:502</a></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="getplugin"></a><a href="#getplugin" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>getPlugin</h3>
+<p>▸ <strong>getPlugin</strong>(<code>name?</code>): <code>Promise</code>&lt;<code>HTMLElement</code>&gt;</p>
+<p>Get the currently active plugin custom element instance, or a specific
+named instance if requested.  <code>getPlugin(name)</code> does not activate the
+plugin requested, so if this plugin is not active the returned
+<code>HTMLElement</code> will not have a <code>parentElement</code>.</p>
+<p>If no plugins have been registered (via <code>registerPlugin()</code>), calling
+<code>getPlugin()</code> will cause <code>perspective-viewer-plugin</code> to be registered as
+a side effect.</p>
+<h4><a class="anchor" aria-hidden="true" id="parameters-7"></a><a href="#parameters-7" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Parameters</h4>
+<table>
+<thead>
+<tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th><th style="text-align:left">Description</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>name?</code></td><td style="text-align:left"><code>string</code></td><td style="text-align:left">Optionally a specific plugin name, defaulting to the current active plugin.</td></tr>
+</tbody>
+</table>
+<h4><a class="anchor" aria-hidden="true" id="returns-10"></a><a href="#returns-10" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>Promise</code>&lt;<code>HTMLElement</code>&gt;</p>
+<p>The active or requested plugin instance.</p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-11"></a><a href="#defined-in-11" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/viewer.ts#L485">rust/perspective-viewer/src/ts/viewer.ts:485</a></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="registerplugin"></a><a href="#registerplugin" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>registerPlugin</h3>
+<p>▸ <code>Static</code> <strong>registerPlugin</strong>(<code>name</code>): <code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>Register a new plugin via its custom element name.  This method is called
+automatically as a side effect of importing a plugin module, so this
+method should only typically be called by plugin authors.</p>
+<p><strong><code>example</code></strong></p>
+<pre><code class="hljs css language-javascript">customElements.get(<span class="hljs-string">"perspective-viewer"</span>).registerPlugin(<span class="hljs-string">"my-plugin"</span>);
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="parameters-8"></a><a href="#parameters-8" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Parameters</h4>
+<table>
+<thead>
+<tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th><th style="text-align:left">Description</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>name</code></td><td style="text-align:left"><code>string</code></td><td style="text-align:left">The <code>name</code> of the custom element to register, as supplied to the <code>customElements.define(name)</code> method.</td></tr>
+</tbody>
+</table>
+<h4><a class="anchor" aria-hidden="true" id="returns-11"></a><a href="#returns-11" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>Promise</code>&lt;<code>void</code>&gt;</p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-12"></a><a href="#defined-in-12" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/viewer.ts#L91">rust/perspective-viewer/src/ts/viewer.ts:91</a></p>
+<hr>
+<h2><a class="anchor" aria-hidden="true" id="ui-action-methods-1"></a><a href="#ui-action-methods-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>UI Action Methods</h2>
+<h3><a class="anchor" aria-hidden="true" id="copy"></a><a href="#copy" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>copy</h3>
+<p>▸ <strong>copy</strong>(<code>flat</code>): <code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>Copies this element's view data (as a CSV) to the clipboard.  This method
+must be called from an event handler, subject to the browser's
+restrictions on clipboard access.  See
+<a href="https://www.w3.org/TR/clipboard-apis/#allow-read-clipboard">https://www.w3.org/TR/clipboard-apis/#allow-read-clipboard</a>.</p>
+<p><strong><code>example</code></strong></p>
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">const</span> viewer = <span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">"perspective-viewer"</span>);
+<span class="hljs-keyword">const</span> button = <span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">"button"</span>);
+button.addEventListener(<span class="hljs-string">"click"</span>, <span class="hljs-keyword">async</span> () =&gt; {
+    <span class="hljs-keyword">await</span> viewer.copy();
+});
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="parameters-9"></a><a href="#parameters-9" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Parameters</h4>
+<table>
+<thead>
+<tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th><th style="text-align:left">Description</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>flat</code></td><td style="text-align:left"><code>boolean</code></td><td style="text-align:left">Whether to use the element's current view config, or to use a default &quot;flat&quot; view.</td></tr>
+</tbody>
+</table>
+<h4><a class="anchor" aria-hidden="true" id="returns-12"></a><a href="#returns-12" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>Promise</code>&lt;<code>void</code>&gt;</p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-13"></a><a href="#defined-in-13" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/viewer.ts#L379">rust/perspective-viewer/src/ts/viewer.ts:379</a></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="download"></a><a href="#download" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>download</h3>
+<p>▸ <strong>download</strong>(<code>flat</code>): <code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>Download this element's data as a CSV file.</p>
+<h4><a class="anchor" aria-hidden="true" id="parameters-10"></a><a href="#parameters-10" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Parameters</h4>
+<table>
+<thead>
+<tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th><th style="text-align:left">Description</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>flat</code></td><td style="text-align:left"><code>boolean</code></td><td style="text-align:left">Whether to use the element's current view config, or to use a default &quot;flat&quot; view.</td></tr>
+</tbody>
+</table>
+<h4><a class="anchor" aria-hidden="true" id="returns-13"></a><a href="#returns-13" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>Promise</code>&lt;<code>void</code>&gt;</p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-14"></a><a href="#defined-in-14" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/viewer.ts#L356">rust/perspective-viewer/src/ts/viewer.ts:356</a></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="toggleconfig"></a><a href="#toggleconfig" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>toggleConfig</h3>
+<p>▸ <strong>toggleConfig</strong>(<code>force?</code>): <code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>Opens/closes the element's config menu, equivalent to clicking the
+settings button in the UI.  This method is equivalent to
+<code>viewer.restore({settings: force})</code> when <code>force</code> is present, but
+<code>restore()</code> cannot toggle as <code>toggleConfig()</code> can, you would need to
+first read the settings state from <code>save()</code> otherwise.</p>
+<p>Calling <code>toggleConfig()</code> may be delayed if an async render is currently
+in process, and it may only partially render the UI if <code>load()</code> has not
+yet resolved.</p>
+<p><strong><code>example</code></strong></p>
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">await</span> viewer.toggleConfig();
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="parameters-11"></a><a href="#parameters-11" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Parameters</h4>
+<table>
+<thead>
+<tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th><th style="text-align:left">Description</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>force?</code></td><td style="text-align:left"><code>boolean</code></td><td style="text-align:left">If supplied, explicitly set the config state to &quot;open&quot; (<code>true</code>) or &quot;closed&quot; (<code>false</code>).</td></tr>
+</tbody>
+</table>
+<h4><a class="anchor" aria-hidden="true" id="returns-14"></a><a href="#returns-14" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>Promise</code>&lt;<code>void</code>&gt;</p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-15"></a><a href="#defined-in-15" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/viewer.ts#L465">rust/perspective-viewer/src/ts/viewer.ts:465</a></p>
+<hr>
+<h2><a class="anchor" aria-hidden="true" id="util-methods-1"></a><a href="#util-methods-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Util Methods</h2>
+<h3><a class="anchor" aria-hidden="true" id="delete"></a><a href="#delete" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>delete</h3>
+<p>▸ <strong>delete</strong>(): <code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>Deletes this element and clears it's internal state (but not its
+user state).  This (or the underlying <code>perspective.view</code>'s equivalent
+method) must be called in order for its memory to be reclaimed, as well
+as the reciprocal method on the <code>perspective.table</code> which this viewer is
+bound to.</p>
+<h4><a class="anchor" aria-hidden="true" id="returns-15"></a><a href="#returns-15" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>Promise</code>&lt;<code>void</code>&gt;</p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-16"></a><a href="#defined-in-16" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/viewer.ts#L344">rust/perspective-viewer/src/ts/viewer.ts:344</a></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="flush"></a><a href="#flush" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>flush</h3>
+<p>▸ <strong>flush</strong>(): <code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>Flush any pending modifications to this <code>&lt;perspective-viewer&gt;</code>.  Since
+<code>&lt;perspective-viewer&gt;</code>'s API is almost entirely <code>async</code>, it may take
+some milliseconds before any method call such as <code>restore()</code> affects
+the rendered element.  If you want to make sure any invoked method which
+affects the rendered has had its results rendered, call and await
+<code>flush()</code></p>
+<p><strong><code>example</code></strong> Flush an unawaited <code>restore()</code></p>
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">const</span> viewer = <span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">"perspective-viewer"</span>);
+viewer.restore({<span class="hljs-attr">row_pivots</span>: [<span class="hljs-string">"State"</span>]});
+<span class="hljs-keyword">await</span> viewer.flush();
+<span class="hljs-built_in">console</span>.log(<span class="hljs-string">"Viewer has been rendered with a pivot!"</span>);
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="returns-16"></a><a href="#returns-16" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>A promise which resolves when the current
+pending state changes have been applied and rendered.</p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-17"></a><a href="#defined-in-17" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/viewer.ts#L312">rust/perspective-viewer/src/ts/viewer.ts:312</a></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="geteditport"></a><a href="#geteditport" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>getEditPort</h3>
+<p>▸ <strong>getEditPort</strong>(): <code>Promise</code>&lt;<code>number</code>&gt;</p>
+<p>Gets the edit port, the port number for which <code>Table</code> updates from this
+<code>&lt;perspective-viewer&gt;</code> are generated.  This port number will be present
+in the options object for a <code>View.on_update()</code> callback for any update
+which was originated by the <code>&lt;perspective-viewer&gt;</code>/user, which can be
+used to distinguish server-originated updates from user edits.</p>
+<p><strong><code>example</code></strong></p>
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">const</span> viewer = <span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">"perspective-viewer"</span>);
+<span class="hljs-keyword">const</span> editport = <span class="hljs-keyword">await</span> viewer.getEditPort();
+<span class="hljs-keyword">const</span> table = <span class="hljs-keyword">await</span> viewer.getTable();
+<span class="hljs-keyword">const</span> view = <span class="hljs-keyword">await</span> table.view();
+view.on_update(<span class="hljs-function"><span class="hljs-params">obj</span> =&gt;</span> {
+    <span class="hljs-keyword">if</span> (obj.port_id = editport) {
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"User edit detected"</span>);
+    }
+});
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="returns-17"></a><a href="#returns-17" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>Promise</code>&lt;<code>number</code>&gt;</p>
+<p>A promise which resolves to the current edit port.</p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-18"></a><a href="#defined-in-18" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/viewer.ts#L420">rust/perspective-viewer/src/ts/viewer.ts:420</a></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="notifyresize"></a><a href="#notifyresize" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>notifyResize</h3>
+<p>▸ <strong>notifyResize</strong>(<code>force?</code>): <code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>Redraw this <code>&lt;perspective-viewer&gt;</code> and plugin when its dimensions or
+visibility has been updated.  By default, <code>&lt;perspective-viewer&gt;</code> will
+auto-size when its own dimensions change, so this method need not be
+called;  when disabled via <code>setAutoSize(false)</code> however, this method
+<em>must</em> be called, and will not respond to dimension or style changes to
+its parent container otherwise.  <code>notifyResize()</code> does not recalculate
+the current <code>View</code>, but all plugins will re-request the data window
+(which itself may be smaller or larger due to resize).</p>
+<p><strong><code>example</code></strong> Bind <code>notfyResize()</code> to browser dimensions</p>
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">const</span> viewer = <span class="hljs-built_in">document</span>.querySelector(<span class="hljs-string">"perspective-viewer"</span>);
+viewer.setAutoSize(<span class="hljs-literal">false</span>);
+<span class="hljs-built_in">window</span>.addEventListener(<span class="hljs-string">"resize"</span>, () =&gt; viewer.notifyResize());
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="parameters-12"></a><a href="#parameters-12" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Parameters</h4>
+<table>
+<thead>
+<tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th><th style="text-align:left">Default value</th><th style="text-align:left">Description</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>force</code></td><td style="text-align:left"><code>boolean</code></td><td style="text-align:left"><code>false</code></td><td style="text-align:left">Whether to re-render, even if the dimenions have not changed.  When set to <code>false</code> and auto-size is enabled (the defaults), calling this method will automatically disable auto-size.</td></tr>
+</tbody>
+</table>
+<h4><a class="anchor" aria-hidden="true" id="returns-18"></a><a href="#returns-18" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>A <code>Promise&lt;void&gt;</code> which resolves when this resize event has
+finished rendering.</p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-19"></a><a href="#defined-in-19" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/viewer.ts#L149">rust/perspective-viewer/src/ts/viewer.ts:149</a></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="restyleelement"></a><a href="#restyleelement" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>restyleElement</h3>
+<p>▸ <strong>restyleElement</strong>(): <code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>Restyles the elements and to pick up any style changes.  While most of
+perspective styling is plain CSS and can be updated at any time, some
+CSS rules are read and cached, e.g. the series colors for
+<code>@finos/perspective-viewer-d3fc</code> which are read from CSS then reapplied
+as SVG and Canvas attributes.</p>
+<h4><a class="anchor" aria-hidden="true" id="returns-19"></a><a href="#returns-19" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>Promise</code>&lt;<code>void</code>&gt;</p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-20"></a><a href="#defined-in-20" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/viewer.ts#L393">rust/perspective-viewer/src/ts/viewer.ts:393</a></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="setautosize"></a><a href="#setautosize" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>setAutoSize</h3>
+<p>▸ <strong>setAutoSize</strong>(<code>autosize?</code>): <code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>Determines the auto-size behavior.  When <code>true</code> (the default), this
+element will re-render itself whenever its own dimensions change,
+utilizing a <code>ResizeObserver</code>;  when <code>false</code>, you must explicitly call
+<code>notifyResize()</code> when the element's dimensions have changed.</p>
+<p><strong><code>example</code></strong> Disable auto-size</p>
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">await</span> viewer.setAutoSize(<span class="hljs-literal">false</span>);
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="parameters-13"></a><a href="#parameters-13" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Parameters</h4>
+<table>
+<thead>
+<tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th><th style="text-align:left">Default value</th><th style="text-align:left">Description</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>autosize</code></td><td style="text-align:left"><code>boolean</code></td><td style="text-align:left"><code>true</code></td><td style="text-align:left">Whether to re-render when this element's dimensions change.</td></tr>
+</tbody>
+</table>
+<h4><a class="anchor" aria-hidden="true" id="returns-20"></a><a href="#returns-20" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>Promise</code>&lt;<code>void</code>&gt;</p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-21"></a><a href="#defined-in-21" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/viewer.ts#L168">rust/perspective-viewer/src/ts/viewer.ts:168</a></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="setthrottle"></a><a href="#setthrottle" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>setThrottle</h3>
+<p>▸ <strong>setThrottle</strong>(<code>value?</code>): <code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>Determines the render throttling behavior. Can be an integer, for
+millisecond window to throttle render event; or, if <code>undefined</code>,
+will try to determine the optimal throttle time from this component's
+render framerate.</p>
+<p><strong><code>example</code></strong> Limit FPS to 1 frame per second</p>
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">await</span> viewer.setThrottle(<span class="hljs-number">1000</span>);
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="parameters-14"></a><a href="#parameters-14" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Parameters</h4>
+<table>
+<thead>
+<tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th><th style="text-align:left">Description</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>value?</code></td><td style="text-align:left"><code>number</code></td><td style="text-align:left">an optional throttle rate in milliseconds (integer).  If not supplied, adaptive throttling is calculated from the average plugin render time.</td></tr>
+</tbody>
+</table>
+<h4><a class="anchor" aria-hidden="true" id="returns-21"></a><a href="#returns-21" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>Promise</code>&lt;<code>void</code>&gt;</p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-22"></a><a href="#defined-in-22" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/viewer.ts#L441">rust/perspective-viewer/src/ts/viewer.ts:441</a></p>
+<h1><a class="anchor" aria-hidden="true" id="interface-iperspectiveviewerplugin"></a><a href="#interface-iperspectiveviewerplugin" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Interface: IPerspectiveViewerPlugin</h1>
+<p>The <code>IPerspectiveViewerPlugin</code> interface defines the necessary API for a
+<code>&lt;perspective-viewer&gt;</code> plugin, which also must be an <code>HTMLElement</code> via the
+Custom Elements API or otherwise.  Rather than implement this API from
+scratch however, the simplest way is to inherit from
+<code>&lt;perspective-viewer-plugin&gt;</code>, which implements <code>IPerspectiveViewerPlugin</code>
+with non-offensive default implementations, where only the <code>draw()</code> and
+<code>name()</code> methods need be overridden to get started with a simple plugin.</p>
+<p>Note that plugins are frozen once a <code>&lt;perspective-viewer&gt;</code> has been
+instantiated, so generally new plugin code must be executed at the module
+level (if packaged as a library), or during application init to ensure global
+availability of a plugin.</p>
+<p><strong><code>example</code></strong></p>
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">const</span> BasePlugin = customElements.get(<span class="hljs-string">"perspective-viewer-plugin"</span>);
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyPlugin</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">BasePlugin</span> </span>{
+    <span class="hljs-keyword">get</span> name() {
+        <span class="hljs-keyword">return</span> <span class="hljs-string">"My Plugin"</span>;
+    }
+    <span class="hljs-keyword">async</span> draw(view) {
+        <span class="hljs-keyword">const</span> count = <span class="hljs-keyword">await</span> view.num_rows();
+        <span class="hljs-keyword">this</span>.innerHTML = <span class="hljs-string">`View has <span class="hljs-subst">${count}</span> rows`</span>;
+    }
+}
+
+customElements.define(<span class="hljs-string">"my-plugin"</span>, MyPlugin);
+<span class="hljs-keyword">const</span> Viewer = customElements.get(<span class="hljs-string">"perspective-viewer"</span>);
+Viewer.registerPlugin(<span class="hljs-string">"my-plugin"</span>);
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="hierarchy-1"></a><a href="#hierarchy-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Hierarchy</h2>
+<ul>
+<li><p><code>HTMLElement</code></p>
+<p>↳ <strong><code>IPerspectiveViewerPlugin</code></strong></p></li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="implemented-by"></a><a href="#implemented-by" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Implemented by</h2>
+<ul>
+<li><a href="#`HTMLPerspectiveViewerPluginElement`"><code>HTMLPerspectiveViewerPluginElement</code></a></li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="table-of-contents-2"></a><a href="#table-of-contents-2" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Table of contents</h2>
+<h3><a class="anchor" aria-hidden="true" id="accessors"></a><a href="#accessors" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Accessors</h3>
+<ul>
+<li><a href="#config_column_names">config_column_names</a></li>
+<li><a href="#min_config_columns">min_config_columns</a></li>
+<li><a href="#name">name</a></li>
+<li><a href="#select_mode">select_mode</a></li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="methods"></a><a href="#methods" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Methods</h3>
+<ul>
+<li><a href="#clear">clear</a></li>
+<li><a href="#delete">delete</a></li>
+<li><a href="#draw">draw</a></li>
+<li><a href="#resize">resize</a></li>
+<li><a href="#restore">restore</a></li>
+<li><a href="#restyle">restyle</a></li>
+<li><a href="#save">save</a></li>
+<li><a href="#update">update</a></li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="accessors-1"></a><a href="#accessors-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Accessors</h2>
+<h3><a class="anchor" aria-hidden="true" id="config_column_names"></a><a href="#config_column_names" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>config_column_names</h3>
+<p>• <code>get</code> <strong>config_column_names</strong>(): <code>string</code>[]</p>
+<p>The named column labels, if desired.  Named columns behave differently
+in drag/drop mode than unnamed columns, having replace/swap behavior
+rather than insert.  If provided, the length of <code>config_column_names</code>
+<em>must</em> be <code>&gt;= min_config_columns</code>, as this is assumed by the drag/drop
+logic.</p>
+<h4><a class="anchor" aria-hidden="true" id="returns-22"></a><a href="#returns-22" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>string</code>[]</p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-23"></a><a href="#defined-in-23" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/plugin.ts#L80">rust/perspective-viewer/src/ts/plugin.ts:80</a></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="min_config_columns"></a><a href="#min_config_columns" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>min_config_columns</h3>
+<p>• <code>get</code> <strong>min_config_columns</strong>(): <code>number</code></p>
+<p>The minimum number of columns required for this plugin to operate.
+This mostly affects drag/drop and column remove button behavior,
+preventing the use from applying configs which violate this min.</p>
+<p>While this option can technically be <code>undefined</code> (as in the case of
+<code>@finos/perspective-viewer-datagrid</code>), doing so currently has nearly
+identical behavior to 1.</p>
+<h4><a class="anchor" aria-hidden="true" id="returns-23"></a><a href="#returns-23" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>number</code></p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-24"></a><a href="#defined-in-24" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/plugin.ts#L71">rust/perspective-viewer/src/ts/plugin.ts:71</a></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="name"></a><a href="#name" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>name</h3>
+<p>• <code>get</code> <strong>name</strong>(): <code>string</code></p>
+<p>The name for this plugin, which is used as both it's unique key for use
+as a parameter for the <code>plugin</code> field of a <code>ViewerConfig</code>, and as the
+display name for this plugin in the <code>&lt;perspective-viewer&gt;</code> UI.</p>
+<h4><a class="anchor" aria-hidden="true" id="returns-24"></a><a href="#returns-24" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>string</code></p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-25"></a><a href="#defined-in-25" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/plugin.ts#L52">rust/perspective-viewer/src/ts/plugin.ts:52</a></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="select_mode"></a><a href="#select_mode" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>select_mode</h3>
+<p>• <code>get</code> <strong>select_mode</strong>(): <code>&quot;select&quot;</code> | <code>&quot;toggle&quot;</code></p>
+<p>Select mode determines how column add/remove buttons behave for this
+plugin.  <code>&quot;select&quot;</code> mode exclusively selects the added column, removing
+other columns.  <code>&quot;toggle&quot;</code> mode toggles the column on or off (dependent
+on column state), leaving existing columns alone.</p>
+<h4><a class="anchor" aria-hidden="true" id="returns-25"></a><a href="#returns-25" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>&quot;select&quot;</code> | <code>&quot;toggle&quot;</code></p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-26"></a><a href="#defined-in-26" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/plugin.ts#L60">rust/perspective-viewer/src/ts/plugin.ts:60</a></p>
+<h2><a class="anchor" aria-hidden="true" id="methods-1"></a><a href="#methods-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Methods</h2>
+<h3><a class="anchor" aria-hidden="true" id="clear"></a><a href="#clear" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>clear</h3>
+<p>▸ <strong>clear</strong>(): <code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>Clear this plugin, though it is up to the discretion of the plugin
+author to determine what this means.  Defaults to resetting this
+element's <code>innerHTML</code>, so be sure to override if you want custom
+behavior.</p>
+<p><strong><code>example</code></strong></p>
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">async</span> clear(): <span class="hljs-built_in">Promise</span>&lt;<span class="hljs-keyword">void</span>&gt; {
+    <span class="hljs-keyword">this</span>.innerHTML = <span class="hljs-string">""</span>;
+}
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="returns-26"></a><a href="#returns-26" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>Promise</code>&lt;<code>void</code>&gt;</p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-27"></a><a href="#defined-in-27" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/plugin.ts#L124">rust/perspective-viewer/src/ts/plugin.ts:124</a></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="delete-1"></a><a href="#delete-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>delete</h3>
+<p>▸ <strong>delete</strong>(): <code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>Free any resources acquired by this plugin and prepare to be deleted.</p>
+<h4><a class="anchor" aria-hidden="true" id="returns-27"></a><a href="#returns-27" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>Promise</code>&lt;<code>void</code>&gt;</p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-28"></a><a href="#defined-in-28" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/plugin.ts#L159">rust/perspective-viewer/src/ts/plugin.ts:159</a></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="draw"></a><a href="#draw" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>draw</h3>
+<p>▸ <strong>draw</strong>(<code>view</code>): <code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>Render this plugin using the provided <code>View</code>.  While there is no
+provision to cancel a render in progress per se, calling a method on
+a <code>View</code> which has been deleted will throw an exception.</p>
+<p><strong><code>example</code></strong></p>
+<pre><code class="hljs"><span class="hljs-keyword">async</span> draw(view: perspective.View): <span class="hljs-built_in">Promise</span>&lt;<span class="hljs-keyword">void</span>&gt; {
+    <span class="hljs-keyword">const</span> csv = <span class="hljs-keyword">await</span> view.to_csv();
+    <span class="hljs-keyword">this</span>.innerHTML = <span class="hljs-string">`&lt;pre&gt;<span class="hljs-subst">${csv}</span>&lt;/pre&gt;`</span>;
+}
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="parameters-15"></a><a href="#parameters-15" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Parameters</h4>
+<table>
+<thead>
+<tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>view</code></td><td style="text-align:left"><code>View</code></td></tr>
+</tbody>
+</table>
+<h4><a class="anchor" aria-hidden="true" id="returns-28"></a><a href="#returns-28" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>Promise</code>&lt;<code>void</code>&gt;</p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-29"></a><a href="#defined-in-29" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/plugin.ts#L95">rust/perspective-viewer/src/ts/plugin.ts:95</a></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="resize"></a><a href="#resize" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>resize</h3>
+<p>▸ <strong>resize</strong>(): <code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>Like <code>update()</code>, but for when the dimensions of the plugin have changed
+and the underlying data has not.</p>
+<h4><a class="anchor" aria-hidden="true" id="returns-29"></a><a href="#returns-29" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>Promise</code>&lt;<code>void</code>&gt;</p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-30"></a><a href="#defined-in-30" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/plugin.ts#L130">rust/perspective-viewer/src/ts/plugin.ts:130</a></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="restore-1"></a><a href="#restore-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>restore</h3>
+<p>▸ <strong>restore</strong>(<code>config</code>): <code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>Restore this plugin to a state previously returned by <code>save()</code>.</p>
+<h4><a class="anchor" aria-hidden="true" id="parameters-16"></a><a href="#parameters-16" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Parameters</h4>
+<table>
+<thead>
+<tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>config</code></td><td style="text-align:left"><code>any</code></td></tr>
+</tbody>
+</table>
+<h4><a class="anchor" aria-hidden="true" id="returns-30"></a><a href="#returns-30" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>Promise</code>&lt;<code>void</code>&gt;</p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-31"></a><a href="#defined-in-31" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/plugin.ts#L154">rust/perspective-viewer/src/ts/plugin.ts:154</a></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="restyle"></a><a href="#restyle" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>restyle</h3>
+<p>▸ <strong>restyle</strong>(): <code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>Notify the plugin that the style environment has changed.  Useful for
+plugins which read CSS styles via <code>window.getComputedStyle()</code>.</p>
+<h4><a class="anchor" aria-hidden="true" id="returns-31"></a><a href="#returns-31" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>Promise</code>&lt;<code>void</code>&gt;</p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-32"></a><a href="#defined-in-32" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/plugin.ts#L136">rust/perspective-viewer/src/ts/plugin.ts:136</a></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="save-1"></a><a href="#save-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>save</h3>
+<p>▸ <strong>save</strong>(): <code>Promise</code>&lt;<code>any</code>&gt;</p>
+<p>Save this plugin's state to a JSON-serializable value.  While this value
+can be anything, it should work reciprocally with <code>restore()</code> to return
+this plugin's renderer to the same state, though potentially with a
+different <code>View</code>.</p>
+<p><code>save()</code> should be used for user-persistent settings that are
+data-agnostic, so the user can have persistent view during refresh or
+reload.  For example, <code>@finos/perspective-viewer-d3fc</code> uses
+<code>plugin_config</code> to remember the user-repositionable legend coordinates.</p>
+<h4><a class="anchor" aria-hidden="true" id="returns-32"></a><a href="#returns-32" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>Promise</code>&lt;<code>any</code>&gt;</p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-33"></a><a href="#defined-in-33" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/plugin.ts#L149">rust/perspective-viewer/src/ts/plugin.ts:149</a></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="update"></a><a href="#update" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>update</h3>
+<p>▸ <strong>update</strong>(<code>view</code>): <code>Promise</code>&lt;<code>void</code>&gt;</p>
+<p>Draw under the assumption that the <code>ViewConfig</code> has not changed since
+the previous call to <code>draw()</code>, but the underlying data has.  Defaults to
+dispatch to <code>draw()</code>.</p>
+<p><strong><code>example</code></strong></p>
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">async</span> update(view: perspective.View): <span class="hljs-built_in">Promise</span>&lt;<span class="hljs-keyword">void</span>&gt; {
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.draw(view);
+}
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="parameters-17"></a><a href="#parameters-17" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Parameters</h4>
+<table>
+<thead>
+<tr><th style="text-align:left">Name</th><th style="text-align:left">Type</th></tr>
+</thead>
+<tbody>
+<tr><td style="text-align:left"><code>view</code></td><td style="text-align:left"><code>View</code></td></tr>
+</tbody>
+</table>
+<h4><a class="anchor" aria-hidden="true" id="returns-33"></a><a href="#returns-33" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Returns</h4>
+<p><code>Promise</code>&lt;<code>void</code>&gt;</p>
+<h4><a class="anchor" aria-hidden="true" id="defined-in-34"></a><a href="#defined-in-34" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Defined in</h4>
+<p><a href="https://github.com/finos/perspective/blob/a87d11528/rust/perspective-viewer/src/ts/plugin.ts#L109">rust/perspective-viewer/src/ts/plugin.ts:109</a></p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/obj/perspective.html"><span class="arrow-prev">← </span><span>Previous</span></a><a class="docs-next button" href="/docs/obj/perspective-python.html"><span>Next</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#table-of-contents">Table of contents</a><ul class="toc-headings"><li><a href="#classes">Classes</a></li><li><a href="#interfaces">Interfaces</a></li><li><a href="#type-aliases">Type aliases</a></li><li><a href="#properties">Properties</a></li></ul></li><li><a href="#type-aliases-1">Type aliases</a><ul class="toc-headings"><li><a href="#perspectiveviewerconfig">PerspectiveViewerConfig</a></li></ul></li><li><a href="#properties-1">Properties</a><ul class="toc-headings"><li><a href="#default">default</a></li></ul></li><li><a href="#hierarchy">Hierarchy</a></li><li><a href="#table-of-contents-1">Table of contents</a><ul class="toc-headings"><li><a href="#data-methods">Data Methods</a></li><li><a href="#persistence-methods">Persistence Methods</a></li><li><a href="#plugin-methods">Plugin Methods</a></li><li><a href="#ui-action-methods">UI Action Methods</a></li><li><a href="#util-methods">Util Methods</a></li></ul></li><li><a href="#data-methods-1">Data Methods</a><ul class="toc-headings"><li><a href="#gettable">getTable</a></li><li><a href="#getview">getView</a></li><li><a href="#load">load</a></li></ul></li><li><a href="#persistence-methods-1">Persistence Methods</a><ul class="toc-headings"><li><a href="#reset">reset</a></li><li><a href="#restore">restore</a></li><li><a href="#save">save</a></li></ul></li><li><a href="#plugin-methods-1">Plugin Methods</a><ul class="toc-headings"><li><a href="#getallplugins">getAllPlugins</a></li><li><a href="#getplugin">getPlugin</a></li><li><a href="#registerplugin">registerPlugin</a></li></ul></li><li><a href="#ui-action-methods-1">UI Action Methods</a><ul class="toc-headings"><li><a href="#copy">copy</a></li><li><a href="#download">download</a></li><li><a href="#toggleconfig">toggleConfig</a></li></ul></li><li><a href="#util-methods-1">Util Methods</a><ul class="toc-headings"><li><a href="#delete">delete</a></li><li><a href="#flush">flush</a></li><li><a href="#geteditport">getEditPort</a></li><li><a href="#notifyresize">notifyResize</a></li><li><a href="#restyleelement">restyleElement</a></li><li><a href="#setautosize">setAutoSize</a></li><li><a href="#setthrottle">setThrottle</a></li></ul></li><li><a href="#hierarchy-1">Hierarchy</a></li><li><a href="#implemented-by">Implemented by</a></li><li><a href="#table-of-contents-2">Table of contents</a><ul class="toc-headings"><li><a href="#accessors">Accessors</a></li><li><a href="#methods">Methods</a></li></ul></li><li><a href="#accessors-1">Accessors</a><ul class="toc-headings"><li><a href="#config_column_names">config_column_names</a></li><li><a href="#min_config_columns">min_config_columns</a></li><li><a href="#name">name</a></li><li><a href="#select_mode">select_mode</a></li></ul></li><li><a href="#methods-1">Methods</a><ul class="toc-headings"><li><a href="#clear">clear</a></li><li><a href="#delete-1">delete</a></li><li><a href="#draw">draw</a></li><li><a href="#resize">resize</a></li><li><a href="#restore-1">restore</a></li><li><a href="#restyle">restyle</a></li><li><a href="#save-1">save</a></li><li><a href="#update">update</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/" class="nav-home"></a><div><h5>Docs</h5><a href="/docs/md/js.html">Javascript User Guide</a><a href="/docs/md/python.html">Python User Guide</a><a href="/docs/obj/perspective.html">Perspective API</a><a href="/docs/obj/perspective-viewer.html">Perspective Viewer API</a><a href="/docs/obj/perspective-python-table.html">Perspective Python API</a></div><div><h5>More</h5><a href="/blog">Blog</a><a href="https://github.com/finos/perspective/">GitHub</a><a class="github-button" data-icon="octicon-star" data-count-href="/facebook/docusaurus/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2021 Perspective Authors</section></footer></div></body></html>
