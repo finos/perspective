@@ -1,5 +1,27 @@
 # Changelog
 
+## [v1.0.8](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.0.7...HEAD)
+
+**Implemented enhancements:**
+
+- 80% reduction in `.wasm` asset size [\#1683](https://github.com/finos/perspective/pull/1683) ([texodus](https://github.com/texodus))
+- Use `puppeteer` for app from CLI [\#1674](https://github.com/finos/perspective/pull/1674) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- Missing libbinding.pyd in Windows 3.9 1.0.7 [\#1677](https://github.com/finos/perspective/issues/1677)
+- DateTime Comparison Blanks out when the milliseconds is 0 [\#1645](https://github.com/finos/perspective/issues/1645)
+- `date` and `datetime` filter bug fixes and support for non-Chrome browsers [\#1685](https://github.com/finos/perspective/pull/1685) ([texodus](https://github.com/texodus))
+- Fix Treemap zoom when a group level is `null` [\#1676](https://github.com/finos/perspective/pull/1676) ([texodus](https://github.com/texodus))
+
+**Merged pull requests:**
+
+- Benchmarks update [\#1681](https://github.com/finos/perspective/pull/1681) ([texodus](https://github.com/texodus))
+- Upgrade Arrow to `6.0.2` [\#1680](https://github.com/finos/perspective/pull/1680) ([texodus](https://github.com/texodus))
+- fix wheel build, make extension first to ensure binaries are inlined, then assemble wheel [\#1679](https://github.com/finos/perspective/pull/1679) ([timkpaine](https://github.com/timkpaine))
+
 ## [v1.0.7](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.0.6...HEAD)

@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "description": "Perspective.js",
     "repository": {
         "type": "git",
@@ -59,12 +59,12 @@
         "automock": false
     },
     "dependencies": {
-        "ws": "^6.1.2",
-        "fflate": "^0.7.2"
+        "fflate": "^0.7.2",
+        "ws": "^6.1.2"
     },
     "devDependencies": {
-        "@finos/perspective-build": "^1.0.7",
-        "@finos/perspective-cpp": "^1.0.7",
+        "@finos/perspective-build": "^1.0.8",
+        "@finos/perspective-cpp": "^1.0.8",
         "jsverify": "^0.8.4",
         "lodash": "^4.17.4",
         "moment": "^2.19.1",
