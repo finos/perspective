@@ -366,12 +366,6 @@ jobs:
             manylinux_flag: "--manylinux2010"
             artifact_name: "cp39-cp39-manylinux2010_x86_64"
 
-          Python39ManyLinux2014:
-            python.version: "3.9"
-            python_flag: "--python39"
-            manylinux_flag: "--manylinux2014"
-            artifact_name: "cp39-cp39-manylinux2014_x86_64"
-
           Python310ManyLinux2010:
             python.version: "3.10"
             python_flag: "--python310"
