@@ -210,6 +210,14 @@ impl Renderer {
         Ok(changed)
     }
 
+    pub async fn with_lock(
+        self,
+        task: impl Future<Output = Result<JsValue, JsValue>>,
+    ) -> Result<JsValue, JsValue> {
+        let draw_mutex = self.draw_lock();
+        draw_mutex.lock(task).await
+    }
+
     pub async fn resize(&self) -> Result<JsValue, JsValue> {
         let draw_mutex = self.draw_lock();
         let timer = self.render_timer();

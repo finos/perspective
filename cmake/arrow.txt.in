@@ -10,12 +10,12 @@ project(arrow-download NONE)
 include(ExternalProject)
 ExternalProject_Add(apachearrow
   GIT_REPOSITORY    https://github.com/apache/arrow.git
-  GIT_TAG           apache-arrow-5.0.0
+  GIT_TAG           apache-arrow-6.0.1
   SOURCE_DIR        "${CMAKE_BINARY_DIR}/arrow-src"
   BINARY_DIR        "${CMAKE_BINARY_DIR}/arrow-build"
   CONFIGURE_COMMAND ""
   BUILD_COMMAND     ""
   INSTALL_COMMAND   ""
   TEST_COMMAND      ""
-  CMAKE_ARGS        "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE} -DFLATBUFFERS_BUILD_TESTS=OFF"
+  CMAKE_ARGS        "-DFLATBUFFERS_BUILD_TESTS=OFF -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH} -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}"
 )

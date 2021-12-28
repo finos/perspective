@@ -25,7 +25,7 @@ pub fn test_callbacks_invoked() {
     let token = Rc::new(Cell::new(0));
     let on_reset = Callback::from({
         clone!(token);
-        move |()| token.set(1)
+        move |_| token.set(1)
     });
 
     let session = Session::default();
@@ -47,14 +47,14 @@ pub fn test_callbacks_invoked() {
     status_bar.send_message(StatusBarMsg::Copy(false));
     assert_eq!(token.get(), 0);
     let status_bar = link.borrow().clone().unwrap();
-    status_bar.send_message(StatusBarMsg::Reset);
+    status_bar.send_message(StatusBarMsg::Reset(false));
     assert_eq!(token.get(), 1);
 }
 
 fn gen(stats: &Option<TableStats>) -> (HtmlElement, Session) {
     let link: WeakComponentLink<StatusBar> = WeakComponentLink::default();
     let div = NodeRef::default();
-    let on_reset = Callback::from(|()| ());
+    let on_reset = Callback::from(|_| ());
     let session = Session::default();
     test_html! {
         <StatusBar

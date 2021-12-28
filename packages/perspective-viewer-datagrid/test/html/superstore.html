@@ -10,9 +10,9 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <script src="perspective.js"></script>
-        <script src="perspective-viewer.js"></script>
-        <script src="perspective-viewer-datagrid.js"></script>
+        <script type="module" src="perspective.js"></script>
+        <script type="module" src="perspective-viewer.js"></script>
+        <script type="module" src="perspective-viewer-datagrid.js"></script>
 
         <style>
             perspective-expression-editor {
@@ -37,7 +37,8 @@
     <body>
         <perspective-viewer> </perspective-viewer>
 
-        <script>
+        <script type="module">
+            import perspective from "./perspective.js";
             var xhr = new XMLHttpRequest();
             xhr.open("GET", "superstore.csv", true);
             xhr.onload = function () {

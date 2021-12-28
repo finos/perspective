@@ -22,7 +22,10 @@ exports.WorkerPlugin = function WorkerPlugin(inline) {
                     assetNames: "[name]",
                     minify: !process.env.PSP_DEBUG,
                     bundle: true,
-                    sourcemap: true,
+                    // // Unfortunately source maps don't work with blob
+                    // // workers, which we need to make cross-origin
+                    // // workers not a PITA ..
+                    // sourcemap: true,
                 });
 
                 return {

@@ -8,10 +8,7 @@ include Makefile
 
 # Source files for perspective-python
 graft perspective
-include perspective/table/*.so
-include perspective/table/*.dll
-include perspective/table/*.dylib
-
+recursive-include perspective/table/
 
 graft perspective/tests
 
@@ -26,7 +23,6 @@ prune docs/dist
 
 # don't ship benchmark
 prune bench
-
 
 # Use package.json for versioning
 include package.json

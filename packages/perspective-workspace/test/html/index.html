@@ -10,9 +10,9 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <script src="perspective.js"></script>
-        <script src="perspective-workspace.js"></script>
-        <script src="perspective-viewer-datagrid.js"></script>
+        <script type="module" src="perspective.js"></script>
+        <script type="module" src="perspective-workspace.js"></script>
+        <script type="module" src="perspective-viewer-datagrid.js"></script>
 
         <link rel="stylesheet" href="material.css" />
         <link rel="stylesheet" href="index.css" />
@@ -21,7 +21,8 @@
     <body>
         <perspective-workspace id="workspace"></perspective-workspace>
 
-        <script>
+        <script type="module">
+            import perspective from "./perspective.js";
             const xhr = new XMLHttpRequest();
             window.__WORKER__ = perspective.worker();
             xhr.open("GET", "superstore.csv", true);

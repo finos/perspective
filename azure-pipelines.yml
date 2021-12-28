@@ -44,8 +44,11 @@ parameters:
         condition: not(eq(variables['Agent.OS'], 'Windows_NT'))
 
       - bash: yarn --frozen-lockfile
-        displayName: "Install Deps"
+        displayName: "Install Javascript Dependencies"
 
+  - name: pythonInitSteps
+    type: stepList
+    default:
       - task: UsePythonVersion@0
         inputs:
           versionSpec: "$(python.version)"
@@ -56,6 +59,9 @@ parameters:
         displayName: "Install Python base dependencies"
         condition: succeeded()
 
+  - name: wasmInitSteps
+    type: stepList
+    default:
       - bash: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
         displayName: "Install wasm-pack"
 
@@ -63,13 +69,13 @@ parameters:
     type: stepList
     default:
       - bash: sudo node scripts/install_tools.js
-        displayName: "Linux System deps"
+        displayName: "Install Linux System dependencies"
 
   - name: macInitSteps
     type: stepList
     default:
       - bash: brew install boost flatbuffers
-        displayName: "Mac System deps"
+        displayName: "Install Mac System dependencies"
 
   - name: windowsInitSteps
     type: stepList
@@ -82,20 +88,32 @@ parameters:
           which python$(python.version)
         displayName: "Which python"
 
-      - script: choco install boost-msvc-14.1 flatc
-        displayName: "System deps"
+      # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/utility/command-line?view=azure-devops&tabs=yaml
+      # When you want to run a batch file from another batch file in Windows CMD, you must use the call command, otherwise the first batch file is terminated.
+      - script: |
+          set VCPKG_DEFAULT_TRIPLET=x64-windows
+          set VCPKG_PLATFORM_TOOLSET=v142
+          git clone https://github.com/Microsoft/vcpkg
+          cd vcpkg
+          call bootstrap-vcpkg.bat
+          call vcpkg.exe install boost-algorithm boost-filesystem boost-multi-index boost-multiprecision boost-program-options boost-system boost-unordered boost-uuid flatbuffers
+          call vcpkg.exe integrate install
+        displayName: "Install Windows System dependencies"
 
   - name: webassemblySteps
     type: stepList
     default:
+      - bash: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+        displayName: "Install wasm-pack"
+
       - bash: yarn lint_js
-        displayName: "Lint"
+        displayName: "Lint Javascript"
 
       - bash: yarn build_js --ci
-        displayName: "Build"
+        displayName: "Build Javascript"
 
       - bash: yarn test_js --quiet --ci
-        displayName: "Test"
+        displayName: "Test Javascript"
         env:
           PSP_DOCKER: 1
 
@@ -103,13 +121,13 @@ parameters:
     type: stepList
     default:
       - script: yarn build_python  --ci $(python_flag) $(manylinux_flag)
-        displayName: "build"
+        displayName: "Build Python"
 
   - name: pythonBuildVS2019Steps
     type: stepList
     default:
       - script: yarn build_python  --ci $(python_flag) $(manylinux_flag)
-        displayName: "build"
+        displayName: "Build Python"
         env:
           # azure pipelines are bad, so force windows-2019 to use VS2019
           PSP_GENERATOR: Visual Studio 16 2019
@@ -118,10 +136,10 @@ parameters:
     type: stepList
     default:
       - bash: yarn lint_python
-        displayName: "Lint"
+        displayName: "Lint Python"
 
       - bash: yarn build_python  --ci $(python_flag) $(manylinux_flag)
-        displayName: "build"
+        displayName: "Build Python"
         env:
           PSP_DOCKER: 1
 
@@ -144,7 +162,7 @@ parameters:
     default:
       # Build a python sdist
       - bash: export SDIST_PUBLISH_NAME=perspective-python-$(Build.SourceBranchName)-$(Build.BuildId).tar.gz && cd $(System.DefaultWorkingDirectory)/python/perspective && ./scripts/build_sdist.sh
-        displayName: "Build sdist"
+        displayName: "Build Python SDist"
 
       # Save the artifact to Azure storage
       - task: PublishPipelineArtifact@1
@@ -158,7 +176,7 @@ parameters:
       # Build a python wheel for Mac 10.14
       - bash: yarn _wheel_python $(python_flag) --macos
         condition: and(succeeded(), or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')))
-        displayName: "Build wheel"
+        displayName: "Build Mac wheel"
 
       # Test the wheel
       - bash: cd $(System.DefaultWorkingDirectory)/python/perspective/scripts && ./test_wheels.sh $(python_flag) --macos
@@ -199,7 +217,6 @@ parameters:
     default:
       # Build a python wheel for Windows
       - bash: yarn _wheel_python $(python_flag)
-        condition: and(succeeded(), or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')))
         displayName: "Build Windows Wheel"
         env:
           # azure pipelines are bad, so force windows-2019 to use VS2019
@@ -225,6 +242,7 @@ jobs:
 
     steps:
       - ${{ parameters.initSteps }}
+      - ${{ parameters.wasmInitSteps }}
       - ${{ parameters.linuxInitSteps }}
       - ${{ parameters.webassemblySteps }}
 
@@ -355,6 +373,7 @@ jobs:
 
     steps:
       - ${{ parameters.initSteps }}
+      - ${{ parameters.pythonInitSteps }}
       - ${{ parameters.pythonBuildDockerSteps }}
       - ${{ parameters.pythonCoverageSteps }}
       - ${{ parameters.pythonLinuxWheelSteps }}
@@ -385,7 +404,6 @@ jobs:
           python.version: "3.7"
           python_flag: ""
           artifact_name: "cp37-cp37m-win64_amd"
-
         ? ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')) }}
         : Python38:
             python.version: "3.8"
@@ -398,23 +416,46 @@ jobs:
 
     steps:
       - ${{ parameters.initSteps }}
+      - ${{ parameters.pythonInitSteps }}
       - ${{ parameters.windowsInitSteps }}
       - ${{ parameters.pythonBuildVS2019Steps }}
-      # - ${{ parameters.pythonWindowsWheelVS2019Steps }}
+
+  # Separate out windows wheel builds as the windows
+  # build takes 37 years to finish
+  - job: "Windows_Wheels"
+    pool:
+      vmImage: "windows-2019"
+    condition: or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual'))
+
+    strategy:
+      matrix:
+        Python37:
+          python.version: "3.7"
+          python_flag: ""
+          artifact_name: "cp37-cp37m-win64_amd"
+        Python38:
+          python.version: "3.8"
+          python_flag: "--python38"
+          artifact_name: "cp38-cp38m-win64_amd"
+        Python39:
+          python.version: "3.9"
+          python_flag: "--python39"
+          artifact_name: "cp39-cp39m-win64_amd"
+
+    steps:
+      - ${{ parameters.initSteps }}
+      - ${{ parameters.pythonInitSteps }}
+      - ${{ parameters.windowsInitSteps }}
+      - ${{ parameters.pythonWindowsWheelVS2019Steps }}
 
   - job: "MacOS_Catalina"
     pool:
       vmImage: "macos-10.15"
+    condition: or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual'))
 
     strategy:
       matrix:
-        Python39:
-          python.version: "3.9"
-          python_flag: "--python39"
-          artifact_name: "cp39-cp39-macosx_10_15_x86_64"
-
-        ? ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')) }}
-        : Python36:
+          Python36:
             python.version: "3.6"
             python_flag: "--python36"
             artifact_name: "cp36-cp36m-macosx_10_15_x86_64"
@@ -428,9 +469,16 @@ jobs:
             python.version: "3.8"
             python_flag: "--python38"
             artifact_name: "cp38-cp38-macosx_10_15_x86_64"
+            
+          Python39:
+            python.version: "3.9"
+            python_flag: "--python39"
+            artifact_name: "cp39-cp39-macosx_10_15_x86_64"
+          
 
     steps:
       - ${{ parameters.initSteps }}
+      - ${{ parameters.pythonInitSteps }}
       - ${{ parameters.macInitSteps }}
       - ${{ parameters.pythonBuildSteps }}
       - ${{ parameters.pythonCoverageSteps }}
@@ -449,6 +497,7 @@ jobs:
 
     steps:
       - ${{ parameters.initSteps }}
+      - ${{ parameters.pythonInitSteps }}
       - ${{ parameters.macInitSteps }}
       - ${{ parameters.pythonBuildSteps }}
       - ${{ parameters.pythonCoverageSteps }}
@@ -474,20 +523,10 @@ jobs:
         displayName: "Install Yarn"
 
       - bash: yarn --frozen-lockfile
-        displayName: "Install Deps"
+        displayName: "Install Javascript Dependencies"
 
-      - task: UsePythonVersion@0
-        inputs:
-          versionSpec: "$(python.version)"
-          architecture: "x64"
-        displayName: "Use Python $(python.version)"
-
-      - bash: python -m pip install --upgrade pip wheel setuptools jupyterlab numpy "pyarrow>=5" "black==20.8b1" flake8-black
-        displayName: "Install Python base dependencies"
-        condition: succeeded()
-
-      - bash: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-        displayName: "Install wasm-pack"
+      - ${{ parameters.pythonInitSteps }}
+      - ${{ parameters.wasmInitSteps }}
 
       - task: DownloadPipelineArtifact@2
         displayName: "Download Python 3.7 Perspective Wheel"
