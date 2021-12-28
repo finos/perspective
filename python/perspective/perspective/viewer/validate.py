@@ -6,16 +6,16 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-from six import iteritems, string_types
 from datetime import datetime
+
+from ..core import ALL_FILTERS, Aggregate, Plugin, Sort
 from ..core.exception import PerspectiveError
-from ..core import Aggregate, Plugin, ALL_FILTERS, Sort
 
 
 def validate_plugin(plugin):
     if isinstance(plugin, Plugin):
         return plugin.value
-    elif isinstance(plugin, string_types):
+    elif isinstance(plugin, str):
         if plugin not in Plugin.options():
             raise PerspectiveError("Unrecognized `plugin`: {0}".format(plugin))
         return plugin
@@ -28,7 +28,7 @@ def validate_plugin(plugin):
 def validate_columns(columns):
     if columns is None:
         return []
-    elif isinstance(columns, string_types):
+    elif isinstance(columns, str):
         columns = [columns]
 
     if isinstance(columns, list):
@@ -40,7 +40,7 @@ def validate_columns(columns):
 def _validate_pivots(pivots):
     if pivots is None:
         return []
-    elif isinstance(pivots, string_types):
+    elif isinstance(pivots, str):
         pivots = [pivots]
 
     if isinstance(pivots, list):
@@ -61,10 +61,10 @@ def validate_aggregates(aggregates):
     if aggregates is None:
         return {}
     elif isinstance(aggregates, dict):
-        for k, v in iteritems(aggregates):
+        for k, v in aggregates.items():
             if isinstance(v, Aggregate):
                 aggregates[k] = v.value
-            elif isinstance(v, string_types):
+            elif isinstance(v, str):
                 if v not in Aggregate.options():
                     raise PerspectiveError("Unrecognized aggregate: %s", v)
             elif isinstance(v, list):
@@ -89,7 +89,7 @@ def validate_aggregates(aggregates):
 def validate_sort(sort):
     if sort is None:
         return []
-    elif isinstance(sort, string_types):
+    elif isinstance(sort, str):
         sort = [sort]
 
     if isinstance(sort, list):
@@ -99,7 +99,7 @@ def validate_sort(sort):
         for col, s in sort:
             if isinstance(s, Sort):
                 s = s.value
-            elif not isinstance(s, string_types) or s not in Sort.options():
+            elif not isinstance(s, str) or s not in Sort.options():
                 raise PerspectiveError("Unrecognized sort direction: %s", s)
             ret.append([col, s])
         return ret
@@ -153,13 +153,13 @@ def validate_expressions(expressions):
     if expressions is None:
         return []
 
-    if isinstance(expressions, string_types):
+    if isinstance(expressions, str):
         # wrap in a list and return
         return [expressions]
 
     if isinstance(expressions, list):
         for expr in expressions:
-            if not isinstance(expr, string_types):
+            if not isinstance(expr, str):
                 raise PerspectiveError(
                     "Cannot parse non-string expression: {}".format(str(type(expr)))
                 )

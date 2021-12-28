@@ -6,13 +6,13 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-import six
 import os
-import numpy as np
-import pandas as pd
 from datetime import date, datetime
 from functools import partial
 from types import MethodType
+
+import numpy as np
+import pandas as pd
 
 if os.name == 'nt':
     BINDING = 'libbinding.pyd'
@@ -291,28 +291,6 @@ class TestClient(object):
             "e": "datetime",
             "f": "string"
         }
-
-    def test_widget_client_schema_py2_types(self):
-        import perspective
-        assert perspective.is_libpsp() is False
-        if six.PY2:
-            widget = perspective.PerspectiveWidget({
-                "a": long,  # noqa: F821
-                "b": float,
-                "c": bool,
-                "d": date,
-                "e": datetime,
-                "f": unicode  # noqa: F821
-            })
-            assert hasattr(widget, "table") is False
-            assert widget._data == {
-                "a": "integer",
-                "b": "float",
-                "c": "boolean",
-                "d": "date",
-                "e": "datetime",
-                "f": "string"
-            }
 
     def test_widget_client_update(self):
         import perspective

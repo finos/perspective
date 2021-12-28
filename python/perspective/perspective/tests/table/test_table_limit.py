@@ -6,11 +6,10 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-import perspective
-import six
-
-from pytest import mark
 from datetime import date, datetime
+
+import perspective
+from pytest import mark
 
 
 class TestTableInfer(object):

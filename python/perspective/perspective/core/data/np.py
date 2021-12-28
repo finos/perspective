@@ -6,9 +6,9 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-import six
-import numpy as np
 from datetime import datetime
+
+import numpy as np
 
 DATE_DTYPES = [
     np.dtype("datetime64[D]"),
@@ -35,11 +35,6 @@ def make_null_mask(array):
     is_object_or_string_dtype = np.issubdtype(array.dtype, np.str_) or np.issubdtype(
         array.dtype, np.object_
     )
-
-    if six.PY2:
-        is_object_or_string_dtype = is_object_or_string_dtype or np.issubdtype(
-            array.dtype, np.unicode_
-        )
 
     is_datetime_dtype = np.issubdtype(array.dtype, np.datetime64) or np.issubdtype(
         array.dtype, np.timedelta64

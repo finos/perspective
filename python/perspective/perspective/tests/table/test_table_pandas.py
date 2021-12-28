@@ -5,12 +5,13 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
-import six
-from io import StringIO
 from datetime import date, datetime
+from io import StringIO
+
 import numpy as np
 import pandas as pd
 from perspective.table import Table
+
 from ..common import superstore
 
 
@@ -276,18 +277,6 @@ class TestTablePandas(object):
         })
         table.update(df)
         assert table.view().to_dict()["a"] == data
-
-    def test_table_pandas_from_schema_long(self):
-        if six.PY2:
-            data = [None, 1, None, 2, None, 3, 4]
-            df = pd.DataFrame({
-                "a": data
-            })
-            table = Table({
-                "a": long  # noqa: F821
-            })
-            table.update(df)
-            assert table.view().to_dict()["a"] == data
 
     def test_table_pandas_from_schema_bool(self):
         data = [True, False, True, False]
@@ -849,8 +838,6 @@ class TestTablePandas(object):
 
     def test_table_pandas_correct_csv_nan_end(self):
         s = "str,int\n,1\n,2\nabc,3"
-        if six.PY2:
-            s = unicode(s)
         csv = StringIO(s)
         data = pd.read_csv(csv)
         tbl = Table(data)
@@ -868,8 +855,6 @@ class TestTablePandas(object):
 
     def test_table_pandas_correct_csv_nan_intermittent(self):
         s = "str,float\nabc,\n,2\nghi,"
-        if six.PY2:
-            s = unicode(s)
         csv = StringIO(s)
         data = pd.read_csv(csv)
         tbl = Table(data)

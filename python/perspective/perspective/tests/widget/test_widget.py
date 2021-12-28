@@ -5,13 +5,13 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
-import six
-import numpy as np
 from datetime import date, datetime
 from functools import partial
 from types import MethodType
-from pytest import raises
+
+import numpy as np
 from perspective import PerspectiveError, PerspectiveWidget, Table
+from pytest import raises
 
 
 def mock_post(self, msg, msg_id=None, assert_msg=None):

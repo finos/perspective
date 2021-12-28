@@ -6,19 +6,17 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-import six
-import numpy
 from calendar import timegm
 from datetime import date, datetime
-from dateutil.parser import parse
-from pytz import UTC
-from pandas import Period
 from re import search
 from time import mktime
-from .libbinding import t_dtype
 
-if six.PY2:
-    from past.builtins import long
+import numpy
+from dateutil.parser import parse
+from pandas import Period
+from pytz import UTC
+
+from .libbinding import t_dtype
 
 
 def _normalize_timestamp(obj):
@@ -73,17 +71,10 @@ class _PerspectiveDateValidator(object):
         if isinstance(obj, (int, float)):
             obj = datetime.fromtimestamp(_normalize_timestamp(obj) / 1000)
 
-        if six.PY2:
-            if isinstance(obj, (long)):
-                obj = datetime.fromtimestamp(long(obj))
-
         if isinstance(obj, numpy.datetime64):
             if str(obj) == "NaT":
                 return None
             obj = obj.astype(datetime)
-
-            if (six.PY2 and isinstance(obj, long)) or isinstance(obj, int):
-                obj = datetime.fromtimestamp(obj / 1000000000)
 
         # Perspective stores month in `t_date` as an integer [0-11],
         # while Python stores month as [1-12], so decrement the Python value
@@ -124,12 +115,6 @@ class _PerspectiveDateValidator(object):
             converter = timegm
             to_timetuple = "utctimetuple"
 
-        if six.PY2:
-            if isinstance(obj, long):
-                # compat with python2 long from datetime.datetime
-                obj = obj / 1000000000
-                return long(obj)
-
         if isinstance(obj, numpy.datetime64):
             if str(obj) == "NaT":
                 return None
@@ -141,10 +126,6 @@ class _PerspectiveDateValidator(object):
                 # Convert numpy "datetime64[D/W/M/Y]", as they are converted
                 # into `datetime.date`.
                 return int((converter(getattr(obj, to_timetuple)())) * 1000)
-
-            if six.PY2:
-                if isinstance(obj, long):
-                    return long(round(obj / 1000000))
 
             if isinstance(obj, int):
                 return round(obj / 1000000)

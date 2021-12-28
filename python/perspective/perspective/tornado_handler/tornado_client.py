@@ -7,9 +7,10 @@
 #
 
 import json
-import six
+
 from tornado import gen, ioloop
 from tornado.websocket import websocket_connect
+
 from ..client import PerspectiveClient
 from ..manager.manager_internal import DateTimeEncoder
 
@@ -101,7 +102,7 @@ class PerspectiveTornadoClient(PerspectiveClient):
             self._pending_binary_length = None
             self._pending_port_id = None
             self._full_binary = b""
-        elif isinstance(msg, six.string_types):
+        elif isinstance(msg, str):
             msg = json.loads(msg)
 
             if msg.get("binary_length"):
