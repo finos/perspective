@@ -37,7 +37,7 @@ const IS_CI = getarg("--ci");
 const SETUP_ONLY = getarg("--setup-only");
 const IS_INSTALL = getarg("--install");
 process.env.PSP_DEBUG =
-process.env.PSP_DEBUG || process.env.debug || getarg("--debug");
+    process.env.PSP_DEBUG || process.env.debug || getarg("--debug");
 
 // Check that the `PYTHON` command is valid, else default to `python`.
 try {
