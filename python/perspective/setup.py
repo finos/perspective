@@ -112,7 +112,7 @@ class PSPBuild(build_ext):
 
     def build_extension_cmake(self, ext):
         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
-        cfg = "Debug" if self.debug else "Release"
+        cfg = "Debug" if self.debug or os.environ.get("PSP_DEBUG") else "Release"
 
         PYTHON_VERSION = "{}.{}".format(sys.version_info.major, sys.version_info.minor)
 
