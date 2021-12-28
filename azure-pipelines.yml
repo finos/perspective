@@ -317,11 +317,11 @@ jobs:
 
     strategy:
       matrix:
-        Python37ManyLinux2010:
-          python.version: "3.7"
-          python_flag: ""
-          manylinux_flag: "--manylinux2010"
-          artifact_name: "cp37-cp37m-manylinux2010_x86_64"
+        Python39ManyLinux2014:
+          python.version: "3.9"
+          python_flag: "--python39"
+          manylinux_flag: "--manylinux2014"
+          artifact_name: "cp39-cp39-manylinux2014_x86_64"
 
         ? ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')) }}
         : Python36ManyLinux2010:
@@ -329,42 +329,55 @@ jobs:
             python_flag: "--python36"
             manylinux_flag: "--manylinux2010"
             artifact_name: "cp36-cp36m-manylinux2010_x86_64"
+
           Python36ManyLinux2014:
             python.version: "3.6"
             python_flag: "--python36"
             manylinux_flag: "--manylinux2014"
             artifact_name: "cp36-cp36m-manylinux2014_x86_64"
-          # Python37ManyLinux2010 is always built
+
+          Python37ManyLinux2010:
+            python.version: "3.7"
+            python_flag: ""
+            manylinux_flag: "--manylinux2010"
+            artifact_name: "cp37-cp37m-manylinux2010_x86_64"
+
           Python37ManyLinux2014:
             python.version: "3.7"
             python_flag: ""
             manylinux_flag: "--manylinux2014"
             artifact_name: "cp37-cp37m-manylinux2014_x86_64"
+
           Python38ManyLinux2010:
             python.version: "3.8"
             python_flag: "--python38"
             manylinux_flag: "--manylinux2010"
             artifact_name: "cp38-cp38-manylinux2010_x86_64"
+
           Python38ManyLinux2014:
             python.version: "3.8"
             python_flag: "--python38"
             manylinux_flag: "--manylinux2014"
             artifact_name: "cp38-cp38-manylinux2014_x86_64"
+
           Python39ManyLinux2010:
             python.version: "3.9"
             python_flag: "--python39"
             manylinux_flag: "--manylinux2010"
             artifact_name: "cp39-cp39-manylinux2010_x86_64"
+
           Python39ManyLinux2014:
             python.version: "3.9"
             python_flag: "--python39"
             manylinux_flag: "--manylinux2014"
             artifact_name: "cp39-cp39-manylinux2014_x86_64"
+
           Python310ManyLinux2010:
             python.version: "3.10"
             python_flag: "--python310"
             manylinux_flag: "--manylinux2010"
             artifact_name: "cp310-cp310-manylinux2010_x86_64"
+
           Python310ManyLinux2014:
             python.version: "3.10"
             python_flag: "--python310"
@@ -399,19 +412,22 @@ jobs:
 
     strategy:
       matrix:
-        Python37:
-          python.version: "3.7"
-          python_flag: ""
-          artifact_name: "cp37-cp37m-win64_amd"
+        Python39:
+          python.version: "3.9"
+          python_flag: "--python39"
+          artifact_name: "cp39-cp39m-win64_amd"
+
         ? ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')) }}
-        : Python38:
+        : Python37:
+            python.version: "3.7"
+            python_flag: ""
+            artifact_name: "cp37-cp37m-win64_amd"
+
+          Python38:
             python.version: "3.8"
             python_flag: "--python38"
             artifact_name: "cp38-cp38m-win64_amd"
-          Python39:
-            python.version: "3.9"
-            python_flag: "--python39"
-            artifact_name: "cp39-cp39m-win64_amd"
+
           Python310:
             python.version: "3.10"
             python_flag: "--python310"
@@ -435,14 +451,17 @@ jobs:
           python.version: "3.7"
           python_flag: ""
           artifact_name: "cp37-cp37m-win64_amd"
+
         Python38:
           python.version: "3.8"
           python_flag: "--python38"
           artifact_name: "cp38-cp38m-win64_amd"
+
         Python39:
           python.version: "3.9"
           python_flag: "--python39"
           artifact_name: "cp39-cp39m-win64_amd"
+
         Python310:
           python.version: "3.10"
           python_flag: "--python310"
@@ -497,6 +516,7 @@ jobs:
           python.version: "3.9"
           python_flag: "--python39"
           artifact_name: "cp39-cp39-macosx_11_0_x86_64"
+
         Python310:
           python.version: "3.10"
           python_flag: "--python310"
