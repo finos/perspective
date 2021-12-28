@@ -45,6 +45,10 @@ std::shared_ptr<Table> make_table_py(
     std::uint32_t offset;
     void* ptr = nullptr;
 
+    // copy to string here to avoid losing python reference/race condition
+    // in async tests
+    std::string index_str = index;
+
     // If the Table has already been created, use it
     if (table_initialized) {
         tbl = table.cast<std::shared_ptr<Table>>();
@@ -259,15 +263,15 @@ std::shared_ptr<Table> make_table_py(
         PerspectiveScopedGILRelease acquire(pool->get_event_loop_thread_id());
         row_count = arrow_loader.row_count();
         data_table.extend(arrow_loader.row_count());
-        arrow_loader.fill_table(data_table, input_schema, index, offset, limit, is_update);
+        arrow_loader.fill_table(data_table, input_schema, index_str, offset, limit, is_update);
     } else if (is_numpy) {
         row_count = numpy_loader.row_count();
         data_table.extend(row_count);
-        numpy_loader.fill_table(data_table, input_schema, index, offset, limit, is_update);
+        numpy_loader.fill_table(data_table, input_schema, index_str, offset, limit, is_update);
     } else {
         row_count = accessor.attr("row_count")().cast<std::int32_t>();
         data_table.extend(row_count);
-        _fill_data(data_table, accessor, input_schema, index, offset, limit, is_update);
+        _fill_data(data_table, accessor, input_schema, index_str, offset, limit, is_update);
     }
 
     if (is_arrow && !is_csv) {
