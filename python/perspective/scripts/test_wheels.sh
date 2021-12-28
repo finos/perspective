@@ -34,6 +34,10 @@ while :; do
             PYTHON_INTERPRETER="python3.8"
             PYTHON_TAG="cp38"
         ;;
+        "--python310")
+            PYTHON_INTERPRETER="python3.10"
+            PYTHON_TAG="cp310"
+        ;;
         "--manylinux2010")
             PLATFORM="manylinux2010"
         ;;

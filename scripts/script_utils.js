@@ -302,6 +302,23 @@ exports.python_image = function python_image(image = "", python = "") {
     return `${image}`;
 };
 
+/**
+ * Get python version from command line args
+ * @returns {string} The python version
+ */
+exports.get_python = () => {
+    const python = getarg("--python310")
+        ? "python3.10"
+        : getarg("--python39")
+        ? "python3.9"
+        : getarg("--python38")
+        ? "python3.8"
+        : getarg("--python36")
+        ? "python3.6"
+        : "python3.7";
+    return python;
+};
+
 /*******************************************************************************
  *
  * Tests

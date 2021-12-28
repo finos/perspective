@@ -13,14 +13,11 @@ const {
     resolve,
     getarg,
     python_image,
+    get_python,
 } = require("./script_utils.js");
 
 const IS_DOCKER = process.env.PSP_DOCKER;
-let PYTHON = getarg("--python38")
-    ? "python3.8"
-    : getarg("--python36")
-    ? "python3.6"
-    : "python3";
+let PYTHON = get_python();
 let IMAGE = "manylinux2014";
 
 if (IS_DOCKER) {

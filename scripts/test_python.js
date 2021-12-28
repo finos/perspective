@@ -14,15 +14,10 @@ const {
     resolve,
     getarg,
     python_image,
+    get_python,
 } = require("./script_utils.js");
 
-let PYTHON = getarg("--python38")
-    ? "python3.8"
-    : getarg("--python36")
-    ? "python3.6"
-    : getarg("--python37")
-    ? "python3.7"
-    : "python3";
+let PYTHON = get_python();
 
 const COVERAGE = getarg("--coverage");
 const VERBOSE = getarg("--debug");

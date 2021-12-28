@@ -15,17 +15,11 @@ const {
     getarg,
     bash,
     python_image,
+    get_python,
 } = require("./script_utils.js");
 const fs = require("fs-extra");
 const IS_DOCKER = process.env.PSP_DOCKER;
 const IS_MACOS = getarg("--macos");
-const PYTHON = getarg("--python39")
-    ? "python3.9"
-    : getarg("--python38")
-    ? "python3.8"
-    : getarg("--python36")
-    ? "python3.6"
-    : "python3.7";
 
 let IMAGE = "manylinux2014";
 let MANYLINUX_VERSION;
