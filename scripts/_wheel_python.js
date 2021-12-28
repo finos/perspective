@@ -18,6 +18,7 @@ const {
     get_python,
 } = require("./script_utils.js");
 const fs = require("fs-extra");
+const PYTHON = get_python();
 const IS_DOCKER = process.env.PSP_DOCKER;
 const IS_MACOS = getarg("--macos");
 
