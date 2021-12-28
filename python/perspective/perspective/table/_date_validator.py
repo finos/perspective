@@ -6,16 +6,14 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
+import numpy
 from calendar import timegm
 from datetime import date, datetime
+from dateutil.parser import parse
+from pytz import UTC
+from pandas import Period
 from re import search
 from time import mktime
-
-import numpy
-from dateutil.parser import parse
-from pandas import Period
-from pytz import UTC
-
 from .libbinding import t_dtype
 
 
@@ -75,6 +73,9 @@ class _PerspectiveDateValidator(object):
             if str(obj) == "NaT":
                 return None
             obj = obj.astype(datetime)
+
+            if isinstance(obj, int):
+                obj = datetime.fromtimestamp(obj / 1000000000)
 
         # Perspective stores month in `t_date` as an integer [0-11],
         # while Python stores month as [1-12], so decrement the Python value
