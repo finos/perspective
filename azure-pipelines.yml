@@ -1,15 +1,29 @@
 trigger:
+  batch: true
   branches:
     include:
-      - "*" # must quote since "*" is a YAML reserved character; we want a string
+      - master
   tags:
     include:
       - "v*"
 
 pr:
+  autoCancel: true
   branches:
     include:
-      - "*" # must quote since "*" is a YAML reserved character; we want a string
+      - master
+  drafts: true
+  paths:
+    exclude:
+      - AUTHORS
+      - CHANGELOG.md
+      - CONTRIBUTING.md
+      - LICENSE
+      - README.md
+      - binder/
+      - docs/
+      - examples/
+      - python/perspective/README.md
 
 schedules:
   - cron: "0 0 * * 6"
