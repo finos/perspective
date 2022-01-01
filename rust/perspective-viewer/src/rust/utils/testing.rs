@@ -81,11 +81,9 @@ macro_rules! test_html {
         use wasm_bindgen::JsCast;
         use yew::prelude::*;
 
-        struct TestElement {
-            html: Html
-        }
+        struct TestElement {}
 
-        #[derive(Properties, Clone)]
+        #[derive(Properties, Clone, PartialEq)]
         struct TestElementProps {
             html: Html
         }
@@ -94,28 +92,26 @@ macro_rules! test_html {
             type Message = ();
             type Properties = TestElementProps;
 
-            fn create(_props: Self::Properties, _link: ComponentLink<Self>) -> Self {
-                TestElement {
-                    html: _props.html,
-                }
+            fn create(_ctx: &Context<Self>) -> Self {
+                TestElement {}
             }
 
-            fn update(&mut self, _msg: Self::Message) -> ShouldRender {
+            fn update(&mut self, _ctx: &Context<Self>, _msg: Self::Message) -> bool {
                 false
             }
 
-            fn change(&mut self, _props: Self::Properties) -> ShouldRender {
+            fn changed(&mut self, _ctx: &Context<Self>) -> bool {
                 true
             }
 
-            fn view(&self) -> Html {
+            fn view(&self, ctx: &Context<Self>) -> Html {
                 html! {
                     <>
                         <style>
                             { "#test{position:absolute;top:0;bottom:0;left:0;right:0;}" }
                             { &CSS }
                         </style>
-                        { self.html.clone() }
+                        { ctx.props().html.clone() }
                     </>
                 }
             }

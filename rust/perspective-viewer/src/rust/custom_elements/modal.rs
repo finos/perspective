@@ -23,7 +23,7 @@ type BlurHandlerType = Rc<RefCell<Option<Closure<dyn FnMut(FocusEvent)>>>>;
 /// to any existing on-page elements, accounting for viewport, scroll position, etc.
 ///
 ///`#[derive(Clone)]` generates the trait bound `T: Clone`, which is not required
-/// because `ComponentLink<T>` implements Clone without this bound;  thus `Clone`
+/// because `Scope<T>` implements Clone without this bound;  thus `Clone`
 /// must be implemented by the `derivative` crate's
 /// [custom bounds](https://mcarton.github.io/rust-derivative/latest/Debug.html#custom-bound)
 /// support.

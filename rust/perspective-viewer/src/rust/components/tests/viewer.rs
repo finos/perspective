@@ -22,12 +22,8 @@ use yew::prelude::*;
 
 wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 
-fn set_up_html() -> (
-    WeakComponentLink<PerspectiveViewer>,
-    web_sys::ShadowRoot,
-    Session,
-) {
-    let link: WeakComponentLink<PerspectiveViewer> = WeakComponentLink::default();
+fn set_up_html() -> (WeakScope<PerspectiveViewer>, web_sys::ShadowRoot, Session) {
+    let link: WeakScope<PerspectiveViewer> = WeakScope::default();
     let root = NodeRef::default();
     let document = window().unwrap().document().unwrap();
     let elem: HtmlElement = document.create_element("div").unwrap().unchecked_into();

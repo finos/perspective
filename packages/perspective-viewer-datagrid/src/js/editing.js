@@ -8,7 +8,7 @@
  */
 
 const selected_position_map = new WeakMap();
-
+import {PLUGIN_SYMBOL} from "./plugin_menu.js";
 function lock(body) {
     let lock;
     return async function (...args) {
@@ -122,12 +122,17 @@ function editableStyleListener(table, viewer) {
     if (!viewer.hasAttribute("editable")) {
         return;
     }
+    const plugins = table[PLUGIN_SYMBOL] || {};
     const edit = isEditable.call(this, viewer);
     for (const td of table.querySelectorAll("td")) {
         const meta = table.getMeta(td);
         const type = this.get_psp_type(meta);
         if (this._is_editable[meta.x]) {
-            if (type === "boolean") {
+            const col_name = meta.column_header[meta.column_header.length - 1];
+            if (type === "string" && plugins[col_name]?.format === "link") {
+                td.toggleAttribute("contenteditable", false);
+                td.classList.toggle("boolean-editable", false);
+            } else if (type === "boolean") {
                 td.toggleAttribute("contenteditable", false);
                 td.classList.toggle("boolean-editable", meta.user !== null);
             } else {

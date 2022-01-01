@@ -6,15 +6,14 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use super::aggregate_selector::*;
+use super::expression_toolbar::*;
 use crate::config::*;
 use crate::dragdrop::*;
 use crate::js::plugin::*;
 use crate::renderer::*;
 use crate::session::*;
 use crate::*;
-
-use super::aggregate_selector::*;
-use super::expression_toolbar::*;
 
 use itertools::Itertools;
 use web_sys::*;
@@ -48,11 +47,8 @@ pub struct ActiveColumnProps {
 }
 
 impl PartialEq for ActiveColumnProps {
-    /// Equality for `ActiveColumnProps` determines when it should re-render, which
-    /// is only when it has changed.
-    /// TODO Aggregates & ViewConfig generally
-    fn eq(&self, rhs: &ActiveColumnProps) -> bool {
-        self.idx == rhs.idx && self.name == rhs.name && self.is_pivot == rhs.is_pivot
+    fn eq(&self, _rhs: &ActiveColumnProps) -> bool {
+        false
     }
 }
 
@@ -138,8 +134,6 @@ pub enum ActiveColumnMsg {
 /// aggregate), and supports drag/drop and missing entries.
 /// TODO Break this into "Active", "Hover" and "Empty"?
 pub struct ActiveColumn {
-    link: ComponentLink<ActiveColumn>,
-    props: ActiveColumnProps,
     add_expression_ref: NodeRef,
     column_type: Option<Type>,
     is_required: bool,
@@ -149,51 +143,40 @@ impl Component for ActiveColumn {
     type Message = ActiveColumnMsg;
     type Properties = ActiveColumnProps;
 
-    fn create(
-        props: <Self as yew::Component>::Properties,
-        link: ComponentLink<Self>,
-    ) -> Self {
+    fn create(ctx: &Context<Self>) -> Self {
         let add_expression_ref = NodeRef::default();
-        let column_type = props.get_type();
-        let is_required = props.get_is_required();
+        let column_type = ctx.props().get_type();
+        let is_required = ctx.props().get_is_required();
         ActiveColumn {
-            link,
-            props,
             add_expression_ref,
             column_type,
             is_required,
         }
     }
 
-    fn change(&mut self, props: <Self as yew::Component>::Properties) -> ShouldRender {
-        let is_required = props.get_is_required();
-        let coltype = props.get_type();
-        let should_render = self.props != props
-            || self.column_type != coltype
-            || is_required != self.is_required;
-        self.column_type = coltype;
-        self.is_required = is_required;
-        self.props = props;
-        should_render
+    fn changed(&mut self, ctx: &Context<Self>) -> bool {
+        self.column_type = ctx.props().get_type();
+        self.is_required = ctx.props().get_is_required();
+        true
     }
 
-    fn update(&mut self, msg: <Self as yew::Component>::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: ActiveColumnMsg) -> bool {
         match msg {
             ActiveColumnMsg::DeactivateColumn(column, shift_key) => {
-                self.props.deactivate_column(column, shift_key);
-                self.props.onselect.emit(());
+                ctx.props().deactivate_column(column, shift_key);
+                ctx.props().onselect.emit(());
                 false
             }
         }
     }
 
-    fn view(&self) -> Html {
+    fn view(&self, ctx: &Context<Self>) -> Html {
         let mut classes = vec!["column_selector_draggable"];
-        if self.props.is_pivot {
+        if ctx.props().is_pivot {
             classes.push("show-aggregate");
         };
 
-        let name = match &self.props.name {
+        let name = match &ctx.props().name {
             ActiveColumnState::DragOver(label) => {
                 classes.push("dragover");
                 if label.is_some() && !self.is_required {
@@ -202,7 +185,7 @@ impl Component for ActiveColumn {
 
                 (
                     label.clone(),
-                    Some(self.props.dragdrop.get_drag_column().unwrap()),
+                    Some(ctx.props().dragdrop.get_drag_column().unwrap()),
                 )
             }
             ActiveColumnState::Column(label, name) => {
@@ -220,8 +203,8 @@ impl Component for ActiveColumn {
                     <div
                         class="column-selector-column"
                         data-label={ label }
-                        data-index={ self.props.idx.to_string() }
-                        ondragenter={ self.props.ondragenter.clone() }>
+                        data-index={ ctx.props().idx.to_string() }
+                        ondragenter={ ctx.props().ondragenter.clone() }>
 
                         <span class="is_column_active inactive">
                         </span>
@@ -236,7 +219,7 @@ impl Component for ActiveColumn {
                 let remove_column = if self.is_required {
                     None
                 } else {
-                    Some(self.link.callback({
+                    Some(ctx.link().callback({
                         let event_name = name.to_owned();
                         move |event: MouseEvent| {
                             ActiveColumnMsg::DeactivateColumn(
@@ -251,7 +234,7 @@ impl Component for ActiveColumn {
                 let dragstart = Callback::from({
                     let event_name = name.to_owned();
                     let noderef = noderef.clone();
-                    let dragdrop = self.props.dragdrop.clone();
+                    let dragdrop = ctx.props().dragdrop.clone();
                     move |event: DragEvent| {
                         let elem = noderef.cast::<HtmlElement>().unwrap();
                         event.data_transfer().unwrap().set_drag_image(&elem, 0, 0);
@@ -263,7 +246,7 @@ impl Component for ActiveColumn {
                 });
 
                 let is_expression =
-                    self.props.session.metadata().is_column_expression(&name);
+                    ctx.props().session.metadata().is_column_expression(&name);
 
                 let class = if self.is_required {
                     "is_column_active required"
@@ -275,8 +258,8 @@ impl Component for ActiveColumn {
                     <div
                         class="column-selector-column"
                         data-label={ label }
-                        data-index={ self.props.idx.to_string() }
-                        ondragenter={ self.props.ondragenter.clone() }>
+                        data-index={ ctx.props().idx.to_string() }
+                        ondragenter={ ctx.props().ondragenter.clone() }>
 
                         <span
                             class={ class }
@@ -287,7 +270,7 @@ impl Component for ActiveColumn {
                             ref={ self.add_expression_ref.clone() }
                             draggable="true"
                             ondragstart={ dragstart }
-                            ondragend={ self.props.ondragend.clone() }>
+                            ondragend={ ctx.props().ondragend.clone() }>
 
                             <span class="column-selector-column-title">
                                 <span
@@ -301,9 +284,9 @@ impl Component for ActiveColumn {
                                     if is_expression {
                                         html! {
                                             <ExpressionToolbar
-                                                session={ self.props.session.clone() }
-                                                renderer={ self.props.renderer.clone() }
-                                                dragdrop={ self.props.dragdrop.clone() }
+                                                session={ ctx.props().session.clone() }
+                                                renderer={ ctx.props().renderer.clone() }
+                                                dragdrop={ ctx.props().dragdrop.clone() }
                                                 name={ name.clone() }
                                                 add_expression_ref={ self.add_expression_ref.clone() }>
                                             </ExpressionToolbar>
@@ -314,9 +297,9 @@ impl Component for ActiveColumn {
                                 }
                             </span>
                             {
-                                if self.props.is_pivot {
-                                    let aggregate = self
-                                        .props
+                                if ctx.props().is_pivot {
+                                    let aggregate = ctx
+                                        .props()
                                         .config
                                         .aggregates
                                         .get(&name)
@@ -325,8 +308,8 @@ impl Component for ActiveColumn {
                                         <AggregateSelector
                                             column={ name.clone() }
                                             aggregate={ aggregate }
-                                            renderer={ self.props.renderer.clone() }
-                                            session={ self.props.session.clone() }>
+                                            renderer={ ctx.props().renderer.clone() }
+                                            session={ ctx.props().session.clone() }>
                                         </AggregateSelector>
                                     }
                                 } else {

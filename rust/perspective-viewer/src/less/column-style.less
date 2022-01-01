@@ -21,8 +21,27 @@
     box-shadow: 0 2px 4px 0 rgb(0 0 0 / 10%);
     user-select: none;
 
+    #column-style-container {
+        margin-bottom: 4px;
+        width: 120px;
+    }
+
+    label {
+        font-size: 8px;
+        width: 100%;
+    }
+
+    input#color-selected,
+    input#format-selected {
+        float: left;
+    }
+
+    input#gradient-param {
+        margin-bottom: 4px;
+    }
+
     input.parameter {
-        max-width: 65px;
+        max-width: 80px;
         background: none;
         color: inherit;
         border: 0px solid transparent;
@@ -83,17 +102,40 @@
     }
 
     div.section {
-        margin-bottom: 8px;
+        margin-bottom: 4px;
+        flex: 1 1 100%;
+    }
+
+    div.inner_section {
+        margin-top: 4px;
     }
 
     div.row {
         display: flex;
         align-items: center;
-        height: 24px;
+        flex-wrap: wrap;
     }
 
     input[type="color"] {
-        width: 24px;
+        width: 36px;
+        height: 36px;
+        cursor: pointer;
+        padding: 0;
+        margin-right: 4px;
+
+        &:before {
+            position: absolute;
+            font-family: "Material Icons";
+            margin-top: 11px;
+            margin-left: 12px;
+            font-size: 12px;
+            content: "add";
+            color: white;
+        }
+
+        &#neg-color-param:before {
+            content: "remove";
+        }
     }
 
     .operator {

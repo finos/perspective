@@ -6,9 +6,8 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::components::column_style::*;
+use crate::components::string_column_style::*;
 use crate::custom_elements::modal::*;
-use crate::utils::WeakComponentLink;
 use crate::*;
 
 use wasm_bindgen::prelude::*;
@@ -17,13 +16,12 @@ use yew::prelude::*;
 
 #[wasm_bindgen]
 #[derive(Clone)]
-pub struct PerspectiveColumnStyleElement {
-    modal: ModalElement<ColumnStyle>,
-    weak_link: WeakComponentLink<ColumnStyle>,
-    props: ColumnStyleProps,
+pub struct PerspectiveStringColumnStyleElement {
+    modal: ModalElement<StringColumnStyle>,
+    props: StringColumnStyleProps,
 }
 
-fn on_change(elem: &web_sys::HtmlElement, config: &ColumnStyleConfig) {
+fn on_change(elem: &web_sys::HtmlElement, config: &StringColumnStyleConfig) {
     let mut event_init = web_sys::CustomEventInit::new();
     event_init.detail(&JsValue::from_serde(config).unwrap());
     let event = CustomEvent::new_with_event_init_dict(
@@ -34,41 +32,35 @@ fn on_change(elem: &web_sys::HtmlElement, config: &ColumnStyleConfig) {
     elem.dispatch_event(&event.unwrap()).unwrap();
 }
 
-impl ResizableMessage for <ColumnStyle as Component>::Message {
+impl ResizableMessage for <StringColumnStyle as Component>::Message {
     fn resize(y: i32, x: i32) -> Self {
-        ColumnStyleMsg::SetPos(y, x)
+        StringColumnStyleMsg::SetPos(y, x)
     }
 }
 
 #[wasm_bindgen]
-impl PerspectiveColumnStyleElement {
+impl PerspectiveStringColumnStyleElement {
     #[wasm_bindgen(constructor)]
     pub fn new(
         elem: web_sys::HtmlElement,
         js_config: JsValue,
-        js_def_config: JsValue,
-    ) -> PerspectiveColumnStyleElement {
+        js_default_config: JsValue,
+    ) -> PerspectiveStringColumnStyleElement {
         let config = js_config.into_serde().unwrap();
-        let default_config = js_def_config.into_serde().unwrap();
+        let default_config = js_default_config.into_serde().unwrap();
         let on_change = {
             clone!(elem);
-            Callback::from(move |x: ColumnStyleConfig| on_change(&elem, &x))
+            Callback::from(move |x: StringColumnStyleConfig| on_change(&elem, &x))
         };
 
-        let weak_link = WeakComponentLink::default();
-        let props = ColumnStyleProps {
-            weak_link: weak_link.clone(),
+        let props = StringColumnStyleProps {
             config,
-            on_change,
             default_config,
+            on_change,
         };
 
         let modal = ModalElement::new(elem, props.clone(), true);
-        PerspectiveColumnStyleElement {
-            modal,
-            weak_link,
-            props,
-        }
+        PerspectiveStringColumnStyleElement { modal, props }
     }
 
     /// Reset to a provided JSON config, to be used in place of `new()` when
@@ -76,17 +68,9 @@ impl PerspectiveColumnStyleElement {
     ///
     /// # Arguments
     /// * `config` - a `ColumnStyle` config in JSON form.
-    /// * `default_config` - the default `ColumnStyle` config for this column
-    ///   type, in JSON form.
-    pub fn reset(&mut self, config: JsValue, default_config: JsValue) {
-        let msg = ColumnStyleMsg::Reset(
-            config.into_serde().unwrap(),
-            default_config.into_serde().unwrap(),
-        );
-
-        if let Some(elem) = self.weak_link.borrow().as_ref() {
-            elem.send_message(msg);
-        }
+    pub fn reset(&mut self, config: JsValue) {
+        let msg = StringColumnStyleMsg::Reset(config.into_serde().unwrap());
+        self.modal.send_message(msg);
     }
 
     /// Dispatches to `ModalElement::open(target)`
@@ -100,6 +84,10 @@ impl PerspectiveColumnStyleElement {
     /// Remove this `ModalElement` from the DOM.
     pub fn close(&mut self) -> Result<(), JsValue> {
         self.modal.hide()
+    }
+
+    pub fn destroy(self) -> Result<(), JsValue> {
+        self.modal.destroy()
     }
 
     /// DOM lifecycle method when connected.  We don't use this, as it can fire during

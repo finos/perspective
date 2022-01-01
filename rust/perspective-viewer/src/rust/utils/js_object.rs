@@ -39,10 +39,21 @@ macro_rules! js_object {
 macro_rules! js_log {
     ($x:expr) => {{
         const DEBUG_ONLY_WARNING: &str = $x;
-        web_sys::console::log_1(&JsValue::from($x));
+        web_sys::console::log_1(&wasm_bindgen::JsValue::from($x));
     }};
     ($x:expr $(, $y:expr)*) => {{
         const DEBUG_ONLY_WARNING: &str = $x;
         web_sys::console::log_1(&format!($x, $($y),*).into());
+    }};
+}
+
+#[macro_export]
+macro_rules! html_template {
+    ($($x:tt)*) => {{
+        html! {
+            <>
+                $($x)*
+            </>
+        }
     }};
 }

@@ -136,7 +136,7 @@ impl PerspectiveViewerElement {
             session: session.clone(),
             renderer: renderer.clone(),
             dragdrop: DragDrop::default(),
-            weak_link: WeakComponentLink::default(),
+            weak_link: WeakScope::default(),
         };
 
         let root = Rc::new(RefCell::new(Some(yew::start_app_with_props_in_element(

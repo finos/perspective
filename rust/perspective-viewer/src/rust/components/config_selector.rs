@@ -22,32 +22,23 @@ use super::sort_item::*;
 use std::rc::Rc;
 use yew::prelude::*;
 
-#[derive(Properties, Clone)]
+#[derive(Properties, Clone, PartialEq)]
 pub struct ConfigSelectorProps {
     pub session: Session,
     pub renderer: Renderer,
     pub dragdrop: DragDrop,
-    pub filter_dropdown: FilterDropDownElement,
 }
 
 derive_renderable_props!(ConfigSelectorProps);
 
+#[derive(Debug)]
 pub enum ConfigSelectorMsg {
     DragStart(DragEffect),
     DragEnd,
-    DragOverRowPivots(usize),
-    DragOverColumnPivots(usize),
-    DragOverSort(usize),
-    DragOverFilter(usize),
-    DragLeaveRowPivots,
-    DragLeaveColumnPivots,
-    DragLeaveSort,
-    DragLeaveFilter,
+    DragOver(usize, DropAction),
+    DragLeave(DropAction),
     Drop(String, DropAction, DragEffect, usize),
-    CloseRowPivot(usize),
-    CloseColumnPivot(usize),
-    CloseSort(usize),
-    CloseFilter(usize),
+    Close(usize, DropAction),
     SetFilterValue(usize, String),
     TransposePivots,
     ViewCreated,
@@ -55,169 +46,175 @@ pub enum ConfigSelectorMsg {
 
 #[derive(Clone)]
 pub struct ConfigSelector {
-    props: ConfigSelectorProps,
-    link: ComponentLink<ConfigSelector>,
+    filter_dropdown: FilterDropDownElement,
     subscriptions: [Rc<Subscription>; 4],
 }
 
-derive_dragdrop_list!(
-    RowPivotSelector,
-    RowPivotDragContext,
-    ConfigSelector,
-    PivotItem,
-    DragOverRowPivots,
-    DragLeaveRowPivots,
-    CloseRowPivot
-);
+struct RowPivotContext {}
+struct ColumnPivotContext {}
+struct SortDragContext {}
+struct FilterDragContext {}
 
-derive_dragdrop_list!(
-    ColumnPivotSelector,
-    ColumnPivotDragContext,
-    ConfigSelector,
-    PivotItem,
-    DragOverColumnPivots,
-    DragLeaveColumnPivots,
-    CloseColumnPivot
-);
+impl DragContext<ConfigSelectorMsg> for RowPivotContext {
+    fn dragenter(index: usize) -> ConfigSelectorMsg {
+        ConfigSelectorMsg::DragOver(index, DropAction::RowPivots)
+    }
 
-derive_dragdrop_list!(
-    SortSelector,
-    SortDragContext,
-    ConfigSelector,
-    SortItem,
-    DragOverSort,
-    DragLeaveSort,
-    CloseSort
-);
+    fn close(index: usize) -> ConfigSelectorMsg {
+        ConfigSelectorMsg::Close(index, DropAction::RowPivots)
+    }
 
-derive_dragdrop_list!(
-    FilterSelector,
-    FilterDragContext,
-    ConfigSelector,
-    FilterItem,
-    DragOverFilter,
-    DragLeaveFilter,
-    CloseFilter
-);
+    fn dragleave() -> ConfigSelectorMsg {
+        ConfigSelectorMsg::DragLeave(DropAction::RowPivots)
+    }
+}
+
+impl DragContext<ConfigSelectorMsg> for ColumnPivotContext {
+    fn dragenter(index: usize) -> ConfigSelectorMsg {
+        ConfigSelectorMsg::DragOver(index, DropAction::ColumnPivots)
+    }
+
+    fn close(index: usize) -> ConfigSelectorMsg {
+        ConfigSelectorMsg::Close(index, DropAction::ColumnPivots)
+    }
+
+    fn dragleave() -> ConfigSelectorMsg {
+        ConfigSelectorMsg::DragLeave(DropAction::ColumnPivots)
+    }
+}
+
+impl DragContext<ConfigSelectorMsg> for SortDragContext {
+    fn dragenter(index: usize) -> ConfigSelectorMsg {
+        ConfigSelectorMsg::DragOver(index, DropAction::Sort)
+    }
+
+    fn close(index: usize) -> ConfigSelectorMsg {
+        ConfigSelectorMsg::Close(index, DropAction::Sort)
+    }
+
+    fn dragleave() -> ConfigSelectorMsg {
+        ConfigSelectorMsg::DragLeave(DropAction::Sort)
+    }
+}
+
+impl DragContext<ConfigSelectorMsg> for FilterDragContext {
+    fn dragenter(index: usize) -> ConfigSelectorMsg {
+        ConfigSelectorMsg::DragOver(index, DropAction::Filter)
+    }
+
+    fn close(index: usize) -> ConfigSelectorMsg {
+        ConfigSelectorMsg::Close(index, DropAction::Filter)
+    }
+
+    fn dragleave() -> ConfigSelectorMsg {
+        ConfigSelectorMsg::DragLeave(DropAction::Filter)
+    }
+}
+
+type RowPivotSelector = DragDropList<ConfigSelector, PivotItem, RowPivotContext>;
+type ColumnPivotSelector = DragDropList<ConfigSelector, PivotItem, ColumnPivotContext>;
+type SortSelector = DragDropList<ConfigSelector, SortItem, SortDragContext>;
+type FilterSelector = DragDropList<ConfigSelector, FilterItem, FilterDragContext>;
 
 impl Component for ConfigSelector {
     type Message = ConfigSelectorMsg;
     type Properties = ConfigSelectorProps;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let cb = link.callback(ConfigSelectorMsg::DragStart);
-        let drag_sub = Rc::new(props.dragdrop.add_on_drag_action(cb));
+    fn create(ctx: &Context<Self>) -> Self {
+        let cb = ctx.link().callback(ConfigSelectorMsg::DragStart);
+        let drag_sub = Rc::new(ctx.props().dragdrop.add_on_drag_action(cb));
 
-        let cb = link.callback(|_| ConfigSelectorMsg::DragEnd);
-        let dragend_sub = Rc::new(props.dragdrop.add_on_dragend_action(cb));
+        let cb = ctx.link().callback(|_| ConfigSelectorMsg::DragEnd);
+        let dragend_sub = Rc::new(ctx.props().dragdrop.add_on_dragend_action(cb));
 
-        let cb = link.callback(|x: (String, DropAction, DragEffect, usize)| {
-            ConfigSelectorMsg::Drop(x.0, x.1, x.2, x.3)
-        });
-        let drop_sub = Rc::new(props.dragdrop.add_on_drop_action(cb));
+        let cb = ctx
+            .link()
+            .callback(|x: (String, DropAction, DragEffect, usize)| {
+                ConfigSelectorMsg::Drop(x.0, x.1, x.2, x.3)
+            });
+        let drop_sub = Rc::new(ctx.props().dragdrop.add_on_drop_action(cb));
 
-        let cb = link.callback(|_| ConfigSelectorMsg::ViewCreated);
-        let view_sub = Rc::new(props.session.on_view_created.add_listener(cb));
+        let cb = ctx.link().callback(|_| ConfigSelectorMsg::ViewCreated);
+        let view_sub = Rc::new(ctx.props().session.on_view_created.add_listener(cb));
 
+        let filter_dropdown = FilterDropDownElement::new(ctx.props().session.clone());
         let subscriptions = [drop_sub, view_sub, drag_sub, dragend_sub];
         ConfigSelector {
-            props,
-            link,
+            filter_dropdown,
             subscriptions,
         }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             ConfigSelectorMsg::DragStart(_) | ConfigSelectorMsg::ViewCreated => true,
             ConfigSelectorMsg::DragEnd => true,
-            ConfigSelectorMsg::DragOverRowPivots(index) => {
-                self.props.dragdrop.drag_enter(DropAction::RowPivots, index)
+            ConfigSelectorMsg::DragOver(index, action) => {
+                ctx.props().dragdrop.drag_enter(action, index)
             }
-            ConfigSelectorMsg::DragOverColumnPivots(index) => self
-                .props
-                .dragdrop
-                .drag_enter(DropAction::ColumnPivots, index),
-            ConfigSelectorMsg::DragOverSort(index) => {
-                self.props.dragdrop.drag_enter(DropAction::Sort, index)
-            }
-            ConfigSelectorMsg::DragOverFilter(index) => {
-                self.props.dragdrop.drag_enter(DropAction::Filter, index)
-            }
-            ConfigSelectorMsg::DragLeaveRowPivots => {
-                self.props.dragdrop.drag_leave(DropAction::RowPivots);
+            ConfigSelectorMsg::DragLeave(action) => {
+                ctx.props().dragdrop.drag_leave(action);
                 true
             }
-            ConfigSelectorMsg::DragLeaveColumnPivots => {
-                self.props.dragdrop.drag_leave(DropAction::ColumnPivots);
-                true
-            }
-            ConfigSelectorMsg::DragLeaveSort => {
-                self.props.dragdrop.drag_leave(DropAction::Sort);
-                true
-            }
-            ConfigSelectorMsg::DragLeaveFilter => {
-                self.props.dragdrop.drag_leave(DropAction::Filter);
-                true
-            }
-            ConfigSelectorMsg::CloseSort(index) => {
-                let ViewConfig { mut sort, .. } = self.props.session.get_view_config();
+            ConfigSelectorMsg::Close(index, DropAction::Sort) => {
+                let ViewConfig { mut sort, .. } = ctx.props().session.get_view_config();
                 sort.remove(index as usize);
                 let sort = Some(sort);
-                self.props.update_and_render(ViewConfigUpdate {
+                ctx.props().update_and_render(ViewConfigUpdate {
                     sort,
                     ..ViewConfigUpdate::default()
                 });
 
                 true
             }
-            ConfigSelectorMsg::CloseRowPivot(index) => {
+            ConfigSelectorMsg::Close(index, DropAction::RowPivots) => {
                 let ViewConfig { mut row_pivots, .. } =
-                    self.props.session.get_view_config();
+                    ctx.props().session.get_view_config();
                 row_pivots.remove(index as usize);
                 let row_pivots = Some(row_pivots);
-                self.props.update_and_render(ViewConfigUpdate {
+                ctx.props().update_and_render(ViewConfigUpdate {
                     row_pivots,
                     ..ViewConfigUpdate::default()
                 });
 
                 true
             }
-            ConfigSelectorMsg::CloseColumnPivot(index) => {
+            ConfigSelectorMsg::Close(index, DropAction::ColumnPivots) => {
                 let ViewConfig {
                     mut column_pivots, ..
-                } = self.props.session.get_view_config();
+                } = ctx.props().session.get_view_config();
                 column_pivots.remove(index as usize);
-                self.props.update_and_render(ViewConfigUpdate {
+                ctx.props().update_and_render(ViewConfigUpdate {
                     column_pivots: Some(column_pivots),
                     ..ViewConfigUpdate::default()
                 });
 
                 true
             }
-            ConfigSelectorMsg::CloseFilter(index) => {
-                self.props.filter_dropdown.hide().unwrap();
+            ConfigSelectorMsg::Close(index, DropAction::Filter) => {
+                self.filter_dropdown.hide().unwrap();
                 let ViewConfig { mut filter, .. } =
-                    self.props.session.get_view_config();
+                    ctx.props().session.get_view_config();
                 filter.remove(index as usize);
-                self.props.update_and_render(ViewConfigUpdate {
+                ctx.props().update_and_render(ViewConfigUpdate {
                     filter: Some(filter),
                     ..ViewConfigUpdate::default()
                 });
 
                 true
             }
+            ConfigSelectorMsg::Close(_, _) => false,
             ConfigSelectorMsg::Drop(column, action, effect, index)
                 if action != DropAction::Active =>
             {
-                let update = self.props.session.create_drag_drop_update(
+                let update = ctx.props().session.create_drag_drop_update(
                     column,
                     index,
                     action,
                     effect,
-                    &self.props.renderer.metadata(),
+                    &ctx.props().renderer.metadata(),
                 );
-                self.props.update_and_render(update);
+                ctx.props().update_and_render(update);
                 true
             }
             ConfigSelectorMsg::Drop(_, _, DragEffect::Move(action), _)
@@ -227,7 +224,7 @@ impl Component for ConfigSelector {
             }
             ConfigSelectorMsg::Drop(_, _, _, _) => false,
             ConfigSelectorMsg::TransposePivots => {
-                let mut view_config = self.props.session.get_view_config();
+                let mut view_config = ctx.props().session.get_view_config();
                 std::mem::swap(
                     &mut view_config.row_pivots,
                     &mut view_config.column_pivots,
@@ -239,12 +236,12 @@ impl Component for ConfigSelector {
                     ..ViewConfigUpdate::default()
                 };
 
-                self.props.update_and_render(update);
+                ctx.props().update_and_render(update);
                 true
             }
             ConfigSelectorMsg::SetFilterValue(index, input) => {
                 let ViewConfig { mut filter, .. } =
-                    self.props.session.get_view_config();
+                    ctx.props().session.get_view_config();
 
                 filter[index].2 = FilterTerm::Scalar(Scalar::String(input));
 
@@ -254,29 +251,29 @@ impl Component for ConfigSelector {
                     ..ViewConfigUpdate::default()
                 };
 
-                self.props.update_and_render(update);
+                ctx.props().update_and_render(update);
                 false
             }
         }
     }
 
     /// Should not render on change, as this component only depends on service state.
-    fn change(&mut self, _props: Self::Properties) -> ShouldRender {
+    fn changed(&mut self, _ctx: &Context<Self>) -> bool {
         false
     }
 
-    fn view(&self) -> Html {
-        let config = self.props.session.get_view_config();
-        let transpose = self.link.callback(|_| ConfigSelectorMsg::TransposePivots);
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let config = ctx.props().session.get_view_config();
+        let transpose = ctx.link().callback(|_| ConfigSelectorMsg::TransposePivots);
 
-        let class = if self.props.dragdrop.get_drag_column().is_some() {
+        let class = if ctx.props().dragdrop.get_drag_column().is_some() {
             "dragdrop-highlight"
         } else {
             ""
         };
 
         let dragend = Callback::from({
-            let dragdrop = self.props.dragdrop.clone();
+            let dragdrop = ctx.props().dragdrop.clone();
             move |_event| dragdrop.drag_end()
         });
 
@@ -285,14 +282,14 @@ impl Component for ConfigSelector {
 
                 <RowPivotSelector
                     name="row_pivots"
-                    parent={ self.link.clone() }
-                    is_dragover={ self.props.dragdrop.is_dragover(DropAction::RowPivots) }
-                    dragdrop={ self.props.dragdrop.clone() }>
+                    parent={ ctx.link().clone() }
+                    is_dragover={ ctx.props().dragdrop.is_dragover(DropAction::RowPivots) }
+                    dragdrop={ ctx.props().dragdrop.clone() }>
                     {
                         for config.row_pivots.iter().map(|row_pivot| {
                             html_nested! {
                                 <PivotItem
-                                    dragdrop={ self.props.dragdrop.clone() }
+                                    dragdrop={ ctx.props().dragdrop.clone() }
                                     action={ DropAction::RowPivots }
                                     column={ row_pivot.clone() }>
                                 </PivotItem>
@@ -312,14 +309,14 @@ impl Component for ConfigSelector {
 
                 <ColumnPivotSelector
                     name="column_pivots"
-                    parent={ self.link.clone() }
-                    is_dragover={ self.props.dragdrop.is_dragover(DropAction::ColumnPivots) }
-                    dragdrop={ self.props.dragdrop.clone() }>
+                    parent={ ctx.link().clone() }
+                    is_dragover={ ctx.props().dragdrop.is_dragover(DropAction::ColumnPivots) }
+                    dragdrop={ ctx.props().dragdrop.clone() }>
                     {
                         for config.column_pivots.iter().map(|column_pivot| {
                             html_nested! {
                                 <PivotItem
-                                    dragdrop={ self.props.dragdrop.clone() }
+                                    dragdrop={ ctx.props().dragdrop.clone() }
                                     action={ DropAction::ColumnPivots }
                                     column={ column_pivot.clone() }>
                                 </PivotItem>
@@ -331,9 +328,9 @@ impl Component for ConfigSelector {
                 <SortSelector
                     name="sort"
                     allow_duplicates=true
-                    parent={ self.link.clone() }
-                    dragdrop={ self.props.dragdrop.clone() }
-                    is_dragover={ self.props.dragdrop.is_dragover(DropAction::Sort).map(|(index, name)| {
+                    parent={ ctx.link().clone() }
+                    dragdrop={ ctx.props().dragdrop.clone() }
+                    is_dragover={ ctx.props().dragdrop.is_dragover(DropAction::Sort).map(|(index, name)| {
                         (index, Sort(name, SortDir::Asc))
                     }) }>
                     {
@@ -341,9 +338,9 @@ impl Component for ConfigSelector {
                             html_nested! {
                                 <SortItem
                                     idx={ idx }
-                                    session={ self.props.session.clone() }
-                                    renderer={ self.props.renderer.clone() }
-                                    dragdrop={ self.props.dragdrop.clone() }
+                                    session={ ctx.props().session.clone() }
+                                    renderer={ ctx.props().renderer.clone() }
+                                    dragdrop={ ctx.props().dragdrop.clone() }
                                     sort={ sort.clone() }>
                                 </SortItem>
                             }
@@ -354,24 +351,23 @@ impl Component for ConfigSelector {
                 <FilterSelector
                     name="filter"
                     allow_duplicates=true
-                    parent={ self.link.clone() }
-                    dragdrop={ self.props.dragdrop.clone() }
-                    is_dragover={ self.props.dragdrop.is_dragover(DropAction::Filter).map(|(index, name)| {
+                    parent={ ctx.link().clone() }
+                    dragdrop={ ctx.props().dragdrop.clone() }
+                    is_dragover={ ctx.props().dragdrop.is_dragover(DropAction::Filter).map(|(index, name)| {
                         (index, Filter(name, FilterOp::EQ, FilterTerm::Scalar(Scalar::Null)))
                     }) }>
                     {
                         for config.filter.iter().enumerate().map(|(idx, filter)| {
-                            let filter_keydown = self
-                                .link
+                            let filter_keydown = ctx.link()
                                 .callback(move |txt| ConfigSelectorMsg::SetFilterValue(idx, txt));
 
                             html_nested! {
                                 <FilterItem
                                     idx={ idx }
-                                    filter_dropdown={ self.props.filter_dropdown.clone() }
-                                    session={ self.props.session.clone() }
-                                    renderer={ self.props.renderer.clone() }
-                                    dragdrop={ self.props.dragdrop.clone() }
+                                    filter_dropdown={ self.filter_dropdown.clone() }
+                                    session={ ctx.props().session.clone() }
+                                    renderer={ ctx.props().renderer.clone() }
+                                    dragdrop={ ctx.props().dragdrop.clone() }
                                     filter={ filter.clone() }
                                     on_keydown={ filter_keydown }>
                                 </FilterItem>

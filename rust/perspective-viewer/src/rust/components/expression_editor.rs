@@ -21,6 +21,7 @@ use std::rc::Rc;
 use wasm_bindgen::{prelude::*, JsCast};
 use wasm_bindgen_futures::future_to_promise;
 use web_sys::*;
+use yew::html::Scope;
 use yew::prelude::*;
 
 static CSS: &str = include_str!("../../../build/css/expression-editor.css");
@@ -44,6 +45,12 @@ pub struct ExpressionEditorProps {
     pub alias: Option<String>,
 }
 
+impl PartialEq for ExpressionEditorProps {
+    fn eq(&self, other: &Self) -> bool {
+        self.alias == other.alias
+    }
+}
+
 /// Expression editor component wraps `monaco-editor` and a button toolbar.
 pub struct ExpressionEditor {
     top: i32,
@@ -57,8 +64,8 @@ impl Component for ExpressionEditor {
     type Message = ExpressionEditorMsg;
     type Properties = ExpressionEditorProps;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        let state = ExpressionEditorState::new(link, props);
+    fn create(ctx: &Context<Self>) -> Self {
+        let state = ExpressionEditorState::new(ctx);
         ExpressionEditor {
             top: 0,
             left: 0,
@@ -68,7 +75,7 @@ impl Component for ExpressionEditor {
         }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             ExpressionEditorMsg::SetPos(top, left) => {
                 self.top = top;
@@ -88,8 +95,8 @@ impl Component for ExpressionEditor {
                 self.edit_enabled = false;
                 self.save_enabled = false;
                 maybe!({
-                    let alias = self.state.props.alias.as_ref()?;
-                    let session = &self.state.props.session;
+                    let alias = ctx.props().alias.as_ref()?;
+                    let session = &ctx.props().session;
                     let old = session.metadata().get_expression_by_alias(alias)?;
                     self.state.editor.borrow().as_ref()?.1.set_value(&old);
                     Some(())
@@ -99,10 +106,10 @@ impl Component for ExpressionEditor {
                 true
             }
             ExpressionEditorMsg::EnableSave(x) => {
-                self.state.props.on_validate.emit(false);
+                ctx.props().on_validate.emit(false);
                 let is_edited = maybe!({
-                    let alias = self.state.props.alias.as_ref()?;
-                    let session = &self.state.props.session;
+                    let alias = ctx.props().alias.as_ref()?;
+                    let session = &ctx.props().session;
                     let old = session.metadata().get_expression_by_alias(alias)?;
                     let value = self.state.editor.borrow().as_ref()?.1.get_value();
                     let new = value.as_string()?;
@@ -127,7 +134,7 @@ impl Component for ExpressionEditor {
                 if self.save_enabled {
                     if let Some((_, x)) = self.state.editor.borrow().as_ref() {
                         let expr = x.get_value();
-                        self.state.props.on_save.emit(expr);
+                        ctx.props().on_save.emit(expr);
                         x.set_value("");
                     }
                 }
@@ -136,12 +143,12 @@ impl Component for ExpressionEditor {
         }
     }
 
-    fn change(&mut self, _props: Self::Properties) -> ShouldRender {
+    fn changed(&mut self, _ctx: &Context<Self>) -> bool {
         web_sys::console::warn_1(&"Unreachable".into());
         false
     }
 
-    fn rendered(&mut self, first_render: bool) {
+    fn rendered(&mut self, _ctx: &Context<Self>, first_render: bool) {
         if first_render {
             drop(future_to_promise(self.state.clone().init_monaco_editor()));
         } else if self.state.0.editor.borrow().is_some() {
@@ -149,16 +156,11 @@ impl Component for ExpressionEditor {
         }
     }
 
-    fn view(&self) -> Html {
-        let reset = self.state.link.callback(|_| ExpressionEditorMsg::Reset);
-        let save = self
-            .state
-            .link
-            .callback_once(|_| ExpressionEditorMsg::SaveExpr);
-
-        let resize = self
-            .state
-            .link
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let reset = ctx.link().callback(|_| ExpressionEditorMsg::Reset);
+        let save = ctx.link().callback_once(|_| ExpressionEditorMsg::SaveExpr);
+        let resize = ctx
+            .link()
             .callback(|(width, height)| ExpressionEditorMsg::Resize(width, height));
 
         html! {
@@ -197,13 +199,16 @@ impl Component for ExpressionEditor {
 }
 
 struct ExpressionEditorStateImpl {
+    alias: Option<String>,
     editor: RefCell<Option<(Editor, JsMonacoEditor)>>,
-    props: ExpressionEditorProps,
     on_validate: Closure<dyn Fn(JsValue)>,
     on_save: Closure<dyn Fn(JsValue)>,
-    link: ComponentLink<ExpressionEditor>,
+    on_init: Callback<()>,
+    on_validate_complete: Callback<bool>,
     theme: RefCell<Option<String>>,
     container: NodeRef,
+    session: Session,
+    link: Scope<ExpressionEditor>,
 }
 
 /// `ExpressionEditorState` is useful to separate from `ExpressionEditor` to
@@ -219,30 +224,34 @@ impl Deref for ExpressionEditorState {
 }
 
 impl ExpressionEditorState {
-    fn new(
-        link: ComponentLink<ExpressionEditor>,
-        props: ExpressionEditorProps,
-    ) -> Self {
-        let on_validate = link.callback(ExpressionEditorMsg::Validate).into_closure();
-        let on_save = link
+    fn new(ctx: &Context<ExpressionEditor>) -> Self {
+        let on_validate = ctx
+            .link()
+            .callback(ExpressionEditorMsg::Validate)
+            .into_closure();
+        let on_save = ctx
+            .link()
             .callback(|_| ExpressionEditorMsg::SaveExpr)
             .into_closure();
 
         ExpressionEditorState(Rc::new(ExpressionEditorStateImpl {
+            alias: ctx.props().alias.clone(),
             container: NodeRef::default(),
             editor: RefCell::new(None),
-            link,
-            props,
+            session: ctx.props().session.clone(),
+            on_init: ctx.props().on_init.clone(),
             on_save,
             on_validate,
+            on_validate_complete: ctx.props().on_validate.clone(),
             theme: RefCell::new(None),
+            link: ctx.link().clone(),
         }))
     }
 
     /// Initialize the `monaco-editor` for this `<perspective-expression-editor>`.
     /// This method should only be called once per element.
     async fn init_monaco_editor(self) -> Result<JsValue, JsValue> {
-        let column_names = self.props.session.metadata().get_table_columns();
+        let column_names = self.session.metadata().get_table_columns();
         let monaco = init_monaco().await.unwrap();
         if let Some(ref theme) = *self.theme.borrow() {
             init_theme(theme.as_str(), &monaco);
@@ -266,13 +275,11 @@ impl ExpressionEditorState {
         *self.editor.borrow_mut() = Some((monaco, editor.clone()));
         await_animation_frame().await?;
         editor.focus();
-        self.props.on_init.emit(());
+        self.on_init.emit(());
         let expression = maybe!({
-            let alias = self.props.alias.as_ref()?;
-            let edit = self.props.session.metadata().get_edit_by_alias(alias);
-            edit.or_else(|| {
-                self.props.session.metadata().get_expression_by_alias(alias)
-            })
+            let alias = self.alias.as_ref()?;
+            let edit = self.session.metadata().get_edit_by_alias(alias);
+            edit.or_else(|| self.session.metadata().get_expression_by_alias(alias))
         });
 
         if let Some(expr) = expression.as_ref() {
@@ -290,7 +297,7 @@ impl ExpressionEditorState {
         if let Some((_, x)) = self.editor.borrow().as_ref() {
             let mut i = 1;
             let mut name = "New Column 1".to_owned();
-            let config = self.props.session.metadata();
+            let config = self.session.metadata();
             while config.get_column_table_type(&name).is_some() {
                 i += 1;
                 name = format!("New Column {}", i);
@@ -312,9 +319,9 @@ impl ExpressionEditorState {
     async fn validate_expr(self) -> Result<JsValue, JsValue> {
         let (monaco, editor) = self.editor.borrow().as_ref().unwrap().clone();
         let expr = editor.get_value();
-        self.props.on_validate.emit(true);
+        self.on_validate_complete.emit(true);
         let model = editor.get_model();
-        let (msg, arr) = match self.props.session.validate_expr(expr).await? {
+        let (msg, arr) = match self.session.validate_expr(expr).await? {
             None => (true, js_sys::Array::new()),
             Some(err) => {
                 let marker = error_to_marker(err);

@@ -71,15 +71,15 @@ window.addEventListener("DOMContentLoaded", async function () {
         sort: [["chg", "desc"]],
         plugin_config: {
             "(-)chg": {
-                color_mode: "bar",
+                number_color_mode: "bar",
                 gradient: 10,
             },
             "(+)chg": {
-                color_mode: "bar",
+                number_color_mode: "bar",
                 gradient: 10,
             },
             chg: {
-                color_mode: "gradient",
+                number_color_mode: "gradient",
                 gradient: 10,
             },
         },

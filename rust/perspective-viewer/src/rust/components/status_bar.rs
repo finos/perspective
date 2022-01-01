@@ -12,7 +12,7 @@ use crate::utils::*;
 use crate::*;
 
 #[cfg(test)]
-use crate::utils::WeakComponentLink;
+use crate::utils::WeakScope;
 
 use wasm_bindgen_futures::spawn_local;
 use yew::prelude::*;
@@ -25,7 +25,13 @@ pub struct StatusBarProps {
 
     #[cfg(test)]
     #[prop_or_default]
-    pub weak_link: WeakComponentLink<StatusBar>,
+    pub weak_link: WeakScope<StatusBar>,
+}
+
+impl PartialEq for StatusBarProps {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
 }
 
 pub enum StatusBarMsg {
@@ -38,8 +44,6 @@ pub enum StatusBarMsg {
 
 /// A toolbar with buttons, and `Table` & `View` status information.
 pub struct StatusBar {
-    link: ComponentLink<Self>,
-    props: StatusBarProps,
     is_updating: bool,
     _sub: [Subscription; 3],
 }
@@ -48,29 +52,25 @@ impl Component for StatusBar {
     type Message = StatusBarMsg;
     type Properties = StatusBarProps;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        enable_weak_link_test!(props, link);
-        let cb = link.callback(|_| StatusBarMsg::TableStatsChanged);
+    fn create(ctx: &Context<Self>) -> Self {
+        enable_weak_link_test!(ctx.props(), ctx.link());
+        let cb = ctx.link().callback(|_| StatusBarMsg::TableStatsChanged);
         let _sub = [
-            props.session.on_stats.add_listener(cb),
-            props
-                .session
-                .on_view_config_updated
-                .add_listener(link.callback(|_| StatusBarMsg::SetIsUpdating(true))),
-            props
-                .session
-                .on_view_created
-                .add_listener(link.callback(|_| StatusBarMsg::SetIsUpdating(false))),
+            ctx.props().session.on_stats.add_listener(cb),
+            ctx.props().session.on_view_config_updated.add_listener(
+                ctx.link().callback(|_| StatusBarMsg::SetIsUpdating(true)),
+            ),
+            ctx.props().session.on_view_created.add_listener(
+                ctx.link().callback(|_| StatusBarMsg::SetIsUpdating(false)),
+            ),
         ];
         Self {
-            link,
-            props,
             _sub,
             is_updating: false,
         }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             StatusBarMsg::SetIsUpdating(is_updating) => {
                 self.is_updating = is_updating;
@@ -78,11 +78,11 @@ impl Component for StatusBar {
             }
             StatusBarMsg::TableStatsChanged => true,
             StatusBarMsg::Reset(all) => {
-                self.props.on_reset.emit(all);
+                ctx.props().on_reset.emit(all);
                 false
             }
             StatusBarMsg::Export(flat) => {
-                let session = self.props.session.clone();
+                let session = ctx.props().session.clone();
                 spawn_local(async move {
                     session.download_as_csv(flat).await.expect("Export failed");
                 });
@@ -90,7 +90,7 @@ impl Component for StatusBar {
                 false
             }
             StatusBarMsg::Copy(flat) => {
-                let session = self.props.session.clone();
+                let session = ctx.props().session.clone();
                 spawn_local(async move {
                     session.copy_to_clipboard(flat).await.expect("Copy failed");
                 });
@@ -100,27 +100,23 @@ impl Component for StatusBar {
         }
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props = props;
-        false
-    }
 
-    fn view(&self) -> Html {
-        let stats = self.props.session.get_table_stats();
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let stats = ctx.props().session.get_table_stats();
         let class_name = self.status_class_name(&stats);
         let is_updating_class_name = if self.is_updating { "updating" } else { " " };
-        let reset = self
-            .link
+        let reset = ctx
+            .link()
             .callback(|event: MouseEvent| StatusBarMsg::Reset(event.shift_key()));
-        let export = self
-            .link
+        let export = ctx
+            .link()
             .callback(|event: MouseEvent| StatusBarMsg::Export(event.shift_key()));
-        let copy = self
-            .link
+        let copy = ctx
+            .link()
             .callback(|event: MouseEvent| StatusBarMsg::Copy(event.shift_key()));
 
         html! {
-            <div id={ self.props.id.clone() } class={ is_updating_class_name }>
+            <div id={ ctx.props().id.clone() } class={ is_updating_class_name }>
                 <div class="section">
                     <span id="status" class={ class_name }></span>
                 </div>

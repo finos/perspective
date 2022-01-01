@@ -10,10 +10,11 @@ use crate::*;
 
 use std::fmt::Display;
 use std::str::FromStr;
+use wasm_bindgen::JsCast;
 use yew::prelude::*;
 
 #[cfg(test)]
-use crate::utils::WeakComponentLink;
+use crate::utils::WeakScope;
 
 // The type constraints on this component are boilerplate and will be alias-able
 // in a [future rust version](https://doc.rust-lang.org/nightly/unstable-book/language-features/trait-alias.html)
@@ -56,9 +57,24 @@ where
     #[prop_or_default]
     pub class: Option<&'static str>,
 
+    #[prop_or_default]
+    pub name: Option<&'static str>,
+
     #[cfg(test)]
     #[prop_or_default]
-    pub weak_link: WeakComponentLink<RadioList<T>>,
+    pub weak_link: WeakScope<RadioList<T>>,
+}
+
+impl<T> PartialEq for RadioListProps<T>
+where
+    T: Clone + Display + FromStr + PartialEq + 'static,
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.values == other.values
+            && self.disabled == other.disabled
+            && self.selected == other.selected
+            && self.class == other.class
+    }
 }
 
 impl<T> RadioListProps<T>
@@ -103,8 +119,7 @@ pub struct RadioList<T>
 where
     T: Clone + Display + FromStr + PartialEq + 'static,
 {
-    link: ComponentLink<Self>,
-    props: RadioListProps<T>,
+    selected: T,
 }
 
 impl<T> Component for RadioList<T>
@@ -114,45 +129,62 @@ where
     type Message = RadioListMsg;
     type Properties = RadioListProps<T>;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        props.validate();
-        enable_weak_link_test!(props, link);
-        Self { link, props }
+    fn create(ctx: &Context<Self>) -> Self {
+        ctx.props().validate();
+        enable_weak_link_test!(ctx.props(), ctx.link());
+        Self {
+            selected: ctx.props().selected.clone(),
+        }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             RadioListMsg::Change(value) => {
                 if let Ok(x) = T::from_str(&value) {
-                    self.props.selected = x.clone();
-                    self.props.on_change.emit(x);
+                    self.selected = x.clone();
+                    ctx.props().on_change.emit(x);
                 }
             }
         };
         false
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        props.validate();
-        self.props = props;
+    fn changed(&mut self, ctx: &Context<Self>) -> bool {
+        ctx.props().validate();
+        self.selected = ctx.props().selected.clone();
         true
     }
 
-    fn view(&self) -> Html {
-        let on_change = self
-            .link
-            .callback(move |event: InputData| RadioListMsg::Change(event.value));
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let on_change = ctx.link().callback(move |event: InputEvent| {
+            RadioListMsg::Change(
+                event
+                    .target()
+                    .unwrap()
+                    .unchecked_into::<web_sys::HtmlInputElement>()
+                    .value(),
+            )
+        });
 
-        let class = match self.props.class {
+        let class = match ctx.props().class {
             Some(x) => format!("radio-list-item {}", x),
             None => "radio-list-item".to_owned(),
         };
 
-        self.props
+        ctx.props()
             .children
             .iter()
             .enumerate()
-            .map(|(idx, child)| self.render_item(idx, child, &class, on_change.clone()))
+            .map(|(idx, child)| {
+                self.render_item(
+                    ctx,
+                    idx,
+                    child,
+                    &class,
+                    on_change.clone(),
+                    &self.selected,
+                )
+            })
             .collect::<Html>()
     }
 }
@@ -170,22 +202,24 @@ where
     /// * `on_change` - The callback when this `<input>` changes.
     fn render_item(
         &self,
+        ctx: &Context<Self>,
         idx: usize,
         child: Html,
         class: &str,
-        on_change: Callback<InputData>,
+        on_change: Callback<InputEvent>,
+        selected: &T,
     ) -> Html {
         html! {
             <div class={ class.to_string() }>
                 <input
                     id={ format!("radio-list-{}", idx) }
-                    name="radio-list"
+                    name={ ctx.props().name.unwrap_or("radio-list") }
                     type="radio"
-                    value={ format!("{}", self.props.values[idx]) }
+                    value={ format!("{}", ctx.props().values[idx]) }
                     class="parameter"
                     oninput={ on_change }
-                    disabled={ self.props.disabled }
-                    checked={ self.props.selected == self.props.values[idx] } />
+                    disabled={ ctx.props().disabled }
+                    checked={ selected == &ctx.props().values[idx] } />
                 { child }
             </div>
         }

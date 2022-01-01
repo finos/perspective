@@ -63,6 +63,12 @@ impl Deref for DragDrop {
     }
 }
 
+impl PartialEq for DragDrop {
+    fn eq(&self, other: &Self) -> bool {
+        Rc::ptr_eq(&self.0, &other.0)
+    }
+}
+
 impl DragDrop {
     pub fn add_on_drop_action(
         &self,

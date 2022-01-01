@@ -15,7 +15,6 @@ use super::render_warning::RenderWarning;
 use super::status_bar::StatusBar;
 
 use crate::config::*;
-use crate::custom_elements::filter_dropdown::FilterDropDownElement;
 use crate::dragdrop::*;
 use crate::renderer::*;
 use crate::session::Session;
@@ -35,7 +34,13 @@ pub struct PerspectiveViewerProps {
     pub dragdrop: DragDrop,
 
     #[prop_or_default]
-    pub weak_link: WeakComponentLink<PerspectiveViewer>,
+    pub weak_link: WeakScope<PerspectiveViewer>,
+}
+
+impl PartialEq for PerspectiveViewerProps {
+    fn eq(&self, _rhs: &Self) -> bool {
+        false
+    }
 }
 
 pub enum Msg {
@@ -52,41 +57,33 @@ pub enum Msg {
 }
 
 pub struct PerspectiveViewer {
-    link: ComponentLink<Self>,
-    props: PerspectiveViewerProps,
     settings_open: bool,
     dimensions: Option<(usize, usize, Option<usize>, Option<usize>)>,
     on_rendered: Option<Sender<()>>,
-    filter_dropdown: FilterDropDownElement,
     fonts: FontLoaderProps,
 }
 
 impl Component for PerspectiveViewer {
     type Message = Msg;
     type Properties = PerspectiveViewerProps;
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        *props.weak_link.borrow_mut() = Some(link.clone());
-        let filter_dropdown = FilterDropDownElement::new(props.session.clone());
-
-        let elem = props.elem.clone();
-        let callback = link.callback(|()| Msg::PreloadFontsUpdate);
+    fn create(ctx: &Context<Self>) -> Self {
+        *ctx.props().weak_link.borrow_mut() = Some(ctx.link().clone());
+        let elem = ctx.props().elem.clone();
+        let callback = ctx.link().callback(|()| Msg::PreloadFontsUpdate);
         Self {
-            props,
-            link,
             settings_open: false,
             dimensions: None,
             on_rendered: None,
-            filter_dropdown,
             fonts: FontLoaderProps::new(&elem, callback),
         }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::PreloadFontsUpdate => true,
             Msg::Reset(all, sender) => {
-                let renderer = self.props.renderer.clone();
-                let session = self.props.session.clone();
+                let renderer = ctx.props().renderer.clone();
+                let session = ctx.props().session.clone();
                 let _ = promisify_ignore_view_delete(async move {
                     session.reset(all);
                     renderer.reset();
@@ -118,30 +115,30 @@ impl Component for PerspectiveViewer {
                     None => self.settings_open = !self.settings_open,
                 };
 
-                self.props
+                ctx.props()
                     .elem
                     .toggle_attribute_with_force("settings", self.settings_open)
                     .unwrap();
 
-                dispatch_settings_event(&self.props.elem, self.settings_open).unwrap();
+                dispatch_settings_event(&ctx.props().elem, self.settings_open).unwrap();
                 true
             }
             Msg::ToggleSettings(force, resolve) => {
                 match force {
                     Some(SettingsUpdate::Missing) => (),
                     Some(SettingsUpdate::SetDefault) => {
-                        self.toggle_settings(Some(false), resolve)
+                        self.toggle_settings(ctx, Some(false), resolve)
                     }
                     Some(SettingsUpdate::Update(force)) => {
-                        self.toggle_settings(Some(force), resolve)
+                        self.toggle_settings(ctx, Some(force), resolve)
                     }
-                    None => self.toggle_settings(None, resolve),
+                    None => self.toggle_settings(ctx, None, resolve),
                 }
 
                 false
             }
             Msg::ToggleSettingsFinished(sender) => {
-                dispatch_settings_event(&self.props.elem, self.settings_open).unwrap();
+                dispatch_settings_event(&ctx.props().elem, self.settings_open).unwrap();
                 self.on_rendered = Some(sender);
                 true
             }
@@ -158,13 +155,13 @@ impl Component for PerspectiveViewer {
 
     /// This top-level component is mounted to the Custom Element, so it has no API
     /// to provide props - but for sanity if needed, just return true on change.
-    fn change(&mut self, _props: Self::Properties) -> ShouldRender {
+    fn changed(&mut self, _ctx: &Context<Self>) -> bool {
         true
     }
 
     /// On rendered call notify_resize().  This also triggers any registered async
     /// callbacks to the Custom Element API.
-    fn rendered(&mut self, _first_render: bool) {
+    fn rendered(&mut self, _ctx: &Context<Self>, _first_render: bool) {
         let resolve = self.on_rendered.take();
         if let Some(resolve) = resolve {
             resolve.send(()).expect("Orphan render");
@@ -174,8 +171,8 @@ impl Component for PerspectiveViewer {
     /// `PerspectiveViewer` has two basic UI modes - "open" and "closed".
     // TODO these may be expensive to buil dbecause they will generate recursively from
     // `JsPerspectiveConfig` - they may need caching as in the JavaScript version.
-    fn view(&self) -> Html {
-        let settings = self.link.callback(|_| Msg::ToggleSettings(None, None));
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let settings = ctx.link().callback(|_| Msg::ToggleSettings(None, None));
         if self.settings_open {
             html! {
                 <>
@@ -183,27 +180,26 @@ impl Component for PerspectiveViewer {
                     <SplitPanel id="app_panel">
                         <div id="side_panel" class="column noselect">
                             <PluginSelector
-                                session={ self.props.session.clone() }
-                                renderer={ self.props.renderer.clone() }>
+                                session={ ctx.props().session.clone() }
+                                renderer={ ctx.props().renderer.clone() }>
                             </PluginSelector>
                             <ColumnSelector
-                                dragdrop={ self.props.dragdrop.clone() }
-                                renderer={ self.props.renderer.clone() }
-                                session={ self.props.session.clone() }>
+                                dragdrop={ ctx.props().dragdrop.clone() }
+                                renderer={ ctx.props().renderer.clone() }
+                                session={ ctx.props().session.clone() }>
                             </ColumnSelector>
                         </div>
                         <div id="main_column">
                             <ConfigSelector
-                                dragdrop={ self.props.dragdrop.clone() }
-                                session={ self.props.session.clone() }
-                                renderer={ self.props.renderer.clone() }
-                                filter_dropdown={ self.filter_dropdown.clone() }>
+                                dragdrop={ ctx.props().dragdrop.clone() }
+                                session={ ctx.props().session.clone() }
+                                renderer={ ctx.props().renderer.clone() }>
                             </ConfigSelector>
                             <div id="main_panel_container">
                                 <RenderWarning
                                     dimensions={ self.dimensions }
-                                    session={ self.props.session.clone() }
-                                    renderer={ self.props.renderer.clone() }>
+                                    session={ ctx.props().session.clone() }
+                                    renderer={ ctx.props().renderer.clone() }>
                                 </RenderWarning>
                                 <slot></slot>
                             </div>
@@ -211,8 +207,8 @@ impl Component for PerspectiveViewer {
                     </SplitPanel>
                     <StatusBar
                         id="status_bar"
-                        session={ self.props.session.clone() }
-                        on_reset={ self.link.callback(|all| Msg::Reset(all, None)) }>
+                        session={ ctx.props().session.clone() }
+                        on_reset={ ctx.link().callback(|all| Msg::Reset(all, None)) }>
                     </StatusBar>
                     <div
                         id="settings_button"
@@ -228,8 +224,8 @@ impl Component for PerspectiveViewer {
                     <style>{ &CSS }</style>
                     <RenderWarning
                         dimensions={ self.dimensions }
-                        session={ self.props.session.clone() }
-                        renderer={ self.props.renderer.clone() }>
+                        session={ ctx.props().session.clone() }
+                        renderer={ ctx.props().renderer.clone() }>
                     </RenderWarning>
                     <div id="main_panel_container" class="settings-closed">
                         <slot></slot>
@@ -241,7 +237,7 @@ impl Component for PerspectiveViewer {
         }
     }
 
-    fn destroy(&mut self) {}
+    fn destroy(&mut self, _ctx: &Context<Self>) {}
 }
 
 impl PerspectiveViewer {
@@ -257,6 +253,7 @@ impl PerspectiveViewer {
     ///   (`Some(true)`/`Some(false)`), or to just toggle the current state (`None`).
     fn toggle_settings(
         &mut self,
+        ctx: &Context<Self>,
         force: Option<bool>,
         sender: Option<Sender<Result<JsValue, JsValue>>>,
     ) {
@@ -269,9 +266,9 @@ impl PerspectiveViewer {
             Some(_) | None => {
                 let force = !self.settings_open;
                 self.settings_open = force;
-                let callback = self.link.callback_once(Msg::ToggleSettingsFinished);
-                let renderer = self.props.renderer.clone();
-                let session = self.props.session.clone();
+                let callback = ctx.link().callback_once(Msg::ToggleSettingsFinished);
+                let renderer = ctx.props().renderer.clone();
+                let session = ctx.props().session.clone();
                 drop(promisify_ignore_view_delete(async move {
                     let result = if session.js_get_table().is_some() {
                         renderer.presize(force, callback.emit_and_render()).await

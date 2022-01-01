@@ -34,7 +34,8 @@ export {HTMLPerspectiveViewerPluginElement} from "./plugin";
 export {HTMLPerspectiveViewerElement, PerspectiveViewerConfig} from "./viewer";
 export * from "./extensions";
 
-import "./style";
+import "./number-column-style";
+import "./string-column-style";
 import "mobile-drag-drop-shadow-dom";
 
 import {HTMLPerspectiveViewerPluginElement} from "./plugin";

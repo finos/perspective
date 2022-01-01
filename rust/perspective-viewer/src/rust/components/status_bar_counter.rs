@@ -21,35 +21,34 @@ pub struct StatusBarRowsCounterProps {
 
     #[cfg(test)]
     #[prop_or_default]
-    pub weak_link: WeakComponentLink<StatusBarRowsCounter>,
+    pub weak_link: WeakScope<StatusBarRowsCounter>,
+}
+
+impl PartialEq for StatusBarRowsCounterProps {
+    fn eq(&self, other: &Self) -> bool {
+        self.stats == other.stats
+    }
 }
 
 /// A label widget which displays a row count and a "projection" count, the number of
 /// rows in the `View` which includes aggregate rows.
-pub struct StatusBarRowsCounter {
-    stats: Option<TableStats>,
-}
+pub struct StatusBarRowsCounter {}
 
 impl Component for StatusBarRowsCounter {
     type Message = ();
     type Properties = StatusBarRowsCounterProps;
 
-    fn create(props: Self::Properties, _link: ComponentLink<Self>) -> Self {
-        enable_weak_link_test!(props, _link);
-        StatusBarRowsCounter { stats: props.stats }
+    fn create(_ctx: &Context<Self>) -> Self {
+        enable_weak_link_test!(_ctx.props(), _ctx.link());
+        StatusBarRowsCounter {}
     }
 
-    fn update(&mut self, _msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, _ctx: &Context<Self>, _msg: Self::Message) -> bool {
         false
     }
 
-    fn change(&mut self, _props: Self::Properties) -> ShouldRender {
-        self.stats = _props.stats;
-        true
-    }
-
-    fn view(&self) -> Html {
-        match &self.stats {
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        match &ctx.props().stats {
             Some(TableStats {
                 num_rows: Some(num_rows),
                 virtual_rows: Some(virtual_rows),

@@ -6,8 +6,9 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-pub mod column_style;
 pub mod expression_editor;
 pub mod filter_dropdown;
 pub mod modal;
+pub mod number_column_style;
+pub mod string_column_style;
 pub mod viewer;
