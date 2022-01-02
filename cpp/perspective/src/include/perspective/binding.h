@@ -8,8 +8,6 @@
  */
 #pragma once
 
-#if defined(PSP_ENABLE_WASM) || defined(PSP_ENABLE_PYTHON)
-
 #include <perspective/base.h>
 #include <perspective/gnode.h>
 #include <perspective/data_table.h>
@@ -380,5 +378,3 @@ namespace binding {
 
 } // end namespace binding
 } // end namespace perspective
-
-#endif

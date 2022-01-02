@@ -9,10 +9,8 @@
 
 #pragma once
 
-#ifdef PSP_ENABLE_PYTHON
 #include <arrow/util/parallel.h>
 #include <arrow/status.h>
-#endif
 
 namespace perspective {
 
