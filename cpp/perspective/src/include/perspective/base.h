@@ -430,8 +430,7 @@ struct PERSPECTIVE_EXPORT t_cmp_charptr {
     }
 };
 
-struct t_cchar_umap_cmp
-    : public std::binary_function<const char*, const char*, bool> {
+struct t_cchar_umap_cmp {
     inline bool
     operator()(const char* x, const char* y) const {
         return strcmp(x, y) == 0;
