@@ -14,6 +14,7 @@
 #include <perspective/exports.h>
 #include <mutex>
 #include <atomic>
+#include <functional>
 
 #ifdef PSP_ENABLE_PYTHON
 #include <thread>
@@ -48,6 +49,8 @@ public:
 
     t_pool();
     t_uindex register_gnode(t_gnode* node);
+
+    void set_update_cb(std::function<void(t_uindex /*port_id*/)> cb);
 
 #if defined PSP_ENABLE_WASM || defined PSP_ENABLE_PYTHON
     void set_update_delegate(t_val ud);
@@ -119,6 +122,10 @@ private:
 #if defined PSP_ENABLE_WASM || defined PSP_ENABLE_PYTHON
     t_val m_update_delegate;
 #endif
+    /**
+     * m_update_cb will be called after each update.
+     */
+    std::function<void(t_uindex /*port_id*/)> m_update_cb;
     std::atomic_flag m_run;
     std::atomic<bool> m_data_remaining;
     std::atomic<t_uindex> m_sleep;

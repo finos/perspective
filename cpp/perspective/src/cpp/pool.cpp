@@ -222,7 +222,14 @@ t_pool::set_update_delegate(t_val ud) {
 #endif
 
 void
+t_pool::set_update_cb(std::function<void(t_uindex /*port_id*/)> cb) {
+    m_update_cb = cb;
+}
+
+void
 t_pool::notify_userspace(t_uindex port_id) {
+    if (m_update_cb)
+        m_update_cb(port_id);
 #if defined PSP_ENABLE_WASM
     m_update_delegate.call<void>("_update_callback", port_id);
 #elif PSP_ENABLE_PYTHON
