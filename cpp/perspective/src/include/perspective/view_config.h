@@ -107,7 +107,7 @@ public:
     std::int32_t get_row_pivot_depth() const;
     std::int32_t get_column_pivot_depth() const;
 
-private:
+//private:
     bool m_init;
 
     /**
