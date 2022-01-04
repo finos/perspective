@@ -93,10 +93,7 @@ module.exports = {
 Perspective can be loaded directly from
 [unpkg.com](https://unpkg.com/@finos/perspective-viewer), which is the easiest
 way to get started with Perspective in the browser, and absolutely perfect for
-spinning up quick instances of `perspective-viewer`. An example is demonstrated
-in
-[`superstore-arrow.html`](https://github.com/finos/perspective/blob/master/examples/simple/superstore-arrow.html),
-which loads a dataset stored in the Apache Arrow format using the `Fetch` API.
+spinning up quick instances of `perspective-viewer`.
 
 Add these scripts to your `.html`'s `<head>` section:
 
