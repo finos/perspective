@@ -8,10 +8,10 @@
  *
  */
 
-import {PerspectiveColumnStyleElement} from "@finos/perspective-viewer/dist/pkg/perspective_viewer.js";
+import {PerspectiveNumberColumnStyleElement} from "@finos/perspective-viewer/dist/pkg/perspective_viewer.js";
 
 class HTMLPerspectiveColumnStyleElement extends HTMLElement {
-    private instance: PerspectiveColumnStyleElement;
+    private instance: PerspectiveNumberColumnStyleElement;
 
     constructor() {
         super();
@@ -25,7 +25,7 @@ class HTMLPerspectiveColumnStyleElement extends HTMLElement {
         if (this.instance) {
             this.instance.reset(config, default_config);
         } else {
-            this.instance = new PerspectiveColumnStyleElement(
+            this.instance = new PerspectiveNumberColumnStyleElement(
                 this,
                 config,
                 default_config
@@ -34,14 +34,18 @@ class HTMLPerspectiveColumnStyleElement extends HTMLElement {
 
         this.instance.open(target);
     }
+
+    destroy() {
+        this.instance.destroy();
+    }
 }
 
 if (
-    document.createElement("perspective-column-style").constructor ===
+    document.createElement("perspective-number-column-style").constructor ===
     HTMLElement
 ) {
     window.customElements.define(
-        "perspective-column-style",
+        "perspective-number-column-style",
         HTMLPerspectiveColumnStyleElement
     );
 }

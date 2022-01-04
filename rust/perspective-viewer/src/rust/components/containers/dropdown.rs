@@ -9,6 +9,7 @@
 use std::fmt::Debug;
 use std::fmt::Display;
 use std::str::FromStr;
+use wasm_bindgen::JsCast;
 use yew::prelude::*;
 
 #[derive(Clone, PartialEq)]
@@ -55,9 +56,8 @@ where
     T: Clone + Display + FromStr + PartialEq + 'static,
     T::Err: Clone + Debug + 'static,
 {
-    props: DropDownProps<T>,
     select_ref: NodeRef,
-    link: ComponentLink<Self>,
+    selected: T,
 }
 
 impl<T> Component for DropDown<T>
@@ -68,64 +68,63 @@ where
     type Message = DropDownMsg<T>;
     type Properties = DropDownProps<T>;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        DropDown {
-            props,
-            link,
+    fn create(_ctx: &Context<Self>) -> Self {
+        DropDown::<T> {
             select_ref: NodeRef::default(),
+            selected: _ctx.props().selected.clone(),
         }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         let DropDownMsg::SelectedChanged(x) = msg;
-        self.props.selected = x;
-        self.props.on_select.emit(self.props.selected.clone());
+        self.selected = x;
+        ctx.props().on_select.emit(self.selected.clone());
         true
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        let should_render = self.props != props;
-        self.props = props;
-        should_render
-    }
+    // fn changed(&mut self, props: Self::Properties) -> bool {
+    //     let should_render = ctx.props() != props;
+    //     ctx.props() = props;
+    //     should_render
+    // }
 
     // Annoyingly, `<select>` cannot be updated from its HTML alone.
-    fn rendered(&mut self, _first_render: bool) {
+    fn rendered(&mut self, ctx: &Context<Self>, _first_render: bool) {
         if let Some(elem) = self.select_ref.cast::<web_sys::HtmlSelectElement>() {
-            elem.set_value(&format!("{}", self.props.selected))
+            elem.set_value(&format!("{}", ctx.props().selected))
         }
     }
 
-    fn view(&self) -> Html {
-        let callback = self.link.callback(|data: ChangeData| {
-            DropDownMsg::SelectedChanged(match data {
-                ChangeData::Select(e) => T::from_str(e.value().as_str()).unwrap(),
-                ChangeData::Value(x) => T::from_str(x.as_str()).unwrap(),
-                ChangeData::Files(_) => panic!("No idea ..."),
-            })
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let callback = ctx.link().callback(|event: Event| {
+            let value = event
+                .target()
+                .unwrap()
+                .unchecked_into::<web_sys::HtmlSelectElement>()
+                .value();
+            DropDownMsg::SelectedChanged(T::from_str(value.as_str()).unwrap())
         });
 
-        let class = if let Some(class) = &self.props.class {
+        let class = if let Some(class) = &ctx.props().class {
             format!("noselect {}", class)
         } else {
             "noselect".to_owned()
         };
 
-        let is_group_selected =
-            !self.props.values.iter().any(
-                |x| matches!(x, DropDownItem::Option(y) if *y == self.props.selected),
-            );
+        let is_group_selected = !ctx.props().values.iter().any(
+            |x| matches!(x, DropDownItem::Option(y) if *y == ctx.props().selected),
+        );
 
         let select = html! {
             <select
-                id={ self.props.id }
+                id={ ctx.props().id }
                 class={ class }
                 ref={ self.select_ref.clone() }
                 onchange={callback}>
                 {
-                    for self.props.values.iter().map(|value| match value {
+                    for ctx.props().values.iter().map(|value| match value {
                         DropDownItem::Option(value) => {
-                            let selected = *value == self.props.selected;
+                            let selected = *value == ctx.props().selected;
                             html! {
                                 <option
                                     selected={ selected }
@@ -139,7 +138,7 @@ where
                             {
                                 for group.iter().map(|value| {
                                     let selected =
-                                        *value == self.props.selected;
+                                        *value == ctx.props().selected;
 
                                     let label = format!("{}", value)
                                         .strip_prefix(name)
@@ -169,7 +168,7 @@ where
                     <label>{ "weighted mean" }</label>
                     <div
                         class="dropdown-width-container"
-                        data-value={ format!("{}", self.props.selected) }>
+                        data-value={ format!("{}", ctx.props().selected) }>
                         { select }
                     </div>
                 </>
@@ -178,7 +177,7 @@ where
             html! {
                 <div
                     class="dropdown-width-container"
-                    data-value={ format!("{}", self.props.selected) }>
+                    data-value={ format!("{}", ctx.props().selected) }>
                     { select }
                 </div>
             }

@@ -117,6 +117,11 @@ customElements.define(
                         config.pos_color = config.pos_color[0];
                         config.neg_color = config.neg_color[0];
                     }
+
+                    if (config?.color) {
+                        config.color = config.color[0];
+                    }
+
                     token[col] = config;
                 }
 
@@ -150,6 +155,10 @@ customElements.define(
                 if (config?.pos_color) {
                     config.pos_color = create_color_record(config.pos_color);
                     config.neg_color = create_color_record(config.neg_color);
+                }
+
+                if (config?.color) {
+                    config.color = create_color_record(config.color);
                 }
 
                 if (Object.keys(config).length === 0) {

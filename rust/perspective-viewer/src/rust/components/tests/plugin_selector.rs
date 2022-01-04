@@ -100,7 +100,7 @@ pub async fn test_plugin_selected() {
     PLUGIN_REGISTRY.register_plugin("perspective-viewer-debug3");
     PLUGIN_REGISTRY.register_plugin("perspective-viewer-debug4");
 
-    let link: WeakComponentLink<PluginSelector> = WeakComponentLink::default();
+    let link: WeakScope<PluginSelector> = WeakScope::default();
     let result: Rc<RefCell<Option<JsPerspectiveViewerPlugin>>> =
         Rc::new(RefCell::new(None));
     let document = window().unwrap().document().unwrap();

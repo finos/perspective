@@ -60,7 +60,7 @@ impl FilterDropDownElement {
     }
 
     pub fn autocomplete(
-        &mut self,
+        &self,
         column: (usize, String),
         input: String,
         target: HtmlElement,
@@ -113,7 +113,7 @@ impl FilterDropDownElement {
         self.modal.send_message(FilterDropDownMsg::ItemUp);
     }
 
-    pub fn hide(&mut self) -> Result<(), JsValue> {
+    pub fn hide(&self) -> Result<(), JsValue> {
         let result = self.modal.hide();
         drop(self.column.borrow_mut().take());
         result

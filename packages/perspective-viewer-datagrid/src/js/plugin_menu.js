@@ -11,8 +11,6 @@ import chroma from "chroma-js";
 
 export const PLUGIN_SYMBOL = Symbol("Plugin Symbol");
 
-let MENU = undefined;
-
 export function make_gradient(chromahex) {
     const [r, g, b] = chromahex.rgb();
     const [r1, g1, b1] = chromahex
@@ -25,25 +23,37 @@ export function make_gradient(chromahex) {
 }
 
 export function activate_plugin_menu(regularTable, target, column_max) {
-    MENU = MENU || document.createElement("perspective-column-style");
+    const is_numeric = typeof column_max !== "undefined";
+    const MENU = document.createElement(
+        `perspective-${is_numeric ? "number" : "string"}-column-style`
+    );
     const target_meta = regularTable.getMeta(target);
     const column_name =
         target_meta.column_header[target_meta.column_header.length - 1];
     const column_type = this._schema[column_name];
-    const default_config = {
-        gradient: column_max,
-        pos_color: this._pos_color[0],
-        neg_color: this._neg_color[0],
-        color_mode: "foreground",
-    };
+    let default_config;
+    if (is_numeric) {
+        default_config = {
+            gradient: column_max,
+            pos_color: this._pos_color[0],
+            neg_color: this._neg_color[0],
+            number_color_mode: "foreground",
+        };
+    } else {
+        default_config = {
+            color: this._color[0],
+        };
+    }
 
-    if (column_type === "float") {
+    if (column_type === "string") {
+        // do nothing
+    } else if (column_type === "float") {
         default_config.fixed = 2;
     } else if (column_type === "integer") {
         default_config.fixed = 0;
     } else {
         this._open_column_styles_menu.pop();
-        regularTable.draw();
+        regularTable.draw({preserve_width: true});
         return;
     }
 
@@ -60,6 +70,14 @@ export function activate_plugin_menu(regularTable, target, column_max) {
                 config.neg_color,
                 ...chroma(config.neg_color).rgb(),
                 make_gradient(chroma(config.neg_color)),
+            ];
+        }
+
+        if (config.color) {
+            config.color = [
+                config.color,
+                ...chroma(config.color).rgb(),
+                make_gradient(chroma(config.color)),
             ];
         }
 
@@ -81,8 +99,9 @@ export function activate_plugin_menu(regularTable, target, column_max) {
             update_handler
         );
         MENU.removeEventListener("blur", blur_handler);
+        MENU.destroy();
         this._open_column_styles_menu.pop();
-        await regularTable.draw();
+        await regularTable.draw({preserve_width: true});
         regularTable.parentElement.dispatchEvent(
             new Event("perspective-config-update")
         );
@@ -98,11 +117,15 @@ export function activate_plugin_menu(regularTable, target, column_max) {
         {},
         (pset[column_name] = pset[column_name] || {})
     );
+
     if (config.pos_color) {
         config.pos_color = config.pos_color[0];
         config.neg_color = config.neg_color[0];
     }
 
-    // open the menu
+    if (config.color) {
+        config.color = config.color[0];
+    }
+
     MENU.open(target, config, default_config);
 }

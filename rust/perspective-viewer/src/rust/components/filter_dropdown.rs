@@ -26,14 +26,14 @@ pub struct FilterDropDown {
     values: Option<Vec<String>>,
     selected: usize,
     on_select: Option<Callback<String>>,
-    // link: ComponentLink<Self>,
+    // link: Scope<Self>,
 }
 
 impl Component for FilterDropDown {
     type Message = FilterDropDownMsg;
     type Properties = ();
 
-    fn create(_props: Self::Properties, _link: ComponentLink<Self>) -> Self {
+    fn create(_ctx: &Context<Self>) -> Self {
         FilterDropDown {
             top: 0,
             left: 0,
@@ -44,7 +44,7 @@ impl Component for FilterDropDown {
         }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             FilterDropDownMsg::SetCallback(callback) => {
                 self.on_select = Some(callback);
@@ -100,11 +100,11 @@ impl Component for FilterDropDown {
         }
     }
 
-    fn change(&mut self, _props: Self::Properties) -> ShouldRender {
+    fn changed(&mut self, _ctx: &Context<Self>) -> bool {
         false
     }
 
-    fn view(&self) -> Html {
+    fn view(&self, _ctx: &Context<Self>) -> Html {
         let body = if let Some(ref values) = self.values {
             if !values.is_empty() {
                 values

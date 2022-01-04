@@ -1,5 +1,4 @@
 const fs = require("fs");
-const crypto = require("crypto");
 const path = require("path");
 const esbuild = require("esbuild");
 
@@ -7,9 +6,7 @@ exports.WorkerPlugin = function WorkerPlugin(inline) {
     function setup(build) {
         build.onResolve({filter: /worker.js$/}, (args) => {
             if (args.namespace === "worker-stub") {
-                const outfile =
-                    `dist/umd/` + crypto.randomBytes(4).readUInt32LE(0);
-
+                const outfile = `build/worker/` + path.basename(args.path);
                 const subbuild = esbuild.build({
                     target: ["es2021"],
                     entryPoints: [require.resolve(args.path)],
@@ -22,10 +19,7 @@ exports.WorkerPlugin = function WorkerPlugin(inline) {
                     assetNames: "[name]",
                     minify: !process.env.PSP_DEBUG,
                     bundle: true,
-                    // // Unfortunately source maps don't work with blob
-                    // // workers, which we need to make cross-origin
-                    // // workers not a PITA ..
-                    // sourcemap: true,
+                    sourcemap: true,
                 });
 
                 return {
@@ -84,9 +78,27 @@ exports.WorkerPlugin = function WorkerPlugin(inline) {
         });
 
         build.onLoad({filter: /.*/, namespace: "worker"}, async (args) => {
+            // Get the subbuild output and delete the temp file
             await args.pluginData.subbuild;
             contents = await fs.promises.readFile(args.pluginData.outfile);
-            await fs.promises.unlink(args.pluginData.outfile);
+
+            // Copy the sourcemaps also
+            const mapfile = args.pluginData.outfile + ".map";
+            sourcemap = await fs.promises.readFile(mapfile);
+
+            const outpath =
+                build.initialOptions.outdir ||
+                path.dirname(build.initialOptions.outfile);
+
+            if (!fs.existsSync(outpath)) {
+                fs.mkdirSync(outpath, {recursive: true});
+            }
+
+            await fs.promises.writeFile(
+                path.join(outpath, path.basename(args.path) + ".map"),
+                sourcemap
+            );
+
             return {
                 contents,
                 loader: inline ? "text" : "file",

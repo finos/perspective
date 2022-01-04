@@ -26,6 +26,12 @@ pub struct ExpressionToolbarProps {
     pub dragdrop: DragDrop,
 }
 
+impl PartialEq for ExpressionToolbarProps {
+    fn eq(&self, _rhs: &Self) -> bool {
+        false
+    }
+}
+
 derive_renderable_props!(ExpressionToolbarProps);
 
 impl ExpressionToolbarProps {
@@ -58,11 +64,6 @@ impl ExpressionToolbarProps {
 
     fn is_closable(&self) -> bool {
         !self.session.is_column_expression_in_use(&self.name)
-            && !self
-                .dragdrop
-                .get_drag_column()
-                .map(|x| x == self.name)
-                .unwrap_or_default()
     }
 }
 
@@ -73,46 +74,27 @@ pub enum ExpressionToolbarMsg {
 }
 
 pub struct ExpressionToolbar {
-    link: ComponentLink<ExpressionToolbar>,
-    props: ExpressionToolbarProps,
     expression_editor: Option<ExpressionEditorElement>,
-    is_closable: bool,
 }
 
 impl Component for ExpressionToolbar {
     type Message = ExpressionToolbarMsg;
     type Properties = ExpressionToolbarProps;
 
-    fn create(
-        props: <Self as yew::Component>::Properties,
-        link: ComponentLink<Self>,
-    ) -> Self {
-        let is_closable = props.is_closable();
+    fn create(_ctx: &Context<Self>) -> Self {
         ExpressionToolbar {
-            link,
-            props,
             expression_editor: None,
-            is_closable,
         }
     }
 
-    fn change(&mut self, props: <Self as yew::Component>::Properties) -> ShouldRender {
-        let is_closable = props.is_closable();
-        let should_render =
-            self.props.name != props.name || self.is_closable != is_closable;
-        self.props = props;
-        self.is_closable = is_closable;
-        should_render
-    }
-
-    fn update(&mut self, msg: <Self as yew::Component>::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: ExpressionToolbarMsg) -> bool {
         match msg {
             ExpressionToolbarMsg::Close => {
-                self.props.close_expr();
+                ctx.props().close_expr();
                 false
             }
             ExpressionToolbarMsg::Save(expression) => {
-                let props = self.props.clone();
+                let props = ctx.props().clone();
                 let expression_editor = self.expression_editor.take();
                 spawn_local(async move {
                     props.save_expr(&expression).await;
@@ -124,14 +106,17 @@ impl Component for ExpressionToolbar {
                 false
             }
             ExpressionToolbarMsg::Edit => {
-                let on_save = self.link.callback(ExpressionToolbarMsg::Save);
-                let target =
-                    self.props.add_expression_ref.cast::<HtmlElement>().unwrap();
+                let on_save = ctx.link().callback(ExpressionToolbarMsg::Save);
+                let target = ctx
+                    .props()
+                    .add_expression_ref
+                    .cast::<HtmlElement>()
+                    .unwrap();
 
                 let mut element = ExpressionEditorElement::new(
-                    self.props.session.clone(),
+                    ctx.props().session.clone(),
                     on_save,
-                    Some(self.props.name.to_owned()),
+                    Some(ctx.props().name.to_owned()),
                 );
 
                 element.open(target);
@@ -141,14 +126,14 @@ impl Component for ExpressionToolbar {
         }
     }
 
-    fn view(&self) -> Html {
-        let edit = self.link.callback(|_| ExpressionToolbarMsg::Edit);
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let edit = ctx.link().callback(|_| ExpressionToolbarMsg::Edit);
 
         html! {
             <>
                 {
-                    if self.is_closable {
-                        let close = self.link.callback(|_| ExpressionToolbarMsg::Close);
+                    if ctx.props().is_closable() {
+                        let close = ctx.link().callback(|_| ExpressionToolbarMsg::Close);
                         html! {
                             <span
                                 onmousedown={ close }

@@ -22,6 +22,7 @@ use yew::prelude::*;
 #[derive(Properties, Clone)]
 pub struct InactiveColumnProps {
     pub idx: usize,
+    pub visible: bool,
     pub name: String,
     pub dragdrop: DragDrop,
     pub session: Session,
@@ -34,8 +35,8 @@ impl PartialEq for InactiveColumnProps {
     /// Equality for `InactiveColumnProps` determines when it should re-render, which
     /// is only when it has changed.
     /// TODO Aggregates
-    fn eq(&self, rhs: &InactiveColumnProps) -> bool {
-        self.idx == rhs.idx && self.name == rhs.name
+    fn eq(&self, _rhs: &InactiveColumnProps) -> bool {
+        false
     }
 }
 
@@ -92,8 +93,6 @@ pub enum InactiveColumnMsg {
 }
 
 pub struct InactiveColumn {
-    link: ComponentLink<InactiveColumn>,
-    props: InactiveColumnProps,
     add_expression_ref: NodeRef,
 }
 
@@ -101,52 +100,40 @@ impl Component for InactiveColumn {
     type Message = InactiveColumnMsg;
     type Properties = InactiveColumnProps;
 
-    fn create(
-        props: <Self as yew::Component>::Properties,
-        link: ComponentLink<Self>,
-    ) -> Self {
+    fn create(_ctx: &Context<Self>) -> Self {
         InactiveColumn {
-            link,
-            props,
             add_expression_ref: NodeRef::default(),
         }
     }
 
-    fn change(&mut self, props: <Self as yew::Component>::Properties) -> ShouldRender {
-        // let should_render = self.props != props;
-        // TODO this can be avoided by checking is_closable
-        self.props = props;
-        true
-    }
-
-    fn update(&mut self, msg: <Self as yew::Component>::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: InactiveColumnMsg) -> bool {
         match msg {
             InactiveColumnMsg::ActivateColumn(shift_key) => {
-                self.props
-                    .activate_column(self.props.name.to_owned(), shift_key);
-                self.props.onselect.emit(());
+                ctx.props()
+                    .activate_column(ctx.props().name.to_owned(), shift_key);
+                ctx.props().onselect.emit(());
                 false
             }
         }
     }
 
-    fn view(&self) -> Html {
-        let col_type = self
-            .props
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let col_type = ctx
+            .props()
             .session
             .metadata()
-            .get_column_table_type(&self.props.name)
+            .get_column_table_type(&ctx.props().name)
             .expect("Unknown column");
 
-        let add_column = self.link.callback(|event: MouseEvent| {
+        let add_column = ctx.link().callback(|event: MouseEvent| {
             InactiveColumnMsg::ActivateColumn(event.shift_key())
         });
 
         let noderef = NodeRef::default();
         let dragstart = Callback::from({
-            let event_name = self.props.name.to_owned();
+            let event_name = ctx.props().name.to_owned();
             let noderef = noderef.clone();
-            let dragdrop = self.props.dragdrop.clone();
+            let dragdrop = ctx.props().dragdrop.clone();
             move |_event: DragEvent| {
                 let elem = noderef.cast::<HtmlElement>().unwrap();
                 _event.data_transfer().unwrap().set_drag_image(&elem, 0, 0);
@@ -154,16 +141,17 @@ impl Component for InactiveColumn {
             }
         });
 
-        let is_expression = self
-            .props
+        let is_expression = ctx
+            .props()
             .session
             .metadata()
-            .is_column_expression(&self.props.name);
+            .is_column_expression(&ctx.props().name);
 
         html! {
             <div
                 class="column-selector-column"
-                data-index={ self.props.idx.to_string() }>
+                style={ if ctx.props().visible { None } else { Some("display:none") } }
+                data-index={ ctx.props().idx.to_string() }>
 
                 <span
                     class="is_column_active"
@@ -174,23 +162,23 @@ impl Component for InactiveColumn {
                     draggable="true"
                     ref={ self.add_expression_ref.clone() }
                     ondragstart={ dragstart }
-                    ondragend={ self.props.ondragend.clone() }>
+                    ondragend={ ctx.props().ondragend.clone() }>
 
                     <span
                         ref={ noderef.clone() }
                         class={ format!("column_name {}", col_type) }>
                         {
-                            self.props.name.clone()
+                            ctx.props().name.clone()
                         }
                     </span>
                     {
                         if is_expression {
                             html! {
                                 <ExpressionToolbar
-                                    session={ self.props.session.clone() }
-                                    renderer={ self.props.renderer.clone() }
-                                    dragdrop={ self.props.dragdrop.clone() }
-                                    name={ self.props.name.clone() }
+                                    session={ ctx.props().session.clone() }
+                                    renderer={ ctx.props().renderer.clone() }
+                                    dragdrop={ ctx.props().dragdrop.clone() }
+                                    name={ ctx.props().name.clone() }
                                     add_expression_ref={ self.add_expression_ref.clone() }>
 
                                 </ExpressionToolbar>

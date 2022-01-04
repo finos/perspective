@@ -24,8 +24,6 @@ use yew::prelude::*;
 
 /// A control for a single filter condition.
 pub struct FilterItem {
-    props: FilterItemProperties,
-    link: ComponentLink<FilterItem>,
     input: String,
     input_ref: NodeRef,
 }
@@ -39,7 +37,7 @@ pub enum FilterItemMsg {
 }
 
 #[derive(Properties, Clone)]
-pub struct FilterItemProperties {
+pub struct FilterItemProps {
     pub filter: Filter,
     pub idx: usize,
     pub filter_dropdown: FilterDropDownElement,
@@ -49,9 +47,16 @@ pub struct FilterItemProperties {
     pub dragdrop: DragDrop,
 }
 
-derive_renderable_props!(FilterItemProperties);
+impl PartialEq for FilterItemProps {
+    fn eq(&self, _rhs: &Self) -> bool {
+        false
+        // self.idx == other.idx && self.filter == other.filter
+    }
+}
 
-impl DragDropListItemProps for FilterItemProperties {
+derive_renderable_props!(FilterItemProps);
+
+impl DragDropListItemProps for FilterItemProps {
     type Item = Filter;
 
     fn get_item(&self) -> Filter {
@@ -59,7 +64,7 @@ impl DragDropListItemProps for FilterItemProperties {
     }
 }
 
-impl FilterItemProperties {
+impl FilterItemProps {
     /// Does this filter item get a "suggestions" auto-complete modal?
     fn is_suggestable(&self) -> bool {
         (self.filter.1 == FilterOp::EQ || self.filter.1 == FilterOp::NE)
@@ -223,28 +228,26 @@ type FilterOpSelector = DropDown<FilterOp>;
 
 impl Component for FilterItem {
     type Message = FilterItemMsg;
-    type Properties = FilterItemProperties;
+    type Properties = FilterItemProps;
 
-    fn create(props: FilterItemProperties, link: ComponentLink<Self>) -> Self {
-        let input = props.get_filter_input().unwrap_or_else(|| "".to_owned());
+    fn create(ctx: &Context<Self>) -> Self {
+        let input = ctx
+            .props()
+            .get_filter_input()
+            .unwrap_or_else(|| "".to_owned());
         let input_ref = NodeRef::default();
-        if let Some(Type::Bool) = props.get_filter_type() {
-            props.update_filter_input(input.clone());
+        if let Some(Type::Bool) = ctx.props().get_filter_type() {
+            ctx.props().update_filter_input(input.clone());
         }
 
-        FilterItem {
-            props,
-            link,
-            input,
-            input_ref,
-        }
+        FilterItem { input, input_ref }
     }
 
-    fn update(&mut self, msg: FilterItemMsg) -> bool {
+    fn update(&mut self, ctx: &Context<Self>, msg: FilterItemMsg) -> bool {
         match msg {
             FilterItemMsg::FilterInput(column, input) => {
                 let target = self.input_ref.cast::<HtmlInputElement>().unwrap();
-                let input = if let Some(Type::Bool) = self.props.get_filter_type() {
+                let input = if let Some(Type::Bool) = ctx.props().get_filter_type() {
                     if target.checked() {
                         "true".to_owned()
                     } else {
@@ -254,59 +257,58 @@ impl Component for FilterItem {
                     input
                 };
 
-                if self.props.is_suggestable() {
-                    self.props.filter_dropdown.autocomplete(
+                if ctx.props().is_suggestable() {
+                    ctx.props().filter_dropdown.autocomplete(
                         column,
                         input.clone(),
                         target.unchecked_into(),
-                        self.props.on_keydown.clone(),
+                        ctx.props().on_keydown.clone(),
                     );
                 }
 
-                self.props.update_filter_input(input);
+                ctx.props().update_filter_input(input);
                 false
             }
             FilterItemMsg::FilterKeyDown(40) => {
-                if self.props.is_suggestable() {
-                    self.props.filter_dropdown.item_down();
-                    self.props.filter_dropdown.item_select();
+                if ctx.props().is_suggestable() {
+                    ctx.props().filter_dropdown.item_down();
+                    ctx.props().filter_dropdown.item_select();
                 }
                 false
             }
             FilterItemMsg::FilterKeyDown(38) => {
-                if self.props.is_suggestable() {
-                    self.props.filter_dropdown.item_up();
-                    self.props.filter_dropdown.item_select();
+                if ctx.props().is_suggestable() {
+                    ctx.props().filter_dropdown.item_up();
+                    ctx.props().filter_dropdown.item_select();
                 }
                 false
             }
             FilterItemMsg::Close => {
-                self.props.filter_dropdown.hide().unwrap();
+                ctx.props().filter_dropdown.hide().unwrap();
                 false
             }
             FilterItemMsg::FilterKeyDown(13) => {
-                if self.props.is_suggestable() {
-                    self.props.filter_dropdown.item_select();
-                    self.props.filter_dropdown.hide().unwrap();
+                if ctx.props().is_suggestable() {
+                    ctx.props().filter_dropdown.item_select();
+                    ctx.props().filter_dropdown.hide().unwrap();
                 }
                 false
             }
             FilterItemMsg::FilterKeyDown(_) => {
-                if self.props.is_suggestable() {
-                    self.props.filter_dropdown.reautocomplete();
+                if ctx.props().is_suggestable() {
+                    ctx.props().filter_dropdown.reautocomplete();
                 }
                 false
             }
             FilterItemMsg::FilterOpSelect(op) => {
-                self.props.update_filter_op(op);
+                ctx.props().update_filter_op(op);
                 true
             }
         }
     }
 
-    fn change(&mut self, props: FilterItemProperties) -> bool {
-        self.props = props;
-        if let Some(input) = self.props.get_filter_input() {
+    fn changed(&mut self, ctx: &Context<Self>) -> bool {
+        if let Some(input) = ctx.props().get_filter_input() {
             self.input = input;
             true
         } else {
@@ -314,39 +316,50 @@ impl Component for FilterItem {
         }
     }
 
-    fn view(&self) -> Html {
-        let idx = self.props.idx;
-        let filter = self.props.filter.clone();
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let idx = ctx.props().idx;
+        let filter = ctx.props().filter.clone();
         let column = filter.0.to_owned();
-        let col_type = self.props.session.metadata().get_column_table_type(&column);
+        let col_type = ctx
+            .props()
+            .session
+            .metadata()
+            .get_column_table_type(&column);
 
-        let select = self.link.callback(FilterItemMsg::FilterOpSelect);
+        let select = ctx.link().callback(FilterItemMsg::FilterOpSelect);
 
         let noderef = &self.input_ref;
-        let input = self.link.callback({
+        let input = ctx.link().callback({
             let column = column.clone();
-            move |input: InputData| {
-                FilterItemMsg::FilterInput((idx, column.clone()), input.value)
+            move |input: InputEvent| {
+                FilterItemMsg::FilterInput(
+                    (idx, column.clone()),
+                    input
+                        .target()
+                        .unwrap()
+                        .unchecked_into::<HtmlInputElement>()
+                        .value(),
+                )
             }
         });
 
-        let focus = self.link.callback({
+        let focus = ctx.link().callback({
             let input = self.input.clone();
             move |_: FocusEvent| {
                 FilterItemMsg::FilterInput((idx, column.clone()), input.clone())
             }
         });
 
-        let blur = self.link.callback(|_| FilterItemMsg::Close);
-        let keydown = self.link.callback(move |event: KeyboardEvent| {
+        let blur = ctx.link().callback(|_| FilterItemMsg::Close);
+        let keydown = ctx.link().callback(move |event: KeyboardEvent| {
             FilterItemMsg::FilterKeyDown(event.key_code())
         });
 
         let dragref = NodeRef::default();
         let dragstart = Callback::from({
-            let event_name = self.props.filter.0.to_owned();
+            let event_name = ctx.props().filter.0.to_owned();
             let dragref = dragref.clone();
-            let dragdrop = self.props.dragdrop.clone();
+            let dragdrop = ctx.props().dragdrop.clone();
             move |event: DragEvent| {
                 let elem = dragref.cast::<HtmlElement>().unwrap();
                 event.data_transfer().unwrap().set_drag_image(&elem, 0, 0);
@@ -358,7 +371,7 @@ impl Component for FilterItem {
         });
 
         let dragend = Callback::from({
-            let dragdrop = self.props.dragdrop.clone();
+            let dragdrop = ctx.props().dragdrop.clone();
             move |_event| dragdrop.drag_end()
         });
 
@@ -440,8 +453,8 @@ impl Component for FilterItem {
             }
         };
 
-        let filter_ops = self
-            .props
+        let filter_ops = ctx
+            .props()
             .get_filter_ops()
             .into_iter()
             .map(DropDownItem::Option)

@@ -21,7 +21,7 @@ wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
 pub fn test_callbacks_invoked() {
-    let link: WeakComponentLink<StatusBar> = WeakComponentLink::default();
+    let link: WeakScope<StatusBar> = WeakScope::default();
     let token = Rc::new(Cell::new(0));
     let on_reset = Callback::from({
         clone!(token);
@@ -52,7 +52,7 @@ pub fn test_callbacks_invoked() {
 }
 
 fn gen(stats: &Option<TableStats>) -> (HtmlElement, Session) {
-    let link: WeakComponentLink<StatusBar> = WeakComponentLink::default();
+    let link: WeakScope<StatusBar> = WeakScope::default();
     let div = NodeRef::default();
     let on_reset = Callback::from(|_| ());
     let session = Session::default();

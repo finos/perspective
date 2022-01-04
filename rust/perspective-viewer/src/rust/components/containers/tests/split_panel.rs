@@ -11,14 +11,14 @@ use web_sys::HtmlElement;
 use yew::prelude::*;
 
 use super::super::split_panel::{SplitPanel, SplitPanelMsg};
-use crate::utils::WeakComponentLink;
+use crate::utils::WeakScope;
 use crate::*;
 
 wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
 pub fn test_resizes_larger() {
-    let link: WeakComponentLink<SplitPanel> = WeakComponentLink::default();
+    let link: WeakScope<SplitPanel> = WeakScope::default();
     let panel_div = NodeRef::default();
     test_html! {
         <SplitPanel id="test" weak_link={ link.clone() }>
@@ -38,7 +38,7 @@ pub fn test_resizes_larger() {
 
 #[wasm_bindgen_test]
 pub async fn test_resizes_narrower() {
-    let link: WeakComponentLink<SplitPanel> = WeakComponentLink::default();
+    let link: WeakScope<SplitPanel> = WeakScope::default();
     let panel_div = NodeRef::default();
     test_html! {
         <SplitPanel id="test" weak_link={ link.clone() }>
@@ -61,7 +61,7 @@ pub async fn test_resizes_narrower() {
 
 #[wasm_bindgen_test]
 pub async fn test_double_click_reset() {
-    let link: WeakComponentLink<SplitPanel> = WeakComponentLink::default();
+    let link: WeakScope<SplitPanel> = WeakScope::default();
     let panel_div = NodeRef::default();
     test_html! {
         <SplitPanel id="test" weak_link={ link.clone() }>

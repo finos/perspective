@@ -10,23 +10,24 @@ use derivative::Derivative;
 use std::cell::RefCell;
 use std::ops::Deref;
 use std::rc::Rc;
+use yew::html::Scope;
 use yew::prelude::*;
 
-/// A mutable reference for capturing the `ComponentLink<_>` props arguments, a useful
+/// A mutable reference for capturing the `Scope<_>` props arguments, a useful
 /// function for tests.
 #[derive(Derivative)]
 #[derivative(Clone(bound = ""), Default(bound = ""))]
-pub struct WeakComponentLink<C: Component>(Rc<RefCell<Option<ComponentLink<C>>>>);
+pub struct WeakScope<C: Component>(Rc<RefCell<Option<Scope<C>>>>);
 
-impl<C: Component> Deref for WeakComponentLink<C> {
-    type Target = Rc<RefCell<Option<ComponentLink<C>>>>;
+impl<C: Component> Deref for WeakScope<C> {
+    type Target = Rc<RefCell<Option<Scope<C>>>>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl<C: Component> PartialEq for WeakComponentLink<C> {
+impl<C: Component> PartialEq for WeakScope<C> {
     fn eq(&self, other: &Self) -> bool {
         Rc::ptr_eq(&self.0, &other.0)
     }

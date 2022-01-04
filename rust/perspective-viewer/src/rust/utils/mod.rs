@@ -16,7 +16,7 @@ mod js_object;
 mod pubsub;
 mod request_animation_frame;
 mod testing;
-mod weak_component_link;
+mod weak_scope;
 
 #[cfg(test)]
 mod tests;
@@ -30,7 +30,7 @@ pub use self::future_to_promise::*;
 pub use self::pubsub::*;
 pub use self::request_animation_frame::*;
 pub use self::testing::*;
-pub use self::weak_component_link::*;
+pub use self::weak_scope::*;
 
 #[macro_export]
 macro_rules! maybe {

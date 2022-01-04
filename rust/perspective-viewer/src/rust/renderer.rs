@@ -91,6 +91,12 @@ impl Deref for Renderer {
     }
 }
 
+impl PartialEq for Renderer {
+    fn eq(&self, other: &Self) -> bool {
+        Rc::ptr_eq(&self.0, &other.0)
+    }
+}
+
 impl Deref for PluginHandle {
     type Target = RefCell<PluginData>;
     fn deref(&self) -> &Self::Target {

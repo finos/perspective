@@ -13,18 +13,22 @@ use super::containers::dragdrop_list::*;
 use web_sys::*;
 use yew::prelude::*;
 
-pub struct PivotItem {
-    props: PivotItemProperties,
-}
+pub struct PivotItem {}
 
 #[derive(Properties, Clone)]
-pub struct PivotItemProperties {
+pub struct PivotItemProps {
     pub column: String,
     pub dragdrop: DragDrop,
     pub action: DropAction,
 }
 
-impl DragDropListItemProps for PivotItemProperties {
+impl PartialEq for PivotItemProps {
+    fn eq(&self, other: &Self) -> bool {
+        self.column == other.column && self.action == other.action
+    }
+}
+
+impl DragDropListItemProps for PivotItemProps {
     type Item = String;
 
     fn get_item(&self) -> String {
@@ -34,15 +38,15 @@ impl DragDropListItemProps for PivotItemProperties {
 
 impl Component for PivotItem {
     type Message = ();
-    type Properties = PivotItemProperties;
+    type Properties = PivotItemProps;
 
-    fn view(&self) -> Html {
+    fn view(&self, ctx: &Context<Self>) -> Html {
         let noderef = NodeRef::default();
         let dragstart = Callback::from({
-            let event_name = self.props.column.to_owned();
+            let event_name = ctx.props().column.to_owned();
             let noderef = noderef.clone();
-            let dragdrop = self.props.dragdrop.clone();
-            let action = self.props.action;
+            let dragdrop = ctx.props().dragdrop.clone();
+            let action = ctx.props().action;
             move |event: DragEvent| {
                 let elem = noderef.cast::<HtmlElement>().unwrap();
                 event.data_transfer().unwrap().set_drag_image(&elem, 0, 0);
@@ -51,7 +55,7 @@ impl Component for PivotItem {
         });
 
         let dragend = Callback::from({
-            let dragdrop = self.props.dragdrop.clone();
+            let dragdrop = ctx.props().dragdrop.clone();
             move |_event| dragdrop.drag_end()
         });
 
@@ -62,26 +66,13 @@ impl Component for PivotItem {
                 ondragstart={ dragstart }
                 ondragend={ dragend }>
                 {
-                    self.props.column.clone()
+                    ctx.props().column.clone()
                 }
             </span>
         }
     }
 
-    fn create(
-        props: <Self as yew::Component>::Properties,
-        _: yew::html::Scope<Self>,
-    ) -> Self {
-        PivotItem { props }
-    }
-
-    fn update(&mut self, _: ()) -> bool {
-        true
-    }
-
-    fn change(&mut self, props: PivotItemProperties) -> bool {
-        let should_render = props.column != self.props.column;
-        self.props = props;
-        should_render
+    fn create(_ctx: &Context<Self>) -> Self {
+        PivotItem {}
     }
 }

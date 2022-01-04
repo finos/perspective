@@ -108,7 +108,7 @@ function tests(extract) {
             });
 
             await page.evaluate(async () => {
-                await workspace.notifyResize(true);
+                await workspace.flush();
             });
 
             return extract(page);

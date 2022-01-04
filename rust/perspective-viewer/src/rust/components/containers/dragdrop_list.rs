@@ -9,31 +9,10 @@
 use crate::dragdrop::*;
 
 use derivative::Derivative;
+use std::marker::PhantomData;
 use web_sys::*;
+use yew::html::Scope;
 use yew::prelude::*;
-
-#[macro_export]
-macro_rules! derive_dragdrop_list {
-    ($name:ident, $context:ident, $parent:ident, $item:ident, $dragenter:ident, $dragleave:ident, $close:ident) => {
-        struct $context {}
-
-        impl DragContext<<$parent as Component>::Message> for $context {
-            fn dragenter(index: usize) -> ConfigSelectorMsg {
-                <$parent as Component>::Message::$dragenter(index)
-            }
-
-            fn close(index: usize) -> ConfigSelectorMsg {
-                <$parent as Component>::Message::$close(index)
-            }
-
-            fn dragleave() -> ConfigSelectorMsg {
-                <$parent as Component>::Message::$dragleave
-            }
-        }
-
-        type $name = DragDropList<$parent, $item, $context>;
-    };
-}
 
 /// Must be implemented by `Properties` of children of `DragDropList`, returning
 /// the value a DragDropItem represents.
@@ -56,7 +35,7 @@ where
     U: Component,
     <U as Component>::Properties: DragDropListItemProps,
 {
-    pub parent: ComponentLink<T>,
+    pub parent: Scope<T>,
     pub dragdrop: DragDrop,
     pub name: &'static str,
     pub children: ChildrenWithProps<U>,
@@ -69,6 +48,20 @@ where
 
     #[prop_or_default]
     pub allow_duplicates: bool,
+}
+
+impl<T, U> PartialEq for DragDropListProps<T, U>
+where
+    T: Component,
+    U: Component,
+    <U as Component>::Properties: DragDropListItemProps,
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name
+            && self.children == other.children
+            && self.allow_duplicates == other.allow_duplicates
+            && self.is_dragover == other.is_dragover
+    }
 }
 
 pub enum DragDropListMsg {
@@ -89,8 +82,9 @@ where
     <U as Component>::Properties: DragDropListItemProps,
     V: DragContext<T::Message> + 'static,
 {
-    props: DragDropListProps<T, U>,
-    link: ComponentLink<Self>,
+    parent_type: PhantomData<T>,
+    item_type: PhantomData<U>,
+    draggable_type: PhantomData<V>,
     elem: NodeRef,
     frozen_size: Option<f64>,
 }
@@ -105,16 +99,21 @@ where
     type Message = DragDropListMsg;
     type Properties = DragDropListProps<T, U>;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
+    fn create(_ctx: &Context<Self>) -> Self {
         DragDropList {
-            props,
-            link,
+            parent_type: PhantomData,
+            item_type: PhantomData,
+            draggable_type: PhantomData,
             elem: NodeRef::default(),
             frozen_size: None,
         }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn changed(&mut self, _ctx: &Context<Self>) -> bool {
+        true
+    }
+
+    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             // When a dragover occurs and a new Column is inserted into the selector,
             // the geometry of the selector may expand and cause a parent reflow,
@@ -152,21 +151,14 @@ where
         }
     }
 
-    /// Should always render on change, as this component only depends on the props from
-    /// its parent and has no `Msg` enums.
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props = props;
-        true
-    }
-
-    fn view(&self) -> Html {
+    fn view(&self, ctx: &Context<Self>) -> Html {
         let dragover = Callback::from(|_event: DragEvent| _event.prevent_default());
 
         // On dragleave, signal the parent but no need to redraw as parent will call
         // `change()` when resetting props.
         let dragleave = dragleave_helper({
-            let parent = self.props.parent.clone();
-            let link = self.link.clone();
+            let parent = ctx.props().parent.clone();
+            let link = ctx.link().clone();
             move || {
                 link.send_message(DragDropListMsg::Freeze(false));
                 parent.send_message(V::dragleave())
@@ -174,8 +166,8 @@ where
         });
 
         let drop = Callback::from({
-            let dragdrop = self.props.dragdrop.clone();
-            let link = self.link.clone();
+            let dragdrop = ctx.props().dragdrop.clone();
+            let link = ctx.link().clone();
             move |_| {
                 link.send_message(DragDropListMsg::Freeze(false));
                 dragdrop.notify_drop();
@@ -183,15 +175,15 @@ where
         });
 
         let columns_html = {
-            let mut columns = self
-                .props
+            let mut columns = ctx
+                .props()
                 .children
                 .iter()
                 .map(|x| (true, Some(x)))
                 .enumerate()
                 .collect::<Vec<(usize, (bool, Option<yew::virtual_dom::VChild<U>>))>>();
 
-            if let Some((x, column)) = &self.props.is_dragover {
+            if let Some((x, column)) = &ctx.props().is_dragover {
                 let index = *x as usize;
                 let col_vchild = columns
                     .iter()
@@ -199,7 +191,7 @@ where
                     .find(|x| x.props.get_item() == *column)
                     .cloned();
 
-                if !self.props.allow_duplicates {
+                if !ctx.props().allow_duplicates {
                     columns.retain(|x| {
                         x.1 .1.as_ref().unwrap().props.get_item() != *column
                     });
@@ -218,9 +210,9 @@ where
             columns
                 .into_iter()
                 .map(|(idx, column)| {
-                    let close = self.props.parent.callback(move |_| V::close(idx));
-                    let dragenter = self.props.parent.callback({
-                        let link = self.link.clone();
+                    let close = ctx.props().parent.callback(move |_| V::close(idx));
+                    let dragenter = ctx.props().parent.callback({
+                        let link = ctx.link().clone();
                         move |event: DragEvent| {
                             event.stop_propagation();
                             event.prevent_default();
@@ -256,9 +248,9 @@ where
                 .collect::<Html>()
         };
 
-        let total = self.props.children.len();
-        let dragenter = self.props.parent.callback({
-            let link = self.link.clone();
+        let total = ctx.props().children.len();
+        let dragenter = ctx.props().parent.callback({
+            let link = ctx.link().clone();
             move |event: DragEvent| {
                 dragenter_helper(event);
                 link.send_message(DragDropListMsg::Freeze(true));
@@ -274,17 +266,17 @@ where
         html! {
             <div style={style} ref={ self.elem.clone() } class="rrow">
                 <div
-                    id={ self.props.name }
+                    id={ ctx.props().name }
                     ondragover={ dragover }
                     ondragenter={ dragenter }
                     ondragleave={ dragleave }
                     ondrop={ drop }>
 
                     <div class="psp-text-field">
-                        <ul class="psp-text-field__input" for={ self.props.name }>
+                        <ul class="psp-text-field__input" for={ ctx.props().name }>
                             { columns_html }
                         </ul>
-                        <label class="pivot-selector-label" for={ self.props.name }></label>
+                        <label class="pivot-selector-label" for={ ctx.props().name }></label>
                     </div>
                 </div>
             </div>

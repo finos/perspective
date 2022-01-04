@@ -41,26 +41,24 @@ impl Debug for FontLoaderProps {
 }
 
 impl PartialEq for FontLoaderProps {
-    fn eq(&self, rhs: &FontLoaderProps) -> bool {
-        Rc::ptr_eq(&self.state, &rhs.state)
+    fn eq(&self, _rhs: &FontLoaderProps) -> bool {
+        false
     }
 }
 
 /// The `FontLoader` component ensures that fonts are loaded before they are
 /// visible.
-pub struct FontLoader {
-    props: FontLoaderProps,
-}
+pub struct FontLoader {}
 
 impl Component for FontLoader {
     type Properties = FontLoaderProps;
     type Message = ();
 
-    fn create(props: FontLoaderProps, _link: ComponentLink<Self>) -> Self {
-        FontLoader { props }
+    fn create(_ctx: &Context<Self>) -> Self {
+        FontLoader {}
     }
 
-    fn update(&mut self, _msg: ()) -> bool {
+    fn update(&mut self, _ctx: &Context<Self>, _msg: ()) -> bool {
         false
     }
 
@@ -68,20 +66,19 @@ impl Component for FontLoader {
     /// multiple sets of `FontLoaderProps` are not instantiated.  We don't
     /// want this to actually be static, since there may be multiple differently
     /// themed `<perspective-viewer>`s in the same wasm process.
-    fn change(&mut self, props: FontLoaderProps) -> bool {
-        assert_eq!(self.props, props);
-        true
-    }
+    // fn changed(&mut self, _ctx: &Context<Self>) -> bool {
+    //     true
+    // }
 
-    fn view(&self) -> yew::virtual_dom::VNode {
-        if let FontLoaderStatus::Finished = self.props.get_status() {
+    fn view(&self, ctx: &Context<Self>) -> yew::virtual_dom::VNode {
+        if let FontLoaderStatus::Finished = ctx.props().get_status() {
             html! {}
         } else {
             html! {
                 <>
-                    <style>{ ":host{opacity!important;}" }</style>
+                    <style>{ ":host{opacity:0!important;}" }</style>
                     {
-                        self.props
+                        ctx.props()
                             .get_fonts()
                             .iter()
                             .map(font_test_html)
@@ -172,7 +169,8 @@ impl FontLoaderProps {
         self.state.on_update.emit(());
 
         for (family, weight) in preload_fonts.iter() {
-            let mut block_fonts: PromiseSet = vec![timeout_font_task(family, weight)];
+            let task = timeout_font_task(family, weight);
+            let mut block_fonts: PromiseSet = vec![Box::pin(task)];
 
             for entry in font_iter(document.fonts().values()) {
                 let font_face = js_sys::Reflect::get(&entry, js_intern!("value"))?
@@ -209,15 +207,17 @@ impl FontLoaderProps {
     }
 }
 
+// An async task which times out.  Can be used to timeout an optional async task
+// by combinging with `Promise::any`.
 fn timeout_font_task(
     family: &str,
     weight: &str,
-) -> Pin<Box<dyn Future<Output = Result<JsValue, JsValue>>>> {
+) -> impl Future<Output = Result<JsValue, JsValue>> {
     let timeout_msg = format!("Timeout awaiting font \"{}:{}\"", family, weight);
-    Box::pin(async {
+    async {
         set_timeout(FONT_DOWNLOAD_TIMEOUT_MS).await?;
         Err(timeout_msg.into())
-    })
+    }
 }
 
 /// Generates a `<span>` for a specific font family and weight with `opacity:0`,

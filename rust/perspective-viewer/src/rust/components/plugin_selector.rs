@@ -17,26 +17,25 @@ use super::containers::dropdown::*;
 
 use yew::prelude::*;
 
-#[derive(Properties, Clone)]
+#[derive(Properties, Clone, PartialEq)]
 pub struct PluginSelectorProps {
     pub renderer: Renderer,
     pub session: Session,
 
     #[cfg(test)]
     #[prop_or_default]
-    pub weak_link: WeakComponentLink<PluginSelector>,
+    pub weak_link: WeakScope<PluginSelector>,
 }
 
 derive_renderable_props!(PluginSelectorProps);
 
+#[derive(Debug)]
 pub enum PluginSelectorMsg {
     ComponentSelectPlugin(String),
     RendererSelectPlugin(String),
 }
 
 pub struct PluginSelector {
-    props: PluginSelectorProps,
-    link: ComponentLink<PluginSelector>,
     _plugin_sub: Subscription,
 }
 
@@ -44,49 +43,47 @@ impl Component for PluginSelector {
     type Message = PluginSelectorMsg;
     type Properties = PluginSelectorProps;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        enable_weak_link_test!(props, link);
-        let _plugin_sub = props.renderer.on_plugin_changed.add_listener({
-            clone!(link);
+    fn create(ctx: &Context<Self>) -> Self {
+        enable_weak_link_test!(ctx.props(), ctx.link());
+        let _plugin_sub = ctx.props().renderer.on_plugin_changed.add_listener({
+            let link = ctx.link().clone();
             move |plugin: JsPerspectiveViewerPlugin| {
                 let name = plugin.name();
                 link.send_message(PluginSelectorMsg::RendererSelectPlugin(name))
             }
         });
 
-        PluginSelector {
-            props,
-            link,
-            _plugin_sub,
-        }
+        PluginSelector { _plugin_sub }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             PluginSelectorMsg::RendererSelectPlugin(_plugin_name) => true,
             PluginSelectorMsg::ComponentSelectPlugin(plugin_name) => {
-                self.props.renderer.set_plugin(Some(&plugin_name)).unwrap();
+                ctx.props().renderer.set_plugin(Some(&plugin_name)).unwrap();
                 let mut update = ViewConfigUpdate::default();
-                self.props.session.set_update_column_defaults(
+                ctx.props().session.set_update_column_defaults(
                     &mut update,
-                    &self.props.renderer.metadata(),
+                    &ctx.props().renderer.metadata(),
                 );
 
-                self.props.update_and_render(update);
+                ctx.props().update_and_render(update);
                 false
             }
         }
     }
 
-    fn change(&mut self, _props: Self::Properties) -> ShouldRender {
-        false
+    fn changed(&mut self, _ctx: &Context<Self>) -> bool {
+        true
     }
 
-    fn view(&self) -> Html {
-        let callback = self.link.callback(PluginSelectorMsg::ComponentSelectPlugin);
-        let plugin_name = self.props.renderer.get_active_plugin().unwrap().name();
-        let options = self
-            .props
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let callback = ctx
+            .link()
+            .callback(PluginSelectorMsg::ComponentSelectPlugin);
+        let plugin_name = ctx.props().renderer.get_active_plugin().unwrap().name();
+        let options = ctx
+            .props()
             .renderer
             .get_all_plugin_names()
             .into_iter()

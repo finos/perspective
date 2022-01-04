@@ -13,6 +13,7 @@ use std::cmp::max;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlElement;
+use yew::html::Scope;
 use yew::prelude::*;
 
 /// The state for the `Resizing` action, including the `MouseEvent` callbacks and
@@ -53,7 +54,7 @@ impl Drop for ResizingState {
 impl ResizingState {
     pub fn new(
         client_x: i32,
-        split_panel: &ComponentLink<SplitPanel>,
+        split_panel: &Scope<SplitPanel>,
         first_elem: &HtmlElement,
     ) -> Result<ResizingState, JsValue> {
         let document = web_sys::window().unwrap().document().unwrap();
@@ -114,7 +115,13 @@ pub struct SplitPanelProps {
 
     #[cfg(test)]
     #[prop_or_default]
-    pub weak_link: WeakComponentLink<SplitPanel>,
+    pub weak_link: WeakScope<SplitPanel>,
+}
+
+impl PartialEq for SplitPanelProps {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id && self.children == other.children
+    }
 }
 
 pub enum SplitPanelMsg {
@@ -144,8 +151,6 @@ fn validate(props: &SplitPanelProps) -> bool {
 /// }
 /// ```
 pub struct SplitPanel {
-    link: ComponentLink<Self>,
-    props: SplitPanelProps,
     resize_state: Option<ResizingState>,
     first_elem: NodeRef,
     style: Option<String>,
@@ -155,24 +160,22 @@ impl Component for SplitPanel {
     type Message = SplitPanelMsg;
     type Properties = SplitPanelProps;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        assert!(validate(&props));
-        enable_weak_link_test!(props, link);
+    fn create(ctx: &Context<Self>) -> Self {
+        assert!(validate(ctx.props()));
+        enable_weak_link_test!(ctx.props(), ctx.link());
         Self {
-            props,
-            link,
             resize_state: None,
             first_elem: NodeRef::default(),
             style: None,
         }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             SplitPanelMsg::Reset => self.style = None,
             SplitPanelMsg::StartResizing(client_x) => {
                 let first = self.first_elem.cast::<HtmlElement>().unwrap();
-                let state = ResizingState::new(client_x, &self.link, &first).ok();
+                let state = ResizingState::new(client_x, ctx.link(), &first).ok();
                 self.resize_state = state;
             }
             SplitPanelMsg::StopResizing => {
@@ -181,7 +184,7 @@ impl Component for SplitPanel {
             SplitPanelMsg::MoveResizing(client_x) => {
                 self.style = self.resize_state.as_ref().map(|state| {
                     let width = max(0, state.width + (client_x - state.start));
-                    if let Some(ref cb) = self.props.on_resize {
+                    if let Some(ref cb) = ctx.props().on_resize {
                         cb.emit((std::cmp::max(0, width), 400));
                     }
 
@@ -192,23 +195,22 @@ impl Component for SplitPanel {
         true
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        assert!(validate(&props));
-        self.props = props;
+    fn changed(&mut self, ctx: &Context<Self>) -> bool {
+        assert!(validate(ctx.props()));
         true
     }
 
-    fn view(&self) -> Html {
-        let mut iter = self.props.children.iter().take(2);
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let mut iter = ctx.props().children.iter().take(2);
         let _ref = self.first_elem.clone();
         let style = self.style.clone();
-        let onmousedown = self.link.callback(|event: MouseEvent| {
+        let onmousedown = ctx.link().callback(|event: MouseEvent| {
             event.prevent_default();
             event.stop_propagation();
             SplitPanelMsg::StartResizing(event.client_x())
         });
 
-        let ondblclick = self.link.callback(|event: MouseEvent| {
+        let ondblclick = ctx.link().callback(|event: MouseEvent| {
             event.prevent_default();
             event.stop_propagation();
             SplitPanelMsg::Reset
@@ -221,7 +223,7 @@ impl Component for SplitPanel {
         };
 
         html! {
-            <div id={ self.props.id.clone() } class="split-panel">
+            <div id={ ctx.props().id.clone() } class="split-panel">
                 <div class={ class } ref={ _ref } style={ style }>
                     { iter.next().unwrap() }
                 </div>

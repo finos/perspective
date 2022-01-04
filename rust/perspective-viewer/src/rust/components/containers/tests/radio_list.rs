@@ -7,7 +7,7 @@
 // file.
 
 use super::super::radio_list::{RadioList, RadioListMsg};
-use crate::utils::WeakComponentLink;
+use crate::utils::WeakScope;
 use crate::*;
 
 use std::cell::RefCell;
@@ -19,7 +19,7 @@ wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
 pub fn test_change_u32() {
-    let link: WeakComponentLink<RadioList<String>> = WeakComponentLink::default();
+    let link: WeakScope<RadioList<String>> = WeakScope::default();
     let result: Rc<RefCell<String>> = Rc::new(RefCell::new("false".to_owned()));
     let on_change = {
         clone!(result);

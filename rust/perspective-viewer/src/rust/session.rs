@@ -73,6 +73,12 @@ impl Deref for Session {
     }
 }
 
+impl PartialEq for Session {
+    fn eq(&self, other: &Self) -> bool {
+        Rc::ptr_eq(&self.0, &other.0)
+    }
+}
+
 impl Deref for SessionHandle {
     type Target = RefCell<SessionData>;
     fn deref(&self) -> &Self::Target {
