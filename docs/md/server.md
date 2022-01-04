@@ -3,7 +3,7 @@ id: server
 title: Data Binding
 ---
 
-<img src="/svg/architecture.svg"></svg>
+<img src="../static/svg/architecture.svg"></svg>
 
 Application developers can choose from [Client (WebAssembly)](#client-only),
 [Server (Python/Node)](#server-only) or
@@ -14,7 +14,7 @@ efficiently.
 
 ## Client-only
 
-<img src="/svg/architecture.sub1.svg"></svg>
+<img src="../static/svg/architecture.sub1.svg"></svg>
 
 _For static datasets, datasets provided by the user, and simple server-less and
 read-only web applications._
@@ -54,7 +54,7 @@ viewer.load(table);
 
 ## Client/Server Replicated
 
-<img src="/svg/architecture.sub3.svg"></svg>
+<img src="../static/svg/architecture.sub3.svg"></svg>
 
 _For medium-sized, real-time, synchronized and/or editable data sets with many
 concurrent users._
@@ -115,7 +115,7 @@ viewer.load(client_table);
 
 ## Server-only
 
-<img src="/svg/architecture.sub2.svg"></svg>
+<img src="../static/svg/architecture.sub2.svg"></svg>
 
 _For extremely large datasets with a small number of concurrent users._
 
