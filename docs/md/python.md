@@ -42,9 +42,8 @@ Perspective in Python: the `Table` API, the JupyterLab widget, and the Tornado
 handler.
 
 For an understanding of Perspective's core concepts, see the
-[Table](/docs/md/table.html), [View](/docs/md/view.html), and
-[Data Binding](/docs/md/server.html) documentation. For API documentation, see
-the [Python API](/docs/obj/perspective-python.html).
+[Table](/docs/md/table.md), [View](/docs/md/view.md), and
+[Data Binding](/docs/md/server.md) documentation.
 
 [More Examples](https://github.com/finos/perspective/tree/master/examples) are
 available on GitHub.
@@ -243,9 +242,9 @@ have no identifier.
 
 `PerspectiveManager` offers an interface for hosting multiple
 `perspective.Table` and `perspective.View` instances, extending their interfaces
-to operate with the [JavaScript library](/docs/md/js.html) over a websocket
+to operate with the [JavaScript library](/docs/md/js.md) over a websocket
 connection. `PerspectiveManager` is required to enable `perspective-python` to
-[operate remotely](/docs/md/js.html#remote-perspective-via-perspective-python-and-tornado)
+[operate remotely](/docs/md/js.md#server-only-via-perspective-python-and-tornado)
 using a websocket API.
 
 ### Async Mode
@@ -338,7 +337,7 @@ section.
 ### Client/Server Replicated Mode
 
 Using Tornado and
-[`PerspectiveTornadoHandler`](/docs/md/python.html#perspectivetornadohandler),
+[`PerspectiveTornadoHandler`](/docs/md/python.md#perspectivetornadohandler),
 as well as `Perspective`'s JavaScript library, we can set up "distributed"
 Perspective instances that allows multiple browser `perspective-viewer` clients
 to read from a common `perspective-python` server, as in the
