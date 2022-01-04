@@ -3,8 +3,8 @@ id: table
 title: Table
 ---
 
-<script src="../../../../js/index.js"></script>
-<link rel="stylesheet" href="../../../../css/concepts/index.css">
+<script src="../js/index.js"></script>
+<link rel="stylesheet" href="../static/css/concepts/index.css">
 
 The `Table` is Perspective's columnar data frame, analogous to a Pandas
 `DataFrame` or Apache Arrow. `Table` supports appending data, in-place updates,
