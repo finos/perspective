@@ -94,7 +94,7 @@ cmp_mselem(const t_mselem& a, const t_mselem& b,
     t_tscalar first_pkey = a.m_pkey;
     t_tscalar second_pkey = b.m_pkey;
 
-    for (int idx = 0, loop_end = sort_order.size(); idx < loop_end; ++idx) {
+    for (int idx = 0, loop_end = (int)(sort_order.size()); idx < loop_end; ++idx) {
         const t_tscalar& first = a.m_row[idx];
         const t_tscalar& second = b.m_row[idx];
 

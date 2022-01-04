@@ -119,28 +119,6 @@ namespace details {
             template <typename T>
             inline bool is_integer_impl(const T& v, t_tscalar_type_tag);
 
-            // #if (defined(_MSC_VER) && (_MSC_VER >= 1900)) ||
-            // !defined(_MSC_VER)
-            // #define exprtk_define_erf(TT,impl)           \
-// inline TT erf_impl(TT v) { return impl(v); } \
-
-            // exprtk_define_erf(      float,::erff)
-            // exprtk_define_erf(     double,::erf )
-            // exprtk_define_erf(long double,::erfl)
-            // #undef exprtk_define_erf
-            // #endif
-
-            // #if (defined(_MSC_VER) && (_MSC_VER >= 1900)) ||
-            // !defined(_MSC_VER)
-            // #define exprtk_define_erfc(TT,impl)           \
-// inline TT erfc_impl(TT v) { return impl(v); } \
-
-            // exprtk_define_erfc(      float,::erfcf)
-            // exprtk_define_erfc(     double,::erfc )
-            // exprtk_define_erfc(long double,::erfcl)
-            // #undef exprtk_define_erfc
-            // #endif
-
         } // end namespace details
     }     // end namespace numeric
 
