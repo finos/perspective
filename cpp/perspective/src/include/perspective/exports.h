@@ -8,7 +8,10 @@
  */
 
 #pragma once
-
+#ifdef PERSPECTIVE_STATIC
+#define PERSPECTIVE_EXPORT
+#define PERSPECTIVE_MPROTECT_EXPORT
+#else
 #ifdef WIN32
 #ifdef PERSPECTIVE_EXPORTS
 #define PERSPECTIVE_EXPORT __declspec(dllexport)
@@ -37,3 +40,4 @@
 #else
 #define PERSPECTIVE_MPROTECT_EXPORT __attribute__((visibility("default")))
 #endif // win32
+#endif
