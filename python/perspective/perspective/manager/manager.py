@@ -6,14 +6,14 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-import six
 import random
 import string
 from functools import partial
+
 from ..core.exception import PerspectiveError
 from ..table import Table
-from .session import PerspectiveSession
 from .manager_internal import _PerspectiveManagerInternal
+from .session import PerspectiveSession
 
 
 def gen_name(size=10, chars=string.ascii_uppercase + string.digits):
@@ -106,7 +106,7 @@ class PerspectiveManager(_PerspectiveManagerInternal):
 
     def get_table_names(self):
         """Return the tables that are hosted with this manager by name."""
-        return list(six.iterkeys(self._tables))
+        return list(self._tables.keys())
 
     def new_session(self):
         return PerspectiveSession(self)

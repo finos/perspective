@@ -6,22 +6,21 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-import six
-import logging
-import numpy
-import pandas
 import json
-
+import logging
 from datetime import date, datetime
 from functools import partial
-from ipywidgets import DOMWidget
-from traitlets import observe, Unicode
 
+import numpy
+import pandas
+from ipywidgets import DOMWidget
+from traitlets import Unicode, observe
+
+from ..core._version import __version__
 from ..core.data import deconstruct_pandas
 from ..core.exception import PerspectiveError
 from ..libpsp import is_libpsp
 from ..viewer import PerspectiveViewer
-from ..core._version import __version__
 
 
 def _type_to_string(t):
@@ -29,7 +28,7 @@ def _type_to_string(t):
     type.  Redefine here as we can't have any dependencies on libbinding in
     client mode.
     """
-    if t in six.integer_types:
+    if t is int:
         return "integer"
     elif t is float:
         return "float"
@@ -39,7 +38,7 @@ def _type_to_string(t):
         return "date"
     elif t is datetime:
         return "datetime"
-    elif t is six.binary_type or t is six.text_type:
+    elif t is bytes or t is str:
         return "string"
     else:
         raise PerspectiveError(
@@ -82,7 +81,7 @@ def _serialize(data):
                     "Received {} in list dataset, expected `dict`!".format(type(row))
                 )
 
-            for k in six.iterkeys(row):
+            for k in row.keys():
                 if type(row[k]) is datetime:
                     row[k] = row[k].strftime("%Y-%m-%d %H:%M:%S.%f")
                 elif type(row[k]) is date:
@@ -91,7 +90,7 @@ def _serialize(data):
     elif isinstance(data, dict):
         formatted = data
 
-        for v in six.itervalues(data):
+        for v in data.values():
             if isinstance(v, type):
                 # serialize schema values to string
                 return {
@@ -105,7 +104,7 @@ def _serialize(data):
                 }
                 break
 
-        for column_name in six.iterkeys(formatted):
+        for column_name in formatted.keys():
             # Replace `datetime.datetime` and `datetime.date` with string
             formatted[column_name] = _serialize_datetime(formatted[column_name])
 
@@ -120,7 +119,7 @@ def _serialize(data):
         columns = [data[col].tolist() for col in data.dtype.names]
         formatted = dict(zip(data.dtype.names, columns))
 
-        for column_name in six.iterkeys(formatted):
+        for column_name in formatted.keys():
             # Replace `datetime.datetime` and `datetime.date` with string
             formatted[column_name] = _serialize_datetime(formatted[column_name])
 

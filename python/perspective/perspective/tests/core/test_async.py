@@ -6,15 +6,14 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-import random
-import six
-import tornado.ioloop
 import queue
+import random
 import threading
-
 from functools import partial
+
+import tornado.ioloop
+from perspective import PerspectiveError, PerspectiveManager, Table
 from pytest import raises
-from perspective import Table, PerspectiveManager, PerspectiveError
 
 
 def syncify(f):
@@ -56,10 +55,7 @@ class TestAsync(object):
 
     @classmethod
     def loop_is_running(cls):
-        if six.PY2:
-            return cls.loop._running
-        else:
-            return cls.loop.asyncio_loop.is_running()
+        return cls.loop.asyncio_loop.is_running()
 
     def test_async_queue_process(self):
         tbl = Table({"a": int, "b": float, "c": str})

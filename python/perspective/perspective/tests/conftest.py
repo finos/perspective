@@ -6,12 +6,12 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-import six
 import time
+from datetime import datetime
+
 import numpy as np
 import pandas as pd
 import pyarrow as pa
-from datetime import datetime
 from pytest import fixture
 
 
@@ -137,15 +137,9 @@ class Util:
         '''Return an integer timestamp based on a date/datetime object.'''
         classname = obj.__class__.__name__
         if classname == "date":
-            if six.PY2:
-                return int((time.mktime(obj.timetuple()) / 1000000.0))
-            else:
-                return datetime(obj.year, obj.month, obj.day).timestamp()
+            return datetime(obj.year, obj.month, obj.day).timestamp()
         elif classname == "datetime":
-            if six.PY2:
-                return int((time.mktime(obj.timetuple()) + obj.microsecond / 1000000.0))
-            else:
-                return obj.timestamp()
+            return obj.timestamp()
         else:
             return -1
 

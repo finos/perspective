@@ -6,16 +6,16 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-import six
-import pandas
-import numpy
 from distutils.util import strtobool
 from math import isnan
 
-from ._date_validator import _PerspectiveDateValidator
-from ..core.data import deconstruct_numpy, make_null_mask, deconstruct_pandas
+import numpy
+import pandas
+
+from ..core.data import deconstruct_numpy, deconstruct_pandas, make_null_mask
 from ..core.data.pd import _parse_datetime_index
 from ..core.exception import PerspectiveError
+from ._date_validator import _PerspectiveDateValidator
 from .libbinding import t_dtype
 
 
@@ -53,7 +53,7 @@ def _type_to_format(data_or_schema):
     elif isinstance(data_or_schema, dict):
         # schema or columns
         for v in data_or_schema.values():
-            if isinstance(v, type) or isinstance(v, six.string_types):
+            if isinstance(v, type) or isinstance(v, str):
                 # schema maps name -> type
                 return False, 2, list(data_or_schema.keys()), data_or_schema
             elif isinstance(v, list):
@@ -104,7 +104,10 @@ class _PerspectiveAccessor(object):
     common :func:`marshal` function.
     """
 
-    INTEGER_TYPES = six.integer_types + (numpy.integer,)
+    INTEGER_TYPES = (
+        int,
+        numpy.integer,
+    )
 
     def __init__(self, data_or_schema):
         (
@@ -127,7 +130,7 @@ class _PerspectiveAccessor(object):
         # Verify that column names are strings, and that numpy arrays are of
         # type `ndarray`
         for name in self._names:
-            if not isinstance(name, six.string_types):
+            if not isinstance(name, str):
                 raise PerspectiveError(
                     "Column names should be strings, not type `{0}`".format(
                         type(name).__name__
@@ -241,22 +244,17 @@ class _PerspectiveAccessor(object):
             if isinstance(val, (bytes, bytearray)):
                 return val.decode("utf-8")
             else:
-                if six.PY2:
-                    # six.u mangles quotes with escape sequences - use native
-                    # unicode()
-                    return unicode(val)  # noqa: F821
-                else:
-                    return str(val)
+                return str(val)
         elif dtype == t_dtype.DTYPE_DATE:
             # return datetime.date
-            if isinstance(val, six.string_types):
+            if isinstance(val, str):
                 parsed = self._date_validator.parse(val)
                 return self._date_validator.to_date_components(parsed)
             else:
                 return self._date_validator.to_date_components(val)
         elif dtype == t_dtype.DTYPE_TIME:
             # return unix timestamps for time
-            if isinstance(val, six.string_types):
+            if isinstance(val, str):
                 parsed = self._date_validator.parse(val)
                 return self._date_validator.to_timestamp(parsed)
             else:

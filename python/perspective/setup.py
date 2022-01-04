@@ -39,7 +39,6 @@ requires = [
     "numpy>=1.13.1",
     "pandas>=0.22.0",
     "python-dateutil>=2.8.0",
-    "six>=1.11.0",
     "tornado>=4.5.3",
     "traitlets>=4.3.2",
 ]

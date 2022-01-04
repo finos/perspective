@@ -6,25 +6,25 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-import six
 from random import random
+
+from ..libpsp import is_libpsp
 from .validate import (
-    validate_plugin,
-    validate_columns,
-    validate_row_pivots,
-    validate_column_pivots,
     validate_aggregates,
-    validate_sort,
-    validate_filter,
+    validate_column_pivots,
+    validate_columns,
     validate_expressions,
+    validate_filter,
+    validate_plugin,
     validate_plugin_config,
+    validate_row_pivots,
+    validate_sort,
 )
 from .viewer_traitlets import PerspectiveTraitlets
-from ..libpsp import is_libpsp
 
 if is_libpsp():
-    from ..libpsp import Table, View, PerspectiveManager
     from ..core.exception import PerspectiveError
+    from ..libpsp import PerspectiveManager, Table, View
 
 
 class PerspectiveViewer(PerspectiveTraitlets, object):
@@ -246,7 +246,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         """Restore a given set of attributes, passed as kwargs
         (e.g. dictionary). Symmetric with `save` so that a given viewer's
         configuration can be reproduced."""
-        for k, v in six.iteritems(kwargs):
+        for k, v in kwargs.items():
             if k in PerspectiveViewer.PERSISTENT_ATTRIBUTES:
                 setattr(self, k, v)
 
@@ -281,7 +281,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         """
         if delete_table:
             # Delete all created views on the widget's manager instance
-            for view in six.itervalues(self.manager._views):
+            for view in self.manager._views.values():
                 view.delete()
 
             # Reset view cache

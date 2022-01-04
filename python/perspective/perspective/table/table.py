@@ -6,28 +6,28 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-from six import string_types, iteritems
 from datetime import date, datetime
-from .view import View
+
+from ..core.exception import PerspectiveError
 from ._accessor import _PerspectiveAccessor
 from ._callback_cache import _PerspectiveCallBackCache
-from ..core.exception import PerspectiveError
 from ._date_validator import _PerspectiveDateValidator
 from ._state import _PerspectiveStateManager
 from ._utils import (
     _dtype_to_pythontype,
     _dtype_to_str,
-    _str_to_pythontype,
     _parse_expression_strings,
+    _str_to_pythontype,
 )
 from .libbinding import (
     make_table,
-    validate_expressions,
     str_to_filter_op,
+    t_dtype,
     t_filter_op,
     t_op,
-    t_dtype,
+    validate_expressions,
 )
+from .view import View
 
 
 class Table(object):
@@ -200,13 +200,13 @@ class Table(object):
             # full expression string in the UI.
             validated["expression_alias"][expression[0]] = expression[1]
 
-        for (alias, dtype) in iteritems(expression_schema):
+        for (alias, dtype) in expression_schema.items():
             if not as_string:
                 dtype = _str_to_pythontype(dtype)
 
             validated["expression_schema"][alias] = expression_schema[alias]
 
-        for (alias, error) in iteritems(expression_errors):
+        for (alias, error) in expression_errors.items():
             error_dict = {}
             error_dict["error_message"] = error.error_message
             error_dict["line"] = error.line
@@ -237,7 +237,7 @@ class Table(object):
         Returns:
             :obj:`bool`: Whether this filter is valid.
         """
-        if isinstance(filter[1], string_types):
+        if isinstance(filter[1], str):
             filter_op = str_to_filter_op(filter[1])
         else:
             filter_op = filter[1]
@@ -257,7 +257,7 @@ class Table(object):
         schema = self.schema()
         in_schema = schema.get(filter[0], None)
         if in_schema and (schema[filter[0]] == date or schema[filter[0]] == datetime):
-            if isinstance(value, string_types):
+            if isinstance(value, str):
                 value = self._date_validator.parse(value)
 
         return value is not None
