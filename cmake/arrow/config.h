@@ -22,3 +22,30 @@
 
 /* #undef DOUBLE_CONVERSION_HAS_CASE_INSENSIBILITY */
 /* #undef GRPCPP_PP_INCLUDE */
+
+#define ARROW_VERSION_STRING "6000001"
+
+#define ARROW_SO_VERSION ""
+#define ARROW_FULL_SO_VERSION ""
+
+#define ARROW_CXX_COMPILER_ID ""
+#define ARROW_CXX_COMPILER_VERSION ""
+#define ARROW_CXX_COMPILER_FLAGS ""
+
+#define ARROW_GIT_ID ""
+#define ARROW_GIT_DESCRIPTION ""
+
+#define ARROW_PACKAGE_KIND ""
+
+// #cmakedefine ARROW_COMPUTE
+// #cmakedefine ARROW_CSV
+// #cmakedefine ARROW_DATASET
+// #cmakedefine ARROW_FILESYSTEM
+// #cmakedefine ARROW_FLIGHT
+// #cmakedefine ARROW_IPC
+// #cmakedefine ARROW_JSON
+
+// #cmakedefine ARROW_S3
+// #cmakedefine ARROW_USE_NATIVE_INT128
+
+// #cmakedefine GRPCPP_PP_INCLUDE

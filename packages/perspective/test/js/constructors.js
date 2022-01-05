@@ -710,7 +710,7 @@ module.exports = (perspective) => {
         it("Serializes a simple view to CSV", async function () {
             var table = await perspective.table(data);
             var view = await table.view({});
-            var answer = `x,y,z\r\n1,a,true\r\n2,b,false\r\n3,c,true\r\n4,d,false`;
+            var answer = `"x","y","z"\n1,"a",true\n2,"b",false\n3,"c",true\n4,"d",false\n`;
             let result = await view.to_csv();
             expect(result).toEqual(answer);
             view.delete();
@@ -723,7 +723,7 @@ module.exports = (perspective) => {
                 row_pivots: ["z"],
                 columns: ["x"],
             });
-            var answer = `__ROW_PATH__,x\r\n,10\r\nfalse,6\r\ntrue,4`;
+            var answer = `"z (Group by 1)","x"\n,10\nfalse,6\ntrue,4\n`;
             let result = await view.to_csv();
             expect(result).toEqual(answer);
             view.delete();
@@ -737,7 +737,7 @@ module.exports = (perspective) => {
                 column_pivots: ["y"],
                 columns: ["x"],
             });
-            var answer = `__ROW_PATH__,\"a,x\",\"b,x\",\"c,x\",\"d,x\"\r\n,1,2,3,4\r\nfalse,,2,,4\r\ntrue,1,,3,`;
+            var answer = `"z (Group by 1)","a|x","b|x","c|x","d|x"\n,1,2,3,4\nfalse,,2,,4\ntrue,1,,3,\n`;
             let result = await view.to_csv();
             expect(result).toEqual(answer);
             view.delete();
@@ -775,7 +775,7 @@ module.exports = (perspective) => {
             let view = await table.view();
             let result = await view.to_csv();
             expect(result).toEqual(
-                `x,y\r\n"Test, hello!",1\r\nTest2",2\r\n"Test3, Hello!""",3`
+                `"x","y"\n"Test, hello!",1\n"Test2""",2\n"Test3, Hello!""",3\n`
             );
             view.delete();
             table.delete();

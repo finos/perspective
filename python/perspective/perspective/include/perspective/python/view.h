@@ -71,15 +71,27 @@ namespace binding {
         std::int32_t start_row, std::int32_t end_row, std::int32_t start_col,
         std::int32_t end_col);
 
-    py::bytes to_arrow_zero(std::shared_ptr<View<t_ctx0>> view,
-        std::int32_t start_row, std::int32_t end_row, std::int32_t start_col,
-        std::int32_t end_col);
-
     py::bytes to_arrow_one(std::shared_ptr<View<t_ctx1>> view,
         std::int32_t start_row, std::int32_t end_row, std::int32_t start_col,
         std::int32_t end_col);
 
     py::bytes to_arrow_two(std::shared_ptr<View<t_ctx2>> view,
+        std::int32_t start_row, std::int32_t end_row, std::int32_t start_col,
+        std::int32_t end_col);
+
+    std::string to_csv_unit(std::shared_ptr<View<t_ctxunit>> view,
+        std::int32_t start_row, std::int32_t end_row, std::int32_t start_col,
+        std::int32_t end_col);
+
+    std::string to_csv_zero(std::shared_ptr<View<t_ctx0>> view,
+        std::int32_t start_row, std::int32_t end_row, std::int32_t start_col,
+        std::int32_t end_col);
+
+    std::string to_csv_one(std::shared_ptr<View<t_ctx1>> view,
+        std::int32_t start_row, std::int32_t end_row, std::int32_t start_col,
+        std::int32_t end_col);
+
+    std::string to_csv_two(std::shared_ptr<View<t_ctx2>> view,
         std::int32_t start_row, std::int32_t end_row, std::int32_t start_col,
         std::int32_t end_col);
 

@@ -331,7 +331,7 @@ namespace binding {
         std::int32_t end_row, std::int32_t start_col, std::int32_t end_col) {
         PerspectiveScopedGILRelease acquire(view->get_event_loop_thread_id());
         std::shared_ptr<std::string> str
-            = view->to_arrow(start_row, end_row, start_col, end_col);
+            = view->to_arrow(start_row, end_row, start_col, end_col, true);
         return py::bytes(*str);
     }
 
@@ -340,7 +340,7 @@ namespace binding {
         std::int32_t end_row, std::int32_t start_col, std::int32_t end_col) {
         PerspectiveScopedGILRelease acquire(view->get_event_loop_thread_id());
         std::shared_ptr<std::string> str
-            = view->to_arrow(start_row, end_row, start_col, end_col);
+            = view->to_arrow(start_row, end_row, start_col, end_col, true);
         return py::bytes(*str);
     }
 
@@ -349,7 +349,7 @@ namespace binding {
         std::int32_t end_row, std::int32_t start_col, std::int32_t end_col) {
         PerspectiveScopedGILRelease acquire(view->get_event_loop_thread_id());
         std::shared_ptr<std::string> str
-            = view->to_arrow(start_row, end_row, start_col, end_col);
+            = view->to_arrow(start_row, end_row, start_col, end_col, true);
         return py::bytes(*str);
     }
 
@@ -358,8 +358,36 @@ namespace binding {
         std::int32_t end_row, std::int32_t start_col, std::int32_t end_col) {
         PerspectiveScopedGILRelease acquire(view->get_event_loop_thread_id());
         std::shared_ptr<std::string> str
-            = view->to_arrow(start_row, end_row, start_col, end_col);
+            = view->to_arrow(start_row, end_row, start_col, end_col, true);
         return py::bytes(*str);
+    }
+
+    std::string
+    to_csv_unit(std::shared_ptr<View<t_ctxunit>> view, std::int32_t start_row,
+        std::int32_t end_row, std::int32_t start_col, std::int32_t end_col) {
+        PerspectiveScopedGILRelease acquire(view->get_event_loop_thread_id());
+        return *view->to_csv(start_row, end_row, start_col, end_col);
+    }
+
+    std::string
+    to_csv_zero(std::shared_ptr<View<t_ctx0>> view, std::int32_t start_row,
+        std::int32_t end_row, std::int32_t start_col, std::int32_t end_col) {
+        PerspectiveScopedGILRelease acquire(view->get_event_loop_thread_id());
+        return *view->to_csv(start_row, end_row, start_col, end_col);
+    }
+
+    std::string
+    to_csv_one(std::shared_ptr<View<t_ctx1>> view, std::int32_t start_row,
+        std::int32_t end_row, std::int32_t start_col, std::int32_t end_col) {
+        PerspectiveScopedGILRelease acquire(view->get_event_loop_thread_id());
+        return *view->to_csv(start_row, end_row, start_col, end_col);
+    }
+
+    std::string
+    to_csv_two(std::shared_ptr<View<t_ctx2>> view, std::int32_t start_row,
+        std::int32_t end_row, std::int32_t start_col, std::int32_t end_col) {
+        PerspectiveScopedGILRelease acquire(view->get_event_loop_thread_id());
+        return *view->to_csv(start_row, end_row, start_col, end_col);
     }
 
     /******************************************************************************
@@ -371,7 +399,8 @@ namespace binding {
     get_row_delta_unit(std::shared_ptr<View<t_ctxunit>> view) {
         PerspectiveScopedGILRelease acquire(view->get_event_loop_thread_id());
         std::shared_ptr<t_data_slice<t_ctxunit>> slice = view->get_row_delta();
-        std::shared_ptr<std::string> arrow = view->data_slice_to_arrow(slice);
+        std::shared_ptr<std::string> arrow
+            = view->data_slice_to_arrow(slice, false);
         return py::bytes(*arrow);
     }
 
@@ -379,7 +408,8 @@ namespace binding {
     get_row_delta_zero(std::shared_ptr<View<t_ctx0>> view) {
         PerspectiveScopedGILRelease acquire(view->get_event_loop_thread_id());
         std::shared_ptr<t_data_slice<t_ctx0>> slice = view->get_row_delta();
-        std::shared_ptr<std::string> arrow = view->data_slice_to_arrow(slice);
+        std::shared_ptr<std::string> arrow
+            = view->data_slice_to_arrow(slice, false);
         return py::bytes(*arrow);
     }
 
@@ -387,7 +417,8 @@ namespace binding {
     get_row_delta_one(std::shared_ptr<View<t_ctx1>> view) {
         PerspectiveScopedGILRelease acquire(view->get_event_loop_thread_id());
         std::shared_ptr<t_data_slice<t_ctx1>> slice = view->get_row_delta();
-        std::shared_ptr<std::string> arrow = view->data_slice_to_arrow(slice);
+        std::shared_ptr<std::string> arrow
+            = view->data_slice_to_arrow(slice, false);
         return py::bytes(*arrow);
     }
 
@@ -395,7 +426,8 @@ namespace binding {
     get_row_delta_two(std::shared_ptr<View<t_ctx2>> view) {
         PerspectiveScopedGILRelease acquire(view->get_event_loop_thread_id());
         std::shared_ptr<t_data_slice<t_ctx2>> slice = view->get_row_delta();
-        std::shared_ptr<std::string> arrow = view->data_slice_to_arrow(slice);
+        std::shared_ptr<std::string> arrow
+            = view->data_slice_to_arrow(slice, false);
         return py::bytes(*arrow);
     }
 

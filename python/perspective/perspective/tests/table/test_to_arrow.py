@@ -152,12 +152,13 @@ class TestToArrow(object):
         arrow = view.to_arrow()
         tbl2 = Table(arrow)
         assert tbl2.schema() == {
+            'a (Group by 1)': int,
             "a": int,
             "b": int,
             "c": int
         }
         d = view.to_dict()
-        d.pop("__ROW_PATH__")
+        d['a (Group by 1)'] = [x[0] if len(x) > 0 else None for x in d.pop("__ROW_PATH__")]
         assert tbl2.view().to_dict() == d
 
     def test_to_arrow_two_symmetric(self):
@@ -171,6 +172,7 @@ class TestToArrow(object):
         arrow = view.to_arrow()
         tbl2 = Table(arrow)
         assert tbl2.schema() == {
+            'a (Group by 1)': int,
             "hello|a": int,
             "hello|b": int,
             "hello|c": int,
@@ -185,7 +187,7 @@ class TestToArrow(object):
             "world2|c": int,
         }
         d = view.to_dict()
-        d.pop("__ROW_PATH__")
+        d['a (Group by 1)'] = [x[0] if len(x) > 0 else None for x in d.pop("__ROW_PATH__")]
         assert tbl2.view().to_dict() == d
 
     def test_to_arrow_column_only_symmetric(self):
@@ -512,5 +514,6 @@ class TestToArrow(object):
         result = view2.to_columns()
         
         assert result == {
+            'b (Group by 1)': [None, 'a', 'b'],
             "a": [2.5, 1.5, 3.5]
         }

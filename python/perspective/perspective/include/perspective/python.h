@@ -445,6 +445,10 @@ PYBIND11_MODULE(libbinding, m) {
     m.def("to_arrow_zero", &to_arrow_zero);
     m.def("to_arrow_one", &to_arrow_one);
     m.def("to_arrow_two", &to_arrow_two);
+    m.def("to_csv_unit", &to_csv_unit);
+    m.def("to_csv_zero", &to_csv_zero);
+    m.def("to_csv_one", &to_csv_one);
+    m.def("to_csv_two", &to_csv_two);
     m.def("get_row_delta_unit", &get_row_delta_unit);
     m.def("get_row_delta_zero", &get_row_delta_zero);
     m.def("get_row_delta_one", &get_row_delta_one);

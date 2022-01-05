@@ -56,7 +56,7 @@ wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
             async draw(view) {
                 this.style.backgroundColor = '#fff';
                 let perspective_viewer = this.parentElement;
-                const csv = await view.to_csv({config: {delimiter: '|'}});
+                const csv = await view.to_csv();
                 const css = `margin:0;overflow:scroll;position:absolute;width:100%;height:100%`;
                 this.innerHTML = `<pre style='${css}'>${csv}</pre>`;
             }

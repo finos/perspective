@@ -241,10 +241,10 @@ endif()
 #######################
 include_directories("${CMAKE_SOURCE_DIR}/src/include")
 
-if(NOT WIN32)
-    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
-    set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG")
-endif()
+# if(NOT WIN32)
+#     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+#     set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG")
+# endif()
 
 if (PSP_WASM_BUILD)
     ####################
@@ -286,6 +286,7 @@ if (PSP_WASM_BUILD)
         set(OPT_FLAGS " \
             -O3 \
             -g0 \
+            -flto \
             ")
 
         # TODO: -flto
@@ -465,7 +466,13 @@ endif()
 
 #####################
 
-set(CMAKE_C_FLAGS " \
+set(CMAKE_C_FLAGS_RELEASE " \
+    ${CMAKE_C_FLAGS} \
+    ${EXTENDED_FLAGS} \
+    ${OPT_FLAGS} \
+    ")
+
+set(CMAKE_CXX_FLAGS_RELEASE " \
     ${CMAKE_C_FLAGS} \
     ${EXTENDED_FLAGS} \
     ${OPT_FLAGS} \
@@ -476,6 +483,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif()
 
 set (SOURCE_FILES
+    ${PSP_CPP_SRC}/src/cpp/vendor/arrow_compute_registry.cpp
     ${PSP_CPP_SRC}/src/cpp/aggregate.cpp
     ${PSP_CPP_SRC}/src/cpp/aggspec.cpp
     ${PSP_CPP_SRC}/src/cpp/arg_sort.cpp
@@ -595,7 +603,7 @@ message("${BUILD_MESSAGE}\n")
 if (PSP_WASM_BUILD)
     set(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} \
         --bind \
-        --source-map-base=\"\" \
+        --source-map-base \"\" \
         --memory-init-file 0 \
         -s EXPORT_ES6=1 \
         -s NO_EXIT_RUNTIME=1 \
@@ -606,6 +614,7 @@ if (PSP_WASM_BUILD)
         -s MAXIMUM_MEMORY=4gb \
         -s USE_ES6_IMPORT_META=0 \
         -s EXPORTED_FUNCTIONS=\"['_main']\" \
+        -s ERROR_ON_UNDEFINED_SYMBOLS=1 \
     ")
 
     add_library(psp ${WASM_SOURCE_FILES})
@@ -613,7 +622,7 @@ if (PSP_WASM_BUILD)
     set_target_properties(psp PROPERTIES COMPILE_FLAGS "")
     target_link_libraries(psp arrow re2)
 
-    # "esm/erspective.cpp.js" from CMAKE_EXECUTABLE_SYNTAX
+    # "esm/perspective.cpp.js" from CMAKE_EXECUTABLE_SYNTAX
     add_executable(perspective_esm src/cpp/emscripten.cpp)
     target_link_libraries(perspective_esm psp)
     target_link_options(perspective_esm PRIVATE -s ENVIRONMENT=worker)
