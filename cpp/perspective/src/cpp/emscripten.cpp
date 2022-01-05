@@ -937,9 +937,8 @@ namespace binding {
                                   << "` is nan" << std::endl;
                         tbl.promote_column(name, DTYPE_STR, i, false);
                         col = tbl.get_column(name);
-                        _fill_col_string(
-                            accessor, col, name, cidx, DTYPE_STR, is_update,
-                            is_limit);
+                        _fill_col_string(accessor, col, name, cidx, DTYPE_STR,
+                            is_update, is_limit);
                         return;
                     } else {
                         col->set_nth(i, static_cast<std::int32_t>(fval));
@@ -1040,16 +1039,20 @@ namespace binding {
                     accessor, tbl, col, name, cidx, type, is_update, is_limit);
             } break;
             case DTYPE_BOOL: {
-                _fill_col_bool(accessor, col, name, cidx, type, is_update, is_limit);
+                _fill_col_bool(
+                    accessor, col, name, cidx, type, is_update, is_limit);
             } break;
             case DTYPE_DATE: {
-                _fill_col_date(accessor, col, name, cidx, type, is_update, is_limit);
+                _fill_col_date(
+                    accessor, col, name, cidx, type, is_update, is_limit);
             } break;
             case DTYPE_TIME: {
-                _fill_col_time(accessor, col, name, cidx, type, is_update, is_limit);
+                _fill_col_time(
+                    accessor, col, name, cidx, type, is_update, is_limit);
             } break;
             case DTYPE_STR: {
-                _fill_col_string(accessor, col, name, cidx, type, is_update, is_limit);
+                _fill_col_string(
+                    accessor, col, name, cidx, type, is_update, is_limit);
             } break;
             case DTYPE_NONE: {
                 break;
@@ -1084,7 +1087,8 @@ namespace binding {
             }
 
             auto col = tbl.get_column(name);
-            _fill_data_helper(dcol, tbl, col, name, cidx, type, is_update, is_limit);
+            _fill_data_helper(
+                dcol, tbl, col, name, cidx, type, is_update, is_limit);
         }
 
         // Fill index column - recreated every time a `t_data_table` is created.

@@ -443,8 +443,8 @@ t_computed_function_store::t_computed_function_store(t_expression_vocab& vocab,
     , m_substring_fn(computed_function::substring(vocab, is_type_validator))
     , m_replace_fn(
           computed_function::replace(vocab, regex_mapping, is_type_validator))
-    , m_replace_all_fn(
-          computed_function::replace_all(vocab, regex_mapping, is_type_validator)) {}
+    , m_replace_all_fn(computed_function::replace_all(
+          vocab, regex_mapping, is_type_validator)) {}
 
 void
 t_computed_function_store::register_computed_functions(
@@ -462,8 +462,7 @@ t_computed_function_store::register_computed_functions(
     sym_table.add_function("is_null", t_computed_expression_parser::IS_NULL_FN);
     sym_table.add_function(
         "is_not_null", t_computed_expression_parser::IS_NOT_NULL_FN);
-    sym_table.add_function(
-        "random", t_computed_expression_parser::RANDOM_FN);
+    sym_table.add_function("random", t_computed_expression_parser::RANDOM_FN);
 
     // Date/datetime functions
     sym_table.add_function(
