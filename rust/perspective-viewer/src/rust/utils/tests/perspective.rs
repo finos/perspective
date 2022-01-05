@@ -49,7 +49,7 @@ pub async fn test_view_to_csv() {
     let table = get_mock_table().await;
     let view = table.view(js_object!().unchecked_ref()).await.unwrap();
     let csv: String = view.to_csv(js_object!()).await.unwrap().into();
-    assert_eq!(csv, "A\r\n1\r\n2\r\n3");
+    assert_eq!(csv, "\"A\"\n1\n2\n3\n");
 }
 
 #[wasm_bindgen_test]

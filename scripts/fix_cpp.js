@@ -17,6 +17,9 @@ function lint(dir) {
 try {
     lint(path`./cpp/perspective/src/cpp/*.cpp`);
     lint(path`./cpp/perspective/src/include/perspective/*.h`);
+    lint(path`./python/perspective/perspective/src/*.cpp`);
+    lint(path`./python/perspective/perspective/include/perspective/*.h`);
+    lint(path`./python/perspective/perspective/include/perspective/python/*.h`);
 } catch (e) {
     console.error(e.message);
     process.exit(1);

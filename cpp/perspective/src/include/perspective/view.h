@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <memory>
 #include <map>
+#include <arrow/api.h>
 #ifdef PSP_ENABLE_PYTHON
 #include <thread>
 #endif
@@ -147,9 +148,25 @@ public:
      * @param end_row
      * @param start_col
      * @param end_col
+     * @param emit_group_by
      * @return std::shared_ptr<std::string>
      */
     std::shared_ptr<std::string> to_arrow(std::int32_t start_row,
+        std::int32_t end_row, std::int32_t start_col, std::int32_t end_col,
+        bool emit_group_by) const;
+
+    /**
+     * @brief Serializes the `View`'s data into the Apache Arrow format
+     * as a bytestring. Using start/end row and column, retrieve a data
+     * slice from the view and serialize it using `to_arrow_helper`.
+     *
+     * @param start_row
+     * @param end_row
+     * @param start_col
+     * @param end_col
+     * @return std::shared_ptr<std::string>
+     */
+    std::shared_ptr<std::string> to_csv(std::int32_t start_row,
         std::int32_t end_row, std::int32_t start_col,
         std::int32_t end_col) const;
 
@@ -165,6 +182,21 @@ public:
      * @return std::shared_ptr<std::string>
      */
     std::shared_ptr<std::string> data_slice_to_arrow(
+        std::shared_ptr<t_data_slice<CTX_T>> data_slice,
+        bool emit_group_by) const;
+
+    /**
+     * @brief Serializes a given data slice into the Apache Arrow format. Can
+     * be directly called with a pointer to a data slice in order to serialize
+     * it to Arrow.
+     *
+     * @param start_row
+     * @param end_row
+     * @param start_col
+     * @param end_col
+     * @return std::shared_ptr<std::string>
+     */
+    std::shared_ptr<std::string> data_slice_to_csv(
         std::shared_ptr<t_data_slice<CTX_T>> data_slice) const;
 
     // Delta calculation
@@ -248,6 +280,22 @@ private:
      */
     std::string _map_aggregate_types(
         const std::string& name, const std::string& typestring) const;
+
+    /**
+     * @brief Serializes a given data slice into the Apache Arrow format. Can
+     * be directly called with a pointer to a data slice in order to serialize
+     * it to Arrow.
+     *
+     * @param start_row
+     * @param end_row
+     * @param start_col
+     * @param end_col
+     * @return std::shared_ptr<std::string>
+     */
+    std::pair<std::shared_ptr<arrow::Schema>,
+        std::shared_ptr<arrow::RecordBatch>>
+    data_slice_to_batches(bool emit_group_by,
+        std::shared_ptr<t_data_slice<CTX_T>> data_slice) const;
 
     void _find_hidden_sort(const std::vector<t_sortspec>& sort);
 

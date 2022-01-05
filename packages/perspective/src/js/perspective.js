@@ -799,7 +799,46 @@ export default function (Module) {
      * comma-separated column paths.
      */
     view.prototype.to_csv = function (options) {
-        return to_format.call(this, options, formatters.csvFormatter);
+        _call_process(this.table.get_id());
+        options = _parse_format_options.bind(this)(options);
+        const start_row = options.start_row;
+        const end_row = options.end_row;
+        const start_col = options.start_col;
+        const end_col = options.end_col;
+        const sides = this.sides();
+        if (this.is_unit_context) {
+            return __MODULE__.to_csv_unit(
+                this._View,
+                start_row,
+                end_row,
+                start_col,
+                end_col
+            );
+        } else if (sides === 0) {
+            return __MODULE__.to_csv_zero(
+                this._View,
+                start_row,
+                end_row,
+                start_col,
+                end_col
+            );
+        } else if (sides === 1) {
+            return __MODULE__.to_csv_one(
+                this._View,
+                start_row,
+                end_row,
+                start_col,
+                end_col
+            );
+        } else if (sides === 2) {
+            return __MODULE__.to_csv_two(
+                this._View,
+                start_row,
+                end_row,
+                start_col,
+                end_col
+            );
+        }
     };
 
     /**

@@ -66,11 +66,13 @@
 
         .dragdrop-highlight {
             .column_selector_draggable.dragover,
-            .column-selector-column:not(:last-child) .column_selector_draggable {
+            .column-selector-column:not(:last-child)
+                .column_selector_draggable {
                 border-bottom-color: var(--active--color) !important;
             }
 
-            .column-selector-column:not(:first-child):not([data-label]) .column_selector_draggable.dragover {
+            .column-selector-column:not(:first-child):not([data-label])
+                .column_selector_draggable.dragover {
                 border-top-color: rgb(0 0 0 / 5%) !important;
             }
         }

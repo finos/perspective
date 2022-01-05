@@ -205,7 +205,7 @@ export class HTMLPerspectiveViewerPluginElement
 
     async draw(view: perspective.View): Promise<void> {
         this.style.backgroundColor = "#fff";
-        const csv = await view.to_csv({config: {delimiter: "|"}});
+        const csv = await view.to_csv();
         const css = `margin:0;overflow:scroll;position:absolute;width:100%;height:100%`;
         this.innerHTML = `<pre style='${css}'>${csv}</pre>`;
     }

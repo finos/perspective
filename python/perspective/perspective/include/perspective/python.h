@@ -19,7 +19,6 @@
 #include <pybind11/numpy.h>
 #include <boost/optional.hpp>
 
-
 /******************************************************************************
  *
  * Perspective includes
@@ -41,11 +40,9 @@
 #include <perspective/python/utils.h>
 #include <perspective/python/view.h>
 
-
 namespace perspective {
-namespace binding {
-}
-}
+namespace binding {}
+} // namespace perspective
 
 /******************************************************************************
  *
@@ -53,15 +50,16 @@ namespace binding {
  */
 using namespace perspective::binding;
 
-PYBIND11_MODULE(libbinding, m)
-{
+PYBIND11_MODULE(libbinding, m) {
     /******************************************************************************
      *
      * PerspectiveCppError
-     * 
-     * PerspectiveCppError is raised in Python when the C++ engine throws an exception.
-     * 
-     * To catch all exceptions from Perspective, catch `PerspectiveError` and `PerspectiveCppError`.
+     *
+     * PerspectiveCppError is raised in Python when the C++ engine throws an
+     * exception.
+     *
+     * To catch all exceptions from Perspective, catch `PerspectiveError` and
+     * `PerspectiveCppError`.
      */
     py::register_exception<PerspectiveException>(m, "PerspectiveCppError");
 
@@ -70,8 +68,8 @@ PYBIND11_MODULE(libbinding, m)
      * Table
      */
     py::class_<Table, std::shared_ptr<Table>>(m, "Table")
-        .def(py::init<std::shared_ptr<t_pool>, std::vector<std::string>, std::vector<t_dtype>,
-        std::uint32_t, std::string>())
+        .def(py::init<std::shared_ptr<t_pool>, std::vector<std::string>,
+            std::vector<t_dtype>, std::uint32_t, std::string>())
         .def("size", &Table::size)
         .def("get_schema", &Table::get_schema)
         .def("unregister_gnode", &Table::unregister_gnode)
@@ -87,9 +85,10 @@ PYBIND11_MODULE(libbinding, m)
      * View
      */
     // Bind a View for each context type
-    py::class_<View<t_ctxunit>, std::shared_ptr<View<t_ctxunit>>>(m, "View_ctxunit")
-        .def(py::init<std::shared_ptr<Table>, std::shared_ptr<t_ctxunit>, std::string, std::string,
-            std::shared_ptr<t_view_config>>())
+    py::class_<View<t_ctxunit>, std::shared_ptr<View<t_ctxunit>>>(
+        m, "View_ctxunit")
+        .def(py::init<std::shared_ptr<Table>, std::shared_ptr<t_ctxunit>,
+            std::string, std::string, std::shared_ptr<t_view_config>>())
         .def("sides", &View<t_ctxunit>::sides)
         .def("num_rows", &View<t_ctxunit>::num_rows)
         .def("num_columns", &View<t_ctxunit>::num_columns)
@@ -112,8 +111,8 @@ PYBIND11_MODULE(libbinding, m)
         .def("is_column_only", &View<t_ctxunit>::is_column_only);
 
     py::class_<View<t_ctx0>, std::shared_ptr<View<t_ctx0>>>(m, "View_ctx0")
-        .def(py::init<std::shared_ptr<Table>, std::shared_ptr<t_ctx0>, std::string, std::string,
-            std::shared_ptr<t_view_config>>())
+        .def(py::init<std::shared_ptr<Table>, std::shared_ptr<t_ctx0>,
+            std::string, std::string, std::shared_ptr<t_view_config>>())
         .def("sides", &View<t_ctx0>::sides)
         .def("num_rows", &View<t_ctx0>::num_rows)
         .def("num_columns", &View<t_ctx0>::num_columns)
@@ -136,8 +135,8 @@ PYBIND11_MODULE(libbinding, m)
         .def("is_column_only", &View<t_ctx0>::is_column_only);
 
     py::class_<View<t_ctx1>, std::shared_ptr<View<t_ctx1>>>(m, "View_ctx1")
-        .def(py::init<std::shared_ptr<Table>, std::shared_ptr<t_ctx1>, std::string, std::string,
-            std::shared_ptr<t_view_config>>())
+        .def(py::init<std::shared_ptr<Table>, std::shared_ptr<t_ctx1>,
+            std::string, std::string, std::shared_ptr<t_view_config>>())
         .def("sides", &View<t_ctx1>::sides)
         .def("num_rows", &View<t_ctx1>::num_rows)
         .def("num_columns", &View<t_ctx1>::num_columns)
@@ -163,8 +162,8 @@ PYBIND11_MODULE(libbinding, m)
         .def("is_column_only", &View<t_ctx1>::is_column_only);
 
     py::class_<View<t_ctx2>, std::shared_ptr<View<t_ctx2>>>(m, "View_ctx2")
-        .def(py::init<std::shared_ptr<Table>, std::shared_ptr<t_ctx2>, std::string, std::string,
-            std::shared_ptr<t_view_config>>())
+        .def(py::init<std::shared_ptr<Table>, std::shared_ptr<t_ctx2>,
+            std::string, std::string, std::shared_ptr<t_view_config>>())
         .def("sides", &View<t_ctx2>::sides)
         .def("num_rows", &View<t_ctx2>::num_rows)
         .def("num_columns", &View<t_ctx2>::num_columns)
@@ -194,17 +193,17 @@ PYBIND11_MODULE(libbinding, m)
      *
      * t_view_config
      */
-    py::class_<t_view_config, std::shared_ptr<t_view_config>>(m, "t_view_config")
-        .def(py::init<
-            const std::vector<std::string>&,
+    py::class_<t_view_config, std::shared_ptr<t_view_config>>(
+        m, "t_view_config")
+        .def(py::init<const std::vector<std::string>&,
             const std::vector<std::string>&,
             const tsl::ordered_map<std::string, std::vector<std::string>>&,
             const std::vector<std::string>&,
-            const std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>>&,
+            const std::vector<
+                std::tuple<std::string, std::string, std::vector<t_tscalar>>>&,
             const std::vector<std::vector<std::string>>&,
             const std::vector<std::shared_ptr<t_computed_expression>>&,
-            const std::string,
-            bool>())
+            const std::string, bool>())
         .def("add_filter_term", &t_view_config::add_filter_term);
 
     /******************************************************************************
@@ -212,7 +211,9 @@ PYBIND11_MODULE(libbinding, m)
      * t_data_table
      */
     py::class_<t_data_table>(m, "t_data_table")
-        .def("size", reinterpret_cast<unsigned long (t_data_table::*)() const>(&t_data_table::size));
+        .def("size",
+            reinterpret_cast<unsigned long (t_data_table::*)() const>(
+                &t_data_table::size));
 
     /******************************************************************************
      *
@@ -229,32 +230,37 @@ PYBIND11_MODULE(libbinding, m)
      * t_gnode
      */
     py::class_<t_gnode, std::shared_ptr<t_gnode>>(m, "t_gnode")
-        .def("get_id", reinterpret_cast<t_uindex (t_gnode::*)() const>(&t_gnode::get_id));
+        .def("get_id",
+            reinterpret_cast<t_uindex (t_gnode::*)() const>(&t_gnode::get_id));
 
     /******************************************************************************
      *
      * t_data_slice
      */
-    py::class_<t_data_slice<t_ctxunit>, std::shared_ptr<t_data_slice<t_ctxunit>>>(m, "t_data_slice_ctxunit")
+    py::class_<t_data_slice<t_ctxunit>,
+        std::shared_ptr<t_data_slice<t_ctxunit>>>(m, "t_data_slice_ctxunit")
         .def("get_column_slice", &t_data_slice<t_ctxunit>::get_column_slice)
         .def("get_slice", &t_data_slice<t_ctxunit>::get_slice)
         .def("get_column_names", &t_data_slice<t_ctxunit>::get_column_names)
         .def("get_pkeys", &t_data_slice<t_ctxunit>::get_pkeys);
 
-    py::class_<t_data_slice<t_ctx0>, std::shared_ptr<t_data_slice<t_ctx0>>>(m, "t_data_slice_ctx0")
+    py::class_<t_data_slice<t_ctx0>, std::shared_ptr<t_data_slice<t_ctx0>>>(
+        m, "t_data_slice_ctx0")
         .def("get_column_slice", &t_data_slice<t_ctx0>::get_column_slice)
         .def("get_slice", &t_data_slice<t_ctx0>::get_slice)
         .def("get_column_names", &t_data_slice<t_ctx0>::get_column_names)
         .def("get_pkeys", &t_data_slice<t_ctx0>::get_pkeys);
 
-    py::class_<t_data_slice<t_ctx1>, std::shared_ptr<t_data_slice<t_ctx1>>>(m, "t_data_slice_ctx1")
+    py::class_<t_data_slice<t_ctx1>, std::shared_ptr<t_data_slice<t_ctx1>>>(
+        m, "t_data_slice_ctx1")
         .def("get_column_slice", &t_data_slice<t_ctx1>::get_column_slice)
         .def("get_slice", &t_data_slice<t_ctx1>::get_slice)
         .def("get_column_names", &t_data_slice<t_ctx1>::get_column_names)
         .def("get_row_path", &t_data_slice<t_ctx1>::get_row_path)
         .def("get_pkeys", &t_data_slice<t_ctx1>::get_pkeys);
 
-    py::class_<t_data_slice<t_ctx2>, std::shared_ptr<t_data_slice<t_ctx2>>>(m, "t_data_slice_ctx2")
+    py::class_<t_data_slice<t_ctx2>, std::shared_ptr<t_data_slice<t_ctx2>>>(
+        m, "t_data_slice_ctx2")
         .def("get_column_slice", &t_data_slice<t_ctx2>::get_column_slice)
         .def("get_slice", &t_data_slice<t_ctx2>::get_slice)
         .def("get_column_names", &t_data_slice<t_ctx2>::get_column_names)
@@ -285,7 +291,6 @@ PYBIND11_MODULE(libbinding, m)
      */
     py::class_<t_ctx2>(m, "t_ctx2");
 
-
     /******************************************************************************
      *
      * t_pool
@@ -303,8 +308,10 @@ PYBIND11_MODULE(libbinding, m)
      */
     py::class_<t_validated_expression_map>(m, "t_validated_expression_map")
         .def(py::init<>())
-        .def("get_expression_schema", &t_validated_expression_map::get_expression_schema)
-        .def("get_expression_errors", &t_validated_expression_map::get_expression_errors);
+        .def("get_expression_schema",
+            &t_validated_expression_map::get_expression_schema)
+        .def("get_expression_errors",
+            &t_validated_expression_map::get_expression_errors);
 
     /******************************************************************************
      *
@@ -382,7 +389,7 @@ PYBIND11_MODULE(libbinding, m)
         .value("DTYPE_LAST_VLEN", DTYPE_LAST_VLEN)
         .value("DTYPE_LAST", DTYPE_LAST);
 
-     /******************************************************************************
+    /******************************************************************************
      *
      * t_filter_op
      */
@@ -438,6 +445,10 @@ PYBIND11_MODULE(libbinding, m)
     m.def("to_arrow_zero", &to_arrow_zero);
     m.def("to_arrow_one", &to_arrow_one);
     m.def("to_arrow_two", &to_arrow_two);
+    m.def("to_csv_unit", &to_csv_unit);
+    m.def("to_csv_zero", &to_csv_zero);
+    m.def("to_csv_one", &to_csv_one);
+    m.def("to_csv_two", &to_csv_two);
     m.def("get_row_delta_unit", &get_row_delta_unit);
     m.def("get_row_delta_zero", &get_row_delta_zero);
     m.def("get_row_delta_one", &get_row_delta_one);
