@@ -519,7 +519,7 @@ impl Session {
 
         Ok(csv
             .lines()
-            .map(|x| x.to_owned())
+            .map(|x| (if x.len() > 1 { &x[1..x.len() - 1] } else { x }).to_owned())
             .skip(2)
             .collect::<Vec<String>>())
     }
@@ -649,17 +649,16 @@ impl Session {
     /// In order to create a new view in this session, the session must first be
     /// validated to create a `ValidSession<'_>` guard.
     pub async fn validate(&self) -> ValidSession<'_> {
-        self.validate_view_config().await.unwrap_or_else(|err| {
+        if let Err(err) = self.validate_view_config().await {
             web_sys::console::error_3(
                 &"Invalid config, resetting to default".into(),
                 &JsValue::from_serde(&self.borrow().config).unwrap(),
                 &err,
             );
 
-            self.borrow_mut()
-                .config
-                .apply_update(ViewConfigUpdate::default());
-        });
+            self.reset(true);
+            self.validate_view_config().await.unwrap();
+        }
 
         ValidSession(self)
     }
