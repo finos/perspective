@@ -519,7 +519,13 @@ impl Session {
 
         Ok(csv
             .lines()
-            .map(|x| (if x.len() > 1 { &x[1..x.len() - 1] } else { x }).to_owned())
+            .map(|x| {
+                if x.len() > 1 {
+                    str::replace(&x[1..x.len() - 1], "\"\"", "\"")
+                } else {
+                    x.to_owned()
+                }
+            })
             .skip(2)
             .collect::<Vec<String>>())
     }
