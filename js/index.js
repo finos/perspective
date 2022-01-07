@@ -135,50 +135,50 @@ window.addEventListener("DOMContentLoaded", () => {
 exports.EXAMPLES = [
     {
         name: "Default",
-        config: {}
+        config: {},
     },
     {
         name: "Row Pivots 1",
         config: {
-            row_pivots: ["Sub-Category"]
+            row_pivots: ["Sub-Category"],
         },
-        aggregates: "dominant"
+        aggregates: "dominant",
     },
     {
         name: "Row Pivots 2",
         config: {
-            row_pivots: ["Category", "Sub-Category"]
-        }
+            row_pivots: ["Category", "Sub-Category"],
+        },
     },
     {
         name: "Column Pivots",
         config: {
             column_pivots: ["Category"],
-            columns: ["Sales", "Quantity", "Discount", "Profit"]
-        }
+            columns: ["Sales", "Quantity", "Discount", "Profit"],
+        },
     },
     {
         name: "Column Pivots 2",
         config: {
             column_pivots: ["Category", "Sub-Category"],
-            columns: ["Sales", "Quantity", "Discount", "Profit"]
-        }
+            columns: ["Sales", "Quantity", "Discount", "Profit"],
+        },
     },
     {
         name: "Both",
         config: {
             row_pivots: ["Region"],
             column_pivots: ["Category"],
-            columns: ["Sales", "Quantity", "Discount", "Profit"]
-        }
+            columns: ["Sales", "Quantity", "Discount", "Profit"],
+        },
     },
     {
         name: "Both 2",
         config: {
             row_pivots: ["Region", "State"],
             column_pivots: ["Category", "Sub-Category"],
-            columns: ["Sales", "Quantity", "Discount", "Profit"]
-        }
+            columns: ["Sales", "Quantity", "Discount", "Profit"],
+        },
     },
     {
         name: "Background Row And Column Pivots",
@@ -189,11 +189,11 @@ exports.EXAMPLES = [
             sort: [["Profit", "col asc"]],
             plugin_config: {
                 Profit: {
-                    color_mode: "background"
+                    number_color_mode: "background",
                     // gradient: 600,
-                }
-            }
-        }
+                },
+            },
+        },
     },
     {
         name: "Gradient Row And Column Pivots",
@@ -204,11 +204,11 @@ exports.EXAMPLES = [
             sort: [["Profit", "col asc"]],
             plugin_config: {
                 Profit: {
-                    color_mode: "gradient",
-                    gradient: 1600
-                }
-            }
-        }
+                    number_color_mode: "gradient",
+                    gradient: 1600,
+                },
+            },
+        },
     },
     {
         name: "BackgBarround Row And Column Pivots",
@@ -219,111 +219,139 @@ exports.EXAMPLES = [
             aggregates: {Sales: "avg"},
             plugin_config: {
                 Sales: {
-                    color_mode: "bar",
-                    gradient: 600
-                }
-            }
-        }
+                    number_color_mode: "bar",
+                    gradient: 600,
+                },
+            },
+        },
     },
     {
         name: "Foreground Colors",
         config: {
-            columns: ["Category", "Sales", "Discount", "Profit", "Sub-Category", "Order Date"],
+            columns: [
+                "Category",
+                "Sales",
+                "Discount",
+                "Profit",
+                "Sub-Category",
+                "Order Date",
+            ],
             plugin_config: {
                 Profit: {
                     pos_color: "#32cd82",
-                    neg_color: "#f50fed"
+                    neg_color: "#f50fed",
                 },
                 Sales: {
                     pos_color: "#780aff",
-                    neg_color: "#f5ac0f"
+                    neg_color: "#f5ac0f",
                 },
                 Discount: {
                     pos_color: "#f5ac0f",
-                    neg_color: "#780aff"
-                }
+                    neg_color: "#780aff",
+                },
             },
-            sort: [["Sub-Category", "desc"]]
-        }
+            sort: [["Sub-Category", "desc"]],
+        },
     },
     {
         name: "Background Colors",
         config: {
-            columns: ["Category", "Sales", "Discount", "Profit", "Sub-Category", "Order Date"],
+            columns: [
+                "Category",
+                "Sales",
+                "Discount",
+                "Profit",
+                "Sub-Category",
+                "Order Date",
+            ],
             plugin_config: {
                 Profit: {
-                    color_mode: "background",
+                    number_color_mode: "background",
                     pos_color: "#32cd82",
-                    neg_color: "#f50fed"
+                    neg_color: "#f50fed",
                 },
                 Sales: {
-                    color_mode: "background",
+                    number_color_mode: "background",
                     pos_color: "#780aff",
-                    neg_color: "#f5ac0f"
+                    neg_color: "#f5ac0f",
                 },
                 Discount: {
-                    color_mode: "background",
+                    number_color_mode: "background",
                     pos_color: "#f5ac0f",
-                    neg_color: "#780aff"
-                }
+                    neg_color: "#780aff",
+                },
             },
-            sort: [["Sub-Category", "desc"]]
-        }
+            sort: [["Sub-Category", "desc"]],
+        },
     },
 
     {
         name: "Gradient Colors",
         config: {
-            columns: ["Category", "Sales", "Discount", "Profit", "Sub-Category", "Order Date"],
+            columns: [
+                "Category",
+                "Sales",
+                "Discount",
+                "Profit",
+                "Sub-Category",
+                "Order Date",
+            ],
             plugin_config: {
                 Profit: {
-                    color_mode: "gradient",
+                    number_color_mode: "gradient",
                     gradient: 600,
                     pos_color: "#32cd82",
-                    neg_color: "#f50fed"
+                    neg_color: "#f50fed",
                 },
                 Sales: {
-                    color_mode: "gradient",
+                    number_color_mode: "gradient",
                     gradient: 2268,
                     pos_color: "#780aff",
-                    neg_color: "#f5ac0f"
+                    neg_color: "#f5ac0f",
                 },
                 Discount: {
-                    color_mode: "gradient",
+                    number_color_mode: "gradient",
                     gradient: 0.8,
                     pos_color: "#f5ac0f",
-                    neg_color: "#780aff"
-                }
+                    neg_color: "#780aff",
+                },
             },
-            sort: [["Sub-Category", "desc"]]
-        }
+            sort: [["Sub-Category", "desc"]],
+        },
     },
     {
         name: "Bar Colors",
         config: {
-            columns: ["Category", "Sales", "Discount", "Profit", "Sub-Category", "Order Date"],
+            columns: [
+                "Category",
+                "Sales",
+                "Discount",
+                "Profit",
+                "Sub-Category",
+                "Order Date",
+            ],
             plugin_config: {
                 Profit: {
-                    color_mode: "bar",
+                    number_color_mode: "bar",
                     gradient: 600,
                     pos_color: "#32cd82",
-                    neg_color: "#f50fed"
+                    neg_color: "#f50fed",
                 },
                 Sales: {
-                    color_mode: "bar",
+                    number_color_mode: "bar",
                     gradient: 2268,
                     pos_color: "#780aff",
-                    neg_color: "#f5ac0f"
+                    neg_color: "#f5ac0f",
                 },
                 Discount: {
-                    color_mode: "bar",
+                    number_color_mode: "bar",
                     gradient: 0.8,
                     pos_color: "#f5ac0f",
-                    neg_color: "#780aff"
-                }
+                    neg_color: "#780aff",
+                },
             },
-            sort: [["Sub-Category", "desc"]]
-        }
+            sort: [["Sub-Category", "desc"]],
+        },
     },
     {
         name: "Thermometer",
@@ -332,20 +360,23 @@ exports.EXAMPLES = [
             columns: ["Profit (-)", "Profit", "Profit (+)"],
             plugin_config: {
                 "Profit (-)": {
-                    color_mode: "bar",
-                    gradient: 10000
+                    number_color_mode: "bar",
+                    gradient: 10000,
                 },
                 Profit: {
-                    color_mode: "gradient",
-                    gradient: 10000
+                    number_color_mode: "gradient",
+                    gradient: 10000,
                 },
                 "Profit (+)": {
-                    color_mode: "bar",
-                    gradient: 10000
-                }
+                    number_color_mode: "bar",
+                    gradient: 10000,
+                },
             },
-            expressions: [`//Profit (-)\nif("Profit"<0){"Profit"}else{0}`, `//Profit (+)\nif("Profit">0){"Profit"}else{0}`]
-        }
+            expressions: [
+                `//Profit (-)\nif("Profit"<0){"Profit"}else{0}`,
+                `//Profit (+)\nif("Profit">0){"Profit"}else{0}`,
+            ],
+        },
     },
 
     // Y Bar
@@ -355,8 +386,8 @@ exports.EXAMPLES = [
         config: {
             plugin: "Y Bar",
             row_pivots: ["Sub-Category"],
-            columns: ["Sales"]
-        }
+            columns: ["Sales"],
+        },
     },
     {
         name: "Y Bar, Sorted Desc By Y-Axis",
@@ -364,8 +395,8 @@ exports.EXAMPLES = [
             plugin: "Y Bar",
             row_pivots: ["Sub-Category"],
             columns: ["Sales"],
-            sort: [["Sales", "desc"]]
-        }
+            sort: [["Sales", "desc"]],
+        },
     },
     {
         name: "Y Bar - Row And Column Pivots",
@@ -373,8 +404,8 @@ exports.EXAMPLES = [
             plugin: "Y Bar",
             row_pivots: ["Sub-Category"],
             column_pivots: ["Ship Mode"],
-            columns: ["Sales"]
-        }
+            columns: ["Sales"],
+        },
     },
 
     {
@@ -383,8 +414,8 @@ exports.EXAMPLES = [
             plugin: "Y Bar",
             row_pivots: ["Category", "Sub-Category"],
             columns: ["Sales"],
-            sort: [["Sales", "desc"]]
-        }
+            sort: [["Sales", "desc"]],
+        },
     },
     {
         name: "Y Bar - Row Pivots 2 And Column Pivots Sorted",
@@ -393,8 +424,8 @@ exports.EXAMPLES = [
             row_pivots: ["Category", "Sub-Category"],
             column_pivots: ["Category"],
             columns: ["Sales"],
-            sort: [["Sales", "desc"]]
-        }
+            sort: [["Sales", "desc"]],
+        },
     },
     {
         name: "Y Bar - Row Pivots 2 And 2 Column Pivots Sorted",
@@ -403,8 +434,8 @@ exports.EXAMPLES = [
             row_pivots: ["Category", "Sub-Category"],
             column_pivots: ["Category", "Region"],
             columns: ["Sales"],
-            sort: [["Sales", "desc"]]
-        }
+            sort: [["Sales", "desc"]],
+        },
     },
     {
         name: "Y Bar - Row Pivots 2 And 2 Column Pivots Sorted 2",
@@ -414,9 +445,9 @@ exports.EXAMPLES = [
             column_pivots: ["Profit (-/+)"],
             columns: ["Profit"],
             expressions: [`//Profit (-/+)\nif("Profit"<0){1}else{0}`],
-            sort: [["Profit", "desc"]]
+            sort: [["Profit", "desc"]],
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
 
     // Y Bar Multi Axis
@@ -428,8 +459,8 @@ exports.EXAMPLES = [
             row_pivots: ["Sub-Category"],
             columns: ["Quantity", "Sales"],
             aggregates: {Sales: "avg"},
-            sort: [["Sales", "desc"]]
-        }
+            sort: [["Sales", "desc"]],
+        },
     },
     {
         name: "Y Bar Multi Axis - SPlit",
@@ -439,8 +470,8 @@ exports.EXAMPLES = [
             columns: ["Quantity", "Sales"],
             sort: [["Sales", "desc"]],
             aggregates: {Sales: "avg"},
-            plugin_config: {splitMainValues: ["Sales"]}
-        }
+            plugin_config: {splitMainValues: ["Sales"]},
+        },
     },
 
     // X Bar
@@ -450,16 +481,16 @@ exports.EXAMPLES = [
         config: {
             plugin: "X Bar",
             row_pivots: ["Sub-Category"],
-            columns: ["Sales"]
-        }
+            columns: ["Sales"],
+        },
     },
     {
         name: "X Bar",
         config: {
             plugin: "X Bar",
             row_pivots: ["Sub-Category"],
-            columns: ["Quantity", "Profit"]
-        }
+            columns: ["Quantity", "Profit"],
+        },
     },
     {
         name: "X Bar, Sorted Desc By X-Axis",
@@ -467,17 +498,8 @@ exports.EXAMPLES = [
             plugin: "X Bar",
             row_pivots: ["Sub-Category"],
             columns: ["Sales"],
-            sort: [["Sales", "asc"]]
-        }
-    },
-    {
-        name: "X Bar - Row And Column Pivots",
-        config: {
-            plugin: "X Bar",
-            row_pivots: ["Sub-Category"],
-            column_pivots: ["Region"],
-            columns: ["Sales"]
-        }
+            sort: [["Sales", "asc"]],
+        },
     },
     {
         name: "X Bar - Row And Column Pivots",
@@ -486,8 +508,17 @@ exports.EXAMPLES = [
             row_pivots: ["Sub-Category"],
             column_pivots: ["Region"],
             columns: ["Sales"],
-            sort: [["Sales", "asc"]]
-        }
+        },
+    },
+    {
+        name: "X Bar - Row And Column Pivots",
+        config: {
+            plugin: "X Bar",
+            row_pivots: ["Sub-Category"],
+            column_pivots: ["Region"],
+            columns: ["Sales"],
+            sort: [["Sales", "asc"]],
+        },
     },
 
     // Y Line
@@ -497,8 +528,8 @@ exports.EXAMPLES = [
         config: {
             plugin: "Y Line",
             row_pivots: ["Order Date"],
-            columns: ["Sales"]
-        }
+            columns: ["Sales"],
+        },
     },
     {
         name: "Y Line - Datetime Axis",
@@ -506,8 +537,8 @@ exports.EXAMPLES = [
             plugin: "Y Line",
             row_pivots: ["Order Date"],
             column_pivots: ["Segment"],
-            columns: ["Sales"]
-        }
+            columns: ["Sales"],
+        },
     },
     {
         name: "Y Line - Datetime Axis Computed",
@@ -515,8 +546,8 @@ exports.EXAMPLES = [
             plugin: "Y Line",
             row_pivots: ["bucket(\"Order Date\", 'M')"],
             expressions: ["bucket(\"Order Date\", 'M')"],
-            columns: ["Sales"]
-        }
+            columns: ["Sales"],
+        },
     },
     {
         name: "Y Line - Datetime Axis",
@@ -524,9 +555,12 @@ exports.EXAMPLES = [
             plugin: "Y Line",
             row_pivots: ["bucket(\"Order Date\", 'M')"],
             column_pivots: ["bucket(\"Order Date\", 'Y')"],
-            expressions: ["bucket(\"Order Date\", 'M')", "bucket(\"Order Date\", 'Y')"],
-            columns: ["Sales"]
-        }
+            expressions: [
+                "bucket(\"Order Date\", 'M')",
+                "bucket(\"Order Date\", 'Y')",
+            ],
+            columns: ["Sales"],
+        },
     },
     {
         name: "Y Line - Datetime Axis And Column Pivots",
@@ -535,17 +569,8 @@ exports.EXAMPLES = [
             row_pivots: ["bucket(\"Order Date\", 'M')"],
             column_pivots: ["Region"],
             expressions: ["bucket(\"Order Date\", 'M')"],
-            columns: ["Sales"]
-        }
-    },
-    {
-        name: "Y Line - Category Axis",
-        config: {
-            plugin: "Y Line",
-            row_pivots: ["State"],
-            columns: ["Sales"]
+            columns: ["Sales"],
         },
-        viewport: {width: 600, height: 450}
     },
     {
         name: "Y Line - Category Axis",
@@ -553,9 +578,18 @@ exports.EXAMPLES = [
             plugin: "Y Line",
             row_pivots: ["State"],
             columns: ["Sales"],
-            sort: [["Sales", "desc"]]
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
+    },
+    {
+        name: "Y Line - Category Axis",
+        config: {
+            plugin: "Y Line",
+            row_pivots: ["State"],
+            columns: ["Sales"],
+            sort: [["Sales", "desc"]],
+        },
+        viewport: {width: 600, height: 450},
     },
     {
         name: "Y Line - Row and Column Pivots",
@@ -564,9 +598,9 @@ exports.EXAMPLES = [
             row_pivots: ["State"],
             column_pivots: ["Segment"],
             columns: ["Sales"],
-            sort: [["Sales", "desc"]]
+            sort: [["Sales", "desc"]],
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
     {
         name: "Y Line - Multi Axis Split",
@@ -575,9 +609,9 @@ exports.EXAMPLES = [
             row_pivots: ["State"],
             columns: ["Sales", "Profit"],
             plugin_config: {splitMainValues: ["Sales"]},
-            sort: [["Sales", "desc"]]
+            sort: [["Sales", "desc"]],
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
     {
         name: "Y Line - Multi Axis Split",
@@ -587,9 +621,9 @@ exports.EXAMPLES = [
             column_pivots: ["Segment"],
             columns: ["Sales", "Profit"],
             plugin_config: {splitMainValues: ["Sales"]},
-            sort: [["Sales", "desc"]]
+            sort: [["Sales", "desc"]],
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
 
     // Y Area
@@ -600,8 +634,8 @@ exports.EXAMPLES = [
             plugin: "Y Area",
             row_pivots: ["bucket(\"Order Date\", 'M')"],
             expressions: ["bucket(\"Order Date\", 'M')"],
-            columns: ["Sales"]
-        }
+            columns: ["Sales"],
+        },
     },
     {
         name: "Y Area - Datetime Axis",
@@ -609,9 +643,12 @@ exports.EXAMPLES = [
             plugin: "Y Area",
             row_pivots: ["bucket(\"Order Date\", 'M')"],
             column_pivots: ["bucket(\"Order Date\", 'Y')"],
-            expressions: ["bucket(\"Order Date\", 'M')", "bucket(\"Order Date\", 'Y')"],
-            columns: ["Sales"]
-        }
+            expressions: [
+                "bucket(\"Order Date\", 'M')",
+                "bucket(\"Order Date\", 'Y')",
+            ],
+            columns: ["Sales"],
+        },
     },
     {
         name: "Y Area - Datetime Axis And Column Pivots",
@@ -620,17 +657,17 @@ exports.EXAMPLES = [
             row_pivots: ["bucket(\"Order Date\", 'M')"],
             column_pivots: ["Region"],
             expressions: ["bucket(\"Order Date\", 'M')"],
-            columns: ["Sales"]
-        }
+            columns: ["Sales"],
+        },
     },
     {
         name: "Y Area - Category Axis",
         config: {
             plugin: "Y Area",
             row_pivots: ["State"],
-            columns: ["Sales"]
+            columns: ["Sales"],
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
     {
         name: "Y Area - Row and Column Pivots",
@@ -638,9 +675,9 @@ exports.EXAMPLES = [
             plugin: "Y Area",
             row_pivots: ["State"],
             column_pivots: ["Ship Mode"],
-            columns: ["Sales"]
+            columns: ["Sales"],
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
     {
         name: "Y Area - 2 Row Pivots",
@@ -648,9 +685,9 @@ exports.EXAMPLES = [
             plugin: "Y Area",
             row_pivots: ["Region", "State"],
             columns: ["Sales"],
-            sort: [["Sales", "desc"]]
+            sort: [["Sales", "desc"]],
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
     {
         name: "Y Area - Row and Column Pivots",
@@ -659,9 +696,9 @@ exports.EXAMPLES = [
             row_pivots: ["Region", "State"],
             column_pivots: ["Region"],
             columns: ["Sales"],
-            sort: [["Sales", "desc"]]
+            sort: [["Sales", "desc"]],
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
     {
         name: "Y Area - Row and Column Pivots 2",
@@ -670,9 +707,9 @@ exports.EXAMPLES = [
             row_pivots: ["Region", "State"],
             column_pivots: ["Ship Mode"],
             columns: ["Sales"],
-            sort: [["Sales", "desc"]]
+            sort: [["Sales", "desc"]],
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
 
     // X/Y Scatter
@@ -683,8 +720,8 @@ exports.EXAMPLES = [
             plugin: "X/Y Scatter",
             row_pivots: ["City"],
             columns: ["Sales", "Quantity"],
-            aggregates: {Sales: "avg", Profit: "avg", Quantity: "avg"}
-        }
+            aggregates: {Sales: "avg", Profit: "avg", Quantity: "avg"},
+        },
     },
     {
         name: "X/Y Scatter - Column Pivots",
@@ -693,8 +730,8 @@ exports.EXAMPLES = [
             row_pivots: ["City"],
             column_pivots: ["Region"],
             columns: ["Sales", "Quantity"],
-            aggregates: {Sales: "avg", Profit: "avg", Quantity: "avg"}
-        }
+            aggregates: {Sales: "avg", Profit: "avg", Quantity: "avg"},
+        },
     },
     {
         name: "X/Y Scatter - Color By Float",
@@ -703,8 +740,8 @@ exports.EXAMPLES = [
             row_pivots: ["State"],
             columns: ["Sales", "Quantity", "Profit"],
             aggregates: {Sales: "avg", Profit: "avg", Quantity: "avg"},
-            sort: [["Profit", "desc"]]
-        }
+            sort: [["Profit", "desc"]],
+        },
     },
     {
         name: "X/Y Scatter - Bubble",
@@ -712,9 +749,9 @@ exports.EXAMPLES = [
             plugin: "X/Y Scatter",
             row_pivots: ["Sub-Category"],
             columns: ["Sales", "Quantity", null, "Profit"],
-            aggregates: {Sales: "avg", Profit: "avg", Quantity: "avg"}
+            aggregates: {Sales: "avg", Profit: "avg", Quantity: "avg"},
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
     {
         name: "X/Y Scatter - Bubble",
@@ -723,9 +760,9 @@ exports.EXAMPLES = [
             row_pivots: ["Sub-Category"],
             column_pivots: ["Category"],
             columns: ["Sales", "Quantity", null, "Profit"],
-            aggregates: {Sales: "avg", Profit: "avg", Quantity: "avg"}
+            aggregates: {Sales: "avg", Profit: "avg", Quantity: "avg"},
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
     {
         name: "X/Y Scatter - Bubble",
@@ -734,9 +771,14 @@ exports.EXAMPLES = [
             row_pivots: ["Sub-Category"],
             columns: ["Sales", "Quantity", "Profit", "Row ID"],
             sort: [["Profit", "desc"]],
-            aggregates: {Sales: "avg", Profit: "sum", Quantity: "avg", "Row ID": "avg"}
+            aggregates: {
+                Sales: "avg",
+                Profit: "sum",
+                Quantity: "avg",
+                "Row ID": "avg",
+            },
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
 
     {
@@ -746,10 +788,10 @@ exports.EXAMPLES = [
             columns: ["Profit", "State", null, "Quantity"],
             row_pivots: ["City"],
             aggregates: {
-                State: "dominant"
-            }
+                State: "dominant",
+            },
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
 
     {
@@ -761,10 +803,10 @@ exports.EXAMPLES = [
             aggregates: {
                 State: "dominant",
                 "Sub-Category": "dominant",
-                Profit: "low"
-            }
+                Profit: "low",
+            },
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
 
     // X/Y Line
@@ -777,15 +819,15 @@ exports.EXAMPLES = [
             aggregates: {
                 "Order Date": "dominant",
                 Sales: "avg",
-                Profit: "avg"
+                Profit: "avg",
             },
             row_pivots: ["State"],
             sort: [
                 ["Profit", "desc"],
-                ["Sales", "desc"]
+                ["Sales", "desc"],
             ],
-            column_pivots: ["Region"]
-        }
+            column_pivots: ["Region"],
+        },
     },
 
     // Treemap
@@ -795,16 +837,16 @@ exports.EXAMPLES = [
         config: {
             plugin: "Treemap",
             row_pivots: ["Sub-Category"],
-            columns: ["Sales"]
-        }
+            columns: ["Sales"],
+        },
     },
     {
         name: "Treemap - 2 Row Pivots",
         config: {
             plugin: "Treemap",
             row_pivots: ["Category", "Sub-Category", "Segment"],
-            columns: ["Sales"]
-        }
+            columns: ["Sales"],
+        },
     },
     {
         name: "Treemap - Float Color",
@@ -812,8 +854,8 @@ exports.EXAMPLES = [
             plugin: "Treemap",
             row_pivots: ["Category", "Sub-Category"],
             columns: ["Sales", "Quantity"],
-            sort: [["Quantity", "desc"]]
-        }
+            sort: [["Quantity", "desc"]],
+        },
     },
     {
         name: "Treemap - Category Color",
@@ -821,8 +863,8 @@ exports.EXAMPLES = [
             plugin: "Treemap",
             row_pivots: ["Category", "Sub-Category"],
             columns: ["Sales", "Category"],
-            aggregates: {Category: "dominant"}
-        }
+            aggregates: {Category: "dominant"},
+        },
     },
     {
         name: "Treemap - Row And Column Pivots Float Color",
@@ -831,9 +873,9 @@ exports.EXAMPLES = [
             row_pivots: ["Category", "Sub-Category"],
             column_pivots: ["Region"],
             columns: ["Sales", "Quantity"],
-            sort: [["Quantity", "desc"]]
+            sort: [["Quantity", "desc"]],
         },
-        viewport: {width: 800, height: 600}
+        viewport: {width: 800, height: 600},
     },
     {
         name: "Treemap - Row And Column Pivots Category Color",
@@ -842,9 +884,9 @@ exports.EXAMPLES = [
             row_pivots: ["Category", "Sub-Category"],
             column_pivots: ["Region"],
             columns: ["Sales", "Region"],
-            aggregates: {Region: "dominant"}
+            aggregates: {Region: "dominant"},
         },
-        viewport: {width: 800, height: 600}
+        viewport: {width: 800, height: 600},
     },
     {
         name: "Treemap - Row And Column Pivots Category Color 2",
@@ -853,9 +895,9 @@ exports.EXAMPLES = [
             row_pivots: ["Category", "Sub-Category"],
             column_pivots: ["Region"],
             columns: ["Sales", "Category"],
-            aggregates: {Category: "dominant"}
+            aggregates: {Category: "dominant"},
         },
-        viewport: {width: 800, height: 600}
+        viewport: {width: 800, height: 600},
     },
     // Sunburst
 
@@ -864,16 +906,16 @@ exports.EXAMPLES = [
         config: {
             plugin: "Sunburst",
             row_pivots: ["Sub-Category"],
-            columns: ["Sales"]
-        }
+            columns: ["Sales"],
+        },
     },
     {
         name: "Sunburst - 2 Row Pivots",
         config: {
             plugin: "Sunburst",
             row_pivots: ["Category", "Sub-Category", "Segment"],
-            columns: ["Sales"]
-        }
+            columns: ["Sales"],
+        },
     },
     {
         name: "Sunburst - Float Color",
@@ -881,8 +923,8 @@ exports.EXAMPLES = [
             plugin: "Sunburst",
             row_pivots: ["Category", "Sub-Category"],
             columns: ["Quantity", "Sales"],
-            sort: [["Quantity", "desc"]]
-        }
+            sort: [["Quantity", "desc"]],
+        },
     },
     {
         name: "Sunburst - Category Color",
@@ -890,8 +932,8 @@ exports.EXAMPLES = [
             plugin: "Sunburst",
             row_pivots: ["Category", "Sub-Category"],
             columns: ["Sales", "Category"],
-            aggregates: {Category: "dominant"}
-        }
+            aggregates: {Category: "dominant"},
+        },
     },
     {
         name: "Sunburst - Row And Column Pivots",
@@ -899,9 +941,9 @@ exports.EXAMPLES = [
             plugin: "Sunburst",
             row_pivots: ["Category", "Sub-Category"],
             column_pivots: ["Region"],
-            columns: ["Sales"]
+            columns: ["Sales"],
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
     {
         name: "Sunburst - Row And Column Pivots Float Color",
@@ -909,9 +951,9 @@ exports.EXAMPLES = [
             plugin: "Sunburst",
             row_pivots: ["Category", "Sub-Category"],
             column_pivots: ["Region"],
-            columns: ["Sales", "Quantity"]
+            columns: ["Sales", "Quantity"],
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
     {
         name: "Sunburst - Row And Column Pivots Category Color",
@@ -920,9 +962,9 @@ exports.EXAMPLES = [
             row_pivots: ["Category", "Sub-Category"],
             column_pivots: ["Region"],
             columns: ["Sales", "Region"],
-            aggregates: {Region: "dominant"}
+            aggregates: {Region: "dominant"},
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
     {
         name: "Sunburst - Row And Column Pivots Category Color 2",
@@ -931,9 +973,9 @@ exports.EXAMPLES = [
             row_pivots: ["Category", "Sub-Category"],
             column_pivots: ["Region"],
             columns: ["Sales", "Category"],
-            aggregates: {Category: "dominant"}
+            aggregates: {Category: "dominant"},
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
 
     // Heatmap
@@ -947,10 +989,10 @@ exports.EXAMPLES = [
             columns: ["Profit"],
             sort: [
                 ["Profit", "desc"],
-                ["Profit", "col desc"]
-            ]
+                ["Profit", "col desc"],
+            ],
             // aggregates: {Category: "dominant"}
-        }
+        },
         // viewport: {width: 600, height: 200}
     },
     {
@@ -962,11 +1004,11 @@ exports.EXAMPLES = [
             columns: ["Profit"],
             sort: [
                 ["Profit", "desc"],
-                ["Profit", "col desc"]
-            ]
+                ["Profit", "col desc"],
+            ],
             // aggregates: {Profit: "low"}
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
     {
         name: "Heatmap 3",
@@ -976,26 +1018,29 @@ exports.EXAMPLES = [
             expressions: ["bucket(\"Order Date\", 'M')"],
             aggregates: {
                 "Order Date": "dominant",
-                Sales: "avg"
+                Sales: "avg",
             },
             column_pivots: ["Sub-Category"],
             row_pivots: ["bucket(\"Order Date\", 'M')"],
-            sort: [["Discount", "col asc"]]
+            sort: [["Discount", "col asc"]],
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
     {
         name: "Heatmap 4",
         config: {
             plugin: "Heatmap",
             columns: ["Profit"],
-            expressions: ['bucket("Profit", 100)', "bucket(\"Order Date\", 'M')"],
+            expressions: [
+                'bucket("Profit", 100)',
+                "bucket(\"Order Date\", 'M')",
+            ],
             row_pivots: ["bucket(\"Order Date\", 'M')"],
             column_pivots: ['bucket("Profit", 100)'],
-            plugin_config: {}
+            plugin_config: {},
         },
-        viewport: {width: 600, height: 450}
-    }
+        viewport: {width: 600, height: 450},
+    },
 ];
 
 
@@ -1055,10 +1100,19 @@ var SECURITIES = [
     "TM.N",
     "KO.N",
     "ORCL.N",
-    "NFLX.N"
+    "NFLX.N",
 ];
 
-var CLIENTS = ["Homer", "Marge", "Bart", "Lisa", "Maggie", "Barney", "Ned", "Moe"];
+var CLIENTS = [
+    "Homer",
+    "Marge",
+    "Bart",
+    "Lisa",
+    "Maggie",
+    "Barney",
+    "Ned",
+    "Moe",
+];
 var id = 0;
 
 function randn_bm() {
@@ -1079,7 +1133,7 @@ function newRow() {
         bid: randn_bm() * 5 + 95,
         ask: randn_bm() * 5 + 105,
         vol: randn_bm() * 5 + 105,
-        id: id++
+        id: id++,
     };
 }
 
@@ -1098,7 +1152,9 @@ function update(table) {
 }
 
 function select(id) {
-    Array.prototype.slice.call(document.querySelectorAll(".buttonWrapper")).map(x => x.classList.remove("selected"));
+    Array.prototype.slice
+        .call(document.querySelectorAll(".buttonWrapper"))
+        .map((x) => x.classList.remove("selected"));
     document.querySelector(id).classList.add("selected");
     const viewer = document.querySelector("perspective-viewer");
     viewer.restore(
@@ -1106,51 +1162,54 @@ function select(id) {
             "#grid": {
                 plugin: "Datagrid",
                 columns: ["chg (-)", "chg", "chg (+)"],
-                expressions: ['//chg (-)\nif("chg"<0){"chg"}else{0}', '//chg (+)\nif("chg">0){"chg"}else{0}'],
+                expressions: [
+                    '//chg (-)\nif("chg"<0){"chg"}else{0}',
+                    '//chg (+)\nif("chg">0){"chg"}else{0}',
+                ],
                 row_pivots: ["name"],
                 column_pivots: ["client"],
                 aggregates: {"chg (-)": "avg", "chg (+)": "avg", chg: "avg"},
                 sort: [["chg", "desc"]],
                 plugin_config: {
                     "chg (-)": {
-                        color_mode: "bar",
-                        gradient: 10
+                        number_color_mode: "bar",
+                        gradient: 10,
                     },
                     "chg (+)": {
-                        color_mode: "bar",
-                        gradient: 10
+                        number_color_mode: "bar",
+                        gradient: 10,
                     },
                     chg: {
-                        color_mode: "gradient",
-                        gradient: 10
-                    }
-                }
+                        number_color_mode: "gradient",
+                        gradient: 10,
+                    },
+                },
             },
             "#grid2": {
                 plugin: "datagrid",
                 columns: ["ask", "bid", "chg"],
                 sort: [
                     ["name", "desc"],
-                    ["lastUpdate", "desc"]
+                    ["lastUpdate", "desc"],
                 ],
                 aggregates: {name: "last", lastUpdate: "last"},
                 row_pivots: ["name", "lastUpdate"],
                 column_pivots: ["client"],
-                plugin_config: {}
+                plugin_config: {},
             },
             "#cyclone": {
                 columns: ["chg"],
                 plugin: "X Bar",
                 sort: [["chg", "asc"]],
                 row_pivots: ["name"],
-                column_pivots: ["client"]
+                column_pivots: ["client"],
             },
             "#pivot": {
                 columns: ["vol"],
                 plugin: "Heatmap",
                 sort: [["vol", "asc"]],
                 row_pivots: ["name"],
-                column_pivots: ["client"]
+                column_pivots: ["client"],
             },
             "#crosssect": {
                 plugin: "X/Y Scatter",
@@ -1158,7 +1217,7 @@ function select(id) {
                 column_pivots: [],
                 columns: ["bid", "ask", "chg", "vol"],
                 aggregates: {bid: "avg", ask: "avg", vol: "avg"},
-                sort: []
+                sort: [],
             },
             "#intersect": {
                 plugin: "Treemap",
@@ -1168,8 +1227,8 @@ function select(id) {
                 aggregates: {bid: "sum", chg: "sum", name: "last"},
                 sort: [
                     ["name", "desc"],
-                    ["chg", "desc"]
-                ]
+                    ["chg", "desc"],
+                ],
             },
             "#enhance": {
                 plugin: "Y Line",
@@ -1178,8 +1237,8 @@ function select(id) {
                 sort: [["lastUpdate", "desc"]],
                 column_pivots: ["client"],
                 columns: ["bid"],
-                aggregates: {bid: "avg", chg: "avg", name: "last"}
-            }
+                aggregates: {bid: "avg", chg: "avg", name: "last"},
+            },
         }[id] || {}
     );
 }
@@ -1188,20 +1247,23 @@ function get_arrow(callback) {
     var xhr = new XMLHttpRequest();
     xhr.open("GET", "arrow/superstore.arrow", true);
     xhr.responseType = "arraybuffer";
-    xhr.onload = function() {
+    xhr.onload = function () {
         callback(xhr.response);
     };
     xhr.send(null);
 }
 
-window.addEventListener("DOMContentLoaded", async function() {
+window.addEventListener("DOMContentLoaded", async function () {
     for (const img of document.querySelectorAll("img")) {
         if (img.dataset.src) {
             img.setAttribute("src", img.dataset.src);
         }
     }
 
-    if (window.location.pathname !== "/" && window.location.pathname !== "/index.html") {
+    if (
+        window.location.pathname !== "/" &&
+        window.location.pathname !== "/index.html"
+    ) {
         return;
     }
 
@@ -1209,35 +1271,53 @@ window.addEventListener("DOMContentLoaded", async function() {
     for (var x = 0; x < 1000; x++) {
         data.push(newRow());
     }
-    elem = Array.prototype.slice.call(document.querySelectorAll("perspective-viewer"))[0];
+    elem = Array.prototype.slice.call(
+        document.querySelectorAll("perspective-viewer")
+    )[0];
     var worker = _finos_perspective__WEBPACK_IMPORTED_MODULE_0__.default.shared_worker();
     var tbl = worker.table(data, {index: "id"});
     elem.load(tbl);
     elem.toggleConfig();
 
-    setTimeout(async function() {
+    setTimeout(async function () {
         let table = await tbl;
         update(table, 0);
     });
 
-    document.querySelector("#velocity").addEventListener("input", function(event) {
-        freq = (-9 / 5) * this.value + 190;
-    });
+    document
+        .querySelector("#velocity")
+        .addEventListener("input", function (event) {
+            freq = (-9 / 5) * this.value + 190;
+        });
 
-    document.querySelector("#grid").addEventListener("mouseenter", () => select("#grid"));
-    document.querySelector("#grid2").addEventListener("mouseenter", () => select("#grid2"));
-    document.querySelector("#cyclone").addEventListener("mouseenter", () => select("#cyclone"));
-    document.querySelector("#pivot").addEventListener("mouseenter", () => select("#pivot"));
-    document.querySelector("#crosssect").addEventListener("mouseenter", () => select("#crosssect"));
-    document.querySelector("#intersect").addEventListener("mouseenter", () => select("#intersect"));
-    document.querySelector("#enhance").addEventListener("mouseenter", () => select("#enhance"));
+    document
+        .querySelector("#grid")
+        .addEventListener("mouseenter", () => select("#grid"));
+    document
+        .querySelector("#grid2")
+        .addEventListener("mouseenter", () => select("#grid2"));
+    document
+        .querySelector("#cyclone")
+        .addEventListener("mouseenter", () => select("#cyclone"));
+    document
+        .querySelector("#pivot")
+        .addEventListener("mouseenter", () => select("#pivot"));
+    document
+        .querySelector("#crosssect")
+        .addEventListener("mouseenter", () => select("#crosssect"));
+    document
+        .querySelector("#intersect")
+        .addEventListener("mouseenter", () => select("#intersect"));
+    document
+        .querySelector("#enhance")
+        .addEventListener("mouseenter", () => select("#enhance"));
 
     select("#grid");
 
-    get_arrow(async function(arrow) {
+    get_arrow(async function (arrow) {
         const container = document.createElement("div");
         container.classList.add("floating_example");
-        container.addEventListener("click", event => {
+        container.addEventListener("click", (event) => {
             if (event.target === container) {
                 container.style.display = "none";
             }
@@ -1250,11 +1330,24 @@ window.addEventListener("DOMContentLoaded", async function() {
         const tbl1 = worker.table(arrow.slice());
         await psp1.load(tbl1);
 
-        const config_defaults = config => Object.assign({plugin_config: {}, plugin: "Datagrid", row_pivots: [], columns: [], expressions: [], column_pivots: [], sort: [], aggregates: {}}, config);
+        const config_defaults = (config) =>
+            Object.assign(
+                {
+                    plugin_config: {},
+                    plugin: "Datagrid",
+                    row_pivots: [],
+                    columns: [],
+                    expressions: [],
+                    column_pivots: [],
+                    sort: [],
+                    aggregates: {},
+                },
+                config
+            );
         // let first_render = true;
 
         for (const image of document.querySelectorAll("a.feature")) {
-            image.addEventListener("click", async event => {
+            image.addEventListener("click", async (event) => {
                 event.preventDefault();
                 const key = parseInt(image.dataset.key);
                 container.style.opacity = 0;
@@ -1268,31 +1361,39 @@ window.addEventListener("DOMContentLoaded", async function() {
             });
         }
 
-        document.querySelector("#switch_theme").addEventListener("click", async function() {
-            const button = this.querySelector(".button");
-            const section = document.querySelector(".productShowcaseSection");
-            const dark = document.querySelector(".productShowcaseSection #dark");
-            const light = document.querySelector(".productShowcaseSection #light");
-            if (button.innerText === "SWITCH TO DARK THEME") {
-                button.innerText = "Switch to Light Theme";
-                dark.style.display = "flex";
-                light.style.display = "none";
-                section.classList.toggle("dark", true);
-                container.classList.toggle("dark", true);
-            } else {
-                button.innerText = "Switch to Dark Theme";
-                dark.style.display = "none";
-                light.style.display = "flex";
-                section.classList.toggle("dark", false);
-                container.classList.toggle("dark", false);
-            }
-            await psp1.restore({
-                plugin: ["Y Bar"],
-                row_pivots: ["State"],
-                columns: ["Sales"]
+        document
+            .querySelector("#switch_theme")
+            .addEventListener("click", async function () {
+                const button = this.querySelector(".button");
+                const section = document.querySelector(
+                    ".productShowcaseSection"
+                );
+                const dark = document.querySelector(
+                    ".productShowcaseSection #dark"
+                );
+                const light = document.querySelector(
+                    ".productShowcaseSection #light"
+                );
+                if (button.innerText === "SWITCH TO DARK THEME") {
+                    button.innerText = "Switch to Light Theme";
+                    dark.style.display = "flex";
+                    light.style.display = "none";
+                    section.classList.toggle("dark", true);
+                    container.classList.toggle("dark", true);
+                } else {
+                    button.innerText = "Switch to Dark Theme";
+                    dark.style.display = "none";
+                    light.style.display = "flex";
+                    section.classList.toggle("dark", false);
+                    container.classList.toggle("dark", false);
+                }
+                await psp1.restore({
+                    plugin: ["Y Bar"],
+                    row_pivots: ["State"],
+                    columns: ["Sales"],
+                });
+                await psp1.restyleElement();
             });
-            await psp1.restyleElement();
-        });
     });
 });
 
@@ -64852,8 +64953,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var regular_table__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(regular_table__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var chroma_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! chroma-js */ "../node_modules/chroma-js/chroma.js");
 /* harmony import */ var chroma_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(chroma_js__WEBPACK_IMPORTED_MODULE_1__);
-var ue=Object.create;var j=Object.defineProperty;var _e=Object.getOwnPropertyDescriptor;var fe=Object.getOwnPropertyNames;var me=Object.getPrototypeOf,be=Object.prototype.hasOwnProperty;var ye=e=>j(e,"__esModule",{value:!0});var B=(e,t)=>()=>(t||e((t={exports:{}}).exports,t),t.exports);var we=(e,t,o)=>{if(t&&typeof t=="object"||typeof t=="function")for(let r of fe(t))!be.call(e,r)&&r!=="default"&&j(e,r,{get:()=>t[r],enumerable:!(o=_e(t,r))||o.enumerable});return e},xe=e=>we(ye(j(e!=null?ue(me(e)):{},"default",e&&e.__esModule&&"default"in e?{get:()=>e.default,enumerable:!0}:{value:e,enumerable:!0})),e);var Y=B((Ue,U)=>{U.exports.default={types:{float:{filter_operator:"==",aggregate:"sum",format:{style:"decimal",minimumFractionDigits:2,maximumFractionDigits:2}},string:{filter_operator:"==",aggregate:"count"},integer:{filter_operator:"==",aggregate:"sum",format:{}},boolean:{filter_operator:"==",aggregate:"count"},datetime:{filter_operator:"==",aggregate:"count",format:{week:"numeric",year:"numeric",month:"numeric",day:"numeric",hour:"numeric",minute:"numeric",second:"numeric"},null_value:-1},date:{filter_operator:"==",aggregate:"count",format:{week:"numeric",year:"numeric",month:"numeric",day:"numeric"},null_value:-1}}}});var K=B((Ye,L)=>{var J=Y().default;L.exports.get_types=function(){return Object.keys(L.exports.get_config().types)};L.exports.get_type_config=function(e){let t={};if(L.exports.get_config().types[e]&&Object.assign(t,L.exports.get_config().types[e]),t.type){let o=L.exports.get_type_config(t.type);return Object.assign(o,t),o}else return t};function F(e){return e&&typeof e=="object"&&!Array.isArray(e)}function N(e,...t){if(!t.length)return e;let o=t.shift();if(F(e)&&F(o))for(let r in o)F(o[r])?(e[r]||Object.assign(e,{[r]:{}}),N(e[r],o[r])):Object.assign(e,{[r]:o[r]});return N(e,...t)}window.__PERSPECTIVE_CONFIG__=void 0;L.exports.override_config=function(e){window.__PERSPECTIVE_CONFIG__&&console.warn("Config already initialized!"),window.__PERSPECTIVE_CONFIG__=N(J,e)};L.exports.get_config=function(){return window.__PERSPECTIVE_CONFIG__||(window.__PERSPECTIVE_CONFIG__=N(J,window.__TEMPLATE_CONFIG__||{})),window.__PERSPECTIVE_CONFIG__}});var X=xe(K());var y=Symbol("Plugin Symbol"),E;function R(e){let[t,o,r]=e.rgb(),[s,i,l]=e.set("hsl.h",(e.get("hsl.h")-15)%360).rgb(),[d,n,a]=e.set("hsl.h",(e.get("hsl.h")+15)%360).rgb();return`linear-gradient(to right top,rgb(${s},${i},${l}),rgb(${t},${o},${r}) 50%,rgb(${d},${n},${a}))`}function T(e,t,o){E=E||document.createElement("perspective-column-style");let r=e.getMeta(t),s=r.column_header[r.column_header.length-1],i=this._schema[s],l={gradient:o,pos_color:this._pos_color[0],neg_color:this._neg_color[0],color_mode:"foreground"};if(i==="float")l.fixed=2;else if(i==="integer")l.fixed=0;else{this._open_column_styles_menu.pop(),e.draw();return}let d=()=>E.blur(),n=u=>{let g=u.detail;g.pos_color&&(g.pos_color=[g.pos_color,...chroma_js__WEBPACK_IMPORTED_MODULE_1___default()(g.pos_color).rgb(),R(chroma_js__WEBPACK_IMPORTED_MODULE_1___default()(g.pos_color))],g.neg_color=[g.neg_color,...chroma_js__WEBPACK_IMPORTED_MODULE_1___default()(g.neg_color).rgb(),R(chroma_js__WEBPACK_IMPORTED_MODULE_1___default()(g.neg_color))]),e[y]=e[y]||{},e[y][s]=g,e.draw({preserve_width:!0}),e.parentElement.dispatchEvent(new Event("perspective-config-update"))},a=async()=>{e.removeEventListener("regular-table-scroll",d),E.removeEventListener("perspective-column-style-change",n),E.removeEventListener("blur",a),this._open_column_styles_menu.pop(),await e.draw(),e.parentElement.dispatchEvent(new Event("perspective-config-update"))};E.addEventListener("perspective-column-style-change",n),E.addEventListener("blur",a),e.addEventListener("regular-table-scroll",d);let p=e[y]||{},c=Object.assign({},p[s]=p[s]||{});c.pos_color&&(c.pos_color=c.pos_color[0],c.neg_color=c.neg_color[0]),E.open(t,c,l)}function D([e,t,o,r],s=[255,255,255]){function i(l,d){return((1-r)*(s[l]/255)+r*(d/255))*255}return[i(0,e),i(1,t),i(2,o)]}function $([e,t,o]){return Math.sqrt(e*e*.299+t*t*.587+o*o*.114)>130?"#161616":"#ffffff"}function ve(e){let t=e._view_cache.config.row_pivots.length-1,o=Array.from(e.children[0].children[0].children),r=e[y]||{};if(o.length>0){let[d]=o.splice(o.length-1,1);for(let n of d?.children){let a=e.getMeta(n),p=a.column_header?.[a.column_header?.length-1],c=this._config.sort.find(f=>f[0]===p),u=a.row_header_x===t,g=typeof a.x=="undefined";u=u||(a.x+1)%this._config.columns.length==0,n.classList.toggle("psp-header-border",u),n.classList.toggle("psp-header-group",!1),n.classList.toggle("psp-header-leaf",!0),n.classList.toggle("psp-is-top",!1),n.classList.toggle("psp-header-corner",g),n.classList.toggle("psp-header-sort-asc",!!c&&c[1]==="asc"),n.classList.toggle("psp-header-sort-desc",!!c&&c[1]==="desc"),n.classList.toggle("psp-header-sort-col-asc",!!c&&c[1]==="col asc"),n.classList.toggle("psp-header-sort-col-desc",!!c&&c[1]==="col desc");let b=q.call(this,a),_=b==="integer"||b==="float";n.classList.toggle("psp-align-right",_),n.classList.toggle("psp-align-left",!_),n.classList.toggle("psp-menu-open",this._open_column_styles_menu[0]===a._virtual_x),n.classList.toggle("psp-menu-enabled",_&&!g),n.classList.toggle("psp-is-width-override",e._column_sizes?.override[a.size_key]!==void 0)}}let s=[],i=new Set,l=e.children[0];for(let d=0;d<o.length;d++){let n=l.rows[d],a=new Set;for(let p=0;p<n.cells.length;p++){let c=n.cells[p];c.style.backgroundColor="";let u=e.getMeta(c),g=u.row_header_x===t||u.x>=0;c.classList.toggle("psp-align-right",!1),c.classList.toggle("psp-align-left",!1),c.classList.toggle("psp-header-group",!0),c.classList.toggle("psp-header-leaf",!1),c.classList.toggle("psp-header-border",g),c.classList.toggle("psp-header-group-corner",typeof u.x=="undefined"),c.classList.toggle("psp-color-mode-bar",!1),c.classList.toggle("psp-header-sort-asc",!1),c.classList.toggle("psp-header-sort-desc",!1),c.classList.toggle("psp-header-sort-col-asc",!1),c.classList.toggle("psp-header-sort-col-desc",!1);let b=n.cells[p],_=p,f,h;for(;s[d]&&s[d][_];++_);for(a.add(_),f=_;f<_+b.colSpan;++f)for(h=d;h<d+b.rowSpan;++h)s[h]||(s[h]=[]),s[h][f]=!0;b.classList.toggle("psp-is-top",d===0||!i.has(f))}i=a}for(let d of e.children[0].children[1].children)for(let n of d.children){let a=e.getMeta(n),p=a.column_header?.[a.column_header?.length-1],c=r[p],u=q.call(this,a),g=u==="integer"||u==="float";if(g){let _=a.user>0,f=a.user<0,[h,m,w,x,v]=(()=>c?.pos_color!==void 0?_?c.pos_color:f?c.neg_color:["",0,0,0,""]:_?this._pos_color:f?this._neg_color:["",0,0,0,""])();if(n.style.position="",c?.color_mode==="background"){let k=this._plugin_background,S=$(D([m,w,x,1],k));n.style.color=S,n.style.backgroundColor=h}else if(c?.color_mode==="gradient"){let k=Math.max(0,Math.min(1,Math.abs(a.user/c.gradient))),S=this._plugin_background,he=$(D([m,w,x,k],S));n.style.color=he,n.style.backgroundColor=`rgba(${m},${w},${x},${k})`}else c?.color_mode==="disabled"?(n.style.backgroundColor="",n.style.color=""):c?.color_mode==="bar"?(n.style.backgroundColor="",n.style.color="",n.style.position="relative",v!==""&&n.children.length>0&&n.children[0].nodeType===Node.ELEMENT_NODE&&(n.children[0].style.background=v)):(n.style.backgroundColor="",n.style.color=h)}else if(u==="boolean"){let[_]=a.user===!0?this._pos_color:a.user===!1?this._neg_color:["",0,0,0,""];n.style.backgroundColor="",n.style.color=_}else n.style.backgroundColor="",n.style.color="";n.classList.toggle("psp-bool-type",u==="boolean"&&a.user!==null);let b=n.tagName==="TH";if(b){let _=typeof a.value!=null&&typeof a.value!=null&&a.value?.toString()?.trim().length>0,f=a.row_header_x>=this._config.row_pivots.length,h=e.getMeta({dx:0,dy:a.y-a.y0+1}),m=h&&h.row_header&&typeof h.row_header[a.row_header_x+1]!="undefined";n.classList.toggle("psp-tree-label",_&&!f),n.classList.toggle("psp-tree-label-expand",_&&!f&&!m),n.classList.toggle("psp-tree-label-collapse",_&&!f&&m),n.classList.toggle("psp-tree-leaf",_&&f)}n.classList.toggle("psp-align-right",!b&&g),n.classList.toggle("psp-align-left",b||!g),n.classList.toggle("psp-color-mode-bar",c?.color_mode==="bar")}}async function Le(e,t,o){let r=e.getMeta(o),s=r.column_header[r.column_header.length-1],l=(t.shiftKey?Ee:ke).call(this,s);e.dispatchEvent(new CustomEvent("regular-table-psp-sort",{detail:{sort:l}}))}function Ee(e){let t=[],o=!1;for(let r of this._config.sort){let[s,i]=r;if(s===e){o=!0;let l=Z.call(this,e,i);l&&t.push(l)}else t.push(r)}return o||t.push([e,"desc"]),t}function ke(e){for(let[t,o]of this._config.sort)if(t===e){let r=Z.call(this,e,o);return r?[r]:[]}return[[e,"desc"]]}function Z(e,t){let r=this._config.column_pivots.length>0?Me:Ce,s=t?r[t]:"desc";if(s)return[e,s]}var Ce={desc:"asc",asc:void 0},Me={desc:"asc",asc:"col desc","col desc":"col asc","col asc":void 0};async function Se(e,t){let o=e.getMeta(t.target),r=t.target.classList.contains("psp-tree-label-collapse");t.shiftKey&&r?this._view.set_depth(o.row_header.filter(s=>s!==void 0).length-2):t.shiftKey?this._view.set_depth(o.row_header.filter(s=>s!==void 0).length-1):r?this._view.collapse(o.y):this._view.expand(o.y),this._num_rows=await this._view.num_rows(),this._num_columns=await this._view.num_columns(),e.draw()}async function Oe(e,t){if(t.which!==1)return;let o=t.target;for(;o.tagName!=="TD"&&o.tagName!=="TH";)if(o=o.parentElement,!e.contains(o))return;if(o.classList.contains("psp-tree-label")&&t.offsetX<26){Se.call(this,e,t),t.stopImmediatePropagation();return}let r=o.getBoundingClientRect();if(o.classList.contains("psp-menu-enabled")&&t.clientY-r.top>16){let s=e.getMeta(o),i=s.column_header?.[s.column_header?.length-1],[,l]=await this._view.get_min_max(i);this._open_column_styles_menu.unshift(s._virtual_x),e.draw(),T.call(this,e,o,l),t.preventDefault(),t.stopImmediatePropagation()}else o.classList.contains("psp-header-leaf")&&!o.classList.contains("psp-header-corner")&&(Le.call(this,e,t,o),t.stopImmediatePropagation())}function ze(e,t){if(t.which!==1)return;let o=t.target;for(;o.tagName!=="TD"&&o.tagName!=="TH";)if(o=o.parentElement,!e.contains(o))return;(o.classList.contains("psp-tree-label")&&t.offsetX<26||o.classList.contains("psp-header-leaf")&&!o.classList.contains("psp-header-corner"))&&t.stopImmediatePropagation()}var C={},G={datetime:Intl.DateTimeFormat,date:Intl.DateTimeFormat,integer:Intl.NumberFormat,float:Intl.NumberFormat,boolean:class{format(e){return e?"check":"close"}}},ee=C;function te(e,t,o={},r=!1){if(t===null)return"-";let s=e[e.length-1],i=o[s],l=r&&this._table_schema[s]||this._schema[s]||"string",d=l==="integer"||l==="float";if(d&&i?.color_mode==="bar"){let n=Math.max(0,Math.min(.95,Math.abs(t/i.gradient)*.95)),a=this._div_factory.get(),p=t>=0?"left":"right";return a.setAttribute("style",`width:${(n*100).toFixed(2)}%;position:absolute;${p}:0;height:80%;top:10%;pointer-events:none;`),a}else{let n=d&&i&&i.fixed!==void 0,a=n?`${l}${i.fixed}`:l;if(C[a]===void 0){let p=(0,X.get_type_config)(l);if(n){let c={minimumFractionDigits:i.fixed,maximumFractionDigits:i.fixed};C[a]=new G[l]("en-us",c)}else G[l]?C[a]=new G[l]("en-us",p.format):C[a]=!1}return C[a]?C[a].format(t):t}}function*Ie(e=[],t,o){let r=o[y];for(let s of e){s=["TOTAL",...s];let i=s[s.length-1];s=s.slice(0,s.length-1).fill("");let l=te.call(this,[t[s.length-1]],i,r,!0);s=s.concat({toString:()=>l}),s.length=t.length+1,yield s}}async function Ae(e,t,o,r,s){let i={};r-t>0&&s-o>0?(i=await this._view.to_columns({start_row:o,start_col:t,end_row:s,end_col:r,id:!0}),this._ids=i.__ID__):this._div_factory.clear();let l=[],d=[],n=[];for(let a of this._column_paths.slice(t,r)){let p=a.split("|"),c=i[a]||new Array(s-o).fill(null);l.push(c.map(u=>te.call(this,p,u,e[y]))),d.push(c),n.push(p)}return{num_rows:this._num_rows,num_columns:this._column_paths.length,row_headers:Array.from(Ie.call(this,i.__ROW_PATH__,this._config.row_pivots,e)),column_headers:n,data:l,metadata:d}}function H(e,t,o){let r=window.getComputedStyle(e).getPropertyValue(t).trim();return r.length>0?r:o}var oe=class{constructor(t){this._name=t,this._elements=[],this._index=0}clear(){this._index=0}get(){this._elements[this._index]||(this._elements[this._index]=document.createElement(this._name));let t=this._elements[this._index];return this._index+=1,t}};function I(e){let t=chroma_js__WEBPACK_IMPORTED_MODULE_1___default()(e),o=R(t);return[e,...t.rgb(),o]}async function W(e,t,o,r={}){let s=await o.get_config(),i=s.expressions.map(v=>v[1]),[l,d,n,a,p,c]=await Promise.all([t.schema(),t.validate_expressions(i),o.num_rows(),o.schema(),o.expression_schema(),o.column_paths()]),u=chroma_js__WEBPACK_IMPORTED_MODULE_1___default()(H(e,"--plugin--background","#FFFFFF")).rgb(),g=I(H(e,"--rt-pos-cell--color","#338DCD")),b=I(H(e,"--rt-neg-cell--color","#FF5942")),_={...a,...p},f={...l,...d.expression_schema},h=c.filter(v=>v!=="__ROW_PATH__"&&v!=="__ID__"),m=[],w=[];for(let v of h){let k=v.split("|"),S=k[k.length-1];w.push(_[S]),m.push(!!l[S])}let x=Object.assign(r,{_view:o,_table:t,_table_schema:f,_config:s,_num_rows:n,_schema:_,_ids:[],_open_column_styles_menu:[],_plugin_background:u,_pos_color:g,_neg_color:b,_column_paths:h,_column_types:w,_is_editable:m,_row_header_types:s.row_pivots.map(v=>f[v]),get_psp_type:q});return x._div_factory=x._div_factory||new oe("div"),e.setDataListener(Ae.bind(x,e),{virtual_mode:e.parentElement.virtual_mode||"both"}),x}function q(e){return e.x>=0?this._column_types[e.x]:this._row_header_types[e.row_header_x-1]}async function re(e,t){e.addStyleListener(ve.bind(t,e)),e.addEventListener("mousedown",Oe.bind(t,e)),e.addEventListener("click",ze.bind(t,e)),await e.draw()}var se=`regular-table{padding:12px 0 0 12px;scrollbar-color:transparent transparent;scrollbar-width:thin;outline:none}regular-table:hover{scrollbar-color:rgba(0,0,0,.3) transparent}regular-table{font-family:"Open Sans"}regular-table div[tabindex]{outline:none}regular-table>div{position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden}regular-table th{text-align:center}regular-table thead tr:not(:last-child) th{overflow:hidden;max-width:0px}regular-table thead tr:last-child .rt-float,regular-table tbody .rt-float{text-align:right}regular-table thead .rt-integer,regular-table tbody .rt-integer{text-align:right}regular-table tbody th{text-align:left}regular-table span.rt-tree-container{display:flex;align-items:center;height:100%}regular-table thead .rt-string,regular-table tbody .rt-string,regular-table thead .rt-date,regular-table tbody .rt-date,regular-table thead .rt-datetime,regular-table tbody .rt-datetime{text-align:left}regular-table thead tr:last-child th{border-bottom:1px solid #ddd}regular-table th{position:relative}regular-table tr th span.rt-tree-group{margin-left:5px;margin-right:15px;border-left:1px solid #eee;height:100%}regular-table td,regular-table th{white-space:nowrap;font-size:12px;padding:0 5px;height:19px}regular-table tr:hover td{background:#eee;opacity:1}regular-table tr:hover{color:#333}regular-table table *{box-sizing:border-box}regular-table table{position:absolute;overflow:hidden;color:#666;outline:none}regular-table span.rt-row-header-icon{color:#aaa;padding-right:4px;font-family:"Material Icons"}regular-table span.rt-column-header-icon{font-size:10px;padding-left:3px;display:inline-block;width:10px;font-family:"Material Icons"}regular-table span.rt-row-header-icon:hover{color:#1a7da1;text-shadow:0px 0px 3px #1a7da1}regular-table .rt-selected td{background-color:#eee}regular-table .rt-cell-clip{overflow:hidden;text-overflow:ellipsis}regular-table td span.rt-group-name,regular-table th span.rt-group-name{margin-right:-5px;padding-right:5px;padding-left:8px;flex:1;height:100%}regular-table th span.rt-group-name{text-align:left}regular-table td th span.rt-group-leaf,regular-table th span.rt-group-leaf{margin-left:16px;height:100%}regular-table .rt-column-resize{height:100%;width:10px;position:absolute;top:0;right:0;cursor:col-resize}regular-table::-webkit-scrollbar,regular-table::-webkit-scrollbar-corner{background-color:transparent;height:12px;width:12px}regular-table::-webkit-scrollbar-thumb{background-clip:content-box;background-color:#0000;border-radius:5px}regular-table::-webkit-scrollbar-thumb:horizontal{border-bottom:2px solid transparent;border-top:2px solid transparent}regular-table::-webkit-scrollbar-thumb:vertical{border-left:2px solid transparent;border-right:2px solid transparent}regular-table:hover::-webkit-scrollbar-thumb{background-color:#00000026}regular-table::-webkit-scrollbar-thumb:hover{background-color:#0000004d}.psp-header-border:not(.psp-is-top):not(.psp-header-leaf){box-shadow:1px 0 var(--pv-divider--color, #eaedef)}.psp-header-group{box-shadow:0 10px 0 -9px var(--pv-divider--color, #eaedef)}.psp-is-top{box-shadow:5px 4px 0 -4px var(--pv-divider--color, #eaedef)}.psp-is-top.psp-header-group:not(.psp-header-group-corner){box-shadow:5px 4px 0 -4px var(--pv-divider--color, #eaedef),0 10px 0 -9px var(--pv-divider--color, #eaedef)}.psp-header-border.psp-header-group:not(.psp-is-top):not(.psp-header-group-corner){box-shadow:1px 0 var(--pv-divider--color, #eaedef),0 10px 0 -9px var(--pv-divider--color, #eaedef)}.psp-header-leaf.psp-header-border{box-shadow:5px -4px 0 -4px var(--pv-divider--color, #eaedef)}tr:only-child th{box-shadow:none!important}regular-table tbody tr:hover th.psp-tree-leaf:not(.psp-row-selected):not(.psp-row-subselected),regular-table tbody tr:hover th.psp-tree-label:not(.psp-row-selected):not(.psp-row-subselected),regular-table tbody tr:hover td:not(.psp-row-selected):not(.psp-row-subselected){border-color:var(--rt-hover--border-color, #c5c9d080)!important;background-color:transparent;box-shadow:0 1px 0 var(--rt-hover--border-color, #c5c9d080),0 3px #0000000d,0 5px #00000003}regular-table tbody tr:hover+tr th.psp-tree-leaf:not(.psp-row-selected):not(.psp-row-subselected),regular-table tbody tr:hover+tr th.psp-tree-label:not(.psp-row-selected):not(.psp-row-subselected),regular-table tbody tr:hover+tr td:not(.psp-row-selected):not(.psp-row-subselected){border-top-color:transparent}regular-table tbody tr th:first-child:not(:empty),regular-table tbody tr th:first-child:empty+th:not(:empty),regular-table tbody tr th:first-child:empty~th:empty+th:not(:empty),regular-table tbody tr td:first-child{border-left-width:1px;border-left-color:transparent}regular-table tbody tr th:last-child,regular-table tbody tr td:last-child{border-right-width:1px;border-right-color:transparent}regular-table tbody tr:hover{color:#161616}regular-table tbody tr:hover th:first-child:not(:empty),regular-table tbody tr:hover th:first-child:empty+th:not(:empty),regular-table tbody tr:hover th:first-child:empty~th:empty+th:not(:empty),regular-table tbody tr:hover td:first-child{border-left-color:var(--rt-hover--border-color, #c5c9d080)!important}regular-table tbody tr:hover th:last-child,regular-table tbody tr:hover td:last-child{border-right-color:var(--rt-hover--border-color, #c5c9d080)!important}perspective-viewer[settings] regular-table .psp-header-leaf{height:36px;vertical-align:top;padding-top:2px}perspective-viewer[settings] regular-table .psp-header-leaf:not(.psp-header-corner):before{font-family:"Material Icons";content:"menu";position:absolute;width:calc(100% - 8px);left:5px;bottom:0px;color:var(--inactive--color, #b4b7be)}perspective-viewer[settings] regular-table .psp-header-leaf.psp-menu-enabled:not(.psp-header-corner):before{color:inherit;cursor:pointer}perspective-viewer[settings] regular-table .psp-header-leaf.psp-menu-open:not(.psp-header-corner){pointer-events:none}perspective-viewer[settings] regular-table .psp-header-leaf.psp-menu-open:not(.psp-header-corner):before{content:"expand_less"}perspective-viewer[settings] regular-table .psp-header-leaf.psp-menu-enabled:hover:before{color:#338dcd}perspective-viewer[settings] regular-table .psp-header-leaf .rt-column-resize{height:18px}.psp-row-selected,:hover .psp-row-selected,:hover th.psp-tree-leaf.psp-row-selected,:hover th.psp-tree-label.psp-row-selected{color:#fff!important;background-color:#ea7319!important;border-color:#ea7319!important}.psp-row-selected.psp-tree-label:not(:hover):before{color:#fff}.psp-row-subselected,:hover .psp-row-subselected,:hover th.psp-tree-leaf.psp-row-subselected,:hover th.psp-tree-label.psp-row-subselected{background:rgba(234,115,25,.2)!important}.psp-error{color:red}td:focus{outline:#666;outline-style:dotted;outline-width:1px}perspective-viewer.dragging regular-table{pointer-events:none}.psp-header-border:last-child{border-right-width:0px}.psp-header-sort-desc:after{font-family:"Material Icons";font-size:10px;content:"arrow_downward"}.psp-header-sort-asc:after{font-family:"Material Icons";font-size:10px;content:"arrow_upward"}.psp-header-sort-col-desc:after{font-family:"Material Icons";font-size:10px;content:"arrow_back"}.psp-header-sort-col-asc:after{font-family:"Material Icons";font-size:10px;content:"arrow_forward"}tbody th:last-of-type{border-right:1px solid #eaedef;overflow:hidden;text-overflow:ellipsis}tbody th:empty{background-image:linear-gradient(to right,transparent 9px,#eee 10px,transparent 11px);background-repeat:no-repeat;min-width:20px;max-width:20px;pointer-events:none}.psp-tree-label{max-width:0px;min-width:0px}.psp-tree-label:before{color:#ccc;font-family:"Material Icons";padding-right:11px;vertical-align:-1px}.psp-tree-label-expand:before{content:"add"}.psp-tree-label-collapse:before{content:"remove"}.psp-tree-label:hover:before{color:#338dcd;text-shadow:0px 0px 5px #338dcd}regular-table thead tr:last-child th{border-bottom-width:0px}.psp-tree-leaf{padding-left:24px}.psp-align-right{text-align:right}.psp-align-left{text-align:left}.psp-positive:not(:focus){color:var(--rt-pos-cell--color, #338dcd)}.psp-negative:not(:focus){color:var(--rt-neg-cell--color, #ff5942)}regular-table table tbody td{min-width:52px!important}.psp-is-width-override .rt-column-resize,.rt-column-resize:hover{border:1px dashed #999;border-bottom-width:0px;border-left-width:0px}.psp-bool-type{font-family:"Material Icons"}.boolean-editable{cursor:pointer}regular-table table{user-select:none;color:#161616;border-collapse:separate}regular-table table th{font-weight:400}regular-table table td,regular-table table th{border-color:#eaedef;height:23px}regular-table table .psp-header-group{text-overflow:ellipsis}regular-table table .psp-header-leaf{border-bottom-width:0px}regular-table table td,regular-table table th.psp-tree-label,regular-table table th.psp-tree-label,regular-table table th.psp-tree-leaf,regular-table table tbody tr:first-child th{border-style:solid;border-width:0px;border-top-width:1px}regular-table table tbody th:empty{background-position:0px -10px}
-`;async function A({_view:e,_config:t},o,r){let s=t.row_pivots,i=t.column_pivots,l=o>=0?o:0,d=l+1,n=await e.to_json({start_row:l,end_row:d}),p=n.map(h=>h.__ROW_PATH__)[0]||[],c=s.map((h,m)=>{let w=p[m];return w?[h,"==",w]:void 0}).filter(h=>h),u=s.length>0?r+1:r,g=Object.keys(n[0])[u],b={row:n[0]},_=[];if(g){let h=g.split("|");b.column_names=[h[h.length-1]],_=i.map((m,w)=>{let x=h[w];return x?[m,"==",x]:void 0}).filter(m=>m).filter(([,,m])=>m!=="__ROW_PATH__")}let f=t.filter.concat(c).concat(_);return b.config={filter:f},b}var O=new WeakMap;async function Pe(e,t,o){let r=e.getMeta(o.target);if(!t.hasAttribute("selectable")||o.handled||o.which!==1||!r)return;let s=this._ids[r.y-r.y0];if(r&&r.y>=0){let i=O.get(e),l=!!i&&i.reduce((a,p,c)=>a&&p===s[c],!0),d=!!i&&s.length===i.length&&l,n=[];d?O.delete(e):(O.set(e,s),n=await A(this,r.y,r.x),n=n.config.filter),await e.draw(),o.handled=!0,t.dispatchEvent(new CustomEvent("perspective-select",{bubbles:!0,composed:!0,detail:{selected:!d,config:{filter:n}}}))}}function Re(e,t){if(!t.hasAttribute("selectable"))return;let o=O.has(e),r=O.get(e);for(let s of e.querySelectorAll("td"))if(!o)s.classList.toggle("psp-row-selected",!1),s.classList.toggle("psp-row-subselected",!1);else{let i=e.getMeta(s),l=this._ids[i.y-i.y0],d=r.reduce((n,a,p)=>n&&a===l[p],!0);s.classList.toggle("psp-row-selected",l.length===r.length&&d),s.classList.toggle("psp-row-subselected",l.length!==r.length&&d)}for(let s of e.querySelectorAll("tbody th")){let i=e.getMeta(s),l=this._ids[i.y-i.y0];if(!o||!!l[i.row_header_x])s.classList.toggle("psp-row-selected",!1),s.classList.toggle("psp-row-subselected",!1);else{let d=r.reduce((n,a,p)=>n&&a===l[p],!0);s.classList.toggle("psp-row-selected",l.length===r.length&&d),s.classList.toggle("psp-row-subselected",l.length!==r.length&&d)}}}function ne(e,t){e.addStyleListener(Re.bind(this,e,t)),e.addEventListener("mousedown",Pe.bind(this,e,t))}async function ie(e){O.delete(e);for(let t of e.querySelectorAll("td,th"))t.classList.toggle("psp-row-selected",!1),t.classList.toggle("psp-row-subselected",!1)}async function je(e,t,o){let r=e.getMeta(o.target);if(!r)return;let{x:s,y:i}=r,{row:l,column_names:d,config:n}=await A(this,i,s);t.dispatchEvent(new CustomEvent("perspective-click",{bubbles:!0,composed:!0,detail:{row:l,column_names:d,config:n}}))}function le(e,t){e.addEventListener("click",je.bind(this,e,t))}var M=new WeakMap;function Fe(e){let t;return async function(...o){if(!!t&&await t&&!!t)return;let r;t=new Promise(s=>r=s),await e.apply(this,o),t=void 0,r()}}function ae(){if(this.isContentEditable){let e=document.getSelection().getRangeAt(0),t=e.cloneRange();return t.selectNodeContents(this),t.setEnd(e.endContainer,e.endOffset),t.toString().length}else return this.target.selectionStart}function ce(e,t,o){let r=e.getMeta(o),s=t._schema[t._column_paths[r.x]];if(r){let i=o.textContent,l=t._ids[r.y-r.y0];if(s==="float"||s==="integer"){if(i=parseFloat(i.replace(/,/g,"")),isNaN(i))return!1}else if(s==="date"||s==="datetime"){if(i=Date.parse(i),isNaN(i))return!1}else s==="boolean"&&(i=i==="check"?!1:i==="close"?!0:null);let d={__INDEX__:l,[t._column_paths[r.x]]:i};return t._table.update([d],{port_id:t._edit_port}),!0}}function V(e){let t=this._config.row_pivots.length===0&&this._config.column_pivots.length===0,o=e.hasAttribute("selectable"),r=e.hasAttribute("editable");return t&&!o&&r}var z=Fe(async function(e,t,o,r){let s=e.getMeta(t),i=this._column_paths.length,l=this._num_rows,d=M.get(e);if(!d)return;s.x+o<i&&0<=s.x+o&&(d.x=s.x+o),s.y+r<l&&0<=s.y+r&&(d.y=s.y+r);let n=Math.max(s.x0-10,0),a=Math.min(s.x0+10,i),p=Math.max(s.y0-5,0),c=Math.min(s.y0+10,l),u=s.x0+o,g=s.y0+r;for(;!de(e)&&u>=n&&u<a&&g>=p&&g<c;)await e.scrollToCell(u,g,i,l),M.set(e,d),u+=o,g+=r});function De(e,t){if(!t.hasAttribute("editable"))return;let o=V.call(this,t);for(let r of e.querySelectorAll("td")){let s=e.getMeta(r),i=this.get_psp_type(s);this._is_editable[s.x]?i==="boolean"?(r.toggleAttribute("contenteditable",!1),r.classList.toggle("boolean-editable",s.user!==null)):(r.toggleAttribute("contenteditable",o),r.classList.toggle("boolean-editable",!1)):(r.toggleAttribute("contenteditable",!1),r.classList.toggle("boolean-editable",!1))}}var de=e=>{let t=e.querySelectorAll("td"),o=M.get(e);if(o){for(let r of t){let s=e.getMeta(r);if(s.x===o.x&&s.y===o.y)return document.activeElement!==r&&r.focus({preventScroll:!0}),!0}document.activeElement!==document.body&&e.contains(document.activeElement)&&document.activeElement.blur()}};function $e(e,t,o){if(!V.call(this,t))return;let r=document.activeElement;switch(o.target.classList.remove("psp-error"),o.keyCode){case 13:o.preventDefault(),o.shiftKey?z.call(this,e,r,0,-1):z.call(this,e,r,0,1);break;case 37:ae.call(r)==0&&(o.preventDefault(),z.call(this,e,r,-1,0));break;case 38:o.preventDefault(),z.call(this,e,r,0,-1);break;case 39:ae.call(r)==r.textContent.length&&(o.preventDefault(),z.call(this,e,r,1,0));break;case 40:o.preventDefault(),z.call(this,e,r,0,1);break;default:}}function Ge(e,t,o){if(V.call(this,t)&&M.has(e)){o.target.classList.remove("psp-error");let r=M.get(e);M.delete(e),r.content!==o.target.textContent&&(ce(e,this,o.target)||(o.target.textContent=r.content,o.target.classList.add("psp-error"),o.target.focus()))}}function He(e,t,o){let r=e.getMeta(o.target);if(r){let s={x:r.x,y:r.y,content:o.target.textContent};M.set(e,s)}}function We(e,t,o){let r=e.getMeta(o.target);if(typeof r?.x!="undefined"){let s=this._is_editable[r.x],i=this.get_psp_type(r)==="boolean",l=o.target.textContent==="-";s&&i&&!l&&ce(e,this,o.target)}}async function pe(e,t){this._edit_port=await t.getEditPort(),e.addStyleListener(De.bind(this,e,t)),e.addStyleListener(de.bind(this,e,t)),e.addEventListener("click",We.bind(this,e,t)),e.addEventListener("focusin",He.bind(this,e,t)),e.addEventListener("focusout",Ge.bind(this,e,t)),e.addEventListener("keydown",$e.bind(this,e,t))}async function ge(e,t){e.addEventListener("regular-table-psp-sort",o=>{this._preserve_focus_state=!0,t.restore({sort:o.detail.sort})})}customElements.define("perspective-viewer-datagrid",class extends HTMLElement{constructor(){super();this.datagrid=document.createElement("regular-table"),this.datagrid.formatters=ee}async activate(e){let t=this.parentElement,o=await t.getTable(!0);this._initialized?await W(this.datagrid,o,e,this.model):(this.innerHTML="",this.appendChild(this.datagrid),this.model=await W(this.datagrid,o,e),re(this.datagrid,this.model),await ne.call(this.model,this.datagrid,t),await le.call(this.model,this.datagrid,t),await pe.call(this.model,this.datagrid,t),await ge.call(this.model,this.datagrid,t),this._initialized=!0)}get name(){return"Datagrid"}get select_mode(){return"toggle"}get min_config_columns(){}get config_column_names(){}async draw(e){let t=this._save_column_size_overrides();await this.activate(e);let o=this.parentElement,r=this.datagrid.draw({invalid_columns:!0});this.model._preserve_focus_state?this.model._preserve_focus_state=!1:(this.datagrid.scrollTop=0,this.datagrid.scrollLeft=0,ie(this.datagrid,o),this.datagrid._resetAutoSize()),this._restore_column_size_overrides(t),await r}async update(e){this.model._num_rows=await e.num_rows(),await this.datagrid.draw()}async resize(){this._initialized&&await this.datagrid.draw()}async clear(){this.datagrid._resetAutoSize(),this.datagrid.clear()}save(){if(this.datagrid){let e=this.datagrid,t={};for(let r of Object.keys(e[y]||{})){let s=Object.assign({},e[y][r]);s?.pos_color&&(s.pos_color=s.pos_color[0],s.neg_color=s.neg_color[0]),t[r]=s}let o=this._save_column_size_overrides();for(let r of Object.keys(o||{}))t[r]||(t[r]={}),t[r].column_size_override=o[r];return JSON.parse(JSON.stringify(t))}return{}}restore(e){e=JSON.parse(JSON.stringify(e));let t={};for(let r of Object.keys(e)){let s=e[r];s.column_size_override!==void 0&&(t[r]=s.column_size_override,delete s.column_size_override),s?.pos_color&&(s.pos_color=I(s.pos_color),s.neg_color=I(s.neg_color)),Object.keys(s).length===0&&delete e[r]}let o=this.datagrid;try{o._resetAutoSize()}catch{}this._restore_column_size_overrides(t,!0),o[y]=e}async restyle(){}delete(){this.datagrid.table_model&&this.datagrid._resetAutoSize(),this.datagrid.clear()}_save_column_size_overrides(){if(!this._initialized)return[];if(this._cached_column_sizes){let i=this._cached_column_sizes;return this._cached_column_sizes=void 0,i}let e=this.datagrid._column_sizes.override,{row_pivots:t,columns:o}=this.model._config,r=t?.length>0?t.length+1:0,s={};for(let i of Object.keys(e))if(e[i]!==void 0){let l=i-r;l>-1&&(s[this.model._column_paths[l]]=e[i])}return s}_restore_column_size_overrides(e,t=!1){if(!this._initialized)return;t&&(this._cached_column_sizes=e);let o={},{row_pivots:r,columns:s}=this.model._config,i=r?.length>0?r.length+1:0;for(let l of Object.keys(e)){let d=this.model._column_paths.indexOf(l);o[d+i]=e[l]}this.datagrid._column_sizes.override=o}});function qe(){let e=document.createElement("style");e.textContent=se,document.head.insertBefore(e,document.head.firstChild)}function Ve(){customElements.get("perspective-viewer").registerPlugin("perspective-viewer-datagrid")}customElements.whenDefined("perspective-viewer").then(Ve);qe();
+var xe=Object.create;var G=Object.defineProperty;var ve=Object.getOwnPropertyDescriptor;var Le=Object.getOwnPropertyNames;var ke=Object.getPrototypeOf,Ee=Object.prototype.hasOwnProperty;var Ce=e=>G(e,"__esModule",{value:!0});var K=(e,t)=>()=>(t||e((t={exports:{}}).exports,t),t.exports);var Me=(e,t,o)=>{if(t&&typeof t=="object"||typeof t=="function")for(let s of Le(t))!Ee.call(e,s)&&s!=="default"&&G(e,s,{get:()=>t[s],enumerable:!(o=ve(t,s))||o.enumerable});return e},Se=e=>Me(Ce(G(e!=null?xe(ke(e)):{},"default",e&&e.__esModule&&"default"in e?{get:()=>e.default,enumerable:!0}:{value:e,enumerable:!0})),e);var T=K((Ze,X)=>{X.exports.default={types:{float:{filter_operator:"==",aggregate:"sum",format:{style:"decimal",minimumFractionDigits:2,maximumFractionDigits:2}},string:{filter_operator:"==",aggregate:"count"},integer:{filter_operator:"==",aggregate:"sum",format:{}},boolean:{filter_operator:"==",aggregate:"count"},datetime:{filter_operator:"==",aggregate:"count",format:{week:"numeric",year:"numeric",month:"numeric",day:"numeric",hour:"numeric",minute:"numeric",second:"numeric"},null_value:-1},date:{filter_operator:"==",aggregate:"count",format:{week:"numeric",year:"numeric",month:"numeric",day:"numeric"},null_value:-1}}}});var Z=K((et,k)=>{var Q=T().default;k.exports.get_types=function(){return Object.keys(k.exports.get_config().types)};k.exports.get_type_config=function(e){let t={};if(k.exports.get_config().types[e]&&Object.assign(t,k.exports.get_config().types[e]),t.type){let o=k.exports.get_type_config(t.type);return Object.assign(o,t),o}else return t};function H(e){return e&&typeof e=="object"&&!Array.isArray(e)}function F(e,...t){if(!t.length)return e;let o=t.shift();if(H(e)&&H(o))for(let s in o)H(o[s])?(e[s]||Object.assign(e,{[s]:{}}),F(e[s],o[s])):Object.assign(e,{[s]:o[s]});return F(e,...t)}window.__PERSPECTIVE_CONFIG__=void 0;k.exports.override_config=function(e){window.__PERSPECTIVE_CONFIG__&&console.warn("Config already initialized!"),window.__PERSPECTIVE_CONFIG__=F(Q,e)};k.exports.get_config=function(){return window.__PERSPECTIVE_CONFIG__||(window.__PERSPECTIVE_CONFIG__=F(Q,window.__TEMPLATE_CONFIG__||{})),window.__PERSPECTIVE_CONFIG__}});var ee=Se(Z());var x=Symbol("Plugin Symbol");function N(e){let[t,o,s]=e.rgb(),[r,i,l]=e.set("hsl.h",(e.get("hsl.h")-15)%360).rgb(),[c,n,a]=e.set("hsl.h",(e.get("hsl.h")+15)%360).rgb();return`linear-gradient(to right top,rgb(${r},${i},${l}),rgb(${t},${o},${s}) 50%,rgb(${c},${n},${a}))`}function W(e,t,o){let s=typeof o!="undefined",r=document.createElement(`perspective-${s?"number":"string"}-column-style`),i=e.getMeta(t),l=i.column_header[i.column_header.length-1],c=this._schema[l],n;if(s?n={gradient:o,pos_color:this._pos_color[0],neg_color:this._neg_color[0],number_color_mode:"foreground"}:n={color:this._color[0]},c!=="string")if(c==="float")n.fixed=2;else if(c==="integer")n.fixed=0;else{this._open_column_styles_menu.pop(),e.draw({preserve_width:!0});return}let a=()=>r.blur(),g=m=>{let d=m.detail;d.pos_color&&(d.pos_color=[d.pos_color,...chroma_js__WEBPACK_IMPORTED_MODULE_1___default()(d.pos_color).rgb(),N(chroma_js__WEBPACK_IMPORTED_MODULE_1___default()(d.pos_color))],d.neg_color=[d.neg_color,...chroma_js__WEBPACK_IMPORTED_MODULE_1___default()(d.neg_color).rgb(),N(chroma_js__WEBPACK_IMPORTED_MODULE_1___default()(d.neg_color))]),d.color&&(d.color=[d.color,...chroma_js__WEBPACK_IMPORTED_MODULE_1___default()(d.color).rgb(),N(chroma_js__WEBPACK_IMPORTED_MODULE_1___default()(d.color))]),e[x]=e[x]||{},e[x][l]=d,e.draw({preserve_width:!0}),e.parentElement.dispatchEvent(new Event("perspective-config-update"))},p=async()=>{e.removeEventListener("regular-table-scroll",a),r.removeEventListener("perspective-column-style-change",g),r.removeEventListener("blur",p),r.destroy(),this._open_column_styles_menu.pop(),await e.draw({preserve_width:!0}),e.parentElement.dispatchEvent(new Event("perspective-config-update"))};r.addEventListener("perspective-column-style-change",g),r.addEventListener("blur",p),e.addEventListener("regular-table-scroll",a);let h=e[x]||{},_=Object.assign({},h[l]=h[l]||{});_.pos_color&&(_.pos_color=_.pos_color[0],_.neg_color=_.neg_color[0]),_.color&&(_.color=_.color[0]),r.open(t,_,n)}function P([e,t,o,s],r=[255,255,255]){function i(l,c){return((1-s)*(r[l]/255)+s*(c/255))*255}return[i(0,e),i(1,t),i(2,o)]}function j([e,t,o]){return Math.sqrt(e*e*.299+t*t*.587+o*o*.114)>130?"#161616":"#ffffff"}function Oe(e){let t=e._view_cache.config.row_pivots.length-1,o=Array.from(e.children[0].children[0].children),s=e[x]||{};if(o.length>0){let[c]=o.splice(o.length-1,1);for(let n of c?.children){let a=e.getMeta(n),g=a.column_header?.[a.column_header?.length-1],p=this._config.sort.find(u=>u[0]===g),h=a.row_header_x===t,_=typeof a.x=="undefined";h=h||(a.x+1)%this._config.columns.length==0,n.classList.toggle("psp-header-border",h),n.classList.toggle("psp-header-group",!1),n.classList.toggle("psp-header-leaf",!0),n.classList.toggle("psp-is-top",!1),n.classList.toggle("psp-header-corner",_),n.classList.toggle("psp-header-sort-asc",!!p&&p[1]==="asc"),n.classList.toggle("psp-header-sort-desc",!!p&&p[1]==="desc"),n.classList.toggle("psp-header-sort-col-asc",!!p&&p[1]==="col asc"),n.classList.toggle("psp-header-sort-col-desc",!!p&&p[1]==="col desc");let m=B.call(this,a),d=m==="integer"||m==="float",f=m==="string";n.classList.toggle("psp-align-right",d),n.classList.toggle("psp-align-left",!d),n.classList.toggle("psp-menu-open",this._open_column_styles_menu[0]===a._virtual_x),n.classList.toggle("psp-menu-enabled",(f||d)&&!_),n.classList.toggle("psp-is-width-override",e._column_sizes?.override[a.size_key]!==void 0)}}let r=[],i=new Set,l=e.children[0];for(let c=0;c<o.length;c++){let n=l.rows[c],a=new Set;for(let g=0;g<n.cells.length;g++){let p=n.cells[g];p.style.backgroundColor="";let h=e.getMeta(p),_=h.row_header_x===t||h.x>=0;p.classList.toggle("psp-align-right",!1),p.classList.toggle("psp-align-left",!1),p.classList.toggle("psp-header-group",!0),p.classList.toggle("psp-header-leaf",!1),p.classList.toggle("psp-header-border",_),p.classList.toggle("psp-header-group-corner",typeof h.x=="undefined"),p.classList.toggle("psp-color-mode-bar",!1),p.classList.toggle("psp-header-sort-asc",!1),p.classList.toggle("psp-header-sort-desc",!1),p.classList.toggle("psp-header-sort-col-asc",!1),p.classList.toggle("psp-header-sort-col-desc",!1);let m=n.cells[g],d=g,f,u;for(;r[c]&&r[c][d];++d);for(a.add(d),f=d;f<d+m.colSpan;++f)for(u=c;u<c+m.rowSpan;++u)r[u]||(r[u]=[]),r[u][f]=!0;m.classList.toggle("psp-is-top",c===0||!i.has(f))}i=a}for(let c of e.children[0].children[1].children)for(let n of c.children){let a=e.getMeta(n),g=a.column_header?.[a.column_header?.length-1],p=B.call(this,a),h=s[g],_=p==="integer"||p==="float";if(_){let d=a.user>0,f=a.user<0,[u,b,v,w,L]=(()=>h?.pos_color!==void 0?d?h.pos_color:f?h.neg_color:["",0,0,0,""]:d?this._pos_color:f?this._neg_color:["",0,0,0,""])();if(n.style.position="",h?.number_color_mode==="background"){let y=this._plugin_background,E=j(P([b,v,w,1],y));n.style.color=E,n.style.backgroundColor=u}else if(h?.number_color_mode==="gradient"){let y=Math.max(0,Math.min(1,Math.abs(a.user/h.gradient))),E=this._plugin_background,O=j(P([b,v,w,y],E));n.style.color=O,n.style.backgroundColor=`rgba(${b},${v},${w},${y})`}else h?.number_color_mode==="disabled"?(n.style.backgroundColor="",n.style.color=""):h?.number_color_mode==="bar"?(n.style.backgroundColor="",n.style.color="",n.style.position="relative",L!==""&&n.children.length>0&&n.children[0].nodeType===Node.ELEMENT_NODE&&(n.children[0].style.background=L)):(n.style.backgroundColor="",n.style.color=u)}else if(p==="boolean"){let[d]=a.user===!0?this._pos_color:a.user===!1?this._neg_color:["",0,0,0,""];n.style.backgroundColor="",n.style.color=d}else if(p==="string"){let[d,f,u,b,v]=(()=>h?.color!==void 0?h.color:this._color)();if(h?.string_color_mode==="foreground"&&a.user!==null)n.style.color=d,n.style.backgroundColor="",h?.format==="link"&&(n.children[0].style.color=d);else if(h?.string_color_mode==="background"&&a.user!==null){let w=this._plugin_background,L=j(P([f,u,b,1],w));n.style.color=L,n.style.backgroundColor=d}else if(h?.string_color_mode==="series"&&a.user!==null){this._series_color_map.has(g)||(this._series_color_map.set(g,new Map),this._series_color_seed.set(g,0));let w=this._series_color_map.get(g);if(!w.has(a.user)){let J=this._series_color_seed.get(g);w.set(a.user,J),this._series_color_seed.set(g,J+1)}let L=w.get(a.user),[y,E,O]=chroma_js__WEBPACK_IMPORTED_MODULE_1___default()(d).hsl();y=y+L*150%360;let Y=chroma_js__WEBPACK_IMPORTED_MODULE_1___default()(y,E,O,"hsl"),[_e,fe,me]=Y.rgb(),be=Y.hex(),ye=this._plugin_background,we=j(P([_e,fe,me,1],ye));n.style.color=we,n.style.backgroundColor=be}else n.style.backgroundColor="",n.style.color=""}else n.style.backgroundColor="",n.style.color="";n.classList.toggle("psp-bool-type",p==="boolean"&&a.user!==null);let m=n.tagName==="TH";if(m){let d=typeof a.value!=null&&typeof a.value!=null&&a.value?.toString()?.trim().length>0,f=a.row_header_x>=this._config.row_pivots.length,u=e.getMeta({dx:0,dy:a.y-a.y0+1}),b=u&&u.row_header&&typeof u.row_header[a.row_header_x+1]!="undefined";n.classList.toggle("psp-tree-label",d&&!f),n.classList.toggle("psp-tree-label-expand",d&&!f&&!b),n.classList.toggle("psp-tree-label-collapse",d&&!f&&b),n.classList.toggle("psp-tree-leaf",d&&f)}n.classList.toggle("psp-align-right",!m&&_),n.classList.toggle("psp-align-left",m||!_),n.classList.toggle("psp-color-mode-bar",h?.number_color_mode==="bar"&&_)}}async function ze(e,t,o){let s=e.getMeta(o),r=s.column_header[s.column_header.length-1],l=(t.shiftKey?Ie:Ae).call(this,r);e.dispatchEvent(new CustomEvent("regular-table-psp-sort",{detail:{sort:l}}))}function Ie(e){let t=[],o=!1;for(let s of this._config.sort){let[r,i]=s;if(r===e){o=!0;let l=te.call(this,e,i);l&&t.push(l)}else t.push(s)}return o||t.push([e,"desc"]),t}function Ae(e){for(let[t,o]of this._config.sort)if(t===e){let s=te.call(this,e,o);return s?[s]:[]}return[[e,"desc"]]}function te(e,t){let s=this._config.column_pivots.length>0?Pe:Ne,r=t?s[t]:"desc";if(r)return[e,r]}var Ne={desc:"asc",asc:void 0},Pe={desc:"asc",asc:"col desc","col desc":"col asc","col asc":void 0};async function je(e,t){let o=e.getMeta(t.target),s=t.target.classList.contains("psp-tree-label-collapse");t.shiftKey&&s?this._view.set_depth(o.row_header.filter(r=>r!==void 0).length-2):t.shiftKey?this._view.set_depth(o.row_header.filter(r=>r!==void 0).length-1):s?this._view.collapse(o.y):this._view.expand(o.y),this._num_rows=await this._view.num_rows(),this._num_columns=await this._view.num_columns(),e.draw()}async function Re(e,t){if(t.which!==1)return;let o=t.target;if(o.tagName==="A")return;for(;o.tagName!=="TD"&&o.tagName!=="TH";)if(o=o.parentElement,!e.contains(o))return;if(o.classList.contains("psp-tree-label")&&t.offsetX<26){je.call(this,e,t),t.stopImmediatePropagation();return}let s=o.getBoundingClientRect();if(o.classList.contains("psp-menu-enabled")&&t.clientY-s.top>16){let r=e.getMeta(o),i=r.column_header?.[r.column_header?.length-1],l=this._schema[i];if(this._open_column_styles_menu.unshift(r._virtual_x),l==="string")e.draw({preserve_width:!0}),W.call(this,e,o);else{let[,c]=await this._view.get_min_max(i);e.draw({preserve_width:!0}),W.call(this,e,o,c)}t.preventDefault(),t.stopImmediatePropagation()}else o.classList.contains("psp-header-leaf")&&!o.classList.contains("psp-header-corner")&&(ze.call(this,e,t,o),t.stopImmediatePropagation())}function Fe(e,t){if(t.which!==1)return;let o=t.target;for(;o.tagName!=="TD"&&o.tagName!=="TH";)if(o=o.parentElement,!e.contains(o))return;(o.classList.contains("psp-tree-label")&&t.offsetX<26||o.classList.contains("psp-header-leaf")&&!o.classList.contains("psp-header-corner"))&&t.stopImmediatePropagation()}var C={},q={datetime:Intl.DateTimeFormat,date:Intl.DateTimeFormat,integer:Intl.NumberFormat,float:Intl.NumberFormat,boolean:class{format(e){return e?"check":"close"}}},oe=C;function re(e,t,o={},s=!1){if(t===null)return"-";let r=e[e.length-1],i=s&&this._table_schema[r]||this._schema[r]||"string",l=o[r],c=i==="integer"||i==="float";if(c&&l?.number_color_mode==="bar"){let n=Math.max(0,Math.min(.95,Math.abs(t/l.gradient)*.95)),a=this._div_factory.get(),g=t>=0?"left":"right";return a.setAttribute("style",`width:${(n*100).toFixed(2)}%;position:absolute;${g}:0;height:80%;top:10%;pointer-events:none;`),a}else if(l?.format==="link"&&i==="string"){let n=document.createElement("a");return n.setAttribute("href",t),n.setAttribute("target","_blank"),n.textContent=t,n}else if(l?.format==="bold"&&i==="string"){let n=document.createElement("b");return n.textContent=t,n}else if(l?.format==="italics"&&i==="string"){let n=document.createElement("i");return n.textContent=t,n}else{let n=c&&l&&l.fixed!==void 0,a=n?`${i}${l.fixed}`:i;if(C[a]===void 0){let g=(0,ee.get_type_config)(i);if(n){let p={minimumFractionDigits:l.fixed,maximumFractionDigits:l.fixed};C[a]=new q[i]("en-us",p)}else q[i]?C[a]=new q[i]("en-us",g.format):C[a]=!1}return C[a]?C[a].format(t):t}}function*De(e=[],t,o){let s=o[x];for(let r of e){r=["TOTAL",...r];let i=r[r.length-1];r=r.slice(0,r.length-1).fill("");let l=re.call(this,[t[r.length-1]],i,s,!0);l instanceof HTMLElement?r=r.concat(l):r=r.concat({toString:()=>l}),r.length=t.length+1,yield r}}async function $e(e,t,o,s,r){let i={};s-t>0&&r-o>0?(i=await this._view.to_columns({start_row:o,start_col:t,end_row:r,end_col:s,id:!0}),this._ids=i.__ID__):this._div_factory.clear();let l=[],c=[],n=[];for(let a of this._column_paths.slice(t,s)){let g=a.split("|"),p=i[a]||new Array(r-o).fill(null);l.push(p.map(h=>re.call(this,g,h,e[x]))),c.push(p),n.push(g)}return{num_rows:this._num_rows,num_columns:this._column_paths.length,row_headers:Array.from(De.call(this,i.__ROW_PATH__,this._config.row_pivots,e)),column_headers:n,data:l,metadata:c}}function $(e,t,o){let s=window.getComputedStyle(e).getPropertyValue(t).trim();return s.length>0?s:o}var se=class{constructor(t){this._name=t,this._elements=[],this._index=0}clear(){this._index=0}get(){this._elements[this._index]||(this._elements[this._index]=document.createElement(this._name));let t=this._elements[this._index];return this._index+=1,t}};function M(e){let t=chroma_js__WEBPACK_IMPORTED_MODULE_1___default()(e),o=N(t);return[e,...t.rgb(),o]}async function V(e,t,o,s={}){let r=await o.get_config(),i=r.expressions.map(y=>y[1]),[l,c,n,a,g,p]=await Promise.all([t.schema(),t.validate_expressions(i),o.num_rows(),o.schema(),o.expression_schema(),o.column_paths()]),h=chroma_js__WEBPACK_IMPORTED_MODULE_1___default()($(e,"--plugin--background","#FFFFFF")).rgb(),_=M($(e,"--rt-pos-cell--color","#338DCD")),m=M($(e,"--rt-neg-cell--color","#FF5942")),d=M($(e,"--active--color","#ff0000")),f={...a,...g},u={...l,...c.expression_schema},b=p.filter(y=>y!=="__ROW_PATH__"&&y!=="__ID__"),v=[],w=[];for(let y of b){let E=y.split("|"),O=E[E.length-1];w.push(f[O]),v.push(!!l[O])}let L=Object.assign(s,{_view:o,_table:t,_table_schema:u,_config:r,_num_rows:n,_schema:f,_ids:[],_open_column_styles_menu:[],_plugin_background:h,_color:d,_pos_color:_,_neg_color:m,_column_paths:b,_column_types:w,_is_editable:v,_row_header_types:r.row_pivots.map(y=>u[y]),_series_color_map:new Map,_series_color_seed:new Map,get_psp_type:B});return L._div_factory=L._div_factory||new se("div"),e.setDataListener($e.bind(L,e),{virtual_mode:e.parentElement.virtual_mode||"both"}),L}function B(e){return e.x>=0?this._column_types[e.x]:this._row_header_types[e.row_header_x-1]}async function ne(e,t){e.addStyleListener(Oe.bind(t,e)),e.addEventListener("mousedown",Re.bind(t,e)),e.addEventListener("click",Fe.bind(t,e)),await e.draw()}var ie=`regular-table{padding:12px 0 0 12px;scrollbar-color:transparent transparent;scrollbar-width:thin;outline:none}regular-table:hover{scrollbar-color:rgba(0,0,0,.3) transparent}regular-table{font-family:"Open Sans"}regular-table div[tabindex]{outline:none}regular-table>div{position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden}regular-table th{text-align:center}regular-table thead tr:not(:last-child) th{overflow:hidden;max-width:0px}regular-table thead tr:last-child .rt-float,regular-table tbody .rt-float{text-align:right}regular-table thead .rt-integer,regular-table tbody .rt-integer{text-align:right}regular-table tbody th{text-align:left}regular-table span.rt-tree-container{display:flex;align-items:center;height:100%}regular-table thead .rt-string,regular-table tbody .rt-string,regular-table thead .rt-date,regular-table tbody .rt-date,regular-table thead .rt-datetime,regular-table tbody .rt-datetime{text-align:left}regular-table thead tr:last-child th{border-bottom:1px solid #ddd}regular-table th{position:relative}regular-table tr th span.rt-tree-group{margin-left:5px;margin-right:15px;border-left:1px solid #eee;height:100%}regular-table td,regular-table th{white-space:nowrap;font-size:12px;padding:0 5px;height:19px}regular-table tr:hover td{background:#eee;opacity:1}regular-table tr:hover{color:#333}regular-table table *{box-sizing:border-box}regular-table table{position:absolute;overflow:hidden;color:#666;outline:none}regular-table span.rt-row-header-icon{color:#aaa;padding-right:4px;font-family:"Material Icons"}regular-table span.rt-column-header-icon{font-size:10px;padding-left:3px;display:inline-block;width:10px;font-family:"Material Icons"}regular-table span.rt-row-header-icon:hover{color:#1a7da1;text-shadow:0px 0px 3px #1a7da1}regular-table .rt-selected td{background-color:#eee}regular-table .rt-cell-clip{overflow:hidden;text-overflow:ellipsis}regular-table td span.rt-group-name,regular-table th span.rt-group-name{margin-right:-5px;padding-right:5px;padding-left:8px;flex:1;height:100%}regular-table th span.rt-group-name{text-align:left}regular-table td th span.rt-group-leaf,regular-table th span.rt-group-leaf{margin-left:16px;height:100%}regular-table .rt-column-resize{height:100%;width:10px;position:absolute;top:0;right:0;cursor:col-resize}regular-table a{color:var(--rt-pos-cell--color)}regular-table a:visited{color:var(--active--color)}regular-table::-webkit-scrollbar,regular-table::-webkit-scrollbar-corner{background-color:transparent;height:12px;width:12px}regular-table::-webkit-scrollbar-thumb{background-clip:content-box;background-color:#0000;border-radius:5px}regular-table::-webkit-scrollbar-thumb:horizontal{border-bottom:2px solid transparent;border-top:2px solid transparent}regular-table::-webkit-scrollbar-thumb:vertical{border-left:2px solid transparent;border-right:2px solid transparent}regular-table:hover::-webkit-scrollbar-thumb{background-color:#00000026}regular-table::-webkit-scrollbar-thumb:hover{background-color:#0000004d}.psp-header-border:not(.psp-is-top):not(.psp-header-leaf){box-shadow:1px 0 var(--pv-divider--color, #eaedef)}.psp-header-group{box-shadow:0 10px 0 -9px var(--pv-divider--color, #eaedef)}.psp-is-top{box-shadow:5px 4px 0 -4px var(--pv-divider--color, #eaedef)}.psp-is-top.psp-header-group:not(.psp-header-group-corner){box-shadow:5px 4px 0 -4px var(--pv-divider--color, #eaedef),0 10px 0 -9px var(--pv-divider--color, #eaedef)}.psp-header-border.psp-header-group:not(.psp-is-top):not(.psp-header-group-corner){box-shadow:1px 0 var(--pv-divider--color, #eaedef),0 10px 0 -9px var(--pv-divider--color, #eaedef)}.psp-header-leaf.psp-header-border{box-shadow:5px -4px 0 -4px var(--pv-divider--color, #eaedef)}tr:only-child th{box-shadow:none!important}regular-table tbody tr:hover th.psp-tree-leaf:not(.psp-row-selected):not(.psp-row-subselected),regular-table tbody tr:hover th.psp-tree-label:not(.psp-row-selected):not(.psp-row-subselected),regular-table tbody tr:hover td:not(.psp-row-selected):not(.psp-row-subselected){border-color:var(--rt-hover--border-color, #c5c9d080)!important;background-color:transparent;box-shadow:0 1px 0 var(--rt-hover--border-color, #c5c9d080),0 3px #0000000d,0 5px #00000003}regular-table tbody tr:hover+tr th.psp-tree-leaf:not(.psp-row-selected):not(.psp-row-subselected),regular-table tbody tr:hover+tr th.psp-tree-label:not(.psp-row-selected):not(.psp-row-subselected),regular-table tbody tr:hover+tr td:not(.psp-row-selected):not(.psp-row-subselected){border-top-color:transparent}regular-table tbody tr th:first-child:not(:empty),regular-table tbody tr th:first-child:empty+th:not(:empty),regular-table tbody tr th:first-child:empty~th:empty+th:not(:empty),regular-table tbody tr td:first-child{border-left-width:1px;border-left-color:transparent}regular-table tbody tr th:last-child,regular-table tbody tr td:last-child{border-right-width:1px;border-right-color:transparent}regular-table tbody tr:hover{color:#161616}regular-table tbody tr:hover th:first-child:not(:empty),regular-table tbody tr:hover th:first-child:empty+th:not(:empty),regular-table tbody tr:hover th:first-child:empty~th:empty+th:not(:empty),regular-table tbody tr:hover td:first-child{border-left-color:var(--rt-hover--border-color, #c5c9d080)!important}regular-table tbody tr:hover th:last-child,regular-table tbody tr:hover td:last-child{border-right-color:var(--rt-hover--border-color, #c5c9d080)!important}perspective-viewer[settings] regular-table .psp-header-leaf{height:36px;vertical-align:top;padding-top:2px}perspective-viewer[settings] regular-table .psp-header-leaf:not(.psp-header-corner):before{font-family:"Material Icons";content:"menu";position:absolute;width:calc(100% - 8px);left:5px;bottom:0px;color:var(--inactive--color, #b4b7be)}perspective-viewer[settings] regular-table .psp-header-leaf.psp-menu-enabled:not(.psp-header-corner):before{color:inherit;cursor:pointer}perspective-viewer[settings] regular-table .psp-header-leaf.psp-menu-open:not(.psp-header-corner){pointer-events:none}perspective-viewer[settings] regular-table .psp-header-leaf.psp-menu-open:not(.psp-header-corner):before{content:"expand_less"}perspective-viewer[settings] regular-table .psp-header-leaf.psp-menu-enabled:hover:before{color:#338dcd}perspective-viewer[settings] regular-table .psp-header-leaf .rt-column-resize{height:18px}.psp-row-selected,:hover .psp-row-selected,:hover th.psp-tree-leaf.psp-row-selected,:hover th.psp-tree-label.psp-row-selected{color:#fff!important;background-color:#ea7319!important;border-color:#ea7319!important}.psp-row-selected.psp-tree-label:not(:hover):before{color:#fff}.psp-row-subselected,:hover .psp-row-subselected,:hover th.psp-tree-leaf.psp-row-subselected,:hover th.psp-tree-label.psp-row-subselected{background:rgba(234,115,25,.2)!important}.psp-error{color:red}td:focus{outline:#666;outline-style:dotted;outline-width:1px}perspective-viewer.dragging regular-table{pointer-events:none}.psp-header-border:last-child{border-right-width:0px}.psp-header-sort-desc:after{font-family:"Material Icons";font-size:10px;content:"arrow_downward"}.psp-header-sort-asc:after{font-family:"Material Icons";font-size:10px;content:"arrow_upward"}.psp-header-sort-col-desc:after{font-family:"Material Icons";font-size:10px;content:"arrow_back"}.psp-header-sort-col-asc:after{font-family:"Material Icons";font-size:10px;content:"arrow_forward"}tbody th:last-of-type{border-right:1px solid #eaedef;overflow:hidden;text-overflow:ellipsis}tbody th:empty{background-image:linear-gradient(to right,transparent 9px,#eee 10px,transparent 11px);background-repeat:no-repeat;min-width:20px;max-width:20px;pointer-events:none}.psp-tree-label{max-width:0px;min-width:0px}.psp-tree-label:before{color:#ccc;font-family:"Material Icons";padding-right:11px;vertical-align:-1px}.psp-tree-label-expand:before{content:"add"}.psp-tree-label-collapse:before{content:"remove"}.psp-tree-label:hover:before{color:#338dcd;text-shadow:0px 0px 5px #338dcd}regular-table thead tr:last-child th{border-bottom-width:0px}.psp-tree-leaf{padding-left:24px}.psp-align-right{text-align:right}.psp-align-left{text-align:left}.psp-positive:not(:focus){color:var(--rt-pos-cell--color, #338dcd)}.psp-negative:not(:focus){color:var(--rt-neg-cell--color, #ff5942)}regular-table table tbody td{min-width:52px!important}.psp-is-width-override .rt-column-resize,.rt-column-resize:hover{border:1px dashed #999;border-bottom-width:0px;border-left-width:0px}.psp-bool-type{font-family:"Material Icons"}.boolean-editable{cursor:pointer}regular-table table{user-select:none;color:#161616;border-collapse:separate}regular-table table th{font-weight:400}regular-table table td,regular-table table th{border-color:#eaedef;height:23px}regular-table table .psp-header-group{text-overflow:ellipsis}regular-table table .psp-header-leaf{border-bottom-width:0px}regular-table table td,regular-table table th.psp-tree-label,regular-table table th.psp-tree-label,regular-table table th.psp-tree-leaf,regular-table table tbody tr:first-child th{border-style:solid;border-width:0px;border-top-width:1px}regular-table table tbody th:empty{background-position:0px -10px}
+`;async function R({_view:e,_config:t},o,s){let r=t.row_pivots,i=t.column_pivots,l=o>=0?o:0,c=l+1,n=await e.to_json({start_row:l,end_row:c}),g=n.map(u=>u.__ROW_PATH__)[0]||[],p=r.map((u,b)=>{let v=g[b];return v?[u,"==",v]:void 0}).filter(u=>u),h=r.length>0?s+1:s,_=Object.keys(n[0])[h],m={row:n[0]},d=[];if(_){let u=_.split("|");m.column_names=[u[u.length-1]],d=i.map((b,v)=>{let w=u[v];return w?[b,"==",w]:void 0}).filter(b=>b).filter(([,,b])=>b!=="__ROW_PATH__")}let f=t.filter.concat(p).concat(d);return m.config={filter:f},m}var I=new WeakMap;async function He(e,t,o){let s=e.getMeta(o.target);if(!t.hasAttribute("selectable")||o.handled||o.which!==1||!s)return;let r=this._ids[s.y-s.y0];if(s&&s.y>=0){let i=I.get(e),l=!!i&&i.reduce((a,g,p)=>a&&g===r[p],!0),c=!!i&&r.length===i.length&&l,n=[];c?I.delete(e):(I.set(e,r),n=await R(this,s.y,s.x),n=n.config.filter),await e.draw({preserve_width:!0}),o.handled=!0,t.dispatchEvent(new CustomEvent("perspective-select",{bubbles:!0,composed:!0,detail:{selected:!c,config:{filter:n}}}))}}function We(e,t){if(!t.hasAttribute("selectable"))return;let o=I.has(e),s=I.get(e);for(let r of e.querySelectorAll("td"))if(!o)r.classList.toggle("psp-row-selected",!1),r.classList.toggle("psp-row-subselected",!1);else{let i=e.getMeta(r),l=this._ids[i.y-i.y0],c=s.reduce((n,a,g)=>n&&a===l[g],!0);r.classList.toggle("psp-row-selected",l.length===s.length&&c),r.classList.toggle("psp-row-subselected",l.length!==s.length&&c)}for(let r of e.querySelectorAll("tbody th")){let i=e.getMeta(r),l=this._ids[i.y-i.y0];if(!o||!!l[i.row_header_x])r.classList.toggle("psp-row-selected",!1),r.classList.toggle("psp-row-subselected",!1);else{let c=s.reduce((n,a,g)=>n&&a===l[g],!0);r.classList.toggle("psp-row-selected",l.length===s.length&&c),r.classList.toggle("psp-row-subselected",l.length!==s.length&&c)}}}function le(e,t){e.addStyleListener(We.bind(this,e,t)),e.addEventListener("mousedown",He.bind(this,e,t))}async function ae(e){I.delete(e);for(let t of e.querySelectorAll("td,th"))t.classList.toggle("psp-row-selected",!1),t.classList.toggle("psp-row-subselected",!1)}async function qe(e,t,o){let s=e.getMeta(o.target);if(!s)return;let{x:r,y:i}=s,{row:l,column_names:c,config:n}=await R(this,i,r);t.dispatchEvent(new CustomEvent("perspective-click",{bubbles:!0,composed:!0,detail:{row:l,column_names:c,config:n}}))}function ce(e,t){e.addEventListener("click",qe.bind(this,e,t))}var S=new WeakMap;function Ve(e){let t;return async function(...o){if(!!t&&await t&&!!t)return;let s;t=new Promise(r=>s=r),await e.apply(this,o),t=void 0,s()}}function de(){if(this.isContentEditable){let e=document.getSelection().getRangeAt(0),t=e.cloneRange();return t.selectNodeContents(this),t.setEnd(e.endContainer,e.endOffset),t.toString().length}else return this.target.selectionStart}function pe(e,t,o){let s=e.getMeta(o),r=t._schema[t._column_paths[s.x]];if(s){let i=o.textContent,l=t._ids[s.y-s.y0];if(r==="float"||r==="integer"){if(i=parseFloat(i.replace(/,/g,"")),isNaN(i))return!1}else if(r==="date"||r==="datetime"){if(i=Date.parse(i),isNaN(i))return!1}else r==="boolean"&&(i=i==="check"?!1:i==="close"?!0:null);let c={__INDEX__:l,[t._column_paths[s.x]]:i};return t._table.update([c],{port_id:t._edit_port}),!0}}function U(e){let t=this._config.row_pivots.length===0&&this._config.column_pivots.length===0,o=e.hasAttribute("selectable"),s=e.hasAttribute("editable");return t&&!o&&s}var A=Ve(async function(e,t,o,s){let r=e.getMeta(t),i=this._column_paths.length,l=this._num_rows,c=S.get(e);if(!c)return;r.x+o<i&&0<=r.x+o&&(c.x=r.x+o),r.y+s<l&&0<=r.y+s&&(c.y=r.y+s);let n=Math.max(r.x0-10,0),a=Math.min(r.x0+10,i),g=Math.max(r.y0-5,0),p=Math.min(r.y0+10,l),h=r.x0+o,_=r.y0+s;for(;!ge(e)&&h>=n&&h<a&&_>=g&&_<p;)await e.scrollToCell(h,_,i,l),S.set(e,c),h+=o,_+=s});function Be(e,t){if(!t.hasAttribute("editable"))return;let o=e[x]||{},s=U.call(this,t);for(let r of e.querySelectorAll("td")){let i=e.getMeta(r),l=this.get_psp_type(i);if(this._is_editable[i.x]){let c=i.column_header[i.column_header.length-1];l==="string"&&o[c]?.format==="link"?(r.toggleAttribute("contenteditable",!1),r.classList.toggle("boolean-editable",!1)):l==="boolean"?(r.toggleAttribute("contenteditable",!1),r.classList.toggle("boolean-editable",i.user!==null)):(r.toggleAttribute("contenteditable",s),r.classList.toggle("boolean-editable",!1))}else r.toggleAttribute("contenteditable",!1),r.classList.toggle("boolean-editable",!1)}}var ge=e=>{let t=e.querySelectorAll("td"),o=S.get(e);if(o){for(let s of t){let r=e.getMeta(s);if(r.x===o.x&&r.y===o.y)return document.activeElement!==s&&s.focus({preventScroll:!0}),!0}document.activeElement!==document.body&&e.contains(document.activeElement)&&document.activeElement.blur()}};function Ue(e,t,o){if(!U.call(this,t))return;let s=document.activeElement;switch(o.target.classList.remove("psp-error"),o.keyCode){case 13:o.preventDefault(),o.shiftKey?A.call(this,e,s,0,-1):A.call(this,e,s,0,1);break;case 37:de.call(s)==0&&(o.preventDefault(),A.call(this,e,s,-1,0));break;case 38:o.preventDefault(),A.call(this,e,s,0,-1);break;case 39:de.call(s)==s.textContent.length&&(o.preventDefault(),A.call(this,e,s,1,0));break;case 40:o.preventDefault(),A.call(this,e,s,0,1);break;default:}}function Ye(e,t,o){if(U.call(this,t)&&S.has(e)){o.target.classList.remove("psp-error");let s=S.get(e);S.delete(e),s.content!==o.target.textContent&&(pe(e,this,o.target)||(o.target.textContent=s.content,o.target.classList.add("psp-error"),o.target.focus()))}}function Je(e,t,o){let s=e.getMeta(o.target);if(s){let r={x:s.x,y:s.y,content:o.target.textContent};S.set(e,r)}}function Ke(e,t,o){let s=e.getMeta(o.target);if(typeof s?.x!="undefined"){let r=this._is_editable[s.x],i=this.get_psp_type(s)==="boolean",l=o.target.textContent==="-";r&&i&&!l&&pe(e,this,o.target)}}async function he(e,t){this._edit_port=await t.getEditPort(),e.addStyleListener(Be.bind(this,e,t)),e.addStyleListener(ge.bind(this,e,t)),e.addEventListener("click",Ke.bind(this,e,t)),e.addEventListener("focusin",Je.bind(this,e,t)),e.addEventListener("focusout",Ye.bind(this,e,t)),e.addEventListener("keydown",Ue.bind(this,e,t))}async function ue(e,t){e.addEventListener("regular-table-psp-sort",o=>{this._preserve_focus_state=!0,t.restore({sort:o.detail.sort})})}customElements.define("perspective-viewer-datagrid",class extends HTMLElement{constructor(){super();this.datagrid=document.createElement("regular-table"),this.datagrid.formatters=oe}async activate(e){let t=this.parentElement,o=await t.getTable(!0);this._initialized?await V(this.datagrid,o,e,this.model):(this.innerHTML="",this.appendChild(this.datagrid),this.model=await V(this.datagrid,o,e),ne(this.datagrid,this.model),await le.call(this.model,this.datagrid,t),await ce.call(this.model,this.datagrid,t),await he.call(this.model,this.datagrid,t),await ue.call(this.model,this.datagrid,t),this._initialized=!0)}get name(){return"Datagrid"}get select_mode(){return"toggle"}get min_config_columns(){}get config_column_names(){}async draw(e){let t=this._save_column_size_overrides();await this.activate(e);let o=this.parentElement,s=this.datagrid.draw({invalid_columns:!0});this.model._preserve_focus_state?this.model._preserve_focus_state=!1:(this.datagrid.scrollTop=0,this.datagrid.scrollLeft=0,ae(this.datagrid,o),this.datagrid._resetAutoSize()),this._restore_column_size_overrides(t),await s}async update(e){this.model._num_rows=await e.num_rows(),await this.datagrid.draw()}async resize(){this._initialized&&await this.datagrid.draw()}async clear(){this.datagrid._resetAutoSize(),this.datagrid.clear()}save(){if(this.datagrid){let e=this.datagrid,t={};for(let s of Object.keys(e[x]||{})){let r=Object.assign({},e[x][s]);r?.pos_color&&(r.pos_color=r.pos_color[0],r.neg_color=r.neg_color[0]),r?.color&&(r.color=r.color[0]),t[s]=r}let o=this._save_column_size_overrides();for(let s of Object.keys(o||{}))t[s]||(t[s]={}),t[s].column_size_override=o[s];return JSON.parse(JSON.stringify(t))}return{}}restore(e){e=JSON.parse(JSON.stringify(e));let t={};for(let s of Object.keys(e)){let r=e[s];r.column_size_override!==void 0&&(t[s]=r.column_size_override,delete r.column_size_override),r?.pos_color&&(r.pos_color=M(r.pos_color),r.neg_color=M(r.neg_color)),r?.color&&(r.color=M(r.color)),Object.keys(r).length===0&&delete e[s]}let o=this.datagrid;try{o._resetAutoSize()}catch{}this._restore_column_size_overrides(t,!0),o[x]=e}async restyle(){}delete(){this.datagrid.table_model&&this.datagrid._resetAutoSize(),this.datagrid.clear()}_save_column_size_overrides(){if(!this._initialized)return[];if(this._cached_column_sizes){let i=this._cached_column_sizes;return this._cached_column_sizes=void 0,i}let e=this.datagrid._column_sizes.override,{row_pivots:t,columns:o}=this.model._config,s=t?.length>0?t.length+1:0,r={};for(let i of Object.keys(e))if(e[i]!==void 0){let l=i-s;l>-1&&(r[this.model._column_paths[l]]=e[i])}return r}_restore_column_size_overrides(e,t=!1){if(!this._initialized)return;t&&(this._cached_column_sizes=e);let o={},{row_pivots:s,columns:r}=this.model._config,i=s?.length>0?s.length+1:0;for(let l of Object.keys(e)){let c=this.model._column_paths.indexOf(l);o[c+i]=e[l]}this.datagrid._column_sizes.override=o}});function Xe(){let e=document.createElement("style");e.textContent=ie,document.head.insertBefore(e,document.head.firstChild)}function Te(){customElements.get("perspective-viewer").registerPlugin("perspective-viewer-datagrid")}customElements.whenDefined("perspective-viewer").then(Te);Xe();
 
 
 /***/ }),
@@ -64894,14 +64995,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "HTMLPerspectiveViewerElement": () => /* binding */ a,
 /* harmony export */   "HTMLPerspectiveViewerPluginElement": () => /* binding */ n,
-/* harmony export */   "default": () => /* binding */ U
+/* harmony export */   "default": () => /* binding */ J
 /* harmony export */ });
 /* harmony import */ var _finos_perspective_viewer_dist_pkg_perspective_viewer_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @finos/perspective-viewer/dist/pkg/perspective_viewer.js */ "../rust/perspective-viewer/dist/pkg/perspective_viewer.js");
 /* harmony import */ var fflate__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! fflate */ "../node_modules/fflate/esm/browser.js");
 /* harmony import */ var _finos_perspective_viewer_dist_pkg_perspective_viewer_bg_wasm__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @finos/perspective-viewer/dist/pkg/perspective_viewer_bg.wasm */ "../rust/perspective-viewer/dist/pkg/perspective_viewer_bg.wasm");
 /* harmony import */ var mobile_drag_drop_shadow_dom__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! mobile-drag-drop-shadow-dom */ "../node_modules/mobile-drag-drop-shadow-dom/index.js");
 /* harmony import */ var mobile_drag_drop_shadow_dom__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(mobile_drag_drop_shadow_dom__WEBPACK_IMPORTED_MODULE_3__);
-var n=class extends HTMLElement{constructor(){super()}get name(){return"Debug"}get select_mode(){return"select"}get min_config_columns(){}get config_column_names(){}async update(e){return this.draw(e)}async draw(e){this.style.backgroundColor="#fff";let i=await e.to_csv({config:{delimiter:"|"}}),r="margin:0;overflow:scroll;position:absolute;width:100%;height:100%";this.innerHTML=`<pre style='${r}'>${i}</pre>`}async clear(){this.innerHTML=""}async resize(){}async restyle(){}async save(){}async restore(){}async delete(){}};document.createElement("perspective-viewer-plugin").constructor===HTMLElement&&window.customElements.define("perspective-viewer-plugin",n);window.addEventListener("unhandledrejection",t=>{t.reason?.message==="View method cancelled"&&t.preventDefault()});function l(t){return new Uint32Array(t.slice(0,4))[0]==559903}async function y(){let t=await _finos_perspective_viewer_dist_pkg_perspective_viewer_bg_wasm__WEBPACK_IMPORTED_MODULE_1__,e=[],i=0,r=new fflate__WEBPACK_IMPORTED_MODULE_2__.Decompress(s=>{s&&(i+=s.byteLength,e.push(s))});if(t instanceof URL||typeof t=="string"){let g=(await fetch(t.toString())).body.getReader(),o=0;for(;;){let{value:c,done:v}=await g.read();if(v)break;o===0&&l(c.buffer)||o===1?(o=1,r.push(c,v)):(o=2,i+=c.byteLength,e.push(c))}}else if(t instanceof Uint8Array)l(t.buffer)?r.push(t,!0):(i=t.byteLength,e=[t]);else{let s=new Uint8Array(t);l(t)?r.push(s,!0):(i=s.byteLength,e=[s])}let m=0,w=new Uint8Array(i);for(let s of e)w.set(s,m),m+=s.byteLength;return await (0,_finos_perspective_viewer_dist_pkg_perspective_viewer_js__WEBPACK_IMPORTED_MODULE_0__.default)(w)}var p=y();var a=class extends HTMLElement{constructor(){super();this.load_wasm()}async load_wasm(){await p,this.instance||(this.instance=new _finos_perspective_viewer_dist_pkg_perspective_viewer_js__WEBPACK_IMPORTED_MODULE_0__.PerspectiveViewerElement(this))}async connectedCallback(){await this.load_wasm(),this.instance.connected_callback()}static async registerPlugin(e){await p,(0,_finos_perspective_viewer_dist_pkg_perspective_viewer_js__WEBPACK_IMPORTED_MODULE_0__.register_plugin)(e)}async load(e){await this.load_wasm(),await this.instance.js_load(e)}async notifyResize(e=!1){await this.load_wasm(),await this.instance.js_resize(e)}async setAutoSize(e=!0){await this.load_wasm(),await this.instance.js_set_auto_size(e)}async getTable(e){return await this.load_wasm(),await this.instance.js_get_table(!!e)}async getView(){return await this.load_wasm(),await this.instance.js_get_view()}async restore(e){await this.load_wasm(),await this.instance.js_restore(e)}async save(e){return await this.load_wasm(),await this.instance.js_save(e)}async flush(){await this.load_wasm(),await this.instance.js_flush()}async reset(e=!1){await this.load_wasm(),await this.instance.js_reset(e)}async delete(){await this.load_wasm(),await this.instance.js_delete()}async download(e){await this.load_wasm(),await this.instance.js_download(e)}async copy(e){await this.load_wasm(),await this.instance.js_copy(e)}async restyleElement(){await this.load_wasm(),await this.instance.js_restyle_element()}async getEditPort(){return await this.load_wasm(),await this.instance.js_get_edit_port()}async setThrottle(e){await this.load_wasm(),await this.instance.js_set_throttle(e)}async toggleConfig(e){await this.load_wasm(),await this.instance.js_toggle_config(e)}async getPlugin(e){return await this.load_wasm(),await this.instance.js_get_plugin(e)}async getAllPlugins(){return await this.load_wasm(),await this.instance.js_get_all_plugins()}};document.createElement("perspective-viewer").constructor===HTMLElement&&window.customElements.define("perspective-viewer",a);var d=class extends HTMLElement{constructor(){super()}async open(e,i,r){this.instance?this.instance.reset(i,r):this.instance=new _finos_perspective_viewer_dist_pkg_perspective_viewer_js__WEBPACK_IMPORTED_MODULE_0__.PerspectiveColumnStyleElement(this,i,r),this.instance.open(e)}};document.createElement("perspective-column-style").constructor===HTMLElement&&window.customElements.define("perspective-column-style",d);var U={HTMLPerspectiveViewerElement:a,HTMLPerspectiveViewerPluginElement:n};
+var n=class extends HTMLElement{constructor(){super()}get name(){return"Debug"}get select_mode(){return"select"}get min_config_columns(){}get config_column_names(){}async update(e){return this.draw(e)}async draw(e){this.style.backgroundColor="#fff";let i=await e.to_csv(),r="margin:0;overflow:scroll;position:absolute;width:100%;height:100%";this.innerHTML=`<pre style='${r}'>${i}</pre>`}async clear(){this.innerHTML=""}async resize(){}async restyle(){}async save(){}async restore(){}async delete(){}};document.createElement("perspective-viewer-plugin").constructor===HTMLElement&&window.customElements.define("perspective-viewer-plugin",n);window.addEventListener("unhandledrejection",t=>{t.reason?.message==="View method cancelled"&&t.preventDefault()});function l(t){return new Uint32Array(t.slice(0,4))[0]==559903}async function h(){let t=await _finos_perspective_viewer_dist_pkg_perspective_viewer_bg_wasm__WEBPACK_IMPORTED_MODULE_1__,e=[],i=0,r=new fflate__WEBPACK_IMPORTED_MODULE_2__.Decompress(s=>{s&&(i+=s.byteLength,e.push(s))});if(t instanceof URL||typeof t=="string"){let g=(await fetch(t.toString())).body.getReader(),o=0;for(;;){let{value:c,done:v}=await g.read();if(v)break;o===0&&l(c.buffer)||o===1?(o=1,r.push(c,v)):(o=2,i+=c.byteLength,e.push(c))}}else if(t instanceof Uint8Array)l(t.buffer)?r.push(t,!0):(i=t.byteLength,e=[t]);else{let s=new Uint8Array(t);l(t)?r.push(s,!0):(i=s.byteLength,e=[s])}let p=0,w=new Uint8Array(i);for(let s of e)w.set(s,p),p+=s.byteLength;return await (0,_finos_perspective_viewer_dist_pkg_perspective_viewer_js__WEBPACK_IMPORTED_MODULE_0__.default)(w)}var m=h();var a=class extends HTMLElement{constructor(){super();this.load_wasm()}async load_wasm(){await m,this.instance||(this.instance=new _finos_perspective_viewer_dist_pkg_perspective_viewer_js__WEBPACK_IMPORTED_MODULE_0__.PerspectiveViewerElement(this))}async connectedCallback(){await this.load_wasm(),this.instance.connected_callback()}static async registerPlugin(e){await m,(0,_finos_perspective_viewer_dist_pkg_perspective_viewer_js__WEBPACK_IMPORTED_MODULE_0__.register_plugin)(e)}async load(e){await this.load_wasm(),await this.instance.js_load(e)}async notifyResize(e=!1){await this.load_wasm(),await this.instance.js_resize(e)}async setAutoSize(e=!0){await this.load_wasm(),await this.instance.js_set_auto_size(e)}async getTable(e){return await this.load_wasm(),await this.instance.js_get_table(!!e)}async getView(){return await this.load_wasm(),await this.instance.js_get_view()}async restore(e){await this.load_wasm(),await this.instance.js_restore(e)}async save(e){return await this.load_wasm(),await this.instance.js_save(e)}async flush(){await this.load_wasm(),await this.instance.js_flush()}async reset(e=!1){await this.load_wasm(),await this.instance.js_reset(e)}async delete(){await this.load_wasm(),await this.instance.js_delete()}async download(e){await this.load_wasm(),await this.instance.js_download(e)}async copy(e){await this.load_wasm(),await this.instance.js_copy(e)}async restyleElement(){await this.load_wasm(),await this.instance.js_restyle_element()}async getEditPort(){return await this.load_wasm(),await this.instance.js_get_edit_port()}async setThrottle(e){await this.load_wasm(),await this.instance.js_set_throttle(e)}async toggleConfig(e){await this.load_wasm(),await this.instance.js_toggle_config(e)}async getPlugin(e){return await this.load_wasm(),await this.instance.js_get_plugin(e)}async getAllPlugins(){return await this.load_wasm(),await this.instance.js_get_all_plugins()}};document.createElement("perspective-viewer").constructor===HTMLElement&&window.customElements.define("perspective-viewer",a);var d=class extends HTMLElement{constructor(){super()}async open(e,i,r){this.instance?this.instance.reset(i,r):this.instance=new _finos_perspective_viewer_dist_pkg_perspective_viewer_js__WEBPACK_IMPORTED_MODULE_0__.PerspectiveNumberColumnStyleElement(this,i,r),this.instance.open(e)}destroy(){this.instance.destroy()}};document.createElement("perspective-number-column-style").constructor===HTMLElement&&window.customElements.define("perspective-number-column-style",d);var u=class extends HTMLElement{constructor(){super()}async open(e,i,r){this.instance?this.instance.reset(i):this.instance=new _finos_perspective_viewer_dist_pkg_perspective_viewer_js__WEBPACK_IMPORTED_MODULE_0__.PerspectiveStringColumnStyleElement(this,i,r),this.instance.open(e)}destroy(){this.instance.destroy()}};document.createElement("perspective-string-column-style").constructor===HTMLElement&&window.customElements.define("perspective-string-column-style",u);var J={HTMLPerspectiveViewerElement:a,HTMLPerspectiveViewerPluginElement:n};
 
 
 /***/ }),
@@ -64918,13 +65019,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "register_plugin": () => /* binding */ register_plugin,
 /* harmony export */   "ExpressionEditorElement": () => /* binding */ ExpressionEditorElement,
 /* harmony export */   "FilterDropDownElement": () => /* binding */ FilterDropDownElement,
-/* harmony export */   "PerspectiveColumnStyleElement": () => /* binding */ PerspectiveColumnStyleElement,
+/* harmony export */   "PerspectiveNumberColumnStyleElement": () => /* binding */ PerspectiveNumberColumnStyleElement,
+/* harmony export */   "PerspectiveStringColumnStyleElement": () => /* binding */ PerspectiveStringColumnStyleElement,
 /* harmony export */   "PerspectiveViewerElement": () => /* binding */ PerspectiveViewerElement,
 /* harmony export */   "default": () => __WEBPACK_DEFAULT_EXPORT__
 /* harmony export */ });
-/* harmony import */ var _snippets_perspective_viewer_c0843f68e2505c94_inline0_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./snippets/perspective-viewer-c0843f68e2505c94/inline0.js */ "../rust/perspective-viewer/dist/pkg/snippets/perspective-viewer-c0843f68e2505c94/inline0.js");
-/* harmony import */ var _snippets_perspective_viewer_c0843f68e2505c94_inline1_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./snippets/perspective-viewer-c0843f68e2505c94/inline1.js */ "../rust/perspective-viewer/dist/pkg/snippets/perspective-viewer-c0843f68e2505c94/inline1.js");
-/* harmony import */ var _snippets_perspective_viewer_c0843f68e2505c94_inline2_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./snippets/perspective-viewer-c0843f68e2505c94/inline2.js */ "../rust/perspective-viewer/dist/pkg/snippets/perspective-viewer-c0843f68e2505c94/inline2.js");
+/* harmony import */ var _snippets_perspective_viewer_362cf5cec2bfcc07_inline0_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./snippets/perspective-viewer-362cf5cec2bfcc07/inline0.js */ "../rust/perspective-viewer/dist/pkg/snippets/perspective-viewer-362cf5cec2bfcc07/inline0.js");
+/* harmony import */ var _snippets_perspective_viewer_362cf5cec2bfcc07_inline1_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./snippets/perspective-viewer-362cf5cec2bfcc07/inline1.js */ "../rust/perspective-viewer/dist/pkg/snippets/perspective-viewer-362cf5cec2bfcc07/inline1.js");
+/* harmony import */ var _snippets_perspective_viewer_362cf5cec2bfcc07_inline2_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./snippets/perspective-viewer-362cf5cec2bfcc07/inline2.js */ "../rust/perspective-viewer/dist/pkg/snippets/perspective-viewer-362cf5cec2bfcc07/inline2.js");
 
 
 
@@ -65141,7 +65243,8 @@ function makeMutClosure(arg0, arg1, dtor, f) {
     return real;
 }
 function __wbg_adapter_38(arg0, arg1, arg2) {
-    wasm._dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h53b4d469cd938f46(arg0, arg1, addHeapObject(arg2));
+    var ret = wasm._dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__hd40c24e5ec1758cc(arg0, arg1, addHeapObject(arg2));
+    return takeObject(ret);
 }
 
 function makeClosure(arg0, arg1, dtor, f) {
@@ -65166,34 +65269,33 @@ function makeClosure(arg0, arg1, dtor, f) {
     return real;
 }
 function __wbg_adapter_41(arg0, arg1, arg2) {
-    var ret = wasm._dyn_core__ops__function__Fn__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__hf8e580659c4a6aa4(arg0, arg1, addHeapObject(arg2));
+    var ret = wasm._dyn_core__ops__function__Fn__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__hea69c29bb43fc712(arg0, arg1, addHeapObject(arg2));
     return takeObject(ret);
 }
 
 function __wbg_adapter_44(arg0, arg1, arg2) {
-    wasm._dyn_core__ops__function__Fn__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__hd24871b03e982b96(arg0, arg1, addHeapObject(arg2));
+    wasm._dyn_core__ops__function__Fn__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h98ce1519245f6517(arg0, arg1, addHeapObject(arg2));
 }
 
-function __wbg_adapter_47(arg0, arg1, arg2) {
-    var ret = wasm._dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h506193790338abde(arg0, arg1, addHeapObject(arg2));
+function __wbg_adapter_47(arg0, arg1) {
+    wasm._dyn_core__ops__function__FnMut_____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__hf2f30d44751e1550(arg0, arg1);
+}
+
+function __wbg_adapter_50(arg0, arg1, arg2, arg3, arg4) {
+    var ret = wasm._dyn_core__ops__function__Fn__A_B_C___Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h32860381ab64b9e6(arg0, arg1, addHeapObject(arg2), addHeapObject(arg3), addHeapObject(arg4));
     return takeObject(ret);
 }
 
-function __wbg_adapter_50(arg0, arg1, arg2) {
-    wasm._dyn_core__ops__function__Fn__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h98b1bfd6f909c29a(arg0, arg1, addHeapObject(arg2));
-}
-
-function __wbg_adapter_53(arg0, arg1) {
-    wasm._dyn_core__ops__function__FnMut_____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h177f0ca32657e778(arg0, arg1);
+function __wbg_adapter_53(arg0, arg1, arg2) {
+    wasm._dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h90b359bc846f8cf1(arg0, arg1, addHeapObject(arg2));
 }
 
 function __wbg_adapter_56(arg0, arg1, arg2) {
-    wasm._dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h479569e71572058c(arg0, arg1, addHeapObject(arg2));
+    wasm._dyn_core__ops__function__Fn__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__hee123e6bcd03787d(arg0, arg1, addHeapObject(arg2));
 }
 
-function __wbg_adapter_59(arg0, arg1, arg2, arg3, arg4) {
-    var ret = wasm._dyn_core__ops__function__Fn__A_B_C___Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__he1b4b09ea4d4202c(arg0, arg1, addHeapObject(arg2), addHeapObject(arg3), addHeapObject(arg4));
-    return takeObject(ret);
+function __wbg_adapter_59(arg0, arg1, arg2) {
+    wasm._dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h8dd09acac260aa8b(arg0, arg1, addHeapObject(arg2));
 }
 
 let stack_pointer = 32;
@@ -65205,18 +65307,18 @@ function addBorrowedObject(obj) {
 }
 function __wbg_adapter_62(arg0, arg1, arg2) {
     try {
-        wasm._dyn_core__ops__function__FnMut___A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h909631b74d3adb4a(arg0, arg1, addBorrowedObject(arg2));
+        wasm._dyn_core__ops__function__FnMut___A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h5baddc38700eb5ef(arg0, arg1, addBorrowedObject(arg2));
     } finally {
         heap[stack_pointer++] = undefined;
     }
 }
 
 function __wbg_adapter_65(arg0, arg1) {
-    wasm._dyn_core__ops__function__FnMut_____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h3c28690f13f4a967(arg0, arg1);
+    wasm._dyn_core__ops__function__FnMut_____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__hf70028ad8b2f9d7f(arg0, arg1);
 }
 
 function __wbg_adapter_68(arg0, arg1, arg2) {
-    wasm._dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h67d4f8890949011b(arg0, arg1, addHeapObject(arg2));
+    wasm._dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h9a1ccf7c47709953(arg0, arg1, addHeapObject(arg2));
 }
 
 function handleError(f, args) {
@@ -65235,8 +65337,8 @@ function register_plugin(name) {
     wasm.register_plugin(ptr0, len0);
 }
 
-function __wbg_adapter_471(arg0, arg1, arg2, arg3) {
-    wasm.wasm_bindgen__convert__closures__invoke2_mut__he202e67c3950b4e1(arg0, arg1, addHeapObject(arg2), addHeapObject(arg3));
+function __wbg_adapter_464(arg0, arg1, arg2, arg3) {
+    wasm.wasm_bindgen__convert__closures__invoke2_mut__hdefe806df71e4fe1(arg0, arg1, addHeapObject(arg2), addHeapObject(arg3));
 }
 
 /**
@@ -65273,10 +65375,10 @@ class FilterDropDownElement {
 }
 /**
 */
-class PerspectiveColumnStyleElement {
+class PerspectiveNumberColumnStyleElement {
 
     static __wrap(ptr) {
-        const obj = Object.create(PerspectiveColumnStyleElement.prototype);
+        const obj = Object.create(PerspectiveNumberColumnStyleElement.prototype);
         obj.ptr = ptr;
 
         return obj;
@@ -65291,7 +65393,7 @@ class PerspectiveColumnStyleElement {
 
     free() {
         const ptr = this.__destroy_into_raw();
-        wasm.__wbg_perspectivecolumnstyleelement_free(ptr);
+        wasm.__wbg_perspectivenumbercolumnstyleelement_free(ptr);
     }
     /**
     * @param {HTMLElement} elem
@@ -65299,8 +65401,8 @@ class PerspectiveColumnStyleElement {
     * @param {any} js_def_config
     */
     constructor(elem, js_config, js_def_config) {
-        var ret = wasm.perspectivecolumnstyleelement_new(addHeapObject(elem), addHeapObject(js_config), addHeapObject(js_def_config));
-        return PerspectiveColumnStyleElement.__wrap(ret);
+        var ret = wasm.perspectivenumbercolumnstyleelement_new(addHeapObject(elem), addHeapObject(js_config), addHeapObject(js_def_config));
+        return PerspectiveNumberColumnStyleElement.__wrap(ret);
     }
     /**
     * Reset to a provided JSON config, to be used in place of `new()` when
@@ -65314,7 +65416,7 @@ class PerspectiveColumnStyleElement {
     * @param {any} default_config
     */
     reset(config, default_config) {
-        wasm.perspectivecolumnstyleelement_reset(this.ptr, addHeapObject(config), addHeapObject(default_config));
+        wasm.perspectivenumbercolumnstyleelement_reset(this.ptr, addHeapObject(config), addHeapObject(default_config));
     }
     /**
     * Dispatches to `ModalElement::open(target)`
@@ -65324,20 +65426,98 @@ class PerspectiveColumnStyleElement {
     * @param {HTMLElement} target
     */
     open(target) {
-        wasm.perspectivecolumnstyleelement_open(this.ptr, addHeapObject(target));
+        wasm.perspectivenumbercolumnstyleelement_open(this.ptr, addHeapObject(target));
     }
     /**
     * Remove this `ModalElement` from the DOM.
     */
     close() {
-        wasm.perspectivecolumnstyleelement_close(this.ptr);
+        wasm.perspectivenumbercolumnstyleelement_close(this.ptr);
+    }
+    /**
+    */
+    destroy() {
+        const ptr = this.__destroy_into_raw();
+        wasm.perspectivenumbercolumnstyleelement_destroy(ptr);
     }
     /**
     * DOM lifecycle method when connected.  We don't use this, as it can fire during
     * innocuous events like re-parenting.
     */
     connected_callback() {
-        wasm.perspectivecolumnstyleelement_connected_callback(this.ptr);
+        wasm.perspectivenumbercolumnstyleelement_connected_callback(this.ptr);
+    }
+}
+/**
+*/
+class PerspectiveStringColumnStyleElement {
+
+    static __wrap(ptr) {
+        const obj = Object.create(PerspectiveStringColumnStyleElement.prototype);
+        obj.ptr = ptr;
+
+        return obj;
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.ptr;
+        this.ptr = 0;
+
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_perspectivestringcolumnstyleelement_free(ptr);
+    }
+    /**
+    * @param {HTMLElement} elem
+    * @param {any} js_config
+    * @param {any} js_default_config
+    */
+    constructor(elem, js_config, js_default_config) {
+        var ret = wasm.perspectivestringcolumnstyleelement_new(addHeapObject(elem), addHeapObject(js_config), addHeapObject(js_default_config));
+        return PerspectiveStringColumnStyleElement.__wrap(ret);
+    }
+    /**
+    * Reset to a provided JSON config, to be used in place of `new()` when
+    * re-using this component.
+    *
+    * # Arguments
+    * * `config` - a `ColumnStyle` config in JSON form.
+    * @param {any} config
+    */
+    reset(config) {
+        wasm.perspectivestringcolumnstyleelement_reset(this.ptr, addHeapObject(config));
+    }
+    /**
+    * Dispatches to `ModalElement::open(target)`
+    *
+    * # Arguments
+    * `target` - the relative target to pin this `ModalElement` to.
+    * @param {HTMLElement} target
+    */
+    open(target) {
+        wasm.perspectivestringcolumnstyleelement_open(this.ptr, addHeapObject(target));
+    }
+    /**
+    * Remove this `ModalElement` from the DOM.
+    */
+    close() {
+        wasm.perspectivestringcolumnstyleelement_close(this.ptr);
+    }
+    /**
+    */
+    destroy() {
+        const ptr = this.__destroy_into_raw();
+        wasm.perspectivestringcolumnstyleelement_destroy(ptr);
+    }
+    /**
+    * DOM lifecycle method when connected.  We don't use this, as it can fire during
+    * innocuous events like re-parenting.
+    */
+    connected_callback() {
+        wasm.perspectivestringcolumnstyleelement_connected_callback(this.ptr);
     }
 }
 /**
@@ -65658,107 +65838,107 @@ async function init(input) {
         var ret = false;
         return ret;
     };
-    imports.wbg.__wbg_size_7021af868456443a = function() { return handleError(function (arg0) {
-        var ret = getObject(arg0).size();
-        return addHeapObject(ret);
-    }, arguments) };
-    imports.wbg.__wbg_delete_2a66fbd418b1cdbb = function() { return handleError(function (arg0) {
-        var ret = getObject(arg0).delete();
-        return addHeapObject(ret);
-    }, arguments) };
-    imports.wbg.__wbg_resize_7cddb0b33bcd73c1 = function() { return handleError(function (arg0) {
-        var ret = getObject(arg0).resize();
-        return addHeapObject(ret);
-    }, arguments) };
-    imports.wbg.__wbg_validateexpressions_d7570066b11599d5 = function() { return handleError(function (arg0, arg1) {
-        var ret = getObject(arg0).validate_expressions(takeObject(arg1));
-        return addHeapObject(ret);
-    }, arguments) };
-    imports.wbg.__wbg_save_d4e5bfee882e1687 = function(arg0) {
-        var ret = getObject(arg0).save();
-        return addHeapObject(ret);
-    };
-    imports.wbg.__wbg_makeport_fa8d1c47fce9fab2 = function() { return handleError(function (arg0) {
-        var ret = getObject(arg0).make_port();
-        return addHeapObject(ret);
-    }, arguments) };
-    imports.wbg.__wbg_monacomodule_e0196b5f793ebd79 = function() {
-        var ret = (0,_snippets_perspective_viewer_c0843f68e2505c94_inline1_js__WEBPACK_IMPORTED_MODULE_1__.monaco_module)();
-        return addHeapObject(ret);
-    };
-    imports.wbg.__wbg_schema_5072b8075346144c = function() { return handleError(function (arg0) {
+    imports.wbg.__wbg_schema_ad095ebcdb4dd76f = function() { return handleError(function (arg0) {
         var ret = getObject(arg0).schema();
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_draw_68b5bec6c49d9537 = function() { return handleError(function (arg0, arg1, arg2, arg3, arg4, arg5, arg6) {
-        var ret = getObject(arg0).draw(getObject(arg1), arg2 === 0 ? undefined : arg3 >>> 0, arg4 === 0 ? undefined : arg5 >>> 0, arg6 !== 0);
-        return addHeapObject(ret);
-    }, arguments) };
-    imports.wbg.__wbg_default_ae230a3a54ef4360 = function() {
-        var ret = (0,_snippets_perspective_viewer_c0843f68e2505c94_inline0_js__WEBPACK_IMPORTED_MODULE_0__.default)();
-        return addHeapObject(ret);
-    };
-    imports.wbg.__wbg_numcolumns_ca3b90e5758d4cc4 = function() { return handleError(function (arg0) {
+    imports.wbg.__wbg_numcolumns_6a8d86bb12e88692 = function() { return handleError(function (arg0) {
         var ret = getObject(arg0).num_columns();
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_numrows_bfa0daf338aee083 = function() { return handleError(function (arg0) {
+    imports.wbg.__wbg_validateexpressions_eca5656ca2844419 = function() { return handleError(function (arg0, arg1) {
+        var ret = getObject(arg0).validate_expressions(takeObject(arg1));
+        return addHeapObject(ret);
+    }, arguments) };
+    imports.wbg.__wbg_numrows_dfd6ed430e0147ff = function() { return handleError(function (arg0) {
         var ret = getObject(arg0).num_rows();
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_restyle_a9ed1963cd616df4 = function() { return handleError(function (arg0, arg1) {
-        var ret = getObject(arg0).restyle(getObject(arg1));
+    imports.wbg.__wbg_resize_8a11e82f499e6d89 = function() { return handleError(function (arg0) {
+        var ret = getObject(arg0).resize();
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_register_5cef7f4ceb18dac9 = function(arg0, arg1) {
+    imports.wbg.__wbg_size_ea3857b7b9c01a01 = function() { return handleError(function (arg0) {
+        var ret = getObject(arg0).size();
+        return addHeapObject(ret);
+    }, arguments) };
+    imports.wbg.__wbg_view_e3b1f5dab63015c7 = function() { return handleError(function (arg0, arg1) {
+        var ret = getObject(arg0).view(getObject(arg1));
+        return addHeapObject(ret);
+    }, arguments) };
+    imports.wbg.__wbg_monacomodule_9d24db234e2e1549 = function() {
+        var ret = (0,_snippets_perspective_viewer_362cf5cec2bfcc07_inline1_js__WEBPACK_IMPORTED_MODULE_1__.monaco_module)();
+        return addHeapObject(ret);
+    };
+    imports.wbg.__wbg_save_5742b4ec09ae0d34 = function(arg0) {
+        var ret = getObject(arg0).save();
+        return addHeapObject(ret);
+    };
+    imports.wbg.__wbg_register_1a0bbab9f7619662 = function(arg0, arg1) {
         getObject(arg0).register(takeObject(arg1));
     };
-    imports.wbg.__wbg_setMonarchTokensProvider_a474b0b926df5e72 = function(arg0, arg1, arg2, arg3) {
+    imports.wbg.__wbg_setMonarchTokensProvider_1fa51a80d68f1ac1 = function(arg0, arg1, arg2, arg3) {
         getObject(arg0).setMonarchTokensProvider(getStringFromWasm0(arg1, arg2), takeObject(arg3));
     };
-    imports.wbg.__wbg_setLanguageConfiguration_8c4c063e2129b864 = function(arg0, arg1, arg2, arg3) {
+    imports.wbg.__wbg_setLanguageConfiguration_d6c86e31029d9ef5 = function(arg0, arg1, arg2, arg3) {
         getObject(arg0).setLanguageConfiguration(getStringFromWasm0(arg1, arg2), takeObject(arg3));
     };
-    imports.wbg.__wbg_registerCompletionItemProvider_3b1dfed9945161f5 = function(arg0, arg1, arg2, arg3) {
+    imports.wbg.__wbg_registerCompletionItemProvider_61ecf83f366d2e16 = function(arg0, arg1, arg2, arg3) {
         getObject(arg0).registerCompletionItemProvider(getStringFromWasm0(arg1, arg2), takeObject(arg3));
     };
-    imports.wbg.__wbg_update_212fef5bc3ec3f57 = function() { return handleError(function (arg0, arg1, arg2, arg3, arg4, arg5, arg6) {
-        var ret = getObject(arg0).update(getObject(arg1), arg2 === 0 ? undefined : arg3 >>> 0, arg4 === 0 ? undefined : arg5 >>> 0, arg6 !== 0);
+    imports.wbg.__wbg_draw_f7001e36a5451367 = function() { return handleError(function (arg0, arg1, arg2, arg3, arg4, arg5, arg6) {
+        var ret = getObject(arg0).draw(getObject(arg1), arg2 === 0 ? undefined : arg3 >>> 0, arg4 === 0 ? undefined : arg5 >>> 0, arg6 !== 0);
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_columns_6c3cf45d167745d7 = function() { return handleError(function (arg0) {
-        var ret = getObject(arg0).columns();
+    imports.wbg.__wbg_delete_cd3c8d59be8fee68 = function() { return handleError(function (arg0) {
+        var ret = getObject(arg0).delete();
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_tocsv_4e5b0c79211496e9 = function() { return handleError(function (arg0, arg1) {
-        var ret = getObject(arg0).to_csv(takeObject(arg1));
+    imports.wbg.__wbg_makeport_8c752476acd3fe27 = function() { return handleError(function (arg0) {
+        var ret = getObject(arg0).make_port();
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_schema_299601974bdb2121 = function() { return handleError(function (arg0) {
+    imports.wbg.__wbg_schema_b1cd087318fe451d = function() { return handleError(function (arg0) {
         var ret = getObject(arg0).schema();
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_view_ca467a892d036d57 = function() { return handleError(function (arg0, arg1) {
-        var ret = getObject(arg0).view(getObject(arg1));
+    imports.wbg.__wbg_tocsv_2ec429ab1e0bb451 = function() { return handleError(function (arg0, arg1) {
+        var ret = getObject(arg0).to_csv(takeObject(arg1));
+        return addHeapObject(ret);
+    }, arguments) };
+    imports.wbg.__wbg_update_b0b2df3342b63ce2 = function() { return handleError(function (arg0, arg1, arg2, arg3, arg4, arg5, arg6) {
+        var ret = getObject(arg0).update(getObject(arg1), arg2 === 0 ? undefined : arg3 >>> 0, arg4 === 0 ? undefined : arg5 >>> 0, arg6 !== 0);
+        return addHeapObject(ret);
+    }, arguments) };
+    imports.wbg.__wbg_default_3edfeada4cfc405b = function() {
+        var ret = (0,_snippets_perspective_viewer_362cf5cec2bfcc07_inline0_js__WEBPACK_IMPORTED_MODULE_0__.default)();
+        return addHeapObject(ret);
+    };
+    imports.wbg.__wbg_columns_b15d8d6c4a353055 = function() { return handleError(function (arg0) {
+        var ret = getObject(arg0).columns();
+        return addHeapObject(ret);
+    }, arguments) };
+    imports.wbg.__wbg_restyle_d98bfa634bd438a3 = function() { return handleError(function (arg0, arg1) {
+        var ret = getObject(arg0).restyle(getObject(arg1));
         return addHeapObject(ret);
     }, arguments) };
     imports.wbg.__wbindgen_is_null = function(arg0) {
         var ret = getObject(arg0) === null;
         return ret;
     };
-    imports.wbg.__wbg_lineNumber_bae643dee5b6fac6 = function(arg0) {
+    imports.wbg.__wbg_lineNumber_6b2a1c0159871238 = function(arg0) {
         var ret = getObject(arg0).lineNumber;
         return ret;
     };
-    imports.wbg.__wbg_column_5dc2ec4a9446da5b = function(arg0) {
+    imports.wbg.__wbg_column_885264f87b0a4a0b = function(arg0) {
         var ret = getObject(arg0).column;
         return ret;
     };
-    imports.wbg.__wbg_findTokenIndexAtOffset_28c53f44c2fabd17 = function(arg0, arg1) {
+    imports.wbg.__wbg_findTokenIndexAtOffset_847b202bf8c16c65 = function(arg0, arg1) {
         var ret = getObject(arg0).findTokenIndexAtOffset(arg1 >>> 0);
         return ret;
     };
-    imports.wbg.__wbg_getClassName_dc8a0b1d4f360527 = function(arg0, arg1) {
+    imports.wbg.__wbg_getClassName_5bc865fe97705383 = function(arg0, arg1) {
         var ret = getObject(arg0).getClassName(arg1 >>> 0);
         return addHeapObject(ret);
     };
@@ -65766,677 +65946,640 @@ async function init(input) {
         var ret = getObject(arg0) === getObject(arg1);
         return ret;
     };
-    imports.wbg.__wbg_triggerKind_a04b39923e7f8080 = function(arg0) {
+    imports.wbg.__wbg_triggerKind_9e780becc9ed4ce7 = function(arg0) {
         var ret = getObject(arg0).triggerKind;
         return ret;
     };
-    imports.wbg.__wbg_restore_76e4aa8fb7320db8 = function(arg0, arg1) {
+    imports.wbg.__wbg_restore_f1fbc066c9637e24 = function(arg0, arg1) {
         getObject(arg0).restore(getObject(arg1));
     };
-    imports.wbg.__wbg_delete_cbf9e01614dcd93d = function(arg0) {
+    imports.wbg.__wbg_delete_55c2b041a4419d5d = function(arg0) {
         getObject(arg0).delete();
     };
-    imports.wbg.__wbg_setrenderwarning_7f18f43f4c195de9 = function(arg0, arg1) {
+    imports.wbg.__wbg_setrenderwarning_2b6ccbc5a0b49b4f = function(arg0, arg1) {
         getObject(arg0).render_warning = arg1 !== 0;
     };
     imports.wbg.__wbindgen_is_undefined = function(arg0) {
         var ret = getObject(arg0) === undefined;
         return ret;
     };
-    imports.wbg.__wbg_editor_a3e8f38e5a6ff050 = function(arg0) {
+    imports.wbg.__wbg_editor_91084c85a69a3fde = function(arg0) {
         var ret = getObject(arg0).editor;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_languages_bdce22417e89d114 = function(arg0) {
+    imports.wbg.__wbg_languages_aca44d3eda97078c = function(arg0) {
         var ret = getObject(arg0).languages;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_create_2b2bfbcdaf3a80ac = function(arg0, arg1, arg2) {
+    imports.wbg.__wbg_create_806f286d290f99c8 = function(arg0, arg1, arg2) {
         var ret = getObject(arg0).create(takeObject(arg1), takeObject(arg2));
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_defineTheme_d37305aaddf23730 = function(arg0, arg1, arg2, arg3) {
+    imports.wbg.__wbg_defineTheme_c4f18cdd46a4014d = function(arg0, arg1, arg2, arg3) {
         getObject(arg0).defineTheme(getStringFromWasm0(arg1, arg2), takeObject(arg3));
     };
-    imports.wbg.__wbg_setModelMarkers_b67b2e9724d8e76f = function(arg0, arg1, arg2, arg3, arg4) {
+    imports.wbg.__wbg_setModelMarkers_f49dfc56a0816242 = function(arg0, arg1, arg2, arg3, arg4) {
         getObject(arg0).setModelMarkers(getObject(arg1), getStringFromWasm0(arg2, arg3), getObject(arg4));
     };
-    imports.wbg.__wbg_layout_e155854fca3e6a1a = function(arg0, arg1) {
+    imports.wbg.__wbg_layout_901473f7828d2488 = function(arg0, arg1) {
         getObject(arg0).layout(getObject(arg1));
     };
-    imports.wbg.__wbg_getModel_923cb083a285ba71 = function(arg0) {
+    imports.wbg.__wbg_getModel_4ba1a741bc1eaaff = function(arg0) {
         var ret = getObject(arg0).getModel();
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_getValue_30be2d9f0a0559a4 = function(arg0) {
+    imports.wbg.__wbg_getValue_e8d4002de327ab32 = function(arg0) {
         var ret = getObject(arg0).getValue();
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_setValue_6eca76f49bed2cf7 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbg_setValue_464f1cd5da0d99d4 = function(arg0, arg1, arg2) {
         getObject(arg0).setValue(getStringFromWasm0(arg1, arg2));
     };
-    imports.wbg.__wbg_setPosition_f1690886e8f9176a = function(arg0, arg1) {
+    imports.wbg.__wbg_setPosition_53889da2861e22f4 = function(arg0, arg1) {
         getObject(arg0).setPosition(getObject(arg1));
     };
-    imports.wbg.__wbg_addCommand_98b1790956464b06 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbg_addCommand_0087418877d24153 = function(arg0, arg1, arg2) {
         getObject(arg0).addCommand(arg1 >>> 0, getObject(arg2));
     };
-    imports.wbg.__wbg_focus_3131955a4b5e7d82 = function(arg0) {
+    imports.wbg.__wbg_focus_d1521065885d8ced = function(arg0) {
         getObject(arg0).focus();
     };
-    imports.wbg.__wbg_onDidChangeContent_d41320178f8fc3db = function(arg0, arg1) {
+    imports.wbg.__wbg_onDidChangeContent_333bdbf90ce64b26 = function(arg0, arg1) {
         getObject(arg0).onDidChangeContent(getObject(arg1));
     };
-    imports.wbg.__wbg_getLineTokens_4d587d3918470176 = function(arg0, arg1) {
+    imports.wbg.__wbg_getLineTokens_6c81bc0a3f533604 = function(arg0, arg1) {
         var ret = getObject(arg0).getLineTokens(arg1 >>> 0);
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_onupdate_9b5a885e9fd72396 = function(arg0, arg1) {
+    imports.wbg.__wbg_onupdate_b8cf42908fc20235 = function(arg0, arg1) {
         getObject(arg0).on_update(getObject(arg1));
     };
-    imports.wbg.__wbg_removeupdate_8369e0bc3d34e1fc = function(arg0, arg1) {
+    imports.wbg.__wbg_removeupdate_77fe2a7740d00e48 = function(arg0, arg1) {
         getObject(arg0).remove_update(getObject(arg1));
     };
-    imports.wbg.__wbg_errors_5588c8bb5de1f6ca = function(arg0) {
+    imports.wbg.__wbg_errors_20c512f8dca36c8d = function(arg0) {
         var ret = getObject(arg0).errors;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_expressionschema_360e1fb9b7a86594 = function(arg0) {
+    imports.wbg.__wbg_expressionschema_7a07dfdf1c19fa1f = function(arg0) {
         var ret = getObject(arg0).expression_schema;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_expressionalias_c29958fc7f2b9f5a = function(arg0) {
+    imports.wbg.__wbg_expressionalias_c0691678ddeeed2e = function(arg0) {
         var ret = getObject(arg0).expression_alias;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_name_ffec4c011f05a36f = function(arg0, arg1) {
+    imports.wbg.__wbg_name_4e59ce156796a1db = function(arg0, arg1) {
         var ret = getObject(arg1).name;
         var ptr0 = passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         var len0 = WASM_VECTOR_LEN;
         getInt32Memory0()[arg0 / 4 + 1] = len0;
         getInt32Memory0()[arg0 / 4 + 0] = ptr0;
     };
-    imports.wbg.__wbg_maxcolumns_9905aa44ce5bdf3e = function(arg0, arg1) {
+    imports.wbg.__wbg_maxcolumns_41c0acb329b63f5a = function(arg0, arg1) {
         var ret = getObject(arg1).max_columns;
         getInt32Memory0()[arg0 / 4 + 1] = isLikeNone(ret) ? 0 : ret;
         getInt32Memory0()[arg0 / 4 + 0] = !isLikeNone(ret);
     };
-    imports.wbg.__wbg_maxcells_b9453739c4f8d0df = function(arg0, arg1) {
+    imports.wbg.__wbg_maxcells_240ed21a2cc23a45 = function(arg0, arg1) {
         var ret = getObject(arg1).max_cells;
         getInt32Memory0()[arg0 / 4 + 1] = isLikeNone(ret) ? 0 : ret;
         getInt32Memory0()[arg0 / 4 + 0] = !isLikeNone(ret);
     };
-    imports.wbg.__wbg_renderwarning_20c26e28783869b4 = function(arg0) {
+    imports.wbg.__wbg_renderwarning_28b6ae4b73e78f68 = function(arg0) {
         var ret = getObject(arg0).render_warning;
         return isLikeNone(ret) ? 0xFFFFFF : ret ? 1 : 0;
     };
-    imports.wbg.__wbg_selectmode_6fecb5f6426e7d2d = function(arg0) {
+    imports.wbg.__wbg_selectmode_2d072add5bfb5e92 = function(arg0) {
         var ret = getObject(arg0).select_mode;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_minconfigcolumns_2b141a9a4af6c59e = function(arg0, arg1) {
+    imports.wbg.__wbg_minconfigcolumns_fc8660538ce7232d = function(arg0, arg1) {
         var ret = getObject(arg1).min_config_columns;
         getInt32Memory0()[arg0 / 4 + 1] = isLikeNone(ret) ? 0 : ret;
         getInt32Memory0()[arg0 / 4 + 0] = !isLikeNone(ret);
     };
-    imports.wbg.__wbg_configcolumnnames_0757342ef5bd0e91 = function(arg0) {
+    imports.wbg.__wbg_configcolumnnames_1a26628997420d20 = function(arg0) {
         var ret = getObject(arg0).config_column_names;
         return isLikeNone(ret) ? 0 : addHeapObject(ret);
     };
-    imports.wbg.__wbg_new_0996eb6852c8fcd7 = function(arg0) {
-        var ret = new _snippets_perspective_viewer_c0843f68e2505c94_inline2_js__WEBPACK_IMPORTED_MODULE_2__.default(getObject(arg0));
+    imports.wbg.__wbg_new_752f1a80978ec26a = function(arg0) {
+        var ret = new _snippets_perspective_viewer_362cf5cec2bfcc07_inline2_js__WEBPACK_IMPORTED_MODULE_2__.default(getObject(arg0));
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_observe_61640aa76650bada = function(arg0, arg1) {
+    imports.wbg.__wbg_observe_86c9286ddb2080e3 = function(arg0, arg1) {
         getObject(arg0).observe(getObject(arg1));
     };
-    imports.wbg.__wbg_unobserve_0c2f4caad1896637 = function(arg0, arg1) {
+    imports.wbg.__wbg_unobserve_6d276eada6182ea1 = function(arg0, arg1) {
         getObject(arg0).unobserve(getObject(arg1));
     };
-    imports.wbg.__wbg_contentRect_a94859f043ac1527 = function(arg0) {
+    imports.wbg.__wbg_contentRect_3f8cd97f6e2969a6 = function(arg0) {
         var ret = getObject(arg0).contentRect;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_new_59cb74e423758ede = function() {
+    imports.wbg.__wbg_new_693216e109162396 = function() {
         var ret = new Error();
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_stack_558ba5917b466edd = function(arg0, arg1) {
+    imports.wbg.__wbg_stack_0ddaca5d1abfb52f = function(arg0, arg1) {
         var ret = getObject(arg1).stack;
         var ptr0 = passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         var len0 = WASM_VECTOR_LEN;
         getInt32Memory0()[arg0 / 4 + 1] = len0;
         getInt32Memory0()[arg0 / 4 + 0] = ptr0;
     };
-    imports.wbg.__wbg_error_4bb6c2a97407129a = function(arg0, arg1) {
+    imports.wbg.__wbg_error_09919627ac0992f5 = function(arg0, arg1) {
         try {
             console.error(getStringFromWasm0(arg0, arg1));
         } finally {
             wasm.__wbindgen_free(arg0, arg1);
         }
     };
-    imports.wbg.__wbg_newwithu8arraysequence_717878549d30e47f = function() { return handleError(function (arg0) {
+    imports.wbg.__wbg_newwithu8arraysequence_fdc7895dacd60d21 = function() { return handleError(function (arg0) {
         var ret = new Blob(getObject(arg0));
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_writeText_cacf5a0e39e301cf = function(arg0, arg1, arg2) {
+    imports.wbg.__wbg_writeText_24e516a13acdea5a = function(arg0, arg1, arg2) {
         var ret = getObject(arg0).writeText(getStringFromWasm0(arg1, arg2));
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_getPropertyValue_74b0b2fd345b03c9 = function() { return handleError(function (arg0, arg1, arg2, arg3) {
+    imports.wbg.__wbg_getPropertyValue_937a708feb88202f = function() { return handleError(function (arg0, arg1, arg2, arg3) {
         var ret = getObject(arg1).getPropertyValue(getStringFromWasm0(arg2, arg3));
         var ptr0 = passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         var len0 = WASM_VECTOR_LEN;
         getInt32Memory0()[arg0 / 4 + 1] = len0;
         getInt32Memory0()[arg0 / 4 + 0] = ptr0;
     }, arguments) };
-    imports.wbg.__wbg_setProperty_e3d42ccff5ebac2f = function() { return handleError(function (arg0, arg1, arg2, arg3, arg4) {
+    imports.wbg.__wbg_setProperty_dccccce3a52c26db = function() { return handleError(function (arg0, arg1, arg2, arg3, arg4) {
         getObject(arg0).setProperty(getStringFromWasm0(arg1, arg2), getStringFromWasm0(arg3, arg4));
     }, arguments) };
-    imports.wbg.__wbg_new_9907abcf6ec2b9a0 = function() { return handleError(function (arg0, arg1) {
+    imports.wbg.__wbg_new_3af016a292a0ea38 = function() { return handleError(function (arg0, arg1) {
         var ret = new CustomEvent(getStringFromWasm0(arg0, arg1));
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_newwitheventinitdict_db06a760c6f3e418 = function() { return handleError(function (arg0, arg1, arg2) {
+    imports.wbg.__wbg_newwitheventinitdict_183544aa2c542424 = function() { return handleError(function (arg0, arg1, arg2) {
         var ret = new CustomEvent(getStringFromWasm0(arg0, arg1), getObject(arg2));
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_setDragImage_a9b7e618fc64880c = function(arg0, arg1, arg2, arg3) {
+    imports.wbg.__wbg_setDragImage_97e7f5b52f6e9f92 = function(arg0, arg1, arg2, arg3) {
         getObject(arg0).setDragImage(getObject(arg1), arg2, arg3);
     };
-    imports.wbg.__wbg_readyState_579fe5d90b8e2552 = function(arg0, arg1) {
+    imports.wbg.__wbg_readyState_be8f2b804adc7ff6 = function(arg0, arg1) {
         var ret = getObject(arg1).readyState;
         var ptr0 = passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         var len0 = WASM_VECTOR_LEN;
         getInt32Memory0()[arg0 / 4 + 1] = len0;
         getInt32Memory0()[arg0 / 4 + 0] = ptr0;
     };
-    imports.wbg.__wbg_body_08ba7a3043ff8e77 = function(arg0) {
+    imports.wbg.__wbg_body_525168d9e773c3f8 = function(arg0) {
         var ret = getObject(arg0).body;
         return isLikeNone(ret) ? 0 : addHeapObject(ret);
     };
-    imports.wbg.__wbg_fonts_f832055e8b7cb21e = function(arg0) {
+    imports.wbg.__wbg_fonts_62f407546d8daeb4 = function(arg0) {
         var ret = getObject(arg0).fonts;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_createElement_7cbe07ad3289abea = function() { return handleError(function (arg0, arg1, arg2) {
+    imports.wbg.__wbg_createElement_ac65a6ce60c4812c = function() { return handleError(function (arg0, arg1, arg2) {
         var ret = getObject(arg0).createElement(getStringFromWasm0(arg1, arg2));
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_createElementNS_ae76308e06470c87 = function() { return handleError(function (arg0, arg1, arg2, arg3, arg4) {
+    imports.wbg.__wbg_createElementNS_267edeea0c97331c = function() { return handleError(function (arg0, arg1, arg2, arg3, arg4) {
         var ret = getObject(arg0).createElementNS(arg1 === 0 ? undefined : getStringFromWasm0(arg1, arg2), getStringFromWasm0(arg3, arg4));
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_createTextNode_bbff6f9f6e6b38bf = function(arg0, arg1, arg2) {
+    imports.wbg.__wbg_createTextNode_442392ad92e75695 = function(arg0, arg1, arg2) {
         var ret = getObject(arg0).createTextNode(getStringFromWasm0(arg1, arg2));
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_width_5c7aabd2a7489c51 = function(arg0) {
+    imports.wbg.__wbg_width_a04d387a0e0ffe94 = function(arg0) {
         var ret = getObject(arg0).width;
         return ret;
     };
-    imports.wbg.__wbg_height_b3f5ccd4af20f47f = function(arg0) {
+    imports.wbg.__wbg_height_f7c5c956730ab37a = function(arg0) {
         var ret = getObject(arg0).height;
         return ret;
     };
-    imports.wbg.__wbg_width_4a05f41e80124c7f = function(arg0) {
+    imports.wbg.__wbg_width_4a83a800a544b73a = function(arg0) {
         var ret = getObject(arg0).width;
         return ret;
     };
-    imports.wbg.__wbg_height_34876dec0309368d = function(arg0) {
+    imports.wbg.__wbg_height_76d64c7ff32eb400 = function(arg0) {
         var ret = getObject(arg0).height;
         return ret;
     };
-    imports.wbg.__wbg_top_759d072a3a15fd13 = function(arg0) {
+    imports.wbg.__wbg_top_22e7024d271b5677 = function(arg0) {
         var ret = getObject(arg0).top;
         return ret;
     };
-    imports.wbg.__wbg_left_515d30ed4e76f921 = function(arg0) {
+    imports.wbg.__wbg_left_f2f24ba3851b8295 = function(arg0) {
         var ret = getObject(arg0).left;
         return ret;
     };
-    imports.wbg.__wbg_get_59a8aefe136d2a82 = function(arg0, arg1, arg2, arg3) {
+    imports.wbg.__wbg_get_dc5a3f4246f4363e = function(arg0, arg1, arg2, arg3) {
         var ret = getObject(arg1)[getStringFromWasm0(arg2, arg3)];
         var ptr0 = isLikeNone(ret) ? 0 : passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         var len0 = WASM_VECTOR_LEN;
         getInt32Memory0()[arg0 / 4 + 1] = len0;
         getInt32Memory0()[arg0 / 4 + 0] = ptr0;
     };
-    imports.wbg.__wbg_set_a19051e252972900 = function() { return handleError(function (arg0, arg1, arg2, arg3, arg4) {
+    imports.wbg.__wbg_set_6bc5ebabff049b08 = function() { return handleError(function (arg0, arg1, arg2, arg3, arg4) {
         getObject(arg0)[getStringFromWasm0(arg1, arg2)] = getStringFromWasm0(arg3, arg4);
     }, arguments) };
-    imports.wbg.__wbg_delete_da6a924ec6dfb430 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbg_delete_bdb7962606ab7ffc = function(arg0, arg1, arg2) {
         delete getObject(arg0)[getStringFromWasm0(arg1, arg2)];
     };
-    imports.wbg.__wbg_add_7aae9b7574ae2ffd = function() { return handleError(function (arg0, arg1, arg2) {
+    imports.wbg.__wbg_add_3b4cecc512643e9f = function() { return handleError(function (arg0, arg1, arg2) {
         getObject(arg0).add(getStringFromWasm0(arg1, arg2));
     }, arguments) };
-    imports.wbg.__wbg_remove_13a99cef9b30fd93 = function() { return handleError(function (arg0, arg1, arg2) {
+    imports.wbg.__wbg_remove_c15603553c81dc31 = function() { return handleError(function (arg0, arg1, arg2) {
         getObject(arg0).remove(getStringFromWasm0(arg1, arg2));
     }, arguments) };
-    imports.wbg.__wbg_dataTransfer_f3d4cd9b8a33f8cd = function(arg0) {
+    imports.wbg.__wbg_dataTransfer_7916d51ea966dcb4 = function(arg0) {
         var ret = getObject(arg0).dataTransfer;
         return isLikeNone(ret) ? 0 : addHeapObject(ret);
     };
-    imports.wbg.__wbg_instanceof_Element_6bc6669240998e07 = function(arg0) {
+    imports.wbg.__wbg_instanceof_Element_8143882371652178 = function(arg0) {
         var ret = getObject(arg0) instanceof Element;
         return ret;
     };
-    imports.wbg.__wbg_namespaceURI_5ab9ad8edd6b745e = function(arg0, arg1) {
+    imports.wbg.__wbg_namespaceURI_f65a7a956acf4bc5 = function(arg0, arg1) {
         var ret = getObject(arg1).namespaceURI;
         var ptr0 = isLikeNone(ret) ? 0 : passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         var len0 = WASM_VECTOR_LEN;
         getInt32Memory0()[arg0 / 4 + 1] = len0;
         getInt32Memory0()[arg0 / 4 + 0] = ptr0;
     };
-    imports.wbg.__wbg_classList_1f142788c78799ed = function(arg0) {
+    imports.wbg.__wbg_classList_bbb57a7d3cc23c85 = function(arg0) {
         var ret = getObject(arg0).classList;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_clientWidth_725008becfa6f008 = function(arg0) {
+    imports.wbg.__wbg_clientWidth_acc83939b1545b91 = function(arg0) {
         var ret = getObject(arg0).clientWidth;
         return ret;
     };
-    imports.wbg.__wbg_clientHeight_cd4d7e2d713d4b5f = function(arg0) {
+    imports.wbg.__wbg_clientHeight_95c707ac8248c652 = function(arg0) {
         var ret = getObject(arg0).clientHeight;
         return ret;
     };
-    imports.wbg.__wbg_children_5570264a02a5348a = function(arg0) {
+    imports.wbg.__wbg_children_283b5c3c4312d771 = function(arg0) {
         var ret = getObject(arg0).children;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_attachShadow_121aeff0e52af368 = function() { return handleError(function (arg0, arg1) {
+    imports.wbg.__wbg_attachShadow_f0d8083616f120aa = function() { return handleError(function (arg0, arg1) {
         var ret = getObject(arg0).attachShadow(getObject(arg1));
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_getAttribute_5d45357036c3ad3d = function(arg0, arg1, arg2, arg3) {
-        var ret = getObject(arg1).getAttribute(getStringFromWasm0(arg2, arg3));
-        var ptr0 = isLikeNone(ret) ? 0 : passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        var len0 = WASM_VECTOR_LEN;
-        getInt32Memory0()[arg0 / 4 + 1] = len0;
-        getInt32Memory0()[arg0 / 4 + 0] = ptr0;
-    };
-    imports.wbg.__wbg_getBoundingClientRect_813f74e2f4f344e2 = function(arg0) {
+    imports.wbg.__wbg_getBoundingClientRect_dbd899b7c945c55d = function(arg0) {
         var ret = getObject(arg0).getBoundingClientRect();
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_hasAttribute_7285532dbf4a3478 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbg_hasAttribute_4c5fc91198e862c3 = function(arg0, arg1, arg2) {
         var ret = getObject(arg0).hasAttribute(getStringFromWasm0(arg1, arg2));
         return ret;
     };
-    imports.wbg.__wbg_removeAttribute_43b052e0560d223b = function() { return handleError(function (arg0, arg1, arg2) {
+    imports.wbg.__wbg_removeAttribute_16e5bf3866aa53e8 = function() { return handleError(function (arg0, arg1, arg2) {
         getObject(arg0).removeAttribute(getStringFromWasm0(arg1, arg2));
     }, arguments) };
-    imports.wbg.__wbg_setAttribute_b638fce95071fff6 = function() { return handleError(function (arg0, arg1, arg2, arg3, arg4) {
+    imports.wbg.__wbg_setAttribute_27ca65e30a1c3c4a = function() { return handleError(function (arg0, arg1, arg2, arg3, arg4) {
         getObject(arg0).setAttribute(getStringFromWasm0(arg1, arg2), getStringFromWasm0(arg3, arg4));
     }, arguments) };
-    imports.wbg.__wbg_toggleAttribute_611dae8d928bf34f = function() { return handleError(function (arg0, arg1, arg2, arg3) {
+    imports.wbg.__wbg_toggleAttribute_8cf952af952c2cc5 = function() { return handleError(function (arg0, arg1, arg2, arg3) {
         var ret = getObject(arg0).toggleAttribute(getStringFromWasm0(arg1, arg2), arg3 !== 0);
         return ret;
     }, arguments) };
-    imports.wbg.__wbg_target_62e7aaed452a6541 = function(arg0) {
+    imports.wbg.__wbg_target_2dfa485f32a6d005 = function(arg0) {
         var ret = getObject(arg0).target;
         return isLikeNone(ret) ? 0 : addHeapObject(ret);
     };
-    imports.wbg.__wbg_currentTarget_78272dcb22832a88 = function(arg0) {
+    imports.wbg.__wbg_currentTarget_6b97d12fe7054dd4 = function(arg0) {
         var ret = getObject(arg0).currentTarget;
         return isLikeNone(ret) ? 0 : addHeapObject(ret);
     };
-    imports.wbg.__wbg_preventDefault_4eb36ec8e5563ad6 = function(arg0) {
+    imports.wbg.__wbg_preventDefault_7c4d18eb2bb1a26a = function(arg0) {
         getObject(arg0).preventDefault();
     };
-    imports.wbg.__wbg_stopPropagation_a8397a950849e3f6 = function(arg0) {
+    imports.wbg.__wbg_stopPropagation_11ccdc30c46ad19a = function(arg0) {
         getObject(arg0).stopPropagation();
     };
-    imports.wbg.__wbg_addEventListener_63378230aa6735d7 = function() { return handleError(function (arg0, arg1, arg2, arg3) {
+    imports.wbg.__wbg_addEventListener_936431894dca4639 = function() { return handleError(function (arg0, arg1, arg2, arg3) {
         getObject(arg0).addEventListener(getStringFromWasm0(arg1, arg2), getObject(arg3));
     }, arguments) };
-    imports.wbg.__wbg_addEventListener_e8fdfac380f9ea25 = function() { return handleError(function (arg0, arg1, arg2, arg3, arg4) {
+    imports.wbg.__wbg_addEventListener_6d9a78a5d277bdaf = function() { return handleError(function (arg0, arg1, arg2, arg3, arg4) {
         getObject(arg0).addEventListener(getStringFromWasm0(arg1, arg2), getObject(arg3), getObject(arg4));
     }, arguments) };
-    imports.wbg.__wbg_dispatchEvent_ff22c95b95c5d04d = function() { return handleError(function (arg0, arg1) {
+    imports.wbg.__wbg_dispatchEvent_bacbc3eeb0d17fcd = function() { return handleError(function (arg0, arg1) {
         var ret = getObject(arg0).dispatchEvent(getObject(arg1));
         return ret;
     }, arguments) };
-    imports.wbg.__wbg_removeEventListener_19da1e4551104118 = function() { return handleError(function (arg0, arg1, arg2, arg3) {
+    imports.wbg.__wbg_removeEventListener_6e1e9e37bdc74923 = function() { return handleError(function (arg0, arg1, arg2, arg3) {
         getObject(arg0).removeEventListener(getStringFromWasm0(arg1, arg2), getObject(arg3));
     }, arguments) };
-    imports.wbg.__wbg_removeEventListener_0007cd1449f82876 = function() { return handleError(function (arg0, arg1, arg2, arg3, arg4) {
+    imports.wbg.__wbg_removeEventListener_09c628abeb1c283b = function() { return handleError(function (arg0, arg1, arg2, arg3, arg4) {
         getObject(arg0).removeEventListener(getStringFromWasm0(arg1, arg2), getObject(arg3), arg4 !== 0);
     }, arguments) };
-    imports.wbg.__wbg_instanceof_FontFace_9821b9acee3abf4f = function(arg0) {
+    imports.wbg.__wbg_instanceof_FontFace_095633da5a60e4d1 = function(arg0) {
         var ret = getObject(arg0) instanceof FontFace;
         return ret;
     };
-    imports.wbg.__wbg_family_f0f774ca2883f93c = function(arg0, arg1) {
+    imports.wbg.__wbg_family_8b33871beb47388b = function(arg0, arg1) {
         var ret = getObject(arg1).family;
         var ptr0 = passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         var len0 = WASM_VECTOR_LEN;
         getInt32Memory0()[arg0 / 4 + 1] = len0;
         getInt32Memory0()[arg0 / 4 + 0] = ptr0;
     };
-    imports.wbg.__wbg_weight_1091d687334c6c24 = function(arg0, arg1) {
+    imports.wbg.__wbg_weight_cb1f0ded9c3fcd29 = function(arg0, arg1) {
         var ret = getObject(arg1).weight;
         var ptr0 = passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         var len0 = WASM_VECTOR_LEN;
         getInt32Memory0()[arg0 / 4 + 1] = len0;
         getInt32Memory0()[arg0 / 4 + 0] = ptr0;
     };
-    imports.wbg.__wbg_loaded_8c895fa7e9477709 = function() { return handleError(function (arg0) {
+    imports.wbg.__wbg_loaded_b07b4ee5c31f9abc = function() { return handleError(function (arg0) {
         var ret = getObject(arg0).loaded;
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_values_04b408eb3d6d7687 = function(arg0) {
+    imports.wbg.__wbg_values_705706cce046e96c = function(arg0) {
         var ret = getObject(arg0).values();
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_next_016bee4a741ccb79 = function() { return handleError(function (arg0) {
+    imports.wbg.__wbg_next_c7f69285044a0543 = function() { return handleError(function (arg0) {
         var ret = getObject(arg0).next();
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_item_a479291920c028ec = function(arg0, arg1) {
+    imports.wbg.__wbg_item_5a5f92bba46832d3 = function(arg0, arg1) {
         var ret = getObject(arg0).item(arg1 >>> 0);
         return isLikeNone(ret) ? 0 : addHeapObject(ret);
     };
-    imports.wbg.__wbg_dataset_49b9d3bcc6ea66c2 = function(arg0) {
+    imports.wbg.__wbg_dataset_7f3bc0a0cd4f7382 = function(arg0) {
         var ret = getObject(arg0).dataset;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_style_854f82bcc16efd28 = function(arg0) {
+    imports.wbg.__wbg_style_25309daade79abb3 = function(arg0) {
         var ret = getObject(arg0).style;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_offsetParent_8de5608b9b91f0c9 = function(arg0) {
+    imports.wbg.__wbg_offsetParent_21a2a48c194cfe05 = function(arg0) {
         var ret = getObject(arg0).offsetParent;
         return isLikeNone(ret) ? 0 : addHeapObject(ret);
     };
-    imports.wbg.__wbg_offsetWidth_fcd49defe585c688 = function(arg0) {
+    imports.wbg.__wbg_offsetWidth_7dd96a3df070d552 = function(arg0) {
         var ret = getObject(arg0).offsetWidth;
         return ret;
     };
-    imports.wbg.__wbg_offsetHeight_bb51b47c9f03728a = function(arg0) {
+    imports.wbg.__wbg_offsetHeight_fe07e4498698e768 = function(arg0) {
         var ret = getObject(arg0).offsetHeight;
         return ret;
     };
-    imports.wbg.__wbg_blur_11fab903447f8be6 = function() { return handleError(function (arg0) {
+    imports.wbg.__wbg_blur_b336d41728268f5a = function() { return handleError(function (arg0) {
         getObject(arg0).blur();
     }, arguments) };
-    imports.wbg.__wbg_click_5bcdaa3dfcd006fb = function(arg0) {
+    imports.wbg.__wbg_click_a22518ab89bfd9b8 = function(arg0) {
         getObject(arg0).click();
     };
-    imports.wbg.__wbg_focus_a3a607c2c1081818 = function() { return handleError(function (arg0) {
+    imports.wbg.__wbg_focus_2fac919cca20d33b = function() { return handleError(function (arg0) {
         getObject(arg0).focus();
     }, arguments) };
-    imports.wbg.__wbg_instanceof_HtmlInputElement_bd1ce15e756a8ae2 = function(arg0) {
-        var ret = getObject(arg0) instanceof HTMLInputElement;
-        return ret;
-    };
-    imports.wbg.__wbg_checked_3edadcb55226cc83 = function(arg0) {
+    imports.wbg.__wbg_checked_dc000202a8fa9328 = function(arg0) {
         var ret = getObject(arg0).checked;
         return ret;
     };
-    imports.wbg.__wbg_setchecked_1fe693236b4c24f3 = function(arg0, arg1) {
+    imports.wbg.__wbg_setchecked_dc7daac77dc0e73e = function(arg0, arg1) {
         getObject(arg0).checked = arg1 !== 0;
     };
-    imports.wbg.__wbg_files_942fbf6943996106 = function(arg0) {
-        var ret = getObject(arg0).files;
-        return isLikeNone(ret) ? 0 : addHeapObject(ret);
-    };
-    imports.wbg.__wbg_value_e27a74c3db49694f = function(arg0, arg1) {
+    imports.wbg.__wbg_value_f4c762446c572119 = function(arg0, arg1) {
         var ret = getObject(arg1).value;
         var ptr0 = passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         var len0 = WASM_VECTOR_LEN;
         getInt32Memory0()[arg0 / 4 + 1] = len0;
         getInt32Memory0()[arg0 / 4 + 0] = ptr0;
     };
-    imports.wbg.__wbg_setvalue_4f1af4fbd0b9942b = function(arg0, arg1, arg2) {
+    imports.wbg.__wbg_setvalue_65a652cfd99c8a4a = function(arg0, arg1, arg2) {
         getObject(arg0).value = getStringFromWasm0(arg1, arg2);
     };
-    imports.wbg.__wbg_instanceof_HtmlSelectElement_9e453923d9cacda8 = function(arg0) {
-        var ret = getObject(arg0) instanceof HTMLSelectElement;
-        return ret;
-    };
-    imports.wbg.__wbg_value_b431982196f2362c = function(arg0, arg1) {
+    imports.wbg.__wbg_value_265001c20fda4531 = function(arg0, arg1) {
         var ret = getObject(arg1).value;
         var ptr0 = passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         var len0 = WASM_VECTOR_LEN;
         getInt32Memory0()[arg0 / 4 + 1] = len0;
         getInt32Memory0()[arg0 / 4 + 0] = ptr0;
     };
-    imports.wbg.__wbg_setvalue_3bf5c8f910de1ebe = function(arg0, arg1, arg2) {
+    imports.wbg.__wbg_setvalue_a46eeb72562081c1 = function(arg0, arg1, arg2) {
         getObject(arg0).value = getStringFromWasm0(arg1, arg2);
     };
-    imports.wbg.__wbg_instanceof_HtmlTextAreaElement_ceec64505a6bc087 = function(arg0) {
-        var ret = getObject(arg0) instanceof HTMLTextAreaElement;
-        return ret;
-    };
-    imports.wbg.__wbg_value_41a8d072fc94a8a4 = function(arg0, arg1) {
+    imports.wbg.__wbg_value_d8dfe9a459c6ea2a = function(arg0, arg1) {
         var ret = getObject(arg1).value;
         var ptr0 = passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         var len0 = WASM_VECTOR_LEN;
         getInt32Memory0()[arg0 / 4 + 1] = len0;
         getInt32Memory0()[arg0 / 4 + 0] = ptr0;
     };
-    imports.wbg.__wbg_setvalue_e3b8a9c5a4ad0114 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbg_setvalue_b1b2f2945b1cb6ef = function(arg0, arg1, arg2) {
         getObject(arg0).value = getStringFromWasm0(arg1, arg2);
     };
-    imports.wbg.__wbg_keyCode_9de4c14bf3d88f3c = function(arg0) {
+    imports.wbg.__wbg_keyCode_218ac9c01e06b3d5 = function(arg0) {
         var ret = getObject(arg0).keyCode;
         return ret;
     };
-    imports.wbg.__wbg_clientX_df24871aabb01061 = function(arg0) {
+    imports.wbg.__wbg_clientX_5bbce6c078e1510e = function(arg0) {
         var ret = getObject(arg0).clientX;
         return ret;
     };
-    imports.wbg.__wbg_shiftKey_31c1bdd985f9be8e = function(arg0) {
+    imports.wbg.__wbg_shiftKey_257c3f6b1ca35555 = function(arg0) {
         var ret = getObject(arg0).shiftKey;
         return ret;
     };
-    imports.wbg.__wbg_relatedTarget_a0da548df21c06bf = function(arg0) {
+    imports.wbg.__wbg_relatedTarget_c63203073e65b8de = function(arg0) {
         var ret = getObject(arg0).relatedTarget;
         return isLikeNone(ret) ? 0 : addHeapObject(ret);
     };
-    imports.wbg.__wbg_clipboard_06b3f6375fedd3b7 = function(arg0) {
+    imports.wbg.__wbg_clipboard_a304e2b83d0400c6 = function(arg0) {
         var ret = getObject(arg0).clipboard;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_nodeName_36e9b947eea43be6 = function(arg0, arg1) {
-        var ret = getObject(arg1).nodeName;
-        var ptr0 = passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        var len0 = WASM_VECTOR_LEN;
-        getInt32Memory0()[arg0 / 4 + 1] = len0;
-        getInt32Memory0()[arg0 / 4 + 0] = ptr0;
-    };
-    imports.wbg.__wbg_isConnected_b09abcd930e87ef7 = function(arg0) {
+    imports.wbg.__wbg_isConnected_021a4fb42a3d7537 = function(arg0) {
         var ret = getObject(arg0).isConnected;
         return ret;
     };
-    imports.wbg.__wbg_parentNode_be5a24e2fde5b638 = function(arg0) {
+    imports.wbg.__wbg_parentNode_e1dd029be06cee39 = function(arg0) {
         var ret = getObject(arg0).parentNode;
         return isLikeNone(ret) ? 0 : addHeapObject(ret);
     };
-    imports.wbg.__wbg_lastChild_5fc52139f307fbaa = function(arg0) {
+    imports.wbg.__wbg_lastChild_60bd092ff114802e = function(arg0) {
         var ret = getObject(arg0).lastChild;
         return isLikeNone(ret) ? 0 : addHeapObject(ret);
     };
-    imports.wbg.__wbg_setnodeValue_7404ea475784eb1c = function(arg0, arg1, arg2) {
+    imports.wbg.__wbg_setnodeValue_ef88f21c4f2101f5 = function(arg0, arg1, arg2) {
         getObject(arg0).nodeValue = arg1 === 0 ? undefined : getStringFromWasm0(arg1, arg2);
     };
-    imports.wbg.__wbg_textContent_8c1def1e3477ec2e = function(arg0, arg1) {
-        var ret = getObject(arg1).textContent;
-        var ptr0 = isLikeNone(ret) ? 0 : passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        var len0 = WASM_VECTOR_LEN;
-        getInt32Memory0()[arg0 / 4 + 1] = len0;
-        getInt32Memory0()[arg0 / 4 + 0] = ptr0;
-    };
-    imports.wbg.__wbg_appendChild_98dedaeac24501f2 = function() { return handleError(function (arg0, arg1) {
+    imports.wbg.__wbg_appendChild_6ed236bb79c198df = function() { return handleError(function (arg0, arg1) {
         var ret = getObject(arg0).appendChild(getObject(arg1));
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_contains_2f199b3210c5028a = function(arg0, arg1) {
+    imports.wbg.__wbg_contains_11705db278357c60 = function(arg0, arg1) {
         var ret = getObject(arg0).contains(getObject(arg1));
         return ret;
     };
-    imports.wbg.__wbg_insertBefore_5886cc01dc0233e3 = function() { return handleError(function (arg0, arg1, arg2) {
+    imports.wbg.__wbg_insertBefore_7159f24556965e30 = function() { return handleError(function (arg0, arg1, arg2) {
         var ret = getObject(arg0).insertBefore(getObject(arg1), getObject(arg2));
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_removeChild_51369e223cb8a779 = function() { return handleError(function (arg0, arg1) {
+    imports.wbg.__wbg_removeChild_f633f19eb895b696 = function() { return handleError(function (arg0, arg1) {
         var ret = getObject(arg0).removeChild(getObject(arg1));
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_now_5ae3d18d57dd226f = function(arg0) {
+    imports.wbg.__wbg_now_44a034aa2e1d73dd = function(arg0) {
         var ret = getObject(arg0).now();
         return ret;
     };
-    imports.wbg.__wbg_instanceof_ShadowRoot_0f1ffdfecd50b13b = function(arg0) {
+    imports.wbg.__wbg_instanceof_ShadowRoot_17fc69013b5c44c6 = function(arg0) {
         var ret = getObject(arg0) instanceof ShadowRoot;
         return ret;
     };
-    imports.wbg.__wbg_host_176eeb3f3cb78943 = function(arg0) {
+    imports.wbg.__wbg_host_786667ae381479f7 = function(arg0) {
         var ret = getObject(arg0).host;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_createObjectURL_e46eb3ca9fdf20c5 = function() { return handleError(function (arg0, arg1) {
+    imports.wbg.__wbg_createObjectURL_a97d76bcc0a4968c = function() { return handleError(function (arg0, arg1) {
         var ret = URL.createObjectURL(getObject(arg1));
         var ptr0 = passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         var len0 = WASM_VECTOR_LEN;
         getInt32Memory0()[arg0 / 4 + 1] = len0;
         getInt32Memory0()[arg0 / 4 + 0] = ptr0;
     }, arguments) };
-    imports.wbg.__wbg_instanceof_Window_fbe0320f34c4cd31 = function(arg0) {
+    imports.wbg.__wbg_instanceof_Window_11e25482011fc506 = function(arg0) {
         var ret = getObject(arg0) instanceof Window;
         return ret;
     };
-    imports.wbg.__wbg_document_2b44f2a86e03665a = function(arg0) {
+    imports.wbg.__wbg_document_5aff8cd83ef968f5 = function(arg0) {
         var ret = getObject(arg0).document;
         return isLikeNone(ret) ? 0 : addHeapObject(ret);
     };
-    imports.wbg.__wbg_navigator_74ca2cbc2348b985 = function(arg0) {
+    imports.wbg.__wbg_navigator_5c90643c2a2b6cda = function(arg0) {
         var ret = getObject(arg0).navigator;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_innerWidth_c4fa0fec0fd477b8 = function() { return handleError(function (arg0) {
+    imports.wbg.__wbg_innerWidth_8c5001da2fdd6a9e = function() { return handleError(function (arg0) {
         var ret = getObject(arg0).innerWidth;
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_innerHeight_6344b1c89c013158 = function() { return handleError(function (arg0) {
+    imports.wbg.__wbg_innerHeight_03d3f1d9eb5f7034 = function() { return handleError(function (arg0) {
         var ret = getObject(arg0).innerHeight;
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_performance_eee010e5e49f08df = function(arg0) {
+    imports.wbg.__wbg_performance_9d1ecf711183e1d5 = function(arg0) {
         var ret = getObject(arg0).performance;
         return isLikeNone(ret) ? 0 : addHeapObject(ret);
     };
-    imports.wbg.__wbg_getComputedStyle_229a290295f66091 = function() { return handleError(function (arg0, arg1) {
+    imports.wbg.__wbg_getComputedStyle_344a4d9212ebf966 = function() { return handleError(function (arg0, arg1) {
         var ret = getObject(arg0).getComputedStyle(getObject(arg1));
         return isLikeNone(ret) ? 0 : addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_requestAnimationFrame_65ebf8f2415064e2 = function() { return handleError(function (arg0, arg1) {
+    imports.wbg.__wbg_requestAnimationFrame_1fb079d39e1b8a26 = function() { return handleError(function (arg0, arg1) {
         var ret = getObject(arg0).requestAnimationFrame(getObject(arg1));
         return ret;
     }, arguments) };
-    imports.wbg.__wbg_setTimeout_62ddbd1dbc58b759 = function() { return handleError(function (arg0, arg1, arg2) {
+    imports.wbg.__wbg_setTimeout_ce28a603906ebcbb = function() { return handleError(function (arg0, arg1, arg2) {
         var ret = getObject(arg0).setTimeout(getObject(arg1), arg2);
         return ret;
     }, arguments) };
-    imports.wbg.__wbg_error_9783be44659339ea = function(arg0) {
+    imports.wbg.__wbg_error_d95afd6217cfd219 = function(arg0) {
         console.error(getObject(arg0));
     };
-    imports.wbg.__wbg_error_5d177043c8522b3b = function(arg0, arg1, arg2) {
+    imports.wbg.__wbg_error_0147c5cf9d9745cf = function(arg0, arg1, arg2) {
         console.error(getObject(arg0), getObject(arg1), getObject(arg2));
     };
-    imports.wbg.__wbg_warn_632e55193637edf0 = function(arg0) {
+    imports.wbg.__wbg_warn_b39e749f1dc02058 = function(arg0) {
         console.warn(getObject(arg0));
     };
-    imports.wbg.__wbg_new_1abc33d4f9ba3e80 = function() {
+    imports.wbg.__wbg_new_515b65a8e7699d00 = function() {
         var ret = new Array();
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_get_a8b9619536c590d4 = function(arg0, arg1) {
+    imports.wbg.__wbg_get_b7bbf50adcc94294 = function(arg0, arg1) {
         var ret = getObject(arg0)[arg1 >>> 0];
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_length_4c7aec6f35774e3d = function(arg0) {
+    imports.wbg.__wbg_length_555f836564bf148d = function(arg0) {
         var ret = getObject(arg0).length;
         return ret;
     };
-    imports.wbg.__wbg_push_44968dcdf4cfbb43 = function(arg0, arg1) {
+    imports.wbg.__wbg_push_b7f68478f81d358b = function(arg0, arg1) {
         var ret = getObject(arg0).push(getObject(arg1));
         return ret;
     };
-    imports.wbg.__wbg_instanceof_ArrayBuffer_c1c493728d7c2825 = function(arg0) {
+    imports.wbg.__wbg_instanceof_ArrayBuffer_1ae2a91a8421001f = function(arg0) {
         var ret = getObject(arg0) instanceof ArrayBuffer;
         return ret;
     };
-    imports.wbg.__wbg_slice_aed6b880b22578b4 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbg_slice_3563f88f39165260 = function(arg0, arg1, arg2) {
         var ret = getObject(arg0).slice(arg1 >>> 0, arg2 >>> 0);
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_instanceof_Error_ee0400be53261d48 = function(arg0) {
+    imports.wbg.__wbg_instanceof_Error_2ef86611e2afab04 = function(arg0) {
         var ret = getObject(arg0) instanceof Error;
         return ret;
     };
-    imports.wbg.__wbg_message_def3f4d0edb6218f = function(arg0) {
+    imports.wbg.__wbg_message_e440fbd911a845a2 = function(arg0) {
         var ret = getObject(arg0).message;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_newnoargs_ab5e899738c0eff4 = function(arg0, arg1) {
+    imports.wbg.__wbg_newnoargs_9fdd8f3961dd1bee = function(arg0, arg1) {
         var ret = new Function(getStringFromWasm0(arg0, arg1));
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_call_ab183a630df3a257 = function() { return handleError(function (arg0, arg1) {
+    imports.wbg.__wbg_call_ba36642bd901572b = function() { return handleError(function (arg0, arg1) {
         var ret = getObject(arg0).call(getObject(arg1));
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_call_7a2b5e98ac536644 = function() { return handleError(function (arg0, arg1, arg2) {
+    imports.wbg.__wbg_call_3fc07b7d5fc9022d = function() { return handleError(function (arg0, arg1, arg2) {
         var ret = getObject(arg0).call(getObject(arg1), getObject(arg2));
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_getTimezoneOffset_98f9d354772d45bf = function(arg0) {
+    imports.wbg.__wbg_getTimezoneOffset_baab8599eeb15f06 = function(arg0) {
         var ret = getObject(arg0).getTimezoneOffset();
         return ret;
     };
-    imports.wbg.__wbg_new_439e850043fbceaf = function(arg0) {
+    imports.wbg.__wbg_new_f994c74215dcdb52 = function(arg0) {
         var ret = new Date(getObject(arg0));
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_is_e8ad5aa6da4b8c83 = function(arg0, arg1) {
+    imports.wbg.__wbg_is_a973b4c0e9019083 = function(arg0, arg1) {
         var ret = Object.is(getObject(arg0), getObject(arg1));
         return ret;
     };
-    imports.wbg.__wbg_keys_127b01ec83516fee = function(arg0) {
+    imports.wbg.__wbg_keys_a56f3f1587eb77e9 = function(arg0) {
         var ret = Object.keys(getObject(arg0));
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_new_dc5b27cfd2149b8f = function() {
+    imports.wbg.__wbg_new_edbe38a4e21329dd = function() {
         var ret = new Object();
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_get_4bab9404e99a1f85 = function() { return handleError(function (arg0, arg1) {
+    imports.wbg.__wbg_get_800098c980b31ea2 = function() { return handleError(function (arg0, arg1) {
         var ret = Reflect.get(getObject(arg0), getObject(arg1));
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_set_3afd31f38e771338 = function() { return handleError(function (arg0, arg1, arg2) {
+    imports.wbg.__wbg_set_73349fc4814e0fc6 = function() { return handleError(function (arg0, arg1, arg2) {
         var ret = Reflect.set(getObject(arg0), getObject(arg1), getObject(arg2));
         return ret;
     }, arguments) };
-    imports.wbg.__wbg_buffer_bc64154385c04ac4 = function(arg0) {
+    imports.wbg.__wbg_buffer_9e184d6f785de5ed = function(arg0) {
         var ret = getObject(arg0).buffer;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_instanceof_Promise_cbd2e204e5ad538f = function(arg0) {
+    imports.wbg.__wbg_instanceof_Promise_b2dc9a259c6bc079 = function(arg0) {
         var ret = getObject(arg0) instanceof Promise;
         return ret;
     };
-    imports.wbg.__wbg_new_bae826039151b559 = function(arg0, arg1) {
+    imports.wbg.__wbg_new_c143a4f563f78c4e = function(arg0, arg1) {
         try {
             var state0 = {a: arg0, b: arg1};
             var cb0 = (arg0, arg1) => {
                 const a = state0.a;
                 state0.a = 0;
                 try {
-                    return __wbg_adapter_471(a, state0.b, arg0, arg1);
+                    return __wbg_adapter_464(a, state0.b, arg0, arg1);
                 } finally {
                     state0.a = a;
                 }
@@ -66447,59 +66590,59 @@ async function init(input) {
             state0.a = state0.b = 0;
         }
     };
-    imports.wbg.__wbg_resolve_9b0f9ddf5f89cb1e = function(arg0) {
+    imports.wbg.__wbg_resolve_cae3d8f752f5db88 = function(arg0) {
         var ret = Promise.resolve(getObject(arg0));
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_then_b4358f6ec1ee6657 = function(arg0, arg1) {
+    imports.wbg.__wbg_then_c2361a9d5c9a4fcb = function(arg0, arg1) {
         var ret = getObject(arg0).then(getObject(arg1));
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_then_3d9a54b0affdf26d = function(arg0, arg1, arg2) {
+    imports.wbg.__wbg_then_6c9a4bf55755f9b8 = function(arg0, arg1, arg2) {
         var ret = getObject(arg0).then(getObject(arg1), getObject(arg2));
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_self_77eca7b42660e1bb = function() { return handleError(function () {
+    imports.wbg.__wbg_self_bb69a836a72ec6e9 = function() { return handleError(function () {
         var ret = self.self;
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_window_51dac01569f1ba70 = function() { return handleError(function () {
+    imports.wbg.__wbg_window_3304fc4b414c9693 = function() { return handleError(function () {
         var ret = window.window;
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_globalThis_34bac2d08ebb9b58 = function() { return handleError(function () {
+    imports.wbg.__wbg_globalThis_e0d21cabc6630763 = function() { return handleError(function () {
         var ret = globalThis.globalThis;
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_global_1c436164a66c9c22 = function() { return handleError(function () {
+    imports.wbg.__wbg_global_8463719227271676 = function() { return handleError(function () {
         var ret = __webpack_require__.g.global;
         return addHeapObject(ret);
     }, arguments) };
-    imports.wbg.__wbg_newwithbyteoffsetandlength_3c8748473807c7cf = function(arg0, arg1, arg2) {
+    imports.wbg.__wbg_newwithbyteoffsetandlength_e57ad1f2ce812c03 = function(arg0, arg1, arg2) {
         var ret = new Uint8Array(getObject(arg0), arg1 >>> 0, arg2 >>> 0);
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_new_22a33711cf65b661 = function(arg0) {
+    imports.wbg.__wbg_new_e8101319e4cf95fc = function(arg0) {
         var ret = new Uint8Array(getObject(arg0));
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_buffer_1e44eb7f10bef0b1 = function(arg0) {
+    imports.wbg.__wbg_buffer_1c5918a4ab656ff7 = function(arg0) {
         var ret = getObject(arg0).buffer;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbg_length_e9f6f145de2fede5 = function(arg0) {
+    imports.wbg.__wbg_length_2d56cb37075fcfb1 = function(arg0) {
         var ret = getObject(arg0).length;
         return ret;
     };
-    imports.wbg.__wbg_byteLength_b2e6f3c4410077a7 = function(arg0) {
+    imports.wbg.__wbg_byteLength_e0515bc94cfc5dee = function(arg0) {
         var ret = getObject(arg0).byteLength;
         return ret;
     };
-    imports.wbg.__wbg_byteOffset_13609605f9b31148 = function(arg0) {
+    imports.wbg.__wbg_byteOffset_77eec84716a2e737 = function(arg0) {
         var ret = getObject(arg0).byteOffset;
         return ret;
     };
-    imports.wbg.__wbg_set_b29de3f25280c6ec = function(arg0, arg1, arg2) {
+    imports.wbg.__wbg_set_e8ae7b27314e8b98 = function(arg0, arg1, arg2) {
         getObject(arg0).set(getObject(arg1), arg2 >>> 0);
     };
     imports.wbg.__wbindgen_number_get = function(arg0, arg1) {
@@ -66542,48 +66685,48 @@ async function init(input) {
         var ret = wasm.memory;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper2280 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbindgen_closure_wrapper2592 = function(arg0, arg1, arg2) {
         var ret = makeMutClosure(arg0, arg1, 36, __wbg_adapter_38);
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper2282 = function(arg0, arg1, arg2) {
-        var ret = makeClosure(arg0, arg1, 30, __wbg_adapter_41);
+    imports.wbg.__wbindgen_closure_wrapper2594 = function(arg0, arg1, arg2) {
+        var ret = makeClosure(arg0, arg1, 34, __wbg_adapter_41);
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper2284 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbindgen_closure_wrapper2596 = function(arg0, arg1, arg2) {
         var ret = makeClosure(arg0, arg1, 42, __wbg_adapter_44);
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper2286 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbindgen_closure_wrapper2598 = function(arg0, arg1, arg2) {
         var ret = makeMutClosure(arg0, arg1, 40, __wbg_adapter_47);
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper2288 = function(arg0, arg1, arg2) {
-        var ret = makeClosure(arg0, arg1, 32, __wbg_adapter_50);
+    imports.wbg.__wbindgen_closure_wrapper2600 = function(arg0, arg1, arg2) {
+        var ret = makeClosure(arg0, arg1, 44, __wbg_adapter_50);
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper2290 = function(arg0, arg1, arg2) {
-        var ret = makeMutClosure(arg0, arg1, 28, __wbg_adapter_53);
+    imports.wbg.__wbindgen_closure_wrapper2602 = function(arg0, arg1, arg2) {
+        var ret = makeMutClosure(arg0, arg1, 38, __wbg_adapter_53);
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper2292 = function(arg0, arg1, arg2) {
-        var ret = makeMutClosure(arg0, arg1, 38, __wbg_adapter_56);
+    imports.wbg.__wbindgen_closure_wrapper2604 = function(arg0, arg1, arg2) {
+        var ret = makeClosure(arg0, arg1, 32, __wbg_adapter_56);
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper2294 = function(arg0, arg1, arg2) {
-        var ret = makeClosure(arg0, arg1, 34, __wbg_adapter_59);
+    imports.wbg.__wbindgen_closure_wrapper2606 = function(arg0, arg1, arg2) {
+        var ret = makeMutClosure(arg0, arg1, 30, __wbg_adapter_59);
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper7248 = function(arg0, arg1, arg2) {
-        var ret = makeMutClosure(arg0, arg1, 1262, __wbg_adapter_62);
+    imports.wbg.__wbindgen_closure_wrapper7965 = function(arg0, arg1, arg2) {
+        var ret = makeMutClosure(arg0, arg1, 1386, __wbg_adapter_62);
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper7831 = function(arg0, arg1, arg2) {
-        var ret = makeMutClosure(arg0, arg1, 1325, __wbg_adapter_65);
+    imports.wbg.__wbindgen_closure_wrapper8552 = function(arg0, arg1, arg2) {
+        var ret = makeMutClosure(arg0, arg1, 1450, __wbg_adapter_65);
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper7892 = function(arg0, arg1, arg2) {
-        var ret = makeMutClosure(arg0, arg1, 1337, __wbg_adapter_68);
+    imports.wbg.__wbindgen_closure_wrapper11205 = function(arg0, arg1, arg2) {
+        var ret = makeMutClosure(arg0, arg1, 1463, __wbg_adapter_68);
         return addHeapObject(ret);
     };
 
@@ -66607,9 +66750,9 @@ async function init(input) {
 
 /***/ }),
 
-/***/ "../rust/perspective-viewer/dist/pkg/snippets/perspective-viewer-c0843f68e2505c94/inline0.js":
+/***/ "../rust/perspective-viewer/dist/pkg/snippets/perspective-viewer-362cf5cec2bfcc07/inline0.js":
 /*!***************************************************************************************************!*\
-  !*** ../rust/perspective-viewer/dist/pkg/snippets/perspective-viewer-c0843f68e2505c94/inline0.js ***!
+  !*** ../rust/perspective-viewer/dist/pkg/snippets/perspective-viewer-362cf5cec2bfcc07/inline0.js ***!
   \***************************************************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
@@ -66628,9 +66771,9 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "../rust/perspective-viewer/dist/pkg/snippets/perspective-viewer-c0843f68e2505c94/inline1.js":
+/***/ "../rust/perspective-viewer/dist/pkg/snippets/perspective-viewer-362cf5cec2bfcc07/inline1.js":
 /*!***************************************************************************************************!*\
-  !*** ../rust/perspective-viewer/dist/pkg/snippets/perspective-viewer-c0843f68e2505c94/inline1.js ***!
+  !*** ../rust/perspective-viewer/dist/pkg/snippets/perspective-viewer-362cf5cec2bfcc07/inline1.js ***!
   \***************************************************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
@@ -66647,9 +66790,9 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "../rust/perspective-viewer/dist/pkg/snippets/perspective-viewer-c0843f68e2505c94/inline2.js":
+/***/ "../rust/perspective-viewer/dist/pkg/snippets/perspective-viewer-362cf5cec2bfcc07/inline2.js":
 /*!***************************************************************************************************!*\
-  !*** ../rust/perspective-viewer/dist/pkg/snippets/perspective-viewer-c0843f68e2505c94/inline2.js ***!
+  !*** ../rust/perspective-viewer/dist/pkg/snippets/perspective-viewer-362cf5cec2bfcc07/inline2.js ***!
   \***************************************************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
@@ -66687,7 +66830,7 @@ function Worker_fn() {
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
-module.exports = __webpack_require__.p + "9a7e9d3c2b73ce006498.wasm";
+module.exports = __webpack_require__.p + "1ce59f084b7df0d45de6.wasm";
 
 /***/ }),
 
@@ -66698,7 +66841,7 @@ module.exports = __webpack_require__.p + "9a7e9d3c2b73ce006498.wasm";
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
-module.exports = __webpack_require__.p + "f6d2b36a272922c82b11.wasm";
+module.exports = __webpack_require__.p + "58bcbe16755e64b3ba6b.wasm";
 
 /***/ })
 
