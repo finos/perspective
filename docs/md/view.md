@@ -3,13 +3,13 @@ id: view
 title: View
 ---
 
-<script src="../js/index.js"></script>
+<script src="../../../../js/index.js"></script>
 <link rel="stylesheet" href="../../../../css/concepts/index.css">
 
 The View is Perspective's query and serialization interface. It represents a
 query on the `Table`'s dataset and is always created from an existing `Table`
 instance via the `view()` method with a set of
-[`View` configuration parameters](https://perspective.finos.org/docs/md/view.html#querying-data-with-view):
+[`View` configuration parameters](https://perspective.finos.org/docs/obj/perspective.html#module_perspective..table+view):
 
 ```javascript
 const table = await perspective.table({
@@ -71,7 +71,7 @@ view = table.view(
 )
 ```
 
-See the [View API documentation](https://perspective.finos.org/docs/md/view.html) for more details.
+See the [View API documentation](/docs/obj/perspective.html) for more details.
 
 ## Row Pivots
 
@@ -389,7 +389,7 @@ In Javascript, a `table()` can be constructed on a `view()` instance, which will
 return a new `table()` based on the `view()`'s dataset, and all future updates
 that affect the `view()` will be forwarded to the new `table()`. This is
 particularly useful for implementing a
-[Client/Server Replicated](server.md#clientserver-replicated) design,
+[Client/Server Replicated](docs/md/server.html#clientserver-replicated) design,
 by serializing the `View` to an arrow and setting up an `on_update` callback:
 
 ```javascript
