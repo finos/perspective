@@ -581,7 +581,6 @@ namespace computed_function {
         if (!str.is_valid())
             return rval;
 
-
         re2::StringPiece result;
         const std::string& match_string = str.to_string();
         bool found
@@ -598,7 +597,8 @@ namespace computed_function {
         std::size_t start_idx = result.data() - match_string.data();
         std::size_t end_idx = start_idx + result.size() - 1;
 
-        if (start_idx < 0 || end_idx < 0 || end_idx >= match_string.size() || (start_idx > end_idx)) {
+        if (start_idx < 0 || end_idx < 0 || end_idx >= match_string.size()
+            || (start_idx > end_idx)) {
             rval.set(false);
             return rval;
         }
@@ -616,7 +616,8 @@ namespace computed_function {
         return rval;
     }
 
-    substring::substring(t_expression_vocab& expression_vocab, bool is_type_validator)
+    substring::substring(
+        t_expression_vocab& expression_vocab, bool is_type_validator)
         : m_expression_vocab(expression_vocab)
         , m_is_type_validator(is_type_validator) {}
 
@@ -652,7 +653,7 @@ namespace computed_function {
             if (gt.type == t_generic_type::e_scalar) {
                 t_scalar_view temp_scalar_view(gt);
                 t_tscalar temp_scalar = temp_scalar_view();
-                
+
                 // type check - first param must be string, 2nd and 3rd param
                 // must be numeric, all must be valid
                 t_dtype dtype = temp_scalar.get_dtype();
@@ -684,7 +685,7 @@ namespace computed_function {
                 return rval;
             }
         }
-        
+
         // done type checking
         if (m_is_type_validator) {
             return rval;
@@ -694,9 +695,8 @@ namespace computed_function {
 
         // Value check: strings cannot be 0 length, indices must be valid
         if (length == 0 || start_idx < 0
-            || (num_params == 3 && substring_length < 0)
-            || start_idx >= length
-            || (substring_length != std::string::npos 
+            || (num_params == 3 && substring_length < 0) || start_idx >= length
+            || (substring_length != std::string::npos
                 && start_idx + substring_length > length)) {
             return rval;
         }
@@ -728,8 +728,8 @@ namespace computed_function {
 
         // the replace pattern
         t_string_view pattern_view(parameters[1]);
-        std::string match_pattern =
-            std::string(pattern_view.begin(), pattern_view.end());
+        std::string match_pattern
+            = std::string(pattern_view.begin(), pattern_view.end());
 
         // replacer can be a string literal, for the string '' as intern does
         // not pick up on empty strings but we need to be able to replace
@@ -742,8 +742,8 @@ namespace computed_function {
             replacer_scalar = replacer_view();
         } else if (gt.type == t_generic_type::e_string) {
             t_string_view replacer_view(gt);
-            std::string replacer_str =
-                std::string(replacer_view.begin(), replacer_view.end());
+            std::string replacer_str
+                = std::string(replacer_view.begin(), replacer_view.end());
 
             // only the empty string should be passed in as a string literal,
             // all other strings must be interned first.
@@ -761,11 +761,11 @@ namespace computed_function {
 
         if (string_scalar.m_type != DTYPE_STR
             || replacer_scalar.m_type != DTYPE_STR
-            || match_pattern.size() == 0)  {
+            || match_pattern.size() == 0) {
             rval.m_status = STATUS_CLEAR;
             return rval;
         }
-        
+
         // typecheck the regex
         RE2* compiled_pattern = m_regex_mapping.intern(match_pattern);
 
@@ -775,20 +775,22 @@ namespace computed_function {
         }
 
         // done with type_checking
-        if (m_is_type_validator) return rval;
+        if (m_is_type_validator)
+            return rval;
 
         // make a copy of search_str, as replace() will mutate it and we
         // don't want to mutate the string in the vocab
         std::string search_string = string_scalar.to_string();
 
-        if (search_string.size() == 0) return rval;
+        if (search_string.size() == 0)
+            return rval;
 
         // but we can take a reference to the replacer
         const std::string& replacer_string = replacer_scalar.to_string();
         re2::StringPiece replacer(replacer_string);
 
-        bool replaced = RE2::Replace(
-            &(search_string), *(compiled_pattern), replacer);
+        bool replaced
+            = RE2::Replace(&(search_string), *(compiled_pattern), replacer);
 
         if (!replaced) {
             // Return the original result if the replacement didn't happen
@@ -822,8 +824,8 @@ namespace computed_function {
 
         // the replace pattern
         t_string_view pattern_view(parameters[1]);
-        std::string match_pattern =
-            std::string(pattern_view.begin(), pattern_view.end());
+        std::string match_pattern
+            = std::string(pattern_view.begin(), pattern_view.end());
 
         // replacer can be a string literal, for the string '' as intern does
         // not pick up on empty strings but we need to be able to replace
@@ -836,8 +838,8 @@ namespace computed_function {
             replacer_scalar = replacer_view();
         } else if (gt.type == t_generic_type::e_string) {
             t_string_view replacer_view(gt);
-            std::string replacer_str =
-                std::string(replacer_view.begin(), replacer_view.end());
+            std::string replacer_str
+                = std::string(replacer_view.begin(), replacer_view.end());
 
             // only the empty string should be passed in as a string literal,
             // all other strings must be interned first.
@@ -855,11 +857,11 @@ namespace computed_function {
 
         if (string_scalar.m_type != DTYPE_STR
             || replacer_scalar.m_type != DTYPE_STR
-            || match_pattern.size() == 0)  {
+            || match_pattern.size() == 0) {
             rval.m_status = STATUS_CLEAR;
             return rval;
         }
-        
+
         // typecheck the regex
         RE2* compiled_pattern = m_regex_mapping.intern(match_pattern);
 
@@ -869,13 +871,15 @@ namespace computed_function {
         }
 
         // done with type_checking
-        if (m_is_type_validator) return rval;
+        if (m_is_type_validator)
+            return rval;
 
         // make a copy of search_str, as replace() will mutate it and we
         // don't want to mutate the string in the vocab
         std::string search_string = string_scalar.to_string();
 
-        if (search_string.size() == 0) return rval;
+        if (search_string.size() == 0)
+            return rval;
 
         // but we can take a reference to the replacer
         const std::string& replacer_string = replacer_scalar.to_string();

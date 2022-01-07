@@ -102,9 +102,79 @@ namespace apachearrow {
      * @param stride
      * @return std::shared_ptr<arrow::Array>
      */
-    std::shared_ptr<arrow::Array> string_col_to_dictionary_array(
-        const std::vector<t_tscalar>& data, std::int32_t cidx,
-        std::int32_t stride, t_get_data_extents extents);
+    template <typename F>
+    std::shared_ptr<arrow::Array>
+    string_col_to_dictionary_array(t_get_data_extents extents, F f) {
+        t_vocab vocab;
+        vocab.init(false);
+        arrow::Int32Builder indices_builder;
+        arrow::StringBuilder values_builder;
+        auto reserve_status
+            = indices_builder.Reserve(extents.m_erow - extents.m_srow);
+        if (!reserve_status.ok()) {
+            std::stringstream ss;
+            ss << "Failed to allocate buffer for column: "
+               << reserve_status.message() << std::endl;
+            PSP_COMPLAIN_AND_ABORT(ss.str());
+        }
+
+        for (int ridx = extents.m_srow; ridx < extents.m_erow; ++ridx) {
+            // auto idx = get_idx(cidx, ridx, stride, extents);
+            t_tscalar scalar = f(ridx);
+            if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
+                auto adx = vocab.get_interned(scalar.to_string());
+                indices_builder.UnsafeAppend(adx);
+            } else {
+                indices_builder.UnsafeAppendNull();
+            }
+        }
+
+        // get str out of vocab
+        for (auto i = 0; i < vocab.get_vlenidx(); i++) {
+            const char* str = vocab.unintern_c(i);
+            arrow::Status s = values_builder.Append(str, strlen(str));
+            if (!s.ok()) {
+                std::stringstream ss;
+                ss << "Could not append string to dictionary array: "
+                   << s.message() << std::endl;
+                PSP_COMPLAIN_AND_ABORT(ss.str());
+            }
+        }
+
+        // Write dictionary indices
+        std::shared_ptr<arrow::Array> indices_array;
+        arrow::Status indices_status = indices_builder.Finish(&indices_array);
+        if (!indices_status.ok()) {
+            std::stringstream ss;
+            ss << "Could not write indices for dictionary array: "
+               << indices_status.message() << std::endl;
+            PSP_COMPLAIN_AND_ABORT(ss.str());
+        }
+
+        // Write dictionary values
+        std::shared_ptr<arrow::Array> values_array;
+        arrow::Status values_status = values_builder.Finish(&values_array);
+        if (!values_status.ok()) {
+            std::stringstream ss;
+            ss << "Could not write values for dictionary array: "
+               << values_status.message() << std::endl;
+            PSP_COMPLAIN_AND_ABORT(ss.str());
+        }
+        auto dictionary_type = arrow::dictionary(arrow::int32(), arrow::utf8());
+
+        arrow::Result<std::shared_ptr<arrow::Array>> result
+            = arrow::DictionaryArray::FromArrays(
+                dictionary_type, indices_array, values_array);
+
+        if (!result.ok()) {
+            std::stringstream ss;
+            ss << "Could not write values for dictionary array: "
+               << result.status().message() << std::endl;
+            PSP_COMPLAIN_AND_ABORT(ss.str());
+        }
+
+        return *result;
+    }
 
     /**
      * @brief Build an `arrow::Array` from a column contained in `data`. Column
@@ -118,10 +188,9 @@ namespace apachearrow {
      * @param stride
      * @return std::shared_ptr<arrow::Array>
      */
-    template <typename ArrowDataType, typename ArrowValueType>
+    template <typename ArrowDataType, typename ArrowValueType, typename F>
     std::shared_ptr<arrow::Array>
-    numeric_col_to_array(const std::vector<t_tscalar>& data, std::int32_t cidx,
-        std::int32_t stride, t_get_data_extents extents) {
+    numeric_col_to_array(t_get_data_extents extents, F f) {
         // NumericBuilder encompasses the most types (int/float/datetime)
         arrow::NumericBuilder<ArrowDataType> array_builder;
         auto reserve_status
@@ -134,8 +203,7 @@ namespace apachearrow {
         }
 
         for (int ridx = extents.m_srow; ridx < extents.m_erow; ++ridx) {
-            auto idx = get_idx(cidx, ridx, stride, extents);
-            t_tscalar scalar = data.operator[](idx);
+            t_tscalar scalar = f(ridx);
             if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
                 ArrowValueType val = get_scalar<ArrowValueType>(scalar);
                 array_builder.UnsafeAppend(val);
@@ -150,6 +218,114 @@ namespace apachearrow {
         arrow::Status status = array_builder.Finish(&array);
         if (!status.ok()) {
             PSP_COMPLAIN_AND_ABORT(status.message());
+        }
+        return array;
+    }
+
+    template <typename F>
+    std::shared_ptr<arrow::Array>
+    boolean_col_to_array(t_get_data_extents extents, F f) {
+        arrow::BooleanBuilder array_builder;
+        auto reserve_status
+            = array_builder.Reserve(extents.m_erow - extents.m_srow);
+        if (!reserve_status.ok()) {
+            std::stringstream ss;
+            ss << "Failed to allocate buffer for column: "
+               << reserve_status.message() << std::endl;
+            PSP_COMPLAIN_AND_ABORT(ss.str());
+        }
+
+        for (int ridx = extents.m_srow; ridx < extents.m_erow; ++ridx) {
+            t_tscalar scalar = f(ridx);
+            arrow::Status s;
+            if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
+                array_builder.UnsafeAppend(get_scalar<bool>(scalar));
+            } else {
+                array_builder.UnsafeAppendNull();
+            }
+        }
+
+        std::shared_ptr<arrow::Array> array;
+        arrow::Status status = array_builder.Finish(&array);
+        if (!status.ok()) {
+            PSP_COMPLAIN_AND_ABORT(
+                "Could not serialize boolean column: " + status.message());
+        }
+        return array;
+    }
+
+    template <typename F>
+    std::shared_ptr<arrow::Array>
+    date_col_to_array(t_get_data_extents extents, F f) {
+        arrow::Date32Builder array_builder;
+        auto reserve_status
+            = array_builder.Reserve(extents.m_erow - extents.m_srow);
+        if (!reserve_status.ok()) {
+            std::stringstream ss;
+            ss << "Failed to allocate buffer for column: "
+               << reserve_status.message() << std::endl;
+            PSP_COMPLAIN_AND_ABORT(ss.str());
+        }
+
+        for (int ridx = extents.m_srow; ridx < extents.m_erow; ++ridx) {
+            t_tscalar scalar = f(ridx);
+            if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
+                t_date val = scalar.get<t_date>();
+                // years are signed, while month/days are unsigned
+                date::year year{val.year()};
+                // Increment month by 1, as date::month is [1-12] but
+                // t_date::month() is [0-11]
+                date::month month{static_cast<std::uint32_t>(val.month() + 1)};
+                date::day day{static_cast<std::uint32_t>(val.day())};
+                date::year_month_day ymd(year, month, day);
+                date::sys_days days_since_epoch = ymd;
+                array_builder.UnsafeAppend(static_cast<std::int32_t>(
+                    days_since_epoch.time_since_epoch().count()));
+            } else {
+                array_builder.UnsafeAppendNull();
+            }
+        }
+
+        std::shared_ptr<arrow::Array> array;
+        arrow::Status status = array_builder.Finish(&array);
+        if (!status.ok()) {
+            PSP_COMPLAIN_AND_ABORT(
+                "Could not serialize date column: " + status.message());
+        }
+        return array;
+    }
+
+    template <typename F>
+    std::shared_ptr<arrow::Array>
+    timestamp_col_to_array(t_get_data_extents extents, F f) {
+        // TimestampType requires parameters, so initialize them here
+        std::shared_ptr<arrow::DataType> type
+            = arrow::timestamp(arrow::TimeUnit::MILLI);
+        arrow::TimestampBuilder array_builder(
+            type, arrow::default_memory_pool());
+        auto reserve_status
+            = array_builder.Reserve(extents.m_erow - extents.m_srow);
+        if (!reserve_status.ok()) {
+            std::stringstream ss;
+            ss << "Failed to allocate buffer for column: "
+               << reserve_status.message() << std::endl;
+            PSP_COMPLAIN_AND_ABORT(ss.str());
+        }
+
+        for (int ridx = extents.m_srow; ridx < extents.m_erow; ++ridx) {
+            t_tscalar scalar = f(ridx);
+            if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
+                array_builder.UnsafeAppend(get_scalar<std::int64_t>(scalar));
+            } else {
+                array_builder.UnsafeAppendNull();
+            }
+        }
+
+        std::shared_ptr<arrow::Array> array;
+        arrow::Status status = array_builder.Finish(&array);
+        if (!status.ok()) {
+            PSP_COMPLAIN_AND_ABORT(
+                "Could not serialize timestamp column: " + status.message());
         }
         return array;
     }

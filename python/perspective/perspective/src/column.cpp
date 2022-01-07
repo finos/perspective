@@ -17,24 +17,25 @@
 namespace perspective {
 
 template <>
-void t_column::object_copied<PSP_OBJECT_TYPE>(std::uint64_t ptr) const {
+void
+t_column::object_copied<PSP_OBJECT_TYPE>(std::uint64_t ptr) const {
     // get what was there and incref if can
-    if (ptr){
+    if (ptr) {
         py::handle handle = reinterpret_cast<PSP_OBJECT_TYPE>(ptr);
         handle.inc_ref();
     }
 }
 
 template <>
-void t_column::object_cleared<PSP_OBJECT_TYPE>(std::uint64_t ptr) const {
+void
+t_column::object_cleared<PSP_OBJECT_TYPE>(std::uint64_t ptr) const {
     // get what was there and decref if can
-    if (ptr){
+    if (ptr) {
         py::handle handle = reinterpret_cast<PSP_OBJECT_TYPE>(ptr);
         handle.dec_ref();
     }
 }
 
-
-}
+} // namespace perspective
 
 #endif

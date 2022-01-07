@@ -1,5 +1,33 @@
 # Changelog
 
+## [v1.1.0](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.0.8...HEAD)
+
+**Breaking changes:**
+
+- CSV output rewrite \(Arrow/C++\) [\#1692](https://github.com/finos/perspective/pull/1692) ([texodus](https://github.com/texodus))
+
+**Implemented enhancements:**
+
+- Column style menu for `string` type columns [\#1691](https://github.com/finos/perspective/pull/1691) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- String field filter in server mode not work [\#1690](https://github.com/finos/perspective/issues/1690)
+- CSV output with `row_pivots` \> 1 don't render correctly [\#1666](https://github.com/finos/perspective/issues/1666)
+- Fix auto-reset when `HTMLPerspectiveViewerElement.load()` called twice [\#1695](https://github.com/finos/perspective/pull/1695) ([texodus](https://github.com/texodus))
+
+**Closed issues:**
+
+- SyntaxError: Unexpected token '.' when using webpack PerspectivePlugin [\#1687](https://github.com/finos/perspective/issues/1687)
+- installation error Ubuntu 20.04.3 LTS \(GNU/Linux 5.11.0-1021-oracle aarch64\) [\#1686](https://github.com/finos/perspective/issues/1686)
+
+**Merged pull requests:**
+
+- purge six dependency [\#1689](https://github.com/finos/perspective/pull/1689) ([timkpaine](https://github.com/timkpaine))
+- Reduce CI: Turn off branch builds, only build on PRs to master [\#1688](https://github.com/finos/perspective/pull/1688) ([timkpaine](https://github.com/timkpaine))
+
 ## [v1.0.8](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.0.7...HEAD)

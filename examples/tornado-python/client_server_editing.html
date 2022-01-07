@@ -53,11 +53,11 @@
 
             // Connect to the websocket and create a new webworker
             const websocket = perspective.websocket("ws://localhost:8080/websocket");
-            const worker = perspective.shared_worker();
+            const worker = perspective.worker();
 
             // Get handles to the `Table` on the server, and create a
             // `view()` on the server.
-            const server_table = websocket.open_table("data_source_one");
+            const server_table = await websocket.open_table("data_source_one");
             const server_view = await server_table.view();
             
             // Serialize the current state of the view to an arrow, and create
@@ -69,7 +69,7 @@
             const client_table = await worker.table(arrow, {index: "Row ID"});
             const client_view = await client_table.view();// client -> server
 
-            await viewer.load(client_table);
+            await viewer.load(Promise.resolve(client_table));
 
             // Create ports on both the client and the server - this allows
             // the client and server to track which updates are coming from

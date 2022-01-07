@@ -205,15 +205,24 @@ namespace binding {
     to_arrow(std::shared_ptr<View<CTX_T>> view, std::int32_t start_row,
         std::int32_t end_row, std::int32_t start_col, std::int32_t end_col) {
         std::shared_ptr<std::string> s
-            = view->to_arrow(start_row, end_row, start_col, end_col);
+            = view->to_arrow(start_row, end_row, start_col, end_col, true);
         return str_to_arraybuffer(s)["buffer"];
+    }
+
+    template <typename CTX_T>
+    t_val
+    to_csv(std::shared_ptr<View<CTX_T>> view, std::int32_t start_row,
+        std::int32_t end_row, std::int32_t start_col, std::int32_t end_col) {
+        std::shared_ptr<std::string> s
+            = view->to_csv(start_row, end_row, start_col, end_col);
+        return t_val(*s);
     }
 
     template <typename CTX_T>
     t_val
     get_row_delta(std::shared_ptr<View<CTX_T>> view) {
         auto slice = view->get_row_delta();
-        auto row_delta = view->data_slice_to_arrow(slice);
+        auto row_delta = view->data_slice_to_arrow(slice, false);
         return str_to_arraybuffer(row_delta)["buffer"];
     }
 
@@ -937,9 +946,8 @@ namespace binding {
                                   << "` is nan" << std::endl;
                         tbl.promote_column(name, DTYPE_STR, i, false);
                         col = tbl.get_column(name);
-                        _fill_col_string(
-                            accessor, col, name, cidx, DTYPE_STR, is_update,
-                            is_limit);
+                        _fill_col_string(accessor, col, name, cidx, DTYPE_STR,
+                            is_update, is_limit);
                         return;
                     } else {
                         col->set_nth(i, static_cast<std::int32_t>(fval));
@@ -1040,16 +1048,20 @@ namespace binding {
                     accessor, tbl, col, name, cidx, type, is_update, is_limit);
             } break;
             case DTYPE_BOOL: {
-                _fill_col_bool(accessor, col, name, cidx, type, is_update, is_limit);
+                _fill_col_bool(
+                    accessor, col, name, cidx, type, is_update, is_limit);
             } break;
             case DTYPE_DATE: {
-                _fill_col_date(accessor, col, name, cidx, type, is_update, is_limit);
+                _fill_col_date(
+                    accessor, col, name, cidx, type, is_update, is_limit);
             } break;
             case DTYPE_TIME: {
-                _fill_col_time(accessor, col, name, cidx, type, is_update, is_limit);
+                _fill_col_time(
+                    accessor, col, name, cidx, type, is_update, is_limit);
             } break;
             case DTYPE_STR: {
-                _fill_col_string(accessor, col, name, cidx, type, is_update, is_limit);
+                _fill_col_string(
+                    accessor, col, name, cidx, type, is_update, is_limit);
             } break;
             case DTYPE_NONE: {
                 break;
@@ -1084,7 +1096,8 @@ namespace binding {
             }
 
             auto col = tbl.get_column(name);
-            _fill_data_helper(dcol, tbl, col, name, cidx, type, is_update, is_limit);
+            _fill_data_helper(
+                dcol, tbl, col, name, cidx, type, is_update, is_limit);
         }
 
         // Fill index column - recreated every time a `t_data_table` is created.
@@ -2285,6 +2298,10 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("to_arrow_zero", &to_arrow<t_ctx0>);
     function("to_arrow_one", &to_arrow<t_ctx1>);
     function("to_arrow_two", &to_arrow<t_ctx2>);
+    function("to_csv_unit", &to_csv<t_ctxunit>);
+    function("to_csv_zero", &to_csv<t_ctx0>);
+    function("to_csv_one", &to_csv<t_ctx1>);
+    function("to_csv_two", &to_csv<t_ctx2>);
     function("get_row_delta_unit", &get_row_delta<t_ctxunit>);
     function("get_row_delta_zero", &get_row_delta<t_ctx0>);
     function("get_row_delta_one", &get_row_delta<t_ctx1>);

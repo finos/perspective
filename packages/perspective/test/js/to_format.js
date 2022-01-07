@@ -651,9 +651,12 @@ module.exports = (perspective) => {
             let view2 = await table2.view();
             let json2 = await view2.to_json();
 
-            expect(json2).toEqual(
-                json.map((x) => {
-                    delete x["__ROW_PATH__"];
+            expect(json).toEqual(
+                json2.map((x) => {
+                    x.__ROW_PATH__ = [x["string (Group by 1)"]].filter(
+                        (x) => x
+                    );
+                    delete x["string (Group by 1)"];
                     return x;
                 })
             );
@@ -679,6 +682,7 @@ module.exports = (perspective) => {
             let result = await view2.to_columns();
 
             expect(result).toEqual({
+                "string (Group by 1)": [null, "a", "b"],
                 float: [2.75, 1.75, 3.75],
                 string: [4, 2, 2],
             });
@@ -701,9 +705,12 @@ module.exports = (perspective) => {
             let view2 = await table2.view();
             let json2 = await view2.to_json();
 
-            expect(json2).toEqual(
-                json.map((x) => {
-                    delete x["__ROW_PATH__"];
+            expect(json).toEqual(
+                json2.map((x) => {
+                    x.__ROW_PATH__ = [x["string (Group by 1)"]].filter(
+                        (x) => x
+                    );
+                    delete x["string (Group by 1)"];
                     return x;
                 })
             );
@@ -727,9 +734,12 @@ module.exports = (perspective) => {
             let view2 = await table2.view();
             let json2 = await view2.to_json();
 
-            expect(json2).toEqual(
-                json.map((x) => {
-                    delete x["__ROW_PATH__"];
+            expect(json).toEqual(
+                json2.map((x) => {
+                    x.__ROW_PATH__ = [x["string (Group by 1)"]].filter(
+                        (x) => x
+                    );
+                    delete x["string (Group by 1)"];
                     return x;
                 })
             );
@@ -753,9 +763,12 @@ module.exports = (perspective) => {
             let view2 = await table2.view();
             let json2 = await view2.to_json();
 
-            expect(json2).toEqual(
-                json.map((x) => {
-                    delete x["__ROW_PATH__"];
+            expect(json).toEqual(
+                json2.map((x) => {
+                    x.__ROW_PATH__ = [x["string (Group by 1)"]].filter(
+                        (x) => x
+                    );
+                    delete x["string (Group by 1)"];
                     return x;
                 })
             );
@@ -775,9 +788,12 @@ module.exports = (perspective) => {
             let view2 = await table2.view();
             let json2 = await view2.to_json();
 
-            expect(json2).toEqual(
-                json.map((x) => {
-                    delete x["__ROW_PATH__"];
+            expect(json).toEqual(
+                json2.map((x) => {
+                    x.__ROW_PATH__ = [x["string (Group by 1)"]].filter(
+                        (x) => x
+                    );
+                    delete x["string (Group by 1)"];
                     return x;
                 })
             );
@@ -797,9 +813,12 @@ module.exports = (perspective) => {
             let view2 = await table2.view();
             let json2 = await view2.to_json();
 
-            expect(json2).toEqual(
-                json.map((x) => {
-                    delete x["__ROW_PATH__"];
+            expect(json).toEqual(
+                json2.map((x) => {
+                    x.__ROW_PATH__ = [x["string (Group by 1)"]].filter(
+                        (x) => x
+                    );
+                    delete x["string (Group by 1)"];
                     return x;
                 })
             );
@@ -822,9 +841,12 @@ module.exports = (perspective) => {
             let view2 = await table2.view();
             let json2 = await view2.to_json();
 
-            expect(json2).toEqual(
-                json.map((x) => {
-                    delete x["__ROW_PATH__"];
+            expect(json).toEqual(
+                json2.map((x) => {
+                    x.__ROW_PATH__ = [x["string (Group by 1)"]].filter(
+                        (x) => x
+                    );
+                    delete x["string (Group by 1)"];
                     return x;
                 })
             );
@@ -848,9 +870,12 @@ module.exports = (perspective) => {
             let view2 = await table2.view();
             let json2 = await view2.to_json();
 
-            expect(json2).toEqual(
-                json.map((x) => {
-                    delete x["__ROW_PATH__"];
+            expect(json).toEqual(
+                json2.map((x) => {
+                    x.__ROW_PATH__ = [x["string (Group by 1)"]].filter(
+                        (x) => x
+                    );
+                    delete x["string (Group by 1)"];
                     return x;
                 })
             );
@@ -873,9 +898,12 @@ module.exports = (perspective) => {
             let view2 = await table2.view();
             let json2 = await view2.to_json();
 
-            expect(json2).toEqual(
-                json.map((x) => {
-                    delete x["__ROW_PATH__"];
+            expect(json).toEqual(
+                json2.map((x) => {
+                    x.__ROW_PATH__ = [x["string (Group by 1)"]].filter(
+                        (x) => x
+                    );
+                    delete x["string (Group by 1)"];
                     return x;
                 })
             );
@@ -898,9 +926,12 @@ module.exports = (perspective) => {
             let view2 = await table2.view();
             let json2 = await view2.to_json();
 
-            expect(json2).toEqual(
-                json.map((x) => {
-                    delete x["__ROW_PATH__"];
+            expect(json).toEqual(
+                json2.map((x) => {
+                    x.__ROW_PATH__ = [x["string (Group by 1)"]].filter(
+                        (x) => x
+                    );
+                    delete x["string (Group by 1)"];
                     return x;
                 })
             );
@@ -920,12 +951,7 @@ module.exports = (perspective) => {
             let view2 = await table2.view();
             let json2 = await view2.to_json();
 
-            expect(json2).toEqual(
-                json.map((x) => {
-                    delete x["__ROW_PATH__"];
-                    return x;
-                })
-            );
+            expect(json).toEqual(json2);
 
             view2.delete();
             table2.delete();
@@ -946,12 +972,7 @@ module.exports = (perspective) => {
             let view2 = await table2.view();
             let json2 = await view2.to_json();
 
-            expect(json2).toEqual(
-                json.map((x) => {
-                    delete x["__ROW_PATH__"];
-                    return x;
-                })
-            );
+            expect(json).toEqual(json2);
 
             view2.delete();
             table2.delete();
@@ -971,12 +992,7 @@ module.exports = (perspective) => {
             let view2 = await table2.view();
             let json2 = await view2.to_json();
 
-            expect(json2).toEqual(
-                json.map((x) => {
-                    delete x["__ROW_PATH__"];
-                    return x;
-                })
-            );
+            expect(json).toEqual(json2);
 
             view2.delete();
             table2.delete();
@@ -993,12 +1009,7 @@ module.exports = (perspective) => {
             let view2 = await table2.view();
             let json2 = await view2.to_json();
 
-            expect(json2).toEqual(
-                json.map((x) => {
-                    delete x["__ROW_PATH__"];
-                    return x;
-                })
-            );
+            expect(json).toEqual(json2);
 
             view2.delete();
             table2.delete();
@@ -1015,12 +1026,7 @@ module.exports = (perspective) => {
             let view2 = await table2.view();
             let json2 = await view2.to_json();
 
-            expect(json2).toEqual(
-                json.map((x) => {
-                    delete x["__ROW_PATH__"];
-                    return x;
-                })
-            );
+            expect(json).toEqual(json2);
 
             view2.delete();
             table2.delete();

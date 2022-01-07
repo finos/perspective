@@ -44,7 +44,8 @@ should use `@finos/perspective-webpack-plugin` to manage the `.worker.js` and
 performance, the plugin-compiled version of Perspective:
 
 - Downloads `.wasm` and `.js` assets in parallel.
-- Compiles `.wasm` incrementally via [streaming instantiation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WebAssembly/instantiateStreaming).
+- Compiles `.wasm` incrementally via
+  [streaming instantiation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WebAssembly/instantiateStreaming).
 - Lazily downloads large features only when used such as `monaco-editor`.
 - overall bundle size is ~20% smaller (due to bas64 encoding overhead).
 
@@ -64,10 +65,11 @@ module.exports = {
 };
 ```
 
-`@finos/perspective-viewer` has a dependence on [`monaco-editor`](https://microsoft.github.io/monaco-editor/),
-which itself depends on several CSS assets.  If your webpack config uses a
-loader for `"*.css"` or similar, you may need to exclude `monaco-editor` from
-this loader to prevent double-encoding:
+`@finos/perspective-viewer` has a dependence on
+[`monaco-editor`](https://microsoft.github.io/monaco-editor/), which itself
+depends on several CSS assets. If your webpack config uses a loader for
+`"*.css"` or similar, you may need to exclude `monaco-editor` from this loader
+to prevent double-encoding:
 
 ```javascript
 module.exports = {
@@ -78,13 +80,10 @@ module.exports = {
       {
         test: /\.css$/,
         exclude: [/monaco-editor/], // <- Exclude `monaco-editor`
-        use: [
-          {loader: "style-loader"},
-          {loader: "css-loader"},
-        ],
-      }
-    ]
-  }
+        use: [{ loader: "style-loader" }, { loader: "css-loader" }],
+      },
+    ],
+  },
 };
 ```
 
@@ -397,7 +396,7 @@ _*index.html*_
 ></perspective-viewer>
 ```
 
-If you choose not to bundle the themes yourself, they are available through 
+If you choose not to bundle the themes yourself, they are available through
 [unpkg.com](https://unpkg.com/@finos/perspective-viewer/dist/umd/).
 
 These can be directly linked in your HTML file:
