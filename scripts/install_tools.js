@@ -21,7 +21,7 @@ try {
         console.log("-- Installing Flatbuffers");
         execute`mkdir -p /usr/local`;
         process.chdir("/usr/local");
-        execute`git clone https://github.com/google/flatbuffers.git`;
+        execute`git clone --depth 1 --branch v1.12.1 https://github.com/google/flatbuffers.git`;
         process.chdir("/usr/local/flatbuffers");
         execute`cmake -G "Unix Makefiles"`;
         execute`make`;
