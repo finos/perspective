@@ -29,7 +29,7 @@ namespace binding {
 
     std::shared_ptr<Table>
     make_table_py(t_val table, t_data_accessor accessor, std::uint32_t limit,
-        py::str index, t_op op, bool is_update, bool is_arrow, bool is_csv,
+        std::string index, t_op op, bool is_update, bool is_arrow, bool is_csv,
         t_uindex port_id) {
         bool table_initialized = !table.is_none();
         std::shared_ptr<t_pool> pool;
@@ -291,7 +291,7 @@ namespace binding {
             PerspectiveScopedGILRelease acquire(
                 pool->get_event_loop_thread_id());
             row_count = arrow_loader.row_count();
-            data_table.extend(arrow_loader.row_count());
+            data_table.extend(row_count);
             arrow_loader.fill_table(
                 data_table, input_schema, index, offset, limit, is_update);
         } else if (is_numpy) {

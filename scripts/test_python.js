@@ -58,11 +58,11 @@ if (IS_DOCKER) {
 const pytest_client_mode = (IS_DOCKER) => {
     if (IS_DOCKER) {
         return bash`${docker(IMAGE)} bash -c "cd \
-            python/perspective && TZ=UTC ${PYTHON} -m pytest \
+            python/perspective && TZ=UTC PYTHONMALLOC=debug ${PYTHON} -m pytest \
             ${VERBOSE ? "-vv --full-trace" : ""} --noconftest 
             perspective/tests/client_mode"`;
     } else {
-        return bash`cd ${python_path} && ${PYTHON} -m pytest \
+        return bash`cd ${python_path} && PYTHONMALLOC=debug ${PYTHON} -m pytest \
             ${VERBOSE ? "-vv --full-trace" : ""} --noconftest 
             perspective/tests/client_mode`;
     }
@@ -74,12 +74,12 @@ const pytest_client_mode = (IS_DOCKER) => {
 const pytest = (IS_DOCKER) => {
     if (IS_DOCKER) {
         return bash`${docker(IMAGE)} bash -c "cd \
-            python/perspective && TZ=UTC ${PYTHON} -m pytest \
+            python/perspective && TZ=UTC PYTHONMALLOC=debug ${PYTHON} -m pytest \
             ${VERBOSE ? "-vv --full-trace" : ""} perspective \
             --ignore=perspective/tests/client_mode \
             --cov=perspective"`;
     } else {
-        return bash`cd ${python_path} && ${PYTHON} -m pytest \
+        return bash`cd ${python_path} && PYTHONMALLOC=debug ${PYTHON} -m pytest \
             ${VERBOSE ? "-vv --full-trace" : ""} perspective \
             --ignore=perspective/tests/client_mode \
             ${COVERAGE ? "--cov=perspective" : ""}`;
