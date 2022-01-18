@@ -22,7 +22,7 @@ namespace binding {
      * Table API
      */
     std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor,
-        std::uint32_t limit, py::str index, t_op op, bool is_update,
+        std::uint32_t limit, std::string index, t_op op, bool is_update,
         bool is_arrow, bool is_csv, t_uindex port_id);
 
 } // namespace binding
