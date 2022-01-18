@@ -104,6 +104,13 @@ class TestTable(object):
             "float": [None, 2.5, None]
         }
 
+    def test_table_string_column_with_nulls_update_and_filter(self):
+        tbl = Table([{'a': '1', 'b': 2, 'c': '3'}, {'a': '2', 'b': 3, 'c': '4'}, {'a': '3', 'b': 3, 'c': None}], index='a')
+        view = tbl.view(filter=[['c', '==', '4']])
+        records = view.to_records()
+        tbl.update([{'a': '4', 'b': 10}])
+        assert records == view.to_records()
+
     def test_table_int(self):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)

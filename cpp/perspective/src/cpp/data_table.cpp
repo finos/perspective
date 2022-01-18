@@ -517,13 +517,16 @@ t_data_table::filter_cpp(
                     bool tval;
 
                     if (ft.m_use_interned) {
-                        cell_val.set(*(columns[cidx]->get_nth<t_uindex>(ridx)));
-                        tval = ft(cell_val);
+                        if (*(columns[cidx]->get_nth_status(ridx))
+                            == STATUS_VALID) {
+                            cell_val.set(
+                                *(columns[cidx]->get_nth<t_uindex>(ridx)));
+                        }
                     } else {
                         cell_val = columns[cidx]->get_scalar(ridx);
-                        tval = ft(cell_val);
                     }
 
+                    tval = ft(cell_val);
                     if ((ft.m_op != FILTER_OP_IS_NULL && !cell_val.is_valid())
                         || !tval) {
                         pass = false;
