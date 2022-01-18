@@ -291,7 +291,7 @@ namespace binding {
             PerspectiveScopedGILRelease acquire(
                 pool->get_event_loop_thread_id());
             row_count = arrow_loader.row_count();
-            data_table.extend(arrow_loader.row_count());
+            data_table.extend(row_count);
             arrow_loader.fill_table(
                 data_table, input_schema, index, offset, limit, is_update);
         } else if (is_numpy) {
