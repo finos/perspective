@@ -1,5 +1,25 @@
 # Changelog
 
+## [v1.1.1](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.1.0...HEAD)
+
+**Fixed bugs:**
+
+- Async Mode \(GIL unlock\) Does Not Work With Tables Based On Views [\#1704](https://github.com/finos/perspective/issues/1704)
+- Unexpected behavior with string filtering/views/partial updates [\#1701](https://github.com/finos/perspective/issues/1701)
+- Fix bad filter when `.update()` contains missing string column value [\#1708](https://github.com/finos/perspective/pull/1708) ([texodus](https://github.com/texodus))
+- Fix async mode segfault on `.load()` with indexed Arrow [\#1707](https://github.com/finos/perspective/pull/1707) ([texodus](https://github.com/texodus))
+- Fix `perspective-viewer` filter dropdown for values with double quotes [\#1696](https://github.com/finos/perspective/pull/1696) ([texodus](https://github.com/texodus))
+
+**Closed issues:**
+
+- CDN example in document doesn't work [\#1706](https://github.com/finos/perspective/issues/1706)
+
+**Merged pull requests:**
+
+- Pin `flatc` to 1.12.1 [\#1705](https://github.com/finos/perspective/pull/1705) ([texodus](https://github.com/texodus))
+
 ## [v1.1.0](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.0.8...HEAD)
