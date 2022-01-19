@@ -1,5 +1,5 @@
 {
-    "__GIT_COMMIT__": "c2a7bb4102f9f22893d9e992ebf81f01ea02f903",
+    "__GIT_COMMIT__": "a0ac032f159a9eb480cd7d54e5ff217a4aea42a6",
     "index_restore_workspace_with_detail_only": "d24f601369fbf86c853d4dd2894506e3",
     "index_Light_DOM_restore_workspace_with_detail_only": "9381de0b57c14a110dddf74bc029bad2",
     "index_Shadow_DOM_restore_workspace_with_detail_only": "912377d649971a7d3d4d8444f559f8b6",
@@ -14,5 +14,7 @@
     "index_Light_DOM_Create_multiple_with_names": "31c20ab9bde04f101fffa07fdfc832e4",
     "index_Shadow_DOM_Create_One": "02d56ecdcf18f8c44fe3d1c80749ce1a",
     "index_Shadow_DOM_Create_Multiple": "988e29fe4ebba32135338cebb1dcd698",
-    "index_Shadow_DOM_Create_multiple_with_names": "9e6c683ce0a2bf9f0937f19aca244d90"
+    "index_Shadow_DOM_Create_multiple_with_names": "9e6c683ce0a2bf9f0937f19aca244d90",
+    "workspace-all_Light_DOM_Restore_workspace_\"Bucket_by_year": "03033ba8778d455a60ef8d9475d6dbaf",
+    "workspace-all_Shadow_DOM_Restore_workspace_\"Bucket_by_year": "912377d649971a7d3d4d8444f559f8b6"
 }

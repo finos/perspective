@@ -3,7 +3,7 @@
     "superstore.html/doesn't leak elements.": "d0fd18b3d4d7c183c5ed155b4bf37972",
     "superstore.html/doesn't leak views when setting row pivots.": "54daaa4bbbe59f6ed4acc301ba871bab",
     "superstore.html/doesn't leak views when setting filters.": "6dfc1e505f1428424c3265f0236f22fc",
-    "__GIT_COMMIT__": "e3b0f3ba1499779bdbca3d2544aa2c8a3c4735c6",
+    "__GIT_COMMIT__": "a0ac032f159a9eb480cd7d54e5ff217a4aea42a6",
     "blank.html/Handles reloading with a schema.": "e58c62f6e0ff16dc4d753f99e0fc39c3",
     "superstore_shows_a_grid_without_any_settings_applied_": "ae1c4690d978598ca14c8669244ce604",
     "superstore_Responsive_Layout_shows_horizontal_columns_on_small_vertical_viewports_": "57ba3ad341cf8a0e4df6ab96715ff2a0",
@@ -67,5 +67,7 @@
     "superstore_restore_restores_a_config_from_save": "94207660854a9e203ad7f8051333611f",
     "Expressions_Click_on_add_column_button_opens_the_expression_UI_": "41eab73e5a1831116702e9a03f579eb9",
     "Expressions_Resetting_the_viewer_partially_should_not_delete_all_expressions": "0c15f7064c3299a7dba47477c7028d1d",
-    "Expressions_Resetting_the_viewer_partially_when_expression_as_in_columns_field,_should_not_delete_all_expressions": "0c15f7064c3299a7dba47477c7028d1d"
+    "Expressions_Resetting_the_viewer_partially_when_expression_as_in_columns_field,_should_not_delete_all_expressions": "0c15f7064c3299a7dba47477c7028d1d",
+    "superstore-all_restore__Bucket_by_year_": "3243fc1f0c30d45d6f103b340547e044",
+    "superstore-all_restore__Plugin_config_color_mode_": "e15272040eea436c123116c69c11a3e8"
 }
