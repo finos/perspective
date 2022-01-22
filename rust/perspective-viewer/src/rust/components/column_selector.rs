@@ -201,7 +201,7 @@ impl Component for ColumnSelector {
             let is_dragover_column =
                 ctx.props().dragdrop.is_dragover(DropAction::Active);
 
-            let is_pivot = config.is_pivot();
+            let is_pivot = config.is_aggregated();
             let expression_columns =
                 ctx.props().session.metadata().get_expression_columns();
             let columns_iter = ColumnsIterator::new(

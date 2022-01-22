@@ -70,8 +70,8 @@ impl ViewConfig {
             .map(|x| x.unchecked_into())
     }
 
-    pub fn is_pivot(&self) -> bool {
-        !self.row_pivots.is_empty() || !self.column_pivots.is_empty()
+    pub fn is_aggregated(&self) -> bool {
+        !self.row_pivots.is_empty()
     }
 
     pub fn reset(&mut self, reset_expressions: bool) {
