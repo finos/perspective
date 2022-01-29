@@ -127,6 +127,10 @@ export function register(...plugins) {
                     }
 
                     async draw(view, end_col, end_row) {
+                        if (!this.isConnected) {
+                            return;
+                        }
+
                         this.config = await this.parentElement.save();
                         await this.update(view, end_col, end_row, true);
                     }
