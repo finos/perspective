@@ -56,24 +56,27 @@ perspective-viewer.dragging regular-table {
 }
 
 .psp-header-sort-desc:after {
-    font-family: "Material Icons";
+    font-family: var(--button--font-family, inherit);
     font-size: 10px;
-    content: "arrow_downward";
+    content: var(--sort-order-desc--content, "\2193");
 }
+
 .psp-header-sort-asc:after {
-    font-family: "Material Icons";
+    font-family: var(--button--font-family, inherit);
     font-size: 10px;
-    content: "arrow_upward";
+    content: var(--sort-order-asc--content, "\2191");
 }
+
 .psp-header-sort-col-desc:after {
-    font-family: "Material Icons";
+    font-family: var(--button--font-family, inherit);
     font-size: 10px;
-    content: "arrow_back";
+    content: var(--sort-order-col-desc--content, "\2190");
 }
+
 .psp-header-sort-col-asc:after {
-    font-family: "Material Icons";
+    font-family: var(--button--font-family, inherit);
     font-size: 10px;
-    content: "arrow_forward";
+    content: var(--sort-order-col-asc--content, "\2192");
 }
 
 tbody th:last-of-type {
@@ -99,15 +102,15 @@ tbody th:empty {
 }
 .psp-tree-label:before {
     color: #ccc;
-    font-family: "Material Icons";
+    font-family: var(--button--font-family, inherit);
     padding-right: 11px;
     vertical-align: -1px;
 }
 .psp-tree-label-expand:before {
-    content: "add";
+    content: var(--tree-label-expand--content, "+");
 }
 .psp-tree-label-collapse:before {
-    content: "remove";
+    content: var(--tree-label-collapse--content, "-");
 }
 
 .psp-tree-label:hover:before {
@@ -148,7 +151,7 @@ regular-table table tbody td {
 }
 
 .psp-bool-type {
-    font-family: "Material Icons";
+    font-family: var(--button--font-family, "Material Icons");
 }
 
 .boolean-editable {
