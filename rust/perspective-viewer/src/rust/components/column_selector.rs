@@ -201,7 +201,7 @@ impl Component for ColumnSelector {
             let is_dragover_column =
                 ctx.props().dragdrop.is_dragover(DropAction::Active);
 
-            let is_pivot = config.is_pivot();
+            let is_pivot = config.is_aggregated();
             let expression_columns =
                 ctx.props().session.metadata().get_expression_columns();
             let columns_iter = ColumnsIterator::new(
@@ -351,8 +351,8 @@ impl Component for ColumnSelector {
 }
 
 /// Encapsulates the logic of determining which columns go in the "Active" and
-/// "Inactive" column sections of the `ColumnSelector` component, via the pair of
-/// iterator returning functions `active()` and `inactive()`.
+/// "Inactive" column sections of the `ColumnSelector` component, via the
+/// iterator returning functions `active()`, `inactive()` and `expression()`.
 struct ColumnsIterator<'a> {
     table_columns: &'a [String],
     expression_columns: &'a [String],

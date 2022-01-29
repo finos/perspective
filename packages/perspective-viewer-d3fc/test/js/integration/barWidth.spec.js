@@ -64,6 +64,7 @@ utils.with_server({}, () => {
                             plugin_config: {},
                             settings: false,
                             expressions: [],
+                            theme: "Material Light",
                         });
 
                         return await get_contents("ybar")(page);

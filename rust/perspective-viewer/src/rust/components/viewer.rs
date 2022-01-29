@@ -86,7 +86,7 @@ impl Component for PerspectiveViewer {
                 let session = ctx.props().session.clone();
                 let _ = promisify_ignore_view_delete(async move {
                     session.reset(all);
-                    renderer.reset();
+                    renderer.reset().await;
                     let result =
                         renderer.draw(session.validate().await.create_view()).await;
 
@@ -208,6 +208,7 @@ impl Component for PerspectiveViewer {
                     <StatusBar
                         id="status_bar"
                         session={ ctx.props().session.clone() }
+                        renderer={ ctx.props().renderer.clone() }
                         on_reset={ ctx.link().callback(|all| Msg::Reset(all, None)) }>
                     </StatusBar>
                     <div

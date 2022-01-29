@@ -70,6 +70,10 @@ customElements.define(
         }
 
         async draw(view) {
+            if (!this.isConnected) {
+                return;
+            }
+
             const old_sizes = this._save_column_size_overrides();
             await this.activate(view);
             let viewer = this.parentElement;
@@ -178,7 +182,9 @@ customElements.define(
             datagrid[PLUGIN_SYMBOL] = token;
         }
 
-        async restyle() {}
+        async restyle(view) {
+            this.draw(view);
+        }
 
         delete() {
             if (this.datagrid.table_model) {

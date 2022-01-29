@@ -58,7 +58,7 @@ impl ViewSubscriptionData {
         let stats = TableStats {
             num_rows: Some(num_rows),
             virtual_rows: Some(virtual_rows),
-            is_pivot: self.config.is_pivot() || virtual_rows != num_rows,
+            is_pivot: self.config.is_aggregated() || virtual_rows != num_rows,
         };
 
         self.on_stats.emit(stats);

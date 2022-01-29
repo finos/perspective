@@ -14,7 +14,7 @@
     z-index: 10000;
     padding: 6px;
     outline: none;
-    font-family: "Open Sans";
+    background-color: #ffffff;
     font-size: 12px;
     font-weight: 300;
     border: inherit;
@@ -50,7 +50,7 @@
 
     input.parameter[type="number"] {
         border-bottom-width: 1px;
-        border-color: var(--input--border-color);
+        border-color: var(--input--border-color, var(--inactive--color, inherit));
     }
 
     .indent {
@@ -65,7 +65,7 @@
 
     input[type="checkbox"] {
         appearance: none;
-        font-family: "Material Icons";
+        font-family: var(--button--font-family, inherit);
         font-size: 16px;
         text-align: center;
 
@@ -74,30 +74,30 @@
         }
 
         &:not([disabled]):checked:after {
-            color: var(--active-color, red);
+            color: var(--active--color, red);
         }
 
         &:after {
             content: "\E835";
-            color: var(--inactive-color, #999);
+            color: var(--inactive--color, #999);
         }
     }
 
     input[type="radio"] {
-        appearance: none;
-        font-family: "Material Icons";
+        appearance: var(--column-style-radio--appearance, auto);
+        font-family: var(--button--font-family, inherit);
         font-size: 16px;
         font-feature-settings: "liga";
         text-align: center;
 
         &:checked:after {
-            content: "radio_button_checked";
-            color: var(--active-color, red);
+            content: var(--column-style-radio-checked--content, none);
+            color: var(--active--color, red);
         }
 
         &:after {
-            content: "radio_button_unchecked";
-            color: var(--inactive-color, #999);
+            content: var(--column-style-radio-unchecked--content, none);
+            color: var(--inactive--color, #999);
         }
     }
 
@@ -125,16 +125,16 @@
 
         &:before {
             position: absolute;
-            font-family: "Material Icons";
+            font-family: var(--button--font-family, inherit);
             margin-top: 11px;
             margin-left: 12px;
             font-size: 12px;
-            content: "add";
+            content: var(--column-style-pos-color--content, "+");
             color: white;
         }
 
         &#neg-color-param:before {
-            content: "remove";
+            content: var(--column-style-neg-color--content, "-");
         }
     }
 

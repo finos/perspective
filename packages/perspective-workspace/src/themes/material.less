@@ -1,36 +1,27 @@
-@import "../../../../rust/perspective-viewer/src/less/fonts.less";
-@import (reference)
-    "../../../../rust/perspective-viewer/src/themes/material-dense.less";
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+@import "@finos/perspective-viewer/src/themes/material.less";
 
 perspective-workspace {
     .perspective-workspace-material-base();
 }
 
-perspective-viewer.workspace-detail-widget {
-    .perspective-viewer-material-dense();
-    background-color: #f2f4f6;
-}
-
-perspective-viewer.workspace-master-widget {
-    .perspective-viewer-material-dense();
+perspective-viewer[data-perspective-theme="Material Light"].workspace-master-widget {
     background-color: #f2f4f6;
     --plugin--background: #f2f4f6;
     regular-table {
-        --pv-divider--color: #e0e4e9 !important;
         td,
         th {
             border-color: #e0e4e9;
         }
     }
-}
-
-perspective-number-column-style,
-perspective-expression-editor {
-    background-color: #ffffff;
-    color: #161616;
-    border: 1px solid #e0e4e9;
-    --input--border-color: #e0e4e9;
-    --active-color: @blue500;
 }
 
 .perspective-workspace-material-base() {

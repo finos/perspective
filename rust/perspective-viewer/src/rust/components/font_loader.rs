@@ -62,14 +62,6 @@ impl Component for FontLoader {
         false
     }
 
-    /// Font loading shoudl only occur once per element, so try to ensure that
-    /// multiple sets of `FontLoaderProps` are not instantiated.  We don't
-    /// want this to actually be static, since there may be multiple differently
-    /// themed `<perspective-viewer>`s in the same wasm process.
-    // fn changed(&mut self, _ctx: &Context<Self>) -> bool {
-    //     true
-    // }
-
     fn view(&self, ctx: &Context<Self>) -> yew::virtual_dom::VNode {
         if let FontLoaderStatus::Finished = ctx.props().get_status() {
             html! {}

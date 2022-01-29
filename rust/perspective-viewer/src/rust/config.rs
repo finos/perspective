@@ -31,6 +31,7 @@ pub struct ViewerConfig {
     pub plugin: String,
     pub plugin_config: Value,
     pub settings: bool,
+    pub theme: Option<String>,
 
     #[serde(flatten)]
     pub view_config: ViewConfig,
@@ -42,6 +43,7 @@ impl ViewerConfig {
             plugin: renderer.get_active_plugin().unwrap().name(),
             view_config: ViewConfig::default(),
             plugin_config: Value::Null,
+            theme: None,
             settings: false,
         }
     }
@@ -52,6 +54,9 @@ impl ViewerConfig {
 pub struct ViewerConfigUpdate {
     #[serde(default)]
     pub plugin: PluginUpdate,
+
+    #[serde(default)]
+    pub theme: ThemeUpdate,
 
     #[serde(default)]
     pub settings: SettingsUpdate,
@@ -72,6 +77,7 @@ pub enum OptionalUpdate<T: Clone> {
 
 pub type PluginUpdate = OptionalUpdate<String>;
 pub type SettingsUpdate = OptionalUpdate<bool>;
+pub type ThemeUpdate = OptionalUpdate<String>;
 
 /// Handles `{}` when included as a field with `#[serde(default)]`.
 impl<T: Clone> Default for OptionalUpdate<T> {

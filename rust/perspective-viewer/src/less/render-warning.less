@@ -23,7 +23,7 @@
         z-index: 10000;
 
         &.plugin_information--warning {
-            background: @amber400;
+            background: var(--warning--background, @amber400);
         }
 
         .plugin_information__text {
@@ -35,10 +35,13 @@
         }
 
         .plugin_information__text:before {
-            content: var(--overflow_hint--before);
-            font-family: var(--overflow_hint--font-family);
-            color: var(--overflow_hint--color);
-            padding: var(--overflow_hint--padding);
+            content: var(--overflow-hint-icon--content);
+            font-family: var(
+                --overflow_hint--font-family,
+                var(--button--font-family, inherit)
+            );
+            color: var(--overflow-hint-icon--color);
+            padding: var(--overflow-hint-icon--padding, 0 12px 0 6px);
             font-size: 16px;
         }
 

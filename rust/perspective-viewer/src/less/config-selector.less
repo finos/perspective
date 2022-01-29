@@ -20,13 +20,17 @@
         display: flex;
         flex-wrap: wrap;
         justify-content: flex-start;
-        padding: var(--top_panel--padding, 5px 0px 10px 0px);
+        padding: var(--top-panel--padding, 5px 0px 10px 0px);
         max-width: 1000px;
         z-index: 1;
 
         .row_close {
             display: inline;
-            font-family: "Material Icons";
+            font-family: var(
+                --column-close--font-family,
+                var(--button--font-family, "inherit")
+            );
+
             cursor: pointer;
             min-width: 12px;
             margin-right: 3px;
@@ -36,7 +40,7 @@
             margin-left: 3px;
             margin-right: 0px;
             &:before {
-                content: "close";
+                content: var(--column-close--content, "X");
             }
         }
 
@@ -86,11 +90,11 @@
         }
 
         #row_pivots label.pivot-selector-label:before {
-            content: var(--row_pivots--before, "Row Pivots");
+            content: var(--row_pivots--content, "Row Pivots");
         }
 
         #column_pivots label.pivot-selector-label:before {
-            content: var(--column_pivots--before, "Column Pivots");
+            content: var(--column_pivots--content, "Column Pivots");
         }
 
         #sort label.pivot-selector-label:before {
@@ -184,7 +188,7 @@
             font-weight: 300;
             color: var(--inactive--color, #b4b7be);
             white-space: nowrap;
-            padding: var(--column-drop-container--padding, 0px 0px 2px 10px);
+            padding: var(--column-drop-container--padding, 0px);
             font-size: 12px;
             display: inline-block;
         }
@@ -196,8 +200,8 @@
         .psp-text-field__input:not(:empty) + label {
             position: absolute;
             top: 0px;
-            margin: var(--column-drop-label--margin, 0);
-            font-size: var(--column-drop-label--font-size, 12px);
+            margin: var(--column-drop-label--margin, -10px 0px 0px 0px);
+            font-size: var(--column-drop-label--font-size, 10px);
             display: var(--column-drop-label--display, none);
         }
 
@@ -220,42 +224,42 @@
     .sort-icon {
         margin-left: 4px;
         cursor: pointer;
-        font-family: "Material Icons";
+        font-family: var(--button--font-family, inherit);
 
         &.desc:before {
-            content: var(--sort-order-desc--before, "\2193");
+            content: var(--sort-order-desc--content, "\2193");
         }
 
         &.asc:before {
-            content: var(--sort-order-asc--before, "\2191");
+            content: var(--sort-order-asc--content, "\2191");
         }
 
         &.none:before {
-            content: var(--sort-order-none--before, "-");
+            content: var(--sort-order-none--content, "-");
         }
 
         &.asc.abs:before {
-            content: var(--sort-order-asc-abs--before, "\21E7");
+            content: var(--sort-order-asc-abs--content, "\21E7");
         }
 
         &.desc.abs:before {
-            content: var(--sort-order-desc-abs--before, "\21E9");
+            content: var(--sort-order-desc-abs--content, "\21E9");
         }
 
         &.col.asc:before {
-            content: var(--sort-order-col-asc--before, "\2192");
+            content: var(--sort-order-col-asc--content, "\2192");
         }
 
         &.col.desc:before {
-            content: var(--sort-order-col-desc--before, "\2190");
+            content: var(--sort-order-col-desc--content, "\2190");
         }
 
         &.col.asc.abs:before {
-            content: var(--sort-order-col-asc-abs--before, "\21E8");
+            content: var(--sort-order-col-asc-abs--content, "\21E8");
         }
 
         &.col.desc.abs:before {
-            content: var(--sort-order-col-desc-abs--before, "\21E6");
+            content: var(--sort-order-col-desc-abs--content, "\21E6");
         }
     }
 }

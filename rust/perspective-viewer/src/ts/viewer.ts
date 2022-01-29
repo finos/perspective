@@ -396,6 +396,30 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
     }
 
     /**
+     * Sets the theme names available via the `<perspective-viewer>` status bar
+     * UI.  Typically these will be auto-detected simply by including the
+     * theme `.css` in a `<link>` tag;  however, auto-detection can fail if
+     * the `<link>` tag is not a same-origin request due to CORS.  For servers
+     * configured to allow cross-origin requests, you can use the
+     * [`crossorigin` attribute](https://html.spec.whatwg.org/multipage/semantics.html#attr-link-crossorigin)
+     * to enable detection, e.g. `<link crossorigin="anonymous" .. >`.  If for
+     * whatever reason auto-detection still fails, you may set the themes via
+     * this method.  Note the theme `.css` must still be loaded in this case -
+     * the `resetThemes()` method only lets the `<perspective-viewer>` know what
+     * theme names are available.
+     * @param Util
+     * @example
+     * ```javascript
+     * const viewer = document.querySelector("perspective-viewer");
+     * await viewer.resetThemes(["Material Light", "Material Dark"]);
+     * ```
+     */
+    async resetThemes(themes: Array<string>): Promise<void> {
+        await this.load_wasm();
+        await this.instance.js_reset_themes(themes);
+    }
+
+    /**
      * Gets the edit port, the port number for which `Table` updates from this
      * `<perspective-viewer>` are generated.  This port number will be present
      * in the options object for a `View.on_update()` callback for any update

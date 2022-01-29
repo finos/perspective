@@ -142,8 +142,10 @@ export class PerspectiveDocumentWidget extends DocumentWidget {
         }
 
         // pickup theme from env
-        this._psp.dark =
-            document.body.getAttribute("data-jp-theme-light") === "false";
+        this._psp.theme =
+            document.body.getAttribute("data-jp-theme-light") === "false"
+                ? "Material Light"
+                : "Material Dark";
     }
 
     dispose() {
@@ -341,16 +343,17 @@ function activate(app, restorer, themeManager) {
                 ? themeManager.isLight(themeManager.theme)
                 : true;
 
+        const theme = is_light ? "Material Light" : "Material Dark";
         trackercsv.forEach((pspDocWidget) => {
-            pspDocWidget.psp.dark = !isLight;
+            pspDocWidget.psp.theme = theme;
         });
 
         trackerjson.forEach((pspDocWidget) => {
-            pspDocWidget.psp.dark = !isLight;
+            pspDocWidget.psp.theme = theme;
         });
 
         trackerarrow.forEach((pspDocWidget) => {
-            pspDocWidget.psp.dark = !isLight;
+            pspDocWidget.psp.theme = theme;
         });
     };
 

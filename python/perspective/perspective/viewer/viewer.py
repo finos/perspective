@@ -66,7 +66,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         filter=None,
         expressions=None,
         plugin_config=None,
-        dark=None,
+        theme=None,
         editable=False,
     ):
         """Initialize an instance of `PerspectiveViewer` with the given viewer
@@ -96,7 +96,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
                 select by default.
             plugin_config (:obj:`dict`): A configuration for the plugin, i.e.
                 the datagrid plugin or a chart plugin.
-            dark (:obj:`bool`): Whether to invert the color theme.
+            theme (:obj:`str`): The color theme to use.
             editable (:obj:`bool`): Whether to allow editability using the grid.
 
         Examples:
@@ -128,7 +128,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         self.filter = validate_filter(filter) or []
         self.expressions = validate_expressions(expressions) or []
         self.plugin_config = validate_plugin_config(plugin_config) or {}
-        self.dark = dark
+        self.theme = theme
         self.editable = editable
 
     @property
