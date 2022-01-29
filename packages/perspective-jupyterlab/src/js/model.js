@@ -34,6 +34,7 @@ export class PerspectiveModel extends DOMWidgetModel {
             filter: [],
             expressions: [],
             plugin_config: {},
+            settings: true,
             theme: "Material Light",
             editable: false,
             server: false,
