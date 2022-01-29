@@ -2,6 +2,9 @@ perspective-viewer {
     flex: 1;
     margin: 24px;
     overflow: visible;
+}
+
+perspective-viewer[data-perspective-theme="Material Light"] {
     --d3fc-positive--gradient: linear-gradient(
         #94d0ff,
         #8795e8,
