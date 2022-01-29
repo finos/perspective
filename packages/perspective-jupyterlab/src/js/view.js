@@ -34,11 +34,7 @@ export class PerspectiveView extends DOMWidgetView {
             plugin_config: this.model.get("plugin_config"),
             server: this.model.get("server"),
             client: this.model.get("client"),
-            dark:
-                this.model.get("dark") === null // only set if its a bool, otherwise inherit
-                    ? document.body.getAttribute("data-jp-theme-light") ===
-                      "false"
-                    : this.model.get("dark"),
+            theme: this.model.get("theme"),
             editable: this.model.get("editable"),
             bindto: this.el,
             view: this,
@@ -108,7 +104,7 @@ export class PerspectiveView extends DOMWidgetView {
         this.model.on("change:filter", this.filter_changed, this);
         this.model.on("change:expressions", this.expressions_changed, this);
         this.model.on("change:plugin_config", this.plugin_config_changed, this);
-        this.model.on("change:dark", this.dark_changed, this);
+        this.model.on("change:theme", this.theme_changed, this);
         this.model.on("change:editable", this.editable_changed, this);
 
         /**
@@ -411,8 +407,11 @@ export class PerspectiveView extends DOMWidgetView {
         this.pWidget.plugin_config = this.model.get("plugin_config");
     }
 
-    dark_changed() {
-        this.pWidget.dark = this.model.get("dark");
+    theme_changed() {
+        this.pWidget.restore({
+            theme: this.model.get("theme"),
+        });
+    }
     }
 
     editable_changed() {

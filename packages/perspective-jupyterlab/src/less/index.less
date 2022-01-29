@@ -1,10 +1,7 @@
 @import "@finos/perspective-viewer/src/less/fonts.less";
-@import "@finos/perspective-viewer/src/themes/material-dense.less";
-@import (reference)
-    "@finos/perspective-viewer/src/themes/material-dense.dark.less";
+@import "@finos/perspective-viewer/src/themes/themes.less";
 
-div.PSPContainer,
-div.PSPContainer-dark {
+div.PSPContainer {
     overflow: auto;
     resize: both;
     padding-right: 5px;
@@ -13,38 +10,21 @@ div.PSPContainer-dark {
     flex: 1;
 }
 
-perspective-number-column-style.dark {
-    .perspective-number-column-style-material-dark();
-}
-
-perspective-expression-editor.dark {
-    .perspective-expression-editor-material-dark();
-}
-
 // Widget height for Jupyterlab
-.jp-NotebookPanel-notebook div.PSPContainer,
-.jp-NotebookPanel-notebook div.PSPContainer-dark {
+.jp-NotebookPanel-notebook div.PSPContainer {
     height: 520px;
 }
 
 // Widget height for Voila
-.jp-OutputArea-output div.PSPContainer,
-.jp-OutputArea-output div.PSPContainer-dark {
+.jp-OutputArea-output div.PSPContainer {
     height: 520px;
 }
 
-div.PSPContainer perspective-viewer {
-    .perspective-viewer-material-dense();
+div.PSPContainer perspective-viewer[data-perspective-theme="Material Light"] {
     --plugin--border: 1px solid #e0e0e0;
 }
 
-div.PSPContainer-dark perspective-viewer {
-    .perspective-viewer-material-dense-dark();
-    --plugin--border: 1px solid #333333;
-}
-
-div.PSPContainer perspective-viewer,
-div.PSPContainer-dark perspective-viewer {
+div.PSPContainer perspective-viewer {
     display: block;
     height: 98%;
 }

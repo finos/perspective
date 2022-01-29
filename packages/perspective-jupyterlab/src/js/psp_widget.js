@@ -9,12 +9,7 @@
 
 import "@finos/perspective-viewer";
 import {Widget} from "@lumino/widgets";
-import {
-    MIME_TYPE,
-    PSP_CLASS,
-    PSP_CONTAINER_CLASS,
-    PSP_CONTAINER_CLASS_DARK,
-} from "./utils";
+import {MIME_TYPE, PSP_CLASS, PSP_CONTAINER_CLASS} from "./utils";
 
 let _increment = 0;
 
@@ -53,14 +48,13 @@ export class PerspectiveWidget extends Widget {
         const filter = options.filter || [];
         const expressions = options.expressions || options.expressions || [];
         const plugin_config = options.plugin_config || {};
-        const dark = options.dark || false;
+        const theme = options.theme || "Material Light";
         const editable = options.editable || false;
         const server = options.server || false;
         const client = options.client || false;
         // const selectable: boolean = options.selectable || false;
         this.server = server;
         this.client = client;
-        this.dark = dark;
         this.editable = editable;
         this._viewer_config = {
             plugin,
@@ -72,6 +66,7 @@ export class PerspectiveWidget extends Widget {
             aggregates,
             expressions,
             filter,
+            theme,
         };
         // this.plugin_config = plugin_config;
         // this.selectable = selectable;
@@ -248,27 +243,6 @@ export class PerspectiveWidget extends Widget {
         this._server = server;
     }
 
-    /**
-     * Enable or disable dark mode by re-rendering the viewer.
-     */
-
-    get dark() {
-        return this._dark;
-    }
-
-    set dark(dark) {
-        this._dark = dark;
-        if (this._dark) {
-            this.node.classList.add(PSP_CONTAINER_CLASS_DARK);
-            this.node.classList.remove(PSP_CONTAINER_CLASS);
-        } else {
-            this.node.classList.add(PSP_CONTAINER_CLASS);
-            this.node.classList.remove(PSP_CONTAINER_CLASS_DARK);
-        }
-        if (this.isAttached) {
-            this.viewer.restyleElement();
-        }
-    }
 
     get editable() {
         return this._editable;
