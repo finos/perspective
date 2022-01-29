@@ -412,7 +412,6 @@ export class PerspectiveView extends DOMWidgetView {
             theme: this.model.get("theme"),
         });
     }
-    }
 
     editable_changed() {
         this.pWidget.editable = this.model.get("editable");

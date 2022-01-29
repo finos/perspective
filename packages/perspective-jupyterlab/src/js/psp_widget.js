@@ -243,7 +243,6 @@ export class PerspectiveWidget extends Widget {
         this._server = server;
     }
 
-
     get editable() {
         return this._editable;
     }
