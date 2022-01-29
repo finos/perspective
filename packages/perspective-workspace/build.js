@@ -14,7 +14,7 @@ const BUILD = [
     {
         entryPoints: [
             "src/themes/material.less",
-            "src/themes/material.dark.less",
+            "src/themes/material-dark.less",
         ],
         plugins: [lessLoader()],
         outdir: "dist/css",

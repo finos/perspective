@@ -80,7 +80,7 @@ class PerspectiveWebpackPlugin {
             });
 
             if (this.options.inline || this.options.inlineWorker) {
-                rules[rules.length - 1].use.options.inline = "no-fallback";
+                rules[rules.length - 1].use[1].options.inline = "no-fallback";
             }
         }
 
