@@ -351,8 +351,8 @@ impl Component for ColumnSelector {
 }
 
 /// Encapsulates the logic of determining which columns go in the "Active" and
-/// "Inactive" column sections of the `ColumnSelector` component, via the pair of
-/// iterator returning functions `active()` and `inactive()`.
+/// "Inactive" column sections of the `ColumnSelector` component, via the
+/// iterator returning functions `active()`, `inactive()` and `expression()`.
 struct ColumnsIterator<'a> {
     table_columns: &'a [String],
     expression_columns: &'a [String],

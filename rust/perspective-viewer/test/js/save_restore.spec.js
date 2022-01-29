@@ -48,6 +48,7 @@ utils.with_server({}, () => {
                     row_pivots: ["State"],
                     settings: true,
                     sort: [],
+                    theme: null,
                 });
 
                 return await get_contents(page);
@@ -79,6 +80,7 @@ utils.with_server({}, () => {
                         row_pivots: ["State"],
                         settings: true,
                         sort: [],
+                        theme: null,
                     });
 
                     const config2 = await page.evaluate(async () => {
@@ -119,6 +121,7 @@ utils.with_server({}, () => {
                         row_pivots: [],
                         settings: true,
                         sort: [],
+                        theme: null,
                     });
 
                     const config3 = await page.evaluate(async (config) => {
@@ -139,6 +142,7 @@ utils.with_server({}, () => {
                         row_pivots: ["State"],
                         settings: true,
                         sort: [],
+                        theme: null,
                     });
 
                     return await get_contents(page);

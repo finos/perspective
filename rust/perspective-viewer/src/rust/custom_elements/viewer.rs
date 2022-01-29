@@ -22,7 +22,7 @@ use flate2::read::ZlibDecoder;
 use flate2::write::ZlibEncoder;
 use flate2::Compression;
 use futures::channel::oneshot::*;
-use futures::future::join_all;
+
 use js_intern::*;
 use js_sys::*;
 use std::cell::RefCell;
@@ -129,6 +129,20 @@ impl PerspectiveViewerElement {
         // Application State
         let session = Session::default();
         let renderer = Renderer::new(elem.clone(), session.clone());
+
+        // Theme
+        let _ = promisify_ignore_view_delete({
+            let elem = elem.clone();
+            let renderer = renderer.clone();
+            async move {
+                if let Some(theme) = renderer.get_theme_name().await {
+                    elem.set_attribute("data-perspective-theme", &theme)
+                        .unwrap();
+                }
+
+                Ok(JsValue::UNDEFINED)
+            }
+        });
 
         // Create Yew App
         let props = PerspectiveViewerProps {
@@ -308,6 +322,7 @@ impl PerspectiveViewerElement {
                 plugin,
                 plugin_config,
                 settings,
+                theme,
                 mut view_config,
             } = if update.is_string() {
                 let js_str = update.as_string().into_jserror()?;
@@ -323,6 +338,28 @@ impl PerspectiveViewerElement {
                 rmp_serde::from_slice(&slice).into_jserror()?
             } else {
                 update.into_serde().into_jserror()?
+            };
+
+            let needs_restyle = match theme {
+                OptionalUpdate::SetDefault => {
+                    let current_name = renderer.get_theme_name().await;
+                    if None != current_name {
+                        renderer.set_theme_name(None).await?;
+                        true
+                    } else {
+                        false
+                    }
+                }
+                OptionalUpdate::Update(x) => {
+                    let current_name = renderer.get_theme_name().await;
+                    if current_name.is_some() && current_name.as_ref().unwrap() != &x {
+                        renderer.set_theme_name(Some(&x)).await?;
+                        true
+                    } else {
+                        false
+                    }
+                }
+                _ => false,
             };
 
             let plugin_changed = renderer.update_plugin(plugin)?;
@@ -350,6 +387,14 @@ impl PerspectiveViewerElement {
             });
 
             drop(draw_task.await?);
+
+            // TODO this should be part of the API for `draw()` above, such that
+            // the plugin need not render twice when a theme is provided.
+            if needs_restyle {
+                let view = session.get_view().into_jserror()?;
+                renderer.restyle_all(&view).await?;
+            }
+
             Ok(JsValue::UNDEFINED)
         })
     }
@@ -364,6 +409,7 @@ impl PerspectiveViewerElement {
         let root = self.root.clone();
         let view_config = self.session.get_view_config();
         let js_plugin = self.renderer.get_active_plugin();
+        let renderer = self.renderer.clone();
         future_to_promise(async move {
             let msg = Msg::QuerySettings(sender);
             root.borrow()
@@ -379,11 +425,13 @@ impl PerspectiveViewerElement {
                 .into_serde::<serde_json::Value>()
                 .into_jserror()?;
 
+            let theme = renderer.get_theme_name().await;
             let viewer_config = ViewerConfig {
                 plugin,
                 plugin_config,
                 settings,
                 view_config,
+                theme,
             };
 
             match format.as_deref() {
@@ -498,14 +546,29 @@ impl PerspectiveViewerElement {
         let session = self.session.clone();
         promisify_ignore_view_delete(async move {
             let view = session.get_view().into_jserror()?;
-            let plugins = renderer.get_all_plugins();
-            let tasks = plugins.iter().map(|plugin| plugin.restyle(&view));
+            renderer.restyle_all(&view).await
+        })
+    }
 
-            join_all(tasks)
-                .await
-                .into_iter()
-                .collect::<Result<Vec<_>, _>>()
-                .map(|_| JsValue::UNDEFINED)
+    /// Set the available theme names available in the status bar UI.
+    pub fn js_reset_themes(&self, themes: JsValue) -> js_sys::Promise {
+        let renderer = self.renderer.clone();
+        let session = self.session.clone();
+        promisify_ignore_view_delete(async move {
+            let themes: Option<Vec<String>> = themes.into_serde().into_jserror()?;
+            let theme = renderer.get_theme_name().await;
+            renderer.reset_theme_names(themes).await;
+            let reset_theme = renderer
+                .get_theme_config()
+                .await?
+                .0
+                .iter()
+                .find(|y| theme.as_ref() == Some(y))
+                .cloned();
+
+            renderer.set_theme_name(reset_theme.as_deref()).await?;
+            let view = session.get_view().into_jserror()?;
+            renderer.restyle_all(&view).await
         })
     }
 

@@ -7,12 +7,14 @@
 // file.
 
 use crate::components::status_bar::*;
+use crate::renderer::*;
 use crate::session::*;
 use crate::utils::*;
 use crate::*;
 
 use std::cell::Cell;
 use std::rc::Rc;
+use wasm_bindgen::JsCast;
 use wasm_bindgen_test::*;
 use web_sys::*;
 use yew::prelude::*;
@@ -28,13 +30,22 @@ pub fn test_callbacks_invoked() {
         move |_| token.set(1)
     });
 
+    let elem: HtmlElement = window()
+        .unwrap()
+        .document()
+        .unwrap()
+        .create_element("div")
+        .unwrap()
+        .unchecked_into();
     let session = Session::default();
+    let renderer = Renderer::new(elem, session.clone());
 
     test_html! {
         <StatusBar
             id="test"
             weak_link={ link.clone() }
             session={ session }
+            renderer={ renderer }
             on_reset={ on_reset }>
         </StatusBar>
     };
@@ -56,12 +67,22 @@ fn gen(stats: &Option<TableStats>) -> (HtmlElement, Session) {
     let div = NodeRef::default();
     let on_reset = Callback::from(|_| ());
     let session = Session::default();
+    let elem: HtmlElement = window()
+        .unwrap()
+        .document()
+        .unwrap()
+        .create_element("div")
+        .unwrap()
+        .unchecked_into();
+
+    let renderer = Renderer::new(elem, session.clone());
     test_html! {
         <StatusBar
             id="test"
             weak_link={ link.clone() }
             ref={ div.clone() }
             session={ session.clone() }
+            renderer={ renderer }
             on_reset={ on_reset }>
         </StatusBar>
     };

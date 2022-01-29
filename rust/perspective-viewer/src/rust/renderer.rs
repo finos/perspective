@@ -8,21 +8,24 @@
 
 mod activate;
 mod limits;
+mod plugin_store;
 mod render_timer;
+mod theme_store;
 
 pub mod registry;
 
+use self::activate::*;
+use self::limits::*;
+use self::plugin_store::*;
+use self::render_timer::*;
+use self::theme_store::*;
 use crate::config::*;
 use crate::js::perspective::*;
 use crate::js::plugin::*;
 use crate::session::*;
 use crate::utils::*;
 use crate::*;
-
-use self::activate::*;
-use self::limits::*;
-use self::render_timer::*;
-
+use futures::future::join_all;
 use registry::*;
 use std::cell::{Ref, RefCell};
 use std::future::Future;
@@ -34,58 +37,31 @@ use web_sys::*;
 use yew::prelude::*;
 
 #[derive(Clone)]
-pub struct Renderer(Rc<PluginHandle>);
+pub struct Renderer(Rc<RendererData>);
 
 /// Immutable state
-pub struct PluginHandle {
-    plugin_data: RefCell<PluginData>,
+pub struct RendererData {
+    plugin_data: RefCell<RendererMutData>,
     draw_lock: DebounceMutex,
     _session: Session,
     pub on_plugin_changed: PubSub<JsPerspectiveViewerPlugin>,
     pub on_limits_changed: PubSub<RenderLimits>,
+    pub on_theme_config_updated: PubSub<(Vec<String>, Option<usize>)>,
 }
-
-type RenderLimits = (usize, usize, Option<usize>, Option<usize>);
-
-#[derive(Default)]
-struct LazyPluginStore {
-    plugins: Option<Vec<JsPerspectiveViewerPlugin>>,
-    plugin_records: Option<Vec<String>>,
-}
-
-impl LazyPluginStore {
-    fn init_lazy(&mut self) {
-        self.plugins = Some(PLUGIN_REGISTRY.create_plugins());
-        self.plugin_records = Some(PLUGIN_REGISTRY.available_plugin_names());
-    }
-
-    pub fn plugins(&mut self) -> &Vec<JsPerspectiveViewerPlugin> {
-        if self.plugins.is_none() {
-            self.init_lazy();
-        }
-
-        self.plugins.as_ref().unwrap()
-    }
-
-    pub fn plugin_records(&mut self) -> &Vec<String> {
-        if self.plugins.is_none() {
-            self.init_lazy();
-        }
-
-        self.plugin_records.as_ref().unwrap()
-    }
-}
-
-pub struct PluginData {
+/// Mutable state
+pub struct RendererMutData {
     viewer_elem: HtmlElement,
+    theme_store: ThemeStore,
     metadata: ViewConfigRequirements,
-    plugin_store: LazyPluginStore,
+    plugin_store: PluginStore,
     plugins_idx: Option<usize>,
     timer: MovingWindowRenderTimer,
 }
 
+type RenderLimits = (usize, usize, Option<usize>, Option<usize>);
+
 impl Deref for Renderer {
-    type Target = PluginHandle;
+    type Target = RendererData;
     fn deref(&self) -> &Self::Target {
         &self.0
     }
@@ -97,8 +73,8 @@ impl PartialEq for Renderer {
     }
 }
 
-impl Deref for PluginHandle {
-    type Target = RefCell<PluginData>;
+impl Deref for RendererData {
+    type Target = RefCell<RendererMutData>;
     fn deref(&self) -> &Self::Target {
         &self.plugin_data
     }
@@ -106,11 +82,13 @@ impl Deref for PluginHandle {
 
 impl Renderer {
     pub fn new(viewer_elem: HtmlElement, _session: Session) -> Renderer {
-        Renderer(Rc::new(PluginHandle {
-            plugin_data: RefCell::new(PluginData {
+        let theme_store = ThemeStore::new(&viewer_elem);
+        Renderer(Rc::new(RendererData {
+            plugin_data: RefCell::new(RendererMutData {
                 viewer_elem,
+                theme_store,
                 metadata: ViewConfigRequirements::default(),
-                plugin_store: LazyPluginStore::default(),
+                plugin_store: PluginStore::default(),
                 plugins_idx: None,
                 timer: MovingWindowRenderTimer::default(),
             }),
@@ -118,11 +96,13 @@ impl Renderer {
             draw_lock: Default::default(),
             on_plugin_changed: Default::default(),
             on_limits_changed: Default::default(),
+            on_theme_config_updated: Default::default(),
         }))
     }
 
-    pub fn reset(&self) {
+    pub async fn reset(&self) {
         self.0.borrow_mut().plugins_idx = None;
+        self.0.borrow().theme_store.reset(None).await;
         if let Ok(plugin) = self.get_active_plugin() {
             plugin.restore(&js_object!());
         }
@@ -170,6 +150,80 @@ impl Renderer {
         let idx = idx.ok_or_else(|| JsValue::from(format!("No Plugin `{}`", name)))?;
         let result = self.0.borrow_mut().plugin_store.plugins().get(idx).cloned();
         Ok(result.unwrap())
+    }
+
+    pub async fn get_theme_config(
+        &self,
+    ) -> Result<(Vec<String>, Option<usize>), JsValue> {
+        let mut theme_store = self.0.borrow().theme_store.clone();
+        let themes = theme_store.get_themes().await?;
+        let index = self
+            .0
+            .borrow()
+            .viewer_elem
+            .get_attribute("data-perspective-theme")
+            .and_then(|x| themes.iter().position(|y| y == &x))
+            .or_else(|| if !themes.is_empty() { Some(0) } else { None });
+
+        Ok((themes, index))
+    }
+
+    /// Returns the currently applied theme, or the default theme if no theme
+    /// has been set and themes are detected in the `document`, or `None` if
+    /// no themes are available.
+    pub async fn get_theme_name(&self) -> Option<String> {
+        let (themes, index) = self.get_theme_config().await.ok()?;
+        index.and_then(|x| themes.get(x).cloned())
+    }
+
+    fn set_theme_attribute(&self, theme: Option<&str>) -> Result<(), JsValue> {
+        if let Some(theme) = theme {
+            self.0
+                .borrow()
+                .viewer_elem
+                .set_attribute("data-perspective-theme", theme)
+        } else {
+            self.0
+                .borrow()
+                .viewer_elem
+                .remove_attribute("data-perspective-theme")
+        }
+    }
+
+    /// Set the theme by name, or `None` for the default theme.
+    pub async fn set_theme_name(&self, theme: Option<&str>) -> Result<(), JsValue> {
+        let (themes, _) = self.get_theme_config().await?;
+        let index = if let Some(theme) = theme {
+            self.set_theme_attribute(Some(theme))?;
+            themes.iter().position(|x| x == theme)
+        } else if !themes.is_empty() {
+            self.set_theme_attribute(themes.get(0).map(|x| x.as_str()))?;
+            Some(0)
+        } else {
+            self.set_theme_attribute(None)?;
+            None
+        };
+
+        self.on_theme_config_updated.emit_all((themes, index));
+        Ok(())
+    }
+
+    pub async fn reset_theme_names(&self, themes: Option<Vec<String>>) {
+        self.0.borrow().theme_store.reset(themes).await
+    }
+
+    pub async fn restyle_all(
+        &self,
+        view: &JsPerspectiveView,
+    ) -> Result<JsValue, JsValue> {
+        let plugins = self.get_all_plugins();
+        let tasks = plugins.iter().map(|plugin| plugin.restyle(view));
+
+        join_all(tasks)
+            .await
+            .into_iter()
+            .collect::<Result<Vec<_>, _>>()
+            .map(|_| JsValue::UNDEFINED)
     }
 
     pub fn set_throttle(&mut self, val: Option<f64>) {

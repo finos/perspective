@@ -15,7 +15,7 @@
         align-items: center;
 
         .section {
-            box-shadow: 8px 0px 0px -7px var(--pv-divider--color, #ccc);
+            box-shadow: 8px 0px 0px -7px var(--inactive--color, #ccc);
             display: flex;
             align-items: center;
 
@@ -34,8 +34,14 @@
             }
         }
 
+        #menu-bar {
+            overflow: hidden;
+            .button {
+                height: 36px;
+            }
+        }
+
         span {
-            font-family: "Open Sans";
             font-size: 12px;
             margin: 0px 10px;
             user-select: none;
@@ -45,7 +51,7 @@
             &:before {
                 text-transform: none;
                 margin-right: 4px;
-                font-family: "Material Icons";
+                font-family: var(--button--font-family, inherit);
                 vertical-align: bottom;
             }
 
@@ -55,7 +61,7 @@
         }
 
         span.icon {
-            font-family: "Material Icons";
+            font-family: var(--button--font-family, inherit);
             height: 100%;
             line-height: 36px;
             margin: 0;
@@ -67,7 +73,7 @@
 
             &:before {
                 color: #ccc;
-                content: "circle";
+                content: var(--status-icon--content, "\2B24");
             }
 
             &.connected,
@@ -91,7 +97,7 @@
 
         span#export {
             &:before {
-                content: "download";
+                content: var(--export-button-icon--content, "\2193");
             }
         }
 
@@ -103,13 +109,19 @@
 
         span#reset {
             &:before {
-                content: "refresh";
+                content: var(--reset-button-icon--content, "\27F3");
             }
         }
 
         span#copy {
             &:before {
-                content: "content_copy";
+                content: var(--copy-button-icon--content, "\1F4CB");
+            }
+        }
+
+        span#theme {
+            &:before {
+                content: var(--theme-button-icon--content, "T");
             }
         }
 
@@ -117,7 +129,8 @@
             margin: 0px;
             padding: 0 5px 0px 10px;
             transition: background-color 0.2s;
-            span {
+            & > span,
+            & > .dropdown-width-container {
                 pointer-events: none;
                 overflow: hidden;
                 display: none;
@@ -129,14 +142,26 @@
             }
 
             &:hover {
-                span {
-                    display: contents;
-                }
-
                 min-width: 75px;
                 cursor: pointer;
                 background-color: rgba(0, 0, 0, 0.05);
                 transition: none;
+
+                & > span {
+                    display: contents;
+                }
+
+                & > .dropdown-width-container {
+                    display: inline;
+                    pointer-events: all;
+                    & > select {
+                        cursor: pointer;
+                        margin-left: -28px;
+                        padding-left: 28px;
+                        width: calc(100% + 28px);
+                        height: 36px;
+                    }
+                }
             }
         }
     }

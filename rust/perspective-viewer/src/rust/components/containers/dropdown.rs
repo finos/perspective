@@ -82,16 +82,16 @@ where
         true
     }
 
-    // fn changed(&mut self, props: Self::Properties) -> bool {
-    //     let should_render = ctx.props() != props;
-    //     ctx.props() = props;
-    //     should_render
-    // }
+    // The `<select>` has its own state not refelcted by `DropDownProps`.
+    fn changed(&mut self, ctx: &Context<Self>) -> bool {
+        self.selected = ctx.props().selected.clone();
+        true
+    }
 
     // Annoyingly, `<select>` cannot be updated from its HTML alone.
-    fn rendered(&mut self, ctx: &Context<Self>, _first_render: bool) {
+    fn rendered(&mut self, _ctx: &Context<Self>, _first_render: bool) {
         if let Some(elem) = self.select_ref.cast::<web_sys::HtmlSelectElement>() {
-            elem.set_value(&format!("{}", ctx.props().selected))
+            elem.set_value(&format!("{}", self.selected))
         }
     }
 
@@ -168,7 +168,7 @@ where
                     <label>{ "weighted mean" }</label>
                     <div
                         class="dropdown-width-container"
-                        data-value={ format!("{}", ctx.props().selected) }>
+                        data-value={ format!("{}", self.selected) }>
                         { select }
                     </div>
                 </>
@@ -177,7 +177,7 @@ where
             html! {
                 <div
                     class="dropdown-width-container"
-                    data-value={ format!("{}", ctx.props().selected) }>
+                    data-value={ format!("{}", self.selected) }>
                     { select }
                 </div>
             }

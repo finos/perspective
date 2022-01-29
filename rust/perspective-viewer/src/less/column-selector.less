@@ -37,10 +37,13 @@
             min-width: 20px;
             margin-top: -2px;
             height: 0px;
-            font-family: var(--column-add--font-family, inherit);
+            font-family: var(
+                --column-add--font-family,
+                var(--button--font-family, inherit)
+            );
             &:before {
                 font-feature-settings: "liga";
-                content: var(--column-add--before, "+");
+                content: var(--column-add--content, "+");
             }
         }
 
@@ -93,7 +96,7 @@
             span.expression-edit-button,
             span.expression-delete-button {
                 padding-top: 1px;
-                font-family: "Material Icons";
+                font-family: var(--button--font-family, inherit);
                 cursor: pointer;
                 opacity: 1;
                 color: #999;
@@ -213,12 +216,16 @@
         }
 
         .is_column_active {
-            font-family: var(--column-selector--font-family, Arial) !important;
-            width: var(--column_selector--width, 20px);
-            min-width: var(--column_selector--width, 20px);
+            font-family: var(
+                --column-selector--font-family,
+                var(--button--font-family, inherit)
+            ) !important;
+
+            width: var(--column-selector--width, 24px);
+            min-width: var(--column-selector--width, 24px);
             height: var(--is_visible--height, auto);
             cursor: pointer;
-            font-size: var(--column_selector--font-size, 14px);
+            font-size: var(--column-selector--font-size, 14px);
         }
 
         #active-columns,
@@ -251,7 +258,7 @@
             .is_column_active {
                 color: var(--active--color, #999);
                 &:before {
-                    content: var(--active-column-selector--content, none);
+                    content: var(--active-column-selector--content, "\2611");
                 }
 
                 &.required {
@@ -274,7 +281,7 @@
                     font-size: 10px;
                     margin-left: 22px;
                     left: 1px;
-                    padding: var(--column_type--padding, 0px 0px 0px 5px);
+                    padding: var(--column_type--padding, 0px 0px 0px 0px);
                     color: var(--inactive--color, #666);
                     position: absolute;
                     margin-top: -15px;
@@ -330,7 +337,7 @@
             .is_column_active {
                 color: var(--inactive--color, #999);
                 &:before {
-                    content: var(--inactive-column-selector--content, none);
+                    content: var(--inactive-column-selector--content, "\2610");
                 }
             }
 

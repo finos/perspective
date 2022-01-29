@@ -217,7 +217,7 @@ where
                         let theme = get_theme(&target);
                         this.open_within_viewport(target)?;
                         if let Some(theme) = theme {
-                            this.custom_element.class_list().add_1(&theme)?;
+                            this.custom_element.set_attribute("data-perspective-theme", &theme)?;
                         }
 
                         Ok(())
@@ -260,8 +260,8 @@ where
             let target = self.target.borrow_mut().take().unwrap();
             let event = web_sys::CustomEvent::new("-perspective-close-expression")?;
             target.class_list().remove_1("modal-target").unwrap();
-            if let Some(theme) = get_theme(&target) {
-                self.custom_element.class_list().remove_1(&theme)?;
+            if get_theme(&target).is_some() {
+                self.custom_element.remove_attribute("data-perspective-theme")?;
             }
 
             target.dispatch_event(&event)?;
@@ -278,15 +278,16 @@ where
     }
 }
 
+
 fn get_theme(elem: &HtmlElement) -> Option<String> {
     let styles = window().unwrap().get_computed_style(elem).unwrap().unwrap();
     styles
-        .get_property_value("--modal--class")
+        .get_property_value("--theme-name")
         .ok()
         .and_then(|x| {
             let trimmed = x.trim();
             if !trimmed.is_empty() {
-                Some(trimmed.to_owned())
+                Some(trimmed[1..trimmed.len() - 1].to_owned())
             } else {
                 None
             }

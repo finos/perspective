@@ -42,8 +42,9 @@ const PREBUILD = [
 const BUILD = [
     {
         entryPoints: [
-            "src/themes/material-dense.less",
-            "src/themes/material-dense.dark.less",
+            "src/themes/themes.less",
+            "src/themes/material.less",
+            "src/themes/material-dark.less",
         ],
         plugins: [WasmPlugin(false), lessLoader()],
         outdir: "dist/css",
