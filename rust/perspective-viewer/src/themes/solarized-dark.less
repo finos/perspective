@@ -1,0 +1,74 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+@import "../less/fonts";
+@import (reference) "./material-dark.less";
+@import (reference) "./solarized.less";
+
+perspective-viewer,
+perspective-viewer[data-perspective-theme="Solarized Dark"] {
+    --theme-name: "Solarized Dark";
+}
+
+perspective-viewer[data-perspective-theme="Solarized Dark"],
+.perspective-viewer-solarized-dark {
+    .perspective-viewer-solarized();
+    .perspective-viewer-material-dark--colors();
+    .perspective-viewer-solarized-dark--colors();
+    .perspective-viewer-solarized-dark--datagrid();
+    .perspective-viewer-solarized-dark--d3fc();
+}
+
+perspective-number-column-style[data-perspective-theme="Solarized Dark"],
+perspective-string-column-style[data-perspective-theme="Solarized Dark"],
+perspective-expression-editor[data-perspective-theme="Solarized Dark"],
+.perspective-modal-solarized-dark {
+    .perspective-modal-solarized();
+    .perspective-viewer-solarized-dark--colors();
+    background-color: #073642;
+}
+
+.perspective-viewer-solarized-dark--colors {
+    color: #93a1a1;
+    background: #002b36;
+
+    --inactive--color: #073642;
+    --plugin--background: #073642;
+}
+
+.perspective-viewer-solarized-dark--datagrid {
+    regular-table {
+        table {
+            color: #93a1a1;
+        }
+    }
+
+    regular-table table tbody tr td,
+    regular-table table tbody tr th {
+        border-top-color: #002b36;
+    }
+
+    regular-table table tbody th:empty {
+        background: linear-gradient(
+            to right,
+            transparent 9px,
+            #002b36 10px,
+            transparent 11px
+        );
+    }
+}
+
+.perspective-viewer-solarized-dark--d3fc {
+    --d3fc-treedata--labels: white;
+    --d3fc-treedata--hover-highlight: white;
+    --d3fc-axis-ticks--color: #93a1a1;
+    --d3fc-axis--lines: #93a1a1;
+    --d3fc-gridline--color: #002b36;
+    --d3fc-legend--text: #93a1a1;
+}
