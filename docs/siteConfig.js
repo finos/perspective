@@ -95,7 +95,7 @@ const siteConfig = {
     highlight: {
         theme: "atom-one-light"
     },
-    scripts: ["js/fonts.js", "https://buttons.github.io/buttons.js", "js/index.js"],
+    scripts: ["https://buttons.github.io/buttons.js", "js/index.js"],
     stylesheets: [
         "https://fonts.googleapis.com/css?family=Material+Icons",
         "https://fonts.googleapis.com/css?family=Open+Sans",

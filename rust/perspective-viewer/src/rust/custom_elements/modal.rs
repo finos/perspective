@@ -217,7 +217,7 @@ where
                         let theme = get_theme(&target);
                         this.open_within_viewport(target)?;
                         if let Some(theme) = theme {
-                            this.custom_element.set_attribute("data-perspective-theme", &theme)?;
+                            this.custom_element.set_attribute("theme", &theme)?;
                         }
 
                         Ok(())
@@ -261,7 +261,7 @@ where
             let event = web_sys::CustomEvent::new("-perspective-close-expression")?;
             target.class_list().remove_1("modal-target").unwrap();
             if get_theme(&target).is_some() {
-                self.custom_element.remove_attribute("data-perspective-theme")?;
+                self.custom_element.remove_attribute("theme")?;
             }
 
             target.dispatch_event(&event)?;
@@ -277,7 +277,6 @@ where
         Ok(())
     }
 }
-
 
 fn get_theme(elem: &HtmlElement) -> Option<String> {
     let styles = window().unwrap().get_computed_style(elem).unwrap().unwrap();

@@ -134,8 +134,7 @@ impl PerspectiveViewerElement {
             let renderer = renderer.clone();
             async move {
                 if let Some(theme) = renderer.get_theme_name().await {
-                    elem.set_attribute("data-perspective-theme", &theme)
-                        .unwrap();
+                    elem.set_attribute("theme", &theme).unwrap();
                 }
 
                 Ok(JsValue::UNDEFINED)

@@ -1,0 +1,40 @@
+@import "../../../rust/perspective-viewer/src/themes/material.less";
+@import "../../../rust/perspective-viewer/src/themes/material-dark.less";
+@import "../../../rust/perspective-viewer/src/less/variables.less";
+
+perspective-column-style.dark,
+perspective-expression-editor.dark {
+    background-color: @grey700;
+    color: #ffffff;
+    border: 1px solid @grey500;
+    --input--border-color: @grey500;
+    --active--color: #2770a9;
+    --inactive--color: @grey500;
+}
+
+td,
+th,
+table,
+tbody,
+thead {
+    border: 0;
+    font-size: 12px;
+    font-family: "Open Sans";
+    margin: 0;
+    padding: 0;
+    vertical-align: middle;
+}
+
+table tr {
+    border-top: none;
+}
+
+table tr:nth-child(2n) {
+    background-color: transparent;
+}
+
+table th,
+table td {
+    border: none;
+    padding: 0px 5px;
+}

@@ -166,7 +166,7 @@ impl Renderer {
             .0
             .borrow()
             .viewer_elem
-            .get_attribute("data-perspective-theme")
+            .get_attribute("theme")
             .and_then(|x| themes.iter().position(|y| y == &x))
             .or_else(|| if !themes.is_empty() { Some(0) } else { None });
 
@@ -203,15 +203,9 @@ impl Renderer {
 
     fn set_theme_attribute(&self, theme: Option<&str>) -> Result<(), JsValue> {
         if let Some(theme) = theme {
-            self.0
-                .borrow()
-                .viewer_elem
-                .set_attribute("data-perspective-theme", theme)
+            self.0.borrow().viewer_elem.set_attribute("theme", theme)
         } else {
-            self.0
-                .borrow()
-                .viewer_elem
-                .remove_attribute("data-perspective-theme")
+            self.0.borrow().viewer_elem.remove_attribute("theme")
         }
     }
 

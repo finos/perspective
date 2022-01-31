@@ -19,9 +19,9 @@ async function run_with_theme(page, is_dark = false) {
     <script src="/node_modules/@finos/perspective-viewer/dist/umd/perspective-viewer.js"></script>
     <script src="/node_modules/@finos/perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js"></script>
     <script src="/node_modules/@finos/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js"></script>
-    <link rel='stylesheet' href="/node_modules/@finos/perspective-viewer/dist/umd/material-dense.${
-        is_dark ? "dark." : ""
-    }css" is="custom-style">
+    <link rel='stylesheet' href="/node_modules/@finos/perspective-viewer/dist/css/material${
+        is_dark ? "-dark" : ""
+    }.css">
     <style>
         perspective-viewer {
             position: absolute;

@@ -20,7 +20,7 @@ async function main() {
         viewer.load(table);
         const token = {};
         for (const attribute of viewer.attributes) {
-            if (attribute.name !== "settings") {
+            if (attribute.name !== "settings" && attribute.name !== "theme") {
                 token[attribute.name] = JSON.parse(attribute.nodeValue);
             }
         }

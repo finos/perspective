@@ -20,7 +20,9 @@ function imgUrl(img) {
 }
 
 function docUrl(doc, language) {
-    return siteConfig.baseUrl + "docs/" + (language ? language + "/" : "") + doc;
+    return (
+        siteConfig.baseUrl + "docs/" + (language ? language + "/" : "") + doc
+    );
 }
 
 function pageUrl(page, language) {
@@ -38,10 +40,10 @@ class Button extends React.Component {
 }
 
 Button.defaultProps = {
-    target: "_self"
+    target: "_self",
 };
 
-const SplashContainer = props => (
+const SplashContainer = (props) => (
     <div className="homeContainer">
         <div className="homeSplashFade">
             <div className="wrapper homeWrapper">{props.children}</div>
@@ -49,13 +51,13 @@ const SplashContainer = props => (
     </div>
 );
 
-const Logo = props => (
+const Logo = (props) => (
     <div className="projectLogo">
         <img data-src={props.img_src} />
     </div>
 );
 
-const ProjectTitle = props => (
+const ProjectTitle = (props) => (
     <h2 className="projectTitle">
         <perspective-logo />
         {/* <small>
@@ -63,7 +65,7 @@ const ProjectTitle = props => (
     </h2>
 );
 
-const PromoSection = props => (
+const PromoSection = (props) => (
     <div className="section promoSection">
         <div className="promoRow">
             <div className="pluginRowBlock">{props.children}</div>
@@ -78,7 +80,10 @@ class HomeSplash extends React.Component {
             <SplashContainer>
                 <div className="inner">
                     <ProjectTitle />
-                    <perspective-viewer class="titleViewer nosuperstore" />
+                    <perspective-viewer
+                        theme="Material Dark"
+                        class="titleViewer nosuperstore"
+                    />
 
                     <PromoSection>
                         <Button id="grid">Sparkgrid</Button>
@@ -96,13 +101,13 @@ class HomeSplash extends React.Component {
     }
 }
 
-const Block = props => (
+const Block = (props) => (
     <Container id={props.id} background={props.background}>
         <GridBlock contents={props.children} layout={props.layout} />
     </Container>
 );
 
-const PerspectiveBlock = props => {
+const PerspectiveBlock = (props) => {
     const block = props.children[0];
     let beforeImage, afterImage;
     if (block.imageAlign === "right") {
@@ -119,12 +124,16 @@ const PerspectiveBlock = props => {
         );
     }
     return (
-        <Container padding={["top"]} id={props.id} background={props.background}>
+        <Container
+            padding={["top"]}
+            id={props.id}
+            background={props.background}
+        >
             <div
                 className={classNames({
                     imageAlignRight: !!afterImage,
                     imageAlignLeft: !!beforeImage,
-                    imageAlignSide: true
+                    imageAlignSide: true,
                 })}
                 key={block.title}
             >
@@ -133,7 +142,9 @@ const PerspectiveBlock = props => {
                     <h2>
                         <MarkdownBlock>{block.title}</MarkdownBlock>
                     </h2>
-                    <MarkdownBlock layout="twoColumn">{block.content}</MarkdownBlock>
+                    <MarkdownBlock layout="twoColumn">
+                        {block.content}
+                    </MarkdownBlock>
                 </div>
                 {afterImage}
             </div>
@@ -141,7 +152,7 @@ const PerspectiveBlock = props => {
     );
 };
 
-const GalleryBlock = props => {
+const GalleryBlock = (props) => {
     const block = props.children[0];
     let beforeImage, afterImage;
 
@@ -150,13 +161,18 @@ const GalleryBlock = props => {
     }
 
     const showcase = siteConfig.users
-        .filter(user => {
+        .filter((user) => {
             return user.pinned;
         })
         .map((user, i) => {
             return (
                 <a href={user.infoLink} key={i}>
-                    <img style={{width: "33.3%"}} data-src={user.image} alt={user.caption} title={user.caption} />
+                    <img
+                        style={{width: "33.3%"}}
+                        data-src={user.image}
+                        alt={user.caption}
+                        title={user.caption}
+                    />
                 </a>
             );
         });
@@ -175,12 +191,16 @@ const GalleryBlock = props => {
         );
     }
     return (
-        <Container padding={["top"]} id={props.id} background={props.background}>
+        <Container
+            padding={["top"]}
+            id={props.id}
+            background={props.background}
+        >
             <div
                 className={classNames({
                     imageAlignRight: !!afterImage,
                     imageAlignLeft: !!beforeImage,
-                    imageAlignSide: true
+                    imageAlignSide: true,
                 })}
                 key={block.title}
             >
@@ -189,7 +209,9 @@ const GalleryBlock = props => {
                     <h2>
                         <MarkdownBlock>{block.title}</MarkdownBlock>
                     </h2>
-                    <MarkdownBlock layout="twoColumn">{block.content}</MarkdownBlock>
+                    <MarkdownBlock layout="twoColumn">
+                        {block.content}
+                    </MarkdownBlock>
                 </div>
                 {afterImage}
             </div>
@@ -197,15 +219,21 @@ const GalleryBlock = props => {
     );
 };
 
-const YoutubeBlock = props => {
+const YoutubeBlock = (props) => {
     const block = props.children[0];
     let beforeImage, afterImage;
-    const url = "https://www.youtube.com/embed/IO-HJsGdleE?&theme=dark&autohide=1&modestbranding=1&showinfo=0&rel=0";
+    const url =
+        "https://www.youtube.com/embed/IO-HJsGdleE?&theme=dark&autohide=1&modestbranding=1&showinfo=0&rel=0";
     if (block.imageAlign === "right") {
         afterImage = (
             <div className="blockImage">
                 <div className="youtube">
-                    <iframe width="500" height="294" src={url} frameBorder="0"></iframe>
+                    <iframe
+                        width="500"
+                        height="294"
+                        src={url}
+                        frameBorder="0"
+                    ></iframe>
                 </div>
             </div>
         );
@@ -213,18 +241,27 @@ const YoutubeBlock = props => {
         beforeImage = (
             <div className="blockImage">
                 <div className="youtube">
-                    <iframe width="500" height="294" src={url} frameBorder="0"></iframe>
+                    <iframe
+                        width="500"
+                        height="294"
+                        src={url}
+                        frameBorder="0"
+                    ></iframe>
                 </div>
             </div>
         );
     }
     return (
-        <Container padding={["bottom"]} id={props.id} background={props.background}>
+        <Container
+            padding={["bottom"]}
+            id={props.id}
+            background={props.background}
+        >
             <div
                 className={classNames({
                     imageAlignRight: !!afterImage,
                     imageAlignLeft: !!beforeImage,
-                    imageAlignSide: true
+                    imageAlignSide: true,
                 })}
                 key={block.title}
             >
@@ -241,25 +278,27 @@ const YoutubeBlock = props => {
     );
 };
 
-const Features = props => (
+const Features = (props) => (
     <Block layout="fourColumn">
         {[
             {
                 image: "https://bl.ocks.org/texodus/raw/803de90736a3641ad91c5c7a1b49d0a7/thumbnail.png",
-                title: "Simple"
+                title: "Simple",
             },
             {
-                content: "Utilizing bleeding-edge browser technology such as Web Assembly and Apache Arrow, Perspective is unmatched in browser performance",
+                content:
+                    "Utilizing bleeding-edge browser technology such as Web Assembly and Apache Arrow, Perspective is unmatched in browser performance",
                 image: imgUrl("baseline-trending_up-24px.svg"),
                 imageAlign: "top",
-                title: "Powerful"
+                title: "Powerful",
             },
             {
-                content: "Engineered for reliability and production-vetted on the J.P. Morgan trading floor, now available to the development community as Open Source",
+                content:
+                    "Engineered for reliability and production-vetted on the J.P. Morgan trading floor, now available to the development community as Open Source",
                 image: imgUrl("baseline-security-24px.svg"),
                 imageAlign: "top",
-                title: "Industrial"
-            }
+                title: "Industrial",
+            },
         ]}
     </Block>
 );
@@ -314,13 +353,13 @@ data or streaming updates via [Apache Arrow](https://arrow.apache.org/).
 
 `;
 
-const Description = props => (
+const Description = (props) => (
     <GalleryBlock id="demo1">
         {[
             {
                 content: DESCRIPTION_TEXT,
-                imageAlign: "right"
-            }
+                imageAlign: "right",
+            },
         ]}
     </GalleryBlock>
 );
@@ -345,13 +384,13 @@ allowing [Pandas](https://pandas.pydata.org/) and Arrow preview, transform,
 export and persist Perspective visualizations _interactively_.
 `;
 
-const Jupyter = props => (
+const Jupyter = (props) => (
     <YoutubeBlock id="demo1">
         {[
             {
                 content: PYTHON_TEXT,
-                imageAlign: "right"
-            }
+                imageAlign: "right",
+            },
         ]}
     </YoutubeBlock>
 );
@@ -378,14 +417,14 @@ relies on [WebAssembly](https://webassembly.org/) for excellent
 _query calculation_ time, and [Apache Arrow](https://arrow.apache.org/)
 for its conservative _memory footprint_ and efficient _data serialization_.
 `;
-const Javascript = props => (
+const Javascript = (props) => (
     <Block id="javascript">
         {[
             {
                 content: JS_TEXT,
                 image: imgUrl("demo_large.gif"),
-                imageAlign: "left"
-            }
+                imageAlign: "left",
+            },
         ]}
     </Block>
 );
@@ -403,7 +442,7 @@ const Javascript = props => (
 // \`\`\`
 // `;
 
-const GetStarted = props => (
+const GetStarted = (props) => (
     <Container padding={["bottom", "top"]} id={props.id} background="dark">
         <div id="get_started">
             <perspective-viewer class="nosuperstore"></perspective-viewer>
@@ -411,7 +450,7 @@ const GetStarted = props => (
     </Container>
 );
 
-const Testimonials = props => {
+const Testimonials = (props) => {
     return (
         <div className="testimonials">
             <Container padding={["bottom", "top"]}>
@@ -420,9 +459,10 @@ const Testimonials = props => {
                     contents={[
                         {
                             image: `https://bl.ocks.org/texodus/raw/803de90736a3641ad91c5c7a1b49d0a7/preview.png`,
-                            infoLink: "https://bl.ocks.org/texodus/803de90736a3641ad91c5c7a1b49d0a7",
+                            infoLink:
+                                "https://bl.ocks.org/texodus/803de90736a3641ad91c5c7a1b49d0a7",
                             imageAlign: "top",
-                            title: 'Superstore <br/><font size="2">Static Apache Arrow Example</font>'
+                            title: 'Superstore <br/><font size="2">Static Apache Arrow Example</font>',
                         },
                         {
                             content:
@@ -430,7 +470,7 @@ const Testimonials = props => {
                             image: `${siteConfig.baseUrl}img/hector-ramos.png`,
                             imageAlign: "top",
                             imageAlt: "Hector Ramos",
-                            title: 'Hector Ramos <br/><font size="2">Lead React Native Advocate</font>'
+                            title: 'Hector Ramos <br/><font size="2">Lead React Native Advocate</font>',
                         },
                         {
                             content:
@@ -438,8 +478,8 @@ const Testimonials = props => {
                             image: `${siteConfig.baseUrl}img/ricky-vetter.jpg`,
                             imageAlign: "top",
                             imageAlt: "Ricky Vetter",
-                            title: 'Ricky Vetter <br/><font size="2">ReasonReact Developer</font>'
-                        }
+                            title: 'Ricky Vetter <br/><font size="2">ReasonReact Developer</font>',
+                        },
                     ]}
                     layout="threeColumn"
                 />
@@ -448,20 +488,24 @@ const Testimonials = props => {
     );
 };
 
-const Showcase = props => {
+const Showcase = (props) => {
     if ((siteConfig.users || []).length === 0) {
         return null;
     }
 
     const showcase = siteConfig.users
-        .filter(user => {
+        .filter((user) => {
             return user.pinned;
         })
         .map((user, i) => {
             return (
                 <a href={user.infoLink} key={i}>
                     <h4>{user.caption}</h4>
-                    <img data-src={user.image} alt={user.caption} title={user.caption} />
+                    <img
+                        data-src={user.image}
+                        alt={user.caption}
+                        title={user.caption}
+                    />
                 </a>
             );
         });
@@ -474,7 +518,7 @@ const Showcase = props => {
     );
 };
 
-const ChartTypes = props => {
+const ChartTypes = (props) => {
     if ((siteConfig.users || []).length === 0) {
         return null;
     }
