@@ -44,6 +44,7 @@ class PerspectiveTraitlets(HasTraits):
     filter = List(default_value=[]).tag(sync=True)
     expressions = List(default_value=[]).tag(sync=True)
     plugin_config = Dict(default_value={}).tag(sync=True)
+    settings = Bool(True).tag(sync=True)
     theme = Unicode("Material Light", allow_none=True).tag(sync=True)
     editable = Bool(False).tag(sync=True)
     server = Bool(False).tag(sync=True)

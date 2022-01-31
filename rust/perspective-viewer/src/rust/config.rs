@@ -12,20 +12,39 @@ mod filters;
 mod sort;
 mod view_config;
 
-use crate::renderer::Renderer;
-
 pub use aggregates::*;
 pub use column_type::*;
 pub use filters::*;
 pub use sort::*;
 pub use view_config::*;
 
+use crate::renderer::Renderer;
+use crate::utils::*;
+use flate2::read::ZlibDecoder;
+use flate2::write::ZlibEncoder;
+use flate2::Compression;
 use serde::Deserialize;
 use serde::Deserializer;
 use serde::Serialize;
 use serde_json::Value;
+use std::io::Read;
+use std::io::Write;
+use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
 
-#[derive(Serialize)]
+#[derive(Deserialize)]
+pub enum ViewerConfigEncoding {
+    #[serde(rename = "json")]
+    JSON,
+
+    #[serde(rename = "string")]
+    String,
+
+    #[serde(rename = "arraybuffer")]
+    ArrayBuffer,
+}
+
+#[derive(Serialize, PartialEq)]
 #[serde(deny_unknown_fields)]
 pub struct ViewerConfig {
     pub plugin: String,
@@ -47,6 +66,35 @@ impl ViewerConfig {
             settings: false,
         }
     }
+
+    /// Encode a `ViewerConfig` to a `JsValue` in a supported type.
+    pub fn encode(
+        &self,
+        format: &Option<ViewerConfigEncoding>,
+    ) -> Result<JsValue, JsValue> {
+        match format {
+            Some(ViewerConfigEncoding::String) => {
+                let mut encoder = ZlibEncoder::new(Vec::new(), Compression::default());
+                let bytes = rmp_serde::to_vec(self).into_jserror()?;
+                encoder.write_all(&bytes).into_jserror()?;
+                let encoded = encoder.finish().into_jserror()?;
+                Ok(JsValue::from(base64::encode(encoded)))
+            }
+            Some(ViewerConfigEncoding::ArrayBuffer) => {
+                let array =
+                    js_sys::Uint8Array::from(&rmp_serde::to_vec(self).unwrap()[..]);
+                let start = array.byte_offset();
+                let len = array.byte_length();
+                Ok(array
+                    .buffer()
+                    .slice_with_end(start, start + len)
+                    .unchecked_into())
+            }
+            None | Some(ViewerConfigEncoding::JSON) => {
+                Ok(JsValue::from_serde(self).unwrap())
+            }
+        }
+    }
 }
 
 #[derive(Deserialize)]
@@ -66,6 +114,28 @@ pub struct ViewerConfigUpdate {
 
     #[serde(flatten)]
     pub view_config: ViewConfigUpdate,
+}
+
+impl ViewerConfigUpdate {
+    /// Decode a `JsValue` into a `ViewerConfigUpdate` by auto-detecting format
+    /// from JavaScript type.
+    pub fn decode(update: &JsValue) -> Result<ViewerConfigUpdate, JsValue> {
+        if update.is_string() {
+            let js_str = update.as_string().into_jserror()?;
+            let bytes = base64::decode(js_str).into_jserror()?;
+            let mut decoder = ZlibDecoder::new(&*bytes);
+            let mut decoded = vec![];
+            decoder.read_to_end(&mut decoded).into_jserror()?;
+            rmp_serde::from_slice(&decoded).into_jserror()
+        } else if update.is_instance_of::<js_sys::ArrayBuffer>() {
+            let uint8array = js_sys::Uint8Array::new(update);
+            let mut slice = vec![0; uint8array.length() as usize];
+            uint8array.copy_to(&mut slice[..]);
+            rmp_serde::from_slice(&slice).into_jserror()
+        } else {
+            update.into_serde().into_jserror()
+        }
+    }
 }
 
 #[derive(Clone)]

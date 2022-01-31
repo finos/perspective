@@ -30,11 +30,11 @@ use registry::*;
 use std::cell::{Ref, RefCell};
 use std::future::Future;
 use std::ops::Deref;
+use std::pin::Pin;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::*;
-use yew::prelude::*;
 
 #[derive(Clone)]
 pub struct Renderer(Rc<RendererData>);
@@ -46,8 +46,10 @@ pub struct RendererData {
     _session: Session,
     pub on_plugin_changed: PubSub<JsPerspectiveViewerPlugin>,
     pub on_limits_changed: PubSub<RenderLimits>,
+    pub on_settings_open_changed: PubSub<bool>,
     pub on_theme_config_updated: PubSub<(Vec<String>, Option<usize>)>,
 }
+
 /// Mutable state
 pub struct RendererMutData {
     viewer_elem: HtmlElement,
@@ -56,6 +58,7 @@ pub struct RendererMutData {
     plugin_store: PluginStore,
     plugins_idx: Option<usize>,
     timer: MovingWindowRenderTimer,
+    is_settings_open: bool,
 }
 
 type RenderLimits = (usize, usize, Option<usize>, Option<usize>);
@@ -91,10 +94,12 @@ impl Renderer {
                 plugin_store: PluginStore::default(),
                 plugins_idx: None,
                 timer: MovingWindowRenderTimer::default(),
+                is_settings_open: false,
             }),
             _session,
             draw_lock: Default::default(),
             on_plugin_changed: Default::default(),
+            on_settings_open_changed: Default::default(),
             on_limits_changed: Default::default(),
             on_theme_config_updated: Default::default(),
         }))
@@ -166,6 +171,26 @@ impl Renderer {
             .or_else(|| if !themes.is_empty() { Some(0) } else { None });
 
         Ok((themes, index))
+    }
+
+    pub fn is_settings_open(&self) -> bool {
+        self.0.borrow().is_settings_open
+    }
+
+    pub fn set_settings_open(&self, open: Option<bool>) -> Result<bool, JsValue> {
+        let open_state = open.unwrap_or_else(|| !self.0.borrow().is_settings_open);
+        if self.0.borrow().is_settings_open != open_state {
+            self.0.borrow_mut().is_settings_open = open_state;
+            self.0
+                .borrow()
+                .viewer_elem
+                .toggle_attribute_with_force("settings", open_state)
+                .unwrap();
+
+            self.on_settings_open_changed.emit_all(open_state);
+        }
+
+        Ok(open_state)
     }
 
     /// Returns the currently applied theme, or the default theme if no theme
@@ -408,58 +433,86 @@ fn make_short_name(name: &str) -> String {
         .collect()
 }
 
-/// A `RenderableProps` is a `Properties` with `session` and `renderer` fields, as
+/// A `RenderableProps` is any struct with `session` and `renderer` fields, as
 /// this method is boilerplate but has no other trait to live on currently.  As
 /// I'm too lazy to be bothered to implement a `proc-macro` crate, instead this
 /// trait can be conveniently derived via the `derive_renderable_props!()` macro
 /// on a suitable struct.
-pub trait RenderableProps: Properties {
-    fn update_and_render(&self, update: ViewConfigUpdate);
-    fn render(&self);
+pub trait RenderableProps {
+    fn session(&self) -> &'_ Session;
+    fn renderer(&self) -> &'_ Renderer;
+
+    fn update_and_render(&self, update: crate::config::ViewConfigUpdate) {
+        self.session().update_view_config(update);
+        let session = self.session().clone();
+        let renderer = self.renderer().clone();
+        let _ = promisify_ignore_view_delete(async move {
+            drop(
+                renderer
+                    .draw(session.validate().await.create_view())
+                    .await?,
+            );
+            Ok(JsValue::UNDEFINED)
+        });
+    }
+
+    fn render(&self) {
+        let session = self.session().clone();
+        let renderer = self.renderer().clone();
+        let _ = promisify_ignore_view_delete(async move {
+            drop(renderer.draw(async { Ok(&session) }).await?);
+            Ok(JsValue::UNDEFINED)
+        });
+    }
+
+    fn get_viewer_config(
+        &self,
+    ) -> Pin<Box<dyn Future<Output = Result<ViewerConfig, JsValue>>>> {
+        let view_config = self.session().get_view_config();
+        let js_plugin = self.renderer().get_active_plugin();
+        let renderer = self.renderer().clone();
+        Box::pin(async move {
+            let settings = renderer.is_settings_open();
+            let js_plugin = js_plugin?;
+            let plugin = js_plugin.name();
+            let plugin_config = js_plugin
+                .save()
+                .into_serde::<serde_json::Value>()
+                .into_jserror()?;
+
+            let theme = renderer.get_theme_name().await;
+            Ok(ViewerConfig {
+                plugin,
+                plugin_config,
+                settings,
+                view_config,
+                theme,
+            })
+        })
+    }
+}
+
+impl RenderableProps for (Session, Renderer) {
+    fn session(&self) -> &'_ Session {
+        &self.0
+    }
+
+    fn renderer(&self) -> &'_ Renderer {
+        &self.1
+    }
 }
 
 #[macro_export]
 macro_rules! derive_renderable_props {
-    ($key:ident) => {
+    ($key:ty) => {
         impl crate::renderer::RenderableProps for $key {
-            fn update_and_render(&self, update: crate::config::ViewConfigUpdate) {
-                crate::renderer::update_and_render(
-                    &self.session,
-                    &self.renderer,
-                    update,
-                );
+            fn session(&self) -> &'_ Session {
+                &self.session
             }
 
-            fn render(&self) {
-                crate::renderer::render(&self.session, &self.renderer);
+            fn renderer(&self) -> &'_ Renderer {
+                &self.renderer
             }
         }
     };
-}
-
-pub fn update_and_render(
-    session: &Session,
-    renderer: &Renderer,
-    update: ViewConfigUpdate,
-) {
-    session.update_view_config(update);
-    let session = session.clone();
-    let renderer = renderer.clone();
-    let _ = promisify_ignore_view_delete(async move {
-        drop(
-            renderer
-                .draw(session.validate().await.create_view())
-                .await?,
-        );
-        Ok(JsValue::UNDEFINED)
-    });
-}
-
-pub fn render(session: &Session, renderer: &Renderer) {
-    let session = session.clone();
-    let renderer = renderer.clone();
-    let _ = promisify_ignore_view_delete(async move {
-        drop(renderer.draw(async { Ok(&session) }).await?);
-        Ok(JsValue::UNDEFINED)
-    });
 }

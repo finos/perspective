@@ -343,7 +343,7 @@ function activate(app, restorer, themeManager) {
                 ? themeManager.isLight(themeManager.theme)
                 : true;
 
-        const theme = is_light ? "Material Light" : "Material Dark";
+        const theme = isLight ? "Material Light" : "Material Dark";
         trackercsv.forEach((pspDocWidget) => {
             pspDocWidget.psp.theme = theme;
         });

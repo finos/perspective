@@ -35,12 +35,19 @@ export class PerspectiveView extends DOMWidgetView {
             server: this.model.get("server"),
             client: this.model.get("client"),
             theme: this.model.get("theme"),
+            settings: this.model.get("settings"),
             editable: this.model.get("editable"),
             bindto: this.el,
             view: this,
         });
 
         this.perspective_client = new PerspectiveJupyterClient(this);
+        this._synchronize_state = this._synchronize_state.bind(this);
+        this.pWidget.node.children[0].addEventListener(
+            "perspective-config-update",
+            this._synchronize_state
+        );
+
         return this.pWidget.node;
     }
 
@@ -58,12 +65,10 @@ export class PerspectiveView extends DOMWidgetView {
      * @param mutations
      */
 
-    _synchronize_state(mutations) {
-        for (const mutation of mutations) {
-            const name = mutation.attributeName.replace(/-/g, "_");
-            let new_value = this.pWidget.viewer.getAttribute(
-                mutation.attributeName
-            );
+    _synchronize_state(event) {
+        const config = event.detail;
+        for (const name of Object.keys(config)) {
+            let new_value = config[name];
 
             const current_value = this.model.get(name);
             if (typeof new_value === "undefined") {
@@ -73,7 +78,8 @@ export class PerspectiveView extends DOMWidgetView {
             if (
                 new_value &&
                 typeof new_value === "string" &&
-                name !== "plugin"
+                name !== "plugin" &&
+                name !== "theme"
             ) {
                 new_value = JSON.parse(new_value);
             }
@@ -105,6 +111,7 @@ export class PerspectiveView extends DOMWidgetView {
         this.model.on("change:expressions", this.expressions_changed, this);
         this.model.on("change:plugin_config", this.plugin_config_changed, this);
         this.model.on("change:theme", this.theme_changed, this);
+        this.model.on("change:settings", this.settings_changed, this);
         this.model.on("change:editable", this.editable_changed, this);
 
         /**
@@ -347,6 +354,10 @@ export class PerspectiveView extends DOMWidgetView {
         // Delete the <perspective-viewer> but do not terminate the shared
         // worker as it is shared across other widgets.
         this.pWidget.delete();
+        this.pWidget.node.removeEventListener(
+            "perspective-config-update",
+            this._synchronize_state
+        );
     }
 
     /**
@@ -410,6 +421,12 @@ export class PerspectiveView extends DOMWidgetView {
     theme_changed() {
         this.pWidget.restore({
             theme: this.model.get("theme"),
+        });
+    }
+
+    settings_changed() {
+        this.pWidget.restore({
+            settings: this.model.get("settings"),
         });
     }
 

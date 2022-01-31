@@ -55,8 +55,12 @@ utils.with_server({}, () => {
                         columns: ["Profit", "Sales"],
                         expressions: [],
                         filter: [],
+                        plugin: "Debug",
+                        plugin_config: {},
                         row_pivots: ["State"],
+                        settings: true,
                         sort: [],
+                        theme: null,
                     });
 
                     return await get_contents(page);

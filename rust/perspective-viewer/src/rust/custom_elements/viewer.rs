@@ -9,6 +9,7 @@
 use crate::components::viewer::*;
 use crate::config::*;
 use crate::custom_elements::expression_editor::ExpressionEditorElement;
+use crate::custom_events::*;
 use crate::dragdrop::*;
 use crate::js::perspective::*;
 use crate::js::plugin::JsPerspectiveViewerPlugin;
@@ -18,16 +19,10 @@ use crate::session::Session;
 use crate::utils::*;
 use crate::*;
 
-use flate2::read::ZlibDecoder;
-use flate2::write::ZlibEncoder;
-use flate2::Compression;
 use futures::channel::oneshot::*;
-
 use js_intern::*;
 use js_sys::*;
 use std::cell::RefCell;
-use std::io::Read;
-use std::io::Write;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -111,10 +106,13 @@ pub struct PerspectiveViewerElement {
     root: Rc<RefCell<Option<AppHandle<PerspectiveViewer>>>>,
     session: Session,
     renderer: Renderer,
-    subscriptions: Rc<[Subscription; 4]>,
+    events: CustomEvents,
+    subscriptions: Rc<[Subscription; 2]>,
     expression_editor: Rc<RefCell<Option<ExpressionEditorElement>>>,
     resize_handle: Rc<RefCell<Option<ResizeObserverHandle>>>,
 }
+
+derive_renderable_props!(PerspectiveViewerElement);
 
 #[wasm_bindgen]
 impl PerspectiveViewerElement {
@@ -169,16 +167,6 @@ impl PerspectiveViewerElement {
             }
         });
 
-        let plugin_sub = renderer.on_plugin_changed.add_listener({
-            clone!(elem);
-            move |plugin| dispatch_plugin_changed(&elem, &plugin)
-        });
-
-        let view_sub = session.on_view_created.add_listener({
-            clone!(elem, session);
-            move |_| dispatch_config_update(&elem, &session)
-        });
-
         let limit_sub = {
             let callback = root
                 .borrow()
@@ -188,6 +176,7 @@ impl PerspectiveViewerElement {
             renderer.on_limits_changed.add_listener(callback)
         };
 
+        let events = CustomEvents::new(&elem, &session, &renderer);
         let resize_handle = ResizeObserverHandle::new(&elem, &renderer);
         PerspectiveViewerElement {
             elem,
@@ -195,7 +184,8 @@ impl PerspectiveViewerElement {
             session,
             renderer,
             expression_editor: Rc::new(RefCell::new(None)),
-            subscriptions: Rc::new([plugin_sub, update_sub, limit_sub, view_sub]),
+            events,
+            subscriptions: Rc::new([update_sub, limit_sub]),
             resize_handle: Rc::new(RefCell::new(Some(resize_handle))),
         }
     }
@@ -324,21 +314,7 @@ impl PerspectiveViewerElement {
                 settings,
                 theme,
                 mut view_config,
-            } = if update.is_string() {
-                let js_str = update.as_string().into_jserror()?;
-                let bytes = base64::decode(js_str).into_jserror()?;
-                let mut decoder = ZlibDecoder::new(&*bytes);
-                let mut decoded = vec![];
-                decoder.read_to_end(&mut decoded).into_jserror()?;
-                rmp_serde::from_slice(&decoded).into_jserror()?
-            } else if update.is_instance_of::<js_sys::ArrayBuffer>() {
-                let uint8array = js_sys::Uint8Array::new(&update);
-                let mut slice = vec![0; uint8array.length() as usize];
-                uint8array.copy_to(&mut slice[..]);
-                rmp_serde::from_slice(&slice).into_jserror()?
-            } else {
-                update.into_serde().into_jserror()?
-            };
+            } = ViewerConfigUpdate::decode(&update)?;
 
             let needs_restyle = match theme {
                 OptionalUpdate::SetDefault => {
@@ -369,13 +345,8 @@ impl PerspectiveViewerElement {
             }
 
             session.update_view_config(view_config);
-            let settings = Some(settings.clone());
+            let settings = settings.clone();
             let draw_task = renderer.draw(async {
-                root.borrow()
-                    .as_ref()
-                    .ok_or("Already deleted!")?
-                    .send_message(Msg::ApplySettings(settings));
-
                 let plugin = renderer.get_active_plugin()?;
                 if let Some(plugin_config) = &plugin_config {
                     let js_config = JsValue::from_serde(plugin_config);
@@ -383,6 +354,13 @@ impl PerspectiveViewerElement {
                 }
 
                 let result = session.validate().await.create_view().await;
+                let (sender, receiver) = channel::<()>();
+                root.borrow()
+                    .as_ref()
+                    .ok_or("Already deleted!")?
+                    .send_message(Msg::ToggleSettingsComplete(settings, sender));
+
+                receiver.await.into_jserror()?;
                 result
             });
 
@@ -404,59 +382,13 @@ impl PerspectiveViewerElement {
     ///
     /// # Arguments
     /// - `format` Supports "json" (default), "arraybuffer" or "string".
-    pub fn js_save(&self, format: Option<String>) -> js_sys::Promise {
-        let (sender, receiver) = channel::<bool>();
-        let root = self.root.clone();
-        let view_config = self.session.get_view_config();
-        let js_plugin = self.renderer.get_active_plugin();
-        let renderer = self.renderer.clone();
+    pub fn js_save(&self, format: JsValue) -> js_sys::Promise {
+        let viewer_config_task = self.get_viewer_config();
         future_to_promise(async move {
-            let msg = Msg::QuerySettings(sender);
-            root.borrow()
-                .as_ref()
-                .ok_or(js_intern!("Already deleted!"))?
-                .send_message(msg);
-
-            let settings = receiver.await.into_jserror()?;
-            let js_plugin = js_plugin?;
-            let plugin = js_plugin.name();
-            let plugin_config = js_plugin
-                .save()
-                .into_serde::<serde_json::Value>()
+            let format = JsValue::into_serde::<Option<ViewerConfigEncoding>>(&format)
                 .into_jserror()?;
-
-            let theme = renderer.get_theme_name().await;
-            let viewer_config = ViewerConfig {
-                plugin,
-                plugin_config,
-                settings,
-                view_config,
-                theme,
-            };
-
-            match format.as_deref() {
-                Some("string") => {
-                    let mut encoder =
-                        ZlibEncoder::new(Vec::new(), Compression::default());
-                    let bytes = rmp_serde::to_vec(&viewer_config).into_jserror()?;
-                    encoder.write_all(&bytes).into_jserror()?;
-                    let encoded = encoder.finish().into_jserror()?;
-                    Ok(JsValue::from(base64::encode(encoded)))
-                }
-                Some("arraybuffer") => {
-                    let array = js_sys::Uint8Array::from(
-                        &rmp_serde::to_vec(&viewer_config).unwrap()[..],
-                    );
-                    let start = array.byte_offset();
-                    let len = array.byte_length();
-                    Ok(array
-                        .buffer()
-                        .slice_with_end(start, start + len)
-                        .unchecked_into())
-                }
-                None | Some("json") => Ok(JsValue::from_serde(&viewer_config).unwrap()),
-                Some(x) => Err(format!("Unknown serialization format `{}`", x).into()),
-            }
+            let viewer_config = viewer_config_task.await?;
+            viewer_config.encode(&format)
         })
     }
 
@@ -593,7 +525,8 @@ impl PerspectiveViewerElement {
     /// - `force` Force the state of the panel open or closed, or `None` to toggle.
     pub fn js_toggle_config(&self, force: Option<bool>) -> js_sys::Promise {
         let (sender, receiver) = channel::<Result<JsValue, JsValue>>();
-        let msg = Msg::ToggleSettings(force.map(SettingsUpdate::Update), Some(sender));
+        let msg =
+            Msg::ToggleSettingsInit(force.map(SettingsUpdate::Update), Some(sender));
         let root = self.root.clone();
         promisify_ignore_view_delete(async move {
             root.borrow()
@@ -626,27 +559,4 @@ impl PerspectiveViewerElement {
             Some(name) => self.renderer.get_plugin(&name),
         }
     }
-}
-
-fn dispatch_plugin_changed(elem: &HtmlElement, plugin: &JsPerspectiveViewerPlugin) {
-    let mut event_init = web_sys::CustomEventInit::new();
-    event_init.detail(plugin);
-    let event = web_sys::CustomEvent::new_with_event_init_dict(
-        "perspective-plugin-update",
-        &event_init,
-    );
-
-    elem.dispatch_event(&event.unwrap()).unwrap();
-}
-
-fn dispatch_config_update(elem: &HtmlElement, session: &Session) {
-    let mut event_init = web_sys::CustomEventInit::new();
-    let config = JsValue::from_serde(&session.get_view_config()).unwrap();
-    event_init.detail(&config);
-    let event = web_sys::CustomEvent::new_with_event_init_dict(
-        "perspective-config-update",
-        &event_init,
-    );
-
-    elem.dispatch_event(&event.unwrap()).unwrap();
 }

@@ -45,22 +45,20 @@ impl PartialEq for PerspectiveViewerProps {
 
 pub enum Msg {
     Reset(bool, Option<Sender<()>>),
-    ApplySettings(Option<SettingsUpdate>),
-    ToggleSettings(
+    ToggleSettingsInit(
         Option<SettingsUpdate>,
         Option<Sender<Result<JsValue, JsValue>>>,
     ),
+    ToggleSettingsComplete(SettingsUpdate, Sender<()>),
     PreloadFontsUpdate,
-    QuerySettings(Sender<bool>),
-    ToggleSettingsFinished(Sender<()>),
     RenderLimits(Option<(usize, usize, Option<usize>, Option<usize>)>),
 }
 
 pub struct PerspectiveViewer {
-    settings_open: bool,
     dimensions: Option<(usize, usize, Option<usize>, Option<usize>)>,
     on_rendered: Option<Sender<()>>,
     fonts: FontLoaderProps,
+    settings_open: bool,
 }
 
 impl Component for PerspectiveViewer {
@@ -70,11 +68,12 @@ impl Component for PerspectiveViewer {
         *ctx.props().weak_link.borrow_mut() = Some(ctx.link().clone());
         let elem = ctx.props().elem.clone();
         let callback = ctx.link().callback(|()| Msg::PreloadFontsUpdate);
+
         Self {
-            settings_open: false,
             dimensions: None,
             on_rendered: None,
             fonts: FontLoaderProps::new(&elem, callback),
+            settings_open: false,
         }
     }
 
@@ -99,49 +98,36 @@ impl Component for PerspectiveViewer {
 
                 false
             }
-            Msg::QuerySettings(sender) => {
-                sender.send(self.settings_open).unwrap();
-                false
-            }
-            Msg::ApplySettings(force) => {
-                match force {
-                    Some(SettingsUpdate::Missing) => {}
-                    Some(SettingsUpdate::SetDefault) => {
-                        self.settings_open = false;
-                    }
-                    Some(SettingsUpdate::Update(force)) => {
-                        self.settings_open = force;
-                    }
-                    None => self.settings_open = !self.settings_open,
-                };
-
-                ctx.props()
-                    .elem
-                    .toggle_attribute_with_force("settings", self.settings_open)
-                    .unwrap();
-
-                dispatch_settings_event(&ctx.props().elem, self.settings_open).unwrap();
-                true
-            }
-            Msg::ToggleSettings(force, resolve) => {
+            Msg::ToggleSettingsInit(force, resolve) => {
                 match force {
                     Some(SettingsUpdate::Missing) => (),
                     Some(SettingsUpdate::SetDefault) => {
-                        self.toggle_settings(ctx, Some(false), resolve)
+                        self.init_toggle_settings_task(ctx, Some(false), resolve)
                     }
                     Some(SettingsUpdate::Update(force)) => {
-                        self.toggle_settings(ctx, Some(force), resolve)
+                        self.init_toggle_settings_task(ctx, Some(force), resolve)
                     }
-                    None => self.toggle_settings(ctx, None, resolve),
+                    None => self.init_toggle_settings_task(ctx, None, resolve),
                 }
 
                 false
             }
-            Msg::ToggleSettingsFinished(sender) => {
-                dispatch_settings_event(&ctx.props().elem, self.settings_open).unwrap();
-                self.on_rendered = Some(sender);
-                true
-            }
+            Msg::ToggleSettingsComplete(is_open, resolve) => match is_open {
+                SettingsUpdate::SetDefault if self.settings_open => {
+                    self.settings_open = false;
+                    self.on_rendered = Some(resolve);
+                    true
+                }
+                SettingsUpdate::Update(force) if force != self.settings_open => {
+                    self.settings_open = force;
+                    self.on_rendered = Some(resolve);
+                    true
+                }
+                _ => {
+                    resolve.send(()).expect("Orphan render");
+                    false
+                }
+            },
             Msg::RenderLimits(dimensions) => {
                 if self.dimensions != dimensions {
                     self.dimensions = dimensions;
@@ -161,7 +147,12 @@ impl Component for PerspectiveViewer {
 
     /// On rendered call notify_resize().  This also triggers any registered async
     /// callbacks to the Custom Element API.
-    fn rendered(&mut self, _ctx: &Context<Self>, _first_render: bool) {
+    fn rendered(&mut self, ctx: &Context<Self>, _first_render: bool) {
+        ctx.props()
+            .renderer
+            .set_settings_open(Some(self.settings_open))
+            .unwrap();
+
         let resolve = self.on_rendered.take();
         if let Some(resolve) = resolve {
             resolve.send(()).expect("Orphan render");
@@ -172,7 +163,7 @@ impl Component for PerspectiveViewer {
     // TODO these may be expensive to buil dbecause they will generate recursively from
     // `JsPerspectiveConfig` - they may need caching as in the JavaScript version.
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let settings = ctx.link().callback(|_| Msg::ToggleSettings(None, None));
+        let settings = ctx.link().callback(|_| Msg::ToggleSettingsInit(None, None));
         if self.settings_open {
             html! {
                 <>
@@ -252,22 +243,26 @@ impl PerspectiveViewer {
     /// # Arguments
     /// * `force` - Whether to explicitly set the settings panel state to Open/Close
     ///   (`Some(true)`/`Some(false)`), or to just toggle the current state (`None`).
-    fn toggle_settings(
+    fn init_toggle_settings_task(
         &mut self,
         ctx: &Context<Self>,
         force: Option<bool>,
         sender: Option<Sender<Result<JsValue, JsValue>>>,
     ) {
+        let is_open = ctx.props().renderer.is_settings_open();
         match force {
-            Some(force) if self.settings_open == force => {
+            Some(force) if is_open == force => {
                 if let Some(sender) = sender {
                     sender.send(Ok(JsValue::UNDEFINED)).unwrap();
                 }
             }
             Some(_) | None => {
-                let force = !self.settings_open;
-                self.settings_open = force;
-                let callback = ctx.link().callback_once(Msg::ToggleSettingsFinished);
+                let force = !is_open;
+                let callback = ctx.link().callback_once(move |resolve| {
+                    let update = SettingsUpdate::Update(force);
+                    Msg::ToggleSettingsComplete(update, resolve)
+                });
+
                 let renderer = ctx.props().renderer.clone();
                 let session = ctx.props().session.clone();
                 drop(promisify_ignore_view_delete(async move {
@@ -279,6 +274,7 @@ impl PerspectiveViewer {
                     };
 
                     if let Some(sender) = sender {
+                        // TODO shouldn't ignore, this should retry (?)
                         let msg = result.clone().or_else(ignore_view_delete);
                         sender.send(msg).into_jserror()?;
                     };
@@ -288,23 +284,4 @@ impl PerspectiveViewer {
             }
         };
     }
-}
-
-/// Dispatch the "perspective-toggle-settings" event to notify external
-/// listeners.
-fn dispatch_settings_event(
-    viewer_elem: &web_sys::HtmlElement,
-    open: bool,
-) -> Result<(), JsValue> {
-    let mut event_init = web_sys::CustomEventInit::new();
-    event_init.detail(&JsValue::from(open));
-    let event = web_sys::CustomEvent::new_with_event_init_dict(
-        "perspective-toggle-settings",
-        &event_init,
-    );
-
-    viewer_elem.toggle_attribute_with_force("settings", open)?;
-    viewer_elem.dispatch_event(&event.unwrap()).unwrap();
-
-    Ok(())
 }

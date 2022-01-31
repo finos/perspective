@@ -69,12 +69,17 @@ pub fn test_settings_closed() {
 pub async fn test_settings_open() {
     let (link, root, _) = set_up_html();
     let viewer = link.borrow().clone().unwrap();
-    viewer.send_message(Msg::ToggleSettings(
+    viewer.send_message(Msg::ToggleSettingsInit(
         Some(SettingsUpdate::Update(true)),
         None,
     ));
+
     let (sender, receiver) = channel::<()>();
-    viewer.send_message(Msg::ToggleSettingsFinished(sender));
+    viewer.send_message(Msg::ToggleSettingsComplete(
+        SettingsUpdate::Update(true),
+        sender,
+    ));
+
     receiver.await.unwrap();
     for selector in ["#app_panel", "slot", "#settings_button", "#status_bar"].iter() {
         assert!(root
@@ -90,7 +95,7 @@ pub async fn test_load_table() {
     let (link, root, session) = set_up_html();
     let table = get_mock_table().await;
     let viewer = link.borrow().clone().unwrap();
-    viewer.send_message(Msg::ToggleSettings(
+    viewer.send_message(Msg::ToggleSettingsInit(
         Some(SettingsUpdate::Update(true)),
         None,
     ));

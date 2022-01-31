@@ -49,6 +49,8 @@ export class PerspectiveWidget extends Widget {
         const expressions = options.expressions || options.expressions || [];
         const plugin_config = options.plugin_config || {};
         const theme = options.theme || "Material Light";
+        const settings =
+            typeof options.settings === "boolean" ? options.settings : true;
         const editable = options.editable || false;
         const server = options.server || false;
         const client = options.client || false;
@@ -66,6 +68,7 @@ export class PerspectiveWidget extends Widget {
             aggregates,
             expressions,
             filter,
+            settings,
             theme,
         };
         // this.plugin_config = plugin_config;
