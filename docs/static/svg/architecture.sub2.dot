@@ -25,7 +25,7 @@ digraph G {
                 fillcolor="#E6E2DA"
             ]
             view_thread_1 [
-                label="view({\l    row_pivots:'[\"State\"]\l    column_pivots:'[\"Segment\"]'\l})\l"
+                label="view({\l    group_by:'[\"State\"]\l    split_by:'[\"Segment\"]'\l})\l"
                 width=2.5
                 color=none
                 fillcolor="#EDEBDF"

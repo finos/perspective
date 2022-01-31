@@ -180,7 +180,7 @@ class CustomDatagridPlugin extends customElements.get(
                         column_path_parts[column_path_parts.length - 1]
                     ];
             } else {
-                const column_path = this._row_pivots[metadata.row_header_x - 1];
+                const column_path = this._group_by[metadata.row_header_x - 1];
                 type = this._table_schema[column_path];
             }
             const clean_name =
@@ -202,7 +202,7 @@ class CustomDatagridPlugin extends customElements.get(
     async refresh_cache() {
         const view = this._view;
         this._column_paths = await view.column_paths();
-        this._row_pivots = await view.get_config()["row_pivots"];
+        this._group_by = await view.get_config()["group_by"];
         this._schema = await view.schema();
         this._dirty = false;
     }

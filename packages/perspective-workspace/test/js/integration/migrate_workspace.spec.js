@@ -59,8 +59,8 @@ const TESTS = [
                     name: "One",
                     plugin: "Y Area",
                     plugin_config: {},
-                    row_pivots: ["bucket(\"Order Date\", 'M')"],
-                    column_pivots: ["Ship Mode"],
+                    group_by: ["bucket(\"Order Date\", 'M')"],
+                    split_by: ["Ship Mode"],
                     columns: ["Sales"],
                     filter: [["Category", "==", "Office Supplies"]],
                     sort: [],
@@ -101,7 +101,7 @@ function tests(extract) {
             delete config.viewers.One["settings"];
 
             expect(config).toEqual(current);
-            expect(converted).toEqual(current);
+            expect(convert(old, {replace_defaults: true})).toEqual(current);
             return extract(page);
         });
     }

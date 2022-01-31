@@ -11,13 +11,13 @@ from random import random
 from ..libpsp import is_libpsp
 from .validate import (
     validate_aggregates,
-    validate_column_pivots,
+    validate_split_by,
     validate_columns,
     validate_expressions,
     validate_filter,
     validate_plugin,
     validate_plugin_config,
-    validate_row_pivots,
+    validate_group_by,
     validate_sort,
 )
 from .viewer_traitlets import PerspectiveTraitlets
@@ -43,8 +43,8 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
     # Viewer attributes that should be saved in `save()` and restored using
     # `restore()`. Symmetric to `PERSISTENT_ATTRIBUTES` in `perspective-viewer`.
     PERSISTENT_ATTRIBUTES = (
-        "row_pivots",
-        "column_pivots",
+        "group_by",
+        "split_by",
         "filter",
         "sort",
         "aggregates",
@@ -61,8 +61,8 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         self,
         plugin="Datagrid",
         columns=None,
-        row_pivots=None,
-        column_pivots=None,
+        group_by=None,
+        split_by=None,
         aggregates=None,
         sort=None,
         filter=None,
@@ -79,10 +79,10 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         Keyword Arguments:
             columns (:obj:`list` of :obj:`str`): A list of column names to be
                 visible to the user.
-            row_pivots (:obj:`list` of :obj:`str`): A list of column names to
-                use as row pivots.
-            column_pivots (:obj:`list` of :obj:`str`): A list of column names
-                to use as column pivots.
+            group_by (:obj:`list` of :obj:`str`): A list of column names to
+                use as group by.
+            split_by (:obj:`list` of :obj:`str`): A list of column names
+                to use as split by.
             aggregates (:obj:`dict` of :obj:`str` to :obj:`str`):  A dictionary
                 of column names to aggregate types, which specify aggregates
                 for individual columns.
@@ -107,7 +107,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         Examples:
             >>> viewer = PerspectiveViewer(
             ...     aggregates={"a": "avg"},
-            ...     row_pivots=["a"],
+            ...     group_by=["a"],
             ...     sort=[["b", "desc"]],
             ...     filter=[["a", ">", 1]],
             ...     expressions=["// new column \n \"Sales\" + \"Profit\""]
@@ -126,8 +126,8 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         # Viewer configuration
         self.plugin = validate_plugin(plugin)
         self.columns = validate_columns(columns) or []
-        self.row_pivots = validate_row_pivots(row_pivots) or []
-        self.column_pivots = validate_column_pivots(column_pivots) or []
+        self.group_by = validate_group_by(group_by) or []
+        self.split_by = validate_split_by(split_by) or []
         self.aggregates = validate_aggregates(aggregates) or {}
         self.sort = validate_sort(sort) or []
         self.filter = validate_filter(filter) or []
@@ -261,12 +261,12 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         modify the underlying `Table`.
 
         Example:
-            widget = PerspectiveWidget(data, row_pivots=["date"], plugin=Plugin.XBAR)
+            widget = PerspectiveWidget(data, group_by=["date"], plugin=Plugin.XBAR)
             widget.reset()
             widget.plugin  #
         """
-        self.row_pivots = []
-        self.column_pivots = []
+        self.group_by = []
+        self.split_by = []
         self.filter = []
         self.sort = []
         self.expressions = []

@@ -25,8 +25,8 @@ export class PerspectiveView extends DOMWidgetView {
         this.pWidget = new PerspectiveJupyterWidget(undefined, {
             plugin: this.model.get("plugin"),
             columns: this.model.get("columns"),
-            row_pivots: this.model.get("row_pivots"),
-            column_pivots: this.model.get("column_pivots"),
+            group_by: this.model.get("group_by"),
+            split_by: this.model.get("split_by"),
             aggregates: this.model.get("aggregates"),
             sort: this.model.get("sort"),
             filter: this.model.get("filter"),
@@ -103,8 +103,8 @@ export class PerspectiveView extends DOMWidgetView {
         this.model.on("msg:custom", this._handle_message, this);
         this.model.on("change:plugin", this.plugin_changed, this);
         this.model.on("change:columns", this.columns_changed, this);
-        this.model.on("change:row_pivots", this.row_pivots_changed, this);
-        this.model.on("change:column_pivots", this.column_pivots_changed, this);
+        this.model.on("change:group_by", this.group_by_changed, this);
+        this.model.on("change:split_by", this.split_by_changed, this);
         this.model.on("change:aggregates", this.aggregates_changed, this);
         this.model.on("change:sort", this.sort_changed, this);
         this.model.on("change:filter", this.filter_changed, this);
@@ -378,15 +378,15 @@ export class PerspectiveView extends DOMWidgetView {
         });
     }
 
-    row_pivots_changed() {
+    group_by_changed() {
         this.pWidget.restore({
-            row_pivots: this.model.get("row_pivots"),
+            group_by: this.model.get("group_by"),
         });
     }
 
-    column_pivots_changed() {
+    split_by_changed() {
         this.pWidget.restore({
-            column_pivots: this.model.get("column_pivots"),
+            split_by: this.model.get("split_by"),
         });
     }
 

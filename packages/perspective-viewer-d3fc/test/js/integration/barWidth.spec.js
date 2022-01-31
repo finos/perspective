@@ -47,8 +47,8 @@ utils.with_server({}, () => {
                             await viewer.restore({
                                 plugin: "Y Bar",
                                 columns: ["Profit"],
-                                row_pivots: ["Order Date"],
-                                column_pivots: ["Profit"],
+                                group_by: ["Order Date"],
+                                split_by: ["Profit"],
                             });
                             return await viewer.save();
                         });
@@ -56,8 +56,8 @@ utils.with_server({}, () => {
                         expect(config).toEqual({
                             plugin: "Y Bar",
                             columns: ["Profit"],
-                            row_pivots: ["Order Date"],
-                            column_pivots: ["Profit"],
+                            group_by: ["Order Date"],
+                            split_by: ["Profit"],
                             aggregates: {},
                             filter: [],
                             sort: [],
@@ -95,7 +95,7 @@ utils.with_server({}, () => {
 //                     await viewer.getTable();
 //                     await viewer.restore({
 //                         settings: true,
-//                         row_pivots: ["State"],
+//                         group_by: ["State"],
 //                         columns: ["Profit", "Sales"],
 //                     });
 //                     return await viewer.save();
@@ -103,13 +103,13 @@ utils.with_server({}, () => {
 
 //                 expect(config).toEqual({
 //                     aggregates: {},
-//                     column_pivots: [],
+//                     split_by: [],
 //                     columns: ["Profit", "Sales"],
 //                     expressions: [],
 //                     filter: [],
 //                     plugin: "Debug",
 //                     plugin_config: {},
-//                     row_pivots: ["State"],
+//                     group_by: ["State"],
 //                     settings: true,
 //                     sort: [],
 //                 });
@@ -126,7 +126,7 @@ utils.with_server({}, () => {
 //                         await viewer.getTable();
 //                         await viewer.restore({
 //                             settings: true,
-//                             row_pivots: ["State"],
+//                             group_by: ["State"],
 //                             columns: ["Profit", "Sales"],
 //                         });
 //                         return await viewer.save();
@@ -134,13 +134,13 @@ utils.with_server({}, () => {
 
 //                     expect(config).toEqual({
 //                         aggregates: {},
-//                         column_pivots: [],
+//                         split_by: [],
 //                         columns: ["Profit", "Sales"],
 //                         expressions: [],
 //                         filter: [],
 //                         plugin: "Debug",
 //                         plugin_config: {},
-//                         row_pivots: ["State"],
+//                         group_by: ["State"],
 //                         settings: true,
 //                         sort: [],
 //                     });
@@ -154,7 +154,7 @@ utils.with_server({}, () => {
 
 //                     expect(config2).toEqual({
 //                         aggregates: {},
-//                         column_pivots: [],
+//                         split_by: [],
 //                         columns: [
 //                             "Row ID",
 //                             "Order ID",
@@ -180,7 +180,7 @@ utils.with_server({}, () => {
 //                         filter: [],
 //                         plugin: "Debug",
 //                         plugin_config: {},
-//                         row_pivots: [],
+//                         group_by: [],
 //                         settings: true,
 //                         sort: [],
 //                     });
@@ -194,13 +194,13 @@ utils.with_server({}, () => {
 
 //                     expect(config3).toEqual({
 //                         aggregates: {},
-//                         column_pivots: [],
+//                         split_by: [],
 //                         columns: ["Profit", "Sales"],
 //                         expressions: [],
 //                         filter: [],
 //                         plugin: "Debug",
 //                         plugin_config: {},
-//                         row_pivots: ["State"],
+//                         group_by: ["State"],
 //                         settings: true,
 //                         sort: [],
 //                     });

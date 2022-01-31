@@ -1,7 +1,5 @@
 {
-    "sizes": [
-        1
-    ],
+    "sizes": [1],
     "detail": {
         "main": {
             "type": "split-area",
@@ -24,10 +22,7 @@
                     "currentIndex": 0
                 }
             ],
-            "sizes": [
-                0.4,
-                0.6
-            ]
+            "sizes": [0.4, 0.6]
         }
     },
     "mode": "globalFilters",
@@ -111,22 +106,10 @@
         },
         "PERSPECTIVE_GENERATED_ID_5": {
             "plugin": "Candlestick",
-            "columns": [
-                "open",
-                "close",
-                "high",
-                "low"
-            ],
-            "row_pivots": [
-                "date"
-            ],
+            "columns": ["open", "close", "high", "low"],
+            "group_by": ["date"],
             "plugin_config": {
-                "realValues": [
-                    "open",
-                    "close",
-                    "high",
-                    "low"
-                ]
+                "realValues": ["open", "close", "high", "low"]
             },
             "master": false,
             "name": "Px",
@@ -135,13 +118,9 @@
         },
         "PERSPECTIVE_GENERATED_ID_3": {
             "plugin": "Y Bar",
-            "columns": [
-                "uVolume"
-            ],
+            "columns": ["uVolume"],
             "plugin_config": {
-                "realValues": [
-                    "uVolume"
-                ]
+                "realValues": ["uVolume"]
             },
             "master": false,
             "name": "Volume",

@@ -50,36 +50,36 @@ pub struct ConfigSelector {
     subscriptions: [Rc<Subscription>; 4],
 }
 
-struct RowPivotContext {}
-struct ColumnPivotContext {}
+struct GroupByContext {}
+struct SplitByContext {}
 struct SortDragContext {}
 struct FilterDragContext {}
 
-impl DragContext<ConfigSelectorMsg> for RowPivotContext {
+impl DragContext<ConfigSelectorMsg> for GroupByContext {
     fn dragenter(index: usize) -> ConfigSelectorMsg {
-        ConfigSelectorMsg::DragOver(index, DropAction::RowPivots)
+        ConfigSelectorMsg::DragOver(index, DropAction::GroupBy)
     }
 
     fn close(index: usize) -> ConfigSelectorMsg {
-        ConfigSelectorMsg::Close(index, DropAction::RowPivots)
+        ConfigSelectorMsg::Close(index, DropAction::GroupBy)
     }
 
     fn dragleave() -> ConfigSelectorMsg {
-        ConfigSelectorMsg::DragLeave(DropAction::RowPivots)
+        ConfigSelectorMsg::DragLeave(DropAction::GroupBy)
     }
 }
 
-impl DragContext<ConfigSelectorMsg> for ColumnPivotContext {
+impl DragContext<ConfigSelectorMsg> for SplitByContext {
     fn dragenter(index: usize) -> ConfigSelectorMsg {
-        ConfigSelectorMsg::DragOver(index, DropAction::ColumnPivots)
+        ConfigSelectorMsg::DragOver(index, DropAction::SplitBy)
     }
 
     fn close(index: usize) -> ConfigSelectorMsg {
-        ConfigSelectorMsg::Close(index, DropAction::ColumnPivots)
+        ConfigSelectorMsg::Close(index, DropAction::SplitBy)
     }
 
     fn dragleave() -> ConfigSelectorMsg {
-        ConfigSelectorMsg::DragLeave(DropAction::ColumnPivots)
+        ConfigSelectorMsg::DragLeave(DropAction::SplitBy)
     }
 }
 
@@ -111,8 +111,8 @@ impl DragContext<ConfigSelectorMsg> for FilterDragContext {
     }
 }
 
-type RowPivotSelector = DragDropList<ConfigSelector, PivotItem, RowPivotContext>;
-type ColumnPivotSelector = DragDropList<ConfigSelector, PivotItem, ColumnPivotContext>;
+type GroupBySelector = DragDropList<ConfigSelector, PivotItem, GroupByContext>;
+type SplitBySelector = DragDropList<ConfigSelector, PivotItem, SplitByContext>;
 type SortSelector = DragDropList<ConfigSelector, SortItem, SortDragContext>;
 type FilterSelector = DragDropList<ConfigSelector, FilterItem, FilterDragContext>;
 
@@ -167,25 +167,24 @@ impl Component for ConfigSelector {
 
                 true
             }
-            ConfigSelectorMsg::Close(index, DropAction::RowPivots) => {
-                let ViewConfig { mut row_pivots, .. } =
+            ConfigSelectorMsg::Close(index, DropAction::GroupBy) => {
+                let ViewConfig { mut group_by, .. } =
                     ctx.props().session.get_view_config();
-                row_pivots.remove(index as usize);
-                let row_pivots = Some(row_pivots);
+                group_by.remove(index as usize);
+                let group_by = Some(group_by);
                 ctx.props().update_and_render(ViewConfigUpdate {
-                    row_pivots,
+                    group_by,
                     ..ViewConfigUpdate::default()
                 });
 
                 true
             }
-            ConfigSelectorMsg::Close(index, DropAction::ColumnPivots) => {
-                let ViewConfig {
-                    mut column_pivots, ..
-                } = ctx.props().session.get_view_config();
-                column_pivots.remove(index as usize);
+            ConfigSelectorMsg::Close(index, DropAction::SplitBy) => {
+                let ViewConfig { mut split_by, .. } =
+                    ctx.props().session.get_view_config();
+                split_by.remove(index as usize);
                 ctx.props().update_and_render(ViewConfigUpdate {
-                    column_pivots: Some(column_pivots),
+                    split_by: Some(split_by),
                     ..ViewConfigUpdate::default()
                 });
 
@@ -225,14 +224,11 @@ impl Component for ConfigSelector {
             ConfigSelectorMsg::Drop(_, _, _, _) => false,
             ConfigSelectorMsg::TransposePivots => {
                 let mut view_config = ctx.props().session.get_view_config();
-                std::mem::swap(
-                    &mut view_config.row_pivots,
-                    &mut view_config.column_pivots,
-                );
+                std::mem::swap(&mut view_config.group_by, &mut view_config.split_by);
 
                 let update = ViewConfigUpdate {
-                    row_pivots: Some(view_config.row_pivots),
-                    column_pivots: Some(view_config.column_pivots),
+                    group_by: Some(view_config.group_by),
+                    split_by: Some(view_config.split_by),
                     ..ViewConfigUpdate::default()
                 };
 
@@ -280,23 +276,23 @@ impl Component for ConfigSelector {
         html! {
             <div slot="top_panel" id="top_panel" class={ class } ondragend={ dragend }>
 
-                <RowPivotSelector
-                    name="row_pivots"
+                <GroupBySelector
+                    name="group_by"
                     parent={ ctx.link().clone() }
-                    is_dragover={ ctx.props().dragdrop.is_dragover(DropAction::RowPivots) }
+                    is_dragover={ ctx.props().dragdrop.is_dragover(DropAction::GroupBy) }
                     dragdrop={ ctx.props().dragdrop.clone() }>
                     {
-                        for config.row_pivots.iter().map(|row_pivot| {
+                        for config.group_by.iter().map(|group_by| {
                             html_nested! {
                                 <PivotItem
                                     dragdrop={ ctx.props().dragdrop.clone() }
-                                    action={ DropAction::RowPivots }
-                                    column={ row_pivot.clone() }>
+                                    action={ DropAction::GroupBy }
+                                    column={ group_by.clone() }>
                                 </PivotItem>
                             }
                         })
                     }
-                </RowPivotSelector>
+                </GroupBySelector>
 
                 <span
                     id="transpose_button"
@@ -307,23 +303,23 @@ impl Component for ConfigSelector {
                     { "\u{21C4}" }
                 </span>
 
-                <ColumnPivotSelector
-                    name="column_pivots"
+                <SplitBySelector
+                    name="split_by"
                     parent={ ctx.link().clone() }
-                    is_dragover={ ctx.props().dragdrop.is_dragover(DropAction::ColumnPivots) }
+                    is_dragover={ ctx.props().dragdrop.is_dragover(DropAction::SplitBy) }
                     dragdrop={ ctx.props().dragdrop.clone() }>
                     {
-                        for config.column_pivots.iter().map(|column_pivot| {
+                        for config.split_by.iter().map(|split_by| {
                             html_nested! {
                                 <PivotItem
                                     dragdrop={ ctx.props().dragdrop.clone() }
-                                    action={ DropAction::ColumnPivots }
-                                    column={ column_pivot.clone() }>
+                                    action={ DropAction::SplitBy }
+                                    column={ split_by.clone() }>
                                 </PivotItem>
                             }
                         })
                     }
-                </ColumnPivotSelector>
+                </SplitBySelector>
 
                 <SortSelector
                     name="sort"

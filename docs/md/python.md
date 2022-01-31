@@ -122,7 +122,7 @@ table = perspective.Table(data, index="float")
 Likewise, a `View` can be created via the `view()` method:
 
 ```python
-view = table.view(row_pivots=["float"], filter=[["bool", "==", True]])
+view = table.view(group_by=["float"], filter=[["bool", "==", True]])
 column_data = view.to_dict()
 row_data = view.to_records()
 ```
@@ -469,7 +469,7 @@ constructed from a dataset:
 
 ```python
 from perspective import PerspectiveWidget, Table
-PerspectiveWidget(data, row_pivots=["date"])
+PerspectiveWidget(data, group_by=["date"])
 ```
 
 .. or a schema:

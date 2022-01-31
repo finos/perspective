@@ -1051,7 +1051,7 @@ if os.name != 'nt':
             os.environ["TZ"] = "UTC"
             time.tzset()
 
-        def test_table_row_pivot_datetime_row_path_local_time_EST(self):
+        def test_table_group_by_datetime_row_path_local_time_EST(self):
             """Make sure that string datetimes generated in Python are in
             local time and not UTC."""
             data = {
@@ -1061,7 +1061,7 @@ if os.name != 'nt':
 
             table = Table(data)
 
-            view = table.view(row_pivots=["a"])
+            view = table.view(group_by=["a"])
             assert view.to_columns() == {
                 "__ROW_PATH__": [
                     [],
@@ -1073,7 +1073,7 @@ if os.name != 'nt':
                 "b": [3, 0, 1, 2]
             }
 
-        def test_table_row_pivot_datetime_row_path_UTC(self):
+        def test_table_group_by_datetime_row_path_UTC(self):
             """Make sure that string datetimes generated in Python are in
             UTC if the timezone is UTC.
             
@@ -1090,7 +1090,7 @@ if os.name != 'nt':
 
             table = Table(data)
 
-            view = table.view(row_pivots=["a"])
+            view = table.view(group_by=["a"])
             assert view.to_columns() == {
                 "__ROW_PATH__": [
                     [],
@@ -1102,7 +1102,7 @@ if os.name != 'nt':
                 "b": [3, 0, 1, 2]
             }
 
-        def test_table_row_pivot_datetime_row_path_CST(self):
+        def test_table_group_by_datetime_row_path_CST(self):
             """Make sure that string datetimes generated in Python are in
             CST if the timezone is CST."""
             os.environ["TZ"] = "US/Central"
@@ -1115,7 +1115,7 @@ if os.name != 'nt':
 
             table = Table(data)
 
-            view = table.view(row_pivots=["a"])
+            view = table.view(group_by=["a"])
             assert view.to_columns() == {
                 "__ROW_PATH__": [
                     [],
@@ -1127,7 +1127,7 @@ if os.name != 'nt':
                 "b": [3, 0, 1, 2]
             }
 
-        def test_table_row_pivot_datetime_row_path_PST(self):
+        def test_table_group_by_datetime_row_path_PST(self):
             """Make sure that string datetimes generated in Python are in
             CST if the timezone is CST."""
             os.environ["TZ"] = "US/Pacific"
@@ -1140,7 +1140,7 @@ if os.name != 'nt':
 
             table = Table(data)
 
-            view = table.view(row_pivots=["a"])
+            view = table.view(group_by=["a"])
             assert view.to_columns() == {
                 "__ROW_PATH__": [
                     [],
@@ -1521,13 +1521,13 @@ if os.name != 'nt':
 
 class TestTableDateTimePivots(object):
 
-    def test_table_row_pivot_date_correct(self):
+    def test_table_group_by_date_correct(self):
         data = {
             "a": [date(2020, i, 15) for i in range(1, 13)],
             "b": [i for i in range(1, 13)]
         }
         table = Table(data)
-        view = table.view(row_pivots=["a"])
+        view = table.view(group_by=["a"])
         assert view.to_columns() == {
             "__ROW_PATH__": [
                 [],
@@ -1548,13 +1548,13 @@ class TestTableDateTimePivots(object):
             "b": [78, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
         }
 
-    def test_table_row_pivot_pandas_date_correct(self):
+    def test_table_group_by_pandas_date_correct(self):
         data = {
             "a": [date(2020, i, 15) for i in range(1, 13)],
             "b": [i for i in range(1, 13)]
         }
         table = Table(pd.DataFrame(data))
-        view = table.view(row_pivots=["a"])
+        view = table.view(group_by=["a"])
         assert view.to_columns() == {
             "__ROW_PATH__": [
                 [],
@@ -1576,13 +1576,13 @@ class TestTableDateTimePivots(object):
             "b": [78, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
         }
 
-    def test_table_column_pivot_date_correct(self):
+    def test_table_split_by_date_correct(self):
         data = {
             "a": [date(2020, i, 15) for i in range(1, 13)],
             "b": [i for i in range(1, 13)]
         }
         table = Table(data)
-        view = table.view(column_pivots=["a"])
+        view = table.view(split_by=["a"])
         assert view.to_columns() == {
             '2020-01-15|a': [datetime(2020, 1, 15, 0, 0),
                              None,
@@ -1874,13 +1874,13 @@ class TestTableDateTimePivots(object):
                              12]
         }
 
-    def test_table_column_pivot_pandas_date_correct(self):
+    def test_table_split_by_pandas_date_correct(self):
         data = {
             "a": [date(2020, i, 15) for i in range(1, 13)],
             "b": [i for i in range(1, 13)]
         }
         table = Table(pd.DataFrame(data))
-        view = table.view(columns=["a", "b"], column_pivots=["a"])
+        view = table.view(columns=["a", "b"], split_by=["a"])
         assert view.to_columns() == {
             '2020-01-15|a': [datetime(2020, 1, 15, 0, 0),
                              None,

@@ -7,8 +7,8 @@
         "url": "https://github.com/finos/perspective"
     },
     "license": "Apache-2.0",
-    "unpkg": "dist/cdn/perspective-viewer.js",
-    "jsdelivr": "dist/cdn/perspective-viewer.js",
+    "unpkg": "dist/umd/perspective-viewer.js",
+    "jsdelivr": "dist/umd/perspective-viewer.js",
     "exports": {
         ".": {
             "require": "./dist/umd/perspective-viewer.js",
@@ -44,7 +44,7 @@
         "test:build:rust": "cpy ../../packages/perspective/dist/umd/perspective.js dist/pkg/",
         "test:build:js": "cpy \"test/html/*\" dist/cdn && cpy \"test/csv/*\" dist/cdn && cpy \"test/css/*\" dist/cdn",
         "test:build": "npm-run-all test:build:*",
-        "test:run:rust": "HEADLESS_TIMEOUT=40 wasm-pack test --chrome --headless",
+        "test:run:rust": "WASM_BINDGEN_TEST_TIMEOUT=60 wasm-pack test --chrome --headless",
         "test:run": "jest --rootDir=. --config=../../tools/perspective-test/jest.config.js --color --noStackTrace 2>&1",
         "test:clean": "rm perspective.csv || true",
         "test": "yarn test:build && npm-run-all -p test:run:rust test:run && yarn test:clean"

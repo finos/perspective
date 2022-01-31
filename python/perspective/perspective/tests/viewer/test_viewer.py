@@ -74,11 +74,11 @@ class TestViewer:
 
     def test_viewer_load_clears_state(self):
         table = Table({"a": [1, 2, 3]})
-        viewer = PerspectiveViewer(theme="Material Dark", row_pivots=["a"])
+        viewer = PerspectiveViewer(theme="Material Dark", group_by=["a"])
         viewer.load(table)
-        assert viewer.row_pivots == ["a"]
+        assert viewer.group_by == ["a"]
         viewer.load({"b": [1, 2, 3]})
-        assert viewer.row_pivots == []
+        assert viewer.group_by == []
         assert viewer.theme == "Material Dark"  # should not break UI
 
     def test_viewer_load_np(self):

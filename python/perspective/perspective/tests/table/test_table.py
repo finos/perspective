@@ -596,7 +596,7 @@ class TestTable(object):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         data2 = [{"a": 3, "b": 4}, {"a": 1, "b": 2}]
         tbl = Table(data)
-        view = tbl.view(row_pivots=["a"], column_pivots=["b"])
+        view = tbl.view(group_by=["a"], split_by=["b"])
         first = view.to_records()
         tbl.replace(data2)
         assert view.to_records() == first

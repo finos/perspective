@@ -482,7 +482,7 @@ module.exports = (perspective) => {
                 y: ["A", "B", "C", "C"],
             });
             const view = await table.view({
-                row_pivots: ['lower("y")'],
+                group_by: ['lower("y")'],
                 expressions: ['lower("y")'],
             });
 
@@ -1125,7 +1125,7 @@ module.exports = (perspective) => {
         });
     });
 
-    describe("Computed updates with row pivots", function () {
+    describe("Computed updates with group by", function () {
         it("should update on dependent columns, add", async function () {
             const table = await perspective.table(pivot_data);
             const view = await table.view({
@@ -1133,7 +1133,7 @@ module.exports = (perspective) => {
                 aggregates: {
                     '"int" + "float"': "sum",
                 },
-                row_pivots: ['"int" + "float"'],
+                group_by: ['"int" + "float"'],
                 expressions: ['"int" + "float"'],
             });
 
@@ -1158,7 +1158,7 @@ module.exports = (perspective) => {
             const table = await perspective.table(pivot_data);
             const view = await table.view({
                 columns: ['"int" - "float"', "int"],
-                row_pivots: ['"int" - "float"'],
+                group_by: ['"int" - "float"'],
                 expressions: ['"int" - "float"'],
             });
 
@@ -1210,7 +1210,7 @@ module.exports = (perspective) => {
 
             const view = await table.view({
                 columns: ['"int" * "float"', "int"],
-                row_pivots: ['"int" * "float"'],
+                group_by: ['"int" * "float"'],
                 expressions: ['"int" * "float"'],
             });
 
@@ -1262,7 +1262,7 @@ module.exports = (perspective) => {
 
             const view = await table.view({
                 columns: ['"int" / "float"', "int"],
-                row_pivots: ['"int" / "float"'],
+                group_by: ['"int" / "float"'],
                 expressions: ['"int" / "float"'],
             });
 

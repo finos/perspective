@@ -51,9 +51,9 @@ class TestWidget:
         }
 
     def test_widget_no_data(self):
-        widget = PerspectiveWidget(None, plugin="X Bar", row_pivots=["a"])
+        widget = PerspectiveWidget(None, plugin="X Bar", group_by=["a"])
         assert widget.plugin == "X Bar"
-        assert widget.row_pivots == ["a"]
+        assert widget.group_by == ["a"]
 
     def test_widget_schema(self):
         schema = {
@@ -284,7 +284,7 @@ class TestWidget:
 
         # create a view on the manager
         table_name, table = list(widget.manager._tables.items())[0]
-        make_view_message = {"id": 1, "table_name": table_name, "view_name": "view1", "cmd": "view", "config": {"row_pivots": ["a"]}}
+        make_view_message = {"id": 1, "table_name": table_name, "view_name": "view1", "cmd": "view", "config": {"group_by": ["a"]}}
         widget.manager._process(make_view_message, lambda x: True)
 
         assert len(widget.manager._views) == 1

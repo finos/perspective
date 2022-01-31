@@ -17,10 +17,10 @@ class ViewConfig(object):
         Keyword Arguments:
             columns (:obj:`list` of :obj:`str`): A list of column names to be
                 visible to the user.
-            row_pivots (:obj:`list` of :obj:`str`): A list of column names to
-                use as row pivots.
-            column_pivots (:obj:`list` of :obj:`str`): A list of column names
-                to use as column pivots.
+            group_by (:obj:`list` of :obj:`str`): A list of column names to
+                use as group by.
+            split_by (:obj:`list` of :obj:`str`): A list of column names
+                to use as split by.
             aggregates (:obj:`dict` of :obj:`str` to :obj:`str`):  A dictionary
                 of column names to aggregate types, which specify aggregates
                 for individual columns.
@@ -35,34 +35,34 @@ class ViewConfig(object):
                 expressions which will be calculated by the view.
         """
         self._config = config
-        self._row_pivots = self._config.get("row_pivots", [])
-        self._column_pivots = self._config.get("column_pivots", [])
+        self._group_by = self._config.get("group_by", [])
+        self._split_by = self._config.get("split_by", [])
         self._aggregates = self._config.get("aggregates", {})
         self._columns = self._config.get("columns", [])
         self._sort = self._config.get("sort", [])
         self._filter = self._config.get("filter", [])
         self._expressions = self._config.get("expressions", [])
         self._filter_op = self._config.get("filter_op", "and")
-        self.row_pivot_depth = self._config.get("row_pivot_depth", None)
-        self.column_pivot_depth = self._config.get("column_pivot_depth", None)
+        self.group_by_depth = self._config.get("group_by_depth", None)
+        self.split_by_depth = self._config.get("split_by_depth", None)
 
-    def get_row_pivots(self):
+    def get_group_by(self):
         """The columns used as
-        [row pivots](https://en.wikipedia.org/wiki/Pivot_table#Row_labels)
+        [group by](https://en.wikipedia.org/wiki/Pivot_table#Row_labels)
 
         Returns:
-            list : the columns used as row pivots
+            list : the columns used as group by
         """
-        return self._row_pivots
+        return self._group_by
 
-    def get_column_pivots(self):
+    def get_split_by(self):
         """The columns used as
-        [column pivots](https://en.wikipedia.org/wiki/Pivot_table#Column_labels)
+        [split by](https://en.wikipedia.org/wiki/Pivot_table#Column_labels)
 
         Returns:
-            list : the columns used as column pivots
+            list : the columns used as split by
         """
-        return self._column_pivots
+        return self._split_by
 
     def get_aggregates(self):
         """Defines the grouping of data within columns.

@@ -70,8 +70,8 @@ impl Display for SortDir {
 
 impl SortDir {
     /// Increment the `SortDir` in logical order, given an `abs()` modifier.
-    pub fn cycle(&self, col_pivots: bool, abs: bool) -> SortDir {
-        let order: &[SortDir] = match (col_pivots, abs) {
+    pub fn cycle(&self, split_by: bool, abs: bool) -> SortDir {
+        let order: &[SortDir] = match (split_by, abs) {
             (false, false) => &[SortDir::None, SortDir::Asc, SortDir::Desc],
             (false, true) => &[SortDir::None, SortDir::AscAbs, SortDir::DescAbs],
             (true, false) => &[

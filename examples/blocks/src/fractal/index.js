@@ -40,8 +40,8 @@ function generate_layout(params) {
     return {
         plugin: "Heatmap",
         settings: true,
-        row_pivots: [`floor("index" / ${params.height})`],
-        column_pivots: [`"index" % ${params.height}`],
+        group_by: [`floor("index" / ${params.height})`],
+        split_by: [`"index" % ${params.height}`],
         columns: ["color"],
         expressions: [
             generate_mandelbrot(params).trim(),

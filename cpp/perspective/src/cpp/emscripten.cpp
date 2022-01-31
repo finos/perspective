@@ -1451,10 +1451,9 @@ namespace binding {
     make_view_config(const t_gnode& gnode, std::shared_ptr<t_schema> schema,
         t_val date_parser, t_val config) {
         // extract vectors from JS, where they were created
-        auto row_pivots
-            = config.call<std::vector<std::string>>("get_row_pivots");
+        auto row_pivots = config.call<std::vector<std::string>>("get_group_by");
         auto column_pivots
-            = config.call<std::vector<std::string>>("get_column_pivots");
+            = config.call<std::vector<std::string>>("get_split_by");
         auto columns = config.call<std::vector<std::string>>("get_columns");
         auto sort
             = config.call<std::vector<std::vector<std::string>>>("get_sort");
@@ -1578,14 +1577,14 @@ namespace binding {
         view_config->init(schema);
 
         // set pivot depths if provided
-        if (has_value(config["row_pivot_depth"])) {
+        if (has_value(config["group_by_depth"])) {
             view_config->set_row_pivot_depth(
-                config["row_pivot_depth"].as<std::int32_t>());
+                config["group_by_depth"].as<std::int32_t>());
         }
 
-        if (has_value(config["column_pivot_depth"])) {
+        if (has_value(config["split_by_depth"])) {
             view_config->set_column_pivot_depth(
-                config["column_pivot_depth"].as<std::int32_t>());
+                config["split_by_depth"].as<std::int32_t>());
         }
 
         return view_config;

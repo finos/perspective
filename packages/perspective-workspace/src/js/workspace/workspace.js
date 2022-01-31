@@ -518,8 +518,8 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
             return;
         }
         const candidates = new Set([
-            ...(config["row_pivots"] || []),
-            ...(config["column_pivots"] || []),
+            ...(config["group_by"] || []),
+            ...(config["split_by"] || []),
             ...(config.filter || []).map((x) => x[0]),
         ]);
         const filters = [...event.detail.config.filter];
@@ -599,7 +599,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
             if (this._linkedViewers.length === 1) {
                 this.getAllWidgets().forEach(async (widget) => {
                     const config = await widget.viewer.save();
-                    if (config["row_pivots"]) {
+                    if (config["group_by"]) {
                         await widget.viewer.restore({selectable: true});
                     }
                 });
@@ -854,8 +854,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
                 const config = await event.target?.save();
                 if (config) {
                     const selectable =
-                        this._linkedViewers.length > 0 &&
-                        !!config["row_pivots"];
+                        this._linkedViewers.length > 0 && !!config["group_by"];
                     if (selectable !== !!config.selectable) {
                         event.target.restore({selectable});
                     }

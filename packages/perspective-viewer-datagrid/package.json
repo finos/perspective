@@ -2,8 +2,8 @@
     "name": "@finos/perspective-viewer-datagrid",
     "version": "1.1.1",
     "description": "Perspective datagrid plugin based on `regular-table`",
-    "unpkg": "dist/cdn/perspective-viewer-datagrid.js",
-    "jsdelivr": "dist/cdn/perspective-viewer-datagrid.js",
+    "unpkg": "dist/umd/perspective-viewer-datagrid.js",
+    "jsdelivr": "dist/umd/perspective-viewer-datagrid.js",
     "exports": {
         ".": {
             "require": "./dist/umd/perspective-viewer-datagrid.js",

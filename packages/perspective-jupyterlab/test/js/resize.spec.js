@@ -55,7 +55,7 @@ utils.with_server({}, () => {
                 }
             );
 
-            test.capture("row_pivots traitlet works", async (page) => {
+            test.capture("group_by traitlet works", async (page) => {
                 await page.waitForSelector(
                     "perspective-viewer:not([updating])"
                 );
@@ -66,7 +66,7 @@ utils.with_server({}, () => {
                             .toggleConfig()
                 );
                 return await page.evaluate(async () => {
-                    await window.__WIDGET__.restore({row_pivots: ["State"]});
+                    await window.__WIDGET__.restore({group_by: ["State"]});
                     return window.__WIDGET__.viewer.innerHTML;
                 });
                 // await page.waitForSelector("perspective-viewer:not([updating])");

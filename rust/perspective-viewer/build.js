@@ -87,11 +87,6 @@ const BUILD = [
         outfile: "dist/cjs/migrate.js",
     },
     {
-        entryPoints: ["src/ts/migrate.ts"],
-        format: "esm",
-        outfile: "dist/esm/migrate.js",
-    },
-    {
         entryPoints: ["src/ts/perspective-viewer.ts"],
         format: "esm",
         plugins: [

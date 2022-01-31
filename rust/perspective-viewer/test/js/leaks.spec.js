@@ -52,7 +52,7 @@ utils.with_server({}, () => {
             );
 
             test.capture(
-                "doesn't leak views when setting row pivots",
+                "doesn't leak views when setting group by",
                 async (page) => {
                     let viewer = await page.$("perspective-viewer");
                     await page.evaluate(async (viewer) => {
@@ -78,13 +78,13 @@ utils.with_server({}, () => {
                                 Math.random() * (pivots.length - start)
                             );
                             await element.restore({
-                                row_pivots: pivots.slice(start, length),
+                                group_by: pivots.slice(start, length),
                             });
                         }, viewer);
                     }
 
                     return await page.evaluate(async (viewer) => {
-                        await viewer.restore({row_pivots: ["State"]});
+                        await viewer.restore({group_by: ["State"]});
                         await viewer.toggleConfig();
                         return viewer.innerHTML;
                     }, viewer);

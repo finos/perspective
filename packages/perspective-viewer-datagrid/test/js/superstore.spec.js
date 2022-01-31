@@ -111,7 +111,7 @@ utils.with_server({}, () => {
             //     });
             // });
 
-            // test.capture("expression columns have the right row pivot headers", async page => {
+            // test.capture("expression columns have the right group by headers", async page => {
             //     const viewer = await page.$("perspective-viewer");
             //     await page.evaluate(async () => await document.querySelector("perspective-viewer").toggleConfig());
 

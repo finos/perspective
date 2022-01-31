@@ -16,22 +16,22 @@ class TestException(object):
 
         with raises(PerspectiveCppError) as ex:
             # creating view with unknown column should throw
-            tbl.view(row_pivots=["b"])
+            tbl.view(group_by=["b"])
 
         assert (
             str(ex.value)
-            == "Invalid column 'b' found in View row_pivots.\n"
+            == "Invalid column 'b' found in View group_by.\n"
         )
 
     def test_exception_from_core_catch_generic(self):
         tbl = Table({"a": [1, 2, 3]})
         # `PerspectiveCppError` should inherit from `Exception`
         with raises(Exception) as ex:
-            tbl.view(row_pivots=["b"])
+            tbl.view(group_by=["b"])
 
         assert (
             str(ex.value)
-            == "Invalid column 'b' found in View row_pivots.\n"
+            == "Invalid column 'b' found in View group_by.\n"
         )
 
     def test_exception_from_core_correct_types(self):
@@ -48,9 +48,9 @@ class TestException(object):
         )
 
         with raises(PerspectiveCppError) as ex:
-            tbl.view(row_pivots=["b"])
+            tbl.view(group_by=["b"])
 
         assert (
             str(ex.value)
-            == "Invalid column 'b' found in View row_pivots.\n"
+            == "Invalid column 'b' found in View group_by.\n"
         )

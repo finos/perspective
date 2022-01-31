@@ -22,27 +22,30 @@
         <script src="perspective.js"></script>
 
         <link rel="stylesheet" href="index.css" />
-        <link rel="stylesheet" crossorigin="anonymous" href="/node_modules/@finos/perspective-viewer/dist/css/themes.css" />
+        <link
+            rel="stylesheet"
+            crossorigin="anonymous"
+            href="/node_modules/@finos/perspective-viewer/dist/css/themes.css"
+        />
     </head>
 
     <body>
         <perspective-viewer id="view1"> </perspective-viewer>
 
         <script>
-
             window.addEventListener("DOMContentLoaded", async function () {
                 const elem = document.getElementById("view1");
-                const plugin = await elem.getPlugin("Y Area")
+                const plugin = await elem.getPlugin("Y Area");
                 plugin.max_columns = 100;
 
                 const client = perspective.websocket();
                 elem.load(client.open_table("data_source_one"));
                 elem.restore({
                     plugin: "Y Area",
-                    row_pivots: [
+                    group_by: [
                         "var d := 1000 * float(\"Date\");\nbucket(datetime(d), 'M')",
                     ],
-                    column_pivots: ["Name"],
+                    split_by: ["Name"],
                     columns: ["Hash"],
                     sort: [["Hash", "col desc"]],
                     expressions: [

@@ -1,217 +1,248 @@
 exports.EXAMPLES = [
     {
         name: "Default",
-        config: {}
+        config: {},
     },
     {
-        name: "Row Pivots 1",
+        name: "Group By 1",
         config: {
-            row_pivots: ["Sub-Category"]
+            group_by: ["Sub-Category"],
         },
-        aggregates: "dominant"
+        aggregates: "dominant",
     },
     {
-        name: "Row Pivots 2",
+        name: "Group By 2",
         config: {
-            row_pivots: ["Category", "Sub-Category"]
-        }
+            group_by: ["Category", "Sub-Category"],
+        },
     },
     {
-        name: "Column Pivots",
+        name: "Split By",
         config: {
-            column_pivots: ["Category"],
-            columns: ["Sales", "Quantity", "Discount", "Profit"]
-        }
+            split_by: ["Category"],
+            columns: ["Sales", "Quantity", "Discount", "Profit"],
+        },
     },
     {
-        name: "Column Pivots 2",
+        name: "Split By 2",
         config: {
-            column_pivots: ["Category", "Sub-Category"],
-            columns: ["Sales", "Quantity", "Discount", "Profit"]
-        }
+            split_by: ["Category", "Sub-Category"],
+            columns: ["Sales", "Quantity", "Discount", "Profit"],
+        },
     },
     {
         name: "Both",
         config: {
-            row_pivots: ["Region"],
-            column_pivots: ["Category"],
-            columns: ["Sales", "Quantity", "Discount", "Profit"]
-        }
+            group_by: ["Region"],
+            split_by: ["Category"],
+            columns: ["Sales", "Quantity", "Discount", "Profit"],
+        },
     },
     {
         name: "Both 2",
         config: {
-            row_pivots: ["Region", "State"],
-            column_pivots: ["Category", "Sub-Category"],
-            columns: ["Sales", "Quantity", "Discount", "Profit"]
-        }
+            group_by: ["Region", "State"],
+            split_by: ["Category", "Sub-Category"],
+            columns: ["Sales", "Quantity", "Discount", "Profit"],
+        },
     },
     {
-        name: "Background Row And Column Pivots",
+        name: "Background Row And Split By",
         config: {
-            row_pivots: ["State"],
-            column_pivots: ["Sub-Category"],
+            group_by: ["State"],
+            split_by: ["Sub-Category"],
             columns: ["Profit"],
             sort: [["Profit", "col asc"]],
             plugin_config: {
                 Profit: {
-                    color_mode: "background"
+                    color_mode: "background",
                     // gradient: 600,
-                }
-            }
-        }
+                },
+            },
+        },
     },
     {
-        name: "Gradient Row And Column Pivots",
+        name: "Gradient Row And Split By",
         config: {
-            row_pivots: ["State"],
-            column_pivots: ["Sub-Category"],
+            group_by: ["State"],
+            split_by: ["Sub-Category"],
             columns: ["Profit"],
             sort: [["Profit", "col asc"]],
             plugin_config: {
                 Profit: {
                     color_mode: "gradient",
-                    gradient: 1600
-                }
-            }
-        }
+                    gradient: 1600,
+                },
+            },
+        },
     },
     {
-        name: "BackgBarround Row And Column Pivots",
+        name: "BackgBarround Row And Split By",
         config: {
-            row_pivots: ["State"],
-            column_pivots: ["Sub-Category"],
+            group_by: ["State"],
+            split_by: ["Sub-Category"],
             columns: ["Sales"],
             aggregates: {Sales: "avg"},
             plugin_config: {
                 Sales: {
                     color_mode: "bar",
-                    gradient: 600
-                }
-            }
-        }
+                    gradient: 600,
+                },
+            },
+        },
     },
     {
         name: "Foreground Colors",
         config: {
-            columns: ["Category", "Sales", "Discount", "Profit", "Sub-Category", "Order Date"],
+            columns: [
+                "Category",
+                "Sales",
+                "Discount",
+                "Profit",
+                "Sub-Category",
+                "Order Date",
+            ],
             plugin_config: {
                 Profit: {
                     pos_color: "#32cd82",
-                    neg_color: "#f50fed"
+                    neg_color: "#f50fed",
                 },
                 Sales: {
                     pos_color: "#780aff",
-                    neg_color: "#f5ac0f"
+                    neg_color: "#f5ac0f",
                 },
                 Discount: {
                     pos_color: "#f5ac0f",
-                    neg_color: "#780aff"
-                }
+                    neg_color: "#780aff",
+                },
             },
-            sort: [["Sub-Category", "desc"]]
-        }
+            sort: [["Sub-Category", "desc"]],
+        },
     },
     {
         name: "Background Colors",
         config: {
-            columns: ["Category", "Sales", "Discount", "Profit", "Sub-Category", "Order Date"],
+            columns: [
+                "Category",
+                "Sales",
+                "Discount",
+                "Profit",
+                "Sub-Category",
+                "Order Date",
+            ],
             plugin_config: {
                 Profit: {
                     color_mode: "background",
                     pos_color: "#32cd82",
-                    neg_color: "#f50fed"
+                    neg_color: "#f50fed",
                 },
                 Sales: {
                     color_mode: "background",
                     pos_color: "#780aff",
-                    neg_color: "#f5ac0f"
+                    neg_color: "#f5ac0f",
                 },
                 Discount: {
                     color_mode: "background",
                     pos_color: "#f5ac0f",
-                    neg_color: "#780aff"
-                }
+                    neg_color: "#780aff",
+                },
             },
-            sort: [["Sub-Category", "desc"]]
-        }
+            sort: [["Sub-Category", "desc"]],
+        },
     },
 
     {
         name: "Gradient Colors",
         config: {
-            columns: ["Category", "Sales", "Discount", "Profit", "Sub-Category", "Order Date"],
+            columns: [
+                "Category",
+                "Sales",
+                "Discount",
+                "Profit",
+                "Sub-Category",
+                "Order Date",
+            ],
             plugin_config: {
                 Profit: {
                     color_mode: "gradient",
                     gradient: 600,
                     pos_color: "#32cd82",
-                    neg_color: "#f50fed"
+                    neg_color: "#f50fed",
                 },
                 Sales: {
                     color_mode: "gradient",
                     gradient: 2268,
                     pos_color: "#780aff",
-                    neg_color: "#f5ac0f"
+                    neg_color: "#f5ac0f",
                 },
                 Discount: {
                     color_mode: "gradient",
                     gradient: 0.8,
                     pos_color: "#f5ac0f",
-                    neg_color: "#780aff"
-                }
+                    neg_color: "#780aff",
+                },
             },
-            sort: [["Sub-Category", "desc"]]
-        }
+            sort: [["Sub-Category", "desc"]],
+        },
     },
     {
         name: "Bar Colors",
         config: {
-            columns: ["Category", "Sales", "Discount", "Profit", "Sub-Category", "Order Date"],
+            columns: [
+                "Category",
+                "Sales",
+                "Discount",
+                "Profit",
+                "Sub-Category",
+                "Order Date",
+            ],
             plugin_config: {
                 Profit: {
                     color_mode: "bar",
                     gradient: 600,
                     pos_color: "#32cd82",
-                    neg_color: "#f50fed"
+                    neg_color: "#f50fed",
                 },
                 Sales: {
                     color_mode: "bar",
                     gradient: 2268,
                     pos_color: "#780aff",
-                    neg_color: "#f5ac0f"
+                    neg_color: "#f5ac0f",
                 },
                 Discount: {
                     color_mode: "bar",
                     gradient: 0.8,
                     pos_color: "#f5ac0f",
-                    neg_color: "#780aff"
-                }
+                    neg_color: "#780aff",
+                },
             },
-            sort: [["Sub-Category", "desc"]]
-        }
+            sort: [["Sub-Category", "desc"]],
+        },
     },
     {
         name: "Thermometer",
         config: {
-            row_pivots: ["State"],
+            group_by: ["State"],
             columns: ["Profit (-)", "Profit", "Profit (+)"],
             plugin_config: {
                 "Profit (-)": {
                     color_mode: "bar",
-                    gradient: 10000
+                    gradient: 10000,
                 },
                 Profit: {
                     color_mode: "gradient",
-                    gradient: 10000
+                    gradient: 10000,
                 },
                 "Profit (+)": {
                     color_mode: "bar",
-                    gradient: 10000
-                }
+                    gradient: 10000,
+                },
             },
-            expressions: [`//Profit (-)\nif("Profit"<0){"Profit"}else{0}`, `//Profit (+)\nif("Profit">0){"Profit"}else{0}`]
-        }
+            expressions: [
+                `//Profit (-)\nif("Profit"<0){"Profit"}else{0}`,
+                `//Profit (+)\nif("Profit">0){"Profit"}else{0}`,
+            ],
+        },
     },
 
     // Y Bar
@@ -220,69 +251,69 @@ exports.EXAMPLES = [
         name: "Y Bar",
         config: {
             plugin: "Y Bar",
-            row_pivots: ["Sub-Category"],
-            columns: ["Sales"]
-        }
+            group_by: ["Sub-Category"],
+            columns: ["Sales"],
+        },
     },
     {
         name: "Y Bar, Sorted Desc By Y-Axis",
         config: {
             plugin: "Y Bar",
-            row_pivots: ["Sub-Category"],
+            group_by: ["Sub-Category"],
             columns: ["Sales"],
-            sort: [["Sales", "desc"]]
-        }
+            sort: [["Sales", "desc"]],
+        },
     },
     {
-        name: "Y Bar - Row And Column Pivots",
+        name: "Y Bar - Row And Split By",
         config: {
             plugin: "Y Bar",
-            row_pivots: ["Sub-Category"],
-            column_pivots: ["Ship Mode"],
-            columns: ["Sales"]
-        }
+            group_by: ["Sub-Category"],
+            split_by: ["Ship Mode"],
+            columns: ["Sales"],
+        },
     },
 
     {
-        name: "Y Bar - Row Pivots 2 Sorted",
+        name: "Y Bar - Group By 2 Sorted",
         config: {
             plugin: "Y Bar",
-            row_pivots: ["Category", "Sub-Category"],
+            group_by: ["Category", "Sub-Category"],
             columns: ["Sales"],
-            sort: [["Sales", "desc"]]
-        }
+            sort: [["Sales", "desc"]],
+        },
     },
     {
-        name: "Y Bar - Row Pivots 2 And Column Pivots Sorted",
+        name: "Y Bar - Group By 2 And Split By Sorted",
         config: {
             plugin: "Y Bar",
-            row_pivots: ["Category", "Sub-Category"],
-            column_pivots: ["Category"],
+            group_by: ["Category", "Sub-Category"],
+            split_by: ["Category"],
             columns: ["Sales"],
-            sort: [["Sales", "desc"]]
-        }
+            sort: [["Sales", "desc"]],
+        },
     },
     {
-        name: "Y Bar - Row Pivots 2 And 2 Column Pivots Sorted",
+        name: "Y Bar - Group By 2 And 2 Split By Sorted",
         config: {
             plugin: "Y Bar",
-            row_pivots: ["Category", "Sub-Category"],
-            column_pivots: ["Category", "Region"],
+            group_by: ["Category", "Sub-Category"],
+            split_by: ["Category", "Region"],
             columns: ["Sales"],
-            sort: [["Sales", "desc"]]
-        }
+            sort: [["Sales", "desc"]],
+        },
     },
     {
-        name: "Y Bar - Row Pivots 2 And 2 Column Pivots Sorted 2",
+        name: "Y Bar - Group By 2 And 2 Split By Sorted 2",
         config: {
             plugin: "Y Bar",
-            row_pivots: ["State"],
-            column_pivots: ["Profit (-/+)"],
+            group_by: ["State"],
+            split_by: ["Profit (-/+)"],
             columns: ["Profit"],
             expressions: [`//Profit (-/+)\nif("Profit"<0){1}else{0}`],
-            sort: [["Profit", "desc"]]
+            sort: [["Profit", "desc"]],
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
 
     // Y Bar Multi Axis
@@ -291,22 +322,22 @@ exports.EXAMPLES = [
         name: "Y Bar Multi Axis",
         config: {
             plugin: "Y Bar",
-            row_pivots: ["Sub-Category"],
+            group_by: ["Sub-Category"],
             columns: ["Quantity", "Sales"],
             aggregates: {Sales: "avg"},
-            sort: [["Sales", "desc"]]
-        }
+            sort: [["Sales", "desc"]],
+        },
     },
     {
         name: "Y Bar Multi Axis - SPlit",
         config: {
             plugin: "Y Bar",
-            row_pivots: ["Sub-Category"],
+            group_by: ["Sub-Category"],
             columns: ["Quantity", "Sales"],
             sort: [["Sales", "desc"]],
             aggregates: {Sales: "avg"},
-            plugin_config: {splitMainValues: ["Sales"]}
-        }
+            plugin_config: {splitMainValues: ["Sales"]},
+        },
     },
 
     // X Bar
@@ -315,45 +346,45 @@ exports.EXAMPLES = [
         name: "X Bar",
         config: {
             plugin: "X Bar",
-            row_pivots: ["Sub-Category"],
-            columns: ["Sales"]
-        }
+            group_by: ["Sub-Category"],
+            columns: ["Sales"],
+        },
     },
     {
         name: "X Bar",
         config: {
             plugin: "X Bar",
-            row_pivots: ["Sub-Category"],
-            columns: ["Quantity", "Profit"]
-        }
+            group_by: ["Sub-Category"],
+            columns: ["Quantity", "Profit"],
+        },
     },
     {
         name: "X Bar, Sorted Desc By X-Axis",
         config: {
             plugin: "X Bar",
-            row_pivots: ["Sub-Category"],
+            group_by: ["Sub-Category"],
             columns: ["Sales"],
-            sort: [["Sales", "asc"]]
-        }
+            sort: [["Sales", "asc"]],
+        },
     },
     {
-        name: "X Bar - Row And Column Pivots",
+        name: "X Bar - Row And Split By",
         config: {
             plugin: "X Bar",
-            row_pivots: ["Sub-Category"],
-            column_pivots: ["Region"],
-            columns: ["Sales"]
-        }
+            group_by: ["Sub-Category"],
+            split_by: ["Region"],
+            columns: ["Sales"],
+        },
     },
     {
-        name: "X Bar - Row And Column Pivots",
+        name: "X Bar - Row And Split By",
         config: {
             plugin: "X Bar",
-            row_pivots: ["Sub-Category"],
-            column_pivots: ["Region"],
+            group_by: ["Sub-Category"],
+            split_by: ["Region"],
             columns: ["Sales"],
-            sort: [["Sales", "asc"]]
-        }
+            sort: [["Sales", "asc"]],
+        },
     },
 
     // Y Line
@@ -362,100 +393,103 @@ exports.EXAMPLES = [
         name: "Y Line - Datetime Axis",
         config: {
             plugin: "Y Line",
-            row_pivots: ["Order Date"],
-            columns: ["Sales"]
-        }
+            group_by: ["Order Date"],
+            columns: ["Sales"],
+        },
     },
     {
         name: "Y Line - Datetime Axis",
         config: {
             plugin: "Y Line",
-            row_pivots: ["Order Date"],
-            column_pivots: ["Segment"],
-            columns: ["Sales"]
-        }
+            group_by: ["Order Date"],
+            split_by: ["Segment"],
+            columns: ["Sales"],
+        },
     },
     {
         name: "Y Line - Datetime Axis Computed",
         config: {
             plugin: "Y Line",
-            row_pivots: ["bucket(\"Order Date\", 'M')"],
+            group_by: ["bucket(\"Order Date\", 'M')"],
             expressions: ["bucket(\"Order Date\", 'M')"],
-            columns: ["Sales"]
-        }
+            columns: ["Sales"],
+        },
     },
     {
         name: "Y Line - Datetime Axis",
         config: {
             plugin: "Y Line",
-            row_pivots: ["bucket(\"Order Date\", 'M')"],
-            column_pivots: ["bucket(\"Order Date\", 'Y')"],
-            expressions: ["bucket(\"Order Date\", 'M')", "bucket(\"Order Date\", 'Y')"],
-            columns: ["Sales"]
-        }
+            group_by: ["bucket(\"Order Date\", 'M')"],
+            split_by: ["bucket(\"Order Date\", 'Y')"],
+            expressions: [
+                "bucket(\"Order Date\", 'M')",
+                "bucket(\"Order Date\", 'Y')",
+            ],
+            columns: ["Sales"],
+        },
     },
     {
-        name: "Y Line - Datetime Axis And Column Pivots",
+        name: "Y Line - Datetime Axis And Split By",
         config: {
             plugin: "Y Line",
-            row_pivots: ["bucket(\"Order Date\", 'M')"],
-            column_pivots: ["Region"],
+            group_by: ["bucket(\"Order Date\", 'M')"],
+            split_by: ["Region"],
             expressions: ["bucket(\"Order Date\", 'M')"],
-            columns: ["Sales"]
-        }
+            columns: ["Sales"],
+        },
     },
     {
         name: "Y Line - Category Axis",
         config: {
             plugin: "Y Line",
-            row_pivots: ["State"],
-            columns: ["Sales"]
+            group_by: ["State"],
+            columns: ["Sales"],
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
     {
         name: "Y Line - Category Axis",
         config: {
             plugin: "Y Line",
-            row_pivots: ["State"],
+            group_by: ["State"],
             columns: ["Sales"],
-            sort: [["Sales", "desc"]]
+            sort: [["Sales", "desc"]],
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
     {
-        name: "Y Line - Row and Column Pivots",
+        name: "Y Line - Row and Split By",
         config: {
             plugin: "Y Line",
-            row_pivots: ["State"],
-            column_pivots: ["Segment"],
+            group_by: ["State"],
+            split_by: ["Segment"],
             columns: ["Sales"],
-            sort: [["Sales", "desc"]]
+            sort: [["Sales", "desc"]],
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
     {
         name: "Y Line - Multi Axis Split",
         config: {
             plugin: "Y Line",
-            row_pivots: ["State"],
+            group_by: ["State"],
             columns: ["Sales", "Profit"],
             plugin_config: {splitMainValues: ["Sales"]},
-            sort: [["Sales", "desc"]]
+            sort: [["Sales", "desc"]],
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
     {
         name: "Y Line - Multi Axis Split",
         config: {
             plugin: "Y Line",
-            row_pivots: ["State"],
-            column_pivots: ["Segment"],
+            group_by: ["State"],
+            split_by: ["Segment"],
             columns: ["Sales", "Profit"],
             plugin_config: {splitMainValues: ["Sales"]},
-            sort: [["Sales", "desc"]]
+            sort: [["Sales", "desc"]],
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
 
     // Y Area
@@ -464,81 +498,84 @@ exports.EXAMPLES = [
         name: "Y Area - Datetime Axis Computed",
         config: {
             plugin: "Y Area",
-            row_pivots: ["bucket(\"Order Date\", 'M')"],
+            group_by: ["bucket(\"Order Date\", 'M')"],
             expressions: ["bucket(\"Order Date\", 'M')"],
-            columns: ["Sales"]
-        }
+            columns: ["Sales"],
+        },
     },
     {
         name: "Y Area - Datetime Axis",
         config: {
             plugin: "Y Area",
-            row_pivots: ["bucket(\"Order Date\", 'M')"],
-            column_pivots: ["bucket(\"Order Date\", 'Y')"],
-            expressions: ["bucket(\"Order Date\", 'M')", "bucket(\"Order Date\", 'Y')"],
-            columns: ["Sales"]
-        }
+            group_by: ["bucket(\"Order Date\", 'M')"],
+            split_by: ["bucket(\"Order Date\", 'Y')"],
+            expressions: [
+                "bucket(\"Order Date\", 'M')",
+                "bucket(\"Order Date\", 'Y')",
+            ],
+            columns: ["Sales"],
+        },
     },
     {
-        name: "Y Area - Datetime Axis And Column Pivots",
+        name: "Y Area - Datetime Axis And Split By",
         config: {
             plugin: "Y Area",
-            row_pivots: ["bucket(\"Order Date\", 'M')"],
-            column_pivots: ["Region"],
+            group_by: ["bucket(\"Order Date\", 'M')"],
+            split_by: ["Region"],
             expressions: ["bucket(\"Order Date\", 'M')"],
-            columns: ["Sales"]
-        }
+            columns: ["Sales"],
+        },
     },
     {
         name: "Y Area - Category Axis",
         config: {
             plugin: "Y Area",
-            row_pivots: ["State"],
-            columns: ["Sales"]
-        },
-        viewport: {width: 600, height: 450}
-    },
-    {
-        name: "Y Area - Row and Column Pivots",
-        config: {
-            plugin: "Y Area",
-            row_pivots: ["State"],
-            column_pivots: ["Ship Mode"],
-            columns: ["Sales"]
-        },
-        viewport: {width: 600, height: 450}
-    },
-    {
-        name: "Y Area - 2 Row Pivots",
-        config: {
-            plugin: "Y Area",
-            row_pivots: ["Region", "State"],
+            group_by: ["State"],
             columns: ["Sales"],
-            sort: [["Sales", "desc"]]
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
     {
-        name: "Y Area - Row and Column Pivots",
+        name: "Y Area - Row and Split By",
         config: {
             plugin: "Y Area",
-            row_pivots: ["Region", "State"],
-            column_pivots: ["Region"],
+            group_by: ["State"],
+            split_by: ["Ship Mode"],
             columns: ["Sales"],
-            sort: [["Sales", "desc"]]
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
     {
-        name: "Y Area - Row and Column Pivots 2",
+        name: "Y Area - 2 Group By",
         config: {
             plugin: "Y Area",
-            row_pivots: ["Region", "State"],
-            column_pivots: ["Ship Mode"],
+            group_by: ["Region", "State"],
             columns: ["Sales"],
-            sort: [["Sales", "desc"]]
+            sort: [["Sales", "desc"]],
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
+    },
+    {
+        name: "Y Area - Row and Split By",
+        config: {
+            plugin: "Y Area",
+            group_by: ["Region", "State"],
+            split_by: ["Region"],
+            columns: ["Sales"],
+            sort: [["Sales", "desc"]],
+        },
+        viewport: {width: 600, height: 450},
+    },
+    {
+        name: "Y Area - Row and Split By 2",
+        config: {
+            plugin: "Y Area",
+            group_by: ["Region", "State"],
+            split_by: ["Ship Mode"],
+            columns: ["Sales"],
+            sort: [["Sales", "desc"]],
+        },
+        viewport: {width: 600, height: 450},
     },
 
     // X/Y Scatter
@@ -547,62 +584,67 @@ exports.EXAMPLES = [
         name: "X/Y Scatter",
         config: {
             plugin: "X/Y Scatter",
-            row_pivots: ["City"],
+            group_by: ["City"],
             columns: ["Sales", "Quantity"],
-            aggregates: {Sales: "avg", Profit: "avg", Quantity: "avg"}
-        }
+            aggregates: {Sales: "avg", Profit: "avg", Quantity: "avg"},
+        },
     },
     {
-        name: "X/Y Scatter - Column Pivots",
+        name: "X/Y Scatter - Split By",
         config: {
             plugin: "X/Y Scatter",
-            row_pivots: ["City"],
-            column_pivots: ["Region"],
+            group_by: ["City"],
+            split_by: ["Region"],
             columns: ["Sales", "Quantity"],
-            aggregates: {Sales: "avg", Profit: "avg", Quantity: "avg"}
-        }
+            aggregates: {Sales: "avg", Profit: "avg", Quantity: "avg"},
+        },
     },
     {
         name: "X/Y Scatter - Color By Float",
         config: {
             plugin: "X/Y Scatter",
-            row_pivots: ["State"],
+            group_by: ["State"],
             columns: ["Sales", "Quantity", "Profit"],
             aggregates: {Sales: "avg", Profit: "avg", Quantity: "avg"},
-            sort: [["Profit", "desc"]]
-        }
-    },
-    {
-        name: "X/Y Scatter - Bubble",
-        config: {
-            plugin: "X/Y Scatter",
-            row_pivots: ["Sub-Category"],
-            columns: ["Sales", "Quantity", null, "Profit"],
-            aggregates: {Sales: "avg", Profit: "avg", Quantity: "avg"}
+            sort: [["Profit", "desc"]],
         },
-        viewport: {width: 600, height: 450}
     },
     {
         name: "X/Y Scatter - Bubble",
         config: {
             plugin: "X/Y Scatter",
-            row_pivots: ["Sub-Category"],
-            column_pivots: ["Category"],
+            group_by: ["Sub-Category"],
             columns: ["Sales", "Quantity", null, "Profit"],
-            aggregates: {Sales: "avg", Profit: "avg", Quantity: "avg"}
+            aggregates: {Sales: "avg", Profit: "avg", Quantity: "avg"},
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
     {
         name: "X/Y Scatter - Bubble",
         config: {
             plugin: "X/Y Scatter",
-            row_pivots: ["Sub-Category"],
+            group_by: ["Sub-Category"],
+            split_by: ["Category"],
+            columns: ["Sales", "Quantity", null, "Profit"],
+            aggregates: {Sales: "avg", Profit: "avg", Quantity: "avg"},
+        },
+        viewport: {width: 600, height: 450},
+    },
+    {
+        name: "X/Y Scatter - Bubble",
+        config: {
+            plugin: "X/Y Scatter",
+            group_by: ["Sub-Category"],
             columns: ["Sales", "Quantity", "Profit", "Row ID"],
             sort: [["Profit", "desc"]],
-            aggregates: {Sales: "avg", Profit: "sum", Quantity: "avg", "Row ID": "avg"}
+            aggregates: {
+                Sales: "avg",
+                Profit: "sum",
+                Quantity: "avg",
+                "Row ID": "avg",
+            },
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
 
     {
@@ -610,12 +652,12 @@ exports.EXAMPLES = [
         config: {
             plugin: "X/Y Scatter",
             columns: ["Profit", "State", null, "Quantity"],
-            row_pivots: ["City"],
+            group_by: ["City"],
             aggregates: {
-                State: "dominant"
-            }
+                State: "dominant",
+            },
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
 
     {
@@ -623,14 +665,14 @@ exports.EXAMPLES = [
         config: {
             plugin: "X/Y Scatter",
             columns: ["State", "Sub-Category", "Quantity", "Sales", null],
-            row_pivots: ["State", "Sub-Category"],
+            group_by: ["State", "Sub-Category"],
             aggregates: {
                 State: "dominant",
                 "Sub-Category": "dominant",
-                Profit: "low"
-            }
+                Profit: "low",
+            },
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
 
     // X/Y Line
@@ -643,15 +685,15 @@ exports.EXAMPLES = [
             aggregates: {
                 "Order Date": "dominant",
                 Sales: "avg",
-                Profit: "avg"
+                Profit: "avg",
             },
-            row_pivots: ["State"],
+            group_by: ["State"],
             sort: [
                 ["Profit", "desc"],
-                ["Sales", "desc"]
+                ["Sales", "desc"],
             ],
-            column_pivots: ["Region"]
-        }
+            split_by: ["Region"],
+        },
     },
 
     // Treemap
@@ -660,68 +702,68 @@ exports.EXAMPLES = [
         name: "Treemap",
         config: {
             plugin: "Treemap",
-            row_pivots: ["Sub-Category"],
-            columns: ["Sales"]
-        }
+            group_by: ["Sub-Category"],
+            columns: ["Sales"],
+        },
     },
     {
-        name: "Treemap - 2 Row Pivots",
+        name: "Treemap - 2 Group By",
         config: {
             plugin: "Treemap",
-            row_pivots: ["Category", "Sub-Category", "Segment"],
-            columns: ["Sales"]
-        }
+            group_by: ["Category", "Sub-Category", "Segment"],
+            columns: ["Sales"],
+        },
     },
     {
         name: "Treemap - Float Color",
         config: {
             plugin: "Treemap",
-            row_pivots: ["Category", "Sub-Category"],
+            group_by: ["Category", "Sub-Category"],
             columns: ["Sales", "Quantity"],
-            sort: [["Quantity", "desc"]]
-        }
+            sort: [["Quantity", "desc"]],
+        },
     },
     {
         name: "Treemap - Category Color",
         config: {
             plugin: "Treemap",
-            row_pivots: ["Category", "Sub-Category"],
+            group_by: ["Category", "Sub-Category"],
             columns: ["Sales", "Category"],
-            aggregates: {Category: "dominant"}
-        }
+            aggregates: {Category: "dominant"},
+        },
     },
     {
-        name: "Treemap - Row And Column Pivots Float Color",
+        name: "Treemap - Row And Split By Float Color",
         config: {
             plugin: "Treemap",
-            row_pivots: ["Category", "Sub-Category"],
-            column_pivots: ["Region"],
+            group_by: ["Category", "Sub-Category"],
+            split_by: ["Region"],
             columns: ["Sales", "Quantity"],
-            sort: [["Quantity", "desc"]]
+            sort: [["Quantity", "desc"]],
         },
-        viewport: {width: 800, height: 600}
+        viewport: {width: 800, height: 600},
     },
     {
-        name: "Treemap - Row And Column Pivots Category Color",
+        name: "Treemap - Row And Split By Category Color",
         config: {
             plugin: "Treemap",
-            row_pivots: ["Category", "Sub-Category"],
-            column_pivots: ["Region"],
+            group_by: ["Category", "Sub-Category"],
+            split_by: ["Region"],
             columns: ["Sales", "Region"],
-            aggregates: {Region: "dominant"}
+            aggregates: {Region: "dominant"},
         },
-        viewport: {width: 800, height: 600}
+        viewport: {width: 800, height: 600},
     },
     {
-        name: "Treemap - Row And Column Pivots Category Color 2",
+        name: "Treemap - Row And Split By Category Color 2",
         config: {
             plugin: "Treemap",
-            row_pivots: ["Category", "Sub-Category"],
-            column_pivots: ["Region"],
+            group_by: ["Category", "Sub-Category"],
+            split_by: ["Region"],
             columns: ["Sales", "Category"],
-            aggregates: {Category: "dominant"}
+            aggregates: {Category: "dominant"},
         },
-        viewport: {width: 800, height: 600}
+        viewport: {width: 800, height: 600},
     },
     // Sunburst
 
@@ -729,77 +771,77 @@ exports.EXAMPLES = [
         name: "Sunburst",
         config: {
             plugin: "Sunburst",
-            row_pivots: ["Sub-Category"],
-            columns: ["Sales"]
-        }
+            group_by: ["Sub-Category"],
+            columns: ["Sales"],
+        },
     },
     {
-        name: "Sunburst - 2 Row Pivots",
+        name: "Sunburst - 2 Group By",
         config: {
             plugin: "Sunburst",
-            row_pivots: ["Category", "Sub-Category", "Segment"],
-            columns: ["Sales"]
-        }
+            group_by: ["Category", "Sub-Category", "Segment"],
+            columns: ["Sales"],
+        },
     },
     {
         name: "Sunburst - Float Color",
         config: {
             plugin: "Sunburst",
-            row_pivots: ["Category", "Sub-Category"],
+            group_by: ["Category", "Sub-Category"],
             columns: ["Quantity", "Sales"],
-            sort: [["Quantity", "desc"]]
-        }
+            sort: [["Quantity", "desc"]],
+        },
     },
     {
         name: "Sunburst - Category Color",
         config: {
             plugin: "Sunburst",
-            row_pivots: ["Category", "Sub-Category"],
+            group_by: ["Category", "Sub-Category"],
             columns: ["Sales", "Category"],
-            aggregates: {Category: "dominant"}
-        }
-    },
-    {
-        name: "Sunburst - Row And Column Pivots",
-        config: {
-            plugin: "Sunburst",
-            row_pivots: ["Category", "Sub-Category"],
-            column_pivots: ["Region"],
-            columns: ["Sales"]
+            aggregates: {Category: "dominant"},
         },
-        viewport: {width: 600, height: 450}
     },
     {
-        name: "Sunburst - Row And Column Pivots Float Color",
+        name: "Sunburst - Row And Split By",
         config: {
             plugin: "Sunburst",
-            row_pivots: ["Category", "Sub-Category"],
-            column_pivots: ["Region"],
-            columns: ["Sales", "Quantity"]
+            group_by: ["Category", "Sub-Category"],
+            split_by: ["Region"],
+            columns: ["Sales"],
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
     {
-        name: "Sunburst - Row And Column Pivots Category Color",
+        name: "Sunburst - Row And Split By Float Color",
         config: {
             plugin: "Sunburst",
-            row_pivots: ["Category", "Sub-Category"],
-            column_pivots: ["Region"],
+            group_by: ["Category", "Sub-Category"],
+            split_by: ["Region"],
+            columns: ["Sales", "Quantity"],
+        },
+        viewport: {width: 600, height: 450},
+    },
+    {
+        name: "Sunburst - Row And Split By Category Color",
+        config: {
+            plugin: "Sunburst",
+            group_by: ["Category", "Sub-Category"],
+            split_by: ["Region"],
             columns: ["Sales", "Region"],
-            aggregates: {Region: "dominant"}
+            aggregates: {Region: "dominant"},
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
     {
-        name: "Sunburst - Row And Column Pivots Category Color 2",
+        name: "Sunburst - Row And Split By Category Color 2",
         config: {
             plugin: "Sunburst",
-            row_pivots: ["Category", "Sub-Category"],
-            column_pivots: ["Region"],
+            group_by: ["Category", "Sub-Category"],
+            split_by: ["Region"],
             columns: ["Sales", "Category"],
-            aggregates: {Category: "dominant"}
+            aggregates: {Category: "dominant"},
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
 
     // Heatmap
@@ -808,31 +850,31 @@ exports.EXAMPLES = [
         name: "Heatmap",
         config: {
             plugin: "Heatmap",
-            row_pivots: ["Sub-Category"],
-            column_pivots: ["Region"],
+            group_by: ["Sub-Category"],
+            split_by: ["Region"],
             columns: ["Profit"],
             sort: [
                 ["Profit", "desc"],
-                ["Profit", "col desc"]
-            ]
+                ["Profit", "col desc"],
+            ],
             // aggregates: {Category: "dominant"}
-        }
+        },
         // viewport: {width: 600, height: 200}
     },
     {
         name: "Heatmap 2",
         config: {
             plugin: "Heatmap",
-            row_pivots: ["State"],
-            column_pivots: ["Sub-Category"],
+            group_by: ["State"],
+            split_by: ["Sub-Category"],
             columns: ["Profit"],
             sort: [
                 ["Profit", "desc"],
-                ["Profit", "col desc"]
-            ]
+                ["Profit", "col desc"],
+            ],
             // aggregates: {Profit: "low"}
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
     {
         name: "Heatmap 3",
@@ -842,24 +884,27 @@ exports.EXAMPLES = [
             expressions: ["bucket(\"Order Date\", 'M')"],
             aggregates: {
                 "Order Date": "dominant",
-                Sales: "avg"
+                Sales: "avg",
             },
-            column_pivots: ["Sub-Category"],
-            row_pivots: ["bucket(\"Order Date\", 'M')"],
-            sort: [["Discount", "col asc"]]
+            split_by: ["Sub-Category"],
+            group_by: ["bucket(\"Order Date\", 'M')"],
+            sort: [["Discount", "col asc"]],
         },
-        viewport: {width: 600, height: 450}
+        viewport: {width: 600, height: 450},
     },
     {
         name: "Heatmap 4",
         config: {
             plugin: "Heatmap",
             columns: ["Profit"],
-            expressions: ['bucket("Profit", 100)', "bucket(\"Order Date\", 'M')"],
-            row_pivots: ["bucket(\"Order Date\", 'M')"],
-            column_pivots: ['bucket("Profit", 100)'],
-            plugin_config: {}
+            expressions: [
+                'bucket("Profit", 100)',
+                "bucket(\"Order Date\", 'M')",
+            ],
+            group_by: ["bucket(\"Order Date\", 'M')"],
+            split_by: ['bucket("Profit", 100)'],
+            plugin_config: {},
         },
-        viewport: {width: 600, height: 450}
-    }
+        viewport: {width: 600, height: 450},
+    },
 ];

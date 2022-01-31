@@ -126,9 +126,9 @@ namespace binding {
     make_view_config(const t_gnode& gnode, std::shared_ptr<t_schema> schema,
         t_val date_parser, t_val config) {
         auto row_pivots
-            = config.attr("get_row_pivots")().cast<std::vector<std::string>>();
-        auto column_pivots = config.attr("get_column_pivots")()
-                                 .cast<std::vector<std::string>>();
+            = config.attr("get_group_by")().cast<std::vector<std::string>>();
+        auto column_pivots
+            = config.attr("get_split_by")().cast<std::vector<std::string>>();
         auto columns
             = config.attr("get_columns")().cast<std::vector<std::string>>();
         auto sort = config.attr("get_sort")()
@@ -250,14 +250,14 @@ namespace binding {
         view_config->init(schema);
 
         // set pivot depths if provided
-        if (!config.attr("row_pivot_depth").is_none()) {
+        if (!config.attr("group_by_depth").is_none()) {
             view_config->set_row_pivot_depth(
-                config.attr("row_pivot_depth").cast<std::int32_t>());
+                config.attr("group_by_depth").cast<std::int32_t>());
         }
 
-        if (!config.attr("column_pivot_depth").is_none()) {
+        if (!config.attr("split_by_depth").is_none()) {
             view_config->set_column_pivot_depth(
-                config.attr("column_pivot_depth").cast<std::int32_t>());
+                config.attr("split_by_depth").cast<std::int32_t>());
         }
 
         return view_config;

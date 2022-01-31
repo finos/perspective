@@ -37,7 +37,7 @@ class TestView(object):
     def test_view_one(self):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
-        view = tbl.view(row_pivots=["a"])
+        view = tbl.view(group_by=["a"])
         assert view.num_rows() == 3
         assert view.num_columns() == 2
         assert view.schema() == {
@@ -53,7 +53,7 @@ class TestView(object):
     def test_view_two(self):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
-        view = tbl.view(row_pivots=["a"], column_pivots=["b"])
+        view = tbl.view(group_by=["a"], split_by=["b"])
         assert view.num_rows() == 3
         assert view.num_columns() == 4
         assert view.schema() == {
@@ -69,7 +69,7 @@ class TestView(object):
     def test_view_two_column_only(self):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
-        view = tbl.view(column_pivots=["b"])
+        view = tbl.view(split_by=["b"])
         assert view.num_rows() == 2
         assert view.num_columns() == 4
         assert view.schema() == {
@@ -129,7 +129,7 @@ class TestView(object):
             "b": [1.5, 2.5, 3.5]
         }
         tbl = Table(data)
-        view = tbl.view(row_pivots=["a"])
+        view = tbl.view(group_by=["a"])
         paths = view.column_paths()
         assert paths == ["__ROW_PATH__", "a", "b"]
 
@@ -140,7 +140,7 @@ class TestView(object):
             "1234": [5, 6, 7]
         }
         tbl = Table(data)
-        view = tbl.view(row_pivots=["a"], columns=["b", "1234", "a"])
+        view = tbl.view(group_by=["a"], columns=["b", "1234", "a"])
         paths = view.column_paths()
         assert paths == ["__ROW_PATH__", "b", "1234", "a"]
 
@@ -150,7 +150,7 @@ class TestView(object):
             "b": [1.5, 2.5, 3.5]
         }
         tbl = Table(data)
-        view = tbl.view(row_pivots=["a"], column_pivots=["b"])
+        view = tbl.view(group_by=["a"], split_by=["b"])
         paths = view.column_paths()
         assert paths == ["__ROW_PATH__", "1.5|a", "1.5|b", "2.5|a", "2.5|b", "3.5|a", "3.5|b"]
 
@@ -160,7 +160,7 @@ class TestView(object):
             "b": [1.5, 2.5, 3.5]
         }
         tbl = Table(data)
-        view = tbl.view(column_pivots=["b"])
+        view = tbl.view(split_by=["b"])
         paths = view.column_paths()
         assert paths == ["1.5|a", "1.5|b", "2.5|a", "2.5|b", "3.5|a", "3.5|b"]
 
@@ -182,7 +182,7 @@ class TestView(object):
             "c": [3, 2, 1]
         }
         tbl = Table(data)
-        view = tbl.view(column_pivots=["a"], columns=["a", "b"], sort=[["c", "col desc"]])
+        view = tbl.view(split_by=["a"], columns=["a", "b"], sort=[["c", "col desc"]])
         paths = view.column_paths()
         assert paths == ["1|a", "1|b", "2|a", "2|b", "3|a", "3|b"]
 
@@ -193,7 +193,7 @@ class TestView(object):
             "c": [3, 2, 1]
         }
         tbl = Table(data)
-        view = tbl.view(column_pivots=["b"], columns=["a", "b", "c"])
+        view = tbl.view(split_by=["b"], columns=["a", "b", "c"])
         paths = view.column_paths()
         assert paths == ["false|a", "false|b", "false|c", "true|a", "true|b", "true|c"]
 
@@ -220,7 +220,7 @@ class TestView(object):
     def test_one_view_schema(self):
         data = [{"a": "abc", "b": 2}, {"a": "abc", "b": 4}]
         tbl = Table(data)
-        view = tbl.view(row_pivots=["a"], aggregates={"a": "distinct count"})
+        view = tbl.view(group_by=["a"], aggregates={"a": "distinct count"})
         assert view.schema() == {
             "a": int,
             "b": int
@@ -230,8 +230,8 @@ class TestView(object):
         data = [{"a": "abc", "b": "def"}, {"a": "abc", "b": "def"}]
         tbl = Table(data)
         view = tbl.view(
-            row_pivots=["a"],
-            column_pivots=["b"],
+            group_by=["a"],
+            split_by=["b"],
             aggregates={
                 "a": "count",
                 "b": "count"
@@ -253,7 +253,7 @@ class TestView(object):
     def test_view_no_columns_pivoted(self):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
-        view = tbl.view(row_pivots=["a"], columns=[])
+        view = tbl.view(group_by=["a"], columns=[])
         assert view.num_columns() == 0
         assert view.to_records() == [
             {
@@ -286,7 +286,7 @@ class TestView(object):
             "str": ["a", "b", "c", "d"]
         }))
         view = table.view(
-            columns=["-0.1", "-0.05", "0.0", "0.1"], row_pivots=["str"])
+            columns=["-0.1", "-0.05", "0.0", "0.1"], group_by=["str"])
         assert view.column_paths() == [
             "__ROW_PATH__", "-0.1", "-0.05", "0.0", "0.1"]
 
@@ -295,7 +295,7 @@ class TestView(object):
         data = [{"a": 1, "b": 2, "c": 3, "d": 4}, {"a": 3, "b": 4, "c": 5, "d": 6}]
         tbl = Table(data)
         view = tbl.view(
-            row_pivots=["a"],
+            group_by=["a"],
             columns=["a", "b", "c", "d"],
             aggregates={"d": "avg", "c": "avg", "b": "last", "a": "last"}
         )
@@ -313,7 +313,7 @@ class TestView(object):
         }, columns=["d", "a", "c", "b"])
         tbl = Table(data)
         view = tbl.view(
-            row_pivots=["a"],
+            group_by=["a"],
             aggregates={"d": "avg", "c": "avg", "b": "last", "a": "last"}
         )
 
@@ -324,7 +324,7 @@ class TestView(object):
         data = [{"a": 1, "b": 2, "c": 3, "d": 4}, {"a": 3, "b": 4, "c": 5, "d": 6}]
         tbl = Table(data)
         view = tbl.view(
-            row_pivots=["a"],
+            group_by=["a"],
             aggregates={"c": "avg", "a": "last"},
             columns=[]
         )
@@ -343,7 +343,7 @@ class TestView(object):
         tbl = Table(data)
         cols = tbl.columns();
         view = tbl.view(
-            row_pivots=["a"],
+            group_by=["a"],
             aggregates={"c": "avg", "a": "last"}
         )
 
@@ -359,13 +359,13 @@ class TestView(object):
         assert result["a"] == [3, 1, 3]
         assert result["c"] == [4, 3, 5]
 
-    # row and column pivot paths
-    def test_view_row_pivot_datetime_row_paths_are_same_as_data(self):
+    # row and split by paths
+    def test_view_group_by_datetime_row_paths_are_same_as_data(self):
         """Tests row paths for datetimes in UTC. Timezone-related tests are
         in the `test_table_datetime` file."""
         data = {"a": [datetime(2019, 7, 11, 12, 30)], "b": [1]}
         tbl = Table(data)
-        view = tbl.view(row_pivots=["a"])
+        view = tbl.view(group_by=["a"])
         data = view.to_dict()
 
         for rp in data["__ROW_PATH__"]:
@@ -376,31 +376,31 @@ class TestView(object):
             "a": [datetime(2019, 7, 11, 12, 30)], "b": [1]
         }
 
-    def test_view_column_pivot_datetime_names_utc(self):
+    def test_view_split_by_datetime_names_utc(self):
         """Tests column paths for datetimes in UTC. Timezone-related tests are
         in the `test_table_datetime` file."""
         data = {"a": [datetime(2019, 7, 11, 12, 30)], "b": [1]}
         tbl = Table(data)
-        view = tbl.view(column_pivots=["a"])
+        view = tbl.view(split_by=["a"])
         cols = view.column_paths()
         assert cols == ["2019-07-11 12:30:00.000|a", "2019-07-11 12:30:00.000|b"]
 
-    def test_view_column_pivot_datetime_names_min(self):
+    def test_view_split_by_datetime_names_min(self):
         """Tests column paths for datetimes in UTC. Timezone-related tests are
         in the `test_table_datetime` file."""
         data = {"a": [datetime.min], "b": [1]}
         tbl = Table(data)
-        view = tbl.view(column_pivots=["a"])
+        view = tbl.view(split_by=["a"])
         cols = view.column_paths()
         assert cols == ["1970-01-01 00:00:00.000|a", "1970-01-01 00:00:00.000|b"]
 
     @mark.skip
-    def test_view_column_pivot_datetime_names_max(self):
+    def test_view_split_by_datetime_names_max(self):
         """Tests column paths for datetimes in UTC. Timezone-related tests are
         in the `test_table_datetime` file."""
         data = {"a": [datetime.max], "b": [1]}
         tbl = Table(data)
-        view = tbl.view(column_pivots=["a"])
+        view = tbl.view(split_by=["a"])
         cols = view.column_paths()
         assert cols == ["10000-01-01 00:00:00.000|a", "10000-01-01 00:00:00.000|b"]
 
@@ -411,7 +411,7 @@ class TestView(object):
         tbl = Table(data)
         view = tbl.view(
             aggregates={"a": "avg"},
-            row_pivots=["a"]
+            group_by=["a"]
         )
         assert view.to_records() == [
             {"__ROW_PATH__": [], "a": 2.0, "b": 6},
@@ -424,7 +424,7 @@ class TestView(object):
         tbl = Table(data)
         view = tbl.view(
             aggregates={"a": "count"},
-            row_pivots=["a"]
+            group_by=["a"]
         )
         assert view.to_records() == [
             {"__ROW_PATH__": [], "a": 2, "b": 6},
@@ -437,7 +437,7 @@ class TestView(object):
         tbl = Table(data)
         view = tbl.view(
             aggregates={"a": "distinct count"},
-            row_pivots=["a"]
+            group_by=["a"]
         )
         assert view.to_records() == [
             {"__ROW_PATH__": [], "a": 1},
@@ -449,7 +449,7 @@ class TestView(object):
         tbl = Table(data)
         view = tbl.view(
             aggregates={"a": "distinct count"},
-            row_pivots=["a"]
+            group_by=["a"]
         )
         assert view.to_records() == [
             {"__ROW_PATH__": [], "a": 1},
@@ -465,7 +465,7 @@ class TestView(object):
         tbl = Table(data)
         view = tbl.view(
             aggregates={"y": "mean"},
-            row_pivots=["a"],
+            group_by=["a"],
             columns=['y']
         )
         assert view.to_records() == [
@@ -486,7 +486,7 @@ class TestView(object):
         })
         view = tbl.view(
             aggregates={"y": "mean"},
-            row_pivots=["a"],
+            group_by=["a"],
             columns=['y']
         )
         tbl.update(data)
@@ -504,7 +504,7 @@ class TestView(object):
         tbl = Table(data)
         view = tbl.view(
             aggregates={"y": ["weighted mean", "x"]},
-            row_pivots=["a"],
+            group_by=["a"],
             columns=['y']
         )
         assert view.to_records() == [
@@ -521,7 +521,7 @@ class TestView(object):
         tbl = Table(data)
         view = tbl.view(
             aggregates={"y": ["weighted mean", "x"]},
-            row_pivots=["a"],
+            group_by=["a"],
             columns=['y']
         )
         assert view.to_records() == [
@@ -538,7 +538,7 @@ class TestView(object):
         table = Table(data)
         view = table.view(
             aggregates={"x": "var"},
-            row_pivots=["y"]
+            group_by=["y"]
         )
 
         result = view.to_dict()
@@ -554,7 +554,7 @@ class TestView(object):
         table = Table(data)
         view = table.view(
             aggregates={"a": "var"},
-            row_pivots=["b"]
+            group_by=["b"]
         )
 
         result = view.to_columns()
@@ -571,7 +571,7 @@ class TestView(object):
             "c": [1, 2, 3, 4]
         }
         table = Table(data, index="c")
-        view = table.view(columns=["a"], row_pivots=["b"], aggregates={"a": "var"})
+        view = table.view(columns=["a"], group_by=["b"], aggregates={"a": "var"})
         result = view.to_columns()
         assert result["a"][0] == approx(np.var([0.1, 0.5, 0.8]))
         assert result["a"][1] is None
@@ -603,7 +603,7 @@ class TestView(object):
         table = Table(data)
         view = table.view(
             aggregates={"a": "var"},
-            row_pivots=["b"]
+            group_by=["b"]
         )
 
         result = view.to_columns()
@@ -637,7 +637,7 @@ class TestView(object):
         table = Table(data)
         view = table.view(
             aggregates={"a": "var"},
-            row_pivots=["b"]
+            group_by=["b"]
         )
 
         result = view.to_columns()
@@ -691,7 +691,7 @@ class TestView(object):
         table = Table(data, index="c")
         view = table.view(
             aggregates={"a": "var"},
-            row_pivots=["b"]
+            group_by=["b"]
         )
 
         result = view.to_columns()
@@ -738,7 +738,7 @@ class TestView(object):
         table = Table(data, index="c")
         view = table.view(
             aggregates={"a": "var", "b": "last", "c": "last"},
-            row_pivots=["b"]
+            group_by=["b"]
         )
 
         result = view.to_columns()
@@ -794,7 +794,7 @@ class TestView(object):
         table = Table(data)
         view = table.view(
             aggregates={"a": "var"},
-            row_pivots=["b"]
+            group_by=["b"]
         )
 
         result = view.to_columns()
@@ -810,7 +810,7 @@ class TestView(object):
         table = Table(data)
         view = table.view(
             aggregates={"a": "var"},
-            row_pivots=["b"]
+            group_by=["b"]
         )
 
         result = view.to_columns()
@@ -825,7 +825,7 @@ class TestView(object):
         table = Table(data)
         view = table.view(
             aggregates={"x": "stddev"},
-            row_pivots=["y"]
+            group_by=["y"]
         )
 
         result = view.to_dict()
@@ -841,7 +841,7 @@ class TestView(object):
         table = Table(data)
         view = table.view(
             aggregates={"a": "stddev"},
-            row_pivots=["b"]
+            group_by=["b"]
         )
 
         result = view.to_columns()
@@ -858,7 +858,7 @@ class TestView(object):
             "c": [1, 2, 3, 4]
         }
         table = Table(data, index="c")
-        view = table.view(columns=["a"], row_pivots=["b"], aggregates={"a": "stddev"})
+        view = table.view(columns=["a"], group_by=["b"], aggregates={"a": "stddev"})
         result = view.to_columns()
         assert result["a"][0] == approx(np.std([0.1, 0.5, 0.8]))
         assert result["a"][1] is None
@@ -890,7 +890,7 @@ class TestView(object):
         table = Table(data)
         view = table.view(
             aggregates={"a": "stddev"},
-            row_pivots=["b"]
+            group_by=["b"]
         )
 
         result = view.to_columns()
@@ -924,7 +924,7 @@ class TestView(object):
         table = Table(data)
         view = table.view(
             aggregates={"a": "stddev"},
-            row_pivots=["b"]
+            group_by=["b"]
         )
 
         result = view.to_columns()
@@ -978,7 +978,7 @@ class TestView(object):
         table = Table(data, index="c")
         view = table.view(
             aggregates={"a": "stddev"},
-            row_pivots=["b"]
+            group_by=["b"]
         )
 
         result = view.to_columns()
@@ -1025,7 +1025,7 @@ class TestView(object):
         table = Table(data, index="c")
         view = table.view(
             aggregates={"a": "stddev", "b": "last", "c": "last"},
-            row_pivots=["b"]
+            group_by=["b"]
         )
 
         result = view.to_columns()
@@ -1081,7 +1081,7 @@ class TestView(object):
         table = Table(data)
         view = table.view(
             aggregates={"a": "stddev"},
-            row_pivots=["b"]
+            group_by=["b"]
         )
 
         result = view.to_columns()
@@ -1097,7 +1097,7 @@ class TestView(object):
         table = Table(data)
         view = table.view(
             aggregates={"a": "stddev"},
-            row_pivots=["b"]
+            group_by=["b"]
         )
 
         result = view.to_columns()
@@ -1150,7 +1150,7 @@ class TestView(object):
         tbl = Table(data)
         view = tbl.view(
             columns=["x", "w"],
-            row_pivots=["y"],
+            group_by=["y"],
             sort=[["w", "asc"]],
             aggregates={
                 "w": "avg",
@@ -1172,7 +1172,7 @@ class TestView(object):
         tbl = Table(data)
         view = tbl.view(
             columns=["x", "w"],
-            row_pivots=["y"],
+            group_by=["y"],
             sort=[["w", "asc"]],
             aggregates={
                 "w": "sum",
@@ -1194,7 +1194,7 @@ class TestView(object):
         tbl = Table(data)
         view = tbl.view(
             columns=["x", "w"],
-            row_pivots=["y"],
+            group_by=["y"],
             sort=[["w", "asc"]],
             aggregates={
                 "w": "unique",
@@ -1636,7 +1636,7 @@ class TestView(object):
             })
 
         tbl = Table(data)
-        view = tbl.view(row_pivots=["a"])
+        view = tbl.view(group_by=["a"])
         assert view.to_dict() == {
             "__ROW_PATH__": [[], [1], [3]],
             "a": [4, 1, 3],
@@ -1661,7 +1661,7 @@ class TestView(object):
             "a": int,
             "b": int
         })
-        view = tbl.view(row_pivots=["a"])
+        view = tbl.view(group_by=["a"])
         view.on_update(cb1, mode="row")
         tbl.update(update_data)
 
@@ -1681,7 +1681,7 @@ class TestView(object):
             "a": int,
             "b": int
         })
-        view = tbl.view(row_pivots=["a"], sort=[["a", "desc"]])
+        view = tbl.view(group_by=["a"], sort=[["a", "desc"]])
         view.on_update(cb1, mode="row")
         tbl.update(update_data)
 
@@ -1701,7 +1701,7 @@ class TestView(object):
             "a": int,
             "b": int
         })
-        view = tbl.view(row_pivots=["a"], filter=[["a", ">", 3]])
+        view = tbl.view(group_by=["a"], filter=[["a", ">", 3]])
         view.on_update(cb1, mode="row")
         tbl.update(update_data)
 
@@ -1722,7 +1722,7 @@ class TestView(object):
             "b": int
         })
         view = tbl.view(
-            row_pivots=["a"],
+            group_by=["a"],
             sort=[["a", "desc"]],
             filter=[["a", ">", 3]])
         view.on_update(cb1, mode="row")
@@ -1745,7 +1745,7 @@ class TestView(object):
             "b": int
         }, index="a")
 
-        view = tbl.view(row_pivots=["a"])
+        view = tbl.view(group_by=["a"])
         view.on_update(cb1, mode="row")
 
         tbl.update(update_data)
@@ -1767,7 +1767,7 @@ class TestView(object):
             "b": int
         }, index="a")
 
-        view = tbl.view(row_pivots=["a"], sort=[["b", "desc"]])
+        view = tbl.view(group_by=["a"], sort=[["b", "desc"]])
         view.on_update(cb1, mode="row")
 
         tbl.update(update_data)
@@ -1789,7 +1789,7 @@ class TestView(object):
             "b": int
         }, index="a")
 
-        view = tbl.view(row_pivots=["a"], filter=[["a", ">", 3]])
+        view = tbl.view(group_by=["a"], filter=[["a", ">", 3]])
         view.on_update(cb1, mode="row")
 
         tbl.update(update_data)
@@ -1812,7 +1812,7 @@ class TestView(object):
             })
 
         tbl = Table(data)
-        view = tbl.view(row_pivots=["a"], column_pivots=["b"])
+        view = tbl.view(group_by=["a"], split_by=["b"])
         assert view.to_dict() == {
             "__ROW_PATH__": [[], [1], [3]],
             "2|a": [1, 1, None],
@@ -1838,7 +1838,7 @@ class TestView(object):
             "a": int,
             "b": int
         })
-        view = tbl.view(row_pivots=["a"], column_pivots=["b"])
+        view = tbl.view(group_by=["a"], split_by=["b"])
         view.on_update(cb1, mode="row")
         tbl.update(data)
 
@@ -1857,7 +1857,7 @@ class TestView(object):
             "a": int,
             "b": int
         }, index="a")
-        view = tbl.view(row_pivots=["a"], column_pivots=["b"])
+        view = tbl.view(group_by=["a"], split_by=["b"])
         view.on_update(cb1, mode="row")
         tbl.update(data)
 
@@ -1879,7 +1879,7 @@ class TestView(object):
             })
 
         tbl = Table(data)
-        view = tbl.view(column_pivots=["b"])
+        view = tbl.view(split_by=["b"])
         assert view.to_dict() == {
             "2|a": [1, None],
             "2|b": [2, None],
@@ -1907,7 +1907,7 @@ class TestView(object):
             })
 
         tbl = Table(data, index="a")
-        view = tbl.view(column_pivots=["b"])
+        view = tbl.view(split_by=["b"])
         assert view.to_dict() == {
             "2|a": [1, None],
             "2|b": [2, None],
@@ -1932,7 +1932,7 @@ class TestView(object):
             "a": int,
             "b": int
         })
-        view = tbl.view(column_pivots=["b"])
+        view = tbl.view(split_by=["b"])
         view.on_update(cb1, mode="row")
         tbl.update(data)
 
@@ -1951,7 +1951,7 @@ class TestView(object):
             "a": int,
             "b": int
         }, index="a")
-        view = tbl.view(column_pivots=["b"])
+        view = tbl.view(split_by=["b"])
         view.on_update(cb1, mode="row")
         tbl.update(data)
 
@@ -1978,8 +1978,8 @@ class TestView(object):
 
         tbl = Table(data, index="i")
         view = tbl.view(
-            row_pivots=["b"],
-            column_pivots=["a"],
+            group_by=["b"],
+            split_by=["a"],
             columns=["c"],
             filter=[["c", ">", 0]],
             sort=[["c", "asc"], ["a", "col asc"]],
@@ -2029,37 +2029,37 @@ class TestView(object):
     def test_view_collapse_one(self):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
-        view = tbl.view(row_pivots=["a"])
+        view = tbl.view(group_by=["a"])
         assert view.collapse(0) == 2
 
     def test_view_collapse_two(self):
         data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
         tbl = Table(data)
-        view = tbl.view(row_pivots=["a"], column_pivots=["c"])
+        view = tbl.view(group_by=["a"], split_by=["c"])
         assert view.collapse(0) == 0
 
     def test_view_collapse_two_column_only(self):
         data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
         tbl = Table(data)
-        view = tbl.view(column_pivots=["c"])
+        view = tbl.view(split_by=["c"])
         assert view.collapse(0) == 0
 
     def test_view_expand_one(self):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
-        view = tbl.view(row_pivots=["a"])
+        view = tbl.view(group_by=["a"])
         assert view.expand(0) == 0
 
     def test_view_expand_two(self):
         data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
         tbl = Table(data)
-        view = tbl.view(row_pivots=["a"], column_pivots=["c"])
+        view = tbl.view(group_by=["a"], split_by=["c"])
         assert view.expand(1) == 1
 
     def test_view_expand_two_column_only(self):
         data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
         tbl = Table(data)
-        view = tbl.view(column_pivots=["c"])
+        view = tbl.view(split_by=["c"])
         assert view.expand(0) == 0
 
     # view config validation
@@ -2113,19 +2113,19 @@ class TestView(object):
         view2 = tbl.view()
         assert view2.num_rows() == 202
 
-    def test_invalid_row_pivot_should_throw(self):
+    def test_invalid_group_by_should_throw(self):
         data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
         tbl = Table(data)
         with raises(PerspectiveCppError) as ex:
-            tbl.view(row_pivots=["x"])
-        assert str(ex.value) == "Invalid column 'x' found in View row_pivots.\n"
+            tbl.view(group_by=["x"])
+        assert str(ex.value) == "Invalid column 'x' found in View group_by.\n"
 
-    def test_invalid_column_pivot_should_throw(self):
+    def test_invalid_split_by_should_throw(self):
         data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
         tbl = Table(data)
         with raises(PerspectiveCppError) as ex:
-            tbl.view(column_pivots=["x"])
-        assert str(ex.value) == "Invalid column 'x' found in View column_pivots.\n"
+            tbl.view(split_by=["x"])
+        assert str(ex.value) == "Invalid column 'x' found in View split_by.\n"
 
     def test_invalid_filters_should_throw(self):
         data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
@@ -2145,7 +2145,7 @@ class TestView(object):
         data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
         tbl = Table(data)
         with raises(PerspectiveCppError) as ex:
-            tbl.view(row_pivots=["a"], column_pivots=["c"], filter=[["a", ">", 1]], aggregates={"a": "avg"}, sort=[["x", "desc"]])
+            tbl.view(group_by=["a"], split_by=["c"], filter=[["a", ">", 1]], aggregates={"a": "avg"}, sort=[["x", "desc"]])
         assert str(ex.value) == "Invalid column 'x' found in View sorts.\n"
 
     def test_invalid_columns_not_in_expression_should_throw(self):
@@ -2180,8 +2180,8 @@ class TestView(object):
             columns=["abc"],
             sort=[["abc", "desc"]],
             filter=[["abc", "==", "A"]],
-            row_pivots=["abc"],
-            column_pivots=["abc"],
+            group_by=["abc"],
+            split_by=["abc"],
             expressions=["// abc \n 'hello!'"]
         )
 

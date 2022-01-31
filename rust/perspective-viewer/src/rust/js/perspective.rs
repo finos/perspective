@@ -118,10 +118,10 @@ extern "C" {
     pub type JsPerspectiveViewConfigUpdate;
 
     // #[wasm_bindgen(method, getter)]
-    // pub fn row_pivots(this: &JsPerspectiveViewConfig) -> js_sys::Array;
+    // pub fn group_by(this: &JsPerspectiveViewConfig) -> js_sys::Array;
 
     // #[wasm_bindgen(method, getter)]
-    // pub fn column_pivots(this: &JsPerspectiveViewConfig) -> js_sys::Array;
+    // pub fn split_by(this: &JsPerspectiveViewConfig) -> js_sys::Array;
 
     pub type JsPerspectiveValidatedExpressions;
 

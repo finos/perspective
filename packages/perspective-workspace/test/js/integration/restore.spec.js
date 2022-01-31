@@ -49,7 +49,7 @@ function tests(extract) {
                 One: {
                     table: "superstore",
                     name: "Test",
-                    row_pivots: ["State"],
+                    group_by: ["State"],
                     columns: ["Sales", "Profit"],
                 },
                 Two: {table: "superstore", name: "One"},
@@ -82,7 +82,7 @@ function tests(extract) {
                 PERSPECTIVE_GENERATED_ID_0: {
                     table: "superstore",
                     name: "Test",
-                    row_pivots: ["State"],
+                    group_by: ["State"],
                     columns: ["Sales", "Profit"],
                 },
             },

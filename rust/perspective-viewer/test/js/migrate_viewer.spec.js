@@ -44,8 +44,8 @@ const TESTS = [
         {
             plugin: "Y Area",
             plugin_config: {},
-            row_pivots: ["bucket(\"Order Date\", 'M')"],
-            column_pivots: ["Ship Mode"],
+            group_by: ["bucket(\"Order Date\", 'M')"],
+            split_by: ["Ship Mode"],
             columns: ["Sales"],
             filter: [["Category", "==", "Office Supplies"]],
             sort: [],
@@ -73,8 +73,8 @@ const TESTS = [
             plugin_config: {
                 Sales: {number_color_mode: "gradient", gradient: 10},
             },
-            row_pivots: [],
-            column_pivots: [],
+            group_by: [],
+            split_by: [],
             columns: ["Sales"],
             filter: [],
             sort: [],
@@ -90,7 +90,7 @@ utils.with_server({}, () => {
         () => {
             for (const [name, old, current] of TESTS) {
                 test.capture(`restore '${name}'`, async (page) => {
-                    const converted = convert(old);
+                    const converted = convert(JSON.parse(JSON.stringify(old)));
                     const config = await page.evaluate(async (old) => {
                         const viewer =
                             document.querySelector("perspective-viewer");
@@ -109,7 +109,9 @@ utils.with_server({}, () => {
                     delete config.settings;
 
                     expect(config).toEqual(current);
-                    expect(converted).toEqual(current);
+                    expect(convert(old, {replace_defaults: true})).toEqual(
+                        current
+                    );
                     return await get_contents(page);
                 });
             }

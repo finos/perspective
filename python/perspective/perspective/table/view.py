@@ -63,8 +63,8 @@ class View(object):
         self._is_unit_context = (
             self._table._index == ""
             and self._sides == 0
-            and len(self._config.get_row_pivots()) == 0
-            and len(self._config.get_column_pivots()) == 0
+            and len(self._config.get_group_by()) == 0
+            and len(self._config.get_split_by()) == 0
             and len(self._config.get_filter()) == 0
             and len(self._config.get_sort()) == 0
             and len(self._config.get_expressions()) == 0
@@ -122,20 +122,17 @@ class View(object):
         """An integer representing the # of hierarchial axis on this
         :class:`~perspective.View`.
 
-        0 - Neither ``row_pivots`` nor ``column_pivots`` properties are set.
+        0 - Neither ``group_by`` nor ``split_by`` properties are set.
 
-        1 - ``row_pivots`` is set.
+        1 - ``group_by`` is set.
 
-        2 - ``column_pivots`` is set (and also maybe ``row_pivots``).
+        2 - ``split_by`` is set (and also maybe ``group_by``).
 
         Returns:
             :obj:`int`: 0 <= N <= 2
         """
-        if (
-            len(self._config.get_row_pivots()) > 0
-            or len(self._config.get_column_pivots()) > 0
-        ):
-            if len(self._config.get_column_pivots()) > 0:
+        if len(self._config.get_group_by()) > 0 or len(self._config.get_split_by()) > 0:
+            if len(self._config.get_split_by()) > 0:
                 return 2
             else:
                 return 1
@@ -160,7 +157,7 @@ class View(object):
     def num_rows(self):
         """The number of aggregated rows in the :class:`~perspective.View`.
 
-        This count includes the total aggregate rows for all ``row_pivots``
+        This count includes the total aggregate rows for all ``group_by``
         depth levels, and can also be affected by any applied ``filter``.
 
         Returns:
@@ -170,7 +167,7 @@ class View(object):
 
     def num_columns(self):
         """The number of aggregated columns in the :class:`~perspective.View`.
-        This is affected by the ``column_pivots`` that are applied to the
+        This is affected by the ``split_by`` that are applied to the
         :class:`~perspective.View`.
 
         Returns:
@@ -192,7 +189,7 @@ class View(object):
         Args:
             idx (:obj:`int`): Row index to expand.
         """
-        return self._view.expand(idx, len(self._config.get_row_pivots()))
+        return self._view.expand(idx, len(self._config.get_group_by()))
 
     def collapse(self, idx):
         """Collapses the row at 'idx', i.e. hiding its leaf rows.
@@ -207,15 +204,15 @@ class View(object):
 
         Args:
             depth (:obj:`int`): Depth to collapse all nodes to, which
-                may be no greater then the length of the ``row_pivots``
+                may be no greater then the length of the ``group_by``
                 property.
         """
-        return self._view.set_depth(depth, len(self._config.get_row_pivots()))
+        return self._view.set_depth(depth, len(self._config.get_group_by()))
 
     def column_paths(self):
         """Returns the names of the columns as they show in the
         :class:`~perspective.View`, i.e. the hierarchial columns when
-        ``column_pivots`` is applied.
+        ``split_by`` is applied.
 
         Returns:
             :obj:`list` of :obj`str`: Aggregated column names.
@@ -464,9 +461,9 @@ class View(object):
         of :obj:`dict` containing each row.
 
         By default, the entire dataset is returned, though this can be windowed
-        via ``kwargs``.  When ``row_pivots`` are applied, a ``__ROW_PATH__``
+        via ``kwargs``.  When ``group_by`` are applied, a ``__ROW_PATH__``
         column name will be generated in addition to the applied ``columns``.
-        When ``column_pivots`` are applied, column names will be qualified
+        When ``split_by`` are applied, column names will be qualified
         with their column group name.
 
         Keyword Args:
