@@ -109,15 +109,15 @@ function select(id) {
                 sort: [["chg", "desc"]],
                 plugin_config: {
                     "chg (-)": {
-                        color_mode: "bar",
+                        number_color_mode: "bar",
                         gradient: 10,
                     },
                     "chg (+)": {
-                        color_mode: "bar",
+                        number_color_mode: "bar",
                         gradient: 10,
                     },
                     chg: {
-                        color_mode: "gradient",
+                        number_color_mode: "gradient",
                         gradient: 10,
                     },
                 },
@@ -311,25 +311,28 @@ window.addEventListener("DOMContentLoaded", async function () {
                 const light = document.querySelector(
                     ".productShowcaseSection #light"
                 );
+                let theme;
                 if (button.innerText === "SWITCH TO DARK THEME") {
                     button.innerText = "Switch to Light Theme";
                     dark.style.display = "flex";
                     light.style.display = "none";
+                    theme = "Material Dark";
                     section.classList.toggle("dark", true);
                     container.classList.toggle("dark", true);
                 } else {
                     button.innerText = "Switch to Dark Theme";
                     dark.style.display = "none";
                     light.style.display = "flex";
+                    theme = "Material Light";
                     section.classList.toggle("dark", false);
                     container.classList.toggle("dark", false);
                 }
                 await psp1.restore({
-                    plugin: ["Y Bar"],
+                    plugin: "Y Bar",
                     group_by: ["State"],
                     columns: ["Sales"],
+                    theme,
                 });
-                await psp1.restyleElement();
             });
     });
 });

@@ -37,14 +37,5 @@ module.exports = [
         experiments: {
             syncWebAssembly: true
         }
-    },
-    {
-        mode: process.env.NODE_ENV || "development",
-        entry: "./js/fonts.js",
-        output: {
-            filename: "fonts.js",
-            libraryTarget: "umd",
-            path: path.resolve(__dirname, "static/js")
-        }
     }
 ];

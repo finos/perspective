@@ -125,7 +125,7 @@ cmake-build-debug
 .pytest_cache
 
 package.json.lerna_backup
-website/static/css/material.dark.css
+website/static/css/material-dark.css
 
 # CPP Compile
 /src/include/boost
@@ -179,7 +179,7 @@ rust/perspective-viewer/target2
 .emsdk
 vcpkg
 
-docs/static/css/material.dark.css
+docs/static/css/material-dark.css
 docs/i18n/en.json
 docs/static/js
 

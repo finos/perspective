@@ -11,11 +11,11 @@
 @import (reference) "./material-dark.less";
 
 perspective-viewer,
-perspective-viewer[data-perspective-theme="Monokai"] {
+perspective-viewer[theme="Monokai"] {
     --theme-name: "Monokai";
 }
 
-perspective-viewer[data-perspective-theme="Monokai"],
+perspective-viewer[theme="Monokai"],
 .perspective-viewer-monokai {
     .perspective-viewer-material-dark();
     .perspective-viewer-monokai--colors();
@@ -23,9 +23,9 @@ perspective-viewer[data-perspective-theme="Monokai"],
     .perspective-viewer-monokai--d3fc();
 }
 
-perspective-number-column-style[data-perspective-theme="Monokai"],
-perspective-string-column-style[data-perspective-theme="Monokai"],
-perspective-expression-editor[data-perspective-theme="Monokai"],
+perspective-number-column-style[theme="Monokai"],
+perspective-string-column-style[theme="Monokai"],
+perspective-expression-editor[theme="Monokai"],
 .perspective-modal-monokai {
     .perspective-modal-material-dark();
     .perspective-viewer-monokai--colors();
@@ -33,7 +33,6 @@ perspective-expression-editor[data-perspective-theme="Monokai"],
     background-color: #2d2a2e;
     border: 1px solid #797979;
 }
-
 
 .perspective-viewer-monokai--colors {
     color: #d6d6d6;

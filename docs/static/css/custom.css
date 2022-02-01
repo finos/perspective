@@ -25,7 +25,7 @@ body {
     font-family: "Open Sans";
 }
 
-.darkBackground, .darkBackground perspective-viewer {
+.darkBackground {
     background-color: #242526 !important;
 }
 
@@ -206,10 +206,10 @@ h2.headerTitle {
     background: #04AA6D;
     cursor: pointer;
   }
-
+/* 
 .homeContainer perspective-viewer {
     background: none !important;
-}
+} */
 
 .homeContainer perspective-viewer, perspective-viewer {
     --d3fc-full--gradient: linear-gradient(#4d342f 0%, #e4521b 22.5%, #feeb65 42.5%, #f0f0f0 50%, #dcedc8 57.5%, #42b3d5 67.5%, #1a237e 100%);

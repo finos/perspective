@@ -4,7 +4,7 @@ perspective-viewer {
     overflow: visible;
 }
 
-perspective-viewer[data-perspective-theme="Material Light"] {
+perspective-viewer[theme="Material Light"] {
     --d3fc-positive--gradient: linear-gradient(
         #94d0ff,
         #8795e8,
