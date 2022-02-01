@@ -1,5 +1,19 @@
 # Changelog
 
+## [v1.2.0](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.1.1...HEAD)
+
+**Breaking changes:**
+
+- Add `settings` and `theme` to `perspective-config-update` DOM event and `PerspectiveWidget` python class [\#1712](https://github.com/finos/perspective/pull/1712) ([texodus](https://github.com/texodus))
+- Replace `row_pivots` with `group_by`, `column_pivots` with `split_by`, add `convert()` migration utility [\#1709](https://github.com/finos/perspective/pull/1709) ([texodus](https://github.com/texodus))
+
+**Merged pull requests:**
+
+- Update docs for new theme API [\#1713](https://github.com/finos/perspective/pull/1713) ([texodus](https://github.com/texodus))
+- User-selectable Theme API [\#1711](https://github.com/finos/perspective/pull/1711) ([texodus](https://github.com/texodus))
+
 ## [v1.1.1](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.1.0...HEAD)
