@@ -74,7 +74,7 @@ describe("leaks", function () {
         describe("1-sided", function () {
             it("to_json does not leak", async () => {
                 const table = await perspective.table(arr.slice());
-                const view = await table.view({row_pivots: ["State"]});
+                const view = await table.view({group_by: ["State"]});
                 await leak_test(async function () {
                     let json = await view.to_json();
                     expect(json.length).toEqual(50);
@@ -204,7 +204,7 @@ describe("leaks", function () {
 
             await leak_test(async () => {
                 const view = await table.view({
-                    row_pivots: [
+                    group_by: [
                         columns[Math.floor(Math.random() * columns.length)],
                     ],
                     expressions: [
@@ -234,10 +234,10 @@ describe("leaks", function () {
 
             await leak_test(async () => {
                 const view = await table.view({
-                    row_pivots: [
+                    group_by: [
                         columns[Math.floor(Math.random() * columns.length)],
                     ],
-                    column_pivots: [
+                    split_by: [
                         columns[Math.floor(Math.random() * columns.length)],
                     ],
                     expressions: [

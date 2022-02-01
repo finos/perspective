@@ -166,7 +166,7 @@ module.exports = (perspective) => {
                     y: ["A", "B", "C", "D"],
                 });
                 const view = await table.view({
-                    row_pivots: ['lower("y")'],
+                    group_by: ['lower("y")'],
                     expressions: ['lower("y")'],
                 });
 
@@ -194,7 +194,7 @@ module.exports = (perspective) => {
                     y: ["A", "B", "C", "D"],
                 });
                 const view = await table.view({
-                    row_pivots: ['lower("y")'],
+                    group_by: ['lower("y")'],
                     expressions: ['lower("y")'],
                     sort: [['lower("y")', "desc"]],
                     columns: ["x"],
@@ -225,8 +225,8 @@ module.exports = (perspective) => {
                     aggregates: {
                         'lower("y")': "last",
                     },
-                    row_pivots: ['lower("y")'],
-                    column_pivots: ["y"],
+                    group_by: ['lower("y")'],
+                    split_by: ["y"],
                     expressions: ['lower("y")'],
                 });
 

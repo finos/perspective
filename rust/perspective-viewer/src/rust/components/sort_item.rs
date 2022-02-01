@@ -62,13 +62,11 @@ impl Component for SortItem {
         match msg {
             SortItemMsg::SortDirClick(shift_key) => {
                 let ViewConfig {
-                    mut sort,
-                    column_pivots,
-                    ..
+                    mut sort, split_by, ..
                 } = ctx.props().session.get_view_config();
                 let sort_item =
                     &mut sort.get_mut(ctx.props().idx).expect("Sort on no column");
-                sort_item.1 = sort_item.1.cycle(!column_pivots.is_empty(), shift_key);
+                sort_item.1 = sort_item.1.cycle(!split_by.is_empty(), shift_key);
                 let update = ViewConfigUpdate {
                     sort: Some(sort),
                     ..ViewConfigUpdate::default()

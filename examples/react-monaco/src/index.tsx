@@ -27,7 +27,7 @@ import "./index.css";
 const worker = perspective.default.shared_worker();
 
 const config: PerspectiveViewerConfig = {
-    row_pivots: ["State"],
+    group_by: ["State"],
 };
 
 type ConfigEditorProps = {

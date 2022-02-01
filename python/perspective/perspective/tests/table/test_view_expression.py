@@ -466,7 +466,7 @@ class TestViewExpression(object):
             return [{"a": random()} for _ in range(50)]
 
         table = Table(data())
-        view = table.view(row_pivots=["c0"], expressions=['//c0\n"a" * 2'])
+        view = table.view(group_by=["c0"], expressions=['//c0\n"a" * 2'])
 
         for _ in range(5):
             table.update(data())
@@ -481,7 +481,7 @@ class TestViewExpression(object):
             return [{"a": random()} for _ in range(50)]
 
         table = Table(data())
-        view = table.view(row_pivots=["c0"], column_pivots=["c1"], expressions=['//c0\n"a" * 2', "//c1\n'new string'"])
+        view = table.view(group_by=["c0"], split_by=["c1"], expressions=['//c0\n"a" * 2', "//c1\n'new string'"])
 
         for i in range(5):
             table.update(data())
@@ -577,7 +577,7 @@ class TestViewExpression(object):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
 
         view = table.view(
-            row_pivots=["computed"],
+            group_by=["computed"],
             aggregates={
                 "computed": ["weighted mean", "b"]
             },
@@ -585,7 +585,7 @@ class TestViewExpression(object):
         )
 
         view2 = table.view(
-            row_pivots=["computed"],
+            group_by=["computed"],
             aggregates={
                 "computed": "last"
             },
@@ -1044,10 +1044,10 @@ class TestViewExpression(object):
             "computed": [6, 8, 10, 12],
         }
 
-    def test_view_expression_with_row_pivots(self):
+    def test_view_expression_with_group_by(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         view = table.view(
-            row_pivots=["computed"],
+            group_by=["computed"],
             expressions=[
                 '// computed \n "a" + "b"',
             ]
@@ -1059,11 +1059,11 @@ class TestViewExpression(object):
             "computed": [36.0, 6.0, 8.0, 10.0, 12.0],
         }
 
-    def test_view_expression_with_row_pivots_clear(self):
+    def test_view_expression_with_group_by_clear(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
 
         view = table.view(
-            row_pivots=["computed"],
+            group_by=["computed"],
             expressions=[
                 '// computed \n "a" + "b"',
             ]
@@ -1085,11 +1085,11 @@ class TestViewExpression(object):
             "computed": [None],
         }
 
-    def test_view_expression_with_row_pivots_replace(self):
+    def test_view_expression_with_group_by_replace(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
 
         view = table.view(
-            row_pivots=["computed"],
+            group_by=["computed"],
             expressions=[
                 '// computed \n "a" + "b"',
             ]
@@ -1111,10 +1111,10 @@ class TestViewExpression(object):
             "computed": [360.0, 60.0, 80.0, 100.0, 120.0],
         }
 
-    def test_view_expression_with_column_pivots(self):
+    def test_view_expression_with_split_by(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         view = table.view(
-            column_pivots=["computed"],
+            split_by=["computed"],
             expressions=[
                 '// computed \n "a" + "b"',
             ]
@@ -1134,10 +1134,10 @@ class TestViewExpression(object):
             "12|computed": [None, None, None, 12.0],
         }
 
-    def test_view_expression_with_row_column_pivots(self):
+    def test_view_expression_with_row_split_by(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         view = table.view(
-            column_pivots=["computed"],
+            split_by=["computed"],
             expressions=[
                 '// computed \n "a" + "b"',
             ]

@@ -158,8 +158,8 @@ module.exports = (perspective) => {
             ];
             const table = await perspective.table(input);
             const view = await table.view({
-                row_pivots: ["z"],
-                column_pivots: ["x"],
+                group_by: ["z"],
+                split_by: ["x"],
                 sort: [["y", "asc"]],
                 columns: ["y"],
             });

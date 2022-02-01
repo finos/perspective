@@ -15,7 +15,7 @@ import {
     register_plugin,
 } from "@finos/perspective-viewer/dist/pkg/perspective_viewer.js";
 
-import {WASM_MODULE} from "./init.js";
+import {WASM_MODULE} from "./init";
 
 export type PerspectiveViewerConfig = perspective.ViewConfig & {
     plugin?: string;
@@ -304,7 +304,7 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
      * @example <caption>Flush an unawaited `restore()`</caption>
      * ```javascript
      * const viewer = document.querySelector("perspective-viewer");
-     * viewer.restore({row_pivots: ["State"]});
+     * viewer.restore({group_by: ["State"]});
      * await viewer.flush();
      * console.log("Viewer has been rendered with a pivot!");
      * ```

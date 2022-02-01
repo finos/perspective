@@ -199,7 +199,7 @@ module.exports = (perspective) => {
             it("empty, pivoted", async function () {
                 var table = await perspective.table(data);
                 var view = await table.view({
-                    row_pivots: ["y"],
+                    group_by: ["y"],
                     filter: [["x", "==", 100]],
                 });
                 let json = await view.to_json();
@@ -250,7 +250,7 @@ module.exports = (perspective) => {
                     }
                 );
                 var view = await table.view({
-                    row_pivots: ["a"],
+                    group_by: ["a"],
                     columns: ["b", "c"],
                 });
 

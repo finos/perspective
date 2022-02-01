@@ -8,8 +8,8 @@
     },
     "author": "",
     "license": "Apache-2.0",
-    "unpkg": "dist/cdn/perspective.js",
-    "jsdelivr": "dist/cdn/perspective.js",
+    "unpkg": "dist/umd/perspective.js",
+    "jsdelivr": "dist/umd/perspective.js",
     "exports": {
         ".": {
             "node": "./dist/cjs/perspective.node.js",

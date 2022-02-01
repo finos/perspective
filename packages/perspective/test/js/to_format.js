@@ -270,7 +270,7 @@ module.exports = (perspective) => {
         it("one-sided views should have row paths", async function () {
             let table = await perspective.table(int_float_string_data);
             let view = await table.view({
-                row_pivots: ["int"],
+                group_by: ["int"],
             });
             let json = await view.to_json();
             for (let d of json) {
@@ -283,7 +283,7 @@ module.exports = (perspective) => {
         it("one-sided views with start_col > 0 should have row paths", async function () {
             let table = await perspective.table(int_float_string_data);
             let view = await table.view({
-                row_pivots: ["int"],
+                group_by: ["int"],
             });
             let json = await view.to_json({start_col: 1});
             for (let d of json) {
@@ -296,7 +296,7 @@ module.exports = (perspective) => {
         it("one-sided column-only views should not have row paths", async function () {
             let table = await perspective.table(int_float_string_data);
             let view = await table.view({
-                column_pivots: ["int"],
+                split_by: ["int"],
             });
             let json = await view.to_json();
             for (let d of json) {
@@ -312,7 +312,7 @@ module.exports = (perspective) => {
                 {x: 2, y: "b"},
             ]);
             let view = await table.view({
-                column_pivots: ["x"],
+                split_by: ["x"],
             });
             let json = await view.to_json();
             expect(json).toEqual([
@@ -329,7 +329,7 @@ module.exports = (perspective) => {
                 {x: 2, y: "b"},
             ]);
             let view = await table.view({
-                column_pivots: ["x"],
+                split_by: ["x"],
             });
             let json = await view.to_json({
                 start_row: 1,
@@ -344,8 +344,8 @@ module.exports = (perspective) => {
         it("two-sided views should have row paths", async function () {
             let table = await perspective.table(int_float_string_data);
             let view = await table.view({
-                row_pivots: ["int"],
-                column_pivots: ["string"],
+                group_by: ["int"],
+                split_by: ["string"],
             });
             let json = await view.to_json();
             for (let d of json) {
@@ -358,8 +358,8 @@ module.exports = (perspective) => {
         it("two-sided views with start_col > 0 should have row paths", async function () {
             let table = await perspective.table(int_float_string_data);
             let view = await table.view({
-                row_pivots: ["int"],
-                column_pivots: ["string"],
+                group_by: ["int"],
+                split_by: ["string"],
             });
             let json = await view.to_json({start_col: 1});
             for (let d of json) {
@@ -372,8 +372,8 @@ module.exports = (perspective) => {
         it("two-sided sorted views with start_col > 0 should have row paths", async function () {
             let table = await perspective.table(int_float_string_data);
             let view = await table.view({
-                row_pivots: ["int"],
-                column_pivots: ["string"],
+                group_by: ["int"],
+                split_by: ["string"],
                 sort: [["string", "desc"]],
             });
             let json = await view.to_json({start_col: 1});
@@ -389,14 +389,14 @@ module.exports = (perspective) => {
         it("should emit same number of column names as number of pivots", async function () {
             let table = await perspective.table(int_float_string_data);
             let view = await table.view({
-                row_pivots: ["int"],
-                column_pivots: ["float", "string"],
+                group_by: ["int"],
+                split_by: ["float", "string"],
                 sort: [["int", "asc"]],
             });
             let json = await view.to_json();
             // Get the first emitted column name that is not __ROW_PATH__
             let name = Object.keys(json[0])[1];
-            // make sure that number of separators = num of column pivots
+            // make sure that number of separators = num of split by
             expect((name.match(/\|/g) || []).length).toEqual(2);
             view.delete();
             table.delete();
@@ -452,7 +452,7 @@ module.exports = (perspective) => {
         it("only emits leaves when leaves_only is set", async function () {
             let table = await perspective.table(int_float_string_data);
             let view = await table.view({
-                row_pivots: ["int"],
+                group_by: ["int"],
             });
             let json = await view.to_json({leaves_only: true});
             expect(json).toEqual([
@@ -644,7 +644,7 @@ module.exports = (perspective) => {
 
         it("Transitive arrow output 1-sided", async function () {
             let table = await perspective.table(int_float_string_data);
-            let view = await table.view({row_pivots: ["string"]});
+            let view = await table.view({group_by: ["string"]});
             let json = await view.to_json();
             let arrow = await view.to_arrow();
             let table2 = await perspective.table(arrow);
@@ -673,7 +673,7 @@ module.exports = (perspective) => {
                 string: ["a", "a", "b", "b"],
             });
             let view = await table.view({
-                row_pivots: ["string"],
+                group_by: ["string"],
                 aggregates: {float: "mean"},
             });
             let arrow = await view.to_arrow();
@@ -696,7 +696,7 @@ module.exports = (perspective) => {
         it("Transitive arrow output 1-sided mean", async function () {
             let table = await perspective.table(int_float_string_data);
             let view = await table.view({
-                row_pivots: ["string"],
+                group_by: ["string"],
                 aggregates: {float: "mean"},
             });
             let json = await view.to_json();
@@ -724,7 +724,7 @@ module.exports = (perspective) => {
         it("Transitive arrow output 1-sided sorted mean", async function () {
             let table = await perspective.table(int_float_string_data);
             let view = await table.view({
-                row_pivots: ["string"],
+                group_by: ["string"],
                 aggregates: {float: "mean"},
                 sort: [["string", "desc"]],
             });
@@ -752,7 +752,7 @@ module.exports = (perspective) => {
         it("Transitive arrow output 1-sided hidden sort mean", async function () {
             let table = await perspective.table(int_float_string_data);
             let view = await table.view({
-                row_pivots: ["string"],
+                group_by: ["string"],
                 aggregates: {float: "mean"},
                 columns: ["float", "int"],
                 sort: [["string", "desc"]],
@@ -781,7 +781,7 @@ module.exports = (perspective) => {
 
         it("Transitive arrow output 1-sided with row range", async function () {
             let table = await perspective.table(int_float_string_data);
-            let view = await table.view({row_pivots: ["string"]});
+            let view = await table.view({group_by: ["string"]});
             let json = await view.to_json({start_row: 1, end_row: 3});
             let arrow = await view.to_arrow({start_row: 1, end_row: 3});
             let table2 = await perspective.table(arrow);
@@ -806,7 +806,7 @@ module.exports = (perspective) => {
 
         it("Transitive arrow output 1-sided with col range", async function () {
             let table = await perspective.table(int_float_string_data);
-            let view = await table.view({row_pivots: ["string"]});
+            let view = await table.view({group_by: ["string"]});
             let json = await view.to_json({start_col: 1, end_col: 3});
             let arrow = await view.to_arrow({start_col: 1, end_col: 3});
             let table2 = await perspective.table(arrow);
@@ -832,8 +832,8 @@ module.exports = (perspective) => {
         it("Transitive arrow output 2-sided", async function () {
             let table = await perspective.table(int_float_string_data);
             let view = await table.view({
-                row_pivots: ["string"],
-                column_pivots: ["int"],
+                group_by: ["string"],
+                split_by: ["int"],
             });
             let json = await view.to_json();
             let arrow = await view.to_arrow();
@@ -860,8 +860,8 @@ module.exports = (perspective) => {
         it("Transitive arrow output 2-sided sorted", async function () {
             let table = await perspective.table(int_float_string_data);
             let view = await table.view({
-                row_pivots: ["string"],
-                column_pivots: ["int"],
+                group_by: ["string"],
+                split_by: ["int"],
                 sort: [["int", "desc"]],
             });
             let json = await view.to_json();
@@ -889,8 +889,8 @@ module.exports = (perspective) => {
         it("Transitive arrow output 2-sided with row range", async function () {
             let table = await perspective.table(int_float_string_data);
             let view = await table.view({
-                row_pivots: ["string"],
-                column_pivots: ["int"],
+                group_by: ["string"],
+                split_by: ["int"],
             });
             let json = await view.to_json({start_row: 1, end_row: 3});
             let arrow = await view.to_arrow({start_row: 1, end_row: 3});
@@ -917,8 +917,8 @@ module.exports = (perspective) => {
         it("Transitive arrow output 2-sided with col range", async function () {
             let table = await perspective.table(int_float_string_data);
             let view = await table.view({
-                row_pivots: ["string"],
-                column_pivots: ["int"],
+                group_by: ["string"],
+                split_by: ["int"],
             });
             let json = await view.to_json({start_col: 1, end_col: 3});
             let arrow = await view.to_arrow({start_col: 1, end_col: 3});
@@ -944,7 +944,7 @@ module.exports = (perspective) => {
 
         it("Transitive arrow output 2-sided column only", async function () {
             let table = await perspective.table(int_float_string_data);
-            let view = await table.view({column_pivots: ["string"]});
+            let view = await table.view({split_by: ["string"]});
             let json = await view.to_json();
             let arrow = await view.to_arrow();
             let table2 = await perspective.table(arrow);
@@ -962,7 +962,7 @@ module.exports = (perspective) => {
         it("Transitive arrow output 2-sided column only hidden sort", async function () {
             let table = await perspective.table(int_float_string_data);
             let view = await table.view({
-                column_pivots: ["string"],
+                split_by: ["string"],
                 columns: ["float"],
                 sort: [["int", "desc"]],
             });
@@ -983,7 +983,7 @@ module.exports = (perspective) => {
         it("Transitive arrow output 2-sided column only sorted", async function () {
             let table = await perspective.table(int_float_string_data);
             let view = await table.view({
-                column_pivots: ["string"],
+                split_by: ["string"],
                 sort: [["int", "desc"]],
             });
             let json = await view.to_json();
@@ -1002,7 +1002,7 @@ module.exports = (perspective) => {
 
         it("Transitive arrow output 2-sided column only row range", async function () {
             let table = await perspective.table(int_float_string_data);
-            let view = await table.view({column_pivots: ["string"]});
+            let view = await table.view({split_by: ["string"]});
             let json = await view.to_json({start_row: 1, end_row: 3});
             let arrow = await view.to_arrow({start_row: 1, end_row: 3});
             let table2 = await perspective.table(arrow);
@@ -1019,7 +1019,7 @@ module.exports = (perspective) => {
 
         it("Transitive arrow output 2-sided column only col range", async function () {
             let table = await perspective.table(int_float_string_data);
-            let view = await table.view({column_pivots: ["string"]});
+            let view = await table.view({split_by: ["string"]});
             let json = await view.to_json({start_col: 1, end_col: 3});
             let arrow = await view.to_arrow({start_col: 1, end_col: 3});
             let table2 = await perspective.table(arrow);
@@ -1556,7 +1556,7 @@ module.exports = (perspective) => {
             it("should generate pkeys of aggregated rows for 1-sided", async function () {
                 let table = await perspective.table(int_float_string_data);
                 let view = await table.view({
-                    row_pivots: ["int"],
+                    group_by: ["int"],
                 });
                 let json = await view.to_json({
                     index: true,
@@ -1574,8 +1574,8 @@ module.exports = (perspective) => {
                 // 2-sided implicit pkeys do not work
                 let table = await perspective.table(int_float_string_data);
                 let view = await table.view({
-                    row_pivots: ["int"],
-                    column_pivots: ["float"],
+                    group_by: ["int"],
+                    split_by: ["float"],
                 });
                 let json = await view.to_json({
                     index: true,

@@ -191,16 +191,15 @@ export function register(...plugins) {
                             return type;
                         };
 
-                        const {columns, row_pivots, column_pivots, filter} =
-                            config;
+                        const {columns, group_by, split_by, filter} = config;
                         const filtered =
-                            row_pivots.length > 0
+                            group_by.length > 0
                                 ? json.reduce(
                                       (acc, col) => {
                                           if (
                                               col.__ROW_PATH__ &&
                                               col.__ROW_PATH__.length ==
-                                                  row_pivots.length
+                                                  group_by.length
                                           ) {
                                               acc.agg_paths.push(
                                                   acc.aggs.slice()
@@ -223,14 +222,14 @@ export function register(...plugins) {
                                   )
                                 : {rows: json};
                         const dataMap = (col, i) =>
-                            !row_pivots.length
+                            !group_by.length
                                 ? {...col, __ROW_PATH__: [i]}
                                 : col;
                         const mapped = filtered.rows.map(dataMap);
 
                         let settings = {
                             realValues,
-                            crossValues: row_pivots.map((r) => ({
+                            crossValues: group_by.map((r) => ({
                                 name: r,
                                 type: get_pivot_column_type(r),
                             })),
@@ -238,7 +237,7 @@ export function register(...plugins) {
                                 name: a,
                                 type: view_schema[a],
                             })),
-                            splitValues: column_pivots.map((r) => ({
+                            splitValues: split_by.map((r) => ({
                                 name: r,
                                 type: get_pivot_column_type(r),
                             })),

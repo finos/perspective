@@ -193,7 +193,7 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
         >>> tbl = Table(data, index="a")
         >>> widget = PerspectiveWidget(
         ...     tbl,
-        ...     row_pivots=["a"],
+        ...     group_by=["a"],
         ...     sort=[["b", "desc"]],
         ...     filter=[["a", ">", 1]]
         ... )
@@ -257,7 +257,7 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
             >>> widget = PerspectiveWidget(
             ...     {"a": [1, 2, 3]},
             ...     aggregates={"a": "avg"},
-            ...     row_pivots=["a"],
+            ...     group_by=["a"],
             ...     sort=[["b", "desc"]],
             ...     filter=[["a", ">", 1]],
             ...     expressions=["// new column \n \"Sales\" + \"Profit\""])
@@ -285,11 +285,11 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
         if isinstance(data, pandas.DataFrame) or isinstance(data, pandas.Series):
             data, config = deconstruct_pandas(data)
 
-            if config.get("row_pivots", None) and "row_pivots" not in kwargs:
-                kwargs.update({"row_pivots": config["row_pivots"]})
+            if config.get("group_by", None) and "group_by" not in kwargs:
+                kwargs.update({"group_by": config["group_by"]})
 
-            if config.get("column_pivots", None) and "column_pivots" not in kwargs:
-                kwargs.update({"column_pivots": config["column_pivots"]})
+            if config.get("split_by", None) and "split_by" not in kwargs:
+                kwargs.update({"split_by": config["split_by"]})
 
             if config.get("columns", None) and "columns" not in kwargs:
                 kwargs.update({"columns": config["columns"]})

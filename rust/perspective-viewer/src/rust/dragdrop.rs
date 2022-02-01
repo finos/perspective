@@ -20,8 +20,8 @@ use yew::prelude::*;
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum DropAction {
     Active,
-    RowPivots,
-    ColumnPivots,
+    GroupBy,
+    SplitBy,
     Sort,
     Filter,
 }

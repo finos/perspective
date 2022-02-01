@@ -31,7 +31,7 @@ const getTable = async (): Promise<perspective.Table> => {
 };
 
 const config: PerspectiveViewerConfig = {
-    row_pivots: ["State"],
+    group_by: ["State"],
 };
 
 const App = (): React.ReactElement => {

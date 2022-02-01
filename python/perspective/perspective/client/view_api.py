@@ -16,8 +16,8 @@ def view(
     client,
     table_name,
     columns=None,
-    row_pivots=None,
-    column_pivots=None,
+    group_by=None,
+    split_by=None,
     aggregates=None,
     sort=None,
     filter=None,
@@ -32,8 +32,8 @@ def view(
 
     config = {
         "columns": columns,
-        "row_pivots": row_pivots,
-        "column_pivots": column_pivots,
+        "group_by": group_by,
+        "split_by": split_by,
         "aggregates": aggregates,
         "sort": sort,
         "filter": filter,

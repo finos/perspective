@@ -139,8 +139,8 @@ declare module "@finos/perspective" {
 
     export type ViewConfig = {
         columns?: Array<ColumnName>;
-        row_pivots?: Array<ColumnName>;
-        column_pivots?: Array<ColumnName>;
+        group_by?: Array<ColumnName>;
+        split_by?: Array<ColumnName>;
         aggregates?: {[column_name: string]: Aggregate};
         sort?: Array<Sort>;
         filter?: Array<Filter>;

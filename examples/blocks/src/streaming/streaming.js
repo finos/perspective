@@ -65,8 +65,8 @@ window.addEventListener("DOMContentLoaded", async function () {
             '//(-)chg\nif("chg"<0){"chg"}else{0}',
             '//(+)chg\nif("chg">0){"chg"}else{0}',
         ],
-        row_pivots: ["name"],
-        column_pivots: ["client"],
+        group_by: ["name"],
+        split_by: ["client"],
         aggregates: {"(-)chg": "avg", "(+)chg": "avg", chg: "avg"},
         sort: [["chg", "desc"]],
         plugin_config: {

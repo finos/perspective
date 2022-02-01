@@ -57,7 +57,7 @@ power multiple `view()`s concurrently:
 const view = await table.view({
   columns: ["Sales"],
   aggregates: { Sales: "sum" },
-  row_pivots: ["Region", "Country"],
+  group_by: ["Region", "Country"],
   filter: [["Category", "in", ["Furniture", "Technology"]]],
 });
 ```
@@ -66,32 +66,32 @@ const view = await table.view({
 view = table.view(
   columns=["Sales"],
   aggregates={"Sales": "sum"},
-  row_pivot=["Region", "Country"],
+  group_by=["Region", "Country"],
   filter=[["Category", "in", ["Furniture", "Technology"]]]
 )
 ```
 
 See the [View API documentation](/docs/obj/perspective.html) for more details.
 
-## Row Pivots
+## Group By
 
-A row pivot _groups_ the dataset by the unique values of each column used as a
-row pivot - a close analogue in SQL to the `GROUP BY` statement. The underlying
+A group by _groups_ the dataset by the unique values of each column used as a
+group by - a close analogue in SQL to the `GROUP BY` statement. The underlying
 dataset is aggregated to show the values belonging to each group, and a total
 row is calculated for each group, showing the currently selected aggregated
-value (e.g. `sum`) of the column. Row pivots are useful for hierarchies,
+value (e.g. `sum`) of the column. Group by are useful for hierarchies,
 categorizing data and attributing values, i.e. showing the number of units sold
-based on State and City. In Perspective, row pivots are represented as an array
-of string column names to pivot, are applied in the order provided; For example,
-a row pivot of `["State", "City", "Postal Code"]` shows the values for each
-Postal Code, which are grouped by City, which are in turn grouped by State.
+based on State and City. In Perspective, group by are represented as an array of
+string column names to pivot, are applied in the order provided; For example, a
+group by of `["State", "City", "Postal Code"]` shows the values for each Postal
+Code, which are grouped by City, which are in turn grouped by State.
 
 ```javascript
-const view = await table.view({ row_pivots: ["a", "c"] });
+const view = await table.view({ group_by: ["a", "c"] });
 ```
 
 ```python
-view = table.view(row_pivots=["a", "c"])
+view = table.view(group_by=["a", "c"])
 ```
 
 #### Example
@@ -99,38 +99,38 @@ view = table.view(row_pivots=["a", "c"])
 ```javascript
 const elem = document.querySelector("perspective-viewer");
 await elem.restore({
-  row_pivots: ["State", "City"],
+  group_by: ["State", "City"],
 });
 ```
 
 ```python
 widget = PerspectiveWidget()
 widget.restore(
-  row_pivots=["State", "City"]
+  group_by=["State", "City"]
 )
 ```
 
 <div>
-<perspective-viewer row_pivots='["State", "City"]' columns='["Sales", "Profit"]'>
+<perspective-viewer group_by='["State", "City"]' columns='["Sales", "Profit"]'>
 </perspective-viewer>
 </div>
 
-## Column Pivots
+## Split By
 
-A column pivot _splits_ the dataset by the unique values of each column used as
-a column pivot. The underlying dataset is not aggregated, and a new column is
-created for each unique value of the column pivot. Each newly created column
-contains the parts of the dataset that correspond to the column header, i.e. a
-`View` that has `["State"]` as its column pivot will have a new column for each
-state. In Perspective, column pivots are represented as an array of string
-column names to pivot:
+A split by _splits_ the dataset by the unique values of each column used as a
+split by. The underlying dataset is not aggregated, and a new column is created
+for each unique value of the split by. Each newly created column contains the
+parts of the dataset that correspond to the column header, i.e. a `View` that
+has `["State"]` as its split by will have a new column for each state. In
+Perspective, Split By are represented as an array of string column names to
+pivot:
 
 ```javascript
-const view = await table.view({ column_pivots: ["a", "c"] });
+const view = await table.view({ split_by: ["a", "c"] });
 ```
 
 ```python
-view = table.view(column_pivots=["a", "c"])
+view = table.view(split_by=["a", "c"])
 ```
 
 #### Example
@@ -138,8 +138,8 @@ view = table.view(column_pivots=["a", "c"])
 ```javascript
 const elem = document.querySelector("perspective-viewer");
 await elem.restore({
-  row_pivots: ["Category"],
-  column_pivots: ["Region"],
+  group_by: ["Category"],
+  split_by: ["Region"],
   columns: ["Sales", "Profit"],
 });
 ```
@@ -147,22 +147,22 @@ await elem.restore({
 ```python
 widget = PerspectiveWidget()
 widget.restore(
-  row_pivots=["Category"],
-  column_pivots=["Region"],
+  group_by=["Category"],
+  split_by=["Region"],
   columns=["Sales", "Profit"]
 )
 ```
 
 <div>
-<perspective-viewer row_pivots='["Category"]' column_pivots='["Region"]' columns='["Sales", "Profit"]'>
+<perspective-viewer group_by='["Category"]' split_by='["Region"]' columns='["Sales", "Profit"]'>
 </perspective-viewer>
 </div>
 
 ## Aggregates
 
 Aggregates perform a calculation over an entire column, and are displayed when
-one or more [Row Pivots](#row-pivots) are applied to the `View`. Aggregates can
-be specified by the user, or Perspective will use the following sensible default
+one or more [Group By](#row-pivots) are applied to the `View`. Aggregates can be
+specified by the user, or Perspective will use the following sensible default
 aggregates based on column type:
 
 - "sum" for `integer` and `float` columns
@@ -196,7 +196,7 @@ view = table.view(
 const elem = document.querySelector("perspective-viewer");
 await elem.restore({
   aggregates: {"Sales": "avg", "Profit", "median"},
-  row_pivots: ["State", "City"],
+  group_by: ["State", "City"],
   columns: ["Sales", "Profit"]
 });
 ```
@@ -205,13 +205,13 @@ await elem.restore({
 widget = PerspectiveWidget()
 widget.restore(
   aggregates={"Sales": "avg", "Profit", "median"},
-  row_pivots=["State", "City"],
+  group_by=["State", "City"],
   columns=["Sales", "Profit"]
 )
 ```
 
 <div>
-<perspective-viewer aggregates='{"Sales": "avg", "Profit": "median"}' row_pivots='["State", "City"]' columns='["Sales", "Profit"]'>
+<perspective-viewer aggregates='{"Sales": "avg", "Profit": "median"}' group_by='["State", "City"]' columns='["Sales", "Profit"]'>
 </perspective-viewer>
 </div>
 

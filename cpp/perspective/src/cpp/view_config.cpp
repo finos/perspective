@@ -74,7 +74,7 @@ t_view_config::validate(std::shared_ptr<t_schema> schema) {
     for (const std::string& col : m_row_pivots) {
         if (!schema->has_column(col) && expression_aliases.count(col) == 0) {
             std::stringstream ss;
-            ss << "Invalid column '" << col << "' found in View row_pivots."
+            ss << "Invalid column '" << col << "' found in View group_by."
                << std::endl;
             PSP_COMPLAIN_AND_ABORT(ss.str());
         }
@@ -83,7 +83,7 @@ t_view_config::validate(std::shared_ptr<t_schema> schema) {
     for (const std::string& col : m_column_pivots) {
         if (!schema->has_column(col) && expression_aliases.count(col) == 0) {
             std::stringstream ss;
-            ss << "Invalid column '" << col << "' found in View column_pivots."
+            ss << "Invalid column '" << col << "' found in View split_by."
                << std::endl;
             PSP_COMPLAIN_AND_ABORT(ss.str());
         }

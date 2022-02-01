@@ -283,7 +283,7 @@ function styleListener(regularTable) {
                     typeof metadata.value != null &&
                     metadata.value?.toString()?.trim().length > 0;
                 const is_leaf =
-                    metadata.row_header_x >= this._config.row_pivots.length;
+                    metadata.row_header_x >= this._config.group_by.length;
                 const next = regularTable.getMeta({
                     dx: 0,
                     dy: metadata.y - metadata.y0 + 1,
@@ -355,7 +355,7 @@ function override_sort(column_name) {
     return [[column_name, "desc"]];
 }
 function create_sort(column_name, sort_dir) {
-    const is_col_sortable = this._config.column_pivots.length > 0;
+    const is_col_sortable = this._config.split_by.length > 0;
     const order = is_col_sortable ? ROW_COL_SORT_ORDER : ROW_SORT_ORDER;
     const inc_sort_dir = sort_dir ? order[sort_dir] : "desc";
     if (inc_sort_dir) {
@@ -622,7 +622,7 @@ async function dataListener(regularTable, x0, y0, x1, y1) {
             _tree_header.call(
                 this,
                 columns.__ROW_PATH__,
-                this._config.row_pivots,
+                this._config.group_by,
                 regularTable
             )
         ),
@@ -739,7 +739,7 @@ export async function createModel(regular, table, view, extend = {}) {
         _column_paths,
         _column_types,
         _is_editable,
-        _row_header_types: config.row_pivots.map((column_path) => {
+        _row_header_types: config.group_by.map((column_path) => {
             return _table_schema[column_path];
         }),
         _series_color_map: new Map(),

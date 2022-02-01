@@ -148,7 +148,7 @@ class TestToArrow(object):
                   datetime(2019, 7, 11, 12, 30)]
         }
         tbl = Table(data)
-        view = tbl.view(row_pivots=["a"])
+        view = tbl.view(group_by=["a"])
         arrow = view.to_arrow()
         tbl2 = Table(arrow)
         assert tbl2.schema() == {
@@ -168,7 +168,7 @@ class TestToArrow(object):
             "c": [datetime(2019, 7, 11, 12, i) for i in range(0, 40, 10)]
         }
         tbl = Table(data)
-        view = tbl.view(row_pivots=["a"], column_pivots=["b"])
+        view = tbl.view(group_by=["a"], split_by=["b"])
         arrow = view.to_arrow()
         tbl2 = Table(arrow)
         assert tbl2.schema() == {
@@ -197,7 +197,7 @@ class TestToArrow(object):
             "c": [datetime(2019, 7, 11, 12, i) for i in range(0, 40, 10)]
         }
         tbl = Table(data)
-        view = tbl.view(column_pivots=["a"])
+        view = tbl.view(split_by=["a"])
         arrow = view.to_arrow()
         tbl2 = Table(arrow)
         assert tbl2.schema() == {
@@ -506,7 +506,7 @@ class TestToArrow(object):
         }
 
         table = Table(data)
-        view = table.view(row_pivots=["b"], columns=["a"], aggregates={"a": "mean"})
+        view = table.view(group_by=["b"], columns=["a"], aggregates={"a": "mean"})
         arrow = view.to_arrow()
 
         table2 = Table(arrow)

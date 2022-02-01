@@ -886,7 +886,7 @@ class TestTablePandas(object):
         }
         assert tbl.size() == 3
 
-    def test_rowpivots(self):
+    def test_groupbys(self):
         df = superstore(100)
         df_pivoted = df.set_index(['Country', 'Region'])
         table = Table(df_pivoted)
@@ -903,7 +903,7 @@ class TestTablePandas(object):
         assert "Country" in columns
         assert "Region" in columns
 
-    def test_colpivots(self):
+    def test_splitbys(self):
         arrays = [np.array(['bar', 'bar', 'bar', 'bar', 'baz', 'baz', 'baz', 'baz', 'foo', 'foo', 'foo', 'foo', 'qux', 'qux', 'qux', 'qux']),
                   np.array(['one', 'one', 'two', 'two', 'one', 'one', 'two', 'two', 'one', 'one', 'two', 'two', 'one', 'one', 'two', 'two']),
                   np.array(['X', 'Y', 'X', 'Y', 'X', 'Y', 'X', 'Y', 'X', 'Y', 'X', 'Y', 'X', 'Y', 'X', 'Y'])]

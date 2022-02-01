@@ -87,7 +87,7 @@ describe("get_min_max", function () {
         it("float col", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                row_pivots: ["y"],
+                group_by: ["y"],
             });
             const cols = await view.get_min_max("w");
             expect(cols).toEqual([-4, 1]);
@@ -98,7 +98,7 @@ describe("get_min_max", function () {
         it("int col", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                row_pivots: ["y"],
+                group_by: ["y"],
             });
             const cols = await view.get_min_max("x");
             expect(cols).toEqual([8, 12]);
@@ -109,7 +109,7 @@ describe("get_min_max", function () {
         it("string col", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                row_pivots: ["y"],
+                group_by: ["y"],
             });
             const cols = await view.get_min_max("y");
             expect(cols).toEqual([4, 4]);
@@ -122,8 +122,8 @@ describe("get_min_max", function () {
         it("float col", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                row_pivots: ["y"],
-                column_pivots: ["z"],
+                group_by: ["y"],
+                split_by: ["z"],
             });
             const cols = await view.get_min_max("w");
             expect(cols).toEqual([-9.5, 9.5]);
@@ -134,8 +134,8 @@ describe("get_min_max", function () {
         it("int column", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                row_pivots: ["y"],
-                column_pivots: ["z"],
+                group_by: ["y"],
+                split_by: ["z"],
             });
             const cols = await view.get_min_max("x");
             expect(cols).toEqual([1, 8]);
@@ -146,8 +146,8 @@ describe("get_min_max", function () {
         it("string column", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                row_pivots: ["y"],
-                column_pivots: ["z"],
+                group_by: ["y"],
+                split_by: ["z"],
             });
             const cols = await view.get_min_max("y");
             expect(cols).toEqual([1, 3]);
@@ -160,7 +160,7 @@ describe("get_min_max", function () {
         it("float col", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                column_pivots: ["z"],
+                split_by: ["z"],
             });
             const cols = await view.get_min_max("w");
             expect(cols).toEqual([-9.5, 8.5]);
@@ -171,7 +171,7 @@ describe("get_min_max", function () {
         it("int col", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                column_pivots: ["z"],
+                split_by: ["z"],
             });
             const cols = await view.get_min_max("x");
             expect(cols).toEqual([1, 4]);
@@ -182,7 +182,7 @@ describe("get_min_max", function () {
         it("string col", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                column_pivots: ["z"],
+                split_by: ["z"],
             });
             const cols = await view.get_min_max("y");
             expect(cols).toEqual(["a", "d"]);

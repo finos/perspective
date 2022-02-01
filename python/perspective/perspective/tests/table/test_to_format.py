@@ -116,7 +116,7 @@ class TestToFormat(object):
         data = [{"a": 1, "b": "string1"}, {"a": 1, "b": "string2"}]
         tbl = Table(data)
         view = tbl.view(
-            row_pivots=["a"]
+            group_by=["a"]
         )
         assert view.to_records() == [
             {"__ROW_PATH__": [], "a": 2, "b": 2}, {"__ROW_PATH__": [1], "a": 2, "b": 2}
@@ -126,8 +126,8 @@ class TestToFormat(object):
         data = [{"a": 1, "b": "string1"}, {"a": 1, "b": "string2"}]
         tbl = Table(data)
         view = tbl.view(
-            row_pivots=["a"],
-            column_pivots=["b"]
+            group_by=["a"],
+            split_by=["b"]
         )
         assert view.to_records() == [
             {"__ROW_PATH__": [], "string1|a": 1, "string1|b": 1, "string2|a": 1, "string2|b": 1},
@@ -138,7 +138,7 @@ class TestToFormat(object):
         data = [{"a": 1, "b": "string1"}, {"a": 1, "b": "string2"}]
         tbl = Table(data)
         view = tbl.view(
-            column_pivots=["b"]
+            split_by=["b"]
         )
         assert view.to_records() == [
             {"string1|a": 1, "string1|b": "string1", "string2|a": None, "string2|b": None},
@@ -217,7 +217,7 @@ class TestToFormat(object):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
         tbl = Table(data)
         view = tbl.view(
-            row_pivots=["a"]
+            group_by=["a"]
         )
         assert view.to_dict() == {
             "__ROW_PATH__": [[], [1]],
@@ -229,8 +229,8 @@ class TestToFormat(object):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
         tbl = Table(data)
         view = tbl.view(
-            row_pivots=["a"],
-            column_pivots=["b"]
+            group_by=["a"],
+            split_by=["b"]
         )
         assert view.to_dict() == {
             "__ROW_PATH__": [[], [1]],
@@ -242,7 +242,7 @@ class TestToFormat(object):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
         tbl = Table(data)
         view = tbl.view(
-            column_pivots=["b"]
+            split_by=["b"]
         )
         assert view.to_dict() == {
             "2|a": [1, 1],
@@ -253,7 +253,7 @@ class TestToFormat(object):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
         tbl = Table(data)
         view = tbl.view(
-            row_pivots=["a"],
+            group_by=["a"],
             columns=[]
         )
         assert view.to_dict() == {"__ROW_PATH__": [[], [1]]}
@@ -262,8 +262,8 @@ class TestToFormat(object):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
         tbl = Table(data)
         view = tbl.view(
-            row_pivots=["a"],
-            column_pivots=["b"],
+            group_by=["a"],
+            split_by=["b"],
             columns=[]
         )
         assert view.to_dict() == {
@@ -274,7 +274,7 @@ class TestToFormat(object):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
         tbl = Table(data)
         view = tbl.view(
-            column_pivots=["b"],
+            split_by=["b"],
             columns=[]
         )
         assert view.to_dict() == {}
@@ -342,7 +342,7 @@ class TestToFormat(object):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
         tbl = Table(data)
         view = tbl.view(
-            row_pivots=["a"]
+            group_by=["a"]
         )
         v = view.to_numpy()
         assert np.array_equal(v["__ROW_PATH__"], [[], [1]])
@@ -353,8 +353,8 @@ class TestToFormat(object):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
         tbl = Table(data)
         view = tbl.view(
-            row_pivots=["a"],
-            column_pivots=["b"]
+            group_by=["a"],
+            split_by=["b"]
         )
         v = view.to_numpy()
         assert np.array_equal(v["__ROW_PATH__"], [[], [1]])
@@ -365,7 +365,7 @@ class TestToFormat(object):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
         tbl = Table(data)
         view = tbl.view(
-            column_pivots=["b"]
+            split_by=["b"]
         )
         v = view.to_numpy()
         assert np.array_equal(v["2|a"], np.array([1, 1]))
@@ -405,7 +405,7 @@ class TestToFormat(object):
         data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
         tbl = Table(data)
         view = tbl.view(
-            row_pivots=["a"]
+            group_by=["a"]
         )
         records = view.to_records(
             end_row=1000
@@ -420,8 +420,8 @@ class TestToFormat(object):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
         view = tbl.view(
-            row_pivots=["a"],
-            column_pivots=["b"]
+            group_by=["a"],
+            split_by=["b"]
         )
         records = view.to_records(
             end_row=1000
@@ -543,7 +543,7 @@ class TestToFormat(object):
         data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
         tbl = Table(data)
         view = tbl.view(
-            row_pivots=["a"]
+            group_by=["a"]
         )
         records = view.to_records(
             end_col=1000
@@ -558,7 +558,7 @@ class TestToFormat(object):
         data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
         tbl = Table(data)
         view = tbl.view(
-            row_pivots=["a"]
+            group_by=["a"]
         )
         records = view.to_records(
             start_col=2,
@@ -570,7 +570,7 @@ class TestToFormat(object):
         data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
         tbl = Table(data)
         view = tbl.view(
-            row_pivots=["a"]
+            group_by=["a"]
         )
         records = view.to_records(
             start_col=20,
@@ -582,7 +582,7 @@ class TestToFormat(object):
         data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
         tbl = Table(data)
         view = tbl.view(
-            row_pivots=["a"]
+            group_by=["a"]
         )
         records = view.to_records(
             start_col=0,
@@ -594,8 +594,8 @@ class TestToFormat(object):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
         view = tbl.view(
-            row_pivots=["a"],
-            column_pivots=["b"]
+            group_by=["a"],
+            split_by=["b"]
         )
         records = view.to_records(
             end_col=1000
@@ -628,8 +628,8 @@ class TestToFormat(object):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
         view = tbl.view(
-            row_pivots=["a"],
-            column_pivots=["b"]
+            group_by=["a"],
+            split_by=["b"]
         )
         records = view.to_records(
             end_row=12,
@@ -645,8 +645,8 @@ class TestToFormat(object):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
         view = tbl.view(
-            row_pivots=["a"],
-            column_pivots=["b"]
+            group_by=["a"],
+            split_by=["b"]
         )
         records = view.to_records(
             end_row=12,
@@ -659,8 +659,8 @@ class TestToFormat(object):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
         view = tbl.view(
-            row_pivots=["a"],
-            column_pivots=["b"]
+            group_by=["a"],
+            split_by=["b"]
         )
         records = view.to_records(
             end_row=12,
@@ -673,8 +673,8 @@ class TestToFormat(object):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
         view = tbl.view(
-            row_pivots=["a"],
-            column_pivots=["b"]
+            group_by=["a"],
+            split_by=["b"]
         )
         records = view.to_records(
             end_row=12,
@@ -688,8 +688,8 @@ class TestToFormat(object):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
         view = tbl.view(
-            row_pivots=["a"],
-            column_pivots=["b"],
+            group_by=["a"],
+            split_by=["b"],
             sort=[["a", "desc"]]
         )
         records = view.to_records(
@@ -703,8 +703,8 @@ class TestToFormat(object):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
         view = tbl.view(
-            row_pivots=["a"],
-            column_pivots=["b"],
+            group_by=["a"],
+            split_by=["b"],
             sort=[["a", "desc"]]
         )
         records = view.to_records(
@@ -719,8 +719,8 @@ class TestToFormat(object):
         tbl = Table(data)
         view = tbl.view(
             columns=[],
-            row_pivots=["a"],
-            column_pivots=["b"],
+            group_by=["a"],
+            split_by=["b"],
             sort=[["a", "desc"]]
         )
         records = view.to_records(
@@ -734,8 +734,8 @@ class TestToFormat(object):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
         view = tbl.view(
-            row_pivots=["a"],
-            column_pivots=["b"],
+            group_by=["a"],
+            split_by=["b"],
             sort=[["a", "desc"]]
         )
         records = view.to_records(
@@ -752,8 +752,8 @@ class TestToFormat(object):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
         view = tbl.view(
-            row_pivots=["a"],
-            column_pivots=["b"],
+            group_by=["a"],
+            split_by=["b"],
             sort=[["a", "desc"]]
         )
         records = view.to_records(
@@ -806,8 +806,8 @@ class TestToFormat(object):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
         view = tbl.view(
-            row_pivots=["a"],
-            column_pivots=["b"]
+            group_by=["a"],
+            split_by=["b"]
         )
         records = view.to_records(
             end_row=12,
@@ -921,7 +921,7 @@ class TestToFormat(object):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
         tbl = Table(data)
         view = tbl.view(
-            row_pivots=["a"]
+            group_by=["a"]
         )
         assert view.to_csv() == '"a (Group by 1)","a","b"\n,2,4\n1,2,4\n'
 
@@ -929,8 +929,8 @@ class TestToFormat(object):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
         tbl = Table(data)
         view = tbl.view(
-            row_pivots=["a"],
-            column_pivots=["b"]
+            group_by=["a"],
+            split_by=["b"]
         )
         assert view.to_csv() == '"a (Group by 1)","2|a","2|b"\n,2,4\n1,2,4\n'
 
@@ -938,7 +938,7 @@ class TestToFormat(object):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
         tbl = Table(data)
         view = tbl.view(
-            column_pivots=["b"]
+            split_by=["b"]
         )
         assert view.to_csv() == '"2|a","2|b"\n1,2\n1,2\n'
 
@@ -946,7 +946,7 @@ class TestToFormat(object):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
         tbl = Table(data)
         view = tbl.view(
-            row_pivots=["a"],
+            group_by=["a"],
             columns=[]
         )
         assert view.to_csv() == '"a (Group by 1)"\n\n1\n'
@@ -955,8 +955,8 @@ class TestToFormat(object):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
         tbl = Table(data)
         view = tbl.view(
-            row_pivots=["a"],
-            column_pivots=["b"],
+            group_by=["a"],
+            split_by=["b"],
             columns=[]
         )
         assert view.to_csv() == '"a (Group by 1)"\n\n1\n'
@@ -965,7 +965,7 @@ class TestToFormat(object):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
         tbl = Table(data)
         view = tbl.view(
-            column_pivots=["b"],
+            split_by=["b"],
             columns=[]
         )
 
@@ -1014,7 +1014,7 @@ class TestToFormat(object):
     def test_to_format_implicit_index_two_dict(self):
         data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
         tbl = Table(data)
-        view = tbl.view(row_pivots=["a"], column_pivots=["b"])
+        view = tbl.view(group_by=["a"], split_by=["b"])
         assert view.to_dict(index=True) == {
             '2.5|a': [1.5, 1.5, None],
             '2.5|b': [2.5, 2.5, None],
@@ -1027,7 +1027,7 @@ class TestToFormat(object):
     def test_to_format_implicit_index_two_dict(self):
         data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
         tbl = Table(data)
-        view = tbl.view(row_pivots=["a"], column_pivots=["b"])
+        view = tbl.view(group_by=["a"], split_by=["b"])
         assert view.to_dict(id=True) == {
             '2.5|a': [1.5, 1.5, None],
             '2.5|b': [2.5, 2.5, None],

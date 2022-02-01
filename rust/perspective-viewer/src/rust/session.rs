@@ -183,7 +183,7 @@ impl Session {
             DragEffect::Copy => (),
             DragEffect::Move(DropAction::Active) => {
                 let is_to_group_or_split =
-                    matches!(drop, DropAction::RowPivots | DropAction::ColumnPivots);
+                    matches!(drop, DropAction::GroupBy | DropAction::SplitBy);
 
                 if ((!is_to_swap && is_from_swap)
                     || (is_to_swap && !is_from_swap && is_to_empty)
@@ -205,13 +205,13 @@ impl Session {
                     update.columns = Some(config.columns.clone());
                 }
             }
-            DragEffect::Move(DropAction::RowPivots) => {
-                config.row_pivots.retain(|x| x != &column);
-                update.row_pivots = Some(config.row_pivots.clone());
+            DragEffect::Move(DropAction::GroupBy) => {
+                config.group_by.retain(|x| x != &column);
+                update.group_by = Some(config.group_by.clone());
             }
-            DragEffect::Move(DropAction::ColumnPivots) => {
-                config.column_pivots.retain(|x| x != &column);
-                update.column_pivots = Some(config.column_pivots.clone());
+            DragEffect::Move(DropAction::SplitBy) => {
+                config.split_by.retain(|x| x != &column);
+                update.split_by = Some(config.split_by.clone());
             }
             DragEffect::Move(DropAction::Sort) => {
                 config.sort.retain(|x| x.0 != column);
@@ -266,17 +266,17 @@ impl Session {
 
                 update.columns = Some(config.columns);
             }
-            DropAction::RowPivots => {
-                config.row_pivots.retain(|x| x != &column);
-                let index = std::cmp::min(index as usize, config.row_pivots.len());
-                config.row_pivots.insert(index, column);
-                update.row_pivots = Some(config.row_pivots);
+            DropAction::GroupBy => {
+                config.group_by.retain(|x| x != &column);
+                let index = std::cmp::min(index as usize, config.group_by.len());
+                config.group_by.insert(index, column);
+                update.group_by = Some(config.group_by);
             }
-            DropAction::ColumnPivots => {
-                config.column_pivots.retain(|x| x != &column);
-                let index = std::cmp::min(index as usize, config.column_pivots.len());
-                config.column_pivots.insert(index, column);
-                update.column_pivots = Some(config.column_pivots);
+            DropAction::SplitBy => {
+                config.split_by.retain(|x| x != &column);
+                let index = std::cmp::min(index as usize, config.split_by.len());
+                config.split_by.insert(index, column);
+                update.split_by = Some(config.split_by);
             }
             DropAction::Sort => {
                 let index = std::cmp::min(index as usize, config.sort.len());
@@ -312,8 +312,8 @@ impl Session {
         let ViewConfig {
             columns,
             expressions,
-            row_pivots,
-            column_pivots,
+            group_by,
+            split_by,
             sort,
             filter,
             aggregates,
@@ -350,12 +350,12 @@ impl Session {
             })
             .collect::<Vec<_>>();
 
-        let row_pivots = row_pivots
+        let group_by = group_by
             .into_iter()
             .map(|x| if x == column { new_name.clone() } else { x })
             .collect::<Vec<_>>();
 
-        let column_pivots = column_pivots
+        let split_by = split_by
             .into_iter()
             .map(|x| if x == column { new_name.clone() } else { x })
             .collect::<Vec<_>>();
@@ -387,8 +387,8 @@ impl Session {
             columns: Some(columns),
             aggregates: Some(aggregates),
             expressions: Some(expressions),
-            row_pivots: Some(row_pivots),
-            column_pivots: Some(column_pivots),
+            group_by: Some(group_by),
+            split_by: Some(split_by),
             sort: Some(sort),
             filter: Some(filter),
         }
@@ -497,7 +497,7 @@ impl Session {
     ) -> Result<Vec<String>, JsValue> {
         let expressions = self.borrow().config.expressions.clone();
         let config = ViewConfig {
-            row_pivots: vec![column],
+            group_by: vec![column],
             columns: vec![],
             expressions,
             ..ViewConfig::default()
@@ -781,19 +781,19 @@ impl Session {
             }
         }
 
-        for column in config.row_pivots.iter() {
+        for column in config.group_by.iter() {
             if all_columns.contains(column) || expression_names.contains(column) {
                 view_columns.insert(column);
             } else {
-                return Err(format!("Unknown \"{}\" in `row_pivots`", column).into());
+                return Err(format!("Unknown \"{}\" in `group_by`", column).into());
             }
         }
 
-        for column in config.column_pivots.iter() {
+        for column in config.split_by.iter() {
             if all_columns.contains(column) || expression_names.contains(column) {
                 view_columns.insert(column);
             } else {
-                return Err(format!("Unknown \"{}\" in `column_pivots`", column).into());
+                return Err(format!("Unknown \"{}\" in `split_by`", column).into());
             }
         }
 

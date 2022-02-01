@@ -68,8 +68,8 @@ function write(table, model, active_cell) {
 
 function isEditable(viewer) {
     const has_pivots =
-        this._config.row_pivots.length === 0 &&
-        this._config.column_pivots.length === 0;
+        this._config.group_by.length === 0 &&
+        this._config.split_by.length === 0;
     const selectable = viewer.hasAttribute("selectable");
     const editable = viewer.hasAttribute("editable");
     return has_pivots && !selectable && editable;

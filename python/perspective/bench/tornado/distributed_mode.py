@@ -28,7 +28,7 @@ async def bench_stddev(client):
     table = client.open_table("data_source_one")
     start = time.time()
     view = await table.view(
-        row_pivots=["State"],
+        group_by=["State"],
         aggregates={"Sales": "standard deviation"},
         columns=["Sales"],
     )

@@ -20,7 +20,11 @@
         <script src="http://localhost:8080/node_modules/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js"></script>
         <script src="http://localhost:8080/node_modules/perspective/dist/umd/perspective.js"></script>
 
-        <link rel="stylesheet" crossorigin="anonymous" href="/node_modules/@finos/perspective-viewer/dist/css/themes.css" />
+        <link
+            rel="stylesheet"
+            crossorigin="anonymous"
+            href="/node_modules/@finos/perspective-viewer/dist/css/themes.css"
+        />
 
         <style>
             perspective-viewer {
@@ -66,8 +70,8 @@
                         low: "avg",
                     },
                     columns: ["high", "low"],
-                    row_pivots: ["client"],
-                    column_pivots: ["name"],
+                    group_by: ["client"],
+                    split_by: ["name"],
                 });
                 viewer.toggleConfig();
             });

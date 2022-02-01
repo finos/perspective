@@ -29,10 +29,10 @@ use wasm_bindgen_test::*;
 #[serde(deny_unknown_fields)]
 pub struct ViewConfig {
     #[serde(default)]
-    pub row_pivots: Vec<String>,
+    pub group_by: Vec<String>,
 
     #[serde(default)]
-    pub column_pivots: Vec<String>,
+    pub split_by: Vec<String>,
 
     #[serde(default)]
     pub columns: Vec<Option<String>>,
@@ -70,7 +70,7 @@ impl ViewConfig {
     }
 
     pub fn is_aggregated(&self) -> bool {
-        !self.row_pivots.is_empty()
+        !self.group_by.is_empty()
     }
 
     pub fn reset(&mut self, reset_expressions: bool) {
@@ -85,9 +85,8 @@ impl ViewConfig {
     /// which were unset.
     pub fn apply_update(&mut self, update: ViewConfigUpdate) -> bool {
         let mut changed = false;
-        changed = Self::_apply(&mut self.row_pivots, update.row_pivots) || changed;
-        changed =
-            Self::_apply(&mut self.column_pivots, update.column_pivots) || changed;
+        changed = Self::_apply(&mut self.group_by, update.group_by) || changed;
+        changed = Self::_apply(&mut self.split_by, update.split_by) || changed;
         changed = Self::_apply(&mut self.columns, update.columns) || changed;
         changed = Self::_apply(&mut self.filter, update.filter) || changed;
         changed = Self::_apply(&mut self.sort, update.sort) || changed;
@@ -98,8 +97,8 @@ impl ViewConfig {
 
     pub fn is_column_expression_in_use(&self, name: &str) -> bool {
         let name = name.to_owned();
-        self.row_pivots.contains(&name)
-            || self.column_pivots.contains(&name)
+        self.group_by.contains(&name)
+            || self.split_by.contains(&name)
             || self.sort.iter().any(|x| x.0 == name)
             || self.filter.iter().any(|x| x.0 == name)
             || self.columns.contains(&Some(name))
@@ -110,10 +109,10 @@ impl ViewConfig {
 #[serde(deny_unknown_fields)]
 pub struct ViewConfigUpdate {
     #[serde(default)]
-    pub row_pivots: Option<Vec<String>>,
+    pub group_by: Option<Vec<String>>,
 
     #[serde(default)]
-    pub column_pivots: Option<Vec<String>>,
+    pub split_by: Option<Vec<String>>,
 
     #[serde(default)]
     pub columns: Option<Vec<Option<String>>>,
@@ -155,23 +154,23 @@ mod tests {
     }
 
     #[wasm_bindgen_test]
-    pub fn test_row_pivots() {
+    pub fn test_group_by() {
         let x = js_object!(
-            "row_pivots",
+            "group_by",
             [JsValue::from("Test")].iter().collect::<Array>()
         );
         let rec: ViewConfig = x.into_serde().unwrap();
-        assert_eq!(rec.row_pivots, vec!("Test"));
+        assert_eq!(rec.group_by, vec!("Test"));
     }
 
     #[wasm_bindgen_test]
-    pub fn test_column_pivots() {
+    pub fn test_split_by() {
         let x = js_object!(
-            "column_pivots",
+            "split_by",
             [JsValue::from("Test")].iter().collect::<Array>()
         );
         let rec: ViewConfig = x.into_serde().unwrap();
-        assert_eq!(rec.column_pivots, vec!("Test"));
+        assert_eq!(rec.split_by, vec!("Test"));
     }
 
     #[wasm_bindgen_test]
@@ -256,40 +255,40 @@ mod tests {
     }
 
     #[wasm_bindgen_test]
-    pub fn test_apply_update_row_pivots() {
+    pub fn test_apply_update_group_by() {
         let mut view_config = ViewConfig::default();
         let update = ViewConfigUpdate {
-            row_pivots: Some(vec!["Test".to_owned()]),
+            group_by: Some(vec!["Test".to_owned()]),
             ..ViewConfigUpdate::default()
         };
 
-        assert_eq!(view_config.row_pivots.len(), 0);
+        assert_eq!(view_config.group_by.len(), 0);
         let changed = view_config.apply_update(update);
         assert!(changed);
-        assert_eq!(view_config.row_pivots, vec!("Test".to_owned()));
+        assert_eq!(view_config.group_by, vec!("Test".to_owned()));
     }
 
     #[wasm_bindgen_test]
-    pub fn test_apply_update_row_pivots_then_column_pivots() {
+    pub fn test_apply_update_group_by_then_split_by() {
         let mut view_config = ViewConfig::default();
         let update = ViewConfigUpdate {
-            row_pivots: Some(vec!["Test".to_owned()]),
+            group_by: Some(vec!["Test".to_owned()]),
             ..ViewConfigUpdate::default()
         };
 
-        assert_eq!(view_config.row_pivots.len(), 0);
+        assert_eq!(view_config.group_by.len(), 0);
         let changed = view_config.apply_update(update);
         assert!(changed);
-        assert_eq!(view_config.row_pivots, vec!("Test".to_owned()));
-        assert_eq!(view_config.column_pivots.len(), 0);
+        assert_eq!(view_config.group_by, vec!("Test".to_owned()));
+        assert_eq!(view_config.split_by.len(), 0);
         let update = ViewConfigUpdate {
-            column_pivots: Some(vec!["Test2".to_owned()]),
+            split_by: Some(vec!["Test2".to_owned()]),
             ..ViewConfigUpdate::default()
         };
 
         let changed = view_config.apply_update(update);
         assert!(changed);
-        assert_eq!(view_config.row_pivots, vec!("Test".to_owned()));
-        assert_eq!(view_config.column_pivots, vec!("Test2".to_owned()));
+        assert_eq!(view_config.group_by, vec!("Test".to_owned()));
+        assert_eq!(view_config.split_by, vec!("Test2".to_owned()));
     }
 }

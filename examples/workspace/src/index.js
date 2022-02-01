@@ -38,13 +38,13 @@ const DEFAULT_LAYOUT = {
         Three: {
             table: "superstore",
             name: "Test Widget III (modified)",
-            row_pivots: ["State"],
+            group_by: ["State"],
             columns: ["Sales", "Profit"],
         },
         Four: {
             table: "superstore",
             name: "Test Widget IV (modified)",
-            row_pivots: ["Category", "Sub-Category"],
+            group_by: ["Category", "Sub-Category"],
             columns: ["Sales", "Profit"],
         },
     },

@@ -66,8 +66,8 @@ pub async fn test_view_num_rows() {
 //     let view = table.view(js_object!().unchecked_ref()).await.unwrap();
 //     let config = view.get_config().await.unwrap();
 //     assert!(JsValue::is_object(&config));
-//     let row_pivot_len = config.row_pivots().length();
-//     assert_eq!(row_pivot_len, 0);
-//     let col_pivot_len = config.column_pivots().length();
+//     let group_by_len = config.group_by().length();
+//     assert_eq!(group_by_len, 0);
+//     let col_pivot_len = config.split_by().length();
 //     assert_eq!(col_pivot_len, 0);
 // }

@@ -40,9 +40,8 @@ export class PerspectiveWidget extends Widget {
     _set_attributes(options) {
         const plugin = options.plugin || "datagrid";
         const columns = options.columns || [];
-        const row_pivots = options.row_pivots || options.row_pivots || [];
-        const column_pivots =
-            options.column_pivots || options.column_pivots || [];
+        const group_by = options.group_by || options.group_by || [];
+        const split_by = options.split_by || options.split_by || [];
         const aggregates = options.aggregates || {};
         const sort = options.sort || [];
         const filter = options.filter || [];
@@ -61,8 +60,8 @@ export class PerspectiveWidget extends Widget {
         this._viewer_config = {
             plugin,
             plugin_config,
-            row_pivots,
-            column_pivots,
+            group_by,
+            split_by,
             sort,
             columns,
             aggregates,

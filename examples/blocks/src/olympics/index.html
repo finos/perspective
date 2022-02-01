@@ -1,8 +1,14 @@
 <html>
     <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"/>
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
+        />
 
-        <link rel="stylesheet" href="/node_modules/@finos/perspective-workspace/dist/umd/material.css"/>
+        <link
+            rel="stylesheet"
+            href="/node_modules/@finos/perspective-workspace/dist/umd/material.css"
+        />
 
         <script src="/node_modules/@finos/perspective-workspace/dist/umd/perspective-workspace.js"></script>
         <script src="/node_modules/@finos/perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js"></script>
@@ -109,7 +115,7 @@
                         Two: {
                             selectable: true,
                             plugin: "datagrid",
-                            row_pivots: ["country"],
+                            group_by: ["country"],
                             aggregates: {
                                 sport: "dominant",
                             },
@@ -130,8 +136,8 @@
                         },
                         Three: {
                             plugin: "Heatmap",
-                            row_pivots: ["sport"],
-                            column_pivots: ["age"],
+                            group_by: ["sport"],
+                            split_by: ["age"],
                             sort: [["total", "desc"]],
                             columns: ["total"],
                             filter: [],
@@ -152,7 +158,7 @@
                                 "silver",
                                 "bronze",
                             ],
-                            row_pivots: ["athlete"],
+                            group_by: ["athlete"],
                             sort: [["total", "desc"]],
                             aggregates: {
                                 sport: "dominant",
@@ -173,7 +179,7 @@
                                 ["year", "in", ["2002", "2006", "2010", ""]],
                             ],
                             columns: ["age", "total"],
-                            row_pivots: ["year"],
+                            group_by: ["year"],
                             plugin_config: {
                                 realValues: ["age", "total"],
                                 splitMainValues: ["age"],
@@ -184,7 +190,7 @@
                         PERSPECTIVE_GENERATED_ID_0: {
                             plugin: "Y Line",
                             columns: ["age", "total"],
-                            row_pivots: ["year"],
+                            group_by: ["year"],
                             aggregates: {
                                 age: "avg",
                             },

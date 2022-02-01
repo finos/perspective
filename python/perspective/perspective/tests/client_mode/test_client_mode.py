@@ -333,7 +333,7 @@ class TestClient(object):
         widget.delete()
         widget.post = MethodType(mocked_post, widget)
 
-    def test_widget_load_column_pivots_client(self):
+    def test_widget_load_split_by_client(self):
         import perspective
         assert perspective.is_libpsp() is False
         # behavior should not change for client mode
@@ -346,5 +346,5 @@ class TestClient(object):
         widget = perspective.PerspectiveWidget(df_both)
         assert hasattr(widget, "table") is False
         assert widget.columns == ['value']
-        assert widget.column_pivots == ['first', 'second', 'third']
-        assert widget.row_pivots == ['index']
+        assert widget.split_by == ['first', 'second', 'third']
+        assert widget.group_by == ['index']

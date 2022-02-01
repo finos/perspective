@@ -58,10 +58,10 @@ def deconstruct_pandas(data, kwargs=None):
 
     Returns:
         (pandas.DataFrame, dict): a Pandas DataFrame and a dictionary containing
-            optional members `columns`, `row_pivots`, and `column_pivots`.
+            optional members `columns`, `group_by`, and `split_by`.
     """
     kwargs = kwargs or {}
-    kwargs = {"columns": [], "row_pivots": [], "column_pivots": []}
+    kwargs = {"columns": [], "group_by": [], "split_by": []}
 
     # Decompose Period index to timestamps
     if isinstance(data.index, pd.PeriodIndex):
@@ -80,7 +80,7 @@ def deconstruct_pandas(data, kwargs=None):
         and isinstance(data.index, pd.MultiIndex)
     ):
         # Row and col pivots
-        kwargs["row_pivots"].extend([str(c) for c in data.index.names])
+        kwargs["group_by"].extend([str(c) for c in data.index.names])
 
         # Two strategies
         if None in data.columns.names:
@@ -95,13 +95,13 @@ def deconstruct_pandas(data, kwargs=None):
             #  US     Region 1
             #
             # We need to transform this to:
-            # row_pivots = ['Country', 'Region']
-            # column_pivots = ['State', 'Quantity']
+            # group_by = ['Country', 'Region']
+            # split_by = ['State', 'Quantity']
             # columns = ['Discount', 'Sales']
-            existent = kwargs["row_pivots"] + data.columns.names
+            existent = kwargs["group_by"] + data.columns.names
             for c in data.columns.names:
                 if c is not None:
-                    kwargs["column_pivots"].append(c)
+                    kwargs["split_by"].append(c)
                     data = data.stack()
             data = pd.DataFrame(data).reset_index()
 
@@ -111,8 +111,8 @@ def deconstruct_pandas(data, kwargs=None):
         else:
             # In this case, we have no need as the values is just a single entry
             # e.g. pt = pd.pivot_table(df, values = 'Discount', index=['Country','Region'], columns = ['Category', 'Segment'])
-            for _ in kwargs["row_pivots"]:
-                # unstack row pivots
+            for _ in kwargs["group_by"]:
+                # unstack group by
                 data = data.unstack()
             data = pd.DataFrame(data)
 
@@ -126,10 +126,10 @@ def deconstruct_pandas(data, kwargs=None):
             if val is None:
                 new_names[j] = "index" if i == 0 else "index-{}".format(i)
                 i += 1
-                # kwargs['row_pivots'].append(str(new_names[j]))
+                # kwargs['group_by'].append(str(new_names[j]))
             else:
-                if str(val) not in kwargs["row_pivots"]:
-                    kwargs["column_pivots"].append(str(val))
+                if str(val) not in kwargs["group_by"]:
+                    kwargs["split_by"].append(str(val))
 
         # Finally, remap any values columns to have column name 'value'
         data.index.names = new_names
@@ -137,10 +137,7 @@ def deconstruct_pandas(data, kwargs=None):
         data.columns = [
             str(c)
             if c
-            in ["index"]
-            + kwargs["row_pivots"]
-            + kwargs["column_pivots"]
-            + kwargs["columns"]
+            in ["index"] + kwargs["group_by"] + kwargs["split_by"] + kwargs["columns"]
             else "value"
             for c in data.columns
         ]
@@ -150,18 +147,18 @@ def deconstruct_pandas(data, kwargs=None):
                 for c in data.columns
                 if c
                 not in ["index"]
-                + kwargs["row_pivots"]
-                + kwargs["column_pivots"]
+                + kwargs["group_by"]
+                + kwargs["split_by"]
                 + kwargs["columns"]
             ]
         )
     elif isinstance(data, pd.DataFrame) and isinstance(data.columns, pd.MultiIndex):
         # Col pivots
         if data.index.name:
-            kwargs["row_pivots"].append(str(data.index.name))
-            push_row_pivot = False
+            kwargs["group_by"].append(str(data.index.name))
+            push_group_by = False
         else:
-            push_row_pivot = True
+            push_group_by = True
 
         data = pd.DataFrame(data.unstack())
 
@@ -171,16 +168,16 @@ def deconstruct_pandas(data, kwargs=None):
             if val is None:
                 new_names[j] = "index" if i == 0 else "index-{}".format(i)
                 i += 1
-                if push_row_pivot:
-                    kwargs["row_pivots"].append(str(new_names[j]))
+                if push_group_by:
+                    kwargs["group_by"].append(str(new_names[j]))
             else:
-                if str(val) not in kwargs["row_pivots"]:
-                    kwargs["column_pivots"].append(str(val))
+                if str(val) not in kwargs["group_by"]:
+                    kwargs["split_by"].append(str(val))
 
         data.index.names = new_names
         data.columns = [
             str(c)
-            if c in ["index"] + kwargs["row_pivots"] + kwargs["column_pivots"]
+            if c in ["index"] + kwargs["group_by"] + kwargs["split_by"]
             else "value"
             for c in data.columns
         ]
@@ -188,13 +185,13 @@ def deconstruct_pandas(data, kwargs=None):
             [
                 "value"
                 for c in data.columns
-                if c not in ["index"] + kwargs["row_pivots"] + kwargs["column_pivots"]
+                if c not in ["index"] + kwargs["group_by"] + kwargs["split_by"]
             ]
         )
 
     elif isinstance(data, pd.DataFrame) and isinstance(data.index, pd.MultiIndex):
-        # Row pivots
-        kwargs["row_pivots"].extend(list(data.index.names))
+        # Group by
+        kwargs["group_by"].extend(list(data.index.names))
         data = data.reset_index()  # copy
 
     if isinstance(data, pd.DataFrame):

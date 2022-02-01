@@ -391,8 +391,8 @@ class Table(object):
     def view(
         self,
         columns=None,
-        row_pivots=None,
-        column_pivots=None,
+        group_by=None,
+        split_by=None,
         aggregates=None,
         sort=None,
         filter=None,
@@ -408,10 +408,10 @@ class Table(object):
         Keyword Arguments:
             columns (:obj:`list` of :obj:`str`): A list of column names to be
                 visible to the user.
-            row_pivots (:obj:`list` of :obj:`str`): A list of column names to
-                use as row pivots.
-            column_pivots (:obj:`list` of :obj:`str`): A list of column names
-                to use as column pivots.
+            group_by (:obj:`list` of :obj:`str`): A list of column names to
+                use as group by.
+            split_by (:obj:`list` of :obj:`str`): A list of column names
+                to use as split by.
             aggregates (:obj:`dict` of :obj:`str` to :obj:`str`):  A dictionary
                 of column names to aggregate types, which specify aggregates
                 for individual columns.
@@ -449,10 +449,10 @@ class Table(object):
         else:
             config["columns"] = columns
 
-        if row_pivots is not None:
-            config["row_pivots"] = row_pivots
-        if column_pivots is not None:
-            config["column_pivots"] = column_pivots
+        if group_by is not None:
+            config["group_by"] = group_by
+        if split_by is not None:
+            config["split_by"] = split_by
         if aggregates is not None:
             config["aggregates"] = aggregates
         if sort is not None:

@@ -345,7 +345,7 @@ utils.with_server({}, () => {
             );
 
             test.capture(
-                "Resetting the viewer when expression as in row_pivots or other field, should delete all expressions",
+                "Resetting the viewer when expression as in group_by or other field, should delete all expressions",
                 async (page) => {
                     await page.evaluate(async () => {
                         document.activeElement.blur();
@@ -354,7 +354,7 @@ utils.with_server({}, () => {
                         await elem.toggleConfig(true);
                         await elem.restore({
                             columns: ["1 + 2"],
-                            row_pivots: ["3 + 4"],
+                            group_by: ["3 + 4"],
                             sort: [["1 + 2", "asc"]],
                             filter: [["1 + 2", "==", 3]],
                             expressions: ["3 + 4", "1 + 2"],
@@ -435,7 +435,7 @@ utils.with_server({}, () => {
                         await elem.restore({
                             expressions: ['"Sales" + 100'],
                             aggregates: {'"Sales" + 100': "avg"},
-                            row_pivots: ["State"],
+                            group_by: ["State"],
                             columns: ['"Sales" + 100'],
                         });
                     });

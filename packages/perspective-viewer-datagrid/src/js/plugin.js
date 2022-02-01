@@ -215,9 +215,9 @@ customElements.define(
             }
 
             const overrides = this.datagrid._column_sizes.override;
-            const {row_pivots, columns} = this.model._config;
+            const {group_by, columns} = this.model._config;
             const tree_header_offset =
-                row_pivots?.length > 0 ? row_pivots.length + 1 : 0;
+                group_by?.length > 0 ? group_by.length + 1 : 0;
 
             const old_sizes = {};
             for (const key of Object.keys(overrides)) {
@@ -252,9 +252,9 @@ customElements.define(
             }
 
             const overrides = {};
-            const {row_pivots, columns} = this.model._config;
+            const {group_by, columns} = this.model._config;
             const tree_header_offset =
-                row_pivots?.length > 0 ? row_pivots.length + 1 : 0;
+                group_by?.length > 0 ? group_by.length + 1 : 0;
 
             for (const key of Object.keys(old_sizes)) {
                 const index = this.model._column_paths.indexOf(key);

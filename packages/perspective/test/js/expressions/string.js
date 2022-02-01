@@ -83,7 +83,7 @@ module.exports = (perspective) => {
             });
             const view = await table.view({
                 aggregates: {column: "last"},
-                row_pivots: ["column"],
+                group_by: ["column"],
                 expressions: [
                     `//column\nconcat("a", ', ', 'here is a long string, ', "b")`,
                 ],

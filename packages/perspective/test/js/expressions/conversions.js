@@ -80,7 +80,7 @@ module.exports = (perspective) => {
             });
 
             const view = await table.view({
-                row_pivots: ["computed"],
+                group_by: ["computed"],
                 aggregates: {
                     computed: "last",
                     computed2: "last",

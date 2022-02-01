@@ -100,7 +100,7 @@ by invoking the [view](#module_perspective..table+view) method.
 **Example**  
 ```js
 // Returns a new View, pivoted in the row space by the "name" column.
-await table.view({row_pivots: ["name"]});
+await table.view({group_by: ["name"]});
 ```
 
 * * *
@@ -218,10 +218,10 @@ Serializes this view to JSON data in a column-oriented format.
 **Kind**: instance method of [<code>view</code>](#module_perspective..view)  
 **Returns**: <code>[ &#x27;Promise&#x27; ].&lt;Array&gt;</code> - A Promise resolving to An array of Objects
 representing the rows of this [view](#module_perspective..view).  If this
-[view](#module_perspective..view) had a "row_pivots" config parameter
+[view](#module_perspective..view) had a "group_by" config parameter
 supplied when constructed, each row Object will have a "__ROW_PATH__"
 key, whose value specifies this row's aggregated path.  If this
-[view](#module_perspective..view) had a "column_pivots" config parameter
+[view](#module_perspective..view) had a "split_by" config parameter
 supplied, the keys of this object will be comma-prepended with their
 comma-separated column paths.  
 **Params**
@@ -250,10 +250,10 @@ Serializes this view to JSON data in a row-oriented format.
 **Kind**: instance method of [<code>view</code>](#module_perspective..view)  
 **Returns**: <code>[ &#x27;Promise&#x27; ].&lt;Array&gt;</code> - A Promise resolving to An array of Objects
 representing the rows of this [view](#module_perspective..view).  If this
-[view](#module_perspective..view) had a "row_pivots" config parameter
+[view](#module_perspective..view) had a "group_by" config parameter
 supplied when constructed, each row Object will have a "__ROW_PATH__"
 key, whose value specifies this row's aggregated path.  If this
-[view](#module_perspective..view) had a "column_pivots" config parameter
+[view](#module_perspective..view) had a "split_by" config parameter
 supplied, the keys of this object will be comma-prepended with their
 comma-separated column paths.  
 **Params**
@@ -279,10 +279,10 @@ Serializes this view to CSV data in a standard format.
 **Kind**: instance method of [<code>view</code>](#module_perspective..view)  
 **Returns**: <code>[ &#x27;Promise&#x27; ].&lt;string&gt;</code> - A Promise resolving to a string in CSV format
 representing the rows of this [view](#module_perspective..view).  If this
-[view](#module_perspective..view) had a "row_pivots" config parameter
+[view](#module_perspective..view) had a "group_by" config parameter
 supplied when constructed, each row will have prepended those values
 specified by this row's aggregated path.  If this
-[view](#module_perspective..view) had a "column_pivots" config parameter
+[view](#module_perspective..view) had a "split_by" config parameter
 supplied, the keys of this object will be comma-prepended with their
 comma-separated column paths.  
 **Params**
@@ -355,7 +355,7 @@ serialize.
 
 #### view.num\_rows() ⇒ <code>[ &#x27;Promise&#x27; ].&lt;number&gt;</code>
 The number of aggregated rows in this [view](#module_perspective..view).
-This is affected by the "row_pivots" configuration parameter supplied to
+This is affected by the "group_by" configuration parameter supplied to
 this [view](#module_perspective..view)'s contructor.
 
 **Kind**: instance method of [<code>view</code>](#module_perspective..view)  
@@ -367,7 +367,7 @@ this [view](#module_perspective..view)'s contructor.
 
 #### view.num\_columns() ⇒ <code>[ &#x27;Promise&#x27; ].&lt;number&gt;</code>
 The number of aggregated columns in this [view](view).  This is affected
-by the "column_pivots" configuration parameter supplied to this
+by the "split_by" configuration parameter supplied to this
 [view](view)'s contructor.
 
 **Kind**: instance method of [<code>view</code>](#module_perspective..view)  
@@ -695,15 +695,15 @@ bound to this table.
 
 - [config] <code>Object</code> - The configuration object for this
 [view](#module_perspective..view).
-    - [.row_pivots] <code>[ &#x27;Array&#x27; ].&lt;string&gt;</code> - An array of column names to
-use as [Row Pivots](https://en.wikipedia.org/wiki/Pivot_table#Row_labels).
-    - [.column_pivots] <code>[ &#x27;Array&#x27; ].&lt;string&gt;</code> - An array of column names to
-use as [Column Pivots](https://en.wikipedia.org/wiki/Pivot_table#Column_labels).
+    - [.group_by] <code>[ &#x27;Array&#x27; ].&lt;string&gt;</code> - An array of column names to
+use as [Group By](https://en.wikipedia.org/wiki/Pivot_table#Row_labels).
+    - [.split_by] <code>[ &#x27;Array&#x27; ].&lt;string&gt;</code> - An array of column names to
+use as [Split By](https://en.wikipedia.org/wiki/Pivot_table#Column_labels).
     - [.columns] <code>[ &#x27;Array&#x27; ].&lt;Object&gt;</code> - An array of column names for the
 output columns. If none are provided, all columns are output.
     - [.aggregates] <code>Object</code> - An object, the keys of which are
 column names, and their respective values are the aggregates calculations
-to use when this view has `row_pivots`. A column provided to
+to use when this view has `group_by`. A column provided to
 `config.columns` without an aggregate in this object, will use the
 default aggregate calculation for its type.
     - [.filter] <code>[ &#x27;Array&#x27; ].&lt;Array.&lt;string&gt;&gt;</code> - An Array of Filter
@@ -718,7 +718,7 @@ desc", "asc abs", "desc abs", "col asc abs", "col desc abs".
 **Example**  
 ```js
 const view = await table.view({
-     row_pivots: ["region"],
+     group_by: ["region"],
      columns: ["region"],
      aggregates: {"region": "dominant"},
      filter: [["client", "contains", "fred"]],
