@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>perspective-python API · Perspective</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="`perspective.table` contains `Table` and `View`, the data primitives of Perspective."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="perspective-python API · Perspective"/><meta property="og:type" content="website"/><meta property="og:url" content="https://perspective.finos.org//index.html"/><meta property="og:description" content="`perspective.table` contains `Table` and `View`, the data primitives of Perspective."/><meta property="og:image" content="https://perspective.finos.org/img/perspective.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://perspective.finos.org/img/perspective.png"/><link rel="shortcut icon" href="/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-light.min.css"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Material+Icons"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Public+Sans"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono"/><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900"/><script type="text/javascript" src="js/fonts.js"></script><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="js/index.js"></script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/logo.png" alt="Perspective"/><h2 class="headerTitleWithLogo">Perspective</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/docs/md/js.html" target="_self">Docs</a></li><li class=""><a href="https://github.com/finos/perspective/" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>API</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Guides</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/md/js.html">JavaScript User Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/md/python.html">Python User Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/md/table.html">Table</a></li><li class="navListItem"><a class="navItem" href="/docs/md/view.html">View</a></li><li class="navListItem"><a class="navItem" href="/docs/md/server.html">Data Binding</a></li><li class="navListItem"><a class="navItem" href="/docs/md/development.html">Developer Guide</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">API</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/obj/perspective.html">perspective API</a></li><li class="navListItem"><a class="navItem" href="/docs/obj/perspective-viewer.html">perspective-viewer API</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/obj/perspective-python.html">perspective-python API</a></li></ul></div></div></section></div><script>
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>perspective-python API · Perspective</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="`perspective.table` contains `Table` and `View`, the data primitives of Perspective."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="perspective-python API · Perspective"/><meta property="og:type" content="website"/><meta property="og:url" content="https://perspective.finos.org//index.html"/><meta property="og:description" content="`perspective.table` contains `Table` and `View`, the data primitives of Perspective."/><meta property="og:image" content="https://perspective.finos.org/img/perspective.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://perspective.finos.org/img/perspective.png"/><link rel="shortcut icon" href="/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-light.min.css"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Material+Icons"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Public+Sans"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono"/><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="js/index.js"></script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/logo.png" alt="Perspective"/><h2 class="headerTitleWithLogo">Perspective</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/docs/md/js.html" target="_self">Docs</a></li><li class=""><a href="https://github.com/finos/perspective/" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>API</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Guides</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/md/js.html">JavaScript User Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/md/python.html">Python User Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/md/table.html">Table</a></li><li class="navListItem"><a class="navItem" href="/docs/md/view.html">View</a></li><li class="navListItem"><a class="navItem" href="/docs/md/server.html">Data Binding</a></li><li class="navListItem"><a class="navItem" href="/docs/md/development.html">Developer Guide</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">API</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/obj/perspective.html">perspective API</a></li><li class="navListItem"><a class="navItem" href="/docs/obj/perspective-viewer.html">perspective-viewer API</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/obj/perspective-python.html">perspective-python API</a></li></ul></div></div></section></div><script>
             var coll = document.getElementsByClassName('collapsible');
             var checkActiveCategory = true;
             for (var i = 0; i < coll.length; i++) {
@@ -199,7 +199,7 @@ that should be removed.</p></li>
 <span class="hljs-meta">&gt;&gt;&gt; </span>tbl.view().to_records()
 [{<span class="hljs-string">"a"</span>: <span class="hljs-number">1</span>}]
 </code></pre>
-<h4><a class="anchor" aria-hidden="true" id="viewcolumnsnone-row_pivotsnone-column_pivotsnone-aggregatesnone-sortnone-filternone-expressionsnone"></a><a href="#viewcolumnsnone-row_pivotsnone-column_pivotsnone-aggregatesnone-sortnone-filternone-expressionsnone" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>view(columns=None, row_pivots=None, column_pivots=None, aggregates=None, sort=None, filter=None, expressions=None)</h4>
+<h4><a class="anchor" aria-hidden="true" id="viewcolumnsnone-group_bynone-split_bynone-aggregatesnone-sortnone-filternone-expressionsnone"></a><a href="#viewcolumnsnone-group_bynone-split_bynone-aggregatesnone-sortnone-filternone-expressionsnone" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>view(columns=None, group_by=None, split_by=None, aggregates=None, sort=None, filter=None, expressions=None)</h4>
 <p>Create a new <code>View</code> from this
 <code>Table</code> via the supplied keyword arguments.</p>
 <p>A View is an immutable set of transformations applied to the data stored
@@ -210,10 +210,10 @@ pivoting, aggregating, sorting, and filtering.</p>
 <ul>
 <li><p><strong>columns</strong> (<code>list</code> of <code>str</code>) – A list of column names to be
 visible to the user.</p></li>
-<li><p><strong>row_pivots</strong> (<code>list</code> of <code>str</code>) – A list of column names to
-use as row pivots.</p></li>
-<li><p><strong>column_pivots</strong> (<code>list</code> of <code>str</code>) – A list of column names
-to use as column pivots.</p></li>
+<li><p><strong>group_by</strong> (<code>list</code> of <code>str</code>) – A list of column names to
+use as group by.</p></li>
+<li><p><strong>split_by</strong> (<code>list</code> of <code>str</code>) – A list of column names
+to use as split by.</p></li>
 <li><p><strong>aggregates</strong> (<code>dict</code> of <code>str</code> to <code>str</code>) – A dictionary
 of column names to aggregate types, which specify aggregates
 for individual columns.</p></li>
@@ -300,9 +300,9 @@ this <code>View</code> was instantiated.</p>
 <h4><a class="anchor" aria-hidden="true" id="sides"></a><a href="#sides" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>sides()</h4>
 <p>An integer representing the # of hierarchial axis on this
 <code>View</code>.</p>
-<p>0 - Neither <code>row_pivots</code> nor <code>column_pivots</code> properties are set.</p>
-<p>1 - <code>row_pivots</code> is set.</p>
-<p>2 - <code>column_pivots</code> is set (and also maybe <code>row_pivots</code>).</p>
+<p>0 - Neither <code>group_by</code> nor <code>split_by</code> properties are set.</p>
+<p>1 - <code>group_by</code> is set.</p>
+<p>2 - <code>split_by</code> is set (and also maybe <code>group_by</code>).</p>
 <ul>
 <li><p><strong>Returns</strong></p>
 <p>0 &lt;= N &lt;= 2</p></li>
@@ -323,7 +323,7 @@ this <code>View</code> was instantiated.</p>
 </ul>
 <h4><a class="anchor" aria-hidden="true" id="num_rows"></a><a href="#num_rows" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>num_rows()</h4>
 <p>The number of aggregated rows in the <code>View</code>.</p>
-<p>This count includes the total aggregate rows for all <code>row_pivots</code>
+<p>This count includes the total aggregate rows for all <code>group_by</code>
 depth levels, and can also be affected by any applied <code>filter</code>.</p>
 <ul>
 <li><p><strong>Returns</strong></p>
@@ -335,7 +335,7 @@ depth levels, and can also be affected by any applied <code>filter</code>.</p>
 </ul>
 <h4><a class="anchor" aria-hidden="true" id="num_columns"></a><a href="#num_columns" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>num_columns()</h4>
 <p>The number of aggregated columns in the <code>View</code>.
-This is affected by the <code>column_pivots</code> that are applied to the
+This is affected by the <code>split_by</code> that are applied to the
 <code>View</code>.</p>
 <ul>
 <li><p><strong>Returns</strong></p>
@@ -372,13 +372,13 @@ This is affected by the <code>column_pivots</code> that are applied to the
 <ul>
 <li><p><strong>Parameters</strong></p>
 <p><strong>depth</strong> (<code>int</code>) – Depth to collapse all nodes to, which
-may be no greater then the length of the <code>row_pivots</code>
+may be no greater then the length of the <code>group_by</code>
 property.</p></li>
 </ul>
 <h4><a class="anchor" aria-hidden="true" id="column_paths"></a><a href="#column_paths" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>column_paths()</h4>
 <p>Returns the names of the columns as they show in the
 <code>View</code>, i.e. the hierarchial columns when
-<code>column_pivots</code> is applied.</p>
+<code>split_by</code> is applied.</p>
 <ul>
 <li><p><strong>Returns</strong></p>
 <p>obj`str`: Aggregated column names.</p></li>
@@ -527,9 +527,9 @@ called!
 <p>Serialize the <code>View</code>’s dataset into a <code>list</code>
 of <code>dict</code> containing each row.</p>
 <p>By default, the entire dataset is returned, though this can be windowed
-via <code>kwargs</code>.  When <code>row_pivots</code> are applied, a <code>__ROW_PATH__</code>
+via <code>kwargs</code>.  When <code>group_by</code> are applied, a <code>__ROW_PATH__</code>
 column name will be generated in addition to the applied <code>columns</code>.
-When <code>column_pivots</code> are applied, column names will be qualified
+When <code>split_by</code> are applied, column names will be qualified
 with their column group name.</p>
 <ul>
 <li><p><strong>Keyword Arguments</strong></p>
@@ -683,9 +683,9 @@ formatted in the CSV.</p></li>
 <p>Serialize the <code>View</code>’s dataset into a <code>list</code>
 of <code>dict</code> containing each row.</p>
 <p>By default, the entire dataset is returned, though this can be windowed
-via <code>kwargs</code>.  When <code>row_pivots</code> are applied, a <code>__ROW_PATH__</code>
+via <code>kwargs</code>.  When <code>group_by</code> are applied, a <code>__ROW_PATH__</code>
 column name will be generated in addition to the applied <code>columns</code>.
-When <code>column_pivots</code> are applied, column names will be qualified
+When <code>split_by</code> are applied, column names will be qualified
 with their column group name.</p>
 <ul>
 <li><p><strong>Keyword Arguments</strong></p>
@@ -773,7 +773,7 @@ and state is maintained across page refreshes.</p>
 <span class="hljs-meta">&gt;&gt;&gt; </span>tbl = Table(data, index=<span class="hljs-string">"a"</span>)
 <span class="hljs-meta">&gt;&gt;&gt; </span>widget = PerspectiveWidget(
 <span class="hljs-meta">... </span>    tbl,
-<span class="hljs-meta">... </span>    row_pivots=[<span class="hljs-string">"a"</span>],
+<span class="hljs-meta">... </span>    group_by=[<span class="hljs-string">"a"</span>],
 <span class="hljs-meta">... </span>    sort=[[<span class="hljs-string">"b"</span>, <span class="hljs-string">"desc"</span>]],
 <span class="hljs-meta">... </span>    filter=[[<span class="hljs-string">"a"</span>, <span class="hljs-string">"&gt;"</span>, <span class="hljs-number">1</span>]]
 <span class="hljs-meta">... </span>)
@@ -830,7 +830,7 @@ Examples:
     &gt;&gt;&gt; widget = PerspectiveWidget(
     ...     {&quot;a&quot;: [1, 2, 3]},
     ...     aggregates={&quot;a&quot;: &quot;avg&quot;},
-    ...     row_pivots=[&quot;a&quot;],
+    ...     group_by=[&quot;a&quot;],
     ...     sort=[[&quot;b&quot;, &quot;desc&quot;]],
     ...     filter=[[&quot;a&quot;, &quot;&gt;&quot;, 1]],
     ...     expressions=[&quot;// new column
@@ -865,7 +865,7 @@ deleted. Defaults to True.</p></li>
 <p>Bases: <code>perspective.viewer.viewer_traitlets.PerspectiveTraitlets</code>, <code>object</code></p>
 <p>PerspectiveViewer wraps the perspective.Table API and exposes an API
 around creating views, loading data, and updating data.</p>
-<h4><a class="anchor" aria-hidden="true" id="__init__plugindatagrid-columnsnone-row_pivotsnone-column_pivotsnone-aggregatesnone-sortnone-filternone-expressionsnone-plugin_confignone-darknone-editablefalse"></a><a href="#__init__plugindatagrid-columnsnone-row_pivotsnone-column_pivotsnone-aggregatesnone-sortnone-filternone-expressionsnone-plugin_confignone-darknone-editablefalse" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>_<em>init</em>_(plugin='Datagrid', columns=None, row_pivots=None, column_pivots=None, aggregates=None, sort=None, filter=None, expressions=None, plugin_config=None, dark=None, editable=False)</h4>
+<h4><a class="anchor" aria-hidden="true" id="__init__plugindatagrid-columnsnone-group_bynone-split_bynone-aggregatesnone-sortnone-filternone-expressionsnone-plugin_confignone-settingstrue-themenone-editablefalse"></a><a href="#__init__plugindatagrid-columnsnone-group_bynone-split_bynone-aggregatesnone-sortnone-filternone-expressionsnone-plugin_confignone-settingstrue-themenone-editablefalse" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>_<em>init</em>_(plugin='Datagrid', columns=None, group_by=None, split_by=None, aggregates=None, sort=None, filter=None, expressions=None, plugin_config=None, settings=True, theme=None, editable=False)</h4>
 <p>Initialize an instance of PerspectiveViewer with the given viewer</p>
 <pre><code class="hljs">configuration.  Do not pass a Table or data into the constructor -
 use the `load()` method to provide the viewer with data.
@@ -876,13 +876,13 @@ Keyword Arguments:
 
         visible to the user.
 
-    row_pivots (`list` of `str`): A list of column names to
+    group_by (`list` of `str`): A list of column names to
 
-        use as row pivots.
+        use as group by.
 
-    column_pivots (`list` of `str`): A list of column names
+    split_by (`list` of `str`): A list of column names
 
-        to use as column pivots.
+        to use as split by.
 
     aggregates (`dict` of `str` to `str`):  A dictionary
 
@@ -912,7 +912,11 @@ Keyword Arguments:
 
         the datagrid plugin or a chart plugin.
 
-    dark (`bool`): Whether to invert the color theme.
+    settings(`bool`): Whether the perspective query settings
+
+        panel should be open.
+
+    theme (`str`): The color theme to use.
     editable (`bool`): Whether to allow editability using the grid.
 
 Examples:
@@ -920,7 +924,7 @@ Examples:
     ```python
     &gt;&gt;&gt; viewer = PerspectiveViewer(
     ...     aggregates={&quot;a&quot;: &quot;avg&quot;},
-    ...     row_pivots=[&quot;a&quot;],
+    ...     group_by=[&quot;a&quot;],
     ...     sort=[[&quot;b&quot;, &quot;desc&quot;]],
     ...     filter=[[&quot;a&quot;, &quot;&gt;&quot;, 1]],
     ...     expressions=[&quot;// new column
@@ -1016,7 +1020,7 @@ configuration can be reproduced.</p>
 <p>Resets the viewer’s attributes and state, but does not delete or
 modify the underlying Table.</p>
 <h5><a class="anchor" aria-hidden="true" id="examples-12"></a><a href="#examples-12" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Examples</h5>
-<p>widget = PerspectiveWidget(data, row_pivots=[“date”], plugin=Plugin.XBAR)
+<p>widget = PerspectiveWidget(data, group_by=[“date”], plugin=Plugin.XBAR)
 widget.reset()
 widget.plugin  #</p>
 <h4><a class="anchor" aria-hidden="true" id="deletedelete_tabletrue-1"></a><a href="#deletedelete_tabletrue-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>delete(delete_table=True)</h4>

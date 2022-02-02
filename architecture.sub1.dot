@@ -30,7 +30,7 @@ digraph G {
            
          
             view2 [
-                label="view({\l    row_pivot: [\"Sub-Category\"]\l})\l"
+                label="view({\l    group_by: [\"Sub-Category\"]\l})\l"
                 width=2.5
                 color=none
                 fillcolor="#EDEBDF"

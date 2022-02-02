@@ -24,13 +24,13 @@ digraph G {
                 fillcolor="#E6E2DA"
             ]
             view_thread_2 [
-                label="view({\l    row_pivot: [\"State\"]]\l})\l"
+                label="view({\l    group_by: [\"State\"]]\l})\l"
                 width=2.5
                 color=none
                 fillcolor="#EDEBDF"
             ]
             view_thread_2_2 [
-                label="view({\l    row_pivot: [\"City\"]]\l})\l"
+                label="view({\l    group_by: [\"City\"]]\l})\l"
                 width=2.5
                 color=none
                 fillcolor="#EDEBDF"
@@ -55,7 +55,7 @@ digraph G {
                 fillcolor="#E6E2DA"
             ]
             view_thread_1 [
-                label="view({\l    row_pivots:'[\"State\"]\l    column_pivots:'[\"Segment\"]'\l})\l"
+                label="view({\l    group_by:'[\"State\"]\l    split_by:'[\"Segment\"]'\l})\l"
                 width=2.5
                 color=none
                 fillcolor="#EDEBDF"
@@ -94,13 +94,13 @@ digraph G {
                 fillcolor="#E6E2DA"
             ]
             view1 [
-                label="view({\l    row_pivot: [\"Category\"]\l    filter: [[\"State\",\"==\",\"Texas\"]]\l})\l"
+                label="view({\l    group_by: [\"Category\"]\l    filter: [[\"State\",\"==\",\"Texas\"]]\l})\l"
                 width=2.5
                 color=none
                 fillcolor="#EDEBDF"
             ]
             view2 [
-                label="view({\l    row_pivot: [\"Sub-Category\"]\l})\l"
+                label="view({\l    group_by: [\"Sub-Category\"]\l})\l"
                 width=2.5
                 color=none
                 fillcolor="#EDEBDF"
@@ -133,7 +133,7 @@ digraph G {
             ]
 
             view12 [
-                label="view({\l    row_pivot: [\"Category\"]\l    filter: [[\"State\",\"==\",\"Texas\"]]\l})\l"
+                label="view({\l    group_by: [\"Category\"]\l    filter: [[\"State\",\"==\",\"Texas\"]]\l})\l"
                 width=2.5
                 color=none
                 fillcolor="#EDEBDF"
