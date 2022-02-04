@@ -64,13 +64,13 @@
     }
 
     input[type="checkbox"] {
-        appearance: none;
+        appearance: var(--column-style-checkbox--appearance, auto);
         font-family: var(--button--font-family, inherit);
         font-size: 16px;
         text-align: center;
 
         &:checked:after {
-            content: "\E834";
+            content: var(--column-style-checkbox-checked--content, none);
         }
 
         &:not([disabled]):checked:after {
@@ -78,7 +78,7 @@
         }
 
         &:after {
-            content: "\E835";
+            content: var(--column-style-checkbox-unchecked--content, none);
             color: var(--inactive--color, #999);
         }
     }
