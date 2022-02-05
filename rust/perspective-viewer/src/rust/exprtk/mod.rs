@@ -29,9 +29,9 @@ pub use init::init_theme;
 ///
 /// # Arguments
 /// * `names` - a vector of owned names for the `View()` with page focus.
-pub fn set_global_completion_column_names(names: Vec<String>) {
+pub fn set_global_completion_column_names(names: &[String]) {
     COMPLETION_COLUMN_NAMES.with(|x| {
-        *x.borrow_mut() = names;
+        *x.borrow_mut() = names.to_vec();
     });
 }
 

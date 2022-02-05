@@ -98,36 +98,41 @@ impl Component for PerspectiveViewer {
 
                 false
             }
-            Msg::ToggleSettingsInit(force, resolve) => {
-                match force {
-                    Some(SettingsUpdate::Missing) => (),
-                    Some(SettingsUpdate::SetDefault) => {
-                        self.init_toggle_settings_task(ctx, Some(false), resolve)
-                    }
-                    Some(SettingsUpdate::Update(force)) => {
-                        self.init_toggle_settings_task(ctx, Some(force), resolve)
-                    }
-                    None => self.init_toggle_settings_task(ctx, None, resolve),
-                }
-
+            Msg::ToggleSettingsInit(Some(SettingsUpdate::Missing), None) => false,
+            Msg::ToggleSettingsInit(Some(SettingsUpdate::Missing), Some(resolve)) => {
+                resolve.send(Ok(JsValue::UNDEFINED)).unwrap();
                 false
             }
-            Msg::ToggleSettingsComplete(is_open, resolve) => match is_open {
-                SettingsUpdate::SetDefault if self.settings_open => {
-                    self.settings_open = false;
-                    self.on_rendered = Some(resolve);
-                    true
-                }
-                SettingsUpdate::Update(force) if force != self.settings_open => {
-                    self.settings_open = force;
-                    self.on_rendered = Some(resolve);
-                    true
-                }
-                _ => {
-                    resolve.send(()).expect("Orphan render");
-                    false
-                }
-            },
+            Msg::ToggleSettingsInit(Some(SettingsUpdate::SetDefault), resolve) => {
+                self.init_toggle_settings_task(ctx, Some(false), resolve);
+                false
+            }
+            Msg::ToggleSettingsInit(Some(SettingsUpdate::Update(force)), resolve) => {
+                self.init_toggle_settings_task(ctx, Some(force), resolve);
+                false
+            }
+            Msg::ToggleSettingsInit(None, resolve) => {
+                self.init_toggle_settings_task(ctx, None, resolve);
+                false
+            }
+            Msg::ToggleSettingsComplete(SettingsUpdate::SetDefault, resolve)
+                if self.settings_open =>
+            {
+                self.settings_open = false;
+                self.on_rendered = Some(resolve);
+                true
+            }
+            Msg::ToggleSettingsComplete(SettingsUpdate::Update(force), resolve)
+                if force != self.settings_open =>
+            {
+                self.settings_open = force;
+                self.on_rendered = Some(resolve);
+                true
+            }
+            Msg::ToggleSettingsComplete(_, resolve) => {
+                resolve.send(()).expect("Orphan render");
+                false
+            }
             Msg::RenderLimits(dimensions) => {
                 if self.dimensions != dimensions {
                     self.dimensions = dimensions;

@@ -30,7 +30,6 @@ use registry::*;
 use std::cell::{Ref, RefCell};
 use std::future::Future;
 use std::ops::Deref;
-use std::pin::Pin;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -425,88 +424,4 @@ fn make_short_name(name: &str) -> String {
         .chars()
         .filter(|x| x.is_alphabetic())
         .collect()
-}
-
-/// A `RenderableProps` is any struct with `session` and `renderer` fields, as
-/// this method is boilerplate but has no other trait to live on currently.  As
-/// I'm too lazy to be bothered to implement a `proc-macro` crate, instead this
-/// trait can be conveniently derived via the `derive_renderable_props!()` macro
-/// on a suitable struct.
-pub trait RenderableProps {
-    fn session(&self) -> &'_ Session;
-    fn renderer(&self) -> &'_ Renderer;
-
-    fn update_and_render(&self, update: crate::config::ViewConfigUpdate) {
-        self.session().update_view_config(update);
-        let session = self.session().clone();
-        let renderer = self.renderer().clone();
-        let _ = promisify_ignore_view_delete(async move {
-            drop(
-                renderer
-                    .draw(session.validate().await.create_view())
-                    .await?,
-            );
-            Ok(JsValue::UNDEFINED)
-        });
-    }
-
-    fn render(&self) {
-        let session = self.session().clone();
-        let renderer = self.renderer().clone();
-        let _ = promisify_ignore_view_delete(async move {
-            drop(renderer.draw(async { Ok(&session) }).await?);
-            Ok(JsValue::UNDEFINED)
-        });
-    }
-
-    fn get_viewer_config(
-        &self,
-    ) -> Pin<Box<dyn Future<Output = Result<ViewerConfig, JsValue>>>> {
-        let view_config = self.session().get_view_config();
-        let js_plugin = self.renderer().get_active_plugin();
-        let renderer = self.renderer().clone();
-        Box::pin(async move {
-            let settings = renderer.is_settings_open();
-            let js_plugin = js_plugin?;
-            let plugin = js_plugin.name();
-            let plugin_config = js_plugin
-                .save()
-                .into_serde::<serde_json::Value>()
-                .into_jserror()?;
-
-            let theme = renderer.get_theme_name().await;
-            Ok(ViewerConfig {
-                plugin,
-                plugin_config,
-                settings,
-                view_config,
-                theme,
-            })
-        })
-    }
-}
-
-impl RenderableProps for (Session, Renderer) {
-    fn session(&self) -> &'_ Session {
-        &self.0
-    }
-
-    fn renderer(&self) -> &'_ Renderer {
-        &self.1
-    }
-}
-
-#[macro_export]
-macro_rules! derive_renderable_props {
-    ($key:ty) => {
-        impl crate::renderer::RenderableProps for $key {
-            fn session(&self) -> &'_ Session {
-                &self.session
-            }
-
-            fn renderer(&self) -> &'_ Renderer {
-                &self.renderer
-            }
-        }
-    };
 }

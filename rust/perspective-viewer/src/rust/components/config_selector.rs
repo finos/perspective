@@ -6,18 +6,18 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::config::*;
-use crate::custom_elements::filter_dropdown::FilterDropDownElement;
-use crate::dragdrop::*;
-use crate::renderer::*;
-use crate::session::*;
-use crate::utils::*;
-use crate::*;
-
 use super::containers::dragdrop_list::*;
 use super::filter_item::*;
 use super::pivot_item::*;
 use super::sort_item::*;
+use crate::config::*;
+use crate::custom_elements::filter_dropdown::FilterDropDownElement;
+use crate::dragdrop::*;
+use crate::model::*;
+use crate::renderer::*;
+use crate::session::*;
+use crate::utils::*;
+use crate::*;
 
 use std::rc::Rc;
 use yew::prelude::*;
@@ -29,7 +29,7 @@ pub struct ConfigSelectorProps {
     pub dragdrop: DragDrop,
 }
 
-derive_renderable_props!(ConfigSelectorProps);
+derive_session_renderer_model!(ConfigSelectorProps);
 
 #[derive(Debug)]
 pub enum ConfigSelectorMsg {

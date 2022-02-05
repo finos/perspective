@@ -36,10 +36,11 @@ pub use self::weak_scope::*;
 macro_rules! maybe {
     ($($exp:stmt);*) => {{
         #[must_use]
-        let x = (|| {
-            $(
-                $exp
-            )*
+        let x = ({
+            #[inline(always)]
+            || {
+                $($exp)*
+            }
         })();
         x
     }};

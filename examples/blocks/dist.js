@@ -10,12 +10,24 @@ const replacements = {
     // the wasm assets to not load correctly when using aliases ..
 
     // "perspective/dist/umd/perspective.js": "perspective"
-    "perspective/dist/umd/perspective.js": "perspective",
-    "perspective-viewer/dist/umd/perspective-viewer.js": "perspective-viewer",
+    "perspective/dist/umd/perspective.js": "perspective@latest",
+    "perspective-viewer/dist/umd/perspective-viewer.js":
+        "perspective-viewer@latest",
     "perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js":
-        "perspective-viewer-datagrid",
+        "perspective-viewer-datagrid@latest",
     "perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js":
-        "perspective-viewer-d3fc",
+        "perspective-viewer-d3fc@latest",
+    "perspective-workspace/dist/umd/perspective-workspace.js":
+        "perspective-workspace@latest",
+
+    "perspective/dist/cdn/perspective.js":
+        "perspective@latest/dist/cdn/perspective.js",
+    "perspective-viewer/dist/cdn/perspective-viewer.js":
+        "perspective-viewer@latest/dist/cdn/perspective-viewer.js",
+    "perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js":
+        "perspective-viewer-datagrid@latest/dist/cdn/perspective-viewer-datagrid.js",
+    "perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js":
+        "perspective-viewer-d3fc@latest/dist/cdn/perspective-viewer-d3fc.js",
 };
 
 execute`mkdir -p dist`;

@@ -8,6 +8,7 @@
 
 use super::containers::dropdown::*;
 use crate::config::*;
+use crate::model::*;
 use crate::renderer::*;
 use crate::session::*;
 use crate::*;
@@ -22,7 +23,7 @@ pub struct AggregateSelectorProps {
     pub session: Session,
 }
 
-derive_renderable_props!(AggregateSelectorProps);
+derive_session_renderer_model!(AggregateSelectorProps);
 
 impl PartialEq for AggregateSelectorProps {
     fn eq(&self, _rhs: &Self) -> bool {

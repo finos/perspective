@@ -3,7 +3,7 @@
     "superstore.html/doesn't leak elements.": "d0fd18b3d4d7c183c5ed155b4bf37972",
     "superstore.html/doesn't leak views when setting group by.": "54daaa4bbbe59f6ed4acc301ba871bab",
     "superstore.html/doesn't leak views when setting filters.": "6dfc1e505f1428424c3265f0236f22fc",
-    "__GIT_COMMIT__": "d78112fd72a79af6eb96cbfe93033d82dbcd60bc",
+    "__GIT_COMMIT__": "897bda0e979438e37387549ed838c3fd27c9df9d",
     "blank.html/Handles reloading with a schema.": "e58c62f6e0ff16dc4d753f99e0fc39c3",
     "superstore_shows_a_grid_without_any_settings_applied_": "ae1c4690d978598ca14c8669244ce604",
     "superstore_Responsive_Layout_shows_horizontal_columns_on_small_vertical_viewports_": "57ba3ad341cf8a0e4df6ab96715ff2a0",
@@ -69,5 +69,16 @@
     "Expressions_Resetting_the_viewer_partially_should_not_delete_all_expressions": "0c15f7064c3299a7dba47477c7028d1d",
     "Expressions_Resetting_the_viewer_partially_when_expression_as_in_columns_field,_should_not_delete_all_expressions": "0c15f7064c3299a7dba47477c7028d1d",
     "superstore-all_restore__Bucket_by_year_": "3243fc1f0c30d45d6f103b340547e044",
-    "superstore-all_restore__Plugin_config_color_mode_": "e15272040eea436c123116c69c11a3e8"
+    "superstore-all_restore__Plugin_config_color_mode_": "e15272040eea436c123116c69c11a3e8",
+    "dragdrop_superstore_drop_from_inactive_to_active_should_add": "dbd60eaf68a7e64f53789c9a0284f760",
+    "dragdrop_superstore_drop_from_active_to_active_should_swap": "3e28538caa72dddf53cdc24c7e2f31db",
+    "dragdrop_column-selector-modes_drop_from_inactive_to_required_column_should_add": "f3a7cf5a4ecb5b6d6716157c3754a2f9",
+    "dragdrop_column-selector-modes_drop_from_required_to_required_should_swap": "d4ee59df6cdf10bdda2a267ab86ae47d",
+    "dragdrop_column-selector-modes_drop_from_required_to_empty_column_should_fail": "dc67df9995256380ee392fbf3bc93d49",
+    "dragdrop_column-selector-modes_drop_from_inactive_to_empty_should_add": "ed1fa96c3309bdf14b39510976ab4905",
+    "dragdrop_column-selector-modes_drop_from_named_to_required_should_swap": "19a342f5d7a520d31acc86cd44216a6c",
+    "dragdrop_column-selector-modes_drop_from_optional_to_empty_columns_should_move": "97c3b093844985b6c85522f3a8a38b2b",
+    "dragdrop_column-selector-modes_dragover_from_named_to_required_columns_should_swap": "d469dcb92ea7110eae4047866e1e1eb1",
+    "dragdrop_column-selector-modes_dragover_from_optional_to_empty_columns_should_move": "fe87af103e2003b54d3c6f11027bc6cd",
+    "dragdrop_column-selector-modes_dragover_from_optional_to_required_columns_should_swap": "9d1b438f6be52216557505a8c66da036"
 }

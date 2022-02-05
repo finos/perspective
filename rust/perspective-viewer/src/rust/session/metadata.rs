@@ -137,37 +137,11 @@ impl SessionMetadata {
         Ok(expression_names)
     }
 
-    /// The `table`'s unique column names, including the alias columns names of
-    /// expression columns.
-    fn _get_all_columns(&self) -> Option<Vec<String>> {
-        self.as_ref().map(move |meta| {
-            let expressions = meta
-                .expr_meta
-                .as_ref()
-                .map(|x| Box::new(x.schema.keys()) as Box<dyn Iterator<Item = &String>>)
-                .unwrap_or_else(|| Box::new([].iter()));
-
-            meta.column_names
-                .iter()
-                .chain(expressions)
-                .cloned()
-                .collect::<Vec<_>>()
-        })
-    }
-
     /// Returns the unique column names in this session that are expression columns.
-    pub fn get_expression_columns(&self) -> Vec<String> {
-        let expr = maybe!(Some(
-            self.as_ref()?
-                .expr_meta
-                .as_ref()?
-                .schema
-                .keys()
-                .cloned()
-                .collect::<Vec<_>>()
-        ));
-
-        expr.unwrap_or_default()
+    pub fn get_expression_columns(&self) -> impl Iterator<Item = &'_ String> {
+        maybe!(Some(self.as_ref()?.expr_meta.as_ref()?.schema.keys()))
+            .into_iter()
+            .flatten()
     }
 
     /// Returns the full original expression `String` for an expression alias.
@@ -211,16 +185,8 @@ impl SessionMetadata {
             .remove(alias)))
     }
 
-    pub fn get_table_columns(&self) -> Option<Vec<String>> {
-        self.as_ref().map(|meta| meta.column_names.clone())
-    }
-
-    pub fn iter_columns<'a>(&'a self) -> Box<dyn Iterator<Item = &'a String> + 'a> {
-        Box::new(
-            maybe!(Some(self.as_ref()?.column_names.iter()))
-                .into_iter()
-                .flatten(),
-        )
+    pub fn get_table_columns(&self) -> Option<&'_ Vec<String>> {
+        self.as_ref().map(|meta| &meta.column_names)
     }
 
     pub fn is_column_expression(&self, name: &str) -> bool {
@@ -274,8 +240,8 @@ impl SessionMetadata {
                 Type::Float | Type::Integer => {
                     let num_cols = self
                         .get_expression_columns()
-                        .into_iter()
-                        .chain(self.get_table_columns()?.into_iter())
+                        .cloned()
+                        .chain(self.get_table_columns()?.clone().into_iter())
                         .map(move |name| {
                             self.get_column_table_type(&name)
                                 .map(|coltype| (name, coltype))

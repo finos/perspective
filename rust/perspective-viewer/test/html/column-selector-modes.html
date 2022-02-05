@@ -1,0 +1,67 @@
+<!--
+   
+   Copyright (c) 2017, the Perspective Authors.
+   
+   This file is part of the Perspective library, distributed under the terms of
+   the Apache License 2.0.  The full license can be found in the LICENSE file.
+
+-->
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <script type="module" src="perspective.js"></script>
+        <script type="module" src="perspective-viewer.js"></script>
+
+        <link rel="stylesheet" href="demo.css" />
+
+        <style>
+            perspective-expression-editor {
+                --monaco-cursor--visibility: hidden;
+                --monaco-container--appearance: none;
+            }
+        </style>
+    </head>
+
+    <body>
+        <script type="module">
+            import perspective from "./perspective.js";
+
+            class TestChartPlugin extends customElements.get("perspective-viewer-plugin") {
+                get name() {
+                    return "test chart";
+                }
+
+                get select_mode() {
+                    return "toggle"
+                }
+
+                get config_column_names() {
+                    return ["X Axis", "Y Axis", "Color", "Size", "Tooltip"];
+                }
+
+                get min_config_columns() {
+                    return 2;
+                }
+            }
+            
+            customElements.define("test-chart-plugin", TestChartPlugin);
+            const Viewer = customElements.get("perspective-viewer");
+            Viewer.registerPlugin("test-chart-plugin");
+
+            const viewer = document.createElement("perspective-viewer");
+            document.body.appendChild(viewer);
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "superstore.csv", true);
+            xhr.onload = async function () {
+                window.__CSV__ = xhr.response;
+                window.__WORKER__ = perspective.worker();
+                const table = window.__WORKER__.table(xhr.response);
+                const t = await table;
+                await viewer.load(table);
+            };
+            xhr.send(null);
+        </script>
+    </body>
+</html>

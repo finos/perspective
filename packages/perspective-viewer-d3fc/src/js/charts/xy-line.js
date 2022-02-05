@@ -101,7 +101,7 @@ xyLine.plugin = {
     initial: {
         type: "number",
         count: 2,
-        names: ["X Axis", "Y Axis"],
+        names: ["X Axis", "Y Axis", "Tooltip"],
     },
     selectMode: "toggle",
 };
