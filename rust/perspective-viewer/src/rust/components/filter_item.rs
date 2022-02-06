@@ -9,6 +9,7 @@
 use crate::config::*;
 use crate::custom_elements::filter_dropdown::*;
 use crate::dragdrop::*;
+use crate::model::*;
 use crate::renderer::*;
 use crate::session::*;
 use crate::utils::{posix_to_utc_str, str_to_utc_posix};
@@ -54,7 +55,7 @@ impl PartialEq for FilterItemProps {
     }
 }
 
-derive_renderable_props!(FilterItemProps);
+derive_session_renderer_model!(FilterItemProps);
 
 impl DragDropListItemProps for FilterItemProps {
     type Item = Filter;

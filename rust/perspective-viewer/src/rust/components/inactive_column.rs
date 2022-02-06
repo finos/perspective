@@ -9,6 +9,7 @@
 use crate::config::*;
 use crate::dragdrop::*;
 use crate::js::plugin::*;
+use crate::model::*;
 use crate::renderer::*;
 use crate::session::*;
 use crate::*;
@@ -40,7 +41,7 @@ impl PartialEq for InactiveColumnProps {
     }
 }
 
-derive_renderable_props!(InactiveColumnProps);
+derive_session_renderer_model!(InactiveColumnProps);
 
 impl InactiveColumnProps {
     /// Add a column to the active columns, which corresponds to the `columns` field

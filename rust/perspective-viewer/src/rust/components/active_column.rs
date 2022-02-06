@@ -11,6 +11,7 @@ use super::expression_toolbar::*;
 use crate::config::*;
 use crate::dragdrop::*;
 use crate::js::plugin::*;
+use crate::model::*;
 use crate::renderer::*;
 use crate::session::*;
 use crate::*;
@@ -18,17 +19,6 @@ use crate::*;
 use itertools::Itertools;
 use web_sys::*;
 use yew::prelude::*;
-
-/// The possible states of a column (row) in the active columns list, including the
-/// `Option<String>` label type.
-#[derive(Clone, PartialEq)]
-pub enum ActiveColumnState {
-    Column(Label, String),
-    Required(Label),
-    DragOver(Label),
-}
-
-type Label = Option<String>;
 
 #[derive(Properties, Clone)]
 pub struct ActiveColumnProps {
@@ -70,7 +60,7 @@ impl ActiveColumnProps {
     }
 }
 
-derive_renderable_props!(ActiveColumnProps);
+derive_session_renderer_model!(ActiveColumnProps);
 
 impl ActiveColumnProps {
     /// Remove an active column from `columns`, or alternatively make this column

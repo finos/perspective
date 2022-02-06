@@ -14,6 +14,7 @@ use crate::dragdrop::*;
 use crate::js::perspective::*;
 use crate::js::plugin::JsPerspectiveViewerPlugin;
 use crate::js::resize_observer::*;
+use crate::model::*;
 use crate::renderer::*;
 use crate::session::Session;
 use crate::utils::*;
@@ -112,7 +113,7 @@ pub struct PerspectiveViewerElement {
     resize_handle: Rc<RefCell<Option<ResizeObserverHandle>>>,
 }
 
-derive_renderable_props!(PerspectiveViewerElement);
+derive_session_renderer_model!(PerspectiveViewerElement);
 
 #[wasm_bindgen]
 impl PerspectiveViewerElement {

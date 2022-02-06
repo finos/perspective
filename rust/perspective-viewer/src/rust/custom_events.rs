@@ -8,6 +8,7 @@
 
 use crate::config::*;
 use crate::js::plugin::JsPerspectiveViewerPlugin;
+use crate::model::*;
 use crate::renderer::*;
 use crate::session::Session;
 use crate::utils::*;
@@ -40,7 +41,7 @@ struct CustomEventsData {
     last_dispatched: RefCell<Option<ViewerConfig>>,
 }
 
-derive_renderable_props!(CustomEventsData);
+derive_session_renderer_model!(CustomEventsData);
 
 impl CustomEvents {
     pub fn new(

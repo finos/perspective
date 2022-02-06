@@ -8,6 +8,7 @@
 
 use crate::config::*;
 use crate::dragdrop::*;
+use crate::model::*;
 use crate::renderer::*;
 use crate::session::*;
 use crate::*;
@@ -36,7 +37,7 @@ impl PartialEq for SortItemProps {
     }
 }
 
-derive_renderable_props!(SortItemProps);
+derive_session_renderer_model!(SortItemProps);
 
 impl DragDropListItemProps for SortItemProps {
     type Item = Sort;

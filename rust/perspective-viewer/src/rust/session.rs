@@ -86,8 +86,8 @@ impl Deref for SessionHandle {
     }
 }
 
-type MetadataRef<'a> = std::cell::Ref<'a, SessionMetadata>;
-type MetadataMutRef<'a> = std::cell::RefMut<'a, SessionMetadata>;
+pub type MetadataRef<'a> = std::cell::Ref<'a, SessionMetadata>;
+pub type MetadataMutRef<'a> = std::cell::RefMut<'a, SessionMetadata>;
 
 impl Session {
     pub fn metadata(&self) -> MetadataRef<'_> {
@@ -578,7 +578,9 @@ impl Session {
                     .into_iter()
                     .chain(
                         self.metadata()
-                            .iter_columns()
+                            .get_table_columns()
+                            .into_iter()
+                            .flatten()
                             .filter(|x| {
                                 !numeric_config_columns
                                     .iter()
@@ -606,7 +608,9 @@ impl Session {
                 } else {
                     config_update.columns = Some(
                         self.metadata()
-                            .iter_columns()
+                            .get_table_columns()
+                            .into_iter()
+                            .flatten()
                             .take(*min_cols)
                             .cloned()
                             .map(Some)
@@ -741,7 +745,9 @@ impl Session {
         let config = self.borrow().config.clone();
         let table_columns = self
             .metadata()
-            .iter_columns()
+            .get_table_columns()
+            .into_iter()
+            .flatten()
             .cloned()
             .collect::<Vec<String>>();
 

@@ -251,13 +251,15 @@ impl ExpressionEditorState {
     /// Initialize the `monaco-editor` for this `<perspective-expression-editor>`.
     /// This method should only be called once per element.
     async fn init_monaco_editor(self) -> Result<JsValue, JsValue> {
-        let column_names = self.session.metadata().get_table_columns();
         let monaco = init_monaco().await.unwrap();
         if let Some(ref theme) = *self.theme.borrow() {
             init_theme(theme.as_str(), &monaco);
         }
 
-        set_global_completion_column_names(column_names.into_jserror()?);
+        set_global_completion_column_names(
+            self.session.metadata().get_table_columns().into_jserror()?,
+        );
+
         let args = EditorArgs {
             theme: "exprtk-theme",
             value: "",

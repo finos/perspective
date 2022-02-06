@@ -9,7 +9,7 @@
 use serde::Deserialize;
 use std::fmt::Display;
 
-#[derive(Deserialize, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Deserialize, Clone, Copy, PartialEq, PartialOrd, Eq, Ord)]
 pub enum Type {
     #[serde(rename = "string")]
     String,

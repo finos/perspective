@@ -9,6 +9,7 @@
 use crate::config::*;
 use crate::custom_elements::expression_editor::ExpressionEditorElement;
 use crate::dragdrop::*;
+use crate::model::*;
 use crate::renderer::*;
 use crate::session::*;
 use crate::*;
@@ -32,7 +33,7 @@ impl PartialEq for ExpressionToolbarProps {
     }
 }
 
-derive_renderable_props!(ExpressionToolbarProps);
+derive_session_renderer_model!(ExpressionToolbarProps);
 
 impl ExpressionToolbarProps {
     pub async fn save_expr(&self, expression: &JsValue) {
