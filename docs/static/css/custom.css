@@ -233,14 +233,16 @@ h2.headerTitle {
     --plugin--box-shadow: none !important;
 }
 
-.floating_example ~ perspective-expression-editor, .floating_example ~ perspective-column-style {
+.floating_example ~ perspective-expression-editor,
+.floating_example ~ perspective-number-column-style,
+.floating_example ~ perspective-string-column-style {
     z-index: 100000000 !important;
     position: fixed !important;
 }
 
 .floating_example {
     position:fixed;
-    z-index: 1000000;
+    z-index: 1000;
     justify-content: center;
     inset: 0;
     background-color: rgba(0,0,0,0.8);

@@ -40,6 +40,10 @@ function tests(extract) {
             await workspace.restore(config);
         }, config);
 
+        await page.evaluate(async () => {
+            await workspace.flush();
+        });
+
         return extract(page);
     });
 
@@ -70,6 +74,10 @@ function tests(extract) {
             const workspace = document.getElementById("workspace");
             await workspace.restore(config);
         }, config);
+
+        await page.evaluate(async () => {
+            await workspace.flush();
+        });
 
         return extract(page);
     });

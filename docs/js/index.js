@@ -108,17 +108,19 @@ function select(id) {
                 aggregates: {"chg (-)": "avg", "chg (+)": "avg", chg: "avg"},
                 sort: [["chg", "desc"]],
                 plugin_config: {
-                    "chg (-)": {
-                        number_color_mode: "bar",
-                        gradient: 10,
-                    },
-                    "chg (+)": {
-                        number_color_mode: "bar",
-                        gradient: 10,
-                    },
-                    chg: {
-                        number_color_mode: "gradient",
-                        gradient: 10,
+                    columns: {
+                        "chg (-)": {
+                            number_color_mode: "bar",
+                            gradient: 10,
+                        },
+                        "chg (+)": {
+                            number_color_mode: "bar",
+                            gradient: 10,
+                        },
+                        chg: {
+                            number_color_mode: "gradient",
+                            gradient: 10,
+                        },
                     },
                 },
             },

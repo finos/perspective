@@ -16,6 +16,7 @@ import {
     create_color_record,
 } from "./regular_table_handlers.js";
 import MATERIAL_STYLE from "../less/regular_table.less";
+import TOOLBAR_STYLE from "../less/toolbar.less";
 import {configureRowSelectable, deselect} from "./row_selection.js";
 import {configureClick} from "./click.js";
 import {configureEditable} from "./editing.js";
@@ -29,6 +30,76 @@ customElements.define(
             super();
             this.datagrid = document.createElement("regular-table");
             this.datagrid.formatters = formatters;
+            this._is_scroll_lock = true;
+        }
+
+        connectedCallback() {
+            if (!this._toolbar) {
+                this._toolbar = document.createElement(
+                    "perspective-viewer-datagrid-toolbar"
+                );
+
+                this._toolbar.setAttribute("slot", "plugin-settings");
+                this._toolbar.attachShadow({mode: "open"});
+                this._toolbar.shadowRoot.innerHTML = `
+                    <style>
+                        ${TOOLBAR_STYLE}
+                    </style>
+                    <div id="toolbar">
+                        <span id="scroll_lock" class="lock-scroll button"><span>Align Scroll</span></span>
+                        <span id="edit_mode" class="button"><span>Read Only</span></span>
+                    </div>
+                `;
+
+                this._scroll_lock =
+                    this._toolbar.shadowRoot.querySelector("#scroll_lock");
+                this._scroll_lock.addEventListener("click", () =>
+                    this._toggle_scroll_lock()
+                );
+
+                this._edit_mode =
+                    this._toolbar.shadowRoot.querySelector("#edit_mode");
+                this._edit_mode.addEventListener("click", () => {
+                    this._toggle_edit_mode();
+                    this.datagrid.draw();
+                });
+            }
+
+            this.parentElement.appendChild(this._toolbar);
+        }
+
+        disconnectedCallback() {
+            this._toolbar.parentElement.removeChild(this._toolbar);
+        }
+
+        _toggle_edit_mode(force = undefined) {
+            if (typeof force === "undefined") {
+                force = !this._is_edit_mode;
+            }
+
+            this._is_edit_mode = force;
+            this.classList.toggle("editable", force);
+            this._edit_mode.classList.toggle("editable", force);
+            if (force) {
+                this._edit_mode.children[0].textContent = "Editable";
+            } else {
+                this._edit_mode.children[0].textContent = "Read Only";
+            }
+        }
+
+        _toggle_scroll_lock(force = undefined) {
+            if (typeof force === "undefined") {
+                force = !this._is_scroll_lock;
+            }
+
+            this._is_scroll_lock = force;
+            this.classList.toggle("sub-cell-scroll-enabled", !force);
+            this._scroll_lock.classList.toggle("lock-scroll", force);
+            if (!force) {
+                this._scroll_lock.children[0].textContent = "Free Scroll";
+            } else {
+                this._scroll_lock.children[0].textContent = "Align Scroll";
+            }
         }
 
         async activate(view) {
@@ -89,6 +160,12 @@ customElements.define(
 
             this._restore_column_size_overrides(old_sizes);
             await draw;
+
+            this._toolbar.classList.toggle(
+                "aggregated",
+                this.model._config.group_by.length > 0 ||
+                    this.model._config.split_by.length > 0
+            );
         }
 
         async update(view) {
@@ -110,7 +187,11 @@ customElements.define(
         save() {
             if (this.datagrid) {
                 const datagrid = this.datagrid;
-                const token = {};
+                const token = {
+                    columns: {},
+                    scroll_lock: !!this._is_scroll_lock,
+                    editable: !!this._is_edit_mode,
+                };
 
                 for (const col of Object.keys(datagrid[PLUGIN_SYMBOL] || {})) {
                     const config = Object.assign(
@@ -126,18 +207,18 @@ customElements.define(
                         config.color = config.color[0];
                     }
 
-                    token[col] = config;
+                    token.columns[col] = config;
                 }
 
                 const column_size_overrides =
                     this._save_column_size_overrides();
 
                 for (const col of Object.keys(column_size_overrides || {})) {
-                    if (!token[col]) {
-                        token[col] = {};
+                    if (!token.columns[col]) {
+                        token.columns[col] = {};
                     }
 
-                    token[col].column_size_override =
+                    token.columns[col].column_size_override =
                         column_size_overrides[col];
                 }
 
@@ -149,25 +230,41 @@ customElements.define(
         restore(token) {
             token = JSON.parse(JSON.stringify(token));
             const overrides = {};
-            for (const col of Object.keys(token)) {
-                const config = token[col];
-                if (config.column_size_override !== undefined) {
-                    overrides[col] = config.column_size_override;
-                    delete config["column_size_override"];
-                }
+            if (token.columns) {
+                for (const col of Object.keys(token.columns)) {
+                    const col_config = token.columns[col];
+                    if (col_config.column_size_override !== undefined) {
+                        overrides[col] = col_config.column_size_override;
+                        delete col_config["column_size_override"];
+                    }
 
-                if (config?.pos_color) {
-                    config.pos_color = create_color_record(config.pos_color);
-                    config.neg_color = create_color_record(config.neg_color);
-                }
+                    if (col_config?.pos_color) {
+                        col_config.pos_color = create_color_record(
+                            col_config.pos_color
+                        );
+                        col_config.neg_color = create_color_record(
+                            col_config.neg_color
+                        );
+                    }
 
-                if (config?.color) {
-                    config.color = create_color_record(config.color);
-                }
+                    if (col_config?.color) {
+                        col_config.color = create_color_record(
+                            col_config.color
+                        );
+                    }
 
-                if (Object.keys(config).length === 0) {
-                    delete token[col];
+                    if (Object.keys(col_config).length === 0) {
+                        delete token.columns[col];
+                    }
                 }
+            }
+
+            if ("editable" in token) {
+                this._toggle_edit_mode(token.editable);
+            }
+
+            if ("scroll_lock" in token) {
+                this._toggle_scroll_lock(token.scroll_lock);
             }
 
             const datagrid = this.datagrid;
@@ -179,7 +276,7 @@ customElements.define(
             }
 
             this._restore_column_size_overrides(overrides, true);
-            datagrid[PLUGIN_SYMBOL] = token;
+            datagrid[PLUGIN_SYMBOL] = token.columns;
         }
 
         async restyle(view) {

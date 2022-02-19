@@ -401,17 +401,36 @@ function migrate_plugins(old, options) {
  */
 function migrate_plugin_config(old, options) {
     if (old.plugin === "Datagrid" && !!old.plugin_config) {
-        for (const name of Object.keys(old.plugin_config)) {
-            const column = old.plugin_config[name];
-            if (typeof column.color_mode === "string") {
-                column.number_color_mode = column.color_mode;
-                delete column["color_mode"];
+        if (!old.plugin_config.columns) {
+            if (options.warn) {
+                console.warn(
+                    `Deprecated perspective attribute "plugin_config" moved to "plugin_config.columns"`
+                );
+            }
 
-                if (options.warn) {
-                    console.warn(
-                        `Deprecated perspective attribute "color_mode" renamed "number_color_mode"`
-                    );
+            const columns = {};
+            for (const name of Object.keys(old.plugin_config)) {
+                const column = old.plugin_config[name];
+                delete old.plugin_config[name];
+
+                if (typeof column.color_mode === "string") {
+                    column.number_color_mode = column.color_mode;
+                    delete column["color_mode"];
+
+                    if (options.warn) {
+                        console.warn(
+                            `Deprecated perspective attribute "color_mode" renamed "number_color_mode"`
+                        );
+                    }
                 }
+
+                columns[name] = column;
+            }
+
+            old.plugin_config.columns = columns;
+            if (options.replace_defaults) {
+                old.plugin_config.editable = false;
+                old.plugin_config.scroll_lock = true;
             }
         }
     }

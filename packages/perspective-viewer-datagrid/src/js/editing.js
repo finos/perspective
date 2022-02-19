@@ -66,12 +66,12 @@ function write(table, model, active_cell) {
     }
 }
 
-function isEditable(viewer) {
+function isEditable(viewer, allowed = false) {
     const has_pivots =
         this._config.group_by.length === 0 &&
         this._config.split_by.length === 0;
     const selectable = viewer.hasAttribute("selectable");
-    const editable = viewer.hasAttribute("editable");
+    const editable = allowed || !!viewer.children[0]._is_edit_mode;
     return has_pivots && !selectable && editable;
 }
 
@@ -119,11 +119,13 @@ function editableStyleListener(table, viewer) {
     // the styler entirely if editing was disabled at the time of element
     // creation, but toggle in when e.g. pivots or selectable will
     // affect editability.
-    if (!viewer.hasAttribute("editable")) {
-        return;
-    }
     const plugins = table[PLUGIN_SYMBOL] || {};
     const edit = isEditable.call(this, viewer);
+    table.parentElement.classList.toggle(
+        "edit-mode-allowed",
+        isEditable.call(this, viewer, true)
+    );
+
     for (const td of table.querySelectorAll("td")) {
         const meta = table.getMeta(td);
         const type = this.get_psp_type(meta);
@@ -136,7 +138,9 @@ function editableStyleListener(table, viewer) {
                 td.toggleAttribute("contenteditable", false);
                 td.classList.toggle("boolean-editable", meta.user !== null);
             } else {
-                td.toggleAttribute("contenteditable", edit);
+                if (edit !== td.hasAttribute("contenteditable")) {
+                    td.toggleAttribute("contenteditable", edit);
+                }
                 td.classList.toggle("boolean-editable", false);
             }
         } else {

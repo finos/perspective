@@ -54,9 +54,11 @@ exports.EXAMPLES = [
             columns: ["Profit"],
             sort: [["Profit", "col asc"]],
             plugin_config: {
-                Profit: {
-                    color_mode: "background",
-                    // gradient: 600,
+                columns: {
+                    Profit: {
+                        number_color_mode: "background",
+                        // gradient: 600,
+                    },
                 },
             },
         },
@@ -69,9 +71,11 @@ exports.EXAMPLES = [
             columns: ["Profit"],
             sort: [["Profit", "col asc"]],
             plugin_config: {
-                Profit: {
-                    color_mode: "gradient",
-                    gradient: 1600,
+                columns: {
+                    Profit: {
+                        number_color_mode: "gradient",
+                        gradient: 1600,
+                    },
                 },
             },
         },
@@ -84,9 +88,11 @@ exports.EXAMPLES = [
             columns: ["Sales"],
             aggregates: {Sales: "avg"},
             plugin_config: {
-                Sales: {
-                    color_mode: "bar",
-                    gradient: 600,
+                columns: {
+                    Sales: {
+                        number_color_mode: "bar",
+                        gradient: 600,
+                    },
                 },
             },
         },
@@ -103,17 +109,19 @@ exports.EXAMPLES = [
                 "Order Date",
             ],
             plugin_config: {
-                Profit: {
-                    pos_color: "#32cd82",
-                    neg_color: "#f50fed",
-                },
-                Sales: {
-                    pos_color: "#780aff",
-                    neg_color: "#f5ac0f",
-                },
-                Discount: {
-                    pos_color: "#f5ac0f",
-                    neg_color: "#780aff",
+                columns: {
+                    Profit: {
+                        pos_color: "#32cd82",
+                        neg_color: "#f50fed",
+                    },
+                    Sales: {
+                        pos_color: "#780aff",
+                        neg_color: "#f5ac0f",
+                    },
+                    Discount: {
+                        pos_color: "#f5ac0f",
+                        neg_color: "#780aff",
+                    },
                 },
             },
             sort: [["Sub-Category", "desc"]],
@@ -131,20 +139,22 @@ exports.EXAMPLES = [
                 "Order Date",
             ],
             plugin_config: {
-                Profit: {
-                    color_mode: "background",
-                    pos_color: "#32cd82",
-                    neg_color: "#f50fed",
-                },
-                Sales: {
-                    color_mode: "background",
-                    pos_color: "#780aff",
-                    neg_color: "#f5ac0f",
-                },
-                Discount: {
-                    color_mode: "background",
-                    pos_color: "#f5ac0f",
-                    neg_color: "#780aff",
+                columns: {
+                    Profit: {
+                        number_color_mode: "background",
+                        pos_color: "#32cd82",
+                        neg_color: "#f50fed",
+                    },
+                    Sales: {
+                        number_color_mode: "background",
+                        pos_color: "#780aff",
+                        neg_color: "#f5ac0f",
+                    },
+                    Discount: {
+                        number_color_mode: "background",
+                        pos_color: "#f5ac0f",
+                        neg_color: "#780aff",
+                    },
                 },
             },
             sort: [["Sub-Category", "desc"]],
@@ -163,23 +173,25 @@ exports.EXAMPLES = [
                 "Order Date",
             ],
             plugin_config: {
-                Profit: {
-                    color_mode: "gradient",
-                    gradient: 600,
-                    pos_color: "#32cd82",
-                    neg_color: "#f50fed",
-                },
-                Sales: {
-                    color_mode: "gradient",
-                    gradient: 2268,
-                    pos_color: "#780aff",
-                    neg_color: "#f5ac0f",
-                },
-                Discount: {
-                    color_mode: "gradient",
-                    gradient: 0.8,
-                    pos_color: "#f5ac0f",
-                    neg_color: "#780aff",
+                columns: {
+                    Profit: {
+                        number_color_mode: "gradient",
+                        gradient: 600,
+                        pos_color: "#32cd82",
+                        neg_color: "#f50fed",
+                    },
+                    Sales: {
+                        number_color_mode: "gradient",
+                        gradient: 2268,
+                        pos_color: "#780aff",
+                        neg_color: "#f5ac0f",
+                    },
+                    Discount: {
+                        number_color_mode: "gradient",
+                        gradient: 0.8,
+                        pos_color: "#f5ac0f",
+                        neg_color: "#780aff",
+                    },
                 },
             },
             sort: [["Sub-Category", "desc"]],
@@ -197,23 +209,25 @@ exports.EXAMPLES = [
                 "Order Date",
             ],
             plugin_config: {
-                Profit: {
-                    color_mode: "bar",
-                    gradient: 600,
-                    pos_color: "#32cd82",
-                    neg_color: "#f50fed",
-                },
-                Sales: {
-                    color_mode: "bar",
-                    gradient: 2268,
-                    pos_color: "#780aff",
-                    neg_color: "#f5ac0f",
-                },
-                Discount: {
-                    color_mode: "bar",
-                    gradient: 0.8,
-                    pos_color: "#f5ac0f",
-                    neg_color: "#780aff",
+                columns: {
+                    Profit: {
+                        number_color_mode: "bar",
+                        gradient: 600,
+                        pos_color: "#32cd82",
+                        neg_color: "#f50fed",
+                    },
+                    Sales: {
+                        number_color_mode: "bar",
+                        gradient: 2268,
+                        pos_color: "#780aff",
+                        neg_color: "#f5ac0f",
+                    },
+                    Discount: {
+                        number_color_mode: "bar",
+                        gradient: 0.8,
+                        pos_color: "#f5ac0f",
+                        neg_color: "#780aff",
+                    },
                 },
             },
             sort: [["Sub-Category", "desc"]],
@@ -225,17 +239,19 @@ exports.EXAMPLES = [
             group_by: ["State"],
             columns: ["Profit (-)", "Profit", "Profit (+)"],
             plugin_config: {
-                "Profit (-)": {
-                    color_mode: "bar",
-                    gradient: 10000,
-                },
-                Profit: {
-                    color_mode: "gradient",
-                    gradient: 10000,
-                },
-                "Profit (+)": {
-                    color_mode: "bar",
-                    gradient: 10000,
+                columns: {
+                    "Profit (-)": {
+                        number_color_mode: "bar",
+                        gradient: 10000,
+                    },
+                    Profit: {
+                        number_color_mode: "gradient",
+                        gradient: 10000,
+                    },
+                    "Profit (+)": {
+                        number_color_mode: "bar",
+                        gradient: 10000,
+                    },
                 },
             },
             expressions: [
