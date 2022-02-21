@@ -10,6 +10,7 @@ use crate::utils::*;
 use crate::*;
 
 use std::cmp::max;
+use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlElement;
@@ -111,6 +112,9 @@ pub struct SplitPanelProps {
     pub children: Children,
 
     #[prop_or_default]
+    pub on_reset: Option<Rc<PubSub<()>>>,
+
+    #[prop_or_default]
     pub on_resize: Option<Callback<(i32, i32)>>,
 
     #[cfg(test)]
@@ -172,7 +176,12 @@ impl Component for SplitPanel {
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            SplitPanelMsg::Reset => self.style = None,
+            SplitPanelMsg::Reset => {
+                self.style = None;
+                if let Some(on_reset) = &ctx.props().on_reset {
+                    on_reset.emit_all(());
+                }
+            }
             SplitPanelMsg::StartResizing(client_x) => {
                 let first = self.first_elem.cast::<HtmlElement>().unwrap();
                 let state = ResizingState::new(client_x, ctx.link(), &first).ok();

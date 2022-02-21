@@ -69,7 +69,7 @@
 
         .dragdrop-highlight {
             .column_selector_draggable.dragover,
-            .column-selector-column:not(:last-child)
+            .column-selector-column:not(:last-child):not(:nth-last-child(2))
                 .column_selector_draggable {
                 border-bottom-color: var(--active--color) !important;
             }
@@ -86,7 +86,8 @@
             align-items: stretch;
             font-size: 12px;
 
-            &:last-child {
+            &:last-child,
+            &:nth-last-child(2) {
                 .column_selector_draggable {
                     border-color: transparent;
                 }
@@ -231,7 +232,7 @@
         #active-columns,
         #sub-columns {
             flex: 0 1 auto;
-            overflow-x: hidden;
+            overflow-x: hidden !important;
             overflow-y: scroll;
 
             &::-webkit-scrollbar-thumb {
@@ -255,6 +256,7 @@
         }
 
         #active-columns {
+            display: flex;
             .is_column_active {
                 color: var(--active--color, #999);
                 &:before {
@@ -328,7 +330,10 @@
         // selected for the `columns` field of the `ViewConfig`.
         #inactive-columns,
         #expression-columns {
-            margin-bottom: 6px;
+            & > div:not(:empty) {
+                margin-bottom: 6px;
+            }
+
             &:empty {
                 display: none;
                 margin: 0px;

@@ -21,6 +21,7 @@ use crate::session::Session;
 use crate::utils::*;
 
 use futures::channel::oneshot::*;
+use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use yew::prelude::*;
 
@@ -59,6 +60,7 @@ pub struct PerspectiveViewer {
     on_rendered: Option<Sender<()>>,
     fonts: FontLoaderProps,
     settings_open: bool,
+    on_dimensions_reset: Rc<PubSub<()>>,
 }
 
 impl Component for PerspectiveViewer {
@@ -74,6 +76,7 @@ impl Component for PerspectiveViewer {
             on_rendered: None,
             fonts: FontLoaderProps::new(&elem, callback),
             settings_open: false,
+            on_dimensions_reset: Default::default(),
         }
     }
 
@@ -173,7 +176,9 @@ impl Component for PerspectiveViewer {
             html! {
                 <>
                     <style>{ &CSS }</style>
-                    <SplitPanel id="app_panel">
+                    <SplitPanel
+                        id="app_panel"
+                        on_reset={ self.on_dimensions_reset.clone() }>
                         <div id="side_panel" class="column noselect">
                             <PluginSelector
                                 session={ ctx.props().session.clone() }
@@ -182,7 +187,8 @@ impl Component for PerspectiveViewer {
                             <ColumnSelector
                                 dragdrop={ ctx.props().dragdrop.clone() }
                                 renderer={ ctx.props().renderer.clone() }
-                                session={ ctx.props().session.clone() }>
+                                session={ ctx.props().session.clone() }
+                                on_dimensions_reset={ self.on_dimensions_reset.clone() }>
                             </ColumnSelector>
                         </div>
                         <div id="main_column">

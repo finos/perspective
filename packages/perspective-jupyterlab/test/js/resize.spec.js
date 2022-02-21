@@ -42,9 +42,6 @@ utils.with_server({}, () => {
                         await document
                             .querySelector("perspective-viewer")
                             .getTable();
-                        await document
-                            .querySelector("perspective-viewer")
-                            .flush();
                     });
 
                     await page.evaluate(async () => {
@@ -57,7 +54,7 @@ utils.with_server({}, () => {
 
                         await document
                             .querySelector("perspective-viewer")
-                            .notifyResize(true);
+                            .notifyResize();
                     });
 
                     return await page.evaluate(async () => {
@@ -65,7 +62,7 @@ utils.with_server({}, () => {
                             "position:absolute;top:0;left:0;width:800px;height:600px";
                         await document
                             .querySelector("perspective-viewer")
-                            .notifyResize(true);
+                            .notifyResize();
 
                         for (const elem of document.querySelectorAll(
                             "perspective-viewer *"

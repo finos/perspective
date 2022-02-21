@@ -12,6 +12,7 @@
 pub mod dragdrop_list;
 pub mod dropdown;
 pub mod radio_list;
+pub mod scroll_panel;
 pub mod split_panel;
 
 #[cfg(test)]

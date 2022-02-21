@@ -89,6 +89,17 @@ impl InactiveColumnProps {
     }
 }
 
+impl From<InactiveColumnProps> for yew::Html {
+    fn from(props: InactiveColumnProps) -> Self {
+        html! {
+            html! {
+                <InactiveColumn with props>
+                </InactiveColumn>
+            }
+        }
+    }
+}
+
 pub enum InactiveColumnMsg {
     ActivateColumn(bool),
 }
