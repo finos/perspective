@@ -71,7 +71,11 @@ const TESTS = [
         {
             plugin: "Datagrid",
             plugin_config: {
-                Sales: {number_color_mode: "gradient", gradient: 10},
+                columns: {
+                    Sales: {number_color_mode: "gradient", gradient: 10},
+                },
+                editable: false,
+                scroll_lock: true,
             },
             group_by: [],
             split_by: [],

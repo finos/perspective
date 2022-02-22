@@ -200,6 +200,9 @@ impl Component for StatusBar {
                         <span>{ "Copy" }</span>
                     </span>
                     { theme_button }
+                    <div id="plugin-settings">
+                        <slot name="plugin-settings"></slot>
+                    </div>
                 </div>
                 <div id="rows" class="section">
                     <StatusBarRowsCounter stats={ stats } />

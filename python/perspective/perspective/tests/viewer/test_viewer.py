@@ -242,12 +242,14 @@ class TestViewer:
         assert viewer.expressions == ['"a" * 2']
 
     def test_save_restore_plugin_config(self):
-        viewer = PerspectiveViewer(plugin="Datagrid", plugin_config={"a": {"fixed": 4}})
+        viewer = PerspectiveViewer(plugin="Datagrid", plugin_config={"columns": {"a": {"fixed": 4}}})
         config = viewer.save()
 
         assert config["plugin_config"] == {
-            "a": {
-                "fixed": 4
+            "columns": {
+                "a": {
+                    "fixed": 4
+                }
             }
         }
 

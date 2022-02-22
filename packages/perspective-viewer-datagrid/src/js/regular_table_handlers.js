@@ -751,7 +751,11 @@ export async function createModel(regular, table, view, extend = {}) {
     model._div_factory = model._div_factory || new ElemFactory("div");
 
     regular.setDataListener(dataListener.bind(model, regular), {
-        virtual_mode: regular.parentElement.virtual_mode || "both",
+        virtual_mode:
+            window
+                .getComputedStyle(regular)
+                .getPropertyValue("--datagrid-virtual-mode")
+                ?.trim() || "both",
     });
 
     return model;

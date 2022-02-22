@@ -41,6 +41,10 @@
             }
         }
 
+        #plugin-settings {
+            margin-left: auto;
+        }
+
         span {
             font-size: 12px;
             margin: 0px 10px;
@@ -58,6 +62,10 @@
             &:hover {
                 color: inherit;
             }
+        }
+
+        span#rows {
+            margin-left: 2px;
         }
 
         span.icon {
@@ -129,6 +137,7 @@
             margin: 0px;
             padding: 0 5px 0px 10px;
             transition: background-color 0.2s;
+            color: var(--inactive--color, #ccc);
             & > span,
             & > .dropdown-width-container {
                 pointer-events: none;
@@ -143,6 +152,7 @@
 
             &:hover {
                 min-width: 75px;
+                color: inherit;
                 cursor: pointer;
                 background-color: rgba(0, 0, 0, 0.05);
                 transition: none;

@@ -41,17 +41,19 @@
             "split_by": null,
             "filter": null,
             "plugin_config": {
-                "IMDB Rating": {
-                    "number_color_mode": "gradient",
-                    "pos_color": "#b87ff0",
-                    "neg_color": "#FF9485",
-                    "gradient": 8.1
-                },
-                "US Gross": {
-                    "number_color_mode": "gradient",
-                    "pos_color": "#126e3a",
-                    "neg_color": "#FF9485",
-                    "gradient": 19729862602
+                "columns": {
+                    "IMDB Rating": {
+                        "number_color_mode": "gradient",
+                        "pos_color": "#b87ff0",
+                        "neg_color": "#FF9485",
+                        "gradient": 8.1
+                    },
+                    "US Gross": {
+                        "number_color_mode": "gradient",
+                        "pos_color": "#126e3a",
+                        "neg_color": "#FF9485",
+                        "gradient": 19729862602
+                    }
                 }
             },
             "master": true,
