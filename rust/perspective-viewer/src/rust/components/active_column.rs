@@ -30,7 +30,6 @@ pub struct ActiveColumnProps {
     pub ondragenter: Callback<DragEvent>,
     pub ondragend: Callback<DragEvent>,
     pub onselect: Callback<()>,
-    pub config: ViewConfig,
 
     #[prop_or_default]
     pub is_pivot: bool,
@@ -60,6 +59,17 @@ impl ActiveColumnProps {
     }
 }
 
+impl From<ActiveColumnProps> for yew::Html {
+    fn from(props: ActiveColumnProps) -> Self {
+        html! {
+            html! {
+                <ActiveColumn with props>
+                </ActiveColumn>
+            }
+        }
+    }
+}
+
 derive_session_renderer_model!(ActiveColumnProps);
 
 impl ActiveColumnProps {
@@ -71,7 +81,7 @@ impl ActiveColumnProps {
     ///   respect to `columns`.
     /// - `shift` whether to toggle or select this column.
     pub fn deactivate_column(&self, name: String, shift: bool) {
-        let ViewConfig { mut columns, .. } = self.session.get_view_config();
+        let mut columns = self.session.borrow_view_config().columns.clone();
         let max_cols = self
             .renderer
             .metadata()
@@ -290,7 +300,8 @@ impl Component for ActiveColumn {
                                 if ctx.props().is_pivot {
                                     let aggregate = ctx
                                         .props()
-                                        .config
+                                        .session
+                                        .borrow_view_config()
                                         .aggregates
                                         .get(&name)
                                         .cloned();

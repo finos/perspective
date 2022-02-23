@@ -26,8 +26,8 @@ pub struct AggregateSelectorProps {
 derive_session_renderer_model!(AggregateSelectorProps);
 
 impl PartialEq for AggregateSelectorProps {
-    fn eq(&self, _rhs: &Self) -> bool {
-        false
+    fn eq(&self, rhs: &Self) -> bool {
+        self.column == rhs.column && self.aggregate == rhs.aggregate
     }
 }
 

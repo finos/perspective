@@ -27,7 +27,7 @@ use self::view_subscription::*;
 use copy::*;
 use download::*;
 use itertools::Itertools;
-use std::cell::RefCell;
+use std::cell::{Ref, RefCell};
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::iter::IntoIterator;
@@ -479,6 +479,10 @@ impl Session {
     /// TODO view_config could be a ref
     pub fn get_view_config(&self) -> ViewConfig {
         self.borrow().config.clone()
+    }
+
+    pub fn borrow_view_config(&self) -> Ref<ViewConfig> {
+        Ref::map(self.borrow(), |x| &x.config)
     }
 
     /// Get all unique column values for a given column name.

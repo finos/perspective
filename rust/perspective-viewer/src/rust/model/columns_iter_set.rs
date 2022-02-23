@@ -12,6 +12,7 @@ use crate::renderer::*;
 use crate::session::*;
 use crate::*;
 use itertools::Itertools;
+use std::collections::HashSet;
 
 /// The possible states of a column (row) in the active columns list, including the
 /// `Option<String>` label type.
@@ -179,8 +180,20 @@ impl<'a> ColumnsIteratorSet<'a> {
         &'a self,
         values: impl Iterator<Item = &'a String>,
     ) -> impl Iterator<Item = OrderedColumn<'a>> {
+        let is_drag_active = maybe! {
+            let dragover_col = self.is_dragover_column.as_ref();
+            let cols = &self.config.columns;
+            let (_, drag_name) = dragover_col?;
+            let is_drag_active = cols.iter().flatten().any(|x| x == drag_name);
+            Some(is_drag_active)
+        };
+
+        let col_set = self.config.columns.iter().collect::<HashSet<_>>();
+
         let mut filtered = values
-            .filter_map(|name| self.to_ordered_column(name))
+            .filter_map(move |name| {
+                self.to_ordered_column(name, is_drag_active, &col_set)
+            })
             .collect::<Vec<_>>();
 
         filtered.sort();
@@ -189,16 +202,20 @@ impl<'a> ColumnsIteratorSet<'a> {
 
     /// Convert a column `name` into an `OrderedColumn` based on whether it is
     /// active or in a drag state where an immediate drop would make it active.
-    fn to_ordered_column(&'a self, name: &'a str) -> Option<OrderedColumn<'a>> {
+    fn to_ordered_column(
+        &'a self,
+        name: &'a str,
+        is_drag_active: Option<bool>,
+        col_set: &HashSet<&Option<String>>,
+    ) -> Option<OrderedColumn<'a>> {
         let dragover_col = self.is_dragover_column.as_ref();
         let cols = &self.config.columns;
-        let is_active = cols.iter().flatten().any(|x| x == name);
+        let is_active = col_set.contains(&Some(name.to_string())); // cols.iter().flatten().any(|x| x == name);
         let is_swap_over = maybe! {
-            let (drop_index, drag_name) = dragover_col?;
-            let is_drag_active = cols.iter().flatten().any(|x| x == drag_name);
+            let (drop_index, _) = dragover_col?;
             let is_swap = self.renderer.metadata().is_swap(*drop_index);
             let is_over = cols.get(*drop_index)?.as_ref()? == name;
-            Some(is_swap && is_over && !is_drag_active)
+            Some(is_swap && is_over && !is_drag_active?)
         };
 
         if !is_active || is_swap_over.unwrap_or_default() {

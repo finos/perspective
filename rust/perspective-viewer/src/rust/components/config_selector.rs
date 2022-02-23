@@ -259,7 +259,7 @@ impl Component for ConfigSelector {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let config = ctx.props().session.get_view_config();
+        let config = ctx.props().session.borrow_view_config();
         let transpose = ctx.link().callback(|_| ConfigSelectorMsg::TransposePivots);
 
         let class = if ctx.props().dragdrop.get_drag_column().is_some() {
