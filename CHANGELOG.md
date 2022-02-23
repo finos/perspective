@@ -1,5 +1,28 @@
 # Changelog
 
+## [v1.3.0](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.2.0...HEAD)
+
+**Breaking changes:**
+
+- Add scroll\_lock optional free scroll mode for `@finos/perspective-viewer-datagrid` [\#1721](https://github.com/finos/perspective/pull/1721) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- Virtual column selector [\#1722](https://github.com/finos/perspective/pull/1722) ([texodus](https://github.com/texodus))
+
+**Closed issues:**
+
+- Not allowed to load local resource: blob:null/88ca3529-3169-498e-a4f0-95b53f569642 [\#1720](https://github.com/finos/perspective/issues/1720)
+- General performance question for wide datasets \(400+ columns\) [\#1719](https://github.com/finos/perspective/issues/1719)
+
+**Merged pull requests:**
+
+- Drag/drop tests [\#1716](https://github.com/finos/perspective/pull/1716) ([texodus](https://github.com/texodus))
+- Add column-style-checkbox css variables [\#1715](https://github.com/finos/perspective/pull/1715) ([jkusa](https://github.com/jkusa))
+- remove defunct IEX Cloud example - replace with Polygon.io stock example [\#1714](https://github.com/finos/perspective/pull/1714) ([timkpaine](https://github.com/timkpaine))
+
 ## [v1.2.0](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.1.1...HEAD)
