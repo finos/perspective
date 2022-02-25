@@ -1,5 +1,13 @@
 # Changelog
 
+## [v1.3.1](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.3.0...HEAD)
+
+**Fixed bugs:**
+
+- Fix python memory leak in `table()` [\#1724](https://github.com/finos/perspective/pull/1724) ([texodus](https://github.com/texodus))
+
 ## [v1.3.0](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.2.0...HEAD)
