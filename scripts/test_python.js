@@ -63,7 +63,8 @@ const pytest_client_mode = (IS_DOCKER) => {
             perspective/tests/client_mode"`;
     } else {
         return bash`cd ${python_path} && PYTHONMALLOC=debug ${PYTHON} -m pytest \
-            ${VERBOSE ? "-vv --full-trace" : ""} --noconftest 
+            ${VERBOSE ? "-vv --full-trace" : ""} --noconftest
+            --disable-pytest-warnings
             perspective/tests/client_mode`;
     }
 };
@@ -77,11 +78,13 @@ const pytest = (IS_DOCKER) => {
             python/perspective && TZ=UTC PYTHONMALLOC=debug ${PYTHON} -m pytest \
             ${VERBOSE ? "-vv --full-trace" : ""} perspective \
             --ignore=perspective/tests/client_mode \
+            --disable-pytest-warnings
             --cov=perspective"`;
     } else {
         return bash`cd ${python_path} && PYTHONMALLOC=debug ${PYTHON} -m pytest \
             ${VERBOSE ? "-vv --full-trace" : ""} perspective \
             --ignore=perspective/tests/client_mode \
+            --disable-pytest-warnings
             ${COVERAGE ? "--cov=perspective" : ""}`;
     }
 };

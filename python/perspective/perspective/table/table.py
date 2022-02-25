@@ -513,6 +513,7 @@ class Table(object):
         self._state_manager.remove_process(self._table.get_id())
         self._table.unregister_gnode(self._gnode_id)
         [cb() for cb in self._delete_callbacks]
+        self._table = None
 
     def _update_callback(self, port_id):
         """After `process` completes internally, this method is called by the
