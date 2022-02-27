@@ -28,7 +28,7 @@ pub fn test_resizes_larger() {
     };
 
     let split_panel = link.borrow().clone().unwrap();
-    split_panel.send_message(SplitPanelMsg::StartResizing(10));
+    split_panel.send_message(SplitPanelMsg::StartResizing(0, 10));
     split_panel.send_message(SplitPanelMsg::MoveResizing(100));
     split_panel.send_message(SplitPanelMsg::StopResizing);
 
@@ -48,10 +48,10 @@ pub async fn test_resizes_narrower() {
     };
 
     let split_panel = link.borrow().clone().unwrap();
-    split_panel.send_message(SplitPanelMsg::StartResizing(10));
+    split_panel.send_message(SplitPanelMsg::StartResizing(0, 10));
     split_panel.send_message(SplitPanelMsg::MoveResizing(100));
     split_panel.send_message(SplitPanelMsg::StopResizing);
-    split_panel.send_message(SplitPanelMsg::StartResizing(100));
+    split_panel.send_message(SplitPanelMsg::StartResizing(0, 100));
     split_panel.send_message(SplitPanelMsg::MoveResizing(50));
     split_panel.send_message(SplitPanelMsg::StopResizing);
 
@@ -71,10 +71,10 @@ pub async fn test_double_click_reset() {
     };
 
     let split_panel = link.borrow().clone().unwrap();
-    split_panel.send_message(SplitPanelMsg::StartResizing(10));
+    split_panel.send_message(SplitPanelMsg::StartResizing(0, 10));
     split_panel.send_message(SplitPanelMsg::MoveResizing(100));
     split_panel.send_message(SplitPanelMsg::StopResizing);
-    split_panel.send_message(SplitPanelMsg::Reset);
+    split_panel.send_message(SplitPanelMsg::Reset(0));
 
     let width = panel_div.cast::<HtmlElement>().unwrap().offset_width();
     assert_eq!(width, 0);

@@ -8,6 +8,7 @@
 
 use crate::js::plugin::*;
 
+use extend::ext;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::thread::LocalKey;
@@ -25,17 +26,8 @@ pub struct PluginRecord {
 }
 
 /// A global registry of all plugins that have been registered.
-pub trait PluginRegistry {
-    fn create_plugins(&'static self) -> Vec<JsPerspectiveViewerPlugin>;
-    fn default_plugin_name(&'static self) -> String;
-    fn available_plugin_names(&'static self) -> Vec<String>;
-    fn register_plugin(&'static self, name: &str);
-
-    #[cfg(test)]
-    fn reset(&'static self);
-}
-
-impl PluginRegistry for LocalKey<Rc<RefCell<Vec<PluginRecord>>>> {
+#[ext]
+pub impl LocalKey<Rc<RefCell<Vec<PluginRecord>>>> {
     fn create_plugins(&'static self) -> Vec<JsPerspectiveViewerPlugin> {
         register_default();
         self.with(

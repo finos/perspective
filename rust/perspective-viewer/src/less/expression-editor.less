@@ -24,6 +24,21 @@
 
     #editor-container {
         min-width: 0px;
+    }
+
+    .split-panel.orient-vertical > .split-panel-divider {
+        margin-bottom: -6px;
+    }
+
+    .split-panel.orient-vertical
+        > .split-panel-child:not(.is-width-override)
+        #editor-container {
+        height: 242px;
+    }
+
+    .split-panel:not(.orient-vertical)
+        > .split-panel-child:not(.is-width-override)
+        #editor-container {
         width: 400px;
     }
 
@@ -41,7 +56,7 @@
 
     #monaco-container {
         width: 100%;
-        height: 200px;
+        height: calc(100% - 42px);
         overflow: visible;
         // margin-right: 8px;
         &::-webkit-resizer {
@@ -63,7 +78,7 @@
         display: flex;
         justify-content: flex-end;
         margin-left: 20px;
-        margin-top: 12px;
+        margin-top: 6px;
         margin-right: 8px;
     }
 

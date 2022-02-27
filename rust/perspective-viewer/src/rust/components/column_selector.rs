@@ -18,6 +18,7 @@ use crate::session::*;
 use crate::utils::*;
 use crate::*;
 
+use extend::ext;
 use std::iter::*;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
@@ -67,7 +68,7 @@ pub enum ColumnSelectorMsg {
     Drag(DragEffect),
     DragEnd,
     Drop((String, DropAction, DragEffect, usize)),
-    OpenExpressionEditor,
+    OpenExpressionEditor(bool),
     SaveExpression(JsValue),
 }
 
@@ -195,24 +196,20 @@ impl Component for ColumnSelector {
             ColumnSelectorMsg::Drop((_, _, _, _)) => true,
             ColumnSelectorMsg::SaveExpression(expression) => {
                 ctx.props().save_expr(&expression);
-                self.expression_editor
-                    .take()
-                    .and_then(|elem| elem.destroy().ok())
-                    .unwrap();
-
+                self.expression_editor.as_ref().map(|x| x.hide());
                 true
             }
-            ColumnSelectorMsg::OpenExpressionEditor => {
-                let on_save = ctx.link().callback(ColumnSelectorMsg::SaveExpression);
-                let mut element = ExpressionEditorElement::new(
-                    ctx.props().session.clone(),
-                    on_save,
-                    None,
-                );
+            ColumnSelectorMsg::OpenExpressionEditor(reset) => {
+                if reset {
+                    self.expression_editor = None;
+                }
 
                 let target = self.add_expression_ref.cast::<HtmlElement>().unwrap();
-                element.open(target);
-                self.expression_editor = Some(element);
+                let expression_editor = self
+                    .expression_editor
+                    .get_or_insert_with(|| ctx.create_expression_editor());
+
+                expression_editor.open(target);
                 false
             }
         }
@@ -264,9 +261,9 @@ impl Component for ColumnSelector {
                 move |_event| dragdrop.drag_end()
             });
 
-            let add_expression = ctx
-                .link()
-                .callback(|_| ColumnSelectorMsg::OpenExpressionEditor);
+            let add_expression = ctx.link().callback(|event: MouseEvent| {
+                ColumnSelectorMsg::OpenExpressionEditor(event.shift_key())
+            });
 
             let select = ctx.link().callback(|()| ColumnSelectorMsg::ViewCreated);
             let mut active_classes = classes!();
@@ -363,5 +360,16 @@ impl Component for ColumnSelector {
         } else {
             html! {}
         }
+    }
+}
+
+#[ext]
+impl Context<ColumnSelector> {
+    /// Create a new `ExpressionEditorElement`.  Used for lazy instantiation,
+    /// as creating this element will ultimately download `monaco` which is
+    /// very large.
+    fn create_expression_editor(&self) -> ExpressionEditorElement {
+        let on_save = self.link().callback(ColumnSelectorMsg::SaveExpression);
+        ExpressionEditorElement::new(self.props().session.clone(), on_save, None)
     }
 }

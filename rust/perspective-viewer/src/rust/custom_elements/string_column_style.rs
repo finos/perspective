@@ -33,7 +33,7 @@ fn on_change(elem: &web_sys::HtmlElement, config: &StringColumnStyleConfig) {
 }
 
 impl ResizableMessage for <StringColumnStyle as Component>::Message {
-    fn resize(y: i32, x: i32) -> Self {
+    fn resize(y: i32, x: i32, _: bool) -> Self {
         StringColumnStyleMsg::SetPos(y, x)
     }
 }
@@ -78,7 +78,7 @@ impl PerspectiveStringColumnStyleElement {
     /// # Arguments
     /// `target` - the relative target to pin this `ModalElement` to.
     pub fn open(&mut self, target: web_sys::HtmlElement) {
-        self.modal.open(target);
+        self.modal.open(target, None);
     }
 
     /// Remove this `ModalElement` from the DOM.

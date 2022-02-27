@@ -12,6 +12,10 @@ mod metadata;
 mod view;
 mod view_subscription;
 
+use self::metadata::*;
+use self::view::View;
+pub use self::view_subscription::TableStats;
+use self::view_subscription::*;
 use crate::config::*;
 use crate::dragdrop::*;
 use crate::js::perspective::*;
@@ -19,14 +23,12 @@ use crate::js::plugin::*;
 use crate::utils::*;
 use crate::*;
 
-use self::metadata::*;
-use self::view::View;
-pub use self::view_subscription::TableStats;
-use self::view_subscription::*;
-
 use copy::*;
 use download::*;
+
+use futures::channel::oneshot::*;
 use itertools::Itertools;
+use js_intern::*;
 use std::cell::{Ref, RefCell};
 use std::collections::HashMap;
 use std::collections::HashSet;
@@ -132,6 +134,23 @@ impl Session {
         self.on_table_loaded.emit_all(());
         self.set_initial_stats().await?;
         Ok(JsValue::UNDEFINED)
+    }
+
+    pub async fn await_table(&self) -> Result<(), JsValue> {
+        if self.js_get_table().is_none() {
+            let (sender, receiver) = channel::<()>();
+            let sender = RefCell::new(Some(sender));
+            let _sub = self.on_table_loaded.add_listener(move |x| {
+                sender.borrow_mut().take().unwrap().send(x).unwrap()
+            });
+
+            receiver.await.into_jserror()?;
+            let _ = self
+                .js_get_table()
+                .ok_or_else(|| js_intern!("No table set"))?;
+        }
+
+        Ok(())
     }
 
     pub fn js_get_table(&self) -> Option<JsValue> {
