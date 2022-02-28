@@ -610,6 +610,11 @@ t_tscalar::set(const t_tscalar v) {
     m_inplace = v.m_inplace;
 }
 
+void
+t_tscalar::set_status(t_status s) {
+    m_status = s;
+};
+
 t_tscalar
 t_tscalar::abs() const {
     t_tscalar rval;
@@ -1433,16 +1438,22 @@ t_tscalar::cmp(t_filter_op op, const t_tscalar& other) const {
 
     switch (op) {
         case FILTER_OP_LT: {
-            return value < other;
+            return m_status == STATUS_VALID && other.m_status == STATUS_VALID
+                && value < other;
         } break;
         case FILTER_OP_LTEQ: {
-            return value < other || other == value;
+            return (m_status == STATUS_VALID && other.m_status == STATUS_VALID
+                       && value < other)
+                || other == value;
         } break;
         case FILTER_OP_GT: {
-            return value > other;
+            return m_status == STATUS_VALID && other.m_status == STATUS_VALID
+                && value > other;
         } break;
         case FILTER_OP_GTEQ: {
-            return value > other || other == value;
+            return (m_status == STATUS_VALID && other.m_status == STATUS_VALID
+                       && value > other)
+                || other == value;
         } break;
         case FILTER_OP_EQ: {
             return other == value;
