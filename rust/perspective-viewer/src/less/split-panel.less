@@ -11,12 +11,30 @@
 :host {
     .split-panel {
         display: flex;
+        height: 100%;
+        width: 100%;
+
+        &.orient-vertical {
+            flex-direction: column;
+
+            & > .split-panel-child {
+                flex: 1 1 auto;
+            }
+
+            & > .split-panel-divider:hover {
+                cursor: row-resize;
+            }
+        }
+
+        &.orient-vertical.orient-reverse {
+            flex-direction: column-reverse;
+        }
 
         & > * {
             flex: 1 1 auto;
         }
 
-        & > *:first-child {
+        &:not(.orient-vertical) > *:first-child {
             flex: 0 0 auto;
         }
 
@@ -35,6 +53,7 @@
         // Make the elements embedded in each child stretch to fill the
         // container
         .split-panel-child {
+            position: relative;
             display: flex;
 
             & > * {

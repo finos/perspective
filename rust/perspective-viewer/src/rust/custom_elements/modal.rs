@@ -9,7 +9,7 @@
 use crate::utils::*;
 
 use derivative::Derivative;
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -35,6 +35,38 @@ pub struct ModalElement<T: Component> {
     target: Rc<RefCell<Option<HtmlElement>>>,
     blurhandler: BlurHandlerType,
     own_focus: bool,
+    resize_sub: Rc<RefCell<Option<Subscription>>>,
+    anchor: Rc<Cell<ModalAnchor>>,
+}
+
+/// Anchor point enum, `ModalCornerTargetCorner`
+#[derive(Clone, Copy)]
+enum ModalAnchor {
+    BottomRightTopLeft,
+    BottomRightBottomLeft,
+    BottomRightTopRight,
+    BottomLeftTopLeft,
+    TopRightTopLeft,
+    TopRightBottomRight,
+    TopLeftBottomLeft,
+}
+
+impl Default for ModalAnchor {
+    fn default() -> ModalAnchor {
+        ModalAnchor::TopLeftBottomLeft
+    }
+}
+
+impl ModalAnchor {
+    fn is_rev_vert(&self) -> bool {
+        matches!(
+            self,
+            ModalAnchor::BottomLeftTopLeft
+                | ModalAnchor::BottomRightBottomLeft
+                | ModalAnchor::BottomRightTopLeft
+                | ModalAnchor::BottomRightTopRight
+        )
+    }
 }
 
 /// Given the bounds of the target element as previous computed, as well as the
@@ -43,11 +75,11 @@ pub struct ModalElement<T: Component> {
 /// coordinates that keeps the element on-screen.
 fn calc_relative_position(
     elem: &HtmlElement,
-    top: i32,
+    _top: i32,
     left: i32,
     height: i32,
     width: i32,
-) -> Option<(i32, i32)> {
+) -> ModalAnchor {
     let window = web_sys::window().unwrap();
     let rect = elem.get_bounding_client_rect();
     let inner_width = window.inner_width().unwrap().as_f64().unwrap() as i32;
@@ -62,47 +94,32 @@ fn calc_relative_position(
     let target_over_x = inner_width < rect_left + width;
     let target_over_y = inner_height < rect_top + height;
 
-    // target/moadl
+    // modal/target
     match (elem_over_y, elem_over_x, target_over_x, target_over_y) {
-        (true, _, true, true) => {
-            // bottom right/top left
-            Some((top - rect_height, left - rect_width + 1))
-        }
-        (true, _, true, false) => {
-            // bottom right, bottom left
-            Some((top - rect_height + height, left - rect_width + 1))
-        }
+        (true, _, true, true) => ModalAnchor::BottomRightTopLeft,
+        (true, _, true, false) => ModalAnchor::BottomRightBottomLeft,
         (true, true, false, _) => {
             if left + width - rect_width > 0 {
-                // bottom right/top right
-                Some((top - rect_height + 1, left + width - rect_width))
+                ModalAnchor::BottomRightTopRight
             } else {
-                // bottom left/top left
-                Some((top - rect_height + 1, left))
+                ModalAnchor::BottomLeftTopLeft
             }
         }
-        (true, false, false, _) => {
-            // bottom left/top left
-            Some((top - rect_height + 1, left))
-        }
-        (false, true, true, _) => {
-            // top right/top left
-            Some((top, left - rect_width + 1))
-        }
+        (true, false, false, _) => ModalAnchor::BottomLeftTopLeft,
+        (false, true, true, _) => ModalAnchor::TopRightTopLeft,
         (false, true, false, _) => {
             if left + width - rect_width > 0 {
-                // top right/bottom right
-                Some((top + height - 1, left + width - rect_width))
+                ModalAnchor::TopRightBottomRight
             } else {
-                None
+                ModalAnchor::TopLeftBottomLeft
             }
         }
-        _ => None,
+        _ => ModalAnchor::TopLeftBottomLeft,
     }
 }
 
 pub trait ResizableMessage {
-    fn resize(y: i32, x: i32) -> Self;
+    fn resize(y: i32, x: i32, rev_vert: bool) -> Self;
 }
 
 impl<T> ModalElement<T>
@@ -134,6 +151,39 @@ where
             target: Rc::new(RefCell::new(None)),
             own_focus,
             blurhandler,
+            resize_sub: Rc::new(RefCell::new(None)),
+            anchor: Default::default(),
+        }
+    }
+
+    fn calc_anchor_position(&self, target: &HtmlElement) -> (i32, i32) {
+        let height = target.offset_height() as i32;
+        let width = target.offset_width() as i32;
+        let elem = target.clone().unchecked_into::<HtmlElement>();
+        let rect = elem.get_bounding_client_rect();
+        let top = rect.top() as i32;
+        let left = rect.left() as i32;
+
+        let self_rect = self.custom_element.get_bounding_client_rect();
+        let rect_height = self_rect.height() as i32;
+        let rect_width = self_rect.width() as i32;
+
+        match self.anchor.get() {
+            ModalAnchor::BottomRightTopLeft => {
+                (top - rect_height, left - rect_width + 1)
+            }
+            ModalAnchor::BottomRightBottomLeft => {
+                (top - rect_height + height, left - rect_width + 1)
+            }
+            ModalAnchor::BottomRightTopRight => {
+                (top - rect_height + 1, left + width - rect_width)
+            }
+            ModalAnchor::BottomLeftTopLeft => (top - rect_height + 1, left),
+            ModalAnchor::TopRightTopLeft => (top, left - rect_width + 1),
+            ModalAnchor::TopRightBottomRight => {
+                (top + height - 1, left + width - rect_width)
+            }
+            ModalAnchor::TopLeftBottomLeft => ((top + height - 1), left),
         }
     }
 
@@ -145,10 +195,10 @@ where
         let top = rect.top() as i32;
         let left = rect.left() as i32;
 
-        *self.target.borrow_mut() = Some(target);
+        *self.target.borrow_mut() = Some(target.clone());
 
         // Default, top left/bottom left
-        let msg = T::Message::resize((top + height - 1) as i32, left as i32);
+        let msg = T::Message::resize((top + height - 1) as i32, left as i32, false);
         self.root.borrow().as_ref().unwrap().send_message(msg);
 
         let window = web_sys::window().unwrap();
@@ -160,13 +210,17 @@ where
             .append_child(&self.custom_element)?;
 
         // Check if the modal has been positioned off-screen and re-locate if necessary
-        match calc_relative_position(&self.custom_element, top, left, height, width) {
-            None => (),
-            Some((top, left)) => {
-                let msg = T::Message::resize(top as i32, left as i32);
-                self.root.borrow().as_ref().unwrap().send_message(msg);
-            }
-        };
+        self.anchor.set(calc_relative_position(
+            &self.custom_element,
+            top,
+            left,
+            height,
+            width,
+        ));
+
+        let (top, left) = self.calc_anchor_position(&target);
+        let msg = T::Message::resize(top, left, self.anchor.get().is_rev_vert());
+        self.root.borrow().as_ref().unwrap().send_message(msg);
 
         if self.own_focus {
             let mut this = Some(self.clone());
@@ -205,7 +259,22 @@ where
     ///
     /// Because the Custom Element has a `blur` handler, we must invoke this before
     /// attempting to re-parent the element.
-    pub fn open(&self, target: web_sys::HtmlElement) {
+    pub fn open(
+        &self,
+        target: web_sys::HtmlElement,
+        resize_pubsub: Option<&PubSub<()>>,
+    ) {
+        if let Some(resize) = resize_pubsub {
+            let this = self.clone();
+            let target = target.clone();
+            let anchor = self.anchor.clone();
+            *self.resize_sub.borrow_mut() = Some(resize.add_listener(move |()| {
+                let (top, left) = this.calc_anchor_position(&target);
+                let msg = T::Message::resize(top, left, anchor.get().is_rev_vert());
+                this.root.borrow().as_ref().unwrap().send_message(msg);
+            }));
+        };
+
         if !self.is_open() {
             self.custom_element.blur().unwrap();
             let window = web_sys::window().unwrap();

@@ -78,6 +78,9 @@ extern "C" {
     #[wasm_bindgen(method, js_name = "defineTheme")]
     pub fn define_theme(this: &Editor, id: &str, options: JsValue);
 
+    #[wasm_bindgen(method, js_name = "setTheme")]
+    pub fn set_theme(this: &Editor, theme: &str);
+
     #[wasm_bindgen(method, js_name = "setModelMarkers")]
     pub fn set_model_markers(
         this: &Editor,
@@ -185,8 +188,8 @@ extern "C" {
 
 #[derive(Serialize)]
 pub struct ResizeArgs {
-    pub width: u32,
-    pub height: u32,
+    pub width: i32,
+    pub height: i32,
 }
 
 #[derive(Serialize)]

@@ -15,26 +15,56 @@ new_column_selector = []
 default = ["new_column_selector"]
 
 [dependencies]
+# Provides async `Mutex` for locked sections such as `render`
 async-std = "1.9.0"
+
+# Allow async methods to be used in traits
 async-trait = "=0.1.42"
+
+# Encode persistence tokens
 base64 = "0.13.0"
+
+# Timezone correction
 chrono = "0.4"
+
+# More derivable traits
 derivative = "2.2.0"
+
+# Easy way to define & implement a singleton trait (type extension)
+extend = "1.1.2"
+
+# Compress tokens
 flate2 = "1.0.20"
+
+# General async tools
 futures = "0.3.12"
+
+# General iterator improvements
 itertools = "0.10.1"
+
+# Performance improvements for common string to JS conversions
 js-intern = "0.3.1"
+
+# Comma-sep numeric representation
 num-format = "0.4.0"
+
+# MessagePack serialization
 rmp-serde = "0.15.5"
+
+# Serialization for tokens and JS APIs
 serde = { version = "1.0", features = ["derive"] }
+
+# Support for "unknown"/dicitonary types such as `plugin_config`
 serde_json = { version = "1.0.59", features = ["raw_value"] }
+
+# Browser API bindings
 wasm-bindgen = { version = "=0.2.74", features = ["serde-serialize"] }
+
+# Browser `Promise` bindings
 wasm-bindgen-futures = "0.4.20"
 
 # https://github.com/yewstack/yew/issues/2154
 yew = { git = "https://github.com/yewstack/yew", rev = "60c08736f1034f9402dddae4335584c103ffd7f0" }
-
-wee_alloc = { version = "0.4.5", optional = true }
 
 [dependencies.web-sys]
 version = "0.3.46"
@@ -101,5 +131,5 @@ wasm-bindgen-test = "0.3.13"
 
 [profile.release]
 opt-level = "z"
-codegen-units = 1
-lto = true
+# codegen-units = 1
+# lto = true

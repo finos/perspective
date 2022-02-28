@@ -9,8 +9,10 @@
 use crate::components::expression_editor::*;
 use crate::custom_elements::modal::*;
 use crate::session::Session;
+use crate::utils::*;
 use crate::*;
 
+use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::*;
@@ -20,11 +22,12 @@ use yew::prelude::*;
 #[derive(Clone)]
 pub struct ExpressionEditorElement {
     modal: ModalElement<ExpressionEditor>,
+    resize_pubsub: Rc<PubSub<()>>,
 }
 
 impl ResizableMessage for <ExpressionEditor as Component>::Message {
-    fn resize(y: i32, x: i32) -> Self {
-        ExpressionEditorMsg::SetPos(y, x)
+    fn resize(y: i32, x: i32, rev_vert: bool) -> Self {
+        ExpressionEditorMsg::SetPos(y, x, rev_vert)
     }
 }
 
@@ -62,23 +65,32 @@ impl ExpressionEditorElement {
             }
         });
 
+        let resize_pubsub: PubSub<()> = PubSub::default();
         let props = ExpressionEditorProps {
             on_save,
             on_init,
             on_validate,
+            on_resize: resize_pubsub.callback(),
             session,
             alias,
         };
 
         let modal = ModalElement::new(editor, props, true);
-        ExpressionEditorElement { modal }
+        ExpressionEditorElement {
+            modal,
+            resize_pubsub: Rc::new(resize_pubsub),
+        }
     }
 
     pub fn open(&mut self, target: HtmlElement) {
         let monaco_theme = get_theme(&target);
         self.modal
             .send_message(ExpressionEditorMsg::SetTheme(monaco_theme));
-        self.modal.open(target);
+        self.modal.open(target, Some(&*self.resize_pubsub));
+    }
+
+    pub fn hide(&self) -> Result<(), JsValue> {
+        self.modal.hide()
     }
 
     pub fn destroy(self) -> Result<(), JsValue> {

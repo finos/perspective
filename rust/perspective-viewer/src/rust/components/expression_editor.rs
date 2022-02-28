@@ -27,7 +27,7 @@ use yew::prelude::*;
 static CSS: &str = include_str!("../../../build/css/expression-editor.css");
 
 pub enum ExpressionEditorMsg {
-    SetPos(i32, i32),
+    SetPos(i32, i32, bool),
     SetTheme(String),
     Reset,
     Resize(i32, i32),
@@ -41,6 +41,7 @@ pub struct ExpressionEditorProps {
     pub on_save: Callback<JsValue>,
     pub on_init: Callback<()>,
     pub on_validate: Callback<bool>,
+    pub on_resize: Callback<()>,
     pub session: Session,
     pub alias: Option<String>,
 }
@@ -58,6 +59,7 @@ pub struct ExpressionEditor {
     save_enabled: bool,
     edit_enabled: bool,
     state: ExpressionEditorState,
+    reverse_vertical: bool,
 }
 
 impl Component for ExpressionEditor {
@@ -71,13 +73,15 @@ impl Component for ExpressionEditor {
             left: 0,
             save_enabled: false,
             edit_enabled: false,
+            reverse_vertical: false,
             state,
         }
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            ExpressionEditorMsg::SetPos(top, left) => {
+            ExpressionEditorMsg::SetPos(top, left, reverse_vertical) => {
+                self.reverse_vertical = reverse_vertical;
                 self.top = top;
                 self.left = left;
                 true
@@ -86,9 +90,9 @@ impl Component for ExpressionEditor {
                 drop(future_to_promise(self.state.clone().validate_expr()));
                 false
             }
-
             ExpressionEditorMsg::Resize(width, height) => {
                 self.state.set_dimensions(width, height);
+                ctx.props().on_resize.emit(());
                 false
             }
             ExpressionEditorMsg::Reset => {
@@ -125,8 +129,10 @@ impl Component for ExpressionEditor {
             ExpressionEditorMsg::SetTheme(theme) => {
                 if let Some((ref editor, _)) = *self.state.editor.borrow() {
                     init_theme(theme.as_str(), editor);
+                    editor.set_theme(theme.as_str());
                 }
 
+                self.state.set_default_content();
                 *self.state.theme.borrow_mut() = Some(theme);
                 false
             }
@@ -138,6 +144,7 @@ impl Component for ExpressionEditor {
                         x.set_value("");
                     }
                 }
+
                 false
             }
         }
@@ -151,17 +158,29 @@ impl Component for ExpressionEditor {
     fn rendered(&mut self, _ctx: &Context<Self>, first_render: bool) {
         if first_render {
             drop(future_to_promise(self.state.clone().init_monaco_editor()));
-        } else if self.state.0.editor.borrow().is_some() {
-            self.state.editor.borrow().as_ref().unwrap().1.focus();
+        } else if let Some((_, editor)) = &*self.state.0.editor.borrow() {
+            editor.layout(&JsValue::UNDEFINED);
+            let editor = editor.clone();
+            let _ = future_to_promise(async move {
+                await_animation_frame().await?;
+                editor.focus();
+                Ok(JsValue::UNDEFINED)
+            });
         }
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         let reset = ctx.link().callback(|_| ExpressionEditorMsg::Reset);
         let save = ctx.link().callback_once(|_| ExpressionEditorMsg::SaveExpr);
-        let resize = ctx
-            .link()
-            .callback(|(width, height)| ExpressionEditorMsg::Resize(width, height));
+        let resize_horiz = ctx.link().callback(|(width, height)| {
+            ExpressionEditorMsg::Resize(width, height - 54)
+        });
+
+        let resize_vert = ctx.link().callback(|(width, height)| {
+            ExpressionEditorMsg::Resize(width, height - 48)
+        });
+
+        let reset_size = ctx.link().callback(|()| ExpressionEditorMsg::Resize(0, 0));
 
         html! {
             <>
@@ -169,29 +188,38 @@ impl Component for ExpressionEditor {
                     { &CSS }
                     { format!(":host{{left:{}px;top:{}px;}}", self.left, self.top) }
                 </style>
-                <SplitPanel id="expression-editor-split-panel" on_resize={ resize }>
-                    <div id="editor-container">
-                        <div id="monaco-container" ref={ self.state.container.clone() } style=""></div>
-                        <div id="psp-expression-editor-actions">
-                            <button
-                                id="psp-expression-editor-button-reset"
-                                class="psp-expression-editor__button"
-                                onmousedown={ reset }
-                                disabled={ !self.edit_enabled }>
-                                { if self.edit_enabled { "Reset" } else { "" } }
-                            </button>
-                            <button
-                                id="psp-expression-editor-button-save"
-                                class="psp-expression-editor__button"
-                                onmousedown={ save }
-                                disabled={ !self.save_enabled }>
-                                { if self.save_enabled { "Save" } else { "" } }
-                            </button>
-                        </div>
-                    </div>
-                    <div>
+                <SplitPanel
+                    id="expression-editor-split-panel"
+                    on_resize={ resize_horiz }
+                    on_reset={ reset_size.clone() }>
+                    <SplitPanel
+                        orientation={ Orientation::Vertical }
+                        reverse={ self.reverse_vertical }
+                        on_resize={ resize_vert }
+                        on_reset={ reset_size }>
 
-                    </div>
+                        <div id="editor-container">
+                            <div id="monaco-container" ref={ self.state.container.clone() } style=""></div>
+                            <div id="psp-expression-editor-actions">
+                                <button
+                                    id="psp-expression-editor-button-reset"
+                                    class="psp-expression-editor__button"
+                                    onmousedown={ reset }
+                                    disabled={ !self.edit_enabled }>
+                                    { if self.edit_enabled { "Reset" } else { "" } }
+                                </button>
+                                <button
+                                    id="psp-expression-editor-button-save"
+                                    class="psp-expression-editor__button"
+                                    onmousedown={ save }
+                                    disabled={ !self.save_enabled }>
+                                    { if self.save_enabled { "Save" } else { "" } }
+                                </button>
+                            </div>
+                        </div>
+                        <div></div>
+                    </SplitPanel>
+                    <div></div>
                 </SplitPanel>
             </>
         }
@@ -251,11 +279,12 @@ impl ExpressionEditorState {
     /// Initialize the `monaco-editor` for this `<perspective-expression-editor>`.
     /// This method should only be called once per element.
     async fn init_monaco_editor(self) -> Result<JsValue, JsValue> {
-        let monaco = init_monaco().await.unwrap();
+        let monaco = init_monaco().await.into_jserror()?;
         if let Some(ref theme) = *self.theme.borrow() {
             init_theme(theme.as_str(), &monaco);
         }
 
+        self.session.await_table().await?;
         set_global_completion_column_names(
             self.session.metadata().get_table_columns().into_jserror()?,
         );
@@ -264,10 +293,9 @@ impl ExpressionEditorState {
             theme: "exprtk-theme",
             value: "",
             language: "exprtk",
-            automatic_layout: true,
+            automatic_layout: false,
             minimap: MinimapArgs { enabled: false },
         };
-
         let container = self.container.cast::<HtmlElement>().unwrap();
         let editor_args = JsValue::from_serde(&args).unwrap();
         let editor = monaco.create(container, editor_args);
@@ -276,7 +304,6 @@ impl ExpressionEditorState {
         let cb = self.on_validate.as_ref().as_ref().unchecked_ref();
         *self.editor.borrow_mut() = Some((monaco, editor.clone()));
         await_animation_frame().await?;
-        editor.focus();
         self.on_init.emit(());
         let expression = maybe!({
             let alias = self.alias.as_ref()?;
@@ -292,27 +319,30 @@ impl ExpressionEditorState {
         }
 
         editor.get_model().on_did_change_content(cb);
+        editor.focus();
         Ok(JsValue::UNDEFINED)
     }
 
     fn set_default_content(&self) {
         if let Some((_, x)) = self.editor.borrow().as_ref() {
-            let mut i = 1;
-            let mut name = "New Column 1".to_owned();
-            let config = self.session.metadata();
-            while config.get_column_table_type(&name).is_some() {
-                i += 1;
-                name = format!("New Column {}", i);
-            }
+            if x.get_value() == "" {
+                let mut i = 1;
+                let mut name = "New Column 1".to_owned();
+                let config = self.session.metadata();
+                while config.get_column_table_type(&name).is_some() {
+                    i += 1;
+                    name = format!("New Column {}", i);
+                }
 
-            x.set_value(&format!("// {}\n", name));
-            x.set_position(
-                &JsValue::from_serde(&PositionArgs {
-                    column: 1,
-                    line_number: 2,
-                })
-                .unwrap(),
-            );
+                x.set_value(&format!("// {}\n", name));
+                x.set_position(
+                    &JsValue::from_serde(&PositionArgs {
+                        column: 1,
+                        line_number: 2,
+                    })
+                    .unwrap(),
+                );
+            }
         }
     }
 

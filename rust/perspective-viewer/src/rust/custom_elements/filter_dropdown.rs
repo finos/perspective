@@ -29,7 +29,7 @@ pub struct FilterDropDownElement {
 }
 
 impl ResizableMessage for <FilterDropDown as Component>::Message {
-    fn resize(y: i32, x: i32) -> Self {
+    fn resize(y: i32, x: i32, _: bool) -> Self {
         FilterDropDownMsg::SetPos(y, x)
     }
 }
@@ -56,7 +56,7 @@ impl FilterDropDownElement {
     }
 
     pub fn reautocomplete(&self) {
-        self.modal.open(self.target.borrow().clone().unwrap());
+        self.modal.open(self.target.borrow().clone().unwrap(), None);
     }
 
     pub fn autocomplete(
@@ -93,7 +93,7 @@ impl FilterDropDownElement {
                             FilterDropDownMsg::SetValues(values),
                         ]);
 
-                        modal.open(target);
+                        modal.open(target, None);
                         Ok(JsValue::UNDEFINED)
                     }
                 });

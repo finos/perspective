@@ -172,13 +172,14 @@ impl Component for PerspectiveViewer {
     // `JsPerspectiveConfig` - they may need caching as in the JavaScript version.
     fn view(&self, ctx: &Context<Self>) -> Html {
         let settings = ctx.link().callback(|_| Msg::ToggleSettingsInit(None, None));
+        let callback = self.on_dimensions_reset.callback();
         if self.settings_open {
             html! {
                 <>
                     <style>{ &CSS }</style>
                     <SplitPanel
                         id="app_panel"
-                        on_reset={ self.on_dimensions_reset.clone() }>
+                        on_reset={ callback }>
                         <div id="side_panel" class="column noselect">
                             <PluginSelector
                                 session={ ctx.props().session.clone() }

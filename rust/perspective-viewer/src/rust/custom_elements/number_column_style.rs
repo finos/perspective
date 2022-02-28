@@ -36,7 +36,7 @@ fn on_change(elem: &web_sys::HtmlElement, config: &NumberColumnStyleConfig) {
 }
 
 impl ResizableMessage for <NumberColumnStyle as Component>::Message {
-    fn resize(y: i32, x: i32) -> Self {
+    fn resize(y: i32, x: i32, _: bool) -> Self {
         NumberColumnStyleMsg::SetPos(y, x)
     }
 }
@@ -89,7 +89,7 @@ impl PerspectiveNumberColumnStyleElement {
     /// # Arguments
     /// `target` - the relative target to pin this `ModalElement` to.
     pub fn open(&mut self, target: web_sys::HtmlElement) {
-        self.modal.open(target);
+        self.modal.open(target, None);
     }
 
     /// Remove this `ModalElement` from the DOM.
