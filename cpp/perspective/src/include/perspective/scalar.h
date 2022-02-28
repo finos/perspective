@@ -98,6 +98,8 @@ struct PERSPECTIVE_EXPORT t_tscalar {
     void set(float v);
     void set(t_tscalar v);
 
+    void set_status(t_status s);
+
     bool is_nan() const;
     bool is_none() const;
     bool is_str() const;
