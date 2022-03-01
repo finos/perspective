@@ -84,7 +84,7 @@ export function activate_plugin_menu(regularTable, target, column_max) {
         regularTable[PLUGIN_SYMBOL] = regularTable[PLUGIN_SYMBOL] || {};
         regularTable[PLUGIN_SYMBOL][column_name] = config;
         regularTable.draw({preserve_width: true});
-        regularTable.parentElement.dispatchEvent(
+        regularTable.parentElement.parentElement.dispatchEvent(
             new Event("perspective-config-update")
         );
     };
@@ -102,7 +102,7 @@ export function activate_plugin_menu(regularTable, target, column_max) {
         MENU.destroy();
         this._open_column_styles_menu.pop();
         await regularTable.draw({preserve_width: true});
-        regularTable.parentElement.dispatchEvent(
+        regularTable.parentElement.parentElement.dispatchEvent(
             new Event("perspective-config-update")
         );
     };
