@@ -378,11 +378,19 @@ fn split_panel_divider(props: &SplitPanelDividerProps) -> Html {
         SplitPanelMsg::Reset(i)
     });
 
+    // TODO Not sure why, but under some circumstances this can trugger a
+    // `dragstart`, leading to further drag events which cause perspective
+    // havoc.  `event.prevent_default()` in `onmousedown` alternatively fixes
+    // this, but also prevents this event from trigger focus-stealing e.g. from
+    // open dialogs.
+    let ondragstart = Callback::from(|event: DragEvent| event.prevent_default());
+
     html_template! {
         <div
             class="split-panel-divider"
-            onmousedown={ onmousedown.clone() }
-            ondblclick={ ondblclick.clone() }>
+            ondragstart={ ondragstart }
+            onmousedown={ onmousedown }
+            ondblclick={ ondblclick }>
         </div>
     }
 }
