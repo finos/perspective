@@ -31,7 +31,9 @@ utils.with_server({}, () => {
                 "perspective-config-update event is fired when column style is changed",
                 async (page) => {
                     // Await the viewer element to exist on the page
-                    const viewer = await page.$("perspective-viewer");
+                    const viewer = await page.waitForSelector(
+                        "perspective-viewer"
+                    );
                     const {x, y} = await page.evaluate(async (viewer) => {
                         // Await the table load
                         await viewer.getTable();
@@ -67,7 +69,7 @@ utils.with_server({}, () => {
                     await page.mouse.click(x, y);
 
                     // Await the style menu existing on the page
-                    const style_menu = await page.$(
+                    const style_menu = await page.waitForSelector(
                         "perspective-number-column-style"
                     );
 
