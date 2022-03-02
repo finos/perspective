@@ -356,6 +356,7 @@ impl PartialEq for SplitPanelDividerProps {
     }
 }
 
+/// The resize handle for a `SplitPanel`.
 #[function_component(SplitPanelDivider)]
 fn split_panel_divider(props: &SplitPanelDividerProps) -> Html {
     let orientation = props.orientation;

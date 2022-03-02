@@ -30,6 +30,7 @@ where
     total_height: f64,
     _props: PhantomData<T>,
     _dimensions_reset_sub: Option<Subscription>,
+    _resize_sub: Option<Subscription>,
 }
 
 #[derive(Properties, Clone)]
@@ -61,6 +62,9 @@ where
 
     #[prop_or_default]
     pub dragleave: Callback<DragEvent>,
+
+    #[prop_or_default]
+    pub on_resize: Option<Rc<PubSub<()>>>,
 
     #[prop_or_default]
     pub on_dimensions_reset: Option<Rc<PubSub<()>>>,
@@ -123,6 +127,16 @@ where
                 })
             });
 
+        let link = ctx.link().clone();
+        let _resize_sub = ctx.props().on_resize.as_ref().map(|pubsub| {
+            pubsub.add_listener(move |_| {
+                link.send_message_batch(vec![
+                    ScrollPanelMsg::UpdateViewportDimensions,
+                    ScrollPanelMsg::CalculateWindowContent,
+                ])
+            })
+        });
+
         Self {
             viewport_ref: Default::default(),
             viewport_height: 0f64,
@@ -132,6 +146,7 @@ where
             total_height: ctx.props().total_height(ctx),
             _props: PhantomData,
             _dimensions_reset_sub,
+            _resize_sub,
         }
     }
 

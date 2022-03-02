@@ -39,12 +39,18 @@ struct ResizeObserverHandle {
 }
 
 impl ResizeObserverHandle {
-    fn new(elem: &HtmlElement, renderer: &Renderer) -> ResizeObserverHandle {
+    fn new(
+        elem: &HtmlElement,
+        renderer: &Renderer,
+        root: &AppHandle<PerspectiveViewer>,
+    ) -> ResizeObserverHandle {
+        let on_resize = root.callback(|()| Msg::Resize);
         let mut state = ResizeObserverState {
             elem: elem.clone(),
             renderer: renderer.clone(),
             width: elem.offset_width(),
             height: elem.offset_height(),
+            on_resize,
         };
 
         let _callback = (move |xs| state.on_resize(&xs)).into_closure_mut();
@@ -70,6 +76,7 @@ struct ResizeObserverState {
     renderer: Renderer,
     width: i32,
     height: i32,
+    on_resize: Callback<()>,
 }
 
 impl ResizeObserverState {
@@ -88,9 +95,12 @@ impl ResizeObserverState {
             let resized = self.width != content_width || self.height != content_height;
             if resized && is_visible {
                 let renderer = self.renderer.clone();
-                let _ = promisify_ignore_view_delete(
-                    async move { renderer.resize().await },
-                );
+                let callback = self.on_resize.clone();
+                let _ = promisify_ignore_view_delete(async move {
+                    renderer.resize().await?;
+                    callback.emit(());
+                    Ok(JsValue::UNDEFINED)
+                });
             }
 
             self.width = content_width;
@@ -151,10 +161,7 @@ impl PerspectiveViewerElement {
             weak_link: WeakScope::default(),
         };
 
-        let root = Rc::new(RefCell::new(Some(yew::start_app_with_props_in_element(
-            shadow_root,
-            props,
-        ))));
+        let root = yew::start_app_with_props_in_element(shadow_root, props);
 
         // Create callbacks
         let update_sub = session.on_update.add_listener({
@@ -168,19 +175,15 @@ impl PerspectiveViewerElement {
         });
 
         let limit_sub = {
-            let callback = root
-                .borrow()
-                .as_ref()
-                .unwrap()
-                .callback(|x| Msg::RenderLimits(Some(x)));
+            let callback = root.callback(|x| Msg::RenderLimits(Some(x)));
             renderer.on_limits_changed.add_listener(callback)
         };
 
         let events = CustomEvents::new(&elem, &session, &renderer);
-        let resize_handle = ResizeObserverHandle::new(&elem, &renderer);
+        let resize_handle = ResizeObserverHandle::new(&elem, &renderer, &root);
         PerspectiveViewerElement {
             elem,
-            root,
+            root: Rc::new(RefCell::new(Some(root))),
             session,
             renderer,
             expression_editor: Rc::new(RefCell::new(None)),
@@ -457,7 +460,11 @@ impl PerspectiveViewerElement {
     ///   not.
     pub fn js_set_auto_size(&mut self, autosize: bool) {
         if autosize {
-            let handle = Some(ResizeObserverHandle::new(&self.elem, &self.renderer));
+            let handle = Some(ResizeObserverHandle::new(
+                &self.elem,
+                &self.renderer,
+                self.root.borrow().as_ref().unwrap(),
+            ));
             *self.resize_handle.borrow_mut() = handle;
         } else {
             *self.resize_handle.borrow_mut() = None;

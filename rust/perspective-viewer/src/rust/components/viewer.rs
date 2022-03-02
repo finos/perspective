@@ -45,6 +45,7 @@ impl PartialEq for PerspectiveViewerProps {
 }
 
 pub enum Msg {
+    Resize,
     Reset(bool, Option<Sender<()>>),
     ToggleSettingsInit(
         Option<SettingsUpdate>,
@@ -60,6 +61,7 @@ pub struct PerspectiveViewer {
     on_rendered: Option<Sender<()>>,
     fonts: FontLoaderProps,
     settings_open: bool,
+    on_resize: Rc<PubSub<()>>,
     on_dimensions_reset: Rc<PubSub<()>>,
 }
 
@@ -76,6 +78,7 @@ impl Component for PerspectiveViewer {
             on_rendered: None,
             fonts: FontLoaderProps::new(&elem, callback),
             settings_open: false,
+            on_resize: Default::default(),
             on_dimensions_reset: Default::default(),
         }
     }
@@ -83,6 +86,10 @@ impl Component for PerspectiveViewer {
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::PreloadFontsUpdate => true,
+            Msg::Resize => {
+                self.on_resize.emit_all(());
+                false
+            }
             Msg::Reset(all, sender) => {
                 let renderer = ctx.props().renderer.clone();
                 let session = ctx.props().session.clone();
@@ -189,6 +196,7 @@ impl Component for PerspectiveViewer {
                                 dragdrop={ ctx.props().dragdrop.clone() }
                                 renderer={ ctx.props().renderer.clone() }
                                 session={ ctx.props().session.clone() }
+                                on_resize={ self.on_resize.clone() }
                                 on_dimensions_reset={ self.on_dimensions_reset.clone() }>
                             </ColumnSelector>
                         </div>
