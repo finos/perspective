@@ -48,7 +48,7 @@ pub enum StatusBarMsg {
 
 /// A toolbar with buttons, and `Table` & `View` status information.
 pub struct StatusBar {
-    is_updating: bool,
+    is_updating: i32,
     theme: Option<String>,
     themes: Vec<String>,
     _sub: [Subscription; 4],
@@ -87,14 +87,15 @@ impl Component for StatusBar {
             _sub,
             theme: None,
             themes: vec![],
-            is_updating: false,
+            is_updating: 0,
         }
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             StatusBarMsg::SetIsUpdating(is_updating) => {
-                self.is_updating = is_updating;
+                self.is_updating =
+                    max!(0, self.is_updating + if is_updating { 1 } else { -1 });
                 true
             }
             StatusBarMsg::TableStatsChanged => true,
@@ -142,7 +143,11 @@ impl Component for StatusBar {
     fn view(&self, ctx: &Context<Self>) -> Html {
         let stats = ctx.props().session.get_table_stats();
         let class_name = self.status_class_name(&stats);
-        let is_updating_class_name = if self.is_updating { "updating" } else { " " };
+        let is_updating_class_name = if self.is_updating > 0 {
+            "updating"
+        } else {
+            " "
+        };
 
         let reset = ctx
             .link()

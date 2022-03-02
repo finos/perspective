@@ -33,11 +33,8 @@ pub trait SessionRendererModel {
         let session = self.session().clone();
         let renderer = self.renderer().clone();
         let _ = promisify_ignore_view_delete(async move {
-            drop(
-                renderer
-                    .draw(session.validate().await.create_view())
-                    .await?,
-            );
+            let view = session.validate().await;
+            drop(renderer.draw(view.create_view()).await?);
             Ok(JsValue::UNDEFINED)
         });
     }
