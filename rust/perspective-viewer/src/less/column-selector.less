@@ -41,6 +41,7 @@
                 --column-add--font-family,
                 var(--button--font-family, inherit)
             );
+            font-display: block;
             &:before {
                 font-feature-settings: "liga";
                 content: var(--column-add--content, "+");
@@ -98,6 +99,7 @@
             span.expression-delete-button {
                 padding-top: 1px;
                 font-family: var(--button--font-family, inherit);
+                font-display: block;
                 cursor: pointer;
                 opacity: 1;
                 color: #999;
@@ -221,7 +223,7 @@
                 --column-selector--font-family,
                 var(--button--font-family, inherit)
             ) !important;
-
+            font-display: block;
             width: var(--column-selector--width, 24px);
             min-width: var(--column-selector--width, 24px);
             height: var(--is_visible--height, auto);

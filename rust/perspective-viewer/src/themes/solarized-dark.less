@@ -38,27 +38,32 @@ perspective-expression-editor[theme="Solarized Dark"],
     color: #93a1a1;
     background: #002b36;
 
-    --inactive--color: #073642;
+    --inactive--color: #586e75;
     --plugin--background: #073642;
 }
 
 .perspective-viewer-solarized-dark--datagrid {
     regular-table {
-        table {
+        table,
+        table tr:hover {
             color: #93a1a1;
         }
     }
 
     regular-table table tbody tr td,
     regular-table table tbody tr th {
-        border-top-color: #002b36;
+        border-top-color: #586e75;
+    }
+
+    regular-table::-webkit-scrollbar-thumb {
+        background-color: var(--inactive--color, #586e75);
     }
 
     regular-table table tbody th:empty {
         background: linear-gradient(
             to right,
             transparent 9px,
-            #002b36 10px,
+            #586e75 10px,
             transparent 11px
         );
     }
