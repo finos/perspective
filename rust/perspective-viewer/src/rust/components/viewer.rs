@@ -16,9 +16,11 @@ use super::status_bar::StatusBar;
 
 use crate::config::*;
 use crate::dragdrop::*;
+use crate::model::*;
 use crate::renderer::*;
-use crate::session::Session;
+use crate::session::*;
 use crate::utils::*;
+use crate::*;
 
 use futures::channel::oneshot::*;
 use std::rc::Rc;
@@ -37,6 +39,8 @@ pub struct PerspectiveViewerProps {
     #[prop_or_default]
     pub weak_link: WeakScope<PerspectiveViewer>,
 }
+
+derive_session_renderer_model!(PerspectiveViewerProps);
 
 impl PartialEq for PerspectiveViewerProps {
     fn eq(&self, _rhs: &Self) -> bool {
@@ -179,14 +183,14 @@ impl Component for PerspectiveViewer {
     // `JsPerspectiveConfig` - they may need caching as in the JavaScript version.
     fn view(&self, ctx: &Context<Self>) -> Html {
         let settings = ctx.link().callback(|_| Msg::ToggleSettingsInit(None, None));
-        let callback = self.on_dimensions_reset.callback();
         if self.settings_open {
             html! {
                 <>
                     <style>{ &CSS }</style>
                     <SplitPanel
                         id="app_panel"
-                        on_reset={ callback }>
+                        on_reset={ self.on_dimensions_reset.callback() }
+                        on_resize_finished={ ctx.props().render_callback() }>
                         <div id="side_panel" class="column noselect">
                             <PluginSelector
                                 session={ ctx.props().session.clone() }

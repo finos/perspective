@@ -187,6 +187,9 @@ pub struct SplitPanelProps {
     #[prop_or_default]
     pub on_resize: Option<Callback<(i32, i32)>>,
 
+    #[prop_or_default]
+    pub on_resize_finished: Option<Callback<()>>,
+
     #[cfg(test)]
     #[prop_or_default]
     pub weak_link: WeakScope<SplitPanel>,
@@ -273,6 +276,9 @@ impl Component for SplitPanel {
             }
             SplitPanelMsg::StopResizing => {
                 self.resize_state = None;
+                if let Some(cb) = &ctx.props().on_resize_finished {
+                    cb.emit(());
+                }
             }
             SplitPanelMsg::MoveResizing(client_offset) => {
                 if let Some(state) = self.resize_state.as_ref() {
