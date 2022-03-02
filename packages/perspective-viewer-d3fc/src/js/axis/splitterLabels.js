@@ -32,7 +32,7 @@ export const splitterLabels = (settings) => {
             .style("color", (d) =>
                 coloured ? withoutOpacity(color(d.name)) : undefined
             )
-            .on("click", (_event, d) => {
+            .on("click", (event, d) => {
                 if (disabled) return;
 
                 if (alt) {
@@ -44,6 +44,11 @@ export const splitterLabels = (settings) => {
                         settings.splitMainValues || []
                     );
                 }
+
+                event.target
+                    .getRootNode()
+                    .host.closest("perspective-viewer")
+                    ?.dispatchEvent(new Event("perspective-config-update"));
 
                 redrawChart(selection);
             });
