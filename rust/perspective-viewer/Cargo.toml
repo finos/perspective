@@ -131,5 +131,5 @@ wasm-bindgen-test = "0.3.13"
 
 [profile.release]
 opt-level = "z"
-# codegen-units = 1
-# lto = true
+codegen-units = 1
+lto = true

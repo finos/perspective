@@ -1,5 +1,24 @@
 # Changelog
 
+## [v1.3.2](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.3.1...HEAD)
+
+**Implemented enhancements:**
+
+- Vertical resize for expression editor [\#1725](https://github.com/finos/perspective/pull/1725) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- Column Styles Updates Do Not Fire `perspective-config-update` Event Correctly [\#1727](https://github.com/finos/perspective/issues/1727)
+- UI small fixes [\#1731](https://github.com/finos/perspective/pull/1731) ([texodus](https://github.com/texodus))
+- fix: fire config-update evnt on perspective-viewer [\#1728](https://github.com/finos/perspective/pull/1728) ([jkusa](https://github.com/jkusa))
+- Fix filtering on string columns containing `null` [\#1726](https://github.com/finos/perspective/pull/1726) ([texodus](https://github.com/texodus))
+
+**Merged pull requests:**
+
+- Add tests [\#1730](https://github.com/finos/perspective/pull/1730) ([texodus](https://github.com/texodus))
+
 ## [v1.3.1](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.3.0...HEAD)

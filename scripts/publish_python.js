@@ -113,6 +113,7 @@ try {
         // Python publish
         console.log(`-- Building "perspective-python" ${PERSPECTIVE_VERSION}`);
         fs.writeFileSync("./.perspectiverc", `PSP_PROJECT=python`);
+        require("dotenv").config({path: "./.perspectiverc"});
         execute`yarn clean --deps`;
         execute`yarn build`;
 

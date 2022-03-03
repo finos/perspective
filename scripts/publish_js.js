@@ -33,14 +33,15 @@ try {
         --unreleased-only
         --base CHANGELOG.md
         --output CHANGELOG.md
-        --unreleased-label=v1.3.1
-        --since-tag=v1.3.0
+        --unreleased-label=v1.3.2
+        --since-tag=v1.3.1
     `;
 
     execute`git add CHANGELOG.md`;
 
     console.log(`-- Building "@finos/perspective(-*)"`);
     fs.writeFileSync("./.perspectiverc", `PSP_PROJECT=js`);
+    require("dotenv").config({path: "./.perspectiverc"});
     execute`yarn clean --deps`;
     execute`rm -rf node_modules`;
     execute`yarn`;

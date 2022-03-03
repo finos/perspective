@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "perspective-python-internal",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "scripts": {
     "bench": "python3 bench/perspective_benchmark.py",
     "docs": "python3 docs/generate.py"
