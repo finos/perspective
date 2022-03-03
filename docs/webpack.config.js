@@ -4,7 +4,7 @@ const PerspectivePlugin = require("@finos/perspective-webpack-plugin");
 
 module.exports = [
     {
-        mode: process.env.NODE_ENV || "development",
+        mode: process.env.NODE_ENV || "production",
         entry: "./js/index.js",
         output: {
             filename: "index.js",
