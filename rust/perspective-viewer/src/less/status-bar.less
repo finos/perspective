@@ -56,6 +56,7 @@
                 text-transform: none;
                 margin-right: 4px;
                 font-family: var(--button--font-family, inherit);
+                font-display: block;
                 vertical-align: bottom;
             }
 
@@ -70,15 +71,13 @@
 
         span.icon {
             font-family: var(--button--font-family, inherit);
+            font-display: block;
             height: 100%;
             line-height: 36px;
             margin: 0;
         }
 
         span#status {
-            opacity: 0.5;
-            animation: twinkle 0.5s 1;
-
             &:before {
                 color: #ccc;
                 content: var(--status-icon--content, "\2B24");
@@ -177,30 +176,39 @@
     }
 }
 
-#status_bar.updating span#status {
-    animation: pulse 2s infinite;
+// Status bar status icon animations
+:host #status_bar.updating span#status {
+    animation-name: status-bar-updating;
+    animation-duration: var(--status-icon-updating--animation-duration, 1s);
+    animation-iteration-count: infinite;
 }
 
-@keyframes pulse {
-    0% {
-        opacity: 1;
-    }
+:host #status_bar span#status {
+    animation-name: status-bar;
+    animation-duration: var(--status-icon--animation-duration, 0.5s);
+    animation-iteration-count: 1;
+}
 
-    50% {
-        opacity: 0.5;
+@keyframes status-bar-updating {
+    0% {
+        filter: var(--status-icon-updating-keyframes-start--filter, opacity(1));
+        transform: var(--status-icon-updating-keyframes-start--transform, none);
     }
 
     100% {
-        opacity: 1;
+        filter: var(--status-icon-updating-keyframes-end--filter, opacity(0.2));
+        transform: var(--status-icon-updating-keyframes-end--transform, none);
     }
 }
 
-@keyframes twinkle {
+@keyframes status-bar {
     0% {
-        filter: saturate(4);
+        filter: var(--status-icon-keyframes-start--filter, saturate(4));
+        transform: var(--status-icon-keyframes-start--transform, none);
     }
 
     100% {
-        filter: saturate(1);
+        filter: var(--status-icon-keyframes-end--filter, saturate(1));
+        transform: var(--status-icon-keyframes-end--transform, none);
     }
 }

@@ -7,10 +7,10 @@
  *
  */
 
-@import "../less/fonts";
-@import (reference) "./material-dark.less";
+@import (css)
+    url("https://fonts.googleapis.com/css?family=Roboto+Mono:200,400%7CMaterial+Icons+Outlined%7COpen+Sans:300,400,700");
 
-// @import url("https://fonts.googleapis.com/css2?family=Lato&display=swap");
+@import (reference) "./material-dark.less";
 
 perspective-viewer,
 perspective-viewer[theme="Vaporwave"] {
@@ -21,7 +21,8 @@ perspective-viewer[theme="Vaporwave"],
 .perspective-viewer-vaporwave {
     .perspective-viewer-material-dark();
     .perspective-viewer-vaporwave--colors();
-    // .perspective-viewer-vaporwave--fonts();
+    .perspective-viewer-vaporwave--animation();
+    .perspective-viewer-vaporwave--fonts();
     .perspective-viewer-vaporwave--datagrid();
     .perspective-viewer-vaporwave--d3fc();
 }
@@ -33,13 +34,13 @@ perspective-expression-editor[theme="Vaporwave"],
     .perspective-modal-material-dark();
     .perspective-viewer-vaporwave--colors();
 
-    background-color: rgb(7, 8, 29);
+    background-color: #07081d;
 }
 
-// .perspective-viewer-vaporwave--fonts();
-//     font-family: "Lato" !important;
-//     --preload-fonts: "Roboto Mono:200;Lato:400;Material Icons:400";
-// }
+.perspective-viewer-vaporwave--fonts {
+    --button--font-family: "Material Icons Outlined";
+    --preload-fonts: "Roboto Mono:200;Open Sans:300,400;Material Icons Outlined:400";
+}
 
 .perspective-viewer-vaporwave--colors {
     color: #49acff;
@@ -48,6 +49,15 @@ perspective-expression-editor[theme="Vaporwave"],
     --inactive--color: rgb(19, 33, 50) !important;
     --plugin--border: 1px solid rgb(19, 33, 50) !important;
     --plugin--background: rgb(7, 8, 29) !important;
+}
+
+.perspective-viewer-vaporwave--animation {
+    --status-icon-updating-keyframes-start--filter: opacity(1);
+    --status-icon-updating-keyframes-end--filter: opacity(0);
+    --status-icon-updating-keyframes-start--transform: scale(1);
+    --status-icon-updating-keyframes-end--transform: scale(0.5);
+    --status-icon-keyframes-start--transform: scale(1.25);
+    --status-icon-keyframes-end--transform: scale(1);
 }
 
 .perspective-viewer-vaporwave--datagrid {
@@ -95,36 +105,51 @@ perspective-expression-editor[theme="Vaporwave"],
     --d3fc-series-9: hsl(157, 100%, 25%);
     --d3fc-series-10: hsl(272, 100%, 35%);
 
-    --d3fc-positive--gradient: linear-gradient(
-        #000080,
-        #7d007e,
-        #c0006f,
-        #f10057,
-        #ff473b,
-        #ff8a0b,
-        #ffc600,
-        #ffff00
+    --d3fc-negative--gradient: linear-gradient(
+        #f3d431,
+        #efb92d,
+        #ed9c25,
+        #eb7e20,
+        #e75d1e,
+        #d14632,
+        #b03e38,
+        #8c3a36,
+        #643633,
+        #07081d
     ) !important;
 
-    --d3fc-negative--gradient: linear-gradient(
-        #000080,
-        #7d007e,
-        #c0006f,
-        #f10057,
-        #ff473b,
-        #ff8a0b,
-        #ffc600,
-        #ffff00
+    --d3fc-positive--gradient: linear-gradient(
+        #07081d,
+        #2e4463,
+        #1e588a,
+        #086da7,
+        #0082b9,
+        #039ac7,
+        #12b1d4,
+        #2bc8e2,
+        #3ddff0,
+        #61f4fb
     ) !important;
 
     --d3fc-full--gradient: linear-gradient(
-        #000080,
-        #7d007e,
-        #c0006f,
-        #f10057,
-        #ff473b,
-        #ff8a0b,
-        #ffc600,
-        #ffff00
+        #f3d431,
+        #efb92d,
+        #ed9c25,
+        #eb7e20,
+        #e75d1e,
+        #d14632,
+        #b03e38,
+        #8c3a36,
+        #643633,
+        #07081d,
+        #2e4463,
+        #1e588a,
+        #086da7,
+        #0082b9,
+        #039ac7,
+        #12b1d4,
+        #2bc8e2,
+        #3ddff0,
+        #61f4fb
     ) !important;
 }

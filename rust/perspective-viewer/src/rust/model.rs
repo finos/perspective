@@ -18,6 +18,7 @@ use crate::utils::*;
 use std::future::Future;
 use std::pin::Pin;
 use wasm_bindgen::prelude::*;
+use yew::prelude::*;
 
 /// A `SessionRendererModel` is any struct with `session` and `renderer` fields, as
 /// this method is boilerplate but has no other trait to live on currently.  As
@@ -33,13 +34,23 @@ pub trait SessionRendererModel {
         let session = self.session().clone();
         let renderer = self.renderer().clone();
         let _ = promisify_ignore_view_delete(async move {
-            drop(
-                renderer
-                    .draw(session.validate().await.create_view())
-                    .await?,
-            );
+            let view = session.validate().await;
+            drop(renderer.draw(view.create_view()).await?);
             Ok(JsValue::UNDEFINED)
         });
+    }
+
+    fn render_callback(&self) -> Callback<()> {
+        let session = self.session().clone();
+        let renderer = self.renderer().clone();
+        Callback::from(move |_| {
+            let session = session.clone();
+            let renderer = renderer.clone();
+            drop(promisify_ignore_view_delete(async move {
+                drop(renderer.draw(async { Ok(&session) }).await?);
+                Ok(JsValue::UNDEFINED)
+            }))
+        })
     }
 
     fn render(&self) {

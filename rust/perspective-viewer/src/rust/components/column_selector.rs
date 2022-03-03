@@ -33,6 +33,9 @@ pub struct ColumnSelectorProps {
     pub dragdrop: DragDrop,
 
     #[prop_or_default]
+    pub on_resize: Option<Rc<PubSub<()>>>,
+
+    #[prop_or_default]
     pub on_dimensions_reset: Option<Rc<PubSub<()>>>,
 }
 
@@ -327,6 +330,7 @@ impl Component for ColumnSelector {
                         dragenter={ Callback::from(dragenter_helper) }
                         dragleave={ dragleave }
                         drop={ drop }
+                        on_resize={ ctx.props().on_resize.clone() }
                         on_dimensions_reset={ ctx.props().on_dimensions_reset.clone() }
                         items={ Rc::new(active_columns.collect::<Vec<_>>()) }
                         named_row_count={ self.named_row_count }
@@ -337,6 +341,7 @@ impl Component for ColumnSelector {
                         <ScrollPanel<InactiveColumnProps>
                             id="expression-columns"
                             items={ Rc::new(expression_columns.collect::<Vec<_>>()) }
+                            on_dimensions_reset={ ctx.props().on_dimensions_reset.clone() }
                             row_height={ 20.0 }>
                         </ScrollPanel<InactiveColumnProps>>
                         <ScrollPanel<InactiveColumnProps>

@@ -704,7 +704,7 @@ impl<'a> ValidSession<'a> {
     /// Set a new `View` (derived from this `Session`'s `Table`), and create the
     /// `update()` subscription, consuming this `ValidSession<'_>` and returning
     /// the original `&Session`.
-    pub async fn create_view(self) -> Result<&'a Session, JsValue> {
+    pub async fn create_view(&self) -> Result<&'a Session, JsValue> {
         let js_config = self.0.borrow().config.as_jsvalue()?;
         let table = self
             .0
@@ -730,8 +730,15 @@ impl<'a> ValidSession<'a> {
 
         // self.0.borrow_mut().metadata.as_mut().unwrap().view_schema = Some(view_schema);
         self.0.borrow_mut().view_sub = Some(sub);
-        self.0.on_view_created.emit_all(());
         Ok(self.0)
+    }
+}
+
+impl<'a> Drop for ValidSession<'a> {
+    /// `ValidSession` is a guard for listeners of the `view_created` pubsub
+    /// event.
+    fn drop(&mut self) {
+        self.0.on_view_created.emit_all(());
     }
 }
 

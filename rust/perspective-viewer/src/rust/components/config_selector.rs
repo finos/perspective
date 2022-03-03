@@ -300,7 +300,6 @@ impl Component for ConfigSelector {
                     title="Transpose Pivots"
                     onmousedown={ transpose }>
 
-                    { "\u{21C4}" }
                 </span>
 
                 <SplitBySelector

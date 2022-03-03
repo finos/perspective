@@ -30,7 +30,7 @@
                 --column-close--font-family,
                 var(--button--font-family, "inherit")
             );
-
+            font-display: block;
             cursor: pointer;
             min-width: 12px;
             margin-right: 3px;
@@ -210,13 +210,19 @@
             min-width: 5px;
             max-width: 5px;
             flex-grow: 0;
-            color: var(--inactive--color, inherit);
             font-family: Arial;
             font-size: 12px;
             user-select: none;
             padding: 12px 24px 0 0;
+
             &:hover {
                 color: var(--active--color, inherit);
+            }
+
+            &:before {
+                font-family: var(--button--font-family, inherit);
+                color: var(--inactive--color, #666);
+                content: var(--transpose-button--content, "\21C4");
             }
         }
     }
@@ -225,6 +231,7 @@
         margin-left: 4px;
         cursor: pointer;
         font-family: var(--button--font-family, inherit);
+        font-display: block;
 
         &.desc:before {
             content: var(--sort-order-desc--content, "\2193");

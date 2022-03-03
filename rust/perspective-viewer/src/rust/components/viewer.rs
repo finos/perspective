@@ -16,9 +16,11 @@ use super::status_bar::StatusBar;
 
 use crate::config::*;
 use crate::dragdrop::*;
+use crate::model::*;
 use crate::renderer::*;
-use crate::session::Session;
+use crate::session::*;
 use crate::utils::*;
+use crate::*;
 
 use futures::channel::oneshot::*;
 use std::rc::Rc;
@@ -38,6 +40,8 @@ pub struct PerspectiveViewerProps {
     pub weak_link: WeakScope<PerspectiveViewer>,
 }
 
+derive_session_renderer_model!(PerspectiveViewerProps);
+
 impl PartialEq for PerspectiveViewerProps {
     fn eq(&self, _rhs: &Self) -> bool {
         false
@@ -45,6 +49,7 @@ impl PartialEq for PerspectiveViewerProps {
 }
 
 pub enum Msg {
+    Resize,
     Reset(bool, Option<Sender<()>>),
     ToggleSettingsInit(
         Option<SettingsUpdate>,
@@ -60,6 +65,7 @@ pub struct PerspectiveViewer {
     on_rendered: Option<Sender<()>>,
     fonts: FontLoaderProps,
     settings_open: bool,
+    on_resize: Rc<PubSub<()>>,
     on_dimensions_reset: Rc<PubSub<()>>,
 }
 
@@ -76,6 +82,7 @@ impl Component for PerspectiveViewer {
             on_rendered: None,
             fonts: FontLoaderProps::new(&elem, callback),
             settings_open: false,
+            on_resize: Default::default(),
             on_dimensions_reset: Default::default(),
         }
     }
@@ -83,6 +90,10 @@ impl Component for PerspectiveViewer {
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::PreloadFontsUpdate => true,
+            Msg::Resize => {
+                self.on_resize.emit_all(());
+                false
+            }
             Msg::Reset(all, sender) => {
                 let renderer = ctx.props().renderer.clone();
                 let session = ctx.props().session.clone();
@@ -172,14 +183,14 @@ impl Component for PerspectiveViewer {
     // `JsPerspectiveConfig` - they may need caching as in the JavaScript version.
     fn view(&self, ctx: &Context<Self>) -> Html {
         let settings = ctx.link().callback(|_| Msg::ToggleSettingsInit(None, None));
-        let callback = self.on_dimensions_reset.callback();
         if self.settings_open {
             html! {
                 <>
                     <style>{ &CSS }</style>
                     <SplitPanel
                         id="app_panel"
-                        on_reset={ callback }>
+                        on_reset={ self.on_dimensions_reset.callback() }
+                        on_resize_finished={ ctx.props().render_callback() }>
                         <div id="side_panel" class="column noselect">
                             <PluginSelector
                                 session={ ctx.props().session.clone() }
@@ -189,6 +200,7 @@ impl Component for PerspectiveViewer {
                                 dragdrop={ ctx.props().dragdrop.clone() }
                                 renderer={ ctx.props().renderer.clone() }
                                 session={ ctx.props().session.clone() }
+                                on_resize={ self.on_resize.clone() }
                                 on_dimensions_reset={ self.on_dimensions_reset.clone() }>
                             </ColumnSelector>
                         </div>
