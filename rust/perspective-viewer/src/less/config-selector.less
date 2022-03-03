@@ -31,6 +31,7 @@
                 var(--button--font-family, "inherit")
             );
             font-display: block;
+            color: #999;
             cursor: pointer;
             min-width: 12px;
             margin-right: 3px;
@@ -39,8 +40,13 @@
             margin-top: 2px;
             margin-left: 3px;
             margin-right: 0px;
+            
             &:before {
                 content: var(--column-close--content, "X");
+            }
+            &:hover {
+                opacity: 1;
+                color: var(--active--color, #000);
             }
         }
 
@@ -232,6 +238,12 @@
         cursor: pointer;
         font-family: var(--button--font-family, inherit);
         font-display: block;
+        color: #999;
+
+        &:hover {
+            opacity: 1;
+            color: var(--active--color, #000);
+        }
 
         &.desc:before {
             content: var(--sort-order-desc--content, "\2193");

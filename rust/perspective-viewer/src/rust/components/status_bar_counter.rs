@@ -59,7 +59,7 @@ impl Component for StatusBarRowsCounter {
                 html! {
                     <>
                         <span>{ format!("{} ", vrows) }</span>
-                        <span class="icon">{ "arrow_back" }</span>
+                        <span id="counter-arrow" class="icon"></span>
                         <span>{ format!(" {} rows", nrows) }</span>
                     </>
                 }
