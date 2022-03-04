@@ -127,9 +127,7 @@ class WebWorkerClient extends Client {
         let _worker;
         const msg = {cmd: "init", config: get_config()};
         if (typeof WebAssembly === "undefined") {
-            throw new Error(
-                "WebAssembly not supported. Support for ASM.JS has been removed as of 0.3.1."
-            );
+            throw new Error("WebAssembly not supported.");
         } else {
             [_worker, msg.buffer] = await Promise.all([
                 _override().worker(),

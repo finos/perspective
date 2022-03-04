@@ -43,10 +43,47 @@ exports.WorkerPlugin = function WorkerPlugin(inline) {
                 return {
                     contents: `
                         import worker from ${JSON.stringify(args.path)};
+                        function make_host(a, b) {
+                            function addEventListener(type, callback) {
+                                a.push(callback);
+                            }
+
+                            function postMessage(msg) {
+                                if (Object.keys(msg).length > 0) {
+                                    for (const listener of b) {
+                                        listener({data: msg});
+                                    }
+                                }
+                            }
+
+                            return {
+                                addEventListener,
+                                postMessage,
+                                location: {href: ""}
+                            }
+                        }
+
+                        function run_single_threaded(code, e) {
+                            console.error("Running perspective in single-threaded mode due to error initializing Web Worker:", e);
+                            let f = Function("const self = arguments[0];" + code);
+                            const workers = [];
+                            const mains = [];
+                            f(make_host(workers, mains));
+                            return make_host(mains, workers);
+                        }
+
                         export const initialize = async function () {
-                            const blob = new Blob([worker], {type: 'application/javascript'});
-                            const url = URL.createObjectURL(blob);
-                            return new Worker(url, {type: "module"});
+                            if (window.location.protocol.startsWith("file")) {
+                                return run_single_threaded(worker, "file:// protocol does not support Web Workers");
+                            }
+
+                            try {
+                                const blob = new Blob([worker], {type: 'application/javascript'});
+                                const url = URL.createObjectURL(blob);
+                                return new Worker(url, {type: "module"});
+                            } catch (e) {
+                                return run_single_threaded(worker, e);
+                            }
                         };
 
                         export default initialize;
@@ -64,12 +101,49 @@ exports.WorkerPlugin = function WorkerPlugin(inline) {
                         return code;
                     };
 
+                    function make_host(a, b) {
+                        function addEventListener(type, callback) {
+                            a.push(callback);
+                        }
+
+                        function postMessage(msg) {
+                            if (Object.keys(msg).length > 0) {
+                                for (const listener of b) {
+                                    listener({data: msg});
+                                }
+                            }
+                        }
+
+                        return {
+                            addEventListener,
+                            postMessage,
+                            location: {href: ""}
+                        }
+                    }
+
+                    function run_single_threaded(code, e) {
+                        console.error("Running perspective in single-threaded mode due to error initializing Web Worker:", e);
+                        let f = Function("const self = arguments[0];" + code);
+                        const workers = [];
+                        const mains = [];
+                        f(make_host(workers, mains));
+                        return make_host(mains, workers);
+                    }
+
                     const code_promise = get_worker_code();
                     export const initialize = async function () {
                         const code = await code_promise;
-                        const blob = new Blob([code], {type: 'application/javascript'});
-                        const url2 = URL.createObjectURL(blob);
-                        return new Worker(url2, {type: "module"});
+                        if (window.location.protocol.startsWith("file")) {
+                            return run_single_threaded(code, "file:// protocol does not support Web Workers");
+                        }
+
+                        try {
+                            const blob = new Blob([code], {type: 'application/javascript'});
+                            const url = URL.createObjectURL(blob);
+                            return new Worker(url, {type: "module"});
+                        } catch (e) {
+                            return run_single_threaded(code, e);
+                        }
                     };
 
                     export default initialize;
