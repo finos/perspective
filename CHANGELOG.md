@@ -1,5 +1,25 @@
 # Changelog
 
+## [v1.3.3](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.3.2...HEAD)
+
+**Implemented enhancements:**
+
+- Allow `@finos/perspective` to run in single-threaded mode [\#1737](https://github.com/finos/perspective/pull/1737) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- Fix bugs reported from docs site [\#1733](https://github.com/finos/perspective/pull/1733) ([texodus](https://github.com/texodus))
+
+**Closed issues:**
+
+- `yarn toggle_puppeteer` still supported?  [\#1735](https://github.com/finos/perspective/issues/1735)
+
+**Merged pull requests:**
+
+- Update dev docs [\#1736](https://github.com/finos/perspective/pull/1736) ([texodus](https://github.com/texodus))
+
 ## [v1.3.2](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.3.1...HEAD)

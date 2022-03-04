@@ -1,7 +1,7 @@
 {
     "name": "webpack-example",
     "private": true,
-    "version": "1.3.2",
+    "version": "1.3.3",
     "description": "An example app built using `@finos/perspective-viewer`.",
     "scripts": {
         "start": "webpack serve"
@@ -9,13 +9,13 @@
     "keywords": [],
     "license": "Apache-2.0",
     "dependencies": {
-        "@finos/perspective": "^1.3.2",
-        "@finos/perspective-viewer": "^1.3.2",
-        "@finos/perspective-viewer-d3fc": "^1.3.2",
-        "@finos/perspective-viewer-datagrid": "^1.3.2"
+        "@finos/perspective": "^1.3.3",
+        "@finos/perspective-viewer": "^1.3.3",
+        "@finos/perspective-viewer-d3fc": "^1.3.3",
+        "@finos/perspective-viewer-datagrid": "^1.3.3"
     },
     "devDependencies": {
-        "@finos/perspective-webpack-plugin": "^1.3.2",
+        "@finos/perspective-webpack-plugin": "^1.3.3",
         "css-loader": "^0.28.7",
         "style-loader": "^0.18.2",
         "webpack": "^5.14.0",
