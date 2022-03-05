@@ -272,7 +272,7 @@ public:
 
     void clear();
 
-    t_tscalar first_last_helper(t_uindex nidx, const t_aggspec& spec,
+    t_tscalar first_last_helper(t_uindex nidx, const t_aggspec& spec, t_aggtype agg,
         const t_gstate& gstate,
         const t_data_table& expression_master_table) const;
 

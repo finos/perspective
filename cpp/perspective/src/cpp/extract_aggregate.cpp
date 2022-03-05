@@ -58,8 +58,10 @@ extract_aggregate(const t_aggspec& aggspec, const t_column* aggcol,
         case AGGTYPE_OR:
         case AGGTYPE_LAST_BY_INDEX:
         case AGGTYPE_LAST_VALUE:
+        case AGGTYPE_LAST_MINUS_FIRST:
         case AGGTYPE_HIGH_WATER_MARK:
         case AGGTYPE_LOW_WATER_MARK:
+        case AGGTYPE_HIGH_MINUS_LOW:
         case AGGTYPE_SCALED_DIV:
         case AGGTYPE_SCALED_ADD:
         case AGGTYPE_SCALED_MUL:
