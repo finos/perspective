@@ -55,6 +55,9 @@ pub enum SingleAggregate {
     #[serde(rename = "last by index")]
     LastByIndex,
 
+    #[serde(rename = "last minus first")]
+    LastMinusFirst,
+
     #[serde(rename = "last")]
     Last,
 
@@ -79,6 +82,9 @@ pub enum SingleAggregate {
     #[serde(rename = "low")]
     Low,
 
+    #[serde(rename = "high minus low")]
+    HighMinusLow,
+
     #[serde(rename = "stddev")]
     StdDev,
 
@@ -101,6 +107,7 @@ impl Display for SingleAggregate {
             SingleAggregate::Median => "median",
             SingleAggregate::First => "first",
             SingleAggregate::LastByIndex => "last by index",
+            SingleAggregate::LastMinusFirst => "last minus first",
             SingleAggregate::Last => "last",
             SingleAggregate::Count => "count",
             SingleAggregate::DistinctCount => "distinct count",
@@ -109,6 +116,7 @@ impl Display for SingleAggregate {
             SingleAggregate::Join => "join",
             SingleAggregate::High => "high",
             SingleAggregate::Low => "low",
+            SingleAggregate::HighMinusLow => "high minus low",
             SingleAggregate::StdDev => "stddev",
             SingleAggregate::Var => "var",
         };
@@ -133,6 +141,7 @@ impl FromStr for SingleAggregate {
             "median" => Ok(SingleAggregate::Median),
             "first" => Ok(SingleAggregate::First),
             "last by index" => Ok(SingleAggregate::LastByIndex),
+            "last minus first" => Ok(SingleAggregate::LastMinusFirst),
             "last" => Ok(SingleAggregate::Last),
             "count" => Ok(SingleAggregate::Count),
             "distinct count" => Ok(SingleAggregate::DistinctCount),
@@ -141,6 +150,7 @@ impl FromStr for SingleAggregate {
             "join" => Ok(SingleAggregate::Join),
             "high" => Ok(SingleAggregate::High),
             "low" => Ok(SingleAggregate::Low),
+            "high minus low" => Ok(SingleAggregate::HighMinusLow),
             "stddev" => Ok(SingleAggregate::StdDev),
             "var" => Ok(SingleAggregate::Var),
             x => Err(format!("Unknown aggregate `{}`", x).into()),
@@ -216,7 +226,9 @@ const NUMBER_AGGREGATES: &[SingleAggregate] = &[
     SingleAggregate::First,
     SingleAggregate::High,
     SingleAggregate::Low,
+    SingleAggregate::HighMinusLow,
     SingleAggregate::LastByIndex,
+    SingleAggregate::LastMinusFirst,
     SingleAggregate::Last,
     SingleAggregate::Mean,
     SingleAggregate::Median,

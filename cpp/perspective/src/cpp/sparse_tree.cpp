@@ -1224,7 +1224,16 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info,
             case AGGTYPE_LAST_BY_INDEX: {
                 old_value.set(dst->get_scalar(dst_ridx));
                 new_value.set(first_last_helper(
-                    nidx, spec, gstate, expression_master_table));
+                    nidx, spec, spec.agg(), gstate, expression_master_table));
+                dst->set_scalar(dst_ridx, new_value);
+            } break;
+            case AGGTYPE_LAST_MINUS_FIRST: {
+                old_value.set(dst->get_scalar(dst_ridx));
+                auto first_new_value = (first_last_helper(
+                    nidx, spec, AGGTYPE_FIRST, gstate, expression_master_table));
+                auto last_new_value = (first_last_helper(
+                    nidx, spec, AGGTYPE_LAST_BY_INDEX, gstate, expression_master_table));
+                new_value.set(last_new_value - first_new_value);
                 dst->set_scalar(dst_ridx, new_value);
             } break;
             case AGGTYPE_AND: {
@@ -1300,6 +1309,18 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info,
                 if (dst_scalar.is_valid()) {
                     new_value.set(std::min(dst_scalar, src_scalar));
                 }
+                dst->set_scalar(dst_ridx, new_value);
+            } break;
+            case AGGTYPE_HIGH_MINUS_LOW: {
+                t_tscalar dst_scalar = dst->get_scalar(dst_ridx);
+                old_value.set(dst_scalar);
+                auto pkeys = get_pkeys(nidx);
+                std::vector<double> values;
+                read_column_from_gstate(gstate, expression_master_table,
+                    spec.get_dependencies()[0].name(), pkeys, values, true);
+                auto low_high = std::minmax_element(
+                    values.begin(), values.end());
+                new_value.set(*(low_high.second) - *(low_high.first));
                 dst->set_scalar(dst_ridx, new_value);
             } break;
             case AGGTYPE_UDF_COMBINER:
@@ -1991,7 +2012,7 @@ t_stree::get_deltas() const {
 }
 
 t_tscalar
-t_stree::first_last_helper(t_uindex nidx, const t_aggspec& spec,
+t_stree::first_last_helper(t_uindex nidx, const t_aggspec& spec, t_aggtype agg,
     const t_gstate& gstate, const t_data_table& expression_master_table) const {
     auto pkeys = get_pkeys(nidx);
 
@@ -2012,7 +2033,7 @@ t_stree::first_last_helper(t_uindex nidx, const t_aggspec& spec,
     switch (spec.get_sort_type()) {
         case SORTTYPE_ASCENDING:
         case SORTTYPE_ASCENDING_ABS: {
-            if (spec.agg() == AGGTYPE_FIRST) {
+            if (agg == AGGTYPE_FIRST) {
                 if (minmax_idx.m_min >= 0) {
                     return values[minmax_idx.m_min];
                 }
@@ -2024,7 +2045,7 @@ t_stree::first_last_helper(t_uindex nidx, const t_aggspec& spec,
         } break;
         case SORTTYPE_DESCENDING:
         case SORTTYPE_DESCENDING_ABS: {
-            if (spec.agg() == AGGTYPE_FIRST) {
+            if (agg == AGGTYPE_FIRST) {
                 if (minmax_idx.m_max >= 0) {
                     return values[minmax_idx.m_max];
                 }
