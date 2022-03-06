@@ -2020,13 +2020,13 @@ t_stree::get_deltas() const {
     return m_deltas;
 }
 
-t_tscalar
-t_stree::first_last_helper(t_uindex nidx, const t_aggspec& spec, t_aggtype agg,
+std::pair<t_tscalar, t_tscalar>
+t_stree::first_last_helper(t_uindex nidx, const t_aggspec& spec,
     const t_gstate& gstate, const t_data_table& expression_master_table) const {
     auto pkeys = get_pkeys(nidx);
 
     if (pkeys.empty())
-        return mknone();
+        return std::make_pair(mknone(), mknone());
 
     std::vector<t_tscalar> values;
     std::vector<t_tscalar> sort_values;
@@ -2039,37 +2039,43 @@ t_stree::first_last_helper(t_uindex nidx, const t_aggspec& spec, t_aggtype agg,
 
     auto minmax_idx = get_minmax_idx(sort_values, spec.get_sort_type());
 
+    std::pair<t_tscalar, t_tscalar> ret;
     switch (spec.get_sort_type()) {
         case SORTTYPE_ASCENDING:
         case SORTTYPE_ASCENDING_ABS: {
-            if (agg == AGGTYPE_FIRST) {
-                if (minmax_idx.m_min >= 0) {
-                    return values[minmax_idx.m_min];
-                }
+            if (minmax_idx.m_min >= 0) {
+                ret.first = values[minmax_idx.m_min];
             } else {
-                if (minmax_idx.m_max >= 0) {
-                    return values[minmax_idx.m_max];
-                }
+                ret.first = mknone();
+            }
+
+            if (minmax_idx.m_max >= 0) {
+                ret.second = values[minmax_idx.m_max];
+            } else {
+                ret.second = mknone();
             }
         } break;
         case SORTTYPE_DESCENDING:
         case SORTTYPE_DESCENDING_ABS: {
-            if (agg == AGGTYPE_FIRST) {
-                if (minmax_idx.m_max >= 0) {
-                    return values[minmax_idx.m_max];
-                }
+            if (minmax_idx.m_max >= 0) {
+                ret.first = values[minmax_idx.m_max];
             } else {
-                if (minmax_idx.m_min >= 0) {
-                    return values[minmax_idx.m_min];
-                }
+                ret.first = mknone();
+            }
+
+            if (minmax_idx.m_min >= 0) {
+                ret.second = values[minmax_idx.m_min];
+            } else {
+                ret.second = mknone();
             }
         } break;
         default: {
-            // return none
+            ret.first = mknone();
+            ret.second = mknone();
         }
     }
 
-    return mknone();
+    return ret;
 }
 
 bool
