@@ -34,8 +34,7 @@ pub struct DropDownMenu<T>
 where
     T: Into<Html> + Clone + PartialEq + 'static,
 {
-    top: i32,
-    left: i32,
+    position: Option<(i32, i32)>,
     _props: PhantomData<T>,
 }
 
@@ -48,8 +47,7 @@ where
 
     fn create(_ctx: &Context<Self>) -> Self {
         DropDownMenu {
-            top: 0,
-            left: 0,
+            position: None,
             _props: Default::default(),
         }
     }
@@ -57,16 +55,12 @@ where
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             DropDownMenuMsg::SetPos(top, left) => {
-                self.top = top;
-                self.left = left;
+                self.position = Some((top, left));
                 true
             }
         }
     }
 
-    fn changed(&mut self, _ctx: &Context<Self>) -> bool {
-        false
-    }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         let values = &ctx.props().values;
@@ -118,8 +112,14 @@ where
             <>
                 <style>
                     { &CSS }
-                    { format!(":host{{left:{}px;top:{}px;}}", self.left, self.top) }
                 </style>
+                {
+                    self.position.map(|(top, left)| html! {
+                        <style>
+                            { format!(":host{{left:{}px;top:{}px;}}", left, top) }
+                        </style>
+                    }).unwrap_or_default()
+                }
                 { body }
             </>
         }

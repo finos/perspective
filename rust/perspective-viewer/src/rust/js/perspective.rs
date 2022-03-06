@@ -100,6 +100,11 @@ extern "C" {
         this: &JsPerspectiveView,
     ) -> Result<JsValue, JsValue>;
 
+    #[wasm_bindgen(method, catch, js_name = to_columns)]
+    pub async fn _to_columns(
+        this: &JsPerspectiveView,
+    ) -> Result<JsValue, JsValue>;
+
     #[wasm_bindgen(method, catch, js_name = num_rows)]
     pub async fn _num_rows(this: &JsPerspectiveView) -> Result<JsValue, JsValue>;
 
@@ -158,6 +163,7 @@ impl JsPerspectiveTable {
 impl JsPerspectiveView {
     async_typed!(_to_csv, to_csv(&self, options: js_sys::Object) -> js_sys::JsString);
     async_typed!(_to_arrow, to_arrow(&self) -> js_sys::ArrayBuffer);
+    async_typed!(_to_columns, to_columns(&self) -> js_sys::Object);
     async_typed!(_num_rows, num_rows(&self) -> f64);
     async_typed!(_num_columns, num_columns(&self) -> f64);
     async_typed!(_schema, schema(&self) -> JsPerspectiveViewSchema);

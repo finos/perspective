@@ -7,19 +7,22 @@
 // file.
 
 mod columns_iter_set;
+mod export_method;
 
 pub use self::columns_iter_set::*;
-
+pub use self::export_method::*;
 use crate::config::*;
 use crate::dragdrop::*;
 use crate::renderer::*;
 use crate::session::*;
 use crate::utils::*;
 use futures::join;
+use js_intern::*;
 use std::future::Future;
 use std::pin::Pin;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
+use wasm_bindgen_futures::JsFuture;
 use yew::prelude::*;
 
 /// A `SessionRendererModel` is any struct with `session` and `renderer` fields, as
@@ -64,22 +67,18 @@ pub trait SessionRendererModel {
         });
     }
 
-    fn download_as_html(&self) -> Pin<Box<dyn Future<Output = Result<(), JsValue>>>> {
+    fn html_as_jsvalue(
+        &self,
+    ) -> Pin<Box<dyn Future<Output = Result<JsValue, JsValue>>>> {
         let view_config = self.get_viewer_config();
         let session = self.session().clone();
         Box::pin(async move {
-            if let (Ok(arrow), Ok(mut config)) =
-                join!(session.get_table_arrow(), view_config)
-            {
-                config.settings = false;
-                let window = web_sys::window().unwrap();
-                let document = window.document().unwrap();
-                let element: web_sys::HtmlElement =
-                    document.create_element("a")?.unchecked_into();
-                let js_config = serde_json::to_string(&config).into_jserror()?;
-                let blob_url = {
-                    let html =
-                        JsValue::from(format!("<!DOCTYPE html lang=\"en\">
+            let (arrow, config) = join!(session.get_table_arrow(), view_config);
+            let arrow = arrow?;
+            let mut config = config?;
+            config.settings = false;
+            let js_config = serde_json::to_string(&config).into_jserror()?;
+            let html = JsValue::from(format!("<!DOCTYPE html lang=\"en\">
 <html>
 <head>
 <meta name=\"viewport\" content=\"width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no\"/>
@@ -108,20 +107,8 @@ window.viewer.restore(JSON.parse(window.layout.textContent));
 </body>
 </html>
 ", base64::encode(arrow), js_config));
-                    let array = [html].iter().collect::<js_sys::Array>();
-                    let blob = web_sys::Blob::new_with_u8_array_sequence(&array)?;
-                    web_sys::Url::create_object_url_with_blob(&blob)?
-                };
-
-                element.set_attribute("download", "perspective.html")?;
-                element.set_attribute("href", &blob_url)?;
-                element.style().set_property("display", "none")?;
-                document.body().unwrap().append_child(&element)?;
-                element.click();
-                document.body().unwrap().remove_child(&element)?;
-            }
-
-            Ok(())
+            let array = [html].iter().collect::<js_sys::Array>();
+            Ok(web_sys::Blob::new_with_u8_array_sequence(&array)?.into())
         })
     }
 
@@ -149,6 +136,67 @@ window.viewer.restore(JSON.parse(window.layout.textContent));
                 theme,
             })
         })
+    }
+
+    fn config_as_jsvalue(
+        &self,
+    ) -> Pin<Box<dyn Future<Output = Result<JsValue, JsValue>>>> {
+        let viewer_config = self.get_viewer_config();
+        Box::pin(async move {
+            viewer_config
+                .await?
+                .encode(&Some(ViewerConfigEncoding::JSONString))
+        })
+    }
+
+    fn export_method_to_jsvalue(
+        &self,
+        method: ExportMethod,
+    ) -> Pin<Box<dyn Future<Output = Result<JsValue, JsValue>>>> {
+        match method {
+            ExportMethod::Csv => {
+                let session = self.session().clone();
+                Box::pin(async move { session.csv_as_jsvalue(false).await })
+            }
+            ExportMethod::CsvAll => {
+                let session = self.session().clone();
+                Box::pin(async move { session.csv_as_jsvalue(true).await })
+            }
+            ExportMethod::Json => {
+                let session = self.session().clone();
+                Box::pin(async move { session.json_as_jsvalue(false).await })
+            }
+            ExportMethod::JsonAll => {
+                let session = self.session().clone();
+                Box::pin(async move { session.json_as_jsvalue(true).await })
+            }
+            ExportMethod::Arrow => {
+                let session = self.session().clone();
+                Box::pin(async move { session.arrow_as_jsvalue(false).await })
+            }
+            ExportMethod::ArrowAll => {
+                let session = self.session().clone();
+                Box::pin(async move { session.arrow_as_jsvalue(true).await })
+            }
+            ExportMethod::Html => {
+                let html_task = self.html_as_jsvalue();
+                Box::pin(async move { html_task.await })
+            }
+            ExportMethod::Png => {
+                let renderer = self.renderer().clone();
+                Box::pin(async move {
+                    let plugin = renderer.get_active_plugin()?;
+                    let render = js_sys::Reflect::get(&plugin, js_intern!("render"))?;
+                    let render_fun = render.unchecked_into::<js_sys::Function>();
+                    let png = render_fun.call0(&plugin)?;
+                    JsFuture::from(png.unchecked_into::<js_sys::Promise>()).await
+                })
+            }
+            ExportMethod::JsonConfig => {
+                let config_task = self.config_as_jsvalue();
+                Box::pin(async move { config_task.await })
+            }
+        }
     }
 }
 

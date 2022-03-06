@@ -225,26 +225,10 @@ export function register(...plugins) {
                             );
                         }
 
-                        const button = document.createElement("a");
-                        button.setAttribute("download", "perspective.png");
-                        document.body.appendChild(button);
-                        button.addEventListener(
-                            "click",
-                            function dlCanvas() {
-                                var dt = canvas.toDataURL("image/png"); // << this fails in IE/Edge...
-                                dt = dt.replace(
-                                    /^data:image\/[^;]*/,
-                                    "data:application/octet-stream"
-                                );
-                                dt = dt.replace(
-                                    /^data:application\/octet-stream/,
-                                    "data:application/octet-stream;headers=Content-Disposition%3A%20attachment%3B%20filename=perspective.png"
-                                );
-                                this.href = dt;
-                            },
-                            false
+                        return await new Promise(
+                            (x) => canvas.toBlob((blob) => x(blob)),
+                            "image/png"
                         );
-                        button.click();
                     }
 
                     async draw(view, end_col, end_row) {

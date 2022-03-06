@@ -29,6 +29,26 @@
             monospace;
     }
 
+    input {
+        margin-left: 12px;
+        margin-right: 12px;
+        padding: 0;
+        border: none;
+        border-bottom: 1px solid var(--inactive--color, #ccc);
+        background: transparent;
+        font-family: var(--interface-monospace--font-family, "Roboto Mono"),
+            monospace;
+        font-weight: 300;
+        font-size: 14px;
+        color: inherit;
+        outline: none;
+    }
+
+    .invalid {
+        color: var(--error--color, #ff0000);
+        border-color: var(--error--color, #ff0000);
+    }
+
     .selected {
         background-color: rgba(0, 0, 0, 0.05);
     }
@@ -41,6 +61,7 @@
         display: flex;
         flex-direction: column;
         margin-left: 12px;
+        margin-right: 12px;
     }
 
     span {

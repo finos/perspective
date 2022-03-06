@@ -403,7 +403,8 @@ impl PerspectiveViewerElement {
     pub fn js_download(&self, flat: bool) -> js_sys::Promise {
         let session = self.session.clone();
         future_to_promise(async move {
-            session.download_as_csv(flat).await?;
+            let val = session.csv_as_jsvalue(flat).await?;
+            download("untitled.csv", &val)?;
             Ok(JsValue::UNDEFINED)
         })
     }

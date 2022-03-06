@@ -7,12 +7,12 @@
 // file.
 
 mod copy;
-mod download;
 mod metadata;
 mod view;
 mod view_subscription;
 
 use self::metadata::*;
+use self::view::PerspectiveOwned;
 use self::view::View;
 pub use self::view_subscription::TableStats;
 use self::view_subscription::*;
@@ -24,7 +24,6 @@ use crate::utils::*;
 use crate::*;
 
 use copy::*;
-use download::*;
 
 use futures::channel::oneshot::*;
 use itertools::Itertools;
@@ -463,27 +462,6 @@ impl Session {
         Ok(())
     }
 
-    pub async fn download_as_arrow(self, flat: bool) -> Result<(), JsValue> {
-        if flat {
-            let table = self.borrow().table.clone();
-            if let Some(table) = table {
-                download_arrow_flat(&table).await?;
-            }
-        } else {
-            let view = self
-                .borrow()
-                .view_sub
-                .as_ref()
-                .map(|x| x.get_view().clone());
-
-            if let Some(view) = view {
-                download_arrow(&view).await?;
-            }
-        };
-
-        Ok(())
-    }
-
     pub async fn get_table_arrow(&self) -> Result<Vec<u8>, JsValue> {
         let table = self.borrow().table.clone().into_jserror()?;
         let view = table.view(&js_object!().unchecked_into()).await?;
@@ -493,25 +471,39 @@ impl Session {
         Ok(js_sys::Uint8Array::new(&bytes).to_vec())
     }
 
-    pub async fn download_as_csv(self, flat: bool) -> Result<(), JsValue> {
-        if flat {
-            let table = self.borrow().table.clone();
-            if let Some(table) = table {
-                download_csv_flat(&table).await?;
-            }
+    async fn flat_as_jsvalue(&self, flat: bool) -> Result<View, JsValue> {
+        Ok(if flat {
+            let table = self.borrow().table.clone().into_jserror()?;
+            PerspectiveOwned::new(table.view(&js_object!().unchecked_into()).await?)
         } else {
-            let view = self
-                .borrow()
+            self.borrow()
                 .view_sub
                 .as_ref()
-                .map(|x| x.get_view().clone());
+                .map(|x| x.get_view().clone())
+                .into_jserror()?
+        })
+    }
 
-            if let Some(view) = view {
-                download_csv(&view).await?;
-            }
-        };
+    pub async fn arrow_as_jsvalue(self, flat: bool) -> Result<JsValue, JsValue> {
+        let view = self.flat_as_jsvalue(flat).await?;
+        let arrow = view.to_arrow().await.unwrap();
+        Ok(js_sys::Uint8Array::new(&arrow).into())
+    }
 
-        Ok(())
+    pub async fn json_as_jsvalue(self, flat: bool) -> Result<JsValue, JsValue> {
+        let view = self.flat_as_jsvalue(flat).await?;
+        let json = view.to_columns().await.unwrap();
+        Ok(js_sys::JSON::stringify(&json)?.into())
+    }
+
+    pub async fn csv_as_jsvalue(&self, flat: bool) -> Result<JsValue, JsValue> {
+        let view = self.flat_as_jsvalue(flat).await?;
+        let csv_fut = view.to_csv(js_object!("formatted", true));
+        let csv = csv_fut.await.unwrap();
+        let csv_str = csv.as_string().unwrap();
+        let bytes = csv_str.as_bytes();
+        let value = unsafe { js_sys::Uint8Array::view(bytes) };
+        Ok(value.unchecked_into())
     }
 
     pub fn get_view(&self) -> Option<View> {

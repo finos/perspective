@@ -42,6 +42,9 @@ pub enum ViewerConfigEncoding {
 
     #[serde(rename = "arraybuffer")]
     ArrayBuffer,
+
+    #[serde(skip_serializing)]
+    JSONString,
 }
 
 #[derive(Serialize, PartialEq)]
@@ -90,8 +93,11 @@ impl ViewerConfig {
                     .slice_with_end(start, start + len)
                     .unchecked_into())
             }
+            Some(ViewerConfigEncoding::JSONString) => {
+                Ok(JsValue::from(serde_json::to_string(self).into_jserror()?))
+            }
             None | Some(ViewerConfigEncoding::JSON) => {
-                Ok(JsValue::from_serde(self).unwrap())
+                JsValue::from_serde(self).into_jserror()
             }
         }
     }
