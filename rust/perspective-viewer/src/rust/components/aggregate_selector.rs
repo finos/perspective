@@ -6,7 +6,7 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use super::containers::dropdown::*;
+use super::containers::select::*;
 use crate::config::*;
 use crate::model::*;
 use crate::renderer::*;
@@ -36,7 +36,7 @@ pub enum AggregateSelectorMsg {
 }
 
 pub struct AggregateSelector {
-    aggregates: Vec<DropDownItem<Aggregate>>,
+    aggregates: Vec<SelectItem<Aggregate>>,
     aggregate: Option<Aggregate>,
 }
 
@@ -87,13 +87,13 @@ impl Component for AggregateSelector {
 
         html! {
             <div class="aggregate-selector-wrapper">
-                <DropDown<Aggregate>
+                <Select<Aggregate>
                     class={ "aggregate-selector" }
                     values={ values }
                     selected={ selected_agg }
                     on_select={ callback }>
 
-                </DropDown<Aggregate>>
+                </Select<Aggregate>>
             </div>
         }
     }
@@ -113,7 +113,7 @@ impl AggregateSelector {
     pub fn get_dropdown_aggregates(
         &self,
         ctx: &Context<Self>,
-    ) -> Vec<DropDownItem<Aggregate>> {
+    ) -> Vec<SelectItem<Aggregate>> {
         let aggregates = ctx
             .props()
             .session
@@ -129,7 +129,7 @@ impl AggregateSelector {
             .collect::<Vec<_>>();
 
         let multi_aggregates2 = if !multi_aggregates.is_empty() {
-            vec![DropDownItem::OptGroup("weighted mean", multi_aggregates)]
+            vec![SelectItem::OptGroup("weighted mean", multi_aggregates)]
         } else {
             vec![]
         };
@@ -138,7 +138,7 @@ impl AggregateSelector {
             .iter()
             .filter(|x| matches!(x, Aggregate::SingleAggregate(_)))
             .cloned()
-            .map(DropDownItem::Option)
+            .map(SelectItem::Option)
             .chain(multi_aggregates2);
 
         s.collect::<Vec<_>>()

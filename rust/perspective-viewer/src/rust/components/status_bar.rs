@@ -6,13 +6,15 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::components::containers::dropdown::*;
+use crate::components::containers::select::*;
 use crate::components::status_bar_counter::StatusBarRowsCounter;
+use crate::custom_elements::export_dropdown::*;
 use crate::renderer::*;
 use crate::session::*;
 use crate::utils::*;
 use crate::*;
 use wasm_bindgen_futures::spawn_local;
+use web_sys::*;
 use yew::prelude::*;
 
 #[cfg(test)]
@@ -38,7 +40,7 @@ impl PartialEq for StatusBarProps {
 
 pub enum StatusBarMsg {
     Reset(bool),
-    Export(bool),
+    Export,
     Copy(bool),
     SetThemeConfig((Vec<String>, Option<usize>)),
     SetTheme(String),
@@ -51,6 +53,8 @@ pub struct StatusBar {
     is_updating: i32,
     theme: Option<String>,
     themes: Vec<String>,
+    export_ref: NodeRef,
+    export_dropdown: Option<ExportDropDownMenuElement>,
     _sub: [Subscription; 4],
 }
 
@@ -87,6 +91,8 @@ impl Component for StatusBar {
             _sub,
             theme: None,
             themes: vec![],
+            export_dropdown: None,
+            export_ref: NodeRef::default(),
             is_updating: 0,
         }
     }
@@ -121,12 +127,13 @@ impl Component for StatusBar {
 
                 false
             }
-            StatusBarMsg::Export(flat) => {
+            StatusBarMsg::Export => {
                 let session = ctx.props().session.clone();
-                spawn_local(async move {
-                    session.download_as_csv(flat).await.expect("Export failed");
-                });
-
+                let renderer = ctx.props().renderer.clone();
+                let export_dropdown = ExportDropDownMenuElement::new(session, renderer);
+                let target = self.export_ref.cast::<HtmlElement>().unwrap();
+                export_dropdown.open(target);
+                self.export_dropdown = Some(export_dropdown);
                 false
             }
             StatusBarMsg::Copy(flat) => {
@@ -153,9 +160,7 @@ impl Component for StatusBar {
             .link()
             .callback(|event: MouseEvent| StatusBarMsg::Reset(event.shift_key()));
 
-        let export = ctx
-            .link()
-            .callback(|event: MouseEvent| StatusBarMsg::Export(event.shift_key()));
+        let export = ctx.link().callback(|_: MouseEvent| StatusBarMsg::Export);
 
         let copy = ctx
             .link()
@@ -169,18 +174,18 @@ impl Component for StatusBar {
                     .themes
                     .iter()
                     .cloned()
-                    .map(DropDownItem::Option)
+                    .map(SelectItem::Option)
                     .collect::<Vec<_>>();
 
                 if values.len() > 1 {
                     html! {
                         <span id="theme" class="button">
-                            <DropDown<String>
+                            <Select<String>
                                 id="theme_selector"
                                 values={ values }
                                 selected={ selected.to_owned() }
                                 on_select={ ontheme }>
-                            </DropDown<String>>
+                            </Select<String>>
                         </span>
                     }
                 } else {
@@ -198,7 +203,12 @@ impl Component for StatusBar {
                     <span id="reset" class="button" onmousedown={ reset }>
                         <span>{ "Reset" }</span>
                     </span>
-                    <span id="export" class="button" onmousedown={ export }>
+                    <span
+                        ref={ self.export_ref.clone() }
+                        id="export"
+                        class="button"
+                        onmousedown={ export }>
+
                         <span>{ "Export" }</span>
                     </span>
                     <span id="copy" class="button" onmousedown={ copy }>

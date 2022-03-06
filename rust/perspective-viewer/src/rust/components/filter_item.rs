@@ -16,7 +16,7 @@ use crate::utils::{posix_to_utc_str, str_to_utc_posix};
 use crate::*;
 
 use super::containers::dragdrop_list::*;
-use super::containers::dropdown::*;
+use super::containers::select::*;
 
 use chrono::{NaiveDate, TimeZone, Utc};
 use wasm_bindgen::JsCast;
@@ -225,7 +225,7 @@ impl FilterItemProps {
     }
 }
 
-type FilterOpSelector = DropDown<FilterOp>;
+type FilterOpSelector = Select<FilterOp>;
 
 impl Component for FilterItem {
     type Message = FilterItemMsg;
@@ -458,7 +458,7 @@ impl Component for FilterItem {
             .props()
             .get_filter_ops()
             .into_iter()
-            .map(DropDownItem::Option)
+            .map(SelectItem::Option)
             .collect::<Vec<_>>();
 
         html! {

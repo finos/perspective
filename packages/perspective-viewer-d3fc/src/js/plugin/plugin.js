@@ -126,6 +126,127 @@ export function register(...plugins) {
                         chart.plugin.max_columns = x;
                     }
 
+                    async render() {
+                        var canvas = document.createElement("canvas");
+                        var container =
+                            this.shadowRoot.querySelector("#container");
+                        canvas.width = container.offsetWidth;
+                        canvas.height = container.offsetHeight;
+
+                        const context = canvas.getContext("2d");
+                        context.fillStyle =
+                            window
+                                .getComputedStyle(this)
+                                .getPropertyValue("--plugin--background") ||
+                            "white";
+                        context.fillRect(0, 0, canvas.width, canvas.height);
+                        const text_color = window
+                            .getComputedStyle(this)
+                            .getPropertyValue("color");
+
+                        const svgs = Array.from(
+                            this.shadowRoot.querySelectorAll(
+                                "svg:not(#dragHandles)"
+                            )
+                        );
+
+                        for (const svg of svgs.reverse()) {
+                            var img = document.createElement("img");
+                            // document.body.appendChild(img);
+                            img.width = svg.parentNode.offsetWidth;
+                            img.height = svg.parentNode.offsetHeight;
+
+                            // Pretty sure this is a chrome bug - `drawImage()` call
+                            // without this scales incorrectly.
+                            const new_svg = svg.cloneNode(true);
+                            if (!new_svg.hasAttribute("viewBox")) {
+                                new_svg.setAttribute(
+                                    "viewBox",
+                                    `0 0 ${img.width} ${img.height}`
+                                );
+                            }
+
+                            new_svg.setAttribute(
+                                "xmlns",
+                                "http://www.w3.org/2000/svg"
+                            );
+
+                            for (const text of new_svg.querySelectorAll(
+                                "text"
+                            )) {
+                                text.setAttribute("fill", text_color);
+                            }
+
+                            var xml = new XMLSerializer().serializeToString(
+                                new_svg
+                            );
+
+                            xml = xml.replace(/[^\x00-\x7F]/g, "");
+
+                            const done = new Promise((x, y) => {
+                                img.onload = x;
+                                img.onerror = y;
+                            });
+
+                            try {
+                                img.src = `data:image/svg+xml;base64,${btoa(
+                                    xml
+                                )}`;
+                                await done;
+                            } catch (e) {
+                                const done = new Promise((x, y) => {
+                                    img.onload = x;
+                                    img.onerror = y;
+                                });
+                                img.src = `data:image/svg+xml;utf8,${xml}`;
+                                await done;
+                            }
+
+                            context.drawImage(
+                                img,
+                                svg.parentNode.offsetLeft,
+                                svg.parentNode.offsetTop,
+                                img.width,
+                                img.height
+                            );
+                        }
+
+                        const canvases = Array.from(
+                            this.shadowRoot.querySelectorAll("canvas")
+                        );
+
+                        for (const canvas of canvases.reverse()) {
+                            context.drawImage(
+                                canvas,
+                                canvas.parentNode.offsetLeft,
+                                canvas.parentNode.offsetTop,
+                                canvas.width / window.devicePixelRatio,
+                                canvas.height / window.devicePixelRatio
+                            );
+                        }
+
+                        const button = document.createElement("a");
+                        button.setAttribute("download", "perspective.png");
+                        document.body.appendChild(button);
+                        button.addEventListener(
+                            "click",
+                            function dlCanvas() {
+                                var dt = canvas.toDataURL("image/png"); // << this fails in IE/Edge...
+                                dt = dt.replace(
+                                    /^data:image\/[^;]*/,
+                                    "data:application/octet-stream"
+                                );
+                                dt = dt.replace(
+                                    /^data:application\/octet-stream/,
+                                    "data:application/octet-stream;headers=Content-Disposition%3A%20attachment%3B%20filename=perspective.png"
+                                );
+                                this.href = dt;
+                            },
+                            false
+                        );
+                        button.click();
+                    }
+
                     async draw(view, end_col, end_row) {
                         if (!this.isConnected) {
                             return;

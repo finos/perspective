@@ -16,10 +16,10 @@ export const labelMapExists = (d) =>
     d.target && d.target.textAttributes ? true : false;
 
 export const toggleLabels = (nodes, treemapLevel, crossValues) => {
-    nodes
-        .selectAll("text")
-        .style("font-size", null)
-        .attr("class", (d) => textLevelHelper(d, treemapLevel, crossValues));
+    nodes.selectAll("text").each(function (d, i) {
+        const help = textLevelHelper(d, treemapLevel, crossValues);
+        this.style = help;
+    });
 
     const visibleNodes = selectVisibleNodes(nodes);
     centerLabels(visibleNodes);
@@ -32,8 +32,7 @@ export const restoreLabels = (nodes) => {
         label
             .attr("dx", d.target.textAttributes.dx)
             .attr("dy", d.target.textAttributes.dy)
-            .attr("class", d.target.textAttributes.class)
-            .style("font-size", d.target.textAttributes["font-size"]);
+            .attr("style", d.target.textAttributes.style);
     });
 };
 
@@ -47,7 +46,7 @@ export const preventTextCollisions = (nodes) => {
         .selectAll("text")
         .filter(
             (_, i, nodes) =>
-                select(nodes[i]).attr("class") === textVisability.high
+                select(nodes[i]).attr("style") === textVisibility.high
         )
         .each((_, i, nodes) => topNodes.push(nodes[i]));
 
@@ -55,7 +54,7 @@ export const preventTextCollisions = (nodes) => {
         .selectAll("text")
         .filter(
             (_, i, nodes) =>
-                select(nodes[i]).attr("class") === textVisability.low
+                select(nodes[i]).attr("style") === textVisibility.low
         )
         .each((_, i, nodes) => {
             const lowerNode = nodes[i];
@@ -93,8 +92,8 @@ export const textOpacity = {top: 1, mid: 0.7, lower: 0};
 export const selectVisibleNodes = (nodes) =>
     nodes.filter(
         (_, i, nodes) =>
-            select(nodes[i]).selectAll("text").attr("class") !==
-            textVisability.zero
+            select(nodes[i]).selectAll("text").attr("style") !==
+            textVisibility.zero
     );
 
 export const adjustLabelsThatOverflow = (nodes) =>
@@ -118,7 +117,7 @@ const shrinkOrHideText = (d) => {
     const rectRect = rect.getBBox();
 
     if (!needsToShrinkOrHide(d, rectRect, textRect)) {
-        select(d).attr("class", select(d).attr("class"));
+        select(d).attr("style", select(d).attr("style"));
     }
 };
 
@@ -136,7 +135,7 @@ const needsToShrinkOrHide = (d, rectRect, textRect) => {
             centerText(d);
         } else {
             select(d).style("font-size", null);
-            select(d).attr("class", textVisability.zero);
+            select(d).style("opacity", "0");
         }
         return true;
     }
@@ -149,15 +148,19 @@ const textLevelHelper = (d, treemapLevel, crossValues) => {
             .filter((x) => x !== "")
             .every((x) => d.crossValue.includes(x))
     )
-        return textVisability.zero;
+        return textVisibility.zero;
     switch (d.depth) {
         case treemapLevel + 1:
-            return textVisability.high;
+            return textVisibility.high;
         case treemapLevel + 2:
-            return textVisability.low;
+            return textVisibility.low;
         default:
-            return textVisability.zero;
+            return textVisibility.zero;
     }
 };
 
-const textVisability = {high: "top", low: "mid", zero: "lower"};
+const textVisibility = {
+    high: "font-size:14px;z-index:5;pointer-events: none;",
+    low: "font-size:8px;opacity:0.7;z-index:4;",
+    zero: "font-size:0px;opacity:0;z-index:4;",
+};
