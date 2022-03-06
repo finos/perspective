@@ -143,6 +143,9 @@ struct PERSPECTIVE_EXPORT t_tscalar {
     t_tscalar& operator/=(const t_tscalar& rhs);
     t_tscalar& operator%=(const t_tscalar& rhs);
 
+    t_tscalar add_typesafe(const t_tscalar& rhs) const;
+    t_tscalar sub_typesafe(const t_tscalar& rhs) const;
+
     bool is_numeric() const;
 
     static t_tscalar canonical(t_dtype dtype);
@@ -160,6 +163,7 @@ struct PERSPECTIVE_EXPORT t_tscalar {
     std::string to_string(bool for_expr = false) const;
     double to_double() const;
     std::int64_t to_int64() const;
+    std::int32_t to_int32() const;
     std::uint64_t to_uint64() const;
 
     bool begins_with(const t_tscalar& other) const;

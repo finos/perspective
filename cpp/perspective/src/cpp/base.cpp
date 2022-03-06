@@ -463,6 +463,8 @@ str_to_aggtype(const std::string& str) {
         return t_aggtype::AGGTYPE_FIRST;
     } else if (str == "last by index") {
         return t_aggtype::AGGTYPE_LAST_BY_INDEX;
+    } else if (str == "last minus first") {
+        return t_aggtype::AGGTYPE_LAST_MINUS_FIRST;
     } else if (str == "py_agg") {
         return t_aggtype::AGGTYPE_PY_AGG;
     } else if (str == "and") {
@@ -475,6 +477,8 @@ str_to_aggtype(const std::string& str) {
         return t_aggtype::AGGTYPE_HIGH_WATER_MARK;
     } else if (str == "low" || str == "low_water_mark") {
         return t_aggtype::AGGTYPE_LOW_WATER_MARK;
+    } else if (str == "high minus low") {
+        return t_aggtype::AGGTYPE_HIGH_MINUS_LOW;
     } else if (str == "sum abs" || str == "sum_abs") {
         return t_aggtype::AGGTYPE_SUM_ABS;
     } else if (str == "abs sum" || str == "abs_sum") {

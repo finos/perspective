@@ -348,6 +348,68 @@ module.exports = (perspective) => {
             table.delete();
         });
 
+        it("['z'], last_minus_first", async function () {
+            var table = await perspective.table(
+                [
+                    {x: 1, y: "a", z: true},
+                    {x: 2, y: "b", z: false},
+                    {x: 3, y: "c", z: true},
+                    {x: 4, y: "d", z: false},
+                ],
+                {index: "y"}
+            );
+            var view = await table.view({
+                group_by: ["z"],
+                columns: ["x"],
+                aggregates: {x: "last minus first"},
+            });
+            const answer = [
+                {__ROW_PATH__: [], x: -1},
+                {__ROW_PATH__: [false], x: 2},
+                {__ROW_PATH__: [true], x: -2},
+            ];
+            table.update({
+                x: [5],
+                y: ["a"],
+                z: [true],
+            });
+            const result = await view.to_json();
+            expect(result).toEqual(answer);
+            view.delete();
+            table.delete();
+        });
+
+        it("['z'], high_minus_low", async function () {
+            var table = await perspective.table(
+                [
+                    {x: 1, y: "a", z: true},
+                    {x: 2, y: "b", z: false},
+                    {x: 3, y: "c", z: true},
+                    {x: 4, y: "d", z: false},
+                ],
+                {index: "y"}
+            );
+            var view = await table.view({
+                group_by: ["z"],
+                columns: ["x"],
+                aggregates: {x: "high minus low"},
+            });
+            const answer = [
+                {__ROW_PATH__: [], x: 3},
+                {__ROW_PATH__: [false], x: 2},
+                {__ROW_PATH__: [true], x: 2},
+            ];
+            table.update({
+                x: [5],
+                y: ["a"],
+                z: [true],
+            });
+            const result = await view.to_json();
+            expect(result).toEqual(answer);
+            view.delete();
+            table.delete();
+        });
+
         it("['z'], first by index with partial updates", async function () {
             var table = await perspective.table(data, {index: "y"});
             var view = await table.view({

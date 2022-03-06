@@ -403,6 +403,50 @@ t_tscalar::operator%=(const t_tscalar& rhs) {
     return *this;
 }
 
+t_tscalar
+t_tscalar::add_typesafe(const t_tscalar& rhs) const {
+    t_tscalar rval;
+    rval.clear();
+    rval.m_type = DTYPE_FLOAT64;
+    if (!is_numeric() || !rhs.is_numeric()) {
+        rval.m_status = STATUS_CLEAR;
+        return rval;
+    }
+    if (!rhs.is_valid() || !is_valid()) {
+        return rval;
+    }
+    if (is_floating_point() || rhs.is_floating_point()) {
+        rval.m_type = DTYPE_FLOAT64;
+        rval.set(to_double() + rhs.to_double());
+        return rval;
+    }
+    rval.m_type = DTYPE_INT64;
+    rval.set(to_int64() + rhs.to_int64());
+    return rval;
+}
+
+t_tscalar
+t_tscalar::sub_typesafe(const t_tscalar& rhs) const {
+    t_tscalar rval;
+    rval.clear();
+    rval.m_type = DTYPE_FLOAT64;
+    if (!is_numeric() || !rhs.is_numeric()) {
+        rval.m_status = STATUS_CLEAR;
+        return rval;
+    }
+    if (!rhs.is_valid() || !is_valid()) {
+        return rval;
+    }
+    if (is_floating_point()) {
+        rval.m_type = DTYPE_FLOAT64;
+        rval.set(to_double() - rhs.to_double());
+        return rval;
+    }
+    rval.m_type = DTYPE_INT32;
+    rval.set(to_int32() - rhs.to_int32());
+    return rval;
+}
+
 bool
 t_tscalar::is_numeric() const {
     return is_numeric_type(static_cast<t_dtype>(m_type));
@@ -1167,6 +1211,57 @@ t_tscalar::coerce_numeric_dtype(t_dtype dtype) const {
 
 std::int64_t
 t_tscalar::to_int64() const {
+    switch (m_type) {
+        case DTYPE_INT64: {
+            return get<std::int64_t>();
+        } break;
+        case DTYPE_INT32: {
+            return get<std::int32_t>();
+        } break;
+        case DTYPE_INT16: {
+            return get<std::int16_t>();
+        } break;
+        case DTYPE_INT8: {
+            return get<std::int8_t>();
+        } break;
+        case DTYPE_UINT64: {
+            return get<std::uint64_t>();
+        } break;
+        case DTYPE_UINT32: {
+            return get<std::uint32_t>();
+        } break;
+        case DTYPE_UINT16: {
+            return get<std::uint16_t>();
+        } break;
+        case DTYPE_UINT8: {
+            return get<std::uint8_t>();
+        } break;
+        case DTYPE_FLOAT64: {
+            return get<double>();
+        } break;
+        case DTYPE_FLOAT32: {
+            return get<float>();
+        } break;
+        case DTYPE_DATE: {
+            return get<std::uint32_t>();
+        } break;
+        case DTYPE_TIME: {
+            return get<std::int64_t>();
+        } break;
+        case DTYPE_BOOL: {
+            return get<bool>();
+        } break;
+        case DTYPE_NONE:
+        default: {
+            return 0;
+        }
+    }
+
+    return 0;
+}
+
+std::int32_t
+t_tscalar::to_int32() const {
     switch (m_type) {
         case DTYPE_INT64: {
             return get<std::int64_t>();

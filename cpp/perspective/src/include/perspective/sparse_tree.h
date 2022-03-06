@@ -272,8 +272,8 @@ public:
 
     void clear();
 
-    t_tscalar first_last_helper(t_uindex nidx, const t_aggspec& spec,
-        const t_gstate& gstate,
+    std::pair<t_tscalar, t_tscalar> first_last_helper(t_uindex nidx,
+        const t_aggspec& spec, const t_gstate& gstate,
         const t_data_table& expression_master_table) const;
 
     bool node_exists(t_uindex nidx);
