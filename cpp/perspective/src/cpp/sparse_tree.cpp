@@ -1220,20 +1220,25 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info,
 
                 dst->set_scalar(dst_ridx, new_value);
             } break;
-            case AGGTYPE_FIRST:
+            case AGGTYPE_FIRST: {
+                old_value.set(dst->get_scalar(dst_ridx));
+                auto pair = first_last_helper(
+                    nidx, spec, gstate, expression_master_table);
+                new_value.set(pair.first);
+                dst->set_scalar(dst_ridx, new_value);
+            } break;
             case AGGTYPE_LAST_BY_INDEX: {
                 old_value.set(dst->get_scalar(dst_ridx));
-                new_value.set(first_last_helper(
-                    nidx, spec, spec.agg(), gstate, expression_master_table));
+                auto pair = first_last_helper(
+                    nidx, spec, gstate, expression_master_table);
+                new_value.set(pair.second);
                 dst->set_scalar(dst_ridx, new_value);
             } break;
             case AGGTYPE_LAST_MINUS_FIRST: {
                 old_value.set(dst->get_scalar(dst_ridx));
-                auto first_new_value = (first_last_helper(
-                    nidx, spec, AGGTYPE_FIRST, gstate, expression_master_table));
-                auto last_new_value = (first_last_helper(
-                    nidx, spec, AGGTYPE_LAST_BY_INDEX, gstate, expression_master_table));
-                new_value.set(last_new_value - first_new_value);
+                auto pair = (first_last_helper(
+                    nidx, spec, gstate, expression_master_table));
+                new_value.set(pair.second.sub_typesafe(pair.first));
                 dst->set_scalar(dst_ridx, new_value);
             } break;
             case AGGTYPE_AND: {
@@ -1315,12 +1320,16 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info,
                 t_tscalar dst_scalar = dst->get_scalar(dst_ridx);
                 old_value.set(dst_scalar);
                 auto pkeys = get_pkeys(nidx);
-                std::vector<double> values;
+                std::vector<t_tscalar> values;
                 read_column_from_gstate(gstate, expression_master_table,
-                    spec.get_dependencies()[0].name(), pkeys, values, true);
-                auto low_high = std::minmax_element(
-                    values.begin(), values.end());
-                new_value.set(*(low_high.second) - *(low_high.first));
+                    spec.get_dependencies()[0].name(), pkeys, values);
+                auto low_high
+                    = std::minmax_element(values.begin(), values.end());
+                t_tscalar first;
+                first.set(*(low_high.first));
+                t_tscalar second;
+                second.set(*(low_high.second));
+                new_value.set(second.sub_typesafe(first));
                 dst->set_scalar(dst_ridx, new_value);
             } break;
             case AGGTYPE_UDF_COMBINER:
