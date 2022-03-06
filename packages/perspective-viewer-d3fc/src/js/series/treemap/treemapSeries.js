@@ -72,12 +72,17 @@ export function treemapSeries() {
             .style("width", (d) => calcWidth(d))
             .style("height", (d) => calcHeight(d));
 
-        color &&
-            rects.style("fill", (d) => {
+        rects.style("fill", (d) => {
+            if (nodeLevelHelper(maxDepth, d) === nodeLevel.leaf) {
                 if (d.data.color) {
                     return color(d.data.color);
+                } else {
+                    return root_settings.colorStyles.series;
                 }
-            });
+            } else {
+                return "transparent";
+            }
+        });
 
         const labels = nodesMerge
             .filter((d) => d.value !== 0)
