@@ -463,11 +463,11 @@ impl Session {
         Ok(())
     }
 
-    pub async fn download_as_csv(self, flat: bool) -> Result<(), JsValue> {
+    pub async fn download_as_arrow(self, flat: bool) -> Result<(), JsValue> {
         if flat {
             let table = self.borrow().table.clone();
             if let Some(table) = table {
-                download_flat(&table).await?;
+                download_arrow_flat(&table).await?;
             }
         } else {
             let view = self
@@ -477,7 +477,37 @@ impl Session {
                 .map(|x| x.get_view().clone());
 
             if let Some(view) = view {
-                download(&view).await?;
+                download_arrow(&view).await?;
+            }
+        };
+
+        Ok(())
+    }
+
+    pub async fn get_table_arrow(&self) -> Result<Vec<u8>, JsValue> {
+        let table = self.borrow().table.clone().into_jserror()?;
+        let view = table.view(&js_object!().unchecked_into()).await?;
+        let csv_fut = view.to_arrow();
+        let bytes = csv_fut.await?;
+        view.delete().await?;
+        Ok(js_sys::Uint8Array::new(&bytes).to_vec())
+    }
+
+    pub async fn download_as_csv(self, flat: bool) -> Result<(), JsValue> {
+        if flat {
+            let table = self.borrow().table.clone();
+            if let Some(table) = table {
+                download_csv_flat(&table).await?;
+            }
+        } else {
+            let view = self
+                .borrow()
+                .view_sub
+                .as_ref()
+                .map(|x| x.get_view().clone());
+
+            if let Some(view) = view {
+                download_csv(&view).await?;
             }
         };
 

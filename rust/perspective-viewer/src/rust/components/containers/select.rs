@@ -13,22 +13,22 @@ use wasm_bindgen::JsCast;
 use yew::prelude::*;
 
 #[derive(Clone, PartialEq)]
-pub enum DropDownItem<T> {
+pub enum SelectItem<T> {
     Option(T),
     OptGroup(&'static str, Vec<T>),
 }
 
-pub enum DropDownMsg<T> {
+pub enum SelectMsg<T> {
     SelectedChanged(T),
 }
 
 #[derive(Properties, Clone)]
-pub struct DropDownProps<T>
+pub struct SelectProps<T>
 where
     T: Clone + Display + FromStr + PartialEq + 'static,
     T::Err: Clone + Debug + 'static,
 {
-    pub values: Vec<DropDownItem<T>>,
+    pub values: Vec<SelectItem<T>>,
     pub selected: T,
     pub on_select: Callback<T>,
 
@@ -39,7 +39,7 @@ where
     pub class: Option<String>,
 }
 
-impl<T> PartialEq for DropDownProps<T>
+impl<T> PartialEq for SelectProps<T>
 where
     T: Clone + Display + FromStr + PartialEq + 'static,
     T::Err: Clone + Debug + 'static,
@@ -51,7 +51,7 @@ where
 
 /// A `<select>` HTML elements, lifted to support parameterization over a set of
 /// values of a type `T`.
-pub struct DropDown<T>
+pub struct Select<T>
 where
     T: Clone + Display + FromStr + PartialEq + 'static,
     T::Err: Clone + Debug + 'static,
@@ -60,29 +60,29 @@ where
     selected: T,
 }
 
-impl<T> Component for DropDown<T>
+impl<T> Component for Select<T>
 where
     T: Clone + Display + FromStr + PartialEq + 'static,
     T::Err: Clone + Debug + 'static,
 {
-    type Message = DropDownMsg<T>;
-    type Properties = DropDownProps<T>;
+    type Message = SelectMsg<T>;
+    type Properties = SelectProps<T>;
 
     fn create(_ctx: &Context<Self>) -> Self {
-        DropDown::<T> {
+        Select::<T> {
             select_ref: NodeRef::default(),
             selected: _ctx.props().selected.clone(),
         }
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
-        let DropDownMsg::SelectedChanged(x) = msg;
+        let SelectMsg::SelectedChanged(x) = msg;
         self.selected = x;
         ctx.props().on_select.emit(self.selected.clone());
         true
     }
 
-    // The `<select>` has its own state not refelcted by `DropDownProps`.
+    // The `<select>` has its own state not refelcted by `SelectProps`.
     fn changed(&mut self, ctx: &Context<Self>) -> bool {
         self.selected = ctx.props().selected.clone();
         true
@@ -102,7 +102,7 @@ where
                 .unwrap()
                 .unchecked_into::<web_sys::HtmlSelectElement>()
                 .value();
-            DropDownMsg::SelectedChanged(T::from_str(value.as_str()).unwrap())
+            SelectMsg::SelectedChanged(T::from_str(value.as_str()).unwrap())
         });
 
         let class = if let Some(class) = &ctx.props().class {
@@ -111,9 +111,10 @@ where
             "noselect".to_owned()
         };
 
-        let is_group_selected = !ctx.props().values.iter().any(
-            |x| matches!(x, DropDownItem::Option(y) if *y == ctx.props().selected),
-        );
+        let is_group_selected =
+            !ctx.props().values.iter().any(
+                |x| matches!(x, SelectItem::Option(y) if *y == ctx.props().selected),
+            );
 
         let select = html! {
             <select
@@ -123,7 +124,7 @@ where
                 onchange={callback}>
                 {
                     for ctx.props().values.iter().map(|value| match value {
-                        DropDownItem::Option(value) => {
+                        SelectItem::Option(value) => {
                             let selected = *value == ctx.props().selected;
                             html! {
                                 <option
@@ -133,7 +134,7 @@ where
                                 </option>
                             }
                         },
-                        DropDownItem::OptGroup(name, group) => html! {
+                        SelectItem::OptGroup(name, group) => html! {
                             <optgroup label={ name.to_owned() }>
                             {
                                 for group.iter().map(|value| {

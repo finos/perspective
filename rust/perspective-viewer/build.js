@@ -29,6 +29,7 @@ const PREBUILD = [
         entryPoints: [
             "viewer",
             "column-style",
+            "dropdown-menu",
             "filter-dropdown",
             "expression-editor",
         ].map((x) => `src/less/${x}.less`),

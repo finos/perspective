@@ -14,7 +14,7 @@ use crate::session::*;
 use crate::utils::*;
 use crate::*;
 
-use super::containers::dropdown::*;
+use super::containers::select::*;
 
 use yew::prelude::*;
 
@@ -88,18 +88,18 @@ impl Component for PluginSelector {
             .renderer
             .get_all_plugin_names()
             .into_iter()
-            .map(DropDownItem::Option)
+            .map(SelectItem::Option)
             .collect::<Vec<_>>();
 
         html! {
             <div id="plugin_selector_container">
-                <DropDown<String>
+                <Select<String>
                     id="plugin_selector"
                     values={ options }
                     selected={ plugin_name }
                     on_select={ callback }>
 
-                </DropDown<String>>
+                </Select<String>>
             </div>
         }
     }
