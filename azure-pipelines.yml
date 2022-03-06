@@ -408,59 +408,59 @@ jobs:
   #     - ${{ parameters.pythonBuildSteps }}
   #     - ${{ parameters.pythonSDistSteps }}
 
-  - job: "Windows"
-    pool:
-      vmImage: "windows-2019"
+  # - job: "Windows"
+  #   pool:
+  #     vmImage: "windows-2019"
 
-    strategy:
-      matrix:
-        Python37:
-          python.version: "3.7"
-          python_flag: ""
-          artifact_name: "cp37-cp37m-win64_amd"
-        ? ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')) }}
-        : Python38:
-            python.version: "3.8"
-            python_flag: "--python38"
-            artifact_name: "cp38-cp38m-win64_amd"
-          Python39:
-            python.version: "3.9"
-            python_flag: "--python39"
-            artifact_name: "cp39-cp39m-win64_amd"
+  #   strategy:
+  #     matrix:
+  #       Python37:
+  #         python.version: "3.7"
+  #         python_flag: ""
+  #         artifact_name: "cp37-cp37m-win64_amd"
+  #       ? ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')) }}
+  #       : Python38:
+  #           python.version: "3.8"
+  #           python_flag: "--python38"
+  #           artifact_name: "cp38-cp38m-win64_amd"
+  #         Python39:
+  #           python.version: "3.9"
+  #           python_flag: "--python39"
+  #           artifact_name: "cp39-cp39m-win64_amd"
 
-    steps:
-      - ${{ parameters.initSteps }}
-      - ${{ parameters.pythonInitSteps }}
-      - ${{ parameters.windowsInitSteps }}
-      - ${{ parameters.pythonBuildVS2019Steps }}
+  #   steps:
+  #     - ${{ parameters.initSteps }}
+  #     - ${{ parameters.pythonInitSteps }}
+  #     - ${{ parameters.windowsInitSteps }}
+  #     - ${{ parameters.pythonBuildVS2019Steps }}
 
   # Separate out windows wheel builds as the windows
   # build takes 37 years to finish
-  - job: "Windows_Wheels"
-    pool:
-      vmImage: "windows-2019"
-    condition: or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual'))
+  # - job: "Windows_Wheels"
+  #   pool:
+  #     vmImage: "windows-2019"
+  #   condition: or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual'))
 
-    strategy:
-      matrix:
-        Python37:
-          python.version: "3.7"
-          python_flag: ""
-          artifact_name: "cp37-cp37m-win64_amd"
-        Python38:
-          python.version: "3.8"
-          python_flag: "--python38"
-          artifact_name: "cp38-cp38m-win64_amd"
-        Python39:
-          python.version: "3.9"
-          python_flag: "--python39"
-          artifact_name: "cp39-cp39m-win64_amd"
+  #   strategy:
+  #     matrix:
+  #       Python37:
+  #         python.version: "3.7"
+  #         python_flag: ""
+  #         artifact_name: "cp37-cp37m-win64_amd"
+  #       Python38:
+  #         python.version: "3.8"
+  #         python_flag: "--python38"
+  #         artifact_name: "cp38-cp38m-win64_amd"
+  #       Python39:
+  #         python.version: "3.9"
+  #         python_flag: "--python39"
+  #         artifact_name: "cp39-cp39m-win64_amd"
 
-    steps:
-      - ${{ parameters.initSteps }}
-      - ${{ parameters.pythonInitSteps }}
-      - ${{ parameters.windowsInitSteps }}
-      - ${{ parameters.pythonWindowsWheelVS2019Steps }}
+  #   steps:
+  #     - ${{ parameters.initSteps }}
+  #     - ${{ parameters.pythonInitSteps }}
+  #     - ${{ parameters.windowsInitSteps }}
+  #     - ${{ parameters.pythonWindowsWheelVS2019Steps }}
 
   - job: "MacOS_Catalina"
     pool:
