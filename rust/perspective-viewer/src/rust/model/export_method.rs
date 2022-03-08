@@ -7,8 +7,39 @@
 // file.
 
 use crate::*;
+use std::fmt::Display;
 use std::rc::Rc;
 use yew::prelude::*;
+
+#[derive(Clone, Copy, PartialEq)]
+pub enum MimeType {
+    TextPlain,
+    ImagePng,
+}
+
+impl Default for MimeType {
+    fn default() -> Self {
+        MimeType::TextPlain
+    }
+}
+
+impl From<MimeType> for JsValue {
+    fn from(x: MimeType) -> JsValue {
+        JsValue::from(format!("{}", x))
+    }
+}
+
+impl Display for MimeType {
+    fn fmt(
+        &self,
+        fmt: &mut std::fmt::Formatter<'_>,
+    ) -> std::result::Result<(), std::fmt::Error> {
+        fmt.write_str(match self {
+            MimeType::TextPlain => "text/plain",
+            MimeType::ImagePng => "image/png",
+        })
+    }
+}
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum ExportMethod {
@@ -21,6 +52,37 @@ pub enum ExportMethod {
     Arrow,
     ArrowAll,
     JsonConfig,
+}
+
+impl ExportMethod {
+    pub fn to_filename(&self) -> &'static str {
+        match self {
+            ExportMethod::Csv => ".csv",
+            ExportMethod::CsvAll => ".all.csv",
+            ExportMethod::Json => ".json",
+            ExportMethod::JsonAll => ".all.json",
+            ExportMethod::Html => ".html",
+            ExportMethod::Png => ".png",
+            ExportMethod::Arrow => ".arrow",
+            ExportMethod::ArrowAll => ".all.arrow",
+            ExportMethod::JsonConfig => ".config.json",
+        }
+    }
+
+    pub fn mimetype(&self) -> MimeType {
+        match self {
+            ExportMethod::Png => MimeType::ImagePng,
+            _ => MimeType::TextPlain,
+        }
+    }
+}
+
+impl From<ExportMethod> for Html {
+    fn from(x: ExportMethod) -> Html {
+        html! {
+            <code>{ x.to_filename() }</code>
+        }
+    }
 }
 
 impl ExportMethod {
@@ -40,17 +102,7 @@ pub struct ExportFile {
 
 impl ExportFile {
     pub fn to_filename(&self) -> String {
-        match self.method {
-            ExportMethod::Csv => format!("{}.csv", self.name),
-            ExportMethod::CsvAll => format!("{}.all.csv", self.name),
-            ExportMethod::Json => format!("{}.json", self.name),
-            ExportMethod::JsonAll => format!("{}.all.json", self.name),
-            ExportMethod::Html => format!("{}.html", self.name),
-            ExportMethod::Png => format!("{}.png", self.name),
-            ExportMethod::Arrow => format!("{}.arrow", self.name),
-            ExportMethod::ArrowAll => format!("{}.all.arrow", self.name),
-            ExportMethod::JsonConfig => format!("{}.config.json", self.name),
-        }
+        format!("{}{}", self.name, self.method.to_filename())
     }
 }
 
@@ -63,7 +115,7 @@ impl From<ExportFile> for Html {
         };
 
         html_template! {
-            <code class={ class }>{ x.to_filename() }</code>
+            <code class={ class }>{ x.name }</code>{ x.method }
         }
     }
 }

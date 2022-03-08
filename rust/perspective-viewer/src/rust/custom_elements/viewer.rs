@@ -415,9 +415,16 @@ impl PerspectiveViewerElement {
     /// - `flat` Whether to use the current `ViewConfig` to generate this data, or use
     ///   the default.
     pub fn js_copy(&self, flat: bool) -> js_sys::Promise {
-        let session = self.session.clone();
+        let method = if flat {
+            ExportMethod::CsvAll
+        } else {
+            ExportMethod::Csv
+        };
+
+        let js_task = self.export_method_to_jsvalue(method);
+        let copy_task = copy_to_clipboard(js_task, MimeType::TextPlain);
         future_to_promise(async move {
-            session.copy_to_clipboard(flat).await?;
+            copy_task.await?;
             Ok(JsValue::UNDEFINED)
         })
     }

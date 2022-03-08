@@ -12,11 +12,11 @@
 use wasm_bindgen::prelude::*;
 // use web_sys::HtmlElement;
 
-#[wasm_bindgen(inline_js = "export default ResizeObserver")]
+#[wasm_bindgen(inline_js = "export const ResizeObserver = window.ResizeObserver")]
 extern "C" {
     pub type ResizeObserver;
 
-    #[wasm_bindgen(constructor, js_class = "default")]
+    #[wasm_bindgen(constructor, js_class = "ResizeObserver")]
     pub fn new(callback: &js_sys::Function) -> ResizeObserver;
 
     #[wasm_bindgen(method)]

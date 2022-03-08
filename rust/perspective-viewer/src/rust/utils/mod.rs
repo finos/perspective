@@ -7,6 +7,7 @@
 // file.
 
 mod async_callback;
+mod clipboard;
 mod closure;
 mod datetime;
 mod debounce;
@@ -23,6 +24,7 @@ mod weak_scope;
 mod tests;
 
 pub use self::async_callback::*;
+pub use self::clipboard::*;
 pub use self::closure::*;
 pub use self::datetime::*;
 pub use self::debounce::*;

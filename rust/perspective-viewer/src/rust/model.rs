@@ -69,7 +69,7 @@ pub trait SessionRendererModel {
 
     fn html_as_jsvalue(
         &self,
-    ) -> Pin<Box<dyn Future<Output = Result<JsValue, JsValue>>>> {
+    ) -> Pin<Box<dyn Future<Output = Result<web_sys::Blob, JsValue>>>> {
         let view_config = self.get_viewer_config();
         let session = self.session().clone();
         Box::pin(async move {
@@ -108,7 +108,7 @@ window.viewer.restore(JSON.parse(window.layout.textContent));
 </html>
 ", base64::encode(arrow), js_config));
             let array = [html].iter().collect::<js_sys::Array>();
-            Ok(web_sys::Blob::new_with_u8_array_sequence(&array)?.into())
+            Ok(web_sys::Blob::new_with_u8_array_sequence(&array)?)
         })
     }
 
@@ -140,19 +140,23 @@ window.viewer.restore(JSON.parse(window.layout.textContent));
 
     fn config_as_jsvalue(
         &self,
-    ) -> Pin<Box<dyn Future<Output = Result<JsValue, JsValue>>>> {
+    ) -> Pin<Box<dyn Future<Output = Result<web_sys::Blob, JsValue>>>> {
         let viewer_config = self.get_viewer_config();
         Box::pin(async move {
-            viewer_config
+            let config = viewer_config
                 .await?
-                .encode(&Some(ViewerConfigEncoding::JSONString))
+                .encode(&Some(ViewerConfigEncoding::JSONString))?;
+            let array = [config].iter().collect::<js_sys::Array>();
+            let mut options = web_sys::BlobPropertyBag::new();
+            options.type_("text/plain");
+            web_sys::Blob::new_with_str_sequence_and_options(&array, &options)
         })
     }
 
     fn export_method_to_jsvalue(
         &self,
         method: ExportMethod,
-    ) -> Pin<Box<dyn Future<Output = Result<JsValue, JsValue>>>> {
+    ) -> Pin<Box<dyn Future<Output = Result<web_sys::Blob, JsValue>>>> {
         match method {
             ExportMethod::Csv => {
                 let session = self.session().clone();
@@ -189,7 +193,11 @@ window.viewer.restore(JSON.parse(window.layout.textContent));
                     let render = js_sys::Reflect::get(&plugin, js_intern!("render"))?;
                     let render_fun = render.unchecked_into::<js_sys::Function>();
                     let png = render_fun.call0(&plugin)?;
-                    JsFuture::from(png.unchecked_into::<js_sys::Promise>()).await
+                    let result =
+                        JsFuture::from(png.unchecked_into::<js_sys::Promise>())
+                            .await?
+                            .unchecked_into();
+                    Ok(result)
                 })
             }
             ExportMethod::JsonConfig => {

@@ -6,7 +6,6 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-mod copy;
 mod metadata;
 mod view;
 mod view_subscription;
@@ -23,8 +22,6 @@ use crate::js::plugin::*;
 use crate::utils::*;
 use crate::*;
 
-use copy::*;
-
 use futures::channel::oneshot::*;
 use itertools::Itertools;
 use js_intern::*;
@@ -37,7 +34,6 @@ use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::future_to_promise;
-
 use yew::prelude::*;
 
 /// The `Session` struct is the principal interface to the Perspective engine, the
@@ -441,27 +437,6 @@ impl Session {
         }
     }
 
-    pub async fn copy_to_clipboard(self, flat: bool) -> Result<(), JsValue> {
-        if flat {
-            let table = self.borrow().table.clone();
-            if let Some(table) = table {
-                copy_flat(&table).await?;
-            }
-        } else {
-            let view = self
-                .borrow()
-                .view_sub
-                .as_ref()
-                .map(|x| x.get_view().clone());
-
-            if let Some(view) = view {
-                copy(&view).await?;
-            }
-        };
-
-        Ok(())
-    }
-
     pub async fn get_table_arrow(&self) -> Result<Vec<u8>, JsValue> {
         let table = self.borrow().table.clone().into_jserror()?;
         let view = table.view(&js_object!().unchecked_into()).await?;
@@ -484,26 +459,43 @@ impl Session {
         })
     }
 
-    pub async fn arrow_as_jsvalue(self, flat: bool) -> Result<JsValue, JsValue> {
+    pub async fn arrow_as_jsvalue(self, flat: bool) -> Result<web_sys::Blob, JsValue> {
         let view = self.flat_as_jsvalue(flat).await?;
         let arrow = view.to_arrow().await.unwrap();
-        Ok(js_sys::Uint8Array::new(&arrow).into())
+        let array = [js_sys::Uint8Array::new(&arrow)]
+            .iter()
+            .collect::<js_sys::Array>();
+        let blob = web_sys::Blob::new_with_u8_array_sequence(&array)?;
+        Ok(blob)
     }
 
-    pub async fn json_as_jsvalue(self, flat: bool) -> Result<JsValue, JsValue> {
+    pub async fn json_as_jsvalue(self, flat: bool) -> Result<web_sys::Blob, JsValue> {
         let view = self.flat_as_jsvalue(flat).await?;
         let json = view.to_columns().await.unwrap();
-        Ok(js_sys::JSON::stringify(&json)?.into())
+        let array = [js_sys::JSON::stringify(&json)?]
+            .iter()
+            .collect::<js_sys::Array>();
+        let mut options = web_sys::BlobPropertyBag::new();
+        options.type_("text/plain");
+        let blob = web_sys::Blob::new_with_str_sequence_and_options(&array, &options)?;
+        Ok(blob)
     }
 
-    pub async fn csv_as_jsvalue(&self, flat: bool) -> Result<JsValue, JsValue> {
+    pub async fn csv_as_jsvalue(&self, flat: bool) -> Result<web_sys::Blob, JsValue> {
         let view = self.flat_as_jsvalue(flat).await?;
         let csv_fut = view.to_csv(js_object!("formatted", true));
         let csv = csv_fut.await.unwrap();
         let csv_str = csv.as_string().unwrap();
         let bytes = csv_str.as_bytes();
         let value = unsafe { js_sys::Uint8Array::view(bytes) };
-        Ok(value.unchecked_into())
+        let mut options = web_sys::BlobPropertyBag::new();
+        options.type_("text/plain");
+        let value = web_sys::Blob::new_with_u8_array_sequence_and_options(
+            &[value].iter().collect::<js_sys::Array>(),
+            &options,
+        )?;
+
+        Ok(value)
     }
 
     pub fn get_view(&self) -> Option<View> {

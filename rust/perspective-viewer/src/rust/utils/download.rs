@@ -9,14 +9,12 @@
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
-pub fn download(name: &str, value: &JsValue) -> Result<(), JsValue> {
+pub fn download(name: &str, value: &web_sys::Blob) -> Result<(), JsValue> {
     let window = web_sys::window().unwrap();
     let document = window.document().unwrap();
     let element: web_sys::HtmlElement = document.create_element("a")?.unchecked_into();
     let blob_url = {
-        let array = [value].iter().collect::<js_sys::Array>();
-        let blob = web_sys::Blob::new_with_u8_array_sequence(&array)?;
-        web_sys::Url::create_object_url_with_blob(&blob)?
+        web_sys::Url::create_object_url_with_blob(&value)?
     };
 
     element.set_attribute("download", name)?;
