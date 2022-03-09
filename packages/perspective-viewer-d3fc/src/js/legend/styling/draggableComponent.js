@@ -43,7 +43,9 @@ export function draggableComponent() {
             pinned = isNodeInTopRight(node)
                 ? pinNodeToTopRight(node)
                 : unpinNodeFromTopRight(node, pinned);
+        });
 
+        drag.on("end", function (event) {
             viewer?.dispatchEvent(new Event("perspective-config-update"));
         });
 

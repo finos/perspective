@@ -125,6 +125,7 @@ utils.with_server({}, () => {
                     await page.mouse.move(start.x, start.y);
                     await page.mouse.down();
                     await page.mouse.move(target.x, target.y);
+                    await page.mouse.up();
 
                     const count = await page.evaluate(async (viewer) => {
                         // Await the plugin rendering
