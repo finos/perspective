@@ -16,6 +16,7 @@
     "files": [
         "dist/**/*"
     ],
+    "types": "index.d.ts",
     "scripts": {
         "bench": "npm-run-all bench:build bench:run",
         "bench:build": ":",
