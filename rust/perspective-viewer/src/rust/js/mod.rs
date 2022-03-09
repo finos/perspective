@@ -6,6 +6,7 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+pub mod clipboard_item;
 pub mod monaco;
 pub mod perspective;
 // pub mod perspective_viewer;

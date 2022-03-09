@@ -6,11 +6,12 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-pub mod copy_dropdown;
-pub mod export_dropdown;
-pub mod expression_editor;
-pub mod filter_dropdown;
-pub mod modal;
-pub mod number_column_style;
-pub mod string_column_style;
-pub mod viewer;
+use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen(inline_js = "export const ClipboardItem = window.ClipboardItem")]
+extern "C" {
+    pub type ClipboardItem;
+
+    #[wasm_bindgen(constructor, js_class = "ClipboardItem")]
+    pub fn new(files: &js_sys::Object) -> ClipboardItem;
+}

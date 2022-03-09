@@ -6,13 +6,14 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::components::export_dropdown::*;
+use crate::components::copy_dropdown::*;
 use crate::custom_elements::modal::*;
 use crate::model::*;
 use crate::renderer::Renderer;
 use crate::session::Session;
 use crate::utils::*;
 
+use js_intern::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
@@ -23,52 +24,52 @@ use yew::prelude::*;
 
 #[wasm_bindgen]
 #[derive(Clone)]
-pub struct ExportDropDownMenuElement {
-    modal: ModalElement<ExportDropDownMenu>,
+pub struct CopyDropDownMenuElement {
+    modal: ModalElement<CopyDropDownMenu>,
     target: Rc<RefCell<Option<HtmlElement>>>,
 }
 
-impl ResizableMessage for <ExportDropDownMenu as Component>::Message {
+impl ResizableMessage for <CopyDropDownMenu as Component>::Message {
     fn resize(y: i32, x: i32, _: bool) -> Self {
-        ExportDropDownMenuMsg::SetPos(y, x)
+        CopyDropDownMenuMsg::SetPos(y, x)
     }
 }
 
-impl ExportDropDownMenuElement {
-    pub fn new(session: Session, renderer: Renderer) -> ExportDropDownMenuElement {
+impl CopyDropDownMenuElement {
+    pub fn new(session: Session, renderer: Renderer) -> CopyDropDownMenuElement {
         let document = window().unwrap().document().unwrap();
         let dropdown = document
-            .create_element("perspective-export-dropdown")
+            .create_element("perspective-copy-dropdown")
             .unwrap()
             .unchecked_into::<HtmlElement>();
 
-        let modal_rc: Rc<RefCell<Option<ModalElement<ExportDropDownMenu>>>> =
+        let modal_rc: Rc<RefCell<Option<ModalElement<CopyDropDownMenu>>>> =
             Default::default();
 
         let callback = Callback::from({
             let modal_rc = modal_rc.clone();
             let renderer = renderer.clone();
-            move |x: ExportFile| {
-                if !x.name.is_empty() {
-                    let session = session.clone();
-                    let renderer = renderer.clone();
-                    let modal = modal_rc.borrow().clone().unwrap();
-                    spawn_local(async move {
-                        let val = (&session, &renderer)
-                            .export_method_to_jsvalue(x.method)
-                            .await
-                            .unwrap();
-                        download(&x.to_filename(), &val).unwrap();
-                        modal.hide().unwrap();
-                    })
-                }
+            move |x: ExportMethod| {
+                let js_task = (&session, &renderer).export_method_to_jsvalue(x);
+                let copy_task = copy_to_clipboard(js_task, x.mimetype());
+                let modal = modal_rc.borrow().clone().unwrap();
+                spawn_local(async move {
+                    let result = copy_task.await;
+                    crate::js_log_maybe! {
+                        result?;
+                        modal.hide()?;
+                    }
+                })
             }
         });
 
-        let props = ExportDropDownMenuProps { renderer, callback };
+        let plugin = renderer.get_active_plugin().unwrap();
+        let has_render = js_sys::Reflect::has(&plugin, js_intern!("render")).unwrap();
+        let values = Rc::new(get_menu_items(has_render));
+        let props = CopyDropDownMenuProps { values, callback };
         let modal = ModalElement::new(dropdown, props, true);
         *modal_rc.borrow_mut() = Some(modal.clone());
-        ExportDropDownMenuElement {
+        CopyDropDownMenuElement {
             modal,
             target: Default::default(),
         }

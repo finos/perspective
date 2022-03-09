@@ -9,6 +9,7 @@
 //! `components` contains all Yew `Component` types, but only exports the 4 necessary
 //! for public Custom Elements.  The rest are internal components of these 4.
 
+pub mod copy_dropdown;
 pub mod export_dropdown;
 pub mod expression_editor;
 pub mod filter_dropdown;

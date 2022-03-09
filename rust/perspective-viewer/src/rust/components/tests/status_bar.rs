@@ -55,7 +55,7 @@ pub fn test_callbacks_invoked() {
     status_bar.send_message(StatusBarMsg::Export);
     assert_eq!(token.get(), 0);
     let status_bar = link.borrow().clone().unwrap();
-    status_bar.send_message(StatusBarMsg::Copy(false));
+    status_bar.send_message(StatusBarMsg::Copy);
     assert_eq!(token.get(), 0);
     let status_bar = link.borrow().clone().unwrap();
     status_bar.send_message(StatusBarMsg::Reset(false));

@@ -155,10 +155,12 @@ impl DragDrop {
             _ => true,
         };
 
-        r.drag_state
-            .as_mut()
-            .expect("Hover index without hover")
-            .state = Some((action, index));
+        crate::js_log_maybe! {
+            r.drag_state
+                .as_mut()
+                .into_jserror()?
+                .state = Some((action, index))
+        };
 
         should_render
     }

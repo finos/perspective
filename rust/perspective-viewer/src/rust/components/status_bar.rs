@@ -8,12 +8,13 @@
 
 use crate::components::containers::select::*;
 use crate::components::status_bar_counter::StatusBarRowsCounter;
+use crate::custom_elements::copy_dropdown::*;
 use crate::custom_elements::export_dropdown::*;
 use crate::renderer::*;
 use crate::session::*;
 use crate::utils::*;
 use crate::*;
-use wasm_bindgen_futures::spawn_local;
+
 use web_sys::*;
 use yew::prelude::*;
 
@@ -41,7 +42,7 @@ impl PartialEq for StatusBarProps {
 pub enum StatusBarMsg {
     Reset(bool),
     Export,
-    Copy(bool),
+    Copy,
     SetThemeConfig((Vec<String>, Option<usize>)),
     SetTheme(String),
     TableStatsChanged,
@@ -54,7 +55,9 @@ pub struct StatusBar {
     theme: Option<String>,
     themes: Vec<String>,
     export_ref: NodeRef,
+    copy_ref: NodeRef,
     export_dropdown: Option<ExportDropDownMenuElement>,
+    copy_dropdown: Option<CopyDropDownMenuElement>,
     _sub: [Subscription; 4],
 }
 
@@ -91,6 +94,8 @@ impl Component for StatusBar {
             _sub,
             theme: None,
             themes: vec![],
+            copy_dropdown: None,
+            copy_ref: NodeRef::default(),
             export_dropdown: None,
             export_ref: NodeRef::default(),
             is_updating: 0,
@@ -128,20 +133,25 @@ impl Component for StatusBar {
                 false
             }
             StatusBarMsg::Export => {
-                let session = ctx.props().session.clone();
-                let renderer = ctx.props().renderer.clone();
-                let export_dropdown = ExportDropDownMenuElement::new(session, renderer);
                 let target = self.export_ref.cast::<HtmlElement>().unwrap();
-                export_dropdown.open(target);
-                self.export_dropdown = Some(export_dropdown);
+                self.export_dropdown
+                    .get_or_insert_with(|| {
+                        let session = ctx.props().session.clone();
+                        let renderer = ctx.props().renderer.clone();
+                        ExportDropDownMenuElement::new(session, renderer)
+                    })
+                    .open(target);
                 false
             }
-            StatusBarMsg::Copy(flat) => {
-                let session = ctx.props().session.clone();
-                spawn_local(async move {
-                    session.copy_to_clipboard(flat).await.expect("Copy failed");
-                });
-
+            StatusBarMsg::Copy => {
+                let target = self.copy_ref.cast::<HtmlElement>().unwrap();
+                self.copy_dropdown
+                    .get_or_insert_with(|| {
+                        let session = ctx.props().session.clone();
+                        let renderer = ctx.props().renderer.clone();
+                        CopyDropDownMenuElement::new(session, renderer)
+                    })
+                    .open(target);
                 false
             }
         }
@@ -161,10 +171,7 @@ impl Component for StatusBar {
             .callback(|event: MouseEvent| StatusBarMsg::Reset(event.shift_key()));
 
         let export = ctx.link().callback(|_: MouseEvent| StatusBarMsg::Export);
-
-        let copy = ctx
-            .link()
-            .callback(|event: MouseEvent| StatusBarMsg::Copy(event.shift_key()));
+        let copy = ctx.link().callback(|_: MouseEvent| StatusBarMsg::Copy);
 
         let theme_button = match &self.theme {
             None => html! {},
@@ -211,7 +218,12 @@ impl Component for StatusBar {
 
                         <span>{ "Export" }</span>
                     </span>
-                    <span id="copy" class="button" onmousedown={ copy }>
+                    <span
+                        ref={ self.copy_ref.clone() }
+                        id="copy"
+                        class="button"
+                        onmousedown={ copy }>
+
                         <span>{ "Copy" }</span>
                     </span>
                     { theme_button }

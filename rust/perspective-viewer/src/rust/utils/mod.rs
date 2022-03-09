@@ -7,9 +7,11 @@
 // file.
 
 mod async_callback;
+mod clipboard;
 mod closure;
 mod datetime;
 mod debounce;
+mod download;
 mod errors;
 mod future_to_promise;
 mod js_object;
@@ -22,9 +24,11 @@ mod weak_scope;
 mod tests;
 
 pub use self::async_callback::*;
+pub use self::clipboard::*;
 pub use self::closure::*;
 pub use self::datetime::*;
 pub use self::debounce::*;
+pub use self::download::*;
 pub use self::errors::*;
 pub use self::future_to_promise::*;
 pub use self::pubsub::*;
@@ -43,6 +47,23 @@ macro_rules! maybe {
             }
         })();
         x
+    }};
+}
+
+#[macro_export]
+macro_rules! js_log_maybe {
+    ($($exp:stmt);* $(;)*) => {{
+        #[must_use]
+        let x = ({
+            #[inline(always)]
+            || {
+                {
+                    $($exp)*
+                };
+                Ok(())
+            }
+        })();
+        x.unwrap_or_else(|e| web_sys::console::error_1(&e))
     }};
 }
 
