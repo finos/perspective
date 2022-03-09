@@ -1,7 +1,19 @@
 import {View} from "@finos/perspective";
 import {RegularTableElement} from "regular-table";
 
-declare class PerspectiveViewerDatagridPluginElement extends HTMLElement {
+declare global {
+    interface CustomElementRegistry {
+        get(
+            tagName: "perspective-viewer-datagrid"
+        ): PerspectiveViewerDatagridPluginElement;
+
+        whenDefined(
+            tagName: "perspective-viewer-datagrid"
+        ): Promise<PerspectiveViewerDatagridPluginElement>;
+    }
+}
+
+export declare class PerspectiveViewerDatagridPluginElement extends HTMLElement {
     public readonly datagrid: RegularTableElement;
 
     // private methods
