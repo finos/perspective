@@ -37,7 +37,7 @@ utils.with_server({}, () => {
                         // Await the table load
                         await viewer.getTable();
 
-                        viewer.restore({
+                        await viewer.restore({
                             plugin: "Y Line",
                             columns: ["Sales", "Profit"],
                         });
@@ -55,7 +55,9 @@ utils.with_server({}, () => {
                         await page.waitForFunction(() =>
                             document
                                 .querySelector("perspective-viewer-d3fc-yline")
-                                .shadowRoot.querySelector(".y-label")
+                                .shadowRoot.querySelector(
+                                    ".y-label .splitter-label"
+                                )
                         )
                     ).asElement();
                     await axisLabel.click(axisLabel);
@@ -85,7 +87,7 @@ utils.with_server({}, () => {
                         // Await the table load
                         await viewer.getTable();
 
-                        viewer.restore({
+                        await viewer.restore({
                             plugin: "Y Line",
                             columns: ["Sales", "Profit"],
                         });
