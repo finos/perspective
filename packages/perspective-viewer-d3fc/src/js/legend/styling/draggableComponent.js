@@ -19,6 +19,7 @@ export function draggableComponent() {
 
     const draggable = (element) => {
         const node = element.node();
+        const viewer = node.getRootNode().host.closest("perspective-viewer");
         node.style.cursor = "move";
         if (settings.legend) {
             node.style.left = settings.legend.left;
@@ -39,12 +40,13 @@ export function draggableComponent() {
             };
             settings.legend = {...settings.legend, ...position};
 
-            if (isNodeInTopRight(node)) {
-                pinned = pinNodeToTopRight(node);
-                return;
-            }
+            pinned = isNodeInTopRight(node)
+                ? pinNodeToTopRight(node)
+                : unpinNodeFromTopRight(node, pinned);
+        });
 
-            pinned = unpinNodeFromTopRight(node, pinned);
+        drag.on("end", function (event) {
+            viewer?.dispatchEvent(new Event("perspective-config-update"));
         });
 
         element.call(drag);

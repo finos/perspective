@@ -143,5 +143,7 @@
     "sunburst_filters_filters_by_a_numeric_column": "10d1208b485425756fcc932229386b02",
     "sunburst_filters_filters_by_an_alpha_column": "10d1208b485425756fcc932229386b02",
     "sunburst_filters_filters_with__in__comparator": "10d1208b485425756fcc932229386b02",
-    "bar_rendering_bugs_correctly_render_when_a_bar_chart_has_non_equidistant_times_on_a_datetime_axis": "9e7617a454d83e328aaa3d25c8145a0e"
+    "bar_rendering_bugs_correctly_render_when_a_bar_chart_has_non_equidistant_times_on_a_datetime_axis": "9e7617a454d83e328aaa3d25c8145a0e",
+    "events_perspective-config-update_event_is_fired_when_series_axis_is_changed": "6bf8e592d3aa69e0c141a9caca01bae2",
+    "events_perspective-config-update_event_is_fired_when_legend_position_is_changed": "c07cb12b00fe628aba8751721f8f5498"
 }
