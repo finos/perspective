@@ -21,12 +21,12 @@ relevent DOM method e.g. `document.createElement("perspective-viewer")` or
 
 ### Classes
 
-- [HTMLPerspectiveViewerElement](#HTMLPerspectiveViewerElement)
-- [HTMLPerspectiveViewerPluginElement](#HTMLPerspectiveViewerPluginElement)
+- [HTMLPerspectiveViewerElement](#class-htmlperspectiveviewerelement)
+- [HTMLPerspectiveViewerPluginElement](#interface-iperspectiveviewerplugin)
 
 ### Interfaces
 
-- [IPerspectiveViewerPlugin](#IPerspectiveViewerPlugin)
+- [IPerspectiveViewerPlugin](#interface-iperspectiveviewerplugin)
 
 ### Type aliases
 
@@ -395,7 +395,7 @@ restore.
 
 As noted in `save()`, this configuration state does not include the
 `Table` or its `Schema`.  In order for `restore()` to work correctly, it
-must be called on a `<perspective-viewer>` that has a `Table already
+must be called on a `<perspective-viewer>` that has a `Table` already
 `load()`-ed, with the same (or a type-compatible superset) `Schema`.
 It does not need have the same rows, or even be populated.
 
