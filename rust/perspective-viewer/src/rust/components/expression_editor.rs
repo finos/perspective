@@ -6,7 +6,8 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::components::containers::split_panel::*;
+use super::containers::modal_anchor::*;
+use super::containers::split_panel::*;
 use crate::exprtk::*;
 use crate::js::monaco::*;
 use crate::js::perspective::*;
@@ -186,8 +187,8 @@ impl Component for ExpressionEditor {
             <>
                 <style>
                     { &CSS }
-                    { format!(":host{{left:{}px;top:{}px;}}", self.left, self.top) }
                 </style>
+                <ModalAnchor top={ self.top } left={ self.left } />
                 <SplitPanel
                     id="expression-editor-split-panel"
                     on_resize={ resize_horiz }

@@ -6,6 +6,7 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use super::containers::modal_anchor::*;
 use web_sys::*;
 use yew::prelude::*;
 
@@ -140,8 +141,8 @@ impl Component for FilterDropDown {
             <>
                 <style>
                     { &CSS }
-                    { format!(":host{{left:{}px;top:{}px;}}", self.left, self.top) }
                 </style>
+                <ModalAnchor top={ self.top } left={ self.left } />
                 { body }
             </>
         }

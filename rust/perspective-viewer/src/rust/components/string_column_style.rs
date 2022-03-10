@@ -7,6 +7,7 @@
 // file.
 
 use super::color_selector::*;
+use super::containers::modal_anchor::*;
 use super::containers::radio_list::RadioList;
 use crate::*;
 
@@ -329,8 +330,8 @@ impl Component for StringColumnStyle {
         html_template! {
             <style>
                 { &CSS }
-                { format!(":host{{left:{}px;top:{}px;}}", self.left, self.top) }
             </style>
+            <ModalAnchor top={ self.top } left={ self.left } />
             <div id="column-style-container">
                 <div>
                     <label class="indent">{ "Format" }</label>

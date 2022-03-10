@@ -35,6 +35,10 @@ pub fn test_set_pos() {
     assert!(panel_div
         .cast::<HtmlElement>()
         .unwrap()
+        .next_sibling()
+        .as_ref()
+        .unwrap()
+        .unchecked_ref::<HtmlElement>()
         .inner_html()
         .contains("left:100px;top:90px;"));
 }
@@ -43,6 +47,9 @@ pub fn test_set_pos() {
 /// DocumentFragment.
 fn cs_query(node: &NodeRef, query: &str) -> HtmlElement {
     node.cast::<HtmlElement>()
+        .unwrap()
+        .next_sibling()
+        .as_ref()
         .unwrap()
         .next_sibling()
         .as_ref()
