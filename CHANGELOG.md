@@ -1,5 +1,28 @@
 # Changelog
 
+## [v1.3.4](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.3.3...HEAD)
+
+**Implemented enhancements:**
+
+- Copy menu [\#1744](https://github.com/finos/perspective/pull/1744) ([texodus](https://github.com/texodus))
+- New aggregates `last minus first` and `high minus low` [\#1742](https://github.com/finos/perspective/pull/1742) ([texodus](https://github.com/texodus))
+- Export `.png`, `.html`, `.arrow` [\#1740](https://github.com/finos/perspective/pull/1740) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- Fire `perspective-config-update` on axis switch for multi-axis charts [\#1729](https://github.com/finos/perspective/issues/1729)
+- D3FC Chart style and bug fixes [\#1752](https://github.com/finos/perspective/pull/1752) ([texodus](https://github.com/texodus))
+- Fire `perspective-config-update` event on D3FC legend and axis events [\#1748](https://github.com/finos/perspective/pull/1748) ([texodus](https://github.com/texodus))
+- export `perspective-viewer-datagrid`  plugin customElement and it's typings [\#1746](https://github.com/finos/perspective/pull/1746) ([zemeolotu](https://github.com/zemeolotu))
+- Add `main` field to package json [\#1745](https://github.com/finos/perspective/pull/1745) ([zemeolotu](https://github.com/zemeolotu))
+
+**Merged pull requests:**
+
+- Disable OSX Python CI [\#1754](https://github.com/finos/perspective/pull/1754) ([texodus](https://github.com/texodus))
+- Disable Windows builds [\#1741](https://github.com/finos/perspective/pull/1741) ([texodus](https://github.com/texodus))
+
 ## [v1.3.3](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.3.2...HEAD)

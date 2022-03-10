@@ -33,8 +33,8 @@ try {
         --unreleased-only
         --base CHANGELOG.md
         --output CHANGELOG.md
-        --unreleased-label=v1.3.3
-        --since-tag=v1.3.2
+        --unreleased-label=v1.3.4
+        --since-tag=v1.3.3
     `;
 
     execute`git add CHANGELOG.md`;
