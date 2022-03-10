@@ -115,7 +115,10 @@ impl From<ExportFile> for Html {
         };
 
         html_template! {
-            <code class={ class }>{ x.name }</code>{ x.method }
+            <code class={ class }>
+                { x.name }
+                { x.method.to_filename() }
+            </code>
         }
     }
 }
