@@ -7,6 +7,7 @@
 // file.
 
 use super::color_range_selector::*;
+use super::containers::modal_anchor::*;
 use super::containers::radio_list::RadioList;
 use crate::*;
 
@@ -389,8 +390,8 @@ impl Component for NumberColumnStyle {
             <>
                 <style>
                     { &CSS }
-                    { format!(":host{{left:{}px;top:{}px;}}", self.left, self.top) }
                 </style>
+                <ModalAnchor top={ self.top } left={ self.left } />
                 <div id="column-style-container">
                     <div>
                         <label id="fixed-examples" class="indent">{

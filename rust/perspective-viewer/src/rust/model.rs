@@ -108,7 +108,7 @@ window.viewer.restore(JSON.parse(window.layout.textContent));
 </html>
 ", base64::encode(arrow), js_config));
             let array = [html].iter().collect::<js_sys::Array>();
-            Ok(web_sys::Blob::new_with_u8_array_sequence(&array)?)
+            web_sys::Blob::new_with_u8_array_sequence(&array)
         })
     }
 

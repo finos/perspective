@@ -46,6 +46,7 @@ export function draggableComponent() {
         });
 
         drag.on("end", function (event) {
+            d3.select(window).on(resizeForDraggingEvent, null);
             viewer?.dispatchEvent(new Event("perspective-config-update"));
         });
 

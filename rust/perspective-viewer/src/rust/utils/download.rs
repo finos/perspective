@@ -13,10 +13,7 @@ pub fn download(name: &str, value: &web_sys::Blob) -> Result<(), JsValue> {
     let window = web_sys::window().unwrap();
     let document = window.document().unwrap();
     let element: web_sys::HtmlElement = document.create_element("a")?.unchecked_into();
-    let blob_url = {
-        web_sys::Url::create_object_url_with_blob(&value)?
-    };
-
+    let blob_url = web_sys::Url::create_object_url_with_blob(value)?;
     element.set_attribute("download", name)?;
     element.set_attribute("href", &blob_url)?;
     element.style().set_property("display", "none")?;

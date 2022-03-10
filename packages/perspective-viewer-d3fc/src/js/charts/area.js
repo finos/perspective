@@ -12,6 +12,7 @@ import {chartSvgFactory} from "../axis/chartFactory";
 import {axisSplitter} from "../axis/axisSplitter";
 import {AXIS_TYPES} from "../axis/axisType";
 import {areaSeries} from "../series/areaSeries";
+import {lineSeries} from "../series/lineSeries";
 import {seriesColors} from "../series/seriesColors";
 import {splitAndBaseData} from "../data/splitAndBaseData";
 import {colorLegend} from "../legend/legend";
@@ -28,9 +29,16 @@ function areaChart(container, settings) {
     const color = seriesColors(settings);
     const legend = colorLegend().settings(settings).scale(color);
 
-    const series = fc
+    const area_series = fc
         .seriesSvgRepeat()
         .series(areaSeries(settings, color).orient("vertical"));
+
+    const line_series = fc
+        .seriesSvgRepeat()
+        .series(lineSeries(settings, color))
+        .orient("vertical");
+
+    const series = fc.seriesSvgMulti().series([area_series, line_series]);
 
     const xAxis = axisFactory(settings)
         .excludeType(AXIS_TYPES.linear)

@@ -115,11 +115,22 @@ export default () => {
                     bound = true;
                     // add the zoom interaction on the enter selection
                     const plotArea = sel.select(chartPlotArea);
+                    const device_pixel_factor = canvas
+                        ? window.devicePixelRatio
+                        : 1;
 
                     plotArea
                         .on("measure.zoom-range", (event) => {
-                            if (xCopy) xCopy.range([0, event.detail.width]);
-                            if (yCopy) yCopy.range([0, event.detail.height]);
+                            if (xCopy)
+                                xCopy.range([
+                                    0,
+                                    event.detail.width / device_pixel_factor,
+                                ]);
+                            if (yCopy)
+                                yCopy.range([
+                                    0,
+                                    event.detail.height / device_pixel_factor,
+                                ]);
 
                             if (settings.zoom) {
                                 const initialTransform = d3.zoomIdentity

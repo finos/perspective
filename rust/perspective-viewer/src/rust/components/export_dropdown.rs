@@ -7,6 +7,7 @@
 // file.
 
 use super::containers::dropdown_menu::*;
+use super::containers::modal_anchor::*;
 use crate::model::*;
 use crate::renderer::*;
 
@@ -82,9 +83,7 @@ impl Component for ExportDropDownMenu {
         let plugin = ctx.props().renderer.get_active_plugin().unwrap();
         let has_render = js_sys::Reflect::has(&plugin, js_intern!("render")).unwrap();
         html_template! {
-            <style>
-                { format!(":host{{left:{}px;top:{}px;}}", self.left, self.top) }
-            </style>
+            <ModalAnchor top={ self.top } left={ self.left } />
             <span class="dropdown-group-label">{ "Save as" }</span>
             <input
                 class={ if self.invalid { "invalid" } else { "" }}

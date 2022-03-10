@@ -14,6 +14,7 @@
 @sans-serif-fonts: Arial, sans-serif;
 
 :host {
+    user-select: none;
     .chart {
         position: absolute;
         box-sizing: border-box;
@@ -407,14 +408,15 @@
 
         & button {
             -webkit-appearance: none;
-            background: rgb(247, 247, 247);
-            border: 1px solid rgb(204, 204, 204);
-            padding: 10px;
+            background: var(--plugin--background, rgb(247, 247, 247));
+            border: 1px solid var(--inactive--color, rgb(204, 204, 204));
+            color: var(--d3fc-label--color, inherit);
+            font-size: 12px;
+            padding: 8px;
             opacity: 0.5;
             cursor: pointer;
-
             &:hover {
-                background: rgb(230, 230, 230);
+                opacity: 1;
             }
         }
     }

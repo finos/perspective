@@ -13,7 +13,6 @@ use crate::renderer::Renderer;
 use crate::session::Session;
 use crate::utils::*;
 
-use js_intern::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
@@ -63,10 +62,7 @@ impl CopyDropDownMenuElement {
             }
         });
 
-        let plugin = renderer.get_active_plugin().unwrap();
-        let has_render = js_sys::Reflect::has(&plugin, js_intern!("render")).unwrap();
-        let values = Rc::new(get_menu_items(has_render));
-        let props = CopyDropDownMenuProps { values, callback };
+        let props = CopyDropDownMenuProps { renderer, callback };
         let modal = ModalElement::new(dropdown, props, true);
         *modal_rc.borrow_mut() = Some(modal.clone());
         CopyDropDownMenuElement {
