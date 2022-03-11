@@ -4,7 +4,7 @@
     "description": "Perspective.js D3FC Plugin",
     "unpkg": "./dist/umd/perspective-viewer-d3fc.js",
     "jsdelivr": "./dist/umd/perspective-viewer-d3fc.js",
-    "main": "./dist/umd/perspective-viewer-d3fc.js",
+    "main": "./dist/esm/perspective-viewer-d3fc.js",
     "exports": {
         ".": {
             "require": "./dist/umd/perspective-viewer-d3fc.js",

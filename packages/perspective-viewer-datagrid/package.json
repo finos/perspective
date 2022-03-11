@@ -3,7 +3,7 @@
     "version": "1.3.4",
     "description": "Perspective datagrid plugin based on `regular-table`",
     "unpkg": "dist/umd/perspective-viewer-datagrid.js",
-    "main": "dist/umd/perspective-viewer-datagrid.js",
+    "main": "dist/esm/perspective-viewer-datagrid.js",
     "jsdelivr": "dist/umd/perspective-viewer-datagrid.js",
     "exports": {
         ".": {

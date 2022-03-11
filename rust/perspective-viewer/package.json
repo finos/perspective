@@ -8,7 +8,7 @@
     },
     "license": "Apache-2.0",
     "unpkg": "dist/umd/perspective-viewer.js",
-    "main": "dist/umd/perspective-viewer.js",
+    "main": "dist/esm/perspective-viewer.js",
     "jsdelivr": "dist/umd/perspective-viewer.js",
     "exports": {
         ".": {

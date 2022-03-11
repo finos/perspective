@@ -10,7 +10,7 @@
     "license": "Apache-2.0",
     "unpkg": "dist/umd/perspective.js",
     "jsdelivr": "dist/umd/perspective.js",
-    "main": "dist/umd/perspective.js",
+    "main": "dist/esm/perspective.js",
     "exports": {
         ".": {
             "node": "./dist/cjs/perspective.node.js",
