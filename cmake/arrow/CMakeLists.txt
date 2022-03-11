@@ -218,29 +218,29 @@ set_property(SOURCE util/io_util.cc
            APPEND_STRING
            PROPERTY COMPILE_FLAGS " -Wno-unused-macros -stdlib=libc++")
 
-# make clean will delete the generated file
-set_source_files_properties(${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/Message_generated.h PROPERTIES GENERATED TRUE)
-set_source_files_properties(${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/File_generated.h PROPERTIES GENERATED TRUE)
-set_source_files_properties(${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/Schema_generated.h PROPERTIES GENERATED TRUE)
-set_source_files_properties(${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/Tensor_generated.h PROPERTIES GENERATED TRUE)
-set_source_files_properties(${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/SparseTensor_generated.h PROPERTIES GENERATED TRUE)
-set_source_files_properties(${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/feather_generated.h PROPERTIES GENERATED TRUE)
+# # make clean will delete the generated file
+# set_source_files_properties(${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/Message_generated.h PROPERTIES GENERATED TRUE)
+# set_source_files_properties(${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/File_generated.h PROPERTIES GENERATED TRUE)
+# set_source_files_properties(${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/Schema_generated.h PROPERTIES GENERATED TRUE)
+# set_source_files_properties(${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/Tensor_generated.h PROPERTIES GENERATED TRUE)
+# set_source_files_properties(${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/SparseTensor_generated.h PROPERTIES GENERATED TRUE)
+# set_source_files_properties(${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/feather_generated.h PROPERTIES GENERATED TRUE)
 
-set(FBS_OUTPUT_FILES
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/Message_generated.h
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/File_generated.h
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/Schema_generated.h
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/Tensor_generated.h
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/SparseTensor_generated.h
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/feather_generated.h)
+# set(FBS_OUTPUT_FILES
+#     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/Message_generated.h
+#     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/File_generated.h
+#     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/Schema_generated.h
+#     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/Tensor_generated.h
+#     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/SparseTensor_generated.h
+#     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/feather_generated.h)
 
-set(FBS_SRC
-    ${CMAKE_BINARY_DIR}/arrow-src/format/Message.fbs
-    ${CMAKE_BINARY_DIR}/arrow-src/format/File.fbs
-    ${CMAKE_BINARY_DIR}/arrow-src/format/Schema.fbs
-    ${CMAKE_BINARY_DIR}/arrow-src/format/Tensor.fbs
-    ${CMAKE_BINARY_DIR}/arrow-src/format/SparseTensor.fbs
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/feather.fbs)
+# set(FBS_SRC
+#     ${CMAKE_BINARY_DIR}/arrow-src/format/Message.fbs
+#     ${CMAKE_BINARY_DIR}/arrow-src/format/File.fbs
+#     ${CMAKE_BINARY_DIR}/arrow-src/format/Schema.fbs
+#     ${CMAKE_BINARY_DIR}/arrow-src/format/Tensor.fbs
+#     ${CMAKE_BINARY_DIR}/arrow-src/format/SparseTensor.fbs
+#     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/feather.fbs)
 
 include_directories(src)
 
@@ -265,17 +265,17 @@ target_link_libraries(arrow
     ${Boost_SYSTEM_LIBRARY}
     ${ARROW_TEST_LINK_TOOLCHAIN})
 
-find_package(Flatbuffers)
+# find_package(Flatbuffers)
 
-add_custom_command(OUTPUT ${FBS_OUTPUT_FILES}
-                   COMMAND ${FLATBUFFERS_COMPILER}
-                           -c
-                           -o
-                           ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/
-                           ${FBS_SRC}
-                   DEPENDS ${FLATBUFFERS_COMPILER}
-                   COMMENT "Running flatc compiler on ${FBS_SRC}"
-                   VERBATIM)
+# add_custom_command(OUTPUT ${FBS_OUTPUT_FILES}
+#                    COMMAND ${FLATBUFFERS_COMPILER}
+#                            -c
+#                            -o
+#                            ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/
+#                            ${FBS_SRC}
+#                    DEPENDS ${FLATBUFFERS_COMPILER}
+#                    COMMENT "Running flatc compiler on ${FBS_SRC}"
+#                    VERBATIM)
 
 add_custom_target(arrow_fb_files DEPENDS ${FBS_OUTPUT_FILES})
 add_dependencies(arrow arrow_fb_files)
