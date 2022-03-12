@@ -1,6 +1,6 @@
-const esbuild = require("esbuild");
 const {NodeModulesExternal} = require("@finos/perspective-build/external");
 const {InlineCSSPlugin} = require("@finos/perspective-build/inline_css");
+const {UMDLoader} = require("@finos/perspective-build/umd");
 const {build} = require("@finos/perspective-build/build");
 
 const BUILD = [
@@ -21,8 +21,9 @@ const BUILD = [
             global: "window",
         },
         entryPoints: ["src/js/plugin.js"],
-        plugins: [InlineCSSPlugin()],
-        format: "iife",
+        globalName: "perspective_datagrid",
+        plugins: [InlineCSSPlugin(), UMDLoader()],
+        format: "cjs",
         loader: {
             ".html": "text",
         },

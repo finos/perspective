@@ -1,5 +1,6 @@
 const {NodeModulesExternal} = require("@finos/perspective-build/external");
 const {InlineCSSPlugin} = require("@finos/perspective-build/inline_css");
+const {UMDLoader} = require("@finos/perspective-build/umd");
 const {build} = require("@finos/perspective-build/build");
 
 const BUILD = [
@@ -44,8 +45,8 @@ const BUILD = [
         define: {
             global: "window",
         },
-        plugins: [InlineCSSPlugin()],
-        format: "iife",
+        plugins: [InlineCSSPlugin(), UMDLoader()],
+        format: "cjs",
         loader: {
             ".html": "text",
         },
