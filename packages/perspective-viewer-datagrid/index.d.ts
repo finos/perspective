@@ -43,6 +43,5 @@ export declare class PerspectiveViewerDatagridPluginElement extends HTMLElement 
     public clear(): Promise<void>;
     public delete(): void;
     public save(): Promise<void>;
-    public restore(token: any): Promise<void>;
-    public restore(token: any): Promise<void>;
+    public restore(token: unknown): Promise<void>;
 }
