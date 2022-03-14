@@ -31,7 +31,6 @@
                 var(--button--font-family, "inherit")
             );
             font-display: block;
-            color: #999;
             cursor: pointer;
             min-width: 12px;
             margin-right: 3px;
@@ -46,7 +45,7 @@
             }
             &:hover {
                 opacity: 1;
-                color: var(--active--color, #000);
+                color: var(--active--color, inherit);
             }
         }
 
@@ -238,11 +237,9 @@
         cursor: pointer;
         font-family: var(--button--font-family, inherit);
         font-display: block;
-        color: #999;
-
         &:hover {
             opacity: 1;
-            color: var(--active--color, #000);
+            color: var(--active--color, inherit);
         }
 
         &.desc:before {
