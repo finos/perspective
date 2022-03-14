@@ -173,13 +173,13 @@ impl Component for ExpressionEditor {
     fn view(&self, ctx: &Context<Self>) -> Html {
         let reset = ctx.link().callback(|_| ExpressionEditorMsg::Reset);
         let save = ctx.link().callback_once(|_| ExpressionEditorMsg::SaveExpr);
-        let resize_horiz = ctx.link().callback(|(width, height)| {
-            ExpressionEditorMsg::Resize(width, height - 54)
-        });
+        let resize_horiz = ctx
+            .link()
+            .callback(|(width, height)| ExpressionEditorMsg::Resize(width, height - 54));
 
-        let resize_vert = ctx.link().callback(|(width, height)| {
-            ExpressionEditorMsg::Resize(width, height - 48)
-        });
+        let resize_vert = ctx
+            .link()
+            .callback(|(width, height)| ExpressionEditorMsg::Resize(width, height - 48));
 
         let reset_size = ctx.link().callback(|()| ExpressionEditorMsg::Resize(0, 0));
 
@@ -277,8 +277,9 @@ impl ExpressionEditorState {
         }))
     }
 
-    /// Initialize the `monaco-editor` for this `<perspective-expression-editor>`.
-    /// This method should only be called once per element.
+    /// Initialize the `monaco-editor` for this
+    /// `<perspective-expression-editor>`. This method should only be called
+    /// once per element.
     async fn init_monaco_editor(self) -> Result<JsValue, JsValue> {
         let monaco = init_monaco().await.into_jserror()?;
         if let Some(ref theme) = *self.theme.borrow() {

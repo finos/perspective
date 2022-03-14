@@ -46,25 +46,18 @@ pub enum SortDir {
 }
 
 impl Display for SortDir {
-    fn fmt(
-        &self,
-        fmt: &mut std::fmt::Formatter<'_>,
-    ) -> std::result::Result<(), std::fmt::Error> {
-        write!(
-            fmt,
-            "{}",
-            match self {
-                SortDir::None => "none",
-                SortDir::Desc => "desc",
-                SortDir::Asc => "asc",
-                SortDir::ColDesc => "col desc",
-                SortDir::ColAsc => "col asc",
-                SortDir::DescAbs => "desc abs",
-                SortDir::AscAbs => "asc abs",
-                SortDir::ColDescAbs => "col desc abs",
-                SortDir::ColAscAbs => "col asc abs",
-            }
-        )
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
+        write!(fmt, "{}", match self {
+            SortDir::None => "none",
+            SortDir::Desc => "desc",
+            SortDir::Asc => "asc",
+            SortDir::ColDesc => "col desc",
+            SortDir::ColAsc => "col asc",
+            SortDir::DescAbs => "desc abs",
+            SortDir::AscAbs => "asc abs",
+            SortDir::ColDescAbs => "col desc abs",
+            SortDir::ColAscAbs => "col asc abs",
+        })
     }
 }
 

@@ -110,10 +110,7 @@ impl AggregateSelector {
         });
     }
 
-    pub fn get_dropdown_aggregates(
-        &self,
-        ctx: &Context<Self>,
-    ) -> Vec<SelectItem<Aggregate>> {
+    pub fn get_dropdown_aggregates(&self, ctx: &Context<Self>) -> Vec<SelectItem<Aggregate>> {
         let aggregates = ctx
             .props()
             .session

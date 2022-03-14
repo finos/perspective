@@ -35,10 +35,10 @@ derive_session_renderer_model!(ConfigSelectorProps);
 pub enum ConfigSelectorMsg {
     DragStart(DragEffect),
     DragEnd,
-    DragOver(usize, DropAction),
-    DragLeave(DropAction),
-    Drop(String, DropAction, DragEffect, usize),
-    Close(usize, DropAction),
+    DragOver(usize, DragTarget),
+    DragLeave(DragTarget),
+    Drop(String, DragTarget, DragEffect, usize),
+    Close(usize, DragTarget),
     SetFilterValue(usize, String),
     TransposePivots,
     ViewCreated,
@@ -47,7 +47,7 @@ pub enum ConfigSelectorMsg {
 #[derive(Clone)]
 pub struct ConfigSelector {
     filter_dropdown: FilterDropDownElement,
-    subscriptions: [Rc<Subscription>; 4],
+    _subscriptions: [Rc<Subscription>; 4],
 }
 
 struct GroupByContext {}
@@ -57,57 +57,57 @@ struct FilterDragContext {}
 
 impl DragContext<ConfigSelectorMsg> for GroupByContext {
     fn dragenter(index: usize) -> ConfigSelectorMsg {
-        ConfigSelectorMsg::DragOver(index, DropAction::GroupBy)
+        ConfigSelectorMsg::DragOver(index, DragTarget::GroupBy)
     }
 
     fn close(index: usize) -> ConfigSelectorMsg {
-        ConfigSelectorMsg::Close(index, DropAction::GroupBy)
+        ConfigSelectorMsg::Close(index, DragTarget::GroupBy)
     }
 
     fn dragleave() -> ConfigSelectorMsg {
-        ConfigSelectorMsg::DragLeave(DropAction::GroupBy)
+        ConfigSelectorMsg::DragLeave(DragTarget::GroupBy)
     }
 }
 
 impl DragContext<ConfigSelectorMsg> for SplitByContext {
     fn dragenter(index: usize) -> ConfigSelectorMsg {
-        ConfigSelectorMsg::DragOver(index, DropAction::SplitBy)
+        ConfigSelectorMsg::DragOver(index, DragTarget::SplitBy)
     }
 
     fn close(index: usize) -> ConfigSelectorMsg {
-        ConfigSelectorMsg::Close(index, DropAction::SplitBy)
+        ConfigSelectorMsg::Close(index, DragTarget::SplitBy)
     }
 
     fn dragleave() -> ConfigSelectorMsg {
-        ConfigSelectorMsg::DragLeave(DropAction::SplitBy)
+        ConfigSelectorMsg::DragLeave(DragTarget::SplitBy)
     }
 }
 
 impl DragContext<ConfigSelectorMsg> for SortDragContext {
     fn dragenter(index: usize) -> ConfigSelectorMsg {
-        ConfigSelectorMsg::DragOver(index, DropAction::Sort)
+        ConfigSelectorMsg::DragOver(index, DragTarget::Sort)
     }
 
     fn close(index: usize) -> ConfigSelectorMsg {
-        ConfigSelectorMsg::Close(index, DropAction::Sort)
+        ConfigSelectorMsg::Close(index, DragTarget::Sort)
     }
 
     fn dragleave() -> ConfigSelectorMsg {
-        ConfigSelectorMsg::DragLeave(DropAction::Sort)
+        ConfigSelectorMsg::DragLeave(DragTarget::Sort)
     }
 }
 
 impl DragContext<ConfigSelectorMsg> for FilterDragContext {
     fn dragenter(index: usize) -> ConfigSelectorMsg {
-        ConfigSelectorMsg::DragOver(index, DropAction::Filter)
+        ConfigSelectorMsg::DragOver(index, DragTarget::Filter)
     }
 
     fn close(index: usize) -> ConfigSelectorMsg {
-        ConfigSelectorMsg::Close(index, DropAction::Filter)
+        ConfigSelectorMsg::Close(index, DragTarget::Filter)
     }
 
     fn dragleave() -> ConfigSelectorMsg {
-        ConfigSelectorMsg::DragLeave(DropAction::Filter)
+        ConfigSelectorMsg::DragLeave(DragTarget::Filter)
     }
 }
 
@@ -122,26 +122,26 @@ impl Component for ConfigSelector {
 
     fn create(ctx: &Context<Self>) -> Self {
         let cb = ctx.link().callback(ConfigSelectorMsg::DragStart);
-        let drag_sub = Rc::new(ctx.props().dragdrop.add_on_drag_action(cb));
+        let drag_sub = Rc::new(ctx.props().dragdrop.dragstart_received.add_listener(cb));
 
         let cb = ctx.link().callback(|_| ConfigSelectorMsg::DragEnd);
-        let dragend_sub = Rc::new(ctx.props().dragdrop.add_on_dragend_action(cb));
+        let dragend_sub = Rc::new(ctx.props().dragdrop.dragend_received.add_listener(cb));
 
         let cb = ctx
             .link()
-            .callback(|x: (String, DropAction, DragEffect, usize)| {
+            .callback(|x: (String, DragTarget, DragEffect, usize)| {
                 ConfigSelectorMsg::Drop(x.0, x.1, x.2, x.3)
             });
-        let drop_sub = Rc::new(ctx.props().dragdrop.add_on_drop_action(cb));
+        let drop_sub = Rc::new(ctx.props().dragdrop.drop_received.add_listener(cb));
 
         let cb = ctx.link().callback(|_| ConfigSelectorMsg::ViewCreated);
-        let view_sub = Rc::new(ctx.props().session.on_view_created.add_listener(cb));
+        let view_sub = Rc::new(ctx.props().session.view_created.add_listener(cb));
 
         let filter_dropdown = FilterDropDownElement::new(ctx.props().session.clone());
-        let subscriptions = [drop_sub, view_sub, drag_sub, dragend_sub];
+        let _subscriptions = [drop_sub, view_sub, drag_sub, dragend_sub];
         ConfigSelector {
             filter_dropdown,
-            subscriptions,
+            _subscriptions,
         }
     }
 
@@ -156,7 +156,7 @@ impl Component for ConfigSelector {
                 ctx.props().dragdrop.drag_leave(action);
                 true
             }
-            ConfigSelectorMsg::Close(index, DropAction::Sort) => {
+            ConfigSelectorMsg::Close(index, DragTarget::Sort) => {
                 let ViewConfig { mut sort, .. } = ctx.props().session.get_view_config();
                 sort.remove(index as usize);
                 let sort = Some(sort);
@@ -167,9 +167,8 @@ impl Component for ConfigSelector {
 
                 true
             }
-            ConfigSelectorMsg::Close(index, DropAction::GroupBy) => {
-                let ViewConfig { mut group_by, .. } =
-                    ctx.props().session.get_view_config();
+            ConfigSelectorMsg::Close(index, DragTarget::GroupBy) => {
+                let ViewConfig { mut group_by, .. } = ctx.props().session.get_view_config();
                 group_by.remove(index as usize);
                 let group_by = Some(group_by);
                 ctx.props().update_and_render(ViewConfigUpdate {
@@ -179,9 +178,8 @@ impl Component for ConfigSelector {
 
                 true
             }
-            ConfigSelectorMsg::Close(index, DropAction::SplitBy) => {
-                let ViewConfig { mut split_by, .. } =
-                    ctx.props().session.get_view_config();
+            ConfigSelectorMsg::Close(index, DragTarget::SplitBy) => {
+                let ViewConfig { mut split_by, .. } = ctx.props().session.get_view_config();
                 split_by.remove(index as usize);
                 ctx.props().update_and_render(ViewConfigUpdate {
                     split_by: Some(split_by),
@@ -190,10 +188,9 @@ impl Component for ConfigSelector {
 
                 true
             }
-            ConfigSelectorMsg::Close(index, DropAction::Filter) => {
+            ConfigSelectorMsg::Close(index, DragTarget::Filter) => {
                 self.filter_dropdown.hide().unwrap();
-                let ViewConfig { mut filter, .. } =
-                    ctx.props().session.get_view_config();
+                let ViewConfig { mut filter, .. } = ctx.props().session.get_view_config();
                 filter.remove(index as usize);
                 ctx.props().update_and_render(ViewConfigUpdate {
                     filter: Some(filter),
@@ -204,7 +201,7 @@ impl Component for ConfigSelector {
             }
             ConfigSelectorMsg::Close(_, _) => false,
             ConfigSelectorMsg::Drop(column, action, effect, index)
-                if action != DropAction::Active =>
+                if action != DragTarget::Active =>
             {
                 let update = ctx.props().session.create_drag_drop_update(
                     column,
@@ -217,7 +214,7 @@ impl Component for ConfigSelector {
                 true
             }
             ConfigSelectorMsg::Drop(_, _, DragEffect::Move(action), _)
-                if action != DropAction::Active =>
+                if action != DragTarget::Active =>
             {
                 true
             }
@@ -236,8 +233,7 @@ impl Component for ConfigSelector {
                 true
             }
             ConfigSelectorMsg::SetFilterValue(index, input) => {
-                let ViewConfig { mut filter, .. } =
-                    ctx.props().session.get_view_config();
+                let ViewConfig { mut filter, .. } = ctx.props().session.get_view_config();
 
                 filter[index].2 = FilterTerm::Scalar(Scalar::String(input));
 
@@ -253,7 +249,8 @@ impl Component for ConfigSelector {
         }
     }
 
-    /// Should not render on change, as this component only depends on service state.
+    /// Should not render on change, as this component only depends on service
+    /// state.
     fn changed(&mut self, _ctx: &Context<Self>) -> bool {
         false
     }
@@ -279,14 +276,14 @@ impl Component for ConfigSelector {
                 <GroupBySelector
                     name="group_by"
                     parent={ ctx.link().clone() }
-                    is_dragover={ ctx.props().dragdrop.is_dragover(DropAction::GroupBy) }
+                    is_dragover={ ctx.props().dragdrop.is_dragover(DragTarget::GroupBy) }
                     dragdrop={ ctx.props().dragdrop.clone() }>
                     {
                         for config.group_by.iter().map(|group_by| {
                             html_nested! {
                                 <PivotItem
                                     dragdrop={ ctx.props().dragdrop.clone() }
-                                    action={ DropAction::GroupBy }
+                                    action={ DragTarget::GroupBy }
                                     column={ group_by.clone() }>
                                 </PivotItem>
                             }
@@ -305,14 +302,14 @@ impl Component for ConfigSelector {
                 <SplitBySelector
                     name="split_by"
                     parent={ ctx.link().clone() }
-                    is_dragover={ ctx.props().dragdrop.is_dragover(DropAction::SplitBy) }
+                    is_dragover={ ctx.props().dragdrop.is_dragover(DragTarget::SplitBy) }
                     dragdrop={ ctx.props().dragdrop.clone() }>
                     {
                         for config.split_by.iter().map(|split_by| {
                             html_nested! {
                                 <PivotItem
                                     dragdrop={ ctx.props().dragdrop.clone() }
-                                    action={ DropAction::SplitBy }
+                                    action={ DragTarget::SplitBy }
                                     column={ split_by.clone() }>
                                 </PivotItem>
                             }
@@ -325,7 +322,7 @@ impl Component for ConfigSelector {
                     allow_duplicates=true
                     parent={ ctx.link().clone() }
                     dragdrop={ ctx.props().dragdrop.clone() }
-                    is_dragover={ ctx.props().dragdrop.is_dragover(DropAction::Sort).map(|(index, name)| {
+                    is_dragover={ ctx.props().dragdrop.is_dragover(DragTarget::Sort).map(|(index, name)| {
                         (index, Sort(name, SortDir::Asc))
                     }) }>
                     {
@@ -348,7 +345,7 @@ impl Component for ConfigSelector {
                     allow_duplicates=true
                     parent={ ctx.link().clone() }
                     dragdrop={ ctx.props().dragdrop.clone() }
-                    is_dragover={ ctx.props().dragdrop.is_dragover(DropAction::Filter).map(|(index, name)| {
+                    is_dragover={ ctx.props().dragdrop.is_dragover(DragTarget::Filter).map(|(index, name)| {
                         (index, Filter(name, FilterOp::EQ, FilterTerm::Scalar(Scalar::Null)))
                     }) }>
                     {

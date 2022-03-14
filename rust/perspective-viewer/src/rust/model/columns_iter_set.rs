@@ -14,8 +14,8 @@ use crate::*;
 use itertools::Itertools;
 use std::collections::HashSet;
 
-/// The possible states of a column (row) in the active columns list, including the
-/// `Option<String>` label type.
+/// The possible states of a column (row) in the active columns list, including
+/// the `Option<String>` label type.
 #[derive(Clone, PartialEq)]
 pub enum ActiveColumnState {
     Column(Label, String),
@@ -43,7 +43,7 @@ impl<'a> ColumnsIteratorSet<'a> {
         renderer: &'a Renderer,
         dragdrop: &DragDrop,
     ) -> ColumnsIteratorSet<'a> {
-        let is_dragover_column = dragdrop.is_dragover(DropAction::Active);
+        let is_dragover_column = dragdrop.is_dragover(DragTarget::Active);
         ColumnsIteratorSet {
             config,
             session,
@@ -53,8 +53,8 @@ impl<'a> ColumnsIteratorSet<'a> {
         }
     }
 
-    /// Generate an iterator for active columns, which are represented as `Option`
-    /// for dragover and missing columns.
+    /// Generate an iterator for active columns, which are represented as
+    /// `Option` for dragover and missing columns.
     pub fn active(&'a self) -> impl Iterator<Item = ActiveColumnState> + 'a {
         let min_cols = self
             .renderer
@@ -85,17 +85,16 @@ impl<'a> ColumnsIteratorSet<'a> {
                     .unwrap_or_default();
 
                 if is_to_swap || is_from_required {
-                    let all_columns =
-                        self.config.columns.iter().filter_map(move |x| match x {
-                            Some(x) if x == from_column => {
-                                if is_to_empty && !is_from_swap {
-                                    None
-                                } else {
-                                    Some(to_column.unwrap_or(&None))
-                                }
+                    let all_columns = self.config.columns.iter().filter_map(move |x| match x {
+                        Some(x) if x == from_column => {
+                            if is_to_empty && !is_from_swap {
+                                None
+                            } else {
+                                Some(to_column.unwrap_or(&None))
                             }
-                            x => Some(x),
-                        });
+                        }
+                        x => Some(x),
+                    });
 
                     let before_cols = all_columns
                         .clone()
@@ -113,17 +112,16 @@ impl<'a> ColumnsIteratorSet<'a> {
                         _ => *to_index + 1,
                     };
 
-                    let all_columns =
-                        self.config.columns.iter().filter_map(move |x| match x {
-                            Some(x) if x == from_column => {
-                                if !is_from_swap {
-                                    None
-                                } else {
-                                    Some(&None)
-                                }
+                    let all_columns = self.config.columns.iter().filter_map(move |x| match x {
+                        Some(x) if x == from_column => {
+                            if !is_from_swap {
+                                None
+                            } else {
+                                Some(&None)
                             }
-                            x => Some(x),
-                        });
+                        }
+                        x => Some(x),
+                    });
 
                     let before_cols = all_columns
                         .clone()
@@ -137,8 +135,7 @@ impl<'a> ColumnsIteratorSet<'a> {
                     ))
                 }
             }
-            _ => self
-                .to_active_column_state(Box::new(self.config.columns.iter().map(Some))),
+            _ => self.to_active_column_state(Box::new(self.config.columns.iter().map(Some))),
         }
     }
 
@@ -146,13 +143,7 @@ impl<'a> ColumnsIteratorSet<'a> {
         &self,
         iter: Box<dyn Iterator<Item = Option<&'a Option<String>>> + 'a>,
     ) -> impl Iterator<Item = ActiveColumnState> + 'a {
-        let named_columns = self
-            .renderer
-            .metadata()
-            .names
-            .clone()
-            .unwrap_or_else(std::vec::Vec::new);
-
+        let named_columns = self.renderer.metadata().names.clone().unwrap_or_default();
         iter.pad_using(named_columns.len(), |_| Some(&None))
             .enumerate()
             .map(move |(idx, x)| {
@@ -170,8 +161,8 @@ impl<'a> ColumnsIteratorSet<'a> {
         self.order_columns(self.metadata.get_expression_columns())
     }
 
-    /// Generate an iterator for inactive columns, which also shows the columns in
-    /// sorted order by type, then name.
+    /// Generate an iterator for inactive columns, which also shows the columns
+    /// in sorted order by type, then name.
     pub fn inactive(&'a self) -> impl Iterator<Item = OrderedColumn<'a>> {
         self.order_columns(self.metadata.get_table_columns().into_iter().flatten())
     }
@@ -191,9 +182,7 @@ impl<'a> ColumnsIteratorSet<'a> {
         let col_set = self.config.columns.iter().collect::<HashSet<_>>();
 
         let mut filtered = values
-            .filter_map(move |name| {
-                self.to_ordered_column(name, is_drag_active, &col_set)
-            })
+            .filter_map(move |name| self.to_ordered_column(name, is_drag_active, &col_set))
             .collect::<Vec<_>>();
 
         filtered.sort();

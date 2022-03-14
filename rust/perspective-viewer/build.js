@@ -4,6 +4,7 @@ const util = require("util");
 const fs = require("fs");
 const fflate = require("fflate");
 
+const {download_wasm_opt} = require("@finos/perspective-build/rust_wasm");
 const {IgnoreCSSPlugin} = require("@finos/perspective-build/ignore_css");
 const {IgnoreFontsPlugin} = require("@finos/perspective-build/ignore_fonts");
 const {WasmPlugin} = require("@finos/perspective-build/wasm");
@@ -124,22 +125,58 @@ const INHERIT = {
 
 async function build_all() {
     await Promise.all(PREBUILD.map(build)).catch(() => process.exit(1));
+    const debug = process.env.PSP_DEBUG ? "--debug" : "--release";
 
-    const debug = process.env.PSP_DEBUG ? "--debug" : "";
+    // Compile rust
     execSync(
-        `CARGO_TARGET_DIR=./build wasm-pack build ${debug} --out-dir dist/pkg --target web`,
+        `CARGO_TARGET_DIR=./build cargo +nightly build ${debug} --lib --target wasm32-unknown-unknown -Z build-std=std,panic_abort -Z build-std-features=panic_immediate_abort`,
         INHERIT
     );
 
+    // Find `wasm-bindgen` CLI
+    try {
+        execSync(`which wasm-bindgen`, INHERIT);
+    } catch (e) {
+        console.log(`No \`wasm-bindgen-cli\` found, installing`);
+        execSync(`cargo install wasm-bindgen-cli --version 0.2.74`, INHERIT);
+    }
+
+    // Generate wasm-bindgen bindings
+    const UNOPT_PATH = `build/wasm32-unknown-unknown/release/perspective_viewer.wasm`;
+    execSync(
+        `wasm-bindgen ${UNOPT_PATH} --out-dir dist/pkg --typescript --target web`,
+        INHERIT
+    );
+
+    // Find `wasm-opt`
+    const WASM_OPT = `../../tools/perspective-build/lib/wasm-opt`;
+    if (!fs.existsSync(WASM_OPT)) {
+        console.log(`No \`wasm-opt\` found, installing`);
+        await download_wasm_opt();
+    }
+
+    // Optimize wasm
+    const OPT_PATH = `dist/pkg/perspective_viewer_bg.wasm`;
+    const WASM_OPT_OPTIONS = [
+        `-lmu`,
+        `--dce`,
+        `--strip-producers`,
+        `--strip-target-features`,
+        `--strip-debug`,
+    ].join(" ");
+
+    execSync(
+        `${WASM_OPT} -Oz ${WASM_OPT_OPTIONS} -o wasm-opt.wasm ${OPT_PATH}`,
+        INHERIT
+    );
+    execSync(`mv wasm-opt.wasm ${OPT_PATH}`, INHERIT);
+
+    // Compress wasm
     const wasm = fs.readFileSync("dist/pkg/perspective_viewer_bg.wasm");
-    const compressed = fflate.compressSync(wasm);
+    const compressed = fflate.compressSync(wasm, {level: 9});
     fs.writeFileSync("dist/pkg/perspective_viewer_bg.wasm", compressed);
 
-    // Remove wasm-pack artifacts
-    fs.rmSync("dist/pkg/package.json");
-    fs.rmSync("dist/pkg/.gitignore");
-    fs.rmSync("dist/pkg/README.md");
-
+    // JavaScript
     execSync("yarn tsc --project tsconfig.json", INHERIT);
 
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));

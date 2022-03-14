@@ -25,7 +25,6 @@ use yew::prelude::*;
 #[derive(Clone)]
 pub struct CopyDropDownMenuElement {
     modal: ModalElement<CopyDropDownMenu>,
-    target: Rc<RefCell<Option<HtmlElement>>>,
 }
 
 impl ResizableMessage for <CopyDropDownMenu as Component>::Message {
@@ -42,8 +41,7 @@ impl CopyDropDownMenuElement {
             .unwrap()
             .unchecked_into::<HtmlElement>();
 
-        let modal_rc: Rc<RefCell<Option<ModalElement<CopyDropDownMenu>>>> =
-            Default::default();
+        let modal_rc: Rc<RefCell<Option<ModalElement<CopyDropDownMenu>>>> = Default::default();
 
         let callback = Callback::from({
             let modal_rc = modal_rc.clone();
@@ -54,10 +52,10 @@ impl CopyDropDownMenuElement {
                 let modal = modal_rc.borrow().clone().unwrap();
                 spawn_local(async move {
                     let result = copy_task.await;
-                    crate::js_log_maybe! {
+                    crate::js_log_maybe!({
                         result?;
                         modal.hide()?;
-                    }
+                    })
                 })
             }
         });
@@ -65,10 +63,7 @@ impl CopyDropDownMenuElement {
         let props = CopyDropDownMenuProps { renderer, callback };
         let modal = ModalElement::new(dropdown, props, true);
         *modal_rc.borrow_mut() = Some(modal.clone());
-        CopyDropDownMenuElement {
-            modal,
-            target: Default::default(),
-        }
+        CopyDropDownMenuElement { modal }
     }
 
     pub fn open(&self, target: HtmlElement) {

@@ -70,13 +70,13 @@ pub enum ColumnSelectorMsg {
     HoverActiveIndex(Option<usize>),
     Drag(DragEffect),
     DragEnd,
-    Drop((String, DropAction, DragEffect, usize)),
+    Drop((String, DragTarget, DragEffect, usize)),
     OpenExpressionEditor(bool),
     SaveExpression(JsValue),
 }
 
-/// A `ColumnSelector` controls the `columns` field of the `ViewConfig`, deriving its
-/// options from the table columns and `ViewConfig` expressions.
+/// A `ColumnSelector` controls the `columns` field of the `ViewConfig`,
+/// deriving its options from the table columns and `ViewConfig` expressions.
 pub struct ColumnSelector {
     _subscriptions: [Subscription; 5],
     add_expression_ref: NodeRef,
@@ -91,27 +91,27 @@ impl Component for ColumnSelector {
     fn create(ctx: &Context<Self>) -> Self {
         let table_sub = {
             let cb = ctx.link().callback(|_| ColumnSelectorMsg::TableLoaded);
-            ctx.props().session.on_table_loaded.add_listener(cb)
+            ctx.props().session.table_loaded.add_listener(cb)
         };
 
         let view_sub = {
             let cb = ctx.link().callback(|_| ColumnSelectorMsg::ViewCreated);
-            ctx.props().session.on_view_created.add_listener(cb)
+            ctx.props().session.view_created.add_listener(cb)
         };
 
         let drop_sub = {
             let cb = ctx.link().callback(ColumnSelectorMsg::Drop);
-            ctx.props().dragdrop.add_on_drop_action(cb)
+            ctx.props().dragdrop.drop_received.add_listener(cb)
         };
 
         let drag_sub = {
             let cb = ctx.link().callback(ColumnSelectorMsg::Drag);
-            ctx.props().dragdrop.add_on_drag_action(cb)
+            ctx.props().dragdrop.dragstart_received.add_listener(cb)
         };
 
         let dragend_sub = {
             let cb = ctx.link().callback(|_| ColumnSelectorMsg::DragEnd);
-            ctx.props().dragdrop.add_on_dragend_action(cb)
+            ctx.props().dragdrop.dragend_received.add_listener(cb)
         };
 
         let named = maybe! {
@@ -133,7 +133,7 @@ impl Component for ColumnSelector {
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            ColumnSelectorMsg::Drag(DragEffect::Move(DropAction::Active)) => false,
+            ColumnSelectorMsg::Drag(DragEffect::Move(DragTarget::Active)) => false,
             ColumnSelectorMsg::Drag(_) => true,
             ColumnSelectorMsg::DragEnd => true,
             ColumnSelectorMsg::TableLoaded => true,
@@ -157,32 +157,34 @@ impl Component for ColumnSelector {
                     .map(|x| x.is_some())
                     .unwrap_or_default();
 
-                let from_index = ctx.props().dragdrop.get_drag_column().and_then(|x| {
-                    config.columns.iter().position(|z| z.as_ref() == Some(&x))
-                });
+                let from_index = ctx
+                    .props()
+                    .dragdrop
+                    .get_drag_column()
+                    .and_then(|x| config.columns.iter().position(|z| z.as_ref() == Some(&x)));
 
                 if min_cols
                     .and_then(|x| from_index.map(|from_index| from_index < x))
                     .unwrap_or_default()
                     && is_to_empty
                 {
-                    ctx.props().dragdrop.drag_leave(DropAction::Active);
+                    ctx.props().dragdrop.drag_leave(DragTarget::Active);
                     true
                 } else {
                     ctx.props()
                         .dragdrop
-                        .drag_enter(DropAction::Active, to_index)
+                        .drag_enter(DragTarget::Active, to_index)
                 }
             }
             ColumnSelectorMsg::HoverActiveIndex(_) => {
-                ctx.props().dragdrop.drag_leave(DropAction::Active);
+                ctx.props().dragdrop.drag_leave(DragTarget::Active);
                 true
             }
-            ColumnSelectorMsg::Drop((column, DropAction::Active, effect, index)) => {
+            ColumnSelectorMsg::Drop((column, DragTarget::Active, effect, index)) => {
                 let update = ctx.props().session.create_drag_drop_update(
                     column,
                     index,
-                    DropAction::Active,
+                    DragTarget::Active,
                     effect,
                     &ctx.props().renderer.metadata(),
                 );
@@ -190,12 +192,7 @@ impl Component for ColumnSelector {
                 ctx.props().update_and_render(update);
                 true
             }
-            ColumnSelectorMsg::Drop((
-                _,
-                _,
-                DragEffect::Move(DropAction::Active),
-                _,
-            )) => true,
+            ColumnSelectorMsg::Drop((_, _, DragEffect::Move(DragTarget::Active), _)) => true,
             ColumnSelectorMsg::Drop((_, _, _, _)) => true,
             ColumnSelectorMsg::SaveExpression(expression) => {
                 ctx.props().save_expr(&expression);
@@ -230,7 +227,7 @@ impl Component for ColumnSelector {
             });
 
             let dragover = Callback::from(|_event: DragEvent| _event.prevent_default());
-            let dragenter = ctx.link().callback(move |event: DragEvent| {
+            let ondragenter = ctx.link().callback(move |event: DragEvent| {
                 // Safari does not set `relatedTarget` so this event must be allowed to
                 // bubble so we can count entry/exit stacks to determine true
                 // `"dragleave"`.
@@ -259,7 +256,7 @@ impl Component for ColumnSelector {
                 move |_| dragdrop.notify_drop()
             });
 
-            let dragend = Callback::from({
+            let ondragend = Callback::from({
                 let dragdrop = ctx.props().dragdrop.clone();
                 move |_event| dragdrop.drag_end()
             });
@@ -268,7 +265,7 @@ impl Component for ColumnSelector {
                 ColumnSelectorMsg::OpenExpressionEditor(event.shift_key())
             });
 
-            let select = ctx.link().callback(|()| ColumnSelectorMsg::ViewCreated);
+            let onselect = ctx.link().callback(|()| ColumnSelectorMsg::ViewCreated);
             let mut active_classes = classes!();
             if ctx.props().dragdrop.get_drag_column().is_some() {
                 active_classes.push("dragdrop-highlight");
@@ -278,48 +275,58 @@ impl Component for ColumnSelector {
                 active_classes.push("collapse");
             }
 
-            let active_columns =
-                columns_iter.active().enumerate().map(|(idx, name)| {
-                    ActiveColumnProps {
-                        idx,
-                        name: name.clone(),
-                        dragdrop: ctx.props().dragdrop.clone(),
-                        session: ctx.props().session.clone(),
-                        renderer: ctx.props().renderer.clone(),
-                        ondragenter: dragenter.clone(),
-                        ondragend: dragend.clone(),
-                        onselect: select.clone(),
-                        is_pivot,
-                    }
-                });
+            let active_columns = columns_iter.active().enumerate().map(|(idx, name)| {
+                clone!(
+                    ctx.props().dragdrop,
+                    ctx.props().renderer,
+                    ctx.props().session,
+                    ondragenter,
+                    ondragend,
+                    onselect
+                );
+
+                ActiveColumnProps {
+                    idx,
+                    name,
+                    dragdrop,
+                    session,
+                    renderer,
+                    ondragenter,
+                    ondragend,
+                    onselect,
+                    is_pivot,
+                }
+            });
 
             let expression_columns =
-                columns_iter.expression().enumerate().map(|(idx, vc)| {
-                    InactiveColumnProps {
+                columns_iter
+                    .expression()
+                    .enumerate()
+                    .map(|(idx, vc)| InactiveColumnProps {
                         idx,
                         visible: vc.is_visible,
                         name: vc.name.to_owned(),
                         dragdrop: ctx.props().dragdrop.clone(),
                         session: ctx.props().session.clone(),
                         renderer: ctx.props().renderer.clone(),
-                        onselect: select.clone(),
-                        ondragend: dragend.clone(),
-                    }
-                });
+                        onselect: onselect.clone(),
+                        ondragend: ondragend.clone(),
+                    });
 
             let inactive_columns =
-                columns_iter.inactive().enumerate().map(|(idx, vc)| {
-                    InactiveColumnProps {
+                columns_iter
+                    .inactive()
+                    .enumerate()
+                    .map(|(idx, vc)| InactiveColumnProps {
                         idx,
                         visible: vc.is_visible,
                         name: vc.name.to_owned(),
                         dragdrop: ctx.props().dragdrop.clone(),
                         session: ctx.props().session.clone(),
                         renderer: ctx.props().renderer.clone(),
-                        onselect: select.clone(),
-                        ondragend: dragend.clone(),
-                    }
-                });
+                        onselect: onselect.clone(),
+                        ondragend: ondragend.clone(),
+                    });
 
             html! {
                 <>

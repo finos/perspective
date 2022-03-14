@@ -39,9 +39,9 @@ impl Drop for RenderTimerType {
 }
 
 impl Default for RenderTimerType {
-    fn default() -> RenderTimerType {
+    fn default() -> Self {
         let deque: Rc<RefCell<Option<VecDeque<f64>>>> = Default::default();
-        RenderTimerType::Moving(register_on_visibility_change(deque.clone()), deque)
+        Self::Moving(register_on_visibility_change(deque.clone()), deque)
     }
 }
 
@@ -57,10 +57,7 @@ fn register_on_visibility_change(
     let closure = fun.into_closure();
     let document = window().unwrap().document().unwrap();
     document
-        .add_event_listener_with_callback(
-            "visibilitychange",
-            closure.as_ref().unchecked_ref(),
-        )
+        .add_event_listener_with_callback("visibilitychange", closure.as_ref().unchecked_ref())
         .unwrap();
 
     closure

@@ -81,8 +81,8 @@ impl<T> RadioListProps<T>
 where
     T: Clone + Display + FromStr + PartialEq + 'static,
 {
-    /// Validate a `RadioListProps`'s dimensions to make sure the no runtime errors
-    /// can occur when looking up values.
+    /// Validate a `RadioListProps`'s dimensions to make sure the no runtime
+    /// errors can occur when looking up values.
     fn validate(&self) {
         assert_eq!(self.children.len(), self.values.len());
         assert!(self.values.iter().any(|x| *x == self.selected));
@@ -176,14 +176,7 @@ where
             .iter()
             .enumerate()
             .map(|(idx, child)| {
-                self.render_item(
-                    ctx,
-                    idx,
-                    child,
-                    &class,
-                    on_change.clone(),
-                    &self.selected,
-                )
+                self.render_item(ctx, idx, child, &class, on_change.clone(), &self.selected)
             })
             .collect::<Html>()
     }

@@ -101,14 +101,13 @@ pub async fn test_plugin_selected() {
     PLUGIN_REGISTRY.register_plugin("perspective-viewer-debug4");
 
     let link: WeakScope<PluginSelector> = WeakScope::default();
-    let result: Rc<RefCell<Option<JsPerspectiveViewerPlugin>>> =
-        Rc::new(RefCell::new(None));
+    let result: Rc<RefCell<Option<JsPerspectiveViewerPlugin>>> = Rc::new(RefCell::new(None));
     let document = window().unwrap().document().unwrap();
     let elem: HtmlElement = document.create_element("div").unwrap().unchecked_into();
     let session = Session::default();
     session.set_table(get_mock_table().await).await.unwrap();
     let renderer = Renderer::new(elem, session.clone());
-    let _sub = renderer.on_plugin_changed.add_listener({
+    let _sub = renderer.plugin_changed.add_listener({
         clone!(result);
         move |val| {
             *result.borrow_mut() = Some(val);

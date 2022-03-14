@@ -13,8 +13,8 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::future_to_promise;
 
 /// Same as `future_to_promise`, except this version will catch `"View is not
-/// initialzied"` errors thrown from disposed Perspective objects without causing Rust
-/// `abort()`s.
+/// initialzied"` errors thrown from disposed Perspective objects without
+/// causing Rust `abort()`s.
 ///
 /// # Arguments
 /// * `f` - a `Future` to convert to a `Promise` and execute.
@@ -40,9 +40,7 @@ pub fn ignore_view_delete(f: JsValue) -> Result<JsValue, JsValue> {
             }
         }
         _ => match f.as_string() {
-            Some(x) if x == "View method cancelled" => {
-                Ok(JsValue::from("View method cancelled"))
-            }
+            Some(x) if x == "View method cancelled" => Ok(JsValue::from("View method cancelled")),
             Some(_) => Err(f),
             _ => {
                 if js_sys::Reflect::get(&f, js_intern!("message"))

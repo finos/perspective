@@ -8,7 +8,6 @@
 
 use crate::components::viewer::*;
 use crate::config::*;
-use crate::custom_elements::expression_editor::ExpressionEditorElement;
 use crate::custom_events::*;
 use crate::dragdrop::*;
 use crate::js::perspective::*;
@@ -94,11 +93,10 @@ impl ResizeObserverState {
             let content_height = content.height().floor() as i32;
             let resized = self.width != content_width || self.height != content_height;
             if resized && is_visible {
-                let renderer = self.renderer.clone();
-                let callback = self.on_resize.clone();
+                clone!(self.on_resize, self.renderer);
                 let _ = promisify_ignore_view_delete(async move {
                     renderer.resize().await?;
-                    callback.emit(());
+                    on_resize.emit(());
                     Ok(JsValue::UNDEFINED)
                 });
             }
@@ -109,18 +107,33 @@ impl ResizeObserverState {
     }
 }
 
-/// A `customElements` external API.
+/// A `customElements` class which encapsulates both the `<perspective-viewer>`
+/// public API, as well as the Rust component state.
+///
+///     ┌─────────────────────────────────────────┐
+///     │ Custom Element                          │
+///     │┌──────────────┐┌───────────────────────┐│
+///     ││ yew::app     ││ Model                 ││
+///     ││┌────────────┐││┌─────────┐┌──────────┐││
+///     │││ Components ││││ Session ││ Renderer │││
+///     ││└────────────┘│││┌───────┐││┌────────┐│││
+///     │└──────────────┘│││ Table ││││ Plugin ││││
+///     │┌──────────────┐││└───────┘││└────────┘│││
+///     ││ HtmlElement  │││┌───────┐│└──────────┘││
+///     │└──────────────┘│││ View  ││┌──────────┐││
+///     │                ││└───────┘││ DragDrop │││
+///     │                │└─────────┘└──────────┘││
+///     │                └───────────────────────┘│
+///     └─────────────────────────────────────────┘
 #[wasm_bindgen]
-#[derive(Clone)]
 pub struct PerspectiveViewerElement {
     elem: HtmlElement,
     root: Rc<RefCell<Option<AppHandle<PerspectiveViewer>>>>,
+    resize_handle: Rc<RefCell<Option<ResizeObserverHandle>>>,
     session: Session,
     renderer: Renderer,
-    events: CustomEvents,
-    subscriptions: Rc<[Subscription; 2]>,
-    expression_editor: Rc<RefCell<Option<ExpressionEditorElement>>>,
-    resize_handle: Rc<RefCell<Option<ResizeObserverHandle>>>,
+    _events: CustomEvents,
+    _subscriptions: Rc<[Subscription; 2]>,
 }
 
 derive_session_renderer_model!(PerspectiveViewerElement);
@@ -164,7 +177,7 @@ impl PerspectiveViewerElement {
         let root = yew::start_app_with_props_in_element(shadow_root, props);
 
         // Create callbacks
-        let update_sub = session.on_update.add_listener({
+        let update_sub = session.table_updated.add_listener({
             clone!(renderer, session);
             move |_| {
                 clone!(renderer, session);
@@ -176,20 +189,19 @@ impl PerspectiveViewerElement {
 
         let limit_sub = {
             let callback = root.callback(|x| Msg::RenderLimits(Some(x)));
-            renderer.on_limits_changed.add_listener(callback)
+            renderer.limits_changed.add_listener(callback)
         };
 
-        let events = CustomEvents::new(&elem, &session, &renderer);
+        let _events = CustomEvents::new(&elem, &session, &renderer);
         let resize_handle = ResizeObserverHandle::new(&elem, &renderer, &root);
         PerspectiveViewerElement {
             elem,
             root: Rc::new(RefCell::new(Some(root))),
             session,
             renderer,
-            expression_editor: Rc::new(RefCell::new(None)),
-            events,
-            subscriptions: Rc::new([update_sub, limit_sub]),
             resize_handle: Rc::new(RefCell::new(Some(resize_handle))),
+            _events,
+            _subscriptions: Rc::new([update_sub, limit_sub]),
         }
     }
 
@@ -210,8 +222,7 @@ impl PerspectiveViewerElement {
 
         self.session.update_view_config(config);
 
-        let session = self.session.clone();
-        let renderer = self.renderer.clone();
+        clone!(self.renderer, self.session);
         future_to_promise(async move {
             renderer
                 .draw(async {
@@ -231,8 +242,7 @@ impl PerspectiveViewerElement {
     /// callee).  Allowing a `<perspective-viewer>` to be garbage-collected
     /// without calling `delete()` will leak WASM memory.
     pub fn js_delete(&mut self) -> js_sys::Promise {
-        let renderer = self.renderer.clone();
-        let session = self.session.clone();
+        clone!(self.renderer, self.session);
         let root = self.root.clone();
         future_to_promise(self.renderer.clone().with_lock(async move {
             renderer.delete()?;
@@ -259,7 +269,7 @@ impl PerspectiveViewerElement {
     ///
     /// # Arguments
     /// - `wait_for_table` whether to wait for `load()` to be called, or fail
-    ///   immediately if `load()` has not yet been called.  
+    ///   immediately if `load()` has not yet been called.
     pub fn js_get_table(&self, wait_for_table: bool) -> js_sys::Promise {
         let session = self.session.clone();
         future_to_promise(async move {
@@ -269,7 +279,7 @@ impl PerspectiveViewerElement {
                 None => {
                     let (sender, receiver) = channel::<()>();
                     let sender = RefCell::new(Some(sender));
-                    let _sub = session.on_table_loaded.add_listener(move |x| {
+                    let _sub = session.table_loaded.add_listener(move |x| {
                         sender.borrow_mut().take().unwrap().send(x).unwrap()
                     });
 
@@ -281,15 +291,14 @@ impl PerspectiveViewerElement {
     }
 
     pub fn js_flush(&self) -> js_sys::Promise {
-        let session = self.session.clone();
-        let renderer = self.renderer.clone();
+        clone!(self.renderer, self.session);
         promisify_ignore_view_delete(async move {
             if session.js_get_table().is_none() {
                 let (sender, receiver) = channel::<()>();
                 let sender = RefCell::new(Some(sender));
-                let _sub = session.on_table_loaded.add_listener(move |x| {
-                    sender.borrow_mut().take().unwrap().send(x).unwrap()
-                });
+                let _sub = session
+                    .table_loaded
+                    .add_listener(move |x| sender.borrow_mut().take().unwrap().send(x).unwrap());
 
                 receiver.await.into_jserror()?;
                 let _ = session
@@ -307,9 +316,7 @@ impl PerspectiveViewerElement {
     /// - `update` The config to restore to, as returned by `.save()` in either
     ///   "json", "string" or "arraybuffer" format.
     pub fn js_restore(&self, update: JsValue) -> js_sys::Promise {
-        let session = self.session.clone();
-        let renderer = self.renderer.clone();
-        let root = self.root.clone();
+        clone!(self.session, self.renderer, self.root);
         promisify_ignore_view_delete(async move {
             let ViewerConfigUpdate {
                 plugin,
@@ -343,8 +350,7 @@ impl PerspectiveViewerElement {
 
             let plugin_changed = renderer.update_plugin(plugin)?;
             if plugin_changed {
-                session
-                    .set_update_column_defaults(&mut view_config, &renderer.metadata());
+                session.set_update_column_defaults(&mut view_config, &renderer.metadata());
             }
 
             session.update_view_config(view_config);
@@ -380,16 +386,16 @@ impl PerspectiveViewerElement {
         })
     }
 
-    /// Save this element to serialized state object, one which can be restored via
-    /// the `.restore()` method.
+    /// Save this element to serialized state object, one which can be restored
+    /// via the `.restore()` method.
     ///
     /// # Arguments
     /// - `format` Supports "json" (default), "arraybuffer" or "string".
     pub fn js_save(&self, format: JsValue) -> js_sys::Promise {
         let viewer_config_task = self.get_viewer_config();
         future_to_promise(async move {
-            let format = JsValue::into_serde::<Option<ViewerConfigEncoding>>(&format)
-                .into_jserror()?;
+            let format =
+                JsValue::into_serde::<Option<ViewerConfigEncoding>>(&format).into_jserror()?;
             let viewer_config = viewer_config_task.await?;
             viewer_config.encode(&format)
         })
@@ -398,8 +404,8 @@ impl PerspectiveViewerElement {
     /// Download this viewer's `View` or `Table` data as a `.csv` file.
     ///
     /// # Arguments
-    /// - `flat` Whether to use the current `ViewConfig` to generate this data, or use
-    ///   the default.
+    /// - `flat` Whether to use the current `ViewConfig` to generate this data,
+    ///   or use the default.
     pub fn js_download(&self, flat: bool) -> js_sys::Promise {
         let session = self.session.clone();
         future_to_promise(async move {
@@ -409,11 +415,12 @@ impl PerspectiveViewerElement {
         })
     }
 
-    /// Copy this viewer's `View` or `Table` data as CSV to the system clipboard.
+    /// Copy this viewer's `View` or `Table` data as CSV to the system
+    /// clipboard.
     ///
     /// # Arguments
-    /// - `flat` Whether to use the current `ViewConfig` to generate this data, or use
-    ///   the default.
+    /// - `flat` Whether to use the current `ViewConfig` to generate this data,
+    ///   or use the default.
     pub fn js_copy(&self, flat: bool) -> js_sys::Promise {
         let method = if flat {
             ExportMethod::CsvAll
@@ -450,7 +457,9 @@ impl PerspectiveViewerElement {
     /// Recalculate the viewer's dimensions and redraw.
     pub fn js_resize(&self, force: bool) -> js_sys::Promise {
         if !force && self.resize_handle.borrow().is_some() {
-            let msg: JsValue = "`notifyResize(false)` called, disabling auto-size.  It can be re-enabled with `setAutoSize(true)`.".into();
+            let msg: JsValue = "`notifyResize(false)` called, disabling auto-size.  It can be \
+                                re-enabled with `setAutoSize(true)`."
+                .into();
             web_sys::console::warn_1(&msg);
             *self.resize_handle.borrow_mut() = None;
         }
@@ -489,8 +498,7 @@ impl PerspectiveViewerElement {
 
     /// Restyle all plugins from current document.
     pub fn js_restyle_element(&self) -> js_sys::Promise {
-        let renderer = self.renderer.clone();
-        let session = self.session.clone();
+        clone!(self.renderer, self.session);
         promisify_ignore_view_delete(async move {
             let view = session.get_view().into_jserror()?;
             renderer.restyle_all(&view).await
@@ -499,8 +507,7 @@ impl PerspectiveViewerElement {
 
     /// Set the available theme names available in the status bar UI.
     pub fn js_reset_themes(&self, themes: JsValue) -> js_sys::Promise {
-        let renderer = self.renderer.clone();
-        let session = self.session.clone();
+        clone!(self.renderer, self.session);
         promisify_ignore_view_delete(async move {
             let themes: Option<Vec<String>> = themes.into_serde().into_jserror()?;
             let theme = renderer.get_theme_name().await;
@@ -520,16 +527,17 @@ impl PerspectiveViewerElement {
     }
 
     /// Determines the render throttling behavior. Can be an integer, for
-    /// millisecond window to throttle render event; or, if `None`, adaptive throttling
-    /// will be calculated from the measured render time of the last 5 frames.
+    /// millisecond window to throttle render event; or, if `None`, adaptive
+    /// throttling will be calculated from the measured render time of the
+    /// last 5 frames.
     ///
     /// # Examples
     /// // Only draws at most 1 frame/sec.
     /// viewer.js_set_throttle(Some(1000_f64));
     ///
     /// # Arguments
-    /// - `throttle` The throttle rate - milliseconds (f64), or `None` for adaptive
-    ///   throttling.
+    /// - `throttle` The throttle rate - milliseconds (f64), or `None` for
+    ///   adaptive throttling.
     pub fn js_set_throttle(&mut self, val: Option<f64>) {
         self.renderer.set_throttle(val);
     }
@@ -537,11 +545,11 @@ impl PerspectiveViewerElement {
     /// Toggle (or force) the config panel open/closed.
     ///
     /// # Arguments
-    /// - `force` Force the state of the panel open or closed, or `None` to toggle.
+    /// - `force` Force the state of the panel open or closed, or `None` to
+    ///   toggle.
     pub fn js_toggle_config(&self, force: Option<bool>) -> js_sys::Promise {
         let (sender, receiver) = channel::<Result<JsValue, JsValue>>();
-        let msg =
-            Msg::ToggleSettingsInit(force.map(SettingsUpdate::Update), Some(sender));
+        let msg = Msg::ToggleSettingsInit(force.map(SettingsUpdate::Update), Some(sender));
         let root = self.root.clone();
         promisify_ignore_view_delete(async move {
             root.borrow()
@@ -552,19 +560,19 @@ impl PerspectiveViewerElement {
         })
     }
 
-    /// Get an `Array` of all of the plugin custom elements registered for this element.
-    /// This may not include plugins which called `registerPlugin()` after the host has
-    /// rendered for the first time.
+    /// Get an `Array` of all of the plugin custom elements registered for this
+    /// element. This may not include plugins which called
+    /// `registerPlugin()` after the host has rendered for the first time.
     pub fn js_get_all_plugins(&self) -> Array {
         self.renderer.get_all_plugins().iter().collect::<Array>()
     }
 
-    /// Gets a plugin Custom Element with the `name` field, or get the active plugin
-    /// if no `name` is provided.
+    /// Gets a plugin Custom Element with the `name` field, or get the active
+    /// plugin if no `name` is provided.
     ///
     /// # Arguments
-    /// - `name` The `name` property of a perspective plugin Custom Element, or `None`
-    ///   for the active plugin's Custom Element.
+    /// - `name` The `name` property of a perspective plugin Custom Element, or
+    ///   `None` for the active plugin's Custom Element.
     pub fn js_get_plugin(
         &self,
         name: Option<String>,

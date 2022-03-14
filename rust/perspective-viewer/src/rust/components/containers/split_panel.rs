@@ -16,8 +16,8 @@ use web_sys::HtmlElement;
 use yew::html::Scope;
 use yew::prelude::*;
 
-/// The state for the `Resizing` action, including the `MouseEvent` callbacks and
-/// panel starting dimensions.
+/// The state for the `Resizing` action, including the `MouseEvent` callbacks
+/// and panel starting dimensions.
 struct ResizingState {
     mousemove: Closure<dyn Fn(MouseEvent)>,
     mouseup: Closure<dyn Fn(MouseEvent)>,
@@ -32,9 +32,9 @@ struct ResizingState {
 }
 
 impl Drop for ResizingState {
-    /// On `drop`, we must remove these event listeners from the document `body`.
-    /// Without this, the `Closure` objects would not leak, but the document will
-    /// continue to call them, causing runtime exceptions.
+    /// On `drop`, we must remove these event listeners from the document
+    /// `body`. Without this, the `Closure` objects would not leak, but the
+    /// document will continue to call them, causing runtime exceptions.
     fn drop(&mut self) {
         let result: Result<(), JsValue> = maybe! {
             let document = web_sys::window().unwrap().document().unwrap();
@@ -53,8 +53,8 @@ impl Drop for ResizingState {
     }
 }
 
-/// When the instantiated, capture the initial dimensions and create the MouseEvent
-/// callbacks.
+/// When the instantiated, capture the initial dimensions and create the
+/// MouseEvent callbacks.
 impl ResizingState {
     pub fn new(
         index: usize,
@@ -141,13 +141,11 @@ impl ResizingState {
     /// occurring.
     fn capture_cursor(&mut self) -> Result<(), JsValue> {
         self.cursor = self.body_style.get_property_value("cursor")?;
-        self.body_style.set_property(
-            "cursor",
-            match self.orientation {
+        self.body_style
+            .set_property("cursor", match self.orientation {
                 Orientation::Horizontal => "col-resize",
                 Orientation::Vertical => "row-resize",
-            },
-        )
+            })
     }
 
     /// " but for release
@@ -217,8 +215,8 @@ pub enum SplitPanelMsg {
     Reset(usize),
 }
 
-/// A panel with 2 sub panels and a mouse-draggable divider which allows apportioning
-/// the panel's width.
+/// A panel with 2 sub panels and a mouse-draggable divider which allows
+/// apportioning the panel's width.
 ///
 /// # Examples
 ///
@@ -369,13 +367,10 @@ fn split_panel_divider(props: &SplitPanelDividerProps) -> Html {
     let i = props.i;
     let link = props.link.clone();
     let onmousedown = link.callback(move |event: MouseEvent| {
-        SplitPanelMsg::StartResizing(
-            i,
-            match orientation {
-                Orientation::Horizontal => event.client_x(),
-                Orientation::Vertical => event.client_y(),
-            },
-        )
+        SplitPanelMsg::StartResizing(i, match orientation {
+            Orientation::Horizontal => event.client_x(),
+            Orientation::Vertical => event.client_y(),
+        })
     });
 
     let ondblclick = props.link.callback(move |event: MouseEvent| {

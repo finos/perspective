@@ -73,9 +73,10 @@ where
     }
 }
 
-/// Manages the lifetime of a listener registered to a `PubSub<T>` by deregistering
-/// the associated listener when dropped.  The wrapped `Fn` of `Subscriptions` is
-/// the deregister closure provided by the issuing `PubSub<T>`.
+/// Manages the lifetime of a listener registered to a `PubSub<T>` by
+/// deregistering the associated listener when dropped.  The wrapped `Fn` of
+/// `Subscriptions` is the deregister closure provided by the issuing
+/// `PubSub<T>`.
 #[must_use]
 pub struct Subscription(Box<dyn Fn()>);
 

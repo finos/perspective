@@ -21,6 +21,10 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::future_to_promise;
 use web_sys::*;
 
+/// A collection of `Subscription` which should trigger an event on the
+/// JavaScript Custom Element as a `CustomEvent`.  There are no public methods
+/// on `CustomElements`, but when it is `drop()` the Custom Element will no
+/// longer dispatch events such as `"perspective-config-change"`.
 #[derive(Clone)]
 pub struct CustomEvents(Rc<(CustomEventsDataRc, [Subscription; 4])>);
 
@@ -44,11 +48,7 @@ struct CustomEventsData {
 derive_session_renderer_model!(CustomEventsData);
 
 impl CustomEvents {
-    pub fn new(
-        elem: &HtmlElement,
-        session: &Session,
-        renderer: &Renderer,
-    ) -> CustomEvents {
+    pub fn new(elem: &HtmlElement, session: &Session, renderer: &Renderer) -> Self {
         let data = CustomEventsDataRc(Rc::new(CustomEventsData {
             elem: elem.clone(),
             session: session.clone(),
@@ -56,14 +56,14 @@ impl CustomEvents {
             last_dispatched: Default::default(),
         }));
 
-        let theme_sub = renderer.on_theme_config_updated.add_listener({
+        let theme_sub = renderer.theme_config_updated.add_listener({
             clone!(data);
             move |_| {
                 data.clone().dispatch_config_update();
             }
         });
 
-        let settings_sub = renderer.on_settings_open_changed.add_listener({
+        let settings_sub = renderer.settings_open_changed.add_listener({
             clone!(data);
             move |open| {
                 data.dispatch_settings_open_changed(open);
@@ -71,7 +71,7 @@ impl CustomEvents {
             }
         });
 
-        let plugin_sub = renderer.on_plugin_changed.add_listener({
+        let plugin_sub = renderer.plugin_changed.add_listener({
             clone!(data);
             move |plugin| {
                 data.dispatch_plugin_changed(&plugin);
@@ -79,17 +79,19 @@ impl CustomEvents {
             }
         });
 
-        let view_sub = session.on_view_created.add_listener({
+        let view_sub = session.view_created.add_listener({
             clone!(data);
             move |_| {
                 data.clone().dispatch_config_update();
             }
         });
 
-        CustomEvents(Rc::new((
-            data,
-            [theme_sub, settings_sub, plugin_sub, view_sub],
-        )))
+        Self(Rc::new((data, [
+            theme_sub,
+            settings_sub,
+            plugin_sub,
+            view_sub,
+        ])))
     }
 }
 

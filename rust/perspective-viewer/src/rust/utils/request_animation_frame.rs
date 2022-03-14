@@ -39,7 +39,8 @@ pub async fn await_dom_loaded() -> Result<(), JsValue> {
     }
 }
 
-/// An `async` version of `set_timeout`, which resolves in `timeout` milliseconds
+/// An `async` version of `set_timeout`, which resolves in `timeout`
+/// milliseconds
 pub async fn set_timeout(timeout: i32) -> Result<(), JsValue> {
     let (sender, receiver) = channel::<()>();
     let jsfun = Closure::once_into_js(move || {
@@ -48,10 +49,7 @@ pub async fn set_timeout(timeout: i32) -> Result<(), JsValue> {
 
     web_sys::window()
         .unwrap()
-        .set_timeout_with_callback_and_timeout_and_arguments_0(
-            jsfun.unchecked_ref(),
-            timeout,
-        )?;
+        .set_timeout_with_callback_and_timeout_and_arguments_0(jsfun.unchecked_ref(), timeout)?;
 
     let x = receiver.await;
     x.into_jserror()

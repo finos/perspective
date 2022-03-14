@@ -163,17 +163,14 @@ impl StringColumnStyle {
     }
 
     fn color_props(&self, ctx: &Context<Self>) -> ColorProps {
-        let color_oninput = ctx.link().callback(StringColumnStyleMsg::ColorChanged);
+        let on_color = ctx.link().callback(StringColumnStyleMsg::ColorChanged);
         let color = self
             .config
             .color
             .clone()
             .unwrap_or_else(|| ctx.props().default_config.color.to_owned());
 
-        props!(ColorProps {
-            color,
-            on_color: color_oninput.clone(),
-        })
+        props!(ColorProps { color, on_color })
     }
 }
 
@@ -261,8 +258,7 @@ impl Component for StringColumnStyle {
         let format_mode_selected = self.config.format.unwrap_or_default();
 
         // Format mode radio callback
-        let format_mode_changed =
-            ctx.link().callback(StringColumnStyleMsg::FormatChanged);
+        let format_mode_changed = ctx.link().callback(StringColumnStyleMsg::FormatChanged);
 
         // Color enabled/disabled oninput callback
         let color_enabled_oninput = ctx.link().callback(move |event: InputEvent| {
@@ -276,8 +272,7 @@ impl Component for StringColumnStyle {
         let selected_color_mode = self.config.string_color_mode.unwrap_or_default();
 
         // Color mode radio callback
-        let color_mode_changed =
-            ctx.link().callback(StringColumnStyleMsg::ColorModeChanged);
+        let color_mode_changed = ctx.link().callback(StringColumnStyleMsg::ColorModeChanged);
 
         let select_values = vec![
             StringColorMode::Foreground,
@@ -313,19 +308,18 @@ impl Component for StringColumnStyle {
                 }
             };
 
-        let series_controls =
-            if let Some(StringColorMode::Series) = self.config.string_color_mode {
-                html_template! {
-                    <span class="row">{ "Series" }</span>
-                    <div class="row section inner_section">
-                        <ColorSelector with self.color_props(ctx) />
-                    </div>
-                }
-            } else {
-                html! {
-                    <span class="row">{ "Series" }</span>
-                }
-            };
+        let series_controls = if let Some(StringColorMode::Series) = self.config.string_color_mode {
+            html_template! {
+                <span class="row">{ "Series" }</span>
+                <div class="row section inner_section">
+                    <ColorSelector with self.color_props(ctx) />
+                </div>
+            }
+        } else {
+            html! {
+                <span class="row">{ "Series" }</span>
+            }
+        };
 
         html_template! {
             <style>
@@ -345,7 +339,7 @@ impl Component for StringColumnStyle {
 
                     <RadioList<FormatMode>
                         class="indent"
-                        disabled={ !self.config.format.is_some() }
+                        disabled={ self.config.format.is_none() }
                         values={ vec!(FormatMode::Bold, FormatMode::Italics, FormatMode::Link) }
                         selected={ format_mode_selected }
                         on_change={ format_mode_changed } >
@@ -369,7 +363,7 @@ impl Component for StringColumnStyle {
                     <RadioList<StringColorMode>
                         class="indent"
                         name="color-radio-list"
-                        disabled={ !self.config.string_color_mode.is_some() }
+                        disabled={ self.config.string_color_mode.is_none() }
                         values={ select_values }
                         selected={ selected_color_mode }
                         on_change={ color_mode_changed } >

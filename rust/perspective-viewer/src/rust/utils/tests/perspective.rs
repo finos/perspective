@@ -19,7 +19,7 @@ wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 pub async fn test_table_size() {
     let table = get_mock_table().await;
     let size = table.size().await.unwrap();
-    assert_eq!(size, 3_f64);
+    assert!(size - 3_f64 < 0.01);
 }
 
 #[wasm_bindgen_test]
@@ -57,7 +57,7 @@ pub async fn test_view_num_rows() {
     let table = get_mock_table().await;
     let view = table.view(js_object!().unchecked_ref()).await.unwrap();
     let num_rows = view.num_rows().await.unwrap();
-    assert_eq!(num_rows, 3_f64);
+    assert!(num_rows - 3_f64 < 0.01);
 }
 
 // #[wasm_bindgen_test]

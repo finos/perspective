@@ -44,9 +44,7 @@ impl PartialEq for ActiveColumnProps {
 impl ActiveColumnProps {
     fn get_name(&self) -> Option<String> {
         match &self.name {
-            ActiveColumnState::DragOver(_) => {
-                Some(self.dragdrop.get_drag_column().unwrap())
-            }
+            ActiveColumnState::DragOver(_) => Some(self.dragdrop.get_drag_column().unwrap()),
             ActiveColumnState::Column(_, name) => Some(name.to_owned()),
             ActiveColumnState::Required(_) => None,
         }
@@ -73,12 +71,13 @@ impl From<ActiveColumnProps> for yew::Html {
 derive_session_renderer_model!(ActiveColumnProps);
 
 impl ActiveColumnProps {
-    /// Remove an active column from `columns`, or alternatively make this column
-    /// the only column in `columns` if the shift key is set (via the `shift` flag).
+    /// Remove an active column from `columns`, or alternatively make this
+    /// column the only column in `columns` if the shift key is set (via the
+    /// `shift` flag).
     ///
     /// # Arguments
-    /// - `name` The name of the column to de-activate, which is a unique ID with
-    ///   respect to `columns`.
+    /// - `name` The name of the column to de-activate, which is a unique ID
+    ///   with respect to `columns`.
     /// - `shift` whether to toggle or select this column.
     pub fn deactivate_column(&self, name: String, shift: bool) {
         let mut columns = self.session.borrow_view_config().columns.clone();
@@ -129,9 +128,9 @@ pub enum ActiveColumnMsg {
     DeactivateColumn(String, bool),
 }
 
-/// An `ActiveColumn` indicates a column which is part of the `columns` field of a
-/// `ViewConfig`.  It shows additional column details in context (like selected
-/// aggregate), and supports drag/drop and missing entries.
+/// An `ActiveColumn` indicates a column which is part of the `columns` field of
+/// a `ViewConfig`.  It shows additional column details in context (like
+/// selected aggregate), and supports drag/drop and missing entries.
 /// TODO Break this into "Active", "Hover" and "Empty"?
 pub struct ActiveColumn {
     add_expression_ref: NodeRef,
@@ -188,9 +187,7 @@ impl Component for ActiveColumn {
                     Some(ctx.props().dragdrop.get_drag_column().unwrap()),
                 )
             }
-            ActiveColumnState::Column(label, name) => {
-                (label.clone(), Some(name.to_owned()))
-            }
+            ActiveColumnState::Column(label, name) => (label.clone(), Some(name.to_owned())),
             ActiveColumnState::Required(label) => (label.clone(), None),
         };
 
@@ -240,13 +237,12 @@ impl Component for ActiveColumn {
                         event.data_transfer().unwrap().set_drag_image(&elem, 0, 0);
                         dragdrop.drag_start(
                             event_name.to_string(),
-                            DragEffect::Move(DropAction::Active),
+                            DragEffect::Move(DragTarget::Active),
                         )
                     }
                 });
 
-                let is_expression =
-                    ctx.props().session.metadata().is_column_expression(&name);
+                let is_expression = ctx.props().session.metadata().is_column_expression(&name);
 
                 let class = if self.is_required {
                     "is_column_active required"
@@ -327,8 +323,8 @@ impl Component for ActiveColumn {
                 // columns out until the new View forces a re-render (and the
                 // `change()` method on this component checks for this).
 
-                let class = Itertools::intersperse(classes.iter().cloned(), " ")
-                    .collect::<String>();
+                let class =
+                    Itertools::intersperse(classes.iter().cloned(), " ").collect::<String>();
 
                 html! {
                     <div

@@ -19,7 +19,7 @@ pub struct PivotItem {}
 pub struct PivotItemProps {
     pub column: String,
     pub dragdrop: DragDrop,
-    pub action: DropAction,
+    pub action: DragTarget,
 }
 
 impl PartialEq for PivotItemProps {

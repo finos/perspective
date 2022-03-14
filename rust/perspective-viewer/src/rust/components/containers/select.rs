@@ -111,10 +111,11 @@ where
             "noselect".to_owned()
         };
 
-        let is_group_selected =
-            !ctx.props().values.iter().any(
-                |x| matches!(x, SelectItem::Option(y) if *y == ctx.props().selected),
-            );
+        let is_group_selected = !ctx
+            .props()
+            .values
+            .iter()
+            .any(|x| matches!(x, SelectItem::Option(y) if *y == ctx.props().selected));
 
         let select = html! {
             <select

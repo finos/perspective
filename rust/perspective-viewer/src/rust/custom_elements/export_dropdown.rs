@@ -25,7 +25,6 @@ use yew::prelude::*;
 #[derive(Clone)]
 pub struct ExportDropDownMenuElement {
     modal: ModalElement<ExportDropDownMenu>,
-    target: Rc<RefCell<Option<HtmlElement>>>,
 }
 
 impl ResizableMessage for <ExportDropDownMenu as Component>::Message {
@@ -42,8 +41,7 @@ impl ExportDropDownMenuElement {
             .unwrap()
             .unchecked_into::<HtmlElement>();
 
-        let modal_rc: Rc<RefCell<Option<ModalElement<ExportDropDownMenu>>>> =
-            Default::default();
+        let modal_rc: Rc<RefCell<Option<ModalElement<ExportDropDownMenu>>>> = Default::default();
 
         let callback = Callback::from({
             let modal_rc = modal_rc.clone();
@@ -58,7 +56,7 @@ impl ExportDropDownMenuElement {
                             .export_method_to_jsvalue(x.method)
                             .await
                             .unwrap();
-                        download(&x.to_filename(), &val).unwrap();
+                        download(&x.as_filename(), &val).unwrap();
                         modal.hide().unwrap();
                     })
                 }
@@ -68,10 +66,7 @@ impl ExportDropDownMenuElement {
         let props = ExportDropDownMenuProps { renderer, callback };
         let modal = ModalElement::new(dropdown, props, true);
         *modal_rc.borrow_mut() = Some(modal.clone());
-        ExportDropDownMenuElement {
-            modal,
-            target: Default::default(),
-        }
+        ExportDropDownMenuElement { modal }
     }
 
     pub fn open(&self, target: HtmlElement) {

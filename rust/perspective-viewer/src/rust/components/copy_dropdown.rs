@@ -72,10 +72,7 @@ fn get_menu_items(has_render: bool) -> Vec<CopyDropDownMenuItem> {
                 vec![ExportMethod::Csv, ExportMethod::Json]
             },
         ),
-        CopyDropDownMenuItem::OptGroup(
-            "All",
-            vec![ExportMethod::CsvAll, ExportMethod::JsonAll],
-        ),
+        CopyDropDownMenuItem::OptGroup("All", vec![ExportMethod::CsvAll, ExportMethod::JsonAll]),
         CopyDropDownMenuItem::OptGroup("Config", vec![ExportMethod::JsonConfig]),
     ]
 }

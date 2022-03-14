@@ -30,8 +30,8 @@ impl PartialEq for StatusBarRowsCounterProps {
     }
 }
 
-/// A label widget which displays a row count and a "projection" count, the number of
-/// rows in the `View` which includes aggregate rows.
+/// A label widget which displays a row count and a "projection" count, the
+/// number of rows in the `View` which includes aggregate rows.
 pub struct StatusBarRowsCounter {}
 
 impl Component for StatusBarRowsCounter {

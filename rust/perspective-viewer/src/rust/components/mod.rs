@@ -6,8 +6,9 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-//! `components` contains all Yew `Component` types, but only exports the 4 necessary
-//! for public Custom Elements.  The rest are internal components of these 4.
+//! `components` contains all Yew `Component` types, but only exports the 4
+//! necessary for public Custom Elements.  The rest are internal components of
+//! these 4.
 
 pub mod copy_dropdown;
 pub mod export_dropdown;

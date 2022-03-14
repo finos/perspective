@@ -130,6 +130,8 @@ version = "0.3"
 wasm-bindgen-test = "0.3.13"
 
 [profile.release]
+panic = "abort"
 opt-level = "z"
 codegen-units = 1
 lto = true
+strip = true

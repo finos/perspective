@@ -69,16 +69,18 @@ impl Component for StatusBar {
         enable_weak_link_test!(ctx.props(), ctx.link());
         let cb = ctx.link().callback(|_| StatusBarMsg::TableStatsChanged);
         let _sub = [
-            ctx.props().session.on_stats.add_listener(cb),
-            ctx.props().session.on_view_config_updated.add_listener(
-                ctx.link().callback(|_| StatusBarMsg::SetIsUpdating(true)),
-            ),
-            ctx.props().session.on_view_created.add_listener(
-                ctx.link().callback(|_| StatusBarMsg::SetIsUpdating(false)),
-            ),
+            ctx.props().session.stats_changed.add_listener(cb),
+            ctx.props()
+                .session
+                .view_config_changed
+                .add_listener(ctx.link().callback(|_| StatusBarMsg::SetIsUpdating(true))),
+            ctx.props()
+                .session
+                .view_created
+                .add_listener(ctx.link().callback(|_| StatusBarMsg::SetIsUpdating(false))),
             ctx.props()
                 .renderer
-                .on_theme_config_updated
+                .theme_config_updated
                 .add_listener(ctx.link().callback(StatusBarMsg::SetThemeConfig)),
         ];
 
@@ -105,8 +107,7 @@ impl Component for StatusBar {
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             StatusBarMsg::SetIsUpdating(is_updating) => {
-                self.is_updating =
-                    max!(0, self.is_updating + if is_updating { 1 } else { -1 });
+                self.is_updating = max!(0, self.is_updating + if is_updating { 1 } else { -1 });
                 true
             }
             StatusBarMsg::TableStatsChanged => true,
@@ -122,8 +123,7 @@ impl Component for StatusBar {
                 should_render
             }
             StatusBarMsg::SetTheme(theme) => {
-                let renderer = ctx.props().renderer.clone();
-                let session = ctx.props().session.clone();
+                clone!(ctx.props().renderer, ctx.props().session);
                 let _ = promisify_ignore_view_delete(async move {
                     renderer.set_theme_name(Some(&theme)).await?;
                     let view = session.get_view().into_jserror()?;
@@ -136,8 +136,7 @@ impl Component for StatusBar {
                 let target = self.export_ref.cast::<HtmlElement>().unwrap();
                 self.export_dropdown
                     .get_or_insert_with(|| {
-                        let session = ctx.props().session.clone();
-                        let renderer = ctx.props().renderer.clone();
+                        clone!(ctx.props().renderer, ctx.props().session);
                         ExportDropDownMenuElement::new(session, renderer)
                     })
                     .open(target);
@@ -147,8 +146,7 @@ impl Component for StatusBar {
                 let target = self.copy_ref.cast::<HtmlElement>().unwrap();
                 self.copy_dropdown
                     .get_or_insert_with(|| {
-                        let session = ctx.props().session.clone();
-                        let renderer = ctx.props().renderer.clone();
+                        clone!(ctx.props().renderer, ctx.props().session);
                         CopyDropDownMenuElement::new(session, renderer)
                     })
                     .open(target);
@@ -240,7 +238,7 @@ impl Component for StatusBar {
 }
 
 impl StatusBar {
-    fn status_class_name(&self, stats: &Option<TableStats>) -> &'static str {
+    const fn status_class_name(&self, stats: &Option<TableStats>) -> &'static str {
         match stats {
             Some(TableStats {
                 num_rows: Some(_),

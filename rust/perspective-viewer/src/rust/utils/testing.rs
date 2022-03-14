@@ -30,8 +30,8 @@ extern "C" {
     fn worker() -> js_sys::Promise;
 }
 
-/// Generate a test `Table`, but only create teh webworker once or the tests will
-/// figuratively literally run forever.
+/// Generate a test `Table`, but only create teh webworker once or the tests
+/// will figuratively literally run forever.
 #[cfg(test)]
 pub async fn get_mock_table() -> JsPerspectiveTable {
     thread_local! {
@@ -58,10 +58,10 @@ pub async fn get_mock_table() -> JsPerspectiveTable {
         .unwrap()
 }
 
-/// A macro which set a property called `weak_link` on the container `Properties`
-/// when `cfg(test)`, such that unit tests may send messages to a component.
-/// This macro needs to be called in `create()` on any Component which needs to
-/// receive messages in a test.
+/// A macro which set a property called `weak_link` on the container
+/// `Properties` when `cfg(test)`, such that unit tests may send messages to a
+/// component. This macro needs to be called in `create()` on any Component
+/// which needs to receive messages in a test.
 #[macro_export]
 macro_rules! enable_weak_link_test {
     ($props:expr, $link:expr) => {

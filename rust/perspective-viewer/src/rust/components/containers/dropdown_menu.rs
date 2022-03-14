@@ -61,7 +61,6 @@ where
         }
     }
 
-
     fn view(&self, ctx: &Context<Self>) -> Html {
         let values = &ctx.props().values;
         let body = if !values.is_empty() {

@@ -18,13 +18,14 @@ use yew::prelude::*;
 
 type BlurHandlerType = Rc<RefCell<Option<Closure<dyn FnMut(FocusEvent)>>>>;
 
-/// A `ModalElement` wraps the parameterized yew `Component` in a Custom Element.
-/// Via the `open()` and `close()` methods, a `ModalElement` can be positioned next
-/// to any existing on-page elements, accounting for viewport, scroll position, etc.
+/// A `ModalElement` wraps the parameterized yew `Component` in a Custom
+/// Element. Via the `open()` and `close()` methods, a `ModalElement` can be
+/// positioned next to any existing on-page elements, accounting for viewport,
+/// scroll position, etc.
 ///
-///`#[derive(Clone)]` generates the trait bound `T: Clone`, which is not required
-/// because `Scope<T>` implements Clone without this bound;  thus `Clone`
-/// must be implemented by the `derivative` crate's
+///`#[derive(Clone)]` generates the trait bound `T: Clone`, which is not
+/// required because `Scope<T>` implements Clone without this bound;  thus
+/// `Clone` must be implemented by the `derivative` crate's
 /// [custom bounds](https://mcarton.github.io/rust-derivative/latest/Debug.html#custom-bound)
 /// support.
 #[derive(Derivative)]
@@ -58,7 +59,7 @@ impl Default for ModalAnchor {
 }
 
 impl ModalAnchor {
-    fn is_rev_vert(&self) -> bool {
+    const fn is_rev_vert(&self) -> bool {
         matches!(
             self,
             ModalAnchor::BottomLeftTopLeft
@@ -169,20 +170,14 @@ where
         let rect_width = self_rect.width() as i32;
 
         match self.anchor.get() {
-            ModalAnchor::BottomRightTopLeft => {
-                (top - rect_height, left - rect_width + 1)
-            }
+            ModalAnchor::BottomRightTopLeft => (top - rect_height, left - rect_width + 1),
             ModalAnchor::BottomRightBottomLeft => {
                 (top - rect_height + height, left - rect_width + 1)
             }
-            ModalAnchor::BottomRightTopRight => {
-                (top - rect_height + 1, left + width - rect_width)
-            }
+            ModalAnchor::BottomRightTopRight => (top - rect_height + 1, left + width - rect_width),
             ModalAnchor::BottomLeftTopLeft => (top - rect_height + 1, left),
             ModalAnchor::TopRightTopLeft => (top, left - rect_width + 1),
-            ModalAnchor::TopRightBottomRight => {
-                (top + height - 1, left + width - rect_width)
-            }
+            ModalAnchor::TopRightBottomRight => (top + height - 1, left + width - rect_width),
             ModalAnchor::TopLeftBottomLeft => ((top + height - 1), left),
         }
     }
@@ -225,8 +220,7 @@ where
         if self.own_focus {
             let mut this = Some(self.clone());
             *self.blurhandler.borrow_mut() = Some(
-                (move |_| this.take().and_then(|x| x.hide().ok()).unwrap_or(()))
-                    .into_closure_mut(),
+                (move |_| this.take().and_then(|x| x.hide().ok()).unwrap_or(())).into_closure_mut(),
             );
 
             self.custom_element.add_event_listener_with_callback(
@@ -257,13 +251,9 @@ where
     /// absolutely positioned relative to an alread-connected `target`
     /// element.
     ///
-    /// Because the Custom Element has a `blur` handler, we must invoke this before
-    /// attempting to re-parent the element.
-    pub fn open(
-        &self,
-        target: web_sys::HtmlElement,
-        resize_pubsub: Option<&PubSub<()>>,
-    ) {
+    /// Because the Custom Element has a `blur` handler, we must invoke this
+    /// before attempting to re-parent the element.
+    pub fn open(&self, target: web_sys::HtmlElement, resize_pubsub: Option<&PubSub<()>>) {
         if let Some(resize) = resize_pubsub {
             let this = self.clone();
             let target = target.clone();

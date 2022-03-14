@@ -13,8 +13,8 @@ use super::language::*;
 use js_intern::*;
 use wasm_bindgen::prelude::*;
 
-/// This helper _must_ create the `JsValue` anew on each call, or it causes strange
-/// & subtle bugs in monaco.
+/// This helper _must_ create the `JsValue` anew on each call, or it causes
+/// strange & subtle bugs in monaco.
 /// https://github.com/microsoft/monaco-editor/issues/1510
 pub fn get_completions(
     model: JsMonacoModel,
@@ -22,8 +22,8 @@ pub fn get_completions(
     token: JsMonacoTriggerToken,
 ) -> JsValue {
     // Test the token stream until the cursor to distinguish opening from closing
-    // quotes - otherwise the column completion popup will occur at the end of a column
-    // name also.
+    // quotes - otherwise the column completion popup will occur at the end of a
+    // column name also.
     let tokens = model.get_line_tokens(position.line_number());
     let token_index = tokens.find_token_index_at_offset(position.column());
     let prev_token_type = tokens.get_class_name(token_index) == *js_intern!("mtk23");

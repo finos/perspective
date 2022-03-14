@@ -21,16 +21,13 @@ use crate::utils::WeakScope;
 #[derive(Clone)]
 pub struct PerspectiveNumberColumnStyleElement {
     modal: ModalElement<NumberColumnStyle>,
-    props: NumberColumnStyleProps,
 }
 
 fn on_change(elem: &web_sys::HtmlElement, config: &NumberColumnStyleConfig) {
     let mut event_init = web_sys::CustomEventInit::new();
     event_init.detail(&JsValue::from_serde(config).unwrap());
-    let event = CustomEvent::new_with_event_init_dict(
-        "perspective-column-style-change",
-        &event_init,
-    );
+    let event =
+        CustomEvent::new_with_event_init_dict("perspective-column-style-change", &event_init);
 
     elem.dispatch_event(&event.unwrap()).unwrap();
 }
@@ -64,8 +61,8 @@ impl PerspectiveNumberColumnStyleElement {
             weak_link: WeakScope::default(),
         };
 
-        let modal = ModalElement::new(elem, props.clone(), true);
-        PerspectiveNumberColumnStyleElement { modal, props }
+        let modal = ModalElement::new(elem, props, true);
+        PerspectiveNumberColumnStyleElement { modal }
     }
 
     /// Reset to a provided JSON config, to be used in place of `new()` when
@@ -101,7 +98,7 @@ impl PerspectiveNumberColumnStyleElement {
         self.modal.destroy()
     }
 
-    /// DOM lifecycle method when connected.  We don't use this, as it can fire during
-    /// innocuous events like re-parenting.
+    /// DOM lifecycle method when connected.  We don't use this, as it can fire
+    /// during innocuous events like re-parenting.
     pub fn connected_callback(&self) {}
 }

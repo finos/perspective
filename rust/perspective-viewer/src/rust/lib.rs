@@ -8,25 +8,22 @@
 
 // Required by yew's `html` macro.
 #![recursion_limit = "1024"]
-#![warn(clippy::all)]
+#![warn(clippy::all, clippy::panic_in_result_fn)]
 
-pub mod components;
-pub mod config;
 pub mod custom_elements;
-pub mod custom_events;
-pub mod dragdrop;
-pub mod exprtk;
-pub mod js;
-pub mod model;
-pub mod renderer;
-pub mod session;
-pub mod utils;
+
+mod components;
+mod config;
+mod custom_events;
+mod dragdrop;
+mod exprtk;
+mod js;
+mod model;
+mod renderer;
+mod session;
+mod utils;
 
 use wasm_bindgen::prelude::*;
-
-#[cfg(feature = "wee_alloc")]
-#[global_allocator]
-static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
 pub fn register_plugin(name: &str) {

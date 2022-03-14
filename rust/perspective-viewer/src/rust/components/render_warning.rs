@@ -8,6 +8,7 @@
 
 use crate::renderer::*;
 use crate::session::*;
+use crate::*;
 
 use wasm_bindgen_futures::future_to_promise;
 use yew::prelude::*;
@@ -74,8 +75,7 @@ impl Component for RenderWarning {
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             RenderWarningMsg::DismissWarning => {
-                let renderer = ctx.props().renderer.clone();
-                let session = ctx.props().session.clone();
+                clone!(ctx.props().renderer, ctx.props().session);
                 let _promise = future_to_promise(async move {
                     renderer.disable_active_plugin_render_warning();
                     renderer.update(&session).await

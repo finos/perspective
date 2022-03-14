@@ -16,8 +16,8 @@ use wasm_bindgen::JsCast;
 // #[cfg(test)]
 // use wasm_bindgen_test::*;
 
-// `wasm-bindgen` only supports `JsValue` return types from `extern async fn`, so use
-// this macro to generate well-typed versions.
+// `wasm-bindgen` only supports `JsValue` return types from `extern async fn`,
+// so use this macro to generate well-typed versions.
 macro_rules! async_typed {
     (@jsvalue $sym:ident ()) => {{ $sym.await?; }};
     (@jsvalue $sym:ident f64) => { $sym.await?.as_f64().unwrap() };
