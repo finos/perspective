@@ -1,5 +1,24 @@
 # Changelog
 
+## [v1.3.5](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.3.4...HEAD)
+
+**Fixed bugs:**
+
+- Fix JLab `settings` flicker [\#1762](https://github.com/finos/perspective/pull/1762) ([texodus](https://github.com/texodus))
+- Export `perspective-viewer-datagrid` types [\#1759](https://github.com/finos/perspective/pull/1759) ([texodus](https://github.com/texodus))
+
+**Closed issues:**
+
+- display bug on python widget with new v1.2.0 setting options [\#1761](https://github.com/finos/perspective/issues/1761)
+
+**Merged pull requests:**
+
+- Allow more icons to be overridden [\#1763](https://github.com/finos/perspective/pull/1763) ([texodus](https://github.com/texodus))
+- Rust lint+nightly [\#1760](https://github.com/finos/perspective/pull/1760) ([texodus](https://github.com/texodus))
+- Fix flatbuffers [\#1757](https://github.com/finos/perspective/pull/1757) ([texodus](https://github.com/texodus))
+
 ## [v1.3.4](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.3.3...HEAD)
