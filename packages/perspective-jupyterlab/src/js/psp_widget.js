@@ -113,8 +113,11 @@ export class PerspectiveWidget extends Widget {
      */
 
     async load(table) {
-        this.viewer.load(table);
-        await this.viewer.restore(this._viewer_config);
+        const load_task = this.viewer.load(table);
+        const restore_task = this.viewer.restore(this._viewer_config);
+        await load_task;
+        this._load_complete = true;
+        await restore_task;
     }
 
     /**
@@ -293,7 +296,6 @@ export class PerspectiveWidget extends Widget {
         div.style.setProperty("display", "flex");
         div.style.setProperty("flex-direction", "row");
         node.appendChild(div);
-        viewer.toggleConfig(true);
 
         return viewer;
     }
