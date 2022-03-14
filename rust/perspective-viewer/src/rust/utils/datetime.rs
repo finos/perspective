@@ -41,8 +41,7 @@ pub fn str_to_utc_posix(val: &str) -> Result<f64, JsValue> {
     let tz = get_local_tz();
     NaiveDateTime::parse_from_str(val, input_value_format(val)?)
         .map(|ref posix| {
-            DateTime::<Utc>::from(tz.from_local_datetime(posix).unwrap())
-                .timestamp_millis() as f64
+            DateTime::<Utc>::from(tz.from_local_datetime(posix).unwrap()).timestamp_millis() as f64
         })
         .into_jserror()
 }

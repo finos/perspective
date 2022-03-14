@@ -43,10 +43,10 @@ pub struct RendererData {
     plugin_data: RefCell<RendererMutData>,
     draw_lock: DebounceMutex,
     _session: Session,
-    pub on_plugin_changed: PubSub<JsPerspectiveViewerPlugin>,
-    pub on_limits_changed: PubSub<RenderLimits>,
-    pub on_settings_open_changed: PubSub<bool>,
-    pub on_theme_config_updated: PubSub<(Vec<String>, Option<usize>)>,
+    pub plugin_changed: PubSub<JsPerspectiveViewerPlugin>,
+    pub limits_changed: PubSub<RenderLimits>,
+    pub settings_open_changed: PubSub<bool>,
+    pub theme_config_updated: PubSub<(Vec<String>, Option<usize>)>,
 }
 
 /// Mutable state
@@ -83,9 +83,9 @@ impl Deref for RendererData {
 }
 
 impl Renderer {
-    pub fn new(viewer_elem: HtmlElement, _session: Session) -> Renderer {
+    pub fn new(viewer_elem: HtmlElement, _session: Session) -> Self {
         let theme_store = ThemeStore::new(&viewer_elem);
-        Renderer(Rc::new(RendererData {
+        Self(Rc::new(RendererData {
             plugin_data: RefCell::new(RendererMutData {
                 viewer_elem,
                 theme_store,
@@ -97,16 +97,17 @@ impl Renderer {
             }),
             _session,
             draw_lock: Default::default(),
-            on_plugin_changed: Default::default(),
-            on_settings_open_changed: Default::default(),
-            on_limits_changed: Default::default(),
-            on_theme_config_updated: Default::default(),
+            plugin_changed: Default::default(),
+            settings_open_changed: Default::default(),
+            limits_changed: Default::default(),
+            theme_config_updated: Default::default(),
         }))
     }
 
     pub async fn reset(&self) {
         self.0.borrow_mut().plugins_idx = None;
-        self.0.borrow().theme_store.reset(None).await;
+        let store = self.0.borrow().theme_store.clone();
+        store.reset(None).await;
         if let Ok(plugin) = self.get_active_plugin() {
             plugin.restore(&js_object!());
         }
@@ -132,9 +133,10 @@ impl Renderer {
         self.0.borrow_mut().plugin_store.plugin_records().clone()
     }
 
-    /// Gets the currently active plugin.  Calling this method before a plugin has
-    /// been selected will cause the default (first) plugin to be selected, and doing
-    /// so when no plugins have been registered is an error.
+    /// Gets the currently active plugin.  Calling this method before a plugin
+    /// has been selected will cause the default (first) plugin to be
+    /// selected, and doing so when no plugins have been registered is an
+    /// error.
     pub fn get_active_plugin(&self) -> Result<JsPerspectiveViewerPlugin, JsValue> {
         if self.0.borrow().plugins_idx.is_none() {
             self.set_plugin(Some(&PLUGIN_REGISTRY.default_plugin_name()))?;
@@ -156,9 +158,7 @@ impl Renderer {
         Ok(result.unwrap())
     }
 
-    pub async fn get_theme_config(
-        &self,
-    ) -> Result<(Vec<String>, Option<usize>), JsValue> {
+    pub async fn get_theme_config(&self) -> Result<(Vec<String>, Option<usize>), JsValue> {
         let mut theme_store = self.0.borrow().theme_store.clone();
         let themes = theme_store.get_themes().await?;
         let index = self
@@ -167,7 +167,7 @@ impl Renderer {
             .viewer_elem
             .get_attribute("theme")
             .and_then(|x| themes.iter().position(|y| y == &x))
-            .or_else(|| if !themes.is_empty() { Some(0) } else { None });
+            .or(if !themes.is_empty() { Some(0) } else { None });
 
         Ok((themes, index))
     }
@@ -186,7 +186,7 @@ impl Renderer {
                 .toggle_attribute_with_force("settings", open_state)
                 .unwrap();
 
-            self.on_settings_open_changed.emit_all(open_state);
+            self.settings_open_changed.emit_all(open_state);
         }
 
         Ok(open_state)
@@ -222,18 +222,16 @@ impl Renderer {
             None
         };
 
-        self.on_theme_config_updated.emit_all((themes, index));
+        self.theme_config_updated.emit_all((themes, index));
         Ok(())
     }
 
     pub async fn reset_theme_names(&self, themes: Option<Vec<String>>) {
-        self.0.borrow().theme_store.reset(themes).await
+        let store = self.0.borrow().theme_store.clone();
+        store.reset(themes).await
     }
 
-    pub async fn restyle_all(
-        &self,
-        view: &JsPerspectiveView,
-    ) -> Result<JsValue, JsValue> {
+    pub async fn restyle_all(&self, view: &JsPerspectiveView) -> Result<JsValue, JsValue> {
         let plugins = self.get_all_plugins();
         let tasks = plugins.iter().map(|plugin| plugin.restyle(view));
 
@@ -282,7 +280,7 @@ impl Renderer {
             self.borrow_mut().plugins_idx = Some(idx);
             let plugin: JsPerspectiveViewerPlugin = self.get_active_plugin()?;
             self.borrow_mut().metadata = plugin.get_requirements()?;
-            self.on_plugin_changed.emit_all(plugin);
+            self.plugin_changed.emit_all(plugin);
         }
 
         Ok(changed)
@@ -354,7 +352,7 @@ impl Renderer {
         let plugin = self.get_active_plugin()?;
         let meta = self.metadata().clone();
         let limits = get_row_and_col_limits(view, &meta).await?;
-        self.on_limits_changed.emit_all(limits);
+        self.limits_changed.emit_all(limits);
         let viewer_elem = &self.0.borrow().viewer_elem.clone();
         if is_update {
             let task = plugin.update(view, limits.2, limits.3, false);
@@ -384,10 +382,8 @@ impl Renderer {
                     .item(0)
                     .unwrap()
                     .unchecked_into();
-                let new_width =
-                    format!("{}px", &self.0.borrow().viewer_elem.client_width());
-                let new_height =
-                    format!("{}px", &self.0.borrow().viewer_elem.client_height());
+                let new_width = format!("{}px", &self.0.borrow().viewer_elem.client_width());
+                let new_height = format!("{}px", &self.0.borrow().viewer_elem.client_height());
                 main_panel.style().set_property("width", &new_width)?;
                 main_panel.style().set_property("height", &new_height)?;
                 let resize = plugin.resize().await;

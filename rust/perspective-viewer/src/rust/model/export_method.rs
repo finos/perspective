@@ -19,21 +19,18 @@ pub enum MimeType {
 
 impl Default for MimeType {
     fn default() -> Self {
-        MimeType::TextPlain
+        Self::TextPlain
     }
 }
 
 impl From<MimeType> for JsValue {
-    fn from(x: MimeType) -> JsValue {
-        JsValue::from(format!("{}", x))
+    fn from(x: MimeType) -> Self {
+        Self::from(format!("{}", x))
     }
 }
 
 impl Display for MimeType {
-    fn fmt(
-        &self,
-        fmt: &mut std::fmt::Formatter<'_>,
-    ) -> std::result::Result<(), std::fmt::Error> {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
         fmt.write_str(match self {
             MimeType::TextPlain => "text/plain",
             MimeType::ImagePng => "image/png",
@@ -55,32 +52,32 @@ pub enum ExportMethod {
 }
 
 impl ExportMethod {
-    pub fn to_filename(&self) -> &'static str {
+    pub const fn as_filename(&self) -> &'static str {
         match self {
-            ExportMethod::Csv => ".csv",
-            ExportMethod::CsvAll => ".all.csv",
-            ExportMethod::Json => ".json",
-            ExportMethod::JsonAll => ".all.json",
-            ExportMethod::Html => ".html",
-            ExportMethod::Png => ".png",
-            ExportMethod::Arrow => ".arrow",
-            ExportMethod::ArrowAll => ".all.arrow",
-            ExportMethod::JsonConfig => ".config.json",
+            Self::Csv => ".csv",
+            Self::CsvAll => ".all.csv",
+            Self::Json => ".json",
+            Self::JsonAll => ".all.json",
+            Self::Html => ".html",
+            Self::Png => ".png",
+            Self::Arrow => ".arrow",
+            Self::ArrowAll => ".all.arrow",
+            Self::JsonConfig => ".config.json",
         }
     }
 
-    pub fn mimetype(&self) -> MimeType {
+    pub const fn mimetype(&self) -> MimeType {
         match self {
-            ExportMethod::Png => MimeType::ImagePng,
+            Self::Png => MimeType::ImagePng,
             _ => MimeType::TextPlain,
         }
     }
 }
 
 impl From<ExportMethod> for Html {
-    fn from(x: ExportMethod) -> Html {
+    fn from(x: ExportMethod) -> Self {
         html! {
-            <code>{ x.to_filename() }</code>
+            <code>{ x.as_filename() }</code>
         }
     }
 }
@@ -101,8 +98,8 @@ pub struct ExportFile {
 }
 
 impl ExportFile {
-    pub fn to_filename(&self) -> String {
-        format!("{}{}", self.name, self.method.to_filename())
+    pub fn as_filename(&self) -> String {
+        format!("{}{}", self.name, self.method.as_filename())
     }
 }
 
@@ -117,7 +114,7 @@ impl From<ExportFile> for Html {
         html_template! {
             <code class={ class }>
                 { x.name }
-                { x.method.to_filename() }
+                { x.method.as_filename() }
             </code>
         }
     }

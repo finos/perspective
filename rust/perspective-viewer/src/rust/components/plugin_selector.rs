@@ -46,7 +46,7 @@ impl Component for PluginSelector {
 
     fn create(ctx: &Context<Self>) -> Self {
         enable_weak_link_test!(ctx.props(), ctx.link());
-        let _plugin_sub = ctx.props().renderer.on_plugin_changed.add_listener({
+        let _plugin_sub = ctx.props().renderer.plugin_changed.add_listener({
             let link = ctx.link().clone();
             move |plugin: JsPerspectiveViewerPlugin| {
                 let name = plugin.name();
@@ -63,10 +63,9 @@ impl Component for PluginSelector {
             PluginSelectorMsg::ComponentSelectPlugin(plugin_name) => {
                 ctx.props().renderer.set_plugin(Some(&plugin_name)).unwrap();
                 let mut update = ViewConfigUpdate::default();
-                ctx.props().session.set_update_column_defaults(
-                    &mut update,
-                    &ctx.props().renderer.metadata(),
-                );
+                ctx.props()
+                    .session
+                    .set_update_column_defaults(&mut update, &ctx.props().renderer.metadata());
 
                 ctx.props().update_and_render(update);
                 false

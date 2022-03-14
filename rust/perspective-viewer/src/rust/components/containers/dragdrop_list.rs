@@ -68,13 +68,14 @@ pub enum DragDropListMsg {
     Freeze(bool),
 }
 
-/// A sub-selector for a list-like component of a `JsViewConfig`, such as `filters`
-/// and `sort`.  `DragDropList` is parameterized by two `Component` types, the
-/// parent component `T` and the inner item compnent `U`, which must additionally
-/// implement `DragDropListItemProps` trait on its own `Properties` associated type.
+/// A sub-selector for a list-like component of a `JsViewConfig`, such as
+/// `filters` and `sort`.  `DragDropList` is parameterized by two `Component`
+/// types, the parent component `T` and the inner item compnent `U`, which must
+/// additionally implement `DragDropListItemProps` trait on its own `Properties`
+/// associated type.
 ///
-/// Before you ask:  yes, `frozen_size` needs to be a float64 since `flex` containers
-/// can have fractional dimensions.
+/// Before you ask:  yes, `frozen_size` needs to be a float64 since `flex`
+/// containers can have fractional dimensions.
 pub struct DragDropList<T, U, V>
 where
     T: Component,
@@ -192,9 +193,7 @@ where
                     .cloned();
 
                 if !ctx.props().allow_duplicates {
-                    columns.retain(|x| {
-                        x.1 .1.as_ref().unwrap().props.get_item() != *column
-                    });
+                    columns.retain(|x| x.1 .1.as_ref().unwrap().props.get_item() != *column);
                 }
 
                 // If inserting into the middle of the list, use

@@ -51,12 +51,12 @@ impl Default for NumberColorMode {
 impl Display for NumberColorMode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let text = match self {
-            NumberColorMode::Foreground => "foreground",
-            NumberColorMode::Background => "background",
-            NumberColorMode::Gradient => "gradient",
-            NumberColorMode::Bar => "bar",
-            _ => panic!("Unknown color mode!"),
-        };
+            Self::Foreground => Ok("foreground"),
+            Self::Background => Ok("background"),
+            Self::Gradient => Ok("gradient"),
+            Self::Bar => Ok("bar"),
+            _ => Err(std::fmt::Error),
+        }?;
 
         write!(f, "{}", text)
     }
@@ -66,10 +66,10 @@ impl FromStr for NumberColorMode {
     type Err = String;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "foreground" => Ok(NumberColorMode::Foreground),
-            "background" => Ok(NumberColorMode::Background),
-            "gradient" => Ok(NumberColorMode::Gradient),
-            "bar" => Ok(NumberColorMode::Bar),
+            "foreground" => Ok(Self::Foreground),
+            "background" => Ok(Self::Background),
+            "gradient" => Ok(Self::Gradient),
+            "bar" => Ok(Self::Bar),
             x => Err(format!("Unknown NumberColorMode::{}", x)),
         }
     }
@@ -77,15 +77,15 @@ impl FromStr for NumberColorMode {
 
 impl NumberColorMode {
     fn is_foreground(&self) -> bool {
-        *self == NumberColorMode::Foreground
+        *self == Self::Foreground
     }
 
     fn is_enabled(&self) -> bool {
-        *self != NumberColorMode::Disabled
+        *self != Self::Disabled
     }
 
     fn needs_gradient(&self) -> bool {
-        *self == NumberColorMode::Gradient || *self == NumberColorMode::Bar
+        *self == Self::Gradient || *self == Self::Bar
     }
 }
 
@@ -185,8 +185,7 @@ impl Component for NumberColumnStyle {
     }
 
     fn changed(&mut self, ctx: &Context<Self>) -> bool {
-        let mut new =
-            NumberColumnStyle::reset(&ctx.props().config, &ctx.props().default_config);
+        let mut new = NumberColumnStyle::reset(&ctx.props().config, &ctx.props().default_config);
         std::mem::swap(self, &mut new);
         true
     }
@@ -329,48 +328,45 @@ impl Component for NumberColumnStyle {
             NumberColorMode::Bar,
         ];
 
-        let foreground_controls =
-            if self.config.number_color_mode == NumberColorMode::Foreground {
-                html_template! {
-                    <span class="row">{ "Foreground" }</span>
-                    <div class="row section inner_section">
-                        <ColorRangeSelector with self.color_props(ctx) />
-                    </div>
-                }
-            } else {
-                html! {
-                    <span class="row">{ "Foreground" }</span>
-                }
-            };
+        let foreground_controls = if self.config.number_color_mode == NumberColorMode::Foreground {
+            html_template! {
+                <span class="row">{ "Foreground" }</span>
+                <div class="row section inner_section">
+                    <ColorRangeSelector with self.color_props(ctx) />
+                </div>
+            }
+        } else {
+            html! {
+                <span class="row">{ "Foreground" }</span>
+            }
+        };
 
-        let background_controls =
-            if self.config.number_color_mode == NumberColorMode::Background {
-                html_template! {
-                    <span class="row">{ "Background" }</span>
-                    <div class="row section inner_section">
-                        <ColorRangeSelector with self.color_props(ctx) />
-                    </div>
-                }
-            } else {
-                html! {
-                    <span class="row">{ "Background" }</span>
-                }
-            };
+        let background_controls = if self.config.number_color_mode == NumberColorMode::Background {
+            html_template! {
+                <span class="row">{ "Background" }</span>
+                <div class="row section inner_section">
+                    <ColorRangeSelector with self.color_props(ctx) />
+                </div>
+            }
+        } else {
+            html! {
+                <span class="row">{ "Background" }</span>
+            }
+        };
 
-        let gradient_controls =
-            if self.config.number_color_mode == NumberColorMode::Gradient {
-                html_template! {
-                    <span class="row">{ "Gradient" }</span>
-                    <div class="row section inner_section">
-                        <ColorRangeSelector with self.color_props(ctx) />
-                        <MaxValueChooser with self.max_value_props(ctx) />
-                    </div>
-                }
-            } else {
-                html! {
-                    <span class="row">{ "Gradient" }</span>
-                }
-            };
+        let gradient_controls = if self.config.number_color_mode == NumberColorMode::Gradient {
+            html_template! {
+                <span class="row">{ "Gradient" }</span>
+                <div class="row section inner_section">
+                    <ColorRangeSelector with self.color_props(ctx) />
+                    <MaxValueChooser with self.max_value_props(ctx) />
+                </div>
+            }
+        } else {
+            html! {
+                <span class="row">{ "Gradient" }</span>
+            }
+        };
 
         let bar_controls = if self.config.number_color_mode == NumberColorMode::Bar {
             html_template! {
@@ -491,17 +487,13 @@ impl NumberColumnStyle {
     }
 
     fn color_props(&self, ctx: &Context<Self>) -> ColorRangeProps {
-        let pos_color_oninput =
-            ctx.link().callback(NumberColumnStyleMsg::PosColorChanged);
-
-        let neg_color_oninput =
-            ctx.link().callback(NumberColumnStyleMsg::NegColorChanged);
-
+        let on_pos_color = ctx.link().callback(NumberColumnStyleMsg::PosColorChanged);
+        let on_neg_color = ctx.link().callback(NumberColumnStyleMsg::NegColorChanged);
         props!(ColorRangeProps {
             pos_color: self.pos_color.to_owned(),
             neg_color: self.neg_color.to_owned(),
-            on_pos_color: pos_color_oninput,
-            on_neg_color: neg_color_oninput
+            on_pos_color,
+            on_neg_color
         })
     }
 

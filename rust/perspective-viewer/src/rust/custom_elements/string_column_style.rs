@@ -18,16 +18,13 @@ use yew::prelude::*;
 #[derive(Clone)]
 pub struct PerspectiveStringColumnStyleElement {
     modal: ModalElement<StringColumnStyle>,
-    props: StringColumnStyleProps,
 }
 
 fn on_change(elem: &web_sys::HtmlElement, config: &StringColumnStyleConfig) {
     let mut event_init = web_sys::CustomEventInit::new();
     event_init.detail(&JsValue::from_serde(config).unwrap());
-    let event = CustomEvent::new_with_event_init_dict(
-        "perspective-column-style-change",
-        &event_init,
-    );
+    let event =
+        CustomEvent::new_with_event_init_dict("perspective-column-style-change", &event_init);
 
     elem.dispatch_event(&event.unwrap()).unwrap();
 }
@@ -41,11 +38,7 @@ impl ResizableMessage for <StringColumnStyle as Component>::Message {
 #[wasm_bindgen]
 impl PerspectiveStringColumnStyleElement {
     #[wasm_bindgen(constructor)]
-    pub fn new(
-        elem: web_sys::HtmlElement,
-        js_config: JsValue,
-        js_default_config: JsValue,
-    ) -> PerspectiveStringColumnStyleElement {
+    pub fn new(elem: web_sys::HtmlElement, js_config: JsValue, js_default_config: JsValue) -> Self {
         let config = js_config.into_serde().unwrap();
         let default_config = js_default_config.into_serde().unwrap();
         let on_change = {
@@ -59,8 +52,8 @@ impl PerspectiveStringColumnStyleElement {
             on_change,
         };
 
-        let modal = ModalElement::new(elem, props.clone(), true);
-        PerspectiveStringColumnStyleElement { modal, props }
+        let modal = ModalElement::new(elem, props, true);
+        Self { modal }
     }
 
     /// Reset to a provided JSON config, to be used in place of `new()` when
@@ -90,7 +83,7 @@ impl PerspectiveStringColumnStyleElement {
         self.modal.destroy()
     }
 
-    /// DOM lifecycle method when connected.  We don't use this, as it can fire during
-    /// innocuous events like re-parenting.
+    /// DOM lifecycle method when connected.  We don't use this, as it can fire
+    /// during innocuous events like re-parenting.
     pub fn connected_callback(&self) {}
 }

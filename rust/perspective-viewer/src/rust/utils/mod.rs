@@ -39,7 +39,6 @@ pub use self::weak_scope::*;
 #[macro_export]
 macro_rules! maybe {
     ($($exp:stmt);*) => {{
-        #[must_use]
         let x = ({
             #[inline(always)]
             || {
@@ -52,13 +51,12 @@ macro_rules! maybe {
 
 #[macro_export]
 macro_rules! js_log_maybe {
-    ($($exp:stmt);* $(;)*) => {{
-        #[must_use]
+    ($($exp:tt)+) => {{
         let x = ({
             #[inline(always)]
             || {
                 {
-                    $($exp)*
+                    $($exp)+
                 };
                 Ok(())
             }
@@ -67,16 +65,31 @@ macro_rules! js_log_maybe {
     }};
 }
 
-/// A helper to for the pattern `let x2 = x;` necessary to clone structs destined
-/// for an `async` or `'static` closure stack.  This is like `move || { .. }` or
-/// `move async { .. }`, but for clone semantics.
+/// A helper to for the pattern `let x2 = x;` necessary to clone structs
+/// destined for an `async` or `'static` closure stack.  This is like `move || {
+/// .. }` or `move async { .. }`, but for clone semantics.
 #[macro_export]
 macro_rules! clone {
-    ($($x:ident : $y:ident),*) => {
-        $(let $x = $y.clone();)*
+    ($i:ident) => {
+        let $i = $i.clone();
     };
-    ($($x:ident),*) => {
-        $(let $x = $x.clone();)*
+    ($i:ident, $($tt:tt)*) => {
+        clone!($i);
+        clone!($($tt)*);
+    };
+    ($this:ident . $i:ident) => {
+        let $i = $this.$i.clone();
+    };
+    ($this:ident . $i:ident, $($tt:tt)*) => {
+        clone!($this . $i);
+        clone!($($tt)*);
+    };
+    ($this:ident . $borrow:ident() . $i:ident) => {
+        let $i = $this.$borrow().$i.clone();
+    };
+    ($this:ident . $borrow:ident() . $i:ident, $($tt:tt)*) => {
+        clone!($this.$borrow().$i);
+        clone!($($tt)*);
     };
 }
 

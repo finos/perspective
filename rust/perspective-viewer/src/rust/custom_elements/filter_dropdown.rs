@@ -9,6 +9,7 @@
 use crate::components::filter_dropdown::*;
 use crate::custom_elements::modal::*;
 use crate::session::Session;
+use crate::*;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -35,7 +36,7 @@ impl ResizableMessage for <FilterDropDown as Component>::Message {
 }
 
 impl FilterDropDownElement {
-    pub fn new(session: Session) -> FilterDropDownElement {
+    pub fn new(session: Session) -> Self {
         let document = window().unwrap().document().unwrap();
         let dropdown = document
             .create_element("perspective-filter-dropdown")
@@ -43,10 +44,9 @@ impl FilterDropDownElement {
             .unchecked_into::<HtmlElement>();
 
         let column: Rc<RefCell<Option<(usize, String)>>> = Rc::new(RefCell::new(None));
-
         let modal = ModalElement::new(dropdown, (), false);
         let values = Rc::new(RefCell::new(None));
-        FilterDropDownElement {
+        Self {
             modal,
             session,
             column,
@@ -81,16 +81,14 @@ impl FilterDropDownElement {
                 *self.column.borrow_mut() = Some(column.clone());
                 *self.target.borrow_mut() = Some(target.clone());
                 let _ = future_to_promise({
-                    let modal = self.modal.clone();
-                    let session = self.session.clone();
-                    let values_ref = self.values.clone();
+                    clone!(self.modal, self.session, self.values);
                     async move {
-                        let values = session.get_column_values(column.1).await?;
-                        *values_ref.borrow_mut() = Some(values);
-                        let values = filter_values(&input, &values_ref);
+                        let all_values = session.get_column_values(column.1).await?;
+                        *values.borrow_mut() = Some(all_values);
+                        let filter_values = filter_values(&input, &values);
                         modal.send_message_batch(vec![
                             FilterDropDownMsg::SetCallback(callback),
-                            FilterDropDownMsg::SetValues(values),
+                            FilterDropDownMsg::SetValues(filter_values),
                         ]);
 
                         modal.open(target, None);
@@ -122,10 +120,7 @@ impl FilterDropDownElement {
     pub fn connected_callback(&self) {}
 }
 
-fn filter_values(
-    input: &str,
-    values: &Rc<RefCell<Option<Vec<String>>>>,
-) -> Vec<String> {
+fn filter_values(input: &str, values: &Rc<RefCell<Option<Vec<String>>>>) -> Vec<String> {
     let input = input.to_lowercase();
     if let Some(values) = &*values.borrow() {
         values

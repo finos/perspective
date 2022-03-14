@@ -192,11 +192,9 @@ impl FilterItemProps {
                     }
                 }
                 Some(Type::Date) => match NaiveDate::parse_from_str(&val, "%Y-%m-%d") {
-                    Ok(ref posix) => posix.and_hms_opt(0, 0, 0).map(|x| {
-                        FilterTerm::Scalar(
-                            Scalar::DateTime(x.timestamp_millis() as f64),
-                        )
-                    }),
+                    Ok(ref posix) => posix
+                        .and_hms_opt(0, 0, 0)
+                        .map(|x| FilterTerm::Scalar(Scalar::DateTime(x.timestamp_millis() as f64))),
                     _ => None,
                 },
                 Some(Type::Datetime) => match str_to_utc_posix(&val) {
@@ -346,15 +344,13 @@ impl Component for FilterItem {
 
         let focus = ctx.link().callback({
             let input = self.input.clone();
-            move |_: FocusEvent| {
-                FilterItemMsg::FilterInput((idx, column.clone()), input.clone())
-            }
+            move |_: FocusEvent| FilterItemMsg::FilterInput((idx, column.clone()), input.clone())
         });
 
         let blur = ctx.link().callback(|_| FilterItemMsg::Close);
-        let keydown = ctx.link().callback(move |event: KeyboardEvent| {
-            FilterItemMsg::FilterKeyDown(event.key_code())
-        });
+        let keydown = ctx
+            .link()
+            .callback(move |event: KeyboardEvent| FilterItemMsg::FilterKeyDown(event.key_code()));
 
         let dragref = NodeRef::default();
         let dragstart = Callback::from({
@@ -364,10 +360,7 @@ impl Component for FilterItem {
             move |event: DragEvent| {
                 let elem = dragref.cast::<HtmlElement>().unwrap();
                 event.data_transfer().unwrap().set_drag_image(&elem, 0, 0);
-                dragdrop.drag_start(
-                    event_name.to_string(),
-                    DragEffect::Move(DropAction::Filter),
-                )
+                dragdrop.drag_start(event_name.to_string(), DragEffect::Move(DragTarget::Filter))
             }
         });
 

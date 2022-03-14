@@ -13,9 +13,10 @@ use yew::prelude::*;
 pub trait ToClosure<T> {
     type Output;
 
-    /// Convert `self` to a `Closure`.  This is mostly just for code cleanliness,
-    /// as stable Rust does not yet supports specialization (which would support more
-    /// types) nor `Unsize<_>` (which would elide more explicit type annotations).
+    /// Convert `self` to a `Closure`.  This is mostly just for code
+    /// cleanliness, as stable Rust does not yet supports specialization
+    /// (which would support more types) nor `Unsize<_>` (which would elide
+    /// more explicit type annotations).
     fn into_closure(self) -> Self::Output;
 }
 
@@ -58,7 +59,7 @@ where
     }
 }
 
-impl<U> ToClosure<Callback<U>> for Callback<U>
+impl<U> ToClosure<Self> for Callback<U>
 where
     U: FromWasmAbi + 'static,
 {

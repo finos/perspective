@@ -56,8 +56,8 @@ pub fn init_theme(theme: &str, editor: &Editor) {
     editor.define_theme("exprtk-theme", theme_args)
 }
 
-/// Initializes the `MonacoEnvironment` global definition, which the monaco library
-/// uses to resolve its Web Workers and features.
+/// Initializes the `MonacoEnvironment` global definition, which the monaco
+/// library uses to resolve its Web Workers and features.
 pub async fn init_environment() -> Result<(), error::Error> {
     let worker = new_worker().await;
     let closure = Closure::once_into_js(move |_: JsValue| worker);

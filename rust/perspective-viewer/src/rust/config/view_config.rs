@@ -81,8 +81,8 @@ impl ViewConfig {
         std::mem::swap(self, &mut config);
     }
 
-    /// Apply `ViewConfigUpdate` to a `ViewConfig`, ignoring any fields in `update`
-    /// which were unset.
+    /// Apply `ViewConfigUpdate` to a `ViewConfig`, ignoring any fields in
+    /// `update` which were unset.
     pub fn apply_update(&mut self, update: ViewConfigUpdate) -> bool {
         let mut changed = false;
         changed = Self::_apply(&mut self.group_by, update.group_by) || changed;

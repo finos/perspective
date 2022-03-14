@@ -26,8 +26,8 @@ struct ThemeStoreData {
 }
 
 impl ThemeStore {
-    pub fn new(elem: &HtmlElement) -> ThemeStore {
-        ThemeStore(Rc::new(ThemeStoreData {
+    pub fn new(elem: &HtmlElement) -> Self {
+        Self(Rc::new(ThemeStoreData {
             viewer_elem: elem.clone(),
             themes: Default::default(), //RefCell::new(None),
         }))

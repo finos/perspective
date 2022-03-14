@@ -59,18 +59,12 @@ fn get_menu_items(name: &str, has_render: bool) -> Vec<ExportDropDownMenuItem> {
                 ]
             },
         ),
-        ExportDropDownMenuItem::OptGroup(
-            "All",
-            vec![
-                ExportMethod::CsvAll.new_file(name),
-                ExportMethod::JsonAll.new_file(name),
-                ExportMethod::ArrowAll.new_file(name),
-            ],
-        ),
-        ExportDropDownMenuItem::OptGroup(
-            "Config",
-            vec![ExportMethod::JsonConfig.new_file(name)],
-        ),
+        ExportDropDownMenuItem::OptGroup("All", vec![
+            ExportMethod::CsvAll.new_file(name),
+            ExportMethod::JsonAll.new_file(name),
+            ExportMethod::ArrowAll.new_file(name),
+        ]),
+        ExportDropDownMenuItem::OptGroup("Config", vec![ExportMethod::JsonConfig.new_file(name)]),
     ]
 }
 

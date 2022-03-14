@@ -14,9 +14,7 @@ use serde::Serialize;
 use std::fmt::Display;
 use wasm_bindgen::*;
 
-#[derive(
-    Clone, Copy, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize,
-)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
 #[serde()]
 pub enum SingleAggregate {
     #[serde(rename = "sum")]
@@ -173,10 +171,7 @@ pub enum Aggregate {
 }
 
 impl Display for Aggregate {
-    fn fmt(
-        &self,
-        fmt: &mut std::fmt::Formatter<'_>,
-    ) -> std::result::Result<(), std::fmt::Error> {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
         match self {
             Aggregate::SingleAggregate(x) => write!(fmt, "{}", x)?,
             Aggregate::MultiAggregate(MultiAggregate::WeightedMean, x) => {
@@ -192,10 +187,7 @@ impl FromStr for Aggregate {
     fn from_str(input: &str) -> std::result::Result<Self, JsValue> {
         Ok(
             if let Some(stripped) = input.strip_prefix("weighted mean by ") {
-                Aggregate::MultiAggregate(
-                    MultiAggregate::WeightedMean,
-                    stripped.to_owned(),
-                )
+                Aggregate::MultiAggregate(MultiAggregate::WeightedMean, stripped.to_owned())
             } else {
                 Aggregate::SingleAggregate(SingleAggregate::from_str(input)?)
             },
@@ -258,14 +250,12 @@ impl Type {
         }
     }
 
-    pub fn default_aggregate(&self) -> Aggregate {
+    pub const fn default_aggregate(&self) -> Aggregate {
         match self {
             Type::Bool | Type::Date | Type::Datetime | Type::String => {
                 Aggregate::SingleAggregate(SingleAggregate::Count)
             }
-            Type::Integer | Type::Float => {
-                Aggregate::SingleAggregate(SingleAggregate::Sum)
-            }
+            Type::Integer | Type::Float => Aggregate::SingleAggregate(SingleAggregate::Sum),
         }
     }
 }

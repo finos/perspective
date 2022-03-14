@@ -26,10 +26,7 @@ pub enum Scalar {
 }
 
 impl Display for Scalar {
-    fn fmt(
-        &self,
-        fmt: &mut std::fmt::Formatter<'_>,
-    ) -> std::result::Result<(), std::fmt::Error> {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
         match self {
             Scalar::Float(x) => write!(fmt, "{}", x),
             Scalar::String(x) => write!(fmt, "{}", x),
@@ -40,6 +37,7 @@ impl Display for Scalar {
     }
 }
 
+#[allow(clippy::upper_case_acronyms)]
 #[derive(Clone, Copy, Deserialize, Debug, PartialEq, Serialize)]
 #[serde()]
 pub enum FilterOp {
@@ -84,24 +82,21 @@ pub enum FilterOp {
 }
 
 impl Display for FilterOp {
-    fn fmt(
-        &self,
-        fmt: &mut std::fmt::Formatter<'_>,
-    ) -> std::result::Result<(), std::fmt::Error> {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
         let op = match self {
-            FilterOp::Contains => "contains",
-            FilterOp::In => "in",
-            FilterOp::NotIn => "not in",
-            FilterOp::BeginsWith => "begins with",
-            FilterOp::EndsWith => "ends with",
-            FilterOp::IsNull => "is null",
-            FilterOp::IsNotNull => "is not null",
-            FilterOp::GT => ">",
-            FilterOp::LT => "<",
-            FilterOp::EQ => "==",
-            FilterOp::GTE => ">=",
-            FilterOp::LTE => "<=",
-            FilterOp::NE => "!=",
+            Self::Contains => "contains",
+            Self::In => "in",
+            Self::NotIn => "not in",
+            Self::BeginsWith => "begins with",
+            Self::EndsWith => "ends with",
+            Self::IsNull => "is null",
+            Self::IsNotNull => "is not null",
+            Self::GT => ">",
+            Self::LT => "<",
+            Self::EQ => "==",
+            Self::GTE => ">=",
+            Self::LTE => "<=",
+            Self::NE => "!=",
         };
 
         write!(fmt, "{}", op)
@@ -110,9 +105,7 @@ impl Display for FilterOp {
 
 impl FromStr for FilterOp {
     type Err = String;
-    fn from_str(
-        input: &str,
-    ) -> std::result::Result<Self, <Self as std::str::FromStr>::Err> {
+    fn from_str(input: &str) -> std::result::Result<Self, <Self as std::str::FromStr>::Err> {
         match input {
             "contains" => Ok(FilterOp::Contains),
             "in" => Ok(FilterOp::In),
@@ -140,10 +133,7 @@ pub enum FilterTerm {
 }
 
 impl Display for FilterTerm {
-    fn fmt(
-        &self,
-        fmt: &mut std::fmt::Formatter<'_>,
-    ) -> std::result::Result<(), std::fmt::Error> {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
         match self {
             FilterTerm::Scalar(x) => {
                 write!(fmt, "{}", x)?;
@@ -151,11 +141,8 @@ impl Display for FilterTerm {
             FilterTerm::Array(xs) => write!(
                 fmt,
                 "{}",
-                Itertools::intersperse(
-                    xs.iter().map(|x| format!("{}", x)),
-                    ",".to_owned()
-                )
-                .collect::<String>()
+                Itertools::intersperse(xs.iter().map(|x| format!("{}", x)), ",".to_owned())
+                    .collect::<String>()
             )?,
         }
 

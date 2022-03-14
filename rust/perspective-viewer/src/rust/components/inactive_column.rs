@@ -33,8 +33,8 @@ pub struct InactiveColumnProps {
 }
 
 impl PartialEq for InactiveColumnProps {
-    /// Equality for `InactiveColumnProps` determines when it should re-render, which
-    /// is only when it has changed.
+    /// Equality for `InactiveColumnProps` determines when it should re-render,
+    /// which is only when it has changed.
     /// TODO Aggregates
     fn eq(&self, _rhs: &InactiveColumnProps) -> bool {
         false
@@ -44,12 +44,12 @@ impl PartialEq for InactiveColumnProps {
 derive_session_renderer_model!(InactiveColumnProps);
 
 impl InactiveColumnProps {
-    /// Add a column to the active columns, which corresponds to the `columns` field
-    /// of the `JsPerspectiveViewConfig`.
+    /// Add a column to the active columns, which corresponds to the `columns`
+    /// field of the `JsPerspectiveViewConfig`.
     ///
     /// # Arguments
-    /// - `name` The name of the column to de-activate, which is a unique ID with
-    ///   respect to `columns`.
+    /// - `name` The name of the column to de-activate, which is a unique ID
+    ///   with respect to `columns`.
     /// - `shift` whether to toggle or select this column.
     pub fn activate_column(&self, name: String, shift: bool) {
         let ViewConfig { mut columns, .. } = self.session.get_view_config();
@@ -137,9 +137,9 @@ impl Component for InactiveColumn {
             .get_column_table_type(&ctx.props().name)
             .expect("Unknown column");
 
-        let add_column = ctx.link().callback(|event: MouseEvent| {
-            InactiveColumnMsg::ActivateColumn(event.shift_key())
-        });
+        let add_column = ctx
+            .link()
+            .callback(|event: MouseEvent| InactiveColumnMsg::ActivateColumn(event.shift_key()));
 
         let noderef = NodeRef::default();
         let dragstart = Callback::from({

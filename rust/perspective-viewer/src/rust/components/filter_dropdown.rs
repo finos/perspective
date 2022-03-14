@@ -109,25 +109,25 @@ impl Component for FilterDropDown {
         let body = if let Some(ref values) = self.values {
             if !values.is_empty() {
                 values
-                .iter()
-                .enumerate()
-                .map(|(idx, value)| {
-                    let click = self.on_select.as_ref().unwrap().reform({
-                        let value = value.clone();
-                        move |_: MouseEvent| value.clone()
-                    });
+                    .iter()
+                    .enumerate()
+                    .map(|(idx, value)| {
+                        let click = self.on_select.as_ref().unwrap().reform({
+                            let value = value.clone();
+                            move |_: MouseEvent| value.clone()
+                        });
 
-                    if idx == self.selected {
-                        html! {
-                            <span onmousedown={ click }class="selected">{ value }</span>
+                        if idx == self.selected {
+                            html! {
+                                <span onmousedown={ click }class="selected">{ value }</span>
+                            }
+                        } else {
+                            html! {
+                                <span onmousedown={ click }>{ value }</span>
+                            }
                         }
-                    } else {
-                        html! {
-                            <span onmousedown={ click }>{ value }</span>
-                        }
-                    }
-                })
-                .collect::<Html>()
+                    })
+                    .collect::<Html>()
             } else {
                 html! {
                     <span class="no-results">{ "No Completions" }</span>

@@ -18,8 +18,8 @@ use super::containers::dragdrop_list::*;
 use web_sys::*;
 use yew::prelude::*;
 
-/// A `SortItem` includes the column name and `SortDir` arrow, a clickable button
-/// which cycles through the available `SortDir` states.
+/// A `SortItem` includes the column name and `SortDir` arrow, a clickable
+/// button which cycles through the available `SortDir` states.
 pub struct SortItem {}
 
 #[derive(Properties, Clone)]
@@ -65,8 +65,7 @@ impl Component for SortItem {
                 let ViewConfig {
                     mut sort, split_by, ..
                 } = ctx.props().session.get_view_config();
-                let sort_item =
-                    &mut sort.get_mut(ctx.props().idx).expect("Sort on no column");
+                let sort_item = &mut sort.get_mut(ctx.props().idx).expect("Sort on no column");
                 sort_item.1 = sort_item.1.cycle(!split_by.is_empty(), shift_key);
                 let update = ViewConfigUpdate {
                     sort: Some(sort),
@@ -91,10 +90,7 @@ impl Component for SortItem {
             move |event: DragEvent| {
                 let elem = noderef.cast::<HtmlElement>().unwrap();
                 event.data_transfer().unwrap().set_drag_image(&elem, 0, 0);
-                dragdrop.drag_start(
-                    event_name.to_string(),
-                    DragEffect::Move(DropAction::Sort),
-                )
+                dragdrop.drag_start(event_name.to_string(), DragEffect::Move(DragTarget::Sort))
             }
         });
 

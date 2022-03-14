@@ -25,11 +25,11 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
 use yew::prelude::*;
 
-/// A `SessionRendererModel` is any struct with `session` and `renderer` fields, as
-/// this method is boilerplate but has no other trait to live on currently.  As
-/// I'm too lazy to be bothered to implement a `proc-macro` crate, instead this
-/// trait can be conveniently derived via the `derive_session_renderer_model!()` macro
-/// on a suitable struct.
+/// A `SessionRendererModel` is any struct with `session` and `renderer` fields,
+/// as this method is boilerplate but has no other trait to live on currently.
+/// As I'm too lazy to be bothered to implement a `proc-macro` crate, instead
+/// this trait can be conveniently derived via the
+/// `derive_session_renderer_model!()` macro on a suitable struct.
 pub trait SessionRendererModel {
     fn session(&self) -> &'_ Session;
     fn renderer(&self) -> &'_ Renderer;
@@ -67,9 +67,7 @@ pub trait SessionRendererModel {
         });
     }
 
-    fn html_as_jsvalue(
-        &self,
-    ) -> Pin<Box<dyn Future<Output = Result<web_sys::Blob, JsValue>>>> {
+    fn html_as_jsvalue(&self) -> Pin<Box<dyn Future<Output = Result<web_sys::Blob, JsValue>>>> {
         let view_config = self.get_viewer_config();
         let session = self.session().clone();
         Box::pin(async move {
@@ -112,9 +110,7 @@ window.viewer.restore(JSON.parse(window.layout.textContent));
         })
     }
 
-    fn get_viewer_config(
-        &self,
-    ) -> Pin<Box<dyn Future<Output = Result<ViewerConfig, JsValue>>>> {
+    fn get_viewer_config(&self) -> Pin<Box<dyn Future<Output = Result<ViewerConfig, JsValue>>>> {
         let view_config = self.session().get_view_config();
         let js_plugin = self.renderer().get_active_plugin();
         let renderer = self.renderer().clone();
@@ -138,9 +134,7 @@ window.viewer.restore(JSON.parse(window.layout.textContent));
         })
     }
 
-    fn config_as_jsvalue(
-        &self,
-    ) -> Pin<Box<dyn Future<Output = Result<web_sys::Blob, JsValue>>>> {
+    fn config_as_jsvalue(&self) -> Pin<Box<dyn Future<Output = Result<web_sys::Blob, JsValue>>>> {
         let viewer_config = self.get_viewer_config();
         Box::pin(async move {
             let config = viewer_config
@@ -193,10 +187,9 @@ window.viewer.restore(JSON.parse(window.layout.textContent));
                     let render = js_sys::Reflect::get(&plugin, js_intern!("render"))?;
                     let render_fun = render.unchecked_into::<js_sys::Function>();
                     let png = render_fun.call0(&plugin)?;
-                    let result =
-                        JsFuture::from(png.unchecked_into::<js_sys::Promise>())
-                            .await?
-                            .unchecked_into();
+                    let result = JsFuture::from(png.unchecked_into::<js_sys::Promise>())
+                        .await?
+                        .unchecked_into();
                     Ok(result)
                 })
             }
@@ -236,16 +229,8 @@ macro_rules! derive_session_renderer_model {
 pub trait ViewerModel: SessionRendererModel {
     fn dragdrop(&self) -> &'_ DragDrop;
 
-    fn column_selector_iter_set<'a>(
-        &'a self,
-        config: &'a ViewConfig,
-    ) -> ColumnsIteratorSet<'a> {
-        ColumnsIteratorSet::new(
-            config,
-            self.session(),
-            self.renderer(),
-            self.dragdrop(),
-        )
+    fn column_selector_iter_set<'a>(&'a self, config: &'a ViewConfig) -> ColumnsIteratorSet<'a> {
+        ColumnsIteratorSet::new(config, self.session(), self.renderer(), self.dragdrop())
     }
 }
 

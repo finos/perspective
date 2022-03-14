@@ -81,8 +81,7 @@ mod tests {
             render_warning: true,
             ..ViewConfigRequirements::default()
         };
-        let (_, _, max_cols, max_rows) =
-            get_row_and_col_limits(&view, &reqs).await.unwrap();
+        let (_, _, max_cols, max_rows) = get_row_and_col_limits(&view, &reqs).await.unwrap();
         assert_eq!(max_cols, None);
         assert_eq!(max_rows, None);
     }
@@ -105,8 +104,7 @@ mod tests {
             ..ViewConfigRequirements::default()
         };
 
-        let (_, _, max_cols, max_rows) =
-            get_row_and_col_limits(&view, &reqs).await.unwrap();
+        let (_, _, max_cols, max_rows) = get_row_and_col_limits(&view, &reqs).await.unwrap();
         assert_eq!(max_cols, None);
         assert_eq!(max_rows, None);
     }
@@ -128,8 +126,7 @@ mod tests {
             render_warning: true,
             ..ViewConfigRequirements::default()
         };
-        let (_, _, max_cols, max_rows) =
-            get_row_and_col_limits(&view, &reqs).await.unwrap();
+        let (_, _, max_cols, max_rows) = get_row_and_col_limits(&view, &reqs).await.unwrap();
         assert_eq!(max_cols, Some(1));
         assert_eq!(max_rows, None);
     }
@@ -151,8 +148,7 @@ mod tests {
             render_warning: true,
             ..ViewConfigRequirements::default()
         };
-        let (_, _, max_cols, max_rows) =
-            get_row_and_col_limits(&view, &reqs).await.unwrap();
+        let (_, _, max_cols, max_rows) = get_row_and_col_limits(&view, &reqs).await.unwrap();
         assert_eq!(max_cols, Some(4));
         assert_eq!(max_rows, None);
     }
@@ -174,8 +170,7 @@ mod tests {
             render_warning: true,
             ..ViewConfigRequirements::default()
         };
-        let (_, _, max_cols, max_rows) =
-            get_row_and_col_limits(&view, &reqs).await.unwrap();
+        let (_, _, max_cols, max_rows) = get_row_and_col_limits(&view, &reqs).await.unwrap();
         assert_eq!(max_cols, None);
         assert_eq!(max_rows, Some(2));
     }
@@ -199,8 +194,7 @@ mod tests {
             ..ViewConfigRequirements::default()
         };
 
-        let (_, _, max_cols, max_rows) =
-            get_row_and_col_limits(&view, &reqs).await.unwrap();
+        let (_, _, max_cols, max_rows) = get_row_and_col_limits(&view, &reqs).await.unwrap();
         assert_eq!(max_cols, Some(2));
         assert_eq!(max_rows, Some(5));
     }

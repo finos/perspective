@@ -32,10 +32,7 @@ pub struct FontLoaderProps {
 }
 
 impl Debug for FontLoaderProps {
-    fn fmt(
-        &self,
-        fmt: &mut std::fmt::Formatter<'_>,
-    ) -> std::result::Result<(), std::fmt::Error> {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
         fmt.write_str("FontLoaderProps")
     }
 }
@@ -101,10 +98,7 @@ pub struct FontLoaderState {
 }
 
 impl FontLoaderProps {
-    pub fn new(
-        elem: &web_sys::HtmlElement,
-        on_update: Callback<()>,
-    ) -> FontLoaderProps {
+    pub fn new(elem: &web_sys::HtmlElement, on_update: Callback<()>) -> FontLoaderProps {
         let inner = FontLoaderState {
             status: Cell::new(FontLoaderStatus::Uninitialized),
             elem: elem.clone(),
@@ -138,8 +132,8 @@ impl FontLoaderProps {
         Ok(JsValue::UNDEFINED)
     }
 
-    /// Awaits loading of a required set of font/weight pairs, given an element with
-    /// a CSS variable of the format:
+    /// Awaits loading of a required set of font/weight pairs, given an element
+    /// with a CSS variable of the format:
     /// ```css
     /// perspective-viewer {
     ///     --preload-fonts: "Roboto Mono:200;Open Sans:300,400;Material Icons:400";
@@ -182,9 +176,7 @@ impl FontLoaderProps {
         }
 
         if block_promises.len() != preload_fonts.len() {
-            web_sys::console::warn_1(
-                &format!("Missing preload fonts {:?}", &preload_fonts).into(),
-            );
+            web_sys::console::warn_1(&format!("Missing preload fonts {:?}", &preload_fonts).into());
         }
 
         let res = join_all(block_promises)
@@ -201,10 +193,7 @@ impl FontLoaderProps {
 
 // An async task which times out.  Can be used to timeout an optional async task
 // by combinging with `Promise::any`.
-fn timeout_font_task(
-    family: &str,
-    weight: &str,
-) -> impl Future<Output = Result<JsValue, JsValue>> {
+fn timeout_font_task(family: &str, weight: &str) -> impl Future<Output = Result<JsValue, JsValue>> {
     let timeout_msg = format!("Timeout awaiting font \"{}:{}\"", family, weight);
     async {
         set_timeout(FONT_DOWNLOAD_TIMEOUT_MS).await?;

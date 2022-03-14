@@ -153,8 +153,6 @@ pub fn test_status_table_and_view_loaded() {
     assert_eq!(
         rows,
         "\
-<span>54,321 </span>\
-<span class=\"icon\">arrow_back</span>\
-<span> 12,345,678 rows</span>"
+<span>54,321 </span><span class=\"icon\">arrow_back</span><span> 12,345,678 rows</span>"
     );
 }

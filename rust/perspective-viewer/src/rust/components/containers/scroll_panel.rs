@@ -90,9 +90,8 @@ where
         let named_col_section_height =
             ctx.props().named_row_count as f64 * ctx.props().named_row_height;
 
-        max!(0, ctx.props().items.len() - ctx.props().named_row_count) as f64
-            * ctx.props().row_height
-            + named_col_section_height
+        (max!(0, ctx.props().items.len() - ctx.props().named_row_count) as f64)
+            .mul_add(ctx.props().row_height, named_col_section_height)
     }
 }
 
@@ -117,15 +116,14 @@ where
 
     fn create(ctx: &Context<Self>) -> Self {
         let link = ctx.link().clone();
-        let _dimensions_reset_sub =
-            ctx.props().on_dimensions_reset.as_ref().map(|pubsub| {
-                pubsub.add_listener(move |_| {
-                    link.send_message_batch(vec![
-                        ScrollPanelMsg::ResetAutoWidth,
-                        ScrollPanelMsg::CalculateWindowContent,
-                    ])
-                })
-            });
+        let _dimensions_reset_sub = ctx.props().on_dimensions_reset.as_ref().map(|pubsub| {
+            pubsub.add_listener(move |_| {
+                link.send_message_batch(vec![
+                    ScrollPanelMsg::ResetAutoWidth,
+                    ScrollPanelMsg::CalculateWindowContent,
+                ])
+            })
+        });
 
         let link = ctx.link().clone();
         let _resize_sub = ctx.props().on_resize.as_ref().map(|pubsub| {
@@ -176,28 +174,26 @@ where
                     max!(
                         0,
                         ((scroll_top / ctx.props().row_height).floor() as usize
-                            + ctx.props().named_row_count)
-                            as isize,
+                            + ctx.props().named_row_count) as isize,
                     ) as usize
                 } else {
-                    max!(0.0, (scroll_top / ctx.props().named_row_height).floor())
-                        as usize
+                    max!(0.0, (scroll_top / ctx.props().named_row_height).floor()) as usize
                 };
 
                 let total_visible = min!(
-                    ((self.viewport_height / ctx.props().row_height).ceil()) as usize
-                        + 2,
-                    max!(0, ctx.props().items.len() as isize - start_node as isize)
-                        as usize,
+                    ((self.viewport_height / ctx.props().row_height).ceil()) as usize + 2,
+                    max!(0, ctx.props().items.len() as isize - start_node as isize) as usize,
                 );
 
-                let start_y = max!(
+                let start_y = (max!(
                     0,
                     start_node as isize - ctx.props().named_row_count as isize,
-                ) as f64
-                    * ctx.props().row_height
-                    + min!(ctx.props().named_row_count, start_node) as f64
-                        * ctx.props().named_row_height;
+                ) as f64)
+                    .mul_add(
+                        ctx.props().row_height,
+                        min!(ctx.props().named_row_count, start_node) as f64
+                            * ctx.props().named_row_height,
+                    );
 
                 let end_node = start_node + total_visible;
                 if end_node > ctx.props().items.len() {

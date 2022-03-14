@@ -17,8 +17,8 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use yew::prelude::*;
 
-/// Metadata snapshot of the current `Table()`/`View()` state which may be of interest
-/// to components.
+/// Metadata snapshot of the current `Table()`/`View()` state which may be of
+/// interest to components.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct TableStats {
     pub is_pivot: bool,
@@ -67,9 +67,10 @@ impl ViewSubscriptionData {
 }
 
 impl ViewSubscription {
-    /// Create a new `ViewSubscription` with the provided Perspective `Table()` and
-    /// `View()` pair.  During initialization, any necessary Perspective API events
-    /// will be subscribed to and subsequently cleaned up via `Drop` trait.
+    /// Create a new `ViewSubscription` with the provided Perspective `Table()`
+    /// and `View()` pair.  During initialization, any necessary Perspective
+    /// API events will be subscribed to and subsequently cleaned up via
+    /// `Drop` trait.
     ///
     /// # Arguments
     /// * `table` - a Perspective `Table()`
@@ -82,7 +83,7 @@ impl ViewSubscription {
         config: ViewConfig,
         on_stats: Callback<TableStats>,
         on_update: Callback<()>,
-    ) -> ViewSubscription {
+    ) -> Self {
         let data = ViewSubscriptionData {
             table,
             view: View::new(view),
@@ -99,18 +100,18 @@ impl ViewSubscription {
         let closure = fun.into_closure();
         data.view.on_update(closure.as_ref().unchecked_ref());
         let _ = promisify_ignore_view_delete(data.clone().update_view_stats());
-        ViewSubscription { data, closure }
+        Self { data, closure }
     }
 
     /// Getter for the underlying `View()`.
-    pub fn get_view(&self) -> &View {
+    pub const fn get_view(&self) -> &View {
         &self.data.view
     }
 
     /// Getter for the underlying `Table()`.
     /// TODO this is un-used, but I'm leaving it as a reminder that the API
     /// intends this to be public.
-    pub fn _table(&self) -> &JsPerspectiveTable {
+    pub const fn _table(&self) -> &JsPerspectiveTable {
         &self.data.table
     }
 }

@@ -16,22 +16,22 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::spawn_local;
 
-/// `PerspectiveOwned` is a newtype-ed `Rc` smart pointer which guarantees either a
-/// `JsPerspectiveView` or `JsPerspectiveTable` will have its `.delete()` method
-/// called when it is dropped.
+/// `PerspectiveOwned` is a newtype-ed `Rc` smart pointer which guarantees
+/// either a `JsPerspectiveView` or `JsPerspectiveTable` will have its
+/// `.delete()` method called when it is dropped.
 #[derive(Derivative)]
 #[derivative(Clone(bound = ""))]
 pub struct PerspectiveOwned<T>(Rc<PerspectiveOwnedSession<T>>)
 where
     T: AsyncDelete + 'static;
 
-/// An owned `JsPerspectiveView` which calls its JavaScript `delete()` method when
-/// this struct is `drop()`-ed.
+/// An owned `JsPerspectiveView` which calls its JavaScript `delete()` method
+/// when this struct is `drop()`-ed.
 pub type View = PerspectiveOwned<JsPerspectiveView>;
 
 /// `<perspective-viewer>` does not currently take ownership of `Table`. objects
-/// so this is not currently needed, but it will be in the future and this polymorphism
-/// is th emotiviation behind the `PerspectiveOwned<T>` type.
+/// so this is not currently needed, but it will be in the future and this
+/// polymorphism is th emotiviation behind the `PerspectiveOwned<T>` type.
 #[allow(dead_code)]
 pub type Table = PerspectiveOwned<JsPerspectiveTable>;
 
@@ -40,12 +40,12 @@ where
     T: AsyncDelete + 'static + JsCast,
 {
     /// Take ownership of a `T` and construct a `PerspectiveOwned<T>`.
-    pub fn new(obj: T) -> PerspectiveOwned<T> {
-        PerspectiveOwned(Rc::new(PerspectiveOwnedSession(Some(obj))))
+    pub fn new(obj: T) -> Self {
+        Self(Rc::new(PerspectiveOwnedSession(Some(obj))))
     }
 
-    /// Get a reference to the owned object as a `JsValue`, which is necessary to
-    /// pass it back to other JavaScript APIs.
+    /// Get a reference to the owned object as a `JsValue`, which is necessary
+    /// to pass it back to other JavaScript APIs.
     pub fn as_jsvalue(&self) -> JsValue {
         self.0
              .0
@@ -70,8 +70,8 @@ where
 }
 
 /// `PerspectiveOwnedSession<T>` is a newtype wrapper for implementing `Drop`.
-/// Alternatively, we could just implement `Drop` directly on `JsPerspectiveView` and
-/// `JsPerspectiveTable`.
+/// Alternatively, we could just implement `Drop` directly on
+/// `JsPerspectiveView` and `JsPerspectiveTable`.
 struct PerspectiveOwnedSession<T: AsyncDelete + 'static>(Option<T>);
 
 #[async_trait(?Send)]

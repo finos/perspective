@@ -25,8 +25,9 @@ struct SessionViewExpressionMetadata {
 }
 
 /// Metadata state reflects data we could fetch from a `View`, but would like to
-/// do so without `async`.  It must be recreated by any `async` method which changes
-/// the `View` and may temporarily be out-of-sync with the `View`/`ViewConfig`.
+/// do so without `async`.  It must be recreated by any `async` method which
+/// changes the `View` and may temporarily be out-of-sync with the
+/// `View`/`ViewConfig`.
 #[derive(Default)]
 pub struct SessionMetadata(Option<SessionMetadataState>);
 
@@ -56,9 +57,7 @@ pub struct SessionMetadataState {
 
 impl SessionMetadata {
     /// Creates a new `SessionMetadata` from a `JsPerspectiveTable`.
-    pub(super) async fn from_table(
-        table: &JsPerspectiveTable,
-    ) -> Result<SessionMetadata, JsValue> {
+    pub(super) async fn from_table(table: &JsPerspectiveTable) -> Result<Self, JsValue> {
         let column_names = {
             let columns = table.columns().await?;
             if columns.length() > 0 {
@@ -78,7 +77,7 @@ impl SessionMetadata {
 
         let edit_port = table.make_port().await?;
 
-        Ok(SessionMetadata(Some(SessionMetadataState {
+        Ok(Self(Some(SessionMetadataState {
             column_names,
             table_schema,
             edit_port,
@@ -116,8 +115,7 @@ impl SessionMetadata {
             .into_serde::<HashMap<String, Type>>()
             .into_jserror()?;
 
-        let expression_names =
-            expression_schema.keys().cloned().collect::<HashSet<_>>();
+        let expression_names = expression_schema.keys().cloned().collect::<HashSet<_>>();
 
         let mut edited = self
             .as_mut()
@@ -137,7 +135,8 @@ impl SessionMetadata {
         Ok(expression_names)
     }
 
-    /// Returns the unique column names in this session that are expression columns.
+    /// Returns the unique column names in this session that are expression
+    /// columns.
     pub fn get_expression_columns(&self) -> impl Iterator<Item = &'_ String> {
         maybe!(Some(self.as_ref()?.expr_meta.as_ref()?.schema.keys()))
             .into_iter()
@@ -201,13 +200,14 @@ impl SessionMetadata {
         self.as_ref().map(|meta| meta.edit_port)
     }
 
-    /// Returns the type of a column name relative to the `Table`.  Despite the name,
-    /// `get_column_table_type()` also returns the `Table` type for Expressions,
-    /// which despite living on the `View` still have a `table` type associated with
-    /// them pre-aggregation.
+    /// Returns the type of a column name relative to the `Table`.  Despite the
+    /// name, `get_column_table_type()` also returns the `Table` type for
+    /// Expressions, which despite living on the `View` still have a `table`
+    /// type associated with them pre-aggregation.
     ///
     /// # Arguments
-    /// - `name` The column name (or expresison alias) to retrieve a principal type.
+    /// - `name` The column name (or expresison alias) to retrieve a principal
+    ///   type.
     pub fn get_column_table_type(&self, name: &str) -> Option<Type> {
         maybe!({
             let meta = self.as_ref()?;
@@ -218,13 +218,15 @@ impl SessionMetadata {
         })
     }
 
-    /// Returns the type of a column name relative to the `View`, including expression
-    /// columns which were part of the `ViewConfig`.  Types returned from the `View`
-    /// incorporate the type transform applied by their aggregate if applicable, so
-    /// may differ from the type returned by `get_column_table_type()`.
+    /// Returns the type of a column name relative to the `View`, including
+    /// expression columns which were part of the `ViewConfig`.  Types
+    /// returned from the `View` incorporate the type transform applied by
+    /// their aggregate if applicable, so may differ from the type returned
+    /// by `get_column_table_type()`.
     ///
     /// # Arguments
-    /// - `name` The column name (or expresison alias) to retrieve a `View` type.
+    /// - `name` The column name (or expresison alias) to retrieve a `View`
+    ///   type.
     pub fn get_column_view_type(&self, name: &str) -> Option<Type> {
         maybe!(self.as_ref()?.view_schema.as_ref()?.get(name)).cloned()
     }
@@ -248,14 +250,9 @@ impl SessionMetadata {
                         })
                         .collect::<Option<Vec<_>>>()?
                         .into_iter()
-                        .filter(|(_, coltype)| {
-                            *coltype == Type::Integer || *coltype == Type::Float
-                        })
+                        .filter(|(_, coltype)| *coltype == Type::Integer || *coltype == Type::Float)
                         .map(|(name, _)| {
-                            Aggregate::MultiAggregate(
-                                MultiAggregate::WeightedMean,
-                                name,
-                            )
+                            Aggregate::MultiAggregate(MultiAggregate::WeightedMean, name)
                         });
                     Box::new(aggregates.chain(num_cols))
                 }

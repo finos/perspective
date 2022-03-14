@@ -95,13 +95,11 @@ impl Component for PerspectiveViewer {
                 false
             }
             Msg::Reset(all, sender) => {
-                let renderer = ctx.props().renderer.clone();
-                let session = ctx.props().session.clone();
+                clone!(ctx.props().renderer, ctx.props().session);
                 let _ = promisify_ignore_view_delete(async move {
                     session.reset(all);
                     renderer.reset().await;
-                    let result =
-                        renderer.draw(session.validate().await.create_view()).await;
+                    let result = renderer.draw(session.validate().await.create_view()).await;
 
                     if let Some(sender) = sender {
                         sender.send(()).unwrap();
@@ -158,14 +156,15 @@ impl Component for PerspectiveViewer {
         }
     }
 
-    /// This top-level component is mounted to the Custom Element, so it has no API
-    /// to provide props - but for sanity if needed, just return true on change.
+    /// This top-level component is mounted to the Custom Element, so it has no
+    /// API to provide props - but for sanity if needed, just return true on
+    /// change.
     fn changed(&mut self, _ctx: &Context<Self>) -> bool {
         true
     }
 
-    /// On rendered call notify_resize().  This also triggers any registered async
-    /// callbacks to the Custom Element API.
+    /// On rendered call notify_resize().  This also triggers any registered
+    /// async callbacks to the Custom Element API.
     fn rendered(&mut self, ctx: &Context<Self>, _first_render: bool) {
         ctx.props()
             .renderer
@@ -179,8 +178,9 @@ impl Component for PerspectiveViewer {
     }
 
     /// `PerspectiveViewer` has two basic UI modes - "open" and "closed".
-    // TODO these may be expensive to buil dbecause they will generate recursively from
-    // `JsPerspectiveConfig` - they may need caching as in the JavaScript version.
+    // TODO these may be expensive to buil dbecause they will generate recursively
+    // from `JsPerspectiveConfig` - they may need caching as in the JavaScript
+    // version.
     fn view(&self, ctx: &Context<Self>) -> Html {
         let settings = ctx.link().callback(|_| Msg::ToggleSettingsInit(None, None));
         if self.settings_open {
@@ -257,16 +257,19 @@ impl Component for PerspectiveViewer {
 }
 
 impl PerspectiveViewer {
-    /// Toggle the settings, or force the settings panel either open (true) or closed
-    /// (false) explicitly.  In order to reduce apparent screen-shear, `toggle_settings()`
-    /// uses a somewhat complex render order:  it first resize the plugin's `<div>`
-    /// without moving it, using `overflow: hidden` to hide the extra draw area;  then,
-    /// after the _async_ drawing of the plugin is complete, it will send a message to
-    /// complete the toggle action and re-render the element with the settings removed.
+    /// Toggle the settings, or force the settings panel either open (true) or
+    /// closed (false) explicitly.  In order to reduce apparent
+    /// screen-shear, `toggle_settings()` uses a somewhat complex render
+    /// order:  it first resize the plugin's `<div>` without moving it,
+    /// using `overflow: hidden` to hide the extra draw area;  then,
+    /// after the _async_ drawing of the plugin is complete, it will send a
+    /// message to complete the toggle action and re-render the element with
+    /// the settings removed.
     ///
     /// # Arguments
-    /// * `force` - Whether to explicitly set the settings panel state to Open/Close
-    ///   (`Some(true)`/`Some(false)`), or to just toggle the current state (`None`).
+    /// * `force` - Whether to explicitly set the settings panel state to
+    ///   Open/Close (`Some(true)`/`Some(false)`), or to just toggle the current
+    ///   state (`None`).
     fn init_toggle_settings_task(
         &mut self,
         ctx: &Context<Self>,
@@ -287,8 +290,7 @@ impl PerspectiveViewer {
                     Msg::ToggleSettingsComplete(update, resolve)
                 });
 
-                let renderer = ctx.props().renderer.clone();
-                let session = ctx.props().session.clone();
+                clone!(ctx.props().renderer, ctx.props().session);
                 drop(promisify_ignore_view_delete(async move {
                     let result = if session.js_get_table().is_some() {
                         renderer.presize(force, callback.emit_and_render()).await

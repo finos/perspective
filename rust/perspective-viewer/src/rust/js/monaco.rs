@@ -176,9 +176,9 @@ extern "C" {
     pub fn trigger_character(this: &JsMonacoTriggerToken) -> String;
 }
 
-// Serde does not support closures and wasm_bindgen does not support anonymous object
-// construction without `Reflect`, so this signature is not possible and is instead
-// constructed manually.
+// Serde does not support closures and wasm_bindgen does not support anonymous
+// object construction without `Reflect`, so this signature is not possible and
+// is instead constructed manually.
 
 // #[derive(Serialize)]
 // #[serde(rename_all = "camelCase")]

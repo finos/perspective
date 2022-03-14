@@ -18,7 +18,7 @@ pub use filters::*;
 pub use sort::*;
 pub use view_config::*;
 
-use crate::renderer::Renderer;
+// use crate::renderer::Renderer;
 use crate::utils::*;
 use flate2::read::ZlibDecoder;
 use flate2::write::ZlibEncoder;
@@ -35,7 +35,7 @@ use wasm_bindgen::JsCast;
 #[derive(Deserialize)]
 pub enum ViewerConfigEncoding {
     #[serde(rename = "json")]
-    JSON,
+    Json,
 
     #[serde(rename = "string")]
     String,
@@ -60,21 +60,18 @@ pub struct ViewerConfig {
 }
 
 impl ViewerConfig {
-    pub fn new(renderer: &Renderer) -> ViewerConfig {
-        ViewerConfig {
-            plugin: renderer.get_active_plugin().unwrap().name(),
-            view_config: ViewConfig::default(),
-            plugin_config: Value::Null,
-            theme: None,
-            settings: false,
-        }
-    }
+    // pub fn new(renderer: &Renderer) -> Self {
+    //     Self {
+    //         plugin: renderer.get_active_plugin().unwrap().name(),
+    //         view_config: ViewConfig::default(),
+    //         plugin_config: Value::Null,
+    //         theme: None,
+    //         settings: false,
+    //     }
+    // }
 
     /// Encode a `ViewerConfig` to a `JsValue` in a supported type.
-    pub fn encode(
-        &self,
-        format: &Option<ViewerConfigEncoding>,
-    ) -> Result<JsValue, JsValue> {
+    pub fn encode(&self, format: &Option<ViewerConfigEncoding>) -> Result<JsValue, JsValue> {
         match format {
             Some(ViewerConfigEncoding::String) => {
                 let mut encoder = ZlibEncoder::new(Vec::new(), Compression::default());
@@ -84,8 +81,7 @@ impl ViewerConfig {
                 Ok(JsValue::from(base64::encode(encoded)))
             }
             Some(ViewerConfigEncoding::ArrayBuffer) => {
-                let array =
-                    js_sys::Uint8Array::from(&rmp_serde::to_vec(self).unwrap()[..]);
+                let array = js_sys::Uint8Array::from(&rmp_serde::to_vec(self).unwrap()[..]);
                 let start = array.byte_offset();
                 let len = array.byte_length();
                 Ok(array
@@ -96,9 +92,7 @@ impl ViewerConfig {
             Some(ViewerConfigEncoding::JSONString) => {
                 Ok(JsValue::from(serde_json::to_string(self).into_jserror()?))
             }
-            None | Some(ViewerConfigEncoding::JSON) => {
-                JsValue::from_serde(self).into_jserror()
-            }
+            None | Some(ViewerConfigEncoding::Json) => JsValue::from_serde(self).into_jserror(),
         }
     }
 }
@@ -125,7 +119,7 @@ pub struct ViewerConfigUpdate {
 impl ViewerConfigUpdate {
     /// Decode a `JsValue` into a `ViewerConfigUpdate` by auto-detecting format
     /// from JavaScript type.
-    pub fn decode(update: &JsValue) -> Result<ViewerConfigUpdate, JsValue> {
+    pub fn decode(update: &JsValue) -> Result<Self, JsValue> {
         if update.is_string() {
             let js_str = update.as_string().into_jserror()?;
             let bytes = base64::decode(js_str).into_jserror()?;
@@ -165,15 +159,16 @@ impl<T: Clone> Default for OptionalUpdate<T> {
 /// Handles `{plugin: null}` and `{plugin: val}` by treating this type as an
 /// option.
 impl<T: Clone> From<Option<T>> for OptionalUpdate<T> {
-    fn from(opt: Option<T>) -> OptionalUpdate<T> {
+    fn from(opt: Option<T>) -> Self {
         match opt {
-            Some(v) => OptionalUpdate::<T>::Update(v),
-            None => OptionalUpdate::SetDefault,
+            Some(v) => Self::Update(v),
+            None => Self::SetDefault,
         }
     }
 }
 
-/// Treats `PluginUpdate` enum as an `Option<T>` when present during deserialization.
+/// Treats `PluginUpdate` enum as an `Option<T>` when present during
+/// deserialization.
 impl<'a, T> Deserialize<'a> for OptionalUpdate<T>
 where
     T: Deserialize<'a> + Clone,
