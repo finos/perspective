@@ -39,8 +39,13 @@
             margin-top: 2px;
             margin-left: 3px;
             margin-right: 0px;
+            
             &:before {
                 content: var(--column-close--content, "X");
+            }
+            &:hover {
+                opacity: 1;
+                color: var(--active--color, inherit);
             }
         }
 
@@ -232,6 +237,10 @@
         cursor: pointer;
         font-family: var(--button--font-family, inherit);
         font-display: block;
+        &:hover {
+            opacity: 1;
+            color: var(--active--color, inherit);
+        }
 
         &.desc:before {
             content: var(--sort-order-desc--content, "\2193");

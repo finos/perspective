@@ -113,11 +113,19 @@
             span.expression-delete-button {
                 padding-right: 1.5px;
                 padding-left: 5px;
+                
+                &::before {
+                    content: var(--column-close--content, "close")
+                }
             }
 
             span.expression-edit-button {
                 padding-left: 1.5px;
                 padding-right: 3px;
+                
+                &::before {
+                    content: var(--column-menu--content, "menu")
+                }
             }
 
             .column_selector_draggable {

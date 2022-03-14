@@ -139,9 +139,6 @@ impl Component for ExpressionToolbar {
                             <span
                                 onmousedown={ close }
                                 class="expression-delete-button">
-                                {
-                                    "close"
-                                }
                             </span>
                         }
                     } else {
@@ -149,9 +146,6 @@ impl Component for ExpressionToolbar {
                             <span
                                 class="expression-delete-button"
                                 style="opacity:0">
-                                {
-                                    "close"
-                                }
                             </span>
                         }
                     }
@@ -159,9 +153,6 @@ impl Component for ExpressionToolbar {
                 <span
                     onmousedown={ edit }
                     class="expression-edit-button">
-                    {
-                        "menu"
-                    }
                 </span>
             </>
         }
