@@ -204,36 +204,22 @@ build the test suite for every package and run them.</p>
 <p>The JavaScript test suite is composed of two sections: a Node.js test, which
 asserts behavior of the <code>@finos/perspective</code> library, and a suite of
 <a href="https://developers.google.com/web/tools/puppeteer/">Puppeteer</a> tests, which
-assert the behavior of the rest of the UI facing packages. For the latter,
-you'll need Docker installed, as these tests use a Puppeteer and Chrome build
-installed in a Docker container.</p>
+assert the behavior of the rest of the UI facing packages.</p>
 <p>The Puppeteer/UI tests are a form of
 <a href="https://en.wikipedia.org/wiki/Characterization_test">characterization tests</a>
 which use screenshots to compare current and previous behavior of
 <code>&lt;perspective-viewer&gt;</code> and its plugins. The results of each comparison are
 stored in each package's <code>test/results/results.json</code> file, and the screenshots
-themselves are stored in the package's <code>screenshots/</code> directory, though only the
+themselves are stored in the package's <code>tests/screenshots/</code> directory, though only the
 former should be checked into GIT. When a test in these suites fails, a
 <code>file.failed.png</code> and <code>file.diff.png</code> are also generated, showing the divergent
 screenshot and a contrast diff respectively, so you can verify that the changed
 behavior either does or does not reflect your patch. If you're confident that
 the screenshots reflect your change, you can update the new hashes manually in
-the <code>test/results/results.json</code> file, or update all hashes with the <code>--wrte</code>
+the <code>test/results/results.json</code> file, or update all hashes with the <code>--write</code>
 flag:</p>
 <pre><code class="hljs css language-bash">yarn <span class="hljs-built_in">test</span> --write
 </code></pre>
-<p>For quick local iteration and debugging failing tests, the Puppeteer tests can
-use a local copy of Puppeteer, rather than relying on the supplied Docker image.
-These will run much quicker, and can be optionally run without <code>--headless</code> mode
-for debugging test failures quickly. However, due to rendering inconsistencies
-between platforms, the resulting test hashes will not match the ones saved in
-<code>results.json</code>, so you will need to re-run the suite with the <code>--write</code> flag to
-generate a <code>results.local.json</code> file specific to your OS.</p>
-<p>To toggle between local and Docker Puppeteer, run</p>
-<pre><code class="hljs css language-bash">yarn toggle_puppeteer
-</code></pre>
-<p>This will install a local copy of Puppeteer via <code>yarn</code> the first time it is run,
-if a local Puppeteer is not found.</p>
 <h3><a class="anchor" aria-hidden="true" id="python"></a><a href="#python" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Python</h3>
 <p>The Python test suite is built on Pytest, and it asserts the correct behavior of
 the Python library.</p>

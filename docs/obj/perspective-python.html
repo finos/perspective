@@ -57,9 +57,697 @@
         </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">perspective-python API</h1></header><article><div><span><p><code>perspective.table</code> contains <code>Table</code> and <code>View</code>, the data primitives of Perspective.</p>
 <p>For usage, see the <a href="/docs/md/python.html">Python User Guide</a>.</p>
 <h2><a class="anchor" aria-hidden="true" id="table"></a><a href="#table" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Table</h2>
+<h3><a class="anchor" aria-hidden="true" id="class-perspectivetabletabledata-limitnone-indexnone"></a><a href="#class-perspectivetabletabledata-limitnone-indexnone" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>class perspective.table.Table(data, limit=None, index=None)</h3>
+<p>Bases: <code>object</code></p>
+<h4><a class="anchor" aria-hidden="true" id="__init__data-limitnone-indexnone"></a><a href="#__init__data-limitnone-indexnone" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>_<em>init</em>_(data, limit=None, index=None)</h4>
+<p>Construct a <code>Table</code> using the provided data or
+schema and optional configuration dictionary.</p>
+<p><code>Table</code> instances are immutable - column names and
+data types cannot be changed after creation. If a schema is provided,
+the <code>Table</code> will be empty.  Subsequent updates MUST
+conform to the column names and data types provided in the schema.</p>
+<ul>
+<li><p><strong>Parameters</strong></p>
+<p><strong>data</strong> (<code>dict</code>/<code>list</code>/<code>pandas.DataFrame</code>) – Data or
+schema which initializes the <code>Table</code>.</p></li>
+</ul>
+<ul>
+<li><p><strong>Keyword Arguments</strong></p>
+<ul>
+<li><p><strong>index</strong> (<code>str</code>) – A string column name to use as the
+<code>Table</code> primary key.</p></li>
+<li><p><strong>limit</strong> (<code>int</code>) – The maximum number of rows the
+<code>Table</code> should have.  Cannot be set at the
+same time as <code>index</code>. Updates past the limit will begin
+writing at row 0.</p></li>
+</ul></li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="make_port"></a><a href="#make_port" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>make_port()</h4>
+<p>Create a new input port on the underlying gnode, and return an
+<code>int</code> containing the ID of the new input port.</p>
+<h4><a class="anchor" aria-hidden="true" id="remove_portport_id"></a><a href="#remove_portport_id" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>remove_port(port_id)</h4>
+<p>Remove the specified port from the underlying gnode.</p>
+<h4><a class="anchor" aria-hidden="true" id="get_index"></a><a href="#get_index" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>get_index()</h4>
+<p>Returns the Table’s index column, or <code>None</code> if an index is not
+specified by the user.</p>
+<h4><a class="anchor" aria-hidden="true" id="get_limit"></a><a href="#get_limit" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>get_limit()</h4>
+<p>Returns the Table’s limit, or <code>None</code> if an index is not
+specified by the user.</p>
+<h4><a class="anchor" aria-hidden="true" id="clear"></a><a href="#clear" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>clear()</h4>
+<p>Removes all the rows in the <code>Table</code>, but
+preserves everything else including the schema and any callbacks or
+registered <code>View</code>.</p>
+<h4><a class="anchor" aria-hidden="true" id="replacedata"></a><a href="#replacedata" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>replace(data)</h4>
+<p>Replaces all rows in the <code>Table</code> with the new
+data that conforms to the <code>Table</code> schema.</p>
+<ul>
+<li><p><strong>Parameters</strong></p>
+<p><strong>data</strong> (<code>dict</code>/<code>list</code>/<code>pandas.DataFrame</code>) – New data
+that will be filled into the <code>Table</code>.</p></li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="size"></a><a href="#size" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>size()</h4>
+<p>Returns the row count of the <code>Table</code>.</p>
+<h4><a class="anchor" aria-hidden="true" id="schemaas_stringfalse"></a><a href="#schemaas_stringfalse" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>schema(as_string=False)</h4>
+<p>Returns the schema of this <code>Table</code>, a <code>dict</code>
+mapping of string column names to python data types.</p>
+<ul>
+<li><p><strong>Keyword Arguments</strong></p>
+<p><strong>as_string</strong> (<code>bool</code>) – returns the data types as string
+representations, if True</p></li>
+</ul>
+<ul>
+<li><p><strong>Returns</strong></p>
+<p>A key-value mapping of column names to data types.</p></li>
+</ul>
+<ul>
+<li><p><strong>Return type</strong></p>
+<p><code>dict</code></p></li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="validate_expressionsexpressions-as_stringfalse"></a><a href="#validate_expressionsexpressions-as_stringfalse" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>validate_expressions(expressions, as_string=False)</h4>
+<p>Returns an <code>dict</code> with two keys: “expression_schema”, which is
+a schema containing the column names and data types for each valid
+expression in <code>expressions</code>, and “errors”, which is a dict of
+expressions to error objects that contain additional metadata:
+error_message, line, and column.</p>
+<ul>
+<li><p><strong>Parameters</strong></p>
+<p><strong>expressions</strong> (<code>list</code>) – A list of string expressions to validate
+and create a schema from.</p></li>
+</ul>
+<ul>
+<li><p><strong>Keyword Arguments</strong></p>
+<p><strong>as_string</strong> (<code>bool</code>) – If True, returns the data types as string
+representations so they can be serialized.</p></li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="columns"></a><a href="#columns" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>columns()</h4>
+<p>Returns the column names of this <code>Table</code>.</p>
+<ul>
+<li><p><strong>Returns</strong></p>
+<p>a list of string column names</p></li>
+</ul>
+<ul>
+<li><p><strong>Return type</strong></p>
+<p><code>list</code></p></li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="is_valid_filterfilter"></a><a href="#is_valid_filterfilter" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>is_valid_filter(filter)</h4>
+<p>Tests whether a given filter expression string is valid, e.g. that
+the filter term is not None or an unparsable date/datetime.  null/
+not null operators don’t need a comparison value.</p>
+<ul>
+<li><p><strong>Parameters</strong></p>
+<p><strong>filter</strong> (<code>string</code>) – The filter expression to validate.</p></li>
+</ul>
+<ul>
+<li><p><strong>Returns</strong></p>
+<p>Whether this filter is valid.</p></li>
+</ul>
+<ul>
+<li><p><strong>Return type</strong></p>
+<p><code>bool</code></p></li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="updatedata-port_id0"></a><a href="#updatedata-port_id0" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>update(data, port_id=0)</h4>
+<p>Update the <code>Table</code> with new data.</p>
+<p>Updates on <code>Table</code> without an explicit <code>index</code>
+are treated as appends.  Updates on <code>Table</code> with
+an explicit <code>index</code> should have the index as part of the <code>data</code>
+param, as this instructs the engine to locate the indexed row and write
+into it.  If an index is not provided, the update is treated as an
+append.</p>
+<ul>
+<li><p><strong>Parameters</strong></p>
+<p><strong>data</strong> (<code>dict</code>/<code>list</code>/<code>pandas.DataFrame</code>) – The data
+with which to update the <code>Table</code>.</p></li>
+</ul>
+<h5><a class="anchor" aria-hidden="true" id="examples"></a><a href="#examples" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Examples</h5>
+<pre><code class="hljs css language-python"><span class="hljs-meta">&gt;&gt;&gt; </span>tbl = Table({<span class="hljs-string">"a"</span>: [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>], <span class="hljs-string">"b"</span>: [<span class="hljs-string">"a"</span>, <span class="hljs-string">"b"</span>, <span class="hljs-string">"c"</span>]}, index=<span class="hljs-string">"a"</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>tbl.update({<span class="hljs-string">"a"</span>: [<span class="hljs-number">2</span>, <span class="hljs-number">3</span>], <span class="hljs-string">"b"</span>: [<span class="hljs-string">"a"</span>, <span class="hljs-string">"a"</span>]})
+<span class="hljs-meta">&gt;&gt;&gt; </span>tbl.view().to_dict()
+{<span class="hljs-string">"a"</span>: [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>], <span class="hljs-string">"b"</span>: [<span class="hljs-string">"a"</span>, <span class="hljs-string">"a"</span>, <span class="hljs-string">"a"</span>]}
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="removepkeys-port_id0"></a><a href="#removepkeys-port_id0" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>remove(pkeys, port_id=0)</h4>
+<p>Removes the rows with the primary keys specified in <code>pkeys</code>.</p>
+<p>If the <code>Table</code> does not have an index, <code>remove()</code>
+has no effect.  Removes propagate to views derived from the table.</p>
+<ul>
+<li><p><strong>Parameters</strong></p>
+<p><strong>pkeys</strong> (<code>list</code>) – a list of primary keys to indicate the rows
+that should be removed.</p></li>
+</ul>
+<h5><a class="anchor" aria-hidden="true" id="examples-1"></a><a href="#examples-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Examples</h5>
+<pre><code class="hljs css language-python"><span class="hljs-meta">&gt;&gt;&gt; </span>tbl = Table({<span class="hljs-string">"a"</span>: [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>]}, index=<span class="hljs-string">"a"</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>tbl.remove([<span class="hljs-number">2</span>, <span class="hljs-number">3</span>])
+<span class="hljs-meta">&gt;&gt;&gt; </span>tbl.view().to_records()
+[{<span class="hljs-string">"a"</span>: <span class="hljs-number">1</span>}]
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="viewcolumnsnone-group_bynone-split_bynone-aggregatesnone-sortnone-filternone-expressionsnone"></a><a href="#viewcolumnsnone-group_bynone-split_bynone-aggregatesnone-sortnone-filternone-expressionsnone" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>view(columns=None, group_by=None, split_by=None, aggregates=None, sort=None, filter=None, expressions=None)</h4>
+<p>Create a new <code>View</code> from this
+<code>Table</code> via the supplied keyword arguments.</p>
+<p>A View is an immutable set of transformations applied to the data stored
+in a <code>Table</code>, which can be used for querying,
+pivoting, aggregating, sorting, and filtering.</p>
+<ul>
+<li><p><strong>Keyword Arguments</strong></p>
+<ul>
+<li><p><strong>columns</strong> (<code>list</code> of <code>str</code>) – A list of column names to be
+visible to the user.</p></li>
+<li><p><strong>group_by</strong> (<code>list</code> of <code>str</code>) – A list of column names to
+use as group by.</p></li>
+<li><p><strong>split_by</strong> (<code>list</code> of <code>str</code>) – A list of column names
+to use as split by.</p></li>
+<li><p><strong>aggregates</strong> (<code>dict</code> of <code>str</code> to <code>str</code>) – A dictionary
+of column names to aggregate types, which specify aggregates
+for individual columns.</p></li>
+<li><p><strong>sort</strong> (<code>list</code> of <code>list</code> of <code>str</code>) – A list of lists,
+each list containing a column name and a sort direction
+(<code>asc</code>, <code>desc</code>, <code>asc abs</code>, <code>desc abs</code>, <code>col asc</code>,
+<code>col desc</code>, <code>col asc abs</code>, <code>col desc abs</code>).</p></li>
+<li><p><strong>filter</strong> (<code>list</code> of <code>list</code> of <code>str</code>) – A list of lists,
+each list containing a column name, a filter comparator, and a
+value to filter by.</p></li>
+</ul></li>
+</ul>
+<ul>
+<li><p><strong>Returns</strong></p>
+<p>A new <code>View</code></p>
+<p>instance bound to this <code>Table</code>.</p></li>
+</ul>
+<ul>
+<li><p><strong>Return type</strong></p>
+<p><code>View</code></p></li>
+</ul>
+<h5><a class="anchor" aria-hidden="true" id="examples-2"></a><a href="#examples-2" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Examples</h5>
+<pre><code class="hljs css language-python"><span class="hljs-meta">&gt;&gt;&gt; </span>tbl = Table({<span class="hljs-string">"a"</span>: [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>]})
+<span class="hljs-meta">&gt;&gt;&gt; </span>view = tbl.view(filter=[[<span class="hljs-string">"a"</span>, <span class="hljs-string">"=="</span>, <span class="hljs-number">1</span>]]
+<span class="hljs-meta">&gt;&gt;&gt; </span>view.to_dict()
+<span class="hljs-meta">&gt;&gt;&gt; </span>{<span class="hljs-string">"a"</span>: [<span class="hljs-number">1</span>]}
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="on_deletecallback"></a><a href="#on_deletecallback" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>on_delete(callback)</h4>
+<p>Register a callback to be invoked when the
+<code>delete()</code> method is called on this
+<code>Table</code>.</p>
+<ul>
+<li><p><strong>Parameters</strong></p>
+<p><strong>callback</strong> (<code>func</code>) – A callback function to invoke on delete.</p></li>
+</ul>
+<h5><a class="anchor" aria-hidden="true" id="examples-3"></a><a href="#examples-3" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Examples</h5>
+<pre><code class="hljs css language-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">deleter</span><span class="hljs-params">()</span>:</span>
+<span class="hljs-meta">... </span>    print(<span class="hljs-string">"Delete called!"</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>table.on_delete(deleter)
+<span class="hljs-meta">&gt;&gt;&gt; </span>table.delete()
+<span class="hljs-meta">&gt;&gt;&gt; </span>Delete called!
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="remove_deletecallback"></a><a href="#remove_deletecallback" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>remove_delete(callback)</h4>
+<p>De-register the supplied callback from the
+<code>delete()</code> event for this
+<code>Table</code></p>
+<h5><a class="anchor" aria-hidden="true" id="examples-4"></a><a href="#examples-4" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Examples</h5>
+<pre><code class="hljs css language-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">deleter</span><span class="hljs-params">()</span>:</span>
+<span class="hljs-meta">... </span>    print(<span class="hljs-string">"Delete called!"</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>table.on_delete(deleter)
+<span class="hljs-meta">&gt;&gt;&gt; </span>table.remove_delete(deleter)
+<span class="hljs-meta">&gt;&gt;&gt; </span>table.delete()
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="delete"></a><a href="#delete" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>delete()</h4>
+<p>Delete this <code>Table</code> and clean up associated
+resources, assuming it has no <code>View</code> instances
+registered to it (which must be deleted first).</p>
 <h2><a class="anchor" aria-hidden="true" id="view"></a><a href="#view" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>View</h2>
-<p><code>perspective.core</code> contains modules that implements <code>perspective-python</code> in various environments,
-most notably <code>PerspectiveWidget</code> and <code>PerspectiveTornadoHandler</code>.</p>
+<h3><a class="anchor" aria-hidden="true" id="class-perspectivetableviewviewtable-kwargs"></a><a href="#class-perspectivetableviewviewtable-kwargs" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>class perspective.table.view.View(Table, **kwargs)</h3>
+<p>Bases: <code>object</code></p>
+<p>A <code>View</code> object represents a specific transform
+(pivot, filter, sort, etc) configuration on an underlying
+<code>Table</code>.  <code>View</code> objects
+cannot be directly instantiated - they must be derived from an existing
+<code>Table</code> via the <code>view()</code>
+method.</p>
+<p><code>View</code> instances receive all updates from the
+<code>Table</code> from which they are derived, and can be
+serialized (via <code>to_\*</code> methods) or trigger a callback when it is updated.
+<code>View</code> objects will remain in memory and actively
+process updates until <code>delete()</code> method is called.</p>
+<h4><a class="anchor" aria-hidden="true" id="get_config"></a><a href="#get_config" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>get_config()</h4>
+<p>Returns a copy of the immutable configuration <code>kwargs</code> from which
+this <code>View</code> was instantiated.</p>
+<ul>
+<li><p><strong>Returns</strong></p>
+<p><code>kwargs</code> supplied to the</p>
+<p><code>perspective.Table.view()</code> method.</p></li>
+</ul>
+<ul>
+<li><p><strong>Return type</strong></p>
+<p><code>dict</code></p></li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="sides"></a><a href="#sides" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>sides()</h4>
+<p>An integer representing the # of hierarchial axis on this
+<code>View</code>.</p>
+<p>0 - Neither <code>group_by</code> nor <code>split_by</code> properties are set.</p>
+<p>1 - <code>group_by</code> is set.</p>
+<p>2 - <code>split_by</code> is set (and also maybe <code>group_by</code>).</p>
+<ul>
+<li><p><strong>Returns</strong></p>
+<p>0 &lt;= N &lt;= 2</p></li>
+</ul>
+<ul>
+<li><p><strong>Return type</strong></p>
+<p><code>int</code></p></li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="get_min_maxcolname"></a><a href="#get_min_maxcolname" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>get_min_max(colname)</h4>
+<p>Calculates the [min, max] of the leaf nodes of a column colname.</p>
+<ul>
+<li><p><strong>Parameters</strong></p>
+<p><strong>colname</strong> (<code>str</code>) – The name of the column to calcualte range for.</p></li>
+</ul>
+<ul>
+<li><p><strong>Returns</strong></p>
+<p><code>list</code> of 2 elements, the min and max of the</p></li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="num_rows"></a><a href="#num_rows" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>num_rows()</h4>
+<p>The number of aggregated rows in the <code>View</code>.</p>
+<p>This count includes the total aggregate rows for all <code>group_by</code>
+depth levels, and can also be affected by any applied <code>filter</code>.</p>
+<ul>
+<li><p><strong>Returns</strong></p>
+<p>Number of rows.</p></li>
+</ul>
+<ul>
+<li><p><strong>Return type</strong></p>
+<p><code>int</code></p></li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="num_columns"></a><a href="#num_columns" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>num_columns()</h4>
+<p>The number of aggregated columns in the <code>View</code>.
+This is affected by the <code>split_by</code> that are applied to the
+<code>View</code>.</p>
+<ul>
+<li><p><strong>Returns</strong></p>
+<p>Number of columns.</p></li>
+</ul>
+<ul>
+<li><p><strong>Return type</strong></p>
+<p><code>int</code></p></li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="get_row_expandedidx"></a><a href="#get_row_expandedidx" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>get_row_expanded(idx)</h4>
+<p>Returns whether row at idx is expanded or collapsed.</p>
+<ul>
+<li><p><strong>Returns</strong></p>
+<p>Is this row expanded?</p></li>
+</ul>
+<ul>
+<li><p><strong>Return type</strong></p>
+<p><code>bool</code></p></li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="expandidx"></a><a href="#expandidx" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>expand(idx)</h4>
+<p>Expands the row at ‘idx’, i.e. displaying its leaf rows.</p>
+<ul>
+<li><p><strong>Parameters</strong></p>
+<p><strong>idx</strong> (<code>int</code>) – Row index to expand.</p></li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="collapseidx"></a><a href="#collapseidx" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>collapse(idx)</h4>
+<p>Collapses the row at ‘idx’, i.e. hiding its leaf rows.</p>
+<ul>
+<li><p><strong>Parameters</strong></p>
+<p><strong>idx</strong> (<code>int</code>) – Row index to collapse.</p></li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="set_depthdepth"></a><a href="#set_depthdepth" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>set_depth(depth)</h4>
+<p>Sets the expansion depth of the pivot tree.</p>
+<ul>
+<li><p><strong>Parameters</strong></p>
+<p><strong>depth</strong> (<code>int</code>) – Depth to collapse all nodes to, which
+may be no greater then the length of the <code>group_by</code>
+property.</p></li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="column_paths"></a><a href="#column_paths" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>column_paths()</h4>
+<p>Returns the names of the columns as they show in the
+<code>View</code>, i.e. the hierarchial columns when
+<code>split_by</code> is applied.</p>
+<ul>
+<li><p><strong>Returns</strong></p>
+<p>obj`str`: Aggregated column names.</p></li>
+</ul>
+<ul>
+<li><p><strong>Return type</strong></p>
+<p><code>list</code> of</p></li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="schemaas_stringfalse-1"></a><a href="#schemaas_stringfalse-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>schema(as_string=False)</h4>
+<p>The schema of this <code>View</code>, which is a key-value
+map that contains the column names and their Python data types.</p>
+<p>If the columns are aggregated, their aggregated types will be shown
+returned instead.</p>
+<ul>
+<li><p><strong>Keyword Arguments</strong></p>
+<p><strong>as_string</strong> (<code>bool</code>) – returns data types as string
+representations, if <code>True</code>.</p></li>
+</ul>
+<ul>
+<li><p><strong>Returns</strong></p>
+<p>A map of <code>str</code> column name to <code>str</code> or</p>
+<p><code>type</code>, depending on the value of <code>as_string</code> kwarg.</p></li>
+</ul>
+<ul>
+<li><p><strong>Return type</strong></p>
+<p><code>dict</code></p></li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="expression_schemaas_stringfalse"></a><a href="#expression_schemaas_stringfalse" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>expression_schema(as_string=False)</h4>
+<p>Returns the expression schema of this <code>View</code>,
+which is a key-value map that contains the expressions and their
+Python data types.</p>
+<p>If the columns are aggregated, their aggregated types will be returned
+instead.</p>
+<ul>
+<li><p><strong>Keyword Arguments</strong></p>
+<p><strong>as_string</strong> (<code>bool</code>) – returns data types as string
+representations, if <code>True</code>.</p></li>
+</ul>
+<ul>
+<li><p><strong>Returns</strong></p>
+<p>A map of <code>str</code> column name to <code>str</code> or</p>
+<p><code>type</code>, depending on the value of <code>as_string</code> kwarg.</p></li>
+</ul>
+<ul>
+<li><p><strong>Return type</strong></p>
+<p><code>dict</code></p></li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="on_updatecallback-modenone"></a><a href="#on_updatecallback-modenone" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>on_update(callback, mode=None)</h4>
+<p>Add a callback to be fired when <code>perspective.Table.update()</code> is
+called on the parent <code>Table</code>.</p>
+<p>Multiple callbacks can be set through calling <code>on_update</code> multiple
+times, and will be called in the order they are set. Callback must be a
+callable function that takes exactly 1 or 2 parameters, depending on
+whether on_update is called with mode=”row”. The first parameter is
+always port_id, an <code>int</code> that indicates which input port the
+update comes from. A RuntimeError will be thrown if the callback
+has mis-configured parameters.</p>
+<ul>
+<li><p><strong>Parameters</strong></p>
+<ul>
+<li><p><strong>callback</strong> (<code>callable</code>) – a callable function reference that will
+be called when <code>perspective.Table.update()</code> is called.</p></li>
+<li><p><strong>mode</strong> (<code>str</code>) – if set to “row”, the callback will be passed
+an Arrow-serialized dataset of the rows that were updated.
+Defaults to “none”.</p></li>
+</ul></li>
+</ul>
+<h5><a class="anchor" aria-hidden="true" id="examples-5"></a><a href="#examples-5" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Examples</h5>
+<pre><code class="hljs css language-python">&gt;&gt;&gt; def updater(port_id):
+...     print("Update fired on port", port_id)
+&gt;&gt;&gt; def updater_with_delta(port_id, delta):
+...     print("Update on port", port_id, "delta len:", len(delta)))
+&gt;&gt;&gt; view.on_update(updater)
+&gt;&gt;&gt; view.on_update(updater, mode="row")
+&gt;&gt;&gt; table.update({"a": [1]})'
+&gt;&gt;&gt; Update fired on port 0
+&gt;&gt;&gt; Update on port 0 delta len: 64
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="remove_updatecallback"></a><a href="#remove_updatecallback" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>remove_update(callback)</h4>
+<p>Given a callback function, remove it from the list of callbacks.</p>
+<ul>
+<li><p><strong>Parameters</strong></p>
+<p><strong>callback</strong> (<code>func</code>) – a function reference that will be removed.</p></li>
+</ul>
+<h5><a class="anchor" aria-hidden="true" id="examples-6"></a><a href="#examples-6" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Examples</h5>
+<pre><code class="hljs css language-python"><span class="hljs-meta">&gt;&gt;&gt; </span>table = perspective.Table(data)
+<span class="hljs-meta">&gt;&gt;&gt; </span>view = table.view()
+<span class="hljs-meta">&gt;&gt;&gt; </span>view2 = table.view()
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">callback</span><span class="hljs-params">()</span>:</span>
+<span class="hljs-meta">... </span>    print(<span class="hljs-string">"called!"</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>view.on_update(callback)
+<span class="hljs-meta">&gt;&gt;&gt; </span>view2.on_update(callback)
+<span class="hljs-meta">&gt;&gt;&gt; </span>table.update(new_data)
+called!
+<span class="hljs-meta">&gt;&gt;&gt; </span>view2.remove_update(callback)
+<span class="hljs-meta">&gt;&gt;&gt; </span>table.update(new_data) <span class="hljs-comment"># callback removed and will not fire</span>
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="on_deletecallback-1"></a><a href="#on_deletecallback-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>on_delete(callback)</h4>
+<p>Set a callback to be run when the <code>perspective.View.delete()</code>
+method is called on this <code>View</code>.</p>
+<ul>
+<li><p><strong>Parameters</strong></p>
+<p><strong>callback</strong> (<code>callable</code>) – A callback to run after
+<code>perspective.View.delete()</code> method has been called.</p></li>
+</ul>
+<h5><a class="anchor" aria-hidden="true" id="examples-7"></a><a href="#examples-7" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Examples</h5>
+<pre><code class="hljs css language-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">deleter</span><span class="hljs-params">()</span>:</span>
+<span class="hljs-meta">&gt;&gt;&gt; </span>    print(<span class="hljs-string">"Delete called!"</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>view.on_delete(deleter)
+<span class="hljs-meta">&gt;&gt;&gt; </span>view.delete()
+<span class="hljs-meta">&gt;&gt;&gt; </span>Delete called!
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="delete-1"></a><a href="#delete-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>delete()</h4>
+<p>Delete the <code>View</code> and clean up all associated
+callbacks.</p>
+<p>This method must be called to clean up callbacks used by the
+<code>View</code>, as well as allow for deletion of the
+underlying <code>Table</code>.</p>
+<h5><a class="anchor" aria-hidden="true" id="examples-8"></a><a href="#examples-8" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Examples</h5>
+<pre><code class="hljs css language-python"><span class="hljs-meta">&gt;&gt;&gt; </span>table = perspective.Table(data)
+<span class="hljs-meta">&gt;&gt;&gt; </span>view = table.view()
+<span class="hljs-meta">&gt;&gt;&gt; </span>view.delete()
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="remove_deletecallback-1"></a><a href="#remove_deletecallback-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>remove_delete(callback)</h4>
+<p>Remove the delete callback associated with this
+<code>View</code>.</p>
+<ul>
+<li><p><strong>Parameters</strong></p>
+<p><strong>callback</strong> (<code>callable</code>) – A reference to a callable function that
+will be removed from delete callbacks.</p></li>
+</ul>
+<h5><a class="anchor" aria-hidden="true" id="examples-9"></a><a href="#examples-9" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Examples</h5>
+<pre><code class="hljs css language-python"><span class="hljs-meta">&gt;&gt;&gt; </span>table = perspective.Table(data)
+<span class="hljs-meta">&gt;&gt;&gt; </span>view = table.view()
+<span class="hljs-meta">&gt;&gt;&gt; </span>view2 = table.view()
+<span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">callback</span><span class="hljs-params">()</span>:</span>
+<span class="hljs-meta">... </span>    print(<span class="hljs-string">"called!"</span>)
+<span class="hljs-meta">&gt;&gt;&gt; </span>view.on_delete(callback)
+<span class="hljs-meta">&gt;&gt;&gt; </span>view2.on_delete(callback)
+<span class="hljs-meta">&gt;&gt;&gt; </span>view.delete()
+called!
+<span class="hljs-meta">&gt;&gt;&gt; </span>view2.remove_delete(callback)
+<span class="hljs-meta">&gt;&gt;&gt; </span>view2.delete() <span class="hljs-comment"># callback removed and will not fire</span>
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="to_recordskwargs"></a><a href="#to_recordskwargs" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>to_records(**kwargs)</h4>
+<p>Serialize the <code>View</code>’s dataset into a <code>list</code>
+of <code>dict</code> containing each row.</p>
+<p>By default, the entire dataset is returned, though this can be windowed
+via <code>kwargs</code>.  When <code>group_by</code> are applied, a <code>__ROW_PATH__</code>
+column name will be generated in addition to the applied <code>columns</code>.
+When <code>split_by</code> are applied, column names will be qualified
+with their column group name.</p>
+<ul>
+<li><p><strong>Keyword Arguments</strong></p>
+<ul>
+<li><p><strong>start_row</strong> (<code>int</code>) – (Defaults to 0).</p></li>
+<li><p><strong>end_row</strong> (<code>int</code>) – (Defaults to
+<code>perspective.View.num_rows()</code>).</p></li>
+<li><p><strong>start_col</strong> (<code>int</code>) – (Defaults to 0).</p></li>
+<li><p><strong>end_col</strong> (<code>int</code>) – (Defaults to
+<code>perspective.View.num_columns()</code>).</p></li>
+<li><p><strong>id</strong> (<code>bool</code>) – Whether to return a logical row ID for each
+row (Defaults to <code>False</code>).</p></li>
+<li><p><strong>index</strong> (<code>bool</code>) – Whether to return an implicit pkey for each
+row (Defaults to <code>False</code>).</p></li>
+<li><p><strong>leaves_only</strong> (<code>bool</code>) – Whether to return only the data at the
+end of the tree (Defaults to <code>False</code>).</p></li>
+</ul></li>
+</ul>
+<ul>
+<li><p><strong>Returns</strong></p>
+<p>A list of <code>dict</code>, where each dict</p>
+<p>represents a row of the current state of the
+<code>View</code>.</p></li>
+</ul>
+<ul>
+<li><p><strong>Return type</strong></p>
+<p><code>list</code> of <code>dict</code></p></li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="to_dictoptions"></a><a href="#to_dictoptions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>to_dict(**options)</h4>
+<p>Serialize the <code>View</code>’s dataset into a <code>dict</code>
+of <code>str</code> keys and <code>list</code> values.  Each key is a column name,
+and the associated value is the column’s data packed into a <code>list</code>.
+If the <code>View</code> is aggregated, the aggregated dataset
+will be returned.</p>
+<ul>
+<li><p><strong>Keyword Arguments</strong></p>
+<ul>
+<li><p><strong>start_row</strong> (<code>int</code>) – (Defaults to 0).</p></li>
+<li><p><strong>end_row</strong> (<code>int</code>) – (Defaults to
+<code>perspective.View.num_rows()</code>).</p></li>
+<li><p><strong>start_col</strong> (<code>int</code>) – (Defaults to 0).</p></li>
+<li><p><strong>end_col</strong> (<code>int</code>) – (Defaults to
+<code>perspective.View.num_columns()</code>).</p></li>
+<li><p><strong>id</strong> (<code>bool</code>) – Whether to return a logical row ID for each
+row (Defaults to <code>False</code>).</p></li>
+<li><p><strong>index</strong> (<code>bool</code>) – Whether to return an implicit pkey for each
+row (Defaults to <code>False</code>).</p></li>
+<li><p><strong>leaves_only</strong> (<code>bool</code>) – Whether to return only the data at the
+end of the tree (Defaults to <code>False</code>).</p></li>
+</ul></li>
+</ul>
+<ul>
+<li><p><strong>Returns</strong></p>
+<p>A dictionary with string keys and list values, where</p>
+<p>key = column name and value = column values.</p></li>
+</ul>
+<ul>
+<li><p><strong>Return type</strong></p>
+<p><code>dict</code></p></li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="to_numpyoptions"></a><a href="#to_numpyoptions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>to_numpy(**options)</h4>
+<p>Serialize the view’s dataset into a <code>dict</code> of <code>str</code> keys
+and <code>numpy.array</code> values.  Each key is a column name, and the
+associated value is the column’s data packed into a numpy array.</p>
+<ul>
+<li><p><strong>Keyword Arguments</strong></p>
+<ul>
+<li><p><strong>start_row</strong> (<code>int</code>) – (Defaults to 0).</p></li>
+<li><p><strong>end_row</strong> (<code>int</code>) – (Defaults to
+<code>perspective.View.num_rows()</code>).</p></li>
+<li><p><strong>start_col</strong> (<code>int</code>) – (Defaults to 0).</p></li>
+<li><p><strong>end_col</strong> (<code>int</code>) – (Defaults to
+<code>perspective.View.num_columns()</code>).</p></li>
+<li><p><strong>id</strong> (<code>bool</code>) – Whether to return a logical row ID for each
+row (Defaults to <code>False</code>).</p></li>
+<li><p><strong>index</strong> (<code>bool</code>) – Whether to return an implicit pkey for each
+row (Defaults to <code>False</code>).</p></li>
+<li><p><strong>leaves_only</strong> (<code>bool</code>) – Whether to return only the data at the
+end of the tree (Defaults to <code>False</code>).</p></li>
+</ul></li>
+</ul>
+<ul>
+<li><p><strong>Returns</strong></p>
+<p>A dictionary with string keys</p>
+<p>and numpy array values, where key = column name and
+value = column values.</p></li>
+</ul>
+<ul>
+<li><p><strong>Return type</strong></p>
+<p><code>dict</code> of <code>numpy.array</code></p></li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="to_dfoptions"></a><a href="#to_dfoptions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>to_df(**options)</h4>
+<p>Serialize the view’s dataset into a pandas dataframe.</p>
+<p>If the view is aggregated, the aggregated dataset will be returned.</p>
+<ul>
+<li><p><strong>Keyword Arguments</strong></p>
+<ul>
+<li><p><strong>start_row</strong> (<code>int</code>) – (Defaults to 0).</p></li>
+<li><p><strong>end_row</strong> (<code>int</code>) – (Defaults to
+<code>perspective.View.num_rows()</code>).</p></li>
+<li><p><strong>start_col</strong> (<code>int</code>) – (Defaults to 0).</p></li>
+<li><p><strong>end_col</strong> (<code>int</code>) – (Defaults to
+<code>perspective.View.num_columns()</code>).</p></li>
+<li><p><strong>id</strong> (<code>bool</code>) – Whether to return a logical row ID for each
+row (Defaults to <code>False</code>).</p></li>
+<li><p><strong>index</strong> (<code>bool</code>) – Whether to return an implicit pkey for each
+row (Defaults to <code>False</code>).</p></li>
+<li><p><strong>leaves_only</strong> (<code>bool</code>) – Whether to return only the data at the
+end of the tree (Defaults to <code>False</code>).</p></li>
+</ul></li>
+</ul>
+<ul>
+<li><p><strong>Returns</strong></p>
+<p>A DataFrame serialization of the current</p>
+<p>state of this <code>View</code>.</p></li>
+</ul>
+<ul>
+<li><p><strong>Return type</strong></p>
+<p><code>pandas.DataFrame</code></p></li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="to_csvkwargs"></a><a href="#to_csvkwargs" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>to_csv(**kwargs)</h4>
+<p>Serialize the <code>View</code>’s dataset into a CSV string.</p>
+<ul>
+<li><p><strong>Keyword Arguments</strong></p>
+<ul>
+<li><p><strong>start_row</strong> (<code>int</code>) – (Defaults to 0).</p></li>
+<li><p><strong>end_row</strong> (<code>int</code>) – (Defaults to
+<code>perspective.View.num_rows()</code>).</p></li>
+<li><p><strong>start_col</strong> (<code>int</code>) – (Defaults to 0).</p></li>
+<li><p><strong>end_col</strong> (<code>int</code>) – (Defaults to
+<code>perspective.View.num_columns()</code>).</p></li>
+<li><p><strong>id</strong> (<code>bool</code>) – Whether to return a logical row ID for each
+row (Defaults to <code>False</code>).</p></li>
+<li><p><strong>index</strong> (<code>bool</code>) – Whether to return an implicit pkey for each
+row (Defaults to False).</p></li>
+<li><p><strong>leaves_only</strong> (<code>bool</code>) – Whether to return only the data at the
+end of the tree (Defaults to False).</p></li>
+<li><p><strong>date_format</strong> (<code>str</code>) – How <code>datetime</code> objects should be
+formatted in the CSV.</p></li>
+</ul></li>
+</ul>
+<ul>
+<li><p><strong>Returns</strong></p>
+<p>A CSV-formatted string containing the serialized data.</p></li>
+</ul>
+<ul>
+<li><p><strong>Return type</strong></p>
+<p><code>str</code></p></li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="to_jsonkwargs"></a><a href="#to_jsonkwargs" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>to_json(**kwargs)</h4>
+<p>Serialize the <code>View</code>’s dataset into a <code>list</code>
+of <code>dict</code> containing each row.</p>
+<p>By default, the entire dataset is returned, though this can be windowed
+via <code>kwargs</code>.  When <code>group_by</code> are applied, a <code>__ROW_PATH__</code>
+column name will be generated in addition to the applied <code>columns</code>.
+When <code>split_by</code> are applied, column names will be qualified
+with their column group name.</p>
+<ul>
+<li><p><strong>Keyword Arguments</strong></p>
+<ul>
+<li><p><strong>start_row</strong> (<code>int</code>) – (Defaults to 0).</p></li>
+<li><p><strong>end_row</strong> (<code>int</code>) – (Defaults to
+<code>perspective.View.num_rows()</code>).</p></li>
+<li><p><strong>start_col</strong> (<code>int</code>) – (Defaults to 0).</p></li>
+<li><p><strong>end_col</strong> (<code>int</code>) – (Defaults to
+<code>perspective.View.num_columns()</code>).</p></li>
+<li><p><strong>id</strong> (<code>bool</code>) – Whether to return a logical row ID for each
+row (Defaults to <code>False</code>).</p></li>
+<li><p><strong>index</strong> (<code>bool</code>) – Whether to return an implicit pkey for each
+row (Defaults to <code>False</code>).</p></li>
+<li><p><strong>leaves_only</strong> (<code>bool</code>) – Whether to return only the data at the
+end of the tree (Defaults to <code>False</code>).</p></li>
+</ul></li>
+</ul>
+<ul>
+<li><p><strong>Returns</strong></p>
+<p>A list of <code>dict</code>, where each dict</p>
+<p>represents a row of the current state of the
+<code>View</code>.</p></li>
+</ul>
+<ul>
+<li><p><strong>Return type</strong></p>
+<p><code>list</code> of <code>dict</code></p></li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="to_columnsoptions"></a><a href="#to_columnsoptions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>to_columns(**options)</h4>
+<p>Serialize the <code>View</code>’s dataset into a <code>dict</code>
+of <code>str</code> keys and <code>list</code> values.  Each key is a column name,
+and the associated value is the column’s data packed into a <code>list</code>.
+If the <code>View</code> is aggregated, the aggregated dataset
+will be returned.</p>
+<ul>
+<li><p><strong>Keyword Arguments</strong></p>
+<ul>
+<li><p><strong>start_row</strong> (<code>int</code>) – (Defaults to 0).</p></li>
+<li><p><strong>end_row</strong> (<code>int</code>) – (Defaults to
+<code>perspective.View.num_rows()</code>).</p></li>
+<li><p><strong>start_col</strong> (<code>int</code>) – (Defaults to 0).</p></li>
+<li><p><strong>end_col</strong> (<code>int</code>) – (Defaults to
+<code>perspective.View.num_columns()</code>).</p></li>
+<li><p><strong>id</strong> (<code>bool</code>) – Whether to return a logical row ID for each
+row (Defaults to <code>False</code>).</p></li>
+<li><p><strong>index</strong> (<code>bool</code>) – Whether to return an implicit pkey for each
+row (Defaults to <code>False</code>).</p></li>
+<li><p><strong>leaves_only</strong> (<code>bool</code>) – Whether to return only the data at the
+end of the tree (Defaults to <code>False</code>).</p></li>
+</ul></li>
+</ul>
+<ul>
+<li><p><strong>Returns</strong></p>
+<p>A dictionary with string keys and list values, where</p>
+<p>key = column name and value = column values.</p></li>
+</ul>
+<ul>
+<li><p><strong>Return type</strong></p>
+<p><code>dict</code>
+<code>perspective.core</code> contains modules that implements <code>perspective-python</code> in various environments,
+most notably <code>PerspectiveWidget</code> and <code>PerspectiveTornadoHandler</code>.</p></li>
+</ul>
 <p>Additionally, <code>perspective.core</code> defines several enums that provide easy access to aggregate options, different plugins, sort directions etc.</p>
 <p>For usage of <code>PerspectiveWidget</code> and <code>PerspectiveTornadoHandler</code>, see the User Guide in the sidebar.</p>
 <h2><a class="anchor" aria-hidden="true" id="perspectivewidget"></a><a href="#perspectivewidget" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>PerspectiveWidget</h2>
@@ -72,7 +760,7 @@ in the form of a JupyterLab IPython widget.</p>
 functionality of perspective-viewer.  Changes on the viewer can be
 programatically set on the :class`~perspective.PerspectiveWidget` instance,
 and state is maintained across page refreshes.</p>
-<h5><a class="anchor" aria-hidden="true" id="examples"></a><a href="#examples" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Examples</h5>
+<h5><a class="anchor" aria-hidden="true" id="examples-10"></a><a href="#examples-10" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Examples</h5>
 <pre><code class="hljs css language-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">from</span> perspective <span class="hljs-keyword">import</span> Table, PerspectiveWidget
 <span class="hljs-meta">&gt;&gt;&gt; </span>data = {
 <span class="hljs-meta">... </span>    <span class="hljs-string">"a"</span>: [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>],
@@ -96,7 +784,7 @@ and state is maintained across page refreshes.</p>
 [[<span class="hljs-string">"b"</span>, <span class="hljs-string">"desc"</span>], [<span class="hljs-string">"a"</span>, <span class="hljs-string">"asc"</span>]]
 <span class="hljs-meta">&gt;&gt;&gt; </span>widget.update({<span class="hljs-string">"a"</span>: [<span class="hljs-number">4</span>, <span class="hljs-number">5</span>]}) <span class="hljs-comment"># Browser UI updates</span>
 </code></pre>
-<h4><a class="anchor" aria-hidden="true" id="__init__data-indexnone-limitnone-serverfalse-clienttrue-kwargs"></a><a href="#__init__data-indexnone-limitnone-serverfalse-clienttrue-kwargs" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>_<em>init</em>_(data, index=None, limit=None, server=False, client=True, **kwargs)</h4>
+<h4><a class="anchor" aria-hidden="true" id="__init__data-indexnone-limitnone-serverfalse-clientfalse-kwargs"></a><a href="#__init__data-indexnone-limitnone-serverfalse-clientfalse-kwargs" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>_<em>init</em>_(data, index=None, limit=None, server=False, client=False, **kwargs)</h4>
 <p>Initialize an instance of :class`~perspective.PerspectiveWidget`</p>
 <pre><code class="hljs">with the given table/data and viewer configuration.
 
@@ -157,10 +845,10 @@ Otherwise, it calls Viewer.load() using super().</p>
 <p>Update the widget with new data. If running in client mode, this
 method serializes the data and calls the browser viewer’s update
 method. Otherwise, it calls Viewer.update() using super().</p>
-<h4><a class="anchor" aria-hidden="true" id="clear"></a><a href="#clear" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>clear()</h4>
+<h4><a class="anchor" aria-hidden="true" id="clear-1"></a><a href="#clear-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>clear()</h4>
 <p>Clears the widget’s underlying Table.</p>
 <p>In client mode, clears the _data attribute of the widget.</p>
-<h4><a class="anchor" aria-hidden="true" id="replacedata"></a><a href="#replacedata" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>replace(data)</h4>
+<h4><a class="anchor" aria-hidden="true" id="replacedata-1"></a><a href="#replacedata-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>replace(data)</h4>
 <p>Replaces the widget’s Table with new data conforming to the same
 schema. Does not clear user-set state. If in client mode, serializes
 the data and sends it to the browser.</p>
@@ -289,7 +977,7 @@ Cannot be set at the same time as index. Ignored if a
 <code>Table</code> or <code>View</code> is supplied.</p></li>
 </ul></li>
 </ul>
-<h5><a class="anchor" aria-hidden="true" id="examples-1"></a><a href="#examples-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Examples</h5>
+<h5><a class="anchor" aria-hidden="true" id="examples-11"></a><a href="#examples-11" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Examples</h5>
 <pre><code class="hljs css language-python"><span class="hljs-meta">&gt;&gt;&gt; </span><span class="hljs-keyword">from</span> perspective <span class="hljs-keyword">import</span> Table, PerspectiveViewer
 <span class="hljs-meta">&gt;&gt;&gt; </span>data = {<span class="hljs-string">"a"</span>: [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>]}
 <span class="hljs-meta">&gt;&gt;&gt; </span>tbl = Table(data)
@@ -310,9 +998,9 @@ affected by whether an index is set on the underlying table.</p>
 <li><p><strong>data for the table.</strong> (<em>update</em>) –</p></li>
 </ul></li>
 </ul>
-<h4><a class="anchor" aria-hidden="true" id="clear-1"></a><a href="#clear-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>clear()</h4>
+<h4><a class="anchor" aria-hidden="true" id="clear-2"></a><a href="#clear-2" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>clear()</h4>
 <p>Clears the rows of this viewer’s <code>Table</code>.</p>
-<h4><a class="anchor" aria-hidden="true" id="replacedata-1"></a><a href="#replacedata-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>replace(data)</h4>
+<h4><a class="anchor" aria-hidden="true" id="replacedata-2"></a><a href="#replacedata-2" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>replace(data)</h4>
 <p>Replaces the rows of this viewer’s Table with new data.</p>
 <ul>
 <li><p><strong>Parameters</strong></p>
@@ -331,7 +1019,7 @@ configuration can be reproduced.</p>
 <h4><a class="anchor" aria-hidden="true" id="reset"></a><a href="#reset" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>reset()</h4>
 <p>Resets the viewer’s attributes and state, but does not delete or
 modify the underlying Table.</p>
-<h5><a class="anchor" aria-hidden="true" id="examples-2"></a><a href="#examples-2" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Examples</h5>
+<h5><a class="anchor" aria-hidden="true" id="examples-12"></a><a href="#examples-12" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Examples</h5>
 <p>widget = PerspectiveWidget(data, group_by=[“date”], plugin=Plugin.XBAR)
 widget.reset()
 widget.plugin  #</p>
@@ -347,7 +1035,165 @@ deleted. Defaults to True.</p></li>
 <h2><a class="anchor" aria-hidden="true" id="perspectivetornadohandler"></a><a href="#perspectivetornadohandler" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>PerspectiveTornadoHandler</h2>
 <p><code>PerspectiveTornadoHandler</code> is a ready-made Perspective server that interfaces seamlessly with
 <code>@finos/perspective-viewer</code> in Javascript.</p>
+<h3><a class="anchor" aria-hidden="true" id="class-perspectivetornado_handlertornado_handlerperspectivetornadohandlerargs-kwargs"></a><a href="#class-perspectivetornado_handlertornado_handlerperspectivetornadohandlerargs-kwargs" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>class perspective.tornado_handler.tornado_handler.PerspectiveTornadoHandler(*args, **kwargs)</h3>
+<p>Bases: <code>tornado.websocket.WebSocketHandler</code></p>
+<p>PerspectiveTornadoHandler is a drop-in implementation of Perspective.</p>
+<p>Use it inside Tornado routing to create a server-side Perspective that is
+ready to receive websocket messages from the front-end perspective-viewer.
+Because Tornado implements an event loop, this handler links Perspective
+with IOLoop.current() in order to defer expensive operations until the
+next free iteration of the event loop.</p>
+<p>The Perspective client and server will automatically keep the Websocket
+alive without timing out.</p>
+<h5><a class="anchor" aria-hidden="true" id="examples-13"></a><a href="#examples-13" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Examples</h5>
+<pre><code class="hljs css language-python"><span class="hljs-meta">&gt;&gt;&gt; </span>MANAGER = PerspectiveManager()
+<span class="hljs-meta">&gt;&gt;&gt; </span>MANAGER.host_table(<span class="hljs-string">"data_source_one"</span>, Table(
+<span class="hljs-meta">... </span>    pd.read_csv(<span class="hljs-string">"superstore.csv"</span>)))
+<span class="hljs-meta">&gt;&gt;&gt; </span>app = tornado.web.Application([
+<span class="hljs-meta">... </span>    (<span class="hljs-string">r"/"</span>, MainHandler),
+<span class="hljs-meta">... </span>    (<span class="hljs-string">r"/websocket"</span>, PerspectiveTornadoHandler, {
+<span class="hljs-meta">... </span>        <span class="hljs-string">"manager"</span>: MANAGER,
+<span class="hljs-meta">... </span>        <span class="hljs-string">"check_origin"</span>: <span class="hljs-literal">True</span>
+<span class="hljs-meta">... </span>    })
+<span class="hljs-meta">... </span>])
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="__init__args-kwargs"></a><a href="#__init__args-kwargs" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>_<em>init</em>_(*args, **kwargs)</h4>
+<p>Create a new instance of the PerspectiveTornadoHandler with the
+given Manager instance.</p>
+<ul>
+<li><p><strong>Keyword Arguments</strong></p>
+<ul>
+<li><p><strong>manager</strong> (<code>PerspectiveManager</code>) – A PerspectiveManager instance.
+Must be provided on initialization.</p></li>
+<li><p><strong>(</strong> (<em>check_origin</em>) – obj`bool`): If True, all requests will be accepted
+regardless of origin. Defaults to False.</p></li>
+<li><p><strong>chunk_size</strong> (<code>int</code>) – Binary messages will not exceed this length
+(in bytes);  payloads above this limit will be chunked
+across multiple messages. Defaults to 25165824 (24MB), and
+be disabled entirely with None.</p></li>
+</ul></li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="check_originorigin"></a><a href="#check_originorigin" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>check_origin(origin)</h4>
+<p>Returns whether the handler allows requests from origins outside
+of the host URL.</p>
+<ul>
+<li><p><strong>Parameters</strong></p>
+<p><strong>(</strong> (<em>origin</em>) – obj”bool): a boolean that indicates whether requests
+outside of the host URL should be accepted. If <code>True</code>, request
+URLs will not be validated and all requests will be allowed.
+Defaults to <code>False</code>.</p></li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="on_messagemessage"></a><a href="#on_messagemessage" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>on_message(message)</h4>
+<p>When the websocket receives a message, send it to the <code>process</code>
+method of the PerspectiveManager with a reference to the <code>post</code>
+callback.</p>
+<h4><a class="anchor" aria-hidden="true" id="postmessage-binaryfalse"></a><a href="#postmessage-binaryfalse" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>post(message, binary=False)</h4>
+<p>When post is called by PerspectiveManager, serialize the data to
+JSON and send it to the client.</p>
+<ul>
+<li><p><strong>Parameters</strong></p>
+<p><strong>message</strong> (<code>str</code>) – a JSON-serialized string containing a message to the
+front-end perspective-viewer.</p></li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="on_close"></a><a href="#on_close" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>on_close()</h4>
+<p>Remove the views associated with the client when the websocket
+closes.</p>
 <h2><a class="anchor" aria-hidden="true" id="perspectivemanager"></a><a href="#perspectivemanager" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>PerspectiveManager</h2>
 <p><code>PerspectiveManager</code> implements a communication protocol between Perspective runtimes in different languages.
 Through its <code>process()</code> method, it allows runtimes to communicate instructions and interoperate.</p>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/obj/perspective-viewer.html"><span class="arrow-prev">← </span><span>perspective-viewer API</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#table">Table</a></li><li><a href="#view">View</a></li><li><a href="#perspectivewidget">PerspectiveWidget</a><ul class="toc-headings"><li><a href="#class-perspectivewidgetwidgetperspectivewidgetkwargs">class perspective.widget.widget.PerspectiveWidget(**kwargs)</a></li><li><a href="#class-perspectiveviewerviewerperspectiveviewerkwargs">class perspective.viewer.viewer.PerspectiveViewer(**kwargs)</a></li></ul></li><li><a href="#perspectivetornadohandler">PerspectiveTornadoHandler</a></li><li><a href="#perspectivemanager">PerspectiveManager</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/" class="nav-home"></a><div><h5>Docs</h5><a href="/docs/md/js.html">Javascript User Guide</a><a href="/docs/md/python.html">Python User Guide</a><a href="/docs/obj/perspective.html">Perspective API</a><a href="/docs/obj/perspective-viewer.html">Perspective Viewer API</a><a href="/docs/obj/perspective-python-table.html">Perspective Python API</a></div><div><h5>More</h5><a href="/blog">Blog</a><a href="https://github.com/finos/perspective/">GitHub</a><a class="github-button" data-icon="octicon-star" data-count-href="/facebook/docusaurus/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2022 Perspective Authors</section></footer></div></body></html>
+<h3><a class="anchor" aria-hidden="true" id="class-perspectivemanagermanagerperspectivemanagerlockfalse"></a><a href="#class-perspectivemanagermanagerperspectivemanagerlockfalse" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>class perspective.manager.manager.PerspectiveManager(lock=False)</h3>
+<p>Bases: <code>perspective.manager.manager_internal._PerspectiveManagerInternal</code></p>
+<p>PerspectiveManager is an orchestrator for running Perspective on the
+server side.</p>
+<p>The core functionality resides in process(), which receives
+JSON-serialized messages from a client (implemented by perspective-viewer
+in the browser), executes the commands in the message, and returns the
+results of those commands back to the post_callback. Table instances
+should be passed to the manager using host_table - this allows server
+code to call Table APIs natively instead of proxying them through the
+Manager. Because Perspective is designed to be used in a shared context,
+i.e. multiple clients all accessing the same Table, PerspectiveManager
+comes with the context of sessions - an encapsulation of the actions
+and resources used by a single connection to Perspective, which can be
+cleaned up after the connection is closed.</p>
+<ul>
+<li><p>When a client connects, for example through a websocket, a new session</p>
+<p>should be spawned using new_session().</p></li>
+</ul>
+<ul>
+<li><p>When the websocket closes, call close() on the session instance to</p>
+<p>clean up associated resources.</p></li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="__init__lockfalse"></a><a href="#__init__lockfalse" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>_<em>init</em>_(lock=False)</h4>
+<p>Create a new <code>PerspectiveManager</code> instance.</p>
+<ul>
+<li><p><strong>Keyword Arguments</strong></p>
+<p><strong>lock</strong> (<code>bool</code>) – [description]. Defaults to False.</p></li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="lock"></a><a href="#lock" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>lock()</h4>
+<p>Block messages that can mutate the state of <code>Table</code>
+objects under management.</p>
+<p>All <code>PerspectiveManager</code> objects exposed over the internet should be
+locked to prevent content from being mutated by clients.</p>
+<h4><a class="anchor" aria-hidden="true" id="unlock"></a><a href="#unlock" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>unlock()</h4>
+<p>Unblock messages that can mutate the state of
+<code>Table</code> objects under management.</p>
+<h4><a class="anchor" aria-hidden="true" id="hostitem-namenone"></a><a href="#hostitem-namenone" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>host(item, name=None)</h4>
+<p>Given a <code>Table</code>, place it under management and
+allow operations on it to be passed through the Manager instance.</p>
+<ul>
+<li><p><strong>Parameters</strong></p>
+<p><strong>item</strong> (<code>Table</code>) – a Table to be managed.</p></li>
+</ul>
+<ul>
+<li><p><strong>Keyword Arguments</strong></p>
+<p><strong>name</strong> (<code>str</code>) – an optional name to allow retrieval through
+<code>get_table</code>. A name will be generated if not provided.</p></li>
+</ul>
+<h4><a class="anchor" aria-hidden="true" id="host_tablename-table"></a><a href="#host_tablename-table" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>host_table(name, table)</h4>
+<p>Given a reference to a Table, manage it and allow operations on it
+to occur through the Manager.</p>
+<p>If a function for queue_process is defined (i.e., by
+<code>PerspectiveTornadoHandler</code>), bind the function to
+<code>Table</code> and have it call the manager’s version of
+queue_process.</p>
+<h4><a class="anchor" aria-hidden="true" id="get_tablename"></a><a href="#get_tablename" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>get_table(name)</h4>
+<p>Return a table under management by name.</p>
+<h4><a class="anchor" aria-hidden="true" id="get_table_names"></a><a href="#get_table_names" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>get_table_names()</h4>
+<p>Return the tables that are hosted with this manager by name.</p>
+<h4><a class="anchor" aria-hidden="true" id="call_loopf-args-kwargs"></a><a href="#call_loopf-args-kwargs" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>call_loop(f, *args, **kwargs)</h4>
+<p>Calls f() on this PerspectiveManager’s event loop if it has one,
+or raise a PerspectiveError if there is no loop callback set using
+set_loop_callback().</p>
+<h4><a class="anchor" aria-hidden="true" id="set_loop_callbackloop_callback"></a><a href="#set_loop_callbackloop_callback" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>set_loop_callback(loop_callback)</h4>
+<p>Sets this PerspectiveManager to run in Async mode, defering
+update() application and releasing the GIL for expensive operations.</p>
+<p>Once called, this PerspectiveManager and all Perspective objects it
+hosts must only be interacted with from the same thread.</p>
+<ul>
+<li><p><strong>Parameters</strong></p>
+<p><strong>loop_callback</strong> – A function which accepts a function reference and
+its args/kwargs, and schedules it to run on the same thread
+on which set_loop_callback()` was originally invoked.</p></li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="perspectivemanagersessionrandom"></a><a href="#perspectivemanagersessionrandom" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>perspective.manager.session.random()</h3>
+<h3><a class="anchor" aria-hidden="true" id="class-perspectivemanagersessionperspectivesessionmanager"></a><a href="#class-perspectivemanagersessionperspectivesessionmanager" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>class perspective.manager.session.PerspectiveSession(manager)</h3>
+<p>Bases: <code>object</code></p>
+<p>Encapsulates the actions and resources of a single connection to
+Perspective.</p>
+<h4><a class="anchor" aria-hidden="true" id="__init__manager"></a><a href="#__init__manager" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>_<em>init</em>_(manager)</h4>
+<p>Create a new session object, keeping track of a unique client_id and
+the manager the session belongs to.</p>
+<p>PerspectiveSession should not be constructed directly. Instead, use
+PerspectiveManager.new_session() to create a new session.</p>
+<h4><a class="anchor" aria-hidden="true" id="processmessage-post_callback"></a><a href="#processmessage-post_callback" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>process(message, post_callback)</h4>
+<p>Pass a message to the manager’s process method, which passes the
+result to post_callback.</p>
+<p>Additionally, intercept calls to on_update in order
+to track the callbacks that were created through this session. This
+allows for cleaning up callbacks after a session closes, which may not
+necessarily involve calling delete() on associated views.</p>
+<h4><a class="anchor" aria-hidden="true" id="close"></a><a href="#close" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>close()</h4>
+<p>Remove the views and callbacks that were created within this session
+when the session ends.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/obj/perspective-viewer.html"><span class="arrow-prev">← </span><span>perspective-viewer API</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#table">Table</a><ul class="toc-headings"><li><a href="#class-perspectivetabletabledata-limitnone-indexnone">class perspective.table.Table(data, limit=None, index=None)</a></li></ul></li><li><a href="#view">View</a><ul class="toc-headings"><li><a href="#class-perspectivetableviewviewtable-kwargs">class perspective.table.view.View(Table, **kwargs)</a></li></ul></li><li><a href="#perspectivewidget">PerspectiveWidget</a><ul class="toc-headings"><li><a href="#class-perspectivewidgetwidgetperspectivewidgetkwargs">class perspective.widget.widget.PerspectiveWidget(**kwargs)</a></li><li><a href="#class-perspectiveviewerviewerperspectiveviewerkwargs">class perspective.viewer.viewer.PerspectiveViewer(**kwargs)</a></li></ul></li><li><a href="#perspectivetornadohandler">PerspectiveTornadoHandler</a><ul class="toc-headings"><li><a href="#class-perspectivetornado_handlertornado_handlerperspectivetornadohandlerargs-kwargs">class perspective.tornado_handler.tornado_handler.PerspectiveTornadoHandler(*args, **kwargs)</a></li></ul></li><li><a href="#perspectivemanager">PerspectiveManager</a><ul class="toc-headings"><li><a href="#class-perspectivemanagermanagerperspectivemanagerlockfalse">class perspective.manager.manager.PerspectiveManager(lock=False)</a></li><li><a href="#perspectivemanagersessionrandom">perspective.manager.session.random()</a></li><li><a href="#class-perspectivemanagersessionperspectivesessionmanager">class perspective.manager.session.PerspectiveSession(manager)</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/" class="nav-home"></a><div><h5>Docs</h5><a href="/docs/md/js.html">Javascript User Guide</a><a href="/docs/md/python.html">Python User Guide</a><a href="/docs/obj/perspective.html">Perspective API</a><a href="/docs/obj/perspective-viewer.html">Perspective Viewer API</a><a href="/docs/obj/perspective-python-table.html">Perspective Python API</a></div><div><h5>More</h5><a href="/blog">Blog</a><a href="https://github.com/finos/perspective/">GitHub</a><a class="github-button" data-icon="octicon-star" data-count-href="/facebook/docusaurus/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2022 Perspective Authors</section></footer></div></body></html>
