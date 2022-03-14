@@ -305,8 +305,7 @@ export class PerspectiveViewerDatagridPluginElement extends HTMLElement {
 
         const overrides = this.datagrid._column_sizes.override;
         const {group_by, columns} = this.model._config;
-        const tree_header_offset =
-            group_by?.length > 0 ? group_by.length + 1 : 0;
+        const tree_header_offset = group_by?.length > 0 ? group_by.length : 0;
 
         const old_sizes = {};
         for (const key of Object.keys(overrides)) {
