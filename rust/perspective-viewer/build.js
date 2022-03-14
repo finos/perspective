@@ -125,11 +125,11 @@ const INHERIT = {
 
 async function build_all() {
     await Promise.all(PREBUILD.map(build)).catch(() => process.exit(1));
-    const debug = process.env.PSP_DEBUG ? "--debug" : "--release";
+    const cargo_debug = process.env.PSP_DEBUG ? "" : "--release";
 
     // Compile rust
     execSync(
-        `CARGO_TARGET_DIR=./build cargo +nightly build ${debug} --lib --target wasm32-unknown-unknown -Z build-std=std,panic_abort -Z build-std-features=panic_immediate_abort`,
+        `CARGO_TARGET_DIR=./build cargo +nightly build ${cargo_debug} --lib --target wasm32-unknown-unknown -Z build-std=std,panic_abort -Z build-std-features=panic_immediate_abort`,
         INHERIT
     );
 
@@ -142,9 +142,10 @@ async function build_all() {
     }
 
     // Generate wasm-bindgen bindings
+    const wasm_bindgen_debug = process.env.PSP_DEBUG ? "--debug" : "";
     const UNOPT_PATH = `build/wasm32-unknown-unknown/release/perspective_viewer.wasm`;
     execSync(
-        `wasm-bindgen ${UNOPT_PATH} --out-dir dist/pkg --typescript --target web`,
+        `wasm-bindgen ${UNOPT_PATH} ${wasm_bindgen_debug} --out-dir dist/pkg --typescript --target web`,
         INHERIT
     );
 
