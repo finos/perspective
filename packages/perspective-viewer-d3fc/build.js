@@ -45,6 +45,7 @@ const BUILD = [
         define: {
             global: "window",
         },
+        globalName: "perspective_viewer_d3fc",
         plugins: [InlineCSSPlugin(), UMDLoader()],
         format: "cjs",
         loader: {
