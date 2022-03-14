@@ -57,6 +57,25 @@ utils.with_jupyterlab(process.env.__JUPYTERLAB_PORT__, () => {
             );
 
             test.jupyterlab(
+                "Loads with settings=False",
+                [
+                    [
+                        "table = perspective.Table(arrow_data)",
+                        "w = perspective.PerspectiveWidget(table, columns=['f64', 'str', 'datetime'], settings=False)",
+                    ].join("\n"),
+                    "w",
+                ],
+                async (page) => {
+                    const viewer = await default_body(page);
+                    const settings = await viewer.evaluate(async (viewer) => {
+                        return viewer.hasAttribute("settings");
+                    });
+
+                    expect(settings).toEqual(false);
+                }
+            );
+
+            test.jupyterlab(
                 "Loads data",
                 [
                     "w = perspective.PerspectiveWidget(arrow_data, columns=['f64', 'str', 'datetime'])",

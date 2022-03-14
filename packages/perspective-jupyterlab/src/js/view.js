@@ -66,6 +66,10 @@ export class PerspectiveView extends DOMWidgetView {
      */
 
     _synchronize_state(event) {
+        if (!this.pWidget._load_complete) {
+            return;
+        }
+
         const config = event.detail;
         for (const name of Object.keys(config)) {
             let new_value = config[name];
