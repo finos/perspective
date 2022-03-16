@@ -70,12 +70,12 @@
 
         .dragdrop-highlight {
             .column_selector_draggable.dragover,
-            .column-selector-column:not(:last-child):not(:nth-last-child(2))
+            .column-selector-column:not(:last-child):not(:nth-last-child(2)):not(:nth-last-child(3))
                 .column_selector_draggable {
                 border-bottom-color: var(--active--color) !important;
             }
 
-            .column-selector-column:not(:first-child):not([data-label])
+            .column-selector-column:not(:first-child):not([data-label]):not(:nth-last-child(2))
                 .column_selector_draggable.dragover {
                 border-top-color: rgb(0 0 0 / 5%) !important;
             }
@@ -113,18 +113,18 @@
             span.expression-delete-button {
                 padding-right: 1.5px;
                 padding-left: 5px;
-                
+
                 &::before {
-                    content: var(--column-close--content, "close")
+                    content: var(--column-close--content, "close");
                 }
             }
 
             span.expression-edit-button {
                 padding-left: 1.5px;
                 padding-right: 3px;
-                
+
                 &::before {
-                    content: var(--column-menu--content, "menu")
+                    content: var(--column-menu--content, "menu");
                 }
             }
 
@@ -237,6 +237,21 @@
             height: var(--is_visible--height, auto);
             cursor: pointer;
             font-size: var(--column-selector--font-size, 14px);
+        }
+
+        #active-columns.collapse {
+            .column-selector-column:nth-last-child(3) {
+                .column_selector_draggable {
+                    border-color: transparent;
+                }
+            }
+        }
+
+        #active-columns:not(.collapse).dragdrop-highlight {
+            .column-selector-column:not(:last-child):not(:nth-last-child(2))
+                .column_selector_draggable {
+                border-bottom-color: var(--active--color) !important;
+            }
         }
 
         #active-columns,
