@@ -314,6 +314,8 @@ export class PerspectiveViewerDatagridPluginElement extends HTMLElement {
                 const index = key - tree_header_offset;
                 if (index > -1) {
                     old_sizes[this.model._column_paths[index]] = overrides[key];
+                } else if (index === -1) {
+                    old_sizes["__ROW_PATH__"] = overrides[key];
                 }
             }
         }
@@ -345,8 +347,12 @@ export class PerspectiveViewerDatagridPluginElement extends HTMLElement {
             group_by?.length > 0 ? group_by.length + 1 : 0;
 
         for (const key of Object.keys(old_sizes)) {
-            const index = this.model._column_paths.indexOf(key);
-            overrides[index + tree_header_offset] = old_sizes[key];
+            if (key === "__ROW_PATH__") {
+                overrides[tree_header_offset - 1] = old_sizes[key];
+            } else {
+                const index = this.model._column_paths.indexOf(key);
+                overrides[index + tree_header_offset] = old_sizes[key];
+            }
         }
 
         this.datagrid._column_sizes.override = overrides;
