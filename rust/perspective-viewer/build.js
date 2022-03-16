@@ -42,6 +42,12 @@ const PREBUILD = [
         plugins: [IgnoreFontsPlugin(), WasmPlugin(true), lessLoader()],
         outdir: "build/css",
     },
+    {
+        entryPoints: ["src/ts/monaco.ts"],
+        format: "esm",
+        plugins: [NodeModulesExternal()],
+        outdir: "dist/esm",
+    },
 ];
 
 const BUILD = [
@@ -115,7 +121,7 @@ const POSTBUILD = [
         entryPoints: ["dist/cdn/perspective-viewer.js"],
         format: "esm",
         plugins: [NodeModulesExternal()],
-        external: ["*.wasm", "*.worker.js", "*.main.js"],
+        external: ["*.wasm", "*.worker.js", "*monaco.js"],
         outdir: "dist/cdn",
         allowOverwrite: true,
     },
