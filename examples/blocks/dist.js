@@ -28,6 +28,8 @@ const replacements = {
         "perspective-viewer-datagrid@latest/dist/cdn/perspective-viewer-datagrid.js",
     "perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js":
         "perspective-viewer-d3fc@latest/dist/cdn/perspective-viewer-d3fc.js",
+    "perspective-workspace/dist/cdn/perspective-workspace.js":
+        "perspective-workspace@latest/dist/cdn/perspective-workspace.js",
 };
 
 execute`mkdir -p dist`;

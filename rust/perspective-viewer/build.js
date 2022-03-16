@@ -143,7 +143,8 @@ async function build_all() {
 
     // Generate wasm-bindgen bindings
     const wasm_bindgen_debug = process.env.PSP_DEBUG ? "--debug" : "";
-    const UNOPT_PATH = `build/wasm32-unknown-unknown/release/perspective_viewer.wasm`;
+    const profile_dir = process.env.PSP_DEBUG ? "debug" : "release";
+    const UNOPT_PATH = `build/wasm32-unknown-unknown/${profile_dir}/perspective_viewer.wasm`;
     execSync(
         `wasm-bindgen ${UNOPT_PATH} ${wasm_bindgen_debug} --out-dir dist/pkg --typescript --target web`,
         INHERIT
