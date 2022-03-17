@@ -1,5 +1,27 @@
 # Changelog
 
+## [v1.3.6](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.3.5...HEAD)
+
+**Implemented enhancements:**
+
+- Add extra empty column indicator when columns can be appended [\#1770](https://github.com/finos/perspective/pull/1770) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- Fix tree column override width persistence in `perspective-viewer-datagrid` [\#1772](https://github.com/finos/perspective/pull/1772) ([texodus](https://github.com/texodus))
+
+**Closed issues:**
+
+- Support `to_posix()` for `datetime` and `date` types in ExprTK [\#1768](https://github.com/finos/perspective/issues/1768)
+- Issue building perspective with debug on [\#1765](https://github.com/finos/perspective/issues/1765)
+
+**Merged pull requests:**
+
+- Fix `--debug` flag for real this time [\#1769](https://github.com/finos/perspective/pull/1769) ([texodus](https://github.com/texodus))
+- Fix `debug` build script [\#1766](https://github.com/finos/perspective/pull/1766) ([texodus](https://github.com/texodus))
+
 ## [v1.3.5](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.3.4...HEAD)
