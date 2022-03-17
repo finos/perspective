@@ -173,7 +173,8 @@ where
                 let start_node = if scroll_top > named_col_section_height {
                     max!(
                         0,
-                        ((scroll_top / ctx.props().row_height).floor() as usize
+                        (((scroll_top - named_col_section_height) / ctx.props().row_height).floor()
+                            as usize
                             + ctx.props().named_row_count) as isize,
                     ) as usize
                 } else {

@@ -167,6 +167,11 @@ impl Component for ColumnSelector {
                     .and_then(|x| from_index.map(|from_index| from_index < x))
                     .unwrap_or_default()
                     && is_to_empty
+                    || from_index
+                        .map(|from_index| {
+                            from_index == config.columns.len() - 1 && to_index > from_index
+                        })
+                        .unwrap_or_default()
                 {
                     ctx.props().dragdrop.drag_leave(DragTarget::Active);
                     true
@@ -271,7 +276,9 @@ impl Component for ColumnSelector {
                 active_classes.push("dragdrop-highlight");
             };
 
-            if config.columns.len() != all_columns.len() + config.expressions.len() {
+            if config.columns.iter().filter(|x| x.is_some()).count()
+                != all_columns.len() + config.expressions.len()
+            {
                 active_classes.push("collapse");
             }
 

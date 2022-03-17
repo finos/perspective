@@ -63,26 +63,46 @@ impl<'a> ColumnsIteratorSet<'a> {
             .as_ref()
             .map_or(0, |x| x.len());
 
+        let named_columns = self.renderer.metadata().names.clone().unwrap_or_default();
+        let last_col = self.config.columns.last().and_then(|x| x.as_ref());
+        let has_blank_tail = last_col.is_none()
+            || self.config.columns.len() < named_columns.len()
+            || self.config.columns.iter().filter(|x| x.is_some()).count()
+                == self
+                    .session
+                    .metadata()
+                    .get_table_columns()
+                    .map(|x| x.len())
+                    .unwrap_or_default()
+                    + self.config.expressions.len();
+
         match &self.is_dragover_column {
             Some((to_index, from_column)) => {
                 let is_to_swap = self.renderer.metadata().is_swap(*to_index);
                 let to_column = self.config.columns.get(*to_index);
                 let is_to_empty = to_column.map(|x| x.is_none()).unwrap_or_default();
-                let is_from_required = self
+                let from_index = self
                     .config
                     .columns
                     .iter()
-                    .position(|x| x.as_ref() == Some(from_column))
+                    .position(|x| x.as_ref() == Some(from_column));
+
+                let is_from_required = from_index
                     .and_then(|x| self.renderer.metadata().min.map(|y| x < y))
                     .unwrap_or_default();
 
-                let is_from_swap = self
-                    .config
-                    .columns
-                    .iter()
-                    .position(|x| x.as_ref() == Some(from_column))
+                let is_from_swap = from_index
                     .map(|x| self.renderer.metadata().is_swap(x))
                     .unwrap_or_default();
+
+                let is_dragover_last = *to_index == self.config.columns.len()
+                    || (*to_index == self.config.columns.len() - 1 && from_index.is_some());
+
+                let tail = if has_blank_tail || is_dragover_last {
+                    [].iter().cloned()
+                } else {
+                    [Some(&None)].iter().cloned()
+                };
 
                 if is_to_swap || is_from_required {
                     let all_columns = self.config.columns.iter().filter_map(move |x| match x {
@@ -104,7 +124,10 @@ impl<'a> ColumnsIteratorSet<'a> {
 
                     let after_cols = all_columns.skip(*to_index + 1).map(Some);
                     self.to_active_column_state(Box::new(
-                        before_cols.chain([None].iter().cloned()).chain(after_cols),
+                        before_cols
+                            .chain([None].iter().cloned())
+                            .chain(after_cols)
+                            .chain(tail),
                     ))
                 } else {
                     let to_offset = match to_column {
@@ -131,11 +154,24 @@ impl<'a> ColumnsIteratorSet<'a> {
 
                     let after_cols = all_columns.skip(to_offset).map(Some);
                     self.to_active_column_state(Box::new(
-                        before_cols.chain([None].iter().cloned()).chain(after_cols),
+                        before_cols
+                            .chain([None].iter().cloned())
+                            .chain(after_cols)
+                            .chain(tail),
                     ))
                 }
             }
-            _ => self.to_active_column_state(Box::new(self.config.columns.iter().map(Some))),
+            _ => {
+                let tail = if has_blank_tail {
+                    [].iter().cloned()
+                } else {
+                    [Some(&None)].iter().cloned()
+                };
+
+                self.to_active_column_state(Box::new(
+                    self.config.columns.iter().map(Some).chain(tail),
+                ))
+            }
         }
     }
 
@@ -180,7 +216,6 @@ impl<'a> ColumnsIteratorSet<'a> {
         };
 
         let col_set = self.config.columns.iter().collect::<HashSet<_>>();
-
         let mut filtered = values
             .filter_map(move |name| self.to_ordered_column(name, is_drag_active, &col_set))
             .collect::<Vec<_>>();
