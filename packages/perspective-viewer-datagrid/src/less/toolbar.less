@@ -36,11 +36,11 @@
 }
 
 #scroll_lock.lock-scroll:before {
-    content: "lock";
+    content: var(--toolbar-scroll-lock-active--content);
 }
 
 #scroll_lock:before {
-    content: "lock_open";
+    content: var(--toolbar-scroll-lock--content);
 }
 
 #select_mode:before {
@@ -48,11 +48,11 @@
 }
 
 #edit_mode:before {
-    content: "edit_off";
+    content: var(--toolbar-edit-mode--content);
 }
 
 #edit_mode.editable:before {
-    content: "edit";
+    content: var(--toolbar-edit-mode-active--content);
 }
 
 :host(.aggregated) #toolbar #edit_mode {
@@ -87,6 +87,8 @@
 
 .button:hover {
     opacity: 1;
+    display: flex;
+    align-items: center;
     color: inherit;
     cursor: pointer;
     min-width: 105px;
