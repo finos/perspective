@@ -32,7 +32,8 @@ t_vdnode::t_vdnode(bool expanded, bool has_children)
     , m_has_children(has_children) {}
 
 t_traversal::t_traversal(std::shared_ptr<const t_stree> tree)
-    : m_tree(tree) {
+    : m_tree(tree)
+    , m_is_leaves_only(false) {
     t_stnode_vec rchildren;
     tree->get_child_nodes(0, rchildren);
     populate_root_children(rchildren);
@@ -174,14 +175,22 @@ t_traversal::expand_node(
         count += 1;
     }
 
-    // Update node being expanded
-    exp_tvnode.m_expanded = !sorted_idx.empty();
-    exp_tvnode.m_ndesc += n_changed;
-    exp_tvnode.m_nchild = n_changed;
-
     // insert children of node into the traversal
-    m_nodes->insert(
-        m_nodes->begin() + exp_idx + 1, children.begin(), children.end());
+    if (m_is_leaves_only) {
+        if (children.size() > 0) {
+            m_nodes->erase(m_nodes->begin() + exp_idx);
+            m_nodes->insert(
+                m_nodes->begin() + exp_idx, children.begin(), children.end());
+        }
+    } else {
+        // Update node being expanded
+        exp_tvnode.m_expanded = !sorted_idx.empty();
+        exp_tvnode.m_ndesc += n_changed;
+        exp_tvnode.m_nchild = n_changed;
+
+        m_nodes->insert(
+            m_nodes->begin() + exp_idx + 1, children.begin(), children.end());
+    }
 
     // update ancestors about their new descendents
     update_ancestors(exp_idx, n_changed);
@@ -280,7 +289,6 @@ t_traversal::update_sucessors(t_index nidx, t_index n_changed) {
 
     while (c_node->m_depth > 0) {
         t_index pidx = nidx - c_node->m_rel_pidx;
-
         const t_tvnode& p_node = (*m_nodes)[pidx];
 
         t_index p_nchild = p_node.m_nchild;
@@ -289,7 +297,7 @@ t_traversal::update_sucessors(t_index nidx, t_index n_changed) {
         for (int i = 0; i < p_nchild; i++) {
             t_index curr_cidx = pidx + coffset;
             t_tvnode& child_node = (*m_nodes)[curr_cidx];
-            if (curr_cidx > nidx) {
+            if (!m_is_leaves_only && curr_cidx > nidx) {
                 child_node.m_rel_pidx += n_changed;
             }
             if (child_node.m_expanded) {
@@ -312,7 +320,11 @@ t_traversal::get_tree_index(t_index idx) const {
 
 t_uindex
 t_traversal::size() const {
-    return m_nodes->size();
+    if (m_is_leaves_only) {
+        return m_nodes->size() - 1;
+    } else {
+        return m_nodes->size();
+    }
 }
 
 t_depth
@@ -467,12 +479,17 @@ t_traversal::get_leaves(std::vector<t_index>& out_data) const {
 }
 
 void
-t_traversal::get_child_indices(
-    t_index nidx, std::vector<std::pair<t_index, t_index>>& out_data) const {
+t_traversal::get_child_indices(t_index nidx,
+    std::vector<std::pair<t_index, t_index>>& out_data, t_index count) const {
     const t_tvnode& tvnode = (*m_nodes)[nidx];
-    t_index nchild = tvnode.m_nchild;
-    t_index coffset = 1;
+    t_index nchild;
+    if (count >= 0) {
+        nchild = count;
+    } else {
+        nchild = tvnode.m_nchild;
+    }
 
+    t_index coffset = m_is_leaves_only && nidx > 0 ? 0 : 1;
     for (int i = 0; i < nchild; i++) {
         t_index curr_cidx = nidx + coffset;
         const t_tvnode& child_node = (*m_nodes)[curr_cidx];
@@ -506,7 +523,7 @@ t_traversal::get_num_tree_leaves(t_index idx) const {
 void
 t_traversal::post_order(t_index nidx, std::vector<t_index>& out_vec) {
     std::vector<std::pair<t_index, t_index>> children;
-    get_child_indices(nidx, children);
+    get_child_indices(nidx, children, -1);
 
     for (t_index idx = 0, loop_end = children.size(); idx < loop_end; ++idx) {
         post_order(children[idx].first, out_vec);
@@ -526,9 +543,14 @@ t_traversal::set_depth(
     while (pending.size() > 0) {
         t_index curidx = pending.back();
         pending.pop_back();
-        n_changed += expand_node(sortby, curidx, ctx2);
+        t_index _n_changed = expand_node(sortby, curidx, ctx2);
+        n_changed += _n_changed;
         std::vector<std::pair<t_index, t_index>> children;
-        get_child_indices(curidx, children);
+        if (m_is_leaves_only && curidx != 0) {
+            get_child_indices(curidx, children, _n_changed);
+        } else {
+            get_child_indices(curidx, children, -1);
+        }
         std::vector<t_index> collapse;
         for (t_index idx = 0, loop_end = children.size(); idx < loop_end;
              ++idx) {
@@ -666,6 +688,11 @@ t_traversal::drop_tree_indices(const std::vector<t_uindex>& indices) {
 
         remove_subtree(tvidx);
     }
+}
+
+void
+t_traversal::set_is_leaves_only(bool is_leaves_only) {
+    m_is_leaves_only = is_leaves_only;
 }
 
 bool

@@ -482,7 +482,7 @@ void
 t_ctx2::column_sort_by(const std::vector<t_sortspec>& sortby) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    m_ctraversal->sort_by(m_config, sortby, *(ctree().get()));
+    m_ctraversal->sort_by(sortby, *(ctree().get()));
 }
 
 void
@@ -493,7 +493,7 @@ t_ctx2::sort_by(const std::vector<t_sortspec>& sortby) {
     if (m_sortby.empty()) {
         return;
     }
-    m_rtraversal->sort_by(m_config, sortby, *(rtree().get()), this);
+    m_rtraversal->sort_by(sortby, *(rtree().get()), this);
 }
 
 void
@@ -501,6 +501,24 @@ t_ctx2::reset_sortby() {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     m_sortby = std::vector<t_sortspec>();
+}
+
+std::shared_ptr<t_traversal>
+t_ctx2::set_is_leaves_only() {
+    auto trav = m_rtraversal;
+    m_rtraversal = std::make_shared<t_traversal>(rtree());
+    m_rtraversal->set_is_leaves_only(true);
+    if (!m_sortby.empty()) {
+        m_rtraversal->sort_by(m_sortby, *(rtree().get()), this);
+    }
+
+    m_rtraversal->set_depth(m_sortby, m_config.get_num_rpivots() - 1);
+    return trav;
+}
+
+void
+t_ctx2::clear_is_leaves_only(std::shared_ptr<t_traversal> trav) {
+    m_rtraversal = trav;
 }
 
 void

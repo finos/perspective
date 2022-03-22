@@ -116,6 +116,8 @@ public:
 
     const tsl::hopscotch_set<t_tscalar>& get_delta_pkeys() const;
 
+    void set_is_leaves_only(bool is_leaves_only);
+
     // Unity api
     std::vector<t_tscalar> unity_get_row_data(t_uindex idx) const;
     std::vector<t_tscalar> unity_get_row_path(t_uindex idx) const;

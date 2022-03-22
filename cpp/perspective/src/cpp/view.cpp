@@ -531,11 +531,64 @@ View<t_ctx2>::get_data(t_uindex start_row, t_uindex end_row, t_uindex start_col,
 template <typename CTX_T>
 std::shared_ptr<std::string>
 View<CTX_T>::to_arrow(std::int32_t start_row, std::int32_t end_row,
-    std::int32_t start_col, std::int32_t end_col, bool emit_group_by) const {
+    std::int32_t start_col, std::int32_t end_col, bool emit_group_by,
+    bool is_leaves_only) const {
     std::shared_ptr<t_data_slice<CTX_T>> data_slice
         = get_data(start_row, end_row, start_col, end_col);
     return data_slice_to_arrow(data_slice, emit_group_by);
 };
+
+template <>
+std::shared_ptr<std::string>
+View<t_ctx1>::to_arrow(std::int32_t start_row, std::int32_t end_row,
+    std::int32_t start_col, std::int32_t end_col, bool emit_group_by,
+    bool is_leaves_only) const {
+    std::shared_ptr<t_traversal> guard;
+    if (is_leaves_only) {
+        guard = m_ctx->set_is_leaves_only();
+        start_row += 1;
+    }
+
+    std::shared_ptr<t_data_slice<t_ctx1>> data_slice
+        = get_data(start_row, end_row, start_col, end_col);
+    auto arr = data_slice_to_arrow(data_slice, emit_group_by);
+    if (is_leaves_only) {
+        m_ctx->clear_is_leaves_only(guard);
+    }
+
+    return arr;
+};
+
+template <>
+std::shared_ptr<std::string>
+View<t_ctx2>::to_arrow(std::int32_t start_row, std::int32_t end_row,
+    std::int32_t start_col, std::int32_t end_col, bool emit_group_by,
+    bool is_leaves_only) const {
+    std::shared_ptr<t_traversal> guard;
+    if (is_leaves_only) {
+        guard = m_ctx->set_is_leaves_only();
+        start_row += 1;
+    }
+
+    std::shared_ptr<t_data_slice<t_ctx2>> data_slice
+        = get_data(start_row, end_row, start_col, end_col);
+    auto arr = data_slice_to_arrow(data_slice, emit_group_by);
+    if (is_leaves_only) {
+        m_ctx->clear_is_leaves_only(guard);
+    }
+
+    return arr;
+};
+
+// template <>
+// std::shared_ptr<std::string>
+// View<t_ctxunit>::to_arrow(std::int32_t start_row, std::int32_t end_row,
+//     std::int32_t start_col, std::int32_t end_col, bool emit_group_by,
+//     bool is_leaves_only) const {
+//     std::shared_ptr<t_data_slice<t_ctxunit>> data_slice
+//         = get_data(start_row, end_row, start_col, end_col);
+//     return data_slice_to_arrow(data_slice, emit_group_by);
+// };
 
 template <typename CTX_T>
 std::shared_ptr<std::string>
@@ -1311,6 +1364,12 @@ View<CTX_T>::get_event_loop_thread_id() const {
     return m_table->get_pool()->get_event_loop_thread_id();
 };
 #endif
+
+template <typename CTX_T>
+void
+View<CTX_T>::set_separator(std::string sep) {
+    m_separator = sep;
+}
 
 /******************************************************************************
  *

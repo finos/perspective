@@ -205,7 +205,7 @@ ctx_get_flattened_tree(t_index idx, t_depth stop_depth, t_traversal& trav,
     t_index ptidx = trav.get_tree_index(idx);
     trav.set_depth(sortby, stop_depth);
     if (!sortby.empty()) {
-        trav.sort_by(config, sortby, *(trav.get_tree()));
+        trav.sort_by(sortby, *(trav.get_tree()));
     }
     t_index new_tvidx = trav.tree_index_lookup(ptidx, idx);
     return trav.get_flattened_tree(new_tvidx, stop_depth);

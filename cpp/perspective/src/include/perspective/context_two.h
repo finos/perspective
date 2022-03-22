@@ -58,6 +58,9 @@ public:
 
     using t_ctxbase<t_ctx2>::get_data;
 
+    std::shared_ptr<t_traversal> set_is_leaves_only();
+    void clear_is_leaves_only(std::shared_ptr<t_traversal> trav);
+
 protected:
     std::vector<t_cellinfo> resolve_cells(
         const std::vector<std::pair<t_uindex, t_uindex>>& cells) const;

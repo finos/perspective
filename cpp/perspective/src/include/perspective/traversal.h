@@ -75,11 +75,12 @@ public:
     void get_leaves(std::vector<t_index>& out_data) const;
 
     template <typename SRC_T>
-    void sort_by(const t_config& config, const std::vector<t_sortspec>& sortby,
-        const SRC_T& src, t_ctx2* ctx2 = nullptr);
+    void sort_by(const std::vector<t_sortspec>& sortby, const SRC_T& src,
+        t_ctx2* ctx2 = nullptr);
 
-    void get_child_indices(
-        t_index nidx, std::vector<std::pair<t_index, t_index>>& out_data) const;
+    void get_child_indices(t_index nidx,
+        std::vector<std::pair<t_index, t_index>>& out_data,
+        t_index count) const;
 
     void print_stats();
 
@@ -112,9 +113,12 @@ public:
     void populate_root_children(const t_stnode_vec& rchildren);
     void populate_root_children(std::shared_ptr<const t_stree> tree);
 
+    void set_is_leaves_only(bool is_leaves_only);
+
 private:
     std::shared_ptr<const t_stree> m_tree;
     std::shared_ptr<std::vector<t_tvnode>> m_nodes;
+    bool m_is_leaves_only;
 };
 
 /**
@@ -128,7 +132,7 @@ private:
  */
 template <typename SRC_T>
 void
-t_traversal::sort_by(const t_config& config,
+t_traversal::sort_by(
     const std::vector<t_sortspec>& sortby, const SRC_T& src, t_ctx2* ctx2) {
     std::vector<t_tvnode> new_nodes(m_nodes->size());
 
@@ -162,7 +166,7 @@ t_traversal::sort_by(const t_config& config,
         const t_tvnode& head = (*m_nodes)[h_ctvidx];
 
         std::vector<std::pair<t_index, t_index>> h_children;
-        get_child_indices(h_ctvidx, h_children);
+        get_child_indices(h_ctvidx, h_children, -1);
 
         if (!h_children.empty()) {
             // Get sorted indices

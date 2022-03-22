@@ -50,6 +50,9 @@ public:
 
     using t_ctxbase<t_ctx1>::get_data;
 
+    std::shared_ptr<t_traversal> set_is_leaves_only();
+    void clear_is_leaves_only(std::shared_ptr<t_traversal> trav);
+
 private:
     std::shared_ptr<t_traversal> m_traversal;
     std::shared_ptr<t_stree> m_tree;

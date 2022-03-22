@@ -153,7 +153,7 @@ public:
      */
     std::shared_ptr<std::string> to_arrow(std::int32_t start_row,
         std::int32_t end_row, std::int32_t start_col, std::int32_t end_col,
-        bool emit_group_by) const;
+        bool emit_group_by, bool is_leaves_only) const;
 
     /**
      * @brief Serializes the `View`'s data into the Apache Arrow format
@@ -245,6 +245,8 @@ public:
      * @return std::shared_ptr<t_data_slice<CTX_T>>
      */
     std::shared_ptr<t_data_slice<CTX_T>> get_row_delta() const;
+
+    void set_separator(std::string sep);
 
     // Getters
     std::shared_ptr<CTX_T> get_context() const;

@@ -203,9 +203,10 @@ namespace binding {
     template <typename CTX_T>
     t_val
     to_arrow(std::shared_ptr<View<CTX_T>> view, std::int32_t start_row,
-        std::int32_t end_row, std::int32_t start_col, std::int32_t end_col) {
-        std::shared_ptr<std::string> s
-            = view->to_arrow(start_row, end_row, start_col, end_col, true);
+        std::int32_t end_row, std::int32_t start_col, std::int32_t end_col,
+        bool is_leaves_only) {
+        std::shared_ptr<std::string> s = view->to_arrow(
+            start_row, end_row, start_col, end_col, true, is_leaves_only);
         return str_to_arraybuffer(s)["buffer"];
     }
 
@@ -1922,7 +1923,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_sort", &View<t_ctxunit>::get_sort)
         .function("get_step_delta", &View<t_ctxunit>::get_step_delta)
         .function("get_column_dtype", &View<t_ctxunit>::get_column_dtype)
-        .function("is_column_only", &View<t_ctxunit>::is_column_only);
+        .function("is_column_only", &View<t_ctxunit>::is_column_only)
+        .function("set_separator", &View<t_ctxunit>::set_separator);
 
     class_<View<t_ctx0>>("View_ctx0")
         .constructor<std::shared_ptr<Table>, std::shared_ptr<t_ctx0>,
@@ -1948,7 +1950,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_sort", &View<t_ctx0>::get_sort)
         .function("get_step_delta", &View<t_ctx0>::get_step_delta)
         .function("get_column_dtype", &View<t_ctx0>::get_column_dtype)
-        .function("is_column_only", &View<t_ctx0>::is_column_only);
+        .function("is_column_only", &View<t_ctx0>::is_column_only)
+        .function("set_separator", &View<t_ctx0>::set_separator);
 
     class_<View<t_ctx1>>("View_ctx1")
         .constructor<std::shared_ptr<Table>, std::shared_ptr<t_ctx1>,
@@ -1977,7 +1980,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_sort", &View<t_ctx1>::get_sort)
         .function("get_step_delta", &View<t_ctx1>::get_step_delta)
         .function("get_column_dtype", &View<t_ctx1>::get_column_dtype)
-        .function("is_column_only", &View<t_ctx1>::is_column_only);
+        .function("is_column_only", &View<t_ctx1>::is_column_only)
+        .function("set_separator", &View<t_ctx1>::set_separator);
 
     class_<View<t_ctx2>>("View_ctx2")
         .constructor<std::shared_ptr<Table>, std::shared_ptr<t_ctx2>,
@@ -2007,7 +2011,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_row_path", &View<t_ctx2>::get_row_path)
         .function("get_step_delta", &View<t_ctx2>::get_step_delta)
         .function("get_column_dtype", &View<t_ctx2>::get_column_dtype)
-        .function("is_column_only", &View<t_ctx2>::is_column_only);
+        .function("is_column_only", &View<t_ctx2>::is_column_only)
+        .function("set_separator", &View<t_ctx2>::set_separator);
 
     /******************************************************************************
      *

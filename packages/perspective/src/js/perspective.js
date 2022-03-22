@@ -901,39 +901,54 @@ export default function (Module) {
         const end_col = options.end_col;
         const sides = this.sides();
 
+        if (options.separator) {
+            this._View.set_separator(options.separator);
+        }
+
+        let arrow;
         if (this.is_unit_context) {
-            return __MODULE__.to_arrow_unit(
+            arrow = __MODULE__.to_arrow_unit(
                 this._View,
                 start_row,
                 end_row,
                 start_col,
-                end_col
+                end_col,
+                !!options.leaves_only
             );
         } else if (sides === 0) {
-            return __MODULE__.to_arrow_zero(
+            arrow = __MODULE__.to_arrow_zero(
                 this._View,
                 start_row,
                 end_row,
                 start_col,
-                end_col
+                end_col,
+                !!options.leaves_only
             );
         } else if (sides === 1) {
-            return __MODULE__.to_arrow_one(
+            arrow = __MODULE__.to_arrow_one(
                 this._View,
                 start_row,
                 end_row,
                 start_col,
-                end_col
+                end_col,
+                !!options.leaves_only
             );
         } else if (sides === 2) {
-            return __MODULE__.to_arrow_two(
+            arrow = __MODULE__.to_arrow_two(
                 this._View,
                 start_row,
                 end_row,
                 start_col,
-                end_col
+                end_col,
+                !!options.leaves_only
             );
         }
+
+        if (options.separator) {
+            this._View.set_separator("|");
+        }
+
+        return arrow;
     };
 
     /**

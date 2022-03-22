@@ -297,7 +297,7 @@ t_ctx_grouped_pkey::sort_by(const std::vector<t_sortspec>& sortby) {
     if (m_sortby.empty()) {
         return;
     }
-    m_traversal->sort_by(m_config, sortby, *this);
+    m_traversal->sort_by(sortby, *this);
 }
 
 void
@@ -642,7 +642,7 @@ t_ctx_grouped_pkey::rebuild() {
     set_expansion_state(expansion_state);
 
     if (!m_sortby.empty()) {
-        m_traversal->sort_by(m_config, m_sortby, *this);
+        m_traversal->sort_by(m_sortby, *this);
     }
 }
 

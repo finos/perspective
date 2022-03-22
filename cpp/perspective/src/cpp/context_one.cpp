@@ -360,7 +360,7 @@ t_ctx1::sort_by(const std::vector<t_sortspec>& sortby) {
     if (m_sortby.empty()) {
         return;
     }
-    m_traversal->sort_by(m_config, sortby, *(m_tree.get()));
+    m_traversal->sort_by(sortby, *(m_tree.get()));
 }
 
 void
@@ -517,6 +517,24 @@ t_ctx1::reset_step_state() {
     if (t_env::log_progress()) {
         std::cout << "t_ctx1.reset_step_state " << repr() << std::endl;
     }
+}
+
+std::shared_ptr<t_traversal>
+t_ctx1::set_is_leaves_only() {
+    auto trav = m_traversal;
+    m_traversal = std::make_shared<t_traversal>(m_tree);
+    m_traversal->set_is_leaves_only(true);
+    if (!m_sortby.empty()) {
+        m_traversal->sort_by(m_sortby, *(m_tree.get()));
+    }
+
+    m_traversal->set_depth(m_sortby, m_config.get_num_rpivots() - 1);
+    return trav;
+}
+
+void
+t_ctx1::clear_is_leaves_only(std::shared_ptr<t_traversal> trav) {
+    m_traversal = trav;
 }
 
 t_index

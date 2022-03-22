@@ -28,6 +28,12 @@ t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx,
     , m_slice(slice)
     , m_column_names(column_names) {
     m_stride = m_end_col - m_start_col;
+    t_uindex ctx_nrows = m_ctx->get_row_count();
+    t_uindex ncols = m_ctx->get_column_count();
+    auto ext = sanitize_get_data_extents(
+        ctx_nrows, ncols, start_row, end_row, start_col, end_col);
+    m_start_row = ext.m_srow;
+    m_end_row = ext.m_erow;
 }
 
 template <typename CTX_T>
@@ -48,6 +54,12 @@ t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx,
     , m_column_names(column_names)
     , m_column_indices(column_indices) {
     m_stride = m_end_col - m_start_col;
+    t_uindex ctx_nrows = m_ctx->get_row_count();
+    t_uindex ncols = m_ctx->get_column_count();
+    auto ext = sanitize_get_data_extents(
+        ctx_nrows, ncols, start_row, end_row, start_col, end_col);
+    m_start_row = ext.m_srow;
+    m_end_row = ext.m_erow;
 }
 
 template <typename CTX_T>
