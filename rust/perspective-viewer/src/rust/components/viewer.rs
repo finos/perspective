@@ -9,7 +9,7 @@
 use super::column_selector::ColumnSelector;
 use super::config_selector::ConfigSelector;
 use super::containers::split_panel::SplitPanel;
-use super::font_loader::{FontLoader, FontLoaderProps};
+use super::font_loader::{FontLoader, FontLoaderProps, FontLoaderStatus};
 use super::plugin_selector::PluginSelector;
 use super::render_warning::RenderWarning;
 use super::status_bar::StatusBar;
@@ -19,6 +19,7 @@ use crate::dragdrop::*;
 use crate::model::*;
 use crate::renderer::*;
 use crate::session::*;
+use crate::theme::Theme;
 use crate::utils::*;
 use crate::*;
 
@@ -29,18 +30,19 @@ use yew::prelude::*;
 
 pub static CSS: &str = include_str!("../../../build/css/viewer.css");
 
-#[derive(Properties, Clone)]
+#[derive(Properties)]
 pub struct PerspectiveViewerProps {
     pub elem: web_sys::HtmlElement,
     pub session: Session,
     pub renderer: Renderer,
+    pub theme: Theme,
     pub dragdrop: DragDrop,
 
     #[prop_or_default]
     pub weak_link: WeakScope<PerspectiveViewer>,
 }
 
-derive_session_renderer_model!(PerspectiveViewerProps);
+derive_model!(Renderer, Session for PerspectiveViewerProps);
 
 impl PartialEq for PerspectiveViewerProps {
     fn eq(&self, _rhs: &Self) -> bool {
@@ -95,10 +97,11 @@ impl Component for PerspectiveViewer {
                 false
             }
             Msg::Reset(all, sender) => {
-                clone!(ctx.props().renderer, ctx.props().session);
+                clone!(ctx.props().renderer, ctx.props().session, ctx.props().theme);
                 let _ = promisify_ignore_view_delete(async move {
                     session.reset(all);
                     renderer.reset().await;
+                    theme.reset(None).await;
                     let result = renderer.draw(session.validate().await.create_view()).await;
 
                     if let Some(sender) = sender {
@@ -141,9 +144,15 @@ impl Component for PerspectiveViewer {
                 self.on_rendered = Some(resolve);
                 true
             }
-            Msg::ToggleSettingsComplete(_, resolve) => {
+            Msg::ToggleSettingsComplete(_, resolve)
+                if matches!(self.fonts.get_status(), FontLoaderStatus::Finished) =>
+            {
                 resolve.send(()).expect("Orphan render");
                 false
+            }
+            Msg::ToggleSettingsComplete(_, resolve) => {
+                self.on_rendered = Some(resolve);
+                true
             }
             Msg::RenderLimits(dimensions) => {
                 if self.dimensions != dimensions {
@@ -171,9 +180,14 @@ impl Component for PerspectiveViewer {
             .set_settings_open(Some(self.settings_open))
             .unwrap();
 
-        let resolve = self.on_rendered.take();
-        if let Some(resolve) = resolve {
-            resolve.send(()).expect("Orphan render");
+        if self.on_rendered.is_some()
+            && matches!(self.fonts.get_status(), FontLoaderStatus::Finished)
+        {
+            self.on_rendered
+                .take()
+                .unwrap()
+                .send(())
+                .expect("Orphan render");
         }
     }
 
@@ -183,73 +197,67 @@ impl Component for PerspectiveViewer {
     // version.
     fn view(&self, ctx: &Context<Self>) -> Html {
         let settings = ctx.link().callback(|_| Msg::ToggleSettingsInit(None, None));
-        if self.settings_open {
-            html! {
-                <>
-                    <style>{ &CSS }</style>
-                    <SplitPanel
-                        id="app_panel"
-                        on_reset={ self.on_dimensions_reset.callback() }
-                        on_resize_finished={ ctx.props().render_callback() }>
-                        <div id="side_panel" class="column noselect">
-                            <PluginSelector
+        html_template! {
+            <style>{ &CSS }</style>
+
+            if self.settings_open {
+                <SplitPanel
+                    id="app_panel"
+                    on_reset={ self.on_dimensions_reset.callback() }
+                    on_resize_finished={ ctx.props().render_callback() }>
+                    <div id="side_panel" class="column noselect">
+                        <PluginSelector
+                            session={ ctx.props().session.clone() }
+                            renderer={ ctx.props().renderer.clone() }>
+                        </PluginSelector>
+                        <ColumnSelector
+                            dragdrop={ ctx.props().dragdrop.clone() }
+                            renderer={ ctx.props().renderer.clone() }
+                            session={ ctx.props().session.clone() }
+                            on_resize={ self.on_resize.clone() }
+                            on_dimensions_reset={ self.on_dimensions_reset.clone() }>
+                        </ColumnSelector>
+                    </div>
+                    <div id="main_column">
+                        <ConfigSelector
+                            dragdrop={ ctx.props().dragdrop.clone() }
+                            session={ ctx.props().session.clone() }
+                            renderer={ ctx.props().renderer.clone() }>
+                        </ConfigSelector>
+                        <div id="main_panel_container">
+                            <RenderWarning
+                                dimensions={ self.dimensions }
                                 session={ ctx.props().session.clone() }
                                 renderer={ ctx.props().renderer.clone() }>
-                            </PluginSelector>
-                            <ColumnSelector
-                                dragdrop={ ctx.props().dragdrop.clone() }
-                                renderer={ ctx.props().renderer.clone() }
-                                session={ ctx.props().session.clone() }
-                                on_resize={ self.on_resize.clone() }
-                                on_dimensions_reset={ self.on_dimensions_reset.clone() }>
-                            </ColumnSelector>
+                            </RenderWarning>
+                            <slot></slot>
                         </div>
-                        <div id="main_column">
-                            <ConfigSelector
-                                dragdrop={ ctx.props().dragdrop.clone() }
-                                session={ ctx.props().session.clone() }
-                                renderer={ ctx.props().renderer.clone() }>
-                            </ConfigSelector>
-                            <div id="main_panel_container">
-                                <RenderWarning
-                                    dimensions={ self.dimensions }
-                                    session={ ctx.props().session.clone() }
-                                    renderer={ ctx.props().renderer.clone() }>
-                                </RenderWarning>
-                                <slot></slot>
-                            </div>
-                        </div>
-                    </SplitPanel>
-                    <StatusBar
-                        id="status_bar"
-                        session={ ctx.props().session.clone() }
-                        renderer={ ctx.props().renderer.clone() }
-                        on_reset={ ctx.link().callback(|all| Msg::Reset(all, None)) }>
-                    </StatusBar>
-                    <div
-                        id="settings_button"
-                        class="noselect button"
-                        onmousedown={ settings }>
                     </div>
-                    <FontLoader with self.fonts.clone()></FontLoader>
-                </>
+                </SplitPanel>
+                <StatusBar
+                    id="status_bar"
+                    session={ ctx.props().session.clone() }
+                    renderer={ ctx.props().renderer.clone() }
+                    theme={ ctx.props().theme.clone() }
+                    on_reset={ ctx.link().callback(|all| Msg::Reset(all, None)) }>
+                </StatusBar>
+            } else {
+                <RenderWarning
+                    dimensions={ self.dimensions }
+                    session={ ctx.props().session.clone() }
+                    renderer={ ctx.props().renderer.clone() }>
+                </RenderWarning>
+                <div id="main_panel_container" class="settings-closed">
+                    <slot></slot>
+                </div>
             }
-        } else {
-            html! {
-                <>
-                    <style>{ &CSS }</style>
-                    <RenderWarning
-                        dimensions={ self.dimensions }
-                        session={ ctx.props().session.clone() }
-                        renderer={ ctx.props().renderer.clone() }>
-                    </RenderWarning>
-                    <div id="main_panel_container" class="settings-closed">
-                        <slot></slot>
-                    </div>
-                    <div id="settings_button" class="noselect button" onmousedown={ settings }></div>
-                    <FontLoader with self.fonts.clone()></FontLoader>
-                </>
-            }
+
+            <div
+                id="settings_button"
+                class="noselect button"
+                onmousedown={ settings }>
+            </div>
+            <FontLoader ..self.fonts.clone()></FontLoader>
         }
     }
 
@@ -285,7 +293,7 @@ impl PerspectiveViewer {
             }
             Some(_) | None => {
                 let force = !is_open;
-                let callback = ctx.link().callback_once(move |resolve| {
+                let callback = ctx.link().callback(move |resolve| {
                     let update = SettingsUpdate::Update(force);
                     Msg::ToggleSettingsComplete(update, resolve)
                 });

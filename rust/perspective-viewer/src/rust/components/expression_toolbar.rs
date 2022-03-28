@@ -14,6 +14,7 @@ use crate::renderer::*;
 use crate::session::*;
 use crate::*;
 
+use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::*;
 use yew::prelude::*;
@@ -33,7 +34,7 @@ impl PartialEq for ExpressionToolbarProps {
     }
 }
 
-derive_session_renderer_model!(ExpressionToolbarProps);
+derive_model!(Renderer, Session for ExpressionToolbarProps);
 
 impl ExpressionToolbarProps {
     pub async fn save_expr(&self, expression: &JsValue) {
@@ -52,10 +53,7 @@ impl ExpressionToolbarProps {
             .get_expression_by_alias(&self.name)
             .unwrap();
 
-        let ViewConfig {
-            mut expressions, ..
-        } = self.session.get_view_config();
-
+        let mut expressions = self.session.get_view_config().expressions.clone();
         expressions.retain(|x| x != &expression);
         self.update_and_render(ViewConfigUpdate {
             expressions: Some(expressions),
@@ -129,32 +127,24 @@ impl Component for ExpressionToolbar {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         let edit = ctx.link().callback(|_| ExpressionToolbarMsg::Edit);
-
-        html! {
-            <>
-                {
-                    if ctx.props().is_closable() {
-                        let close = ctx.link().callback(|_| ExpressionToolbarMsg::Close);
-                        html! {
-                            <span
-                                onmousedown={ close }
-                                class="expression-delete-button">
-                            </span>
-                        }
-                    } else {
-                        html! {
-                            <span
-                                class="expression-delete-button"
-                                style="opacity:0">
-                            </span>
-                        }
-                    }
-                }
+        let close = ctx.link().callback(|_| ExpressionToolbarMsg::Close);
+        html_template! {
+            if ctx.props().is_closable() {
                 <span
-                    onmousedown={ edit }
-                    class="expression-edit-button">
+                    onmousedown={ close }
+                    class="expression-delete-button">
                 </span>
-            </>
+            } else {
+                <span
+                    class="expression-delete-button"
+                    style="opacity:0">
+                </span>
+            }
+
+            <span
+                onmousedown={ edit }
+                class="expression-edit-button">
+            </span>
         }
     }
 }

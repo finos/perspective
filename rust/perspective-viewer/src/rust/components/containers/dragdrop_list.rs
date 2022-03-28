@@ -157,14 +157,25 @@ where
 
         // On dragleave, signal the parent but no need to redraw as parent will call
         // `change()` when resetting props.
-        let dragleave = dragleave_helper({
-            let parent = ctx.props().parent.clone();
-            let link = ctx.link().clone();
-            move || {
-                link.send_message(DragDropListMsg::Freeze(false));
-                parent.send_message(V::dragleave())
-            }
-        });
+        let drag_container = DragDropContainer::new(
+            {
+                let total = ctx.props().children.len();
+                let parent = ctx.props().parent.clone();
+                let link = ctx.link().clone();
+                move || {
+                    link.send_message(DragDropListMsg::Freeze(true));
+                    parent.send_message(V::dragenter(total))
+                }
+            },
+            {
+                let parent = ctx.props().parent.clone();
+                let link = ctx.link().clone();
+                move || {
+                    link.send_message(DragDropListMsg::Freeze(false));
+                    parent.send_message(V::dragleave())
+                }
+            },
+        );
 
         let drop = Callback::from({
             let dragdrop = ctx.props().dragdrop.clone();
@@ -247,16 +258,6 @@ where
                 .collect::<Html>()
         };
 
-        let total = ctx.props().children.len();
-        let dragenter = ctx.props().parent.callback({
-            let link = ctx.link().clone();
-            move |event: DragEvent| {
-                dragenter_helper(event);
-                link.send_message(DragDropListMsg::Freeze(true));
-                V::dragenter(total)
-            }
-        });
-
         let style = match self.frozen_size {
             Some(x) => format!("max-width:{}px;min-width:{}px", x.floor(), x.ceil()),
             None => "".to_owned(),
@@ -267,8 +268,9 @@ where
                 <div
                     id={ ctx.props().name }
                     ondragover={ dragover }
-                    ondragenter={ dragenter }
-                    ondragleave={ dragleave }
+                    ondragenter={ drag_container.dragenter }
+                    ondragleave={ drag_container.dragleave }
+                    ref={ drag_container.noderef }
                     ondrop={ drop }>
 
                     <div class="psp-text-field">

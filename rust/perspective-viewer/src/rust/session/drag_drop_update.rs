@@ -44,6 +44,7 @@ impl ViewConfig {
             .map(|x| x.is_none())
             .unwrap_or_default();
 
+        let is_swap_to_after_last = index == config.columns.len() && from_index.is_some();
         match drag {
             DragEffect::Copy => (),
             DragEffect::Move(DragTarget::Active) => {
@@ -55,6 +56,7 @@ impl ViewConfig {
                     || is_to_group_or_split)
                     && config.columns.len() > 1
                     && !is_from_required
+                    && !is_swap_to_after_last
                 {
                     // Is not a swap
                     if !is_to_swap && !is_to_group_or_split {
@@ -90,45 +92,47 @@ impl ViewConfig {
 
         match drop {
             DragTarget::Active => {
-                if is_to_swap || is_from_required {
-                    let column = Some(column);
-                    config.columns.extend(std::iter::repeat(None).take({
-                        let fill_to = requirements
-                            .names
-                            .as_ref()
-                            .map(|x| std::cmp::max(x.len() - 1, index))
-                            .unwrap_or(index);
+                if !is_swap_to_after_last {
+                    if is_to_swap || is_from_required {
+                        let column = Some(column);
+                        config.columns.extend(std::iter::repeat(None).take({
+                            let fill_to = requirements
+                                .names
+                                .as_ref()
+                                .map(|x| std::cmp::max(x.len() - 1, index))
+                                .unwrap_or(index);
 
-                        if fill_to >= (config.columns.len() - 1) {
-                            fill_to + 1 - config.columns.len()
+                            if fill_to >= (config.columns.len() - 1) {
+                                fill_to + 1 - config.columns.len()
+                            } else {
+                                0
+                            }
+                        }));
+
+                        if let Some(prev) = config.columns.iter().position(|x| *x == column) {
+                            config.columns.swap(index, prev);
                         } else {
-                            0
+                            config.columns[index] = column;
                         }
-                    }));
-
-                    if let Some(prev) = config.columns.iter().position(|x| *x == column) {
-                        config.columns.swap(index, prev);
                     } else {
-                        config.columns[index] = column;
-                    }
-                } else {
-                    config.columns.retain(|x| x.as_ref() != Some(&column));
-                    config.columns.extend(std::iter::repeat(None).take(
-                        if index >= config.columns.len() {
-                            index - config.columns.len()
+                        config.columns.retain(|x| x.as_ref() != Some(&column));
+                        config.columns.extend(std::iter::repeat(None).take(
+                            if index >= config.columns.len() {
+                                index - config.columns.len()
+                            } else {
+                                0
+                            },
+                        ));
+
+                        if is_to_empty {
+                            config.columns[index] = Some(column)
                         } else {
-                            0
-                        },
-                    ));
-
-                    if is_to_empty {
-                        config.columns[index] = Some(column)
-                    } else {
-                        config.columns.insert(index, Some(column));
+                            config.columns.insert(index, Some(column));
+                        }
                     }
-                }
 
-                update.columns = Some(config.columns);
+                    update.columns = Some(config.columns);
+                }
             }
             DragTarget::GroupBy => {
                 config.group_by.retain(|x| x != &column);

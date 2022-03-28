@@ -25,7 +25,6 @@ use crate::js::plugin::*;
 use crate::utils::*;
 use crate::*;
 
-use futures::channel::oneshot::*;
 use js_intern::*;
 use std::cell::{Ref, RefCell};
 use std::collections::HashSet;
@@ -124,21 +123,13 @@ impl Session {
         self.borrow_mut().view_sub = None;
         self.borrow_mut().metadata = metadata;
         self.borrow_mut().table = Some(table);
-
         self.table_loaded.emit_all(());
-        self.set_initial_stats().await?;
-        Ok(JsValue::UNDEFINED)
+        self.set_initial_stats().await
     }
 
     pub async fn await_table(&self) -> Result<(), JsValue> {
         if self.js_get_table().is_none() {
-            let (sender, receiver) = channel::<()>();
-            let sender = RefCell::new(Some(sender));
-            let _sub = self
-                .table_loaded
-                .add_listener(move |x| sender.borrow_mut().take().unwrap().send(x).unwrap());
-
-            receiver.await.into_jserror()?;
+            self.table_loaded.listen_once().await.into_jserror()?;
             let _ = self
                 .js_get_table()
                 .ok_or_else(|| js_intern!("No table set"))?;
@@ -148,10 +139,7 @@ impl Session {
     }
 
     pub fn js_get_table(&self) -> Option<JsValue> {
-        self.borrow()
-            .table
-            .clone()
-            .map(|x| x.unchecked_into::<JsValue>())
+        self.borrow().table.clone()?.dyn_into().ok()
     }
 
     pub fn js_get_view(&self) -> Option<JsValue> {
@@ -187,8 +175,7 @@ impl Session {
             .unwrap();
 
         let expression = expression.as_string().unwrap();
-        let view_config = self.get_view_config();
-        view_config.create_replace_expression_update(
+        self.get_view_config().create_replace_expression_update(
             column,
             &old_expression,
             &new_name,
@@ -214,52 +201,22 @@ impl Session {
         }
     }
 
-    pub async fn get_table_arrow(&self) -> Result<Vec<u8>, JsValue> {
-        let table = self.borrow().table.clone().into_jserror()?;
-        let view = table.view(&js_object!().unchecked_into()).await?;
-        let csv_fut = view.to_arrow();
-        let bytes = csv_fut.await?;
-        view.delete().await?;
-        Ok(js_sys::Uint8Array::new(&bytes).to_vec())
+    pub async fn arrow_as_vec(&self, flat: bool) -> Result<Vec<u8>, JsValue> {
+        let arrow = self.flat_as_jsvalue(flat).await?.to_arrow().await?;
+        Ok(js_sys::Uint8Array::new(&arrow).to_vec())
     }
 
-    pub async fn arrow_as_jsvalue(self, flat: bool) -> Result<web_sys::Blob, JsValue> {
-        let view = self.flat_as_jsvalue(flat).await?;
-        let arrow = view.to_arrow().await.unwrap();
-        let array = [js_sys::Uint8Array::new(&arrow)]
-            .iter()
-            .collect::<js_sys::Array>();
-        let blob = web_sys::Blob::new_with_u8_array_sequence(&array)?;
-        Ok(blob)
+    pub async fn arrow_as_jsvalue(self, flat: bool) -> Result<js_sys::ArrayBuffer, JsValue> {
+        self.flat_as_jsvalue(flat).await?.to_arrow().await
     }
 
-    pub async fn json_as_jsvalue(self, flat: bool) -> Result<web_sys::Blob, JsValue> {
-        let view = self.flat_as_jsvalue(flat).await?;
-        let json = view.to_columns().await.unwrap();
-        let array = [js_sys::JSON::stringify(&json)?]
-            .iter()
-            .collect::<js_sys::Array>();
-        let mut options = web_sys::BlobPropertyBag::new();
-        options.type_("text/plain");
-        let blob = web_sys::Blob::new_with_str_sequence_and_options(&array, &options)?;
-        Ok(blob)
+    pub async fn json_as_jsvalue(self, flat: bool) -> Result<js_sys::Object, JsValue> {
+        self.flat_as_jsvalue(flat).await?.to_columns().await
     }
 
-    pub async fn csv_as_jsvalue(&self, flat: bool) -> Result<web_sys::Blob, JsValue> {
-        let view = self.flat_as_jsvalue(flat).await?;
-        let csv_fut = view.to_csv(js_object!("formatted", true));
-        let csv = csv_fut.await.unwrap();
-        let csv_str = csv.as_string().unwrap();
-        let bytes = csv_str.as_bytes();
-        let value = unsafe { js_sys::Uint8Array::view(bytes) };
-        let mut options = web_sys::BlobPropertyBag::new();
-        options.type_("text/plain");
-        let value = web_sys::Blob::new_with_u8_array_sequence_and_options(
-            &[value].iter().collect::<js_sys::Array>(),
-            &options,
-        )?;
-
-        Ok(value)
+    pub async fn csv_as_jsvalue(&self, flat: bool) -> Result<js_sys::JsString, JsValue> {
+        let opts = js_object!("formatted", true);
+        self.flat_as_jsvalue(flat).await?.to_csv(opts).await
     }
 
     pub fn get_view(&self) -> Option<View> {
@@ -273,12 +230,7 @@ impl Session {
         self.borrow().stats.clone()
     }
 
-    /// TODO view_config could be a ref
-    pub fn get_view_config(&self) -> ViewConfig {
-        self.borrow().config.clone()
-    }
-
-    pub fn borrow_view_config(&self) -> Ref<ViewConfig> {
+    pub fn get_view_config(&self) -> Ref<ViewConfig> {
         Ref::map(self.borrow(), |x| &x.config)
     }
 
@@ -344,8 +296,9 @@ impl Session {
     /// if provided.
     pub fn update_view_config(&self, config_update: ViewConfigUpdate) {
         self.borrow_mut().view_sub = None;
-        self.borrow_mut().config.apply_update(config_update);
-        self.view_config_changed.emit_all(());
+        if self.borrow_mut().config.apply_update(config_update) {
+            self.view_config_changed.emit_all(());
+        }
     }
 
     pub fn reset_stats(&self) {
@@ -383,16 +336,19 @@ impl Session {
     }
 
     async fn flat_as_jsvalue(&self, flat: bool) -> Result<View, JsValue> {
-        Ok(if flat {
+        if flat {
             let table = self.borrow().table.clone().into_jserror()?;
-            PerspectiveOwned::new(table.view(&js_object!().unchecked_into()).await?)
+            table
+                .view(&js_object!().unchecked_into())
+                .await
+                .map(PerspectiveOwned::new)
         } else {
             self.borrow()
                 .view_sub
                 .as_ref()
                 .map(|x| x.get_view().clone())
-                .into_jserror()?
-        })
+                .into_jserror()
+        }
     }
 
     /// Update the this `Session`'s `TableStats` data from the `Table`.
@@ -454,7 +410,7 @@ impl Session {
 
         for column in config.columns.iter().flatten() {
             if all_columns.contains(column) || expression_names.contains(column) {
-                view_columns.insert(column);
+                let _existed = view_columns.insert(column);
             } else {
                 return Err(format!("Unknown \"{}\" in `columns`", column).into());
             }
@@ -462,7 +418,7 @@ impl Session {
 
         for column in config.group_by.iter() {
             if all_columns.contains(column) || expression_names.contains(column) {
-                view_columns.insert(column);
+                let _existed = view_columns.insert(column);
             } else {
                 return Err(format!("Unknown \"{}\" in `group_by`", column).into());
             }
@@ -470,7 +426,7 @@ impl Session {
 
         for column in config.split_by.iter() {
             if all_columns.contains(column) || expression_names.contains(column) {
-                view_columns.insert(column);
+                let _existed = view_columns.insert(column);
             } else {
                 return Err(format!("Unknown \"{}\" in `split_by`", column).into());
             }
@@ -478,7 +434,7 @@ impl Session {
 
         for sort in config.sort.iter() {
             if all_columns.contains(&sort.0) || expression_names.contains(&sort.0) {
-                view_columns.insert(&sort.0);
+                let _existed = view_columns.insert(&sort.0);
             } else {
                 return Err(format!("Unknown \"{}\" in `sort`", sort.0).into());
             }
@@ -486,7 +442,7 @@ impl Session {
 
         for filter in config.filter.iter() {
             if all_columns.contains(&filter.0) || expression_names.contains(&filter.0) {
-                view_columns.insert(&filter.0);
+                let _existed = view_columns.insert(&filter.0);
             } else {
                 return Err(format!("Unknown \"{}\" in `filter`", &filter.0).into());
             }

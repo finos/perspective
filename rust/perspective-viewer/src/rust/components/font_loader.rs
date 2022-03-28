@@ -6,12 +6,11 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::utils::*;
+use crate::{html_template, utils::*};
 
 use futures::future::{join_all, select_all};
 use js_intern::*;
 use std::cell::{Cell, Ref, RefCell};
-use std::fmt::Debug;
 use std::future::Future;
 use std::iter::{repeat_with, Iterator};
 use std::pin::Pin;
@@ -29,12 +28,6 @@ const FONT_TEST_SAMPLE: &str = "ABCD";
 #[derive(Clone, Properties)]
 pub struct FontLoaderProps {
     state: Rc<FontLoaderState>,
-}
-
-impl Debug for FontLoaderProps {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
-        fmt.write_str("FontLoaderProps")
-    }
 }
 
 impl PartialEq for FontLoaderProps {
@@ -63,17 +56,15 @@ impl Component for FontLoader {
         if let FontLoaderStatus::Finished = ctx.props().get_status() {
             html! {}
         } else {
-            html! {
-                <>
-                    <style>{ ":host{opacity:0!important;}" }</style>
-                    {
-                        ctx.props()
-                            .get_fonts()
-                            .iter()
-                            .map(font_test_html)
-                            .collect::<Html>()
-                    }
-                </>
+            html_template! {
+                <style>{ ":host{opacity:0!important;}" }</style>
+                {
+                    ctx.props()
+                        .get_fonts()
+                        .iter()
+                        .map(font_test_html)
+                        .collect::<Html>()
+                }
             }
         }
     }
@@ -114,7 +105,7 @@ impl FontLoaderProps {
         state
     }
 
-    fn get_status(&self) -> FontLoaderStatus {
+    pub fn get_status(&self) -> FontLoaderStatus {
         self.state.status.get()
     }
 
@@ -205,7 +196,11 @@ fn timeout_font_task(family: &str, weight: &str) -> impl Future<Output = Result<
 /// since not all of the fonts may be shown and when e.g. the settings panel is
 /// closed, and this will defer font loading.
 fn font_test_html((family, weight): &(String, String)) -> Html {
-    let style = format!("opacity:0;font-family:{};font-weight:{}", family, weight);
+    let style = format!(
+        "opacity:0;font-family:\"{}\";font-weight:{}",
+        family, weight
+    );
+
     html! { <span style={ style }>{FONT_TEST_SAMPLE}</span> }
 }
 

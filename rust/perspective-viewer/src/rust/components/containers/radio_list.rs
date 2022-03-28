@@ -32,7 +32,7 @@ use crate::utils::WeakScope;
 // trait Selectable: Clone + Display + FromStr + PartialEq + 'static {}
 // ```
 
-#[derive(Properties, Clone, Default)]
+#[derive(Properties, Default)]
 pub struct RadioListProps<T>
 where
     T: Clone + Display + FromStr + PartialEq + 'static,

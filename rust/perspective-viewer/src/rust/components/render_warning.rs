@@ -13,7 +13,7 @@ use crate::*;
 use wasm_bindgen_futures::future_to_promise;
 use yew::prelude::*;
 
-#[derive(Properties, Clone)]
+#[derive(Properties)]
 pub struct RenderWarningProps {
     pub dimensions: Option<(usize, usize, Option<usize>, Option<usize>)>,
     pub renderer: Renderer,

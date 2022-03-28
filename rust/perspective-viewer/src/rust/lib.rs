@@ -8,12 +8,15 @@
 
 // Required by yew's `html` macro.
 #![recursion_limit = "1024"]
-#![warn(clippy::all, clippy::panic_in_result_fn)]
-
-pub mod custom_elements;
+#![warn(
+    clippy::all,
+    clippy::panic_in_result_fn,
+    clippy::await_holding_refcell_ref
+)]
 
 mod components;
 mod config;
+pub mod custom_elements;
 mod custom_events;
 mod dragdrop;
 mod exprtk;
@@ -21,12 +24,11 @@ mod js;
 mod model;
 mod renderer;
 mod session;
+mod theme;
 mod utils;
 
-use wasm_bindgen::prelude::*;
-
-#[wasm_bindgen]
+#[wasm_bindgen::prelude::wasm_bindgen]
 pub fn register_plugin(name: &str) {
-    use crate::renderer::registry::*;
+    use crate::renderer::*;
     PLUGIN_REGISTRY.register_plugin(name);
 }

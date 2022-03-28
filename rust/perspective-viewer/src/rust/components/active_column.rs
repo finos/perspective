@@ -59,16 +59,14 @@ impl ActiveColumnProps {
 
 impl From<ActiveColumnProps> for yew::Html {
     fn from(props: ActiveColumnProps) -> Self {
+        let key = format!("{}", props.name);
         html! {
-            html! {
-                <ActiveColumn with props>
-                </ActiveColumn>
-            }
+            <ActiveColumn key={ key } ..props></ActiveColumn>
         }
     }
 }
 
-derive_session_renderer_model!(ActiveColumnProps);
+derive_model!(Renderer, Session for ActiveColumnProps);
 
 impl ActiveColumnProps {
     /// Remove an active column from `columns`, or alternatively make this
@@ -80,7 +78,7 @@ impl ActiveColumnProps {
     ///   with respect to `columns`.
     /// - `shift` whether to toggle or select this column.
     pub fn deactivate_column(&self, name: String, shift: bool) {
-        let mut columns = self.session.borrow_view_config().columns.clone();
+        let mut columns = self.session.get_view_config().columns.clone();
         let max_cols = self
             .renderer
             .metadata()
@@ -276,28 +274,24 @@ impl Component for ActiveColumn {
                                         name.clone()
                                     }
                                 </span>
-                                {
-                                    if is_expression {
-                                        html! {
-                                            <ExpressionToolbar
-                                                session={ ctx.props().session.clone() }
-                                                renderer={ ctx.props().renderer.clone() }
-                                                dragdrop={ ctx.props().dragdrop.clone() }
-                                                name={ name.clone() }
-                                                add_expression_ref={ self.add_expression_ref.clone() }>
-                                            </ExpressionToolbar>
-                                        }
-                                    } else {
-                                        html! {}
-                                    }
+
+                                if is_expression {
+                                    <ExpressionToolbar
+                                        session={ ctx.props().session.clone() }
+                                        renderer={ ctx.props().renderer.clone() }
+                                        dragdrop={ ctx.props().dragdrop.clone() }
+                                        name={ name.clone() }
+                                        add_expression_ref={ self.add_expression_ref.clone() }>
+                                    </ExpressionToolbar>
                                 }
+
                             </span>
                             {
                                 if ctx.props().is_pivot {
                                     let aggregate = ctx
                                         .props()
                                         .session
-                                        .borrow_view_config()
+                                        .get_view_config()
                                         .aggregates
                                         .get(&name)
                                         .cloned();

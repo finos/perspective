@@ -9,8 +9,10 @@
 pub mod copy_dropdown;
 pub mod export_dropdown;
 pub mod expression_editor;
-pub mod filter_dropdown;
+mod filter_dropdown;
 pub mod modal;
 pub mod number_column_style;
 pub mod string_column_style;
 pub mod viewer;
+
+pub use self::filter_dropdown::*;

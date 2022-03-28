@@ -7,8 +7,7 @@
 // file.
 
 use crate::components::plugin_selector::*;
-use crate::js::plugin::*;
-use crate::renderer::registry::*;
+use crate::js::*;
 use crate::renderer::*;
 use crate::session::*;
 use crate::utils::*;
@@ -106,7 +105,7 @@ pub async fn test_plugin_selected() {
     let elem: HtmlElement = document.create_element("div").unwrap().unchecked_into();
     let session = Session::default();
     session.set_table(get_mock_table().await).await.unwrap();
-    let renderer = Renderer::new(elem, session.clone());
+    let renderer = Renderer::new(&elem);
     let _sub = renderer.plugin_changed.add_listener({
         clone!(result);
         move |val| {
@@ -123,11 +122,13 @@ pub async fn test_plugin_selected() {
         </PluginSelector>
     };
 
+    await_animation_frame().await.unwrap();
     let plugin_selector = link.borrow().clone().unwrap();
     plugin_selector.send_message(PluginSelectorMsg::ComponentSelectPlugin(
         "Debug B".to_owned(),
     ));
 
+    await_animation_frame().await.unwrap();
     assert_eq!(
         result.borrow().as_ref().map(|x| x.name()),
         Some("Debug B".to_owned())

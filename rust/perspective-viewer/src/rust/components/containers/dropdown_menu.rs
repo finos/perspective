@@ -17,11 +17,9 @@ pub static CSS: &str = include_str!("../../../../build/css/dropdown-menu.css");
 
 pub type DropDownMenuItem<T> = SelectItem<T>;
 
-pub enum DropDownMenuMsg {
-    SetPos(i32, i32),
-}
+pub type DropDownMenuMsg = ();
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, PartialEq)]
 pub struct DropDownMenuProps<T>
 where
     T: Into<Html> + Clone + PartialEq + 'static,
@@ -34,7 +32,6 @@ pub struct DropDownMenu<T>
 where
     T: Into<Html> + Clone + PartialEq + 'static,
 {
-    position: Option<(i32, i32)>,
     _props: PhantomData<T>,
 }
 
@@ -47,18 +44,12 @@ where
 
     fn create(_ctx: &Context<Self>) -> Self {
         DropDownMenu {
-            position: None,
             _props: Default::default(),
         }
     }
 
-    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
-        match msg {
-            DropDownMenuMsg::SetPos(top, left) => {
-                self.position = Some((top, left));
-                true
-            }
-        }
+    fn update(&mut self, _ctx: &Context<Self>, _msg: Self::Message) -> bool {
+        false
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
@@ -107,20 +98,11 @@ where
             }
         };
 
-        html! {
-            <>
-                <style>
-                    { &CSS }
-                </style>
-                {
-                    self.position.map(|(top, left)| html! {
-                        <style>
-                            { format!(":host{{left:{}px;top:{}px;}}", left, top) }
-                        </style>
-                    }).unwrap_or_default()
-                }
-                { body }
-            </>
+        html_template! {
+            <style>
+                { &CSS }
+            </style>
+            { body }
         }
     }
 }

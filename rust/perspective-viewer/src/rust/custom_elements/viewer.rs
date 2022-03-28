@@ -6,20 +6,18 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::components::viewer::*;
+use crate::components::{Msg, PerspectiveViewer, PerspectiveViewerProps};
 use crate::config::*;
 use crate::custom_events::*;
 use crate::dragdrop::*;
-use crate::js::perspective::*;
-use crate::js::plugin::JsPerspectiveViewerPlugin;
-use crate::js::resize_observer::*;
+use crate::js::*;
 use crate::model::*;
 use crate::renderer::*;
 use crate::session::Session;
+use crate::theme::*;
 use crate::utils::*;
 use crate::*;
 
-use futures::channel::oneshot::*;
 use js_intern::*;
 use js_sys::*;
 use std::cell::RefCell;
@@ -110,21 +108,24 @@ impl ResizeObserverState {
 /// A `customElements` class which encapsulates both the `<perspective-viewer>`
 /// public API, as well as the Rust component state.
 ///
-///     ┌─────────────────────────────────────────┐
-///     │ Custom Element                          │
-///     │┌──────────────┐┌───────────────────────┐│
-///     ││ yew::app     ││ Model                 ││
-///     ││┌────────────┐││┌─────────┐┌──────────┐││
-///     │││ Components ││││ Session ││ Renderer │││
-///     ││└────────────┘│││┌───────┐││┌────────┐│││
-///     │└──────────────┘│││ Table ││││ Plugin ││││
-///     │┌──────────────┐││└───────┘││└────────┘│││
-///     ││ HtmlElement  │││┌───────┐│└──────────┘││
-///     │└──────────────┘│││ View  ││┌──────────┐││
-///     │                ││└───────┘││ DragDrop │││
-///     │                │└─────────┘└──────────┘││
-///     │                └───────────────────────┘│
-///     └─────────────────────────────────────────┘
+///     ┌───────────────────────────────────────────┐
+///     │ Custom Element                            │
+///     │┌──────────────┐┌─────────────────────────┐│
+///     ││ yew::app     ││ Model                   ││
+///     ││┌────────────┐││┌─────────┐┌────────────┐││
+///     │││ Components ││││ Session ││ Renderer   │││
+///     ││└────────────┘│││┌───────┐││┌──────────┐│││
+///     │└──────────────┘│││ Table ││││ Plugin   ││││
+///     │┌──────────────┐││└───────┘││└──────────┘│││
+///     ││ HtmlElement  │││┌───────┐│└────────────┘││
+///     │└──────────────┘│││ View  ││┌────────────┐││
+///     │                ││└───────┘││ DragDrop   │││
+///     │                │└─────────┘└────────────┘││
+///     │                │┌──────────────┐┌───────┐││
+///     │                ││ CustomEvents ││ Theme │││
+///     │                │└──────────────┘└───────┘││
+///     │                └─────────────────────────┘│
+///     └───────────────────────────────────────────┘
 #[wasm_bindgen]
 pub struct PerspectiveViewerElement {
     elem: HtmlElement,
@@ -132,11 +133,12 @@ pub struct PerspectiveViewerElement {
     resize_handle: Rc<RefCell<Option<ResizeObserverHandle>>>,
     session: Session,
     renderer: Renderer,
+    theme: Theme,
     _events: CustomEvents,
     _subscriptions: Rc<[Subscription; 2]>,
 }
 
-derive_session_renderer_model!(PerspectiveViewerElement);
+derive_model!(Renderer, Session, Theme for PerspectiveViewerElement);
 
 #[wasm_bindgen]
 impl PerspectiveViewerElement {
@@ -150,15 +152,15 @@ impl PerspectiveViewerElement {
 
         // Application State
         let session = Session::default();
-        let renderer = Renderer::new(elem.clone(), session.clone());
+        let renderer = Renderer::new(&elem);
+        let theme = Theme::new(&elem);
 
         // Theme
         let _ = promisify_ignore_view_delete({
-            let elem = elem.clone();
-            let renderer = renderer.clone();
+            clone!(elem, theme);
             async move {
-                if let Some(theme) = renderer.get_theme_name().await {
-                    elem.set_attribute("theme", &theme).unwrap();
+                if let Some(theme_name) = theme.get_name().await {
+                    elem.set_attribute("theme", &theme_name).unwrap();
                 }
 
                 Ok(JsValue::UNDEFINED)
@@ -170,11 +172,12 @@ impl PerspectiveViewerElement {
             elem: elem.clone(),
             session: session.clone(),
             renderer: renderer.clone(),
+            theme: theme.clone(),
             dragdrop: DragDrop::default(),
             weak_link: WeakScope::default(),
         };
 
-        let root = yew::start_app_with_props_in_element(shadow_root, props);
+        let root = yew::Renderer::with_root_and_props(shadow_root, props).render();
 
         // Create callbacks
         let update_sub = session.table_updated.add_listener({
@@ -192,13 +195,14 @@ impl PerspectiveViewerElement {
             renderer.limits_changed.add_listener(callback)
         };
 
-        let _events = CustomEvents::new(&elem, &session, &renderer);
+        let _events = CustomEvents::new(&elem, &session, &renderer, &theme);
         let resize_handle = ResizeObserverHandle::new(&elem, &renderer, &root);
         PerspectiveViewerElement {
             elem,
             root: Rc::new(RefCell::new(Some(root))),
             session,
             renderer,
+            theme,
             resize_handle: Rc::new(RefCell::new(Some(resize_handle))),
             _events,
             _subscriptions: Rc::new([update_sub, limit_sub]),
@@ -277,13 +281,7 @@ impl PerspectiveViewerElement {
                 Some(table) => Ok(table),
                 None if !wait_for_table => Err(JsValue::from("No table set")),
                 None => {
-                    let (sender, receiver) = channel::<()>();
-                    let sender = RefCell::new(Some(sender));
-                    let _sub = session.table_loaded.add_listener(move |x| {
-                        sender.borrow_mut().take().unwrap().send(x).unwrap()
-                    });
-
-                    receiver.await.into_jserror()?;
+                    session.table_loaded.listen_once().await.into_jserror()?;
                     session.js_get_table().ok_or_else(|| "No table set".into())
                 }
             }
@@ -294,13 +292,7 @@ impl PerspectiveViewerElement {
         clone!(self.renderer, self.session);
         promisify_ignore_view_delete(async move {
             if session.js_get_table().is_none() {
-                let (sender, receiver) = channel::<()>();
-                let sender = RefCell::new(Some(sender));
-                let _sub = session
-                    .table_loaded
-                    .add_listener(move |x| sender.borrow_mut().take().unwrap().send(x).unwrap());
-
-                receiver.await.into_jserror()?;
+                session.table_loaded.listen_once().await.into_jserror()?;
                 let _ = session
                     .js_get_table()
                     .ok_or_else(|| js_intern!("No table set"))?;
@@ -316,30 +308,30 @@ impl PerspectiveViewerElement {
     /// - `update` The config to restore to, as returned by `.save()` in either
     ///   "json", "string" or "arraybuffer" format.
     pub fn js_restore(&self, update: JsValue) -> js_sys::Promise {
-        clone!(self.session, self.renderer, self.root);
+        clone!(self.session, self.renderer, self.root, self.theme);
         promisify_ignore_view_delete(async move {
             let ViewerConfigUpdate {
                 plugin,
                 plugin_config,
                 settings,
-                theme,
+                theme: theme_name,
                 mut view_config,
             } = ViewerConfigUpdate::decode(&update)?;
 
-            let needs_restyle = match theme {
+            let needs_restyle = match theme_name {
                 OptionalUpdate::SetDefault => {
-                    let current_name = renderer.get_theme_name().await;
+                    let current_name = theme.get_name().await;
                     if None != current_name {
-                        renderer.set_theme_name(None).await?;
+                        theme.set_name(None).await?;
                         true
                     } else {
                         false
                     }
                 }
                 OptionalUpdate::Update(x) => {
-                    let current_name = renderer.get_theme_name().await;
+                    let current_name = theme.get_name().await;
                     if current_name.is_some() && current_name.as_ref().unwrap() != &x {
-                        renderer.set_theme_name(Some(&x)).await?;
+                        theme.set_name(Some(&x)).await?;
                         true
                     } else {
                         false
@@ -354,13 +346,12 @@ impl PerspectiveViewerElement {
             }
 
             session.update_view_config(view_config);
-            let settings = settings.clone();
             let draw_task = renderer.draw(async {
-                let (sender, receiver) = channel::<()>();
-                root.borrow()
+                let task = root
+                    .borrow()
                     .as_ref()
-                    .ok_or("Already deleted!")?
-                    .send_message(Msg::ToggleSettingsComplete(settings, sender));
+                    .ok_or("Already deleted")?
+                    .promise_message(move |x| Msg::ToggleSettingsComplete(settings, x));
 
                 let plugin = renderer.get_active_plugin()?;
                 if let Some(plugin_config) = &plugin_config {
@@ -369,7 +360,7 @@ impl PerspectiveViewerElement {
                 }
 
                 let result = session.validate().await.create_view().await;
-                receiver.await.into_jserror()?;
+                task.await.into_jserror()?;
                 result
             });
 
@@ -394,8 +385,7 @@ impl PerspectiveViewerElement {
     pub fn js_save(&self, format: JsValue) -> js_sys::Promise {
         let viewer_config_task = self.get_viewer_config();
         future_to_promise(async move {
-            let format =
-                JsValue::into_serde::<Option<ViewerConfigEncoding>>(&format).into_jserror()?;
+            let format = JsValue::into_serde(&format).into_jserror()?;
             let viewer_config = viewer_config_task.await?;
             viewer_config.encode(&format)
         })
@@ -409,7 +399,7 @@ impl PerspectiveViewerElement {
     pub fn js_download(&self, flat: bool) -> js_sys::Promise {
         let session = self.session.clone();
         future_to_promise(async move {
-            let val = session.csv_as_jsvalue(flat).await?;
+            let val = session.csv_as_jsvalue(flat).await?.as_blob()?;
             download("untitled.csv", &val)?;
             Ok(JsValue::UNDEFINED)
         })
@@ -441,15 +431,16 @@ impl PerspectiveViewerElement {
     /// # Arguments
     /// - `all` Whether to clear `expressions` also.
     pub fn js_reset(&self, reset_expressions: JsValue) -> js_sys::Promise {
-        let (sender, receiver) = channel::<()>();
         let root = self.root.clone();
         let all = reset_expressions.as_bool().unwrap_or_default();
         promisify_ignore_view_delete(async move {
-            root.borrow()
+            let task = root
+                .borrow()
                 .as_ref()
-                .ok_or("Already deleted!")?
-                .send_message(Msg::Reset(all, Some(sender)));
-            receiver.await.map_err(|_| JsValue::from("Cancelled"))?;
+                .ok_or("Already deleted")?
+                .promise_message(move |x| Msg::Reset(all, Some(x)));
+
+            task.await.into_jserror()?;
             Ok(JsValue::UNDEFINED)
         })
     }
@@ -507,20 +498,19 @@ impl PerspectiveViewerElement {
 
     /// Set the available theme names available in the status bar UI.
     pub fn js_reset_themes(&self, themes: JsValue) -> js_sys::Promise {
-        clone!(self.renderer, self.session);
+        clone!(self.renderer, self.session, self.theme);
         promisify_ignore_view_delete(async move {
             let themes: Option<Vec<String>> = themes.into_serde().into_jserror()?;
-            let theme = renderer.get_theme_name().await;
-            renderer.reset_theme_names(themes).await;
-            let reset_theme = renderer
-                .get_theme_config()
+            let theme_name = theme.get_name().await;
+            theme.reset(themes).await;
+            let reset_theme = theme
+                .get_themes()
                 .await?
-                .0
                 .iter()
-                .find(|y| theme.as_ref() == Some(y))
+                .find(|y| theme_name.as_ref() == Some(y))
                 .cloned();
 
-            renderer.set_theme_name(reset_theme.as_deref()).await?;
+            theme.set_name(reset_theme.as_deref()).await?;
             let view = session.get_view().into_jserror()?;
             renderer.restyle_all(&view).await
         })
@@ -548,15 +538,16 @@ impl PerspectiveViewerElement {
     /// - `force` Force the state of the panel open or closed, or `None` to
     ///   toggle.
     pub fn js_toggle_config(&self, force: Option<bool>) -> js_sys::Promise {
-        let (sender, receiver) = channel::<Result<JsValue, JsValue>>();
-        let msg = Msg::ToggleSettingsInit(force.map(SettingsUpdate::Update), Some(sender));
         let root = self.root.clone();
         promisify_ignore_view_delete(async move {
-            root.borrow()
+            let force = force.map(SettingsUpdate::Update);
+            let task = root
+                .borrow()
                 .as_ref()
-                .expect("Already deleted!")
-                .send_message(msg);
-            receiver.await.map_err(|_| JsValue::from("Cancelled"))?
+                .into_jserror()?
+                .promise_message(|x| Msg::ToggleSettingsInit(force, Some(x)));
+
+            task.await.map_err(|_| JsValue::from("Cancelled"))?
         })
     }
 

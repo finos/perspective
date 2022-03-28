@@ -7,34 +7,43 @@
 // file.
 
 use super::containers::dropdown_menu::*;
-use super::containers::modal_anchor::*;
+use super::modal::ModalLink;
+use super::modal::SetModalLink;
 use crate::model::*;
 use crate::renderer::*;
-
+use crate::utils::*;
 use crate::*;
+
 use js_intern::*;
 use std::rc::Rc;
 use yew::prelude::*;
 
 pub type ExportDropDownMenuItem = DropDownMenuItem<ExportFile>;
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, PartialEq)]
 pub struct ExportDropDownMenuProps {
     pub renderer: Renderer,
     pub callback: Callback<ExportFile>,
+
+    #[prop_or_default]
+    weak_link: WeakScope<ExportDropDownMenu>,
+}
+
+impl ModalLink<ExportDropDownMenu> for ExportDropDownMenuProps {
+    fn weak_link(&self) -> &'_ utils::WeakScope<ExportDropDownMenu> {
+        &self.weak_link
+    }
 }
 
 #[derive(Default)]
 pub struct ExportDropDownMenu {
-    top: i32,
-    left: i32,
     title: String,
+    _sub: Option<Subscription>,
     input_ref: NodeRef,
     invalid: bool,
 }
 
 pub enum ExportDropDownMenuMsg {
-    SetPos(i32, i32),
     TitleChange,
 }
 
@@ -77,7 +86,6 @@ impl Component for ExportDropDownMenu {
         let plugin = ctx.props().renderer.get_active_plugin().unwrap();
         let has_render = js_sys::Reflect::has(&plugin, js_intern!("render")).unwrap();
         html_template! {
-            <ModalAnchor top={ self.top } left={ self.left } />
             <span class="dropdown-group-label">{ "Save as" }</span>
             <input
                 class={ if self.invalid { "invalid" } else { "" }}
@@ -93,11 +101,6 @@ impl Component for ExportDropDownMenu {
 
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            ExportDropDownMenuMsg::SetPos(top, left) => {
-                self.top = top;
-                self.left = left;
-                true
-            }
             ExportDropDownMenuMsg::TitleChange => {
                 self.title = self
                     .input_ref
@@ -111,9 +114,18 @@ impl Component for ExportDropDownMenu {
         }
     }
 
-    fn create(_ctx: &Context<Self>) -> Self {
+    fn create(ctx: &Context<Self>) -> Self {
+        ctx.set_modal_link();
+        let _sub = Some(
+            ctx.props()
+                .renderer
+                .plugin_changed
+                .add_listener(ctx.link().callback(|_| ExportDropDownMenuMsg::TitleChange)),
+        );
+
         ExportDropDownMenu {
             title: "untitled".to_owned(),
+            _sub,
             ..Default::default()
         }
     }

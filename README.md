@@ -1,5 +1,5 @@
-![Perspective](https://github.com/finos/perspective/blob/dark-logo/docs/static/img/logo/logo-light.png?raw=true#gh-light-mode-only)
-![Perspective](https://github.com/finos/perspective/blob/dark-logo/docs/static/img/logo/logo-dark.png?raw=true#gh-dark-mode-only)
+![Perspective](https://github.com/finos/perspective/blob/master/docs/static/img/logo/logo-light.png?raw=true#gh-light-mode-only)
+![Perspective](https://github.com/finos/perspective/blob/master/docs/static/img/logo/logo-dark.png?raw=true#gh-dark-mode-only)
 
 [![npm](https://img.shields.io/npm/v/@finos/perspective.svg?style=flat)](https://www.npmjs.com/package/@finos/perspective)
 [![PyPI](https://img.shields.io/pypi/v/perspective-python.svg?style=flat)](https://pypi.python.org/pypi/perspective-python)

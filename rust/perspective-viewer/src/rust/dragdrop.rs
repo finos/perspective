@@ -6,8 +6,8 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::js_log_maybe;
 use crate::utils::*;
+use crate::*;
 
 use std::cell::RefCell;
 use std::ops::Deref;
@@ -183,17 +183,22 @@ impl DragDrop {
 /// Safari does not set `relatedTarget` on `"dragleave"`, which makes it
 /// impossible to determine whether a logical drag leave has happened with just
 /// this event, so use function on `"dragenter"` to capture the `relatedTarget`.
-pub fn dragenter_helper(event: DragEvent) {
-    js_log_maybe!({
-        event.stop_propagation();
-        event.prevent_default();
-        if event.related_target().is_none() {
-            event
-                .current_target()
-                .into_jserror()?
-                .unchecked_ref::<HtmlElement>()
-                .dataset()
-                .set("safaridragleave", "true")?;
+pub fn dragenter_helper(callback: impl Fn() + 'static, target: NodeRef) -> Callback<DragEvent> {
+    Callback::from({
+        move |event: DragEvent| {
+            js_log_maybe!({
+                event.stop_propagation();
+                event.prevent_default();
+                if event.related_target().is_none() {
+                    target
+                        .cast::<HtmlElement>()
+                        .into_jserror()?
+                        .dataset()
+                        .set("safaridragleave", "true")?;
+                }
+            });
+
+            callback();
         }
     })
 }
@@ -201,8 +206,9 @@ pub fn dragenter_helper(event: DragEvent) {
 /// HTML drag/drop will fire a bubbling `dragleave` event over all children of a
 /// `dragleave`-listened-to element, so we need to filter out the events from
 /// the children elements with this esoteric DOM arcana.
-pub fn dragleave_helper(callback: impl Fn() + 'static) -> Callback<DragEvent> {
+pub fn dragleave_helper(callback: impl Fn() + 'static, drag_ref: NodeRef) -> Callback<DragEvent> {
     Callback::from({
+        clone!(drag_ref);
         move |event: DragEvent| {
             js_log_maybe!({
                 event.stop_propagation();
@@ -212,11 +218,6 @@ pub fn dragleave_helper(callback: impl Fn() + 'static) -> Callback<DragEvent> {
                     .related_target()
                     .or_else(|| Some(JsValue::UNDEFINED.unchecked_into::<EventTarget>()))
                     .and_then(|x| x.dyn_into::<Element>().ok());
-
-                let current_target = event
-                    .current_target()
-                    .into_jserror()?
-                    .unchecked_into::<HtmlElement>();
 
                 // This is a wild chrome bug. `dragleave` can fire with the `relatedTarget`
                 // property set to an element inside the closed `ShadowRoot` hosted by a
@@ -252,6 +253,7 @@ pub fn dragleave_helper(callback: impl Fn() + 'static) -> Callback<DragEvent> {
                     )
                 }
 
+                let current_target = drag_ref.cast::<HtmlElement>().into_jserror()?;
                 match related_target {
                     Some(ref related) => {
                         if !current_target.contains(Some(related)) {
@@ -272,4 +274,22 @@ pub fn dragleave_helper(callback: impl Fn() + 'static) -> Callback<DragEvent> {
             })
         }
     })
+}
+
+#[derive(Clone)]
+pub struct DragDropContainer {
+    pub noderef: NodeRef,
+    pub dragenter: Callback<DragEvent>,
+    pub dragleave: Callback<DragEvent>,
+}
+
+impl DragDropContainer {
+    pub fn new<F: Fn() + 'static, G: Fn() + 'static>(ondragenter: F, ondragleave: G) -> Self {
+        let noderef = NodeRef::default();
+        DragDropContainer {
+            dragenter: dragenter_helper(ondragenter, noderef.clone()),
+            dragleave: dragleave_helper(ondragleave, noderef.clone()),
+            noderef,
+        }
+    }
 }

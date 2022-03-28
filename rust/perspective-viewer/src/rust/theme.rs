@@ -7,7 +7,9 @@
 // file.
 
 use crate::utils::*;
+
 use async_std::sync::Mutex;
+use std::ops::Deref;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -18,25 +20,34 @@ use web_sys::*;
 /// typically must be performed only once, when `document.styleSheets` is
 /// up-to-date.
 #[derive(Clone)]
-pub struct ThemeStore(Rc<ThemeStoreData>);
+pub struct Theme(Rc<ThemeData>);
 
-struct ThemeStoreData {
-    viewer_elem: HtmlElement,
-    themes: Mutex<Option<Vec<String>>>,
+impl Deref for Theme {
+    type Target = ThemeData;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
-impl ThemeStore {
+pub struct ThemeData {
+    viewer_elem: HtmlElement,
+    themes: Mutex<Option<Vec<String>>>,
+    pub theme_config_updated: PubSub<(Vec<String>, Option<usize>)>,
+}
+
+impl Theme {
     pub fn new(elem: &HtmlElement) -> Self {
-        Self(Rc::new(ThemeStoreData {
+        Self(Rc::new(ThemeData {
             viewer_elem: elem.clone(),
-            themes: Default::default(), //RefCell::new(None),
+            themes: Default::default(),
+            theme_config_updated: PubSub::default(),
         }))
     }
 
     /// Get the available theme names from the browser environment by parsing
     /// readable stylesheets.  This method is memoized - the state can be
     /// flushed by calling `reset()`.
-    pub async fn get_themes(&mut self) -> Result<Vec<String>, JsValue> {
+    pub async fn get_themes(&self) -> Result<Vec<String>, JsValue> {
         let mut mutex = self.0.themes.lock().await;
         if mutex.is_none() {
             await_dom_loaded().await?;
@@ -52,6 +63,50 @@ impl ThemeStore {
     pub async fn reset(&self, themes: Option<Vec<String>>) {
         let mut mutex = self.0.themes.lock().await;
         *mutex = themes;
+    }
+
+    pub async fn get_config(&self) -> Result<(Vec<String>, Option<usize>), JsValue> {
+        let themes = self.get_themes().await?;
+        let name = self.0.viewer_elem.get_attribute("theme");
+        let index = name
+            .and_then(|x| themes.iter().position(|y| y == &x))
+            .or(if !themes.is_empty() { Some(0) } else { None });
+
+        Ok((themes, index))
+    }
+
+    /// Returns the currently applied theme, or the default theme if no theme
+    /// has been set and themes are detected in the `document`, or `None` if
+    /// no themes are available.
+    pub async fn get_name(&self) -> Option<String> {
+        let (themes, index) = self.get_config().await.ok()?;
+        index.and_then(|x| themes.get(x).cloned())
+    }
+
+    fn set_theme_attribute(&self, theme: Option<&str>) -> Result<(), JsValue> {
+        if let Some(theme) = theme {
+            self.0.viewer_elem.set_attribute("theme", theme)
+        } else {
+            self.0.viewer_elem.remove_attribute("theme")
+        }
+    }
+
+    /// Set the theme by name, or `None` for the default theme.
+    pub async fn set_name(&self, theme: Option<&str>) -> Result<(), JsValue> {
+        let (themes, _) = self.get_config().await?;
+        let index = if let Some(theme) = theme {
+            self.set_theme_attribute(Some(theme))?;
+            themes.iter().position(|x| x == theme)
+        } else if !themes.is_empty() {
+            self.set_theme_attribute(themes.get(0).map(|x| x.as_str()))?;
+            Some(0)
+        } else {
+            self.set_theme_attribute(None)?;
+            None
+        };
+
+        self.theme_config_updated.emit_all((themes, index));
+        Ok(())
     }
 }
 

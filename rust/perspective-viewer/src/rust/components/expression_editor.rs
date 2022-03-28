@@ -6,8 +6,8 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use super::containers::modal_anchor::*;
 use super::containers::split_panel::*;
+use super::modal::*;
 use crate::exprtk::*;
 use crate::js::monaco::*;
 use crate::js::perspective::*;
@@ -28,7 +28,6 @@ use yew::prelude::*;
 static CSS: &str = include_str!("../../../build/css/expression-editor.css");
 
 pub enum ExpressionEditorMsg {
-    SetPos(i32, i32, bool),
     SetTheme(String),
     Reset,
     Resize(i32, i32),
@@ -37,7 +36,7 @@ pub enum ExpressionEditorMsg {
     SaveExpr,
 }
 
-#[derive(Properties, Clone)]
+#[derive(Properties)]
 pub struct ExpressionEditorProps {
     pub on_save: Callback<JsValue>,
     pub on_init: Callback<()>,
@@ -45,22 +44,28 @@ pub struct ExpressionEditorProps {
     pub on_resize: Callback<()>,
     pub session: Session,
     pub alias: Option<String>,
+
+    #[prop_or_default]
+    weak_link: WeakScope<ExpressionEditor>,
+}
+
+impl ModalLink<ExpressionEditor> for ExpressionEditorProps {
+    fn weak_link(&self) -> &'_ WeakScope<ExpressionEditor> {
+        &self.weak_link
+    }
 }
 
 impl PartialEq for ExpressionEditorProps {
-    fn eq(&self, other: &Self) -> bool {
-        self.alias == other.alias
+    fn eq(&self, _other: &Self) -> bool {
+        false
     }
 }
 
 /// Expression editor component wraps `monaco-editor` and a button toolbar.
 pub struct ExpressionEditor {
-    top: i32,
-    left: i32,
     save_enabled: bool,
     edit_enabled: bool,
     state: ExpressionEditorState,
-    reverse_vertical: bool,
 }
 
 impl Component for ExpressionEditor {
@@ -68,25 +73,17 @@ impl Component for ExpressionEditor {
     type Properties = ExpressionEditorProps;
 
     fn create(ctx: &Context<Self>) -> Self {
+        ctx.set_modal_link();
         let state = ExpressionEditorState::new(ctx);
         ExpressionEditor {
-            top: 0,
-            left: 0,
             save_enabled: false,
             edit_enabled: false,
-            reverse_vertical: false,
             state,
         }
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            ExpressionEditorMsg::SetPos(top, left, reverse_vertical) => {
-                self.reverse_vertical = reverse_vertical;
-                self.top = top;
-                self.left = left;
-                true
-            }
             ExpressionEditorMsg::Validate(_val) => {
                 drop(future_to_promise(self.state.clone().validate_expr()));
                 false
@@ -151,28 +148,18 @@ impl Component for ExpressionEditor {
         }
     }
 
-    fn changed(&mut self, _ctx: &Context<Self>) -> bool {
-        web_sys::console::warn_1(&"Unreachable".into());
-        false
-    }
-
     fn rendered(&mut self, _ctx: &Context<Self>, first_render: bool) {
         if first_render {
             drop(future_to_promise(self.state.clone().init_monaco_editor()));
         } else if let Some((_, editor)) = &*self.state.0.editor.borrow() {
             editor.layout(&JsValue::UNDEFINED);
-            let editor = editor.clone();
-            let _ = future_to_promise(async move {
-                await_animation_frame().await?;
-                editor.focus();
-                Ok(JsValue::UNDEFINED)
-            });
+            editor.focus();
         }
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         let reset = ctx.link().callback(|_| ExpressionEditorMsg::Reset);
-        let save = ctx.link().callback_once(|_| ExpressionEditorMsg::SaveExpr);
+        let save = ctx.link().callback(|_| ExpressionEditorMsg::SaveExpr);
         let resize_horiz = ctx
             .link()
             .callback(|(width, height)| ExpressionEditorMsg::Resize(width, height - 54));
@@ -183,46 +170,50 @@ impl Component for ExpressionEditor {
 
         let reset_size = ctx.link().callback(|()| ExpressionEditorMsg::Resize(0, 0));
 
-        html! {
-            <>
-                <style>
-                    { &CSS }
-                </style>
-                <ModalAnchor top={ self.top } left={ self.left } />
-                <SplitPanel
-                    id="expression-editor-split-panel"
-                    on_resize={ resize_horiz }
-                    on_reset={ reset_size.clone() }>
-                    <SplitPanel
-                        orientation={ Orientation::Vertical }
-                        reverse={ self.reverse_vertical }
-                        on_resize={ resize_vert }
-                        on_reset={ reset_size }>
+        let reverse_vertical: bool = ctx
+            .link()
+            .context::<ModalOrientation>(Callback::noop())
+            .unwrap()
+            .0
+            .into();
 
-                        <div id="editor-container">
-                            <div id="monaco-container" ref={ self.state.container.clone() } style=""></div>
-                            <div id="psp-expression-editor-actions">
-                                <button
-                                    id="psp-expression-editor-button-reset"
-                                    class="psp-expression-editor__button"
-                                    onmousedown={ reset }
-                                    disabled={ !self.edit_enabled }>
-                                    { if self.edit_enabled { "Reset" } else { "" } }
-                                </button>
-                                <button
-                                    id="psp-expression-editor-button-save"
-                                    class="psp-expression-editor__button"
-                                    onmousedown={ save }
-                                    disabled={ !self.save_enabled }>
-                                    { if self.save_enabled { "Save" } else { "" } }
-                                </button>
-                            </div>
+        html_template! {
+            <style>
+                { &CSS }
+            </style>
+            <SplitPanel
+                id="expression-editor-split-panel"
+                on_resize={ resize_horiz }
+                on_reset={ reset_size.clone() }>
+                <SplitPanel
+                    orientation={ Orientation::Vertical }
+                    reverse={ reverse_vertical }
+                    on_resize={ resize_vert }
+                    on_reset={ reset_size }>
+
+                    <div id="editor-container">
+                        <div id="monaco-container" ref={ self.state.container.clone() } style=""></div>
+                        <div id="psp-expression-editor-actions">
+                            <button
+                                id="psp-expression-editor-button-reset"
+                                class="psp-expression-editor__button"
+                                onmousedown={ reset }
+                                disabled={ !self.edit_enabled }>
+                                { if self.edit_enabled { "Reset" } else { "" } }
+                            </button>
+                            <button
+                                id="psp-expression-editor-button-save"
+                                class="psp-expression-editor__button"
+                                onmousedown={ save }
+                                disabled={ !self.save_enabled }>
+                                { if self.save_enabled { "Save" } else { "" } }
+                            </button>
                         </div>
-                        <div></div>
-                    </SplitPanel>
+                    </div>
                     <div></div>
                 </SplitPanel>
-            </>
+                <div></div>
+            </SplitPanel>
         }
     }
 }

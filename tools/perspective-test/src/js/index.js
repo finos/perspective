@@ -413,6 +413,7 @@ test.capture = function capture(
         url = page_url,
         timeout = 60000,
         viewport = null,
+        reload_page = false,
         fail_on_errors = true,
     } = {}
 ) {
@@ -446,6 +447,10 @@ test.capture = function capture(
             const filename = path.join(dir_name, test_name);
             if (!fs.existsSync(dir_name)) {
                 mkdirSyncRec(dir_name);
+            }
+
+            if (reload_page) {
+                OLD_SETTINGS[test_root + url] = undefined;
             }
 
             for (let x = 0; x < iterations; x++) {

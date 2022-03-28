@@ -7,7 +7,7 @@
 // file.
 
 use crate::config::*;
-use crate::js::plugin::*;
+use crate::js::*;
 use crate::model::*;
 use crate::renderer::*;
 use crate::session::*;
@@ -18,7 +18,7 @@ use super::containers::select::*;
 
 use yew::prelude::*;
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, PartialEq)]
 pub struct PluginSelectorProps {
     pub renderer: Renderer,
     pub session: Session,
@@ -28,7 +28,7 @@ pub struct PluginSelectorProps {
     pub weak_link: WeakScope<PluginSelector>,
 }
 
-derive_session_renderer_model!(PluginSelectorProps);
+derive_model!(Renderer, Session for PluginSelectorProps);
 
 #[derive(Debug)]
 pub enum PluginSelectorMsg {
@@ -61,7 +61,11 @@ impl Component for PluginSelector {
         match msg {
             PluginSelectorMsg::RendererSelectPlugin(_plugin_name) => true,
             PluginSelectorMsg::ComponentSelectPlugin(plugin_name) => {
-                ctx.props().renderer.set_plugin(Some(&plugin_name)).unwrap();
+                ctx.props()
+                    .renderer
+                    .update_plugin(PluginUpdate::Update(plugin_name))
+                    .unwrap();
+
                 let mut update = ViewConfigUpdate::default();
                 ctx.props()
                     .session

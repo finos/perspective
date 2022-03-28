@@ -6,20 +6,9 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-mod aggregates;
-mod column_type;
-mod filters;
-mod sort;
-mod view_config;
-
-pub use aggregates::*;
-pub use column_type::*;
-pub use filters::*;
-pub use sort::*;
-pub use view_config::*;
-
-// use crate::renderer::Renderer;
+use super::view_config::*;
 use crate::utils::*;
+
 use flate2::read::ZlibDecoder;
 use flate2::write::ZlibEncoder;
 use flate2::Compression;
@@ -47,6 +36,8 @@ pub enum ViewerConfigEncoding {
     JSONString,
 }
 
+/// The state of an entire `custom_elements::PerspectiveViewerElement` component
+/// and its `Plugin`.
 #[derive(Serialize, PartialEq)]
 #[serde(deny_unknown_fields)]
 pub struct ViewerConfig {
@@ -60,16 +51,6 @@ pub struct ViewerConfig {
 }
 
 impl ViewerConfig {
-    // pub fn new(renderer: &Renderer) -> Self {
-    //     Self {
-    //         plugin: renderer.get_active_plugin().unwrap().name(),
-    //         view_config: ViewConfig::default(),
-    //         plugin_config: Value::Null,
-    //         theme: None,
-    //         settings: false,
-    //     }
-    // }
-
     /// Encode a `ViewerConfig` to a `JsValue` in a supported type.
     pub fn encode(&self, format: &Option<ViewerConfigEncoding>) -> Result<JsValue, JsValue> {
         match format {
