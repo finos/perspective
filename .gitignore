@@ -166,8 +166,7 @@ python/perspective/python_junit.xml
 python/perspective/coverage.xml
 python/perspective/bench/stresstest/results
 python/perspective/perspective/labextension
-python/perspective/perspective/nbextension/
-!python/perspective/perspective/nbextension/extension.js
+python/perspective/perspective/nbextension/perspective-nbextension.js
 
 junit.xml
 
