@@ -49,8 +49,8 @@ PerspectiveModel.serializers = {
 };
 
 PerspectiveModel.model_name = "PerspectiveModel";
-PerspectiveModel.model_module = "@finos/perspective-jupyterlab";
+PerspectiveModel.model_module = "@finos/perspective";
 PerspectiveModel.model_module_version = PERSPECTIVE_VERSION;
 PerspectiveModel.view_name = "PerspectiveView";
-PerspectiveModel.view_module = "@finos/perspective-jupyterlab";
+PerspectiveModel.view_module = "@finos/perspective";
 PerspectiveModel.view_module_version = PERSPECTIVE_VERSION;

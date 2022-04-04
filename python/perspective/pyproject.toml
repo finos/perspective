@@ -1,3 +1,3 @@
 [build-system]
 # Minimum requirements for the build system to execute.
-requires = ["setuptools", "wheel", "numpy>=1.13.1"]
+requires = ["setuptools", "wheel", "numpy>=1.13.1", "jupyter-packaging=0.12"]

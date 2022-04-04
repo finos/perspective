@@ -161,13 +161,16 @@ python/perspective/perspective_python.egg-info
 python/perspective/perspective/tests/table/psp_test
 python/perspective/perspective/node/assets/*
 /__pycache__
-docs/static/js/logo.js
-docs/static/js/logo.js.map
 python/perspective/pip-wheel-metadata
-junit.xml
 python/perspective/python_junit.xml
 python/perspective/coverage.xml
 python/perspective/bench/stresstest/results
+python/perspective/perspective/labextension
+python/perspective/perspective/nbextension/
+!python/perspective/perspective/nbextension/extension.js
+
+junit.xml
+
 rust/perspective-viewer/target
 rust/perspective-viewer/pkg
 rust/perspective-viewer/target2
@@ -175,21 +178,23 @@ rust/perspective-viewer/pkg
 
 rust/perspective-viewer/target
 rust/perspective-viewer/target2
+rust/perspective-viewer/target.vscode
 
 .emsdk
 vcpkg
 
+docs/static/js/logo.js
+docs/static/js/logo.js.map
 docs/static/css/material-dark.css
 docs/i18n/en.json
 docs/static/js
+docs/static/features
 
-rust/perspective-viewer/target.vscode
 target.vscode
 
 # jupyterlab test artifacts
 packages/perspective-jupyterlab/test/config/jupyter/lab
 packages/perspective-jupyterlab/test/config/jupyter/migrated
-docs/static/features
 results.debug.json
 
 tools/perspective-build/lib

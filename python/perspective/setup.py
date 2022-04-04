@@ -7,19 +7,25 @@
 #
 from __future__ import print_function
 
-import io
 import os
 import os.path
 import platform
 import re
 import subprocess
 import sys
+
 from codecs import open
 from distutils.version import LooseVersion
 
-from setuptools import Extension, find_packages, setup
+from setuptools import Extension, find_packages, setup, Command
 from setuptools.command.build_ext import build_ext
 from setuptools.command.sdist import sdist
+
+from jupyter_packaging import (
+    ensure_targets,
+    get_version,
+)
+from jupyter_packaging.setupbase import _get_file_handler
 
 try:
     from shutil import which
@@ -29,10 +35,20 @@ except ImportError:
     raise Exception("Requires Python 3.6 or later")
 
 here = os.path.abspath(os.path.dirname(__file__))
+nb_path = os.path.join("perspective", "nbextension", "static")
+lab_path = os.path.join("perspective", "labextension")
+
 
 with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read().replace("\r\n", "\n")
 
+if sys.version_info.major < 3:
+    raise Exception("Requires Python 3.6 or later")
+
+version = get_version(os.path.join(here, "perspective", "core", "_version.py"))
+
+########################
+# Get requirement info #
 requires = [
     "ipywidgets>=7.5.1",
     "future>=0.16.0",
@@ -43,11 +59,10 @@ requires = [
     "traitlets>=4.3.2",
 ]
 
-if sys.version_info.major < 3:
-    raise Exception("Requires Python 3.6 or later")
 
 requires_dev = [
     "black==20.8b1",
+    "check-manifest",
     "Faker>=1.0.0",
     "flake8>=3.7.8",
     "flake8-black>=0.2.0",
@@ -66,20 +81,9 @@ requires_dev = [
 ] + requires
 
 
-def get_version(file, name="__version__"):
-    """Get the version of the package from the given file by
-    executing it and extracting the given `name`.
-    """
-    path = os.path.realpath(file)
-    version_ns = {}
-    with io.open(path, encoding="utf8") as f:
-        exec(f.read(), {}, version_ns)
-    return version_ns[name]
-
-
-version = get_version(os.path.join(here, "perspective", "core", "_version.py"))
-
-
+#####################
+# Custom Extensions #
+#####################
 class PSPExtension(Extension):
     def __init__(self, name, sourcedir="dist"):
         Extension.__init__(self, name, sources=[])
@@ -221,15 +225,57 @@ class PSPCheckSDist(sdist):
         super(PSPCheckSDist, self).run()
 
     def run_check(self):
-        for file in ("CMakeLists.txt", "cmake", "src"):
-            path = os.path.abspath(os.path.join(here, "dist", file))
-            if not os.path.exists(path):
-                raise Exception(
-                    "Path is missing! {}\nMust run `yarn build_python` before building sdist so cmake files are installed".format(
-                        path
-                    )
-                )
+        ...
+        # Check for C++ assets
+        # for file in ("CMakeLists.txt", "cmake", "src"):
+        #     path = os.path.abspath(os.path.join(here, "dist", file))
+        #     if not os.path.exists(path):
+        #         raise Exception(
+        #             "Path is missing! {}\nMust run `yarn build_python` before building sdist so cmake files are installed".format(
+        #                 path
+        #             )
+        #         )
 
+        # Check for JS assets
+        # for file in ("labextension/package.json", "nbextension/static/index.js"):
+        # for file in ("labextension/package.json"):
+        #     path = os.path.abspath(os.path.join(here, "perspective", file))
+        #     if not os.path.exists(path):
+        #         raise Exception(
+        #             "Path is missing! {}\nMust run `yarn build` before building sdist so JS files are installed".format(
+        #                 path
+        #             )
+        #         )
+
+##############################
+# NBExtension / Labextension #
+##############################
+data_files_spec = [
+    # NBExtension
+    # (
+    #     "share/jupyter/nbextensions/finos-perspective-jupyterlab",
+    #     "perspective/nbextension/static",
+    #     "*.js*"
+    # ),
+    # Activate nbextension by default
+    # (
+    #     "etc/jupyter/nbconfig/notebook.d",
+    #     "perspective/extension",
+    #     "finos-perspective-nbextension.json"
+    # ),
+    # Labextension
+    (
+        "share/jupyter/labextensions/@finos/perspective-jupyterlab",
+        "ipyregulartable/labextension",
+        "**",
+    ),
+    # Config to enable server extension by default:
+    # (
+    #     "etc/jupyter/jupyter_server_config.d",
+    #     "perspective/extension",
+    #     "finos-perspective-jupyterlab.json"
+    # ),
+]
 
 setup(
     name="perspective-python",
@@ -256,5 +302,15 @@ setup(
     install_requires=requires,
     extras_require={"dev": requires_dev},
     ext_modules=[PSPExtension("perspective")],
-    cmdclass=dict(build_ext=PSPBuild, sdist=PSPCheckSDist),
+    cmdclass=dict(
+        build_ext=PSPBuild,
+        sdist=PSPCheckSDist,
+        # ensure_targets=ensure_targets(
+        #     [
+        #         # os.path.join("perspective", "nbextension", "static", "index.js"),
+        #         os.path.join("perspective", "labextension", "package.json"),
+        #     ]
+        # ),
+        # handle_files=_get_file_handler(package_data_spec=None, data_files_spec=data_files_spec),
+    ),
 )

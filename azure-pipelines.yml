@@ -146,8 +146,14 @@ parameters:
   - name: pythonBuildSteps
     type: stepList
     default:
+      - bash: yarn lint_python
+        displayName: "Lint Python"
+
       - script: yarn build_python  --ci $(python_flag) $(manylinux_flag)
         displayName: "Build Python"
+
+      - bash: yarn check_python
+        displayName: "Check Python Manifest"
 
   - name: pythonBuildVS2019Steps
     type: stepList

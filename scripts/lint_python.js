@@ -32,7 +32,11 @@ if (IS_DOCKER) {
     IMAGE = python_image(MANYLINUX_VERSION, PYTHON);
 }
 
-const IS_FIX = getarg("--fix");
+const CMD_TYPE = getarg("--fix")
+    ? "fix"
+    : getarg("--check-manifest")
+    ? "manifest"
+    : "lint";
 
 // Check that the `PYTHON` command is valid, else default to `python`.
 try {
@@ -44,15 +48,25 @@ try {
 
 try {
     let cmd;
-    let lint_cmd = `${PYTHON} -m flake8 perspective bench setup.py`;
-    let fix_cmd = `black perspective bench setup.py --exclude tests`;
+    let lint_cmd =
+        "black --check perspective bench setup.py && flake8 perspective bench setup.py";
+    let fix_cmd = "black perspective bench setup.py --exclude tests";
+    let check_cmd = "check-manifest";
+
+    if (CMD_TYPE === "fix") {
+        cmd = fix_cmd;
+    } else if (CMD_TYPE === "manifest") {
+        cmd = check_cmd;
+    } else {
+        cmd = lint_cmd;
+    }
 
     if (process.env.PSP_DOCKER) {
-        cmd = `cd python/perspective && ${IS_FIX ? fix_cmd : lint_cmd}`;
+        cmd = `cd python/perspective && ${cmd}`;
         execute`${docker(IMAGE)} bash -c "${cmd}"`;
     } else {
         const python_path = resolve`${__dirname}/../python/perspective`;
-        execute`cd ${python_path} && ${IS_FIX ? fix_cmd : lint_cmd}`;
+        execute`cd ${python_path} && ${cmd}`;
     }
 } catch (e) {
     console.log(e);
