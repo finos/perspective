@@ -46,6 +46,22 @@
         "@jupyter-widgets/base-manager": "^1.0.0-alpha.0"
     },
     "jupyterlab": {
-        "extension": true
+        "extension": "lib/index.js",
+        "outputDir": "../../python/perspective/perspective/labextension",
+        "discovery": {
+          "server": {
+            "base": {
+              "name": "perspective-python"
+            },
+            "managers": [
+              "pip"
+            ]
+          }
+        },
+        "_build": {
+          "load": "remoteEntry.js",
+          "extension": "./index",
+          "mimeExtension": "./index"
+        }
     }
 }

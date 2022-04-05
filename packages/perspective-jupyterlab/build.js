@@ -64,11 +64,7 @@ async function build_all() {
         ["dist/umd/*", "package.json"],
         "../../python/perspective/perspective/labextension/"
     );
-    cpy(
-        ["dist/umd/perspective-nbextension.js"],
-        "../../python/perspective/perspective/nbextension/"
-    );
-
+    cpy(["dist/umd/*"], "../../python/perspective/perspective/nbextension/");
 }
 
 build_all();

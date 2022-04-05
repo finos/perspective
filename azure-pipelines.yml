@@ -189,6 +189,26 @@ parameters:
           codeCoverageTool: Cobertura
           summaryFileLocation: "$(System.DefaultWorkingDirectory)/**/*coverage.xml"
 
+  - name: pythonJSAssetsSteps
+    type: stepList
+    default:
+
+      - bash: |
+          node scripts/_pull_pipeline_artifact.js $(System.DefaultWorkingDirectory) $(Build.BuildId)
+          unzip $(System.DefaultWorkingDirectory)/perspective-jupyterlab-dist
+          mv $(System.DefaultWorkingDirectory)/perspective-jupyterlab-dist/perspective-jupyterlab-dist.tgz $(System.DefaultWorkingDirectory)/perspective-jupyterlab-dist.tgz
+          rm -rf $(System.DefaultWorkingDirectory)/perspective-jupyterlab-dist
+        displayName: "Download perspective-jupyterlab dist"
+
+      - bash: tar --strip-components=1 -xvf $(System.DefaultWorkingDirectory)/perspective-jupyterlab-dist.tgz -C $(System.DefaultWorkingDirectory)/packages/perspective-jupyterlab package
+        displayName: "Install perspective-jupyterlab dist"
+
+      - bash: |
+          cp -r $(System.DefaultWorkingDirectory)/packages/perspective-jupyterlab/package.json $(System.DefaultWorkingDirectory)/python/perspective/perspective/labextension
+          cp -r $(System.DefaultWorkingDirectory)/packages/perspective-jupyterlab/dist/umd/* $(System.DefaultWorkingDirectory)/python/perspective/perspective/labextension
+          cp -r $(System.DefaultWorkingDirectory)/packages/perspective-jupyterlab/dist/umd/* $(System.DefaultWorkingDirectory)/python/perspective/perspective/nbextension/
+        displayName: "Install copy assets into place as if build"
+
   - name: pythonSDistSteps
     type: stepList
     default:

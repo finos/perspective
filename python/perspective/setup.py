@@ -22,10 +22,11 @@ from setuptools.command.build_ext import build_ext
 from setuptools.command.sdist import sdist
 
 from jupyter_packaging import (
+    combine_commands,
+    create_cmdclass,
     ensure_targets,
     get_version,
 )
-from jupyter_packaging.setupbase import _get_file_handler
 
 try:
     from shutil import which
@@ -225,27 +226,26 @@ class PSPCheckSDist(sdist):
         super(PSPCheckSDist, self).run()
 
     def run_check(self):
-        ...
         # Check for C++ assets
-        # for file in ("CMakeLists.txt", "cmake", "src"):
-        #     path = os.path.abspath(os.path.join(here, "dist", file))
-        #     if not os.path.exists(path):
-        #         raise Exception(
-        #             "Path is missing! {}\nMust run `yarn build_python` before building sdist so cmake files are installed".format(
-        #                 path
-        #             )
-        #         )
+        for file in ("CMakeLists.txt", "cmake", "src"):
+            path = os.path.abspath(os.path.join(here, "dist", file))
+            if not os.path.exists(path):
+                raise Exception(
+                    "Path is missing! {}\nMust run `yarn build_python` before building sdist so cmake files are installed".format(
+                        path
+                    )
+                )
 
         # Check for JS assets
-        # for file in ("labextension/package.json", "nbextension/static/index.js"):
-        # for file in ("labextension/package.json"):
-        #     path = os.path.abspath(os.path.join(here, "perspective", file))
-        #     if not os.path.exists(path):
-        #         raise Exception(
-        #             "Path is missing! {}\nMust run `yarn build` before building sdist so JS files are installed".format(
-        #                 path
-        #             )
-        #         )
+        for file in ("labextension/package.json", "nbextension/perspective-nbextension.js"):
+            path = os.path.abspath(os.path.join(here, "perspective", file))
+            if not os.path.exists(path):
+                raise Exception(
+                    "Path is missing! {}\nMust run `yarn build` before building sdist so JS files are installed".format(
+                        path
+                    )
+                )
+
 
 ##############################
 # NBExtension / Labextension #
@@ -266,7 +266,7 @@ data_files_spec = [
     # Labextension
     (
         "share/jupyter/labextensions/@finos/perspective-jupyterlab",
-        "ipyregulartable/labextension",
+        "perspective/labextension",
         "**",
     ),
     # Config to enable server extension by default:
@@ -276,6 +276,16 @@ data_files_spec = [
     #     "finos-perspective-jupyterlab.json"
     # ),
 ]
+
+cmdclass = create_cmdclass("js", data_files_spec=data_files_spec)
+cmdclass["js"] = ensure_targets(
+            [
+                os.path.join("perspective", "nbextension", "perspective-nbextension.js"),
+                os.path.join("perspective", "labextension", "package.json"),
+            ]
+        )
+cmdclass["build_ext"] = PSPBuild
+cmdclass["sdist"] = combine_commands(cmdclass["sdist"], PSPCheckSDist)
 
 setup(
     name="perspective-python",
@@ -302,15 +312,5 @@ setup(
     install_requires=requires,
     extras_require={"dev": requires_dev},
     ext_modules=[PSPExtension("perspective")],
-    cmdclass=dict(
-        build_ext=PSPBuild,
-        sdist=PSPCheckSDist,
-        # ensure_targets=ensure_targets(
-        #     [
-        #         # os.path.join("perspective", "nbextension", "static", "index.js"),
-        #         os.path.join("perspective", "labextension", "package.json"),
-        #     ]
-        # ),
-        # handle_files=_get_file_handler(package_data_spec=None, data_files_spec=data_files_spec),
-    ),
+    cmdclass=cmdclass,
 )

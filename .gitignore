@@ -165,8 +165,8 @@ python/perspective/pip-wheel-metadata
 python/perspective/python_junit.xml
 python/perspective/coverage.xml
 python/perspective/bench/stresstest/results
-python/perspective/perspective/labextension
-python/perspective/perspective/nbextension/perspective-nbextension.js
+python/perspective/perspective/labextension/
+python/perspective/perspective/nbextension/
 
 junit.xml
 
