@@ -453,10 +453,8 @@ View<t_ctx2>::get_data(t_uindex start_row, t_uindex end_row, t_uindex start_col,
     std::vector<std::vector<t_tscalar>> cols;
     bool is_sorted = m_sort.size() > 0;
 
-    if (is_column_only()) {
-        start_row += m_row_offset;
-        end_row += m_row_offset;
-    }
+    start_row += m_row_offset;
+    end_row += m_row_offset;
 
     if (is_sorted) {
         /**
@@ -546,7 +544,6 @@ View<t_ctx1>::to_arrow(std::int32_t start_row, std::int32_t end_row,
     std::shared_ptr<t_traversal> guard;
     if (is_leaves_only) {
         guard = m_ctx->set_is_leaves_only();
-        start_row += 1;
     }
 
     std::shared_ptr<t_data_slice<t_ctx1>> data_slice
@@ -567,7 +564,6 @@ View<t_ctx2>::to_arrow(std::int32_t start_row, std::int32_t end_row,
     std::shared_ptr<t_traversal> guard;
     if (is_leaves_only) {
         guard = m_ctx->set_is_leaves_only();
-        start_row += 1;
     }
 
     std::shared_ptr<t_data_slice<t_ctx2>> data_slice
@@ -579,16 +575,6 @@ View<t_ctx2>::to_arrow(std::int32_t start_row, std::int32_t end_row,
 
     return arr;
 };
-
-// template <>
-// std::shared_ptr<std::string>
-// View<t_ctxunit>::to_arrow(std::int32_t start_row, std::int32_t end_row,
-//     std::int32_t start_col, std::int32_t end_col, bool emit_group_by,
-//     bool is_leaves_only) const {
-//     std::shared_ptr<t_data_slice<t_ctxunit>> data_slice
-//         = get_data(start_row, end_row, start_col, end_col);
-//     return data_slice_to_arrow(data_slice, emit_group_by);
-// };
 
 template <typename CTX_T>
 std::shared_ptr<std::string>
