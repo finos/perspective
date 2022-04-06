@@ -152,19 +152,15 @@ docs/static/arrow/
 __pycache__/
 
 # Copied C++ source folders
-python/perspective/cmake
-python/perspective/src
-python/perspective/test
-python/cmake
-python/cpp
 python/perspective/perspective_python.egg-info
-python/perspective/perspective/tests/table/psp_test
-python/perspective/perspective/node/assets/*
-/__pycache__
 python/perspective/pip-wheel-metadata
 python/perspective/python_junit.xml
 python/perspective/coverage.xml
+python/perspective/perspective/tests/table/psp_test
+python/perspective/perspective/node/assets/*
+/__pycache__
 python/perspective/bench/stresstest/results
+python/perspective/perspective/jupyter/lib
 python/perspective/perspective/labextension/
 python/perspective/perspective/nbextension/
 

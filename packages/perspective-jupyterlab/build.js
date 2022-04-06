@@ -60,11 +60,6 @@ const BUILD = [
 async function build_all() {
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
     cpy(["dist/css/*"], "dist/umd");
-    cpy(
-        ["dist/umd/*", "package.json"],
-        "../../python/perspective/perspective/labextension/"
-    );
-    cpy(["dist/umd/*"], "../../python/perspective/perspective/nbextension/");
 }
 
 build_all();
