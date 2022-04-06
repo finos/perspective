@@ -355,7 +355,7 @@ std::pair<std::shared_ptr<t_data_table>, std::shared_ptr<t_data_table>>
 t_stree::build_strand_table(const t_data_table& flattened,
     const t_data_table& delta, const t_data_table& prev,
     const t_data_table& current, const t_data_table& transitions,
-    const std::vector<t_aggspec>& aggspecs, const t_config& config) const {
+    const std::vector<t_aggspec>& aggspecs, const t_config& config, const t_gstate& gstate) const {
 
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
@@ -432,8 +432,42 @@ t_stree::build_strand_table(const t_data_table& flattened,
     }
 
     bool has_filters = config.has_filters();
-
     if (has_filters) {
+        std::set<t_tscalar> expired_pkeys;
+        if (config.has_in_recent_filter()) {
+            auto table = gstate.get_table();
+            std::vector<const t_column*> piv_pcols(npivotlike);
+            for (t_uindex pidx = 0; pidx < npivotlike; ++pidx) {
+                const std::string& piv = metadata.m_strand_schema.m_columns[pidx];
+                piv_pcols[pidx] = table->get_const_column(piv).get();
+            }
+            std::vector<const t_column*> agg_pcols(aggcolsize);
+            for (t_uindex aggidx = 0; aggidx < aggcolsize; ++aggidx) {
+                const std::string& aggcol = metadata.m_aggschema.m_columns[aggidx];
+                if (aggcol == "psp_strand_count") {
+                    agg_pcols[aggidx] = 0;
+                } else {
+                    agg_pcols[aggidx] = table->get_const_column(aggcol).get();
+                }
+            }
+            auto pkey_list = get_pkeys(0);
+            auto size = pkey_list.size();
+            auto row_index_list = gstate.get_pkeys_idx(pkey_list);
+            auto msk_all = table->filter_cpp_rows(config.get_combiner(), config.get_fterms(), row_index_list);
+            for (t_uindex idx = 0; idx < size; ++idx) {
+                auto pkey = pkey_list[idx];
+                auto row_index = row_index_list[idx];
+                bool m = msk_all.get(row_index);
+                if (!m) {
+                    expired_pkeys.insert(pkey);
+                    build_strand_table_phase_2(pkey, row_index, metadata.m_pivsize,
+                        strand_count_idx, aggcolsize, piv_pcols, agg_pcols,
+                        piv_scols, agg_acols, agg_scount, spkey, insert_count,
+                        metadata.m_pivot_like_columns);
+                }
+            }
+        }
+
         for (t_uindex idx = 0, loop_end = flattened.size(); idx < loop_end;
              ++idx) {
             bool filter_prev = msk_prev.get(idx);
@@ -444,7 +478,9 @@ t_stree::build_strand_table(const t_data_table& flattened,
             t_op op = static_cast<t_op>(op_);
             bool pivots_neq;
 
-            if (!filter_prev && !filter_curr) {
+            if (expired_pkeys.find(pkey) != expired_pkeys.end()) {
+                continue;
+            } else if (!filter_prev && !filter_curr) {
                 // nothing to do
                 continue;
             } else if (!filter_prev && filter_curr) {
@@ -530,7 +566,7 @@ t_stree::build_strand_table(const t_data_table& flattened,
  */
 std::pair<std::shared_ptr<t_data_table>, std::shared_ptr<t_data_table>>
 t_stree::build_strand_table(const t_data_table& flattened,
-    const std::vector<t_aggspec>& aggspecs, const t_config& config) const {
+    const std::vector<t_aggspec>& aggspecs, const t_config& config, const t_gstate& gstate) const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 

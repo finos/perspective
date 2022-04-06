@@ -556,6 +556,83 @@ t_data_table::filter_cpp(
     return mask;
 }
 
+t_mask
+t_data_table::filter_cpp_rows(
+    t_filter_op combiner, const std::vector<t_fterm>& fterms_, const std::vector<t_uindex>& row_index_list) const {
+    auto self = const_cast<t_data_table*>(this);
+    auto fterms = fterms_;
+
+    t_mask mask(size());
+    t_uindex fterm_size = fterms.size();
+    std::vector<t_uindex> indices(fterm_size);
+    std::vector<const t_column*> columns(fterm_size);
+
+    for (t_uindex idx = 0; idx < fterm_size; ++idx) {
+        indices[idx] = m_schema.get_colidx(fterms[idx].m_colname);
+        columns[idx] = get_const_column(fterms[idx].m_colname).get();
+        fterms[idx].coerce_numeric(columns[idx]->get_dtype());
+        if (fterms[idx].m_use_interned) {
+            t_tscalar& thr = fterms[idx].m_threshold;
+            auto col = self->get_column(fterms[idx].m_colname);
+            auto interned = col->get_interned(thr.get_char_ptr());
+            thr.set(interned);
+        }
+    }
+
+    switch (combiner) {
+        case FILTER_OP_AND: {
+            t_tscalar cell_val;
+
+            for (t_uindex ridx : row_index_list) {
+                bool pass = true;
+
+                for (t_uindex cidx = 0; cidx < fterm_size; ++cidx) {
+                    if (!pass)
+                        break;
+
+                    const auto& ft = fterms[cidx];
+                    bool tval;
+
+                    if (ft.m_use_interned) {
+                        cell_val.set(*(columns[cidx]->get_nth<t_uindex>(ridx)));
+                        cell_val.set_status(
+                            *(columns[cidx]->get_nth_status(ridx)));
+                    } else {
+                        cell_val = columns[cidx]->get_scalar(ridx);
+                    }
+
+                    tval = ft(cell_val);
+                    if (!tval) {
+                        pass = false;
+                        break;
+                    }
+                }
+
+                mask.set(ridx, pass);
+            }
+        } break;
+        case FILTER_OP_OR: {
+            for (t_uindex ridx : row_index_list) {
+                bool pass = false;
+                for (t_uindex cidx = 0; cidx < fterm_size; ++cidx) {
+                    t_tscalar cell_val = columns[cidx]->get_scalar(ridx);
+                    if (fterms[cidx](cell_val)) {
+                        pass = true;
+                        break;
+                    }
+                }
+                mask.set(ridx, pass);
+            }
+        } break;
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Unknown filter op");
+        } break;
+    }
+
+    return mask;
+}
+
+
 t_uindex
 t_data_table::get_capacity() const {
     return m_capacity;

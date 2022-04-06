@@ -57,6 +57,10 @@ namespace binding {
             case FILTER_OP_IS_NOT_NULL: {
                 terms.push_back(mktscalar(0));
             } break;
+            case FILTER_OP_IN_RECENT: {
+                terms.push_back(
+                    mktscalar(filter_term.cast<double>()));
+            } break;
             default: {
                 switch (column_type) {
                     case DTYPE_INT32: {

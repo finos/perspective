@@ -402,6 +402,7 @@ PYBIND11_MODULE(libbinding, m) {
         .value("FILTER_OP_NE", FILTER_OP_NE)
         .value("FILTER_OP_BEGINS_WITH", FILTER_OP_BEGINS_WITH)
         .value("FILTER_OP_ENDS_WITH", FILTER_OP_ENDS_WITH)
+        .value("FILTER_OP_IN_RECENT", FILTER_OP_IN_RECENT)
         .value("FILTER_OP_CONTAINS", FILTER_OP_CONTAINS)
         .value("FILTER_OP_OR", FILTER_OP_OR)
         .value("FILTER_OP_IN", FILTER_OP_IN)

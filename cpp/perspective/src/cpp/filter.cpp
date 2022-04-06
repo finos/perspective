@@ -77,6 +77,10 @@ t_fterm::get_expr() const {
             ss << "." << filter_op_to_str(m_op) << "( "
                << m_threshold.to_string(true) << " )";
         } break;
+        case FILTER_OP_IN_RECENT: {
+            ss << filter_op_to_str(m_op) << " ";
+            ss << m_threshold.to_string(true);
+        } break;
         default: {
             ss << " is failed_compilation";
         }

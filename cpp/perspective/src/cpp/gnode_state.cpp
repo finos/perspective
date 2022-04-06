@@ -735,7 +735,6 @@ t_gstate::get_pkeys_idx(const std::vector<t_tscalar>& pkeys) const {
 
     for (const auto& p : pkeys) {
         auto lk = lookup(p);
-        std::cout << "pkey " << p << " exists " << lk.m_exists << std::endl;
         if (lk.m_exists)
             rv.push_back(lk.m_idx);
     }
