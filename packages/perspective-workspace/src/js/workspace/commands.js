@@ -10,6 +10,10 @@
 import {CommandRegistry} from "@lumino/commands/src";
 import {MODE} from "./workspace";
 
+import perspective from "@finos/perspective";
+
+const worker = perspective.shared_worker();
+
 export const createCommands = (workspace, indicator) => {
     const commands = new CommandRegistry();
 
@@ -112,6 +116,64 @@ export const createCommands = (workspace, indicator) => {
             args.widget.parent === workspace.dockpanel
                 ? "Create Global Filter"
                 : "Remove Global Filter",
+        mnemonic: 0,
+    });
+
+    commands.addCommand("workspace:flatten", {
+        execute: async (args) => {
+            const view = await args.widget.viewer.getView();
+            const arrow = await view.to_arrow({
+                separator: ", ",
+                leaves_only: true,
+            });
+
+            const table = await worker.table(arrow);
+            const {group_by} = await args.widget.viewer.save();
+            const columns = await table.columns();
+            const new_group_by = columns.slice(0, group_by.length);
+            const new_config = {
+                table: "a",
+                group_by: new_group_by,
+                split_by: [],
+                filter: [],
+                sort: [],
+                columns: columns.slice(group_by.length),
+            };
+
+            workspace.addTable("a", Promise.resolve(table));
+
+            if (workspace.dockpanel.mode === "single-document") {
+                workspace.toggleSingleDocument(widget);
+            }
+            // const config = await widget.save();
+            new_config.name = new_config.name
+                ? `${new_config.name} (flat)`
+                : "";
+
+            const duplicate = workspace._createWidgetAndNode({
+                config: new_config,
+            });
+            // if (config.linked) {
+            //     workspace._linkWidget(duplicate);
+            // }
+
+            // if (widget.master) {
+            //     const index = workspace.masterPanel.widgets.indexOf(widget) + 1;
+            //     workspace.masterPanel.insertWidget(index, duplicate);
+            // } else {
+            workspace.dockpanel.addWidget(duplicate, {
+                mode: "split-right",
+                ref: args.widget,
+            });
+            // }
+
+            await duplicate.task;
+
+            // args.widget.viewer.load(table);
+            // args.widget.viewer.restore(new_config);
+        },
+        iconClass: "menu-reset",
+        label: "Flatten",
         mnemonic: 0,
     });
 

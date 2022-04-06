@@ -748,6 +748,7 @@ export class PerspectiveWorkspace extends SplitPanel {
                 command: "workspace:minimize",
                 args: {widget},
             });
+            contextMenu.addItem({command: "workspace:flatten", args: {widget}});
             contextMenu.addItem({
                 command: "workspace:duplicate",
                 args: {widget},

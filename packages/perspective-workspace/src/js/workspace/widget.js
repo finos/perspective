@@ -103,7 +103,10 @@ export class PerspectiveViewerWidget extends Widget {
             this.viewer.setAttribute("editable", editable);
         }
 
-        const restore_config = () => this.viewer.restore({...viewerConfig});
+        const restore_config = async () => {
+            await this.viewer.restore({...viewerConfig});
+            this._restore_config = undefined;
+        };
 
         if (this._is_table_loaded) {
             return restore_config();
