@@ -205,6 +205,9 @@ public:
 
     void pprint() const;
 
+    std::vector<t_uindex> get_pkeys_idx(
+        const std::vector<t_tscalar>& pkeys) const;
+
 protected:
     /**
      * @brief If the pkey exists in the state, return its row index. Otherwise,
@@ -236,8 +239,6 @@ protected:
 
 private:
     // Unused methods
-    std::vector<t_uindex> get_pkeys_idx(
-        const std::vector<t_tscalar>& pkeys) const;
     std::vector<t_tscalar> has_pkeys(const std::vector<t_tscalar>& pkeys) const;
     std::vector<t_tscalar> get_pkeys() const;
 

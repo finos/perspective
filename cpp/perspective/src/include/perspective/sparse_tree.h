@@ -181,11 +181,11 @@ public:
     build_strand_table(const t_data_table& flattened, const t_data_table& delta,
         const t_data_table& prev, const t_data_table& current,
         const t_data_table& transitions, const std::vector<t_aggspec>& aggspecs,
-        const t_config& config) const;
+        const t_config& config, const t_gstate& gstate) const;
 
     std::pair<std::shared_ptr<t_data_table>, std::shared_ptr<t_data_table>>
     build_strand_table(const t_data_table& flattened,
-        const std::vector<t_aggspec>& aggspecs, const t_config& config) const;
+        const std::vector<t_aggspec>& aggspecs, const t_config& config, const t_gstate& gstate) const;
 
     void update_shape_from_static(const t_dtree_ctx& ctx);
 

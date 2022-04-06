@@ -344,8 +344,11 @@ filter_op_to_str(t_filter_op op) {
         case FILTER_OP_ENDS_WITH: {
             return "endswith";
         } break;
+        case FILTER_OP_IN_RECENT: {
+            return "in recent";
+        } break;
         case FILTER_OP_CONTAINS: {
-            return "in";
+            return "contains";
         } break;
         case FILTER_OP_OR: {
             return "or";
@@ -388,6 +391,8 @@ str_to_filter_op(const std::string& str) {
         return t_filter_op::FILTER_OP_BEGINS_WITH;
     } else if (str == "ends with" || str == "endswith") {
         return t_filter_op::FILTER_OP_ENDS_WITH;
+    } else if (str == "in recent" || str == "inrecent") {
+        return t_filter_op::FILTER_OP_IN_RECENT;
     } else if (str == "in") {
         return t_filter_op::FILTER_OP_IN;
     } else if (str == "contains") {

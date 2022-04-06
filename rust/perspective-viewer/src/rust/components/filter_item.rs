@@ -98,7 +98,11 @@ impl FilterItemProps {
             }
             (Type::Datetime, FilterTerm::Scalar(Scalar::Float(x)))
             | (Type::Datetime, FilterTerm::Scalar(Scalar::DateTime(x))) => {
-                posix_to_utc_str(*x).ok()
+                if self.filter.1 == FilterOp::InRecent {
+                    Some(format!("{}", x))
+                } else {
+                    posix_to_utc_str(*x).ok()
+                }
             }
             (Type::Bool, FilterTerm::Scalar(Scalar::Bool(x))) => {
                 Some((if *x { "true" } else { "false" }).to_owned())
@@ -124,6 +128,17 @@ impl FilterItemProps {
                 FilterOp::In,
                 FilterOp::IsNotNull,
                 FilterOp::IsNull,
+            ],
+            Some(Type::Datetime) => vec![
+                FilterOp::EQ,
+                FilterOp::NE,
+                FilterOp::GT,
+                FilterOp::GTE,
+                FilterOp::LT,
+                FilterOp::LTE,
+                FilterOp::IsNotNull,
+                FilterOp::IsNull,
+                FilterOp::InRecent,
             ],
             Some(Type::Bool) => {
                 vec![FilterOp::EQ, FilterOp::IsNull, FilterOp::IsNotNull]
@@ -197,9 +212,19 @@ impl FilterItemProps {
                         .map(|x| FilterTerm::Scalar(Scalar::DateTime(x.timestamp_millis() as f64))),
                     _ => None,
                 },
-                Some(Type::Datetime) => match str_to_utc_posix(&val) {
-                    Ok(x) => Some(FilterTerm::Scalar(Scalar::DateTime(x))),
-                    _ => None,
+                Some(Type::Datetime) => if filter_item.1 == FilterOp::InRecent {
+                    if val.is_empty() {
+                        None
+                    } else if let Ok(num) = val.parse::<f64>() {
+                        Some(FilterTerm::Scalar(Scalar::Float(num.floor())))
+                    } else {
+                        None
+                    }
+                }else{
+                    match str_to_utc_posix(&val) {
+                        Ok(x) => Some(FilterTerm::Scalar(Scalar::DateTime(x))),
+                        _ => None,
+                    }
                 },
                 Some(Type::Bool) => Some(FilterTerm::Scalar(match val.as_str() {
                     "true" => Scalar::Bool(true),
@@ -422,17 +447,33 @@ impl Component for FilterItem {
                     value={ self.input.clone() }
                     oninput={ input }/>
             },
-            Some(Type::Datetime) => html! {
-                <input
-                    type="datetime-local"
-                    placeholder="Value"
-                    class="datetime-filter"
-                    step="0.001"
-                    ref={ noderef.clone() }
-                    onkeydown={ keydown }
-                    value={ self.input.clone() }
-                    oninput={ input }/>
-            },
+            Some(Type::Datetime) => 
+                if matches!(&filter.1, FilterOp::InRecent) {
+                    html! {
+                        <input
+                            type="number"
+                            placeholder="Value"
+                            class="num-filter"
+                            step="1"
+                            ref={ noderef.clone() }
+                            onkeydown={ keydown }
+                            value={ self.input.clone() }
+                            oninput={ input }/>
+                    }
+                } else {
+                    html! {
+                        <input
+                            type="datetime-local"
+                            placeholder="Value"
+                            class="datetime-filter"
+                            step="0.001"
+                            ref={ noderef.clone() }
+                            onkeydown={ keydown }
+                            value={ self.input.clone() }
+                            oninput={ input }/>
+                    }
+                }
+            ,
             Some(Type::Bool) => {
                 html! {
                     <input

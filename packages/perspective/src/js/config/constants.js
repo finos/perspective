@@ -138,6 +138,7 @@ export const FILTER_OPERATORS = {
     or: "or",
     beginsWith: "begins with",
     endsWith: "ends with",
+    inRecent: "in recent",
 };
 
 const BOOLEAN_FILTERS = [
@@ -183,6 +184,7 @@ const DATETIME_FILTERS = [
     FILTER_OPERATORS.doesNotEqual,
     FILTER_OPERATORS.isNull,
     FILTER_OPERATORS.isNotNull,
+    FILTER_OPERATORS.inRecent,
 ];
 
 export const COLUMN_SEPARATOR_STRING = "|";

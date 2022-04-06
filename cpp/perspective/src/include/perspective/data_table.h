@@ -137,6 +137,9 @@ public:
 
     t_mask filter_cpp(
         t_filter_op combiner, const std::vector<t_fterm>& fops) const;
+
+    t_mask filter_cpp_rows(t_filter_op combiner, const std::vector<t_fterm>& fterms_, const std::vector<t_uindex>& row_index_list) const;
+
     t_data_table* clone_(const t_mask& mask) const;
     std::shared_ptr<t_data_table> clone(const t_mask& mask) const;
     std::shared_ptr<t_data_table> clone() const;

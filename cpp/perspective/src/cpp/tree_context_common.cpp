@@ -143,7 +143,7 @@ notify_sparse_tree(std::shared_ptr<t_stree> tree,
     const t_data_table& expression_master_table) {
 
     auto strand_values = tree->build_strand_table(
-        flattened, delta, prev, current, transitions, aggregates, config);
+        flattened, delta, prev, current, transitions, aggregates, config, gstate);
 
     auto strands = strand_values.first;
     auto strand_deltas = strand_values.second;
@@ -161,7 +161,7 @@ notify_sparse_tree(std::shared_ptr<t_stree> tree,
     const t_config& config, const t_gstate& gstate,
     const t_data_table& expression_master_table) {
     auto strand_values
-        = tree->build_strand_table(flattened, aggregates, config);
+        = tree->build_strand_table(flattened, aggregates, config, gstate);
 
     auto strands = strand_values.first;
     auto strand_deltas = strand_values.second;

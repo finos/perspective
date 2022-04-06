@@ -8,6 +8,7 @@
  */
 
 #pragma once
+#include <chrono>
 #include <perspective/first.h>
 #include <perspective/base.h>
 #include <perspective/raw_types.h>
@@ -145,6 +146,10 @@ struct PERSPECTIVE_EXPORT t_fterm {
             } break;
             case FILTER_OP_IN: {
                 rv = std::find(m_bag.begin(), m_bag.end(), s) != m_bag.end();
+            } break;
+            case FILTER_OP_IN_RECENT: {
+                auto now = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+                rv = s.to_double() / 1000.0 + m_threshold.to_double() > now;
             } break;
             default: {
                 rv = s.cmp(m_op, m_threshold);

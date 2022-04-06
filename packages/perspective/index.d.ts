@@ -54,6 +54,7 @@ declare module "@finos/perspective" {
         | "!="
         | "is null"
         | "is not null"
+        | "in recent"
         | "in"
         | "not in"
         | "begins with"

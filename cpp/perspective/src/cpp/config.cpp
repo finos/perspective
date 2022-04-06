@@ -386,6 +386,17 @@ t_config::has_filters() const {
     return false;
 }
 
+bool
+t_config::has_in_recent_filter() const {
+    if (!has_filters())
+        return false;
+    for (auto& t : m_fterms) {
+        if (t.m_op == FILTER_OP_IN_RECENT)
+            return true;
+    }
+    return false;
+}
+
 const std::vector<t_fterm>&
 t_config::get_fterms() const {
     return m_fterms;

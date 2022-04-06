@@ -157,6 +157,8 @@ public:
 
     bool has_filters() const;
 
+    bool has_in_recent_filter() const;
+
     const std::vector<t_fterm>& get_fterms() const;
 
     std::vector<std::shared_ptr<t_computed_expression>> get_expressions() const;

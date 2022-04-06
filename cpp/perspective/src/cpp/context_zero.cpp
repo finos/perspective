@@ -100,6 +100,21 @@ t_ctx0::notify(const t_data_table& flattened, const t_data_table& delta,
     bool delete_encountered = false;
 
     if (m_config.has_filters()) {
+        if (m_config.has_in_recent_filter()) {
+            auto table = m_gstate->get_table();
+            auto pkey_list = m_traversal->get_pkeys();
+            auto size = pkey_list.size();
+            auto row_index_list = m_gstate->get_pkeys_idx(m_traversal->get_pkeys());
+            auto msk_all = table->filter_cpp_rows(m_config.get_combiner(), m_config.get_fterms(), row_index_list);
+            for (t_uindex idx = 0; idx < size; ++idx) {
+                auto pkey = pkey_list[idx];
+                auto row_index = row_index_list[idx];
+                bool m = msk_all.get(row_index);
+                if (!m)
+                    m_traversal->delete_row(pkey);
+            }
+        }
+
         t_mask msk_prev = filter_table_for_config(prev, m_config);
         t_mask msk_curr = filter_table_for_config(curr, m_config);
 

@@ -56,6 +56,9 @@ pub enum FilterOp {
     #[serde(rename = "ends with")]
     EndsWith,
 
+    #[serde(rename = "in recent")]
+    InRecent,
+
     #[serde(rename = "is null")]
     IsNull,
 
@@ -89,6 +92,7 @@ impl Display for FilterOp {
             Self::NotIn => "not in",
             Self::BeginsWith => "begins with",
             Self::EndsWith => "ends with",
+            Self::InRecent => "in recent",
             Self::IsNull => "is null",
             Self::IsNotNull => "is not null",
             Self::GT => ">",
@@ -112,6 +116,7 @@ impl FromStr for FilterOp {
             "not in" => Ok(FilterOp::NotIn),
             "begins with" => Ok(FilterOp::BeginsWith),
             "ends with" => Ok(FilterOp::EndsWith),
+            "in recent" => Ok(FilterOp::InRecent),
             "is null" => Ok(FilterOp::IsNull),
             "is not null" => Ok(FilterOp::IsNotNull),
             ">" => Ok(FilterOp::GT),
