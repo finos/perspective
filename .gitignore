@@ -160,9 +160,9 @@ python/perspective/perspective/tests/table/psp_test
 python/perspective/perspective/node/assets/*
 /__pycache__
 python/perspective/bench/stresstest/results
-python/perspective/perspective/jupyter/lib
 python/perspective/perspective/labextension/
 python/perspective/perspective/nbextension/
+python/perspective/jupyter/lib
 
 junit.xml
 

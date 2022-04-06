@@ -4,11 +4,10 @@
   "version": "1.3.6",
   "main": "lib/index.js",
   "scripts": {
-    "build": "npm run build:lib && npm run build:nbextension && npm run build:labextension",
     "build:labextension": "jupyter labextension build .",
     "build:lib": "babel src/ --source-maps --out-dir lib/",
-    "build:nbextension": "echo \"webpack --mode=production -c webpack.config.js\"",
-    "build:all": "npm run build:lib && npm run build:labextension && npm run build:nbextension",
+    "build:nbextension": "webpack --mode=production -c webpack.config.js",
+    "build": "npm-run-all build:*",
     "clean": "npm run clean:lib && npm run clean:nbextension",
     "clean:lib": "rimraf lib",
     "clean:labextension": "rimraf ../perspective/labextension",
@@ -30,11 +29,14 @@
     }
   },
   "nohoist": [
-    "**/*"
+    "**"
   ],
   "dependencies": {
     "@finos/perspective-jupyterlab": "1.3.6",
-    "@jupyter-widgets/base": "^3.0.0 || ^4.0.0"
+    "@jupyter-widgets/base": "^3.0.0 || ^4.0.0",
+    "@jupyterlab/application": "^3.0.0",
+    "@lumino/application": "^1.7.3",
+    "@lumino/widgets": "^1.9.3"
   },
   "devDependencies": {
     "@babel/cli": "^7.14.5",

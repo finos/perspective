@@ -8,15 +8,51 @@
  */
 const path = require("path");
 
-const exclude = /\.\.\/\.\.\/\.\.\/node_modules/;
+const exclude = /.*(node_modules).*/;
 const rules = [
+    { test: /\.css$/, use: ['style-loader', 'css-loader'] },
+    { test: /\.txt$/, use: 'raw-loader' },
+    { test: /\.md$/, use: 'raw-loader' },
+    { test: /\.(jpg|png|gif)$/, use: 'file-loader' },
     {test: /\.js$/, loader: "source-map-loader", exclude},
-    {test: /\.css$/, use: ["style-loader", "css-loader"], exclude},
+    { test: /\.js.map$/, use: 'file-loader' },
+    {
+      test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
+      use: 'url-loader?limit=10000&mimetype=application/font-woff'
+    },
+    {
+      test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
+      use: 'url-loader?limit=10000&mimetype=application/font-woff'
+    },
+    {
+      test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
+      use: 'url-loader?limit=10000&mimetype=application/octet-stream'
+    },
+    { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, use: 'file-loader' },
+    {
+      // In .css files, svg is loaded as a data URI.
+      test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
+      issuer: /\.css$/,
+      use: {
+        loader: 'svg-url-loader',
+        options: { encoding: 'none', limit: 10000 }
+      }
+    },
+    {
+      // In .ts and .tsx files (both of which compile to .js), svg files
+      // must be loaded as a raw string instead of data URIs.
+      test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
+      issuer: /\.js$/,
+      use: {
+        loader: 'raw-loader'
+      }
+    },
 ];
 
 // Packages that shouldn't be bundled but loaded at runtime
 // const externals = ["@jupyter-widgets/base", /@jupyterlab/, /node_modules/];
-const externals = /\.\.\/\.\.\/\.\.\/node_modules/;
+// const externals = /.*(node_modules).*/;
+const externals = /.*((@jupyter-widgets\/base)|(@jupyterlab)).*/;
 const resolve = {
     extensions: [".js"],
 };

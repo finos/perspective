@@ -25,6 +25,7 @@ from jupyter_packaging import (
     combine_commands,
     create_cmdclass,
     ensure_targets,
+    install_npm,
     get_version,
 )
 
@@ -278,12 +279,17 @@ data_files_spec = [
 ]
 
 cmdclass = create_cmdclass("js", data_files_spec=data_files_spec)
-cmdclass["js"] = ensure_targets(
-            [
-                os.path.join("perspective", "nbextension", "perspective-nbextension.js"),
-                os.path.join("perspective", "labextension", "package.json"),
-            ]
-        )
+cmdclass["js"] = combine_commands(
+    install_npm("jupyter", build_cmd="build"),
+
+    ensure_targets(
+        [
+            os.path.join("perspective", "nbextension", "static", "index.js"),
+            os.path.join("perspective", "labextension", "package.json"),
+            os.path.join("perspective", "labextension", "static", "style.js"),
+        ]
+    ),
+)
 cmdclass["build_ext"] = PSPBuild
 cmdclass["sdist"] = combine_commands(cmdclass["sdist"], PSPCheckSDist)
 
