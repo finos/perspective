@@ -212,7 +212,7 @@ public:
     void set_event_loop_thread_id(std::thread::id id);
 #endif
 
-protected:
+//protected:
     /**
      * @brief Given `tbl`, notify each registered context with `tbl`.
      *
@@ -321,7 +321,7 @@ protected:
     void _compute_expressions(std::shared_ptr<t_data_table> master,
         std::shared_ptr<t_data_table> flattened);
 
-private:
+//private:
     /**
      * @brief Process the input data table by flattening it, calculating
      * transitional values, and returning a new masked version.
