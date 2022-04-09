@@ -15,9 +15,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#define ARROW_VERSION_MAJOR 6
+#define ARROW_VERSION_MAJOR 7
 #define ARROW_VERSION_MINOR 0
-#define ARROW_VERSION_PATCH 1
+#define ARROW_VERSION_PATCH 0
 #define ARROW_VERSION ((ARROW_VERSION_MAJOR * 1000) + ARROW_VERSION_MINOR) * 1000 + ARROW_VERSION_PATCH
 
 /* #undef DOUBLE_CONVERSION_HAS_CASE_INSENSIBILITY */
@@ -36,6 +36,8 @@
 #define ARROW_GIT_DESCRIPTION ""
 
 #define ARROW_PACKAGE_KIND ""
+
+#define ARROW_BUILD_TYPE "release"
 
 // #cmakedefine ARROW_COMPUTE
 // #cmakedefine ARROW_CSV
