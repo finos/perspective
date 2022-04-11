@@ -193,3 +193,6 @@ docs/static/features
 results.debug.json
 
 tools/perspective-build/lib
+
+boost_1_71_0
+.vs
