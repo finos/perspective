@@ -8,7 +8,7 @@
  */
 
 import "@finos/perspective-viewer";
-import {Widget} from "@lumino/widgets";
+import {Widget} from "@lumino/widgets/src/widget";
 
 export class PerspectiveViewerWidget extends Widget {
     constructor({viewer, node}) {

@@ -8,7 +8,7 @@
  */
 
 import {h} from "@lumino/virtualdom";
-import {Menu} from "@lumino/widgets";
+import {Menu} from "@lumino/widgets/src/menu";
 
 export class MenuRenderer extends Menu.Renderer {
     constructor(element) {

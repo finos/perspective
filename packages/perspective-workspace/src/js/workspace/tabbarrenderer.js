@@ -8,7 +8,7 @@
  */
 
 import {h} from "@lumino/virtualdom";
-import {TabBar} from "@lumino/widgets";
+import {TabBar} from "@lumino/widgets/src/tabbar";
 
 export const TabBarItems = {
     Config: "config",

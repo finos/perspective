@@ -8,9 +8,10 @@
  */
 
 import {find, toArray} from "@lumino/algorithm";
-import {Panel} from "@lumino/widgets";
+import {Panel} from "@lumino/widgets/src/panel";
+import {SplitPanel} from "@lumino/widgets/src/splitpanel";
 import {PerspectiveDockPanel} from "./dockpanel";
-import {Menu} from "@lumino/widgets";
+import {Menu} from "@lumino/widgets/src/menu";
 import {MenuRenderer} from "./menu";
 import {createCommands} from "./commands";
 
@@ -18,7 +19,6 @@ import {PerspectiveViewerWidget} from "./widget";
 import uniqBy from "lodash/uniqBy";
 import debounce from "lodash/debounce";
 import cloneDeep from "lodash/cloneDeep";
-import {DiscreteSplitPanel} from "./discrete";
 
 const DEFAULT_WORKSPACE_SIZE = [1, 3];
 
@@ -62,7 +62,7 @@ class ObservableMap extends Map {
     }
 }
 
-export class PerspectiveWorkspace extends DiscreteSplitPanel {
+export class PerspectiveWorkspace extends SplitPanel {
     constructor(element, options = {}) {
         super({orientation: "horizontal"});
 
@@ -74,7 +74,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         this.detailPanel.layout.fitPolicy = "set-no-constraint";
         this.detailPanel.addClass("perspective-scroll-panel");
         this.detailPanel.addWidget(this.dockpanel);
-        this.masterPanel = new DiscreteSplitPanel({orientation: "vertical"});
+        this.masterPanel = new SplitPanel({orientation: "vertical"});
         this.masterPanel.addClass("master-panel");
 
         this.dockpanel.layoutModified.connect(() => this.workspaceUpdated());

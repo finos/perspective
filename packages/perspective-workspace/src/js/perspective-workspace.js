@@ -12,7 +12,7 @@ import template from "../html/workspace.html";
 import {PerspectiveWorkspace, SIDE} from "./workspace";
 export {PerspectiveWorkspace} from "./workspace";
 import {MessageLoop} from "@lumino/messaging";
-import {Widget} from "@lumino/widgets";
+import {Widget} from "@lumino/widgets/src/widget";
 import {bindTemplate} from "./workspace/utils.js";
 export {PerspectiveViewerWidget} from "./workspace/widget";
 

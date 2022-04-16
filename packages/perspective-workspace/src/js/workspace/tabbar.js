@@ -9,7 +9,7 @@
 
 import {ArrayExt} from "@lumino/algorithm";
 import {ElementExt} from "@lumino/domutils";
-import {TabBar} from "@lumino/widgets";
+import {TabBar} from "@lumino/widgets/src/tabbar";
 import {TabBarItems, DEFAULT_TITLE} from "./tabbarrenderer";
 
 export class PerspectiveTabBar extends TabBar {
@@ -76,7 +76,7 @@ export class PerspectiveTabBar extends TabBar {
                     }
 
                     const title = this.titles[index];
-                    title.owner.toggleConfig();
+                    title.owner.viewer.toggleConfig();
                     return;
                 }
                 break;
