@@ -142,7 +142,10 @@ docs/perspective.*.rst
 docs/python
 package.json.bak
 yarn.lock.bak
-docs/static/img
+docs/static/img/**/*
+!docs/static/img/logo/
+!docs/static/img/logo/**
+
 
 docs/static/arrow/
 .perspectiverc
