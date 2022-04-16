@@ -12,10 +12,7 @@ use crate::*;
 
 use wasm_bindgen::prelude::*;
 use web_sys::*;
-use yew::prelude::*;
-
-#[cfg(test)]
-use crate::utils::WeakScope;
+use yew::*;
 
 #[wasm_bindgen]
 #[derive(Clone)]
@@ -32,12 +29,6 @@ fn on_change(elem: &web_sys::HtmlElement, config: &NumberColumnStyleConfig) {
     elem.dispatch_event(&event.unwrap()).unwrap();
 }
 
-impl ResizableMessage for <NumberColumnStyle as Component>::Message {
-    fn resize(y: i32, x: i32, _: bool) -> Self {
-        NumberColumnStyleMsg::SetPos(y, x)
-    }
-}
-
 #[wasm_bindgen]
 impl PerspectiveNumberColumnStyleElement {
     #[wasm_bindgen(constructor)]
@@ -46,20 +37,18 @@ impl PerspectiveNumberColumnStyleElement {
         js_config: JsValue,
         js_def_config: JsValue,
     ) -> PerspectiveNumberColumnStyleElement {
-        let config = js_config.into_serde().unwrap();
-        let default_config = js_def_config.into_serde().unwrap();
+        let config: NumberColumnStyleConfig = js_config.into_serde().unwrap();
+        let default_config: NumberColumnStyleDefaultConfig = js_def_config.into_serde().unwrap();
         let on_change = {
             clone!(elem);
             Callback::from(move |x: NumberColumnStyleConfig| on_change(&elem, &x))
         };
 
-        let props = NumberColumnStyleProps {
+        let props = props!(NumberColumnStyleProps {
             config,
             on_change,
             default_config,
-            #[cfg(test)]
-            weak_link: WeakScope::default(),
-        };
+        });
 
         let modal = ModalElement::new(elem, props, true);
         PerspectiveNumberColumnStyleElement { modal }

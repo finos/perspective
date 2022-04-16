@@ -122,13 +122,8 @@ impl JsPerspectiveViewerPlugin {
     pub fn get_requirements(&self) -> Result<ViewConfigRequirements, JsValue> {
         Ok(ViewConfigRequirements {
             min: self.min_config_columns(),
-            mode: self
-                .select_mode()
-                .into_serde::<ColumnSelectMode>()
-                .into_jserror()?,
-            names: self
-                .config_column_names()
-                .map(|x| x.into_serde::<Vec<String>>().unwrap()),
+            mode: self.select_mode().into_serde().into_jserror()?,
+            names: self.config_column_names().map(|x| x.into_serde().unwrap()),
             max_columns: self.max_columns(),
             max_cells: self.max_cells(),
             name: self.name(),

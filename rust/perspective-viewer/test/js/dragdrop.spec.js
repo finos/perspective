@@ -324,7 +324,8 @@ utils.with_server({}, () => {
 
                             await drag(page, origin, target);
                             return await get_contents(page);
-                        }
+                        },
+                        {reload_page: true}
                     );
 
                     test.capture(
@@ -356,7 +357,8 @@ utils.with_server({}, () => {
 
                             await drag(page, origin, target);
                             return await get_contents(page);
-                        }
+                        },
+                        {reload_page: true}
                     );
 
                     test.capture(
@@ -388,7 +390,8 @@ utils.with_server({}, () => {
 
                             await drag(page, origin, target);
                             return await get_contents(page);
-                        }
+                        },
+                        {reload_page: true}
                     );
                 });
             },

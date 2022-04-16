@@ -128,6 +128,14 @@ extern "C" {
     #[wasm_bindgen(method, js_name = "addCommand")]
     pub fn add_command(this: &JsMonacoEditor, key_code: u32, value: &js_sys::Function);
 
+    #[wasm_bindgen(method, js_name = "onDidScrollChange")]
+    pub fn on_did_scroll_change(this: &JsMonacoEditor, callback: &js_sys::Function) -> JsDisposable;
+
+    pub type JsDisposable;
+
+    #[wasm_bindgen(method, js_name = "dispose")]
+    pub fn dispose(this: &JsDisposable);
+
     // #[wasm_bindgen(method, js_name = "getValue")]
     // pub fn get_value_str(this: &JsMonacoEditor) -> String;
 

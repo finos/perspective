@@ -22,7 +22,7 @@ use yew::prelude::*;
 /// button which cycles through the available `SortDir` states.
 pub struct SortItem {}
 
-#[derive(Properties, Clone)]
+#[derive(Properties)]
 pub struct SortItemProps {
     pub sort: Sort,
     pub idx: usize,
@@ -37,7 +37,7 @@ impl PartialEq for SortItemProps {
     }
 }
 
-derive_session_renderer_model!(SortItemProps);
+derive_model!(Renderer, Session for SortItemProps);
 
 impl DragDropListItemProps for SortItemProps {
     type Item = Sort;
@@ -62,11 +62,10 @@ impl Component for SortItem {
     fn update(&mut self, ctx: &Context<Self>, msg: SortItemMsg) -> bool {
         match msg {
             SortItemMsg::SortDirClick(shift_key) => {
-                let ViewConfig {
-                    mut sort, split_by, ..
-                } = ctx.props().session.get_view_config();
+                let is_split = ctx.props().session.get_view_config().split_by.is_empty();
+                let mut sort = ctx.props().session.get_view_config().sort.clone();
                 let sort_item = &mut sort.get_mut(ctx.props().idx).expect("Sort on no column");
-                sort_item.1 = sort_item.1.cycle(!split_by.is_empty(), shift_key);
+                sort_item.1 = sort_item.1.cycle(!is_split, shift_key);
                 let update = ViewConfigUpdate {
                     sort: Some(sort),
                     ..ViewConfigUpdate::default()
@@ -99,22 +98,20 @@ impl Component for SortItem {
             move |_event| dragdrop.drag_end()
         });
 
-        html! {
-            <>
-                <span
-                    draggable="true"
-                    ref={ noderef.clone() }
-                    ondragstart={ dragstart }
-                    ondragend={ dragend }>
-                    {
-                        ctx.props().sort.0.to_owned()
-                    }
-                </span>
-                <span
-                    class={ format!("sort-icon {}", ctx.props().sort.1) }
-                    onmousedown={ onclick }>
-                </span>
-            </>
+        html_template! {
+            <span
+                draggable="true"
+                ref={ noderef.clone() }
+                ondragstart={ dragstart }
+                ondragend={ dragend }>
+                {
+                    ctx.props().sort.0.to_owned()
+                }
+            </span>
+            <span
+                class={ format!("sort-icon {}", ctx.props().sort.1) }
+                onmousedown={ onclick }>
+            </span>
         }
     }
 }

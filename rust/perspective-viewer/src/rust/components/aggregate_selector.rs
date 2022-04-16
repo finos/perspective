@@ -15,7 +15,7 @@ use crate::*;
 
 use yew::prelude::*;
 
-#[derive(Properties, Clone)]
+#[derive(Properties)]
 pub struct AggregateSelectorProps {
     pub column: String,
     pub aggregate: Option<Aggregate>,
@@ -23,7 +23,7 @@ pub struct AggregateSelectorProps {
     pub session: Session,
 }
 
-derive_session_renderer_model!(AggregateSelectorProps);
+derive_model!(Renderer, Session for AggregateSelectorProps);
 
 impl PartialEq for AggregateSelectorProps {
     fn eq(&self, rhs: &Self) -> bool {
@@ -102,7 +102,7 @@ impl Component for AggregateSelector {
 impl AggregateSelector {
     pub fn set_aggregate(&mut self, ctx: &Context<Self>, aggregate: Aggregate) {
         self.aggregate = Some(aggregate.clone());
-        let ViewConfig { mut aggregates, .. } = ctx.props().session.get_view_config();
+        let mut aggregates = ctx.props().session.get_view_config().aggregates.clone();
         aggregates.insert(ctx.props().column.clone(), aggregate);
         ctx.props().update_and_render(ViewConfigUpdate {
             aggregates: Some(aggregates),

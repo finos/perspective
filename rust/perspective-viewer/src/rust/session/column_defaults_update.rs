@@ -41,7 +41,7 @@ impl ViewConfigUpdate {
                 .filter(|x| {
                     matches!(
                         metadata.get_column_table_type(x),
-                        Some(Type::Float) | Some(Type::Integer)
+                        Some(Type::Float | Type::Integer)
                     )
                 })
                 .take(*min_cols)
@@ -74,7 +74,7 @@ impl ViewConfigUpdate {
                             .filter(|x| {
                                 matches!(
                                     metadata.get_column_table_type(x),
-                                    Some(Type::Float) | Some(Type::Integer)
+                                    Some(Type::Float | Type::Integer)
                                 )
                             })
                             .cloned()

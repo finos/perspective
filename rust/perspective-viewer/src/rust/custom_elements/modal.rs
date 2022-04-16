@@ -6,6 +6,7 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use crate::components::*;
 use crate::utils::*;
 
 use derivative::Derivative;
@@ -13,6 +14,7 @@ use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
+use wasm_bindgen_futures::spawn_local;
 use web_sys::*;
 use yew::prelude::*;
 
@@ -30,8 +32,12 @@ type BlurHandlerType = Rc<RefCell<Option<Closure<dyn FnMut(FocusEvent)>>>>;
 /// support.
 #[derive(Derivative)]
 #[derivative(Clone(bound = ""))]
-pub struct ModalElement<T: Component> {
-    root: Rc<RefCell<Option<AppHandle<T>>>>,
+pub struct ModalElement<T>
+where
+    T: Component,
+    T::Properties: ModalLink<T>,
+{
+    root: Rc<RefCell<Option<AppHandle<Modal<T>>>>>,
     custom_element: HtmlElement,
     target: Rc<RefCell<Option<HtmlElement>>>,
     blurhandler: BlurHandlerType,
@@ -119,14 +125,10 @@ fn calc_relative_position(
     }
 }
 
-pub trait ResizableMessage {
-    fn resize(y: i32, x: i32, rev_vert: bool) -> Self;
-}
-
 impl<T> ModalElement<T>
 where
     T: Component,
-    <T as Component>::Message: ResizableMessage,
+    T::Properties: ModalLink<T>,
 {
     pub fn new(
         custom_element: web_sys::HtmlElement,
@@ -140,10 +142,15 @@ where
             .unwrap()
             .unchecked_into::<web_sys::Element>();
 
-        let root = Rc::new(RefCell::new(Some(yew::start_app_with_props_in_element(
-            shadow_root,
-            props,
-        ))));
+        let cprops = ModalProps {
+            child: Some(html_nested! {
+                <T ..props />
+            }),
+        };
+
+        let root = Rc::new(RefCell::new(Some(
+            yew::Renderer::with_root_and_props(shadow_root, cprops).render(),
+        )));
 
         let blurhandler = Rc::new(RefCell::new(None));
         ModalElement {
@@ -182,18 +189,23 @@ where
         }
     }
 
-    fn open_within_viewport(&mut self, target: HtmlElement) -> Result<(), JsValue> {
+    async fn open_within_viewport(&self, target: HtmlElement) -> Result<(), JsValue> {
         let height = target.offset_height() as i32;
         let width = target.offset_width() as i32;
         let elem = target.clone().unchecked_into::<HtmlElement>();
         let rect = elem.get_bounding_client_rect();
         let top = rect.top() as i32;
         let left = rect.left() as i32;
-
         *self.target.borrow_mut() = Some(target.clone());
 
         // Default, top left/bottom left
-        let msg = T::Message::resize((top + height - 1) as i32, left as i32, false);
+        let msg = ModalMsg::SetPos {
+            top: (top + height - 1) as i32,
+            left: left as i32,
+            visible: false,
+            rev_vert: false,
+        };
+
         self.root.borrow().as_ref().unwrap().send_message(msg);
 
         let window = web_sys::window().unwrap();
@@ -203,6 +215,8 @@ where
             .body()
             .unwrap()
             .append_child(&self.custom_element)?;
+
+        await_animation_frame().await?;
 
         // Check if the modal has been positioned off-screen and re-locate if necessary
         self.anchor.set(calc_relative_position(
@@ -214,7 +228,13 @@ where
         ));
 
         let (top, left) = self.calc_anchor_position(&target);
-        let msg = T::Message::resize(top, left, self.anchor.get().is_rev_vert());
+        let msg = ModalMsg::SetPos {
+            top,
+            left,
+            visible: true,
+            rev_vert: self.anchor.get().is_rev_vert(),
+        };
+
         self.root.borrow().as_ref().unwrap().send_message(msg);
 
         if self.own_focus {
@@ -240,11 +260,19 @@ where
     }
 
     pub fn send_message(&self, msg: T::Message) {
-        self.root.borrow().as_ref().unwrap().send_message(msg)
+        self.root
+            .borrow()
+            .as_ref()
+            .unwrap()
+            .send_message(ModalMsg::SubMsg(msg))
     }
 
-    pub fn send_message_batch(&self, msg: Vec<T::Message>) {
-        self.root.borrow().as_ref().unwrap().send_message_batch(msg)
+    pub fn send_message_batch(&self, msgs: Vec<T::Message>) {
+        self.root
+            .borrow()
+            .as_ref()
+            .unwrap()
+            .send_message_batch(msgs.into_iter().map(ModalMsg::SubMsg).collect())
     }
 
     /// Open this modal by attaching directly to `document.body` with position
@@ -260,30 +288,29 @@ where
             let anchor = self.anchor.clone();
             *self.resize_sub.borrow_mut() = Some(resize.add_listener(move |()| {
                 let (top, left) = this.calc_anchor_position(&target);
-                let msg = T::Message::resize(top, left, anchor.get().is_rev_vert());
+                let msg = ModalMsg::SetPos {
+                    top,
+                    left,
+                    visible: true,
+                    rev_vert: anchor.get().is_rev_vert(),
+                };
+
                 this.root.borrow().as_ref().unwrap().send_message(msg);
             }));
         };
 
         if !self.is_open() {
             self.custom_element.blur().unwrap();
-            let window = web_sys::window().unwrap();
-            let mut this = self.clone();
-            window
-                .request_animation_frame(
-                    Closure::once_into_js(move || {
-                        target.class_list().add_1("modal-target")?;
-                        let theme = get_theme(&target);
-                        this.open_within_viewport(target)?;
-                        if let Some(theme) = theme {
-                            this.custom_element.set_attribute("theme", &theme)?;
-                        }
-
-                        Ok(())
-                    })
-                    .unchecked_ref(),
-                )
-                .unwrap();
+            let this = self.clone();
+            spawn_local(async move {
+                await_animation_frame().await.unwrap();
+                target.class_list().add_1("modal-target").unwrap();
+                let theme = get_theme(&target);
+                this.open_within_viewport(target).await.unwrap();
+                if let Some(theme) = theme {
+                    this.custom_element.set_attribute("theme", &theme).unwrap();
+                }
+            });
         }
     }
 

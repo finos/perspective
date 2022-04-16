@@ -15,7 +15,7 @@ use crate::utils::*;
 use num_format::{Locale, ToFormattedString};
 use yew::prelude::*;
 
-#[derive(Properties, Clone)]
+#[derive(Properties)]
 pub struct StatusBarRowsCounterProps {
     pub stats: Option<TableStats>,
 
@@ -56,12 +56,10 @@ impl Component for StatusBarRowsCounter {
             }) => {
                 let vrows = virtual_rows.to_formatted_string(&Locale::en);
                 let nrows = num_rows.to_formatted_string(&Locale::en);
-                html! {
-                    <>
-                        <span>{ format!("{} ", vrows) }</span>
-                        <span id="counter-arrow" class="icon"></span>
-                        <span>{ format!(" {} rows", nrows) }</span>
-                    </>
+                html_template! {
+                    <span>{ format!("{} ", vrows) }</span>
+                    <span id="counter-arrow" class="icon"></span>
+                    <span>{ format!(" {} rows", nrows) }</span>
                 }
             }
 

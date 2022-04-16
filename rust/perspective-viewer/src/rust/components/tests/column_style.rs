@@ -6,50 +6,22 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use std::{cell::RefCell, rc::Rc};
+use crate::components::number_column_style::*;
+use crate::utils::{await_animation_frame, WeakScope};
+use crate::*;
 
+use std::{cell::RefCell, rc::Rc};
 use wasm_bindgen::JsCast;
 use wasm_bindgen_test::*;
 use web_sys::*;
 use yew::prelude::*;
 
-use crate::components::number_column_style::*;
-use crate::utils::WeakScope;
-use crate::*;
-
 wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
-
-#[wasm_bindgen_test]
-pub fn test_set_pos() {
-    let link: WeakScope<NumberColumnStyle> = WeakScope::default();
-    let panel_div = NodeRef::default();
-    test_html! {
-        <NumberColumnStyle
-            ref={ panel_div.clone() }
-            weak_link={ link.clone() }>
-        </NumberColumnStyle>
-    };
-
-    let column_style = link.borrow().clone().unwrap();
-    column_style.send_message(NumberColumnStyleMsg::SetPos(90, 100));
-    assert!(panel_div
-        .cast::<HtmlElement>()
-        .unwrap()
-        .next_sibling()
-        .as_ref()
-        .unwrap()
-        .unchecked_ref::<HtmlElement>()
-        .inner_html()
-        .contains("left:100px;top:90px;"));
-}
 
 /// Find a node relatie to `ColumnStyle` ref's root, which is a
 /// DocumentFragment.
 fn cs_query(node: &NodeRef, query: &str) -> HtmlElement {
     node.cast::<HtmlElement>()
-        .unwrap()
-        .next_sibling()
-        .as_ref()
         .unwrap()
         .next_sibling()
         .as_ref()
@@ -64,7 +36,7 @@ fn cs_query(node: &NodeRef, query: &str) -> HtmlElement {
 }
 
 #[wasm_bindgen_test]
-pub fn test_initial_fixed() {
+pub async fn test_initial_fixed() {
     let panel_div = NodeRef::default();
     let config = NumberColumnStyleConfig {
         fixed: Some(4),
@@ -78,6 +50,7 @@ pub fn test_initial_fixed() {
         </NumberColumnStyle>
     };
 
+    await_animation_frame().await.unwrap();
     assert_eq!(
         cs_query(&panel_div, "#fixed-examples").inner_text(),
         "Prec 0.0001"
@@ -85,7 +58,7 @@ pub fn test_initial_fixed() {
 }
 
 #[wasm_bindgen_test]
-pub fn test_fixed_msg_overrides_default() {
+pub async fn test_fixed_msg_overrides_default() {
     let link: WeakScope<NumberColumnStyle> = WeakScope::default();
     let panel_div = NodeRef::default();
     let default_config = NumberColumnStyleDefaultConfig {
@@ -101,6 +74,7 @@ pub fn test_fixed_msg_overrides_default() {
         </NumberColumnStyle>
     };
 
+    await_animation_frame().await.unwrap();
     assert_eq!(
         cs_query(&panel_div, "#fixed-examples").inner_text(),
         "Prec 0.0001"
@@ -108,6 +82,8 @@ pub fn test_fixed_msg_overrides_default() {
 
     let column_style = link.borrow().clone().unwrap();
     column_style.send_message(NumberColumnStyleMsg::FixedChanged("2".to_owned()));
+    await_animation_frame().await.unwrap();
+
     assert_eq!(
         cs_query(&panel_div, "#fixed-examples").inner_text(),
         "Prec 0.01"
@@ -115,7 +91,7 @@ pub fn test_fixed_msg_overrides_default() {
 }
 
 #[wasm_bindgen_test]
-pub fn test_fixed_is_0() {
+pub async fn test_fixed_is_0() {
     let panel_div = NodeRef::default();
     let config = NumberColumnStyleConfig {
         fixed: Some(0),
@@ -128,6 +104,7 @@ pub fn test_fixed_is_0() {
         </NumberColumnStyle>
     };
 
+    await_animation_frame().await.unwrap();
     assert_eq!(
         cs_query(&panel_div, "#fixed-examples").inner_text().trim(),
         "Prec 1"
@@ -135,7 +112,7 @@ pub fn test_fixed_is_0() {
 }
 
 #[wasm_bindgen_test]
-pub fn test_color_enabled() {
+pub async fn test_color_enabled() {
     let link: WeakScope<NumberColumnStyle> = WeakScope::default();
     let result: Rc<RefCell<NumberColumnStyleConfig>> =
         Rc::new(RefCell::new(NumberColumnStyleConfig::default()));
@@ -153,18 +130,24 @@ pub fn test_color_enabled() {
         </NumberColumnStyle>
     };
 
+    await_animation_frame().await.unwrap();
+
     let column_style = link.borrow().clone().unwrap();
     column_style.send_message(NumberColumnStyleMsg::ColorEnabledChanged(true));
+    await_animation_frame().await.unwrap();
+
     assert_eq!(
         result.borrow().number_color_mode,
         NumberColorMode::Foreground
     );
     column_style.send_message(NumberColumnStyleMsg::ColorEnabledChanged(false));
+    await_animation_frame().await.unwrap();
+
     assert_eq!(result.borrow().number_color_mode, NumberColorMode::Disabled);
 }
 
 #[wasm_bindgen_test]
-pub fn test_color_mode_changed() {
+pub async fn test_color_mode_changed() {
     let link: WeakScope<NumberColumnStyle> = WeakScope::default();
     let result: Rc<RefCell<NumberColumnStyleConfig>> =
         Rc::new(RefCell::new(NumberColumnStyleConfig::default()));
@@ -188,6 +171,7 @@ pub fn test_color_mode_changed() {
         </NumberColumnStyle>
     };
 
+    await_animation_frame().await.unwrap();
     let column_style = link.borrow().clone().unwrap();
     assert_eq!(
         result.borrow().number_color_mode,
@@ -195,11 +179,15 @@ pub fn test_color_mode_changed() {
     );
     assert_eq!(result.borrow().pos_color, None);
     column_style.send_message(NumberColumnStyleMsg::ColorEnabledChanged(false));
+    await_animation_frame().await.unwrap();
+
     assert_eq!(result.borrow().number_color_mode, NumberColorMode::Disabled);
     assert_eq!(result.borrow().pos_color, None);
     column_style.send_message(NumberColumnStyleMsg::NumberColorModeChanged(
         NumberColorMode::Background,
     ));
+    await_animation_frame().await.unwrap();
+
     assert_eq!(
         result.borrow().number_color_mode,
         NumberColorMode::Background
@@ -208,7 +196,7 @@ pub fn test_color_mode_changed() {
 }
 
 #[wasm_bindgen_test]
-pub fn test_pos_color_changed_override_defaults() {
+pub async fn test_pos_color_changed_override_defaults() {
     let link: WeakScope<NumberColumnStyle> = WeakScope::default();
     let result: Rc<RefCell<NumberColumnStyleConfig>> =
         Rc::new(RefCell::new(NumberColumnStyleConfig::default()));
@@ -232,6 +220,7 @@ pub fn test_pos_color_changed_override_defaults() {
             weak_link={ link.clone() }>
         </NumberColumnStyle>
     };
+    await_animation_frame().await.unwrap();
 
     let column_style = link.borrow().clone().unwrap();
     assert_eq!(
@@ -241,6 +230,8 @@ pub fn test_pos_color_changed_override_defaults() {
     assert_eq!(result.borrow().neg_color, None);
     assert_eq!(result.borrow().pos_color, None);
     column_style.send_message(NumberColumnStyleMsg::PosColorChanged("#666".to_owned()));
+    await_animation_frame().await.unwrap();
+
     assert_eq!(
         result.borrow().number_color_mode,
         NumberColorMode::Foreground
@@ -248,6 +239,8 @@ pub fn test_pos_color_changed_override_defaults() {
     assert_eq!(result.borrow().pos_color, Some("#666".to_owned()));
     assert_eq!(result.borrow().neg_color, Some("#321".to_owned()));
     column_style.send_message(NumberColumnStyleMsg::PosColorChanged("#123".to_owned()));
+    await_animation_frame().await.unwrap();
+
     assert_eq!(
         result.borrow().number_color_mode,
         NumberColorMode::Foreground
@@ -257,7 +250,7 @@ pub fn test_pos_color_changed_override_defaults() {
 }
 
 #[wasm_bindgen_test]
-pub fn test_pos_color_and_mode_changed_override_defaults() {
+pub async fn test_pos_color_and_mode_changed_override_defaults() {
     let link: WeakScope<NumberColumnStyle> = WeakScope::default();
     let result: Rc<RefCell<NumberColumnStyleConfig>> =
         Rc::new(RefCell::new(NumberColumnStyleConfig::default()));
@@ -282,6 +275,8 @@ pub fn test_pos_color_and_mode_changed_override_defaults() {
         </NumberColumnStyle>
     };
 
+    await_animation_frame().await.unwrap();
+
     let column_style = link.borrow().clone().unwrap();
     assert_eq!(
         result.borrow().number_color_mode,
@@ -292,6 +287,8 @@ pub fn test_pos_color_and_mode_changed_override_defaults() {
     column_style.send_message(NumberColumnStyleMsg::NumberColorModeChanged(
         NumberColorMode::Background,
     ));
+
+    await_animation_frame().await.unwrap();
     assert_eq!(
         result.borrow().number_color_mode,
         NumberColorMode::Background
@@ -299,6 +296,8 @@ pub fn test_pos_color_and_mode_changed_override_defaults() {
     assert_eq!(result.borrow().pos_color, None);
     assert_eq!(result.borrow().neg_color, None);
     column_style.send_message(NumberColumnStyleMsg::PosColorChanged("#666".to_owned()));
+
+    await_animation_frame().await.unwrap();
     assert_eq!(
         result.borrow().number_color_mode,
         NumberColorMode::Background
@@ -306,6 +305,8 @@ pub fn test_pos_color_and_mode_changed_override_defaults() {
     assert_eq!(result.borrow().pos_color, Some("#666".to_owned()));
     assert_eq!(result.borrow().neg_color, Some("#321".to_owned()));
     column_style.send_message(NumberColumnStyleMsg::PosColorChanged("#123".to_owned()));
+
+    await_animation_frame().await.unwrap();
     assert_eq!(
         result.borrow().number_color_mode,
         NumberColorMode::Background

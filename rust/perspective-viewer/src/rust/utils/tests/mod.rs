@@ -7,6 +7,5 @@
 // file.
 
 mod debounce;
-mod perspective;
 mod pubsub;
 mod request_animation_frame;

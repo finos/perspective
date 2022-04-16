@@ -12,7 +12,7 @@ use crate::*;
 
 use wasm_bindgen::prelude::*;
 use web_sys::*;
-use yew::prelude::*;
+use yew::*;
 
 #[wasm_bindgen]
 #[derive(Clone)]
@@ -29,28 +29,24 @@ fn on_change(elem: &web_sys::HtmlElement, config: &StringColumnStyleConfig) {
     elem.dispatch_event(&event.unwrap()).unwrap();
 }
 
-impl ResizableMessage for <StringColumnStyle as Component>::Message {
-    fn resize(y: i32, x: i32, _: bool) -> Self {
-        StringColumnStyleMsg::SetPos(y, x)
-    }
-}
-
 #[wasm_bindgen]
 impl PerspectiveStringColumnStyleElement {
     #[wasm_bindgen(constructor)]
     pub fn new(elem: web_sys::HtmlElement, js_config: JsValue, js_default_config: JsValue) -> Self {
-        let config = js_config.into_serde().unwrap();
-        let default_config = js_default_config.into_serde().unwrap();
+        let config: StringColumnStyleConfig = js_config.into_serde().unwrap();
+        let default_config: StringColumnStyleDefaultConfig =
+            js_default_config.into_serde().unwrap();
+
         let on_change = {
             clone!(elem);
             Callback::from(move |x: StringColumnStyleConfig| on_change(&elem, &x))
         };
 
-        let props = StringColumnStyleProps {
+        let props = props!(StringColumnStyleProps {
             config,
             default_config,
             on_change,
-        };
+        });
 
         let modal = ModalElement::new(elem, props, true);
         Self { modal }

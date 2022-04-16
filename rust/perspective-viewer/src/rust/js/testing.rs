@@ -8,7 +8,7 @@
 
 #[cfg(test)]
 use {
-    crate::js::perspective::*, crate::*, std::cell::RefCell, wasm_bindgen::prelude::*,
+    super::perspective::*, crate::*, std::cell::RefCell, wasm_bindgen::prelude::*,
     wasm_bindgen::JsCast, wasm_bindgen_futures::JsFuture,
 };
 
@@ -83,7 +83,7 @@ macro_rules! test_html {
 
         struct TestElement {}
 
-        #[derive(Properties, Clone, PartialEq)]
+        #[derive(Properties, PartialEq)]
         struct TestElementProps {
             html: Html
         }
@@ -105,14 +105,12 @@ macro_rules! test_html {
             }
 
             fn view(&self, ctx: &Context<Self>) -> Html {
-                html! {
-                    <>
-                        <style>
-                            { "#test{position:absolute;top:0;bottom:0;left:0;right:0;}" }
-                            { &CSS }
-                        </style>
-                        { ctx.props().html.clone() }
-                    </>
+                html_template! {
+                    <style>
+                        { "#test{position:absolute;top:0;bottom:0;left:0;right:0;}" }
+                        { &CSS }
+                    </style>
+                    { ctx.props().html.clone() }
                 }
             }
         }
@@ -129,6 +127,6 @@ macro_rules! test_html {
             .unwrap()
             .unchecked_into::<web_sys::Element>();
 
-        yew::start_app_with_props_in_element::<TestElement>(shadow_root, TestElementProps { html: html!{ $($html)* } })
+        yew::Renderer::<TestElement>::with_root_and_props(shadow_root, TestElementProps { html: html!{ $($html)* } }).render()
     }}
 }

@@ -53,9 +53,15 @@ function cut_first(f) {
 
 const execute_throw = (cmd) => {
     if (process.argv.indexOf("--debug") > -1) {
-        console.log(`$ ${cmd}`);
+        process.stdout.write(`$ ${cmd}\n`);
     }
-    execSync(cmd, {stdio: "inherit"});
+
+    let env = {...process.env};
+    if (!!process.env.PSP_DEBUG || process.argv.indexOf("--debug") >= 0) {
+        env.PSP_DEBUG = 1;
+    }
+
+    execSync(cmd, {stdio: "inherit", env});
 };
 
 const execute = (cmd) => {

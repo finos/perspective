@@ -22,11 +22,10 @@ use extend::ext;
 use std::iter::*;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
 use web_sys::*;
 use yew::prelude::*;
 
-#[derive(Properties, Clone)]
+#[derive(Properties)]
 pub struct ColumnSelectorProps {
     pub session: Session,
     pub renderer: Renderer,
@@ -39,15 +38,12 @@ pub struct ColumnSelectorProps {
     pub on_dimensions_reset: Option<Rc<PubSub<()>>>,
 }
 
-derive_viewer_model!(ColumnSelectorProps);
+derive_model!(DragDrop, Renderer, Session for ColumnSelectorProps);
 
 impl ColumnSelectorProps {
     fn save_expr(&self, expression: &JsValue) {
         let expression = expression.as_string().unwrap();
-        let ViewConfig {
-            mut expressions, ..
-        } = self.session.get_view_config();
-
+        let mut expressions = self.session.get_view_config().expressions.clone();
         expressions.retain(|x| x != &expression);
         expressions.push(expression);
         self.update_and_render(ViewConfigUpdate {
@@ -150,7 +146,7 @@ impl Component for ColumnSelector {
             }
             ColumnSelectorMsg::HoverActiveIndex(Some(to_index)) => {
                 let min_cols = ctx.props().renderer.metadata().min;
-                let config = ctx.props().session.borrow_view_config();
+                let config = ctx.props().session.get_view_config();
                 let is_to_empty = !config
                     .columns
                     .get(to_index)
@@ -226,35 +222,13 @@ impl Component for ColumnSelector {
             let is_pivot = config.is_aggregated();
             let columns_iter = ctx.props().column_selector_iter_set(&config);
 
-            let dragleave = dragleave_helper({
+            let drag_container = DragDropContainer::new(|| {}, {
                 let link = ctx.link().clone();
                 move || link.send_message(ColumnSelectorMsg::HoverActiveIndex(None))
             });
 
             let dragover = Callback::from(|_event: DragEvent| _event.prevent_default());
-            let ondragenter = ctx.link().callback(move |event: DragEvent| {
-                // Safari does not set `relatedTarget` so this event must be allowed to
-                // bubble so we can count entry/exit stacks to determine true
-                // `"dragleave"`.
-                if event.related_target().is_some() {
-                    event.stop_propagation();
-                    event.prevent_default();
-                }
-
-                let index = maybe! {
-                    event
-                        .current_target()
-                        .into_jserror()?
-                        .unchecked_into::<HtmlElement>()
-                        .dataset()
-                        .get("index")
-                        .into_jserror()?
-                        .parse::<usize>()
-                        .into_jserror()
-                };
-
-                ColumnSelectorMsg::HoverActiveIndex(index.ok())
-            });
+            let ondragenter = ctx.link().callback(ColumnSelectorMsg::HoverActiveIndex);
 
             let drop = Callback::from({
                 let dragdrop = ctx.props().dragdrop.clone();
@@ -287,10 +261,22 @@ impl Component for ColumnSelector {
                     ctx.props().dragdrop,
                     ctx.props().renderer,
                     ctx.props().session,
-                    ondragenter,
+                    // ondragenter,
                     ondragend,
                     onselect
                 );
+
+                let ondragenter = ondragenter.reform(move |event: DragEvent| {
+                    // Safari does not set `relatedTarget` so this event must be allowed to
+                    // bubble so we can count entry/exit stacks to determine true
+                    // `"dragleave"`.
+                    if event.related_target().is_some() {
+                        event.stop_propagation();
+                        event.prevent_default();
+                    }
+
+                    Some(idx)
+                });
 
                 ActiveColumnProps {
                     idx,
@@ -335,46 +321,47 @@ impl Component for ColumnSelector {
                         ondragend: ondragend.clone(),
                     });
 
-            html! {
-                <>
-                    <ScrollPanel<ActiveColumnProps>
-                        id="active-columns"
-                        class={ active_classes }
-                        dragover={ dragover }
-                        dragenter={ Callback::from(dragenter_helper) }
-                        dragleave={ dragleave }
-                        drop={ drop }
-                        on_resize={ ctx.props().on_resize.clone() }
-                        on_dimensions_reset={ ctx.props().on_dimensions_reset.clone() }
-                        items={ Rc::new(active_columns.collect::<Vec<_>>()) }
-                        named_row_count={ self.named_row_count }
-                        named_row_height={ if is_pivot { 62.0 } else { 42.0 } }
-                        row_height={ if is_pivot { 40.0 } else { 20.0 } }>
-                    </ScrollPanel<ActiveColumnProps>>
-                    <div id="sub-columns">
-                        <ScrollPanel<InactiveColumnProps>
-                            id="expression-columns"
-                            items={ Rc::new(expression_columns.collect::<Vec<_>>()) }
-                            on_dimensions_reset={ ctx.props().on_dimensions_reset.clone() }
-                            row_height={ 20.0 }>
-                        </ScrollPanel<InactiveColumnProps>>
-                        <ScrollPanel<InactiveColumnProps>
-                            id="inactive-columns"
-                            on_dimensions_reset={ ctx.props().on_dimensions_reset.clone() }
-                            items={ Rc::new(inactive_columns.collect::<Vec<_>>()) }
-                            row_height={ 20.0 }>
-                        </ScrollPanel<InactiveColumnProps>>
-                    </div>
-                    <div
-                        id="add-expression"
-                        class="side_panel-action"
-                        ref={ self.add_expression_ref.clone() }
-                        onmousedown={ add_expression }>
+            // let dragenter = dragenter_helper(dragleave_ref.clone());
 
-                        <span class="psp-icon psp-icon__add"></span>
-                        <span class="psp-title__columnName">{ "New Column" }</span>
-                    </div>
-                </>
+            html_template! {
+                <ScrollPanel<ActiveColumnProps>
+                    id="active-columns"
+                    class={ active_classes }
+                    dragover={ dragover }
+                    dragenter={ drag_container.dragenter }
+                    dragleave={ drag_container.dragleave }
+                    ref={ drag_container.noderef }
+                    drop={ drop }
+                    on_resize={ ctx.props().on_resize.clone() }
+                    on_dimensions_reset={ ctx.props().on_dimensions_reset.clone() }
+                    items={ Rc::new(active_columns.collect::<Vec<_>>()) }
+                    named_row_count={ self.named_row_count }
+                    named_row_height={ if is_pivot { 62.0 } else { 42.0 } }
+                    row_height={ if is_pivot { 40.0 } else { 20.0 } }>
+                </ScrollPanel<ActiveColumnProps>>
+                <div id="sub-columns">
+                    <ScrollPanel<InactiveColumnProps>
+                        id="expression-columns"
+                        items={ Rc::new(expression_columns.collect::<Vec<_>>()) }
+                        on_dimensions_reset={ ctx.props().on_dimensions_reset.clone() }
+                        row_height={ 20.0 }>
+                    </ScrollPanel<InactiveColumnProps>>
+                    <ScrollPanel<InactiveColumnProps>
+                        id="inactive-columns"
+                        on_dimensions_reset={ ctx.props().on_dimensions_reset.clone() }
+                        items={ Rc::new(inactive_columns.collect::<Vec<_>>()) }
+                        row_height={ 20.0 }>
+                    </ScrollPanel<InactiveColumnProps>>
+                </div>
+                <div
+                    id="add-expression"
+                    class="side_panel-action"
+                    ref={ self.add_expression_ref.clone() }
+                    onmousedown={ add_expression }>
+
+                    <span class="psp-icon psp-icon__add"></span>
+                    <span class="psp-title__columnName">{ "New Column" }</span>
+                </div>
             }
         } else {
             html! {}

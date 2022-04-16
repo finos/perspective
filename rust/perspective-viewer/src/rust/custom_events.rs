@@ -7,15 +7,16 @@
 // file.
 
 use crate::config::*;
-use crate::js::plugin::JsPerspectiveViewerPlugin;
+use crate::js::JsPerspectiveViewerPlugin;
 use crate::model::*;
 use crate::renderer::*;
 use crate::session::Session;
+use crate::theme::Theme;
 use crate::utils::*;
 use crate::*;
-use std::ops::Deref;
 
 use std::cell::RefCell;
+use std::ops::Deref;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::future_to_promise;
@@ -42,25 +43,25 @@ struct CustomEventsData {
     elem: HtmlElement,
     session: Session,
     renderer: Renderer,
+    theme: Theme,
     last_dispatched: RefCell<Option<ViewerConfig>>,
 }
 
-derive_session_renderer_model!(CustomEventsData);
+derive_model!(Renderer, Session, Theme for CustomEventsData);
 
 impl CustomEvents {
-    pub fn new(elem: &HtmlElement, session: &Session, renderer: &Renderer) -> Self {
+    pub fn new(elem: &HtmlElement, session: &Session, renderer: &Renderer, theme: &Theme) -> Self {
         let data = CustomEventsDataRc(Rc::new(CustomEventsData {
             elem: elem.clone(),
             session: session.clone(),
             renderer: renderer.clone(),
+            theme: theme.clone(),
             last_dispatched: Default::default(),
         }));
 
-        let theme_sub = renderer.theme_config_updated.add_listener({
+        let theme_sub = theme.theme_config_updated.add_listener({
             clone!(data);
-            move |_| {
-                data.clone().dispatch_config_update();
-            }
+            move |_| data.clone().dispatch_config_update()
         });
 
         let settings_sub = renderer.settings_open_changed.add_listener({

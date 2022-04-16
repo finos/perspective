@@ -7,8 +7,7 @@
  *
  */
 
-const execSync = require("child_process").execSync;
-const execute = (cmd) => execSync(cmd, {stdio: "inherit"});
+const {execute} = require("./script_utils.js");
 
 const inquirer = require("inquirer");
 const fs = require("fs");
@@ -41,7 +40,7 @@ const CONFIG = new Proxy(
         write() {
             fs.writeFileSync("./.perspectiverc", this.config.join("\n"));
             if (process.env.PSP_BUILD_IMMEDIATELY) {
-                execute("node scripts/build.js");
+                execute`"node scripts/build.js"`;
             }
         }
     })(),

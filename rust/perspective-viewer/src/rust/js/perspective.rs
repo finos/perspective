@@ -6,8 +6,6 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-// use crate::*;
-
 use js_sys::Array;
 use serde::Deserialize;
 use wasm_bindgen::prelude::*;

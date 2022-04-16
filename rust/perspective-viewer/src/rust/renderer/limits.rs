@@ -8,8 +8,11 @@
 
 use crate::js::perspective::*;
 use crate::js::plugin::*;
+
+#[cfg(test)]
 use crate::*;
 
+use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
 #[cfg(test)]

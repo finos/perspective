@@ -9,9 +9,8 @@
 use crate::components::export_dropdown::*;
 use crate::custom_elements::modal::*;
 use crate::model::*;
-use crate::renderer::Renderer;
-use crate::session::Session;
 use crate::utils::*;
+use crate::*;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -19,7 +18,7 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::*;
-use yew::prelude::*;
+use yew::*;
 
 #[wasm_bindgen]
 #[derive(Clone)]
@@ -27,14 +26,8 @@ pub struct ExportDropDownMenuElement {
     modal: ModalElement<ExportDropDownMenu>,
 }
 
-impl ResizableMessage for <ExportDropDownMenu as Component>::Message {
-    fn resize(y: i32, x: i32, _: bool) -> Self {
-        ExportDropDownMenuMsg::SetPos(y, x)
-    }
-}
-
 impl ExportDropDownMenuElement {
-    pub fn new(session: Session, renderer: Renderer) -> ExportDropDownMenuElement {
+    pub fn new<A: GetViewerConfigModel>(model: &A) -> ExportDropDownMenuElement {
         let document = window().unwrap().document().unwrap();
         let dropdown = document
             .create_element("perspective-export-dropdown")
@@ -44,26 +37,22 @@ impl ExportDropDownMenuElement {
         let modal_rc: Rc<RefCell<Option<ModalElement<ExportDropDownMenu>>>> = Default::default();
 
         let callback = Callback::from({
+            let model = model.cloned();
             let modal_rc = modal_rc.clone();
-            let renderer = renderer.clone();
             move |x: ExportFile| {
                 if !x.name.is_empty() {
-                    let session = session.clone();
-                    let renderer = renderer.clone();
-                    let modal = modal_rc.borrow().clone().unwrap();
+                    clone!(modal_rc, model);
                     spawn_local(async move {
-                        let val = (&session, &renderer)
-                            .export_method_to_jsvalue(x.method)
-                            .await
-                            .unwrap();
+                        let val = model.export_method_to_jsvalue(x.method).await.unwrap();
                         download(&x.as_filename(), &val).unwrap();
-                        modal.hide().unwrap();
+                        modal_rc.borrow().clone().unwrap().hide().unwrap();
                     })
                 }
             }
         });
 
-        let props = ExportDropDownMenuProps { renderer, callback };
+        let renderer = model.renderer().clone();
+        let props = props!(ExportDropDownMenuProps { renderer, callback });
         let modal = ModalElement::new(dropdown, props, true);
         *modal_rc.borrow_mut() = Some(modal.clone());
         ExportDropDownMenuElement { modal }

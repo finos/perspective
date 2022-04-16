@@ -11,7 +11,7 @@ use super::filter_item::*;
 use super::pivot_item::*;
 use super::sort_item::*;
 use crate::config::*;
-use crate::custom_elements::filter_dropdown::FilterDropDownElement;
+use crate::custom_elements::FilterDropDownElement;
 use crate::dragdrop::*;
 use crate::model::*;
 use crate::renderer::*;
@@ -22,14 +22,14 @@ use crate::*;
 use std::rc::Rc;
 use yew::prelude::*;
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, PartialEq)]
 pub struct ConfigSelectorProps {
     pub session: Session,
     pub renderer: Renderer,
     pub dragdrop: DragDrop,
 }
 
-derive_session_renderer_model!(ConfigSelectorProps);
+derive_model!(Renderer, Session for ConfigSelectorProps);
 
 #[derive(Debug)]
 pub enum ConfigSelectorMsg {
@@ -157,7 +157,7 @@ impl Component for ConfigSelector {
                 true
             }
             ConfigSelectorMsg::Close(index, DragTarget::Sort) => {
-                let ViewConfig { mut sort, .. } = ctx.props().session.get_view_config();
+                let mut sort = ctx.props().session.get_view_config().sort.clone();
                 sort.remove(index as usize);
                 let sort = Some(sort);
                 ctx.props().update_and_render(ViewConfigUpdate {
@@ -168,7 +168,7 @@ impl Component for ConfigSelector {
                 true
             }
             ConfigSelectorMsg::Close(index, DragTarget::GroupBy) => {
-                let ViewConfig { mut group_by, .. } = ctx.props().session.get_view_config();
+                let mut group_by = ctx.props().session.get_view_config().group_by.clone();
                 group_by.remove(index as usize);
                 let group_by = Some(group_by);
                 ctx.props().update_and_render(ViewConfigUpdate {
@@ -179,7 +179,7 @@ impl Component for ConfigSelector {
                 true
             }
             ConfigSelectorMsg::Close(index, DragTarget::SplitBy) => {
-                let ViewConfig { mut split_by, .. } = ctx.props().session.get_view_config();
+                let mut split_by = ctx.props().session.get_view_config().split_by.clone();
                 split_by.remove(index as usize);
                 ctx.props().update_and_render(ViewConfigUpdate {
                     split_by: Some(split_by),
@@ -190,7 +190,7 @@ impl Component for ConfigSelector {
             }
             ConfigSelectorMsg::Close(index, DragTarget::Filter) => {
                 self.filter_dropdown.hide().unwrap();
-                let ViewConfig { mut filter, .. } = ctx.props().session.get_view_config();
+                let mut filter = ctx.props().session.get_view_config().filter.clone();
                 filter.remove(index as usize);
                 ctx.props().update_and_render(ViewConfigUpdate {
                     filter: Some(filter),
@@ -220,7 +220,7 @@ impl Component for ConfigSelector {
             }
             ConfigSelectorMsg::Drop(_, _, _, _) => false,
             ConfigSelectorMsg::TransposePivots => {
-                let mut view_config = ctx.props().session.get_view_config();
+                let mut view_config = ctx.props().session.get_view_config().clone();
                 std::mem::swap(&mut view_config.group_by, &mut view_config.split_by);
 
                 let update = ViewConfigUpdate {
@@ -233,10 +233,8 @@ impl Component for ConfigSelector {
                 true
             }
             ConfigSelectorMsg::SetFilterValue(index, input) => {
-                let ViewConfig { mut filter, .. } = ctx.props().session.get_view_config();
-
+                let mut filter = ctx.props().session.get_view_config().filter.clone();
                 filter[index].2 = FilterTerm::Scalar(Scalar::String(input));
-
                 let filter = Some(filter);
                 let update = ViewConfigUpdate {
                     filter,
@@ -256,7 +254,7 @@ impl Component for ConfigSelector {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let config = ctx.props().session.borrow_view_config();
+        let config = ctx.props().session.get_view_config();
         let transpose = ctx.link().callback(|_| ConfigSelectorMsg::TransposePivots);
 
         let class = if ctx.props().dragdrop.get_drag_column().is_some() {

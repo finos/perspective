@@ -10,13 +10,18 @@
 //! necessary for public Custom Elements.  The rest are internal components of
 //! these 4.
 
-pub mod copy_dropdown;
+mod copy_dropdown;
 pub mod export_dropdown;
 pub mod expression_editor;
 pub mod filter_dropdown;
+mod modal;
 pub mod number_column_style;
 pub mod string_column_style;
-pub mod viewer;
+mod viewer;
+
+pub use self::copy_dropdown::*;
+pub use self::modal::*;
+pub use self::viewer::*;
 
 mod active_column;
 mod aggregate_selector;

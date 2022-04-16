@@ -69,14 +69,8 @@ impl SessionMetadata {
             }
         };
 
-        let table_schema = table
-            .schema()
-            .await?
-            .into_serde::<HashMap<String, Type>>()
-            .into_jserror()?;
-
+        let table_schema = table.schema().await?.into_serde().into_jserror()?;
         let edit_port = table.make_port().await?;
-
         Ok(Self(Some(SessionMetadataState {
             column_names,
             table_schema,
@@ -89,10 +83,7 @@ impl SessionMetadata {
         &mut self,
         view_schema: &JsPerspectiveViewSchema,
     ) -> Result<(), JsValue> {
-        let view_schema = view_schema
-            .into_serde::<HashMap<String, Type>>()
-            .into_jserror()?;
-
+        let view_schema = view_schema.into_serde().into_jserror()?;
         self.as_mut().unwrap().view_schema = Some(view_schema);
         Ok(())
     }
@@ -105,15 +96,11 @@ impl SessionMetadata {
             return Err(JsValue::from("Expressions invalid"));
         }
 
-        let expression_alias = valid_recs
-            .expression_alias()
-            .into_serde::<HashMap<String, String>>()
-            .into_jserror()?;
+        let expression_alias: HashMap<String, String> =
+            valid_recs.expression_alias().into_serde().into_jserror()?;
 
-        let expression_schema = valid_recs
-            .expression_schema()
-            .into_serde::<HashMap<String, Type>>()
-            .into_jserror()?;
+        let expression_schema: HashMap<String, Type> =
+            valid_recs.expression_schema().into_serde().into_jserror()?;
 
         let expression_names = expression_schema.keys().cloned().collect::<HashSet<_>>();
 

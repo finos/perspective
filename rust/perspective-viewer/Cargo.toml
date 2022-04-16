@@ -2,7 +2,7 @@
 name = "perspective-viewer"
 version = "1.0.8"
 authors = ["Andrew Stein <steinlink@gmail.com>"]
-edition = "2018"
+edition = "2021"
 description = "A frontend for Perspective"
 repository = "https://github.com/finos/perspective"
 
@@ -19,7 +19,7 @@ default = ["new_column_selector"]
 async-std = "1.9.0"
 
 # Allow async methods to be used in traits
-async-trait = "=0.1.42"
+async-trait = "^0.1.52"
 
 # Encode persistence tokens
 base64 = "0.13.0"
@@ -64,7 +64,7 @@ wasm-bindgen = { version = "=0.2.74", features = ["serde-serialize"] }
 wasm-bindgen-futures = "0.4.20"
 
 # https://github.com/yewstack/yew/issues/2154
-yew = { git = "https://github.com/yewstack/yew", rev = "60c08736f1034f9402dddae4335584c103ffd7f0" }
+yew = { git = "https://github.com/yewstack/yew", rev = "ee6a67e3ea54e45656b87de27f0f894067d16e0d", features = ["csr"] }
 
 [dependencies.web-sys]
 version = "0.3.46"
@@ -128,6 +128,10 @@ version = "0.3"
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.13"
+
+[profile.dev]
+panic = "abort"
+opt-level = "s"
 
 [profile.release]
 panic = "abort"
