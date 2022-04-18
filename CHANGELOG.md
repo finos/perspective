@@ -1,5 +1,13 @@
 # Changelog
 
+## [v1.3.8](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.3.7...HEAD)
+
+**Fixed bugs:**
+
+- Fix `perspective-workspace` webpack compat [\#1784](https://github.com/finos/perspective/pull/1784) ([texodus](https://github.com/texodus))
+
 ## [v1.3.7](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.3.6...HEAD)

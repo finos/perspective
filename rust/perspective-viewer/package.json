@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-viewer",
-    "version": "1.3.7",
+    "version": "1.3.8",
     "description": "The `<perspective-viewer>` Custom Element, frontend for Perspective.js",
     "repository": {
         "type": "git",
@@ -54,7 +54,7 @@
         "access": "public"
     },
     "dependencies": {
-        "@finos/perspective": "^1.3.7",
+        "@finos/perspective": "^1.3.8",
         "fflate": "^0.7.2",
         "mobile-drag-drop-shadow-dom": "3.0.0",
         "monaco-editor": "0.24.0"
@@ -63,6 +63,6 @@
         "monaco-editor-webpack-plugin": "3.1.0"
     },
     "devDependencies": {
-        "@finos/perspective-test": "^1.3.7"
+        "@finos/perspective-test": "^1.3.8"
     }
 }
