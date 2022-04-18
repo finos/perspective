@@ -776,5 +776,4 @@ export async function configureRegularTable(regular, model) {
         mousedownListener.bind(model, regular)
     );
     regular.addEventListener("click", clickListener.bind(model, regular));
-    await regular.draw();
 }

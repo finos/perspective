@@ -7,7 +7,7 @@
  *
  */
 
-import {h} from "@lumino/virtualdom";
+import {h} from "@lumino/virtualdom/src";
 import {TabBar} from "@lumino/widgets/src/tabbar";
 
 export const TabBarItems = {
@@ -44,7 +44,7 @@ export class PerspectiveTabBarRenderer extends TabBar.Renderer {
             {key, className, title, style, dataset},
             this.renderConfigIcon(),
             this.renderLabel(data),
-            this.renderCloseIcon(data),
+            this.renderCloseIcon(),
             h.div({className: "divider"})
         );
     }
@@ -53,6 +53,12 @@ export class PerspectiveTabBarRenderer extends TabBar.Renderer {
         return h.div({
             className: "p-TabBar-tabConfigIcon",
             id: TabBarItems.Config,
+        });
+    }
+
+    renderCloseIcon() {
+        return h.div({
+            className: "lm-TabBar-tabCloseIcon" + " p-TabBar-tabCloseIcon",
         });
     }
 }

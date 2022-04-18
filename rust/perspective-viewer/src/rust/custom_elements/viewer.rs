@@ -573,4 +573,11 @@ impl PerspectiveViewerElement {
             Some(name) => self.renderer.get_plugin(&name),
         }
     }
+
+    /// Internal Only.
+    ///
+    /// Get this custom element model's raw pointer.
+    pub fn js_unsafe_get_model(&self) -> *const PerspectiveViewerElement {
+        std::ptr::addr_of!(*self)
+    }
 }

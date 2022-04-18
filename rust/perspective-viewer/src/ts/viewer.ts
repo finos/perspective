@@ -512,6 +512,11 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
         return plugin;
     }
 
+    async unsafe_get_model(): Promise<number> {
+        await this.load_wasm();
+        return await this.instance.js_unsafe_get_model();
+    }
+
     /**
      * Get all plugin custom element instances, in order of registration.
      *

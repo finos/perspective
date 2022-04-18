@@ -11,7 +11,7 @@ import style from "../less/workspace.less";
 import template from "../html/workspace.html";
 import {PerspectiveWorkspace, SIDE} from "./workspace";
 export {PerspectiveWorkspace} from "./workspace";
-import {MessageLoop} from "@lumino/messaging";
+import {MessageLoop} from "@lumino/messaging/src";
 import {Widget} from "@lumino/widgets/src/widget";
 import {bindTemplate} from "./workspace/utils.js";
 export {PerspectiveViewerWidget} from "./workspace/widget";
@@ -195,6 +195,7 @@ class PerspectiveWorkspaceElement extends HTMLElement {
         }
 
         this.workspace.remove_unslotted_widgets(viewers);
+        this.workspace.update_details_panel(viewers);
     }
 
     _register_light_dom_listener() {

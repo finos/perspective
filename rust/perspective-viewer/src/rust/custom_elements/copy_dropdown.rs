@@ -7,9 +7,11 @@
 // file.
 
 use super::modal::*;
+use super::viewer::PerspectiveViewerElement;
 use crate::components::{CopyDropDownMenu, CopyDropDownMenuProps};
 use crate::js::*;
 use crate::model::*;
+use crate::utils::*;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -22,22 +24,57 @@ use yew::*;
 #[wasm_bindgen]
 #[derive(Clone)]
 pub struct CopyDropDownMenuElement {
-    modal: ModalElement<CopyDropDownMenu>,
+    elem: HtmlElement,
+    modal: Rc<RefCell<Option<ModalElement<CopyDropDownMenu>>>>,
+}
+
+#[wasm_bindgen]
+impl CopyDropDownMenuElement {
+    #[wasm_bindgen(constructor)]
+    pub fn new(elem: HtmlElement) -> CopyDropDownMenuElement {
+        CopyDropDownMenuElement {
+            elem,
+            modal: Default::default(),
+        }
+    }
+
+    pub fn open(&self, target: HtmlElement) {
+        if let Some(x) = &*self.modal.borrow() {
+            x.open(target, None);
+        }
+    }
+
+    pub fn hide(&self) -> Result<(), JsValue> {
+        let borrowed = self.modal.borrow();
+        borrowed.as_ref().into_jserror()?.hide()
+    }
+
+    #[allow(clippy::not_unsafe_ptr_arg_deref)]
+    pub fn unsafe_set_model(&self, ptr: *const PerspectiveViewerElement) {
+        let model = unsafe { ptr.as_ref().unwrap() };
+        self.set_model(model);
+    }
+
+    pub fn connected_callback(&self) {}
 }
 
 impl CopyDropDownMenuElement {
-    pub fn new<A: GetViewerConfigModel>(model: &A) -> CopyDropDownMenuElement {
+    pub fn new_from_model<A: GetViewerConfigModel>(model: &A) -> CopyDropDownMenuElement {
         let document = window().unwrap().document().unwrap();
         let dropdown = document
-            .create_element("perspective-copy-dropdown")
+            .create_element("perspective-copy-menu")
             .unwrap()
             .unchecked_into::<HtmlElement>();
 
-        let modal_rc: Rc<RefCell<Option<ModalElement<CopyDropDownMenu>>>> = Default::default();
+        let elem = Self::new(dropdown);
+        elem.set_model(model);
+        elem
+    }
 
+    pub fn set_model<A: GetViewerConfigModel>(&self, model: &A) {
         let callback = Callback::from({
             let model = model.cloned();
-            let modal_rc = modal_rc.clone();
+            let modal_rc = self.modal.clone();
             move |x: ExportMethod| {
                 let js_task = model.export_method_to_jsvalue(x);
                 let copy_task = copy_to_clipboard(js_task, x.mimetype());
@@ -54,18 +91,7 @@ impl CopyDropDownMenuElement {
 
         let renderer = model.renderer().clone();
         let props = props!(CopyDropDownMenuProps { renderer, callback });
-        let modal = ModalElement::new(dropdown, props, true);
-        *modal_rc.borrow_mut() = Some(modal.clone());
-        CopyDropDownMenuElement { modal }
+        let modal = ModalElement::new(self.elem.clone(), props, true);
+        *self.modal.borrow_mut() = Some(modal);
     }
-
-    pub fn open(&self, target: HtmlElement) {
-        self.modal.open(target, None);
-    }
-
-    pub fn hide(&self) -> Result<(), JsValue> {
-        self.modal.hide()
-    }
-
-    pub fn connected_callback(&self) {}
 }

@@ -39,10 +39,6 @@ export class PerspectiveViewerWidget extends Widget {
         return this._master;
     }
 
-    get table() {
-        return this.viewer.table;
-    }
-
     set name(value) {
         if (value != null) {
             this.viewer.setAttribute("name", value);
@@ -146,6 +142,7 @@ export class PerspectiveViewerWidget extends Widget {
         if (this.viewer.parentElement) {
             this.viewer.parentElement.removeChild(this.viewer);
         }
+
         await this.viewer.delete();
     }
 }

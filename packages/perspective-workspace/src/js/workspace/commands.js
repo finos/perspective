@@ -7,24 +7,82 @@
  *
  */
 
-import {CommandRegistry} from "@lumino/commands";
+import {CommandRegistry} from "@lumino/commands/src";
 import {MODE} from "./workspace";
 
-export const createCommands = (workspace) => {
+export const createCommands = (workspace, indicator) => {
     const commands = new CommandRegistry();
 
     commands.addCommand("workspace:export", {
-        execute: (args) => args.widget.viewer.download(),
+        execute: async (args) => {
+            const menu = document.createElement("perspective-export-menu");
+            workspace.apply_indicator_theme();
+            menu.unsafe_set_model(await args.widget.viewer.unsafe_get_model());
+            menu.open(indicator);
+            args.init_overlay();
+            menu.addEventListener("blur", () => {
+                args.contextMenu.aboutToClose.emit({});
+            });
+        },
+        isEnabled: (args) => {
+            if (args.contextMenu.node.isConnected) {
+                indicator.style.top = args.contextMenu.node.offsetTop;
+                indicator.style.left = args.contextMenu.node.offsetLeft;
+            }
+
+            return true;
+        },
         iconClass: "menu-export",
-        label: "Export CSV",
+        label: "Export",
         mnemonic: 0,
     });
 
     commands.addCommand("workspace:copy", {
-        execute: (args) => args.widget.viewer.copy(),
+        execute: async (args) => {
+            const menu = document.createElement("perspective-copy-menu");
+            workspace.apply_indicator_theme();
+            menu.unsafe_set_model(await args.widget.viewer.unsafe_get_model());
+            menu.open(indicator);
+            args.init_overlay();
+            menu.addEventListener("blur", () => {
+                args.contextMenu.aboutToClose.emit({});
+            });
+        },
         iconClass: "menu-copy",
-        label: "Copy To Clipboard",
+        label: "Copy",
         mnemonic: 0,
+    });
+
+    commands.addCommand("workspace:new", {
+        execute: (args) => {
+            const widget = workspace._createWidgetAndNode({
+                config: {table: args.table},
+            });
+
+            workspace.dockpanel.addWidget(widget, {
+                mode: "split-right",
+                ref: args.widget,
+            });
+        },
+        iconClass: "menu-new-tables",
+        label: (args) => args.table,
+    });
+
+    commands.addCommand("workspace:newview", {
+        execute: async (args) => {
+            const config = await args.target_widget.save();
+            const widget = workspace._createWidgetAndNode({
+                config,
+            });
+
+            workspace.dockpanel.addWidget(widget, {
+                mode: "split-right",
+                ref: args.widget,
+            });
+        },
+        iconClass: "menu-new-tables",
+        isVisible: (args) => args.target_widget.title.label !== "",
+        label: (args) => args.target_widget.title.label,
     });
 
     commands.addCommand("workspace:reset", {
@@ -83,6 +141,15 @@ export const createCommands = (workspace) => {
             workspace.dockpanel.mode === "single-document",
         iconClass: "menu-minimize",
         label: () => "Minimize",
+        mnemonic: 0,
+    });
+
+    commands.addCommand("workspace:close", {
+        execute: (args) => {
+            args.widget.close();
+        },
+        iconClass: "menu-close",
+        label: () => "Close",
         mnemonic: 0,
     });
 
