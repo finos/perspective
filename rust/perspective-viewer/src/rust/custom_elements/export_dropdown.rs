@@ -20,25 +20,62 @@ use wasm_bindgen_futures::spawn_local;
 use web_sys::*;
 use yew::*;
 
+use super::viewer::PerspectiveViewerElement;
+
 #[wasm_bindgen]
 #[derive(Clone)]
 pub struct ExportDropDownMenuElement {
-    modal: ModalElement<ExportDropDownMenu>,
+    elem: HtmlElement,
+    modal: Rc<RefCell<Option<ModalElement<ExportDropDownMenu>>>>,
+}
+
+#[wasm_bindgen]
+impl ExportDropDownMenuElement {
+    #[wasm_bindgen(constructor)]
+    pub fn new(elem: HtmlElement) -> ExportDropDownMenuElement {
+        ExportDropDownMenuElement {
+            elem,
+            modal: Default::default(),
+        }
+    }
+
+    pub fn open(&self, target: HtmlElement) {
+        if let Some(x) = &*self.modal.borrow() {
+            x.open(target, None);
+        }
+    }
+
+    pub fn hide(&self) -> Result<(), JsValue> {
+        let borrowed = self.modal.borrow();
+        borrowed.as_ref().into_jserror()?.hide()
+    }
+
+    #[allow(clippy::not_unsafe_ptr_arg_deref)]
+    pub fn unsafe_set_model(&self, ptr: *const PerspectiveViewerElement) {
+        let model = unsafe { ptr.as_ref().unwrap() };
+        self.set_model(model);
+    }
+
+    pub fn connected_callback(&self) {}
 }
 
 impl ExportDropDownMenuElement {
-    pub fn new<A: GetViewerConfigModel>(model: &A) -> ExportDropDownMenuElement {
+    pub fn new_from_model<A: GetViewerConfigModel>(model: &A) -> ExportDropDownMenuElement {
         let document = window().unwrap().document().unwrap();
         let dropdown = document
-            .create_element("perspective-export-dropdown")
+            .create_element("perspective-export-menu")
             .unwrap()
             .unchecked_into::<HtmlElement>();
 
-        let modal_rc: Rc<RefCell<Option<ModalElement<ExportDropDownMenu>>>> = Default::default();
+        let elem = Self::new(dropdown);
+        elem.set_model(model);
+        elem
+    }
 
+    pub fn set_model<A: GetViewerConfigModel>(&self, model: &A) {
         let callback = Callback::from({
             let model = model.cloned();
-            let modal_rc = modal_rc.clone();
+            let modal_rc = self.modal.clone();
             move |x: ExportFile| {
                 if !x.name.is_empty() {
                     clone!(modal_rc, model);
@@ -53,18 +90,7 @@ impl ExportDropDownMenuElement {
 
         let renderer = model.renderer().clone();
         let props = props!(ExportDropDownMenuProps { renderer, callback });
-        let modal = ModalElement::new(dropdown, props, true);
-        *modal_rc.borrow_mut() = Some(modal.clone());
-        ExportDropDownMenuElement { modal }
+        let modal = ModalElement::new(self.elem.clone(), props, true);
+        *self.modal.borrow_mut() = Some(modal);
     }
-
-    pub fn open(&self, target: HtmlElement) {
-        self.modal.open(target, None);
-    }
-
-    pub fn hide(&self) -> Result<(), JsValue> {
-        self.modal.hide()
-    }
-
-    pub fn connected_callback(&self) {}
 }

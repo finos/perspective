@@ -37,7 +37,7 @@ impl DebounceMutex {
     ) -> Result<JsValue, JsValue> {
         let next = self.0.id.get() + 1;
         let mut last = self.0.mutex.lock().await;
-        if *last <= next {
+        if *last < next {
             let next = self.0.id.get() + 1;
             self.0.id.set(next);
             let result = f.await;

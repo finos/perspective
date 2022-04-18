@@ -37,6 +37,8 @@ export * from "./migrate";
 
 import "./number-column-style";
 import "./string-column-style";
+import "./copy_menu";
+import "./export_menu";
 import "mobile-drag-drop-shadow-dom";
 
 import {HTMLPerspectiveViewerPluginElement} from "./plugin";

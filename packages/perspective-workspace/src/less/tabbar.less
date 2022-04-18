@@ -14,6 +14,7 @@
     border: none;
     color: var(--workspace-secondary--color, #666);
     cursor: pointer;
+    padding: 0px;
 }
 
 .p-TabBar-tabLabel[value="[untitled]"] {
@@ -94,11 +95,10 @@
 }
 
 .divider {
-    left: 14px;
+    left: 32px;
     bottom: 0;
     position: absolute;
-    right: 14px;
-    display: none;
+    right: 32px;
 
     height: 1px;
     background-color: var(--workspace-tabbar--border-color, #eaeaea);
@@ -108,10 +108,6 @@
 .p-TabBar-tab.p-mod-hidden {
     display: flex !important;
     opacity: 0.5;
-}
-
-.p-TabBar-tab.p-mod-hidden .divider {
-    display: none;
 }
 
 .p-TabBar-tab.p-mod-current .divider {
@@ -191,7 +187,7 @@
 }
 
 .p-TabBar-content > .p-TabBar-tab.p-mod-current.settings_open {
-    border-width: 1px !important;
+    border-width: 1px 1px 0px 1px !important;
     border-color: var(--workspace-tabbar--border-color, #ddd);
     .p-TabBar-tabToolbar {
         display: flex;
@@ -202,7 +198,6 @@
         background-color: var(--workspace-tabbar--border-color, #ddd);
     }
     &:last-child:first-child .divider {
-        background: none;
         transition: none;
     }
 }
@@ -230,6 +225,7 @@
     max-height: 26px !important;
     transform: none !important;
     transition: color 0.2s ease-out;
+    border-bottom-width: 0px !important;
 }
 
 .p-TabBar-content > .p-TabBar-tab {
@@ -275,7 +271,7 @@
 
 .p-TabBar-tabConfigIcon {
     padding-left: 8px;
-    padding-right: 4px !important;
+    padding-right: 8px !important;
 }
 
 .p-TabBar-tabLoadingIcon {
@@ -310,8 +306,7 @@
 
 .perspective-workspace.context-menu * .p-TabBar,
 .perspective-workspace.context-menu
-    .p-DockPanel
-    .p-Widget:not(.context-focus)
+    .p-Widget.workspace-widget:not(.context-focus)
     .viewer-container {
     opacity: 0.2;
 }

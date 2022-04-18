@@ -35,15 +35,14 @@
         "@finos/perspective-viewer": "^1.3.6",
         "@finos/perspective-viewer-d3fc": "^1.3.6",
         "@finos/perspective-viewer-datagrid": "^1.3.6",
-        "@jupyter-widgets/base": "^3.0.0 || ^4.0.0",
-        "@jupyterlab/application": "^3.0.0",
-        "@lumino/application": "^1.7.3",
-        "@lumino/widgets": "^1.9.3"
+        "@jupyter-widgets/base": "^4.1.0",
+        "@jupyterlab/application": "^3.3.2",
+        "@lumino/application": "^1.27.0",
+        "@lumino/widgets": "1.31.1"
     },
     "devDependencies": {
         "@finos/perspective-build": "^1.3.6",
-        "@finos/perspective-test": "^1.3.6",
-        "@jupyter-widgets/base-manager": "^1.0.0-alpha.0"
+        "@finos/perspective-test": "^1.3.6"
     },
     "jupyterlab": {
         "extension": true

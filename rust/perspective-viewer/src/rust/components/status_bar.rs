@@ -140,14 +140,14 @@ impl Component for StatusBar {
             StatusBarMsg::Export => {
                 let target = self.export_ref.cast::<HtmlElement>().unwrap();
                 self.export_dropdown
-                    .get_or_insert_with(|| ExportDropDownMenuElement::new(ctx.props()))
+                    .get_or_insert_with(|| ExportDropDownMenuElement::new_from_model(ctx.props()))
                     .open(target);
                 false
             }
             StatusBarMsg::Copy => {
                 let target = self.copy_ref.cast::<HtmlElement>().unwrap();
                 self.copy_dropdown
-                    .get_or_insert_with(|| CopyDropDownMenuElement::new(ctx.props()))
+                    .get_or_insert_with(|| CopyDropDownMenuElement::new_from_model(ctx.props()))
                     .open(target);
                 false
             }

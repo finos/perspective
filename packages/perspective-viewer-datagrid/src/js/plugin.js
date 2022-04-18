@@ -139,12 +139,12 @@ export class PerspectiveViewerDatagridPluginElement extends HTMLElement {
     }
 
     async draw(view) {
-        if (!this.isConnected) {
+        await this.activate(view);
+        if (!this.isConnected || this.offsetParent == null) {
             return;
         }
 
         const old_sizes = this._save_column_size_overrides();
-        await this.activate(view);
         let viewer = this.parentElement;
         const draw = this.datagrid.draw({invalid_columns: true});
         if (!this.model._preserve_focus_state) {
@@ -172,6 +172,10 @@ export class PerspectiveViewerDatagridPluginElement extends HTMLElement {
     }
 
     async resize() {
+        if (!this.isConnected || this.offsetParent == null) {
+            return;
+        }
+
         if (this._initialized) {
             await this.datagrid.draw();
         }
