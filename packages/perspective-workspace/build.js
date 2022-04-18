@@ -29,7 +29,9 @@ const BUILD = [
             InlineCSSPlugin(),
             IgnoreCSSPlugin(),
             IgnoreFontsPlugin(),
-            NodeModulesExternal(),
+
+            // Inlining `lumino` and importing the `.ts` source saves _50kb_
+            NodeModulesExternal("@lumino"),
         ],
         loader: {
             ".html": "text",
