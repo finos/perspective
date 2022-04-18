@@ -1,5 +1,19 @@
 # Changelog
 
+## [v1.3.7](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.3.6...HEAD)
+
+**Implemented enhancements:**
+
+- `perspective-workspace` Context Menu Update [\#1783](https://github.com/finos/perspective/pull/1783) ([texodus](https://github.com/texodus))
+
+**Merged pull requests:**
+
+- Add Github dark mode logo to `README.md`  [\#1782](https://github.com/finos/perspective/pull/1782) ([texodus](https://github.com/texodus))
+- Upgrade `yew` [\#1776](https://github.com/finos/perspective/pull/1776) ([texodus](https://github.com/texodus))
+- Make toolbar icons configurable [\#1767](https://github.com/finos/perspective/pull/1767) ([kevinhinterlong](https://github.com/kevinhinterlong))
+
 ## [v1.3.6](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.3.5...HEAD)

@@ -1,7 +1,7 @@
 {
     "name": "promo",
     "private": true,
-    "version": "1.3.6",
+    "version": "1.3.7",
     "description": "An puppeteer-guided demo of Perspective's functionality, as seen on Github.",
     "scripts": {
         "dev": "webpack-dev-server --open",
@@ -13,14 +13,14 @@
     "keywords": [],
     "license": "Apache-2.0",
     "dependencies": {
-        "@finos/perspective": "^1.3.6",
-        "@finos/perspective-viewer": "^1.3.6",
-        "@finos/perspective-viewer-d3fc": "^1.3.6",
-        "@finos/perspective-viewer-datagrid": "^1.3.6",
-        "@finos/perspective-workspace": "^1.3.6"
+        "@finos/perspective": "^1.3.7",
+        "@finos/perspective-viewer": "^1.3.7",
+        "@finos/perspective-viewer-d3fc": "^1.3.7",
+        "@finos/perspective-viewer-datagrid": "^1.3.7",
+        "@finos/perspective-workspace": "^1.3.7"
     },
     "devDependencies": {
-        "@finos/perspective-webpack-plugin": "^1.3.6",
+        "@finos/perspective-webpack-plugin": "^1.3.7",
         "http-server": "^0.11.1",
         "npm-run-all": "^4.1.3",
         "rimraf": "^2.5.2"
