@@ -35,7 +35,6 @@ if (
     document.createElement("perspective-export-menu").constructor ===
     HTMLElement
 ) {
-    console.log("WIP");
     window.customElements.define(
         "perspective-export-menu",
         HTMLPerspectiveExportDropDownMenuElement

@@ -34,7 +34,6 @@ class HTMLPerspectiveCopyDropDownMenuElement extends HTMLElement {
 if (
     document.createElement("perspective-copy-menu").constructor === HTMLElement
 ) {
-    console.log("WIP");
     window.customElements.define(
         "perspective-copy-menu",
         HTMLPerspectiveCopyDropDownMenuElement
