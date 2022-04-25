@@ -1,5 +1,14 @@
 # Changelog
 
+## [v1.3.9](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.3.8...HEAD)
+
+**Fixed bugs:**
+
+- Fix `perspective-workspace` detach error [\#1788](https://github.com/finos/perspective/pull/1788) ([texodus](https://github.com/texodus))
+- Fix spurious logging [\#1785](https://github.com/finos/perspective/pull/1785) ([texodus](https://github.com/texodus))
+
 ## [v1.3.8](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.3.7...HEAD)
