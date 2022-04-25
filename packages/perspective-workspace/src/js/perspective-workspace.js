@@ -206,32 +206,26 @@ class PerspectiveWorkspaceElement extends HTMLElement {
     }
 
     connectedCallback() {
-        this.side = this.side || SIDE.LEFT;
+        if (!this.side) {
+            this.side = this.side || SIDE.LEFT;
 
-        const container = this.shadowRoot.querySelector("#container");
-        this.workspace = new PerspectiveWorkspace(this, {side: this.side});
+            const container = this.shadowRoot.querySelector("#container");
+            this.workspace = new PerspectiveWorkspace(this, {side: this.side});
 
-        this._register_light_dom_listener();
+            this._register_light_dom_listener();
 
-        // TODO: check we only insert one of these
-        if (!this._injectStyle) {
-            this._injectStyle = document.createElement("style");
-            this._injectStyle.toggleAttribute("injected", true);
-            this._injectStyle.innerHTML = injectedStyles;
+            MessageLoop.sendMessage(this.workspace, Widget.Msg.BeforeAttach);
+            container.insertBefore(this.workspace.node, null);
+            MessageLoop.sendMessage(this.workspace, Widget.Msg.AfterAttach);
+
+            window.onresize = this.workspace.update.bind(this.workspace);
         }
-
-        document.head.appendChild(this._injectStyle);
-
-        MessageLoop.sendMessage(this.workspace, Widget.Msg.BeforeAttach);
-        container.insertBefore(this.workspace.node, null);
-        MessageLoop.sendMessage(this.workspace, Widget.Msg.AfterAttach);
-
-        window.onresize = this.workspace.update.bind(this.workspace);
-    }
-
-    disconnectedCallback() {
-        document.head.removeChild(this._injectStyle);
     }
 }
+
+const _injectStyle = document.createElement("style");
+_injectStyle.toggleAttribute("injected", true);
+_injectStyle.innerHTML = injectedStyles;
+document.head.appendChild(_injectStyle);
 
 bindTemplate(template, style)(PerspectiveWorkspaceElement);

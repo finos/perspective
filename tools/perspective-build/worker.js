@@ -19,7 +19,7 @@ exports.WorkerPlugin = function WorkerPlugin(inline) {
                     assetNames: "[name]",
                     minify: !process.env.PSP_DEBUG,
                     bundle: true,
-                    sourcemap: true,
+                    sourcemap: false,
                 });
 
                 return {
@@ -156,9 +156,9 @@ exports.WorkerPlugin = function WorkerPlugin(inline) {
             await args.pluginData.subbuild;
             contents = await fs.promises.readFile(args.pluginData.outfile);
 
-            // Copy the sourcemaps also
-            const mapfile = args.pluginData.outfile + ".map";
-            sourcemap = await fs.promises.readFile(mapfile);
+            // // Copy the sourcemaps also
+            // const mapfile = args.pluginData.outfile + ".map";
+            // sourcemap = await fs.promises.readFile(mapfile);
 
             const outpath =
                 build.initialOptions.outdir ||
@@ -168,10 +168,10 @@ exports.WorkerPlugin = function WorkerPlugin(inline) {
                 fs.mkdirSync(outpath, {recursive: true});
             }
 
-            await fs.promises.writeFile(
-                path.join(outpath, path.basename(args.path) + ".map"),
-                sourcemap
-            );
+            // await fs.promises.writeFile(
+            //     path.join(outpath, path.basename(args.path) + ".map"),
+            //     sourcemap
+            // );
 
             return {
                 contents,
