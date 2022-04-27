@@ -1,5 +1,13 @@
 # Changelog
 
+## [v1.3.10](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.3.9...HEAD)
+
+**Fixed bugs:**
+
+- Remove 'treemaps' persistent token for d3fc plugin [\#1789](https://github.com/finos/perspective/pull/1789) ([texodus](https://github.com/texodus))
+
 ## [v1.3.9](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.3.8...HEAD)

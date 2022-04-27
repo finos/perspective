@@ -1,7 +1,7 @@
 {
     "name": "workspace",
     "private": true,
-    "version": "1.3.9",
+    "version": "1.3.10",
     "description": "An example app built using `@finos/perspective-workspace`.",
     "scripts": {
         "start": "webpack serve --open",
@@ -10,14 +10,14 @@
     "keywords": [],
     "license": "Apache-2.0",
     "dependencies": {
-        "@finos/perspective": "^1.3.9",
-        "@finos/perspective-viewer": "^1.3.9",
-        "@finos/perspective-viewer-d3fc": "^1.3.9",
-        "@finos/perspective-viewer-datagrid": "^1.3.9",
-        "@finos/perspective-workspace": "^1.3.9"
+        "@finos/perspective": "^1.3.10",
+        "@finos/perspective-viewer": "^1.3.10",
+        "@finos/perspective-viewer-d3fc": "^1.3.10",
+        "@finos/perspective-viewer-datagrid": "^1.3.10",
+        "@finos/perspective-workspace": "^1.3.10"
     },
     "devDependencies": {
-        "@finos/perspective-webpack-plugin": "^1.3.9",
+        "@finos/perspective-webpack-plugin": "^1.3.10",
         "http-server": "^0.11.1",
         "npm-run-all": "^4.1.3",
         "rimraf": "^2.5.2"
