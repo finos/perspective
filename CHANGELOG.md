@@ -1,5 +1,23 @@
 # Changelog
 
+## [v1.3.11](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.3.10...HEAD)
+
+**Implemented enhancements:**
+
+- Add support for LargeUtf8 arrow column type [\#1796](https://github.com/finos/perspective/pull/1796) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- Fix datagrid error when `resetThemes()` is called while hidden [\#1795](https://github.com/finos/perspective/pull/1795) ([texodus](https://github.com/texodus))
+- Allow attempt to create workers from file protocol for e.g. electron [\#1794](https://github.com/finos/perspective/pull/1794) ([texodus](https://github.com/texodus))
+- Fix `sum` aggregate to force re-agg for expression columns [\#1793](https://github.com/finos/perspective/pull/1793) ([texodus](https://github.com/texodus))
+
+**Closed issues:**
+
+- Add ignore to group by selection  [\#1791](https://github.com/finos/perspective/issues/1791)
+
 ## [v1.3.10](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.3.9...HEAD)
