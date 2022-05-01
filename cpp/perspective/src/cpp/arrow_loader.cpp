@@ -80,7 +80,8 @@ namespace apachearrow {
 
     t_dtype
     convert_type(const std::string& src) {
-        if (src == "dictionary" || src == "utf8" || src == "binary") {
+        if (src == "dictionary" || src == "utf8" || src == "binary"
+            || src == "large_utf8") {
             return DTYPE_STR;
         } else if (src == "bool") {
             return DTYPE_BOOL;
@@ -297,6 +298,23 @@ namespace apachearrow {
                            << indices->type()->name() << "'" << std::endl;
                         PSP_COMPLAIN_AND_ABORT(ss.str());
                     }
+                }
+            } break;
+            case arrow::LargeStringType::type_id: {
+                std::shared_ptr<arrow::LargeStringArray> scol
+                    = std::static_pointer_cast<arrow::LargeStringArray>(src);
+                const arrow::LargeStringArray::offset_type* offsets
+                    = scol->raw_value_offsets();
+                const uint8_t* values = scol->value_data()->data();
+
+                std::string elem;
+
+                for (std::uint32_t i = 0; i < len; ++i) {
+                    arrow::LargeStringArray::offset_type bidx = offsets[i];
+                    std::size_t es = offsets[i + 1] - bidx;
+                    elem.assign(
+                        reinterpret_cast<const char*>(values) + bidx, es);
+                    dest->set_nth(offset + i, elem);
                 }
             } break;
             case arrow::BinaryType::type_id:
