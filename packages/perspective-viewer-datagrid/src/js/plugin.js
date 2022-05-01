@@ -139,7 +139,10 @@ export class PerspectiveViewerDatagridPluginElement extends HTMLElement {
     }
 
     async draw(view) {
-        await this.activate(view);
+        if (this.parentElement) {
+            await this.activate(view);
+        }
+
         if (!this.isConnected || this.offsetParent == null) {
             return;
         }
