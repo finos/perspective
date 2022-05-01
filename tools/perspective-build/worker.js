@@ -134,7 +134,7 @@ exports.WorkerPlugin = function WorkerPlugin(inline) {
                     export const initialize = async function () {
                         const code = await code_promise;
                         if (window.location.protocol.startsWith("file")) {
-                            return run_single_threaded(code, "file:// protocol does not support Web Workers");
+                            console.warn(code, "file:// protocol does not support Web Workers");
                         }
 
                         try {
@@ -142,6 +142,7 @@ exports.WorkerPlugin = function WorkerPlugin(inline) {
                             const url = URL.createObjectURL(blob);
                             return new Worker(url, {type: "module"});
                         } catch (e) {
+                            console.warn("Failed to instantiate worker, falling back to single-threaded runtime", e);
                             return run_single_threaded(code, e);
                         }
                     };
