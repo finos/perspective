@@ -7,9 +7,10 @@
 // file.
 
 use super::containers::dropdown_menu::*;
-use super::containers::modal_anchor::*;
+use super::modal::*;
 use crate::model::*;
 use crate::renderer::*;
+use crate::utils::*;
 use crate::*;
 
 use js_intern::*;
@@ -19,16 +20,23 @@ use yew::prelude::*;
 pub type CopyDropDownMenuMsg = DropDownMenuMsg;
 pub type CopyDropDownMenuItem = DropDownMenuItem<ExportMethod>;
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, PartialEq)]
 pub struct CopyDropDownMenuProps {
     pub renderer: Renderer,
     pub callback: Callback<ExportMethod>,
+
+    #[prop_or_default]
+    weak_link: WeakScope<CopyDropDownMenu>,
 }
 
-#[derive(Default)]
 pub struct CopyDropDownMenu {
-    top: i32,
-    left: i32,
+    _sub: Subscription,
+}
+
+impl ModalLink<CopyDropDownMenu> for CopyDropDownMenuProps {
+    fn weak_link(&self) -> &'_ WeakScope<CopyDropDownMenu> {
+        &self.weak_link
+    }
 }
 
 impl Component for CopyDropDownMenu {
@@ -39,7 +47,6 @@ impl Component for CopyDropDownMenu {
         let plugin = ctx.props().renderer.get_active_plugin().unwrap();
         let has_render = js_sys::Reflect::has(&plugin, js_intern!("render")).unwrap();
         html_template! {
-            <ModalAnchor top={ self.top } left={ self.left } />
             <DropDownMenu<ExportMethod>
                 values={ Rc::new(get_menu_items(has_render)) }
                 callback={ ctx.props().callback.clone() }>
@@ -47,18 +54,19 @@ impl Component for CopyDropDownMenu {
         }
     }
 
-    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
-        match msg {
-            CopyDropDownMenuMsg::SetPos(top, left) => {
-                self.top = top;
-                self.left = left;
-                true
-            }
-        }
+    fn update(&mut self, _ctx: &Context<Self>, _msg: Self::Message) -> bool {
+        true
     }
 
-    fn create(_ctx: &Context<Self>) -> Self {
-        CopyDropDownMenu::default()
+    fn create(ctx: &Context<Self>) -> Self {
+        ctx.set_modal_link();
+        let _sub = ctx
+            .props()
+            .renderer
+            .plugin_changed
+            .add_listener(ctx.link().callback(|_| ()));
+
+        CopyDropDownMenu { _sub }
     }
 }
 

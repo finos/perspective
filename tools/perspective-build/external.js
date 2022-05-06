@@ -1,11 +1,13 @@
-exports.NodeModulesExternal = function NodeModulesExternal() {
+exports.NodeModulesExternal = function NodeModulesExternal(whitelist) {
     function setup(build) {
         build.onResolve({filter: /^[A-Za-z0-9\@]/}, (args) => {
-            return {
-                path: args.path,
-                external: true,
-                namespace: "skip-node-modules",
-            };
+            if (!whitelist || !args.path.startsWith(whitelist)) {
+                return {
+                    path: args.path,
+                    external: true,
+                    namespace: "skip-node-modules",
+                };
+            }
         });
     }
 

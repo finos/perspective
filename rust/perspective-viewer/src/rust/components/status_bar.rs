@@ -12,26 +12,31 @@ use crate::custom_elements::copy_dropdown::*;
 use crate::custom_elements::export_dropdown::*;
 use crate::renderer::*;
 use crate::session::*;
+use crate::theme::Theme;
 use crate::utils::*;
 use crate::*;
 
+use wasm_bindgen::prelude::*;
 use web_sys::*;
 use yew::prelude::*;
 
 #[cfg(test)]
 use crate::utils::WeakScope;
 
-#[derive(Properties, Clone)]
+#[derive(Properties)]
 pub struct StatusBarProps {
     pub id: String,
     pub on_reset: Callback<bool>,
     pub session: Session,
     pub renderer: Renderer,
+    pub theme: Theme,
 
     #[cfg(test)]
     #[prop_or_default]
     pub weak_link: WeakScope<StatusBar>,
 }
+
+derive_model!(Renderer, Session, Theme for StatusBarProps);
 
 impl PartialEq for StatusBarProps {
     fn eq(&self, other: &Self) -> bool {
@@ -79,16 +84,16 @@ impl Component for StatusBar {
                 .view_created
                 .add_listener(ctx.link().callback(|_| StatusBarMsg::SetIsUpdating(false))),
             ctx.props()
-                .renderer
+                .theme
                 .theme_config_updated
                 .add_listener(ctx.link().callback(StatusBarMsg::SetThemeConfig)),
         ];
 
         // Fetch initial theme
-        let renderer = ctx.props().renderer.clone();
+        let theme = ctx.props().theme.clone();
         let on_theme = ctx.link().callback(StatusBarMsg::SetThemeConfig);
         let _ = promisify_ignore_view_delete(async move {
-            on_theme.emit(renderer.get_theme_config().await?);
+            on_theme.emit(theme.get_config().await?);
             Ok(JsValue::UNDEFINED)
         });
 
@@ -122,10 +127,10 @@ impl Component for StatusBar {
                 self.themes = themes;
                 should_render
             }
-            StatusBarMsg::SetTheme(theme) => {
-                clone!(ctx.props().renderer, ctx.props().session);
+            StatusBarMsg::SetTheme(theme_name) => {
+                clone!(ctx.props().renderer, ctx.props().session, ctx.props().theme);
                 let _ = promisify_ignore_view_delete(async move {
-                    renderer.set_theme_name(Some(&theme)).await?;
+                    theme.set_name(Some(&theme_name)).await?;
                     let view = session.get_view().into_jserror()?;
                     renderer.restyle_all(&view).await
                 });
@@ -135,20 +140,14 @@ impl Component for StatusBar {
             StatusBarMsg::Export => {
                 let target = self.export_ref.cast::<HtmlElement>().unwrap();
                 self.export_dropdown
-                    .get_or_insert_with(|| {
-                        clone!(ctx.props().renderer, ctx.props().session);
-                        ExportDropDownMenuElement::new(session, renderer)
-                    })
+                    .get_or_insert_with(|| ExportDropDownMenuElement::new_from_model(ctx.props()))
                     .open(target);
                 false
             }
             StatusBarMsg::Copy => {
                 let target = self.copy_ref.cast::<HtmlElement>().unwrap();
                 self.copy_dropdown
-                    .get_or_insert_with(|| {
-                        clone!(ctx.props().renderer, ctx.props().session);
-                        CopyDropDownMenuElement::new(session, renderer)
-                    })
+                    .get_or_insert_with(|| CopyDropDownMenuElement::new_from_model(ctx.props()))
                     .open(target);
                 false
             }
@@ -182,8 +181,8 @@ impl Component for StatusBar {
                     .map(SelectItem::Option)
                     .collect::<Vec<_>>();
 
-                if values.len() > 1 {
-                    html! {
+                html! {
+                    if values.len() > 1 {
                         <span id="theme" class="button">
                             <Select<String>
                                 id="theme_selector"
@@ -193,8 +192,6 @@ impl Component for StatusBar {
                             </Select<String>>
                         </span>
                     }
-                } else {
-                    html! {}
                 }
             }
         };
@@ -240,14 +237,16 @@ impl Component for StatusBar {
 impl StatusBar {
     const fn status_class_name(&self, stats: &Option<TableStats>) -> &'static str {
         match stats {
-            Some(TableStats {
-                num_rows: Some(_),
-                virtual_rows: Some(_),
-                is_pivot: true,
-            })
-            | Some(TableStats {
-                num_rows: Some(_), ..
-            }) => "connected",
+            Some(
+                TableStats {
+                    num_rows: Some(_),
+                    virtual_rows: Some(_),
+                    is_pivot: true,
+                }
+                | TableStats {
+                    num_rows: Some(_), ..
+                },
+            ) => "connected",
             Some(TableStats { num_rows: None, .. }) => "initializing",
             None => "uninitialized",
         }

@@ -7,7 +7,7 @@
 // file.
 
 use crate::config::*;
-use crate::custom_elements::filter_dropdown::*;
+use crate::custom_elements::*;
 use crate::dragdrop::*;
 use crate::model::*;
 use crate::renderer::*;
@@ -55,7 +55,7 @@ impl PartialEq for FilterItemProps {
     }
 }
 
-derive_session_renderer_model!(FilterItemProps);
+derive_model!(Renderer, Session for FilterItemProps);
 
 impl DragDropListItemProps for FilterItemProps {
     type Item = Filter;
@@ -96,8 +96,7 @@ impl FilterItemProps {
                     None
                 }
             }
-            (Type::Datetime, FilterTerm::Scalar(Scalar::Float(x)))
-            | (Type::Datetime, FilterTerm::Scalar(Scalar::DateTime(x))) => {
+            (Type::Datetime, FilterTerm::Scalar(Scalar::Float(x) | Scalar::DateTime(x))) => {
                 posix_to_utc_str(*x).ok()
             }
             (Type::Bool, FilterTerm::Scalar(Scalar::Bool(x))) => {
@@ -147,7 +146,7 @@ impl FilterItemProps {
     /// # Arguments
     /// - `op` The new `FilterOp`.
     fn update_filter_op(&self, op: FilterOp) {
-        let ViewConfig { mut filter, .. } = self.session.get_view_config();
+        let mut filter = self.session.get_view_config().filter.clone();
         let filter_item = &mut filter.get_mut(self.idx).expect("Filter on no column");
         filter_item.1 = op;
         let update = ViewConfigUpdate {
@@ -163,7 +162,7 @@ impl FilterItemProps {
     /// # Arguments
     /// - `val` The new filter value.
     fn update_filter_input(&self, val: String) {
-        let ViewConfig { mut filter, .. } = self.session.get_view_config();
+        let mut filter = self.session.get_view_config().filter.clone();
         let filter_item = &mut filter.get_mut(self.idx).expect("Filter on no column");
         let filter_input = match filter_item.1 {
             FilterOp::In => Some(FilterTerm::Array(
@@ -454,43 +453,38 @@ impl Component for FilterItem {
             .map(SelectItem::Option)
             .collect::<Vec<_>>();
 
-        html! {
-            <>
-                <span
-                    draggable="true"
-                    ref={ dragref }
-                    ondragstart={ dragstart }
-                    ondragend={ dragend }>
-                    {
-                        filter.0.to_owned()
-                    }
-                </span>
-                <FilterOpSelector
-                    class="filterop-selector"
-                    values={ filter_ops }
-                    selected={ filter.1 }
-                    on_select={ select }>
-                </FilterOpSelector>
+        html_template! {
+            <span
+                draggable="true"
+                ref={ dragref }
+                ondragstart={ dragstart }
+                ondragend={ dragend }>
                 {
-                    if matches!(&filter.1, FilterOp::IsNotNull | FilterOp::IsNull) {
-                        html! {}
-                    } else if let Some(Type::Bool) = col_type {
-                        html! {
-                            { input_elem }
-                        }
-                    } else {
-                        html! {
-                            <label
-                                class={ format!("input-sizer {}", type_class) }
-                                data-value={ format!("{}", filter.2) }>
-                                {
-                                    input_elem
-                                }
-                            </label>
-                        }
-                    }
+                    filter.0.to_owned()
                 }
-            </>
+            </span>
+            <FilterOpSelector
+                class="filterop-selector"
+                values={ filter_ops }
+                selected={ filter.1 }
+                on_select={ select }>
+            </FilterOpSelector>
+
+            if !matches!(&filter.1, FilterOp::IsNotNull | FilterOp::IsNull) {
+                if let Some(Type::Bool) = col_type {
+                    {
+                        input_elem
+                    }
+                } else {
+                    <label
+                        class={ format!("input-sizer {}", type_class) }
+                        data-value={ format!("{}", filter.2) }>
+                        {
+                            input_elem
+                        }
+                    </label>
+                }
+            }
         }
     }
 }

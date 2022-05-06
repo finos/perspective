@@ -33,6 +33,7 @@ const EXCLUDED_SETTINGS = [
     "size",
     "colorStyles",
     "agg_paths",
+    "treemaps",
 ];
 
 function getD3FCStyles() {

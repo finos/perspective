@@ -8,7 +8,7 @@
  */
 
 import "@finos/perspective-viewer";
-import {Widget} from "@lumino/widgets";
+import {Widget} from "@lumino/widgets/src/widget";
 
 export class PerspectiveViewerWidget extends Widget {
     constructor({viewer, node}) {
@@ -37,10 +37,6 @@ export class PerspectiveViewerWidget extends Widget {
 
     get master() {
         return this._master;
-    }
-
-    get table() {
-        return this.viewer.table;
     }
 
     set name(value) {
@@ -146,6 +142,7 @@ export class PerspectiveViewerWidget extends Widget {
         if (this.viewer.parentElement) {
             this.viewer.parentElement.removeChild(this.viewer);
         }
+
         await this.viewer.delete();
     }
 }

@@ -15,7 +15,7 @@ use yew::prelude::*;
 
 pub struct PivotItem {}
 
-#[derive(Properties, Clone)]
+#[derive(Properties)]
 pub struct PivotItemProps {
     pub column: String,
     pub dragdrop: DragDrop,

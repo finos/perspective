@@ -6,37 +6,11 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use crate::js::*;
 use crate::*;
-use std::fmt::Display;
+
 use std::rc::Rc;
 use yew::prelude::*;
-
-#[derive(Clone, Copy, PartialEq)]
-pub enum MimeType {
-    TextPlain,
-    ImagePng,
-}
-
-impl Default for MimeType {
-    fn default() -> Self {
-        Self::TextPlain
-    }
-}
-
-impl From<MimeType> for JsValue {
-    fn from(x: MimeType) -> Self {
-        Self::from(format!("{}", x))
-    }
-}
-
-impl Display for MimeType {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
-        fmt.write_str(match self {
-            MimeType::TextPlain => "text/plain",
-            MimeType::ImagePng => "image/png",
-        })
-    }
-}
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum ExportMethod {

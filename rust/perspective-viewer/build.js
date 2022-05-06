@@ -13,6 +13,9 @@ const {NodeModulesExternal} = require("@finos/perspective-build/external");
 const {ReplacePlugin} = require("@finos/perspective-build/replace");
 const {build} = require("@finos/perspective-build/build");
 
+const IS_DEBUG =
+    !!process.env.PSP_DEBUG || process.argv.indexOf("--debug") >= 0;
+
 function _compile(fileNames) {
     const ts = require("typescript");
     const path = require.resolve("@finos/perspective-viewer/tsconfig.json");
@@ -125,7 +128,7 @@ const INHERIT = {
 
 async function build_all() {
     await Promise.all(PREBUILD.map(build)).catch(() => process.exit(1));
-    const cargo_debug = process.env.PSP_DEBUG ? "" : "--release";
+    const cargo_debug = IS_DEBUG ? "" : "--release";
 
     // Compile rust
     execSync(
@@ -142,36 +145,38 @@ async function build_all() {
     }
 
     // Generate wasm-bindgen bindings
-    const wasm_bindgen_debug = process.env.PSP_DEBUG ? "--debug" : "";
-    const profile_dir = process.env.PSP_DEBUG ? "debug" : "release";
+    const wasm_bindgen_debug = IS_DEBUG ? "--debug" : "";
+    const profile_dir = IS_DEBUG ? "debug" : "release";
     const UNOPT_PATH = `build/wasm32-unknown-unknown/${profile_dir}/perspective_viewer.wasm`;
     execSync(
         `wasm-bindgen ${UNOPT_PATH} ${wasm_bindgen_debug} --out-dir dist/pkg --typescript --target web`,
         INHERIT
     );
 
-    // Find `wasm-opt`
-    const WASM_OPT = `../../tools/perspective-build/lib/wasm-opt`;
-    if (!fs.existsSync(WASM_OPT)) {
-        console.log(`No \`wasm-opt\` found, installing`);
-        await download_wasm_opt();
+    if (!IS_DEBUG) {
+        // Find `wasm-opt`
+        const WASM_OPT = `../../tools/perspective-build/lib/wasm-opt`;
+        if (!fs.existsSync(WASM_OPT)) {
+            console.log(`No \`wasm-opt\` found, installing`);
+            await download_wasm_opt();
+        }
+
+        // Optimize wasm
+        const OPT_PATH = `dist/pkg/perspective_viewer_bg.wasm`;
+        const WASM_OPT_OPTIONS = [
+            `-lmu`,
+            `--dce`,
+            `--strip-producers`,
+            `--strip-target-features`,
+            `--strip-debug`,
+        ].join(" ");
+
+        execSync(
+            `${WASM_OPT} -Oz ${WASM_OPT_OPTIONS} -o wasm-opt.wasm ${OPT_PATH}`,
+            INHERIT
+        );
+        execSync(`mv wasm-opt.wasm ${OPT_PATH}`, INHERIT);
     }
-
-    // Optimize wasm
-    const OPT_PATH = `dist/pkg/perspective_viewer_bg.wasm`;
-    const WASM_OPT_OPTIONS = [
-        `-lmu`,
-        `--dce`,
-        `--strip-producers`,
-        `--strip-target-features`,
-        `--strip-debug`,
-    ].join(" ");
-
-    execSync(
-        `${WASM_OPT} -Oz ${WASM_OPT_OPTIONS} -o wasm-opt.wasm ${OPT_PATH}`,
-        INHERIT
-    );
-    execSync(`mv wasm-opt.wasm ${OPT_PATH}`, INHERIT);
 
     // Compress wasm
     const wasm = fs.readFileSync("dist/pkg/perspective_viewer_bg.wasm");

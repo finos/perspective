@@ -20,7 +20,7 @@ use yew::prelude::*;
 
 pub struct ScrollPanel<T>
 where
-    T: Into<Html> + Clone + PartialEq + 'static,
+    T: Into<Html> + PartialEq + 'static,
 {
     viewport_ref: NodeRef,
     viewport_height: f64,
@@ -33,10 +33,10 @@ where
     _resize_sub: Option<Subscription>,
 }
 
-#[derive(Properties, Clone)]
+#[derive(Properties)]
 pub struct ScrollPanelProps<T>
 where
-    T: Into<Html> + Clone + PartialEq + 'static,
+    T: Into<Html> + PartialEq + 'static,
 {
     pub items: Rc<Vec<T>>,
     pub row_height: f64,
@@ -75,7 +75,7 @@ where
 
 impl<T> PartialEq for ScrollPanelProps<T>
 where
-    T: Into<Html> + Clone + PartialEq + 'static,
+    T: Into<Html> + PartialEq + 'static,
 {
     fn eq(&self, _rhs: &ScrollPanelProps<T>) -> bool {
         false
@@ -216,10 +216,13 @@ where
     /// potentially updated height.
     fn changed(&mut self, ctx: &Context<Self>) -> bool {
         let total_height = ctx.props().total_height(ctx);
-        self.needs_rerender = (self.total_height - total_height).abs() > 0.1f64;
+        self.needs_rerender =
+            self.needs_rerender || (self.total_height - total_height).abs() > 0.1f64;
         self.total_height = total_height;
-        ctx.link()
-            .send_message(ScrollPanelMsg::CalculateWindowContent);
+        ctx.link().send_message_batch(vec![
+            ScrollPanelMsg::UpdateViewportDimensions,
+            ScrollPanelMsg::CalculateWindowContent,
+        ]);
 
         false
     }

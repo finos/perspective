@@ -17,7 +17,7 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::future_to_promise;
 use web_sys::*;
-use yew::prelude::*;
+use yew::*;
 
 #[wasm_bindgen]
 #[derive(Clone)]
@@ -29,12 +29,6 @@ pub struct FilterDropDownElement {
     target: Rc<RefCell<Option<HtmlElement>>>,
 }
 
-impl ResizableMessage for <FilterDropDown as Component>::Message {
-    fn resize(y: i32, x: i32, _: bool) -> Self {
-        FilterDropDownMsg::SetPos(y, x)
-    }
-}
-
 impl FilterDropDownElement {
     pub fn new(session: Session) -> Self {
         let document = window().unwrap().document().unwrap();
@@ -44,7 +38,8 @@ impl FilterDropDownElement {
             .unchecked_into::<HtmlElement>();
 
         let column: Rc<RefCell<Option<(usize, String)>>> = Rc::new(RefCell::new(None));
-        let modal = ModalElement::new(dropdown, (), false);
+        let props = props!(FilterDropDownProps {});
+        let modal = ModalElement::new(dropdown, props, false);
         let values = Rc::new(RefCell::new(None));
         Self {
             modal,

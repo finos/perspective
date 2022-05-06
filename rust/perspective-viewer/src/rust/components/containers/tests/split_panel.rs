@@ -11,13 +11,13 @@ use web_sys::HtmlElement;
 use yew::prelude::*;
 
 use super::super::split_panel::{SplitPanel, SplitPanelMsg};
-use crate::utils::WeakScope;
+use crate::utils::{await_animation_frame, WeakScope};
 use crate::*;
 
 wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
-pub fn test_resizes_larger() {
+pub async fn test_resizes_larger() {
     let link: WeakScope<SplitPanel> = WeakScope::default();
     let panel_div = NodeRef::default();
     test_html! {
@@ -27,10 +27,12 @@ pub fn test_resizes_larger() {
         </SplitPanel>
     };
 
+    await_animation_frame().await.unwrap();
     let split_panel = link.borrow().clone().unwrap();
     split_panel.send_message(SplitPanelMsg::StartResizing(0, 10));
     split_panel.send_message(SplitPanelMsg::MoveResizing(100));
     split_panel.send_message(SplitPanelMsg::StopResizing);
+    await_animation_frame().await.unwrap();
 
     let width = panel_div.cast::<HtmlElement>().unwrap().offset_width();
     assert_eq!(width, 90);
@@ -47,13 +49,16 @@ pub async fn test_resizes_narrower() {
         </SplitPanel>
     };
 
+    await_animation_frame().await.unwrap();
     let split_panel = link.borrow().clone().unwrap();
     split_panel.send_message(SplitPanelMsg::StartResizing(0, 10));
     split_panel.send_message(SplitPanelMsg::MoveResizing(100));
     split_panel.send_message(SplitPanelMsg::StopResizing);
+    await_animation_frame().await.unwrap();
     split_panel.send_message(SplitPanelMsg::StartResizing(0, 100));
     split_panel.send_message(SplitPanelMsg::MoveResizing(50));
     split_panel.send_message(SplitPanelMsg::StopResizing);
+    await_animation_frame().await.unwrap();
 
     let width = panel_div.cast::<HtmlElement>().unwrap().offset_width();
     assert_eq!(width, 40);
@@ -70,6 +75,7 @@ pub async fn test_double_click_reset() {
         </SplitPanel>
     };
 
+    await_animation_frame().await.unwrap();
     let split_panel = link.borrow().clone().unwrap();
     split_panel.send_message(SplitPanelMsg::StartResizing(0, 10));
     split_panel.send_message(SplitPanelMsg::MoveResizing(100));

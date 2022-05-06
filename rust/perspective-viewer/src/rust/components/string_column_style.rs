@@ -7,8 +7,9 @@
 // file.
 
 use super::color_selector::*;
-use super::containers::modal_anchor::*;
 use super::containers::radio_list::RadioList;
+use super::modal::{ModalLink, SetModalLink};
+use crate::utils::WeakScope;
 use crate::*;
 
 use serde::{Deserialize, Serialize};
@@ -130,7 +131,6 @@ pub struct StringColumnStyleDefaultConfig {
 
 pub enum StringColumnStyleMsg {
     Reset(StringColumnStyleConfig),
-    SetPos(i32, i32),
     FormatEnabled(bool),
     FormatChanged(FormatMode),
     ColorModeEnabled(bool),
@@ -138,7 +138,7 @@ pub enum StringColumnStyleMsg {
     ColorChanged(String),
 }
 
-#[derive(Properties, Clone)]
+#[derive(Properties)]
 pub struct StringColumnStyleProps {
     #[prop_or_default]
     pub config: StringColumnStyleConfig,
@@ -148,6 +148,15 @@ pub struct StringColumnStyleProps {
 
     #[prop_or_default]
     pub on_change: Callback<StringColumnStyleConfig>,
+
+    #[prop_or_default]
+    weak_link: WeakScope<StringColumnStyle>,
+}
+
+impl ModalLink<StringColumnStyle> for StringColumnStyleProps {
+    fn weak_link(&self) -> &'_ WeakScope<StringColumnStyle> {
+        &self.weak_link
+    }
 }
 
 impl PartialEq for StringColumnStyleProps {
@@ -178,8 +187,6 @@ impl StringColumnStyle {
 /// rather than its props (which has two version of this data itself, the
 /// JSON serializable config record and the defaults record).
 pub struct StringColumnStyle {
-    top: i32,
-    left: i32,
     config: StringColumnStyleConfig,
 }
 
@@ -188,9 +195,8 @@ impl Component for StringColumnStyle {
     type Properties = StringColumnStyleProps;
 
     fn create(ctx: &Context<Self>) -> Self {
+        ctx.set_modal_link();
         StringColumnStyle {
-            top: 0,
-            left: 0,
             config: ctx.props().config.clone(),
         }
     }
@@ -199,11 +205,6 @@ impl Component for StringColumnStyle {
         match msg {
             StringColumnStyleMsg::Reset(config) => {
                 self.config = config;
-                true
-            }
-            StringColumnStyleMsg::SetPos(top, left) => {
-                self.top = top;
-                self.left = left;
                 true
             }
             StringColumnStyleMsg::FormatEnabled(val) => {
@@ -285,7 +286,7 @@ impl Component for StringColumnStyle {
                 html_template! {
                     <span class="row">{ "Foreground" }</span>
                     <div class="row section inner_section">
-                        <ColorSelector with self.color_props(ctx) />
+                        <ColorSelector ..self.color_props(ctx) />
                     </div>
                 }
             } else {
@@ -299,7 +300,7 @@ impl Component for StringColumnStyle {
                 html_template! {
                     <span class="row">{ "Background" }</span>
                     <div class="row section inner_section">
-                        <ColorSelector with self.color_props(ctx) />
+                        <ColorSelector ..self.color_props(ctx) />
                     </div>
                 }
             } else {
@@ -312,7 +313,7 @@ impl Component for StringColumnStyle {
             html_template! {
                 <span class="row">{ "Series" }</span>
                 <div class="row section inner_section">
-                    <ColorSelector with self.color_props(ctx) />
+                    <ColorSelector ..self.color_props(ctx) />
                 </div>
             }
         } else {
@@ -325,7 +326,6 @@ impl Component for StringColumnStyle {
             <style>
                 { &CSS }
             </style>
-            <ModalAnchor top={ self.top } left={ self.left } />
             <div id="column-style-container">
                 <div>
                     <label class="indent">{ "Format" }</label>

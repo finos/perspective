@@ -41,7 +41,7 @@ impl PartialEq for InactiveColumnProps {
     }
 }
 
-derive_session_renderer_model!(InactiveColumnProps);
+derive_model!(Renderer, Session for InactiveColumnProps);
 
 impl InactiveColumnProps {
     /// Add a column to the active columns, which corresponds to the `columns`
@@ -52,7 +52,7 @@ impl InactiveColumnProps {
     ///   with respect to `columns`.
     /// - `shift` whether to toggle or select this column.
     pub fn activate_column(&self, name: String, shift: bool) {
-        let ViewConfig { mut columns, .. } = self.session.get_view_config();
+        let mut columns = self.session.get_view_config().columns.clone();
         let max_cols = self
             .renderer
             .metadata()
@@ -91,11 +91,9 @@ impl InactiveColumnProps {
 
 impl From<InactiveColumnProps> for yew::Html {
     fn from(props: InactiveColumnProps) -> Self {
+        let key = props.name.to_owned();
         html! {
-            html! {
-                <InactiveColumn with props>
-                </InactiveColumn>
-            }
+            <InactiveColumn key={ key } ..props></InactiveColumn>
         }
     }
 }
@@ -183,21 +181,16 @@ impl Component for InactiveColumn {
                             ctx.props().name.clone()
                         }
                     </span>
-                    {
-                        if is_expression {
-                            html! {
-                                <ExpressionToolbar
-                                    session={ ctx.props().session.clone() }
-                                    renderer={ ctx.props().renderer.clone() }
-                                    dragdrop={ ctx.props().dragdrop.clone() }
-                                    name={ ctx.props().name.clone() }
-                                    add_expression_ref={ self.add_expression_ref.clone() }>
 
-                                </ExpressionToolbar>
-                            }
-                        } else {
-                            html! {}
-                        }
+                    if is_expression {
+                        <ExpressionToolbar
+                            session={ ctx.props().session.clone() }
+                            renderer={ ctx.props().renderer.clone() }
+                            dragdrop={ ctx.props().dragdrop.clone() }
+                            name={ ctx.props().name.clone() }
+                            add_expression_ref={ self.add_expression_ref.clone() }>
+
+                        </ExpressionToolbar>
                     }
                 </div>
             </div>

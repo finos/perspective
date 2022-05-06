@@ -7,8 +7,9 @@
 // file.
 
 use super::color_range_selector::*;
-use super::containers::modal_anchor::*;
 use super::containers::radio_list::RadioList;
+use super::modal::*;
+use crate::utils::WeakScope;
 use crate::*;
 
 use serde::{Deserialize, Serialize};
@@ -18,9 +19,6 @@ use wasm_bindgen::*;
 use web_sys::*;
 use yew::prelude::*;
 use yew::*;
-
-#[cfg(test)]
-use crate::utils::WeakScope;
 
 pub static CSS: &str = include_str!("../../../build/css/column-style.css");
 
@@ -126,7 +124,6 @@ pub struct NumberColumnStyleDefaultConfig {
 
 pub enum NumberColumnStyleMsg {
     Reset(NumberColumnStyleConfig, NumberColumnStyleDefaultConfig),
-    SetPos(i32, i32),
     FixedChanged(String),
     ColorEnabledChanged(bool),
     PosColorChanged(String),
@@ -138,7 +135,7 @@ pub enum NumberColumnStyleMsg {
 /// A `ColumnStyle` component is mounted to the window anchored at the screen
 /// position of `elem`.  It needs two input configs, the current configuration
 /// object and a default version without `Option<>`
-#[derive(Properties, Clone)]
+#[derive(Properties)]
 pub struct NumberColumnStyleProps {
     #[prop_or_default]
     pub config: NumberColumnStyleConfig,
@@ -149,9 +146,14 @@ pub struct NumberColumnStyleProps {
     #[prop_or_default]
     pub on_change: Callback<NumberColumnStyleConfig>,
 
-    #[cfg(test)]
     #[prop_or_default]
     pub weak_link: WeakScope<NumberColumnStyle>,
+}
+
+impl ModalLink<NumberColumnStyle> for NumberColumnStyleProps {
+    fn weak_link(&self) -> &'_ WeakScope<NumberColumnStyle> {
+        &self.weak_link
+    }
 }
 
 impl PartialEq for NumberColumnStyleProps {
@@ -166,8 +168,6 @@ impl NumberColumnStyleProps {}
 /// rather than its props (which has two version of this data itself, the
 /// JSON serializable config record and the defaults record).
 pub struct NumberColumnStyle {
-    top: i32,
-    left: i32,
     config: NumberColumnStyleConfig,
     color_mode: NumberColorMode,
     pos_color: String,
@@ -180,7 +180,7 @@ impl Component for NumberColumnStyle {
     type Properties = NumberColumnStyleProps;
 
     fn create(ctx: &Context<Self>) -> Self {
-        enable_weak_link_test!(ctx.props(), ctx.link());
+        ctx.set_modal_link();
         NumberColumnStyle::reset(&ctx.props().config, &ctx.props().default_config)
     }
 
@@ -195,11 +195,6 @@ impl Component for NumberColumnStyle {
             NumberColumnStyleMsg::Reset(config, default_config) => {
                 let mut new = NumberColumnStyle::reset(&config, &default_config);
                 std::mem::swap(self, &mut new);
-                true
-            }
-            NumberColumnStyleMsg::SetPos(top, left) => {
-                self.top = top;
-                self.left = left;
                 true
             }
             NumberColumnStyleMsg::FixedChanged(fixed) => {
@@ -332,7 +327,7 @@ impl Component for NumberColumnStyle {
             html_template! {
                 <span class="row">{ "Foreground" }</span>
                 <div class="row section inner_section">
-                    <ColorRangeSelector with self.color_props(ctx) />
+                    <ColorRangeSelector ..self.color_props(ctx) />
                 </div>
             }
         } else {
@@ -345,7 +340,7 @@ impl Component for NumberColumnStyle {
             html_template! {
                 <span class="row">{ "Background" }</span>
                 <div class="row section inner_section">
-                    <ColorRangeSelector with self.color_props(ctx) />
+                    <ColorRangeSelector ..self.color_props(ctx) />
                 </div>
             }
         } else {
@@ -358,8 +353,8 @@ impl Component for NumberColumnStyle {
             html_template! {
                 <span class="row">{ "Gradient" }</span>
                 <div class="row section inner_section">
-                    <ColorRangeSelector with self.color_props(ctx) />
-                    <MaxValueChooser with self.max_value_props(ctx) />
+                    <ColorRangeSelector ..self.color_props(ctx) />
+                    <MaxValueChooser ..self.max_value_props(ctx) />
                 </div>
             }
         } else {
@@ -372,8 +367,8 @@ impl Component for NumberColumnStyle {
             html_template! {
                 <span class="row">{ "Bar" }</span>
                 <div class="row section inner_section">
-                    <ColorRangeSelector with self.color_props(ctx) />
-                    <MaxValueChooser with self.max_value_props(ctx) />
+                    <ColorRangeSelector ..self.color_props(ctx) />
+                    <MaxValueChooser ..self.max_value_props(ctx) />
                 </div>
             }
         } else {
@@ -382,60 +377,57 @@ impl Component for NumberColumnStyle {
             }
         };
 
-        html! {
-            <>
-                <style>
-                    { &CSS }
-                </style>
-                <ModalAnchor top={ self.top } left={ self.left } />
-                <div id="column-style-container">
-                    <div>
-                        <label id="fixed-examples" class="indent">{
-                            self.make_fixed_text(ctx)
-                        }</label>
-                    </div>
-                    <div class="row section">
-                        <input type="checkbox" checked=true disabled=true/>
-                        <input
-                            id="fixed-param"
-                            class="parameter"
-                            type="number"
-                            min="0"
-                            step="1"
-                            value={ fixed_value }
-                            oninput={ fixed_oninput }/>
-                    </div>
-                    <div>
-                        <label class="indent">{ "Color" }</label>
-                    </div>
-                    <div>
-                        <input
-                            id="color-selected"
-                            type="checkbox"
-                            oninput={ color_enabled_oninput }
-                            checked={ self.config.number_color_mode.is_enabled() } />
-                        <RadioList<NumberColorMode>
-                            class="indent"
-                            disabled={ !self.config.number_color_mode.is_enabled() }
-                            values={ select_values }
-                            selected={ selected_color_mode }
-                            on_change={ color_mode_changed } >
-
-                            { foreground_controls }
-                            { background_controls }
-                            { gradient_controls }
-                            { bar_controls }
-
-                        </RadioList<NumberColorMode>>
-                    </div>
-
+        html_template! {
+            <style>
+                { &CSS }
+            </style>
+            <div id="column-style-container">
+                <div>
+                    <label id="fixed-examples" class="indent">{
+                        self.make_fixed_text(ctx)
+                    }</label>
                 </div>
-            </>
+                <div class="row section">
+                    <input type="checkbox" checked=true disabled=true/>
+                    <input
+                        id="fixed-param"
+                        class="parameter"
+                        type="number"
+                        min="0"
+                        step="1"
+                        value={ fixed_value }
+                        oninput={ fixed_oninput }/>
+                </div>
+                <div>
+                    <label class="indent">{ "Color" }</label>
+                </div>
+                <div>
+                    <input
+                        id="color-selected"
+                        type="checkbox"
+                        oninput={ color_enabled_oninput }
+                        checked={ self.config.number_color_mode.is_enabled() } />
+                    <RadioList<NumberColorMode>
+                        class="indent"
+                        disabled={ !self.config.number_color_mode.is_enabled() }
+                        values={ select_values }
+                        selected={ selected_color_mode }
+                        on_change={ color_mode_changed } >
+
+                        { foreground_controls }
+                        { background_controls }
+                        { gradient_controls }
+                        { bar_controls }
+
+                    </RadioList<NumberColorMode>>
+                </div>
+
+            </div>
         }
     }
 }
 
-#[derive(Properties, PartialEq, Clone)]
+#[derive(Properties, PartialEq)]
 pub struct MaxValueChooserProps {
     max_value: f64,
     on_max_value: Callback<String>,
@@ -551,8 +543,6 @@ impl NumberColumnStyle {
         };
 
         NumberColumnStyle {
-            top: 0,
-            left: 0,
             config,
             color_mode,
             pos_color,

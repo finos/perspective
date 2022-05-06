@@ -6,27 +6,32 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+//! `Renderer` owns the JavaScript Custom Element plugin, as well as
+//! associated state such as column restrictions and `plugin_config`
+//! (de-)serialization.
+//!
+//! `Renderer` wraps a smart pointer and is meant to be shared among many
+//! references throughout the application.
+
 mod activate;
 mod limits;
 mod plugin_store;
+mod registry;
 mod render_timer;
-mod theme_store;
-
-pub mod registry;
 
 use self::activate::*;
 use self::limits::*;
 use self::plugin_store::*;
+pub use self::registry::*;
 use self::render_timer::*;
-use self::theme_store::*;
 use crate::config::*;
 use crate::js::perspective::*;
 use crate::js::plugin::*;
 use crate::session::*;
 use crate::utils::*;
 use crate::*;
+
 use futures::future::join_all;
-use registry::*;
 use std::cell::{Ref, RefCell};
 use std::future::Future;
 use std::ops::Deref;
@@ -42,17 +47,14 @@ pub struct Renderer(Rc<RendererData>);
 pub struct RendererData {
     plugin_data: RefCell<RendererMutData>,
     draw_lock: DebounceMutex,
-    _session: Session,
     pub plugin_changed: PubSub<JsPerspectiveViewerPlugin>,
     pub limits_changed: PubSub<RenderLimits>,
     pub settings_open_changed: PubSub<bool>,
-    pub theme_config_updated: PubSub<(Vec<String>, Option<usize>)>,
 }
 
 /// Mutable state
 pub struct RendererMutData {
     viewer_elem: HtmlElement,
-    theme_store: ThemeStore,
     metadata: ViewConfigRequirements,
     plugin_store: PluginStore,
     plugins_idx: Option<usize>,
@@ -83,31 +85,25 @@ impl Deref for RendererData {
 }
 
 impl Renderer {
-    pub fn new(viewer_elem: HtmlElement, _session: Session) -> Self {
-        let theme_store = ThemeStore::new(&viewer_elem);
+    pub fn new(viewer_elem: &HtmlElement) -> Self {
         Self(Rc::new(RendererData {
             plugin_data: RefCell::new(RendererMutData {
-                viewer_elem,
-                theme_store,
+                viewer_elem: viewer_elem.clone(),
                 metadata: ViewConfigRequirements::default(),
                 plugin_store: PluginStore::default(),
                 plugins_idx: None,
                 timer: MovingWindowRenderTimer::default(),
                 is_settings_open: false,
             }),
-            _session,
             draw_lock: Default::default(),
             plugin_changed: Default::default(),
             settings_open_changed: Default::default(),
             limits_changed: Default::default(),
-            theme_config_updated: Default::default(),
         }))
     }
 
     pub async fn reset(&self) {
         self.0.borrow_mut().plugins_idx = None;
-        let store = self.0.borrow().theme_store.clone();
-        store.reset(None).await;
         if let Ok(plugin) = self.get_active_plugin() {
             plugin.restore(&js_object!());
         }
@@ -158,20 +154,6 @@ impl Renderer {
         Ok(result.unwrap())
     }
 
-    pub async fn get_theme_config(&self) -> Result<(Vec<String>, Option<usize>), JsValue> {
-        let mut theme_store = self.0.borrow().theme_store.clone();
-        let themes = theme_store.get_themes().await?;
-        let index = self
-            .0
-            .borrow()
-            .viewer_elem
-            .get_attribute("theme")
-            .and_then(|x| themes.iter().position(|y| y == &x))
-            .or(if !themes.is_empty() { Some(0) } else { None });
-
-        Ok((themes, index))
-    }
-
     pub fn is_settings_open(&self) -> bool {
         self.0.borrow().is_settings_open
     }
@@ -183,52 +165,12 @@ impl Renderer {
             self.0
                 .borrow()
                 .viewer_elem
-                .toggle_attribute_with_force("settings", open_state)
-                .unwrap();
+                .toggle_attribute_with_force("settings", open_state)?;
 
             self.settings_open_changed.emit_all(open_state);
         }
 
         Ok(open_state)
-    }
-
-    /// Returns the currently applied theme, or the default theme if no theme
-    /// has been set and themes are detected in the `document`, or `None` if
-    /// no themes are available.
-    pub async fn get_theme_name(&self) -> Option<String> {
-        let (themes, index) = self.get_theme_config().await.ok()?;
-        index.and_then(|x| themes.get(x).cloned())
-    }
-
-    fn set_theme_attribute(&self, theme: Option<&str>) -> Result<(), JsValue> {
-        if let Some(theme) = theme {
-            self.0.borrow().viewer_elem.set_attribute("theme", theme)
-        } else {
-            self.0.borrow().viewer_elem.remove_attribute("theme")
-        }
-    }
-
-    /// Set the theme by name, or `None` for the default theme.
-    pub async fn set_theme_name(&self, theme: Option<&str>) -> Result<(), JsValue> {
-        let (themes, _) = self.get_theme_config().await?;
-        let index = if let Some(theme) = theme {
-            self.set_theme_attribute(Some(theme))?;
-            themes.iter().position(|x| x == theme)
-        } else if !themes.is_empty() {
-            self.set_theme_attribute(themes.get(0).map(|x| x.as_str()))?;
-            Some(0)
-        } else {
-            self.set_theme_attribute(None)?;
-            None
-        };
-
-        self.theme_config_updated.emit_all((themes, index));
-        Ok(())
-    }
-
-    pub async fn reset_theme_names(&self, themes: Option<Vec<String>>) {
-        let store = self.0.borrow().theme_store.clone();
-        store.reset(themes).await
     }
 
     pub async fn restyle_all(&self, view: &JsPerspectiveView) -> Result<JsValue, JsValue> {
@@ -251,6 +193,11 @@ impl Renderer {
         self.get_active_plugin().unwrap().set_render_warning(false);
     }
 
+    /// Set the active plugin to the plugin registerd as `name`, or the default
+    /// plugin if `None` is provided.
+    ///
+    /// # Arguments
+    /// - `update` The `PluginUpdate` behavior to set.
     pub fn update_plugin(&self, update: PluginUpdate) -> Result<bool, JsValue> {
         match &update {
             PluginUpdate::Missing => Ok(false),
@@ -259,14 +206,9 @@ impl Renderer {
         }
     }
 
-    /// Set the active plugin to the plugin registerd as `name`, or the default
-    /// plugin if `None` is provided.
-    ///
-    /// # Arguments
-    /// - `name` The optional plugin name to set as active.
-    pub fn set_plugin(&self, name: Option<&str>) -> Result<bool, JsValue> {
+    fn set_plugin(&self, name: Option<&str>) -> Result<bool, JsValue> {
         let default_plugin_name = PLUGIN_REGISTRY.default_plugin_name();
-        let name = name.unwrap_or_else(|| default_plugin_name.as_str());
+        let name = name.unwrap_or(default_plugin_name.as_str());
         let idx = self
             .find_plugin_idx(name)
             .ok_or_else(|| JsValue::from(format!("Unkown plugin '{}'", name)))?;

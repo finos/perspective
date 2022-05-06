@@ -11,8 +11,8 @@ import style from "../less/workspace.less";
 import template from "../html/workspace.html";
 import {PerspectiveWorkspace, SIDE} from "./workspace";
 export {PerspectiveWorkspace} from "./workspace";
-import {MessageLoop} from "@lumino/messaging";
-import {Widget} from "@lumino/widgets";
+import {MessageLoop} from "@lumino/messaging/src";
+import {Widget} from "@lumino/widgets/src/widget";
 import {bindTemplate} from "./workspace/utils.js";
 export {PerspectiveViewerWidget} from "./workspace/widget";
 
@@ -195,6 +195,7 @@ class PerspectiveWorkspaceElement extends HTMLElement {
         }
 
         this.workspace.remove_unslotted_widgets(viewers);
+        this.workspace.update_details_panel(viewers);
     }
 
     _register_light_dom_listener() {
@@ -205,32 +206,26 @@ class PerspectiveWorkspaceElement extends HTMLElement {
     }
 
     connectedCallback() {
-        this.side = this.side || SIDE.LEFT;
+        if (!this.side) {
+            this.side = this.side || SIDE.LEFT;
 
-        const container = this.shadowRoot.querySelector("#container");
-        this.workspace = new PerspectiveWorkspace(this, {side: this.side});
+            const container = this.shadowRoot.querySelector("#container");
+            this.workspace = new PerspectiveWorkspace(this, {side: this.side});
 
-        this._register_light_dom_listener();
+            this._register_light_dom_listener();
 
-        // TODO: check we only insert one of these
-        if (!this._injectStyle) {
-            this._injectStyle = document.createElement("style");
-            this._injectStyle.toggleAttribute("injected", true);
-            this._injectStyle.innerHTML = injectedStyles;
+            MessageLoop.sendMessage(this.workspace, Widget.Msg.BeforeAttach);
+            container.insertBefore(this.workspace.node, null);
+            MessageLoop.sendMessage(this.workspace, Widget.Msg.AfterAttach);
+
+            window.onresize = this.workspace.update.bind(this.workspace);
         }
-
-        document.head.appendChild(this._injectStyle);
-
-        MessageLoop.sendMessage(this.workspace, Widget.Msg.BeforeAttach);
-        container.insertBefore(this.workspace.node, null);
-        MessageLoop.sendMessage(this.workspace, Widget.Msg.AfterAttach);
-
-        window.onresize = this.workspace.update.bind(this.workspace);
-    }
-
-    disconnectedCallback() {
-        document.head.removeChild(this._injectStyle);
     }
 }
+
+const _injectStyle = document.createElement("style");
+_injectStyle.toggleAttribute("injected", true);
+_injectStyle.innerHTML = injectedStyles;
+document.head.appendChild(_injectStyle);
 
 bindTemplate(template, style)(PerspectiveWorkspaceElement);

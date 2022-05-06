@@ -60,7 +60,6 @@
                 text-transform: none;
                 margin-right: 4px;
                 font-family: var(--button--font-family, inherit);
-                font-display: block;
                 vertical-align: bottom;
             }
 
@@ -75,7 +74,6 @@
 
         span.icon {
             font-family: var(--button--font-family, inherit);
-            font-display: block;
             height: 100%;
             line-height: 36px;
             margin: 0;
@@ -167,6 +165,7 @@
                 }
 
                 & > .dropdown-width-container {
+                    overflow: visible;
                     display: inline;
                     pointer-events: all;
                     & > select {

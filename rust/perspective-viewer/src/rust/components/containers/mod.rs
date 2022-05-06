@@ -11,7 +11,6 @@
 
 pub mod dragdrop_list;
 pub mod dropdown_menu;
-pub mod modal_anchor;
 pub mod radio_list;
 pub mod scroll_panel;
 pub mod select;

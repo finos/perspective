@@ -9,6 +9,13 @@
 
 @import "@finos/perspective-viewer/src/themes/material.less";
 
+
+perspective-workspace,
+perspective-workspace[theme="Material Light"],
+perspective-indicator[theme="Material Light"] {
+    --theme-name: "Material Light";
+}
+
 perspective-workspace {
     .perspective-workspace-material-base();
 }
@@ -42,6 +49,10 @@ perspective-viewer[theme="Material Light"].workspace-master-widget {
     --menu-reset--content: "autorenew";
     --menu-link--content: "link";
     --menu-unlink--content: "link_off";
+    --menu-newmenu--content: "add";
+    --menu-close--content: "close";
+    --menu-new--content: "description";
+    --menu-newview--content: "file_copy";
 }
 
 .p-Menu {

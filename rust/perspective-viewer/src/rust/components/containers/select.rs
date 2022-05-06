@@ -22,7 +22,7 @@ pub enum SelectMsg<T> {
     SelectedChanged(T),
 }
 
-#[derive(Properties, Clone)]
+#[derive(Properties)]
 pub struct SelectProps<T>
 where
     T: Clone + Display + FromStr + PartialEq + 'static,
@@ -129,6 +129,7 @@ where
                             let selected = *value == ctx.props().selected;
                             html! {
                                 <option
+                                    key={ format!("{}", value) }
                                     selected={ selected }
                                     value={ format!("{}", value) }>
                                     { format!("{}", value) }
@@ -136,27 +137,28 @@ where
                             }
                         },
                         SelectItem::OptGroup(name, group) => html! {
-                            <optgroup label={ name.to_owned() }>
-                            {
-                                for group.iter().map(|value| {
-                                    let selected =
-                                        *value == ctx.props().selected;
+                            <optgroup key={ name.to_owned() } label={ name.to_owned() }>
+                                {
+                                    for group.iter().map(|value| {
+                                        let selected =
+                                            *value == ctx.props().selected;
 
-                                    let label = format!("{}", value)
-                                        .strip_prefix(name)
-                                        .unwrap()
-                                        .trim()
-                                        .to_owned();
+                                        let label = format!("{}", value)
+                                            .strip_prefix(name)
+                                            .unwrap()
+                                            .trim()
+                                            .to_owned();
 
-                                    html! {
-                                        <option
-                                            selected={ selected }
-                                            value={ format!("{}", value) }>
-                                            { label }
-                                        </option>
-                                    }
-                                })
-                            }
+                                        html! {
+                                            <option
+                                                key={ format!("{}", value) }
+                                                selected={ selected }
+                                                value={ format!("{}", value) }>
+                                                { label }
+                                            </option>
+                                        }
+                                    })
+                                }
                             </optgroup>
                         }
                     })
@@ -164,19 +166,15 @@ where
             </select>
         };
 
-        if is_group_selected {
-            html! {
-                <>
-                    <label>{ "weighted mean" }</label>
-                    <div
-                        class="dropdown-width-container"
-                        data-value={ format!("{}", self.selected) }>
-                        { select }
-                    </div>
-                </>
-            }
-        } else {
-            html! {
+        html! {
+            if is_group_selected {
+                <label>{ "weighted mean" }</label>
+                <div
+                    class="dropdown-width-container"
+                    data-value={ format!("{}", self.selected) }>
+                    { select }
+                </div>
+            } else {
                 <div
                     class="dropdown-width-container"
                     data-value={ format!("{}", self.selected) }>

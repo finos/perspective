@@ -6,12 +6,13 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use crate::*;
+
 use wasm_bindgen::JsCast;
 use web_sys::*;
 use yew::prelude::*;
-use yew::*;
 
-#[derive(Properties, PartialEq, Clone)]
+#[derive(Properties, PartialEq)]
 pub struct ColorProps {
     pub color: String,
     pub on_color: Callback<String>,
@@ -27,14 +28,12 @@ pub fn color_component(props: &ColorProps) -> Html {
             .value()
     });
 
-    html! {
-        <>
-            <label>{ "Color" }</label>
-            <input
-                class="parameter"
-                type="color"
-                value={ props.color.to_owned() }
-                oninput={ oninput }/>
-        </>
+    html_template! {
+        <label>{ "Color" }</label>
+        <input
+            class="parameter"
+            type="color"
+            value={ props.color.to_owned() }
+            oninput={ oninput }/>
     }
 }

@@ -12,24 +12,26 @@ use yew::prelude::*;
 
 use crate::components::status_bar_counter::*;
 use crate::session::TableStats;
+use crate::utils::await_animation_frame;
 use crate::*;
 
 wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
-pub fn test_counter_none() {
+pub async fn test_counter_none() {
     let div = NodeRef::default();
     test_html! {
         <StatusBarRowsCounter stats={ None } ref={ div.clone() }>
         </StatusBarRowsCounter>
     };
 
+    await_animation_frame().await.unwrap();
     let div = div.cast::<HtmlElement>().unwrap();
     assert_eq!(div.inner_html(), "- rows");
 }
 
 #[wasm_bindgen_test]
-pub fn test_counter_initializing() {
+pub async fn test_counter_initializing() {
     let div = NodeRef::default();
     let stats = Some(TableStats {
         is_pivot: false,
@@ -42,12 +44,13 @@ pub fn test_counter_initializing() {
         </StatusBarRowsCounter>
     };
 
+    await_animation_frame().await.unwrap();
     let div = div.cast::<HtmlElement>().unwrap();
     assert_eq!(div.inner_html(), "- rows");
 }
 
 #[wasm_bindgen_test]
-pub fn test_counter_some_connected_no_view() {
+pub async fn test_counter_some_connected_no_view() {
     let div = NodeRef::default();
     let stats = Some(TableStats {
         is_pivot: false,
@@ -60,12 +63,13 @@ pub fn test_counter_some_connected_no_view() {
         </StatusBarRowsCounter>
     };
 
+    await_animation_frame().await.unwrap();
     let div = div.cast::<HtmlElement>().unwrap();
     assert_eq!(div.inner_html(), "123,456,789 rows");
 }
 
 #[wasm_bindgen_test]
-pub fn test_counter_some_connected_no_pivot() {
+pub async fn test_counter_some_connected_no_pivot() {
     let div = NodeRef::default();
     let stats = Some(TableStats {
         is_pivot: false,
@@ -78,12 +82,13 @@ pub fn test_counter_some_connected_no_pivot() {
         </StatusBarRowsCounter>
     };
 
+    await_animation_frame().await.unwrap();
     let div = div.cast::<HtmlElement>().unwrap();
     assert_eq!(div.inner_html(), "123,456,789 rows");
 }
 
 #[wasm_bindgen_test]
-pub fn test_counter_some_connected_pivot() {
+pub async fn test_counter_some_connected_pivot() {
     let div = NodeRef::default();
     let stats = Some(TableStats {
         is_pivot: true,
@@ -96,6 +101,7 @@ pub fn test_counter_some_connected_pivot() {
         </StatusBarRowsCounter>
     };
 
+    await_animation_frame().await.unwrap();
     let div = div.cast::<HtmlElement>().unwrap();
     assert_eq!(div.inner_html(), "54,321 ");
 }

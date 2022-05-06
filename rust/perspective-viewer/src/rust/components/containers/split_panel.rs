@@ -166,7 +166,7 @@ impl Default for Orientation {
     }
 }
 
-#[derive(Properties, Clone, Default)]
+#[derive(Properties, Default)]
 pub struct SplitPanelProps {
     pub children: Children,
 
@@ -396,7 +396,7 @@ fn split_panel_divider(props: &SplitPanelDividerProps) -> Html {
     }
 }
 
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, PartialEq)]
 struct SplitPanelChildProps {
     style: Option<String>,
     ref_: NodeRef,

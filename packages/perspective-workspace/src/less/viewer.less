@@ -46,6 +46,9 @@
 
 .context-menu > perspective-viewer {
     filter: saturate(0);
+    & > * {
+        pointer-events: none;
+    }
 }
 
 perspective-viewer {
@@ -61,6 +64,11 @@ perspective-viewer {
     font-family: "Open Sans", Arial, sans-serif;
 }
 
+.lm-mod-override-cursor {
+    cursor: grabbing !important;
+}
+
 .lm-mod-override-cursor perspective-viewer > * {
     pointer-events: none;
+
 }
