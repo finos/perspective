@@ -11,7 +11,7 @@ import {IJupyterWidgetRegistry} from "@jupyter-widgets/base";
 import {PerspectiveModel} from "./model";
 import {PerspectiveView} from "./view";
 import {PERSPECTIVE_VERSION} from "./version";
-const EXTENSION_ID = "@finos/perspective";
+const EXTENSION_ID = "@finos/perspective-jupyter";
 
 /**
  * PerspectiveJupyterPlugin Defines the Jupyterlab plugin, and registers `PerspectiveModel` and `PerspectiveView`
