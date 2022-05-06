@@ -13,7 +13,5 @@ window.__webpack_public_path__ = `${document
     .querySelector("body")
     .getAttribute("data-base-url")}nbextensions/finos-perspective`;
 
-import {PerspectiveJupyterPlugin} from "@finos/perspective-jupyterlab/dist/umd/perspective-jupyterlab";
-const plugins = [PerspectiveJupyterPlugin];
+import plugins from "@finos/perspective-jupyterlab/dist/umd/perspective-nbextension";
 export default plugins;
-   
