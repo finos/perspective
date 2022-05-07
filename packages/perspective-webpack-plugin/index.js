@@ -32,6 +32,9 @@ class PerspectiveWebpackPlugin {
                 ),
                 wasmName: "[name].wasm",
                 workerName: "[name].js",
+                publicPath: undefined,
+                wasmPublicPath: undefined,
+                workerPublicPath: undefined,
             },
             options
         );
@@ -50,6 +53,7 @@ class PerspectiveWebpackPlugin {
                 loader: require.resolve("worker-loader"),
                 options: {
                     filename: this.options.workerName,
+                    publicPath: this.options.publicPath || this.options.workerPublicPath,
                 },
             },
         });
@@ -74,6 +78,7 @@ class PerspectiveWebpackPlugin {
                         loader: require.resolve("worker-loader"),
                         options: {
                             filename: "editor.worker.js",
+                            publicPath: this.options.publicPath || this.options.workerPublicPath,
                         },
                     },
                 ],
@@ -84,11 +89,20 @@ class PerspectiveWebpackPlugin {
             }
         }
 
-        if (!(this.options.inline || this.options.inlineWasm)) {
+        if (!(this.options.inline || this.options.inlineWasm || this.options.publicPath || this.options.wasmPublicPath)) {
             rules.push({
                 test: /\.wasm$/,
                 include: [this.options.wasmPath, this.options.viewerPath],
                 type: "asset/resource",
+            });
+        } else if (this.options.publicPath || this.options.wasmPublicPath) {
+            rules.push({
+                test: /\.wasm$/,
+                include: [this.options.wasmPath, this.options.viewerPath],
+                loader: require.resolve("file-loader"),
+                options: {
+                    publicPath: this.options.publicPath || this.options.wasmPublicPath,
+                }
             });
         } else {
             rules.push({
