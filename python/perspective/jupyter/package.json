@@ -7,7 +7,7 @@
     "build:labextension": "jupyter labextension build .",
     "build:lib": "babel src/ --source-maps --out-dir lib/",
     "build:nbextension": "webpack --mode=production -c webpack.config.js",
-    "build": "echo \"skipping workspace build. to build, use \"build-all\"",
+    "build": "echo \"skipping workspace build. to build, use 'build-all'\"",
     "build-all": "npm-run-all build:*",
     "clean": "npm run clean:lib && npm run clean:nbextension",
     "clean:lib": "rimraf lib",
