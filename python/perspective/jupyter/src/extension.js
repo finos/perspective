@@ -12,7 +12,7 @@ if (window.require) {
   window.require.config({
     map: {
       "*": {
-        "@finos/perspective-jupyter": "nbextensions/@finos/perspective-jupyter/index"
+        "@finos/perspective-jupyter": "nbextensions/@finos/perspective-jupyter/index",
       }
     }
   });

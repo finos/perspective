@@ -12,7 +12,9 @@ const version = require("./package.json").version;
 const PerspectivePlugin = require("@finos/perspective-webpack-plugin");
 
 const devtool = process.argv.mode === "development" ? "source-map" : false;
-const plugins = [new PerspectivePlugin({inline: true}), new webpack.DefinePlugin({
+const plugins = [
+    new PerspectivePlugin({inline: true}),
+    new webpack.DefinePlugin({
         "process.env": "{}",
         global: {}
       })];

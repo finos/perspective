@@ -1,11 +1,12 @@
-// import "./build/perspective-nbextension.css";
-// import "@finos/perspective-jupyterlab/dist/umd/perspective-nbextension.css";
-// export * as default from "./build/perspective-nbextension"
-// export * as default from "@finos/perspective-jupyterlab/dist/umd/perspective-nbextension"
+__webpack_public_path__ = window.__webpack_public_path__ = `${document.querySelector("body").getAttribute("data-base-url")}nbextensions/@finos/perspective-jupyter`; // Configure requirejs
 
-// import "@finos/perspective-jupyterlab/dist/umd/perspective-nbextension.css";
-export {PerspectiveModel, PerspectiveView} from "@finos/perspective-jupyterlab/src/js/nbextension"
-import {PerspectiveView} from "@finos/perspective-jupyterlab/src/js/view"
-import {PerspectiveModel} from "@finos/perspective-jupyterlab/src/js/model"
+const {PerspectiveModel, PerspectiveView} = require("@finos/perspective-jupyterlab/src/js/nbextension");
+// import {PerspectiveView} from "@finos/perspective-jupyterlab/src/js/view"
+// import {PerspectiveModel} from "@finos/perspective-jupyterlab/src/js/model"
 console.log(PerspectiveModel)
 console.log(PerspectiveView)
+
+module.exports = {
+    PerspectiveModel,
+    PerspectiveView,
+}
