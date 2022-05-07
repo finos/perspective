@@ -7,5 +7,6 @@
  *
  */
 
+import "@finos/perspective-jupyterlab/dist/umd/perspective-jupyterlab.css";
 import plugins from "@finos/perspective-jupyterlab/dist/umd/perspective-jupyterlab";
 export default plugins;

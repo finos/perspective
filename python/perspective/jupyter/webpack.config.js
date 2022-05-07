@@ -76,6 +76,7 @@ module.exports = [
                 "nbextension",
                 "static"
             ),
+            publicPath: "",
             libraryTarget: "amd",
         },
         module: {

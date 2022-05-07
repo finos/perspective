@@ -43,24 +43,5 @@
     "devDependencies": {
         "@finos/perspective-build": "^1.3.11",
         "@finos/perspective-test": "^1.3.11"
-    },
-    "jupyterlab": {
-        "extension": "lib/index.js",
-        "outputDir": "../../python/perspective/perspective/labextension",
-        "discovery": {
-          "server": {
-            "base": {
-              "name": "perspective-python"
-            },
-            "managers": [
-              "pip"
-            ]
-          }
-        },
-        "_build": {
-          "load": "remoteEntry.js",
-          "extension": "./index",
-          "mimeExtension": "./index"
-        }
     }
 }

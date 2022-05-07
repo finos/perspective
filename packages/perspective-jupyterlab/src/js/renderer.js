@@ -367,7 +367,7 @@ function activate(app, restorer, themeManager) {
  */
 export const perspectiveRenderers = {
     activate: activate,
-    id: "@finos/perspective-jupyterlab:renderers",
+    id: "@finos/perspective-jupyter:renderers",
     requires: [],
     optional: [ILayoutRestorer, IThemeManager],
     autoStart: true,

@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "@finos/perspective-jupyter",
-  "version": "1.3.6",
+  "version": "1.3.11",
   "main": "lib/index.js",
   "scripts": {
     "build:labextension": "jupyter labextension build .",
@@ -32,11 +32,8 @@
     "**"
   ],
   "dependencies": {
-    "@finos/perspective-jupyterlab": "1.3.6",
-    "@jupyter-widgets/base": "^3.0.0 || ^4.0.0",
-    "@jupyterlab/application": "^3.0.0",
-    "@lumino/application": "^1.7.3",
-    "@lumino/widgets": "^1.9.3"
+    "@jupyter-widgets/base": "^4.1.0",
+    "@jupyterlab/application": "^3.3.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.14.5",
