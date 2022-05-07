@@ -23,7 +23,7 @@ window.addEventListener("unhandledrejection", (event) => {
 });
 
 function is_gzip(buffer) {
-    return new Uint32Array(buffer.slice(0, 4))[0] == 559903;
+    return buffer[0] === 0x1F && buffer[1] === 0x8B && buffer[2] === 0x08;
 }
 
 async function load_wasm() {
