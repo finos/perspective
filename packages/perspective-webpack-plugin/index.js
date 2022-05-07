@@ -94,7 +94,9 @@ class PerspectiveWebpackPlugin {
                 test: /\.wasm$/,
                 include: [this.options.wasmPath, this.options.viewerPath],
                 type: "asset/resource",
-                assetModuleFilename: this.options.wasmName,
+                generator: {
+                    filename: this.options.wasmName,
+                }
             });
         } else if (this.options.publicPath || this.options.wasmPublicPath) {
             rules.push({
