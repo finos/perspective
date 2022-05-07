@@ -42,6 +42,7 @@ const NBEXTENSION_BUILD = {
     define: {
         global: "window",
     },
+    publicPath: "/",
     plugins: [lessLoader(), WasmPlugin(true), WorkerPlugin(true)],
     external: ["@jupyter*", "@lumino*", "@jupyter-widgets*"],
     format: "esm",

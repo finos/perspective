@@ -76,8 +76,8 @@ module.exports = [
                 "nbextension",
                 "static"
             ),
-            publicPath: "",
-            libraryTarget: "amd",
+            publicPath: "/",
+            libraryTarget: "umd",
         },
         module: {
             rules,
