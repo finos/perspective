@@ -1,12 +1,11 @@
-/******************************************************************************
- *
- * Copyright (c) 2022, the Perspective Authors.
- *
- * This file is part of the Perspective library, distributed under the terms of
- * the Apache License 2.0.  The full license can be found in the LICENSE file.
- *
- */
+// import "./build/perspective-nbextension.css";
+// import "@finos/perspective-jupyterlab/dist/umd/perspective-nbextension.css";
+// export * as default from "./build/perspective-nbextension"
+// export * as default from "@finos/perspective-jupyterlab/dist/umd/perspective-nbextension"
 
-import "./build/perspective-jupyterlab.css";
-import plugins from "./build/perspective-jupyterlab";
-export default plugins;
+// import "@finos/perspective-jupyterlab/dist/umd/perspective-nbextension.css";
+export {PerspectiveModel, PerspectiveView} from "@finos/perspective-jupyterlab/src/js/nbextension"
+import {PerspectiveView} from "@finos/perspective-jupyterlab/src/js/view"
+import {PerspectiveModel} from "@finos/perspective-jupyterlab/src/js/model"
+console.log(PerspectiveModel)
+console.log(PerspectiveView)

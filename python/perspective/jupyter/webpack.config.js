@@ -7,57 +7,35 @@
  *
  */
 const path = require("path");
+const webpack = require("webpack");
 const version = require("./package.json").version;
+const PerspectivePlugin = require("@finos/perspective-webpack-plugin");
+
 const devtool = process.argv.mode === "development" ? "source-map" : false;
+const plugins = [new PerspectivePlugin({inline: true}), new webpack.DefinePlugin({
+        "process.env": "{}",
+        global: {}
+      })];
 
-const exclude = /.*(node_modules).*/;
 const rules = [
-    {test: /\.css$/, use: ["style-loader", "css-loader"]},
-    {test: /\.txt$/, use: "raw-loader"},
-    {test: /\.md$/, use: "raw-loader"},
-    {test: /\.(jpg|png|gif)$/, use: "file-loader"},
-    {test: /\.js$/, loader: "source-map-loader", exclude},
-    {test: /\.js.map$/, use: "file-loader"},
     {
-        test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
-        use: "url-loader?limit=10000&mimetype=application/font-woff",
+        test: /\.less$/,
+        exclude: /node_modules/,
+        use: ["style-loader", "css-loader", "less-loader"],
     },
     {
-        test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
-        use: "url-loader?limit=10000&mimetype=application/font-woff",
+        test: /\.css$/,
+        exclude: [/monaco-editor/], // <- Exclude `monaco-editor`
+        use: ["style-loader", "css-loader"],
     },
-    {
-        test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
-        use: "url-loader?limit=10000&mimetype=application/octet-stream",
-    },
-    {test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, use: "file-loader"},
-    {
-        // In .css files, svg is loaded as a data URI.
-        test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
-        issuer: /\.css$/,
-        use: {
-            loader: "svg-url-loader",
-            options: {encoding: "none", limit: 10000},
-        },
-    },
-    {
-        // In .ts and .tsx files (both of which compile to .js), svg files
-        // must be loaded as a raw string instead of data URIs.
-        test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
-        issuer: /\.js$/,
-        use: {
-            loader: "raw-loader",
-        },
-    },
-];
-
+    {test: /\.js$/, loader: "babel-loader"},
+  ];
+  
 // Packages that shouldn't be bundled but loaded at runtime
-// const externals = ["@jupyter-widgets/base", /@jupyterlab/, /node_modules/];
-// const externals = /.*(node_modules).*/;
-const externals = /.*((@jupyter-widgets\/base)|(@jupyterlab)).*/;
+const externals = ["@jupyter-widgets/base"];
 const resolve = {
-    extensions: [".js"],
-    fallback: {path: require.resolve("path-browserify")},
+// Add '.ts' and '.tsx' as resolvable extensions.
+extensions: [".webpack.js", ".web.js", ".js"],
 };
 
 module.exports = [
@@ -85,8 +63,8 @@ module.exports = [
             rules,
         },
         devtool,
+        plugins,
         externals,
-        resolve,
     },
     {
         // Bundle for the notebook containing the custom widget views and models
@@ -95,7 +73,7 @@ module.exports = [
         // custom widget.
         // It must be an amd module
         //
-        entry: "./lib/nbextension.js",
+        entry: "./lib/index.js",
         devtool,
         resolve,
         output: {
@@ -113,7 +91,8 @@ module.exports = [
         module: {
             rules,
         },
-        externals: ["@jupyter-widgets/base"],
+        externals,
+        plugins,
     },
     {
         // Embeddable {{ cookiecutter.npm_package_name }} bundle
@@ -142,8 +121,9 @@ module.exports = [
         },
         devtool,
         module: {
-            rules: rules,
+            rules,
         },
-        externals: ["@jupyter-widgets/base"],
+        externals,
+        plugins,
     },
 ];

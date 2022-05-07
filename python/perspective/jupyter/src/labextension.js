@@ -7,10 +7,7 @@
  *
  */
 
-/* css */
-import "../less/index.less";
-import "@finos/perspective-viewer-datagrid";
-import "@finos/perspective-viewer-d3fc";
-
-export * from "./view";
-export * from "./model";
+ import "@finos/perspective-jupyterlab/dist/umd/perspective-jupyterlab.css";
+ import plugins from "@finos/perspective-jupyterlab";
+ export default plugins;
+ 

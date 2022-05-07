@@ -189,20 +189,6 @@ parameters:
           codeCoverageTool: Cobertura
           summaryFileLocation: "$(System.DefaultWorkingDirectory)/**/*coverage.xml"
 
-  - name: pythonJSAssetsSteps
-    type: stepList
-    default:
-
-      - bash: |
-          node scripts/_pull_pipeline_artifact.js $(System.DefaultWorkingDirectory) $(Build.BuildId)
-          unzip $(System.DefaultWorkingDirectory)/perspective-jupyterlab-dist
-          mv $(System.DefaultWorkingDirectory)/perspective-jupyterlab-dist/perspective-jupyterlab-dist.tgz $(System.DefaultWorkingDirectory)/perspective-jupyterlab-dist.tgz
-          rm -rf $(System.DefaultWorkingDirectory)/perspective-jupyterlab-dist
-        displayName: "Download perspective-jupyterlab dist"
-
-      - bash: tar --strip-components=1 -xvf $(System.DefaultWorkingDirectory)/perspective-jupyterlab-dist.tgz -C $(System.DefaultWorkingDirectory)/packages/perspective-jupyterlab package
-        displayName: "Install perspective-jupyterlab dist"
-
   - name: pythonSDistSteps
     type: stepList
     default:
@@ -419,6 +405,7 @@ jobs:
 
     steps:
       - ${{ parameters.initSteps }}
+      - ${{ parameters.wasmInitSteps }}
       - ${{ parameters.pythonInitSteps }}
       - ${{ parameters.pythonBuildDockerSteps }}
       - ${{ parameters.pythonCoverageSteps }}
@@ -436,6 +423,7 @@ jobs:
 
   #   steps:
   #     - ${{ parameters.initSteps }}
+      # - ${{ parameters.wasmInitSteps }}
   #     - ${{ parameters.linuxInitSteps }}
   #     - ${{ parameters.pythonBuildSteps }}
   #     - ${{ parameters.pythonSDistSteps }}
@@ -462,6 +450,7 @@ jobs:
 
     steps:
       - ${{ parameters.initSteps }}
+      - ${{ parameters.wasmInitSteps }}
       - ${{ parameters.pythonInitSteps }}
       - ${{ parameters.windowsInitSteps }}
       - ${{ parameters.pythonBuildVS2019Steps }}
@@ -490,6 +479,7 @@ jobs:
 
     steps:
       - ${{ parameters.initSteps }}
+      - ${{ parameters.wasmInitSteps }}
       - ${{ parameters.pythonInitSteps }}
       - ${{ parameters.windowsInitSteps }}
       - ${{ parameters.pythonWindowsWheelVS2019Steps }}
@@ -524,6 +514,7 @@ jobs:
 
     steps:
       - ${{ parameters.initSteps }}
+      - ${{ parameters.wasmInitSteps }}
       - ${{ parameters.pythonInitSteps }}
       - ${{ parameters.macInitSteps }}
       - ${{ parameters.pythonBuildSteps }}
@@ -543,6 +534,7 @@ jobs:
 
     steps:
       - ${{ parameters.initSteps }}
+      - ${{ parameters.wasmInitSteps }}
       - ${{ parameters.pythonInitSteps }}
       - ${{ parameters.macInitSteps }}
       - ${{ parameters.pythonBuildSteps }}
