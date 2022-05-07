@@ -94,6 +94,7 @@ class PerspectiveWebpackPlugin {
                 test: /\.wasm$/,
                 include: [this.options.wasmPath, this.options.viewerPath],
                 type: "asset/resource",
+                assetModuleFilename: this.options.wasmName,
             });
         } else if (this.options.publicPath || this.options.wasmPublicPath) {
             rules.push({
@@ -102,6 +103,7 @@ class PerspectiveWebpackPlugin {
                 loader: require.resolve("file-loader"),
                 options: {
                     publicPath: this.options.publicPath || this.options.wasmPublicPath,
+                    name: this.options.wasmName,
                 }
             });
         } else {
