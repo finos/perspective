@@ -18,7 +18,6 @@ if (window.require) {
   });
 } // Export the required load_ipython_extension
 
-
-module.exports = {
+export default {
   load_ipython_extension: function () {}
 };

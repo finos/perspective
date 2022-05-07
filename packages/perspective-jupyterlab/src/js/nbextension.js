@@ -6,6 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+
 /* css */
 import "../less/index.less";
 import "@finos/perspective-viewer-datagrid";

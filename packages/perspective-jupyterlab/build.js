@@ -45,7 +45,7 @@ const NBEXTENSION_BUILD = {
     publicPath: "/",
     plugins: [lessLoader(), WasmPlugin(true), WorkerPlugin(true)],
     external: ["@jupyter*", "@lumino*", "@jupyter-widgets*"],
-    format: "esm",
+    format: "iife",
     loader: {
         ".html": "text",
         ".ttf": "file",
@@ -61,6 +61,8 @@ const BUILD = [
 async function build_all() {
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
     cpy(["dist/css/*"], "dist/umd");
+    cpy(["dist/umd/*"], "../../python/perspective/jupyter/src/build");
+    cpy(["dist/umd/*"], "../../python/perspective/jupyter/lib/build");
 }
 
 build_all();

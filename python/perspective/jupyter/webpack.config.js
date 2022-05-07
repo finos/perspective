@@ -61,6 +61,33 @@ const resolve = {
 };
 
 module.exports = [
+    /**
+     * Notebook extension
+     *
+     * This bundle only contains the part of the JavaScript that is run on load of
+     * the notebook.
+     */
+    {
+        entry: "./lib/extension.js",
+        output: {
+            filename: "extension.js",
+            path: path.resolve(
+                __dirname,
+                "..",
+                "perspective",
+                "nbextension",
+                "static"
+            ),
+            publicPath: "",
+            libraryTarget: "amd",
+        },
+        module: {
+            rules,
+        },
+        devtool,
+        externals,
+        resolve,
+    },
     {
         // Bundle for the notebook containing the custom widget views and models
         //

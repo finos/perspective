@@ -4,8 +4,8 @@
   "version": "1.3.11",
   "main": "lib/index.js",
   "scripts": {
+    "build:lib": "babel src/*.js --source-maps --out-dir lib/",
     "build:labextension": "jupyter labextension build .",
-    "build:lib": "babel src/ --source-maps --out-dir lib/",
     "build:nbextension": "webpack --mode=production -c webpack.config.js",
     "build": "echo \"skipping workspace build. to build, use 'build-all'\"",
     "build-all": "npm-run-all build:*",
