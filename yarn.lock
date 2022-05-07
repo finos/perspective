@@ -2270,7 +2270,7 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@jupyter-widgets/base@^4.1.0":
+"@jupyter-widgets/base@^3.0.0 || ^4.0.0":
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/@jupyter-widgets/base/-/base-4.1.0.tgz#15500da61b800086d5dbce95d2f11c0c0acb43fc"
   integrity sha512-yYAIiBWLwldr3yHWG3FvGeltRyI2GTo2mQdxoP6X7mvKeib4n43zcSKqIkP8f4h+dhiw48z+Ct8vQxp0BA8Gvg==

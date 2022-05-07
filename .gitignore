@@ -164,7 +164,7 @@ python/perspective/perspective/node/assets/*
 /__pycache__
 python/perspective/bench/stresstest/results
 python/perspective/perspective/labextension/
-python/perspective/perspective/nbextension/
+python/perspective/perspective/nbextension/static/index*.js
 python/perspective/jupyter/lib
 
 junit.xml

@@ -7,7 +7,8 @@
     "build:labextension": "jupyter labextension build .",
     "build:lib": "babel src/ --source-maps --out-dir lib/",
     "build:nbextension": "webpack --mode=production -c webpack.config.js",
-    "build": "npm-run-all build:*",
+    "build": "echo \"skipping workspace build. to build, use \"build-all\"",
+    "build-all": "npm-run-all build:*",
     "clean": "npm run clean:lib && npm run clean:nbextension",
     "clean:lib": "rimraf lib",
     "clean:labextension": "rimraf ../perspective/labextension",
@@ -17,6 +18,12 @@
     "extension": true,
     "outputDir": "../perspective/labextension",
     "webpackConfig": "jupyter/webpack.config.js",
+    "sharedPackages": {
+      "@jupyter-widgets/base": {
+        "bundled": false,
+        "singleton": true
+      }
+    },
     "discovery": {
       "server": {
         "base": {
@@ -32,7 +39,7 @@
     "**"
   ],
   "dependencies": {
-    "@jupyter-widgets/base": "^4.1.0",
+    "@jupyter-widgets/base": "^3.0.0 || ^4.0.0",
     "@jupyterlab/application": "^3.3.2"
   },
   "devDependencies": {
