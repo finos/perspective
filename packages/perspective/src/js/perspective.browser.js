@@ -42,7 +42,7 @@ const _override = /* @__PURE__ */ (function () {
                 }
 
                 async wasm() {
-                    const _wasm = await wasm;
+                    let _wasm = await wasm;
 
                     let parts = [];
                     let length = 0;
@@ -52,6 +52,10 @@ const _override = /* @__PURE__ */ (function () {
                             parts.push(chunk);
                         }
                     });
+
+                    if (_wasm instanceof ArrayBuffer && !_wasm.buffer) {
+                        _wasm = new Uint8Array(_wasm);
+                    }
 
                     if (_wasm.buffer && _wasm.buffer instanceof ArrayBuffer) {
                         console.warn(INLINE_WARNING);
@@ -91,7 +95,6 @@ const _override = /* @__PURE__ */ (function () {
                         buffer.set(part, offset);
                         offset += part.byteLength;
                     }
-
                     this._wasm = buffer.buffer;
                     return this._wasm;
                 }
