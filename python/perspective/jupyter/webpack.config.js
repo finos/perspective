@@ -15,8 +15,7 @@ const devtool = process.argv.mode === "development" ? "source-map" : false;
 const plugins = [
     new PerspectivePlugin({inline: true}),
     new webpack.DefinePlugin({
-        "process.env": "{}",
-        global: {}
+        "process.env": "{}"
       })];
 
 const rules = [
