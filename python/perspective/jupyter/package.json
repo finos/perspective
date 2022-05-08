@@ -7,7 +7,7 @@
     "build:lib": "babel src/*.js --source-maps --out-dir lib/",
     "build:labextension": "jupyter labextension build .",
     "build:nbextension": "webpack --mode=production -c webpack.config.js",
-    "build": "echo \"skipping workspace build. to build, use 'build-all'\"",
+    "build": "echo \"Skipping workspace build of @finos/perspective-jupyter. to build, use 'build-all'\"",
     "build-all": "npm-run-all build:*",
     "clean": "npm run clean:lib && npm run clean:nbextension",
     "clean:lib": "rimraf lib",
@@ -15,8 +15,9 @@
     "clean:nbextension": "rimraf ../perspective/nbextension/index.js"
   },
   "jupyterlab": {
-    "extension": "lib/labextension",
+    "extension": true,
     "outputDir": "../perspective/labextension",
+    "webpackConfig": "jupyter/webpack.config.js",
     "sharedPackages": {
       "@jupyter-widgets/base": {
         "bundled": false,

@@ -1,12 +1,13 @@
-__webpack_public_path__ = window.__webpack_public_path__ = `${document.querySelector("body").getAttribute("data-base-url")}nbextensions/@finos/perspective-jupyter`; // Configure requirejs
+/******************************************************************************
+ *
+ * Copyright (c) 2022, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
 
-const {PerspectiveModel, PerspectiveView} = require("@finos/perspective-jupyterlab/src/js/nbextension");
-// import {PerspectiveView} from "@finos/perspective-jupyterlab/src/js/view"
-// import {PerspectiveModel} from "@finos/perspective-jupyterlab/src/js/model"
-console.log(PerspectiveModel)
-console.log(PerspectiveView)
-
-module.exports = {
-    PerspectiveModel,
-    PerspectiveView,
-}
+ import "@finos/perspective-jupyterlab/dist/umd/perspective-jupyterlab.css";
+ import plugins from "@finos/perspective-jupyterlab";
+ export default plugins;
+ 
