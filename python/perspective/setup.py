@@ -238,7 +238,7 @@ class PSPCheckSDist(sdist):
                 )
 
         # Check for JS assets
-        for file in ("labextension/package.json", "nbextension/perspective-nbextension.js"):
+        for file in ("labextension/package.json", "nbextension/static/index.js"):
             path = os.path.abspath(os.path.join(here, "perspective", file))
             if not os.path.exists(path):
                 raise Exception(
@@ -253,35 +253,28 @@ class PSPCheckSDist(sdist):
 ##############################
 data_files_spec = [
     # NBExtension
-    # (
-    #     "share/jupyter/nbextensions/finos-perspective-jupyterlab",
-    #     "perspective/nbextension/static",
-    #     "*.js*"
-    # ),
+    (
+        "share/jupyter/nbextensions/@finos/perspective-jupyter",
+        "perspective/nbextension/static",
+        "*.js*",
+    ),
     # Activate nbextension by default
-    # (
-    #     "etc/jupyter/nbconfig/notebook.d",
-    #     "perspective/extension",
-    #     "finos-perspective-nbextension.json"
-    # ),
+    (
+        "etc/jupyter/nbconfig/notebook.d",
+        "perspective/extension",
+        "finos-perspective-nbextension.json",
+    ),
     # Labextension
     (
-        "share/jupyter/labextensions/@finos/perspective-jupyterlab",
+        "share/jupyter/labextensions/@finos/perspective-jupyter",
         "perspective/labextension",
         "**",
     ),
-    # Config to enable server extension by default:
-    # (
-    #     "etc/jupyter/jupyter_server_config.d",
-    #     "perspective/extension",
-    #     "finos-perspective-jupyterlab.json"
-    # ),
 ]
 
 cmdclass = create_cmdclass("js", data_files_spec=data_files_spec)
 cmdclass["js"] = combine_commands(
     install_npm("jupyter", build_cmd="build-all"),
-
     ensure_targets(
         [
             os.path.join("perspective", "nbextension", "static", "index.js"),
