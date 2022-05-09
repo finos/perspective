@@ -17,7 +17,7 @@ import sys
 from codecs import open
 from distutils.version import LooseVersion
 
-from setuptools import Extension, find_packages, setup, Command
+from setuptools import Extension, find_packages, setup
 from setuptools.command.build_ext import build_ext
 from setuptools.command.sdist import sdist
 
