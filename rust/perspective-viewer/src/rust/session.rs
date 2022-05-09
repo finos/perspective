@@ -312,7 +312,7 @@ impl Session {
 
     /// In order to create a new view in this session, the session must first be
     /// validated to create a `ValidSession<'_>` guard.
-    pub async fn validate(&self) -> ValidSession<'_> {
+    pub async fn validate(&self) -> Result<ValidSession<'_>, JsValue> {
         if let Err(err) = self.validate_view_config().await {
             web_sys::console::error_3(
                 &"Invalid config, resetting to default".into(),
@@ -321,10 +321,10 @@ impl Session {
             );
 
             self.reset(true);
-            self.validate_view_config().await.unwrap();
+            self.validate_view_config().await?;
         }
 
-        ValidSession(self)
+        Ok(ValidSession(self))
     }
 
     async fn get_validated_expression_name(&self, expr: &JsValue) -> Result<String, JsValue> {
