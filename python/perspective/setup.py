@@ -47,7 +47,7 @@ if sys.version_info.major < 3:
     raise Exception("Requires Python 3.6 or later")
 
 requires_dev = [
-    "black==20.8b1",
+    "black==22.3",
     "Faker>=1.0.0",
     "flake8>=3.7.8",
     "flake8-black>=0.2.0",
@@ -176,7 +176,7 @@ class PSPBuild(build_ext):
                     "-DCMAKE_TOOLCHAIN_FILE={}".format(vcpkg_toolchain_file)
                 )
 
-            if sys.maxsize > 2 ** 32:
+            if sys.maxsize > 2**32:
                 # build 64 bit to match python
                 cmake_args += ["-A", "x64"]
 
