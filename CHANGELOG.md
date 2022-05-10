@@ -1,5 +1,17 @@
 # Changelog
 
+## [v1.3.12](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.3.11...HEAD)
+
+**Implemented enhancements:**
+
+- Support autocomplete for IN filter type [\#1798](https://github.com/finos/perspective/pull/1798) ([spff](https://github.com/spff))
+
+**Fixed bugs:**
+
+- Fix `restore()` error [\#1803](https://github.com/finos/perspective/pull/1803) ([texodus](https://github.com/texodus))
+
 ## [v1.3.11](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.3.10...HEAD)
