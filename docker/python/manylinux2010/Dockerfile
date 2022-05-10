@@ -39,10 +39,10 @@ RUN cp -arf /opt/python/cp39-cp39/* /usr/local/
 ENV PATH=/usr/local/bin:$PATH
 
 # Install dependencies
-RUN python3.6 -m pip install numpy scipy pybind11 cython codecov mock "black>=22" flake8-black pytest pytest-cov traitlets ipywidgets faker psutil
-RUN python3.7 -m pip install numpy scipy pybind11 cython codecov mock "black>=22" flake8-black pytest pytest-cov traitlets ipywidgets faker psutil
-RUN python3.8 -m pip install numpy scipy pybind11 cython codecov mock "black>=22" flake8-black pytest pytest-cov traitlets ipywidgets faker psutil
-RUN python3.9 -m pip install numpy scipy pybind11 cython codecov mock "black>=22" flake8-black pytest pytest-cov traitlets ipywidgets faker psutil
+RUN python3.6 -m pip install numpy scipy pybind11 cython codecov mock "black>=22" "flake8-black>=0.2.4" pytest pytest-cov traitlets ipywidgets faker psutil
+RUN python3.7 -m pip install numpy scipy pybind11 cython codecov mock "black>=22" "flake8-black>=0.2.4" pytest pytest-cov traitlets ipywidgets faker psutil
+RUN python3.8 -m pip install numpy scipy pybind11 cython codecov mock "black>=22" "flake8-black>=0.2.4" pytest pytest-cov traitlets ipywidgets faker psutil
+RUN python3.9 -m pip install numpy scipy pybind11 cython codecov mock "black>=22" "flake8-black>=0.2.4" pytest pytest-cov traitlets ipywidgets faker psutil
 
 # Install Auditwheel - not available on Python 2
 RUN python3.6 -m pip install --ignore-installed auditwheel

@@ -47,10 +47,10 @@ if sys.version_info.major < 3:
     raise Exception("Requires Python 3.6 or later")
 
 requires_dev = [
-    "black==22.3",
+    "black>=22.3",
     "Faker>=1.0.0",
     "flake8>=3.7.8",
-    "flake8-black>=0.2.0",
+    "flake8-black>=0.2.4",
     "mock",
     "psutil",
     "pybind11>=2.4.0",
