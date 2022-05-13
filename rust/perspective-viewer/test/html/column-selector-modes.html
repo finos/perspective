@@ -27,13 +27,15 @@
         <script type="module">
             import perspective from "./perspective.js";
 
-            class TestChartPlugin extends customElements.get("perspective-viewer-plugin") {
+            class TestChartPlugin extends customElements.get(
+                "perspective-viewer-plugin"
+            ) {
                 get name() {
                     return "test chart";
                 }
 
                 get select_mode() {
-                    return "toggle"
+                    return "toggle";
                 }
 
                 get config_column_names() {
@@ -44,7 +46,7 @@
                     return 2;
                 }
             }
-            
+
             customElements.define("test-chart-plugin", TestChartPlugin);
             const Viewer = customElements.get("perspective-viewer");
             Viewer.registerPlugin("test-chart-plugin");

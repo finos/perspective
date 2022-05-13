@@ -348,7 +348,8 @@ t_view_config::make_aggspec(const std::string& column,
         }
     }
 
-    if (agg_type == AGGTYPE_FIRST || agg_type == AGGTYPE_LAST_BY_INDEX || agg_type == AGGTYPE_LAST_MINUS_FIRST) {
+    if (agg_type == AGGTYPE_FIRST || agg_type == AGGTYPE_LAST_BY_INDEX
+        || agg_type == AGGTYPE_LAST_MINUS_FIRST) {
         dependencies.push_back(t_dep("psp_okey", DEPTYPE_COLUMN));
         aggspec = t_aggspec(
             column, column, agg_type, dependencies, SORTTYPE_ASCENDING);
