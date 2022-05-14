@@ -69,7 +69,7 @@ parameters:
           architecture: "x64"
         displayName: "Use Python $(python.version)"
 
-      - bash: python -m pip install --upgrade pip wheel setuptools "jupyterlab>=3.0.14" numpy "pyarrow>=5" "black>=22.3" flake8-black
+      - bash: python -m pip install --upgrade pip wheel setuptools "jupyterlab>=3.0.14" numpy "pyarrow>=5" "black>=22.3" "flake8-black>=0.2.4"
         displayName: "Install Python base dependencies"
         condition: succeeded()
 
