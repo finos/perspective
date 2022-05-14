@@ -33,6 +33,23 @@ here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read().replace("\r\n", "\n")
 
+if sys.version_info.major < 3:
+    raise Exception("Requires Python 3.6 or later")
+
+
+def get_version(file, name="__version__"):
+    """Get the version of the package from the given file by
+    executing it and extracting the given `name`.
+    """
+    path = os.path.realpath(file)
+    version_ns = {}
+    with io.open(path, encoding="utf8") as f:
+        exec(f.read(), {}, version_ns)
+    return version_ns[name]
+
+
+version = get_version(os.path.join(here, "perspective", "core", "_version.py"))
+
 requires = [
     "ipywidgets>=7.5.1",
     "future>=0.16.0",
@@ -67,20 +84,6 @@ requires_dev = (
     + requires
     + requires_starlette
 )
-
-
-def get_version(file, name="__version__"):
-    """Get the version of the package from the given file by
-    executing it and extracting the given `name`.
-    """
-    path = os.path.realpath(file)
-    version_ns = {}
-    with io.open(path, encoding="utf8") as f:
-        exec(f.read(), {}, version_ns)
-    return version_ns[name]
-
-
-version = get_version(os.path.join(here, "perspective", "core", "_version.py"))
 
 
 class PSPExtension(Extension):

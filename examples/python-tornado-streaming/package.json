@@ -1,5 +1,5 @@
 {
-    "name": "tornado-streaming-python",
+    "name": "python-tornado-streaming",
     "private": true,
     "version": "1.3.13",
     "description": "An example of streaming a `perspective-python` server to the browser.",
