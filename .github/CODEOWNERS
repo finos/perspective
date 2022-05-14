@@ -1,0 +1,11 @@
+
+# Autoadd reviewers to this code for visibility
+# CI/CD
+.github/workflows/*.yml @timkpaine
+azure-pipelines.yml @timkpaine
+
+# Jupyter
+packages/perspective-jupyterlab @timkpaine
+
+# Python
+python/perspective @timkpaine

@@ -137,13 +137,13 @@ parameters:
   - name: pythonBuildSteps
     type: stepList
     default:
-      - script: yarn build_python  --ci $(python_flag) $(manylinux_flag)
+      - script: yarn build_python_azure  --ci $(python_flag) $(manylinux_flag)
         displayName: "Build Python"
 
   - name: pythonBuildVS2019Steps
     type: stepList
     default:
-      - script: yarn build_python  --ci $(python_flag) $(manylinux_flag)
+      - script: yarn build_python_azure  --ci $(python_flag) $(manylinux_flag)
         displayName: "Build Python"
         env:
           # azure pipelines are bad, so force windows-2019 to use VS2019
@@ -155,7 +155,7 @@ parameters:
       - bash: yarn lint_python
         displayName: "Lint Python"
 
-      - bash: yarn build_python  --ci $(python_flag) $(manylinux_flag)
+      - bash: yarn build_python_azure  --ci $(python_flag) $(manylinux_flag)
         displayName: "Build Python"
         env:
           PSP_DOCKER: 1
