@@ -28,8 +28,14 @@ class PerspectiveStarletteHandler(object):
         ... app.add_api_websocket_route('/websocket', endpoint)
     """
 
-    def __init__(self, manager, websocket: WebSocket, check_origin=False,
-                 chunk_size=25165824, chunk_sleep=0):
+    def __init__(
+        self,
+        manager,
+        websocket: WebSocket,
+        check_origin=False,
+        chunk_size=25165824,
+        chunk_sleep=0,
+    ):
         """Create a new instance of the PerspectiveTornadoHandler with the
         given Manager instance.
 
@@ -56,8 +62,7 @@ class PerspectiveStarletteHandler(object):
             )
 
     def check_origin(self, origin):
-        """TODO
-        """
+        """TODO"""
         return self._check_origin
 
     async def run(self) -> None:
@@ -79,7 +84,10 @@ class PerspectiveStarletteHandler(object):
             return
 
         def runner(*args, **kwargs):
-            return asyncio.run_coroutine_threadsafe(self.post(*args, **kwargs), asyncio.get_event_loop())
+            return asyncio.run_coroutine_threadsafe(
+                self.post(*args, **kwargs), asyncio.get_event_loop()
+            )
+
         self._session.process(message, runner)
 
     async def post(self, message, binary=False):

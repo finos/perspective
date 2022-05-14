@@ -41,30 +41,32 @@ requires = [
     "python-dateutil>=2.8.0",
     "tornado>=4.5.3",
     "traitlets>=4.3.2",
-    "starlette"
 ]
 
-if sys.version_info.major < 3:
-    raise Exception("Requires Python 3.6 or later")
+requires_starlette = ["starlette"]
 
-requires_dev = [
-    "black==20.8b1",
-    "Faker>=1.0.0",
-    "flake8>=3.7.8",
-    "flake8-black>=0.2.0",
-    "mock",
-    "psutil",
-    "pybind11>=2.4.0",
-    "pyarrow>=0.16.0",
-    "pytest>=4.3.0",
-    "pytest-cov>=2.6.1",
-    "pytest-check-links",
-    "pytest-tornado",
-    "pytz>=2018.9",
-    "Sphinx>=1.8.4",
-    "sphinx-markdown-builder>=0.5.2",
-    "wheel",
-] + requires
+requires_dev = (
+    [
+        "black==20.8b1",
+        "Faker>=1.0.0",
+        "flake8>=3.7.8",
+        "flake8-black>=0.2.0",
+        "mock",
+        "psutil",
+        "pybind11>=2.4.0",
+        "pyarrow>=0.16.0",
+        "pytest>=4.3.0",
+        "pytest-cov>=2.6.1",
+        "pytest-check-links",
+        "pytest-tornado",
+        "pytz>=2018.9",
+        "Sphinx>=1.8.4",
+        "sphinx-markdown-builder>=0.5.2",
+        "wheel",
+    ]
+    + requires
+    + requires_starlette
+)
 
 
 def get_version(file, name="__version__"):
@@ -177,7 +179,7 @@ class PSPBuild(build_ext):
                     "-DCMAKE_TOOLCHAIN_FILE={}".format(vcpkg_toolchain_file)
                 )
 
-            if sys.maxsize > 2 ** 32:
+            if sys.maxsize > 2**32:
                 # build 64 bit to match python
                 cmake_args += ["-A", "x64"]
 
@@ -255,7 +257,7 @@ setup(
     zip_safe=False,
     python_requires=">=3.6",
     install_requires=requires,
-    extras_require={"dev": requires_dev},
+    extras_require={"dev": requires_dev, "starlette": requires_starlette},
     ext_modules=[PSPExtension("perspective")],
     cmdclass=dict(build_ext=PSPBuild, sdist=PSPCheckSDist),
 )
