@@ -15,10 +15,19 @@ export * from "./widget";
 
 import "../../less/index.less";
 
-import "@finos/perspective-viewer-datagrid";
-import "@finos/perspective-viewer-d3fc";
+// FIXME index.out.jss:602 DOMException: Failed to execute 'define' on 'CustomElementRegistry': the name "perspective-viewer-datagrid" has already been used with this registry
+// import "@finos/perspective-viewer-datagrid";
+// import "@finos/perspective-viewer-d3fc";
 
+// NOTE: only expose the widget here
 import {PerspectiveJupyterPlugin} from "./plugin";
 
-const plugins = [PerspectiveJupyterPlugin];
+let plugins = [PerspectiveJupyterPlugin];
+
+// Conditionally import renderers if running in jupyterlab only
+if (window && window._JUPYTERLAB) {
+    const {PerspectiveRenderers} = require("./renderer");
+    plugins.push(PerspectiveRenderers);
+}
+
 export default plugins;

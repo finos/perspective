@@ -19,9 +19,6 @@ import {
 import {ABCWidgetFactory, DocumentWidget} from "@jupyterlab/docregistry";
 import {PerspectiveWidget} from "./psp_widget";
 
-import "../../less/index.less";
-import "@finos/perspective-viewer-datagrid";
-import "@finos/perspective-viewer-d3fc";
 import perspective from "@finos/perspective/dist/esm/perspective.js";
 
 /**
@@ -367,8 +364,8 @@ function activate(app, restorer, themeManager) {
 /**
  * The perspective extension for files
  */
-export const perspectiveRenderers = {
-    activate: activate,
+export const PerspectiveRenderers = {
+    activate,
     id: "@finos/perspective-jupyter:renderers",
     requires: [],
     optional: [ILayoutRestorer, IThemeManager],

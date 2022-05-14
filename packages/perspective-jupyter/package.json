@@ -55,8 +55,7 @@
         "@jupyterlab/builder": "^3.4.0"
     },
     "jupyterlab": {
-        "extension": "dist/umd/perspective-jupyter.js",
-        "mimeExtension": "dist/umd/perspective-mimerenderer.js",
+        "extension": true,
         "outputDir": "../../python/perspective/perspective/labextension",
         "sharedPackages": {
             "@jupyter-widgets/base": {
