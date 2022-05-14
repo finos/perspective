@@ -26,17 +26,7 @@ try:
 
     CPU_COUNT = os.cpu_count()
 except ImportError:
-    # Python2
-    try:
-        from backports.shutil_which import which
-    except ImportError:
-        # just rely on path
-        def which(x):
-            return x
-
-    import multiprocessing
-
-    CPU_COUNT = multiprocessing.cpu_count()
+    raise Exception("Requires Python 3.6 or later")
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -49,24 +39,21 @@ requires = [
     "numpy>=1.13.1",
     "pandas>=0.22.0",
     "python-dateutil>=2.8.0",
-    "six>=1.11.0",
     "tornado>=4.5.3",
     "traitlets>=4.3.2",
     "starlette"
 ]
 
 if sys.version_info.major < 3:
-    requires += ["backports.shutil-which"]
+    raise Exception("Requires Python 3.6 or later")
 
-if (sys.version_info.major == 2 and sys.version_info.minor < 7) or (
-    sys.version_info.major == 3 and sys.version_info.minor < 6
-):
-    raise Exception("Requires Python 2.7/3.6 or later")
-
-requires_dev_py2 = [
+requires_dev = [
+    "black==20.8b1",
     "Faker>=1.0.0",
     "flake8>=3.7.8",
+    "flake8-black>=0.2.0",
     "mock",
+    "psutil",
     "pybind11>=2.4.0",
     "pyarrow>=0.16.0",
     "pytest>=4.3.0",
@@ -78,11 +65,6 @@ requires_dev_py2 = [
     "sphinx-markdown-builder>=0.5.2",
     "wheel",
 ] + requires
-
-requires_dev = [
-    "flake8-black>=0.2.0",
-    "black==20.8b1",
-] + requires_dev_py2  # for development, remember to install black and flake8-black
 
 
 def get_version(file, name="__version__"):
@@ -167,10 +149,13 @@ class PSPBuild(build_ext):
         if platform.system() == "Windows":
             import distutils.msvccompiler as dm
 
+            # https://wiki.python.org/moin/WindowsCompilers#Microsoft_Visual_C.2B-.2B-_14.0_with_Visual_Studio_2015_.28x86.2C_x64.2C_ARM.29
             msvc = {
                 "12": "Visual Studio 12 2013",
                 "14": "Visual Studio 14 2015",
+                "14.0": "Visual Studio 14 2015",
                 "14.1": "Visual Studio 15 2017",
+                "14.2": "Visual Studio 16 2019",
             }.get(dm.get_build_version(), "Visual Studio 15 2017")
 
             cmake_args.extend(
@@ -182,6 +167,15 @@ class PSPBuild(build_ext):
                     os.environ.get("PSP_GENERATOR", msvc),
                 ]
             )
+
+            vcpkg_toolchain_file = os.path.abspath(
+                os.path.join("..", "..", "vcpkg\\scripts\\buildsystems\\vcpkg.cmake")
+            )
+
+            if os.path.exists(vcpkg_toolchain_file):
+                cmake_args.append(
+                    "-DCMAKE_TOOLCHAIN_FILE={}".format(vcpkg_toolchain_file)
+                )
 
             if sys.maxsize > 2 ** 32:
                 # build 64 bit to match python
@@ -249,20 +243,19 @@ setup(
     author_email="open_source@jpmorgan.com",
     license="Apache 2.0",
     classifiers=[
-        "Development Status :: 3 - Alpha",
-        "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.7",
+        "Development Status :: 5 - Production/Stable",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
     ],
     keywords="analytics tools plotting",
     packages=find_packages(exclude=["bench", "bench.*"]),
     include_package_data=True,
     zip_safe=False,
+    python_requires=">=3.6",
     install_requires=requires,
-    extras_require={"dev": requires_dev, "devpy2": requires_dev_py2},
+    extras_require={"dev": requires_dev},
     ext_modules=[PSPExtension("perspective")],
     cmdclass=dict(build_ext=PSPBuild, sdist=PSPCheckSDist),
 )

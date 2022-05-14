@@ -6,15 +6,14 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-import random
-import six
-import tornado.ioloop
 import queue
+import random
 import threading
-
 from functools import partial
+
+import tornado.ioloop
+from perspective import PerspectiveError, PerspectiveManager, Table
 from pytest import raises
-from perspective import Table, PerspectiveManager, PerspectiveError
 
 
 def syncify(f):
@@ -56,10 +55,7 @@ class TestAsync(object):
 
     @classmethod
     def loop_is_running(cls):
-        if six.PY2:
-            return cls.loop._running
-        else:
-            return cls.loop.asyncio_loop.is_running()
+        return cls.loop.asyncio_loop.is_running()
 
     def test_async_queue_process(self):
         tbl = Table({"a": int, "b": float, "c": str})
@@ -262,6 +258,35 @@ class TestAsync(object):
         assert sentinel["sync"] == 11
 
         tbl.delete()
+
+    def test_async_single_manager_tables_chained(self):
+        columns = {"index": int, "num1": int, "num2": int}
+        manager = PerspectiveManager()
+        tbl = Table(columns, index="index")
+        view = tbl.view()
+        tbl2 = Table(view.to_arrow(), index=tbl.get_index())
+        manager.host(tbl, "tbl")
+        manager.host(tbl2, "tbl2")
+        view.on_update(lambda port, delta: tbl2.update(delta), "row")
+        manager.set_loop_callback(TestAsync.loop.add_callback)
+
+        for i in range(1000):
+            manager.call_loop(tbl.update, [{"index": i, "num1": i, "num2": 2 * i}])
+            i += 1
+
+        q = queue.Queue()
+        manager.call_loop(q.put, True)
+        q.get()
+
+        @syncify
+        def _tbl_task2():
+            size = tbl2.size()
+            return size
+
+        assert _tbl_task2() == 1000
+        view.delete()
+        tbl.delete()
+        tbl2.delete()
 
     def test_async_queue_process_multiple_ports(self):
         tbl = Table({"a": int, "b": float, "c": str})

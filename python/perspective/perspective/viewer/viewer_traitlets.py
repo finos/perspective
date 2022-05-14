@@ -10,11 +10,11 @@ from traitlets import HasTraits, Unicode, List, Bool, Dict, validate
 from .validate import (
     validate_plugin,
     validate_columns,
-    validate_row_pivots,
-    validate_column_pivots,
+    validate_group_by,
+    validate_split_by,
     validate_aggregates,
     validate_sort,
-    validate_filters,
+    validate_filter,
     validate_expressions,
     validate_plugin_config,
 )
@@ -27,24 +27,25 @@ class PerspectiveTraitlets(HasTraits):
 
     Examples:
         >>> widget = perspective.PerspectiveWidget(
-        ...     data, row_pivots=["a", "b", "c"])
-        PerspectiveWidget(row_pivots=["a", "b", "c"])
-        >>> widget.column_pivots=["b"]
+        ...     data, group_by=["a", "b", "c"])
+        PerspectiveWidget(group_by=["a", "b", "c"])
+        >>> widget.split_by=["b"]
         >>> widget
-        PerspectiveWidget(row_pivots=["a", "b", "c"], column_pivots=["b"])
+        PerspectiveWidget(group_by=["a", "b", "c"], split_by=["b"])
     """
 
     # `perspective-viewer` options
     plugin = Unicode("Datagrid").tag(sync=True)
     columns = List(default_value=[]).tag(sync=True)
-    row_pivots = List(trait=Unicode(), default_value=[]).tag(sync=True, o=True)
-    column_pivots = List(trait=Unicode(), default_value=[]).tag(sync=True)
+    group_by = List(trait=Unicode(), default_value=[]).tag(sync=True, o=True)
+    split_by = List(trait=Unicode(), default_value=[]).tag(sync=True)
     aggregates = Dict(default_value={}).tag(sync=True)
     sort = List(default_value=[]).tag(sync=True)
-    filters = List(default_value=[]).tag(sync=True)
+    filter = List(default_value=[]).tag(sync=True)
     expressions = List(default_value=[]).tag(sync=True)
     plugin_config = Dict(default_value={}).tag(sync=True)
-    dark = Bool(None, allow_none=True).tag(sync=True)
+    settings = Bool(True).tag(sync=True)
+    theme = Unicode("Material Light", allow_none=True).tag(sync=True)
     editable = Bool(False).tag(sync=True)
     server = Bool(False).tag(sync=True)
     client = Bool(False).tag(sync=True)
@@ -57,13 +58,13 @@ class PerspectiveTraitlets(HasTraits):
     def _validate_columns(self, proposal):
         return validate_columns(proposal.value)
 
-    @validate("row_pivots")
-    def _validate_row_pivots(self, proposal):
-        return validate_row_pivots(proposal.value)
+    @validate("group_by")
+    def _validate_group_by(self, proposal):
+        return validate_group_by(proposal.value)
 
-    @validate("column_pivots")
-    def _validate_column_pivots(self, proposal):
-        return validate_column_pivots(proposal.value)
+    @validate("split_by")
+    def _validate_split_by(self, proposal):
+        return validate_split_by(proposal.value)
 
     @validate("aggregates")
     def _validate_aggregates(self, proposal):
@@ -73,9 +74,9 @@ class PerspectiveTraitlets(HasTraits):
     def _validate_sort(self, proposal):
         return validate_sort(proposal.value)
 
-    @validate("filters")
-    def _validate_filters(self, proposal):
-        return validate_filters(proposal.value)
+    @validate("filter")
+    def _validate_filter(self, proposal):
+        return validate_filter(proposal.value)
 
     @validate("expressions")
     def _validate_expressions(self, proposal):

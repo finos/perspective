@@ -52,7 +52,9 @@ function legendComponent(scrollLegendComponent, scaleModifier) {
             scrollLegend
                 .scale(scale)
                 .orient("vertical")
-                .on("cellclick", function (d) {
+                .on("cellclick", function (_d) {
+                    // d3-svg-legend is very outdated and incompat with d3 6.x
+                    const d = this.__data__;
                     settings.hideKeys = settings.hideKeys || [];
                     if (settings.hideKeys.includes(d)) {
                         settings.hideKeys = settings.hideKeys.filter(

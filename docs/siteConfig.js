@@ -19,6 +19,30 @@ const siteConfig = {
     users: [
         {
             pinned: true,
+            image: "https://bl.ocks.org/texodus/raw/6b4dcebf65db4ebe4fe53a6de5ea0b48/thumbnail.png",
+            infoLink: "https://bl.ocks.org/texodus/6b4dcebf65db4ebe4fe53a6de5ea0b48",
+            caption: "Movies"
+        },
+        {
+            pinned: true,
+            image: "https://texodus.github.io/nypd-ccrb/preview.png",
+            infoLink: "https://texodus.github.io/nypd-ccrb/",
+            caption: "CCRB"
+        },
+        {
+            pinned: true,
+            image: "https://sc1f.github.io/pudgy-penguin-perspective/meta.png",
+            infoLink: "https://sc1f.github.io/pudgy-penguin-perspective/",
+            caption: "NFT"
+        },
+        {
+            pinned: true,
+            image: "https://perspective.finos.org/img/mtg_thumbnail.png",
+            infoLink: "https://texodus.github.io/mtg-perspective/?seasons-in-the-abyss-67",
+            caption: "Magic"
+        },
+        {
+            pinned: true,
             image: "https://bl.ocks.org/texodus/raw/803de90736a3641ad91c5c7a1b49d0a7/thumbnail.png",
             infoLink: "https://bl.ocks.org/texodus/803de90736a3641ad91c5c7a1b49d0a7",
             caption: "Superstore"
@@ -29,13 +53,6 @@ const siteConfig = {
             infoLink: "https://bl.ocks.org/texodus/efd4a857aca9a52ab6cddbb6e1f701c9",
             caption: "Olympics"
         },
-        {
-            pinned: true,
-            image: "https://bl.ocks.org/texodus/raw/c42f3189699bd29cf20bbe7dce767b07/62d75a47e049602312ba2597bfd37eb032b156f0/thumbnail.png",
-            infoLink: "https://bl.ocks.org/texodus/c42f3189699bd29cf20bbe7dce767b07",
-            caption: "Styled"
-        },
-
         {
             pinned: true,
             image: "https://bl.ocks.org/texodus/raw/45b868833c9f456bd39a51e606412c5d/e590d237a5237790694946018680719c9fef56cb/thumbnail.png ",
@@ -78,14 +95,14 @@ const siteConfig = {
     highlight: {
         theme: "atom-one-light"
     },
-    scripts: ["js/fonts.js", "https://buttons.github.io/buttons.js", "js/index.js"],
-    // stylesheets: [
-    //     "https://fonts.googleapis.com/css?family=Material+Icons",
-    //     "https://fonts.googleapis.com/css?family=Open+Sans",
-    //     "https://fonts.googleapis.com/css?family=Public+Sans",
-    //     "https://fonts.googleapis.com/css?family=Roboto+Mono",
-    //     "https://fonts.googleapis.com/css2?family=Orbitron:wght@900"
-    // ],
+    scripts: ["https://buttons.github.io/buttons.js", "js/index.js"],
+    stylesheets: [
+        "https://fonts.googleapis.com/css?family=Material+Icons",
+        "https://fonts.googleapis.com/css?family=Open+Sans",
+        "https://fonts.googleapis.com/css?family=Public+Sans",
+        "https://fonts.googleapis.com/css?family=Roboto+Mono",
+        "https://fonts.googleapis.com/css2?family=Orbitron:wght@900"
+    ],
     onPageNav: "separate",
     ogImage: "img/perspective.png",
     twitterImage: "img/perspective.png"

@@ -102,7 +102,7 @@ module.exports = (perspective) => {
             var table = await perspective.table(data);
             var view = await table.view({
                 aggregate: [{column: "x", op: "sum"}],
-                row_pivots: ["z"],
+                group_by: ["z"],
             });
             var answer = [
                 {__ROW_PATH__: [], x: 10},
@@ -118,7 +118,7 @@ module.exports = (perspective) => {
         it("Aggregates are processed in the order of the columns array", async function () {
             const table = await perspective.table(data);
             const view = await table.view({
-                row_pivots: ["z"],
+                group_by: ["z"],
                 columns: ["y", "z"],
                 aggregates: {
                     z: "last",
@@ -141,7 +141,7 @@ module.exports = (perspective) => {
         it("Aggregates are not in columns are ignored", async function () {
             const table = await perspective.table(data);
             const view = await table.view({
-                row_pivots: ["z"],
+                group_by: ["z"],
                 columns: ["y", "z"],
                 aggregates: {
                     x: "count",
@@ -163,7 +163,7 @@ module.exports = (perspective) => {
         it("['z'], sum", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                row_pivots: ["z"],
+                group_by: ["z"],
                 columns: ["x"],
             });
             var answer = [
@@ -180,7 +180,7 @@ module.exports = (perspective) => {
         it("['z'], weighted mean", async function () {
             var table = await perspective.table(data2);
             var view = await table.view({
-                row_pivots: ["z"],
+                group_by: ["z"],
                 aggregates: {x: ["weighted mean", "y"]},
                 columns: ["x"],
             });
@@ -203,7 +203,7 @@ module.exports = (perspective) => {
             });
 
             const view = await table.view({
-                row_pivots: ["z"],
+                group_by: ["z"],
                 columns: ["x"],
                 aggregates: {x: ["weighted mean", "y"]},
             });
@@ -225,7 +225,7 @@ module.exports = (perspective) => {
         it("['z'], mean", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                row_pivots: ["z"],
+                group_by: ["z"],
                 columns: ["x"],
                 aggregates: {x: "mean"},
             });
@@ -247,7 +247,7 @@ module.exports = (perspective) => {
                 z: "boolean",
             });
             const view = await table.view({
-                row_pivots: ["z"],
+                group_by: ["z"],
                 columns: ["x"],
                 aggregates: {x: "mean"},
             });
@@ -268,7 +268,7 @@ module.exports = (perspective) => {
         it("['z'], first by index", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                row_pivots: ["z"],
+                group_by: ["z"],
                 columns: ["x"],
                 aggregates: {x: "first by index"},
             });
@@ -286,7 +286,7 @@ module.exports = (perspective) => {
         it("['z'], join", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                row_pivots: ["z"],
+                group_by: ["z"],
                 columns: ["x"],
                 aggregates: {x: "join"},
             });
@@ -310,7 +310,7 @@ module.exports = (perspective) => {
             });
             var table = await perspective.table(data2);
             var view = await table.view({
-                row_pivots: ["z"],
+                group_by: ["z"],
                 columns: ["y"],
                 aggregates: {y: "join"},
             });
@@ -328,7 +328,7 @@ module.exports = (perspective) => {
         it("['z'], first by index with appends", async function () {
             var table = await perspective.table(data, {index: "y"});
             var view = await table.view({
-                row_pivots: ["z"],
+                group_by: ["z"],
                 columns: ["x"],
                 aggregates: {x: "first by index"},
             });
@@ -348,10 +348,72 @@ module.exports = (perspective) => {
             table.delete();
         });
 
+        it("['z'], last_minus_first", async function () {
+            var table = await perspective.table(
+                [
+                    {x: 1, y: "a", z: true},
+                    {x: 2, y: "b", z: false},
+                    {x: 3, y: "c", z: true},
+                    {x: 4, y: "d", z: false},
+                ],
+                {index: "y"}
+            );
+            var view = await table.view({
+                group_by: ["z"],
+                columns: ["x"],
+                aggregates: {x: "last minus first"},
+            });
+            const answer = [
+                {__ROW_PATH__: [], x: -1},
+                {__ROW_PATH__: [false], x: 2},
+                {__ROW_PATH__: [true], x: -2},
+            ];
+            table.update({
+                x: [5],
+                y: ["a"],
+                z: [true],
+            });
+            const result = await view.to_json();
+            expect(result).toEqual(answer);
+            view.delete();
+            table.delete();
+        });
+
+        it("['z'], high_minus_low", async function () {
+            var table = await perspective.table(
+                [
+                    {x: 1, y: "a", z: true},
+                    {x: 2, y: "b", z: false},
+                    {x: 3, y: "c", z: true},
+                    {x: 4, y: "d", z: false},
+                ],
+                {index: "y"}
+            );
+            var view = await table.view({
+                group_by: ["z"],
+                columns: ["x"],
+                aggregates: {x: "high minus low"},
+            });
+            const answer = [
+                {__ROW_PATH__: [], x: 3},
+                {__ROW_PATH__: [false], x: 2},
+                {__ROW_PATH__: [true], x: 2},
+            ];
+            table.update({
+                x: [5],
+                y: ["a"],
+                z: [true],
+            });
+            const result = await view.to_json();
+            expect(result).toEqual(answer);
+            view.delete();
+            table.delete();
+        });
+
         it("['z'], first by index with partial updates", async function () {
             var table = await perspective.table(data, {index: "y"});
             var view = await table.view({
-                row_pivots: ["z"],
+                group_by: ["z"],
                 columns: ["x"],
                 aggregates: {x: "first by index"},
             });
@@ -386,7 +448,7 @@ module.exports = (perspective) => {
                     x: "last",
                     y: "count",
                 },
-                row_pivots: ["y"],
+                group_by: ["y"],
             });
 
             expect(await view.to_columns()).toEqual({
@@ -435,7 +497,7 @@ module.exports = (perspective) => {
                     x: "count",
                     y: "high",
                 },
-                row_pivots: ["x"],
+                group_by: ["x"],
             });
 
             expect(await view.to_columns()).toEqual({
@@ -485,7 +547,7 @@ module.exports = (perspective) => {
                     x: "count",
                     y: "low",
                 },
-                row_pivots: ["x"],
+                group_by: ["x"],
             });
 
             expect(await view.to_columns()).toEqual({
@@ -545,7 +607,7 @@ module.exports = (perspective) => {
                     x: "count",
                     y: "low",
                 },
-                row_pivots: ["x"],
+                group_by: ["x"],
             });
 
             expect(await view.to_columns()).toEqual({
@@ -608,7 +670,7 @@ module.exports = (perspective) => {
                     x: "last",
                     y: "count",
                 },
-                row_pivots: ["y"],
+                group_by: ["y"],
             });
 
             expect(await view.to_columns()).toEqual({
@@ -659,7 +721,7 @@ module.exports = (perspective) => {
                     x: "last",
                     y: "count",
                 },
-                row_pivots: ["y", "z"],
+                group_by: ["y", "z"],
             });
 
             expect(await view.to_columns()).toEqual({
@@ -740,7 +802,7 @@ module.exports = (perspective) => {
                     x: "last",
                     y: "count",
                 },
-                row_pivots: ["x"],
+                group_by: ["x"],
             });
 
             expect(await view.to_columns()).toEqual({
@@ -755,7 +817,7 @@ module.exports = (perspective) => {
                     x: "last",
                     y: "last",
                 },
-                row_pivots: ["x"],
+                group_by: ["x"],
             });
 
             expect(await view2.to_columns()).toEqual({
@@ -819,8 +881,8 @@ module.exports = (perspective) => {
                     x: "last",
                     y: "count",
                 },
-                row_pivots: ["y"],
-                column_pivots: ["x"],
+                group_by: ["y"],
+                split_by: ["x"],
             });
 
             expect(await view.to_columns()).toEqual({
@@ -869,7 +931,7 @@ module.exports = (perspective) => {
                     x: "last",
                     y: "count",
                 },
-                row_pivots: ["y"],
+                group_by: ["y"],
             });
 
             expect(await view.to_columns()).toEqual({
@@ -938,7 +1000,7 @@ module.exports = (perspective) => {
                     x: "last",
                     y: "count",
                 },
-                row_pivots: ["y"],
+                group_by: ["y"],
                 filter: [["x", "==", "a"]],
             });
 
@@ -1005,7 +1067,7 @@ module.exports = (perspective) => {
                     x: "last",
                     y: "count",
                 },
-                row_pivots: ["y"],
+                group_by: ["y"],
             });
 
             expect(await view.to_columns()).toEqual({
@@ -1061,7 +1123,7 @@ module.exports = (perspective) => {
         it("['z'], last by index", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                row_pivots: ["z"],
+                group_by: ["z"],
                 columns: ["x"],
                 aggregates: {x: "last by index"},
             });
@@ -1079,7 +1141,7 @@ module.exports = (perspective) => {
         it("['z'], last by index with appends", async function () {
             const table = await perspective.table(data);
             const view = await table.view({
-                row_pivots: ["z"],
+                group_by: ["z"],
                 columns: ["x"],
                 aggregates: {x: "last by index"},
             });
@@ -1102,7 +1164,7 @@ module.exports = (perspective) => {
         it("['z'], last by index with partial updates", async function () {
             const table = await perspective.table(data, {index: "y"});
             const view = await table.view({
-                row_pivots: ["z"],
+                group_by: ["z"],
                 columns: ["x"],
                 aggregates: {x: "last by index"},
             });
@@ -1125,7 +1187,7 @@ module.exports = (perspective) => {
         it("['z'], last", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                row_pivots: ["z"],
+                group_by: ["z"],
                 columns: ["x"],
                 aggregates: {x: "last"},
             });
@@ -1163,7 +1225,7 @@ module.exports = (perspective) => {
             );
 
             const view = await table.view({
-                row_pivots: ["x"],
+                group_by: ["x"],
                 aggregates: {
                     x: "unique",
                     y: "unique",
@@ -1209,7 +1271,7 @@ module.exports = (perspective) => {
         it("variance", async function () {
             const table = await perspective.table(float_data);
             const view = await table.view({
-                row_pivots: ["y"],
+                group_by: ["y"],
                 columns: ["x"],
                 aggregates: {x: "var"},
             });
@@ -1239,7 +1301,7 @@ module.exports = (perspective) => {
                 z: [1, 1, 1, 1, 1, 1],
             });
             const view = await table.view({
-                row_pivots: ["y", "z"],
+                group_by: ["y", "z"],
                 columns: ["x"],
                 aggregates: {x: "var"},
             });
@@ -1262,7 +1324,7 @@ module.exports = (perspective) => {
         it("variance append", async function () {
             const table = await perspective.table(float_data);
             const view = await table.view({
-                row_pivots: ["y"],
+                group_by: ["y"],
                 columns: ["x"],
                 aggregates: {x: "var"},
             });
@@ -1307,7 +1369,7 @@ module.exports = (perspective) => {
             );
 
             const view = await table.view({
-                row_pivots: ["y"],
+                group_by: ["y"],
                 columns: ["x"],
                 aggregates: {x: "var"},
             });
@@ -1344,7 +1406,7 @@ module.exports = (perspective) => {
 
             const table = await perspective.table(float_data_copy);
             const view = await table.view({
-                row_pivots: ["y"],
+                group_by: ["y"],
                 columns: ["x"],
                 aggregates: {x: "var"},
             });
@@ -1369,7 +1431,7 @@ module.exports = (perspective) => {
                 y: ["a"],
             });
             const view = await table.view({
-                row_pivots: ["y"],
+                group_by: ["y"],
                 columns: ["x"],
                 aggregates: {x: "var"},
             });
@@ -1387,7 +1449,7 @@ module.exports = (perspective) => {
                 y: ["a", "a"],
             });
             const view = await table.view({
-                row_pivots: ["y"],
+                group_by: ["y"],
                 columns: ["x"],
                 aggregates: {x: "var"},
             });
@@ -1404,7 +1466,7 @@ module.exports = (perspective) => {
         it("standard deviation", async function () {
             const table = await perspective.table(float_data);
             const view = await table.view({
-                row_pivots: ["y"],
+                group_by: ["y"],
                 columns: ["x"],
                 aggregates: {x: "stddev"},
             });
@@ -1436,7 +1498,7 @@ module.exports = (perspective) => {
                 z: [1, 1, 1, 1, 1, 1],
             });
             const view = await table.view({
-                row_pivots: ["y", "z"],
+                group_by: ["y", "z"],
                 columns: ["x"],
                 aggregates: {x: "stddev"},
             });
@@ -1462,7 +1524,7 @@ module.exports = (perspective) => {
         it("standard deviation append", async function () {
             const table = await perspective.table(float_data);
             const view = await table.view({
-                row_pivots: ["y"],
+                group_by: ["y"],
                 columns: ["x"],
                 aggregates: {x: "stddev"},
             });
@@ -1510,7 +1572,7 @@ module.exports = (perspective) => {
             );
 
             const view = await table.view({
-                row_pivots: ["y"],
+                group_by: ["y"],
                 columns: ["x"],
                 aggregates: {x: "stddev"},
             });
@@ -1550,7 +1612,7 @@ module.exports = (perspective) => {
 
             const table = await perspective.table(float_data_copy);
             const view = await table.view({
-                row_pivots: ["y"],
+                group_by: ["y"],
                 columns: ["x"],
                 aggregates: {x: "stddev"},
             });
@@ -1575,7 +1637,7 @@ module.exports = (perspective) => {
                 y: ["a"],
             });
             const view = await table.view({
-                row_pivots: ["y"],
+                group_by: ["y"],
                 columns: ["x"],
                 aggregates: {x: "stddev"},
             });
@@ -1593,7 +1655,7 @@ module.exports = (perspective) => {
                 y: ["a", "a"],
             });
             const view = await table.view({
-                row_pivots: ["y"],
+                group_by: ["y"],
                 columns: ["x"],
                 aggregates: {x: "stddev"},
             });
@@ -1617,7 +1679,7 @@ module.exports = (perspective) => {
                 {x: null, y: 2},
             ]);
             var view = await table.view({
-                row_pivots: ["y"],
+                group_by: ["y"],
                 columns: ["x"],
                 aggregates: {x: "mean"},
             });
@@ -1643,7 +1705,7 @@ module.exports = (perspective) => {
                 {x: null, y: 2},
             ]);
             var view = await table.view({
-                row_pivots: ["y"],
+                group_by: ["y"],
                 columns: ["x"],
                 aggregates: {x: "mean"},
             });
@@ -1670,7 +1732,7 @@ module.exports = (perspective) => {
                 {x: null, y: 2},
             ]);
             var view = await table.view({
-                row_pivots: ["y"],
+                group_by: ["y"],
                 columns: ["x"],
                 aggregates: {x: "mean"},
             });
@@ -1695,7 +1757,7 @@ module.exports = (perspective) => {
                 {x: null, y: 2},
             ]);
             var view = await table.view({
-                row_pivots: ["y"],
+                group_by: ["y"],
                 columns: ["x"],
             });
             var answer = [
@@ -1719,7 +1781,7 @@ module.exports = (perspective) => {
                 {x: null, y: 2},
             ]);
             var view = await table.view({
-                row_pivots: ["y"],
+                group_by: ["y"],
                 columns: ["x"],
                 aggregates: {x: "abs sum"},
             });
@@ -1746,7 +1808,7 @@ module.exports = (perspective) => {
                 {x: 4, y: 2},
             ]);
             var view = await table.view({
-                row_pivots: ["y"],
+                group_by: ["y"],
                 columns: ["x"],
                 aggregates: {x: "mean"},
             });
@@ -1781,7 +1843,7 @@ module.exports = (perspective) => {
                 {x: 7, y: 2, z: "c"},
             ]);
             var view = await table.view({
-                row_pivots: ["y", "z"],
+                group_by: ["y", "z"],
                 columns: ["x"],
                 aggregates: {x: "mean"},
             });
@@ -1808,7 +1870,7 @@ module.exports = (perspective) => {
                 {x: "y"},
             ]);
             var view = await table.view({
-                row_pivots: ["x"],
+                group_by: ["x"],
                 columns: ["x"],
                 aggregates: {x: "distinct count"},
             });
@@ -1831,7 +1893,7 @@ module.exports = (perspective) => {
                 {a: "a", x: 3, y: null},
             ]);
             var view = await table.view({
-                row_pivots: ["a"],
+                group_by: ["a"],
                 aggregates: {y: ["weighted mean", "x"]},
                 columns: ["y"],
             });
@@ -1857,7 +1919,7 @@ module.exports = (perspective) => {
                 {x: -3, y: 2},
             ]);
             var view = await table.view({
-                row_pivots: ["y"],
+                group_by: ["y"],
                 columns: ["x"],
                 aggregates: {x: "sum abs"},
             });
@@ -1882,7 +1944,7 @@ module.exports = (perspective) => {
                 {x: -3, y: 2},
             ]);
             var view = await table.view({
-                row_pivots: ["y"],
+                group_by: ["y"],
                 columns: ["x"],
                 aggregates: {x: "abs sum"},
             });
@@ -1898,11 +1960,11 @@ module.exports = (perspective) => {
         });
     });
 
-    describe("Row pivot", function () {
+    describe("Group by", function () {
         it("['x']", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                row_pivots: ["x"],
+                group_by: ["x"],
                 aggregates: {y: "distinct count", z: "distinct count"},
             });
             var answer = [
@@ -1933,7 +1995,7 @@ module.exports = (perspective) => {
             const table = await perspective.table(schema, {index: "id"});
             table.update(rec1);
             let view = await table.view({
-                row_pivots: ["id"],
+                group_by: ["id"],
                 columns: ["pos"],
             });
             let rec2 = [{id: 1, chg: 3}];
@@ -1962,7 +2024,7 @@ module.exports = (perspective) => {
                 var table = await perspective.table(dataWithNulls);
 
                 var view = await table.view({
-                    row_pivots: ["name"],
+                    group_by: ["name"],
                     aggregates: {name: "distinct count"},
                 });
 
@@ -1993,7 +2055,7 @@ module.exports = (perspective) => {
                 table.update(dataWithNull2);
 
                 var view = await table.view({
-                    row_pivots: ["name"],
+                    group_by: ["name"],
                     aggregates: {name: "distinct count"},
                 });
 
@@ -2014,7 +2076,7 @@ module.exports = (perspective) => {
         it("['x'] has a schema", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                row_pivots: ["x"],
+                group_by: ["x"],
             });
             let result2 = await view.schema();
             expect(result2).toEqual({x: "integer", y: "integer", z: "integer"});
@@ -2025,7 +2087,7 @@ module.exports = (perspective) => {
         it("['x'] translates type `string` to `integer` when pivoted by row", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                row_pivots: ["x"],
+                group_by: ["x"],
                 columns: ["y"],
                 aggregates: {y: "distinct count"},
             });
@@ -2038,7 +2100,7 @@ module.exports = (perspective) => {
         it("['x'] translates type `integer` to `float` when pivoted by row", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                row_pivots: ["y"],
+                group_by: ["y"],
                 columns: ["x"],
                 aggregates: {x: "avg"},
             });
@@ -2051,7 +2113,7 @@ module.exports = (perspective) => {
         it("['x'] does not translate type when only pivoted by column", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                column_pivots: ["y"],
+                split_by: ["y"],
                 columns: ["x"],
                 aggregates: {x: "avg"},
             });
@@ -2064,7 +2126,7 @@ module.exports = (perspective) => {
         it("['x'] has the correct # of rows", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                row_pivots: ["x"],
+                group_by: ["x"],
             });
             let result2 = await view.num_rows();
             expect(result2).toEqual(5);
@@ -2075,7 +2137,7 @@ module.exports = (perspective) => {
         it("['x'] has the correct # of columns", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                row_pivots: ["x"],
+                group_by: ["x"],
             });
             let result2 = await view.num_columns();
             expect(result2).toEqual(3);
@@ -2083,7 +2145,7 @@ module.exports = (perspective) => {
             table.delete();
         });
 
-        it("Row Pivot by date column results in correct headers", async function () {
+        it("Group By by date column results in correct headers", async function () {
             var table = await perspective.table({
                 a: [
                     new Date("2020/01/15"),
@@ -2102,7 +2164,7 @@ module.exports = (perspective) => {
                 b: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
             });
             var view = await table.view({
-                row_pivots: ["a"],
+                group_by: ["a"],
             });
             const results = await view.to_columns();
             expect(results).toEqual({
@@ -2157,7 +2219,7 @@ module.exports = (perspective) => {
         it("['z']", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                row_pivots: ["z"],
+                group_by: ["z"],
                 aggregates: {y: "distinct count", z: "distinct count"},
             });
             var answer = [
@@ -2174,7 +2236,7 @@ module.exports = (perspective) => {
         it("['x', 'z']", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                row_pivots: ["x", "z"],
+                group_by: ["x", "z"],
                 aggregates: {y: "distinct count", z: "distinct count"},
             });
             var answer = [
@@ -2197,7 +2259,7 @@ module.exports = (perspective) => {
         it("['x', 'z'] windowed", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                row_pivots: ["x", "z"],
+                group_by: ["x", "z"],
             });
             var answer = [
                 {__ROW_PATH__: [1, true], x: 1, y: 1, z: 1},
@@ -2217,8 +2279,8 @@ module.exports = (perspective) => {
         it("['x', 'z'], pivot_depth = 1", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                row_pivots: ["x", "z"],
-                row_pivot_depth: 1,
+                group_by: ["x", "z"],
+                group_by_depth: 1,
                 aggregates: {y: "distinct count", z: "distinct count"},
             });
             var answer = [
@@ -2235,11 +2297,11 @@ module.exports = (perspective) => {
         });
     });
 
-    describe("Column pivot", function () {
+    describe("Split by", function () {
         it("['y'] only, schema", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                column_pivots: ["y"],
+                split_by: ["y"],
             });
             let result2 = await view.schema();
             expect(result2).toEqual(meta);
@@ -2250,7 +2312,7 @@ module.exports = (perspective) => {
         it("['z'] only, datetime column", async function () {
             var table = await perspective.table(data_8);
             var view = await table.view({
-                column_pivots: ["z"],
+                split_by: ["z"],
                 columns: ["x", "y"],
             });
             let result2 = await view.to_columns();
@@ -2267,7 +2329,7 @@ module.exports = (perspective) => {
         it("['x'] only, column-oriented input", async function () {
             var table = await perspective.table(data_7);
             var view = await table.view({
-                column_pivots: ["z"],
+                split_by: ["z"],
             });
             let result2 = await view.to_json();
             expect(result2).toEqual([
@@ -2319,7 +2381,7 @@ module.exports = (perspective) => {
         it("['z'] only, column-oriented output", async function () {
             var table = await perspective.table(data_7);
             var view = await table.view({
-                column_pivots: ["z"],
+                split_by: ["z"],
             });
             let result2 = await view.to_columns();
             expect(result2).toEqual({
@@ -2339,7 +2401,7 @@ module.exports = (perspective) => {
         it("['y'] only sorted by ['x'] desc", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                column_pivots: ["y"],
+                split_by: ["y"],
                 sort: [["x", "desc"]],
             });
             var answer = [
@@ -2409,7 +2471,7 @@ module.exports = (perspective) => {
         it("['y'] only", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                column_pivots: ["y"],
+                split_by: ["y"],
             });
             var answer = [
                 {
@@ -2478,8 +2540,8 @@ module.exports = (perspective) => {
         it("['x'] by ['y']", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                column_pivots: ["y"],
-                row_pivots: ["x"],
+                split_by: ["y"],
+                group_by: ["x"],
             });
             var answer = [
                 {
@@ -2567,7 +2629,7 @@ module.exports = (perspective) => {
         it("['x', 'z']", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                column_pivots: ["x", "z"],
+                split_by: ["x", "z"],
                 columns: ["y"],
             });
             let result2 = await view.to_json();
@@ -2619,8 +2681,8 @@ module.exports = (perspective) => {
                 {x: 12, y: "C", z: false, a: "BB", b: "CC", c: "DD"},
             ]);
             var view = await table.view({
-                column_pivots: ["z", "b"],
-                row_pivots: ["y", "a"],
+                split_by: ["z", "b"],
+                group_by: ["y", "a"],
                 columns: ["x"],
                 aggregates: {x: "last"},
             });
@@ -2641,7 +2703,7 @@ module.exports = (perspective) => {
         });
     });
 
-    describe("Column pivot w/sort", function () {
+    describe("Split by w/sort", function () {
         it("['y'] by ['z'], sorted by 'x'", async function () {
             var table = await perspective.table([
                 {x: 7, y: "A", z: true},
@@ -2658,8 +2720,8 @@ module.exports = (perspective) => {
                 {x: 12, y: "C", z: false},
             ]);
             var view = await table.view({
-                column_pivots: ["z"],
-                row_pivots: ["y"],
+                split_by: ["z"],
+                group_by: ["y"],
                 sort: [["x", "desc"]],
                 aggregates: {y: "distinct count", z: "distinct count"},
             });
@@ -2724,8 +2786,8 @@ module.exports = (perspective) => {
                 {x: 12, y: "C", z: false},
             ]);
             var view = await table.view({
-                column_pivots: ["y"],
-                row_pivots: ["z"],
+                split_by: ["y"],
+                group_by: ["z"],
                 sort: [["y", "col desc"]],
                 columns: ["x", "y"],
                 aggregates: {x: "sum", y: "any"},
@@ -2748,8 +2810,8 @@ module.exports = (perspective) => {
         it("['y'] by ['x'] sorted by ['x'] desc has the correct # of columns", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                column_pivots: ["y"],
-                row_pivots: ["x"],
+                split_by: ["y"],
+                group_by: ["x"],
                 sort: [["x", "desc"]],
             });
             let num_cols = await view.num_columns();
@@ -2760,11 +2822,11 @@ module.exports = (perspective) => {
     });
 
     describe("Pivot table operations", function () {
-        it("Should not expand past number of row pivots", async function () {
+        it("Should not expand past number of group by", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                row_pivots: ["x"],
-                column_pivots: ["y"],
+                group_by: ["x"],
+                split_by: ["y"],
             });
             var expanded_idx = await view.expand(2);
             // invalid expands return the index
@@ -2838,7 +2900,7 @@ module.exports = (perspective) => {
         it("Should return all columns with __ROW_PATH__, 1-sided view", async function () {
             const table = await perspective.table(data);
             const view = await table.view({
-                row_pivots: ["x"],
+                group_by: ["x"],
             });
             const paths = await view.column_paths();
             expect(paths).toEqual(["__ROW_PATH__", "x", "y", "z"]);
@@ -2860,7 +2922,7 @@ module.exports = (perspective) => {
             // the map. This test makes sure that column orders are respected
             // by the engine for all column names.
             const view = await table.view({
-                row_pivots: ["x"],
+                group_by: ["x"],
                 columns: ["2345", "1234", "x", "1.23456789"],
                 aggregates: {
                     x: "sum",
@@ -2882,7 +2944,7 @@ module.exports = (perspective) => {
         it("Should return all columns in specified order, 1-sided view", async function () {
             const table = await perspective.table(data);
             const view = await table.view({
-                row_pivots: ["x"],
+                group_by: ["x"],
                 columns: ["z", "y", "x"],
             });
             const paths = await view.column_paths();
@@ -2895,7 +2957,7 @@ module.exports = (perspective) => {
             const table = await perspective.table(data);
             const view = await table.view({
                 columns: ["x"],
-                row_pivots: ["x"],
+                group_by: ["x"],
             });
             const paths = await view.column_paths();
             expect(paths).toEqual(["__ROW_PATH__", "x"]);
@@ -2906,8 +2968,8 @@ module.exports = (perspective) => {
         it("Should return all columns with __ROW_PATH__, 2-sided view", async function () {
             const table = await perspective.table(data);
             const view = await table.view({
-                row_pivots: ["x"],
-                column_pivots: ["y"],
+                group_by: ["x"],
+                split_by: ["y"],
             });
             const paths = await view.column_paths();
             expect(paths).toEqual([
@@ -2933,8 +2995,8 @@ module.exports = (perspective) => {
             const table = await perspective.table(data);
             const view = await table.view({
                 columns: ["z", "y", "x"],
-                row_pivots: ["x"],
-                column_pivots: ["y"],
+                group_by: ["x"],
+                split_by: ["y"],
             });
             const paths = await view.column_paths();
             expect(paths).toEqual([
@@ -2960,8 +3022,8 @@ module.exports = (perspective) => {
             const table = await perspective.table(data);
             const view = await table.view({
                 columns: ["x"],
-                row_pivots: ["x"],
-                column_pivots: ["y"],
+                group_by: ["x"],
+                split_by: ["y"],
             });
             const paths = await view.column_paths();
             expect(paths).toEqual(["__ROW_PATH__", "a|x", "b|x", "c|x", "d|x"]);

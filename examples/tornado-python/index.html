@@ -19,7 +19,7 @@
     <script src="http://localhost:8080/node_modules/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js"></script>
     <script src="http://localhost:8080/node_modules/perspective/dist/umd/perspective.js"></script>
 
-    <link rel='stylesheet' href="http://localhost:8080/node_modules/perspective-viewer/dist/umd/material-dense.css">
+    <link rel="stylesheet" crossorigin="anonymous" href="/node_modules/@finos/perspective-viewer/dist/css/themes.css" />
 
     <style>
         perspective-viewer{position:absolute;top:0;left:0;right:0;bottom:0;}
@@ -28,10 +28,7 @@
 </head>
 
 <body>
-    <perspective-viewer 
-        id="viewer">
-    
-    </perspective-viewer>
+    <perspective-viewer id="viewer"></perspective-viewer>
 
     <script>
 
@@ -63,7 +60,7 @@
              * server. All public API methods are available through this
              * proxied table.
              */
-            const server_table = websocket.open_table("data_source_one");
+            const server_table = await websocket.open_table("data_source_one");
 
             /**
              * Create a `View` on the server.
@@ -88,7 +85,7 @@
              * synchronization between server and client, see
              * `client_server_editing.html`.
              */
-            const table = await worker.table(server_view, {
+            const table = worker.table(server_view, {
                 index: await server_table.get_index()
             });
             

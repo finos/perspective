@@ -1,0 +1,106 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+@import "../less/fonts";
+@import (reference) "./material.less";
+
+perspective-viewer,
+perspective-viewer[theme="Solarized"] {
+    --theme-name: "Solarized";
+}
+
+perspective-viewer[theme="Solarized"],
+.perspective-viewer-solarized {
+    .perspective-viewer-material();
+    .perspective-viewer-solarized--colors();
+    .perspective-viewer-solarized--datagrid();
+    .perspective-viewer-solarized--d3fc();
+}
+
+perspective-copy-menu[theme="Solarized"],
+perspective-export-menu[theme="Solarized"],
+perspective-filter-dropdown[theme="Solarized"],
+perspective-number-column-style[theme="Solarized"],
+perspective-string-column-style[theme="Solarized"],
+perspective-expression-editor[theme="Solarized"],
+.perspective-modal-solarized {
+    .perspective-modal-material();
+    .perspective-viewer-solarized--colors();
+
+    background-color: #fdf6e3;
+}
+
+.perspective-viewer-solarized--colors {
+    color: #586e75;
+    background: #eee8d5;
+    --active--color: #268bd2;
+    --error--color: #cb4b16;
+    --inactive--color: #93a1a1;
+    --plugin--background: #fdf6e3;
+
+    // Column type indicators
+    --float--column-type--color: #268bd2;
+    --string--column-type--color: #cb4b16;
+    --date--column-type--color: #2aa198;
+    --boolean--column-type--color: #b58900;
+}
+
+.perspective-viewer-solarized--datagrid {
+    regular-table {
+        --rt-pos-cell--color: #268bd2 !important;
+        --rt-neg-cell--color: #cb4b16 !important;
+    }
+
+    regular-table {
+        table {
+            color: #586e75;
+        }
+    }
+
+    regular-table table tbody tr td,
+    regular-table table tbody tr th {
+        border-top-color: #93a1a1;
+    }
+
+    regular-table table tbody th:empty {
+        background: linear-gradient(
+            to right,
+            transparent 9px,
+            #93a1a1 10px,
+            transparent 11px
+        );
+    }
+}
+
+.perspective-viewer-solarized--d3fc {
+    --d3fc-treedata--labels: black;
+    --d3fc-treedata--hover-highlight: black;
+
+    --d3fc-axis-ticks--color: #586e75;
+    --d3fc-gridline--color: #eee8d5;
+    --d3fc-series: #268bd2;
+    --d3fc-series-1: #268bd2;
+    --d3fc-series-2: #cb4b16;
+    --d3fc-series-3: #b58900;
+    --d3fc-series-4: #859900;
+    --d3fc-series-5: #2aa198;
+
+    --d3fc-series-6: #6c71c4;
+    --d3fc-series-7: #d33682;
+
+    --d3fc-positive--gradient: linear-gradient(
+        #268bd2 0%,
+        #2aa198,
+        #859900,
+        #b58900,
+        #cb4b16,
+        #dc322f,
+        #d33682 100%
+    );
+}

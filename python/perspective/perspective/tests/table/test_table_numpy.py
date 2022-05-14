@@ -1,4 +1,4 @@
-# *****************************************************************************
+################################################################################
 #
 # Copyright (c) 2019, the Perspective Authors.
 #
@@ -6,13 +6,13 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-import six
-import pandas as pd
+from datetime import date, datetime
+
 import numpy as np
-from pytest import raises
+import pandas as pd
 from perspective import PerspectiveError
 from perspective.table import Table
-from datetime import date, datetime
+from pytest import raises
 
 
 class TestTableNumpy(object):
@@ -93,18 +93,6 @@ class TestTableNumpy(object):
             "a": [1, 2, 3],
             "b": [4, 5, 6]
         }
-
-    def test_table_long_numpy(self):
-        if six.PY2:
-            data = {"a": np.array([1, 2, 3], dtype=long)}  # noqa: F821
-            tbl = Table(data)
-            assert tbl.schema() == {
-                "a": int
-            }
-            assert tbl.size() == 3
-            assert tbl.view().to_dict() == {
-                "a": [1, 2, 3]
-            }
 
     def test_table_float(self):
         data = {"a": np.array([1.1, 2.2]), "b": np.array([3.3, 4.4])}
@@ -198,8 +186,6 @@ class TestTableNumpy(object):
 
     def test_table_str_dtype(self):
         dtype = "U3"
-        if six.PY2:
-            dtype = "|S3"
         data = {"a": np.array(["abc", "def"], dtype=dtype), "b": np.array(["hij", "klm"], dtype=dtype)}
         tbl = Table(data)
         assert tbl.size() == 2
@@ -207,19 +193,6 @@ class TestTableNumpy(object):
             "a": ["abc", "def"],
             "b": ["hij", "klm"]
         }
-
-    def test_table_unicode_py2(self):
-        if six.PY2:
-            data = {
-                "a": np.array([unicode("abc"), unicode("def")]),  # noqa: F821
-                "b": np.array([unicode("hij"), unicode("klm")])  # noqa: F821
-            }
-            tbl = Table(data)
-            assert tbl.size() == 2
-            assert tbl.view().to_dict() == {
-                "a": ["abc", "def"],
-                "b": ["hij", "klm"]
-            }
 
     # date and datetime
 
@@ -623,39 +596,6 @@ class TestTableNumpy(object):
         table.update(df)
         assert table.view().to_dict()["a"] == [1, None, 2, None, 3, 4]
 
-    def test_table_numpy_from_schema_long(self):
-        if six.PY2:
-            df = {
-                "a": np.array([1, None, 2, None, 3, 4])
-            }
-            table = Table({
-                "a": long  # noqa: F821
-            })
-            table.update(df)
-            assert table.view().to_dict()["a"] == [1, None, 2, None, 3, 4]
-
-    def test_table_numpy_from_schema_int_to_long(self):
-        if six.PY2:
-            df = {
-                "a": np.array([1, 2, 3, 4], dtype="int64")
-            }
-            table = Table({
-                "a": long  # noqa: F821
-            })
-            table.update(df)
-            assert table.view().to_dict()["a"] == [1, 2, 3, 4]
-
-    def test_table_numpy_from_schema_float_to_long(self):
-        if six.PY2:
-            df = {
-                "a": np.array([1, None, 2, None, 3, 4], dtype="float64")
-            }
-            table = Table({
-                "a": long  # noqa: F821
-            })
-            table.update(df)
-            assert table.view().to_dict()["a"] == [1, None, 2, None, 3, 4]
-
     def test_table_numpy_from_schema_bool(self):
         data = [True, False, True, False]
         df = {
@@ -1033,8 +973,6 @@ class TestTableNumpy(object):
 
     def test_table_recarray_str_dtype(self):
         dtype = "U7"
-        if six.PY2:
-            dtype = "|S7"
         table = Table(np.array([("string1", "string2"), ("string3", "string4")], dtype=[('x', dtype), ('y', dtype)]).view(np.recarray))
         assert table.schema() == {
             "x": str,

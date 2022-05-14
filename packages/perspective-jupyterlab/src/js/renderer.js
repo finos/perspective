@@ -21,8 +21,7 @@ import {PerspectiveWidget} from "./psp_widget";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 // const perspective = require("@finos/perspective").default;
-import perspective from "@finos/perspective";
-
+import perspective from "@finos/perspective/dist/esm/perspective.js";
 /**
  * The name of the factories that creates widgets.
  */
@@ -143,8 +142,10 @@ export class PerspectiveDocumentWidget extends DocumentWidget {
         }
 
         // pickup theme from env
-        this._psp.dark =
-            document.body.getAttribute("data-jp-theme-light") === "false";
+        this._psp.theme =
+            document.body.getAttribute("data-jp-theme-light") === "false"
+                ? "Material Light"
+                : "Material Dark";
     }
 
     dispose() {
@@ -342,16 +343,17 @@ function activate(app, restorer, themeManager) {
                 ? themeManager.isLight(themeManager.theme)
                 : true;
 
+        const theme = isLight ? "Material Light" : "Material Dark";
         trackercsv.forEach((pspDocWidget) => {
-            pspDocWidget.psp.dark = !isLight;
+            pspDocWidget.psp.theme = theme;
         });
 
         trackerjson.forEach((pspDocWidget) => {
-            pspDocWidget.psp.dark = !isLight;
+            pspDocWidget.psp.theme = theme;
         });
 
         trackerarrow.forEach((pspDocWidget) => {
-            pspDocWidget.psp.dark = !isLight;
+            pspDocWidget.psp.theme = theme;
         });
     };
 

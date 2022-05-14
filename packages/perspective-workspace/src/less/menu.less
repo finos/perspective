@@ -7,9 +7,11 @@
  *
  */
 
-@import (inline) "~@lumino/widgets/style/menu.css";
+@import (inline) "@lumino/widgets/style/menu.css";
 
 .p-Menu {
+    font-family: "Open Sans";
+    font-size: 12px;
     padding: 8px;
     background: white;
     color: #666;
@@ -17,13 +19,11 @@
     border-left-width: 0px;
     border-top-width: 0px;
     border-right-width: 1px;
-    font: 12px Helvetica, Arial, sans-serif;
-    box-shadow: rgba(0, 0, 0, 0.2) 0px 3px 1px -2px,
-        rgba(0, 0, 0, 0.14) 0px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 1px 5px 0px;
+    box-shadow: 0 2px 4px #0000001a;
 }
 
 .p-Menu-item.p-mod-active {
-    background: rgba(0, 0, 0, 0.05);
+    background: rgba(0, 0, 0, 0.1);
 }
 
 .p-Menu-item.p-mod-disabled {
@@ -32,10 +32,11 @@
 
 .p-Menu-itemIcon {
     width: 21px;
-    padding: 5px 2px 3px 0px;
+    padding: 4px 2px 4px 0px;
 }
 
 .p-Menu-itemLabel {
+    flex: 1 1;
     padding: 4px 2px 4px 2px;
 }
 
@@ -50,6 +51,12 @@
 .p-Menu-itemSubmenuIcon {
     width: 16px;
     padding: 4px 0px;
+}
+
+.p-Menu-item {
+    display: flex;
+    align-items: center;
+    outline: none;
 }
 
 .p-Menu-item[data-type="separator"] > div {
@@ -94,6 +101,11 @@
 
 .p-Menu-itemIcon:before {
     content: attr(content);
+    font-family: "Material Icons";
+}
+
+[data-type=submenu] .lm-Menu-itemSubmenuIcon:before {
+    content: "chevron_right";
     font-family: "Material Icons";
 }
 

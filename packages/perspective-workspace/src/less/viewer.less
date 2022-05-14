@@ -1,28 +1,28 @@
 @border-color: 1px solid #eaeaea;
 
 .workspace-master-widget {
-    --settings-button--content: var(
+    --config-button-icon--content: var(
         --open-settings-button--content,
         "\1F527"
     ) !important;
 }
 
 .workspace-master-widget[settings] {
-    --settings-button--content: var(
+    --config-button-icon--content: var(
         --close-settings-button--content,
         "\1F527"
     ) !important;
 }
 
 .workspace-detail-widget.widget-maximize {
-    --settings-button--content: var(
+    --config-button-icon--content: var(
         --open-settings-button--content,
         "\1F527"
     ) !important;
 }
 
 .workspace-detail-widget.widget-maximize[settings] {
-    --settings-button--content: var(
+    --config-button-icon--content: var(
         --close-settings-button--content,
         "\1F527"
     ) !important;
@@ -36,16 +36,19 @@
 }
 
 .workspace-detail-widget {
-    --settings-button--content: "" !important;
-    --plugin--border: 1px solid #eaeaea;
+    --config-button-icon--content: "" !important;
 }
 
 .context-menu > perspective-viewer.context-focus {
     opacity: 1;
+    filter: none;
 }
 
 .context-menu > perspective-viewer {
-    opacity: 0.2;
+    filter: saturate(0);
+    & > * {
+        pointer-events: none;
+    }
 }
 
 perspective-viewer {
@@ -61,6 +64,11 @@ perspective-viewer {
     font-family: "Open Sans", Arial, sans-serif;
 }
 
-.lm-mod-override-cursor perspective-viewer regular-table {
+.lm-mod-override-cursor {
+    cursor: grabbing !important;
+}
+
+.lm-mod-override-cursor perspective-viewer > * {
     pointer-events: none;
+
 }

@@ -6,8 +6,6 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-// use crate::*;
-
 use js_sys::Array;
 use serde::Deserialize;
 use wasm_bindgen::prelude::*;
@@ -16,8 +14,8 @@ use wasm_bindgen::JsCast;
 // #[cfg(test)]
 // use wasm_bindgen_test::*;
 
-// `wasm-bindgen` only supports `JsValue` return types from `extern async fn`, so use
-// this macro to generate well-typed versions.
+// `wasm-bindgen` only supports `JsValue` return types from `extern async fn`,
+// so use this macro to generate well-typed versions.
 macro_rules! async_typed {
     (@jsvalue $sym:ident ()) => {{ $sym.await?; }};
     (@jsvalue $sym:ident f64) => { $sym.await?.as_f64().unwrap() };
@@ -95,6 +93,16 @@ extern "C" {
         options: js_sys::Object,
     ) -> Result<JsValue, JsValue>;
 
+    #[wasm_bindgen(method, catch, js_name = to_arrow)]
+    pub async fn _to_arrow(
+        this: &JsPerspectiveView,
+    ) -> Result<JsValue, JsValue>;
+
+    #[wasm_bindgen(method, catch, js_name = to_columns)]
+    pub async fn _to_columns(
+        this: &JsPerspectiveView,
+    ) -> Result<JsValue, JsValue>;
+
     #[wasm_bindgen(method, catch, js_name = num_rows)]
     pub async fn _num_rows(this: &JsPerspectiveView) -> Result<JsValue, JsValue>;
 
@@ -118,10 +126,10 @@ extern "C" {
     pub type JsPerspectiveViewConfigUpdate;
 
     // #[wasm_bindgen(method, getter)]
-    // pub fn row_pivots(this: &JsPerspectiveViewConfig) -> js_sys::Array;
+    // pub fn group_by(this: &JsPerspectiveViewConfig) -> js_sys::Array;
 
     // #[wasm_bindgen(method, getter)]
-    // pub fn column_pivots(this: &JsPerspectiveViewConfig) -> js_sys::Array;
+    // pub fn split_by(this: &JsPerspectiveViewConfig) -> js_sys::Array;
 
     pub type JsPerspectiveValidatedExpressions;
 
@@ -152,6 +160,8 @@ impl JsPerspectiveTable {
 
 impl JsPerspectiveView {
     async_typed!(_to_csv, to_csv(&self, options: js_sys::Object) -> js_sys::JsString);
+    async_typed!(_to_arrow, to_arrow(&self) -> js_sys::ArrayBuffer);
+    async_typed!(_to_columns, to_columns(&self) -> js_sys::Object);
     async_typed!(_num_rows, num_rows(&self) -> f64);
     async_typed!(_num_columns, num_columns(&self) -> f64);
     async_typed!(_schema, schema(&self) -> JsPerspectiveViewSchema);

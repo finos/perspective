@@ -1,0 +1,43 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+@import "@finos/perspective-viewer/src/less/variables.less";
+@import "@finos/perspective-viewer/src/themes/material-dark.less";
+
+@import (reference) "./material.less";
+
+perspective-workspace,
+perspective-workspace[theme="Material Dark"],
+perspective-indicator[theme="Material Dark"] {
+    --theme-name: "Material Dark";
+}
+
+perspective-workspace {
+    .perspective-workspace-material-base();
+    background-color: @grey800;
+    color: white;
+    --workspace-master--background-color: @grey800;
+    --workspace-tabbar--background-color: @grey700;
+    --workspace-tabbar--border: 1px solid @grey500;
+    --workspace-tabbar--border-color: @grey500;
+    --workspace-secondary--color: @grey60;
+}
+
+perspective-viewer[theme="Material Dark"].workspace-master-widget {
+    --plugin--background: @grey800;
+}
+
+.p-Menu {
+    font-family: "Open Sans" !important;
+    font-weight: 300 !important;
+    background: @grey700 !important;
+    color: white !important;
+    border: 1px solid @grey500 !important;
+    box-shadow: 0 2px 4px 0 rgb(0 0 0 / 10%) !important;
+}

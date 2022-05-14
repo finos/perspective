@@ -19,17 +19,18 @@ export function draggableComponent() {
 
     const draggable = (element) => {
         const node = element.node();
+        const viewer = node.getRootNode().host.closest("perspective-viewer");
         node.style.cursor = "move";
         if (settings.legend) {
             node.style.left = settings.legend.left;
             node.style.top = settings.legend.top;
         }
 
-        const drag = d3.drag().on("drag", function () {
+        const drag = d3.drag().on("drag", function (event) {
             const offsets = enforceContainerBoundaries(
                 this,
-                d3.event.dx,
-                d3.event.dy
+                event.dx,
+                event.dy
             );
             this.style.left = `${this.offsetLeft + offsets.x}px`;
             this.style.top = `${this.offsetTop + offsets.y}px`;
@@ -39,12 +40,14 @@ export function draggableComponent() {
             };
             settings.legend = {...settings.legend, ...position};
 
-            if (isNodeInTopRight(node)) {
-                pinned = pinNodeToTopRight(node);
-                return;
-            }
+            pinned = isNodeInTopRight(node)
+                ? pinNodeToTopRight(node)
+                : unpinNodeFromTopRight(node, pinned);
+        });
 
-            pinned = unpinNodeFromTopRight(node, pinned);
+        drag.on("end", function (event) {
+            d3.select(window).on(resizeForDraggingEvent, null);
+            viewer?.dispatchEvent(new Event("perspective-config-update"));
         });
 
         element.call(drag);

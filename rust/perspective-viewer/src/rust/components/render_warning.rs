@@ -8,15 +8,22 @@
 
 use crate::renderer::*;
 use crate::session::*;
+use crate::*;
 
 use wasm_bindgen_futures::future_to_promise;
 use yew::prelude::*;
 
-#[derive(Properties, Clone)]
+#[derive(Properties)]
 pub struct RenderWarningProps {
     pub dimensions: Option<(usize, usize, Option<usize>, Option<usize>)>,
     pub renderer: Renderer,
     pub session: Session,
+}
+
+impl PartialEq for RenderWarningProps {
+    fn eq(&self, other: &Self) -> bool {
+        self.dimensions == other.dimensions
+    }
 }
 
 pub enum RenderWarningMsg {
@@ -24,15 +31,13 @@ pub enum RenderWarningMsg {
 }
 
 pub struct RenderWarning {
-    props: RenderWarningProps,
-    link: ComponentLink<RenderWarning>,
     col_warn: Option<(usize, usize)>,
     row_warn: Option<(usize, usize)>,
 }
 
 impl RenderWarning {
-    fn update_warnings(&mut self) {
-        if let Some((num_cols, num_rows, max_cols, max_rows)) = self.props.dimensions {
+    fn update_warnings(&mut self, ctx: &Context<Self>) {
+        if let Some((num_cols, num_rows, max_cols, max_rows)) = ctx.props().dimensions {
             let count = num_cols * num_rows;
             if max_cols.map_or(false, |x| x < num_cols) {
                 self.col_warn = Some((max_cols.unwrap(), num_cols));
@@ -56,24 +61,21 @@ impl Component for RenderWarning {
     type Message = RenderWarningMsg;
     type Properties = RenderWarningProps;
 
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
+    fn create(ctx: &Context<Self>) -> Self {
         // enable_weak_link_test!(props, link);
         let mut elem = RenderWarning {
-            props,
-            link,
             col_warn: None,
             row_warn: None,
         };
 
-        elem.update_warnings();
+        elem.update_warnings(ctx);
         elem
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             RenderWarningMsg::DismissWarning => {
-                let renderer = self.props.renderer.clone();
-                let session = self.props.session.clone();
+                clone!(ctx.props().renderer, ctx.props().session);
                 let _promise = future_to_promise(async move {
                     renderer.disable_active_plugin_render_warning();
                     renderer.update(&session).await
@@ -83,13 +85,12 @@ impl Component for RenderWarning {
         true
     }
 
-    fn change(&mut self, props: Self::Properties) -> ShouldRender {
-        self.props = props;
-        self.update_warnings();
+    fn changed(&mut self, ctx: &Context<Self>) -> bool {
+        self.update_warnings(ctx);
         true
     }
 
-    fn view(&self) -> Html {
+    fn view(&self, ctx: &Context<Self>) -> Html {
         if self.col_warn.is_some() || self.row_warn.is_some() {
             let warning = match (self.col_warn, self.row_warn) {
                 (Some((x, y)), Some((a, b))) => html! {
@@ -120,7 +121,7 @@ impl Component for RenderWarning {
                 },
             };
 
-            let onclick = self.link.callback(|_| RenderWarningMsg::DismissWarning);
+            let onclick = ctx.link().callback(|_| RenderWarningMsg::DismissWarning);
             html! {
                 <div
                     class="plugin_information plugin_information--warning"

@@ -7,10 +7,11 @@
  *
  */
 
-import {find, toArray} from "@lumino/algorithm";
-import {Panel} from "@lumino/widgets";
+import {find, toArray} from "@lumino/algorithm/src";
+import {Panel} from "@lumino/widgets/src/panel";
+import {SplitPanel} from "@lumino/widgets/src/splitpanel";
 import {PerspectiveDockPanel} from "./dockpanel";
-import {Menu} from "@lumino/widgets";
+import {Menu} from "@lumino/widgets/src/menu";
 import {MenuRenderer} from "./menu";
 import {createCommands} from "./commands";
 
@@ -18,7 +19,6 @@ import {PerspectiveViewerWidget} from "./widget";
 import uniqBy from "lodash/uniqBy";
 import debounce from "lodash/debounce";
 import cloneDeep from "lodash/cloneDeep";
-import {DiscreteSplitPanel} from "./discrete";
 
 const DEFAULT_WORKSPACE_SIZE = [1, 3];
 
@@ -62,7 +62,7 @@ class ObservableMap extends Map {
     }
 }
 
-export class PerspectiveWorkspace extends DiscreteSplitPanel {
+export class PerspectiveWorkspace extends SplitPanel {
     constructor(element, options = {}) {
         super({orientation: "horizontal"});
 
@@ -74,14 +74,13 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         this.detailPanel.layout.fitPolicy = "set-no-constraint";
         this.detailPanel.addClass("perspective-scroll-panel");
         this.detailPanel.addWidget(this.dockpanel);
-        this.masterPanel = new DiscreteSplitPanel({orientation: "vertical"});
+        this.masterPanel = new SplitPanel({orientation: "vertical"});
         this.masterPanel.addClass("master-panel");
 
         this.dockpanel.layoutModified.connect(() => this.workspaceUpdated());
-        this.masterPanel.layoutModified.connect(() => this.workspaceUpdated());
-        this.layoutModified.connect(() => this.workspaceUpdated());
 
         this.addWidget(this.detailPanel);
+        this.spacing = 8;
 
         this.element = element;
         this._side = options.side || SIDE.LEFT;
@@ -92,10 +91,33 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         this._tables = new ObservableMap();
         this._tables.addSetListener(this._set_listener.bind(this));
         this._tables.addDeleteListener(this._delete_listener.bind(this));
-        this.commands = createCommands(this);
+        this.indicator = this.init_indicator();
+        this.commands = createCommands(this, this.indicator);
         this.menuRenderer = new MenuRenderer(this.element);
 
         this.customCommands = [];
+        element.addEventListener("contextmenu", (event) =>
+            this.showContextMenu(null, event)
+        );
+    }
+
+    init_indicator() {
+        const indicator = document.createElement("perspective-indicator");
+        indicator.style.position = "fixed";
+        indicator.style.pointerEvents = "none";
+        document.body.appendChild(indicator);
+        return indicator;
+    }
+
+    apply_indicator_theme() {
+        const theme_name = JSON.parse(
+            window
+                .getComputedStyle(this.element)
+                .getPropertyValue("--theme-name")
+                .trim()
+        );
+
+        this.indicator.setAttribute("theme", theme_name);
     }
 
     /***************************************************************************
@@ -130,6 +152,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
             const newSizes = this.relativeSizes().slice().reverse();
 
             this.detailPanel.close();
+            this.detailPanel.removeClass("has-master-panel");
             this.masterPanel.close();
 
             if (value === SIDE.LEFT) {
@@ -200,6 +223,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
             this.setupMasterPanel(sizes || DEFAULT_WORKSPACE_SIZE);
         } else {
             if (this.masterPanel.isAttached) {
+                this.detailPanel.removeClass("has-master-panel");
                 this.masterPanel.close();
             }
 
@@ -415,6 +439,12 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         }
     }
 
+    update_details_panel(viewers) {
+        if (this.masterPanel.widgets.length === 0) {
+            this.masterPanel.close();
+        }
+    }
+
     /***************************************************************************
      *
      * Workspace-level contextmenu actions
@@ -472,7 +502,6 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         this._maximizedWidget = widget;
         this.dockpanel.mode = "single-document";
         this.dockpanel.activateWidget(widget);
-        widget.notifyResize();
     }
 
     _unmaximize() {
@@ -516,8 +545,8 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
             return;
         }
         const candidates = new Set([
-            ...(config["row_pivots"] || []),
-            ...(config["column_pivots"] || []),
+            ...(config["group_by"] || []),
+            ...(config["split_by"] || []),
             ...(config.filter || []).map((x) => x[0]),
         ]);
         const filters = [...event.detail.config.filter];
@@ -569,6 +598,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         if (this.masterPanel.widgets.length === 0) {
             this.detailPanel.close();
             this.masterPanel.close();
+            this.detailPanel.removeClass("has-master-panel");
             this.addWidget(this.detailPanel);
         }
 
@@ -596,7 +626,7 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
             if (this._linkedViewers.length === 1) {
                 this.getAllWidgets().forEach(async (widget) => {
                     const config = await widget.viewer.save();
-                    if (config["row_pivots"]) {
+                    if (config["group_by"]) {
                         await widget.viewer.restore({selectable: true});
                     }
                 });
@@ -636,21 +666,112 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
             renderer: this.menuRenderer,
         });
 
-        contextMenu.addItem({command: "workspace:maximize", args: {widget}});
-        contextMenu.addItem({command: "workspace:minimize", args: {widget}});
-        contextMenu.addItem({command: "workspace:duplicate", args: {widget}});
-        contextMenu.addItem({command: "workspace:master", args: {widget}});
-        contextMenu.addItem({command: "workspace:link", args: {widget}});
+        const tabbar = find(
+            this.dockpanel.tabBars(),
+            (bar) => bar.currentTitle.owner === widget
+        );
 
-        contextMenu.addItem({type: "separator"});
+        const init_overlay = () => {
+            if (widget) {
+                widget.addClass("context-focus");
+                widget.viewer.classList.add("context-focus");
+                tabbar && tabbar.node.classList.add("context-focus");
+                this.element.classList.add("context-menu");
+                this.addClass("context-menu");
 
-        contextMenu.addItem({command: "workspace:export", args: {widget}});
-        contextMenu.addItem({command: "workspace:copy", args: {widget}});
-        contextMenu.addItem({command: "workspace:reset", args: {widget}});
+                if (
+                    widget.viewer.classList.contains("workspace-master-widget")
+                ) {
+                    contextMenu.node.classList.add("workspace-master-menu");
+                } else {
+                    contextMenu.node.classList.remove("workspace-master-menu");
+                }
+            }
+        };
 
-        contextMenu.addItem({type: "separator"});
+        contextMenu.init_overlay = init_overlay;
 
-        contextMenu.addItem({command: "workspace:close", args: {widget}});
+        if (widget?.parent === this.dockpanel || widget === null) {
+            contextMenu.addItem({
+                type: "submenu",
+                command: "workspace:newmenu",
+                submenu: (() => {
+                    const submenu = new Menu({
+                        commands: this.commands,
+                        renderer: this.menuRenderer,
+                    });
+
+                    for (const table of this.tables.keys()) {
+                        submenu.addItem({
+                            command: "workspace:new",
+                            args: {table, widget},
+                        });
+                    }
+
+                    const widgets = PerspectiveDockPanel.getWidgets(
+                        this.dockpanel.saveLayout()
+                    );
+
+                    if (widgets.length > 0) {
+                        submenu.addItem({type: "separator"});
+                    }
+
+                    let seen = new Set();
+                    for (const target_widget of widgets) {
+                        if (!seen.has(target_widget.title.label)) {
+                            submenu.addItem({
+                                command: "workspace:newview",
+                                args: {widget, target_widget},
+                            });
+
+                            seen.add(target_widget.title.label);
+                        }
+                    }
+
+                    submenu.title.label = "New Table";
+
+                    return submenu;
+                })(),
+            });
+        }
+
+        if (widget) {
+            if (widget?.parent === this.dockpanel) {
+                contextMenu.addItem({type: "separator"});
+            }
+
+            contextMenu.addItem({
+                command: "workspace:maximize",
+                args: {widget},
+            });
+            contextMenu.addItem({
+                command: "workspace:minimize",
+                args: {widget},
+            });
+            contextMenu.addItem({
+                command: "workspace:duplicate",
+                args: {widget},
+            });
+
+            contextMenu.addItem({command: "workspace:master", args: {widget}});
+            contextMenu.addItem({command: "workspace:link", args: {widget}});
+
+            contextMenu.addItem({type: "separator"});
+
+            contextMenu.addItem({command: "workspace:reset", args: {widget}});
+            contextMenu.addItem({
+                command: "workspace:export",
+                args: {contextMenu, widget, init_overlay},
+            });
+            contextMenu.addItem({
+                command: "workspace:copy",
+                args: {contextMenu, widget, init_overlay},
+            });
+
+            contextMenu.addItem({type: "separator"});
+
+            contextMenu.addItem({command: "workspace:close", args: {widget}});
+        }
 
         if (this.customCommands.length > 0) {
             contextMenu.addItem({type: "separator"});
@@ -658,36 +779,22 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
                 contextMenu.addItem({command, args: {widget}});
             });
         }
+
+        contextMenu.aboutToClose.connect(() => {
+            if (widget) {
+                this.element.classList.remove("context-menu");
+                this.removeClass("context-menu");
+                widget.removeClass("context-focus");
+                tabbar?.node?.classList.remove("context-focus");
+            }
+        });
+
         return contextMenu;
     }
 
     showContextMenu(widget, event) {
         const menu = this.createContextMenu(widget);
-        const tabbar = find(
-            this.dockpanel.tabBars(),
-            (bar) => bar.currentTitle.owner === widget
-        );
-
-        widget.addClass("context-focus");
-        widget.viewer.classList.add("context-focus");
-        tabbar && tabbar.node.classList.add("context-focus");
-        this.element.classList.add("context-menu");
-        this.addClass("context-menu");
-
-        if (widget.viewer.classList.contains("workspace-master-widget")) {
-            menu.node.classList.add("workspace-master-menu");
-        } else {
-            menu.node.classList.remove("workspace-master-menu");
-        }
-        this._menu_opened = true;
-
-        menu.aboutToClose.connect(() => {
-            this.element.classList.remove("context-menu");
-            this.removeClass("context-menu");
-            widget.removeClass("context-focus");
-            tabbar?.node?.classList.remove("context-focus");
-        });
-
+        menu.init_overlay();
         menu.open(event.clientX, event.clientY);
         event.preventDefault();
         event.stopPropagation();
@@ -706,11 +813,13 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
         this._linkedViewers = [];
 
         if (this.masterPanel.isAttached) {
+            this.detailPanel.removeClass("has-master-panel");
             this.masterPanel.close();
         }
     }
 
     setupMasterPanel(sizes) {
+        this.detailPanel.addClass("has-master-panel");
         if (this.side === SIDE.RIGHT) {
             this.addWidget(this.detailPanel);
             this.addWidget(this.masterPanel);
@@ -849,14 +958,14 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
                 const config = await event.target?.save();
                 if (config) {
                     const selectable =
-                        this._linkedViewers.length > 0 &&
-                        !!config["row_pivots"];
+                        this._linkedViewers.length > 0 && !!config["group_by"];
                     if (selectable !== !!config.selectable) {
                         event.target.restore({selectable});
                     }
                 }
             }
         };
+
         widget.node.addEventListener("contextmenu", contextMenu);
         widget.viewer.addEventListener("perspective-toggle-settings", settings);
         widget.viewer.addEventListener("perspective-config-update", updated);
@@ -864,8 +973,8 @@ export class PerspectiveWorkspace extends DiscreteSplitPanel {
             "perspective-plugin-update",
             this.workspaceUpdated
         );
-        widget.title.changed.connect(updated);
 
+        widget.title.changed.connect(updated);
         this.listeners.set(widget, () => {
             widget.node.removeEventListener("contextmenu", contextMenu);
             widget.viewer.removeEventListener(

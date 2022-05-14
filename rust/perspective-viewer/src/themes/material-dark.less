@@ -1,0 +1,135 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+@import "../less/fonts";
+@import "../less/variables";
+@import (reference) "material";
+
+// Register theme for auto-detection
+perspective-viewer,
+perspective-viewer[theme="Material Dark"] {
+    --theme-name: "Material Dark";
+}
+
+perspective-viewer[theme="Material Dark"],
+.perspective-viewer-material-dark {
+    .perspective-viewer-material();
+    .perspective-viewer-material-dark--colors();
+    .perspective-viewer-material-dark--datagrid();
+    .perspective-viewer-material-dark--d3fc();
+}
+
+perspective-copy-menu[theme="Material Dark"],
+perspective-export-menu[theme="Material Dark"],
+perspective-filter-dropdown[theme="Material Dark"],
+perspective-number-column-style[theme="Material Dark"],
+perspective-string-column-style[theme="Material Dark"],
+perspective-expression-editor[theme="Material Dark"],
+.perspective-modal-material-dark {
+    .perspective-modal-material();
+    .perspective-viewer-material-dark--colors();
+
+    background-color: @grey700;
+    border: 1px solid @grey300;
+}
+
+.perspective-viewer-material-dark--colors {
+    background-color: @grey800;
+    color: white;
+    --monaco-theme: vs-dark;
+    --active--color: #2770a9;
+    --error--color: @red50;
+    --inactive--color: @grey300;
+    --plugin--background: @grey700;
+    --modal-target--background: rgba(255, 255, 255, 0.05);
+    --select--background-color: @grey800;
+    --active--background: rgba(39, 113, 170, 0.5);
+    --expression--operator-color: @grey60;
+    --expression--function-color: @lightblue600;
+    --expression--error-color: rgb(255, 136, 136);
+    --calendar--filter: invert(1);
+    --warning--color: #333;
+
+    // Column type indicators
+    --float--column-type--color: @blue50;
+    --string--column-type--color: @red50;
+    --date--column-type--color: @green50;
+    --boolean--column-type--color: @orange50;
+}
+
+.perspective-viewer-material-dark--datagrid {
+    regular-table {
+        --rt-pos-cell--color: @blue50;
+        --rt-neg-cell--color: @red50;
+        table {
+            color: white;
+        }
+
+        table tr:hover {
+            color: white;
+        }
+
+        table tbody tr {
+            td,
+            th {
+                --rt-hover--border-color: @grey200;
+                border-top-color: @grey500;
+            }
+        }
+    }
+
+    regular-table::-webkit-scrollbar-thumb {
+        background-color: @grey500;
+    }
+
+    tbody th:empty {
+        background: linear-gradient(
+            to right,
+            transparent 9px,
+            @grey500 10px,
+            transparent 11px
+        );
+        background-repeat: no-repeat;
+        background-position: 0px -10px;
+    }
+}
+
+.perspective-viewer-material-dark--d3fc {
+    --d3fc-legend--text: @grey60;
+    --d3fc-treedata--labels: white;
+    --d3fc-treedata--hover-highlight: white;
+    --d3fc-tooltip--color: white;
+    --d3fc-axis-ticks--color: @grey60;
+    --d3fc-axis--lines: @grey200;
+    --d3fc-gridline--color: @grey500;
+    --d3fc-tooltip--background: rgba(42, 44, 47, 1);
+    --d3fc-tooltip--border-color: @grey800;
+    --d3fc-legend--background: rgba(42, 44, 47, 0.8);
+
+    --d3fc-series: rgb(71, 120, 194);
+    --d3fc-series-1: rgb(71, 120, 194);
+    --d3fc-series-2: rgb(204, 120, 48);
+    --d3fc-series-3: rgb(158, 84, 192);
+    --d3fc-series-4: rgb(51, 150, 153);
+    --d3fc-series-5: rgb(102, 114, 143);
+    --d3fc-series-6: rgb(211, 103, 189);
+    --d3fc-series-7: rgb(109, 124, 77);
+    --d3fc-series-8: rgb(221, 99, 103);
+    --d3fc-series-9: rgb(120, 104, 206);
+    --d3fc-series-10: rgb(23, 166, 123);
+
+    --d3fc-full--gradient: linear-gradient(
+        #dd6367 0%,
+        #242526 50%,
+        #3289c8 100%
+    );
+
+    --d3fc-positive--gradient: linear-gradient(#242526 0%, #3289c8 100%);
+    --d3fc-negative--gradient: linear-gradient(#dd6367 0%, #242526 100%);
+}

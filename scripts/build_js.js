@@ -15,7 +15,7 @@ try {
             ? `${process.env.PACKAGE}`
             : "*";
 
-    execute`lerna exec --scope="@finos/${scope}" -- yarn build`;
+    execute`GODEBUG=asyncpreemptoff=1 lerna exec --scope="@finos/${scope}" -- yarn build`;
 } catch (e) {
     console.log(e.message);
     process.exit(1);

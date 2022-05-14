@@ -274,7 +274,7 @@ namespace binding {
      * @return t_config
      */
     template <typename T>
-    std::shared_ptr<t_view_config> make_view_config(
+    std::shared_ptr<t_view_config> make_view_config(const t_gnode& gnode,
         std::shared_ptr<t_schema> schema, T date_parser, T config);
 
     /**

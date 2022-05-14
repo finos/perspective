@@ -145,6 +145,9 @@ t_aggspec::agg_str() const {
         case AGGTYPE_LAST_BY_INDEX: {
             return "last_by_index";
         } break;
+        case AGGTYPE_LAST_MINUS_FIRST: {
+            return "last_minus_first";
+        } break;
         case AGGTYPE_PY_AGG: {
             return "py_agg";
         } break;
@@ -163,6 +166,9 @@ t_aggspec::agg_str() const {
         case AGGTYPE_LOW_WATER_MARK: {
             return "low_water_mark";
         }
+        case AGGTYPE_HIGH_MINUS_LOW: {
+            return "high_minus_low";
+        } break;
         case AGGTYPE_UDF_COMBINER: {
             std::stringstream ss;
             ss << "udf_combiner_" << disp_name();
@@ -311,10 +317,12 @@ t_aggspec::get_output_specs(const t_schema& schema) const {
         case AGGTYPE_MEDIAN:
         case AGGTYPE_FIRST:
         case AGGTYPE_LAST_BY_INDEX:
+        case AGGTYPE_LAST_MINUS_FIRST:
         case AGGTYPE_OR:
         case AGGTYPE_LAST_VALUE:
         case AGGTYPE_HIGH_WATER_MARK:
         case AGGTYPE_LOW_WATER_MARK:
+        case AGGTYPE_HIGH_MINUS_LOW:
         case AGGTYPE_IDENTITY:
         case AGGTYPE_DISTINCT_LEAF: {
             t_dtype coltype = schema.get_dtype(m_dependencies[0].name());

@@ -13,27 +13,18 @@ namespace perspective {
 
 namespace computed_function {
 
-    using int8 = std::int8_t;
-    using int16 = std::int16_t;
-    using int32 = std::int32_t;
-    using int64 = std::int64_t;
-    using uint8 = std::uint8_t;
-    using uint16 = std::uint16_t;
-    using uint32 = std::uint32_t;
-    using uint64 = std::uint64_t;
-    using float32 = float;
-    using float64 = double;
-
-    intern::intern(std::shared_ptr<t_vocab> expression_vocab)
+    intern::intern(t_expression_vocab& expression_vocab, bool is_type_validator)
         : exprtk::igeneric_function<t_tscalar>("S")
-        , m_expression_vocab(expression_vocab) {
+        , m_expression_vocab(expression_vocab)
+        , m_is_type_validator(is_type_validator) {
+        // The sentinel is a string scalar pointing to an empty string
+        // that is stored in `expression_vocab`. Previously we were using
+        // string scalars with nullptrs to type check, which caused nullptr
+        // errors in strcmp().
         t_tscalar sentinel;
         sentinel.clear();
-
-        // The sentinel is a string scalar that is returned to indicate a
-        // valid call to the function without actually computing any values.
-        sentinel.m_type = DTYPE_STR;
-        sentinel.m_data.m_charptr = nullptr;
+        sentinel.set(m_expression_vocab.get_empty_string());
+        sentinel.m_status = STATUS_INVALID;
         m_sentinel = sentinel;
     }
 
@@ -44,43 +35,32 @@ namespace computed_function {
         t_tscalar rval;
         rval.clear();
         rval.m_type = DTYPE_STR;
-
-        std::string temp_str;
-
         t_generic_type& gt = parameters[0];
 
         // intern('abc') - with a scalar string
         t_string_view temp_string(gt);
-        temp_str = std::string(temp_string.begin(), temp_string.end()).c_str();
+        std::string temp_str
+            = std::string(temp_string.begin(), temp_string.end());
 
-        // Don't allow empty strings
-        if (temp_str == "")
-            return rval;
-
-        // If the vocab is a nullptr, we are in type checking mode - TODO might
-        // be better to make this explicit so that we never fall into an invalid
-        // mode or try to deref a nullptr, maybe with an enum or something.
-        if (m_expression_vocab == nullptr) {
+        if (m_is_type_validator) {
+            // Return the sentinel value which indicates a valid output from
+            // type checking, as the output value is not STATUS_CLEAR
             return m_sentinel;
         }
 
-        // Intern the string into the vocabulary, and return the index of the
-        // string inside the vocabulary.
-        t_uindex interned = m_expression_vocab->get_interned(temp_str);
-
-        rval.set(m_expression_vocab->unintern_c(interned));
+        // Intern the string into the vocabulary.
+        rval.set(m_expression_vocab.intern(temp_str));
         return rval;
     }
 
-    concat::concat(std::shared_ptr<t_vocab> expression_vocab)
-        : m_expression_vocab(expression_vocab) {
+    concat::concat(t_expression_vocab& expression_vocab, bool is_type_validator)
+        : m_expression_vocab(expression_vocab)
+        , m_is_type_validator(is_type_validator) {
         t_tscalar sentinel;
         sentinel.clear();
+        sentinel.set(m_expression_vocab.get_empty_string());
+        sentinel.m_status = STATUS_INVALID;
 
-        // The sentinel is a string scalar that is returned to indicate a
-        // valid call to the function without actually computing any values.
-        sentinel.m_type = DTYPE_STR;
-        sentinel.m_data.m_charptr = nullptr;
         m_sentinel = sentinel;
     }
 
@@ -99,7 +79,7 @@ namespace computed_function {
         for (auto i = 0; i < parameters.size(); ++i) {
             t_generic_type& gt = parameters[i];
 
-            if (t_generic_type::e_scalar == gt.type) {
+            if (gt.type == t_generic_type::e_scalar) {
                 t_scalar_view temp(gt);
                 t_tscalar temp_scalar = temp();
 
@@ -112,7 +92,7 @@ namespace computed_function {
 
                 // current param is the right type and we are type checking,
                 // so move on to the next param
-                if (m_expression_vocab == nullptr) {
+                if (m_is_type_validator) {
                     continue;
                 }
 
@@ -125,33 +105,29 @@ namespace computed_function {
                 result += temp_scalar.to_string();
             } else {
                 // An invalid call.
+                rval.m_status = STATUS_CLEAR;
                 return rval;
             }
         }
 
-        // don't try to intern an empty string as it will throw an error, but
-        // by this point we know the params are valid - so return the sentinel
-        // string value.
-        if (result == "" || m_expression_vocab == nullptr) {
+        // We know the params are valid - so return the sentinel string value.
+        if (result == "" || m_is_type_validator) {
             return m_sentinel;
         }
 
-        t_uindex interned = m_expression_vocab->get_interned(result);
-        rval.set(m_expression_vocab->unintern_c(interned));
-
+        rval.set(m_expression_vocab.intern(result));
         return rval;
     }
 
-    upper::upper(std::shared_ptr<t_vocab> expression_vocab)
+    upper::upper(t_expression_vocab& expression_vocab, bool is_type_validator)
         : exprtk::igeneric_function<t_tscalar>("T")
-        , m_expression_vocab(expression_vocab) {
+        , m_expression_vocab(expression_vocab)
+        , m_is_type_validator(is_type_validator) {
         t_tscalar sentinel;
         sentinel.clear();
+        sentinel.set(m_expression_vocab.get_empty_string());
+        sentinel.m_status = STATUS_INVALID;
 
-        // The sentinel is a string scalar that is returned to indicate a
-        // valid call to the function without actually computing any values.
-        sentinel.m_type = DTYPE_STR;
-        sentinel.m_data.m_charptr = nullptr;
         m_sentinel = sentinel;
     }
 
@@ -187,27 +163,25 @@ namespace computed_function {
         // don't try to intern an empty string as it will throw an error, but
         // by this point we know the params are valid - so return the sentinel
         // string value.
-        if (temp_str == "" || m_expression_vocab == nullptr) {
+        if (temp_str == "" || m_is_type_validator) {
             return m_sentinel;
         }
 
         boost::to_upper(temp_str);
 
-        t_uindex interned = m_expression_vocab->get_interned(temp_str);
-        rval.set(m_expression_vocab->unintern_c(interned));
+        rval.set(m_expression_vocab.intern(temp_str));
         return rval;
     }
 
-    lower::lower(std::shared_ptr<t_vocab> expression_vocab)
+    lower::lower(t_expression_vocab& expression_vocab, bool is_type_validator)
         : exprtk::igeneric_function<t_tscalar>("T")
-        , m_expression_vocab(expression_vocab) {
+        , m_expression_vocab(expression_vocab)
+        , m_is_type_validator(is_type_validator) {
         t_tscalar sentinel;
         sentinel.clear();
+        sentinel.set(m_expression_vocab.get_empty_string());
+        sentinel.m_status = STATUS_INVALID;
 
-        // The sentinel is a string scalar that is returned to indicate a
-        // valid call to the function without actually computing any values.
-        sentinel.m_type = DTYPE_STR;
-        sentinel.m_data.m_charptr = nullptr;
         m_sentinel = sentinel;
     }
 
@@ -242,28 +216,18 @@ namespace computed_function {
         // don't try to intern an empty string as it will throw an error, but
         // by this point we know the params are valid - so return the sentinel
         // string value.
-        if (temp_str == "" || m_expression_vocab == nullptr) {
+        if (temp_str == "" || m_is_type_validator) {
             return m_sentinel;
         }
 
         boost::to_lower(temp_str);
 
-        t_uindex interned = m_expression_vocab->get_interned(temp_str);
-        rval.set(m_expression_vocab->unintern_c(interned));
+        rval.set(m_expression_vocab.intern(temp_str));
         return rval;
     }
 
-    length::length(std::shared_ptr<t_vocab> expression_vocab)
-        : exprtk::igeneric_function<t_tscalar>("T")
-        , m_expression_vocab(expression_vocab) {
-        t_tscalar sentinel;
-        sentinel.clear();
-
-        // The sentinel is a string scalar that is returned to indicate a
-        // valid call to the function without actually computing any values.
-        sentinel.m_type = DTYPE_FLOAT64;
-        m_sentinel = sentinel;
-    }
+    length::length()
+        : exprtk::igeneric_function<t_tscalar>("T") {}
 
     length::~length() {}
 
@@ -298,24 +262,16 @@ namespace computed_function {
         }
 
         temp_str = temp_scalar.to_string();
-
-        if (m_expression_vocab == nullptr) {
-            return m_sentinel;
-        }
-
-        rval.set(static_cast<double>(temp_str.size()));
+        rval.set(static_cast<double>(temp_str.length()));
         return rval;
     }
 
-    order::order(std::shared_ptr<t_vocab> expression_vocab)
+    order::order(bool is_type_validator)
         : m_order_map({})
         , m_order_idx(0)
-        , m_expression_vocab(expression_vocab) {
+        , m_is_type_validator(is_type_validator) {
         t_tscalar sentinel;
         sentinel.clear();
-
-        // The sentinel is a string scalar that is returned to indicate a
-        // valid call to the function without actually computing any values.
         sentinel.m_type = DTYPE_FLOAT64;
         m_sentinel = sentinel;
     }
@@ -332,18 +288,45 @@ namespace computed_function {
         // uint comparisons to numeric literals and other numeric columns would
         // always be false, as comparisons are False across types.
         rval.m_type = DTYPE_FLOAT64;
-        std::string temp_str;
 
         if (parameters.size() <= 1) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        // Validate that the input column is of string type
+        const t_generic_type& input_scalar_gt = parameters[0];
+
+        // if first input is not scalar, return
+        if (input_scalar_gt.type != t_generic_type::e_scalar) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        t_scalar_view input_scalar_view(input_scalar_gt);
+        t_tscalar input_scalar = input_scalar_view();
+
+        // Invalid type
+        if (input_scalar.get_dtype() != DTYPE_STR
+            || input_scalar.m_status == STATUS_CLEAR) {
+            rval.m_status = STATUS_CLEAR;
             return rval;
         }
 
         // generate the map if not generated
         if (m_order_map.size() == 0) {
-            for (auto i = 0; i < parameters.size(); ++i) {
+            // Validate order parameters
+            for (auto i = 1; i < parameters.size(); ++i) {
                 // Because all strings are interned, there should be no string
                 // literals passed to any functions.
-                t_generic_type& gt = parameters[i];
+                const t_generic_type& gt = parameters[i];
+
+                // Make sure all params are scalars too
+                if (gt.type != t_generic_type::e_scalar) {
+                    rval.m_status = STATUS_CLEAR;
+                    return rval;
+                }
+
                 t_scalar_view temp(gt);
                 t_tscalar temp_scalar = temp();
 
@@ -356,7 +339,7 @@ namespace computed_function {
 
                 // current param is the right type and we are type checking,
                 // so move on to the next param
-                if (m_expression_vocab == nullptr) {
+                if (m_is_type_validator) {
                     continue;
                 }
 
@@ -376,10 +359,8 @@ namespace computed_function {
             }
         }
 
-        // don't try to intern an empty string as it will throw an error, but
-        // by this point we know the params are valid - so return the sentinel
-        // string value.
-        if (m_expression_vocab == nullptr) {
+        // We know the params are valid - so return the sentinel float value.
+        if (m_is_type_validator) {
             return m_sentinel;
         }
 
@@ -403,6 +384,517 @@ namespace computed_function {
             // natural sorting can be applied.
             rval.set(m_order_idx);
         }
+
+        return rval;
+    }
+
+    void
+    order::clear_order_map() {
+        m_order_map.clear();
+        m_order_idx = 0;
+    }
+
+    match::match(t_regex_mapping& regex_mapping)
+        : exprtk::igeneric_function<t_tscalar>("TS")
+        , m_regex_mapping(regex_mapping) {}
+
+    match::~match() {}
+
+    t_tscalar
+    match::operator()(t_parameter_list parameters) {
+        t_tscalar rval;
+        rval.clear();
+        rval.m_type = DTYPE_BOOL;
+
+        // Parameters already validated
+        t_scalar_view str_view(parameters[0]);
+        t_string_view pattern_view(parameters[1]);
+
+        t_tscalar str = str_view();
+        std::string match_pattern
+            = std::string(pattern_view.begin(), pattern_view.end());
+
+        // Type-check: only operate on strings, and pattern must be > size 0
+        if (str.get_dtype() != DTYPE_STR || str.m_status == STATUS_CLEAR
+            || match_pattern.size() == 0) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        RE2* compiled_pattern = m_regex_mapping.intern(match_pattern);
+
+        if (compiled_pattern == nullptr) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        if (!str.is_valid())
+            return rval;
+
+        const std::string& match_string = str.to_string();
+
+        // Get the pattern from the map and perform the match.
+        rval.set(RE2::PartialMatch(match_string, *compiled_pattern));
+
+        return rval;
+    }
+
+    match_all::match_all(t_regex_mapping& regex_mapping)
+        : exprtk::igeneric_function<t_tscalar>("TS")
+        , m_regex_mapping(regex_mapping) {}
+
+    match_all::~match_all() {}
+
+    t_tscalar
+    match_all::operator()(t_parameter_list parameters) {
+        t_tscalar rval;
+        rval.clear();
+        rval.m_type = DTYPE_BOOL;
+
+        // Parameters already validated
+        t_scalar_view str_view(parameters[0]);
+        t_string_view pattern_view(parameters[1]);
+
+        t_tscalar str = str_view();
+        std::string match_pattern
+            = std::string(pattern_view.begin(), pattern_view.end());
+
+        // Type-check: only operate on strings, and pattern must be > size 0
+        if (str.get_dtype() != DTYPE_STR || str.m_status == STATUS_CLEAR
+            || match_pattern.size() == 0) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        RE2* compiled_pattern = m_regex_mapping.intern(match_pattern);
+
+        if (compiled_pattern == nullptr) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        if (!str.is_valid())
+            return rval;
+
+        const std::string& match_string = str.to_string();
+
+        // Get the pattern from the map and perform the match.
+        rval.set(RE2::FullMatch(match_string, *compiled_pattern));
+
+        return rval;
+    }
+
+    search::search(t_expression_vocab& expression_vocab,
+        t_regex_mapping& regex_mapping, bool is_type_validator)
+        : exprtk::igeneric_function<t_tscalar>("TS")
+        , m_expression_vocab(expression_vocab)
+        , m_regex_mapping(regex_mapping)
+        , m_is_type_validator(is_type_validator) {}
+
+    search::~search() {}
+
+    t_tscalar
+    search::operator()(t_parameter_list parameters) {
+        t_tscalar rval;
+        rval.clear();
+        rval.m_type = DTYPE_STR;
+
+        // Parameters already validated
+        t_scalar_view str_view(parameters[0]);
+        t_string_view pattern_view(parameters[1]);
+
+        t_tscalar str = str_view();
+        std::string match_pattern
+            = std::string(pattern_view.begin(), pattern_view.end());
+
+        // Type-check: only operate on strings, and pattern must be > size 0
+        if (str.get_dtype() != DTYPE_STR || str.m_status == STATUS_CLEAR
+            || match_pattern.size() == 0) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        RE2* compiled_pattern = m_regex_mapping.intern(match_pattern);
+
+        if (compiled_pattern == nullptr
+            || compiled_pattern->NumberOfCapturingGroups() < 1) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        if (!str.is_valid() || m_is_type_validator)
+            return rval;
+
+        re2::StringPiece result;
+        const std::string& match_string = str.to_string();
+        bool found
+            = RE2::PartialMatch(match_string, *compiled_pattern, &result);
+
+        // Return null if no match, or if the match is size 0 - don't allow
+        // empty strings back out.
+        if (!found || result.size() == 0) {
+            return rval;
+        }
+
+        rval.set(m_expression_vocab.intern(result.ToString()));
+
+        return rval;
+    }
+
+    indexof::indexof(t_regex_mapping& regex_mapping)
+        : exprtk::igeneric_function<t_tscalar>("TSV")
+        , m_regex_mapping(regex_mapping) {}
+
+    indexof::~indexof() {}
+
+    t_tscalar
+    indexof::operator()(t_parameter_list parameters) {
+        t_tscalar rval;
+        rval.clear();
+        rval.m_type = DTYPE_BOOL;
+
+        // Parameters already validated
+        t_scalar_view str_view(parameters[0]);
+        t_string_view pattern_view(parameters[1]);
+        t_vector_view output_vector(parameters[2]);
+
+        t_tscalar str = str_view();
+        std::string match_pattern
+            = std::string(pattern_view.begin(), pattern_view.end());
+
+        // Type-check: only operate on strings, and pattern must be > size 0,
+        // and output vector must be big enough to hold the output
+        if (str.get_dtype() != DTYPE_STR || str.m_status == STATUS_CLEAR
+            || match_pattern.size() == 0 || output_vector.size() < 2) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        RE2* compiled_pattern = m_regex_mapping.intern(match_pattern);
+
+        if (compiled_pattern == nullptr
+            || compiled_pattern->NumberOfCapturingGroups() < 1) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        if (!str.is_valid())
+            return rval;
+
+        re2::StringPiece result;
+        const std::string& match_string = str.to_string();
+        bool found
+            = RE2::PartialMatch(match_string, *compiled_pattern, &result);
+
+        if (!found) {
+            // no-op on the input vector
+            rval.set(false);
+            return rval;
+        }
+
+        // re2::StringPiece::data is a ptr into the string being matched,
+        // so we can pointer math the start and end index of the match
+        std::size_t start_idx = result.data() - match_string.data();
+        std::size_t end_idx = start_idx + result.size() - 1;
+
+        if (start_idx < 0 || end_idx < 0 || end_idx >= match_string.size()
+            || (start_idx > end_idx)) {
+            rval.set(false);
+            return rval;
+        }
+
+        t_tscalar start_scalar;
+        t_tscalar end_scalar;
+
+        start_scalar.set(static_cast<double>(start_idx));
+        end_scalar.set(static_cast<double>(end_idx));
+
+        output_vector[0] = start_scalar;
+        output_vector[1] = end_scalar;
+
+        rval.set(true);
+        return rval;
+    }
+
+    substring::substring(
+        t_expression_vocab& expression_vocab, bool is_type_validator)
+        : m_expression_vocab(expression_vocab)
+        , m_is_type_validator(is_type_validator) {}
+
+    substring::~substring() {}
+
+    t_tscalar
+    substring::operator()(t_parameter_list parameters) {
+        t_tscalar rval;
+        rval.clear();
+        rval.m_type = DTYPE_STR;
+        auto num_params = parameters.size();
+
+        // substring(string, start_idx) or substring(string, start_idx, length)
+        if (num_params != 2 && num_params != 3) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        std::string search_string;
+
+        // Must be able to check for negative indices from the user -
+        // std::size_t is unsigned so a user passing in -1 is automatically
+        // cast to 0, which is incorrect as we want to detect the -1 and return
+        // null.
+        std::int64_t start_idx;
+
+        // npos == all chars until end of the string
+        std::int64_t substring_length = std::string::npos;
+
+        for (auto i = 0; i < num_params; ++i) {
+            const t_generic_type& gt = parameters[i];
+
+            if (gt.type == t_generic_type::e_scalar) {
+                t_scalar_view temp_scalar_view(gt);
+                t_tscalar temp_scalar = temp_scalar_view();
+
+                // type check - first param must be string, 2nd and 3rd param
+                // must be numeric, all must be valid
+                t_dtype dtype = temp_scalar.get_dtype();
+
+                if ((i == 0 && dtype != DTYPE_STR)
+                    || (i != 0 && !temp_scalar.is_numeric())
+                    || temp_scalar.m_status == STATUS_CLEAR) {
+                    rval.m_status = STATUS_CLEAR;
+                    return rval;
+                }
+
+                // Only check for types - bad indices will always return null
+                // but be valid expressions.
+                if (m_is_type_validator || !temp_scalar.is_valid()) {
+                    return rval;
+                }
+
+                // Passed type checking, assign values
+                if (i == 0) {
+                    search_string = temp_scalar.to_string();
+                } else if (i == 1) {
+                    start_idx = temp_scalar.to_double();
+                } else if (i == 2) {
+                    substring_length = temp_scalar.to_double();
+                }
+            } else {
+                // called with invalid params - exit
+                rval.m_status = STATUS_CLEAR;
+                return rval;
+            }
+        }
+
+        // done type checking
+        if (m_is_type_validator) {
+            return rval;
+        }
+
+        std::size_t length = search_string.length();
+
+        // Value check: strings cannot be 0 length, indices must be valid
+        if (length == 0 || start_idx < 0
+            || (num_params == 3 && substring_length < 0) || start_idx >= length
+            || (substring_length != std::string::npos
+                && start_idx + substring_length > length)) {
+            return rval;
+        }
+
+        rval.set(m_expression_vocab.intern(
+            search_string.substr(start_idx, substring_length)));
+
+        return rval;
+    }
+
+    replace::replace(t_expression_vocab& expression_vocab,
+        t_regex_mapping& regex_mapping, bool is_type_validator)
+        : exprtk::igeneric_function<t_tscalar>("TS?")
+        , m_expression_vocab(expression_vocab)
+        , m_regex_mapping(regex_mapping)
+        , m_is_type_validator(is_type_validator) {}
+
+    replace::~replace() {}
+
+    t_tscalar
+    replace::operator()(t_parameter_list parameters) {
+        t_tscalar rval;
+        rval.clear();
+        rval.m_type = DTYPE_STR;
+
+        // the string to be replaced
+        t_scalar_view string_scalar_view(parameters[0]);
+        t_tscalar string_scalar = string_scalar_view();
+
+        // the replace pattern
+        t_string_view pattern_view(parameters[1]);
+        std::string match_pattern
+            = std::string(pattern_view.begin(), pattern_view.end());
+
+        // replacer can be a string literal, for the string '' as intern does
+        // not pick up on empty strings but we need to be able to replace
+        // with empty string. Thus, type-check replacer before continuing.
+        const t_generic_type& gt(parameters[2]);
+        t_tscalar replacer_scalar;
+
+        if (gt.type == t_generic_type::e_scalar) {
+            t_scalar_view replacer_view(gt);
+            replacer_scalar = replacer_view();
+        } else if (gt.type == t_generic_type::e_string) {
+            t_string_view replacer_view(gt);
+            std::string replacer_str
+                = std::string(replacer_view.begin(), replacer_view.end());
+
+            // only the empty string should be passed in as a string literal,
+            // all other strings must be interned first.
+            if (replacer_str.size() != 0) {
+                rval.m_status = STATUS_CLEAR;
+                return rval;
+            }
+
+            // use the empty string from vocab
+            replacer_scalar.set(m_expression_vocab.get_empty_string());
+        } else {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        if (string_scalar.m_type != DTYPE_STR
+            || replacer_scalar.m_type != DTYPE_STR
+            || match_pattern.size() == 0) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        // typecheck the regex
+        RE2* compiled_pattern = m_regex_mapping.intern(match_pattern);
+
+        if (compiled_pattern == nullptr) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        // done with type_checking
+        if (m_is_type_validator)
+            return rval;
+
+        // make a copy of search_str, as replace() will mutate it and we
+        // don't want to mutate the string in the vocab
+        std::string search_string = string_scalar.to_string();
+
+        if (search_string.size() == 0)
+            return rval;
+
+        // but we can take a reference to the replacer
+        const std::string& replacer_string = replacer_scalar.to_string();
+        re2::StringPiece replacer(replacer_string);
+
+        bool replaced
+            = RE2::Replace(&(search_string), *(compiled_pattern), replacer);
+
+        if (!replaced) {
+            // Return the original result if the replacement didn't happen
+            return string_scalar;
+        }
+
+        // Or the string with the replacement set
+        rval.set(m_expression_vocab.intern(search_string));
+
+        return rval;
+    }
+
+    replace_all::replace_all(t_expression_vocab& expression_vocab,
+        t_regex_mapping& regex_mapping, bool is_type_validator)
+        : exprtk::igeneric_function<t_tscalar>("TS?")
+        , m_expression_vocab(expression_vocab)
+        , m_regex_mapping(regex_mapping)
+        , m_is_type_validator(is_type_validator) {}
+
+    replace_all::~replace_all() {}
+
+    t_tscalar
+    replace_all::operator()(t_parameter_list parameters) {
+        t_tscalar rval;
+        rval.clear();
+        rval.m_type = DTYPE_STR;
+
+        // the string to be replaced
+        t_scalar_view string_scalar_view(parameters[0]);
+        t_tscalar string_scalar = string_scalar_view();
+
+        // the replace pattern
+        t_string_view pattern_view(parameters[1]);
+        std::string match_pattern
+            = std::string(pattern_view.begin(), pattern_view.end());
+
+        // replacer can be a string literal, for the string '' as intern does
+        // not pick up on empty strings but we need to be able to replace
+        // with empty string. Thus, type-check replacer before continuing.
+        const t_generic_type& gt(parameters[2]);
+        t_tscalar replacer_scalar;
+
+        if (gt.type == t_generic_type::e_scalar) {
+            t_scalar_view replacer_view(gt);
+            replacer_scalar = replacer_view();
+        } else if (gt.type == t_generic_type::e_string) {
+            t_string_view replacer_view(gt);
+            std::string replacer_str
+                = std::string(replacer_view.begin(), replacer_view.end());
+
+            // only the empty string should be passed in as a string literal,
+            // all other strings must be interned first.
+            if (replacer_str.size() != 0) {
+                rval.m_status = STATUS_CLEAR;
+                return rval;
+            }
+
+            // use the empty string from vocab
+            replacer_scalar.set(m_expression_vocab.get_empty_string());
+        } else {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        if (string_scalar.m_type != DTYPE_STR
+            || replacer_scalar.m_type != DTYPE_STR
+            || match_pattern.size() == 0) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        // typecheck the regex
+        RE2* compiled_pattern = m_regex_mapping.intern(match_pattern);
+
+        if (compiled_pattern == nullptr) {
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        }
+
+        // done with type_checking
+        if (m_is_type_validator)
+            return rval;
+
+        // make a copy of search_str, as replace() will mutate it and we
+        // don't want to mutate the string in the vocab
+        std::string search_string = string_scalar.to_string();
+
+        if (search_string.size() == 0)
+            return rval;
+
+        // but we can take a reference to the replacer
+        const std::string& replacer_string = replacer_scalar.to_string();
+        re2::StringPiece replacer(replacer_string);
+
+        std::size_t replaced = RE2::GlobalReplace(
+            &(search_string), *(compiled_pattern), replacer);
+
+        if (replaced == 0) {
+            // Return the original result if the replacement didn't happen
+            return string_scalar;
+        }
+
+        // Or the string with the replacement set
+        rval.set(m_expression_vocab.intern(search_string));
 
         return rval;
     }
@@ -470,16 +962,16 @@ namespace computed_function {
         "03 March", "04 April", "05 May", "06 June", "07 July", "08 August",
         "09 September", "10 October", "11 November", "12 December"};
 
-    day_of_week::day_of_week(std::shared_ptr<t_vocab> expression_vocab)
+    day_of_week::day_of_week(
+        t_expression_vocab& expression_vocab, bool is_type_validator)
         : exprtk::igeneric_function<t_tscalar>("T")
-        , m_expression_vocab(expression_vocab) {
+        , m_expression_vocab(expression_vocab)
+        , m_is_type_validator(is_type_validator) {
         t_tscalar sentinel;
         sentinel.clear();
+        sentinel.set(m_expression_vocab.get_empty_string());
+        sentinel.m_status = STATUS_INVALID;
 
-        // The sentinel is a string scalar that is returned to indicate a
-        // valid call to the function without actually computing any values.
-        sentinel.m_type = DTYPE_STR;
-        sentinel.m_data.m_charptr = nullptr;
         m_sentinel = sentinel;
     }
 
@@ -508,7 +1000,7 @@ namespace computed_function {
 
         val.set(temp_scalar);
 
-        if (m_expression_vocab == nullptr) {
+        if (m_is_type_validator) {
             return m_sentinel;
         }
 
@@ -548,23 +1040,20 @@ namespace computed_function {
             result = days_of_week[(weekday - date::Sunday).count()];
         }
 
-        // Intern the string pointer so it does not fall out of reference and
-        // cause a memory error.
-        t_uindex interned = m_expression_vocab->get_interned(result);
-        rval.set(m_expression_vocab->unintern_c(interned));
+        rval.set(m_expression_vocab.intern(result));
         return rval;
     }
 
-    month_of_year::month_of_year(std::shared_ptr<t_vocab> expression_vocab)
+    month_of_year::month_of_year(
+        t_expression_vocab& expression_vocab, bool is_type_validator)
         : exprtk::igeneric_function<t_tscalar>("T")
-        , m_expression_vocab(expression_vocab) {
+        , m_expression_vocab(expression_vocab)
+        , m_is_type_validator(is_type_validator) {
         t_tscalar sentinel;
         sentinel.clear();
+        sentinel.set(m_expression_vocab.get_empty_string());
+        sentinel.m_status = STATUS_INVALID;
 
-        // The sentinel is a string scalar that is returned to indicate a
-        // valid call to the function without actually computing any values.
-        sentinel.m_type = DTYPE_STR;
-        sentinel.m_data.m_charptr = nullptr;
         m_sentinel = sentinel;
     }
 
@@ -594,7 +1083,7 @@ namespace computed_function {
 
         val.set(temp_scalar);
 
-        if (m_expression_vocab == nullptr) {
+        if (m_is_type_validator) {
             return m_sentinel;
         }
 
@@ -627,8 +1116,7 @@ namespace computed_function {
 
         // Intern the string pointer so it does not fall out of reference and
         // cause a memory error.
-        t_uindex interned = m_expression_vocab->get_interned(result);
-        rval.set(m_expression_vocab->unintern_c(interned));
+        rval.set(m_expression_vocab.intern(result));
         return rval;
     }
 
@@ -1051,7 +1539,7 @@ namespace computed_function {
         t_tscalar rval;
         rval.clear();
         rval.m_type = DTYPE_BOOL;
-        
+
         t_scalar_view _low(parameters[0]);
         t_scalar_view _val(parameters[1]);
         t_scalar_view _high(parameters[2]);
@@ -1073,7 +1561,7 @@ namespace computed_function {
         if (!low.is_valid() || !val.is_valid() || !high.is_valid()) {
             return rval;
         }
-        
+
         rval.set((low <= val) && (val <= high));
         return rval;
     }
@@ -1095,7 +1583,7 @@ namespace computed_function {
         for (auto i = 0; i < parameters.size(); ++i) {
             t_generic_type& gt = parameters[i];
 
-            if (t_generic_type::e_scalar == gt.type) {
+            if (gt.type == t_generic_type::e_scalar) {
                 t_scalar_view _temp(gt);
                 t_tscalar temp = _temp();
 
@@ -1108,8 +1596,8 @@ namespace computed_function {
                     continue;
                 }
             } else {
-                std::cerr << "[min_fn] Invalid parameter in min_fn()"
-                          << std::endl;
+                // An invalid call - needs to fail at the type check.
+                rval.m_status = STATUS_CLEAR;
                 return rval;
             }
         }
@@ -1148,7 +1636,7 @@ namespace computed_function {
         for (auto i = 0; i < parameters.size(); ++i) {
             t_generic_type& gt = parameters[i];
 
-            if (t_generic_type::e_scalar == gt.type) {
+            if (gt.type == t_generic_type::e_scalar) {
                 t_scalar_view _temp(gt);
                 t_tscalar temp = _temp();
 
@@ -1161,8 +1649,8 @@ namespace computed_function {
                     continue;
                 }
             } else {
-                std::cerr << "[max_fn] Invalid parameter in max_fn()"
-                          << std::endl;
+                // An invalid call - needs to fail at the type check.
+                rval.m_status = STATUS_CLEAR;
                 return rval;
             }
         }
@@ -1264,16 +1752,15 @@ namespace computed_function {
         return rval;
     }
 
-    to_string::to_string(std::shared_ptr<t_vocab> expression_vocab)
+    to_string::to_string(
+        t_expression_vocab& expression_vocab, bool is_type_validator)
         : exprtk::igeneric_function<t_tscalar>("T")
-        , m_expression_vocab(expression_vocab) {
+        , m_expression_vocab(expression_vocab)
+        , m_is_type_validator(is_type_validator) {
         t_tscalar sentinel;
         sentinel.clear();
-
-        // The sentinel is a string scalar that is returned to indicate a
-        // valid call to the function without actually computing any values.
-        sentinel.m_type = DTYPE_STR;
-        sentinel.m_data.m_charptr = nullptr;
+        sentinel.set(m_expression_vocab.get_empty_string());
+        sentinel.m_status = STATUS_INVALID;
         m_sentinel = sentinel;
     }
 
@@ -1300,12 +1787,11 @@ namespace computed_function {
         // don't try to intern an empty string as it will throw an error, but
         // by this point we know the params are valid - so return the sentinel
         // string value.
-        if (temp_str == "" || m_expression_vocab == nullptr) {
+        if (temp_str == "" || m_is_type_validator) {
             return m_sentinel;
         }
 
-        t_uindex interned = m_expression_vocab->get_interned(temp_str);
-        rval.set(m_expression_vocab->unintern_c(interned));
+        rval.set(m_expression_vocab.intern(temp_str));
         return rval;
     }
 
@@ -1406,11 +1892,12 @@ namespace computed_function {
     }
 
     to_boolean::to_boolean()
-    : exprtk::igeneric_function<t_tscalar>("T") {}
+        : exprtk::igeneric_function<t_tscalar>("T") {}
 
     to_boolean::~to_boolean() {}
 
-    t_tscalar to_boolean::operator()(t_parameter_list parameters) {
+    t_tscalar
+    to_boolean::operator()(t_parameter_list parameters) {
         t_tscalar val;
         t_tscalar rval;
         rval.clear();
@@ -1507,5 +1994,23 @@ namespace computed_function {
         return rval;
     }
 
+    // Set up random number generator
+    std::default_random_engine random::RANDOM_ENGINE
+        = std::default_random_engine();
+    std::uniform_real_distribution<double> random::DISTRIBUTION
+        = std::uniform_real_distribution<double>(0, 1);
+
+    random::random()
+        : exprtk::igeneric_function<t_tscalar>("Z") {}
+
+    random::~random() {}
+
+    t_tscalar
+    random::operator()(t_parameter_list parameters) {
+        t_tscalar rval;
+        rval.clear();
+        rval.set(random::DISTRIBUTION(random::RANDOM_ENGINE));
+        return rval;
+    }
 } // end namespace computed_function
 } // end namespace perspective

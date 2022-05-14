@@ -9,66 +9,72 @@
 
 <!DOCTYPE html>
 <html>
+    <head>
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
+        />
 
-<head>
+        <script src="http://localhost:8080/node_modules/perspective-viewer/dist/umd/perspective-viewer.js"></script>
+        <script src="http://localhost:8080/node_modules/perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js"></script>
+        <script src="http://localhost:8080/node_modules/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js"></script>
+        <script src="http://localhost:8080/node_modules/perspective/dist/umd/perspective.js"></script>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+        <link
+            rel="stylesheet"
+            crossorigin="anonymous"
+            href="/node_modules/@finos/perspective-viewer/dist/css/themes.css"
+        />
 
-    <script src="http://localhost:8080/node_modules/perspective-viewer/dist/umd/perspective-viewer.js"></script>
-    <script src="http://localhost:8080/node_modules/perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js"></script>
-    <script src="http://localhost:8080/node_modules/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js"></script>
-    <script src="http://localhost:8080/node_modules/perspective/dist/umd/perspective.js"></script>
+        <style>
+            perspective-viewer {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+            }
+        </style>
+    </head>
 
-    <link rel='stylesheet' href="http://localhost:8080/node_modules/perspective-viewer/dist/umd/material-dense.css">
+    <body>
+        <perspective-viewer id="viewer" ,> </perspective-viewer>
 
-    <style>
-        perspective-viewer{position:absolute;top:0;left:0;right:0;bottom:0;}
-    </style>
+        <script>
+            window.addEventListener("DOMContentLoaded", async function () {
+                const viewer = document.getElementById("viewer");
 
-</head>
+                // Create a client that expects a Perspective server to accept
+                // Websocket connections at the specified URL.
+                const websocket = perspective.websocket(
+                    "ws://localhost:8080/websocket"
+                );
 
-<body>
+                /* This shows Perspective running in "server mode": the `table`
+                variable is a proxy for the `Table` we created on the server.
+                
+                All operations that are possible through the Javascript API are
+                possible on the Python API as well, thus calling `view()`,
+                `schema()`, `update()` etc on `const table` will pass those
+                operations to the Python `Table`, execute the commands,
+                and return the result back to Javascript.
+                */
+                const table = websocket.open_table("data_source_one");
 
-    <perspective-viewer 
-        id="viewer",
-        plugin="X/Y Scatter"
-        aggregates='{
-            "high": "avg",
-            "low": "avg"
-        }'
-        columns='["high", "low"]'
-        row-pivots='["client"]'
-        column-pivots='["name"]'>
-    
-    </perspective-viewer>
-
-    <script>
-
-        window.addEventListener('DOMContentLoaded', async function () {
-            const viewer = document.getElementById('viewer');
-
-            // Create a client that expects a Perspective server to accept
-            // Websocket connections at the specified URL.
-            const websocket = perspective.websocket("ws://localhost:8080/websocket");
-
-            /* This shows Perspective running in "server mode": the `table`
-            variable is a proxy for the `Table` we created on the server.
-            
-            All operations that are possible through the Javascript API are
-            possible on the Python API as well, thus calling `view()`,
-            `schema()`, `update()` etc on `const table` will pass those
-            operations to the Python `Table`, execute the commands,
-            and return the result back to Javascript.
-            */
-            const table = websocket.open_table('data_source_one');
-
-            // Load this in the `<perspective-viewer>`.
-            viewer.load(table);
-            viewer.toggleConfig();
-        });
-
-    </script>
-
-</body>
-
+                // Load this in the `<perspective-viewer>`.
+                viewer.load(table);
+                viewer.restore({
+                    plugin: "X/Y Scatter",
+                    aggregates: {
+                        high: "avg",
+                        low: "avg",
+                    },
+                    columns: ["high", "low"],
+                    group_by: ["client"],
+                    split_by: ["name"],
+                });
+                viewer.toggleConfig();
+            });
+        </script>
+    </body>
 </html>

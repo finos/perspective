@@ -491,7 +491,7 @@ module.exports = (perspective) => {
 
                 expect(schema.expression_schema["expr"]).toBeUndefined();
                 expect(schema.errors["expr"]).toEqual({
-                    column: 63,
+                    column: 62,
                     line: 1,
                     error_message:
                         "Parser Error - Invalid expression encountered",
@@ -717,6 +717,58 @@ module.exports = (perspective) => {
             await table.delete();
         });
 
+        it("Clear() and declare string", async function () {
+            const table = await perspective.table(
+                expressions_common.int_float_data
+            );
+
+            const view = await table.view({
+                expressions: [
+                    "'hello'",
+                    "'very long string that is very long and has many characters'",
+                ],
+            });
+
+            const results = await view.to_columns();
+            expect(results["'hello'"]).toEqual([
+                "hello",
+                "hello",
+                "hello",
+                "hello",
+            ]);
+            expect(
+                results[
+                    "'very long string that is very long and has many characters'"
+                ]
+            ).toEqual([
+                "very long string that is very long and has many characters",
+                "very long string that is very long and has many characters",
+                "very long string that is very long and has many characters",
+                "very long string that is very long and has many characters",
+            ]);
+
+            await view.delete();
+            await table.clear();
+
+            table.update([expressions_common.int_float_data[0]]);
+
+            const view2 = await table.view({
+                expressions: [
+                    "'hello'",
+                    "'another very long string with many characters'",
+                ],
+            });
+
+            const results2 = await view2.to_columns();
+            expect(results2["'hello'"]).toEqual(["hello"]);
+            expect(
+                results2["'another very long string with many characters'"]
+            ).toEqual(["another very long string with many characters"]);
+
+            await view2.delete();
+            await table.delete();
+        });
+
         it("Declare numeric var", async function () {
             const table = await perspective.table(
                 expressions_common.int_float_data
@@ -790,6 +842,101 @@ module.exports = (perspective) => {
             ).toEqual(["hello", "hello", "hello", "hello"]);
 
             await view.delete();
+            await table.delete();
+        });
+
+        it("Declare string var one long one short", async function () {
+            const table = await perspective.table(
+                expressions_common.int_float_data
+            );
+            const view = await table.view({
+                expressions: [
+                    `var x := 'abcdefghijklmnop'; var y := '123'; concat(x, y)`,
+                ],
+            });
+
+            const results = await view.to_columns();
+            expect(
+                results[
+                    `var x := 'abcdefghijklmnop'; var y := '123'; concat(x, y)`
+                ]
+            ).toEqual([
+                "abcdefghijklmnop123",
+                "abcdefghijklmnop123",
+                "abcdefghijklmnop123",
+                "abcdefghijklmnop123",
+            ]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Declare string var short", async function () {
+            const table = await perspective.table(
+                expressions_common.int_float_data
+            );
+            const view = await table.view({
+                expressions: [`var x := 'abc'; var y := '123'; concat(x, y)`],
+            });
+
+            const results = await view.to_columns();
+            expect(
+                results[`var x := 'abc'; var y := '123'; concat(x, y)`]
+            ).toEqual(["abc123", "abc123", "abc123", "abc123"]);
+
+            await view.delete();
+            await table.delete();
+        });
+
+        it("Clear() and Declare string var", async function () {
+            const table = await perspective.table(
+                expressions_common.int_float_data
+            );
+            const view = await table.view({
+                expressions: [
+                    "var x := 'Eabcdefghijklmn'; var y := '0123456789'; var z := 'ABCD'; var zz := 'EFG'; concat(x, y, z, zz)",
+                ],
+            });
+
+            const results = await view.to_columns();
+            expect(
+                results[
+                    "var x := 'Eabcdefghijklmn'; var y := '0123456789'; var z := 'ABCD'; var zz := 'EFG'; concat(x, y, z, zz)"
+                ]
+            ).toEqual([
+                "Eabcdefghijklmn0123456789ABCDEFG",
+                "Eabcdefghijklmn0123456789ABCDEFG",
+                "Eabcdefghijklmn0123456789ABCDEFG",
+                "Eabcdefghijklmn0123456789ABCDEFG",
+            ]);
+
+            await view.delete();
+
+            await table.clear();
+
+            table.update([expressions_common.int_float_data[0]]);
+
+            const view2 = await table.view({
+                expressions: [
+                    "var x := 'Eabcdefghijklmn'; var y := '0123456789'; var z := 'ABCD'; var zz := 'EFG'; concat(x, y, z, zz)",
+                    "var x := 'abcdefghijklmn'; var y := 'ABCDEFG123456789'; x",
+                ],
+            });
+
+            const results2 = await view2.to_columns();
+            expect(
+                results2[
+                    "var x := 'Eabcdefghijklmn'; var y := '0123456789'; var z := 'ABCD'; var zz := 'EFG'; concat(x, y, z, zz)"
+                ]
+            ).toEqual(["Eabcdefghijklmn0123456789ABCDEFG"]);
+
+            expect(
+                results2[
+                    "var x := 'abcdefghijklmn'; var y := 'ABCDEFG123456789'; x"
+                ]
+            ).toEqual(["abcdefghijklmn"]);
+
+            await view2.delete();
             await table.delete();
         });
 
@@ -1059,6 +1206,28 @@ module.exports = (perspective) => {
             table.delete();
         });
 
+        it("Should only parse first comment as an alias", async () => {
+            const table = await perspective.table({a: [1, 2, 3]});
+            const view = await table.view({
+                expressions: [
+                    "var x := 1 + 2;\n// another comment\nx + 3 + 4 # comment",
+                ],
+            });
+            const schema = await view.expression_schema();
+            expect(schema).toEqual({
+                "var x := 1 + 2;\n// another comment\nx + 3 + 4 # comment":
+                    "float",
+            });
+            const result = await view.to_columns();
+            expect(
+                result[
+                    "var x := 1 + 2;\n// another comment\nx + 3 + 4 # comment"
+                ]
+            ).toEqual(Array(3).fill(10));
+            await view.delete();
+            await table.delete();
+        });
+
         it("Should be able to alias a real column in `view()`", async function () {
             const table = await perspective.table(
                 expressions_common.all_types_arrow.slice()
@@ -1099,7 +1268,7 @@ module.exports = (perspective) => {
                 expressions_common.int_float_data
             );
             const view = await table.view({
-                row_pivots: ["'abc'"], // checks that the strings are interned
+                group_by: ["'abc'"], // checks that the strings are interned
                 expressions: ["'abc'"],
             });
             const result = await view.to_columns();
@@ -1413,7 +1582,7 @@ module.exports = (perspective) => {
 
             const view3 = await table.view({
                 expressions: ["// new column\n100 * 100"],
-                row_pivots: ["y"],
+                group_by: ["y"],
             });
 
             const result3 = await view3.to_columns();
@@ -2073,12 +2242,12 @@ module.exports = (perspective) => {
             table.delete();
         });
 
-        it("Should be able to row pivot on a non-expression column and get correct results for the expression column.", async function () {
+        it("Should be able to group by on a non-expression column and get correct results for the expression column.", async function () {
             const table = await perspective.table(
                 expressions_common.int_float_data
             );
             const view = await table.view({
-                row_pivots: ["w"],
+                group_by: ["w"],
                 expressions: ['"w" + "x"'],
             });
             const result = await view.to_columns();
@@ -2094,12 +2263,12 @@ module.exports = (perspective) => {
             table.delete();
         });
 
-        it("Should be able to row pivot on an expression column.", async function () {
+        it("Should be able to group by on an expression column.", async function () {
             const table = await perspective.table(
                 expressions_common.int_float_data
             );
             const view = await table.view({
-                row_pivots: ['"w" + "x"'],
+                group_by: ['"w" + "x"'],
                 expressions: ['"w" + "x"'],
             });
             const result = await view.to_columns();
@@ -2122,7 +2291,7 @@ module.exports = (perspective) => {
 
             // default order
             let view = await table.view({
-                row_pivots: ["y"],
+                group_by: ["y"],
                 expressions: ['// column\n"w" + "x"'],
             });
 
@@ -2148,7 +2317,7 @@ module.exports = (perspective) => {
                 const output = expected.slice();
                 output.unshift("__ROW_PATH__");
                 view = await table.view({
-                    row_pivots: ["y"],
+                    group_by: ["y"],
                     expressions: ['// column\n"w" + "x"'],
                     columns: expected,
                 });
@@ -2161,7 +2330,7 @@ module.exports = (perspective) => {
                 const output = expected.slice();
                 output.unshift("__ROW_PATH__");
                 view = await table.view({
-                    row_pivots: ["column"],
+                    group_by: ["column"],
                     expressions: ['// column\n"w" + "x"'],
                     columns: expected,
                 });
@@ -2178,7 +2347,7 @@ module.exports = (perspective) => {
                 expressions_common.int_float_data
             );
             const config = {
-                row_pivots: ["y"],
+                group_by: ["y"],
                 expressions: ["1234"],
                 aggregates: {
                     x: "sum",
@@ -2227,12 +2396,12 @@ module.exports = (perspective) => {
             table.delete();
         });
 
-        it("Should be able to column pivot on an expression column.", async function () {
+        it("Should be able to split by on an expression column.", async function () {
             const table = await perspective.table(
                 expressions_common.int_float_data
             );
             const view = await table.view({
-                column_pivots: ['"w" + "x"'],
+                split_by: ['"w" + "x"'],
                 expressions: ['"w" + "x"'],
             });
             const result = await view.to_columns();
@@ -2262,13 +2431,13 @@ module.exports = (perspective) => {
             table.delete();
         });
 
-        it("Should be able to row + column pivot on an expression column.", async function () {
+        it("Should be able to row + split by on an expression column.", async function () {
             const table = await perspective.table(
                 expressions_common.int_float_data
             );
             const view = await table.view({
-                row_pivots: ['"w" + "x"'],
-                column_pivots: ['"w" + "x"'],
+                group_by: ['"w" + "x"'],
+                split_by: ['"w" + "x"'],
                 expressions: ['"w" + "x"'],
             });
             const result = await view.to_columns();
@@ -2306,7 +2475,7 @@ module.exports = (perspective) => {
                 z: [1.5, 2.5, 3.5, 4.5],
             });
             const view = await table.view({
-                row_pivots: ['"x" + "z"'],
+                group_by: ['"x" + "z"'],
                 aggregates: {
                     '"x" + "z"': "median",
                     x: "median",
@@ -2332,7 +2501,7 @@ module.exports = (perspective) => {
                 z: [1.5, 2.5, 3.5, 4.5],
             });
             const view = await table.view({
-                row_pivots: ["y"],
+                group_by: ["y"],
                 columns: ['"x" + "z"'],
                 aggregates: {
                     '"x" + "z"': ["weighted mean", "y"],
@@ -2355,7 +2524,7 @@ module.exports = (perspective) => {
                 z: [1.5, 2.5, 3.5, 4.5],
             });
             const view = await table.view({
-                row_pivots: ['"x"'],
+                group_by: ['"x"'],
                 aggregates: {
                     '"x"': "median",
                     x: "median",
@@ -2380,7 +2549,7 @@ module.exports = (perspective) => {
                 y: ["w", "w", "y", "w"],
             });
             const view = await table.view({
-                row_pivots: ['upper("x")'],
+                group_by: ['upper("x")'],
                 aggregates: {
                     'upper("x")': "distinct count",
                 },
@@ -2406,7 +2575,7 @@ module.exports = (perspective) => {
                 ],
             });
             const view = await table.view({
-                row_pivots: [`bucket("x", 'M')`],
+                group_by: [`bucket("x", 'M')`],
                 aggregates: {
                     "bucket(\"x\", 'M')": "distinct count",
                 },
@@ -2429,7 +2598,7 @@ module.exports = (perspective) => {
                 z: [1.5, 2.5, 3.5, 4.5],
             });
             const view = await table.view({
-                row_pivots: ['"x" + "z"'],
+                group_by: ['"x" + "z"'],
                 aggregates: {
                     x: ["weighted mean", '"x" + "z"'],
                     '"x" + "z"': ["weighted mean", "y"],
@@ -2815,6 +2984,10 @@ module.exports = (perspective) => {
                         'upper("c")',
                         `bucket("b", 'M')`,
                         `bucket("b", 's')`,
+                        `bucket("b",'M')`,
+                        `bucket("b",'s')`,
+                        `bucket("b",       'M')`,
+                        `bucket("b",       's')`,
                     ],
                 });
                 const schema = await view.expression_schema();
@@ -2827,6 +3000,10 @@ module.exports = (perspective) => {
                     'upper("c")': "string",
                     "bucket(\"b\", 'M')": "date",
                     "bucket(\"b\", 's')": "datetime",
+                    "bucket(\"b\",'M')": "date",
+                    "bucket(\"b\",'s')": "datetime",
+                    "bucket(\"b\",       'M')": "date",
+                    "bucket(\"b\",       's')": "datetime",
                 });
                 view.delete();
                 table.delete();
@@ -2839,7 +3016,7 @@ module.exports = (perspective) => {
                     c: ["a", "b", "c", "d"],
                 });
                 const view = await table.view({
-                    row_pivots: ["c"],
+                    group_by: ["c"],
                     expressions: [
                         '"a" ^ 2',
                         "sqrt(144)",
@@ -2873,7 +3050,7 @@ module.exports = (perspective) => {
                     c: ["a", "b", "c", "d"],
                 });
                 const view = await table.view({
-                    row_pivots: ["c"],
+                    group_by: ["c"],
                     aggregates: {
                         "0 and 1": "any",
                         "0 or 1": "any",
@@ -2912,8 +3089,8 @@ module.exports = (perspective) => {
                     c: ["a", "b", "c", "d"],
                 });
                 const view = await table.view({
-                    row_pivots: ["c"],
-                    column_pivots: ["a"],
+                    group_by: ["c"],
+                    split_by: ["a"],
                     expressions: [
                         '"a" ^ 2',
                         "sqrt(144)",
@@ -2947,8 +3124,8 @@ module.exports = (perspective) => {
                     c: ["a", "b", "c", "d"],
                 });
                 const view = await table.view({
-                    row_pivots: ["c"],
-                    column_pivots: ["a"],
+                    group_by: ["c"],
+                    split_by: ["a"],
                     aggregates: {
                         "0 and 1": "any",
                         "0 or 1": "any",

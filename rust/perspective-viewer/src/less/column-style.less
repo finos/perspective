@@ -10,19 +10,38 @@
 @import "./radio-list.less";
 
 :host {
-    position: absolute;
+    position: fixed;
     z-index: 10000;
     padding: 6px;
     outline: none;
-    font-family: "Open Sans";
+    background-color: #ffffff;
     font-size: 12px;
     font-weight: 300;
     border: inherit;
     box-shadow: 0 2px 4px 0 rgb(0 0 0 / 10%);
     user-select: none;
 
+    #column-style-container {
+        margin-bottom: 4px;
+        width: 120px;
+    }
+
+    label {
+        font-size: 8px;
+        width: 100%;
+    }
+
+    input#color-selected,
+    input#format-selected {
+        float: left;
+    }
+
+    input#gradient-param {
+        margin-bottom: 4px;
+    }
+
     input.parameter {
-        max-width: 65px;
+        max-width: 80px;
         background: none;
         color: inherit;
         border: 0px solid transparent;
@@ -31,7 +50,10 @@
 
     input.parameter[type="number"] {
         border-bottom-width: 1px;
-        border-color: var(--input--border-color);
+        border-color: var(
+            --input--border-color,
+            var(--inactive--color, inherit)
+        );
     }
 
     .indent {
@@ -45,55 +67,78 @@
     }
 
     input[type="checkbox"] {
-        appearance: none;
-        font-family: "Material Icons";
+        appearance: var(--column-style-checkbox--appearance, auto);
+        font-family: var(--button--font-family, inherit);
         font-size: 16px;
         text-align: center;
 
         &:checked:after {
-            content: "\E834";
+            content: var(--column-style-checkbox-checked--content, none);
         }
 
         &:not([disabled]):checked:after {
-            color: var(--active-color, red);
+            color: var(--active--color, red);
         }
 
         &:after {
-            content: "\E835";
-            color: var(--inactive-color, #999);
+            content: var(--column-style-checkbox-unchecked--content, none);
+            color: var(--inactive--color, #999);
         }
     }
 
     input[type="radio"] {
-        appearance: none;
-        font-family: "Material Icons";
+        appearance: var(--column-style-radio--appearance, auto);
+        font-family: var(--button--font-family, inherit);
         font-size: 16px;
         font-feature-settings: "liga";
         text-align: center;
 
         &:checked:after {
-            content: "radio_button_checked";
-            color: var(--active-color, red);
+            content: var(--column-style-radio-checked--content, none);
+            color: var(--active--color, red);
         }
 
         &:after {
-            content: "radio_button_unchecked";
-            color: var(--inactive-color, #999);
+            content: var(--column-style-radio-unchecked--content, none);
+            color: var(--inactive--color, #999);
         }
     }
 
     div.section {
-        margin-bottom: 8px;
+        margin-bottom: 4px;
+        flex: 1 1 100%;
+    }
+
+    div.inner_section {
+        margin-top: 4px;
     }
 
     div.row {
         display: flex;
         align-items: center;
-        height: 24px;
+        flex-wrap: wrap;
     }
 
     input[type="color"] {
-        width: 24px;
+        width: 36px;
+        height: 36px;
+        cursor: pointer;
+        padding: 0;
+        margin-right: 4px;
+
+        &:before {
+            position: absolute;
+            font-family: var(--button--font-family, inherit);
+            margin-top: 11px;
+            margin-left: 12px;
+            font-size: 12px;
+            content: var(--column-style-pos-color--content, "+");
+            color: white;
+        }
+
+        &#neg-color-param:before {
+            content: var(--column-style-neg-color--content, "-");
+        }
     }
 
     .operator {

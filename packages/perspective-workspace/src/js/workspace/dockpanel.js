@@ -7,10 +7,10 @@
  *
  */
 
-import {DockPanel} from "@lumino/widgets";
-import {DiscreteDockPanel} from "./discrete";
+import {DockPanel} from "@lumino/widgets/src/dockpanel";
 import {PerspectiveTabBar} from "./tabbar";
 import {PerspectiveTabBarRenderer} from "./tabbarrenderer";
+import {toArray} from "@lumino/algorithm/src";
 
 class PerspectiveDockPanelRenderer extends DockPanel.Renderer {
     createTabBar() {
@@ -22,7 +22,7 @@ class PerspectiveDockPanelRenderer extends DockPanel.Renderer {
     }
 }
 
-export class PerspectiveDockPanel extends DiscreteDockPanel {
+export class PerspectiveDockPanel extends DockPanel {
     constructor() {
         super({renderer: new PerspectiveDockPanelRenderer()});
         this._renderer.dock = this;
@@ -31,11 +31,20 @@ export class PerspectiveDockPanel extends DiscreteDockPanel {
     _onTabDetachRequested(sender, args) {
         super._onTabDetachRequested(sender, args);
         // blur widget on when it's being moved
-        const widget = sender.titles[0].owner;
+        const widget = sender.titles[args.index].owner;
+        const old = this.layout.saveLayout();
+        if (toArray(this.layout.widgets()).length > 1) {
+            this.layout.removeWidget(widget);
+        }
+
         widget.addClass("widget-blur");
 
         if (this._drag) {
             this._drag._promise.then(() => {
+                if (!widget.node.isConnected) {
+                    this.layout.restoreLayout(old);
+                }
+
                 widget.removeClass("widget-blur");
             });
         }

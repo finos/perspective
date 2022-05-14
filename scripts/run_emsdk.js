@@ -14,7 +14,7 @@ try {
     const cwd = process.cwd();
     const cmd = process.argv.slice(2).join(" ");
     const emsdkdir = path.join(__dirname, "..", ".emsdk");
-    execute_throw`cd ${emsdkdir} && . ./emsdk_env.sh && cd ${cwd} && ${cmd}`;
+    execute_throw`cd ${emsdkdir} && . ./emsdk_env.sh >/dev/null 2>&1 && cd ${cwd} && ${cmd}`;
 } catch (e) {
     console.log(e.message);
     process.exit(1);

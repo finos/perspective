@@ -10,8 +10,12 @@
 
 import type * as perspective from "@finos/perspective";
 
-import * as internal from "../../dist/pkg/perspective_viewer.js";
-import {WASM_MODULE} from "./init.js";
+import {
+    PerspectiveViewerElement,
+    register_plugin,
+} from "@finos/perspective-viewer/dist/pkg/perspective_viewer.js";
+
+import {WASM_MODULE} from "./init";
 
 export type PerspectiveViewerConfig = perspective.ViewConfig & {
     plugin?: string;
@@ -40,8 +44,8 @@ export type PerspectiveViewerConfig = perspective.ViewConfig & {
  * ```
  * @noInheritDoc
  */
-export class PerspectiveViewerElement extends HTMLElement {
-    private instance: internal.PerspectiveViewerElement;
+export class HTMLPerspectiveViewerElement extends HTMLElement {
+    private instance: PerspectiveViewerElement;
 
     /**
      * Should not be called directly (will throw `TypeError: Illegal
@@ -54,9 +58,9 @@ export class PerspectiveViewerElement extends HTMLElement {
     }
 
     private async load_wasm(): Promise<void> {
-        const module = await WASM_MODULE;
+        await WASM_MODULE;
         if (!this.instance) {
-            this.instance = new module.PerspectiveViewerElement(this);
+            this.instance = new PerspectiveViewerElement(this);
         }
     }
 
@@ -85,8 +89,8 @@ export class PerspectiveViewerElement extends HTMLElement {
      * ```
      */
     static async registerPlugin(name: string): Promise<void> {
-        const module = await WASM_MODULE;
-        module.register_plugin(name);
+        await WASM_MODULE;
+        register_plugin(name);
     }
 
     /**
@@ -112,40 +116,65 @@ export class PerspectiveViewerElement extends HTMLElement {
      * my_viewer.load(tbl);
      * ```
      */
-    async load(table: Promise<perspective.Table>): Promise<void> {
+    async load(
+        table: Promise<perspective.Table> | perspective.Table
+    ): Promise<void> {
         await this.load_wasm();
         await this.instance.js_load(table);
     }
 
     /**
      * Redraw this `<perspective-viewer>` and plugin when its dimensions or
-     * visibility have been updated.  This method _must_ be called in these
-     * cases, and will not by default respond to dimension or style changes to
-     * its parent container.  `notifyResize()` does not recalculate the current
-     * `View`, but all plugins will re-request the data window (which itself
-     * may be smaller or larger due to resize).
+     * visibility has been updated.  By default, `<perspective-viewer>` will
+     * auto-size when its own dimensions change, so this method need not be
+     * called;  when disabled via `setAutoSize(false)` however, this method
+     * _must_ be called, and will not respond to dimension or style changes to
+     * its parent container otherwise.  `notifyResize()` does not recalculate
+     * the current `View`, but all plugins will re-request the data window
+     * (which itself may be smaller or larger due to resize).
      *
      * @category Util
+     * @param force Whether to re-render, even if the dimenions have not
+     * changed.  When set to `false` and auto-size is enabled (the defaults),
+     * calling this method will automatically disable auto-size.
      * @returns A `Promise<void>` which resolves when this resize event has
      * finished rendering.
      * @example <caption>Bind `notfyResize()` to browser dimensions</caption>
      * ```javascript
      * const viewer = document.querySelector("perspective-viewer");
+     * viewer.setAutoSize(false);
      * window.addEventListener("resize", () => viewer.notifyResize());
      * ```
      */
-    async notifyResize(): Promise<void> {
+    async notifyResize(force = false): Promise<void> {
         await this.load_wasm();
-        await this.instance.js_resize();
+        await this.instance.js_resize(force);
     }
 
     /**
-     * Returns the `perspective.Table()` which was supplied to `load()`.  If
-     * `load()` has been called but the supplied `Promise<perspective.Table>`
-     * has not resolved, `getTable()` will `await`;  if `load()` has not yet
-     * been called, an `Error` will be thrown.
+     * Determines the auto-size behavior.  When `true` (the default), this
+     * element will re-render itself whenever its own dimensions change,
+     * utilizing a `ResizeObserver`;  when `false`, you must explicitly call
+     * `notifyResize()` when the element's dimensions have changed.
      *
+     * @category Util
+     * @param autosize Whether to re-render when this element's dimensions
+     * change.
+     * @example <caption>Disable auto-size</caption>
+     * ```javascript
+     * await viewer.setAutoSize(false);
+     * ```
+     */
+    async setAutoSize(autosize = true): Promise<void> {
+        await this.load_wasm();
+        await this.instance.js_set_auto_size(autosize);
+    }
+
+    /**
+     * Returns the `perspective.Table()` which was supplied to `load()`
      * @category Data
+     * @param wait_for_table Whether to await `load()` if it has not yet been
+     * invoked, or fail immediately.
      * @returns A `Promise` which resolves to a `perspective.Table`
      * @example <caption>Share a `Table`</caption>
      * ```javascript
@@ -155,10 +184,34 @@ export class PerspectiveViewerElement extends HTMLElement {
      * await viewer2.load(table);
      * ```
      */
-    async getTable(): Promise<perspective.Table> {
+    async getTable(wait_for_table?: boolean): Promise<perspective.Table> {
         await this.load_wasm();
-        const table = await this.instance.js_get_table();
+        const table = await this.instance.js_get_table(!!wait_for_table);
         return table;
+    }
+
+    /**
+     * Returns the underlying `perspective.View` currently configured for this
+     * `<perspective-viewer>`.  Because ownership of the `perspective.View` is
+     * mainainted by the `<perspective-viewer>` it was created by, this `View`
+     * may become deleted (invalidated by calling `delete()`) at any time -
+     * specifically, it will be deleted whenever the `PerspectiveViewConfig`
+     * changes.  Because of this, when using this API, prefer calling
+     * `getView()` repeatedly over caching the returned `perspective.View`,
+     * especially in `async` contexts.
+     * @category Data
+     * @returns A `Promise` which ressolves to a `perspective.View`.
+     * @example <caption>Collapse grid to root</caption>
+     * ```javascript
+     * const viewer = document.querySelector("perspective-viewer");
+     * const view = await viewer.getView();
+     * await view.set_depth(0);
+     * ```
+     */
+    async getView(): Promise<perspective.View> {
+        await this.load_wasm();
+        const view = await this.instance.js_get_view();
+        return view;
     }
 
     /**
@@ -251,7 +304,7 @@ export class PerspectiveViewerElement extends HTMLElement {
      * @example <caption>Flush an unawaited `restore()`</caption>
      * ```javascript
      * const viewer = document.querySelector("perspective-viewer");
-     * viewer.restore({row_pivots: ["State"]});
+     * viewer.restore({group_by: ["State"]});
      * await viewer.flush();
      * console.log("Viewer has been rendered with a pivot!");
      * ```
@@ -267,15 +320,16 @@ export class PerspectiveViewerElement extends HTMLElement {
      * state.
      *
      * @category Persistence
+     * @param all Should `expressions` param be reset as well, defaults to
      * @example
      * ```javascript
      * const viewer = document.querySelector("perspective-viewer");
      * await viewer.reset();
      * ```
      */
-    async reset(): Promise<void> {
+    async reset(all = false): Promise<void> {
         await this.load_wasm();
-        await this.instance.js_reset();
+        await this.instance.js_reset(all);
     }
 
     /**
@@ -339,6 +393,30 @@ export class PerspectiveViewerElement extends HTMLElement {
     async restyleElement(): Promise<void> {
         await this.load_wasm();
         await this.instance.js_restyle_element();
+    }
+
+    /**
+     * Sets the theme names available via the `<perspective-viewer>` status bar
+     * UI.  Typically these will be auto-detected simply by including the
+     * theme `.css` in a `<link>` tag;  however, auto-detection can fail if
+     * the `<link>` tag is not a same-origin request due to CORS.  For servers
+     * configured to allow cross-origin requests, you can use the
+     * [`crossorigin` attribute](https://html.spec.whatwg.org/multipage/semantics.html#attr-link-crossorigin)
+     * to enable detection, e.g. `<link crossorigin="anonymous" .. >`.  If for
+     * whatever reason auto-detection still fails, you may set the themes via
+     * this method.  Note the theme `.css` must still be loaded in this case -
+     * the `resetThemes()` method only lets the `<perspective-viewer>` know what
+     * theme names are available.
+     * @param Util
+     * @example
+     * ```javascript
+     * const viewer = document.querySelector("perspective-viewer");
+     * await viewer.resetThemes(["Material Light", "Material Dark"]);
+     * ```
+     */
+    async resetThemes(themes: Array<string>): Promise<void> {
+        await this.load_wasm();
+        await this.instance.js_reset_themes(themes);
     }
 
     /**
@@ -434,6 +512,11 @@ export class PerspectiveViewerElement extends HTMLElement {
         return plugin;
     }
 
+    async unsafe_get_model(): Promise<number> {
+        await this.load_wasm();
+        return await this.instance.js_unsafe_get_model();
+    }
+
     /**
      * Get all plugin custom element instances, in order of registration.
      *
@@ -455,6 +538,6 @@ export class PerspectiveViewerElement extends HTMLElement {
 if (document.createElement("perspective-viewer").constructor === HTMLElement) {
     window.customElements.define(
         "perspective-viewer",
-        PerspectiveViewerElement
+        HTMLPerspectiveViewerElement
     );
 }

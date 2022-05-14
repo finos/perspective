@@ -205,15 +205,24 @@ namespace binding {
     to_arrow(std::shared_ptr<View<CTX_T>> view, std::int32_t start_row,
         std::int32_t end_row, std::int32_t start_col, std::int32_t end_col) {
         std::shared_ptr<std::string> s
-            = view->to_arrow(start_row, end_row, start_col, end_col);
+            = view->to_arrow(start_row, end_row, start_col, end_col, true);
         return str_to_arraybuffer(s)["buffer"];
+    }
+
+    template <typename CTX_T>
+    t_val
+    to_csv(std::shared_ptr<View<CTX_T>> view, std::int32_t start_row,
+        std::int32_t end_row, std::int32_t start_col, std::int32_t end_col) {
+        std::shared_ptr<std::string> s
+            = view->to_csv(start_row, end_row, start_col, end_col);
+        return t_val(*s);
     }
 
     template <typename CTX_T>
     t_val
     get_row_delta(std::shared_ptr<View<CTX_T>> view) {
         auto slice = view->get_row_delta();
-        auto row_delta = view->data_slice_to_arrow(slice);
+        auto row_delta = view->data_slice_to_arrow(slice, false);
         return str_to_arraybuffer(row_delta)["buffer"];
     }
 
@@ -740,15 +749,17 @@ namespace binding {
 
     void
     _fill_col_time(t_data_accessor accessor, std::shared_ptr<t_column> col,
-        std::string name, std::int32_t cidx, t_dtype type, bool is_update) {
+        std::string name, std::int32_t cidx, t_dtype type, bool is_update,
+        bool is_limit) {
         t_uindex nrows = col->size();
         for (auto i = 0; i < nrows; ++i) {
             t_val item = accessor.call<t_val>("marshal", cidx, i, type);
+            bool is_undefined = item.isUndefined();
 
-            if (item.isUndefined())
+            if (is_undefined && !is_limit)
                 continue;
 
-            if (item.isNull()) {
+            if (item.isNull() || is_undefined) {
                 if (is_update) {
                     col->unset(i);
                 } else {
@@ -771,15 +782,16 @@ namespace binding {
     void
     _fill_col_date(t_data_accessor accessor, std::shared_ptr<t_column> col,
         const std::string& name, std::int32_t cidx, t_dtype type,
-        bool is_update) {
+        bool is_update, bool is_limit) {
         t_uindex nrows = col->size();
         for (auto i = 0; i < nrows; ++i) {
             t_val item = accessor.call<t_val>("marshal", cidx, i, type);
+            bool is_undefined = item.isUndefined();
 
-            if (item.isUndefined())
+            if (is_undefined && !is_limit)
                 continue;
 
-            if (item.isNull()) {
+            if (item.isNull() || is_undefined) {
                 if (is_update) {
                     col->unset(i);
                 } else {
@@ -802,15 +814,16 @@ namespace binding {
     void
     _fill_col_bool(t_data_accessor accessor, std::shared_ptr<t_column> col,
         const std::string& name, std::int32_t cidx, t_dtype type,
-        bool is_update) {
+        bool is_update, bool is_limit) {
         t_uindex nrows = col->size();
         for (auto i = 0; i < nrows; ++i) {
             t_val item = accessor.call<t_val>("marshal", cidx, i, type);
+            bool is_undefined = item.isUndefined();
 
-            if (item.isUndefined())
+            if (is_undefined && !is_limit)
                 continue;
 
-            if (item.isNull()) {
+            if (item.isNull() || is_undefined) {
                 if (is_update) {
                     col->unset(i);
                 } else {
@@ -827,15 +840,16 @@ namespace binding {
     void
     _fill_col_string(t_data_accessor accessor, std::shared_ptr<t_column> col,
         const std::string& name, std::int32_t cidx, t_dtype type,
-        bool is_update) {
+        bool is_update, bool is_limit) {
         t_uindex nrows = col->size();
         for (auto i = 0; i < nrows; ++i) {
             t_val item = accessor.call<t_val>("marshal", cidx, i, type);
+            bool is_undefined = item.isUndefined();
 
-            if (item.isUndefined())
+            if (is_undefined && !is_limit)
                 continue;
 
-            if (item.isNull()) {
+            if (item.isNull() || is_undefined) {
                 if (is_update) {
                     col->unset(i);
                 } else {
@@ -851,15 +865,16 @@ namespace binding {
     void
     _fill_col_int64(t_data_accessor accessor, t_data_table& tbl,
         std::shared_ptr<t_column> col, const std::string& name,
-        std::int32_t cidx, t_dtype type, bool is_update) {
+        std::int32_t cidx, t_dtype type, bool is_update, bool is_limit) {
         t_uindex nrows = col->size();
         for (auto i = 0; i < nrows; ++i) {
             t_val item = accessor.call<t_val>("marshal", cidx, i, type);
+            bool is_undefined = item.isUndefined();
 
-            if (item.isUndefined())
+            if (is_undefined && !is_limit)
                 continue;
 
-            if (item.isNull()) {
+            if (item.isNull() || is_undefined) {
                 if (is_update) {
                     col->unset(i);
                 } else {
@@ -876,7 +891,7 @@ namespace binding {
                 tbl.promote_column(name, DTYPE_STR, i, false);
                 col = tbl.get_column(name);
                 _fill_col_string(
-                    accessor, col, name, cidx, DTYPE_STR, is_update);
+                    accessor, col, name, cidx, DTYPE_STR, is_update, is_limit);
                 return;
             } else {
                 col->set_nth(i, static_cast<std::int64_t>(fval));
@@ -887,15 +902,16 @@ namespace binding {
     void
     _fill_col_numeric(t_data_accessor accessor, t_data_table& tbl,
         std::shared_ptr<t_column> col, const std::string& name,
-        std::int32_t cidx, t_dtype type, bool is_update) {
+        std::int32_t cidx, t_dtype type, bool is_update, bool is_limit) {
         t_uindex nrows = col->size();
         for (auto i = 0; i < nrows; ++i) {
             t_val item = accessor.call<t_val>("marshal", cidx, i, type);
+            bool is_undefined = item.isUndefined();
 
-            if (item.isUndefined())
+            if (is_undefined && !is_limit)
                 continue;
 
-            if (item.isNull()) {
+            if (item.isNull() || is_undefined) {
                 if (is_update) {
                     col->unset(i);
                 } else {
@@ -930,8 +946,8 @@ namespace binding {
                                   << "` is nan" << std::endl;
                         tbl.promote_column(name, DTYPE_STR, i, false);
                         col = tbl.get_column(name);
-                        _fill_col_string(
-                            accessor, col, name, cidx, DTYPE_STR, is_update);
+                        _fill_col_string(accessor, col, name, cidx, DTYPE_STR,
+                            is_update, is_limit);
                         return;
                     } else {
                         col->set_nth(i, static_cast<std::int32_t>(fval));
@@ -1025,30 +1041,34 @@ namespace binding {
     void
     _fill_data_helper(t_data_accessor accessor, t_data_table& tbl,
         std::shared_ptr<t_column> col, const std::string& name,
-        std::int32_t cidx, t_dtype type, bool is_update) {
+        std::int32_t cidx, t_dtype type, bool is_update, bool is_limit) {
         switch (type) {
             case DTYPE_INT64: {
                 _fill_col_int64(
-                    accessor, tbl, col, name, cidx, type, is_update);
+                    accessor, tbl, col, name, cidx, type, is_update, is_limit);
             } break;
             case DTYPE_BOOL: {
-                _fill_col_bool(accessor, col, name, cidx, type, is_update);
+                _fill_col_bool(
+                    accessor, col, name, cidx, type, is_update, is_limit);
             } break;
             case DTYPE_DATE: {
-                _fill_col_date(accessor, col, name, cidx, type, is_update);
+                _fill_col_date(
+                    accessor, col, name, cidx, type, is_update, is_limit);
             } break;
             case DTYPE_TIME: {
-                _fill_col_time(accessor, col, name, cidx, type, is_update);
+                _fill_col_time(
+                    accessor, col, name, cidx, type, is_update, is_limit);
             } break;
             case DTYPE_STR: {
-                _fill_col_string(accessor, col, name, cidx, type, is_update);
+                _fill_col_string(
+                    accessor, col, name, cidx, type, is_update, is_limit);
             } break;
             case DTYPE_NONE: {
                 break;
             }
             default:
                 _fill_col_numeric(
-                    accessor, tbl, col, name, cidx, type, is_update);
+                    accessor, tbl, col, name, cidx, type, is_update, is_limit);
         }
     }
 
@@ -1057,6 +1077,7 @@ namespace binding {
         const t_schema& input_schema, const std::string& index,
         std::uint32_t offset, std::uint32_t limit, bool is_update) {
         bool implicit_index = false;
+        bool is_limit = limit != UINT32_MAX;
         std::vector<std::string> col_names(input_schema.columns());
         std::vector<t_dtype> data_types(input_schema.types());
 
@@ -1069,13 +1090,14 @@ namespace binding {
                 std::shared_ptr<t_column> pkey_col_sptr
                     = tbl.add_column_sptr("psp_pkey", type, true);
                 _fill_data_helper(dcol, tbl, pkey_col_sptr, "psp_pkey", cidx,
-                    type, is_update);
+                    type, is_update, is_limit);
                 tbl.clone_column("psp_pkey", "psp_okey");
                 continue;
             }
 
             auto col = tbl.get_column(name);
-            _fill_data_helper(dcol, tbl, col, name, cidx, type, is_update);
+            _fill_data_helper(
+                dcol, tbl, col, name, cidx, type, is_update, is_limit);
         }
 
         // Fill index column - recreated every time a `t_data_table` is created.
@@ -1426,13 +1448,12 @@ namespace binding {
 
     template <>
     std::shared_ptr<t_view_config>
-    make_view_config(
-        std::shared_ptr<t_schema> schema, t_val date_parser, t_val config) {
+    make_view_config(const t_gnode& gnode, std::shared_ptr<t_schema> schema,
+        t_val date_parser, t_val config) {
         // extract vectors from JS, where they were created
-        auto row_pivots
-            = config.call<std::vector<std::string>>("get_row_pivots");
+        auto row_pivots = config.call<std::vector<std::string>>("get_group_by");
         auto column_pivots
-            = config.call<std::vector<std::string>>("get_column_pivots");
+            = config.call<std::vector<std::string>>("get_split_by");
         auto columns = config.call<std::vector<std::string>>("get_columns");
         auto sort
             = config.call<std::vector<std::vector<std::string>>>("get_sort");
@@ -1469,6 +1490,10 @@ namespace binding {
             = config.call<std::vector<std::vector<t_val>>>("get_expressions");
         std::vector<std::shared_ptr<t_computed_expression>> expressions;
         expressions.reserve(js_expressions.size());
+
+        t_expression_vocab& expression_vocab = *(gnode.get_expression_vocab());
+        t_regex_mapping& regex_mapping
+            = *(gnode.get_expression_regex_mapping());
 
         // Will either abort() or succeed completely, and this isn't a public
         // API so we can directly index for speed.
@@ -1509,7 +1534,7 @@ namespace binding {
             std::shared_ptr<t_computed_expression> expression
                 = t_computed_expression_parser::precompute(expression_alias,
                     expression_string, parsed_expression_string, column_ids,
-                    schema);
+                    schema, expression_vocab, regex_mapping);
 
             schema->add_column(expression_alias, expression->get_dtype());
             expressions.push_back(expression);
@@ -1552,14 +1577,14 @@ namespace binding {
         view_config->init(schema);
 
         // set pivot depths if provided
-        if (has_value(config["row_pivot_depth"])) {
+        if (has_value(config["group_by_depth"])) {
             view_config->set_row_pivot_depth(
-                config["row_pivot_depth"].as<std::int32_t>());
+                config["group_by_depth"].as<std::int32_t>());
         }
 
-        if (has_value(config["column_pivot_depth"])) {
+        if (has_value(config["split_by_depth"])) {
             view_config->set_column_pivot_depth(
-                config["column_pivot_depth"].as<std::int32_t>());
+                config["split_by_depth"].as<std::int32_t>());
         }
 
         return view_config;
@@ -1573,8 +1598,13 @@ namespace binding {
         // `make_view_config`.
         std::shared_ptr<t_schema> schema
             = std::make_shared<t_schema>(table->get_schema());
+
+        // Pass the gnode into `make_view_config` so we can use its vocab to
+        // validate expressions.
+        const t_gnode& gnode = *(table->get_gnode());
+
         std::shared_ptr<t_view_config> config
-            = make_view_config<t_val>(schema, date_parser, view_config);
+            = make_view_config<t_val>(gnode, schema, date_parser, view_config);
 
         auto ctx = make_context<CTX_T>(table, schema, config, name);
 
@@ -2267,6 +2297,10 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("to_arrow_zero", &to_arrow<t_ctx0>);
     function("to_arrow_one", &to_arrow<t_ctx1>);
     function("to_arrow_two", &to_arrow<t_ctx2>);
+    function("to_csv_unit", &to_csv<t_ctxunit>);
+    function("to_csv_zero", &to_csv<t_ctx0>);
+    function("to_csv_one", &to_csv<t_ctx1>);
+    function("to_csv_two", &to_csv<t_ctx2>);
     function("get_row_delta_unit", &get_row_delta<t_ctxunit>);
     function("get_row_delta_zero", &get_row_delta<t_ctx0>);
     function("get_row_delta_one", &get_row_delta<t_ctx1>);

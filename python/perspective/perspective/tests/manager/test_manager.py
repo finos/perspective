@@ -148,7 +148,7 @@ class TestPerspectiveManager(object):
         assert manager._views["view1"].num_rows() == 3
 
     def test_manager_create_view_one(self):
-        message = {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view", "config": {"row_pivots": ["a"]}}
+        message = {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view", "config": {"group_by": ["a"]}}
         manager = PerspectiveManager()
         table = Table(data)
         manager.host_table("table1", table)
@@ -160,7 +160,7 @@ class TestPerspectiveManager(object):
         }
 
     def test_manager_create_view_two(self):
-        message = {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view", "config": {"row_pivots": ["a"], "column_pivots": ["b"]}}
+        message = {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view", "config": {"group_by": ["a"], "split_by": ["b"]}}
         manager = PerspectiveManager()
         table = Table(data)
         manager.host_table("table1", table)
@@ -317,7 +317,7 @@ class TestPerspectiveManager(object):
             }
         })
 
-        make_view_message = {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view", "config": {"row_pivots": ["a"]}}
+        make_view_message = {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view", "config": {"group_by": ["a"]}}
         message = {"id": 2, "name": "view1", "cmd": "view_method", "method": "schema", "args": [False]}
         manager = PerspectiveManager()
         table = Table(data)

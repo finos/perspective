@@ -13,9 +13,6 @@
 #include <perspective/flat_traversal.h>
 #include <perspective/scalar.h>
 #include <perspective/schema.h>
-#ifdef PSP_PARALLEL_FOR
-#include <tbb/parallel_sort.h>
-#endif
 
 namespace perspective {
 

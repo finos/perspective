@@ -12,11 +12,6 @@ import * as gparser from "gradient-parser";
 
 export const initialiseStyles = (container, settings) => {
     if (!settings.colorStyles) {
-        const data = ["series"];
-        for (let n = 1; n <= 10; n++) {
-            data.push(`series-${n}`);
-        }
-
         const styles = {
             scheme: [],
             gradient: {},
@@ -25,20 +20,24 @@ export const initialiseStyles = (container, settings) => {
         };
 
         const computed = computedStyle(container);
-        data.forEach((d, i) => {
-            styles[d] = computed(`--d3fc-${d}`);
-
-            if (i > 0) {
-                styles.scheme.push(styles[d]);
+        styles["series"] = computed(`--d3fc-local-series`);
+        for (let i = 1; ; i++) {
+            const key = `series-${i}`;
+            const color = computed(`--d3fc-local-${key}`);
+            if (!color) {
+                break;
             }
-        });
+
+            styles[key] = color;
+            styles.scheme.push(color);
+        }
 
         styles.opacity = getOpacityFromColor(styles.series);
         styles.grid.gridLineColor = computed`--d3fc-gridline--color`;
 
         const gradients = ["full", "positive", "negative"];
         gradients.forEach((g) => {
-            const gradient = computed(`--d3fc-${g}--gradient`);
+            const gradient = computed(`--d3fc-local-${g}--gradient`);
             styles.gradient[g] = parseGradient(gradient, styles.opacity);
         });
 
@@ -57,12 +56,8 @@ const stepAsColor = (value, opacity) => {
 };
 
 const computedStyle = (container) => {
-    if (window.ShadyCSS) {
-        return (d) => window.ShadyCSS.getComputedStyleValue(container, d);
-    } else {
-        const containerStyles = getComputedStyle(container);
-        return (d) => containerStyles.getPropertyValue(d);
-    }
+    const containerStyles = getComputedStyle(container);
+    return (d) => containerStyles?.getPropertyValue(d);
 };
 
 const parseGradient = (gradient, opacity) => {

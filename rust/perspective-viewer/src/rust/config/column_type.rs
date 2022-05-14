@@ -9,7 +9,7 @@
 use serde::Deserialize;
 use std::fmt::Display;
 
-#[derive(Deserialize, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Deserialize, Clone, Copy, PartialEq, PartialOrd, Eq, Ord)]
 pub enum Type {
     #[serde(rename = "string")]
     String,
@@ -31,21 +31,14 @@ pub enum Type {
 }
 
 impl Display for Type {
-    fn fmt(
-        &self,
-        fmt: &mut std::fmt::Formatter<'_>,
-    ) -> std::result::Result<(), std::fmt::Error> {
-        write!(
-            fmt,
-            "{}",
-            match self {
-                Type::String => "string",
-                Type::Integer => "integer",
-                Type::Float => "float",
-                Type::Bool => "boolean",
-                Type::Date => "date",
-                Type::Datetime => "datetime",
-            }
-        )
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
+        write!(fmt, "{}", match self {
+            Type::String => "string",
+            Type::Integer => "integer",
+            Type::Float => "float",
+            Type::Bool => "boolean",
+            Type::Date => "date",
+            Type::Datetime => "datetime",
+        })
     }
 }

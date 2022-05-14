@@ -46,32 +46,25 @@ pub enum SortDir {
 }
 
 impl Display for SortDir {
-    fn fmt(
-        &self,
-        fmt: &mut std::fmt::Formatter<'_>,
-    ) -> std::result::Result<(), std::fmt::Error> {
-        write!(
-            fmt,
-            "{}",
-            match self {
-                SortDir::None => "none",
-                SortDir::Desc => "desc",
-                SortDir::Asc => "asc",
-                SortDir::ColDesc => "col desc",
-                SortDir::ColAsc => "col asc",
-                SortDir::DescAbs => "desc abs",
-                SortDir::AscAbs => "asc abs",
-                SortDir::ColDescAbs => "col desc abs",
-                SortDir::ColAscAbs => "col asc abs",
-            }
-        )
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
+        write!(fmt, "{}", match self {
+            SortDir::None => "none",
+            SortDir::Desc => "desc",
+            SortDir::Asc => "asc",
+            SortDir::ColDesc => "col desc",
+            SortDir::ColAsc => "col asc",
+            SortDir::DescAbs => "desc abs",
+            SortDir::AscAbs => "asc abs",
+            SortDir::ColDescAbs => "col desc abs",
+            SortDir::ColAscAbs => "col asc abs",
+        })
     }
 }
 
 impl SortDir {
     /// Increment the `SortDir` in logical order, given an `abs()` modifier.
-    pub fn cycle(&self, col_pivots: bool, abs: bool) -> SortDir {
-        let order: &[SortDir] = match (col_pivots, abs) {
+    pub fn cycle(&self, split_by: bool, abs: bool) -> SortDir {
+        let order: &[SortDir] = match (split_by, abs) {
             (false, false) => &[SortDir::None, SortDir::Asc, SortDir::Desc],
             (false, true) => &[SortDir::None, SortDir::AscAbs, SortDir::DescAbs],
             (true, false) => &[

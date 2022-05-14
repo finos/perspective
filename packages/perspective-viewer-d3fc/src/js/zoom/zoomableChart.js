@@ -26,8 +26,8 @@ export default () => {
         const chartPlotArea = `d3fc-${canvas ? "canvas" : "svg"}.plot-area`;
         if (xScale || yScale) {
             const dateAxis = xCopy && xCopy.domain()[0] instanceof Date;
-            const zoom = d3.zoom().on("zoom", () => {
-                const {transform} = d3.event;
+            const zoom = d3.zoom().on("zoom", (event) => {
+                const {transform} = event;
                 settings.zoom = {
                     k: transform.k,
                     x: transform.x,
@@ -115,11 +115,22 @@ export default () => {
                     bound = true;
                     // add the zoom interaction on the enter selection
                     const plotArea = sel.select(chartPlotArea);
+                    const device_pixel_factor = canvas
+                        ? window.devicePixelRatio
+                        : 1;
 
                     plotArea
-                        .on("measure.zoom-range", () => {
-                            if (xCopy) xCopy.range([0, d3.event.detail.width]);
-                            if (yCopy) yCopy.range([0, d3.event.detail.height]);
+                        .on("measure.zoom-range", (event) => {
+                            if (xCopy)
+                                xCopy.range([
+                                    0,
+                                    event.detail.width / device_pixel_factor,
+                                ]);
+                            if (yCopy)
+                                yCopy.range([
+                                    0,
+                                    event.detail.height / device_pixel_factor,
+                                ]);
 
                             if (settings.zoom) {
                                 const initialTransform = d3.zoomIdentity

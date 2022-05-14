@@ -9,29 +9,27 @@
 use crate::components::expression_editor::*;
 use crate::custom_elements::modal::*;
 use crate::session::Session;
+use crate::utils::*;
 use crate::*;
 
+use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::*;
-use yew::prelude::*;
+use yew::*;
 
 #[wasm_bindgen]
 #[derive(Clone)]
 pub struct ExpressionEditorElement {
     modal: ModalElement<ExpressionEditor>,
-}
-
-impl ResizableMessage for <ExpressionEditor as Component>::Message {
-    fn resize(y: i32, x: i32) -> Self {
-        ExpressionEditorMsg::SetPos(y, x)
-    }
+    resize_pubsub: Rc<PubSub<()>>,
 }
 
 impl ExpressionEditorElement {
     pub fn new(
         session: Session,
         on_save: Callback<JsValue>,
+        alias: Option<String>,
     ) -> ExpressionEditorElement {
         let document = window().unwrap().document().unwrap();
         let editor = document
@@ -61,31 +59,36 @@ impl ExpressionEditorElement {
             }
         });
 
-        let props = ExpressionEditorProps {
+        let resize_pubsub: PubSub<()> = PubSub::default();
+        let props = props!(ExpressionEditorProps {
             on_save,
             on_init,
             on_validate,
+            on_resize: resize_pubsub.callback(),
             session,
-        };
+            alias,
+        });
 
         let modal = ModalElement::new(editor, props, true);
-        ExpressionEditorElement { modal }
+        ExpressionEditorElement {
+            modal,
+            resize_pubsub: Rc::new(resize_pubsub),
+        }
     }
 
     pub fn open(&mut self, target: HtmlElement) {
         let monaco_theme = get_theme(&target);
         self.modal
             .send_message(ExpressionEditorMsg::SetTheme(monaco_theme));
-        self.modal.open(target);
+        self.modal.open(target, Some(&*self.resize_pubsub));
+    }
+
+    pub fn hide(&self) -> Result<(), JsValue> {
+        self.modal.hide()
     }
 
     pub fn destroy(self) -> Result<(), JsValue> {
         self.modal.destroy()
-    }
-
-    pub fn set_content(&self, content: &str) {
-        self.modal
-            .send_message(ExpressionEditorMsg::SetContent(content.to_owned()));
     }
 
     pub fn connected_callback(&self) {}

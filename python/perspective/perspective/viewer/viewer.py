@@ -6,25 +6,25 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-import six
 from random import random
+
+from ..libpsp import is_libpsp
 from .validate import (
-    validate_plugin,
-    validate_columns,
-    validate_row_pivots,
-    validate_column_pivots,
     validate_aggregates,
-    validate_sort,
-    validate_filters,
+    validate_split_by,
+    validate_columns,
     validate_expressions,
+    validate_filter,
+    validate_plugin,
     validate_plugin_config,
+    validate_group_by,
+    validate_sort,
 )
 from .viewer_traitlets import PerspectiveTraitlets
-from ..libpsp import is_libpsp
 
 if is_libpsp():
-    from ..libpsp import Table, View, PerspectiveManager
     from ..core.exception import PerspectiveError
+    from ..libpsp import PerspectiveManager, Table, View
 
 
 class PerspectiveViewer(PerspectiveTraitlets, object):
@@ -43,9 +43,9 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
     # Viewer attributes that should be saved in `save()` and restored using
     # `restore()`. Symmetric to `PERSISTENT_ATTRIBUTES` in `perspective-viewer`.
     PERSISTENT_ATTRIBUTES = (
-        "row_pivots",
-        "column_pivots",
-        "filters",
+        "group_by",
+        "split_by",
+        "filter",
         "sort",
         "aggregates",
         "columns",
@@ -53,20 +53,23 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         "plugin",
         "editable",
         "plugin_config",
+        "theme",
+        "settings",
     )
 
     def __init__(
         self,
         plugin="Datagrid",
         columns=None,
-        row_pivots=None,
-        column_pivots=None,
+        group_by=None,
+        split_by=None,
         aggregates=None,
         sort=None,
-        filters=None,
+        filter=None,
         expressions=None,
         plugin_config=None,
-        dark=None,
+        settings=True,
+        theme=None,
         editable=False,
     ):
         """Initialize an instance of `PerspectiveViewer` with the given viewer
@@ -76,10 +79,10 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         Keyword Arguments:
             columns (:obj:`list` of :obj:`str`): A list of column names to be
                 visible to the user.
-            row_pivots (:obj:`list` of :obj:`str`): A list of column names to
-                use as row pivots.
-            column_pivots (:obj:`list` of :obj:`str`): A list of column names
-                to use as column pivots.
+            group_by (:obj:`list` of :obj:`str`): A list of column names to
+                use as group by.
+            split_by (:obj:`list` of :obj:`str`): A list of column names
+                to use as split by.
             aggregates (:obj:`dict` of :obj:`str` to :obj:`str`):  A dictionary
                 of column names to aggregate types, which specify aggregates
                 for individual columns.
@@ -96,13 +99,15 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
                 select by default.
             plugin_config (:obj:`dict`): A configuration for the plugin, i.e.
                 the datagrid plugin or a chart plugin.
-            dark (:obj:`bool`): Whether to invert the color theme.
+            settings(:obj:`bool`): Whether the perspective query settings
+                panel should be open.
+            theme (:obj:`str`): The color theme to use.
             editable (:obj:`bool`): Whether to allow editability using the grid.
 
         Examples:
             >>> viewer = PerspectiveViewer(
             ...     aggregates={"a": "avg"},
-            ...     row_pivots=["a"],
+            ...     group_by=["a"],
             ...     sort=[["b", "desc"]],
             ...     filter=[["a", ">", 1]],
             ...     expressions=["// new column \n \"Sales\" + \"Profit\""]
@@ -121,14 +126,15 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         # Viewer configuration
         self.plugin = validate_plugin(plugin)
         self.columns = validate_columns(columns) or []
-        self.row_pivots = validate_row_pivots(row_pivots) or []
-        self.column_pivots = validate_column_pivots(column_pivots) or []
+        self.group_by = validate_group_by(group_by) or []
+        self.split_by = validate_split_by(split_by) or []
         self.aggregates = validate_aggregates(aggregates) or {}
         self.sort = validate_sort(sort) or []
-        self.filters = validate_filters(filters) or []
+        self.filter = validate_filter(filter) or []
         self.expressions = validate_expressions(expressions) or []
         self.plugin_config = validate_plugin_config(plugin_config) or {}
-        self.dark = dark
+        self.settings = settings
+        self.theme = theme
         self.editable = editable
 
     @property
@@ -246,7 +252,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         """Restore a given set of attributes, passed as kwargs
         (e.g. dictionary). Symmetric with `save` so that a given viewer's
         configuration can be reproduced."""
-        for k, v in six.iteritems(kwargs):
+        for k, v in kwargs.items():
             if k in PerspectiveViewer.PERSISTENT_ATTRIBUTES:
                 setattr(self, k, v)
 
@@ -255,13 +261,13 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         modify the underlying `Table`.
 
         Example:
-            widget = PerspectiveWidget(data, row_pivots=["date"], plugin=Plugin.XBAR)
+            widget = PerspectiveWidget(data, group_by=["date"], plugin=Plugin.XBAR)
             widget.reset()
             widget.plugin  #
         """
-        self.row_pivots = []
-        self.column_pivots = []
-        self.filters = []
+        self.group_by = []
+        self.split_by = []
+        self.filter = []
         self.sort = []
         self.expressions = []
         self.aggregates = {}
@@ -281,7 +287,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         """
         if delete_table:
             # Delete all created views on the widget's manager instance
-            for view in six.itervalues(self.manager._views):
+            for view in self.manager._views.values():
                 view.delete()
 
             # Reset view cache

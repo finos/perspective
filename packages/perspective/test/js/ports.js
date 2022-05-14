@@ -227,12 +227,12 @@ module.exports = (perspective) => {
                 const view = await table.view();
 
                 const view2 = await table.view({
-                    row_pivots: ["w"],
+                    group_by: ["w"],
                 });
 
                 const view3 = await table.view({
-                    row_pivots: ["w"],
-                    column_pivots: ["x"],
+                    group_by: ["w"],
+                    split_by: ["x"],
                 });
 
                 for (const port_id of port_ids) {
@@ -366,12 +366,12 @@ module.exports = (perspective) => {
                 const view = await table.view();
 
                 const view2 = await table.view({
-                    row_pivots: ["w"],
+                    group_by: ["w"],
                 });
 
                 const view3 = await table.view({
-                    row_pivots: ["w"],
-                    column_pivots: ["x"],
+                    group_by: ["w"],
+                    split_by: ["x"],
                 });
 
                 for (const port_id of port_ids) {

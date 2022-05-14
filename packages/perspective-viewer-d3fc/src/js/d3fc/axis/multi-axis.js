@@ -41,10 +41,10 @@ const multiAxis = (orient, baseAxis, scale) => {
             return;
         }
 
-        if (selection.selection) {
-            groupDataJoin.transition(selection);
-            domainPathDataJoin.transition(selection);
-        }
+        // if (selection.selection) {
+        //     groupDataJoin.call(selection);
+        //     domainPathDataJoin.call(selection);
+        // }
 
         selection.each((data, index, group) => {
             const element = group[index];

@@ -74,6 +74,7 @@ flycheck_*.el
 *.so
 *.dylib
 *.dll
+*.pyd
 
 # Fortran module files
 *.mod
@@ -124,7 +125,7 @@ cmake-build-debug
 .pytest_cache
 
 package.json.lerna_backup
-website/static/css/material.dark.css
+website/static/css/material-dark.css
 
 # CPP Compile
 /src/include/boost
@@ -141,7 +142,10 @@ docs/perspective.*.rst
 docs/python
 package.json.bak
 yarn.lock.bak
-docs/static/img
+docs/static/img/**/*
+!docs/static/img/logo/
+!docs/static/img/logo/**
+
 
 docs/static/arrow/
 .perspectiverc
@@ -149,6 +153,7 @@ docs/static/arrow/
 # Python
 *.pyc
 __pycache__/
+.venv
 
 # Copied C++ source folders
 python/perspective/cmake
@@ -174,9 +179,11 @@ rust/perspective-viewer/pkg
 
 rust/perspective-viewer/target
 rust/perspective-viewer/target2
-.emsdk
 
-docs/static/css/material.dark.css
+.emsdk
+vcpkg
+
+docs/static/css/material-dark.css
 docs/i18n/en.json
 docs/static/js
 
@@ -189,5 +196,4 @@ packages/perspective-jupyterlab/test/config/jupyter/migrated
 docs/static/features
 results.debug.json
 
-.venv
-.vscode
+tools/perspective-build/lib

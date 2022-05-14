@@ -484,7 +484,7 @@ module.exports = (perspective) => {
                     x: "last",
                     y: "count",
                 },
-                row_pivots: ["y"],
+                group_by: ["y"],
             });
 
             expect(await view.to_columns()).toEqual({
@@ -1739,7 +1739,7 @@ module.exports = (perspective) => {
         it("update with depth expansion", async function () {
             var table = await perspective.table(meta, {index: "y"});
             var view = await table.view({
-                row_pivots: ["z", "y"],
+                group_by: ["z", "y"],
                 columns: [],
             });
             table.update(data);
@@ -1959,7 +1959,7 @@ module.exports = (perspective) => {
             );
             table.update([{x: 2, y: null}]);
             var view = await table.view({
-                row_pivots: ["x"],
+                group_by: ["x"],
                 columns: ["y"],
             });
             let json = await view.to_json();
@@ -2413,7 +2413,7 @@ module.exports = (perspective) => {
         it("should partial update on 1-sided views using implicit '__INDEX__'", async function () {
             let table = await perspective.table(data);
             let view = await table.view({
-                row_pivots: ["x"],
+                group_by: ["x"],
             });
 
             table.update([
@@ -2449,8 +2449,8 @@ module.exports = (perspective) => {
         it("should partial update on 2-sided views using implicit '__INDEX__'", async function () {
             let table = await perspective.table(data);
             let view = await table.view({
-                row_pivots: ["x"],
-                column_pivots: ["y"],
+                group_by: ["x"],
+                split_by: ["y"],
             });
 
             table.update([

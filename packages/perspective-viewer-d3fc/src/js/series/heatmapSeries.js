@@ -10,11 +10,12 @@ import * as fc from "d3fc";
 import {tooltip} from "../tooltip/tooltip";
 
 export function heatmapSeries(settings, color) {
-    let series = fc.seriesSvgHeatmap();
+    let series = fc.seriesCanvasHeatmap();
 
-    series.decorate((selection) => {
-        tooltip().settings(settings)(selection);
-        selection.select("path").attr("fill", (d) => color(d.colorValue));
+    series.decorate((ctx, d) => {
+        ctx.fillStyle = color(d.colorValue);
+        // tooltip().settings(settings)(selection);
+        // selection.select("path").attr("fill", (d) => color(d.colorValue));
     });
 
     return fc

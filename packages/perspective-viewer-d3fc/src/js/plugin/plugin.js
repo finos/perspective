@@ -33,6 +33,7 @@ const EXCLUDED_SETTINGS = [
     "size",
     "colorStyles",
     "agg_paths",
+    "treemaps",
 ];
 
 function getD3FCStyles() {
@@ -46,6 +47,10 @@ function getD3FCStyles() {
         }
     });
     return d3fcStyles.join("");
+}
+
+function register_element(plugin_name) {
+    customElements.get("perspective-viewer").registerPlugin(plugin_name);
 }
 
 export function register(...plugins) {
@@ -122,7 +127,116 @@ export function register(...plugins) {
                         chart.plugin.max_columns = x;
                     }
 
+                    async render() {
+                        var canvas = document.createElement("canvas");
+                        var container =
+                            this.shadowRoot.querySelector("#container");
+                        canvas.width = container.offsetWidth;
+                        canvas.height = container.offsetHeight;
+
+                        const context = canvas.getContext("2d");
+                        context.fillStyle =
+                            window
+                                .getComputedStyle(this)
+                                .getPropertyValue("--plugin--background") ||
+                            "white";
+                        context.fillRect(0, 0, canvas.width, canvas.height);
+                        const text_color = window
+                            .getComputedStyle(this)
+                            .getPropertyValue("color");
+
+                        const svgs = Array.from(
+                            this.shadowRoot.querySelectorAll(
+                                "svg:not(#dragHandles)"
+                            )
+                        );
+
+                        for (const svg of svgs.reverse()) {
+                            var img = document.createElement("img");
+                            // document.body.appendChild(img);
+                            img.width = svg.parentNode.offsetWidth;
+                            img.height = svg.parentNode.offsetHeight;
+
+                            // Pretty sure this is a chrome bug - `drawImage()` call
+                            // without this scales incorrectly.
+                            const new_svg = svg.cloneNode(true);
+                            if (!new_svg.hasAttribute("viewBox")) {
+                                new_svg.setAttribute(
+                                    "viewBox",
+                                    `0 0 ${img.width} ${img.height}`
+                                );
+                            }
+
+                            new_svg.setAttribute(
+                                "xmlns",
+                                "http://www.w3.org/2000/svg"
+                            );
+
+                            for (const text of new_svg.querySelectorAll(
+                                "text"
+                            )) {
+                                text.setAttribute("fill", text_color);
+                            }
+
+                            var xml = new XMLSerializer().serializeToString(
+                                new_svg
+                            );
+
+                            xml = xml.replace(/[^\x00-\x7F]/g, "");
+
+                            const done = new Promise((x, y) => {
+                                img.onload = x;
+                                img.onerror = y;
+                            });
+
+                            try {
+                                img.src = `data:image/svg+xml;base64,${btoa(
+                                    xml
+                                )}`;
+                                await done;
+                            } catch (e) {
+                                const done = new Promise((x, y) => {
+                                    img.onload = x;
+                                    img.onerror = y;
+                                });
+                                img.src = `data:image/svg+xml;utf8,${xml}`;
+                                await done;
+                            }
+
+                            context.drawImage(
+                                img,
+                                svg.parentNode.offsetLeft,
+                                svg.parentNode.offsetTop,
+                                img.width,
+                                img.height
+                            );
+                        }
+
+                        const canvases = Array.from(
+                            this.shadowRoot.querySelectorAll("canvas")
+                        );
+
+                        for (const canvas of canvases.reverse()) {
+                            context.drawImage(
+                                canvas,
+                                canvas.parentNode.offsetLeft,
+                                canvas.parentNode.offsetTop,
+                                canvas.width / window.devicePixelRatio,
+                                canvas.height / window.devicePixelRatio
+                            );
+                        }
+
+                        return await new Promise(
+                            (x) => canvas.toBlob((blob) => x(blob)),
+                            "image/png"
+                        );
+                    }
+
                     async draw(view, end_col, end_row) {
+                        if (!this.isConnected) {
+                            return;
+                        }
+
                         this.config = await this.parentElement.save();
                         await this.update(view, end_col, end_row, true);
                     }
@@ -183,16 +297,15 @@ export function register(...plugins) {
                             return type;
                         };
 
-                        const {columns, row_pivots, column_pivots, filter} =
-                            config;
+                        const {columns, group_by, split_by, filter} = config;
                         const filtered =
-                            row_pivots.length > 0
+                            group_by.length > 0
                                 ? json.reduce(
                                       (acc, col) => {
                                           if (
                                               col.__ROW_PATH__ &&
                                               col.__ROW_PATH__.length ==
-                                                  row_pivots.length
+                                                  group_by.length
                                           ) {
                                               acc.agg_paths.push(
                                                   acc.aggs.slice()
@@ -215,14 +328,14 @@ export function register(...plugins) {
                                   )
                                 : {rows: json};
                         const dataMap = (col, i) =>
-                            !row_pivots.length
+                            !group_by.length
                                 ? {...col, __ROW_PATH__: [i]}
                                 : col;
                         const mapped = filtered.rows.map(dataMap);
 
                         let settings = {
                             realValues,
-                            crossValues: row_pivots.map((r) => ({
+                            crossValues: group_by.map((r) => ({
                                 name: r,
                                 type: get_pivot_column_type(r),
                             })),
@@ -230,7 +343,7 @@ export function register(...plugins) {
                                 name: a,
                                 type: view_schema[a],
                             })),
-                            splitValues: column_pivots.map((r) => ({
+                            splitValues: split_by.map((r) => ({
                                 name: r,
                                 type: get_pivot_column_type(r),
                             })),
@@ -261,6 +374,17 @@ export function register(...plugins) {
                             {...this._settings, ...settings},
                             handler
                         );
+
+                        // If only a right-axis Y axis remains, reset the alt
+                        // axis list to default.
+                        if (
+                            this._settings.splitMainValues &&
+                            this._settings.splitMainValues.length >=
+                                columns.length
+                        ) {
+                            this._settings.splitMainValues = [];
+                        }
+
                         initialiseStyles(this._container, this._settings);
 
                         if (clear) {
@@ -308,10 +432,6 @@ export function register(...plugins) {
                      */
                     async resize() {
                         if (this.isConnected) {
-                            if (chart.plugin.name === "Treemap") {
-                                this.clear();
-                            }
-
                             this._draw();
                         }
                     }
@@ -352,8 +472,8 @@ export function register(...plugins) {
             );
 
             customElements
-                .get("perspective-viewer")
-                .registerPlugin(plugin_name);
+                .whenDefined("perspective-viewer")
+                .then(() => register_element(plugin_name));
         }
     });
 }

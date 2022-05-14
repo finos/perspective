@@ -5,7 +5,7 @@ const {EXAMPLES} = require("./features.js");
 
 const DEFAULT_VIEWPORT = {
     width: 400,
-    height: 300
+    height: 300,
 };
 
 async function run_with_theme(page, is_dark = false) {
@@ -19,7 +19,9 @@ async function run_with_theme(page, is_dark = false) {
     <script src="/node_modules/@finos/perspective-viewer/dist/umd/perspective-viewer.js"></script>
     <script src="/node_modules/@finos/perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js"></script>
     <script src="/node_modules/@finos/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js"></script>
-    <link rel='stylesheet' href="/node_modules/@finos/perspective-viewer/dist/umd/material-dense.${is_dark ? "dark." : ""}css" is="custom-style">
+    <link rel='stylesheet' href="/node_modules/@finos/perspective-viewer/dist/css/material${
+        is_dark ? "-dark" : ""
+    }.css">
     <style>
         perspective-viewer {
             position: absolute;
@@ -54,7 +56,7 @@ async function run_with_theme(page, is_dark = false) {
 </body>
 </html>`);
     await page.setViewport(DEFAULT_VIEWPORT);
-    await page.evaluate(async function() {
+    await page.evaluate(async function () {
         const viewer = document.querySelector("perspective-viewer");
         await viewer.flush();
         await viewer.toggleConfig();
@@ -65,9 +67,19 @@ async function run_with_theme(page, is_dark = false) {
     for (const idx in EXAMPLES) {
         const {config, viewport} = EXAMPLES[idx];
         await await page.setViewport(viewport || DEFAULT_VIEWPORT);
-        const new_config = Object.assign({plugin: "Datagrid", row_pivots: [], expressions: [], column_pivots: [], sort: [], aggregates: {}}, config);
+        const new_config = Object.assign(
+            {
+                plugin: "Datagrid",
+                group_by: [],
+                expressions: [],
+                split_by: [],
+                sort: [],
+                aggregates: {},
+            },
+            config
+        );
         console.log(JSON.stringify(new_config));
-        await page.evaluate(async config => {
+        await page.evaluate(async (config) => {
             const viewer = document.querySelector("perspective-viewer");
             await viewer.reset();
             await viewer.restore(config);
@@ -76,10 +88,12 @@ async function run_with_theme(page, is_dark = false) {
         await page.waitForSelector("perspective-viewer:not([updating])");
         const screenshot = await page.screenshot({
             captureBeyondViewport: false,
-            fullPage: true
+            fullPage: true,
         });
 
-        const name = `static/features/feature_${idx}${is_dark ? "_dark" : ""}.png`;
+        const name = `static/features/feature_${idx}${
+            is_dark ? "_dark" : ""
+        }.png`;
         fs.writeFileSync(name, screenshot);
         cp.execSync(`convert ${name} -resize 400x300 ${name}`);
         // html.push(`<img src="./test_${idx}.png"></img>`);

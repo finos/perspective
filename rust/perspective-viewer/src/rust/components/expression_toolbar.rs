@@ -8,11 +8,13 @@
 
 use crate::config::*;
 use crate::custom_elements::expression_editor::ExpressionEditorElement;
+use crate::dragdrop::*;
+use crate::model::*;
 use crate::renderer::*;
 use crate::session::*;
-use crate::dragdrop::*;
 use crate::*;
 
+use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::*;
 use yew::prelude::*;
@@ -26,7 +28,13 @@ pub struct ExpressionToolbarProps {
     pub dragdrop: DragDrop,
 }
 
-derive_renderable_props!(ExpressionToolbarProps);
+impl PartialEq for ExpressionToolbarProps {
+    fn eq(&self, _rhs: &Self) -> bool {
+        false
+    }
+}
+
+derive_model!(Renderer, Session for ExpressionToolbarProps);
 
 impl ExpressionToolbarProps {
     pub async fn save_expr(&self, expression: &JsValue) {
@@ -39,11 +47,13 @@ impl ExpressionToolbarProps {
     }
 
     pub fn close_expr(&self) {
-        let expression = self.session.metadata().get_alias_expression(&self.name);
-        let ViewConfig {
-            mut expressions, ..
-        } = self.session.get_view_config();
+        let expression = self
+            .session
+            .metadata()
+            .get_expression_by_alias(&self.name)
+            .unwrap();
 
+        let mut expressions = self.session.get_view_config().expressions.clone();
         expressions.retain(|x| x != &expression);
         self.update_and_render(ViewConfigUpdate {
             expressions: Some(expressions),
@@ -52,7 +62,7 @@ impl ExpressionToolbarProps {
     }
 
     fn is_closable(&self) -> bool {
-        !self.session.is_column_expression_in_use(&self.name) && !self.dragdrop.get_drag_column().map(|x| x == self.name).unwrap_or_default()
+        !self.session.is_column_expression_in_use(&self.name)
     }
 }
 
@@ -63,46 +73,27 @@ pub enum ExpressionToolbarMsg {
 }
 
 pub struct ExpressionToolbar {
-    link: ComponentLink<ExpressionToolbar>,
-    props: ExpressionToolbarProps,
     expression_editor: Option<ExpressionEditorElement>,
-    is_closable: bool,
 }
 
 impl Component for ExpressionToolbar {
     type Message = ExpressionToolbarMsg;
     type Properties = ExpressionToolbarProps;
 
-    fn create(
-        props: <Self as yew::Component>::Properties,
-        link: ComponentLink<Self>,
-    ) -> Self {
-        let is_closable = props.is_closable();
+    fn create(_ctx: &Context<Self>) -> Self {
         ExpressionToolbar {
-            link,
-            props,
             expression_editor: None,
-            is_closable,
         }
     }
 
-    fn change(&mut self, props: <Self as yew::Component>::Properties) -> ShouldRender {
-        let is_closable = props.is_closable();
-        let should_render =
-            self.props.name != props.name || self.is_closable != is_closable;
-        self.props = props;
-        self.is_closable = is_closable;
-        should_render
-    }
-
-    fn update(&mut self, msg: <Self as yew::Component>::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: ExpressionToolbarMsg) -> bool {
         match msg {
             ExpressionToolbarMsg::Close => {
-                self.props.close_expr();
+                ctx.props().close_expr();
                 false
             }
             ExpressionToolbarMsg::Save(expression) => {
-                let props = self.props.clone();
+                let props = ctx.props().clone();
                 let expression_editor = self.expression_editor.take();
                 spawn_local(async move {
                     props.save_expr(&expression).await;
@@ -114,63 +105,46 @@ impl Component for ExpressionToolbar {
                 false
             }
             ExpressionToolbarMsg::Edit => {
-                let on_save = self.link.callback(ExpressionToolbarMsg::Save);
-                let target =
-                    self.props.add_expression_ref.cast::<HtmlElement>().unwrap();
+                let on_save = ctx.link().callback(ExpressionToolbarMsg::Save);
+                let target = ctx
+                    .props()
+                    .add_expression_ref
+                    .cast::<HtmlElement>()
+                    .unwrap();
 
-                let expr = self
-                    .props
-                    .session
-                    .metadata()
-                    .get_alias_expression(&self.props.name);
-                let mut element =
-                    ExpressionEditorElement::new(self.props.session.clone(), on_save);
+                let mut element = ExpressionEditorElement::new(
+                    ctx.props().session.clone(),
+                    on_save,
+                    Some(ctx.props().name.to_owned()),
+                );
 
                 element.open(target);
-                element.set_content(&expr);
                 self.expression_editor = Some(element);
                 false
             }
         }
     }
 
-    fn view(&self) -> Html {
-        let edit = self.link.callback(|_| ExpressionToolbarMsg::Edit);
-
-        html! {
-            <>
-                {
-                    if self.is_closable {
-                        let close = self.link.callback(|_| ExpressionToolbarMsg::Close);
-                        html! {
-                            <span
-                                onmousedown={ close }
-                                class="expression-delete-button">
-                                {
-                                    "close"
-                                }
-                            </span>
-                        }
-                    } else {
-                        html! {
-                            <span
-                                class="expression-delete-button"
-                                style="opacity:0">
-                                {
-                                    "close"
-                                }
-                            </span>
-                        }
-                    }
-                }
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let edit = ctx.link().callback(|_| ExpressionToolbarMsg::Edit);
+        let close = ctx.link().callback(|_| ExpressionToolbarMsg::Close);
+        html_template! {
+            if ctx.props().is_closable() {
                 <span
-                    onmousedown={ edit }
-                    class="expression-edit-button">
-                    {
-                        "menu"
-                    }
+                    onmousedown={ close }
+                    class="expression-delete-button">
                 </span>
-            </>
+            } else {
+                <span
+                    class="expression-delete-button"
+                    style="opacity:0">
+                </span>
+            }
+
+            <span
+                onmousedown={ edit }
+                class="expression-edit-button">
+            </span>
         }
     }
 }

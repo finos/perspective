@@ -955,6 +955,7 @@ void
 t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info,
     t_uindex src_ridx, t_uindex dst_ridx, t_index nstrands,
     const t_gstate& gstate, const t_data_table& expression_master_table) {
+    const t_schema& expression_schema = expression_master_table.get_schema();
 
     for (t_uindex idx : info.m_dst_topo_sorted) {
         const t_column* src = info.m_src[idx];
@@ -962,6 +963,8 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info,
         const t_aggspec& spec = info.m_aggspecs[idx];
         t_tscalar new_value = mknone();
         t_tscalar old_value = mknone();
+        auto is_expr
+            = expression_schema.has_column(spec.get_dependencies()[0].name());
 
         switch (spec.agg()) {
             case AGGTYPE_PCT_SUM_PARENT:
@@ -971,9 +974,9 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info,
                 t_tscalar dst_scalar = dst->get_scalar(dst_ridx);
                 old_value.set(dst_scalar);
                 new_value.set(dst_scalar.add(src_scalar));
-                if (old_value
-                        .is_nan()) // is_nan returns false for non-float types
-                {
+
+                // is_nan returns false for non-float types
+                if (is_expr || old_value.is_nan()) {
                     // if we previously had a NaN, add can't make it finite
                     // again; recalculate entire sum in case it is now finite
                     auto pkeys = get_pkeys(nidx);
@@ -1220,11 +1223,25 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info,
 
                 dst->set_scalar(dst_ridx, new_value);
             } break;
-            case AGGTYPE_FIRST:
+            case AGGTYPE_FIRST: {
+                old_value.set(dst->get_scalar(dst_ridx));
+                auto pair = first_last_helper(
+                    nidx, spec, gstate, expression_master_table);
+                new_value.set(pair.first);
+                dst->set_scalar(dst_ridx, new_value);
+            } break;
             case AGGTYPE_LAST_BY_INDEX: {
                 old_value.set(dst->get_scalar(dst_ridx));
-                new_value.set(first_last_helper(
+                auto pair = first_last_helper(
+                    nidx, spec, gstate, expression_master_table);
+                new_value.set(pair.second);
+                dst->set_scalar(dst_ridx, new_value);
+            } break;
+            case AGGTYPE_LAST_MINUS_FIRST: {
+                old_value.set(dst->get_scalar(dst_ridx));
+                auto pair = (first_last_helper(
                     nidx, spec, gstate, expression_master_table));
+                new_value.set(pair.second.sub_typesafe(pair.first));
                 dst->set_scalar(dst_ridx, new_value);
             } break;
             case AGGTYPE_AND: {
@@ -1300,6 +1317,22 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info,
                 if (dst_scalar.is_valid()) {
                     new_value.set(std::min(dst_scalar, src_scalar));
                 }
+                dst->set_scalar(dst_ridx, new_value);
+            } break;
+            case AGGTYPE_HIGH_MINUS_LOW: {
+                t_tscalar dst_scalar = dst->get_scalar(dst_ridx);
+                old_value.set(dst_scalar);
+                auto pkeys = get_pkeys(nidx);
+                std::vector<t_tscalar> values;
+                read_column_from_gstate(gstate, expression_master_table,
+                    spec.get_dependencies()[0].name(), pkeys, values);
+                auto low_high
+                    = std::minmax_element(values.begin(), values.end());
+                t_tscalar first;
+                first.set(*(low_high.first));
+                t_tscalar second;
+                second.set(*(low_high.second));
+                new_value.set(second.sub_typesafe(first));
                 dst->set_scalar(dst_ridx, new_value);
             } break;
             case AGGTYPE_UDF_COMBINER:
@@ -1990,13 +2023,13 @@ t_stree::get_deltas() const {
     return m_deltas;
 }
 
-t_tscalar
+std::pair<t_tscalar, t_tscalar>
 t_stree::first_last_helper(t_uindex nidx, const t_aggspec& spec,
     const t_gstate& gstate, const t_data_table& expression_master_table) const {
     auto pkeys = get_pkeys(nidx);
 
     if (pkeys.empty())
-        return mknone();
+        return std::make_pair(mknone(), mknone());
 
     std::vector<t_tscalar> values;
     std::vector<t_tscalar> sort_values;
@@ -2009,37 +2042,43 @@ t_stree::first_last_helper(t_uindex nidx, const t_aggspec& spec,
 
     auto minmax_idx = get_minmax_idx(sort_values, spec.get_sort_type());
 
+    std::pair<t_tscalar, t_tscalar> ret;
     switch (spec.get_sort_type()) {
         case SORTTYPE_ASCENDING:
         case SORTTYPE_ASCENDING_ABS: {
-            if (spec.agg() == AGGTYPE_FIRST) {
-                if (minmax_idx.m_min >= 0) {
-                    return values[minmax_idx.m_min];
-                }
+            if (minmax_idx.m_min >= 0) {
+                ret.first = values[minmax_idx.m_min];
             } else {
-                if (minmax_idx.m_max >= 0) {
-                    return values[minmax_idx.m_max];
-                }
+                ret.first = mknone();
+            }
+
+            if (minmax_idx.m_max >= 0) {
+                ret.second = values[minmax_idx.m_max];
+            } else {
+                ret.second = mknone();
             }
         } break;
         case SORTTYPE_DESCENDING:
         case SORTTYPE_DESCENDING_ABS: {
-            if (spec.agg() == AGGTYPE_FIRST) {
-                if (minmax_idx.m_max >= 0) {
-                    return values[minmax_idx.m_max];
-                }
+            if (minmax_idx.m_max >= 0) {
+                ret.first = values[minmax_idx.m_max];
             } else {
-                if (minmax_idx.m_min >= 0) {
-                    return values[minmax_idx.m_min];
-                }
+                ret.first = mknone();
+            }
+
+            if (minmax_idx.m_min >= 0) {
+                ret.second = values[minmax_idx.m_min];
+            } else {
+                ret.second = mknone();
             }
         } break;
         default: {
-            // return none
+            ret.first = mknone();
+            ret.second = mknone();
         }
     }
 
-    return mknone();
+    return ret;
 }
 
 bool

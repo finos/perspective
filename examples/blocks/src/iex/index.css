@@ -16,6 +16,10 @@ input {
     max-width: 600px;
 }
 
+perspective-viewer-datagrid regular-table {
+    overflow-x: hidden;
+}
+
 perspective-viewer table {
     white-space: nowrap;
 }

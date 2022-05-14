@@ -14,9 +14,7 @@ use serde::Serialize;
 use std::fmt::Display;
 use wasm_bindgen::*;
 
-#[derive(
-    Clone, Copy, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize,
-)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
 #[serde()]
 pub enum SingleAggregate {
     #[serde(rename = "sum")]
@@ -55,6 +53,9 @@ pub enum SingleAggregate {
     #[serde(rename = "last by index")]
     LastByIndex,
 
+    #[serde(rename = "last minus first")]
+    LastMinusFirst,
+
     #[serde(rename = "last")]
     Last,
 
@@ -79,6 +80,9 @@ pub enum SingleAggregate {
     #[serde(rename = "low")]
     Low,
 
+    #[serde(rename = "high minus low")]
+    HighMinusLow,
+
     #[serde(rename = "stddev")]
     StdDev,
 
@@ -101,6 +105,7 @@ impl Display for SingleAggregate {
             SingleAggregate::Median => "median",
             SingleAggregate::First => "first",
             SingleAggregate::LastByIndex => "last by index",
+            SingleAggregate::LastMinusFirst => "last minus first",
             SingleAggregate::Last => "last",
             SingleAggregate::Count => "count",
             SingleAggregate::DistinctCount => "distinct count",
@@ -109,6 +114,7 @@ impl Display for SingleAggregate {
             SingleAggregate::Join => "join",
             SingleAggregate::High => "high",
             SingleAggregate::Low => "low",
+            SingleAggregate::HighMinusLow => "high minus low",
             SingleAggregate::StdDev => "stddev",
             SingleAggregate::Var => "var",
         };
@@ -133,6 +139,7 @@ impl FromStr for SingleAggregate {
             "median" => Ok(SingleAggregate::Median),
             "first" => Ok(SingleAggregate::First),
             "last by index" => Ok(SingleAggregate::LastByIndex),
+            "last minus first" => Ok(SingleAggregate::LastMinusFirst),
             "last" => Ok(SingleAggregate::Last),
             "count" => Ok(SingleAggregate::Count),
             "distinct count" => Ok(SingleAggregate::DistinctCount),
@@ -141,6 +148,7 @@ impl FromStr for SingleAggregate {
             "join" => Ok(SingleAggregate::Join),
             "high" => Ok(SingleAggregate::High),
             "low" => Ok(SingleAggregate::Low),
+            "high minus low" => Ok(SingleAggregate::HighMinusLow),
             "stddev" => Ok(SingleAggregate::StdDev),
             "var" => Ok(SingleAggregate::Var),
             x => Err(format!("Unknown aggregate `{}`", x).into()),
@@ -148,16 +156,14 @@ impl FromStr for SingleAggregate {
     }
 }
 
-#[derive(Clone, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
-#[cfg_attr(test, derive(Debug))]
+#[derive(Clone, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
 #[serde()]
 pub enum MultiAggregate {
     #[serde(rename = "weighted mean")]
     WeightedMean,
 }
 
-#[derive(Clone, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
-#[cfg_attr(test, derive(Debug))]
+#[derive(Clone, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
 #[serde(untagged)]
 pub enum Aggregate {
     SingleAggregate(SingleAggregate),
@@ -165,10 +171,7 @@ pub enum Aggregate {
 }
 
 impl Display for Aggregate {
-    fn fmt(
-        &self,
-        fmt: &mut std::fmt::Formatter<'_>,
-    ) -> std::result::Result<(), std::fmt::Error> {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
         match self {
             Aggregate::SingleAggregate(x) => write!(fmt, "{}", x)?,
             Aggregate::MultiAggregate(MultiAggregate::WeightedMean, x) => {
@@ -184,10 +187,7 @@ impl FromStr for Aggregate {
     fn from_str(input: &str) -> std::result::Result<Self, JsValue> {
         Ok(
             if let Some(stripped) = input.strip_prefix("weighted mean by ") {
-                Aggregate::MultiAggregate(
-                    MultiAggregate::WeightedMean,
-                    stripped.to_owned(),
-                )
+                Aggregate::MultiAggregate(MultiAggregate::WeightedMean, stripped.to_owned())
             } else {
                 Aggregate::SingleAggregate(SingleAggregate::from_str(input)?)
             },
@@ -218,7 +218,9 @@ const NUMBER_AGGREGATES: &[SingleAggregate] = &[
     SingleAggregate::First,
     SingleAggregate::High,
     SingleAggregate::Low,
+    SingleAggregate::HighMinusLow,
     SingleAggregate::LastByIndex,
+    SingleAggregate::LastMinusFirst,
     SingleAggregate::Last,
     SingleAggregate::Mean,
     SingleAggregate::Median,
@@ -248,14 +250,12 @@ impl Type {
         }
     }
 
-    pub fn default_aggregate(&self) -> Aggregate {
+    pub const fn default_aggregate(&self) -> Aggregate {
         match self {
             Type::Bool | Type::Date | Type::Datetime | Type::String => {
                 Aggregate::SingleAggregate(SingleAggregate::Count)
             }
-            Type::Integer | Type::Float => {
-                Aggregate::SingleAggregate(SingleAggregate::Sum)
-            }
+            Type::Integer | Type::Float => Aggregate::SingleAggregate(SingleAggregate::Sum),
         }
     }
 }

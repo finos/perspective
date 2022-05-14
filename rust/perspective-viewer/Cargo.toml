@@ -1,8 +1,8 @@
 [package]
 name = "perspective-viewer"
-version = "0.10.0"
+version = "1.0.8"
 authors = ["Andrew Stein <steinlink@gmail.com>"]
-edition = "2018"
+edition = "2021"
 description = "A frontend for Perspective"
 repository = "https://github.com/finos/perspective"
 
@@ -12,38 +12,59 @@ path = "src/rust/lib.rs"
 
 [features]
 new_column_selector = []
-default = ["console_error_panic_hook", "new_column_selector"]
+default = ["new_column_selector"]
 
 [dependencies]
+# Provides async `Mutex` for locked sections such as `render`
 async-std = "1.9.0"
-async-trait = "=0.1.42"
+
+# Allow async methods to be used in traits
+async-trait = "^0.1.52"
+
+# Encode persistence tokens
 base64 = "0.13.0"
+
+# Timezone correction
 chrono = "0.4"
+
+# More derivable traits
 derivative = "2.2.0"
+
+# Easy way to define & implement a singleton trait (type extension)
+extend = "1.1.2"
+
+# Compress tokens
 flate2 = "1.0.20"
+
+# General async tools
 futures = "0.3.12"
+
+# General iterator improvements
 itertools = "0.10.1"
+
+# Performance improvements for common string to JS conversions
 js-intern = "0.3.1"
+
+# Comma-sep numeric representation
 num-format = "0.4.0"
+
+# MessagePack serialization
 rmp-serde = "0.15.5"
+
+# Serialization for tokens and JS APIs
 serde = { version = "1.0", features = ["derive"] }
+
+# Support for "unknown"/dicitonary types such as `plugin_config`
 serde_json = { version = "1.0.59", features = ["raw_value"] }
+
+# Browser API bindings
 wasm-bindgen = { version = "=0.2.74", features = ["serde-serialize"] }
+
+# Browser `Promise` bindings
 wasm-bindgen-futures = "0.4.20"
-yew = { git = "https://github.com/yewstack/yew", rev = "f94487364f6eb1c7862e48f7c82ee4122ae8e845" }
 
-# The `console_error_panic_hook` crate provides better debugging of panics by
-# logging them with `console.error`. This is great for development, but requires
-# all the `std::fmt` and `std::panicking` infrastructure, so isn't great for
-# code size when deploying.
-console_error_panic_hook = { version = "0.1.6", optional = true }
-
-# `wee_alloc` is a tiny allocator for wasm that is only ~1K in code size
-# compared to the default allocator's ~10K. It is slower than the default
-# allocator, however.
-#
-# Unfortunately, `wee_alloc` requires nightly Rust when targeting wasm for now.
-wee_alloc = { version = "0.4.5", optional = true }
+# https://github.com/yewstack/yew/issues/2154
+yew = { git = "https://github.com/yewstack/yew", rev = "ee6a67e3ea54e45656b87de27f0f894067d16e0d", features = ["csr"] }
 
 [dependencies.web-sys]
 version = "0.3.46"
@@ -52,21 +73,32 @@ features = [
     "Blob",
     "Clipboard",
     "CssStyleDeclaration", 
+    "CssStyleSheet",
+    "CssRuleList",
+    "CssRule",
+    "CssStyleRule",
     "CustomEvent",
     "CustomEventInit",
     "DataTransfer",
     "Document",
     "DomRect",
     "DomStringMap",
+    "DomTokenList",
     "Element",
     # "DomTokenList",
     "Event",
     "EventTarget",
     "EventListener",
+    "FontFace",
+    "FontFaceSet",
+    "FontFaceSetIterator",
+    "FontFaceSetIteratorResult",
     # "DocumentFragment",
     "HtmlCollection",
     "HtmlElement",
     "HtmlTextAreaElement",
+    "HtmlSelectElement",
+    "InputEvent",
     "KeyboardEvent",
     # "MouseEvent",
     "MutationObserver",
@@ -83,6 +115,8 @@ features = [
     "ShadowRoot",
     "ShadowRootMode",
     "ShadowRootInit",
+    "StyleSheet",
+    "StyleSheetList",
     "Url",
     "VisibilityState",
     "Window"
@@ -95,7 +129,13 @@ version = "0.3"
 [dev-dependencies]
 wasm-bindgen-test = "0.3.13"
 
+[profile.dev]
+panic = "abort"
+opt-level = "s"
+
 [profile.release]
+panic = "abort"
 opt-level = "z"
 codegen-units = 1
 lto = true
+strip = true

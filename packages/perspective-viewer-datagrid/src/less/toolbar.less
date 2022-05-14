@@ -1,0 +1,107 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+:host {
+    position: relative;
+    display: block;
+}
+
+:host #container {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: stretch;
+    align-items: stretch;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+:host #toolbar {
+    display: flex;
+    align-items: center;
+    height: 36px;
+}
+
+:host #slot-container {
+    flex: 1;
+    position: relative;
+}
+
+#scroll_lock.lock-scroll:before {
+    content: var(--toolbar-scroll-lock-active--content);
+}
+
+#scroll_lock:before {
+    content: var(--toolbar-scroll-lock--content);
+}
+
+#select_mode:before {
+    content: "highlight_alt";
+}
+
+#edit_mode:before {
+    content: var(--toolbar-edit-mode--content);
+}
+
+#edit_mode.editable:before {
+    content: var(--toolbar-edit-mode-active--content);
+}
+
+:host(.aggregated) #toolbar #edit_mode {
+    display: none;
+}
+
+.button:before {
+    color: var(--inactive--color, #ccc);
+    line-height: 36px;
+    font-size: 14px;
+    font-family: var(--button--font-family, "Material Icons Outlined");
+    vertical-align: bottom;
+    margin: 0 11px;
+}
+
+.button.editable:before,
+.button.lock-scroll:before {
+    color: inherit;
+}
+
+.button {
+    user-select: none;
+    width: 36px;
+    box-sizing: border-box;
+}
+
+.button > span {
+    display: none;
+    margin: 0;
+    padding: 0;
+}
+
+.button:hover {
+    opacity: 1;
+    display: flex;
+    align-items: center;
+    color: inherit;
+    cursor: pointer;
+    min-width: 105px;
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.button:hover:before {
+    margin: 0 6px 0 11px;
+}
+
+.button:hover > span {
+    display: contents;
+    font-size: 12px;
+    font-weight: 300;
+    line-height: 36px;
+}

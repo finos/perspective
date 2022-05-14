@@ -122,7 +122,7 @@ table = perspective.Table(data, index="float")
 Likewise, a `View` can be created via the `view()` method:
 
 ```python
-view = table.view(row_pivots=["float"], filter=[["bool", "==", True]])
+view = table.view(group_by=["float"], filter=[["bool", "==", True]])
 column_data = view.to_dict()
 row_data = view.to_records()
 ```
@@ -469,7 +469,7 @@ constructed from a dataset:
 
 ```python
 from perspective import PerspectiveWidget, Table
-PerspectiveWidget(data, row_pivots=["date"])
+PerspectiveWidget(data, group_by=["date"])
 ```
 
 .. or a schema:
@@ -591,7 +591,7 @@ restrictions on memory and CPU feature utilization, and the architecture in
 general suffers when the dataset itself is too large to download to the client
 in full.
 
-The Python runtime does not suffer from memory limitations, utilizes
-[TBB](https://github.com/intel/tbb) for threading and parallel processing, and
-generates architecture optimized code, which currently makes it more suitable as
-a server-side runtime than `node.js`.
+The Python runtime does not suffer from memory limitations, utilizes Apache
+Arrow internal threadpools for threading and parallel processing, and generates
+architecture optimized code, which currently makes it more suitable as a
+server-side runtime than `node.js`.

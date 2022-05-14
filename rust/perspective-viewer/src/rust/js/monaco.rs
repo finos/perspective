@@ -21,49 +21,29 @@ pub enum KeyCode {
     Enter = 3,
 }
 
+// Handle `MonacoWebpackPlugin` and esbuild
 #[cfg_attr(
     not(test),
-    wasm_bindgen(module = "monaco-editor/esm/vs/editor/editor.worker")
+    wasm_bindgen(inline_js = "
+    import * as monaco from 'monaco-editor/esm/vs/editor/editor.worker.js';
+    export default async function () {
+        return await monaco.initialize();
+    }
+")
 )]
-#[cfg_attr(test, wasm_bindgen(inline_js = "export default function() {}"))]
+#[cfg_attr(test, wasm_bindgen(inline_js = "export default async function() {}"))]
 extern "C" {
     #[wasm_bindgen(js_name = "default")]
-    pub type EditorWorker;
-
-    #[wasm_bindgen(constructor, js_class = "default")]
-    pub fn new() -> EditorWorker;
+    pub async fn new_worker() -> JsValue;
 }
 
 #[cfg_attr(
     not(test),
     wasm_bindgen(inline_js = "
     export async function monaco_module() {
-        return import(
-            /* webpackChunkName: \"monaco-exts\" */
-            /* webpackMode: \"eager\" */
-            '../../../../dist/esm/monaco.js'
-        ); 
-    }
-")
-)]
-#[cfg_attr(
-    test,
-    wasm_bindgen(inline_js = "export async function monaco_module() {}")
-)]
-#[rustfmt::skip]
-extern "C" {
-    #[wasm_bindgen(js_name = "monaco_module")]
-    pub async fn monaco_exts();
-}
-
-#[cfg_attr(
-    not(test),
-    wasm_bindgen(inline_js = "
-    export async function monaco_module() { 
-        return import(
+        return await import(
             /* webpackChunkName: \"monaco\" */
-            /* webpackMode: \"eager\" */
-            'monaco-editor/esm/vs/editor/editor.api'
+            'monaco-editor/esm/vs/editor/edcore.main.js'
         ); 
     }
 ")
@@ -98,6 +78,9 @@ extern "C" {
     #[wasm_bindgen(method, js_name = "defineTheme")]
     pub fn define_theme(this: &Editor, id: &str, options: JsValue);
 
+    #[wasm_bindgen(method, js_name = "setTheme")]
+    pub fn set_theme(this: &Editor, theme: &str);
+
     #[wasm_bindgen(method, js_name = "setModelMarkers")]
     pub fn set_model_markers(
         this: &Editor,
@@ -127,6 +110,9 @@ extern "C" {
     #[derive(Clone)]
     pub type JsMonacoEditor;
 
+    #[wasm_bindgen(method, js_name = "layout")]
+    pub fn layout(this: &JsMonacoEditor, arg: &JsValue);
+
     #[wasm_bindgen(method, js_name = "getModel")]
     pub fn get_model(this: &JsMonacoEditor) -> JsMonacoModel;
 
@@ -141,6 +127,14 @@ extern "C" {
 
     #[wasm_bindgen(method, js_name = "addCommand")]
     pub fn add_command(this: &JsMonacoEditor, key_code: u32, value: &js_sys::Function);
+
+    #[wasm_bindgen(method, js_name = "onDidScrollChange")]
+    pub fn on_did_scroll_change(this: &JsMonacoEditor, callback: &js_sys::Function) -> JsDisposable;
+
+    pub type JsDisposable;
+
+    #[wasm_bindgen(method, js_name = "dispose")]
+    pub fn dispose(this: &JsDisposable);
 
     // #[wasm_bindgen(method, js_name = "getValue")]
     // pub fn get_value_str(this: &JsMonacoEditor) -> String;
@@ -190,15 +184,21 @@ extern "C" {
     pub fn trigger_character(this: &JsMonacoTriggerToken) -> String;
 }
 
-// Serde does not support closures and wasm_bindgen does not support anonymous object
-// construction without `Reflect`, so this signature is not possible and is instead
-// constructed manually.
+// Serde does not support closures and wasm_bindgen does not support anonymous
+// object construction without `Reflect`, so this signature is not possible and
+// is instead constructed manually.
 
 // #[derive(Serialize)]
 // #[serde(rename_all = "camelCase")]
 // pub struct RegisterCompletionItemProviderArgs {
 //     pub provider_completion_items: Closure< ... >,
 // }
+
+#[derive(Serialize)]
+pub struct ResizeArgs {
+    pub width: i32,
+    pub height: i32,
+}
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]

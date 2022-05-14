@@ -52,7 +52,7 @@ public:
 
     void compute(std::shared_ptr<t_data_table> source_table,
         std::shared_ptr<t_data_table> destination_table,
-        std::shared_ptr<t_vocab> vocab) const;
+        t_expression_vocab& vocab, t_regex_mapping& regex_mapping) const;
 
     const std::string& get_expression_alias() const;
     const std::string& get_expression_string() const;
@@ -66,7 +66,6 @@ private:
     std::string m_expression_string;
     std::string m_parsed_expression_string;
     std::vector<std::pair<std::string, std::string>> m_column_ids;
-    std::shared_ptr<t_vocab> m_expression_vocab;
     t_dtype m_dtype;
 };
 
@@ -96,7 +95,8 @@ public:
         const std::string& expression_string,
         const std::string& parsed_expression_string,
         const std::vector<std::pair<std::string, std::string>>& column_ids,
-        std::shared_ptr<t_schema> schema);
+        std::shared_ptr<t_schema> schema, t_expression_vocab& vocab,
+        t_regex_mapping& regex_mapping);
 
     /**
      * @brief Returns the dtype of the given expression, or `DTYPE_NONE`
@@ -122,36 +122,30 @@ public:
         const std::string& expression_string,
         const std::string& parsed_expression_string,
         const std::vector<std::pair<std::string, std::string>>& column_ids,
-        const t_schema& schema, t_expression_error& error);
+        const t_schema& schema, t_expression_error& error,
+        t_expression_vocab& vocab, t_regex_mapping& regex_mapping);
 
     static std::shared_ptr<exprtk::parser<t_tscalar>> PARSER;
 
     // Applied to the parser
     static std::size_t PARSER_COMPILE_OPTIONS;
 
-    // Instances of Exprtk functions
+    // Static computed functions have no state
     static computed_function::bucket BUCKET_FN;
     static computed_function::hour_of_day HOUR_OF_DAY_FN;
-    static computed_function::day_of_week DAY_OF_WEEK_VALIDATOR_FN;
-    static computed_function::month_of_year MONTH_OF_YEAR_VALIDATOR_FN;
-    static computed_function::intern INTERN_VALIDATOR_FN;
-    static computed_function::concat CONCAT_VALIDATOR_FN;
-    static computed_function::order ORDER_VALIDATOR_FN;
-    static computed_function::upper UPPER_VALIDATOR_FN;
-    static computed_function::lower LOWER_VALIDATOR_FN;
-    static computed_function::length LENGTH_VALIDATOR_FN;
     static computed_function::percent_of PERCENT_OF_FN;
     static computed_function::inrange_fn INRANGE_FN;
     static computed_function::min_fn MIN_FN;
     static computed_function::max_fn MAX_FN;
+    static computed_function::length LENGTH_FN;
     static computed_function::is_null IS_NULL_FN;
     static computed_function::is_not_null IS_NOT_NULL_FN;
-    static computed_function::to_string TO_STRING_VALIDATOR_FN;
     static computed_function::to_integer TO_INTEGER_FN;
     static computed_function::to_float TO_FLOAT_FN;
     static computed_function::to_boolean TO_BOOLEAN_FN;
     static computed_function::make_date MAKE_DATE_FN;
     static computed_function::make_datetime MAKE_DATETIME_FN;
+    static computed_function::random RANDOM_FN;
 
     // constants for True and False as DTYPE_BOOL scalars
     static t_tscalar TRUE_SCALAR;
@@ -175,6 +169,46 @@ struct PERSPECTIVE_EXPORT t_validated_expression_map {
 
     std::map<std::string, std::string> m_expression_schema;
     std::map<std::string, t_expression_error> m_expression_errors;
+};
+
+/**
+ * @brief Store instances of each computed function for use in
+ * t_computed_expression::compute, t_computed_expression::precompute,
+ * and t_computed_expression::get_dtype. When a new computed function
+ * definition is added, it needs to be added here as well.
+ */
+struct PERSPECTIVE_EXPORT t_computed_function_store {
+    PSP_NON_COPYABLE(t_computed_function_store);
+
+    t_computed_function_store(t_expression_vocab& vocab,
+        t_regex_mapping& regex_mapping, bool is_type_validator);
+
+    void register_computed_functions(
+        exprtk::symbol_table<t_tscalar>& sym_table);
+
+    /**
+     * @brief Clear any intermediate state that may be used by functions, such
+     * as mappings that must be cleared per-invocation.
+     */
+    void clear_computed_function_state();
+
+    // Member functions are instances that must be initialized per-method call,
+    // as they have references to a `t_expression_vocab`.
+    computed_function::day_of_week m_day_of_week_fn;
+    computed_function::month_of_year m_month_of_year_fn;
+    computed_function::intern m_intern_fn;
+    computed_function::concat m_concat_fn;
+    computed_function::order m_order_fn;
+    computed_function::upper m_upper_fn;
+    computed_function::lower m_lower_fn;
+    computed_function::to_string m_to_string_fn;
+    computed_function::match m_match_fn;
+    computed_function::match_all m_match_all_fn;
+    computed_function::search m_search_fn;
+    computed_function::indexof m_indexof_fn;
+    computed_function::substring m_substring_fn;
+    computed_function::replace m_replace_fn;
+    computed_function::replace_all m_replace_all_fn;
 };
 
 } // end namespace perspective

@@ -148,16 +148,17 @@ class TestToArrow(object):
                   datetime(2019, 7, 11, 12, 30)]
         }
         tbl = Table(data)
-        view = tbl.view(row_pivots=["a"])
+        view = tbl.view(group_by=["a"])
         arrow = view.to_arrow()
         tbl2 = Table(arrow)
         assert tbl2.schema() == {
+            'a (Group by 1)': int,
             "a": int,
             "b": int,
             "c": int
         }
         d = view.to_dict()
-        d.pop("__ROW_PATH__")
+        d['a (Group by 1)'] = [x[0] if len(x) > 0 else None for x in d.pop("__ROW_PATH__")]
         assert tbl2.view().to_dict() == d
 
     def test_to_arrow_two_symmetric(self):
@@ -167,10 +168,11 @@ class TestToArrow(object):
             "c": [datetime(2019, 7, 11, 12, i) for i in range(0, 40, 10)]
         }
         tbl = Table(data)
-        view = tbl.view(row_pivots=["a"], column_pivots=["b"])
+        view = tbl.view(group_by=["a"], split_by=["b"])
         arrow = view.to_arrow()
         tbl2 = Table(arrow)
         assert tbl2.schema() == {
+            'a (Group by 1)': int,
             "hello|a": int,
             "hello|b": int,
             "hello|c": int,
@@ -185,7 +187,7 @@ class TestToArrow(object):
             "world2|c": int,
         }
         d = view.to_dict()
-        d.pop("__ROW_PATH__")
+        d['a (Group by 1)'] = [x[0] if len(x) > 0 else None for x in d.pop("__ROW_PATH__")]
         assert tbl2.view().to_dict() == d
 
     def test_to_arrow_column_only_symmetric(self):
@@ -195,7 +197,7 @@ class TestToArrow(object):
             "c": [datetime(2019, 7, 11, 12, i) for i in range(0, 40, 10)]
         }
         tbl = Table(data)
-        view = tbl.view(column_pivots=["a"])
+        view = tbl.view(split_by=["a"])
         arrow = view.to_arrow()
         tbl2 = Table(arrow)
         assert tbl2.schema() == {
@@ -504,7 +506,7 @@ class TestToArrow(object):
         }
 
         table = Table(data)
-        view = table.view(row_pivots=["b"], columns=["a"], aggregates={"a": "mean"})
+        view = table.view(group_by=["b"], columns=["a"], aggregates={"a": "mean"})
         arrow = view.to_arrow()
 
         table2 = Table(arrow)
@@ -512,5 +514,6 @@ class TestToArrow(object):
         result = view2.to_columns()
         
         assert result == {
+            'b (Group by 1)': [None, 'a', 'b'],
             "a": [2.5, 1.5, 3.5]
         }

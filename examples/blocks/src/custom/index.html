@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Orbitron">                                 
-    <link rel='stylesheet' href="/node_modules/@finos/perspective-viewer/dist/umd/material-dense.dark.css">
+    <link rel="stylesheet" crossorigin="anonymous" href="/node_modules/@finos/perspective-viewer/dist/css/material-dark.css" />
 
     <script src="/node_modules/@finos/perspective-viewer/dist/umd/perspective-viewer.js"></script>
     <script src="/node_modules/@finos/perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js"></script>
@@ -16,9 +16,7 @@
 </head>
 
 <body>
-    <perspective-viewer 
-        plugin="Custom Datagrid" 
-        columns='["Profit","Sub-Category","State","Sales","Category","Order Date","Quantity"]'>
+    <perspective-viewer>
     </perspective-viewer>
 
     <script>
@@ -28,7 +26,11 @@
             const data = await fetch("/node_modules/superstore-arrow/superstore.arrow");
             const arr = await data.arrayBuffer();
             const table = perspective.worker().table(arr.slice());
-            await viewer.load(table);
+            viewer.load(table);
+            viewer.restore({
+                plugin: "Custom Datagrid",
+                columns: ["Profit","Sub-Category","State","Sales","Category","Order Date"]
+            });
             viewer.toggleConfig();
         });
 

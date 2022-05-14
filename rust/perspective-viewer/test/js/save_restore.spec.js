@@ -31,7 +31,7 @@ utils.with_server({}, () => {
                     await viewer.getTable();
                     await viewer.restore({
                         settings: true,
-                        row_pivots: ["State"],
+                        group_by: ["State"],
                         columns: ["Profit", "Sales"],
                     });
                     return await viewer.save();
@@ -39,15 +39,16 @@ utils.with_server({}, () => {
 
                 expect(config).toEqual({
                     aggregates: {},
-                    column_pivots: [],
+                    split_by: [],
                     columns: ["Profit", "Sales"],
                     expressions: [],
                     filter: [],
                     plugin: "Debug",
                     plugin_config: {},
-                    row_pivots: ["State"],
+                    group_by: ["State"],
                     settings: true,
                     sort: [],
+                    theme: null,
                 });
 
                 return await get_contents(page);
@@ -62,7 +63,7 @@ utils.with_server({}, () => {
                         await viewer.getTable();
                         await viewer.restore({
                             settings: true,
-                            row_pivots: ["State"],
+                            group_by: ["State"],
                             columns: ["Profit", "Sales"],
                         });
                         return await viewer.save();
@@ -70,15 +71,16 @@ utils.with_server({}, () => {
 
                     expect(config).toEqual({
                         aggregates: {},
-                        column_pivots: [],
+                        split_by: [],
                         columns: ["Profit", "Sales"],
                         expressions: [],
                         filter: [],
                         plugin: "Debug",
                         plugin_config: {},
-                        row_pivots: ["State"],
+                        group_by: ["State"],
                         settings: true,
                         sort: [],
+                        theme: null,
                     });
 
                     const config2 = await page.evaluate(async () => {
@@ -90,7 +92,7 @@ utils.with_server({}, () => {
 
                     expect(config2).toEqual({
                         aggregates: {},
-                        column_pivots: [],
+                        split_by: [],
                         columns: [
                             "Row ID",
                             "Order ID",
@@ -116,9 +118,10 @@ utils.with_server({}, () => {
                         filter: [],
                         plugin: "Debug",
                         plugin_config: {},
-                        row_pivots: [],
+                        group_by: [],
                         settings: true,
                         sort: [],
+                        theme: null,
                     });
 
                     const config3 = await page.evaluate(async (config) => {
@@ -130,15 +133,16 @@ utils.with_server({}, () => {
 
                     expect(config3).toEqual({
                         aggregates: {},
-                        column_pivots: [],
+                        split_by: [],
                         columns: ["Profit", "Sales"],
                         expressions: [],
                         filter: [],
                         plugin: "Debug",
                         plugin_config: {},
-                        row_pivots: ["State"],
+                        group_by: ["State"],
                         settings: true,
                         sort: [],
+                        theme: null,
                     });
 
                     return await get_contents(page);

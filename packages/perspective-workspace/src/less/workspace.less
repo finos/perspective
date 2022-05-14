@@ -7,13 +7,14 @@
  *
  */
 
+@import "../../../../node_modules/@lumino/widgets/style/index.css";
+
 :host {
-    @import "~@lumino/widgets/style/index.css";
     @import "./tabbar.less";
     @import "./dockpanel.less";
     @import "./widget.less";
 
-    background-color: #f2f4f6;
+    background-color: hsl(210deg 18% 90%);
 
     width: 100%;
     height: 100%;
@@ -34,7 +35,11 @@
 
     .master-panel {
         background-color: var(--workspace-master--background-color, inherit);
-        padding: 12px 0px 12px 12px;
+        padding: 0px 0px 0px 0px;
+
+        .viewer-container {
+            border-width: 0px;
+        }
     }
 
     .perspective-workspace.context-menu * .p-SplitPanel-handle {

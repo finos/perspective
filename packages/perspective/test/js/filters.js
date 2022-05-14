@@ -199,7 +199,7 @@ module.exports = (perspective) => {
             it("empty, pivoted", async function () {
                 var table = await perspective.table(data);
                 var view = await table.view({
-                    row_pivots: ["y"],
+                    group_by: ["y"],
                     filter: [["x", "==", 100]],
                 });
                 let json = await view.to_json();
@@ -250,7 +250,7 @@ module.exports = (perspective) => {
                     }
                 );
                 var view = await table.view({
-                    row_pivots: ["a"],
+                    group_by: ["a"],
                     columns: ["b", "c"],
                 });
 
@@ -575,7 +575,7 @@ module.exports = (perspective) => {
                 table.delete();
             });
 
-            it("x > 2", async function () {
+            it("x > 2.5", async function () {
                 var table = await perspective.table({x: "float", y: "integer"});
                 table.update([
                     {x: 3.5, y: 1},
@@ -613,6 +613,78 @@ module.exports = (perspective) => {
                     filter: [["x", ">", null]],
                 });
                 var answer = dataSet;
+                let result = await view.to_json();
+                expect(result).toEqual(answer);
+                view.delete();
+                table.delete();
+            });
+
+            it("x == 'a'", async function () {
+                var table = await perspective.table([
+                    {x: "b", y: 1},
+                    {x: "a", y: 1},
+                    {x: null, y: 1},
+                    {x: null, y: 1},
+                    {x: "a", y: 2},
+                    {x: "b", y: 2},
+                    {x: null, y: 2},
+                ]);
+                var view = await table.view({
+                    filter: [["x", "==", "a"]],
+                });
+                var answer = [
+                    {x: "a", y: 1},
+                    {x: "a", y: 2},
+                ];
+                let result = await view.to_json();
+                expect(result).toEqual(answer);
+                view.delete();
+                table.delete();
+            });
+
+            it("x != 'a'", async function () {
+                var table = await perspective.table([
+                    {x: "b", y: 1},
+                    {x: "a", y: 1},
+                    {x: null, y: 1},
+                    {x: null, y: 1},
+                    {x: "a", y: 2},
+                    {x: "b", y: 2},
+                    {x: null, y: 2},
+                ]);
+                var view = await table.view({
+                    filter: [["x", "!=", "a"]],
+                });
+                var answer = [
+                    {x: "b", y: 1},
+                    {x: null, y: 1},
+                    {x: null, y: 1},
+                    {x: "b", y: 2},
+                    {x: null, y: 2},
+                ];
+                let result = await view.to_json();
+                expect(result).toEqual(answer);
+                view.delete();
+                table.delete();
+            });
+
+            it("x == 'b'", async function () {
+                var table = await perspective.table([
+                    {x: "b", y: 1},
+                    {x: "a", y: 1},
+                    {x: null, y: 1},
+                    {x: null, y: 1},
+                    {x: "a", y: 2},
+                    {x: "b", y: 2},
+                    {x: null, y: 2},
+                ]);
+                var view = await table.view({
+                    filter: [["x", "==", "b"]],
+                });
+                var answer = [
+                    {x: "b", y: 1},
+                    {x: "b", y: 2},
+                ];
                 let result = await view.to_json();
                 expect(result).toEqual(answer);
                 view.delete();

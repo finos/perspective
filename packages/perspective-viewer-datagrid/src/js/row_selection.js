@@ -39,7 +39,7 @@ async function selectionListener(regularTable, viewer, event) {
             filter = filter.config.filter;
         }
 
-        await regularTable.draw();
+        await regularTable.draw({preserve_width: true});
         event.handled = true;
         viewer.dispatchEvent(
             new CustomEvent("perspective-select", {

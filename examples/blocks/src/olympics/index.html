@@ -1,19 +1,15 @@
 <html>
     <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+        <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" />
 
-        <script src="https://cdn.jsdelivr.net/npm/webfontloader"></script>
-        <script>WebFont.load({google:{families:["Roboto Mono:200,400","Material Icons","Open Sans:300,400"]}})</script>
+        <link rel="stylesheet" crossorigin="anonymous" href="/node_modules/@finos/perspective-workspace/dist/css/material.css" />
 
-        <link rel='stylesheet' href="/node_modules/@finos/perspective-workspace/dist/umd/material.css">
-      
         <script src="/node_modules/@finos/perspective-workspace/dist/umd/perspective-workspace.js"></script>
         <script src="/node_modules/@finos/perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js"></script>
         <script src="/node_modules/@finos/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js"></script>
         <script src="/node_modules/@finos/perspective/dist/umd/perspective.js"></script>
-        
-        <style>
 
+        <style>
             body {
                 display: flex;
                 flex-direction: column;
@@ -27,172 +23,190 @@
                 overflow: hidden;
             }
 
-            perspective-viewer {
+            perspective-viewer[theme="Material Light"] {
                 --d3fc-positive--gradient: linear-gradient(
-                    #94D0FF, 
-                    #8795E8, 
-                    #966bff, 
-                    #AD8CFF,
-                    #C774E8, 
-                    #c774a9, 
-                    #FF6AD5, 
-                    #ff6a8b, 
-                    #ff8b8b, 
+                    #94d0ff,
+                    #8795e8,
+                    #966bff,
+                    #ad8cff,
+                    #c774e8,
+                    #c774a9,
+                    #ff6ad5,
+                    #ff6a8b,
+                    #ff8b8b,
                     #ffa58b,
-                    #ffde8b, 
-                    #cdde8b, 
-                    #8bde8b, 
+                    #ffde8b,
+                    #cdde8b,
+                    #8bde8b,
                     #20de8b
                 );
             }
-
         </style>
-
     </head>
-    <body> 
-
+    <body>
         <perspective-workspace id="workspace"></perspective-workspace>
-      
+
         <script>
+            const SCHEMA = {
+                athlete: "string",
+                age: "integer",
+                country: "string",
+                year: "string",
+                date: "date",
+                sport: "string",
+                gold: "integer",
+                silver: "integer",
+                bronze: "integer",
+                total: "integer",
+            };
 
-        const SCHEMA = {
-            athlete: "string",
-            age: "integer",
-            country: "string",
-            year: "string",
-            date: "date",
-            sport: "string",
-            gold: "integer",
-            silver: "integer",
-            bronze: "integer",
-            total: "integer"
-        };
+            const CSV_URL =
+                "https://raw.githubusercontent.com/ag-grid/ag-grid/master/packages/ag-grid-docs/src/olympicWinnersSmall.json";
 
-        const URL = "https://raw.githubusercontent.com/ag-grid/ag-grid/master/packages/ag-grid-docs/src/olympicWinnersSmall.json";
+            const datasource = async () => {
+                const request = fetch(CSV_URL);
+                const worker = perspective.worker();
+                const table = await worker.table(SCHEMA);
+                const response = await request;
+                const json = await response.json();
+                table.update(json);
+                return table;
+            };
 
-        const datasource = async () => {
-            const request = fetch(URL);
-            const worker = perspective.worker();
-            const table = await worker.table(SCHEMA);
-            const response = await request;
-            const json = await response.json();
-            table.update(json);
-            return table;
-        };
+            window.addEventListener("load", () => {
+                window.workspace.tables.set("olympics", datasource());
 
-        window.addEventListener("load", () => {
-            window.workspace.tables.set("olympics", datasource());
-
-            window.workspace.restore({
-                sizes: [0.3, 0.7],
-                detail: {
-                    main: {
-                        type: "split-area",
-                        orientation: "vertical",
-                        children: [
-                            {
-                                type: "tab-area",
-                                widgets: ["Three"],
-                                currentIndex: 0
+                window.workspace.restore({
+                    sizes: [0.3, 0.7],
+                    detail: {
+                        main: {
+                            type: "split-area",
+                            orientation: "vertical",
+                            children: [
+                                {
+                                    type: "tab-area",
+                                    widgets: ["Three"],
+                                    currentIndex: 0,
+                                },
+                                {
+                                    type: "tab-area",
+                                    widgets: [
+                                        "PERSPECTIVE_GENERATED_ID_1",
+                                        "PERSPECTIVE_GENERATED_ID_2",
+                                        "PERSPECTIVE_GENERATED_ID_0",
+                                    ],
+                                    currentIndex: 0,
+                                },
+                            ],
+                            sizes: [0.7, 0.3],
+                        },
+                    },
+                    master: {
+                        widgets: ["Two"],
+                        sizes: [1],
+                    },
+                    viewers: {
+                        Two: {
+                            selectable: true,
+                            plugin: "datagrid",
+                            group_by: ["country"],
+                            aggregates: {
+                                sport: "dominant",
                             },
-                            {
-                                type: "tab-area",
-                                widgets: ["PERSPECTIVE_GENERATED_ID_1", "PERSPECTIVE_GENERATED_ID_2", "PERSPECTIVE_GENERATED_ID_0"],
-                                currentIndex: 0
-                            }
-                        ],
-                        sizes: [0.7, 0.3]
-                    }
-                },
-                master: {
-                    widgets: ["Two"],
-                    sizes: [1]
-                },
-                viewers: {
-                    Two: {
-                        selectable: true,
-                        plugin: "datagrid",
-                        "row_pivots": ["country"],
-                        aggregates: {
-                            sport: "dominant"
+                            sort: [["total", "desc"]],
+                            columns: [
+                                "total",
+                                "gold",
+                                "bronze",
+                                "silver",
+                                "sport",
+                            ],
+                            // plugin_config: {
+                            //     selected: "Canada"
+                            // },
+                            master: true,
+                            name: "Test Widget Two",
+                            table: "olympics",
                         },
-                        sort: [["total", "desc"]],
-                        columns: ["total", "gold", "bronze", "silver", "sport"],
-                        // plugin_config: {
-                        //     selected: "Canada"
-                        // },
-                        master: true,
-                        name: "Test Widget Two",
-                        table: "olympics"
-                    },
-                    Three: {
-                        plugin: "Heatmap",
-                        "row_pivots": ["sport"],
-                        "column_pivots": ["age"],
-                        sort: [["total", "desc"]],
-                        columns: ["total"],
-                        filter: [],
-                        plugin_config: {
-                            realValues: ["total"]
+                        Three: {
+                            plugin: "Heatmap",
+                            group_by: ["sport"],
+                            split_by: ["age"],
+                            sort: [["total", "desc"]],
+                            columns: ["total"],
+                            filter: [],
+                            plugin_config: {
+                                realValues: ["total"],
+                            },
+                            name: "Sport by Age Heatmap",
+                            table: "olympics",
                         },
-                        name: "Sport by Age Heatmap",
-                        table: "olympics"
-                    },
-                    PERSPECTIVE_GENERATED_ID_1: {
-                        plugin: "datagrid",
-                        columns: ["total", "sport", "country", "age", "gold", "silver", "bronze"],
-                        "row_pivots": ["athlete"],
-                        sort: [["total", "desc"]],
-                        aggregates: {
-                            sport: "dominant",
-                            age: "high",
-                            country: "dominant"
+                        PERSPECTIVE_GENERATED_ID_1: {
+                            plugin: "datagrid",
+                            columns: [
+                                "total",
+                                "sport",
+                                "country",
+                                "age",
+                                "gold",
+                                "silver",
+                                "bronze",
+                            ],
+                            group_by: ["athlete"],
+                            sort: [["total", "desc"]],
+                            aggregates: {
+                                sport: "dominant",
+                                age: "high",
+                                country: "dominant",
+                            },
+                            filter: [["country", "==", "Canada"]],
+                            name: "Athlete by Sport",
+                            table: "olympics",
                         },
-                        filter: [["country", "==", "Canada"]],
-                        name: "Athlete by Sport",
-                        table: "olympics"
-                    },
-                    PERSPECTIVE_GENERATED_ID_2: {
-                        plugin: "Y Line",
-                        aggregates: {
-                            age: "avg"
+                        PERSPECTIVE_GENERATED_ID_2: {
+                            plugin: "Y Line",
+                            aggregates: {
+                                age: "avg",
+                            },
+                            filter: [
+                                // ["country", "==", "Canada"],
+                                ["year", "in", ["2002", "2006", "2010", ""]],
+                            ],
+                            columns: ["age", "total"],
+                            group_by: ["year"],
+                            plugin_config: {
+                                realValues: ["age", "total"],
+                                splitMainValues: ["age"],
+                            },
+                            name: "Medals vs Avg Age 2002-2010 (Winter)",
+                            table: "olympics",
                         },
-                        filter: [
-                            // ["country", "==", "Canada"],
-                            ["year", "in", ["2002", "2006", "2010", ""]]
-                        ],
-                        columns: ["age", "total"],
-                        "row_pivots": ["year"],
-                        plugin_config: {
-                            realValues: ["age", "total"],
-                            splitMainValues: ["age"]
-                        },
-                        name: "Medals vs Avg Age 2002-2010 (Winter)",
-                        table: "olympics"
-                    },
-                    PERSPECTIVE_GENERATED_ID_0: {
-                        plugin: "Y Line",
-                        columns: ["age", "total"],
-                        "row_pivots": ["year"],
-                        aggregates: {
-                            age: "avg"
-                        },
-                        filter: [
-                            // ["country", "==", "Canada"],
-                            ["year", "in", ["2000", "2004", "2008", "2012", ""]]
-                        ],
-                        plugin_config: {
-                            realValues: ["age", "total"],
-                            splitMainValues: ["age"]
-                        },
+                        PERSPECTIVE_GENERATED_ID_0: {
+                            plugin: "Y Line",
+                            columns: ["age", "total"],
+                            group_by: ["year"],
+                            aggregates: {
+                                age: "avg",
+                            },
+                            filter: [
+                                // ["country", "==", "Canada"],
+                                [
+                                    "year",
+                                    "in",
+                                    ["2000", "2004", "2008", "2012", ""],
+                                ],
+                            ],
+                            plugin_config: {
+                                realValues: ["age", "total"],
+                                splitMainValues: ["age"],
+                            },
 
-                        name: "Medals vs Avg Age 2000-2012 (Summer)",
-                        table: "olympics"
-                    }
-                }
+                            name: "Medals vs Avg Age 2000-2012 (Summer)",
+                            table: "olympics",
+                        },
+                    },
+                });
             });
-        });
-
         </script>
     </body>
 </html>

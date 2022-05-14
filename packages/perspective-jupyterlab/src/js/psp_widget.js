@@ -9,12 +9,7 @@
 
 import "@finos/perspective-viewer";
 import {Widget} from "@lumino/widgets";
-import {
-    MIME_TYPE,
-    PSP_CLASS,
-    PSP_CONTAINER_CLASS,
-    PSP_CONTAINER_CLASS_DARK,
-} from "./utils";
+import {MIME_TYPE, PSP_CLASS, PSP_CONTAINER_CLASS} from "./utils";
 
 let _increment = 0;
 
@@ -45,33 +40,35 @@ export class PerspectiveWidget extends Widget {
     _set_attributes(options) {
         const plugin = options.plugin || "datagrid";
         const columns = options.columns || [];
-        const row_pivots = options.row_pivots || options.row_pivots || [];
-        const column_pivots =
-            options.column_pivots || options.column_pivots || [];
+        const group_by = options.group_by || options.group_by || [];
+        const split_by = options.split_by || options.split_by || [];
         const aggregates = options.aggregates || {};
         const sort = options.sort || [];
         const filter = options.filter || [];
         const expressions = options.expressions || options.expressions || [];
         const plugin_config = options.plugin_config || {};
-        const dark = options.dark || false;
+        const theme = options.theme || "Material Light";
+        const settings =
+            typeof options.settings === "boolean" ? options.settings : true;
         const editable = options.editable || false;
         const server = options.server || false;
         const client = options.client || false;
         // const selectable: boolean = options.selectable || false;
         this.server = server;
         this.client = client;
-        this.dark = dark;
         this.editable = editable;
         this._viewer_config = {
             plugin,
             plugin_config,
-            row_pivots,
-            column_pivots,
+            group_by,
+            split_by,
             sort,
             columns,
             aggregates,
             expressions,
             filter,
+            settings,
+            theme,
         };
         // this.plugin_config = plugin_config;
         // this.selectable = selectable;
@@ -86,18 +83,8 @@ export class PerspectiveWidget extends Widget {
      */
 
     onAfterShow(msg) {
-        this.notifyResize();
+        this.viewer.notifyResize(true);
         super.onAfterShow(msg);
-    }
-
-    /**
-     * Lumino: widget resize
-     *
-     */
-
-    onResize(msg) {
-        this.notifyResize();
-        super.onResize(msg);
     }
 
     onActivateRequest(msg) {
@@ -105,10 +92,6 @@ export class PerspectiveWidget extends Widget {
             this.viewer.focus();
         }
         super.onActivateRequest(msg);
-    }
-
-    async notifyResize() {
-        await this.viewer.notifyResize();
     }
 
     async toggleConfig() {
@@ -130,8 +113,11 @@ export class PerspectiveWidget extends Widget {
      */
 
     async load(table) {
-        this.viewer.load(table);
-        await this.viewer.restore(this._viewer_config);
+        const load_task = this.viewer.load(table);
+        const restore_task = this.viewer.restore(this._viewer_config);
+        await load_task;
+        this._load_complete = true;
+        await restore_task;
     }
 
     /**
@@ -141,7 +127,7 @@ export class PerspectiveWidget extends Widget {
      */
 
     async _update(data) {
-        const table = await this.viewer.getTable();
+        const table = await this.viewer.getTable(true);
         await table.update(data);
     }
 
@@ -150,7 +136,7 @@ export class PerspectiveWidget extends Widget {
      */
 
     async clear() {
-        const table = await this.viewer.getTable();
+        const table = await this.viewer.getTable(true);
         await table.clear();
     }
 
@@ -162,7 +148,7 @@ export class PerspectiveWidget extends Widget {
      */
 
     async replace(data) {
-        const table = await this.viewer.getTable();
+        const table = await this.viewer.getTable(true);
         await table.replace(data);
     }
 
@@ -262,28 +248,6 @@ export class PerspectiveWidget extends Widget {
         this._server = server;
     }
 
-    /**
-     * Enable or disable dark mode by re-rendering the viewer.
-     */
-
-    get dark() {
-        return this._dark;
-    }
-
-    set dark(dark) {
-        this._dark = dark;
-        if (this._dark) {
-            this.node.classList.add(PSP_CONTAINER_CLASS_DARK);
-            this.node.classList.remove(PSP_CONTAINER_CLASS);
-        } else {
-            this.node.classList.add(PSP_CONTAINER_CLASS);
-            this.node.classList.remove(PSP_CONTAINER_CLASS_DARK);
-        }
-        if (this.isAttached) {
-            this.viewer.restyleElement();
-        }
-    }
-
     get editable() {
         return this._editable;
     }
@@ -332,20 +296,6 @@ export class PerspectiveWidget extends Widget {
         div.style.setProperty("display", "flex");
         div.style.setProperty("flex-direction", "row");
         node.appendChild(div);
-        if (!viewer.notifyResize) {
-            console.warn("Warning: not bound to real element");
-        } else {
-            const resize_observer = new MutationObserver((mutations) => {
-                if (mutations.some((x) => x.attributeName === "style")) {
-                    viewer.notifyResize.call(viewer);
-                }
-            });
-
-            resize_observer.observe(node, {
-                attributes: true,
-            });
-            viewer.toggleConfig();
-        }
 
         return viewer;
     }

@@ -15,11 +15,13 @@ const default_body = async (page) => {
     await execute_all_cells(page);
     const viewer = await page.waitForSelector(
         ".jp-OutputArea-output perspective-viewer",
-        {visible: true}
+        {visible: true, timeout: 1200000}
     );
     await viewer.evaluate(async (viewer) => await viewer.flush());
     return viewer;
 };
+
+jest.setTimeout(1200000);
 
 utils.with_jupyterlab(process.env.__JUPYTERLAB_PORT__, () => {
     describe.jupyter(
@@ -51,7 +53,28 @@ utils.with_jupyterlab(process.env.__JUPYTERLAB_PORT__, () => {
                     });
 
                     expect(num_rows).toEqual(5);
-                }
+                },
+                {timeout: 120000}
+            );
+
+            test.jupyterlab(
+                "Loads with settings=False",
+                [
+                    [
+                        "table = perspective.Table(arrow_data)",
+                        "w = perspective.PerspectiveWidget(table, columns=['f64', 'str', 'datetime'], settings=False)",
+                    ].join("\n"),
+                    "w",
+                ],
+                async (page) => {
+                    const viewer = await default_body(page);
+                    const settings = await viewer.evaluate(async (viewer) => {
+                        return viewer.hasAttribute("settings");
+                    });
+
+                    expect(settings).toEqual(false);
+                },
+                {timeout: 120000}
             );
 
             test.jupyterlab(
@@ -78,7 +101,8 @@ utils.with_jupyterlab(process.env.__JUPYTERLAB_PORT__, () => {
                     });
 
                     expect(num_rows).toEqual(5);
-                }
+                },
+                {timeout: 120000}
             );
 
             test.jupyterlab(
@@ -109,7 +133,8 @@ utils.with_jupyterlab(process.env.__JUPYTERLAB_PORT__, () => {
                     });
 
                     expect(num_rows).toEqual(10);
-                }
+                },
+                {timeout: 120000}
             );
         },
         {name: "Simple", root: path.join(__dirname, "..", "..")}

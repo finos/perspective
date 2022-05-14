@@ -12,9 +12,7 @@
 #include <perspective/arg_sort.h>
 #include <perspective/multi_sort.h>
 #include <perspective/scalar.h>
-#ifdef PSP_PARALLEL_FOR
-#include <tbb/parallel_sort.h>
-#endif
+
 namespace perspective {
 
 void

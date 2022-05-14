@@ -21,6 +21,10 @@
     }
 }
 
+.lm-Widget, .p-Widget {
+    cursor: inherit;
+}
+
 .p-DockPanel.ew,
 .p-DockPanel.ew .p-Widget,
 .p-SplitPanel.ew,
@@ -36,7 +40,7 @@
 }
 
 .workspace-master-widget {
-    min-width: 300px;
+    min-width: 100px !important;
 }
 
 .p-DockPanel.resizing ::slotted(perspective-viewer),
@@ -77,6 +81,6 @@
     border: 1px dashed #666;
     transition-property: top, left, right, bottom;
     transition-duration: 50ms;
-    transition-timing-function: ease;
+    transition-timing-function: linear;
     margin: 0px;
 }

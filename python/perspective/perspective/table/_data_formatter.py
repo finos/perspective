@@ -54,9 +54,7 @@ def to_format(options, view, output_format):
 
     for ridx in range(options["start_row"], options["end_row"]):
         row_path = data_slice.get_row_path(ridx) if options["has_row_path"] else []
-        if options["leaves_only"] and len(row_path) < len(
-            view._config.get_row_pivots()
-        ):
+        if options["leaves_only"] and len(row_path) < len(view._config.get_group_by()):
             continue
 
         if output_format == "records":

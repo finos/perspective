@@ -7,15 +7,17 @@
  *
  */
 
-import perspective from "@finos/perspective/dist/esm/perspective.parallel.js";
 import "./index.css";
+
+import perspective from "@finos/perspective";
+
 import "@finos/perspective-viewer";
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
 
 window.addEventListener("DOMContentLoaded", async () => {
     const worker = perspective.worker();
-    const table = await worker.table([
+    const table = worker.table([
         {x: 1, y: 2},
         {x: 2, y: 2},
     ]);

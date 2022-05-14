@@ -74,7 +74,7 @@ t_view_config::validate(std::shared_ptr<t_schema> schema) {
     for (const std::string& col : m_row_pivots) {
         if (!schema->has_column(col) && expression_aliases.count(col) == 0) {
             std::stringstream ss;
-            ss << "Invalid column '" << col << "' found in View row_pivots."
+            ss << "Invalid column '" << col << "' found in View group_by."
                << std::endl;
             PSP_COMPLAIN_AND_ABORT(ss.str());
         }
@@ -83,7 +83,7 @@ t_view_config::validate(std::shared_ptr<t_schema> schema) {
     for (const std::string& col : m_column_pivots) {
         if (!schema->has_column(col) && expression_aliases.count(col) == 0) {
             std::stringstream ss;
-            ss << "Invalid column '" << col << "' found in View column_pivots."
+            ss << "Invalid column '" << col << "' found in View split_by."
                << std::endl;
             PSP_COMPLAIN_AND_ABORT(ss.str());
         }
@@ -257,7 +257,8 @@ t_view_config::fill_aggspecs(std::shared_ptr<t_schema> schema) {
             if (is_column_only) {
                 // Always sort by `ANY` in column only views
                 agg_type = t_aggtype::AGGTYPE_ANY;
-            } else if ((is_row_pivot && is_row_sort) || (is_column_pivot && !is_row_sort)) {
+            } else if ((is_row_pivot && is_row_sort)
+                || (is_column_pivot && !is_row_sort)) {
                 // Otherwise if the hidden column is in pivot on the same axis,
                 // use `UNIQUE`
                 agg_type = t_aggtype::AGGTYPE_UNIQUE;
@@ -347,7 +348,7 @@ t_view_config::make_aggspec(const std::string& column,
         }
     }
 
-    if (agg_type == AGGTYPE_FIRST || agg_type == AGGTYPE_LAST_BY_INDEX) {
+    if (agg_type == AGGTYPE_FIRST || agg_type == AGGTYPE_LAST_BY_INDEX || agg_type == AGGTYPE_LAST_MINUS_FIRST) {
         dependencies.push_back(t_dep("psp_okey", DEPTYPE_COLUMN));
         aggspec = t_aggspec(
             column, column, agg_type, dependencies, SORTTYPE_ASCENDING);

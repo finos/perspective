@@ -1,0 +1,111 @@
+perspective-viewer {
+    flex: 1;
+    margin: 24px;
+    overflow: visible;
+}
+
+perspective-viewer[theme="Material Light"],
+perspective-viewer[theme="Material Dark"] {
+    --d3fc-positive--gradient: linear-gradient(
+        #94d0ff,
+        #8795e8,
+        #966bff,
+        #ad8cff,
+        #c774e8,
+        #c774a9,
+        #ff6ad5,
+        #ff6a8b,
+        #ff8b8b,
+        #ffa58b,
+        #ffde8b,
+        #cdde8b,
+        #8bde8b,
+        #20de8b
+    );
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #f2f4f6;
+}
+
+#controls {
+    display: flex;
+    margin: 24px 24px 0px 40px;
+}
+
+.range {
+    position: relative;
+    display: inline-flex;
+    flex-direction: column;
+    margin-right: 24px;
+}
+
+span,
+input,
+button {
+    font-family: "Open Sans";
+    font-size: 12px;
+    background: none;
+    margin: 0px;
+    border-color: #ccc;
+    color: #666;
+    padding: 6px 12px 6px 0px;
+}
+
+input {
+    height: 14px;
+    border-width: 0px;
+    border-style: solid;
+    border-bottom-width: 1px;
+    color: inherit;
+    outline: none;
+}
+
+input[type="range"] {
+    margin-top: 2px;
+}
+
+input[type="number"] {
+    font-family: "Roboto Mono";
+}
+
+input:focus {
+    border-color: #1a7da1;
+}
+
+input::placeholder {
+    color: #ccc;
+}
+
+button {
+    border: 1px solid #ccc;
+    text-transform: uppercase;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    padding-left: 12px;
+    height: 28px;
+    outline: none;
+}
+
+button:hover {
+    cursor: pointer;
+}
+
+#run {
+    justify-self: center;
+    margin-right: 24px;
+    height: 83px;
+    width: 80px;
+}
+
+#run:disabled {
+    opacity: 0.2;
+}

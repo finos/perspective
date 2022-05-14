@@ -15,7 +15,7 @@ utils.with_server({}, () => {
         "superstore.html",
         () => {
             test.capture(
-                "click on add column button opens the expression UI.",
+                "Click on add column button opens the expression UI.",
                 async (page) => {
                     await page.evaluate(async () => {
                         const elem =
@@ -37,7 +37,6 @@ utils.with_server({}, () => {
                         )?.shadowRoot;
 
                         return (
-                            root?.querySelector(".cdr.squiggly-error") &&
                             root?.querySelector(".rename-label") &&
                             root?.querySelector(
                                 ".invisible.scrollbar.vertical.fade"
@@ -258,7 +257,31 @@ utils.with_server({}, () => {
                         await elem.restore({
                             expressions: ["3 + 4", "1 + 2"],
                         });
-                        await elem.reset();
+                        await elem.reset(true);
+                    });
+
+                    return page.evaluate(async () => {
+                        const elem =
+                            document.querySelector("perspective-viewer");
+                        return elem.shadowRoot.querySelector(
+                            "#expression-columns"
+                        ).innerHTML;
+                    });
+                }
+            );
+
+            test.capture(
+                "Resetting the viewer partially should not delete all expressions",
+                async (page) => {
+                    await page.evaluate(async () => {
+                        document.activeElement.blur();
+                        const elem =
+                            document.querySelector("perspective-viewer");
+                        await elem.toggleConfig(true);
+                        await elem.restore({
+                            expressions: ["3 + 4", "1 + 2"],
+                        });
+                        await elem.reset(false);
                     });
 
                     return page.evaluate(async () => {
@@ -283,7 +306,7 @@ utils.with_server({}, () => {
                             columns: ["1 + 2"],
                             expressions: ["3 + 4", "1 + 2"],
                         });
-                        await elem.reset();
+                        await elem.reset(true);
                     });
 
                     return page.evaluate(async () => {
@@ -297,7 +320,7 @@ utils.with_server({}, () => {
             );
 
             test.capture(
-                "Resetting the viewer when expression as in row_pivots or other field, should delete all expressions",
+                "Resetting the viewer partially when expression as in columns field, should not delete all expressions",
                 async (page) => {
                     await page.evaluate(async () => {
                         document.activeElement.blur();
@@ -306,12 +329,37 @@ utils.with_server({}, () => {
                         await elem.toggleConfig(true);
                         await elem.restore({
                             columns: ["1 + 2"],
-                            row_pivots: ["3 + 4"],
+                            expressions: ["3 + 4", "1 + 2"],
+                        });
+                        await elem.reset(false);
+                    });
+
+                    return page.evaluate(async () => {
+                        const elem =
+                            document.querySelector("perspective-viewer");
+                        return elem.shadowRoot.querySelector(
+                            "#expression-columns"
+                        ).innerHTML;
+                    });
+                }
+            );
+
+            test.capture(
+                "Resetting the viewer when expression as in group_by or other field, should delete all expressions",
+                async (page) => {
+                    await page.evaluate(async () => {
+                        document.activeElement.blur();
+                        const elem =
+                            document.querySelector("perspective-viewer");
+                        await elem.toggleConfig(true);
+                        await elem.restore({
+                            columns: ["1 + 2"],
+                            group_by: ["3 + 4"],
                             sort: [["1 + 2", "asc"]],
                             filter: [["1 + 2", "==", 3]],
                             expressions: ["3 + 4", "1 + 2"],
                         });
-                        await elem.reset();
+                        await elem.reset(true);
                     });
 
                     return page.evaluate(async () => {
@@ -387,7 +435,7 @@ utils.with_server({}, () => {
                         await elem.restore({
                             expressions: ['"Sales" + 100'],
                             aggregates: {'"Sales" + 100': "avg"},
-                            row_pivots: ["State"],
+                            group_by: ["State"],
                             columns: ['"Sales" + 100'],
                         });
                     });

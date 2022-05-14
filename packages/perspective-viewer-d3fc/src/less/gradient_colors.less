@@ -1,0 +1,38 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+:host {
+    .chart {
+        // Local definitions allow for defaults that can easily be overridden
+        // by a theme applied to the parent.  These styles are only read by
+        // `getComputedStyle()`.
+        --d3fc-local-full--gradient: var(
+            --d3fc-full--gradient,
+            linear-gradient(
+                #4d342f 0%,
+                #e4521b 22.5%,
+                #feeb65 42.5%,
+                #f0f0f0 50%,
+                #dcedc8 57.5%,
+                #42b3d5 67.5%,
+                #1a237e 100%
+            )
+        );
+
+        --d3fc-local-positive--gradient: var(
+            --d3fc-positive--gradient,
+            linear-gradient(#dcedc8 0%, #42b3d5 35%, #1a237e 100%)
+        );
+
+        --d3fc-local-negative--gradient: var(
+            --d3fc-negative--gradient,
+            linear-gradient(#feeb65 100%, #e4521b 70%, #4d342f 0%)
+        );
+    }
+}

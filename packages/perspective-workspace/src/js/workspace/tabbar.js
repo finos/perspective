@@ -7,9 +7,9 @@
  *
  */
 
-import {ArrayExt} from "@lumino/algorithm";
-import {ElementExt} from "@lumino/domutils";
-import {TabBar} from "@lumino/widgets";
+import {ArrayExt} from "@lumino/algorithm/src";
+import {ElementExt} from "@lumino/domutils/src";
+import {TabBar} from "@lumino/widgets/src/tabbar";
 import {TabBarItems, DEFAULT_TITLE} from "./tabbarrenderer";
 
 export class PerspectiveTabBar extends TabBar {
@@ -60,6 +60,11 @@ export class PerspectiveTabBar extends TabBar {
 
             case "mousedown":
                 if (event.target.id === TabBarItems.Config) {
+                    return;
+                }
+                break;
+            case "pointerdown":
+                if (event.target.id === TabBarItems.Config) {
                     const tabs = this.contentNode.children;
 
                     // Find the index of the released tab.
@@ -76,7 +81,7 @@ export class PerspectiveTabBar extends TabBar {
                     }
 
                     const title = this.titles[index];
-                    title.owner.toggleConfig();
+                    title.owner.viewer.toggleConfig();
                     return;
                 }
                 break;
@@ -167,9 +172,6 @@ export class PerspectiveTabBar extends TabBar {
     }
 
     _addEventListeners() {
-        this.tabActivateRequested.connect(() => {
-            this.currentTitle.owner.notifyResize();
-        });
         this.node.addEventListener("dblclick", this);
         this.node.addEventListener("contextmenu", this);
     }

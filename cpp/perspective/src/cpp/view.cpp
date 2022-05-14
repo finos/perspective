@@ -12,6 +12,8 @@
 #include <perspective/arrow_writer.h>
 #include <sstream>
 
+#include <arrow/csv/writer.h>
+
 namespace perspective {
 
 std::string
@@ -529,16 +531,25 @@ View<t_ctx2>::get_data(t_uindex start_row, t_uindex end_row, t_uindex start_col,
 template <typename CTX_T>
 std::shared_ptr<std::string>
 View<CTX_T>::to_arrow(std::int32_t start_row, std::int32_t end_row,
-    std::int32_t start_col, std::int32_t end_col) const {
+    std::int32_t start_col, std::int32_t end_col, bool emit_group_by) const {
     std::shared_ptr<t_data_slice<CTX_T>> data_slice
         = get_data(start_row, end_row, start_col, end_col);
-    return data_slice_to_arrow(data_slice);
+    return data_slice_to_arrow(data_slice, emit_group_by);
 };
 
 template <typename CTX_T>
 std::shared_ptr<std::string>
-View<CTX_T>::data_slice_to_arrow(
-    std::shared_ptr<t_data_slice<CTX_T>> data_slice) const {
+View<CTX_T>::to_csv(std::int32_t start_row, std::int32_t end_row,
+    std::int32_t start_col, std::int32_t end_col) const {
+    std::shared_ptr<t_data_slice<CTX_T>> data_slice
+        = get_data(start_row, end_row, start_col, end_col);
+    return data_slice_to_csv(data_slice);
+};
+
+template <typename CTX_T>
+std::pair<std::shared_ptr<arrow::Schema>, std::shared_ptr<arrow::RecordBatch>>
+View<CTX_T>::data_slice_to_batches(
+    bool emit_group_by, std::shared_ptr<t_data_slice<CTX_T>> data_slice) const {
     // From the data slice, get all the metadata we need
     t_get_data_extents extents = data_slice->get_data_extents();
     std::int32_t start_col = extents.m_scol;
@@ -555,9 +566,259 @@ View<CTX_T>::data_slice_to_arrow(
 
     std::int32_t num_columns = end_col - start_col;
 
-    if (num_columns > 0) {
-        fields.reserve(num_columns);
-        vectors.reserve(num_columns);
+    std::vector<std::string> row_pivots = m_view_config->get_row_pivots();
+    t_uindex num_row_paths = emit_group_by ? row_pivots.size() : 0;
+    if (num_columns + num_row_paths > 0) {
+        fields.reserve(num_columns + num_row_paths);
+        vectors.reserve(num_columns + num_row_paths);
+    }
+
+    if (emit_group_by && num_row_paths > 0 && !is_column_only()) {
+        auto schema = m_table->get_schema();
+        for (auto rpidx = 0; rpidx < num_row_paths; ++rpidx) {
+            std::string column_name = row_pivots.at(rpidx);
+            std::string row_path_name = column_name;
+            row_path_name += " (Group by ";
+            row_path_name += std::to_string(rpidx + 1);
+            row_path_name += ")";
+
+            // Get the "table" type for this column, as row_pivots are not in
+            // the view schema.
+            t_dtype dtype;
+            if (schema.has_column(column_name)) {
+                dtype = schema.get_dtype(column_name);
+            } else {
+                for (const auto& expr : m_expressions) {
+                    std::string expression_alias = expr->get_expression_alias();
+                    if (expr->get_expression_alias() == column_name) {
+                        dtype = expr->get_dtype();
+                        break;
+                    }
+                }
+            }
+
+            std::shared_ptr<arrow::Array> arr;
+            switch (dtype) {
+                case DTYPE_INT8: {
+                    fields.push_back(
+                        arrow::field(row_path_name, arrow::int8()));
+                    arr = apachearrow::numeric_col_to_array<arrow::Int8Type,
+                        std::int8_t>(extents, [&, rpidx](t_uindex ridx) {
+                        auto depth = m_ctx->unity_get_row_depth(ridx);
+                        if (rpidx < depth) {
+                            return m_ctx->unity_get_row_path(ridx).at(
+                                (depth - 1) - rpidx);
+                        } else {
+                            return mknone();
+                        }
+                    });
+                } break;
+                case DTYPE_UINT8: {
+                    fields.push_back(
+                        arrow::field(row_path_name, arrow::uint8()));
+                    arr = apachearrow::numeric_col_to_array<arrow::UInt8Type,
+                        std::uint8_t>(extents, [&, rpidx](t_uindex ridx) {
+                        auto depth = m_ctx->unity_get_row_depth(ridx);
+                        if (rpidx < depth) {
+                            return m_ctx->unity_get_row_path(ridx).at(
+                                (depth - 1) - rpidx);
+                        } else {
+                            return mknone();
+                        }
+                    });
+                } break;
+                case DTYPE_INT16: {
+                    fields.push_back(
+                        arrow::field(row_path_name, arrow::int16()));
+                    arr = apachearrow::numeric_col_to_array<arrow::Int16Type,
+                        std::int16_t>(extents, [&, rpidx](t_uindex ridx) {
+                        auto depth = m_ctx->unity_get_row_depth(ridx);
+                        if (rpidx < depth) {
+                            return m_ctx->unity_get_row_path(ridx).at(
+                                (depth - 1) - rpidx);
+                        } else {
+                            return mknone();
+                        }
+                    });
+                } break;
+                case DTYPE_UINT16: {
+                    fields.push_back(
+                        arrow::field(row_path_name, arrow::uint16()));
+                    arr = apachearrow::numeric_col_to_array<arrow::UInt16Type,
+                        std::uint16_t>(extents, [&, rpidx](t_uindex ridx) {
+                        auto depth = m_ctx->unity_get_row_depth(ridx);
+                        if (rpidx < depth) {
+                            return m_ctx->unity_get_row_path(ridx).at(
+                                (depth - 1) - rpidx);
+                        } else {
+                            return mknone();
+                        }
+                    });
+                } break;
+                case DTYPE_INT32: {
+                    fields.push_back(
+                        arrow::field(row_path_name, arrow::int32()));
+                    arr = apachearrow::numeric_col_to_array<arrow::Int32Type,
+                        std::int32_t>(extents, [&, rpidx](t_uindex ridx) {
+                        auto depth = m_ctx->unity_get_row_depth(ridx);
+                        if (rpidx < depth) {
+                            return m_ctx->unity_get_row_path(ridx).at(
+                                (depth - 1) - rpidx);
+                        } else {
+                            return mknone();
+                        }
+                    });
+                } break;
+                case DTYPE_UINT32: {
+                    fields.push_back(
+                        arrow::field(row_path_name, arrow::uint32()));
+                    arr = apachearrow::numeric_col_to_array<arrow::UInt32Type,
+                        std::uint32_t>(extents, [&, rpidx](t_uindex ridx) {
+                        auto depth = m_ctx->unity_get_row_depth(ridx);
+                        if (rpidx < depth) {
+                            return m_ctx->unity_get_row_path(ridx).at(
+                                (depth - 1) - rpidx);
+                        } else {
+                            return mknone();
+                        }
+                    });
+                } break;
+                case DTYPE_INT64: {
+                    fields.push_back(
+                        arrow::field(row_path_name, arrow::int64()));
+                    arr = apachearrow::numeric_col_to_array<arrow::Int64Type,
+                        std::int64_t>(extents, [&, rpidx](t_uindex ridx) {
+                        auto depth = m_ctx->unity_get_row_depth(ridx);
+                        if (rpidx < depth) {
+                            return m_ctx->unity_get_row_path(ridx).at(
+                                (depth - 1) - rpidx);
+                        } else {
+                            return mknone();
+                        }
+                    });
+                } break;
+                case DTYPE_UINT64: {
+                    fields.push_back(
+                        arrow::field(row_path_name, arrow::uint64()));
+                    arr = apachearrow::numeric_col_to_array<arrow::UInt64Type,
+                        std::uint64_t>(extents, [&, rpidx](t_uindex ridx) {
+                        auto depth = m_ctx->unity_get_row_depth(ridx);
+                        if (rpidx < depth) {
+                            return m_ctx->unity_get_row_path(ridx).at(
+                                (depth - 1) - rpidx);
+                        } else {
+                            return mknone();
+                        }
+                    });
+                } break;
+                case DTYPE_FLOAT32: {
+                    fields.push_back(
+                        arrow::field(row_path_name, arrow::float32()));
+                    arr = apachearrow::numeric_col_to_array<arrow::FloatType,
+                        float>(extents, [&, rpidx](t_uindex ridx) {
+                        auto depth = m_ctx->unity_get_row_depth(ridx);
+                        if (rpidx < depth) {
+                            return m_ctx->unity_get_row_path(ridx).at(
+                                (depth - 1) - rpidx);
+                        } else {
+                            return mknone();
+                        }
+                    });
+                } break;
+                case DTYPE_FLOAT64: {
+                    fields.push_back(
+                        arrow::field(row_path_name, arrow::float64()));
+                    arr = apachearrow::numeric_col_to_array<arrow::DoubleType,
+                        double>(extents, [&, rpidx](t_uindex ridx) {
+                        auto depth = m_ctx->unity_get_row_depth(ridx);
+                        if (rpidx < depth) {
+                            return m_ctx->unity_get_row_path(ridx).at(
+                                (depth - 1) - rpidx);
+                        } else {
+                            return mknone();
+                        }
+                    });
+                } break;
+                case DTYPE_DATE: {
+                    fields.push_back(
+                        arrow::field(row_path_name, arrow::date32()));
+                    arr = apachearrow::date_col_to_array(
+                        extents, [&, rpidx](t_uindex ridx) {
+                            auto depth = m_ctx->unity_get_row_depth(ridx);
+                            if (rpidx < depth) {
+                                return m_ctx->unity_get_row_path(ridx).at(
+                                    (depth - 1) - rpidx);
+                            } else {
+                                return mknone();
+                            }
+                        });
+                } break;
+                case DTYPE_TIME: {
+                    fields.push_back(arrow::field(row_path_name,
+                        arrow::timestamp(arrow::TimeUnit::MILLI)));
+                    arr = apachearrow::timestamp_col_to_array(
+                        extents, [&, rpidx](t_uindex ridx) {
+                            auto depth = m_ctx->unity_get_row_depth(ridx);
+                            if (rpidx < depth) {
+                                return m_ctx->unity_get_row_path(ridx).at(
+                                    (depth - 1) - rpidx);
+                            } else {
+                                return mknone();
+                            }
+                        });
+                } break;
+                case DTYPE_BOOL: {
+                    fields.push_back(
+                        arrow::field(row_path_name, arrow::boolean()));
+                    arr = apachearrow::boolean_col_to_array(
+                        extents, [&, rpidx](t_uindex ridx) {
+                            auto depth = m_ctx->unity_get_row_depth(ridx);
+                            if (rpidx < depth) {
+                                return m_ctx->unity_get_row_path(ridx).at(
+                                    (depth - 1) - rpidx);
+                            } else {
+                                return mknone();
+                            }
+                        });
+                } break;
+                case DTYPE_STR: {
+                    fields.push_back(arrow::field(row_path_name,
+                        arrow::dictionary(arrow::int32(), arrow::utf8())));
+                    arr = apachearrow::string_col_to_dictionary_array(
+                        extents, [&, rpidx](t_uindex ridx) {
+                            auto depth = m_ctx->unity_get_row_depth(ridx);
+                            if (rpidx < depth) {
+                                return m_ctx->unity_get_row_path(ridx).at(
+                                    (depth - 1) - rpidx);
+                            } else {
+                                return mknone();
+                            }
+                        });
+                } break;
+                case DTYPE_OBJECT: {
+                    fields.push_back(
+                        arrow::field(row_path_name, arrow::uint64()));
+                    arr = apachearrow::numeric_col_to_array<arrow::UInt64Type,
+                        std::uint64_t>(extents, [&, rpidx](t_uindex ridx) {
+                        auto depth = m_ctx->unity_get_row_depth(ridx);
+                        if (rpidx < depth) {
+                            return m_ctx->unity_get_row_path(ridx).at(
+                                (depth - 1) - rpidx);
+                        } else {
+                            return mknone();
+                        }
+                    });
+                } break;
+                default: {
+                    std::stringstream ss;
+                    ss << "Cannot serialize column `" << row_path_name
+                       << "` of type `" << get_dtype_descr(dtype)
+                       << "` to Arrow format." << std::endl;
+                    PSP_COMPLAIN_AND_ABORT(ss.str());
+                }
+            }
+            vectors.push_back(arr);
+        }
     }
 
     // calculate the number of columns (including __ROW_PATH__) minus
@@ -583,11 +844,11 @@ View<CTX_T>::data_slice_to_arrow(
         std::vector<t_tscalar> col_path = names.at(cidx);
         t_dtype dtype = get_column_dtype(cidx);
 
-        // mean and weighted mean uses DTYPE_F64PAIR on the aggtable, which is
-        // the dtype returned by get_column_dtype. However, in the output data
-        // slice they are DTYPE_FLOAT64 and the f64 pair is not exposed outside
-        // of the sparse tree. Thus, treat f64 pair as DTYPE_FLOAT64 for arrow
-        // serialization.
+        // mean and weighted mean uses DTYPE_F64PAIR on the aggtable, which
+        // is the dtype returned by get_column_dtype. However, in the output
+        // data slice they are DTYPE_FLOAT64 and the f64 pair is not exposed
+        // outside of the sparse tree. Thus, treat f64 pair as DTYPE_FLOAT64
+        // for arrow serialization.
         if (dtype == DTYPE_F64PAIR) {
             dtype = DTYPE_FLOAT64;
         }
@@ -605,79 +866,135 @@ View<CTX_T>::data_slice_to_arrow(
             case DTYPE_INT8: {
                 fields.push_back(arrow::field(name, arrow::int8()));
                 arr = apachearrow::numeric_col_to_array<arrow::Int8Type,
-                    std::int8_t>(slice, cidx, stride, extents);
+                    std::int8_t>(
+                    extents, [slice, cidx, stride, extents](t_uindex ridx) {
+                        return slice[(ridx - extents.m_srow) * stride
+                            + (cidx - extents.m_scol)];
+                    });
             } break;
             case DTYPE_UINT8: {
                 fields.push_back(arrow::field(name, arrow::uint8()));
                 arr = apachearrow::numeric_col_to_array<arrow::UInt8Type,
-                    std::uint8_t>(slice, cidx, stride, extents);
+                    std::uint8_t>(
+                    extents, [slice, cidx, stride, extents](t_uindex ridx) {
+                        return slice[(ridx - extents.m_srow) * stride
+                            + (cidx - extents.m_scol)];
+                    });
             } break;
             case DTYPE_INT16: {
                 fields.push_back(arrow::field(name, arrow::int16()));
                 arr = apachearrow::numeric_col_to_array<arrow::Int16Type,
-                    std::int16_t>(slice, cidx, stride, extents);
+                    std::int16_t>(
+                    extents, [slice, cidx, stride, extents](t_uindex ridx) {
+                        return slice[(ridx - extents.m_srow) * stride
+                            + (cidx - extents.m_scol)];
+                    });
             } break;
             case DTYPE_UINT16: {
                 fields.push_back(arrow::field(name, arrow::uint16()));
                 arr = apachearrow::numeric_col_to_array<arrow::UInt16Type,
-                    std::uint16_t>(slice, cidx, stride, extents);
+                    std::uint16_t>(
+                    extents, [slice, cidx, stride, extents](t_uindex ridx) {
+                        return slice[(ridx - extents.m_srow) * stride
+                            + (cidx - extents.m_scol)];
+                    });
             } break;
             case DTYPE_INT32: {
                 fields.push_back(arrow::field(name, arrow::int32()));
                 arr = apachearrow::numeric_col_to_array<arrow::Int32Type,
-                    std::int32_t>(slice, cidx, stride, extents);
+                    std::int32_t>(
+                    extents, [slice, cidx, stride, extents](t_uindex ridx) {
+                        return slice[(ridx - extents.m_srow) * stride
+                            + (cidx - extents.m_scol)];
+                    });
             } break;
             case DTYPE_UINT32: {
                 fields.push_back(arrow::field(name, arrow::uint32()));
                 arr = apachearrow::numeric_col_to_array<arrow::UInt32Type,
-                    std::uint32_t>(slice, cidx, stride, extents);
+                    std::uint32_t>(
+                    extents, [slice, cidx, stride, extents](t_uindex ridx) {
+                        return slice[(ridx - extents.m_srow) * stride
+                            + (cidx - extents.m_scol)];
+                    });
             } break;
             case DTYPE_INT64: {
                 fields.push_back(arrow::field(name, arrow::int64()));
                 arr = apachearrow::numeric_col_to_array<arrow::Int64Type,
-                    std::int64_t>(slice, cidx, stride, extents);
+                    std::int64_t>(
+                    extents, [slice, cidx, stride, extents](t_uindex ridx) {
+                        return slice[(ridx - extents.m_srow) * stride
+                            + (cidx - extents.m_scol)];
+                    });
             } break;
             case DTYPE_UINT64: {
                 fields.push_back(arrow::field(name, arrow::uint64()));
                 arr = apachearrow::numeric_col_to_array<arrow::UInt64Type,
-                    std::uint64_t>(slice, cidx, stride, extents);
+                    std::uint64_t>(
+                    extents, [slice, cidx, stride, extents](t_uindex ridx) {
+                        return slice[(ridx - extents.m_srow) * stride
+                            + (cidx - extents.m_scol)];
+                    });
             } break;
             case DTYPE_FLOAT32: {
                 fields.push_back(arrow::field(name, arrow::float32()));
                 arr = apachearrow::numeric_col_to_array<arrow::FloatType,
-                    float>(slice, cidx, stride, extents);
+                    float>(
+                    extents, [slice, cidx, stride, extents](t_uindex ridx) {
+                        return slice[(ridx - extents.m_srow) * stride
+                            + (cidx - extents.m_scol)];
+                    });
             } break;
             case DTYPE_FLOAT64: {
                 fields.push_back(arrow::field(name, arrow::float64()));
                 arr = apachearrow::numeric_col_to_array<arrow::DoubleType,
-                    double>(slice, cidx, stride, extents);
+                    double>(
+                    extents, [slice, cidx, stride, extents](t_uindex ridx) {
+                        return slice[(ridx - extents.m_srow) * stride
+                            + (cidx - extents.m_scol)];
+                    });
             } break;
             case DTYPE_DATE: {
                 fields.push_back(arrow::field(name, arrow::date32()));
                 arr = apachearrow::date_col_to_array(
-                    slice, cidx, stride, extents);
+                    extents, [slice, cidx, stride, extents](t_uindex ridx) {
+                        return slice[(ridx - extents.m_srow) * stride
+                            + (cidx - extents.m_scol)];
+                    });
             } break;
             case DTYPE_TIME: {
                 fields.push_back(arrow::field(
                     name, arrow::timestamp(arrow::TimeUnit::MILLI)));
                 arr = apachearrow::timestamp_col_to_array(
-                    slice, cidx, stride, extents);
+                    extents, [slice, cidx, stride, extents](t_uindex ridx) {
+                        return slice[(ridx - extents.m_srow) * stride
+                            + (cidx - extents.m_scol)];
+                    });
             } break;
             case DTYPE_BOOL: {
                 fields.push_back(arrow::field(name, arrow::boolean()));
                 arr = apachearrow::boolean_col_to_array(
-                    slice, cidx, stride, extents);
+                    extents, [slice, cidx, stride, extents](t_uindex ridx) {
+                        return slice[(ridx - extents.m_srow) * stride
+                            + (cidx - extents.m_scol)];
+                    });
             } break;
             case DTYPE_STR: {
                 fields.push_back(arrow::field(
                     name, arrow::dictionary(arrow::int32(), arrow::utf8())));
                 arr = apachearrow::string_col_to_dictionary_array(
-                    slice, cidx, stride, extents);
+                    extents, [slice, cidx, stride, extents](t_uindex ridx) {
+                        return slice[(ridx - extents.m_srow) * stride
+                            + (cidx - extents.m_scol)];
+                    });
             } break;
             case DTYPE_OBJECT: {
                 fields.push_back(arrow::field(name, arrow::uint64()));
                 arr = apachearrow::numeric_col_to_array<arrow::UInt64Type,
-                    std::uint64_t>(slice, cidx, stride, extents);
+                    std::uint64_t>(
+                    extents, [slice, cidx, stride, extents](t_uindex ridx) {
+                        return slice[(ridx - extents.m_srow) * stride
+                            + (cidx - extents.m_scol)];
+                    });
             } break;
             default: {
                 std::stringstream ss;
@@ -701,21 +1018,18 @@ View<CTX_T>::data_slice_to_arrow(
         PSP_COMPLAIN_AND_ABORT(ss.str());
     }
 
-    std::shared_ptr<arrow::ResizableBuffer> buffer;
+    return std::make_pair(arrow_schema, batches);
+}
 
-#if ARROW_VERSION_MAJOR < 1
-    auto allocated = arrow::AllocateResizableBuffer(0, &buffer);
-    if (!allocated.ok()) {
-        std::stringstream ss;
-        ss << "Failed to allocate buffer: " << allocated.message() << std::endl;
-        PSP_COMPLAIN_AND_ABORT(ss.str());
-    }
-
-    arrow::io::BufferOutputStream sink(buffer);
-    auto options = arrow::ipc::IpcOptions::Defaults();
-    auto res = arrow::ipc::RecordBatchStreamWriter::Open(
-        &sink, arrow_schema, options);
-#else
+template <typename CTX_T>
+std::shared_ptr<std::string>
+View<CTX_T>::data_slice_to_arrow(
+    std::shared_ptr<t_data_slice<CTX_T>> data_slice, bool emit_group_by) const {
+    std::pair<std::shared_ptr<arrow::Schema>,
+        std::shared_ptr<arrow::RecordBatch>>
+        pairs = data_slice_to_batches(emit_group_by, data_slice);
+    std::shared_ptr<arrow::RecordBatch> batches = pairs.second;
+    std::shared_ptr<arrow::Schema> arrow_schema = pairs.first;
     arrow::Result<std::shared_ptr<arrow::ResizableBuffer>> allocated
         = arrow::AllocateResizableBuffer(0);
     if (!allocated.ok()) {
@@ -725,15 +1039,46 @@ View<CTX_T>::data_slice_to_arrow(
         PSP_COMPLAIN_AND_ABORT(ss.str());
     }
 
+    std::shared_ptr<arrow::ResizableBuffer> buffer;
     buffer = *allocated;
     arrow::io::BufferOutputStream sink(buffer);
     auto options = arrow::ipc::IpcWriteOptions::Defaults();
-    auto res = arrow::ipc::NewStreamWriter(&sink, arrow_schema, options);
-#endif
-
+    auto res = arrow::ipc::MakeStreamWriter(&sink, arrow_schema, options);
     std::shared_ptr<arrow::ipc::RecordBatchWriter> writer = *res;
     PSP_CHECK_ARROW_STATUS(writer->WriteRecordBatch(*batches));
     PSP_CHECK_ARROW_STATUS(writer->Close());
+    PSP_CHECK_ARROW_STATUS(sink.Close());
+    return std::make_shared<std::string>(buffer->ToString());
+}
+
+template <typename CTX_T>
+std::shared_ptr<std::string>
+View<CTX_T>::data_slice_to_csv(
+    std::shared_ptr<t_data_slice<CTX_T>> data_slice) const {
+    std::pair<std::shared_ptr<arrow::Schema>,
+        std::shared_ptr<arrow::RecordBatch>>
+        pairs = data_slice_to_batches(true, data_slice);
+    std::shared_ptr<arrow::RecordBatch> batches = pairs.second;
+    std::shared_ptr<arrow::Schema> arrow_schema = pairs.first;
+    arrow::Result<std::shared_ptr<arrow::ResizableBuffer>> allocated
+        = arrow::AllocateResizableBuffer(0);
+    if (!allocated.ok()) {
+        std::stringstream ss;
+        ss << "Failed to allocate buffer: " << allocated.status().message()
+           << std::endl;
+        PSP_COMPLAIN_AND_ABORT(ss.str());
+    }
+
+    std::shared_ptr<arrow::ResizableBuffer> buffer;
+    buffer = *allocated;
+    arrow::io::BufferOutputStream sink(buffer);
+    auto write_options = arrow::csv::WriteOptions::Defaults();
+    auto maybe_writer
+        = arrow::csv::MakeCSVWriter(&sink, arrow_schema, write_options);
+    std::shared_ptr<arrow::ipc::RecordBatchWriter> writer = *maybe_writer;
+    PSP_CHECK_ARROW_STATUS(writer->WriteRecordBatch(*batches));
+    PSP_CHECK_ARROW_STATUS(writer->Close());
+    PSP_CHECK_ARROW_STATUS(sink.Close());
     return std::make_shared<std::string>(buffer->ToString());
 }
 
@@ -926,17 +1271,17 @@ View<CTX_T>::get_row_delta() const {
     t_uindex num_sides = sides();
 
     if (num_sides == 2 && m_sort.size() > 0) {
-        // Use column_names instead of column_paths, as column_names does not
-        // skip hidden sort columns whereas column_paths does, which causes
-        // issues later on.
+        // Use column_names instead of column_paths, as column_names does
+        // not skip hidden sort columns whereas column_paths does, which
+        // causes issues later on.
         paths = column_names(true, m_column_pivots.size());
     } else {
         paths = column_paths();
     }
 
-    // Add __ROW_PATH__ to the beginning for column only or for 2-sided sorted
-    // contexts where we used `column_names`, which does not add __ROW_PATH__
-    // automatically.
+    // Add __ROW_PATH__ to the beginning for column only or for 2-sided
+    // sorted contexts where we used `column_names`, which does not add
+    // __ROW_PATH__ automatically.
     if (is_column_only() || (num_sides == 2 && m_sort.size() > 0)) {
         t_tscalar row_path;
         row_path.set("__ROW_PATH__");

@@ -7,7 +7,7 @@
 set -e
 
 SDIST_NAME=perspective-python
-SDIST_VERSION=`git describe --abbrev=0 --tags  | cut -c2-`
+SDIST_VERSION=`git describe --abbrev=0 --tags  | cut -c2- | sed 's/-rc\./rc/g'`
 SDIST_FULL_NAME=$SDIST_NAME-$SDIST_VERSION
 SDIST_FULL_NAME_TAR=$SDIST_FULL_NAME.tar.gz
 
@@ -37,6 +37,14 @@ echo "-----------------------"
 echo "Testing sdist-built assets"
 
 python3 -c "import perspective;print(perspective.is_libpsp())"
+
+echo "-----------------------"
+echo "Cleaning tmp"
+
+cd ../..
+rm -rf tmp
+
+echo $(pwd)
 
 echo "-----------------------"
 echo "Done.."

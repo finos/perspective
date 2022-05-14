@@ -9,81 +9,100 @@
 use super::column_selector::ColumnSelector;
 use super::config_selector::ConfigSelector;
 use super::containers::split_panel::SplitPanel;
+use super::font_loader::{FontLoader, FontLoaderProps, FontLoaderStatus};
 use super::plugin_selector::PluginSelector;
 use super::render_warning::RenderWarning;
 use super::status_bar::StatusBar;
 
 use crate::config::*;
-use crate::custom_elements::filter_dropdown::FilterDropDownElement;
 use crate::dragdrop::*;
+use crate::model::*;
 use crate::renderer::*;
-use crate::session::Session;
+use crate::session::*;
+use crate::theme::Theme;
 use crate::utils::*;
+use crate::*;
 
 use futures::channel::oneshot::*;
+use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use yew::prelude::*;
 
-pub static CSS: &str = include_str!("../../../dist/css/viewer.css");
+pub static CSS: &str = include_str!("../../../build/css/viewer.css");
 
-#[derive(Properties, Clone)]
+#[derive(Properties)]
 pub struct PerspectiveViewerProps {
     pub elem: web_sys::HtmlElement,
     pub session: Session,
     pub renderer: Renderer,
+    pub theme: Theme,
     pub dragdrop: DragDrop,
 
     #[prop_or_default]
-    pub weak_link: WeakComponentLink<PerspectiveViewer>,
+    pub weak_link: WeakScope<PerspectiveViewer>,
+}
+
+derive_model!(Renderer, Session for PerspectiveViewerProps);
+
+impl PartialEq for PerspectiveViewerProps {
+    fn eq(&self, _rhs: &Self) -> bool {
+        false
+    }
 }
 
 pub enum Msg {
-    Reset(Option<Sender<()>>),
-    ApplySettings(Option<SettingsUpdate>),
-    ToggleSettings(
+    Resize,
+    Reset(bool, Option<Sender<()>>),
+    ToggleSettingsInit(
         Option<SettingsUpdate>,
         Option<Sender<Result<JsValue, JsValue>>>,
     ),
-    QuerySettings(Sender<bool>),
-    ToggleSettingsFinished(Sender<()>),
+    ToggleSettingsComplete(SettingsUpdate, Sender<()>),
+    PreloadFontsUpdate,
     RenderLimits(Option<(usize, usize, Option<usize>, Option<usize>)>),
 }
 
 pub struct PerspectiveViewer {
-    link: ComponentLink<Self>,
-    props: PerspectiveViewerProps,
-    settings_open: bool,
     dimensions: Option<(usize, usize, Option<usize>, Option<usize>)>,
     on_rendered: Option<Sender<()>>,
-    filter_dropdown: FilterDropDownElement,
+    fonts: FontLoaderProps,
+    settings_open: bool,
+    on_resize: Rc<PubSub<()>>,
+    on_dimensions_reset: Rc<PubSub<()>>,
 }
 
 impl Component for PerspectiveViewer {
     type Message = Msg;
     type Properties = PerspectiveViewerProps;
-    fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        *props.weak_link.borrow_mut() = Some(link.clone());
-        let filter_dropdown = FilterDropDownElement::new(props.session.clone());
+    fn create(ctx: &Context<Self>) -> Self {
+        *ctx.props().weak_link.borrow_mut() = Some(ctx.link().clone());
+        let elem = ctx.props().elem.clone();
+        let callback = ctx.link().callback(|()| Msg::PreloadFontsUpdate);
+
         Self {
-            props,
-            link,
-            settings_open: false,
             dimensions: None,
             on_rendered: None,
-            filter_dropdown,
+            fonts: FontLoaderProps::new(&elem, callback),
+            settings_open: false,
+            on_resize: Default::default(),
+            on_dimensions_reset: Default::default(),
         }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            Msg::Reset(sender) => {
-                let renderer = self.props.renderer.clone();
-                let session = self.props.session.clone();
+            Msg::PreloadFontsUpdate => true,
+            Msg::Resize => {
+                self.on_resize.emit_all(());
+                false
+            }
+            Msg::Reset(all, sender) => {
+                clone!(ctx.props().renderer, ctx.props().session, ctx.props().theme);
                 let _ = promisify_ignore_view_delete(async move {
-                    session.reset();
-                    renderer.reset();
-                    let result =
-                        renderer.draw(session.validate().await.create_view()).await;
+                    session.reset(all);
+                    renderer.reset().await;
+                    theme.reset(None).await;
+                    let result = renderer.draw(session.validate().await?.create_view()).await;
 
                     if let Some(sender) = sender {
                         sender.send(()).unwrap();
@@ -94,47 +113,45 @@ impl Component for PerspectiveViewer {
 
                 false
             }
-            Msg::QuerySettings(sender) => {
-                sender.send(self.settings_open).unwrap();
+            Msg::ToggleSettingsInit(Some(SettingsUpdate::Missing), None) => false,
+            Msg::ToggleSettingsInit(Some(SettingsUpdate::Missing), Some(resolve)) => {
+                resolve.send(Ok(JsValue::UNDEFINED)).unwrap();
                 false
             }
-            Msg::ApplySettings(force) => {
-                match force {
-                    Some(SettingsUpdate::Missing) => {}
-                    Some(SettingsUpdate::SetDefault) => {
-                        self.settings_open = false;
-                    }
-                    Some(SettingsUpdate::Update(force)) => {
-                        self.settings_open = force;
-                    }
-                    None => self.settings_open = !self.settings_open,
-                };
-
-                self.props
-                    .elem
-                    .toggle_attribute_with_force("settings", self.settings_open)
-                    .unwrap();
-
-                dispatch_settings_event(&self.props.elem, self.settings_open).unwrap();
+            Msg::ToggleSettingsInit(Some(SettingsUpdate::SetDefault), resolve) => {
+                self.init_toggle_settings_task(ctx, Some(false), resolve);
+                false
+            }
+            Msg::ToggleSettingsInit(Some(SettingsUpdate::Update(force)), resolve) => {
+                self.init_toggle_settings_task(ctx, Some(force), resolve);
+                false
+            }
+            Msg::ToggleSettingsInit(None, resolve) => {
+                self.init_toggle_settings_task(ctx, None, resolve);
+                false
+            }
+            Msg::ToggleSettingsComplete(SettingsUpdate::SetDefault, resolve)
+                if self.settings_open =>
+            {
+                self.settings_open = false;
+                self.on_rendered = Some(resolve);
                 true
             }
-            Msg::ToggleSettings(force, resolve) => {
-                match force {
-                    Some(SettingsUpdate::Missing) => (),
-                    Some(SettingsUpdate::SetDefault) => {
-                        self.toggle_settings(Some(false), resolve)
-                    }
-                    Some(SettingsUpdate::Update(force)) => {
-                        self.toggle_settings(Some(force), resolve)
-                    }
-                    None => self.toggle_settings(None, resolve),
-                }
-
+            Msg::ToggleSettingsComplete(SettingsUpdate::Update(force), resolve)
+                if force != self.settings_open =>
+            {
+                self.settings_open = force;
+                self.on_rendered = Some(resolve);
+                true
+            }
+            Msg::ToggleSettingsComplete(_, resolve)
+                if matches!(self.fonts.get_status(), FontLoaderStatus::Finished) =>
+            {
+                resolve.send(()).expect("Orphan render");
                 false
             }
-            Msg::ToggleSettingsFinished(sender) => {
-                dispatch_settings_event(&self.props.elem, self.settings_open).unwrap();
-                self.on_rendered = Some(sender);
+            Msg::ToggleSettingsComplete(_, resolve) => {
+                self.on_rendered = Some(resolve);
                 true
             }
             Msg::RenderLimits(dimensions) => {
@@ -148,120 +165,140 @@ impl Component for PerspectiveViewer {
         }
     }
 
-    /// This top-level component is mounted to the Custom Element, so it has no API
-    /// to provide props - but for sanity if needed, just return true on change.
-    fn change(&mut self, _props: Self::Properties) -> ShouldRender {
+    /// This top-level component is mounted to the Custom Element, so it has no
+    /// API to provide props - but for sanity if needed, just return true on
+    /// change.
+    fn changed(&mut self, _ctx: &Context<Self>) -> bool {
         true
     }
 
-    /// On rendered call notify_resize().  This also triggers any registered async
-    /// callbacks to the Custom Element API.
-    fn rendered(&mut self, _first_render: bool) {
-        let resolve = self.on_rendered.take();
-        if let Some(resolve) = resolve {
-            resolve.send(()).expect("Orphan render");
+    /// On rendered call notify_resize().  This also triggers any registered
+    /// async callbacks to the Custom Element API.
+    fn rendered(&mut self, ctx: &Context<Self>, _first_render: bool) {
+        ctx.props()
+            .renderer
+            .set_settings_open(Some(self.settings_open))
+            .unwrap();
+
+        if self.on_rendered.is_some()
+            && matches!(self.fonts.get_status(), FontLoaderStatus::Finished)
+        {
+            self.on_rendered
+                .take()
+                .unwrap()
+                .send(())
+                .expect("Orphan render");
         }
     }
 
     /// `PerspectiveViewer` has two basic UI modes - "open" and "closed".
-    // TODO these may be expensive to buil dbecause they will generate recursively from
-    // `JsPerspectiveConfig` - they may need caching as in the JavaScript version.
-    fn view(&self) -> Html {
-        let settings = self.link.callback(|_| Msg::ToggleSettings(None, None));
-        if self.settings_open {
-            html! {
-                <>
-                    <style>{ &CSS }</style>
-                    <SplitPanel id="app_panel">
-                        <div id="side_panel" class="column noselect">
-                            <PluginSelector
-                                session={ self.props.session.clone() }
-                                renderer={ self.props.renderer.clone() }>
-                            </PluginSelector>
-                            <ColumnSelector
-                                dragdrop={ self.props.dragdrop.clone() }
-                                renderer={ self.props.renderer.clone() }
-                                session={ self.props.session.clone() }>
-                            </ColumnSelector>
-                        </div>
-                        <div id="main_column">
-                            <ConfigSelector
-                                dragdrop={ self.props.dragdrop.clone() }
-                                session={ self.props.session.clone() }
-                                renderer={ self.props.renderer.clone() }
-                                filter_dropdown={ self.filter_dropdown.clone() }>
-                            </ConfigSelector>
-                            <div id="main_panel_container">
-                                <RenderWarning
-                                    dimensions={ self.dimensions }
-                                    session={ self.props.session.clone() }
-                                    renderer={ self.props.renderer.clone() }>
-                                </RenderWarning>
-                                <slot></slot>
-                            </div>
-                        </div>
-                    </SplitPanel>
-                    <StatusBar
-                        id="status_bar"
-                        session={ self.props.session.clone() }
-                        on_reset={ self.link.callback(|_| Msg::Reset(None)) }>
-                    </StatusBar>
-                    <div
-                        id="settings_button"
-                        class="noselect button"
-                        onmousedown={ settings }>
+    // TODO these may be expensive to buil dbecause they will generate recursively
+    // from `JsPerspectiveConfig` - they may need caching as in the JavaScript
+    // version.
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let settings = ctx.link().callback(|_| Msg::ToggleSettingsInit(None, None));
+        html_template! {
+            <style>{ &CSS }</style>
+
+            if self.settings_open {
+                <SplitPanel
+                    id="app_panel"
+                    on_reset={ self.on_dimensions_reset.callback() }
+                    on_resize_finished={ ctx.props().render_callback() }>
+                    <div id="side_panel" class="column noselect">
+                        <PluginSelector
+                            session={ ctx.props().session.clone() }
+                            renderer={ ctx.props().renderer.clone() }>
+                        </PluginSelector>
+                        <ColumnSelector
+                            dragdrop={ ctx.props().dragdrop.clone() }
+                            renderer={ ctx.props().renderer.clone() }
+                            session={ ctx.props().session.clone() }
+                            on_resize={ self.on_resize.clone() }
+                            on_dimensions_reset={ self.on_dimensions_reset.clone() }>
+                        </ColumnSelector>
                     </div>
-                </>
-            }
-        } else {
-            html! {
-                <>
-                    <style>{ &CSS }</style>
-                    <RenderWarning
-                        dimensions={ self.dimensions }
-                        session={ self.props.session.clone() }
-                        renderer={ self.props.renderer.clone() }>
-                    </RenderWarning>
-                    <div id="main_panel_container" class="settings-closed">
-                        <slot></slot>
+                    <div id="main_column">
+                        <ConfigSelector
+                            dragdrop={ ctx.props().dragdrop.clone() }
+                            session={ ctx.props().session.clone() }
+                            renderer={ ctx.props().renderer.clone() }>
+                        </ConfigSelector>
+                        <div id="main_panel_container">
+                            <RenderWarning
+                                dimensions={ self.dimensions }
+                                session={ ctx.props().session.clone() }
+                                renderer={ ctx.props().renderer.clone() }>
+                            </RenderWarning>
+                            <slot></slot>
+                        </div>
                     </div>
-                    <div id="settings_button" class="noselect button" onmousedown={ settings }></div>
-                </>
+                </SplitPanel>
+                <StatusBar
+                    id="status_bar"
+                    session={ ctx.props().session.clone() }
+                    renderer={ ctx.props().renderer.clone() }
+                    theme={ ctx.props().theme.clone() }
+                    on_reset={ ctx.link().callback(|all| Msg::Reset(all, None)) }>
+                </StatusBar>
+            } else {
+                <RenderWarning
+                    dimensions={ self.dimensions }
+                    session={ ctx.props().session.clone() }
+                    renderer={ ctx.props().renderer.clone() }>
+                </RenderWarning>
+                <div id="main_panel_container" class="settings-closed">
+                    <slot></slot>
+                </div>
             }
+
+            <div
+                id="settings_button"
+                class="noselect button"
+                onmousedown={ settings }>
+            </div>
+            <FontLoader ..self.fonts.clone()></FontLoader>
         }
     }
 
-    fn destroy(&mut self) {}
+    fn destroy(&mut self, _ctx: &Context<Self>) {}
 }
 
 impl PerspectiveViewer {
-    /// Toggle the settings, or force the settings panel either open (true) or closed
-    /// (false) explicitly.  In order to reduce apparent screen-shear, `toggle_settings()`
-    /// uses a somewhat complex render order:  it first resize the plugin's `<div>`
-    /// without moving it, using `overflow: hidden` to hide the extra draw area;  then,
-    /// after the _async_ drawing of the plugin is complete, it will send a message to
-    /// complete the toggle action and re-render the element with the settings removed.
+    /// Toggle the settings, or force the settings panel either open (true) or
+    /// closed (false) explicitly.  In order to reduce apparent
+    /// screen-shear, `toggle_settings()` uses a somewhat complex render
+    /// order:  it first resize the plugin's `<div>` without moving it,
+    /// using `overflow: hidden` to hide the extra draw area;  then,
+    /// after the _async_ drawing of the plugin is complete, it will send a
+    /// message to complete the toggle action and re-render the element with
+    /// the settings removed.
     ///
     /// # Arguments
-    /// * `force` - Whether to explicitly set the settings panel state to Open/Close
-    ///   (`Some(true)`/`Some(false)`), or to just toggle the current state (`None`).
-    fn toggle_settings(
+    /// * `force` - Whether to explicitly set the settings panel state to
+    ///   Open/Close (`Some(true)`/`Some(false)`), or to just toggle the current
+    ///   state (`None`).
+    fn init_toggle_settings_task(
         &mut self,
+        ctx: &Context<Self>,
         force: Option<bool>,
         sender: Option<Sender<Result<JsValue, JsValue>>>,
     ) {
+        let is_open = ctx.props().renderer.is_settings_open();
         match force {
-            Some(force) if self.settings_open == force => {
+            Some(force) if is_open == force => {
                 if let Some(sender) = sender {
                     sender.send(Ok(JsValue::UNDEFINED)).unwrap();
                 }
             }
             Some(_) | None => {
-                let force = !self.settings_open;
-                self.settings_open = force;
-                let callback = self.link.callback_once(Msg::ToggleSettingsFinished);
-                let renderer = self.props.renderer.clone();
-                let session = self.props.session.clone();
+                let force = !is_open;
+                let callback = ctx.link().callback(move |resolve| {
+                    let update = SettingsUpdate::Update(force);
+                    Msg::ToggleSettingsComplete(update, resolve)
+                });
+
+                clone!(ctx.props().renderer, ctx.props().session);
                 drop(promisify_ignore_view_delete(async move {
                     let result = if session.js_get_table().is_some() {
                         renderer.presize(force, callback.emit_and_render()).await
@@ -271,6 +308,7 @@ impl PerspectiveViewer {
                     };
 
                     if let Some(sender) = sender {
+                        // TODO shouldn't ignore, this should retry (?)
                         let msg = result.clone().or_else(ignore_view_delete);
                         sender.send(msg).into_jserror()?;
                     };
@@ -280,23 +318,4 @@ impl PerspectiveViewer {
             }
         };
     }
-}
-
-/// Dispatch the "perspective-toggle-settings" event to notify external
-/// listeners.
-fn dispatch_settings_event(
-    viewer_elem: &web_sys::HtmlElement,
-    open: bool,
-) -> Result<(), JsValue> {
-    let mut event_init = web_sys::CustomEventInit::new();
-    event_init.detail(&JsValue::from(open));
-    let event = web_sys::CustomEvent::new_with_event_init_dict(
-        "perspective-toggle-settings",
-        &event_init,
-    );
-
-    viewer_elem.toggle_attribute_with_force("settings", open)?;
-    viewer_elem.dispatch_event(&event.unwrap()).unwrap();
-
-    Ok(())
 }

@@ -37,10 +37,14 @@
             min-width: 20px;
             margin-top: -2px;
             height: 0px;
-            font-family: var(--column-add--font-family, inherit);
+            font-family: var(
+                --column-add--font-family,
+                var(--button--font-family, inherit)
+            );
+
             &:before {
                 font-feature-settings: "liga";
-                content: var(--column-add--before, "+");
+                content: var(--column-add--content, "+");
             }
         }
 
@@ -64,13 +68,27 @@
             cursor: pointer;
         }
 
+        .dragdrop-highlight {
+            .column_selector_draggable.dragover,
+            .column-selector-column:not(:last-child):not(:nth-last-child(2)):not(:nth-last-child(3))
+                .column_selector_draggable {
+                border-bottom-color: var(--active--color) !important;
+            }
+
+            .column-selector-column:not(:first-child):not([data-label]):not(:nth-last-child(2))
+                .column_selector_draggable.dragover {
+                border-top-color: rgb(0 0 0 / 5%) !important;
+            }
+        }
+
         .column-selector-column {
             display: flex;
             flex-direction: row;
             align-items: stretch;
             font-size: 12px;
 
-            &:last-child {
+            &:last-child,
+            &:nth-last-child(2) {
                 .column_selector_draggable {
                     border-color: transparent;
                 }
@@ -80,7 +98,7 @@
             span.expression-edit-button,
             span.expression-delete-button {
                 padding-top: 1px;
-                font-family: "Material Icons";
+                font-family: var(--button--font-family, inherit);
                 cursor: pointer;
                 opacity: 1;
                 color: #999;
@@ -94,11 +112,19 @@
             span.expression-delete-button {
                 padding-right: 1.5px;
                 padding-left: 5px;
+
+                &::before {
+                    content: var(--column-close--content, "close");
+                }
             }
 
             span.expression-edit-button {
                 padding-left: 1.5px;
                 padding-right: 3px;
+
+                &::before {
+                    content: var(--column-menu--content, "menu");
+                }
             }
 
             .column_selector_draggable {
@@ -114,7 +140,6 @@
                 font-size: 12px;
                 flex-grow: 1;
                 color: inherit;
-                transition: height 0.2s;
                 box-sizing: border-box;
                 flex-direction: column;
                 justify-content: space-evenly;
@@ -201,18 +226,36 @@
         }
 
         .is_column_active {
-            font-family: var(--column-selector--font-family, Arial) !important;
-            width: var(--column_selector--width, 20px);
-            min-width: var(--column_selector--width, 20px);
+            font-family: var(
+                --column-selector--font-family,
+                var(--button--font-family, inherit)
+            ) !important;
+            width: var(--column-selector--width, 24px);
+            min-width: var(--column-selector--width, 24px);
             height: var(--is_visible--height, auto);
             cursor: pointer;
-            font-size: var(--column_selector--font-size, 14px);
+            font-size: var(--column-selector--font-size, 14px);
+        }
+
+        #active-columns.collapse {
+            .column-selector-column:nth-last-child(3) {
+                .column_selector_draggable {
+                    border-color: transparent;
+                }
+            }
+        }
+
+        #active-columns:not(.collapse).dragdrop-highlight {
+            .column-selector-column:not(:last-child):not(:nth-last-child(2))
+                .column_selector_draggable {
+                border-bottom-color: var(--active--color) !important;
+            }
         }
 
         #active-columns,
         #sub-columns {
             flex: 0 1 auto;
-            overflow-x: hidden;
+            overflow-x: hidden !important;
             overflow-y: scroll;
 
             &::-webkit-scrollbar-thumb {
@@ -236,10 +279,11 @@
         }
 
         #active-columns {
+            display: flex;
             .is_column_active {
                 color: var(--active--color, #999);
                 &:before {
-                    content: var(--active-column-selector--content, none);
+                    content: var(--active-column-selector--content, "\2611");
                 }
 
                 &.required {
@@ -262,7 +306,7 @@
                     font-size: 10px;
                     margin-left: 22px;
                     left: 1px;
-                    padding: var(--column_type--padding, 0px 0px 0px 5px);
+                    padding: var(--column_type--padding, 0px 0px 0px 0px);
                     color: var(--inactive--color, #666);
                     position: absolute;
                     margin-top: -15px;
@@ -279,12 +323,17 @@
         .dragover,
         .empty-named {
             pointer-events: none;
-            border: 1px dashed var(--inactive--color, #ddd) !important;
-            // margin-left: -2px;
-
             & > * {
                 opacity: 0;
             }
+        }
+
+        .empty-named {
+            border: 1px dashed var(--inactive--color, #ddd) !important;
+        }
+
+        .dragover {
+            border: 1px dashed var(--active--color, #666) !important;
         }
 
         .dragover {
@@ -295,11 +344,19 @@
             box-shadow: inset 0 0 15px rgb(0 0 0 / 5%);
         }
 
+        .dragdrop-highlight .empty-named {
+            border-color: var(--active--color) !important;
+            border-bottom-color: var(--active--color) !important;
+        }
+
         // Inactive Columns are the columns in the column selector not currently
         // selected for the `columns` field of the `ViewConfig`.
         #inactive-columns,
         #expression-columns {
-            margin-bottom: 6px;
+            & > div:not(:empty) {
+                margin-bottom: 6px;
+            }
+
             &:empty {
                 display: none;
                 margin: 0px;
@@ -308,7 +365,7 @@
             .is_column_active {
                 color: var(--inactive--color, #999);
                 &:before {
-                    content: var(--inactive-column-selector--content, none);
+                    content: var(--inactive-column-selector--content, "\2610");
                 }
             }
 

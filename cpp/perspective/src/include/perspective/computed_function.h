@@ -17,7 +17,10 @@
 #include <perspective/column.h>
 #include <perspective/data_table.h>
 #include <perspective/exprtk.h>
+#include <perspective/expression_vocab.h>
+#include <perspective/regex.h>
 #include <boost/algorithm/string.hpp>
+#include <random>
 #include <type_traits>
 #include <date/date.h>
 #include <tsl/hopscotch_set.h>
@@ -31,16 +34,50 @@ namespace computed_function {
     typedef typename exprtk::igeneric_function<t_tscalar>::generic_type
         t_generic_type;
     typedef typename t_generic_type::scalar_view t_scalar_view;
+    typedef typename t_generic_type::vector_view t_vector_view;
     typedef typename t_generic_type::string_view t_string_view;
 
-#define STRING_FUNCTION_HEADER(NAME)                                           \
+// A regex function that caches its parsed regex objects.
+#define REGEX_FUNCTION_HEADER(NAME)                                            \
     struct NAME : public exprtk::igeneric_function<t_tscalar> {                \
-        NAME(std::shared_ptr<t_vocab> expression_vocab);                       \
+        NAME(t_regex_mapping& regex_mapping);                                  \
         ~NAME();                                                               \
         t_tscalar operator()(t_parameter_list parameters);                     \
-        std::shared_ptr<t_vocab> m_expression_vocab;                           \
-        t_tscalar m_sentinel;                                                  \
+        t_regex_mapping& m_regex_mapping;                                      \
     };
+
+// A regex function that returns a string stored in the expression vocab.
+#define REGEX_STRING_FUNCTION_HEADER(NAME)                                     \
+    struct NAME : public exprtk::igeneric_function<t_tscalar> {                \
+        NAME(t_expression_vocab& expression_vocab,                             \
+            t_regex_mapping& regex_mapping, bool is_type_validator);           \
+        ~NAME();                                                               \
+        t_tscalar operator()(t_parameter_list parameters);                     \
+        t_expression_vocab& m_expression_vocab;                                \
+        t_regex_mapping& m_regex_mapping;                                      \
+        bool m_is_type_validator;                                              \
+    };
+
+// A function that returns a new string that is not part of the original
+// input column. To prevent the new strings from going out of scope and causing
+// memory errors, store the strings in the expression_vocab of the gnode
+// that is the parent of the view. String functions MUST NOT BE STATIC;
+// because Exprtk is the caller of the function (using operator()), the only
+// place we can provide a reference to the vocab is through the constructor.
+// As string functions are constructed per-invocation of compute/precompute/
+// get_dtype, and because the gnode is guaranteed to be valid for all of
+// those invocations, we can store a reference to the vocab.
+#define STRING_FUNCTION_HEADER(NAME)                                           \
+    struct NAME : public exprtk::igeneric_function<t_tscalar> {                \
+        NAME(t_expression_vocab& expression_vocab, bool is_type_validator);    \
+        ~NAME();                                                               \
+        t_tscalar operator()(t_parameter_list parameters);                     \
+        t_expression_vocab& m_expression_vocab;                                \
+        t_tscalar m_sentinel;                                                  \
+        bool m_is_type_validator;                                              \
+    };
+
+    // TODO PSP_NON_COPYABLE all functions
 
     // Place string literals into `expression_vocab` so they do not go out
     // of scope and remain valid for the lifetime of the table.
@@ -54,9 +91,6 @@ namespace computed_function {
 
     // Lowercase a string
     STRING_FUNCTION_HEADER(lower)
-
-    // Length of the string
-    STRING_FUNCTION_HEADER(length)
 
     /**
      * @brief Given a string column and 1...n string parameters, generate a
@@ -72,14 +106,15 @@ namespace computed_function {
      * the end.
      */
     struct order : public exprtk::igeneric_function<t_tscalar> {
-        order(std::shared_ptr<t_vocab> expression_vocab);
+        order(bool is_type_validator);
         ~order();
+
         t_tscalar operator()(t_parameter_list parameters);
+        void clear_order_map();
 
         tsl::hopscotch_map<std::string, double> m_order_map;
         double m_order_idx;
-
-        std::shared_ptr<t_vocab> m_expression_vocab;
+        bool m_is_type_validator;
         t_tscalar m_sentinel;
     };
 
@@ -89,12 +124,63 @@ namespace computed_function {
      */
     STRING_FUNCTION_HEADER(contains)
 
+    /**
+     * @brief match(string, pattern) => True if the string or a substring
+     * partially matches pattern, and False otherwise.
+     */
+    REGEX_FUNCTION_HEADER(match)
+
+    /**
+     * @brief match_all(string, pattern) => True if the string fully matches
+     * pattern, and False otherwise.
+     */
+    REGEX_FUNCTION_HEADER(match_all)
+
+    /**
+     * @brief search(string, pattern) => Returns the substring in the first
+     * capturing group that matches pattern. If the regex does not have any
+     * capturing groups, fails type checking and returns null.
+     */
+    REGEX_STRING_FUNCTION_HEADER(search)
+
+    /**
+     * @brief indexof(string, pattern) => the start index of the first match,
+     * partial or full, inside string for pattern, or null if the string
+     * does not match the pattern at all.
+     */
+    REGEX_FUNCTION_HEADER(indexof)
+
+    /**
+     * @brief substr(string, start_idx, end_idx) => the substring of string
+     * at start_idx (inclusive) and end_idx (exclusive). If end_idx is not
+     * provided, defaults to string.length(). Equivalent to the string slice
+     * operator (str[bidx:eidx]) in Python. If bidx > eidx, returns null.
+     */
+    STRING_FUNCTION_HEADER(substring)
+
+    /**
+     * @brief replace(string, replace_str, pattern) => Replaces the first match
+     * of pattern inside string with replace_str, or returns the original
+     * string if no replacements were made.
+     */
+    REGEX_STRING_FUNCTION_HEADER(replace)
+
+    /**
+     * @brief replace_all(string, replace_str, pattern) => Replaces all matches
+     * of pattern inside string with replace_str, or returns the original
+     * string if no replacements were made.
+     */
+    REGEX_STRING_FUNCTION_HEADER(replace_all)
+
 #define FUNCTION_HEADER(NAME)                                                  \
     struct NAME : public exprtk::igeneric_function<t_tscalar> {                \
         NAME();                                                                \
         ~NAME();                                                               \
         t_tscalar operator()(t_parameter_list parameters);                     \
     };
+
+    // Length of the string
+    FUNCTION_HEADER(length)
 
     /**
      * @brief Return the hour of the day the date/datetime belongs to.
@@ -232,7 +318,7 @@ namespace computed_function {
     /**
      * @brief Convert a column or scalar to a boolean, which returns True if the
      * value is truthy or False otherwise.
-     * 
+     *
      * boolean(1)
      * boolean(null)
      */
@@ -243,6 +329,21 @@ namespace computed_function {
      * new datetime value.
      */
     FUNCTION_HEADER(make_datetime)
+
+    /**
+     * @brief Return a random float between 0.0 and 1.0, inclusive.
+     */
+    struct random : public exprtk::igeneric_function<t_tscalar> {
+        random();
+        ~random();
+
+        t_tscalar operator()(t_parameter_list parameters);
+
+        // faster unit lookups, since we are calling this lookup in a tight
+        // loop.
+        static std::default_random_engine RANDOM_ENGINE;
+        static std::uniform_real_distribution<double> DISTRIBUTION;
+    };
 
 } // end namespace computed_function
 } // end namespace perspective

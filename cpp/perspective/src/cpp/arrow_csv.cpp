@@ -20,6 +20,57 @@
 #include <arrow/csv/reader.h>
 #endif
 
+template <class TimePoint>
+static inline arrow::TimestampType::c_type
+ConvertTimePoint(TimePoint tp, arrow::TimeUnit::type unit) {
+    auto duration = tp.time_since_epoch();
+    switch (unit) {
+        case arrow::TimeUnit::SECOND:
+            return std::chrono::duration_cast<std::chrono::seconds>(duration)
+                .count();
+        case arrow::TimeUnit::MILLI:
+            return std::chrono::duration_cast<std::chrono::milliseconds>(
+                duration)
+                .count();
+        case arrow::TimeUnit::MICRO:
+            return std::chrono::duration_cast<std::chrono::microseconds>(
+                duration)
+                .count();
+        case arrow::TimeUnit::NANO:
+            return std::chrono::duration_cast<std::chrono::nanoseconds>(
+                duration)
+                .count();
+        default:
+            // Compiler errors without default case even though all enum cases
+            // are handled
+            assert(0);
+            return 0;
+    }
+}
+
+static inline bool
+ParseYYYY_MM_DD(const char* s, arrow_vendored::date::year_month_day* out) {
+    uint16_t year = 0;
+    uint8_t month = 0;
+    uint8_t day = 0;
+    if (ARROW_PREDICT_FALSE(s[4] != '-') || ARROW_PREDICT_FALSE(s[7] != '-')) {
+        return false;
+    }
+    if (ARROW_PREDICT_FALSE(!arrow::internal::ParseUnsigned(s + 0, 4, &year))) {
+        return false;
+    }
+    if (ARROW_PREDICT_FALSE(
+            !arrow::internal::ParseUnsigned(s + 5, 2, &month))) {
+        return false;
+    }
+    if (ARROW_PREDICT_FALSE(!arrow::internal::ParseUnsigned(s + 8, 2, &day))) {
+        return false;
+    }
+    *out = {arrow_vendored::date::year{year},
+        arrow_vendored::date::month{month}, arrow_vendored::date::day{day}};
+    return out->ok();
+}
+
 namespace perspective {
 namespace apachearrow {
 
@@ -100,9 +151,7 @@ namespace apachearrow {
                 if (length == 23) {
                     // "YYYY-MM-DD[ T]hh:mm:ss.sss"
                     arrow_vendored::date::year_month_day ymd;
-                    if (ARROW_PREDICT_FALSE(
-                            !arrow::internal::detail::ParseYYYY_MM_DD(
-                                s, &ymd))) {
+                    if (ARROW_PREDICT_FALSE(!ParseYYYY_MM_DD(s, &ymd))) {
                         return false;
                     }
                     std::chrono::seconds seconds;
@@ -116,16 +165,14 @@ namespace apachearrow {
                         return false;
                     }
 
-                    *out = arrow::internal::detail::ConvertTimePoint(
+                    *out = ConvertTimePoint(
                         arrow_vendored::date::sys_days(ymd) + seconds + millis,
                         unit);
                     return true;
                 } else if (length == 25) {
                     // "2008-09-15[ T]15:53:00+05:00"
                     arrow_vendored::date::year_month_day ymd;
-                    if (ARROW_PREDICT_FALSE(
-                            !arrow::internal::detail::ParseYYYY_MM_DD(
-                                s, &ymd))) {
+                    if (ARROW_PREDICT_FALSE(!ParseYYYY_MM_DD(s, &ymd))) {
                         return false;
                     }
                     std::chrono::seconds seconds;
@@ -139,7 +186,7 @@ namespace apachearrow {
                         return false;
                     }
 
-                    *out = arrow::internal::detail::ConvertTimePoint(
+                    *out = ConvertTimePoint(
                         arrow_vendored::date::sys_days(ymd) + tz + seconds,
                         unit);
                     return true;
@@ -193,7 +240,7 @@ namespace apachearrow {
     csvToTable(std::string& csv, bool is_update,
         std::unordered_map<std::string, std::shared_ptr<arrow::DataType>>&
             schema) {
-        arrow::MemoryPool* pool = arrow::default_memory_pool();
+        arrow::io::IOContext io_context = arrow::io::default_io_context();
         auto input = std::make_shared<arrow::io::BufferReader>(csv);
         auto read_options = arrow::csv::ReadOptions::Defaults();
         auto parse_options = arrow::csv::ParseOptions::Defaults();
@@ -209,7 +256,7 @@ namespace apachearrow {
         }
 
         auto maybe_reader = arrow::csv::TableReader::Make(
-            pool, input, read_options, parse_options, convert_options);
+            io_context, input, read_options, parse_options, convert_options);
 
         std::shared_ptr<arrow::csv::TableReader> reader = *maybe_reader;
 

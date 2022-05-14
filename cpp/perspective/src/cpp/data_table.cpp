@@ -108,7 +108,7 @@ t_data_table::init(bool make_columns) {
 
     if (make_columns) {
 #ifdef PSP_PARALLEL_FOR
-        tbb::parallel_for(0, int(m_schema.size()), 1,
+        parallel_for(int(m_schema.size()),
             [this](int idx)
 #else
         for (t_uindex idx = 0, loop_end = m_schema.size(); idx < loop_end;
@@ -454,7 +454,7 @@ t_data_table::append(const t_data_table& other) {
     }
 
 #ifdef PSP_PARALLEL_FOR
-    tbb::parallel_for(0, int(src_cols.size()), 1,
+    parallel_for(int(src_cols.size()),
         [&src_cols, dst_cols](int colidx)
 #else
     for (t_uindex colidx = 0, loop_end = src_cols.size(); colidx < loop_end;
@@ -518,14 +518,14 @@ t_data_table::filter_cpp(
 
                     if (ft.m_use_interned) {
                         cell_val.set(*(columns[cidx]->get_nth<t_uindex>(ridx)));
-                        tval = ft(cell_val);
+                        cell_val.set_status(
+                            *(columns[cidx]->get_nth_status(ridx)));
                     } else {
                         cell_val = columns[cidx]->get_scalar(ridx);
-                        tval = ft(cell_val);
                     }
 
-                    if ((ft.m_op != FILTER_OP_IS_NULL && !cell_val.is_valid())
-                        || !tval) {
+                    tval = ft(cell_val);
+                    if (!tval) {
                         pass = false;
                         break;
                     }

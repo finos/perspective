@@ -65,22 +65,24 @@ window.addEventListener("DOMContentLoaded", async function () {
             '//(-)chg\nif("chg"<0){"chg"}else{0}',
             '//(+)chg\nif("chg">0){"chg"}else{0}',
         ],
-        row_pivots: ["name"],
-        column_pivots: ["client"],
+        group_by: ["name"],
+        split_by: ["client"],
         aggregates: {"(-)chg": "avg", "(+)chg": "avg", chg: "avg"},
         sort: [["chg", "desc"]],
         plugin_config: {
-            "(-)chg": {
-                color_mode: "bar",
-                gradient: 10,
-            },
-            "(+)chg": {
-                color_mode: "bar",
-                gradient: 10,
-            },
-            chg: {
-                color_mode: "gradient",
-                gradient: 10,
+            columns: {
+                "(-)chg": {
+                    number_color_mode: "bar",
+                    gradient: 10,
+                },
+                "(+)chg": {
+                    number_color_mode: "bar",
+                    gradient: 10,
+                },
+                chg: {
+                    number_color_mode: "gradient",
+                    gradient: 10,
+                },
             },
         },
     });

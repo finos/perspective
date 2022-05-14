@@ -98,6 +98,8 @@ struct PERSPECTIVE_EXPORT t_tscalar {
     void set(float v);
     void set(t_tscalar v);
 
+    void set_status(t_status s);
+
     bool is_nan() const;
     bool is_none() const;
     bool is_str() const;
@@ -141,6 +143,9 @@ struct PERSPECTIVE_EXPORT t_tscalar {
     t_tscalar& operator/=(const t_tscalar& rhs);
     t_tscalar& operator%=(const t_tscalar& rhs);
 
+    t_tscalar add_typesafe(const t_tscalar& rhs) const;
+    t_tscalar sub_typesafe(const t_tscalar& rhs) const;
+
     bool is_numeric() const;
 
     static t_tscalar canonical(t_dtype dtype);
@@ -158,6 +163,7 @@ struct PERSPECTIVE_EXPORT t_tscalar {
     std::string to_string(bool for_expr = false) const;
     double to_double() const;
     std::int64_t to_int64() const;
+    std::int32_t to_int32() const;
     std::uint64_t to_uint64() const;
 
     bool begins_with(const t_tscalar& other) const;
@@ -167,9 +173,9 @@ struct PERSPECTIVE_EXPORT t_tscalar {
 
     /**
      * @brief Identical to operator bool(), but less ambiguous.
-     * 
-     * @return true 
-     * @return false 
+     *
+     * @return true
+     * @return false
      */
     bool as_bool() const;
 
@@ -419,11 +425,11 @@ t_tscalar mktscalar();
 /**
  * @brief Overload comparisons between size_t and t_tscalar as the comparison
  * is used in exprtk for scalar initialization.
- * 
- * @param lhs 
- * @param rhs 
- * @return true 
- * @return false 
+ *
+ * @param lhs
+ * @param rhs
+ * @return true
+ * @return false
  */
 bool operator>(const std::size_t& lhs, const t_tscalar& rhs);
 

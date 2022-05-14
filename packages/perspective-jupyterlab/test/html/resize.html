@@ -15,9 +15,9 @@
             href="data:image/x-icon;,"
             type="image/x-icon"
         />
-        <script src="lumino.js"></script>
-        <script src="perspective.js"></script>
-        <script src="perspective-viewer-datagrid.js"></script>
+        <script type="module" src="lumino.js"></script>
+        <script type="module" src="perspective.js"></script>
+        <script type="module" src="perspective-viewer-datagrid.js"></script>
 
         <link rel="stylesheet" href="demo.css" />
     </head>
@@ -25,7 +25,8 @@
     <body>
         <div id="container"></div>
 
-        <script>
+        <script type="module">
+            import perspective from "./perspective.js";
             window.__WIDGET__ = new PerspectiveLumino.PerspectiveWidget();
             document
                 .getElementById("container")

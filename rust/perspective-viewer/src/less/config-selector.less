@@ -10,17 +10,26 @@
 @import "./variables.less";
 
 :host {
+    #top_panel.dragdrop-highlight {
+        .psp-text-field {
+            border-bottom-color: var(--active--color) !important;
+        }
+    }
+
     #top_panel {
         display: flex;
         flex-wrap: wrap;
         justify-content: flex-start;
-        padding: var(--top_panel--padding, 5px 0px 10px 0px);
+        padding: var(--top-panel--padding, 5px 0px 10px 0px);
         max-width: 1000px;
         z-index: 1;
 
         .row_close {
             display: inline;
-            font-family: "Material Icons";
+            font-family: var(
+                --column-close--font-family,
+                var(--button--font-family, "inherit")
+            );
             cursor: pointer;
             min-width: 12px;
             margin-right: 3px;
@@ -29,8 +38,13 @@
             margin-top: 2px;
             margin-left: 3px;
             margin-right: 0px;
+            
             &:before {
-                content: "close";
+                content: var(--column-close--content, "X");
+            }
+            &:hover {
+                opacity: 1;
+                color: var(--active--color, inherit);
             }
         }
 
@@ -60,8 +74,7 @@
                 min-height: 14px;
                 margin-top: 5px;
                 overflow: visible;
-                border-left: 2px solid
-                    var(--inactive--color, rgba(0, 0, 0, 0.5));
+                border-left: 2px solid var(--active--color, rgba(0, 0, 0, 0.5));
                 margin-right: 2px;
                 margin-left: -4px;
 
@@ -80,12 +93,12 @@
             pointer-events: none;
         }
 
-        #row_pivots label.pivot-selector-label:before {
-            content: var(--row_pivots--before, "Row Pivots");
+        #group_by label.pivot-selector-label:before {
+            content: var(--group_by--content, "Group By");
         }
 
-        #column_pivots label.pivot-selector-label:before {
-            content: var(--column_pivots--before, "Column Pivots");
+        #split_by label.pivot-selector-label:before {
+            content: var(--split_by--content, "Split By");
         }
 
         #sort label.pivot-selector-label:before {
@@ -143,25 +156,8 @@
             flex-direction: column;
             justify-content: flex-end;
             min-height: 24px;
-            // background is nor transitionable ...
-            transition: border-color 0.3s ease-out,
-                background-size 0.3s ease-out;
             background-size: 100% 200%;
         }
-
-        // :host(.dragging) .psp-text-field.dropping {
-        //     border-bottom-width: 2px;
-        //     border-style: solid;
-        //     border-color: var(--active--color, @blue500);
-        // }
-
-        // :host(.dragging) .psp-text-field {
-        //     border-bottom-width: 1px;
-        //     border-style: solid;
-        //     border-color: var(--active--color, @blue500);
-        //     background: var(--input-dragover--background, linear-gradient(to top, rgb(203, 231, 249), transparent 25%));
-        //     background-size: 100% 100%;
-        // }
 
         .psp-text-field > .psp-text-field__input {
             flex-wrap: wrap;
@@ -196,36 +192,20 @@
             font-weight: 300;
             color: var(--inactive--color, #b4b7be);
             white-space: nowrap;
-            padding: var(--column-drop-container--padding, 0px 0px 2px 10px);
+            padding: var(--column-drop-container--padding, 0px);
             font-size: 12px;
             display: inline-block;
-            // TODO animate?
-            // transition: font-size 0.3s, margin 0.3s;
         }
 
-        // .dropping .psp-text-field__input,
         .psp-text-field__input:not(:empty) {
             display: flex !important;
         }
 
-        // .dropping .psp-text-field__input::after {
-        //     content: "|";
-        //     width: 0px;
-        //     overflow: visible;
-        //     margin-top: -1px;
-        //     position: absolute;
-        // }
-
-        // .dropping * {
-        //     pointer-events: none;
-        // }
-
-        // .dropping .psp-text-field label,
         .psp-text-field__input:not(:empty) + label {
             position: absolute;
             top: 0px;
-            margin: var(--column-drop-label--margin, 0);
-            font-size: var(--column-drop-label--font-size, 12px);
+            margin: var(--column-drop-label--margin, -10px 0px 0px 0px);
+            font-size: var(--column-drop-label--font-size, 10px);
             display: var(--column-drop-label--display, none);
         }
 
@@ -234,13 +214,19 @@
             min-width: 5px;
             max-width: 5px;
             flex-grow: 0;
-            color: var(--inactive--color, inherit);
             font-family: Arial;
             font-size: 12px;
             user-select: none;
             padding: 12px 24px 0 0;
-            &:hover {
+
+            &:hover:before {
                 color: var(--active--color, inherit);
+            }
+
+            &:before {
+                font-family: var(--button--font-family, inherit);
+                color: var(--inactive--color, #666);
+                content: var(--transpose-button--content, "\21C4");
             }
         }
     }
@@ -248,42 +234,46 @@
     .sort-icon {
         margin-left: 4px;
         cursor: pointer;
-        font-family: "Material Icons";
+        font-family: var(--button--font-family, inherit);
+        &:hover {
+            opacity: 1;
+            color: var(--active--color, inherit);
+        }
 
         &.desc:before {
-            content: var(--sort-order-desc--before, "\2193");
+            content: var(--sort-order-desc--content, "\2193");
         }
 
         &.asc:before {
-            content: var(--sort-order-asc--before, "\2191");
+            content: var(--sort-order-asc--content, "\2191");
         }
 
         &.none:before {
-            content: var(--sort-order-none--before, "-");
+            content: var(--sort-order-none--content, "-");
         }
 
         &.asc.abs:before {
-            content: var(--sort-order-asc-abs--before, "\21E7");
+            content: var(--sort-order-asc-abs--content, "\21E7");
         }
 
         &.desc.abs:before {
-            content: var(--sort-order-desc-abs--before, "\21E9");
+            content: var(--sort-order-desc-abs--content, "\21E9");
         }
 
         &.col.asc:before {
-            content: var(--sort-order-col-asc--before, "\2192");
+            content: var(--sort-order-col-asc--content, "\2192");
         }
 
         &.col.desc:before {
-            content: var(--sort-order-col-desc--before, "\2190");
+            content: var(--sort-order-col-desc--content, "\2190");
         }
 
         &.col.asc.abs:before {
-            content: var(--sort-order-col-asc-abs--before, "\21E8");
+            content: var(--sort-order-col-asc-abs--content, "\21E8");
         }
 
         &.col.desc.abs:before {
-            content: var(--sort-order-col-desc-abs--before, "\21E6");
+            content: var(--sort-order-col-desc-abs--content, "\21E6");
         }
     }
 }

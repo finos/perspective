@@ -7,7 +7,7 @@
  *
  */
 
-const {get_config} = require("@finos/perspective/dist/esm/config");
+const {get_config} = require("@finos/perspective");
 const path = require("path");
 const webpack = require("webpack");
 const cssnano = require("cssnano");
@@ -17,6 +17,7 @@ class PerspectiveWebpackPlugin {
         this.options = Object.assign(
             {},
             {
+                monaco: true,
                 inline: false,
                 inlineWasm: false,
                 inlineWorker: false,
@@ -53,50 +54,41 @@ class PerspectiveWebpackPlugin {
             },
         });
 
-        rules.push({
-            test: /editor\.worker\.js$/,
-            type: "javascript/auto",
-            include: /monaco\-editor/,
-            use: {
-                loader: require.resolve("worker-loader"),
-                options: {
-                    filename: "editor.worker.js",
-                },
-            },
-        });
-
         if (this.options.inline || this.options.inlineWorker) {
-            rules[rules.length - 2].use.options.inline = "no-fallback";
             rules[rules.length - 1].use.options.inline = "no-fallback";
-        } else {
+        }
+
+        if (this.options.monaco) {
             rules.push({
-                test: /\.js$/,
-                include: path.dirname(
-                    require.resolve("@finos/perspective-viewer/package.json")
-                ),
+                test: /editor\.worker\.js$/,
+                type: "javascript/auto",
+                include: /monaco\-editor/,
                 use: [
                     {
-                        loader: require.resolve("string-replace-loader"),
+                        loader: "exports-loader",
                         options: {
-                            search: /webpackMode:\s*?"eager"/g,
-                            replace: "",
+                            exports: "named Worker_fn initialize",
+                        },
+                    },
+                    {
+                        loader: require.resolve("worker-loader"),
+                        options: {
+                            filename: "editor.worker.js",
                         },
                     },
                 ],
             });
+
+            if (this.options.inline || this.options.inlineWorker) {
+                rules[rules.length - 1].use[1].options.inline = "no-fallback";
+            }
         }
 
         if (!(this.options.inline || this.options.inlineWasm)) {
             rules.push({
                 test: /\.wasm$/,
-                type: "javascript/auto",
                 include: [this.options.wasmPath, this.options.viewerPath],
-                use: {
-                    loader: require.resolve("file-loader"),
-                    options: {
-                        name: this.options.wasmName,
-                    },
-                },
+                type: "asset/resource",
             });
         } else {
             rules.push({
@@ -107,38 +99,40 @@ class PerspectiveWebpackPlugin {
             });
         }
 
-        rules.push({
-            test: /\.css$/,
-            include: /monaco\-editor/,
-            use: [
-                {
-                    loader: require.resolve("css-loader"),
-                    options: {sourceMap: false},
-                },
-                {
-                    loader: require.resolve("postcss-loader"),
-                    options: {
-                        sourceMap: false,
-                        postcssOptions: {
-                            map: {annotation: false},
-                            minimize: true,
-                            plugins: [
-                                cssnano({
-                                    preset: "lite",
-                                    discardComments: {removeAll: true},
-                                }),
-                            ],
+        if (this.options.monaco) {
+            rules.push({
+                test: /\.css$/,
+                include: /monaco\-editor/,
+                use: [
+                    {
+                        loader: require.resolve("css-loader"),
+                        options: {sourceMap: false},
+                    },
+                    {
+                        loader: require.resolve("postcss-loader"),
+                        options: {
+                            sourceMap: false,
+                            postcssOptions: {
+                                map: {annotation: false},
+                                minimize: true,
+                                plugins: [
+                                    cssnano({
+                                        preset: "lite",
+                                        discardComments: {removeAll: true},
+                                    }),
+                                ],
+                            },
                         },
                     },
-                },
-            ],
-        });
+                ],
+            });
 
-        rules.push({
-            test: /\.ttf$/,
-            include: /monaco\-editor/,
-            use: [require.resolve("file-loader")],
-        });
+            rules.push({
+                test: /\.ttf$/,
+                include: /monaco\-editor/,
+                type: "asset/resource",
+            });
+        }
 
         const perspective_config = get_config();
         if (perspective_config) {
@@ -163,15 +157,21 @@ class PerspectiveWebpackPlugin {
 
         const plugin_replace = new webpack.NormalModuleReplacementPlugin(
             /@finos\/perspective$/,
-            "@finos/perspective/dist/esm/perspective.parallel.js"
+            "@finos/perspective/dist/esm/perspective.js"
         );
         plugin_replace.apply(compiler);
 
         const plugin_replace2 = new webpack.NormalModuleReplacementPlugin(
             /@finos\/perspective\-viewer$/,
-            "@finos/perspective-viewer/dist/esm/index.js"
+            "@finos/perspective-viewer/dist/esm/perspective-viewer.js"
         );
         plugin_replace2.apply(compiler);
+
+        const plugin_replace3 = new webpack.NormalModuleReplacementPlugin(
+            /@finos\/perspective\-workspace$/,
+            "@finos/perspective-workspace/dist/esm/perspective-workspace.js"
+        );
+        plugin_replace3.apply(compiler);
 
         moduleOptions.rules = (moduleOptions.rules || []).concat(rules);
     }

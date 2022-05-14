@@ -1,19 +1,15 @@
 <html>
     <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+        <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" />
 
-        <script src="https://cdn.jsdelivr.net/npm/webfontloader"></script>
-        <script>WebFont.load({google:{families:["Roboto Mono:200,400","Material Icons","Open Sans:300,400"]}})</script>
-
-        <link rel='stylesheet' href="/node_modules/@finos/perspective-workspace/dist/umd/material.css">
+        <link rel="stylesheet" crossorigin="anonymous" href="/node_modules/@finos/perspective-workspace/dist/css/material.css"/>
 
         <script src="/node_modules/@finos/perspective-workspace/dist/umd/perspective-workspace.js"></script>
         <script src="/node_modules/@finos/perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js"></script>
         <script src="/node_modules/@finos/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js"></script>
         <script src="/node_modules/@finos/perspective/dist/umd/perspective.js"></script>
-                
-        <style>
 
+        <style>
             body {
                 display: flex;
                 flex-direction: column;
@@ -26,20 +22,16 @@
                 padding: 0;
                 overflow: hidden;
             }
-
         </style>
-
     </head>
-    <body> 
-
+    <body>
         <perspective-workspace id="workspace">
             <perspective-viewer table="superstore"></perspective-viewer>
         </perspective-workspace>
-      
-        <script>
 
+        <script>
             const DATA_URL = "/node_modules/superstore-arrow/superstore.arrow";
-                        
+
             async function get_layout() {
                 const req = await fetch("layout.json");
                 const json = await req.json();
@@ -59,7 +51,6 @@
                 const layout = await get_layout();
                 window.workspace.restore(layout);
             });
-
         </script>
     </body>
 </html>

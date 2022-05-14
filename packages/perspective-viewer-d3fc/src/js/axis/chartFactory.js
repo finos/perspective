@@ -10,20 +10,28 @@ import * as d3 from "d3";
 import * as fc from "d3fc";
 
 export const chartSvgFactory = (xAxis, yAxis) =>
-    chartFactory(xAxis, yAxis, fc.chartSvgCartesian, false);
+    chartFactory(xAxis, yAxis, (x, y) => x.svgPlotArea(y), false);
 export const chartCanvasFactory = (xAxis, yAxis) =>
-    chartFactory(xAxis, yAxis, fc.chartCanvasCartesian, true);
+    chartFactory(
+        xAxis,
+        yAxis,
+        (x, y) => {
+            return x.canvasPlotArea(y).svgPlotArea(fc.seriesSvgPoint());
+        },
+        true
+    );
 
 const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
     let axisSplitter = null;
     let altAxis = null;
 
-    const chart = cartesian({
-        xScale: xAxis.scale,
-        yScale: yAxis.scale,
-        xAxis: xAxis.component,
-        yAxis: yAxis.component,
-    })
+    const chart = fc
+        .chartCartesian({
+            xScale: xAxis.scale,
+            yScale: yAxis.scale,
+            xAxis: xAxis.component,
+            yAxis: yAxis.component,
+        })
         .xDomain(xAxis.domain)
         .xLabel(xAxis.label)
         .xAxisHeight(xAxis.size)
@@ -61,10 +69,29 @@ const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
         return chart;
     };
 
+    /**
+     * Mimics the previous D3FC API and returns the main plot area selection.
+     * Both chart types will have both layers, so this should be determined
+     * by the constructor's `canvas` property.
+     *
+     * @param  {...any} args If provided, this function will act as a setter.
+     * @returns
+     */
+    chart.plotArea = function (...args) {
+        if (args.length == 0) {
+            if (canvas) {
+                return this.canvasPlotArea();
+            } else {
+                return this.svgPlotArea();
+            }
+        } else {
+            return cartesian(this, ...args);
+        }
+    };
+
     const oldDecorate = chart.decorate();
     chart.decorate((container, data) => {
         const plotArea = container.select("d3fc-svg.plot-area");
-
         const node = plotArea.select("svg").node();
         node.setAttribute(
             "viewBox",
@@ -80,6 +107,15 @@ const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
         }
 
         oldDecorate(container, data);
+
+        // Not sure why these are out of order ...
+        // https://github.com/d3fc/d3fc/blob/master/packages/d3fc-chart/README.md#changing-the-z-order-of-plot-areas
+        if (canvas) {
+            const svgPlotArea = container.select(".svg-plot-area").node();
+            const canvasPlotArea = container.select(".canvas-plot-area").node();
+            d3.selectAll([svgPlotArea, canvasPlotArea]).order();
+        }
+
         if (!axisSplitter) return;
 
         if (axisSplitter.haveSplit()) {
@@ -93,9 +129,9 @@ const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
 
             // Column 5 of the grid
             container
-                .enter()
+                // .enter()
                 .append("div")
-                .attr("class", "y2-label-container")
+                .attr("class", "y-label right-label")
                 .style("grid-column", 5)
                 .style("-ms-grid-column", 5)
                 .style("grid-row", 3)
@@ -104,8 +140,8 @@ const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
                 .style("display", "flex")
                 .style("align-items", "center")
                 .style("justify-content", "center")
-                .append("div")
-                .attr("class", "y-label")
+                .append("span")
+                .attr("class", "y-label splitter-label")
                 .style("transform", "rotate(-90deg)");
 
             const y2Scale = altAxis.scale.domain(altAxis.domain);
@@ -116,18 +152,20 @@ const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
             // Render the axis
             y2AxisDataJoin(container, ["right"])
                 .attr("class", (d) => `y-axis ${d}-axis`)
-                .on("measure", (d, i, nodes) => {
-                    const {width, height} = d3.event.detail;
+                .on("measure", function (event, d) {
+                    const {width, height} = event.detail;
                     if (d === "left") {
-                        d3.select(nodes[i])
+                        d3.select(event.currentTarget)
                             .select("svg")
                             .attr("viewBox", `${-width} 0 ${width} ${height}`)
                             .attr("preserveAspectRatio", "none");
                     }
                     y2Scale.range([height, 0]);
                 })
-                .on("draw", (d, i, nodes) => {
-                    d3.select(nodes[i]).select("svg").call(yAxisComponent);
+                .on("draw", function (event, d) {
+                    d3.select(event.currentTarget)
+                        .select("svg")
+                        .call(yAxisComponent);
                 });
 
             // Render all the series using either the primary or alternate
@@ -148,13 +186,13 @@ const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
 
                 container
                     .select("d3fc-canvas.plot-area")
-                    .on("draw", (d, i, nodes) => {
+                    .on("draw", function (event, d) {
                         drawMultiCanvasSeries(
-                            d3.select(nodes[i]).select("canvas")
+                            d3.select(event.currentTarget).select("canvas")
                         );
                     });
             } else {
-                const drawMultiSvgSeries = (selection) => {
+                const drawMultiSvgSeries = function (selection) {
                     const svgPlotArea = chart.plotArea();
                     svgPlotArea.xScale(xAxis.scale);
 
@@ -169,8 +207,10 @@ const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
 
                 container
                     .select("d3fc-svg.plot-area")
-                    .on("draw", (d, i, nodes) => {
-                        drawMultiSvgSeries(d3.select(nodes[i]).select("svg"));
+                    .on("draw", function (event, d) {
+                        drawMultiSvgSeries(
+                            d3.select(event.currentTarget).select("svg")
+                        );
                     });
             }
         }

@@ -1262,13 +1262,13 @@ module.exports = (perspective) => {
             const table = await perspective.table(expressions_common.data);
 
             const v1 = await table.view({
-                row_pivots: ["y"],
-                column_pivots: ["x"],
+                group_by: ["y"],
+                split_by: ["x"],
                 expressions: [`// column \n"x" + 10`],
             });
             const v2 = await table.view({
-                row_pivots: ["x"],
-                column_pivots: ["y"],
+                group_by: ["x"],
+                split_by: ["y"],
                 expressions: [`// column \n upper("y")`],
                 aggregates: {
                     column: "last",
@@ -1301,7 +1301,7 @@ module.exports = (perspective) => {
             });
 
             const v1 = await table.view({
-                row_pivots: ["x"],
+                group_by: ["x"],
                 expressions: [`// column \n"z" + 10`],
                 aggregates: {
                     column: "avg",
@@ -1309,7 +1309,7 @@ module.exports = (perspective) => {
             });
 
             const v2 = await table.view({
-                row_pivots: ["x"],
+                group_by: ["x"],
                 expressions: [`// column \n upper("y")`],
                 aggregates: {
                     column: "last",
@@ -1317,7 +1317,7 @@ module.exports = (perspective) => {
             });
 
             const v3 = await table.view({
-                row_pivots: ["x"],
+                group_by: ["x"],
                 expressions: [`// column \n 2 * "z"`],
                 aggregates: {
                     column: ["weighted mean", "z"],
@@ -1346,8 +1346,8 @@ module.exports = (perspective) => {
             });
 
             const v1 = await table.view({
-                row_pivots: ["x"],
-                column_pivots: ["y"],
+                group_by: ["x"],
+                split_by: ["y"],
                 expressions: [`// column \n"z" + 10`],
                 aggregates: {
                     column: "avg",
@@ -1355,8 +1355,8 @@ module.exports = (perspective) => {
             });
 
             const v2 = await table.view({
-                row_pivots: ["x"],
-                column_pivots: ["y"],
+                group_by: ["x"],
+                split_by: ["y"],
                 expressions: [`// column \n upper("y")`],
                 aggregates: {
                     column: "last",
@@ -1364,8 +1364,8 @@ module.exports = (perspective) => {
             });
 
             const v3 = await table.view({
-                row_pivots: ["x"],
-                column_pivots: ["y"],
+                group_by: ["x"],
+                split_by: ["y"],
                 expressions: [`// column \n 2 * "z"`],
                 aggregates: {
                     column: ["weighted mean", "z"],

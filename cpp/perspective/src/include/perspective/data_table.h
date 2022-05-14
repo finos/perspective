@@ -18,8 +18,7 @@
 #include <perspective/filter.h>
 #include <perspective/compat.h>
 #ifdef PSP_PARALLEL_FOR
-#include <tbb/parallel_sort.h>
-#include <tbb/tbb.h>
+#include <perspective/parallel_for.h>
 #endif
 #include <tuple>
 
@@ -441,7 +440,7 @@ t_data_table::flatten_helper_1(FLATTENED_T flattened) const {
     t_uindex ndata_cols = d_columns.size();
 
 #ifdef PSP_PARALLEL_FOR
-    tbb::parallel_for(0, int(ndata_cols), 1,
+    parallel_for(int(ndata_cols),
         [&s_columns, &sorted, &d_columns, &fltrecs, this](int colidx)
 #else
     for (t_uindex colidx = 0; colidx < ndata_cols; ++colidx)
@@ -521,7 +520,7 @@ t_data_table::flatten_helper_1(FLATTENED_T flattened) const {
 #endif
 
 #ifdef PSP_PARALLEL_FOR
-    tbb::parallel_for(0, int(m_schema.get_num_columns()),
+    parallel_for(int(m_schema.get_num_columns()),
         [&flattened, this](int colidx)
 #else
     for (t_uindex colidx = 0, loop_end = m_schema.get_num_columns();

@@ -1,0 +1,108 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+@import "../less/fonts";
+@import (reference) "./material-dark.less";
+
+perspective-viewer,
+perspective-viewer[theme="Monokai"] {
+    --theme-name: "Monokai";
+}
+
+perspective-viewer[theme="Monokai"],
+.perspective-viewer-monokai {
+    .perspective-viewer-material-dark();
+    .perspective-viewer-monokai--colors();
+    .perspective-viewer-monokai--datagrid();
+    .perspective-viewer-monokai--d3fc();
+}
+
+perspective-copy-menu[theme="Monokai"],
+perspective-export-menu[theme="Monokai"],
+perspective-filter-dropdown[theme="Monokai"],
+perspective-number-column-style[theme="Monokai"],
+perspective-string-column-style[theme="Monokai"],
+perspective-expression-editor[theme="Monokai"],
+.perspective-modal-monokai {
+    .perspective-modal-material-dark();
+    .perspective-viewer-monokai--colors();
+
+    background-color: #2d2a2e;
+    border: 1px solid #797979;
+}
+
+.perspective-viewer-monokai--colors {
+    color: #d6d6d6;
+    background: #2d2a2e;
+
+    --active--color: #78dce8;
+    --error--color: #ff6188;
+    --inactive--color: #797979;
+    --plugin--background: #2d2a2e;
+    // --plugin--border: #797979;
+
+    // Column type indicators
+    --float--column-type--color: #78dce8;
+    --string--column-type--color: #ff6188;
+    --date--column-type--color: #a9dc76;
+    --boolean--column-type--color: #ffd866;
+
+    --warning--background: #ffd866;
+}
+
+.perspective-viewer-monokai--datagrid {
+    regular-table {
+        --rt-pos-cell--color: #78dce8 !important;
+        --rt-neg-cell--color: #ff6188 !important;
+    }
+
+    regular-table table tbody tr td,
+    regular-table table tbody tr th {
+        border-top-color: #444444;
+    }
+
+    regular-table table tbody th:empty {
+        background: linear-gradient(
+            to right,
+            transparent 9px,
+            #444444 10px,
+            transparent 11px
+        );
+    }
+}
+
+.perspective-viewer-monokai--d3fc {
+    --d3fc-treedata--labels: #d6d6d6;
+    --d3fc-treedata--hover-highlight: #2d2a2e;
+
+    --d3fc-axis-ticks--color: #d6d6d6;
+    --d3fc-gridline--color: #444444;
+    --d3fc-series: #78dce8;
+    --d3fc-series-1: #78dce8;
+    --d3fc-series-2: #ff6188;
+    --d3fc-series-3: #fc9867;
+    --d3fc-series-4: #ffd866;
+    --d3fc-series-5: #a9dc76;
+
+    --d3fc-series-6: #ab9df2;
+    --d3fc-series-7: #66d9ef;
+    --d3fc-series-8: #f92672;
+    --d3fc-series-9: #fd971f;
+    --d3fc-series-10: #e6db74;
+    --d3fc-series-11: #a6e22e;
+    --d3fc-series-12: #ae81ff;
+
+    --d3fc-negative--gradient: linear-gradient(#272822 0%, #ff6188 100%);
+    --d3fc-positive--gradient: linear-gradient(#272822 0%, #78dce8 100%);
+    --d3fc-full--gradient: linear-gradient(
+        #ff6188 0%,
+        #272822 50%,
+        #78dce8 100%
+    );
+}

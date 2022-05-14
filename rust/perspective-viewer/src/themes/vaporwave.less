@@ -1,0 +1,158 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+@import (css)
+    url("https://fonts.googleapis.com/css?display=block&family=Roboto+Mono:200,400%7CMaterial+Icons+Outlined%7COpen+Sans:300,400,700");
+
+@import (reference) "./material-dark.less";
+
+perspective-viewer,
+perspective-viewer[theme="Vaporwave"] {
+    --theme-name: "Vaporwave";
+}
+
+perspective-viewer[theme="Vaporwave"],
+.perspective-viewer-vaporwave {
+    .perspective-viewer-material-dark();
+    .perspective-viewer-vaporwave--colors();
+    .perspective-viewer-vaporwave--animation();
+    .perspective-viewer-vaporwave--fonts();
+    .perspective-viewer-vaporwave--datagrid();
+    .perspective-viewer-vaporwave--d3fc();
+}
+
+perspective-copy-menu[theme="Vaporwave"],
+perspective-export-menu[theme="Vaporwave"],
+perspective-filter-dropdown[theme="Vaporwave"],
+perspective-number-column-style[theme="Vaporwave"],
+perspective-string-column-style[theme="Vaporwave"],
+perspective-expression-editor[theme="Vaporwave"],
+.perspective-modal-vaporwave {
+    .perspective-modal-material-dark();
+    .perspective-viewer-vaporwave--colors();
+
+    background-color: #07081d;
+}
+
+.perspective-viewer-vaporwave--fonts {
+    --button--font-family: "Material Icons Outlined";
+    --preload-fonts: "Roboto Mono:200;Open Sans:300,400;Material Icons Outlined:400";
+}
+
+.perspective-viewer-vaporwave--colors {
+    color: #49acff;
+    background: rgb(7, 8, 29) !important;
+
+    --inactive--color: rgb(19, 33, 50) !important;
+    --plugin--border: 1px solid rgb(19, 33, 50) !important;
+    --plugin--background: rgb(7, 8, 29) !important;
+}
+
+.perspective-viewer-vaporwave--animation {
+    --status-icon-updating-keyframes-start--filter: opacity(1);
+    --status-icon-updating-keyframes-end--filter: opacity(0);
+    --status-icon-updating-keyframes-start--transform: scale(1);
+    --status-icon-updating-keyframes-end--transform: scale(0.5);
+    --status-icon-keyframes-start--transform: scale(1.25);
+    --status-icon-keyframes-end--transform: scale(1);
+}
+
+.perspective-viewer-vaporwave--datagrid {
+    regular-table {
+        --pp-color-1: rgb(9, 33, 50);
+        --pp-color-2: rgb(66, 182, 230);
+        --rt-pos-cell--color: rgb(66, 182, 230) !important;
+    }
+
+    regular-table td,
+    th {
+        --rt-hover--border-color: var(--pp-color-1) !important;
+    }
+
+    regular-table table tbody tr td,
+    regular-table table tbody tr th {
+        border-top-color: rgb(19, 33, 50) !important;
+    }
+
+    regular-table table tbody th:empty {
+        background: linear-gradient(
+            to right,
+            transparent 9px,
+            rgb(19, 33, 50) 10px,
+            transparent 11px
+        );
+        background-repeat: no-repeat;
+        background-position: 0px -10px;
+    }
+}
+
+.perspective-viewer-vaporwave--d3fc {
+    --d3fc-axis-ticks--color: #49acff;
+    --d3fc-gridline--color: rgb(19, 33, 50);
+    --d3fc-series: #01cdfe;
+    --d3fc-series-1: #ff71ce;
+    --d3fc-series-2: #01cdfe;
+    --d3fc-series-3: #05ffa1;
+    --d3fc-series-4: #b967ff;
+    --d3fc-series-5: #fffb96;
+
+    --d3fc-series-6: hsl(192, 99%, 25%);
+    --d3fc-series-7: hsl(321, 100%, 36%);
+    --d3fc-series-8: hsl(192, 99%, 25%);
+    --d3fc-series-9: hsl(157, 100%, 25%);
+    --d3fc-series-10: hsl(272, 100%, 35%);
+
+    --d3fc-negative--gradient: linear-gradient(
+        #f3d431,
+        #efb92d,
+        #ed9c25,
+        #eb7e20,
+        #e75d1e,
+        #d14632,
+        #b03e38,
+        #8c3a36,
+        #643633,
+        #07081d
+    ) !important;
+
+    --d3fc-positive--gradient: linear-gradient(
+        #07081d,
+        #2e4463,
+        #1e588a,
+        #086da7,
+        #0082b9,
+        #039ac7,
+        #12b1d4,
+        #2bc8e2,
+        #3ddff0,
+        #61f4fb
+    ) !important;
+
+    --d3fc-full--gradient: linear-gradient(
+        #f3d431,
+        #efb92d,
+        #ed9c25,
+        #eb7e20,
+        #e75d1e,
+        #d14632,
+        #b03e38,
+        #8c3a36,
+        #643633,
+        #07081d,
+        #2e4463,
+        #1e588a,
+        #086da7,
+        #0082b9,
+        #039ac7,
+        #12b1d4,
+        #2bc8e2,
+        #3ddff0,
+        #61f4fb
+    ) !important;
+}

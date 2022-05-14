@@ -6,13 +6,16 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use super::modal::*;
+use crate::utils::WeakScope;
+use crate::*;
+
 use web_sys::*;
 use yew::prelude::*;
 
-static CSS: &str = include_str!("../../../dist/css/filter-dropdown.css");
+static CSS: &str = include_str!("../../../build/css/filter-dropdown.css");
 
 pub enum FilterDropDownMsg {
-    SetPos(i32, i32),
     SetValues(Vec<String>),
     SetCallback(Callback<String>),
     ItemDown,
@@ -21,22 +24,31 @@ pub enum FilterDropDownMsg {
 }
 
 pub struct FilterDropDown {
-    top: i32,
-    left: i32,
     values: Option<Vec<String>>,
     selected: usize,
     on_select: Option<Callback<String>>,
-    // link: ComponentLink<Self>,
+    // link: Scope<Self>,
+}
+
+#[derive(Properties, PartialEq)]
+pub struct FilterDropDownProps {
+    #[prop_or_default]
+    pub weak_link: WeakScope<FilterDropDown>,
+}
+
+impl ModalLink<FilterDropDown> for FilterDropDownProps {
+    fn weak_link(&self) -> &'_ WeakScope<FilterDropDown> {
+        &self.weak_link
+    }
 }
 
 impl Component for FilterDropDown {
     type Message = FilterDropDownMsg;
-    type Properties = ();
+    type Properties = FilterDropDownProps;
 
-    fn create(_props: Self::Properties, _link: ComponentLink<Self>) -> Self {
+    fn create(ctx: &Context<Self>) -> Self {
+        ctx.set_modal_link();
         FilterDropDown {
-            top: 0,
-            left: 0,
             values: Some(vec![]),
             selected: 0,
             on_select: None,
@@ -44,16 +56,11 @@ impl Component for FilterDropDown {
         }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             FilterDropDownMsg::SetCallback(callback) => {
                 self.on_select = Some(callback);
                 false
-            }
-            FilterDropDownMsg::SetPos(top, left) => {
-                self.top = top;
-                self.left = left;
-                true
             }
             FilterDropDownMsg::SetValues(values) => {
                 self.values = Some(values);
@@ -100,50 +107,44 @@ impl Component for FilterDropDown {
         }
     }
 
-    fn change(&mut self, _props: Self::Properties) -> ShouldRender {
+    fn changed(&mut self, _ctx: &Context<Self>) -> bool {
         false
     }
 
-    fn view(&self) -> Html {
-        let body = if let Some(ref values) = self.values {
-            if !values.is_empty() {
-                values
-                .iter()
-                .enumerate()
-                .map(|(idx, value)| {
-                    let click = self.on_select.as_ref().unwrap().reform({
-                        let value = value.clone();
-                        move |_: MouseEvent| value.clone()
-                    });
+    fn view(&self, _ctx: &Context<Self>) -> Html {
+        let body = html! {
+            if let Some(ref values) = self.values {
+                if !values.is_empty() {
+                    {
+                        for values
+                            .iter()
+                            .enumerate()
+                            .map(|(idx, value)| {
+                                let click = self.on_select.as_ref().unwrap().reform({
+                                    let value = value.clone();
+                                    move |_: MouseEvent| value.clone()
+                                });
 
-                    if idx == self.selected {
-                        html! {
-                            <span onmousedown={ click }class="selected">{ value }</span>
-                        }
-                    } else {
-                        html! {
-                            <span onmousedown={ click }>{ value }</span>
-                        }
+                                html! {
+                                    if idx == self.selected {
+                                        <span onmousedown={ click } class="selected">{ value }</span>
+                                    } else {
+                                        <span onmousedown={ click }>{ value }</span>
+                                    }
+                                }
+                            })
                     }
-                })
-                .collect::<Html>()
-            } else {
-                html! {
+                } else {
                     <span class="no-results">{ "No Completions" }</span>
                 }
             }
-        } else {
-            html! {}
         };
 
-        html! {
-            <>
-                <style>
-                    { &CSS }
-                    { format!(":host{{left:{}px;top:{}px;}}", self.left, self.top) }
-                </style>
-                { body }
-            </>
+        html_template! {
+            <style>
+                { &CSS }
+            </style>
+            { body }
         }
     }
 }

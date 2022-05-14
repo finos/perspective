@@ -8,12 +8,13 @@
  */
 
 @import "./monaco.less";
+@import "./split-panel.less";
 
 :host {
-    position: absolute;
+    position: fixed;
     z-index: 10000;
     outline: none;
-    font-family: "Open Sans";
+    font-family: Arial;
     font-size: 12px;
     font-weight: 300;
     border: inherit;
@@ -21,10 +22,43 @@
     user-select: none;
     background-color: white;
 
-    #monaco-container {
+    #editor-container {
+        min-width: 0px;
+    }
+
+    .split-panel.orient-vertical > .split-panel-divider {
+        margin-bottom: -6px;
+    }
+
+    .split-panel.orient-vertical
+        > .split-panel-child:not(.is-width-override)
+        #editor-container {
+        height: 242px;
+    }
+
+    .split-panel:not(.orient-vertical)
+        > .split-panel-child:not(.is-width-override)
+        #editor-container {
         width: 400px;
-        height: 200px;
+    }
+
+    #horizontal-resize {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        width: 8px;
+        &:hover {
+            cursor: ew-resize;
+            background: rgba(0, 0, 0, 0.05);
+        }
+    }
+
+    #monaco-container {
+        width: 100%;
+        height: calc(100% - 42px);
         overflow: visible;
+        // margin-right: 8px;
         &::-webkit-resizer {
             appearance: var(--monaco-container--appearance, auto);
         }
@@ -44,7 +78,8 @@
         display: flex;
         justify-content: flex-end;
         margin-left: 20px;
-        margin-top: 12px;
+        margin-top: 6px;
+        margin-right: 8px;
     }
 
     .psp-expression-editor__button {
@@ -66,7 +101,8 @@
             opacity: 0.5;
         }
 
-        &#psp-expression-editor-button-save {
+        &#psp-expression-editor-button-save,
+        &#psp-expression-editor-button-reset {
             color: inherit;
             font-family: inherit;
             font-weight: 300;
@@ -75,7 +111,6 @@
             opacity: 0.1;
             background-color: inherit;
             transition: background-color 0.2s;
-            padding-right: 0 6px;
 
             &:not([disabled]) {
                 opacity: 1;
@@ -84,14 +119,25 @@
             &:before {
                 margin-right: 6px;
                 font-size: 14px;
-                font-family: "Material Icons";
-                content: "save";
+                font-family: var(--button--font-family, inherit);
             }
 
             &:hover {
                 background-color: rgba(0, 0, 0, 0.05);
                 transition: none;
             }
+        }
+
+        &#psp-expression-editor-button-save {
+            margin-right: 12px;
+        }
+
+        &#psp-expression-editor-button-save:before {
+            content: var(--save-button-icon--content, "\1F4BE");
+        }
+
+        &#psp-expression-editor-button-reset:before {
+            content: var(--reset-button-icon--content, "\27F3");
         }
     }
 }

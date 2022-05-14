@@ -1,0 +1,62 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+@import "@finos/perspective-viewer/src/themes/material.less";
+
+
+perspective-workspace,
+perspective-workspace[theme="Material Light"],
+perspective-indicator[theme="Material Light"] {
+    --theme-name: "Material Light";
+}
+
+perspective-workspace {
+    .perspective-workspace-material-base();
+}
+
+perspective-viewer[theme="Material Light"].workspace-master-widget {
+    background-color: #f2f4f6;
+    --plugin--background: #f2f4f6;
+    regular-table {
+        td,
+        th {
+            border-color: #e0e4e9;
+        }
+    }
+}
+
+.perspective-workspace-material-base() {
+    --open-settings-button--content: "expand_more";
+    --close-settings-button--content: "expand_less";
+    --close-button--content: "close";
+    --settings--font-family: "Material Icons";
+
+    --master-divider--background-color: #243136;
+
+    --menu-maximize--content: "fullscreen";
+    --menu-minimize--content: "fullscreen_exit";
+    --menu-duplicate--content: "call_split";
+    --menu-master--content: "cast";
+    --menu-detail--content: "notes";
+    --menu-export--content: "file_download";
+    --menu-copy--content: "file_copy";
+    --menu-reset--content: "autorenew";
+    --menu-link--content: "link";
+    --menu-unlink--content: "link_off";
+    --menu-newmenu--content: "add";
+    --menu-close--content: "close";
+    --menu-new--content: "description";
+    --menu-newview--content: "file_copy";
+}
+
+.p-Menu {
+    font-family: "Open Sans", Arial;
+    font-weight: 300;
+    color: #161616;
+}

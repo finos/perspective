@@ -1163,6 +1163,32 @@ module.exports = (perspective) => {
                 await view.delete();
                 await table.delete();
             });
+
+            it("random", async function () {
+                const table = await perspective.table({
+                    x: "float",
+                });
+
+                const data = [];
+                for (let i = 0; i < 1000; i++) {
+                    data.push(i);
+                }
+                table.update({x: data});
+                const view = await table.view({
+                    expressions: ["random()"],
+                });
+                const schema = await view.expression_schema();
+                expect(schema).toEqual({"random()": "float"});
+                const result = await view.to_columns();
+
+                for (let i = 0; i < 1000; i++) {
+                    const res = result["random()"][i];
+                    expect(res >= 0 && res <= 1).toBe(true);
+                }
+
+                await view.delete();
+                await table.delete();
+            });
         });
 
         describe("Booleans", function () {

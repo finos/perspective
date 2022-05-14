@@ -31,6 +31,11 @@ dependencies to be installed:
 - [Boost](https://www.boost.org/) (version 1.67 or higher, must be built - not
   header-only)
 - [Flatbuffers](https://google.github.io/flatbuffers/flatbuffers_guide_building.html)
+- [wasm-pack](https://github.com/rustwasm/wasm-pack)
+
+**_This list may be non-exhaustive depending on your OS/environment; please open
+a thread in [Discussions](https://github.com/finos/perspective/discussions) if
+you have any questions_**
 
 ## Build
 
@@ -52,10 +57,10 @@ yarn setup
 ```
 
 If everything is successful, you should be able to run any of the `examples/`
-packages, e.g. `examples/simple` like so:
+packages, e.g. `examples/blocks` like so:
 
 ```bash
-yarn start simple
+yarn start blocks
 ```
 
 ## `Perspective.js`
@@ -215,44 +220,25 @@ yarn test -t 'button test (A|B)'
 The JavaScript test suite is composed of two sections: a Node.js test, which
 asserts behavior of the `@finos/perspective` library, and a suite of
 [Puppeteer](https://developers.google.com/web/tools/puppeteer/) tests, which
-assert the behavior of the rest of the UI facing packages. For the latter,
-you'll need Docker installed, as these tests use a Puppeteer and Chrome build
-installed in a Docker container.
+assert the behavior of the rest of the UI facing packages.
 
 The Puppeteer/UI tests are a form of
 [characterization tests](https://en.wikipedia.org/wiki/Characterization_test)
 which use screenshots to compare current and previous behavior of
 `<perspective-viewer>` and its plugins. The results of each comparison are
 stored in each package's `test/results/results.json` file, and the screenshots
-themselves are stored in the package's `screenshots/` directory, though only the
+themselves are stored in the package's `tests/screenshots/` directory, though only the
 former should be checked into GIT. When a test in these suites fails, a
 `file.failed.png` and `file.diff.png` are also generated, showing the divergent
 screenshot and a contrast diff respectively, so you can verify that the changed
 behavior either does or does not reflect your patch. If you're confident that
 the screenshots reflect your change, you can update the new hashes manually in
-the `test/results/results.json` file, or update all hashes with the `--wrte`
+the `test/results/results.json` file, or update all hashes with the `--write`
 flag:
 
 ```bash
 yarn test --write
 ```
-
-For quick local iteration and debugging failing tests, the Puppeteer tests can
-use a local copy of Puppeteer, rather than relying on the supplied Docker image.
-These will run much quicker, and can be optionally run without `--headless` mode
-for debugging test failures quickly. However, due to rendering inconsistencies
-between platforms, the resulting test hashes will not match the ones saved in
-`results.json`, so you will need to re-run the suite with the `--write` flag to
-generate a `results.local.json` file specific to your OS.
-
-To toggle between local and Docker Puppeteer, run
-
-```bash
-yarn toggle_puppeteer
-```
-
-This will install a local copy of Puppeteer via `yarn` the first time it is run,
-if a local Puppeteer is not found.
 
 ### Python
 

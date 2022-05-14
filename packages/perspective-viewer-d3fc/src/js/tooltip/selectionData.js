@@ -6,7 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import {get_type_config} from "@finos/perspective/dist/esm/config";
+import {get_type_config} from "../../../../perspective/src/js/config";
 
 export function toValue(type, value) {
     switch (type) {
@@ -28,6 +28,7 @@ export function toValue(type, value) {
 
 export function getGroupValues(data, settings) {
     if (settings.crossValues.length === 0) return [];
+    if (data.crossValue.length === 0) return [];
     const groupValues = (data.crossValue.split
         ? data.crossValue.split("|")
         : [data.crossValue]) || [data.key];

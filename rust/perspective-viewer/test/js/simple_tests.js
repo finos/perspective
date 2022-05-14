@@ -43,7 +43,7 @@ exports.default = function (get_contents = get_contents_default) {
             await page.evaluate(async () => {
                 const viewer = document.querySelector("perspective-viewer");
                 await viewer.restore({
-                    row_pivots: ["State"],
+                    group_by: ["State"],
                     settings: true,
                 });
             });
@@ -55,7 +55,7 @@ exports.default = function (get_contents = get_contents_default) {
             await page.evaluate(async () => {
                 const viewer = document.querySelector("perspective-viewer");
                 await viewer.restore({
-                    row_pivots: ["Category", "Sub-Category"],
+                    group_by: ["Category", "Sub-Category"],
                     settings: true,
                 });
             });
@@ -67,7 +67,7 @@ exports.default = function (get_contents = get_contents_default) {
             await page.evaluate(async () => {
                 const viewer = document.querySelector("perspective-viewer");
                 await viewer.restore({
-                    column_pivots: ["Category"],
+                    split_by: ["Category"],
                     settings: true,
                 });
             });
@@ -79,8 +79,8 @@ exports.default = function (get_contents = get_contents_default) {
             await page.evaluate(async () => {
                 const viewer = document.querySelector("perspective-viewer");
                 await viewer.restore({
-                    row_pivots: ["State"],
-                    column_pivots: ["Category"],
+                    group_by: ["State"],
+                    split_by: ["Category"],
                     settings: true,
                 });
             });
@@ -92,11 +92,12 @@ exports.default = function (get_contents = get_contents_default) {
             await page.evaluate(async () => {
                 const viewer = document.querySelector("perspective-viewer");
                 await viewer.restore({
-                    row_pivots: ["Region", "State"],
-                    column_pivots: ["Category", "Sub-Category"],
+                    group_by: ["Region", "State"],
+                    split_by: ["Category", "Sub-Category"],
                     settings: true,
                 });
-                await viewer.notifyResize();
+
+                await viewer.notifyResize(true);
             });
 
             return await get_contents(page);

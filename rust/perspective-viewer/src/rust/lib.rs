@@ -8,32 +8,27 @@
 
 // Required by yew's `html` macro.
 #![recursion_limit = "1024"]
-#![warn(clippy::all)]
+#![warn(
+    clippy::all,
+    clippy::panic_in_result_fn,
+    clippy::await_holding_refcell_ref
+)]
 
-pub mod components;
-pub mod config;
+mod components;
+mod config;
 pub mod custom_elements;
-pub mod dragdrop;
-pub mod exprtk;
-pub mod js;
-pub mod renderer;
-pub mod session;
-pub mod utils;
+mod custom_events;
+mod dragdrop;
+mod exprtk;
+mod js;
+mod model;
+mod renderer;
+mod session;
+mod theme;
+mod utils;
 
-use wasm_bindgen::prelude::*;
-
-#[cfg(feature = "wee_alloc")]
-#[global_allocator]
-static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
-
-#[wasm_bindgen]
-pub fn set_panic_hook() {
-    #[cfg(feature = "console_error_panic_hook")]
-    console_error_panic_hook::set_once();
-}
-
-#[wasm_bindgen]
+#[wasm_bindgen::prelude::wasm_bindgen]
 pub fn register_plugin(name: &str) {
-    use crate::renderer::registry::*;
+    use crate::renderer::*;
     PLUGIN_REGISTRY.register_plugin(name);
 }

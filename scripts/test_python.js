@@ -16,11 +16,13 @@ const {
     python_image,
 } = require("./script_utils.js");
 
-let PYTHON = getarg("--python2")
-    ? "python2"
-    : getarg("--python38")
+let PYTHON = getarg("--python38")
     ? "python3.8"
-    : "python3.7";
+    : getarg("--python36")
+    ? "python3.6"
+    : getarg("--python37")
+    ? "python3.7"
+    : "python3";
 
 const COVERAGE = getarg("--coverage");
 const VERBOSE = getarg("--debug");
@@ -56,12 +58,13 @@ if (IS_DOCKER) {
 const pytest_client_mode = (IS_DOCKER) => {
     if (IS_DOCKER) {
         return bash`${docker(IMAGE)} bash -c "cd \
-            python/perspective && TZ=UTC ${PYTHON} -m pytest \
+            python/perspective && TZ=UTC PYTHONMALLOC=debug ${PYTHON} -m pytest \
             ${VERBOSE ? "-vv --full-trace" : ""} --noconftest 
             perspective/tests/client_mode"`;
     } else {
-        return bash`cd ${python_path} && ${PYTHON} -m pytest \
-            ${VERBOSE ? "-vv --full-trace" : ""} --noconftest 
+        return bash`cd ${python_path} && PYTHONMALLOC=debug ${PYTHON} -m pytest \
+            ${VERBOSE ? "-vv --full-trace" : ""} --noconftest
+            --disable-pytest-warnings
             perspective/tests/client_mode`;
     }
 };
@@ -72,14 +75,16 @@ const pytest_client_mode = (IS_DOCKER) => {
 const pytest = (IS_DOCKER) => {
     if (IS_DOCKER) {
         return bash`${docker(IMAGE)} bash -c "cd \
-            python/perspective && TZ=UTC ${PYTHON} -m pytest \
+            python/perspective && TZ=UTC PYTHONMALLOC=debug ${PYTHON} -m pytest \
             ${VERBOSE ? "-vv --full-trace" : ""} perspective \
             --ignore=perspective/tests/client_mode \
+            --disable-pytest-warnings
             --cov=perspective"`;
     } else {
-        return bash`cd ${python_path} && ${PYTHON} -m pytest \
+        return bash`cd ${python_path} && PYTHONMALLOC=debug ${PYTHON} -m pytest \
             ${VERBOSE ? "-vv --full-trace" : ""} perspective \
             --ignore=perspective/tests/client_mode \
+            --disable-pytest-warnings
             ${COVERAGE ? "--cov=perspective" : ""}`;
     }
 };

@@ -7,6 +7,7 @@
 // file.
 
 use derivative::Derivative;
+use futures::channel::oneshot::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 use yew::prelude::*;
@@ -17,6 +18,7 @@ use yew::prelude::*;
 #[derivative(Default(bound = ""))]
 pub struct PubSub<T: Clone> {
     listeners: Rc<RefCell<Vec<Callback<T>>>>,
+    once_listeners: Rc<RefCell<Vec<Callback<T>>>>,
 }
 
 pub trait AddListener<T> {
@@ -38,6 +40,10 @@ impl<T: Clone + 'static> PubSub<T> {
         for listener in listeners.iter() {
             listener.emit(val.clone());
         }
+
+        for listener in self.once_listeners.replace(Vec::default()).into_iter() {
+            listener.emit(val.clone());
+        }
     }
 
     /// Get this `PubSub<_>`'s `.emit_all()` method as a `Callback<T>`.
@@ -49,6 +55,21 @@ impl<T: Clone + 'static> PubSub<T> {
                 listener.emit(val.clone());
             }
         })
+    }
+
+    /// Register a `FnOnce` listener to this `PubSub<_>`, whice does not need a
+    /// `Subcription`.
+    pub fn add_listener_once<F: FnOnce(T) + 'static>(&self, f: F) {
+        let f = RefCell::new(Some(f));
+        let cb = Callback::from(move |x| f.borrow_mut().take().map(|f| f(x)).unwrap_or_default());
+        self.once_listeners.borrow_mut().insert(0, cb);
+    }
+
+    /// Await this `PubSub<_>`'s next call to `emit_all()`, once.
+    pub async fn listen_once(&self) -> Result<T, Canceled> {
+        let (sender, receiver) = channel::<T>();
+        self.add_listener_once(move |x| sender.send(x).unwrap_or(()));
+        receiver.await
     }
 }
 
@@ -73,9 +94,10 @@ where
     }
 }
 
-/// Manages the lifetime of a listener registered to a `PubSub<T>` by deregistering
-/// the associated listener when dropped.  The wrapped `Fn` of `Subscriptions` is
-/// the deregister closure provided by the issuing `PubSub<T>`.
+/// Manages the lifetime of a listener registered to a `PubSub<T>` by
+/// deregistering the associated listener when dropped.  The wrapped `Fn` of
+/// `Subscriptions` is the deregister closure provided by the issuing
+/// `PubSub<T>`.
 #[must_use]
 pub struct Subscription(Box<dyn Fn()>);
 

@@ -9,19 +9,21 @@
  */
 
 @import "./checkbox.less";
-@import "./dropdown.less";
+@import "./select.less";
 @import "./split-panel.less";
 @import "./status-bar.less";
 @import "./render-warning.less";
 @import "./column-selector.less";
 @import "./config-selector.less";
 @import "./filter-item.less";
+@import "./scroll-panel.less";
 
 :host {
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: stretch;
+    font-family: Arial;
 
     * {
         box-sizing: border-box;
@@ -34,6 +36,7 @@
         left: 0;
         right: 0;
         top: 0;
+        height: auto;
     }
 
     #status_bar {
@@ -69,7 +72,7 @@
     #side_panel {
         position: relative;
         flex: 0 0 auto;
-        padding: var(--side_panel--padding, 10px 2px 0px 11px);
+        padding: var(--side-panel--padding, 10px 2px 0px 11px);
         box-sizing: border-box;
         width: 100%;
 
@@ -88,7 +91,7 @@
         #plugin_selector_container {
             margin-right: 6px;
             min-height: 29px;
-            margin-left: var(--column_selector--width, 20px);
+            margin-left: var(--column-selector--width, 24px);
             overflow: hidden;
             display: flex;
         }
@@ -137,7 +140,7 @@
         background-color: var(--select--background-color, white);
         background: var(
             --select--background,
-            url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB2ZXJzaW9uPSIxLjEiIGlkPSJMYXllcl8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCIKCSB2aWV3Qm94PSIwIDAgNC45IDEwIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA0LjkgMTA7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4KPHN0eWxlIHR5cGU9InRleHQvY3NzIj4KCS5zdDB7ZmlsbDojQUFBQUFBO30KPC9zdHlsZT4KPHRpdGxlPmFycm93czwvdGl0bGU+Cjxwb2x5Z29uIGNsYXNzPSJzdDAiIHBvaW50cz0iMS40LDQuNyAyLjUsMy4yIDMuNSw0LjcgIi8+Cjxwb2x5Z29uIGNsYXNzPSJzdDAiIHBvaW50cz0iMy41LDUuMyAyLjUsNi44IDEuNCw1LjMgIi8+Cjwvc3ZnPg==)
+            url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB2ZXJzaW9uPSIxLjEiIGlkPSJMYXllcl8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiBoZWlnaHQ9IjIxIiB4PSIwcHgiIHk9IjBweCIKCSB2aWV3Qm94PSIwIDAgNC45IDEwIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA0LjkgMTA7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4KPHN0eWxlIHR5cGU9InRleHQvY3NzIj4KCS5zdDB7ZmlsbDojQUFBQUFBO30KPC9zdHlsZT4KPHRpdGxlPmFycm93czwvdGl0bGU+Cjxwb2x5Z29uIGNsYXNzPSJzdDAiIHBvaW50cz0iMS40LDQuNyAyLjUsMy4yIDMuNSw0LjcgIi8+Cjxwb2x5Z29uIGNsYXNzPSJzdDAiIHBvaW50cz0iMy41LDUuMyAyLjUsNi44IDEuNCw1LjMgIi8+Cjwvc3ZnPg==)
                 no-repeat right 2px center
         );
         option {
@@ -159,7 +162,7 @@
         position: absolute;
         top: 0;
         left: 0;
-        padding: var(--settings-button--padding, 15px 8px);
+        padding: var(--config-button--padding, 15px 8px);
         overflow: hidden;
         display: flex;
         align-items: center;
@@ -179,7 +182,7 @@
         }
         &:before {
             font-feature-settings: "liga";
-            content: var(--settings-button--content, "\1f527");
+            content: var(--config-button-icon--content, "\1f527");
         }
     }
 

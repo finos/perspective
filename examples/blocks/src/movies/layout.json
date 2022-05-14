@@ -31,27 +31,29 @@
         "PERSPECTIVE_GENERATED_ID_2": {
             "selectable": true,
             "plugin": "Datagrid",
-            "row_pivots": ["Distributor"],
+            "group_by": ["Distributor"],
             "aggregates": {
                 "IMDB Rating": "avg"
             },
             "sort": [["US Gross", "desc"]],
             "columns": ["US Gross"],
             "expressions": null,
-            "column_pivots": null,
+            "split_by": null,
             "filter": null,
             "plugin_config": {
-                "IMDB Rating": {
-                    "color_mode": "gradient",
-                    "pos_color": "#b87ff0",
-                    "neg_color": "#FF9485",
-                    "gradient": 8.1
-                },
-                "US Gross": {
-                    "color_mode": "gradient",
-                    "pos_color": "#126e3a",
-                    "neg_color": "#FF9485",
-                    "gradient": 19729862602
+                "columns": {
+                    "IMDB Rating": {
+                        "number_color_mode": "gradient",
+                        "pos_color": "#b87ff0",
+                        "neg_color": "#FF9485",
+                        "gradient": 8.1
+                    },
+                    "US Gross": {
+                        "number_color_mode": "gradient",
+                        "pos_color": "#126e3a",
+                        "neg_color": "#FF9485",
+                        "gradient": 19729862602
+                    }
                 }
             },
             "master": true,
@@ -61,7 +63,7 @@
         },
         "PERSPECTIVE_GENERATED_ID_0": {
             "plugin": "X/Y Scatter",
-            "row_pivots": ["Title"],
+            "group_by": ["Title"],
             "aggregates": {
                 "IMDB Rating": "avg",
                 "Rotten Tomatoes Rating": "avg",
@@ -82,7 +84,7 @@
             "selectable": null,
 
             "expressions": null,
-            "column_pivots": null,
+            "split_by": null,
             "filter": null,
             "plugin_config": {
                 "realValues": [
@@ -108,12 +110,12 @@
         "PERSPECTIVE_GENERATED_ID_3": {
             "plugin": "Y Area",
             "expressions": ["bucket(\"Release Date\", 'Y')"],
-            "row_pivots": ["bucket(\"Release Date\", 'Y')"],
+            "group_by": ["bucket(\"Release Date\", 'Y')"],
             "aggregates": {
                 "Rotten Tomatoes Rating": "avg"
             },
             "columns": ["US Gross"],
-            "column_pivots": ["Major Genre"],
+            "split_by": ["Major Genre"],
             "selectable": null,
 
             "filter": null,
@@ -133,7 +135,7 @@
         "PERSPECTIVE_GENERATED_ID_1": {
             "plugin": "Y Line",
             "expressions": ["bucket(\"Release Date\", 'Y')"],
-            "row_pivots": ["bucket(\"Release Date\", 'Y')"],
+            "group_by": ["bucket(\"Release Date\", 'Y')"],
             "aggregates": {
                 "Rotten Tomatoes Rating": "avg"
             },
@@ -145,7 +147,7 @@
                 "US DVD Sales"
             ],
             "selectable": null,
-            "column_pivots": null,
+            "split_by": null,
             "filter": null,
             "sort": null,
             "plugin_config": {

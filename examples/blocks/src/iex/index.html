@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">    
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" />
 
     <script src="/node_modules/@finos/perspective/dist/umd/perspective.js"></script>
     <script src="/node_modules/@finos/perspective-workspace/dist/umd/perspective-workspace.js"></script>
@@ -10,7 +9,7 @@
     <script src="/node_modules/@finos/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js"></script>
 
     <link rel='stylesheet' href="index.css">
-    <link rel='stylesheet' href="/node_modules/@finos/perspective-workspace/dist/umd/material.css" is="custom-style">
+    <link rel='stylesheet' crossorigin="anonymous" href="/node_modules/@finos/perspective-workspace/dist/css/material.css">
     <script src="index.js"></script>
     
 </head>
@@ -18,9 +17,9 @@
     <input id="ticker" type="text" value="JPM"></input>
     <div id="container">
         <perspective-workspace id="workspace">
-            <perspective-viewer disable-virtual-datagrid table="query1"></perspective-viewer>
-            <perspective-viewer disable-virtual-datagrid table="query2"></perspective-viewer>
-            <perspective-viewer disable-virtual-datagrid table="query3"></perspective-viewer>
+            <perspective-viewer table="query1"></perspective-viewer>
+            <perspective-viewer table="query2"></perspective-viewer>
+            <perspective-viewer table="query3"></perspective-viewer>
         </perspective-workspace>        
     </div>
 </body>

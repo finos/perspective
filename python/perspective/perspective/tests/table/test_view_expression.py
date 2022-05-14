@@ -1,4 +1,4 @@
-# *****************************************************************************
+################################################################################
 #
 # Copyright (c) 2019, the Perspective Authors.
 #
@@ -6,13 +6,17 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-from random import random
+import re
+from random import random, randint, choices
+from string import ascii_letters
 from pytest import raises
 from datetime import date, datetime
 from time import mktime
 from perspective import Table, PerspectiveCppError
 from .test_view import compare_delta
 
+def randstr(length, input=ascii_letters):
+    return "".join(choices(input, k=length))
 
 class TestViewExpression(object):
     def test_table_validate_expressions_empty(self):
@@ -154,6 +158,281 @@ class TestViewExpression(object):
         }
         assert view.expression_schema() == {"computed": float}
 
+    def test_view_expression_string_per_page(self):
+        table = Table({"a": [i for i in range(100)]})
+        big_strings = [randstr(6400) for _ in range(4)]
+        view = table.view(
+            expressions=[
+                "//computed{}\nvar x := '{}'; lower(x)".format(i, big_strings[i]) for i in range(4)
+            ]
+        )
+
+        result = view.to_columns()
+        schema = view.expression_schema()
+
+        for i in range(4):
+            name = "computed{}".format(i)
+            res = big_strings[i].lower()
+            assert schema[name] == str
+            assert result[name] == [res for _ in range(100)]
+
+    def test_view_expression_string_page_stress(self):
+        table = Table({"a": [i for i in range(100)]})
+        big_strings = [
+            "".join(["a" for _ in range(640)]),
+            "".join(["b" for _ in range(640)]),
+            "".join(["c" for _ in range(640)]),
+            "".join(["d" for _ in range(640)]),
+        ]
+
+        view = table.view(
+            expressions=[
+                "//computed\nvar a := '{}'; var b := '{}'; var c := '{}'; var d := '{}'; concat(a, b, c, d)".format(*big_strings)
+            ]
+        )
+
+        result = view.to_columns()
+        schema = view.expression_schema()
+        assert schema == {"computed": str}
+        assert result["computed"] == ["".join(big_strings) for _ in range(100)]
+
+    def test_view_expression_new_vocab_page(self):
+        table = Table({"a": [randstr(100) for _ in range(100)]})
+
+        def make_expression(idx):
+            expr = ["//computed{}".format(idx)]
+            num_vars = randint(1, 26)
+            concat_cols = []
+            concat_result = []
+
+            for i in range(num_vars):
+                name = ascii_letters[i]
+                string_literal = randstr(randint(100, 1000))
+
+                if random() > 0.5:
+                    result = string_literal.upper()
+                    string_literal = "upper('{}')".format(string_literal)
+                else:
+                    result = string_literal.lower()
+                    string_literal = "lower('{}')".format(string_literal)
+
+                concat_cols.append(name)
+                concat_result.append(result)
+
+                expr.append("var {} := {};".format(name, string_literal))
+
+            expr.append("concat(\"a\", {})".format(", ".join(concat_cols)))
+
+            return {
+                "expression_name": expr[0][2:],
+                "expression": "\n".join(expr),
+                "output": "".join(concat_result)
+            }
+
+        expressions = [make_expression(i) for i in range(10)]
+
+        view = table.view(
+            expressions=[expr["expression"] for expr in expressions]
+        )
+
+        result = view.to_columns()
+        schema = view.expression_schema()
+
+        for expr in expressions:
+            name = expr["expression_name"]
+            assert schema[name] == str
+
+            for i in range(100):
+                val = result["a"][i]
+                assert result[name][i] == val + expr["output"]
+
+    def test_view_expression_collide_local_var(self):
+        """Make sure that strings declared under the same var name in
+        different expressions do not collide."""
+        table = Table({"a": [1, 2, 3, 4]})
+        strings = [randstr(50) for _ in range(8)]
+
+        view = table.view(
+            expressions=[
+                "// computed \n var w := '{}'; var x := '{}'; var y := '{}'; var z := '{}'; concat(w, x, y, z)".format(*strings[:4]),
+                "// computed2 \n var w := '{}'; var x := '{}'; var y := '{}'; var z := '{}'; concat(w, x, y, z)".format(*strings[4:]),
+            ]
+        )
+
+        result = view.to_columns()
+        schema = view.expression_schema()
+
+        assert schema == {
+            "computed": str,
+            "computed2": str
+        }
+
+        assert result["computed"] == ["".join(strings[:4]) for _ in range(4)]
+        assert result["computed2"] == ["".join(strings[4:]) for _ in range(4)]
+
+    def test_view_random_expressions(self):
+        def make_expression():
+            """Create a random expression with a few local string vars that
+            are too long to be stored in-place."""
+            expression_name = randstr(10)
+            expression = ["// {}\n".format(expression_name)]
+            num_vars = randint(1, 26)
+            output_var_name = ""
+            output_str = ""
+
+            for i in range(num_vars):
+                name = ascii_letters[i]
+                string_literal = randstr(randint(15, 100))
+                expression.append("var {} := '{}';\n".format(name, string_literal))
+
+                if i == num_vars - 1:
+                    output_var_name = name
+                    output_str = string_literal
+
+            expression.append(output_var_name)
+            return {
+                "expression_name": expression_name,
+                "expression": "".join(expression),
+                "output": output_str
+            }
+
+        table = Table({"a": [1, 2, 3, 4]})
+
+        for _ in range(5):
+            exprs = [make_expression() for _ in range(5)]
+            output_map = {expr["expression_name"]: expr["output"] for expr in exprs}
+            view = table.view(expressions=[expr["expression"] for expr in exprs])
+            expression_schema = view.expression_schema()
+            result = view.to_columns()
+
+            for expr in output_map.keys():
+                assert expression_schema[expr] == str
+                assert result[expr] == [output_map[expr] for _ in range(4)]
+
+    def test_view_expression_string_literal_compare(self):
+        table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
+        validated = table.validate_expressions(['// computed \n \'a\' == \'a\''])
+
+        assert validated["expression_schema"] == {
+            "computed": "boolean"
+        }
+
+        view = table.view(expressions=['// computed \n \'a\' == \'a\''])
+
+        assert view.to_columns() == {
+            "a": [1, 2, 3, 4],
+            "b": [5, 6, 7, 8],
+            "computed": [True, True, True, True],
+        }
+
+        assert view.expression_schema() == {"computed": bool}
+
+    def test_view_expression_string_literal_compare_null(self):
+        table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
+        validated = table.validate_expressions(['// computed \n \'a\' == null'])
+
+        assert validated["expression_schema"] == {
+            "computed": "float"
+        }
+
+        view = table.view(expressions=['// computed \n \'a\' == null'])
+
+        assert view.to_columns() == {
+            "a": [1, 2, 3, 4],
+            "b": [5, 6, 7, 8],
+            "computed": [0, 0, 0, 0],
+        }
+
+        assert view.expression_schema() == {"computed": float}
+
+    def test_view_expression_string_literal_compare_column(self):
+        table = Table({"a": ["a", "a", "b", "c"]})
+        validated = table.validate_expressions(['// computed \n "a" == \'a\''])
+
+        assert validated["expression_schema"] == {
+            "computed": "boolean"
+        }
+
+        view = table.view(expressions=['// computed \n "a" == \'a\''])
+
+        assert view.to_columns() == {
+            "a": ["a", "a", "b", "c"],
+            "computed": [True, True, False, False],
+        }
+
+        assert view.expression_schema() == {"computed": bool}
+
+    def test_view_expression_string_literal_compare_column_null(self):
+        table = Table({"a": ["a", None, "b", "c", None]})
+        validated = table.validate_expressions(['// computed \n "a" == \'a\''])
+
+        assert validated["expression_schema"] == {
+            "computed": "boolean"
+        }
+
+        view = table.view(expressions=['// computed \n "a" == \'a\''])
+
+        assert view.to_columns() == {
+            "a": ["a", None, "b", "c", None],
+            "computed": [True, False, False, False, False],
+        }
+
+        assert view.expression_schema() == {"computed": bool}
+
+    def test_view_expression_string_literal_compare_column_null_long(self):
+        table = Table({"a": ["abcdefghijklmnopqrstuvwxyz", None, "abcdefghijklmnopqrstuvwxyz", "aabcdefghijklmnopqrstuvwxyz", None]})
+        validated = table.validate_expressions(['// computed \n "a" == \'abcdefghijklmnopqrstuvwxyz\''])
+
+        assert validated["expression_schema"] == {
+            "computed": "boolean"
+        }
+
+        view = table.view(expressions=['// computed \n "a" == \'abcdefghijklmnopqrstuvwxyz\''])
+        result = view.to_columns()
+        assert result["computed"] == [True, False, True, False, False]
+
+        assert view.expression_schema() == {"computed": bool}
+
+    def test_view_expression_string_literal_compare_column_null_long_var(self):
+        table = Table({"a": ["abcdefghijklmnopqrstuvwxyz", None, "abcdefghijklmnopqrstuvwxyz", "aabcdefghijklmnopqrstuvwxyz", None]})
+        validated = table.validate_expressions(['// computed \n var xyz := \'abcdefghijklmnopqrstuvwxyz\'; "a" == xyz'])
+
+        assert validated["expression_schema"] == {
+            "computed": "boolean"
+        }
+
+        view = table.view(expressions=['// computed \n var xyz := \'abcdefghijklmnopqrstuvwxyz\'; "a" == xyz'])
+        result = view.to_columns()
+        assert result["computed"] == [True, False, True, False, False]
+        assert view.expression_schema() == {"computed": bool}
+
+    def test_view_expression_string_literal_compare_if(self):
+        table = Table({"a": ["a", "a", "b", "c"]})
+        validated = table.validate_expressions(['// computed \n if("a" == \'a\', 1, 2)'])
+
+        assert validated["expression_schema"] == {
+            "computed": "float"
+        }
+
+        view = table.view(expressions=['// computed \n if("a" == \'a\', 1, 2)'])
+
+        assert view.to_columns() == {
+            "a": ["a", "a", "b", "c"],
+            "computed": [1, 1, 2, 2],
+        }
+
+        assert view.expression_schema() == {"computed": float}
+
+    def test_view_expression_string_literal_var(self):
+        table = Table({"a": [1, 2, 3]})
+
+        for _ in range(10):
+            view = table.view(expressions=["var x := 'Eabcdefghijklmn'; var y := '0123456789'; concat(x, y)"])
+            assert view.to_columns() == {
+                "a": [1, 2, 3],
+                "var x := 'Eabcdefghijklmn'; var y := '0123456789'; concat(x, y)": ["Eabcdefghijklmn0123456789", "Eabcdefghijklmn0123456789", "Eabcdefghijklmn0123456789"]
+            }
+
     def test_view_streaming_expression(self):
         def data():
             return [{"a": random()} for _ in range(50)]
@@ -187,7 +466,7 @@ class TestViewExpression(object):
             return [{"a": random()} for _ in range(50)]
 
         table = Table(data())
-        view = table.view(row_pivots=["c0"], expressions=['//c0\n"a" * 2'])
+        view = table.view(group_by=["c0"], expressions=['//c0\n"a" * 2'])
 
         for _ in range(5):
             table.update(data())
@@ -202,7 +481,7 @@ class TestViewExpression(object):
             return [{"a": random()} for _ in range(50)]
 
         table = Table(data())
-        view = table.view(row_pivots=["c0"], column_pivots=["c1"], expressions=['//c0\n"a" * 2', "//c1\n'new string'"])
+        view = table.view(group_by=["c0"], split_by=["c1"], expressions=['//c0\n"a" * 2', "//c1\n'new string'"])
 
         for i in range(5):
             table.update(data())
@@ -298,7 +577,7 @@ class TestViewExpression(object):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
 
         view = table.view(
-            row_pivots=["computed"],
+            group_by=["computed"],
             aggregates={
                 "computed": ["weighted mean", "b"]
             },
@@ -306,7 +585,7 @@ class TestViewExpression(object):
         )
 
         view2 = table.view(
-            row_pivots=["computed"],
+            group_by=["computed"],
             aggregates={
                 "computed": "last"
             },
@@ -765,10 +1044,10 @@ class TestViewExpression(object):
             "computed": [6, 8, 10, 12],
         }
 
-    def test_view_expression_with_row_pivots(self):
+    def test_view_expression_with_group_by(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         view = table.view(
-            row_pivots=["computed"],
+            group_by=["computed"],
             expressions=[
                 '// computed \n "a" + "b"',
             ]
@@ -780,11 +1059,11 @@ class TestViewExpression(object):
             "computed": [36.0, 6.0, 8.0, 10.0, 12.0],
         }
 
-    def test_view_expression_with_row_pivots_clear(self):
+    def test_view_expression_with_group_by_clear(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
 
         view = table.view(
-            row_pivots=["computed"],
+            group_by=["computed"],
             expressions=[
                 '// computed \n "a" + "b"',
             ]
@@ -806,11 +1085,11 @@ class TestViewExpression(object):
             "computed": [None],
         }
 
-    def test_view_expression_with_row_pivots_replace(self):
+    def test_view_expression_with_group_by_replace(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
 
         view = table.view(
-            row_pivots=["computed"],
+            group_by=["computed"],
             expressions=[
                 '// computed \n "a" + "b"',
             ]
@@ -832,10 +1111,10 @@ class TestViewExpression(object):
             "computed": [360.0, 60.0, 80.0, 100.0, 120.0],
         }
 
-    def test_view_expression_with_column_pivots(self):
+    def test_view_expression_with_split_by(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         view = table.view(
-            column_pivots=["computed"],
+            split_by=["computed"],
             expressions=[
                 '// computed \n "a" + "b"',
             ]
@@ -855,10 +1134,10 @@ class TestViewExpression(object):
             "12|computed": [None, None, None, 12.0],
         }
 
-    def test_view_expression_with_row_column_pivots(self):
+    def test_view_expression_with_row_split_by(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         view = table.view(
-            column_pivots=["computed"],
+            split_by=["computed"],
             expressions=[
                 '// computed \n "a" + "b"',
             ]
@@ -1391,3 +1670,300 @@ class TestViewExpression(object):
         assert result["computed5"] == ["abcdefghijklmnop", "def"]
         assert result["computed6"] == ["false", "true"]
         assert result["computed7"] == ["1234.57"] * 2
+
+    def test_view_expession_multicomment(self):
+        table = Table({"a": [1, 2, 3, 4]})
+        view = table.view(expressions=["var x := 1 + 2;\n// def\nx + 100 // cdefghijk"])
+        assert view.expression_schema() == {"var x := 1 + 2;\n// def\nx + 100 // cdefghijk": float}
+        assert view.to_columns() == {
+            "var x := 1 + 2;\n// def\nx + 100 // cdefghijk": [103, 103, 103, 103],
+            "a": [1, 2, 3, 4]
+        }
+    
+    def test_view_regex_email(self):
+        endings = ["com", "net", "co.uk", "ie", "me", "io", "co"]
+        data = ["{}@{}.{}".format(randstr(30, ascii_letters + "0123456789" + "._-"), randstr(10), choices(endings, k=1)[0]) for _ in range(100)]
+        table = Table({"a": data})
+        expressions = [
+            "// address\nsearch(\"a\", '^([a-zA-Z0-9._-]+)@')",
+            "// domain\nsearch(\"a\", '@([a-zA-Z.]+)$')",
+            "//is_email?\nmatch_all(\"a\", '^([a-zA-Z0-9._-]+)@([a-zA-Z.]+)$')",
+            "//has_at?\nmatch(\"a\", '@')"
+        ]
+
+        view = table.view(expressions=expressions)
+        schema = view.expression_schema()
+        assert schema == {
+            "address": str,
+            "domain": str,
+            "is_email?": bool,
+            "has_at?": bool
+        }
+
+        results = view.to_columns()
+
+        for i in range(100):
+            source = results["a"][i]
+            expected_address = re.match(r"^([a-zA-Z0-9._-]+)@", source).group(1)
+            expected_domain = re.search(r"@([a-zA-Z.]+)$", source).group(1)
+            assert results["address"][i] == expected_address
+            assert results["domain"][i] == expected_domain
+            assert results["is_email?"][i] == True
+            assert results["has_at?"][i] == True
+
+    def test_view_expression_number(self):
+        def digits():
+            return randstr(4, "0123456789")
+        
+        data = []
+
+        for _ in range(1000):
+            separator = "-" if random() > 0.5 else " "
+            data.append("{}{}{}{}{}{}{}".format(digits(), separator, digits(), separator, digits(), separator, digits()))
+        
+        table = Table({"a": data})
+        view = table.view(expressions=["""// parsed\n
+        var parts[4];
+        parts[0] := search("a", '^([0-9]{4})[ -][0-9]{4}[ -][0-9]{4}[ -][0-9]{4}');
+        parts[1] := search("a", '^[0-9]{4}[ -]([0-9]{4})[ -][0-9]{4}[ -][0-9]{4}');
+        parts[2] := search("a", '^[0-9]{4}[ -][0-9]{4}[ -]([0-9]{4})[ -][0-9]{4}');
+        parts[3] := search("a", '^[0-9]{4}[ -][0-9]{4}[ -][0-9]{4}[ -]([0-9]{4})');
+        concat(parts[0], parts[1], parts[2], parts[3])
+        """, "//is_number?\nmatch_all(\"a\", '^[0-9]{4}[ -][0-9]{4}[ -][0-9]{4}[ -][0-9]{4}')"])
+        schema = view.expression_schema()
+        assert schema == {"parsed": str, "is_number?": bool}
+        results = view.to_columns()
+        
+        for i in range(1000):
+            source = results["a"][i]
+            expected = re.sub(r"[ -]", "", source)
+            assert results["parsed"][i] == expected
+            assert results["is_number?"][i] == True
+
+    def test_view_expression_newlines(self):
+        table = Table({"a": [
+            "abc\ndef",
+            "\n\n\n\nabc\ndef",
+            "abc\n\n\n\n\n\nabc\ndef\n\n\n\n",
+            None,
+            "def",
+        ],
+        "b": [
+            "hello\tworld",
+            "\n\n\n\n\nhello\n\n\n\n\n\tworld",
+            "\tworld",
+            "world",
+            None,
+        ]})
+
+        view = table.view(
+            expressions=[
+                "//c1\nsearch(\"a\", '(\ndef)')",
+                "//c2\nsearch(\"b\", '(\tworld)')",
+                "//c3\nmatch(\"a\", '\\n')",
+                "//c4\nmatch(\"b\", '\\n')"
+            ]
+        )
+
+        assert view.expression_schema() == {
+            "c1": str,
+            "c2": str,
+            "c3": bool,
+            "c4": bool
+        }
+
+        results = view.to_columns()
+        assert results["c1"] == ["\ndef", "\ndef", "\ndef", None, None]
+        assert results["c2"] == ["\tworld", "\tworld", "\tworld", None, None]
+        assert results["c3"] == [True, True, True, None, False]
+        assert results["c4"] == [False, True, False, False, None]
+
+    def test_view_regex_substring(self):
+        data = ["abc, def", "efg", "", None, "aaaaaaaaaaaaa"]
+        table = Table({
+            "x": data
+        })
+        view = table.view(expressions=[
+            '//a\nsubstring(\'abcdef\', 0)',
+            '//abc\nsubstring(\'abcdef\', 3)',
+            '//b\nsubstring("x", 0)',
+            '//c\nsubstring("x", 5, 1)',
+            '//d\nsubstring("x", 100)',
+            '//e\nsubstring("x", 0, 10000)',
+            '//f\nsubstring("x", 5, 0)',
+        ])
+        results = view.to_columns()
+
+        assert results["a"] == ['abcdef' for _ in data]
+        assert results["abc"] == ['def' for _ in data]
+        assert results["b"] == [d if d else None for d in data]
+        assert results["c"] == ["d", None, None, None, "a"]
+        assert results["d"] == [None for _ in data]
+        assert results["e"] == [None for _ in data]
+        assert results["f"] == ["", None, None, None, ""]
+
+    # FIXME: // ending\nvar domain := search(\"a\", '@([a-zA-Z.]+)$'); length(domain) > 0 ? search(domain, '[.](.*)$') : null
+    # is a broken expression without the newline after var domain
+    def test_view_regex_email_substr(self):
+        endings = ["com", "net", "co.uk", "ie", "me", "io", "co"]
+        data = ["{}@{}.{}".format(randstr(30, ascii_letters + "0123456789" + "._-"), randstr(10), choices(endings, k=1)[0]) for _ in range(100)]
+        table = Table({"a": data})
+        expressions = [
+            "// address\nvar vec[2]; indexof(\"a\", '^([a-zA-Z0-9._-]+)@', vec) ? substring(\"a\", vec[0], vec[1] - vec[0] + 1) : null",
+            """// ending
+            var domain := search(\"a\", '@([a-zA-Z.]+)$');
+            var len := length(domain);
+            if (len > 0 and is_not_null(domain)) {
+                search(domain, '[.](.*)$');
+            } else {
+                'not found';
+            }"""
+        ]
+
+        view = table.view(expressions=expressions)
+        schema = view.expression_schema()
+        assert schema == {
+            "address": str,
+            "ending": str,
+        }
+
+        results = view.to_columns()
+
+        for i in range(100):
+            source = results["a"][i]
+            address = re.match(r"^([a-zA-Z0-9._-]+)@", source).group(1)
+            domain = re.search(r"@([a-zA-Z.]+)$", source).group(1)
+            ending = re.search(r"[.](.*)$", domain).group(1)
+            assert results["address"][i] == address
+            assert results["ending"][i] == ending
+
+    def test_view_expressions_replace(self):
+        def digits():
+            return randstr(4, "0123456789")
+        
+        data = []
+
+        for _ in range(1000):
+            separator = "-" if random() > 0.5 else " "
+            data.append("{}{}{}{}{}{}{}".format(digits(), separator, digits(), separator, digits(), separator, digits()))
+        
+        table = Table({"a": data, "b": [str(i) for i in range(1000)]})
+        expressions = [
+            """//w
+            replace('abc-def-hijk', '-', '')""",
+            """//x
+            replace("a", '[0-9]{4}$', "b")""",
+            """//y
+            replace("a", '[a-z]{4}$', "b")""",
+            """//z
+            var x := 'long string, very cool!'; replace("a", '^[0-9]{4}', x)"""
+        ]
+
+        validate = table.validate_expressions(expressions)
+        assert validate["expression_schema"] == {
+            "w": "string",
+            "x": "string",
+            "y": "string",
+            "z": "string",
+        }
+
+        view = table.view(expressions=expressions)
+        schema = view.expression_schema()
+        assert schema == {
+            "w": str,
+            "x": str,
+            "y": str,
+            "z": str,
+        }
+        results = view.to_columns()
+        
+        for i in range(1000):
+            source = results["a"][i]
+            idx = results["b"][i]
+            assert results["w"][i] == "abcdef-hijk";
+            assert results["x"][i] == re.sub(r"[0-9]{4}$", idx, source, 1)
+            assert results["y"][i] == source
+            assert results["z"][i] == re.sub(r"^[0-9]{4}", "long string, very cool!", source, 1)
+
+    def test_view_replace_invalid(self):
+        table = Table({"a": "string", "b": "string"});
+        expressions = [
+            """//v
+            replace('abc-def-hijk', '-', 123)""",
+            """//w
+            replace('', '-', today())""",
+            """//x
+            replace("a", '[0-9]{4}$', today())""",
+            """//y
+            replace("a", '[a-z]{4}$', null)""",
+            """//z
+            var x := 123; replace("a", '^[0-9]{4}', x)""",
+        ]
+        validate = table.validate_expressions(expressions)
+        assert validate["expression_schema"] == {}
+
+    def test_view_expressions_replace_all(self):
+        def digits():
+            return randstr(4, "0123456789")
+        
+        data = []
+
+        for _ in range(1000):
+            separator = "-" if random() > 0.5 else " "
+            data.append("{}{}{}{}{}{}{}".format(digits(), separator, digits(), separator, digits(), separator, digits()))
+        
+        table = Table({"a": data, "b": [str(i) for i in range(1000)]})
+        expressions = [
+            """//w
+            replace_all('abc-def-hijk', '-', '')""",
+            """//x
+            replace_all("a", '[0-9]{4}$', "b")""",
+            """//y
+            replace_all("a", '[a-z]{4}$', "b")""",
+            """//z
+            var x := 'long string, very cool!'; replace_all("a", '^[0-9]{4}', x)"""
+        ]
+
+        validate = table.validate_expressions(expressions)
+        assert validate["expression_schema"] == {
+            "w": "string",
+            "x": "string",
+            "y": "string",
+            "z": "string",
+        }
+
+        view = table.view(expressions=expressions)
+        schema = view.expression_schema()
+        assert schema == {
+            "w": str,
+            "x": str,
+            "y": str,
+            "z": str,
+        }
+
+        results = view.to_columns()
+        
+        for i in range(1000):
+            source = results["a"][i]
+            idx = results["b"][i]
+            assert results["w"][i] == "abcdefhijk";
+            assert results["x"][i] == re.sub(r"[0-9]{4}$", idx, source)
+            assert results["y"][i] == source
+            assert results["z"][i] == re.sub(r"^[0-9]{4}", "long string, very cool!", source)
+
+    def test_view_replace_invalid(self):
+        table = Table({"a": "string", "b": "string"});
+        expressions = [
+            """//v
+            replace_all('abc-def-hijk', '-', 123)""",
+            """//w
+            replace_all('', '-', today())""",
+            """//x
+            replace_all("a", '[0-9]{4}$', today())""",
+            """//y
+            replace_all("a", '[a-z]{4}$', null)""",
+            """//z
+            var x := 123; replace_all("a", '^[0-9]{4}', x)""",
+        ]
+        validate = table.validate_expressions(expressions)
+        assert validate["expression_schema"] == {}

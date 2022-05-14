@@ -17,10 +17,10 @@
         outline: none;
 
         &:before {
-            font-family: "Material Icons";
+            font-family: var(--button--font-family, inherit);
             color: var(--inactive--color, #ccc);
             content: var(--inactive-column-selector--content, none);
-            font-size: var(--column_selector--font-size, 14px);
+            font-size: var(--column-selector--font-size, 14px);
         }
 
         &:checked:before {

@@ -1,5 +1,535 @@
 # Changelog
 
+## [v1.3.13](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.3.12...HEAD)
+
+**Fixed bugs:**
+
+- Fix export-to-html [\#1806](https://github.com/finos/perspective/pull/1806) ([texodus](https://github.com/texodus))
+
+**Merged pull requests:**
+
+- Fix jest timeouts for jupyterlab [\#1805](https://github.com/finos/perspective/pull/1805) ([texodus](https://github.com/texodus))
+- Make toggle-menu more responsive under load [\#1804](https://github.com/finos/perspective/pull/1804) ([texodus](https://github.com/texodus))
+
+## [v1.3.12](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.3.11...HEAD)
+
+**Implemented enhancements:**
+
+- Support autocomplete for IN filter type [\#1798](https://github.com/finos/perspective/pull/1798) ([spff](https://github.com/spff))
+
+**Fixed bugs:**
+
+- Fix `restore()` error [\#1803](https://github.com/finos/perspective/pull/1803) ([texodus](https://github.com/texodus))
+
+## [v1.3.11](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.3.10...HEAD)
+
+**Implemented enhancements:**
+
+- Add support for LargeUtf8 arrow column type [\#1796](https://github.com/finos/perspective/pull/1796) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- Fix datagrid error when `resetThemes()` is called while hidden [\#1795](https://github.com/finos/perspective/pull/1795) ([texodus](https://github.com/texodus))
+- Allow attempt to create workers from file protocol for e.g. electron [\#1794](https://github.com/finos/perspective/pull/1794) ([texodus](https://github.com/texodus))
+- Fix `sum` aggregate to force re-agg for expression columns [\#1793](https://github.com/finos/perspective/pull/1793) ([texodus](https://github.com/texodus))
+
+**Closed issues:**
+
+- Add ignore to group by selection  [\#1791](https://github.com/finos/perspective/issues/1791)
+
+## [v1.3.10](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.3.9...HEAD)
+
+**Fixed bugs:**
+
+- Remove 'treemaps' persistent token for d3fc plugin [\#1789](https://github.com/finos/perspective/pull/1789) ([texodus](https://github.com/texodus))
+
+## [v1.3.9](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.3.8...HEAD)
+
+**Fixed bugs:**
+
+- Fix `perspective-workspace` detach error [\#1788](https://github.com/finos/perspective/pull/1788) ([texodus](https://github.com/texodus))
+- Fix spurious logging [\#1785](https://github.com/finos/perspective/pull/1785) ([texodus](https://github.com/texodus))
+
+## [v1.3.8](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.3.7...HEAD)
+
+**Fixed bugs:**
+
+- Fix `perspective-workspace` webpack compat [\#1784](https://github.com/finos/perspective/pull/1784) ([texodus](https://github.com/texodus))
+
+## [v1.3.7](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.3.6...HEAD)
+
+**Implemented enhancements:**
+
+- `perspective-workspace` Context Menu Update [\#1783](https://github.com/finos/perspective/pull/1783) ([texodus](https://github.com/texodus))
+
+**Merged pull requests:**
+
+- Add Github dark mode logo to `README.md`  [\#1782](https://github.com/finos/perspective/pull/1782) ([texodus](https://github.com/texodus))
+- Upgrade `yew` [\#1776](https://github.com/finos/perspective/pull/1776) ([texodus](https://github.com/texodus))
+- Make toolbar icons configurable [\#1767](https://github.com/finos/perspective/pull/1767) ([kevinhinterlong](https://github.com/kevinhinterlong))
+
+## [v1.3.6](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.3.5...HEAD)
+
+**Implemented enhancements:**
+
+- Add extra empty column indicator when columns can be appended [\#1770](https://github.com/finos/perspective/pull/1770) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- Fix tree column override width persistence in `perspective-viewer-datagrid` [\#1772](https://github.com/finos/perspective/pull/1772) ([texodus](https://github.com/texodus))
+
+**Closed issues:**
+
+- Support `to_posix()` for `datetime` and `date` types in ExprTK [\#1768](https://github.com/finos/perspective/issues/1768)
+- Issue building perspective with debug on [\#1765](https://github.com/finos/perspective/issues/1765)
+
+**Merged pull requests:**
+
+- Fix `--debug` flag for real this time [\#1769](https://github.com/finos/perspective/pull/1769) ([texodus](https://github.com/texodus))
+- Fix `debug` build script [\#1766](https://github.com/finos/perspective/pull/1766) ([texodus](https://github.com/texodus))
+
+## [v1.3.5](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.3.4...HEAD)
+
+**Fixed bugs:**
+
+- Fix JLab `settings` flicker [\#1762](https://github.com/finos/perspective/pull/1762) ([texodus](https://github.com/texodus))
+- Export `perspective-viewer-datagrid` types [\#1759](https://github.com/finos/perspective/pull/1759) ([texodus](https://github.com/texodus))
+
+**Closed issues:**
+
+- display bug on python widget with new v1.2.0 setting options [\#1761](https://github.com/finos/perspective/issues/1761)
+
+**Merged pull requests:**
+
+- Allow more icons to be overridden [\#1763](https://github.com/finos/perspective/pull/1763) ([texodus](https://github.com/texodus))
+- Rust lint+nightly [\#1760](https://github.com/finos/perspective/pull/1760) ([texodus](https://github.com/texodus))
+- Fix flatbuffers [\#1757](https://github.com/finos/perspective/pull/1757) ([texodus](https://github.com/texodus))
+
+## [v1.3.4](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.3.3...HEAD)
+
+**Implemented enhancements:**
+
+- Copy menu [\#1744](https://github.com/finos/perspective/pull/1744) ([texodus](https://github.com/texodus))
+- New aggregates `last minus first` and `high minus low` [\#1742](https://github.com/finos/perspective/pull/1742) ([texodus](https://github.com/texodus))
+- Export `.png`, `.html`, `.arrow` [\#1740](https://github.com/finos/perspective/pull/1740) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- Fire `perspective-config-update` on axis switch for multi-axis charts [\#1729](https://github.com/finos/perspective/issues/1729)
+- D3FC Chart style and bug fixes [\#1752](https://github.com/finos/perspective/pull/1752) ([texodus](https://github.com/texodus))
+- Fire `perspective-config-update` event on D3FC legend and axis events [\#1748](https://github.com/finos/perspective/pull/1748) ([texodus](https://github.com/texodus))
+- export `perspective-viewer-datagrid`  plugin customElement and it's typings [\#1746](https://github.com/finos/perspective/pull/1746) ([zemeolotu](https://github.com/zemeolotu))
+- Add `main` field to package json [\#1745](https://github.com/finos/perspective/pull/1745) ([zemeolotu](https://github.com/zemeolotu))
+
+**Merged pull requests:**
+
+- Disable OSX Python CI [\#1754](https://github.com/finos/perspective/pull/1754) ([texodus](https://github.com/texodus))
+- Disable Windows builds [\#1741](https://github.com/finos/perspective/pull/1741) ([texodus](https://github.com/texodus))
+
+## [v1.3.3](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.3.2...HEAD)
+
+**Implemented enhancements:**
+
+- Allow `@finos/perspective` to run in single-threaded mode [\#1737](https://github.com/finos/perspective/pull/1737) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- Fix bugs reported from docs site [\#1733](https://github.com/finos/perspective/pull/1733) ([texodus](https://github.com/texodus))
+
+**Closed issues:**
+
+- `yarn toggle_puppeteer` still supported?  [\#1735](https://github.com/finos/perspective/issues/1735)
+
+**Merged pull requests:**
+
+- Update dev docs [\#1736](https://github.com/finos/perspective/pull/1736) ([texodus](https://github.com/texodus))
+
+## [v1.3.2](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.3.1...HEAD)
+
+**Implemented enhancements:**
+
+- Vertical resize for expression editor [\#1725](https://github.com/finos/perspective/pull/1725) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- Column Styles Updates Do Not Fire `perspective-config-update` Event Correctly [\#1727](https://github.com/finos/perspective/issues/1727)
+- UI small fixes [\#1731](https://github.com/finos/perspective/pull/1731) ([texodus](https://github.com/texodus))
+- fix: fire config-update evnt on perspective-viewer [\#1728](https://github.com/finos/perspective/pull/1728) ([jkusa](https://github.com/jkusa))
+- Fix filtering on string columns containing `null` [\#1726](https://github.com/finos/perspective/pull/1726) ([texodus](https://github.com/texodus))
+
+**Merged pull requests:**
+
+- Add tests [\#1730](https://github.com/finos/perspective/pull/1730) ([texodus](https://github.com/texodus))
+
+## [v1.3.1](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.3.0...HEAD)
+
+**Fixed bugs:**
+
+- Fix python memory leak in `table()` [\#1724](https://github.com/finos/perspective/pull/1724) ([texodus](https://github.com/texodus))
+
+## [v1.3.0](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.2.0...HEAD)
+
+**Breaking changes:**
+
+- Add scroll\_lock optional free scroll mode for `@finos/perspective-viewer-datagrid` [\#1721](https://github.com/finos/perspective/pull/1721) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- Virtual column selector [\#1722](https://github.com/finos/perspective/pull/1722) ([texodus](https://github.com/texodus))
+
+**Closed issues:**
+
+- Not allowed to load local resource: blob:null/88ca3529-3169-498e-a4f0-95b53f569642 [\#1720](https://github.com/finos/perspective/issues/1720)
+- General performance question for wide datasets \(400+ columns\) [\#1719](https://github.com/finos/perspective/issues/1719)
+
+**Merged pull requests:**
+
+- Drag/drop tests [\#1716](https://github.com/finos/perspective/pull/1716) ([texodus](https://github.com/texodus))
+- Add column-style-checkbox css variables [\#1715](https://github.com/finos/perspective/pull/1715) ([jkusa](https://github.com/jkusa))
+- remove defunct IEX Cloud example - replace with Polygon.io stock example [\#1714](https://github.com/finos/perspective/pull/1714) ([timkpaine](https://github.com/timkpaine))
+
+## [v1.2.0](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.1.1...HEAD)
+
+**Breaking changes:**
+
+- Add `settings` and `theme` to `perspective-config-update` DOM event and `PerspectiveWidget` python class [\#1712](https://github.com/finos/perspective/pull/1712) ([texodus](https://github.com/texodus))
+- Replace `row_pivots` with `group_by`, `column_pivots` with `split_by`, add `convert()` migration utility [\#1709](https://github.com/finos/perspective/pull/1709) ([texodus](https://github.com/texodus))
+
+**Merged pull requests:**
+
+- Update docs for new theme API [\#1713](https://github.com/finos/perspective/pull/1713) ([texodus](https://github.com/texodus))
+- User-selectable Theme API [\#1711](https://github.com/finos/perspective/pull/1711) ([texodus](https://github.com/texodus))
+
+## [v1.1.1](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.1.0...HEAD)
+
+**Fixed bugs:**
+
+- Async Mode \(GIL unlock\) Does Not Work With Tables Based On Views [\#1704](https://github.com/finos/perspective/issues/1704)
+- Unexpected behavior with string filtering/views/partial updates [\#1701](https://github.com/finos/perspective/issues/1701)
+- Fix bad filter when `.update()` contains missing string column value [\#1708](https://github.com/finos/perspective/pull/1708) ([texodus](https://github.com/texodus))
+- Fix async mode segfault on `.load()` with indexed Arrow [\#1707](https://github.com/finos/perspective/pull/1707) ([texodus](https://github.com/texodus))
+- Fix `perspective-viewer` filter dropdown for values with double quotes [\#1696](https://github.com/finos/perspective/pull/1696) ([texodus](https://github.com/texodus))
+
+**Closed issues:**
+
+- CDN example in document doesn't work [\#1706](https://github.com/finos/perspective/issues/1706)
+
+**Merged pull requests:**
+
+- Pin `flatc` to 1.12.1 [\#1705](https://github.com/finos/perspective/pull/1705) ([texodus](https://github.com/texodus))
+
+## [v1.1.0](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.0.8...HEAD)
+
+**Breaking changes:**
+
+- CSV output rewrite \(Arrow/C++\) [\#1692](https://github.com/finos/perspective/pull/1692) ([texodus](https://github.com/texodus))
+
+**Implemented enhancements:**
+
+- Column style menu for `string` type columns [\#1691](https://github.com/finos/perspective/pull/1691) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- String field filter in server mode not work [\#1690](https://github.com/finos/perspective/issues/1690)
+- CSV output with `row_pivots` \> 1 don't render correctly [\#1666](https://github.com/finos/perspective/issues/1666)
+- Fix auto-reset when `HTMLPerspectiveViewerElement.load()` called twice [\#1695](https://github.com/finos/perspective/pull/1695) ([texodus](https://github.com/texodus))
+
+**Closed issues:**
+
+- SyntaxError: Unexpected token '.' when using webpack PerspectivePlugin [\#1687](https://github.com/finos/perspective/issues/1687)
+- installation error Ubuntu 20.04.3 LTS \(GNU/Linux 5.11.0-1021-oracle aarch64\) [\#1686](https://github.com/finos/perspective/issues/1686)
+
+**Merged pull requests:**
+
+- purge six dependency [\#1689](https://github.com/finos/perspective/pull/1689) ([timkpaine](https://github.com/timkpaine))
+- Reduce CI: Turn off branch builds, only build on PRs to master [\#1688](https://github.com/finos/perspective/pull/1688) ([timkpaine](https://github.com/timkpaine))
+
+## [v1.0.8](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.0.7...HEAD)
+
+**Implemented enhancements:**
+
+- 80% reduction in `.wasm` asset size [\#1683](https://github.com/finos/perspective/pull/1683) ([texodus](https://github.com/texodus))
+- Use `puppeteer` for app from CLI [\#1674](https://github.com/finos/perspective/pull/1674) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- Missing libbinding.pyd in Windows 3.9 1.0.7 [\#1677](https://github.com/finos/perspective/issues/1677)
+- DateTime Comparison Blanks out when the milliseconds is 0 [\#1645](https://github.com/finos/perspective/issues/1645)
+- `date` and `datetime` filter bug fixes and support for non-Chrome browsers [\#1685](https://github.com/finos/perspective/pull/1685) ([texodus](https://github.com/texodus))
+- Fix Treemap zoom when a group level is `null` [\#1676](https://github.com/finos/perspective/pull/1676) ([texodus](https://github.com/texodus))
+
+**Merged pull requests:**
+
+- Benchmarks update [\#1681](https://github.com/finos/perspective/pull/1681) ([texodus](https://github.com/texodus))
+- Upgrade Arrow to `6.0.2` [\#1680](https://github.com/finos/perspective/pull/1680) ([texodus](https://github.com/texodus))
+- fix wheel build, make extension first to ensure binaries are inlined, then assemble wheel [\#1679](https://github.com/finos/perspective/pull/1679) ([timkpaine](https://github.com/timkpaine))
+
+## [v1.0.7](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.0.6...HEAD)
+
+**Implemented enhancements:**
+
+- Preserve `expressions` on reset \(shift+ to force\) [\#1673](https://github.com/finos/perspective/pull/1673) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- Some expressions are available in Perspective-Python but not in the Monaco editor [\#1671](https://github.com/finos/perspective/issues/1671)
+- Fix `perspective-workspace` errors [\#1675](https://github.com/finos/perspective/pull/1675) ([texodus](https://github.com/texodus))
+
+**Merged pull requests:**
+
+- Build windows wheel every time so its tested [\#1672](https://github.com/finos/perspective/pull/1672) ([timkpaine](https://github.com/timkpaine))
+
+## [v1.0.6](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.0.5...HEAD)
+
+**Implemented enhancements:**
+
+- Fix `perspective-workspace` and add `monaco-editor-webpack-plugin` compatibility to `perspective-webpack-plugin` [\#1662](https://github.com/finos/perspective/pull/1662) ([texodus](https://github.com/texodus))
+- D3FC fast `Treemap`, fix for non-POSIX time axis, better resize [\#1660](https://github.com/finos/perspective/pull/1660) ([texodus](https://github.com/texodus))
+- Resizable expression editor [\#1643](https://github.com/finos/perspective/pull/1643) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- perspective-view collapse / expand functions returning error [\#1656](https://github.com/finos/perspective/issues/1656)
+- Themes moved causing build errors [\#1648](https://github.com/finos/perspective/issues/1648)
+- Fix `position: sticky` Chrome render bug in `perspective-viewer-datagrid` [\#1661](https://github.com/finos/perspective/pull/1661) ([texodus](https://github.com/texodus))
+- Implement `getView()` [\#1657](https://github.com/finos/perspective/pull/1657) ([texodus](https://github.com/texodus))
+
+**Merged pull requests:**
+
+- add missing definition for re2 on os x to reenable conda builds [\#1654](https://github.com/finos/perspective/pull/1654) ([timkpaine](https://github.com/timkpaine))
+
+## [v1.0.5](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.0.4...HEAD)
+
+**Fixed bugs:**
+
+- DateTime Comparison Blanks out when the milliseconds is 0 [\#1645](https://github.com/finos/perspective/issues/1645)
+- Treemap zoom-out misrenders and does not fire `perspective-click` event [\#1628](https://github.com/finos/perspective/issues/1628)
+- Treemap zoom broken in `1.0.1` [\#1627](https://github.com/finos/perspective/issues/1627)
+- Fix `datetime`/`date`/`integer`/`float` filter occasionally resetting while typing [\#1653](https://github.com/finos/perspective/pull/1653) ([texodus](https://github.com/texodus))
+- D3FC Treemap bug fixes [\#1652](https://github.com/finos/perspective/pull/1652) ([texodus](https://github.com/texodus))
+
+## [v1.0.4](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.0.3...HEAD)
+
+**Implemented enhancements:**
+
+- Parallelized `.wasm` download and deferred font loading [\#1647](https://github.com/finos/perspective/pull/1647) ([texodus](https://github.com/texodus))
+- Add auto-resizing to `<perspective-viewer>` [\#1633](https://github.com/finos/perspective/pull/1633) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- build errors after upgrade to 1.0.3 [\#1646](https://github.com/finos/perspective/issues/1646)
+- Remove wasm-pack artifacts which interfere with perspective packaging [\#1651](https://github.com/finos/perspective/pull/1651) ([texodus](https://github.com/texodus))
+- Fix column-selector collapse \(inverted\) [\#1650](https://github.com/finos/perspective/pull/1650) ([texodus](https://github.com/texodus))
+- Emit `.d.ts` declaration files for `@finos/perspective-viewer` [\#1649](https://github.com/finos/perspective/pull/1649) ([texodus](https://github.com/texodus))
+
+**Merged pull requests:**
+
+- \[Formatting\] force line-feed line endings for all text files for easier windows development [\#1635](https://github.com/finos/perspective/pull/1635) ([timkpaine](https://github.com/timkpaine))
+- Overload re2 cmakelists to fix cmake/threads detection issue on conda-forge mac builds, and pin C++ dependency versions [\#1634](https://github.com/finos/perspective/pull/1634) ([timkpaine](https://github.com/timkpaine))
+- Update CMakeLists.txt for more thread help on mac for conda [\#1631](https://github.com/finos/perspective/pull/1631) ([timkpaine](https://github.com/timkpaine))
+- \[Formatting\] Fix mixed tabs/spaces in C++ CMakeLists.txt  [\#1630](https://github.com/finos/perspective/pull/1630) ([timkpaine](https://github.com/timkpaine))
+- Fix Azure windows wheel step [\#1629](https://github.com/finos/perspective/pull/1629) ([texodus](https://github.com/texodus))
+
+## [v1.0.3](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.0.2...HEAD)
+
+**Fixed bugs:**
+
+- Missing data not properly handled when "limit" is set [\#1616](https://github.com/finos/perspective/issues/1616)
+- JupyterLab CSV widget not working anymore [\#1612](https://github.com/finos/perspective/issues/1612)
+- Precision Display Window on Dark Background [\#1609](https://github.com/finos/perspective/issues/1609)
+- DateTime Uses GMT instead of Local Time [\#1606](https://github.com/finos/perspective/issues/1606)
+- Fix partial-updates on tables with `limit` set for javascript [\#1624](https://github.com/finos/perspective/pull/1624) ([texodus](https://github.com/texodus))
+- Fix partial-updates on tables with `limit` set for python [\#1623](https://github.com/finos/perspective/pull/1623) ([texodus](https://github.com/texodus))
+- Fix `datetime` filter timezone bug [\#1622](https://github.com/finos/perspective/pull/1622) ([texodus](https://github.com/texodus))
+- `PerspectiveWidget()` dialog theme fix [\#1621](https://github.com/finos/perspective/pull/1621) ([texodus](https://github.com/texodus))
+- Add `wait_for_table` flag to `getTable()` [\#1619](https://github.com/finos/perspective/pull/1619) ([texodus](https://github.com/texodus))
+- Fix `worker.js` cross-origin workaround for CDN [\#1618](https://github.com/finos/perspective/pull/1618) ([texodus](https://github.com/texodus))
+
+**Closed issues:**
+
+- Customized types are not support perspective 1.0.1 [\#1602](https://github.com/finos/perspective/issues/1602)
+- Update `windows-2016` to `windows-latest` and set up Visual Studio 2019 build [\#1601](https://github.com/finos/perspective/issues/1601)
+
+**Merged pull requests:**
+
+- bump windows build for vc 14.2 / vs 16 2019, add macos 11 build for py3.9 [\#1626](https://github.com/finos/perspective/pull/1626) ([timkpaine](https://github.com/timkpaine))
+- add threads explicit on mac [\#1625](https://github.com/finos/perspective/pull/1625) ([timkpaine](https://github.com/timkpaine))
+- Fix publish through practice [\#1620](https://github.com/finos/perspective/pull/1620) ([texodus](https://github.com/texodus))
+
+## [v1.0.2](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.0.2...HEAD)
+
+**Implemented enhancements:**
+
+- More regex functions - find, substring, replace [\#1598](https://github.com/finos/perspective/pull/1598) ([sc1f](https://github.com/sc1f))
+- Add Regex functions using Exprtk and RE2 [\#1596](https://github.com/finos/perspective/pull/1596) ([sc1f](https://github.com/sc1f))
+- Persist edited expressions and add 'Reset' button [\#1594](https://github.com/finos/perspective/pull/1594) ([texodus](https://github.com/texodus))
+
+**Closed issues:**
+
+- Can't install perspective javascript libraries with yarn/npm [\#1605](https://github.com/finos/perspective/issues/1605)
+- Can't install perspective-python on python3.9, macOS Big Sur [\#1603](https://github.com/finos/perspective/issues/1603)
+
+**Merged pull requests:**
+
+- Fix D3 alt-axis regression [\#1617](https://github.com/finos/perspective/pull/1617) ([texodus](https://github.com/texodus))
+- New example [\#1615](https://github.com/finos/perspective/pull/1615) ([texodus](https://github.com/texodus))
+- Publish script for Python [\#1613](https://github.com/finos/perspective/pull/1613) ([texodus](https://github.com/texodus))
+- Port to `esbuild` [\#1611](https://github.com/finos/perspective/pull/1611) ([texodus](https://github.com/texodus))
+- Upgrade `d3fc` to `15.2.4` and switch "Heatmap" to use canvas renderer [\#1599](https://github.com/finos/perspective/pull/1599) ([texodus](https://github.com/texodus))
+- Add ExprTK example fractal [\#1595](https://github.com/finos/perspective/pull/1595) ([texodus](https://github.com/texodus))
+
+## [v1.0.1](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.0.0...HEAD)
+
+**Implemented enhancements:**
+
+- Universal binaries for OSX [\#1590](https://github.com/finos/perspective/pull/1590) ([texodus](https://github.com/texodus))
+- Drag/drop highlight and in-place column updates [\#1586](https://github.com/finos/perspective/pull/1586) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- Access Violation with python 3.9 expressions [\#1575](https://github.com/finos/perspective/issues/1575)
+- Stacked bar widths are calculated incorrectly when passed null values [\#1561](https://github.com/finos/perspective/issues/1561)
+- Docs: unstyled perspective-viewer components on views guide [\#1534](https://github.com/finos/perspective/issues/1534)
+- `@finos/perspective-webpack-plugin@0.10.0` has a stale peer dependency [\#1503](https://github.com/finos/perspective/issues/1503)
+- Fix JupyterLab widget `filter` traitlet [\#1593](https://github.com/finos/perspective/pull/1593) ([texodus](https://github.com/texodus))
+- Fix corrupt string results in `expressions` [\#1589](https://github.com/finos/perspective/pull/1589) ([texodus](https://github.com/texodus))
+
+**Closed issues:**
+
+- Remove dependency on system boost and statically link boost::regex [\#1564](https://github.com/finos/perspective/issues/1564)
+- typo in docs index page [\#1506](https://github.com/finos/perspective/issues/1506)
+
+**Merged pull requests:**
+
+- Remove TBB [\#1591](https://github.com/finos/perspective/pull/1591) ([texodus](https://github.com/texodus))
+- Remove python 2 from build and CI scripts [\#1583](https://github.com/finos/perspective/pull/1583) ([timkpaine](https://github.com/timkpaine))
+- remove deprecated webpack-specific tilde prefix convention [\#1582](https://github.com/finos/perspective/pull/1582) ([timkpaine](https://github.com/timkpaine))
+- Fix documentation typos [\#1581](https://github.com/finos/perspective/pull/1581) ([timkpaine](https://github.com/timkpaine))
+- Update python classifiers [\#1579](https://github.com/finos/perspective/pull/1579) ([timkpaine](https://github.com/timkpaine))
+- Align `@lumino` versions [\#1576](https://github.com/finos/perspective/pull/1576) ([texodus](https://github.com/texodus))
+- Bar Rendering bug null sends fix [\#1569](https://github.com/finos/perspective/pull/1569) ([mattcolozzo](https://github.com/mattcolozzo))
+- swap out JS style versioning in python script [\#1563](https://github.com/finos/perspective/pull/1563) ([timkpaine](https://github.com/timkpaine))
+- Upgrade Apache Arrow to 5.0.0 [\#1545](https://github.com/finos/perspective/pull/1545) ([texodus](https://github.com/texodus))
+
+## [v1.0.0](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.0.0-rc.2...HEAD)
+
+**Breaking changes:**
+
+- New `\<perspective-viewer\>` [\#1488](https://github.com/finos/perspective/pull/1488) ([texodus](https://github.com/texodus))
+
+**Implemented enhancements:**
+
+- toggleConfig\(\) via attribute and part of save\(\) \(for perspective-viewer\) [\#879](https://github.com/finos/perspective/issues/879)
+- Boolean datagrid columns [\#1553](https://github.com/finos/perspective/pull/1553) ([texodus](https://github.com/texodus))
+- Persistent column widths [\#1549](https://github.com/finos/perspective/pull/1549) ([texodus](https://github.com/texodus))
+- Return booleans from expression comparisons, allow for vectors to be defined in expressions [\#1548](https://github.com/finos/perspective/pull/1548) ([sc1f](https://github.com/sc1f))
+- Boolean column filter controls for `\<perspective-viewer\>` [\#1547](https://github.com/finos/perspective/pull/1547) ([texodus](https://github.com/texodus))
+- Fix M1 \(Apple Silicon\) build for `perspective-python` and improve developer docs [\#1525](https://github.com/finos/perspective/pull/1525) ([sc1f](https://github.com/sc1f))
+
+**Fixed bugs:**
+
+- `save` on a `perspective-viewer` emits `plugin: null` if the attribute hasnt been set, instead of using the active plugin \(e.g. datagrid\) [\#1501](https://github.com/finos/perspective/issues/1501)
+- Scrolling in the Olympics example grids expands the table continuosly [\#1302](https://github.com/finos/perspective/issues/1302)
+- table.replace + unique aggregate incorrectly sets values to 0 in datagrid [\#1175](https://github.com/finos/perspective/issues/1175)
+- Heatmap doesn't work when dates are used in columns [\#1132](https://github.com/finos/perspective/issues/1132)
+- Inconsistent UI when transposing Pivots [\#1021](https://github.com/finos/perspective/issues/1021)
+- Fix \#1566, remove deprecated flags from WASM debug build [\#1567](https://github.com/finos/perspective/pull/1567) ([sc1f](https://github.com/sc1f))
+- Fix \#1562, fix regressions in PerspectiveWidget [\#1565](https://github.com/finos/perspective/pull/1565) ([sc1f](https://github.com/sc1f))
+- Fix python wheel CI [\#1552](https://github.com/finos/perspective/pull/1552) ([texodus](https://github.com/texodus))
+- Long expressions block edit and delete buttons [\#1546](https://github.com/finos/perspective/issues/1546)
+- Perspective Viewer does not type tag or filter for booleans [\#1544](https://github.com/finos/perspective/issues/1544)
+- Incorrect type for Filters in Typescript perspective-viewer/index.d.ts [\#1517](https://github.com/finos/perspective/issues/1517)
+- Perspective-viewer compilation error due to missing loader. [\#1497](https://github.com/finos/perspective/issues/1497)
+- table.size\(\) incorrect after remove\(\) [\#1225](https://github.com/finos/perspective/issues/1225)
+- `table.remove\(keys\)` from node seems to corrupt indexing? [\#998](https://github.com/finos/perspective/issues/998)
+- Fix examples [\#1556](https://github.com/finos/perspective/pull/1556) ([texodus](https://github.com/texodus))
+- Fix expression column button toolbar styling [\#1555](https://github.com/finos/perspective/pull/1555) ([texodus](https://github.com/texodus))
+- Fix hidden sort aggregate as `unique` only when sorted on the same axis [\#1554](https://github.com/finos/perspective/pull/1554) ([texodus](https://github.com/texodus))
+- Fixes `bucket\(\)` computed function validation [\#1551](https://github.com/finos/perspective/pull/1551) ([texodus](https://github.com/texodus))
+- Fix 'weighted mean' aggregate support in \<perspective-viewer\> [\#1543](https://github.com/finos/perspective/pull/1543) ([texodus](https://github.com/texodus))
+- Fix column section collapse with expressions [\#1542](https://github.com/finos/perspective/pull/1542) ([texodus](https://github.com/texodus))
+- Fix `is \(not\) null`, `date`, `datetime` filters [\#1541](https://github.com/finos/perspective/pull/1541) ([texodus](https://github.com/texodus))
+- Fix workspace filter events [\#1540](https://github.com/finos/perspective/pull/1540) ([texodus](https://github.com/texodus))
+- Fix `docs` site and NPM artifact for `\<perspective-viewer\>` update [\#1533](https://github.com/finos/perspective/pull/1533) ([texodus](https://github.com/texodus))
+- Fix drag/drop exclusive cases [\#1532](https://github.com/finos/perspective/pull/1532) ([texodus](https://github.com/texodus))
+- Re-add `getEditPort\(\)` and `restyleElement\(\)` methods [\#1531](https://github.com/finos/perspective/pull/1531) ([texodus](https://github.com/texodus))
+- Use TypeScript for `@finos/perspective-viewer` [\#1530](https://github.com/finos/perspective/pull/1530) ([texodus](https://github.com/texodus))
+- Fix `settings` key to trigger redraw + container redraw [\#1529](https://github.com/finos/perspective/pull/1529) ([texodus](https://github.com/texodus))
+- Fix \#1505, \#998, \#1225 - results after remove are correct [\#1528](https://github.com/finos/perspective/pull/1528) ([sc1f](https://github.com/sc1f))
+- Fix D3FC chart resize via `preserveAspectRatio` [\#1526](https://github.com/finos/perspective/pull/1526) ([texodus](https://github.com/texodus))
+
+**Closed issues:**
+
+- Segfault with python 3.9 expressions [\#1572](https://github.com/finos/perspective/issues/1572)
+- Loading remote table from Python breaks the viewer [\#1566](https://github.com/finos/perspective/issues/1566)
+- PerspectiveWidget should init a shared\_worker and not a worker-per-widget [\#1562](https://github.com/finos/perspective/issues/1562)
+- Perspective Viewer does not work in Custom Element Examples remote\_express and remote-express-typescript  [\#1536](https://github.com/finos/perspective/issues/1536)
+- Perspective refuses to work with React with webpack 4.x [\#1512](https://github.com/finos/perspective/issues/1512)
+- `bucket\(\)` expression doesn't validate when 0 or more than 1 space separate arguments [\#1550](https://github.com/finos/perspective/issues/1550)
+- Records added via table.update do not appear in perspective viewer filter values [\#1535](https://github.com/finos/perspective/issues/1535)
+- Inconsistent view output under frequent insert&delete [\#1505](https://github.com/finos/perspective/issues/1505)
+
+**Merged pull requests:**
+
+- `docs` for updated `perspective-viewer` [\#1574](https://github.com/finos/perspective/pull/1574) ([texodus](https://github.com/texodus))
+- Make `/node\_modules` external to TS [\#1557](https://github.com/finos/perspective/pull/1557) ([texodus](https://github.com/texodus))
+- Upgrade emscripten to 2.0.29 [\#1539](https://github.com/finos/perspective/pull/1539) ([texodus](https://github.com/texodus))
+- Add docs for `\<perspective-viewer-plugin\>` [\#1538](https://github.com/finos/perspective/pull/1538) ([texodus](https://github.com/texodus))
+- Lint upgrade and remove TypeScript for `@finos/perspective-jupyterlab` [\#1537](https://github.com/finos/perspective/pull/1537) ([texodus](https://github.com/texodus))
+- add some light sdist tests and upload sdist in CI [\#1433](https://github.com/finos/perspective/pull/1433) ([timkpaine](https://github.com/timkpaine))
+
 ## [v0.10.3](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v0.10.2...HEAD)
@@ -8,8 +538,6 @@
 
 - Refactor `to\_arrow`, fix row deltas for pivoted views [\#1519](https://github.com/finos/perspective/pull/1519) ([sc1f](https://github.com/sc1f))
 - Fix count aggregate when last aggregate and partial updates are applied [\#1518](https://github.com/finos/perspective/pull/1518) ([sc1f](https://github.com/sc1f))
-
-# Changelog
 
 ## [v0.10.2](https://github.com/finos/perspective/tree/HEAD)
 
@@ -20,8 +548,6 @@
 - Filtering using `in` operator doesn't work as expected [\#1520](https://github.com/finos/perspective/issues/1520)
 - Fix support for array-like filter terms [\#1524](https://github.com/finos/perspective/pull/1524) ([texodus](https://github.com/texodus))
 - Add new aggregates to ViewConfig enum [\#1516](https://github.com/finos/perspective/pull/1516) ([sc1f](https://github.com/sc1f))
-
-# Changelog
 
 ## [v0.10.1](https://github.com/finos/perspective/tree/HEAD)
 
@@ -49,8 +575,6 @@
 
 - Preload fonts [\#1481](https://github.com/finos/perspective/pull/1481) ([texodus](https://github.com/texodus))
 - Refactoring [\#1471](https://github.com/finos/perspective/pull/1471) ([texodus](https://github.com/texodus))
-
-# Changelog
 
 ## [v0.10.0](https://github.com/finos/perspective/tree/HEAD)
 
@@ -82,8 +606,6 @@
 - New website [\#1470](https://github.com/finos/perspective/pull/1470) ([texodus](https://github.com/texodus))
 - Add Jupyterlab tests to CI [\#1460](https://github.com/finos/perspective/pull/1460) ([texodus](https://github.com/texodus))
 - Build Windows wheel, limit wheel builds to scheduled and tagged builds [\#1453](https://github.com/finos/perspective/pull/1453) ([sc1f](https://github.com/sc1f))
-
-# Changelog
 
 ## [v0.9.0](https://github.com/finos/perspective/tree/HEAD)
 
@@ -129,8 +651,6 @@
 - Optional lazy-load `monaco-editor` [\#1435](https://github.com/finos/perspective/pull/1435) ([texodus](https://github.com/texodus))
 - Expose `join` aggregate [\#1434](https://github.com/finos/perspective/pull/1434) ([texodus](https://github.com/texodus))
 - organize azure pipelines file [\#1381](https://github.com/finos/perspective/pull/1381) ([timkpaine](https://github.com/timkpaine))
-
-# Changelog
 
 ## [v0.8.3](https://github.com/finos/perspective/tree/HEAD)
 
@@ -2306,15 +2826,6 @@
 - Jest [\#2](https://github.com/finos/perspective/pull/2) ([texodus](https://github.com/texodus))
 - README corrections [\#1](https://github.com/finos/perspective/pull/1) ([neilslinger](https://github.com/neilslinger))
 
-
-
-\* *This Changelog was automatically generated by [github_changelog_generator](https://github.com/github-changelog-generator/github-changelog-generator)*
-
-
-\* *This Changelog was automatically generated by [github_changelog_generator](https://github.com/github-changelog-generator/github-changelog-generator)*
-
-
-\* *This Changelog was automatically generated by [github_changelog_generator](https://github.com/github-changelog-generator/github-changelog-generator)*
 
 
 \* *This Changelog was automatically generated by [github_changelog_generator](https://github.com/github-changelog-generator/github-changelog-generator)*

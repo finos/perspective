@@ -17,7 +17,7 @@ module.exports = (perspective) => {
                 };
                 var table = await perspective.table(DATA);
                 var view = await table.view({
-                    row_pivots: ["a"],
+                    group_by: ["a"],
                     columns: ["b"],
                     aggregates: {b: "last"},
                 });
@@ -98,7 +98,7 @@ module.exports = (perspective) => {
                 };
                 var table = await perspective.table(DATA);
                 var view = await table.view({
-                    row_pivots: ["c", "a"],
+                    group_by: ["c", "a"],
                     columns: ["b"],
                     aggregates: {b: "last"},
                 });
@@ -184,7 +184,7 @@ module.exports = (perspective) => {
                 };
                 var table = await perspective.table(DATA);
                 var view = await table.view({
-                    row_pivots: ["c", "a"],
+                    group_by: ["c", "a"],
                     columns: ["b"],
                     aggregates: {b: "last"},
                 });
@@ -217,7 +217,7 @@ module.exports = (perspective) => {
             var table = await perspective.table(dataWithNulls);
 
             var view = await table.view({
-                row_pivots: ["name"],
+                group_by: ["name"],
                 aggregates: {name: "distinct count"},
             });
 
@@ -248,7 +248,7 @@ module.exports = (perspective) => {
             table.update(dataWithNull2);
 
             var view = await table.view({
-                row_pivots: ["name"],
+                group_by: ["name"],
                 aggregates: {name: "distinct count"},
             });
 
@@ -276,7 +276,7 @@ module.exports = (perspective) => {
             var table = await perspective.table(dataWithNull1);
 
             var view = await table.view({
-                row_pivots: ["name"],
+                group_by: ["name"],
                 aggregates: {value: "avg"},
             });
 
@@ -304,7 +304,7 @@ module.exports = (perspective) => {
                 {x: "BBBBBBBBBBBBBB"},
             ];
             const tbl = await perspective.table(data);
-            const view = await tbl.view({row_pivots: ["x"]});
+            const view = await tbl.view({group_by: ["x"]});
 
             const result = await view.to_json();
             expect(result).toEqual([

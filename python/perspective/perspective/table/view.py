@@ -6,7 +6,6 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-import os
 import pandas
 from functools import partial, wraps
 from random import random
@@ -26,6 +25,10 @@ from .libbinding import (
     to_arrow_zero,
     to_arrow_one,
     to_arrow_two,
+    to_csv_unit,
+    to_csv_zero,
+    to_csv_one,
+    to_csv_two,
     get_row_delta_unit,
     get_row_delta_zero,
     get_row_delta_one,
@@ -60,8 +63,8 @@ class View(object):
         self._is_unit_context = (
             self._table._index == ""
             and self._sides == 0
-            and len(self._config.get_row_pivots()) == 0
-            and len(self._config.get_column_pivots()) == 0
+            and len(self._config.get_group_by()) == 0
+            and len(self._config.get_split_by()) == 0
             and len(self._config.get_filter()) == 0
             and len(self._config.get_sort()) == 0
             and len(self._config.get_expressions()) == 0
@@ -119,20 +122,17 @@ class View(object):
         """An integer representing the # of hierarchial axis on this
         :class:`~perspective.View`.
 
-        0 - Neither ``row_pivots`` nor ``column_pivots`` properties are set.
+        0 - Neither ``group_by`` nor ``split_by`` properties are set.
 
-        1 - ``row_pivots`` is set.
+        1 - ``group_by`` is set.
 
-        2 - ``column_pivots`` is set (and also maybe ``row_pivots``).
+        2 - ``split_by`` is set (and also maybe ``group_by``).
 
         Returns:
             :obj:`int`: 0 <= N <= 2
         """
-        if (
-            len(self._config.get_row_pivots()) > 0
-            or len(self._config.get_column_pivots()) > 0
-        ):
-            if len(self._config.get_column_pivots()) > 0:
+        if len(self._config.get_group_by()) > 0 or len(self._config.get_split_by()) > 0:
+            if len(self._config.get_split_by()) > 0:
                 return 2
             else:
                 return 1
@@ -157,7 +157,7 @@ class View(object):
     def num_rows(self):
         """The number of aggregated rows in the :class:`~perspective.View`.
 
-        This count includes the total aggregate rows for all ``row_pivots``
+        This count includes the total aggregate rows for all ``group_by``
         depth levels, and can also be affected by any applied ``filter``.
 
         Returns:
@@ -167,7 +167,7 @@ class View(object):
 
     def num_columns(self):
         """The number of aggregated columns in the :class:`~perspective.View`.
-        This is affected by the ``column_pivots`` that are applied to the
+        This is affected by the ``split_by`` that are applied to the
         :class:`~perspective.View`.
 
         Returns:
@@ -189,7 +189,7 @@ class View(object):
         Args:
             idx (:obj:`int`): Row index to expand.
         """
-        return self._view.expand(idx, len(self._config.get_row_pivots()))
+        return self._view.expand(idx, len(self._config.get_group_by()))
 
     def collapse(self, idx):
         """Collapses the row at 'idx', i.e. hiding its leaf rows.
@@ -204,15 +204,15 @@ class View(object):
 
         Args:
             depth (:obj:`int`): Depth to collapse all nodes to, which
-                may be no greater then the length of the ``row_pivots``
+                may be no greater then the length of the ``group_by``
                 property.
         """
-        return self._view.set_depth(depth, len(self._config.get_row_pivots()))
+        return self._view.set_depth(depth, len(self._config.get_group_by()))
 
     def column_paths(self):
         """Returns the names of the columns as they show in the
         :class:`~perspective.View`, i.e. the hierarchial columns when
-        ``column_pivots`` is applied.
+        ``split_by`` is applied.
 
         Returns:
             :obj:`list` of :obj`str`: Aggregated column names.
@@ -461,9 +461,9 @@ class View(object):
         of :obj:`dict` containing each row.
 
         By default, the entire dataset is returned, though this can be windowed
-        via ``kwargs``.  When ``row_pivots`` are applied, a ``__ROW_PATH__``
+        via ``kwargs``.  When ``group_by`` are applied, a ``__ROW_PATH__``
         column name will be generated in addition to the applied ``columns``.
-        When ``column_pivots`` are applied, column names will be qualified
+        When ``split_by`` are applied, column names will be qualified
         with their column group name.
 
         Keyword Args:
@@ -567,7 +567,7 @@ class View(object):
         cols = self.to_numpy(**options)
         return pandas.DataFrame(cols)
 
-    def to_csv(self, **options):
+    def to_csv(self, **kwargs):
         """Serialize the :class:`~perspective.View`'s dataset into a CSV string.
 
         Keyword Args:
@@ -589,19 +589,40 @@ class View(object):
         Returns:
             :obj:`str`: A CSV-formatted string containing the serialized data.
         """
-        date_format = None
 
-        # Handle to_csv calls from `<perspective-viewer>`, which uses the
-        # JavaScript Intl.DateTimeFormat API that takes a locale instead of a
-        # string format.
-        # TODO This should move to portable code.
-        if options.pop("formatted", False):
-            date_format = "%Y/%m/%d %H:%M:%S"
-
-        return self.to_df(**options).to_csv(
-            date_format=date_format,
-            line_terminator="\r\n" if os.name == "nt" else "\n",
-        )
+        options = _parse_format_options(self, kwargs)
+        if self._is_unit_context:
+            return to_csv_unit(
+                self._view,
+                options["start_row"],
+                options["end_row"],
+                options["start_col"],
+                options["end_col"],
+            )
+        elif self._sides == 0:
+            return to_csv_zero(
+                self._view,
+                options["start_row"],
+                options["end_row"],
+                options["start_col"],
+                options["end_col"],
+            )
+        elif self._sides == 1:
+            return to_csv_one(
+                self._view,
+                options["start_row"],
+                options["end_row"],
+                options["start_col"],
+                options["end_col"],
+            )
+        else:
+            return to_csv_two(
+                self._view,
+                options["start_row"],
+                options["end_row"],
+                options["start_col"],
+                options["end_col"],
+            )
 
     @wraps(to_records)
     def to_json(self, **options):

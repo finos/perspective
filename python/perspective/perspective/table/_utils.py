@@ -14,7 +14,12 @@ from .libbinding import t_dtype
 ALIAS_REGEX = re.compile(r"//(.+)\n")
 EXPRESSION_COLUMN_NAME_REGEX = re.compile(r"\"(.*?[^\\])\"")
 STRING_LITERAL_REGEX = re.compile(r"'(.*?[^\\])'")
-BUCKET_LITERAL_REGEX = re.compile(r"bucket\(.*?,\s*(intern\(\'([smhDWMY])\'\))\s*\)")
+FUNCTION_LITERAL_REGEX = re.compile(
+    r"(bucket|match|match_all|search|indexof)\(.*?,\s*(intern\(\'(.+)\'\)).*\)"
+)
+REPLACE_FN_REGEX = re.compile(
+    r"(replace_all|replace)\(.*?,\s*(intern\(\'(.*)\'\)),.*\)"
+)
 BOOLEAN_LITERAL_REGEX = re.compile(r"([a-zA-Z_]+[a-zA-Z0-9_]*)")
 
 
@@ -126,16 +131,20 @@ def _replace_expression_column_name(
     return column_name_map[column_name]
 
 
-def _replace_bucket_unit(match_obj):
+def _replace_interned_param(match_obj):
     """Replace the intern('unit') in `bucket()` with just the string
     literal, because the unit determines the return type of the column and the
     function would not be able to validate a unit if it was interned."""
     full = match_obj.group(0)
-    interned = match_obj.group(1)
-    unit = match_obj.group(2)
+    intern_fn = match_obj.group(2)
+    value = match_obj.group(3)
+    intern_idx = full.index(intern_fn)
 
-    # from "bucket(col, intern('unit'))" to "bucket(col, 'unit')"
-    return "{0}'{1}')".format(full[0 : full.index(interned)], unit)
+    # from fn(param, intern('string'), param, param...) to
+    # fn (param, 'string', ...)
+    return "{}'{}'{}".format(
+        full[0:intern_idx], value, full[intern_idx + len(intern_fn) :]
+    )
 
 
 def _parse_expression_strings(expressions):
@@ -166,9 +175,6 @@ def _parse_expression_strings(expressions):
 
         if alias_match:
             alias = alias_match.group(1).strip()
-
-            # Remove the alias from the expression
-            parsed = re.sub(ALIAS_REGEX, "", expression)
         else:
             # Expression itself is the alias
             alias = expression
@@ -199,8 +205,11 @@ def _parse_expression_strings(expressions):
             parsed,
         )
 
-        # remove the `intern()` in bucket - TODO: this is messy
-        parsed = re.sub(BUCKET_LITERAL_REGEX, _replace_bucket_unit, parsed)
+        # remove the `intern()` in bucket and regex functions that take
+        # string literal parameters. TODO this logic should be centralized
+        # in C++ instead of being duplicated.
+        parsed = re.sub(FUNCTION_LITERAL_REGEX, _replace_interned_param, parsed)
+        parsed = re.sub(REPLACE_FN_REGEX, _replace_interned_param, parsed)
 
         validated = [alias, expression, parsed, column_id_map]
 

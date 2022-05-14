@@ -34,6 +34,7 @@ const nodeLevelHelper = (maxDepth, d) =>
 
 export function treemapSeries() {
     let settings = null;
+    let root_settings = null;
     let data = null;
     let color = null;
     let treemapDiv = null;
@@ -71,12 +72,17 @@ export function treemapSeries() {
             .style("width", (d) => calcWidth(d))
             .style("height", (d) => calcHeight(d));
 
-        color &&
-            rects.style("fill", (d) => {
+        rects.style("fill", (d) => {
+            if (nodeLevelHelper(maxDepth, d) === nodeLevel.leaf) {
                 if (d.data.color) {
                     return color(d.data.color);
+                } else {
+                    return root_settings.colorStyles.series;
                 }
-            });
+            } else {
+                return "transparent";
+            }
+        });
 
         const labels = nodesMerge
             .filter((d) => d.value !== 0)
@@ -85,7 +91,7 @@ export function treemapSeries() {
             .attr("y", (d) => d.y0 + calcHeight(d) / 2)
             .text((d) => d.label);
 
-        const rootNode = rects.filter((d) => d.crossValue === "").datum();
+        const rootNode = rects.filter((d) => d.crossValue.length === 0).datum();
         calculateRootLevelMap(nodesMerge, rootNode);
 
         toggleLabels(nodesMerge, 0, []);
@@ -96,7 +102,7 @@ export function treemapSeries() {
             settings.treemapRoute.push(rootNode.crossValue);
         rects
             .filter((d) => d.children)
-            .on("click", (d) =>
+            .on("click", (_event, d) =>
                 changeLevel(
                     d,
                     rects,
@@ -106,7 +112,8 @@ export function treemapSeries() {
                     treemapDiv,
                     treemapSvg,
                     rootNode,
-                    parentCtrls
+                    parentCtrls,
+                    root_settings
                 )
             );
 
@@ -118,7 +125,8 @@ export function treemapSeries() {
             treemapDiv,
             treemapSvg,
             rootNode,
-            parentCtrls
+            parentCtrls,
+            root_settings
         );
     };
 
@@ -127,6 +135,7 @@ export function treemapSeries() {
             return settings;
         }
         settings = args[0];
+        root_settings = args[1];
         return _treemapSeries;
     };
 

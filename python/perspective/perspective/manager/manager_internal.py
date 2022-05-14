@@ -6,13 +6,13 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-from six import string_types
 import datetime
-import logging
 import json
+import logging
 from functools import partial
+
 from ..core.exception import PerspectiveError
-from ..table import Table, PerspectiveCppError
+from ..table import PerspectiveCppError, Table
 from ..table._callback_cache import _PerspectiveCallBackCache
 from ..table._date_validator import _PerspectiveDateValidator
 
@@ -94,7 +94,7 @@ class _PerspectiveManagerInternal(object):
 
             self._pending_binary = None
 
-        if isinstance(msg, string_types):
+        if isinstance(msg, str):
             msg = json.loads(msg)
 
         if not isinstance(msg, dict):

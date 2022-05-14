@@ -7,8 +7,7 @@
 // file.
 
 use crate::components::plugin_selector::*;
-use crate::js::plugin::*;
-use crate::renderer::registry::*;
+use crate::js::*;
 use crate::renderer::*;
 use crate::session::*;
 use crate::utils::*;
@@ -56,7 +55,7 @@ wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
             async draw(view) {
                 this.style.backgroundColor = '#fff';
                 let perspective_viewer = this.parentElement;
-                const csv = await view.to_csv({config: {delimiter: '|'}});
+                const csv = await view.to_csv();
                 const css = `margin:0;overflow:scroll;position:absolute;width:100%;height:100%`;
                 this.innerHTML = `<pre style='${css}'>${csv}</pre>`;
             }
@@ -100,15 +99,14 @@ pub async fn test_plugin_selected() {
     PLUGIN_REGISTRY.register_plugin("perspective-viewer-debug3");
     PLUGIN_REGISTRY.register_plugin("perspective-viewer-debug4");
 
-    let link: WeakComponentLink<PluginSelector> = WeakComponentLink::default();
-    let result: Rc<RefCell<Option<JsPerspectiveViewerPlugin>>> =
-        Rc::new(RefCell::new(None));
+    let link: WeakScope<PluginSelector> = WeakScope::default();
+    let result: Rc<RefCell<Option<JsPerspectiveViewerPlugin>>> = Rc::new(RefCell::new(None));
     let document = window().unwrap().document().unwrap();
     let elem: HtmlElement = document.create_element("div").unwrap().unchecked_into();
     let session = Session::default();
     session.set_table(get_mock_table().await).await.unwrap();
-    let renderer = Renderer::new(elem, session.clone());
-    let _sub = renderer.on_plugin_changed.add_listener({
+    let renderer = Renderer::new(&elem);
+    let _sub = renderer.plugin_changed.add_listener({
         clone!(result);
         move |val| {
             *result.borrow_mut() = Some(val);
@@ -124,11 +122,13 @@ pub async fn test_plugin_selected() {
         </PluginSelector>
     };
 
+    await_animation_frame().await.unwrap();
     let plugin_selector = link.borrow().clone().unwrap();
     plugin_selector.send_message(PluginSelectorMsg::ComponentSelectPlugin(
         "Debug B".to_owned(),
     ));
 
+    await_animation_frame().await.unwrap();
     assert_eq!(
         result.borrow().as_ref().map(|x| x.name()),
         Some("Debug B".to_owned())

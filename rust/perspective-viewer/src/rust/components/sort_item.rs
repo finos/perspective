@@ -8,6 +8,7 @@
 
 use crate::config::*;
 use crate::dragdrop::*;
+use crate::model::*;
 use crate::renderer::*;
 use crate::session::*;
 use crate::*;
@@ -17,15 +18,12 @@ use super::containers::dragdrop_list::*;
 use web_sys::*;
 use yew::prelude::*;
 
-/// A `SortItem` includes the column name and `SortDir` arrow, a clickable button
-/// which cycles through the available `SortDir` states.
-pub struct SortItem {
-    props: SortItemProperties,
-    link: ComponentLink<SortItem>,
-}
+/// A `SortItem` includes the column name and `SortDir` arrow, a clickable
+/// button which cycles through the available `SortDir` states.
+pub struct SortItem {}
 
-#[derive(Properties, Clone)]
-pub struct SortItemProperties {
+#[derive(Properties)]
+pub struct SortItemProps {
     pub sort: Sort,
     pub idx: usize,
     pub session: Session,
@@ -33,9 +31,15 @@ pub struct SortItemProperties {
     pub dragdrop: DragDrop,
 }
 
-derive_renderable_props!(SortItemProperties);
+impl PartialEq for SortItemProps {
+    fn eq(&self, other: &Self) -> bool {
+        self.sort == other.sort && self.idx == other.idx
+    }
+}
 
-impl DragDropListItemProps for SortItemProperties {
+derive_model!(Renderer, Session for SortItemProps);
+
+impl DragDropListItemProps for SortItemProps {
     type Item = Sort;
 
     fn get_item(&self) -> Sort {
@@ -49,76 +53,65 @@ pub enum SortItemMsg {
 
 impl Component for SortItem {
     type Message = SortItemMsg;
-    type Properties = SortItemProperties;
+    type Properties = SortItemProps;
 
-    fn create(
-        props: <Self as yew::Component>::Properties,
-        link: yew::html::Scope<Self>,
-    ) -> Self {
-        SortItem { props, link }
+    fn create(_ctx: &Context<Self>) -> Self {
+        SortItem {}
     }
 
-    fn update(&mut self, msg: SortItemMsg) -> bool {
+    fn update(&mut self, ctx: &Context<Self>, msg: SortItemMsg) -> bool {
         match msg {
             SortItemMsg::SortDirClick(shift_key) => {
-                let ViewConfig {
-                    mut sort,
-                    column_pivots,
-                    ..
-                } = self.props.session.get_view_config();
-                let sort_item =
-                    &mut sort.get_mut(self.props.idx).expect("Sort on no column");
-                sort_item.1 = sort_item.1.cycle(!column_pivots.is_empty(), shift_key);
+                let is_split = ctx.props().session.get_view_config().split_by.is_empty();
+                let mut sort = ctx.props().session.get_view_config().sort.clone();
+                let sort_item = &mut sort.get_mut(ctx.props().idx).expect("Sort on no column");
+                sort_item.1 = sort_item.1.cycle(!is_split, shift_key);
                 let update = ViewConfigUpdate {
                     sort: Some(sort),
                     ..ViewConfigUpdate::default()
                 };
-                self.props.update_and_render(update);
+                ctx.props().update_and_render(update);
                 false
             }
         }
     }
 
-    fn change(&mut self, props: SortItemProperties) -> bool {
-        self.props = props;
-        true
-    }
-
-    fn view(&self) -> Html {
-        let onclick = self
-            .link
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let onclick = ctx
+            .link()
             .callback(|event: MouseEvent| SortItemMsg::SortDirClick(event.shift_key()));
 
         let noderef = NodeRef::default();
         let dragstart = Callback::from({
-            let event_name = self.props.sort.0.to_owned();
+            let event_name = ctx.props().sort.0.to_owned();
             let noderef = noderef.clone();
-            let dragdrop = self.props.dragdrop.clone();
+            let dragdrop = ctx.props().dragdrop.clone();
             move |event: DragEvent| {
                 let elem = noderef.cast::<HtmlElement>().unwrap();
                 event.data_transfer().unwrap().set_drag_image(&elem, 0, 0);
-                dragdrop.drag_start(
-                    event_name.to_string(),
-                    DragEffect::Move(DropAction::Sort),
-                )
+                dragdrop.drag_start(event_name.to_string(), DragEffect::Move(DragTarget::Sort))
             }
         });
 
-        html! {
-            <>
-                <span
-                    draggable="true"
-                    ref={ noderef.clone() }
-                    ondragstart={ dragstart }>
-                    {
-                        self.props.sort.0.to_owned()
-                    }
-                </span>
-                <span
-                    class={ format!("sort-icon {}", self.props.sort.1) }
-                    onmousedown={ onclick }>
-                </span>
-            </>
+        let dragend = Callback::from({
+            let dragdrop = ctx.props().dragdrop.clone();
+            move |_event| dragdrop.drag_end()
+        });
+
+        html_template! {
+            <span
+                draggable="true"
+                ref={ noderef.clone() }
+                ondragstart={ dragstart }
+                ondragend={ dragend }>
+                {
+                    ctx.props().sort.0.to_owned()
+                }
+            </span>
+            <span
+                class={ format!("sort-icon {}", ctx.props().sort.1) }
+                onmousedown={ onclick }>
+            </span>
         }
     }
 }

@@ -16,19 +16,18 @@
 namespace perspective {
 namespace binding {
 
-/**
- * @brief Initialize the expressions parser. Must be called at module
- * initialization before any interactions with the module. 
- * 
- */
-void init_expression_parser();
+    /**
+     * @brief Initialize the expressions parser. Must be called at module
+     * initialization before any interactions with the module.
+     *
+     */
+    void init_expression_parser();
 
-t_validated_expression_map
-validate_expressions_py(
-    std::shared_ptr<Table> table,
-    const std::vector<std::vector<t_val>>& p_expressions);
+    t_validated_expression_map validate_expressions_py(
+        std::shared_ptr<Table> table,
+        const std::vector<std::vector<t_val>>& p_expressions);
 
-} //namespace binding
-} //namespace perspective
+} // namespace binding
+} // namespace perspective
 
 #endif

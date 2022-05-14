@@ -16,12 +16,12 @@
 
 namespace perspective {
 
-//Specialize for PSP_OBJECT_TYPE
+// Specialize for PSP_OBJECT_TYPE
 template <>
 void t_column::object_copied<PSP_OBJECT_TYPE>(t_uindex idx) const;
 template <>
 void t_column::object_cleared<PSP_OBJECT_TYPE>(t_uindex idx) const;
 
-}
+} // namespace perspective
 
 #endif

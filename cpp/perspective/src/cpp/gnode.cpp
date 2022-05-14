@@ -18,11 +18,13 @@
 #include <perspective/mask.h>
 #include <perspective/tracing.h>
 #include <perspective/env_vars.h>
+#include <perspective/expression_vocab.h>
 
 #include <perspective/utils.h>
 
 #ifdef PSP_ENABLE_PYTHON
 #include <perspective/pyutils.h>
+#include <perspective/parallel_for.h>
 #endif
 
 namespace perspective {
@@ -108,6 +110,10 @@ t_gnode::init() {
         std::shared_ptr<t_port> input_port = iter.second;
         input_port->get_table()->flatten();
     }
+
+    // Initialize expression-related state
+    m_expression_vocab = std::make_shared<t_expression_vocab>();
+    m_expression_regex_mapping = std::make_shared<t_regex_mapping>();
 
     m_init = true;
 }
@@ -343,7 +349,7 @@ t_gnode::_process_table(t_uindex port_id) {
     t_uindex ncols = column_names.size();
 
 #ifdef PSP_PARALLEL_FOR
-    tbb::parallel_for(0, int(ncols), 1,
+    parallel_for(int(ncols),
         [&_process_state, &column_names, this](int colidx)
 #else
     for (t_uindex colidx = 0; colidx < ncols; ++colidx)
@@ -717,7 +723,7 @@ t_gnode::_update_contexts_from_state(std::shared_ptr<t_data_table> tbl) {
 
     t_index num_contexts = m_contexts.size();
 
-    // Iterate over contexts in parallel using TBB
+    // Iterate over contexts in parallel
     std::vector<std::string> context_names(num_contexts);
     std::vector<t_ctx_handle> context_handles(num_contexts);
 
@@ -769,7 +775,7 @@ t_gnode::_update_contexts_from_state(std::shared_ptr<t_data_table> tbl) {
     };
 
 #ifdef PSP_PARALLEL_FOR
-    tbb::parallel_for(0, int(num_contexts), 1,
+    parallel_for(int(num_contexts),
         [&update_contexts_helper](int ctx_idx)
 #else
     for (t_index ctx_idx = 0; ctx_idx < num_contexts; ++ctx_idx)
@@ -873,6 +879,9 @@ t_gnode::_register_context(
         pkeyed_table = m_gstate->get_pkeyed_table();
     }
 
+    t_expression_vocab& expression_vocab = *(m_expression_vocab);
+    t_regex_mapping& expression_regex_mapping = *(m_expression_regex_mapping);
+
     switch (type) {
         case TWO_SIDED_CONTEXT: {
             set_ctx_state<t_ctx2>(ptr_);
@@ -880,7 +889,8 @@ t_gnode::_register_context(
             ctx->reset();
 
             if (should_update) {
-                ctx->compute_expressions(pkeyed_table);
+                ctx->compute_expressions(
+                    pkeyed_table, expression_vocab, expression_regex_mapping);
                 update_context_from_state<t_ctx2>(ctx, name, pkeyed_table);
             }
         } break;
@@ -890,7 +900,8 @@ t_gnode::_register_context(
             ctx->reset();
 
             if (should_update) {
-                ctx->compute_expressions(pkeyed_table);
+                ctx->compute_expressions(
+                    pkeyed_table, expression_vocab, expression_regex_mapping);
                 update_context_from_state<t_ctx1>(ctx, name, pkeyed_table);
             }
         } break;
@@ -900,7 +911,8 @@ t_gnode::_register_context(
             ctx->reset();
 
             if (should_update) {
-                ctx->compute_expressions(pkeyed_table);
+                ctx->compute_expressions(
+                    pkeyed_table, expression_vocab, expression_regex_mapping);
                 update_context_from_state<t_ctx0>(ctx, name, pkeyed_table);
             }
         } break;
@@ -920,7 +932,8 @@ t_gnode::_register_context(
             ctx->reset();
 
             if (should_update) {
-                ctx->compute_expressions(pkeyed_table);
+                ctx->compute_expressions(
+                    pkeyed_table, expression_vocab, expression_regex_mapping);
                 update_context_from_state<t_ctx_grouped_pkey>(
                     ctx, name, pkeyed_table);
             }
@@ -985,7 +998,7 @@ t_gnode::notify_contexts(std::shared_ptr<t_data_table> flattened) {
           };
 
 #ifdef PSP_PARALLEL_FOR
-    tbb::parallel_for(0, int(num_contexts), 1,
+    parallel_for(int(num_contexts),
         [&notify_context_helper](int ctx_idx)
 #else
     for (t_index ctx_idx = 0; ctx_idx < num_contexts; ++ctx_idx)
@@ -1003,25 +1016,32 @@ t_gnode::notify_contexts(std::shared_ptr<t_data_table> flattened) {
 
 void
 t_gnode::_compute_expressions(std::shared_ptr<t_data_table> flattened_masked) {
+    t_expression_vocab& expression_vocab = *(m_expression_vocab);
+    t_regex_mapping& expression_regex_mapping = *(m_expression_regex_mapping);
+
     for (const auto& iter : m_contexts) {
         const t_ctx_handle& ctxh = iter.second;
         switch (ctxh.get_type()) {
             case TWO_SIDED_CONTEXT: {
                 t_ctx2* ctx = static_cast<t_ctx2*>(ctxh.m_ctx);
-                ctx->compute_expressions(flattened_masked);
+                ctx->compute_expressions(flattened_masked, expression_vocab,
+                    expression_regex_mapping);
             } break;
             case ONE_SIDED_CONTEXT: {
                 t_ctx1* ctx = static_cast<t_ctx1*>(ctxh.m_ctx);
-                ctx->compute_expressions(flattened_masked);
+                ctx->compute_expressions(flattened_masked, expression_vocab,
+                    expression_regex_mapping);
             } break;
             case ZERO_SIDED_CONTEXT: {
                 t_ctx0* ctx = static_cast<t_ctx0*>(ctxh.m_ctx);
-                ctx->compute_expressions(flattened_masked);
+                ctx->compute_expressions(flattened_masked, expression_vocab,
+                    expression_regex_mapping);
             } break;
             case GROUPED_PKEY_CONTEXT: {
                 t_ctx_grouped_pkey* ctx
                     = static_cast<t_ctx_grouped_pkey*>(ctxh.m_ctx);
-                ctx->compute_expressions(flattened_masked);
+                ctx->compute_expressions(flattened_masked, expression_vocab,
+                    expression_regex_mapping);
             } break;
             case UNIT_CONTEXT:
                 break;
@@ -1044,6 +1064,9 @@ t_gnode::_compute_expressions(std::shared_ptr<t_data_table> master,
     std::shared_ptr<t_data_table> existed
         = m_oports[PSP_PORT_EXISTED]->get_table();
 
+    t_expression_vocab& expression_vocab = *(m_expression_vocab);
+    t_regex_mapping& expression_regex_mapping = *(m_expression_regex_mapping);
+
     for (const auto& iter : m_contexts) {
         const t_ctx_handle& ctxh = iter.second;
 
@@ -1051,23 +1074,27 @@ t_gnode::_compute_expressions(std::shared_ptr<t_data_table> master,
             case TWO_SIDED_CONTEXT: {
                 t_ctx2* ctx = static_cast<t_ctx2*>(ctxh.m_ctx);
                 ctx->compute_expressions(master, flattened, delta, prev,
-                    current, transitions, existed);
+                    current, transitions, existed, expression_vocab,
+                    expression_regex_mapping);
             } break;
             case ONE_SIDED_CONTEXT: {
                 t_ctx1* ctx = static_cast<t_ctx1*>(ctxh.m_ctx);
                 ctx->compute_expressions(master, flattened, delta, prev,
-                    current, transitions, existed);
+                    current, transitions, existed, expression_vocab,
+                    expression_regex_mapping);
             } break;
             case ZERO_SIDED_CONTEXT: {
                 t_ctx0* ctx = static_cast<t_ctx0*>(ctxh.m_ctx);
                 ctx->compute_expressions(master, flattened, delta, prev,
-                    current, transitions, existed);
+                    current, transitions, existed, expression_vocab,
+                    expression_regex_mapping);
             } break;
             case GROUPED_PKEY_CONTEXT: {
                 t_ctx_grouped_pkey* ctx
                     = static_cast<t_ctx_grouped_pkey*>(ctxh.m_ctx);
                 ctx->compute_expressions(master, flattened, delta, prev,
-                    current, transitions, existed);
+                    current, transitions, existed, expression_vocab,
+                    expression_regex_mapping);
             } break;
             case UNIT_CONTEXT:
                 break;
@@ -1082,6 +1109,16 @@ t_gnode::_compute_expressions(std::shared_ptr<t_data_table> master,
  *
  * Getters
  */
+
+std::shared_ptr<t_expression_vocab>
+t_gnode::get_expression_vocab() const {
+    return m_expression_vocab;
+}
+
+std::shared_ptr<t_regex_mapping>
+t_gnode::get_expression_regex_mapping() const {
+    return m_expression_regex_mapping;
+}
 
 t_schema
 t_gnode::get_output_schema() const {
@@ -1296,6 +1333,10 @@ t_gnode::reset() {
     }
 
     m_gstate->reset();
+
+    // Clear expression-related state
+    m_expression_vocab->clear();
+    m_expression_regex_mapping->clear();
 }
 
 void

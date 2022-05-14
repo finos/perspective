@@ -24,7 +24,7 @@ export const flattenExtent = (array) => {
 
 export const flattenArray = (array) => {
     if (Array.isArray(array)) {
-        return [].concat(...array.map(flattenArray));
+        return array.flat(Infinity);
     } else {
         return [array];
     }

@@ -168,7 +168,7 @@ export default function (Module) {
      *
      * @example
      * // Returns a new View, pivoted in the row space by the "name" column.
-     * await table.view({row_pivots: ["name"]});
+     * await table.view({group_by: ["name"]});
      *
      * @class
      * @hideconstructor
@@ -184,8 +184,8 @@ export default function (Module) {
         this.is_unit_context =
             this.table.index === "" &&
             sides === 0 &&
-            this.view_config.row_pivots.length === 0 &&
-            this.view_config.column_pivots.length === 0 &&
+            this.view_config.group_by.length === 0 &&
+            this.view_config.split_by.length === 0 &&
             this.view_config.filter.length === 0 &&
             this.view_config.sort.length === 0 &&
             this.view_config.expressions.length === 0;
@@ -566,7 +566,7 @@ export default function (Module) {
             if (
                 has_row_path &&
                 leaves_only &&
-                row_path.size() < this.config.row_pivots.length
+                row_path.size() < this.config.group_by.length
             ) {
                 row_path.delete();
                 continue;
@@ -736,10 +736,10 @@ export default function (Module) {
      *
      * @returns {Promise<Array>} A Promise resolving to An array of Objects
      * representing the rows of this {@link module:perspective~view}.  If this
-     * {@link module:perspective~view} had a "row_pivots" config parameter
+     * {@link module:perspective~view} had a "group_by" config parameter
      * supplied when constructed, each row Object will have a "__ROW_PATH__"
      * key, whose value specifies this row's aggregated path.  If this
-     * {@link module:perspective~view} had a "column_pivots" config parameter
+     * {@link module:perspective~view} had a "split_by" config parameter
      * supplied, the keys of this object will be comma-prepended with their
      * comma-separated column paths.
      */
@@ -764,10 +764,10 @@ export default function (Module) {
      *
      * @returns {Promise<Array>} A Promise resolving to An array of Objects
      * representing the rows of this {@link module:perspective~view}.  If this
-     * {@link module:perspective~view} had a "row_pivots" config parameter
+     * {@link module:perspective~view} had a "group_by" config parameter
      * supplied when constructed, each row Object will have a "__ROW_PATH__"
      * key, whose value specifies this row's aggregated path.  If this
-     * {@link module:perspective~view} had a "column_pivots" config parameter
+     * {@link module:perspective~view} had a "split_by" config parameter
      * supplied, the keys of this object will be comma-prepended with their
      * comma-separated column paths.
      */
@@ -791,15 +791,54 @@ export default function (Module) {
      * serialize.
      * @returns {Promise<string>} A Promise resolving to a string in CSV format
      * representing the rows of this {@link module:perspective~view}.  If this
-     * {@link module:perspective~view} had a "row_pivots" config parameter
+     * {@link module:perspective~view} had a "group_by" config parameter
      * supplied when constructed, each row will have prepended those values
      * specified by this row's aggregated path.  If this
-     * {@link module:perspective~view} had a "column_pivots" config parameter
+     * {@link module:perspective~view} had a "split_by" config parameter
      * supplied, the keys of this object will be comma-prepended with their
      * comma-separated column paths.
      */
     view.prototype.to_csv = function (options) {
-        return to_format.call(this, options, formatters.csvFormatter);
+        _call_process(this.table.get_id());
+        options = _parse_format_options.bind(this)(options);
+        const start_row = options.start_row;
+        const end_row = options.end_row;
+        const start_col = options.start_col;
+        const end_col = options.end_col;
+        const sides = this.sides();
+        if (this.is_unit_context) {
+            return __MODULE__.to_csv_unit(
+                this._View,
+                start_row,
+                end_row,
+                start_col,
+                end_col
+            );
+        } else if (sides === 0) {
+            return __MODULE__.to_csv_zero(
+                this._View,
+                start_row,
+                end_row,
+                start_col,
+                end_col
+            );
+        } else if (sides === 1) {
+            return __MODULE__.to_csv_one(
+                this._View,
+                start_row,
+                end_row,
+                start_col,
+                end_col
+            );
+        } else if (sides === 2) {
+            return __MODULE__.to_csv_two(
+                this._View,
+                start_row,
+                end_row,
+                start_col,
+                end_col
+            );
+        }
     };
 
     /**
@@ -899,7 +938,7 @@ export default function (Module) {
 
     /**
      * The number of aggregated rows in this {@link module:perspective~view}.
-     * This is affected by the "row_pivots" configuration parameter supplied to
+     * This is affected by the "group_by" configuration parameter supplied to
      * this {@link module:perspective~view}'s contructor.
      *
      * @async
@@ -913,7 +952,7 @@ export default function (Module) {
 
     /**
      * The number of aggregated columns in this {@link view}.  This is affected
-     * by the "column_pivots" configuration parameter supplied to this
+     * by the "split_by" configuration parameter supplied to this
      * {@link view}'s contructor.
      *
      * @async
@@ -947,7 +986,7 @@ export default function (Module) {
      * @returns {Promise<void>}
      */
     view.prototype.expand = function (idx) {
-        return this._View.expand(idx, this.config.row_pivots.length);
+        return this._View.expand(idx, this.config.group_by.length);
     };
 
     /**
@@ -966,7 +1005,7 @@ export default function (Module) {
      *
      */
     view.prototype.set_depth = function (depth) {
-        return this._View.set_depth(depth, this.config.row_pivots.length);
+        return this._View.set_depth(depth, this.config.group_by.length);
     };
 
     /**
@@ -1176,16 +1215,16 @@ export default function (Module) {
      * @hideconstructor
      */
     function view_config(config) {
-        this.row_pivots = config.row_pivots || [];
-        this.column_pivots = config.column_pivots || [];
+        this.group_by = config.group_by || [];
+        this.split_by = config.split_by || [];
         this.aggregates = config.aggregates || {};
         this.columns = config.columns;
         this.filter = config.filter || [];
         this.sort = config.sort || [];
         this.expressions = config.expressions || [];
         this.filter_op = config.filter_op || "and";
-        this.row_pivot_depth = config.row_pivot_depth;
-        this.column_pivot_depth = config.column_pivot_depth;
+        this.group_by_depth = config.group_by_depth;
+        this.split_by_depth = config.split_by_depth;
     }
 
     /**
@@ -1195,14 +1234,14 @@ export default function (Module) {
      *
      * @private
      */
-    view_config.prototype.get_row_pivots = function () {
+    view_config.prototype.get_group_by = function () {
         let vector = __MODULE__.make_string_vector();
-        return fill_vector(vector, this.row_pivots);
+        return fill_vector(vector, this.group_by);
     };
 
-    view_config.prototype.get_column_pivots = function () {
+    view_config.prototype.get_split_by = function () {
         let vector = __MODULE__.make_string_vector();
-        return fill_vector(vector, this.column_pivots);
+        return fill_vector(vector, this.split_by);
     };
 
     view_config.prototype.get_columns = function () {
@@ -1466,14 +1505,11 @@ export default function (Module) {
             // First, look for a column alias, which is a // style comment
             // on the first line of the expression.
             let expression_alias;
+            let alias_match = expression_string.match(/^\/\/(?<alias>.+?)\n/);
 
-            let parsed_expression_string = expression_string.replace(
-                /\/\/(.+?)$/m,
-                (_, alias) => {
-                    expression_alias = alias.trim();
-                    return "";
-                }
-            );
+            if (alias_match?.groups?.alias) {
+                expression_alias = alias_match.groups.alias.trim();
+            }
 
             // If an alias does not exist, the alias is the expression itself.
             if (!expression_alias || expression_alias.length == 0) {
@@ -1481,7 +1517,7 @@ export default function (Module) {
             }
 
             // Replace `true` and `false` reserved words with symbols
-            parsed_expression_string = parsed_expression_string.replace(
+            let parsed_expression_string = expression_string.replace(
                 /([a-zA-Z_]+[a-zA-Z0-9_]*)/g,
                 (match) => {
                     if (match == "true") {
@@ -1520,15 +1556,33 @@ export default function (Module) {
                 (match) => `intern(${match})`
             );
 
-            // Replace intern() for bucket, as it takes a string literal
-            // parameter and does not work if that param is interned. TODO:
-            // this is clumsy and we should have a better way of handling it.
+            const replace_interned_param = (match, _, intern_fn, value) => {
+                // Takes a string of the form fn(x, intern('y'))
+                // and removes intern() to create fn(x, 'y')
+                const intern_idx = match.indexOf(intern_fn);
+                return `${match.substring(
+                    0,
+                    intern_idx
+                )}'${value}'${match.substring(intern_idx + intern_fn.length)}`;
+            };
+
+            // Replace intern() for bucket and regex functions that take
+            // a string literal parameter and does not work if that param is
+            // interned. TODO: this is clumsy and we should have a better
+            // way of handling it.
             // TODO I concur  -- texodus
             parsed_expression_string = parsed_expression_string.replace(
-                /bucket\(.*?,\s*(intern\(\'([smhDWMY])\'\))\s*\)/g,
-                (match, full, value) => {
-                    return `${match.substr(0, match.indexOf(full))}'${value}')`;
-                }
+                /(bucket|match|match_all|search|indexof)\(.*?,\s*(intern\(\'(.+)\'\)).*\)/g,
+                replace_interned_param
+            );
+
+            // replace and replace_all have multiple string params, only one of
+            // which needs to be interned - the regex differs from the one
+            // above as it asserts the middle parameter is the one to be
+            // replaced.
+            parsed_expression_string = parsed_expression_string.replace(
+                /(replace_all|replace)\(.*?,\s*(intern\(\'(.*)\'\)),.*\)/g,
+                replace_interned_param
             );
 
             const validated = [
@@ -1574,7 +1628,10 @@ export default function (Module) {
      * // {'"Sales" + "Profit"': "float"}
      * console.log(results.expression_schema);
      *
-     * // {"invalid": "unknown token!", "1 + 'string'": "TypeError"}
+     * // {
+     * //   "invalid": {column: 0, line: 0, error_message: "unknown token!"},
+     * //   "1 + 'string'": {column: 0, line: 0, error_message: "Type Error"}
+     * // }
      * console.log(results.errors);
      */
     table.prototype.validate_expressions = function (
@@ -1686,15 +1743,15 @@ export default function (Module) {
      *
      * @param {Object} [config] The configuration object for this
      * {@link module:perspective~view}.
-     * @param {Array<string>} [config.row_pivots] An array of column names to
-     * use as {@link https://en.wikipedia.org/wiki/Pivot_table#Row_labels Row Pivots}.
-     * @param {Array<string>} [config.column_pivots] An array of column names to
-     * use as {@link https://en.wikipedia.org/wiki/Pivot_table#Column_labels Column Pivots}.
+     * @param {Array<string>} [config.group_by] An array of column names to
+     * use as {@link https://en.wikipedia.org/wiki/Pivot_table#Row_labels Group By}.
+     * @param {Array<string>} [config.split_by] An array of column names to
+     * use as {@link https://en.wikipedia.org/wiki/Pivot_table#Column_labels Split By}.
      * @param {Array<Object>} [config.columns] An array of column names for the
      * output columns. If none are provided, all columns are output.
      * @param {Object} [config.aggregates] An object, the keys of which are
      * column names, and their respective values are the aggregates calculations
-     * to use when this view has `row_pivots`. A column provided to
+     * to use when this view has `group_by`. A column provided to
      * `config.columns` without an aggregate in this object, will use the
      * default aggregate calculation for its type.
      * @param {Array<Array<string>>} [config.filter] An Array of Filter
@@ -1708,7 +1765,7 @@ export default function (Module) {
      *
      * @example
      * const view = await table.view({
-     *      row_pivots: ["region"],
+     *      group_by: ["region"],
      *      columns: ["region"],
      *      aggregates: {"region": "dominant"},
      *      filter: [["client", "contains", "fred"]],
@@ -1759,8 +1816,8 @@ export default function (Module) {
             }
         }
 
-        config.row_pivots = config.row_pivots || [];
-        config.column_pivots = config.column_pivots || [];
+        config.group_by = config.group_by || [];
+        config.split_by = config.split_by || [];
         config.aggregates = config.aggregates || {};
         config.filter = config.filter || [];
         config.sort = config.sort || [];
@@ -1803,8 +1860,8 @@ export default function (Module) {
         let name = Math.random() + "";
         let sides;
 
-        if (config.row_pivots.length > 0 || config.column_pivots.length > 0) {
-            if (config.column_pivots && config.column_pivots.length > 0) {
+        if (config.group_by.length > 0 || config.split_by.length > 0) {
+            if (config.split_by && config.split_by.length > 0) {
                 sides = 2;
             } else {
                 sides = 1;

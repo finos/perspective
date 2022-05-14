@@ -54,7 +54,7 @@ t_expression_tables::calculate_transitions(
     auto num_cols = column_names.size();
 
 #ifdef PSP_PARALLEL_FOR
-    tbb::parallel_for(0, int(num_cols), 1,
+    parallel_for(int(num_cols),
         [&column_names, &existed_column, this](int cidx)
 #else
     for (t_uindex cidx = 0; cidx < num_cols; ++cidx)
@@ -75,7 +75,8 @@ t_expression_tables::calculate_transitions(
 
                 bool prev_valid = prev_column.is_valid(ridx);
                 bool curr_valid = current_column.is_valid(ridx);
-                bool prev_curr_eq = prev_valid && curr_valid && (prev_value == curr_value);
+                bool prev_curr_eq
+                    = prev_valid && curr_valid && (prev_value == curr_value);
 
                 t_value_transition transition;
 

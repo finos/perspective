@@ -1,0 +1,21 @@
+cmake_minimum_required(VERSION 3.7.2)
+
+project(re2-download NONE)
+
+# *******************************************************************
+# NOTE: this depedency's CMakeLists.txt is overloaded, make sure to
+# adjust if you update the tag
+# *******************************************************************
+
+include(ExternalProject)
+ExternalProject_Add(re2
+  GIT_REPOSITORY    https://github.com/google/re2.git
+  GIT_TAG           2021-11-01
+  SOURCE_DIR        "${CMAKE_BINARY_DIR}/re2-src"
+  BINARY_DIR        "${CMAKE_BINARY_DIR}/re2-build"
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND     ""
+  INSTALL_COMMAND   ""
+  TEST_COMMAND      ""
+  CMAKE_ARGS        " -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH} -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}"
+)

@@ -12,6 +12,7 @@ const {read_stdin, open_browser} = require("./utils.js");
 const fs = require("fs");
 const path = require("path");
 const program = require("commander");
+const puppeteer = require("puppeteer");
 
 /**
  * Convert data from one format to another.
@@ -66,11 +67,15 @@ async function convert(filename, options) {
  * @param {*} options
  */
 async function host(filename, options) {
-    let files = [path.join(__dirname, "html")];
+    let files = [path.join(__dirname, "..", "html")];
     if (options.assets) {
         files = [options.assets, ...files];
     }
-    const server = new WebSocketServer({assets: files, port: options.port});
+    const server = new WebSocketServer({
+        assets: files,
+        port: options.port,
+        host_psp: true,
+    });
     let file;
     if (filename) {
         file = await table(fs.readFileSync(filename).toString());
@@ -79,7 +84,32 @@ async function host(filename, options) {
     }
     server.host_table("data_source_one", file);
     if (options.open) {
-        open_browser(options.port);
+        const browser = await puppeteer.launch({
+            headless: false,
+            defaultViewport: null,
+            args: [
+                "--incognito",
+                "--noerrdialogs",
+                "--disable-translate",
+                "--no-first-run",
+                "--fast",
+                "--fast-start",
+                "--disable-infobars",
+                "--window-size=1200,800",
+                "--disable-features=TranslateUI",
+                "--disk-cache-dir=/dev/null",
+                `--app=http://localhost:${options.port}/`,
+            ],
+        });
+
+        const pages = await browser.pages();
+
+        // console.log("Fukc");
+        const page = pages[0];
+        page.on("close", () => {
+            browser.close();
+            process.exit(0);
+        });
     }
 }
 
@@ -87,7 +117,7 @@ program
     .version(
         JSON.parse(
             fs
-                .readFileSync(path.join(__dirname, "..", "package.json"))
+                .readFileSync(path.join(__dirname, "..", "..", "package.json"))
                 .toString()
         ).version
     )

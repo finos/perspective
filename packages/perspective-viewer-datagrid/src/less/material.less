@@ -10,10 +10,8 @@
 @row-height: 19px;
 
 regular-table {
-    padding-top: 12px;
-    padding-left: 12px;
-    padding-bottom: 0;
-    padding-right: 0;
+    padding: 0;
+    margin: 12px 0 0 12px;
 
     // firefox scrollbar styling
     scrollbar-color: transparent transparent;
@@ -25,8 +23,54 @@ regular-table:hover {
     scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
 }
 
+.sub-cell-scroll-enabled regular-table table {
+    tbody td,
+    thead th:not(.rt-group-corner) {
+        transform: translate(var(--regular-table--transform-x, 0px));
+    }
+
+    tbody {
+        transform: translate(0, var(--regular-table--transform-y, 0px));
+    }
+
+    tbody tr:first-child {
+        td,
+        th {
+            clip-path: polygon(
+                0 var(--regular-table--clip-y, 0),
+                0 200%,
+                200% 200%,
+                200% var(--regular-table--clip-y, 0)
+            );
+        }
+    }
+
+    thead th.rt-group-corner {
+        background: var(--plugin--background, white);
+        z-index: 1;
+    }
+
+    tbody tr td:first-of-type {
+        clip-path: polygon(
+            var(--regular-table--clip-x, 0) 0,
+            var(--regular-table--clip-x, 0) 200%,
+            200% 200%,
+            200% 0
+        );
+    }
+
+    tbody tr:first-child td:first-of-type {
+        clip-path: polygon(
+            var(--regular-table--clip-x, 0) var(--regular-table--clip-y, 0),
+            var(--regular-table--clip-x, 0) 200%,
+            200% 200%,
+            200% var(--regular-table--clip-y, 0)
+        );
+    }
+}
+
 regular-table {
-    font-family: "Open Sans";
+    font-family: inherit;
 
     div[tabindex] {
         outline: none;
@@ -83,7 +127,12 @@ regular-table {
     // frozen rows
 
     thead tr:last-child th {
-        border-bottom: 1px solid #ddd;
+        border-bottom: 1px solid #eaedef;
+    }
+
+    tbody tr:first-child td,
+    tbody tr:first-child th {
+        border-top: 1px solid transparent !important;
     }
 
     th {
@@ -131,7 +180,7 @@ regular-table {
     span.rt-row-header-icon {
         color: #aaa;
         padding-right: 4px;
-        font-family: "Material Icons";
+        font-family: var(--button--font-family, "Material Icons");
     }
 
     span.rt-column-header-icon {
@@ -139,7 +188,7 @@ regular-table {
         padding-left: 3px;
         display: inline-block;
         width: 10px;
-        font-family: "Material Icons";
+        font-family: var(--button--font-family, "Material Icons");
     }
 
     span.rt-row-header-icon:hover {
@@ -194,6 +243,14 @@ regular-table {
         top: 0;
         right: 0;
         cursor: col-resize;
+    }
+
+    a {
+        color: var(--rt-pos-cell--color);
+    }
+
+    a:visited {
+        color: var(--active--color);
     }
 
     // webkit (chrome, safari, etc) scrollbar styling

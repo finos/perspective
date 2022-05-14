@@ -5,12 +5,12 @@ project(double-conversion-download NONE)
 include(ExternalProject)
 ExternalProject_Add(double-conversion
   GIT_REPOSITORY    https://github.com/google/double-conversion.git
-  GIT_TAG           master
+  GIT_TAG           v3.1.5
   SOURCE_DIR        "${CMAKE_BINARY_DIR}/double-conversion-src"
   BINARY_DIR        "${CMAKE_BINARY_DIR}/double-conversion-build"
   CONFIGURE_COMMAND ""
   BUILD_COMMAND     ""
   INSTALL_COMMAND   ""
   TEST_COMMAND      ""
-  CMAKE_ARGS        "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}"
+  CMAKE_ARGS        " -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH} -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}"
 )

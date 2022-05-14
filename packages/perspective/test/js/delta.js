@@ -583,7 +583,7 @@ module.exports = (perspective) => {
             it("returns changed rows", async function (done) {
                 let table = await perspective.table(data, {index: "x"});
                 let view = await table.view({
-                    row_pivots: ["y"],
+                    group_by: ["y"],
                     aggregates: {y: "distinct count", z: "distinct count"},
                 });
                 view.on_update(
@@ -616,7 +616,7 @@ module.exports = (perspective) => {
                 );
 
                 const view = await table.view({
-                    row_pivots: ["z"],
+                    group_by: ["z"],
                     aggregates: {y: "unique"},
                 });
 
@@ -652,7 +652,7 @@ module.exports = (perspective) => {
             it("returns changed rows, column range", async function (done) {
                 let table = await perspective.table(data, {index: "x"});
                 let view = await table.view({
-                    row_pivots: ["y"],
+                    group_by: ["y"],
                     columns: ["x"],
                     aggregates: {y: "distinct count", z: "distinct count"},
                 });
@@ -672,7 +672,7 @@ module.exports = (perspective) => {
             it("returns nothing when updated data is not in pivot", async function (done) {
                 let table = await perspective.table(data, {index: "x"});
                 let view = await table.view({
-                    row_pivots: ["y"],
+                    group_by: ["y"],
                     aggregates: {y: "distinct count", z: "distinct count"},
                 });
                 view.on_update(
@@ -690,7 +690,7 @@ module.exports = (perspective) => {
             it("returns added rows", async function (done) {
                 let table = await perspective.table(data);
                 let view = await table.view({
-                    row_pivots: ["y"],
+                    group_by: ["y"],
                     aggregates: {y: "distinct count", z: "distinct count"},
                 });
                 view.on_update(
@@ -713,7 +713,7 @@ module.exports = (perspective) => {
             it("returns added rows, column range", async function (done) {
                 let table = await perspective.table(data);
                 let view = await table.view({
-                    row_pivots: ["y"],
+                    group_by: ["y"],
                     columns: ["z"],
                     aggregates: {y: "distinct count", z: "distinct count"},
                 });
@@ -733,7 +733,7 @@ module.exports = (perspective) => {
             it("returns deleted columns", async function (done) {
                 let table = await perspective.table(data, {index: "x"});
                 let view = await table.view({
-                    row_pivots: ["y"],
+                    group_by: ["y"],
                     aggregates: {y: "distinct count", z: "distinct count"},
                 });
                 view.on_update(
@@ -756,7 +756,7 @@ module.exports = (perspective) => {
             it("returns changed rows in non-sequential update", async function (done) {
                 let table = await perspective.table(data, {index: "x"});
                 let view = await table.view({
-                    row_pivots: ["y"],
+                    group_by: ["y"],
                     aggregates: {y: "distinct count", z: "distinct count"},
                 });
                 view.on_update(
@@ -782,7 +782,7 @@ module.exports = (perspective) => {
                     y: ["A", "B", "C", "D"],
                 });
                 const view = await table.view({
-                    row_pivots: ["y"],
+                    group_by: ["y"],
                     sort: [["y", "desc"]],
                     columns: ["x"],
                 });
@@ -803,11 +803,11 @@ module.exports = (perspective) => {
         });
 
         describe("2-sided row delta", function () {
-            it("returns changed rows when updated data in row pivot", async function (done) {
+            it("returns changed rows when updated data in group by", async function (done) {
                 let table = await perspective.table(data, {index: "y"});
                 let view = await table.view({
-                    row_pivots: ["y"],
-                    column_pivots: ["x"],
+                    group_by: ["y"],
+                    split_by: ["x"],
                 });
                 view.on_update(
                     async function (updated) {
@@ -826,11 +826,11 @@ module.exports = (perspective) => {
                 table.update(partial_change_y);
             });
 
-            it("returns changed rows when updated data in row pivot, column range", async function (done) {
+            it("returns changed rows when updated data in group by, column range", async function (done) {
                 let table = await perspective.table(data, {index: "y"});
                 let view = await table.view({
-                    row_pivots: ["y"],
-                    column_pivots: ["x"],
+                    group_by: ["y"],
+                    split_by: ["x"],
                     columns: ["x"],
                 });
                 view.on_update(
@@ -850,11 +850,11 @@ module.exports = (perspective) => {
                 table.update(partial_change_y);
             });
 
-            it("returns changed rows when updated data in row pivot, hidden sort", async function (done) {
+            it("returns changed rows when updated data in group by, hidden sort", async function (done) {
                 let table = await perspective.table(data, {index: "y"});
                 let view = await table.view({
-                    row_pivots: ["y"],
-                    column_pivots: ["x"],
+                    group_by: ["y"],
+                    split_by: ["x"],
                     sort: [["y", "desc"]],
                     columns: ["x"],
                 });
@@ -878,11 +878,11 @@ module.exports = (perspective) => {
                 table.update(partial_change_y);
             });
 
-            it.skip("returns changed rows when updated data in row pivot multi, hidden sort", async function (done) {
+            it.skip("returns changed rows when updated data in group by multi, hidden sort", async function (done) {
                 let table = await perspective.table(data, {index: "y"});
                 let view = await table.view({
-                    row_pivots: ["y", "x", "z"],
-                    column_pivots: ["x"],
+                    group_by: ["y", "x", "z"],
+                    split_by: ["x"],
                     sort: [["y", "desc"]],
                     columns: ["x"],
                 });
@@ -913,11 +913,11 @@ module.exports = (perspective) => {
                 table.update(partial_change_y);
             });
 
-            it("returns changed rows when updated data in column pivot", async function (done) {
+            it("returns changed rows when updated data in split by", async function (done) {
                 let table = await perspective.table(data, {index: "x"});
                 let view = await table.view({
-                    row_pivots: ["y"],
-                    column_pivots: ["z"],
+                    group_by: ["y"],
+                    split_by: ["z"],
                 });
                 view.on_update(
                     async function (updated) {
@@ -936,11 +936,11 @@ module.exports = (perspective) => {
                 table.update(partial_change_z);
             });
 
-            it("returns changed rows when updated data in column pivot, column range", async function (done) {
+            it("returns changed rows when updated data in split by, column range", async function (done) {
                 let table = await perspective.table(data, {index: "x"});
                 let view = await table.view({
-                    row_pivots: ["y"],
-                    column_pivots: ["z"],
+                    group_by: ["y"],
+                    split_by: ["z"],
                     columns: ["y"],
                 });
                 view.on_update(
@@ -960,11 +960,11 @@ module.exports = (perspective) => {
                 table.update(partial_change_z);
             });
 
-            it("returns changed rows when updated data in row and column pivot", async function (done) {
+            it("returns changed rows when updated data in row and split by", async function (done) {
                 let table = await perspective.table(data, {index: "x"});
                 let view = await table.view({
-                    row_pivots: ["y"],
-                    column_pivots: ["z"],
+                    group_by: ["y"],
+                    split_by: ["z"],
                 });
                 view.on_update(
                     async function (updated) {
@@ -983,11 +983,11 @@ module.exports = (perspective) => {
                 table.update(partial_change_y_z);
             });
 
-            it("returns changed rows when updated data in row and column pivot, column range", async function (done) {
+            it("returns changed rows when updated data in row and split by, column range", async function (done) {
                 let table = await perspective.table(data, {index: "x"});
                 let view = await table.view({
-                    row_pivots: ["y"],
-                    column_pivots: ["z"],
+                    group_by: ["y"],
+                    split_by: ["z"],
                     columns: ["x"],
                 });
                 view.on_update(
@@ -1010,8 +1010,8 @@ module.exports = (perspective) => {
             it("returns nothing when updated data is not in pivot", async function (done) {
                 let table = await perspective.table(data, {index: "x"});
                 let view = await table.view({
-                    row_pivots: ["y"],
-                    column_pivots: ["x"],
+                    group_by: ["y"],
+                    split_by: ["x"],
                     aggregates: {y: "distinct count", z: "distinct count"},
                 });
                 view.on_update(
@@ -1029,8 +1029,8 @@ module.exports = (perspective) => {
             it("returns added rows", async function (done) {
                 let table = await perspective.table(data);
                 let view = await table.view({
-                    row_pivots: ["y"],
-                    column_pivots: ["x"],
+                    group_by: ["y"],
+                    split_by: ["x"],
                 });
                 view.on_update(
                     async function (updated) {
@@ -1052,8 +1052,8 @@ module.exports = (perspective) => {
             it("returns deleted columns", async function (done) {
                 let table = await perspective.table(data, {index: "x"});
                 let view = await table.view({
-                    row_pivots: ["y"],
-                    column_pivots: ["x"],
+                    group_by: ["y"],
+                    split_by: ["x"],
                     aggregates: {y: "unique"},
                     columns: ["x", "y", "z"],
                 });
@@ -1082,8 +1082,8 @@ module.exports = (perspective) => {
             it("returns deleted columns, column range", async function (done) {
                 let table = await perspective.table(data, {index: "x"});
                 let view = await table.view({
-                    row_pivots: ["y"],
-                    column_pivots: ["x"],
+                    group_by: ["y"],
+                    split_by: ["x"],
                     aggregates: {y: "unique"},
                     columns: ["y"],
                 });
@@ -1112,8 +1112,8 @@ module.exports = (perspective) => {
             it("returns changed rows in non-sequential update", async function (done) {
                 let table = await perspective.table(data, {index: "x"});
                 let view = await table.view({
-                    row_pivots: ["y"],
-                    column_pivots: ["x"],
+                    group_by: ["y"],
+                    split_by: ["x"],
                     aggregates: {y: "distinct count", z: "distinct count"},
                 });
                 view.on_update(
@@ -1137,7 +1137,7 @@ module.exports = (perspective) => {
             it("returns changed rows in column-only pivots", async function (done) {
                 let table = await perspective.table(data, {index: "x"});
                 let view = await table.view({
-                    column_pivots: ["x"],
+                    split_by: ["x"],
                 });
                 view.on_update(
                     async function (updated) {
@@ -1175,7 +1175,7 @@ module.exports = (perspective) => {
                     index: "x",
                 });
                 let view = await table.view({
-                    column_pivots: ["y"],
+                    split_by: ["y"],
                 });
                 view.on_update(
                     async function (updated) {
@@ -1241,7 +1241,7 @@ module.exports = (perspective) => {
                 });
 
                 const view = await table.view({
-                    column_pivots: ["x"],
+                    split_by: ["x"],
                     sort: [["y", "desc"]],
                     columns: ["y"],
                     aggregates: {y: "last"},
@@ -1287,7 +1287,7 @@ module.exports = (perspective) => {
                     index: "x",
                 });
                 let view = await table.view({
-                    column_pivots: ["y"],
+                    split_by: ["y"],
                     columns: ["x"],
                 });
                 view.on_update(
@@ -1329,7 +1329,7 @@ module.exports = (perspective) => {
                     index: "x",
                 });
                 const view = await table.view({
-                    column_pivots: ["y"],
+                    split_by: ["y"],
                     columns: ["x"],
                     sort: [["x", "desc"]],
                 });
@@ -1376,7 +1376,7 @@ module.exports = (perspective) => {
                     }
                 );
                 let view = await table.view({
-                    column_pivots: ["y"],
+                    split_by: ["y"],
                     columns: ["x"],
                     sort: [["x", "desc"]],
                 });
@@ -1399,7 +1399,7 @@ module.exports = (perspective) => {
             it("returns changed rows, col only hidden sort", async function (done) {
                 const table = await perspective.table(data, {index: "x"});
                 const view = await table.view({
-                    column_pivots: ["y"],
+                    split_by: ["y"],
                     columns: ["x"],
                     sort: [["y", "desc"]],
                 });

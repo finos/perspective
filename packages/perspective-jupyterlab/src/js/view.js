@@ -14,7 +14,7 @@ import {PerspectiveJupyterWidget} from "./widget";
 import {PerspectiveJupyterClient} from "./client";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const perspective = require("@finos/perspective").default;
+import perspective from "@finos/perspective/dist/esm/perspective.js";
 
 /**
  * `PerspectiveView` defines the plugin's DOM and how the plugin interacts with
@@ -25,8 +25,8 @@ export class PerspectiveView extends DOMWidgetView {
         this.pWidget = new PerspectiveJupyterWidget(undefined, {
             plugin: this.model.get("plugin"),
             columns: this.model.get("columns"),
-            row_pivots: this.model.get("row_pivots"),
-            column_pivots: this.model.get("column_pivots"),
+            group_by: this.model.get("group_by"),
+            split_by: this.model.get("split_by"),
             aggregates: this.model.get("aggregates"),
             sort: this.model.get("sort"),
             filter: this.model.get("filter"),
@@ -34,17 +34,20 @@ export class PerspectiveView extends DOMWidgetView {
             plugin_config: this.model.get("plugin_config"),
             server: this.model.get("server"),
             client: this.model.get("client"),
-            dark:
-                this.model.get("dark") === null // only set if its a bool, otherwise inherit
-                    ? document.body.getAttribute("data-jp-theme-light") ===
-                      "false"
-                    : this.model.get("dark"),
+            theme: this.model.get("theme"),
+            settings: this.model.get("settings"),
             editable: this.model.get("editable"),
             bindto: this.el,
             view: this,
         });
 
         this.perspective_client = new PerspectiveJupyterClient(this);
+        this._synchronize_state = this._synchronize_state.bind(this);
+        this.pWidget.node.children[0].addEventListener(
+            "perspective-config-update",
+            this._synchronize_state
+        );
+
         return this.pWidget.node;
     }
 
@@ -62,12 +65,14 @@ export class PerspectiveView extends DOMWidgetView {
      * @param mutations
      */
 
-    _synchronize_state(mutations) {
-        for (const mutation of mutations) {
-            const name = mutation.attributeName.replace(/-/g, "_");
-            let new_value = this.pWidget.viewer.getAttribute(
-                mutation.attributeName
-            );
+    _synchronize_state(event) {
+        if (!this.pWidget._load_complete) {
+            return;
+        }
+
+        const config = event.detail;
+        for (const name of Object.keys(config)) {
+            let new_value = config[name];
 
             const current_value = this.model.get(name);
             if (typeof new_value === "undefined") {
@@ -77,7 +82,8 @@ export class PerspectiveView extends DOMWidgetView {
             if (
                 new_value &&
                 typeof new_value === "string" &&
-                name !== "plugin"
+                name !== "plugin" &&
+                name !== "theme"
             ) {
                 new_value = JSON.parse(new_value);
             }
@@ -101,14 +107,15 @@ export class PerspectiveView extends DOMWidgetView {
         this.model.on("msg:custom", this._handle_message, this);
         this.model.on("change:plugin", this.plugin_changed, this);
         this.model.on("change:columns", this.columns_changed, this);
-        this.model.on("change:row_pivots", this.row_pivots_changed, this);
-        this.model.on("change:column_pivots", this.column_pivots_changed, this);
+        this.model.on("change:group_by", this.group_by_changed, this);
+        this.model.on("change:split_by", this.split_by_changed, this);
         this.model.on("change:aggregates", this.aggregates_changed, this);
         this.model.on("change:sort", this.sort_changed, this);
-        this.model.on("change:filters", this.filters_changed, this);
+        this.model.on("change:filter", this.filter_changed, this);
         this.model.on("change:expressions", this.expressions_changed, this);
         this.model.on("change:plugin_config", this.plugin_config_changed, this);
-        this.model.on("change:dark", this.dark_changed, this);
+        this.model.on("change:theme", this.theme_changed, this);
+        this.model.on("change:settings", this.settings_changed, this);
         this.model.on("change:editable", this.editable_changed, this);
 
         /**
@@ -351,6 +358,10 @@ export class PerspectiveView extends DOMWidgetView {
         // Delete the <perspective-viewer> but do not terminate the shared
         // worker as it is shared across other widgets.
         this.pWidget.delete();
+        this.pWidget.node.removeEventListener(
+            "perspective-config-update",
+            this._synchronize_state
+        );
     }
 
     /**
@@ -371,15 +382,15 @@ export class PerspectiveView extends DOMWidgetView {
         });
     }
 
-    row_pivots_changed() {
+    group_by_changed() {
         this.pWidget.restore({
-            row_pivots: this.model.get("row_pivots"),
+            group_by: this.model.get("group_by"),
         });
     }
 
-    column_pivots_changed() {
+    split_by_changed() {
         this.pWidget.restore({
-            column_pivots: this.model.get("column_pivots"),
+            split_by: this.model.get("split_by"),
         });
     }
 
@@ -395,7 +406,7 @@ export class PerspectiveView extends DOMWidgetView {
         });
     }
 
-    filters_changed() {
+    filter_changed() {
         this.pWidget.restore({
             filter: this.model.get("filter"),
         });
@@ -411,8 +422,16 @@ export class PerspectiveView extends DOMWidgetView {
         this.pWidget.plugin_config = this.model.get("plugin_config");
     }
 
-    dark_changed() {
-        this.pWidget.dark = this.model.get("dark");
+    theme_changed() {
+        this.pWidget.restore({
+            theme: this.model.get("theme"),
+        });
+    }
+
+    settings_changed() {
+        this.pWidget.restore({
+            settings: this.model.get("settings"),
+        });
     }
 
     editable_changed() {

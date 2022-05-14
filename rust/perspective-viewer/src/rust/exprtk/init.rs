@@ -22,7 +22,6 @@ use wasm_bindgen::JsCast;
 /// Initializes the `plang` language definition using Monaco's `Languages`
 /// module.
 pub async fn init_language() -> Result<Editor, error::Error> {
-    let exts = monaco_exts();
     let module = monaco_module().await.unchecked_into::<MonacoModule>();
     let languages = module.languages();
     let editor = module.editor();
@@ -39,7 +38,6 @@ pub async fn init_language() -> Result<Editor, error::Error> {
 
     provider.forget();
     languages.register_completion_item_provider("exprtk", items.into());
-    exts.await;
     Ok(editor)
 }
 
@@ -58,10 +56,12 @@ pub fn init_theme(theme: &str, editor: &Editor) {
     editor.define_theme("exprtk-theme", theme_args)
 }
 
-/// Initializes the `MonacoEnvironment` global definition, which the monaco library
-/// uses to resolve its Web Workers and features.
-pub fn init_environment() -> Result<(), error::Error> {
-    let monaco_env = js_object!("getWorker", Closure::once_into_js(EditorWorker::new));
+/// Initializes the `MonacoEnvironment` global definition, which the monaco
+/// library uses to resolve its Web Workers and features.
+pub async fn init_environment() -> Result<(), error::Error> {
+    let worker = new_worker().await;
+    let closure = Closure::once_into_js(move |_: JsValue| worker);
+    let monaco_env = js_object!("getWorker", closure);
     let window = web_sys::window().unwrap();
     Reflect::set(&window, js_intern!("MonacoEnvironment"), &monaco_env).unwrap();
     Ok(())

@@ -7,7 +7,9 @@
  *
  */
 
-import {get_type_config} from "@finos/perspective/dist/esm/config/index.js";
+// Import this directly due to overly-sensitive tree shaking
+import {get_type_config} from "../../../perspective/src/js/config/index.js";
+
 import {
     activate_plugin_menu,
     PLUGIN_SYMBOL,
@@ -61,13 +63,17 @@ function styleListener(regularTable) {
 
             let type = get_psp_type.call(this, metadata);
             const is_numeric = type === "integer" || type === "float";
+            const is_string = type === "string";
             td.classList.toggle("psp-align-right", is_numeric);
             td.classList.toggle("psp-align-left", !is_numeric);
             td.classList.toggle(
                 "psp-menu-open",
                 this._open_column_styles_menu[0] === metadata._virtual_x
             );
-            td.classList.toggle("psp-menu-enabled", is_numeric && !is_corner);
+            td.classList.toggle(
+                "psp-menu-enabled",
+                (is_string || is_numeric) && !is_corner
+            );
             td.classList.toggle(
                 "psp-is-width-override",
                 regularTable._column_sizes?.override[metadata.size_key] !==
@@ -128,9 +134,9 @@ function styleListener(regularTable) {
             const metadata = regularTable.getMeta(td);
             const column_name =
                 metadata.column_header?.[metadata.column_header?.length - 1];
-            const plugin = plugins[column_name];
 
             let type = get_psp_type.call(this, metadata);
+            const plugin = plugins[column_name];
             const is_numeric = type === "integer" || type === "float";
 
             if (is_numeric) {
@@ -153,14 +159,14 @@ function styleListener(regularTable) {
                 })();
 
                 td.style.position = "";
-                if (plugin?.color_mode === "background") {
+                if (plugin?.number_color_mode === "background") {
                     const source = this._plugin_background;
                     const foreground = infer_foreground_from_background(
                         rgbaToRgb([r, g, b, 1], source)
                     );
                     td.style.color = foreground;
                     td.style.backgroundColor = hex;
-                } else if (plugin?.color_mode === "gradient") {
+                } else if (plugin?.number_color_mode === "gradient") {
                     const a = Math.max(
                         0,
                         Math.min(1, Math.abs(metadata.user / plugin.gradient))
@@ -169,12 +175,13 @@ function styleListener(regularTable) {
                     const foreground = infer_foreground_from_background(
                         rgbaToRgb([r, g, b, a], source)
                     );
+
                     td.style.color = foreground;
                     td.style.backgroundColor = `rgba(${r},${g},${b},${a})`;
-                } else if (plugin?.color_mode === "disabled") {
+                } else if (plugin?.number_color_mode === "disabled") {
                     td.style.backgroundColor = "";
                     td.style.color = "";
-                } else if (plugin?.color_mode === "bar") {
+                } else if (plugin?.number_color_mode === "bar") {
                     td.style.backgroundColor = "";
                     td.style.color = "";
                     td.style.position = "relative";
@@ -199,6 +206,66 @@ function styleListener(regularTable) {
 
                 td.style.backgroundColor = "";
                 td.style.color = hex;
+            } else if (type === "string") {
+                const [hex, r, g, b, gradhex] = (() => {
+                    if (plugin?.color !== undefined) {
+                        return plugin.color;
+                    } else {
+                        return this._color;
+                    }
+                })();
+
+                if (
+                    plugin?.string_color_mode === "foreground" &&
+                    metadata.user !== null
+                ) {
+                    td.style.color = hex;
+                    td.style.backgroundColor = "";
+                    if (plugin?.format === "link") {
+                        td.children[0].style.color = hex;
+                    }
+                } else if (
+                    plugin?.string_color_mode === "background" &&
+                    metadata.user !== null
+                ) {
+                    const source = this._plugin_background;
+                    const foreground = infer_foreground_from_background(
+                        rgbaToRgb([r, g, b, 1], source)
+                    );
+                    td.style.color = foreground;
+                    td.style.backgroundColor = hex;
+                } else if (
+                    plugin?.string_color_mode === "series" &&
+                    metadata.user !== null
+                ) {
+                    if (!this._series_color_map.has(column_name)) {
+                        this._series_color_map.set(column_name, new Map());
+                        this._series_color_seed.set(column_name, 0);
+                    }
+
+                    const series_map = this._series_color_map.get(column_name);
+                    if (!series_map.has(metadata.user)) {
+                        const seed = this._series_color_seed.get(column_name);
+                        series_map.set(metadata.user, seed);
+                        this._series_color_seed.set(column_name, seed + 1);
+                    }
+
+                    const color_seed = series_map.get(metadata.user);
+                    let [h, s, l] = chroma(hex).hsl();
+                    h = h + ((color_seed * 150) % 360);
+                    const color2 = chroma(h, s, l, "hsl");
+                    const [r, g, b] = color2.rgb();
+                    const hex2 = color2.hex();
+                    const source = this._plugin_background;
+                    const foreground = infer_foreground_from_background(
+                        rgbaToRgb([r, g, b, 1], source)
+                    );
+                    td.style.color = foreground;
+                    td.style.backgroundColor = hex2;
+                } else {
+                    td.style.backgroundColor = "";
+                    td.style.color = "";
+                }
             } else {
                 td.style.backgroundColor = "";
                 td.style.color = "";
@@ -216,7 +283,7 @@ function styleListener(regularTable) {
                     typeof metadata.value != null &&
                     metadata.value?.toString()?.trim().length > 0;
                 const is_leaf =
-                    metadata.row_header_x >= this._config.row_pivots.length;
+                    metadata.row_header_x >= this._config.group_by.length;
                 const next = regularTable.getMeta({
                     dx: 0,
                     dy: metadata.y - metadata.y0 + 1,
@@ -242,7 +309,7 @@ function styleListener(regularTable) {
             td.classList.toggle("psp-align-left", is_th || !is_numeric);
             td.classList.toggle(
                 "psp-color-mode-bar",
-                plugin?.color_mode === "bar"
+                plugin?.number_color_mode === "bar" && is_numeric
             );
         }
     }
@@ -288,7 +355,7 @@ function override_sort(column_name) {
     return [[column_name, "desc"]];
 }
 function create_sort(column_name, sort_dir) {
-    const is_col_sortable = this._config.column_pivots.length > 0;
+    const is_col_sortable = this._config.split_by.length > 0;
     const order = is_col_sortable ? ROW_COL_SORT_ORDER : ROW_SORT_ORDER;
     const inc_sort_dir = sort_dir ? order[sort_dir] : "desc";
     if (inc_sort_dir) {
@@ -333,6 +400,10 @@ async function mousedownListener(regularTable, event) {
     }
 
     let target = event.target;
+    if (target.tagName === "A") {
+        return;
+    }
+
     while (target.tagName !== "TD" && target.tagName !== "TH") {
         target = target.parentElement;
         if (!regularTable.contains(target)) {
@@ -354,10 +425,17 @@ async function mousedownListener(regularTable, event) {
         const meta = regularTable.getMeta(target);
         const column_name =
             meta.column_header?.[meta.column_header?.length - 1];
-        const [, max] = await this._view.get_min_max(column_name);
+        const column_type = this._schema[column_name];
         this._open_column_styles_menu.unshift(meta._virtual_x);
-        regularTable.draw();
-        activate_plugin_menu.call(this, regularTable, target, max);
+        if (column_type === "string") {
+            regularTable.draw({preserve_width: true});
+            activate_plugin_menu.call(this, regularTable, target);
+        } else {
+            const [, max] = await this._view.get_min_max(column_name);
+            regularTable.draw({preserve_width: true});
+            activate_plugin_menu.call(this, regularTable, target, max);
+        }
+
         event.preventDefault();
         event.stopImmediatePropagation();
     } else if (
@@ -414,13 +492,13 @@ function _format(parts, val, plugins = {}, use_table_schema = false) {
     }
 
     const title = parts[parts.length - 1];
-    const plugin = plugins[title];
     const type =
         (use_table_schema && this._table_schema[title]) ||
         this._schema[title] ||
         "string";
+    const plugin = plugins[title];
     const is_numeric = type === "integer" || type === "float";
-    if (is_numeric && plugin?.color_mode === "bar") {
+    if (is_numeric && plugin?.number_color_mode === "bar") {
         const a = Math.max(
             0,
             Math.min(0.95, Math.abs(val / plugin.gradient) * 0.95)
@@ -434,6 +512,20 @@ function _format(parts, val, plugins = {}, use_table_schema = false) {
             )}%;position:absolute;${anchor}:0;height:80%;top:10%;pointer-events:none;`
         );
         return div;
+    } else if (plugin?.format === "link" && type === "string") {
+        const anchor = document.createElement("a");
+        anchor.setAttribute("href", val);
+        anchor.setAttribute("target", "_blank");
+        anchor.textContent = val;
+        return anchor;
+    } else if (plugin?.format === "bold" && type === "string") {
+        const anchor = document.createElement("b");
+        anchor.textContent = val;
+        return anchor;
+    } else if (plugin?.format === "italics" && type === "string") {
+        const anchor = document.createElement("i");
+        anchor.textContent = val;
+        return anchor;
     } else {
         const is_plugin_override =
             is_numeric && plugin && plugin.fixed !== undefined;
@@ -480,7 +572,13 @@ function* _tree_header(paths = [], row_headers, regularTable) {
             plugins,
             true
         );
-        path = path.concat({toString: () => formatted});
+
+        if (formatted instanceof HTMLElement) {
+            path = path.concat(formatted);
+        } else {
+            path = path.concat({toString: () => formatted});
+        }
+
         path.length = row_headers.length + 1;
         yield path;
     }
@@ -524,7 +622,7 @@ async function dataListener(regularTable, x0, y0, x1, y1) {
             _tree_header.call(
                 this,
                 columns.__ROW_PATH__,
-                this._config.row_pivots,
+                this._config.group_by,
                 regularTable
             )
         ),
@@ -603,6 +701,9 @@ export async function createModel(regular, table, view, extend = {}) {
     const _neg_color = create_color_record(
         get_rule(regular, "--rt-neg-cell--color", "#FF5942")
     );
+    const _color = create_color_record(
+        get_rule(regular, "--active--color", "#ff0000")
+    );
     const _schema = {...schema, ...expression_schema};
     const _table_schema = {
         ...table_schema,
@@ -632,21 +733,31 @@ export async function createModel(regular, table, view, extend = {}) {
         _ids: [],
         _open_column_styles_menu: [],
         _plugin_background,
+        _color,
         _pos_color,
         _neg_color,
         _column_paths,
         _column_types,
         _is_editable,
-        _row_header_types: config.row_pivots.map((column_path) => {
+        _row_header_types: config.group_by.map((column_path) => {
             return _table_schema[column_path];
         }),
+        _series_color_map: new Map(),
+        _series_color_seed: new Map(),
         get_psp_type,
     });
 
     // Re-use div factory
     model._div_factory = model._div_factory || new ElemFactory("div");
 
-    regular.setDataListener(dataListener.bind(model, regular));
+    regular.setDataListener(dataListener.bind(model, regular), {
+        virtual_mode:
+            window
+                .getComputedStyle(regular)
+                .getPropertyValue("--datagrid-virtual-mode")
+                ?.trim() || "both",
+    });
+
     return model;
 }
 
@@ -665,5 +776,4 @@ export async function configureRegularTable(regular, model) {
         mousedownListener.bind(model, regular)
     );
     regular.addEventListener("click", clickListener.bind(model, regular));
-    await regular.draw();
 }

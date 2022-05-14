@@ -9,59 +9,47 @@
 
 <!DOCTYPE html>
 <html>
+    <head>
+        <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no"/>
 
-<head>
+        <script type="module" src="/node_modules/@finos/perspective/dist/cdn/perspective.js"></script>
+        <script type="module" src="/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.js"></script>
+        <script type="module" src="/node_modules/@finos/perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js"></script>
+        <script type="module" src="/node_modules/@finos/perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js"></script>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
-    
-    <script src="https://cdn.jsdelivr.net/npm/webfontloader"></script>
-    <script>WebFont.load({google:{families:["Roboto Mono:200,400","Material Icons","Open Sans:300,400"]}})</script>
+        <link rel="stylesheet" crossorigin="anonymous" href="/node_modules/@finos/perspective-viewer/dist/css/themes.css" />
 
-    <script src="/node_modules/@finos/perspective/dist/umd/perspective.js"></script>
-    <script src="/node_modules/@finos/perspective-viewer/dist/umd/perspective-viewer.js"></script>
-    <script src="/node_modules/@finos/perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js"></script>
-    <script src="/node_modules/@finos/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js"></script>
+        <script type="module">
+            import {worker} from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
 
-    <link rel='stylesheet' href="/node_modules/@finos/perspective-viewer/dist/umd/material-dense.css" is="custom-style">
-    
-    <style>
-        perspective-viewer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-        }
-    </style>
+            const WORKER = worker();
+            const REQ = fetch("/node_modules/superstore-arrow/superstore.arrow");
 
-</head>
-
-<body>
-
-    <perspective-viewer editable>
-
-    </perspective-viewer>
-
-    <script>
-        const WORKER = window.perspective.worker();
-    
-        function on_load() {
-            var el = document.getElementsByTagName('perspective-viewer')[0];
-            WORKER.table(this.response).then(table => {
-                el.load(Promise.resolve(table));
+            async function load() {
+                const resp = await REQ;
+                const arrow = await resp.arrayBuffer();
+                const el = document.getElementsByTagName("perspective-viewer")[0];
+                const table = WORKER.table(arrow);
+                el.load(table);
                 el.toggleConfig();
-            });
-        }
+            }
 
-        window.addEventListener('DOMContentLoaded', function () {
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', '/node_modules/superstore-arrow/superstore.arrow', true);
-            xhr.responseType = "arraybuffer"
-            xhr.onload = on_load.bind(xhr);
-            xhr.send(null);
-        });
-    </script>
+            load();
 
-</body>
+        </script>
 
+        <style>
+            perspective-viewer {
+                position: absolute;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                right: 0;
+            }
+        </style>
+    </head>
+
+    <body>
+        <perspective-viewer editable> </perspective-viewer>
+    </body>
 </html>

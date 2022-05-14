@@ -23,11 +23,11 @@
 #include <perspective/computed_expression.h>
 #include <perspective/computed_function.h>
 #include <perspective/expression_tables.h>
+#include <perspective/regex.h>
 #include <tsl/ordered_map.h>
 #ifdef PSP_PARALLEL_FOR
 #include <thread>
-#include <tbb/parallel_sort.h>
-#include <tbb/tbb.h>
+#include <perspective/parallel_for.h>
 #endif
 #include <chrono>
 
@@ -205,6 +205,9 @@ public:
     void pprint() const;
     std::string repr() const;
 
+    std::shared_ptr<t_expression_vocab> get_expression_vocab() const;
+    std::shared_ptr<t_regex_mapping> get_expression_regex_mapping() const;
+
 #ifdef PSP_PARALLEL_FOR
     void set_event_loop_thread_id(std::thread::id id);
 #endif
@@ -357,6 +360,9 @@ private:
     std::chrono::high_resolution_clock::time_point m_epoch;
     std::function<void()> m_pool_cleanup;
     bool m_was_updated;
+
+    std::shared_ptr<t_expression_vocab> m_expression_vocab;
+    std::shared_ptr<t_regex_mapping> m_expression_regex_mapping;
 
 #ifdef PSP_ENABLE_PYTHON
     std::thread::id m_event_loop_thread_id;

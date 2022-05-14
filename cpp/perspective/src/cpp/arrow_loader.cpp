@@ -17,25 +17,6 @@ namespace apachearrow {
         std::shared_ptr<arrow::Table>& table) {
         arrow::io::BufferReader buffer_reader(
             reinterpret_cast<const std::uint8_t*>(ptr), length);
-#if ARROW_VERSION_MAJOR < 1
-        std::shared_ptr<arrow::ipc::RecordBatchReader> batch_reader;
-        arrow::Status status = arrow::ipc::RecordBatchStreamReader::Open(
-            &buffer_reader, &batch_reader);
-        if (!status.ok()) {
-            std::stringstream ss;
-            ss << "Failed to open RecordBatchStreamReader: " << status.message()
-               << std::endl;
-            PSP_COMPLAIN_AND_ABORT(ss.str());
-        } else {
-            status = batch_reader->ReadAll(&table);
-            if (!status.ok()) {
-                std::stringstream ss;
-                ss << "Failed to read stream record batch: " << status.message()
-                   << std::endl;
-                PSP_COMPLAIN_AND_ABORT(ss.str());
-            };
-        }
-#else
         auto status = arrow::ipc::RecordBatchStreamReader::Open(&buffer_reader);
         if (!status.ok()) {
             std::stringstream ss;
@@ -52,7 +33,6 @@ namespace apachearrow {
                 PSP_COMPLAIN_AND_ABORT(ss.str());
             };
         }
-#endif
     }
 
     void
@@ -60,36 +40,7 @@ namespace apachearrow {
         std::shared_ptr<arrow::Table>& table) {
         arrow::io::BufferReader buffer_reader(
             reinterpret_cast<const std::uint8_t*>(ptr), length);
-#if ARROW_VERSION_MAJOR < 1
-        std::shared_ptr<arrow::ipc::RecordBatchFileReader> batch_reader;
-        arrow::Status status = arrow::ipc::RecordBatchFileReader::Open(
-            &buffer_reader, &batch_reader);
-        if (!status.ok()) {
-            std::stringstream ss;
-            ss << "Failed to open RecordBatchFileReader: " << status.message()
-               << std::endl;
-            PSP_COMPLAIN_AND_ABORT(ss.str());
-        } else {
-            std::vector<std::shared_ptr<arrow::RecordBatch>> batches;
-            auto num_batches = batch_reader->num_record_batches();
-            for (int i = 0; i < num_batches; ++i) {
-                std::shared_ptr<arrow::RecordBatch> chunk;
-                status = batch_reader->ReadRecordBatch(i, &chunk);
-                if (!status.ok()) {
-                    PSP_COMPLAIN_AND_ABORT("Failed to read file record batch: "
-                        + status.message());
-                }
-                batches.push_back(chunk);
-            }
-            status = arrow::Table::FromRecordBatches(batches, &table);
-            if (!status.ok()) {
-                std::stringstream ss;
-                ss << "Failed to create Table from RecordBatches: "
-                   << status.message() << std::endl;
-                PSP_COMPLAIN_AND_ABORT(ss.str());
-            };
-        };
-#else
+
         auto status = arrow::ipc::RecordBatchFileReader::Open(&buffer_reader);
         if (!status.ok()) {
             std::stringstream ss;
@@ -120,7 +71,6 @@ namespace apachearrow {
             };
             table = *status3;
         };
-#endif
     }
 
     using namespace perspective;
@@ -130,7 +80,8 @@ namespace apachearrow {
 
     t_dtype
     convert_type(const std::string& src) {
-        if (src == "dictionary" || src == "utf8" || src == "binary") {
+        if (src == "dictionary" || src == "utf8" || src == "binary"
+            || src == "large_utf8") {
             return DTYPE_STR;
         } else if (src == "bool") {
             return DTYPE_BOOL;
@@ -254,7 +205,7 @@ namespace apachearrow {
             } else {
                 if (!input_schema.has_column(index)) {
                     std::stringstream ss;
-                    ss << "Specified index `" << index
+                    ss << "Specified indexx `" << index
                        << "` is invalid as it does not appear in the Table."
                        << std::endl;
                     PSP_COMPLAIN_AND_ABORT(ss.str());
@@ -347,6 +298,23 @@ namespace apachearrow {
                            << indices->type()->name() << "'" << std::endl;
                         PSP_COMPLAIN_AND_ABORT(ss.str());
                     }
+                }
+            } break;
+            case arrow::LargeStringType::type_id: {
+                std::shared_ptr<arrow::LargeStringArray> scol
+                    = std::static_pointer_cast<arrow::LargeStringArray>(src);
+                const arrow::LargeStringArray::offset_type* offsets
+                    = scol->raw_value_offsets();
+                const uint8_t* values = scol->value_data()->data();
+
+                std::string elem;
+
+                for (std::uint32_t i = 0; i < len; ++i) {
+                    arrow::LargeStringArray::offset_type bidx = offsets[i];
+                    std::size_t es = offsets[i + 1] - bidx;
+                    elem.assign(
+                        reinterpret_cast<const char*>(values) + bidx, es);
+                    dest->set_nth(offset + i, elem);
                 }
             } break;
             case arrow::BinaryType::type_id:

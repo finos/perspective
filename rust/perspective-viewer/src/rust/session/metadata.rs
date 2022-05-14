@@ -9,19 +9,40 @@
 use crate::config::*;
 use crate::js::perspective::*;
 use crate::utils::*;
-
 use crate::*;
 
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::iter::IntoIterator;
+use std::ops::Deref;
+use std::ops::DerefMut;
 use wasm_bindgen::prelude::*;
 
+struct SessionViewExpressionMetadata {
+    schema: HashMap<String, Type>,
+    alias: HashMap<String, String>,
+    edited: HashMap<String, String>,
+}
+
 /// Metadata state reflects data we could fetch from a `View`, but would like to
-/// do so without `async`.  It must be recreated by any `async` method which changes
-/// the `View` and may temporarily be out-of-sync with the `View`/`ViewConfig`.
+/// do so without `async`.  It must be recreated by any `async` method which
+/// changes the `View` and may temporarily be out-of-sync with the
+/// `View`/`ViewConfig`.
 #[derive(Default)]
 pub struct SessionMetadata(Option<SessionMetadataState>);
+
+impl Deref for SessionMetadata {
+    type Target = Option<SessionMetadataState>;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for SessionMetadata {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
 
 /// TODO the multiple `Option` types could probably be merged since they are
 /// populated within an async lock
@@ -31,15 +52,12 @@ pub struct SessionMetadataState {
     table_schema: HashMap<String, Type>,
     edit_port: f64,
     view_schema: Option<HashMap<String, Type>>,
-    view_expression_schema: Option<HashMap<String, Type>>,
-    view_expression_alias: Option<HashMap<String, String>>,
+    expr_meta: Option<SessionViewExpressionMetadata>,
 }
 
 impl SessionMetadata {
     /// Creates a new `SessionMetadata` from a `JsPerspectiveTable`.
-    pub(super) async fn from_table(
-        table: &JsPerspectiveTable,
-    ) -> Result<SessionMetadata, JsValue> {
+    pub(super) async fn from_table(table: &JsPerspectiveTable) -> Result<Self, JsValue> {
         let column_names = {
             let columns = table.columns().await?;
             if columns.length() > 0 {
@@ -51,15 +69,9 @@ impl SessionMetadata {
             }
         };
 
-        let table_schema = table
-            .schema()
-            .await?
-            .into_serde::<HashMap<String, Type>>()
-            .into_jserror()?;
-
+        let table_schema = table.schema().await?.into_serde().into_jserror()?;
         let edit_port = table.make_port().await?;
-
-        Ok(SessionMetadata(Some(SessionMetadataState {
+        Ok(Self(Some(SessionMetadataState {
             column_names,
             table_schema,
             edit_port,
@@ -71,171 +83,161 @@ impl SessionMetadata {
         &mut self,
         view_schema: &JsPerspectiveViewSchema,
     ) -> Result<(), JsValue> {
-        let view_schema = view_schema
-            .into_serde::<HashMap<String, Type>>()
-            .into_jserror()?;
-
-        self.0.as_mut().unwrap().view_schema = Some(view_schema);
+        let view_schema = view_schema.into_serde().into_jserror()?;
+        self.as_mut().unwrap().view_schema = Some(view_schema);
         Ok(())
     }
 
     pub(super) fn update_expressions(
         &mut self,
-        // table: &JsPerspectiveTable,
         valid_recs: &JsPerspectiveValidatedExpressions,
     ) -> Result<HashSet<String>, JsValue> {
         if js_sys::Object::keys(&valid_recs.errors()).length() > 0 {
-            panic!("Wormfood!");
+            return Err(JsValue::from("Expressions invalid"));
         }
 
-        let expression_alias = valid_recs
-            .expression_alias()
-            .into_serde::<HashMap<String, String>>()
-            .into_jserror()?;
+        let expression_alias: HashMap<String, String> =
+            valid_recs.expression_alias().into_serde().into_jserror()?;
 
-        self.0.as_mut().unwrap().view_expression_alias = Some(expression_alias);
-        let expression_schema = valid_recs
-            .expression_schema()
-            .into_serde::<HashMap<String, Type>>()
-            .into_jserror()?;
+        let expression_schema: HashMap<String, Type> =
+            valid_recs.expression_schema().into_serde().into_jserror()?;
 
-        let expression_names =
-            expression_schema.keys().cloned().collect::<HashSet<_>>();
+        let expression_names = expression_schema.keys().cloned().collect::<HashSet<_>>();
 
-        self.0.as_mut().unwrap().view_expression_schema = Some(expression_schema);
+        let mut edited = self
+            .as_mut()
+            .unwrap()
+            .expr_meta
+            .take()
+            .map(|x| x.edited)
+            .unwrap_or_default();
+
+        edited.retain(|k, _| expression_alias.get(k).is_some());
+        self.as_mut().unwrap().expr_meta = Some(SessionViewExpressionMetadata {
+            schema: expression_schema,
+            alias: expression_alias,
+            edited,
+        });
+
         Ok(expression_names)
     }
 
-    /// The `table`'s unique column names, including the alias columns names of
-    /// expression columns.
-    fn _get_all_columns(&self) -> Option<Vec<String>> {
-        self.0.as_ref().map(move |meta| {
-            let expressions = meta
-                .view_expression_schema
-                .as_ref()
-                .map(|x| Box::new(x.keys()) as Box<dyn Iterator<Item = &String>>)
-                .unwrap_or_else(|| Box::new([].iter()));
-
-            meta.column_names
-                .iter()
-                .chain(expressions)
-                .cloned()
-                .collect::<Vec<_>>()
-        })
-    }
-
-    /// Returns the unique column names in this session that are expression columns.
-    pub fn get_expression_columns(&self) -> Vec<String> {
-        self.0
-            .as_ref()
-            .and_then(|meta| {
-                meta.view_expression_schema
-                    .as_ref()
-                    .map(|x| x.keys().cloned().collect::<Vec<_>>())
-            })
-            .unwrap_or_default()
+    /// Returns the unique column names in this session that are expression
+    /// columns.
+    pub fn get_expression_columns(&self) -> impl Iterator<Item = &'_ String> {
+        maybe!(Some(self.as_ref()?.expr_meta.as_ref()?.schema.keys()))
+            .into_iter()
+            .flatten()
     }
 
     /// Returns the full original expression `String` for an expression alias.
     ///
     /// # Arguments
     /// - `alias` An alias name for an expression column in this `Session`.
-    pub fn get_alias_expression(&self, alias: &str) -> String {
-        self.0
-            .as_ref()
-            .and_then(|meta| meta.view_expression_alias.as_ref())
-            .and_then(|x| x.get(alias))
-            .cloned()
-            .unwrap_or_else(|| "".to_owned())
+    pub fn get_expression_by_alias(&self, alias: &str) -> Option<String> {
+        maybe!(self.as_ref()?.expr_meta.as_ref()?.alias.get(alias)).cloned()
     }
 
-    pub fn get_table_columns(&self) -> Option<Vec<String>> {
-        self.0.as_ref().map(|meta| meta.column_names.clone())
+    /// Returns the edited expression `String` (e.g. the not-yet-saved, edited
+    /// expression state of a column, if any) for an expression alias.
+    ///
+    /// # Arguments
+    /// - `alias` An alias name for an expression column in this `Session`.
+    pub fn get_edit_by_alias(&self, alias: &str) -> Option<String> {
+        maybe!(self
+            .as_ref()?
+            .expr_meta
+            .as_ref()?
+            .edited
+            .get(alias)
+            .cloned())
     }
 
-    pub fn iter_columns<'a>(&'a self) -> Box<dyn Iterator<Item = &'a String> + 'a> {
-        Box::new(
-            self.0
-                .as_ref()
-                .map(|meta| meta.column_names.iter())
-                .into_iter()
-                .flatten(),
-        )
+    pub fn set_edit_by_alias(&mut self, alias: &str, edit: String) {
+        drop(maybe!(self
+            .as_mut()?
+            .expr_meta
+            .as_mut()?
+            .edited
+            .insert(alias.to_owned(), edit)))
+    }
+
+    pub fn clear_edit_by_alias(&mut self, alias: &str) {
+        drop(maybe!(self
+            .as_mut()?
+            .expr_meta
+            .as_mut()?
+            .edited
+            .remove(alias)))
+    }
+
+    pub fn get_table_columns(&self) -> Option<&'_ Vec<String>> {
+        self.as_ref().map(|meta| &meta.column_names)
     }
 
     pub fn is_column_expression(&self, name: &str) -> bool {
-        self.0
-            .as_ref()
-            .and_then(|meta| {
-                meta.view_expression_schema
-                    .as_ref()
-                    .map(|schema| schema.contains_key(name))
-            })
-            .unwrap_or(false)
+        let is_expr = maybe!(Some(
+            self.as_ref()?.expr_meta.as_ref()?.schema.contains_key(name)
+        ));
+
+        is_expr.unwrap_or_default()
     }
 
     pub fn get_edit_port(&self) -> Option<f64> {
-        self.0.as_ref().map(|meta| meta.edit_port)
+        self.as_ref().map(|meta| meta.edit_port)
     }
 
-    /// Returns the type of a column name relative to the `Table`.  Despite the name,
-    /// `get_column_table_type()` also returns the `Table` type for Expressions,
-    /// which despite living on the `View` still have a `table` type associated with
-    /// them pre-aggregation.
+    /// Returns the type of a column name relative to the `Table`.  Despite the
+    /// name, `get_column_table_type()` also returns the `Table` type for
+    /// Expressions, which despite living on the `View` still have a `table`
+    /// type associated with them pre-aggregation.
     ///
     /// # Arguments
-    /// - `name` The column name (or expresison alias) to retrieve a principal type.
+    /// - `name` The column name (or expresison alias) to retrieve a principal
+    ///   type.
     pub fn get_column_table_type(&self, name: &str) -> Option<Type> {
-        self.0
-            .as_ref()
-            .and_then(|meta| {
-                meta.table_schema.get(name).or_else(|| {
-                    meta.view_expression_schema
-                        .as_ref()
-                        .and_then(|schema| schema.get(name))
-                })
-            })
-            .cloned()
+        maybe!({
+            let meta = self.as_ref()?;
+            meta.table_schema
+                .get(name)
+                .or_else(|| meta.expr_meta.as_ref()?.schema.get(name))
+                .cloned()
+        })
     }
 
-    /// Returns the type of a column name relative to the `View`, including expression
-    /// columns which were part of the `ViewConfig`.  Types returned from the `View`
-    /// incorporate the type transform applied by their aggregate if applicable, so
-    /// may differ from the type returned by `get_column_table_type()`.
+    /// Returns the type of a column name relative to the `View`, including
+    /// expression columns which were part of the `ViewConfig`.  Types
+    /// returned from the `View` incorporate the type transform applied by
+    /// their aggregate if applicable, so may differ from the type returned
+    /// by `get_column_table_type()`.
     ///
     /// # Arguments
-    /// - `name` The column name (or expresison alias) to retrieve a `View` type.
+    /// - `name` The column name (or expresison alias) to retrieve a `View`
+    ///   type.
     pub fn get_column_view_type(&self, name: &str) -> Option<Type> {
-        self.0
-            .as_ref()
-            .and_then(|meta| meta.view_schema.as_ref())
-            .and_then(|schema| schema.get(name))
-            .cloned()
+        maybe!(self.as_ref()?.view_schema.as_ref()?.get(name)).cloned()
     }
 
     pub fn get_column_aggregates<'a>(
         &'a self,
         name: &str,
     ) -> Option<Box<dyn Iterator<Item = Aggregate> + 'a>> {
-        optionally! {
+        maybe!({
             let coltype = self.get_column_table_type(name)?;
             let aggregates = coltype.aggregates_iter();
             Some(match coltype {
                 Type::Float | Type::Integer => {
                     let num_cols = self
                         .get_expression_columns()
-                        .into_iter()
-                        .chain(self.get_table_columns()?.into_iter())
+                        .cloned()
+                        .chain(self.get_table_columns()?.clone().into_iter())
                         .map(move |name| {
-                            self.get_column_table_type(&name).map(|coltype|
-                                (name, coltype)
-                            )
+                            self.get_column_table_type(&name)
+                                .map(|coltype| (name, coltype))
                         })
                         .collect::<Option<Vec<_>>>()?
                         .into_iter()
-                        .filter(|(_, coltype)| {
-                            *coltype == Type::Integer || *coltype == Type::Float
-                        })
+                        .filter(|(_, coltype)| *coltype == Type::Integer || *coltype == Type::Float)
                         .map(|(name, _)| {
                             Aggregate::MultiAggregate(MultiAggregate::WeightedMean, name)
                         });
@@ -243,6 +245,6 @@ impl SessionMetadata {
                 }
                 _ => aggregates,
             })
-        }
+        })
     }
 }

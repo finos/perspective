@@ -5,7 +5,9 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+
 from logging import critical
+import os
 
 
 def is_libpsp():
@@ -24,7 +26,6 @@ try:
     from .viewer import *  # noqa: F401, F403
     from .table.libbinding import (
         init_expression_parser,
-        _set_nthreads,
     )
 
     def set_threadpool_size(nthreads):
@@ -32,7 +33,7 @@ try:
         total number of available cores, which can be set explicity by
         setting `nthreads` to `None`.
         """
-        _set_nthreads(-1 if nthreads is None else nthreads)
+        os.environ["OMP_THREAD_LIMIT"] = "0" if nthreads is None else str(nthreads)
 
     init_expression_parser()
 except ImportError:

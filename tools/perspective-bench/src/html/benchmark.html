@@ -1,0 +1,59 @@
+<!--
+   
+   Copyright (c) 2017, the Perspective Authors.
+   
+   This file is part of the Perspective library, distributed under the terms of
+   the Apache License 2.0.  The full license can be found in the LICENSE file.
+
+-->
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
+        />
+
+        <script src="node_modules/@finos/perspective/dist/umd/perspective.js"></script>
+        <script src="node_modules/@finos/perspective-viewer/dist/umd/perspective-viewer.js"></script>
+        <script src="node_modules/@finos/perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js"></script>
+        <script src="node_modules/@finos/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js"></script>
+
+        <link rel="stylesheet" crossorigin="anonymous" href="/node_modules/@finos/perspective-viewer/dist/css/themes.css" />
+
+        <style>
+            perspective-viewer {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+            }
+        </style>
+    </head>
+
+    <body>
+        <perspective-viewer></perspective-viewer>
+
+        <script>
+            window.addEventListener("DOMContentLoaded", async () => {
+                const el =
+                    document.getElementsByTagName("perspective-viewer")[0];
+                el.addEventListener("perspective-config-update", async () =>
+                    localStorage.setItem(
+                        "layout",
+                        JSON.stringify(await el.save())
+                    )
+                );
+                const req = await fetch("benchmark.arrow");
+                const arrow = await req.arrayBuffer();
+                const worker = perspective.worker();
+                const table = await worker.table(arrow);
+                el.load(table);
+                el.restore(JSON.parse(localStorage.getItem("layout")));
+                el.toggleConfig();
+            });
+        </script>
+    </body>
+</html>

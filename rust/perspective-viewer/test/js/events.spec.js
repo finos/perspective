@@ -42,7 +42,7 @@ utils.with_server({}, () => {
 
                         await viewer.restore({
                             settings: true,
-                            row_pivots: ["State"],
+                            group_by: ["State"],
                             columns: ["Profit", "Sales"],
                         });
 
@@ -51,12 +51,16 @@ utils.with_server({}, () => {
 
                     expect(config).toEqual({
                         aggregates: {},
-                        column_pivots: [],
+                        split_by: [],
                         columns: ["Profit", "Sales"],
                         expressions: [],
                         filter: [],
-                        row_pivots: ["State"],
+                        plugin: "Debug",
+                        plugin_config: {},
+                        group_by: ["State"],
+                        settings: true,
                         sort: [],
+                        theme: null,
                     });
 
                     return await get_contents(page);
@@ -81,7 +85,7 @@ utils.with_server({}, () => {
                     await viewer.restore({
                         settings: true,
                         plugin: "Debug",
-                        row_pivots: ["State"],
+                        group_by: ["State"],
                     });
                     return config;
                 });

@@ -515,7 +515,7 @@ module.exports = (perspective) => {
         it("Int, 1-sided view", async function () {
             var table = await perspective.table(int_float_data);
             var view = await table.view({
-                row_pivots: ["int"],
+                group_by: ["int"],
                 columns: ["int", "float"],
             });
             const result = await view.col_to_js_typed_array("int");
@@ -528,7 +528,7 @@ module.exports = (perspective) => {
         it("Float, 1-sided view", async function () {
             var table = await perspective.table(int_float_data);
             var view = await table.view({
-                row_pivots: ["int"],
+                group_by: ["int"],
                 columns: ["int", "float"],
             });
             const result = await view.col_to_js_typed_array("float");
@@ -540,7 +540,7 @@ module.exports = (perspective) => {
         it("Datetime, 1-sided view", async function () {
             var table = await perspective.table(datetime_data);
             var view = await table.view({
-                row_pivots: ["int"],
+                group_by: ["int"],
                 columns: ["datetime"],
                 aggregates: {datetime: "high"},
             });
@@ -550,11 +550,11 @@ module.exports = (perspective) => {
             table.delete();
         });
 
-        it("Int, 2-sided view with row pivot", async function () {
+        it("Int, 2-sided view with group by", async function () {
             var table = await perspective.table(int_float_data);
             var view = await table.view({
-                column_pivots: ["float"],
-                row_pivots: ["int"],
+                split_by: ["float"],
+                group_by: ["int"],
                 columns: ["int", "float"],
             });
             const result = await view.col_to_js_typed_array("3.5|int");
@@ -563,11 +563,11 @@ module.exports = (perspective) => {
             table.delete();
         });
 
-        it("Float, 2-sided view with row pivot", async function () {
+        it("Float, 2-sided view with group by", async function () {
             var table = await perspective.table(int_float_data);
             var view = await table.view({
-                column_pivots: ["float"],
-                row_pivots: ["int"],
+                split_by: ["float"],
+                group_by: ["int"],
                 columns: ["int", "float"],
             });
             const result = await view.col_to_js_typed_array("3.5|float");
@@ -576,9 +576,9 @@ module.exports = (perspective) => {
             table.delete();
         });
 
-        it("Int, 2-sided view, no row pivot", async function () {
+        it("Int, 2-sided view, no group by", async function () {
             var table = await perspective.table(int_float_data);
-            var view = await table.view({column_pivots: ["float"]});
+            var view = await table.view({split_by: ["float"]});
             const result = await view.col_to_js_typed_array("3.5|int");
             // bytelength should not include the aggregate row
             expect(result[0].byteLength).toEqual(16);
@@ -586,9 +586,9 @@ module.exports = (perspective) => {
             table.delete();
         });
 
-        it("Float, 2-sided view, no row pivot", async function () {
+        it("Float, 2-sided view, no group by", async function () {
             var table = await perspective.table(int_float_data);
-            var view = await table.view({column_pivots: ["float"]});
+            var view = await table.view({split_by: ["float"]});
             const result = await view.col_to_js_typed_array("3.5|float");
             expect(result[0].byteLength).toEqual(32);
             view.delete();
@@ -617,7 +617,7 @@ module.exports = (perspective) => {
         it("Symmetric output with to_columns, 1-sided", async function () {
             let table = await perspective.table(int_float_string_data);
             let view = await table.view({
-                row_pivots: ["int"],
+                group_by: ["int"],
                 columns: ["int", "float"],
             });
             let cols = await view.to_columns();
@@ -667,11 +667,11 @@ module.exports = (perspective) => {
             const table = await perspective.table(int_float_string_data);
             table
                 .view({
-                    row_pivots: ["abcd"],
+                    group_by: ["abcd"],
                 })
                 .catch((error) => {
                     expect(error.message).toEqual(
-                        "Abort(): Invalid column 'abcd' found in View row_pivots.\n"
+                        "Abort(): Invalid column 'abcd' found in View group_by.\n"
                     );
                     table.delete();
                 });
@@ -695,11 +695,11 @@ module.exports = (perspective) => {
 
             try {
                 await table.view({
-                    row_pivots: ["abcd"],
+                    group_by: ["abcd"],
                 });
             } catch (error) {
                 expect(error.message).toEqual(
-                    "Abort(): Invalid column 'abcd' found in View row_pivots.\n"
+                    "Abort(): Invalid column 'abcd' found in View group_by.\n"
                 );
                 table.delete();
             }
@@ -710,7 +710,7 @@ module.exports = (perspective) => {
         it("Serializes a simple view to CSV", async function () {
             var table = await perspective.table(data);
             var view = await table.view({});
-            var answer = `x,y,z\r\n1,a,true\r\n2,b,false\r\n3,c,true\r\n4,d,false`;
+            var answer = `"x","y","z"\n1,"a",true\n2,"b",false\n3,"c",true\n4,"d",false\n`;
             let result = await view.to_csv();
             expect(result).toEqual(answer);
             view.delete();
@@ -720,10 +720,10 @@ module.exports = (perspective) => {
         it("Serializes 1 sided view to CSV", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                row_pivots: ["z"],
+                group_by: ["z"],
                 columns: ["x"],
             });
-            var answer = `__ROW_PATH__,x\r\n,10\r\nfalse,6\r\ntrue,4`;
+            var answer = `"z (Group by 1)","x"\n,10\nfalse,6\ntrue,4\n`;
             let result = await view.to_csv();
             expect(result).toEqual(answer);
             view.delete();
@@ -733,11 +733,11 @@ module.exports = (perspective) => {
         it("Serializes a 2 sided view to CSV", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                row_pivots: ["z"],
-                column_pivots: ["y"],
+                group_by: ["z"],
+                split_by: ["y"],
                 columns: ["x"],
             });
-            var answer = `__ROW_PATH__,\"a,x\",\"b,x\",\"c,x\",\"d,x\"\r\n,1,2,3,4\r\nfalse,,2,,4\r\ntrue,1,,3,`;
+            var answer = `"z (Group by 1)","a|x","b|x","c|x","d|x"\n,1,2,3,4\nfalse,,2,,4\ntrue,1,,3,\n`;
             let result = await view.to_csv();
             expect(result).toEqual(answer);
             view.delete();
@@ -775,7 +775,7 @@ module.exports = (perspective) => {
             let view = await table.view();
             let result = await view.to_csv();
             expect(result).toEqual(
-                `x,y\r\n"Test, hello!",1\r\nTest2",2\r\n"Test3, Hello!""",3`
+                `"x","y"\n"Test, hello!",1\n"Test2""",2\n"Test3, Hello!""",3\n`
             );
             view.delete();
             table.delete();
@@ -970,7 +970,7 @@ module.exports = (perspective) => {
             var view = await table.view();
             var num_rows = await view.num_rows();
             var view2 = await table.view({
-                column_pivots: ["x"],
+                split_by: ["x"],
             });
             var num_rows_col_only = await view2.num_rows();
             expect(num_rows_col_only).toEqual(num_rows);
@@ -1420,6 +1420,38 @@ module.exports = (perspective) => {
             it("get_limit() on table with limit", async function () {
                 const table = await perspective.table(data, {limit: 2});
                 expect(await table.get_limit()).toEqual(2);
+            });
+        });
+
+        describe("Limit table constructors", function () {
+            it("Should not apply partial updates on limit tables when index wraps", async function () {
+                const table = await perspective.table(
+                    {a: "float", b: "float"},
+                    {
+                        limit: 3,
+                    }
+                );
+
+                table.update([{a: 10}, {b: 1}, {a: 20}, {a: null, b: 2}]);
+                const view = await table.view();
+                const records = await view.to_json();
+                await view.delete();
+                await table.delete();
+
+                const table2 = await perspective.table(
+                    {a: "float", b: "float"},
+                    {
+                        limit: 3,
+                    }
+                );
+
+                table2.update([{a: 10}, {b: 1}, {a: 20}, {b: 2}]);
+                const view2 = await table2.view();
+                const records2 = await view2.to_json();
+                await view2.delete();
+                await table2.delete();
+
+                expect(records).toEqual(records2);
             });
         });
 

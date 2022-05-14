@@ -11,6 +11,7 @@ const {Client} = require("./api/client.js");
 const {Server} = require("./api/server.js");
 const {WebSocketManager} = require("./websocket/manager");
 const {WebSocketClient} = require("./websocket/client");
+const {get_config, get_type_config} = require("./config/index.js");
 
 const perspective = require("./perspective.js").default;
 
@@ -21,24 +22,25 @@ const process = require("process");
 const path = require("path");
 
 const load_perspective =
-    require("./@finos/perspective-cpp/dist/cjs/perspective.cpp.js").default;
-
-// eslint-disable-next-line no-undef
+    require("../../dist/pkg/cjs/perspective.cpp.js").default;
 
 const LOCAL_PATH = path.join(process.cwd(), "node_modules");
-const buffer = fs.readFileSync(
-    require.resolve("./@finos/perspective-cpp/dist/cjs/perspective.cpp.wasm")
-).buffer;
+const buffer =
+    require("@finos/perspective/pkg/cjs/perspective.cpp.wasm").default;
 
 const SYNC_SERVER = new (class extends Server {
     init(msg) {
-        load_perspective({
-            wasmBinary: buffer,
-            wasmJSMethod: "native-wasm",
-        }).then((core) => {
-            this.perspective = perspective(core);
-            super.init(msg);
-        });
+        buffer
+            .then((buffer) =>
+                load_perspective({
+                    wasmBinary: buffer,
+                    wasmJSMethod: "native-wasm",
+                })
+            )
+            .then((core) => {
+                this.perspective = perspective(core);
+                super.init(msg);
+            });
     }
 
     post(msg) {
@@ -58,13 +60,15 @@ module.exports = SYNC_CLIENT;
 module.exports.sync_module = () => SYNC_SERVER.perspective;
 
 const DEFAULT_ASSETS = [
-    "@finos/perspective/dist/umd",
+    "@finos/perspective/dist/cdn",
     "@finos/perspective-bench/dist",
-    "@finos/perspective-viewer/dist/umd",
-    "@finos/perspective-viewer-datagrid/dist/umd",
-    "@finos/perspective-viewer-d3fc/dist/umd",
-    "@finos/perspective-workspace/dist/umd",
-    "@finos/perspective-jupyterlab/dist/umd",
+    "@finos/perspective-viewer/dist/cdn",
+    "@finos/perspective-viewer/dist/css",
+    "@finos/perspective-viewer-datagrid/dist/cdn",
+    "@finos/perspective-viewer-d3fc/dist/cdn",
+    "@finos/perspective-workspace/dist/cdn",
+    "@finos/perspective-workspace/dist/css",
+    "@finos/perspective-jupyterlab/dist/cdn",
 ];
 
 const CONTENT_TYPES = {
@@ -146,7 +150,9 @@ function perspective_assets(assets, host_psp) {
                             );
                             return;
                         }
-                    } catch (e) {}
+                    } catch (e) {
+                        // console.log(e);
+                    }
                 }
             }
             if (url.indexOf("favicon.ico") > -1) {
@@ -214,7 +220,10 @@ const websocket = (url) => {
     return new WebSocketClient(new WebSocket(url));
 };
 
+module.exports.get_type_config = get_type_config;
+module.exports.get_config = get_config;
 module.exports.worker = () => module.exports;
+module.exports.shared_worker = () => module.exports;
 module.exports.websocket = websocket;
 module.exports.perspective_assets = perspective_assets;
 module.exports.WebSocketServer = WebSocketServer;

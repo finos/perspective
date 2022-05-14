@@ -7,7 +7,7 @@
 // file.
 
 use super::super::radio_list::{RadioList, RadioListMsg};
-use crate::utils::WeakComponentLink;
+use crate::utils::{await_animation_frame, WeakScope};
 use crate::*;
 
 use std::cell::RefCell;
@@ -18,8 +18,8 @@ use yew::prelude::*;
 wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
-pub fn test_change_u32() {
-    let link: WeakComponentLink<RadioList<String>> = WeakComponentLink::default();
+pub async fn test_change_u32() {
+    let link: WeakScope<RadioList<String>> = WeakScope::default();
     let result: Rc<RefCell<String>> = Rc::new(RefCell::new("false".to_owned()));
     let on_change = {
         clone!(result);
@@ -43,11 +43,18 @@ pub fn test_change_u32() {
         </RadioList<String>>
     };
 
+    await_animation_frame().await.unwrap();
     let radio_list = link.borrow().clone().unwrap();
     radio_list.send_message(RadioListMsg::Change("2".to_owned()));
+    await_animation_frame().await.unwrap();
+
     assert_eq!(*result.borrow(), "2");
     radio_list.send_message(RadioListMsg::Change("3".to_owned()));
+    await_animation_frame().await.unwrap();
+
     assert_eq!(*result.borrow(), "3");
     radio_list.send_message(RadioListMsg::Change("1".to_owned()));
+    await_animation_frame().await.unwrap();
+
     assert_eq!(*result.borrow(), "1");
 }

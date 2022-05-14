@@ -16,7 +16,7 @@ import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
 import {
     PerspectiveViewerConfig,
-    PerspectiveViewerElement,
+    HTMLPerspectiveViewerElement,
 } from "@finos/perspective-viewer";
 
 import "./index.css";
@@ -31,11 +31,11 @@ const getTable = async (): Promise<perspective.Table> => {
 };
 
 const config: PerspectiveViewerConfig = {
-    row_pivots: ["State"],
+    group_by: ["State"],
 };
 
 const App = (): React.ReactElement => {
-    const viewer = React.useRef<PerspectiveViewerElement>(null);
+    const viewer = React.useRef<HTMLPerspectiveViewerElement>(null);
 
     React.useEffect(() => {
         getTable().then((table) => {
