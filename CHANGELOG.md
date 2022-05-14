@@ -1,5 +1,18 @@
 # Changelog
 
+## [v1.3.13](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.3.12...HEAD)
+
+**Fixed bugs:**
+
+- Fix export-to-html [\#1806](https://github.com/finos/perspective/pull/1806) ([texodus](https://github.com/texodus))
+
+**Merged pull requests:**
+
+- Fix jest timeouts for jupyterlab [\#1805](https://github.com/finos/perspective/pull/1805) ([texodus](https://github.com/texodus))
+- Make toggle-menu more responsive under load [\#1804](https://github.com/finos/perspective/pull/1804) ([texodus](https://github.com/texodus))
+
 ## [v1.3.12](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.3.11...HEAD)
