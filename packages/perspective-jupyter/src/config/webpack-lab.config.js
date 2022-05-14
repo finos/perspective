@@ -30,11 +30,7 @@ const rules = [
     },
 ];
 
-// Packages that shouldn't be bundled but loaded at runtime
 const externals = ["@jupyter-widgets/base"];
-const resolve = {
-    extensions: [".webpack.js", ".web.js", ".js"],
-};
 
 module.exports = {
     entry: "./dist/esm/lab/index.js",

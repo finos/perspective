@@ -11,6 +11,7 @@
 // it should not be published and as such does not product a dist/umd
 // output
 
-import "@finos/perspective-jupyterlab/dist/umd/perspective-jupyterlab.css";
-import plugins from "@finos/perspective-jupyterlab";
+// import from umd dist
+import "@finos/perspective-jupyter/dist/umd/perspective-jupyter.css";
+import plugins from "@finos/perspective-jupyter/dist/umd/perspective-jupyter";
 export default plugins;

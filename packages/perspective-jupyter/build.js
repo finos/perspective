@@ -37,25 +37,25 @@ const PROD_BUILD = {
     outfile: "dist/umd/perspective-jupyter.js",
 };
 
-const NBEXTENSION_BUILD = {
-    entryPoints: ["src/js/notebook/index.js"],
-    define: {
-        global: "window",
-    },
-    format: "esm",
-    plugins: [lessLoader(), WasmPlugin(true), WorkerPlugin(true)],
-    // external: ["@jupyter*", "@lumino*", "@jupyter-widgets*"],
-    external: ["@jupyter-widgets*"],
-    loader: {
-        ".html": "text",
-        ".ttf": "file",
-    },
-    outfile: "dist/umd/perspective-nbextension.js",
-};
+// const NBEXTENSION_BUILD = {
+//     entryPoints: ["src/js/notebook/index.js"],
+//     define: {
+//         global: "window",
+//     },
+//     format: "esm",
+//     plugins: [lessLoader(), WasmPlugin(true), WorkerPlugin(true)],
+//     // external: ["@jupyter*", "@lumino*", "@jupyter-widgets*"],
+//     external: ["@jupyter-widgets*"],
+//     loader: {
+//         ".html": "text",
+//         ".ttf": "file",
+//     },
+//     outfile: "dist/umd/perspective-nbextension.js",
+// };
 
 const BUILD = [
     process.argv.some((x) => x == "--test") ? TEST_BUILD : PROD_BUILD,
-    NBEXTENSION_BUILD,
+    // NBEXTENSION_BUILD,
 ];
 
 async function build_all() {

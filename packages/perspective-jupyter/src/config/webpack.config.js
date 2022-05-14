@@ -30,7 +30,7 @@ const rules = [
         exclude: [/monaco-editor/], // <- Exclude `monaco-editor`
         use: ["style-loader", "css-loader"],
     },
-    {test: /\.js$/, loader: "babel-loader"},
+    // {test: /\.js$/, loader: "babel-loader"},
 ];
 
 // Packages that shouldn't be bundled but loaded at runtime
@@ -47,12 +47,26 @@ module.exports = [
      * the notebook.
      */
     {
-        entry: "./dist/esm/notebook/extension.js",
+        entry: path.resolve(
+            __dirname,
+            "..",
+            "..",
+            "dist",
+            "esm",
+            "notebook",
+            "extension.js"
+        ),
         output: {
             filename: "extension.js",
             path: path.resolve(
                 __dirname,
                 "..",
+                "..",
+                "..",
+                "..",
+                "..",
+                "python",
+                "perspective",
                 "perspective",
                 "nbextension",
                 "static"
@@ -74,7 +88,15 @@ module.exports = [
         // custom widget.
         // It must be an amd module
         //
-        entry: "./dist/esm/notebook/index.js",
+        entry: path.resolve(
+            __dirname,
+            "..",
+            "..",
+            "dist",
+            "esm",
+            "notebook",
+            "index.js"
+        ),
         devtool,
         resolve,
         output: {
@@ -82,6 +104,12 @@ module.exports = [
             path: path.resolve(
                 __dirname,
                 "..",
+                "..",
+                "..",
+                "..",
+                "..",
+                "python",
+                "perspective",
                 "perspective",
                 "nbextension",
                 "static"
@@ -110,7 +138,15 @@ module.exports = [
         // The target bundle is always `dist/index.js`, which is the path required
         // by the custom widget embedder.
         //
-        entry: "./dist/esm/notebook/embed.js",
+        entry: path.resolve(
+            __dirname,
+            "..",
+            "..",
+            "dist",
+            "esm",
+            "notebook",
+            "embed.js"
+        ),
         output: {
             filename: "index.js",
             path: path.resolve(__dirname, "dist"),
