@@ -393,6 +393,81 @@ utils.with_server({}, () => {
                         },
                         {reload_page: true}
                     );
+                    test.capture(
+                        "filter in should work",
+                        async (page) => {
+                            await restore_viewer(page, {
+                                settings: true,
+                                group_by: [],
+                                columns: [
+                                    "Order ID",
+                                    "City",
+                                    null,
+                                    null,
+                                    "Category",
+                                ],
+                            });
+                            const origin = await shadow_elem(
+                                page,
+                                `#active-columns [data-index="1"] .column_selector_draggable`
+                            );
+                            const target = await shadow_elem(page, "#filter");
+                            await drag_and_drop(page, origin, target);
+                            await page.evaluateHandle(async () => {
+                                const mouseEvent =
+                                    document.createEvent("MouseEvents");
+                                mouseEvent.initEvent("focus", true, true);
+                                const input = document
+                                    .querySelector("perspective-viewer")
+                                    .shadowRoot.querySelector(
+                                        '[placeholder="Value"]'
+                                    );
+                                input.dispatchEvent(mouseEvent);
+                            });
+                            await page.evaluateHandle(async () => {
+                                const op = document
+                                    .querySelector("perspective-viewer")
+                                    .shadowRoot.querySelector(
+                                        ".filterop-selector"
+                                    );
+                                op.value = "in";
+                                const input = document
+                                    .querySelector("perspective-viewer")
+                                    .shadowRoot.querySelector(
+                                        '[placeholder="Value"]'
+                                    );
+                                input.dispatchEvent(
+                                    new Event("change", {
+                                        bubbles: true,
+                                        cancelable: true,
+                                    })
+                                );
+                            });
+                            await page.evaluateHandle(async () => {
+                                await sleep(500);
+                                const input = document
+                                    .querySelector("perspective-viewer")
+                                    .shadowRoot.querySelector(
+                                        '[placeholder="Value"]'
+                                    );
+                                input.value = "a,Ch";
+                                input.dispatchEvent(
+                                    new Event("input", {
+                                        bubbles: true,
+                                        cancelable: true,
+                                    })
+                                );
+                                function sleep(time) {
+                                    return new Promise((resolve) =>
+                                        setTimeout(resolve, time)
+                                    );
+                                }
+                                await sleep(500);
+                            });
+                            return await get_contents(page);
+                        },
+                        {reload_page: true}
+                    );
                 });
             },
             {root: path.join(__dirname, "..", "..")}

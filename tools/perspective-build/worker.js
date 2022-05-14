@@ -121,8 +121,7 @@ exports.WorkerPlugin = function WorkerPlugin(inline) {
                         }
                     }
 
-                    function run_single_threaded(code, e) {
-                        console.error("Running perspective in single-threaded mode due to error initializing Web Worker:", e);
+                    function run_single_threaded(code) {
                         let f = Function("const self = arguments[0];" + code);
                         const workers = [];
                         const mains = [];
@@ -133,8 +132,9 @@ exports.WorkerPlugin = function WorkerPlugin(inline) {
                     const code_promise = get_worker_code();
                     export const initialize = async function () {
                         const code = await code_promise;
-                        if (window.location.protocol.startsWith("file")) {
-                            console.warn(code, "file:// protocol does not support Web Workers");
+                        if (window.location.protocol.startsWith("file") && !window.isElectron) {
+                            console.warn("file:// protocol does not support Web Workers");
+                            return run_single_threaded(code);
                         }
 
                         try {
@@ -143,7 +143,7 @@ exports.WorkerPlugin = function WorkerPlugin(inline) {
                             return new Worker(url, {type: "module"});
                         } catch (e) {
                             console.warn("Failed to instantiate worker, falling back to single-threaded runtime", e);
-                            return run_single_threaded(code, e);
+                            return run_single_threaded(code);
                         }
                     };
 

@@ -80,5 +80,6 @@
     "dragdrop_column-selector-modes_drop_from_optional_to_empty_columns_should_move": "34a9ec617816dd8e024f6892372d44de",
     "dragdrop_column-selector-modes_dragover_from_named_to_required_columns_should_swap": "9c0c91c132ac0241145f84f80e906d7c",
     "dragdrop_column-selector-modes_dragover_from_optional_to_empty_columns_should_move": "6608921b082aeedc10407e6e939ac5fd",
-    "dragdrop_column-selector-modes_dragover_from_optional_to_required_columns_should_swap": "a4437c6463709641b63b096686b29e6d"
+    "dragdrop_column-selector-modes_dragover_from_optional_to_required_columns_should_swap": "a4437c6463709641b63b096686b29e6d",
+    "dragdrop_column-selector-modes_dragover_filter_in_should_work": "8e90d838a3b1a8fd1e449f0e1bb3a67e"
 }

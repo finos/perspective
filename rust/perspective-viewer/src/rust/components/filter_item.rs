@@ -68,7 +68,7 @@ impl DragDropListItemProps for FilterItemProps {
 impl FilterItemProps {
     /// Does this filter item get a "suggestions" auto-complete modal?
     fn is_suggestable(&self) -> bool {
-        (self.filter.1 == FilterOp::EQ || self.filter.1 == FilterOp::NE)
+        (self.filter.1 == FilterOp::EQ || self.filter.1 == FilterOp::NE || self.filter.1 == FilterOp::In)
             && self.get_filter_type() == Some(Type::String)
     }
 
@@ -258,7 +258,11 @@ impl Component for FilterItem {
                 if ctx.props().is_suggestable() {
                     ctx.props().filter_dropdown.autocomplete(
                         column,
-                        input.clone(),
+                        if ctx.props().filter.1 == FilterOp::In {
+                            input.split(",").last().unwrap().to_owned()
+                        } else {
+                            input.clone()
+                        },
                         target.unchecked_into(),
                         ctx.props().on_keydown.clone(),
                     );

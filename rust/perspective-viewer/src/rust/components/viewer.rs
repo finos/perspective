@@ -102,7 +102,7 @@ impl Component for PerspectiveViewer {
                     session.reset(all);
                     renderer.reset().await;
                     theme.reset(None).await;
-                    let result = renderer.draw(session.validate().await.create_view()).await;
+                    let result = renderer.draw(session.validate().await?.create_view()).await;
 
                     if let Some(sender) = sender {
                         sender.send(()).unwrap();
