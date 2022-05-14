@@ -67,8 +67,9 @@ class PerspectiveStarletteHandler(object):
 
     async def run(self) -> None:
         try:
+            await self._websocket.accept()
             while True:
-                message = await self.websocket.receive_text()
+                message = await self._websocket.receive_text()
                 await self.on_message(message)
         finally:
             self.on_close()
@@ -138,6 +139,6 @@ class PerspectiveStarletteHandler(object):
 
     async def write_message(self, message: str, binary: bool = False) -> None:
         if binary:
-            await self.websocket.send_bytes(message)
+            await self._websocket.send_bytes(message)
         else:
-            await self.websocket.send_text(message)
+            await self._websocket.send_text(message)

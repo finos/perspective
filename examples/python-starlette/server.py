@@ -12,9 +12,9 @@ import logging
 import threading
 import uvicorn
 
-from fastapi import FastAPI
-from starlette.applications import Starlette
-from starlette.routing import Route, Mount
+from fastapi import FastAPI, WebSocket
+from fastapi.middleware.cors import CORSMiddleware
+from starlette.responses import FileResponse
 from starlette.staticfiles import StaticFiles
 
 from perspective import Table, PerspectiveManager, PerspectiveStarletteHandler
@@ -26,56 +26,52 @@ file_path = os.path.join(
 )
 
 
+def static_nodemodules_handler(rest_of_path):
+    if rest_of_path.startswith("@finos"):
+        return FileResponse("../../node_modules/{}".format(rest_of_path))
+    return FileResponse("../../node_modules/@finos/{}".format(rest_of_path))
+
+
 def perspective_thread(manager):
-    """Perspective application thread starts its own tornado IOLoop, and
+    """Perspective application thread starts its own event loop, and
     adds the table with the name "data_source_one", which will be used
     in the front-end."""
-    psp_loop = asyncio.get_running_loop()
-    manager.set_loop_callback(psp_loop.add_callback)
+    psp_loop = asyncio.new_event_loop()
+    manager.set_loop_callback(psp_loop.call_soon_threadsafe)
     with open(file_path, mode="rb") as file:
         table = Table(file.read(), index="Row ID")
         manager.host_table("data_source_one", table)
-    psp_loop.start()
+    psp_loop.run_forever()
 
-
-def make_app(fastapi=False):
-    '''Create an application.
-
-    To demo wit FastAPI, set FASTAPI env var e.g.
-    FASTAPI=1 yarn start
-
-    Args:
-        fastapi (bool, optional): make a fastapi app. Defaults to False.
-    '''
+def make_app():
     manager = PerspectiveManager()
 
     thread = threading.Thread(target=perspective_thread, args=(manager,))
     thread.daemon = True
     thread.start()
 
-    async def websocket_handler(websocket):
+    async def websocket_handler(websocket: WebSocket):
         handler = PerspectiveStarletteHandler(manager, websocket)
         await handler.run()
 
-    static_nodemodules_files = StaticFiles(directory="../../node_modules/@finos/")
+    # static_html_files = StaticFiles(directory="../python-tornado", html=True)
     static_html_files = StaticFiles(directory="../python-tornado", html=True)
 
-    if not fastapi:
-        routes = [
-            Route("/websocket", websocket_handler),
-            Mount("/node_modules", static_nodemodules_files),
-            Mount("/", static_html_files),
-        ]
+    app = FastAPI()
+    app.add_api_websocket_route('/websocket', websocket_handler)
+    app.get("/node_modules/{rest_of_path:path}")(static_nodemodules_handler)
+    app.mount("/", static_html_files)
 
-        app = Starlette(debug=True, routes=routes)
-    else:
-        app = FastAPI()
-        app.add_api_websocket_route('/websocket', websocket_handler)
-        app.mount("/node_modules", static_nodemodules_files)
-        app.mount("/", static_html_files)
-
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+    return app
 
 if __name__ == "__main__":
-    app = make_app(os.environ.get("FASTAPI", ""))
+    app = make_app()
     logging.critical("Listening on http://localhost:8080")
     uvicorn.run(app, host='0.0.0.0', port=8080)
