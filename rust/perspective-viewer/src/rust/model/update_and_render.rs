@@ -36,7 +36,7 @@ pub trait UpdateAndRender: HasRenderer + HasSession {
         self.session().update_view_config(update);
         clone!(self.session(), self.renderer());
         let _ = promisify_ignore_view_delete(async move {
-            let view = session.validate().await;
+            let view = session.validate().await?;
             drop(renderer.draw(view.create_view()).await?);
             Ok(JsValue::UNDEFINED)
         });

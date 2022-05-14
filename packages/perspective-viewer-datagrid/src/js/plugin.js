@@ -77,11 +77,13 @@ export class PerspectiveViewerDatagridPluginElement extends HTMLElement {
 
         this._is_edit_mode = force;
         this.classList.toggle("editable", force);
-        this._edit_mode.classList.toggle("editable", force);
-        if (force) {
-            this._edit_mode.children[0].textContent = "Editable";
-        } else {
-            this._edit_mode.children[0].textContent = "Read Only";
+        if (this._edit_mode !== undefined) {
+            this._edit_mode.classList.toggle("editable", force);
+            if (force) {
+                this._edit_mode.children[0].textContent = "Editable";
+            } else {
+                this._edit_mode.children[0].textContent = "Read Only";
+            }
         }
     }
 
@@ -92,11 +94,13 @@ export class PerspectiveViewerDatagridPluginElement extends HTMLElement {
 
         this._is_scroll_lock = force;
         this.classList.toggle("sub-cell-scroll-enabled", !force);
-        this._scroll_lock.classList.toggle("lock-scroll", force);
-        if (!force) {
-            this._scroll_lock.children[0].textContent = "Free Scroll";
-        } else {
-            this._scroll_lock.children[0].textContent = "Align Scroll";
+        if (this._scroll_lock !== undefined) {
+            this._scroll_lock.classList.toggle("lock-scroll", force);
+            if (!force) {
+                this._scroll_lock.children[0].textContent = "Free Scroll";
+            } else {
+                this._scroll_lock.children[0].textContent = "Align Scroll";
+            }
         }
     }
 

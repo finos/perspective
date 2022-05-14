@@ -234,7 +234,7 @@ impl PerspectiveViewerElement {
                     let table: JsPerspectiveTable = promise.unchecked_into();
                     session.reset_stats();
                     session.set_table(table).await?;
-                    session.validate().await.create_view().await
+                    session.validate().await?.create_view().await
                 })
                 .await
         })
@@ -353,13 +353,17 @@ impl PerspectiveViewerElement {
                     .ok_or("Already deleted")?
                     .promise_message(move |x| Msg::ToggleSettingsComplete(settings, x));
 
-                let plugin = renderer.get_active_plugin()?;
-                if let Some(plugin_config) = &plugin_config {
-                    let js_config = JsValue::from_serde(plugin_config);
-                    plugin.restore(&js_config.into_jserror()?);
-                }
+                let result = async {
+                    let plugin = renderer.get_active_plugin()?;
+                    if let Some(plugin_config) = &plugin_config {
+                        let js_config = JsValue::from_serde(plugin_config);
+                        plugin.restore(&js_config.into_jserror()?);
+                    }
 
-                let result = session.validate().await.create_view().await;
+                    session.validate().await?.create_view().await
+                }
+                .await;
+
                 task.await.into_jserror()?;
                 result
             });

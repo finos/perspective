@@ -32,9 +32,11 @@ use crate::utils::*;
 use crate::*;
 
 use futures::future::join_all;
+use futures::future::select_all;
 use std::cell::{Ref, RefCell};
 use std::future::Future;
 use std::ops::Deref;
+use std::pin::Pin;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -311,31 +313,72 @@ impl Renderer {
         on_toggle: impl Future<Output = Result<(), JsValue>>,
     ) -> Result<JsValue, JsValue> {
         let task = async {
-            let plugin = self.get_active_plugin()?;
-            if open {
-                on_toggle.await?;
-                plugin.resize().await
-            } else {
-                let main_panel: web_sys::HtmlElement = self
-                    .0
-                    .borrow()
-                    .viewer_elem
-                    .children()
-                    .item(0)
-                    .unwrap()
-                    .unchecked_into();
-                let new_width = format!("{}px", &self.0.borrow().viewer_elem.client_width());
-                let new_height = format!("{}px", &self.0.borrow().viewer_elem.client_height());
-                main_panel.style().set_property("width", &new_width)?;
-                main_panel.style().set_property("height", &new_height)?;
-                let resize = plugin.resize().await;
-                main_panel.style().set_property("width", "")?;
-                main_panel.style().set_property("height", "")?;
-                on_toggle.await?;
-                resize
-            }
+            let task = async {
+                let plugin = self.get_active_plugin()?;
+                if open {
+                    // 6a. If getting smaller just resize, else
+                    plugin.resize().await
+                } else {
+                    // 6b. Resize the `<div>` offscreen  ...
+                    let main_panel: web_sys::HtmlElement = self
+                        .0
+                        .borrow()
+                        .viewer_elem
+                        .children()
+                        .item(0)
+                        .unwrap()
+                        .unchecked_into();
+                    let new_width = format!("{}px", &self.0.borrow().viewer_elem.client_width());
+                    let new_height = format!("{}px", &self.0.borrow().viewer_elem.client_height());
+                    main_panel.style().set_property("width", &new_width)?;
+                    main_panel.style().set_property("height", &new_height)?;
+
+                    // 6b (cont). ... then resize the plugin
+                    let resize = plugin.resize().await;
+                    main_panel.style().set_property("width", "")?;
+                    main_panel.style().set_property("height", "")?;
+                    resize
+                }
+            };
+
+            // 3. Lock on draw, in parallell with a timeout
+            let draw_lock = self.draw_lock();
+            let tasks: [Pin<Box<dyn Future<Output = Option<Result<JsValue, JsValue>>>>>; 2] = [
+                Box::pin(async move { Some(draw_lock.lock(task).await) }),
+                Box::pin(async {
+                    set_timeout(500).await.unwrap();
+                    None
+                }),
+            ];
+
+            // 2. Wait for the first task to finish of ..
+            select_all(tasks.into_iter()).await
         };
-        self.draw_lock().lock(task).await
+
+        // 1. Decide whether to draw the plugin or self first
+        let (ans, _, rest) = if open {
+            on_toggle.await?;
+            task.await
+        } else {
+            let result = task.await;
+            on_toggle.await?;
+            result
+        };
+
+        // 7. If we bailed (2) due to timeout, still need to await the other
+        //    task.  `on_toggle` has resolved by now either way.
+        match ans {
+            Some(x) => x,
+            None => {
+                web_sys::console::log_1(&"Presize took longer than 500ms".into());
+                join_all(rest.into_iter())
+                    .await
+                    .into_iter()
+                    .next()
+                    .unwrap()
+                    .unwrap()
+            }
+        }
     }
 
     fn draw_lock(&self) -> DebounceMutex {

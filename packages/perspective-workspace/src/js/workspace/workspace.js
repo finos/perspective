@@ -728,8 +728,6 @@ export class PerspectiveWorkspace extends SplitPanel {
                         }
                     }
 
-                    console.log(this.viewers);
-
                     submenu.title.label = "New Table";
 
                     return submenu;
