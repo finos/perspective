@@ -56,9 +56,10 @@ requires = [
     "numpy>=1.13.1",
     "pandas>=0.22.0",
     "python-dateutil>=2.8.0",
-    "tornado>=4.5.3",
     "traitlets>=4.3.2",
 ]
+
+requires_tornado = ["tornado>=4.5.3"]
 
 requires_starlette = ["starlette"]
 
@@ -82,6 +83,7 @@ requires_dev = (
         "wheel",
     ]
     + requires
+    + requires_tornado
     + requires_starlette
 )
 
@@ -260,7 +262,11 @@ setup(
     zip_safe=False,
     python_requires=">=3.6",
     install_requires=requires,
-    extras_require={"dev": requires_dev, "starlette": requires_starlette},
+    extras_require={
+        "dev": requires_dev,
+        "starlette": requires_starlette,
+        "tornado": requires_tornado,
+    },
     ext_modules=[PSPExtension("perspective")],
     cmdclass=dict(build_ext=PSPBuild, sdist=PSPCheckSDist),
 )
