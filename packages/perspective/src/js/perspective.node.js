@@ -68,7 +68,7 @@ const DEFAULT_ASSETS = [
     "@finos/perspective-viewer-d3fc/dist/cdn",
     "@finos/perspective-workspace/dist/cdn",
     "@finos/perspective-workspace/dist/css",
-    "@finos/perspective-jupyterlab/dist/cdn",
+    "@finos/perspective-jupyter/dist/cdn",
 ];
 
 const CONTENT_TYPES = {

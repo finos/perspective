@@ -7,10 +7,13 @@
  *
  */
 
-/* css */
-import "../less/index.less";
+import "../../less/index.less";
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
+export {PerspectiveView} from "../plugin/view";
+export {PerspectiveModel} from "../plugin/model";
 
-export * from "./view";
-export * from "./model";
+import {PerspectiveView} from "../plugin/view";
+import {PerspectiveModel} from "../plugin/model";
+console.log(PerspectiveModel);
+console.log(PerspectiveView);

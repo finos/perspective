@@ -8,7 +8,7 @@ const {UMDLoader} = require("@finos/perspective-build/umd");
 const {build} = require("@finos/perspective-build/build");
 
 const TEST_BUILD = {
-    entryPoints: ["src/js/psp_widget.js"],
+    entryPoints: ["src/js/plugin/psp_widget.js"],
     define: {
         global: "window",
     },
@@ -23,7 +23,7 @@ const TEST_BUILD = {
 };
 
 const PROD_BUILD = {
-    entryPoints: ["src/js/index.js"],
+    entryPoints: ["src/js/plugin/index.js"],
     define: {
         global: "window",
     },
@@ -34,15 +34,15 @@ const PROD_BUILD = {
         ".html": "text",
         ".ttf": "file",
     },
-    outfile: "dist/umd/perspective-jupyterlab.js",
+    outfile: "dist/umd/perspective-jupyter.js",
 };
 
 const NBEXTENSION_BUILD = {
-    entryPoints: ["src/js/nbextension.js"],
+    entryPoints: ["src/js/notebook/index.js"],
     define: {
         global: "window",
     },
-    format: 'esm',
+    format: "esm",
     plugins: [lessLoader(), WasmPlugin(true), WorkerPlugin(true)],
     // external: ["@jupyter*", "@lumino*", "@jupyter-widgets*"],
     external: ["@jupyter-widgets*"],
@@ -60,9 +60,7 @@ const BUILD = [
 
 async function build_all() {
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
-    cpy(["dist/css/*"], "dist/umd");
-    // cpy(["dist/umd/*"], "../../python/perspective/jupyter/src/build");
-    // cpy(["dist/umd/*"], "../../python/perspective/jupyter/lib/build");
+    cpy(["src/less/*"], "dist/less");
 }
 
 build_all();

@@ -18,7 +18,7 @@ const PACKAGE_ROOT = path.join(__dirname, "..", "..", "..");
  */
 const kill_jlab = () => {
     console.log("-- Cleaning up Jupyterlab process");
-    execute`ps aux | grep -i '[j]upyter-lab --no-browser' | awk '{print $2}' | xargs kill -9 && echo "[perspective-jupyterlab] JupyterLab process terminated"`;
+    execute`ps aux | grep -i '[j]upyter-lab --no-browser' | awk '{print $2}' | xargs kill -9 && echo "[perspective-jupyter] JupyterLab process terminated"`;
 };
 
 exports.kill_jlab = kill_jlab;
