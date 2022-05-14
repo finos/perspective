@@ -6,7 +6,7 @@ python3 -m pip install -U perspective-python
 
 export NODE_OPTIONS=--max-old-space-size=32768
 
-EXTENSIONS="@jupyter-widgets/jupyterlab-manager @finos/perspective-jupyterlab"
+EXTENSIONS="@jupyter-widgets/jupyterlab-manager @finos/perspective-jupyter"
 
 
 jupyter labextension install $EXTENSIONS --no-build

@@ -76,7 +76,7 @@ have installed `perspective-python` and then install the extension from the
 Jupyter lab extension directory:
 
 ```bash
-jupyter labextension install @finos/perspective-jupyterlab
+jupyter labextension install @finos/perspective-jupyter
 ```
 
 If the widget does not display, you might be missing the

@@ -193,8 +193,8 @@ docs/static/features
 target.vscode
 
 # jupyterlab test artifacts
-packages/perspective-jupyterlab/test/config/jupyter/lab
-packages/perspective-jupyterlab/test/config/jupyter/migrated
+packages/perspective-jupyter/test/config/jupyter/lab
+packages/perspective-jupyter/test/config/jupyter/migrated
 results.debug.json
 
 tools/perspective-build/lib

@@ -8,15 +8,16 @@
  */
 const path = require("path");
 const webpack = require("webpack");
-const version = require("./package.json").version;
+const version = require("../../package.json").version;
 const PerspectivePlugin = require("@finos/perspective-webpack-plugin");
 
 const devtool = process.argv.mode === "development" ? "source-map" : false;
 const plugins = [
     new PerspectivePlugin({inline: true}),
     new webpack.DefinePlugin({
-        "process.env": "{}"
-      })];
+        "process.env": "{}",
+    }),
+];
 
 const rules = [
     {
@@ -29,14 +30,13 @@ const rules = [
         exclude: [/monaco-editor/], // <- Exclude `monaco-editor`
         use: ["style-loader", "css-loader"],
     },
-    {test: /\.js$/, loader: "babel-loader"},
-  ];
-  
+    // {test: /\.js$/, loader: "babel-loader"},
+];
+
 // Packages that shouldn't be bundled but loaded at runtime
 const externals = ["@jupyter-widgets/base"];
 const resolve = {
-// Add '.ts' and '.tsx' as resolvable extensions.
-extensions: [".webpack.js", ".web.js", ".js"],
+    extensions: [".webpack.js", ".web.js", ".js"],
 };
 
 module.exports = [
@@ -47,12 +47,26 @@ module.exports = [
      * the notebook.
      */
     {
-        entry: "./lib/extension.js",
+        entry: path.resolve(
+            __dirname,
+            "..",
+            "..",
+            "dist",
+            "esm",
+            "notebook",
+            "extension.js"
+        ),
         output: {
             filename: "extension.js",
             path: path.resolve(
                 __dirname,
                 "..",
+                "..",
+                "..",
+                "..",
+                "..",
+                "python",
+                "perspective",
                 "perspective",
                 "nbextension",
                 "static"
@@ -74,7 +88,15 @@ module.exports = [
         // custom widget.
         // It must be an amd module
         //
-        entry: "./lib/nbextension.js",
+        entry: path.resolve(
+            __dirname,
+            "..",
+            "..",
+            "dist",
+            "esm",
+            "notebook",
+            "index.js"
+        ),
         devtool,
         resolve,
         output: {
@@ -82,6 +104,12 @@ module.exports = [
             path: path.resolve(
                 __dirname,
                 "..",
+                "..",
+                "..",
+                "..",
+                "..",
+                "python",
+                "perspective",
                 "perspective",
                 "nbextension",
                 "static"
@@ -89,38 +117,6 @@ module.exports = [
             publicPath: "",
             libraryTarget: "amd",
         },
-        module: {
-            rules,
-        },
-        externals,
-        plugins,
-    },
-    {
-        // Embeddable {{ cookiecutter.npm_package_name }} bundle
-        //
-        // This bundle is generally almost identical to the notebook bundle
-        // containing the custom widget views and models.
-        //
-        // The only difference is in the configuration of the webpack public path
-        // for the static assets.
-        //
-        // It will be automatically distributed by unpkg to work with the static
-        // widget embedder.
-        //
-        // The target bundle is always `dist/index.js`, which is the path required
-        // by the custom widget embedder.
-        //
-        entry: "./lib/embed.js",
-        output: {
-            filename: "index.js",
-            path: path.resolve(__dirname, "dist"),
-            libraryTarget: "amd",
-            publicPath:
-                "https://unpkg.com/@finos/perspective-jupyter@" +
-                version +
-                "/dist/",
-        },
-        devtool,
         module: {
             rules,
         },

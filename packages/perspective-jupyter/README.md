@@ -10,7 +10,7 @@ This extension allows in-lining perspective based charts in jupyterlab notebooks
 
 ```bash
 jupyter labextension install @jupyter-widgets/jupyterlab-manager
-jupyter labextension install @finos/perspective-jupyterlab
+jupyter labextension install @finos/perspective-jupyter
 ```
 
 ### PIP

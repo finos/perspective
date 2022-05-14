@@ -69,7 +69,7 @@ parameters:
           architecture: "x64"
         displayName: "Use Python $(python.version)"
 
-      - bash: python -m pip install --upgrade pip wheel setuptools "jupyterlab>=3.0.14" numpy "pyarrow>=5" "black==20.8b1" flake8-black
+      - bash: python -m pip install --upgrade pip wheel setuptools "jupyterlab>=3.4" numpy "pyarrow>=5" "black==20.8b1" flake8-black
         displayName: "Install Python base dependencies"
         condition: succeeded()
 
@@ -275,6 +275,7 @@ jobs:
     steps:
       - ${{ parameters.initSteps }}
       - ${{ parameters.wasmInitSteps }}
+      - ${{ paramters.pythonInitSteps }}
       - ${{ parameters.linuxInitSteps }}
       - ${{ parameters.webassemblySteps }}
 
@@ -324,8 +325,8 @@ jobs:
       - bash: cd $(System.DefaultWorkingDirectory)/packages/perspective-viewer-d3fc && yarn pack --filename=perspective-viewer-d3fc-dist.tgz
         displayName: "yarn pack perspective-viewer-d3fc"
 
-      - bash: cd $(System.DefaultWorkingDirectory)/packages/perspective-jupyterlab && yarn pack --filename=perspective-jupyterlab-dist.tgz
-        displayName: "yarn pack perspective-jupyterlab"
+      - bash: cd $(System.DefaultWorkingDirectory)/packages/perspective-jupyter && yarn pack --filename=perspective-jupyter-dist.tgz
+        displayName: "yarn pack perspective-jupyter"
 
       # Upload the packed versions
       - task: PublishPipelineArtifact@1
@@ -350,8 +351,8 @@ jobs:
 
       - task: PublishPipelineArtifact@1
         inputs:
-          targetPath: "$(System.DefaultWorkingDirectory)/packages/perspective-jupyterlab/perspective-jupyterlab-dist.tgz"
-          artifactName: "perspective-jupyterlab-dist"
+          targetPath: "$(System.DefaultWorkingDirectory)/packages/perspective-jupyter/perspective-jupyter-dist.tgz"
+          artifactName: "perspective-jupyter-dist"
 
   - job: "Linux"
     pool:
@@ -604,9 +605,9 @@ jobs:
           path: $(System.DefaultWorkingDirectory)
 
       - task: DownloadPipelineArtifact@2
-        displayName: "Download perspective-jupyterlab dist"
+        displayName: "Download perspective-jupyter dist"
         inputs:
-          artifact: "perspective-jupyterlab-dist"
+          artifact: "perspective-jupyter-dist"
           path: $(System.DefaultWorkingDirectory)
 
       - bash: tar --strip-components=1 -xvf $(System.DefaultWorkingDirectory)/perspective-dist.tgz -C $(System.DefaultWorkingDirectory)/packages/perspective package
@@ -621,13 +622,13 @@ jobs:
       - bash: tar --strip-components=1 -xvf $(System.DefaultWorkingDirectory)/perspective-viewer-d3fc-dist.tgz -C $(System.DefaultWorkingDirectory)/packages/perspective-viewer-d3fc package
         displayName: "Install perspective-viewer-d3fc dist"
 
-      - bash: tar --strip-components=1 -xvf $(System.DefaultWorkingDirectory)/perspective-jupyterlab-dist.tgz -C $(System.DefaultWorkingDirectory)/packages/perspective-jupyterlab package
-        displayName: "Install perspective-jupyterlab dist"
+      - bash: tar --strip-components=1 -xvf $(System.DefaultWorkingDirectory)/perspective-jupyter-dist.tgz -C $(System.DefaultWorkingDirectory)/packages/perspective-jupyter package
+        displayName: "Install perspective-jupyter dist"
 
-      - bash: jupyter labextension install $(System.DefaultWorkingDirectory)/packages/perspective-jupyterlab
-        displayName: "Install perspective-jupyterlab labextension"
+      - bash: jupyter labextension install $(System.DefaultWorkingDirectory)/packages/perspective-jupyter
+        displayName: "Install perspective-jupyter labextension"
 
       - bash: yarn test_js --jupyter --debug
         displayName: "Run Jupyterlab tests"
         env:
-          PACKAGE: perspective-jupyterlab
+          PACKAGE: perspective-jupyter

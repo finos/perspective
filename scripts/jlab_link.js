@@ -14,7 +14,7 @@ const packages = [
     "./rust/perspective-viewer",
     "./packages/perspective-viewer-datagrid",
     "./packages/perspective-viewer-d3fc",
-    "./packages/perspective-jupyterlab",
+    "./packages/perspective-jupyter",
 ];
 
 /**
@@ -30,8 +30,8 @@ const packages = [
  * changes picked up in their current Jupyterlab installation.
  *
  * To set up your Jupyterlab environment with the local
- * `perspective-jupyterlab` plugin, run
- * `jupyter labextension install ./packages/perspective-jupyterlab` to link
+ * `perspective-jupyter` plugin, run
+ * `jupyter labextension install ./packages/perspective-jupyter` to link
  * to the local plugin.
  */
 (async function () {

@@ -46,7 +46,7 @@ def write_version():
         f.write('major_minor_version = "{}"\n'.format(truncated))
 
     logging.info("`perspective-python` updated to version `{}`".format(version))
-    logging.info("`PerspectiveWidget` now requires `perspective-jupyterlab` version `~{}`".format(truncated))
+    logging.info("`PerspectiveWidget` now requires `perspective-jupyter` version `~{}`".format(truncated))
 
 
 if __name__ == "__main__":

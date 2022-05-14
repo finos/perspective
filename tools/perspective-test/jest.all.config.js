@@ -5,7 +5,7 @@ module.exports = {
         "packages/perspective-viewer-datagrid/test/js",
         "packages/perspective-viewer-d3fc/test/js",
         "packages/perspective-workspace/test/js",
-        "packages/perspective-jupyterlab/test/js",
+        "packages/perspective-jupyter/test/js",
     ],
     verbose: true,
     testURL: "http://localhost/",
@@ -17,7 +17,7 @@ module.exports = {
     collectCoverageFrom: ["packages/perspective/dist/cjs/**"],
     coverageProvider: "v8",
     coverageReporters: ["cobertura", "text"],
-    // perspective-jupyterlab tests mock `@jupyter-widgets`, which is in
+    // perspective-jupyter tests mock `@jupyter-widgets`, which is in
     // Typescript.
     transformIgnorePatterns: [
         "/node_modules/(?!(d3|internmap|delaunator|robust-predicates|@jupyter-widgets)).+\\.js",
