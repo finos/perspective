@@ -6,9 +6,8 @@
         "dist/**/*",
         "src/**/*"
     ],
-    "browser": "dist/umd/perspective-jupyter.js",
+    "main": "dist/umd/perspective-jupyter.js",
     "style": "dist/umd/perspective-jupyter.css",
-    "main": "dist/esm/index.js",
     "directories": {
         "dist": "dist/"
     },
@@ -23,7 +22,7 @@
         "build": "npm-run-all build:*",
         "build:base": "node build.js",
         "build:lib": "babel src/js/ --source-maps --out-dir dist/esm/",
-        "build:labextension": "jupyter labextension build .",
+        "build:labextension": "jupyter labextension build . --debug",
         "build:nbextension": "webpack --mode=production -c src/config/webpack.config.js",
         "clean": "npm-run-all clean:*",
         "clean:dist": "rimraf dist",
@@ -56,9 +55,9 @@
         "@jupyterlab/builder": "^3.4.0"
     },
     "jupyterlab": {
-        "extension": true,
+        "extension": "dist/umd/perspective-jupyter.js",
+        "mimeExtension": "dist/umd/perspective-mimerenderer.js",
         "outputDir": "../../python/perspective/perspective/labextension",
-        "webpackConfig": "src/config/webpack-lab.config.js",
         "sharedPackages": {
             "@jupyter-widgets/base": {
                 "bundled": false,

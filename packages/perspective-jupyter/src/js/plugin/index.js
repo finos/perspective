@@ -13,15 +13,12 @@ export * from "./version";
 export * from "./view";
 export * from "./widget";
 
-/* css */
 import "../../less/index.less";
+
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
-import {perspectiveRenderers} from "./renderer";
+
 import {PerspectiveJupyterPlugin} from "./plugin";
 
-/**
- * Export the renderer as default.
- */
-const plugins = [PerspectiveJupyterPlugin, perspectiveRenderers];
+const plugins = [PerspectiveJupyterPlugin];
 export default plugins;

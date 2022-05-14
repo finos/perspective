@@ -19,9 +19,11 @@ import {
 import {ABCWidgetFactory, DocumentWidget} from "@jupyterlab/docregistry";
 import {PerspectiveWidget} from "./psp_widget";
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-// const perspective = require("@finos/perspective").default;
+import "../../less/index.less";
+import "@finos/perspective-viewer-datagrid";
+import "@finos/perspective-viewer-d3fc";
 import perspective from "@finos/perspective/dist/esm/perspective.js";
+
 /**
  * The name of the factories that creates widgets.
  */

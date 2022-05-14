@@ -6,16 +6,9 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-const webpack = require("webpack");
 const PerspectivePlugin = require("@finos/perspective-webpack-plugin");
 
-const devtool = process.argv.mode === "development" ? "source-map" : false;
-const plugins = [
-    new PerspectivePlugin({inline: true}),
-    new webpack.DefinePlugin({
-        "process.env": "{}",
-    }),
-];
+const plugins = [new PerspectivePlugin({inline: true})];
 
 const rules = [
     {
@@ -30,14 +23,9 @@ const rules = [
     },
 ];
 
-const externals = ["@jupyter-widgets/base"];
-
 module.exports = {
-    entry: "./dist/esm/lab/index.js",
     module: {
         rules,
     },
-    devtool,
     plugins,
-    externals,
 };

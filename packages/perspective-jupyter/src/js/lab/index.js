@@ -13,5 +13,9 @@
 
 // import from umd dist
 import "@finos/perspective-jupyter/dist/umd/perspective-jupyter.css";
-import plugins from "@finos/perspective-jupyter/dist/umd/perspective-jupyter";
+import jupyterPlugins from "@finos/perspective-jupyter/dist/umd/perspective-jupyter";
+import renderPlugins from "@finos/perspective-jupyter/dist/umd/perspective-mimerenderer";
+
+const plugins = [...jupyterPlugins, ...renderPlugins];
+
 export default plugins;
