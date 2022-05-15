@@ -264,13 +264,13 @@ parameters:
 
       - task: PublishPipelineArtifact@1
         inputs:
-          targetPath: "$(System.DefaultWorkingDirectory)/python/perspective/perspective/perspective-nbextension-dist.tgz"
-          artifactName: "perspective-nbextension-dist"
+          targetPath: "$(System.DefaultWorkingDirectory)/python/perspective/perspective/perspective-nbextension.tgz"
+          artifactName: "perspective-nbextension"
 
       - task: PublishPipelineArtifact@1
         inputs:
-          targetPath: "$(System.DefaultWorkingDirectory)/python/perspective/perspective/perspective-labextension-dist.tgz"
-          artifactName: "perspective-labextension-dist"
+          targetPath: "$(System.DefaultWorkingDirectory)/python/perspective/perspective/perspective-labextension.tgz"
+          artifactName: "perspective-labextension"
 
 
   # Steps to upload npm-packed assets
@@ -326,22 +326,22 @@ parameters:
     type: stepList
     default:
       - task: DownloadPipelineArtifact@2
-        displayName: "Download perspective-nbextension dist"
+        displayName: "Download perspective-nbextension"
         inputs:
-          artifact: "perspective-nbextension-dist"
+          artifact: "perspective-nbextension"
           path: $(System.DefaultWorkingDirectory)
 
       - task: DownloadPipelineArtifact@2
-        displayName: "Download perspective-labextension dist"
+        displayName: "Download perspective-labextension"
         inputs:
-          artifact: "perspective-labextension-dist"
+          artifact: "perspective-labextension"
           path: $(System.DefaultWorkingDirectory)
   
-      - bash: tar --strip-components=1 -xvf $(System.DefaultWorkingDirectory)/perspective-nbextension-dist.tgz -C $(System.DefaultWorkingDirectory)/python/perspective/perspective/
-        displayName: "Install perspective-nbextension dist"
+      - bash: tar --strip-components=1 -xvf $(System.DefaultWorkingDirectory)/perspective-nbextension.tgz -C $(System.DefaultWorkingDirectory)/python/perspective/perspective/
+        displayName: "Install perspective-nbextension"
   
-      - bash: tar --strip-components=1 -xvf $(System.DefaultWorkingDirectory)/perspective-labextension-dist.tgz -C $(System.DefaultWorkingDirectory)/python/perspective/perspective/
-        displayName: "Install perspective-labextension dist"
+      - bash: tar --strip-components=1 -xvf $(System.DefaultWorkingDirectory)/perspective-labextension.tgz -C $(System.DefaultWorkingDirectory)/python/perspective/perspective/
+        displayName: "Install perspective-labextension"
       
 
   ##########
@@ -388,27 +388,27 @@ parameters:
   - name: pythonUploadArtifactsSteps
     type: stepList
     default:
-      - bash: tar cfzv perspective-python-dist-$(ImageOS).tgz $(System.DefaultWorkingDirectory)/python/perspective 
+      - bash: tar cfzv perspective-python-build-$(ImageOS).tgz $(System.DefaultWorkingDirectory)/python/perspective 
         displayName: "Compress PSP-only build"
 
       # Upload the packed versions
       - task: PublishPipelineArtifact@1
         inputs:
-          targetPath: "perspective-python-dist-$(ImageOS).tgz"
-          artifactName: "perspective-python-dist-$(ImageOS)"
+          targetPath: "perspective-python-build-$(ImageOS).tgz"
+          artifactName: "perspective-python-build-$(ImageOS)"
 
   # Extracting build assets
   - name: pythonDownloadArtifactsSteps
     type: stepList
     default:
       - task: DownloadPipelineArtifact@2
-        displayName: "Download psp-only perspective python dist"
+        displayName: "Download psp-only perspective python build"
         inputs:
-          artifact: "perspective-python-dist-$(ImageOS)"
+          artifact: "perspective-python-build-$(ImageOS)"
           path: $(System.DefaultWorkingDirectory)
 
-      - bash: tar --strip-components=1 -xvf $(System.DefaultWorkingDirectory)/perspective-python-dist-$(ImageOS).tgz -C $(System.DefaultWorkingDirectory)/python/
-        displayName: "Install perspective-python dist"
+      - bash: tar --strip-components=1 -xvf $(System.DefaultWorkingDirectory)/perspective-python-build-$(ImageOS).tgz -C $(System.DefaultWorkingDirectory)/python/
+        displayName: "Install perspective-python build"
 
   # Builds regular builds
   - name: pythonBuildSteps
