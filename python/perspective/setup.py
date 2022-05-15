@@ -25,7 +25,6 @@ from jupyter_packaging import (
     combine_commands,
     create_cmdclass,
     ensure_targets,
-    install_npm,
     get_version,
 )
 
@@ -187,7 +186,7 @@ class PSPBuild(build_ext):
                     "-DCMAKE_TOOLCHAIN_FILE={}".format(vcpkg_toolchain_file)
                 )
 
-            if sys.maxsize > 2**32:
+            if sys.maxsize > 2 ** 32:
                 # build 64 bit to match python
                 cmake_args += ["-A", "x64"]
 
