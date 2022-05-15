@@ -13,9 +13,12 @@ try {
     let scope =
         process.env.PACKAGE && process.env.PACKAGE !== ""
             ? `${process.env.PACKAGE}`
-            : "*";
-
-    execute`GODEBUG=asyncpreemptoff=1 lerna exec --scope="@finos/${scope}" -- yarn build`;
+            : "";
+    if (scope) {
+        execute`GODEBUG=asyncpreemptoff=1 lerna exec --scope="@finos/${scope}" -- yarn build`;
+    } else {
+        execute`GODEBUG=asyncpreemptoff=1 yarn build:js:parallel`;
+    }
 } catch (e) {
     console.log(e.message);
     process.exit(1);

@@ -35,6 +35,9 @@ schedules:
 
 variables:
   YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
+  PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
+  RUSTUP_CACHE_FOLDER: $(Pipeline.Workspace)/.rustup
+  CARGO_CACHE_FOLDER: $(Pipeline.Workspace)/.cargo
 
 parameters:
   - name: initSteps
@@ -69,6 +72,14 @@ parameters:
           architecture: "x64"
         displayName: "Use Python $(python.version)"
 
+      - task: Cache@2
+        inputs:
+          key: 'pip | "$(Agent.OS)" | python/perspective/setup.py'
+          restoreKeys: |
+            pip | "$(Agent.OS)"
+          path: $(PIP_CACHE_DIR)
+        displayName: Cache pip
+
       - bash: python -m pip install --upgrade pip wheel setuptools "jupyterlab>=3.0.14" numpy "pyarrow>=5" "black==20.8b1" flake8-black
         displayName: "Install Python base dependencies"
         condition: succeeded()
@@ -76,6 +87,22 @@ parameters:
   - name: wasmInitSteps
     type: stepList
     default:
+      - task: Cache@2
+        inputs:
+          key: 'rustup | "$(Agent.OS)" | rust/perspective-viewer/Cargo.lock'
+          restoreKeys: |
+            rustup | "$(Agent.OS)"
+          path: $(RUSTUP_CACHE_FOLDER)
+        displayName: Cache rustup
+
+      - task: Cache@2
+        inputs:
+          key: 'cargo | "$(Agent.OS)" | rust/perspective-viewer/Cargo.lock'
+          restoreKeys: |
+            cargo | "$(Agent.OS)"
+          path: $(CARGO_CACHE_FOLDER)
+        displayName: Cache cargo
+
       - bash: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
         displayName: "Install wasm-pack"
 
