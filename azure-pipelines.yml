@@ -710,7 +710,8 @@ jobs:
   # Separate out windows wheel builds as the windows
   # build takes 37 years to finish
   - job: "Windows_Wheels"
-    dependsOn: ["WebAssembly", "Windows_BuildPSP"]
+    # dependsOn: ["WebAssembly", "Windows_BuildPSP"]
+    dependsOn: ["WebAssembly"]
     pool:
       vmImage: "windows-2019"
     condition: or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual'))
