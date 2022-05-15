@@ -256,10 +256,10 @@ parameters:
   - name: jsUploadJupyterArtifactsSteps
     type: stepList
     default:
-      - bash: cd $(System.DefaultWorkingDirectory)/python/perspective/perspective/ && tar cfzv nbextension perspective-nbextension.tgz
+      - bash: cd $(System.DefaultWorkingDirectory)/python/perspective/perspective/ && tar cfzv perspective-nbextension.tgz nbextension
         displayName: "compress perspective nbextension"
 
-      - bash: cd $(System.DefaultWorkingDirectory)/python/perspective/perspective/ && tar cfzv labextension perspective-labextension.tgz
+      - bash: cd $(System.DefaultWorkingDirectory)/python/perspective/perspective/ && tar cfzv perspective-labextension.tgz  labextension
         displayName: "compress perspective labextension"
 
       - task: PublishPipelineArtifact@1
@@ -388,14 +388,14 @@ parameters:
   - name: pythonUploadArtifactsSteps
     type: stepList
     default:
-      - bash: cd $(System.DefaultWorkingDirectory)/python/ && tar xfzv perspective perspective-python-dist-$(Agent.Name).tgz
+      - bash: cd $(System.DefaultWorkingDirectory)/python/ && tar cfzv perspective-python-dist-$(vmImage).tgz perspective 
         displayName: "Compress PSP-only build"
 
       # Upload the packed versions
       - task: PublishPipelineArtifact@1
         inputs:
-          targetPath: "$(System.DefaultWorkingDirectory)/packages/perspective/perspective-python-dist-$(Agent.Name).tgz"
-          artifactName: "perspective-python-dist-$(Agent.Name)"
+          targetPath: "$(System.DefaultWorkingDirectory)/packages/perspective/perspective-python-dist-$(vmImage).tgz"
+          artifactName: "perspective-python-dist-$(vmImage)"
 
   # Extracting build assets
   - name: pythonDownloadArtifactsSteps
@@ -404,10 +404,10 @@ parameters:
       - task: DownloadPipelineArtifact@2
         displayName: "Download psp-only perspective python dist"
         inputs:
-          artifact: "perspective-python-dist-$(Agent.Name)"
+          artifact: "perspective-python-dist-$(vmImage)"
           path: $(System.DefaultWorkingDirectory)
 
-      - bash: tar --strip-components=1 -xvf $(System.DefaultWorkingDirectory)/perspective-python-dist-$(Agent.Name).tgz -C $(System.DefaultWorkingDirectory)/python/
+      - bash: tar --strip-components=1 -xvf $(System.DefaultWorkingDirectory)/perspective-python-dist-$(vmImage).tgz -C $(System.DefaultWorkingDirectory)/python/
         displayName: "Install perspective-python dist"
 
   # Builds regular builds
