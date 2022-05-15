@@ -10,10 +10,10 @@
 import "../../less/index.less";
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
-export {PerspectiveView} from "../plugin/view";
-export {PerspectiveModel} from "../plugin/model";
+export {PerspectiveView} from "../view";
+export {PerspectiveModel} from "../model";
 
-import {PerspectiveView} from "../plugin/view";
-import {PerspectiveModel} from "../plugin/model";
+import {PerspectiveView} from "../view";
+import {PerspectiveModel} from "../model";
 console.log(PerspectiveModel);
 console.log(PerspectiveView);

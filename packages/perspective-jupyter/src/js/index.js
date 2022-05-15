@@ -13,11 +13,10 @@ export * from "./version";
 export * from "./view";
 export * from "./widget";
 
-import "../../less/index.less";
+import "../less/index.less";
 
-// FIXME index.out.jss:602 DOMException: Failed to execute 'define' on 'CustomElementRegistry': the name "perspective-viewer-datagrid" has already been used with this registry
-// import "@finos/perspective-viewer-datagrid";
-// import "@finos/perspective-viewer-d3fc";
+import "@finos/perspective-viewer-datagrid";
+import "@finos/perspective-viewer-d3fc";
 
 // NOTE: only expose the widget here
 import {PerspectiveJupyterPlugin} from "./plugin";

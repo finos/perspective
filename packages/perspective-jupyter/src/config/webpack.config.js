@@ -8,7 +8,6 @@
  */
 const path = require("path");
 const webpack = require("webpack");
-const version = require("../../package.json").version;
 const PerspectivePlugin = require("@finos/perspective-webpack-plugin");
 
 const devtool = process.argv.mode === "development" ? "source-map" : false;
@@ -30,7 +29,6 @@ const rules = [
         exclude: [/monaco-editor/], // <- Exclude `monaco-editor`
         use: ["style-loader", "css-loader"],
     },
-    // {test: /\.js$/, loader: "babel-loader"},
 ];
 
 // Packages that shouldn't be bundled but loaded at runtime

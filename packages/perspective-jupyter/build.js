@@ -8,7 +8,7 @@ const {UMDLoader} = require("@finos/perspective-build/umd");
 const {build} = require("@finos/perspective-build/build");
 
 const TEST_BUILD = {
-    entryPoints: ["src/js/plugin/psp_widget.js"],
+    entryPoints: ["src/js/psp_widget.js"],
     define: {
         global: "window",
     },
@@ -23,7 +23,7 @@ const TEST_BUILD = {
 };
 
 const PROD_BUILD = {
-    entryPoints: ["src/js/plugin/index.js"],
+    entryPoints: ["src/js/index.js"],
     define: {
         global: "window",
     },
