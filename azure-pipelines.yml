@@ -357,7 +357,7 @@ parameters:
           PSP_CI_BUILD_LIBPSP_ONLY: 1
 
   # Compressing build assets
-  - name: pythonCompressBuild
+  - name: pythonUploadArtifactsSteps
     type: stepList
     default:
       - bash: cd $(System.DefaultWorkingDirectory)/python/ && tar xfzv perspective perspective-python-dist-$(Agent.Name).tgz
@@ -370,7 +370,7 @@ parameters:
           artifactName: "perspective-python-dist-$(Agent.Name)"
 
   # Extracting build assets
-  - name: pythonExtactBuild
+  - name: pythonDownloadArtifactsSteps
     type: stepList
     default:
       - task: DownloadPipelineArtifact@2
@@ -546,9 +546,8 @@ jobs:
     steps:
       - ${{ parameters.initSteps }}
       - ${{ parameters.pythonInitSteps }}
-      - ${{ parameters.pythonBuildDockerSteps }}
-      - ${{ parameters.pythonCoverageSteps }}
-      # - ${{ parameters.pythonLinuxWheelSteps }}
+      - ${{ parameters.pythonBuildDockerPSPOnlySteps }}
+      - ${{ parameters.pythonUploadArtifactsSteps}}
 
 
   - job: "Linux"
@@ -606,9 +605,10 @@ jobs:
       - ${{ parameters.initSteps }}
       - ${{ parameters.pythonInitSteps }}
       - ${{ parameters.pythonLintDockerSteps }}
+      - ${{ parameters.pythonDownloadArtifactsSteps}}
       - ${{ parameters.pythonBuildDockerSteps }}
       - ${{ parameters.pythonCoverageSteps }}
-      # - ${{ parameters.pythonLinuxWheelSteps }}
+      - ${{ parameters.pythonLinuxWheelSteps }}
 
 
   # - job: 'Linux_Python_SDist'
@@ -631,6 +631,20 @@ jobs:
   - job: "Windows_BuildPSP"
     pool:
       vmImage: "windows-2019"
+
+    strategy:
+      matrix:
+        Python39:
+          python.version: "3.9"
+          python_flag: "--python39"
+          artifact_name: "cp39-cp39m-win64_amd"
+  
+    steps:
+      - ${{ parameters.initSteps }}
+      - ${{ parameters.pythonInitSteps }}
+      - ${{ parameters.windowsInitSteps }}
+      - ${{ parameters.pythonBuildVS2019PSPOnlySteps }}
+      - ${{ parameters.pythonUploadArtifactsSteps}}
 
   - job: "Windows"
     dependsOn: ["WebAssembly", "Windows_BuildPSP"]
@@ -657,6 +671,7 @@ jobs:
       - ${{ parameters.initSteps }}
       - ${{ parameters.pythonInitSteps }}
       - ${{ parameters.windowsInitSteps }}
+      - ${{ parameters.pythonDownloadArtifactsSteps}}
       - ${{ parameters.pythonBuildVS2019Steps }}
       - ${{ parameters.pythonCoverageSteps }}
 
@@ -687,11 +702,30 @@ jobs:
       - ${{ parameters.initSteps }}
       - ${{ parameters.pythonInitSteps }}
       - ${{ parameters.windowsInitSteps }}
-      # - ${{ parameters.pythonWindowsWheelVS2019Steps }}
+      - ${{ parameters.pythonDownloadArtifactsSteps}}
+      - ${{ parameters.pythonWindowsWheelVS2019Steps }}
+
 
   - job: "MacOS_Catalina_BuildPSP"
     pool:
       vmImage: "macos-10.15"
+    condition: or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual'))
+
+    strategy:
+      matrix:
+          Python39:
+            python.version: "3.9"
+            python_flag: "--python39"
+            artifact_name: "cp39-cp39-macosx_10_15_x86_64"
+          
+    steps:
+      - ${{ parameters.initSteps }}
+      - ${{ parameters.pythonInitSteps }}
+      - ${{ parameters.macInitSteps }}
+      - ${{ parameters.pythonLintSteps }}
+      - ${{ parameters.pythonBuildPSPOnlySteps }}
+      - ${{ parameters.pythonUploadArtifactsSteps}}
+
 
   - job: "MacOS_Catalina"
     dependsOn: ["WebAssembly", "MacOS_Catalina_BuildPSP"]
@@ -726,15 +760,30 @@ jobs:
       - ${{ parameters.initSteps }}
       - ${{ parameters.pythonInitSteps }}
       - ${{ parameters.macInitSteps }}
-      - ${{ parameters.pythonLintSteps }}
+      - ${{ parameters.pythonDownloadArtifactsSteps}}
       - ${{ parameters.pythonBuildSteps }}
       - ${{ parameters.pythonCoverageSteps }}
-      # - ${{ parameters.pythonMacWheelSteps }}
+      - ${{ parameters.pythonMacWheelSteps }}
 
   - job: "MacOS_BigSur_BuildPSP"
     pool:
       vmImage: "macos-11"
 
+    strategy:
+      matrix:
+        Python39:
+          python.version: "3.9"
+          python_flag: "--python39"
+          artifact_name: "cp39-cp39-macosx_11_0_x86_64"
+
+    steps:
+      - ${{ parameters.initSteps }}
+      - ${{ parameters.pythonInitSteps }}
+      - ${{ parameters.macInitSteps }}
+      - ${{ parameters.pythonLintSteps }}
+      - ${{ parameters.pythonBuildDockerPSPOnlySteps }}
+      - ${{ parameters.pythonUploadArtifactsSteps }}
+  
   - job: "MacOS_BigSur"
     dependsOn: ["WebAssembly", "MacOS_BigSur_BuildPSP"]
     pool:
@@ -751,20 +800,23 @@ jobs:
       - ${{ parameters.initSteps }}
       - ${{ parameters.pythonInitSteps }}
       - ${{ parameters.macInitSteps }}
-      - ${{ parameters.pythonLintSteps }}
+      - ${{ parameters.pythonDownloadArtifactsSteps}}
       - ${{ parameters.pythonBuildSteps }}
       - ${{ parameters.pythonCoverageSteps }}
-      # - ${{ parameters.pythonMacWheelSteps }}
+      - ${{ parameters.pythonMacWheelSteps }}
 
   - job: "Jupyterlab"
     dependsOn: ["WebAssembly", "Linux"]
     pool:
       vmImage: "ubuntu-latest"
-    variables:
-      python.version: "3.7"
-      python_flag: ""
-      manylinux_flag: "--manylinux2010"
-      artifact_name: "cp37-cp37m-manylinux2010_x86_64"
+
+    strategy:
+      matrix:
+        Python37ManyLinux2010:
+          python.version: "3.7"
+          python_flag: ""
+          manylinux_flag: "--manylinux2010"
+          artifact_name: "cp37-cp37m-manylinux2010_x86_64"
 
     steps:
       # don't use InitSteps because we don't want to cache local puppeteer
@@ -779,7 +831,6 @@ jobs:
         displayName: "Install Javascript Dependencies"
 
       - ${{ parameters.pythonInitSteps }}
-      - ${{ parameters.wasmInitSteps }}
 
       - task: DownloadPipelineArtifact@2
         displayName: "Download Python 3.7 Perspective Wheel"
@@ -790,12 +841,7 @@ jobs:
       - bash: python -m pip install $(System.DefaultWorkingDirectory)/wheel/*.whl
         displayName: "Install perspective-python from wheel"
 
-      - ${{ parameters.jsDownloadArtifactsSteps }}
-
       - bash: yarn add -W --dev puppeteer@9.0.0
         displayName: "Install Puppeteer"
-
-      - bash: jupyter labextension install $(System.DefaultWorkingDirectory)/packages/perspective-jupyter
-        displayName: "Install perspective-jupyter labextension"
 
       - ${{ parameters.jsTestJupyterSteps }}
