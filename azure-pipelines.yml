@@ -524,7 +524,6 @@ jobs:
       - ${{ parameters.wasmInitSteps }}
       - ${{ parameters.pythonInitSteps }}  # needed for jupyter labextension build
       - ${{ parameters.linuxInitSteps }}
-      - ${{ parameters.webassemblySteps }}
       - ${{ parameters.jsLintSteps }}
       - ${{ parameters.jsBuildSteps }}
       - ${{ parameters.jsTestSteps }}
@@ -604,7 +603,7 @@ jobs:
     steps:
       - ${{ parameters.initSteps }}
       - ${{ parameters.pythonInitSteps }}
-      - ${{ parameters.pythonLintDockerSteps }}
+      - ${{ parameters.pythonLintSteps }}
       - ${{ parameters.pythonDownloadArtifactsSteps}}
       - ${{ parameters.pythonBuildDockerSteps }}
       - ${{ parameters.pythonCoverageSteps }}
