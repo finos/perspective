@@ -208,6 +208,8 @@ class PSPBuild(build_ext):
 
         if os.environ.get("PSP_CI_BUILD_LIBPSP_ONLY"):
             cmake_args.append("-DPSP_PYTHON_BUILD_OMIT_BINDING=ON")
+        else:
+            cmake_args.append("-DPSP_PYTHON_BUILD_OMIT_BINDING=OFF")
 
         env["PSP_ENABLE_PYTHON"] = "1"
         env["OSX_DEPLOYMENT_TARGET"] = "10.9"
