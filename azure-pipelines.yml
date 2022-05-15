@@ -394,7 +394,7 @@ parameters:
       # Upload the packed versions
       - task: PublishPipelineArtifact@1
         inputs:
-          targetPath: "$(System.DefaultWorkingDirectory)/packages/perspective/perspective-python-dist-$(ImageOS).tgz"
+          targetPath: "$(System.DefaultWorkingDirectory)/python/perspective-python-dist-$(ImageOS).tgz"
           artifactName: "perspective-python-dist-$(ImageOS)"
 
   # Extracting build assets
