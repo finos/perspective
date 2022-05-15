@@ -37,7 +37,7 @@ variables:
   YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
   PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
   RUSTUP_CACHE_FOLDER: $(Pipeline.Workspace)/.rustup
-  CARGO_CACHE_FOLDER: $(Pipeline.Workspace)/.cargo
+  CARGO_CACHE_FOLDER: $(System.DefaultWorkingDirectory)/rust/perspective-viewer/build
 
 parameters:
   - name: initSteps
