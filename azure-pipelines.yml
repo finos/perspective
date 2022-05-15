@@ -388,14 +388,14 @@ parameters:
   - name: pythonUploadArtifactsSteps
     type: stepList
     default:
-      - bash: cd $(System.DefaultWorkingDirectory)/python/ && tar cfzv perspective-python-dist-$(vmImage).tgz perspective 
+      - bash: cd $(System.DefaultWorkingDirectory)/python/ && tar cfzv perspective-python-dist-$(ImageOS).tgz perspective 
         displayName: "Compress PSP-only build"
 
       # Upload the packed versions
       - task: PublishPipelineArtifact@1
         inputs:
-          targetPath: "$(System.DefaultWorkingDirectory)/packages/perspective/perspective-python-dist-$(vmImage).tgz"
-          artifactName: "perspective-python-dist-$(vmImage)"
+          targetPath: "$(System.DefaultWorkingDirectory)/packages/perspective/perspective-python-dist-$(ImageOS).tgz"
+          artifactName: "perspective-python-dist-$(ImageOS)"
 
   # Extracting build assets
   - name: pythonDownloadArtifactsSteps
@@ -404,10 +404,10 @@ parameters:
       - task: DownloadPipelineArtifact@2
         displayName: "Download psp-only perspective python dist"
         inputs:
-          artifact: "perspective-python-dist-$(vmImage)"
+          artifact: "perspective-python-dist-$(ImageOS)"
           path: $(System.DefaultWorkingDirectory)
 
-      - bash: tar --strip-components=1 -xvf $(System.DefaultWorkingDirectory)/perspective-python-dist-$(vmImage).tgz -C $(System.DefaultWorkingDirectory)/python/
+      - bash: tar --strip-components=1 -xvf $(System.DefaultWorkingDirectory)/perspective-python-dist-$(ImageOS).tgz -C $(System.DefaultWorkingDirectory)/python/
         displayName: "Install perspective-python dist"
 
   # Builds regular builds
@@ -809,11 +809,6 @@ jobs:
           artifact_name: "cp39-cp39-macosx_11_0_x86_64"
 
     steps:
-      - task: Bash@3
-        inputs:
-          targetType: 'inline'
-          script: 'env | sort'
-
       - ${{ parameters.initSteps }}
       - ${{ parameters.pythonInitSteps }}
       - ${{ parameters.macInitSteps }}
