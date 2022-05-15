@@ -245,14 +245,15 @@ class PSPCheckSDist(sdist):
                 )
 
         # Check for JS assets
-        for file in ("labextension/package.json", "nbextension/static/index.js"):
-            path = os.path.abspath(os.path.join(here, "perspective", file))
-            if not os.path.exists(path):
-                raise Exception(
-                    "Path is missing! {}\nMust run `yarn build` before building sdist so JS files are installed".format(
-                        path
+        if not os.environ.get("PSP_CI_SKIP_JS_FILES_CHECK"):
+            for file in ("labextension/package.json", "nbextension/static/index.js"):
+                path = os.path.abspath(os.path.join(here, "perspective", file))
+                if not os.path.exists(path):
+                    raise Exception(
+                        "Path is missing! {}\nMust run `yarn build` before building sdist so JS files are installed".format(
+                            path
+                        )
                     )
-                )
 
 
 ##############################

@@ -227,12 +227,6 @@ parameters:
       - bash: cd $(System.DefaultWorkingDirectory)/packages/perspective-jupyter && yarn pack --filename=perspective-jupyter-dist.tgz
         displayName: "yarn pack perspective-jupyter"
 
-      - bash: cd $(System.DefaultWorkingDirectory)/python/perspective/perspective/ && tar cfzv nbextension perspective-nbextension.tgz
-        displayName: "compress perspective nbextension"
-
-      - bash: cd $(System.DefaultWorkingDirectory)/python/perspective/perspective/ && tar cfzv labextension perspective-labextension.tgz
-        displayName: "compress perspective labextension"
-
       # Upload the packed versions
       - task: PublishPipelineArtifact@1
         inputs:
@@ -259,6 +253,15 @@ parameters:
           targetPath: "$(System.DefaultWorkingDirectory)/packages/perspective-jupyter/perspective-jupyter-dist.tgz"
           artifactName: "perspective-jupyter-dist"
 
+  - name: jsUploadJupyterArtifactsSteps
+    type: stepList
+    default:
+      - bash: cd $(System.DefaultWorkingDirectory)/python/perspective/perspective/ && tar cfzv nbextension perspective-nbextension.tgz
+        displayName: "compress perspective nbextension"
+
+      - bash: cd $(System.DefaultWorkingDirectory)/python/perspective/perspective/ && tar cfzv labextension perspective-labextension.tgz
+        displayName: "compress perspective labextension"
+
       - task: PublishPipelineArtifact@1
         inputs:
           targetPath: "$(System.DefaultWorkingDirectory)/python/perspective/perspective/perspective-nbextension.tgz"
@@ -268,6 +271,7 @@ parameters:
         inputs:
           targetPath: "$(System.DefaultWorkingDirectory)/python/perspective/perspective/perspective-labextension.tgz"
           artifactName: "perspective-labextension-dist"
+
 
   # Steps to upload npm-packed assets
   - name: jsDownloadArtifactsSteps
@@ -296,13 +300,13 @@ parameters:
         inputs:
           artifact: "perspective-viewer-d3fc-dist"
           path: $(System.DefaultWorkingDirectory)
-
+  
       - task: DownloadPipelineArtifact@2
         displayName: "Download perspective-jupyter dist"
         inputs:
           artifact: "perspective-jupyter-dist"
           path: $(System.DefaultWorkingDirectory)
-
+  
       - bash: tar --strip-components=1 -xvf $(System.DefaultWorkingDirectory)/perspective-dist.tgz -C $(System.DefaultWorkingDirectory)/packages/perspective package
         displayName: "Install perspective dist"
 
@@ -318,6 +322,27 @@ parameters:
       - bash: tar --strip-components=1 -xvf $(System.DefaultWorkingDirectory)/perspective-jupyter-dist.tgz -C $(System.DefaultWorkingDirectory)/packages/perspective-jupyter package
         displayName: "Install perspective-jupyter dist"
 
+  - name: jsDownloadJupyterArtifactsSteps
+    type: stepList
+    default:
+      - task: DownloadPipelineArtifact@2
+        displayName: "Download perspective-nbextension dist"
+        inputs:
+          artifact: "perspective-nbextension-dist"
+          path: $(System.DefaultWorkingDirectory)
+
+      - task: DownloadPipelineArtifact@2
+        displayName: "Download perspective-labextension dist"
+        inputs:
+          artifact: "perspective-labextension-dist"
+          path: $(System.DefaultWorkingDirectory)
+  
+      - bash: tar --strip-components=1 -xvf $(System.DefaultWorkingDirectory)/perspective-nbextension-dist.tgz -C $(System.DefaultWorkingDirectory)/python/perspective/perspective/
+        displayName: "Install perspective-nbextension dist"
+  
+      - bash: tar --strip-components=1 -xvf $(System.DefaultWorkingDirectory)/perspective-labextension-dist.tgz -C $(System.DefaultWorkingDirectory)/python/perspective/perspective/
+        displayName: "Install perspective-labextension dist"
+      
 
   ##########
   # Python #
@@ -335,6 +360,7 @@ parameters:
       - script: yarn build_python  --ci $(python_flag)
         env:
           PSP_CI_BUILD_LIBPSP_ONLY: 1
+          PSP_CI_SKIP_JS_FILES_CHECK: 1
         displayName: "Build Python"
 
   - name: pythonBuildDockerPSPOnlySteps
@@ -345,6 +371,7 @@ parameters:
         env:
           PSP_DOCKER: 1
           PSP_CI_BUILD_LIBPSP_ONLY: 1
+          PSP_CI_SKIP_JS_FILES_CHECK: 1
 
   - name: pythonBuildVS2019PSPOnlySteps
     type: stepList
@@ -355,6 +382,7 @@ parameters:
           # azure pipelines are bad, so force windows-2019 to use VS2019
           PSP_GENERATOR: Visual Studio 16 2019
           PSP_CI_BUILD_LIBPSP_ONLY: 1
+          PSP_CI_SKIP_JS_FILES_CHECK: 1
 
   # Compressing build assets
   - name: pythonUploadArtifactsSteps
@@ -528,6 +556,7 @@ jobs:
       - ${{ parameters.jsBuildSteps }}
       - ${{ parameters.jsTestSteps }}
       - ${{ parameters.jsUploadArtifactsSteps }}
+      - ${{ parameters.jsUploadJupyterArtifactsSteps }}
 
 
   - job: "Linux_BuildPSP"
@@ -605,6 +634,7 @@ jobs:
       - ${{ parameters.pythonInitSteps }}
       - ${{ parameters.pythonLintSteps }}
       - ${{ parameters.pythonDownloadArtifactsSteps}}
+      - ${{ parameters.jsDownloadJupyterArtifactsSteps }}
       - ${{ parameters.pythonBuildDockerSteps }}
       - ${{ parameters.pythonCoverageSteps }}
       - ${{ parameters.pythonLinuxWheelSteps }}
@@ -671,6 +701,7 @@ jobs:
       - ${{ parameters.pythonInitSteps }}
       - ${{ parameters.windowsInitSteps }}
       - ${{ parameters.pythonDownloadArtifactsSteps}}
+      - ${{ parameters.jsDownloadJupyterArtifactsSteps }}
       - ${{ parameters.pythonBuildVS2019Steps }}
       - ${{ parameters.pythonCoverageSteps }}
 
@@ -702,6 +733,7 @@ jobs:
       - ${{ parameters.pythonInitSteps }}
       - ${{ parameters.windowsInitSteps }}
       - ${{ parameters.pythonDownloadArtifactsSteps}}
+      - ${{ parameters.jsDownloadJupyterArtifactsSteps }}
       - ${{ parameters.pythonWindowsWheelVS2019Steps }}
 
 
@@ -760,6 +792,7 @@ jobs:
       - ${{ parameters.pythonInitSteps }}
       - ${{ parameters.macInitSteps }}
       - ${{ parameters.pythonDownloadArtifactsSteps}}
+      - ${{ parameters.jsDownloadJupyterArtifactsSteps }}
       - ${{ parameters.pythonBuildSteps }}
       - ${{ parameters.pythonCoverageSteps }}
       - ${{ parameters.pythonMacWheelSteps }}
@@ -800,6 +833,7 @@ jobs:
       - ${{ parameters.pythonInitSteps }}
       - ${{ parameters.macInitSteps }}
       - ${{ parameters.pythonDownloadArtifactsSteps}}
+      - ${{ parameters.jsDownloadJupyterArtifactsSteps }}
       - ${{ parameters.pythonBuildSteps }}
       - ${{ parameters.pythonCoverageSteps }}
       - ${{ parameters.pythonMacWheelSteps }}
