@@ -69,9 +69,13 @@ try {
     let cmd;
     if (IS_CI) {
         cmd = bash`${
-            PSP_CI_BUILD_LIBPSP_ONLY ? "PSP_CI_BUILD_LIBPSP_ONLY=1" : ""
+            PSP_CI_BUILD_LIBPSP_ONLY
+                ? "export PSP_CI_BUILD_LIBPSP_ONLY=1 && "
+                : ""
         }${
-            PSP_CI_SKIP_JS_FILES_CHECK ? "PSP_CI_SKIP_JS_FILES_CHECK=1" : ""
+            PSP_CI_SKIP_JS_FILES_CHECK
+                ? "export PSP_CI_SKIP_JS_FILES_CHECK=1 &&"
+                : ""
         } ${PYTHON} -m pip install -e .[dev] --no-clean &&`;
 
         // pip install in-place with --no-clean so that pep-518 assets stick
