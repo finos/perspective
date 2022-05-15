@@ -62,7 +62,6 @@ module.exports = [
                 "..",
                 "..",
                 "..",
-                "..",
                 "python",
                 "perspective",
                 "perspective",
@@ -101,7 +100,6 @@ module.exports = [
             filename: "index.js",
             path: path.resolve(
                 __dirname,
-                "..",
                 "..",
                 "..",
                 "..",
