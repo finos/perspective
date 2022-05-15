@@ -14,27 +14,19 @@ const {
     resolve,
     getarg,
     bash,
+    python_version,
     python_image,
+    manylinux_version,
 } = require("./script_utils.js");
 const fs = require("fs-extra");
 
-let PYTHON = getarg("--python38")
-    ? "python3.8"
-    : getarg("--python36")
-    ? "python3.6"
-    : getarg("--python37")
-    ? "python3.7"
-    : "python3";
+let PYTHON = python_version();
 
 let IMAGE = "manylinux2010";
 const IS_DOCKER = process.env.PSP_DOCKER;
 
 if (IS_DOCKER) {
-    let MANYLINUX_VERSION = getarg("--manylinux2010")
-        ? "manylinux2010"
-        : getarg("--manylinux2014")
-        ? "manylinux2014"
-        : "manylinux2010";
+    let MANYLINUX_VERSION = manylinux_version();
     IMAGE = python_image(MANYLINUX_VERSION, PYTHON);
 }
 

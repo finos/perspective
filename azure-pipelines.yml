@@ -780,7 +780,7 @@ jobs:
       - ${{ parameters.pythonInitSteps }}
       - ${{ parameters.macInitSteps }}
       - ${{ parameters.pythonLintSteps }}
-      - ${{ parameters.pythonBuildDockerPSPOnlySteps }}
+      - ${{ parameters.pythonBuildPSPOnlySteps }}
       - ${{ parameters.pythonUploadArtifactsSteps }}
   
   - job: "MacOS_BigSur"

@@ -13,17 +13,12 @@ const {
     docker,
     resolve,
     getarg,
+    python_version,
     python_image,
+    manylinux_version,
 } = require("./script_utils.js");
 
-let PYTHON = getarg("--python38")
-    ? "python3.8"
-    : getarg("--python36")
-    ? "python3.6"
-    : getarg("--python37")
-    ? "python3.7"
-    : "python3";
-
+let PYTHON = python_version();
 const COVERAGE = getarg("--coverage");
 const VERBOSE = getarg("--debug");
 const IS_DOCKER = process.env.PSP_DOCKER;
@@ -32,11 +27,7 @@ let IMAGE = "manylinux2010";
 
 if (IS_DOCKER) {
     // defaults to 2010
-    let MANYLINUX_VERSION = getarg("--manylinux2010")
-        ? "manylinux2010"
-        : getarg("--manylinux2014")
-        ? "manylinux2014"
-        : "";
+    let MANYLINUX_VERSION = manylinux_version();
     IMAGE = python_image(MANYLINUX_VERSION, PYTHON);
 }
 
