@@ -829,8 +829,11 @@ jobs:
           artifact_name: "cp39-cp39-macosx_11_0_x86_64"
 
     steps:
-      - task: printAllVariables@1
-        displayName: 'Print all variables via extension'
+      - task: Bash@3
+        inputs:
+          targetType: 'inline'
+          script: 'env | sort'
+
       - ${{ parameters.initSteps }}
       - ${{ parameters.pythonInitSteps }}
       - ${{ parameters.macInitSteps }}
