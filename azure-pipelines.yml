@@ -36,9 +36,9 @@ schedules:
 variables:
   YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
   PIP_CACHE_DIR: $(Agent.HomeDirectory)/.pip
-  RUSTUP_CACHE_FOLDER: $(Agent.HomeDirectory)/.rustup
   CARGO_CACHE_FOLDER: $(Agent.HomeDirectory)/.cargo
   RUST_CACHE_FOLDER: $(System.DefaultWorkingDirectory)/rust/perspective-viewer/build
+  VCPKG_CACHE_FOLDER: $(System.DefaultWorkingDirectory)/vcpkg
 
 parameters:
   - name: initSteps
@@ -90,14 +90,6 @@ parameters:
     default:
       - task: Cache@2
         inputs:
-          key: 'rustup | "$(Agent.OS)" | rust/perspective-viewer/Cargo.lock'
-          restoreKeys: |
-            rustup | "$(Agent.OS)"
-          path: $(RUSTUP_CACHE_FOLDER)
-        displayName: Cache rustup
-
-      - task: Cache@2
-        inputs:
           key: 'cargo | "$(Agent.OS)" | rust/perspective-viewer/Cargo.lock'
           restoreKeys: |
             cargo | "$(Agent.OS)"
@@ -109,7 +101,7 @@ parameters:
           key: 'rust | "$(Agent.OS)" | rust/perspective-viewer/Cargo.lock'
           restoreKeys: |
             rust | "$(Agent.OS)"
-          path: $(RUSTUP_CACHE_FOLDER)
+          path: $(RUST_CACHE_FOLDER)
         displayName: Cache rust build
 
       - bash: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
@@ -136,6 +128,14 @@ parameters:
   - name: windowsInitSteps
     type: stepList
     default:
+      - task: Cache@2
+        inputs:
+          key: 'vcpkg | "$(Agent.OS)" | cpp/perspective/CMakeLists.txt'
+          restoreKeys: |
+            vcpkg | "$(Agent.OS)"
+          path: $(VCPKG_CACHE_FOLDER)
+        displayName: Vcpkg cache
+
       - script: |
           which python > python.txt
           set /p PYTHON=<python.txt
@@ -149,7 +149,7 @@ parameters:
       - script: |
           set VCPKG_DEFAULT_TRIPLET=x64-windows
           set VCPKG_PLATFORM_TOOLSET=v142
-          git clone https://github.com/Microsoft/vcpkg
+          dir vcpkg || git clone https://github.com/Microsoft/vcpkg
           cd vcpkg
           call bootstrap-vcpkg.bat
           call vcpkg.exe install boost-algorithm boost-filesystem boost-multi-index boost-multiprecision boost-program-options boost-system boost-unordered boost-uuid
