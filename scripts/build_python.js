@@ -24,6 +24,8 @@ let PYTHON = python_version();
 
 let IMAGE = "manylinux2010";
 const IS_DOCKER = process.env.PSP_DOCKER;
+const PSP_CI_BUILD_LIBPSP_ONLY = process.env.PSP_CI_BUILD_LIBPSP_ONLY;
+const PSP_CI_SKIP_JS_FILES_CHECK = process.env.PSP_CI_SKIP_JS_FILES_CHECK;
 
 if (IS_DOCKER) {
     let MANYLINUX_VERSION = manylinux_version();
@@ -66,7 +68,11 @@ try {
 
     let cmd;
     if (IS_CI) {
-        cmd = bash`${PYTHON} -m pip install -e .[dev] --no-clean &&`;
+        cmd = bash`${
+            PSP_CI_BUILD_LIBPSP_ONLY ? "PSP_CI_BUILD_LIBPSP_ONLY=1" : ""
+        }${
+            PSP_CI_SKIP_JS_FILES_CHECK ? "PSP_CI_SKIP_JS_FILES_CHECK=1" : ""
+        }${PYTHON} -m pip install -e .[dev] --no-clean &&`;
 
         // pip install in-place with --no-clean so that pep-518 assets stick
         // around for later wheel build (so cmake cache can stay in place)
