@@ -256,10 +256,10 @@ parameters:
   - name: jsUploadJupyterArtifactsSteps
     type: stepList
     default:
-      - bash: tar cfzv perspective-nbextension.tgz $(System.DefaultWorkingDirectory)/python/perspective/perspective/nbextension
+      - bash: tar cfzv perspective-nbextension.tgz --directory=python/perspective/perspective/ nbextension
         displayName: "compress perspective nbextension"
 
-      - bash: tar cfzv perspective-labextension.tgz $(System.DefaultWorkingDirectory)/python/perspective/perspective/labextension
+      - bash: tar cfzv perspective-labextension.tgz --directory=python/perspective/perspective/ labextension
         displayName: "compress perspective labextension"
 
       - task: PublishPipelineArtifact@1
@@ -337,10 +337,10 @@ parameters:
           artifact: "perspective-labextension"
           path: $(System.DefaultWorkingDirectory)
   
-      - bash: tar xvf perspective-nbextension.tgz
+      - bash: tar xvf perspective-nbextension.tgz --directory=python/perspective/perspective/
         displayName: "Install perspective-nbextension"
   
-      - bash: tar xvf perspective-labextension.tgz
+      - bash: tar xvf perspective-labextension.tgz --directory=python/perspective/perspective/
         displayName: "Install perspective-labextension"
       
 
@@ -388,7 +388,7 @@ parameters:
   - name: pythonUploadArtifactsSteps
     type: stepList
     default:
-      - bash: tar cfzv perspective-python-build-$(ImageOS).tgz python/perspective
+      - bash: tar cfzv perspective-python-build-$(ImageOS).tgz --directory=python perspective
         displayName: "Compress PSP-only build"
 
       # Upload the packed versions
@@ -407,7 +407,7 @@ parameters:
           artifact: "perspective-python-build-$(ImageOS)"
           path: $(System.DefaultWorkingDirectory)
 
-      - bash: tar xvf perspective-python-build-$(ImageOS).tgz
+      - bash: tar xvf perspective-python-build-$(ImageOS).tgz --directory=python
         displayName: "Install perspective-python build"
 
   # Builds regular builds
