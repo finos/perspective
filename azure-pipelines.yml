@@ -35,9 +35,10 @@ schedules:
 
 variables:
   YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
-  PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
-  RUSTUP_CACHE_FOLDER: $(Pipeline.Workspace)/.rustup
-  CARGO_CACHE_FOLDER: $(System.DefaultWorkingDirectory)/rust/perspective-viewer/build
+  PIP_CACHE_DIR: ~/.pip
+  RUSTUP_CACHE_FOLDER: ~/.rustup
+  CARGO_CACHE_FOLDER: ~/.cargo
+  RUST_CACHE_FOLDER: $(System.DefaultWorkingDirectory)/rust/perspective-viewer/build
 
 parameters:
   - name: initSteps
@@ -102,6 +103,14 @@ parameters:
             cargo | "$(Agent.OS)"
           path: $(CARGO_CACHE_FOLDER)
         displayName: Cache cargo
+
+      - task: Cache@2
+        inputs:
+          key: 'rust | "$(Agent.OS)" | rust/perspective-viewer/Cargo.lock'
+          restoreKeys: |
+            rust | "$(Agent.OS)"
+          path: $(RUSTUP_CACHE_FOLDER)
+        displayName: Cache rust build
 
       - bash: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
         displayName: "Install wasm-pack"
