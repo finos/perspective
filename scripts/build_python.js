@@ -68,15 +68,7 @@ try {
 
     let cmd;
     if (IS_CI) {
-        cmd = bash`${
-            PSP_CI_BUILD_LIBPSP_ONLY
-                ? "export PSP_CI_BUILD_LIBPSP_ONLY=1 && "
-                : ""
-        }${
-            PSP_CI_SKIP_JS_FILES_CHECK
-                ? "export PSP_CI_SKIP_JS_FILES_CHECK=1 &&"
-                : ""
-        } ${PYTHON} -m pip install -e .[dev] --no-clean &&`;
+        cmd = bash`${PYTHON} -m pip install -e .[dev] --no-clean &&`;
 
         // pip install in-place with --no-clean so that pep-518 assets stick
         // around for later wheel build (so cmake cache can stay in place)
@@ -105,7 +97,15 @@ try {
 
     if (IS_DOCKER) {
         execute`${docker(IMAGE)} bash -c "cd python/perspective && \
-            ${cmd} "`;
+        ${
+            PSP_CI_BUILD_LIBPSP_ONLY
+                ? "export PSP_CI_BUILD_LIBPSP_ONLY=1 && "
+                : ""
+        }${
+            PSP_CI_SKIP_JS_FILES_CHECK
+                ? "export PSP_CI_SKIP_JS_FILES_CHECK=1 &&"
+                : ""
+        } ${cmd} "`;
     } else {
         const python_path = resolve`${__dirname}/../python/perspective`;
         execute`cd ${python_path} && ${cmd}`;
