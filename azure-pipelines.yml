@@ -388,13 +388,13 @@ parameters:
   - name: pythonUploadArtifactsSteps
     type: stepList
     default:
-      - bash: cd $(System.DefaultWorkingDirectory)/python/ && tar cfzv perspective-python-dist-$(ImageOS).tgz perspective 
+      - bash: tar cfzv perspective-python-dist-$(ImageOS).tgz $(System.DefaultWorkingDirectory)/python/perspective 
         displayName: "Compress PSP-only build"
 
       # Upload the packed versions
       - task: PublishPipelineArtifact@1
         inputs:
-          targetPath: "$(System.DefaultWorkingDirectory)/python/perspective-python-dist-$(ImageOS).tgz"
+          targetPath: "perspective-python-dist-$(ImageOS).tgz"
           artifactName: "perspective-python-dist-$(ImageOS)"
 
   # Extracting build assets
