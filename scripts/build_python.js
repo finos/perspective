@@ -87,14 +87,7 @@ try {
         // temporarily to simulate them not being installed)
         //
         // then run the remaining test suite
-        cmd =
-            cmd +
-            `${PYTHON} -m flake8 perspective && echo OK && \
-            ${PYTHON} -m pytest -vvv --noconftest perspective/tests/client_mode && \
-            ${PYTHON} -m pytest -vvv perspective \
-            --ignore=perspective/tests/client_mode \
-            --junitxml=python_junit.xml --cov-report=xml --cov-branch \
-            --cov=perspective`;
+        cmd = cmd + `${PYTHON} -m flake8 perspective && echo OK`;
         if (IMAGE == "python") {
             // test the sdist to make sure we dont
             // dist a non-functioning source dist

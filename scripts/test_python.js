@@ -70,13 +70,19 @@ const pytest = (IS_DOCKER) => {
             ${VERBOSE ? "-vv --full-trace" : ""} perspective \
             --ignore=perspective/tests/client_mode \
             --disable-pytest-warnings
+            --junitxml=python_junit.xml --cov-report=xml --cov-branch \
             --cov=perspective"`;
     } else {
         return bash`cd ${python_path} && PYTHONMALLOC=debug ${PYTHON} -m pytest \
             ${VERBOSE ? "-vv --full-trace" : ""} perspective \
             --ignore=perspective/tests/client_mode \
             --disable-pytest-warnings
-            ${COVERAGE ? "--cov=perspective" : ""}`;
+            --junitxml=python_junit.xml
+            ${
+                COVERAGE
+                    ? "--cov-report=xml --cov-branch --cov=perspective"
+                    : ""
+            }`;
     }
 };
 
