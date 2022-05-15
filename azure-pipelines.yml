@@ -820,7 +820,7 @@ jobs:
     dependsOn: ["WebAssembly", "MacOS_BigSur_BuildPSP"]
     pool:
       vmImage: "macos-11"
-
+  
     strategy:
       matrix:
         Python39:
@@ -829,6 +829,8 @@ jobs:
           artifact_name: "cp39-cp39-macosx_11_0_x86_64"
 
     steps:
+      - task: printAllVariables@1
+        displayName: 'Print all variables via extension'
       - ${{ parameters.initSteps }}
       - ${{ parameters.pythonInitSteps }}
       - ${{ parameters.macInitSteps }}
@@ -842,7 +844,7 @@ jobs:
     dependsOn: ["WebAssembly", "Linux"]
     pool:
       vmImage: "ubuntu-latest"
-
+    
     strategy:
       matrix:
         Python37ManyLinux2010:
