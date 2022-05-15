@@ -809,6 +809,11 @@ jobs:
           artifact_name: "cp39-cp39-macosx_11_0_x86_64"
 
     steps:
+      - task: Bash@3
+        inputs:
+          targetType: 'inline'
+          script: 'env | sort'
+
       - ${{ parameters.initSteps }}
       - ${{ parameters.pythonInitSteps }}
       - ${{ parameters.macInitSteps }}
@@ -829,11 +834,6 @@ jobs:
           artifact_name: "cp39-cp39-macosx_11_0_x86_64"
 
     steps:
-      - task: Bash@3
-        inputs:
-          targetType: 'inline'
-          script: 'env | sort'
-
       - ${{ parameters.initSteps }}
       - ${{ parameters.pythonInitSteps }}
       - ${{ parameters.macInitSteps }}
