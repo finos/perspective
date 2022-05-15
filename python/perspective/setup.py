@@ -282,7 +282,6 @@ data_files_spec = [
 
 cmdclass = create_cmdclass("js", data_files_spec=data_files_spec)
 cmdclass["js"] = combine_commands(
-    install_npm("jupyter", build_cmd="build-all"),
     ensure_targets(
         [
             os.path.join("perspective", "nbextension", "static", "index.js"),
