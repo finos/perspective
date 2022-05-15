@@ -256,20 +256,20 @@ parameters:
   - name: jsUploadJupyterArtifactsSteps
     type: stepList
     default:
-      - bash: cd $(System.DefaultWorkingDirectory)/python/perspective/perspective/ && tar cfzv perspective-nbextension.tgz nbextension
+      - bash: cd $(System.DefaultWorkingDirectory)/python/perspective/perspective/ && tar cfzv perspective-nbextension-dist.tgz nbextension
         displayName: "compress perspective nbextension"
 
-      - bash: cd $(System.DefaultWorkingDirectory)/python/perspective/perspective/ && tar cfzv perspective-labextension.tgz  labextension
+      - bash: cd $(System.DefaultWorkingDirectory)/python/perspective/perspective/ && tar cfzv perspective-labextension-dist.tgz  labextension
         displayName: "compress perspective labextension"
 
       - task: PublishPipelineArtifact@1
         inputs:
-          targetPath: "$(System.DefaultWorkingDirectory)/python/perspective/perspective/perspective-nbextension.tgz"
+          targetPath: "$(System.DefaultWorkingDirectory)/python/perspective/perspective/perspective-nbextension-dist.tgz"
           artifactName: "perspective-nbextension-dist"
 
       - task: PublishPipelineArtifact@1
         inputs:
-          targetPath: "$(System.DefaultWorkingDirectory)/python/perspective/perspective/perspective-labextension.tgz"
+          targetPath: "$(System.DefaultWorkingDirectory)/python/perspective/perspective/perspective-labextension-dist.tgz"
           artifactName: "perspective-labextension-dist"
 
 
