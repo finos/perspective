@@ -48,6 +48,8 @@ if sys.version_info.major < 3:
 
 version = get_version(os.path.join(here, "perspective", "core", "_version.py"))
 
+SKIP_JS_FILES = os.environ.get("PSP_CI_SKIP_JS_FILES_CHECK")
+
 ########################
 # Get requirement info #
 requires = [
@@ -245,7 +247,7 @@ class PSPCheckSDist(sdist):
                 )
 
         # Check for JS assets
-        if not os.environ.get("PSP_CI_SKIP_JS_FILES_CHECK"):
+        if not SKIP_JS_FILES:
             for file in ("labextension/package.json", "nbextension/static/index.js"):
                 path = os.path.abspath(os.path.join(here, "perspective", file))
                 if not os.path.exists(path):
@@ -283,7 +285,9 @@ data_files_spec = [
 cmdclass = create_cmdclass("js", data_files_spec=data_files_spec)
 cmdclass["js"] = combine_commands(
     ensure_targets(
-        [
+        []
+        if SKIP_JS_FILES
+        else [
             os.path.join("perspective", "nbextension", "static", "index.js"),
             os.path.join("perspective", "labextension", "package.json"),
             os.path.join("perspective", "labextension", "static", "style.js"),
