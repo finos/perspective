@@ -72,7 +72,7 @@ try {
             PSP_CI_BUILD_LIBPSP_ONLY ? "PSP_CI_BUILD_LIBPSP_ONLY=1" : ""
         }${
             PSP_CI_SKIP_JS_FILES_CHECK ? "PSP_CI_SKIP_JS_FILES_CHECK=1" : ""
-        }${PYTHON} -m pip install -e .[dev] --no-clean &&`;
+        } ${PYTHON} -m pip install -e .[dev] --no-clean &&`;
 
         // pip install in-place with --no-clean so that pep-518 assets stick
         // around for later wheel build (so cmake cache can stay in place)
