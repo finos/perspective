@@ -388,7 +388,7 @@ parameters:
   - name: pythonUploadArtifactsSteps
     type: stepList
     default:
-      - bash: tar cfzv perspective-python-build-$(ImageOS).tgz $(System.DefaultWorkingDirectory)/python/perspective 
+      - bash: tar cfzv perspective-python-build-$(ImageOS).tgz python/perspective 
         displayName: "Compress PSP-only build"
 
       # Upload the packed versions
