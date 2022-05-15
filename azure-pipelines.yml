@@ -35,9 +35,9 @@ schedules:
 
 variables:
   YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
-  PIP_CACHE_DIR: ~/.pip
-  RUSTUP_CACHE_FOLDER: ~/.rustup
-  CARGO_CACHE_FOLDER: ~/.cargo
+  PIP_CACHE_DIR: $(Agent.HomeDirectory)/.pip
+  RUSTUP_CACHE_FOLDER: $(Agent.HomeDirectory)/.rustup
+  CARGO_CACHE_FOLDER: $(Agent.HomeDirectory)/.cargo
   RUST_CACHE_FOLDER: $(System.DefaultWorkingDirectory)/rust/perspective-viewer/build
 
 parameters:
