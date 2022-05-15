@@ -337,10 +337,10 @@ parameters:
           artifact: "perspective-labextension"
           path: $(System.DefaultWorkingDirectory)
   
-      - bash: tar --strip-components=1 -xvf $(System.DefaultWorkingDirectory)/perspective-nbextension.tgz -C $(System.DefaultWorkingDirectory)/python/perspective/perspective/
+      - bash: tar xvf $(System.DefaultWorkingDirectory)/perspective-nbextension.tgz
         displayName: "Install perspective-nbextension"
   
-      - bash: tar --strip-components=1 -xvf $(System.DefaultWorkingDirectory)/perspective-labextension.tgz -C $(System.DefaultWorkingDirectory)/python/perspective/perspective/
+      - bash:    $(System.DefaultWorkingDirectory)/perspective-labextension.tgz
         displayName: "Install perspective-labextension"
       
 
