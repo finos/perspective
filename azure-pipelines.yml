@@ -337,10 +337,10 @@ parameters:
           artifact: "perspective-labextension"
           path: $(System.DefaultWorkingDirectory)
   
-      - bash: tar xvf $(System.DefaultWorkingDirectory)/perspective-nbextension.tgz
+      - bash: tar xvf perspective-nbextension.tgz
         displayName: "Install perspective-nbextension"
   
-      - bash:    $(System.DefaultWorkingDirectory)/perspective-labextension.tgz
+      - bash: tar xvf perspective-labextension.tgz
         displayName: "Install perspective-labextension"
       
 
@@ -388,7 +388,7 @@ parameters:
   - name: pythonUploadArtifactsSteps
     type: stepList
     default:
-      - bash: tar cfzv perspective-python-build-$(ImageOS).tgz python/perspective 
+      - bash: tar cfzv perspective-python-build-$(ImageOS).tgz python/perspective
         displayName: "Compress PSP-only build"
 
       # Upload the packed versions
@@ -407,7 +407,7 @@ parameters:
           artifact: "perspective-python-build-$(ImageOS)"
           path: $(System.DefaultWorkingDirectory)
 
-      - bash: tar --strip-components=1 -xvf $(System.DefaultWorkingDirectory)/perspective-python-build-$(ImageOS).tgz -C $(System.DefaultWorkingDirectory)/python/
+      - bash: tar xvf perspective-python-build-$(ImageOS).tgz
         displayName: "Install perspective-python build"
 
   # Builds regular builds
