@@ -205,6 +205,9 @@ class PSPBuild(build_ext):
                 else "-j{}".format(env.get("PSP_NUM_CPUS", CPU_COUNT)),
             ]
 
+        if os.environ.get("PSP_CI_BUILD_LIBPSP_ONLY"):
+            cmake_args.append("-DPSP_PYTHON_BUILD_OMIT_BINDING=ON")
+
         env["PSP_ENABLE_PYTHON"] = "1"
         env["OSX_DEPLOYMENT_TARGET"] = "10.9"
 

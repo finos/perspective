@@ -6,9 +6,6 @@
     "bench": "python3 bench/perspective_benchmark.py",
     "docs": "python3 docs/generate.py",
     "clean:labextension": "rimraf perspective/labextension",
-    "clean:nbextension": "rimraf perspective/nbextension/index.js"
-  },
-  "devDependencies": {
-    "rimraf": "^3.0.2"
+    "clean:nbextension": "rimraf perspective/nbextension/static"
   }
 }
