@@ -35,7 +35,7 @@ schedules:
 
 variables:
   YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
-  PIP_CACHE_DIR: /home/vsts/.pip
+  PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
   CARGO_CACHE_FOLDER: /home/vsts/.cargo
   RUST_CACHE_FOLDER: $(System.DefaultWorkingDirectory)/rust/perspective-viewer/build
   VCPKG_CACHE_FOLDER: $(System.DefaultWorkingDirectory)/vcpkg
