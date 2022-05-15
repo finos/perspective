@@ -48,7 +48,7 @@ try {
 
 try {
     let cmd;
-    let lint_cmd ="flake8 perspective bench setup.py";
+    let lint_cmd = "flake8 perspective bench setup.py";
     let fix_cmd = "black perspective bench setup.py --exclude tests";
     let check_cmd = "check-manifest";
 
