@@ -41,6 +41,7 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/builder.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/buffer.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/chunked_array.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/chunk_resolver.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compare.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/config.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/datum.cc
@@ -80,10 +81,12 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/bitmap_builders.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/bitmap_ops.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/bpacking.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/byte_size.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/cancel.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/compression.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/counting_semaphore.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/cpu_info.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/debug.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/decimal.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/delimiting.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/formatting.cc
@@ -100,6 +103,7 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/tdigest.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/thread_pool.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/time.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/tracing.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/trie.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/unreachable.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/uri.cc
