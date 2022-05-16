@@ -154,7 +154,7 @@ parameters:
   - name: jsBuildSteps
     type: stepList
     default:
-      - bash: yarn build_js --ci
+      - bash: yarn build_js 
         displayName: "Build Javascript"
 
   - name: jsTestSteps
