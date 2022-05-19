@@ -4,8 +4,7 @@
     "version": "1.3.13",
     "description": "An example of editing a `perspective-python` server from the browser.",
     "scripts": {
-        "start": "PYTHONPATH=../../python/perspective python3 server.py",
-        "start:python2": "PYTHONPATH=../../python/perspective python2 server.py"
+        "start": "PYTHONPATH=../../python/perspective python3 server.py"
     },
     "keywords": [],
     "license": "Apache-2.0",
