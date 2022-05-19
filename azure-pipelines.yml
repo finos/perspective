@@ -123,15 +123,6 @@ parameters:
   - name: webassemblySteps
     type: stepList
     default:
-      - bash: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-        displayName: "Install wasm-pack"
-
-      - bash: rustup toolchain install nightly
-        displayName: "Install Rust nightly"
-
-      - bash: rustup component add rust-src --toolchain nightly
-        displayName: "Install rust-src"
-
       - bash: yarn lint_js
         displayName: "Lint Javascript"
 
