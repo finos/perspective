@@ -54,7 +54,6 @@ requires_dev = [
     "mock",
     "psutil",
     "pybind11>=2.4.0",
-    "pyarrow>=0.16.0",
     "pytest>=4.3.0",
     "pytest-cov>=2.6.1",
     "pytest-check-links",
