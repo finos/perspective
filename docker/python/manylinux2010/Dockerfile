@@ -6,8 +6,7 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-# https://github.com/pypa/manylinux/issues/428#issuecomment-774729597
-FROM quay.io/pypa/manylinux2010_x86_64:2021-02-06-3d322a5
+FROM quay.io/pypa/manylinux2010_x86_64
 RUN yum -y install rapidjson-devel sudo wget
 
 # Build new cmake
@@ -68,14 +67,3 @@ RUN yum install -y nodejs
 
 RUN npm install --global yarn
 RUN yarn --version
-
-# install flatbuffers
-RUN mkdir -p /usr/local \
-    && cd /usr/local \
-    && git clone https://github.com/google/flatbuffers.git \
-    && cd flatbuffers \
-    && cmake -G "Unix Makefiles" \
-    && make \
-    && cp -r /usr/local/flatbuffers/include/flatbuffers /usr/local/include \
-    && ln -s /usr/local/flatbuffers/flatc /usr/local/bin/flatc \
-    && chmod +x /usr/local/flatbuffers/flatc
