@@ -100,6 +100,8 @@ function perspective_assets(assets, host_psp) {
         response.setHeader("Access-Control-Request-Method", "*");
         response.setHeader("Access-Control-Allow-Methods", "OPTIONS,GET");
         response.setHeader("Access-Control-Allow-Headers", "*");
+        response.setHeader(`Cross-Origin-Embedder-Policy`, `require-corp`);
+        response.setHeader(`Cross-Origin-Opener-Policy`, `same-origin`);
 
         let url = request.url.split(/[\?\#]/)[0];
 

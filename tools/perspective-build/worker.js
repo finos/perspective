@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const esbuild = require("esbuild");
+const {BlobPlugin} = require("./blob.js");
 
 exports.WorkerPlugin = function WorkerPlugin(inline) {
     function setup(build) {
@@ -20,6 +21,7 @@ exports.WorkerPlugin = function WorkerPlugin(inline) {
                     minify: !process.env.PSP_DEBUG,
                     bundle: true,
                     sourcemap: false,
+                    plugins: [BlobPlugin()],
                 });
 
                 return {

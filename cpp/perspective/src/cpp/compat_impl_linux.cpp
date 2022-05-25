@@ -145,7 +145,7 @@ void
 set_thread_name(std::thread& thr, const std::string& name) {
 #ifdef PSP_PARALLEL_FOR
     auto handle = thr.native_handle();
-    pthread_setname_np(handle, name.c_str());
+    // pthread_setname_np(handle, name.c_str());
 #endif
 }
 

@@ -75,34 +75,62 @@ macro_rules! js_log_maybe {
 /// .. }` or `move async { .. }`, but for clone semantics.
 #[macro_export]
 macro_rules! clone {
-    ($i:ident) => {
-        let $i = $i.clone();
+    (impl @bind $i:tt { $($orig:tt)* } { }) => {
+        let $i = $($orig)*.clone();
     };
-    ($i:ident, $($tt:tt)*) => {
-        clone!($i);
-        clone!($($tt)*);
+
+    (impl @bind $i:tt { $($orig:tt)* } { $binder:tt }) => {
+        let $binder = $($orig)*.clone();
     };
-    ($this:ident . $i:ident) => {
-        let $i = $this.$i.clone();
+
+    (impl @expand { $($orig:tt)* } { $($binder:tt)* } $i:tt) => {
+        clone!(impl @bind $i { $($orig)* $i } { $($binder)* });
     };
-    ($this:ident . $i:ident, $($tt:tt)*) => {
-        clone!($this . $i);
-        clone!($($tt)*);
+
+    (impl @expand { $($orig:tt)* } { $($binder:tt)* } $i:tt ()) => {
+        clone!(impl @bind $i { $($orig)* $i () } { $($binder)* });
     };
-    ($this:ident . $borrow:ident() . $i:ident) => {
-        let $i = $this.$borrow().$i.clone();
+
+    (impl @expand { $($orig:tt)* } { $($binder:tt)* } $i:tt . 0) => {
+        clone!(impl @bind $i { $($orig)* $i . 0 } { $($binder)* });
     };
-    ($this:ident . $borrow:ident() . $i:ident, $($tt:tt)*) => {
-        clone!($this.$borrow().$i);
-        clone!($($tt)*);
+
+    (impl @expand { $($orig:tt)* } { $($binder:tt)* } $i:tt . 1) => {
+        clone!(impl @bind $i { $($orig)* $i . 1 } { $($binder)* });
     };
-    ($this:ident . $borrow:ident()) => {
-        let $borrow = $this.$borrow().clone();
+
+    (impl @expand { $($orig:tt)* } { $($binder:tt)* } $i:tt . 2) => {
+        clone!(impl @bind $i { $($orig)* $i . 2 } { $($binder)* });
     };
-    ($this:ident . $borrow:ident(), $($tt:tt)*) => {
-        clone!($this.$borrow());
-        clone!($($tt)*);
+
+    (impl @expand { $($orig:tt)* } { $($binder:tt)* } $i:tt . 3) => {
+        clone!(impl @bind $i { $($orig)* $i . 3 } { $($binder)* });
     };
+
+    (impl @expand { $($orig:tt)* } { $($binder:tt)* } $i:tt = $($tail:tt)+) => {
+        clone!(impl @expand { $($orig)* } { $i } $($tail)+);
+    };
+
+    (impl @expand { $($orig:tt)* } { $($binder:tt)* } $i:tt $($tail:tt)+) => {
+        clone!(impl @expand { $($orig)* $i } { $($binder)* } $($tail)+);
+    };
+
+    (impl @context { $($orig:tt)* } $tail:tt) => {
+        clone!(impl @expand { } { } $($orig)* $tail);
+    };
+
+    (impl @context { $($orig:tt)* } , $($tail:tt)+) => {
+        clone!(impl @expand { } { } $($orig)*);
+        clone!(impl @context { } $($tail)+);
+    };
+
+    (impl @context { $($orig:tt)* } $i:tt $($tail:tt)+) => {
+        clone!(impl @context { $($orig)* $i } $($tail)+);
+    };
+
+    ($($tail:tt)+) => {
+        clone!(impl @context { } $($tail)+);
+    }
 }
 
 #[macro_export]

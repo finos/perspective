@@ -287,9 +287,8 @@ if (PSP_WASM_BUILD)
             -O3 \
             -g0 \
             -flto \
+            -pthread \
             ")
-
-        # TODO: -flto
     endif()
 
     set(ASYNC_MODE_FLAGS "")
@@ -610,6 +609,8 @@ if (PSP_WASM_BUILD)
         -s NO_FILESYSTEM=1 \
         -s ALLOW_MEMORY_GROWTH=1 \
         -s MODULARIZE=1 \
+        -s USE_PTHREADS=1 \
+        -s PROXY_TO_PTHREAD=1 \
         -s EXPORT_NAME=\"load_perspective\" \
         -s MAXIMUM_MEMORY=4gb \
         -s USE_ES6_IMPORT_META=0 \

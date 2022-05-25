@@ -12,6 +12,7 @@
 #include <boost/optional.hpp>
 #include <emscripten.h>
 #include <emscripten/bind.h>
+#include <emscripten/threading.h>
 
 #ifdef PSP_ENABLE_WASM
 #include <emscripten/val.h>

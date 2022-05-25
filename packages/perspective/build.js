@@ -6,6 +6,7 @@ const {WorkerPlugin} = require("@finos/perspective-build/worker");
 const {NodeModulesExternal} = require("@finos/perspective-build/external");
 const {UMDLoader} = require("@finos/perspective-build/umd");
 const {build} = require("@finos/perspective-build/build");
+const {BlobPlugin} = require("@finos/perspective-build/blob");
 
 const BUILD = [
     {
@@ -30,7 +31,7 @@ const BUILD = [
         },
         format: "esm",
         entryPoints: ["src/js/perspective.browser.js"],
-        plugins: [WasmPlugin(false), WorkerPlugin(false)],
+        plugins: [WasmPlugin(false), WorkerPlugin(false), BlobPlugin()],
         outfile: "dist/cdn/perspective.js",
     },
     {

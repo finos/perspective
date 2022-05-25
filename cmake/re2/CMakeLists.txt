@@ -99,9 +99,7 @@ target_include_directories(re2 PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_D
 set_target_properties(re2 PROPERTIES SOVERSION ${SONAME} VERSION ${SONAME}.0.0)
 add_library(re2::re2 ALIAS re2)
 
-if(UNIX)
-  target_link_libraries(re2 PUBLIC Threads::Threads)
-endif()
+target_link_libraries(re2 PUBLIC Threads::Threads)
 
 if(RE2_BUILD_TESTING)
   set(TESTING_SOURCES
@@ -164,6 +162,8 @@ set(RE2_HEADERS
     re2/set.h
     re2/stringpiece.h
     )
+
+set(CMAKE_CXX_FLAGS_RELEASE " -pthread ")
 
 install(FILES ${RE2_HEADERS}
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/re2)

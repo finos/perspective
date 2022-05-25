@@ -14,6 +14,7 @@ import {bindall, get_column_type} from "./utils.js";
 import {Server} from "./api/server.js";
 
 import formatters from "./view_formatters";
+import {promise} from "sinon";
 
 // IE fix - chrono::steady_clock depends on performance.now() which does not
 // exist in IE workers
@@ -35,7 +36,7 @@ const WARNED_KEYS = new Set();
  *
  * @module perspective
  */
-export default function (Module) {
+export default function (Module, module_url, worker_url) {
     let __MODULE__ = Module;
     let accessor = new DataAccessor();
     const SIDES = ["zero", "one", "two"];
@@ -2258,17 +2259,39 @@ export default function (Module) {
          * @param {ArrayBuffer} buffer an ArrayBuffer or Buffer containing the
          * Perspective WASM code
          */
-        init(msg) {
+        async init(msg) {
             if (typeof WebAssembly === "undefined") {
                 throw new Error("WebAssembly not supported");
             } else {
-                __MODULE__({
+                const promise = new Promise((resolve) => {
+                    // The easiest way to deal with emscripten's main thread
+                    // completion, which has an awkward API.
+                    self.__on_wasm_init__ = resolve;
+                });
+
+                // `__MODULE__` is async because we want both the source text
+                // (to pass to the worker threads) and the module (for this
+                // thread).
+                const {default: mod_constructor} = await __MODULE__;
+                const wasm_mod = await mod_constructor({
                     wasmBinary: msg.buffer,
                     wasmJSMethod: "native-wasm",
-                }).then((mod) => {
-                    __MODULE__ = mod;
-                    super.init(msg);
+                    mainScriptUrlOrBlob: module_url,
+                    locateFile(file) {
+                        // The `perspective.cpp.worker.js` file can't be
+                        // correctly linked by esbuild/webpack due to because
+                        // emscripten generated code outputs a dynamic string
+                        // passed to `import()`, so we can only provide this
+                        // file via `locateFile()`.
+                        if (file.endsWith("worker.js")) {
+                            return worker_url;
+                        }
+                    },
                 });
+
+                __MODULE__ = wasm_mod;
+                await promise;
+                super.init(msg);
             }
         }
     }

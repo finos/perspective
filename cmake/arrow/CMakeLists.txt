@@ -261,6 +261,9 @@ add_library(arrow STATIC ${ARROW_SRCS})
 target_compile_definitions(arrow PUBLIC ARROW_NO_DEPRECATED_API)
 target_compile_definitions(arrow PUBLIC ARROW_STATIC)
 
+
+set(CMAKE_CXX_FLAGS_RELEASE " -pthread ")
+
 # will need built boost filesystem and system .lib to work, even though
 # perspective itself does not use those dependencies
 target_link_libraries(arrow

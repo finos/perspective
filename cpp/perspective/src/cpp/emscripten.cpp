@@ -1843,31 +1843,38 @@ namespace binding {
 
 using namespace perspective::binding;
 
+void
+_main_completed() {
+    // clang-format off
+    EM_ASM({
+        if (typeof self !== "undefined") {
+            try {
+                if (self.dispatchEvent && !self._perspective_initialized
+                    && !!self.document) {
+                    self._perspective_initialized = true;
+                    var event = self.document.createEvent("Event");
+                    event.initEvent("perspective-ready", false, true);
+                    self.dispatchEvent(event);
+                } else if (!self.document && self.postMessage) {
+                    self.__on_wasm_init__("done");
+                    self.postMessage({});
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    });
+    // clang-format on
+}
+
 /**
  * Main
  */
 int
 main(int argc, char** argv) {
     t_computed_expression_parser::init();
-
-    // clang-format off
-EM_ASM({
-
-    if (typeof self !== "undefined") {
-        try {
-            if (self.dispatchEvent && !self._perspective_initialized && self.document !== null) {
-                self._perspective_initialized = true;
-                var event = self.document.createEvent("Event");
-                event.initEvent("perspective-ready", false, true);
-                self.dispatchEvent(event);
-            } else if (!self.document && self.postMessage) {                
-                self.postMessage({});
-            }
-        } catch (e) {}
-    }
-
-});
-    // clang-format on
+    parallel_for(8, [](int cidx) {});
+    emscripten_sync_run_in_main_runtime_thread(EM_FUNC_SIG_V, _main_completed);
 }
 
 /******************************************************************************
