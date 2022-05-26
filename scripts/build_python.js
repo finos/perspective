@@ -14,27 +14,21 @@ const {
     resolve,
     getarg,
     bash,
+    python_version,
     python_image,
+    manylinux_version,
 } = require("./script_utils.js");
 const fs = require("fs-extra");
 
-let PYTHON = getarg("--python38")
-    ? "python3.8"
-    : getarg("--python36")
-    ? "python3.6"
-    : getarg("--python37")
-    ? "python3.7"
-    : "python3";
+let PYTHON = python_version();
 
 let IMAGE = "manylinux2010";
 const IS_DOCKER = process.env.PSP_DOCKER;
+const PSP_CI_BUILD_LIBPSP_ONLY = process.env.PSP_CI_BUILD_LIBPSP_ONLY;
+const PSP_CI_SKIP_JS_FILES_CHECK = process.env.PSP_CI_SKIP_JS_FILES_CHECK;
 
 if (IS_DOCKER) {
-    let MANYLINUX_VERSION = getarg("--manylinux2010")
-        ? "manylinux2010"
-        : getarg("--manylinux2014")
-        ? "manylinux2014"
-        : "manylinux2010";
+    let MANYLINUX_VERSION = manylinux_version();
     IMAGE = python_image(MANYLINUX_VERSION, PYTHON);
 }
 
@@ -110,7 +104,15 @@ try {
 
     if (IS_DOCKER) {
         execute`${docker(IMAGE)} bash -c "cd python/perspective && \
-            ${cmd} "`;
+        ${
+            PSP_CI_BUILD_LIBPSP_ONLY
+                ? "export PSP_CI_BUILD_LIBPSP_ONLY=1 && "
+                : ""
+        }${
+            PSP_CI_SKIP_JS_FILES_CHECK
+                ? "export PSP_CI_SKIP_JS_FILES_CHECK=1 &&"
+                : ""
+        } ${cmd} "`;
     } else {
         const python_path = resolve`${__dirname}/../python/perspective`;
         execute`cd ${python_path} && ${cmd}`;

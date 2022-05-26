@@ -1,13 +1,13 @@
 {
-    "name": "@finos/perspective-jupyterlab",
+    "name": "@finos/perspective-jupyter",
     "version": "1.3.13",
     "description": "A Jupyterlab extension for the Perspective library, designed to be used with perspective-python.",
     "files": [
         "dist/**/*",
         "src/**/*"
     ],
-    "main": "dist/umd/perspective-jupyterlab.js",
-    "style": "dist/umd/perspective-jupyterlab.css",
+    "main": "dist/umd/perspective-jupyter.js",
+    "style": "dist/umd/perspective-jupyter.css",
     "directories": {
         "dist": "dist/"
     },
@@ -19,15 +19,23 @@
         "bench": "npm-run-all bench:build bench:run",
         "bench:build": "echo \"No Benchmarks\"",
         "bench:run": "echo \"No Benchmarks\"",
+        "build": "npm-run-all build:*",
+        "build:base": "node build.js",
+        "build:lib": "babel src/js/ --source-maps --out-dir dist/esm/",
+        "build:labextension": "jupyter labextension build . --debug",
+        "build:nbextension": "webpack --mode=production -c src/config/webpack.config.js",
+        "clean": "npm-run-all clean:*",
+        "clean:dist": "rimraf dist",
+        "clean:lib": "rimraf lib",
         "clean:screenshots": "rimraf \"screenshots/**/*.@(failed|diff).png\"",
+        "clean:labextension": "rimraf ../../python/perspective/perspective/labextension",
+        "clean:nbextension": "rimraf ../../python/perspective/perspective/nbextension/static",
+        "test": "npm-run-all test:build test:run",
         "test:build": "cpy \"test/html/*\" dist/umd && cpy \"test/csv/*\" dist/umd && cpy \"test/css/*\" dist/umd && node build.js --test",
         "test:run": "jest --rootDir=. --config=test/config/jest.config.js --color --verbose",
         "test:jupyter:build": "cpy  \"test/html/*\" dist/umd && cpy \"test/arrow/*\" dist/umd && cpy \"test/css/*\" dist/umd",
         "test:jupyter:run": "__JUPYTERLAB_PORT__=6538 jest --rootDir=. --config=test/config/jupyter/jest.config.js --color --verbose",
-        "test": "npm-run-all test:build test:run",
         "test:jupyter": "npm-run-all test:jupyter:build test:jupyter:run",
-        "build": "node build.js",
-        "clean": "rimraf dist",
         "version": "yarn build"
     },
     "dependencies": {
@@ -38,13 +46,32 @@
         "@jupyter-widgets/base": "^4.1.0",
         "@jupyterlab/application": "^3.3.2",
         "@lumino/application": "^1.27.0",
-        "@lumino/widgets": "1.31.1"
+        "@lumino/widgets": "1.31.1",
+        "underscore": "^1.8.3"
     },
     "devDependencies": {
         "@finos/perspective-build": "^1.3.13",
-        "@finos/perspective-test": "^1.3.13"
+        "@finos/perspective-test": "^1.3.13",
+        "@jupyterlab/builder": "^3.4.0"
     },
     "jupyterlab": {
-        "extension": true
+        "extension": true,
+        "outputDir": "../../python/perspective/perspective/labextension",
+        "sharedPackages": {
+            "@jupyter-widgets/base": {
+                "bundled": false,
+                "singleton": true
+            }
+        },
+        "discovery": {
+            "server": {
+                "base": {
+                    "name": "perspective-python"
+                },
+                "managers": [
+                    "pip"
+                ]
+            }
+        }
     }
 }

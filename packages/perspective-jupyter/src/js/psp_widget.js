@@ -276,6 +276,7 @@ export class PerspectiveWidget extends Widget {
     static createNode(node) {
         node.classList.add("p-Widget");
         node.classList.add(PSP_CONTAINER_CLASS);
+
         const viewer = document.createElement("perspective-viewer");
         viewer.classList.add(PSP_CLASS);
         viewer.setAttribute("type", MIME_TYPE);

@@ -7,19 +7,26 @@
 #
 from __future__ import print_function
 
-import io
 import os
 import os.path
 import platform
 import re
 import subprocess
 import sys
+
 from codecs import open
 from distutils.version import LooseVersion
 
 from setuptools import Extension, find_packages, setup
 from setuptools.command.build_ext import build_ext
 from setuptools.command.sdist import sdist
+
+from jupyter_packaging import (
+    combine_commands,
+    create_cmdclass,
+    ensure_targets,
+    get_version,
+)
 
 try:
     from shutil import which
@@ -29,10 +36,22 @@ except ImportError:
     raise Exception("Requires Python 3.6 or later")
 
 here = os.path.abspath(os.path.dirname(__file__))
+nb_path = os.path.join("perspective", "nbextension", "static")
+lab_path = os.path.join("perspective", "labextension")
+
 
 with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read().replace("\r\n", "\n")
 
+if sys.version_info.major < 3:
+    raise Exception("Requires Python 3.6 or later")
+
+version = get_version(os.path.join(here, "perspective", "core", "_version.py"))
+
+SKIP_JS_FILES = os.environ.get("PSP_CI_SKIP_JS_FILES_CHECK")
+
+########################
+# Get requirement info #
 requires = [
     "ipywidgets>=7.5.1",
     "future>=0.16.0",
@@ -45,6 +64,8 @@ requires = [
 
 if sys.version_info.major < 3:
     raise Exception("Requires Python 3.6 or later")
+
+requires_jupyter = ["jupyterlab>=3.4"]
 
 requires_dev = [
     "black==20.8b1",
@@ -62,7 +83,7 @@ requires_dev = [
     "Sphinx>=1.8.4",
     "sphinx-markdown-builder>=0.5.2",
     "wheel",
-] + requires
+] + requires + requires_jupyter
 
 
 def get_version(file, name="__version__"):
@@ -79,6 +100,9 @@ def get_version(file, name="__version__"):
 version = get_version(os.path.join(here, "perspective", "core", "_version.py"))
 
 
+#####################
+# Custom Extensions #
+#####################
 class PSPExtension(Extension):
     def __init__(self, name, sourcedir="dist"):
         Extension.__init__(self, name, sources=[])
@@ -193,6 +217,11 @@ class PSPBuild(build_ext):
                 else "-j{}".format(env.get("PSP_NUM_CPUS", CPU_COUNT)),
             ]
 
+        if os.environ.get("PSP_CI_BUILD_LIBPSP_ONLY"):
+            cmake_args.append("-DPSP_PYTHON_BUILD_OMIT_BINDING=ON")
+        else:
+            cmake_args.append("-DPSP_PYTHON_BUILD_OMIT_BINDING=OFF")
+
         env["PSP_ENABLE_PYTHON"] = "1"
         env["OSX_DEPLOYMENT_TARGET"] = "10.9"
 
@@ -220,6 +249,7 @@ class PSPCheckSDist(sdist):
         super(PSPCheckSDist, self).run()
 
     def run_check(self):
+        # Check for C++ assets
         for file in ("CMakeLists.txt", "cmake", "src"):
             path = os.path.abspath(os.path.join(here, "dist", file))
             if not os.path.exists(path):
@@ -229,6 +259,56 @@ class PSPCheckSDist(sdist):
                     )
                 )
 
+        # Check for JS assets
+        if not SKIP_JS_FILES:
+            for file in ("labextension/package.json", "nbextension/static/index.js"):
+                path = os.path.abspath(os.path.join(here, "perspective", file))
+                if not os.path.exists(path):
+                    raise Exception(
+                        "Path is missing! {}\nMust run `yarn build` before building sdist so JS files are installed".format(
+                            path
+                        )
+                    )
+
+
+##############################
+# NBExtension / Labextension #
+##############################
+data_files_spec = [
+    # NBExtension
+    (
+        "share/jupyter/nbextensions/@finos/perspective-jupyter",
+        "perspective/nbextension/static",
+        "*.js*",
+    ),
+    # Activate nbextension by default
+    (
+        "etc/jupyter/nbconfig/notebook.d",
+        "perspective/extension",
+        "finos-perspective-nbextension.json",
+    ),
+    # Labextension
+    (
+        "share/jupyter/labextensions/@finos/perspective-jupyter",
+        "perspective/labextension",
+        "**",
+    ),
+]
+
+cmdclass = create_cmdclass("js", data_files_spec=data_files_spec)
+cmdclass["js"] = combine_commands(
+    ensure_targets(
+        []
+        if SKIP_JS_FILES
+        else [
+            os.path.join("perspective", "nbextension", "static", "index.js"),
+            os.path.join("perspective", "labextension", "package.json"),
+            os.path.join("perspective", "labextension", "static", "style.js"),
+        ]
+    ),
+)
+cmdclass["build_ext"] = PSPBuild
+cmdclass["sdist"] = combine_commands(cmdclass["sdist"], PSPCheckSDist)
 
 setup(
     name="perspective-python",
@@ -253,7 +333,11 @@ setup(
     zip_safe=False,
     python_requires=">=3.6",
     install_requires=requires,
-    extras_require={"dev": requires_dev},
+    extras_require={
+        "dev": requires_dev,
+        "develop": requires_dev,
+        "jupyter": requires_jupyter,
+    },
     ext_modules=[PSPExtension("perspective")],
-    cmdclass=dict(build_ext=PSPBuild, sdist=PSPCheckSDist),
+    cmdclass=cmdclass,
 )

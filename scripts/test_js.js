@@ -19,7 +19,7 @@ const IS_LOCAL_PUPPETEER = fs.existsSync("node_modules/puppeteer");
 // Unfortunately we have to handle parts of the Jupyter test case here,
 // as the Jupyter server needs to be run outside of the main Jest process.
 const IS_JUPYTER =
-    getarg("--jupyter") && minimatch("perspective-jupyterlab", PACKAGE);
+    getarg("--jupyter") && minimatch("perspective-jupyter", PACKAGE);
 
 if (IS_WRITE) {
     console.log("-- Running the test suite in Write mode");

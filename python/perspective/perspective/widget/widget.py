@@ -173,7 +173,7 @@ class _PerspectiveWidgetMessage(object):
 
 class PerspectiveWidget(DOMWidget, PerspectiveViewer):
     """:class`~perspective.PerspectiveWidget` allows for Perspective to be used
-    in the form of a JupyterLab IPython widget.
+    in the form of a Jupyter IPython widget.
 
     Using `perspective.Table`, you can create a widget that extends the full
     functionality of `perspective-viewer`.  Changes on the viewer can be
@@ -207,10 +207,10 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
 
     # Required by ipywidgets for proper registration of the backend
     _model_name = Unicode("PerspectiveModel").tag(sync=True)
-    _model_module = Unicode("@finos/perspective-jupyterlab").tag(sync=True)
+    _model_module = Unicode("@finos/perspective-jupyter").tag(sync=True)
     _model_module_version = Unicode("~{}".format(__version__)).tag(sync=True)
     _view_name = Unicode("PerspectiveView").tag(sync=True)
-    _view_module = Unicode("@finos/perspective-jupyterlab").tag(sync=True)
+    _view_module = Unicode("@finos/perspective-jupyter").tag(sync=True)
     _view_module_version = Unicode("~{}".format(__version__)).tag(sync=True)
 
     def __init__(
@@ -424,7 +424,7 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
         in the front end.
 
         The posted message should conform to the `PerspectiveJupyterMessage`
-        interface as defined in `@finos/perspective-jupyterlab`.
+        interface as defined in `@finos/perspective-jupyter`.
 
         Args:
             msg (dict): a message from `PerspectiveManager` for the front-end

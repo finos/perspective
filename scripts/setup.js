@@ -128,8 +128,8 @@ async function focus_package() {
                 },
                 {
                     key: "l",
-                    name: "perspective-jupyterlab",
-                    value: "perspective-jupyterlab",
+                    name: "perspective-jupyter",
+                    value: "perspective-jupyter",
                 },
                 {
                     key: "w",

@@ -125,6 +125,7 @@ option(CMAKE_BUILD_TYPE "Release/Debug build" RELEASE)
 option(PSP_WASM_BUILD "Build the WebAssembly Project" ON)
 option(PSP_CPP_BUILD "Build the C++ Project" OFF)
 option(PSP_PYTHON_BUILD "Build the Python Bindings" OFF)
+option(PSP_PYTHON_BUILD_OMIT_BINDING "Build the C++ project, omit the python. FOR CI ONLY" OFF)
 option(PSP_CPP_BUILD_STRICT "Build the C++ with strict warnings" OFF)
 
 if (NOT DEFINED PSP_WASM_BUILD)
@@ -136,7 +137,6 @@ endif()
 if (PSP_WASM_BUILD AND PSP_CPP_BUILD)
     message(FATAL_ERROR "${Red}CPP and Emscripten builds must be done separately${ColorReset}")
 endif()
-
 
 if(DEFINED ENV{PSP_DEBUG})
     set(CMAKE_BUILD_TYPE DEBUG)
@@ -169,7 +169,6 @@ endif()
 if (NOT DEFINED PSP_CPP_BUILD_STRICT)
     set(PSP_CPP_BUILD_STRICT OFF)
 endif()
-
 
 if(PSP_WASM_BUILD)
     set(BUILD_MESSAGE "${BUILD_MESSAGE}\n${Cyan}Building WASM binding${ColorReset}")
@@ -421,7 +420,7 @@ psp_build_dep("hopscotch" "${PSP_CMAKE_MODULE_PATH}/hopscotch.txt.in")
 psp_build_dep("ordered-map" "${PSP_CMAKE_MODULE_PATH}/ordered-map.txt.in")
 
 # Build minimal arrow for both Emscripten and Python
-message("${Cyan}Building minimal Apache Arrow${ColorReset}")
+psp_build_message("${Cyan}Building minimal Apache Arrow${ColorReset}")
 
 # Build arrow dependencies
 psp_build_dep("rapidjson" "${PSP_CMAKE_MODULE_PATH}/rapidjson.txt.in")
@@ -638,6 +637,12 @@ if (PSP_WASM_BUILD)
     set_target_properties(perspective_cjs PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./cjs/")
     set_target_properties(perspective_cjs PROPERTIES OUTPUT_NAME "perspective.cpp")
 elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
+    if(PSP_PYTHON_BUILD_OMIT_BINDING)
+        # bigass warning label
+        message("${Red}*******************************************")
+        message("${Red}ONLY BUILDING PSP LIB, OMITTING BINDINGS")
+        message("${Red}*******************************************${ColorReset}")
+        endif()
     if(NOT WIN32)
         set(CMAKE_SHARED_LIBRARY_SUFFIX .so)
         # Look for the binary using @loader_path (relative to binary location)
@@ -662,25 +667,36 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
         # Python extra targets #
         ########################
         add_library(psp SHARED ${PYTHON_SOURCE_FILES})
-        add_library(binding SHARED ${PYTHON_BINDING_SOURCE_FILES})
+
+        if(NOT PSP_PYTHON_BUILD_OMIT_BINDING)
+            add_library(binding SHARED ${PYTHON_BINDING_SOURCE_FILES})
+        endif()
 
         include_directories(${PSP_PYTHON_SRC}/include)
 
         target_compile_definitions(psp PRIVATE PSP_ENABLE_PYTHON=1)
-        target_compile_definitions(binding PRIVATE PSP_ENABLE_PYTHON=1)
+        if(NOT PSP_PYTHON_BUILD_OMIT_BINDING)
+            target_compile_definitions(binding PRIVATE PSP_ENABLE_PYTHON=1)
+        endif()
 
         if (WIN32)
-            target_compile_definitions(binding PRIVATE WIN32=1)
-            target_compile_definitions(binding PRIVATE _WIN32=1)
+            if(NOT PSP_PYTHON_BUILD_OMIT_BINDING)
+                target_compile_definitions(binding PRIVATE WIN32=1)
+                target_compile_definitions(binding PRIVATE _WIN32=1)
 
-            # .dll not importable
-            set_property(TARGET binding PROPERTY SUFFIX .pyd)
+                # .dll not importable
+                set_property(TARGET binding PROPERTY SUFFIX .pyd)
+            endif()
         elseif (MACOS OR NOT MANYLINUX)
-            target_compile_options(binding PRIVATE -Wdeprecated-declarations)
+            if(NOT PSP_PYTHON_BUILD_OMIT_BINDING)
+                target_compile_options(binding PRIVATE -Wdeprecated-declarations)
+                set_property(TARGET binding PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path})
+            endif()
             set_property(TARGET psp PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path})
-            set_property(TARGET binding PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path})
         else()
-            target_compile_options(binding PRIVATE -Wdeprecated-declarations)
+            if(NOT PSP_PYTHON_BUILD_OMIT_BINDING)
+                target_compile_options(binding PRIVATE -Wdeprecated-declarations)
+            endif()
         endif()
 
         # python 2.7 build on manylinux needs -lrt for access to time functions,
@@ -693,14 +709,18 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
         # Link against minimal arrow static library
         target_link_libraries(psp arrow re2)
 
-        target_link_libraries(binding psp)
+        if(NOT PSP_PYTHON_BUILD_OMIT_BINDING)
+            target_link_libraries(binding psp)
+        endif()
 
         # The compiled libraries will be put in CMAKE_LIBRARY_OUTPUT_DIRECTORY by default. In the
         # setup.py file, we designate this to be in the build/lib.<platform> directory. However,
         # since we want to be able to test perspective in-source, we also copy the libraries into
         # the source folder. These two commands do that.
         add_custom_command(TARGET psp POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:psp> ${PSP_PYTHON_SRC}/table/)
-        add_custom_command(TARGET binding POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:binding> ${PSP_PYTHON_SRC}/table/)
+        if(NOT PSP_PYTHON_BUILD_OMIT_BINDING)
+            add_custom_command(TARGET binding POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:binding> ${PSP_PYTHON_SRC}/table/)
+        endif()
 
         ########################
     else()
@@ -712,7 +732,9 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
         target_compile_options(psp PRIVATE -Wall -Werror)
         target_compile_options(psp PRIVATE $<$<CONFIG:DEBUG>:-fPIC -O0>)
         if(PSP_PYTHON_BUILD)
-            target_compile_options(binding PRIVATE $<$<CONFIG:DEBUG>:-fPIC -O0>)
+            if(NOT PSP_PYTHON_BUILD_OMIT_BINDING)
+                target_compile_options(binding PRIVATE $<$<CONFIG:DEBUG>:-fPIC -O0>)
+            endif()
         endif()
     elseif(WIN32)
         target_compile_definitions(psp PRIVATE PERSPECTIVE_EXPORTS=1)

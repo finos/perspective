@@ -97,13 +97,13 @@ To install this specific version of Emscripten:
 
 ---
 
-### `perspective-jupyterlab`
+### `perspective-jupyter`
 
 To install the Jupyterlab plugin from your local working directory, give
-`jupyter labextension install` the path to the `perspective-jupyterlab` package:
+`jupyter labextension install` the path to the `perspective-jupyter` package:
 
 ```bash
-jupyter labextension install ./packages/perspective-jupyterlab
+jupyter labextension install ./packages/perspective-jupyter
 ```
 
 Afterwards, you should see it listed as a "local extension" when you run

@@ -34,7 +34,7 @@ const PROD_BUILD = {
         ".html": "text",
         ".ttf": "file",
     },
-    outfile: "dist/umd/perspective-jupyterlab.js",
+    outfile: "dist/umd/perspective-jupyter.js",
 };
 
 const BUILD = [
@@ -43,7 +43,7 @@ const BUILD = [
 
 async function build_all() {
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
-    cpy(["dist/css/*"], "dist/umd");
+    cpy(["src/less/*"], "dist/less");
 }
 
 build_all();
