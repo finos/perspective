@@ -11,4 +11,5 @@ from .core import *
 from .core._version import __version__
 from .client import *
 from .handlers import *
+from .nbextension import _jupyter_nbextension_paths
 from .widget import *

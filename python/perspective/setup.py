@@ -7,7 +7,6 @@
 #
 from __future__ import print_function
 
-import io
 import os
 import os.path
 import platform
@@ -22,6 +21,13 @@ from setuptools import Extension, find_packages, setup
 from setuptools.command.build_ext import build_ext
 from setuptools.command.sdist import sdist
 
+from jupyter_packaging import (
+    combine_commands,
+    create_cmdclass,
+    ensure_targets,
+    get_version,
+)
+
 try:
     from shutil import which
 
@@ -30,6 +36,8 @@ except ImportError:
     raise Exception("Requires Python 3.7 or later")
 
 here = os.path.abspath(os.path.dirname(__file__))
+nb_path = os.path.join("perspective", "nbextension", "static")
+lab_path = os.path.join("perspective", "labextension")
 
 with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read().replace("\r\n", "\n")
@@ -42,19 +50,12 @@ if which("cmake") is None and which("cmake.exe") is None:
     raise Exception("Requires cmake")
 
 
-def get_version(file, name="__version__"):
-    """Get the version of the package from the given file by
-    executing it and extracting the given `name`.
-    """
-    path = os.path.realpath(file)
-    version_ns = {}
-    with io.open(path, encoding="utf8") as f:
-        exec(f.read(), {}, version_ns)
-    return version_ns[name]
-
-
 version = get_version(os.path.join(here, "perspective", "core", "_version.py"))
 
+SKIP_JS_FILES = os.environ.get("PSP_CI_SKIP_JS_FILES_CHECK")
+
+########################
+# Get requirement info #
 requires = [
     "ipywidgets>=7.5.1,<9",
     "future>=0.16.0,<1",
@@ -102,6 +103,9 @@ requires_dev = (
 )
 
 
+#####################
+# Custom Extensions #
+#####################
 class PSPExtension(Extension):
     def __init__(self, name, sourcedir="dist"):
         Extension.__init__(self, name, sources=[])
@@ -260,6 +264,7 @@ class PSPCheckSDist(sdist):
         super(PSPCheckSDist, self).run()
 
     def run_check(self):
+        # Check for C++ assets
         for file in ("CMakeLists.txt", "cmake", "src"):
             path = os.path.abspath(os.path.join(here, "dist", file))
             if not os.path.exists(path):
@@ -268,6 +273,56 @@ class PSPCheckSDist(sdist):
                         path
                     )
                 )
+        # Check for JS assets
+        if not SKIP_JS_FILES:
+            for file in ("labextension/package.json", "nbextension/static/index.js"):
+                path = os.path.abspath(os.path.join(here, "perspective", file))
+                if not os.path.exists(path):
+                    raise Exception(
+                        "Path is missing! {}\nMust run `yarn build` before building sdist so JS files are installed".format(
+                            path
+                        )
+                    )
+
+
+##############################
+# NBExtension / Labextension #
+##############################
+data_files_spec = [
+    # NBExtension
+    (
+        "share/jupyter/nbextensions/@finos/perspective-jupyter",
+        "perspective/nbextension/static",
+        "*.js*",
+    ),
+    # Activate nbextension by default
+    (
+        "etc/jupyter/nbconfig/notebook.d",
+        "perspective/extension",
+        "finos-perspective-nbextension.json",
+    ),
+    # Labextension
+    (
+        "share/jupyter/labextensions/@finos/perspective-jupyter",
+        "perspective/labextension",
+        "**",
+    ),
+]
+
+cmdclass = create_cmdclass("js", data_files_spec=data_files_spec)
+cmdclass["js"] = combine_commands(
+    ensure_targets(
+        []
+        if SKIP_JS_FILES
+        else [
+            os.path.join("perspective", "nbextension", "static", "index.js"),
+            os.path.join("perspective", "labextension", "package.json"),
+            os.path.join("perspective", "labextension", "static", "style.js"),
+        ]
+    ),
+)
+cmdclass["build_ext"] = PSPBuild
+cmdclass["sdist"] = combine_commands(cmdclass["sdist"], PSPCheckSDist)
 
 
 setup(
@@ -303,5 +358,5 @@ setup(
         "tornado": requires_tornado,
     },
     ext_modules=[PSPExtension("perspective")],
-    cmdclass=dict(build_ext=PSPBuild, sdist=PSPCheckSDist),
+    cmdclass=cmdclass,
 )

@@ -65,6 +65,7 @@ async function build_all() {
 
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
     cpy(["dist/css/*"], "dist/umd");
+    cpy(["src/less/*"], "dist/less");
 }
 
 build_all();

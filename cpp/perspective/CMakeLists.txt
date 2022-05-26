@@ -354,7 +354,7 @@ psp_build_dep("hopscotch" "${PSP_CMAKE_MODULE_PATH}/hopscotch.txt.in")
 psp_build_dep("ordered-map" "${PSP_CMAKE_MODULE_PATH}/ordered-map.txt.in")
 
 # Build minimal arrow for both Emscripten and Python
-message("${Cyan}Building minimal Apache Arrow${ColorReset}")
+psp_build_message("${Cyan}Building minimal Apache Arrow${ColorReset}")
 
 # Build arrow dependencies
 psp_build_dep("rapidjson" "${PSP_CMAKE_MODULE_PATH}/rapidjson.txt.in")
