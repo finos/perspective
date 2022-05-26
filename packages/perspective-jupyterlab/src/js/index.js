@@ -13,15 +13,20 @@ export * from "./version";
 export * from "./view";
 export * from "./widget";
 
-/* css */
 import "../less/index.less";
+
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
-import {perspectiveRenderers} from "./renderer";
+
+// NOTE: only expose the widget here
 import {PerspectiveJupyterPlugin} from "./plugin";
 
-/**
- * Export the renderer as default.
- */
-const plugins = [PerspectiveJupyterPlugin, perspectiveRenderers];
+let plugins = [PerspectiveJupyterPlugin];
+
+// Conditionally import renderers if running in jupyterlab only
+if (window && window._JUPYTERLAB) {
+    const {PerspectiveRenderers} = require("./renderer");
+    plugins.push(PerspectiveRenderers);
+}
+
 export default plugins;

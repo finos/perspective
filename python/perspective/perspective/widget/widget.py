@@ -173,7 +173,7 @@ class _PerspectiveWidgetMessage(object):
 
 class PerspectiveWidget(DOMWidget, PerspectiveViewer):
     """:class`~perspective.PerspectiveWidget` allows for Perspective to be used
-    in the form of a JupyterLab IPython widget.
+    in the form of a Jupyter IPython widget.
 
     Using `perspective.Table`, you can create a widget that extends the full
     functionality of `perspective-viewer`.  Changes on the viewer can be

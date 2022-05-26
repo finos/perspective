@@ -14,29 +14,21 @@ const {
     resolve,
     getarg,
     bash,
+    python_version,
     python_image,
+    manylinux_version,
 } = require("./script_utils.js");
 const fs = require("fs-extra");
 const IS_DOCKER = process.env.PSP_DOCKER;
 const IS_MACOS = getarg("--macos");
-const PYTHON = getarg("--python39")
-    ? "python3.9"
-    : getarg("--python38")
-    ? "python3.8"
-    : getarg("--python36")
-    ? "python3.6"
-    : "python3.7";
+const PYTHON = python_version();
 
 let IMAGE = "manylinux2014";
 let MANYLINUX_VERSION;
 
 if (IS_DOCKER) {
     // switch to 2014 only on python3
-    MANYLINUX_VERSION = getarg("--manylinux2010")
-        ? "manylinux2010"
-        : getarg("--manylinux2014")
-        ? "manylinux2014"
-        : "manylinux2014";
+    MANYLINUX_VERSION = manylinux_version();
     IMAGE = python_image(MANYLINUX_VERSION, PYTHON);
 }
 
@@ -70,7 +62,7 @@ try {
 
         // These are system deps that may only be in place from pep-517/518 so
         // lets reinstall them to be sure
-        cmd += `${PYTHON} -m pip install -U 'numpy>=1.13.1' wheel twine && `;
+        cmd += `${PYTHON} -m pip install -U 'numpy>=1.13.1' jupyter_packaging wheel twine && `;
 
         // remove the build folder so we completely rebuild (and pick up the
         // libs we just installed above, since this build method won't use

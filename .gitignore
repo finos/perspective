@@ -196,3 +196,5 @@ docs/static/features
 results.debug.json
 
 tools/perspective-build/lib
+python/perspective/perspective/nbextension/static
+python/perspective/perspective/labextension
