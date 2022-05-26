@@ -15,13 +15,13 @@ const default_body = async (page) => {
     await execute_all_cells(page);
     const viewer = await page.waitForSelector(
         ".jp-OutputArea-output perspective-viewer",
-        {visible: true, timeout: 1200000}
+        {visible: true, timeout: 30000}
     );
     await viewer.evaluate(async (viewer) => await viewer.flush());
     return viewer;
 };
 
-jest.setTimeout(1200000);
+jest.setTimeout(30000);
 
 utils.with_jupyterlab(process.env.__JUPYTERLAB_PORT__, () => {
     describe.jupyter(

@@ -108,12 +108,21 @@ module.exports = {
         await page.waitForSelector(".jp-NotebookPanel-toolbar", {
             visible: true,
         });
-        await page.waitForTimeout(1000);
+
+        // wait for a cell to be active
+        await page.waitForSelector(
+            '.jp-Notebook-ExecutionIndicator:not([data-status="idle"])',
+            {timeout: 3000}
+        );
+
+        await page.waitForSelector(
+            '.jp-Notebook-ExecutionIndicator[data-status="idle"]',
+            {timeout: 3000}
+        );
 
         // Use our custom keyboard shortcut to run all cells
         await page.keyboard.press("R");
         await page.keyboard.press("R");
-
         await page.evaluate(() => (document.scrollTop = 0));
     },
 };
