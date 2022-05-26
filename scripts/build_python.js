@@ -60,8 +60,7 @@ try {
     }
 
     if (IS_DOCKER) {
-        execute`${docker(IMAGE)} bash -c "cd python/perspective && \
-            ${cmd} "`;
+        execute`${docker(IMAGE)} bash -c "cd python/perspective && ${cmd} "`;
     } else {
         const python_path = resolve`${__dirname}/../python/perspective`;
         execute`cd ${python_path} && ${cmd}`;
