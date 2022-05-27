@@ -360,7 +360,7 @@ function activate(app, restorer, themeManager) {
 /**
  * The perspective extension for files
  */
-export const perspectiveRenderers = {
+export const PerspectiveRenderers = {
     activate: activate,
     id: "@finos/perspective-jupyterlab-renderers",
     requires: [],
