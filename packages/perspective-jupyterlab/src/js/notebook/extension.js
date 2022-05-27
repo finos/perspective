@@ -22,7 +22,7 @@ if (window.require) {
     window.require.config({
         map: {
             "*": {
-                "@finos/perspective-jupyter":
+                "@finos/perspective-jupyterlab":
                     "nbextensions/@finos/perspective-jupyterlab/index",
             },
         },
