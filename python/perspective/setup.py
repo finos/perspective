@@ -291,7 +291,7 @@ class PSPCheckSDist(sdist):
 data_files_spec = [
     # NBExtension
     (
-        "share/jupyter/nbextensions/@finos/perspective-jupyter",
+        "share/jupyter/nbextensions/@finos/perspective-jupyterlab",
         "perspective/nbextension/static",
         "*.js*",
     ),
@@ -303,7 +303,7 @@ data_files_spec = [
     ),
     # Labextension
     (
-        "share/jupyter/labextensions/@finos/perspective-jupyter",
+        "share/jupyter/labextensions/@finos/perspective-jupyterlab",
         "perspective/labextension",
         "**",
     ),
