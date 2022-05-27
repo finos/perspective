@@ -15,14 +15,8 @@
             "require": "./dist/umd/perspective-viewer.js",
             "import": "./dist/umd/perspective-viewer.js"
         },
-        "./dist/": "./dist/",
-        "./dist/theme/": "./src/themes/",
-        "./dist/themes/": "./src/themes/",
-        "./cdn/": "./dist/cdn/",
-        "./esm/": "./dist/esm/",
-        "./umd/": "./dist/umd/",
-        "./pkg/": "./dist/pkg/",
-        "./src/": "./src/",
+        "./dist/*": "./dist/*",
+        "./src/*": "./src/*",
         "./package.json": "./package.json",
         "./tsconfig.json": "./tsconfig.json"
     },

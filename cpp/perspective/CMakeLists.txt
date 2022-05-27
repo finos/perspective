@@ -683,13 +683,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
             target_compile_options(binding PRIVATE -Wdeprecated-declarations)
         endif()
 
-        # python 2.7 build on manylinux needs -lrt for access to time functions,
-        # otherwise we get an "undefined symbol: clock_gettime" error when
-        # building minimal arrow.
-        if (PSP_PYTHON_BUILD AND MANYLINUX AND PSP_PYTHON_VERSION STREQUAL "2.7")
-            target_link_libraries(psp rt)
-        endif()
-
         # Link against minimal arrow static library
         target_link_libraries(psp arrow re2)
 
