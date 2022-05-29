@@ -72,7 +72,6 @@ requires_dev = (
         "Faker>=1.0.0",
         "flake8>=3.7.8",
         "flake8-black>=0.2.0",
-        "mock",
         "psutil",
         "pybind11>=2.4.0",
         "pyarrow>=0.16.0",
