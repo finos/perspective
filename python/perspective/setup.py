@@ -293,7 +293,7 @@ data_files_spec = [
     (
         "share/jupyter/nbextensions/@finos/perspective-jupyterlab",
         "perspective/nbextension/static",
-        "*.js*",
+        "*.*",
     ),
     # Activate nbextension by default
     (

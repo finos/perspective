@@ -144,8 +144,7 @@
         "fix": "npm-run-all --silent fix:*",
         "check_python": "node scripts/lint_python.js --check-manifest",
         "version": "python3 python/perspective/scripts/write_version.py && git add python/perspective/perspective/core/_version.py",
-        "jlab_link": "node scripts/jlab_link.js",
-        "nb_link": "node scripts/nb_link.js",
+        "jlab_link": "pip3 install ./python/perspective --no-build-isolation",
         "repl": "node scripts/repl.js"
     }
 }
