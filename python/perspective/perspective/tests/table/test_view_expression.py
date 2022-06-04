@@ -1967,3 +1967,38 @@ class TestViewExpression(object):
         ]
         validate = table.validate_expressions(expressions)
         assert validate["expression_schema"] == {}
+
+    def test_view_expression_threadsafe(self):
+        # Addresses a specific bug #1831 which would
+        # fail this test on linux
+        t = Table({"id": int, "symbol": str, "valid": bool, "value": int}, index="id")
+        t.update([{"id": 1, "symbol": "A", "valid": False,  "value": 5},
+                  {"id": 2, "symbol": "A", "valid": True, "value": 10}])
+
+        v = t.view(
+            columns=["symbol", "value", "valid_value"],
+            expressions=["""//valid_value\nfloat("valid" ? "value" : 0)"""]
+        )
+        
+        v_agg = t.view(
+            columns=["symbol", "value", "valid_value"],
+            group_by=["symbol"],
+            aggregates={"symbol": "first", "value": "sum", "valid_value": "sum"},
+            expressions=["""//valid_value\nfloat("valid" ? "value" : 0)"""]
+        )
+        
+        
+        df_flat = v.to_df()
+        df_agg = v_agg.to_df()
+        assert df_flat.iloc[-1]["valid_value"] == df_agg.iloc[-1]["valid_value"]
+        
+        t.update([{"id": 2, "symbol": "A", "valid": False, "value": 10}])
+        
+        df_flat = v.to_df()
+        df_agg = v_agg.to_df()
+        
+        # Fails on linux
+        print(df_flat)
+        print(df_agg)
+        assert df_flat.iloc[-1]["valid_value"] == df_agg.iloc[-1]["valid_value"]
+
