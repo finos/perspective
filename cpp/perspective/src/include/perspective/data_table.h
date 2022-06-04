@@ -439,12 +439,7 @@ t_data_table::flatten_helper_1(FLATTENED_T flattened) const {
     flattened->set_size(store_idx);
     t_uindex ndata_cols = d_columns.size();
 
-#ifdef PSP_PARALLEL_FOR
-    parallel_for(int(ndata_cols),
-        [&s_columns, &sorted, &d_columns, &fltrecs, this](int colidx)
-#else
     for (t_uindex colidx = 0; colidx < ndata_cols; ++colidx)
-#endif
         {
             auto scol = s_columns[colidx];
             auto dcol = d_columns[colidx];
@@ -515,9 +510,6 @@ t_data_table::flatten_helper_1(FLATTENED_T flattened) const {
                 }
             }
         }
-#ifdef PSP_PARALLEL_FOR
-    );
-#endif
 
 #ifdef PSP_PARALLEL_FOR
     parallel_for(int(m_schema.get_num_columns()),
