@@ -120,7 +120,7 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
         table: Promise<perspective.Table> | perspective.Table
     ): Promise<void> {
         await this.load_wasm();
-        await this.instance.js_load(table);
+        await this.instance.js_load(Promise.resolve(table));
     }
 
     /**

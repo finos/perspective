@@ -18,22 +18,28 @@ use serde::Serialize;
 use serde_json::Value;
 use std::io::Read;
 use std::io::Write;
+use std::str::FromStr;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
-#[derive(Deserialize)]
 pub enum ViewerConfigEncoding {
-    #[serde(rename = "json")]
     Json,
-
-    #[serde(rename = "string")]
     String,
-
-    #[serde(rename = "arraybuffer")]
     ArrayBuffer,
-
-    #[serde(skip_serializing)]
     JSONString,
+}
+
+impl FromStr for ViewerConfigEncoding {
+    type Err = JsValue;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "json" => Ok(ViewerConfigEncoding::Json),
+            "string" => Ok(ViewerConfigEncoding::String),
+            "arraybuffer" => Ok(ViewerConfigEncoding::ArrayBuffer),
+            x => Err(format!("Unknown format \"{}\"", x).into()),
+        }
+    }
 }
 
 /// The state of an entire `custom_elements::PerspectiveViewerElement` component

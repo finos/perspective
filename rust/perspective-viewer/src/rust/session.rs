@@ -115,6 +115,10 @@ impl Session {
         false
     }
 
+    pub fn get_table(&self) -> Option<JsPerspectiveTable> {
+        self.borrow().table.clone()
+    }
+
     /// Reset this `Session`'s state with a new `Table`.  Implicitly clears the
     /// `ViewSubscription`, which will need to be re-initialized later via
     /// `create_view()`.

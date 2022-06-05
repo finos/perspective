@@ -92,7 +92,7 @@ impl Component for StatusBar {
         // Fetch initial theme
         let theme = ctx.props().theme.clone();
         let on_theme = ctx.link().callback(StatusBarMsg::SetThemeConfig);
-        let _ = promisify_ignore_view_delete(async move {
+        ApiFuture::spawn(async move {
             on_theme.emit(theme.get_config().await?);
             Ok(JsValue::UNDEFINED)
         });
@@ -129,7 +129,7 @@ impl Component for StatusBar {
             }
             StatusBarMsg::SetTheme(theme_name) => {
                 clone!(ctx.props().renderer, ctx.props().session, ctx.props().theme);
-                let _ = promisify_ignore_view_delete(async move {
+                ApiFuture::spawn(async move {
                     theme.set_name(Some(&theme_name)).await?;
                     let view = session.get_view().into_jserror()?;
                     renderer.restyle_all(&view).await

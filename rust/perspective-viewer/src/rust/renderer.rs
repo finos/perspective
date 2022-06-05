@@ -230,15 +230,15 @@ impl Renderer {
         Ok(changed)
     }
 
-    pub async fn with_lock(
+    pub async fn with_lock<T>(
         self,
-        task: impl Future<Output = Result<JsValue, JsValue>>,
-    ) -> Result<JsValue, JsValue> {
+        task: impl Future<Output = Result<T, JsValue>>,
+    ) -> Result<T, JsValue> {
         let draw_mutex = self.draw_lock();
         draw_mutex.lock(task).await
     }
 
-    pub async fn resize(&self) -> Result<JsValue, JsValue> {
+    pub async fn resize(&self) -> Result<(), JsValue> {
         let draw_mutex = self.draw_lock();
         let timer = self.render_timer();
         draw_mutex
@@ -246,7 +246,7 @@ impl Renderer {
                 set_timeout(timer.get_avg()).await?;
                 let jsplugin = self.get_active_plugin()?;
                 jsplugin.resize().await?;
-                Ok(JsValue::from(true))
+                Ok(())
             })
             .await
     }
@@ -254,11 +254,11 @@ impl Renderer {
     pub async fn draw(
         &self,
         session: impl Future<Output = Result<&Session, JsValue>>,
-    ) -> Result<JsValue, JsValue> {
+    ) -> Result<(), JsValue> {
         self.draw_plugin(session, false).await
     }
 
-    pub async fn update(&self, session: &Session) -> Result<JsValue, JsValue> {
+    pub async fn update(&self, session: &Session) -> Result<(), JsValue> {
         self.draw_plugin(async { Ok(session) }, true).await
     }
 
@@ -266,7 +266,7 @@ impl Renderer {
         &self,
         session: impl Future<Output = Result<&Session, JsValue>>,
         is_update: bool,
-    ) -> Result<JsValue, JsValue> {
+    ) -> Result<(), JsValue> {
         let timer = self.render_timer();
         let task = async move {
             if is_update {
@@ -276,7 +276,7 @@ impl Renderer {
             if let Some(view) = session.await?.get_view() {
                 timer.capture_time(self.draw_view(&view, is_update)).await
             } else {
-                Ok(JsValue::from(true))
+                Ok(())
             }
         };
 
@@ -288,11 +288,7 @@ impl Renderer {
         }
     }
 
-    async fn draw_view(
-        &self,
-        view: &JsPerspectiveView,
-        is_update: bool,
-    ) -> Result<JsValue, JsValue> {
+    async fn draw_view(&self, view: &JsPerspectiveView, is_update: bool) -> Result<(), JsValue> {
         let plugin = self.get_active_plugin()?;
         let meta = self.metadata().clone();
         let limits = get_row_and_col_limits(view, &meta).await?;
@@ -320,14 +316,9 @@ impl Renderer {
                     plugin.resize().await
                 } else {
                     // 6b. Resize the `<div>` offscreen  ...
-                    let main_panel: web_sys::HtmlElement = self
-                        .0
-                        .borrow()
-                        .viewer_elem
-                        .children()
-                        .item(0)
-                        .unwrap()
-                        .unchecked_into();
+                    let main_panel: web_sys::HtmlElement =
+                        self.get_active_plugin()?.unchecked_into();
+
                     let new_width = format!("{}px", &self.0.borrow().viewer_elem.client_width());
                     let new_height = format!("{}px", &self.0.borrow().viewer_elem.client_height());
                     main_panel.style().set_property("width", &new_width)?;
@@ -342,8 +333,9 @@ impl Renderer {
             };
 
             // 3. Lock on draw, in parallell with a timeout
+            type TimeoutTask = Option<Result<JsValue, JsValue>>;
             let draw_lock = self.draw_lock();
-            let tasks: [Pin<Box<dyn Future<Output = Option<Result<JsValue, JsValue>>>>>; 2] = [
+            let tasks: [Pin<Box<dyn Future<Output = TimeoutTask>>>; 2] = [
                 Box::pin(async move { Some(draw_lock.lock(task).await) }),
                 Box::pin(async {
                     set_timeout(500).await.unwrap();

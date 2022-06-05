@@ -77,7 +77,7 @@ macro_rules! enable_weak_link_test {
 #[macro_export]
 macro_rules! test_html {
     ($($html:tt)*) => {{
-        use crate::components::viewer::CSS;
+        use $crate::components::viewer::CSS;
         use wasm_bindgen::JsCast;
         use yew::prelude::*;
 

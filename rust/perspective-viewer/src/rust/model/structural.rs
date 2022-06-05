@@ -35,28 +35,28 @@ pub trait HasDragDrop {
 #[macro_export]
 macro_rules! derive_model {
     (DragDrop for $key:ty) => {
-        impl crate::model::HasDragDrop for $key {
+        impl $crate::model::HasDragDrop for $key {
             fn dragdrop(&self) -> &'_ DragDrop {
                 &self.dragdrop
             }
         }
     };
     (Renderer for $key:ty) => {
-        impl crate::model::HasRenderer for $key {
+        impl $crate::model::HasRenderer for $key {
             fn renderer(&self) -> &'_ Renderer {
                 &self.renderer
             }
         }
     };
     (Session for $key:ty) => {
-        impl crate::model::HasSession for $key {
+        impl $crate::model::HasSession for $key {
             fn session(&self) -> &'_ Session {
                 &self.session
             }
         }
     };
     (Theme for $key:ty) => {
-        impl crate::model::HasTheme for $key {
+        impl $crate::model::HasTheme for $key {
             fn theme(&self) -> &'_ Theme {
                 &self.theme
             }

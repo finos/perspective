@@ -98,7 +98,7 @@ impl Component for PerspectiveViewer {
             }
             Msg::Reset(all, sender) => {
                 clone!(ctx.props().renderer, ctx.props().session, ctx.props().theme);
-                let _ = promisify_ignore_view_delete(async move {
+                ApiFuture::spawn(async move {
                     session.reset(all);
                     renderer.reset().await;
                     theme.reset(None).await;
@@ -299,7 +299,7 @@ impl PerspectiveViewer {
                 });
 
                 clone!(ctx.props().renderer, ctx.props().session);
-                drop(promisify_ignore_view_delete(async move {
+                ApiFuture::spawn(async move {
                     let result = if session.js_get_table().is_some() {
                         renderer.presize(force, callback.emit_and_render()).await
                     } else {
@@ -314,7 +314,7 @@ impl PerspectiveViewer {
                     };
 
                     result
-                }));
+                });
             }
         };
     }

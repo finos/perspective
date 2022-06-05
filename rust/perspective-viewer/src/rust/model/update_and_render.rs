@@ -24,10 +24,10 @@ pub trait UpdateAndRender: HasRenderer + HasSession {
         clone!(self.session(), self.renderer());
         Callback::from(move |_| {
             clone!(session, renderer);
-            drop(promisify_ignore_view_delete(async move {
-                drop(renderer.draw(async { Ok(&session) }).await?);
+            ApiFuture::spawn(async move {
+                renderer.draw(async { Ok(&session) }).await?;
                 Ok(JsValue::UNDEFINED)
-            }))
+            })
         })
     }
 
@@ -35,9 +35,9 @@ pub trait UpdateAndRender: HasRenderer + HasSession {
     fn update_and_render(&self, update: crate::config::ViewConfigUpdate) {
         self.session().update_view_config(update);
         clone!(self.session(), self.renderer());
-        let _ = promisify_ignore_view_delete(async move {
+        ApiFuture::spawn(async move {
             let view = session.validate().await?;
-            drop(renderer.draw(view.create_view()).await?);
+            renderer.draw(view.create_view()).await?;
             Ok(JsValue::UNDEFINED)
         });
     }
