@@ -94,7 +94,7 @@ impl ViewSubscription {
 
         let fun = {
             clone!(data);
-            move |_| js_sys::Promise::from(ApiFuture::from(data.clone().on_view_update()))
+            move |_| js_sys::Promise::from(ApiFuture::new(data.clone().on_view_update()))
         };
 
         let closure = fun.into_closure();

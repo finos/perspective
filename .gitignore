@@ -193,6 +193,6 @@ target.vscode
 packages/perspective-jupyterlab/test/config/jupyter/lab
 packages/perspective-jupyterlab/test/config/jupyter/migrated
 docs/static/features
-results.debug.json
+# results.debug.json
 
 tools/perspective-build/lib

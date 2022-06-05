@@ -14,9 +14,13 @@ use wasm_bindgen::convert::IntoWasmAbi;
 use wasm_bindgen::describe::WasmDescribe;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use wasm_bindgen::__rt::IntoJsResult;
 use wasm_bindgen_futures::future_to_promise;
 use wasm_bindgen_futures::JsFuture;
+
+// TODO This is risky to rely on, but it is currently impossible to implement
+// this trait locally due to the orphan instance restriction.  Using this trait
+// removes alow of boilerplate required by `async` when casting to `Promise`.
+use wasm_bindgen::__rt::IntoJsResult;
 
 /// A newtype wrapper for a `Future` trait object which supports being
 /// marshalled to a `JsPromise`, avoiding an API which requires type casing to
@@ -24,8 +28,12 @@ use wasm_bindgen_futures::JsFuture;
 pub struct ApiFuture<T>(Pin<Box<dyn Future<Output = Result<T, JsValue>>>>);
 
 impl<T> ApiFuture<T> {
+    /// Constructor for `ApiFuture`.  Note that, like a regular `Future`, the
+    /// `ApiFuture` created does _not_ execute without being further cast to a
+    /// `Promise`, either explicitly or implcitly (when exposed via
+    /// `wasm_bindgen`).
     #[must_use]
-    pub fn from<U: Future<Output = Result<T, JsValue>> + 'static>(x: U) -> ApiFuture<T> {
+    pub fn new<U: Future<Output = Result<T, JsValue>> + 'static>(x: U) -> ApiFuture<T> {
         ApiFuture(Box::pin(x))
     }
 }
@@ -34,8 +42,11 @@ impl<T> ApiFuture<T>
 where
     Result<T, JsValue>: IntoJsResult + 'static,
 {
+    /// Construct an `ApiFuture` and execute it immediately.  The `Promise`
+    /// handle created internally is dropped, but since JavaScript `Promise`
+    /// executes on construction, the async invocation persists.
     pub fn spawn<U: Future<Output = Result<T, JsValue>> + 'static>(x: U) {
-        drop(JsValue::from(ApiFuture(Box::pin(x))))
+        drop(js_sys::Promise::from(ApiFuture(Box::pin(x))))
     }
 }
 
@@ -82,9 +93,10 @@ where
     type Abi = <js_sys::Promise as IntoWasmAbi>::Abi;
     #[inline]
     unsafe fn from_abi(js: Self::Abi) -> Self {
-        ApiFuture::from(
-            async move { Ok(JsFuture::from(js_sys::Promise::from_abi(js)).await?.into()) },
-        )
+        ApiFuture::new(async move {
+            let promise = js_sys::Promise::from_abi(js);
+            Ok(JsFuture::from(promise).await?.into())
+        })
     }
 }
 
@@ -120,17 +132,31 @@ where
     })
 }
 
+/// Wraps an error `JsValue` return from a caught JavaScript exception,
+/// checking for the explicit error type indicating that a `JsPerspectiveView`
+/// call has been cancelled due to it already being deleted.  This is a normal
+/// mechanic of the `JsPerspectiveView` to cancel a `View` call that is no
+/// longer need be the viewer, e.g. when the user updates the UI before the
+/// previous update has finished drawing.  Without using exceptions for this,
+/// we'd need to wrap every such `JsPerspectiveView` call individually.
+///
+/// When `"View method cancelled"` message is received, this call should
+/// silently be replaced with `Ok`.  The message itself is returned in this
+/// case (instead of whatever the `async` returns), which is helpful for
+/// detecting this condition when debugging.
 pub fn ignore_view_delete(f: JsValue) -> Result<JsValue, JsValue> {
     match f.clone().dyn_into::<js_sys::Error>() {
         Ok(err) => {
             if err.message() != "View method cancelled" {
                 Err(f)
             } else {
-                Ok(JsValue::from("View method cancelled"))
+                Ok(js_intern!("View method cancelled").clone())
             }
         }
         _ => match f.as_string() {
-            Some(x) if x == "View method cancelled" => Ok(JsValue::from("View method cancelled")),
+            Some(x) if x == "View method cancelled" => {
+                Ok(js_intern!("View method cancelled").clone())
+            }
             Some(_) => Err(f),
             _ => {
                 if js_sys::Reflect::get(&f, js_intern!("message"))
@@ -139,7 +165,7 @@ pub fn ignore_view_delete(f: JsValue) -> Result<JsValue, JsValue> {
                     .unwrap_or_else(|| "".to_owned())
                     == "View method cancelled"
                 {
-                    Ok(JsValue::from("View method cancelled"))
+                    Ok(js_intern!("View method cancelled").clone())
                 } else {
                     Err(f)
                 }

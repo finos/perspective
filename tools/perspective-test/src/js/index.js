@@ -384,6 +384,8 @@ function format_and_clean_xml(result) {
     try {
         return format(result, {
             filter(x) {
+                // TODO We have to strip many geometry attributes due to minute
+                // rendering differences on Linux and dev (presumably OSX).
                 if (x) {
                     if (x.attributes?.dx) {
                         delete x.attributes["dx"];
@@ -393,8 +395,20 @@ function format_and_clean_xml(result) {
                         delete x.attributes["dy"];
                     }
 
+                    if (x.attributes?.x) {
+                        delete x.attributes["dx"];
+                    }
+
+                    if (x.attributes?.y) {
+                        delete x.attributes["dy"];
+                    }
+
                     if (x.attributes?.style) {
                         delete x.attributes["style"];
+                    }
+
+                    if (x.attributes?.viewBox) {
+                        delete x.attributes["viewBox"];
                     }
                 }
 

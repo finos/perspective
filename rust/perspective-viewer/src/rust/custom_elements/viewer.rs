@@ -216,7 +216,7 @@ impl PerspectiveViewerElement {
 
         self.session.update_view_config(config);
         clone!(self.renderer, self.session);
-        ApiFuture::from(async move {
+        ApiFuture::new(async move {
             renderer
                 .draw(async {
                     let table = table.await?;
@@ -235,7 +235,7 @@ impl PerspectiveViewerElement {
     /// without calling `delete()` will leak WASM memory.
     pub fn js_delete(&mut self) -> ApiFuture<bool> {
         clone!(self.renderer, self.session, self.root);
-        ApiFuture::from(self.renderer.clone().with_lock(async move {
+        ApiFuture::new(self.renderer.clone().with_lock(async move {
             renderer.delete()?;
             let result = session.delete();
             root.borrow_mut()
@@ -249,7 +249,7 @@ impl PerspectiveViewerElement {
     /// Get the underlying `View` for thie viewer.
     pub fn js_get_view(&self) -> ApiFuture<JsPerspectiveView> {
         let session = self.session.clone();
-        ApiFuture::from(async move {
+        ApiFuture::new(async move {
             Ok(session
                 .get_view()
                 .ok_or_else(|| js_intern!("No table set"))?
@@ -264,7 +264,7 @@ impl PerspectiveViewerElement {
     ///   immediately if `load()` has not yet been called.
     pub fn js_get_table(&self, wait_for_table: bool) -> ApiFuture<JsPerspectiveTable> {
         let session = self.session.clone();
-        ApiFuture::from(async move {
+        ApiFuture::new(async move {
             match session.get_table() {
                 Some(table) => Ok(table),
                 None if !wait_for_table => Err(JsValue::from("No table set")),
@@ -278,7 +278,7 @@ impl PerspectiveViewerElement {
 
     pub fn js_flush(&self) -> ApiFuture<()> {
         clone!(self.renderer, self.session);
-        ApiFuture::from(async move {
+        ApiFuture::new(async move {
             if session.js_get_table().is_none() {
                 session.table_loaded.listen_once().await.into_jserror()?;
                 let _ = session
@@ -297,7 +297,7 @@ impl PerspectiveViewerElement {
     ///   "json", "string" or "arraybuffer" format.
     pub fn js_restore(&self, update: JsValue) -> ApiFuture<()> {
         clone!(self.session, self.renderer, self.root, self.theme);
-        ApiFuture::from(async move {
+        ApiFuture::new(async move {
             let ViewerConfigUpdate {
                 plugin,
                 plugin_config,
@@ -376,7 +376,7 @@ impl PerspectiveViewerElement {
     /// - `format` Supports "json" (default), "arraybuffer" or "string".
     pub fn js_save(&self, format: Option<String>) -> ApiFuture<JsValue> {
         let viewer_config_task = self.get_viewer_config();
-        ApiFuture::from(async move {
+        ApiFuture::new(async move {
             let format = format
                 .as_ref()
                 .map(|x| ViewerConfigEncoding::from_str(x))
@@ -394,7 +394,7 @@ impl PerspectiveViewerElement {
     ///   or use the default.
     pub fn js_download(&self, flat: bool) -> ApiFuture<()> {
         let session = self.session.clone();
-        ApiFuture::from(async move {
+        ApiFuture::new(async move {
             let val = session.csv_as_jsvalue(flat).await?.as_blob()?;
             download("untitled.csv", &val)
         })
@@ -415,7 +415,7 @@ impl PerspectiveViewerElement {
 
         let js_task = self.export_method_to_jsvalue(method);
         let copy_task = copy_to_clipboard(js_task, MimeType::TextPlain);
-        ApiFuture::from(copy_task)
+        ApiFuture::new(copy_task)
     }
 
     /// Reset the viewer's `ViewerConfig` to the default.
@@ -425,7 +425,7 @@ impl PerspectiveViewerElement {
     pub fn js_reset(&self, reset_expressions: JsValue) -> ApiFuture<()> {
         let root = self.root.clone();
         let all = reset_expressions.as_bool().unwrap_or_default();
-        ApiFuture::from(async move {
+        ApiFuture::new(async move {
             let task = root
                 .borrow()
                 .as_ref()
@@ -447,7 +447,7 @@ impl PerspectiveViewerElement {
         }
 
         let renderer = self.renderer.clone();
-        ApiFuture::from(async move { renderer.resize().await })
+        ApiFuture::new(async move { renderer.resize().await })
     }
 
     /// Sets the auto-size behavior of this component.  When `true`, this
@@ -481,7 +481,7 @@ impl PerspectiveViewerElement {
     /// Restyle all plugins from current document.
     pub fn js_restyle_element(&self) -> ApiFuture<JsValue> {
         clone!(self.renderer, self.session);
-        ApiFuture::from(async move {
+        ApiFuture::new(async move {
             let view = session.get_view().into_jserror()?;
             renderer.restyle_all(&view).await
         })
@@ -490,7 +490,7 @@ impl PerspectiveViewerElement {
     /// Set the available theme names available in the status bar UI.
     pub fn js_reset_themes(&self, themes: Option<Box<[JsValue]>>) -> ApiFuture<JsValue> {
         clone!(self.renderer, self.session, self.theme);
-        ApiFuture::from(async move {
+        ApiFuture::new(async move {
             let themes: Option<Vec<String>> = themes
                 .unwrap_or_default()
                 .iter()
@@ -535,7 +535,7 @@ impl PerspectiveViewerElement {
     ///   toggle.
     pub fn js_toggle_config(&self, force: Option<bool>) -> ApiFuture<JsValue> {
         let root = self.root.clone();
-        ApiFuture::from(async move {
+        ApiFuture::new(async move {
             let force = force.map(SettingsUpdate::Update);
             let task = root
                 .borrow()
