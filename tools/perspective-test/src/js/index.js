@@ -366,6 +366,7 @@ test.run = function run(
                 await page.setViewport({
                     width: viewport.width,
                     height: viewport.height,
+                    deviceScaleFactor: 2,
                 });
             }
             await new Promise(setTimeout);
@@ -440,6 +441,7 @@ test.capture = function capture(
                 await page.setViewport({
                     width: viewport.width,
                     height: viewport.height,
+                    deviceScaleFactor: 2,
                 });
 
             const iterations = process.env.PSP_SATURATE ? 10 : 1;
