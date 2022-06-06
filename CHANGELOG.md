@@ -1,5 +1,26 @@
 # Changelog
 
+## [v1.4.0](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.3.13...HEAD)
+
+**Breaking changes:**
+
+- Fix `exports` field for Node.js 16 compatibility [\#1838](https://github.com/finos/perspective/pull/1838) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- Fix scrolling in Chrome 102 [\#1837](https://github.com/finos/perspective/pull/1837) ([texodus](https://github.com/texodus))
+
+**Merged pull requests:**
+
+- fix bug in setup.js where extra set of quotes prevents initial build [\#1829](https://github.com/finos/perspective/pull/1829) ([timkpaine](https://github.com/timkpaine))
+- Fix jupyterlab test timeouts [\#1823](https://github.com/finos/perspective/pull/1823) ([texodus](https://github.com/texodus))
+- bump arrow version to 8.0.0 [\#1816](https://github.com/finos/perspective/pull/1816) ([timkpaine](https://github.com/timkpaine))
+- remove duplicate steps [\#1815](https://github.com/finos/perspective/pull/1815) ([timkpaine](https://github.com/timkpaine))
+- prune 2 more python2 references [\#1811](https://github.com/finos/perspective/pull/1811) ([timkpaine](https://github.com/timkpaine))
+- fix cmake build error when install under virtualenv [\#1779](https://github.com/finos/perspective/pull/1779) ([shinny-chengzhi](https://github.com/shinny-chengzhi))
+
 ## [v1.3.13](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.3.12...HEAD)
