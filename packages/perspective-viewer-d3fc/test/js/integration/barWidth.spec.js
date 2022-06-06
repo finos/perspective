@@ -27,6 +27,7 @@ function get_contents(temp) {
                     `perspective-viewer perspective-viewer-d3fc-${temp}`
                 )
                 .shadowRoot.querySelector("d3fc-svg.plot-area svg");
+            viewer.removeAttribute("viewBox");
             return viewer.outerHTML || "MISSING";
         }, temp);
     };

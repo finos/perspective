@@ -20,6 +20,7 @@ async function get_contents(page) {
         const viewer = document
             .querySelector(`perspective-viewer perspective-viewer-d3fc-yline`)
             .shadowRoot.querySelector("svg");
+        viewer.removeAttribute("viewBox");
         return viewer.outerHTML || "MISSING";
     });
 }
