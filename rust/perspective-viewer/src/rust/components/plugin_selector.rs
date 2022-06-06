@@ -63,7 +63,7 @@ impl Component for PluginSelector {
             PluginSelectorMsg::ComponentSelectPlugin(plugin_name) => {
                 ctx.props()
                     .renderer
-                    .update_plugin(PluginUpdate::Update(plugin_name))
+                    .update_plugin(&PluginUpdate::Update(plugin_name))
                     .unwrap();
 
                 let mut update = ViewConfigUpdate::default();

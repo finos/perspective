@@ -67,7 +67,7 @@ extern "C" {
         column_limit: Option<usize>,
         row_limit: Option<usize>,
         force: bool
-    ) -> Result<JsValue, JsValue>;
+    ) -> Result<(), JsValue>;
 
     #[wasm_bindgen(method, catch)]
     pub async fn update(
@@ -76,7 +76,7 @@ extern "C" {
         column_limit: Option<usize>,
         row_limit: Option<usize>,
         force: bool
-    ) -> Result<JsValue, JsValue>;
+    ) -> Result<(), JsValue>;
 
     #[wasm_bindgen(method, catch)]
     pub async fn clear(this: &JsPerspectiveViewerPlugin) -> Result<JsValue, JsValue>;

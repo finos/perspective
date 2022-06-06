@@ -17,7 +17,7 @@ use std::pin::Pin;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use wasm_bindgen_futures::{future_to_promise, JsFuture};
+use wasm_bindgen_futures::JsFuture;
 use yew::prelude::*;
 
 const FONT_DOWNLOAD_TIMEOUT_MS: i32 = 1000;
@@ -101,7 +101,7 @@ impl FontLoaderProps {
             state: Rc::new(inner),
         };
 
-        let _ = future_to_promise(state.clone().load_fonts_task_safe());
+        ApiFuture::spawn(state.clone().load_fonts_task_safe());
         state
     }
 
