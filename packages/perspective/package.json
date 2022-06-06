@@ -17,12 +17,8 @@
             "require": "./dist/umd/perspective.js",
             "import": "./dist/umd/perspective.js"
         },
-        "./dist/": "./dist/",
-        "./cjs/": "./dist/cjs/",
-        "./esm/": "./dist/esm/",
-        "./cdn/": "./dist/cdn/",
-        "./src/": "./src/",
-        "./pkg/": "./dist/pkg/",
+        "./dist/*": "./dist/*",
+        "./src/*": "./src/*",
         "./package.json": "./package.json"
     },
     "publishConfig": {
