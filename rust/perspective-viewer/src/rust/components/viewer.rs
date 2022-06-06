@@ -69,6 +69,7 @@ pub struct PerspectiveViewer {
     settings_open: bool,
     on_resize: Rc<PubSub<()>>,
     on_dimensions_reset: Rc<PubSub<()>>,
+    _subscriptions: [Subscription; 1],
 }
 
 impl Component for PerspectiveViewer {
@@ -78,6 +79,10 @@ impl Component for PerspectiveViewer {
         *ctx.props().weak_link.borrow_mut() = Some(ctx.link().clone());
         let elem = ctx.props().elem.clone();
         let callback = ctx.link().callback(|()| Msg::PreloadFontsUpdate);
+        let limit_sub = {
+            let callback = ctx.link().callback(|x| Msg::RenderLimits(Some(x)));
+            ctx.props().renderer.limits_changed.add_listener(callback)
+        };
 
         Self {
             dimensions: None,
@@ -86,6 +91,7 @@ impl Component for PerspectiveViewer {
             settings_open: false,
             on_resize: Default::default(),
             on_dimensions_reset: Default::default(),
+            _subscriptions: [limit_sub],
         }
     }
 
@@ -98,7 +104,7 @@ impl Component for PerspectiveViewer {
             }
             Msg::Reset(all, sender) => {
                 clone!(ctx.props().renderer, ctx.props().session, ctx.props().theme);
-                let _ = promisify_ignore_view_delete(async move {
+                ApiFuture::spawn(async move {
                     session.reset(all);
                     renderer.reset().await;
                     theme.reset(None).await;
@@ -299,7 +305,7 @@ impl PerspectiveViewer {
                 });
 
                 clone!(ctx.props().renderer, ctx.props().session);
-                drop(promisify_ignore_view_delete(async move {
+                ApiFuture::spawn(async move {
                     let result = if session.js_get_table().is_some() {
                         renderer.presize(force, callback.emit_and_render()).await
                     } else {
@@ -314,7 +320,7 @@ impl PerspectiveViewer {
                     };
 
                     result
-                }));
+                });
             }
         };
     }

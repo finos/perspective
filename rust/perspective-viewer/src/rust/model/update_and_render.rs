@@ -10,7 +10,6 @@ use super::structural::*;
 use crate::utils::*;
 use crate::*;
 
-use wasm_bindgen::prelude::*;
 use yew::prelude::*;
 
 /// While `Renderer` manages the plugin and thus the render call itself, the
@@ -24,10 +23,10 @@ pub trait UpdateAndRender: HasRenderer + HasSession {
         clone!(self.session(), self.renderer());
         Callback::from(move |_| {
             clone!(session, renderer);
-            drop(promisify_ignore_view_delete(async move {
-                drop(renderer.draw(async { Ok(&session) }).await?);
-                Ok(JsValue::UNDEFINED)
-            }))
+            ApiFuture::spawn(async move {
+                renderer.draw(async { Ok(&session) }).await?;
+                Ok(())
+            })
         })
     }
 
@@ -35,10 +34,10 @@ pub trait UpdateAndRender: HasRenderer + HasSession {
     fn update_and_render(&self, update: crate::config::ViewConfigUpdate) {
         self.session().update_view_config(update);
         clone!(self.session(), self.renderer());
-        let _ = promisify_ignore_view_delete(async move {
+        ApiFuture::spawn(async move {
             let view = session.validate().await?;
-            drop(renderer.draw(view.create_view()).await?);
-            Ok(JsValue::UNDEFINED)
+            renderer.draw(view.create_view()).await?;
+            Ok(())
         });
     }
 }

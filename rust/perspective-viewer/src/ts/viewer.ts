@@ -51,6 +51,7 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
     /**
      * Should not be called directly (will throw `TypeError: Illegal
      * constructor`).
+     *
      * @ignore
      */
     constructor() {
@@ -121,7 +122,7 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
         table: Promise<perspective.Table> | perspective.Table
     ): Promise<void> {
         await this.load_wasm();
-        await this.instance.js_load(table);
+        await this.instance.js_load(Promise.resolve(table));
     }
 
     /**
@@ -173,6 +174,7 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
 
     /**
      * Returns the `perspective.Table()` which was supplied to `load()`
+     *
      * @category Data
      * @param wait_for_table Whether to await `load()` if it has not yet been
      * invoked, or fail immediately.
@@ -200,6 +202,7 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
      * changes.  Because of this, when using this API, prefer calling
      * `getView()` repeatedly over caching the returned `perspective.View`,
      * especially in `async` contexts.
+     *
      * @category Data
      * @returns A `Promise` which ressolves to a `perspective.View`.
      * @example <caption>Collapse grid to root</caption>
@@ -408,14 +411,17 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
      * this method.  Note the theme `.css` must still be loaded in this case -
      * the `resetThemes()` method only lets the `<perspective-viewer>` know what
      * theme names are available.
-     * @param Util
+     *
+     * @category Util
+     * @param themes A list of theme names to use, or auto-detect from
+     * document's stylesheets if `undefined`.
      * @example
      * ```javascript
      * const viewer = document.querySelector("perspective-viewer");
      * await viewer.resetThemes(["Material Light", "Material Dark"]);
      * ```
      */
-    async resetThemes(themes: Array<string>): Promise<void> {
+    async resetThemes(themes?: Array<string>): Promise<void> {
         await this.load_wasm();
         await this.instance.js_reset_themes(themes);
     }

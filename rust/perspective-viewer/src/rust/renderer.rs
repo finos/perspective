@@ -86,6 +86,9 @@ impl Deref for RendererData {
     }
 }
 
+type TaskResult = Result<JsValue, JsValue>;
+type TimeoutTask<'a> = Pin<Box<dyn Future<Output = Option<TaskResult>> + 'a>>;
+
 impl Renderer {
     pub fn new(viewer_elem: &HtmlElement) -> Self {
         Self(Rc::new(RendererData {
@@ -200,8 +203,8 @@ impl Renderer {
     ///
     /// # Arguments
     /// - `update` The `PluginUpdate` behavior to set.
-    pub fn update_plugin(&self, update: PluginUpdate) -> Result<bool, JsValue> {
-        match &update {
+    pub fn update_plugin(&self, update: &PluginUpdate) -> Result<bool, JsValue> {
+        match update {
             PluginUpdate::Missing => Ok(false),
             PluginUpdate::SetDefault => self.set_plugin(None),
             PluginUpdate::Update(plugin) => self.set_plugin(Some(plugin)),
@@ -230,15 +233,15 @@ impl Renderer {
         Ok(changed)
     }
 
-    pub async fn with_lock(
+    pub async fn with_lock<T>(
         self,
-        task: impl Future<Output = Result<JsValue, JsValue>>,
-    ) -> Result<JsValue, JsValue> {
+        task: impl Future<Output = Result<T, JsValue>>,
+    ) -> Result<T, JsValue> {
         let draw_mutex = self.draw_lock();
         draw_mutex.lock(task).await
     }
 
-    pub async fn resize(&self) -> Result<JsValue, JsValue> {
+    pub async fn resize(&self) -> Result<(), JsValue> {
         let draw_mutex = self.draw_lock();
         let timer = self.render_timer();
         draw_mutex
@@ -246,7 +249,7 @@ impl Renderer {
                 set_timeout(timer.get_avg()).await?;
                 let jsplugin = self.get_active_plugin()?;
                 jsplugin.resize().await?;
-                Ok(JsValue::from(true))
+                Ok(())
             })
             .await
     }
@@ -254,11 +257,11 @@ impl Renderer {
     pub async fn draw(
         &self,
         session: impl Future<Output = Result<&Session, JsValue>>,
-    ) -> Result<JsValue, JsValue> {
+    ) -> Result<(), JsValue> {
         self.draw_plugin(session, false).await
     }
 
-    pub async fn update(&self, session: &Session) -> Result<JsValue, JsValue> {
+    pub async fn update(&self, session: &Session) -> Result<(), JsValue> {
         self.draw_plugin(async { Ok(session) }, true).await
     }
 
@@ -266,7 +269,7 @@ impl Renderer {
         &self,
         session: impl Future<Output = Result<&Session, JsValue>>,
         is_update: bool,
-    ) -> Result<JsValue, JsValue> {
+    ) -> Result<(), JsValue> {
         let timer = self.render_timer();
         let task = async move {
             if is_update {
@@ -276,7 +279,7 @@ impl Renderer {
             if let Some(view) = session.await?.get_view() {
                 timer.capture_time(self.draw_view(&view, is_update)).await
             } else {
-                Ok(JsValue::from(true))
+                Ok(())
             }
         };
 
@@ -288,11 +291,7 @@ impl Renderer {
         }
     }
 
-    async fn draw_view(
-        &self,
-        view: &JsPerspectiveView,
-        is_update: bool,
-    ) -> Result<JsValue, JsValue> {
+    async fn draw_view(&self, view: &JsPerspectiveView, is_update: bool) -> Result<(), JsValue> {
         let plugin = self.get_active_plugin()?;
         let meta = self.metadata().clone();
         let limits = get_row_and_col_limits(view, &meta).await?;
@@ -307,51 +306,17 @@ impl Renderer {
         }
     }
 
+    /// Decide whether to draw plugin or self first based on whether the panel
+    /// is opening or closing, then draw with a timeout.  If the timeout
+    /// triggers, draw self and resolve `on_toggle` but still await the
+    /// completion of the draw task
     pub async fn presize(
         &self,
         open: bool,
         on_toggle: impl Future<Output = Result<(), JsValue>>,
     ) -> Result<JsValue, JsValue> {
-        let task = async {
-            let task = async {
-                let plugin = self.get_active_plugin()?;
-                if open {
-                    // 6a. If getting smaller just resize, else
-                    plugin.resize().await
-                } else {
-                    // 6b. Resize the `<div>` offscreen  ...
-                    let main_panel: web_sys::HtmlElement =
-                        self.get_active_plugin()?.unchecked_into();
-
-                    let new_width = format!("{}px", &self.0.borrow().viewer_elem.client_width());
-                    let new_height = format!("{}px", &self.0.borrow().viewer_elem.client_height());
-                    main_panel.style().set_property("width", &new_width)?;
-                    main_panel.style().set_property("height", &new_height)?;
-
-                    // 6b (cont). ... then resize the plugin
-                    let resize = plugin.resize().await;
-                    main_panel.style().set_property("width", "")?;
-                    main_panel.style().set_property("height", "")?;
-                    resize
-                }
-            };
-
-            // 3. Lock on draw, in parallell with a timeout
-            let draw_lock = self.draw_lock();
-            let tasks: [Pin<Box<dyn Future<Output = Option<Result<JsValue, JsValue>>>>>; 2] = [
-                Box::pin(async move { Some(draw_lock.lock(task).await) }),
-                Box::pin(async {
-                    set_timeout(500).await.unwrap();
-                    None
-                }),
-            ];
-
-            // 2. Wait for the first task to finish of ..
-            select_all(tasks.into_iter()).await
-        };
-
-        // 1. Decide whether to draw the plugin or self first
-        let (ans, _, rest) = if open {
+        let task = self.resize_with_timeout(open);
+        let result = if open {
             on_toggle.await?;
             task.await
         } else {
@@ -360,20 +325,52 @@ impl Renderer {
             result
         };
 
-        // 7. If we bailed (2) due to timeout, still need to await the other
-        //    task.  `on_toggle` has resolved by now either way.
-        match ans {
-            Some(x) => x,
-            None => {
+        match result {
+            Ok(x) => x,
+            Err(cont) => {
                 web_sys::console::log_1(&"Presize took longer than 500ms".into());
-                join_all(rest.into_iter())
-                    .await
-                    .into_iter()
-                    .next()
-                    .unwrap()
-                    .unwrap()
+                cont.await.unwrap()
             }
         }
+    }
+
+    /// Lock on `resize()` task, in parallel with a timeout.  In the return
+    /// type, `Result::Err` contains the continuation task, which must be
+    /// awaited lest the plugin draw itself never trigger.
+    async fn resize_with_timeout(&self, open: bool) -> Result<TaskResult, TimeoutTask<'_>> {
+        let task = async move {
+            if open {
+                self.get_active_plugin()?.resize().await
+            } else {
+                self.resize_with_explicit_dimensions().await
+            }
+        };
+
+        let draw_lock = self.draw_lock();
+        let tasks: [TimeoutTask<'_>; 2] = [
+            Box::pin(async move { Some(draw_lock.lock(task).await) }),
+            Box::pin(async {
+                set_timeout(500).await.unwrap();
+                None
+            }),
+        ];
+
+        let (x, _, y) = select_all(tasks.into_iter()).await;
+        x.ok_or_else(|| y.into_iter().next().unwrap())
+    }
+
+    /// Resize the `<div>` offscreen, then resize the plugin
+    async fn resize_with_explicit_dimensions(&self) -> TaskResult {
+        let plugin = self.get_active_plugin()?;
+        let main_panel: &web_sys::HtmlElement = plugin.unchecked_ref();
+        let new_width = format!("{}px", &self.0.borrow().viewer_elem.client_width());
+        let new_height = format!("{}px", &self.0.borrow().viewer_elem.client_height());
+        main_panel.style().set_property("width", &new_width)?;
+        main_panel.style().set_property("height", &new_height)?;
+        let result = plugin.resize().await;
+        main_panel.style().set_property("width", "")?;
+        main_panel.style().set_property("height", "")?;
+        result
     }
 
     fn draw_lock(&self) -> DebounceMutex {
