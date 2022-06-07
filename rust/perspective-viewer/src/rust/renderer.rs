@@ -320,14 +320,9 @@ impl Renderer {
                     plugin.resize().await
                 } else {
                     // 6b. Resize the `<div>` offscreen  ...
-                    let main_panel: web_sys::HtmlElement = self
-                        .0
-                        .borrow()
-                        .viewer_elem
-                        .children()
-                        .item(0)
-                        .unwrap()
-                        .unchecked_into();
+                    let main_panel: web_sys::HtmlElement =
+                        self.get_active_plugin()?.unchecked_into();
+
                     let new_width = format!("{}px", &self.0.borrow().viewer_elem.client_width());
                     let new_height = format!("{}px", &self.0.borrow().viewer_elem.client_height());
                     main_panel.style().set_property("width", &new_width)?;
