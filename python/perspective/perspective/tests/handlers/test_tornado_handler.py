@@ -9,10 +9,15 @@ import random
 import pytest
 
 import tornado
-from tornado import gen
 from datetime import datetime
 
-from perspective import Table, PerspectiveManager, PerspectiveTornadoHandler, PerspectiveError, tornado_websocket as websocket
+from perspective import (
+    Table,
+    PerspectiveManager,
+    PerspectiveTornadoHandler,
+    PerspectiveError,
+    tornado_websocket as websocket,
+)
 
 
 data = {
@@ -50,11 +55,7 @@ class TestPerspectiveTornadoHandler(object):
         """Connect and initialize a websocket client connection to the
         Perspective tornado server.
         """
-        client = await websocket(
-            "ws://127.0.0.1:{0}/websocket".format(port)
-        )
-
-        # Compatibility with Python < 3.3
+        client = await websocket("ws://127.0.0.1:{0}/websocket".format(port))
         return client
 
     @pytest.mark.gen_test(run_sync=False)
@@ -65,7 +66,7 @@ class TestPerspectiveTornadoHandler(object):
         All test methods must import `app`, `http_client`, and `http_port`,
         otherwise a mysterious timeout will occur."""
         client = await self.websocket_client(http_port)
-        client.terminate()
+        await client.terminate()
 
     @pytest.mark.gen_test(run_sync=False)
     async def test_tornado_handler_table_method(self, app, http_client, http_port):
@@ -305,7 +306,7 @@ class TestPerspectiveTornadoHandler(object):
         output = await view.to_arrow()
 
         for i in range(10):
-            table.update(output)
+            await table.update(output)
 
         size2 = await table.size()
         assert size2 == 110

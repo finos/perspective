@@ -10,26 +10,16 @@ import os
 import os.path
 import logging
 import threading
-import uvicorn
 
-from fastapi import FastAPI, WebSocket
-from fastapi.middleware.cors import CORSMiddleware
-from starlette.responses import FileResponse
-from starlette.staticfiles import StaticFiles
+from aiohttp import web
 
-from perspective import Table, PerspectiveManager, PerspectiveStarletteHandler
+from perspective import Table, PerspectiveManager, PerspectiveAIOHTTPHandler
 
 
 here = os.path.abspath(os.path.dirname(__file__))
 file_path = os.path.join(
     here, "..", "..", "node_modules", "superstore-arrow", "superstore.arrow"
 )
-
-
-def static_nodemodules_handler(rest_of_path):
-    if rest_of_path.startswith("@finos"):
-        return FileResponse("../../node_modules/{}".format(rest_of_path))
-    return FileResponse("../../node_modules/@finos/{}".format(rest_of_path))
 
 
 def perspective_thread(manager):
@@ -51,29 +41,23 @@ def make_app():
     thread.daemon = True
     thread.start()
 
-    async def websocket_handler(websocket: WebSocket):
-        handler = PerspectiveStarletteHandler(manager=manager, websocket=websocket)
+    async def websocket_handler(request):
+        handler = PerspectiveAIOHTTPHandler(manager=manager, request=request)
         await handler.run()
 
-    # static_html_files = StaticFiles(directory="../python-tornado", html=True)
-    static_html_files = StaticFiles(directory="../python-tornado", html=True)
-
-    app = FastAPI()
-    app.add_api_websocket_route("/websocket", websocket_handler)
-    app.get("/node_modules/{rest_of_path:path}")(static_nodemodules_handler)
-    app.mount("/", static_html_files)
-
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+    app = web.Application()
+    app.router.add_get("/websocket", websocket_handler)
+    app.router.add_static(
+        "/node_modules/@finos", "../../node_modules/@finos", follow_symlinks=True
     )
+    app.router.add_static(
+        "/node_modules", "../../node_modules/@finos", follow_symlinks=True
+    )
+    app.router.add_static("/", "../python-tornado", show_index=True)
     return app
 
 
 if __name__ == "__main__":
     app = make_app()
     logging.critical("Listening on http://localhost:8080")
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    web.run_app(app, host="0.0.0.0", port=8080)

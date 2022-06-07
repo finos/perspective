@@ -60,9 +60,11 @@ requires = [
     "traitlets>=4.3.2",
 ]
 
-requires_tornado = ["tornado>=4.5.3"]
+requires_aiohttp = ["aiohttp"]
 
-requires_starlette = ["aiohttp", "fastapi", "starlette"]
+requires_starlette = ["fastapi", "starlette"]
+
+requires_tornado = ["tornado>=4.5.3"]
 
 requires_dev = (
     [
@@ -75,6 +77,7 @@ requires_dev = (
         "pybind11>=2.4.0",
         "pyarrow>=0.16.0",
         "pytest>=4.3.0",
+        "pytest-aiohttp",
         "pytest-asyncio",
         "pytest-cov>=2.6.1",
         "pytest-check-links",
@@ -85,8 +88,9 @@ requires_dev = (
         "wheel",
     ]
     + requires
-    + requires_tornado
+    + requires_aiohttp
     + requires_starlette
+    + requires_tornado
 )
 
 
@@ -271,7 +275,7 @@ setup(
     python_requires=">=3.6",
     install_requires=requires,
     extras_require={
-        "aiohttp": requires_starlette,
+        "aiohttp": requires_aiohttp,
         "dev": requires_dev,
         "fastapi": requires_starlette,
         "starlette": requires_starlette,

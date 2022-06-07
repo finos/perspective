@@ -7,11 +7,11 @@
 #
 
 import asyncio
-from starlette.websockets import WebSocket
-from ..core.exception import PerspectiveError
+
+from .common import PerspectiveHandlerBase
 
 
-class PerspectiveStarletteHandler(object):
+class PerspectiveStarletteHandler(PerspectiveHandlerBase):
     """PerspectiveStarletteHandler is a drop-in implementation of Perspective.
 
     The Perspective client and server will automatically keep the Websocket
@@ -28,15 +28,8 @@ class PerspectiveStarletteHandler(object):
         ... app.add_api_websocket_route('/websocket', endpoint)
     """
 
-    def __init__(
-        self,
-        manager,
-        websocket: WebSocket,
-        check_origin=False,
-        chunk_size=25165824,
-        chunk_sleep=0,
-    ):
-        """Create a new instance of the PerspectiveTornadoHandler with the
+    def __init__(self, *args, **kwargs):
+        """Create a new instance of the PerspectiveStarletteHandler with the
         given Manager instance.
 
         Keyword Args:
@@ -46,24 +39,11 @@ class PerspectiveStarletteHandler(object):
                 regardless of origin. Defaults to False.
             chunk_size (:obj:`int`): Binary messages will not exceed this length
                 (in bytes);  payloads above this limit will be chunked
-                across multiple messages. Defaults to `25165824` (24MB), and
+                across multiple messages. Defaults to `16_777_216` (16MB), and
                 be disabled entirely with `None`.
         """
-        self._manager = manager
-        self._check_origin = check_origin
-        self._chunk_size = chunk_size
-        self._session = self._manager.new_session()
-        self._websocket = websocket
-        self._chunk_sleep = chunk_sleep
-
-        if self._manager is None:
-            raise PerspectiveError(
-                "A `PerspectiveManager` instance must be provided to the handler!"
-            )
-
-    def check_origin(self, origin):
-        """TODO"""
-        return self._check_origin
+        super().__init__(*args, **kwargs)
+        self._websocket = kwargs["websocket"]
 
     async def run(self) -> None:
         try:
@@ -109,37 +89,31 @@ class PerspectiveStarletteHandler(object):
         # `PerspectiveManager`.
         chunked = len(message) > self._chunk_size
 
-        if binary and chunked:
-            await self._post_chunked(
-                message,
-                0,
-                self._chunk_size,
-                len(message),
-            )
-        else:
-            await self.write_message(message, binary)
+        async with self._stream_lock:
+            if binary and chunked:
+                start = 0
+
+                while start < len(message):
+                    end = start + self._chunk_size
+                    if end >= len(message):
+                        end = len(message)
+
+                    asyncio.ensure_future(
+                        self.write_message(message[start:end], binary=True)
+                    )
+                    start = end
+
+                    # Allow the loop to process heartbeats so that client sockets don't
+                    # get closed in the middle of sending a chunk.
+                    await asyncio.sleep(self._chunk_sleep)
+            else:
+                await self.write_message(message, binary)
 
     def on_close(self):
         """Remove the views associated with the client when the websocket
         closes.
         """
         self._session.close()
-
-    async def _post_chunked(self, message, start, end, message_length):
-        """Send a binary message in chunks on the websocket."""
-        if start < message_length:
-            end = start + self._chunk_size
-
-            if end >= message_length:
-                end = message_length
-
-            await self.write_message(message[start:end], binary=True)
-            start = end
-
-            # Allow the loop to process heartbeats so that client sockets don't
-            # get closed in the middle of sending a chunk.
-            await asyncio.sleep(self._chunk_sleep)
-            await self._post_chunked(message, start, end, message_length)
 
     async def write_message(self, message: str, binary: bool = False) -> None:
         if binary:

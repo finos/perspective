@@ -6,7 +6,7 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-from tornado import gen, ioloop
+from tornado import ioloop
 from tornado.websocket import websocket_connect
 
 from .websocket import (
@@ -45,9 +45,8 @@ class PerspectiveTornadoWebsocketConnection(PerspectiveWebsocketConnection):
     def periodic(self, callback, interval) -> Periodic:
         return TornadoPeriodic(callback=callback, interval=interval)
 
-    @gen.coroutine
-    def write(self, message, binary=False):
-        yield self._ws.write_message(message, binary=binary)
+    async def write(self, message, binary=False):
+        return await self._ws.write_message(message, binary=binary)
 
     async def close(self):
         self._ws.close()

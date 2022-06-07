@@ -5,19 +5,25 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
-import random
-import pytest
 
-import tornado
-from tornado import gen
+# NOTE: This is essentially a clone of the tornado handler tests,
+# but using async/await and starlette handler
+
+import pytest
+import random
+
 from datetime import datetime
+
+from fastapi import FastAPI, WebSocket
+from fastapi.testclient import TestClient
 
 from perspective import (
     Table,
     PerspectiveManager,
-    PerspectiveTornadoHandler,
-    tornado_websocket as websocket,
+    PerspectiveStarletteHandler,
 )
+
+from perspective.client.starlette_test import websocket
 
 
 data = {
@@ -29,60 +35,54 @@ data = {
 
 MANAGER = PerspectiveManager()
 
-APPLICATION = tornado.web.Application(
-    [
-        (
-            r"/websocket",
-            PerspectiveTornadoHandler,
-            {"manager": MANAGER, "check_origin": True, "chunk_size": 500},
-        )
-    ]
-)
+
+async def websocket_handler(websocket: WebSocket):
+    handler = PerspectiveStarletteHandler(
+        manager=MANAGER, websocket=websocket, chunk_size=500
+    )
+    await handler.run()
 
 
-@pytest.fixture(scope="module")
-def app():
-    return APPLICATION
+APPLICATION = FastAPI()
+APPLICATION.add_api_websocket_route("/websocket", websocket_handler)
+
+CLIENT = TestClient(APPLICATION)
 
 
-class TestPerspectiveTornadoHandlerChunked(object):
+class TestPerspectiveStarletteHandlerChunked(object):
     def setup_method(self):
         """Flush manager state before each test method execution."""
         MANAGER._tables = {}
         MANAGER._views = {}
 
-    async def websocket_client(self, port):
+    async def websocket_client(self):
         """Connect and initialize a websocket client connection to the
-        Perspective tornado server.
+        Perspective starlette server.
         """
-        client = await websocket("ws://127.0.0.1:{}/websocket".format(port))
-        return client
+        return await websocket(CLIENT, "/websocket")
 
-    @pytest.mark.gen_test(run_sync=False)
-    async def test_tornado_handler_create_view_to_arrow_chunked(
-        self, app, http_client, http_port, sentinel
-    ):
+    @pytest.mark.asyncio
+    async def test_starlette_handler_create_view_to_arrow_chunked(self):
         table_name = str(random.random())
         _table = Table(data)
         MANAGER.host_table(table_name, _table)
 
-        client = await self.websocket_client(http_port)
+        client = await self.websocket_client()
         table = client.open_table(table_name)
         view = await table.view()
         output = await view.to_arrow()
         expected = await table.schema()
 
         assert Table(output).schema(as_string=True) == expected
+        await client.terminate()
 
-    @pytest.mark.gen_test(run_sync=False)
-    async def test_tornado_handler_create_view_to_arrow_update_chunked(
-        self, app, http_client, http_port, sentinel
-    ):
+    @pytest.mark.asyncio
+    async def test_starlette_handler_create_view_to_arrow_update_chunked(self):
         table_name = str(random.random())
         _table = Table(data)
         MANAGER.host_table(table_name, _table)
 
-        client = await self.websocket_client(http_port)
+        client = await self.websocket_client()
         table = client.open_table(table_name)
         view = await table.view()
 
@@ -93,11 +93,10 @@ class TestPerspectiveTornadoHandlerChunked(object):
 
         size2 = await table.size()
         assert size2 == 110
+        await client.terminate()
 
-    @pytest.mark.gen_test(run_sync=False)
-    async def test_tornado_handler_update_chunked_interleaved_with_trivial(
-        self, app, http_client, http_port, sentinel
-    ):
+    @pytest.mark.asyncio
+    async def test_starlette_handler_update_chunked_interleaved_with_trivial(self):
         """Tests that, when a chunked response `output_fut` is interleaved with
         a response belonging to another message ID (and not binary encoded)
         `size3`, both messages de-multiplex correclty and succeed.
@@ -106,7 +105,7 @@ class TestPerspectiveTornadoHandlerChunked(object):
         _table = Table(data)
         MANAGER.host_table(table_name, _table)
 
-        client = await self.websocket_client(http_port)
+        client = await self.websocket_client()
         table = client.open_table(table_name)
         view = await table.view()
 
@@ -121,3 +120,4 @@ class TestPerspectiveTornadoHandlerChunked(object):
 
         size2 = await table.size()
         assert size2 == 110
+        await client.terminate()

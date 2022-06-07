@@ -12,9 +12,13 @@ well as Python-specific data loading support for [NumPy](https://numpy.org/),
 
 Additionally, `perspective-python` provides a session manager suitable for
 integration into server systems such as
-[Tornado websockets](https://www.tornadoweb.org/en/stable/websocket.html), which
-allows fully _virtual_ Perspective tables to be interacted with by multiple
-`<perspective-viewer>` in a web browser.
+[Tornado websockets](https://www.tornadoweb.org/en/stable/websocket.html),
+[AIOHTTP](https://docs.aiohttp.org/en/stable/web_quickstart.html#websockets),
+or [Starlette](https://www.starlette.io/websockets/)/[FastAPI](https://fastapi.tiangolo.com/advanced/websockets/),
+which allows fully _virtual_ Perspective tables to be interacted with by multiple
+`<perspective-viewer>` in a web browser. You can also interact with a Perspective
+table from python clients, and to that end client libraries are implemented for
+both Tornado and AIOHTTP.
 
 As `<perspective-viewer>` will only consume the data necessary to render the
 current screen, this runtime mode allows _ludicrously-sized_ datasets with
@@ -31,9 +35,13 @@ The `perspective` module exports several tools:
 - `Table`, the table constructor for Perspective, which implements the `table`
   and `view` API in the same manner as the JavaScript library.
 - `PerspectiveWidget` the JupyterLab widget for interactive visualization.
-- `PerspectiveTornadoHandler`, an integration with
-  [Tornado](https://www.tornadoweb.org/) that interfaces seamlessly with
+- Perspective webserver handlers  that interfaces seamlessly with
   `<perspective-viewer>` in JavaScript.
+  - `PerspectiveTornadoHandler` for [Tornado](https://www.tornadoweb.org/)
+  - `PerspectiveStarletteHandler` for [Starlette](https://www.starlette.io/) and [FastAPI](https://fastapi.tiangolo.com)
+  - `PerspectiveAIOHTTPHandler` for [AIOHTTP](https://docs.aiohttp.org),
+  - `tornado_websocket`, a Tornado-based websocket client
+  - `aiohttp_websocket` an AIOHTTP-based websocket client
 - `PerspectiveManager` the session manager for a shared server deployment of
   `perspective-python`.
 
@@ -342,7 +350,7 @@ Using Tornado and
 as well as `Perspective`'s JavaScript library, we can set up "distributed"
 Perspective instances that allows multiple browser `perspective-viewer` clients
 to read from a common `perspective-python` server, as in the
-[Tornado Example Project](https://github.com/finos/perspective/tree/master/examples/tornado-python).
+[Tornado Example Project](https://github.com/finos/perspective/tree/master/examples/python-tornado).
 
 This architecture works by maintaining two `Tables`—one on the server, and one
 on the client that mirrors the server's `Table` automatically using `on_update`.
@@ -409,7 +417,11 @@ _*index.html*_
 
 For a more complex example that offers distributed editing of the server
 dataset, see
-[client_server_editing.html](https://github.com/finos/perspective/blob/master/examples/tornado-python/client_server_editing.html).
+[client_server_editing.html](https://github.com/finos/perspective/blob/master/examples/python-tornado/client_server_editing.html).
+
+We also provide examples for Starlette/FastAPI and AIOHTTP:
+- [Starlette Example Project](https://github.com/finos/perspective/tree/master/examples/python-starlette).
+- [AIOHTTP Example Project](https://github.com/finos/perspective/tree/master/examples/python-aiohttp).
 
 ### Server-only Mode
 

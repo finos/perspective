@@ -1,9 +1,9 @@
 ``perspective.core`` contains modules that implements ``perspective-python`` in various environments,
-most notably ``PerspectiveWidget`` and ``PerspectiveTornadoHandler``.
+most notably ``PerspectiveWidget`` and the various Perspective web server handlers.
 
 Additionally, ``perspective.core`` defines several enums that provide easy access to aggregate options, different plugins, sort directions etc.
 
-For usage of ``PerspectiveWidget`` and ``PerspectiveTornadoHandler``, see the User Guide in the sidebar.
+For usage of ``PerspectiveWidget`` and the Perspective web server handlers, see the User Guide in the sidebar.
 
 .. automodule:: perspective.core
    :members:
@@ -24,15 +24,36 @@ PerspectiveWidget
    :show-inheritance:
    :exclude-members: random
 
-PerspectiveTornadoHandler
-=========================
+Perspective Webserver Handlers
+=================================
 
-``PerspectiveTornadoHandler`` is a ready-made Perspective server that interfaces seamlessly with
+Perspective provides several ready-made integrations with webserver libraries that interfaces seamlessly with
 ``@finos/perspective-viewer`` in Javascript.
 
-.. automodule:: perspective.tornado_handler.tornado_handler
+.. automodule:: perspective.handlers.tornado
    :members:
    :show-inheritance:
+
+.. automodule:: perspective.handlers.starlette
+   :members:
+   :show-inheritance:
+
+.. automodule:: perspective.handlers.aiohttp
+   :members:
+   :show-inheritance:
+
+Perspective Websocket Clients
+==============================
+Perspective also provides several client interfaces to integrate with the above Perspective webserver handlers.
+
+.. automodule:: perspective.client.tornado
+   :members:
+   :show-inheritance:
+
+.. automodule:: perspective.client.aiohttp
+   :members:
+   :show-inheritance:
+
 
 PerspectiveManager
 ==================

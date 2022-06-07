@@ -74,7 +74,7 @@ class TestAsync(object):
         tbl.delete()
 
     def test_async_queue_process_csv(self):
-        """Make sure GIL release during CSV loading works"""
+        """Make sure GIL release during CSV loading works"""     
         tbl = Table("x,y,z\n1,a,true\n2,b,false\n3,c,true\n4,d,false")
         manager = PerspectiveManager()
         manager.set_loop_callback(TestAsync.loop.add_callback)

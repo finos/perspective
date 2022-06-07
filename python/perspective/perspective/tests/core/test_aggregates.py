@@ -7,23 +7,26 @@
 #
 
 from pytest import raises
-from perspective import (
-    PerspectiveError,
-    PerspectiveViewer,
-    PerspectiveWidget,
-    Aggregate,
-)
+from perspective import PerspectiveError, PerspectiveViewer,\
+                        PerspectiveWidget, Aggregate
 
 
 class TestAggregates:
+
     def test_aggregates_widget_load(self):
-        aggs = {"a": Aggregate.AVG, "b": Aggregate.LAST}
+        aggs = {
+            "a": Aggregate.AVG,
+            "b": Aggregate.LAST
+        }
         data = {"a": [1, 2, 3], "b": ["a", "b", "c"]}
         widget = PerspectiveWidget(data, aggregates=aggs)
         assert widget.aggregates == aggs
 
     def test_aggregates_widget_load_weighted_mean(self):
-        aggs = {"a": Aggregate.AVG, "b": ["weighted mean", "a"]}
+        aggs = {
+            "a": Aggregate.AVG,
+            "b": ["weighted mean", "a"]
+        }
         data = {"a": [1, 2, 3], "b": ["a", "b", "c"]}
         widget = PerspectiveWidget(data, aggregates=aggs)
         assert widget.aggregates == aggs
@@ -31,8 +34,14 @@ class TestAggregates:
     def test_aggregates_widget_setattr(self):
         data = {"a": [1, 2, 3], "b": ["a", "b", "c"]}
         widget = PerspectiveWidget(data)
-        widget.aggregates = {"a": Aggregate.ANY, "b": Aggregate.LAST}
-        assert widget.aggregates == {"a": "any", "b": "last"}
+        widget.aggregates = {
+            "a": Aggregate.ANY,
+            "b": Aggregate.LAST
+        }
+        assert widget.aggregates == {
+            "a": "any",
+            "b": "last"
+        }
 
     def test_aggregates_widget_load_invalid(self):
         data = {"a": [1, 2, 3], "b": ["a", "b", "c"]}

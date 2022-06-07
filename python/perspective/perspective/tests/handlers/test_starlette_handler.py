@@ -17,9 +17,14 @@ from datetime import datetime
 from fastapi import FastAPI, WebSocket
 from fastapi.testclient import TestClient
 
-from perspective import Table, PerspectiveManager, PerspectiveStarletteHandler, PerspectiveError
+from perspective import (
+    Table,
+    PerspectiveManager,
+    PerspectiveStarletteHandler,
+    PerspectiveError,
+)
 
-from ...client.starlette_test import websocket
+from perspective.client.starlette_test import websocket
 
 
 data = {
@@ -33,7 +38,7 @@ MANAGER = PerspectiveManager()
 
 
 async def websocket_handler(websocket: WebSocket):
-    handler = PerspectiveStarletteHandler(MANAGER, websocket)
+    handler = PerspectiveStarletteHandler(manager=MANAGER, websocket=websocket)
     await handler.run()
 
 
@@ -51,7 +56,7 @@ class TestPerspectiveStarletteHandler(object):
 
     async def websocket_client(self):
         """Connect and initialize a websocket client connection to the
-        Perspective tornado server.
+        Perspective starlette server.
         """
         return await websocket(CLIENT, "/websocket")
 
@@ -213,7 +218,7 @@ class TestPerspectiveStarletteHandler(object):
         def updater(port_id, delta):
             s.set(True)
             assert port_id == port
-            
+
             t2 = Table(delta)
             assert t2.view().to_dict() == data
 

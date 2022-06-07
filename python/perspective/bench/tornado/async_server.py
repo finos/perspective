@@ -77,7 +77,7 @@ def make_app(manager):
         [
             (
                 r"/",
-                perspective.tornado_handler.PerspectiveTornadoHandler,
+                perspective.handlers.tornado.PerspectiveTornadoHandler,
                 {"manager": manager},
             )
         ]

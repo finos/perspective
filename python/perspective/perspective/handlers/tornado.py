@@ -13,7 +13,7 @@ from functools import partial
 from tornado.gen import coroutine
 from tornado.ioloop import IOLoop
 
-from ..core.exception import PerspectiveError
+from perspective import PerspectiveError
 
 
 class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
@@ -42,7 +42,7 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
     """
 
     def __init__(self, *args, **kwargs):
-        """Create a new instance of the PerspectiveTornadoHandler with the
+        """Create a new instance of the PerspectiveHandlerBase with the
         given Manager instance.
 
         Keyword Args:
@@ -69,7 +69,7 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
                 "A `PerspectiveManager` instance must be provided to the tornado handler!"
             )
 
-        super(PerspectiveTornadoHandler, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def check_origin(self, origin):
         """Returns whether the handler allows requests from origins outside
