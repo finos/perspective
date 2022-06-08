@@ -61,529 +61,531 @@ thread_local! {
         ]
     };
 
+    // Link to `kind` enumerations
+    // https://github.com/siku2/rust-monaco/blob/5684979fd326c875d6ee57306b243219fc38ff46/src/sys/languages.rs#L310
     pub static COMPLETIONS: RegisterCompletionItemSuggestions = RegisterCompletionItemSuggestions {
         suggestions: vec![
             CompletionItemSuggestion {
                 label: "var".to_owned(),
-                kind: 17,
+                kind: 17,  // keyword
                 insert_text: "var ${1:x := 1}".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Declare a new local variable".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "abs".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "abs(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Absolute value of x".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "avg".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "avg(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Average of all inputs".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "bucket".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "bucket(${1:x}, ${2:y})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Bucket x by y".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "ceil".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "ceil(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Smallest integer >= x".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "exp".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "exp(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Natural exponent of x (e ^ x)".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "floor".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "floor(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Largest integer <= x".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "frac".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "frac(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Fractional portion (after the decimal) of x".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "iclamp".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "iclamp(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Inverse clamp x within a range".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "inrange".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "inrange(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Returns whether x is within a range".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "log".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "log(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Natural log of x".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "log10".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "log10(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Base 10 log of x".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "log1p".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "log1p(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Natural log of 1 + x where x is very small".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "log2".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "log2(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Base 2 log of x".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "logn".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "logn(${1:x}, ${2:N})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Base N log of x where N >= 0".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "max".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "max(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Maximum value of all inputs".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "min".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "min(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Minimum value of all inputs".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "mul".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "mul(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Product of all inputs".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "percent_of".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "percent_of(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Percent y of x".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "pow".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "pow(${1:x}, ${2:y})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "x to the power of y".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "root".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "root(${1:x}, ${2:N})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "N-th root of x where N >= 0".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "round".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "round(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Round x to the nearest integer".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "sgn".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "sgn(${1:x})".to_owned(),
                 insert_text_rules: 4,
-                documentation: "Sign of x: -1, 1, or 0".to_owned(),
+                documentation: "Sign of x: -1,  // function 1,  // function or 0".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "sqrt".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "sqrt(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Square root of x".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "sum".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "sum(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Sum of all inputs".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "trunc".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "trunc(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Integer portion of x".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "acos".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "acos(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Arc cosine of x in radians".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "acosh".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "acosh(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Inverse hyperbolic cosine of x in radians".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "asin".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "asin(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Arc sine of x in radians".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "asinh".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "asinh(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Inverse hyperbolic sine of x in radians".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "atan".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "atan(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Arc tangent of x in radians".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "atanh".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "atanh(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Inverse hyperbolic tangent of x in radians".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "cos".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "cos(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Cosine of x".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "cosh".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "cosh(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Hyperbolic cosine of x".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "cot".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "cot(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Cotangent of x".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "sin".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "sin(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Sine of x".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "sinc".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "sinc(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Sine cardinal of x".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "sinh".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "sinh(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Hyperbolic sine of x".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "tan".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "tan(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Tangent of x".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "tanh".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "tanh(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Hyperbolic tangent of x".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "deg2rad".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "deg2rad(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Convert x from degrees to radians".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "deg2grad".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "deg2grad(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Convert x from degrees to gradians".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "rad2deg".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "rad2deg(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Convert x from radians to degrees".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "grad2deg".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "grad2deg(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Convert x from gradians to degrees".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "concat".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "concat(${1:x}, ${2:y})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Concatenate string columns and string literals, such as:\nconcat(\"State\".to_owned(), ', ', \"City\")".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "order".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "order(${1:input column}, ${2:value}, ...)".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Generates a sort order for a string column based on the input order of the parameters, such as:\norder(\"State\".to_owned(), 'Texas', 'New York')".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "upper".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "upper(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Uppercase of x".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "lower".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "lower(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Lowercase of x".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "hour_of_day".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "hour_of_day(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Return a datetime's hour of the day as a string".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "month_of_year".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "month_of_year(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Return a datetime's month of the year as a string".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "day_of_week".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "day_of_week(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Return a datetime's day of week as a string".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "now".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "now()".to_owned(),
                 insert_text_rules: 4,
                 documentation: "The current datetime in local time".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "today".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "today()".to_owned(),
                 insert_text_rules: 4,
                 documentation: "The current date in local time".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "null".to_owned(),
-                kind: 17,
+                kind: 17,  // keyword
                 insert_text: "null".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Null value".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "is_null".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "is_null(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Whether x is a null value".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "is_not_null".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "is_not_null(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Whether x is not a null value".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "not".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "not(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "not x".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "true".to_owned(),
-                kind: 17,
+                kind: 17,  // keyword
                 insert_text: "true".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Boolean value true".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "false".to_owned(),
-                kind: 17,
+                kind: 17,  // keyword
                 insert_text: "false".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Boolean value false".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "if".to_owned(),
-                kind: 17,
+                kind: 17,  // keyword
                 insert_text: "if (${1:condition}) {} else if (${2:condition}) {} else {}".to_owned(),
                 insert_text_rules: 4,
                 documentation: "An if/else conditional, which evaluates a condition such as:\n if (\"Sales\" > 100) { true } else { false }".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "for".to_owned(),
-                kind: 17,
+                kind: 17,  // keyword
                 insert_text: "for (${1:expression}) {}".to_owned(),
                 insert_text_rules: 4,
                 documentation: "A for loop, which repeatedly evaluates an incrementing expression such as:\nvar x := 0; var y := 1; for (x < 10; x += 1) { y := x + y }".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "string".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "string(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Converts the given argument to a string".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "integer".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "integer(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Converts the given argument to a 32-bit integer. If the result over/under-flows, null is returned".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "float".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "float(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Converts the argument to a float".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "date".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "date(${1:year}, ${1:month}, ${1:day})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Given a year, month (1-12) and day, create a new date".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "datetime".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "datetime(${1:timestamp})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Given a POSIX timestamp of milliseconds since epoch, create a new datetime".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "boolean".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "boolean(${1:x})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Converts the given argument to a boolean".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "random".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "random()".to_owned(),
                 insert_text_rules: 4,
-                documentation: "Returns a random float between 0 and 1, inclusive.".to_owned(),
+                documentation: "Returns a random float between 0 and 1,  // function inclusive.".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "match".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "match(${1:string}, ${2:pattern})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Returns True if any part of string matches pattern, and False otherwise.".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "match_all".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "match_all(${1:string}, ${2:pattern})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Returns True if the whole string matches pattern, and False otherwise.".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "search".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "search(${1:string}, ${2:pattern})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Returns the substring that matches the first capturing group in pattern, or null if there are no capturing groups in the pattern or if there are no matches.".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "indexof".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "indexof(${1:string}, ${2:pattern}, ${3:output_vector})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Writes into index 0 and 1 of output_vector the start and end indices of the substring that matches the first capturing group in pattern.\n\nReturns true if there is a match and output was written, or false if there are no capturing groups in the pattern, if there are no matches, or if the indices are invalid.".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "substring".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "substring(${1:string}, ${2:start_idx}, ${3:length})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Returns a substring of string from start_idx with the given length. If length is not passed in, returns substring from start_idx to the end of the string. Returns null if the string or any indices are invalid.".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "replace".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "replace(${1:string}, ${2:pattern}, ${3:replacer})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Replaces the first match of pattern in string with replacer, or return the original string if no replaces were made.".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "replace_all".to_owned(),
-                kind: 1,
+                kind: 1,  // function
                 insert_text: "replace(${1:string}, ${2:pattern}, ${3:replacer})".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Replaces all non-overlapping matches of pattern in string with replacer, or return the original string if no replaces were made.".to_owned(),
