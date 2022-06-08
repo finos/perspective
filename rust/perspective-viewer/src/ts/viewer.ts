@@ -13,6 +13,7 @@ import type * as perspective from "@finos/perspective";
 import {
     PerspectiveViewerElement,
     register_plugin,
+    get_exprtk_commands,
 } from "@finos/perspective-viewer/dist/pkg/perspective_viewer.js";
 
 import {WASM_MODULE} from "./init";
@@ -546,6 +547,17 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
     async unsafe_get_model(): Promise<number> {
         await this.load_wasm();
         return await this.instance.js_unsafe_get_model();
+    }
+
+    /**
+     * Get metadata for ExprTK's supported commands.
+     *
+     * @category Internal
+     * @returns An array of JSON descriptors for ExprTK commands
+     */
+    static async getExprtkCommands(): Promise<Array<Record<string, string>>> {
+        await WASM_MODULE;
+        return get_exprtk_commands();
     }
 }
 

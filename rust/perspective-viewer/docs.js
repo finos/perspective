@@ -13,6 +13,7 @@
 
 const fs = require("fs");
 const {Transform, PassThrough} = require("stream");
+const puppeteer = require("puppeteer");
 
 function concatStreams(streams) {
     let pass = new PassThrough();
@@ -68,3 +69,44 @@ concatStreams(inputs)
     .on("finish", function () {
         console.log("Done merging!");
     });
+
+async function capture_exprtk() {
+    const browser = await puppeteer.launch({headless: true});
+    const page = await browser.newPage();
+    await page.addScriptTag({path: "dist/umd/perspective-viewer.js"});
+    const data = await page.evaluate(async () => {
+        const commands = await customElements
+            .get("perspective-viewer")
+            .getExprtkCommands();
+
+        return JSON.stringify(commands, null, 4);
+    });
+
+    let md = `---
+id: perspective-viewer-exprtk
+title: ExprTK Function Reference
+---
+
+## ExprTK Function Reference
+
+`;
+    for (const item of JSON.parse(data)) {
+        if (item.kind === 1) {
+            md += `### ${item.label}
+
+${item.documentation}
+
+\`\`\`
+${item.insertText}
+\`\`\`
+
+`;
+        }
+    }
+
+    fs.writeFileSync("./exprtk.md", md);
+    await page.close();
+    await browser.close();
+}
+
+capture_exprtk();
