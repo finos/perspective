@@ -31,7 +31,7 @@ namespace computed_function {
     intern::~intern() {}
 
     t_tscalar
-    intern::operator()(t_parameter_list parameters) {
+    intern::operator()(t_parameter_list& parameters) {
         t_tscalar rval;
         rval.clear();
         rval.m_type = DTYPE_STR;
@@ -67,7 +67,7 @@ namespace computed_function {
     concat::~concat() {}
 
     t_tscalar
-    concat::operator()(t_parameter_list parameters) {
+    concat::operator()(t_parameter_list& parameters) {
         std::string result;
         t_tscalar rval;
         rval.clear();
@@ -134,7 +134,7 @@ namespace computed_function {
     upper::~upper() {}
 
     t_tscalar
-    upper::operator()(t_parameter_list parameters) {
+    upper::operator()(t_parameter_list& parameters) {
         t_tscalar rval;
         rval.clear();
         rval.m_type = DTYPE_STR;
@@ -188,7 +188,7 @@ namespace computed_function {
     lower::~lower() {}
 
     t_tscalar
-    lower::operator()(t_parameter_list parameters) {
+    lower::operator()(t_parameter_list& parameters) {
         t_tscalar rval;
         rval.clear();
         rval.m_type = DTYPE_STR;
@@ -232,7 +232,7 @@ namespace computed_function {
     length::~length() {}
 
     t_tscalar
-    length::operator()(t_parameter_list parameters) {
+    length::operator()(t_parameter_list& parameters) {
         std::string temp_str;
         t_tscalar rval;
         rval.clear();
@@ -279,7 +279,7 @@ namespace computed_function {
     order::~order() {}
 
     t_tscalar
-    order::operator()(t_parameter_list parameters) {
+    order::operator()(t_parameter_list& parameters) {
         t_tscalar rval;
         rval.clear();
 
@@ -401,7 +401,7 @@ namespace computed_function {
     match::~match() {}
 
     t_tscalar
-    match::operator()(t_parameter_list parameters) {
+    match::operator()(t_parameter_list& parameters) {
         t_tscalar rval;
         rval.clear();
         rval.m_type = DTYPE_BOOL;
@@ -446,7 +446,7 @@ namespace computed_function {
     match_all::~match_all() {}
 
     t_tscalar
-    match_all::operator()(t_parameter_list parameters) {
+    match_all::operator()(t_parameter_list& parameters) {
         t_tscalar rval;
         rval.clear();
         rval.m_type = DTYPE_BOOL;
@@ -494,7 +494,7 @@ namespace computed_function {
     search::~search() {}
 
     t_tscalar
-    search::operator()(t_parameter_list parameters) {
+    search::operator()(t_parameter_list& parameters) {
         t_tscalar rval;
         rval.clear();
         rval.m_type = DTYPE_STR;
@@ -548,7 +548,7 @@ namespace computed_function {
     indexof::~indexof() {}
 
     t_tscalar
-    indexof::operator()(t_parameter_list parameters) {
+    indexof::operator()(t_parameter_list& parameters) {
         t_tscalar rval;
         rval.clear();
         rval.m_type = DTYPE_BOOL;
@@ -624,7 +624,7 @@ namespace computed_function {
     substring::~substring() {}
 
     t_tscalar
-    substring::operator()(t_parameter_list parameters) {
+    substring::operator()(t_parameter_list& parameters) {
         t_tscalar rval;
         rval.clear();
         rval.m_type = DTYPE_STR;
@@ -717,7 +717,7 @@ namespace computed_function {
     replace::~replace() {}
 
     t_tscalar
-    replace::operator()(t_parameter_list parameters) {
+    replace::operator()(t_parameter_list& parameters) {
         t_tscalar rval;
         rval.clear();
         rval.m_type = DTYPE_STR;
@@ -813,7 +813,7 @@ namespace computed_function {
     replace_all::~replace_all() {}
 
     t_tscalar
-    replace_all::operator()(t_parameter_list parameters) {
+    replace_all::operator()(t_parameter_list& parameters) {
         t_tscalar rval;
         rval.clear();
         rval.m_type = DTYPE_STR;
@@ -905,7 +905,7 @@ namespace computed_function {
     hour_of_day::~hour_of_day() {}
 
     t_tscalar
-    hour_of_day::operator()(t_parameter_list parameters) {
+    hour_of_day::operator()(t_parameter_list& parameters) {
         t_tscalar val;
         t_tscalar rval;
         rval.clear();
@@ -978,7 +978,7 @@ namespace computed_function {
     day_of_week::~day_of_week() {}
 
     t_tscalar
-    day_of_week::operator()(t_parameter_list parameters) {
+    day_of_week::operator()(t_parameter_list& parameters) {
         t_tscalar val;
         t_tscalar rval;
         rval.clear();
@@ -1060,7 +1060,7 @@ namespace computed_function {
     month_of_year::~month_of_year() {}
 
     t_tscalar
-    month_of_year::operator()(t_parameter_list parameters) {
+    month_of_year::operator()(t_parameter_list& parameters) {
         t_tscalar val;
         t_tscalar rval;
         rval.clear();
@@ -1132,7 +1132,7 @@ namespace computed_function {
     bucket::~bucket() {}
 
     t_tscalar
-    bucket::operator()(t_parameter_list parameters) {
+    bucket::operator()(t_parameter_list& parameters) {
         t_tscalar val;
         t_tscalar unit;
         t_tscalar rval;
@@ -1535,7 +1535,7 @@ namespace computed_function {
     inrange_fn::~inrange_fn() {}
 
     t_tscalar
-    inrange_fn::operator()(t_parameter_list parameters) {
+    inrange_fn::operator()(t_parameter_list& parameters) {
         t_tscalar rval;
         rval.clear();
         rval.m_type = DTYPE_BOOL;
@@ -1571,7 +1571,7 @@ namespace computed_function {
     min_fn::~min_fn() {}
 
     t_tscalar
-    min_fn::operator()(t_parameter_list parameters) {
+    min_fn::operator()(t_parameter_list& parameters) {
         t_tscalar rval;
         rval.clear();
         rval.m_type = DTYPE_FLOAT64;
@@ -1624,7 +1624,7 @@ namespace computed_function {
     max_fn::~max_fn() {}
 
     t_tscalar
-    max_fn::operator()(t_parameter_list parameters) {
+    max_fn::operator()(t_parameter_list& parameters) {
         t_tscalar rval;
         rval.clear();
         rval.m_type = DTYPE_FLOAT64;
@@ -1678,7 +1678,7 @@ namespace computed_function {
     percent_of::~percent_of() {}
 
     t_tscalar
-    percent_of::operator()(t_parameter_list parameters) {
+    percent_of::operator()(t_parameter_list& parameters) {
         t_tscalar rval;
         rval.clear();
 
@@ -1716,7 +1716,7 @@ namespace computed_function {
     is_null::~is_null() {}
 
     t_tscalar
-    is_null::operator()(t_parameter_list parameters) {
+    is_null::operator()(t_parameter_list& parameters) {
         t_tscalar val;
 
         t_tscalar rval;
@@ -1737,7 +1737,7 @@ namespace computed_function {
     is_not_null::~is_not_null() {}
 
     t_tscalar
-    is_not_null::operator()(t_parameter_list parameters) {
+    is_not_null::operator()(t_parameter_list& parameters) {
         t_tscalar val;
 
         t_tscalar rval;
@@ -1767,7 +1767,7 @@ namespace computed_function {
     to_string::~to_string() {}
 
     t_tscalar
-    to_string::operator()(t_parameter_list parameters) {
+    to_string::operator()(t_parameter_list& parameters) {
         t_tscalar val;
         t_tscalar rval;
         rval.clear();
@@ -1801,7 +1801,7 @@ namespace computed_function {
     to_integer::~to_integer() {}
 
     t_tscalar
-    to_integer::operator()(t_parameter_list parameters) {
+    to_integer::operator()(t_parameter_list& parameters) {
         t_tscalar val;
         t_tscalar rval;
         rval.clear();
@@ -1855,7 +1855,7 @@ namespace computed_function {
     to_float::~to_float() {}
 
     t_tscalar
-    to_float::operator()(t_parameter_list parameters) {
+    to_float::operator()(t_parameter_list& parameters) {
         t_tscalar val;
         t_tscalar rval;
         rval.clear();
@@ -1897,7 +1897,7 @@ namespace computed_function {
     to_boolean::~to_boolean() {}
 
     t_tscalar
-    to_boolean::operator()(t_parameter_list parameters) {
+    to_boolean::operator()(t_parameter_list& parameters) {
         t_tscalar val;
         t_tscalar rval;
         rval.clear();
@@ -1923,7 +1923,7 @@ namespace computed_function {
     make_date::~make_date() {}
 
     t_tscalar
-    make_date::operator()(t_parameter_list parameters) {
+    make_date::operator()(t_parameter_list& parameters) {
         t_tscalar rval;
         rval.clear();
         rval.m_type = DTYPE_DATE;
@@ -1968,7 +1968,7 @@ namespace computed_function {
     make_datetime::~make_datetime() {}
 
     t_tscalar
-    make_datetime::operator()(t_parameter_list parameters) {
+    make_datetime::operator()(t_parameter_list& parameters) {
         t_tscalar rval;
         rval.clear();
         rval.m_type = DTYPE_TIME;
@@ -2006,7 +2006,7 @@ namespace computed_function {
     random::~random() {}
 
     t_tscalar
-    random::operator()(t_parameter_list parameters) {
+    random::operator()(t_parameter_list& parameters) {
         t_tscalar rval;
         rval.clear();
         rval.set(random::DISTRIBUTION(random::RANDOM_ENGINE));

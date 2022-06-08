@@ -22,6 +22,7 @@ thread_local! {
         brackets: vec![
             vec!["(", ")", "delimiter.parenthesis"],
         ],
+
         tokenizer: MonarchTokenizer {
             root: vec![
                 vec!["\\/\\/.*", "comment"],
@@ -435,7 +436,7 @@ thread_local! {
             },
             CompletionItemSuggestion {
                 label: "null".to_owned(),
-                kind: 14,
+                kind: 17,
                 insert_text: "null".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Null value".to_owned(),
@@ -463,14 +464,14 @@ thread_local! {
             },
             CompletionItemSuggestion {
                 label: "true".to_owned(),
-                kind: 1,
+                kind: 17,
                 insert_text: "true".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Boolean value true".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "false".to_owned(),
-                kind: 1,
+                kind: 17,
                 insert_text: "false".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Boolean value false".to_owned(),

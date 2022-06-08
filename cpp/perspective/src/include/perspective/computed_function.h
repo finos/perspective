@@ -42,7 +42,7 @@ namespace computed_function {
     struct NAME : public exprtk::igeneric_function<t_tscalar> {                \
         NAME(t_regex_mapping& regex_mapping);                                  \
         ~NAME();                                                               \
-        t_tscalar operator()(t_parameter_list parameters);                     \
+        t_tscalar operator()(t_parameter_list& parameters);                     \
         t_regex_mapping& m_regex_mapping;                                      \
     };
 
@@ -52,7 +52,7 @@ namespace computed_function {
         NAME(t_expression_vocab& expression_vocab,                             \
             t_regex_mapping& regex_mapping, bool is_type_validator);           \
         ~NAME();                                                               \
-        t_tscalar operator()(t_parameter_list parameters);                     \
+        t_tscalar operator()(t_parameter_list& parameters);                     \
         t_expression_vocab& m_expression_vocab;                                \
         t_regex_mapping& m_regex_mapping;                                      \
         bool m_is_type_validator;                                              \
@@ -71,7 +71,7 @@ namespace computed_function {
     struct NAME : public exprtk::igeneric_function<t_tscalar> {                \
         NAME(t_expression_vocab& expression_vocab, bool is_type_validator);    \
         ~NAME();                                                               \
-        t_tscalar operator()(t_parameter_list parameters);                     \
+        t_tscalar operator()(t_parameter_list& parameters);                     \
         t_expression_vocab& m_expression_vocab;                                \
         t_tscalar m_sentinel;                                                  \
         bool m_is_type_validator;                                              \
@@ -109,7 +109,7 @@ namespace computed_function {
         order(bool is_type_validator);
         ~order();
 
-        t_tscalar operator()(t_parameter_list parameters);
+        t_tscalar operator()(t_parameter_list& parameters);
         void clear_order_map();
 
         tsl::hopscotch_map<std::string, double> m_order_map;
@@ -176,7 +176,7 @@ namespace computed_function {
     struct NAME : public exprtk::igeneric_function<t_tscalar> {                \
         NAME();                                                                \
         ~NAME();                                                               \
-        t_tscalar operator()(t_parameter_list parameters);                     \
+        t_tscalar operator()(t_parameter_list& parameters);                     \
     };
 
     // Length of the string
@@ -223,7 +223,7 @@ namespace computed_function {
         bucket();
         ~bucket();
 
-        t_tscalar operator()(t_parameter_list parameters);
+        t_tscalar operator()(t_parameter_list& parameters);
 
         // faster unit lookups, since we are calling this lookup in a tight
         // loop.
@@ -337,7 +337,7 @@ namespace computed_function {
         random();
         ~random();
 
-        t_tscalar operator()(t_parameter_list parameters);
+        t_tscalar operator()(t_parameter_list& parameters);
 
         // faster unit lookups, since we are calling this lookup in a tight
         // loop.
