@@ -472,9 +472,23 @@ thread_local! {
                 documentation: "Boolean value true".to_owned(),
             },
             CompletionItemSuggestion {
+                label: "True".to_owned(),
+                kind: 14,  // keyword
+                insert_text: "True".to_owned(),
+                insert_text_rules: 4,
+                documentation: "Boolean value true".to_owned(),
+            },
+            CompletionItemSuggestion {
                 label: "false".to_owned(),
                 kind: 17,  // keyword
                 insert_text: "false".to_owned(),
+                insert_text_rules: 4,
+                documentation: "Boolean value false".to_owned(),
+            },
+            CompletionItemSuggestion {
+                label: "False".to_owned(),
+                kind: 14,  // literal
+                insert_text: "False".to_owned(),
                 insert_text_rules: 4,
                 documentation: "Boolean value false".to_owned(),
             },

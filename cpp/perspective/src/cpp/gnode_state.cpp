@@ -349,7 +349,9 @@ t_gstate::update_master_column(t_column* master_column,
 
             } break;
             default: {
-                PSP_COMPLAIN_AND_ABORT("Unexpected type");
+                std::stringstream ss;
+                ss << "Unexpected type: `" << get_dtype_descr(flattened_column->get_dtype()) << "`";
+                PSP_COMPLAIN_AND_ABORT(ss.str());
             }
         }
     }

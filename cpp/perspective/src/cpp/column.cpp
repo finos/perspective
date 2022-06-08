@@ -309,7 +309,9 @@ t_column::push_back<t_tscalar>(t_tscalar elem) {
             push_back(elem.get<std::uint64_t>(), elem.m_status);
         } break;
         default: {
-            PSP_COMPLAIN_AND_ABORT("Unexpected type");
+            std::stringstream ss;
+            ss << "Unexpected type: `" << get_dtype_descr(m_dtype) << "`";
+            PSP_COMPLAIN_AND_ABORT(ss.str());
         }
     }
     ++m_size;
@@ -453,7 +455,9 @@ t_column::get_scalar(t_uindex idx) const {
             rv.m_type = DTYPE_OBJECT;
         } break;
         default: {
-            PSP_COMPLAIN_AND_ABORT("Unexpected type");
+            std::stringstream ss;
+            ss << "Unexpected type: `" << get_dtype_descr(m_dtype) << "`";
+            PSP_COMPLAIN_AND_ABORT(ss.str());
         }
     }
 
@@ -510,7 +514,9 @@ t_column::clear(t_uindex idx, t_status status) {
             set_nth<std::uint64_t>(idx, 0, status);
         } break;
         default: {
-            PSP_COMPLAIN_AND_ABORT("Unexpected type");
+            std::stringstream ss;
+            ss << "Unexpected type: `" << get_dtype_descr(m_dtype) << "`";
+            PSP_COMPLAIN_AND_ABORT(ss.str());
         }
     }
 }
@@ -675,7 +681,9 @@ t_column::set_scalar(t_uindex idx, t_tscalar value) {
             set_nth<std::uint64_t>(idx, tgt, value.m_status);
         }
         default: {
-            PSP_COMPLAIN_AND_ABORT("Unexpected type");
+            std::stringstream ss;
+            ss << "Unexpected type: `" << get_dtype_descr(m_dtype) << "`";
+            PSP_COMPLAIN_AND_ABORT(ss.str());
         }
     }
 }
@@ -900,7 +908,9 @@ t_column::copy(const t_column* other, const std::vector<t_uindex>& indices,
             copy_helper<std::uint64_t>(other, indices, offset);
         } break;
         default: {
-            PSP_COMPLAIN_AND_ABORT("Unexpected type");
+            std::stringstream ss;
+            ss << "Unexpected type: `" << get_dtype_descr(m_dtype) << "`";
+            PSP_COMPLAIN_AND_ABORT(ss.str());
         }
     }
 }
