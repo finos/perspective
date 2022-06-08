@@ -526,8 +526,10 @@ namespace apachearrow {
             iter_col_copy<ARRAY_TYPE, double>(col, array, offset, len);        \
         } break;                                                               \
         default: {                                                             \
-            PSP_COMPLAIN_AND_ABORT("Could not fill arrow column iteratively "  \
-                                   "due to mismatched types.");                \
+            std::stringstream ss;                                              \
+            ss << "Could not fill arrow column `" << name << "` iteratively"   \
+            << " due to mismatched types.";                                    \
+            PSP_COMPLAIN_AND_ABORT(ss.str());                                  \
         }                                                                      \
     }
 
