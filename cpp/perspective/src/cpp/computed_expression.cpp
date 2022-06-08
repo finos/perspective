@@ -76,6 +76,8 @@ t_tscalar t_computed_expression_parser::TRUE_SCALAR = mktscalar(true);
 
 t_tscalar t_computed_expression_parser::FALSE_SCALAR = mktscalar(false);
 
+t_tscalar t_computed_expression_parser::NULL_SCALAR = mktscalar();
+
 /******************************************************************************
  *
  * t_computed_expression
@@ -503,6 +505,7 @@ t_computed_function_store::register_computed_functions(
     // And scalar constants
     sym_table.add_constant("True", t_computed_expression_parser::TRUE_SCALAR);
     sym_table.add_constant("False", t_computed_expression_parser::FALSE_SCALAR);
+    sym_table.add_constant("null", t_computed_expression_parser::NULL_SCALAR);
 }
 
 void

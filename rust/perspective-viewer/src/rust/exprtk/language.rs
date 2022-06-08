@@ -434,6 +434,13 @@ thread_local! {
                 documentation: "The current date in local time".to_owned(),
             },
             CompletionItemSuggestion {
+                label: "null".to_owned(),
+                kind: 14,
+                insert_text: "null".to_owned(),
+                insert_text_rules: 4,
+                documentation: "Null value".to_owned(),
+            },
+            CompletionItemSuggestion {
                 label: "is_null".to_owned(),
                 kind: 1,
                 insert_text: "is_null(${1:x})".to_owned(),

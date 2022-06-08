@@ -150,6 +150,7 @@ public:
     // constants for True and False as DTYPE_BOOL scalars
     static t_tscalar TRUE_SCALAR;
     static t_tscalar FALSE_SCALAR;
+    static t_tscalar NULL_SCALAR;
 };
 
 /**

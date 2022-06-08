@@ -423,6 +423,14 @@ The current date in local time
 today()
 ```
 
+### null
+
+A null literal
+
+```
+null
+```
+
 ### is_null
 
 Whether x is a null value
