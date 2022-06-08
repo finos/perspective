@@ -6,7 +6,8 @@
             "md/table",
             "md/view",
             "md/server",
-            "md/development"
+            "md/development",
+            "md/expressions"
         ],
         "API": [
             "obj/perspective",
