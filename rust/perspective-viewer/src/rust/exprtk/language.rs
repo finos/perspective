@@ -375,14 +375,14 @@ thread_local! {
                 kind: 1,
                 insert_text: "concat(${1:x}, ${2:y})".to_owned(),
                 insert_text_rules: 4,
-                documentation: "Concatenate string columns and string literals, such as:\nconcat(\"State\".to_owned(), ', ', \"City\")".to_owned(),
+                documentation: "Concatenate string columns and string literals, such as:\nconcat(\"State\" ', ', \"City\")".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "order".to_owned(),
                 kind: 1,
                 insert_text: "order(${1:input column}, ${2:value}, ...)".to_owned(),
                 insert_text_rules: 4,
-                documentation: "Generates a sort order for a string column based on the input order of the parameters, such as:\norder(\"State\".to_owned(), 'Texas', 'New York')".to_owned(),
+                documentation: "Generates a sort order for a string column based on the input order of the parameters, such as:\norder(\"State\", 'Texas', 'New York')".to_owned(),
             },
             CompletionItemSuggestion {
                 label: "upper".to_owned(),
