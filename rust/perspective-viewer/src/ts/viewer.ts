@@ -13,6 +13,7 @@ import type * as perspective from "@finos/perspective";
 import {
     PerspectiveViewerElement,
     register_plugin,
+    get_exprtk_commands,
 } from "@finos/perspective-viewer/dist/pkg/perspective_viewer.js";
 
 import {WASM_MODULE} from "./init";
@@ -50,6 +51,7 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
     /**
      * Should not be called directly (will throw `TypeError: Illegal
      * constructor`).
+     *
      * @ignore
      */
     constructor() {
@@ -120,7 +122,7 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
         table: Promise<perspective.Table> | perspective.Table
     ): Promise<void> {
         await this.load_wasm();
-        await this.instance.js_load(table);
+        await this.instance.js_load(Promise.resolve(table));
     }
 
     /**
@@ -172,6 +174,7 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
 
     /**
      * Returns the `perspective.Table()` which was supplied to `load()`
+     *
      * @category Data
      * @param wait_for_table Whether to await `load()` if it has not yet been
      * invoked, or fail immediately.
@@ -199,6 +202,7 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
      * changes.  Because of this, when using this API, prefer calling
      * `getView()` repeatedly over caching the returned `perspective.View`,
      * especially in `async` contexts.
+     *
      * @category Data
      * @returns A `Promise` which ressolves to a `perspective.View`.
      * @example <caption>Collapse grid to root</caption>
@@ -407,14 +411,17 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
      * this method.  Note the theme `.css` must still be loaded in this case -
      * the `resetThemes()` method only lets the `<perspective-viewer>` know what
      * theme names are available.
-     * @param Util
+     *
+     * @category Util
+     * @param themes A list of theme names to use, or auto-detect from
+     * document's stylesheets if `undefined`.
      * @example
      * ```javascript
      * const viewer = document.querySelector("perspective-viewer");
      * await viewer.resetThemes(["Material Light", "Material Dark"]);
      * ```
      */
-    async resetThemes(themes: Array<string>): Promise<void> {
+    async resetThemes(themes?: Array<string>): Promise<void> {
         await this.load_wasm();
         await this.instance.js_reset_themes(themes);
     }
@@ -512,11 +519,6 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
         return plugin;
     }
 
-    async unsafe_get_model(): Promise<number> {
-        await this.load_wasm();
-        return await this.instance.js_unsafe_get_model();
-    }
-
     /**
      * Get all plugin custom element instances, in order of registration.
      *
@@ -532,6 +534,30 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
         await this.load_wasm();
         const plugins = await this.instance.js_get_all_plugins();
         return plugins;
+    }
+
+    /**
+     * Get the raw pointer to this `<perspective-viewer>` WASM model, such that
+     * it may be passed back to WASM function calls that take a
+     * `PerspectiveViewerElement` as an argument.
+     *
+     * @category Internal
+     * @returns A pointer to this model
+     */
+    async unsafe_get_model(): Promise<number> {
+        await this.load_wasm();
+        return await this.instance.js_unsafe_get_model();
+    }
+
+    /**
+     * Get metadata for ExprTK's supported commands.
+     *
+     * @category Internal
+     * @returns An array of JSON descriptors for ExprTK commands
+     */
+    static async getExprtkCommands(): Promise<Array<Record<string, string>>> {
+        await WASM_MODULE;
+        return get_exprtk_commands();
     }
 }
 

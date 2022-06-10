@@ -1,14 +1,19 @@
 {
-  "docs": {
-    "Guides": [
-      "md/js",
-      "md/python",
-      "md/table",
-      "md/view",
-      "md/server",
-      "md/development",
-      "md/expressions"
-    ],
-    "API": ["obj/perspective", "obj/perspective-viewer", "obj/perspective-python"]
-  }
+    "docs": {
+        "Guides": [
+            "md/js",
+            "md/python",
+            "md/table",
+            "md/view",
+            "md/server",
+            "md/development",
+            "md/expressions"
+        ],
+        "API": [
+            "obj/perspective",
+            "obj/perspective-viewer",
+            "obj/perspective-python",
+            "obj/perspective-viewer-exprtk"
+        ]
+    }
 }

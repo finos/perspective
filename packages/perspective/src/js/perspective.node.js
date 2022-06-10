@@ -26,7 +26,7 @@ const load_perspective =
 
 const LOCAL_PATH = path.join(process.cwd(), "node_modules");
 const buffer =
-    require("@finos/perspective/pkg/cjs/perspective.cpp.wasm").default;
+    require("@finos/perspective/dist/pkg/cjs/perspective.cpp.wasm").default;
 
 const SYNC_SERVER = new (class extends Server {
     init(msg) {

@@ -37,11 +37,18 @@ pub struct ThemeData {
 
 impl Theme {
     pub fn new(elem: &HtmlElement) -> Self {
-        Self(Rc::new(ThemeData {
+        let theme = Self(Rc::new(ThemeData {
             viewer_elem: elem.clone(),
             themes: Default::default(),
             theme_config_updated: PubSub::default(),
-        }))
+        }));
+
+        ApiFuture::spawn(theme.clone().init());
+        theme
+    }
+
+    async fn init(self) -> Result<(), JsValue> {
+        self.set_theme_attribute(self.get_name().await.as_deref())
     }
 
     /// Get the available theme names from the browser environment by parsing

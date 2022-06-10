@@ -190,27 +190,41 @@ perspective-expression-editor[theme="Material Light"],
     --toolbar-edit-mode--content: "edit_off";
     --toolbar-edit-mode-active--content: "edit";
 
+    // // This no long works on Chrome 102.x/canary.
+    // // `-webkit-mask-image` causes scroll events to be surpressed for some
+    // // ****** reason.
+
+    // regular-table::-webkit-scrollbar-thumb {
+    //     background-color: #e0e4e9;
+    // }
+
+    // regular-table {
+    //     mask-image: ~"linear-gradient(black, black)",
+    //         ~"linear-gradient(to top, transparent 10%, black 90%)",
+    //         ~"linear-gradient(to left, transparent 10%, black 90%)";
+    //     -webkit-mask-image: ~"linear-gradient(black, black)",
+    //         ~"linear-gradient(to top, transparent 10%, black 90%)",
+    //         ~"linear-gradient(to left, transparent 10%, black 90%)";
+    //     mask-position: ~"-12px -12px", ~"bottom right", ~"bottom right";
+    //     -webkit-mask-position: ~"-12px -12px", ~"bottom right", ~"bottom right";
+    //     mask-size: ~"100% 100%", ~"12px 1000%", ~"1000% 12px";
+    //     -webkit-mask-size: ~"100% 100%", ~"12px 1000%", ~"1000% 12px";
+    //     mask-repeat: no-repeat;
+    //     -webkit-mask-repeat: no-repeat;
+    //     transition: -webkit-mask-position 0.3s, mask-position 0.3s;
+    //     &:hover {
+    //         mask-position: ~"-12px -12px", ~"top right", ~"bottom left";
+    //         -webkit-mask-position: ~"-12px -12px", ~"top right", ~"bottom left";
+    //     }
+    // }
+
+    // // Instead just change the `background-color`.
+
     regular-table::-webkit-scrollbar-thumb {
-        background-color: #e0e4e9;
+        background-color: transparent;
     }
 
-    regular-table {
-        mask-image: ~"linear-gradient(black, black)",
-            ~"linear-gradient(to top, transparent 10%, black 90%)",
-            ~"linear-gradient(to left, transparent 10%, black 90%)";
-        -webkit-mask-image: ~"linear-gradient(black, black)",
-            ~"linear-gradient(to top, transparent 10%, black 90%)",
-            ~"linear-gradient(to left, transparent 10%, black 90%)";
-        mask-position: ~"-12px -12px", ~"bottom right", ~"bottom right";
-        -webkit-mask-position: ~"-12px -12px", ~"bottom right", ~"bottom right";
-        mask-size: ~"100% 100%", ~"12px 1000%", ~"1000% 12px";
-        -webkit-mask-size: ~"100% 100%", ~"12px 1000%", ~"1000% 12px";
-        mask-repeat: no-repeat;
-        -webkit-mask-repeat: no-repeat;
-        transition: -webkit-mask-position 0.3s, mask-position 0.3s;
-        &:hover {
-            mask-position: ~"-12px -12px", ~"top right", ~"bottom left";
-            -webkit-mask-position: ~"-12px -12px", ~"top right", ~"bottom left";
-        }
+    regular-table:hover::-webkit-scrollbar-thumb {
+        background-color: #e0e4e9;  
     }
 }

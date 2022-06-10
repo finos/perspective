@@ -13,7 +13,7 @@
     },
     "emscripten": "2.0.29",
     "engines": {
-        "node": ">=12.7.0"
+        "node": ">=14.18.2"
     },
     "workspaces": [
         "rust/*",

@@ -40,7 +40,7 @@ const CONFIG = new Proxy(
         write() {
             fs.writeFileSync("./.perspectiverc", this.config.join("\n"));
             if (process.env.PSP_BUILD_IMMEDIATELY) {
-                execute`"node scripts/build.js"`;
+                execute`node scripts/build.js`;
             }
         }
     })(),
