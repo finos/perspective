@@ -29,6 +29,19 @@ export class PerspectiveWidget extends Widget {
         this.id = `${name}-` + _increment;
         _increment += 1;
         this._set_attributes(options);
+
+        // bind synchronize to this
+        this._synchronize_state = this._synchronize_state.bind(this);
+
+        this._viewer.addEventListener(
+            "perspective-config-update",
+            this._synchronize_state
+        );
+    }
+
+    async _synchronize_state(event) {
+        // don't use setter
+        this._viewer_config = await this.viewer.save();
     }
 
     /**
@@ -50,13 +63,11 @@ export class PerspectiveWidget extends Widget {
         const theme = options.theme || "Material Light";
         const settings =
             typeof options.settings === "boolean" ? options.settings : true;
-        const editable = options.editable || false;
         const server = options.server || false;
         const client = options.client || false;
         // const selectable: boolean = options.selectable || false;
         this.server = server;
         this.client = client;
-        this.editable = editable;
         this._viewer_config = {
             plugin,
             plugin_config,
@@ -70,8 +81,6 @@ export class PerspectiveWidget extends Widget {
             settings,
             theme,
         };
-        // this.plugin_config = plugin_config;
-        // this.selectable = selectable;
     }
 
     /**********************/
@@ -103,7 +112,8 @@ export class PerspectiveWidget extends Widget {
     }
 
     async restore(config) {
-        return await this.viewer.restore(config);
+        this._viewer_config = {...this._viewer_config, ...config};
+        return await this.viewer.restore(this._viewer_config);
     }
 
     /**
@@ -200,6 +210,14 @@ export class PerspectiveWidget extends Widget {
         return this.title.label;
     }
 
+    get viewer_config() {
+        return this._viewer_config;
+    }
+
+    set viewer_config(viewer_config) {
+        this.restore(viewer_config);
+    }
+
     // `plugin_config` cannot be synchronously read from the viewer, as it is
     // not part of the attribute API and only emitted from save(). Users can
     // pass in a plugin config and have it applied to the viewer, but they
@@ -207,18 +225,11 @@ export class PerspectiveWidget extends Widget {
     // already been set from Python.
 
     get plugin_config() {
-        return this._plugin_config;
+        return this.viewer_config._plugin_config;
     }
 
     set plugin_config(plugin_config) {
-        this._plugin_config = plugin_config;
-
-        // Allow plugin configs passed from Python to take effect on the viewer
-        if (this._plugin_config) {
-            this.viewer.restore({
-                plugin_config: this._plugin_config,
-            });
-        }
+        this.viewer_config = {plugin_config};
     }
 
     /**
@@ -246,19 +257,6 @@ export class PerspectiveWidget extends Widget {
 
     set server(server) {
         this._server = server;
-    }
-
-    get editable() {
-        return this._editable;
-    }
-
-    set editable(editable) {
-        this._editable = editable;
-        if (this._editable) {
-            this.viewer.setAttribute("editable", "");
-        } else {
-            this.viewer.removeAttribute("editable");
-        }
     }
 
     get selectable() {
