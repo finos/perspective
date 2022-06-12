@@ -17,9 +17,7 @@
 #include <perspective/mask.h>
 #include <perspective/filter.h>
 #include <perspective/compat.h>
-#ifdef PSP_PARALLEL_FOR
 #include <perspective/parallel_for.h>
-#endif
 #include <tuple>
 
 namespace perspective {
@@ -439,13 +437,8 @@ t_data_table::flatten_helper_1(FLATTENED_T flattened) const {
     flattened->set_size(store_idx);
     t_uindex ndata_cols = d_columns.size();
 
-#ifdef PSP_PARALLEL_FOR
     parallel_for(int(ndata_cols),
-        [&s_columns, &sorted, &d_columns, &fltrecs, this](int colidx)
-#else
-    for (t_uindex colidx = 0; colidx < ndata_cols; ++colidx)
-#endif
-        {
+        [&s_columns, &sorted, &d_columns, &fltrecs, this](int colidx) {
             auto scol = s_columns[colidx];
             auto dcol = d_columns[colidx];
 
@@ -514,28 +507,16 @@ t_data_table::flatten_helper_1(FLATTENED_T flattened) const {
                     PSP_COMPLAIN_AND_ABORT("Unsupported column dtype");
                 }
             }
-        }
-#ifdef PSP_PARALLEL_FOR
-    );
-#endif
+        });
 
-#ifdef PSP_PARALLEL_FOR
-    parallel_for(int(m_schema.get_num_columns()),
-        [&flattened, this](int colidx)
-#else
-    for (t_uindex colidx = 0, loop_end = m_schema.get_num_columns();
-         colidx < loop_end; ++colidx)
-#endif
-        {
+    parallel_for(
+        int(m_schema.get_num_columns()), [&flattened, this](int colidx) {
             const auto& colname = this->m_schema.m_columns[colidx];
             auto col = get_const_column(colname).get();
             if (col->get_dtype() == DTYPE_STR) {
                 flattened->get_column(colname)->copy_vocabulary(col);
             }
-        }
-#ifdef PSP_PARALLEL_FOR
-    );
-#endif
+        });
 
     d_op_col->valid_raw_fill();
 }

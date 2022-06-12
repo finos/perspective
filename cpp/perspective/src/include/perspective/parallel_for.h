@@ -9,7 +9,7 @@
 
 #pragma once
 
-#ifdef PSP_ENABLE_PYTHON
+#ifdef PSP_PARALLEL_FOR
 #include <arrow/util/parallel.h>
 #include <arrow/status.h>
 #endif
@@ -19,10 +19,16 @@ namespace perspective {
 template <class FUNCTION>
 void
 parallel_for(int num_tasks, FUNCTION&& func) {
+#ifdef PSP_PARALLEL_FOR
     auto status = arrow::internal::ParallelFor(num_tasks, func);
     if (!status.ok()) {
         PSP_COMPLAIN_AND_ABORT("ParallelFor failed");
     }
+#else
+    for (t_uindex aggnum = 0; aggnum < num_tasks; ++aggnum) {
+        func(aggnum);
+    }
+#endif
 }
 
 } // namespace perspective

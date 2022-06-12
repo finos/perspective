@@ -21,10 +21,10 @@
 #include <perspective/expression_vocab.h>
 
 #include <perspective/utils.h>
+#include <perspective/parallel_for.h>
 
 #ifdef PSP_ENABLE_PYTHON
 #include <perspective/pyutils.h>
-#include <perspective/parallel_for.h>
 #endif
 
 namespace perspective {
@@ -348,13 +348,8 @@ t_gnode::_process_table(t_uindex port_id) {
         = get_output_schema().m_columns;
     t_uindex ncols = column_names.size();
 
-#ifdef PSP_PARALLEL_FOR
-    parallel_for(int(ncols),
-        [&_process_state, &column_names, this](int colidx)
-#else
-    for (t_uindex colidx = 0; colidx < ncols; ++colidx)
-#endif
-        {
+    parallel_for(
+        int(ncols), [&_process_state, &column_names, this](int colidx) {
             const std::string& cname = column_names[colidx];
             auto fcolumn
                 = _process_state.m_flattened_data_table->get_column(cname)
@@ -438,10 +433,7 @@ t_gnode::_process_table(t_uindex port_id) {
                     PSP_COMPLAIN_AND_ABORT("Unsupported column dtype");
                 }
             }
-        }
-#ifdef PSP_PARALLEL_FOR
-    );
-#endif
+        });
 
     /**
      * After all columns have been processed (transitional tables written into),
@@ -774,16 +766,9 @@ t_gnode::_update_contexts_from_state(std::shared_ptr<t_data_table> tbl) {
         }
     };
 
-#ifdef PSP_PARALLEL_FOR
-    parallel_for(int(num_contexts),
-        [&update_contexts_helper](int ctx_idx)
-#else
-    for (t_index ctx_idx = 0; ctx_idx < num_contexts; ++ctx_idx)
-#endif
-        { update_contexts_helper(ctx_idx); }
-#ifdef PSP_PARALLEL_FOR
-    );
-#endif
+    parallel_for(int(num_contexts), [&update_contexts_helper](int ctx_idx) {
+        update_contexts_helper(ctx_idx);
+    });
 }
 
 /**
@@ -997,16 +982,9 @@ t_gnode::notify_contexts(std::shared_ptr<t_data_table> flattened) {
               }
           };
 
-#ifdef PSP_PARALLEL_FOR
-    parallel_for(int(num_contexts),
-        [&notify_context_helper](int ctx_idx)
-#else
-    for (t_index ctx_idx = 0; ctx_idx < num_contexts; ++ctx_idx)
-#endif
-        { notify_context_helper(ctx_idx); }
-#ifdef PSP_PARALLEL_FOR
-    );
-#endif
+    parallel_for(int(num_contexts), [&notify_context_helper](int ctx_idx) {
+        notify_context_helper(ctx_idx);
+    });
 }
 
 /******************************************************************************

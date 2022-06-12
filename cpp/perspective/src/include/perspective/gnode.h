@@ -25,9 +25,9 @@
 #include <perspective/expression_tables.h>
 #include <perspective/regex.h>
 #include <tsl/ordered_map.h>
+#include <perspective/parallel_for.h>
 #ifdef PSP_PARALLEL_FOR
 #include <thread>
-#include <perspective/parallel_for.h>
 #endif
 #include <chrono>
 

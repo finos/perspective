@@ -53,13 +53,8 @@ t_expression_tables::calculate_transitions(
 
     auto num_cols = column_names.size();
 
-#ifdef PSP_PARALLEL_FOR
-    parallel_for(int(num_cols),
-        [&column_names, &existed_column, this](int cidx)
-#else
-    for (t_uindex cidx = 0; cidx < num_cols; ++cidx)
-#endif
-        {
+    parallel_for(
+        int(num_cols), [&column_names, &existed_column, this](int cidx) {
             const std::string& cname = column_names[cidx];
             const t_column& prev_column = *(m_prev->get_const_column(cname));
             const t_column& current_column
@@ -106,10 +101,7 @@ t_expression_tables::calculate_transitions(
 
                 transition_column->set_nth<std::uint8_t>(ridx, transition);
             }
-        }
-#ifdef PSP_PARALLEL_FOR
-    );
-#endif
+        });
 }
 
 void
