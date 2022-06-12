@@ -208,7 +208,7 @@ public:
     std::shared_ptr<t_expression_vocab> get_expression_vocab() const;
     std::shared_ptr<t_regex_mapping> get_expression_regex_mapping() const;
 
-#ifdef PSP_PARALLEL_FOR
+#ifdef PSP_ENABLE_PYTHON
     void set_event_loop_thread_id(std::thread::id id);
 #endif
 
