@@ -107,13 +107,13 @@ t_data_table::init(bool make_columns) {
     m_columns = std::vector<std::shared_ptr<t_column>>(m_schema.size());
 
     if (make_columns) {
-        parallel_for(int(m_schema.size()), [this](int idx) {
+        for (t_uindex idx = 0; idx < int(m_schema.size()); ++idx) {
             const std::string& colname = m_schema.m_columns[idx];
             t_dtype dtype = m_schema.m_types[idx];
             m_columns[idx]
                 = make_column(colname, dtype, m_schema.m_status_enabled[idx]);
             m_columns[idx]->init();
-        });
+        }
     }
 
     m_init = true;
@@ -443,9 +443,9 @@ t_data_table::append(const t_data_table& other) {
         }
     }
 
-    parallel_for(int(src_cols.size()), [&src_cols, dst_cols](int colidx) {
+    for (t_uindex colidx = 0; colidx < int(src_cols.size()); ++colidx) {
         dst_cols[colidx]->append(*(src_cols[colidx]));
-    });
+    }
 
     set_capacity(std::max(m_capacity, m_size + other.num_rows()));
     set_size(m_size + other.num_rows());
