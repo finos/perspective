@@ -24,8 +24,8 @@ if (!process.env.GITHUB_TOKEN) {
     throw new Error("Missing Personal Access Token (GITHUB_TOKEN)");
 }
 
-if (!process.env.WORKFLOW_ID) {
-    throw new Error("Missing Github Actions Workflow ID (WORKFLOW_ID)");
+if (!process.env.GITHUB_WORKFLOW_ID) {
+    throw new Error("Missing Github Actions Workflow ID (GITHUB_WORKFLOW_ID)");
 }
 
 if (!process.env.COMMIT) {
@@ -136,7 +136,7 @@ function askQuestion(query) {
                 {
                     owner: "finos",
                     repo: "perspective",
-                    run_id: process.env.WORKFLOW_ID,
+                    run_id: process.env.GITHUB_WORKFLOW_ID,
                     page,
                 }
             );
@@ -168,8 +168,8 @@ function askQuestion(query) {
         // If everything good, or they say they want to proceed,
         // pull the artifacts locally into a temp folder
         if (proceed.toLowerCase() === "y") {
-            const dist_folder = `perspective-wheel-dist-${process.env.WORKFLOW_ID}`;
-            const wheel_folder = `perspective-wheel-dist-${process.env.WORKFLOW_ID}/wheels`;
+            const dist_folder = `perspective-wheel-dist-${process.env.GITHUB_WORKFLOW_ID}`;
+            const wheel_folder = `perspective-wheel-dist-${process.env.GITHUB_WORKFLOW_ID}/wheels`;
 
             // Remove if exists
             await fs.rmdir(dist_folder, {
