@@ -17,17 +17,6 @@ try {
         process.chdir("boost_1_71_0");
         execute`./bootstrap.sh`;
         execute`./b2 -j8 --with-program_options --with-filesystem --with-system install `;
-
-        console.log("-- Installing Flatbuffers");
-        execute`mkdir -p /usr/local`;
-        process.chdir("/usr/local");
-        execute`git clone --depth 1 --branch v1.12.1 https://github.com/google/flatbuffers.git`;
-        process.chdir("/usr/local/flatbuffers");
-        execute`cmake -G "Unix Makefiles"`;
-        execute`make`;
-        execute`cp -r /usr/local/flatbuffers/include/flatbuffers /usr/local/include`;
-        execute`ln -s /usr/local/flatbuffers/flatc /usr/local/bin/flatc`;
-        execute`chmod +x /usr/local/flatbuffers/flatc`;
     }
 } catch (e) {
     console.log(e.message);

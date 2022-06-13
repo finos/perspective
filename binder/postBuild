@@ -1,13 +1,9 @@
 #!/bin/bash
-wget https://cmake.org/files/v3.15/cmake-3.15.4-Linux-x86_64.sh -q && mkdir /tmp/cmake &&  printf "y\nn\n" | sh cmake-3.15.4-Linux-x86_64.sh --prefix=/tmp/cmake > /dev/null && rm -rf cmake-3.15.4-Linux-x86_64.sh
-export PATH=/tmp/cmake/bin:$PATH
-
 python3 -m pip install -U perspective-python
 
 export NODE_OPTIONS=--max-old-space-size=32768
 
 EXTENSIONS="@jupyter-widgets/jupyterlab-manager @finos/perspective-jupyterlab"
-
 
 jupyter labextension install $EXTENSIONS --no-build
 jupyter lab build --dev-build=False --minimize=False

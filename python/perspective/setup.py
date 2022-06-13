@@ -35,7 +35,7 @@ with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read().replace("\r\n", "\n")
 
 requires = [
-    "ipywidgets>=7.5.1",
+    "ipywidgets>=7.7",
     "future>=0.16.0",
     "numpy>=1.13.1",
     "pandas>=0.22.0",
@@ -161,6 +161,7 @@ class PSPBuild(build_ext):
                 "14.0": "Visual Studio 14 2015",
                 "14.1": "Visual Studio 15 2017",
                 "14.2": "Visual Studio 16 2019",
+                "14.3": "Visual Studio 17 2022",
             }.get(dm.get_build_version(), "Visual Studio 15 2017")
 
             cmake_args.extend(
@@ -174,7 +175,12 @@ class PSPBuild(build_ext):
             )
 
             vcpkg_toolchain_file = os.path.abspath(
-                os.path.join("..", "..", "vcpkg\\scripts\\buildsystems\\vcpkg.cmake")
+                os.environ.get(
+                    "PSP_VCPKG_PATH",
+                    os.path.join(
+                        "..", "..", "vcpkg\\scripts\\buildsystems\\vcpkg.cmake"
+                    ),
+                )
             )
 
             if os.path.exists(vcpkg_toolchain_file):
@@ -201,7 +207,12 @@ class PSPBuild(build_ext):
             ]
 
         env["PSP_ENABLE_PYTHON"] = "1"
-        env["OSX_DEPLOYMENT_TARGET"] = "10.9"
+        env["OSX_DEPLOYMENT_TARGET"] = os.environ.get(
+            "PSP_OSX_DEPLOYMENT_TARGET", "10.9"
+        )
+        env["MACOSX_DEPLOYMENT_TARGET"] = os.environ.get(
+            "PSP_OSX_DEPLOYMENT_TARGET", "10.9"
+        )
 
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
