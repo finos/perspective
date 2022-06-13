@@ -52,13 +52,30 @@ if (IS_DOCKER) {
 const pytest_client_mode = (IS_DOCKER) => {
     if (IS_DOCKER) {
         return bash`${docker(IMAGE)} bash -c "cd \
-            python/perspective && TZ=UTC PYTHONMALLOC=debug ${PYTHON} -m pytest \
+            python/perspective && TZ=UTC ${PYTHON} -m pytest \
             ${VERBOSE ? "-vv --full-trace" : ""} --noconftest 
             perspective/tests/client_mode"`;
     } else {
         return bash`cd ${python_path} && ${PYTHON} -m pytest \
             ${VERBOSE ? "-vv --full-trace" : ""} --noconftest
             perspective/tests/client_mode ${PYTEST_FLAGS}`;
+    }
+};
+
+/**
+ * Run pytest for single-threaded tests
+ */
+const pytest_single_threaded = (IS_DOCKER) => {
+    if (IS_DOCKER) {
+        return bash`${docker(IMAGE)} bash -c "cd \
+            python/perspective && TZ=UTC ${PYTHON} -m pytest \
+            ${VERBOSE ? "-vv --full-trace" : ""} --noconftest 
+            perspective/tests/single_threaded"`;
+    } else {
+        return bash`cd ${python_path} && ${PYTHON} -m pytest \
+            ${VERBOSE ? "-vv --full-trace" : ""} --noconftest
+            --disable-pytest-warnings
+            perspective/tests/single_threaded`;
     }
 };
 
@@ -70,11 +87,15 @@ const pytest = (IS_DOCKER) => {
         return bash`${docker(IMAGE)} bash -c "cd \
             python/perspective && TZ=UTC ${PYTHON} -m pytest \
             ${VERBOSE ? "-vv --full-trace" : ""} perspective \
-            --ignore=perspective/tests/client_mode ${PYTEST_FLAGS}"`;
+            --ignore=perspective/tests/client_mode \
+            --ignore=perspective/tests/single_threaded \
+            ${PYTEST_FLAGS}"`;
     } else {
         return bash`cd ${python_path} && ${PYTHON} -m pytest \
             ${VERBOSE ? "-vv --full-trace" : ""} perspective \
-            --ignore=perspective/tests/client_mode ${PYTEST_FLAGS}`;
+            --ignore=perspective/tests/client_mode \
+            --ignore=perspective/tests/single_threaded \
+             ${PYTEST_FLAGS}`;
     }
 };
 
@@ -86,16 +107,9 @@ try {
     PYTHON = "python";
 }
 
-// Check that the `PYTHON` command is valid, else default to `python`.
-try {
-    execute_throw`${PYTHON} --version`;
-} catch (e) {
-    console.warn(`\`${PYTHON}\` not found - using \`python\` instead.`);
-    PYTHON = "python";
-}
-
 try {
     execute(pytest_client_mode(IS_DOCKER));
+    execute(pytest_single_threaded(IS_DOCKER));
     execute(pytest(IS_DOCKER));
 } catch (e) {
     console.log(e.message);

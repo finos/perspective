@@ -5,6 +5,8 @@ Additionally, ``perspective.core`` defines several enums that provide easy acces
 
 For usage of ``PerspectiveWidget`` and ``PerspectiveTornadoHandler``, see the User Guide in the sidebar.
 
+.. autofunction:: perspective.set_threadpool_size
+
 .. automodule:: perspective.core
    :members:
    :show-inheritance:
