@@ -52,6 +52,8 @@ function check() {
     }
 }
 
-if (!check()) {
-    upgrade();
+if (!process.env.PSP_SKIP_EMSDK_INSTALL) {
+    if (!check()) {
+        upgrade();
+    }
 }

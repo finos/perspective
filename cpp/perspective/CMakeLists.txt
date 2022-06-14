@@ -152,6 +152,11 @@ else()
     set(MANYLINUX OFF)
 endif()
 
+if(DEFINED ENV{PSP_USE_CCACHE})
+    set(CMAKE_C_COMPILE_LAUNCHER ccache)
+    set(CMAKE_CXX_COMPILER_LAUNCHER ccache)
+endif()
+
 if (NOT DEFINED PSP_CPP_BUILD)
     set(PSP_CPP_BUILD ON)
 endif()
