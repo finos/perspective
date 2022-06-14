@@ -22,23 +22,12 @@ import perspective from "@finos/perspective/dist/esm/perspective.js";
  */
 export class PerspectiveView extends DOMWidgetView {
     _createElement() {
-        this.pWidget = new PerspectiveJupyterWidget(undefined, {
-            plugin: this.model.get("plugin"),
-            columns: this.model.get("columns"),
-            group_by: this.model.get("group_by"),
-            split_by: this.model.get("split_by"),
-            aggregates: this.model.get("aggregates"),
-            sort: this.model.get("sort"),
-            filter: this.model.get("filter"),
-            expressions: this.model.get("expressions"),
-            plugin_config: this.model.get("plugin_config"),
-            server: this.model.get("server"),
-            client: this.model.get("client"),
-            theme: this.model.get("theme"),
-            settings: this.model.get("settings"),
-            bindto: this.el,
-            view: this,
-        });
+        this.pWidget = new PerspectiveJupyterWidget(
+            undefined,
+            this,
+            this.model.get("server"),
+            this.model.get("client")
+        );
 
         this.perspective_client = new PerspectiveJupyterClient(this);
 
@@ -240,6 +229,22 @@ export class PerspectiveView extends DOMWidgetView {
         return this._client_worker;
     }
 
+    async _restore_from_model() {
+        await this.pWidget.restore({
+            plugin: this.model.get("plugin"),
+            columns: this.model.get("columns"),
+            group_by: this.model.get("group_by"),
+            split_by: this.model.get("split_by"),
+            aggregates: this.model.get("aggregates"),
+            sort: this.model.get("sort"),
+            filter: this.model.get("filter"),
+            expressions: this.model.get("expressions"),
+            plugin_config: this.model.get("plugin_config"),
+            theme: this.model.get("theme"),
+            settings: this.model.get("settings"),
+        });
+    }
+
     /**
      * Given a message that commands the widget to load a dataset or table,
      * process it.
@@ -257,6 +262,7 @@ export class PerspectiveView extends DOMWidgetView {
             const data = msg.data["data"];
             const client_table = this.client_worker.table(data, table_options);
             this.pWidget.load(client_table);
+            this._restore_from_model();
         } else {
             if (this.pWidget.server && msg.data["table_name"]) {
                 /**
@@ -267,6 +273,7 @@ export class PerspectiveView extends DOMWidgetView {
                     msg.data["table_name"]
                 );
                 this.pWidget.load(table);
+                this._restore_from_model();
             } else if (msg.data["table_name"]) {
                 // Get a remote table handle from the Jupyter kernel, and mirror
                 // the table on the client, setting up editing if necessary.
@@ -285,7 +292,8 @@ export class PerspectiveView extends DOMWidgetView {
                             table_options
                         );
 
-                        await this.pWidget.load(client_table);
+                        this.pWidget.load(client_table);
+                        await this._restore_from_model();
 
                         // Need to await the table and get the instance
                         // separately as load() only takes a promise
@@ -328,7 +336,8 @@ export class PerspectiveView extends DOMWidgetView {
             this._kernel_edit_port = await this._kernel_table.make_port();
         }
 
-        if ((this.pWidget.viewer_config.plugin_config || {}).editable) {
+        const {plugin_config} = await this.pWidget.viewer.save();
+        if (plugin_config?.editable) {
             // TODO only evaluated during initial load.
             // Toggling from python after initial load won't
             // cause edits to propagate
