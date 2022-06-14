@@ -6,7 +6,7 @@ name: Build Status
 on:
   push:
     branches:
-      - master
+      - "*"
     tags:
       - v*
     paths-ignore:
@@ -772,9 +772,12 @@ jobs:
           - is-full-run: false
             os: windows-2019
 
-          # Exclude Macos 10.15 bulds
+          # Exclude Macos 10.11 bulds
           - is-full-run: false
             os: macos-10.15
+
+          - is-full-run: false
+            os: macos-10.11
 
           # Exclude Python 3.6, 3.7, and 3.8 builds
           - is-full-run: false
@@ -1409,7 +1412,7 @@ jobs:
     # Setup matrix job configuration #
     ##################################
     runs-on: ${{ matrix.os }}
-    if: ${{ needs.initialize.outputs.SKIP_CI == 'false' && needs.initialize.outputs.SKIP_PYTHON == 'false' }}
+    if: ${{ needs.initialize.outputs.FULL_RUN == 'true' }}
 
     steps:
     - name: Checkout
