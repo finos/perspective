@@ -7,7 +7,7 @@
  *
  */
 
-import load_perspective from "@finos/perspective/pkg/esm/perspective.cpp.js";
+import load_perspective from "@finos/perspective/dist/pkg/esm/perspective.cpp.js";
 import perspective from "./perspective.js";
 
 let _perspective_instance;

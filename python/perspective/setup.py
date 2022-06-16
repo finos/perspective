@@ -13,6 +13,7 @@ import platform
 import re
 import subprocess
 import sys
+import sysconfig
 from codecs import open
 from distutils.version import LooseVersion
 
@@ -140,6 +141,12 @@ class PSPBuild(build_ext):
             "-DPython_ADDITIONAL_VERSIONS={}".format(PYTHON_VERSION),
             "-DPython_FIND_VERSION={}".format(PYTHON_VERSION),
             "-DPython_EXECUTABLE={}".format(sys.executable).replace("\\", "/"),
+            "-DPYTHON_LIBRARY={}".format(sysconfig.get_config_var("LIBDIR")).replace(
+                "\\", "/"
+            ),
+            "-DPYTHON_INCLUDE_DIR={}".format(
+                sysconfig.get_config_var("INCLUDEPY")
+            ).replace("\\", "/"),
             "-DPython_ROOT_DIR={}".format(sys.prefix).replace("\\", "/"),
             "-DPython_ROOT={}".format(sys.prefix).replace("\\", "/"),
             "-DPSP_CMAKE_MODULE_PATH={folder}".format(
@@ -166,6 +173,7 @@ class PSPBuild(build_ext):
                 "14.0": "Visual Studio 14 2015",
                 "14.1": "Visual Studio 15 2017",
                 "14.2": "Visual Studio 16 2019",
+                "14.3": "Visual Studio 17 2022",
             }.get(dm.get_build_version(), "Visual Studio 15 2017")
 
             cmake_args.extend(
@@ -179,7 +187,12 @@ class PSPBuild(build_ext):
             )
 
             vcpkg_toolchain_file = os.path.abspath(
-                os.path.join("..", "..", "vcpkg\\scripts\\buildsystems\\vcpkg.cmake")
+                os.environ.get(
+                    "PSP_VCPKG_PATH",
+                    os.path.join(
+                        "..", "..", "vcpkg\\scripts\\buildsystems\\vcpkg.cmake"
+                    ),
+                )
             )
 
             if os.path.exists(vcpkg_toolchain_file):
@@ -206,7 +219,12 @@ class PSPBuild(build_ext):
             ]
 
         env["PSP_ENABLE_PYTHON"] = "1"
-        env["OSX_DEPLOYMENT_TARGET"] = "10.9"
+        env["OSX_DEPLOYMENT_TARGET"] = os.environ.get(
+            "PSP_OSX_DEPLOYMENT_TARGET", "10.9"
+        )
+        env["MACOSX_DEPLOYMENT_TARGET"] = os.environ.get(
+            "PSP_OSX_DEPLOYMENT_TARGET", "10.9"
+        )
 
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)

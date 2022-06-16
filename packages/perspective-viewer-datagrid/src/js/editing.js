@@ -129,7 +129,7 @@ function editableStyleListener(table, viewer) {
     for (const td of table.querySelectorAll("td")) {
         const meta = table.getMeta(td);
         const type = this.get_psp_type(meta);
-        if (this._is_editable[meta.x]) {
+        if (edit && this._is_editable[meta.x]) {
             const col_name = meta.column_header[meta.column_header.length - 1];
             if (type === "string" && plugins[col_name]?.format === "link") {
                 td.toggleAttribute("contenteditable", false);
@@ -246,10 +246,11 @@ function focusinListener(table, viewer, event) {
 function clickListener(table, _viewer, event) {
     const meta = table.getMeta(event.target);
     if (typeof meta?.x !== "undefined") {
+        const is_all_editable = isEditable.call(this, _viewer);
         const is_editable = this._is_editable[meta.x];
         const is_bool = this.get_psp_type(meta) === "boolean";
         const is_null = event.target.textContent === "-";
-        if (is_editable && is_bool && !is_null) {
+        if (is_all_editable && is_editable && is_bool && !is_null) {
             write(table, this, event.target);
         }
     }

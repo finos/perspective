@@ -13,10 +13,8 @@ import {PerspectiveWidget} from "./psp_widget";
  * PerspectiveJupyterWidget is the ipywidgets front-end for the Perspective Jupyterlab plugin.
  */
 export class PerspectiveJupyterWidget extends PerspectiveWidget {
-    constructor(name = "Perspective", options) {
-        const view = options.view;
-        delete options.view;
-        super(name, options);
+    constructor(name = "Perspective", view, server, client) {
+        super(name, view.el, server, client);
         this._view = view;
     }
 

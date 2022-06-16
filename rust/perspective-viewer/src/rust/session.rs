@@ -33,7 +33,6 @@ use std::ops::Deref;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use wasm_bindgen_futures::future_to_promise;
 use yew::prelude::*;
 
 /// The `Session` struct is the principal interface to the Perspective engine,
@@ -113,6 +112,10 @@ impl Session {
         self.borrow_mut().metadata = SessionMetadata::default();
         self.borrow_mut().table = None;
         false
+    }
+
+    pub fn get_table(&self) -> Option<JsPerspectiveTable> {
+        self.borrow().table.clone()
     }
 
     /// Reset this `Session`'s state with a new `Table`.  Implicitly clears the
@@ -262,9 +265,9 @@ impl Session {
             .as_string()
             .ok_or_else(|| JsValue::from("Bad CSV"))?;
 
-        let _ = future_to_promise(async move {
+        ApiFuture::spawn(async move {
             view.delete().await?;
-            Ok(JsValue::UNDEFINED)
+            Ok(())
         });
 
         Ok(csv

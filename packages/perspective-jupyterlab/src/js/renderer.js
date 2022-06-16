@@ -46,9 +46,7 @@ const WORKER = perspective.worker();
 export class PerspectiveDocumentWidget extends DocumentWidget {
     constructor(options, type = "csv") {
         super({
-            content: new PerspectiveWidget("Perspective", {
-                editable: true,
-            }),
+            content: new PerspectiveWidget("Perspective"),
             context: options.context,
             reveal: options.reveal,
         });

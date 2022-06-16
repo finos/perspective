@@ -22,12 +22,10 @@ const fs = require("fs-extra");
 const IS_DOCKER = process.env.PSP_DOCKER;
 const IS_MACOS = getarg("--macos");
 const PYTHON = python_version();
-
 let IMAGE = "manylinux2014";
 let MANYLINUX_VERSION;
 
 if (IS_DOCKER) {
-    // switch to 2014 only on python3
     MANYLINUX_VERSION = manylinux_version();
     IMAGE = python_image(MANYLINUX_VERSION, PYTHON);
 }
@@ -74,8 +72,7 @@ try {
 
         // Use auditwheel on Linux - repaired wheels are in
         // `python/perspective/wheelhouse`.
-        let PYTHON_INTERPRETER = PYTHON;
-        cmd += `&& ${PYTHON_INTERPRETER} -m auditwheel -v show ./dist/*.whl && ${PYTHON_INTERPRETER} -m auditwheel -v repair -L .lib ./dist/*.whl`;
+        cmd += `&& ${PYTHON} -m auditwheel -v show ./dist/*.whl && ${PYTHON} -m auditwheel -v repair -L .lib ./dist/*.whl`;
     } else if (IS_MACOS) {
         // Don't need to do any cleaning here since we will reuse the cmake
         // cache and numpy paths from the pep-517/518 build in build_python.js

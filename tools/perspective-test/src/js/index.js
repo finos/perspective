@@ -239,12 +239,16 @@ beforeAll(async (done) => {
         results_debug = get_results(RESULTS_DEBUG_FILENAME);
 
         if (results.__GIT_COMMIT__) {
-            const hash = execSync(`git cat-file -e ${results.__GIT_COMMIT__}`);
-            if (!hash || hash.toString().length != 0) {
-                private_console.error(
-                    `-- WARNING - Test results generated from non-existent commit ${results.__GIT_COMMIT__}.`
+            try {
+                const hash = execSync(
+                    `git cat-file -e ${results.__GIT_COMMIT__}`
                 );
-            }
+                if (!hash || hash.toString().length != 0) {
+                    private_console.error(
+                        `-- WARNING - Test results generated from non-existent commit ${results.__GIT_COMMIT__}.`
+                    );
+                }
+            } catch (e) {}
         }
     } catch (e) {
         console.error(e);
@@ -366,6 +370,7 @@ test.run = function run(
                 await page.setViewport({
                     width: viewport.width,
                     height: viewport.height,
+                    deviceScaleFactor: 1,
                 });
             }
             await new Promise(setTimeout);
@@ -384,7 +389,13 @@ function format_and_clean_xml(result) {
     try {
         return format(result, {
             filter(x) {
+                // TODO We have to strip many geometry attributes due to minute
+                // rendering differences on Linux and dev (presumably OSX).
                 if (x) {
+                    if (x.attributes?.r) {
+                        delete x.attributes["r"];
+                    }
+
                     if (x.attributes?.dx) {
                         delete x.attributes["dx"];
                     }
@@ -393,8 +404,40 @@ function format_and_clean_xml(result) {
                         delete x.attributes["dy"];
                     }
 
+                    if (x.attributes?.x) {
+                        delete x.attributes["x"];
+                    }
+
+                    if (x.attributes?.y) {
+                        delete x.attributes["y"];
+                    }
+
+                    if (x.attributes?.x1) {
+                        delete x.attributes["x1"];
+                    }
+
+                    if (x.attributes?.y1) {
+                        delete x.attributes["y1"];
+                    }
+
+                    if (x.attributes?.x2) {
+                        delete x.attributes["x2"];
+                    }
+
+                    if (x.attributes?.y2) {
+                        delete x.attributes["y2"];
+                    }
+
                     if (x.attributes?.style) {
                         delete x.attributes["style"];
+                    }
+
+                    if (x.attributes?.d) {
+                        delete x.attributes["d"];
+                    }
+
+                    if (x.attributes?.transform) {
+                        delete x.attributes["transform"];
                     }
                 }
 
@@ -426,6 +469,7 @@ test.capture = function capture(
                 await page.setViewport({
                     width: viewport.width,
                     height: viewport.height,
+                    deviceScaleFactor: 1,
                 });
 
             const iterations = process.env.PSP_SATURATE ? 10 : 1;

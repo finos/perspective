@@ -13,7 +13,6 @@ use futures::channel::oneshot::*;
 use futures::future::join_all;
 use std::cell::Cell;
 use std::rc::Rc;
-use wasm_bindgen::*;
 use wasm_bindgen_futures::spawn_local;
 use wasm_bindgen_test::*;
 
@@ -96,7 +95,7 @@ pub async fn test_debounce_seq() {
                     .debounce(async {
                         set_timeout(10).await.unwrap();
                         cell.set(cell.get() + 1);
-                        Ok(JsValue::UNDEFINED)
+                        Ok(())
                     })
                     .await
                     .unwrap();

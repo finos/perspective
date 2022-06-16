@@ -152,6 +152,11 @@ else()
     set(MANYLINUX OFF)
 endif()
 
+if(DEFINED ENV{PSP_USE_CCACHE})
+    set(CMAKE_C_COMPILE_LAUNCHER ccache)
+    set(CMAKE_CXX_COMPILER_LAUNCHER ccache)
+endif()
+
 if (NOT DEFINED PSP_CPP_BUILD)
     set(PSP_CPP_BUILD ON)
 endif()
@@ -681,13 +686,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
             set_property(TARGET binding PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path})
         else()
             target_compile_options(binding PRIVATE -Wdeprecated-declarations)
-        endif()
-
-        # python 2.7 build on manylinux needs -lrt for access to time functions,
-        # otherwise we get an "undefined symbol: clock_gettime" error when
-        # building minimal arrow.
-        if (PSP_PYTHON_BUILD AND MANYLINUX AND PSP_PYTHON_VERSION STREQUAL "2.7")
-            target_link_libraries(psp rt)
         endif()
 
         # Link against minimal arrow static library

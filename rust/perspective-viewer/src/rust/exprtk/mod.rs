@@ -18,6 +18,7 @@ use serde_json::error;
 use wasm_bindgen::JsCast;
 
 pub use init::init_theme;
+pub use language::COMPLETIONS;
 
 /// Configure `monaco` for a set of column names, such that intellisense may
 /// complete available columns.  In the interest of simplification, this uses a

@@ -27,8 +27,23 @@ mod session;
 mod theme;
 mod utils;
 
-#[wasm_bindgen::prelude::wasm_bindgen]
+use utils::ToJsValueError;
+use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen]
 pub fn register_plugin(name: &str) {
     use crate::renderer::*;
     PLUGIN_REGISTRY.register_plugin(name);
+}
+
+#[wasm_bindgen]
+pub fn get_exprtk_commands() -> Result<Box<[JsValue]>, JsValue> {
+    crate::exprtk::COMPLETIONS
+        .with(|x| {
+            x.suggestions
+                .iter()
+                .map(JsValue::from_serde)
+                .collect::<Result<Box<[_]>, serde_json::Error>>()
+        })
+        .into_jserror()
 }
