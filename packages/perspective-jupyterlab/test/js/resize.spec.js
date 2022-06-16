@@ -14,7 +14,7 @@ utils.with_server({}, () => {
     describe.page(
         "resize.html",
         () => {
-            test.capture("Config should show by default", async (page) => {
+            test.capture("Config should be hidden by default", async (page) => {
                 await page.waitForFunction(() => !!window.__WIDGET__);
                 return await page.evaluate(async () => {
                     await window.__WIDGET__.viewer.getTable();

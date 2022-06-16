@@ -22,32 +22,28 @@ import perspective from "@finos/perspective/dist/esm/perspective.js";
  */
 export class PerspectiveView extends DOMWidgetView {
     _createElement() {
-        this.pWidget = new PerspectiveJupyterWidget(undefined, {
-            plugin: this.model.get("plugin"),
-            columns: this.model.get("columns"),
-            group_by: this.model.get("group_by"),
-            split_by: this.model.get("split_by"),
-            aggregates: this.model.get("aggregates"),
-            sort: this.model.get("sort"),
-            filter: this.model.get("filter"),
-            expressions: this.model.get("expressions"),
-            plugin_config: this.model.get("plugin_config"),
-            server: this.model.get("server"),
-            client: this.model.get("client"),
-            theme: this.model.get("theme"),
-            settings: this.model.get("settings"),
-            editable: this.model.get("editable"),
-            bindto: this.el,
-            view: this,
-        });
+        this.pWidget = new PerspectiveJupyterWidget(
+            undefined,
+            this,
+            this.model.get("server"),
+            this.model.get("client")
+        );
 
         this.perspective_client = new PerspectiveJupyterClient(this);
+
+        // bind synchronize to this
         this._synchronize_state = this._synchronize_state.bind(this);
-        this.pWidget.node.children[0].addEventListener(
+
+        // add event handler to synchronize
+        this.pWidget.viewer.addEventListener(
             "perspective-config-update",
             this._synchronize_state
         );
 
+        // bind toggle_editable to this
+        this._toggle_editable = this._toggle_editable.bind(this);
+
+        // return the node against witch pWidget is bound
         return this.pWidget.node;
     }
 
@@ -65,12 +61,13 @@ export class PerspectiveView extends DOMWidgetView {
      * @param mutations
      */
 
-    _synchronize_state(event) {
+    async _synchronize_state(event) {
         if (!this.pWidget._load_complete) {
             return;
         }
 
-        const config = event.detail;
+        const config = await this.pWidget.viewer.save();
+
         for (const name of Object.keys(config)) {
             let new_value = config[name];
 
@@ -116,7 +113,6 @@ export class PerspectiveView extends DOMWidgetView {
         this.model.on("change:plugin_config", this.plugin_config_changed, this);
         this.model.on("change:theme", this.theme_changed, this);
         this.model.on("change:settings", this.settings_changed, this);
-        this.model.on("change:editable", this.editable_changed, this);
 
         /**
          * Request a table from the manager. If a table has been loaded, proxy
@@ -233,6 +229,22 @@ export class PerspectiveView extends DOMWidgetView {
         return this._client_worker;
     }
 
+    async _restore_from_model() {
+        await this.pWidget.restore({
+            plugin: this.model.get("plugin"),
+            columns: this.model.get("columns"),
+            group_by: this.model.get("group_by"),
+            split_by: this.model.get("split_by"),
+            aggregates: this.model.get("aggregates"),
+            sort: this.model.get("sort"),
+            filter: this.model.get("filter"),
+            expressions: this.model.get("expressions"),
+            plugin_config: this.model.get("plugin_config"),
+            theme: this.model.get("theme"),
+            settings: this.model.get("settings"),
+        });
+    }
+
     /**
      * Given a message that commands the widget to load a dataset or table,
      * process it.
@@ -250,6 +262,7 @@ export class PerspectiveView extends DOMWidgetView {
             const data = msg.data["data"];
             const client_table = this.client_worker.table(data, table_options);
             this.pWidget.load(client_table);
+            this._restore_from_model();
         } else {
             if (this.pWidget.server && msg.data["table_name"]) {
                 /**
@@ -260,14 +273,18 @@ export class PerspectiveView extends DOMWidgetView {
                     msg.data["table_name"]
                 );
                 this.pWidget.load(table);
+                this._restore_from_model();
             } else if (msg.data["table_name"]) {
                 // Get a remote table handle from the Jupyter kernel, and mirror
                 // the table on the client, setting up editing if necessary.
                 this.perspective_client
                     .open_table(msg.data["table_name"])
                     .then(async (kernel_table) => {
-                        const kernel_view = await kernel_table.view();
-                        const arrow = await kernel_view.to_arrow();
+                        // setup kernel table and view
+                        this._kernel_table = kernel_table;
+                        this._kernel_view = await kernel_table.view();
+
+                        const arrow = await this._kernel_view.to_arrow();
 
                         // Create a client side table
                         let client_table = this.client_worker.table(
@@ -275,64 +292,19 @@ export class PerspectiveView extends DOMWidgetView {
                             table_options
                         );
 
+                        this.pWidget.load(client_table);
+                        await this._restore_from_model();
+
                         // Need to await the table and get the instance
                         // separately as load() only takes a promise
                         // to a table and not the instance itself.
-                        const client_table2 = await client_table;
+                        const client_table_loaded = await client_table;
 
-                        if (this.pWidget.editable) {
-                            await this.pWidget.load(client_table);
+                        // setup local view
+                        this._client_view = await client_table_loaded.view();
 
-                            // Allow edits from the client Perspective to
-                            // feed back to the kernel.
-                            const client_edit_port =
-                                await this.pWidget.getEditPort();
-                            const kernel_edit_port =
-                                await kernel_table.make_port();
-
-                            const client_view = await client_table2.view();
-
-                            // When the client updates, if the update
-                            // comes through the edit port then forward
-                            // it to the server.
-                            client_view.on_update(
-                                (updated) => {
-                                    if (updated.port_id === client_edit_port) {
-                                        kernel_table.update(updated.delta, {
-                                            port_id: kernel_edit_port,
-                                        });
-                                    }
-                                },
-                                {
-                                    mode: "row",
-                                }
-                            );
-
-                            // If the server updates, and the edit is
-                            // not coming from the server edit port,
-                            // then synchronize state with the client.
-                            kernel_view.on_update(
-                                (updated) => {
-                                    if (updated.port_id !== kernel_edit_port) {
-                                        client_table2.update(updated.delta); // any port, we dont care
-                                    }
-                                },
-                                {
-                                    mode: "row",
-                                }
-                            );
-                        } else {
-                            // Load the table and mirror updates from the
-                            // kernel.
-                            await this.pWidget.load(client_table);
-                            kernel_view.on_update(
-                                (updated) =>
-                                    client_table2.update(updated.delta),
-                                {
-                                    mode: "row",
-                                }
-                            );
-                        }
+                        // handle editing
+                        await this._toggle_editable();
                     });
             } else {
                 throw new Error(
@@ -341,12 +313,76 @@ export class PerspectiveView extends DOMWidgetView {
                     )}`
                 );
             }
+
             // Only call `init` after the viewer has a table.
             this.perspective_client.send({
                 id: -1,
                 cmd: "init",
             });
         }
+    }
+
+    async _toggle_editable() {
+        // Need to await the table and get the instance
+        // separately as load() only takes a promise
+        // to a table and not the instance itself.
+        const table = await this.pWidget.getTable();
+
+        // Setup ports in advance
+        if (!this._client_edit_port) {
+            this._client_edit_port = await this.pWidget.getEditPort();
+        }
+        if (!this._kernel_edit_port) {
+            this._kernel_edit_port = await this._kernel_table.make_port();
+        }
+
+        const {plugin_config} = await this.pWidget.viewer.save();
+        if (plugin_config?.editable) {
+            // TODO only evaluated during initial load.
+            // Toggling from python after initial load won't
+            // cause edits to propagate
+
+            // Allow edits from the client Perspective to
+            // feed back to the kernel.
+
+            // When the client updates, if the update
+            // comes through the edit port then forward
+            // it to the server.
+            this._client_view_update_callback = (updated) => {
+                if (updated.port_id === this._client_edit_port) {
+                    this._kernel_table.update(updated.delta, {
+                        port_id: this._kernel_edit_port,
+                    });
+                }
+            };
+
+            // If the server updates, and the edit is
+            // not coming from the server edit port,
+            // then synchronize state with the client.
+            this._kernel_view_update_callback = (updated) => {
+                if (updated.port_id !== this._kernel_edit_port) {
+                    table.update(updated.delta); // any port, we dont care
+                }
+            };
+        } else {
+            // ignore
+            this._client_view_update_callback = () => {};
+
+            // Load the table and mirror updates from the
+            // kernel.
+            this._kernel_view_update_callback = (updated) =>
+                table.update(updated.delta);
+        }
+
+        this._client_view.on_update(
+            (updated) => this._client_view_update_callback(updated),
+            {mode: "row"}
+        );
+
+        this._kernel_view.on_update(
+            (updated) => this._kernel_view_update_callback(updated),
+            {mode: "row"}
+        );
     }
 
     /**
@@ -358,7 +394,7 @@ export class PerspectiveView extends DOMWidgetView {
         // Delete the <perspective-viewer> but do not terminate the shared
         // worker as it is shared across other widgets.
         this.pWidget.delete();
-        this.pWidget.node.removeEventListener(
+        this.pWidget.viewer.removeEventListener(
             "perspective-config-update",
             this._synchronize_state
         );
@@ -419,7 +455,10 @@ export class PerspectiveView extends DOMWidgetView {
     }
 
     plugin_config_changed() {
-        this.pWidget.plugin_config = this.model.get("plugin_config");
+        this.pWidget.restore({
+            plugin_config: this.model.get("plugin_config"),
+        });
+        this._toggle_editable();
     }
 
     theme_changed() {
@@ -432,9 +471,5 @@ export class PerspectiveView extends DOMWidgetView {
         this.pWidget.restore({
             settings: this.model.get("settings"),
         });
-    }
-
-    editable_changed() {
-        this.pWidget.editable = this.model.get("editable");
     }
 }

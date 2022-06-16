@@ -19,59 +19,18 @@ let _increment = 0;
  * @class PerspectiveWidget (name) TODO: document
  */
 export class PerspectiveWidget extends Widget {
-    constructor(name = "Perspective", options = {}) {
+    constructor(name = "Perspective", bindto, server, client) {
         super({
-            node: options.bindto || document.createElement("div"),
+            node: bindto || document.createElement("div"),
         });
+
+        this.server = server;
+        this.client = client;
         this._viewer = PerspectiveWidget.createNode(this.node);
         this.title.label = name;
         this.title.caption = `${name}`;
         this.id = `${name}-` + _increment;
         _increment += 1;
-        this._set_attributes(options);
-    }
-
-    /**
-     * Apply user-provided options to the widget.
-     *
-     * @param options
-     */
-
-    _set_attributes(options) {
-        const plugin = options.plugin || "datagrid";
-        const columns = options.columns || [];
-        const group_by = options.group_by || options.group_by || [];
-        const split_by = options.split_by || options.split_by || [];
-        const aggregates = options.aggregates || {};
-        const sort = options.sort || [];
-        const filter = options.filter || [];
-        const expressions = options.expressions || options.expressions || [];
-        const plugin_config = options.plugin_config || {};
-        const theme = options.theme || "Material Light";
-        const settings =
-            typeof options.settings === "boolean" ? options.settings : true;
-        const editable = options.editable || false;
-        const server = options.server || false;
-        const client = options.client || false;
-        // const selectable: boolean = options.selectable || false;
-        this.server = server;
-        this.client = client;
-        this.editable = editable;
-        this._viewer_config = {
-            plugin,
-            plugin_config,
-            group_by,
-            split_by,
-            sort,
-            columns,
-            aggregates,
-            expressions,
-            filter,
-            settings,
-            theme,
-        };
-        // this.plugin_config = plugin_config;
-        // this.selectable = selectable;
     }
 
     /**********************/
@@ -113,11 +72,8 @@ export class PerspectiveWidget extends Widget {
      */
 
     async load(table) {
-        const load_task = this.viewer.load(table);
-        const restore_task = this.viewer.restore(this._viewer_config);
-        await load_task;
+        await this.viewer.load(table);
         this._load_complete = true;
-        await restore_task;
     }
 
     /**
@@ -198,67 +154,6 @@ export class PerspectiveWidget extends Widget {
 
     get name() {
         return this.title.label;
-    }
-
-    // `plugin_config` cannot be synchronously read from the viewer, as it is
-    // not part of the attribute API and only emitted from save(). Users can
-    // pass in a plugin config and have it applied to the viewer, but they
-    // cannot read the current `plugin_config` of the viewer if it has not
-    // already been set from Python.
-
-    get plugin_config() {
-        return this._plugin_config;
-    }
-
-    set plugin_config(plugin_config) {
-        this._plugin_config = plugin_config;
-
-        // Allow plugin configs passed from Python to take effect on the viewer
-        if (this._plugin_config) {
-            this.viewer.restore({
-                plugin_config: this._plugin_config,
-            });
-        }
-    }
-
-    /**
-     * True if the widget is in client-only mode, i.e. the browser has ownership
-     * of the widget's data.
-     */
-
-    get client() {
-        return this._client;
-    }
-
-    set client(client) {
-        this._client = client;
-    }
-
-    /**
-     * True if the widget is in server-only mode, i.e. the Python backend has
-     * full ownership of the widget's data, and the widget does not have a
-     * `perspective.Table` of its own.
-     */
-
-    get server() {
-        return this._server;
-    }
-
-    set server(server) {
-        this._server = server;
-    }
-
-    get editable() {
-        return this._editable;
-    }
-
-    set editable(editable) {
-        this._editable = editable;
-        if (this._editable) {
-            this.viewer.setAttribute("editable", "");
-        } else {
-            this.viewer.removeAttribute("editable");
-        }
     }
 
     get selectable() {

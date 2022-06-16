@@ -9,6 +9,7 @@
 const fs = require("fs");
 const path = require("path");
 const rimraf = require("rimraf");
+const {TimeoutError} = require("puppeteer");
 const notebook_template = require("./notebook_template.json");
 
 const DIST_ROOT = path.join(__dirname, "..", "..", "dist", "umd");
@@ -102,6 +103,15 @@ test.jupyterlab = async (name, cells, body, args = {}) => {
 };
 
 module.exports = {
+    default_body: async (page) => {
+        await module.exports.execute_all_cells(page);
+        const viewer = await page.waitForSelector(
+            ".jp-OutputArea-output perspective-viewer",
+            {visible: true}
+        );
+        await viewer.evaluate(async (viewer) => await viewer.flush());
+        return viewer;
+    },
     execute_all_cells: async (page) => {
         await page.waitForFunction(async () => !!document.title);
         await page.waitForSelector(".p-Widget", {visible: true});
@@ -122,5 +132,51 @@ module.exports = {
         await page.keyboard.press("R");
         await page.keyboard.press("R");
         await page.evaluate(() => (document.scrollTop = 0));
+    },
+    add_and_execute_cell: async (page, cell_content) => {
+        // wait for a code cell to be visible
+        await page.waitForSelector(".jp-CodeCell", {
+            visible: true,
+        });
+
+        // find and click the a cell in the notebook
+        await page.click(".jp-CodeCell");
+
+        // find and click the "new cell" button
+        await page.click(
+            '.jp-Button[data-command="notebook:insert-cell-below"]'
+        );
+
+        // after clicking new cell, the document will auto
+        // focus the new cell, so lets grab it
+        const el = await page.evaluateHandle(() => document.activeElement);
+        await el.type(cell_content);
+
+        // now while the element is still focused, click the run cell button
+        await page.click('.jp-Button[data-command="runmenu:run"]');
+
+        // wait for kernel to stop running
+        await page.waitForXPath(
+            "//div.jp-InputPrompt[contains(text(),'[*]:')]",
+            {
+                hidden: true,
+            }
+        );
+    },
+    assert_no_error_in_cell: async (page, cell_content) => {
+        // run the cell
+        await module.exports.add_and_execute_cell(page, cell_content);
+
+        // wait for jupyter to render any frontend exceptions
+        return await Promise.race([
+            page
+                .waitForSelector(
+                    'div[data-mime-type="application/vnd.jupyter.stderr"]'
+                )
+                .then(() => false),
+            page
+                .waitForXPath("//div//pre[contains(text(),\"'Passed'\")]")
+                .then(() => true),
+        ]);
     },
 };

@@ -7,7 +7,6 @@
 #
 
 import json
-import logging
 from datetime import date, datetime
 from functools import partial
 
@@ -354,11 +353,6 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
         else:
             # Viewer will ignore **options if `data` is a Table or View.
             super(PerspectiveWidget, self).load(data, **options)
-
-            # Do not enable editing if the table is unindexed.
-            if self.editable and self.table.get_index() is None:
-                logging.critical("Cannot edit on an unindexed `perspective.Table`!")
-                self.editable = False
 
         # Notify front-end of load immediately.
         message = self._make_load_message()
