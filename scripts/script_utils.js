@@ -288,6 +288,29 @@ exports.docker = function docker(image = "puppeteer") {
 };
 
 /**
+ * Get the python version to use from env/arguments
+ *
+ * @returns {string} The python version to use
+ */
+exports.python_version = function python_version() {
+    if (process.env.PYTHON_VERSION) {
+        return `python${process.env.PYTHON_VERSION}`;
+    } else if (getarg("--python310")) {
+        return "python3.10";
+    } else if (getarg("--python39")) {
+        return "python3.9";
+    } else if (getarg("--python38")) {
+        return "python3.8";
+    } else if (getarg("--python37")) {
+        return "python3.7";
+    } else if (getarg("--python36")) {
+        return "python3.6";
+    } else {
+        return "python3";
+    }
+};
+
+/**
  * Get the docker image to use for the given image/python combination
  *
  * @param {string} image The Docker image name.
@@ -308,6 +331,22 @@ exports.python_image = function python_image(image = "", python = "") {
     return `${image}`;
 };
 
+/**
+ * Get the manylinux version to use from env/arguments
+ *
+ * @returns {string} The manylinux version to use
+ */
+exports.manylinux_version = function manylinux_version() {
+    if (process.env.MANYLINUX) {
+        return `manylinux${process.env.MANYLINUX}`;
+    } else if (getarg("--manylinux2010")) {
+        return "manylinux2010";
+    } else if (getarg("--manylinux2014")) {
+        return "manylinux2014";
+    } else {
+        return "manylinux2010";
+    }
+};
 /*******************************************************************************
  *
  * Tests

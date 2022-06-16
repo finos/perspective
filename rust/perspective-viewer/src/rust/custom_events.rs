@@ -19,7 +19,6 @@ use std::cell::RefCell;
 use std::ops::Deref;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::future_to_promise;
 use web_sys::*;
 
 /// A collection of `Subscription` which should trigger an event on the
@@ -123,7 +122,7 @@ impl CustomEventsDataRc {
     }
 
     fn dispatch_config_update(self) {
-        let _ = future_to_promise(async move {
+        ApiFuture::spawn(async move {
             let viewer_config = self.get_viewer_config().await?;
             if viewer_config.view_config != Default::default()
                 && Some(&viewer_config) != self.last_dispatched.borrow().as_ref()
@@ -140,7 +139,7 @@ impl CustomEventsDataRc {
                 self.elem.dispatch_event(&event.unwrap()).unwrap();
             }
 
-            Ok(JsValue::UNDEFINED)
+            Ok(())
         });
     }
 }

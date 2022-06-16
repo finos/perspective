@@ -57,9 +57,13 @@ export class PerspectiveViewerDatagridPluginElement extends HTMLElement {
 
             this._edit_mode =
                 this._toolbar.shadowRoot.querySelector("#edit_mode");
+
             this._edit_mode.addEventListener("click", () => {
                 this._toggle_edit_mode();
                 this.datagrid.draw();
+                this.parentElement.dispatchEvent(
+                    new Event("perspective-config-update")
+                );
             });
         }
 

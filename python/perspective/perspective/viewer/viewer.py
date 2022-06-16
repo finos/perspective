@@ -51,7 +51,6 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         "columns",
         "expressions",
         "plugin",
-        "editable",
         "plugin_config",
         "theme",
         "settings",
@@ -70,7 +69,6 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         plugin_config=None,
         settings=True,
         theme=None,
-        editable=False,
     ):
         """Initialize an instance of `PerspectiveViewer` with the given viewer
         configuration.  Do not pass a `Table` or data into the constructor -
@@ -102,7 +100,6 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
             settings(:obj:`bool`): Whether the perspective query settings
                 panel should be open.
             theme (:obj:`str`): The color theme to use.
-            editable (:obj:`bool`): Whether to allow editability using the grid.
 
         Examples:
             >>> viewer = PerspectiveViewer(
@@ -135,7 +132,6 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         self.plugin_config = validate_plugin_config(plugin_config) or {}
         self.settings = settings
         self.theme = theme
-        self.editable = editable
 
     @property
     def table(self):
@@ -274,7 +270,6 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         self.columns = []
         self.plugin = "Datagrid"
         self.plugin_config = {}
-        self.editable = False
 
     def delete(self, delete_table=True):
         """Delete the Viewer's data and clears its internal state. If

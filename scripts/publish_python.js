@@ -8,125 +8,258 @@
  */
 
 const {execute} = require("./script_utils.js");
-const fs = require("fs");
-var http = require("https");
-const cpy = require("cpy");
+const cp = require("cpy");
+const decompress = require("decompress");
+const decompressUnzip = require("decompress-unzip");
+const fs = require("fs").promises;
+const {Octokit} = require("octokit");
+const readline = require("readline");
 
-if (!process.env.AZURE_TOKEN) {
-    throw new Error("Missing AZURE_TOKEN");
-}
-
-if (!process.env.AZURE_BUILD_ID) {
-    throw new Error("Missing AZURE_BUILD_ID");
-}
+// Artifacts Docs:
+// https://docs.github.com/en/rest/actions/artifacts
+// Example run:
+// https://github.com/finos/perspective/suites/2454745307
 
 if (!process.env.GITHUB_TOKEN) {
-    throw new Error("Missing GITHUB_TOKEN");
+    throw new Error("Missing Personal Access Token (GITHUB_TOKEN)");
 }
 
-async function get(host, path, binary = false) {
-    return await new Promise((resolve) => {
-        const callback = function (response) {
-            if (response.statusCode !== 200) {
-                console.log(response.statusCode);
-            }
+if (!process.env.WORKFLOW_ID) {
+    throw new Error("Missing Github Actions Workflow ID (WORKFLOW_ID)");
+}
 
-            let str = [];
-            response.on("data", function (chunk) {
-                str.push(chunk);
-            });
+if (!process.env.COMMIT) {
+    console.warn(
+        "Running a dry run, this WILL NOT publish to pypi. Set the env var COMMIT to publish."
+    );
+}
 
-            response.on("end", function () {
-                if (binary) {
-                    resolve(Buffer.concat(str));
-                } else {
-                    resolve(str.join(""));
-                }
-            });
-        };
+// Folders for artifacts on GitHub Actions
+const dist_folders = [
+    // https://github.com/actions/virtual-environments
+    // Mac 10.15
+    "perspective-python-dist-macos-10.15-3.6",
+    "perspective-python-dist-macos-10.15-3.7",
+    "perspective-python-dist-macos-10.15-3.8",
+    "perspective-python-dist-macos-10.15-3.9",
 
-        const opts = {
-            host,
-            path,
-            headers: {
-                Authorization:
-                    "Basic " +
-                    Buffer.from(
-                        "user:" + process.env.AZURE_TOKEN,
-                        "utf8"
-                    ).toString("base64"),
-            },
-        };
+    // Mac 11
+    // NOTE: use 10.15
+    // "perspective-python-dist-macos-11-3.6",
+    // "perspective-python-dist-macos-11-3.7",
+    // "perspective-python-dist-macos-11-3.8",
+    // "perspective-python-dist-macos-11-3.9",
 
-        http.request(opts, callback).end();
+    // Ubuntu (Manylinux 2010 and 2014 docker images)
+    "perspective-python-dist-ubuntu-20.04-3.6",
+    "perspective-python-dist-ubuntu-20.04-3.7",
+    "perspective-python-dist-ubuntu-20.04-3.8",
+    "perspective-python-dist-ubuntu-20.04-3.9",
+
+    // Windows 2019 (No 3.6 on windows)
+    "perspective-python-dist-windows-2019-3.7",
+    "perspective-python-dist-windows-2019-3.8",
+    "perspective-python-dist-windows-2019-3.9",
+
+    // Windows 2022
+    // NOTE: omit these for now, rely on 2019 wheels
+    // "perspective-python-dist-windows-2022-3.7",
+    // "perspective-python-dist-windows-2022-3.8",
+    // "perspective-python-dist-windows-2022-3.9",
+];
+
+// Artifacts inside those folders
+const wheels = [
+    // Mac 10.15
+    "cp36-cp36m-macosx_10_14_x86_64",
+    "cp37-cp37m-macosx_10_15_x86_64",
+    "cp38-cp38-macosx_10_15_x86_64",
+    "cp39-cp39-macosx_10_15_x86_64",
+
+    // Mac 11
+    // NOTE: not yet
+    "cp36-cp36m-macosx_11_0_x86_64",
+    "cp37-cp37m-macosx_11_0_x86_64",
+    "cp38-cp38-macosx_11_0_x86_64",
+    "cp39-cp39-macosx_11_0_x86_64",
+
+    // Manylinux 2010
+    "cp36-cp36m-manylinux2010_x86_64",
+    "cp37-cp37m-manylinux2010_x86_64",
+    "cp38-cp38-manylinux2010_x86_64",
+    "cp39-cp39-manylinux2010_x86_64",
+
+    // Manylinux 2014
+    "cp36-cp36m-manylinux2014_x86_64",
+    "cp37-cp37m-manylinux2014_x86_64",
+    "cp38-cp38-manylinux2014_x86_64",
+    "cp39-cp39-manylinux2014_x86_64",
+
+    // Windows (use 2019)
+    "cp37-cp37m-win_amd64",
+    "cp38-cp38-win_amd64",
+    "cp39-cp39-win_amd64",
+];
+
+// GitHub API Wrapper
+const octokit = new Octokit({
+    auth: process.env.GITHUB_TOKEN,
+});
+
+// Helper function to prompt for user input
+function askQuestion(query) {
+    // https://stackoverflow.com/questions/18193953/waiting-for-user-to-enter-input-in-node-js
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
     });
+
+    return new Promise((resolve) =>
+        rl.question(query, (ans) => {
+            rl.close();
+            resolve(ans);
+        })
+    );
 }
 
-try {
-    const build = process.env.AZURE_BUILD_ID;
-    const artifacts = [
-        "cp36-cp36m-macosx_10_15_x86_64",
-        "cp36-cp36m-manylinux2010_x86_64",
-        "cp36-cp36m-manylinux2014_x86_64",
-        "cp37-cp37m-macosx_10_15_x86_64",
-        "cp37-cp37m-manylinux2010_x86_64",
-        "cp37-cp37m-manylinux2014_x86_64",
-        "cp37-cp37m-win64_amd",
-        "cp38-cp38-macosx_10_15_x86_64",
-        "cp38-cp38-manylinux2010_x86_64",
-        "cp38-cp38-manylinux2014_x86_64",
-        "cp38-cp38m-win64_amd",
-        "cp39-cp39-macosx_10_15_x86_64",
-        "cp39-cp39-macosx_11_0_x86_64",
-        "cp39-cp39-manylinux2010_x86_64",
-        "cp39-cp39-manylinux2014_x86_64",
-        "cp39-cp39m-win64_amd",
-    ];
+(async function () {
+    try {
+        // Page to fetch
+        let page = 1;
+        let resp;
 
-    (async function () {
-        for (const artifact of artifacts) {
-            console.log(`-- Downloading artifact "${artifact}"`);
-            const path = `/finosfoundation/perspective/_apis/pipelines/1/runs/${build}/artifacts?artifactName=${artifact}&$expand=signedContent&api-version=6.0-preview.1`;
-            const x = await get("dev.azure.com", path);
-            const json = JSON.parse(x);
-            const url = new URL(json.signedContent.url);
-            const buff = await get(url.host, url.pathname + url.search, true);
-            fs.writeFileSync(`${artifact}.tar.gz`, buff, "binary");
-            execute`ls -lah ${artifact}.tar.gz`;
-            execute`tar -xzf ${artifact}.tar.gz`;
-            const files = fs.readdirSync(artifact);
-            for (const file of files) {
-                if (file.endsWith(".whl")) {
-                    console.log(`-- Uploading artifact "${file}"`);
-                    execute`twine upload ${artifact}/${file}`;
-                    break;
+        // assets loaded
+        let python_dist_folders = [];
+        do {
+            console.log(`Fetching page ${page}`);
+
+            // Fetch the artifacts
+            resp = await octokit.request(
+                "GET /repos/{owner}/{repo}/actions/runs/{run_id}/artifacts?page={page}",
+                {
+                    owner: "finos",
+                    repo: "perspective",
+                    run_id: process.env.WORKFLOW_ID,
+                    page,
                 }
-            }
+            );
 
-            fs.rmdirSync(artifact, {recursive: true, force: true});
+            // Concatenate to existing artifacts
+            python_dist_folders = [
+                ...python_dist_folders,
+                ...resp.data.artifacts.filter(
+                    (artifact) => dist_folders.indexOf(artifact.name) >= 0
+                ),
+            ];
+
+            page += 1;
+        } while (!resp || resp.data.artifacts.length > 0);
+
+        // Print out our results, and what we expected
+        console.log(
+            `Found ${python_dist_folders.length} python folders, expected ${dist_folders.length}`
+        );
+
+        // If they vary (e.g. a partial run), ask the user if they're sure
+        // they want to proceed
+        let proceed = "y";
+        if (python_dist_folders.length !== dist_folders.length) {
+            proceed = "n";
+            proceed = await askQuestion("Proceed? (y/N)");
         }
 
-        // publish is run after version, so any package.json has the right version
-        const pkg_json = require("@finos/perspective/package.json");
-        const PERSPECTIVE_VERSION = pkg_json.version;
+        // If everything good, or they say they want to proceed,
+        // pull the artifacts locally into a temp folder
+        if (proceed.toLowerCase() === "y") {
+            const dist_folder = `perspective-wheel-dist-${process.env.WORKFLOW_ID}`;
+            const wheel_folder = `perspective-wheel-dist-${process.env.WORKFLOW_ID}/wheels`;
 
-        // Python publish
-        console.log(`-- Building "perspective-python" ${PERSPECTIVE_VERSION}`);
-        fs.writeFileSync("./.perspectiverc", `PSP_PROJECT=python`);
-        require("dotenv").config({path: "./.perspectiverc"});
-        execute`yarn clean --deps`;
-        execute`yarn build`;
+            // Remove if exists
+            await fs.rmdir(dist_folder, {
+                recursive: true,
+                force: true,
+            });
 
-        // sdist into `python/perspective/dist`, and test the sdist as well.
-        execute`cd ./python/perspective && ./scripts/build_sdist.sh`;
-        const sdist_name = `perspective-python-${PERSPECTIVE_VERSION}.tar.gz`;
+            // Make directories
+            await fs.mkdir(dist_folder);
+            await fs.mkdir(wheel_folder);
 
-        console.log(
-            `-- Uploading source distribution "${sdist_name}" to PyPi"`
-        );
-        execute`cd python/perspective && python3 -m twine upload ./dist/${sdist_name}`;
-    })();
-} catch (e) {
-    console.error(e.message);
-    process.exit(1);
-}
+            // Download the artifact folders
+            await Promise.all(
+                python_dist_folders.map(async (artifact) => {
+                    // Download the Artifact
+                    const download = await octokit.request(
+                        "GET /repos/{owner}/{repo}/actions/artifacts/{artifact_id}/{archive_format}",
+                        {
+                            owner: "finos",
+                            repo: "perspective",
+                            artifact_id: `${artifact.id}`,
+                            archive_format: "zip",
+                        }
+                    );
+
+                    // Write out the zip file
+                    await fs.appendFile(
+                        `${dist_folder}/${artifact.name}.zip`,
+                        Buffer.from(download.data)
+                    );
+                })
+            );
+
+            // Unzip the folders
+            await Promise.all(
+                python_dist_folders.map(async (artifact) => {
+                    await decompress(
+                        `${dist_folder}/${artifact.name}.zip`,
+                        `${dist_folder}/${artifact.name}`,
+                        {
+                            plugins: [decompressUnzip()],
+                        }
+                    );
+                })
+            );
+
+            // Move the wheels
+            await Promise.all(
+                python_dist_folders.map(async (artifact) => {
+                    await cp(
+                        [`${dist_folder}/${artifact.name}/*.whl`],
+                        `${wheel_folder}`
+                    );
+                })
+            );
+
+            // List the wheels
+            const downloaded_wheels = await fs.readdir(wheel_folder);
+
+            // Print out our results, and what we expected
+            console.log(
+                `Found ${downloaded_wheels.length} wheels, expected ${wheels.length}`
+            );
+
+            // If they vary (e.g. a partial run), ask the user if they're sure
+            // they want to proceed
+            proceed = "y";
+            if (downloaded_wheels.length !== wheels.length) {
+                proceed = "n";
+                proceed = await askQuestion("Proceed? (y/N)");
+            }
+
+            if (proceed === "y") {
+                if (!process.env.COMMIT) {
+                    console.log(
+                        `Uploading:\n\t${downloaded_wheels.join("\n\t")}`
+                    );
+                    console.error(
+                        "Skipping twine upload, marked as dry run.\nSet env var COMMIT=1 to run fo real."
+                    );
+                } else {
+                    execute`twine upload ${wheel_folder}/*.whl`;
+                }
+            }
+        }
+    } catch (e) {
+        console.error(e.message);
+        process.exit(1);
+    }
+})();

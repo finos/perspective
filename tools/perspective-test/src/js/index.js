@@ -239,12 +239,16 @@ beforeAll(async (done) => {
         results_debug = get_results(RESULTS_DEBUG_FILENAME);
 
         if (results.__GIT_COMMIT__) {
-            const hash = execSync(`git cat-file -e ${results.__GIT_COMMIT__}`);
-            if (!hash || hash.toString().length != 0) {
-                private_console.error(
-                    `-- WARNING - Test results generated from non-existent commit ${results.__GIT_COMMIT__}.`
+            try {
+                const hash = execSync(
+                    `git cat-file -e ${results.__GIT_COMMIT__}`
                 );
-            }
+                if (!hash || hash.toString().length != 0) {
+                    private_console.error(
+                        `-- WARNING - Test results generated from non-existent commit ${results.__GIT_COMMIT__}.`
+                    );
+                }
+            } catch (e) {}
         }
     } catch (e) {
         console.error(e);

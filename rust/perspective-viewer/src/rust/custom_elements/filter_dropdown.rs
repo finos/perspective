@@ -9,13 +9,13 @@
 use crate::components::filter_dropdown::*;
 use crate::custom_elements::modal::*;
 use crate::session::Session;
+use crate::utils::ApiFuture;
 use crate::*;
 
 use std::cell::RefCell;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use wasm_bindgen_futures::future_to_promise;
 use web_sys::*;
 use yew::*;
 
@@ -75,7 +75,7 @@ impl FilterDropDownElement {
                 // across an `await` point.
                 *self.column.borrow_mut() = Some(column.clone());
                 *self.target.borrow_mut() = Some(target.clone());
-                let _ = future_to_promise({
+                ApiFuture::spawn({
                     clone!(self.modal, self.session, self.values);
                     async move {
                         let all_values = session.get_column_values(column.1).await?;
@@ -87,7 +87,7 @@ impl FilterDropDownElement {
                         ]);
 
                         modal.open(target, None);
-                        Ok(JsValue::UNDEFINED)
+                        Ok(())
                     }
                 });
             }

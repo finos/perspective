@@ -13,30 +13,24 @@ const {
     docker,
     resolve,
     getarg,
+    python_version,
     python_image,
+    manylinux_version,
 } = require("./script_utils.js");
 
-let PYTHON = getarg("--python38")
-    ? "python3.8"
-    : getarg("--python36")
-    ? "python3.6"
-    : getarg("--python37")
-    ? "python3.7"
-    : "python3";
-
+let PYTHON = python_version();
 const COVERAGE = getarg("--coverage");
 const VERBOSE = getarg("--debug");
 const IS_DOCKER = process.env.PSP_DOCKER;
+
+const PYTEST_FLAGS =
+    "--junitxml=python_junit.xml --cov-report=xml --cov-branch --cov=perspective --disable-pytest-warnings";
 
 let IMAGE = "manylinux2010";
 
 if (IS_DOCKER) {
     // defaults to 2010
-    let MANYLINUX_VERSION = getarg("--manylinux2010")
-        ? "manylinux2010"
-        : getarg("--manylinux2014")
-        ? "manylinux2014"
-        : "";
+    let MANYLINUX_VERSION = manylinux_version();
     IMAGE = python_image(MANYLINUX_VERSION, PYTHON);
 }
 
@@ -62,10 +56,9 @@ const pytest_client_mode = (IS_DOCKER) => {
             ${VERBOSE ? "-vv --full-trace" : ""} --noconftest 
             perspective/tests/client_mode"`;
     } else {
-        return bash`cd ${python_path} && PYTHONMALLOC=debug ${PYTHON} -m pytest \
+        return bash`cd ${python_path} && ${PYTHON} -m pytest \
             ${VERBOSE ? "-vv --full-trace" : ""} --noconftest
-            --disable-pytest-warnings
-            perspective/tests/client_mode`;
+            perspective/tests/client_mode ${PYTEST_FLAGS}`;
     }
 };
 
@@ -75,17 +68,13 @@ const pytest_client_mode = (IS_DOCKER) => {
 const pytest = (IS_DOCKER) => {
     if (IS_DOCKER) {
         return bash`${docker(IMAGE)} bash -c "cd \
-            python/perspective && TZ=UTC PYTHONMALLOC=debug ${PYTHON} -m pytest \
+            python/perspective && TZ=UTC ${PYTHON} -m pytest \
             ${VERBOSE ? "-vv --full-trace" : ""} perspective \
-            --ignore=perspective/tests/client_mode \
-            --disable-pytest-warnings
-            --cov=perspective"`;
+            --ignore=perspective/tests/client_mode ${PYTEST_FLAGS}"`;
     } else {
-        return bash`cd ${python_path} && PYTHONMALLOC=debug ${PYTHON} -m pytest \
+        return bash`cd ${python_path} && ${PYTHON} -m pytest \
             ${VERBOSE ? "-vv --full-trace" : ""} perspective \
-            --ignore=perspective/tests/client_mode \
-            --disable-pytest-warnings
-            ${COVERAGE ? "--cov=perspective" : ""}`;
+            --ignore=perspective/tests/client_mode ${PYTEST_FLAGS}`;
     }
 };
 

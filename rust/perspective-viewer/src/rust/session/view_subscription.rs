@@ -94,12 +94,12 @@ impl ViewSubscription {
 
         let fun = {
             clone!(data);
-            move |_| promisify_ignore_view_delete(data.clone().on_view_update())
+            move |_| js_sys::Promise::from(ApiFuture::new(data.clone().on_view_update()))
         };
 
         let closure = fun.into_closure();
         data.view.on_update(closure.as_ref().unchecked_ref());
-        let _ = promisify_ignore_view_delete(data.clone().update_view_stats());
+        ApiFuture::spawn(data.clone().update_view_stats());
         Self { data, closure }
     }
 

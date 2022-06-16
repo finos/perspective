@@ -8,9 +8,9 @@
 
 use crate::renderer::*;
 use crate::session::*;
+use crate::utils::*;
 use crate::*;
 
-use wasm_bindgen_futures::future_to_promise;
 use yew::prelude::*;
 
 #[derive(Properties)]
@@ -76,7 +76,7 @@ impl Component for RenderWarning {
         match msg {
             RenderWarningMsg::DismissWarning => {
                 clone!(ctx.props().renderer, ctx.props().session);
-                let _promise = future_to_promise(async move {
+                ApiFuture::spawn(async move {
                     renderer.disable_active_plugin_render_warning();
                     renderer.update(&session).await
                 });

@@ -215,7 +215,11 @@ class TestViewer:
 
     def test_save_restore(self):
         table = Table({"a": [1, 2, 3]})
-        viewer = PerspectiveViewer(plugin="X Bar", filter=[["a", "==", 2]], editable=True, expressions=['"a" * 2'])
+        viewer = PerspectiveViewer(
+            plugin="X Bar",
+            filter=[["a", "==", 2]],
+            expressions=['"a" * 2']
+        )
         viewer.load(table)
 
         # Save config
@@ -224,21 +228,18 @@ class TestViewer:
         assert config["filter"] == [["a", "==", 2]]
         assert viewer.plugin == "X Bar"
         assert config["plugin"] == "X Bar"
-        assert config["editable"] is True
         assert config["expressions"] == ['"a" * 2']
 
         # reset configuration
         viewer.reset()
         assert viewer.plugin == "Datagrid"
         assert viewer.filter == []
-        assert viewer.editable is False
         assert viewer.expressions == []
 
         # restore configuration
         viewer.restore(**config)
         assert viewer.filter == [["a", "==", 2]]
         assert viewer.plugin == "X Bar"
-        assert viewer.editable is True
         assert viewer.expressions == ['"a" * 2']
 
     def test_save_restore_plugin_config(self):
