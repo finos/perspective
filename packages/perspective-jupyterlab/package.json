@@ -50,7 +50,7 @@
     "devDependencies": {
         "@finos/perspective-esbuild-plugin": "^1.9.4",
         "@finos/perspective-test": "^1.9.4",
-        "@jupyterlab/builder": "^3.4.0"
+        "@jupyterlab/builder": "^3.4.0",
         "@prospective.co/procss": "^0.1.12",
         "cpy": "^9.0.1"
     },
