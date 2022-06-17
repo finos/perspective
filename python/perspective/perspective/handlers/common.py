@@ -13,7 +13,7 @@ from ..core.exception import PerspectiveError
 
 
 class PerspectiveHandlerBase(ABC):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         """Create a new instance of the PerspectiveHandlerBase with the
         given Manager instance.
 
@@ -28,6 +28,11 @@ class PerspectiveHandlerBase(ABC):
                 be disabled entirely with `None`.
         """
         self._manager = kwargs.pop("manager", None)
+        if self._manager is None:
+            raise PerspectiveError(
+                "A `PerspectiveManager` instance must be provided to the handler!"
+            )
+
         self._check_origin = kwargs.pop("check_origin", False)
 
         # uvicorn (used by aiohttp / starlette) defaults to 16MB max payload
@@ -39,12 +44,6 @@ class PerspectiveHandlerBase(ABC):
         self._chunk_sleep = kwargs.pop("_chunk_sleep", 0)
 
         self._session = self._manager.new_session()
-
-        if self._manager is None:
-            raise PerspectiveError(
-                "A `PerspectiveManager` instance must be provided to the handler!"
-            )
-
         self._stream_lock = asyncio.Lock()
 
     def check_origin(self, origin):
@@ -59,15 +58,24 @@ class PerspectiveHandlerBase(ABC):
         """
         return self._check_origin
 
-    @abstractmethod
-    def on_message(self, message):
+    def _session_callback(self, *args, **kwargs):
+        return asyncio.run_coroutine_threadsafe(
+            self.post(*args, **kwargs), asyncio.get_event_loop()
+        )
+
+    async def on_message(self, message):
         """When the websocket receives a message, send it to the :obj:`process`
         method of the `PerspectiveManager` with a reference to the :obj:`post`
         callback.
         """
+        if message == "ping":
+            # Respond to ping heartbeats from the Websocket client.
+            await self.post("pong")
+            return
 
-    @abstractmethod
-    def post(self, message, binary=False):
+        self._session.process(message, self._session_callback)
+
+    async def post(self, message, binary=False):
         """When `post` is called by `PerspectiveManager`, serialize the data to
         JSON and send it to the client.
 
@@ -75,9 +83,43 @@ class PerspectiveHandlerBase(ABC):
             message (:obj:`str`): a JSON-serialized string containing a message to the
                 front-end `perspective-viewer`.
         """
+        # Only send message in chunks if it passes the threshold set by the
+        # `PerspectiveManager`.
+        chunked = len(message) > self._chunk_size
 
-    @abstractmethod
+        async with self._stream_lock:
+            if binary and chunked:
+                start = 0
+
+                while start < len(message):
+                    end = start + self._chunk_size
+                    if end >= len(message):
+                        end = len(message)
+
+                    asyncio.ensure_future(
+                        self.write_message(message[start:end], binary=True)
+                    )
+                    start = end
+
+                    # Allow the loop to process heartbeats so that client sockets don't
+                    # get closed in the middle of sending a chunk.
+                    await asyncio.sleep(self._chunk_sleep)
+            else:
+                await self.write_message(message, binary)
+
     def on_close(self):
         """Remove the views associated with the client when the websocket
         closes.
+        """
+        self._session.close()
+
+    @abstractmethod
+    async def write_message(self, message: str, binary: bool = False) -> None:
+        """Websocket-specific implementation of writing a message to the websocket client.
+        Must support writing either text or binary messages. Should only be called by this
+        class's `post` function, which handles all the perspective-specific logic
+
+        Args:
+            message (str): the message to write
+            binary (bool, optional): whether or not to write as binary buffer
         """
