@@ -37,7 +37,7 @@
         "prebuild": "mkdirp dist/esm",
         "build": "node ./build.js",
         "test:build": "cpy --cwd test \"html/*\" ../dist/umd",
-        "watch": "webpack --color --watch --config src/config/d3fc.watch.config.js",
+        "watch": ":",
         "test:run": "jest --rootDir=. --config=../../tools/perspective-test/jest.config.js --color",
         "test": "npm-run-all test:build test:run",
         "clean": "rimraf dist",
