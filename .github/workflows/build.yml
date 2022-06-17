@@ -382,13 +382,11 @@ jobs:
       with:
         name: nbextension-build
         path: python/perspective/perspective/nbextension
-        # if-no-files-found: error # TODO
 
     - uses: actions/upload-artifact@v3
       with:
         name: labextension-build
         path: python/perspective/perspective/labextension
-        # if-no-files-found: error # TODO
 
   ##########################################################################################################################
   ##########################################################################################################################
@@ -689,7 +687,7 @@ jobs:
     ###################################################################
     # Run JS build first, then use the artifacts in the python builds #
     ###################################################################
-    needs: [initialize]
+    needs: [initialize, build_js]
 
     strategy:
       # NOTE: this matrix should build wheels across all supported envs.
@@ -815,17 +813,15 @@ jobs:
     ################
     # JS Artifacts #
     ################
-    # TODO
-    # - uses: actions/download-artifact@v3
-    #   with:
-    #     name: nbextension-build
-    #     python: python/perspective/perspective/nbextension
+    - uses: actions/download-artifact@v3
+      with:
+        name: nbextension-build
+        python: python/perspective/perspective/nbextension
 
-    # TODO
-    # - uses: actions/download-artifact@v3
-    #   with:
-    #     name: labextension-build
-    #     python: python/perspective/perspective/labextension
+    - uses: actions/download-artifact@v3
+      with:
+        name: labextension-build
+        python: python/perspective/perspective/labextension
 
     ##########
     # Caches #
