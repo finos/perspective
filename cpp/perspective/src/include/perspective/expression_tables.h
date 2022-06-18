@@ -11,10 +11,7 @@
 #include <perspective/base.h>
 #include <perspective/computed_expression.h>
 #include <perspective/data_table.h>
-
-#ifdef PSP_PARALLEL_FOR
 #include <perspective/parallel_for.h>
-#endif
 
 namespace perspective {
 

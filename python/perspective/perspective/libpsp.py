@@ -30,8 +30,11 @@ try:
 
     def set_threadpool_size(nthreads):
         """Sets the size of the global Perspective thread pool, up to the
-        total number of available cores, which can be set explicity by
-        setting `nthreads` to `None`.
+        total number of available cores.  Passing an explicit
+        `None` sets this limit to the detected hardware concurrency from the
+        environment, which is also the default if this method is never called.
+        `set_threadpool_size()` must be called before any other
+        `perspective-python` API calls, and cannot be changed after such a call.
         """
         os.environ["OMP_THREAD_LIMIT"] = "0" if nthreads is None else str(nthreads)
 

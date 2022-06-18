@@ -25,9 +25,9 @@
 #include <perspective/expression_tables.h>
 #include <perspective/regex.h>
 #include <tsl/ordered_map.h>
+#include <perspective/parallel_for.h>
 #ifdef PSP_PARALLEL_FOR
 #include <thread>
-#include <perspective/parallel_for.h>
 #endif
 #include <chrono>
 
@@ -208,7 +208,7 @@ public:
     std::shared_ptr<t_expression_vocab> get_expression_vocab() const;
     std::shared_ptr<t_regex_mapping> get_expression_regex_mapping() const;
 
-#ifdef PSP_PARALLEL_FOR
+#ifdef PSP_ENABLE_PYTHON
     void set_event_loop_thread_id(std::thread::id id);
 #endif
 

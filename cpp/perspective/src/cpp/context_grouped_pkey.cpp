@@ -617,13 +617,8 @@ t_ctx_grouped_pkey::rebuild() {
         aggindices[idx] = data[idx].m_idx;
     }
 
-#ifdef PSP_PARALLEL_FOR
-    parallel_for(int(naggs),
-        [&aggtable, &aggindices, &aggspecs, &tbl](int aggnum)
-#else
-    for (t_uindex aggnum = 0; aggnum < naggs; ++aggnum)
-#endif
-        {
+    parallel_for(
+        int(naggs), [&aggtable, &aggindices, &aggspecs, &tbl](int aggnum) {
             const t_aggspec& spec = aggspecs[aggnum];
             if (spec.agg() == AGGTYPE_IDENTITY) {
                 auto scol
@@ -632,10 +627,7 @@ t_ctx_grouped_pkey::rebuild() {
                     tbl->get_const_column(spec.get_first_depname()).get(),
                     aggindices, 1);
             }
-        }
-#ifdef PSP_PARALLEL_FOR
-    );
-#endif
+        });
 
     m_traversal = std::shared_ptr<t_traversal>(new t_traversal(m_tree));
 
