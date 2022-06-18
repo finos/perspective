@@ -6,7 +6,7 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-import tornado
+import asyncio
 
 
 def async_queue(client, name, method, cmd, *args, **kwargs):
@@ -26,7 +26,7 @@ def async_queue(client, name, method, cmd, *args, **kwargs):
         "subscribe": False,
     }
 
-    future = tornado.concurrent.Future()
+    future = asyncio.Future()
     client.post(msg, future)
     return future
 

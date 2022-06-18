@@ -5,68 +5,85 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
-
+import asyncio
 import json
+from abc import ABC, abstractmethod
 
-from tornado import gen, ioloop
-from tornado.websocket import websocket_connect
-
-from ..client import PerspectiveClient
+from .client import PerspectiveClient
 from ..manager.manager_internal import DateTimeEncoder
 
 
-@gen.coroutine
-def websocket(url):
-    """Create a new websocket client at the given `url` using the thread current
-    tornado loop."""
-    client = PerspectiveTornadoClient()
-    yield client.connect(url)
-    raise gen.Return(client)
+class Periodic(ABC):
+    def __init__(self, callback, interval):
+        self._callback = callback
+        self._interval = interval
+
+    @abstractmethod
+    async def start(self):
+        ...
+
+    @abstractmethod
+    async def stop(self):
+        ...
 
 
-class PerspectiveTornadoClient(PerspectiveClient):
+class PerspectiveWebsocketConnection(ABC):
+    @abstractmethod
+    async def connect(self, url, on_message, max_message_size) -> None:
+        ...
+
+    @abstractmethod
+    def periodic(self, callback, interval) -> Periodic:
+        ...
+
+    @abstractmethod
+    async def write(self, message, binary=False):
+        ...
+
+    @abstractmethod
+    async def close(self):
+        ...
+
+
+class PerspectiveWebsocketClient(PerspectiveClient):
 
     # Ping the server every 30 seconds
     PING_TIMEOUT = 15 * 1000
 
-    def __init__(self):
-        """Create a `PerspectiveTornadoClient` that interfaces with a
-        Perspective server over a Websocket, using the given
-        `loop` instance, which defaults to ioloop.IOLoop.current() if
-        not provided by the user."""
-        super(PerspectiveTornadoClient, self).__init__()
+    def __init__(self, websocket: PerspectiveWebsocketConnection):
+        """Create a `PerspectiveWebsocketClient` that interfaces with a
+        Perspective server over a Websocket"""
+        super(PerspectiveWebsocketClient, self).__init__()
 
-        self._ws = None
+        self._websocket = websocket
         self._pending_binary = None
         self._pending_binary_length = 0
         self._pending_port_id = None
         self._full_binary = b""
 
-    @gen.coroutine
-    def _send_ping(self):
+    async def _send_ping(self):
         """Send a `ping` heartbeat message to the server's Websocket, which will
         respond with `pong`."""
-        yield self.send("ping")
+        await self.send("ping")
 
-    @gen.coroutine
-    def connect(self, url):
+    async def connect(self, url):
         """Connect to the remote websocket, and send the `init` message to
         assert that the Websocket is alive and accepting connections."""
-        self._ws = yield websocket_connect(
+        await self._websocket.connect(
             url,
-            on_message_callback=self.on_message,
+            on_message=self.on_message,
             max_message_size=1024 * 1024 * 1024,
         )
 
-        yield self.send({"id": -1, "cmd": "init"})
+        await self.send({"id": -1, "cmd": "init"})
 
         # Send a `ping` message every 15 seconds.
-        self._ping_callback = ioloop.PeriodicCallback(
+        self._ping_callback = self._websocket.periodic(
             self._send_ping,
-            callback_time=PerspectiveTornadoClient.PING_TIMEOUT,
+            interval=self.PING_TIMEOUT,
         )
 
-        self._ping_callback.start()
+        await self._ping_callback.start()
 
     def on_message(self, msg):
         """When a message is received, send it to the `_handle` method, or
@@ -83,6 +100,7 @@ class PerspectiveTornadoClient(PerspectiveClient):
             if len(self._full_binary) == self._pending_binary_length:
                 # Chunking is complete
                 binary_msg = self._full_binary
+
             else:
                 # Wait for the next chunk
                 return
@@ -102,6 +120,7 @@ class PerspectiveTornadoClient(PerspectiveClient):
             self._pending_binary_length = None
             self._pending_port_id = None
             self._full_binary = b""
+
         elif isinstance(msg, str):
             msg = json.loads(msg)
 
@@ -117,8 +136,7 @@ class PerspectiveTornadoClient(PerspectiveClient):
             # websocket client sometimes calls None on disconnect ..
             pass
 
-    @gen.coroutine
-    def send(self, msg):
+    async def send(self, msg):
         """Send a message to the Websocket endpoint."""
         if (
             isinstance(msg, dict)
@@ -135,17 +153,21 @@ class PerspectiveTornadoClient(PerspectiveClient):
             # an empty dict here so we don't break compatibility.
             pre_msg["args"].insert(0, {})
 
-            # Must be received in order - for some reason if we yield sending
-            # the pre-message, other messages are sent in its place which
-            # breaks the expectation that the next message is an binary.
-            self._ws.write_message(json.dumps(pre_msg, cls=DateTimeEncoder))
-            yield self._ws.write_message(binary_msg, binary=True)
-        elif isinstance(msg, str):
-            yield self._ws.write_message(msg)
-        else:
-            yield self._ws.write_message(json.dumps(msg, cls=DateTimeEncoder))
+            # Must be received in order - expectation that binary follows premsg
+            await asyncio.gather(
+                *[
+                    self._websocket.write(json.dumps(pre_msg, cls=DateTimeEncoder)),
+                    self._websocket.write(binary_msg, binary=True),
+                ]
+            )
 
-    def terminate(self):
+        elif isinstance(msg, str):
+            await self._websocket.write(msg)
+
+        else:
+            await self._websocket.write(json.dumps(msg, cls=DateTimeEncoder))
+
+    async def terminate(self):
         """Close the websocket client connection."""
-        self._ping_callback.stop()
-        self._ws.close()
+        await self._ping_callback.stop()
+        await self._websocket.close()

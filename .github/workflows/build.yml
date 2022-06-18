@@ -1350,7 +1350,7 @@ jobs:
     ################
     # Python
     - name: Install python dependencies
-      run: python -m pip install --upgrade pip wheel setuptools "jupyterlab>=3.2" numpy "pyarrow>=5" pytest pytest-cov mock Faker psutil pytest-tornado pytz
+      run: python -m pip install --upgrade aiohttp Faker fastapi "jupyterlab>=3.2" mock numpy pip psutil "pyarrow>=5" pytest pytest-cov pytest-aiohttp pytest-asyncio pytest-tornado pytz setuptools wheel
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     #~~~~~~~~~ Build Pipelines ~~~~~~~~~#

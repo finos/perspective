@@ -194,7 +194,7 @@ class PerspectiveTornadoBenchmark(object):
             )
             await asyncio.sleep(delay)
 
-        psp_client = await perspective.tornado_handler.websocket(self.url)
+        psp_client = await perspective.client.tornado.websocket(self.url)
         results = []
 
         for i in range(self.num_runs):

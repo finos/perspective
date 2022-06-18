@@ -1,8 +1,8 @@
 {
-    "name": "tornado-streaming-python",
+    "name": "python-starlette",
     "private": true,
     "version": "1.4.0",
-    "description": "An example of streaming a `perspective-python` server to the browser.",
+    "description": "An example of editing a `perspective-python` server from the browser.",
     "scripts": {
         "start": "PYTHONPATH=../../python/perspective python3 server.py"
     },

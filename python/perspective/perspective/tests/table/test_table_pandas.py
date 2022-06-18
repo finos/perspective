@@ -12,8 +12,6 @@ import numpy as np
 import pandas as pd
 from perspective.table import Table
 
-from ..common import superstore
-
 
 class TestTablePandas(object):
     def test_empty_table(self):
@@ -886,18 +884,16 @@ class TestTablePandas(object):
         }
         assert tbl.size() == 3
 
-    def test_groupbys(self):
-        df = superstore(100)
-        df_pivoted = df.set_index(['Country', 'Region'])
+    def test_groupbys(self, superstore):
+        df_pivoted = superstore.set_index(['Country', 'Region'])
         table = Table(df_pivoted)
         columns = table.columns()
         assert table.size() == 100
         assert "Country" in columns
         assert "Region" in columns
 
-    def test_pivottable(self):
-        df = superstore()
-        pt = pd.pivot_table(df, values='Discount', index=['Country', 'Region'], columns='Category')
+    def test_pivottable(self, superstore):
+        pt = pd.pivot_table(superstore, values='Discount', index=['Country', 'Region'], columns='Category')
         table = Table(pt)
         columns = table.columns()
         assert "Country" in columns

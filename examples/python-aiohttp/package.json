@@ -1,5 +1,5 @@
 {
-    "name": "tornado-python",
+    "name": "python-aiohttp",
     "private": true,
     "version": "1.4.0",
     "description": "An example of editing a `perspective-python` server from the browser.",

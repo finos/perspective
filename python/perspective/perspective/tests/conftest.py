@@ -6,13 +6,17 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-import time
 from datetime import datetime
 
 import numpy as np
 import pandas as pd
 import pyarrow as pa
 from pytest import fixture
+from random import random, randint, choice
+from faker import Faker
+
+
+fake = Faker()
 
 
 def _make_date_time_index(size, time_unit):
@@ -24,15 +28,18 @@ def _make_period_index(size, time_unit):
 
 
 def _make_dataframe(index, size=10):
-    '''Create a new random dataframe of `size` and with a DateTimeIndex of
+    """Create a new random dataframe of `size` and with a DateTimeIndex of
     frequency `time_unit`.
-    '''
-    return pd.DataFrame(index=index, data={
-        "a": np.random.rand(size),
-        "b": np.random.rand(size),
-        "c": np.random.rand(size),
-        "d": np.random.rand(size)
-    })
+    """
+    return pd.DataFrame(
+        index=index,
+        data={
+            "a": np.random.rand(size),
+            "b": np.random.rand(size),
+            "c": np.random.rand(size),
+            "d": np.random.rand(size),
+        },
+    )
 
 
 class Util:
@@ -63,7 +70,8 @@ class Util:
         batch = pa.RecordBatch.from_arrays(arrays, names)
         table = pa.Table.from_batches([batch])
         writer = pa.RecordBatchStreamWriter(
-            stream, table.schema, use_legacy_format=legacy)
+            stream, table.schema, use_legacy_format=legacy
+        )
 
         writer.write_table(table)
         writer.close()
@@ -85,7 +93,8 @@ class Util:
         table = pa.Table.from_pandas(df, schema=schema)
 
         writer = pa.RecordBatchStreamWriter(
-            stream, table.schema, use_legacy_format=legacy)
+            stream, table.schema, use_legacy_format=legacy
+        )
 
         writer.write_table(table)
         writer.close()
@@ -126,7 +135,8 @@ class Util:
         batch = pa.RecordBatch.from_arrays(arrays, names)
         table = pa.Table.from_batches([batch])
         writer = pa.RecordBatchStreamWriter(
-            stream, table.schema, use_legacy_format=legacy)
+            stream, table.schema, use_legacy_format=legacy
+        )
 
         writer.write_table(table)
         writer.close()
@@ -134,7 +144,7 @@ class Util:
 
     @staticmethod
     def to_timestamp(obj):
-        '''Return an integer timestamp based on a date/datetime object.'''
+        """Return an integer timestamp based on a date/datetime object."""
         classname = obj.__class__.__name__
         if classname == "date":
             return datetime(obj.year, obj.month, obj.day).timestamp()
@@ -160,9 +170,9 @@ class Util:
 
 
 class Sentinel(object):
-    '''Generic sentinel class for testing side-effectful code in Python 2 and
+    """Generic sentinel class for testing side-effectful code in Python 2 and
     3.
-    '''
+    """
 
     def __init__(self, value):
         self.value = value
@@ -176,7 +186,7 @@ class Sentinel(object):
 
 @fixture()
 def sentinel():
-    '''Pass `sentinel` into a test and call it with `value` to create a new 
+    """Pass `sentinel` into a test and call it with `value` to create a new
     instance of the Sentinel class.
 
     Example:
@@ -184,13 +194,49 @@ def sentinel():
         >>>    s = sentinel(True)
         >>>    s.set(False)
         >>>    s.get()  # returns False
-    '''
+    """
+
     def _sentinel(value):
         return Sentinel(value)
+
     return _sentinel
 
 
 @fixture
 def util():
-    '''Pass the `Util` class in to a test.'''
+    """Pass the `Util` class in to a test."""
     return Util
+
+
+@fixture
+def superstore(count=100):
+    data = []
+    for id in range(count):
+        dat = {}
+        dat["Row ID"] = id
+        dat["Order ID"] = "{}-{}".format(fake.ein(), fake.zipcode())
+        dat["Order Date"] = fake.date_this_year()
+        dat["Ship Date"] = fake.date_between_dates(dat["Order Date"]).strftime(
+            "%Y-%m-%d"
+        )
+        dat["Order Date"] = dat["Order Date"].strftime("%Y-%m-%d")
+        dat["Ship Mode"] = choice(["First Class", "Standard Class", "Second Class"])
+        dat["Ship Mode"] = choice(["First Class", "Standard Class", "Second Class"])
+        dat["Customer ID"] = fake.zipcode()
+        dat["Segment"] = choice(["A", "B", "C", "D"])
+        dat["Country"] = "US"
+        dat["City"] = fake.city()
+        dat["State"] = fake.state()
+        dat["Postal Code"] = fake.zipcode()
+        dat["Region"] = choice(["Region %d" % i for i in range(5)])
+        dat["Product ID"] = fake.bban()
+        sector = choice(["Industrials", "Technology", "Financials"])
+        industry = choice(["A", "B", "C"])
+        dat["Category"] = sector
+        dat["Sub-Category"] = industry
+        dat["Sales"] = randint(1, 100) * 100
+        dat["Quantity"] = randint(1, 100) * 10
+        dat["Discount"] = round(random() * 100, 2)
+        dat["Profit"] = round(random() * 1000, 2)
+        data.append(dat)
+    return pd.DataFrame(data)

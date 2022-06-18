@@ -12,9 +12,12 @@ import tornado
 from tornado import gen
 from datetime import datetime
 
-from ...table import Table
-from ...manager import PerspectiveManager
-from ...tornado_handler import PerspectiveTornadoHandler, websocket
+from perspective import (
+    Table,
+    PerspectiveManager,
+    PerspectiveTornadoHandler,
+    tornado_websocket as websocket,
+)
 
 
 data = {
@@ -48,54 +51,51 @@ class TestPerspectiveTornadoHandlerChunked(object):
         MANAGER._tables = {}
         MANAGER._views = {}
 
-    @gen.coroutine
-    def websocket_client(self, port):
+    async def websocket_client(self, port):
         """Connect and initialize a websocket client connection to the
         Perspective tornado server.
         """
-        client = yield websocket("ws://127.0.0.1:{0}/websocket".format(port))
-
-        # Compatibility with Python < 3.3
-        raise gen.Return(client)
+        client = await websocket("ws://127.0.0.1:{}/websocket".format(port))
+        return client
 
     @pytest.mark.gen_test(run_sync=False)
-    def test_tornado_handler_create_view_to_arrow_chunked(
+    async def test_tornado_handler_create_view_to_arrow_chunked(
         self, app, http_client, http_port, sentinel
     ):
         table_name = str(random.random())
         _table = Table(data)
         MANAGER.host_table(table_name, _table)
 
-        client = yield self.websocket_client(http_port)
+        client = await self.websocket_client(http_port)
         table = client.open_table(table_name)
-        view = yield table.view()
-        output = yield view.to_arrow()
-        expected = yield table.schema()
+        view = await table.view()
+        output = await view.to_arrow()
+        expected = await table.schema()
 
         assert Table(output).schema(as_string=True) == expected
 
     @pytest.mark.gen_test(run_sync=False)
-    def test_tornado_handler_create_view_to_arrow_update_chunked(
+    async def test_tornado_handler_create_view_to_arrow_update_chunked(
         self, app, http_client, http_port, sentinel
     ):
         table_name = str(random.random())
         _table = Table(data)
         MANAGER.host_table(table_name, _table)
 
-        client = yield self.websocket_client(http_port)
+        client = await self.websocket_client(http_port)
         table = client.open_table(table_name)
-        view = yield table.view()
+        view = await table.view()
 
-        output = yield view.to_arrow()
+        output = await view.to_arrow()
 
         for i in range(10):
-            table.update(output)
+            await table.update(output)
 
-        size2 = yield table.size()
+        size2 = await table.size()
         assert size2 == 110
 
     @pytest.mark.gen_test(run_sync=False)
-    def test_tornado_handler_update_chunked_interleaved_with_trivial(
+    async def test_tornado_handler_update_chunked_interleaved_with_trivial(
         self, app, http_client, http_port, sentinel
     ):
         """Tests that, when a chunked response `output_fut` is interleaved with
@@ -106,18 +106,18 @@ class TestPerspectiveTornadoHandlerChunked(object):
         _table = Table(data)
         MANAGER.host_table(table_name, _table)
 
-        client = yield self.websocket_client(http_port)
+        client = await self.websocket_client(http_port)
         table = client.open_table(table_name)
-        view = yield table.view()
+        view = await table.view()
 
         output_fut = view.to_arrow()
-        size3 = yield view.num_rows()
+        size3 = await view.num_rows()
         assert size3 == 10
 
-        output = yield output_fut
+        output = await output_fut
 
         for i in range(10):
-            table.update(output)
+            await table.update(output)
 
-        size2 = yield table.size()
+        size2 = await table.size()
         assert size2 == 110
