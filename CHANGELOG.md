@@ -1,5 +1,35 @@
 # Changelog
 
+## [v1.4.1](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.4.0...HEAD)
+
+**Implemented enhancements:**
+
+- Add python webserver handlers and clients for starlette \(fastapi\) and aiohttp [\#1828](https://github.com/finos/perspective/pull/1828) ([timkpaine](https://github.com/timkpaine))
+
+**Fixed bugs:**
+
+- `boolean` columns are always editable in `perspective-viewer-datagrid` [\#1833](https://github.com/finos/perspective/issues/1833)
+- `editable` doesn't propagate from `PerspectiveWidget` to `perspective-viewer` in JupyterLab [\#1832](https://github.com/finos/perspective/issues/1832)
+- Computed Column / aggregation inconsistency between operating systems \(race condition?\) [\#1831](https://github.com/finos/perspective/issues/1831)
+- Fix `set_threadpool_size(n)` for `n == 1` [\#1852](https://github.com/finos/perspective/pull/1852) ([texodus](https://github.com/texodus))
+- Reimplement `editable` for PerspectiveWidget in JupyterLab to take into account the latest changes [\#1850](https://github.com/finos/perspective/pull/1850) ([timkpaine](https://github.com/timkpaine))
+- Fix `@finos/perspective-viewer-d3fc` chart-specific exports [\#1847](https://github.com/finos/perspective/pull/1847) ([texodus](https://github.com/texodus))
+
+**Closed issues:**
+
+- Calling view.to\_columns\(\[options\]\) causes table to not be scrollable/stuck [\#1856](https://github.com/finos/perspective/issues/1856)
+
+**Merged pull requests:**
+
+- Remove unused watch commands from viewer-d3fc and viewer-datagrid, remove dependabot, dont trigger full build on merge to master [\#1859](https://github.com/finos/perspective/pull/1859) ([timkpaine](https://github.com/timkpaine))
+- Simplify and uplift binder to latest supported python, perspective wheel, and dependency set [\#1855](https://github.com/finos/perspective/pull/1855) ([timkpaine](https://github.com/timkpaine))
+- Make `PerspectiveViewerElement` rust type usable from non-wasm-abi [\#1846](https://github.com/finos/perspective/pull/1846) ([texodus](https://github.com/texodus))
+- ExprTK/Perspective Documentation  [\#1845](https://github.com/finos/perspective/pull/1845) ([texodus](https://github.com/texodus))
+- Include column name in error log for arrow filling [\#1841](https://github.com/finos/perspective/pull/1841) ([timkpaine](https://github.com/timkpaine))
+- Move CI/CD from Azure Pipelines to GitHub Actions [\#1808](https://github.com/finos/perspective/pull/1808) ([timkpaine](https://github.com/timkpaine))
+
 ## [v1.4.0](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.3.13...HEAD)
