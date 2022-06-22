@@ -12,7 +12,7 @@ use std::str::FromStr;
 use wasm_bindgen::JsCast;
 use yew::prelude::*;
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Eq, PartialEq)]
 pub enum SelectItem<T> {
     Option(T),
     OptGroup(&'static str, Vec<T>),

@@ -15,7 +15,7 @@ use std::marker::PhantomData;
 use std::rc::Rc;
 use yew::{prelude::*, virtual_dom::VChild};
 
-#[derive(Default, Clone, PartialEq)]
+#[derive(Clone, Default, Eq, PartialEq)]
 pub struct ModalOrientation(Rc<Cell<bool>>);
 
 impl From<ModalOrientation> for bool {

@@ -22,7 +22,7 @@ use yew::*;
 
 pub static CSS: &str = include_str!("../../../build/css/column-style.css");
 
-#[derive(PartialEq, Clone, Copy, Debug, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub enum NumberColorMode {
     #[serde(rename = "disabled")]
     Disabled,

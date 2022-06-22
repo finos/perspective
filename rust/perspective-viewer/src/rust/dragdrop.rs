@@ -17,7 +17,7 @@ use wasm_bindgen::JsCast;
 use web_sys::*;
 use yew::prelude::*;
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum DragTarget {
     Active,
     GroupBy,
@@ -26,7 +26,7 @@ pub enum DragTarget {
     Filter,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum DragEffect {
     Copy,
     Move(DragTarget),

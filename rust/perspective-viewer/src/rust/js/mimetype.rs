@@ -9,7 +9,7 @@
 use std::fmt::Display;
 use wasm_bindgen::prelude::*;
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Eq, PartialEq)]
 pub enum MimeType {
     TextPlain,
     ImagePng,

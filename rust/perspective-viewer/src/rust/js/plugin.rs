@@ -85,7 +85,7 @@ extern "C" {
     pub async fn resize(this: &JsPerspectiveViewerPlugin) -> Result<JsValue, JsValue>;
 }
 
-#[derive(Clone, Copy, Deserialize, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub enum ColumnSelectMode {
     Toggle,
@@ -98,7 +98,7 @@ impl Default for ColumnSelectMode {
     }
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct ViewConfigRequirements {
     pub min: Option<usize>,
     pub names: Option<Vec<String>>,

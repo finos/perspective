@@ -22,7 +22,7 @@ use yew::*;
 
 pub static CSS: &str = include_str!("../../../build/css/column-style.css");
 
-#[derive(PartialEq, Clone, Copy, Debug, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub enum StringColorMode {
     #[serde(rename = "foreground")]
     Foreground,
@@ -64,7 +64,7 @@ impl FromStr for StringColorMode {
     }
 }
 
-#[derive(PartialEq, Clone, Copy, Debug, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub enum FormatMode {
     #[serde(rename = "link")]
     Link,
@@ -112,7 +112,7 @@ impl FromStr for FormatMode {
 }
 
 #[cfg_attr(test, derive(Debug))]
-#[derive(Serialize, Deserialize, Clone, Default, PartialEq)]
+#[derive(Clone, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct StringColumnStyleConfig {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub format: Option<FormatMode>,
@@ -124,7 +124,7 @@ pub struct StringColumnStyleConfig {
     pub color: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default, PartialEq)]
+#[derive(Clone, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct StringColumnStyleDefaultConfig {
     pub color: String,
 }
