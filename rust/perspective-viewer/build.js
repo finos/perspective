@@ -164,11 +164,13 @@ async function build_all() {
         // Optimize wasm
         const OPT_PATH = `dist/pkg/perspective_viewer_bg.wasm`;
         const WASM_OPT_OPTIONS = [
-            `-lmu`,
-            `--dce`,
-            `--strip-producers`,
-            `--strip-target-features`,
-            `--strip-debug`,
+            `--low-memory-unused`,
+            `--converge`,
+
+            // This commit to `binaryen/wasm-opt` adds 50k to wasm asset, this
+            // is ths old settings.
+            // https://github.com/WebAssembly/binaryen/commit/1a6efdb4233a077bc6e5e8a340baf5672bb5bced
+            `--one-caller-inline-max-function-size=15`,
         ].join(" ");
 
         execSync(
