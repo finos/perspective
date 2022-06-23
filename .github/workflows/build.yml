@@ -114,7 +114,7 @@ jobs:
         env:
           SKIP_CI: ${{ contains(github.event.head_commit.message, '[ci-skip]') }}
           SKIP_CACHE: ${{ contains(github.event.head_commit.message, '[ci-skip-cache]') }}
-          FULL_RUN: ${{ startsWith(github.ref, 'refs/heads/v') || contains(github.event.head_commit.message, '[ci-full]') }}
+          FULL_RUN: ${{ startsWith(github.ref_name, 'v') || contains(github.event.head_commit.message, '[ci-full]') }}
           SKIP_PYTHON: ${{ contains(github.event.head_commit.message, '[ci-skip-python]') }}
           INCLUDE_WINDOWS: ${{ contains(github.event.head_commit.message, '[ci-include-windows]') }}
         if: ${{ github.event_name == 'push' }}
