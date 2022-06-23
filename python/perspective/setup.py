@@ -27,7 +27,7 @@ try:
 
     CPU_COUNT = os.cpu_count()
 except ImportError:
-    raise Exception("Requires Python 3.6 or later")
+    raise Exception("Requires Python 3.7 or later")
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -35,7 +35,7 @@ with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read().replace("\r\n", "\n")
 
 if sys.version_info.major < 3:
-    raise Exception("Requires Python 3.6 or later")
+    raise Exception("Requires Python 3.7 or later")
 
 
 def get_version(file, name="__version__"):
@@ -283,7 +283,7 @@ setup(
     packages=find_packages(exclude=["bench", "bench.*"]),
     include_package_data=True,
     zip_safe=False,
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     install_requires=requires,
     extras_require={
         "aiohttp": requires_aiohttp,

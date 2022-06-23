@@ -706,7 +706,6 @@ jobs:
           - windows-2022 # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2022-Readme.md
           - windows-2019 # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2019-Readme.md
         python-version:
-          - 3.6
           - 3.7
           - 3.8
           - 3.9
@@ -748,12 +747,6 @@ jobs:
           - os: ubuntu-20.04
             container: none
 
-          # Exclude windows Python 3.6
-          - os: windows-2022
-            python-version: 3.6
-          - os: windows-2019
-            python-version: 3.6
-
           ##############################################
           # Things to exclude if not a full matrix run #
           ##############################################
@@ -779,10 +772,7 @@ jobs:
           - is-full-run: false
             os: macos-10.11
 
-          # Exclude Python 3.6, 3.7, and 3.8 builds
-          - is-full-run: false
-            python-version: 3.6
-
+          # Exclude Python 3.7 and 3.8 builds
           - is-full-run: false
             python-version: 3.7
 
@@ -1229,7 +1219,6 @@ jobs:
           - windows-2022 # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2022-Readme.md
           - windows-2019 # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2019-Readme.md
         python-version:
-          - 3.6
           - 3.7
           - 3.8
           - 3.9
@@ -1239,15 +1228,6 @@ jobs:
         include-windows-run:
           - ${{ needs.initialize.outputs.INCLUDE_WINDOWS == 'true' || needs.initialize.outputs.FULL_RUN == 'true' }}
         exclude:
-          ############################
-          # Things to always exclude #
-          ############################
-          # Exclude windows Python 3.6
-          - os: windows-2022
-            python-version: 3.6
-          - os: windows-2019
-            python-version: 3.6
-
           ##############################################
           # Things to exclude if not a full matrix run #
           ##############################################
@@ -1266,10 +1246,7 @@ jobs:
           - is-full-run: false
             os: macos-10.15
 
-          # Exclude Python 3.6, 3.7, and 3.8 builds
-          - is-full-run: false
-            python-version: 3.6
-
+          # Exclude Python 3.7 and 3.8 builds
           - is-full-run: false
             python-version: 3.7
 

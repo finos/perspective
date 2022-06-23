@@ -303,8 +303,6 @@ exports.python_version = function python_version() {
         return "python3.8";
     } else if (getarg("--python37")) {
         return "python3.7";
-    } else if (getarg("--python36")) {
-        return "python3.6";
     } else {
         return "python3";
     }

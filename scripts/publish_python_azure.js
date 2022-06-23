@@ -65,9 +65,6 @@ async function get(host, path, binary = false) {
 try {
     const build = process.env.AZURE_BUILD_ID;
     const artifacts = [
-        "cp36-cp36m-macosx_10_15_x86_64",
-        "cp36-cp36m-manylinux2010_x86_64",
-        "cp36-cp36m-manylinux2014_x86_64",
         "cp37-cp37m-macosx_10_15_x86_64",
         "cp37-cp37m-manylinux2010_x86_64",
         "cp37-cp37m-manylinux2014_x86_64",

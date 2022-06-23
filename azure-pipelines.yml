@@ -351,18 +351,7 @@ jobs:
           artifact_name: "cp37-cp37m-manylinux2010_x86_64"
 
         ? ${{ if or(startsWith(variables['build.sourceBranch'], 'refs/tags/v'), eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')) }}
-        : Python36ManyLinux2010:
-            python.version: "3.6"
-            python_flag: "--python36"
-            manylinux_flag: "--manylinux2010"
-            artifact_name: "cp36-cp36m-manylinux2010_x86_64"
-          Python36ManyLinux2014:
-            python.version: "3.6"
-            python_flag: "--python36"
-            manylinux_flag: "--manylinux2014"
-            artifact_name: "cp36-cp36m-manylinux2014_x86_64"
-          # Python37ManyLinux2010 is always built
-          Python37ManyLinux2014:
+        : Python37ManyLinux2014:
             python.version: "3.7"
             python_flag: ""
             manylinux_flag: "--manylinux2014"
@@ -472,11 +461,6 @@ jobs:
 
     strategy:
       matrix:
-          Python36:
-            python.version: "3.6"
-            python_flag: "--python36"
-            artifact_name: "cp36-cp36m-macosx_10_15_x86_64"
-
           Python37:
             python.version: "3.7"
             python_flag: ""

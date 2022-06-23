@@ -20,8 +20,6 @@ const fs = require("fs-extra");
 
 let PYTHON = getarg("--python38")
     ? "python3.8"
-    : getarg("--python36")
-    ? "python3.6"
     : getarg("--python37")
     ? "python3.7"
     : "python3";

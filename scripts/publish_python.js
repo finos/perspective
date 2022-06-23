@@ -38,20 +38,17 @@ if (!process.env.COMMIT) {
 const dist_folders = [
     // https://github.com/actions/virtual-environments
     // Mac 10.15
-    "perspective-python-dist-macos-10.15-3.6",
     "perspective-python-dist-macos-10.15-3.7",
     "perspective-python-dist-macos-10.15-3.8",
     "perspective-python-dist-macos-10.15-3.9",
 
     // Mac 11
     // NOTE: use 10.15
-    // "perspective-python-dist-macos-11-3.6",
     // "perspective-python-dist-macos-11-3.7",
     // "perspective-python-dist-macos-11-3.8",
     // "perspective-python-dist-macos-11-3.9",
 
     // Ubuntu (Manylinux 2010 and 2014 docker images)
-    "perspective-python-dist-ubuntu-20.04-3.6",
     "perspective-python-dist-ubuntu-20.04-3.7",
     "perspective-python-dist-ubuntu-20.04-3.8",
     "perspective-python-dist-ubuntu-20.04-3.9",
