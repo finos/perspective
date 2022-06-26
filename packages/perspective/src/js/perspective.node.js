@@ -38,6 +38,7 @@ const SYNC_SERVER = new (class extends Server {
                 })
             )
             .then((core) => {
+                core.init();
                 this.perspective = perspective(core);
                 super.init(msg);
             });

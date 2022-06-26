@@ -259,8 +259,8 @@ if(PSP_WASM_BUILD)
     # ###################
     execute_process(COMMAND which emcc OUTPUT_VARIABLE EMCC)
     execute_process(COMMAND which em++ OUTPUT_VARIABLE EMPP)
-    string(STRIP ${EMCC} EMCC)
-    string(STRIP ${EMPP} EMPP)
+    string(STRIP "${EMCC}" EMCC)
+    string(STRIP "${EMPP}" EMPP)
     set(CMAKE_C_COMPILER ${EMCC})
     set(CMAKE_CXX_COMPILER ${EMPP})
     set(CMAKE_TOOLCHAIN_FILE "$ENV{EMSCRIPTEN_ROOT}/cmake/Modules/Platform/Emscripten.cmake")
@@ -622,6 +622,7 @@ if(PSP_WASM_BUILD)
         --bind \
         --source-map-base \"\" \
         --memory-init-file 0 \
+        --no-entry \
         -s EXPORT_ES6=1 \
         -s NO_EXIT_RUNTIME=1 \
         -s NO_FILESYSTEM=1 \
@@ -630,7 +631,6 @@ if(PSP_WASM_BUILD)
         -s EXPORT_NAME=\"load_perspective\" \
         -s MAXIMUM_MEMORY=4gb \
         -s USE_ES6_IMPORT_META=0 \
-        -s EXPORTED_FUNCTIONS=\"['_main']\" \
         -s ERROR_ON_UNDEFINED_SYMBOLS=1 \
     ")
 
