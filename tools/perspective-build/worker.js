@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const esbuild = require("esbuild");
+const {EmptyPlugin} = require("./empty.js");
 
 exports.WorkerPlugin = function WorkerPlugin(inline) {
     function setup(build) {
@@ -14,6 +15,7 @@ exports.WorkerPlugin = function WorkerPlugin(inline) {
                     define: {
                         global: "self",
                     },
+                    plugins: [EmptyPlugin(["fs", "path"])],
                     entryNames: "[name]",
                     chunkNames: "[name]",
                     assetNames: "[name]",

@@ -1843,18 +1843,6 @@ namespace binding {
 
 using namespace perspective::binding;
 
-/**
- * Main
- */
-void
-init() {
-    t_computed_expression_parser::init();
-
-    // clang-format off
-
-    // clang-format on
-}
-
 /******************************************************************************
  *
  * Embind
@@ -2293,5 +2281,5 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("scalar_to_val", &scalar_to_val);
     function("validate_expressions", &validate_expressions<t_val>);
     function("is_valid_datetime", &is_valid_datetime);
-    function("init", &init);
+    function("init", &t_computed_expression_parser::init);
 }

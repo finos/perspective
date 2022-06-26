@@ -639,20 +639,11 @@ if(PSP_WASM_BUILD)
     set_target_properties(psp PROPERTIES COMPILE_FLAGS "")
     target_link_libraries(psp arrow re2)
 
-    # "esm/perspective.cpp.js" from CMAKE_EXECUTABLE_SYNTAX
-    add_executable(perspective_esm src/cpp/emscripten.cpp)
-    target_link_libraries(perspective_esm psp)
-    target_link_options(perspective_esm PRIVATE -s ENVIRONMENT=worker)
-    target_compile_definitions(perspective_esm PRIVATE PSP_ENABLE_WASM=1)
-    set_target_properties(perspective_esm PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./esm/")
-    set_target_properties(perspective_esm PROPERTIES OUTPUT_NAME "perspective.cpp")
-
     # "cjs/perspective.cpp.js" from CMAKE_EXECUTABLE_SYNTAX
     add_executable(perspective_cjs src/cpp/emscripten.cpp)
     target_link_libraries(perspective_cjs psp)
-    target_link_options(perspective_cjs PRIVATE -s ENVIRONMENT=node)
     target_compile_definitions(perspective_cjs PRIVATE PSP_ENABLE_WASM=1)
-    set_target_properties(perspective_cjs PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./cjs/")
+    set_target_properties(perspective_cjs PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./esm/")
     set_target_properties(perspective_cjs PROPERTIES OUTPUT_NAME "perspective.cpp")
 elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     if(NOT WIN32)
