@@ -18,6 +18,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif()
 
 set(ARROW_SRCS
+
     # Base
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/array_base.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/array_binary.cc
@@ -57,6 +58,7 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/table.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/table_builder.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/tensor.cc
+
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/tensor/coo_converter.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/tensor/csf_converter.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/tensor/csx_converter.cc
@@ -66,6 +68,7 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/buffered.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/caching.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/compressed.cc
+
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/file.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/interfaces.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/memory.cc
@@ -119,6 +122,7 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/vendored/double-conversion/fixed-dtoa.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/vendored/double-conversion/diy-fp.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/vendored/double-conversion/strtod.cc
+
     # CSV
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/converter.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/chunker.cc
@@ -128,6 +132,7 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/parser.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/reader.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/writer.cc
+
     # IPC
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/dictionary.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/feather.cc
@@ -136,15 +141,18 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/options.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/reader.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/writer.cc
+
     # Compute
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/api_aggregate.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/api_scalar.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/api_vector.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/cast.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec.cc
+
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec/aggregate_node.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec/exec_plan.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec/expression.cc
+
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec/filter_node.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec/project_node.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec/source_node.cc
@@ -153,6 +161,7 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/function.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/function_internal.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernel.cc
+
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/registry.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/aggregate_basic.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/aggregate_mode.cc
@@ -160,6 +169,7 @@ set(ARROW_SRCS
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/aggregate_tdigest.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/aggregate_var_std.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/codegen_internal.cc
+
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/hash_aggregate.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/scalar_arithmetic.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/scalar_boolean.cc
@@ -170,6 +180,7 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/scalar_cast_numeric.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/scalar_cast_string.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/scalar_cast_temporal.cc
+
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/scalar_compare.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/scalar_nested.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/scalar_set_lookup.cc
@@ -179,11 +190,13 @@ set(ARROW_SRCS
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/scalar_validity.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/scalar_if_else.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/util_internal.cc
+
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/vector_array_sort.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/vector_hash.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/vector_nested.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/vector_replace.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/vector_selection.cc
+
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/vector_sort.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/row_encoder.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec/union_node.cc
@@ -196,15 +209,16 @@ set(ARROW_SRCS
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec/hash_join.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec/hash_join_node.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec/task_util.cc
-    )
+)
 
-if (PSP_PYTHON_BUILD)
+if(PSP_PYTHON_BUILD)
     set(ARROW_SRCS
         ${ARROW_SRCS}
         ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/file.cc
         ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/tensor/coo_converter.cc
         ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/tensor/csf_converter.cc
         ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/tensor/csx_converter.cc
+
         # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/time.cc
         # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/vendored/double-conversion/bignum-dtoa.cc
         # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/vendored/double-conversion/fast-dtoa.cc
@@ -219,8 +233,8 @@ if (PSP_PYTHON_BUILD)
 endif()
 
 set_property(SOURCE util/io_util.cc
-           APPEND_STRING
-           PROPERTY COMPILE_FLAGS " -Wno-unused-macros -stdlib=libc++")
+    APPEND_STRING
+    PROPERTY COMPILE_FLAGS " -Wno-unused-macros -stdlib=libc++")
 
 # # make clean will delete the generated file
 # set_source_files_properties(${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/Message_generated.h PROPERTIES GENERATED TRUE)
@@ -231,26 +245,26 @@ set_property(SOURCE util/io_util.cc
 # set_source_files_properties(${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/feather_generated.h PROPERTIES GENERATED TRUE)
 
 # set(FBS_OUTPUT_FILES
-#     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/Message_generated.h
-#     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/File_generated.h
-#     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/Schema_generated.h
-#     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/Tensor_generated.h
-#     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/SparseTensor_generated.h
-#     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/feather_generated.h)
+# ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/Message_generated.h
+# ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/File_generated.h
+# ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/Schema_generated.h
+# ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/Tensor_generated.h
+# ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/SparseTensor_generated.h
+# ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/feather_generated.h)
 
 # set(FBS_SRC
-#     ${CMAKE_BINARY_DIR}/arrow-src/format/Message.fbs
-#     ${CMAKE_BINARY_DIR}/arrow-src/format/File.fbs
-#     ${CMAKE_BINARY_DIR}/arrow-src/format/Schema.fbs
-#     ${CMAKE_BINARY_DIR}/arrow-src/format/Tensor.fbs
-#     ${CMAKE_BINARY_DIR}/arrow-src/format/SparseTensor.fbs
-#     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/feather.fbs)
-
+# ${CMAKE_BINARY_DIR}/arrow-src/format/Message.fbs
+# ${CMAKE_BINARY_DIR}/arrow-src/format/File.fbs
+# ${CMAKE_BINARY_DIR}/arrow-src/format/Schema.fbs
+# ${CMAKE_BINARY_DIR}/arrow-src/format/Tensor.fbs
+# ${CMAKE_BINARY_DIR}/arrow-src/format/SparseTensor.fbs
+# ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/feather.fbs)
 include_directories(src)
 
 # Build Arrow as a static library
 set(ARROW_BUILD_STATIC ON)
-if (PSP_WASM_BUILD)
+
+if(PSP_WASM_BUILD)
     set(CMAKE_POSITION_INDEPENDENT_CODE OFF)
 elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -272,14 +286,13 @@ target_link_libraries(arrow
 # find_package(Flatbuffers)
 
 # add_custom_command(OUTPUT ${FBS_OUTPUT_FILES}
-#                    COMMAND ${FLATBUFFERS_COMPILER}
-#                            -c
-#                            -o
-#                            ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/
-#                            ${FBS_SRC}
-#                    DEPENDS ${FLATBUFFERS_COMPILER}
-#                    COMMENT "Running flatc compiler on ${FBS_SRC}"
-#                    VERBATIM)
-
+# COMMAND ${FLATBUFFERS_COMPILER}
+# -c
+# -o
+# ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/
+# ${FBS_SRC}
+# DEPENDS ${FLATBUFFERS_COMPILER}
+# COMMENT "Running flatc compiler on ${FBS_SRC}"
+# VERBATIM)
 add_custom_target(arrow_fb_files DEPENDS ${FBS_OUTPUT_FILES})
 add_dependencies(arrow arrow_fb_files)
