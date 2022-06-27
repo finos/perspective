@@ -262,14 +262,14 @@ const getarg = (exports.getarg = function (flag, ...args) {
  * execute`${docker()} echo "Hello from Docker"`;
  */
 exports.docker = function docker(image = "puppeteer") {
-    console.log(`-- Creating perspective/${image} docker image`);
+    console.log(`-- Creating quay.io/pypa/${image}_x86_64 docker image`);
     const IS_WRITE = getarg("--write") || process.env.WRITE_TESTS;
     const CPUS = parseInt(process.env.PSP_CPU_COUNT);
     const PACKAGE = process.env.PACKAGE;
     const CWD = process.cwd();
     const IS_CI = getarg("--ci");
     const IS_MANYLINUX = image.indexOf("manylinux") > -1 ? true : false;
-    const IMAGE = `perspective/${image}`;
+    const IMAGE = `quay.io/pypa/${image}_x86_64`;
     let env_vars = bash`-eWRITE_TESTS=${IS_WRITE} \
         -ePACKAGE="${PACKAGE}"`;
     let flags = IS_CI ? bash`--rm` : bash`--rm -it`;
@@ -292,19 +292,38 @@ exports.docker = function docker(image = "puppeteer") {
  *
  * @returns {string} The python version to use
  */
-exports.python_version = function python_version() {
-    if (process.env.PYTHON_VERSION) {
-        return `python${process.env.PYTHON_VERSION}`;
-    } else if (getarg("--python310")) {
-        return "python3.10";
-    } else if (getarg("--python39")) {
-        return "python3.9";
-    } else if (getarg("--python38")) {
-        return "python3.8";
-    } else if (getarg("--python37")) {
-        return "python3.7";
+exports.python_version = function python_version(manylinux) {
+    if (manylinux) {
+        if (process.env.PYTHON_VERSION) {
+            const v = process.env.PYTHON_VERSION.replace(".", "");
+            return `/opt/python/cp${v}-cp${v}${
+                v === "37" || v === "36" ? "m" : ""
+            }/bin/python`;
+        } else if (getarg("--python310")) {
+            return `/opt/python/cp310-cp310/bin/python`;
+        } else if (getarg("--python39")) {
+            return `/opt/python/cp39-cp39/bin/python`;
+        } else if (getarg("--python38")) {
+            return `/opt/python/cp38-cp38/bin/python`;
+        } else if (getarg("--python37")) {
+            return `/opt/python/cp37-cp37m/bin/python`;
+        } else {
+            return `/opt/python/cp37-cp37m/bin/python`;
+        }
     } else {
-        return "python3";
+        if (process.env.PYTHON_VERSION) {
+            return `python${process.env.PYTHON_VERSION}`;
+        } else if (getarg("--python310")) {
+            return "python3.10";
+        } else if (getarg("--python39")) {
+            return "python3.9";
+        } else if (getarg("--python38")) {
+            return "python3.8";
+        } else if (getarg("--python37")) {
+            return "python3.7";
+        } else {
+            return "python3";
+        }
     }
 };
 
@@ -319,13 +338,7 @@ exports.python_image = function python_image(image = "", python = "") {
     console.log(
         `-- Getting image for image: '${image}' and python: '${python}'`
     );
-    if (python == "python2") {
-        if (image == "manylinux2014") {
-            throw "Python2 not supported for manylinux2014";
-        } else {
-            return "manylinux2010";
-        }
-    }
+
     return `${image}`;
 };
 

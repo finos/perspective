@@ -138,13 +138,6 @@ yarn build
 
 `perspective-python` supports Python 3.7 and upwards.
 
-### Docker
-
-[Docker](https://docs.docker.com/install/) images with pre-built development
-environments are provided for the Python libraries.
-
-To build Perspective using Docker, select the option in `yarn setup`.
-
 ---
 
 ## System-Specific Instructions
