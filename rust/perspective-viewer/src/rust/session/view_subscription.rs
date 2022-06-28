@@ -19,7 +19,7 @@ use yew::prelude::*;
 
 /// Metadata snapshot of the current `Table()`/`View()` state which may be of
 /// interest to components.
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct TableStats {
     pub is_pivot: bool,
     pub num_rows: Option<u32>,

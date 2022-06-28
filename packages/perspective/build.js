@@ -48,7 +48,6 @@ const BUILD = [
 
 async function build_all() {
     await cpy(["../../cpp/perspective/dist/esm"], "dist/pkg/esm");
-    await cpy(["../../cpp/perspective/dist/cjs"], "dist/pkg/cjs");
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
 }
 

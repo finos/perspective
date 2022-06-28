@@ -1843,33 +1843,6 @@ namespace binding {
 
 using namespace perspective::binding;
 
-/**
- * Main
- */
-int
-main(int argc, char** argv) {
-    t_computed_expression_parser::init();
-
-    // clang-format off
-EM_ASM({
-
-    if (typeof self !== "undefined") {
-        try {
-            if (self.dispatchEvent && !self._perspective_initialized && self.document !== null) {
-                self._perspective_initialized = true;
-                var event = self.document.createEvent("Event");
-                event.initEvent("perspective-ready", false, true);
-                self.dispatchEvent(event);
-            } else if (!self.document && self.postMessage) {                
-                self.postMessage({});
-            }
-        } catch (e) {}
-    }
-
-});
-    // clang-format on
-}
-
 /******************************************************************************
  *
  * Embind
@@ -2308,4 +2281,5 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("scalar_to_val", &scalar_to_val);
     function("validate_expressions", &validate_expressions<t_val>);
     function("is_valid_datetime", &is_valid_datetime);
+    function("init", &t_computed_expression_parser::init);
 }

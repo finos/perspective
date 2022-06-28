@@ -22,7 +22,6 @@ try {
         stdio,
     });
     execSync(`cpy esm/**/* ../esm`, {cwd, stdio});
-    execSync(`cpy cjs/**/* ../cjs`, {cwd, stdio});
 
     const wasm = fs.readFileSync("dist/esm/perspective.cpp.wasm");
     const compressed = fflate.compressSync(wasm);

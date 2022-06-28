@@ -10,11 +10,11 @@ use serde::Deserialize;
 use serde::Serialize;
 use std::fmt::Display;
 
-#[derive(Clone, Deserialize, Debug, PartialEq, Serialize)]
+#[derive(Clone, Deserialize, Debug, Eq, PartialEq, Serialize)]
 #[serde()]
 pub struct Sort(pub String, pub SortDir);
 
-#[derive(Clone, Copy, Deserialize, Debug, PartialEq, Serialize)]
+#[derive(Clone, Copy, Deserialize, Debug, Eq, PartialEq, Serialize)]
 #[serde()]
 pub enum SortDir {
     #[serde(rename = "none")]

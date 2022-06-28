@@ -18,7 +18,7 @@ use std::fmt::Display;
 
 /// The possible states of a column (row) in the active columns list, including
 /// the `Option<String>` label type.
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Eq, PartialEq)]
 pub enum ActiveColumnState {
     Column(Label, String),
     Required(Label),

@@ -38,7 +38,7 @@ impl Display for Scalar {
 }
 
 #[allow(clippy::upper_case_acronyms)]
-#[derive(Clone, Copy, Deserialize, Debug, PartialEq, Serialize)]
+#[derive(Clone, Copy, Deserialize, Debug, Eq, PartialEq, Serialize)]
 #[serde()]
 pub enum FilterOp {
     #[serde(rename = "contains")]

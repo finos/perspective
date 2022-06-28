@@ -20,25 +20,25 @@ const {platform} = process;
 function getUrl() {
     const {arch} = process;
     const baseURL =
-        "https://github.com/WebAssembly/binaryen/releases/download/version_100";
+        "https://github.com/WebAssembly/binaryen/releases/download/version_109";
 
     switch (platform) {
         case "win32":
             if (arch === "x64") {
-                return `${baseURL}/binaryen-version_100-x86_64-windows.tar.gz`;
+                return `${baseURL}/binaryen-version_109-x86_64-windows.tar.gz`;
             }
             break;
         case "darwin":
             if (arch === "arm64") {
-                return `${baseURL}/binaryen-version_100-arm64-macos.tar.gz`;
+                return `${baseURL}/binaryen-version_109-arm64-macos.tar.gz`;
             }
             if (arch === "x64") {
-                return `${baseURL}/binaryen-version_100-x86_64-macos.tar.gz`;
+                return `${baseURL}/binaryen-version_109-x86_64-macos.tar.gz`;
             }
             break;
         case "linux":
             if (arch === "x64") {
-                return `${baseURL}/binaryen-version_100-x86_64-linux.tar.gz`;
+                return `${baseURL}/binaryen-version_109-x86_64-linux.tar.gz`;
             }
             break;
     }
@@ -79,13 +79,13 @@ exports.download_wasm_opt = async function download_wasm_opt() {
 
         const libFolderName = {
             win32: "lib",
-            linux: "lib64",
+            linux: "lib",
             darwin: "lib",
         };
 
         const libFolder = "lib";
 
-        const unpackedFolder = path.resolve(__dirname, "binaryen-version_100");
+        const unpackedFolder = path.resolve(__dirname, "binaryen-version_109");
         const unpackedLibFolder = path.resolve(
             unpackedFolder,
             libFolderName[platform]

@@ -12,7 +12,7 @@ use crate::*;
 use std::rc::Rc;
 use yew::prelude::*;
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Eq, PartialEq)]
 pub enum ExportMethod {
     Csv,
     CsvAll,
@@ -65,7 +65,7 @@ impl ExportMethod {
     }
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Eq, PartialEq)]
 pub struct ExportFile {
     pub name: Rc<String>,
     pub method: ExportMethod,

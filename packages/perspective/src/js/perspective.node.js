@@ -20,24 +20,46 @@ const http = require("http");
 const WebSocket = require("ws");
 const process = require("process");
 const path = require("path");
+const {Decompress} = require("fflate");
 
 const load_perspective =
-    require("../../dist/pkg/cjs/perspective.cpp.js").default;
+    require("../../dist/pkg/esm/perspective.cpp.js").default;
 
 const LOCAL_PATH = path.join(process.cwd(), "node_modules");
 const buffer =
-    require("@finos/perspective/dist/pkg/cjs/perspective.cpp.wasm").default;
+    require("@finos/perspective/dist/pkg/esm/perspective.cpp.wasm").default;
 
+function deflate(buffer) {
+    let parts = [];
+    let length = 0;
+    const decompressor = new Decompress((chunk) => {
+        if (chunk) {
+            length += chunk.byteLength;
+            parts.push(chunk);
+        }
+    });
+
+    decompressor.push(buffer, true);
+    let offset = 0;
+    const buffer2 = new Uint8Array(length);
+    for (const part of parts) {
+        buffer2.set(part, offset);
+        offset += part.byteLength;
+    }
+
+    return buffer2.buffer;
+}
 const SYNC_SERVER = new (class extends Server {
     init(msg) {
         buffer
-            .then((buffer) =>
-                load_perspective({
-                    wasmBinary: buffer,
+            .then((buffer) => {
+                return load_perspective({
+                    wasmBinary: deflate(buffer),
                     wasmJSMethod: "native-wasm",
-                })
-            )
+                });
+            })
             .then((core) => {
+                core.init();
                 this.perspective = perspective(core);
                 super.init(msg);
             });

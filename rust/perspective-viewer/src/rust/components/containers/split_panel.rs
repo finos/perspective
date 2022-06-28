@@ -154,7 +154,7 @@ impl ResizingState {
     }
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Eq, PartialEq)]
 pub enum Orientation {
     Horizontal,
     Vertical,

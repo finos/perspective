@@ -3,19 +3,24 @@ const microtime = require("microtime");
 const psp = require("@finos/perspective");
 const path = require("path");
 
-const VERSIONS = [
-    "@finos/perspective",
-    ...Object.keys(
-        JSON.parse(fs.readFileSync(path.join(__dirname, "../../package.json")))
-            .dependencies
-    ),
-];
+const PKG_DEPS = Object.keys(
+    JSON.parse(fs.readFileSync(path.join(__dirname, "../../package.json")))
+        .dependencies
+);
 
-function load_version(path) {
+process.setMaxListeners(PKG_DEPS.length + 1);
+
+const VERSIONS = ["@finos/perspective", ...PKG_DEPS];
+
+function load_version(path, i) {
     const module = require(path);
-    const {version} = JSON.parse(
+    let {version} = JSON.parse(
         fs.readFileSync(require.resolve(`${path}/package.json`))
     );
+
+    if (i === 0) {
+        version = `${version} (master)`;
+    }
 
     return {version, perspective: module.default || module};
 }
@@ -45,7 +50,9 @@ Object.defineProperty(Array.prototype, "sum", {
 
 async function benchmark({name, before, before_all, test, after, after_all}) {
     let obs_records = [];
-    for (const {version, perspective} of MODULES) {
+    console.log(`${name}`);
+    for (let j = 0; j < MODULES.length; j++) {
+        const {version, perspective} = MODULES[j];
         const args = [];
         args.push_if(await before_all?.(perspective));
         const observations = [];
@@ -62,12 +69,13 @@ async function benchmark({name, before, before_all, test, after, after_all}) {
         }
 
         const avg = observations.sum() / observations.length / 1000;
-        console.log(`${version} ${avg.toFixed(3)}ms`);
+        console.log(`  - ${version} ${avg.toFixed(3)}ms`);
         await after_all?.(perspective, ...args);
 
         obs_records = obs_records.concat(
             observations.map((obs) => ({
                 version: version,
+                version_idx: j,
                 time: obs,
                 benchmark: name,
             }))
@@ -88,6 +96,7 @@ async function benchmark({name, before, before_all, test, after, after_all}) {
 const OBS_TABLE = psp.table({
     version: "string",
     time: "float",
+    version_idx: "integer",
     benchmark: "string",
 });
 
