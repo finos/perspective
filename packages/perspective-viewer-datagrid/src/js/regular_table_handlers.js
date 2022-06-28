@@ -7,8 +7,10 @@
  *
  */
 
-// Import this directly due to overly-sensitive tree shaking
+// TODO Import this directly due to overly-sensitive tree shaking.
 import {get_type_config} from "../../../perspective/src/js/config/index.js";
+import {style_cell_flash} from "./cell_flash.js";
+import {sortHandler} from "./sorting.js";
 
 import {
     activate_plugin_menu,
@@ -168,6 +170,7 @@ function styleListener(regularTable) {
 
                     td.style.position = "";
                     if (plugin?.number_bg_mode === "color") {
+                        td.style.animation = "";
                         td.style.backgroundColor = hex;
                     } else if (plugin?.number_bg_mode === "gradient") {
                         const a = Math.max(
@@ -182,14 +185,27 @@ function styleListener(regularTable) {
                             rgbaToRgb([r, g, b, a], source)
                         );
 
+                        td.style.animation = "";
                         td.style.color = foreground;
                         td.style.backgroundColor = `rgba(${r},${g},${b},${a})`;
+                    } else if (plugin?.number_bg_mode === "pulse") {
+                        // TODO!
+                        style_cell_flash.call(
+                            this,
+                            metadata,
+                            td,
+                            pos_bg_color,
+                            neg_bg_color
+                        );
+                        td.style.backgroundColor = "";
                     } else if (
                         plugin?.number_bg_mode === "disabled" ||
                         !plugin?.number_bg_mode
                     ) {
+                        td.style.animation = "";
                         td.style.backgroundColor = "";
                     } else {
+                        td.style.animation = "";
                         td.style.backgroundColor = "";
                     }
                 }
@@ -358,62 +374,6 @@ function styleListener(regularTable) {
         }
     }
 }
-
-async function sortHandler(regularTable, event, target) {
-    const meta = regularTable.getMeta(target);
-    const column_name = meta.column_header[meta.column_header.length - 1];
-    const sort_method = event.shiftKey ? append_sort : override_sort;
-    const sort = sort_method.call(this, column_name);
-    regularTable.dispatchEvent(
-        new CustomEvent("regular-table-psp-sort", {detail: {sort}})
-    );
-}
-
-function append_sort(column_name) {
-    const sort = [];
-    let found = false;
-    for (const sort_term of this._config.sort) {
-        const [_column_name, _sort_dir] = sort_term;
-        if (_column_name === column_name) {
-            found = true;
-            const term = create_sort.call(this, column_name, _sort_dir);
-            if (term) {
-                sort.push(term);
-            }
-        } else {
-            sort.push(sort_term);
-        }
-    }
-    if (!found) {
-        sort.push([column_name, "desc"]);
-    }
-    return sort;
-}
-function override_sort(column_name) {
-    for (const [_column_name, _sort_dir] of this._config.sort) {
-        if (_column_name === column_name) {
-            const sort = create_sort.call(this, column_name, _sort_dir);
-            return sort ? [sort] : [];
-        }
-    }
-    return [[column_name, "desc"]];
-}
-function create_sort(column_name, sort_dir) {
-    const is_col_sortable = this._config.split_by.length > 0;
-    const order = is_col_sortable ? ROW_COL_SORT_ORDER : ROW_SORT_ORDER;
-    const inc_sort_dir = sort_dir ? order[sort_dir] : "desc";
-    if (inc_sort_dir) {
-        return [column_name, inc_sort_dir];
-    }
-}
-
-const ROW_SORT_ORDER = {desc: "asc", asc: undefined};
-const ROW_COL_SORT_ORDER = {
-    desc: "asc",
-    asc: "col desc",
-    "col desc": "col asc",
-    "col asc": undefined,
-};
 
 async function expandCollapseHandler(regularTable, event) {
     const meta = regularTable.getMeta(event.target);
@@ -633,51 +593,107 @@ function* _tree_header(paths = [], row_headers, regularTable) {
     }
 }
 
-async function dataListener(regularTable, x0, y0, x1, y1) {
-    let columns = {};
-    if (x1 - x0 > 0 && y1 - y0 > 0) {
-        columns = await this._view.to_columns({
-            start_row: y0,
-            start_col: x0,
-            end_row: y1,
-            end_col: x1,
-            id: true,
-        });
-        this._ids = columns.__ID__;
-    } else {
-        this._div_factory.clear();
-    }
+function createDataListener() {
+    let last_meta;
+    let last_column_paths;
+    let last_ids;
+    let last_reverse_ids;
+    let last_reverse_columns;
+    return async function dataListener(regularTable, x0, y0, x1, y1) {
+        let columns = {};
+        let new_window;
+        if (x1 - x0 > 0 && y1 - y0 > 0) {
+            this._is_old_viewport =
+                this._last_window?.start_row === y0 &&
+                this._last_window?.end_row === y1 &&
+                this._last_window?.start_col === x0 &&
+                this._last_window?.end_col === x1;
 
-    const data = [],
-        metadata = [],
-        column_headers = [];
+            new_window = {
+                start_row: y0,
+                start_col: x0,
+                end_row: y1,
+                end_col: x1,
+                id: true,
+            };
 
-    for (const path of this._column_paths.slice(x0, x1)) {
-        const path_parts = path.split("|");
-        const column = columns[path] || new Array(y1 - y0).fill(null);
-        data.push(
-            column.map((x) =>
-                _format.call(this, path_parts, x, regularTable[PLUGIN_SYMBOL])
-            )
-        );
-        metadata.push(column);
-        column_headers.push(path_parts);
-    }
+            columns = await this._view.to_columns(new_window);
+            this._last_window = new_window;
+            this._ids = columns.__ID__;
+            this._reverse_columns = this._column_paths
+                .slice(x0, x1)
+                .reduce((acc, x, i) => {
+                    acc.set(x, i);
+                    return acc;
+                }, new Map());
 
-    return {
-        num_rows: this._num_rows,
-        num_columns: this._column_paths.length,
-        row_headers: Array.from(
-            _tree_header.call(
-                this,
-                columns.__ROW_PATH__,
-                this._config.group_by,
-                regularTable
-            )
-        ),
-        column_headers,
-        data,
-        metadata,
+            this._reverse_ids = this._ids.reduce((acc, x, i) => {
+                acc.set(x?.join("|"), i);
+                return acc;
+            }, new Map());
+        } else {
+            this._div_factory.clear();
+        }
+
+        const data = [],
+            metadata = [],
+            column_headers = [],
+            column_paths = [];
+
+        // for (const path of this._column_paths.slice(x0, x1)) {
+        for (
+            let ipath = x0;
+            ipath < Math.min(x1, this._column_paths.length);
+            ++ipath
+        ) {
+            const path = this._column_paths[ipath];
+            const path_parts = path.split("|");
+            const column = columns[path] || new Array(y1 - y0).fill(null);
+            data.push(
+                column.map((x) =>
+                    _format.call(
+                        this,
+                        path_parts,
+                        x,
+                        regularTable[PLUGIN_SYMBOL]
+                    )
+                )
+            );
+            metadata.push(column);
+            column_headers.push(path_parts);
+            column_paths.push(path);
+        }
+
+        // Only update the last state if this is not a "phantom" call.
+        if (x1 - x0 > 0 && y1 - y0 > 0) {
+            this.last_column_paths = last_column_paths;
+            this.last_meta = last_meta;
+            this.last_ids = last_ids;
+            this.last_reverse_ids = last_reverse_ids;
+            this.last_reverse_columns = last_reverse_columns;
+
+            last_column_paths = column_paths;
+            last_meta = metadata;
+            last_ids = this._ids;
+            last_reverse_ids = this._reverse_ids;
+            last_reverse_columns = this._reverse_columns;
+        }
+
+        return {
+            num_rows: this._num_rows,
+            num_columns: this._column_paths.length,
+            row_headers: Array.from(
+                _tree_header.call(
+                    this,
+                    columns.__ROW_PATH__,
+                    this._config.group_by,
+                    regularTable
+                )
+            ),
+            column_headers,
+            data,
+            metadata,
+        };
     };
 }
 
@@ -810,7 +826,7 @@ export async function createModel(regular, table, view, extend = {}) {
     // Re-use div factory
     model._div_factory = model._div_factory || new ElemFactory("div");
 
-    regular.setDataListener(dataListener.bind(model, regular), {
+    regular.setDataListener(createDataListener().bind(model, regular), {
         virtual_mode:
             window
                 .getComputedStyle(regular)
