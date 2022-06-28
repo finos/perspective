@@ -13,7 +13,6 @@ import {
     createModel,
     configureRegularTable,
     formatters,
-    create_color_record,
 } from "./regular_table_handlers.js";
 import MATERIAL_STYLE from "../less/regular_table.less";
 import TOOLBAR_STYLE from "../less/toolbar.less";
@@ -21,7 +20,7 @@ import {configureRowSelectable, deselect} from "./row_selection.js";
 import {configureClick} from "./click.js";
 import {configureEditable} from "./editing.js";
 import {configureSortable} from "./sorting.js";
-import {PLUGIN_SYMBOL} from "./plugin_menu.js";
+import {PLUGIN_SYMBOL, make_color_record} from "./plugin_menu.js";
 
 export class PerspectiveViewerDatagridPluginElement extends HTMLElement {
     constructor() {
@@ -208,9 +207,11 @@ export class PerspectiveViewerDatagridPluginElement extends HTMLElement {
 
             for (const col of Object.keys(datagrid[PLUGIN_SYMBOL] || {})) {
                 const config = Object.assign({}, datagrid[PLUGIN_SYMBOL][col]);
-                if (config?.pos_color) {
-                    config.pos_color = config.pos_color[0];
-                    config.neg_color = config.neg_color[0];
+                if (config?.pos_fg_color || config?.pos_bg_color) {
+                    config.pos_fg_color = config.pos_fg_color?.[0];
+                    config.neg_fg_color = config.neg_fg_color?.[0];
+                    config.pos_bg_color = config.pos_bg_color?.[0];
+                    config.neg_bg_color = config.neg_bg_color?.[0];
                 }
 
                 if (config?.color) {
@@ -247,17 +248,26 @@ export class PerspectiveViewerDatagridPluginElement extends HTMLElement {
                     delete col_config["column_size_override"];
                 }
 
-                if (col_config?.pos_color) {
-                    col_config.pos_color = create_color_record(
-                        col_config.pos_color
+                if (col_config?.pos_fg_color) {
+                    col_config.pos_fg_color = make_color_record(
+                        col_config.pos_fg_color
                     );
-                    col_config.neg_color = create_color_record(
-                        col_config.neg_color
+                    col_config.neg_fg_color = make_color_record(
+                        col_config.neg_fg_color
+                    );
+                }
+
+                if (col_config?.pos_bg_color) {
+                    col_config.pos_bg_color = make_color_record(
+                        col_config.pos_bg_color
+                    );
+                    col_config.neg_bg_color = make_color_record(
+                        col_config.neg_bg_color
                     );
                 }
 
                 if (col_config?.color) {
-                    col_config.color = create_color_record(col_config.color);
+                    col_config.color = make_color_record(col_config.color);
                 }
 
                 if (Object.keys(col_config).length === 0) {

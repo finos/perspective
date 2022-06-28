@@ -22,6 +22,24 @@ export function make_gradient(chromahex) {
     return `linear-gradient(to right top,rgb(${r1},${g1},${b1}),rgb(${r},${g},${b}) 50%,rgb(${r2},${g2},${b2}))`;
 }
 
+export function make_color_record(color) {
+    const chroma_neg = chroma(color);
+    const _neg_grad = make_gradient(chroma_neg);
+    const rgb = chroma_neg.rgb();
+
+    return [
+        color,
+        ...rgb,
+        _neg_grad,
+        `rgba(${rgb[0]},${rgb[1]},${rgb[2]},1)`,
+        `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0)`,
+    ];
+}
+
+function blend(a, b) {
+    return chroma.mix(a, `rgb(${b[0]},${b[1]},${b[2]})`, 0.5).hex();
+}
+
 export function activate_plugin_menu(regularTable, target, column_max) {
     const is_numeric = typeof column_max !== "undefined";
     const MENU = document.createElement(
@@ -34,10 +52,14 @@ export function activate_plugin_menu(regularTable, target, column_max) {
     let default_config;
     if (is_numeric) {
         default_config = {
-            gradient: column_max,
-            pos_color: this._pos_color[0],
-            neg_color: this._neg_color[0],
-            number_color_mode: "foreground",
+            fg_gradient: column_max,
+            pos_fg_color: this._pos_fg_color[0],
+            neg_fg_color: this._neg_fg_color[0],
+            number_fg_mode: "color",
+            bg_gradient: column_max,
+            pos_bg_color: this._pos_bg_color[0],
+            neg_bg_color: this._neg_bg_color[0],
+            number_bg_mode: "disabled",
         };
     } else {
         default_config = {
@@ -60,25 +82,18 @@ export function activate_plugin_menu(regularTable, target, column_max) {
     const scroll_handler = () => MENU.blur();
     const update_handler = (event) => {
         const config = event.detail;
-        if (config.pos_color) {
-            config.pos_color = [
-                config.pos_color,
-                ...chroma(config.pos_color).rgb(),
-                make_gradient(chroma(config.pos_color)),
-            ];
-            config.neg_color = [
-                config.neg_color,
-                ...chroma(config.neg_color).rgb(),
-                make_gradient(chroma(config.neg_color)),
-            ];
+        if (config.pos_fg_color) {
+            config.pos_fg_color = make_color_record(config.pos_fg_color);
+            config.neg_fg_color = make_color_record(config.neg_fg_color);
+        }
+
+        if (config.pos_bg_color) {
+            config.pos_bg_color = make_color_record(config.pos_bg_color);
+            config.neg_bg_color = make_color_record(config.neg_bg_color);
         }
 
         if (config.color) {
-            config.color = [
-                config.color,
-                ...chroma(config.color).rgb(),
-                make_gradient(chroma(config.color)),
-            ];
+            config.color = make_color_record(config.color);
         }
 
         regularTable[PLUGIN_SYMBOL] = regularTable[PLUGIN_SYMBOL] || {};
@@ -118,9 +133,11 @@ export function activate_plugin_menu(regularTable, target, column_max) {
         (pset[column_name] = pset[column_name] || {})
     );
 
-    if (config.pos_color) {
-        config.pos_color = config.pos_color[0];
-        config.neg_color = config.neg_color[0];
+    if (config.pos_fg_color || config.pos_bg_color) {
+        config.pos_fg_color = config.pos_fg_color?.[0];
+        config.neg_fg_color = config.neg_fg_color?.[0];
+        config.pos_bg_color = config.pos_bg_color?.[0];
+        config.neg_bg_color = config.neg_bg_color?.[0];
     }
 
     if (config.color) {

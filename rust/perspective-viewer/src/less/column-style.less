@@ -32,6 +32,8 @@
     }
 
     input#color-selected,
+    input#fore-selected,
+    input#back-selected,
     input#format-selected {
         float: left;
     }
@@ -105,7 +107,7 @@
     }
 
     div.section {
-        margin-bottom: 4px;
+        margin-bottom: 8px;
         flex: 1 1 100%;
     }
 
@@ -146,7 +148,15 @@
         white-space: pre;
     }
 
+    input[disabled]:after {
+        opacity: 0.5;
+    }
+
     input.parameter[disabled] {
         opacity: 0.5;
+    }
+
+    input[type=checkbox]:not(:disabled) {
+        cursor: pointer;
     }
 }

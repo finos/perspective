@@ -78,7 +78,7 @@ utils.with_server({}, () => {
                             // Find the 'bar' button
                             const bar_button =
                                 style_menu.shadowRoot.querySelector(
-                                    "#radio-list-3"
+                                    '#radio-list-1[name="foreground-list"]'
                                 );
 
                             // Get its coords
