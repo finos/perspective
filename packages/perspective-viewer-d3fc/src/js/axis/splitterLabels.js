@@ -24,16 +24,16 @@ export const splitterLabels = (settings) => {
             .dataJoin("span", "splitter-label")
             .key((d) => d);
 
-        const disabled = !alt && labels.length === 1;
+        const unMoveable = !alt && labels.length === 1;
         const coloured = color && settings.splitValues.length === 0;
         labelDataJoin(selection, labels)
-            .classed("disabled", disabled)
+            .classed("unMoveable", unMoveable)
             .text((d) => d.name)
             .style("color", (d) =>
                 coloured ? withoutOpacity(color(d.name)) : undefined
             )
             .on("click", (event, d) => {
-                if (disabled) return;
+                if (unMoveable) return;
 
                 if (alt) {
                     settings.splitMainValues = settings.splitMainValues.filter(
