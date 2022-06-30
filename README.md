@@ -36,7 +36,7 @@ data or streaming updates via [Apache Arrow](https://arrow.apache.org/).
 <br/>
 <img width="770" src="https://github.com/finos/perspective/blob/gh-pages/img/demo_large.gif?raw=true">
 
-## Examples
+## Examples!
 
 ||||
 |:--|:--|:--|
