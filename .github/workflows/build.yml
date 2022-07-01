@@ -226,7 +226,7 @@ jobs:
       id: emsdk-cache
       with:
         path: .emsdk
-        key: ${{ runner.os }}-emsdk-${{ hashFiles('**/yarn.lock') }}
+        key: ${{ runner.os }}-emsdk-${{ hashFiles('package.json') }}
         restore-keys: |
           ${{ runner.os }}-emsdk-
       if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}

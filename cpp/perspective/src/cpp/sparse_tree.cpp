@@ -1144,16 +1144,20 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info,
                         for (std::set<t_tscalar>::const_iterator iter
                              = vset.begin();
                              iter != vset.end(); ++iter) {
-                            str_size += strlen(iter->get_char_ptr()) + 2;
-                            if (str_size > MAX_JOIN_SIZE) {
+
+                            auto st = iter->to_string();
+                            auto next_len = st.size();
+                            if (next_len + str_size > MAX_JOIN_SIZE) {
                                 break;
                             }
 
                             if (iter != vset.begin()) {
+                                str_size += 2;
                                 ss << ", ";
                             }
 
-                            ss << *iter;
+                            str_size += next_len;
+                            ss << st;
                         }
                         return m_symtable.get_interned_tscalar(
                             ss.str().c_str());

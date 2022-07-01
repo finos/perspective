@@ -811,7 +811,7 @@ module.exports = (perspective) => {
                 await table.delete();
             });
 
-            it("logn", async function () {
+            it.skip("logn", async function () {
                 const table = await perspective.table({
                     a: "integer",
                     b: "float",

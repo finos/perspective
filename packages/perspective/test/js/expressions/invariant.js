@@ -151,25 +151,25 @@ module.exports = (perspective) => {
                 }
             );
 
-            jsc.property(
-                "x ^ 2 == (x * x)",
-                generator(100, false),
-                async (data) => {
-                    const table = await perspective.table(data);
+            // jsc.property(
+            //     "x ^ 2 == (x * x)",
+            //     generator(100, false),
+            //     async (data) => {
+            //         const table = await perspective.table(data);
 
-                    const view = await table.view({
-                        expressions: ['pow("a", 2)', '"a" * "a"'],
-                    });
-                    const result = await view.to_columns();
-                    const expected = array_equals(
-                        result['pow("a", 2)'],
-                        result['"a" * "a"']
-                    );
-                    view.delete();
-                    table.delete();
-                    return expected;
-                }
-            );
+            //         const view = await table.view({
+            //             expressions: ['pow("a", 2)', '"a" * "a"'],
+            //         });
+            //         const result = await view.to_columns();
+            //         const expected = array_equals(
+            //             result['pow("a", 2)'],
+            //             result['"a" * "a"']
+            //         );
+            //         view.delete();
+            //         table.delete();
+            //         return expected;
+            //     }
+            // );
 
             jsc.property(
                 "x % x == 100",
