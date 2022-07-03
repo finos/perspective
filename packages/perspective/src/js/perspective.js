@@ -52,6 +52,8 @@ export default function (Module) {
         if (!_POOL_DEBOUNCES[table_id]) {
             _POOL_DEBOUNCES[table_id] = pool;
             setTimeout(() => _call_process(table_id));
+        } else {
+            pool.delete();
         }
     }
 
@@ -64,6 +66,7 @@ export default function (Module) {
     }
 
     function _remove_process(table_id) {
+        _POOL_DEBOUNCES[table_id]?.delete();
         delete _POOL_DEBOUNCES[table_id];
     }
 
@@ -142,6 +145,7 @@ export default function (Module) {
             _set_process(pool, table_id);
         } else {
             pool._process();
+            pool.delete();
         }
 
         return _Table;
@@ -1302,8 +1306,12 @@ export default function (Module) {
      */
     function table(_Table, index, limit, overridden_types) {
         this._Table = _Table;
-        this.gnode_id = this._Table.get_gnode().get_id();
-        this._Table.get_pool().set_update_delegate(this);
+        const gnode = this._Table.get_gnode();
+        this.gnode_id = gnode.get_id();
+        gnode.delete();
+        const pool = this._Table.get_pool();
+        pool.set_update_delegate(this);
+        pool.delete();
         this.name = Math.random() + "";
         this.initialized = false;
         this.index = index;
@@ -1984,7 +1992,7 @@ export default function (Module) {
                 is_arrow,
                 is_csv,
                 options.port_id
-            );
+            ).delete();
             this.initialized = true;
         } catch (e) {
             console.error(`Update failed: ${e}`);
@@ -2043,7 +2051,7 @@ export default function (Module) {
                 is_arrow,
                 false,
                 options.port_id
-            );
+            ).delete();
             this.initialized = true;
         } catch (e) {
             console.error(`Remove failed`, e);

@@ -325,6 +325,42 @@ module.exports = (perspective) => {
             table.delete();
         });
 
+        it("join with nulls", async function () {
+            const data = [
+                {country: "US", state: "New York", city: null},
+                {
+                    country: "US",
+                    state: "Arizona",
+                    city: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                },
+            ];
+
+            var table = await perspective.table(data);
+            var view = await table.view({
+                group_by: ["country", "state"],
+                columns: ["city"],
+                aggregates: {city: "join"},
+            });
+            var answer = {
+                __ROW_PATH__: [
+                    [],
+                    ["US"],
+                    ["US", "Arizona"],
+                    ["US", "New York"],
+                ],
+                city: [
+                    "null, aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "null, aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "null",
+                ],
+            };
+            let result = await view.to_columns();
+            expect(result).toEqual(answer);
+            view.delete();
+            table.delete();
+        });
+
         it("['z'], first by index with appends", async function () {
             var table = await perspective.table(data, {index: "y"});
             var view = await table.view({
