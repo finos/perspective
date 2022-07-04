@@ -3,7 +3,7 @@
 
 [![npm](https://img.shields.io/npm/v/@finos/perspective.svg?style=flat)](https://www.npmjs.com/package/@finos/perspective)
 [![PyPI](https://img.shields.io/pypi/v/perspective-python.svg?style=flat)](https://pypi.python.org/pypi/perspective-python)
-[![Build Status](https://github.com/finos/perspective/workflows/Build%20Status/badge.svg?branch=master)](https://github.com/finos/perspective/actions?query=workflow%3A%22Build+Status%22)
+[![Build Status](https://github.com/finos/perspective/actions/workflows/build.yml/badge.svg?branch=master&event=push)](https://github.com/finos/perspective/actions/workflows/build.yml)
 
 Perspective is an <i>interactive</i> analytics and data visualization component,
 which is especially well-suited for <i>large</i> and/or <i>streaming</i> datasets.
