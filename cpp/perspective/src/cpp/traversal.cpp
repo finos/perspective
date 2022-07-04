@@ -670,7 +670,7 @@ t_traversal::drop_tree_indices(const std::vector<t_uindex>& indices) {
 
 bool
 t_traversal::is_valid_idx(t_index idx) const {
-    return idx > 0 && idx < t_index(size());
+    return idx >= 0 && idx < t_index(size());
 }
 
 const t_stree*
