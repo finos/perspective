@@ -475,9 +475,14 @@ async function mousedownListener(regularTable, event) {
             regularTable.draw({preserve_width: true});
             activate_plugin_menu.call(this, regularTable, target);
         } else {
-            const [, max] = await this._view.get_min_max(column_name);
+            const [min, max] = await this._view.get_min_max(column_name);
             regularTable.draw({preserve_width: true});
-            activate_plugin_menu.call(this, regularTable, target, max);
+            let bound = Math.max(Math.abs(min), Math.abs(max));
+            if (bound > 1) {
+                bound = Math.round(bound * 100) / 100;
+            }
+
+            activate_plugin_menu.call(this, regularTable, target, bound);
         }
 
         event.preventDefault();
