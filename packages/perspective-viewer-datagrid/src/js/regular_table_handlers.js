@@ -13,7 +13,7 @@ import {get_type_config} from "../../../perspective/src/js/config/index.js";
 import {
     activate_plugin_menu,
     PLUGIN_SYMBOL,
-    make_gradient,
+    make_color_record,
 } from "./plugin_menu.js";
 import {rgbaToRgb, infer_foreground_from_background} from "./color_utils.js";
 
@@ -142,47 +142,89 @@ function styleListener(regularTable) {
             if (is_numeric) {
                 const is_positive = metadata.user > 0;
                 const is_negative = metadata.user < 0;
+
+                let pos_bg_color;
+                if (plugin?.pos_bg_color !== undefined) {
+                    pos_bg_color = plugin.pos_bg_color;
+                } else {
+                    pos_bg_color = this._pos_bg_color;
+                }
+
+                let neg_bg_color;
+                if (plugin?.neg_bg_color !== undefined) {
+                    neg_bg_color = plugin.neg_bg_color;
+                } else {
+                    neg_bg_color = this._neg_bg_color;
+                }
+
+                const bg_tuple = is_positive
+                    ? pos_bg_color
+                    : is_negative
+                    ? neg_bg_color
+                    : ["", ...this._plugin_background, ""];
+
+                {
+                    const [hex, r, g, b, _gradhex] = bg_tuple;
+
+                    td.style.position = "";
+                    if (plugin?.number_bg_mode === "color") {
+                        td.style.backgroundColor = hex;
+                    } else if (plugin?.number_bg_mode === "gradient") {
+                        const a = Math.max(
+                            0,
+                            Math.min(
+                                1,
+                                Math.abs(metadata.user / plugin.bg_gradient)
+                            )
+                        );
+                        const source = this._plugin_background;
+                        const foreground = infer_foreground_from_background(
+                            rgbaToRgb([r, g, b, a], source)
+                        );
+
+                        td.style.color = foreground;
+                        td.style.backgroundColor = `rgba(${r},${g},${b},${a})`;
+                    } else if (
+                        plugin?.number_bg_mode === "disabled" ||
+                        !plugin?.number_bg_mode
+                    ) {
+                        td.style.backgroundColor = "";
+                    } else {
+                        td.style.backgroundColor = "";
+                    }
+                }
+
                 const [hex, r, g, b, gradhex] = (() => {
-                    if (plugin?.pos_color !== undefined) {
+                    if (plugin?.pos_fg_color !== undefined) {
                         return is_positive
-                            ? plugin.pos_color
+                            ? plugin.pos_fg_color
                             : is_negative
-                            ? plugin.neg_color
-                            : ["", 0, 0, 0, ""];
+                            ? plugin.neg_fg_color
+                            : ["", ...this._plugin_background, ""];
                     } else {
                         return is_positive
-                            ? this._pos_color
+                            ? this._pos_fg_color
                             : is_negative
-                            ? this._neg_color
-                            : ["", 0, 0, 0, ""];
+                            ? this._neg_fg_color
+                            : ["", ...this._plugin_background, ""];
                     }
                 })();
 
-                td.style.position = "";
-                if (plugin?.number_color_mode === "background") {
-                    const source = this._plugin_background;
-                    const foreground = infer_foreground_from_background(
-                        rgbaToRgb([r, g, b, 1], source)
-                    );
-                    td.style.color = foreground;
-                    td.style.backgroundColor = hex;
-                } else if (plugin?.number_color_mode === "gradient") {
-                    const a = Math.max(
-                        0,
-                        Math.min(1, Math.abs(metadata.user / plugin.gradient))
-                    );
-                    const source = this._plugin_background;
-                    const foreground = infer_foreground_from_background(
-                        rgbaToRgb([r, g, b, a], source)
-                    );
-
-                    td.style.color = foreground;
-                    td.style.backgroundColor = `rgba(${r},${g},${b},${a})`;
-                } else if (plugin?.number_color_mode === "disabled") {
-                    td.style.backgroundColor = "";
-                    td.style.color = "";
-                } else if (plugin?.number_color_mode === "bar") {
-                    td.style.backgroundColor = "";
+                if (plugin?.number_fg_mode === "disabled") {
+                    if (plugin?.number_bg_mode === "color") {
+                        const source = this._plugin_background;
+                        const foreground = infer_foreground_from_background(
+                            rgbaToRgb(
+                                [bg_tuple[1], bg_tuple[2], bg_tuple[3], 1],
+                                source
+                            )
+                        );
+                        td.style.color = foreground;
+                    } else if (plugin?.number_bg_mode === "gradient") {
+                    } else {
+                        td.style.color = "";
+                    }
+                } else if (plugin?.number_fg_mode === "bar") {
                     td.style.color = "";
                     td.style.position = "relative";
                     if (
@@ -192,16 +234,18 @@ function styleListener(regularTable) {
                     ) {
                         td.children[0].style.background = gradhex;
                     }
-                } else {
-                    td.style.backgroundColor = "";
+                } else if (
+                    plugin?.number_fg_mode === "color" ||
+                    !plugin?.number_fg_mode
+                ) {
                     td.style.color = hex;
                 }
             } else if (type === "boolean") {
                 const [hex] =
                     metadata.user === true
-                        ? this._pos_color
+                        ? this._pos_fg_color
                         : metadata.user === false
-                        ? this._neg_color
+                        ? this._neg_fg_color
                         : ["", 0, 0, 0, ""];
 
                 td.style.backgroundColor = "";
@@ -309,7 +353,7 @@ function styleListener(regularTable) {
             td.classList.toggle("psp-align-left", is_th || !is_numeric);
             td.classList.toggle(
                 "psp-color-mode-bar",
-                plugin?.number_color_mode === "bar" && is_numeric
+                plugin?.number_fg_mode === "bar" && is_numeric
             );
         }
     }
@@ -498,10 +542,10 @@ function _format(parts, val, plugins = {}, use_table_schema = false) {
         "string";
     const plugin = plugins[title];
     const is_numeric = type === "integer" || type === "float";
-    if (is_numeric && plugin?.number_color_mode === "bar") {
+    if (is_numeric && plugin?.number_fg_mode === "bar") {
         const a = Math.max(
             0,
-            Math.min(0.95, Math.abs(val / plugin.gradient) * 0.95)
+            Math.min(0.95, Math.abs(val / plugin.fg_gradient) * 0.95)
         );
         const div = this._div_factory.get();
         const anchor = val >= 0 ? "left" : "right";
@@ -662,10 +706,8 @@ class ElemFactory {
     }
 }
 
-export function create_color_record(color) {
-    const chroma_neg = chroma(color);
-    const _neg_grad = make_gradient(chroma_neg);
-    return [color, ...chroma_neg.rgb(), _neg_grad];
+function blend(a, b) {
+    return chroma.mix(a, `rgb(${b[0]},${b[1]},${b[2]})`, 0.5).hex();
 }
 
 export async function createModel(regular, table, view, extend = {}) {
@@ -675,7 +717,6 @@ export async function createModel(regular, table, view, extend = {}) {
     // feed it into `validate_expressions` and get back the data types for
     // each column without it being affected by a pivot.
     const expressions = config.expressions.map((expr) => expr[1]);
-
     const [
         table_schema,
         validated_expressions,
@@ -695,15 +736,27 @@ export async function createModel(regular, table, view, extend = {}) {
     const _plugin_background = chroma(
         get_rule(regular, "--plugin--background", "#FFFFFF")
     ).rgb();
-    const _pos_color = create_color_record(
+
+    const _pos_fg_color = make_color_record(
         get_rule(regular, "--rt-pos-cell--color", "#338DCD")
     );
-    const _neg_color = create_color_record(
+
+    const _neg_fg_color = make_color_record(
         get_rule(regular, "--rt-neg-cell--color", "#FF5942")
     );
-    const _color = create_color_record(
+
+    const _pos_bg_color = make_color_record(
+        blend(_pos_fg_color[0], _plugin_background)
+    );
+
+    const _neg_bg_color = make_color_record(
+        blend(_neg_fg_color[0], _plugin_background)
+    );
+
+    const _color = make_color_record(
         get_rule(regular, "--active--color", "#ff0000")
     );
+
     const _schema = {...schema, ...expression_schema};
     const _table_schema = {
         ...table_schema,
@@ -734,8 +787,10 @@ export async function createModel(regular, table, view, extend = {}) {
         _open_column_styles_menu: [],
         _plugin_background,
         _color,
-        _pos_color,
-        _neg_color,
+        _pos_fg_color,
+        _neg_fg_color,
+        _pos_bg_color,
+        _neg_bg_color,
         _column_paths,
         _column_types,
         _is_editable,
