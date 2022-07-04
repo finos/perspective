@@ -1,0 +1,32 @@
+{
+    "name": "@finos/perspective-viewer-openlayers",
+    "version": "1.5.0",
+    "main": "src/js/plugin/plugin.js",
+    "files": [
+        "dist/**/*"
+    ],
+    "author": "",
+    "license": "Apache-2.0",
+    "scripts": {
+        "bench": "npm-run-all bench:build bench:run",
+        "bench:build": ":",
+        "bench:run": ":",
+        "build": "node build.js",
+        "test:build": ":",
+        "test:run": ":",
+        "test": "npm-run-all test:build test:run",
+        "watch": ":",
+        "clean": "rimraf dist",
+        "clean:screenshots": "rimraf \"test/screenshots/**/*.@(failed|diff).png\""
+    },
+    "dependencies": {
+        "@finos/perspective": "1.5.0",
+        "d3": "^7.1.1",
+        "gradient-parser": "1.0.2",
+        "less": "^4.1.0",
+        "ol": "^5.3.2"
+    },
+    "peerDependencies": {
+        "@finos/perspective-viewer": "1.5.0"
+    }
+}
