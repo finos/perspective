@@ -1,5 +1,29 @@
 # Changelog
 
+## [v1.5.0](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.4.1...HEAD)
+
+**Breaking changes:**
+
+- Remove Python 3.6 support [\#1867](https://github.com/finos/perspective/pull/1867) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- Wrong Label Color [\#1869](https://github.com/finos/perspective/issues/1869)
+- `join` aggregate is incorrect with certain data sets [\#1786](https://github.com/finos/perspective/issues/1786)
+- Fix small memory leak and validate package.json with CI cache [\#1881](https://github.com/finos/perspective/pull/1881) ([texodus](https://github.com/texodus))
+
+**Closed issues:**
+
+- Aggregates per time ? [\#1870](https://github.com/finos/perspective/issues/1870)
+
+**Merged pull requests:**
+
+- Pin `tornado` to 6.1 in CI [\#1886](https://github.com/finos/perspective/pull/1886) ([texodus](https://github.com/texodus))
+- Changed default color label style for charts with multiple secondary axii [\#1883](https://github.com/finos/perspective/pull/1883) ([texodus](https://github.com/texodus))
+- Update `emsdk` to `3.1.14` [\#1866](https://github.com/finos/perspective/pull/1866) ([texodus](https://github.com/texodus))
+
 ## [v1.4.1](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.4.0...HEAD)

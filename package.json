@@ -95,6 +95,7 @@
         "react": "16.8.6",
         "react-dom": "16.8.6",
         "autoprefixer": "9.7.0",
+        "npm-packlist": "1.1.12",
         "@lumino/algorithm": "^1.9.1",
         "@lumino/commands": "^1.20.0",
         "@lumino/coreutils": "^1.12.0",

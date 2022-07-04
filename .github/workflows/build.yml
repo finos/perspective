@@ -6,7 +6,7 @@ name: Build Status
 on:
   push:
     branches:
-      - "*"
+      - master
     tags:
       - v*
     paths-ignore:
@@ -19,6 +19,9 @@ on:
       - docs/
       - examples/
       - python/perspective/README.md
+  pull_request:
+    branches:
+      - master
   workflow_dispatch:
     inputs:
       ci-full:
