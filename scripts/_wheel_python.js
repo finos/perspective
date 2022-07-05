@@ -61,7 +61,7 @@ try {
     if (MANYLINUX_VERSION) {
         // install deps
         const boost = [
-            `yum -y install wget`,
+            `yum -y install wget libffi-devel`,
             `wget https://boostorg.jfrog.io/artifactory/main/release/1.71.0/source/boost_1_71_0.tar.gz >/dev/null`,
             `tar xfz boost_1_71_0.tar.gz`,
             "cd boost_1_71_0",
