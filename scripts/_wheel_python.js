@@ -21,13 +21,16 @@ const {
 const fs = require("fs-extra");
 const IS_DOCKER = process.env.PSP_DOCKER;
 const IS_MACOS = getarg("--macos");
-const PYTHON = python_version();
 let IMAGE = "manylinux2014";
 let MANYLINUX_VERSION;
+let PYTHON;
 
 if (IS_DOCKER) {
     MANYLINUX_VERSION = manylinux_version();
-    IMAGE = python_image(MANYLINUX_VERSION, PYTHON);
+    PYTHON = python_version(true);
+    IMAGE = python_image(MANYLINUX_VERSION, "xxx");
+} else {
+    PYTHON = python_version();
 }
 
 /**
@@ -57,30 +60,42 @@ try {
     // Create a wheel
     if (MANYLINUX_VERSION) {
         // install deps
+        const boost = [
+            `yum -y install wget`,
+            `wget https://boostorg.jfrog.io/artifactory/main/release/1.71.0/source/boost_1_71_0.tar.gz >/dev/null`,
+            `tar xfz boost_1_71_0.tar.gz`,
+            "cd boost_1_71_0",
+            `./bootstrap.sh`,
+            `./b2 -j8 --with-program_options --with-filesystem --with-system install`,
+            `cd ..`,
+        ].join(" && ");
+
+        // This always runs in docker for now so install boost
+        cmd += ` ${boost} && `;
 
         // These are system deps that may only be in place from pep-517/518 so
         // lets reinstall them to be sure
-        cmd += `${PYTHON} -m pip install -U 'numpy>=1.13.1' wheel twine && `;
+        cmd += `${PYTHON} -m pip install -U 'numpy>=1.13.1' wheel twine auditwheel && `;
 
         // remove the build folder so we completely rebuild (and pick up the
         // libs we just installed above, since this build method won't use
         // pep-517/518)
-        cmd += `rm -rf build/ &&`;
+        cmd += `rm -rf build/ && `;
 
         // now build the wheel in place
-        cmd += `${PYTHON} setup.py build_ext bdist_wheel`;
+        cmd += `${PYTHON} setup.py build_ext bdist_wheel `;
 
         // Use auditwheel on Linux - repaired wheels are in
         // `python/perspective/wheelhouse`.
-        cmd += `&& ${PYTHON} -m auditwheel -v show ./dist/*.whl && ${PYTHON} -m auditwheel -v repair -L .lib ./dist/*.whl`;
+        cmd += `&& ${PYTHON} -m auditwheel -v show ./dist/*.whl && ${PYTHON} -m auditwheel -v repair -L .lib ./dist/*.whl `;
     } else if (IS_MACOS) {
         // Don't need to do any cleaning here since we will reuse the cmake
         // cache and numpy paths from the pep-517/518 build in build_python.js
-        cmd += `${PYTHON} setup.py build_ext bdist_wheel`;
-        cmd += " && mkdir -p ./wheelhouse && cp -v ./dist/*.whl ./wheelhouse";
+        cmd += `${PYTHON} setup.py build_ext bdist_wheel `;
+        cmd += " && mkdir -p ./wheelhouse && cp -v ./dist/*.whl ./wheelhouse ";
     } else {
         // Windows
-        cmd += `${PYTHON} setup.py build_ext bdist_wheel`;
+        cmd += `${PYTHON} setup.py build_ext bdist_wheel `;
     }
 
     // TODO: MacOS wheel processed with delocate segfaults on

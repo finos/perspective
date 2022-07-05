@@ -10,7 +10,6 @@ scripts/* linguist-documentation
 tools/**/* linguist-documentation
 cmake/** linguist-documentation
 CMakeLists.txt linguist-documentation
-docker/** linguist-documentation
 **/*.sh linguist-documentation
 
 * text=auto eol=lf
