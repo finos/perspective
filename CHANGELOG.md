@@ -1,5 +1,29 @@
 # Changelog
 
+## [v1.5.1](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.5.0...HEAD)
+
+**Implemented enhancements:**
+
+- Datagrid cell background "flash" animation when updated [\#1875](https://github.com/finos/perspective/issues/1875)
+- Add `pulse` numeric column background mode [\#1895](https://github.com/finos/perspective/pull/1895) ([texodus](https://github.com/texodus))
+- Split foreground and background numeric column color modes [\#1889](https://github.com/finos/perspective/pull/1889) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- Datagrid open/close row group indicator does not work on the `TOTAL` row when a `split_by` is present [\#1874](https://github.com/finos/perspective/issues/1874)
+- Datagrid tree collapse `hover` indicator triggers on cell hover, but `click` only fires from the button. [\#1873](https://github.com/finos/perspective/issues/1873)
+- Fix gradient bounds calc [\#1890](https://github.com/finos/perspective/pull/1890) ([texodus](https://github.com/texodus))
+- Expand/collapse on entire group cell, rather than just button [\#1888](https://github.com/finos/perspective/pull/1888) ([texodus](https://github.com/texodus))
+- Fix expand/collapse on first row of ctx2 [\#1887](https://github.com/finos/perspective/pull/1887) ([texodus](https://github.com/texodus))
+
+**Merged pull requests:**
+
+- Remove custom docker images [\#1893](https://github.com/finos/perspective/pull/1893) ([texodus](https://github.com/texodus))
+- Fix jlab tests to use local packages [\#1891](https://github.com/finos/perspective/pull/1891) ([texodus](https://github.com/texodus))
+- GHA default \(remove azure\) [\#1854](https://github.com/finos/perspective/pull/1854) ([texodus](https://github.com/texodus))
+
 ## [v1.5.0](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.4.1...HEAD)
