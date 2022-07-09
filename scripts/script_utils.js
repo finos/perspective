@@ -328,6 +328,31 @@ exports.python_version = function python_version(manylinux) {
 };
 
 /**
+ * Get the python tag to use from env/arguments.
+ * NOTE: we only support cpython builds.
+ * 
+ * ref: https://cibuildwheel.readthedocs.io/en/stable/options/#build-skip
+ *
+ * @returns {string} The python tag to use
+ */
+ exports.python_tag = function python_tag(manylinux) {
+     if (process.env.PYTHON_VERSION) {
+         const v = process.env.PYTHON_VERSION.replace(".", "");
+         return `cp${v}`;
+    } else if (getarg("--python310")) {
+        return "cp310";
+    } else if (getarg("--python39")) {
+        return "cp39";
+    } else if (getarg("--python38")) {
+        return "cp38";
+    } else if (getarg("--python37")) {
+        return "cp37";
+    } else {
+        return "cp39";
+    }
+};
+
+/**
  * Get the docker image to use for the given image/python combination
  *
  * @param {string} image The Docker image name.

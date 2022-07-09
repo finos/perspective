@@ -221,6 +221,12 @@ class PSPBuild(build_ext):
             ]
 
         env["PSP_ENABLE_PYTHON"] = "1"
+
+        # Relevant mac env vars:
+        # _PYTHON_HOST_PLATFORM: macosx-11.0-arm64,
+        #                        macosx-10.9-x86_64,
+        #                        macosx-10.9-universal2,
+        # ARCHFLAGS: -arch arm64 -arch x86_64
         env["OSX_DEPLOYMENT_TARGET"] = os.environ.get(
             "PSP_OSX_DEPLOYMENT_TARGET", "10.9"
         )
