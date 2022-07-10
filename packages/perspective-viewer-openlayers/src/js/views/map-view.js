@@ -7,7 +7,7 @@
  *
  */
 
-import {getMapData, getDataExtents} from "../data/data";
+import {getMapData} from "../data/data";
 import {baseMap} from "./base-map";
 import {categoryColorMap} from "../style/categoryColors";
 import {linearColorScale} from "../style/linearColors";
@@ -22,41 +22,39 @@ import {Feature} from "ol";
 import {fromLonLat} from "ol/proj";
 import {Point} from "ol/geom";
 
-const MIN_SIZE = 1;
+const MIN_SIZE = 2;
 const MAX_SIZE = 10;
 const DEFAULT_SIZE = 2;
 
 function mapView(container, config) {
     const data = getMapData(config);
-    const extents = getDataExtents(data);
     const map = baseMap(container);
-
-    const useLinearColors = extents.length > 2;
+    const useLinearColors = !!config.color_extents;
     const colorScale = useLinearColors
-        ? linearColorScale(container, extents[2])
+        ? linearColorScale(container, config.color_extents)
         : null;
+
     const colorMap = useLinearColors
         ? (d) => colorScale(d.cols[2])
         : categoryColorMap(container, data);
-    const sizeMap = sizeMapFromExtents(extents);
-    const shapeMap = categoryShapeMap(container, data);
 
+    const sizeMap = sizeMapFromExtents(config);
+    const shapeMap = categoryShapeMap(container, data);
     const vectorSource = new VectorSource({
         features: data.map((point) =>
             featureFromPoint(point, colorMap, sizeMap, shapeMap)
         ),
         wrapX: false,
     });
-    baseMap.initialiseView(container, vectorSource);
 
+    baseMap.initializeView(container, vectorSource);
     const vectorLayer = new VectorLayer({
         source: vectorSource,
         updateWhileInteracting: true,
         renderMode: "image",
     });
-    map.map.addLayer(vectorLayer);
 
-    // Update the tooltip component
+    map.map.addLayer(vectorLayer);
     map.tooltip
         .config(config)
         .vectorSource(vectorSource)
@@ -65,7 +63,7 @@ function mapView(container, config) {
         .data(data);
 
     if (useLinearColors) {
-        showLegend(container, colorScale, extents[2]);
+        showLegend(container, colorScale, config.color_extents);
     } else {
         hideLegend(container);
     }
@@ -116,20 +114,22 @@ function onHighlight(feature, highlighted) {
     });
 }
 
-function sizeMapFromExtents(extents) {
-    if (extents.length > 3) {
+function sizeMapFromExtents({size_extents}) {
+    if (!!size_extents) {
         // We have the size value
-        const range = extents[3].max - extents[3].min;
+        const range = size_extents.max - size_extents.min;
         return (point) =>
-            ((point.cols[3] - extents[3].min) / range) * (MAX_SIZE - MIN_SIZE) +
+            ((point.cols[3] - size_extents.min) / range) *
+                (MAX_SIZE - MIN_SIZE) +
             MIN_SIZE;
     }
+
     return () => DEFAULT_SIZE;
 }
 
 mapView.plugin = {
-    type: "perspective-viewer-map-points",
-    name: "Map Points",
+    type: "perspective-viewer-openlayers-scatter",
+    name: "Map Scatter",
     max_size: 25000,
     initial: {
         type: "number",

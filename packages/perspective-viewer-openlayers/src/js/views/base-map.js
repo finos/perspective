@@ -37,14 +37,14 @@ baseMap.restyle = (container) => {
     }
 };
 
-baseMap.initialiseView = (container, extent) => {
-    initialiseView(container, extent);
+baseMap.initializeView = (container, extent) => {
+    initializeView(container, extent);
 };
 
 function getOrCreateMap(container) {
     if (!container[PRIVATE]) {
+        // console.log
         const tileLayer = new TileLayer();
-
         const map = new Map({
             target: container,
             layers: [tileLayer],
@@ -59,20 +59,19 @@ function getOrCreateMap(container) {
             initialisedExtent: false,
         };
     }
-
     removeVectorLayer(container);
     setTileUrl(container);
     return container[PRIVATE];
 }
 
-function initialiseView(container, vectorSource) {
-    if (!container[PRIVATE].initialisedExtent) {
-        const extents = vectorSource.getExtent();
-        const map = container[PRIVATE].map;
-        map.getView().fit(extents, {size: map.getSize()});
+function initializeView(container, vectorSource) {
+    // if (!container[PRIVATE].initialisedExtent) {
+    const extents = vectorSource.getExtent();
+    const map = container[PRIVATE].map;
+    map.getView().fit(extents, {size: map.getSize()});
 
-        container[PRIVATE].initialisedExtent = true;
-    }
+    // container[PRIVATE].initialisedExtent = true;
+    // }
 }
 
 function removeVectorLayer(container) {

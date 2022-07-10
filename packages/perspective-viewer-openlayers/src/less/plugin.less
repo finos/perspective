@@ -20,8 +20,12 @@
 
         & .ol-zoom {
             left: auto;
-            top: 4em;
-            left: 0.5em;
+            top: 0.5em;
+            right: 0.5em;
+        }
+
+        & .ol-attribution {
+            filter: var(--map-attribution--filter, none);
         }
 
         & .map-tooltip {
@@ -64,8 +68,8 @@
         & .map-legend {
             position: absolute;
             box-sizing: border-box;
-            top: 3em;
-            right: 0.75em;
+            top: 0.5em;
+            right: 4em;
             width: 80px;
             height: 122px;
             background: var(--map-element-background, #eee);

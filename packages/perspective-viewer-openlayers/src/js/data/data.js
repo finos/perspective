@@ -9,12 +9,13 @@
 
 export function getMapData(config) {
     const points = [];
-
-    // Enumerate through supplied data
+    // const cols = config.columns.map(x => )
     config.data.forEach((row, i) => {
         // Exclude "total" rows that don't have all values
         const groupCount = row.__ROW_PATH__ ? row.__ROW_PATH__.length : 0;
-        if (groupCount < config.group_by.length) return;
+        if (groupCount < config.group_by.length) {
+            return;
+        }
 
         // Get the group from the row path
         const group = row.__ROW_PATH__ ? row.__ROW_PATH__.join("|") : `${i}`;
@@ -36,7 +37,10 @@ export function getMapData(config) {
         // Add the points for this row to the data set
         Object.keys(rowPoints).forEach((key) => {
             const rowPoint = rowPoints[key];
-            const cols = config.columns.map((c) => rowPoint[c]);
+            const cols = config.real_columns.map((c) =>
+                c ? rowPoint[c] : null
+            );
+
             points.push({
                 cols,
                 group: rowPoint.group,
@@ -47,23 +51,4 @@ export function getMapData(config) {
     });
 
     return points;
-}
-
-export function getDataExtents(data) {
-    let extents = null;
-    data.forEach((point) => {
-        if (!extents) {
-            extents = point.cols.map((c) => ({min: c, max: c}));
-        } else {
-            extents = point.cols.map((c, i) =>
-                c
-                    ? {
-                          min: Math.min(c, extents[i].min),
-                          max: Math.max(c, extents[i].max),
-                      }
-                    : extents[i]
-            );
-        }
-    });
-    return extents;
 }

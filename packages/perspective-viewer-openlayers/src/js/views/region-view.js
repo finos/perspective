@@ -7,7 +7,7 @@
  *
  */
 
-import {getMapData, getDataExtents} from "../data/data";
+import {getMapData} from "../data/data";
 import {baseMap} from "./base-map";
 import {linearColorScale} from "../style/linearColors";
 import {showLegend, hideLegend} from "../legend/legend";
@@ -55,7 +55,7 @@ function regionView(container, config) {
         map.map.addLayer(vectorLayer);
 
         vectorSource.on("change", () => {
-            baseMap.initialiseView(container, vectorSource);
+            baseMap.initializeView(container, vectorSource);
         });
 
         // Update the tooltip component

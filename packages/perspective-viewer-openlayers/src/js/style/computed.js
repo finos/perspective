@@ -9,15 +9,9 @@
 import {color, rgb} from "d3-color";
 
 export const computedStyle = (container) => {
-    if (window.ShadyCSS) {
-        return (name, defaultValue) =>
-            window.ShadyCSS.getComputedStyleValue(container, name) ||
-            defaultValue;
-    } else {
-        const containerStyles = getComputedStyle(container);
-        return (name, defaultValue) =>
-            containerStyles.getPropertyValue(name) || defaultValue;
-    }
+    const containerStyles = getComputedStyle(container);
+    return (name, defaultValue) =>
+        containerStyles.getPropertyValue(name) || defaultValue;
 };
 
 export const toFillAndStroke = (col) => {

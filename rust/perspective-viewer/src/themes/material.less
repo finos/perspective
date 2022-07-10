@@ -24,6 +24,7 @@ perspective-viewer[theme="Material Light"],
     .perspective-viewer-material--intl();
     .perspective-viewer-material--d3fc();
     .perspective-viewer-material--datagrid();
+    .perspective-viewer-material--openlayers();
 }
 
 perspective-copy-menu[theme="Material Light"],
@@ -173,6 +174,30 @@ perspective-expression-editor[theme="Material Light"],
         #e4521b 50%,
         #feeb65 90%,
         #f0f0f0 100%
+    );
+}
+
+.perspective-viewer-material--openlayers {
+    --map-tile-url: "http://{a-c}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png";
+    --map-element-background: #fff;
+    --map-category-1: #0366d6;
+    --map-category-2: #ff7f0e;
+    --map-category-3: #2ca02c;
+    --map-category-4: #d62728;
+    --map-category-5: #9467bd;
+    --map-category-6: #8c564b;
+    --map-category-7: #e377c2;
+    --map-category-8: #7f7f7f;
+    --map-category-9: #bcbd22;
+    --map-category-10: #17becf;
+    --map-gradient: linear-gradient(
+        #4d342f 0%,
+        #e4521b 22.5%,
+        #feeb65 42.5%,
+        #f0f0f0 50%,
+        #dcedc8 57.5%,
+        #42b3d5 67.5%,
+        #1a237e 100%
     );
 }
 

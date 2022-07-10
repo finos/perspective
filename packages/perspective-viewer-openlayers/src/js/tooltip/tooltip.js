@@ -199,10 +199,14 @@ export function createTooltip(container, map) {
 
     const composeAggregates = (cols, fromIndex) => {
         if (!cols) return "";
-        const list = config.columns.slice(fromIndex).map((c, i) => ({
-            name: c,
-            value: cols[i + fromIndex].toLocaleString(),
-        }));
+        const list = config.real_columns.slice(fromIndex).map((c, i) =>
+            c === null
+                ? null
+                : {
+                      name: c,
+                      value: cols[i + fromIndex].toLocaleString(),
+                  }
+        );
         return composeList(list);
     };
 
@@ -232,11 +236,12 @@ export function createTooltip(container, map) {
 
     const composeList = (items) => {
         if (items.length) {
-            const itemList = items.map(
-                (item) =>
-                    `<li><span class="label">${sanitize(
-                        item.name
-                    )}</span></span>${sanitize(item.value)}</span></li>`
+            const itemList = items.map((item) =>
+                item === null
+                    ? ``
+                    : `<li><span class="label">${sanitize(
+                          item.name
+                      )}</span></span>${sanitize(item.value)}</span></li>`
             );
             return `<ul>${itemList.join("")}</ul>`;
         }

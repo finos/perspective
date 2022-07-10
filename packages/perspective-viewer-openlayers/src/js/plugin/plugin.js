@@ -9,30 +9,45 @@
 
 import mapView from "../views/map-view";
 import views from "../views/views";
-import "./template";
+import css from "../../less/plugin.less";
 
 views.forEach((plugin) => {
     customElements.define(
         plugin.plugin.type,
         class extends customElements.get("perspective-viewer-plugin") {
+            constructor() {
+                super();
+                this.attachShadow({mode: "open"});
+                const style = document.createElement("style");
+                style.textContent = css;
+                this.shadowRoot.appendChild(style);
+                const container = document.createElement("div");
+                container.setAttribute("id", "container");
+                this.shadowRoot.appendChild(container);
+            }
+
             async draw(view) {
-                drawView(plugin).call(this, view);
+                drawView(plugin).call(this.shadowRoot.children[1], view);
             }
 
             async resize() {
-                mapView.resize(this);
+                mapView.resize(this.shadowRoot.children[1]);
             }
 
             get name() {
                 return plugin.plugin.name;
             }
 
+            get category() {
+                return "OpenStreetMap";
+            }
+
             async restyle(view) {
-                mapView.restyle(this);
+                mapView.restyle(this.shadowRoot.children[1]);
             }
 
             get select_mode() {
-                return "select";
+                return "toggle";
             }
 
             get min_config_columns() {
@@ -50,64 +65,31 @@ views.forEach((plugin) => {
 
 function drawView(viewEntryPoint) {
     return async function (view) {
-        const table = this.parentElement
-            .getTable()
-            .then((table) => table.schema());
+        const table = await this.getRootNode().host.parentElement.getTable();
+
+        // TODO ue faster serialization method
         const [tschema, schema, data, config] = await Promise.all([
-            table,
+            table.schema(),
             view.schema(),
             view.to_json(),
-            view.get_config(),
+            this.getRootNode().host.parentElement.save(),
         ]);
 
-        if (!config.group_by) config.group_by = config.group_by;
-        if (!config.split_by) config.split_by = config.split_by;
-        if (!config.aggregate) config.aggregate = config.aggregates;
+        config.real_columns = config.columns;
+        config.columns = config.columns.filter((x) => !!x);
+
+        // Enrich color info
+        if (!!config.real_columns[2]) {
+            const [min, max] = await view.get_min_max(config.real_columns[2]);
+            config.color_extents = {min, max};
+        }
+
+        // Enrich size info
+        if (!!config.real_columns[3]) {
+            const [min, max] = await view.get_min_max(config.real_columns[3]);
+            config.size_extents = {min, max};
+        }
 
         viewEntryPoint(this, Object.assign({schema, tschema, data}, config));
     };
 }
-
-function resizeView() {
-    if (this[PRIVATE] && this[PRIVATE].view) {
-        this[PRIVATE].view.resize();
-    }
-}
-
-// function deleteView() {
-//     if (this[PRIVATE] && this[PRIVATE].view) {
-//         this[PRIVATE].view.remove();
-//     }
-// }
-
-// function save() {
-//     if (this[PRIVATE] && this[PRIVATE].chart) {
-//         const perspective_d3fc_element = this[PRIVATE].chart;
-//         return perspective_d3fc_element.getSettings();
-//     }
-// }
-
-// function restore(settings) {
-//     const perspective_d3fc_element = getOrCreatePlugin.call(this);
-//     perspective_d3fc_element.setSettings(settings);
-// }
-
-// function getOrCreatePlugin() {
-//     this[PRIVATE] = this[PRIVATE] || {};
-//     if (!this[PRIVATE].view) {
-//         this[PRIVATE].view = document.createElement(name);
-//     }
-
-//     return this[PRIVATE].view;
-// }
-
-// function getElement(div) {
-//     const perspective_d3fc_element = getOrCreatePlugin.call(this);
-
-//     if (!document.body.contains(perspective_d3fc_element)) {
-//         div.innerHTML = "";
-//         div.appendChild(perspective_d3fc_element);
-//     }
-
-//     return perspective_d3fc_element;
-// }
