@@ -5,6 +5,7 @@
             "md/python",
             "md/table",
             "md/view",
+            "md/expressions",
             "md/server",
             "md/development"
         ],
