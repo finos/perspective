@@ -42,6 +42,17 @@ class PerspectiveWebpackPlugin {
         const moduleOptions =
             compilerOptions.module || (compilerOptions.module = {});
         const rules = [];
+
+        // Emscripten outputs require statements for these which are not called
+        // when loaded in browser.  It's not polite to delete these but ...
+        const resolveOptions =
+            compilerOptions.resolve || (compilerOptions.resolve = {});
+        const fallbackOptions =
+            resolveOptions.fallback || (resolveOptions.fallback = {});
+
+        fallbackOptions.path = false;
+        fallbackOptions.fs = false;
+
         rules.push({
             test: /perspective\.worker\.js$/,
             type: "javascript/auto",
