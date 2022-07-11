@@ -5,9 +5,9 @@
             "md/python",
             "md/table",
             "md/view",
+            "md/expressions",
             "md/server",
-            "md/development",
-            "md/expressions"
+            "md/development"
         ],
         "API": [
             "obj/perspective",

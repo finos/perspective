@@ -34,7 +34,10 @@ async function main() {
     let ARROW_ICON = `<span style="font-family:'Material Icons';vertical-align:bottom">arrow_forward</span>`;
     for (const pre of document.querySelectorAll("pre")) {
         const code = pre.children[0];
-        if (code.classList.contains("language-html")) {
+        if (
+            !code.classList.contains("language-python") &&
+            !code.classList.contains("language-javascript")
+        ) {
             continue;
         }
         const name = code.classList.contains("language-javascript")
