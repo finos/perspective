@@ -8,17 +8,18 @@
 
 use super::registry::*;
 use crate::js::plugin::*;
+use std::collections::HashMap;
 
 #[derive(Default)]
 pub struct PluginStore {
     plugins: Option<Vec<JsPerspectiveViewerPlugin>>,
-    plugin_records: Option<Vec<String>>,
+    plugin_records: Option<HashMap<String, Vec<String>>>,
 }
 
 impl PluginStore {
     fn init_lazy(&mut self) {
         self.plugins = Some(PLUGIN_REGISTRY.create_plugins());
-        self.plugin_records = Some(PLUGIN_REGISTRY.available_plugin_names());
+        self.plugin_records = Some(PLUGIN_REGISTRY.available_plugin_names_by_category());
     }
 
     pub fn plugins(&mut self) -> &Vec<JsPerspectiveViewerPlugin> {
@@ -29,7 +30,7 @@ impl PluginStore {
         self.plugins.as_ref().unwrap()
     }
 
-    pub fn plugin_records(&mut self) -> &Vec<String> {
+    pub fn plugin_records(&mut self) -> &HashMap<String, Vec<String>> {
         if self.plugins.is_none() {
             self.init_lazy();
         }

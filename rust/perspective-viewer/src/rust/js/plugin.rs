@@ -24,6 +24,9 @@ extern "C" {
     pub fn name(this: &JsPerspectiveViewerPlugin) -> String;
 
     #[wasm_bindgen(method, getter)]
+    pub fn category(this: &JsPerspectiveViewerPlugin) -> Option<String>;
+
+    #[wasm_bindgen(method, getter)]
     pub fn max_columns(this: &JsPerspectiveViewerPlugin) -> Option<usize>;
 
     #[wasm_bindgen(method, getter)]

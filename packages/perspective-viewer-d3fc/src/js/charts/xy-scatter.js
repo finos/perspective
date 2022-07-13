@@ -132,6 +132,7 @@ function xyScatter(container, settings) {
 
 xyScatter.plugin = {
     name: "X/Y Scatter",
+    category: "X/Y Chart",
     max_cells: 50000,
     max_columns: 50,
     render_warning: true,

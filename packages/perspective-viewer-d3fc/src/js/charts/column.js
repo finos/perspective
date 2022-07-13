@@ -93,6 +93,7 @@ function columnChart(container, settings) {
 }
 columnChart.plugin = {
     name: "Y Bar",
+    category: "Y Chart",
     max_cells: 1000,
     max_columns: 50,
     render_warning: true,

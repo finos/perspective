@@ -97,6 +97,7 @@ function lineChart(container, settings) {
 
 lineChart.plugin = {
     name: "Y Line",
+    category: "Y Chart",
     max_cells: 4000,
     max_columns: 50,
     render_warning: true,

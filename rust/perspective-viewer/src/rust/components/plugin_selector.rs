@@ -37,6 +37,7 @@ pub enum PluginSelectorMsg {
 }
 
 pub struct PluginSelector {
+    options: Vec<SelectItem<String>>,
     _plugin_sub: Subscription,
 }
 
@@ -46,6 +47,7 @@ impl Component for PluginSelector {
 
     fn create(ctx: &Context<Self>) -> Self {
         enable_weak_link_test!(ctx.props(), ctx.link());
+        let options = generate_plugin_optgroups(&ctx.props().renderer);
         let _plugin_sub = ctx.props().renderer.plugin_changed.add_listener({
             let link = ctx.link().clone();
             move |plugin: JsPerspectiveViewerPlugin| {
@@ -54,7 +56,10 @@ impl Component for PluginSelector {
             }
         });
 
-        PluginSelector { _plugin_sub }
+        PluginSelector {
+            options,
+            _plugin_sub,
+        }
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
@@ -85,20 +90,13 @@ impl Component for PluginSelector {
         let callback = ctx
             .link()
             .callback(PluginSelectorMsg::ComponentSelectPlugin);
-        let plugin_name = ctx.props().renderer.get_active_plugin().unwrap().name();
-        let options = ctx
-            .props()
-            .renderer
-            .get_all_plugin_names()
-            .into_iter()
-            .map(SelectItem::Option)
-            .collect::<Vec<_>>();
 
+        let plugin_name = ctx.props().renderer.get_active_plugin().unwrap().name();
         html! {
             <div id="plugin_selector_container">
                 <Select<String>
                     id="plugin_selector"
-                    values={ options }
+                    values={ self.options.clone() }
                     selected={ plugin_name }
                     on_select={ callback }>
 
@@ -106,4 +104,17 @@ impl Component for PluginSelector {
             </div>
         }
     }
+}
+
+/// Generate the opt groups for the plugin selector by collecting by category
+/// then sorting.
+fn generate_plugin_optgroups(renderer: &Renderer) -> Vec<SelectItem<String>> {
+    let mut options = renderer
+        .get_all_plugin_categories()
+        .into_iter()
+        .map(|(category, value)| SelectItem::OptGroup(category.into(), value))
+        .collect::<Vec<_>>();
+
+    options.sort_by_key(|x| x.name());
+    options
 }

@@ -73,14 +73,17 @@ impl Component for CopyDropDownMenu {
 fn get_menu_items(has_render: bool) -> Vec<CopyDropDownMenuItem> {
     vec![
         CopyDropDownMenuItem::OptGroup(
-            "Current View",
+            "Current View".into(),
             if has_render {
                 vec![ExportMethod::Csv, ExportMethod::Json, ExportMethod::Png]
             } else {
                 vec![ExportMethod::Csv, ExportMethod::Json]
             },
         ),
-        CopyDropDownMenuItem::OptGroup("All", vec![ExportMethod::CsvAll, ExportMethod::JsonAll]),
-        CopyDropDownMenuItem::OptGroup("Config", vec![ExportMethod::JsonConfig]),
+        CopyDropDownMenuItem::OptGroup("All".into(), vec![
+            ExportMethod::CsvAll,
+            ExportMethod::JsonAll,
+        ]),
+        CopyDropDownMenuItem::OptGroup("Config".into(), vec![ExportMethod::JsonConfig]),
     ]
 }

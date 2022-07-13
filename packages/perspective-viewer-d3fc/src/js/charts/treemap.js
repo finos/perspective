@@ -80,6 +80,7 @@ function treemap(container, settings) {
 treemap.plugin = {
     type: "Treemap",
     name: "Treemap",
+    category: "Hierarchial Chart",
     max_cells: 5000,
     max_columns: 50,
     render_warning: true,

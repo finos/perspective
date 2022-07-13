@@ -87,6 +87,7 @@ function sunburst(container, settings) {
 
 sunburst.plugin = {
     name: "Sunburst",
+    category: "Hierarchial Chart",
     max_cells: 7500,
     max_columns: 50,
     render_warning: true,

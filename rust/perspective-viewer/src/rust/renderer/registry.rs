@@ -10,6 +10,7 @@ use crate::js::plugin::*;
 
 use extend::ext;
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::rc::Rc;
 use std::thread::LocalKey;
 use wasm_bindgen::prelude::*;
@@ -22,6 +23,7 @@ thread_local! {
 
 pub struct PluginRecord {
     name: String,
+    category: String,
     tag_name: String,
 }
 
@@ -62,14 +64,18 @@ pub impl LocalKey<Rc<RefCell<Vec<PluginRecord>>>> {
         })
     }
 
-    fn available_plugin_names(&'static self) -> Vec<String> {
+    fn available_plugin_names_by_category(&'static self) -> HashMap<String, Vec<String>> {
         register_default();
         self.with(|plugins| {
-            plugins
-                .borrow()
-                .iter()
-                .map(|plugin| plugin.name.to_owned())
-                .collect()
+            plugins.borrow().iter().fold(
+                HashMap::<String, Vec<String>>::default(),
+                |mut acc, plugin| {
+                    acc.entry(plugin.category.to_owned())
+                        .or_default()
+                        .push(plugin.name.to_owned());
+                    acc
+                },
+            )
         })
     }
 
@@ -81,9 +87,13 @@ pub impl LocalKey<Rc<RefCell<Vec<PluginRecord>>>> {
         );
 
         self.with(|plugin| {
+            let plugin_inst = create_plugin(tag_name);
             let record = PluginRecord {
                 tag_name: tag_name.to_owned(),
-                name: create_plugin(tag_name).name(),
+                name: plugin_inst.name(),
+                category: plugin_inst
+                    .category()
+                    .unwrap_or_else(|| "Custom".to_owned()),
             };
 
             plugin.borrow_mut().push(record);
@@ -101,6 +111,7 @@ fn register_default() {
         if plugins.borrow().len() == 0 {
             plugins.borrow_mut().push(PluginRecord {
                 name: "Debug".to_owned(),
+                category: "Custom".to_owned(),
                 tag_name: "perspective-viewer-plugin".to_owned(),
             })
         }
