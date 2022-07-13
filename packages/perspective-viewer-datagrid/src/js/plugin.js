@@ -133,6 +133,10 @@ export class PerspectiveViewerDatagridPluginElement extends HTMLElement {
         return "Datagrid";
     }
 
+    get category() {
+        return "Basic";
+    }
+
     get select_mode() {
         return "toggle";
     }

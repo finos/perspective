@@ -82,6 +82,7 @@ function heatmapChart(container, settings) {
 }
 heatmapChart.plugin = {
     name: "Heatmap",
+    category: "Hierarchial Chart",
     max_cells: 50000,
     max_columns: 500,
     render_warning: true,

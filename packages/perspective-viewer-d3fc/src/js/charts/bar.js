@@ -66,6 +66,7 @@ function barChart(container, settings) {
 }
 barChart.plugin = {
     name: "X Bar",
+    category: "X Chart",
     max_cells: 1000,
     max_columns: 50,
     render_warning: true,

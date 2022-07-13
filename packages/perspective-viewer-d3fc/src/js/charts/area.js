@@ -98,6 +98,7 @@ function areaChart(container, settings) {
 }
 areaChart.plugin = {
     name: "Y Area",
+    category: "Y Chart",
     max_cells: 4000,
     max_columns: 50,
     render_warning: true,

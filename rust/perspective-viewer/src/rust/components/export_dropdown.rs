@@ -50,7 +50,7 @@ pub enum ExportDropDownMenuMsg {
 fn get_menu_items(name: &str, has_render: bool) -> Vec<ExportDropDownMenuItem> {
     vec![
         ExportDropDownMenuItem::OptGroup(
-            "Current View",
+            "Current View".into(),
             if has_render {
                 vec![
                     ExportMethod::Csv.new_file(name),
@@ -68,12 +68,14 @@ fn get_menu_items(name: &str, has_render: bool) -> Vec<ExportDropDownMenuItem> {
                 ]
             },
         ),
-        ExportDropDownMenuItem::OptGroup("All", vec![
+        ExportDropDownMenuItem::OptGroup("All".into(), vec![
             ExportMethod::CsvAll.new_file(name),
             ExportMethod::JsonAll.new_file(name),
             ExportMethod::ArrowAll.new_file(name),
         ]),
-        ExportDropDownMenuItem::OptGroup("Config", vec![ExportMethod::JsonConfig.new_file(name)]),
+        ExportDropDownMenuItem::OptGroup("Config".into(), vec![
+            ExportMethod::JsonConfig.new_file(name)
+        ]),
     ]
 }
 

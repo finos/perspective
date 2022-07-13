@@ -103,6 +103,7 @@ function yScatter(container, settings) {
 
 yScatter.plugin = {
     name: "Y Scatter",
+    category: "Y Chart",
     max_cells: 4000,
     max_columns: 50,
     render_warning: true,

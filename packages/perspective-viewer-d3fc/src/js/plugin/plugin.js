@@ -88,6 +88,10 @@ export function register(...plugins) {
                         return chart.plugin.name;
                     }
 
+                    get category() {
+                        return chart.plugin.category;
+                    }
+
                     get select_mode() {
                         return chart.plugin.selectMode || "select";
                     }
