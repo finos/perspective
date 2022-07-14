@@ -23,6 +23,7 @@ perspective-viewer[theme="Material Dark"],
     .perspective-viewer-material-dark--colors();
     .perspective-viewer-material-dark--datagrid();
     .perspective-viewer-material-dark--d3fc();
+    .perspective-viewer-material-dark--openlayers();
 }
 
 perspective-copy-menu[theme="Material Dark"],
@@ -61,6 +62,27 @@ perspective-expression-editor[theme="Material Dark"],
     --string--column-type--color: @red50;
     --date--column-type--color: @green50;
     --boolean--column-type--color: @orange50;
+}
+
+.perspective-viewer-material-dark--openlayers {
+    --map-tile-url: "http://{a-c}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png";
+    --map-attribution--filter: invert(1) hue-rotate(180deg);
+    --map-element-background: @grey700;
+    --map-category-1: rgb(71, 120, 194);
+    --map-category-2: rgb(204, 120, 48);
+    --map-category-3: rgb(158, 84, 192);
+    --map-category-4: rgb(51, 150, 153);
+    --map-category-5: rgb(102, 114, 143);
+    --map-category-6: rgb(211, 103, 189);
+    --map-category-7: rgb(109, 124, 77);
+    --map-category-8: rgb(221, 99, 103);
+    --map-category-9: rgb(120, 104, 206);
+    --map-category-10: rgb(23, 166, 123);    
+    --map-gradient: linear-gradient(
+        #dd6367 0%,
+        #242526 50%,
+        #3289c8 100%
+    );
 }
 
 .perspective-viewer-material-dark--datagrid {

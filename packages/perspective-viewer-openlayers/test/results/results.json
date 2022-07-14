@@ -1,0 +1,16 @@
+{
+    "superstore_shows_a_grid_without_any_settings_applied": "10d1208b485425756fcc932229386b02",
+    "superstore_displays_visible_columns_": "10d1208b485425756fcc932229386b02",
+    "superstore_pivot_by_a_row": "10d1208b485425756fcc932229386b02",
+    "superstore_pivot_by_two_rows": "10d1208b485425756fcc932229386b02",
+    "superstore_pivot_by_a_column": "10d1208b485425756fcc932229386b02",
+    "superstore_pivot_by_a_row_and_a_column": "10d1208b485425756fcc932229386b02",
+    "superstore_pivot_by_two_rows_and_two_columns": "10d1208b485425756fcc932229386b02",
+    "superstore_sort_by_a_hidden_column": "10d1208b485425756fcc932229386b02",
+    "superstore_sort_by_a_numeric_column": "10d1208b485425756fcc932229386b02",
+    "superstore_sort_by_an_alpha_column": "10d1208b485425756fcc932229386b02",
+    "superstore_filters_filters_by_a_numeric_column": "10d1208b485425756fcc932229386b02",
+    "superstore_filters_filters_by_an_alpha_column": "10d1208b485425756fcc932229386b02",
+    "superstore_filters_filters_with__in__comparator": "10d1208b485425756fcc932229386b02",
+    "__GIT_COMMIT__": "fa4d178e2674dfd4b9edd5594b93df307ae7640c"
+}
