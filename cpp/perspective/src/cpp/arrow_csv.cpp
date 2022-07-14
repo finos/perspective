@@ -78,7 +78,8 @@ namespace apachearrow {
     public:
         bool
         operator()(const char* s, size_t length, arrow::TimeUnit::type out_unit,
-            int64_t* out, bool* out_zone_offset_present = NULLPTR) const override {
+            int64_t* out,
+            bool* out_zone_offset_present = NULLPTR) const override {
             size_t endptr;
             std::string val(s, s + length);
             int64_t value
@@ -142,7 +143,8 @@ namespace apachearrow {
     public:
         bool
         operator()(const char* s, size_t length, arrow::TimeUnit::type unit,
-            int64_t* out, bool* out_zone_offset_present = NULLPTR) const override {
+            int64_t* out,
+            bool* out_zone_offset_present = NULLPTR) const override {
 
             if (!arrow::internal::ParseTimestampISO8601(s, length, unit, out)) {
                 if (s[length - 1] == 'Z') {
@@ -247,6 +249,7 @@ namespace apachearrow {
         auto convert_options = arrow::csv::ConvertOptions::Defaults();
 
         read_options.use_threads = false;
+        parse_options.newlines_in_values = true;
 
         if (is_update) {
             convert_options.column_types = std::move(schema);
