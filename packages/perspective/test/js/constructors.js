@@ -797,6 +797,16 @@ module.exports = (perspective) => {
             view.delete();
             table.delete();
         });
+
+        it("Handles duplicate column names with different types", async function () {
+            const csv = "A,A\ntest,1";
+            let table = await perspective.table(csv);
+            let view = await table.view();
+            let csv2 = await view.to_csv();
+            expect(csv2).toEqual(csv);
+            view.delete();
+            table.delete();
+        });
     });
 
     describe("Constructors", function () {
