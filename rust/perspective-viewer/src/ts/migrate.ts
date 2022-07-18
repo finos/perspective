@@ -414,12 +414,24 @@ function migrate_plugin_config(old, options) {
                 delete old.plugin_config[name];
 
                 if (typeof column.color_mode === "string") {
-                    column.number_color_mode = column.color_mode;
+                    if (column.color_mode === "foreground") {
+                        column.number_fg_mode = "color";
+                    } else if (column.color_mode === "bar") {
+                        column.number_fg_mode = "bar";
+                    } else if (column.color_mode === "background") {
+                        column.number_bg_mode = "color";
+                    } else if (column.color_mode === "gradient") {
+                        column.number_bg_mode = "gradient";
+                    } else {
+                        console.warn(`Unknown color_mode ${column.color_mode}`);
+                    }
+
+                    // column.number_color_mode = column.color_mode;
                     delete column["color_mode"];
 
                     if (options.warn) {
                         console.warn(
-                            `Deprecated perspective attribute "color_mode" renamed "number_color_mode"`
+                            `Deprecated perspective attribute "color_mode" renamed "number_bg_mode"`
                         );
                     }
                 }
@@ -431,6 +443,77 @@ function migrate_plugin_config(old, options) {
             if (options.replace_defaults) {
                 old.plugin_config.editable = false;
                 old.plugin_config.scroll_lock = true;
+            }
+        }
+
+        // Post 1.5, number columns have been split between `fg` and `bg`
+        // style param contexts.
+        for (const name of Object.keys(old.plugin_config.columns)) {
+            const column = old.plugin_config.columns[name];
+
+            if (typeof column.number_color_mode === "string") {
+                if (column.number_color_mode === "foreground") {
+                    column.number_fg_mode = "color";
+                } else if (column.number_color_mode === "bar") {
+                    column.number_fg_mode = "bar";
+                } else if (column.number_color_mode === "background") {
+                    column.number_bg_mode = "color";
+                } else if (column.number_color_mode === "gradient") {
+                    column.number_bg_mode = "gradient";
+                }
+
+                delete column["number_color_mode"];
+
+                if (options.warn) {
+                    console.warn(
+                        `Deprecated perspective attribute "number_color_mode" renamed "number_bg_mode"`
+                    );
+                }
+            }
+
+            if (column.gradient !== undefined) {
+                if (column.number_bg_mode === "gradient") {
+                    column.bg_gradient = column.gradient;
+                } else if (column.number_fg_mode === "bar") {
+                    column.fg_gradient = column.gradient;
+                }
+
+                delete column["gradient"];
+                if (options.warn) {
+                    console.warn(
+                        `Deprecated perspective attribute "gradient" renamed "bg_gradient"`
+                    );
+                }
+            }
+
+            if (column.pos_color !== undefined) {
+                if (column.number_bg_mode !== undefined) {
+                    column.pos_bg_color = column.pos_color;
+                } else if (column.number_fg_mode !== undefined) {
+                    column.pos_fg_color = column.pos_color;
+                }
+
+                delete column["pos_color"];
+                if (options.warn) {
+                    console.warn(
+                        `Deprecated perspective attribute "pos_color" renamed "pos_bg_color"`
+                    );
+                }
+            }
+
+            if (column.neg_color !== undefined) {
+                if (column.number_bg_mode !== undefined) {
+                    column.neg_bg_color = column.neg_color;
+                } else if (column.number_fg_mode !== undefined) {
+                    column.neg_fg_color = column.neg_color;
+                }
+
+                delete column["neg_color"];
+                if (options.warn) {
+                    console.warn(
+                        `Deprecated perspective attribute "neg_color" renamed "neg_bg_color"`
+                    );
+                }
             }
         }
     }
