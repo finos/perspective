@@ -27,7 +27,7 @@ export const domain = () => {
     const _domain = (data) => {
         const flattenedData = flattenArray(data);
         return transformDomain([
-            ...new Set(flattenedData.map((d) => d[valueNames[0]])),
+            ...Array.from(new Set(flattenedData.map((d) => d[valueNames[0]]))),
         ]);
     };
 

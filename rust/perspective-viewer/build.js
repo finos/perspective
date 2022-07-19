@@ -126,8 +126,7 @@ const INHERIT = {
     stderr: "inherit",
 };
 
-async function build_all() {
-    await Promise.all(PREBUILD.map(build)).catch(() => process.exit(1));
+async function compile_rust() {
     const cargo_debug = IS_DEBUG ? "" : "--release";
 
     // Compile rust
@@ -184,6 +183,13 @@ async function build_all() {
     const wasm = fs.readFileSync("dist/pkg/perspective_viewer_bg.wasm");
     const compressed = fflate.compressSync(wasm, {level: 9});
     fs.writeFileSync("dist/pkg/perspective_viewer_bg.wasm", compressed);
+}
+
+async function build_all() {
+    await Promise.all(PREBUILD.map(build)).catch(() => process.exit(1));
+
+    // Rust
+    await compile_rust();
 
     // JavaScript
     execSync("yarn tsc --project tsconfig.json", INHERIT);
