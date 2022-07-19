@@ -1,5 +1,32 @@
 # Changelog
 
+## [v1.6.0](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.5.1...HEAD)
+
+**Implemented enhancements:**
+
+- Implement start\_of\_week and start\_of\_isoweek functions in expression language [\#1901](https://github.com/finos/perspective/issues/1901)
+- Add categories to plugin selector [\#1908](https://github.com/finos/perspective/pull/1908) ([texodus](https://github.com/texodus))
+- Add `@finos/perspective-viewer-openlayers` plugin [\#1882](https://github.com/finos/perspective/pull/1882) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- Add migrate support for datagrid `plugin_config` API [\#1914](https://github.com/finos/perspective/pull/1914) ([texodus](https://github.com/texodus))
+- Fix webpack plugin compat with emsdk single-link build [\#1904](https://github.com/finos/perspective/pull/1904) ([texodus](https://github.com/texodus))
+
+**Closed issues:**
+
+- Sunburst charts in tabs cause hanging [\#1909](https://github.com/finos/perspective/issues/1909)
+- Provide complete documentation for Perspective's variant of ExprTK [\#1818](https://github.com/finos/perspective/issues/1818)
+
+**Merged pull requests:**
+
+- New GitHub Pages site [\#1912](https://github.com/finos/perspective/pull/1912) ([texodus](https://github.com/texodus))
+- Fix Python sdist CI build  [\#1907](https://github.com/finos/perspective/pull/1907) ([texodus](https://github.com/texodus))
+- Fix python CI builds for all linux variants [\#1905](https://github.com/finos/perspective/pull/1905) ([texodus](https://github.com/texodus))
+- Expression Docs [\#1903](https://github.com/finos/perspective/pull/1903) ([texodus](https://github.com/texodus))
+
 ## [v1.5.1](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.5.0...HEAD)

@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-viewer-openlayers",
-    "version": "1.5.1",
+    "version": "1.6.0",
     "main": "src/js/plugin/plugin.js",
     "files": [
         "dist/**/*"
@@ -20,8 +20,8 @@
         "clean:screenshots": "rimraf \"test/screenshots/**/*.@(failed|diff).png\""
     },
     "dependencies": {
-        "@finos/perspective": "1.5.1",
-        "@finos/perspective-viewer": "1.5.1",
+        "@finos/perspective": "^1.6.0",
+        "@finos/perspective-viewer": "^1.6.0",
         "d3": "^7.1.1",
         "gradient-parser": "1.0.2",
         "less": "^4.1.0",

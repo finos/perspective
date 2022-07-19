@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-workspace",
-    "version": "1.5.1",
+    "version": "1.6.0",
     "description": "Perspective Workspace",
     "files": [
         "dist/**/*",
@@ -43,14 +43,14 @@
     "author": "",
     "license": "Apache-2.0",
     "dependencies": {
-        "@finos/perspective-viewer": "^1.5.1",
+        "@finos/perspective-viewer": "^1.6.0",
         "@lumino/algorithm": "1.9.1",
         "@lumino/commands": "1.20.0",
         "@lumino/widgets": "1.31.1",
         "lodash": "^4.17.4"
     },
     "devDependencies": {
-        "@finos/perspective-build": "^1.5.1",
-        "@finos/perspective-test": "^1.5.1"
+        "@finos/perspective-build": "^1.6.0",
+        "@finos/perspective-test": "^1.6.0"
     }
 }
