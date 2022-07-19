@@ -27,12 +27,12 @@
         "cssnano": "^4.1.10",
         "cssnano-preset-lite": "^1.0.1",
         "exports-loader": "^3.1.0",
-        "postcss": "^7.0.19",
-        "postcss-loader": "^4.3.0",
+        "postcss": "^8",
+        "postcss-loader": "^7",
         "string-replace-loader": "^3.0.1",
         "worker-loader": "^3.0.7"
     },
     "peerDependencies": {
-        "webpack": "^5.0.0"
+        "webpack": "^5.60.0"
     }
 }
