@@ -12,8 +12,8 @@ import perspective from "./perspective.js";
 
 let _perspective_instance;
 
-if (global.document !== undefined && typeof WebAssembly !== "undefined") {
-    _perspective_instance = global.perspective = perspective(
+if (globalThis.document !== undefined && typeof WebAssembly !== "undefined") {
+    _perspective_instance = globalThis.perspective = perspective(
         load_perspective({
             wasmJSMethod: "native-wasm",
             printErr: (x) => console.error(x),
@@ -21,7 +21,8 @@ if (global.document !== undefined && typeof WebAssembly !== "undefined") {
         })
     );
 } else {
-    _perspective_instance = global.perspective = perspective(load_perspective);
+    _perspective_instance = globalThis.perspective =
+        perspective(load_perspective);
 }
 
 export default _perspective_instance;
