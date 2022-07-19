@@ -1,4 +1,5 @@
 digraph G {
+    bgcolor=transparent
     graph [rankdir="LR" fontname="helvetica" labeljust="l"]
     node [shape="box" fontname="monospace" fontsize=8 color=gray70 style=filled fillcolor=white];
     edge [color="#EDEBDF" arrowsize=0.8]

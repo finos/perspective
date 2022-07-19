@@ -110,7 +110,6 @@ function get_regex() {
 
 try {
     execute`yarn --silent clean --screenshots`;
-    execute`node_modules/.bin/lerna exec -- mkdir -p dist/umd`;
 
     if (!IS_JUPYTER) {
         // test:build irrelevant for jupyter tests

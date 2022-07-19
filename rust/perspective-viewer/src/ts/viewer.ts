@@ -111,7 +111,7 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
      * const tbl = perspective.table("x,y\n1,a\n2,b");
      * my_viewer.load(tbl);
      * ```
-     * @example <caption>Load Promise<perspective.table></caption>
+     * @example <caption>Load Promise&lt;perspective.table&gt;</caption>
      * ```javascript
      * const my_viewer = document.getElementById('#my_viewer');
      * const tbl = perspective.table("x,y\n1,a\n2,b");

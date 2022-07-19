@@ -6,31 +6,27 @@
 [![Build Status](https://github.com/finos/perspective/actions/workflows/build.yml/badge.svg?branch=master&event=push)](https://github.com/finos/perspective/actions/workflows/build.yml)
 
 Perspective is an <i>interactive</i> analytics and data visualization component,
-which is especially well-suited for <i>large</i> and/or <i>streaming</i> datasets.
-Originally developed at J.P. Morgan and open-sourced through the
-[Fintech Open Source Foundation (FINOS)](https://www.finos.org/),
-Perspective makes it simple to build user-configurable
-analytics entirely in the browser, or in concert with Python and
-[Jupyterlab](https://jupyterlab.readthedocs.io/en/stable/).
-Use it to create reports, dashboards, notebooks and applications, with static
-data or streaming updates via [Apache Arrow](https://arrow.apache.org/).
+which is especially well-suited for <i>large</i> and/or <i>streaming</i>
+datasets. Use it to create user-configurable reports, dashboards, notebooks and
+applications, then deploy stand-alone in the browser, or in concert with Python
+and/or [Jupyterlab](https://jupyterlab.readthedocs.io/en/stable/).
 
-- A fast, memory efficient streaming query engine, written in
-  C++ and compiled for both [WebAssembly](https://webassembly.org/) and
-  [Python](https://www.python.org/) with support for (read/write/stream)ing
-  [Apache Arrow](https://arrow.apache.org/), and a high-performance columnar
-  expression language based on [ExprTK](https://github.com/ArashPartow/exprtk).
+### Features
 
-- A framework-agnostic User Interface
-  [Custom Element](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_custom_elements),
-  powered either in-browser via WebWorker (WebAssembly) or virtually via
-  WebSocket server (Python/Node), as well as a suite of Datagrid and
-  [D3FC](https://d3fc.io/) Chart plugins.
+-   A fast, memory efficient streaming query engine, written in
+    C++ and compiled for both [WebAssembly](https://webassembly.org/) and
+    [Python](https://www.python.org/), with read/write/streaming for
+    [Apache Arrow](https://arrow.apache.org/), and a high-performance columnar
+    expression language based on [ExprTK](https://github.com/ArashPartow/exprtk).
 
-- A [JupyterLab](https://jupyter.org/) widget and Python client library, for
-  interactive data analysis in a notebook, as well as _scalable_ production
-  [Voila](https://github.com/voila-dashboards/voila) and
-  [Holoviz](https://panel.holoviz.org/) applications.
+-   A framework-agnostic User Interface packaged as a
+    [Custom Element](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_custom_elements),
+    powered either in-browser via WebAssembly or virtually via
+    WebSocket server (Python/Node).
+
+-   A [JupyterLab](https://jupyter.org/) widget and Python client library, for
+    interactive data analysis in a notebook, as well as _scalable_ production
+    [Voila](https://github.com/voila-dashboards/voila) applications.
 
 <br/>
 <img width="770" src="https://github.com/finos/perspective/blob/gh-pages/img/demo_large.gif?raw=true">

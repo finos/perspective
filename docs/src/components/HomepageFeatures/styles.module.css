@@ -1,0 +1,40 @@
+.features {
+    display: flex;
+    align-items: center;
+    padding: 2rem 0;
+    width: 100%;
+}
+
+.featureSvg {
+    height: 200px;
+    width: 200px;
+}
+
+.gallerySection {
+    background-color: #fff;
+}
+
+[data-theme="dark"] .gallerySection {
+    background-color: rgb(38, 40, 43);
+}
+
+.gallery {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.gallery img {
+    cursor: pointer;
+    transition: opacity 0.5s;
+}
+
+.gallery:hover img {
+    opacity: 0.3;
+}
+
+.gallery:hover img:hover {
+    opacity: 1;
+    transform: scale(1.1);
+    transition: none;
+}

@@ -196,3 +196,4 @@ docs/static/features
 results.debug.json
 
 tools/perspective-build/lib
+docs/.docusaurus
