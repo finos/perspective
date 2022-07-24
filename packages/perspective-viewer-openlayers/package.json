@@ -7,6 +7,9 @@
     ],
     "author": "",
     "license": "Apache-2.0",
+    "publishConfig": {
+        "access": "public"
+    },
     "scripts": {
         "bench": "npm-run-all bench:build bench:run",
         "bench:build": ":",
