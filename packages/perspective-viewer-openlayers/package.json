@@ -1,7 +1,17 @@
 {
     "name": "@finos/perspective-viewer-openlayers",
     "version": "1.6.0",
-    "main": "src/js/plugin/plugin.js",
+    "unpkg": "dist/umd/perspective-viewer-openlayers.js",
+    "main": "dist/umd/perspective-viewer-openlayers.js",
+    "jsdelivr": "dist/umd/perspective-viewer-openlayers.js",
+    "exports": {
+        ".": {
+            "require": "./dist/umd/perspective-viewer-openlayers.js",
+            "import": "./dist/esm/perspective-viewer-openlayers.js"
+        },
+        "./dist/*": "./dist/*",
+        "./package.json": "./package.json"
+    },
     "files": [
         "dist/**/*"
     ],
