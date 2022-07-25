@@ -10,14 +10,6 @@
 
 import type * as perspective from "@finos/perspective";
 
-import {
-    PerspectiveViewerElement,
-    register_plugin,
-    get_exprtk_commands,
-} from "@finos/perspective-viewer/dist/pkg/perspective_viewer.js";
-
-import {WASM_MODULE} from "./init";
-
 export type PerspectiveViewerConfig = perspective.ViewConfig & {
     plugin?: string;
     settings?: boolean;
@@ -43,57 +35,38 @@ export type PerspectiveViewerConfig = perspective.ViewConfig & {
  * `;
  * const viewer = document.body.querySelector("#viewer");
  * ```
- * @noInheritDoc
  */
-export class HTMLPerspectiveViewerElement extends HTMLElement {
-    private instance: PerspectiveViewerElement;
-
-    /**
-     * Should not be called directly (will throw `TypeError: Illegal
-     * constructor`).
-     *
-     * @ignore
-     */
-    constructor() {
-        super();
-        this.load_wasm();
-    }
-
-    private async load_wasm(): Promise<void> {
-        await WASM_MODULE;
-        if (!this.instance) {
-            this.instance = new PerspectiveViewerElement(this);
-        }
-    }
-
+export interface IPerspectiveViewerElement {
     /**
      * Part of the Custom Elements API.  This method is called by the browser,
      * and should not be called directly by applications.
      *
      * @ignore
      */
-    async connectedCallback(): Promise<void> {
-        await this.load_wasm();
-        this.instance.connected_callback();
-    }
+    connectedCallback(): void;
 
-    /**
-     * Register a new plugin via its custom element name.  This method is called
-     * automatically as a side effect of importing a plugin module, so this
-     * method should only typically be called by plugin authors.
-     *
-     * @category Plugin
-     * @param name The `name` of the custom element to register, as supplied
-     * to the `customElements.define(name)` method.
-     * @example
-     * ```javascript
-     * customElements.get("perspective-viewer").registerPlugin("my-plugin");
-     * ```
-     */
-    static async registerPlugin(name: string): Promise<void> {
-        await WASM_MODULE;
-        register_plugin(name);
-    }
+    // /**
+    //  * Register a new plugin via its custom element name.  This method is called
+    //  * automatically as a side effect of importing a plugin module, so this
+    //  * method should only typically be called by plugin authors.
+    //  *
+    //  * @category Plugin
+    //  * @param name The `name` of the custom element to register, as supplied
+    //  * to the `customElements.define(name)` method.
+    //  * @example
+    //  * ```javascript
+    //  * customElements.get("perspective-viewer").registerPlugin("my-plugin");
+    //  * ```
+    //  */
+    // static registerPlugin(name: string): Promise<void>;
+
+    // /**
+    //  * Get metadata for ExprTK's supported commands.
+    //  *
+    //  * @category Internal
+    //  * @returns An array of JSON descriptors for ExprTK commands
+    //  */
+    // static getExprtkCommands(): Promise<Array<Record<string, string>>>;
 
     /**
      * Load a `perspective.Table`.  If `load` or `update` have already been
@@ -118,12 +91,7 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
      * my_viewer.load(tbl);
      * ```
      */
-    async load(
-        table: Promise<perspective.Table> | perspective.Table
-    ): Promise<void> {
-        await this.load_wasm();
-        await this.instance.js_load(Promise.resolve(table));
-    }
+    load(table: Promise<perspective.Table> | perspective.Table): Promise<void>;
 
     /**
      * Redraw this `<perspective-viewer>` and plugin when its dimensions or
@@ -148,10 +116,7 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
      * window.addEventListener("resize", () => viewer.notifyResize());
      * ```
      */
-    async notifyResize(force = false): Promise<void> {
-        await this.load_wasm();
-        await this.instance.js_resize(force);
-    }
+    notifyResize(force): Promise<void>;
 
     /**
      * Determines the auto-size behavior.  When `true` (the default), this
@@ -167,10 +132,7 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
      * await viewer.setAutoSize(false);
      * ```
      */
-    async setAutoSize(autosize = true): Promise<void> {
-        await this.load_wasm();
-        await this.instance.js_set_auto_size(autosize);
-    }
+    setAutoSize(autosize): void;
 
     /**
      * Returns the `perspective.Table()` which was supplied to `load()`
@@ -187,11 +149,7 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
      * await viewer2.load(table);
      * ```
      */
-    async getTable(wait_for_table?: boolean): Promise<perspective.Table> {
-        await this.load_wasm();
-        const table = await this.instance.js_get_table(!!wait_for_table);
-        return table;
-    }
+    getTable(wait_for_table?: boolean): Promise<perspective.Table>;
 
     /**
      * Returns the underlying `perspective.View` currently configured for this
@@ -212,11 +170,7 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
      * await view.set_depth(0);
      * ```
      */
-    async getView(): Promise<perspective.View> {
-        await this.load_wasm();
-        const view = await this.instance.js_get_view();
-        return view;
-    }
+    getView(): Promise<perspective.View>;
 
     /**
      * Restore this element to a state as generated by a reciprocal call to
@@ -255,12 +209,9 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
      * await viewer.restore(token);
      * ```
      */
-    async restore(
+    restore(
         config: PerspectiveViewerConfig | string | ArrayBuffer
-    ): Promise<void> {
-        await this.load_wasm();
-        await this.instance.js_restore(config);
-    }
+    ): Promise<void>;
 
     /**
      * Serialize this element's attribute/interaction state, but _not_ the
@@ -282,17 +233,13 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
      * localStorage.setItem("viewer_state", token);
      * ```
      */
-    async save(): Promise<PerspectiveViewerConfig>;
-    async save(format: "json"): Promise<PerspectiveViewerConfig>;
-    async save(format: "arraybuffer"): Promise<ArrayBuffer>;
-    async save(format: "string"): Promise<string>;
-    async save(
+    save(): Promise<PerspectiveViewerConfig>;
+    save(format: "json"): Promise<PerspectiveViewerConfig>;
+    save(format: "arraybuffer"): Promise<ArrayBuffer>;
+    save(format: "string"): Promise<string>;
+    save(
         format?: "json" | "arraybuffer" | "string"
-    ): Promise<PerspectiveViewerConfig | string | ArrayBuffer> {
-        await this.load_wasm();
-        const config = await this.instance.js_save(format);
-        return config;
-    }
+    ): Promise<PerspectiveViewerConfig | string | ArrayBuffer>;
 
     /**
      * Flush any pending modifications to this `<perspective-viewer>`.  Since
@@ -313,10 +260,7 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
      * console.log("Viewer has been rendered with a pivot!");
      * ```
      */
-    async flush(): Promise<void> {
-        await this.load_wasm();
-        await this.instance.js_flush();
-    }
+    flush(): Promise<void>;
 
     /**
      * Reset's this element's view state and attributes to default.  Does not
@@ -331,10 +275,7 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
      * await viewer.reset();
      * ```
      */
-    async reset(all = false): Promise<void> {
-        await this.load_wasm();
-        await this.instance.js_reset(all);
-    }
+    reset(all): Promise<void>;
 
     /**
      * Deletes this element and clears it's internal state (but not its
@@ -345,10 +286,7 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
      *
      * @category Util
      */
-    async delete(): Promise<void> {
-        await this.load_wasm();
-        await this.instance.js_delete();
-    }
+    delete(): Promise<void>;
 
     /**
      * Download this element's data as a CSV file.
@@ -357,10 +295,7 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
      * @param flat Whether to use the element's current view
      * config, or to use a default "flat" view.
      */
-    async download(flat: boolean): Promise<void> {
-        await this.load_wasm();
-        await this.instance.js_download(flat);
-    }
+    download(flat: boolean): Promise<void>;
 
     /**
      * Copies this element's view data (as a CSV) to the clipboard.  This method
@@ -380,10 +315,7 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
      * });
      * ```
      */
-    async copy(flat: boolean): Promise<void> {
-        await this.load_wasm();
-        await this.instance.js_copy(flat);
-    }
+    copy(flat: boolean): Promise<void>;
 
     /**
      * Restyles the elements and to pick up any style changes.  While most of
@@ -394,10 +326,7 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
      *
      * @category Util
      */
-    async restyleElement(): Promise<void> {
-        await this.load_wasm();
-        await this.instance.js_restyle_element();
-    }
+    restyleElement(): Promise<void>;
 
     /**
      * Sets the theme names available via the `<perspective-viewer>` status bar
@@ -421,10 +350,7 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
      * await viewer.resetThemes(["Material Light", "Material Dark"]);
      * ```
      */
-    async resetThemes(themes?: Array<string>): Promise<void> {
-        await this.load_wasm();
-        await this.instance.js_reset_themes(themes);
-    }
+    resetThemes(themes?: Array<string>): Promise<void>;
 
     /**
      * Gets the edit port, the port number for which `Table` updates from this
@@ -448,11 +374,7 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
      * });
      * ```
      */
-    async getEditPort(): Promise<number> {
-        await this.load_wasm();
-        const port = await this.instance.js_get_edit_port();
-        return port;
-    }
+    getEditPort(): number;
 
     /**
      * Determines the render throttling behavior. Can be an integer, for
@@ -469,10 +391,7 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
      * await viewer.setThrottle(1000);
      * ```
      */
-    async setThrottle(value?: number): Promise<void> {
-        await this.load_wasm();
-        await this.instance.js_set_throttle(value);
-    }
+    setThrottle(value?: number): void;
 
     /**
      * Opens/closes the element's config menu, equivalent to clicking the
@@ -493,10 +412,7 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
      * await viewer.toggleConfig();
      * ```
      */
-    async toggleConfig(force?: boolean): Promise<void> {
-        await this.load_wasm();
-        await this.instance.js_toggle_config(force);
-    }
+    toggleConfig(force?: boolean): Promise<void>;
 
     /**
      * Get the currently active plugin custom element instance, or a specific
@@ -513,11 +429,7 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
      * active plugin.
      * @returns The active or requested plugin instance.
      */
-    async getPlugin(name?: string): Promise<HTMLElement> {
-        await this.load_wasm();
-        const plugin = await this.instance.js_get_plugin(name);
-        return plugin;
-    }
+    getPlugin(name?: string): Promise<HTMLElement>;
 
     /**
      * Get all plugin custom element instances, in order of registration.
@@ -530,11 +442,7 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
      * @returns An `Array` of the plugin instances for this
      * `<perspective-viewer>`.
      */
-    async getAllPlugins(): Promise<Array<HTMLElement>> {
-        await this.load_wasm();
-        const plugins = await this.instance.js_get_all_plugins();
-        return plugins;
-    }
+    getAllPlugins(): Array<HTMLElement>;
 
     /**
      * Get the raw pointer to this `<perspective-viewer>` WASM model, such that
@@ -544,26 +452,5 @@ export class HTMLPerspectiveViewerElement extends HTMLElement {
      * @category Internal
      * @returns A pointer to this model
      */
-    async unsafe_get_model(): Promise<number> {
-        await this.load_wasm();
-        return await this.instance.js_unsafe_get_model();
-    }
-
-    /**
-     * Get metadata for ExprTK's supported commands.
-     *
-     * @category Internal
-     * @returns An array of JSON descriptors for ExprTK commands
-     */
-    static async getExprtkCommands(): Promise<Array<Record<string, string>>> {
-        await WASM_MODULE;
-        return get_exprtk_commands();
-    }
-}
-
-if (document.createElement("perspective-viewer").constructor === HTMLElement) {
-    window.customElements.define(
-        "perspective-viewer",
-        HTMLPerspectiveViewerElement
-    );
+    unsafeGetModel(): number;
 }

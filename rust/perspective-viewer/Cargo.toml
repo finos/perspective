@@ -11,8 +11,8 @@ crate-type = ["cdylib", "rlib"]
 path = "src/rust/lib.rs"
 
 [features]
-new_column_selector = []
-default = ["new_column_selector"]
+define_custom_elements_async = []
+default = []
 
 [dependencies]
 # Provides async `Mutex` for locked sections such as `render`
@@ -58,16 +58,16 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0.59", features = ["raw_value"] }
 
 # Browser API bindings
-wasm-bindgen = { version = "=0.2.74", features = ["serde-serialize"] }
+wasm-bindgen = { version = "=0.2.80", features = ["serde-serialize"] }
 
 # Browser `Promise` bindings
 wasm-bindgen-futures = "0.4.20"
 
 # https://github.com/yewstack/yew/issues/2154
-yew = { git = "https://github.com/yewstack/yew", rev = "ee6a67e3ea54e45656b87de27f0f894067d16e0d", features = ["csr"] }
+yew = { git = "https://github.com/yewstack/yew", rev = "3760c5f8b56a8ac1730356f4ddbbdc949b9f120c", features = ["csr"] }
 
 [dependencies.web-sys]
-version = "0.3.46"
+version = "0.3.57"
 features = [
     # "Performance",
     "Blob",
@@ -112,6 +112,7 @@ features = [
     # "TouchList",
     # "Touch",
     # "WheelEvent",
+    "ReadableStreamDefaultReader",
     "ShadowRoot",
     "ShadowRootMode",
     "ShadowRootInit",

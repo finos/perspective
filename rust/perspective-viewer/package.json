@@ -43,7 +43,7 @@
         "test:run:rust": "WASM_BINDGEN_TEST_TIMEOUT=60 wasm-pack test --chrome --headless",
         "test:run": "jest --rootDir=. --config=../../tools/perspective-test/jest.config.js --color --noStackTrace 2>&1",
         "test:clean": "rm perspective.csv || true",
-        "test": "yarn test:build && npm-run-all -p test:run:rust test:run && yarn test:clean"
+        "test": "yarn test:build && npm-run-all -p test:run && yarn test:clean"
     },
     "publishConfig": {
         "access": "public"

@@ -47,6 +47,7 @@ fn poll(
             .unwrap()
             .navigator()
             .clipboard()
+            .into_jserror()?
             .write(&items.into());
     } else {
         clone!(js_ref);
