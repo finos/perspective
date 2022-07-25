@@ -304,7 +304,7 @@ jobs:
     ################
     # Python
     - name: Install python dependencies
-      run: python -m pip install --upgrade "jupyterlab>=3.2" "tornado==6.1"
+      run: python -m pip install --upgrade "jupyterlab==3.4.3" "tornado==6.1"
 
     ################
     # Linux
@@ -618,7 +618,7 @@ jobs:
     ################
     # Python
     - name: Install python dependencies
-      run: python -m pip install --upgrade "jupyterlab>=3.2" "tornado==6.1"
+      run: python -m pip install --upgrade "jupyterlab==3.4.3" "tornado==6.1"
 
     ################
     # Wasm
@@ -910,7 +910,7 @@ jobs:
     ################
     # Python
     - name: Install python dependencies
-      run: python -m pip install --upgrade pip wheel setuptools "jupyterlab>=3.2" numpy "pyarrow>=5" "tornado==6.1"
+      run: python -m pip install --upgrade pip wheel setuptools "jupyterlab==3.4.3" numpy "pyarrow>=5" "tornado==6.1"
       if: ${{ runner.os != 'Linux' }}  # skip on manylinux2014
 
     ################
@@ -1161,7 +1161,7 @@ jobs:
     ################
     # Python
     - name: Install python dependencies
-      run: python -m pip install --upgrade "jupyterlab>=3.2" ipywidgets ipykernel "tornado==6.1"
+      run: python -m pip install --upgrade "jupyterlab==3.4.3" ipywidgets ipykernel "tornado==6.1"
 
     # Download artifact
     - uses: actions/download-artifact@v3
@@ -1330,7 +1330,7 @@ jobs:
     ################
     # Python
     - name: Install python dependencies
-      run: python -m pip install --upgrade aiohttp Faker fastapi "jupyterlab>=3.2" mock numpy pip psutil "pyarrow>=5" pytest pytest-cov pytest-aiohttp pytest-asyncio pytest-tornado pytz setuptools wheel "tornado==6.1"
+      run: python -m pip install --upgrade aiohttp Faker fastapi "jupyterlab==3.4.3" mock numpy pip psutil "pyarrow>=5" pytest pytest-cov pytest-aiohttp pytest-asyncio pytest-tornado pytz setuptools wheel "tornado==6.1"
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
@@ -1466,7 +1466,7 @@ jobs:
     ################
     # Python
     - name: Install python dependencies
-      run: python -m pip install --upgrade pip wheel setuptools "jupyterlab>=3.2" numpy "pyarrow>=5" pytest pytest-cov mock aiohttp fastapi Faker psutil pytest-aiohttp pytest-asyncio pytest-tornado pytz "tornado==6.1"
+      run: python -m pip install --upgrade pip wheel setuptools "jupyterlab==3.4.3" numpy "pyarrow>=5" pytest pytest-cov mock aiohttp fastapi Faker psutil pytest-aiohttp pytest-asyncio pytest-tornado pytz "tornado==6.1"
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     #~~~~~~~~~ Build Pipelines ~~~~~~~~~#

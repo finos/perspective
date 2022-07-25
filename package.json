@@ -40,6 +40,8 @@
         "css-loader": "^0.28.7",
         "cssnano": "^4.1.10",
         "cssnano-preset-lite": "^1.0.1",
+        "decompress": "^4.2.1",
+        "decompress-unzip": "^4.0.1",
         "dotenv": "^8.1.0",
         "esbuild": "^0.13.12",
         "esbuild-plugin-less": "^1.1.5",
