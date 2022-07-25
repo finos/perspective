@@ -50,7 +50,7 @@
         "lodash": "^4.17.4"
     },
     "devDependencies": {
-        "@finos/perspective-build": "^1.6.0",
+        "@finos/perspective-esbuild-plugin": "^1.6.0",
         "@finos/perspective-test": "^1.6.0"
     }
 }

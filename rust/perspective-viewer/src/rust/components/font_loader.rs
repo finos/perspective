@@ -6,6 +6,9 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+// TODO yew `Properties`
+#![allow(dead_code)]
+
 use crate::{html_template, utils::*};
 
 use futures::future::{join_all, select_all};

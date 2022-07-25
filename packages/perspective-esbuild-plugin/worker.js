@@ -5,40 +5,43 @@ const {EmptyPlugin} = require("./empty.js");
 
 exports.WorkerPlugin = function WorkerPlugin(inline) {
     function setup(build) {
-        build.onResolve({filter: /worker.js$/}, (args) => {
-            if (args.namespace === "worker-stub") {
-                const outfile = `build/worker/` + path.basename(args.path);
-                const subbuild = esbuild.build({
-                    target: ["es2021"],
-                    entryPoints: [require.resolve(args.path)],
-                    outfile,
-                    define: {
-                        global: "self",
-                    },
-                    plugins: [EmptyPlugin(["fs", "path"])],
-                    entryNames: "[name]",
-                    chunkNames: "[name]",
-                    assetNames: "[name]",
-                    minify: !process.env.PSP_DEBUG,
-                    bundle: true,
-                    sourcemap: false,
-                });
+        build.onResolve(
+            {filter: /^(monaco-editor|\@finos\/perspective).+?worker\.js$/},
+            (args) => {
+                if (args.namespace === "worker-stub") {
+                    const outfile = `build/worker/` + path.basename(args.path);
+                    const subbuild = esbuild.build({
+                        target: ["es2021"],
+                        entryPoints: [require.resolve(args.path)],
+                        outfile,
+                        define: {
+                            global: "self",
+                        },
+                        plugins: [EmptyPlugin(["fs", "path"])],
+                        entryNames: "[name]",
+                        chunkNames: "[name]",
+                        assetNames: "[name]",
+                        minify: !process.env.PSP_DEBUG,
+                        bundle: true,
+                        sourcemap: false,
+                    });
+
+                    return {
+                        path: args.path,
+                        namespace: "worker",
+                        pluginData: {
+                            outfile,
+                            subbuild,
+                        },
+                    };
+                }
 
                 return {
                     path: args.path,
-                    namespace: "worker",
-                    pluginData: {
-                        outfile,
-                        subbuild,
-                    },
+                    namespace: "worker-stub",
                 };
             }
-
-            return {
-                path: args.path,
-                namespace: "worker-stub",
-            };
-        });
+        );
 
         build.onLoad({filter: /.*/, namespace: "worker-stub"}, async (args) => {
             if (inline) {
