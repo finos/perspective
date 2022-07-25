@@ -39,7 +39,7 @@
         "@jupyter-widgets/base": "^4.1.0",
         "@jupyterlab/application": "^3.3.2",
         "@lumino/application": "^1.27.0",
-        "@lumino/widgets": "1.31.1"
+        "@lumino/widgets": "1.33.0"
     },
     "devDependencies": {
         "@finos/perspective-build": "^1.6.0",
