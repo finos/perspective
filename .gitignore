@@ -154,7 +154,7 @@ docs/static/arrow/
 *.pyc
 __pycache__/
 
-# Copied C++ source folders
+# Copied outer source folders
 python/perspective/cmake
 python/perspective/src
 python/perspective/test
@@ -168,6 +168,7 @@ docs/static/js/logo.js
 docs/static/js/logo.js.map
 python/perspective/pip-wheel-metadata
 junit.xml
+python/perspective/README.md
 python/perspective/python_junit.xml
 python/perspective/coverage.xml
 python/perspective/bench/stresstest/results

@@ -13,6 +13,7 @@ process.env.FORCE_COLOR = true;
 const execSync = require("child_process").execSync;
 const _path = require("path");
 const fs = require("fs");
+const fse = require("fs-extra");
 const rimraf = require("rimraf");
 const {promisify} = require("util");
 
@@ -285,6 +286,32 @@ exports.docker = function docker(image = "puppeteer") {
         -v${CWD}:/usr/src/app/perspective \
         -w /usr/src/app/perspective --shm-size=2g -u root \
         --cpus="${CPUS}.0" ${IMAGE}`;
+};
+
+/**
+ * Copy C++/Config/README/LICENSE assets from outer project
+ * into python folder
+ */
+exports.copy_files_to_python_folder = () => {
+    const dist = resolve`${__dirname}/../python/perspective/dist`;
+    const cpp = resolve`${__dirname}/../cpp/perspective/src`;
+    const cmakelists = resolve`${__dirname}/../cpp/perspective/CMakeLists.txt`;
+    const lic = resolve`${__dirname}/../LICENSE`;
+    const readme = resolve`${__dirname}/../LICENSE`;
+
+    const cmake = resolve`${__dirname}/../cmake`;
+    const dcmake = resolve`${dist}/cmake`;
+    const dlic = resolve`${dist}/LICENSE`;
+    const dreadme = resolve`${dist}/../README.md`;
+
+    fse.mkdirpSync(dist);
+    fse.copySync(cmakelists, resolve`${dist}/CMakeLists.txt`, {
+        preserveTimestamps: true,
+    });
+    fse.copySync(cpp, resolve`${dist}/src`, {preserveTimestamps: true});
+    fse.copySync(lic, dlic, {preserveTimestamps: true});
+    fse.copySync(dlic, dreadme, {preserveTimestamps: true});
+    fse.copySync(cmake, dcmake, {preserveTimestamps: true});
 };
 
 /**
