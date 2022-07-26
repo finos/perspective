@@ -54,7 +54,7 @@ class ConvertLinksToAnchors extends Transform {
 
 const inPaths = [
     "./dist/docs/README.md",
-    "./dist/docs/classes/HTMLPerspectiveViewerElement.md",
+    "./dist/docs/interfaces/IPerspectiveViewerElement.md",
     "./dist/docs/interfaces/IPerspectiveViewerPlugin.md",
 ];
 
@@ -75,9 +75,10 @@ async function capture_exprtk() {
     const page = await browser.newPage();
     await page.addScriptTag({path: "dist/umd/perspective-viewer.js"});
     const data = await page.evaluate(async () => {
+        await customElements.whenDefined("perspective-viewer");
         const commands = await customElements
             .get("perspective-viewer")
-            .getExprtkCommands();
+            .getExprTKCommands();
 
         return JSON.stringify(commands, null, 4);
     });

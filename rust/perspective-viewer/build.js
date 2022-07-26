@@ -75,6 +75,7 @@ const BUILD = [
         external: ["*.wasm", "*.worker.js"],
         outdir: "dist/esm",
     },
+
     {
         entryPoints: ["src/ts/perspective-viewer.ts"],
         plugins: [
@@ -111,14 +112,14 @@ const BUILD = [
 // parsed due to this multi-step download+eval.  Luckily `esbuild` is quite fast
 // enough to just run another build to inline this one file `chunk.js`.
 const POSTBUILD = [
-    {
-        entryPoints: ["dist/cdn/perspective-viewer.js"],
-        format: "esm",
-        plugins: [NodeModulesExternal()],
-        external: ["*.wasm", "*.worker.js", "*.main.js"],
-        outdir: "dist/cdn",
-        allowOverwrite: true,
-    },
+    // {
+    //     entryPoints: ["dist/cdn/perspective-viewer.js"],
+    //     format: "esm",
+    //     plugins: [NodeModulesExternal()],
+    //     external: ["*.wasm", "*.worker.js", "*.main.js"],
+    //     outdir: "dist/cdn",
+    //     allowOverwrite: true,
+    // },
 ];
 
 const INHERIT = {
@@ -135,6 +136,7 @@ async function compile_rust() {
 
     await wasm_bindgen("perspective_viewer", {
         debug: IS_DEBUG,
+        version: "0.2.80",
         targetdir: "build",
     });
 
