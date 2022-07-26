@@ -19,11 +19,7 @@ import wasm_worker from "@finos/perspective/src/js/perspective.worker.js";
 import wasm from "@finos/perspective/dist/pkg/esm/perspective.cpp.wasm";
 
 // eslint-disable-next-line max-len
-const INLINE_WARNING = `Perspective has been compiled in "inline" mode.  While \
-Perspective's runtime performance is not affected, you may see smaller assets \
-size and faster engine initial load time using \
-"@finos/perspective-webpack-plugin" to build your application.
-https://perspective.finos.org/docs/md/js.html`;
+const INLINE_WARNING = `Perspective has been compiled in "inline" mode.`;
 
 function is_gzip(buffer) {
     return new Uint32Array(buffer.slice(0, 4))[0] == 559903;
@@ -54,7 +50,7 @@ const _override = /* @__PURE__ */ (function () {
                     });
 
                     if (_wasm.buffer && _wasm.buffer instanceof ArrayBuffer) {
-                        console.warn(INLINE_WARNING);
+                        console.info(INLINE_WARNING);
                         if (is_gzip(_wasm.buffer)) {
                             decompressor.push(_wasm, true);
                         } else {
