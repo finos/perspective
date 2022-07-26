@@ -197,3 +197,4 @@ results.debug.json
 
 tools/perspective-build/lib
 docs/.docusaurus
+packages/perspective-esbuild-plugin/lib

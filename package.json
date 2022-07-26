@@ -52,7 +52,7 @@
         "fs-extra": "^8.1.0",
         "html-loader": "^0.5.1",
         "html-loader-jest": "^0.2.1",
-        "html-webpack-plugin": "^4.5.1",
+        "html-webpack-plugin": "^5.1.0",
         "husky": "^7.0.4",
         "inquirer": "^7.0.0",
         "jest": "^25.1.0",

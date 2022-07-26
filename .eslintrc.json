@@ -1,9 +1,6 @@
 {
     "parser": "babel-eslint",
-    "plugins": [
-        "markdown",
-        "prettier"
-    ],
+    "plugins": ["markdown", "prettier"],
     "env": {
         "browser": true,
         "commonjs": true,
@@ -18,40 +15,47 @@
         "sourceType": "module",
         "experimentalObjectRestSpread": true
     },
-    "overrides": [{
-        "files": ["*.ts", "*.tsx"],
-        "plugins": [
-            "prettier",
-            "@typescript-eslint/eslint-plugin"
-        ],
-        "parser": "@typescript-eslint/parser",
-        "extends":  [
-            "plugin:@typescript-eslint/recommended"
-        ],
-        "rules": {
-            "@typescript-eslint/no-explicit-any": "off",
-            "camelcase": "off",
-            "@typescript-eslint/camelcase": "off"
-
+    "overrides": [
+        {
+            "files": ["*.ts", "*.tsx"],
+            "plugins": ["prettier", "@typescript-eslint/eslint-plugin"],
+            "parser": "@typescript-eslint/parser",
+            "extends": ["plugin:@typescript-eslint/recommended"],
+            "rules": {
+                "@typescript-eslint/no-explicit-any": "off",
+                "camelcase": "off",
+                "@typescript-eslint/camelcase": "off"
+            }
+        },
+        {
+            "files": ["**/test/**/*.js"]
+        },
+        {
+            "files": ["**/*.html"],
+            "rules": {
+                "max-len": ["error", {"code": 200}]
+            }
+        },
+        {
+            "files": ["**/*.md"],
+            "rules": {
+                "no-undef": "off",
+                "no-unused-vars": "off",
+                "no-console": "off",
+                "padded-blocks": "off"
+            }
         }
-    }, {
-        "files": ["**/test/**/*.js"]
-    }, {
-        "files": ["**/*.md"],
-        "rules": {
-            "no-undef": "off",
-            "no-unused-vars": "off",
-            "no-console": "off",
-            "padded-blocks": "off"
-        }
-    }],
+    ],
     "rules": {
-        "prettier/prettier": ["error", {
-            "tabWidth": 4,
-            "bracketSpacing": false
-        }],
+        "prettier/prettier": [
+            "error",
+            {
+                "tabWidth": 4,
+                "bracketSpacing": false
+            }
+        ],
         "@typescript-eslint/camelcase": "off",
-        "linebreak-style": ["error","unix"],
+        "linebreak-style": ["error", "unix"],
         "camelcase": "off"
     }
 }

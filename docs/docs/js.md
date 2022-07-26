@@ -47,18 +47,25 @@ runtime performance impact, but does increase asset load time. Most apps should
 make use of `@finos/perspective-webpack-plugin` which will package these files
 correctly form your existing Webpack configuration.
 
-#### Webpack Plugin (optional)
+#### Via bundlers (optional)
 
 When importing `perspective` from NPM modules for a browser application, you
-should use `@finos/perspective-webpack-plugin` to manage the `.worker.js` and
+may choose to use a provided bundler plugin to manage the `.worker.js` and
 `.wasm` assets for you. Doing so will improve your application's initial load
-performance, the plugin-compiled version of Perspective:
+performance, as the plugin-assisted bundle version of Perspective:
 
 -   Downloads `.wasm` and `.js` assets in parallel.
 -   Compiles `.wasm` incrementally via
     [streaming instantiation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WebAssembly/instantiateStreaming).
 -   Lazily downloads large features only when used such as `monaco-editor`.
 -   overall bundle size is ~20% smaller (due to bas64 encoding overhead).
+
+Perspective comes with bundler plugins for:
+
+-   Webpack via `@finos/perspective-webpack-plugin`
+-   `esbuild` via `@finos/perspective-esbuild-plugin`
+
+##### Webpack
 
 The plugin handles downloading and packaging Perspective's additional assets,
 and is easy to set up in your `webpack.config`:
@@ -97,6 +104,35 @@ module.exports = {
     },
 };
 ```
+
+##### `esbuild`
+
+Applications bundled with `esbuild` can make use of the
+`@finos/perspective-esbuild-plugin` module. A full example can be found in the
+repo under [`examples/esbuild-example`](https://github.com/finos/perspective/tree/master/examples/esbuild-example).
+
+```javascript
+const esbuild = require("esbuild");
+const {PerspectiveEsbuildPlugin} = require("@finos/perspective-esbuild-plugin");
+
+esbuild.build({
+    entryPoints: ["src/index.js"],
+    plugins: [PerspectiveEsbuildPlugin()],
+    format: "esm",
+    bundle: true,
+    loader: {
+        ".ttf": "file",
+    },
+});
+```
+
+When bundling via `esbuild`, you must also
+
+-   Use the `type="module"` attribute in your app's `<script>` tag, as this
+    build mode is only supported via ES modules.
+-   Use the direct imports for the `esm` versions Perspective, specifically
+    `@finos/perspective/dsti/esm/perspective.js` and
+    `@finos/perspective-viewer/dist/esm/perspective-viewer.js`
 
 ### From CDN
 

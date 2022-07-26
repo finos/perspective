@@ -4,6 +4,7 @@
     "version": "1.6.0",
     "description": "An example app built using `@finos/perspective-viewer`.",
     "scripts": {
+        "build": "webpack",
         "start": "webpack serve"
     },
     "keywords": [],
@@ -20,6 +21,7 @@
         "style-loader": "^0.18.2",
         "webpack": "^5.14.0",
         "webpack-cli": "^4.3.1",
-        "webpack-dev-server": "^3.11.2"
+        "webpack-dev-server": "^3.11.2",
+        "html-webpack-plugin": "^5.1.0"
     }
 }

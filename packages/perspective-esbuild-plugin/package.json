@@ -1,10 +1,17 @@
 {
-    "name": "@finos/perspective-build",
+    "name": "@finos/perspective-esbuild-plugin",
     "version": "1.6.0",
-    "description": "Workspace-wide scripts for Perspective build, mainly esbuild and webpack configuration",
-    "private": true,
+    "description": "esbuild plugin for Perspective",
     "author": "",
     "license": "Apache-2.0",
+    "main": "index.js",
+    "publishConfig": {
+        "access": "public"
+    },
+    "files": [
+        "*.js",
+        "README.md"
+    ],
     "scripts": {
         "build": "echo",
         "test": "echo",

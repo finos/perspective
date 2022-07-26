@@ -34,7 +34,7 @@ struct CustomEventsDataRc(Rc<CustomEventsData>);
 impl Deref for CustomEventsDataRc {
     type Target = CustomEventsData;
     fn deref(&self) -> &CustomEventsData {
-        &*self.0
+        &self.0
     }
 }
 

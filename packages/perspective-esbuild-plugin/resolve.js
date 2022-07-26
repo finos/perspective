@@ -21,10 +21,8 @@ exports.ResolvePlugin = function ResolvePlugin(options) {
                     };
                 });
 
-                build.onLoad(
-                    {filter, namespace: "resolve"},
-                    async (args) => {
-                        const importerCode = `
+                build.onLoad({filter, namespace: "resolve"}, async (args) => {
+                    const importerCode = `
                             export * from '${args.path.replace(
                                 args.pluginData.moduleName,
                                 moduleTarget
@@ -34,12 +32,11 @@ exports.ResolvePlugin = function ResolvePlugin(options) {
                                 moduleTarget
                             )}';
                         `;
-                        return {
-                            contents: importerCode,
-                            resolveDir: args.pluginData.resolveDir,
-                        };
-                    }
-                );
+                    return {
+                        contents: importerCode,
+                        resolveDir: args.pluginData.resolveDir,
+                    };
+                });
             }
         },
     };
