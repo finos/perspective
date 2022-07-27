@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-docs",
-    "version": "1.6.0",
+    "version": "1.6.1",
     "private": true,
     "scripts": {
         "docusaurus": "docusaurus",
@@ -17,11 +17,11 @@
     "dependencies": {
         "@docusaurus/core": "2.0.0-beta.21",
         "@docusaurus/preset-classic": "2.0.0-beta.21",
-        "@finos/perspective": "^1.6.0",
-        "@finos/perspective-viewer": "^1.6.0",
-        "@finos/perspective-viewer-d3fc": "^1.6.0",
-        "@finos/perspective-viewer-datagrid": "^1.6.0",
-        "@finos/perspective-webpack-plugin": "^1.6.0",
+        "@finos/perspective": "^1.6.1",
+        "@finos/perspective-viewer": "^1.6.1",
+        "@finos/perspective-viewer-d3fc": "^1.6.1",
+        "@finos/perspective-viewer-datagrid": "^1.6.1",
+        "@finos/perspective-webpack-plugin": "^1.6.1",
         "@mdx-js/react": "^1.6.22",
         "clsx": "^1.1.1",
         "perspective-loader": "file:plugins/perspective-loader",

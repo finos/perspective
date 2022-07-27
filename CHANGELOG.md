@@ -1,5 +1,23 @@
 # Changelog
 
+## [v1.6.1](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.6.0...HEAD)
+
+**Implemented enhancements:**
+
+- Add zoom persistence to OpenLayers plugin [\#1920](https://github.com/finos/perspective/pull/1920) ([texodus](https://github.com/texodus))
+- Publish `@finos/perspective-esbuild-plugin` [\#1918](https://github.com/finos/perspective/pull/1918) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- Fix "inline mode" build [\#1919](https://github.com/finos/perspective/pull/1919) ([texodus](https://github.com/texodus))
+
+**Merged pull requests:**
+
+- Make `perspective-viewer` crate importable for external wasm projects [\#1916](https://github.com/finos/perspective/pull/1916) ([texodus](https://github.com/texodus))
+- Fix publish issues [\#1915](https://github.com/finos/perspective/pull/1915) ([texodus](https://github.com/texodus))
+
 ## [v1.6.0](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.5.1...HEAD)

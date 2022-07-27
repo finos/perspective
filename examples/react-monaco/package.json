@@ -1,7 +1,7 @@
 {
     "name": "react-monaco",
     "private": true,
-    "version": "1.6.0",
+    "version": "1.6.1",
     "description": "An example app built using `@finos/perspective-viewer`.",
     "scripts": {
         "start": "webpack serve --open",
@@ -10,16 +10,16 @@
     "keywords": [],
     "license": "Apache-2.0",
     "dependencies": {
-        "@finos/perspective": "^1.6.0",
-        "@finos/perspective-viewer": "^1.6.0",
-        "@finos/perspective-viewer-d3fc": "^1.6.0",
-        "@finos/perspective-viewer-datagrid": "^1.6.0",
+        "@finos/perspective": "^1.6.1",
+        "@finos/perspective-viewer": "^1.6.1",
+        "@finos/perspective-viewer-d3fc": "^1.6.1",
+        "@finos/perspective-viewer-datagrid": "^1.6.1",
         "react": "16.8.6",
         "react-dom": "16.8.6",
         "react-monaco-editor": "^0.46.0"
     },
     "devDependencies": {
-        "@finos/perspective-webpack-plugin": "^1.6.0",
+        "@finos/perspective-webpack-plugin": "^1.6.1",
         "@types/react": "^16.8.6",
         "@types/react-dom": "^16.9.4",
         "source-map-loader": "^0.2.4",

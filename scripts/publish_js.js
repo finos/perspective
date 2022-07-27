@@ -10,14 +10,6 @@
 const {execute} = require("./script_utils.js");
 const fs = require("fs");
 
-if (!process.env.AZURE_TOKEN) {
-    throw new Error("Missing AZURE_TOKEN");
-}
-
-if (!process.env.AZURE_BUILD_ID) {
-    throw new Error("Missing AZURE_BUILD_ID");
-}
-
 if (!process.env.GITHUB_TOKEN) {
     throw new Error("Missing GITHUB_TOKEN");
 }
@@ -33,8 +25,8 @@ try {
         --unreleased-only
         --base CHANGELOG.md
         --output CHANGELOG.md
-        --unreleased-label=v1.6.0
-        --since-tag=v1.5.1
+        --unreleased-label=v1.6.1
+        --since-tag=v1.6.0
     `;
 
     execute`git add CHANGELOG.md`;
