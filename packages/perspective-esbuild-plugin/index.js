@@ -15,7 +15,10 @@ exports.PerspectiveEsbuildPlugin = function PerspectiveEsbuildPlugin(
     options = {}
 ) {
     const wasm_plugin = WasmPlugin(!!options.wasm?.inline);
-    const worker_plugin = WorkerPlugin(!!options.worker?.inline);
+    const worker_plugin = WorkerPlugin({
+        inline: !!options.worker?.inline,
+        targetdir: options.worker?.targetdir,
+    });
 
     // Rust outputs a `URL()` when an explicit path for the wasm
     // is not specified.  Esbuild ignores this, but webpack does not,

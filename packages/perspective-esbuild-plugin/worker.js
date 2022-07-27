@@ -3,13 +3,15 @@ const path = require("path");
 const esbuild = require("esbuild");
 const {EmptyPlugin} = require("./empty.js");
 
-exports.WorkerPlugin = function WorkerPlugin(inline) {
+exports.WorkerPlugin = function WorkerPlugin(options = {}) {
+    const inline = !!options.inline;
+    const targetdir = options.targetdir || "build/worker";
     function setup(build) {
         build.onResolve(
             {filter: /^(monaco-editor|\@finos\/perspective).+?worker\.js$/},
             (args) => {
                 if (args.namespace === "worker-stub") {
-                    const outfile = `build/worker/` + path.basename(args.path);
+                    const outfile = `${targetdir}/` + path.basename(args.path);
                     const subbuild = esbuild.build({
                         target: ["es2021"],
                         entryPoints: [require.resolve(args.path)],
