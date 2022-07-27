@@ -6,9 +6,22 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use itertools::Itertools;
+
 static VERSION: &str = env!("PKG_VERSION");
 
-pub fn render(data: &str, layout: &str) -> String {
+fn render_plugin(tag_name: impl AsRef<str>) -> String {
+    format!(
+        "import \"https://cdn.jsdelivr.net/npm/@finos/{0}@{1}/dist/cdn/{0}.js\";\n",
+        tag_name.as_ref(),
+        VERSION
+    )
+}
+
+pub fn render(data: &str, layout: &str, plugins: &[String]) -> String {
+    let stmts = plugins.iter().map(render_plugin);
+    let imports = Itertools::intersperse(stmts, " ".to_owned()).collect::<String>();
+
     format!("
 <!DOCTYPE html lang=\"en\">
 <html>
@@ -18,8 +31,7 @@ pub fn render(data: &str, layout: &str) -> String {
 <script type=\"module\">
 import perspective from \"https://cdn.jsdelivr.net/npm/@finos/perspective@{0}/dist/cdn/perspective.js\";
 import \"https://cdn.jsdelivr.net/npm/@finos/perspective-viewer@{0}/dist/cdn/perspective-viewer.js\";
-import \"https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-datagrid@{0}/dist/cdn/perspective-viewer-datagrid.js\";
-import \"https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-d3fc@{0}/dist/cdn/perspective-viewer-d3fc.js\";
+{3}
 const worker = perspective.worker();
 const binary_string = window.atob(window.data.textContent);
 const len = binary_string.length;
@@ -38,5 +50,5 @@ window.viewer.restore(JSON.parse(window.layout.textContent));
 <perspective-viewer id='viewer'></perspective-viewer>
 </body>
 </html>
-", VERSION,  data, layout)
+", VERSION, data, layout, imports)
 }

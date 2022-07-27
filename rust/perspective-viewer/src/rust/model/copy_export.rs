@@ -11,15 +11,24 @@ use super::export_method::*;
 use super::get_viewer_config::*;
 use super::structural::*;
 use crate::config::*;
+use crate::js::JsPerspectiveViewerPlugin;
 use crate::utils::*;
 
 use futures::join;
+use itertools::Itertools;
 use js_intern::*;
+use std::collections::HashSet;
 use std::future::Future;
 use std::pin::Pin;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
+
+fn tag_name_to_package(plugin: &JsPerspectiveViewerPlugin) -> String {
+    let tag_name = plugin.unchecked_ref::<web_sys::HtmlElement>().tag_name();
+    let tag_parts = tag_name.split('-').take(3).map(|x| x.to_lowercase());
+    Itertools::intersperse(tag_parts, "-".to_owned()).collect::<String>()
+}
 
 /// Export functionality, for downloads and copy-to-clipboard, are mostly shared
 /// behavior, but require access to a few state objects depending on which
@@ -30,13 +39,22 @@ pub trait CopyExportModel: HasSession + HasRenderer + HasTheme + GetViewerConfig
     fn html_as_jsvalue(&self) -> Pin<Box<dyn Future<Output = Result<web_sys::Blob, JsValue>>>> {
         let view_config = self.get_viewer_config();
         let session = self.session().clone();
+        let plugins = self
+            .renderer()
+            .get_all_plugins()
+            .iter()
+            .map(tag_name_to_package)
+            .collect::<HashSet<String>>()
+            .into_iter()
+            .collect::<Vec<_>>();
+
         Box::pin(async move {
             let (arrow, config) = join!(session.arrow_as_vec(true), view_config);
             let arrow = arrow?;
             let mut config = config?;
             config.settings = false;
             let js_config = serde_json::to_string(&config).into_jserror()?;
-            let html = export_app::render(&base64::encode(arrow), &js_config);
+            let html = export_app::render(&base64::encode(arrow), &js_config, &plugins);
             js_sys::JsString::from(html.trim()).as_blob()
         })
     }
