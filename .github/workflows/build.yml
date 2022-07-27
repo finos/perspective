@@ -702,7 +702,6 @@ jobs:
         os:
           - ubuntu-20.04 # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-Readme.md
           - macos-11 # https://github.com/actions/virtual-environments/blob/main/images/macos/macos-11-Readme.md
-          - macos-10.15 # https://github.com/actions/virtual-environments/blob/main/images/macos/macos-10.15-Readme.md
           - windows-2022 # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2022-Readme.md
           - windows-2019 # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2019-Readme.md
         python-version:
@@ -726,11 +725,6 @@ jobs:
           - os: macos-11
             container: 2010
           - os: macos-11
-            container: 2014
-
-          - os: macos-10.15
-            container: 2010
-          - os: macos-10.15
             container: 2014
 
           - os: windows-2022
@@ -764,10 +758,6 @@ jobs:
           # Exclude Windows 2019 bulds
           - is-full-run: false
             os: windows-2019
-
-          # Exclude Macos bulds
-          - is-full-run: false
-            os: macos-10.15
 
           - is-full-run: false
             os: macos-11
@@ -1215,7 +1205,6 @@ jobs:
         os:
           - ubuntu-20.04 # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-Readme.md
           - macos-11 # https://github.com/actions/virtual-environments/blob/main/images/macos/macos-11-Readme.md
-          - macos-10.15 # https://github.com/actions/virtual-environments/blob/main/images/macos/macos-10.15-Readme.md
           - windows-2022 # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2022-Readme.md
           - windows-2019 # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2019-Readme.md
         python-version:
@@ -1241,10 +1230,6 @@ jobs:
           # Exclude Windows 2019 bulds
           - is-full-run: false
             os: windows-2019
-
-          # Exclude Macos 10.15 bulds
-          - is-full-run: false
-            os: macos-10.15
 
           # Exclude Python 3.7 and 3.8 builds
           - is-full-run: false
