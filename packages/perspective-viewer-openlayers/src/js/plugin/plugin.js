@@ -57,6 +57,16 @@ views.forEach(async (plugin) => {
             get config_column_names() {
                 return plugin.plugin.initial.names;
             }
+
+            save() {
+                return mapView.save(this.shadowRoot.children[1]);
+            }
+
+            async restore(token) {
+                mapView.restore(this.shadowRoot.children[1], token);
+            }
+
+            delete() {}
         }
     );
 

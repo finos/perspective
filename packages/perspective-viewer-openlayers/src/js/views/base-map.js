@@ -37,6 +37,22 @@ baseMap.restyle = (container) => {
     }
 };
 
+baseMap.restore = (container, token) => {
+    if (container[PRIVATE]) {
+        container[PRIVATE].next_zoom_state = token;
+    }
+};
+
+baseMap.save = (container) => {
+    if (container[PRIVATE]) {
+        const view = container[PRIVATE].map.getView();
+        return {
+            center: view.getCenter(),
+            zoom: view.getZoom(),
+        };
+    }
+};
+
 baseMap.initializeView = (container, extent) => {
     initializeView(container, extent);
 };
@@ -56,7 +72,7 @@ function getOrCreateMap(container) {
             map,
             tileLayer,
             tooltip,
-            initialisedExtent: false,
+            invalid_extents: true,
         };
     }
     removeVectorLayer(container);
@@ -65,13 +81,21 @@ function getOrCreateMap(container) {
 }
 
 function initializeView(container, vectorSource) {
-    // if (!container[PRIVATE].initialisedExtent) {
-    const extents = vectorSource.getExtent();
     const map = container[PRIVATE].map;
-    map.getView().fit(extents, {size: map.getSize()});
+    const extents = vectorSource.getExtent();
+    if (container[PRIVATE]?.next_zoom_state) {
+        map.getView().setZoom(container[PRIVATE].next_zoom_state.zoom);
+        map.getView().setCenter(container[PRIVATE].next_zoom_state.center);
+        container[PRIVATE].next_zoom_state = undefined;
+    } else if (
+        map.getView().getCenter().some(isNaN) ||
+        (!!container[PRIVATE] && container[PRIVATE].invalid_extents)
+    ) {
+        const map = container[PRIVATE].map;
+        map.getView().fit(extents, {size: map.getSize()});
+    }
 
-    // container[PRIVATE].initialisedExtent = true;
-    // }
+    container[PRIVATE].invalid_extents = extents.some(isNaN);
 }
 
 function removeVectorLayer(container) {
