@@ -11,10 +11,10 @@ import mapView from "../views/map-view";
 import views from "../views/views";
 import css from "../../less/plugin.less";
 
-views.forEach((plugin) => {
+views.forEach(async (plugin) => {
     customElements.define(
         plugin.plugin.type,
-        class extends customElements.get("perspective-viewer-plugin") {
+        class extends HTMLElement {
             constructor() {
                 super();
                 this.attachShadow({mode: "open"});
@@ -57,9 +57,20 @@ views.forEach((plugin) => {
             get config_column_names() {
                 return plugin.plugin.initial.names;
             }
+
+            save() {
+                return mapView.save(this.shadowRoot.children[1]);
+            }
+
+            async restore(token) {
+                mapView.restore(this.shadowRoot.children[1], token);
+            }
+
+            delete() {}
         }
     );
 
+    await customElements.whenDefined("perspective-viewer");
     customElements.get("perspective-viewer").registerPlugin(plugin.plugin.type);
 });
 

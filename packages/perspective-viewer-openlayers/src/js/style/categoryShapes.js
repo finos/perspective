@@ -17,9 +17,9 @@ import {
     symbolWye,
 } from "d3";
 
-const {Polygon, Circle} = require("ol/geom");
-const {toContext} = require("ol/render");
-const {Style, Fill, Stroke} = require("ol/style");
+import {Polygon, Circle} from "ol/geom";
+import {toContext} from "ol/render";
+import {Style, Fill, Stroke} from "ol/style";
 
 const shapes = [
     null,

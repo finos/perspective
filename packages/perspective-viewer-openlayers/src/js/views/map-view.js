@@ -77,6 +77,14 @@ mapView.restyle = (container) => {
     baseMap.restyle(container);
 };
 
+mapView.save = (container) => {
+    return baseMap.save(container);
+};
+
+mapView.restore = (container, token) => {
+    baseMap.restore(container, token);
+};
+
 function featureFromPoint(point, colorMap, sizeMap, shapeMap) {
     const feature = new Feature(new Point(fromLonLat(point.cols)));
     const fillAndStroke = colorMap(point);
