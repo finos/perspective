@@ -11,10 +11,10 @@ import mapView from "../views/map-view";
 import views from "../views/views";
 import css from "../../less/plugin.less";
 
-views.forEach((plugin) => {
+views.forEach(async (plugin) => {
     customElements.define(
         plugin.plugin.type,
-        class extends customElements.get("perspective-viewer-plugin") {
+        class extends HTMLElement {
             constructor() {
                 super();
                 this.attachShadow({mode: "open"});
@@ -60,6 +60,7 @@ views.forEach((plugin) => {
         }
     );
 
+    await customElements.whenDefined("perspective-viewer");
     customElements.get("perspective-viewer").registerPlugin(plugin.plugin.type);
 });
 
