@@ -57,7 +57,7 @@ const BUILD = [
             IgnoreCSSPlugin(),
             IgnoreFontsPlugin(),
             WasmPlugin(true),
-            WorkerPlugin(true),
+            WorkerPlugin({inline: true}),
         ],
         format: "iife",
         loader: {
@@ -81,7 +81,7 @@ const BUILD = [
             IgnoreCSSPlugin(),
             IgnoreFontsPlugin(),
             WasmPlugin(false),
-            WorkerPlugin(false),
+            WorkerPlugin({inline: false}),
         ],
         format: "esm",
         splitting: true,

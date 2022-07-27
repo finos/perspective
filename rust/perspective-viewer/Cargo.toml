@@ -14,6 +14,9 @@ path = "src/rust/lib.rs"
 define_custom_elements_async = []
 default = []
 
+[build-dependencies]
+serde_json = { version = "1.0.59", features = ["raw_value"] }
+
 [dependencies]
 # Provides async `Mutex` for locked sections such as `render`
 async-std = "1.9.0"

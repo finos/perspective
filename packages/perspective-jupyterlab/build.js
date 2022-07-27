@@ -12,7 +12,12 @@ const TEST_BUILD = {
     define: {
         global: "window",
     },
-    plugins: [lessLoader(), WasmPlugin(true), WorkerPlugin(true), UMDLoader()],
+    plugins: [
+        lessLoader(),
+        WasmPlugin(true),
+        WorkerPlugin({inline: true}),
+        UMDLoader(),
+    ],
     globalName: "PerspectiveLumino",
     format: "cjs",
     loader: {
@@ -27,7 +32,7 @@ const PROD_BUILD = {
     define: {
         global: "window",
     },
-    plugins: [lessLoader(), WasmPlugin(true), WorkerPlugin(true)],
+    plugins: [lessLoader(), WasmPlugin(true), WorkerPlugin({inline: true})],
     external: ["@jupyter*", "@lumino*"],
     format: "esm",
     loader: {
