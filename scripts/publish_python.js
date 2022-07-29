@@ -36,17 +36,12 @@ if (!process.env.COMMIT) {
 
 // Folders for artifacts on GitHub Actions
 const dist_folders = [
-    // https://github.com/actions/virtual-environments
-    // Mac 10.15
-    "perspective-python-dist-macos-10.15-3.7",
-    "perspective-python-dist-macos-10.15-3.8",
-    "perspective-python-dist-macos-10.15-3.9",
+    // // https://github.com/actions/virtual-environments
 
     // Mac 11
-    // NOTE: use 10.15
-    // "perspective-python-dist-macos-11-3.7",
-    // "perspective-python-dist-macos-11-3.8",
-    // "perspective-python-dist-macos-11-3.9",
+    "perspective-python-dist-macos-11-3.7",
+    "perspective-python-dist-macos-11-3.8",
+    "perspective-python-dist-macos-11-3.9",
 
     // Ubuntu (Manylinux 2010 and 2014 docker images)
     "perspective-python-dist-ubuntu-20.04-3.7",
@@ -69,18 +64,11 @@ const dist_folders = [
 
 // Artifacts inside those folders
 const wheels = [
-    // Mac 10.15
-    // "cp36-cp36m-macosx_10_14_x86_64",
-    "cp37-cp37m-macosx_10_15_x86_64",
-    "cp38-cp38-macosx_10_15_x86_64",
-    "cp39-cp39-macosx_10_15_x86_64",
-
-    // // Mac 11
-    // // NOTE: not yet
-    // // "cp36-cp36m-macosx_11_0_x86_64",
-    // "cp37-cp37m-macosx_11_0_x86_64",
-    // "cp38-cp38-macosx_11_0_x86_64",
-    // "cp39-cp39-macosx_11_0_x86_64",
+    // Mac 11
+    // "cp36-cp36m-macosx_11_0_x86_64",
+    "cp37-cp37m-macosx_11_0_x86_64",
+    "cp38-cp38-macosx_11_0_x86_64",
+    "cp39-cp39-macosx_11_0_x86_64",
 
     // Manylinux 2010
     // "cp36-cp36m-manylinux2010_x86_64",

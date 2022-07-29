@@ -62,9 +62,11 @@ requires = [
 
 requires_aiohttp = ["aiohttp"]
 
+requires_jupyter = ["jupyterlab>=3.2,<4"]
+
 requires_starlette = ["fastapi", "starlette"]
 
-requires_tornado = ["tornado>=4.5.3"]
+requires_tornado = ["tornado>=4.5.3,<6.2"]
 
 requires_dev = (
     [
@@ -72,7 +74,6 @@ requires_dev = (
         "Faker>=1.0.0",
         "flake8>=3.7.8",
         "flake8-black>=0.2.0",
-        "mock",
         "psutil",
         "pybind11>=2.4.0",
         "pyarrow>=0.16.0",
@@ -89,6 +90,7 @@ requires_dev = (
     ]
     + requires
     + requires_aiohttp
+    + requires_jupyter
     + requires_starlette
     + requires_tornado
 )
@@ -278,6 +280,7 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
     ],
     keywords="analytics tools plotting",
     packages=find_packages(exclude=["bench", "bench.*"]),
@@ -288,7 +291,9 @@ setup(
     extras_require={
         "aiohttp": requires_aiohttp,
         "dev": requires_dev,
+        "develop": requires_dev,
         "fastapi": requires_starlette,
+        "jupyter": requires_jupyter,
         "starlette": requires_starlette,
         "tornado": requires_tornado,
     },

@@ -7,7 +7,7 @@
 #
 
 import pandas as pd
-from mock import patch
+from unittest.mock import patch
 from perspective import PerspectiveWidget, Plugin, PerspectiveError
 
 

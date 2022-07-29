@@ -6,7 +6,7 @@ title: Python User Guide
 Perspective for Python uses the exact same C++ data engine used by the
 [WebAssembly version](js.md). The
 library consists of many of the same abstractions and API as in JavaScript, as
-well as Python-specific data loading support for [NumPy](https://numpy.org/),
+well as Python-specific data loading support for [NumPy](https://numpy.org/),
 [Pandas](https://pandas.pydata.org/) (and
 [Apache Arrow](https://arrow.apache.org/), as in JavaScript).
 
@@ -35,7 +35,7 @@ The `perspective` module exports several tools:
 -   `Table`, the table constructor for Perspective, which implements the `table`
     and `view` API in the same manner as the JavaScript library.
 -   `PerspectiveWidget` the JupyterLab widget for interactive visualization.
--   Perspective webserver handlers that interfaces seamlessly with
+-   Perspective webserver handlers that interface seamlessly with
     `<perspective-viewer>` in JavaScript.
     -   `PerspectiveTornadoHandler` for [Tornado](https://www.tornadoweb.org/)
     -   `PerspectiveStarletteHandler` for [Starlette](https://www.starlette.io/) and [FastAPI](https://fastapi.tiangolo.com)
@@ -60,17 +60,28 @@ available on GitHub.
 ## Installation
 
 `perspective-python` contains full bindings to the Perspective API, a JupyterLab
-widget, and a [Tornado](http://www.tornadoweb.org/en/stable/) WebSocket handler
-that allows you to host Perspective using server-side Python.
+widget, and a WebSocket handlers for several webserver libraries
+that allow you to host Perspective using server-side Python.
 
 In addition to supporting row/columnar formats of data using `dict` and `list`,
 `pandas.DataFrame`, dictionaries of NumPy arrays, NumPy structured arrays, and
 NumPy record arrays are all supported in `perspective-python`.
 
-`perspective-python` can be installed from `pip`:
+
+### PyPI
+
+`perspective-python` can be installed from [PyPI](https://pypi.org) via `pip`:
 
 ```bash
 pip install perspective-python
+```
+
+### Anaconda
+
+`perspective-python` can also be installed for [Anaconda](https://anaconda.org/) via [Conda Forge](https://conda-forge.org)
+
+```bash
+conda install -c conda-forge perspective
 ```
 
 ### Jupyterlab
@@ -167,12 +178,12 @@ Unlike JavaScript, where schemas must be created using string representations of
 their types, `perspective-python` leverages Python's type system for schema
 creation. A schema can be created with the following types:
 
--   `int` (and `long` in Python 2)
+-   `int`
 -   `float`
 -   `bool`
 -   `datetime.date`
 -   `datetime.datetime`
--   `str` (and `unicode` in Python 2)
+-   `str`
 -   `object`
 
 #### Loading Custom Objects

@@ -17,8 +17,8 @@ const {
     python_version,
     python_image,
     manylinux_version,
+    copy_files_to_python_folder,
 } = require("./script_utils.js");
-const fs = require("fs-extra");
 
 let PYTHON = python_version();
 
@@ -42,21 +42,7 @@ try {
     PYTHON = "python";
 }
 try {
-    const dist = resolve`${__dirname}/../python/perspective/dist`;
-    const cpp = resolve`${__dirname}/../cpp/perspective/src`;
-    const cmakelists = resolve`${__dirname}/../cpp/perspective/CMakeLists.txt`;
-    const lic = resolve`${__dirname}/../LICENSE`;
-    const cmake = resolve`${__dirname}/../cmake`;
-    const dcmake = resolve`${dist}/cmake`;
-    const dlic = resolve`${dist}/LICENSE`;
-
-    fs.mkdirpSync(dist);
-    fs.copySync(cmakelists, resolve`${dist}/CMakeLists.txt`, {
-        preserveTimestamps: true,
-    });
-    fs.copySync(cpp, resolve`${dist}/src`, {preserveTimestamps: true});
-    fs.copySync(lic, dlic, {preserveTimestamps: true});
-    fs.copySync(cmake, dcmake, {preserveTimestamps: true});
+    copy_files_to_python_folder();
 
     if (SETUP_ONLY) {
         // don't execute any build steps, just copy
