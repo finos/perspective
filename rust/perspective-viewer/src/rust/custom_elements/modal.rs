@@ -142,11 +142,11 @@ where
             .unwrap()
             .unchecked_into::<web_sys::Element>();
 
-        let cprops = ModalProps {
+        let cprops = yew::props!(ModalProps<T> {
             child: Some(html_nested! {
                 <T ..props />
             }),
-        };
+        });
 
         let root = Rc::new(RefCell::new(Some(
             yew::Renderer::with_root_and_props(shadow_root, cprops).render(),

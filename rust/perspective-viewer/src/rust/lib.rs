@@ -55,13 +55,6 @@ pub fn get_exprtk_commands() -> Result<Box<[JsValue]>, JsValue> {
         .into_jserror()
 }
 
-// Handle `MonacoWebpackPlugin` and esbuild
-// #[wasm_bindgen(module = "/dist/pkg/viewer.js")]
-// extern "C" {
-//     #[wasm_bindgen(js_name = "bootstrap")]
-//     pub fn register_perspective_viewer();
-// }
-
 #[wasm_bindgen(js_name = "defineWebComponents")]
 pub fn define_web_components() {
     if cfg!(feature = "define_custom_elements_async") {

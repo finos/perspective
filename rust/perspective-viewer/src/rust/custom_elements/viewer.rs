@@ -161,14 +161,14 @@ impl PerspectiveViewerElement {
         let theme = Theme::new(&elem);
 
         // Create Yew App
-        let props = PerspectiveViewerProps {
+        let props = yew::props!(PerspectiveViewerProps {
             elem: elem.clone(),
             session: session.clone(),
             renderer: renderer.clone(),
             theme: theme.clone(),
             dragdrop: DragDrop::default(),
             weak_link: WeakScope::default(),
-        };
+        });
 
         let root = yew::Renderer::with_root_and_props(shadow_root, props).render();
 

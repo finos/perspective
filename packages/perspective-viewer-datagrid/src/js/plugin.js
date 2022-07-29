@@ -14,6 +14,7 @@ import {
     configureRegularTable,
     formatters,
 } from "./regular_table_handlers.js";
+
 import MATERIAL_STYLE from "../less/regular_table.less";
 import TOOLBAR_STYLE from "../less/toolbar.less";
 import {configureRowSelectable, deselect} from "./row_selection.js";
@@ -22,11 +23,11 @@ import {configureEditable} from "./editing.js";
 import {configureSortable} from "./sorting.js";
 import {PLUGIN_SYMBOL, make_color_record} from "./plugin_menu.js";
 
-export class PerspectiveViewerDatagridPluginElement extends HTMLElement {
+export class HTMLPerspectiveViewerDatagridPluginElement extends HTMLElement {
     constructor() {
         super();
-        this.datagrid = document.createElement("regular-table");
-        this.datagrid.formatters = formatters;
+        this.regular_table = document.createElement("regular-table");
+        this.regular_table.formatters = formatters;
         this._is_scroll_lock = true;
     }
 
@@ -43,13 +44,16 @@ export class PerspectiveViewerDatagridPluginElement extends HTMLElement {
                     ${TOOLBAR_STYLE}
                 </style>
                 <div id="toolbar">
-                    <span id="scroll_lock" class="lock-scroll button"><span>Align Scroll</span></span>
+                    <span id="scroll_lock" class="lock-scroll button">
+                        <span>Align Scroll</span>
+                    </span>
                     <span id="edit_mode" class="button"><span>Read Only</span></span>
                 </div>
             `;
 
             this._scroll_lock =
                 this._toolbar.shadowRoot.querySelector("#scroll_lock");
+
             this._scroll_lock.addEventListener("click", () =>
                 this._toggle_scroll_lock()
             );
@@ -59,7 +63,7 @@ export class PerspectiveViewerDatagridPluginElement extends HTMLElement {
 
             this._edit_mode.addEventListener("click", () => {
                 this._toggle_edit_mode();
-                this.datagrid.draw();
+                this.regular_table.draw();
                 this.parentElement.dispatchEvent(
                     new Event("perspective-config-update")
                 );
@@ -112,20 +116,28 @@ export class PerspectiveViewerDatagridPluginElement extends HTMLElement {
         let table = await viewer.getTable(true);
         if (!this._initialized) {
             this.innerHTML = "";
-            this.appendChild(this.datagrid);
-            this.model = await createModel(this.datagrid, table, view);
-            configureRegularTable(this.datagrid, this.model);
+            this.appendChild(this.regular_table);
+            this.model = await createModel(this.regular_table, table, view);
+            configureRegularTable(this.regular_table, this.model);
             await configureRowSelectable.call(
                 this.model,
-                this.datagrid,
+                this.regular_table,
                 viewer
             );
-            await configureClick.call(this.model, this.datagrid, viewer);
-            await configureEditable.call(this.model, this.datagrid, viewer);
-            await configureSortable.call(this.model, this.datagrid, viewer);
+            await configureClick.call(this.model, this.regular_table, viewer);
+            await configureEditable.call(
+                this.model,
+                this.regular_table,
+                viewer
+            );
+            await configureSortable.call(
+                this.model,
+                this.regular_table,
+                viewer
+            );
             this._initialized = true;
         } else {
-            await createModel(this.datagrid, table, view, this.model);
+            await createModel(this.regular_table, table, view, this.model);
         }
     }
 
@@ -160,12 +172,12 @@ export class PerspectiveViewerDatagridPluginElement extends HTMLElement {
 
         const old_sizes = this._save_column_size_overrides();
         let viewer = this.parentElement;
-        const draw = this.datagrid.draw({invalid_columns: true});
+        const draw = this.regular_table.draw({invalid_columns: true});
         if (!this.model._preserve_focus_state) {
-            this.datagrid.scrollTop = 0;
-            this.datagrid.scrollLeft = 0;
-            deselect(this.datagrid, viewer);
-            this.datagrid._resetAutoSize();
+            this.regular_table.scrollTop = 0;
+            this.regular_table.scrollLeft = 0;
+            deselect(this.regular_table, viewer);
+            this.regular_table._resetAutoSize();
         } else {
             this.model._preserve_focus_state = false;
         }
@@ -182,7 +194,7 @@ export class PerspectiveViewerDatagridPluginElement extends HTMLElement {
 
     async update(view) {
         this.model._num_rows = await view.num_rows();
-        await this.datagrid.draw();
+        await this.regular_table.draw();
     }
 
     async resize() {
@@ -191,18 +203,18 @@ export class PerspectiveViewerDatagridPluginElement extends HTMLElement {
         }
 
         if (this._initialized) {
-            await this.datagrid.draw();
+            await this.regular_table.draw();
         }
     }
 
     async clear() {
-        this.datagrid._resetAutoSize();
-        this.datagrid.clear();
+        this.regular_table._resetAutoSize();
+        this.regular_table.clear();
     }
 
     save() {
-        if (this.datagrid) {
-            const datagrid = this.datagrid;
+        if (this.regular_table) {
+            const datagrid = this.regular_table;
             const token = {
                 columns: {},
                 scroll_lock: !!this._is_scroll_lock,
@@ -288,7 +300,7 @@ export class PerspectiveViewerDatagridPluginElement extends HTMLElement {
             this._toggle_scroll_lock(token.scroll_lock);
         }
 
-        const datagrid = this.datagrid;
+        const datagrid = this.regular_table;
         try {
             datagrid._resetAutoSize();
         } catch (e) {
@@ -305,10 +317,10 @@ export class PerspectiveViewerDatagridPluginElement extends HTMLElement {
     }
 
     delete() {
-        if (this.datagrid.table_model) {
-            this.datagrid._resetAutoSize();
+        if (this.regular_table.table_model) {
+            this.regular_table._resetAutoSize();
         }
-        this.datagrid.clear();
+        this.regular_table.clear();
     }
 
     // Private
@@ -332,7 +344,7 @@ export class PerspectiveViewerDatagridPluginElement extends HTMLElement {
             return x;
         }
 
-        const overrides = this.datagrid._column_sizes.override;
+        const overrides = this.regular_table._column_sizes.override;
         const {group_by, columns} = this.model._config;
         const tree_header_offset =
             group_by?.length > 0 ? group_by.length + 1 : 0;
@@ -384,13 +396,13 @@ export class PerspectiveViewerDatagridPluginElement extends HTMLElement {
             }
         }
 
-        this.datagrid._column_sizes.override = overrides;
+        this.regular_table._column_sizes.override = overrides;
     }
 }
 
 customElements.define(
     "perspective-viewer-datagrid",
-    PerspectiveViewerDatagridPluginElement
+    HTMLPerspectiveViewerDatagridPluginElement
 );
 
 /**
@@ -410,11 +422,12 @@ function _register_global_styles() {
  *
  */
 
-function register_element() {
+async function _register_element() {
+    await customElements.whenDefined("perspective-viewer");
     customElements
         .get("perspective-viewer")
         .registerPlugin("perspective-viewer-datagrid");
 }
 
-customElements.whenDefined("perspective-viewer").then(register_element);
+_register_element();
 _register_global_styles();
