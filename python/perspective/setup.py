@@ -272,7 +272,7 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/finos/perspective",
     author="Perspective Authors",
-    author_email="open_source@jpmorgan.com",
+    author_email="info@finos.org",
     license="Apache 2.0",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
