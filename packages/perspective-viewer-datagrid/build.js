@@ -12,7 +12,7 @@ const BUILD = [
         define: {
             global: "window",
         },
-        entryPoints: ["src/js/plugin.js"],
+        entryPoints: ["src/js/index.js"],
         plugins: [InlineCSSPlugin(), NodeModulesExternal()],
         format: "esm",
         loader: {
@@ -24,7 +24,7 @@ const BUILD = [
         define: {
             global: "window",
         },
-        entryPoints: ["src/js/plugin.js"],
+        entryPoints: ["src/js/index.js"],
         globalName: "perspective_datagrid",
         plugins: [InlineCSSPlugin(), UMDLoader()],
         format: "cjs",
@@ -37,7 +37,7 @@ const BUILD = [
         define: {
             global: "window",
         },
-        entryPoints: ["src/js/plugin.js"],
+        entryPoints: ["src/js/index.js"],
         plugins: [InlineCSSPlugin()],
         format: "esm",
         loader: {

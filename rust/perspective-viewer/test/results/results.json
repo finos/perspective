@@ -3,7 +3,7 @@
     "superstore.html/doesn't leak elements.": "d0fd18b3d4d7c183c5ed155b4bf37972",
     "superstore.html/doesn't leak views when setting group by.": "54daaa4bbbe59f6ed4acc301ba871bab",
     "superstore.html/doesn't leak views when setting filters.": "6dfc1e505f1428424c3265f0236f22fc",
-    "__GIT_COMMIT__": "4c1442210a01ef0e4eb1f2a2ea7ce9faadf7411c",
+    "__GIT_COMMIT__": "0ee79b07e87340cddb5626dfc732ca85932f6d7c",
     "blank.html/Handles reloading with a schema.": "e58c62f6e0ff16dc4d753f99e0fc39c3",
     "superstore_shows_a_grid_without_any_settings_applied_": "ae1c4690d978598ca14c8669244ce604",
     "superstore_Responsive_Layout_shows_horizontal_columns_on_small_vertical_viewports_": "57ba3ad341cf8a0e4df6ab96715ff2a0",
@@ -83,8 +83,8 @@
     "dragdrop_column-selector-modes_dragover_from_optional_to_required_columns_should_swap": "e7d37d256b28d7ee2ff815f7e494a46c",
     "dragdrop_column-selector-modes_dragover_filter_in_should_work": "d6a9d0eb28216e9a1da71fb350207fc6",
     "superstore-all_migrate_restore__Bucket_by_year_": "e553e253c983516dea41eb584a889612",
-    "superstore-all_migrate_restore__Plugin_config_color_mode_": "e15272040eea436c123116c69c11a3e8",
-    "superstore-all_migrate_restore__New_Datagrid_style_API_": "e15272040eea436c123116c69c11a3e8",
-    "superstore-all_migrate_restore__New_Datagrid_style_API_with_a_bar_and_gradient_": "93078014b83a1364c39148e935471f1c",
-    "superstore-all_migrate_restore__New_API,_reflexive_(new_API_is_unmodified)_": "e034d0f8624ed40838ae85a84120eba5"
+    "superstore-all_migrate_restore__Plugin_config_color_mode_": "b8386aeed653c7335d7df5576af6b434",
+    "superstore-all_migrate_restore__New_Datagrid_style_API_": "b8386aeed653c7335d7df5576af6b434",
+    "superstore-all_migrate_restore__New_Datagrid_style_API_with_a_bar_and_gradient_": "ea489f30f8fcc8613b9d3199cc0c05e1",
+    "superstore-all_migrate_restore__New_API,_reflexive_(new_API_is_unmodified)_": "d57ff6279d054bd1b5bcdb1d2aed8f49"
 }

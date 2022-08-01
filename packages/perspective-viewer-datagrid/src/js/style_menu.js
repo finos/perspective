@@ -7,48 +7,30 @@
  *
  */
 
-import chroma from "chroma-js";
-
-export const PLUGIN_SYMBOL = Symbol("Plugin Symbol");
-
-export function make_gradient(chromahex) {
-    const [r, g, b] = chromahex.rgb();
-    const [r1, g1, b1] = chromahex
-        .set("hsl.h", (chromahex.get("hsl.h") - 15) % 360)
-        .rgb();
-    const [r2, g2, b2] = chromahex
-        .set("hsl.h", (chromahex.get("hsl.h") + 15) % 360)
-        .rgb();
-    return `linear-gradient(to right top,rgb(${r1},${g1},${b1}),rgb(${r},${g},${b}) 50%,rgb(${r2},${g2},${b2}))`;
-}
-
-export function make_color_record(color) {
-    const chroma_neg = chroma(color);
-    const _neg_grad = make_gradient(chroma_neg);
-    const rgb = chroma_neg.rgb();
-
-    return [
-        color,
-        ...rgb,
-        _neg_grad,
-        `rgba(${rgb[0]},${rgb[1]},${rgb[2]},1)`,
-        `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0)`,
-    ];
-}
-
-function blend(a, b) {
-    return chroma.mix(a, `rgb(${b[0]},${b[1]},${b[2]})`, 0.5).hex();
-}
+import {make_color_record} from "./color_utils.js";
+import {PRIVATE_PLUGIN_SYMBOL} from "./model";
 
 export function activate_plugin_menu(regularTable, target, column_max) {
-    const is_numeric = typeof column_max !== "undefined";
-    const MENU = document.createElement(
-        `perspective-${is_numeric ? "number" : "string"}-column-style`
-    );
     const target_meta = regularTable.getMeta(target);
+
     const column_name =
         target_meta.column_header[target_meta.column_header.length - 1];
     const column_type = this._schema[column_name];
+    const is_numeric = column_type === "integer" || column_type === "float";
+    const MENU = document.createElement(
+        `perspective-${
+            {
+                float: "number",
+                integer: "number",
+                string: "string",
+                date: "date",
+                datetime: "date",
+            }[column_type]
+        }-column-style`
+    );
+    // const column_name =
+    //     target_meta.column_header[target_meta.column_header.length - 1];
+    // const column_type = this._schema[column_name];
     let default_config;
     if (is_numeric) {
         default_config = {
@@ -62,12 +44,18 @@ export function activate_plugin_menu(regularTable, target, column_max) {
             number_bg_mode: "disabled",
         };
     } else {
+        // date, datetime, string, boolean
         default_config = {
             color: this._color[0],
+            bg_color: this._color[0],
         };
     }
 
-    if (column_type === "string") {
+    if (
+        column_type === "string" ||
+        column_type === "date" ||
+        column_type === "datetime"
+    ) {
         // do nothing
     } else if (column_type === "float") {
         default_config.fixed = 2;
@@ -96,8 +84,13 @@ export function activate_plugin_menu(regularTable, target, column_max) {
             config.color = make_color_record(config.color);
         }
 
-        regularTable[PLUGIN_SYMBOL] = regularTable[PLUGIN_SYMBOL] || {};
-        regularTable[PLUGIN_SYMBOL][column_name] = config;
+        if (config.bg_color) {
+            config.bg_color = make_color_record(config.bg_color);
+        }
+
+        regularTable[PRIVATE_PLUGIN_SYMBOL] =
+            regularTable[PRIVATE_PLUGIN_SYMBOL] || {};
+        regularTable[PRIVATE_PLUGIN_SYMBOL][column_name] = config;
         regularTable.draw({preserve_width: true});
         regularTable.parentElement.parentElement.dispatchEvent(
             new Event("perspective-config-update")
@@ -127,7 +120,7 @@ export function activate_plugin_menu(regularTable, target, column_max) {
     regularTable.addEventListener("regular-table-scroll", scroll_handler);
 
     // Get the current column style config
-    const pset = regularTable[PLUGIN_SYMBOL] || {};
+    const pset = regularTable[PRIVATE_PLUGIN_SYMBOL] || {};
     const config = Object.assign(
         {},
         (pset[column_name] = pset[column_name] || {})
@@ -142,6 +135,10 @@ export function activate_plugin_menu(regularTable, target, column_max) {
 
     if (config.color) {
         config.color = config.color[0];
+    }
+
+    if (config.bg_color) {
+        config.bg_color = config.bg_color[0];
     }
 
     MENU.open(target, config, default_config);

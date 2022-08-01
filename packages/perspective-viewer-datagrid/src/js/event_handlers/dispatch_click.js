@@ -7,9 +7,9 @@
  *
  */
 
-import getCellConfig from "./getCellConfig";
+import getCellConfig from "../get_cell_config";
 
-async function clickListener(table, viewer, event) {
+export async function dispatch_click_listener(table, viewer, event) {
     const meta = table.getMeta(event.target);
     if (!meta) return;
     const {x, y} = meta;
@@ -27,8 +27,4 @@ async function clickListener(table, viewer, event) {
             },
         })
     );
-}
-
-export function configureClick(table, viewer) {
-    table.addEventListener("click", clickListener.bind(this, table, viewer));
 }

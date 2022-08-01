@@ -7,21 +7,14 @@
  *
  */
 
-export async function configureSortable(table, viewer) {
-    table.addEventListener("regular-table-psp-sort", (event) => {
-        this._preserve_focus_state = true;
-        viewer.restore({sort: event.detail.sort});
-    });
-}
-
 export async function sortHandler(regularTable, event, target) {
     const meta = regularTable.getMeta(target);
     const column_name = meta.column_header[meta.column_header.length - 1];
     const sort_method = event.shiftKey ? append_sort : override_sort;
     const sort = sort_method.call(this, column_name);
-    regularTable.dispatchEvent(
-        new CustomEvent("regular-table-psp-sort", {detail: {sort}})
-    );
+    this._preserve_focus_state = true;
+    const viewer = regularTable.parentElement.parentElement;
+    await viewer.restore({sort});
 }
 
 export function append_sort(column_name) {
