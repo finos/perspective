@@ -1,5 +1,18 @@
 # Changelog
 
+## [v1.6.2](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.6.1...HEAD)
+
+**Fixed bugs:**
+
+- Fix Python bug in `async` mode [\#1926](https://github.com/finos/perspective/pull/1926) ([texodus](https://github.com/texodus))
+- Fix app export [\#1921](https://github.com/finos/perspective/pull/1921) ([texodus](https://github.com/texodus))
+
+**Merged pull requests:**
+
+- Cleanup up python requirements installation in CI, remove some dangling azure references, refresh python README [\#1917](https://github.com/finos/perspective/pull/1917) ([timkpaine](https://github.com/timkpaine))
+
 ## [v1.6.1](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.6.0...HEAD)
