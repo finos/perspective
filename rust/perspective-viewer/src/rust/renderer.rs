@@ -111,7 +111,7 @@ impl Renderer {
     pub async fn reset(&self) {
         self.0.borrow_mut().plugins_idx = None;
         if let Ok(plugin) = self.get_active_plugin() {
-            plugin.restore(&js_object!());
+            plugin.restore(&json!({}));
         }
     }
 

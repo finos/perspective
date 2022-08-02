@@ -48,12 +48,12 @@ pub async fn get_mock_table() -> JsPerspectiveTable {
     });
 
     worker
-        .table(js_object!(
-            "A",
-            [JsValue::from(1), JsValue::from(2), JsValue::from(3)]
-                .iter()
-                .collect::<js_sys::Array>()
-        ))
+        .table(
+            json!({
+                "A": [1, 2, 3]
+            })
+            .unchecked_into(),
+        )
         .await
         .unwrap()
 }

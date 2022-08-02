@@ -6,9 +6,6 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-// TODO yew `Properties`
-#![allow(dead_code)]
-
 use crate::{html_template, utils::*};
 
 use futures::future::{join_all, select_all};
@@ -100,9 +97,9 @@ impl FontLoaderProps {
             fonts: RefCell::new(vec![]),
         };
 
-        let state = FontLoaderProps {
+        let state = yew::props!(FontLoaderProps {
             state: Rc::new(inner),
-        };
+        });
 
         ApiFuture::spawn(state.clone().load_fonts_task_safe());
         state

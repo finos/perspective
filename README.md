@@ -56,12 +56,12 @@ and/or [Jupyterlab](https://jupyterlab.readthedocs.io/en/stable/).
 ## Documentation
 
 * [Project Site](https://perspective.finos.org/)
-* [Table](https://perspective.finos.org/docs/md/table.html)
-* [View](https://perspective.finos.org/docs/md/view.html)
-* [Javascript User Guide](https://perspective.finos.org/docs/md/js.html)
-* [Python User Guide](https://perspective.finos.org/docs/md/python.html)
-* [Data Binding](https://perspective.finos.org/docs/md/table.html)
-* [Developer Guide](https://perspective.finos.org/docs/md/development.html)
+* [Table](https://perspective.finos.org/docs/table.html)
+* [View](https://perspective.finos.org/docs/view.html)
+* [Javascript User Guide](https://perspective.finos.org/docs/js.html)
+* [Python User Guide](https://perspective.finos.org/docs/python.html)
+* [Data Binding](https://perspective.finos.org/docs/table.html)
+* [Developer Guide](https://perspective.finos.org/docs/development.html)
 * [Perspective API](https://github.com/finos/perspective/blob/master/packages/perspective/README.md)
 * [Perspective Viewer API](https://github.com/finos/perspective/blob/master/packages/perspective-viewer/README.md)
 * [Perspective Python API](https://perspective.finos.org/docs/obj/perspective-python.html)

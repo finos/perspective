@@ -38,37 +38,6 @@ export type PerspectiveViewerConfig = perspective.ViewConfig & {
  */
 export interface IPerspectiveViewerElement {
     /**
-     * Part of the Custom Elements API.  This method is called by the browser,
-     * and should not be called directly by applications.
-     *
-     * @ignore
-     */
-    connectedCallback(): void;
-
-    // /**
-    //  * Register a new plugin via its custom element name.  This method is called
-    //  * automatically as a side effect of importing a plugin module, so this
-    //  * method should only typically be called by plugin authors.
-    //  *
-    //  * @category Plugin
-    //  * @param name The `name` of the custom element to register, as supplied
-    //  * to the `customElements.define(name)` method.
-    //  * @example
-    //  * ```javascript
-    //  * customElements.get("perspective-viewer").registerPlugin("my-plugin");
-    //  * ```
-    //  */
-    // static registerPlugin(name: string): Promise<void>;
-
-    // /**
-    //  * Get metadata for ExprTK's supported commands.
-    //  *
-    //  * @category Internal
-    //  * @returns An array of JSON descriptors for ExprTK commands
-    //  */
-    // static getExprtkCommands(): Promise<Array<Record<string, string>>>;
-
-    /**
      * Load a `perspective.Table`.  If `load` or `update` have already been
      * called on this element, its internal `perspective.Table` will _not_ be
      * deleted, but it will bed de-referenced by this `<perspective-viewer>`.

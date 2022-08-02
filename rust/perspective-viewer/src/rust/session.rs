@@ -218,8 +218,11 @@ impl Session {
     }
 
     pub async fn csv_as_jsvalue(&self, flat: bool) -> Result<js_sys::JsString, JsValue> {
-        let opts = js_object!("formatted", true);
-        self.flat_as_jsvalue(flat).await?.to_csv(opts).await
+        let opts = json!({"formatted": true});
+        self.flat_as_jsvalue(flat)
+            .await?
+            .to_csv(opts.unchecked_into())
+            .await
     }
 
     pub fn get_view(&self) -> Option<View> {
@@ -260,7 +263,7 @@ impl Session {
         let table = self.borrow().table.clone().unwrap();
         let view = table.view(&js_config).await?;
         let csv = view
-            .to_csv(js_object!())
+            .to_csv(json!({}))
             .await?
             .as_string()
             .ok_or_else(|| JsValue::from("Bad CSV"))?;
@@ -342,7 +345,7 @@ impl Session {
         if flat {
             let table = self.borrow().table.clone().into_jserror()?;
             table
-                .view(&js_object!().unchecked_into())
+                .view(&json!({}).unchecked_into())
                 .await
                 .map(PerspectiveOwned::new)
         } else {
