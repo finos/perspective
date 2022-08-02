@@ -20,7 +20,7 @@ mod datetime;
 mod debounce;
 mod download;
 mod errors;
-mod js_object;
+mod json;
 mod pubsub;
 mod request_animation_frame;
 mod scope;
@@ -38,6 +38,7 @@ pub use self::datetime::*;
 pub use self::debounce::*;
 pub use self::download::*;
 pub use self::errors::*;
+pub use self::json::*;
 pub use self::pubsub::*;
 pub use self::request_animation_frame::*;
 pub use self::scope::*;
@@ -170,4 +171,27 @@ macro_rules! min {
             y
         }
     }}
+}
+
+#[macro_export]
+macro_rules! js_log {
+    ($x:expr) => {{
+        const DEBUG_ONLY_WARNING: &str = $x;
+        web_sys::console::log_1(&wasm_bindgen::JsValue::from($x));
+    }};
+    ($x:expr $(, $y:expr)*) => {{
+        const DEBUG_ONLY_WARNING: &str = $x;
+        web_sys::console::log_1(&format!($x, $($y),*).into());
+    }};
+}
+
+#[macro_export]
+macro_rules! html_template {
+    ($($x:tt)*) => {{
+        html! {
+            <>
+                $($x)*
+            </>
+        }
+    }};
 }

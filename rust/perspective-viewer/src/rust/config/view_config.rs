@@ -136,15 +136,11 @@ mod tests {
 
     #[wasm_bindgen_test]
     pub fn test_multiaggregate_weighted_mean() {
-        let x = js_object!(
-            "aggregates",
-            js_object!(
-                "x",
-                [JsValue::from("weighted mean"), JsValue::from("y")]
-                    .iter()
-                    .collect::<Array>()
-            )
-        );
+        let x = json!({
+            "aggregates": {
+                "x": ["weighted_mean", "y"]
+            }
+        });
 
         let rec: ViewConfig = x.into_serde().unwrap();
         assert_eq!(
@@ -155,20 +151,19 @@ mod tests {
 
     #[wasm_bindgen_test]
     pub fn test_group_by() {
-        let x = js_object!(
-            "group_by",
-            [JsValue::from("Test")].iter().collect::<Array>()
-        );
+        let x = json!({
+            "group_by": ["Test"]
+        });
+
         let rec: ViewConfig = x.into_serde().unwrap();
         assert_eq!(rec.group_by, vec!("Test"));
     }
 
     #[wasm_bindgen_test]
     pub fn test_split_by() {
-        let x = js_object!(
-            "split_by",
-            [JsValue::from("Test")].iter().collect::<Array>()
-        );
+        let x = json!({
+            "split_by": ["Test"]
+        });
         let rec: ViewConfig = x.into_serde().unwrap();
         assert_eq!(rec.split_by, vec!("Test"));
     }
@@ -180,7 +175,7 @@ mod tests {
             .map(|x| JsValue::from(*x))
             .collect::<Array>();
 
-        let x = js_object!("filter", [filter].iter().collect::<Array>());
+        let x = json!({ "filter": [filter] });
         let rec: ViewConfig = x.into_serde().unwrap();
         assert_eq!(
             rec.filter,
@@ -198,7 +193,7 @@ mod tests {
             .iter()
             .collect::<Array>();
 
-        let x = js_object!("filter", [filter].iter().collect::<Array>());
+        let x = json!({ "filter": [filter] });
         let rec: ViewConfig = x.into_serde().unwrap();
         assert_eq!(
             rec.filter,
@@ -217,7 +212,7 @@ mod tests {
             .map(|x| JsValue::from(*x))
             .collect::<Array>();
 
-        let x = js_object!("sort", [sort].iter().collect::<Array>());
+        let x = json!({ "sort": [sort] });
         let rec: ViewConfig = x.into_serde().unwrap();
         assert_eq!(rec.sort, vec!(Sort("Test".to_owned(), SortDir::Asc,)));
     }
@@ -234,7 +229,7 @@ mod tests {
             .map(|x| JsValue::from(*x))
             .collect::<Array>();
 
-        let x = js_object!("sort", [sort1, sort2].iter().collect::<Array>());
+        let x = json!({"sort": [sort1, sort2]});
         let rec: ViewConfig = x.into_serde().unwrap();
         assert_eq!(
             rec.sort,

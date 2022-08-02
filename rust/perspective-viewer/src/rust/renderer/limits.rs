@@ -72,12 +72,12 @@ mod tests {
     #[wasm_bindgen_test]
     pub async fn test_emtpy_schema_no_columns() {
         let closure = closure_helper(0);
-        let closure2 = closure_helper(js_object!());
-        let view = js_object!(
-            "num_columns", closure.as_ref().unchecked_ref::<JsValue>();
-            "num_rows", closure.as_ref().unchecked_ref::<JsValue>();
-            "schema", closure2.as_ref().unchecked_ref::<JsValue>()
-        )
+        let closure2 = closure_helper(json!({}));
+        let view = json!({
+            "num_columns": closure.as_ref().unchecked_ref::<JsValue>(),
+            "num_rows": closure.as_ref().unchecked_ref::<JsValue>(),
+            "schema": closure2.as_ref().unchecked_ref::<JsValue>()
+        })
         .unchecked_into::<JsPerspectiveView>();
 
         let reqs = ViewConfigRequirements {
@@ -93,12 +93,12 @@ mod tests {
     pub async fn test_columns_do_not_exceed_max_columns() {
         let closure = closure_helper(1);
         let closure2 = closure_helper(0);
-        let closure3 = closure_helper(js_object!());
-        let view = js_object!(
-            "num_columns", closure.as_ref().unchecked_ref::<JsValue>();
-            "num_rows", closure2.as_ref().unchecked_ref::<JsValue>();
-            "schema", closure3.as_ref().unchecked_ref::<JsValue>()
-        )
+        let closure3 = closure_helper(json!({}));
+        let view = json!({
+            "num_columns": closure.as_ref().unchecked_ref::<JsValue>(),
+            "num_rows": closure2.as_ref().unchecked_ref::<JsValue>(),
+            "schema": closure3.as_ref().unchecked_ref::<JsValue>()
+        })
         .unchecked_into::<JsPerspectiveView>();
 
         let reqs = ViewConfigRequirements {
@@ -116,12 +116,12 @@ mod tests {
     pub async fn test_columns_exceed_max_columns() {
         let closure = closure_helper(2);
         let closure2 = closure_helper(0);
-        let closure3 = closure_helper(js_object!());
-        let view = js_object!(
-            "num_columns", closure.as_ref().unchecked_ref::<JsValue>();
-            "num_rows", closure2.as_ref().unchecked_ref::<JsValue>();
-            "schema", closure3.as_ref().unchecked_ref::<JsValue>()
-        )
+        let closure3 = closure_helper(json!({}));
+        let view = json!({
+            "num_columns": closure.as_ref().unchecked_ref::<JsValue>(),
+            "num_rows": closure2.as_ref().unchecked_ref::<JsValue>(),
+            "schema": closure3.as_ref().unchecked_ref::<JsValue>()
+        })
         .unchecked_into::<JsPerspectiveView>();
 
         let reqs = ViewConfigRequirements {
@@ -138,12 +138,12 @@ mod tests {
     pub async fn test_when_schema_columns_are_present() {
         let closure = closure_helper(100);
         let closure2 = closure_helper(0);
-        let closure3 = closure_helper(js_object!("x", "string"; "y", "string"));
-        let view = js_object!(
-            "num_columns", closure.as_ref().unchecked_ref::<JsValue>();
-            "num_rows", closure2.as_ref().unchecked_ref::<JsValue>();
-            "schema", closure3.as_ref().unchecked_ref::<JsValue>()
-        )
+        let closure3 = closure_helper(json!({"x": "string", "y": "string"}));
+        let view = json!({
+            "num_columns": closure.as_ref().unchecked_ref::<JsValue>(),
+            "num_rows": closure2.as_ref().unchecked_ref::<JsValue>(),
+            "schema": closure3.as_ref().unchecked_ref::<JsValue>()
+        })
         .unchecked_into::<JsPerspectiveView>();
 
         let reqs = ViewConfigRequirements {
@@ -160,12 +160,12 @@ mod tests {
     pub async fn test_when_max_cells_exits() {
         let closure = closure_helper(1);
         let closure2 = closure_helper(0);
-        let closure3 = closure_helper(js_object!());
-        let view = js_object!(
-            "num_columns", closure.as_ref().unchecked_ref::<JsValue>();
-            "num_rows", closure2.as_ref().unchecked_ref::<JsValue>();
-            "schema", closure3.as_ref().unchecked_ref::<JsValue>()
-        )
+        let closure3 = closure_helper(json!({}));
+        let view = json!({
+            "num_columns": closure.as_ref().unchecked_ref::<JsValue>(),
+            "num_rows": closure2.as_ref().unchecked_ref::<JsValue>(),
+            "schema": closure3.as_ref().unchecked_ref::<JsValue>()
+        })
         .unchecked_into::<JsPerspectiveView>();
 
         let reqs = ViewConfigRequirements {
@@ -182,12 +182,12 @@ mod tests {
     pub async fn test_when_columns_exceed_max_columns_and_max_cells_exists() {
         let closure = closure_helper(4);
         let closure2 = closure_helper(0);
-        let closure3 = closure_helper(js_object!());
-        let view = js_object!(
-            "num_columns", closure.as_ref().unchecked_ref::<JsValue>();
-            "num_rows", closure2.as_ref().unchecked_ref::<JsValue>();
-            "schema", closure3.as_ref().unchecked_ref::<JsValue>()
-        )
+        let closure3 = closure_helper(json!({}));
+        let view = json!({
+            "num_columns": closure.as_ref().unchecked_ref::<JsValue>(),
+            "num_rows": closure2.as_ref().unchecked_ref::<JsValue>(),
+            "schema": closure3.as_ref().unchecked_ref::<JsValue>()
+        })
         .unchecked_into::<JsPerspectiveView>();
 
         let reqs = ViewConfigRequirements {
