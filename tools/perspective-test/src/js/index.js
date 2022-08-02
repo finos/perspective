@@ -8,18 +8,15 @@
  */
 
 const fs = require("fs");
-const crypto = require("crypto");
 const puppeteer = require("puppeteer");
 const path = require("path");
 const execSync = require("child_process").execSync;
 const {track_mouse} = require("./mouse_helper.js");
-const format = require("xml-formatter");
-
 const readline = require("readline");
-
 const cons = require("console");
 const private_console = new cons.Console(process.stdout, process.stderr);
 const cp = require("child_process");
+const {normalize_xml} = require("./html_compare.js");
 
 // Jest does not resolve `exports` field so we must link directly to the file.
 const {
@@ -385,70 +382,6 @@ test.run = function run(
     );
 };
 
-function format_and_clean_xml(result) {
-    try {
-        return format(result, {
-            filter(x) {
-                // TODO We have to strip many geometry attributes due to minute
-                // rendering differences on Linux and dev (presumably OSX).
-                if (x) {
-                    if (x.attributes?.r) {
-                        delete x.attributes["r"];
-                    }
-
-                    if (x.attributes?.dx) {
-                        delete x.attributes["dx"];
-                    }
-
-                    if (x.attributes?.dy) {
-                        delete x.attributes["dy"];
-                    }
-
-                    if (x.attributes?.x) {
-                        delete x.attributes["x"];
-                    }
-
-                    if (x.attributes?.y) {
-                        delete x.attributes["y"];
-                    }
-
-                    if (x.attributes?.x1) {
-                        delete x.attributes["x1"];
-                    }
-
-                    if (x.attributes?.y1) {
-                        delete x.attributes["y1"];
-                    }
-
-                    if (x.attributes?.x2) {
-                        delete x.attributes["x2"];
-                    }
-
-                    if (x.attributes?.y2) {
-                        delete x.attributes["y2"];
-                    }
-
-                    if (x.attributes?.style) {
-                        delete x.attributes["style"];
-                    }
-
-                    if (x.attributes?.d) {
-                        delete x.attributes["d"];
-                    }
-
-                    if (x.attributes?.transform) {
-                        delete x.attributes["transform"];
-                    }
-                }
-
-                return true;
-            },
-        });
-    } catch (e) {
-        return result;
-    }
-}
-
 test.capture = function capture(
     name,
     body,
@@ -550,9 +483,9 @@ test.capture = function capture(
 
                 // Move the mouse offscreen so prev tests dont get hover effects
                 await page.mouse.move(10000, 10000);
-                let result;
+                let raw_xml;
                 try {
-                    result = await body(page);
+                    raw_xml = await body(page);
                 } catch (e) {
                     if (process.env.PSP_PAUSE_ON_FAILURE) {
                         if (!process.env.WRITE_TESTS) {
@@ -565,16 +498,13 @@ test.capture = function capture(
                     throw e;
                 }
 
-                result = format_and_clean_xml(result);
-
-                // await page.close();
-                const hash = crypto
-                    .createHash("md5")
-                    .update(result)
-                    .digest("hex");
+                let {xml: result, hash} = normalize_xml(raw_xml);
 
                 if (hash === results[path_name]) {
-                    if (!fs.existsSync(filename + ".png")) {
+                    if (
+                        !fs.existsSync(filename + ".png") ||
+                        process.env.WRITE_TESTS
+                    ) {
                         const screenshot = await page.screenshot({
                             captureBeyondViewport: false,
                             fullPage: true,

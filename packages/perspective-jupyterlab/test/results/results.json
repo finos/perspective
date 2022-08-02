@@ -1,7 +1,7 @@
 {
-    "__GIT_COMMIT__": "b89bc3b686618a28aa819a2126e94cb97233c6dc",
+    "__GIT_COMMIT__": "be50bcdfb1c1160ccc560af452db54446386ffcf",
     "resize_Config_should_show_by_default": "f492628efc5ce5c9e1bab910cf2557c9",
-    "resize_Resize_the_container_causes_the_widget_to_resize": "509ab32da334765e836e08c902417885",
-    "resize_group_by_traitlet_works": "da4f954e149fdb37f52011ca26cc624f",
-    "resize_Config_should_be_hidden_by_default": "82855cf374a8df768b618e1ec79359a4"
+    "resize_Resize_the_container_causes_the_widget_to_resize": "e3c617dd8acc99d2026d4cd2436d66ab",
+    "resize_group_by_traitlet_works": "f86409c2ccbdf3613a4aa20fc24cc543",
+    "resize_Config_should_be_hidden_by_default": "5ca5a07cbb0d81e16939a622c41575c0"
 }
