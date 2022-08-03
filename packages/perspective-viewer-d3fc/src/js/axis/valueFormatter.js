@@ -8,7 +8,7 @@
  */
 import * as d3 from "d3";
 
-const SI_MIN = 10000000;
+const SI_MIN = 100000;
 
 export default (d) =>
     Math.abs(d) >= SI_MIN
