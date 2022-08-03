@@ -51,6 +51,9 @@ where
 
     #[prop_or_default]
     pub class: Option<String>,
+
+    #[prop_or_default]
+    pub wrapper_class: Option<String>,
 }
 
 impl<T> PartialEq for SelectProps<T>
@@ -184,17 +187,22 @@ where
             </select>
         };
 
+        let wrapper_class = match &ctx.props().wrapper_class {
+            Some(x) => classes!("dropdown-width-container", x),
+            None => classes!("dropdown-width-container"),
+        };
+
         html! {
             if is_group_selected && ctx.props().label.is_some() {
                 <label>{ ctx.props().label.unwrap() }</label>
                 <div
-                    class="dropdown-width-container"
+                    class={ wrapper_class }
                     data-value={ format!("{}", self.selected) }>
                     { select }
                 </div>
             } else {
                 <div
-                    class="dropdown-width-container"
+                    class={ wrapper_class }
                     data-value={ format!("{}", self.selected) }>
                     { select }
                 </div>

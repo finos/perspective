@@ -26,6 +26,8 @@ perspective-viewer[theme="Solarized"],
 perspective-copy-menu[theme="Solarized"],
 perspective-export-menu[theme="Solarized"],
 perspective-filter-dropdown[theme="Solarized"],
+perspective-date-column-style[theme="Solarized"],
+perspective-datetime-column-style[theme="Solarized"],
 perspective-number-column-style[theme="Solarized"],
 perspective-string-column-style[theme="Solarized"],
 perspective-expression-editor[theme="Solarized"],
@@ -69,12 +71,10 @@ perspective-expression-editor[theme="Solarized"],
     }
 
     regular-table table tbody th:empty {
-        background: linear-gradient(
-            to right,
-            transparent 9px,
-            #93a1a1 10px,
-            transparent 11px
-        );
+        background: linear-gradient(to right,
+                transparent 9px,
+                #93a1a1 10px,
+                transparent 11px);
     }
 }
 
@@ -94,13 +94,11 @@ perspective-expression-editor[theme="Solarized"],
     --d3fc-series-6: #6c71c4;
     --d3fc-series-7: #d33682;
 
-    --d3fc-positive--gradient: linear-gradient(
-        #268bd2 0%,
-        #2aa198,
-        #859900,
-        #b58900,
-        #cb4b16,
-        #dc322f,
-        #d33682 100%
-    );
+    --d3fc-positive--gradient: linear-gradient(#268bd2 0%,
+            #2aa198,
+            #859900,
+            #b58900,
+            #cb4b16,
+            #dc322f,
+            #d33682 100%);
 }

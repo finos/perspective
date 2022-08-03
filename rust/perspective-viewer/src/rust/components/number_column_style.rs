@@ -7,187 +7,19 @@
 // file.
 
 use super::color_range_selector::*;
+use super::containers::number_input::*;
 use super::containers::radio_list::RadioList;
+use super::containers::radio_list_item::RadioListItem;
 use super::modal::*;
+use crate::config::*;
 use crate::utils::WeakScope;
 use crate::*;
-use serde::{Deserialize, Serialize};
-use std::fmt::Display;
-use std::str::FromStr;
 use wasm_bindgen::*;
 use web_sys::*;
 use yew::prelude::*;
 use yew::*;
 
 pub static CSS: &str = include_str!("../../../build/css/column-style.css");
-
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
-pub enum NumberForegroundMode {
-    #[serde(rename = "disabled")]
-    Disabled,
-
-    #[serde(rename = "color")]
-    Color,
-
-    #[serde(rename = "bar")]
-    Bar,
-}
-
-impl Default for NumberForegroundMode {
-    fn default() -> Self {
-        NumberForegroundMode::Color
-    }
-}
-
-/// `Display` and `FromStr` are only used for rendering these types as HTML
-/// attributes, where `disabled` will never be rendered as it represents the
-/// options being unavailable.
-impl Display for NumberForegroundMode {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let text = match self {
-            Self::Color => Ok("color"),
-            Self::Bar => Ok("bar"),
-            _ => Err(std::fmt::Error),
-        }?;
-
-        write!(f, "{}", text)
-    }
-}
-
-impl FromStr for NumberForegroundMode {
-    type Err = String;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "color" => Ok(Self::Color),
-            "bar" => Ok(Self::Bar),
-            x => Err(format!("Unknown NumberForegroundMode::{}", x)),
-        }
-    }
-}
-
-impl NumberForegroundMode {
-    fn is_color(&self) -> bool {
-        *self == Self::Color
-    }
-
-    fn is_enabled(&self) -> bool {
-        *self != Self::Disabled
-    }
-
-    fn needs_gradient(&self) -> bool {
-        *self == Self::Bar
-    }
-}
-
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
-pub enum NumberBackgroundMode {
-    #[serde(rename = "disabled")]
-    Disabled,
-
-    #[serde(rename = "color")]
-    Color,
-
-    #[serde(rename = "gradient")]
-    Gradient,
-
-    #[serde(rename = "pulse")]
-    Pulse,
-}
-
-impl Default for NumberBackgroundMode {
-    fn default() -> Self {
-        NumberBackgroundMode::Disabled
-    }
-}
-
-impl Display for NumberBackgroundMode {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let text = match self {
-            Self::Color => Ok("color"),
-            Self::Gradient => Ok("gradient"),
-            Self::Pulse => Ok("pulse"),
-            _ => Err(std::fmt::Error),
-        }?;
-
-        write!(f, "{}", text)
-    }
-}
-
-impl FromStr for NumberBackgroundMode {
-    type Err = String;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "color" => Ok(Self::Color),
-            "gradient" => Ok(Self::Gradient),
-            "pulse" => Ok(Self::Pulse),
-            x => Err(format!("Unknown NumberBackgroundMode::{}", x)),
-        }
-    }
-}
-
-impl NumberBackgroundMode {
-    fn is_disabled(&self) -> bool {
-        *self == Self::Disabled
-    }
-
-    fn needs_gradient(&self) -> bool {
-        *self == Self::Gradient
-    }
-}
-
-#[cfg_attr(test, derive(Debug))]
-#[derive(Serialize, Deserialize, Clone, Default)]
-pub struct NumberColumnStyleConfig {
-    #[serde(default = "NumberForegroundMode::default")]
-    #[serde(skip_serializing_if = "NumberForegroundMode::is_color")]
-    pub number_fg_mode: NumberForegroundMode,
-
-    #[serde(default = "NumberBackgroundMode::default")]
-    #[serde(skip_serializing_if = "NumberBackgroundMode::is_disabled")]
-    pub number_bg_mode: NumberBackgroundMode,
-
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub fixed: Option<u32>,
-
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub pos_fg_color: Option<String>,
-
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub neg_fg_color: Option<String>,
-
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub pos_bg_color: Option<String>,
-
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub neg_bg_color: Option<String>,
-
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub fg_gradient: Option<f64>,
-
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub bg_gradient: Option<f64>,
-}
-
-/// Exactly like a `ColumnStyleConfig`, except without `Option<>` fields, as
-/// this struct represents the default values we should use in the GUI when they
-/// are `None` in the real config.  It is also used to decide when to omit a
-/// field when serialized a `ColumnStyleConfig` to JSON.
-#[derive(Deserialize, Clone, Default, Debug)]
-pub struct NumberColumnStyleDefaultConfig {
-    pub fg_gradient: f64,
-    pub bg_gradient: f64,
-    pub fixed: u32,
-    pub pos_fg_color: String,
-    pub neg_fg_color: String,
-    pub pos_bg_color: String,
-    pub neg_bg_color: String,
-
-    #[serde(default = "NumberForegroundMode::default")]
-    pub number_fg_mode: NumberForegroundMode,
-
-    #[serde(default = "NumberBackgroundMode::default")]
-    pub number_bg_mode: NumberBackgroundMode,
-}
 
 type Side = bool;
 
@@ -473,78 +305,50 @@ impl Component for NumberColumnStyle {
             .link()
             .callback(NumberColumnStyleMsg::NumberBackModeChanged);
 
-        let fg_select_values = vec![NumberForegroundMode::Color, NumberForegroundMode::Bar];
-
-        let bg_select_values = vec![
-            NumberBackgroundMode::Color,
-            NumberBackgroundMode::Gradient,
-            NumberBackgroundMode::Pulse,
-        ];
-
-        let fg_color_controls = if self.config.number_fg_mode == NumberForegroundMode::Color {
-            html_template! {
-                <span class="row">{ "Color" }</span>
-                <div class="row section inner_section">
+        let fg_color_controls = html_template! {
+            <span class="row">{ "Color" }</span>
+            if self.config.number_fg_mode == NumberForegroundMode::Color {
+                <div class="row inner_section">
                     <ColorRangeSelector ..self.color_props(true, ctx) />
                 </div>
             }
-        } else {
-            html! {
-                <span class="row">{ "Color" }</span>
-            }
         };
 
-        let fg_bar_controls = if self.config.number_fg_mode == NumberForegroundMode::Bar {
-            html_template! {
-                <span class="row">{ "Bar" }</span>
-                <div class="row section inner_section">
+        let fg_bar_controls = html_template! {
+            <span class="row">{ "Bar" }</span>
+            if self.config.number_fg_mode == NumberForegroundMode::Bar {
+                <div class="row inner_section">
                     <ColorRangeSelector ..self.color_props(true, ctx) />
-                    <MaxValueChooser ..self.max_value_props(true, ctx) />
+                    <NumberInput ..self.max_value_props(true, ctx) />
                 </div>
-            }
-        } else {
-            html! {
-                <span class="row">{ "Bar" }</span>
             }
         };
 
-        let bg_color_controls = if self.config.number_bg_mode == NumberBackgroundMode::Color {
-            html_template! {
-                <span class="row">{ "Color" }</span>
-                <div class="row section inner_section">
+        let bg_color_controls = html_template! {
+            <span class="row">{ "Color" }</span>
+            if self.config.number_bg_mode == NumberBackgroundMode::Color {
+                <div class="row inner_section">
                     <ColorRangeSelector ..self.color_props(false, ctx) />
                 </div>
-            }
-        } else {
-            html! {
-                <span class="row">{ "Color" }</span>
             }
         };
 
-        let bg_gradient_controls = if self.config.number_bg_mode == NumberBackgroundMode::Gradient {
-            html_template! {
-                <span class="row">{ "Gradient" }</span>
-                <div class="row section inner_section">
+        let bg_gradient_controls = html_template! {
+            <span class="row">{ "Gradient" }</span>
+            if self.config.number_bg_mode == NumberBackgroundMode::Gradient {
+                <div class="row inner_section">
                     <ColorRangeSelector ..self.color_props(false, ctx) />
-                    <MaxValueChooser ..self.max_value_props(false, ctx) />
+                    <NumberInput ..self.max_value_props(false, ctx) />
                 </div>
-            }
-        } else {
-            html! {
-                <span class="row">{ "Gradient" }</span>
             }
         };
 
-        let bg_pulse_controls = if self.config.number_bg_mode == NumberBackgroundMode::Pulse {
-            html_template! {
-                <span class="row">{ "Pulse (Δ)" }</span>
-                <div class="row section inner_section">
+        let bg_pulse_controls = html_template! {
+            <span class="row">{ "Pulse (Δ)" }</span>
+            if self.config.number_bg_mode == NumberBackgroundMode::Pulse {
+                <div class="row inner_section">
                     <ColorRangeSelector ..self.color_props(false, ctx) />
                 </div>
-            }
-        } else {
-            html! {
-                <span class="row">{ "Pulse (Δ)" }</span>
             }
         };
 
@@ -553,7 +357,7 @@ impl Component for NumberColumnStyle {
                 { &CSS }
             </style>
             <div id="column-style-container">
-                <div>
+                <div class="column-style-label">
                     <label id="fixed-examples" class="indent">{
                         self.make_fixed_text(ctx)
                     }</label>
@@ -569,12 +373,11 @@ impl Component for NumberColumnStyle {
                         value={ fixed_value }
                         oninput={ fixed_oninput }/>
                 </div>
-                <div>
+                <div class="column-style-label">
                     <label class="indent">{ "Foreground" }</label>
                 </div>
                 <div class="section">
                     <input
-                        id="fore-selected"
                         type="checkbox"
                         oninput={ fg_enabled_oninput }
                         checked={ self.config.number_fg_mode.is_enabled() } />
@@ -582,21 +385,24 @@ impl Component for NumberColumnStyle {
                         class="indent"
                         name="foreground-list"
                         disabled={ !self.config.number_fg_mode.is_enabled() }
-                        values={ fg_select_values }
                         selected={ selected_fg_mode }
                         on_change={ fg_mode_changed } >
 
-                        { fg_color_controls }
-                        { fg_bar_controls }
-
+                        <RadioListItem<NumberForegroundMode>
+                            value={ NumberForegroundMode::Color }>
+                            { fg_color_controls }
+                        </RadioListItem<NumberForegroundMode>>
+                        <RadioListItem<NumberForegroundMode>
+                            value={ NumberForegroundMode::Bar }>
+                            { fg_bar_controls }
+                        </RadioListItem<NumberForegroundMode>>
                     </RadioList<NumberForegroundMode>>
                 </div>
-                <div>
+                <div class="column-style-label">
                     <label class="indent">{ "Background" }</label>
                 </div>
                 <div class="section">
                     <input
-                        id="back-selected"
                         type="checkbox"
                         oninput={ bg_enabled_oninput }
                         checked={ !self.config.number_bg_mode.is_disabled() } />
@@ -604,48 +410,25 @@ impl Component for NumberColumnStyle {
                         class="indent"
                         name="background-list"
                         disabled={ self.config.number_bg_mode.is_disabled() }
-                        values={ bg_select_values }
                         selected={ selected_bg_mode }
                         on_change={ bg_mode_changed } >
 
-                        { bg_color_controls }
-                        { bg_gradient_controls }
-                        { bg_pulse_controls }
-
+                        <RadioListItem<NumberBackgroundMode>
+                            value={ NumberBackgroundMode::Color }>
+                            { bg_color_controls }
+                        </RadioListItem<NumberBackgroundMode>>
+                        <RadioListItem<NumberBackgroundMode>
+                            value={ NumberBackgroundMode::Gradient }>
+                            { bg_gradient_controls }
+                        </RadioListItem<NumberBackgroundMode>>
+                        <RadioListItem<NumberBackgroundMode>
+                            value={ NumberBackgroundMode::Pulse }>
+                            { bg_pulse_controls }
+                        </RadioListItem<NumberBackgroundMode>>
                     </RadioList<NumberBackgroundMode>>
                 </div>
-
-
             </div>
         }
-    }
-}
-
-#[derive(Properties, PartialEq)]
-pub struct MaxValueChooserProps {
-    max_value: f64,
-    on_max_value: Callback<String>,
-}
-
-#[function_component(MaxValueChooser)]
-fn max_value_chooser(props: &MaxValueChooserProps) -> Html {
-    let oninput = props.on_max_value.reform(|event: InputEvent| {
-        event
-            .target()
-            .unwrap()
-            .unchecked_into::<HtmlInputElement>()
-            .value()
-    });
-
-    html_template! {
-        <label>{ "Max" }</label>
-        <input
-            id="gradient-param"
-            value={ format!("{}", props.max_value) }
-            class="parameter"
-            oninput={ oninput }
-            type="number"
-            min="0" />
     }
 }
 
@@ -710,12 +493,12 @@ impl NumberColumnStyle {
         })
     }
 
-    fn max_value_props(&self, side: bool, ctx: &Context<Self>) -> MaxValueChooserProps {
+    fn max_value_props(&self, side: bool, ctx: &Context<Self>) -> NumberInputProps {
         let on_max_value = ctx
             .link()
             .callback(move |x| NumberColumnStyleMsg::GradientChanged(side, x));
 
-        props!(MaxValueChooserProps {
+        props!(NumberInputProps {
             max_value: if side {
                 self.fg_gradient
             } else {

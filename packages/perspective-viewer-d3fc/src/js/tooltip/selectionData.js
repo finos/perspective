@@ -15,7 +15,7 @@ export function toValue(type, value) {
             return value instanceof Date
                 ? value
                 : new Date(parseInt(value)).toLocaleString(
-                      "en-us",
+                      [],
                       get_type_config(type).format
                   );
         case "integer":

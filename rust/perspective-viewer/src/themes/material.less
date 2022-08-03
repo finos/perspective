@@ -30,6 +30,8 @@ perspective-viewer[theme="Material Light"],
 perspective-copy-menu[theme="Material Light"],
 perspective-export-menu[theme="Material Light"],
 perspective-filter-dropdown[theme="Material Light"],
+perspective-date-column-style[theme="Material Light"],
+perspective-datetime-column-style[theme="Material Light"],
 perspective-number-column-style[theme="Material Light"],
 perspective-string-column-style[theme="Material Light"],
 perspective-expression-editor[theme="Material Light"],
@@ -154,27 +156,21 @@ perspective-expression-editor[theme="Material Light"],
     --d3fc-series-8: #7f7f7f;
     --d3fc-series-9: #bcbd22;
     --d3fc-series-10: #17becf;
-    --d3fc-full--gradient: linear-gradient(
-        #4d342f 0%,
-        #e4521b 22.5%,
-        #feeb65 42.5%,
-        #f0f0f0 50%,
-        #dcedc8 57.5%,
-        #42b3d5 67.5%,
-        #1a237e 100%
-    );
-    --d3fc-positive--gradient: linear-gradient(
-        #f0f0f0 0%,
-        #dcedc8 10%,
-        #42b3d5 50%,
-        #1a237e 100%
-    );
-    --d3fc-negative--gradient: linear-gradient(
-        #4d342f 0%,
-        #e4521b 50%,
-        #feeb65 90%,
-        #f0f0f0 100%
-    );
+    --d3fc-full--gradient: linear-gradient(#4d342f 0%,
+            #e4521b 22.5%,
+            #feeb65 42.5%,
+            #f0f0f0 50%,
+            #dcedc8 57.5%,
+            #42b3d5 67.5%,
+            #1a237e 100%);
+    --d3fc-positive--gradient: linear-gradient(#f0f0f0 0%,
+            #dcedc8 10%,
+            #42b3d5 50%,
+            #1a237e 100%);
+    --d3fc-negative--gradient: linear-gradient(#4d342f 0%,
+            #e4521b 50%,
+            #feeb65 90%,
+            #f0f0f0 100%);
 }
 
 .perspective-viewer-material--openlayers {
@@ -190,15 +186,13 @@ perspective-expression-editor[theme="Material Light"],
     --map-category-8: #7f7f7f;
     --map-category-9: #bcbd22;
     --map-category-10: #17becf;
-    --map-gradient: linear-gradient(
-        #4d342f 0%,
-        #e4521b 22.5%,
-        #feeb65 42.5%,
-        #f0f0f0 50%,
-        #dcedc8 57.5%,
-        #42b3d5 67.5%,
-        #1a237e 100%
-    );
+    --map-gradient: linear-gradient(#4d342f 0%,
+            #e4521b 22.5%,
+            #feeb65 42.5%,
+            #f0f0f0 50%,
+            #dcedc8 57.5%,
+            #42b3d5 67.5%,
+            #1a237e 100%);
 }
 
 .perspective-viewer-material--datagrid {
@@ -250,6 +244,6 @@ perspective-expression-editor[theme="Material Light"],
     }
 
     regular-table:hover::-webkit-scrollbar-thumb {
-        background-color: #e0e4e9;  
+        background-color: #e0e4e9;
     }
 }

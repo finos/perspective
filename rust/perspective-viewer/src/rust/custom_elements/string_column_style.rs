@@ -7,10 +7,10 @@
 // file.
 
 use crate::components::string_column_style::*;
+use crate::config::*;
 use crate::custom_elements::modal::*;
 use crate::utils::CustomElementMetadata;
 use crate::*;
-
 use wasm_bindgen::prelude::*;
 use web_sys::*;
 use yew::*;

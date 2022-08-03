@@ -11,14 +11,20 @@
 
 mod aggregates;
 mod column_type;
+mod datetime_column_style;
 mod filters;
+mod number_column_style;
 mod sort;
+mod string_column_style;
 mod view_config;
 mod viewer_config;
 
 pub use aggregates::*;
 pub use column_type::*;
+pub use datetime_column_style::*;
 pub use filters::*;
+pub use number_column_style::*;
 pub use sort::*;
+pub use string_column_style::*;
 pub use view_config::*;
 pub use viewer_config::*;

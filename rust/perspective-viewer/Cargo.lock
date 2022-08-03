@@ -843,6 +843,7 @@ dependencies = [
  "itertools",
  "js-intern",
  "js-sys",
+ "lazy_static",
  "num-format",
  "rmp-serde",
  "serde",

@@ -11,6 +11,7 @@
 //! these 4.
 
 mod copy_dropdown;
+pub mod datetime_column_style;
 pub mod export_dropdown;
 pub mod expression_editor;
 pub mod filter_dropdown;

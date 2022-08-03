@@ -49,11 +49,11 @@ export async function mousedown_listener(regularTable, event) {
             column_type === "date" ||
             column_type === "datetime"
         ) {
-            regularTable.draw({preserve_width: true});
+            await regularTable.draw({preserve_width: true});
             activate_plugin_menu.call(this, regularTable, target);
         } else {
             const [min, max] = await this._view.get_min_max(column_name);
-            regularTable.draw({preserve_width: true});
+            await regularTable.draw({preserve_width: true});
             let bound = Math.max(Math.abs(min), Math.abs(max));
             if (bound > 1) {
                 bound = Math.round(bound * 100) / 100;

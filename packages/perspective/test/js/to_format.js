@@ -425,8 +425,8 @@ module.exports = (perspective) => {
             let view = await table.view();
             let json = await view.to_json({formatted: true});
             expect(json).toEqual([
-                {datetime: "6/13/2016"},
-                {datetime: "6/14/2016"},
+                {datetime: "6/13/16"},
+                {datetime: "6/14/16"},
             ]);
             view.delete();
             table.delete();
@@ -440,8 +440,8 @@ module.exports = (perspective) => {
             let view = await table.view();
             let json = await view.to_json({formatted: true});
             expect(json).toEqual([
-                {datetime: "1/1/2016, 12:30:00 AM"},
-                {datetime: "6/15/2016, 7:20:00 PM"},
+                {datetime: "1/1/16, 12:30:00 AM"},
+                {datetime: "6/15/16, 7:20:00 PM"},
             ]);
             view.delete();
             table.delete();

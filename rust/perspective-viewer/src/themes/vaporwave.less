@@ -7,8 +7,7 @@
  *
  */
 
-@import (css)
-    url("https://fonts.googleapis.com/css?display=block&family=Roboto+Mono:200,400%7CMaterial+Icons+Outlined%7COpen+Sans:300,400,700");
+@import (css) url("https://fonts.googleapis.com/css?display=block&family=Roboto+Mono:200,400%7CMaterial+Icons+Outlined%7COpen+Sans:300,400,700");
 
 @import (reference) "./material-dark.less";
 
@@ -30,6 +29,8 @@ perspective-viewer[theme="Vaporwave"],
 perspective-copy-menu[theme="Vaporwave"],
 perspective-export-menu[theme="Vaporwave"],
 perspective-filter-dropdown[theme="Vaporwave"],
+perspective-date-column-style[theme="Vaporwave"],
+perspective-datetime-column-style[theme="Vaporwave"],
 perspective-number-column-style[theme="Vaporwave"],
 perspective-string-column-style[theme="Vaporwave"],
 perspective-expression-editor[theme="Vaporwave"],
@@ -81,12 +82,10 @@ perspective-expression-editor[theme="Vaporwave"],
     }
 
     regular-table table tbody th:empty {
-        background: linear-gradient(
-            to right,
-            transparent 9px,
-            rgb(19, 33, 50) 10px,
-            transparent 11px
-        );
+        background: linear-gradient(to right,
+                transparent 9px,
+                rgb(19, 33, 50) 10px,
+                transparent 11px);
         background-repeat: no-repeat;
         background-position: 0px -10px;
     }
@@ -108,51 +107,45 @@ perspective-expression-editor[theme="Vaporwave"],
     --d3fc-series-9: hsl(157, 100%, 25%);
     --d3fc-series-10: hsl(272, 100%, 35%);
 
-    --d3fc-negative--gradient: linear-gradient(
-        #f3d431,
-        #efb92d,
-        #ed9c25,
-        #eb7e20,
-        #e75d1e,
-        #d14632,
-        #b03e38,
-        #8c3a36,
-        #643633,
-        #07081d
-    ) !important;
+    --d3fc-negative--gradient: linear-gradient(#f3d431,
+            #efb92d,
+            #ed9c25,
+            #eb7e20,
+            #e75d1e,
+            #d14632,
+            #b03e38,
+            #8c3a36,
+            #643633,
+            #07081d) !important;
 
-    --d3fc-positive--gradient: linear-gradient(
-        #07081d,
-        #2e4463,
-        #1e588a,
-        #086da7,
-        #0082b9,
-        #039ac7,
-        #12b1d4,
-        #2bc8e2,
-        #3ddff0,
-        #61f4fb
-    ) !important;
+    --d3fc-positive--gradient: linear-gradient(#07081d,
+            #2e4463,
+            #1e588a,
+            #086da7,
+            #0082b9,
+            #039ac7,
+            #12b1d4,
+            #2bc8e2,
+            #3ddff0,
+            #61f4fb) !important;
 
-    --d3fc-full--gradient: linear-gradient(
-        #f3d431,
-        #efb92d,
-        #ed9c25,
-        #eb7e20,
-        #e75d1e,
-        #d14632,
-        #b03e38,
-        #8c3a36,
-        #643633,
-        #07081d,
-        #2e4463,
-        #1e588a,
-        #086da7,
-        #0082b9,
-        #039ac7,
-        #12b1d4,
-        #2bc8e2,
-        #3ddff0,
-        #61f4fb
-    ) !important;
+    --d3fc-full--gradient: linear-gradient(#f3d431,
+            #efb92d,
+            #ed9c25,
+            #eb7e20,
+            #e75d1e,
+            #d14632,
+            #b03e38,
+            #8c3a36,
+            #643633,
+            #07081d,
+            #2e4463,
+            #1e588a,
+            #086da7,
+            #0082b9,
+            #039ac7,
+            #12b1d4,
+            #2bc8e2,
+            #3ddff0,
+            #61f4fb) !important;
 }

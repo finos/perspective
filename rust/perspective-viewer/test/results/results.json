@@ -3,7 +3,7 @@
     "superstore.html/doesn't leak elements.": "d0fd18b3d4d7c183c5ed155b4bf37972",
     "superstore.html/doesn't leak views when setting group by.": "54daaa4bbbe59f6ed4acc301ba871bab",
     "superstore.html/doesn't leak views when setting filters.": "6dfc1e505f1428424c3265f0236f22fc",
-    "__GIT_COMMIT__": "edced0197a24b6d819d5e642a7691290050d0795",
+    "__GIT_COMMIT__": "beebe2eff964946e9384526001b012aa6f46b7ea",
     "blank.html/Handles reloading with a schema.": "e58c62f6e0ff16dc4d753f99e0fc39c3",
     "superstore_shows_a_grid_without_any_settings_applied_": "ae1c4690d978598ca14c8669244ce604",
     "superstore_Responsive_Layout_shows_horizontal_columns_on_small_vertical_viewports_": "57ba3ad341cf8a0e4df6ab96715ff2a0",
@@ -86,5 +86,5 @@
     "superstore-all_migrate_restore__Plugin_config_color_mode_": "993e68451858d6e9cb85b6282445bae0",
     "superstore-all_migrate_restore__New_Datagrid_style_API_": "993e68451858d6e9cb85b6282445bae0",
     "superstore-all_migrate_restore__New_Datagrid_style_API_with_a_bar_and_gradient_": "52ba63f266aaaf22f896ed4784ac4210",
-    "superstore-all_migrate_restore__New_API,_reflexive_(new_API_is_unmodified)_": "ac5f72d0cf23bee2b224c826d23429fd"
+    "superstore-all_migrate_restore__New_API,_reflexive_(new_API_is_unmodified)_": "8a158a3a29fd3a5f7884873aba12ed14"
 }

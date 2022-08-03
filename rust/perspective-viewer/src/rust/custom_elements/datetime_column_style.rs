@@ -6,7 +6,7 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::components::number_column_style::*;
+use crate::components::datetime_column_style::*;
 use crate::config::*;
 use crate::custom_elements::modal::*;
 use crate::utils::CustomElementMetadata;
@@ -17,12 +17,12 @@ use yew::*;
 
 #[wasm_bindgen]
 #[derive(Clone)]
-pub struct PerspectiveNumberColumnStyleElement {
+pub struct PerspectiveDatetimeColumnStyleElement {
     elem: HtmlElement,
-    modal: Option<ModalElement<NumberColumnStyle>>,
+    modal: Option<ModalElement<DatetimeColumnStyle>>,
 }
 
-fn on_change(elem: &web_sys::HtmlElement, config: &NumberColumnStyleConfig) {
+fn on_change(elem: &web_sys::HtmlElement, config: &DatetimeColumnStyleConfig) {
     let mut event_init = web_sys::CustomEventInit::new();
     event_init.detail(&JsValue::from_serde(config).unwrap());
     let event =
@@ -31,15 +31,15 @@ fn on_change(elem: &web_sys::HtmlElement, config: &NumberColumnStyleConfig) {
     elem.dispatch_event(&event.unwrap()).unwrap();
 }
 
-impl CustomElementMetadata for PerspectiveNumberColumnStyleElement {
-    const CUSTOM_ELEMENT_NAME: &'static str = "perspective-number-column-style";
+impl CustomElementMetadata for PerspectiveDatetimeColumnStyleElement {
+    const CUSTOM_ELEMENT_NAME: &'static str = "perspective-datetime-column-style";
 }
 
 #[wasm_bindgen]
-impl PerspectiveNumberColumnStyleElement {
+impl PerspectiveDatetimeColumnStyleElement {
     #[wasm_bindgen(constructor)]
-    pub fn new(elem: web_sys::HtmlElement) -> PerspectiveNumberColumnStyleElement {
-        PerspectiveNumberColumnStyleElement { elem, modal: None }
+    pub fn new(elem: web_sys::HtmlElement) -> Self {
+        Self { elem, modal: None }
     }
 
     /// Reset to a provided JSON config, to be used in place of `new()` when
@@ -47,41 +47,39 @@ impl PerspectiveNumberColumnStyleElement {
     ///
     /// # Arguments
     /// * `config` - a `ColumnStyle` config in JSON form.
-    /// * `default_config` - the default `ColumnStyle` config for this column
-    ///   type, in JSON form.
-    pub fn reset(
-        &mut self,
-        config: NumberColumnStyleConfig,
-        default_config: NumberColumnStyleDefaultConfig,
-    ) -> Result<(), JsValue> {
-        let msg = NumberColumnStyleMsg::Reset(config.into(), default_config.into());
+    pub fn reset(&mut self, config: JsValue) -> Result<(), JsValue> {
+        let msg = DatetimeColumnStyleMsg::Reset(config.into_serde().unwrap());
         self.modal.as_ref().into_jserror()?.send_message(msg);
         Ok(())
     }
 
-    /// Dispatches to `ModalElement::open(target)` after lazy initializing the
-    /// `ModelElement` custom element handle.
+    /// Dispatches to `ModalElement::open(target)`
     ///
     /// # Arguments
     /// `target` - the relative target to pin this `ModalElement` to.
     pub fn open(
         &mut self,
         target: web_sys::HtmlElement,
-        config: NumberColumnStyleConfig,
-        default_config: NumberColumnStyleDefaultConfig,
+        js_config: JsValue,
+        js_default_config: JsValue,
     ) -> Result<(), JsValue> {
         if self.modal.is_some() {
-            self.reset(config, default_config)?;
+            self.reset(js_config)?;
         } else {
+            let config: DatetimeColumnStyleConfig = js_config.into_serde().unwrap();
+            let default_config: DatetimeColumnStyleDefaultConfig =
+                js_default_config.into_serde().unwrap();
+
             let on_change = {
                 clone!(self.elem);
-                Callback::from(move |x: NumberColumnStyleConfig| on_change(&elem, &x))
+                Callback::from(move |x: DatetimeColumnStyleConfig| on_change(&elem, &x))
             };
 
-            let props = props!(NumberColumnStyleProps {
+            let props = props!(DatetimeColumnStyleProps {
+                enable_time_config: true,
                 config,
-                on_change,
                 default_config,
+                on_change,
             });
 
             self.modal = Some(ModalElement::new(self.elem.clone(), props, true));

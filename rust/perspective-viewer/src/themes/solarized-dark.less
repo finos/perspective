@@ -28,6 +28,8 @@ perspective-viewer[theme="Solarized Dark"],
 perspective-copy-menu[theme="Solarized Dark"],
 perspective-export-menu[theme="Solarized Dark"],
 perspective-filter-dropdown[theme="Solarized Dark"],
+perspective-date-column-style[theme="Solarized Dark"],
+perspective-datetime-column-style[theme="Solarized Dark"],
 perspective-number-column-style[theme="Solarized Dark"],
 perspective-string-column-style[theme="Solarized Dark"],
 perspective-expression-editor[theme="Solarized Dark"],
@@ -47,6 +49,7 @@ perspective-expression-editor[theme="Solarized Dark"],
 
 .perspective-viewer-solarized-dark--datagrid {
     regular-table {
+
         table,
         table tr:hover {
             color: #93a1a1;
@@ -63,12 +66,10 @@ perspective-expression-editor[theme="Solarized Dark"],
     }
 
     regular-table table tbody th:empty {
-        background: linear-gradient(
-            to right,
-            transparent 9px,
-            #586e75 10px,
-            transparent 11px
-        );
+        background: linear-gradient(to right,
+                transparent 9px,
+                #586e75 10px,
+                transparent 11px);
     }
 }
 

@@ -625,7 +625,7 @@ export default function (Module) {
                             // Otherwise, this would not need to be conditional.
                             value = new Date(value);
                             value = value.toLocaleString(
-                                "en-us",
+                                [],
                                 type_config.format
                             );
                         }
