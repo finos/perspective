@@ -1,0 +1,24 @@
+{
+    "name": "@finos/perspective-esbuild-plugin",
+    "version": "1.6.2",
+    "description": "esbuild plugin for Perspective",
+    "author": "",
+    "license": "Apache-2.0",
+    "main": "index.js",
+    "publishConfig": {
+        "access": "public"
+    },
+    "files": [
+        "*.js",
+        "README.md"
+    ],
+    "scripts": {
+        "build": "echo",
+        "test": "echo",
+        "clean": "echo"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/finos/perspective/packages/perspective-build"
+    }
+}

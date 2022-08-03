@@ -9,8 +9,7 @@
  */
 
 import {Decompress} from "fflate";
-
-import init_wasm from "@finos/perspective-viewer/dist/pkg/perspective_viewer.js";
+import init_wasm, * as wasm_module from "@finos/perspective-viewer/dist/pkg/perspective_viewer.js";
 import wasm from "@finos/perspective-viewer/dist/pkg/perspective_viewer_bg.wasm";
 
 // There is no way to provide a default rejection handler within a promise and
@@ -31,7 +30,7 @@ async function load_wasm() {
     // load binary
     const compressed = (await wasm) as unknown;
 
-    let parts = [];
+    let parts: Uint8Array[] = [];
     let length = 0;
     const decompressor = new Decompress((chunk) => {
         if (chunk) {
@@ -42,18 +41,20 @@ async function load_wasm() {
 
     if (compressed instanceof URL || typeof compressed === "string") {
         const resp = await fetch(compressed.toString());
-        const reader = resp.body.getReader();
+        const reader = resp.body?.getReader();
         let state = 0;
-        while (true) {
-            const {value, done} = await reader.read();
-            if (done) break;
-            if ((state === 0 && is_gzip(value.buffer)) || state === 1) {
-                state = 1;
-                decompressor.push(value, done);
-            } else {
-                state = 2;
-                length += value.byteLength;
-                parts.push(value);
+        if (reader !== undefined) {
+            while (true) {
+                const {value, done} = await reader.read();
+                if (done || value === undefined) break;
+                if ((state === 0 && is_gzip(value?.buffer)) || state === 1) {
+                    state = 1;
+                    decompressor.push(value, done);
+                } else {
+                    state = 2;
+                    length += value.byteLength;
+                    parts.push(value);
+                }
             }
         }
     } else if (compressed instanceof Uint8Array) {
@@ -80,7 +81,9 @@ async function load_wasm() {
         offset += part.byteLength;
     }
 
-    return await init_wasm(buffer);
+    await init_wasm(buffer);
+    wasm_module.defineWebComponents();
+    return wasm_module;
 }
 
 export const WASM_MODULE = load_wasm();

@@ -6,6 +6,8 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use std::borrow::Borrow;
+use std::borrow::Cow;
 use std::fmt::Debug;
 use std::fmt::Display;
 use std::str::FromStr;
@@ -15,7 +17,16 @@ use yew::prelude::*;
 #[derive(Clone, Eq, PartialEq)]
 pub enum SelectItem<T> {
     Option(T),
-    OptGroup(&'static str, Vec<T>),
+    OptGroup(Cow<'static, str>, Vec<T>),
+}
+
+impl<T: Display> SelectItem<T> {
+    pub fn name<'a>(&self) -> Cow<'a, str> {
+        match self {
+            Self::Option(x) => format!("{}", x).into(),
+            Self::OptGroup(x, _) => x.clone(),
+        }
+    }
 }
 
 pub enum SelectMsg<T> {
@@ -31,6 +42,9 @@ where
     pub values: Vec<SelectItem<T>>,
     pub selected: T,
     pub on_select: Callback<T>,
+
+    #[prop_or_default]
+    pub label: Option<&'static str>,
 
     #[prop_or_default]
     pub id: Option<&'static str>,
@@ -137,15 +151,19 @@ where
                             }
                         },
                         SelectItem::OptGroup(name, group) => html! {
-                            <optgroup key={ name.to_owned() } label={ name.to_owned() }>
+                            <optgroup
+                                key={ name.to_string() }
+                                label={ name.to_string() }>
                                 {
                                     for group.iter().map(|value| {
                                         let selected =
                                             *value == ctx.props().selected;
 
-                                        let label = format!("{}", value)
-                                            .strip_prefix(name)
-                                            .unwrap()
+                                        let label = format!("{}", value);
+                                        let category: &str = name.borrow();
+                                        let label = label
+                                            .strip_prefix(category)
+                                            .unwrap_or(&label)
                                             .trim()
                                             .to_owned();
 
@@ -167,8 +185,8 @@ where
         };
 
         html! {
-            if is_group_selected {
-                <label>{ "weighted mean" }</label>
+            if is_group_selected && ctx.props().label.is_some() {
+                <label>{ ctx.props().label.unwrap() }</label>
                 <div
                     class="dropdown-width-container"
                     data-value={ format!("{}", self.selected) }>

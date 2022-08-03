@@ -90,6 +90,7 @@ impl Component for AggregateSelector {
                 <Select<Aggregate>
                     class={ "aggregate-selector" }
                     values={ values }
+                    label="weighted mean"
                     selected={ selected_agg }
                     on_select={ callback }>
 
@@ -126,7 +127,10 @@ impl AggregateSelector {
             .collect::<Vec<_>>();
 
         let multi_aggregates2 = if !multi_aggregates.is_empty() {
-            vec![SelectItem::OptGroup("weighted mean", multi_aggregates)]
+            vec![SelectItem::OptGroup(
+                "weighted mean".into(),
+                multi_aggregates,
+            )]
         } else {
             vec![]
         };

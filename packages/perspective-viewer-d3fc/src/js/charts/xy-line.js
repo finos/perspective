@@ -95,6 +95,7 @@ function xyLine(container, settings) {
 
 xyLine.plugin = {
     name: "X/Y Line",
+    category: "X/Y Chart",
     max_cells: 50000,
     max_columns: 50,
     render_warning: true,

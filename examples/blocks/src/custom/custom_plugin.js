@@ -162,7 +162,7 @@ class CustomDatagridPlugin extends customElements.get(
 
     async styleListener() {
         const viewer = this.parentElement;
-        const datagrid = this.datagrid;
+        const datagrid = this.regular_table;
         if (this._dirty) {
             await this.refresh_cache();
         }
@@ -213,7 +213,7 @@ class CustomDatagridPlugin extends customElements.get(
         this._dirty = true;
         if (!this._custom_initialized) {
             const viewer = this.parentElement;
-            const datagrid = this.datagrid;
+            const datagrid = this.regular_table;
             this._max = -Infinity;
             await this.refresh_cache(view);
             const table = await viewer.getTable(true);

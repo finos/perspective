@@ -132,6 +132,11 @@ async function focus_package() {
                     value: "perspective-jupyterlab",
                 },
                 {
+                    key: "m",
+                    name: "perspective-viewer-openlayers",
+                    value: "perspective-viewer-openlayers",
+                },
+                {
                     key: "w",
                     name: "perspective-workspace",
                     value: "perspective-workspace",

@@ -31,7 +31,7 @@ pub type View = PerspectiveOwned<JsPerspectiveView>;
 
 /// `<perspective-viewer>` does not currently take ownership of `Table`. objects
 /// so this is not currently needed, but it will be in the future and this
-/// polymorphism is th emotiviation behind the `PerspectiveOwned<T>` type.
+/// polymorphism is the motiviation behind the `PerspectiveOwned<T>` type.
 #[allow(dead_code)]
 pub type Table = PerspectiveOwned<JsPerspectiveTable>;
 

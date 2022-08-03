@@ -110,17 +110,16 @@ function get_regex() {
 
 try {
     execute`yarn --silent clean --screenshots`;
-    execute`node_modules/.bin/lerna exec -- mkdir -p dist/umd`;
 
     if (!IS_JUPYTER) {
         // test:build irrelevant for jupyter tests
         execute`node_modules/.bin/lerna run test:build --stream --scope="@finos/${PACKAGE}"`;
     }
 
-    if (!PACKAGE || minimatch("perspective-viewer", PACKAGE)) {
-        console.log("-- Running Rust tests");
-        execute`yarn lerna --scope=@finos/perspective-viewer exec yarn test:run:rust`;
-    }
+    // if (!PACKAGE || minimatch("perspective-viewer", PACKAGE)) {
+    //     console.log("-- Running Rust tests");
+    //     execute`yarn lerna --scope=@finos/perspective-viewer exec yarn test:run:rust`;
+    // }
 
     if (getarg("--quiet")) {
         // Run all tests with suppressed output.

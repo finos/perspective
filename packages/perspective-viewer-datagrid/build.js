@@ -1,14 +1,18 @@
-const {NodeModulesExternal} = require("@finos/perspective-build/external");
-const {InlineCSSPlugin} = require("@finos/perspective-build/inline_css");
-const {UMDLoader} = require("@finos/perspective-build/umd");
-const {build} = require("@finos/perspective-build/build");
+const {
+    NodeModulesExternal,
+} = require("@finos/perspective-esbuild-plugin/external");
+const {
+    InlineCSSPlugin,
+} = require("@finos/perspective-esbuild-plugin/inline_css");
+const {UMDLoader} = require("@finos/perspective-esbuild-plugin/umd");
+const {build} = require("@finos/perspective-esbuild-plugin/build");
 
 const BUILD = [
     {
         define: {
             global: "window",
         },
-        entryPoints: ["src/js/plugin.js"],
+        entryPoints: ["src/js/index.js"],
         plugins: [InlineCSSPlugin(), NodeModulesExternal()],
         format: "esm",
         loader: {
@@ -20,7 +24,7 @@ const BUILD = [
         define: {
             global: "window",
         },
-        entryPoints: ["src/js/plugin.js"],
+        entryPoints: ["src/js/index.js"],
         globalName: "perspective_datagrid",
         plugins: [InlineCSSPlugin(), UMDLoader()],
         format: "cjs",
@@ -33,7 +37,7 @@ const BUILD = [
         define: {
             global: "window",
         },
-        entryPoints: ["src/js/plugin.js"],
+        entryPoints: ["src/js/index.js"],
         plugins: [InlineCSSPlugin()],
         format: "esm",
         loader: {

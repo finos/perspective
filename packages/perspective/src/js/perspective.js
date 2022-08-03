@@ -15,12 +15,6 @@ import {Server} from "./api/server.js";
 
 import formatters from "./view_formatters";
 
-// IE fix - chrono::steady_clock depends on performance.now() which does not
-// exist in IE workers
-if (global.performance === undefined) {
-    global.performance = {now: Date.now};
-}
-
 if (typeof self !== "undefined" && self.performance === undefined) {
     self.performance = {now: Date.now};
 }

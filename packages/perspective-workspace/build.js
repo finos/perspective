@@ -1,14 +1,22 @@
 const {lessLoader} = require("esbuild-plugin-less");
 const {execSync} = require("child_process");
 
-const {InlineCSSPlugin} = require("@finos/perspective-build/inline_css");
-const {NodeModulesExternal} = require("@finos/perspective-build/external");
-const {IgnoreCSSPlugin} = require("@finos/perspective-build/ignore_css");
-const {IgnoreFontsPlugin} = require("@finos/perspective-build/ignore_fonts");
-const {WasmPlugin} = require("@finos/perspective-build/wasm");
-const {WorkerPlugin} = require("@finos/perspective-build/worker");
-const {ResolvePlugin} = require("@finos/perspective-build/resolve");
-const {build} = require("@finos/perspective-build/build");
+const {
+    InlineCSSPlugin,
+} = require("@finos/perspective-esbuild-plugin/inline_css");
+const {
+    NodeModulesExternal,
+} = require("@finos/perspective-esbuild-plugin/external");
+const {
+    IgnoreCSSPlugin,
+} = require("@finos/perspective-esbuild-plugin/ignore_css");
+const {
+    IgnoreFontsPlugin,
+} = require("@finos/perspective-esbuild-plugin/ignore_fonts");
+const {WasmPlugin} = require("@finos/perspective-esbuild-plugin/wasm");
+const {WorkerPlugin} = require("@finos/perspective-esbuild-plugin/worker");
+const {ResolvePlugin} = require("@finos/perspective-esbuild-plugin/resolve");
+const {build} = require("@finos/perspective-esbuild-plugin/build");
 
 const BUILD = [
     {
@@ -49,7 +57,7 @@ const BUILD = [
             IgnoreCSSPlugin(),
             IgnoreFontsPlugin(),
             WasmPlugin(true),
-            WorkerPlugin(true),
+            WorkerPlugin({inline: true}),
         ],
         format: "iife",
         loader: {
@@ -73,7 +81,7 @@ const BUILD = [
             IgnoreCSSPlugin(),
             IgnoreFontsPlugin(),
             WasmPlugin(false),
-            WorkerPlugin(false),
+            WorkerPlugin({inline: false}),
         ],
         format: "esm",
         splitting: true,

@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-viewer",
-    "version": "1.5.0",
+    "version": "1.6.2",
     "description": "The `<perspective-viewer>` Custom Element, frontend for Perspective.js",
     "repository": {
         "type": "git",
@@ -33,8 +33,8 @@
         "docs": "npm-run-all docs:build docs:concat docs:deploy:*",
         "docs:build": "typedoc --hideBreadcrumbs --out dist/docs --readme none --excludePrivate src/ts/perspective-viewer.ts",
         "docs:concat": "node ./docs.js",
-        "docs:deploy:api": "(echo \"---\nid: perspective-viewer\ntitle: perspective-viewer API\n---\n\n\"; cat README.md) > ../../docs/obj/perspective-viewer.md",
-        "docs:deploy:exprtk": "cat exprtk.md > ../../docs/obj/perspective-viewer-exprtk.md",
+        "docs:deploy:api": "(echo \"---\nid: perspective-viewer\ntitle: perspective-viewer API\n---\n\n\"; cat README.md) > ../../docs/docs/obj/perspective-viewer.md",
+        "docs:deploy:exprtk": "cat exprtk.md > ../../docs/docs/obj/perspective-viewer-exprtk.md",
         "fix": "yarn lint --fix && cargo fmt",
         "lint": "eslint src/ts",
         "test:build:rust": "cpy ../../packages/perspective/dist/umd/perspective.js dist/pkg/",
@@ -43,13 +43,13 @@
         "test:run:rust": "WASM_BINDGEN_TEST_TIMEOUT=60 wasm-pack test --chrome --headless",
         "test:run": "jest --rootDir=. --config=../../tools/perspective-test/jest.config.js --color --noStackTrace 2>&1",
         "test:clean": "rm perspective.csv || true",
-        "test": "yarn test:build && npm-run-all -p test:run:rust test:run && yarn test:clean"
+        "test": "yarn test:build && npm-run-all -p test:run && yarn test:clean"
     },
     "publishConfig": {
         "access": "public"
     },
     "dependencies": {
-        "@finos/perspective": "^1.5.0",
+        "@finos/perspective": "^1.6.2",
         "fflate": "^0.7.2",
         "mobile-drag-drop-shadow-dom": "3.0.0",
         "monaco-editor": "0.24.0"
@@ -58,6 +58,7 @@
         "monaco-editor-webpack-plugin": "3.1.0"
     },
     "devDependencies": {
-        "@finos/perspective-test": "^1.5.0"
+        "@finos/perspective-esbuild-plugin": "^1.6.2",
+        "@finos/perspective-test": "^1.6.2"
     }
 }

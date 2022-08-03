@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective",
-    "version": "1.5.0",
+    "version": "1.6.2",
     "description": "Perspective.js",
     "repository": {
         "type": "git",
@@ -37,7 +37,7 @@
         "build": "node build.js",
         "docs": "npm-run-all docs:jsdoc docs:deploy",
         "docs:jsdoc": "jsdoc2md src/js/perspective.js -p list --separators --no-gfm > README.md",
-        "docs:deploy": "(echo \"---\nid: perspective\ntitle: perspective API\n---\n\n\"; cat README.md) > ../../docs/obj/perspective.md",
+        "docs:deploy": "(echo \"---\nid: perspective\ntitle: perspective API\n---\n\n\"; cat README.md) > ../../docs/docs/obj/perspective.md",
         "test:run": "jest --color --ci --noStackTrace --testPathIgnorePatterns='timezone'",
         "test_timezone:run": "jest --color --ci --config=test/config/timezone/jest.config.js --rootDir=. timezone.spec.js",
         "test": "npm-run-all test:run",
@@ -60,8 +60,8 @@
         "ws": "^6.1.2"
     },
     "devDependencies": {
-        "@finos/perspective-build": "^1.5.0",
-        "@finos/perspective-cpp": "^1.5.0",
+        "@finos/perspective-cpp": "^1.6.2",
+        "@finos/perspective-esbuild-plugin": "^1.6.2",
         "jsverify": "^0.8.4",
         "lodash": "^4.17.4",
         "moment": "^2.19.1",

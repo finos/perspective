@@ -1,32 +1,30 @@
 const {lessLoader} = require("esbuild-plugin-less");
 const {execSync} = require("child_process");
-const util = require("util");
 const fs = require("fs");
 const fflate = require("fflate");
+const {build} = require("@finos/perspective-esbuild-plugin/build");
+const {PerspectiveEsbuildPlugin} = require("@finos/perspective-esbuild-plugin");
+const {
+    wasm_opt,
+    wasm_bindgen,
+} = require("@finos/perspective-esbuild-plugin/rust_wasm");
 
-const {download_wasm_opt} = require("@finos/perspective-build/rust_wasm");
-const {IgnoreCSSPlugin} = require("@finos/perspective-build/ignore_css");
-const {IgnoreFontsPlugin} = require("@finos/perspective-build/ignore_fonts");
-const {WasmPlugin} = require("@finos/perspective-build/wasm");
-const {WorkerPlugin} = require("@finos/perspective-build/worker");
-const {NodeModulesExternal} = require("@finos/perspective-build/external");
-const {ReplacePlugin} = require("@finos/perspective-build/replace");
-const {build} = require("@finos/perspective-build/build");
+const {
+    IgnoreCSSPlugin,
+} = require("@finos/perspective-esbuild-plugin/ignore_css");
+
+const {
+    IgnoreFontsPlugin,
+} = require("@finos/perspective-esbuild-plugin/ignore_fonts");
+
+const {
+    NodeModulesExternal,
+} = require("@finos/perspective-esbuild-plugin/external");
+
+// const {ReplacePlugin} = require("@finos/perspective-esbuild-plugin/replace");
 
 const IS_DEBUG =
     !!process.env.PSP_DEBUG || process.argv.indexOf("--debug") >= 0;
-
-function _compile(fileNames) {
-    const ts = require("typescript");
-    const path = require.resolve("@finos/perspective-viewer/tsconfig.json");
-    const {compilerOptions} = JSON.parse(fs.readFileSync(path).toString());
-    const {options} = ts.convertCompilerOptionsFromJson(compilerOptions, "");
-    const host = ts.createCompilerHost(options);
-    fs.mkdirSync("dist/esm", {recursive: true});
-    host.writeFile = (path, contents) => fs.writeFileSync(path, contents);
-    const program = ts.createProgram(fileNames, options, host);
-    program.emit();
-}
 
 const PREBUILD = [
     {
@@ -39,7 +37,7 @@ const PREBUILD = [
         ].map((x) => `src/less/${x}.less`),
         metafile: false,
         sourcemap: false,
-        plugins: [IgnoreFontsPlugin(), WasmPlugin(true), lessLoader()],
+        plugins: [IgnoreFontsPlugin(), lessLoader()],
         outdir: "build/css",
     },
 ];
@@ -55,7 +53,7 @@ const BUILD = [
             "src/themes/solarized-dark.less",
             "src/themes/vaporwave.less",
         ],
-        plugins: [WasmPlugin(false), lessLoader()],
+        plugins: [lessLoader()],
         outdir: "dist/css",
     },
     {
@@ -65,24 +63,28 @@ const BUILD = [
             IgnoreCSSPlugin(),
             IgnoreFontsPlugin(),
             NodeModulesExternal(),
+            // PerspectiveEsbuildPlugin(),
 
-            // Rust outputs a `URL()` when an explicit path for the wasm
-            // is not specified.  Esbuild ignores this, but webpack does not,
-            // and we always call this method with an explicit path, so this
-            // plugin strips this URL so webpack builds don't fail.
-            ReplacePlugin(/["']perspective_viewer_bg\.wasm["']/, "undefined"),
+            // // Rust outputs a `URL()` when an explicit path for the wasm
+            // // is not specified.  Esbuild ignores this, but webpack does not,
+            // // and we always call this method with an explicit path, so this
+            // // plugin strips this URL so webpack builds don't fail.
+            // ReplacePlugin(/["']perspective_viewer_bg\.wasm["']/, "undefined"),
         ],
         // splitting: true,
         external: ["*.wasm", "*.worker.js"],
         outdir: "dist/esm",
     },
+
     {
         entryPoints: ["src/ts/perspective-viewer.ts"],
         plugins: [
             IgnoreCSSPlugin(),
             IgnoreFontsPlugin(),
-            WasmPlugin(true),
-            WorkerPlugin(true),
+            PerspectiveEsbuildPlugin({
+                wasm: {inline: true},
+                worker: {inline: true},
+            }),
         ],
         outfile: "dist/umd/perspective-viewer.js",
     },
@@ -97,8 +99,7 @@ const BUILD = [
         plugins: [
             IgnoreCSSPlugin(),
             IgnoreFontsPlugin(),
-            WasmPlugin(false),
-            WorkerPlugin(false),
+            PerspectiveEsbuildPlugin(),
         ],
         splitting: true,
         outdir: "dist/cdn",
@@ -126,64 +127,34 @@ const INHERIT = {
     stderr: "inherit",
 };
 
-async function build_all() {
-    await Promise.all(PREBUILD.map(build)).catch(() => process.exit(1));
+async function compile_rust() {
     const cargo_debug = IS_DEBUG ? "" : "--release";
-
-    // Compile rust
     execSync(
         `CARGO_TARGET_DIR=./build cargo +nightly build ${cargo_debug} --lib --target wasm32-unknown-unknown -Z build-std=std,panic_abort -Z build-std-features=panic_immediate_abort`,
         INHERIT
     );
 
-    // Find `wasm-bindgen` CLI
-    try {
-        execSync(`which wasm-bindgen`, INHERIT);
-    } catch (e) {
-        console.log(`No \`wasm-bindgen-cli\` found, installing`);
-        execSync(`cargo install wasm-bindgen-cli --version 0.2.74`, INHERIT);
-    }
-
-    // Generate wasm-bindgen bindings
-    const wasm_bindgen_debug = IS_DEBUG ? "--debug" : "";
-    const profile_dir = IS_DEBUG ? "debug" : "release";
-    const UNOPT_PATH = `build/wasm32-unknown-unknown/${profile_dir}/perspective_viewer.wasm`;
-    execSync(
-        `wasm-bindgen ${UNOPT_PATH} ${wasm_bindgen_debug} --out-dir dist/pkg --typescript --target web`,
-        INHERIT
-    );
+    await wasm_bindgen("perspective_viewer", {
+        debug: IS_DEBUG,
+        version: "0.2.80",
+        targetdir: "build",
+    });
 
     if (!IS_DEBUG) {
-        // Find `wasm-opt`
-        const WASM_OPT = `../../tools/perspective-build/lib/wasm-opt`;
-        if (!fs.existsSync(WASM_OPT)) {
-            console.log(`No \`wasm-opt\` found, installing`);
-            await download_wasm_opt();
-        }
-
-        // Optimize wasm
-        const OPT_PATH = `dist/pkg/perspective_viewer_bg.wasm`;
-        const WASM_OPT_OPTIONS = [
-            `--low-memory-unused`,
-            `--converge`,
-
-            // This commit to `binaryen/wasm-opt` adds 50k to wasm asset, this
-            // is ths old settings.
-            // https://github.com/WebAssembly/binaryen/commit/1a6efdb4233a077bc6e5e8a340baf5672bb5bced
-            `--one-caller-inline-max-function-size=15`,
-        ].join(" ");
-
-        execSync(
-            `${WASM_OPT} -Oz ${WASM_OPT_OPTIONS} -o wasm-opt.wasm ${OPT_PATH}`,
-            INHERIT
-        );
-        execSync(`mv wasm-opt.wasm ${OPT_PATH}`, INHERIT);
+        await wasm_opt("perspective_viewer");
     }
 
     // Compress wasm
     const wasm = fs.readFileSync("dist/pkg/perspective_viewer_bg.wasm");
     const compressed = fflate.compressSync(wasm, {level: 9});
     fs.writeFileSync("dist/pkg/perspective_viewer_bg.wasm", compressed);
+}
+
+async function build_all() {
+    await Promise.all(PREBUILD.map(build)).catch(() => process.exit(1));
+
+    // Rust
+    await compile_rust();
 
     // JavaScript
     execSync("yarn tsc --project tsconfig.json", INHERIT);

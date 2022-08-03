@@ -34,6 +34,7 @@ use crate::*;
 use futures::future::join_all;
 use futures::future::select_all;
 use std::cell::{Ref, RefCell};
+use std::collections::HashMap;
 use std::future::Future;
 use std::ops::Deref;
 use std::pin::Pin;
@@ -110,7 +111,7 @@ impl Renderer {
     pub async fn reset(&self) {
         self.0.borrow_mut().plugins_idx = None;
         if let Ok(plugin) = self.get_active_plugin() {
-            plugin.restore(&js_object!());
+            plugin.restore(&json!({}));
         }
     }
 
@@ -130,7 +131,7 @@ impl Renderer {
     }
 
     /// Return all plugin names, whether they are active or not.
-    pub fn get_all_plugin_names(&self) -> Vec<String> {
+    pub fn get_all_plugin_categories(&self) -> HashMap<String, Vec<String>> {
         self.0.borrow_mut().plugin_store.plugin_records().clone()
     }
 

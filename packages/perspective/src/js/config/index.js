@@ -49,21 +49,21 @@ function mergeDeep(target, ...sources) {
     return mergeDeep(target, ...sources);
 }
 
-global.__PERSPECTIVE_CONFIG__ = undefined;
+globalThis.__PERSPECTIVE_CONFIG__ = undefined;
 
 module.exports.override_config = function (config) {
-    if (global.__PERSPECTIVE_CONFIG__) {
+    if (globalThis.__PERSPECTIVE_CONFIG__) {
         console.warn("Config already initialized!");
     }
-    global.__PERSPECTIVE_CONFIG__ = mergeDeep(DEFAULT_CONFIG, config);
+    globalThis.__PERSPECTIVE_CONFIG__ = mergeDeep(DEFAULT_CONFIG, config);
 };
 
 module.exports.get_config = function get_config() {
-    if (!global.__PERSPECTIVE_CONFIG__) {
-        global.__PERSPECTIVE_CONFIG__ = mergeDeep(
+    if (!globalThis.__PERSPECTIVE_CONFIG__) {
+        globalThis.__PERSPECTIVE_CONFIG__ = mergeDeep(
             DEFAULT_CONFIG,
-            global.__TEMPLATE_CONFIG__ || {}
+            globalThis.__TEMPLATE_CONFIG__ || {}
         );
     }
-    return global.__PERSPECTIVE_CONFIG__;
+    return globalThis.__PERSPECTIVE_CONFIG__;
 };

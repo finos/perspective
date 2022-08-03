@@ -10,18 +10,4 @@
 import load_perspective from "@finos/perspective/dist/pkg/esm/perspective.cpp.js";
 import perspective from "./perspective.js";
 
-let _perspective_instance;
-
-if (global.document !== undefined && typeof WebAssembly !== "undefined") {
-    _perspective_instance = global.perspective = perspective(
-        load_perspective({
-            wasmJSMethod: "native-wasm",
-            printErr: (x) => console.error(x),
-            print: (x) => console.log(x),
-        })
-    );
-} else {
-    _perspective_instance = global.perspective = perspective(load_perspective);
-}
-
-export default _perspective_instance;
+export default globalThis.perspective = perspective(load_perspective);

@@ -1,0 +1,43 @@
+{
+    "name": "@finos/perspective-viewer-openlayers",
+    "version": "1.6.2",
+    "unpkg": "dist/umd/perspective-viewer-openlayers.js",
+    "main": "dist/umd/perspective-viewer-openlayers.js",
+    "jsdelivr": "dist/umd/perspective-viewer-openlayers.js",
+    "exports": {
+        ".": {
+            "require": "./dist/umd/perspective-viewer-openlayers.js",
+            "import": "./dist/esm/perspective-viewer-openlayers.js"
+        },
+        "./dist/*": "./dist/*",
+        "./package.json": "./package.json"
+    },
+    "files": [
+        "dist/**/*"
+    ],
+    "author": "",
+    "license": "Apache-2.0",
+    "publishConfig": {
+        "access": "public"
+    },
+    "scripts": {
+        "bench": "npm-run-all bench:build bench:run",
+        "bench:build": ":",
+        "bench:run": ":",
+        "build": "node build.js",
+        "test:build": "cpy \"test/html/*\" dist/umd",
+        "test:run": "jest --rootDir=. --config=../../tools/perspective-test/jest.config.js --color",
+        "test": "npm-run-all test:build test:run",
+        "watch": ":",
+        "clean": "rimraf dist",
+        "clean:screenshots": "rimraf \"test/screenshots/**/*.@(failed|diff).png\""
+    },
+    "dependencies": {
+        "@finos/perspective": "^1.6.2",
+        "@finos/perspective-viewer": "^1.6.2",
+        "d3": "^7.1.1",
+        "gradient-parser": "1.0.2",
+        "less": "^4.1.0",
+        "ol": "^5.3.2"
+    }
+}

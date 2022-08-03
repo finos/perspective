@@ -8,6 +8,7 @@
 
 import asyncio
 from abc import ABC, abstractmethod
+import functools
 
 from ..core.exception import PerspectiveError
 
@@ -58,10 +59,8 @@ class PerspectiveHandlerBase(ABC):
         """
         return self._check_origin
 
-    def _session_callback(self, *args, **kwargs):
-        return asyncio.run_coroutine_threadsafe(
-            self.post(*args, **kwargs), asyncio.get_event_loop()
-        )
+    def _session_callback(self, loop, *args, **kwargs):
+        return asyncio.run_coroutine_threadsafe(self.post(*args, **kwargs), loop)
 
     async def on_message(self, message):
         """When the websocket receives a message, send it to the :obj:`process`
@@ -73,7 +72,8 @@ class PerspectiveHandlerBase(ABC):
             await self.post("pong")
             return
 
-        self._session.process(message, self._session_callback)
+        loop = asyncio.get_event_loop()
+        self._session.process(message, functools.partial(self._session_callback, loop))
 
     async def post(self, message, binary=False):
         """When `post` is called by `PerspectiveManager`, serialize the data to

@@ -6,13 +6,10 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::js::monaco::*;
-use crate::js_object;
-use crate::utils::*;
-
 use super::completions::*;
 use super::language::*;
-
+use crate::js::monaco::*;
+use crate::utils::*;
 use js_intern::*;
 use js_sys::*;
 use serde_json::error;
@@ -31,10 +28,10 @@ pub async fn init_language() -> Result<Editor, error::Error> {
     let lang_config = LANGUAGE_CONFIG.with(|x| JsValue::from_serde(&x))?;
     languages.set_language_configuration("exprtk", lang_config);
     let provider = get_completions.into_closure();
-    let items = js_object!(
-        "provideCompletionItems", provider.as_ref();
-        "triggerCharacters", [JsValue::from("\"")].iter().collect::<Array>();
-    );
+    let items = crate::json!({
+            "provideCompletionItems": provider.as_ref(),
+            "triggerCharacters": ["\""]
+    });
 
     provider.forget();
     languages.register_completion_item_provider("exprtk", items.into());
@@ -61,7 +58,7 @@ pub fn init_theme(theme: &str, editor: &Editor) {
 pub async fn init_environment() -> Result<(), error::Error> {
     let worker = new_worker().await;
     let closure = Closure::once_into_js(move |_: JsValue| worker);
-    let monaco_env = js_object!("getWorker", closure);
+    let monaco_env = crate::json!({ "getWorker": closure });
     let window = web_sys::window().unwrap();
     Reflect::set(&window, js_intern!("MonacoEnvironment"), &monaco_env).unwrap();
     Ok(())

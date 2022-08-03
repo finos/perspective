@@ -28,6 +28,10 @@ pub struct CopyDropDownMenuElement {
     modal: Rc<RefCell<Option<ModalElement<CopyDropDownMenu>>>>,
 }
 
+impl CustomElementMetadata for CopyDropDownMenuElement {
+    const CUSTOM_ELEMENT_NAME: &'static str = "perspective-copy-menu";
+}
+
 #[wasm_bindgen]
 impl CopyDropDownMenuElement {
     #[wasm_bindgen(constructor)]

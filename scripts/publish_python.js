@@ -36,17 +36,12 @@ if (!process.env.COMMIT) {
 
 // Folders for artifacts on GitHub Actions
 const dist_folders = [
-    // https://github.com/actions/virtual-environments
-    // Mac 10.15
-    "perspective-python-dist-macos-10.15-3.7",
-    "perspective-python-dist-macos-10.15-3.8",
-    "perspective-python-dist-macos-10.15-3.9",
+    // // https://github.com/actions/virtual-environments
 
     // Mac 11
-    // NOTE: use 10.15
-    // "perspective-python-dist-macos-11-3.7",
-    // "perspective-python-dist-macos-11-3.8",
-    // "perspective-python-dist-macos-11-3.9",
+    "perspective-python-dist-macos-11-3.7",
+    "perspective-python-dist-macos-11-3.8",
+    "perspective-python-dist-macos-11-3.9",
 
     // Ubuntu (Manylinux 2010 and 2014 docker images)
     "perspective-python-dist-ubuntu-20.04-3.7",
@@ -63,31 +58,26 @@ const dist_folders = [
     // "perspective-python-dist-windows-2022-3.7",
     // "perspective-python-dist-windows-2022-3.8",
     // "perspective-python-dist-windows-2022-3.9",
+
+    "perspective-python-sdist",
 ];
 
 // Artifacts inside those folders
 const wheels = [
-    // Mac 10.15
-    "cp36-cp36m-macosx_10_14_x86_64",
-    "cp37-cp37m-macosx_10_15_x86_64",
-    "cp38-cp38-macosx_10_15_x86_64",
-    "cp39-cp39-macosx_10_15_x86_64",
-
     // Mac 11
-    // NOTE: not yet
-    "cp36-cp36m-macosx_11_0_x86_64",
+    // "cp36-cp36m-macosx_11_0_x86_64",
     "cp37-cp37m-macosx_11_0_x86_64",
     "cp38-cp38-macosx_11_0_x86_64",
     "cp39-cp39-macosx_11_0_x86_64",
 
     // Manylinux 2010
-    "cp36-cp36m-manylinux2010_x86_64",
+    // "cp36-cp36m-manylinux2010_x86_64",
     "cp37-cp37m-manylinux2010_x86_64",
     "cp38-cp38-manylinux2010_x86_64",
     "cp39-cp39-manylinux2010_x86_64",
 
     // Manylinux 2014
-    "cp36-cp36m-manylinux2014_x86_64",
+    // "cp36-cp36m-manylinux2014_x86_64",
     "cp37-cp37m-manylinux2014_x86_64",
     "cp38-cp38-manylinux2014_x86_64",
     "cp39-cp39-manylinux2014_x86_64",
@@ -172,7 +162,7 @@ function askQuestion(query) {
             const wheel_folder = `perspective-wheel-dist-${process.env.GITHUB_WORKFLOW_ID}/wheels`;
 
             // Remove if exists
-            await fs.rmdir(dist_folder, {
+            await fs.rm(dist_folder, {
                 recursive: true,
                 force: true,
             });
@@ -223,6 +213,10 @@ function askQuestion(query) {
                         [`${dist_folder}/${artifact.name}/*.whl`],
                         `${wheel_folder}`
                     );
+                    await cp(
+                        [`${dist_folder}/${artifact.name}/*.tar.gz`],
+                        `${wheel_folder}`
+                    );
                 })
             );
 
@@ -231,13 +225,15 @@ function askQuestion(query) {
 
             // Print out our results, and what we expected
             console.log(
-                `Found ${downloaded_wheels.length} wheels, expected ${wheels.length}`
+                `Found ${downloaded_wheels.length} wheels, expected ${
+                    wheels.length + 1
+                }`
             );
 
             // If they vary (e.g. a partial run), ask the user if they're sure
             // they want to proceed
             proceed = "y";
-            if (downloaded_wheels.length !== wheels.length) {
+            if (downloaded_wheels.length !== wheels.length + 1) {
                 proceed = "n";
                 proceed = await askQuestion("Proceed? (y/N)");
             }
@@ -251,7 +247,7 @@ function askQuestion(query) {
                         "Skipping twine upload, marked as dry run.\nSet env var COMMIT=1 to run fo real."
                     );
                 } else {
-                    execute`twine upload ${wheel_folder}/*.whl`;
+                    execute`twine upload ${wheel_folder}/*`;
                 }
             }
         }

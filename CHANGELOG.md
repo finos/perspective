@@ -1,5 +1,87 @@
 # Changelog
 
+## [v1.6.2](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.6.1...HEAD)
+
+**Fixed bugs:**
+
+- Fix Python bug in `async` mode [\#1926](https://github.com/finos/perspective/pull/1926) ([texodus](https://github.com/texodus))
+- Fix app export [\#1921](https://github.com/finos/perspective/pull/1921) ([texodus](https://github.com/texodus))
+
+**Merged pull requests:**
+
+- Cleanup up python requirements installation in CI, remove some dangling azure references, refresh python README [\#1917](https://github.com/finos/perspective/pull/1917) ([timkpaine](https://github.com/timkpaine))
+
+## [v1.6.1](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.6.0...HEAD)
+
+**Implemented enhancements:**
+
+- Add zoom persistence to OpenLayers plugin [\#1920](https://github.com/finos/perspective/pull/1920) ([texodus](https://github.com/texodus))
+- Publish `@finos/perspective-esbuild-plugin` [\#1918](https://github.com/finos/perspective/pull/1918) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- Fix "inline mode" build [\#1919](https://github.com/finos/perspective/pull/1919) ([texodus](https://github.com/texodus))
+
+**Merged pull requests:**
+
+- Make `perspective-viewer` crate importable for external wasm projects [\#1916](https://github.com/finos/perspective/pull/1916) ([texodus](https://github.com/texodus))
+- Fix publish issues [\#1915](https://github.com/finos/perspective/pull/1915) ([texodus](https://github.com/texodus))
+
+## [v1.6.0](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.5.1...HEAD)
+
+**Implemented enhancements:**
+
+- Implement start\_of\_week and start\_of\_isoweek functions in expression language [\#1901](https://github.com/finos/perspective/issues/1901)
+- Add categories to plugin selector [\#1908](https://github.com/finos/perspective/pull/1908) ([texodus](https://github.com/texodus))
+- Add `@finos/perspective-viewer-openlayers` plugin [\#1882](https://github.com/finos/perspective/pull/1882) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- Add migrate support for datagrid `plugin_config` API [\#1914](https://github.com/finos/perspective/pull/1914) ([texodus](https://github.com/texodus))
+- Fix webpack plugin compat with emsdk single-link build [\#1904](https://github.com/finos/perspective/pull/1904) ([texodus](https://github.com/texodus))
+
+**Closed issues:**
+
+- Sunburst charts in tabs cause hanging [\#1909](https://github.com/finos/perspective/issues/1909)
+- Provide complete documentation for Perspective's variant of ExprTK [\#1818](https://github.com/finos/perspective/issues/1818)
+
+**Merged pull requests:**
+
+- New GitHub Pages site [\#1912](https://github.com/finos/perspective/pull/1912) ([texodus](https://github.com/texodus))
+- Fix Python sdist CI build  [\#1907](https://github.com/finos/perspective/pull/1907) ([texodus](https://github.com/texodus))
+- Fix python CI builds for all linux variants [\#1905](https://github.com/finos/perspective/pull/1905) ([texodus](https://github.com/texodus))
+- Expression Docs [\#1903](https://github.com/finos/perspective/pull/1903) ([texodus](https://github.com/texodus))
+
+## [v1.5.1](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.5.0...HEAD)
+
+**Implemented enhancements:**
+
+- Datagrid cell background "flash" animation when updated [\#1875](https://github.com/finos/perspective/issues/1875)
+- Add `pulse` numeric column background mode [\#1895](https://github.com/finos/perspective/pull/1895) ([texodus](https://github.com/texodus))
+- Split foreground and background numeric column color modes [\#1889](https://github.com/finos/perspective/pull/1889) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- Datagrid open/close row group indicator does not work on the `TOTAL` row when a `split_by` is present [\#1874](https://github.com/finos/perspective/issues/1874)
+- Datagrid tree collapse `hover` indicator triggers on cell hover, but `click` only fires from the button. [\#1873](https://github.com/finos/perspective/issues/1873)
+- Fix gradient bounds calc [\#1890](https://github.com/finos/perspective/pull/1890) ([texodus](https://github.com/texodus))
+- Expand/collapse on entire group cell, rather than just button [\#1888](https://github.com/finos/perspective/pull/1888) ([texodus](https://github.com/texodus))
+- Fix expand/collapse on first row of ctx2 [\#1887](https://github.com/finos/perspective/pull/1887) ([texodus](https://github.com/texodus))
+
+**Merged pull requests:**
+
+- Remove custom docker images [\#1893](https://github.com/finos/perspective/pull/1893) ([texodus](https://github.com/texodus))
+- Fix jlab tests to use local packages [\#1891](https://github.com/finos/perspective/pull/1891) ([texodus](https://github.com/texodus))
+- GHA default \(remove azure\) [\#1854](https://github.com/finos/perspective/pull/1854) ([texodus](https://github.com/texodus))
+
 ## [v1.5.0](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.4.1...HEAD)

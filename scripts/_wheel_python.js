@@ -17,8 +17,8 @@ const {
     python_version,
     python_image,
     manylinux_version,
+    copy_files_to_python_folder,
 } = require("./script_utils.js");
-const fs = require("fs-extra");
 const IS_DOCKER = process.env.PSP_DOCKER;
 const IS_MACOS = getarg("--macos");
 let IMAGE = "manylinux2014";
@@ -41,18 +41,8 @@ if (IS_DOCKER) {
  */
 try {
     console.log("Copying assets to `dist` folder");
-    const dist = resolve`${__dirname}/../python/perspective/dist`;
-    const cpp = resolve`${__dirname}/../cpp/perspective`;
-    const lic = resolve`${__dirname}/../LICENSE`;
-    const cmake = resolve`${__dirname}/../cmake`;
-    const dcmake = resolve`${dist}/cmake`;
-    const dlic = resolve`${dist}/LICENSE`;
-    const obj = resolve`${dist}/obj`;
-
-    fs.mkdirpSync(dist);
-    fs.copySync(cpp, dist, {preserveTimestamps: true});
-    fs.copySync(lic, dlic, {preserveTimestamps: true});
-    fs.copySync(cmake, dcmake, {preserveTimestamps: true});
+    copy_files_to_python_folder();
+    const obj = resolve`${__dirname}/../python/perspective/dist/obj`;
     clean(obj);
 
     let cmd = bash``;
@@ -61,7 +51,7 @@ try {
     if (MANYLINUX_VERSION) {
         // install deps
         const boost = [
-            `yum -y install wget`,
+            `yum -y install wget libffi-devel`,
             `wget https://boostorg.jfrog.io/artifactory/main/release/1.71.0/source/boost_1_71_0.tar.gz >/dev/null`,
             `tar xfz boost_1_71_0.tar.gz`,
             "cd boost_1_71_0",

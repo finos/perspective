@@ -1,0 +1,28 @@
+
+td,
+th,
+table,
+tbody,
+table thead {
+    border: 0;
+    font-size: 12px;
+    font-family: "Open Sans";
+    margin: 0;
+    padding: 0;
+    vertical-align: middle;
+    background-color: transparent;
+}
+
+table tr {
+    border-top: none;
+}
+
+table tr:nth-child(2n) {
+    background-color: transparent;
+}
+
+table th,
+table td {
+    border: none;
+    padding: 0px 5px;
+}

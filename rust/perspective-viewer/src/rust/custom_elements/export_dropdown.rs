@@ -29,6 +29,10 @@ pub struct ExportDropDownMenuElement {
     modal: Rc<RefCell<Option<ModalElement<ExportDropDownMenu>>>>,
 }
 
+impl CustomElementMetadata for ExportDropDownMenuElement {
+    const CUSTOM_ELEMENT_NAME: &'static str = "perspective-export-menu";
+}
+
 #[wasm_bindgen]
 impl ExportDropDownMenuElement {
     #[wasm_bindgen(constructor)]

@@ -1,7 +1,7 @@
 {
     "name": "python-tornado-streaming",
     "private": true,
-    "version": "1.5.0",
+    "version": "1.6.2",
     "description": "An example of streaming a `perspective-python` server to the browser.",
     "scripts": {
         "start": "PYTHONPATH=../../python/perspective python3 server.py"
@@ -9,15 +9,15 @@
     "keywords": [],
     "license": "Apache-2.0",
     "dependencies": {
-        "@finos/perspective": "^1.5.0",
-        "@finos/perspective-viewer": "^1.5.0",
-        "@finos/perspective-viewer-d3fc": "^1.5.0",
-        "@finos/perspective-viewer-datagrid": "^1.5.0",
-        "@finos/perspective-workspace": "^1.5.0",
+        "@finos/perspective": "^1.6.2",
+        "@finos/perspective-viewer": "^1.6.2",
+        "@finos/perspective-viewer-d3fc": "^1.6.2",
+        "@finos/perspective-viewer-datagrid": "^1.6.2",
+        "@finos/perspective-workspace": "^1.6.2",
         "superstore-arrow": "^1.0.0"
     },
     "devDependencies": {
-        "@finos/perspective-webpack-plugin": "^1.5.0",
+        "@finos/perspective-webpack-plugin": "^1.6.2",
         "npm-run-all": "^4.1.3",
         "rimraf": "^2.5.2"
     }

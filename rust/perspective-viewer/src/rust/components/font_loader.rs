@@ -97,9 +97,9 @@ impl FontLoaderProps {
             fonts: RefCell::new(vec![]),
         };
 
-        let state = FontLoaderProps {
+        let state = yew::props!(FontLoaderProps {
             state: Rc::new(inner),
-        };
+        });
 
         ApiFuture::spawn(state.clone().load_fonts_task_safe());
         state

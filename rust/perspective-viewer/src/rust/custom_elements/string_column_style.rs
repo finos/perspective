@@ -8,6 +8,7 @@
 
 use crate::components::string_column_style::*;
 use crate::custom_elements::modal::*;
+use crate::utils::CustomElementMetadata;
 use crate::*;
 
 use wasm_bindgen::prelude::*;
@@ -17,7 +18,8 @@ use yew::*;
 #[wasm_bindgen]
 #[derive(Clone)]
 pub struct PerspectiveStringColumnStyleElement {
-    modal: ModalElement<StringColumnStyle>,
+    elem: HtmlElement,
+    modal: Option<ModalElement<StringColumnStyle>>,
 }
 
 fn on_change(elem: &web_sys::HtmlElement, config: &StringColumnStyleConfig) {
@@ -29,27 +31,15 @@ fn on_change(elem: &web_sys::HtmlElement, config: &StringColumnStyleConfig) {
     elem.dispatch_event(&event.unwrap()).unwrap();
 }
 
+impl CustomElementMetadata for PerspectiveStringColumnStyleElement {
+    const CUSTOM_ELEMENT_NAME: &'static str = "perspective-string-column-style";
+}
+
 #[wasm_bindgen]
 impl PerspectiveStringColumnStyleElement {
     #[wasm_bindgen(constructor)]
-    pub fn new(elem: web_sys::HtmlElement, js_config: JsValue, js_default_config: JsValue) -> Self {
-        let config: StringColumnStyleConfig = js_config.into_serde().unwrap();
-        let default_config: StringColumnStyleDefaultConfig =
-            js_default_config.into_serde().unwrap();
-
-        let on_change = {
-            clone!(elem);
-            Callback::from(move |x: StringColumnStyleConfig| on_change(&elem, &x))
-        };
-
-        let props = props!(StringColumnStyleProps {
-            config,
-            default_config,
-            on_change,
-        });
-
-        let modal = ModalElement::new(elem, props, true);
-        Self { modal }
+    pub fn new(elem: web_sys::HtmlElement) -> Self {
+        Self { elem, modal: None }
     }
 
     /// Reset to a provided JSON config, to be used in place of `new()` when
@@ -57,26 +47,54 @@ impl PerspectiveStringColumnStyleElement {
     ///
     /// # Arguments
     /// * `config` - a `ColumnStyle` config in JSON form.
-    pub fn reset(&mut self, config: JsValue) {
+    pub fn reset(&mut self, config: JsValue) -> Result<(), JsValue> {
         let msg = StringColumnStyleMsg::Reset(config.into_serde().unwrap());
-        self.modal.send_message(msg);
+        self.modal.as_ref().into_jserror()?.send_message(msg);
+        Ok(())
     }
 
     /// Dispatches to `ModalElement::open(target)`
     ///
     /// # Arguments
     /// `target` - the relative target to pin this `ModalElement` to.
-    pub fn open(&mut self, target: web_sys::HtmlElement) {
-        self.modal.open(target, None);
+    pub fn open(
+        &mut self,
+        target: web_sys::HtmlElement,
+        js_config: JsValue,
+        js_default_config: JsValue,
+    ) -> Result<(), JsValue> {
+        if self.modal.is_some() {
+            self.reset(js_config)?;
+        } else {
+            let config: StringColumnStyleConfig = js_config.into_serde().unwrap();
+            let default_config: StringColumnStyleDefaultConfig =
+                js_default_config.into_serde().unwrap();
+
+            let on_change = {
+                clone!(self.elem);
+                Callback::from(move |x: StringColumnStyleConfig| on_change(&elem, &x))
+            };
+
+            let props = props!(StringColumnStyleProps {
+                config,
+                default_config,
+                on_change,
+            });
+
+            self.modal = Some(ModalElement::new(self.elem.clone(), props, true));
+        }
+
+        self.modal.as_ref().into_jserror()?.open(target, None);
+        Ok(())
     }
 
     /// Remove this `ModalElement` from the DOM.
     pub fn close(&mut self) -> Result<(), JsValue> {
-        self.modal.hide()
+        self.modal.as_ref().into_jserror()?.hide()
     }
 
     pub fn destroy(self) -> Result<(), JsValue> {
-        self.modal.destroy()
+        self.modal.into_jserror()?.destroy()
     }
 
     /// DOM lifecycle method when connected.  We don't use this, as it can fire

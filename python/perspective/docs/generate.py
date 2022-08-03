@@ -52,7 +52,7 @@ def main():
                 txt = fix_returns(txt)
                 output += txt
 
-    output_dir = os.path.join(cwd, "..", "..", "..", "docs", "obj")
+    output_dir = os.path.join(cwd, "..", "..", "..", "docs", "docs", "obj")
     with open(os.path.join(output_dir, "perspective-python.md"), "w+") as file:
         file.write(output)
         file.truncate()

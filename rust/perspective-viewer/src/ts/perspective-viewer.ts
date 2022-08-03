@@ -29,22 +29,15 @@
  * @module perspective-viewer
  */
 
+import "mobile-drag-drop-shadow-dom";
+
 export {IPerspectiveViewerPlugin} from "./plugin";
 export {HTMLPerspectiveViewerPluginElement} from "./plugin";
-export {HTMLPerspectiveViewerElement, PerspectiveViewerConfig} from "./viewer";
+export {IPerspectiveViewerElement} from "./viewer";
+
 export * from "./extensions";
 export * from "./migrate";
 
-import "./number-column-style";
-import "./string-column-style";
-import "./copy_menu";
-import "./export_menu";
-import "mobile-drag-drop-shadow-dom";
+import "./bootstrap";
 
-import {HTMLPerspectiveViewerPluginElement} from "./plugin";
-import {HTMLPerspectiveViewerElement} from "./viewer";
-
-export default {
-    HTMLPerspectiveViewerElement,
-    HTMLPerspectiveViewerPluginElement,
-};
+export default {};

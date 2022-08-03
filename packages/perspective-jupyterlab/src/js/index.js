@@ -17,6 +17,7 @@ export * from "./widget";
 import "../less/index.less";
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
+import "@finos/perspective-viewer-openlayers/dist/umd/perspective-viewer-openlayers.js";
 import {perspectiveRenderers} from "./renderer";
 import {PerspectiveJupyterPlugin} from "./plugin";
 

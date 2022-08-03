@@ -89,6 +89,9 @@ pub enum NumberBackgroundMode {
 
     #[serde(rename = "gradient")]
     Gradient,
+
+    #[serde(rename = "pulse")]
+    Pulse,
 }
 
 impl Default for NumberBackgroundMode {
@@ -102,6 +105,7 @@ impl Display for NumberBackgroundMode {
         let text = match self {
             Self::Color => Ok("color"),
             Self::Gradient => Ok("gradient"),
+            Self::Pulse => Ok("pulse"),
             _ => Err(std::fmt::Error),
         }?;
 
@@ -115,6 +119,7 @@ impl FromStr for NumberBackgroundMode {
         match s {
             "color" => Ok(Self::Color),
             "gradient" => Ok(Self::Gradient),
+            "pulse" => Ok(Self::Pulse),
             x => Err(format!("Unknown NumberBackgroundMode::{}", x)),
         }
     }
@@ -473,6 +478,7 @@ impl Component for NumberColumnStyle {
         let bg_select_values = vec![
             NumberBackgroundMode::Color,
             NumberBackgroundMode::Gradient,
+            NumberBackgroundMode::Pulse,
         ];
 
         let fg_color_controls = if self.config.number_fg_mode == NumberForegroundMode::Color {
@@ -526,6 +532,19 @@ impl Component for NumberColumnStyle {
         } else {
             html! {
                 <span class="row">{ "Gradient" }</span>
+            }
+        };
+
+        let bg_pulse_controls = if self.config.number_bg_mode == NumberBackgroundMode::Pulse {
+            html_template! {
+                <span class="row">{ "Pulse (Δ)" }</span>
+                <div class="row section inner_section">
+                    <ColorRangeSelector ..self.color_props(false, ctx) />
+                </div>
+            }
+        } else {
+            html! {
+                <span class="row">{ "Pulse (Δ)" }</span>
             }
         };
 
@@ -591,6 +610,7 @@ impl Component for NumberColumnStyle {
 
                         { bg_color_controls }
                         { bg_gradient_controls }
+                        { bg_pulse_controls }
 
                     </RadioList<NumberBackgroundMode>>
                 </div>

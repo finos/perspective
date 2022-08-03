@@ -12,6 +12,7 @@ import ohlcCandle from "./ohlcCandle";
 const candlestick = ohlcCandle(seriesCanvasCandlestick);
 candlestick.plugin = {
     name: "Candlestick",
+    category: "Y Chart",
     max_cells: 4000,
     max_columns: 50,
     render_warning: true,

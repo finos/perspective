@@ -1,0 +1,67 @@
+.heroBannerViewer {
+    width: 1000px;
+    height: 600px;
+    margin-top: 24px;
+    margin-bottom: 48px;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.visButtons {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 24px;
+}
+
+.visButton {
+    font-size: 14px;
+    /* border: 1px solid  */
+    border: 1px solid;
+    padding: 10px;
+    border-radius: 3px;
+    margin-right: 2px;
+    opacity: 0.3;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+
+.visButton.visButtonActive {
+    opacity: 1;
+}
+
+.freqSlider {
+    -webkit-appearance: none;
+    background: transparent;
+    border: 1px solid;
+    margin-top: 12px;
+    width: 200px;
+    height: 10px;
+    border-radius: 5px;
+    outline: none;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.freqSlider::-webkit-slider-thumb {
+    background: var(--ifm-hero-background-color);
+    -webkit-appearance: none;
+    appearance: none;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    border: 1px solid;
+    cursor: pointer;
+}
+
+.freqSlider::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    /* background: #04aa6d; */
+    border-color: #fff;
+    cursor: pointer;
+}

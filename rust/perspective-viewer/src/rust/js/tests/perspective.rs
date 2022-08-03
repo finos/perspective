@@ -47,15 +47,15 @@ pub async fn test_table_validate_invalid_expressions() {
 #[wasm_bindgen_test]
 pub async fn test_view_to_csv() {
     let table = get_mock_table().await;
-    let view = table.view(js_object!().unchecked_ref()).await.unwrap();
-    let csv: String = view.to_csv(js_object!()).await.unwrap().into();
+    let view = table.view(json!({}).unchecked_ref()).await.unwrap();
+    let csv: String = view.to_csv(json!({})).await.unwrap().into();
     assert_eq!(csv, "\"A\"\n1\n2\n3\n");
 }
 
 #[wasm_bindgen_test]
 pub async fn test_view_num_rows() {
     let table = get_mock_table().await;
-    let view = table.view(js_object!().unchecked_ref()).await.unwrap();
+    let view = table.view(json!({}).unchecked_ref()).await.unwrap();
     let num_rows = view.num_rows().await.unwrap();
     assert!(num_rows - 3_f64 < 0.01);
 }
@@ -63,7 +63,7 @@ pub async fn test_view_num_rows() {
 // #[wasm_bindgen_test]
 // pub async fn test_view_get_config() {
 //     let table = get_mock_table().await;
-//     let view = table.view(js_object!().unchecked_ref()).await.unwrap();
+//     let view = table.view(json!({}).unchecked_ref()).await.unwrap();
 //     let config = view.get_config().await.unwrap();
 //     assert!(JsValue::is_object(&config));
 //     let group_by_len = config.group_by().length();

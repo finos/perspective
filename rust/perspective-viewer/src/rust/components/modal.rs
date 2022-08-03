@@ -65,7 +65,6 @@ where
     T: Component,
     T::Properties: ModalLink<T>,
 {
-    #[allow(dead_code)]
     pub child: Option<VChild<T>>,
 }
 
