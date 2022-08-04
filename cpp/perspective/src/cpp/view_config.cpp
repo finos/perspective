@@ -110,6 +110,54 @@ t_view_config::validate(std::shared_ptr<t_schema> schema) {
     }
 }
 
+std::vector<std::shared_ptr<t_computed_expression>>
+t_view_config::get_used_expressions() {
+    std::vector<std::shared_ptr<t_computed_expression>> exprs = m_expressions;
+    tsl::hopscotch_set<std::string> used_cols(
+        m_columns.begin(), m_columns.end());
+
+    std::copy(m_row_pivots.begin(), m_row_pivots.end(),
+        std::inserter(used_cols, used_cols.end()));
+
+    for (auto i : m_filter) {
+        used_cols.insert(std::get<0>(i));
+    }
+
+    for (auto i : m_sort) {
+        used_cols.insert(i[0]);
+    }
+
+    std::copy(m_column_pivots.begin(), m_column_pivots.end(),
+        std::inserter(used_cols, used_cols.end()));
+
+    std::copy(m_row_pivots.begin(), m_row_pivots.end(),
+        std::inserter(used_cols, used_cols.end()));
+
+    std::copy(m_row_pivots.begin(), m_row_pivots.end(),
+        std::inserter(used_cols, used_cols.end()));
+
+    auto iter = std::remove_if(exprs.begin(), exprs.end(),
+        [&](std::shared_ptr<perspective::t_computed_expression>& i) {
+            bool unused
+                = used_cols.find(i->get_expression_alias()) == used_cols.end();
+
+#ifdef PSP_DEBUG
+            if (unused) {
+                std::cout << "Unused expression `" << i->get_expression_alias()
+                          << "`" << std::endl;
+            }
+#endif
+
+            return unused;
+        });
+
+    if (iter != exprs.end()) {
+        exprs.erase(iter, exprs.end());
+    }
+
+    return exprs;
+}
+
 void
 t_view_config::add_filter_term(
     std::tuple<std::string, std::string, std::vector<t_tscalar>> term) {
@@ -348,7 +396,8 @@ t_view_config::make_aggspec(const std::string& column,
         }
     }
 
-    if (agg_type == AGGTYPE_FIRST || agg_type == AGGTYPE_LAST_BY_INDEX || agg_type == AGGTYPE_LAST_MINUS_FIRST) {
+    if (agg_type == AGGTYPE_FIRST || agg_type == AGGTYPE_LAST_BY_INDEX
+        || agg_type == AGGTYPE_LAST_MINUS_FIRST) {
         dependencies.push_back(t_dep("psp_okey", DEPTYPE_COLUMN));
         aggspec = t_aggspec(
             column, column, agg_type, dependencies, SORTTYPE_ASCENDING);

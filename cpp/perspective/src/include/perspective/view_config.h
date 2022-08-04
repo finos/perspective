@@ -68,6 +68,11 @@ public:
     void validate(std::shared_ptr<t_schema> schema);
 
     /**
+     * @brief Retrieve only the used expressions.
+     */
+    std::vector<std::shared_ptr<t_computed_expression>> get_used_expressions();
+
+    /**
      * @brief Add filter terms manually, as the filter term must be calculated
      * from the value passed through the binding.
      *

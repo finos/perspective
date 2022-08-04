@@ -1646,7 +1646,7 @@ namespace binding {
         auto filter_op = view_config->get_filter_op();
         auto fterm = view_config->get_fterm();
         auto sortspec = view_config->get_sortspec();
-        auto expressions = view_config->get_expressions();
+        auto expressions = view_config->get_used_expressions();
 
         auto cfg = t_config(columns, fterm, filter_op, expressions);
         auto ctx0 = std::make_shared<t_ctx0>(*(schema.get()), cfg);
@@ -1671,7 +1671,7 @@ namespace binding {
         auto fterm = view_config->get_fterm();
         auto sortspec = view_config->get_sortspec();
         auto row_pivot_depth = view_config->get_row_pivot_depth();
-        auto expressions = view_config->get_expressions();
+        auto expressions = view_config->get_used_expressions();
 
         auto cfg
             = t_config(row_pivots, aggspecs, fterm, filter_op, expressions);
@@ -1708,7 +1708,7 @@ namespace binding {
         auto col_sortspec = view_config->get_col_sortspec();
         auto row_pivot_depth = view_config->get_row_pivot_depth();
         auto column_pivot_depth = view_config->get_column_pivot_depth();
-        auto expressions = view_config->get_expressions();
+        auto expressions = view_config->get_used_expressions();
 
         t_totals total = sortspec.size() > 0 ? TOTALS_BEFORE : TOTALS_HIDDEN;
 
