@@ -29,6 +29,8 @@ mod theme;
 mod utils;
 
 use custom_elements::copy_dropdown::CopyDropDownMenuElement;
+use custom_elements::date_column_style::PerspectiveDateColumnStyleElement;
+use custom_elements::datetime_column_style::PerspectiveDatetimeColumnStyleElement;
 use custom_elements::export_dropdown::ExportDropDownMenuElement;
 use custom_elements::number_column_style::PerspectiveNumberColumnStyleElement;
 use custom_elements::string_column_style::PerspectiveStringColumnStyleElement;
@@ -61,6 +63,8 @@ pub fn define_web_components() {
         define_web_component::<PerspectiveViewerElement>();
     }
 
+    define_web_component::<PerspectiveDateColumnStyleElement>();
+    define_web_component::<PerspectiveDatetimeColumnStyleElement>();
     define_web_component::<PerspectiveStringColumnStyleElement>();
     define_web_component::<PerspectiveNumberColumnStyleElement>();
     define_web_component::<ExportDropDownMenuElement>();

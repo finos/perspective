@@ -62,6 +62,8 @@ export function column_header_style_listener(regularTable) {
             let type = get_psp_type.call(this, metadata);
             const is_numeric = type === "integer" || type === "float";
             const is_string = type === "string";
+            const is_date = type === "date";
+            const is_datetime = type === "datetime";
             td.classList.toggle("psp-align-right", is_numeric);
             td.classList.toggle("psp-align-left", !is_numeric);
             td.classList.toggle(
@@ -70,7 +72,8 @@ export function column_header_style_listener(regularTable) {
             );
             td.classList.toggle(
                 "psp-menu-enabled",
-                (is_string || is_numeric) && !is_corner
+                (is_string || is_numeric || is_date || is_datetime) &&
+                    !is_corner
             );
 
             td.classList.toggle(

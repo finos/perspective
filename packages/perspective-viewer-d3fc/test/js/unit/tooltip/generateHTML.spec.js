@@ -66,7 +66,7 @@ describe("tooltip generateHTML should", () => {
         generateHtml(tooltip, data, settings);
         expect(getContent()).toEqual([
             `main-1: ${testDate.toLocaleString(
-                "en-us",
+                [],
                 get_type_config("datetime").format
             )}`,
         ]);

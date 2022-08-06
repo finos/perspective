@@ -29,6 +29,8 @@ perspective-viewer[theme="Material Dark"],
 perspective-copy-menu[theme="Material Dark"],
 perspective-export-menu[theme="Material Dark"],
 perspective-filter-dropdown[theme="Material Dark"],
+perspective-date-column-style[theme="Material Dark"],
+perspective-datetime-column-style[theme="Material Dark"],
 perspective-number-column-style[theme="Material Dark"],
 perspective-string-column-style[theme="Material Dark"],
 perspective-expression-editor[theme="Material Dark"],
@@ -77,18 +79,17 @@ perspective-expression-editor[theme="Material Dark"],
     --map-category-7: rgb(109, 124, 77);
     --map-category-8: rgb(221, 99, 103);
     --map-category-9: rgb(120, 104, 206);
-    --map-category-10: rgb(23, 166, 123);    
-    --map-gradient: linear-gradient(
-        #dd6367 0%,
-        #242526 50%,
-        #3289c8 100%
-    );
+    --map-category-10: rgb(23, 166, 123);
+    --map-gradient: linear-gradient(#dd6367 0%,
+            #242526 50%,
+            #3289c8 100%);
 }
 
 .perspective-viewer-material-dark--datagrid {
     regular-table {
         --rt-pos-cell--color: @blue50;
         --rt-neg-cell--color: @red50;
+
         table {
             color: white;
         }
@@ -98,6 +99,7 @@ perspective-expression-editor[theme="Material Dark"],
         }
 
         table tbody tr {
+
             td,
             th {
                 --rt-hover--border-color: @grey200;
@@ -111,12 +113,10 @@ perspective-expression-editor[theme="Material Dark"],
     }
 
     tbody th:empty {
-        background: linear-gradient(
-            to right,
-            transparent 9px,
-            @grey500 10px,
-            transparent 11px
-        );
+        background: linear-gradient(to right,
+                transparent 9px,
+                @grey500 10px,
+                transparent 11px);
         background-repeat: no-repeat;
         background-position: 0px -10px;
     }
@@ -146,11 +146,9 @@ perspective-expression-editor[theme="Material Dark"],
     --d3fc-series-9: rgb(120, 104, 206);
     --d3fc-series-10: rgb(23, 166, 123);
 
-    --d3fc-full--gradient: linear-gradient(
-        #dd6367 0%,
-        #242526 50%,
-        #3289c8 100%
-    );
+    --d3fc-full--gradient: linear-gradient(#dd6367 0%,
+            #242526 50%,
+            #3289c8 100%);
 
     --d3fc-positive--gradient: linear-gradient(#242526 0%, #3289c8 100%);
     --d3fc-negative--gradient: linear-gradient(#dd6367 0%, #242526 100%);

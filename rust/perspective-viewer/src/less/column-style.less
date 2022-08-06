@@ -8,6 +8,7 @@
  */
 
 @import "./radio-list.less";
+@import "./select.less";
 
 :host {
     position: fixed;
@@ -21,9 +22,15 @@
     box-shadow: 0 2px 4px 0 rgb(0 0 0 / 10%);
     user-select: none;
 
+    select {
+        height: auto;
+        padding-bottom: 2px;
+        border-bottom: 1px solid var(--input--border-color, #ccc);
+    }
+
     #column-style-container {
         margin-bottom: 4px;
-        width: 120px;
+        // width: 120px;
     }
 
     label {
@@ -31,15 +38,8 @@
         width: 100%;
     }
 
-    input#color-selected,
-    input#fore-selected,
-    input#back-selected,
-    input#format-selected {
+    input[type=checkbox] {
         float: left;
-    }
-
-    input#gradient-param {
-        margin-bottom: 4px;
     }
 
     input.parameter {
@@ -51,12 +51,21 @@
     }
 
     input.parameter[type="number"] {
-        text-align:right;
+        text-align: right;
         border-bottom-width: 1px;
-        border-color: var(
-            --input--border-color,
-            var(--inactive--color, inherit)
-        );
+        border-color: var(--input--border-color, var(--inactive--color, inherit));
+    }
+
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+        opacity: 1;
+        background: transparent;
+        background-color: transparent;
+    }
+
+    .column-style-label {
+        display: flex;
+        padding: 4px 0px;
     }
 
     .indent {
@@ -64,7 +73,7 @@
     }
 
     input[type="checkbox"],
-    & > div > div > span:first-child {
+    &>div>div>span:first-child {
         width: 24px;
         margin: 0;
     }
@@ -108,12 +117,16 @@
     }
 
     div.section {
+        margin-right: 6px;
         margin-bottom: 8px;
         flex: 1 1 100%;
     }
 
     div.inner_section {
         margin-top: 4px;
+        width: 0px;
+        margin-bottom: 8px;
+        flex: 1 1 100%;
     }
 
     div.row {

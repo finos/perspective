@@ -6,8 +6,8 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use super::radio_list_item::*;
 use crate::*;
-
 use std::fmt::Display;
 use std::str::FromStr;
 use wasm_bindgen::JsCast;
@@ -38,11 +38,7 @@ where
     T: Clone + Display + FromStr + PartialEq + 'static,
 {
     /// This component's `Html` children, which will become list items.
-    pub children: Children,
-
-    /// The corresponding `T` values for each child in `children` (must be the
-    /// same length as `children`).
-    pub values: Vec<T>,
+    pub children: ChildrenWithProps<RadioListItem<T>>,
 
     /// Whether this control is enabled.
     pub disabled: bool,
@@ -70,22 +66,10 @@ where
     T: Clone + Display + FromStr + PartialEq + 'static,
 {
     fn eq(&self, other: &Self) -> bool {
-        self.values == other.values
+        self.children == other.children
             && self.disabled == other.disabled
             && self.selected == other.selected
             && self.class == other.class
-    }
-}
-
-impl<T> RadioListProps<T>
-where
-    T: Clone + Display + FromStr + PartialEq + 'static,
-{
-    /// Validate a `RadioListProps`'s dimensions to make sure the no runtime
-    /// errors can occur when looking up values.
-    fn validate(&self) {
-        assert_eq!(self.children.len(), self.values.len());
-        assert!(self.values.iter().any(|x| *x == self.selected));
     }
 }
 
@@ -130,7 +114,6 @@ where
     type Properties = RadioListProps<T>;
 
     fn create(ctx: &Context<Self>) -> Self {
-        ctx.props().validate();
         enable_weak_link_test!(ctx.props(), ctx.link());
         Self {
             selected: ctx.props().selected.clone(),
@@ -150,7 +133,6 @@ where
     }
 
     fn changed(&mut self, ctx: &Context<Self>) -> bool {
-        ctx.props().validate();
         self.selected = ctx.props().selected.clone();
         true
     }
@@ -197,22 +179,23 @@ where
         &self,
         ctx: &Context<Self>,
         idx: usize,
-        child: Html,
+        child: yew::virtual_dom::VChild<RadioListItem<T>>,
         class: &str,
         on_change: Callback<InputEvent>,
         selected: &T,
     ) -> Html {
+        let val = child.props.value.clone();
         html! {
             <div class={ class.to_string() }>
                 <input
                     id={ format!("radio-list-{}", idx) }
                     name={ ctx.props().name.unwrap_or("radio-list") }
                     type="radio"
-                    value={ format!("{}", ctx.props().values[idx]) }
+                    value={ format!("{}", val) }
                     class="parameter"
                     oninput={ on_change }
                     disabled={ ctx.props().disabled }
-                    checked={ selected == &ctx.props().values[idx] } />
+                    checked={ selected == &val } />
                 { child }
             </div>
         }

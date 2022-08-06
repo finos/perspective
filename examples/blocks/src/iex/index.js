@@ -61,7 +61,7 @@ window.addEventListener("DOMContentLoaded", async function () {
     const to_span = (x) => `<span style='color:#666'>${x}</span>`;
 
     workspace.addEventListener("perspective-datagrid-after-update", (event) => {
-        const form = new Intl.NumberFormat("en-us", {});
+        const form = new Intl.NumberFormat([], {});
         const datagrid = event.detail;
         for (const td of datagrid.get_tds()) {
             const metadata = datagrid.get_meta(td);

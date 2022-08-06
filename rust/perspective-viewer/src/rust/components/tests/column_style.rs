@@ -7,9 +7,9 @@
 // file.
 
 use crate::components::number_column_style::*;
+use crate::config::*;
 use crate::utils::{await_animation_frame, WeakScope};
 use crate::*;
-
 use std::{cell::RefCell, rc::Rc};
 use wasm_bindgen::JsCast;
 use wasm_bindgen_test::*;

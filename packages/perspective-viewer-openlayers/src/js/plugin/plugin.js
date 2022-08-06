@@ -30,6 +30,10 @@ views.forEach(async (plugin) => {
                 drawView(plugin).call(this.shadowRoot.children[1], view);
             }
 
+            async update(view) {
+                drawView(plugin).call(this.shadowRoot.children[1], view);
+            }
+
             async resize() {
                 mapView.resize(this.shadowRoot.children[1]);
             }

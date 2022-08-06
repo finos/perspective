@@ -26,6 +26,8 @@ perspective-viewer[theme="Monokai"],
 perspective-copy-menu[theme="Monokai"],
 perspective-export-menu[theme="Monokai"],
 perspective-filter-dropdown[theme="Monokai"],
+perspective-date-column-style[theme="Monokai"],
+perspective-datetime-column-style[theme="Monokai"],
 perspective-number-column-style[theme="Monokai"],
 perspective-string-column-style[theme="Monokai"],
 perspective-expression-editor[theme="Monokai"],
@@ -68,12 +70,10 @@ perspective-expression-editor[theme="Monokai"],
     }
 
     regular-table table tbody th:empty {
-        background: linear-gradient(
-            to right,
-            transparent 9px,
-            #444444 10px,
-            transparent 11px
-        );
+        background: linear-gradient(to right,
+                transparent 9px,
+                #444444 10px,
+                transparent 11px);
     }
 }
 
@@ -100,9 +100,7 @@ perspective-expression-editor[theme="Monokai"],
 
     --d3fc-negative--gradient: linear-gradient(#272822 0%, #ff6188 100%);
     --d3fc-positive--gradient: linear-gradient(#272822 0%, #78dce8 100%);
-    --d3fc-full--gradient: linear-gradient(
-        #ff6188 0%,
-        #272822 50%,
-        #78dce8 100%
-    );
+    --d3fc-full--gradient: linear-gradient(#ff6188 0%,
+            #272822 50%,
+            #78dce8 100%);
 }

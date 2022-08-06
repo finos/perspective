@@ -7,6 +7,7 @@
 // file.
 
 use super::super::radio_list::{RadioList, RadioListMsg};
+use super::super::radio_list_item::RadioListItem;
 use crate::utils::{await_animation_frame, WeakScope};
 use crate::*;
 
@@ -33,12 +34,11 @@ pub async fn test_change_u32() {
             disabled=false
             selected="2"
             on_change={ on_change }
-            values={ vec!("1".to_owned(), "2".to_owned(), "3".to_owned()) }
             weak_link={ link.clone() }>
 
-            <span>{ "One" }</span>
-            <span>{ "Two" }</span>
-            <span>{ "Three" }</span>
+            <RadioListItem<String> value="1"><span>{ "One" }</span></RadioListItem<String>>
+            <RadioListItem<String> value="2"><span>{ "Two" }</span></RadioListItem<String>>
+            <RadioListItem<String> value="3"><span>{ "Three" }</span></RadioListItem<String>>
 
         </RadioList<String>>
     };

@@ -210,7 +210,7 @@ macro_rules! json_internal {
     };
 
     ([]) => {
-        $crate::Value::Array(vec![])
+        js_sys::Array::new()
     };
 
     ([ $($tt:tt)+ ]) => {

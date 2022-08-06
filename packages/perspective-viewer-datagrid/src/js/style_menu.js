@@ -12,7 +12,6 @@ import {PRIVATE_PLUGIN_SYMBOL} from "./model";
 
 export function activate_plugin_menu(regularTable, target, column_max) {
     const target_meta = regularTable.getMeta(target);
-
     const column_name =
         target_meta.column_header[target_meta.column_header.length - 1];
     const column_type = this._schema[column_name];
@@ -24,7 +23,7 @@ export function activate_plugin_menu(regularTable, target, column_max) {
                 integer: "number",
                 string: "string",
                 date: "date",
-                datetime: "date",
+                datetime: "datetime",
             }[column_type]
         }-column-style`
     );
@@ -102,17 +101,20 @@ export function activate_plugin_menu(regularTable, target, column_max) {
             "regular-table-scroll",
             scroll_handler
         );
+
         MENU.removeEventListener(
             "perspective-column-style-change",
             update_handler
         );
+
         MENU.removeEventListener("blur", blur_handler);
-        MENU.destroy();
         this._open_column_styles_menu.pop();
-        await regularTable.draw({preserve_width: true});
         regularTable.parentElement.parentElement.dispatchEvent(
             new Event("perspective-config-update")
         );
+
+        await regularTable.draw({preserve_width: true});
+        MENU.destroy();
     };
 
     MENU.addEventListener("perspective-column-style-change", update_handler);

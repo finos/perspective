@@ -6,19 +6,20 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use wasm_bindgen::JsCast;
+use crate::*;
+use wasm_bindgen::*;
 use web_sys::*;
 use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
-pub struct ColorProps {
-    pub color: String,
-    pub on_color: Callback<String>,
+pub struct NumberInputProps {
+    pub max_value: f64,
+    pub on_max_value: Callback<String>,
 }
 
-#[function_component(ColorSelector)]
-pub fn color_component(props: &ColorProps) -> Html {
-    let oninput = props.on_color.reform(|event: InputEvent| {
+#[function_component(NumberInput)]
+pub fn number_input(props: &NumberInputProps) -> Html {
+    let oninput = props.on_max_value.reform(|event: InputEvent| {
         event
             .target()
             .unwrap()
@@ -26,11 +27,13 @@ pub fn color_component(props: &ColorProps) -> Html {
             .value()
     });
 
-    html! {
+    html_template! {
+        <label>{ "Max" }</label>
         <input
+            value={ format!("{}", props.max_value) }
             class="parameter"
-            type="color"
-            value={ props.color.to_owned() }
-            oninput={ oninput }/>
+            type="number"
+            min="0"
+            oninput={ oninput } />
     }
 }

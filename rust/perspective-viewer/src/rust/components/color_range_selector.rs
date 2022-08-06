@@ -39,7 +39,6 @@ pub fn color_chooser_component(props: &ColorRangeProps) -> Html {
     });
 
     html_template! {
-        <label>{ "Range" }</label>
         <input
             id="color-param"
             class="parameter"

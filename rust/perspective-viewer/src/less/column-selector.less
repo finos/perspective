@@ -10,6 +10,7 @@
 @import "./aggregate-selector.less";
 
 :host {
+
     .column-selector-column-title {
         display: flex;
         width: 100%;
@@ -21,7 +22,7 @@
     }
 
     #side_panel {
-        & > :not(:last-child) {
+        &> :not(:last-child) {
             margin-bottom: 6px;
         }
 
@@ -37,10 +38,8 @@
             min-width: 20px;
             margin-top: -2px;
             height: 0px;
-            font-family: var(
-                --column-add--font-family,
-                var(--button--font-family, inherit)
-            );
+            font-family: var(--column-add--font-family,
+                    var(--button--font-family, inherit));
 
             &:before {
                 font-feature-settings: "liga";
@@ -56,10 +55,12 @@
             font-weight: 300;
             white-space: nowrap;
         }
+
         #add-expression {
             border: var(--column-add--border, none);
             padding: 6px 0 6px 0;
             margin: -6px 0 0 0;
+
             &.expr_editor_open {
                 background: rgba(0, 0, 0, 0.05);
             }
@@ -70,14 +71,13 @@
         }
 
         .dragdrop-highlight {
+
             .column_selector_draggable.dragover,
-            .column-selector-column:not(:last-child):not(:nth-last-child(2)):not(:nth-last-child(3))
-                .column_selector_draggable {
+            .column-selector-column:not(:last-child):not(:nth-last-child(2)):not(:nth-last-child(3)) .column_selector_draggable {
                 border-bottom-color: var(--active--color) !important;
             }
 
-            .column-selector-column:not(:first-child):not([data-label]):not(:nth-last-child(2))
-                .column_selector_draggable.dragover {
+            .column-selector-column:not(:first-child):not([data-label]):not(:nth-last-child(2)) .column_selector_draggable.dragover {
                 border-top-color: rgb(0 0 0 / 5%) !important;
             }
         }
@@ -167,10 +167,8 @@
                 }
 
                 .column_name:before {
-                    font-family: var(
-                        --interface-monospace--font-family,
-                        monospace
-                    );
+                    font-family: var(--interface-monospace--font-family,
+                            monospace);
                     width: var(--column_type--width, auto);
                     min-width: 18px;
                     font-size: 12px;
@@ -180,57 +178,39 @@
 
                 .integer:before,
                 .float:before {
-                    content: var(
-                        --float--column-type--content,
-                        var(--column-type--content, "123")
-                    );
-                    color: var(
-                        --float--column-type--color,
-                        var(--column-type--color, #016bc6)
-                    );
+                    content: var(--float--column-type--content,
+                            var(--column-type--content, "123"));
+                    color: var(--float--column-type--color,
+                            var(--column-type--color, #016bc6));
                 }
 
                 .string:before {
-                    content: var(
-                        --string--column-type--content,
-                        var(--column-type--content, "abc")
-                    );
-                    color: var(
-                        --string--column-type--color,
-                        var(--column-type--color, #fe9292)
-                    );
+                    content: var(--string--column-type--content,
+                            var(--column-type--content, "abc"));
+                    color: var(--string--column-type--color,
+                            var(--column-type--color, #fe9292));
                 }
 
                 .boolean:before {
-                    content: var(
-                        --boolean--column-type--content,
-                        var(--column-type--content, "t/f")
-                    );
-                    color: var(
-                        --boolean--column-type--color,
-                        var(--column-type--color, #999999)
-                    );
+                    content: var(--boolean--column-type--content,
+                            var(--column-type--content, "t/f"));
+                    color: var(--boolean--column-type--color,
+                            var(--column-type--color, #999999));
                 }
 
                 .date:before,
                 .datetime:before {
-                    content: var(
-                        --date--column-type--content,
-                        var(--column-type--content, "mdy")
-                    );
-                    color: var(
-                        --date--column-type--color,
-                        var(--column-type--color, #999999)
-                    );
+                    content: var(--date--column-type--content,
+                            var(--column-type--content, "mdy"));
+                    color: var(--date--column-type--color,
+                            var(--column-type--color, #999999));
                 }
             }
         }
 
         .is_column_active {
-            font-family: var(
-                --column-selector--font-family,
-                var(--button--font-family, inherit)
-            ) !important;
+            font-family: var(--column-selector--font-family,
+                    var(--button--font-family, inherit)) !important;
             width: var(--column-selector--width, 24px);
             min-width: var(--column-selector--width, 24px);
             height: var(--is_visible--height, auto);
@@ -247,8 +227,7 @@
         }
 
         #active-columns:not(.collapse).dragdrop-highlight {
-            .column-selector-column:not(:last-child):not(:nth-last-child(2))
-                .column_selector_draggable {
+            .column-selector-column:not(:last-child):not(:nth-last-child(2)) .column_selector_draggable {
                 border-bottom-color: var(--active--color) !important;
             }
         }
@@ -281,8 +260,10 @@
 
         #active-columns {
             display: flex;
+
             .is_column_active {
                 color: var(--active--color, #999);
+
                 &:before {
                     content: var(--active-column-selector--content, "\2611");
                 }
@@ -299,6 +280,7 @@
 
             .column-selector-column {
                 position: relative;
+
                 .column_selector_draggable {
                     width: calc(100% - 24px);
                 }
@@ -324,7 +306,8 @@
         .dragover,
         .empty-named {
             pointer-events: none;
-            & > * {
+
+            &>* {
                 opacity: 0;
             }
         }
@@ -354,7 +337,7 @@
         // selected for the `columns` field of the `ViewConfig`.
         #inactive-columns,
         #expression-columns {
-            & > div:not(:empty) {
+            &>div:not(:empty) {
                 margin-bottom: 6px;
             }
 
@@ -365,6 +348,7 @@
 
             .is_column_active {
                 color: var(--inactive--color, #999);
+
                 &:before {
                     content: var(--inactive-column-selector--content, "\2610");
                 }
