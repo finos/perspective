@@ -92,7 +92,7 @@ async function focus_package() {
                 }
             },
             filter: (answer) => {
-                if (!answer || answer.length === 7) {
+                if (!answer || answer.length === 8) {
                     return "";
                 } else {
                     return answer;

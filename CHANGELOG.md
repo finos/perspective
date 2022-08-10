@@ -1,5 +1,23 @@
 # Changelog
 
+## [v1.6.3](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.6.2...HEAD)
+
+**Implemented enhancements:**
+
+- Add `date`/`datetime` column configuration for Datagrid, based on JavaScript `Intl` [\#1817](https://github.com/finos/perspective/issues/1817)
+- Add `date` and `datetime` column config [\#1932](https://github.com/finos/perspective/pull/1932) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- Don't calculate unused `expressions` [\#1933](https://github.com/finos/perspective/pull/1933) ([texodus](https://github.com/texodus))
+
+**Merged pull requests:**
+
+- Fix python `_requires_python` publish script on windows [\#1929](https://github.com/finos/perspective/pull/1929) ([texodus](https://github.com/texodus))
+- Refactor `@finos/perspective-viewer-datagrid` [\#1927](https://github.com/finos/perspective/pull/1927) ([texodus](https://github.com/texodus))
+
 ## [v1.6.2](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.6.1...HEAD)
