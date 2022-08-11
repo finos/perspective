@@ -1,5 +1,5 @@
 {
-    "__GIT_COMMIT__": "c744efa438393bf46bf0d0801d9807fd86b64f51",
+    "__GIT_COMMIT__": "67e6675f87a1b57d6e34de57ae6a839d78a4364e",
     "index_restore_workspace_with_detail_only": "d24f601369fbf86c853d4dd2894506e3",
     "index_Light_DOM_restore_workspace_with_detail_only": "e23bd42ed74c5efc2d067301b449027d",
     "index_Shadow_DOM_restore_workspace_with_detail_only": "aa44cdf6689ff93f68d4a4cffe292e09",
@@ -16,5 +16,7 @@
     "index_Shadow_DOM_Create_Multiple": "4d88faf666989a462633244ece20f2c8",
     "index_Shadow_DOM_Create_multiple_with_names": "391266f09bb098827941e474f3733680",
     "workspace-all_Light_DOM_Restore_workspace_\"Bucket_by_year": "c0bc13512d1449e3cde3f1a4c5963a70",
-    "workspace-all_Shadow_DOM_Restore_workspace_\"Bucket_by_year": "aa44cdf6689ff93f68d4a4cffe292e09"
+    "workspace-all_Shadow_DOM_Restore_workspace_\"Bucket_by_year": "aa44cdf6689ff93f68d4a4cffe292e09",
+    "index_Light_DOM_visibility_Sunburst_charts_do_not_loop_forever_when_disconnected_from_DOM": "cd6a7a559b0b7b8cd050c00b8fbdbba3",
+    "index_Shadow_DOM_visibility_Sunburst_charts_do_not_loop_forever_when_disconnected_from_DOM": "b2658306ddd05fe57a00e76bc6770be3"
 }

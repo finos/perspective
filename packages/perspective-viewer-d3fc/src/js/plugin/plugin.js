@@ -237,16 +237,18 @@ export function register(...plugins) {
                     }
 
                     async draw(view, end_col, end_row) {
-                        if (!this.isConnected) {
+                        if (this.offsetParent === null) {
+                            this._staged_view = [view, end_col, end_row];
                             return;
                         }
 
+                        this._staged_view = undefined;
                         this.config = await this.parentElement.save();
                         await this.update(view, end_col, end_row, true);
                     }
 
                     async update(view, end_col, end_row, clear = false) {
-                        if (!this.isConnected) {
+                        if (this.offsetParent === null) {
                             return;
                         }
 
@@ -409,7 +411,7 @@ export function register(...plugins) {
                     }
 
                     _draw() {
-                        if (this._settings.data && this.isConnected) {
+                        if (this.offsetParent !== null) {
                             const containerDiv = d3.select(this._container);
                             const chartClass = `chart ${name}`;
                             this._settings.size =
@@ -434,9 +436,16 @@ export function register(...plugins) {
                      * causes non-cleared redraws duplicate column labels when calculating column name
                      * resize/repositions - see `treemapLabel.js`.
                      */
-                    async resize() {
-                        if (this.isConnected) {
-                            this._draw();
+                    async resize(view) {
+                        if (this.offsetParent !== null) {
+                            if (this._settings?.data !== undefined) {
+                                this._draw();
+                            } else {
+                                const [view, end_col, end_row] =
+                                    this._staged_view;
+                                this._staged_view = undefined;
+                                this.draw(view, end_col, end_row);
+                            }
                         }
                     }
 
