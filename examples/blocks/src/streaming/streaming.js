@@ -90,6 +90,6 @@ window.addEventListener("DOMContentLoaded", async function () {
     // Add more rows every 50ms using the `update()` method on the `table` directly.
     (function postRow() {
         table.update(newRows());
-        setTimeout(postRow, 50);
+        setTimeout(postRow, 10);
     })();
 });

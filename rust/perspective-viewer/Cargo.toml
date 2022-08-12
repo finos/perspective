@@ -1,12 +1,23 @@
 [package]
-name = "perspective-viewer"
-version = "1.0.8"
+name = "perspective"
+version = "1.6.5"
 authors = ["Andrew Stein <steinlink@gmail.com>"]
 edition = "2021"
-description = "A frontend for Perspective"
+description = "A data visualization and analytics component, especially well-suited for large and/or streaming datasets."
 repository = "https://github.com/finos/perspective"
+license = "Apache-2.0"
+homepage = "https://perspective.finos.org"
+keywords = ["experimental"]
+include = [
+    "build.rs",
+    "src/**/*",
+    "build/css/**/*",
+    "Cargo.toml",
+    "package.json",
+]
 
 [lib]
+name = "perspective_viewer"
 crate-type = ["cdylib", "rlib"]
 path = "src/rust/lib.rs"
 
