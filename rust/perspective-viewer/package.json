@@ -60,5 +60,9 @@
     "devDependencies": {
         "@finos/perspective-esbuild-plugin": "^1.6.5",
         "@finos/perspective-test": "^1.6.5"
+        "esbuild": "^0.15.5",
+        "esbuild-plugin-less": "^1.1.9",
+        "node-fetch": "^2.6.7",
+        "tar": "^6.1.11"
     }
 }
