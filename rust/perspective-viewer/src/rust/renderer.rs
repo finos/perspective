@@ -42,6 +42,7 @@ use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::*;
+use yew::html::ImplicitClone;
 
 #[derive(Clone)]
 pub struct Renderer(Rc<RendererData>);
@@ -79,6 +80,8 @@ impl PartialEq for Renderer {
         Rc::ptr_eq(&self.0, &other.0)
     }
 }
+
+impl ImplicitClone for Renderer {}
 
 impl Deref for RendererData {
     type Target = RefCell<RendererMutData>;

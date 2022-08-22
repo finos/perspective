@@ -15,6 +15,7 @@ use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::*;
+use yew::html::ImplicitClone;
 use yew::prelude::*;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -93,6 +94,8 @@ impl PartialEq for DragDrop {
         Rc::ptr_eq(&self.0, &other.0)
     }
 }
+
+impl ImplicitClone for DragDrop {}
 
 impl DragDrop {
     pub fn notify_drop(&self) {
@@ -253,7 +256,7 @@ pub fn dragleave_helper(callback: impl Fn() + 'static, drag_ref: NodeRef) -> Cal
                     )
                 }
 
-                let current_target = drag_ref.cast::<HtmlElement>().into_jserror()?;
+                let current_target = drag_ref.cast::<HtmlElement>().unwrap();
                 match related_target {
                     Some(ref related) => {
                         if !current_target.contains(Some(related)) {

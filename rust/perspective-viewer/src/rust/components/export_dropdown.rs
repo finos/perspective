@@ -92,11 +92,11 @@ impl Component for ExportDropDownMenu {
             <input
                 class={ if self.invalid { "invalid" } else { "" }}
                 oninput={ callback }
-                ref={ self.input_ref.clone() }
+                ref={ &self.input_ref }
                 value={ self.title.to_owned() } />
             <DropDownMenu<ExportFile>
                 values={ Rc::new(get_menu_items(&self.title, has_render)) }
-                callback={ ctx.props().callback.clone() }>
+                callback={ &ctx.props().callback }>
             </DropDownMenu<ExportFile>>
         }
     }

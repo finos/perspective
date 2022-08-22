@@ -17,6 +17,7 @@ use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::*;
+use yew::html::ImplicitClone;
 use yew::*;
 
 #[wasm_bindgen]
@@ -28,6 +29,8 @@ pub struct FilterDropDownElement {
     values: Rc<RefCell<Option<Vec<String>>>>,
     target: Rc<RefCell<Option<HtmlElement>>>,
 }
+
+impl ImplicitClone for FilterDropDownElement {}
 
 impl FilterDropDownElement {
     pub fn new(session: Session) -> Self {

@@ -78,6 +78,7 @@ pub struct ColumnSelector {
     add_expression_ref: NodeRef,
     named_row_count: usize,
     expression_editor: Option<ExpressionEditorElement>,
+    drag_container: DragDropContainer,
 }
 
 impl Component for ColumnSelector {
@@ -119,11 +120,17 @@ impl Component for ColumnSelector {
 
         let named_row_count = named.unwrap_or_default();
 
+        let drag_container = DragDropContainer::new(|| {}, {
+            let link = ctx.link().clone();
+            move || link.send_message(ColumnSelectorMsg::HoverActiveIndex(None))
+        });
+
         ColumnSelector {
             _subscriptions: [table_sub, view_sub, drop_sub, drag_sub, dragend_sub],
             add_expression_ref: NodeRef::default(),
             expression_editor: None,
             named_row_count,
+            drag_container,
         }
     }
 
@@ -221,11 +228,6 @@ impl Component for ColumnSelector {
             let config = ctx.props().session.get_view_config();
             let is_pivot = config.is_aggregated();
             let columns_iter = ctx.props().column_selector_iter_set(&config);
-
-            let drag_container = DragDropContainer::new(|| {}, {
-                let link = ctx.link().clone();
-                move || link.send_message(ColumnSelectorMsg::HoverActiveIndex(None))
-            });
 
             let dragover = Callback::from(|_event: DragEvent| _event.prevent_default());
             let ondragenter = ctx.link().callback(ColumnSelectorMsg::HoverActiveIndex);
@@ -328,12 +330,12 @@ impl Component for ColumnSelector {
                     id="active-columns"
                     class={ active_classes }
                     dragover={ dragover }
-                    dragenter={ drag_container.dragenter }
-                    dragleave={ drag_container.dragleave }
-                    ref={ drag_container.noderef }
+                    dragenter={ &self.drag_container.dragenter }
+                    dragleave={ &self.drag_container.dragleave }
+                    viewport_ref={ &self.drag_container.noderef }
                     drop={ drop }
-                    on_resize={ ctx.props().on_resize.clone() }
-                    on_dimensions_reset={ ctx.props().on_dimensions_reset.clone() }
+                    on_resize={ &ctx.props().on_resize }
+                    on_dimensions_reset={ &ctx.props().on_dimensions_reset }
                     items={ Rc::new(active_columns.collect::<Vec<_>>()) }
                     named_row_count={ self.named_row_count }
                     named_row_height={ if is_pivot { 62.0 } else { 42.0 } }
@@ -343,12 +345,12 @@ impl Component for ColumnSelector {
                     <ScrollPanel<InactiveColumnProps>
                         id="expression-columns"
                         items={ Rc::new(expression_columns.collect::<Vec<_>>()) }
-                        on_dimensions_reset={ ctx.props().on_dimensions_reset.clone() }
+                        on_dimensions_reset={ &ctx.props().on_dimensions_reset }
                         row_height={ 20.0 }>
                     </ScrollPanel<InactiveColumnProps>>
                     <ScrollPanel<InactiveColumnProps>
                         id="inactive-columns"
-                        on_dimensions_reset={ ctx.props().on_dimensions_reset.clone() }
+                        on_dimensions_reset={ &ctx.props().on_dimensions_reset }
                         items={ Rc::new(inactive_columns.collect::<Vec<_>>()) }
                         row_height={ 20.0 }>
                     </ScrollPanel<InactiveColumnProps>>
@@ -356,7 +358,7 @@ impl Component for ColumnSelector {
                 <div
                     id="add-expression"
                     class="side_panel-action"
-                    ref={ self.add_expression_ref.clone() }
+                    ref={ &self.add_expression_ref }
                     onmousedown={ add_expression }>
 
                     <span class="psp-icon psp-icon__add"></span>

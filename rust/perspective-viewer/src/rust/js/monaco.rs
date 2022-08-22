@@ -26,14 +26,17 @@ pub enum KeyCode {
     not(test),
     wasm_bindgen(inline_js = "
     import * as monaco from 'monaco-editor/esm/vs/editor/editor.worker.js';
-    export default async function () {
+    export async function init_monaco() {
         return await monaco.initialize();
     }
 ")
 )]
-#[cfg_attr(test, wasm_bindgen(inline_js = "export default async function() {}"))]
+#[cfg_attr(
+    test,
+    wasm_bindgen(inline_js = "export async function init_monaco() {}")
+)]
 extern "C" {
-    #[wasm_bindgen(js_name = "default")]
+    #[wasm_bindgen(js_name = "init_monaco")]
     pub async fn new_worker() -> JsValue;
 }
 

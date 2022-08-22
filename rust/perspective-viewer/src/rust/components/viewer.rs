@@ -213,28 +213,28 @@ impl Component for PerspectiveViewer {
                     on_resize_finished={ ctx.props().render_callback() }>
                     <div id="side_panel" class="column noselect">
                         <PluginSelector
-                            session={ ctx.props().session.clone() }
-                            renderer={ ctx.props().renderer.clone() }>
+                            session={ &ctx.props().session }
+                            renderer={ &ctx.props().renderer }>
                         </PluginSelector>
                         <ColumnSelector
-                            dragdrop={ ctx.props().dragdrop.clone() }
-                            renderer={ ctx.props().renderer.clone() }
-                            session={ ctx.props().session.clone() }
-                            on_resize={ self.on_resize.clone() }
-                            on_dimensions_reset={ self.on_dimensions_reset.clone() }>
+                            dragdrop={ &ctx.props().dragdrop }
+                            renderer={ &ctx.props().renderer }
+                            session={ &ctx.props().session }
+                            on_resize={ &self.on_resize }
+                            on_dimensions_reset={ &self.on_dimensions_reset }>
                         </ColumnSelector>
                     </div>
                     <div id="main_column">
                         <ConfigSelector
-                            dragdrop={ ctx.props().dragdrop.clone() }
-                            session={ ctx.props().session.clone() }
-                            renderer={ ctx.props().renderer.clone() }>
+                            dragdrop={ &ctx.props().dragdrop }
+                            session={ &ctx.props().session }
+                            renderer={ &ctx.props().renderer }>
                         </ConfigSelector>
                         <div id="main_panel_container">
                             <RenderWarning
                                 dimensions={ self.dimensions }
-                                session={ ctx.props().session.clone() }
-                                renderer={ ctx.props().renderer.clone() }>
+                                session={ &ctx.props().session }
+                                renderer={ &ctx.props().renderer }>
                             </RenderWarning>
                             <slot></slot>
                         </div>
@@ -242,16 +242,16 @@ impl Component for PerspectiveViewer {
                 </SplitPanel>
                 <StatusBar
                     id="status_bar"
-                    session={ ctx.props().session.clone() }
-                    renderer={ ctx.props().renderer.clone() }
-                    theme={ ctx.props().theme.clone() }
+                    session={ &ctx.props().session }
+                    renderer={ &ctx.props().renderer }
+                    theme={ &ctx.props().theme }
                     on_reset={ ctx.link().callback(|all| Msg::Reset(all, None)) }>
                 </StatusBar>
             } else {
                 <RenderWarning
                     dimensions={ self.dimensions }
-                    session={ ctx.props().session.clone() }
-                    renderer={ ctx.props().renderer.clone() }>
+                    session={ &ctx.props().session }
+                    renderer={ &ctx.props().renderer }>
                 </RenderWarning>
                 <div id="main_panel_container" class="settings-closed">
                     <slot></slot>

@@ -136,7 +136,7 @@ async function compile_rust() {
 
     await wasm_bindgen("perspective_viewer", {
         debug: IS_DEBUG,
-        version: "0.2.80",
+        version: "0.2.82",
         targetdir: "build",
     });
 
@@ -158,7 +158,6 @@ async function build_all() {
 
     // JavaScript
     execSync("yarn tsc --project tsconfig.json", INHERIT);
-
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
     await Promise.all(POSTBUILD.map(build)).catch(() => process.exit(1));
 

@@ -13,10 +13,14 @@ use derivative::Derivative;
 use std::cell::Cell;
 use std::marker::PhantomData;
 use std::rc::Rc;
-use yew::{prelude::*, virtual_dom::VChild};
+use yew::html::*;
+use yew::prelude::*;
+use yew::virtual_dom::VChild;
 
 #[derive(Clone, Default, Eq, PartialEq)]
 pub struct ModalOrientation(Rc<Cell<bool>>);
+
+impl ImplicitClone for ModalOrientation {}
 
 impl From<ModalOrientation> for bool {
     fn from(x: ModalOrientation) -> Self {
@@ -128,7 +132,7 @@ where
             <style>
                 { self.css.to_owned() }
             </style>
-            <ContextProvider<ModalOrientation> context={ self.rev_vert.clone() }>
+            <ContextProvider<ModalOrientation> context={ &self.rev_vert }>
                 {
                     child
                 }

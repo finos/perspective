@@ -49,7 +49,7 @@ impl Component for CopyDropDownMenu {
         html_template! {
             <DropDownMenu<ExportMethod>
                 values={ Rc::new(get_menu_items(has_render)) }
-                callback={ ctx.props().callback.clone() }>
+                callback={ &ctx.props().callback }>
             </DropDownMenu<ExportMethod>>
         }
     }

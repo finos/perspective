@@ -59,6 +59,7 @@ pub fn get_exprtk_commands() -> Result<Box<[JsValue]>, JsValue> {
 
 #[wasm_bindgen(js_name = "defineWebComponents")]
 pub fn define_web_components() {
+    tracing_wasm::set_as_global_default();
     if cfg!(feature = "define_custom_elements_async") {
         define_web_component::<PerspectiveViewerElement>();
     }

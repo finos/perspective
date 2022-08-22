@@ -264,7 +264,7 @@ where
         };
 
         html! {
-            <div style={style} ref={ self.elem.clone() } class="rrow">
+            <div style={style} ref={ &self.elem } class="rrow">
                 <div
                     id={ ctx.props().name }
                     ondragover={ dragover }

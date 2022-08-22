@@ -15,7 +15,6 @@ use crate::session::*;
 use crate::theme::Theme;
 use crate::utils::*;
 use crate::*;
-
 use web_sys::*;
 use yew::prelude::*;
 
@@ -205,7 +204,7 @@ impl Component for StatusBar {
                         <span>{ "Reset" }</span>
                     </span>
                     <span
-                        ref={ self.export_ref.clone() }
+                        ref={ &self.export_ref }
                         id="export"
                         class="button"
                         onmousedown={ export }>
@@ -213,7 +212,7 @@ impl Component for StatusBar {
                         <span>{ "Export" }</span>
                     </span>
                     <span
-                        ref={ self.copy_ref.clone() }
+                        ref={ &self.copy_ref }
                         id="copy"
                         class="button"
                         onmousedown={ copy }>
