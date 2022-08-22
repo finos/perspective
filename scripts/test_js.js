@@ -134,7 +134,7 @@ try {
             // copy the test files over and run the tests.
             execute`node_modules/.bin/lerna run test:jupyter:build --stream --scope="@finos/${PACKAGE}"`;
             execute_throw(jest_single("test:jupyter:run"));
-            return;
+            process.exit(0);
         }
 
         if (minimatch("perspective", PACKAGE)) {

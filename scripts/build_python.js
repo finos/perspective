@@ -47,7 +47,7 @@ try {
     if (SETUP_ONLY) {
         // don't execute any build steps, just copy
         // the C++ assets into the python folder
-        return;
+        process.exit(0);
     }
 
     let cmd;
