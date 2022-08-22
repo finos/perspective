@@ -77,7 +77,6 @@ macro_rules! enable_weak_link_test {
 #[macro_export]
 macro_rules! test_html {
     ($($html:tt)*) => {{
-        use $crate::components::viewer::CSS;
         use wasm_bindgen::JsCast;
         use yew::prelude::*;
 
@@ -108,7 +107,7 @@ macro_rules! test_html {
                 html_template! {
                     <style>
                         { "#test{position:absolute;top:0;bottom:0;left:0;right:0;}" }
-                        { &CSS }
+                        // { &CSS }
                     </style>
                     { ctx.props().html.clone() }
                 }

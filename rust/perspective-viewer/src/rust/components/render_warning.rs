@@ -6,11 +6,11 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use super::style::LocalStyle;
 use crate::renderer::*;
 use crate::session::*;
 use crate::utils::*;
 use crate::*;
-
 use yew::prelude::*;
 
 #[derive(Properties)]
@@ -122,7 +122,8 @@ impl Component for RenderWarning {
             };
 
             let onclick = ctx.link().callback(|_| RenderWarningMsg::DismissWarning);
-            html! {
+            html_template! {
+                <LocalStyle href={ css!("render-warning") } />
                 <div
                     class="plugin_information plugin_information--warning"
                     id="plugin_information--size">

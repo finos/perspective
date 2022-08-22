@@ -77,6 +77,7 @@
         "sinon": "^7.3.1",
         "style-loader": "^0.18.2",
         "term-img": "^4.1.0",
+        "tiny-glob": "^0.2.9",
         "ts-loader": "^6.2.0",
         "typedoc": "^0.22.7",
         "typedoc-plugin-markdown": "^3.11.6",

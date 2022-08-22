@@ -118,6 +118,7 @@ features = [
     "HtmlCollection",
     "HtmlElement",
     "HtmlTextAreaElement",
+    "HtmlStyleElement",
     "HtmlSelectElement",
     "InputEvent",
     "KeyboardEvent",

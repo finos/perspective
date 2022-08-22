@@ -21,6 +21,8 @@ use yew::prelude::*;
 #[cfg(test)]
 use crate::utils::WeakScope;
 
+use super::style::LocalStyle;
+
 #[derive(Properties)]
 pub struct StatusBarProps {
     pub id: String,
@@ -194,7 +196,8 @@ impl Component for StatusBar {
             }
         };
 
-        html! {
+        html_template! {
+            <LocalStyle href={ css!("status-bar") } />
             <div id={ ctx.props().id.clone() } class={ is_updating_class_name }>
                 <div class="section">
                     <span id="status" class={ class_name }></span>

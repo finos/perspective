@@ -9,6 +9,7 @@
 // Forked from https://github.com/AircastDev/yew-virtual-scroller (Apache 2.0)
 // Adds support for Yew 0.19, auto-width and a simplified message structure.
 
+use crate::components::style::LocalStyle;
 use crate::utils::*;
 use crate::*;
 
@@ -254,7 +255,7 @@ where
         };
 
         let width_style = format!("width:{}px", max!(self.viewport_width, 0.0));
-        if !windowed_items.is_empty() {
+        let items = if !windowed_items.is_empty() {
             let items = windowed_items.into_iter().map(|item| item.into());
             let onscroll = ctx.link().batch_callback(|_| {
                 vec![
@@ -290,10 +291,16 @@ where
                     id={ ctx.props().id }
                     class={ ctx.props().class.clone() }>
 
+
                     <div style={ content_style }>
                     </div>
                 </div>
             }
+        };
+
+        html_template! {
+            <LocalStyle href={ css!("containers/scroll-panel") } />
+            { items }
         }
     }
 

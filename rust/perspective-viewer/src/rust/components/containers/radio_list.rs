@@ -7,6 +7,7 @@
 // file.
 
 use super::radio_list_item::*;
+use crate::components::style::LocalStyle;
 use crate::*;
 use std::fmt::Display;
 use std::str::FromStr;
@@ -153,14 +154,19 @@ where
             None => "radio-list-item".to_owned(),
         };
 
-        ctx.props()
-            .children
-            .iter()
-            .enumerate()
-            .map(|(idx, child)| {
-                self.render_item(ctx, idx, child, &class, on_change.clone(), &self.selected)
-            })
-            .collect::<Html>()
+        html_template! {
+            <LocalStyle href={ css!("containers/radio-list") } />
+            {
+                ctx.props()
+                .children
+                .iter()
+                .enumerate()
+                .map(|(idx, child)| {
+                    self.render_item(ctx, idx, child, &class, on_change.clone(), &self.selected)
+                })
+                .collect::<Html>()
+            }
+        }
     }
 }
 

@@ -10,6 +10,7 @@ use super::containers::dragdrop_list::*;
 use super::filter_item::*;
 use super::pivot_item::*;
 use super::sort_item::*;
+use super::style::LocalStyle;
 use crate::config::*;
 use crate::custom_elements::FilterDropDownElement;
 use crate::dragdrop::*;
@@ -270,7 +271,7 @@ impl Component for ConfigSelector {
 
         html! {
             <div slot="top_panel" id="top_panel" class={ class } ondragend={ dragend }>
-
+                <LocalStyle href={ css!("config-selector") } />
                 <GroupBySelector
                     name="group_by"
                     parent={ ctx.link().clone() }

@@ -11,6 +11,7 @@ use super::containers::number_input::*;
 use super::containers::radio_list::RadioList;
 use super::containers::radio_list_item::RadioListItem;
 use super::modal::*;
+use super::style::{LocalStyle, StyleProvider};
 use crate::config::*;
 use crate::utils::WeakScope;
 use crate::*;
@@ -18,8 +19,6 @@ use wasm_bindgen::*;
 use web_sys::*;
 use yew::prelude::*;
 use yew::*;
-
-pub static CSS: &str = include_str!("../../../build/css/column-style.css");
 
 type Side = bool;
 
@@ -352,82 +351,82 @@ impl Component for NumberColumnStyle {
             }
         };
 
-        html_template! {
-            <style>
-                { &CSS }
-            </style>
-            <div id="column-style-container">
-                <div class="column-style-label">
-                    <label id="fixed-examples" class="indent">{
-                        self.make_fixed_text(ctx)
-                    }</label>
-                </div>
-                <div class="row section">
-                    <input type="checkbox" checked=true disabled=true/>
-                    <input
-                        id="fixed-param"
-                        class="parameter"
-                        type="number"
-                        min="0"
-                        step="1"
-                        value={ fixed_value }
-                        oninput={ fixed_oninput }/>
-                </div>
-                <div class="column-style-label">
-                    <label class="indent">{ "Foreground" }</label>
-                </div>
-                <div class="section">
-                    <input
-                        type="checkbox"
-                        oninput={ fg_enabled_oninput }
-                        checked={ self.config.number_fg_mode.is_enabled() } />
-                    <RadioList<NumberForegroundMode>
-                        class="indent"
-                        name="foreground-list"
-                        disabled={ !self.config.number_fg_mode.is_enabled() }
-                        selected={ selected_fg_mode }
-                        on_change={ fg_mode_changed } >
+        html! {
+            <StyleProvider>
+                <LocalStyle href={ css!("column-style") } />
+                <div id="column-style-container">
+                    <div class="column-style-label">
+                        <label id="fixed-examples" class="indent">{
+                            self.make_fixed_text(ctx)
+                        }</label>
+                    </div>
+                    <div class="row section">
+                        <input type="checkbox" checked=true disabled=true/>
+                        <input
+                            id="fixed-param"
+                            class="parameter"
+                            type="number"
+                            min="0"
+                            step="1"
+                            value={ fixed_value }
+                            oninput={ fixed_oninput }/>
+                    </div>
+                    <div class="column-style-label">
+                        <label class="indent">{ "Foreground" }</label>
+                    </div>
+                    <div class="section">
+                        <input
+                            type="checkbox"
+                            oninput={ fg_enabled_oninput }
+                            checked={ self.config.number_fg_mode.is_enabled() } />
+                        <RadioList<NumberForegroundMode>
+                            class="indent"
+                            name="foreground-list"
+                            disabled={ !self.config.number_fg_mode.is_enabled() }
+                            selected={ selected_fg_mode }
+                            on_change={ fg_mode_changed } >
 
-                        <RadioListItem<NumberForegroundMode>
-                            value={ NumberForegroundMode::Color }>
-                            { fg_color_controls }
-                        </RadioListItem<NumberForegroundMode>>
-                        <RadioListItem<NumberForegroundMode>
-                            value={ NumberForegroundMode::Bar }>
-                            { fg_bar_controls }
-                        </RadioListItem<NumberForegroundMode>>
-                    </RadioList<NumberForegroundMode>>
-                </div>
-                <div class="column-style-label">
-                    <label class="indent">{ "Background" }</label>
-                </div>
-                <div class="section">
-                    <input
-                        type="checkbox"
-                        oninput={ bg_enabled_oninput }
-                        checked={ !self.config.number_bg_mode.is_disabled() } />
-                    <RadioList<NumberBackgroundMode>
-                        class="indent"
-                        name="background-list"
-                        disabled={ self.config.number_bg_mode.is_disabled() }
-                        selected={ selected_bg_mode }
-                        on_change={ bg_mode_changed } >
+                            <RadioListItem<NumberForegroundMode>
+                                value={ NumberForegroundMode::Color }>
+                                { fg_color_controls }
+                            </RadioListItem<NumberForegroundMode>>
+                            <RadioListItem<NumberForegroundMode>
+                                value={ NumberForegroundMode::Bar }>
+                                { fg_bar_controls }
+                            </RadioListItem<NumberForegroundMode>>
+                        </RadioList<NumberForegroundMode>>
+                    </div>
+                    <div class="column-style-label">
+                        <label class="indent">{ "Background" }</label>
+                    </div>
+                    <div class="section">
+                        <input
+                            type="checkbox"
+                            oninput={ bg_enabled_oninput }
+                            checked={ !self.config.number_bg_mode.is_disabled() } />
+                        <RadioList<NumberBackgroundMode>
+                            class="indent"
+                            name="background-list"
+                            disabled={ self.config.number_bg_mode.is_disabled() }
+                            selected={ selected_bg_mode }
+                            on_change={ bg_mode_changed } >
 
-                        <RadioListItem<NumberBackgroundMode>
-                            value={ NumberBackgroundMode::Color }>
-                            { bg_color_controls }
-                        </RadioListItem<NumberBackgroundMode>>
-                        <RadioListItem<NumberBackgroundMode>
-                            value={ NumberBackgroundMode::Gradient }>
-                            { bg_gradient_controls }
-                        </RadioListItem<NumberBackgroundMode>>
-                        <RadioListItem<NumberBackgroundMode>
-                            value={ NumberBackgroundMode::Pulse }>
-                            { bg_pulse_controls }
-                        </RadioListItem<NumberBackgroundMode>>
-                    </RadioList<NumberBackgroundMode>>
+                            <RadioListItem<NumberBackgroundMode>
+                                value={ NumberBackgroundMode::Color }>
+                                { bg_color_controls }
+                            </RadioListItem<NumberBackgroundMode>>
+                            <RadioListItem<NumberBackgroundMode>
+                                value={ NumberBackgroundMode::Gradient }>
+                                { bg_gradient_controls }
+                            </RadioListItem<NumberBackgroundMode>>
+                            <RadioListItem<NumberBackgroundMode>
+                                value={ NumberBackgroundMode::Pulse }>
+                                { bg_pulse_controls }
+                            </RadioListItem<NumberBackgroundMode>>
+                        </RadioList<NumberBackgroundMode>>
+                    </div>
                 </div>
-            </div>
+            </StyleProvider>
         }
     }
 }

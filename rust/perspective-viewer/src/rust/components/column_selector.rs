@@ -9,6 +9,7 @@
 use super::active_column::*;
 use super::containers::scroll_panel::*;
 use super::inactive_column::*;
+use super::style::LocalStyle;
 use crate::config::*;
 use crate::custom_elements::expression_editor::ExpressionEditorElement;
 use crate::dragdrop::*;
@@ -326,6 +327,7 @@ impl Component for ColumnSelector {
             // let dragenter = dragenter_helper(dragleave_ref.clone());
 
             html_template! {
+                <LocalStyle href={ css!("column-selector") } />
                 <ScrollPanel<ActiveColumnProps>
                     id="active-columns"
                     class={ active_classes }

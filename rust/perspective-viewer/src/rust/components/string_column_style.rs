@@ -10,6 +10,7 @@ use super::color_selector::*;
 use super::containers::radio_list::RadioList;
 use super::containers::radio_list_item::RadioListItem;
 use super::modal::{ModalLink, SetModalLink};
+use super::style::{LocalStyle, StyleProvider};
 use crate::config::*;
 use crate::utils::WeakScope;
 use crate::*;
@@ -17,8 +18,6 @@ use wasm_bindgen::*;
 use web_sys::*;
 use yew::prelude::*;
 use yew::*;
-
-pub static CSS: &str = include_str!("../../../build/css/column-style.css");
 
 pub enum StringColumnStyleMsg {
     Reset(StringColumnStyleConfig),
@@ -180,71 +179,71 @@ impl Component for StringColumnStyle {
         let background_controls =
             self.color_select_row(ctx, &StringColorMode::Background, "Background");
 
-        html_template! {
-            <style>
-                { &CSS }
-            </style>
-            <div id="column-style-container">
-                <div class="column-style-label">
-                    <label class="indent">{ "Format" }</label>
-                </div>
-                <div class="section">
-                    <input
-                        type="checkbox"
-                        oninput={ format_enabled_oninput }
-                        checked={ self.config.format.is_some() } />
+        html! {
+            <StyleProvider>
+                <LocalStyle href={ css!("column-style") } />
+                <div id="column-style-container">
+                    <div class="column-style-label">
+                        <label class="indent">{ "Format" }</label>
+                    </div>
+                    <div class="section">
+                        <input
+                            type="checkbox"
+                            oninput={ format_enabled_oninput }
+                            checked={ self.config.format.is_some() } />
 
-                    <RadioList<FormatMode>
-                        class="indent"
-                        disabled={ self.config.format.is_none() }
-                        selected={ format_mode_selected }
-                        on_change={ format_mode_changed } >
+                        <RadioList<FormatMode>
+                            class="indent"
+                            disabled={ self.config.format.is_none() }
+                            selected={ format_mode_selected }
+                            on_change={ format_mode_changed } >
 
-                        <RadioListItem<FormatMode>
-                            value={ FormatMode::Bold }>
-                            <span>{ "Bold" }</span>
-                        </RadioListItem<FormatMode>>
-                        <RadioListItem<FormatMode>
-                            value={ FormatMode::Italics }>
-                            <span>{ "Italics" }</span>
-                        </RadioListItem<FormatMode>>
-                        <RadioListItem<FormatMode>
-                            value={ FormatMode::Link }>
-                            <span>{ "Link" }</span>
-                        </RadioListItem<FormatMode>>
-                    </RadioList<FormatMode>>
-                </div>
-                <div class="column-style-label">
-                    <label class="indent">{ "Color" }</label>
-                </div>
-                <div class="section">
-                    <input
-                        type="checkbox"
-                        oninput={ color_enabled_oninput }
-                        checked={ self.config.string_color_mode.is_some() } />
+                            <RadioListItem<FormatMode>
+                                value={ FormatMode::Bold }>
+                                <span>{ "Bold" }</span>
+                            </RadioListItem<FormatMode>>
+                            <RadioListItem<FormatMode>
+                                value={ FormatMode::Italics }>
+                                <span>{ "Italics" }</span>
+                            </RadioListItem<FormatMode>>
+                            <RadioListItem<FormatMode>
+                                value={ FormatMode::Link }>
+                                <span>{ "Link" }</span>
+                            </RadioListItem<FormatMode>>
+                        </RadioList<FormatMode>>
+                    </div>
+                    <div class="column-style-label">
+                        <label class="indent">{ "Color" }</label>
+                    </div>
+                    <div class="section">
+                        <input
+                            type="checkbox"
+                            oninput={ color_enabled_oninput }
+                            checked={ self.config.string_color_mode.is_some() } />
 
-                    <RadioList<StringColorMode>
-                        class="indent"
-                        name="color-radio-list"
-                        disabled={ self.config.string_color_mode.is_none() }
-                        selected={ selected_color_mode }
-                        on_change={ color_mode_changed } >
+                        <RadioList<StringColorMode>
+                            class="indent"
+                            name="color-radio-list"
+                            disabled={ self.config.string_color_mode.is_none() }
+                            selected={ selected_color_mode }
+                            on_change={ color_mode_changed } >
 
-                        <RadioListItem<StringColorMode>
-                            value={ StringColorMode::Foreground }>
-                            { foreground_controls }
-                        </RadioListItem<StringColorMode>>
-                        <RadioListItem<StringColorMode>
-                            value={ StringColorMode::Background }>
-                            { background_controls }
-                        </RadioListItem<StringColorMode>>
-                        <RadioListItem<StringColorMode>
-                            value={ StringColorMode::Series }>
-                            { series_controls }
-                        </RadioListItem<StringColorMode>>
-                    </RadioList<StringColorMode>>
+                            <RadioListItem<StringColorMode>
+                                value={ StringColorMode::Foreground }>
+                                { foreground_controls }
+                            </RadioListItem<StringColorMode>>
+                            <RadioListItem<StringColorMode>
+                                value={ StringColorMode::Background }>
+                                { background_controls }
+                            </RadioListItem<StringColorMode>>
+                            <RadioListItem<StringColorMode>
+                                value={ StringColorMode::Series }>
+                                { series_controls }
+                            </RadioListItem<StringColorMode>>
+                        </RadioList<StringColorMode>>
+                    </div>
                 </div>
-            </div>
+            </StyleProvider>
         }
     }
 }

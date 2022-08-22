@@ -17,6 +17,7 @@ use crate::*;
 
 use super::containers::dragdrop_list::*;
 use super::containers::select::*;
+use super::style::LocalStyle;
 
 use chrono::{NaiveDate, TimeZone, Utc};
 use wasm_bindgen::JsCast;
@@ -231,6 +232,7 @@ impl Component for FilterItem {
     type Properties = FilterItemProps;
 
     fn create(ctx: &Context<Self>) -> Self {
+        // css!(ctx, "filter-item");
         let input = ctx
             .props()
             .get_filter_input()
@@ -460,6 +462,7 @@ impl Component for FilterItem {
             .collect::<Vec<_>>();
 
         html_template! {
+            <LocalStyle href={ css!("filter-item") } />
             <span
                 draggable="true"
                 ref={ dragref }
