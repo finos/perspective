@@ -52,7 +52,7 @@ def get_version(file, name="__version__"):
 version = get_version(os.path.join(here, "perspective", "core", "_version.py"))
 
 requires = [
-    "ipywidgets>=7.5.1",
+    "ipywidgets>=7.5.1,<8",
     "future>=0.16.0",
     "numpy>=1.13.1",
     "pandas>=0.22.0",
