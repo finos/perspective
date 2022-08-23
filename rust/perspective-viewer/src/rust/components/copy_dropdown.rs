@@ -8,10 +8,10 @@
 
 use super::containers::dropdown_menu::*;
 use super::modal::*;
+use super::style::StyleProvider;
 use crate::model::*;
 use crate::renderer::*;
 use crate::utils::*;
-use crate::*;
 
 use js_intern::*;
 use std::rc::Rc;
@@ -46,11 +46,13 @@ impl Component for CopyDropDownMenu {
     fn view(&self, ctx: &Context<Self>) -> yew::virtual_dom::VNode {
         let plugin = ctx.props().renderer.get_active_plugin().unwrap();
         let has_render = js_sys::Reflect::has(&plugin, js_intern!("render")).unwrap();
-        html_template! {
-            <DropDownMenu<ExportMethod>
-                values={ Rc::new(get_menu_items(has_render)) }
-                callback={ ctx.props().callback.clone() }>
-            </DropDownMenu<ExportMethod>>
+        html! {
+            <StyleProvider>
+                <DropDownMenu<ExportMethod>
+                    values={ Rc::new(get_menu_items(has_render)) }
+                    callback={ &ctx.props().callback }>
+                </DropDownMenu<ExportMethod>>
+            </StyleProvider>
         }
     }
 

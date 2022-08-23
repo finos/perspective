@@ -7,13 +7,12 @@
 // file.
 
 use super::select::SelectItem;
+use crate::components::style::LocalStyle;
 use crate::*;
 use std::marker::PhantomData;
 use std::rc::Rc;
 use web_sys::*;
 use yew::prelude::*;
-
-pub static CSS: &str = include_str!("../../../../build/css/dropdown-menu.css");
 
 pub type DropDownMenuItem<T> = SelectItem<T>;
 
@@ -99,9 +98,7 @@ where
         };
 
         html_template! {
-            <style>
-                { &CSS }
-            </style>
+            <LocalStyle href={ css!("containers/dropdown-menu") } />
             { body }
         }
     }

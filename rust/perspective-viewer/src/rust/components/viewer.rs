@@ -13,6 +13,7 @@ use super::font_loader::{FontLoader, FontLoaderProps, FontLoaderStatus};
 use super::plugin_selector::PluginSelector;
 use super::render_warning::RenderWarning;
 use super::status_bar::StatusBar;
+use super::style::{LocalStyle, StyleProvider};
 
 use crate::config::*;
 use crate::dragdrop::*;
@@ -27,8 +28,6 @@ use futures::channel::oneshot::*;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use yew::prelude::*;
-
-pub static CSS: &str = include_str!("../../../build/css/viewer.css");
 
 #[derive(Properties)]
 pub struct PerspectiveViewerProps {
@@ -204,65 +203,66 @@ impl Component for PerspectiveViewer {
     fn view(&self, ctx: &Context<Self>) -> Html {
         let settings = ctx.link().callback(|_| Msg::ToggleSettingsInit(None, None));
         html_template! {
-            <style>{ &CSS }</style>
-
-            if self.settings_open {
-                <SplitPanel
-                    id="app_panel"
-                    on_reset={ self.on_dimensions_reset.callback() }
-                    on_resize_finished={ ctx.props().render_callback() }>
-                    <div id="side_panel" class="column noselect">
-                        <PluginSelector
-                            session={ ctx.props().session.clone() }
-                            renderer={ ctx.props().renderer.clone() }>
-                        </PluginSelector>
-                        <ColumnSelector
-                            dragdrop={ ctx.props().dragdrop.clone() }
-                            renderer={ ctx.props().renderer.clone() }
-                            session={ ctx.props().session.clone() }
-                            on_resize={ self.on_resize.clone() }
-                            on_dimensions_reset={ self.on_dimensions_reset.clone() }>
-                        </ColumnSelector>
-                    </div>
-                    <div id="main_column">
-                        <ConfigSelector
-                            dragdrop={ ctx.props().dragdrop.clone() }
-                            session={ ctx.props().session.clone() }
-                            renderer={ ctx.props().renderer.clone() }>
-                        </ConfigSelector>
-                        <div id="main_panel_container">
-                            <RenderWarning
-                                dimensions={ self.dimensions }
-                                session={ ctx.props().session.clone() }
-                                renderer={ ctx.props().renderer.clone() }>
-                            </RenderWarning>
-                            <slot></slot>
+            <StyleProvider>
+                <LocalStyle href={ css!("viewer") } />
+                if self.settings_open {
+                    <SplitPanel
+                        id="app_panel"
+                        on_reset={ self.on_dimensions_reset.callback() }
+                        on_resize_finished={ ctx.props().render_callback() }>
+                        <div id="side_panel" class="column noselect">
+                            <PluginSelector
+                                session={ &ctx.props().session }
+                                renderer={ &ctx.props().renderer }>
+                            </PluginSelector>
+                            <ColumnSelector
+                                dragdrop={ &ctx.props().dragdrop }
+                                renderer={ &ctx.props().renderer }
+                                session={ &ctx.props().session }
+                                on_resize={ &self.on_resize }
+                                on_dimensions_reset={ &self.on_dimensions_reset }>
+                            </ColumnSelector>
                         </div>
+                        <div id="main_column">
+                            <ConfigSelector
+                                dragdrop={ &ctx.props().dragdrop }
+                                session={ &ctx.props().session }
+                                renderer={ &ctx.props().renderer }>
+                            </ConfigSelector>
+                            <div id="main_panel_container">
+                                <RenderWarning
+                                    dimensions={ self.dimensions }
+                                    session={ &ctx.props().session }
+                                    renderer={ &ctx.props().renderer }>
+                                </RenderWarning>
+                                <slot></slot>
+                            </div>
+                        </div>
+                    </SplitPanel>
+                    <StatusBar
+                        id="status_bar"
+                        session={ &ctx.props().session }
+                        renderer={ &ctx.props().renderer }
+                        theme={ &ctx.props().theme }
+                        on_reset={ ctx.link().callback(|all| Msg::Reset(all, None)) }>
+                    </StatusBar>
+                } else {
+                    <RenderWarning
+                        dimensions={ self.dimensions }
+                        session={ &ctx.props().session }
+                        renderer={ &ctx.props().renderer }>
+                    </RenderWarning>
+                    <div id="main_panel_container" class="settings-closed">
+                        <slot></slot>
                     </div>
-                </SplitPanel>
-                <StatusBar
-                    id="status_bar"
-                    session={ ctx.props().session.clone() }
-                    renderer={ ctx.props().renderer.clone() }
-                    theme={ ctx.props().theme.clone() }
-                    on_reset={ ctx.link().callback(|all| Msg::Reset(all, None)) }>
-                </StatusBar>
-            } else {
-                <RenderWarning
-                    dimensions={ self.dimensions }
-                    session={ ctx.props().session.clone() }
-                    renderer={ ctx.props().renderer.clone() }>
-                </RenderWarning>
-                <div id="main_panel_container" class="settings-closed">
-                    <slot></slot>
-                </div>
-            }
+                }
 
-            <div
-                id="settings_button"
-                class="noselect button"
-                onmousedown={ settings }>
-            </div>
+                <div
+                    id="settings_button"
+                    class="noselect button"
+                    onmousedown={ settings }>
+                </div>
+            </StyleProvider>
             <FontLoader ..self.fonts.clone()></FontLoader>
         }
     }

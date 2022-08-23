@@ -138,7 +138,7 @@ where
             <select
                 id={ ctx.props().id }
                 class={ class }
-                ref={ self.select_ref.clone() }
+                ref={ &self.select_ref }
                 onchange={callback}>
                 {
                     for ctx.props().values.iter().map(|value| match value {

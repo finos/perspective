@@ -1,5 +1,4 @@
 {
-    "parser": "babel-eslint",
     "plugins": ["markdown", "prettier"],
     "env": {
         "browser": true,
@@ -10,7 +9,7 @@
         "jest": true
     },
     "parserOptions": {
-        "ecmaVersion": 2017,
+        "ecmaVersion": 2020,
         "ecmaFeatures": {},
         "sourceType": "module",
         "experimentalObjectRestSpread": true

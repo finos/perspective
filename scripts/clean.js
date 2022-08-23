@@ -39,7 +39,8 @@ try {
             ...glob.sync("python/perspective/**/*.pyc"),
             ...glob.sync("python/perspective/**/__pycache__")
         );
-        return;
+
+        process.exit(0);
     }
 
     if (!process.env.PSP_PROJECT || args.indexOf("--deps") > -1) {

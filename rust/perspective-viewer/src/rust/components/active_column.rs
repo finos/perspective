@@ -199,7 +199,7 @@ impl Component for ActiveColumn {
                         class="column-selector-column"
                         data-label={ label }
                         data-index={ ctx.props().idx.to_string() }
-                        ondragenter={ ctx.props().ondragenter.clone() }>
+                        ondragenter={ &ctx.props().ondragenter }>
 
                         <span class="is_column_active inactive">
                         </span>
@@ -253,7 +253,7 @@ impl Component for ActiveColumn {
                         class="column-selector-column"
                         data-label={ label }
                         data-index={ ctx.props().idx.to_string() }
-                        ondragenter={ ctx.props().ondragenter.clone() }>
+                        ondragenter={ &ctx.props().ondragenter }>
 
                         <span
                             class={ class }
@@ -261,10 +261,10 @@ impl Component for ActiveColumn {
                         </span>
                         <div
                             class={ Itertools::intersperse(classes.iter().cloned(), " ").collect::<String>() }
-                            ref={ self.add_expression_ref.clone() }
+                            ref={ &self.add_expression_ref }
                             draggable="true"
                             ondragstart={ dragstart }
-                            ondragend={ ctx.props().ondragend.clone() }>
+                            ondragend={ &ctx.props().ondragend }>
 
                             <span class="column-selector-column-title">
                                 <span
@@ -277,11 +277,11 @@ impl Component for ActiveColumn {
 
                                 if is_expression {
                                     <ExpressionToolbar
-                                        session={ ctx.props().session.clone() }
-                                        renderer={ ctx.props().renderer.clone() }
-                                        dragdrop={ ctx.props().dragdrop.clone() }
+                                        session={ &ctx.props().session }
+                                        renderer={ &ctx.props().renderer }
+                                        dragdrop={ &ctx.props().dragdrop }
                                         name={ name.clone() }
-                                        add_expression_ref={ self.add_expression_ref.clone() }>
+                                        add_expression_ref={ &self.add_expression_ref }>
                                     </ExpressionToolbar>
                                 }
 
@@ -299,8 +299,8 @@ impl Component for ActiveColumn {
                                         <AggregateSelector
                                             column={ name.clone() }
                                             aggregate={ aggregate }
-                                            renderer={ ctx.props().renderer.clone() }
-                                            session={ ctx.props().session.clone() }>
+                                            renderer={ &ctx.props().renderer }
+                                            session={ &ctx.props().session }>
                                         </AggregateSelector>
                                     }
                                 } else {

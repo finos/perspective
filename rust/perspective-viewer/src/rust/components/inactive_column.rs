@@ -170,9 +170,9 @@ impl Component for InactiveColumn {
                 <div
                     class="column_selector_draggable column-selector-column-title"
                     draggable="true"
-                    ref={ self.add_expression_ref.clone() }
+                    ref={ &self.add_expression_ref }
                     ondragstart={ dragstart }
-                    ondragend={ ctx.props().ondragend.clone() }>
+                    ondragend={ &ctx.props().ondragend }>
 
                     <span
                         ref={ noderef.clone() }
@@ -184,11 +184,11 @@ impl Component for InactiveColumn {
 
                     if is_expression {
                         <ExpressionToolbar
-                            session={ ctx.props().session.clone() }
-                            renderer={ ctx.props().renderer.clone() }
-                            dragdrop={ ctx.props().dragdrop.clone() }
+                            session={ &ctx.props().session }
+                            renderer={ &ctx.props().renderer }
+                            dragdrop={ &ctx.props().dragdrop }
                             name={ ctx.props().name.clone() }
-                            add_expression_ref={ self.add_expression_ref.clone() }>
+                            add_expression_ref={ &self.add_expression_ref }>
 
                         </ExpressionToolbar>
                     }

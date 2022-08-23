@@ -24,7 +24,6 @@ use crate::js::perspective::*;
 use crate::js::plugin::*;
 use crate::utils::*;
 use crate::*;
-
 use js_intern::*;
 use std::cell::{Ref, RefCell};
 use std::collections::HashSet;
@@ -33,6 +32,7 @@ use std::ops::Deref;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
+use yew::html::ImplicitClone;
 use yew::prelude::*;
 
 /// The `Session` struct is the principal interface to the Perspective engine,
@@ -40,6 +40,8 @@ use yew::prelude::*;
 /// including the `ViewConfig`.
 #[derive(Clone, Default)]
 pub struct Session(Rc<SessionHandle>);
+
+impl ImplicitClone for Session {}
 
 /// Immutable state for `Session`.
 #[derive(Default)]

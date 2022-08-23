@@ -8,6 +8,8 @@
 
 use super::containers::split_panel::*;
 use super::modal::*;
+use super::style::LocalStyle;
+use super::style::StyleProvider;
 use crate::exprtk::*;
 use crate::js::monaco::*;
 use crate::js::perspective::*;
@@ -25,7 +27,6 @@ use web_sys::*;
 use yew::html::Scope;
 use yew::prelude::*;
 
-static CSS: &str = include_str!("../../../build/css/expression-editor.css");
 
 pub enum ExpressionEditorMsg {
     SetTheme(String),
@@ -178,42 +179,42 @@ impl Component for ExpressionEditor {
             .into();
 
         html_template! {
-            <style>
-                { &CSS }
-            </style>
-            <SplitPanel
-                id="expression-editor-split-panel"
-                on_resize={ resize_horiz }
-                on_reset={ reset_size.clone() }>
+            <StyleProvider>
+                <LocalStyle href={ css!("expression-editor") } />
                 <SplitPanel
-                    orientation={ Orientation::Vertical }
-                    reverse={ reverse_vertical }
-                    on_resize={ resize_vert }
-                    on_reset={ reset_size }>
+                    id="expression-editor-split-panel"
+                    on_resize={ resize_horiz }
+                    on_reset={ reset_size.clone() }>
+                    <SplitPanel
+                        orientation={ Orientation::Vertical }
+                        reverse={ reverse_vertical }
+                        on_resize={ resize_vert }
+                        on_reset={ reset_size }>
 
-                    <div id="editor-container">
-                        <div id="monaco-container" ref={ self.state.container.clone() } style=""></div>
-                        <div id="psp-expression-editor-actions">
-                            <button
-                                id="psp-expression-editor-button-reset"
-                                class="psp-expression-editor__button"
-                                onmousedown={ reset }
-                                disabled={ !self.edit_enabled }>
-                                { if self.edit_enabled { "Reset" } else { "" } }
-                            </button>
-                            <button
-                                id="psp-expression-editor-button-save"
-                                class="psp-expression-editor__button"
-                                onmousedown={ save }
-                                disabled={ !self.save_enabled }>
-                                { if self.save_enabled { "Save" } else { "" } }
-                            </button>
+                        <div id="editor-container">
+                            <div id="monaco-container" ref={ self.state.container.clone() } style=""></div>
+                            <div id="psp-expression-editor-actions">
+                                <button
+                                    id="psp-expression-editor-button-reset"
+                                    class="psp-expression-editor__button"
+                                    onmousedown={ reset }
+                                    disabled={ !self.edit_enabled }>
+                                    { if self.edit_enabled { "Reset" } else { "" } }
+                                </button>
+                                <button
+                                    id="psp-expression-editor-button-save"
+                                    class="psp-expression-editor__button"
+                                    onmousedown={ save }
+                                    disabled={ !self.save_enabled }>
+                                    { if self.save_enabled { "Save" } else { "" } }
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                        <div></div>
+                    </SplitPanel>
                     <div></div>
                 </SplitPanel>
-                <div></div>
-            </SplitPanel>
+            </StyleProvider>
         }
     }
 }

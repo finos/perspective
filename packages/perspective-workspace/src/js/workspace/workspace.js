@@ -350,11 +350,11 @@ export class PerspectiveWorkspace extends SplitPanel {
         if (master || this.mode === MODE.LINKED) {
             widget.viewer.addEventListener(
                 "perspective-select",
-                this.onPerspectiveSelect
+                this.onPerspectiveSelect.bind(this)
             );
             widget.viewer.addEventListener(
                 "perspective-click",
-                this.onPerspectiveSelect
+                this.onPerspectiveSelect.bind(this)
             );
             // TODO remove event listener
             this.masterPanel.addWidget(widget);
@@ -534,7 +534,7 @@ export class PerspectiveWorkspace extends SplitPanel {
         await viewer.restore({filter: newFilters});
     }
 
-    onPerspectiveSelect = async (event) => {
+    async onPerspectiveSelect(event) {
         const config = await event.target.save();
         // perspective-select is already handled for hypergrid
 
@@ -562,7 +562,7 @@ export class PerspectiveWorkspace extends SplitPanel {
                 this._filterViewer(widget.viewer, filters, candidates)
             );
         }
-    };
+    }
 
     async makeMaster(widget) {
         widget.master = true;
@@ -582,11 +582,11 @@ export class PerspectiveWorkspace extends SplitPanel {
         widget.viewer.restyleElement();
         widget.viewer.addEventListener(
             "perspective-click",
-            this.onPerspectiveSelect
+            this.onPerspectiveSelect.bind(this)
         );
         widget.viewer.addEventListener(
             "perspective-select",
-            this.onPerspectiveSelect
+            this.onPerspectiveSelect.bind(this)
         );
     }
 
@@ -605,11 +605,11 @@ export class PerspectiveWorkspace extends SplitPanel {
         widget.viewer.restyleElement();
         widget.viewer.removeEventListener(
             "perspective-click",
-            this.onPerspectiveSelect
+            this.onPerspectiveSelect.bind(this)
         );
         widget.viewer.removeEventListener(
             "perspective-select",
-            this.onPerspectiveSelect
+            this.onPerspectiveSelect.bind(this)
         );
     }
 
@@ -971,7 +971,7 @@ export class PerspectiveWorkspace extends SplitPanel {
         widget.viewer.addEventListener("perspective-config-update", updated);
         widget.viewer.addEventListener(
             "perspective-plugin-update",
-            this.workspaceUpdated
+            this.workspaceUpdated.bind(this)
         );
 
         widget.title.changed.connect(updated);
@@ -987,7 +987,7 @@ export class PerspectiveWorkspace extends SplitPanel {
             );
             widget.viewer.removeEventListener(
                 "perspective-plugin-update",
-                this.workspaceUpdated
+                this.workspaceUpdated.bind(this)
             );
             widget.title.changed.disconnect(updated);
         });
@@ -1021,7 +1021,7 @@ export class PerspectiveWorkspace extends SplitPanel {
         }
     }
 
-    workspaceUpdated = () => {
+    async workspaceUpdated() {
         if (!this._save) {
             this._save = debounce(
                 () =>
@@ -1031,5 +1031,5 @@ export class PerspectiveWorkspace extends SplitPanel {
             );
         }
         this._save();
-    };
+    }
 }

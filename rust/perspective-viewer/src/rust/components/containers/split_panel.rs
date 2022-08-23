@@ -6,6 +6,7 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use crate::components::style::LocalStyle;
 use crate::utils::*;
 use crate::*;
 
@@ -319,6 +320,7 @@ impl Component for SplitPanel {
 
         html! {
             <div id={ ctx.props().id.clone() } class={ classes }>
+                <LocalStyle href={ css!("containers/split-panel") } />
                 <SplitPanelChild
                     style={ self.styles[0].clone() }
                     ref_={ self.refs[0].clone() }>

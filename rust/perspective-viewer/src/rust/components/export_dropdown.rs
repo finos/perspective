@@ -9,6 +9,7 @@
 use super::containers::dropdown_menu::*;
 use super::modal::ModalLink;
 use super::modal::SetModalLink;
+use super::style::StyleProvider;
 use crate::model::*;
 use crate::renderer::*;
 use crate::utils::*;
@@ -87,17 +88,19 @@ impl Component for ExportDropDownMenu {
         let callback = ctx.link().callback(|_| ExportDropDownMenuMsg::TitleChange);
         let plugin = ctx.props().renderer.get_active_plugin().unwrap();
         let has_render = js_sys::Reflect::has(&plugin, js_intern!("render")).unwrap();
-        html_template! {
-            <span class="dropdown-group-label">{ "Save as" }</span>
-            <input
-                class={ if self.invalid { "invalid" } else { "" }}
-                oninput={ callback }
-                ref={ self.input_ref.clone() }
-                value={ self.title.to_owned() } />
-            <DropDownMenu<ExportFile>
-                values={ Rc::new(get_menu_items(&self.title, has_render)) }
-                callback={ ctx.props().callback.clone() }>
-            </DropDownMenu<ExportFile>>
+        html! {
+            <StyleProvider>
+                <span class="dropdown-group-label">{ "Save as" }</span>
+                <input
+                    class={ if self.invalid { "invalid" } else { "" }}
+                    oninput={ callback }
+                    ref={ &self.input_ref }
+                    value={ self.title.to_owned() } />
+                <DropDownMenu<ExportFile>
+                    values={ Rc::new(get_menu_items(&self.title, has_render)) }
+                    callback={ &ctx.props().callback }>
+                </DropDownMenu<ExportFile>>
+            </StyleProvider>
         }
     }
 

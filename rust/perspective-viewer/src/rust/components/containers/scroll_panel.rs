@@ -9,6 +9,7 @@
 // Forked from https://github.com/AircastDev/yew-virtual-scroller (Apache 2.0)
 // Adds support for Yew 0.19, auto-width and a simplified message structure.
 
+use crate::components::style::LocalStyle;
 use crate::utils::*;
 use crate::*;
 
@@ -40,6 +41,9 @@ where
 {
     pub items: Rc<Vec<T>>,
     pub row_height: f64,
+
+    #[prop_or_default]
+    pub viewport_ref: Option<NodeRef>,
 
     // Named rows are not the same size as the other columns.
     #[prop_or_default]
@@ -102,6 +106,19 @@ pub enum ScrollPanelMsg {
     ResetAutoWidth,
 }
 
+impl<T: Into<Html> + Clone + PartialEq> ScrollPanel<T> {
+    fn viewport<'a, 'b: 'a, 'c: 'a>(&'b self, ctx: &'c Context<Self>) -> &'a NodeRef {
+        ctx.props()
+            .viewport_ref
+            .as_ref()
+            .unwrap_or(&self.viewport_ref)
+    }
+
+    fn viewport_elem(&self, ctx: &Context<Self>) -> Element {
+        self.viewport(ctx).cast::<Element>().unwrap()
+    }
+}
+
 struct ContentWindow {
     start_y: f64,
     visible_range: Range<usize>,
@@ -155,7 +172,7 @@ where
                 false
             }
             ScrollPanelMsg::UpdateViewportDimensions => {
-                let viewport = self.viewport_ref.cast::<Element>().unwrap();
+                let viewport = self.viewport_elem(ctx);
                 self.viewport_height = viewport.client_height() as f64;
                 self.viewport_width = {
                     let new_width = viewport.client_width() as f64;
@@ -165,7 +182,7 @@ where
                 false
             }
             ScrollPanelMsg::CalculateWindowContent => {
-                let viewport = self.viewport_ref.cast::<Element>().unwrap();
+                let viewport = self.viewport_elem(ctx);
                 let named_col_section_height =
                     ctx.props().named_row_count as f64 * ctx.props().named_row_height;
 
@@ -238,7 +255,7 @@ where
         };
 
         let width_style = format!("width:{}px", max!(self.viewport_width, 0.0));
-        if !windowed_items.is_empty() {
+        let items = if !windowed_items.is_empty() {
             let items = windowed_items.into_iter().map(|item| item.into());
             let onscroll = ctx.link().batch_callback(|_| {
                 vec![
@@ -249,7 +266,7 @@ where
 
             html! {
                 <div
-                    ref={ self.viewport_ref.clone() }
+                    ref={ self.viewport(ctx) }
                     id={ ctx.props().id }
                     onscroll={ onscroll }
                     ondragover={ &ctx.props().dragover }
@@ -270,14 +287,20 @@ where
         } else {
             html! {
                 <div
-                    ref={ self.viewport_ref.clone() }
+                    ref={ self.viewport(ctx) }
                     id={ ctx.props().id }
                     class={ ctx.props().class.clone() }>
+
 
                     <div style={ content_style }>
                     </div>
                 </div>
             }
+        };
+
+        html_template! {
+            <LocalStyle href={ css!("containers/scroll-panel") } />
+            { items }
         }
     }
 

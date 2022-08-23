@@ -7,13 +7,13 @@
 // file.
 
 use crate::utils::*;
-
 use async_std::sync::Mutex;
 use std::ops::Deref;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::*;
+use yew::html::ImplicitClone;
 
 /// The available themes as detected in the browser environment or set
 /// explicitly when CORS prevents detection.  Detection is expensive and
@@ -28,6 +28,8 @@ impl Deref for Theme {
         &self.0
     }
 }
+
+impl ImplicitClone for Theme {}
 
 pub struct ThemeData {
     viewer_elem: HtmlElement,

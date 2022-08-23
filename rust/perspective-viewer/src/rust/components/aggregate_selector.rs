@@ -7,6 +7,7 @@
 // file.
 
 use super::containers::select::*;
+use super::style::LocalStyle;
 use crate::config::*;
 use crate::model::*;
 use crate::renderer::*;
@@ -84,8 +85,8 @@ impl Component for AggregateSelector {
             .unwrap();
 
         let values = self.aggregates.clone();
-
-        html! {
+        html_template! {
+            <LocalStyle href={ css!("aggregate-selector") } />
             <div class="aggregate-selector-wrapper">
                 <Select<Aggregate>
                     class={ "aggregate-selector" }

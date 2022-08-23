@@ -4,6 +4,7 @@ const fs = require("fs");
 const fflate = require("fflate");
 const {build} = require("@finos/perspective-esbuild-plugin/build");
 const {PerspectiveEsbuildPlugin} = require("@finos/perspective-esbuild-plugin");
+const glob = require("tiny-glob");
 const {
     wasm_opt,
     wasm_bindgen,
@@ -26,15 +27,10 @@ const {
 const IS_DEBUG =
     !!process.env.PSP_DEBUG || process.argv.indexOf("--debug") >= 0;
 
-const PREBUILD = [
+const PREBUILD = async () => [
     {
-        entryPoints: [
-            "viewer",
-            "column-style",
-            "dropdown-menu",
-            "filter-dropdown",
-            "expression-editor",
-        ].map((x) => `src/less/${x}.less`),
+        entryPoints: await glob("src/less/**/*.less"),
+        entryNames: "[dir]/[name]",
         metafile: false,
         sourcemap: false,
         plugins: [IgnoreFontsPlugin(), lessLoader()],
@@ -136,7 +132,7 @@ async function compile_rust() {
 
     await wasm_bindgen("perspective_viewer", {
         debug: IS_DEBUG,
-        version: "0.2.80",
+        version: "0.2.82",
         targetdir: "build",
     });
 
@@ -151,14 +147,15 @@ async function compile_rust() {
 }
 
 async function build_all() {
-    await Promise.all(PREBUILD.map(build)).catch(() => process.exit(1));
+    await Promise.all((await PREBUILD()).map(build)).catch(() =>
+        process.exit(1)
+    );
 
     // Rust
     await compile_rust();
 
     // JavaScript
     execSync("yarn tsc --project tsconfig.json", INHERIT);
-
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
     await Promise.all(POSTBUILD.map(build)).catch(() => process.exit(1));
 

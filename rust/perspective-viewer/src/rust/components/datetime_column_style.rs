@@ -11,6 +11,7 @@ use super::containers::radio_list::RadioList;
 use super::containers::radio_list_item::RadioListItem;
 use super::containers::select::*;
 use super::modal::{ModalLink, SetModalLink};
+use super::style::{LocalStyle, StyleProvider};
 use crate::config::*;
 use crate::utils::WeakScope;
 use crate::*;
@@ -40,8 +41,6 @@ lazy_static! {
     .as_string()
     .unwrap();
 }
-
-pub static CSS: &str = include_str!("../../../build/css/column-style.css");
 
 pub enum DatetimeColumnStyleMsg {
     Reset(DatetimeColumnStyleConfig),
@@ -230,93 +229,93 @@ impl Component for DatetimeColumnStyle {
 
         // TODO this checkbox should be disabled if the timezone is local but
         // can't set `checked=false`.
-        html_template! {
-            <style>
-                { &CSS }
-            </style>
-            <div id="column-style-container">
+        html! {
+            <StyleProvider>
+                <LocalStyle href={ css!("column-style") } />
+                <div id="column-style-container">
 
-                if ctx.props().enable_time_config {
+                    if ctx.props().enable_time_config {
+                        <div class="column-style-label">
+                            <label class="indent">{ "Timezone" }</label>
+                        </div>
+                        <div class="section">
+                            <input
+                                type="checkbox"
+                                onchange={ on_time_zone_reset }
+                                checked={ self.config.time_zone.is_some() } />
+
+                            <Select<String>
+                                wrapper_class="indent"
+                                values={ ALL_TIMEZONES.iter().cloned().collect::<Vec<_>>() }
+                                selected={ self.config.time_zone.as_ref().unwrap_or(&*USER_TIMEZONE).clone() }
+                                on_select={ ctx.link().callback(DatetimeColumnStyleMsg::TimezoneChanged) }>
+                            </Select<String>>
+                        </div>
+
+                        <div class="column-style-label">
+                            <label class="indent">{ "Time Style" }</label>
+                        </div>
+                        <div class="section">
+                            <input
+                                type="checkbox"
+                                onchange={ on_time_reset }
+                                checked={ !self.config.time_style.is_medium() } />
+
+                            <Select<DatetimeFormat>
+                                wrapper_class="indent"
+                                selected={ self.config.time_style }
+                                on_select={ ctx.link().callback(DatetimeColumnStyleMsg::TimeStyleChanged) }
+                                values={ DatetimeFormat::values().iter().map(|x| SelectItem::Option(*x)).collect::<Vec<_>>() } >
+                            </Select<DatetimeFormat>>
+                        </div>
+                    }
+
+
                     <div class="column-style-label">
-                        <label class="indent">{ "Timezone" }</label>
+                        <label class="indent">{ "Date Style" }</label>
                     </div>
                     <div class="section">
                         <input
                             type="checkbox"
-                            onchange={ on_time_zone_reset }
-                            checked={ self.config.time_zone.is_some() } />
-
-                        <Select<String>
-                            wrapper_class="indent"
-                            values={ ALL_TIMEZONES.iter().cloned().collect::<Vec<_>>() }
-                            selected={ self.config.time_zone.as_ref().unwrap_or(&*USER_TIMEZONE).clone() }
-                            on_select={ ctx.link().callback(DatetimeColumnStyleMsg::TimezoneChanged) }>
-                        </Select<String>>
-                    </div>
-
-                    <div class="column-style-label">
-                        <label class="indent">{ "Time Style" }</label>
-                    </div>
-                    <div class="section">
-                        <input
-                            type="checkbox"
-                            onchange={ on_time_reset }
-                            checked={ !self.config.time_style.is_medium() } />
+                            onchange={ on_date_reset }
+                            checked={ !self.config.date_style.is_short() } />
 
                         <Select<DatetimeFormat>
                             wrapper_class="indent"
-                            selected={ self.config.time_style }
-                            on_select={ ctx.link().callback(DatetimeColumnStyleMsg::TimeStyleChanged) }
+                            selected={ self.config.date_style }
+                            on_select={ ctx.link().callback(DatetimeColumnStyleMsg::DateStyleChanged) }
                             values={ DatetimeFormat::values().iter().map(|x| SelectItem::Option(*x)).collect::<Vec<_>>() } >
                         </Select<DatetimeFormat>>
                     </div>
-                }
 
+                    <div class="column-style-label">
+                        <label class="indent">{ "Color" }</label>
+                    </div>
+                    <div class="section">
+                        <input
+                            type="checkbox"
+                            oninput={ color_enabled_oninput }
+                            checked={ self.config.datetime_color_mode.is_some() } />
 
-                <div class="column-style-label">
-                    <label class="indent">{ "Date Style" }</label>
+                        <RadioList<DatetimeColorMode>
+                            class="indent"
+                            name="color-radio-list"
+                            disabled={ self.config.datetime_color_mode.is_none() }
+                            selected={ selected_color_mode }
+                            on_change={ color_mode_changed } >
+
+                            <RadioListItem<DatetimeColorMode>
+                                value={ DatetimeColorMode::Foreground }>
+                                { foreground_controls }
+                            </RadioListItem<DatetimeColorMode>>
+                            <RadioListItem<DatetimeColorMode>
+                                value={ DatetimeColorMode::Background }>
+                                { background_controls }
+                            </RadioListItem<DatetimeColorMode>>
+                        </RadioList<DatetimeColorMode>>
+                    </div>
                 </div>
-                <div class="section">
-                    <input
-                        type="checkbox"
-                        onchange={ on_date_reset }
-                        checked={ !self.config.date_style.is_short() } />
-
-                    <Select<DatetimeFormat>
-                        wrapper_class="indent"
-                        selected={ self.config.date_style }
-                        on_select={ ctx.link().callback(DatetimeColumnStyleMsg::DateStyleChanged) }
-                        values={ DatetimeFormat::values().iter().map(|x| SelectItem::Option(*x)).collect::<Vec<_>>() } >
-                    </Select<DatetimeFormat>>
-                </div>
-
-                <div class="column-style-label">
-                    <label class="indent">{ "Color" }</label>
-                </div>
-                <div class="section">
-                    <input
-                        type="checkbox"
-                        oninput={ color_enabled_oninput }
-                        checked={ self.config.datetime_color_mode.is_some() } />
-
-                    <RadioList<DatetimeColorMode>
-                        class="indent"
-                        name="color-radio-list"
-                        disabled={ self.config.datetime_color_mode.is_none() }
-                        selected={ selected_color_mode }
-                        on_change={ color_mode_changed } >
-
-                        <RadioListItem<DatetimeColorMode>
-                            value={ DatetimeColorMode::Foreground }>
-                            { foreground_controls }
-                        </RadioListItem<DatetimeColorMode>>
-                        <RadioListItem<DatetimeColorMode>
-                            value={ DatetimeColorMode::Background }>
-                            { background_controls }
-                        </RadioListItem<DatetimeColorMode>>
-                    </RadioList<DatetimeColorMode>>
-                </div>
-            </div>
+            </StyleProvider>
         }
     }
 }

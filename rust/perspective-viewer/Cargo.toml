@@ -1,12 +1,23 @@
 [package]
-name = "perspective-viewer"
-version = "1.0.8"
+name = "perspective"
+version = "1.6.5"
 authors = ["Andrew Stein <steinlink@gmail.com>"]
 edition = "2021"
-description = "A frontend for Perspective"
+description = "A data visualization and analytics component, especially well-suited for large and/or streaming datasets."
 repository = "https://github.com/finos/perspective"
+license = "Apache-2.0"
+homepage = "https://perspective.finos.org"
+keywords = ["experimental"]
+include = [
+    "build.rs",
+    "src/**/*",
+    "build/css/**/*",
+    "Cargo.toml",
+    "package.json",
+]
 
 [lib]
+name = "perspective_viewer"
 crate-type = ["cdylib", "rlib"]
 path = "src/rust/lib.rs"
 
@@ -63,17 +74,21 @@ serde = { version = "1.0", features = ["derive"] }
 # Support for "unknown"/dicitonary types such as `plugin_config`
 serde_json = { version = "1.0.59", features = ["raw_value"] }
 
+tracing = { version = ">=0.1.36", features = ["release_max_level_error", "max_level_info"]}
+
+tracing-wasm = ">=0.2.1"
+
 # Browser API bindings
-wasm-bindgen = { version = "=0.2.80", features = ["serde-serialize"] }
+wasm-bindgen = { version = "=0.2.82", features = ["serde-serialize"] }
 
 # Browser `Promise` bindings
 wasm-bindgen-futures = "0.4.20"
 
 # https://github.com/yewstack/yew/issues/2154
-yew = { git = "https://github.com/yewstack/yew", rev = "3760c5f8b56a8ac1730356f4ddbbdc949b9f120c", features = ["csr"] }
+yew = { git = "https://github.com/yewstack/yew", rev = "8172b9ceacdcd7d4609e8ba00f758507a8bbc85d", features = ["csr"] }
 
 [dependencies.web-sys]
-version = "0.3.57"
+version = "0.3.59"
 features = [
     # "Performance",
     "Blob",
@@ -103,6 +118,7 @@ features = [
     "HtmlCollection",
     "HtmlElement",
     "HtmlTextAreaElement",
+    "HtmlStyleElement",
     "HtmlSelectElement",
     "InputEvent",
     "KeyboardEvent",

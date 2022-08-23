@@ -15,12 +15,13 @@ use crate::session::*;
 use crate::theme::Theme;
 use crate::utils::*;
 use crate::*;
-
 use web_sys::*;
 use yew::prelude::*;
 
 #[cfg(test)]
 use crate::utils::WeakScope;
+
+use super::style::LocalStyle;
 
 #[derive(Properties)]
 pub struct StatusBarProps {
@@ -195,7 +196,8 @@ impl Component for StatusBar {
             }
         };
 
-        html! {
+        html_template! {
+            <LocalStyle href={ css!("status-bar") } />
             <div id={ ctx.props().id.clone() } class={ is_updating_class_name }>
                 <div class="section">
                     <span id="status" class={ class_name }></span>
@@ -205,7 +207,7 @@ impl Component for StatusBar {
                         <span>{ "Reset" }</span>
                     </span>
                     <span
-                        ref={ self.export_ref.clone() }
+                        ref={ &self.export_ref }
                         id="export"
                         class="button"
                         onmousedown={ export }>
@@ -213,7 +215,7 @@ impl Component for StatusBar {
                         <span>{ "Export" }</span>
                     </span>
                     <span
-                        ref={ self.copy_ref.clone() }
+                        ref={ &self.copy_ref }
                         id="copy"
                         class="button"
                         onmousedown={ copy }>

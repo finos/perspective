@@ -10,6 +10,7 @@ use super::containers::dragdrop_list::*;
 use super::filter_item::*;
 use super::pivot_item::*;
 use super::sort_item::*;
+use super::style::LocalStyle;
 use crate::config::*;
 use crate::custom_elements::FilterDropDownElement;
 use crate::dragdrop::*;
@@ -270,17 +271,17 @@ impl Component for ConfigSelector {
 
         html! {
             <div slot="top_panel" id="top_panel" class={ class } ondragend={ dragend }>
-
+                <LocalStyle href={ css!("config-selector") } />
                 <GroupBySelector
                     name="group_by"
                     parent={ ctx.link().clone() }
                     is_dragover={ ctx.props().dragdrop.is_dragover(DragTarget::GroupBy) }
-                    dragdrop={ ctx.props().dragdrop.clone() }>
+                    dragdrop={ &ctx.props().dragdrop }>
                     {
                         for config.group_by.iter().map(|group_by| {
                             html_nested! {
                                 <PivotItem
-                                    dragdrop={ ctx.props().dragdrop.clone() }
+                                    dragdrop={ &ctx.props().dragdrop }
                                     action={ DragTarget::GroupBy }
                                     column={ group_by.clone() }>
                                 </PivotItem>
@@ -301,12 +302,12 @@ impl Component for ConfigSelector {
                     name="split_by"
                     parent={ ctx.link().clone() }
                     is_dragover={ ctx.props().dragdrop.is_dragover(DragTarget::SplitBy) }
-                    dragdrop={ ctx.props().dragdrop.clone() }>
+                    dragdrop={ &ctx.props().dragdrop }>
                     {
                         for config.split_by.iter().map(|split_by| {
                             html_nested! {
                                 <PivotItem
-                                    dragdrop={ ctx.props().dragdrop.clone() }
+                                    dragdrop={ &ctx.props().dragdrop }
                                     action={ DragTarget::SplitBy }
                                     column={ split_by.clone() }>
                                 </PivotItem>
@@ -319,7 +320,7 @@ impl Component for ConfigSelector {
                     name="sort"
                     allow_duplicates=true
                     parent={ ctx.link().clone() }
-                    dragdrop={ ctx.props().dragdrop.clone() }
+                    dragdrop={ &ctx.props().dragdrop }
                     is_dragover={ ctx.props().dragdrop.is_dragover(DragTarget::Sort).map(|(index, name)| {
                         (index, Sort(name, SortDir::Asc))
                     }) }>
@@ -328,9 +329,9 @@ impl Component for ConfigSelector {
                             html_nested! {
                                 <SortItem
                                     idx={ idx }
-                                    session={ ctx.props().session.clone() }
-                                    renderer={ ctx.props().renderer.clone() }
-                                    dragdrop={ ctx.props().dragdrop.clone() }
+                                    session={ &ctx.props().session }
+                                    renderer={ &ctx.props().renderer }
+                                    dragdrop={ &ctx.props().dragdrop }
                                     sort={ sort.clone() }>
                                 </SortItem>
                             }
@@ -342,7 +343,7 @@ impl Component for ConfigSelector {
                     name="filter"
                     allow_duplicates=true
                     parent={ ctx.link().clone() }
-                    dragdrop={ ctx.props().dragdrop.clone() }
+                    dragdrop={ &ctx.props().dragdrop }
                     is_dragover={ ctx.props().dragdrop.is_dragover(DragTarget::Filter).map(|(index, name)| {
                         (index, Filter(name, FilterOp::EQ, FilterTerm::Scalar(Scalar::Null)))
                     }) }>
@@ -354,10 +355,10 @@ impl Component for ConfigSelector {
                             html_nested! {
                                 <FilterItem
                                     idx={ idx }
-                                    filter_dropdown={ self.filter_dropdown.clone() }
-                                    session={ ctx.props().session.clone() }
-                                    renderer={ ctx.props().renderer.clone() }
-                                    dragdrop={ ctx.props().dragdrop.clone() }
+                                    filter_dropdown={ &self.filter_dropdown }
+                                    session={ &ctx.props().session }
+                                    renderer={ &ctx.props().renderer }
+                                    dragdrop={ &ctx.props().dragdrop }
                                     filter={ filter.clone() }
                                     on_keydown={ filter_keydown }>
                                 </FilterItem>
