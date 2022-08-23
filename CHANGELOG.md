@@ -1,5 +1,24 @@
 # Changelog
 
+## [v1.6.4](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.6.3...HEAD)
+
+**Fixed bugs:**
+
+- Using sunburst with grouping and tabs results in unresponsive application [\#1938](https://github.com/finos/perspective/issues/1938)
+- Add `not in` filter to valid string type filters in `<perspective-viewer>` [\#1945](https://github.com/finos/perspective/pull/1945) ([texodus](https://github.com/texodus))
+- Upper bound for `ipywidgets` [\#1944](https://github.com/finos/perspective/pull/1944) ([texodus](https://github.com/texodus))
+- Fix Sunburst chart infinite loop bug [\#1939](https://github.com/finos/perspective/pull/1939) ([texodus](https://github.com/texodus))
+
+**Closed issues:**
+
+- "not in" Filter Function Removed? [\#1941](https://github.com/finos/perspective/issues/1941)
+
+**Merged pull requests:**
+
+- Per-component CSS model [\#1943](https://github.com/finos/perspective/pull/1943) ([texodus](https://github.com/texodus))
+
 ## [v1.6.3](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.6.2...HEAD)

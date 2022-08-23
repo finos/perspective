@@ -1,7 +1,7 @@
 {
     "name": "git-history",
     "private": true,
-    "version": "1.6.3",
+    "version": "1.6.4",
     "description": "An example of Perspective's own GIT history rendered in Perspective.",
     "scripts": {
         "start": "node server.js"
@@ -9,9 +9,9 @@
     "keywords": [],
     "license": "Apache-2.0",
     "dependencies": {
-        "@finos/perspective": "^1.6.3",
-        "@finos/perspective-viewer": "^1.6.3",
-        "@finos/perspective-viewer-d3fc": "^1.6.3",
-        "@finos/perspective-viewer-datagrid": "^1.6.3"
+        "@finos/perspective": "^1.6.4",
+        "@finos/perspective-viewer": "^1.6.4",
+        "@finos/perspective-viewer-d3fc": "^1.6.4",
+        "@finos/perspective-viewer-datagrid": "^1.6.4"
     }
 }
