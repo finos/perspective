@@ -123,6 +123,7 @@ impl FilterItemProps {
                 FilterOp::Contains,
                 FilterOp::EndsWith,
                 FilterOp::In,
+                FilterOp::NotIn,
                 FilterOp::IsNotNull,
                 FilterOp::IsNull,
             ],
