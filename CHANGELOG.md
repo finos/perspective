@@ -1,5 +1,13 @@
 # Changelog
 
+## [v1.6.5](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.6.4...HEAD)
+
+**Fixed bugs:**
+
+- Fix column style menus for string & date\(time\) [\#1950](https://github.com/finos/perspective/pull/1950) ([texodus](https://github.com/texodus))
+
 ## [v1.6.4](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.6.3...HEAD)
