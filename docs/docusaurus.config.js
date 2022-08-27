@@ -101,7 +101,7 @@ const config = {
                         items: [
                             {
                                 label: "GitHub",
-                                href: "https://github.com/facebook/docusaurus",
+                                href: "https://github.com/finos/perspective",
                             },
                             {
                                 label: "FINOS",
