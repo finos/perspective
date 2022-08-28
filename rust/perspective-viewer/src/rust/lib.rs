@@ -57,6 +57,11 @@ pub fn get_exprtk_commands() -> Result<Box<[JsValue]>, JsValue> {
         .into_jserror()
 }
 
+/// Register this crate's Custom Elements in the browser's current session.
+/// This must occur before calling any public API methods on these Custom
+/// Elements from JavaScript, as the methods themselves won't be defined yet.
+/// By default, this crate does not register `PerspectiveViewerElement` (as to
+/// preserve backwards-compatible synchronous API).
 #[wasm_bindgen(js_name = "defineWebComponents")]
 pub fn define_web_components() {
     tracing_wasm::set_as_global_default();
