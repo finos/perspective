@@ -9,13 +9,13 @@
 
 const {execute_throw} = require("./script_utils.js");
 const path = require("path");
-const which = require('which')
+const which = require("which");
 
 const cmd = process.argv.slice(2).join(" ");
 
-if (which.sync('emcc')) {
+if (which.sync("emcc")) {
     // Assume that the user has already configged what they need, let's just execute.
-    execute_throw`${cmd}`
+    execute_throw`${cmd}`;
 } else {
     try {
         const cwd = process.cwd();
