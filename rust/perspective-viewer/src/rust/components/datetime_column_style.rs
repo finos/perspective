@@ -100,7 +100,12 @@ impl DatetimeColumnStyle {
 
     /// Generate a color selector component for a specific `StringColorMode`
     /// variant.
-    fn color_select_row(&self, ctx: &Context<Self>, mode: &DatetimeColorMode, title: &str) -> Html {
+    fn color_select_row(
+        &self,
+        ctx: &Context<Self>,
+        mode: &DatetimeColorMode,
+        title: &str,
+    ) -> Html {
         let on_color = ctx.link().callback(DatetimeColumnStyleMsg::ColorChanged);
         let color = self
             .config
@@ -184,7 +189,8 @@ impl Component for DatetimeColumnStyle {
             }
             DatetimeColumnStyleMsg::ColorModeEnabled(enabled) => {
                 if enabled {
-                    self.config.datetime_color_mode = Some(DatetimeColorMode::default());
+                    self.config.datetime_color_mode =
+                        Some(DatetimeColorMode::default());
                 } else {
                     self.config.datetime_color_mode = None;
                     self.config.color = None;
@@ -230,8 +236,10 @@ impl Component for DatetimeColumnStyle {
             .link()
             .callback(|_| DatetimeColumnStyleMsg::TimezoneEnabled);
 
-        let on_date_reset = ctx.link().callback(|_| DatetimeColumnStyleMsg::DateEnabled);
-        let on_time_reset = ctx.link().callback(|_| DatetimeColumnStyleMsg::TimeEnabled);
+        let on_date_reset =
+            ctx.link().callback(|_| DatetimeColumnStyleMsg::DateEnabled);
+        let on_time_reset =
+            ctx.link().callback(|_| DatetimeColumnStyleMsg::TimeEnabled);
         let on_fractional_second_digits_reset = ctx
             .link()
             .callback(|_| DatetimeColumnStyleMsg::FractionalSecondsDigitsEnabled);
