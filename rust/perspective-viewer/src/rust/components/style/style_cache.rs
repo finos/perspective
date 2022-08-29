@@ -56,7 +56,10 @@ impl StyleCache {
             let first = map.values().next().cloned();
             map.insert(name, style.clone());
             if let Some(x) = first {
-                x.get_root_node().insert_before(&style, Some(&x)).unwrap();
+                x.parent_node()
+                    .unwrap_or_else(|| x.get_root_node())
+                    .insert_before(&style, Some(&x))
+                    .unwrap();
             }
         }
     }

@@ -17,7 +17,6 @@ include = [
 ]
 
 [lib]
-name = "perspective_viewer"
 crate-type = ["cdylib", "rlib"]
 path = "src/rust/lib.rs"
 
@@ -89,7 +88,7 @@ yew = { git = "https://github.com/yewstack/yew", rev = "7438cd3059d58d0922e4c151
 
 [dependencies.web-sys]
 version = "0.3.59"
-features = [
+features =  [
     # "Performance",
     "Blob",
     "Clipboard",

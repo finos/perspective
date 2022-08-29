@@ -1,31 +1,27 @@
 @border-color: 1px solid #eaeaea;
 
 .workspace-master-widget {
-    --config-button-icon--content: var(
-        --open-settings-button--content,
-        "\1F527"
-    ) !important;
+    --config-button-icon--content: var(--open-settings-button--content,
+            "\1F527"
+        ) !important;
 }
 
 .workspace-master-widget[settings] {
-    --config-button-icon--content: var(
-        --close-settings-button--content,
-        "\1F527"
-    ) !important;
+    --config-button-icon--content: var(--close-settings-button--content,
+            "\1F527"
+        ) !important;
 }
 
 .workspace-detail-widget.widget-maximize {
-    --config-button-icon--content: var(
-        --open-settings-button--content,
-        "\1F527"
-    ) !important;
+    --config-button-icon--content: var(--open-settings-button--content,
+            "\1F527"
+        ) !important;
 }
 
 .workspace-detail-widget.widget-maximize[settings] {
-    --config-button-icon--content: var(
-        --close-settings-button--content,
-        "\1F527"
-    ) !important;
+    --config-button-icon--content: var(--close-settings-button--content,
+            "\1F527"
+        ) !important;
 }
 
 .p-DockPanel-widget {
@@ -39,14 +35,15 @@
     --config-button-icon--content: "" !important;
 }
 
-.context-menu > perspective-viewer.context-focus {
+.context-menu>perspective-viewer.context-focus {
     opacity: 1;
     filter: none;
 }
 
-.context-menu > perspective-viewer {
+.context-menu>perspective-viewer {
     filter: saturate(0);
-    & > * {
+
+    &>* {
         pointer-events: none;
     }
 }
@@ -61,14 +58,13 @@ perspective-viewer {
     width: 100%;
     height: 100%;
     overflow: visible !important;
-    font-family: "Open Sans", Arial, sans-serif;
 }
 
 .lm-mod-override-cursor {
     cursor: grabbing !important;
 }
 
-.lm-mod-override-cursor perspective-viewer > * {
+.lm-mod-override-cursor perspective-viewer>* {
     pointer-events: none;
 
 }

@@ -130,20 +130,20 @@ async function compile_rust() {
         INHERIT
     );
 
-    await wasm_bindgen("perspective_viewer", {
+    await wasm_bindgen("perspective", {
         debug: IS_DEBUG,
         version: "0.2.82",
         targetdir: "build",
     });
 
     if (!IS_DEBUG) {
-        await wasm_opt("perspective_viewer");
+        await wasm_opt("perspective");
     }
 
     // Compress wasm
-    const wasm = fs.readFileSync("dist/pkg/perspective_viewer_bg.wasm");
+    const wasm = fs.readFileSync("dist/pkg/perspective_bg.wasm");
     const compressed = fflate.compressSync(wasm, {level: 9});
-    fs.writeFileSync("dist/pkg/perspective_viewer_bg.wasm", compressed);
+    fs.writeFileSync("dist/pkg/perspective_bg.wasm", compressed);
 }
 
 async function build_all() {

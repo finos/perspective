@@ -42,4 +42,17 @@ macro_rules! css {
             )),
         )
     }};
+    ($path:expr, $name:expr) => {{
+        (
+            $name,
+            include_str!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/",
+                $path,
+                "/",
+                $name,
+                ".css"
+            )),
+        )
+    }};
 }

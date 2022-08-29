@@ -10,7 +10,6 @@
 @import (inline) "@lumino/widgets/style/menu.css";
 
 .p-Menu {
-    font-family: "Open Sans";
     font-size: 12px;
     padding: 8px;
     background: white;
@@ -20,6 +19,7 @@
     border-top-width: 0px;
     border-right-width: 1px;
     box-shadow: 0 2px 4px #0000001a;
+    max-width: 350px;
 }
 
 .p-Menu-item.p-mod-active {
@@ -31,8 +31,9 @@
 }
 
 .p-Menu-itemIcon {
-    width: 21px;
-    padding: 4px 2px 4px 0px;
+    width: 24px;
+    height: 12px;
+    margin-right: 4px;
 }
 
 .p-Menu-itemLabel {
@@ -49,8 +50,8 @@
 }
 
 .p-Menu-itemSubmenuIcon {
-    width: 16px;
-    padding: 4px 0px;
+    width: 24px;
+    height: 12px;
 }
 
 .p-Menu-item {
@@ -59,12 +60,12 @@
     outline: none;
 }
 
-.p-Menu-item[data-type="separator"] > div {
+.p-Menu-item[data-type="separator"]>div {
     padding: 0;
     height: 9px;
 }
 
-.p-Menu-item[data-type="separator"] > div::after {
+.p-Menu-item[data-type="separator"]>div::after {
     content: "";
     display: block;
     position: relative;

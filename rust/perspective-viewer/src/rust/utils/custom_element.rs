@@ -10,9 +10,7 @@ use wasm_bindgen::prelude::*;
 
 pub trait CustomElementMetadata {
     const CUSTOM_ELEMENT_NAME: &'static str;
-
     const STATICS: &'static [&'static str] = [].as_slice();
-
     const TYPE_NAME: &'static str = std::any::type_name::<Self>();
 
     fn struct_name() -> &'static str {
@@ -24,8 +22,7 @@ pub trait CustomElementMetadata {
 }
 
 #[wasm_bindgen(inline_js = "
-    import * as psp from '@finos/perspective-viewer/dist/pkg/perspective_viewer.js';
-    export function bootstrap(name, clsname, statics) {
+    export function bootstrap(psp, name, clsname, statics) {
         const cls = psp[clsname];
         const proto = cls.prototype;
         class x extends HTMLElement {
@@ -57,11 +54,12 @@ pub trait CustomElementMetadata {
 ")]
 extern "C" {
     #[wasm_bindgen(js_name = "bootstrap")]
-    fn js_bootstrap(name: &str, cls: &str, statics: js_sys::Array) -> JsValue;
+    fn js_bootstrap(psp: &JsValue, name: &str, cls: &str, statics: js_sys::Array) -> JsValue;
 }
 
-pub fn define_web_component<T: CustomElementMetadata>() {
+pub fn define_web_component<T: CustomElementMetadata>(module: &JsValue) {
     js_bootstrap(
+        module,
         T::CUSTOM_ELEMENT_NAME,
         T::struct_name(),
         T::STATICS.iter().cloned().map(JsValue::from).collect(),

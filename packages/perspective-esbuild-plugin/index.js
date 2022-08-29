@@ -25,7 +25,7 @@ exports.PerspectiveEsbuildPlugin = function PerspectiveEsbuildPlugin(
     // and we always call this method with an explicit path, so this
     // plugin strips this URL so webpack builds don't fail.
     const replace_plugin = ReplacePlugin(
-        /["']perspective_viewer_bg\.wasm["']/,
+        /["']perspective_bg\.wasm["']/,
         "undefined"
     );
 

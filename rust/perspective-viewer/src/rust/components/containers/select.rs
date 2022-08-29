@@ -8,9 +8,7 @@
 
 use std::borrow::Borrow;
 use std::borrow::Cow;
-use std::fmt::Debug;
 use std::fmt::Display;
-use std::str::FromStr;
 use wasm_bindgen::JsCast;
 use yew::prelude::*;
 
