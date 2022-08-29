@@ -122,6 +122,10 @@ fn time_style_default() -> DatetimeFormat {
     DatetimeFormat::Medium
 }
 
+/// TODO: note that this is a standard configuration object for the
+/// [`DateTimeFormat`] constructor.
+///
+/// [LINK]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat
 #[cfg_attr(test, derive(Debug))]
 #[derive(Clone, Deserialize, Eq, PartialEq, Serialize)]
 pub struct DatetimeColumnStyleConfig {
@@ -147,7 +151,13 @@ pub struct DatetimeColumnStyleConfig {
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub color: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub fractional_seconds_digits: Option<FractionalSecondDigits>,
 }
+
+// TODO: need values b/w `0..=3`.
+pub type FractionalSecondDigits = bool;
 
 impl Default for DatetimeColumnStyleConfig {
     fn default() -> Self {
@@ -157,6 +167,7 @@ impl Default for DatetimeColumnStyleConfig {
             time_zone: Default::default(),
             datetime_color_mode: Default::default(),
             color: Default::default(),
+            fractional_seconds_digits: Default::default(),
         }
     }
 }

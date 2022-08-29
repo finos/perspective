@@ -47,6 +47,7 @@ pub enum DatetimeColumnStyleMsg {
     TimezoneEnabled,
     DateEnabled,
     TimeEnabled,
+    FractionalSecondsDigitsEnabled,
     DateStyleChanged(DatetimeFormat),
     TimeStyleChanged(DatetimeFormat),
     TimezoneChanged(String),
@@ -156,6 +157,11 @@ impl Component for DatetimeColumnStyle {
                 self.dispatch_config(ctx);
                 true
             }
+            DatetimeColumnStyleMsg::FractionalSecondsDigitsEnabled => {
+                self.config.fractional_seconds_digits = None;
+                self.dispatch_config(ctx);
+                true
+            }
             DatetimeColumnStyleMsg::DateStyleChanged(format) => {
                 self.config.date_style = format;
                 self.dispatch_config(ctx);
@@ -226,6 +232,9 @@ impl Component for DatetimeColumnStyle {
 
         let on_date_reset = ctx.link().callback(|_| DatetimeColumnStyleMsg::DateEnabled);
         let on_time_reset = ctx.link().callback(|_| DatetimeColumnStyleMsg::TimeEnabled);
+        let on_fractional_second_digits_reset = ctx
+            .link()
+            .callback(|_| DatetimeColumnStyleMsg::FractionalSecondsDigitsEnabled);
 
         // TODO this checkbox should be disabled if the timezone is local but
         // can't set `checked=false`.
@@ -267,6 +276,17 @@ impl Component for DatetimeColumnStyle {
                                 on_select={ ctx.link().callback(DatetimeColumnStyleMsg::TimeStyleChanged) }
                                 values={ DatetimeFormat::values().iter().map(|x| SelectItem::Option(*x)).collect::<Vec<_>>() } >
                             </Select<DatetimeFormat>>
+                        </div>
+
+                        <div class="column-style-label">
+                            // TODO: Change this text to match the final feature
+                            <label class="indent">{ "Show microseconds (if available)" }</label>
+                        </div>
+                        <div class="section">
+                            <input
+                                type="checkbox"
+                                onchange={ on_fractional_second_digits_reset }
+                                cshecked={ !self.config.fractional_seconds_digits.is_some() } />
                         </div>
                     }
 
