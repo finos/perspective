@@ -77,9 +77,10 @@
     user-select: none;
     width: 36px;
     box-sizing: border-box;
+    white-space: nowrap;
 }
 
-.button > span {
+.button>span {
     display: none;
     margin: 0;
     padding: 0;
@@ -91,7 +92,7 @@
     align-items: center;
     color: inherit;
     cursor: pointer;
-    min-width: 105px;
+    min-width: var(--button--min-width, 105px);
     background-color: rgba(0, 0, 0, 0.05);
 }
 
@@ -99,7 +100,7 @@
     margin: 0 6px 0 11px;
 }
 
-.button:hover > span {
+.button:hover>span {
     display: contents;
     font-size: 12px;
     font-weight: 300;

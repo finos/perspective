@@ -8,9 +8,7 @@
 
 use std::borrow::Borrow;
 use std::borrow::Cow;
-use std::fmt::Debug;
 use std::fmt::Display;
-use std::str::FromStr;
 use wasm_bindgen::JsCast;
 use yew::prelude::*;
 
@@ -29,15 +27,14 @@ impl<T: Display> SelectItem<T> {
     }
 }
 
-pub enum SelectMsg<T> {
-    SelectedChanged(T),
+pub enum SelectMsg {
+    SelectedChanged(i32),
 }
 
 #[derive(Properties)]
 pub struct SelectProps<T>
 where
-    T: Clone + Display + FromStr + PartialEq + 'static,
-    T::Err: Clone + Debug + 'static,
+    T: Clone + Display + PartialEq + 'static,
 {
     pub values: Vec<SelectItem<T>>,
     pub selected: T,
@@ -58,8 +55,7 @@ where
 
 impl<T> PartialEq for SelectProps<T>
 where
-    T: Clone + Display + FromStr + PartialEq + 'static,
-    T::Err: Clone + Debug + 'static,
+    T: Clone + Display + PartialEq + 'static,
 {
     fn eq(&self, rhs: &Self) -> bool {
         self.selected == rhs.selected && self.values == rhs.values
@@ -70,19 +66,34 @@ where
 /// values of a type `T`.
 pub struct Select<T>
 where
-    T: Clone + Display + FromStr + PartialEq + 'static,
-    T::Err: Clone + Debug + 'static,
+    T: Clone + Display + PartialEq + 'static,
 {
     select_ref: NodeRef,
     selected: T,
 }
 
+fn find_nth<T>(mut count: i32, items: &[SelectItem<T>]) -> Option<&T> {
+    for ref item in items.iter() {
+        match item {
+            SelectItem::Option(_) if count > 0 => {
+                count -= 1;
+            }
+            SelectItem::OptGroup(_, items) if count >= items.len() as i32 => {
+                count -= items.len() as i32;
+            }
+            SelectItem::OptGroup(_, items) => return items.get(count as usize),
+            SelectItem::Option(x) => return Some(x),
+        }
+    }
+
+    None
+}
+
 impl<T> Component for Select<T>
 where
-    T: Clone + Display + FromStr + PartialEq + 'static,
-    T::Err: Clone + Debug + 'static,
+    T: Clone + Display + PartialEq + 'static,
 {
-    type Message = SelectMsg<T>;
+    type Message = SelectMsg;
     type Properties = SelectProps<T>;
 
     fn create(_ctx: &Context<Self>) -> Self {
@@ -94,7 +105,7 @@ where
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         let SelectMsg::SelectedChanged(x) = msg;
-        self.selected = x;
+        self.selected = find_nth(x, &ctx.props().values).unwrap().clone();
         ctx.props().on_select.emit(self.selected.clone());
         true
     }
@@ -118,8 +129,8 @@ where
                 .target()
                 .unwrap()
                 .unchecked_into::<web_sys::HtmlSelectElement>()
-                .value();
-            SelectMsg::SelectedChanged(T::from_str(value.as_str()).unwrap())
+                .selected_index();
+            SelectMsg::SelectedChanged(value)
         });
 
         let class = if let Some(class) = &ctx.props().class {

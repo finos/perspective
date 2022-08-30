@@ -43,4 +43,5 @@ mod tests;
 
 pub use self::copy_dropdown::*;
 pub use self::modal::*;
+pub use self::style::*;
 pub use self::viewer::*;

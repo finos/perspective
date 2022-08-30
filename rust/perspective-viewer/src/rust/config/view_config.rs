@@ -105,7 +105,7 @@ impl ViewConfig {
     }
 }
 
-#[derive(Deserialize, Default)]
+#[derive(Clone, Deserialize, Default, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct ViewConfigUpdate {
     #[serde(default)]

@@ -57,6 +57,39 @@ pub struct ViewerConfig {
 }
 
 impl ViewerConfig {
+    fn _apply<T: Clone + Default>(field: &mut T, update: OptionalUpdate<T>) -> bool {
+        match update {
+            OptionalUpdate::Missing => false,
+            OptionalUpdate::SetDefault => {
+                *field = T::default();
+                true
+            }
+            OptionalUpdate::Update(update) => {
+                *field = update;
+                true
+            }
+        }
+    }
+
+    fn _apply1<T>(field: &mut T, update: Option<T>) -> bool {
+        match update {
+            None => false,
+            Some(update) => {
+                *field = update;
+                true
+            }
+        }
+    }
+
+    pub fn apply(&mut self, update: ViewerConfigUpdate) -> bool {
+        let mut changed = false;
+        changed = Self::_apply(&mut self.plugin, update.plugin) || changed;
+        changed = Self::_apply1(&mut self.plugin_config, update.plugin_config) || changed;
+        changed = Self::_apply(&mut self.settings, update.settings) || changed;
+        changed = self.view_config.apply_update(update.view_config) || changed;
+        changed
+    }
+
     /// Encode a `ViewerConfig` to a `JsValue` in a supported type.
     pub fn encode(&self, format: &Option<ViewerConfigEncoding>) -> Result<JsValue, JsValue> {
         match format {
@@ -84,8 +117,8 @@ impl ViewerConfig {
     }
 }
 
-#[derive(Deserialize)]
-#[serde(deny_unknown_fields)]
+#[derive(Clone, Serialize, Deserialize)]
+// #[serde(deny_unknown_fields)]
 pub struct ViewerConfigUpdate {
     #[serde(default)]
     pub plugin: PluginUpdate,
@@ -125,7 +158,8 @@ impl ViewerConfigUpdate {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
+#[serde(untagged)]
 pub enum OptionalUpdate<T: Clone> {
     SetDefault,
     Missing,
