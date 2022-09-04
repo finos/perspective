@@ -22,9 +22,9 @@ impl PartialEq for LocalStyleProps {
 
 #[function_component(LocalStyle)]
 pub fn local_style(props: &LocalStyleProps) -> Html {
-    use_context::<StyleCache>()
-        .unwrap()
-        .add_style(props.href.0, props.href.1);
+    if let Some(cache) = use_context::<StyleCache>() {
+        cache.add_style(props.href.0, props.href.1);
+    }
 
     html! {}
 }

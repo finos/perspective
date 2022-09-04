@@ -7,13 +7,11 @@
 // file.
 
 use crate::{html_template, utils::*};
-
 use futures::future::{join_all, select_all};
 use js_intern::*;
 use std::cell::{Cell, Ref, RefCell};
 use std::future::Future;
 use std::iter::{repeat_with, Iterator};
-use std::pin::Pin;
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -79,7 +77,7 @@ pub enum FontLoaderStatus {
     Finished,
 }
 
-type PromiseSet = Vec<Pin<Box<dyn Future<Output = Result<JsValue, JsValue>>>>>;
+type PromiseSet = Vec<ApiFuture<JsValue>>;
 
 pub struct FontLoaderState {
     status: Cell<FontLoaderStatus>,
@@ -115,9 +113,9 @@ impl FontLoaderProps {
 
     /// We only want errors in this task to warn, since they are not necessarily
     /// error conditions and mainly of interest to developers.
-    async fn load_fonts_task_safe(self) -> Result<JsValue, JsValue> {
+    async fn load_fonts_task_safe(self) -> ApiResult<JsValue> {
         if let Err(msg) = self.load_fonts_task().await {
-            web_sys::console::warn_1(&msg);
+            web_sys::console::warn_1(&msg.into());
         };
 
         Ok(JsValue::UNDEFINED)
@@ -130,7 +128,7 @@ impl FontLoaderProps {
     ///     --preload-fonts: "Roboto Mono:200;Open Sans:300,400;Material Icons:400";
     /// }
     /// ```
-    async fn load_fonts_task(self) -> Result<JsValue, JsValue> {
+    async fn load_fonts_task(self) -> ApiResult<JsValue> {
         let window = web_sys::window().unwrap();
         let document = window.document().unwrap();
         await_dom_loaded().await?;
@@ -147,7 +145,7 @@ impl FontLoaderProps {
 
         for (family, weight) in preload_fonts.iter() {
             let task = timeout_font_task(family, weight);
-            let mut block_fonts: PromiseSet = vec![Box::pin(task)];
+            let mut block_fonts: PromiseSet = vec![ApiFuture::new(task)];
 
             for entry in font_iter(document.fonts().values()) {
                 let font_face = js_sys::Reflect::get(&entry, js_intern!("value"))?
@@ -158,12 +156,14 @@ impl FontLoaderProps {
                     && (weight == &font_face.weight()
                         || (font_face.weight() == "normal" && weight == "400"))
                 {
-                    block_fonts.push(Box::pin(JsFuture::from(font_face.loaded()?)));
+                    block_fonts.push(ApiFuture::new(async move {
+                        Ok(JsFuture::from(font_face.loaded()?).await?)
+                    }));
                 }
             }
 
             let fut = async { select_all(block_fonts.into_iter()).await.0 };
-            block_promises.push(Box::pin(fut))
+            block_promises.push(ApiFuture::new(fut))
         }
 
         if block_promises.len() != preload_fonts.len() {
@@ -173,7 +173,7 @@ impl FontLoaderProps {
         let res = join_all(block_promises)
             .await
             .into_iter()
-            .collect::<Result<Vec<JsValue>, JsValue>>()
+            .collect::<ApiResult<Vec<JsValue>>>()
             .map(|_| JsValue::UNDEFINED);
 
         self.state.status.set(FontLoaderStatus::Finished);
@@ -184,7 +184,7 @@ impl FontLoaderProps {
 
 // An async task which times out.  Can be used to timeout an optional async task
 // by combinging with `Promise::any`.
-fn timeout_font_task(family: &str, weight: &str) -> impl Future<Output = Result<JsValue, JsValue>> {
+fn timeout_font_task(family: &str, weight: &str) -> impl Future<Output = ApiResult<JsValue>> {
     let timeout_msg = format!("Timeout awaiting font \"{}:{}\"", family, weight);
     async {
         set_timeout(FONT_DOWNLOAD_TIMEOUT_MS).await?;

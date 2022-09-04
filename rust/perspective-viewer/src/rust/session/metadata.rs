@@ -16,7 +16,6 @@ use std::collections::HashSet;
 use std::iter::IntoIterator;
 use std::ops::Deref;
 use std::ops::DerefMut;
-use wasm_bindgen::prelude::*;
 
 struct SessionViewExpressionMetadata {
     schema: HashMap<String, Type>,
@@ -57,7 +56,7 @@ pub struct SessionMetadataState {
 
 impl SessionMetadata {
     /// Creates a new `SessionMetadata` from a `JsPerspectiveTable`.
-    pub(super) async fn from_table(table: &JsPerspectiveTable) -> Result<Self, JsValue> {
+    pub(super) async fn from_table(table: &JsPerspectiveTable) -> ApiResult<Self> {
         let column_names = {
             let columns = table.columns().await?;
             if columns.length() > 0 {
@@ -69,7 +68,7 @@ impl SessionMetadata {
             }
         };
 
-        let table_schema = table.schema().await?.into_serde().into_jserror()?;
+        let table_schema = table.schema().await?.into_serde()?;
         let edit_port = table.make_port().await?;
         Ok(Self(Some(SessionMetadataState {
             column_names,
@@ -82,8 +81,8 @@ impl SessionMetadata {
     pub(super) fn update_view_schema(
         &mut self,
         view_schema: &JsPerspectiveViewSchema,
-    ) -> Result<(), JsValue> {
-        let view_schema = view_schema.into_serde().into_jserror()?;
+    ) -> ApiResult<()> {
+        let view_schema = view_schema.into_serde()?;
         self.as_mut().unwrap().view_schema = Some(view_schema);
         Ok(())
     }
@@ -91,16 +90,16 @@ impl SessionMetadata {
     pub(super) fn update_expressions(
         &mut self,
         valid_recs: &JsPerspectiveValidatedExpressions,
-    ) -> Result<HashSet<String>, JsValue> {
+    ) -> ApiResult<HashSet<String>> {
         if js_sys::Object::keys(&valid_recs.errors()).length() > 0 {
-            return Err(JsValue::from("Expressions invalid"));
+            return Err("Expressions invalid".into());
         }
 
         let expression_alias: HashMap<String, String> =
-            valid_recs.expression_alias().into_serde().into_jserror()?;
+            valid_recs.expression_alias().into_serde()?;
 
         let expression_schema: HashMap<String, Type> =
-            valid_recs.expression_schema().into_serde().into_jserror()?;
+            valid_recs.expression_schema().into_serde()?;
 
         let expression_names = expression_schema.keys().cloned().collect::<HashSet<_>>();
 

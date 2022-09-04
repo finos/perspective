@@ -18,9 +18,6 @@ use futures::join;
 use itertools::Itertools;
 use js_intern::*;
 use std::collections::HashSet;
-use std::future::Future;
-use std::pin::Pin;
-use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
 
@@ -36,7 +33,7 @@ fn tag_name_to_package(plugin: &JsPerspectiveViewerPlugin) -> String {
 /// shared location, rather than distributing in the various state objects
 /// that are relevent per-format.
 pub trait CopyExportModel: HasSession + HasRenderer + HasTheme + GetViewerConfigModel {
-    fn html_as_jsvalue(&self) -> Pin<Box<dyn Future<Output = Result<web_sys::Blob, JsValue>>>> {
+    fn html_as_jsvalue(&self) -> ApiFuture<web_sys::Blob> {
         let view_config = self.get_viewer_config();
         let session = self.session().clone();
         let plugins = self
@@ -48,12 +45,12 @@ pub trait CopyExportModel: HasSession + HasRenderer + HasTheme + GetViewerConfig
             .into_iter()
             .collect::<Vec<_>>();
 
-        Box::pin(async move {
+        ApiFuture::new(async move {
             let (arrow, config) = join!(session.arrow_as_vec(true), view_config);
             let arrow = arrow?;
             let mut config = config?;
             config.settings = false;
-            let js_config = serde_json::to_string(&config).into_jserror()?;
+            let js_config = serde_json::to_string(&config)?;
             let html = export_app::render(&base64::encode(arrow), &js_config, &plugins);
             js_sys::JsString::from(html.trim()).as_blob()
         })
@@ -67,9 +64,9 @@ pub trait CopyExportModel: HasSession + HasRenderer + HasTheme + GetViewerConfig
     ///
     /// It is assumed that `Plugin::render` exists on the plugin's Custom
     /// Element.
-    fn png_as_jsvalue(&self) -> Pin<Box<dyn Future<Output = Result<web_sys::Blob, JsValue>>>> {
+    fn png_as_jsvalue(&self) -> ApiFuture<web_sys::Blob> {
         let renderer = self.renderer().clone();
-        Box::pin(async move {
+        ApiFuture::new(async move {
             let plugin = renderer.get_active_plugin()?;
             let render = js_sys::Reflect::get(&plugin, js_intern!("render"))?;
             let render_fun = render.unchecked_into::<js_sys::Function>();
@@ -82,46 +79,43 @@ pub trait CopyExportModel: HasSession + HasRenderer + HasTheme + GetViewerConfig
     }
 
     /// Generate a result `Blob` for all types of `ExportMethod`.
-    fn export_method_to_jsvalue(
-        &self,
-        method: ExportMethod,
-    ) -> Pin<Box<dyn Future<Output = Result<web_sys::Blob, JsValue>>>> {
+    fn export_method_to_jsvalue(&self, method: ExportMethod) -> ApiFuture<web_sys::Blob> {
         match method {
             ExportMethod::Csv => {
                 let session = self.session().clone();
-                Box::pin(async move { session.csv_as_jsvalue(false).await?.as_blob() })
+                ApiFuture::new(async move { session.csv_as_jsvalue(false).await?.as_blob() })
             }
             ExportMethod::CsvAll => {
                 let session = self.session().clone();
-                Box::pin(async move { session.csv_as_jsvalue(true).await?.as_blob() })
+                ApiFuture::new(async move { session.csv_as_jsvalue(true).await?.as_blob() })
             }
             ExportMethod::Json => {
                 let session = self.session().clone();
-                Box::pin(async move { session.json_as_jsvalue(false).await?.as_blob() })
+                ApiFuture::new(async move { session.json_as_jsvalue(false).await?.as_blob() })
             }
             ExportMethod::JsonAll => {
                 let session = self.session().clone();
-                Box::pin(async move { session.json_as_jsvalue(true).await?.as_blob() })
+                ApiFuture::new(async move { session.json_as_jsvalue(true).await?.as_blob() })
             }
             ExportMethod::Arrow => {
                 let session = self.session().clone();
-                Box::pin(async move { session.arrow_as_jsvalue(false).await?.as_blob() })
+                ApiFuture::new(async move { session.arrow_as_jsvalue(false).await?.as_blob() })
             }
             ExportMethod::ArrowAll => {
                 let session = self.session().clone();
-                Box::pin(async move { session.arrow_as_jsvalue(true).await?.as_blob() })
+                ApiFuture::new(async move { session.arrow_as_jsvalue(true).await?.as_blob() })
             }
             ExportMethod::Html => {
                 let html_task = self.html_as_jsvalue();
-                Box::pin(async move { html_task.await })
+                ApiFuture::new(async move { html_task.await })
             }
             ExportMethod::Png => {
                 let png_task = self.png_as_jsvalue();
-                Box::pin(async move { png_task.await })
+                ApiFuture::new(async move { png_task.await })
             }
             ExportMethod::JsonConfig => {
                 let config_task = self.get_viewer_config();
-                Box::pin(async move {
+                ApiFuture::new(async move {
                     config_task
                         .await?
                         .encode(&Some(ViewerConfigEncoding::JSONString))?

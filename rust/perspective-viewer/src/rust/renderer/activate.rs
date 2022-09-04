@@ -7,9 +7,8 @@
 // file.
 
 use crate::js::plugin::JsPerspectiveViewerPlugin;
-
+use crate::utils::ApiResult;
 use std::future::Future;
-use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::*;
 
@@ -25,8 +24,8 @@ use web_sys::*;
 pub async fn activate_plugin<T>(
     viewer: &HtmlElement,
     plugin: &JsPerspectiveViewerPlugin,
-    task: impl Future<Output = Result<T, JsValue>>,
-) -> Result<T, JsValue> {
+    task: impl Future<Output = ApiResult<T>>,
+) -> ApiResult<T> {
     let html_plugin = plugin.unchecked_ref::<HtmlElement>();
     if html_plugin.parent_node().is_none() {
         html_plugin.style().set_property("opacity", "0")?;

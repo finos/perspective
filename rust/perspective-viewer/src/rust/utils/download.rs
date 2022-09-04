@@ -6,10 +6,10 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use wasm_bindgen::prelude::*;
+use crate::utils::ApiResult;
 use wasm_bindgen::JsCast;
 
-pub fn download(name: &str, value: &web_sys::Blob) -> Result<(), JsValue> {
+pub fn download(name: &str, value: &web_sys::Blob) -> ApiResult<()> {
     let window = web_sys::window().unwrap();
     let document = window.document().unwrap();
     let element: web_sys::HtmlElement = document.create_element("a")?.unchecked_into();

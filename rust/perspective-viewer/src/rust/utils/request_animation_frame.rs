@@ -8,25 +8,25 @@
 
 use crate::utils::*;
 
-use futures::channel::oneshot::*;
+use ::futures::channel::oneshot::*;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::*;
 
 /// An `async` version of `request_animation_frame`, which resolves on the next
 /// animation frame.
-pub async fn await_animation_frame() -> Result<(), JsValue> {
+pub async fn await_animation_frame() -> ApiResult<()> {
     let (sender, receiver) = channel::<()>();
     let jsfun = Closure::once_into_js(move || sender.send(()).unwrap());
     web_sys::window()
         .unwrap()
         .request_animation_frame(jsfun.unchecked_ref())?;
 
-    receiver.await.into_jserror()
+    Ok(receiver.await?)
 }
 
 /// An `async` which awaits the browser's `load` event, which is automatically
 /// bypassed if `document.readyState` indicates this has already occurred.
-pub async fn await_dom_loaded() -> Result<(), JsValue> {
+pub async fn await_dom_loaded() -> ApiResult<()> {
     let window = web_sys::window().unwrap();
     let state = window.document().unwrap().ready_state();
     if state == "complete" || state == "loaded" {
@@ -35,13 +35,13 @@ pub async fn await_dom_loaded() -> Result<(), JsValue> {
         let (sender, receiver) = channel::<()>();
         let jsfun = Closure::once_into_js(move || sender.send(()).unwrap());
         window.add_event_listener_with_callback("load", jsfun.unchecked_ref())?;
-        receiver.await.into_jserror()
+        Ok(receiver.await?)
     }
 }
 
 /// An `async` version of `set_timeout`, which resolves in `timeout`
 /// milliseconds
-pub async fn set_timeout(timeout: i32) -> Result<(), JsValue> {
+pub async fn set_timeout(timeout: i32) -> ApiResult<()> {
     let (sender, receiver) = channel::<()>();
     let jsfun = Closure::once_into_js(move || {
         let _ = sender.send(());
@@ -51,6 +51,5 @@ pub async fn set_timeout(timeout: i32) -> Result<(), JsValue> {
         .unwrap()
         .set_timeout_with_callback_and_timeout_and_arguments_0(jsfun.unchecked_ref(), timeout)?;
 
-    let x = receiver.await;
-    x.into_jserror()
+    Ok(receiver.await?)
 }

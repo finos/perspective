@@ -6,6 +6,7 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use super::errors::*;
 use js_intern::*;
 use std::future::Future;
 use std::pin::Pin;
@@ -25,7 +26,7 @@ use wasm_bindgen::__rt::IntoJsResult;
 /// A newtype wrapper for a `Future` trait object which supports being
 /// marshalled to a `JsPromise`, avoiding an API which requires type casting to
 /// and from `JsValue` and the associated loss of type safety.
-pub struct ApiFuture<T>(Pin<Box<dyn Future<Output = Result<T, JsValue>>>>);
+pub struct ApiFuture<T>(Pin<Box<dyn Future<Output = ApiResult<T>>>>);
 
 impl<T> ApiFuture<T> {
     /// Constructor for `ApiFuture`.  Note that, like a regular `Future`, the
@@ -33,7 +34,7 @@ impl<T> ApiFuture<T> {
     /// `Promise`, either explicitly or implcitly (when exposed via
     /// `wasm_bindgen`).
     #[must_use]
-    pub fn new<U: Future<Output = Result<T, JsValue>> + 'static>(x: U) -> ApiFuture<T> {
+    pub fn new<U: Future<Output = ApiResult<T>> + 'static>(x: U) -> ApiFuture<T> {
         ApiFuture(Box::pin(x))
     }
 }
@@ -45,7 +46,7 @@ where
     /// Construct an `ApiFuture` and execute it immediately.  The `Promise`
     /// handle created internally is dropped, but since JavaScript `Promise`
     /// executes on construction, the async invocation persists.
-    pub fn spawn<U: Future<Output = Result<T, JsValue>> + 'static>(x: U) {
+    pub fn spawn<U: Future<Output = ApiResult<T>> + 'static>(x: U) {
         drop(js_sys::Promise::from(ApiFuture::new(x)))
     }
 }
@@ -64,7 +65,11 @@ where
     Result<T, JsValue>: IntoJsResult + 'static,
 {
     fn from(fut: ApiFuture<T>) -> Self {
-        promisify_ignore_view_delete(async move { fut.0.await.into_js_result() })
+        future_to_promise(async move {
+            let x = Ok(fut.0.await?);
+            let y = Ok(x.into_js_result()?);
+            Ok(y.ignore_view_delete()?)
+        })
     }
 }
 
@@ -104,7 +109,7 @@ impl<T> Future for ApiFuture<T>
 where
     Result<T, JsValue>: IntoJsResult + 'static,
 {
-    type Output = Result<T, JsValue>;
+    type Output = ApiResult<T>;
     fn poll(
         self: Pin<&mut Self>,
         cx: &mut std::task::Context<'_>,
@@ -114,62 +119,51 @@ where
     }
 }
 
-/// Same as `future_to_promise`, except this version will catch `"View is not
-/// initialzied"` errors thrown from disposed Perspective objects without
-/// causing Rust `abort()`s.
-///
-/// # Arguments
-/// * `f` - a `Future` to convert to a `Promise` and execute.
-fn promisify_ignore_view_delete<F>(f: F) -> js_sys::Promise
-where
-    F: Future<Output = Result<JsValue, JsValue>> + 'static,
-{
-    future_to_promise(async move {
-        match f.await {
-            Ok(x) => Ok(x),
-            Err(y) => ignore_view_delete(y),
-        }
-    })
-}
+static CANCELLED_MSG: &str = "View method cancelled";
 
-/// Wraps an error `JsValue` return from a caught JavaScript exception,
-/// checking for the explicit error type indicating that a `JsPerspectiveView`
-/// call has been cancelled due to it already being deleted.  This is a normal
-/// mechanic of the `JsPerspectiveView` to cancel a `View` call that is no
-/// longer need be the viewer, e.g. when the user updates the UI before the
-/// previous update has finished drawing.  Without using exceptions for this,
-/// we'd need to wrap every such `JsPerspectiveView` call individually.
-///
-/// When `"View method cancelled"` message is received, this call should
-/// silently be replaced with `Ok`.  The message itself is returned in this
-/// case (instead of whatever the `async` returns), which is helpful for
-/// detecting this condition when debugging.
-pub fn ignore_view_delete(f: JsValue) -> Result<JsValue, JsValue> {
-    match f.clone().dyn_into::<js_sys::Error>() {
-        Ok(err) => {
-            if err.message() != "View method cancelled" {
-                Err(f)
-            } else {
-                Ok(js_intern!("View method cancelled").clone())
-            }
-        }
-        _ => match f.as_string() {
-            Some(x) if x == "View method cancelled" => {
-                Ok(js_intern!("View method cancelled").clone())
-            }
-            Some(_) => Err(f),
-            _ => {
-                if js_sys::Reflect::get(&f, js_intern!("message"))
-                    .unwrap()
-                    .as_string()
-                    .unwrap_or_else(|| "".to_owned())
-                    == "View method cancelled"
-                {
-                    Ok(js_intern!("View method cancelled").clone())
-                } else {
-                    Err(f)
+#[extend::ext]
+pub impl Result<JsValue, ApiError> {
+    /// Wraps an error `JsValue` return from a caught JavaScript exception,
+    /// checking for the explicit error type indicating that a
+    /// `JsPerspectiveView` call has been cancelled due to it already being
+    /// deleted.  This is a normal mechanic of the `JsPerspectiveView` to
+    /// cancel a `View` call that is no longer need be the viewer, e.g. when
+    /// the user updates the UI before the previous update has finished
+    /// drawing.  Without using exceptions for this, we'd need to wrap every
+    /// such `JsPerspectiveView` call individually.
+    ///
+    /// When `"View method cancelled"` message is received, this call should
+    /// silently be replaced with `Ok`.  The message itself is returned in this
+    /// case (instead of whatever the `async` returns), which is helpful for
+    /// detecting this condition when debugging.
+    fn ignore_view_delete(self) -> Result<JsValue, ApiError> {
+        self.or_else(|x| {
+            let f: JsValue = x.clone().into();
+            match f.dyn_ref::<js_sys::Error>() {
+                Some(err) => {
+                    if err.message() != CANCELLED_MSG {
+                        Err(x)
+                    } else {
+                        Ok(js_intern!(CANCELLED_MSG).clone())
+                    }
                 }
+                _ => match f.as_string() {
+                    Some(x) if x == CANCELLED_MSG => Ok(js_intern!(CANCELLED_MSG).clone()),
+                    Some(_) => Err(x),
+                    _ => {
+                        if js_sys::Reflect::get(&f, js_intern!("message"))
+                            .unwrap()
+                            .as_string()
+                            .unwrap_or_else(|| "".to_owned())
+                            == CANCELLED_MSG
+                        {
+                            Ok(js_intern!(CANCELLED_MSG).clone())
+                        } else {
+                            Err(x)
+                        }
+                    }
+                },
             }
-        },
+        })
     }
 }

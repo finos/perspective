@@ -88,7 +88,7 @@ extern "C" {
     // `<perspective-viewer-plugin>` element does not exist.  Without a stub
     // export, the accompanying snippet will be DCE'd.
     #[wasm_bindgen(js_name = "register_test_components", catch)]
-    pub fn register_test_components() -> Result<(), JsValue>;
+    pub fn register_test_components() -> ApiResult<()>;
 
 }
 

@@ -23,10 +23,6 @@ wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 fn cs_query(node: &NodeRef, query: &str) -> HtmlElement {
     node.cast::<HtmlElement>()
         .unwrap()
-        .next_sibling()
-        .as_ref()
-        .unwrap()
-        .unchecked_ref::<HtmlElement>()
         .query_selector(query)
         .unwrap()
         .as_ref()
@@ -44,10 +40,10 @@ pub async fn test_initial_fixed() {
     };
 
     test_html! {
-        <NumberColumnStyle
-            config={config}
-            ref={ panel_div.clone() }>
-        </NumberColumnStyle>
+        <div ref={ panel_div.clone() }>
+            <NumberColumnStyle config={config}>
+            </NumberColumnStyle>
+        </div>
     };
 
     await_animation_frame().await.unwrap();
@@ -67,11 +63,12 @@ pub async fn test_fixed_msg_overrides_default() {
     };
 
     test_html! {
-        <NumberColumnStyle
-            default_config={default_config}
-            ref={ panel_div.clone() }
-            weak_link={ link.clone() }>
-        </NumberColumnStyle>
+        <div ref={ panel_div.clone() }>
+            <NumberColumnStyle
+                default_config={default_config}
+                weak_link={ link.clone() }>
+            </NumberColumnStyle>
+        </div>
     };
 
     await_animation_frame().await.unwrap();
@@ -98,13 +95,15 @@ pub async fn test_fixed_is_0() {
         ..NumberColumnStyleConfig::default()
     };
     test_html! {
-        <NumberColumnStyle
-            config={ config }
-            ref={ panel_div.clone() }>
-        </NumberColumnStyle>
+        <div ref={ panel_div.clone() }>
+            <NumberColumnStyle
+                config={ config }>
+            </NumberColumnStyle>
+        </div>
     };
 
     await_animation_frame().await.unwrap();
+    web_sys::console::log_1(&panel_div.cast::<HtmlElement>().unwrap().into());
     assert_eq!(
         cs_query(&panel_div, "#fixed-examples").inner_text().trim(),
         "Prec 1"

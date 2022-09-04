@@ -83,11 +83,11 @@ impl ExpressionEditorElement {
         self.modal.open(target, Some(&*self.resize_pubsub));
     }
 
-    pub fn hide(&self) -> Result<(), JsValue> {
+    pub fn hide(&self) -> ApiResult<()> {
         self.modal.hide()
     }
 
-    pub fn destroy(self) -> Result<(), JsValue> {
+    pub fn destroy(self) -> ApiResult<()> {
         self.modal.destroy()
     }
 

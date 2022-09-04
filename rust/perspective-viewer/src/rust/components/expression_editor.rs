@@ -22,11 +22,9 @@ use std::convert::TryFrom;
 use std::ops::Deref;
 use std::rc::Rc;
 use wasm_bindgen::{prelude::*, JsCast};
-use wasm_bindgen_futures::future_to_promise;
 use web_sys::*;
 use yew::html::Scope;
 use yew::prelude::*;
-
 
 pub enum ExpressionEditorMsg {
     SetTheme(String),
@@ -86,7 +84,7 @@ impl Component for ExpressionEditor {
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             ExpressionEditorMsg::Validate(_val) => {
-                drop(future_to_promise(self.state.clone().validate_expr()));
+                ApiFuture::spawn(self.state.clone().validate_expr());
                 false
             }
             ExpressionEditorMsg::Resize(width, height) => {
@@ -151,7 +149,7 @@ impl Component for ExpressionEditor {
 
     fn rendered(&mut self, _ctx: &Context<Self>, first_render: bool) {
         if first_render {
-            drop(future_to_promise(self.state.clone().init_monaco_editor()));
+            ApiFuture::spawn(self.state.clone().init_monaco_editor());
         } else if let Some((_, editor)) = &*self.state.0.editor.borrow() {
             editor.layout(&JsValue::UNDEFINED);
             editor.focus();
@@ -272,15 +270,18 @@ impl ExpressionEditorState {
     /// Initialize the `monaco-editor` for this
     /// `<perspective-expression-editor>`. This method should only be called
     /// once per element.
-    async fn init_monaco_editor(self) -> Result<JsValue, JsValue> {
-        let monaco = init_monaco().await.into_jserror()?;
+    async fn init_monaco_editor(self) -> ApiResult<JsValue> {
+        let monaco = init_monaco().await?;
         if let Some(ref theme) = *self.theme.borrow() {
             init_theme(theme.as_str(), &monaco);
         }
 
         self.session.await_table().await?;
         set_global_completion_column_names(
-            self.session.metadata().get_table_columns().into_jserror()?,
+            self.session
+                .metadata()
+                .get_table_columns()
+                .into_apierror()?,
         );
 
         let args = EditorArgs {
@@ -342,7 +343,7 @@ impl ExpressionEditorState {
 
     /// Validate the editor's current value, and toggle the Save button state
     /// if the expression is valid.
-    async fn validate_expr(self) -> Result<JsValue, JsValue> {
+    async fn validate_expr(self) -> ApiResult<JsValue> {
         let (monaco, editor) = self.editor.borrow().as_ref().unwrap().clone();
         let expr = editor.get_value();
         self.on_validate_complete.emit(true);

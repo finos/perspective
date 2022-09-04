@@ -79,7 +79,7 @@ pub async fn test_settings_open() {
     ));
 
     viewer
-        .promise_message(|x| Msg::ToggleSettingsComplete(SettingsUpdate::Update(true), x))
+        .send_message_async(|x| Msg::ToggleSettingsComplete(SettingsUpdate::Update(true), x))
         .await
         .unwrap();
 

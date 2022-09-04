@@ -10,6 +10,7 @@ use crate::components::number_column_style::*;
 use crate::config::*;
 use crate::custom_elements::modal::*;
 use crate::utils::CustomElementMetadata;
+use crate::utils::*;
 use crate::*;
 use wasm_bindgen::prelude::*;
 use web_sys::*;
@@ -53,9 +54,9 @@ impl PerspectiveNumberColumnStyleElement {
         &mut self,
         config: NumberColumnStyleConfig,
         default_config: NumberColumnStyleDefaultConfig,
-    ) -> Result<(), JsValue> {
+    ) -> ApiResult<()> {
         let msg = NumberColumnStyleMsg::Reset(config.into(), default_config.into());
-        self.modal.as_ref().into_jserror()?.send_message(msg);
+        self.modal.as_apierror()?.send_message(msg);
         Ok(())
     }
 
@@ -69,7 +70,7 @@ impl PerspectiveNumberColumnStyleElement {
         target: web_sys::HtmlElement,
         config: NumberColumnStyleConfig,
         default_config: NumberColumnStyleDefaultConfig,
-    ) -> Result<(), JsValue> {
+    ) -> ApiResult<()> {
         if self.modal.is_some() {
             self.reset(config, default_config)?;
         } else {
@@ -87,17 +88,17 @@ impl PerspectiveNumberColumnStyleElement {
             self.modal = Some(ModalElement::new(self.elem.clone(), props, true));
         }
 
-        self.modal.as_ref().into_jserror()?.open(target, None);
+        self.modal.as_apierror()?.open(target, None);
         Ok(())
     }
 
     /// Remove this `ModalElement` from the DOM.
-    pub fn close(&mut self) -> Result<(), JsValue> {
-        self.modal.as_ref().into_jserror()?.hide()
+    pub fn close(&mut self) -> ApiResult<()> {
+        self.modal.as_apierror()?.hide()
     }
 
-    pub fn destroy(self) -> Result<(), JsValue> {
-        self.modal.into_jserror()?.destroy()
+    pub fn destroy(self) -> ApiResult<()> {
+        self.modal.into_apierror()?.destroy()
     }
 
     /// DOM lifecycle method when connected.  We don't use this, as it can fire

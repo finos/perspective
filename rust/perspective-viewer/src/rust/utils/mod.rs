@@ -11,8 +11,6 @@
 //! to be single-responsibility, but some reference other `crate::utils`
 //! modules when it helps reduce boiler-plate.
 
-mod api_future;
-mod async_callback;
 mod blob;
 mod clone;
 mod closure;
@@ -21,6 +19,7 @@ mod datetime;
 mod debounce;
 mod download;
 mod errors;
+mod futures;
 mod json;
 mod pubsub;
 mod request_animation_frame;
@@ -31,8 +30,7 @@ mod weak_scope;
 #[cfg(test)]
 mod tests;
 
-pub use api_future::*;
-pub use async_callback::*;
+pub use self::futures::*;
 pub use blob::*;
 pub use clone::*;
 pub use closure::*;

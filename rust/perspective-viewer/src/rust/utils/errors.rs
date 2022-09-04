@@ -6,80 +6,97 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use futures::channel::oneshot::Canceled;
-use std::num::*;
-use std::str::*;
 use wasm_bindgen::prelude::*;
 
-pub trait ToJsValueError<T> {
-    /// A convenient extension method for `Result<T, E>`
-    /// such that the `?` operator can compose serde errors with methods
-    /// bound to be JavaScript callbacks.
-    fn into_jserror(self) -> Result<T, JsValue>;
-}
+/// A bespoke error class for chaining a litany of various error types with the
+/// `?` operator.  `anyhow`, `web_sys::JsError` are candidates for replacing
+/// this, but we'd need a way to get around syntacitc conveniences we get
+/// from avoiding orphan instance issues (e.g. converting `JsValue` to an error
+/// in `anyhow`).
+///
+/// We'd still like to implement this, but instead must independently implement
+/// the instance for each error, as otherwise `rustc` will complain that the
+/// `wasm_bindgen` authors my themselves implement `Error` for `JsValue`.
+/// ```
+/// impl<T> From<T> for ApiError
+/// where
+///     T: std::error::Error,
+/// {
+///     fn from(x: T) -> Self {
+///         ApiError(JsValue::from(format!("{}", x)))
+///     }
+/// }
+/// ```
+#[derive(Clone, Debug)]
+pub struct ApiError(JsValue);
 
-impl<T> ToJsValueError<T> for Result<T, serde_json::Error> {
-    fn into_jserror(self) -> std::result::Result<T, JsValue> {
-        self.map_err(|x| JsValue::from(format!("{}", x)))
+pub type ApiResult<T> = Result<T, ApiError>;
+
+impl From<ApiError> for JsValue {
+    fn from(err: ApiError) -> Self {
+        err.0
     }
 }
 
-impl ToJsValueError<JsValue> for Result<(), Result<JsValue, JsValue>> {
-    fn into_jserror(self) -> std::result::Result<JsValue, JsValue> {
+impl From<JsValue> for ApiError {
+    fn from(err: JsValue) -> Self {
+        ApiError(err)
+    }
+}
+
+macro_rules! define_api_error {
+    ( $($t:ty),* ) => {
+        $(
+            impl From<$t> for ApiError {
+                fn from(err: $t) -> Self {
+                    ApiError(JsValue::from(format!("{}", err)))
+                }
+            }
+        )*
+    }
+}
+
+define_api_error!(
+    serde_json::Error,
+    std::io::Error,
+    rmp_serde::encode::Error,
+    rmp_serde::decode::Error,
+    &str,
+    String,
+    futures::channel::oneshot::Canceled,
+    base64::DecodeError,
+    chrono::ParseError
+);
+
+/// Explicit conversion methods for `ApiResult<T>`, for situations where
+/// error-casting through the `?` operator is insufficient.
+pub trait ToApiError<T> {
+    fn into_apierror(self) -> ApiResult<T>;
+    fn as_apierror(&self) -> Result<&T, ApiError>;
+}
+
+impl<T> ToApiError<T> for Option<T> {
+    fn into_apierror(self) -> ApiResult<T> {
+        self.ok_or_else(|| "Unwrap on None".into())
+    }
+
+    fn as_apierror(&self) -> Result<&T, ApiError> {
+        self.as_ref().ok_or_else(|| "Unwrap on None".into())
+    }
+}
+
+impl ToApiError<JsValue> for Result<(), ApiResult<JsValue>> {
+    fn into_apierror(self) -> ApiResult<JsValue> {
         self.map_or_else(|x| x, |()| Ok(JsValue::UNDEFINED))
     }
-}
 
-impl<T> ToJsValueError<T> for Result<T, Canceled> {
-    fn into_jserror(self) -> std::result::Result<T, JsValue> {
-        self.map_err(|_x| JsValue::from("Cancelled"))
-    }
-}
-
-impl<T> ToJsValueError<T> for Option<T> {
-    fn into_jserror(self) -> std::result::Result<T, JsValue> {
-        self.ok_or_else(|| JsValue::from("None"))
-    }
-}
-
-impl<T> ToJsValueError<T> for Result<T, ParseIntError> {
-    fn into_jserror(self) -> Result<T, JsValue> {
-        self.map_err(|x: ParseIntError| JsValue::from(&format!("{}", x)))
-    }
-}
-
-impl<T> ToJsValueError<T> for Result<T, Utf8Error> {
-    fn into_jserror(self) -> Result<T, JsValue> {
-        self.map_err(|x: Utf8Error| JsValue::from(&format!("{}", x)))
-    }
-}
-
-impl<T> ToJsValueError<T> for Result<T, base64::DecodeError> {
-    fn into_jserror(self) -> Result<T, JsValue> {
-        self.map_err(|x: base64::DecodeError| JsValue::from(&format!("{}", x)))
-    }
-}
-
-impl<T> ToJsValueError<T> for Result<T, rmp_serde::encode::Error> {
-    fn into_jserror(self) -> Result<T, JsValue> {
-        self.map_err(|x: rmp_serde::encode::Error| JsValue::from(&format!("{}", x)))
-    }
-}
-
-impl<T> ToJsValueError<T> for Result<T, rmp_serde::decode::Error> {
-    fn into_jserror(self) -> Result<T, JsValue> {
-        self.map_err(|x: rmp_serde::decode::Error| JsValue::from(&format!("{}", x)))
-    }
-}
-
-impl<T> ToJsValueError<T> for Result<T, std::io::Error> {
-    fn into_jserror(self) -> Result<T, JsValue> {
-        self.map_err(|x: std::io::Error| JsValue::from(&format!("{}", x)))
-    }
-}
-
-impl<T> ToJsValueError<T> for Result<T, chrono::ParseError> {
-    fn into_jserror(self) -> Result<T, JsValue> {
-        self.map_err(|x: chrono::ParseError| JsValue::from(&format!("{}", x)))
+    fn as_apierror(&self) -> Result<&JsValue, ApiError> {
+        self.as_ref().map_or_else(
+            |x| match x {
+                Ok(ref x) => Ok(x),
+                Err(err) => Err(err.clone()),
+            },
+            |()| Ok(js_intern::js_intern!("test")),
+        )
     }
 }

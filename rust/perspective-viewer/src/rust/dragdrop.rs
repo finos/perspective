@@ -195,7 +195,7 @@ pub fn dragenter_helper(callback: impl Fn() + 'static, target: NodeRef) -> Callb
                 if event.related_target().is_none() {
                     target
                         .cast::<HtmlElement>()
-                        .into_jserror()?
+                        .into_apierror()?
                         .dataset()
                         .set("safaridragleave", "true")?;
                 }
@@ -246,9 +246,9 @@ pub fn dragleave_helper(callback: impl Fn() + 'static, drag_ref: NodeRef) -> Cal
                 {
                     related_target = Some(
                         related_target
-                            .into_jserror()?
+                            .into_apierror()?
                             .parent_node()
-                            .into_jserror()?
+                            .into_apierror()?
                             .dyn_ref::<ShadowRoot>()
                             .ok_or_else(|| JsValue::from("Chrome drag/drop bug detection failed"))?
                             .host()

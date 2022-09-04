@@ -109,7 +109,7 @@ impl FilterDropDownElement {
         self.modal.send_message(FilterDropDownMsg::ItemUp);
     }
 
-    pub fn hide(&self) -> Result<(), JsValue> {
+    pub fn hide(&self) -> ApiResult<()> {
         let result = self.modal.hide();
         drop(self.column.borrow_mut().take());
         result

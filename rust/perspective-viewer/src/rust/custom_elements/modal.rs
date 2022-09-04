@@ -189,7 +189,7 @@ where
         }
     }
 
-    async fn open_within_viewport(&self, target: HtmlElement) -> Result<(), JsValue> {
+    async fn open_within_viewport(&self, target: HtmlElement) -> ApiResult<()> {
         let height = target.offset_height() as i32;
         let width = target.offset_width() as i32;
         let elem = target.clone().unchecked_into::<HtmlElement>();
@@ -253,7 +253,7 @@ where
                     .unchecked_ref(),
             )?;
 
-            self.custom_element.focus()
+            Ok(self.custom_element.focus()?)
         } else {
             Ok(())
         }
@@ -319,7 +319,7 @@ where
     }
 
     /// Remove from document.
-    pub fn hide(&self) -> Result<(), JsValue> {
+    pub fn hide(&self) -> ApiResult<()> {
         if self.is_open() {
             if self.own_focus {
                 self.custom_element.remove_event_listener_with_callback(
@@ -357,7 +357,7 @@ where
     }
 
     /// Remove from document and cleanup.
-    pub fn destroy(self) -> Result<(), JsValue> {
+    pub fn destroy(self) -> ApiResult<()> {
         self.hide()?;
         self.root.borrow_mut().take().unwrap().destroy();
         Ok(())

@@ -37,7 +37,7 @@ impl Drop for ResizingState {
     /// `body`. Without this, the `Closure` objects would not leak, but the
     /// document will continue to call them, causing runtime exceptions.
     fn drop(&mut self) {
-        let result: Result<(), JsValue> = maybe! {
+        let result: ApiResult<()> = maybe! {
             let document = web_sys::window().unwrap().document().unwrap();
             let body = document.body().unwrap();
             let mousemove = self.mousemove.as_ref().unchecked_ref();
@@ -64,7 +64,7 @@ impl ResizingState {
         reverse: bool,
         split_panel: &Scope<SplitPanel>,
         first_elem: &HtmlElement,
-    ) -> Result<ResizingState, JsValue> {
+    ) -> ApiResult<ResizingState> {
         let document = web_sys::window().unwrap().document().unwrap();
         let body = document.body().unwrap();
         let mut state = ResizingState {
@@ -128,30 +128,31 @@ impl ResizingState {
     }
 
     /// Adds the event listeners, the corollary of `Drop`.
-    fn register_listeners(&self) -> Result<(), JsValue> {
+    fn register_listeners(&self) -> ApiResult<()> {
         let document = web_sys::window().unwrap().document().unwrap();
         let body = document.body().unwrap();
         let mousemove = self.mousemove.as_ref().unchecked_ref();
         body.add_event_listener_with_callback("mousemove", mousemove)?;
 
         let mouseup = self.mouseup.as_ref().unchecked_ref();
-        body.add_event_listener_with_callback("mouseup", mouseup)
+        Ok(body.add_event_listener_with_callback("mouseup", mouseup)?)
     }
 
     /// Helper functions capture and release the global cursor while dragging is
     /// occurring.
-    fn capture_cursor(&mut self) -> Result<(), JsValue> {
+    fn capture_cursor(&mut self) -> ApiResult<()> {
         self.cursor = self.body_style.get_property_value("cursor")?;
-        self.body_style
+        Ok(self
+            .body_style
             .set_property("cursor", match self.orientation {
                 Orientation::Horizontal => "col-resize",
                 Orientation::Vertical => "row-resize",
-            })
+            })?)
     }
 
     /// " but for release
-    fn release_cursor(&self) -> Result<(), JsValue> {
-        self.body_style.set_property("cursor", &self.cursor)
+    fn release_cursor(&self) -> ApiResult<()> {
+        Ok(self.body_style.set_property("cursor", &self.cursor)?)
     }
 }
 

@@ -6,40 +6,44 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use wasm_bindgen::prelude::*;
+use crate::utils::ApiResult;
 
 pub trait AsBlob {
     /// Standardized conversions from common `wasm_bindgen` types to
     /// `js_sys::Blob`, which is commonly necessary to provide data to a
     /// download or clipboard action.
-    fn as_blob(&self) -> Result<web_sys::Blob, JsValue>;
+    fn as_blob(&self) -> ApiResult<web_sys::Blob>;
 }
 
 impl AsBlob for js_sys::ArrayBuffer {
-    fn as_blob(&self) -> Result<web_sys::Blob, JsValue> {
+    fn as_blob(&self) -> ApiResult<web_sys::Blob> {
         let array = [js_sys::Uint8Array::new(self)]
             .iter()
             .collect::<js_sys::Array>();
-        web_sys::Blob::new_with_u8_array_sequence(&array)
+        Ok(web_sys::Blob::new_with_u8_array_sequence(&array)?)
     }
 }
 
 impl AsBlob for js_sys::JsString {
-    fn as_blob(&self) -> Result<web_sys::Blob, JsValue> {
+    fn as_blob(&self) -> ApiResult<web_sys::Blob> {
         let array = [self].iter().collect::<js_sys::Array>();
         let mut options = web_sys::BlobPropertyBag::new();
         options.type_("text/plain");
-        web_sys::Blob::new_with_str_sequence_and_options(&array, &options)
+        Ok(web_sys::Blob::new_with_str_sequence_and_options(
+            &array, &options,
+        )?)
     }
 }
 
 impl AsBlob for js_sys::Object {
-    fn as_blob(&self) -> Result<web_sys::Blob, JsValue> {
+    fn as_blob(&self) -> ApiResult<web_sys::Blob> {
         let array = [js_sys::JSON::stringify(self)?]
             .iter()
             .collect::<js_sys::Array>();
         let mut options = web_sys::BlobPropertyBag::new();
         options.type_("text/plain");
-        web_sys::Blob::new_with_str_sequence_and_options(&array, &options)
+        Ok(web_sys::Blob::new_with_str_sequence_and_options(
+            &array, &options,
+        )?)
     }
 }

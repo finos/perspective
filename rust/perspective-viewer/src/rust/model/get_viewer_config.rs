@@ -17,7 +17,6 @@ use crate::*;
 
 use std::future::Future;
 use std::pin::Pin;
-use wasm_bindgen::prelude::*;
 
 /// A `ViewerConfig` is constructed from various properties acrosss the
 /// application state, including the current `Plugin`, `ViewConfig`, and
@@ -38,14 +37,14 @@ pub trait GetViewerConfigModel: HasSession + HasRenderer + HasTheme {
     }
 
     /// Get the current ViewerConfig
-    fn get_viewer_config(&self) -> Pin<Box<dyn Future<Output = Result<ViewerConfig, JsValue>>>> {
+    fn get_viewer_config(&self) -> Pin<Box<dyn Future<Output = ApiResult<ViewerConfig>>>> {
         clone!(self.renderer(), self.session(), self.theme());
         Box::pin(async move {
             let view_config = session.get_view_config().clone();
             let js_plugin = renderer.get_active_plugin()?;
             let settings = renderer.is_settings_open();
             let plugin = js_plugin.name();
-            let plugin_config: serde_json::Value = js_plugin.save().into_serde().into_jserror()?;
+            let plugin_config: serde_json::Value = js_plugin.save().into_serde()?;
             let theme = theme.get_name().await;
             Ok(ViewerConfig {
                 plugin,

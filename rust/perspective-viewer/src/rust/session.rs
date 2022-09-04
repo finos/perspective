@@ -24,7 +24,6 @@ use crate::js::perspective::*;
 use crate::js::plugin::*;
 use crate::utils::*;
 use crate::*;
-use js_intern::*;
 use std::cell::{Ref, RefCell};
 use std::collections::HashSet;
 use std::iter::IntoIterator;
@@ -123,7 +122,7 @@ impl Session {
     /// Reset this `Session`'s state with a new `Table`.  Implicitly clears the
     /// `ViewSubscription`, which will need to be re-initialized later via
     /// `create_view()`.
-    pub async fn set_table(&self, table: JsPerspectiveTable) -> Result<JsValue, JsValue> {
+    pub async fn set_table(&self, table: JsPerspectiveTable) -> ApiResult<JsValue> {
         let metadata = SessionMetadata::from_table(&table).await?;
         self.borrow_mut().view_sub = None;
         self.borrow_mut().metadata = metadata;
@@ -132,12 +131,10 @@ impl Session {
         self.set_initial_stats().await
     }
 
-    pub async fn await_table(&self) -> Result<(), JsValue> {
+    pub async fn await_table(&self) -> ApiResult<()> {
         if self.js_get_table().is_none() {
-            self.table_loaded.listen_once().await.into_jserror()?;
-            let _ = self
-                .js_get_table()
-                .ok_or_else(|| js_intern!("No table set"))?;
+            self.table_loaded.listen_once().await?;
+            let _ = self.js_get_table().ok_or("No table set")?;
         }
 
         Ok(())
@@ -211,15 +208,15 @@ impl Session {
         Ok(js_sys::Uint8Array::new(&arrow).to_vec())
     }
 
-    pub async fn arrow_as_jsvalue(self, flat: bool) -> Result<js_sys::ArrayBuffer, JsValue> {
+    pub async fn arrow_as_jsvalue(self, flat: bool) -> Result<js_sys::ArrayBuffer, ApiError> {
         self.flat_as_jsvalue(flat).await?.to_arrow().await
     }
 
-    pub async fn json_as_jsvalue(self, flat: bool) -> Result<js_sys::Object, JsValue> {
+    pub async fn json_as_jsvalue(self, flat: bool) -> Result<js_sys::Object, ApiError> {
         self.flat_as_jsvalue(flat).await?.to_columns().await
     }
 
-    pub async fn csv_as_jsvalue(&self, flat: bool) -> Result<js_sys::JsString, JsValue> {
+    pub async fn csv_as_jsvalue(&self, flat: bool) -> Result<js_sys::JsString, ApiError> {
         let opts = json!({"formatted": true});
         self.flat_as_jsvalue(flat)
             .await?
@@ -325,7 +322,7 @@ impl Session {
             web_sys::console::error_3(
                 &"Invalid config, resetting to default".into(),
                 &JsValue::from_serde(&self.borrow().config).unwrap(),
-                &err,
+                &err.into(),
             );
 
             self.reset(true);
@@ -335,17 +332,17 @@ impl Session {
         Ok(ValidSession(self))
     }
 
-    async fn get_validated_expression_name(&self, expr: &JsValue) -> Result<String, JsValue> {
+    async fn get_validated_expression_name(&self, expr: &JsValue) -> ApiResult<String> {
         let arr = [expr].iter().collect::<js_sys::Array>();
         let table = self.borrow().table.as_ref().unwrap().clone();
         let schema = table.validate_expressions(arr).await?.expression_schema();
         let schema_keys = js_sys::Object::keys(&schema);
-        schema_keys.get(0).as_string().into_jserror()
+        schema_keys.get(0).as_string().into_apierror()
     }
 
-    async fn flat_as_jsvalue(&self, flat: bool) -> Result<View, JsValue> {
+    async fn flat_as_jsvalue(&self, flat: bool) -> ApiResult<View> {
         if flat {
-            let table = self.borrow().table.clone().into_jserror()?;
+            let table = self.borrow().table.clone().into_apierror()?;
             table
                 .view(&json!({}).unchecked_into())
                 .await
@@ -355,12 +352,12 @@ impl Session {
                 .view_sub
                 .as_ref()
                 .map(|x| x.get_view().clone())
-                .into_jserror()
+                .into_apierror()
         }
     }
 
     /// Update the this `Session`'s `TableStats` data from the `Table`.
-    async fn set_initial_stats(&self) -> Result<JsValue, JsValue> {
+    async fn set_initial_stats(&self) -> ApiResult<JsValue> {
         let table = self.borrow().table.clone();
         let num_rows = table.unwrap().size().await? as u32;
         let stats = TableStats {
@@ -378,7 +375,7 @@ impl Session {
         self.stats_changed.emit_all(());
     }
 
-    async fn validate_view_config(&self) -> Result<(), JsValue> {
+    async fn validate_view_config(&self) -> ApiResult<()> {
         let config = self.borrow().config.clone();
         let table_columns = self
             .metadata()
@@ -472,7 +469,7 @@ impl<'a> ValidSession<'a> {
     /// Set a new `View` (derived from this `Session`'s `Table`), and create the
     /// `update()` subscription, consuming this `ValidSession<'_>` and returning
     /// the original `&Session`.
-    pub async fn create_view(&self) -> Result<&'a Session, JsValue> {
+    pub async fn create_view(&self) -> Result<&'a Session, ApiError> {
         let js_config = self.0.borrow().config.as_jsvalue()?;
         let table = self
             .0

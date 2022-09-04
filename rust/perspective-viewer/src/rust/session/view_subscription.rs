@@ -44,7 +44,7 @@ pub struct ViewSubscription {
 
 impl ViewSubscriptionData {
     /// Main handler when underlying `View()` calls `on_update()`.
-    async fn on_view_update(self) -> Result<JsValue, JsValue> {
+    async fn on_view_update(self) -> ApiResult<JsValue> {
         self.on_update.emit(());
         self.clone().update_view_stats().await?;
         Ok(JsValue::UNDEFINED)
@@ -52,7 +52,7 @@ impl ViewSubscriptionData {
 
     /// TODO Use serde to serialize the full view config, instead of calculating
     /// `is_pivot` here.
-    async fn update_view_stats(self) -> Result<JsValue, JsValue> {
+    async fn update_view_stats(self) -> ApiResult<JsValue> {
         let num_rows = self.table.size().await? as u32;
         let virtual_rows = self.view.num_rows().await? as u32;
         let stats = TableStats {

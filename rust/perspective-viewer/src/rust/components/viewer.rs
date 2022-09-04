@@ -52,10 +52,7 @@ impl PartialEq for PerspectiveViewerProps {
 pub enum Msg {
     Resize,
     Reset(bool, Option<Sender<()>>),
-    ToggleSettingsInit(
-        Option<SettingsUpdate>,
-        Option<Sender<Result<JsValue, JsValue>>>,
-    ),
+    ToggleSettingsInit(Option<SettingsUpdate>, Option<Sender<ApiResult<JsValue>>>),
     ToggleSettingsComplete(SettingsUpdate, Sender<()>),
     PreloadFontsUpdate,
     RenderLimits(Option<(usize, usize, Option<usize>, Option<usize>)>),
@@ -288,7 +285,7 @@ impl PerspectiveViewer {
         &mut self,
         ctx: &Context<Self>,
         force: Option<bool>,
-        sender: Option<Sender<Result<JsValue, JsValue>>>,
+        sender: Option<Sender<ApiResult<JsValue>>>,
     ) {
         let is_open = ctx.props().renderer.is_settings_open();
         match force {
@@ -307,16 +304,16 @@ impl PerspectiveViewer {
                 clone!(ctx.props().renderer, ctx.props().session);
                 ApiFuture::spawn(async move {
                     let result = if session.js_get_table().is_some() {
-                        renderer.presize(force, callback.emit_and_render()).await
+                        renderer.presize(force, callback.emit_async_safe()).await
                     } else {
-                        callback.emit_and_render().await?;
+                        callback.emit_async_safe().await?;
                         Ok(JsValue::UNDEFINED)
                     };
 
                     if let Some(sender) = sender {
                         // TODO shouldn't ignore, this should retry (?)
-                        let msg = result.clone().or_else(ignore_view_delete);
-                        sender.send(msg).into_jserror()?;
+                        let msg = result.clone().ignore_view_delete();
+                        sender.send(msg).into_apierror()?;
                     };
 
                     result

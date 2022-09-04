@@ -49,9 +49,9 @@ impl ExportDropDownMenuElement {
         }
     }
 
-    pub fn hide(&self) -> Result<(), JsValue> {
+    pub fn hide(&self) -> ApiResult<()> {
         let borrowed = self.modal.borrow();
-        borrowed.as_ref().into_jserror()?.hide()
+        borrowed.as_apierror()?.hide()
     }
 
     #[allow(clippy::not_unsafe_ptr_arg_deref)]
