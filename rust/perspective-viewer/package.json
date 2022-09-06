@@ -59,6 +59,7 @@
     },
     "devDependencies": {
         "@finos/perspective-esbuild-plugin": "^1.6.5",
-        "@finos/perspective-test": "^1.6.5"
+        "@finos/perspective-test": "^1.6.5",
+        "typescript": "4.3.3"
     }
 }
