@@ -9,6 +9,7 @@
 // Required by yew's `html` macro.
 #![recursion_limit = "1024"]
 #![feature(const_type_name)]
+#![feature(let_chains)]
 #![warn(
     clippy::all,
     clippy::panic_in_result_fn,
