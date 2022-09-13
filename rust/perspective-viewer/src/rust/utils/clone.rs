@@ -29,51 +29,51 @@ macro_rules! clone {
     };
 
     (impl @expand { $($orig:tt)* } { $($binder:tt)* } $i:tt) => {
-        clone!(impl @bind $i { $($orig)* $i } { $($binder)* });
+        $crate::clone!(impl @bind $i { $($orig)* $i } { $($binder)* });
     };
 
     (impl @expand { $($orig:tt)* } { $($binder:tt)* } $i:tt ()) => {
-        clone!(impl @bind $i { $($orig)* $i () } { $($binder)* });
+        $crate::clone!(impl @bind $i { $($orig)* $i () } { $($binder)* });
     };
 
     (impl @expand { $($orig:tt)* } { $($binder:tt)* } $i:tt . 0) => {
-        clone!(impl @bind $i { $($orig)* $i . 0 } { $($binder)* });
+        $crate::clone!(impl @bind $i { $($orig)* $i . 0 } { $($binder)* });
     };
 
     (impl @expand { $($orig:tt)* } { $($binder:tt)* } $i:tt . 1) => {
-        clone!(impl @bind $i { $($orig)* $i . 1 } { $($binder)* });
+        $crate::clone!(impl @bind $i { $($orig)* $i . 1 } { $($binder)* });
     };
 
     (impl @expand { $($orig:tt)* } { $($binder:tt)* } $i:tt . 2) => {
-        clone!(impl @bind $i { $($orig)* $i . 2 } { $($binder)* });
+        $crate::clone!(impl @bind $i { $($orig)* $i . 2 } { $($binder)* });
     };
 
     (impl @expand { $($orig:tt)* } { $($binder:tt)* } $i:tt . 3) => {
-        clone!(impl @bind $i { $($orig)* $i . 3 } { $($binder)* });
+        $crate::clone!(impl @bind $i { $($orig)* $i . 3 } { $($binder)* });
     };
 
     (impl @expand { $($orig:tt)* } { $($binder:tt)* } $i:tt = $($tail:tt)+) => {
-        clone!(impl @expand { $($orig)* } { $i } $($tail)+);
+        $crate::clone!(impl @expand { $($orig)* } { $i } $($tail)+);
     };
 
     (impl @expand { $($orig:tt)* } { $($binder:tt)* } $i:tt $($tail:tt)+) => {
-        clone!(impl @expand { $($orig)* $i } { $($binder)* } $($tail)+);
+        $crate::clone!(impl @expand { $($orig)* $i } { $($binder)* } $($tail)+);
     };
 
     (impl @context { $($orig:tt)* } $tail:tt) => {
-        clone!(impl @expand { } { } $($orig)* $tail);
+        $crate::clone!(impl @expand { } { } $($orig)* $tail);
     };
 
     (impl @context { $($orig:tt)* } , $($tail:tt)+) => {
-        clone!(impl @expand { } { } $($orig)*);
-        clone!(impl @context { } $($tail)+);
+        $crate::clone!(impl @expand { } { } $($orig)*);
+        $crate::clone!(impl @context { } $($tail)+);
     };
 
     (impl @context { $($orig:tt)* } $i:tt $($tail:tt)+) => {
-        clone!(impl @context { $($orig)* $i } $($tail)+);
+        $crate::clone!(impl @context { $($orig)* $i } $($tail)+);
     };
 
     ($($tail:tt)+) => {
-        clone!(impl @context { } $($tail)+);
+        $crate::clone!(impl @context { } $($tail)+);
     }
 }

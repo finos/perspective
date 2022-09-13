@@ -86,7 +86,7 @@ impl PerspectiveDatetimeColumnStyleElement {
             self.modal = Some(ModalElement::new(self.elem.clone(), props, true));
         }
 
-        self.modal.as_apierror()?.open(target, None);
+        ApiFuture::spawn(self.modal.as_apierror()?.clone().open(target, None));
         Ok(())
     }
 

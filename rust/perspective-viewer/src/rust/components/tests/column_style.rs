@@ -46,7 +46,6 @@ pub async fn test_initial_fixed() {
         </div>
     };
 
-    await_animation_frame().await.unwrap();
     assert_eq!(
         cs_query(&panel_div, "#fixed-examples").inner_text(),
         "Prec 0.0001"
@@ -71,7 +70,6 @@ pub async fn test_fixed_msg_overrides_default() {
         </div>
     };
 
-    await_animation_frame().await.unwrap();
     assert_eq!(
         cs_query(&panel_div, "#fixed-examples").inner_text(),
         "Prec 0.0001"
@@ -102,8 +100,6 @@ pub async fn test_fixed_is_0() {
         </div>
     };
 
-    await_animation_frame().await.unwrap();
-    web_sys::console::log_1(&panel_div.cast::<HtmlElement>().unwrap().into());
     assert_eq!(
         cs_query(&panel_div, "#fixed-examples").inner_text().trim(),
         "Prec 1"
@@ -130,7 +126,6 @@ pub async fn test_color_enabled() {
         </NumberColumnStyle>
     };
 
-    await_animation_frame().await.unwrap();
     let column_style = link.borrow().clone().unwrap();
     column_style.send_message(NumberColumnStyleMsg::ForeEnabledChanged(true));
     await_animation_frame().await.unwrap();
@@ -169,7 +164,6 @@ pub async fn test_color_mode_changed() {
         </NumberColumnStyle>
     };
 
-    await_animation_frame().await.unwrap();
     let column_style = link.borrow().clone().unwrap();
     assert_eq!(result.borrow().number_fg_mode, NumberForegroundMode::Color);
     assert_eq!(result.borrow().pos_fg_color, None);
@@ -215,14 +209,13 @@ pub async fn test_pos_color_changed_override_defaults() {
             weak_link={ link.clone() }>
         </NumberColumnStyle>
     };
-    await_animation_frame().await.unwrap();
 
     let column_style = link.borrow().clone().unwrap();
     assert_eq!(result.borrow().number_fg_mode, NumberForegroundMode::Color);
     assert_eq!(result.borrow().neg_fg_color, None);
     assert_eq!(result.borrow().pos_fg_color, None);
     column_style.send_message(NumberColumnStyleMsg::PosColorChanged(
-        true,
+        Side::Fg,
         "#666".to_owned(),
     ));
     await_animation_frame().await.unwrap();
@@ -231,7 +224,7 @@ pub async fn test_pos_color_changed_override_defaults() {
     assert_eq!(result.borrow().pos_fg_color, Some("#666".to_owned()));
     assert_eq!(result.borrow().neg_fg_color, Some("#321".to_owned()));
     column_style.send_message(NumberColumnStyleMsg::PosColorChanged(
-        true,
+        Side::Fg,
         "#123".to_owned(),
     ));
     await_animation_frame().await.unwrap();
@@ -267,8 +260,6 @@ pub async fn test_pos_color_and_mode_changed_override_defaults() {
         </NumberColumnStyle>
     };
 
-    await_animation_frame().await.unwrap();
-
     let column_style = link.borrow().clone().unwrap();
     assert_eq!(result.borrow().number_fg_mode, NumberForegroundMode::Color);
     assert_eq!(result.borrow().neg_fg_color, None);
@@ -282,7 +273,7 @@ pub async fn test_pos_color_and_mode_changed_override_defaults() {
     assert_eq!(result.borrow().pos_fg_color, None);
     assert_eq!(result.borrow().neg_fg_color, None);
     column_style.send_message(NumberColumnStyleMsg::PosColorChanged(
-        true,
+        Side::Fg,
         "#666".to_owned(),
     ));
 
@@ -291,7 +282,7 @@ pub async fn test_pos_color_and_mode_changed_override_defaults() {
     assert_eq!(result.borrow().pos_fg_color, Some("#666".to_owned()));
     assert_eq!(result.borrow().neg_fg_color, Some("#321".to_owned()));
     column_style.send_message(NumberColumnStyleMsg::PosColorChanged(
-        true,
+        Side::Fg,
         "#123".to_owned(),
     ));
 

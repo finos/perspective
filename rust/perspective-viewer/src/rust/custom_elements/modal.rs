@@ -8,13 +8,11 @@
 
 use crate::components::*;
 use crate::utils::*;
-
 use derivative::Derivative;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use wasm_bindgen_futures::spawn_local;
 use web_sys::*;
 use yew::prelude::*;
 
@@ -38,7 +36,7 @@ where
     T::Properties: ModalLink<T>,
 {
     root: Rc<RefCell<Option<AppHandle<Modal<T>>>>>,
-    custom_element: HtmlElement,
+    pub custom_element: HtmlElement,
     target: Rc<RefCell<Option<HtmlElement>>>,
     blurhandler: BlurHandlerType,
     own_focus: bool,
@@ -281,7 +279,11 @@ where
     ///
     /// Because the Custom Element has a `blur` handler, we must invoke this
     /// before attempting to re-parent the element.
-    pub fn open(&self, target: web_sys::HtmlElement, resize_pubsub: Option<&PubSub<()>>) {
+    pub async fn open(
+        self,
+        target: web_sys::HtmlElement,
+        resize_pubsub: Option<&PubSub<()>>,
+    ) -> ApiResult<()> {
         if let Some(resize) = resize_pubsub {
             let this = self.clone();
             let target = target.clone();
@@ -300,18 +302,16 @@ where
         };
 
         if !self.is_open() {
-            self.custom_element.blur().unwrap();
-            let this = self.clone();
-            spawn_local(async move {
-                await_animation_frame().await.unwrap();
-                target.class_list().add_1("modal-target").unwrap();
-                let theme = get_theme(&target);
-                this.open_within_viewport(target).await.unwrap();
-                if let Some(theme) = theme {
-                    this.custom_element.set_attribute("theme", &theme).unwrap();
-                }
-            });
+            // self.custom_element.blur().unwrap();
+            target.class_list().add_1("modal-target").unwrap();
+            let theme = get_theme(&target);
+            self.open_within_viewport(target).await.unwrap();
+            if let Some(theme) = theme {
+                self.custom_element.set_attribute("theme", &theme).unwrap();
+            }
         }
+
+        Ok(())
     }
 
     pub fn is_open(&self) -> bool {

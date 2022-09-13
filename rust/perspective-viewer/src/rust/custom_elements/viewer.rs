@@ -17,6 +17,7 @@ use crate::session::Session;
 use crate::theme::*;
 use crate::utils::*;
 use crate::*;
+use gloo::utils::document;
 use js_sys::*;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -290,6 +291,7 @@ impl PerspectiveViewerElement {
     /// - `update` The config to restore to, as returned by `.save()` in either
     ///   "json", "string" or "arraybuffer" format.
     pub fn restore(&self, update: JsValue) -> ApiFuture<()> {
+        document().blur_active_element();
         clone!(self.session, self.renderer, self.root, self.theme);
         ApiFuture::new(async move {
             let ViewerConfigUpdate {
@@ -303,7 +305,7 @@ impl PerspectiveViewerElement {
             let needs_restyle = match theme_name {
                 OptionalUpdate::SetDefault => {
                     let current_name = theme.get_name().await;
-                    if None != current_name {
+                    if current_name.is_some() {
                         theme.set_name(None).await?;
                         true
                     } else {
@@ -538,6 +540,7 @@ impl PerspectiveViewerElement {
     ///   toggle.
     #[wasm_bindgen(js_name = "toggleConfig")]
     pub fn toggle_config(&self, force: Option<bool>) -> ApiFuture<JsValue> {
+        document().blur_active_element();
         let root = self.root.clone();
         ApiFuture::new(async move {
             let force = force.map(SettingsUpdate::Update);

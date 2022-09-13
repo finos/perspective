@@ -19,6 +19,7 @@ module.exports = async function () {
         "--font-render-hinting=medium",
         '--proxy-server="direct://"',
         "--proxy-bypass-list=*",
+        "--js-flags=--expose-gc",
     ];
 
     global.__BROWSER__ = await puppeteer.launch({

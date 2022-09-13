@@ -45,7 +45,7 @@ impl ExportDropDownMenuElement {
 
     pub fn open(&self, target: HtmlElement) {
         if let Some(x) = &*self.modal.borrow() {
-            x.open(target, None);
+            ApiFuture::spawn(x.clone().open(target, None));
         }
     }
 

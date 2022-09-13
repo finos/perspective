@@ -6,7 +6,7 @@ module.exports = function (context, options) {
         configureWebpack(config, isServer) {
             config.module.rules.map((x) => {
                 if (x.test.toString() === "/\\.css$/i") {
-                    x.exclude = [/\.module\.css$/i, /@finos/i, /monaco/i];
+                    x.exclude = [/\.module\.css$/i, /@finos/i];
                 }
             });
 

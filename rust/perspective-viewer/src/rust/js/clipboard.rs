@@ -52,6 +52,10 @@ fn poll(
             .write(&items.into());
     } else {
         clone!(js_ref);
+        if count == 200 {
+            tracing::warn!("Clipboard handler surpassed 10s");
+        }
+
         let f: js_sys::Function =
             Closure::once(Box::new(move || poll(count + 1, mimetype, js_ref)))
                 .into_js_value()

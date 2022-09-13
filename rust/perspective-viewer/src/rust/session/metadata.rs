@@ -130,6 +130,7 @@ impl SessionMetadata {
     }
 
     /// Returns the full original expression `String` for an expression alias.
+    /// TODO should expressions be `Rc`?
     ///
     /// # Arguments
     /// - `alias` An alias name for an expression column in this `Session`.

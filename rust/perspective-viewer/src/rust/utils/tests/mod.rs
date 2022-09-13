@@ -7,6 +7,5 @@
 // file.
 
 mod clone;
-mod debounce;
 mod pubsub;
 mod request_animation_frame;

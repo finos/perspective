@@ -29,37 +29,27 @@ utils.with_server({}, () => {
                         "#add-expression"
                     );
 
-                    // monaco asynchronously validates the input and adds a
-                    // squiggly line (term of art) when it fails.
                     await page.waitForFunction(() => {
                         const root = document.querySelector(
                             "perspective-expression-editor"
-                        )?.shadowRoot;
-
-                        return (
-                            root?.querySelector(".rename-label") &&
-                            root?.querySelector(
-                                ".invisible.scrollbar.vertical.fade"
-                            )
                         );
+
+                        return !!root;
                     });
 
-                    const monaco = await page.waitForFunction(async () => {
+                    const editor = await page.waitForFunction(async () => {
                         const elem = document.querySelector(
                             "perspective-expression-editor"
                         );
-                        return elem?.shadowRoot.querySelector(
-                            "#monaco-container"
-                        );
+                        return elem?.shadowRoot.querySelector("#content");
                     });
 
-                    return await monaco.evaluate((x) => x.outerHTML);
+                    return await editor.evaluate((x) => x.outerHTML);
                 }
             );
 
             test.capture("blur closes the expression UI.", async (page) => {
                 await page.evaluate(async () => {
-                    document.activeElement.blur();
                     const elem = document.querySelector("perspective-viewer");
                     await elem.toggleConfig(true);
                 });
@@ -68,10 +58,11 @@ utils.with_server({}, () => {
                     "perspective-viewer",
                     "#add-expression"
                 );
-                await page.waitForSelector(
-                    "perspective-expression-editor:not([initializing]"
-                );
+                await page.waitForSelector("perspective-expression-editor");
                 await page.evaluate(() => document.activeElement.blur());
+                await page.waitForSelector("perspective-expression-editor", {
+                    hidden: true,
+                });
                 return await page.evaluate(async () => {
                     return (
                         document.querySelector("perspective-expression-editor")
@@ -82,7 +73,6 @@ utils.with_server({}, () => {
 
             async function type_expression_test(page, expr) {
                 await page.evaluate(async () => {
-                    document.activeElement.blur();
                     const elem = document.querySelector("perspective-viewer");
                     await elem.toggleConfig(true);
                 });
@@ -91,13 +81,11 @@ utils.with_server({}, () => {
                     "perspective-viewer",
                     "#add-expression"
                 );
-                await page.waitForSelector(
-                    "perspective-expression-editor:not([initializing])"
-                );
+                await page.waitForSelector("perspective-expression-editor");
                 await page.shadow_type(
                     expr,
                     "perspective-expression-editor",
-                    "textarea"
+                    "#content"
                 );
                 await page.waitForSelector(
                     "perspective-expression-editor:not([validating])"
@@ -165,7 +153,6 @@ utils.with_server({}, () => {
                 "Should save an expression when the save button is clicked",
                 async (page) => {
                     await page.evaluate(async () => {
-                        document.activeElement.blur();
                         const elem =
                             document.querySelector("perspective-viewer");
                         await elem.toggleConfig(true);
@@ -192,7 +179,6 @@ utils.with_server({}, () => {
                 "Should overwrite a duplicate expression alias",
                 async (page) => {
                     await page.evaluate(async () => {
-                        document.activeElement.blur();
                         const elem =
                             document.querySelector("perspective-viewer");
                         await elem.toggleConfig(true);
@@ -221,7 +207,6 @@ utils.with_server({}, () => {
                 "Should overwrite a duplicate expression",
                 async (page) => {
                     await page.evaluate(async () => {
-                        document.activeElement.blur();
                         const elem =
                             document.querySelector("perspective-viewer");
                         await elem.toggleConfig(true);
@@ -250,7 +235,6 @@ utils.with_server({}, () => {
                 "Resetting the viewer should delete all expressions",
                 async (page) => {
                     await page.evaluate(async () => {
-                        document.activeElement.blur();
                         const elem =
                             document.querySelector("perspective-viewer");
                         await elem.toggleConfig(true);
@@ -274,7 +258,6 @@ utils.with_server({}, () => {
                 "Resetting the viewer partially should not delete all expressions",
                 async (page) => {
                     await page.evaluate(async () => {
-                        document.activeElement.blur();
                         const elem =
                             document.querySelector("perspective-viewer");
                         await elem.toggleConfig(true);
@@ -298,7 +281,6 @@ utils.with_server({}, () => {
                 "Resetting the viewer when expression as in columns field, should delete all expressions",
                 async (page) => {
                     await page.evaluate(async () => {
-                        document.activeElement.blur();
                         const elem =
                             document.querySelector("perspective-viewer");
                         await elem.toggleConfig(true);
@@ -323,7 +305,6 @@ utils.with_server({}, () => {
                 "Resetting the viewer partially when expression as in columns field, should not delete all expressions",
                 async (page) => {
                     await page.evaluate(async () => {
-                        document.activeElement.blur();
                         const elem =
                             document.querySelector("perspective-viewer");
                         await elem.toggleConfig(true);
@@ -348,7 +329,6 @@ utils.with_server({}, () => {
                 "Resetting the viewer when expression as in group_by or other field, should delete all expressions",
                 async (page) => {
                     await page.evaluate(async () => {
-                        document.activeElement.blur();
                         const elem =
                             document.querySelector("perspective-viewer");
                         await elem.toggleConfig(true);
@@ -376,7 +356,6 @@ utils.with_server({}, () => {
                 "Expressions should persist when new views are created which don't use them",
                 async (page) => {
                     await page.evaluate(async () => {
-                        document.activeElement.blur();
                         const elem =
                             document.querySelector("perspective-viewer");
                         await elem.toggleConfig(true);
@@ -402,7 +381,6 @@ utils.with_server({}, () => {
                 "Expressions should persist when new views are created using them",
                 async (page) => {
                     await page.evaluate(async () => {
-                        document.activeElement.blur();
                         const elem =
                             document.querySelector("perspective-viewer");
                         await elem.toggleConfig(true);
@@ -428,7 +406,6 @@ utils.with_server({}, () => {
                 "Aggregates for expressions should apply",
                 async (page) => {
                     await page.evaluate(async () => {
-                        document.activeElement.blur();
                         const elem =
                             document.querySelector("perspective-viewer");
                         await elem.toggleConfig(true);
@@ -452,7 +429,6 @@ utils.with_server({}, () => {
 
             test.capture("Should sort by hidden expressions", async (page) => {
                 await page.evaluate(async () => {
-                    document.activeElement.blur();
                     const elem = document.querySelector("perspective-viewer");
                     await elem.toggleConfig(true);
                     await elem.restore({
@@ -471,7 +447,6 @@ utils.with_server({}, () => {
 
             test.capture("Should filter by an expression", async (page) => {
                 await page.evaluate(async () => {
-                    document.activeElement.blur();
                     const elem = document.querySelector("perspective-viewer");
                     await elem.toggleConfig(true);
                     await elem.restore({

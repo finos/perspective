@@ -11,19 +11,18 @@
 //! to be single-responsibility, but some reference other `crate::utils`
 //! modules when it helps reduce boiler-plate.
 
-mod blob;
+mod browser;
 mod clone;
 mod closure;
 mod custom_element;
 mod datetime;
 mod debounce;
-mod download;
 mod errors;
 mod futures;
 mod json;
 mod pubsub;
-mod request_animation_frame;
 mod scope;
+mod tee;
 mod wasm_abi;
 mod weak_scope;
 
@@ -31,18 +30,17 @@ mod weak_scope;
 mod tests;
 
 pub use self::futures::*;
-pub use blob::*;
+pub use browser::*;
 pub use clone::*;
 pub use closure::*;
 pub use custom_element::*;
 pub use datetime::*;
 pub use debounce::*;
-pub use download::*;
 pub use errors::*;
 pub use json::*;
 pub use pubsub::*;
-pub use request_animation_frame::*;
 pub use scope::*;
+pub use tee::*;
 pub use wasm_abi::*;
 pub use weak_scope::*;
 
@@ -71,7 +69,7 @@ macro_rules! js_log_maybe {
                 Ok(())
             }
         })();
-        x.unwrap_or_else(|e| web_sys::console::error_1(&e))
+        x.unwrap_or_else(|e| web_sys::console::warn_1(&e))
     }};
 }
 

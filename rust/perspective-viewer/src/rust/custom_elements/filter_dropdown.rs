@@ -54,7 +54,11 @@ impl FilterDropDownElement {
     }
 
     pub fn reautocomplete(&self) {
-        self.modal.open(self.target.borrow().clone().unwrap(), None);
+        ApiFuture::spawn(
+            self.modal
+                .clone()
+                .open(self.target.borrow().clone().unwrap(), None),
+        );
     }
 
     pub fn autocomplete(
@@ -89,8 +93,7 @@ impl FilterDropDownElement {
                             FilterDropDownMsg::SetValues(filter_values),
                         ]);
 
-                        modal.open(target, None);
-                        Ok(())
+                        modal.open(target, None).await
                     }
                 });
             }

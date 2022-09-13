@@ -27,7 +27,6 @@ pub struct FilterDropDown {
     values: Option<Vec<String>>,
     selected: usize,
     on_select: Option<Callback<String>>,
-    // link: Scope<Self>,
 }
 
 #[derive(Properties, PartialEq)]
@@ -52,7 +51,6 @@ impl Component for FilterDropDown {
             values: Some(vec![]),
             selected: 0,
             on_select: None,
-            // link,
         }
     }
 

@@ -133,17 +133,17 @@ class TestViewExpression(object):
             },
             "datetime()": {
                 "column": 10,
-                "error_message": "Parser Error - Zero parameter call to generic function: datetime not allowed",
+                "error_message": "Zero parameter call to generic function: datetime not allowed",
                 "line": 0,
             },
             "for () {}": {
                 "column": 5,
-                "error_message": "Parser Error - Premature end of expression[2]",
+                "error_message": "Premature end of expression[2]",
                 "line": 0,
             },
             "string()": {
                 "column": 8,
-                "error_message": "Parser Error - Zero parameter call to generic function: string not allowed",
+                "error_message": "Zero parameter call to generic function: string not allowed",
                 "line": 0,
             },
         }

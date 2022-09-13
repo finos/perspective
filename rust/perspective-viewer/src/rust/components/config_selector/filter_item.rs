@@ -6,19 +6,18 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use crate::components::containers::dragdrop_list::*;
+use crate::components::containers::select::*;
+use crate::components::style::LocalStyle;
 use crate::config::*;
 use crate::custom_elements::*;
 use crate::dragdrop::*;
 use crate::model::*;
 use crate::renderer::*;
 use crate::session::*;
+use crate::utils::ApiFuture;
 use crate::utils::{posix_to_utc_str, str_to_utc_posix};
 use crate::*;
-
-use super::containers::dragdrop_list::*;
-use super::containers::select::*;
-use super::style::LocalStyle;
-
 use chrono::{NaiveDate, TimeZone, Utc};
 use wasm_bindgen::JsCast;
 use web_sys::*;
@@ -158,7 +157,7 @@ impl FilterItemProps {
             ..ViewConfigUpdate::default()
         };
 
-        self.update_and_render(update);
+        ApiFuture::spawn(self.update_and_render(update));
     }
 
     /// Update the filter value from the string input read from the DOM.
@@ -221,7 +220,7 @@ impl FilterItemProps {
                 ..ViewConfigUpdate::default()
             };
 
-            self.update_and_render(update);
+            ApiFuture::spawn(self.update_and_render(update));
         }
     }
 }

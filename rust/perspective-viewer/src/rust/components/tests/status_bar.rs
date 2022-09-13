@@ -40,7 +40,6 @@ pub async fn test_callbacks_invoked() {
         .unchecked_into();
     let session = Session::default();
     let theme = Theme::new(&elem);
-    // todo use refs
     let renderer = Renderer::new(&elem);
 
     test_html! {
@@ -72,7 +71,6 @@ pub async fn test_callbacks_invoked() {
 
 async fn gen(stats: &Option<TableStats>) -> (HtmlElement, Session) {
     let link: WeakScope<StatusBar> = WeakScope::default();
-    let div = NodeRef::default();
     let on_reset = Callback::from(|_| ());
     let session = Session::default();
     let elem: HtmlElement = window()
@@ -85,11 +83,10 @@ async fn gen(stats: &Option<TableStats>) -> (HtmlElement, Session) {
 
     let theme = Theme::new(&elem);
     let renderer = Renderer::new(&elem);
-    test_html! {
+    let div = test_html! {
         <StatusBar
             id="test"
             weak_link={ link.clone() }
-            ref={ div.clone() }
             session={ session.clone() }
             renderer={ renderer }
             theme={ theme }
@@ -97,7 +94,6 @@ async fn gen(stats: &Option<TableStats>) -> (HtmlElement, Session) {
         </StatusBar>
     };
 
-    await_animation_frame().await.unwrap();
     if let Some(stats) = stats.as_ref() {
         session.set_stats(stats.clone());
         link.borrow()
@@ -107,7 +103,7 @@ async fn gen(stats: &Option<TableStats>) -> (HtmlElement, Session) {
     }
 
     await_animation_frame().await.unwrap();
-    (div.cast::<HtmlElement>().unwrap(), session)
+    (div, session)
 }
 
 #[wasm_bindgen_test]

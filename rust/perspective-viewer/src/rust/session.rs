@@ -185,8 +185,7 @@ impl Session {
         )
     }
 
-    /// Validate an expression string (as a JsValue since it comes from
-    /// `monaco`), and marshall the results.
+    /// Validate an expression strin and marshall the results.
     pub async fn validate_expr(
         &self,
         expr: JsValue,

@@ -8,7 +8,7 @@ exports.WorkerPlugin = function WorkerPlugin(options = {}) {
     const targetdir = options.targetdir || "build/worker";
     function setup(build) {
         build.onResolve(
-            {filter: /^(monaco-editor|\@finos\/perspective).+?worker\.js$/},
+            {filter: /^(\@finos\/perspective).+?worker\.js$/},
             (args) => {
                 if (args.namespace === "worker-stub") {
                     const outfile = `${targetdir}/` + path.basename(args.path);

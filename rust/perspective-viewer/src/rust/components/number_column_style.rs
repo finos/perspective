@@ -6,10 +6,10 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use super::color_range_selector::*;
-use super::containers::number_input::*;
 use super::containers::radio_list::RadioList;
 use super::containers::radio_list_item::RadioListItem;
+use super::form::color_range_selector::*;
+use super::form::number_input::*;
 use super::modal::*;
 use super::style::{LocalStyle, StyleProvider};
 use crate::config::*;
@@ -20,7 +20,13 @@ use web_sys::*;
 use yew::prelude::*;
 use yew::*;
 
-type Side = bool;
+#[derive(PartialEq, Eq, Copy, Clone)]
+pub enum Side {
+    Fg,
+    Bg,
+}
+
+use Side::*;
 
 pub enum NumberColumnStyleMsg {
     Reset(
@@ -169,7 +175,7 @@ impl Component for NumberColumnStyle {
                 true
             }
             NumberColumnStyleMsg::PosColorChanged(side, val) => {
-                if side {
+                if side == Fg {
                     self.pos_fg_color = val;
                     self.config.pos_fg_color = Some(self.pos_fg_color.to_owned());
                 } else {
@@ -181,7 +187,7 @@ impl Component for NumberColumnStyle {
                 false
             }
             NumberColumnStyleMsg::NegColorChanged(side, val) => {
-                if side {
+                if side == Fg {
                     self.neg_fg_color = val;
                     self.config.neg_fg_color = Some(self.neg_fg_color.to_owned());
                 } else {
@@ -218,27 +224,27 @@ impl Component for NumberColumnStyle {
             }
             NumberColumnStyleMsg::GradientChanged(side, gradient) => {
                 match (side, gradient.parse::<f64>()) {
-                    (true, Ok(x)) => {
+                    (Fg, Ok(x)) => {
                         self.fg_gradient = x;
                         self.config.fg_gradient = Some(x);
                     }
-                    (true, Err(_)) if gradient.is_empty() => {
+                    (Fg, Err(_)) if gradient.is_empty() => {
                         self.fg_gradient = ctx.props().default_config.fg_gradient;
                         self.config.fg_gradient = Some(ctx.props().default_config.fg_gradient);
                     }
-                    (true, Err(_)) => {
+                    (Fg, Err(_)) => {
                         self.fg_gradient = ctx.props().default_config.fg_gradient;
                         self.config.fg_gradient = None;
                     }
-                    (false, Ok(x)) => {
+                    (Bg, Ok(x)) => {
                         self.bg_gradient = x;
                         self.config.bg_gradient = Some(x);
                     }
-                    (false, Err(_)) if gradient.is_empty() => {
+                    (Bg, Err(_)) if gradient.is_empty() => {
                         self.bg_gradient = ctx.props().default_config.bg_gradient;
                         self.config.bg_gradient = Some(ctx.props().default_config.bg_gradient);
                     }
-                    (false, Err(_)) => {
+                    (Bg, Err(_)) => {
                         self.bg_gradient = ctx.props().default_config.bg_gradient;
                         self.config.bg_gradient = None;
                     }
@@ -308,7 +314,7 @@ impl Component for NumberColumnStyle {
             <span class="row">{ "Color" }</span>
             if self.config.number_fg_mode == NumberForegroundMode::Color {
                 <div class="row inner_section">
-                    <ColorRangeSelector ..self.color_props(true, ctx) />
+                    <ColorRangeSelector ..self.color_props(Fg, ctx) />
                 </div>
             }
         };
@@ -317,8 +323,8 @@ impl Component for NumberColumnStyle {
             <span class="row">{ "Bar" }</span>
             if self.config.number_fg_mode == NumberForegroundMode::Bar {
                 <div class="row inner_section">
-                    <ColorRangeSelector ..self.color_props(true, ctx) />
-                    <NumberInput ..self.max_value_props(true, ctx) />
+                    <ColorRangeSelector ..self.color_props(Fg, ctx) />
+                    <NumberInput ..self.max_value_props(Fg, ctx) />
                 </div>
             }
         };
@@ -327,7 +333,7 @@ impl Component for NumberColumnStyle {
             <span class="row">{ "Color" }</span>
             if self.config.number_bg_mode == NumberBackgroundMode::Color {
                 <div class="row inner_section">
-                    <ColorRangeSelector ..self.color_props(false, ctx) />
+                    <ColorRangeSelector ..self.color_props(Bg, ctx) />
                 </div>
             }
         };
@@ -336,8 +342,8 @@ impl Component for NumberColumnStyle {
             <span class="row">{ "Gradient" }</span>
             if self.config.number_bg_mode == NumberBackgroundMode::Gradient {
                 <div class="row inner_section">
-                    <ColorRangeSelector ..self.color_props(false, ctx) />
-                    <NumberInput ..self.max_value_props(false, ctx) />
+                    <ColorRangeSelector ..self.color_props(Bg, ctx) />
+                    <NumberInput ..self.max_value_props(Bg, ctx) />
                 </div>
             }
         };
@@ -346,7 +352,7 @@ impl Component for NumberColumnStyle {
             <span class="row">{ "Pulse (Δ)" }</span>
             if self.config.number_bg_mode == NumberBackgroundMode::Pulse {
                 <div class="row inner_section">
-                    <ColorRangeSelector ..self.color_props(false, ctx) />
+                    <ColorRangeSelector ..self.color_props(Bg, ctx) />
                 </div>
             }
         };
@@ -466,7 +472,7 @@ impl NumberColumnStyle {
         ctx.props().on_change.emit(config);
     }
 
-    fn color_props(&self, side: bool, ctx: &Context<Self>) -> ColorRangeProps {
+    fn color_props(&self, side: Side, ctx: &Context<Self>) -> ColorRangeProps {
         let on_pos_color = ctx
             .link()
             .callback(move |x| NumberColumnStyleMsg::PosColorChanged(side, x));
@@ -475,13 +481,13 @@ impl NumberColumnStyle {
             .callback(move |x| NumberColumnStyleMsg::NegColorChanged(side, x));
 
         props!(ColorRangeProps {
-            pos_color: if side {
+            pos_color: if side == Fg {
                 &self.pos_fg_color
             } else {
                 &self.pos_bg_color
             }
             .to_owned(),
-            neg_color: if side {
+            neg_color: if side == Fg {
                 &self.neg_fg_color
             } else {
                 &self.neg_bg_color
@@ -492,13 +498,13 @@ impl NumberColumnStyle {
         })
     }
 
-    fn max_value_props(&self, side: bool, ctx: &Context<Self>) -> NumberInputProps {
+    fn max_value_props(&self, side: Side, ctx: &Context<Self>) -> NumberInputProps {
         let on_max_value = ctx
             .link()
             .callback(move |x| NumberColumnStyleMsg::GradientChanged(side, x));
 
         props!(NumberInputProps {
-            max_value: if side {
+            max_value: if side == Fg {
                 self.fg_gradient
             } else {
                 self.bg_gradient

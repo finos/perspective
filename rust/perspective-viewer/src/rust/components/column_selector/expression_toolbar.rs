@@ -12,6 +12,7 @@ use crate::dragdrop::*;
 use crate::model::*;
 use crate::renderer::*;
 use crate::session::*;
+use crate::utils::ApiFuture;
 use crate::*;
 
 use wasm_bindgen::prelude::*;
@@ -43,7 +44,7 @@ impl ExpressionToolbarProps {
             .create_replace_expression_update(&self.name, expression)
             .await;
 
-        self.update_and_render(update);
+        ApiFuture::spawn(self.update_and_render(update));
     }
 
     pub fn close_expr(&self) {
@@ -55,10 +56,12 @@ impl ExpressionToolbarProps {
 
         let mut expressions = self.session.get_view_config().expressions.clone();
         expressions.retain(|x| x != &expression);
-        self.update_and_render(ViewConfigUpdate {
+        let config = ViewConfigUpdate {
             expressions: Some(expressions),
             ..ViewConfigUpdate::default()
-        });
+        };
+
+        ApiFuture::spawn(self.update_and_render(config));
     }
 
     fn is_closable(&self) -> bool {

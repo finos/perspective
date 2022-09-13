@@ -93,6 +93,9 @@ impl Deref for RendererData {
 type TaskResult = ApiResult<JsValue>;
 type TimeoutTask<'a> = Pin<Box<dyn Future<Output = Option<TaskResult>> + 'a>>;
 
+/// How long to await a call to the plugin's `draw()` before resizing.
+static PRESIZE_TIMEOUT: i32 = 500;
+
 impl Renderer {
     pub fn new(viewer_elem: &HtmlElement) -> Self {
         Self(Rc::new(RendererData {
@@ -329,7 +332,7 @@ impl Renderer {
         match result {
             Ok(x) => x,
             Err(cont) => {
-                web_sys::console::log_1(&"Presize took longer than 500ms".into());
+                tracing::warn!("Presize took longer than {}ms", PRESIZE_TIMEOUT);
                 cont.await.unwrap()
             }
         }
@@ -351,7 +354,7 @@ impl Renderer {
         let tasks: [TimeoutTask<'_>; 2] = [
             Box::pin(async move { Some(draw_lock.lock(task).await) }),
             Box::pin(async {
-                set_timeout(500).await.unwrap();
+                set_timeout(PRESIZE_TIMEOUT).await.unwrap();
                 None
             }),
         ];

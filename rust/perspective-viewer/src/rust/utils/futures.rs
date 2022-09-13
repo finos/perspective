@@ -26,6 +26,7 @@ use wasm_bindgen::__rt::IntoJsResult;
 /// A newtype wrapper for a `Future` trait object which supports being
 /// marshalled to a `JsPromise`, avoiding an API which requires type casting to
 /// and from `JsValue` and the associated loss of type safety.
+#[must_use]
 pub struct ApiFuture<T>(Pin<Box<dyn Future<Output = ApiResult<T>>>>);
 
 impl<T> ApiFuture<T> {
@@ -33,7 +34,6 @@ impl<T> ApiFuture<T> {
     /// `ApiFuture` created does _not_ execute without being further cast to a
     /// `Promise`, either explicitly or implcitly (when exposed via
     /// `wasm_bindgen`).
-    #[must_use]
     pub fn new<U: Future<Output = ApiResult<T>> + 'static>(x: U) -> ApiFuture<T> {
         ApiFuture(Box::pin(x))
     }

@@ -13,7 +13,6 @@
 mod clipboard;
 pub mod clipboard_item;
 mod mimetype;
-pub mod monaco;
 pub mod perspective;
 pub mod plugin;
 pub mod resize_observer;

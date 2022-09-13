@@ -170,7 +170,7 @@ impl JsPerspectiveView {
     // async_typed!(_get_config, get_config(&self) -> JsPerspectiveViewConfig);
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde()]
 pub struct PerspectiveValidationError {
     pub error_message: String,

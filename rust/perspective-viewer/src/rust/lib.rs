@@ -9,6 +9,7 @@
 // Required by yew's `html` macro.
 #![recursion_limit = "1024"]
 #![feature(const_type_name)]
+#![feature(macro_metavar_expr)]
 #![warn(
     clippy::all,
     clippy::panic_in_result_fn,
@@ -26,7 +27,7 @@ mod model;
 mod renderer;
 mod session;
 mod theme;
-mod utils;
+pub mod utils;
 
 use crate::custom_elements::copy_dropdown::CopyDropDownMenuElement;
 use crate::custom_elements::date_column_style::PerspectiveDateColumnStyleElement;
@@ -54,8 +55,7 @@ pub fn register_plugin(name: &str) {
 #[wasm_bindgen(js_name = "getExprTKCommands")]
 pub fn get_exprtk_commands() -> ApiResult<Box<[JsValue]>> {
     crate::exprtk::COMPLETIONS.with(|x| {
-        Ok(x.suggestions
-            .iter()
+        Ok(x.iter()
             .map(JsValue::from_serde)
             .collect::<Result<Box<[_]>, serde_json::Error>>()?)
     })

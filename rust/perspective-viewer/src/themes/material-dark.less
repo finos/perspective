@@ -45,7 +45,6 @@ perspective-expression-editor[theme="Material Dark"],
 .perspective-viewer-material-dark--colors {
     background-color: @grey800;
     color: white;
-    --monaco-theme: vs-dark;
     --active--color: #2770a9;
     --error--color: @red50;
     --inactive--color: @grey300;
@@ -64,6 +63,12 @@ perspective-expression-editor[theme="Material Dark"],
     --string--column-type--color: @red50;
     --date--column-type--color: @green50;
     --boolean--column-type--color: @orange50;
+
+    // Syntax
+    --code-editor-symbol--color: white;
+    --code-editor-literal--color: @blue50;
+    --code-editor-operator--color: rgb(23, 166, 123);
+    --code-editor-comment--color: rgb(204, 120, 48);
 }
 
 .perspective-viewer-material-dark--openlayers {

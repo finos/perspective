@@ -136,7 +136,7 @@ mod tests {
     pub fn test_multiaggregate_weighted_mean() {
         let x = json!({
             "aggregates": {
-                "x": ["weighted_mean", "y"]
+                "x": ["weighted mean", "y"]
             }
         });
 

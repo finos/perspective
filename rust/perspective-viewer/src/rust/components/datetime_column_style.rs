@@ -6,10 +6,10 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use super::color_selector::*;
 use super::containers::radio_list::RadioList;
 use super::containers::radio_list_item::RadioListItem;
 use super::containers::select::*;
+use super::form::color_selector::*;
 use super::modal::{ModalLink, SetModalLink};
 use super::style::{LocalStyle, StyleProvider};
 use crate::config::*;
@@ -108,16 +108,19 @@ impl DatetimeColumnStyle {
             .unwrap_or_else(|| ctx.props().default_config.color.to_owned());
 
         let color_props = props!(ColorProps { color, on_color });
-        if let Some(x) = &self.config.datetime_color_mode && x == mode {
-            html_template! {
-                <span class="row">{ title }</span>
-                <div class="row inner_section">
-                    <ColorSelector ..color_props />
-                </div>
+        match &self.config.datetime_color_mode {
+            Some(x) if x == mode => {
+                html_template! {
+                    <span class="row">{ title }</span>
+                    <div class="row inner_section">
+                        <ColorSelector ..color_props />
+                    </div>
+                }
             }
-        } else {
-            html! {
-                <span class="row">{ title }</span>
+            _ => {
+                html! {
+                    <span class="row">{ title }</span>
+                }
             }
         }
     }

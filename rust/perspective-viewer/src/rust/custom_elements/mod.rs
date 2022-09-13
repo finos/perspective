@@ -12,9 +12,11 @@ pub mod datetime_column_style;
 pub mod export_dropdown;
 pub mod expression_editor;
 mod filter_dropdown;
+mod function_dropdown;
 pub mod modal;
 pub mod number_column_style;
 pub mod string_column_style;
 pub mod viewer;
 
 pub use self::filter_dropdown::*;
+pub use self::function_dropdown::*;

@@ -287,6 +287,8 @@ jobs:
       uses: actions-rs/toolchain@v1
       with:
           toolchain: nightly
+          target: wasm32-unknown-unknown
+          default: true
           override: true
           components: rustfmt, clippy, rust-src
 
@@ -619,6 +621,17 @@ jobs:
     # Python
     - name: Install python dependencies
       run: yarn _requires_python
+
+
+    ################
+    # Rust
+    - name: Install latest nightly rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: nightly
+        target: wasm32-unknown-unknown
+        default: true
+        override: true
 
     ################
     # Wasm
