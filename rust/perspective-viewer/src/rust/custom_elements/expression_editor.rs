@@ -11,7 +11,6 @@ use crate::custom_elements::modal::*;
 use crate::session::Session;
 use crate::utils::*;
 use crate::*;
-
 use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -22,7 +21,7 @@ use yew::*;
 #[derive(Clone)]
 pub struct ExpressionEditorElement {
     modal: ModalElement<ExpressionEditor>,
-    resize_pubsub: Rc<PubSub<()>>,
+    blurhandler: Rc<Closure<dyn Fn(web_sys::FocusEvent)>>,
 }
 
 impl ExpressionEditorElement {
@@ -37,19 +36,6 @@ impl ExpressionEditorElement {
             .unwrap()
             .unchecked_into::<HtmlElement>();
 
-        editor
-            .toggle_attribute_with_force("initializing", true)
-            .unwrap();
-
-        let on_init = Callback::from({
-            clone!(editor);
-            move |_| {
-                editor
-                    .toggle_attribute_with_force("initializing", false)
-                    .unwrap();
-            }
-        });
-
         let on_validate = Callback::from({
             clone!(editor);
             move |valid| {
@@ -59,47 +45,59 @@ impl ExpressionEditorElement {
             }
         });
 
-        let resize_pubsub: PubSub<()> = PubSub::default();
         let props = props!(ExpressionEditorProps {
             on_save,
-            on_init,
             on_validate,
-            on_resize: resize_pubsub.callback(),
             session,
             alias,
         });
 
-        let modal = ModalElement::new(editor, props, true);
-        ExpressionEditorElement {
-            modal,
-            resize_pubsub: Rc::new(resize_pubsub),
-        }
+        let modal = ModalElement::new(editor.clone(), props, true);
+        let blurhandler = Rc::new(
+            {
+                clone!(modal);
+                move |_event: FocusEvent| {
+                    clone!(modal);
+                    ApiFuture::spawn(async move {
+                        await_animation_frame().await?;
+                        modal.send_message(ExpressionEditorMsg::Render);
+                        Ok(())
+                    });
+                }
+            }
+            .into_closure(),
+        );
+
+        let cb = blurhandler.as_ref().as_ref().unchecked_ref();
+        editor.add_event_listener_with_callback("blur", cb).unwrap();
+        ExpressionEditorElement { modal, blurhandler }
     }
 
     pub fn open(&mut self, target: HtmlElement) {
-        let monaco_theme = get_theme(&target);
-        self.modal
-            .send_message(ExpressionEditorMsg::SetTheme(monaco_theme));
-        self.modal.open(target, Some(&*self.resize_pubsub));
+        clone!(self.modal);
+        ApiFuture::spawn(async move {
+            modal.clone().open(target, None).await?;
+            modal.send_message(ExpressionEditorMsg::Render);
+            Ok(())
+        });
     }
 
-    pub fn hide(&self) -> Result<(), JsValue> {
+    pub fn hide(&self) -> ApiResult<()> {
         self.modal.hide()
     }
 
-    pub fn destroy(self) -> Result<(), JsValue> {
+    pub fn destroy(self) -> ApiResult<()> {
+        let cb = self.blurhandler.as_ref().as_ref().unchecked_ref();
+        let elem = &self.modal.custom_element;
+        elem.remove_event_listener_with_callback("blur", cb)?;
         self.modal.destroy()
     }
 
-    pub fn connected_callback(&self) {}
-}
-
-fn get_theme(elem: &HtmlElement) -> String {
-    let styles = window().unwrap().get_computed_style(elem).unwrap().unwrap();
-    match &styles.get_property_value("--monaco-theme") {
-        Err(_) => "vs",
-        Ok(ref s) if s.trim() == "" => "vs",
-        Ok(x) => x.trim(),
+    /// Reset the editor state to "empty" (the "New Column X" title is dependent
+    /// on the number of expressions stored in the current `Session`).
+    pub fn reset_empty_expr(&self) {
+        self.modal.send_message(ExpressionEditorMsg::SetExprDefault);
     }
-    .to_owned()
+
+    pub fn connected_callback(&self) {}
 }

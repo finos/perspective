@@ -23,6 +23,11 @@ utils.with_server({}, () => {
                         await viewer.reset();
                     }, viewer);
 
+                    // From a helpful blog
+                    // https://media-codings.com/articles/automatically-detect-memory-leaks-with-puppeteer
+                    await page.evaluate(() => window.gc());
+                    const {JSHeapUsedSize: heap1} = await page.metrics();
+
                     for (var i = 0; i < 500; i++) {
                         await page.evaluate(async () => {
                             const element =
@@ -41,6 +46,12 @@ utils.with_server({}, () => {
                         });
                     }
 
+                    // TODO this is very generous memory allowance suggests we
+                    // leak ~0.1% per instance.
+                    await page.evaluate(() => window.gc());
+                    const {JSHeapUsedSize: heap2} = await page.metrics();
+                    expect((heap2 - heap1) / heap1).toBeLessThan(0.5);
+
                     return await page.evaluate(async () => {
                         const element =
                             document.querySelector("perspective-viewer");
@@ -48,7 +59,7 @@ utils.with_server({}, () => {
                         return element.innerHTML;
                     });
                 },
-                {timeout: 60000}
+                {timeout: 120000}
             );
 
             test.capture(
@@ -59,6 +70,9 @@ utils.with_server({}, () => {
                         window.__TABLE__ = await viewer.getTable();
                         await viewer.reset();
                     }, viewer);
+
+                    await page.evaluate(() => window.gc());
+                    const {JSHeapUsedSize: heap1} = await page.metrics();
 
                     for (var i = 0; i < 500; i++) {
                         await page.evaluate(async (element) => {
@@ -83,13 +97,17 @@ utils.with_server({}, () => {
                         }, viewer);
                     }
 
+                    await page.evaluate(() => window.gc());
+                    const {JSHeapUsedSize: heap2} = await page.metrics();
+                    expect((heap2 - heap1) / heap1).toBeLessThan(0.1);
+
                     return await page.evaluate(async (viewer) => {
                         await viewer.restore({group_by: ["State"]});
                         await viewer.toggleConfig();
                         return viewer.innerHTML;
                     }, viewer);
                 },
-                {timeout: 60000}
+                {timeout: 120000}
             );
 
             test.capture(
@@ -100,6 +118,9 @@ utils.with_server({}, () => {
                         window.__TABLE__ = await viewer.getTable();
                         await viewer.reset();
                     }, viewer);
+
+                    await page.evaluate(() => window.gc());
+                    const {JSHeapUsedSize: heap1} = await page.metrics();
 
                     for (var i = 0; i < 500; i++) {
                         await page.evaluate(async (element) => {
@@ -112,13 +133,17 @@ utils.with_server({}, () => {
                         }, viewer);
                     }
 
+                    await page.evaluate(() => window.gc());
+                    const {JSHeapUsedSize: heap2} = await page.metrics();
+                    expect((heap2 - heap1) / heap1).toBeLessThan(0.05);
+
                     return await page.evaluate(async (viewer) => {
                         await viewer.restore({filter: [["Sales", "<", 10]]});
                         await viewer.toggleConfig();
                         return viewer.innerHTML;
                     }, viewer);
                 },
-                {timeout: 60000}
+                {timeout: 120000}
             );
         },
         {root: path.join(__dirname, "..", "..")}

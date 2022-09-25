@@ -52,6 +52,10 @@ flate2 = "1.0.20"
 # General async tools
 futures = "0.3.12"
 
+# Common utils for verbose `wasm_bindgen` patterns, e.g. event listeners and 
+# globals.
+"gloo" = "0.8.0"
+
 # General iterator improvements
 itertools = "0.10.1"
 
@@ -60,6 +64,9 @@ js-intern = "0.3.1"
 
 # Memoize Intl locales
 lazy_static = "1.4.0"
+
+# Parse ExprTK for syntax highlighting.
+nom = "7.1.1"
 
 # Comma-sep numeric representation
 num-format = "0.4.0"
@@ -70,11 +77,13 @@ rmp-serde = "0.15.5"
 # Serialization for tokens and JS APIs
 serde = { version = "1.0", features = ["derive"] }
 
-# Support for "unknown"/dicitonary types such as `plugin_config`
+# Support for "unknown"/dictionary types such as `plugin_config`
 serde_json = { version = "1.0.59", features = ["raw_value"] }
 
+# Async-aware logging that can be disabled at compile-time.
 tracing = { version = ">=0.1.36", features = ["release_max_level_error", "max_level_info"]}
 
+# A JS console printer for `tracing`.
 tracing-wasm = ">=0.2.1"
 
 # Browser API bindings
@@ -133,7 +142,9 @@ features =  [
     # "TouchList",
     # "Touch",
     # "WheelEvent",
+    "Range",
     "ReadableStreamDefaultReader",
+    "Selection",
     "ShadowRoot",
     "ShadowRootMode",
     "ShadowRootInit",

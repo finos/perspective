@@ -6,10 +6,14 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+mod filter_item;
+mod pivot_item;
+mod sort_item;
+
+use self::filter_item::*;
+use self::pivot_item::*;
+use self::sort_item::*;
 use super::containers::dragdrop_list::*;
-use super::filter_item::*;
-use super::pivot_item::*;
-use super::sort_item::*;
 use super::style::LocalStyle;
 use crate::config::*;
 use crate::custom_elements::FilterDropDownElement;
@@ -19,7 +23,6 @@ use crate::renderer::*;
 use crate::session::*;
 use crate::utils::*;
 use crate::*;
-
 use std::rc::Rc;
 use yew::prelude::*;
 
@@ -161,43 +164,46 @@ impl Component for ConfigSelector {
                 let mut sort = ctx.props().session.get_view_config().sort.clone();
                 sort.remove(index as usize);
                 let sort = Some(sort);
-                ctx.props().update_and_render(ViewConfigUpdate {
+                let config = ViewConfigUpdate {
                     sort,
                     ..ViewConfigUpdate::default()
-                });
+                };
 
+                ApiFuture::spawn(ctx.props().update_and_render(config));
                 true
             }
             ConfigSelectorMsg::Close(index, DragTarget::GroupBy) => {
                 let mut group_by = ctx.props().session.get_view_config().group_by.clone();
                 group_by.remove(index as usize);
-                let group_by = Some(group_by);
-                ctx.props().update_and_render(ViewConfigUpdate {
-                    group_by,
+                let config = ViewConfigUpdate {
+                    group_by: Some(group_by),
                     ..ViewConfigUpdate::default()
-                });
+                };
 
+                ApiFuture::spawn(ctx.props().update_and_render(config));
                 true
             }
             ConfigSelectorMsg::Close(index, DragTarget::SplitBy) => {
                 let mut split_by = ctx.props().session.get_view_config().split_by.clone();
                 split_by.remove(index as usize);
-                ctx.props().update_and_render(ViewConfigUpdate {
+                let config = ViewConfigUpdate {
                     split_by: Some(split_by),
                     ..ViewConfigUpdate::default()
-                });
+                };
 
+                ApiFuture::spawn(ctx.props().update_and_render(config));
                 true
             }
             ConfigSelectorMsg::Close(index, DragTarget::Filter) => {
                 self.filter_dropdown.hide().unwrap();
                 let mut filter = ctx.props().session.get_view_config().filter.clone();
                 filter.remove(index as usize);
-                ctx.props().update_and_render(ViewConfigUpdate {
+                let config = ViewConfigUpdate {
                     filter: Some(filter),
                     ..ViewConfigUpdate::default()
-                });
+                };
 
+                ApiFuture::spawn(ctx.props().update_and_render(config));
                 true
             }
             ConfigSelectorMsg::Close(_, _) => false,
@@ -211,7 +217,7 @@ impl Component for ConfigSelector {
                     effect,
                     &ctx.props().renderer.metadata(),
                 );
-                ctx.props().update_and_render(update);
+                ApiFuture::spawn(ctx.props().update_and_render(update));
                 true
             }
             ConfigSelectorMsg::Drop(_, _, DragEffect::Move(action), _)
@@ -230,7 +236,7 @@ impl Component for ConfigSelector {
                     ..ViewConfigUpdate::default()
                 };
 
-                ctx.props().update_and_render(update);
+                ApiFuture::spawn(ctx.props().update_and_render(update));
                 true
             }
             ConfigSelectorMsg::SetFilterValue(index, input) => {
@@ -242,7 +248,7 @@ impl Component for ConfigSelector {
                     ..ViewConfigUpdate::default()
                 };
 
-                ctx.props().update_and_render(update);
+                ApiFuture::spawn(ctx.props().update_and_render(update));
                 false
             }
         }

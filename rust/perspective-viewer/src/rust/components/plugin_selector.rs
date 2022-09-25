@@ -76,7 +76,7 @@ impl Component for PluginSelector {
                     .session
                     .set_update_column_defaults(&mut update, &ctx.props().renderer.metadata());
 
-                ctx.props().update_and_render(update);
+                ApiFuture::spawn(ctx.props().update_and_render(update));
                 false
             }
         }

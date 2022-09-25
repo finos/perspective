@@ -10,6 +10,7 @@ use crate::components::datetime_column_style::*;
 use crate::config::*;
 use crate::custom_elements::modal::*;
 use crate::utils::CustomElementMetadata;
+use crate::utils::*;
 use crate::*;
 use wasm_bindgen::prelude::*;
 use web_sys::*;
@@ -47,9 +48,9 @@ impl PerspectiveDatetimeColumnStyleElement {
     ///
     /// # Arguments
     /// * `config` - a `ColumnStyle` config in JSON form.
-    pub fn reset(&mut self, config: JsValue) -> Result<(), JsValue> {
+    pub fn reset(&mut self, config: JsValue) -> ApiResult<()> {
         let msg = DatetimeColumnStyleMsg::Reset(config.into_serde().unwrap());
-        self.modal.as_ref().into_jserror()?.send_message(msg);
+        self.modal.as_apierror()?.send_message(msg);
         Ok(())
     }
 
@@ -62,7 +63,7 @@ impl PerspectiveDatetimeColumnStyleElement {
         target: web_sys::HtmlElement,
         js_config: JsValue,
         js_default_config: JsValue,
-    ) -> Result<(), JsValue> {
+    ) -> ApiResult<()> {
         if self.modal.is_some() {
             self.reset(js_config)?;
         } else {
@@ -85,17 +86,17 @@ impl PerspectiveDatetimeColumnStyleElement {
             self.modal = Some(ModalElement::new(self.elem.clone(), props, true));
         }
 
-        self.modal.as_ref().into_jserror()?.open(target, None);
+        ApiFuture::spawn(self.modal.as_apierror()?.clone().open(target, None));
         Ok(())
     }
 
     /// Remove this `ModalElement` from the DOM.
-    pub fn close(&mut self) -> Result<(), JsValue> {
-        self.modal.as_ref().into_jserror()?.hide()
+    pub fn close(&mut self) -> ApiResult<()> {
+        self.modal.as_apierror()?.hide()
     }
 
-    pub fn destroy(self) -> Result<(), JsValue> {
-        self.modal.into_jserror()?.destroy()
+    pub fn destroy(self) -> ApiResult<()> {
+        self.modal.into_apierror()?.destroy()
     }
 
     /// DOM lifecycle method when connected.  We don't use this, as it can fire

@@ -8,6 +8,7 @@
 
 use super::mimetype::*;
 use crate::js::clipboard_item::*;
+use crate::utils::*;
 use crate::*;
 
 use std::cell::RefCell;
@@ -18,9 +19,9 @@ use wasm_bindgen::JsCast;
 
 /// Copy a `JsPerspectiveView` to the clipboard as a CSV.
 pub fn copy_to_clipboard(
-    view: impl Future<Output = Result<web_sys::Blob, JsValue>>,
+    view: impl Future<Output = Result<web_sys::Blob, ApiError>>,
     mimetype: MimeType,
-) -> impl Future<Output = Result<(), JsValue>> {
+) -> impl Future<Output = ApiResult<()>> {
     let js_ref: Rc<RefCell<Option<web_sys::Blob>>> = Rc::new(RefCell::new(None));
     poll(0, mimetype, js_ref.clone()).unwrap();
     async move {
@@ -37,7 +38,7 @@ fn poll(
     count: u32,
     mimetype: MimeType,
     js_ref: Rc<RefCell<Option<web_sys::Blob>>>,
-) -> Result<(), JsValue> {
+) -> ApiResult<()> {
     if let Some(js_val) = js_ref.borrow().as_ref() {
         let options = js_sys::Object::new();
         js_sys::Reflect::set(&options, &mimetype.into(), js_val)?;
@@ -47,10 +48,14 @@ fn poll(
             .unwrap()
             .navigator()
             .clipboard()
-            .into_jserror()?
+            .into_apierror()?
             .write(&items.into());
     } else {
         clone!(js_ref);
+        if count == 200 {
+            tracing::warn!("Clipboard handler surpassed 10s");
+        }
+
         let f: js_sys::Function =
             Closure::once(Box::new(move || poll(count + 1, mimetype, js_ref)))
                 .into_js_value()

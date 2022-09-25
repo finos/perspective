@@ -1,0 +1,107 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+:host {
+    #editor {
+        display: flex;
+        flex: 1 1 auto;
+        position: relative;
+        overflow: scroll;
+
+        #line_numbers {
+            padding: 6px;
+            box-sizing: border-box;
+            position: absolute;
+            font-size: 12px;
+            font-weight: 400;
+            font-family: var(--interface-monospace--font-family, monospace);
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 36px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-color: var(--plugin--background, white);
+        }
+
+        pre#content {
+            margin: 0;
+            padding: 6px;
+            padding-left: 36px;
+            position: absolute;
+            box-sizing: border-box;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            pointer-events: none;
+            font-size: 12px;
+            font-weight: 400;
+            font-family: var(--interface-monospace--font-family, monospace);
+            color: var(--code-editor-error--color, red);
+            white-space: pre;
+            overflow: hidden;
+
+            span {
+                // display: contents;
+                display: inline-block;
+            }
+
+            .comment {
+                color: var(--code-editor-comment--color, orange);
+            }
+
+            .operator {
+                color: var(--code-editor-operator--color, green);
+            }
+
+            .unknown {
+                color: var(--code-editor-unknown--color, red);
+            }
+
+            .symbol {
+                color: var(--code-editor-symbol--color, #242526);
+            }
+
+            .column {
+                color: var(--code-editor-column--color, purple);
+            }
+
+            .literal {
+                color: var(--code-editor-literal--color, blue);
+            }
+
+            .error_highlight {
+                border: 0px solid var(--code-editor-error--color, red);
+                border-bottom-width: 1px;
+                margin-bottom: -1px;
+            }
+        }
+
+        #textarea_editable {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            font-size: 12px;
+            font-family: var(--interface-monospace--font-family, monospace);
+            resize: none;
+            padding: 6px;
+            padding-left: 36px;
+            margin: 0;
+            border: none;
+            outline: none;
+            color: transparent;
+            caret-color: var(--code-editor-symbol--color, #242526);
+            white-space: pre;
+            box-sizing: border-box;
+            background-color: transparent;
+        }
+    }
+}

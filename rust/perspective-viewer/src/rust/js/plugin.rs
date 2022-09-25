@@ -61,7 +61,7 @@ extern "C" {
     pub async fn restyle(
         this: &JsPerspectiveViewerPlugin, 
         view: &JsPerspectiveView
-    ) -> Result<JsValue, JsValue>;
+    ) -> ApiResult<JsValue>;
 
     #[wasm_bindgen(method, catch)]
     pub async fn draw(
@@ -70,7 +70,7 @@ extern "C" {
         column_limit: Option<usize>,
         row_limit: Option<usize>,
         force: bool
-    ) -> Result<(), JsValue>;
+    ) -> ApiResult<()>;
 
     #[wasm_bindgen(method, catch)]
     pub async fn update(
@@ -79,13 +79,13 @@ extern "C" {
         column_limit: Option<usize>,
         row_limit: Option<usize>,
         force: bool
-    ) -> Result<(), JsValue>;
+    ) -> ApiResult<()>;
 
     #[wasm_bindgen(method, catch)]
-    pub async fn clear(this: &JsPerspectiveViewerPlugin) -> Result<JsValue, JsValue>;
+    pub async fn clear(this: &JsPerspectiveViewerPlugin) -> ApiResult<JsValue>;
 
     #[wasm_bindgen(method, catch)]
-    pub async fn resize(this: &JsPerspectiveViewerPlugin) -> Result<JsValue, JsValue>;
+    pub async fn resize(this: &JsPerspectiveViewerPlugin) -> ApiResult<JsValue>;
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq)]
@@ -122,10 +122,10 @@ impl ViewConfigRequirements {
 }
 
 impl JsPerspectiveViewerPlugin {
-    pub fn get_requirements(&self) -> Result<ViewConfigRequirements, JsValue> {
+    pub fn get_requirements(&self) -> ApiResult<ViewConfigRequirements> {
         Ok(ViewConfigRequirements {
             min: self.min_config_columns(),
-            mode: self.select_mode().into_serde().into_jserror()?,
+            mode: self.select_mode().into_serde()?,
             names: self.config_column_names().map(|x| x.into_serde().unwrap()),
             max_columns: self.max_columns(),
             max_cells: self.max_cells(),

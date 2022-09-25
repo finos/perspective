@@ -131,7 +131,7 @@ impl Component for StatusBar {
                 clone!(ctx.props().renderer, ctx.props().session, ctx.props().theme);
                 ApiFuture::spawn(async move {
                     theme.set_name(Some(&theme_name)).await?;
-                    let view = session.get_view().into_jserror()?;
+                    let view = session.get_view().into_apierror()?;
                     renderer.restyle_all(&view).await
                 });
 

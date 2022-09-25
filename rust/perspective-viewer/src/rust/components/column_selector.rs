@@ -6,9 +6,14 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use super::active_column::*;
+mod active_column;
+mod aggregate_selector;
+mod expression_toolbar;
+mod inactive_column;
+
+use self::active_column::*;
+use self::inactive_column::*;
 use super::containers::scroll_panel::*;
-use super::inactive_column::*;
 use super::style::LocalStyle;
 use crate::config::*;
 use crate::custom_elements::expression_editor::ExpressionEditorElement;
@@ -18,7 +23,6 @@ use crate::renderer::*;
 use crate::session::*;
 use crate::utils::*;
 use crate::*;
-
 use extend::ext;
 use std::iter::*;
 use std::rc::Rc;
@@ -42,7 +46,7 @@ pub struct ColumnSelectorProps {
 derive_model!(DragDrop, Renderer, Session for ColumnSelectorProps);
 
 impl ColumnSelectorProps {
-    fn save_expr(&self, expression: &JsValue) {
+    fn save_expr(&self, expression: &JsValue) -> ApiFuture<()> {
         let expression = expression.as_string().unwrap();
         let mut expressions = self.session.get_view_config().expressions.clone();
         expressions.retain(|x| x != &expression);
@@ -50,7 +54,7 @@ impl ColumnSelectorProps {
         self.update_and_render(ViewConfigUpdate {
             expressions: Some(expressions),
             ..ViewConfigUpdate::default()
-        });
+        })
     }
 }
 
@@ -71,6 +75,8 @@ pub enum ColumnSelectorMsg {
     OpenExpressionEditor(bool),
     SaveExpression(JsValue),
 }
+
+use ColumnSelectorMsg::*;
 
 /// A `ColumnSelector` controls the `columns` field of the `ViewConfig`,
 /// deriving its options from the table columns and `ViewConfig` expressions.
@@ -137,11 +143,11 @@ impl Component for ColumnSelector {
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            ColumnSelectorMsg::Drag(DragEffect::Move(DragTarget::Active)) => false,
-            ColumnSelectorMsg::Drag(_) => true,
-            ColumnSelectorMsg::DragEnd => true,
-            ColumnSelectorMsg::TableLoaded => true,
-            ColumnSelectorMsg::ViewCreated => {
+            Drag(DragEffect::Move(DragTarget::Active)) => false,
+            Drag(_) => true,
+            DragEnd => true,
+            TableLoaded => true,
+            ViewCreated => {
                 let named = maybe! {
                     let plugin =
                         ctx.props().renderer.get_active_plugin().ok()?;
@@ -152,7 +158,7 @@ impl Component for ColumnSelector {
                 self.named_row_count = named.unwrap_or_default();
                 true
             }
-            ColumnSelectorMsg::HoverActiveIndex(Some(to_index)) => {
+            HoverActiveIndex(Some(to_index)) => {
                 let min_cols = ctx.props().renderer.metadata().min;
                 let config = ctx.props().session.get_view_config();
                 let is_to_empty = !config
@@ -185,11 +191,11 @@ impl Component for ColumnSelector {
                         .drag_enter(DragTarget::Active, to_index)
                 }
             }
-            ColumnSelectorMsg::HoverActiveIndex(_) => {
+            HoverActiveIndex(_) => {
                 ctx.props().dragdrop.drag_leave(DragTarget::Active);
                 true
             }
-            ColumnSelectorMsg::Drop((column, DragTarget::Active, effect, index)) => {
+            Drop((column, DragTarget::Active, effect, index)) => {
                 let update = ctx.props().session.create_drag_drop_update(
                     column,
                     index,
@@ -198,17 +204,27 @@ impl Component for ColumnSelector {
                     &ctx.props().renderer.metadata(),
                 );
 
-                ctx.props().update_and_render(update);
+                ApiFuture::spawn(ctx.props().update_and_render(update));
                 true
             }
-            ColumnSelectorMsg::Drop((_, _, DragEffect::Move(DragTarget::Active), _)) => true,
-            ColumnSelectorMsg::Drop((_, _, _, _)) => true,
-            ColumnSelectorMsg::SaveExpression(expression) => {
-                ctx.props().save_expr(&expression);
-                self.expression_editor.as_ref().map(|x| x.hide());
-                true
+            Drop((_, _, DragEffect::Move(DragTarget::Active), _)) => true,
+            Drop((_, _, _, _)) => true,
+            SaveExpression(expression) => {
+                let task = ctx.props().save_expr(&expression);
+                let expr = self.expression_editor.clone();
+                ApiFuture::spawn(async move {
+                    task.await?;
+                    if let Some(editor) = expr.as_ref() {
+                        editor.hide().unwrap_or_default();
+                        editor.reset_empty_expr();
+                    }
+
+                    Ok(())
+                });
+
+                false
             }
-            ColumnSelectorMsg::OpenExpressionEditor(reset) => {
+            OpenExpressionEditor(reset) => {
                 if reset {
                     self.expression_editor = None;
                 }
@@ -231,7 +247,7 @@ impl Component for ColumnSelector {
             let columns_iter = ctx.props().column_selector_iter_set(&config);
 
             let dragover = Callback::from(|_event: DragEvent| _event.prevent_default());
-            let ondragenter = ctx.link().callback(ColumnSelectorMsg::HoverActiveIndex);
+            let ondragenter = ctx.link().callback(HoverActiveIndex);
 
             let drop = Callback::from({
                 let dragdrop = ctx.props().dragdrop.clone();
@@ -247,7 +263,7 @@ impl Component for ColumnSelector {
                 ColumnSelectorMsg::OpenExpressionEditor(event.shift_key())
             });
 
-            let onselect = ctx.link().callback(|()| ColumnSelectorMsg::ViewCreated);
+            let onselect = ctx.link().callback(|()| ViewCreated);
             let mut active_classes = classes!();
             if ctx.props().dragdrop.get_drag_column().is_some() {
                 active_classes.push("dragdrop-highlight");
@@ -379,7 +395,7 @@ impl Context<ColumnSelector> {
     /// as creating this element will ultimately download `monaco` which is
     /// very large.
     fn create_expression_editor(&self) -> ExpressionEditorElement {
-        let on_save = self.link().callback(ColumnSelectorMsg::SaveExpression);
+        let on_save = self.link().callback(SaveExpression);
         ExpressionEditorElement::new(self.props().session.clone(), on_save, None)
     }
 }

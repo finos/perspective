@@ -61,12 +61,10 @@ impl ViewConfig {
         }
     }
 
-    pub fn as_jsvalue(&self) -> Result<JsPerspectiveViewConfig, JsValue> {
+    pub fn as_jsvalue(&self) -> ApiResult<JsPerspectiveViewConfig> {
         let mut new_config = self.clone();
         new_config.columns.retain(|x| x.is_some());
-        JsValue::from_serde(&new_config)
-            .into_jserror()
-            .map(|x| x.unchecked_into())
+        Ok(JsValue::from_serde(&new_config).map(|x| x.unchecked_into())?)
     }
 
     pub fn is_aggregated(&self) -> bool {
@@ -138,7 +136,7 @@ mod tests {
     pub fn test_multiaggregate_weighted_mean() {
         let x = json!({
             "aggregates": {
-                "x": ["weighted_mean", "y"]
+                "x": ["weighted mean", "y"]
             }
         });
 

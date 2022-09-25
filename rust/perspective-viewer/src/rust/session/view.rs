@@ -7,6 +7,7 @@
 // file.
 
 use crate::js::perspective::*;
+use crate::utils::ApiResult;
 
 use async_trait::async_trait;
 use derivative::Derivative;
@@ -101,12 +102,12 @@ impl<T: AsyncDelete + JsCast + 'static> Drop for PerspectiveOwnedSession<T> {
 
 #[async_trait(?Send)]
 pub trait AsyncDelete {
-    async fn delete(self) -> Result<JsValue, JsValue>;
+    async fn delete(self) -> ApiResult<JsValue>;
 }
 
 #[async_trait(?Send)]
 impl AsyncDelete for JsPerspectiveView {
-    async fn delete(self) -> Result<JsValue, JsValue> {
+    async fn delete(self) -> ApiResult<JsValue> {
         self.delete().await?;
         Ok(JsValue::UNDEFINED)
     }
@@ -114,7 +115,7 @@ impl AsyncDelete for JsPerspectiveView {
 
 #[async_trait(?Send)]
 impl AsyncDelete for JsPerspectiveTable {
-    async fn delete(self) -> Result<JsValue, JsValue> {
+    async fn delete(self) -> ApiResult<JsValue> {
         self.delete().await?;
         Ok(JsValue::UNDEFINED)
     }

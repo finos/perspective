@@ -54,7 +54,11 @@ impl FilterDropDownElement {
     }
 
     pub fn reautocomplete(&self) {
-        self.modal.open(self.target.borrow().clone().unwrap(), None);
+        ApiFuture::spawn(
+            self.modal
+                .clone()
+                .open(self.target.borrow().clone().unwrap(), None),
+        );
     }
 
     pub fn autocomplete(
@@ -89,8 +93,7 @@ impl FilterDropDownElement {
                             FilterDropDownMsg::SetValues(filter_values),
                         ]);
 
-                        modal.open(target, None);
-                        Ok(())
+                        modal.open(target, None).await
                     }
                 });
             }
@@ -109,7 +112,7 @@ impl FilterDropDownElement {
         self.modal.send_message(FilterDropDownMsg::ItemUp);
     }
 
-    pub fn hide(&self) -> Result<(), JsValue> {
+    pub fn hide(&self) -> ApiResult<()> {
         let result = self.modal.hide();
         drop(self.column.borrow_mut().take());
         result

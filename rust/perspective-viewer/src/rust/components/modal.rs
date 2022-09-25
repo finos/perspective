@@ -49,6 +49,7 @@ where
     }
 }
 
+#[derive(Debug)]
 pub enum ModalMsg<T>
 where
     T: Component,
@@ -133,10 +134,36 @@ where
                 { self.css.to_owned() }
             </style>
             <ContextProvider<ModalOrientation> context={ &self.rev_vert }>
-                {
-                    child
-                }
+                <NoRender>
+                    { child }
+                </NoRender>
             </ContextProvider<ModalOrientation>>
         }
+    }
+}
+
+#[derive(Properties, Clone)]
+pub struct NoRenderProps {
+    pub children: Children,
+}
+
+impl PartialEq for NoRenderProps {
+    fn eq(&self, _other: &Self) -> bool {
+        true
+    }
+}
+
+pub struct NoRender {}
+
+impl Component for NoRender {
+    type Message = ();
+    type Properties = NoRenderProps;
+
+    fn create(_ctx: &Context<Self>) -> Self {
+        NoRender {}
+    }
+
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        html! { { ctx.props().children.iter().collect::<Html>()} }
     }
 }

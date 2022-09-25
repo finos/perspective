@@ -25,17 +25,15 @@ wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 
 async fn set_up_html() -> (WeakScope<PerspectiveViewer>, web_sys::ShadowRoot, Session) {
     let link: WeakScope<PerspectiveViewer> = WeakScope::default();
-    let root = NodeRef::default();
     let document = window().unwrap().document().unwrap();
     let elem: HtmlElement = document.create_element("div").unwrap().unchecked_into();
     let session = Session::default();
     let renderer = Renderer::new(&elem);
     let theme = Theme::new(&elem);
     let dragdrop = DragDrop::default();
-    test_html! {
+    let div = test_html! {
         <PerspectiveViewer
             weak_link={ link.clone() }
-            ref={ root.clone() }
             elem={ elem }
             dragdrop={ dragdrop }
             renderer={ renderer }
@@ -45,13 +43,7 @@ async fn set_up_html() -> (WeakScope<PerspectiveViewer>, web_sys::ShadowRoot, Se
     };
 
     await_animation_frame().await.unwrap();
-    let root: web_sys::ShadowRoot = root
-        .cast::<HtmlElement>()
-        .unwrap()
-        .parent_node()
-        .unwrap()
-        .unchecked_into();
-
+    let root: web_sys::ShadowRoot = div.parent_node().unwrap().unchecked_into();
     (link, root, session)
 }
 
@@ -79,7 +71,7 @@ pub async fn test_settings_open() {
     ));
 
     viewer
-        .promise_message(|x| Msg::ToggleSettingsComplete(SettingsUpdate::Update(true), x))
+        .send_message_async(|x| Msg::ToggleSettingsComplete(SettingsUpdate::Update(true), x))
         .await
         .unwrap();
 

@@ -127,7 +127,7 @@ impl CustomEventsDataRc {
             if viewer_config.view_config != Default::default()
                 && Some(&viewer_config) != self.last_dispatched.borrow().as_ref()
             {
-                let json_config = JsValue::from_serde(&viewer_config).into_jserror()?;
+                let json_config = JsValue::from_serde(&viewer_config)?;
                 let mut event_init = web_sys::CustomEventInit::new();
                 event_init.detail(&json_config);
                 let event = web_sys::CustomEvent::new_with_event_init_dict(

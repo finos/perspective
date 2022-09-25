@@ -7,6 +7,8 @@
 // file.der;
 
 use super::structural::*;
+use crate::renderer::Renderer;
+use crate::session::Session;
 use crate::utils::*;
 use crate::*;
 
@@ -31,15 +33,17 @@ pub trait UpdateAndRender: HasRenderer + HasSession {
     }
 
     /// Apply a `ViewConfigUpdate` to the current `View` and render.
-    fn update_and_render(&self, update: crate::config::ViewConfigUpdate) {
+    fn update_and_render(&self, update: crate::config::ViewConfigUpdate) -> ApiFuture<()> {
         self.session().update_view_config(update);
         clone!(self.session(), self.renderer());
-        ApiFuture::spawn(async move {
-            let view = session.validate().await?;
-            renderer.draw(view.create_view()).await?;
-            Ok(())
-        });
+        ApiFuture::new(update_and_render(session, renderer))
     }
+}
+
+async fn update_and_render(session: Session, renderer: Renderer) -> ApiResult<()> {
+    let view = session.validate().await?;
+    renderer.draw(view.create_view()).await?;
+    Ok(())
 }
 
 impl<T: HasRenderer + HasSession> UpdateAndRender for T {}

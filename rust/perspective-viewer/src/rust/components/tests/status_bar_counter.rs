@@ -7,7 +7,6 @@
 // file.
 
 use wasm_bindgen_test::*;
-use web_sys::HtmlElement;
 use yew::prelude::*;
 
 use crate::components::status_bar_counter::*;
@@ -19,89 +18,74 @@ wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
 pub async fn test_counter_none() {
-    let div = NodeRef::default();
-    test_html! {
-        <StatusBarRowsCounter stats={ None } ref={ div.clone() }>
+    let div = test_html! {
+        <StatusBarRowsCounter stats={ None }>
         </StatusBarRowsCounter>
     };
 
-    await_animation_frame().await.unwrap();
-    let div = div.cast::<HtmlElement>().unwrap();
     assert_eq!(div.inner_html(), "- rows");
 }
 
 #[wasm_bindgen_test]
 pub async fn test_counter_initializing() {
-    let div = NodeRef::default();
     let stats = Some(TableStats {
         is_pivot: false,
         num_rows: None,
         virtual_rows: None,
     });
 
-    test_html! {
-        <StatusBarRowsCounter stats={ stats } ref={ div.clone() }>
+    let div = test_html! {
+        <StatusBarRowsCounter stats={ stats }>
         </StatusBarRowsCounter>
     };
 
-    await_animation_frame().await.unwrap();
-    let div = div.cast::<HtmlElement>().unwrap();
     assert_eq!(div.inner_html(), "- rows");
 }
 
 #[wasm_bindgen_test]
 pub async fn test_counter_some_connected_no_view() {
-    let div = NodeRef::default();
     let stats = Some(TableStats {
         is_pivot: false,
         num_rows: Some(123456789),
         virtual_rows: None,
     });
 
-    test_html! {
-        <StatusBarRowsCounter stats={ stats } ref={ div.clone() }>
+    let div = test_html! {
+        <StatusBarRowsCounter stats={ stats }>
         </StatusBarRowsCounter>
     };
 
-    await_animation_frame().await.unwrap();
-    let div = div.cast::<HtmlElement>().unwrap();
     assert_eq!(div.inner_html(), "123,456,789 rows");
 }
 
 #[wasm_bindgen_test]
 pub async fn test_counter_some_connected_no_pivot() {
-    let div = NodeRef::default();
     let stats = Some(TableStats {
         is_pivot: false,
         num_rows: Some(123456789),
         virtual_rows: Some(54321),
     });
 
-    test_html! {
-        <StatusBarRowsCounter stats={ stats } ref={ div.clone() }>
+    let div = test_html! {
+        <StatusBarRowsCounter stats={ stats }>
         </StatusBarRowsCounter>
     };
 
-    await_animation_frame().await.unwrap();
-    let div = div.cast::<HtmlElement>().unwrap();
     assert_eq!(div.inner_html(), "123,456,789 rows");
 }
 
 #[wasm_bindgen_test]
 pub async fn test_counter_some_connected_pivot() {
-    let div = NodeRef::default();
     let stats = Some(TableStats {
         is_pivot: true,
         num_rows: Some(123456789),
         virtual_rows: Some(54321),
     });
 
-    test_html! {
-        <StatusBarRowsCounter stats={ stats } ref={ div.clone() }>
+    let div = test_html! {
+        <StatusBarRowsCounter stats={ stats }>
         </StatusBarRowsCounter>
     };
 
-    await_animation_frame().await.unwrap();
-    let div = div.cast::<HtmlElement>().unwrap();
     assert_eq!(div.inner_html(), "54,321 ");
 }

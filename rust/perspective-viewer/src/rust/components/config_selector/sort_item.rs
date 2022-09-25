@@ -6,15 +6,14 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use crate::components::containers::dragdrop_list::*;
 use crate::config::*;
 use crate::dragdrop::*;
 use crate::model::*;
 use crate::renderer::*;
 use crate::session::*;
+use crate::utils::ApiFuture;
 use crate::*;
-
-use super::containers::dragdrop_list::*;
-
 use web_sys::*;
 use yew::prelude::*;
 
@@ -70,7 +69,7 @@ impl Component for SortItem {
                     sort: Some(sort),
                     ..ViewConfigUpdate::default()
                 };
-                ctx.props().update_and_render(update);
+                ApiFuture::spawn(ctx.props().update_and_render(update));
                 false
             }
         }

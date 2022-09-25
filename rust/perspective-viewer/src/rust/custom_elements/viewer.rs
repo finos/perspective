@@ -17,8 +17,7 @@ use crate::session::Session;
 use crate::theme::*;
 use crate::utils::*;
 use crate::*;
-
-use js_intern::*;
+use gloo::utils::document;
 use js_sys::*;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -215,17 +214,17 @@ impl PerspectiveViewerElement {
         self.session.update_view_config(config);
         clone!(self.renderer, self.session);
         ApiFuture::new(async move {
-            renderer
-                .draw(async {
-                    let table = JsFuture::from(promise)
-                        .await?
-                        .unchecked_into::<JsPerspectiveTable>();
+            let task = async {
+                let table = JsFuture::from(promise)
+                    .await?
+                    .unchecked_into::<JsPerspectiveTable>();
 
-                    session.reset_stats();
-                    session.set_table(table).await?;
-                    session.validate().await?.create_view().await
-                })
-                .await
+                session.reset_stats();
+                session.set_table(table).await?;
+                session.validate().await?.create_view().await
+            };
+
+            renderer.draw(task).await
         })
     }
 
@@ -251,12 +250,7 @@ impl PerspectiveViewerElement {
     #[wasm_bindgen(js_name = "getView")]
     pub fn get_view(&self) -> ApiFuture<JsPerspectiveView> {
         let session = self.session.clone();
-        ApiFuture::new(async move {
-            Ok(session
-                .get_view()
-                .ok_or_else(|| js_intern!("No table set"))?
-                .js_get())
-        })
+        ApiFuture::new(async move { Ok(session.get_view().ok_or("No table set")?.js_get()) })
     }
 
     /// Get the underlying `Table` for this viewer.
@@ -270,10 +264,10 @@ impl PerspectiveViewerElement {
         ApiFuture::new(async move {
             match session.get_table() {
                 Some(table) => Ok(table),
-                None if !wait_for_table.unwrap_or_default() => Err(JsValue::from("No table set")),
+                None if !wait_for_table.unwrap_or_default() => Err("No table set".into()),
                 None => {
-                    session.table_loaded.listen_once().await.into_jserror()?;
-                    session.get_table().ok_or_else(|| "No table set".into())
+                    session.table_loaded.listen_once().await?;
+                    Ok(session.get_table().ok_or("No table set")?)
                 }
             }
         })
@@ -283,10 +277,8 @@ impl PerspectiveViewerElement {
         clone!(self.renderer, self.session);
         ApiFuture::new(async move {
             if session.js_get_table().is_none() {
-                session.table_loaded.listen_once().await.into_jserror()?;
-                let _ = session
-                    .js_get_table()
-                    .ok_or_else(|| js_intern!("No table set"))?;
+                session.table_loaded.listen_once().await?;
+                let _ = session.js_get_table().ok_or("No table set")?;
             };
 
             renderer.draw(async { Ok(&session) }).await
@@ -299,6 +291,7 @@ impl PerspectiveViewerElement {
     /// - `update` The config to restore to, as returned by `.save()` in either
     ///   "json", "string" or "arraybuffer" format.
     pub fn restore(&self, update: JsValue) -> ApiFuture<()> {
+        document().blur_active_element();
         clone!(self.session, self.renderer, self.root, self.theme);
         ApiFuture::new(async move {
             let ViewerConfigUpdate {
@@ -312,7 +305,7 @@ impl PerspectiveViewerElement {
             let needs_restyle = match theme_name {
                 OptionalUpdate::SetDefault => {
                     let current_name = theme.get_name().await;
-                    if None != current_name {
+                    if current_name.is_some() {
                         theme.set_name(None).await?;
                         true
                     } else {
@@ -342,20 +335,20 @@ impl PerspectiveViewerElement {
                     .borrow()
                     .as_ref()
                     .ok_or("Already deleted")?
-                    .promise_message(move |x| Msg::ToggleSettingsComplete(settings, x));
+                    .send_message_async(move |x| Msg::ToggleSettingsComplete(settings, x));
 
                 let result = async {
                     let plugin = renderer.get_active_plugin()?;
                     if let Some(plugin_config) = &plugin_config {
                         let js_config = JsValue::from_serde(plugin_config);
-                        plugin.restore(&js_config.into_jserror()?);
+                        plugin.restore(&js_config?);
                     }
 
                     session.validate().await?.create_view().await
                 }
                 .await;
 
-                task.await.into_jserror()?;
+                task.await?;
                 result
             });
 
@@ -364,7 +357,7 @@ impl PerspectiveViewerElement {
             // TODO this should be part of the API for `draw()` above, such that
             // the plugin need not render twice when a theme is provided.
             if needs_restyle {
-                let view = session.get_view().into_jserror()?;
+                let view = session.get_view().into_apierror()?;
                 renderer.restyle_all(&view).await?;
             }
 
@@ -436,9 +429,9 @@ impl PerspectiveViewerElement {
                 .borrow()
                 .as_ref()
                 .ok_or("Already deleted")?
-                .promise_message(move |x| Msg::Reset(all, Some(x)));
+                .send_message_async(move |x| Msg::Reset(all, Some(x)));
 
-            task.await.into_jserror()
+            Ok(task.await?)
         })
     }
 
@@ -492,7 +485,7 @@ impl PerspectiveViewerElement {
     pub fn restyle_element(&self) -> ApiFuture<JsValue> {
         clone!(self.renderer, self.session);
         ApiFuture::new(async move {
-            let view = session.get_view().into_jserror()?;
+            let view = session.get_view().into_apierror()?;
             renderer.restyle_all(&view).await
         })
     }
@@ -518,7 +511,7 @@ impl PerspectiveViewerElement {
                 .cloned();
 
             theme.set_name(reset_theme.as_deref()).await?;
-            let view = session.get_view().into_jserror()?;
+            let view = session.get_view().into_apierror()?;
             renderer.restyle_all(&view).await
         })
     }
@@ -547,14 +540,14 @@ impl PerspectiveViewerElement {
     ///   toggle.
     #[wasm_bindgen(js_name = "toggleConfig")]
     pub fn toggle_config(&self, force: Option<bool>) -> ApiFuture<JsValue> {
+        document().blur_active_element();
         let root = self.root.clone();
         ApiFuture::new(async move {
             let force = force.map(SettingsUpdate::Update);
             let task = root
                 .borrow()
-                .as_ref()
-                .into_jserror()?
-                .promise_message(|x| Msg::ToggleSettingsInit(force, Some(x)));
+                .as_apierror()?
+                .send_message_async(|x| Msg::ToggleSettingsInit(force, Some(x)));
 
             task.await.map_err(|_| JsValue::from("Cancelled"))?
         })
@@ -575,7 +568,7 @@ impl PerspectiveViewerElement {
     /// - `name` The `name` property of a perspective plugin Custom Element, or
     ///   `None` for the active plugin's Custom Element.
     #[wasm_bindgen(js_name = "getPlugin")]
-    pub fn get_plugin(&self, name: Option<String>) -> Result<JsPerspectiveViewerPlugin, JsValue> {
+    pub fn get_plugin(&self, name: Option<String>) -> ApiResult<JsPerspectiveViewerPlugin> {
         match name {
             None => self.renderer.get_active_plugin(),
             Some(name) => self.renderer.get_plugin(&name),

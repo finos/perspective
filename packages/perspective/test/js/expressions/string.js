@@ -216,7 +216,7 @@ module.exports = (perspective) => {
                 col4: {
                     column: 7,
                     error_message:
-                        "Parser Error - Zero parameter call to generic function: order not allowed",
+                        "Zero parameter call to generic function: order not allowed",
                     line: 1,
                 },
             });
@@ -1098,11 +1098,11 @@ module.exports = (perspective) => {
             }
 
             expect(validated.errors[expressions[0]].error_message).toEqual(
-                "Parser Error - Failed parameter type check for function 'match', Expected 'TS' call set: 'TT'"
+                "Failed parameter type check for function 'match', Expected 'TS' call set: 'TT'"
             );
 
             expect(validated.errors[expressions[1]].error_message).toEqual(
-                "Parser Error - Failed parameter type check for function 'match', Expected 'TS' call set: 'TT'"
+                "Failed parameter type check for function 'match', Expected 'TS' call set: 'TT'"
             );
 
             expect(validated.errors[expressions[2]]).toEqual({
@@ -1142,11 +1142,11 @@ module.exports = (perspective) => {
             }
 
             expect(validated.errors[expressions[0]].error_message).toEqual(
-                "Parser Error - Failed parameter type check for function 'match_all', Expected 'TS' call set: 'TT'"
+                "Failed parameter type check for function 'match_all', Expected 'TS' call set: 'TT'"
             );
 
             expect(validated.errors[expressions[1]].error_message).toEqual(
-                "Parser Error - Failed parameter type check for function 'match_all', Expected 'TS' call set: 'TT'"
+                "Failed parameter type check for function 'match_all', Expected 'TS' call set: 'TT'"
             );
 
             expect(validated.errors[expressions[2]]).toEqual({

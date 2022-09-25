@@ -6,14 +6,14 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use super::containers::select::*;
-use super::style::LocalStyle;
+use crate::components::containers::select::*;
+use crate::components::style::LocalStyle;
 use crate::config::*;
 use crate::model::*;
 use crate::renderer::*;
 use crate::session::*;
+use crate::utils::ApiFuture;
 use crate::*;
-
 use yew::prelude::*;
 
 #[derive(Properties)]
@@ -106,10 +106,12 @@ impl AggregateSelector {
         self.aggregate = Some(aggregate.clone());
         let mut aggregates = ctx.props().session.get_view_config().aggregates.clone();
         aggregates.insert(ctx.props().column.clone(), aggregate);
-        ctx.props().update_and_render(ViewConfigUpdate {
+        let config = ViewConfigUpdate {
             aggregates: Some(aggregates),
             ..ViewConfigUpdate::default()
-        });
+        };
+
+        ApiFuture::spawn(ctx.props().update_and_render(config));
     }
 
     pub fn get_dropdown_aggregates(&self, ctx: &Context<Self>) -> Vec<SelectItem<Aggregate>> {

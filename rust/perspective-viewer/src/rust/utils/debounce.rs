@@ -7,11 +7,11 @@
 // file.
 
 use async_std::sync::Mutex;
-
 use std::cell::Cell;
 use std::future::Future;
 use std::rc::Rc;
-use wasm_bindgen::*;
+
+use crate::utils::ApiResult;
 
 #[derive(Default)]
 pub struct DebounceMutexData {
@@ -31,10 +31,7 @@ impl DebounceMutex {
         result
     }
 
-    pub async fn debounce(
-        &self,
-        f: impl Future<Output = Result<(), JsValue>>,
-    ) -> Result<(), JsValue> {
+    pub async fn debounce(&self, f: impl Future<Output = ApiResult<()>>) -> ApiResult<()> {
         let next = self.0.id.get() + 1;
         let mut last = self.0.mutex.lock().await;
         if *last < next {

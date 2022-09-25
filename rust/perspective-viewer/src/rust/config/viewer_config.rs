@@ -91,13 +91,13 @@ impl ViewerConfig {
     }
 
     /// Encode a `ViewerConfig` to a `JsValue` in a supported type.
-    pub fn encode(&self, format: &Option<ViewerConfigEncoding>) -> Result<JsValue, JsValue> {
+    pub fn encode(&self, format: &Option<ViewerConfigEncoding>) -> ApiResult<JsValue> {
         match format {
             Some(ViewerConfigEncoding::String) => {
                 let mut encoder = ZlibEncoder::new(Vec::new(), Compression::default());
-                let bytes = rmp_serde::to_vec(self).into_jserror()?;
-                encoder.write_all(&bytes).into_jserror()?;
-                let encoded = encoder.finish().into_jserror()?;
+                let bytes = rmp_serde::to_vec(self)?;
+                encoder.write_all(&bytes)?;
+                let encoded = encoder.finish()?;
                 Ok(JsValue::from(base64::encode(encoded)))
             }
             Some(ViewerConfigEncoding::ArrayBuffer) => {
@@ -110,9 +110,9 @@ impl ViewerConfig {
                     .unchecked_into())
             }
             Some(ViewerConfigEncoding::JSONString) => {
-                Ok(JsValue::from(serde_json::to_string(self).into_jserror()?))
+                Ok(JsValue::from(serde_json::to_string(self)?))
             }
-            None | Some(ViewerConfigEncoding::Json) => JsValue::from_serde(self).into_jserror(),
+            None | Some(ViewerConfigEncoding::Json) => Ok(JsValue::from_serde(self)?),
         }
     }
 }
@@ -139,21 +139,21 @@ pub struct ViewerConfigUpdate {
 impl ViewerConfigUpdate {
     /// Decode a `JsValue` into a `ViewerConfigUpdate` by auto-detecting format
     /// from JavaScript type.
-    pub fn decode(update: &JsValue) -> Result<Self, JsValue> {
+    pub fn decode(update: &JsValue) -> ApiResult<Self> {
         if update.is_string() {
-            let js_str = update.as_string().into_jserror()?;
-            let bytes = base64::decode(js_str).into_jserror()?;
+            let js_str = update.as_string().into_apierror()?;
+            let bytes = base64::decode(js_str)?;
             let mut decoder = ZlibDecoder::new(&*bytes);
             let mut decoded = vec![];
-            decoder.read_to_end(&mut decoded).into_jserror()?;
-            rmp_serde::from_slice(&decoded).into_jserror()
+            decoder.read_to_end(&mut decoded)?;
+            Ok(rmp_serde::from_slice(&decoded)?)
         } else if update.is_instance_of::<js_sys::ArrayBuffer>() {
             let uint8array = js_sys::Uint8Array::new(update);
             let mut slice = vec![0; uint8array.length() as usize];
             uint8array.copy_to(&mut slice[..]);
-            rmp_serde::from_slice(&slice).into_jserror()
+            Ok(rmp_serde::from_slice(&slice)?)
         } else {
-            update.into_serde().into_jserror()
+            Ok(update.into_serde()?)
         }
     }
 }

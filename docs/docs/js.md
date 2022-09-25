@@ -57,7 +57,6 @@ performance, as the plugin-assisted bundle version of Perspective:
 -   Downloads `.wasm` and `.js` assets in parallel.
 -   Compiles `.wasm` incrementally via
     [streaming instantiation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WebAssembly/instantiateStreaming).
--   Lazily downloads large features only when used such as `monaco-editor`.
 -   overall bundle size is ~20% smaller (due to bas64 encoding overhead).
 
 Perspective comes with bundler plugins for:
@@ -80,28 +79,6 @@ module.exports = {
         path: "build",
     },
     plugins: [new PerspectivePlugin()],
-};
-```
-
-`@finos/perspective-viewer` has a dependence on
-[`monaco-editor`](https://microsoft.github.io/monaco-editor/), which itself
-depends on several CSS assets. If your webpack config uses a loader for
-`"*.css"` or similar, you may need to exclude `monaco-editor` from this loader
-to prevent double-encoding:
-
-```javascript
-module.exports = {
-    // ...
-
-    module: {
-        rules: [
-            {
-                test: /\.css$/,
-                exclude: [/monaco-editor/], // <- Exclude `monaco-editor`
-                use: [{loader: "style-loader"}, {loader: "css-loader"}],
-            },
-        ],
-    },
 };
 ```
 

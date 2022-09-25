@@ -24,7 +24,7 @@ fn get_local_tz() -> FixedOffset {
     FixedOffset::west(js_sys::Date::new(&0.into()).get_timezone_offset() as i32 * 60)
 }
 
-pub fn posix_to_utc_str(x: f64) -> Result<String, JsValue> {
+pub fn posix_to_utc_str(x: f64) -> ApiResult<String> {
     let tz = get_local_tz();
     if x > 0_f64 {
         Ok(Utc
@@ -37,11 +37,8 @@ pub fn posix_to_utc_str(x: f64) -> Result<String, JsValue> {
     }
 }
 
-pub fn str_to_utc_posix(val: &str) -> Result<f64, JsValue> {
+pub fn str_to_utc_posix(val: &str) -> Result<f64, ApiError> {
     let tz = get_local_tz();
-    NaiveDateTime::parse_from_str(val, input_value_format(val)?)
-        .map(|ref posix| {
-            DateTime::<Utc>::from(tz.from_local_datetime(posix).unwrap()).timestamp_millis() as f64
-        })
-        .into_jserror()
+    let posix = NaiveDateTime::parse_from_str(val, input_value_format(val)?)?;
+    Ok(DateTime::<Utc>::from(tz.from_local_datetime(&posix).unwrap()).timestamp_millis() as f64)
 }

@@ -20,8 +20,7 @@ use {
 #[wasm_bindgen(inline_js = "
 
     export async function worker() {
-        await import('/dist/pkg/perspective.js');
-        console.log(window.perspective);
+        await import('/dist/pkg/test/perspective.js');
         return window.perspective.worker();
     }
 
@@ -84,7 +83,8 @@ macro_rules! test_html {
 
         #[derive(Properties, PartialEq)]
         struct TestElementProps {
-            html: Html
+            html: Html,
+            root: NodeRef,
         }
 
         impl Component for TestElement {
@@ -109,7 +109,9 @@ macro_rules! test_html {
                         { "#test{position:absolute;top:0;bottom:0;left:0;right:0;}" }
                         // { &CSS }
                     </style>
-                    { ctx.props().html.clone() }
+                    <div ref={ ctx.props().root.clone() }>
+                        { ctx.props().html.clone() }
+                    </div>
                 }
             }
         }
@@ -126,6 +128,19 @@ macro_rules! test_html {
             .unwrap()
             .unchecked_into::<web_sys::Element>();
 
-        yew::Renderer::<TestElement>::with_root_and_props(shadow_root, TestElementProps { html: html!{ $($html)* } }).render()
+        let root = NodeRef::default();
+        let props = TestElementProps {
+            html: html!{ $($html)* },
+            root: root.clone(),
+        };
+
+        yew::Renderer::<TestElement>::with_root_and_props(shadow_root, props).render();
+        await_animation_frame().await.unwrap();
+        root.cast::<web_sys::HtmlElement>()
+            .unwrap()
+            .children()
+            .get_with_index(0)
+            .unwrap()
+            .unchecked_into::<web_sys::HtmlElement>()
     }}
 }

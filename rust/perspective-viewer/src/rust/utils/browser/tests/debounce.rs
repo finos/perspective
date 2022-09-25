@@ -6,8 +6,8 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use super::super::debounce::*;
 use super::super::request_animation_frame::set_timeout;
+use crate::utils::debounce::*;
 
 use futures::channel::oneshot::*;
 use futures::future::join_all;

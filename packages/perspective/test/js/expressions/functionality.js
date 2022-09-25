@@ -493,8 +493,7 @@ module.exports = (perspective) => {
                 expect(schema.errors["expr"]).toEqual({
                     column: 62,
                     line: 1,
-                    error_message:
-                        "Parser Error - Invalid expression encountered",
+                    error_message: "Invalid expression encountered",
                 });
 
                 await table.delete();

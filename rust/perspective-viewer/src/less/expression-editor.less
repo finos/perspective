@@ -7,9 +7,6 @@
  *
  */
 
-@import "./monaco.less";
-// @import "./split-panel.less";
-
 :host {
     position: fixed;
     z-index: 10000;
@@ -23,22 +20,41 @@
     background-color: white;
 
     #editor-container {
+        display: flex;
+        flex-direction: column;
         min-width: 0px;
+
+        .error {
+            flex: 1 1 auto;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .error_icon {
+            color: var(--rt-neg-cell--color, red);
+            font-family: var(--button--font-family);
+            padding: 10px 0 0 10px;
+            width: 26px;
+            font-size: 16px;
+
+            &:after {
+                content: "error_outline"; //var(--reset-button-icon--content, "\27F3");
+            }
+        }
     }
 
-    .split-panel.orient-vertical > .split-panel-divider {
+    .split-panel.orient-vertical>.split-panel-divider {
         margin-bottom: -6px;
     }
 
-    .split-panel.orient-vertical
-        > .split-panel-child:not(.is-width-override)
-        #editor-container {
+    .split-panel.orient-vertical>.split-panel-child:not(.is-width-override) #editor-container {
         height: 242px;
     }
 
-    .split-panel:not(.orient-vertical)
-        > .split-panel-child:not(.is-width-override)
-        #editor-container {
+    .split-panel:not(.orient-vertical)>.split-panel-child:not(.is-width-override) #editor-container {
         width: 400px;
     }
 
@@ -48,38 +64,16 @@
         bottom: 0;
         right: 0;
         width: 8px;
+
         &:hover {
             cursor: ew-resize;
             background: rgba(0, 0, 0, 0.05);
         }
     }
 
-    #monaco-container {
-        width: 100%;
-        height: calc(100% - 42px);
-        overflow: visible;
-        // margin-right: 8px;
-        &::-webkit-resizer {
-            appearance: var(--monaco-container--appearance, auto);
-        }
-    }
-    .monaco-hover {
-        background-color: white;
-    }
-
-    .monaco-editor {
-        padding-top: 6px;
-        .cursors-layer .cursor {
-            visibility: var(--monaco-cursor--visibility, inherit) !important;
-        }
-    }
-
     #psp-expression-editor-actions {
         display: flex;
         justify-content: flex-end;
-        margin-left: 20px;
-        margin-top: 6px;
-        margin-right: 8px;
     }
 
     .psp-expression-editor__button {

@@ -9,6 +9,7 @@
 // Required by yew's `html` macro.
 #![recursion_limit = "1024"]
 #![feature(const_type_name)]
+#![feature(macro_metavar_expr)]
 #![warn(
     clippy::all,
     clippy::panic_in_result_fn,
@@ -26,17 +27,18 @@ mod model;
 mod renderer;
 mod session;
 mod theme;
-mod utils;
+pub mod utils;
 
-use custom_elements::copy_dropdown::CopyDropDownMenuElement;
-use custom_elements::date_column_style::PerspectiveDateColumnStyleElement;
-use custom_elements::datetime_column_style::PerspectiveDatetimeColumnStyleElement;
-use custom_elements::export_dropdown::ExportDropDownMenuElement;
-use custom_elements::number_column_style::PerspectiveNumberColumnStyleElement;
-use custom_elements::string_column_style::PerspectiveStringColumnStyleElement;
-use custom_elements::viewer::PerspectiveViewerElement;
+use crate::custom_elements::copy_dropdown::CopyDropDownMenuElement;
+use crate::custom_elements::date_column_style::PerspectiveDateColumnStyleElement;
+use crate::custom_elements::datetime_column_style::PerspectiveDatetimeColumnStyleElement;
+use crate::custom_elements::export_dropdown::ExportDropDownMenuElement;
+use crate::custom_elements::number_column_style::PerspectiveNumberColumnStyleElement;
+use crate::custom_elements::string_column_style::PerspectiveStringColumnStyleElement;
+use crate::custom_elements::viewer::PerspectiveViewerElement;
 
-use utils::{define_web_component, ToJsValueError};
+use crate::utils::define_web_component;
+use crate::utils::ApiResult;
 use wasm_bindgen::prelude::*;
 
 #[cfg(feature = "define_custom_elements_async")]
@@ -51,15 +53,12 @@ pub fn register_plugin(name: &str) {
 
 /// Export all ExprTK commands, for use in generating documentation.
 #[wasm_bindgen(js_name = "getExprTKCommands")]
-pub fn get_exprtk_commands() -> Result<Box<[JsValue]>, JsValue> {
-    crate::exprtk::COMPLETIONS
-        .with(|x| {
-            x.suggestions
-                .iter()
-                .map(JsValue::from_serde)
-                .collect::<Result<Box<[_]>, serde_json::Error>>()
-        })
-        .into_jserror()
+pub fn get_exprtk_commands() -> ApiResult<Box<[JsValue]>> {
+    crate::exprtk::COMPLETIONS.with(|x| {
+        Ok(x.iter()
+            .map(JsValue::from_serde)
+            .collect::<Result<Box<[_]>, serde_json::Error>>()?)
+    })
 }
 
 /// Register this crate's Custom Elements in the browser's current session.
@@ -67,6 +66,7 @@ pub fn get_exprtk_commands() -> Result<Box<[JsValue]>, JsValue> {
 /// Elements from JavaScript, as the methods themselves won't be defined yet.
 /// By default, this crate does not register `PerspectiveViewerElement` (as to
 /// preserve backwards-compatible synchronous API).
+#[cfg(not(test))]
 #[cfg(not(feature = "define_custom_elements_async"))]
 #[wasm_bindgen(js_name = "defineWebComponents")]
 pub fn js_define_web_components() {

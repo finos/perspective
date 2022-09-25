@@ -11,7 +11,6 @@
 
 pub mod dragdrop_list;
 pub mod dropdown_menu;
-pub mod number_input;
 pub mod radio_list;
 pub mod radio_list_item;
 pub mod scroll_panel;

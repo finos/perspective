@@ -49,14 +49,14 @@ impl Theme {
         theme
     }
 
-    async fn init(self) -> Result<(), JsValue> {
+    async fn init(self) -> ApiResult<()> {
         self.set_theme_attribute(self.get_name().await.as_deref())
     }
 
     /// Get the available theme names from the browser environment by parsing
     /// readable stylesheets.  This method is memoized - the state can be
     /// flushed by calling `reset()`.
-    pub async fn get_themes(&self) -> Result<Vec<String>, JsValue> {
+    pub async fn get_themes(&self) -> ApiResult<Vec<String>> {
         let mut mutex = self.0.themes.lock().await;
         if mutex.is_none() {
             await_dom_loaded().await?;
@@ -74,7 +74,7 @@ impl Theme {
         *mutex = themes;
     }
 
-    pub async fn get_config(&self) -> Result<(Vec<String>, Option<usize>), JsValue> {
+    pub async fn get_config(&self) -> ApiResult<(Vec<String>, Option<usize>)> {
         let themes = self.get_themes().await?;
         let name = self.0.viewer_elem.get_attribute("theme");
         let index = name
@@ -92,16 +92,16 @@ impl Theme {
         index.and_then(|x| themes.get(x).cloned())
     }
 
-    fn set_theme_attribute(&self, theme: Option<&str>) -> Result<(), JsValue> {
+    fn set_theme_attribute(&self, theme: Option<&str>) -> ApiResult<()> {
         if let Some(theme) = theme {
-            self.0.viewer_elem.set_attribute("theme", theme)
+            Ok(self.0.viewer_elem.set_attribute("theme", theme)?)
         } else {
-            self.0.viewer_elem.remove_attribute("theme")
+            Ok(self.0.viewer_elem.remove_attribute("theme")?)
         }
     }
 
     /// Set the theme by name, or `None` for the default theme.
-    pub async fn set_name(&self, theme: Option<&str>) -> Result<(), JsValue> {
+    pub async fn set_name(&self, theme: Option<&str>) -> ApiResult<()> {
         let (themes, _) = self.get_config().await?;
         let index = if let Some(theme) = theme {
             self.set_theme_attribute(Some(theme))?;
@@ -129,8 +129,8 @@ fn fill_rule_theme_names(
     themes: &mut Vec<String>,
     rule: &Option<CssRule>,
     elem: &HtmlElement,
-) -> Result<(), JsValue> {
-    if let Some(rule) = rule.as_ref().into_jserror()?.dyn_ref::<CssStyleRule>() {
+) -> ApiResult<()> {
+    if let Some(rule) = rule.as_apierror()?.dyn_ref::<CssStyleRule>() {
         let txt = rule.selector_text();
         if elem.matches(&txt)? {
             let style = rule.style();
@@ -152,10 +152,10 @@ fn fill_sheet_theme_names(
     themes: &mut Vec<String>,
     sheet: &Option<StyleSheet>,
     elem: &HtmlElement,
-) -> Result<(), JsValue> {
+) -> ApiResult<()> {
     let sheet = sheet
         .as_ref()
-        .into_jserror()?
+        .into_apierror()?
         .unchecked_ref::<CssStyleSheet>();
 
     if let Ok(rules) = sheet.css_rules() {

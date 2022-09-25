@@ -90,8 +90,11 @@ impl Deref for RendererData {
     }
 }
 
-type TaskResult = Result<JsValue, JsValue>;
+type TaskResult = ApiResult<JsValue>;
 type TimeoutTask<'a> = Pin<Box<dyn Future<Output = Option<TaskResult>> + 'a>>;
+
+/// How long to await a call to the plugin's `draw()` before resizing.
+static PRESIZE_TIMEOUT: i32 = 500;
 
 impl Renderer {
     pub fn new(viewer_elem: &HtmlElement) -> Self {
@@ -118,7 +121,7 @@ impl Renderer {
         }
     }
 
-    pub fn delete(&self) -> Result<(), JsValue> {
+    pub fn delete(&self) -> ApiResult<()> {
         self.get_active_plugin()?.delete();
         Ok(())
     }
@@ -142,21 +145,21 @@ impl Renderer {
     /// has been selected will cause the default (first) plugin to be
     /// selected, and doing so when no plugins have been registered is an
     /// error.
-    pub fn get_active_plugin(&self) -> Result<JsPerspectiveViewerPlugin, JsValue> {
+    pub fn get_active_plugin(&self) -> ApiResult<JsPerspectiveViewerPlugin> {
         if self.0.borrow().plugins_idx.is_none() {
             self.set_plugin(Some(&PLUGIN_REGISTRY.default_plugin_name()))?;
         }
 
         let idx = self.0.borrow().plugins_idx.unwrap_or(0);
         let result = self.0.borrow_mut().plugin_store.plugins().get(idx).cloned();
-        result.ok_or_else(|| JsValue::from("No Plugin"))
+        Ok(result.ok_or("No Plugin")?)
     }
 
     /// Gets a specific `JsPerspectiveViewerPlugin` by name.
     ///
     /// # Arguments
     /// - `name` The plugin name to lookup.
-    pub fn get_plugin(&self, name: &str) -> Result<JsPerspectiveViewerPlugin, JsValue> {
+    pub fn get_plugin(&self, name: &str) -> ApiResult<JsPerspectiveViewerPlugin> {
         let idx = self.find_plugin_idx(name);
         let idx = idx.ok_or_else(|| JsValue::from(format!("No Plugin `{}`", name)))?;
         let result = self.0.borrow_mut().plugin_store.plugins().get(idx).cloned();
@@ -167,7 +170,7 @@ impl Renderer {
         self.0.borrow().is_settings_open
     }
 
-    pub fn set_settings_open(&self, open: Option<bool>) -> Result<bool, JsValue> {
+    pub fn set_settings_open(&self, open: Option<bool>) -> ApiResult<bool> {
         let open_state = open.unwrap_or_else(|| !self.0.borrow().is_settings_open);
         if self.0.borrow().is_settings_open != open_state {
             self.0.borrow_mut().is_settings_open = open_state;
@@ -182,7 +185,7 @@ impl Renderer {
         Ok(open_state)
     }
 
-    pub async fn restyle_all(&self, view: &JsPerspectiveView) -> Result<JsValue, JsValue> {
+    pub async fn restyle_all(&self, view: &JsPerspectiveView) -> ApiResult<JsValue> {
         let plugins = self.get_all_plugins();
         let tasks = plugins.iter().map(|plugin| plugin.restyle(view));
 
@@ -207,7 +210,7 @@ impl Renderer {
     ///
     /// # Arguments
     /// - `update` The `PluginUpdate` behavior to set.
-    pub fn update_plugin(&self, update: &PluginUpdate) -> Result<bool, JsValue> {
+    pub fn update_plugin(&self, update: &PluginUpdate) -> ApiResult<bool> {
         match update {
             PluginUpdate::Missing => Ok(false),
             PluginUpdate::SetDefault => self.set_plugin(None),
@@ -215,7 +218,7 @@ impl Renderer {
         }
     }
 
-    fn set_plugin(&self, name: Option<&str>) -> Result<bool, JsValue> {
+    fn set_plugin(&self, name: Option<&str>) -> ApiResult<bool> {
         let default_plugin_name = PLUGIN_REGISTRY.default_plugin_name();
         let name = name.unwrap_or(default_plugin_name.as_str());
         let idx = self
@@ -237,15 +240,12 @@ impl Renderer {
         Ok(changed)
     }
 
-    pub async fn with_lock<T>(
-        self,
-        task: impl Future<Output = Result<T, JsValue>>,
-    ) -> Result<T, JsValue> {
+    pub async fn with_lock<T>(self, task: impl Future<Output = ApiResult<T>>) -> ApiResult<T> {
         let draw_mutex = self.draw_lock();
         draw_mutex.lock(task).await
     }
 
-    pub async fn resize(&self) -> Result<(), JsValue> {
+    pub async fn resize(&self) -> ApiResult<()> {
         let draw_mutex = self.draw_lock();
         let timer = self.render_timer();
         draw_mutex
@@ -260,20 +260,20 @@ impl Renderer {
 
     pub async fn draw(
         &self,
-        session: impl Future<Output = Result<&Session, JsValue>>,
-    ) -> Result<(), JsValue> {
+        session: impl Future<Output = Result<&Session, ApiError>>,
+    ) -> ApiResult<()> {
         self.draw_plugin(session, false).await
     }
 
-    pub async fn update(&self, session: &Session) -> Result<(), JsValue> {
+    pub async fn update(&self, session: &Session) -> ApiResult<()> {
         self.draw_plugin(async { Ok(session) }, true).await
     }
 
     async fn draw_plugin(
         &self,
-        session: impl Future<Output = Result<&Session, JsValue>>,
+        session: impl Future<Output = Result<&Session, ApiError>>,
         is_update: bool,
-    ) -> Result<(), JsValue> {
+    ) -> ApiResult<()> {
         let timer = self.render_timer();
         let task = async move {
             if is_update {
@@ -295,7 +295,7 @@ impl Renderer {
         }
     }
 
-    async fn draw_view(&self, view: &JsPerspectiveView, is_update: bool) -> Result<(), JsValue> {
+    async fn draw_view(&self, view: &JsPerspectiveView, is_update: bool) -> ApiResult<()> {
         let plugin = self.get_active_plugin()?;
         let meta = self.metadata().clone();
         let limits = get_row_and_col_limits(view, &meta).await?;
@@ -317,8 +317,8 @@ impl Renderer {
     pub async fn presize(
         &self,
         open: bool,
-        on_toggle: impl Future<Output = Result<(), JsValue>>,
-    ) -> Result<JsValue, JsValue> {
+        on_toggle: impl Future<Output = ApiResult<()>>,
+    ) -> ApiResult<JsValue> {
         let task = self.resize_with_timeout(open);
         let result = if open {
             on_toggle.await?;
@@ -332,7 +332,7 @@ impl Renderer {
         match result {
             Ok(x) => x,
             Err(cont) => {
-                web_sys::console::log_1(&"Presize took longer than 500ms".into());
+                tracing::warn!("Presize took longer than {}ms", PRESIZE_TIMEOUT);
                 cont.await.unwrap()
             }
         }
@@ -354,7 +354,7 @@ impl Renderer {
         let tasks: [TimeoutTask<'_>; 2] = [
             Box::pin(async move { Some(draw_lock.lock(task).await) }),
             Box::pin(async {
-                set_timeout(500).await.unwrap();
+                set_timeout(PRESIZE_TIMEOUT).await.unwrap();
                 None
             }),
         ];

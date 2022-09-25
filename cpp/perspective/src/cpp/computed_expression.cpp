@@ -346,8 +346,8 @@ t_computed_expression_parser::get_dtype(const std::string& expression_alias,
             std::string error_message(parser_error.diagnostic.c_str());
 
             // strip the Exprtk error codes such as "ERR001 -"
-            error.m_error_message = "Parser Error "
-                + error_message.substr(error_message.find("- "));
+            error.m_error_message
+                = error_message.substr(error_message.find("- ") + 2);
 
             error.m_line = parser_error.line_no;
             error.m_column = parser_error.column_no;

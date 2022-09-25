@@ -6,15 +6,15 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use super::expression_toolbar::*;
 use crate::config::*;
 use crate::dragdrop::*;
 use crate::js::plugin::*;
 use crate::model::*;
 use crate::renderer::*;
 use crate::session::*;
+use crate::utils::ApiFuture;
 use crate::*;
-
-use super::expression_toolbar::*;
 
 use itertools::Itertools;
 use web_sys::*;
@@ -82,10 +82,12 @@ impl InactiveColumnProps {
     }
 
     fn apply_columns(&self, columns: Vec<Option<String>>) {
-        self.update_and_render(ViewConfigUpdate {
+        let config = ViewConfigUpdate {
             columns: Some(columns),
             ..ViewConfigUpdate::default()
-        });
+        };
+
+        ApiFuture::spawn(self.update_and_render(config));
     }
 }
 
