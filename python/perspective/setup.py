@@ -70,10 +70,10 @@ requires_tornado = ["tornado>=4.5.3,<6.2"]
 
 requires_dev = (
     [
-        "black==20.8b1",
+        "black==22.8",
         "Faker>=1.0.0",
-        "flake8>=3.7.8",
-        "flake8-black>=0.2.0",
+        "flake8>=5",
+        "flake8-black>=0.3.3",
         "psutil",
         "pybind11>=2.4.0",
         "pyarrow>=0.16.0",
@@ -83,7 +83,7 @@ requires_dev = (
         "pytest-cov>=2.6.1",
         "pytest-check-links",
         "pytest-tornado",
-        "pytz>=2018.9",
+        "pytz>=2022",
         "Sphinx>=1.8.4",
         "sphinx-markdown-builder>=0.5.2",
         "wheel",
@@ -204,7 +204,7 @@ class PSPBuild(build_ext):
                     "-DCMAKE_TOOLCHAIN_FILE={}".format(vcpkg_toolchain_file)
                 )
 
-            if sys.maxsize > 2 ** 32:
+            if sys.maxsize > 2**32:
                 # build 64 bit to match python
                 cmake_args += ["-A", "x64"]
 
