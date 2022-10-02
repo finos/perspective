@@ -80,15 +80,17 @@ exports.WorkerPlugin = function WorkerPlugin(options = {}) {
                         }
 
                         export const initialize = async function () {
-                            if (window.location.protocol.startsWith("file")) {
-                                return run_single_threaded(worker, "file:// protocol does not support Web Workers");
-                            }
-
                             try {
                                 const blob = new Blob([worker], {type: 'application/javascript'});
                                 const url = URL.createObjectURL(blob);
                                 return new Worker(url, {type: "module"});
                             } catch (e) {
+                                if (window.location.protocol.startsWith("file")) {
+                                    console.warn("file:// protocol does not support Web Workers");
+                                } else {
+                                    console.error("Error instantiating Web Worker");
+                                }
+    
                                 return run_single_threaded(worker, e);
                             }
                         };
