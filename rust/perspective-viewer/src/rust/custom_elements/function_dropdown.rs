@@ -50,14 +50,20 @@ impl FunctionDropDownElement {
         input: String,
         target: HtmlElement,
         callback: Callback<CompletionItemSuggestion>,
-    ) {
+    ) -> ApiResult<()> {
         let values = filter_values(&input);
-        self.modal.send_message_batch(vec![
-            FunctionDropDownMsg::SetCallback(callback),
-            FunctionDropDownMsg::SetValues(values),
-        ]);
+        if values.is_empty() {
+            self.modal.hide()?;
+        } else {
+            self.modal.send_message_batch(vec![
+                FunctionDropDownMsg::SetCallback(callback),
+                FunctionDropDownMsg::SetValues(values),
+            ]);
 
-        ApiFuture::spawn(self.modal.clone().open(target, None));
+            ApiFuture::spawn(self.modal.clone().open(target, None));
+        }
+
+        Ok(())
     }
 
     pub fn item_select(&self) {

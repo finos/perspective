@@ -303,14 +303,11 @@ where
             }));
         };
 
-        if !self.is_open() {
-            // self.custom_element.blur().unwrap();
-            target.class_list().add_1("modal-target").unwrap();
-            let theme = get_theme(&target);
-            self.open_within_viewport(target).await.unwrap();
-            if let Some(theme) = theme {
-                self.custom_element.set_attribute("theme", &theme).unwrap();
-            }
+        target.class_list().add_1("modal-target").unwrap();
+        let theme = get_theme(&target);
+        self.open_within_viewport(target).await.unwrap();
+        if let Some(theme) = theme {
+            self.custom_element.set_attribute("theme", &theme).unwrap();
         }
 
         Ok(())

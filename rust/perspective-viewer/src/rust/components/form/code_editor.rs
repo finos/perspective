@@ -83,7 +83,9 @@ fn autocomplete(
     if let Some(x) = token {
         let elem = target.cast::<HtmlElement>().unwrap();
         if elem.is_connected() {
-            filter_dropdown.autocomplete(x.clone(), elem, Callback::from(|_| ()));
+            filter_dropdown
+                .autocomplete(x.clone(), elem, Callback::from(|_| ()))
+                .unwrap();
         } else {
             filter_dropdown.hide().unwrap();
         }
