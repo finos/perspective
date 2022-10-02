@@ -27,6 +27,5 @@ pub use self::perspective::*;
 pub use self::plugin::*;
 pub use self::resize_observer::*;
 // pub use self::testing::enable_weak_link_test;
-
 #[cfg(test)]
 pub use self::testing::*;

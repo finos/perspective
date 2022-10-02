@@ -6,16 +6,14 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use std::collections::{HashMap, HashSet};
+use std::iter::IntoIterator;
+use std::ops::{Deref, DerefMut};
+
 use crate::config::*;
 use crate::js::perspective::*;
 use crate::utils::*;
 use crate::*;
-
-use std::collections::HashMap;
-use std::collections::HashSet;
-use std::iter::IntoIterator;
-use std::ops::Deref;
-use std::ops::DerefMut;
 
 struct SessionViewExpressionMetadata {
     schema: HashMap<String, Type>,
@@ -32,6 +30,7 @@ pub struct SessionMetadata(Option<SessionMetadataState>);
 
 impl Deref for SessionMetadata {
     type Target = Option<SessionMetadataState>;
+
     fn deref(&self) -> &Self::Target {
         &self.0
     }

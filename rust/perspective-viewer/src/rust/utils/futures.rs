@@ -6,22 +6,21 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use super::errors::*;
-use js_intern::*;
 use std::future::Future;
 use std::pin::Pin;
-use wasm_bindgen::convert::FromWasmAbi;
-use wasm_bindgen::convert::IntoWasmAbi;
+
+use js_intern::*;
+use wasm_bindgen::convert::{FromWasmAbi, IntoWasmAbi};
 use wasm_bindgen::describe::WasmDescribe;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use wasm_bindgen_futures::future_to_promise;
-use wasm_bindgen_futures::JsFuture;
-
 // TODO This is risky to rely on, but it is currently impossible to implement
 // this trait locally due to the orphan instance restriction.  Using this trait
 // removes alow of boilerplate required by `async` when casting to `Promise`.
 use wasm_bindgen::__rt::IntoJsResult;
+use wasm_bindgen_futures::{future_to_promise, JsFuture};
+
+use super::errors::*;
 
 /// A newtype wrapper for a `Future` trait object which supports being
 /// marshalled to a `JsPromise`, avoiding an API which requires type casting to
@@ -84,6 +83,7 @@ where
     Result<T, JsValue>: IntoJsResult + 'static,
 {
     type Abi = <js_sys::Promise as IntoWasmAbi>::Abi;
+
     #[inline]
     fn into_abi(self) -> Self::Abi {
         js_sys::Promise::from(self).into_abi()
@@ -96,6 +96,7 @@ where
     T: From<JsValue> + Into<JsValue>,
 {
     type Abi = <js_sys::Promise as IntoWasmAbi>::Abi;
+
     #[inline]
     unsafe fn from_abi(js: Self::Abi) -> Self {
         ApiFuture::new(async move {
@@ -110,6 +111,7 @@ where
     Result<T, JsValue>: IntoJsResult + 'static,
 {
     type Output = ApiResult<T>;
+
     fn poll(
         self: Pin<&mut Self>,
         cx: &mut std::task::Context<'_>,

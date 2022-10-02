@@ -6,9 +6,10 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use std::str::FromStr;
+
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub enum StringColorMode {
@@ -42,6 +43,7 @@ impl Display for StringColorMode {
 
 impl FromStr for StringColorMode {
     type Err = String;
+
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "foreground" => Ok(StringColorMode::Foreground),
@@ -88,6 +90,7 @@ impl Display for FormatMode {
 
 impl FromStr for FormatMode {
     type Err = String;
+
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "link" => Ok(FormatMode::Link),

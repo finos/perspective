@@ -6,8 +6,9 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::utils::ApiResult;
 use wasm_bindgen::JsCast;
+
+use crate::utils::ApiResult;
 
 pub fn download(name: &str, value: &web_sys::Blob) -> ApiResult<()> {
     let window = web_sys::window().unwrap();

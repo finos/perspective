@@ -6,6 +6,11 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use wasm_bindgen::JsCast;
+use wasm_bindgen_test::*;
+use web_sys::*;
+use yew::prelude::*;
+
 use crate::components::viewer::*;
 use crate::config::*;
 use crate::dragdrop::*;
@@ -15,11 +20,6 @@ use crate::session::*;
 use crate::theme::Theme;
 use crate::utils::*;
 use crate::*;
-
-use wasm_bindgen::JsCast;
-use wasm_bindgen_test::*;
-use web_sys::*;
-use yew::prelude::*;
 
 wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 

@@ -6,11 +6,11 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use itertools::Itertools;
-use serde::Deserialize;
-use serde::Serialize;
 use std::fmt::Display;
 use std::str::FromStr;
+
+use itertools::Itertools;
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Deserialize, Debug, PartialEq, Serialize)]
 #[serde(untagged)]
@@ -105,6 +105,7 @@ impl Display for FilterOp {
 
 impl FromStr for FilterOp {
     type Err = String;
+
     fn from_str(input: &str) -> std::result::Result<Self, <Self as std::str::FromStr>::Err> {
         match input {
             "contains" => Ok(FilterOp::Contains),

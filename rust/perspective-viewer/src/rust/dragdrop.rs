@@ -6,17 +6,18 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::utils::*;
-use crate::*;
-
 use std::cell::RefCell;
 use std::ops::Deref;
 use std::rc::Rc;
+
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::*;
 use yew::html::ImplicitClone;
 use yew::prelude::*;
+
+use crate::utils::*;
+use crate::*;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum DragTarget {
@@ -84,6 +85,7 @@ pub struct DragDrop(Rc<DragDropState>);
 
 impl Deref for DragDrop {
     type Target = Rc<DragDropState>;
+
     fn deref(&self) -> &Self::Target {
         &self.0
     }

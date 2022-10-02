@@ -6,6 +6,11 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use wasm_bindgen::prelude::*;
+use wasm_bindgen_futures::spawn_local;
+use web_sys::*;
+use yew::prelude::*;
+
 use crate::config::*;
 use crate::custom_elements::expression_editor::ExpressionEditorElement;
 use crate::dragdrop::*;
@@ -14,11 +19,6 @@ use crate::renderer::*;
 use crate::session::*;
 use crate::utils::ApiFuture;
 use crate::*;
-
-use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::spawn_local;
-use web_sys::*;
-use yew::prelude::*;
 
 #[derive(Properties, Clone)]
 pub struct ExpressionToolbarProps {

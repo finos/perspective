@@ -6,13 +6,14 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::utils::*;
-use crate::*;
-
 use std::cell::*;
 use std::rc::*;
+
 use wasm_bindgen_futures::spawn_local;
 use wasm_bindgen_test::*;
+
+use crate::utils::*;
+use crate::*;
 
 #[wasm_bindgen_test]
 async fn test_request_animation_frame_async() {

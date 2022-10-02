@@ -6,14 +6,16 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::utils::*;
-use async_std::sync::Mutex;
 use std::ops::Deref;
 use std::rc::Rc;
+
+use async_std::sync::Mutex;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::*;
 use yew::html::ImplicitClone;
+
+use crate::utils::*;
 
 /// The available themes as detected in the browser environment or set
 /// explicitly when CORS prevents detection.  Detection is expensive and
@@ -24,6 +26,7 @@ pub struct Theme(Rc<ThemeData>);
 
 impl Deref for Theme {
     type Target = ThemeData;
+
     fn deref(&self) -> &Self::Target {
         &self.0
     }

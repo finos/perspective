@@ -9,15 +9,16 @@
 // Forked from https://github.com/AircastDev/yew-virtual-scroller (Apache 2.0)
 // Adds support for Yew 0.19, auto-width and a simplified message structure.
 
-use crate::components::style::LocalStyle;
-use crate::utils::*;
-use crate::*;
-
 use std::marker::PhantomData;
 use std::ops::Range;
 use std::rc::Rc;
+
 use web_sys::Element;
 use yew::prelude::*;
+
+use crate::components::style::LocalStyle;
+use crate::utils::*;
+use crate::*;
 
 pub struct ScrollPanel<T>
 where

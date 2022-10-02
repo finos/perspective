@@ -6,12 +6,13 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use yew::prelude::*;
+
 use super::style::LocalStyle;
 use crate::renderer::*;
 use crate::session::*;
 use crate::utils::*;
 use crate::*;
-use yew::prelude::*;
 
 #[derive(Properties)]
 pub struct RenderWarningProps {

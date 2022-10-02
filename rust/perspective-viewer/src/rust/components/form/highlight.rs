@@ -6,8 +6,9 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::exprtk::{Cursor, Token};
 use yew::prelude::*;
+
+use crate::exprtk::{Cursor, Token};
 
 /// Highlight a token if the cursor overlaps an error.  This is not a
 /// `Component` because of the the lifetimes associated with `Cursor<'a>` etc.

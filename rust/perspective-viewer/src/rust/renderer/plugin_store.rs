@@ -6,9 +6,10 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use std::collections::HashMap;
+
 use super::registry::*;
 use crate::js::plugin::*;
-use std::collections::HashMap;
 
 #[derive(Default)]
 pub struct PluginStore {

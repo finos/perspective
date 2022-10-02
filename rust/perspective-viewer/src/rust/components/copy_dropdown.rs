@@ -6,16 +6,17 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use std::rc::Rc;
+
+use js_intern::*;
+use yew::prelude::*;
+
 use super::containers::dropdown_menu::*;
 use super::modal::*;
 use super::style::StyleProvider;
 use crate::model::*;
 use crate::renderer::*;
 use crate::utils::*;
-
-use js_intern::*;
-use std::rc::Rc;
-use yew::prelude::*;
 
 pub type CopyDropDownMenuMsg = DropDownMenuMsg;
 pub type CopyDropDownMenuItem = DropDownMenuItem<ExportMethod>;

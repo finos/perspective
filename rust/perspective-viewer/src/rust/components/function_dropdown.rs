@@ -6,13 +6,13 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use web_sys::*;
+use yew::prelude::*;
+
 use super::modal::*;
 use crate::exprtk::CompletionItemSuggestion;
 use crate::utils::WeakScope;
 use crate::*;
-
-use web_sys::*;
-use yew::prelude::*;
 
 static CSS: &str = include_str!("../../../build/css/function-dropdown.css");
 

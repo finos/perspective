@@ -6,11 +6,12 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::utils::{ApiError, ApiResult};
 use js_sys::Array;
 use serde::Deserialize;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
+
+use crate::utils::{ApiError, ApiResult};
 
 // #[cfg(test)]
 // use wasm_bindgen_test::*;
@@ -146,26 +147,39 @@ extern "C" {
 
 impl JsPerspectiveWorker {
     async_typed!(_delete, delete(&self) -> ());
+
     async_typed!(_table, table(&self, data: js_sys::Object) -> JsPerspectiveTable);
 }
 
 impl JsPerspectiveTable {
     async_typed!(_columns, columns(&self) -> js_sys::Array);
+
     async_typed!(_delete, delete(self) -> ());
+
     async_typed!(_make_port, make_port(&self) -> f64);
+
     async_typed!(_validate_expressions, validate_expressions(&self, exprs: Array) -> JsPerspectiveValidatedExpressions);
+
     async_typed!(_schema, schema(&self) -> JsPerspectiveTableSchema);
+
     async_typed!(_view, view(&self, config: &JsPerspectiveViewConfig) -> JsPerspectiveView);
+
     async_typed!(_size, size(&self) -> f64);
 }
 
 impl JsPerspectiveView {
     async_typed!(_to_csv, to_csv(&self, options: js_sys::Object) -> js_sys::JsString);
+
     async_typed!(_to_arrow, to_arrow(&self) -> js_sys::ArrayBuffer);
+
     async_typed!(_to_columns, to_columns(&self) -> js_sys::Object);
+
     async_typed!(_num_rows, num_rows(&self) -> f64);
+
     async_typed!(_num_columns, num_columns(&self) -> f64);
+
     async_typed!(_schema, schema(&self) -> JsPerspectiveViewSchema);
+
     async_typed!(_delete, delete(self) -> ());
     // async_typed!(_get_config, get_config(&self) -> JsPerspectiveViewConfig);
 }

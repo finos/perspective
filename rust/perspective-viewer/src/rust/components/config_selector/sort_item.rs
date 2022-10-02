@@ -6,6 +6,9 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use web_sys::*;
+use yew::prelude::*;
+
 use crate::components::containers::dragdrop_list::*;
 use crate::config::*;
 use crate::dragdrop::*;
@@ -14,8 +17,6 @@ use crate::renderer::*;
 use crate::session::*;
 use crate::utils::ApiFuture;
 use crate::*;
-use web_sys::*;
-use yew::prelude::*;
 
 /// A `SortItem` includes the column name and `SortDir` arrow, a clickable
 /// button which cycles through the available `SortDir` states.

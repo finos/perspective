@@ -6,19 +6,20 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use std::cell::Cell;
+use std::rc::Rc;
+
+use wasm_bindgen::JsCast;
+use wasm_bindgen_test::*;
+use web_sys::*;
+use yew::prelude::*;
+
 use crate::components::status_bar::*;
 use crate::renderer::*;
 use crate::session::*;
 use crate::theme::Theme;
 use crate::utils::*;
 use crate::*;
-
-use std::cell::Cell;
-use std::rc::Rc;
-use wasm_bindgen::JsCast;
-use wasm_bindgen_test::*;
-use web_sys::*;
-use yew::prelude::*;
 
 wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 

@@ -6,24 +6,21 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::js::perspective::JsPerspectiveViewConfig;
-use crate::utils::*;
+use std::collections::HashMap;
+
+use serde::{Deserialize, Serialize};
+use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
+#[cfg(test)]
+use wasm_bindgen_test::*;
+#[cfg(test)]
+use {crate::*, js_sys::Array};
 
 use super::aggregates::*;
 use super::filters::*;
 use super::sort::*;
-
-use serde::Deserialize;
-use serde::Serialize;
-use std::collections::HashMap;
-use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
-
-#[cfg(test)]
-use {crate::*, js_sys::Array};
-
-#[cfg(test)]
-use wasm_bindgen_test::*;
+use crate::js::perspective::JsPerspectiveViewConfig;
+use crate::utils::*;
 
 #[derive(Clone, Debug, Deserialize, Default, PartialEq, Serialize)]
 #[serde(deny_unknown_fields)]

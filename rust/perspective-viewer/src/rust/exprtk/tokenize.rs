@@ -11,16 +11,17 @@ mod number;
 mod string;
 mod symbol;
 
-use self::comment::*;
-use self::number::*;
-use self::string::*;
-use self::symbol::*;
 use nom::branch::alt;
 use nom::bytes::complete::{is_a, is_not};
 use nom::character::complete::{line_ending, space1};
 use nom::combinator::map;
 use nom::multi::many0;
 use yew::prelude::*;
+
+use self::comment::*;
+use self::number::*;
+use self::string::*;
+use self::symbol::*;
 
 /// Syntax-highlightable ExprTK tokens. We had the option of implemnting this
 /// alternatively as `pub struct Token(TokenType, &'a str);`, but I felt this
@@ -119,8 +120,9 @@ pub fn tokenize(input: &str) -> Vec<Token<'_>> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use wasm_bindgen_test::*;
+
+    use super::*;
 
     #[wasm_bindgen_test]
     fn test_simple() {

@@ -6,6 +6,9 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use std::future::Future;
+use std::pin::Pin;
+
 use super::columns_iter_set::*;
 use super::structural::*;
 use crate::config::*;
@@ -14,9 +17,6 @@ use crate::session::*;
 use crate::theme::Theme;
 use crate::utils::*;
 use crate::*;
-
-use std::future::Future;
-use std::pin::Pin;
 
 /// A `ViewerConfig` is constructed from various properties acrosss the
 /// application state, including the current `Plugin`, `ViewConfig`, and

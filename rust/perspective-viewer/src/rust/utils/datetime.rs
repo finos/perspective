@@ -6,10 +6,10 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::utils::*;
-
 use chrono::{DateTime, FixedOffset, NaiveDateTime, TimeZone, Utc};
 use wasm_bindgen::prelude::*;
+
+use crate::utils::*;
 
 fn input_value_format(x: &str) -> Result<&str, JsValue> {
     match x.len() {

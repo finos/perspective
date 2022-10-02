@@ -6,16 +6,18 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use std::rc::Rc;
+
+use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
+use web_sys::*;
+use yew::*;
+
 use crate::components::expression_editor::*;
 use crate::custom_elements::modal::*;
 use crate::session::Session;
 use crate::utils::*;
 use crate::*;
-use std::rc::Rc;
-use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
-use web_sys::*;
-use yew::*;
 
 #[wasm_bindgen]
 #[derive(Clone)]

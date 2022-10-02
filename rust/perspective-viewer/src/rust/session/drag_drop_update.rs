@@ -7,8 +7,7 @@
 // file.
 
 use crate::config::*;
-use crate::dragdrop::DragEffect;
-use crate::dragdrop::DragTarget;
+use crate::dragdrop::{DragEffect, DragTarget};
 use crate::js::plugin::ViewConfigRequirements;
 
 impl ViewConfig {

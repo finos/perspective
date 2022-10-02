@@ -6,11 +6,11 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::utils::*;
-
 use ::futures::channel::oneshot::*;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::*;
+
+use crate::utils::*;
 
 /// An `async` version of `request_animation_frame`, which resolves on the next
 /// animation frame.

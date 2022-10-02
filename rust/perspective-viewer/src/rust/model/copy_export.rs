@@ -6,6 +6,14 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use std::collections::HashSet;
+
+use futures::join;
+use itertools::Itertools;
+use js_intern::*;
+use wasm_bindgen::JsCast;
+use wasm_bindgen_futures::JsFuture;
+
 use super::export_app;
 use super::export_method::*;
 use super::get_viewer_config::*;
@@ -13,13 +21,6 @@ use super::structural::*;
 use crate::config::*;
 use crate::js::JsPerspectiveViewerPlugin;
 use crate::utils::*;
-
-use futures::join;
-use itertools::Itertools;
-use js_intern::*;
-use std::collections::HashSet;
-use wasm_bindgen::JsCast;
-use wasm_bindgen_futures::JsFuture;
 
 fn tag_name_to_package(plugin: &JsPerspectiveViewerPlugin) -> String {
     let tag_name = plugin.unchecked_ref::<web_sys::HtmlElement>().tag_name();

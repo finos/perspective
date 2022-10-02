@@ -6,11 +6,12 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use std::rc::Rc;
+
+use yew::prelude::*;
+
 use crate::js::*;
 use crate::*;
-
-use std::rc::Rc;
-use yew::prelude::*;
 
 #[derive(Clone, Copy, Eq, PartialEq)]
 pub enum ExportMethod {

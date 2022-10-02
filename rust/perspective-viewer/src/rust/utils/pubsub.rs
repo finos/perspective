@@ -6,10 +6,11 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use derivative::Derivative;
-use futures::channel::oneshot::*;
 use std::cell::RefCell;
 use std::rc::Rc;
+
+use derivative::Derivative;
+use futures::channel::oneshot::*;
 use yew::prelude::*;
 
 /// A simple pub/sub struct which allows many listeners to subscribe to a single

@@ -7,6 +7,7 @@
 // file.
 
 use std::fmt::Display;
+
 use wasm_bindgen::prelude::*;
 
 #[derive(Clone, Copy, Eq, PartialEq)]

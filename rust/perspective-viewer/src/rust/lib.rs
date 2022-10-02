@@ -29,6 +29,10 @@ mod session;
 mod theme;
 pub mod utils;
 
+#[cfg(feature = "define_custom_elements_async")]
+pub use components::{LocalStyle, StyleProvider};
+use wasm_bindgen::prelude::*;
+
 use crate::custom_elements::copy_dropdown::CopyDropDownMenuElement;
 use crate::custom_elements::date_column_style::PerspectiveDateColumnStyleElement;
 use crate::custom_elements::datetime_column_style::PerspectiveDatetimeColumnStyleElement;
@@ -36,13 +40,7 @@ use crate::custom_elements::export_dropdown::ExportDropDownMenuElement;
 use crate::custom_elements::number_column_style::PerspectiveNumberColumnStyleElement;
 use crate::custom_elements::string_column_style::PerspectiveStringColumnStyleElement;
 use crate::custom_elements::viewer::PerspectiveViewerElement;
-
-use crate::utils::define_web_component;
-use crate::utils::ApiResult;
-use wasm_bindgen::prelude::*;
-
-#[cfg(feature = "define_custom_elements_async")]
-pub use components::{LocalStyle, StyleProvider};
+use crate::utils::{define_web_component, ApiResult};
 
 /// Register a plugin globally.
 #[wasm_bindgen(js_name = "registerPlugin")]

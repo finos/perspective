@@ -6,13 +6,13 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.der;
 
+use yew::prelude::*;
+
 use super::structural::*;
 use crate::renderer::Renderer;
 use crate::session::Session;
 use crate::utils::*;
 use crate::*;
-
-use yew::prelude::*;
 
 /// While `Renderer` manages the plugin and thus the render call itself, the
 /// current `View` is handled by the `Session` which must be validated and

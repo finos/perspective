@@ -6,6 +6,13 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use std::cell::RefCell;
+use std::rc::Rc;
+
+use wasm_bindgen::JsCast;
+use web_sys::*;
+use yew::prelude::*;
+
 use super::super::LocalStyle;
 use crate::components::form::highlight::highlight;
 use crate::custom_elements::FunctionDropDownElement;
@@ -13,11 +20,6 @@ use crate::exprtk::{tokenize, Cursor};
 use crate::js::PerspectiveValidationError;
 use crate::utils::*;
 use crate::*;
-use std::cell::RefCell;
-use std::rc::Rc;
-use wasm_bindgen::JsCast;
-use web_sys::*;
-use yew::prelude::*;
 
 #[derive(Debug, Properties, PartialEq)]
 pub struct CodeEditorProps {

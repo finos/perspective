@@ -1,4 +1,5 @@
-use std::{fs::File, io::BufReader};
+use std::fs::File;
+use std::io::BufReader;
 
 fn get_version_from_package() -> Option<String> {
     let file = File::open("./package.json").ok()?;

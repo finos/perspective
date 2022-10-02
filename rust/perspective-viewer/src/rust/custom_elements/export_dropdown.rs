@@ -6,14 +6,9 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::components::export_dropdown::*;
-use crate::custom_elements::modal::*;
-use crate::model::*;
-use crate::utils::*;
-use crate::*;
-
 use std::cell::RefCell;
 use std::rc::Rc;
+
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::spawn_local;
@@ -21,6 +16,11 @@ use web_sys::*;
 use yew::*;
 
 use super::viewer::PerspectiveViewerElement;
+use crate::components::export_dropdown::*;
+use crate::custom_elements::modal::*;
+use crate::model::*;
+use crate::utils::*;
+use crate::*;
 
 #[wasm_bindgen]
 #[derive(Clone)]

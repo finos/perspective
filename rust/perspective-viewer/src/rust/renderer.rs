@@ -19,6 +19,19 @@ mod plugin_store;
 mod registry;
 mod render_timer;
 
+use std::cell::{Ref, RefCell};
+use std::collections::HashMap;
+use std::future::Future;
+use std::ops::Deref;
+use std::pin::Pin;
+use std::rc::Rc;
+
+use futures::future::{join_all, select_all};
+use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
+use web_sys::*;
+use yew::html::ImplicitClone;
+
 use self::activate::*;
 use self::limits::*;
 use self::plugin_store::*;
@@ -30,19 +43,6 @@ use crate::js::plugin::*;
 use crate::session::*;
 use crate::utils::*;
 use crate::*;
-
-use futures::future::join_all;
-use futures::future::select_all;
-use std::cell::{Ref, RefCell};
-use std::collections::HashMap;
-use std::future::Future;
-use std::ops::Deref;
-use std::pin::Pin;
-use std::rc::Rc;
-use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
-use web_sys::*;
-use yew::html::ImplicitClone;
 
 #[derive(Clone)]
 pub struct Renderer(Rc<RendererData>);
@@ -70,6 +70,7 @@ type RenderLimits = (usize, usize, Option<usize>, Option<usize>);
 
 impl Deref for Renderer {
     type Target = RendererData;
+
     fn deref(&self) -> &Self::Target {
         &self.0
     }
@@ -85,6 +86,7 @@ impl ImplicitClone for Renderer {}
 
 impl Deref for RendererData {
     type Target = RefCell<RendererMutData>;
+
     fn deref(&self) -> &Self::Target {
         &self.plugin_data
     }

@@ -6,16 +6,17 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use std::cell::RefCell;
+use std::future::Future;
+use std::rc::Rc;
+
+use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
+
 use super::mimetype::*;
 use crate::js::clipboard_item::*;
 use crate::utils::*;
 use crate::*;
-
-use std::cell::RefCell;
-use std::future::Future;
-use std::rc::Rc;
-use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
 
 /// Copy a `JsPerspectiveView` to the clipboard as a CSV.
 pub fn copy_to_clipboard(

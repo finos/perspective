@@ -9,8 +9,9 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use super::super::pubsub::*;
 use wasm_bindgen_test::*;
+
+use super::super::pubsub::*;
 
 #[wasm_bindgen_test]
 pub async fn test_pub_sub() {

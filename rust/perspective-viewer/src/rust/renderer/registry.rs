@@ -6,16 +6,17 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::js::plugin::*;
-
-use extend::ext;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::thread::LocalKey;
+
+use extend::ext;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::*;
+
+use crate::js::plugin::*;
 
 thread_local! {
     pub static PLUGIN_REGISTRY: Rc<RefCell<Vec<PluginRecord>>> = Rc::new(RefCell::new(vec![]));

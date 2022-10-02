@@ -6,6 +6,13 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use std::cell::RefCell;
+use std::ops::Deref;
+use std::rc::Rc;
+
+use wasm_bindgen::prelude::*;
+use web_sys::*;
+
 use crate::config::*;
 use crate::js::JsPerspectiveViewerPlugin;
 use crate::model::*;
@@ -14,12 +21,6 @@ use crate::session::Session;
 use crate::theme::Theme;
 use crate::utils::*;
 use crate::*;
-
-use std::cell::RefCell;
-use std::ops::Deref;
-use std::rc::Rc;
-use wasm_bindgen::prelude::*;
-use web_sys::*;
 
 /// A collection of `Subscription` which should trigger an event on the
 /// JavaScript Custom Element as a `CustomEvent`.  There are no public methods
@@ -33,6 +34,7 @@ struct CustomEventsDataRc(Rc<CustomEventsData>);
 
 impl Deref for CustomEventsDataRc {
     type Target = CustomEventsData;
+
     fn deref(&self) -> &CustomEventsData {
         &self.0
     }

@@ -6,6 +6,11 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use wasm_bindgen::*;
+use web_sys::*;
+use yew::prelude::*;
+use yew::*;
+
 use super::containers::radio_list::RadioList;
 use super::containers::radio_list_item::RadioListItem;
 use super::form::color_range_selector::*;
@@ -15,10 +20,6 @@ use super::style::{LocalStyle, StyleProvider};
 use crate::config::*;
 use crate::utils::WeakScope;
 use crate::*;
-use wasm_bindgen::*;
-use web_sys::*;
-use yew::prelude::*;
-use yew::*;
 
 #[derive(PartialEq, Eq, Copy, Clone)]
 pub enum Side {

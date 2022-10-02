@@ -6,16 +6,15 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
+use yew::prelude::*;
+
+use super::view::*;
 use crate::config::*;
 use crate::js::perspective::*;
 use crate::utils::*;
 use crate::*;
-
-use super::view::*;
-
-use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
-use yew::prelude::*;
 
 /// Metadata snapshot of the current `Table()`/`View()` state which may be of
 /// interest to components.

@@ -6,18 +6,19 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use std::rc::Rc;
+
+use wasm_bindgen::prelude::*;
+use yew::prelude::*;
+
 use super::containers::split_panel::*;
 use super::form::code_editor::*;
 use super::modal::*;
-use super::style::LocalStyle;
-use super::style::StyleProvider;
+use super::style::{LocalStyle, StyleProvider};
 use crate::js::PerspectiveValidationError;
 use crate::session::Session;
 use crate::utils::*;
 use crate::*;
-use std::rc::Rc;
-use wasm_bindgen::prelude::*;
-use yew::prelude::*;
 
 #[derive(Debug)]
 pub enum ExpressionEditorMsg {

@@ -6,15 +6,15 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::components::datetime_column_style::*;
-use crate::config::*;
-use crate::custom_elements::modal::*;
-use crate::utils::CustomElementMetadata;
-use crate::utils::*;
-use crate::*;
 use wasm_bindgen::prelude::*;
 use web_sys::*;
 use yew::*;
+
+use crate::components::datetime_column_style::*;
+use crate::config::*;
+use crate::custom_elements::modal::*;
+use crate::utils::{CustomElementMetadata, *};
+use crate::*;
 
 #[wasm_bindgen]
 #[derive(Clone)]

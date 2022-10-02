@@ -6,6 +6,9 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use yew::prelude::*;
+
+use super::containers::select::*;
 use crate::config::*;
 use crate::js::*;
 use crate::model::*;
@@ -13,10 +16,6 @@ use crate::renderer::*;
 use crate::session::*;
 use crate::utils::*;
 use crate::*;
-
-use super::containers::select::*;
-
-use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
 pub struct PluginSelectorProps {

@@ -6,16 +6,17 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::js::perspective::*;
-use crate::utils::ApiResult;
+use std::ops::Deref;
+use std::rc::Rc;
 
 use async_trait::async_trait;
 use derivative::Derivative;
-use std::ops::Deref;
-use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::spawn_local;
+
+use crate::js::perspective::*;
+use crate::utils::ApiResult;
 
 /// `PerspectiveOwned` is a newtype-ed `Rc` smart pointer which guarantees
 /// either a `JsPerspectiveView` or `JsPerspectiveTable` will have its

@@ -6,12 +6,13 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use super::ApiResult;
 use async_trait::async_trait;
 use extend::ext;
 use futures::channel::oneshot::*;
 use yew::html::Scope;
 use yew::prelude::*;
+
+use super::ApiResult;
 
 #[ext]
 pub impl<T> Scope<T>
