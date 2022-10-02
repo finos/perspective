@@ -1,5 +1,28 @@
 # Changelog
 
+## [v1.7.0](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.6.5...HEAD)
+
+**Implemented enhancements:**
+
+- Replace `monaco-editor` [\#1971](https://github.com/finos/perspective/pull/1971) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- Expression Editor autocomplete bug fixes [\#1982](https://github.com/finos/perspective/pull/1982) ([texodus](https://github.com/texodus))
+- Attempt to instance worker before giving up [\#1980](https://github.com/finos/perspective/pull/1980) ([texodus](https://github.com/texodus))
+
+**Closed issues:**
+
+- Is there a way to set render\_warning = false for the plugin via perspective-workspace layout configuration ? [\#1963](https://github.com/finos/perspective/issues/1963)
+- Reference to \_\_dirname causing test failures [\#1961](https://github.com/finos/perspective/issues/1961)
+
+**Merged pull requests:**
+
+- increment black to latest version [\#1977](https://github.com/finos/perspective/pull/1977) ([timkpaine](https://github.com/timkpaine))
+- Better rust api [\#1960](https://github.com/finos/perspective/pull/1960) ([texodus](https://github.com/texodus))
+
 ## [v1.6.5](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.6.4...HEAD)
