@@ -11,6 +11,14 @@ mod aggregate_selector;
 mod expression_toolbar;
 mod inactive_column;
 
+use std::iter::*;
+use std::rc::Rc;
+
+use extend::ext;
+use wasm_bindgen::prelude::*;
+use web_sys::*;
+use yew::prelude::*;
+
 use self::active_column::*;
 use self::inactive_column::*;
 use super::containers::scroll_panel::*;
@@ -23,12 +31,6 @@ use crate::renderer::*;
 use crate::session::*;
 use crate::utils::*;
 use crate::*;
-use extend::ext;
-use std::iter::*;
-use std::rc::Rc;
-use wasm_bindgen::prelude::*;
-use web_sys::*;
-use yew::prelude::*;
 
 #[derive(Properties)]
 pub struct ColumnSelectorProps {
@@ -208,7 +210,7 @@ impl Component for ColumnSelector {
                 true
             }
             Drop((_, _, DragEffect::Move(DragTarget::Active), _)) => true,
-            Drop((_, _, _, _)) => true,
+            Drop((..)) => true,
             SaveExpression(expression) => {
                 let task = ctx.props().save_expr(&expression);
                 let expr = self.expression_editor.clone();

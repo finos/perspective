@@ -6,10 +6,11 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use derivative::Derivative;
 use std::cell::RefCell;
 use std::ops::Deref;
 use std::rc::Rc;
+
+use derivative::Derivative;
 use yew::html::Scope;
 use yew::prelude::*;
 

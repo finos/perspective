@@ -6,6 +6,10 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use web_sys::*;
+use yew::prelude::*;
+
+use super::style::LocalStyle;
 use crate::components::containers::select::*;
 use crate::components::status_bar_counter::StatusBarRowsCounter;
 use crate::custom_elements::copy_dropdown::*;
@@ -13,15 +17,10 @@ use crate::custom_elements::export_dropdown::*;
 use crate::renderer::*;
 use crate::session::*;
 use crate::theme::Theme;
-use crate::utils::*;
-use crate::*;
-use web_sys::*;
-use yew::prelude::*;
-
 #[cfg(test)]
 use crate::utils::WeakScope;
-
-use super::style::LocalStyle;
+use crate::utils::*;
+use crate::*;
 
 #[derive(Properties)]
 pub struct StatusBarProps {

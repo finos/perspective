@@ -29,7 +29,6 @@ mod weak_scope;
 #[cfg(test)]
 mod tests;
 
-pub use self::futures::*;
 pub use browser::*;
 pub use clone::*;
 pub use closure::*;
@@ -43,6 +42,8 @@ pub use scope::*;
 pub use tee::*;
 pub use wasm_abi::*;
 pub use weak_scope::*;
+
+pub use self::futures::*;
 
 #[macro_export]
 macro_rules! maybe {

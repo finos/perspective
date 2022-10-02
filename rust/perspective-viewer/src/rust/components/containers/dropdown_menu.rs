@@ -6,13 +6,15 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use std::marker::PhantomData;
+use std::rc::Rc;
+
+use web_sys::*;
+use yew::prelude::*;
+
 use super::select::SelectItem;
 use crate::components::style::LocalStyle;
 use crate::*;
-use std::marker::PhantomData;
-use std::rc::Rc;
-use web_sys::*;
-use yew::prelude::*;
 
 pub type DropDownMenuItem<T> = SelectItem<T>;
 

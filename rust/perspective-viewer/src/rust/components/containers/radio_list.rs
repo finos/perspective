@@ -6,16 +6,17 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use super::radio_list_item::*;
-use crate::components::style::LocalStyle;
-use crate::*;
 use std::fmt::Display;
 use std::str::FromStr;
+
 use wasm_bindgen::JsCast;
 use yew::prelude::*;
 
+use super::radio_list_item::*;
+use crate::components::style::LocalStyle;
 #[cfg(test)]
 use crate::utils::WeakScope;
+use crate::*;
 
 // The type constraints on this component are boilerplate and will be alias-able
 // in a [future rust version](https://doc.rust-lang.org/nightly/unstable-book/language-features/trait-alias.html)

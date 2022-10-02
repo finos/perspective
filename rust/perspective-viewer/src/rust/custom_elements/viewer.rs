@@ -6,6 +6,18 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use std::cell::RefCell;
+use std::rc::Rc;
+use std::str::FromStr;
+
+use gloo::utils::document;
+use js_sys::*;
+use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
+use wasm_bindgen_futures::JsFuture;
+use web_sys::*;
+use yew::prelude::*;
+
 use crate::components::{Msg, PerspectiveViewer, PerspectiveViewerProps};
 use crate::config::*;
 use crate::custom_events::*;
@@ -17,16 +29,6 @@ use crate::session::Session;
 use crate::theme::*;
 use crate::utils::*;
 use crate::*;
-use gloo::utils::document;
-use js_sys::*;
-use std::cell::RefCell;
-use std::rc::Rc;
-use std::str::FromStr;
-use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
-use wasm_bindgen_futures::JsFuture;
-use web_sys::*;
-use yew::prelude::*;
 
 struct ResizeObserverHandle {
     elem: HtmlElement,

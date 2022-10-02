@@ -6,15 +6,16 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use std::collections::HashSet;
+use std::fmt::Display;
+
+use itertools::Itertools;
+
 use crate::config::*;
 use crate::dragdrop::*;
 use crate::renderer::*;
 use crate::session::*;
 use crate::*;
-
-use itertools::Itertools;
-use std::collections::HashSet;
-use std::fmt::Display;
 
 /// The possible states of a column (row) in the active columns list, including
 /// the `Option<String>` label type.

@@ -6,10 +6,11 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use derivative::Derivative;
 use std::fmt::Display;
 use std::marker::PhantomData;
 use std::str::FromStr;
+
+use derivative::Derivative;
 use yew::prelude::*;
 
 #[derive(Derivative)]

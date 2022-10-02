@@ -6,6 +6,12 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use std::rc::Rc;
+
+use futures::channel::oneshot::*;
+use wasm_bindgen::prelude::*;
+use yew::prelude::*;
+
 use super::column_selector::ColumnSelector;
 use super::config_selector::ConfigSelector;
 use super::containers::split_panel::SplitPanel;
@@ -14,7 +20,6 @@ use super::plugin_selector::PluginSelector;
 use super::render_warning::RenderWarning;
 use super::status_bar::StatusBar;
 use super::style::{LocalStyle, StyleProvider};
-
 use crate::config::*;
 use crate::dragdrop::*;
 use crate::model::*;
@@ -23,11 +28,6 @@ use crate::session::*;
 use crate::theme::Theme;
 use crate::utils::*;
 use crate::*;
-
-use futures::channel::oneshot::*;
-use std::rc::Rc;
-use wasm_bindgen::prelude::*;
-use yew::prelude::*;
 
 #[derive(Properties)]
 pub struct PerspectiveViewerProps {
@@ -71,6 +71,7 @@ pub struct PerspectiveViewer {
 impl Component for PerspectiveViewer {
     type Message = Msg;
     type Properties = PerspectiveViewerProps;
+
     fn create(ctx: &Context<Self>) -> Self {
         *ctx.props().weak_link.borrow_mut() = Some(ctx.link().clone());
         let elem = ctx.props().elem.clone();

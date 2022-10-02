@@ -6,14 +6,13 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::session::TableStats;
-use crate::*;
-
-#[cfg(test)]
-use crate::utils::*;
-
 use num_format::{Locale, ToFormattedString};
 use yew::prelude::*;
+
+use crate::session::TableStats;
+#[cfg(test)]
+use crate::utils::*;
+use crate::*;
 
 #[derive(Properties)]
 pub struct StatusBarRowsCounterProps {

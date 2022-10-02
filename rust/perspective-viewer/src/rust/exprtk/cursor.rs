@@ -6,8 +6,9 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::js::PerspectiveValidationError;
 use yew::prelude::*;
+
+use crate::js::PerspectiveValidationError;
 
 /// Because ExprTK reports errors in column/row coordinates and visually needs
 /// to be applied to an entire token rather than a single character, we need

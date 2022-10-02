@@ -6,11 +6,13 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::js::plugin::JsPerspectiveViewerPlugin;
-use crate::utils::ApiResult;
 use std::future::Future;
+
 use wasm_bindgen::JsCast;
 use web_sys::*;
+
+use crate::js::plugin::JsPerspectiveViewerPlugin;
+use crate::utils::ApiResult;
 
 /// Given an async `task` which draws `plugin`, activates the plugin in stages
 /// to prevent screen shearing.  First, and plugin is appended ot the DOM with

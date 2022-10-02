@@ -13,9 +13,19 @@ mod replace_expression_update;
 mod view;
 mod view_subscription;
 
+use std::cell::{Ref, RefCell};
+use std::collections::HashSet;
+use std::iter::IntoIterator;
+use std::ops::Deref;
+use std::rc::Rc;
+
+use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
+use yew::html::ImplicitClone;
+use yew::prelude::*;
+
 use self::metadata::*;
-use self::view::PerspectiveOwned;
-use self::view::View;
+use self::view::{PerspectiveOwned, View};
 pub use self::view_subscription::TableStats;
 use self::view_subscription::*;
 use crate::config::*;
@@ -24,15 +34,6 @@ use crate::js::perspective::*;
 use crate::js::plugin::*;
 use crate::utils::*;
 use crate::*;
-use std::cell::{Ref, RefCell};
-use std::collections::HashSet;
-use std::iter::IntoIterator;
-use std::ops::Deref;
-use std::rc::Rc;
-use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
-use yew::html::ImplicitClone;
-use yew::prelude::*;
 
 /// The `Session` struct is the principal interface to the Perspective engine,
 /// the `Table` and `View` objects for this viewer, and all associated state
@@ -65,6 +66,7 @@ pub struct SessionData {
 
 impl Deref for Session {
     type Target = SessionHandle;
+
     fn deref(&self) -> &Self::Target {
         &self.0
     }
@@ -78,6 +80,7 @@ impl PartialEq for Session {
 
 impl Deref for SessionHandle {
     type Target = RefCell<SessionData>;
+
     fn deref(&self) -> &Self::Target {
         &self.session_data
     }

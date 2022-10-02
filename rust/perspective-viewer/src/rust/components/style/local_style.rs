@@ -6,8 +6,9 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use super::style_cache::*;
 use yew::prelude::*;
+
+use super::style_cache::*;
 
 #[derive(Properties)]
 pub struct LocalStyleProps {

@@ -6,17 +6,15 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::js::perspective::*;
-use crate::js::plugin::*;
-
-#[cfg(test)]
-use crate::*;
-
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-
 #[cfg(test)]
 use {crate::utils::*, wasm_bindgen_futures::future_to_promise, wasm_bindgen_test::*};
+
+use crate::js::perspective::*;
+use crate::js::plugin::*;
+#[cfg(test)]
+use crate::*;
 
 pub async fn get_row_and_col_limits(
     view: &JsPerspectiveView,

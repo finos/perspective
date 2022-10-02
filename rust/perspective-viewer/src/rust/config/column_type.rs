@@ -6,8 +6,9 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use serde::Deserialize;
 use std::fmt::Display;
+
+use serde::Deserialize;
 
 #[derive(Deserialize, Clone, Copy, PartialEq, PartialOrd, Eq, Ord)]
 pub enum Type {

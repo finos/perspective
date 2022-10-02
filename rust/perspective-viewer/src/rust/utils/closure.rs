@@ -27,6 +27,7 @@ where
     V: IntoWasmAbi + 'static,
 {
     type Output = Closure<dyn Fn(U) -> V>;
+
     fn into_closure(self) -> Closure<dyn Fn(U) -> V + 'static> {
         Closure::wrap(Box::new(self) as Box<dyn Fn(U) -> V>)
     }
@@ -40,6 +41,7 @@ where
     W: IntoWasmAbi + 'static,
 {
     type Output = Closure<dyn Fn(U, V) -> W>;
+
     fn into_closure(self) -> Closure<dyn Fn(U, V) -> W + 'static> {
         Closure::wrap(Box::new(self) as Box<dyn Fn(U, V) -> W>)
     }
@@ -54,6 +56,7 @@ where
     X: IntoWasmAbi + 'static,
 {
     type Output = Closure<dyn Fn(U, V, W) -> X>;
+
     fn into_closure(self) -> Closure<dyn Fn(U, V, W) -> X + 'static> {
         Closure::wrap(Box::new(self) as Box<dyn Fn(U, V, W) -> X>)
     }
@@ -64,6 +67,7 @@ where
     U: FromWasmAbi + 'static,
 {
     type Output = Closure<dyn Fn(U)>;
+
     fn into_closure(self) -> Closure<dyn Fn(U)> {
         Closure::wrap(Box::new(move |x: U| {
             self.emit(x);

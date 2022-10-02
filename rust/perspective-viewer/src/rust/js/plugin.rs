@@ -6,12 +6,11 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::utils::*;
-
 use serde::*;
 use wasm_bindgen::prelude::*;
 
 use super::perspective::JsPerspectiveView;
+use crate::utils::*;
 
 /// Perspective FFI
 #[wasm_bindgen]

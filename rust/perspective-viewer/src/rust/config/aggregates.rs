@@ -6,14 +6,13 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::utils::{ApiError, ApiResult};
-
-use super::column_type::*;
+use std::fmt::Display;
 use std::str::FromStr;
 
-use serde::Deserialize;
-use serde::Serialize;
-use std::fmt::Display;
+use serde::{Deserialize, Serialize};
+
+use super::column_type::*;
+use crate::utils::{ApiError, ApiResult};
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
 #[serde()]
@@ -126,6 +125,7 @@ impl Display for SingleAggregate {
 
 impl FromStr for SingleAggregate {
     type Err = ApiError;
+
     fn from_str(value: &str) -> ApiResult<Self> {
         match value {
             "sum" => Ok(SingleAggregate::Sum),
@@ -185,6 +185,7 @@ impl Display for Aggregate {
 
 impl FromStr for Aggregate {
     type Err = ApiError;
+
     fn from_str(input: &str) -> ApiResult<Self> {
         Ok(
             if let Some(stripped) = input.strip_prefix("weighted mean by ") {

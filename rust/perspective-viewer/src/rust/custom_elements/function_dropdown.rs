@@ -6,19 +6,20 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::components::function_dropdown::*;
-use crate::custom_elements::modal::*;
-use crate::exprtk::CompletionItemSuggestion;
-use crate::exprtk::COMPLETIONS;
-use crate::utils::ApiFuture;
-use crate::*;
 use std::cell::RefCell;
 use std::rc::Rc;
+
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::*;
 use yew::html::ImplicitClone;
 use yew::*;
+
+use crate::components::function_dropdown::*;
+use crate::custom_elements::modal::*;
+use crate::exprtk::{CompletionItemSuggestion, COMPLETIONS};
+use crate::utils::ApiFuture;
+use crate::*;
 
 #[wasm_bindgen]
 #[derive(Clone)]
@@ -49,14 +50,20 @@ impl FunctionDropDownElement {
         input: String,
         target: HtmlElement,
         callback: Callback<CompletionItemSuggestion>,
-    ) {
+    ) -> ApiResult<()> {
         let values = filter_values(&input);
-        self.modal.send_message_batch(vec![
-            FunctionDropDownMsg::SetCallback(callback),
-            FunctionDropDownMsg::SetValues(values),
-        ]);
+        if values.is_empty() {
+            self.modal.hide()?;
+        } else {
+            self.modal.send_message_batch(vec![
+                FunctionDropDownMsg::SetCallback(callback),
+                FunctionDropDownMsg::SetValues(values),
+            ]);
 
-        ApiFuture::spawn(self.modal.clone().open(target, None));
+            ApiFuture::spawn(self.modal.clone().open(target, None));
+        }
+
+        Ok(())
     }
 
     pub fn item_select(&self) {

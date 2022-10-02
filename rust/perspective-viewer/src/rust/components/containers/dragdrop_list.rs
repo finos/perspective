@@ -6,13 +6,14 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::dragdrop::*;
+use std::marker::PhantomData;
 
 use derivative::Derivative;
-use std::marker::PhantomData;
 use web_sys::*;
 use yew::html::Scope;
 use yew::prelude::*;
+
+use crate::dragdrop::*;
 
 /// Must be implemented by `Properties` of children of `DragDropList`, returning
 /// the value a DragDropItem represents.

@@ -6,21 +6,19 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use super::view_config::*;
-use crate::utils::*;
+use std::io::{Read, Write};
+use std::str::FromStr;
 
 use flate2::read::ZlibDecoder;
 use flate2::write::ZlibEncoder;
 use flate2::Compression;
-use serde::Deserialize;
-use serde::Deserializer;
-use serde::Serialize;
+use serde::{Deserialize, Deserializer, Serialize};
 use serde_json::Value;
-use std::io::Read;
-use std::io::Write;
-use std::str::FromStr;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
+
+use super::view_config::*;
+use crate::utils::*;
 
 pub enum ViewerConfigEncoding {
     Json,

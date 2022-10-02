@@ -6,12 +6,13 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use std::iter::IntoIterator;
+
+use itertools::Itertools;
+
 use super::metadata::*;
 use crate::config::*;
 use crate::js::plugin::*;
-
-use itertools::Itertools;
-use std::iter::IntoIterator;
 
 impl ViewConfigUpdate {
     /// Appends additional columns to the `columns` field of this

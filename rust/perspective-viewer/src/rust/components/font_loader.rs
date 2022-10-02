@@ -6,17 +6,20 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::{html_template, utils::*};
-use futures::future::{join_all, select_all};
-use js_intern::*;
 use std::cell::{Cell, Ref, RefCell};
 use std::future::Future;
 use std::iter::{repeat_with, Iterator};
 use std::rc::Rc;
+
+use futures::future::{join_all, select_all};
+use js_intern::*;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
 use yew::prelude::*;
+
+use crate::html_template;
+use crate::utils::*;
 
 const FONT_DOWNLOAD_TIMEOUT_MS: i32 = 1000;
 const FONT_TEST_SAMPLE: &str = "ABCD";
@@ -39,8 +42,8 @@ impl PartialEq for FontLoaderProps {
 pub struct FontLoader {}
 
 impl Component for FontLoader {
-    type Properties = FontLoaderProps;
     type Message = ();
+    type Properties = FontLoaderProps;
 
     fn create(_ctx: &Context<Self>) -> Self {
         FontLoader {}

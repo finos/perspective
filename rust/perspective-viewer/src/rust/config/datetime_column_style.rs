@@ -6,10 +6,12 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::*;
-use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use std::str::FromStr;
+
+use serde::{Deserialize, Serialize};
+
+use crate::*;
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub enum DatetimeColorMode {
@@ -39,6 +41,7 @@ impl Display for DatetimeColorMode {
 
 impl FromStr for DatetimeColorMode {
     type Err = String;
+
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "foreground" => Ok(DatetimeColorMode::Foreground),
@@ -102,6 +105,7 @@ impl Display for DatetimeFormat {
 
 impl FromStr for DatetimeFormat {
     type Err = String;
+
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "full" => Ok(DatetimeFormat::Full),

@@ -6,16 +6,17 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::utils::WeakScope;
-use crate::*;
-
-use derivative::Derivative;
 use std::cell::Cell;
 use std::marker::PhantomData;
 use std::rc::Rc;
+
+use derivative::Derivative;
 use yew::html::*;
 use yew::prelude::*;
 use yew::virtual_dom::VChild;
+
+use crate::utils::WeakScope;
+use crate::*;
 
 #[derive(Clone, Default, Eq, PartialEq)]
 pub struct ModalOrientation(Rc<Cell<bool>>);

@@ -6,18 +6,18 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use std::rc::Rc;
+
+use js_intern::*;
+use yew::prelude::*;
+
 use super::containers::dropdown_menu::*;
-use super::modal::ModalLink;
-use super::modal::SetModalLink;
+use super::modal::{ModalLink, SetModalLink};
 use super::style::StyleProvider;
 use crate::model::*;
 use crate::renderer::*;
 use crate::utils::*;
 use crate::*;
-
-use js_intern::*;
-use std::rc::Rc;
-use yew::prelude::*;
 
 pub type ExportDropDownMenuItem = DropDownMenuItem<ExportFile>;
 
@@ -81,8 +81,8 @@ fn get_menu_items(name: &str, has_render: bool) -> Vec<ExportDropDownMenuItem> {
 }
 
 impl Component for ExportDropDownMenu {
-    type Properties = ExportDropDownMenuProps;
     type Message = ExportDropDownMenuMsg;
+    type Properties = ExportDropDownMenuProps;
 
     fn view(&self, ctx: &Context<Self>) -> yew::virtual_dom::VNode {
         let callback = ctx.link().callback(|_| ExportDropDownMenuMsg::TitleChange);

@@ -6,15 +6,16 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use super::super::request_animation_frame::set_timeout;
-use crate::utils::debounce::*;
+use std::cell::Cell;
+use std::rc::Rc;
 
 use futures::channel::oneshot::*;
 use futures::future::join_all;
-use std::cell::Cell;
-use std::rc::Rc;
 use wasm_bindgen_futures::spawn_local;
 use wasm_bindgen_test::*;
+
+use super::super::request_animation_frame::set_timeout;
+use crate::utils::debounce::*;
 
 #[wasm_bindgen_test]
 pub async fn test_lock() {

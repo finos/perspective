@@ -6,6 +6,8 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use yew::prelude::*;
+
 use crate::components::containers::select::*;
 use crate::components::style::LocalStyle;
 use crate::config::*;
@@ -14,7 +16,6 @@ use crate::renderer::*;
 use crate::session::*;
 use crate::utils::ApiFuture;
 use crate::*;
-use yew::prelude::*;
 
 #[derive(Properties)]
 pub struct AggregateSelectorProps {

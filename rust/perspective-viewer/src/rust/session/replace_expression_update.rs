@@ -6,9 +6,9 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::config::*;
-
 use std::collections::HashMap;
+
+use crate::config::*;
 
 impl ViewConfig {
     /// Create an update for this `ViewConfig` that replaces an expression

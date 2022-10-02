@@ -6,19 +6,20 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::components::filter_dropdown::*;
-use crate::custom_elements::modal::*;
-use crate::session::Session;
-use crate::utils::ApiFuture;
-use crate::*;
-
 use std::cell::RefCell;
 use std::rc::Rc;
+
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::*;
 use yew::html::ImplicitClone;
 use yew::*;
+
+use crate::components::filter_dropdown::*;
+use crate::custom_elements::modal::*;
+use crate::session::Session;
+use crate::utils::ApiFuture;
+use crate::*;
 
 #[wasm_bindgen]
 #[derive(Clone)]

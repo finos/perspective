@@ -6,8 +6,9 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use serde::Serialize;
 use std::cell::RefCell;
+
+use serde::Serialize;
 
 #[derive(Serialize, Clone, Copy)]
 pub struct CompletionItemSuggestion {

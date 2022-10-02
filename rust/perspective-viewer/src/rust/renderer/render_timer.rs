@@ -6,15 +6,16 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::utils::*;
-
 use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::future::Future;
 use std::rc::Rc;
+
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::*;
+
+use crate::utils::*;
 
 #[derive(Default, Clone)]
 pub struct MovingWindowRenderTimer(Rc<RefCell<RenderTimerType>>);
@@ -68,7 +69,7 @@ impl MovingWindowRenderTimer {
         let perf = window().unwrap().performance().unwrap();
         let start = match *self.0.borrow() {
             RenderTimerType::Constant(_) => 0_f64,
-            RenderTimerType::Moving(_, _) => perf.now(),
+            RenderTimerType::Moving(..) => perf.now(),
         };
 
         let result = f.await;

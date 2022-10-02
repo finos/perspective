@@ -6,13 +6,15 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::*;
 use std::cell::RefCell;
 use std::collections::BTreeMap;
 use std::ops::Deref;
 use std::rc::Rc;
+
 use wasm_bindgen::JsCast;
 use web_sys::HtmlStyleElement;
+
+use crate::*;
 
 type CSSResource = (&'static str, &'static str);
 
@@ -28,6 +30,7 @@ pub struct StyleCache(Rc<StyleCacheData>);
 
 impl Deref for StyleCache {
     type Target = StyleCacheData;
+
     fn deref(&self) -> &Self::Target {
         &self.0
     }

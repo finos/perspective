@@ -6,15 +6,18 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::components::number_column_style::*;
-use crate::config::*;
-use crate::utils::{await_animation_frame, WeakScope};
-use crate::*;
-use std::{cell::RefCell, rc::Rc};
+use std::cell::RefCell;
+use std::rc::Rc;
+
 use wasm_bindgen::JsCast;
 use wasm_bindgen_test::*;
 use web_sys::*;
 use yew::prelude::*;
+
+use crate::components::number_column_style::*;
+use crate::config::*;
+use crate::utils::{await_animation_frame, WeakScope};
+use crate::*;
 
 wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 

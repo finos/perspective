@@ -6,12 +6,12 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use super::super::testing::*;
-use crate::*;
-
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_test::*;
+
+use super::super::testing::*;
+use crate::*;
 
 wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 

@@ -6,10 +6,12 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::*;
-use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use std::str::FromStr;
+
+use serde::{Deserialize, Serialize};
+
+use crate::*;
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub enum NumberForegroundMode {
@@ -46,6 +48,7 @@ impl Display for NumberForegroundMode {
 
 impl FromStr for NumberForegroundMode {
     type Err = String;
+
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "color" => Ok(Self::Color),
@@ -105,6 +108,7 @@ impl Display for NumberBackgroundMode {
 
 impl FromStr for NumberBackgroundMode {
     type Err = String;
+
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "color" => Ok(Self::Color),

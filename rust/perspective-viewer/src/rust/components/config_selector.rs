@@ -10,6 +10,10 @@ mod filter_item;
 mod pivot_item;
 mod sort_item;
 
+use std::rc::Rc;
+
+use yew::prelude::*;
+
 use self::filter_item::*;
 use self::pivot_item::*;
 use self::sort_item::*;
@@ -23,8 +27,6 @@ use crate::renderer::*;
 use crate::session::*;
 use crate::utils::*;
 use crate::*;
-use std::rc::Rc;
-use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
 pub struct ConfigSelectorProps {
@@ -206,7 +208,7 @@ impl Component for ConfigSelector {
                 ApiFuture::spawn(ctx.props().update_and_render(config));
                 true
             }
-            ConfigSelectorMsg::Close(_, _) => false,
+            ConfigSelectorMsg::Close(..) => false,
             ConfigSelectorMsg::Drop(column, action, effect, index)
                 if action != DragTarget::Active =>
             {
@@ -225,7 +227,7 @@ impl Component for ConfigSelector {
             {
                 true
             }
-            ConfigSelectorMsg::Drop(_, _, _, _) => false,
+            ConfigSelectorMsg::Drop(..) => false,
             ConfigSelectorMsg::TransposePivots => {
                 let mut view_config = ctx.props().session.get_view_config().clone();
                 std::mem::swap(&mut view_config.group_by, &mut view_config.split_by);

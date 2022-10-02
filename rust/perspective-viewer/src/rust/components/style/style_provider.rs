@@ -6,11 +6,12 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use super::style_cache::StyleCache;
-use crate::*;
 use web_sys::HtmlStyleElement;
 use yew::prelude::*;
 use yew::virtual_dom::VNode;
+
+use super::style_cache::StyleCache;
+use crate::*;
 
 #[derive(Properties, PartialEq)]
 pub struct StyleProviderProps {

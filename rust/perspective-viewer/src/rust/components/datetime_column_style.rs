@@ -6,6 +6,12 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use lazy_static::*;
+use wasm_bindgen::*;
+use web_sys::*;
+use yew::prelude::*;
+use yew::*;
+
 use super::containers::radio_list::RadioList;
 use super::containers::radio_list_item::RadioListItem;
 use super::containers::select::*;
@@ -15,11 +21,6 @@ use super::style::{LocalStyle, StyleProvider};
 use crate::config::*;
 use crate::utils::WeakScope;
 use crate::*;
-use lazy_static::*;
-use wasm_bindgen::*;
-use web_sys::*;
-use yew::prelude::*;
-use yew::*;
 
 #[wasm_bindgen]
 extern "C" {

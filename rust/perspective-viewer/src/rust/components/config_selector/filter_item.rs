@@ -6,6 +6,11 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use chrono::{NaiveDate, TimeZone, Utc};
+use wasm_bindgen::JsCast;
+use web_sys::*;
+use yew::prelude::*;
+
 use crate::components::containers::dragdrop_list::*;
 use crate::components::containers::select::*;
 use crate::components::style::LocalStyle;
@@ -15,13 +20,8 @@ use crate::dragdrop::*;
 use crate::model::*;
 use crate::renderer::*;
 use crate::session::*;
-use crate::utils::ApiFuture;
-use crate::utils::{posix_to_utc_str, str_to_utc_posix};
+use crate::utils::{posix_to_utc_str, str_to_utc_posix, ApiFuture};
 use crate::*;
-use chrono::{NaiveDate, TimeZone, Utc};
-use wasm_bindgen::JsCast;
-use web_sys::*;
-use yew::prelude::*;
 
 /// A control for a single filter condition.
 pub struct FilterItem {

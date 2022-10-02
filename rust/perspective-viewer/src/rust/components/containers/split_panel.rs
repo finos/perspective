@@ -6,16 +6,17 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use crate::components::style::LocalStyle;
-use crate::utils::*;
-use crate::*;
-
 use std::cmp::max;
+
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlElement;
 use yew::html::Scope;
 use yew::prelude::*;
+
+use crate::components::style::LocalStyle;
+use crate::utils::*;
+use crate::*;
 
 /// The state for the `Resizing` action, including the `MouseEvent` callbacks
 /// and panel starting dimensions.
