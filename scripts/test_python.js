@@ -26,10 +26,10 @@ const IS_DOCKER = process.env.PSP_DOCKER;
 const PYTEST_FLAGS =
     "--junitxml=python_junit.xml --cov-report=xml --cov-branch --cov=perspective --disable-pytest-warnings";
 
-let IMAGE = "manylinux2010";
+let IMAGE = "manylinux2014";
 
 if (IS_DOCKER) {
-    // defaults to 2010
+    // defaults to 2014
     let MANYLINUX_VERSION = manylinux_version();
     IMAGE = python_image(MANYLINUX_VERSION, PYTHON);
 }

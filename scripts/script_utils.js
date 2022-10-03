@@ -378,11 +378,11 @@ exports.manylinux_version = function manylinux_version() {
     if (process.env.MANYLINUX) {
         return `manylinux${process.env.MANYLINUX}`;
     } else if (getarg("--manylinux2010")) {
-        return "manylinux2010";
+        throw new Exception("manylinux2010 no longer supported");
     } else if (getarg("--manylinux2014")) {
         return "manylinux2014";
     } else {
-        return "manylinux2010";
+        return "manylinux2014";
     }
 };
 /*******************************************************************************

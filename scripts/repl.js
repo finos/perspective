@@ -7,21 +7,17 @@
  *
  */
 
-const {execute, docker, getarg, python_image} = require("./script_utils.js");
+const {
+    execute,
+    docker,
+    python_image,
+    python_version,
+    manylinux_version,
+} = require("./script_utils.js");
 
-let PYTHON = getarg("--python38")
-    ? "python3.8"
-    : getarg("--python36")
-    ? "python3.6"
-    : "python3.7";
-let IMAGE = "manylinux2010";
-
-let MANYLINUX_VERSION = getarg("--manylinux2010")
-    ? "manylinux2010"
-    : getarg("--manylinux2014")
-    ? "manylinux2014"
-    : "manylinux2010";
-
+let PYTHON = python_version();
+let IMAGE = "manylinux2014";
+let MANYLINUX_VERSION = manylinux_version();
 IMAGE = python_image(MANYLINUX_VERSION, PYTHON);
 
 try {
