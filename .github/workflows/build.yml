@@ -723,7 +723,6 @@ jobs:
           - 3.9
         container:
           - none  # Not manylinux, we will use this space to build the WASM assets
-          - 2010
           - 2014
         node-version: [16.x]
         is-full-run:
@@ -736,17 +735,11 @@ jobs:
           ############################
           # Exclude manylinux python builds other than linux
           - os: macos-11
-            container: 2010
-          - os: macos-11
             container: 2014
 
           - os: windows-2022
-            container: 2010
-          - os: windows-2022
             container: 2014
 
-          - os: windows-2019
-            container: 2010
           - os: windows-2019
             container: 2014
 
@@ -757,10 +750,6 @@ jobs:
           ##############################################
           # Things to exclude if not a full matrix run #
           ##############################################
-          # Exclude manylinux2010 python builds
-          - is-full-run: false
-            container: 2010
-
           # Exclude windows builds if set
           - include-windows-run: false
             os: windows-2022

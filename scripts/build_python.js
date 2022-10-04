@@ -22,7 +22,7 @@ const {
 
 let PYTHON = python_version();
 
-let IMAGE = "manylinux2010";
+let IMAGE = "manylinux2014";
 const IS_DOCKER = process.env.PSP_DOCKER;
 
 if (IS_DOCKER) {

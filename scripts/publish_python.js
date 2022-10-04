@@ -43,7 +43,7 @@ const dist_folders = [
     "perspective-python-dist-macos-11-3.8",
     "perspective-python-dist-macos-11-3.9",
 
-    // Ubuntu (Manylinux 2010 and 2014 docker images)
+    // Ubuntu (Manylinux 2014 docker images)
     "perspective-python-dist-ubuntu-20.04-3.7",
     "perspective-python-dist-ubuntu-20.04-3.8",
     "perspective-python-dist-ubuntu-20.04-3.9",
@@ -69,12 +69,6 @@ const wheels = [
     "cp37-cp37m-macosx_11_0_x86_64",
     "cp38-cp38-macosx_11_0_x86_64",
     "cp39-cp39-macosx_11_0_x86_64",
-
-    // Manylinux 2010
-    // "cp36-cp36m-manylinux2010_x86_64",
-    "cp37-cp37m-manylinux2010_x86_64",
-    "cp38-cp38-manylinux2010_x86_64",
-    "cp39-cp39-manylinux2010_x86_64",
 
     // Manylinux 2014
     // "cp36-cp36m-manylinux2014_x86_64",

@@ -26,7 +26,7 @@ const requires_script = `"import distutils.core; setup = distutils.core.run_setu
 
         console.log(`Installing: ${requirements}`);
 
-        const cmd = `${PYTHON} -m pip install ${requirements}`;
+        const cmd = `${PYTHON} -m pip install -U ${requirements}`;
         console.log(cmd);
 
         execute`${cmd}`;
