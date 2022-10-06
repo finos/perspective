@@ -50,6 +50,15 @@ where
     }
 }
 
+impl<T> Default for ApiFuture<T>
+where
+    T: Default,
+{
+    fn default() -> Self {
+        ApiFuture::new(async { Ok(Default::default()) })
+    }
+}
+
 impl<T> From<ApiFuture<T>> for JsValue
 where
     Result<T, JsValue>: IntoJsResult + 'static,

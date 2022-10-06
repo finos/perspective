@@ -36,6 +36,7 @@ use wasm_bindgen::prelude::*;
 use crate::custom_elements::copy_dropdown::CopyDropDownMenuElement;
 use crate::custom_elements::date_column_style::PerspectiveDateColumnStyleElement;
 use crate::custom_elements::datetime_column_style::PerspectiveDatetimeColumnStyleElement;
+use crate::custom_elements::debug_plugin::PerspectiveDebugPluginElement;
 use crate::custom_elements::export_dropdown::ExportDropDownMenuElement;
 use crate::custom_elements::number_column_style::PerspectiveNumberColumnStyleElement;
 use crate::custom_elements::string_column_style::PerspectiveStringColumnStyleElement;
@@ -81,6 +82,7 @@ pub fn js_define_web_components() {
 pub fn bootstrap_web_components(psp: &JsValue) {
     if cfg!(feature = "define_custom_elements_async") {
         define_web_component::<PerspectiveViewerElement>(psp);
+        define_web_component::<PerspectiveDebugPluginElement>(psp);
     }
 
     define_web_component::<PerspectiveDateColumnStyleElement>(psp);

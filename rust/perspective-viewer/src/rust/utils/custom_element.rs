@@ -34,11 +34,19 @@ pub trait CustomElementMetadata {
 
         const names = Object.getOwnPropertyNames(proto);
         for (const key of names) {
-            Object.defineProperty(x.prototype, key, {
-                value: function(...args) {
-                    return this._instance[key].call(this._instance, ...args);
-                }
-            });
+            if ('get' in Object.getOwnPropertyDescriptor(proto, key)) {
+                Object.defineProperty(x.prototype, key, {
+                    get: function() {
+                        return this._instance[key];
+                    }
+                });
+            } else {
+                Object.defineProperty(x.prototype, key, {
+                    value: function(...args) {
+                        return this._instance[key].call(this._instance, ...args);
+                    }
+                });
+            }
         }
 
         for (const key of statics) {
