@@ -1,5 +1,18 @@
 # Changelog
 
+## [v1.7.1](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.7.0...HEAD)
+
+**Closed issues:**
+
+- JSON serialization error when updating hosted table with NaN values [\#1985](https://github.com/finos/perspective/issues/1985)
+
+**Merged pull requests:**
+
+- Move default plugin to WASM [\#1986](https://github.com/finos/perspective/pull/1986) ([texodus](https://github.com/texodus))
+- Bump dependencies when installing and building python, drop support for `manylinux2010`  [\#1984](https://github.com/finos/perspective/pull/1984) ([timkpaine](https://github.com/timkpaine))
+
 ## [v1.7.0](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.6.5...HEAD)
