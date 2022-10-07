@@ -43,7 +43,7 @@ import type * as perspective from "@finos/perspective";
  * ```
  * @noInheritDoc
  */
-export interface IPerspectiveViewerPlugin extends HTMLElement {
+export interface IPerspectiveViewerPlugin {
     /**
      * The name for this plugin, which is used as both it's unique key for use
      * as a parameter for the `plugin` field of a `ViewerConfig`, and as the
@@ -57,7 +57,7 @@ export interface IPerspectiveViewerPlugin extends HTMLElement {
      * other columns.  `"toggle"` mode toggles the column on or off (dependent
      * on column state), leaving existing columns alone.
      */
-    get select_mode(): "select" | "toggle" | undefined;
+    get select_mode(): string | undefined;
 
     /**
      * The minimum number of columns required for this plugin to operate.
