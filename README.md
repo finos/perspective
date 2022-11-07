@@ -5,7 +5,7 @@
 [![PyPI](https://img.shields.io/pypi/v/perspective-python.svg?style=flat)](https://pypi.python.org/pypi/perspective-python)
 [![Build Status](https://github.com/finos/perspective/actions/workflows/build.yml/badge.svg?branch=master&event=push)](https://github.com/finos/perspective/actions/workflows/build.yml)
 
-Perspective is an <i>interactive</i> analytics and data visualization component,
+[Perspective](https://perspective.finos.org/) is an <i>interactive</i> analytics and data visualization component,
 which is especially well-suited for <i>large</i> and/or <i>streaming</i>
 datasets. Use it to create user-configurable reports, dashboards, notebooks and
 applications, then deploy stand-alone in the browser, or in concert with Python
