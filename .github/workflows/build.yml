@@ -711,13 +711,13 @@ jobs:
             matrix:
                 os:
                     - ubuntu-20.04 # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-Readme.md
-                    - macos-11 # https://github.com/actions/virtual-environments/blob/main/images/macos/macos-11-Readme.md
+                    - macos-12 # https://github.com/actions/virtual-environments/blob/main/images/macos/macos-11-Readme.md
                     - windows-2022 # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2022-Readme.md
                     - windows-2019 # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2019-Readme.md
                 python-version:
-                    - 3.7
                     - 3.8
                     - 3.9
+                    - "3.10"
                 container:
                     - none # Not manylinux, we will use this space to build the WASM assets
                     - 2014
@@ -731,7 +731,7 @@ jobs:
                     # Things to always exclude #
                     ############################
                     # Exclude manylinux python builds other than linux
-                    - os: macos-11
+                    - os: macos-12
                       container: 2014
 
                     - os: windows-2022
@@ -759,14 +759,14 @@ jobs:
                       os: windows-2019
 
                     - is-full-run: false
-                      os: macos-11
+                      os: macos-12
 
-                    # Exclude Python 3.7 and 3.8 builds
-                    - is-full-run: false
-                      python-version: 3.7
-
+                    # Exclude Python 3.8, 3.10, 3.11 builds
                     - is-full-run: false
                       python-version: 3.8
+
+                    - is-full-run: false
+                      python-version: "3.10"
 
         ##################################
         # Setup matrix job configuration #
@@ -966,7 +966,7 @@ jobs:
                   python3 setup.py sdist
               env:
                   PYTHON_VERSION: ${{ matrix.python-version }}
-              if: ${{ matrix.os == 'macos-11' }}
+              if: ${{ matrix.os == 'macos-12' }}
 
             ##########
             # Windows
@@ -1003,7 +1003,7 @@ jobs:
               with:
                   name: perspective-python-sdist
                   path: python/perspective/dist/*.tar.gz
-              if: ${{ matrix.os == 'macos-11' }}
+              if: ${{ matrix.os == 'macos-12' }}
 
     ##########################################################################################################################
     ##########################################################################################################################
@@ -1202,13 +1202,13 @@ jobs:
             matrix:
                 os:
                     - ubuntu-20.04 # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-Readme.md
-                    - macos-11 # https://github.com/actions/virtual-environments/blob/main/images/macos/macos-11-Readme.md
+                    - macos-12 # https://github.com/actions/virtual-environments/blob/main/images/macos/macos-11-Readme.md
                     - windows-2022 # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2022-Readme.md
                     - windows-2019 # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2019-Readme.md
                 python-version:
-                    - 3.7
                     - 3.8
                     - 3.9
+                    - "3.10"
                 node-version: [16.x]
                 is-full-run:
                     - ${{ needs.initialize.outputs.FULL_RUN == 'true' }}
@@ -1229,15 +1229,19 @@ jobs:
                     - is-full-run: false
                       os: windows-2019
 
-                    # Exclude Python 3.7 and 3.8 builds
+                    # Exclude Mac builds
                     - is-full-run: false
-                      os: macos-11
+                      os: macos-12
 
-                    - is-full-run: false
-                      python-version: 3.7
-
+                    # Exclude Python 3.8, 3.10, 3.11 builds
                     - is-full-run: false
                       python-version: 3.8
+
+                    - is-full-run: false
+                      python-version: "3.10"
+
+                    - is-full-run: false
+                      python-version: "3.11"
 
         ##################################
         # Setup matrix job configuration #
