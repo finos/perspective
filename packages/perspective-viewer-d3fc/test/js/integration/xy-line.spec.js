@@ -12,8 +12,8 @@ const path = require("path");
 const utils = require("@finos/perspective-test");
 const simple_tests = require("@finos/perspective-viewer/test/js/simple_tests.js");
 
-const {withTemplate} = require("./simple-template");
-withTemplate("xyline", "X/Y Line", {columns: ["Sales", "Quantity"]});
+const { withTemplate } = require("./simple-template");
+withTemplate("xyline", "X/Y Line", { columns: ["Sales", "Quantity"] });
 
 function get_contents(temp) {
     return async function (page) {
@@ -35,6 +35,6 @@ utils.with_server({}, () => {
         () => {
             simple_tests.default(get_contents("xyline"));
         },
-        {reload_page: false, root: path.join(__dirname, "..", "..", "..")}
+        { reload_page: false, root: path.join(__dirname, "..", "..", "..") }
     );
 });

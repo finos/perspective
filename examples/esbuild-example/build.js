@@ -1,7 +1,9 @@
 const esbuild = require("esbuild");
 const fs = require("fs");
 const path = require("path");
-const {PerspectiveEsbuildPlugin} = require("@finos/perspective-esbuild-plugin");
+const {
+    PerspectiveEsbuildPlugin,
+} = require("@finos/perspective-esbuild-plugin");
 
 async function build() {
     await esbuild.build({

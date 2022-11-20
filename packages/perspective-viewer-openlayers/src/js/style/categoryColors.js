@@ -6,7 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import {computedStyle, toFillAndStroke} from "./computed";
+import { computedStyle, toFillAndStroke } from "./computed";
 
 const CATEGORY_COLOR_VAR = "--map-category-";
 const defaultColors = [

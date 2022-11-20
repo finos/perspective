@@ -7,13 +7,13 @@
  *
  */
 
-import {computedStyle} from "../style/computed";
-import {createTooltip} from "../tooltip/tooltip";
+import { computedStyle } from "../style/computed";
+import { createTooltip } from "../tooltip/tooltip";
 
 // const ol = require("ol");
-import {Map, View} from "ol";
+import { Map, View } from "ol";
 import TileLayer from "ol/layer/Tile";
-import {OSM} from "ol/source";
+import { OSM } from "ol/source";
 
 const DEFAULT_TILE_URL =
     '"http://{a-c}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"';
@@ -64,7 +64,7 @@ function getOrCreateMap(container) {
         const map = new Map({
             target: container,
             layers: [tileLayer],
-            view: new View({center: [0, 0], zoom: 1}),
+            view: new View({ center: [0, 0], zoom: 1 }),
         });
 
         const tooltip = createTooltip(container, map);
@@ -92,14 +92,14 @@ function initializeView(container, vectorSource) {
         (!!container[PRIVATE] && container[PRIVATE].invalid_extents)
     ) {
         const map = container[PRIVATE].map;
-        map.getView().fit(extents, {size: map.getSize()});
+        map.getView().fit(extents, { size: map.getSize() });
     }
 
     container[PRIVATE].invalid_extents = extents.some(isNaN);
 }
 
 function removeVectorLayer(container) {
-    const {map} = container[PRIVATE];
+    const { map } = container[PRIVATE];
     const layers = map.getLayers().getArray();
     for (var n = layers.length - 1; n > 0; n--) {
         map.removeLayer(layers[n]);
@@ -114,7 +114,7 @@ function setTileUrl(container) {
     const url = tileUrl.trim().substring(1, tileUrl.length - 1);
 
     if (container[PRIVATE].tileUrl != url) {
-        container[PRIVATE].tileLayer.setSource(new OSM({wrapX: false, url}));
+        container[PRIVATE].tileLayer.setSource(new OSM({ wrapX: false, url }));
         container[PRIVATE].tileUrl = url;
     }
 }

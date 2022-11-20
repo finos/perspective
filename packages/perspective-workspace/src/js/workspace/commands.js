@@ -7,8 +7,8 @@
  *
  */
 
-import {CommandRegistry} from "@lumino/commands/src";
-import {MODE} from "./workspace";
+import { CommandRegistry } from "@lumino/commands/src";
+import { MODE } from "./workspace";
 
 export const createCommands = (workspace, indicator) => {
     const commands = new CommandRegistry();
@@ -56,7 +56,7 @@ export const createCommands = (workspace, indicator) => {
     commands.addCommand("workspace:new", {
         execute: (args) => {
             const widget = workspace._createWidgetAndNode({
-                config: {table: args.table},
+                config: { table: args.table },
             });
 
             workspace.dockpanel.addWidget(widget, {
@@ -93,7 +93,7 @@ export const createCommands = (workspace, indicator) => {
     });
 
     commands.addCommand("workspace:duplicate", {
-        execute: ({widget}) => workspace.duplicate(widget),
+        execute: ({ widget }) => workspace.duplicate(widget),
         iconClass: "menu-duplicate",
         isVisible: (args) =>
             args.widget.parent === workspace.dockpanel ? true : false,

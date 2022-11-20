@@ -7,8 +7,8 @@
  *
  */
 
-import {PRIVATE_PLUGIN_SYMBOL} from "../model";
-import {save_column_size_overrides} from "../model/column_overrides.js";
+import { PRIVATE_PLUGIN_SYMBOL } from "../model";
+import { save_column_size_overrides } from "../model/column_overrides.js";
 
 /**
  * Serialize the state of this plugin to a token.

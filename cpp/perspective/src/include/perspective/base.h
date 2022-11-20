@@ -68,7 +68,7 @@ const t_index INVALID_INDEX = -1;
  */
 PERSPECTIVE_EXPORT void psp_abort(const std::string& message);
 
-//#define PSP_TRACE_SENTINEL() t_trace _psp_trace_sentinel;
+// #define PSP_TRACE_SENTINEL() t_trace _psp_trace_sentinel;
 #define PSP_TRACE_SENTINEL()
 #define _ID(x)                                                                 \
     x // https://stackoverflow.com/questions/25144589/c-macro-overloading-is-not-working
@@ -112,7 +112,7 @@ static_assert(                                               \
 std::is_pod<X>::value && std::is_standard_layout<X>::value , \
 " Unsuitable type found. "
 
-//#define LOG_LIFETIMES 1
+// #define LOG_LIFETIMES 1
 
 #ifdef LOG_LIFETIMES
 #define LOG_CONSTRUCTOR(X)                                                     \

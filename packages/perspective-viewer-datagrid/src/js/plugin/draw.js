@@ -7,8 +7,8 @@
  *
  */
 
-import {restore_column_size_overrides} from "../model/column_overrides.js";
-import {save_column_size_overrides} from "../model/column_overrides.js";
+import { restore_column_size_overrides } from "../model/column_overrides.js";
+import { save_column_size_overrides } from "../model/column_overrides.js";
 
 /**
  * Draw this datagrid instance.
@@ -26,12 +26,12 @@ export async function draw(view) {
     }
 
     const old_sizes = save_column_size_overrides.call(this);
-    const draw = this.regular_table.draw({invalid_columns: true});
+    const draw = this.regular_table.draw({ invalid_columns: true });
     if (!this.model._preserve_focus_state) {
         this.regular_table.scrollTop = 0;
         this.regular_table.scrollLeft = 0;
         this.regular_table.dispatchEvent(
-            new CustomEvent("psp-deselect-all", {bubbles: false})
+            new CustomEvent("psp-deselect-all", { bubbles: false })
         );
         this.regular_table._resetAutoSize();
     } else {

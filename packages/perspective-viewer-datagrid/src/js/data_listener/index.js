@@ -7,9 +7,9 @@
  *
  */
 
-import {PRIVATE_PLUGIN_SYMBOL} from "../model";
-import {format_cell} from "./format_cell.js";
-import {format_tree_header} from "./format_tree_header.js";
+import { PRIVATE_PLUGIN_SYMBOL } from "../model";
+import { format_cell } from "./format_cell.js";
+import { format_tree_header } from "./format_tree_header.js";
 
 /**
  * Creates a new DataListener, suitable for passing to `regular-table`'s

@@ -7,7 +7,7 @@
  *
  */
 import * as fc from "d3fc";
-import {tooltip} from "../tooltip/tooltip";
+import { tooltip } from "../tooltip/tooltip";
 
 export function barSeries(settings, color) {
     let series =

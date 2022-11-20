@@ -35,7 +35,7 @@
         width: 100%;
     }
 
-    input[type=checkbox] {
+    input[type="checkbox"] {
         float: left;
     }
 
@@ -50,11 +50,14 @@
     input.parameter[type="number"] {
         text-align: right;
         border-bottom-width: 1px;
-        border-color: var(--input--border-color, var(--inactive--color, inherit));
+        border-color: var(
+            --input--border-color,
+            var(--inactive--color, inherit)
+        );
     }
 
-    input[type=number]::-webkit-inner-spin-button,
-    input[type=number]::-webkit-outer-spin-button {
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
         opacity: 1;
         background: transparent;
         background-color: transparent;
@@ -70,7 +73,7 @@
     }
 
     input[type="checkbox"],
-    &>div>div>span:first-child {
+    & > div > div > span:first-child {
         width: 24px;
         margin: 0;
     }
@@ -167,7 +170,7 @@
         opacity: 0.5;
     }
 
-    input[type=checkbox]:not(:disabled) {
+    input[type="checkbox"]:not(:disabled) {
         cursor: pointer;
     }
 }

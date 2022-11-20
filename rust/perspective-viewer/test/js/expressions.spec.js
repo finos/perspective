@@ -411,7 +411,7 @@ utils.with_server({}, () => {
                         await elem.toggleConfig(true);
                         await elem.restore({
                             expressions: ['"Sales" + 100'],
-                            aggregates: {'"Sales" + 100': "avg"},
+                            aggregates: { '"Sales" + 100': "avg" },
                             group_by: ["State"],
                             columns: ['"Sales" + 100'],
                         });

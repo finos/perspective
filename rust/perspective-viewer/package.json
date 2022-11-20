@@ -36,7 +36,7 @@
         "docs:deploy:api": "(echo \"---\nid: perspective-viewer\ntitle: perspective-viewer API\n---\n\n\"; cat README.md) > ../../docs/docs/obj/perspective-viewer.md",
         "docs:deploy:exprtk": "cat exprtk.md > ../../docs/docs/obj/perspective-viewer-exprtk.md",
         "fix": "yarn lint --fix && cargo fmt",
-        "lint": "eslint src/ts",
+        "lint": "prettier --check src/ts/**/*",
         "test:build:rust": "cpy ../../packages/perspective/dist/umd/perspective.js dist/pkg/test",
         "test:build:js": "cpy \"test/html/*\" dist/cdn && cpy \"test/csv/*\" dist/cdn && cpy \"test/css/*\" dist/cdn",
         "test:build": "npm-run-all test:build:*",

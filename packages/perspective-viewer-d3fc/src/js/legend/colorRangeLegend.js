@@ -8,7 +8,7 @@
  */
 import * as d3 from "d3";
 import * as fc from "d3fc";
-import {getOrCreateElement} from "../utils/utils";
+import { getOrCreateElement } from "../utils/utils";
 import valueformatter from "../axis/valueFormatter";
 
 export function colorRangeLegend() {
@@ -24,7 +24,9 @@ export function colorRangeLegend() {
                     .attr("class", "legend-container legend-color")
                     .style("z-index", "2")
         );
-        const {width, height} = legendSelection.node().getBoundingClientRect();
+        const { width, height } = legendSelection
+            .node()
+            .getBoundingClientRect();
 
         const xScale = d3.scaleBand().domain([0, 1]).range([0, width]);
 

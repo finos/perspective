@@ -7,10 +7,10 @@
  *
  */
 
-import {restore_column_size_overrides} from "../model/column_overrides.js";
-import {toggle_edit_mode, toggle_scroll_lock} from "../model/toolbar.js";
-import {PRIVATE_PLUGIN_SYMBOL} from "../model";
-import {make_color_record} from "../color_utils.js";
+import { restore_column_size_overrides } from "../model/column_overrides.js";
+import { toggle_edit_mode, toggle_scroll_lock } from "../model/toolbar.js";
+import { PRIVATE_PLUGIN_SYMBOL } from "../model";
+import { make_color_record } from "../color_utils.js";
 
 /**
  * Restore this plugin's state from a previously saved `token`.

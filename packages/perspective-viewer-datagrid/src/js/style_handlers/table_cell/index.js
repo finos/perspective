@@ -7,13 +7,13 @@
  *
  */
 
-import {PRIVATE_PLUGIN_SYMBOL} from "../../model";
+import { PRIVATE_PLUGIN_SYMBOL } from "../../model";
 
-import {cell_style_numeric} from "./numeric.js";
-import {cell_style_string} from "./string.js";
-import {cell_style_datetime} from "./datetime.js";
-import {cell_style_boolean} from "./boolean.js";
-import {cell_style_row_header} from "./row_header.js";
+import { cell_style_numeric } from "./numeric.js";
+import { cell_style_string } from "./string.js";
+import { cell_style_datetime } from "./datetime.js";
+import { cell_style_boolean } from "./boolean.js";
+import { cell_style_row_header } from "./row_header.js";
 
 function get_psp_type(metadata) {
     if (metadata.x >= 0) {

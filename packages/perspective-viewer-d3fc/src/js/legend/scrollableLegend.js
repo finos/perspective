@@ -7,12 +7,12 @@
  *
  */
 import * as d3Legend from "d3-svg-legend";
-import {rebindAll} from "d3fc";
-import {getOrCreateElement} from "../utils/utils";
+import { rebindAll } from "d3fc";
+import { getOrCreateElement } from "../utils/utils";
 import legendControlsTemplate from "../../html/legend-controls.html";
-import {cropCellContents} from "./styling/cropCellContents";
-import {draggableComponent} from "./styling/draggableComponent";
-import {resizableComponent} from "./styling/resizableComponent";
+import { cropCellContents } from "./styling/cropCellContents";
+import { draggableComponent } from "./styling/draggableComponent";
+import { resizableComponent } from "./styling/resizableComponent";
 
 const averageCellHeightPx = 16;
 const controlsHeightPx = 20;
@@ -99,7 +99,7 @@ export default (fromLegend, settings) => {
 
     const setPage = (index) => {
         pageIndex = index;
-        settings.legend = {...settings.legend, pageIndex};
+        settings.legend = { ...settings.legend, pageIndex };
     };
 
     const cellFilter = () => (_, i) =>

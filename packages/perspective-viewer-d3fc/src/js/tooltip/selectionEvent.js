@@ -6,7 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import {getGroupValues, getSplitValues, getDataValues} from "./selectionData";
+import { getGroupValues, getSplitValues, getDataValues } from "./selectionData";
 
 const mapToFilter = (d) => [d.name, "==", d.value];
 
@@ -23,7 +23,7 @@ export const raiseEvent = (node, data, settings) => {
             composed: true,
             detail: {
                 column_names,
-                config: {filter},
+                config: { filter },
                 row: data.row,
             },
         })

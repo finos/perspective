@@ -8,7 +8,7 @@
  */
 
 import * as d3 from "d3";
-import {getOrCreateElement} from "../utils/utils";
+import { getOrCreateElement } from "../utils/utils";
 import template from "../../html/zoom-controls.html";
 
 export default () => {
@@ -27,7 +27,7 @@ export default () => {
         if (xScale || yScale) {
             const dateAxis = xCopy && xCopy.domain()[0] instanceof Date;
             const zoom = d3.zoom().on("zoom", (event) => {
-                const {transform} = event;
+                const { transform } = event;
                 settings.zoom = {
                     k: transform.k,
                     x: transform.x,
@@ -202,7 +202,7 @@ export default () => {
     };
 
     const applyTransform = (transform) => {
-        const changeArgs = {...transform};
+        const changeArgs = { ...transform };
         if (xScale) {
             xScale.domain(transform.rescaleX(xCopy).domain());
             changeArgs.xDomain = xScale.domain();

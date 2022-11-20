@@ -7,7 +7,7 @@
  *
  */
 
-const {treeData} = require("../../../../src/js/data/treeData");
+const { treeData } = require("../../../../src/js/data/treeData");
 const {
     data,
     splitData,
@@ -19,7 +19,7 @@ const {
 
 describe("treeData should", () => {
     test("create a structure with the right number of levels", () => {
-        const {data: result} = treeData({
+        const { data: result } = treeData({
             data,
             agg_paths,
             mainValues,
@@ -30,7 +30,7 @@ describe("treeData should", () => {
     });
 
     test("calculate the correct color extents", () => {
-        const {extents} = treeData({
+        const { extents } = treeData({
             data,
             agg_paths,
             mainValues,

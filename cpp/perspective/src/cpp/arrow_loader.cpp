@@ -528,7 +528,7 @@ namespace apachearrow {
         default: {                                                             \
             std::stringstream ss;                                              \
             ss << "Could not fill arrow column `" << name << "` iteratively"   \
-            << " due to mismatched types.";                                    \
+               << " due to mismatched types.";                                 \
             PSP_COMPLAIN_AND_ABORT(ss.str());                                  \
         }                                                                      \
     }

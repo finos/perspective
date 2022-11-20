@@ -7,9 +7,9 @@
  *
  */
 import * as gparser from "gradient-parser";
-import {interpolate, scaleSequential} from "d3";
+import { interpolate, scaleSequential } from "d3";
 
-import {computedStyle, toFillAndStroke} from "./computed";
+import { computedStyle, toFillAndStroke } from "./computed";
 
 const GRADIENT_COLOR_VAR = "--map-gradient";
 const GRADIENT_DEFAULT =

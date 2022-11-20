@@ -7,18 +7,18 @@
  *
  */
 import * as fc from "d3fc";
-import {axisFactory} from "../axis/axisFactory";
-import {chartCanvasFactory} from "../axis/chartFactory";
-import {ohlcData} from "../data/ohlcData";
-import {filterDataByGroup} from "../legend/filter";
+import { axisFactory } from "../axis/axisFactory";
+import { chartCanvasFactory } from "../axis/chartFactory";
+import { ohlcData } from "../data/ohlcData";
+import { filterDataByGroup } from "../legend/filter";
 import withGridLines from "../gridlines/gridlines";
 
-import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
+import { hardLimitZeroPadding } from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
 import nearbyTip from "../tooltip/nearbyTip";
-import {ohlcCandleSeries} from "../series/ohlcCandleSeries";
-import {colorScale, setOpacity} from "../series/seriesColors";
-import {colorLegend} from "../legend/legend";
+import { ohlcCandleSeries } from "../series/ohlcCandleSeries";
+import { colorScale, setOpacity } from "../series/seriesColors";
+import { colorLegend } from "../legend/legend";
 
 function ohlcCandle(seriesCanvas) {
     return function (container, settings) {
@@ -30,7 +30,7 @@ function ohlcCandle(seriesCanvas) {
         const data = srcData.map((seriesData) => {
             const bollingerData = bollinger(seriesData);
             return seriesData.map((d, i) =>
-                Object.assign({bollinger: bollingerData[i]}, d)
+                Object.assign({ bollinger: bollingerData[i] }, d)
             );
         });
 

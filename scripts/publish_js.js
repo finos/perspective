@@ -7,7 +7,7 @@
  *
  */
 
-const {execute} = require("./script_utils.js");
+const { execute } = require("./script_utils.js");
 const fs = require("fs");
 
 if (!process.env.GITHUB_TOKEN) {
@@ -33,7 +33,7 @@ try {
 
     console.log(`-- Building "@finos/perspective(-*)"`);
     fs.writeFileSync("./.perspectiverc", `PSP_PROJECT=js`);
-    require("dotenv").config({path: "./.perspectiverc"});
+    require("dotenv").config({ path: "./.perspectiverc" });
     execute`yarn clean --deps`;
     execute`rm -rf node_modules`;
     execute`yarn`;

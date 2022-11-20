@@ -8,8 +8,11 @@
  */
 
 import * as d3 from "d3";
-import {getChartContainer} from "../../plugin/root";
-import {enforceContainerBoundaries, margin} from "./enforceContainerBoundaries";
+import { getChartContainer } from "../../plugin/root";
+import {
+    enforceContainerBoundaries,
+    margin,
+} from "./enforceContainerBoundaries";
 
 const resizeForDraggingEvent = "resize.for-dragging";
 
@@ -38,7 +41,7 @@ export function draggableComponent() {
                 left: this.style.left,
                 top: this.style.top,
             };
-            settings.legend = {...settings.legend, ...position};
+            settings.legend = { ...settings.legend, ...position };
 
             pinned = isNodeInTopRight(node)
                 ? pinNodeToTopRight(node)

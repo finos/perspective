@@ -24,7 +24,7 @@ function tests(extract) {
         await page.waitForFunction(() => !!window.__TABLE__);
         const config = {
             viewers: {
-                One: {table: "superstore", name: "One"},
+                One: { table: "superstore", name: "One" },
             },
             detail: {
                 main: {
@@ -56,7 +56,7 @@ function tests(extract) {
                     group_by: ["State"],
                     columns: ["Sales", "Profit"],
                 },
-                Two: {table: "superstore", name: "One"},
+                Two: { table: "superstore", name: "One" },
             },
             master: {
                 widgets: ["One"],
@@ -122,7 +122,7 @@ function tests(extract) {
     });
 }
 
-utils.with_server({paths: PATHS}, () => {
+utils.with_server({ paths: PATHS }, () => {
     describe.page(
         "index.html",
         () => {
@@ -147,6 +147,6 @@ utils.with_server({paths: PATHS}, () => {
                 );
             });
         },
-        {root: TEST_ROOT}
+        { root: TEST_ROOT }
     );
 });

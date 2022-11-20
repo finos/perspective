@@ -124,7 +124,7 @@ const make_run_click_callback = (worker, state) => async () => {
     const params = get_gui_params();
     const new_size = params.width * params.height;
     if (!state.size || state.size !== new_size) {
-        let json = {index: new Array(new_size)};
+        let json = { index: new Array(new_size) };
         for (let x = 0; x < new_size; ++x) {
             json.index[x] = x;
         }

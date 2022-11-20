@@ -10,8 +10,8 @@
 import "regular-table";
 
 import MATERIAL_STYLE from "../less/regular_table.less";
-import {HTMLPerspectiveViewerDatagridPluginElement} from "./custom_elements/datagrid.js";
-import {HTMLPerspectiveViewerDatagridToolbarElement} from "./custom_elements/toolbar.js";
+import { HTMLPerspectiveViewerDatagridPluginElement } from "./custom_elements/datagrid.js";
+import { HTMLPerspectiveViewerDatagridToolbarElement } from "./custom_elements/toolbar.js";
 
 /**
  * Appends the default table CSS to `<head>`, should be run once on module

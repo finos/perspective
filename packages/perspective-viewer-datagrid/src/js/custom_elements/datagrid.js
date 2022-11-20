@@ -7,11 +7,11 @@
  *
  */
 
-import {activate} from "../plugin/activate.js";
-import {restore} from "../plugin/restore.js";
-import {connectedCallback} from "../plugin/connected";
-import {save} from "../plugin/save";
-import {draw} from "../plugin/draw";
+import { activate } from "../plugin/activate.js";
+import { restore } from "../plugin/restore.js";
+import { connectedCallback } from "../plugin/connected";
+import { save } from "../plugin/save";
+import { draw } from "../plugin/draw";
 
 /**
  * The custom element class for this plugin.  The interface methods for this

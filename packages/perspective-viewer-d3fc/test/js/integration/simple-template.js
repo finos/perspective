@@ -16,7 +16,7 @@ const DEFAULT_COLUMNS = ["Sales"];
 const withTemplate = (
     name,
     view,
-    {template = SIMPLE_TEMPLATE, columns = DEFAULT_COLUMNS} = {}
+    { template = SIMPLE_TEMPLATE, columns = DEFAULT_COLUMNS } = {}
 ) => {
     const dir_name = path.join(__dirname, "..", "..", "..", "dist", "umd");
     const templateContent = fs.readFileSync(
@@ -29,4 +29,4 @@ const withTemplate = (
     fs.writeFileSync(path.join(dir_name, `${name}.html`), content);
 };
 
-module.exports = {withTemplate};
+module.exports = { withTemplate };

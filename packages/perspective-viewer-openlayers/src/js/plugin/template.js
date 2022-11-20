@@ -13,7 +13,7 @@
 
 // const template = `<template id="${name}"><div id="container"></div></template>`;
 
-// @bindTemplate(template, style) // eslint-disable-next-line no-unused-vars
+// @bindTemplate(template, style)
 // class TemplateElement extends HTMLElement {
 //     constructor() {
 //         super();

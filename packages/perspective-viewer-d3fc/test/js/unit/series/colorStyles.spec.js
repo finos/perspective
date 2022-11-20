@@ -6,8 +6,8 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-const {select} = require("d3");
-const {initialiseStyles} = require("../../../../src/js/series/colorStyles");
+const { select } = require("d3");
+const { initialiseStyles } = require("../../../../src/js/series/colorStyles");
 const sinon = require("sinon");
 
 const styleVariables = {

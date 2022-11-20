@@ -8,7 +8,7 @@
  */
 
 const fs = require("fs");
-require("dotenv").config({path: "./.perspectiverc"});
+require("dotenv").config({ path: "./.perspectiverc" });
 
 if (!fs.existsSync("./.perspectiverc")) {
     console.error("No .perspectiverc, running setup");

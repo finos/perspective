@@ -7,8 +7,8 @@
  *
  */
 
-import {h} from "@lumino/virtualdom/src";
-import {TabBar} from "@lumino/widgets/src/tabbar";
+import { h } from "@lumino/virtualdom/src";
+import { TabBar } from "@lumino/widgets/src/tabbar";
 
 export const TabBarItems = {
     Config: "config",
@@ -39,13 +39,12 @@ export class PerspectiveTabBarRenderer extends TabBar.Renderer {
         let className = this.createTabClass(data);
         const dataset = this.createTabDataset(data);
 
-        // eslint-disable-next-line prettier/prettier
         return h.li(
-            {key, className, title, style, dataset},
+            { key, className, title, style, dataset },
             this.renderConfigIcon(),
             this.renderLabel(data),
             this.renderCloseIcon(),
-            h.div({className: "divider"})
+            h.div({ className: "divider" })
         );
     }
 

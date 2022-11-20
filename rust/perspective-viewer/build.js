@@ -1,8 +1,10 @@
-const {execSync} = require("child_process");
+const { execSync } = require("child_process");
 const fs = require("fs");
 const fflate = require("fflate");
-const {build} = require("@finos/perspective-esbuild-plugin/build");
-const {PerspectiveEsbuildPlugin} = require("@finos/perspective-esbuild-plugin");
+const { build } = require("@finos/perspective-esbuild-plugin/build");
+const {
+    PerspectiveEsbuildPlugin,
+} = require("@finos/perspective-esbuild-plugin");
 const {
     wasm_opt,
     wasm_bindgen,
@@ -42,8 +44,8 @@ const BUILD = [
             IgnoreCSSPlugin(),
             IgnoreFontsPlugin(),
             PerspectiveEsbuildPlugin({
-                wasm: {inline: true},
-                worker: {inline: true},
+                wasm: { inline: true },
+                worker: { inline: true },
             }),
         ],
         outfile: "dist/umd/perspective-viewer.js",
@@ -102,7 +104,7 @@ async function compile_rust() {
 
     // Compress wasm
     const wasm = fs.readFileSync("dist/pkg/perspective_bg.wasm");
-    const compressed = fflate.compressSync(wasm, {level: 9});
+    const compressed = fflate.compressSync(wasm, { level: 9 });
     fs.writeFileSync("dist/pkg/perspective_bg.wasm", compressed);
 }
 

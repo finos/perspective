@@ -449,14 +449,14 @@ module.exports = (perspective) => {
                     sort: [["x", "desc"]],
                 });
                 var answer = [
-                    {w: 4.5, y: "d"},
-                    {w: 5.5, y: "a"},
-                    {w: 3.5, y: "c"},
-                    {w: 6.5, y: "b"},
-                    {w: 2.5, y: "b"},
-                    {w: 7.5, y: "c"},
-                    {w: 1.5, y: "a"},
-                    {w: 8.5, y: "d"},
+                    { w: 4.5, y: "d" },
+                    { w: 5.5, y: "a" },
+                    { w: 3.5, y: "c" },
+                    { w: 6.5, y: "b" },
+                    { w: 2.5, y: "b" },
+                    { w: 7.5, y: "c" },
+                    { w: 1.5, y: "a" },
+                    { w: 8.5, y: "d" },
                 ];
                 let result = await view.to_json();
                 expect(result).toEqual(answer);
@@ -472,11 +472,11 @@ module.exports = (perspective) => {
                     sort: [["x", "desc"]],
                 });
                 var answer = [
-                    {__ROW_PATH__: [], w: 40},
-                    {__ROW_PATH__: ["a"], w: 7},
-                    {__ROW_PATH__: ["b"], w: 9},
-                    {__ROW_PATH__: ["c"], w: 11},
-                    {__ROW_PATH__: ["d"], w: 13},
+                    { __ROW_PATH__: [], w: 40 },
+                    { __ROW_PATH__: ["a"], w: 7 },
+                    { __ROW_PATH__: ["b"], w: 9 },
+                    { __ROW_PATH__: ["c"], w: 11 },
+                    { __ROW_PATH__: ["d"], w: 13 },
                 ];
                 let result = await view.to_json();
                 expect(result).toEqual(answer);
@@ -501,10 +501,10 @@ module.exports = (perspective) => {
                     sort: [["y", "desc"]],
                 });
                 const answer = [
-                    {__ROW_PATH__: [], x: 15},
-                    {__ROW_PATH__: ["c"], x: 5},
-                    {__ROW_PATH__: ["b"], x: 9},
-                    {__ROW_PATH__: ["a"], x: 1},
+                    { __ROW_PATH__: [], x: 15 },
+                    { __ROW_PATH__: ["c"], x: 5 },
+                    { __ROW_PATH__: ["b"], x: 9 },
+                    { __ROW_PATH__: ["a"], x: 1 },
                 ];
                 const result = await view.to_json();
                 expect(result).toEqual(answer);
@@ -523,10 +523,10 @@ module.exports = (perspective) => {
                     sort: [["y", "desc"]],
                 });
                 const answer = [
-                    {__ROW_PATH__: [], x: 15},
-                    {__ROW_PATH__: ["c"], x: 5},
-                    {__ROW_PATH__: ["b"], x: 9},
-                    {__ROW_PATH__: ["a"], x: 1},
+                    { __ROW_PATH__: [], x: 15 },
+                    { __ROW_PATH__: ["c"], x: 5 },
+                    { __ROW_PATH__: ["b"], x: 9 },
+                    { __ROW_PATH__: ["a"], x: 1 },
                 ];
                 const result = await view.to_json();
                 expect(result).toEqual(answer);
@@ -544,14 +544,14 @@ module.exports = (perspective) => {
                 const paths = await view.column_paths();
                 expect(paths).toEqual(["a|w", "b|w", "c|w", "d|w"]);
                 const answer = [
-                    {"a|w": null, "b|w": null, "c|w": null, "d|w": 4.5},
-                    {"a|w": 5.5, "b|w": null, "c|w": null, "d|w": null},
-                    {"a|w": null, "b|w": null, "c|w": 3.5, "d|w": null},
-                    {"a|w": null, "b|w": 6.5, "c|w": null, "d|w": null},
-                    {"a|w": null, "b|w": 2.5, "c|w": null, "d|w": null},
-                    {"a|w": null, "b|w": null, "c|w": 7.5, "d|w": null},
-                    {"a|w": 1.5, "b|w": null, "c|w": null, "d|w": null},
-                    {"a|w": null, "b|w": null, "c|w": null, "d|w": 8.5},
+                    { "a|w": null, "b|w": null, "c|w": null, "d|w": 4.5 },
+                    { "a|w": 5.5, "b|w": null, "c|w": null, "d|w": null },
+                    { "a|w": null, "b|w": null, "c|w": 3.5, "d|w": null },
+                    { "a|w": null, "b|w": 6.5, "c|w": null, "d|w": null },
+                    { "a|w": null, "b|w": 2.5, "c|w": null, "d|w": null },
+                    { "a|w": null, "b|w": null, "c|w": 7.5, "d|w": null },
+                    { "a|w": 1.5, "b|w": null, "c|w": null, "d|w": null },
+                    { "a|w": null, "b|w": null, "c|w": null, "d|w": 8.5 },
                 ];
                 const result = await view.to_json();
                 expect(result).toEqual(answer);
@@ -694,7 +694,7 @@ module.exports = (perspective) => {
                 const view = await table.view({
                     columns: ["x"],
                     split_by: ["y"],
-                    aggregates: {y: "count"},
+                    aggregates: { y: "count" },
                     sort: [["y", "col desc"]],
                 });
 
@@ -717,18 +717,18 @@ module.exports = (perspective) => {
                 var view = await table.view({
                     columns: ["w"],
                     split_by: ["y"],
-                    aggregates: {w: "sum", z: "last"},
+                    aggregates: { w: "sum", z: "last" },
                     sort: [["x", "desc"]],
                 });
                 var answer = [
-                    {"a|w": null, "b|w": null, "c|w": null, "d|w": 4.5},
-                    {"a|w": 5.5, "b|w": null, "c|w": null, "d|w": null},
-                    {"a|w": null, "b|w": null, "c|w": 3.5, "d|w": null},
-                    {"a|w": null, "b|w": 6.5, "c|w": null, "d|w": null},
-                    {"a|w": null, "b|w": 2.5, "c|w": null, "d|w": null},
-                    {"a|w": null, "b|w": null, "c|w": 7.5, "d|w": null},
-                    {"a|w": 1.5, "b|w": null, "c|w": null, "d|w": null},
-                    {"a|w": null, "b|w": null, "c|w": null, "d|w": 8.5},
+                    { "a|w": null, "b|w": null, "c|w": null, "d|w": 4.5 },
+                    { "a|w": 5.5, "b|w": null, "c|w": null, "d|w": null },
+                    { "a|w": null, "b|w": null, "c|w": 3.5, "d|w": null },
+                    { "a|w": null, "b|w": 6.5, "c|w": null, "d|w": null },
+                    { "a|w": null, "b|w": 2.5, "c|w": null, "d|w": null },
+                    { "a|w": null, "b|w": null, "c|w": 7.5, "d|w": null },
+                    { "a|w": 1.5, "b|w": null, "c|w": null, "d|w": null },
+                    { "a|w": null, "b|w": null, "c|w": null, "d|w": 8.5 },
                 ];
                 let result = await view.to_json();
                 expect(result).toEqual(answer);

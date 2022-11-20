@@ -26,7 +26,7 @@ export function restore_column_size_overrides(old_sizes, cache = false) {
     }
 
     const overrides = {};
-    const {group_by, columns} = this.model._config;
+    const { group_by, columns } = this.model._config;
     const tree_header_offset = group_by?.length > 0 ? group_by.length + 1 : 0;
 
     for (const key of Object.keys(old_sizes)) {
@@ -61,7 +61,7 @@ export function save_column_size_overrides() {
     }
 
     const overrides = this.regular_table._column_sizes.override;
-    const {group_by, columns} = this.model._config;
+    const { group_by, columns } = this.model._config;
     const tree_header_offset = group_by?.length > 0 ? group_by.length + 1 : 0;
 
     const old_sizes = {};

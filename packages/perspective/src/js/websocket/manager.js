@@ -6,7 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import {Server} from "../api/server.js";
+import { Server } from "../api/server.js";
 
 let CLIENT_ID_GEN = 0;
 

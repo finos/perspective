@@ -7,20 +7,20 @@
  *
  */
 import * as fc from "d3fc";
-import {axisFactory} from "../axis/axisFactory";
-import {chartCanvasFactory} from "../axis/chartFactory";
+import { axisFactory } from "../axis/axisFactory";
+import { chartCanvasFactory } from "../axis/chartFactory";
 import {
     pointSeriesCanvas,
     symbolTypeFromGroups,
 } from "../series/pointSeriesCanvas";
-import {pointData} from "../data/pointData";
-import {seriesColorsFromGroups} from "../series/seriesColors";
-import {seriesLinearRange, seriesColorRange} from "../series/seriesRange";
-import {symbolLegend} from "../legend/legend";
-import {colorRangeLegend} from "../legend/colorRangeLegend";
-import {filterDataByGroup} from "../legend/filter";
+import { pointData } from "../data/pointData";
+import { seriesColorsFromGroups } from "../series/seriesColors";
+import { seriesLinearRange, seriesColorRange } from "../series/seriesRange";
+import { symbolLegend } from "../legend/legend";
+import { colorRangeLegend } from "../legend/colorRangeLegend";
+import { filterDataByGroup } from "../legend/filter";
 import withGridLines from "../gridlines/gridlines";
-import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
+import { hardLimitZeroPadding } from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
 import nearbyTip from "../tooltip/nearbyTip";
 
