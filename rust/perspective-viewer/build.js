@@ -1,10 +1,8 @@
-const {lessLoader} = require("esbuild-plugin-less");
 const {execSync} = require("child_process");
 const fs = require("fs");
 const fflate = require("fflate");
 const {build} = require("@finos/perspective-esbuild-plugin/build");
 const {PerspectiveEsbuildPlugin} = require("@finos/perspective-esbuild-plugin");
-const glob = require("tiny-glob");
 const {
     wasm_opt,
     wasm_bindgen,
@@ -22,36 +20,10 @@ const {
     NodeModulesExternal,
 } = require("@finos/perspective-esbuild-plugin/external");
 
-// const {ReplacePlugin} = require("@finos/perspective-esbuild-plugin/replace");
-
 const IS_DEBUG =
     !!process.env.PSP_DEBUG || process.argv.indexOf("--debug") >= 0;
 
-const PREBUILD = async () => [
-    {
-        entryPoints: await glob("src/less/**/*.less"),
-        entryNames: "[dir]/[name]",
-        metafile: false,
-        sourcemap: false,
-        plugins: [IgnoreFontsPlugin(), lessLoader()],
-        outdir: "build/css",
-    },
-];
-
 const BUILD = [
-    {
-        entryPoints: [
-            "src/themes/themes.less",
-            "src/themes/material.less",
-            "src/themes/material-dark.less",
-            "src/themes/monokai.less",
-            "src/themes/solarized.less",
-            "src/themes/solarized-dark.less",
-            "src/themes/vaporwave.less",
-        ],
-        plugins: [lessLoader()],
-        outdir: "dist/css",
-    },
     {
         entryPoints: ["src/ts/perspective-viewer.ts"],
         format: "esm",
@@ -59,15 +31,7 @@ const BUILD = [
             IgnoreCSSPlugin(),
             IgnoreFontsPlugin(),
             NodeModulesExternal(),
-            // PerspectiveEsbuildPlugin(),
-
-            // // Rust outputs a `URL()` when an explicit path for the wasm
-            // // is not specified.  Esbuild ignores this, but webpack does not,
-            // // and we always call this method with an explicit path, so this
-            // // plugin strips this URL so webpack builds don't fail.
-            // ReplacePlugin(/["']perspective_viewer_bg\.wasm["']/, "undefined"),
         ],
-        // splitting: true,
         external: ["*.wasm", "*.worker.js"],
         outdir: "dist/esm",
     },
@@ -125,11 +89,7 @@ const INHERIT = {
 
 async function compile_rust() {
     const cargo_debug = IS_DEBUG ? "" : "--release";
-    execSync(
-        `CARGO_TARGET_DIR=./build cargo +nightly build ${cargo_debug} --lib --target wasm32-unknown-unknown -Z build-std=std,panic_abort -Z build-std-features=panic_immediate_abort`,
-        INHERIT
-    );
-
+    execSync(`cargo build ${cargo_debug}`, INHERIT);
     await wasm_bindgen("perspective", {
         debug: IS_DEBUG,
         version: "0.2.82",
@@ -147,10 +107,6 @@ async function compile_rust() {
 }
 
 async function build_all() {
-    await Promise.all((await PREBUILD()).map(build)).catch(() =>
-        process.exit(1)
-    );
-
     // Rust
     await compile_rust();
 

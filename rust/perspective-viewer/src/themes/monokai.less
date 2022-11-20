@@ -7,20 +7,18 @@
  *
  */
 
-@import "../less/fonts";
-@import (reference) "./material-dark.less";
+@import url("ref://./material-dark.less");
 
 perspective-viewer,
 perspective-viewer[theme="Monokai"] {
     --theme-name: "Monokai";
 }
 
-perspective-viewer[theme="Monokai"],
-.perspective-viewer-monokai {
-    .perspective-viewer-material-dark();
-    .perspective-viewer-monokai--colors();
-    .perspective-viewer-monokai--datagrid();
-    .perspective-viewer-monokai--d3fc();
+perspective-viewer[theme="Monokai"] {
+    @include perspective-viewer-material-dark;
+    @include perspective-viewer-monokai--colors;
+    @include perspective-viewer-monokai--datagrid;
+    @include perspective-viewer-monokai--d3fc;
 }
 
 perspective-copy-menu[theme="Monokai"],
@@ -30,16 +28,15 @@ perspective-date-column-style[theme="Monokai"],
 perspective-datetime-column-style[theme="Monokai"],
 perspective-number-column-style[theme="Monokai"],
 perspective-string-column-style[theme="Monokai"],
-perspective-expression-editor[theme="Monokai"],
-.perspective-modal-monokai {
-    .perspective-modal-material-dark();
-    .perspective-viewer-monokai--colors();
+perspective-expression-editor[theme="Monokai"] {
+    @include perspective-modal-material-dark;
+    @include perspective-viewer-monokai--colors;
 
     background-color: #2d2a2e;
     border: 1px solid #797979;
 }
 
-.perspective-viewer-monokai--colors {
+@mixin perspective-viewer-monokai--colors {
     color: #d6d6d6;
     background: #2d2a2e;
 
@@ -47,7 +44,6 @@ perspective-expression-editor[theme="Monokai"],
     --error--color: #ff6188;
     --inactive--color: #797979;
     --plugin--background: #2d2a2e;
-    // --plugin--border: #797979;
 
     // Column type indicators
     --float--column-type--color: #78dce8;
@@ -58,7 +54,7 @@ perspective-expression-editor[theme="Monokai"],
     --warning--background: #ffd866;
 }
 
-.perspective-viewer-monokai--datagrid {
+@mixin perspective-viewer-monokai--datagrid {
     regular-table {
         --rt-pos-cell--color: #78dce8 !important;
         --rt-neg-cell--color: #ff6188 !important;
@@ -77,7 +73,7 @@ perspective-expression-editor[theme="Monokai"],
     }
 }
 
-.perspective-viewer-monokai--d3fc {
+@mixin perspective-viewer-monokai--d3fc {
     --d3fc-treedata--labels: #d6d6d6;
     --d3fc-treedata--hover-highlight: #2d2a2e;
 

@@ -1,4 +1,11 @@
+[build]
+target = "wasm32-unknown-unknown"
+target-dir = "build"
 
 [target.wasm32-unknown-unknown]
 rustflags = ["--cfg=web_sys_unstable_apis"]
 runner = 'wasm-bindgen-test-runner'
+
+[unstable]
+build-std = ["std", "panic_abort"]
+build-std-features = ["panic_immediate_abort"]

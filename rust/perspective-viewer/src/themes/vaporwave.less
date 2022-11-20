@@ -7,23 +7,21 @@
  *
  */
 
-@import (css) url("https://fonts.googleapis.com/css?display=block&family=Roboto+Mono:200,400%7CMaterial+Icons+Outlined%7COpen+Sans:300,400,700");
-
-@import (reference) "./material-dark.less";
+@import url("https://fonts.googleapis.com/css?display=block&family=Roboto+Mono:200,400%7CMaterial+Icons+Outlined%7COpen+Sans:300,400,700");
+@import url("ref://./material-dark.less");
 
 perspective-viewer,
 perspective-viewer[theme="Vaporwave"] {
     --theme-name: "Vaporwave";
 }
 
-perspective-viewer[theme="Vaporwave"],
-.perspective-viewer-vaporwave {
-    .perspective-viewer-material-dark();
-    .perspective-viewer-vaporwave--colors();
-    .perspective-viewer-vaporwave--animation();
-    .perspective-viewer-vaporwave--fonts();
-    .perspective-viewer-vaporwave--datagrid();
-    .perspective-viewer-vaporwave--d3fc();
+perspective-viewer[theme="Vaporwave"] {
+    @include perspective-viewer-material-dark;
+    @include perspective-viewer-vaporwave--colors;
+    @include perspective-viewer-vaporwave--animation;
+    @include perspective-viewer-vaporwave--fonts;
+    @include perspective-viewer-vaporwave--datagrid;
+    @include perspective-viewer-vaporwave--d3fc;
 }
 
 perspective-copy-menu[theme="Vaporwave"],
@@ -33,20 +31,19 @@ perspective-date-column-style[theme="Vaporwave"],
 perspective-datetime-column-style[theme="Vaporwave"],
 perspective-number-column-style[theme="Vaporwave"],
 perspective-string-column-style[theme="Vaporwave"],
-perspective-expression-editor[theme="Vaporwave"],
-.perspective-modal-vaporwave {
-    .perspective-modal-material-dark();
-    .perspective-viewer-vaporwave--colors();
+perspective-expression-editor[theme="Vaporwave"] {
+    @include perspective-modal-material-dark;
+    @include perspective-viewer-vaporwave--colors;
 
     background-color: #07081d;
 }
 
-.perspective-viewer-vaporwave--fonts {
+@mixin perspective-viewer-vaporwave--fonts {
     --button--font-family: "Material Icons Outlined";
     --preload-fonts: "Roboto Mono:200;Open Sans:300,400;Material Icons Outlined:400";
 }
 
-.perspective-viewer-vaporwave--colors {
+@mixin perspective-viewer-vaporwave--colors {
     color: #49acff;
     background: rgb(7, 8, 29) !important;
 
@@ -55,7 +52,7 @@ perspective-expression-editor[theme="Vaporwave"],
     --plugin--background: rgb(7, 8, 29) !important;
 }
 
-.perspective-viewer-vaporwave--animation {
+@mixin perspective-viewer-vaporwave--animation {
     --status-icon-updating-keyframes-start--filter: opacity(1);
     --status-icon-updating-keyframes-end--filter: opacity(0);
     --status-icon-updating-keyframes-start--transform: scale(1);
@@ -64,7 +61,7 @@ perspective-expression-editor[theme="Vaporwave"],
     --status-icon-keyframes-end--transform: scale(1);
 }
 
-.perspective-viewer-vaporwave--datagrid {
+@mixin perspective-viewer-vaporwave--datagrid {
     regular-table {
         --pp-color-1: rgb(9, 33, 50);
         --pp-color-2: rgb(66, 182, 230);
@@ -91,7 +88,7 @@ perspective-expression-editor[theme="Vaporwave"],
     }
 }
 
-.perspective-viewer-vaporwave--d3fc {
+@mixin perspective-viewer-vaporwave--d3fc {
     --d3fc-axis-ticks--color: #49acff;
     --d3fc-gridline--color: rgb(19, 33, 50);
     --d3fc-series: #01cdfe;

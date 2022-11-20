@@ -7,8 +7,8 @@
  *
  */
 
-@import "../less/fonts";
-@import "../less/variables";
+@import "./fonts.less";
+@import "./variables.less";
 
 // Register theme for auto-detection
 perspective-viewer,
@@ -16,15 +16,8 @@ perspective-viewer[theme="Material Light"] {
     --theme-name: "Material Light";
 }
 
-perspective-viewer[theme="Material Light"],
-.perspective-viewer-material {
-    .perspective-viewer-material--dimensions();
-    .perspective-viewer-material--colors();
-    .perspective-viewer-material--fonts();
-    .perspective-viewer-material--intl();
-    .perspective-viewer-material--d3fc();
-    .perspective-viewer-material--datagrid();
-    .perspective-viewer-material--openlayers();
+perspective-viewer[theme="Material Light"] {
+    @include perspective-viewer-material;
 }
 
 perspective-copy-menu[theme="Material Light"],
@@ -36,8 +29,22 @@ perspective-number-column-style[theme="Material Light"],
 perspective-string-column-style[theme="Material Light"],
 perspective-expression-editor[theme="Material Light"],
 .perspective-modal-material {
-    .perspective-viewer-material--fonts();
-    .perspective-viewer-material--colors();
+    @include perspective-modal-material;
+}
+
+@mixin perspective-viewer-material {
+    @include perspective-viewer-material--dimensions;
+    @include perspective-viewer-material--colors;
+    @include perspective-viewer-material--fonts;
+    @include perspective-viewer-material--intl;
+    @include perspective-viewer-material--d3fc;
+    @include perspective-viewer-material--datagrid;
+    @include perspective-viewer-material--openlayers;
+}
+
+@mixin perspective-modal-material {
+    @include perspective-viewer-material--fonts;
+    @include perspective-viewer-material--colors;
 
     background-color: white;
     --column-style-pos-color--content: "add";
@@ -52,7 +59,7 @@ perspective-expression-editor[theme="Material Light"],
     --column-style-checkbox-unchecked--content: "check_box_outline_blank";
 }
 
-.perspective-viewer-material--dimensions {
+@mixin perspective-viewer-material--dimensions {
     --button--font-size: 16px;
     --config-button--padding: 15px 8px 6px 8px;
     --column-drop-label--font-size: 8px;
@@ -70,7 +77,7 @@ perspective-expression-editor[theme="Material Light"],
     --top-panel-row--display: inline-flex;
 }
 
-.perspective-viewer-material--colors {
+@mixin perspective-viewer-material--colors {
     color: #161616;
     background-color: #f2f4f6;
 
@@ -88,7 +95,7 @@ perspective-expression-editor[theme="Material Light"],
     --boolean--column-type--color: @orange500;
 }
 
-.perspective-viewer-material--fonts {
+@mixin perspective-viewer-material--fonts {
     font-family: "Open Sans";
 
     --preload-fonts: "Roboto Mono:200;Open Sans:300,400;Material Icons:400";
@@ -96,7 +103,7 @@ perspective-expression-editor[theme="Material Light"],
     --button--font-family: "Material Icons";
 }
 
-.perspective-viewer-material--intl {
+@mixin perspective-viewer-material--intl {
     // Query overlay labels
     --group_by--content: "Group By";
     --split_by--content: "Split By";
@@ -130,7 +137,7 @@ perspective-expression-editor[theme="Material Light"],
     --column-close--content: "close";
 }
 
-.perspective-viewer-material--d3fc {
+@mixin perspective-viewer-material--d3fc {
     --d3fc-y1-label--content: "arrow_upward";
     --d3fc-y2-label--content: "arrow_downward";
 
@@ -173,7 +180,7 @@ perspective-expression-editor[theme="Material Light"],
             #f0f0f0 100%);
 }
 
-.perspective-viewer-material--openlayers {
+@mixin perspective-viewer-material--openlayers {
     --map-tile-url: "http://{a-c}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png";
     --map-element-background: #fff;
     --map-category-1: #0366d6;
@@ -195,7 +202,7 @@ perspective-expression-editor[theme="Material Light"],
             #1a237e 100%);
 }
 
-.perspective-viewer-material--datagrid {
+@mixin perspective-viewer-material--datagrid {
     --rt-pos-cell--color: @blue300;
     --rt-neg-cell--color: @red300;
 
@@ -208,36 +215,6 @@ perspective-expression-editor[theme="Material Light"],
     --toolbar-scroll-lock-active--content: "lock";
     --toolbar-edit-mode--content: "edit_off";
     --toolbar-edit-mode-active--content: "edit";
-
-    // // This no long works on Chrome 102.x/canary.
-    // // `-webkit-mask-image` causes scroll events to be surpressed for some
-    // // ****** reason.
-
-    // regular-table::-webkit-scrollbar-thumb {
-    //     background-color: #e0e4e9;
-    // }
-
-    // regular-table {
-    //     mask-image: ~"linear-gradient(black, black)",
-    //         ~"linear-gradient(to top, transparent 10%, black 90%)",
-    //         ~"linear-gradient(to left, transparent 10%, black 90%)";
-    //     -webkit-mask-image: ~"linear-gradient(black, black)",
-    //         ~"linear-gradient(to top, transparent 10%, black 90%)",
-    //         ~"linear-gradient(to left, transparent 10%, black 90%)";
-    //     mask-position: ~"-12px -12px", ~"bottom right", ~"bottom right";
-    //     -webkit-mask-position: ~"-12px -12px", ~"bottom right", ~"bottom right";
-    //     mask-size: ~"100% 100%", ~"12px 1000%", ~"1000% 12px";
-    //     -webkit-mask-size: ~"100% 100%", ~"12px 1000%", ~"1000% 12px";
-    //     mask-repeat: no-repeat;
-    //     -webkit-mask-repeat: no-repeat;
-    //     transition: -webkit-mask-position 0.3s, mask-position 0.3s;
-    //     &:hover {
-    //         mask-position: ~"-12px -12px", ~"top right", ~"bottom left";
-    //         -webkit-mask-position: ~"-12px -12px", ~"top right", ~"bottom left";
-    //     }
-    // }
-
-    // // Instead just change the `background-color`.
 
     regular-table::-webkit-scrollbar-thumb {
         background-color: transparent;
