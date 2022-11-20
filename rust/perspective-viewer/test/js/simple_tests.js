@@ -21,7 +21,7 @@ exports.default = function (get_contents = get_contents_default) {
         await page.evaluate(async () => {
             const viewer = document.querySelector("perspective-viewer");
             await viewer.getTable();
-            await viewer.restore({settings: true});
+            await viewer.restore({ settings: true });
         });
 
         return await get_contents(page);

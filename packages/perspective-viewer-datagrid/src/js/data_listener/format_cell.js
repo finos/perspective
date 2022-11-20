@@ -7,7 +7,7 @@
  *
  */
 
-import {FormatterCache} from "./formatter_cache";
+import { FormatterCache } from "./formatter_cache";
 
 const FORMAT_CACHE = new FormatterCache();
 

@@ -7,7 +7,7 @@
  *
  */
 
-const {bash, execute, getarg, execute_throw} = require("./script_utils.js");
+const { bash, execute, getarg, execute_throw } = require("./script_utils.js");
 const minimatch = require("minimatch");
 const fs = require("fs");
 
@@ -116,10 +116,10 @@ try {
         execute`node_modules/.bin/lerna run test:build --stream --scope="@finos/${PACKAGE}"`;
     }
 
-    if (!PACKAGE || minimatch("perspective-viewer", PACKAGE)) {
-        console.log("-- Running Rust tests");
-        execute`yarn lerna --scope=@finos/perspective-viewer exec yarn test:run:rust`;
-    }
+    // if (!PACKAGE || minimatch("perspective-viewer", PACKAGE)) {
+    //     console.log("-- Running Rust tests");
+    //     execute`yarn lerna --scope=@finos/perspective-viewer exec yarn test:run:rust`;
+    // }
 
     if (getarg("--quiet")) {
         // Run all tests with suppressed output.

@@ -7,15 +7,18 @@
  *
  */
 
-import {WebSocketManager, perspective_assets, Table} from "@finos/perspective";
+import {
+    WebSocketManager,
+    perspective_assets,
+    Table,
+} from "@finos/perspective";
 import path from "path";
 import express from "express";
 import expressWs from "express-ws";
-import {AddressInfo} from "net";
+import { AddressInfo } from "net";
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import {securities} from "../../datasources";
+import { securities } from "../../datasources";
 
 const app = expressWs(express()).app;
 

@@ -12,7 +12,7 @@ const path = require("path");
 const utils = require("@finos/perspective-test");
 const simple_tests = require("@finos/perspective-viewer/test/js/simple_tests.js");
 
-const {withTemplate} = require("./simple-template");
+const { withTemplate } = require("./simple-template");
 withTemplate("line", "Y Line");
 
 function get_contents(temp) {
@@ -48,6 +48,6 @@ utils.with_server({}, () => {
             //     await page.waitForSelector("perspective-viewer:not([updating])");
             // });
         },
-        {reload_page: false, root: path.join(__dirname, "..", "..", "..")}
+        { reload_page: false, root: path.join(__dirname, "..", "..", "..") }
     );
 });

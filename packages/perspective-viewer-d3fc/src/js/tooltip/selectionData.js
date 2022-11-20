@@ -6,7 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import {get_type_config} from "../../../../perspective/src/js/config";
+import { get_type_config } from "../../../../perspective/src/js/config";
 
 export function toValue(type, value) {
     switch (type) {

@@ -7,9 +7,9 @@
  *
  */
 
-import {flattenExtent} from "../../axis/flatten";
-import {seriesColorRange} from "../seriesRange";
-import {seriesColorsFromDistinct} from "../seriesColors";
+import { flattenExtent } from "../../axis/flatten";
+import { seriesColorRange } from "../seriesRange";
+import { seriesColorsFromDistinct } from "../seriesColors";
 
 export function treeColor(settings, data) {
     if (settings.realValues.length > 1 && settings.realValues[1] !== null) {

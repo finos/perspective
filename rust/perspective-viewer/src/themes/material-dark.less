@@ -7,9 +7,7 @@
  *
  */
 
-@import "../less/fonts";
-@import "../less/variables";
-@import (reference) "material";
+@import url("ref://material.less");
 
 // Register theme for auto-detection
 perspective-viewer,
@@ -17,13 +15,8 @@ perspective-viewer[theme="Material Dark"] {
     --theme-name: "Material Dark";
 }
 
-perspective-viewer[theme="Material Dark"],
-.perspective-viewer-material-dark {
-    .perspective-viewer-material();
-    .perspective-viewer-material-dark--colors();
-    .perspective-viewer-material-dark--datagrid();
-    .perspective-viewer-material-dark--d3fc();
-    .perspective-viewer-material-dark--openlayers();
+perspective-viewer[theme="Material Dark"] {
+    @include perspective-viewer-material-dark;
 }
 
 perspective-copy-menu[theme="Material Dark"],
@@ -33,16 +26,27 @@ perspective-date-column-style[theme="Material Dark"],
 perspective-datetime-column-style[theme="Material Dark"],
 perspective-number-column-style[theme="Material Dark"],
 perspective-string-column-style[theme="Material Dark"],
-perspective-expression-editor[theme="Material Dark"],
-.perspective-modal-material-dark {
-    .perspective-modal-material();
-    .perspective-viewer-material-dark--colors();
+perspective-expression-editor[theme="Material Dark"] {
+    @include perspective-modal-material-dark;
+}
+
+@mixin perspective-viewer-material-dark {
+    @include perspective-viewer-material;
+    @include perspective-viewer-material-dark--colors;
+    @include perspective-viewer-material-dark--datagrid;
+    @include perspective-viewer-material-dark--d3fc;
+    @include perspective-viewer-material-dark--openlayers;
+}
+
+@mixin perspective-modal-material-dark {
+    @include perspective-modal-material;
+    @include perspective-viewer-material-dark--colors;
 
     background-color: @grey700;
     border: 1px solid @grey300;
 }
 
-.perspective-viewer-material-dark--colors {
+@mixin perspective-viewer-material-dark--colors {
     background-color: @grey800;
     color: white;
     --active--color: #2770a9;
@@ -71,7 +75,7 @@ perspective-expression-editor[theme="Material Dark"],
     --code-editor-comment--color: rgb(204, 120, 48);
 }
 
-.perspective-viewer-material-dark--openlayers {
+@mixin perspective-viewer-material-dark--openlayers {
     --map-tile-url: "http://{a-c}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png";
     --map-attribution--filter: invert(1) hue-rotate(180deg);
     --map-element-background: @grey700;
@@ -90,7 +94,7 @@ perspective-expression-editor[theme="Material Dark"],
             #3289c8 100%);
 }
 
-.perspective-viewer-material-dark--datagrid {
+@mixin perspective-viewer-material-dark--datagrid {
     regular-table {
         --rt-pos-cell--color: @blue50;
         --rt-neg-cell--color: @red50;
@@ -127,7 +131,7 @@ perspective-expression-editor[theme="Material Dark"],
     }
 }
 
-.perspective-viewer-material-dark--d3fc {
+@mixin perspective-viewer-material-dark--d3fc {
     --d3fc-legend--text: @grey60;
     --d3fc-treedata--labels: white;
     --d3fc-treedata--hover-highlight: white;

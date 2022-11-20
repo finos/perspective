@@ -6,8 +6,8 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-const {select} = require("d3");
-const {generateHtml} = require("../../../../src/js/tooltip/generateHTML");
+const { select } = require("d3");
+const { generateHtml } = require("../../../../src/js/tooltip/generateHTML");
 const {
     get_type_config,
 } = require("@finos/perspective/dist/cjs/perspective.node.js");
@@ -23,7 +23,7 @@ describe("tooltip generateHTML should", () => {
         settings = {
             crossValues: [],
             splitValues: [],
-            mainValues: [{name: "main-1", type: "integer"}],
+            mainValues: [{ name: "main-1", type: "integer" }],
             realValues: ["main-1"],
         };
     });
@@ -48,7 +48,7 @@ describe("tooltip generateHTML should", () => {
     });
 
     test("show multiple mainValues", () => {
-        settings.mainValues.push({name: "main-2", type: "float"});
+        settings.mainValues.push({ name: "main-2", type: "float" });
         settings.realValues.push("main-2");
         const data = {
             mainValues: [101, 202.22],
@@ -91,7 +91,7 @@ describe("tooltip generateHTML should", () => {
     });
 
     test("show with single crossValue", () => {
-        settings.crossValues.push({name: "cross-1", type: "string"});
+        settings.crossValues.push({ name: "cross-1", type: "string" });
         const data = {
             crossValue: "tc-1",
             mainValue: 101,
@@ -102,8 +102,8 @@ describe("tooltip generateHTML should", () => {
     });
 
     test("show with multiple crossValues", () => {
-        settings.crossValues.push({name: "cross-1", type: "string"});
-        settings.crossValues.push({name: "cross-2", type: "integer"});
+        settings.crossValues.push({ name: "cross-1", type: "string" });
+        settings.crossValues.push({ name: "cross-2", type: "integer" });
         const data = {
             crossValue: "tc-1|1001",
             mainValue: 101,
@@ -118,7 +118,7 @@ describe("tooltip generateHTML should", () => {
     });
 
     test("show with single splitValue", () => {
-        settings.splitValues.push({name: "split-1", type: "string"});
+        settings.splitValues.push({ name: "split-1", type: "string" });
         const data = {
             key: "ts-1",
             mainValue: 101,
@@ -129,8 +129,8 @@ describe("tooltip generateHTML should", () => {
     });
 
     test("show with multiple splitValues", () => {
-        settings.splitValues.push({name: "split-1", type: "string"});
-        settings.splitValues.push({name: "split-2", type: "integer"});
+        settings.splitValues.push({ name: "split-1", type: "string" });
+        settings.splitValues.push({ name: "split-2", type: "integer" });
         const data = {
             key: "ts-1|1001",
             mainValue: 101,

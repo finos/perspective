@@ -4,8 +4,8 @@ const {
 const {
     InlineCSSPlugin,
 } = require("@finos/perspective-esbuild-plugin/inline_css");
-const {UMDLoader} = require("@finos/perspective-esbuild-plugin/umd");
-const {build} = require("@finos/perspective-esbuild-plugin/build");
+const { UMDLoader } = require("@finos/perspective-esbuild-plugin/umd");
+const { build } = require("@finos/perspective-esbuild-plugin/build");
 
 const BUILD = [
     {

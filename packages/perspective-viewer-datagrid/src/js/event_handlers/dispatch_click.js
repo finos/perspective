@@ -12,9 +12,9 @@ import getCellConfig from "../get_cell_config";
 export async function dispatch_click_listener(table, viewer, event) {
     const meta = table.getMeta(event.target);
     if (!meta) return;
-    const {x, y} = meta;
+    const { x, y } = meta;
 
-    const {row, column_names, config} = await getCellConfig(this, y, x);
+    const { row, column_names, config } = await getCellConfig(this, y, x);
 
     viewer.dispatchEvent(
         new CustomEvent("perspective-click", {

@@ -7,7 +7,7 @@
  *
  */
 
-import {select} from "d3";
+import { select } from "d3";
 
 export const labelVisible = (d) =>
     d.y1 <= 3 && d.y0 >= 1 && (d.y1 - d.y0) * (d.x1 - d.x0) > 0.06;

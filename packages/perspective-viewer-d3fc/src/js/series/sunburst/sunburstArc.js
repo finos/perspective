@@ -7,7 +7,7 @@
  *
  */
 
-import {arc} from "d3";
+import { arc } from "d3";
 
 export const drawArc = (radius) =>
     arc()

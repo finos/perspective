@@ -7,7 +7,7 @@
  *
  */
 
-require("dotenv").config({path: "./.perspectiverc"});
+require("dotenv").config({ path: "./.perspectiverc" });
 process.env.FORCE_COLOR = true;
 
 const execSync = require("child_process").execSync;
@@ -15,7 +15,7 @@ const _path = require("path");
 const fs = require("fs");
 const fse = require("fs-extra");
 const rimraf = require("rimraf");
-const {promisify} = require("util");
+const { promisify } = require("util");
 
 const isWin = process.platform === "win32";
 
@@ -57,12 +57,12 @@ const execute_throw = (cmd) => {
         process.stdout.write(`$ ${cmd}\n`);
     }
 
-    let env = {...process.env};
+    let env = { ...process.env };
     if (!!process.env.PSP_DEBUG || process.argv.indexOf("--debug") >= 0) {
         env.PSP_DEBUG = 1;
     }
 
-    execSync(cmd, {stdio: "inherit", env});
+    execSync(cmd, { stdio: "inherit", env });
 };
 
 const execute = (cmd) => {
@@ -308,10 +308,10 @@ exports.copy_files_to_python_folder = () => {
     fse.copySync(cmakelists, resolve`${dist}/CMakeLists.txt`, {
         preserveTimestamps: true,
     });
-    fse.copySync(cpp, resolve`${dist}/src`, {preserveTimestamps: true});
-    fse.copySync(lic, dlic, {preserveTimestamps: true});
-    fse.copySync(dlic, dreadme, {preserveTimestamps: true});
-    fse.copySync(cmake, dcmake, {preserveTimestamps: true});
+    fse.copySync(cpp, resolve`${dist}/src`, { preserveTimestamps: true });
+    fse.copySync(lic, dlic, { preserveTimestamps: true });
+    fse.copySync(dlic, dreadme, { preserveTimestamps: true });
+    fse.copySync(cmake, dcmake, { preserveTimestamps: true });
 };
 
 /**

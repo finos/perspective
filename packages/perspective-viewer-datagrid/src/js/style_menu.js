@@ -7,8 +7,8 @@
  *
  */
 
-import {make_color_record} from "./color_utils.js";
-import {PRIVATE_PLUGIN_SYMBOL} from "./model";
+import { make_color_record } from "./color_utils.js";
+import { PRIVATE_PLUGIN_SYMBOL } from "./model";
 
 export function activate_plugin_menu(regularTable, target, column_max) {
     const target_meta = regularTable.getMeta(target);
@@ -62,7 +62,7 @@ export function activate_plugin_menu(regularTable, target, column_max) {
         default_config.fixed = 0;
     } else {
         this._open_column_styles_menu.pop();
-        regularTable.draw({preserve_width: true});
+        regularTable.draw({ preserve_width: true });
         return;
     }
 
@@ -90,7 +90,7 @@ export function activate_plugin_menu(regularTable, target, column_max) {
         regularTable[PRIVATE_PLUGIN_SYMBOL] =
             regularTable[PRIVATE_PLUGIN_SYMBOL] || {};
         regularTable[PRIVATE_PLUGIN_SYMBOL][column_name] = config;
-        regularTable.draw({preserve_width: true});
+        regularTable.draw({ preserve_width: true });
         regularTable.parentElement.parentElement.dispatchEvent(
             new Event("perspective-config-update")
         );
@@ -113,7 +113,7 @@ export function activate_plugin_menu(regularTable, target, column_max) {
             new Event("perspective-config-update")
         );
 
-        await regularTable.draw({preserve_width: true});
+        await regularTable.draw({ preserve_width: true });
         MENU.destroy();
     };
 

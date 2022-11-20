@@ -7,7 +7,7 @@
  *
  */
 
-import {PRIVATE_PLUGIN_SYMBOL} from "../model";
+import { PRIVATE_PLUGIN_SYMBOL } from "../model";
 
 function isEditable(viewer, allowed = false) {
     const has_pivots =

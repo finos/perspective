@@ -21,7 +21,7 @@ exports.build = async function build(config) {
 
     if (result.metafile) {
         for (const output of Object.keys(result.metafile.outputs)) {
-            const {inputs, bytes} = result.metafile.outputs[output];
+            const { inputs, bytes } = result.metafile.outputs[output];
             for (const input of Object.keys(inputs)) {
                 if (inputs[input].bytesInOutput / bytes < CUTOFF_PERCENT) {
                     delete inputs[input];

@@ -34,7 +34,7 @@ const DEFAULT_LAYOUT = {
         },
     },
     viewers: {
-        One: {table: "superstore", editable: true},
+        One: { table: "superstore", editable: true },
         Three: {
             table: "superstore",
             name: "Test Widget III (modified)",

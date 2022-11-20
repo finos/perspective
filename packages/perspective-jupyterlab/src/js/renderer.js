@@ -7,8 +7,8 @@
  *
  */
 
-import {ActivityMonitor} from "@jupyterlab/coreutils";
-import {ILayoutRestorer} from "@jupyterlab/application";
+import { ActivityMonitor } from "@jupyterlab/coreutils";
+import { ILayoutRestorer } from "@jupyterlab/application";
 import {
     IThemeManager,
     WidgetTracker,
@@ -16,10 +16,9 @@ import {
     showDialog,
 } from "@jupyterlab/apputils";
 
-import {ABCWidgetFactory, DocumentWidget} from "@jupyterlab/docregistry";
-import {PerspectiveWidget} from "./psp_widget";
+import { ABCWidgetFactory, DocumentWidget } from "@jupyterlab/docregistry";
+import { PerspectiveWidget } from "./psp_widget";
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 // const perspective = require("@finos/perspective").default;
 import perspective from "@finos/perspective/dist/esm/perspective.js";
 /**
@@ -127,7 +126,6 @@ export class PerspectiveDocumentWidget extends DocumentWidget {
                         this.context.model.fromString(resultAsB64);
                         this.context.save();
                     } else if (this._type === "json") {
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         const result = await view.to_json();
                         this.context.model.fromJSON(result);
                         this.context.save();

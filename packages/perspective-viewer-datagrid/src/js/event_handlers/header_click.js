@@ -7,9 +7,9 @@
  *
  */
 
-import {sortHandler} from "./sort.js";
-import {activate_plugin_menu} from "../style_menu.js";
-import {expandCollapseHandler} from "./expand_collapse.js";
+import { sortHandler } from "./sort.js";
+import { activate_plugin_menu } from "../style_menu.js";
+import { expandCollapseHandler } from "./expand_collapse.js";
 
 export async function mousedown_listener(regularTable, event) {
     if (event.which !== 1) {
@@ -49,11 +49,11 @@ export async function mousedown_listener(regularTable, event) {
             column_type === "date" ||
             column_type === "datetime"
         ) {
-            await regularTable.draw({preserve_width: true});
+            await regularTable.draw({ preserve_width: true });
             activate_plugin_menu.call(this, regularTable, target);
         } else {
             const [min, max] = await this._view.get_min_max(column_name);
-            await regularTable.draw({preserve_width: true});
+            await regularTable.draw({ preserve_width: true });
             let bound = Math.max(Math.abs(min), Math.abs(max));
             if (bound > 1) {
                 bound = Math.round(bound * 100) / 100;

@@ -6,9 +6,9 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-require("dotenv").config({path: "./.perspectiverc"});
+require("dotenv").config({ path: "./.perspectiverc" });
 
-const {execute} = require("./script_utils.js");
+const { execute } = require("./script_utils.js");
 
 const args = process.argv.slice(2);
 

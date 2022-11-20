@@ -6,9 +6,9 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import {axisType} from "../axis/axisType";
-import {AXIS_TYPES} from "../axis/axisType";
-import {labelFunction} from "../axis/axisLabel";
+import { axisType } from "../axis/axisType";
+import { AXIS_TYPES } from "../axis/axisType";
+import { labelFunction } from "../axis/axisLabel";
 
 export function heatmapData(settings, data) {
     const labelfn = labelFunction(settings);

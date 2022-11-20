@@ -17,7 +17,7 @@ views.forEach(async (plugin) => {
         class extends HTMLElement {
             constructor() {
                 super();
-                this.attachShadow({mode: "open"});
+                this.attachShadow({ mode: "open" });
                 const style = document.createElement("style");
                 style.textContent = css;
                 this.shadowRoot.appendChild(style);
@@ -96,15 +96,15 @@ function drawView(viewEntryPoint) {
         // Enrich color info
         if (!!config.real_columns[2]) {
             const [min, max] = await view.get_min_max(config.real_columns[2]);
-            config.color_extents = {min, max};
+            config.color_extents = { min, max };
         }
 
         // Enrich size info
         if (!!config.real_columns[3]) {
             const [min, max] = await view.get_min_max(config.real_columns[3]);
-            config.size_extents = {min, max};
+            config.size_extents = { min, max };
         }
 
-        viewEntryPoint(this, Object.assign({schema, tschema, data}, config));
+        viewEntryPoint(this, Object.assign({ schema, tschema, data }, config));
     };
 }

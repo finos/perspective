@@ -8,7 +8,7 @@
  *
  */
 
-import {Decompress} from "fflate";
+import { Decompress } from "fflate";
 import init_wasm, * as wasm_module from "@finos/perspective-viewer/dist/pkg/perspective.js";
 import wasm from "@finos/perspective-viewer/dist/pkg/perspective_bg.wasm";
 
@@ -45,7 +45,7 @@ async function load_wasm() {
         let state = 0;
         if (reader !== undefined) {
             while (true) {
-                const {value, done} = await reader.read();
+                const { value, done } = await reader.read();
                 if (done || value === undefined) break;
                 if ((state === 0 && is_gzip(value?.buffer)) || state === 1) {
                     state = 1;

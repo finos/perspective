@@ -8,7 +8,7 @@
  */
 
 import * as d3 from "d3";
-import {calcWidth, calcHeight} from "./treemapSeries";
+import { calcWidth, calcHeight } from "./treemapSeries";
 import {
     labelMapExists,
     toggleLabels,
@@ -20,8 +20,8 @@ import {
     adjustLabelsThatOverflow,
     restoreLabels,
 } from "./treemapLabel";
-import {calculateSubTreeMap, saveLabelMap} from "./treemapLevelCalculation";
-import {raiseEvent} from "../../tooltip/selectionEvent";
+import { calculateSubTreeMap, saveLabelMap } from "./treemapLevelCalculation";
+import { raiseEvent } from "../../tooltip/selectionEvent";
 
 export function returnToLevel(
     rects,

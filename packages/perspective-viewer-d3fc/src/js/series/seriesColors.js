@@ -7,7 +7,7 @@
  *
  */
 import * as d3 from "d3";
-import {groupFromKey} from "./seriesKey";
+import { groupFromKey } from "./seriesKey";
 
 export function seriesColors(settings) {
     const col =

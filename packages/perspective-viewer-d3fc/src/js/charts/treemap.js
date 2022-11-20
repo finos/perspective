@@ -8,13 +8,13 @@
  */
 
 import * as d3 from "d3";
-import {treeColor} from "../series/treemap/treemapColor";
-import {treeData} from "../data/treeData";
-import {treemapSeries} from "../series/treemap/treemapSeries";
-import {tooltip} from "../tooltip/tooltip";
-import {gridLayoutMultiChart} from "../layout/gridLayoutMultiChart";
-import {colorRangeLegend} from "../legend/colorRangeLegend";
-import {colorLegend} from "../legend/legend";
+import { treeColor } from "../series/treemap/treemapColor";
+import { treeData } from "../data/treeData";
+import { treemapSeries } from "../series/treemap/treemapSeries";
+import { tooltip } from "../tooltip/tooltip";
+import { gridLayoutMultiChart } from "../layout/gridLayoutMultiChart";
+import { colorRangeLegend } from "../legend/colorRangeLegend";
+import { colorLegend } from "../legend/legend";
 
 function treemap(container, settings) {
     if (settings.crossValues.length === 0) {
@@ -58,7 +58,7 @@ function treemap(container, settings) {
         .merge(treemapDiv)
         .select("svg")
         .select("g.treemap")
-        .each(function ({split, data}) {
+        .each(function ({ split, data }) {
             const treemapSvg = d3.select(this);
 
             if (!settings.treemaps[split]) settings.treemaps[split] = {};

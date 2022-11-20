@@ -7,7 +7,7 @@
  *
  */
 
-import {groupFromKey} from "../series/seriesKey";
+import { groupFromKey } from "../series/seriesKey";
 
 export function xySplitData(settings, data) {
     const n_cols = settings.mainValues.length;

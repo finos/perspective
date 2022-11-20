@@ -8,6 +8,7 @@ repository = "https://github.com/finos/perspective"
 license = "Apache-2.0"
 homepage = "https://perspective.finos.org"
 keywords = ["experimental"]
+build = "build.rs"
 include = [
     "build.rs",
     "src/**/*",
@@ -26,6 +27,9 @@ default = []
 
 [build-dependencies]
 serde_json = { version = "1.0.59", features = ["raw_value"] }
+procss = { version = "0.1.4" }
+glob = "0.3.0"
+anyhow = "1.0.66"
 
 [dependencies]
 # Provides async `Mutex` for locked sections such as `render`

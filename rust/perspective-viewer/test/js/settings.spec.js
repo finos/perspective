@@ -31,7 +31,7 @@ utils.with_server({}, () => {
                         const viewer =
                             document.querySelector("perspective-viewer");
                         await viewer.getTable();
-                        await viewer.restore({settings: true});
+                        await viewer.restore({ settings: true });
                     });
 
                     return await get_contents(page);
@@ -45,13 +45,13 @@ utils.with_server({}, () => {
                         const viewer =
                             document.querySelector("perspective-viewer");
                         await viewer.getTable();
-                        await viewer.restore({settings: false});
+                        await viewer.restore({ settings: false });
                     });
 
                     return await get_contents(page);
                 }
             );
         },
-        {root: path.join(__dirname, "..", "..")}
+        { root: path.join(__dirname, "..", "..") }
     );
 });

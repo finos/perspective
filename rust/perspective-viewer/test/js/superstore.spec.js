@@ -18,6 +18,6 @@ utils.with_server({}, () => {
         () => {
             simple_tests.default();
         },
-        {reload_page: false, root: path.join(__dirname, "..", "..")}
+        { reload_page: false, root: path.join(__dirname, "..", "..") }
     );
 });

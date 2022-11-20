@@ -10,7 +10,7 @@
 const utils = require("@finos/perspective-test");
 
 const path = require("path");
-const {expectation} = require("sinon");
+const { expectation } = require("sinon");
 
 async function get_contents(page) {
     return await page.evaluate(async () => {
@@ -149,6 +149,6 @@ utils.with_server({}, () => {
                 }
             );
         },
-        {root: path.join(__dirname, "..", "..")}
+        { root: path.join(__dirname, "..", "..") }
     );
 });

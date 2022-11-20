@@ -8,7 +8,7 @@
  */
 
 import * as d3Array from "d3-array";
-import {defaultPadding} from "../padding/default";
+import { defaultPadding } from "../padding/default";
 
 export const extentLinear = function () {
     let accessors = [

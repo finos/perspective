@@ -71,7 +71,7 @@ export function createTooltip(container, map) {
 
     const onMove = (evt) => {
         // Find the closest point
-        const {coordinate} = evt;
+        const { coordinate } = evt;
         const hoverFeature = getClosest(coordinate);
         const closest = hoverFeature && hoverFeature.get("data");
         if (closest) {
@@ -180,7 +180,7 @@ export function createTooltip(container, map) {
                     composed: true,
                     detail: {
                         column_names,
-                        config: {filters},
+                        config: { filters },
                         row: currentPoint.row,
                     },
                 })
@@ -225,7 +225,7 @@ export function createTooltip(container, map) {
     const getListFromJoin = (join, pivot) => {
         if (join && pivot.length) {
             const values = join.split("|");
-            return values.map((value, i) => ({name: pivot[i], value}));
+            return values.map((value, i) => ({ name: pivot[i], value }));
         }
         return [];
     };

@@ -12,7 +12,7 @@ const path = require("path");
 const utils = require("@finos/perspective-test");
 const simple_tests = require("@finos/perspective-viewer/test/js/simple_tests.js");
 
-const {withTemplate} = require("./simple-template");
+const { withTemplate } = require("./simple-template");
 withTemplate("sunburst", "Sunburst");
 
 function get_contents(temp) {
@@ -78,6 +78,6 @@ utils.with_server({}, () => {
             //     return !!result;
             // });
         },
-        {root: path.join(__dirname, "..", "..", "..")}
+        { root: path.join(__dirname, "..", "..", "..") }
     );
 });

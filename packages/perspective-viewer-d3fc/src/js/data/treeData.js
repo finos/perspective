@@ -8,7 +8,7 @@
  */
 
 import * as d3 from "d3";
-import {toValue} from "../tooltip/selectionData";
+import { toValue } from "../tooltip/selectionData";
 
 export function treeData(settings) {
     const sets = {};
@@ -27,7 +27,7 @@ export function treeData(settings) {
             groups.forEach((group, i) => {
                 let element = currentLevel.find((e) => e.name === group);
                 if (!element) {
-                    element = {name: group, children: []};
+                    element = { name: group, children: [] };
                     currentLevel.push(element);
                 }
                 if (
@@ -74,7 +74,7 @@ export function treeData(settings) {
     });
 
     const data = Object.entries(sets).map((set) => {
-        const tree = {name: "root", children: set[1]};
+        const tree = { name: "root", children: set[1] };
         const root = d3.hierarchy(tree).sum((d) => d.size);
         const chartData = d3.partition().size([2 * Math.PI, root.height + 1])(
             root

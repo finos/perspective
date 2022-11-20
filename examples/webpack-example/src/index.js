@@ -29,7 +29,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
     // const resp = await req;
     // const buffer = await resp.arrayBuffer();
-    const table = worker.table({x: [1, 2, 3, 4, 5]});
+    const table = worker.table({ x: [1, 2, 3, 4, 5] });
 
     viewer.load(table);
 

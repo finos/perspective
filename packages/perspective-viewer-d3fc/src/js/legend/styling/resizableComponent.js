@@ -8,7 +8,7 @@
  */
 
 import * as d3 from "d3";
-import {enforceContainerBoundaries} from "./enforceContainerBoundaries";
+import { enforceContainerBoundaries } from "./enforceContainerBoundaries";
 
 const horizontalHandleClass = "horizontal-drag-handle";
 const verticalHandleClass = "vertical-drag-handle";
@@ -23,8 +23,8 @@ export function resizableComponent() {
     let handleWidthPx = 9;
     let zIndex = 3;
     let settings = null;
-    const minDimensionsPx = {height: 100, width: 100};
-    const maxDimensionsPx = {height: null, width: null};
+    const minDimensionsPx = { height: 100, width: 100 };
+    const maxDimensionsPx = { height: null, width: null };
 
     const callbacks = [];
     const executeCallbacks = (event, direction) =>
@@ -277,7 +277,7 @@ export function resizableComponent() {
                 height: containerNode.style.height,
                 width: containerNode.style.width,
             };
-            settings.legend = {...settings.legend, ...dimensions};
+            settings.legend = { ...settings.legend, ...dimensions };
         }
 
         function resizeAndRelocateHandles(handle, offset, dimension, axis) {
@@ -327,7 +327,7 @@ export function resizableComponent() {
     };
 
     resizable.on = (event, callback) => {
-        callbacks.push({event: event, execute: callback});
+        callbacks.push({ event: event, execute: callback });
         return resizable;
     };
 

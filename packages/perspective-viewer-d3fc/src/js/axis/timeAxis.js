@@ -8,7 +8,7 @@
  */
 import * as d3 from "d3";
 import * as fc from "d3fc";
-import {flattenArray} from "./flatten";
+import { flattenArray } from "./flatten";
 
 export const scale = () => d3.scaleTime();
 

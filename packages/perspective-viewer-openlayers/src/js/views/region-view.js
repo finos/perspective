@@ -7,33 +7,33 @@
  *
  */
 
-import {getMapData} from "../data/data";
-import {baseMap} from "./base-map";
-import {linearColorScale} from "../style/linearColors";
-import {showLegend, hideLegend} from "../legend/legend";
-import {lightenRgb} from "../style/computed";
+import { getMapData } from "../data/data";
+import { baseMap } from "./base-map";
+import { linearColorScale } from "../style/linearColors";
+import { showLegend, hideLegend } from "../legend/legend";
+import { lightenRgb } from "../style/computed";
 
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 
-import {KML} from "ol/format";
+import { KML } from "ol/format";
 
 // /const ol = require("ol");
 // const {Vector: VectorLayer} = ol.layer;
 // const {Vector: VectorSource} = ol.source;
 // const {KML} = ol.format;
-import {Style, Fill, Stroke} from "ol/style";
+import { Style, Fill, Stroke } from "ol/style";
 
 const regionSources = {};
 window.registerMapRegions = ({
     name,
     url,
     key,
-    format = new KML({extractStyles: false}),
+    format = new KML({ extractStyles: false }),
 }) => {
-    const source = new VectorSource({url, format, wrapX: false});
+    const source = new VectorSource({ url, format, wrapX: false });
     const nameFn = typeof key == "string" ? (props) => props[key] : key;
-    regionSources[name] = {source, nameFn};
+    regionSources[name] = { source, nameFn };
 };
 
 function regionView(container, config) {
@@ -79,18 +79,18 @@ function createStyleFunction(regionSource, data, colorScale) {
         const dataPoint = data.find((d) => d.group == regionName);
         if (dataPoint) {
             const style = colorScale(dataPoint.cols[0]);
-            feature.setProperties({data: dataPoint, style});
+            feature.setProperties({ data: dataPoint, style });
 
             const drawStyle = properties.highlightStyle || style;
             return new Style({
-                fill: new Fill({color: drawStyle.fill}),
-                stroke: new Stroke({color: drawStyle.stroke}),
+                fill: new Fill({ color: drawStyle.fill }),
+                stroke: new Stroke({ color: drawStyle.stroke }),
             });
         } else {
             // Mark it with a name so we can identify it in a tooltip
-            feature.setProperties({data: {group: regionName}});
+            feature.setProperties({ data: { group: regionName } });
             return new Style({
-                stroke: new Stroke({color: "rgba(200, 150, 150, 0.2)"}),
+                stroke: new Stroke({ color: "rgba(200, 150, 150, 0.2)" }),
             });
         }
     };
@@ -109,7 +109,7 @@ function onHighlight(feature, highlighted) {
           }
         : null;
 
-    feature.setProperties({highlightStyle: style});
+    feature.setProperties({ highlightStyle: style });
 }
 
 regionView.resize = (container) => {

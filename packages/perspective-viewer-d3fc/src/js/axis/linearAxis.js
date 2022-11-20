@@ -8,8 +8,8 @@
  */
 import * as d3 from "d3";
 import * as fc from "d3fc";
-import {flattenArray} from "./flatten";
-import {extentLinear as customExtent} from "../d3fc/extent/extentLinear";
+import { flattenArray } from "./flatten";
+import { extentLinear as customExtent } from "../d3fc/extent/extentLinear";
 import valueformatter from "./valueFormatter";
 
 export const scale = () => d3.scaleLinear();

@@ -7,9 +7,9 @@
  *
  */
 const path = require("path");
-const {get} = require("http");
-const {spawn} = require("child_process");
-const {execute} = require("../../../../../scripts/script_utils");
+const { get } = require("http");
+const { spawn } = require("child_process");
+const { execute } = require("../../../../../scripts/script_utils");
 
 const PACKAGE_ROOT = path.join(__dirname, "..", "..", "..");
 

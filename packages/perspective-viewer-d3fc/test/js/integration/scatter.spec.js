@@ -12,8 +12,8 @@ const path = require("path");
 const utils = require("@finos/perspective-test");
 const simple_tests = require("@finos/perspective-viewer/test/js/simple_tests.js");
 
-const {withTemplate} = require("./simple-template");
-withTemplate("scatter", "X/Y Scatter", {columns: ["Sales", "Quantity"]});
+const { withTemplate } = require("./simple-template");
+withTemplate("scatter", "X/Y Scatter", { columns: ["Sales", "Quantity"] });
 
 function get_contents(temp) {
     return async function (page) {
@@ -113,6 +113,6 @@ utils.with_server({}, () => {
             //     {preserve_hover: true}
             // );
         },
-        {root: path.join(__dirname, "..", "..", "..")}
+        { root: path.join(__dirname, "..", "..", "..") }
     );
 });

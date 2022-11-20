@@ -7,5 +7,5 @@
  *
  */
 
-import {register} from "../plugin/plugin.js";
+import { register } from "../plugin/plugin.js";
 register("Sunburst");

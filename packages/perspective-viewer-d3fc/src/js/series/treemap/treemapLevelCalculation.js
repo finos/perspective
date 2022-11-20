@@ -7,10 +7,10 @@
  *
  */
 
-import {calcWidth, calcHeight} from "./treemapSeries";
-import {hierarchy, select} from "d3";
+import { calcWidth, calcHeight } from "./treemapSeries";
+import { hierarchy, select } from "d3";
 import treemapLayout from "./treemapLayout";
-import {textOpacity} from "./treemapLabel";
+import { textOpacity } from "./treemapLabel";
 
 const includesAllCrossValues = (d, crossValues) =>
     crossValues.every((val) => d.crossValue.includes(val));
@@ -144,6 +144,8 @@ function calculateTextOpacities(nodesMerge, treemapLevel) {
         const text = select(nodes[i]);
         const d = select(nodes[i]).datum();
         const textVis = text.attr("class");
-        d.mapLevel[treemapLevel].textLockedAt = {opacity: textOpacity[textVis]};
+        d.mapLevel[treemapLevel].textLockedAt = {
+            opacity: textOpacity[textVis],
+        };
     });
 }

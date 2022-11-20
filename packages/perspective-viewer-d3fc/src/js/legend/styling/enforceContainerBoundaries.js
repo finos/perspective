@@ -8,8 +8,8 @@
  */
 
 import * as d3 from "d3";
-import {isElementOverflowing} from "../../utils/utils";
-import {getChartElement} from "../../plugin/root";
+import { isElementOverflowing } from "../../utils/utils";
+import { getChartElement } from "../../plugin/root";
 
 export const margin = 10;
 
@@ -28,12 +28,12 @@ export function enforceContainerBoundaries(innerNode, offsetX, offsetY) {
         left: innerNodeRect.left + offsetX - margin,
     };
 
-    const adjustedOffsets = {x: offsetX, y: offsetY};
+    const adjustedOffsets = { x: offsetX, y: offsetY };
     const boundaries = [
-        {edge: "right", dimension: "x"},
-        {edge: "left", dimension: "x"},
-        {edge: "top", dimension: "y"},
-        {edge: "bottom", dimension: "y"},
+        { edge: "right", dimension: "x" },
+        { edge: "left", dimension: "x" },
+        { edge: "top", dimension: "y" },
+        { edge: "bottom", dimension: "y" },
     ];
 
     boundaries.forEach((bound) => {

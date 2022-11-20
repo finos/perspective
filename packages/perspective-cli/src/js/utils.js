@@ -8,7 +8,7 @@
  */
 
 const exec = require("child_process").exec;
-const {table} = require("@finos/perspective");
+const { table } = require("@finos/perspective");
 
 const OPEN = (port) => `
 if which xdg-open > /dev/null

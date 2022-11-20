@@ -7,12 +7,12 @@
  *
  */
 
-import {select} from "d3";
-import {getChartContainer} from "../plugin/root";
-import {getOrCreateElement, isElementOverflowing} from "../utils/utils";
+import { select } from "d3";
+import { getChartContainer } from "../plugin/root";
+import { getOrCreateElement, isElementOverflowing } from "../utils/utils";
 import tooltipTemplate from "../../html/tooltip.html";
-import {generateHtml} from "./generateHTML";
-import {selectionEvent} from "./selectionEvent";
+import { generateHtml } from "./generateHTML";
+import { selectionEvent } from "./selectionEvent";
 
 export const tooltip = () => {
     let alwaysShow = false;

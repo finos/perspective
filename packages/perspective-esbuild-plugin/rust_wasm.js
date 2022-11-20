@@ -7,8 +7,8 @@ const fs = require("fs");
 const tar = require("tar");
 const path = require("path");
 const fetch = require("node-fetch");
-const {promisify} = require("util");
-const {execSync} = require("child_process");
+const { promisify } = require("util");
+const { execSync } = require("child_process");
 
 const mkdir = promisify(fs.mkdir);
 const copyFile = promisify(fs.copyFile);
@@ -16,10 +16,10 @@ const rmdir = promisify(fs.rmdir);
 const unlink = promisify(fs.unlink);
 const writeFile = promisify(fs.writeFile);
 
-const {platform} = process;
+const { platform } = process;
 
 function getUrl() {
-    const {arch} = process;
+    const { arch } = process;
     const baseURL =
         "https://github.com/WebAssembly/binaryen/releases/download/version_109";
 
@@ -66,7 +66,7 @@ async function download_wasm_opt() {
         file: binariesOutputPath,
         cwd: __dirname,
         filter: (_path, stat) => {
-            const {path: filePath} = stat.header;
+            const { path: filePath } = stat.header;
 
             return [
                 EXECUTABLE_FILENAME,

@@ -11,10 +11,10 @@ const _ = require("lodash");
 const arrows = require("./test_arrows.js");
 
 var data = [
-    {x: 1, y: "a", z: true},
-    {x: 2, y: "b", z: false},
-    {x: 3, y: "c", z: true},
-    {x: 4, y: "d", z: false},
+    { x: 1, y: "a", z: true },
+    { x: 2, y: "b", z: false },
+    { x: 3, y: "c", z: true },
+    { x: 4, y: "d", z: false },
 ];
 
 var col_data = {
@@ -30,10 +30,10 @@ var meta = {
 };
 
 var data_2 = [
-    {x: 3, y: "c", z: false},
-    {x: 4, y: "d", z: true},
-    {x: 5, y: "g", z: false},
-    {x: 6, y: "h", z: true},
+    { x: 3, y: "c", z: false },
+    { x: 4, y: "d", z: true },
+    { x: 5, y: "g", z: false },
+    { x: 6, y: "h", z: true },
 ];
 
 const arrow_result = [
@@ -302,7 +302,7 @@ module.exports = (perspective) => {
         });
 
         it("after an `update()`", async function () {
-            const table = await perspective.table(meta, {index: "x"});
+            const table = await perspective.table(meta, { index: "x" });
             table.update(data);
             const view = await table.view();
             table.remove([1, 2]);
@@ -316,7 +316,7 @@ module.exports = (perspective) => {
         });
 
         it("after a regular data load", async function () {
-            const table = await perspective.table(data, {index: "x"});
+            const table = await perspective.table(data, { index: "x" });
             const view = await table.view();
             table.remove([1, 2]);
             const result = await view.to_json();
@@ -329,7 +329,7 @@ module.exports = (perspective) => {
         });
 
         it("after an `update()`, string pkey", async function () {
-            const table = await perspective.table(meta, {index: "y"});
+            const table = await perspective.table(meta, { index: "y" });
             table.update(data);
             const view = await table.view();
             table.remove(["a", "b"]);
@@ -343,7 +343,7 @@ module.exports = (perspective) => {
         });
 
         it("after a regular data load, string pkey", async function () {
-            const table = await perspective.table(data, {index: "y"});
+            const table = await perspective.table(data, { index: "y" });
             const view = await table.view();
             table.remove(["a", "b"]);
             const result = await view.to_json();
@@ -368,7 +368,7 @@ module.exports = (perspective) => {
                     y: "date",
                     z: "float",
                 },
-                {index: "y"}
+                { index: "y" }
             );
             table.update({
                 x: [1, 2, 3, 4],
@@ -402,7 +402,7 @@ module.exports = (perspective) => {
                     y: "datetime",
                     z: "float",
                 },
-                {index: "y"}
+                { index: "y" }
             );
             table.update({
                 x: [1, 2, 3, 4],
@@ -436,7 +436,7 @@ module.exports = (perspective) => {
                     y: datetimes,
                     z: [1.5, 2.5, 3.5, 4.5],
                 },
-                {index: "y"}
+                { index: "y" }
             );
             const view = await table.view();
             table.remove(datetimes.slice(0, 2));
@@ -453,16 +453,16 @@ module.exports = (perspective) => {
         });
 
         it("multiple single element removes", async function () {
-            const table = await perspective.table(meta, {index: "x"});
+            const table = await perspective.table(meta, { index: "x" });
             for (let i = 0; i < 100; i++) {
-                table.update([{x: i, y: "test", z: false}]);
+                table.update([{ x: i, y: "test", z: false }]);
             }
             for (let i = 1; i < 100; i++) {
                 table.remove([i]);
             }
             const view = await table.view();
             const result = await view.to_json();
-            expect(result).toEqual([{x: 0, y: "test", z: false}]);
+            expect(result).toEqual([{ x: 0, y: "test", z: false }]);
             expect(result.length).toEqual(1);
             expect(await table.size()).toEqual(1);
             view.delete();
@@ -476,7 +476,7 @@ module.exports = (perspective) => {
                     y: ["A"],
                     idx: [1],
                 },
-                {index: "idx"}
+                { index: "idx" }
             );
 
             const view = await table.view({
@@ -535,7 +535,7 @@ module.exports = (perspective) => {
                     x: "string",
                     y: "integer",
                 },
-                {index: "x"}
+                { index: "x" }
             );
 
             table.update({
@@ -567,7 +567,7 @@ module.exports = (perspective) => {
                     x: "string",
                     y: "integer",
                 },
-                {index: "x"}
+                { index: "x" }
             );
 
             table.update({
@@ -598,7 +598,7 @@ module.exports = (perspective) => {
                     x: "string",
                     y: "integer",
                 },
-                {index: "x"}
+                { index: "x" }
             );
 
             table.update({
@@ -661,24 +661,24 @@ module.exports = (perspective) => {
                     x: "integer",
                     y: "integer",
                 },
-                {index: "x"}
+                { index: "x" }
             );
 
             for (let i = 0; i < 100; i++) {
-                table.update([{x: i, y: i}]);
+                table.update([{ x: i, y: i }]);
             }
 
             expect(await table.size()).toEqual(100);
 
             for (let i = 0; i < 100; i++) {
                 table.remove([i]);
-                table.update([{x: i, y: i}]);
+                table.update([{ x: i, y: i }]);
             }
 
             expect(await table.size()).toEqual(100);
 
             for (let i = 0; i < 100; i++) {
-                table.update([{x: i, y: i}]);
+                table.update([{ x: i, y: i }]);
             }
 
             expect(await table.size()).toEqual(100);
@@ -695,15 +695,15 @@ module.exports = (perspective) => {
 
     describe("Schema", function () {
         it("updates with columns not in schema", async function () {
-            var table = await perspective.table({x: "integer", y: "string"});
+            var table = await perspective.table({ x: "integer", y: "string" });
             table.update(data);
             var view = await table.view();
             let result = await view.to_json();
             expect(result).toEqual([
-                {x: 1, y: "a"},
-                {x: 2, y: "b"},
-                {x: 3, y: "c"},
-                {x: 4, y: "d"},
+                { x: 1, y: "a" },
+                { x: 2, y: "b" },
+                { x: 3, y: "c" },
+                { x: 4, y: "d" },
             ]);
             view.delete();
             table.delete();
@@ -719,10 +719,10 @@ module.exports = (perspective) => {
             var view = await table.view();
             let result = await view.to_json();
             expect(result).toEqual([
-                {x: "1", y: "a", z: "true"},
-                {x: "2", y: "b", z: "false"},
-                {x: "3", y: "c", z: "true"},
-                {x: "4", y: "d", z: "false"},
+                { x: "1", y: "a", z: "true" },
+                { x: "2", y: "b", z: "false" },
+                { x: "3", y: "c", z: "true" },
+                { x: "4", y: "d", z: "false" },
             ]);
             view.delete();
             table.delete();
@@ -775,14 +775,14 @@ module.exports = (perspective) => {
             };
 
             var expected = [
-                {x: 1, y: "a", z: true},
-                {x: 2, y: "b", z: false},
-                {x: 3, y: "h", z: false},
-                {x: 4, y: "i", z: true},
-                {x: 5, y: "j", z: false},
+                { x: 1, y: "a", z: true },
+                { x: 2, y: "b", z: false },
+                { x: 3, y: "h", z: false },
+                { x: 4, y: "i", z: true },
+                { x: 5, y: "j", z: false },
             ];
 
-            var table = await perspective.table(col_data, {index: "x"});
+            var table = await perspective.table(col_data, { index: "x" });
             table.update(colUpdate);
             var view = await table.view();
             let result = await view.to_json();
@@ -1023,7 +1023,7 @@ module.exports = (perspective) => {
                     a: "string",
                     b: "string",
                 },
-                {index: "a"}
+                { index: "a" }
             );
             table.update(arrows.dict_arrow.slice());
             const view = await table.view();
@@ -1043,7 +1043,7 @@ module.exports = (perspective) => {
                 {
                     a: "string",
                 },
-                {index: "a"}
+                { index: "a" }
             );
             table.update(arrows.dict_arrow.slice());
             const view = await table.view();
@@ -1065,7 +1065,7 @@ module.exports = (perspective) => {
                     b: "string",
                     x: "integer",
                 },
-                {index: "a"}
+                { index: "a" }
             );
             table.update(arrows.dict_arrow.slice());
             const view = await table.view();
@@ -1089,7 +1089,7 @@ module.exports = (perspective) => {
                     b: "float",
                     c: "string",
                 },
-                {index: "a"}
+                { index: "a" }
             );
 
             const view = await table.view();
@@ -1220,7 +1220,7 @@ module.exports = (perspective) => {
                     table.delete();
                     done();
                 },
-                {mode: "row"}
+                { mode: "row" }
             );
             table.update(data);
         });
@@ -1240,7 +1240,7 @@ module.exports = (perspective) => {
                         done();
                     }
                 },
-                {mode: "row"}
+                { mode: "row" }
             );
             table.update(data);
         });
@@ -1261,7 +1261,7 @@ module.exports = (perspective) => {
                     table2.delete();
                     done();
                 },
-                {mode: "row"}
+                { mode: "row" }
             );
             table1.update(data);
         });
@@ -1285,13 +1285,13 @@ module.exports = (perspective) => {
                     table2.delete();
                     done();
                 },
-                {mode: "row"}
+                { mode: "row" }
             );
             table1.update(data);
         });
 
         it("properly removes a failed update callback on a table", async function (done) {
-            const table = await perspective.table({x: "integer"});
+            const table = await perspective.table({ x: "integer" });
             const view = await table.view();
             let size = await table.size();
             let counter = 0;
@@ -1309,9 +1309,9 @@ module.exports = (perspective) => {
                 expect(sz).toEqual(size++);
             });
 
-            table.update([{x: 1}]);
-            table.update([{x: 2}]);
-            table.update([{x: 3}]);
+            table.update([{ x: 1 }]);
+            table.update([{ x: 2 }]);
+            table.update([{ x: 3 }]);
 
             const view2 = await table.view(); // create a new view to make sure we process every update transacation.
             const final_size = await table.size();
@@ -1399,7 +1399,7 @@ module.exports = (perspective) => {
 
     describe("Limit", function () {
         it("{limit: 2} with table of size 4", async function () {
-            var table = await perspective.table(data, {limit: 2});
+            var table = await perspective.table(data, { limit: 2 });
             var view = await table.view();
             let result = await view.to_json();
             expect(result).toEqual(data.slice(2));
@@ -1408,7 +1408,7 @@ module.exports = (perspective) => {
         });
 
         it("{limit: 5} with 2 updates of size 4", async function () {
-            var table = await perspective.table(data, {limit: 5});
+            var table = await perspective.table(data, { limit: 5 });
             table.update(data);
             var view = await table.view();
             let result = await view.to_json();
@@ -1421,7 +1421,7 @@ module.exports = (perspective) => {
 
         it("{limit: 1} with arrow update", async function () {
             const arrow = arrows.test_arrow.slice();
-            var table = await perspective.table(arrow, {limit: 1});
+            var table = await perspective.table(arrow, { limit: 1 });
             table.update(arrow.slice());
             var view = await table.view();
             let result = await view.to_json();
@@ -1433,7 +1433,7 @@ module.exports = (perspective) => {
 
     describe("Indexed", function () {
         it("{index: 'x'} (int)", async function () {
-            var table = await perspective.table(data, {index: "x"});
+            var table = await perspective.table(data, { index: "x" });
             var view = await table.view();
             table.update(data);
             let result = await view.to_json();
@@ -1443,7 +1443,7 @@ module.exports = (perspective) => {
         });
 
         it("{index: 'y'} (string)", async function () {
-            var table = await perspective.table(data, {index: "y"});
+            var table = await perspective.table(data, { index: "y" });
             var view = await table.view();
             table.update(data);
             let result = await view.to_json();
@@ -1457,7 +1457,7 @@ module.exports = (perspective) => {
                 x: [0, 1, null, 2, 3],
                 y: ["a", "b", "c", "d", "e"],
             };
-            const table = await perspective.table(data, {index: "x"});
+            const table = await perspective.table(data, { index: "x" });
             const view = await table.view();
             const result = await view.to_columns();
             expect(result).toEqual({
@@ -1473,7 +1473,7 @@ module.exports = (perspective) => {
                 x: [0, 1, 2, 3, 4],
                 y: ["", "a", "b", "c", null],
             };
-            const table = await perspective.table(data, {index: "y"});
+            const table = await perspective.table(data, { index: "y" });
             const view = await table.view();
             const result = await view.to_columns();
             expect(result).toEqual({
@@ -1489,7 +1489,7 @@ module.exports = (perspective) => {
                 x: [0, 1, null, 2, 3],
                 y: ["a", "b", "c", "d", "e"],
             };
-            const table = await perspective.table(data, {index: "x"});
+            const table = await perspective.table(data, { index: "x" });
             table.update({
                 x: [null, 0],
                 y: ["x", "y"],
@@ -1509,7 +1509,7 @@ module.exports = (perspective) => {
                 x: [0, 1, 2, 3, 4],
                 y: ["", "a", "b", "c", null],
             };
-            const table = await perspective.table(data, {index: "y"});
+            const table = await perspective.table(data, { index: "y" });
             table.update({
                 x: [5, 6],
                 y: ["", null],
@@ -1534,7 +1534,7 @@ module.exports = (perspective) => {
                     x: "date",
                     y: "integer",
                 },
-                {index: "x"}
+                { index: "x" }
             );
             table.update(data);
             const view = await table.view();
@@ -1567,7 +1567,7 @@ module.exports = (perspective) => {
                     x: "datetime",
                     y: "integer",
                 },
-                {index: "x"}
+                { index: "x" }
             );
             table.update(data);
             const view = await table.view();
@@ -1619,7 +1619,7 @@ module.exports = (perspective) => {
         });
 
         it("multiple updates on int {index: 'x'}", async function () {
-            var table = await perspective.table(data, {index: "x"});
+            var table = await perspective.table(data, { index: "x" });
             var view = await table.view();
             table.update(data);
             table.update(data);
@@ -1631,7 +1631,7 @@ module.exports = (perspective) => {
         });
 
         it("multiple updates on str {index: 'y'}", async function () {
-            var table = await perspective.table(data, {index: "y"});
+            var table = await perspective.table(data, { index: "y" });
             var view = await table.view();
             table.update(data);
             table.update(data);
@@ -1643,19 +1643,19 @@ module.exports = (perspective) => {
         });
 
         it("multiple updates on str {index: 'y'} with new, old, null pkey", async function () {
-            var table = await perspective.table(data, {index: "y"});
+            var table = await perspective.table(data, { index: "y" });
             var view = await table.view();
-            table.update([{x: 1, y: "a", z: true}]);
-            table.update([{x: 100, y: null, z: true}]);
-            table.update([{x: 123, y: "abc", z: true}]);
+            table.update([{ x: 1, y: "a", z: true }]);
+            table.update([{ x: 100, y: null, z: true }]);
+            table.update([{ x: 123, y: "abc", z: true }]);
             let result = await view.to_json();
             expect(result).toEqual([
-                {x: 100, y: null, z: true},
-                {x: 1, y: "a", z: true},
-                {x: 123, y: "abc", z: true},
-                {x: 2, y: "b", z: false},
-                {x: 3, y: "c", z: true},
-                {x: 4, y: "d", z: false},
+                { x: 100, y: null, z: true },
+                { x: 1, y: "a", z: true },
+                { x: 123, y: "abc", z: true },
+                { x: 2, y: "b", z: false },
+                { x: 3, y: "c", z: true },
+                { x: 4, y: "d", z: false },
             ]);
             view.delete();
             table.delete();
@@ -1668,21 +1668,21 @@ module.exports = (perspective) => {
                     x: [1, 2, 3],
                     y: ["a", null, "c"],
                 },
-                {index: "y"}
+                { index: "y" }
             );
 
             const view = await table.view();
 
-            table.update([{x: 12345, y: "a"}]);
-            table.update([{x: 100, y: null}]);
-            table.update([{x: 123, y: "abc"}]);
+            table.update([{ x: 12345, y: "a" }]);
+            table.update([{ x: 100, y: null }]);
+            table.update([{ x: 123, y: "abc" }]);
 
             const result = await view.to_json();
             expect(result).toEqual([
-                {x: 100, y: null},
-                {x: 12345, y: "a"},
-                {x: 123, y: "abc"},
-                {x: 3, y: "c"},
+                { x: 100, y: null },
+                { x: 12345, y: "a" },
+                { x: 123, y: "abc" },
+                { x: 3, y: "c" },
             ]);
 
             await view.delete();
@@ -1690,7 +1690,7 @@ module.exports = (perspective) => {
         });
 
         it("{index: 'x'} with overlap", async function () {
-            var table = await perspective.table(data, {index: "x"});
+            var table = await perspective.table(data, { index: "x" });
             var view = await table.view();
             table.update(data);
             table.update(data_2);
@@ -1701,7 +1701,7 @@ module.exports = (perspective) => {
         });
 
         it("update and index (int)", async function (done) {
-            var table = await perspective.table(meta, {index: "x"});
+            var table = await perspective.table(meta, { index: "x" });
             var view = await table.view();
             table.update(data);
             view.on_update(
@@ -1713,13 +1713,13 @@ module.exports = (perspective) => {
                     table.delete();
                     done();
                 },
-                {mode: "row"}
+                { mode: "row" }
             );
             table.update(data_2);
         });
 
         it("update and index (string)", async function (done) {
-            var table = await perspective.table(meta, {index: "y"});
+            var table = await perspective.table(meta, { index: "y" });
             var view = await table.view();
             table.update(data);
             view.on_update(
@@ -1731,13 +1731,13 @@ module.exports = (perspective) => {
                     table.delete();
                     done();
                 },
-                {mode: "row"}
+                { mode: "row" }
             );
             table.update(data_2);
         });
 
         it("update with depth expansion", async function () {
-            var table = await perspective.table(meta, {index: "y"});
+            var table = await perspective.table(meta, { index: "y" });
             var view = await table.view({
                 group_by: ["z", "y"],
                 columns: [],
@@ -1747,13 +1747,13 @@ module.exports = (perspective) => {
             let result = await view.to_json();
 
             let expected = [
-                {__ROW_PATH__: []},
-                {__ROW_PATH__: [false]},
-                {__ROW_PATH__: [false, "b"]},
-                {__ROW_PATH__: [false, "d"]},
-                {__ROW_PATH__: [true]},
-                {__ROW_PATH__: [true, "a"]},
-                {__ROW_PATH__: [true, "c"]},
+                { __ROW_PATH__: [] },
+                { __ROW_PATH__: [false] },
+                { __ROW_PATH__: [false, "b"] },
+                { __ROW_PATH__: [false, "d"] },
+                { __ROW_PATH__: [true] },
+                { __ROW_PATH__: [true, "a"] },
+                { __ROW_PATH__: [true, "c"] },
             ];
             expect(result).toEqual(expected);
             view.delete();
@@ -1762,16 +1762,16 @@ module.exports = (perspective) => {
 
         it("partial update", async function (done) {
             var partial = [
-                {x: 5, y: "a"},
-                {y: "b", z: true},
+                { x: 5, y: "a" },
+                { y: "b", z: true },
             ];
             var expected = [
-                {x: 5, y: "a", z: true},
-                {x: 2, y: "b", z: true},
-                {x: 3, y: "c", z: true},
-                {x: 4, y: "d", z: false},
+                { x: 5, y: "a", z: true },
+                { x: 2, y: "b", z: true },
+                { x: 3, y: "c", z: true },
+                { x: 4, y: "d", z: false },
             ];
-            var table = await perspective.table(meta, {index: "y"});
+            var table = await perspective.table(meta, { index: "y" });
             var view = await table.view();
             table.update(data);
             view.on_update(
@@ -1787,7 +1787,7 @@ module.exports = (perspective) => {
                     table.delete();
                     done();
                 },
-                {mode: "row"}
+                { mode: "row" }
             );
             table.update(partial);
         });
@@ -1800,12 +1800,12 @@ module.exports = (perspective) => {
             };
 
             var expected = [
-                {x: 5, y: "a", z: true},
-                {x: 2, y: "b", z: true},
-                {x: 3, y: "c", z: true},
-                {x: 4, y: "d", z: false},
+                { x: 5, y: "a", z: true },
+                { x: 2, y: "b", z: true },
+                { x: 3, y: "c", z: true },
+                { x: 4, y: "d", z: false },
             ];
-            var table = await perspective.table(meta, {index: "y"});
+            var table = await perspective.table(meta, { index: "y" });
             var view = await table.view();
             table.update(col_data);
             view.on_update(
@@ -1821,7 +1821,7 @@ module.exports = (perspective) => {
                     table.delete();
                     done();
                 },
-                {mode: "row"}
+                { mode: "row" }
             );
             table.update(partial);
         });
@@ -1831,7 +1831,7 @@ module.exports = (perspective) => {
                 x: [0, 1, null, 2, 3],
                 y: ["a", "b", "c", "d", "e"],
             };
-            const table = await perspective.table(data, {index: "x"});
+            const table = await perspective.table(data, { index: "x" });
             const view = await table.view();
             const result = await view.to_columns();
 
@@ -1859,7 +1859,7 @@ module.exports = (perspective) => {
                     table.delete();
                     done();
                 },
-                {mode: "row"}
+                { mode: "row" }
             );
 
             table.update({
@@ -1874,7 +1874,7 @@ module.exports = (perspective) => {
                 y: ["a", "b", "c", "d", "e"],
                 z: [true, false, true, false, true],
             };
-            const table = await perspective.table(data, {index: "x"});
+            const table = await perspective.table(data, { index: "x" });
             const view = await table.view();
             const result = await view.to_columns();
 
@@ -1905,7 +1905,7 @@ module.exports = (perspective) => {
                     table.delete();
                     done();
                 },
-                {mode: "row"}
+                { mode: "row" }
             );
 
             table.update({
@@ -1921,12 +1921,12 @@ module.exports = (perspective) => {
             };
 
             var expected = [
-                {x: 1, y: "a", z: false},
-                {x: 2, y: "b", z: true},
-                {x: 3, y: "c", z: true},
-                {x: 4, y: "d", z: false},
+                { x: 1, y: "a", z: false },
+                { x: 2, y: "b", z: true },
+                { x: 3, y: "c", z: true },
+                { x: 4, y: "d", z: false },
             ];
-            var table = await perspective.table(meta, {index: "y"});
+            var table = await perspective.table(meta, { index: "y" });
             var view = await table.view();
             table.update(col_data);
             view.on_update(
@@ -1942,7 +1942,7 @@ module.exports = (perspective) => {
                     table.delete();
                     done();
                 },
-                {mode: "row"}
+                { mode: "row" }
             );
             table.update(partial);
         });
@@ -1952,46 +1952,48 @@ module.exports = (perspective) => {
         it("recalculates sum aggregates when a null unsets a value", async function () {
             var table = await perspective.table(
                 [
-                    {x: 1, y: 1},
-                    {x: 2, y: 1},
+                    { x: 1, y: 1 },
+                    { x: 2, y: 1 },
                 ],
-                {index: "x"}
+                { index: "x" }
             );
-            table.update([{x: 2, y: null}]);
+            table.update([{ x: 2, y: null }]);
             var view = await table.view({
                 group_by: ["x"],
                 columns: ["y"],
             });
             let json = await view.to_json();
             expect(json).toEqual([
-                {__ROW_PATH__: [], y: 1},
-                {__ROW_PATH__: [1], y: 1},
-                {__ROW_PATH__: [2], y: 0},
+                { __ROW_PATH__: [], y: 1 },
+                { __ROW_PATH__: [1], y: 1 },
+                { __ROW_PATH__: [2], y: 0 },
             ]);
             view.delete();
             table.delete();
         });
 
         it("can be removed entirely", async function () {
-            var table = await perspective.table([{x: 1, y: 1}], {index: "x"});
-            table.update([{x: 1, y: null}]);
-            table.update([{x: 1, y: 1}]);
+            var table = await perspective.table([{ x: 1, y: 1 }], {
+                index: "x",
+            });
+            table.update([{ x: 1, y: null }]);
+            table.update([{ x: 1, y: 1 }]);
             var view = await table.view();
             let json = await view.to_json();
-            expect(json).toEqual([{x: 1, y: 1}]);
+            expect(json).toEqual([{ x: 1, y: 1 }]);
             view.delete();
             table.delete();
         });
 
         it("partial update with null unsets value", async function () {
-            var partial = [{x: null, y: "a", z: false}];
+            var partial = [{ x: null, y: "a", z: false }];
             var expected = [
-                {x: null, y: "a", z: false},
-                {x: 2, y: "b", z: false},
-                {x: 3, y: "c", z: true},
-                {x: 4, y: "d", z: false},
+                { x: null, y: "a", z: false },
+                { x: 2, y: "b", z: false },
+                { x: 3, y: "c", z: true },
+                { x: 4, y: "d", z: false },
             ];
-            var table = await perspective.table(meta, {index: "y"});
+            var table = await perspective.table(meta, { index: "y" });
             var view = await table.view();
             table.update(data);
             table.update(partial);
@@ -2002,15 +2004,15 @@ module.exports = (perspective) => {
         });
 
         it("update by adding rows (new pkeys) with partials/nulls", async function () {
-            var update = [{x: null, y: "e", z: null}];
+            var update = [{ x: null, y: "e", z: null }];
             var expected = [
-                {x: 1, y: "a", z: true},
-                {x: 2, y: "b", z: false},
-                {x: 3, y: "c", z: true},
-                {x: 4, y: "d", z: false},
-                {x: null, y: "e", z: null},
+                { x: 1, y: "a", z: true },
+                { x: 2, y: "b", z: false },
+                { x: 3, y: "c", z: true },
+                { x: 4, y: "d", z: false },
+                { x: null, y: "e", z: null },
             ];
-            var table = await perspective.table(meta, {index: "y"});
+            var table = await perspective.table(meta, { index: "y" });
             var view = await table.view();
             table.update(data);
             table.update(update);
@@ -2027,12 +2029,12 @@ module.exports = (perspective) => {
             };
 
             var expected = [
-                {x: null, y: "a", z: true},
-                {x: 2, y: "b", z: false},
-                {x: 3, y: "c", z: true},
-                {x: 4, y: "d", z: false},
+                { x: null, y: "a", z: true },
+                { x: 2, y: "b", z: false },
+                { x: 3, y: "c", z: true },
+                { x: 4, y: "d", z: false },
             ];
-            var table = await perspective.table(meta, {index: "y"});
+            var table = await perspective.table(meta, { index: "y" });
             var view = await table.view();
             table.update(col_data);
             table.update(partial);
@@ -2152,10 +2154,10 @@ module.exports = (perspective) => {
 
             // does not unset any values
             expect(result).toEqual([
-                {x: 1, y: "a", z: true},
-                {x: 2, y: "b", z: false},
-                {x: 3, y: "new_string", z: true},
-                {x: 4, y: "d", z: false},
+                { x: 1, y: "a", z: true },
+                { x: 2, y: "b", z: false },
+                { x: 3, y: "new_string", z: true },
+                { x: 4, y: "d", z: false },
             ]);
             view.delete();
             table.delete();
@@ -2176,10 +2178,10 @@ module.exports = (perspective) => {
 
             // does not unset any values
             expect(result).toEqual([
-                {x: 1, y: "a", z: true},
-                {x: 2, y: "b", z: false},
-                {x: 3, y: "new_string", z: null},
-                {x: 4, y: "d", z: false},
+                { x: 1, y: "a", z: true },
+                { x: 2, y: "b", z: false },
+                { x: 3, y: "new_string", z: null },
+                { x: 4, y: "d", z: false },
             ]);
             view.delete();
             table.delete();
@@ -2198,10 +2200,10 @@ module.exports = (perspective) => {
 
             // does not unset any values
             expect(result).toEqual([
-                {x: 1, y: "a", z: null},
-                {x: 2, y: "b", z: false},
-                {x: 3, y: "new_string", z: true},
-                {x: 4, y: "d", z: false},
+                { x: 1, y: "a", z: null },
+                { x: 2, y: "b", z: false },
+                { x: 3, y: "new_string", z: true },
+                { x: 4, y: "d", z: false },
             ]);
             view.delete();
             table.delete();
@@ -2229,7 +2231,7 @@ module.exports = (perspective) => {
         });
 
         it("should apply updates using '__INDEX__' on a table with explicit index set", async function () {
-            let table = await perspective.table(data, {index: "x"});
+            let table = await perspective.table(data, { index: "x" });
             table.update([
                 {
                     __INDEX__: 2,
@@ -2248,7 +2250,7 @@ module.exports = (perspective) => {
         });
 
         it("should apply multiple sequential updates using '__INDEX__' on a table with explicit index set", async function () {
-            let table = await perspective.table(data, {index: "x"});
+            let table = await perspective.table(data, { index: "x" });
             table.update([
                 {
                     __INDEX__: 2,
@@ -2272,7 +2274,7 @@ module.exports = (perspective) => {
         });
 
         it("should apply mulitple nonsequential updates using '__INDEX__' on a table with explicit index set", async function () {
-            let table = await perspective.table(data, {index: "x"});
+            let table = await perspective.table(data, { index: "x" });
             table.update([
                 {
                     __INDEX__: 2,
@@ -2403,7 +2405,7 @@ module.exports = (perspective) => {
 
             let expected = JSON.parse(JSON.stringify(data));
             expected[0]["y"] = "new_string";
-            expected.push({x: null, y: "new_string", z: null});
+            expected.push({ x: null, y: "new_string", z: null });
 
             expect(result).toEqual(expected);
             view.delete();
@@ -2426,11 +2428,11 @@ module.exports = (perspective) => {
             let result = await view.to_json();
             // update should be applied properly
             expect(result).toEqual([
-                {__ROW_PATH__: [], x: 109, y: 4, z: 4},
-                {__ROW_PATH__: [2], x: 2, y: 1, z: 1},
-                {__ROW_PATH__: [3], x: 3, y: 1, z: 1},
-                {__ROW_PATH__: [4], x: 4, y: 1, z: 1},
-                {__ROW_PATH__: [100], x: 100, y: 1, z: 1},
+                { __ROW_PATH__: [], x: 109, y: 4, z: 4 },
+                { __ROW_PATH__: [2], x: 2, y: 1, z: 1 },
+                { __ROW_PATH__: [3], x: 3, y: 1, z: 1 },
+                { __ROW_PATH__: [4], x: 4, y: 1, z: 1 },
+                { __ROW_PATH__: [100], x: 100, y: 1, z: 1 },
             ]);
 
             // check that un-pivoted view reflects data correctly
@@ -2607,11 +2609,11 @@ module.exports = (perspective) => {
                     x: "integer",
                     y: "string",
                 },
-                {index: "x"}
+                { index: "x" }
             );
 
             flat_view = await table.view();
-            filtered_view = await table.view({filter: [["y", "==", "a"]]});
+            filtered_view = await table.view({ filter: [["y", "==", "a"]] });
         });
 
         afterEach(async () => {
@@ -2737,16 +2739,16 @@ module.exports = (perspective) => {
         });
 
         it("View output should always be consistent with filter, deterministic", async () => {
-            filtered_view = await table.view({filter: [["y", "==", "b"]]});
+            filtered_view = await table.view({ filter: [["y", "==", "b"]] });
 
             for (let i = 0; i < 10; i++) {
                 // append new rows
-                table.update([{x: i, y: "a"}]);
+                table.update([{ x: i, y: "a" }]);
                 expect(await table.size()).toEqual(i + 1);
 
                 // make sure appended
                 const result = await flat_view.to_json();
-                expect(result[result.length - 1]).toEqual({x: i, y: "a"});
+                expect(result[result.length - 1]).toEqual({ x: i, y: "a" });
 
                 // filtering
                 expect(await filtered_view.to_json()).toEqual(
@@ -2757,7 +2759,7 @@ module.exports = (perspective) => {
             await filtered_view.delete();
 
             // new view with filter
-            filtered_view = await table.view({filter: [["y", "==", "a"]]});
+            filtered_view = await table.view({ filter: [["y", "==", "a"]] });
             let flat = await flat_view.to_json();
             let filtered = await filtered_view.to_json();
 
@@ -2767,7 +2769,7 @@ module.exports = (perspective) => {
             for (let i = 0; i < 10; i++) {
                 // partial update rows
                 if (i % 2 == 0) {
-                    table.update([{x: i, y: "b"}]);
+                    table.update([{ x: i, y: "b" }]);
 
                     flat = await flat_view.to_json();
                     filtered = await filtered_view.to_json();
@@ -2791,11 +2793,11 @@ module.exports = (perspective) => {
                 flat.filter((row) => row.y === "b").map((row) => row.x)
             );
             expect(await flat_view.to_json()).toEqual([
-                {x: 1, y: "a"},
-                {x: 3, y: "a"},
-                {x: 5, y: "a"},
-                {x: 7, y: "a"},
-                {x: 9, y: "a"},
+                { x: 1, y: "a" },
+                { x: 3, y: "a" },
+                { x: 5, y: "a" },
+                { x: 7, y: "a" },
+                { x: 9, y: "a" },
             ]);
         });
 
@@ -2805,17 +2807,17 @@ module.exports = (perspective) => {
                     index: "string",
                     x: "string",
                 },
-                {index: "index"}
+                { index: "index" }
             );
             const view = await tbl.view();
 
-            tbl.update({index: ["a", "d", "b"], x: ["abc", "def", "acc"]});
+            tbl.update({ index: ["a", "d", "b"], x: ["abc", "def", "acc"] });
             tbl.remove(["b"]);
 
-            const view2 = await tbl.view({filter: [["x", "==", "abc"]]});
+            const view2 = await tbl.view({ filter: [["x", "==", "abc"]] });
             await view.delete();
 
-            expect(await view2.to_json()).toEqual([{index: "a", x: "abc"}]);
+            expect(await view2.to_json()).toEqual([{ index: "a", x: "abc" }]);
             console.log(await view2.to_json());
 
             await view2.delete();
@@ -2828,17 +2830,17 @@ module.exports = (perspective) => {
                     index: "string",
                     x: "string",
                 },
-                {index: "index"}
+                { index: "index" }
             );
             const view = await tbl.view();
 
-            tbl.update({index: ["a", "c"], x: ["abc", "def"]});
+            tbl.update({ index: ["a", "c"], x: ["abc", "def"] });
             tbl.remove(["c"]);
 
-            const view2 = await tbl.view({filter: [["x", "==", "abc"]]});
+            const view2 = await tbl.view({ filter: [["x", "==", "abc"]] });
             await view.delete();
 
-            expect(await view2.to_json()).toEqual([{index: "a", x: "abc"}]);
+            expect(await view2.to_json()).toEqual([{ index: "a", x: "abc" }]);
             console.log(await view2.to_json());
 
             await view2.delete();
@@ -2851,17 +2853,17 @@ module.exports = (perspective) => {
                     index: "string",
                     x: "string",
                 },
-                {index: "index"}
+                { index: "index" }
             );
             const view = await tbl.view();
 
-            tbl.update({index: ["a", "b", "c"], x: ["abc", "def", "acc"]});
+            tbl.update({ index: ["a", "b", "c"], x: ["abc", "def", "acc"] });
             tbl.remove(["b"]);
 
-            const view2 = await tbl.view({filter: [["x", "==", "abc"]]});
+            const view2 = await tbl.view({ filter: [["x", "==", "abc"]] });
             await view.delete();
 
-            expect(await view2.to_json()).toEqual([{index: "a", x: "abc"}]);
+            expect(await view2.to_json()).toEqual([{ index: "a", x: "abc" }]);
             console.log(await view2.to_json());
 
             await view2.delete();
@@ -2874,17 +2876,17 @@ module.exports = (perspective) => {
                     index: "float",
                     x: "string",
                 },
-                {index: "index"}
+                { index: "index" }
             );
             const view = await tbl.view();
 
-            tbl.update({index: [50, 1, 2], x: ["abc", "def", "acc"]});
+            tbl.update({ index: [50, 1, 2], x: ["abc", "def", "acc"] });
             tbl.remove([1]);
 
-            const view2 = await tbl.view({filter: [["x", "==", "acc"]]});
+            const view2 = await tbl.view({ filter: [["x", "==", "acc"]] });
             await view.delete();
 
-            expect(await view2.to_json()).toEqual([{index: 2, x: "acc"}]);
+            expect(await view2.to_json()).toEqual([{ index: 2, x: "acc" }]);
             console.log(await view2.to_json());
 
             await view2.delete();
@@ -2897,17 +2899,17 @@ module.exports = (perspective) => {
                     index: "float",
                     x: "string",
                 },
-                {index: "index"}
+                { index: "index" }
             );
             const view = await tbl.view();
 
-            tbl.update({index: [1, 2, 3], x: ["abc", "def", "acc"]});
+            tbl.update({ index: [1, 2, 3], x: ["abc", "def", "acc"] });
             tbl.remove([3]);
 
-            const view2 = await tbl.view({filter: [["x", "==", "def"]]});
+            const view2 = await tbl.view({ filter: [["x", "==", "def"]] });
             await view.delete();
 
-            expect(await view2.to_json()).toEqual([{index: 2, x: "def"}]);
+            expect(await view2.to_json()).toEqual([{ index: 2, x: "def" }]);
             console.log(await view2.to_json());
 
             await view2.delete();
@@ -2920,7 +2922,7 @@ module.exports = (perspective) => {
                     index: "date",
                     x: "string",
                 },
-                {index: "index"}
+                { index: "index" }
             );
             const view = await tbl.view();
 
@@ -2934,11 +2936,11 @@ module.exports = (perspective) => {
             });
             tbl.remove([1]);
 
-            const view2 = await tbl.view({filter: [["x", "==", "acc"]]});
+            const view2 = await tbl.view({ filter: [["x", "==", "acc"]] });
             await view.delete();
 
             expect(await view2.to_json()).toEqual([
-                {index: new Date(2015, 5, 10).getTime(), x: "acc"},
+                { index: new Date(2015, 5, 10).getTime(), x: "acc" },
             ]);
             console.log(await view2.to_json());
 
@@ -2952,7 +2954,7 @@ module.exports = (perspective) => {
                     index: "date",
                     x: "string",
                 },
-                {index: "index"}
+                { index: "index" }
             );
             const view = await tbl.view();
 
@@ -2966,11 +2968,11 @@ module.exports = (perspective) => {
             });
             tbl.remove([3]);
 
-            const view2 = await tbl.view({filter: [["x", "==", "def"]]});
+            const view2 = await tbl.view({ filter: [["x", "==", "def"]] });
             await view.delete();
 
             expect(await view2.to_json()).toEqual([
-                {index: new Date(2015, 5, 10).getTime(), x: "def"},
+                { index: new Date(2015, 5, 10).getTime(), x: "def" },
             ]);
             console.log(await view2.to_json());
 
@@ -2984,7 +2986,7 @@ module.exports = (perspective) => {
                     index: "datetime",
                     x: "string",
                 },
-                {index: "index"}
+                { index: "index" }
             );
             const view = await tbl.view();
 
@@ -2998,11 +3000,11 @@ module.exports = (perspective) => {
             });
             tbl.remove([1]);
 
-            const view2 = await tbl.view({filter: [["x", "==", "acc"]]});
+            const view2 = await tbl.view({ filter: [["x", "==", "acc"]] });
             await view.delete();
 
             expect(await view2.to_json()).toEqual([
-                {index: new Date(2015, 5, 10, 15, 10, 2).getTime(), x: "acc"},
+                { index: new Date(2015, 5, 10, 15, 10, 2).getTime(), x: "acc" },
             ]);
             console.log(await view2.to_json());
 
@@ -3016,7 +3018,7 @@ module.exports = (perspective) => {
                     index: "datetime",
                     x: "string",
                 },
-                {index: "index"}
+                { index: "index" }
             );
             const view = await tbl.view();
 
@@ -3030,11 +3032,11 @@ module.exports = (perspective) => {
             });
             tbl.remove([3]);
 
-            const view2 = await tbl.view({filter: [["x", "==", "def"]]});
+            const view2 = await tbl.view({ filter: [["x", "==", "def"]] });
             await view.delete();
 
             expect(await view2.to_json()).toEqual([
-                {index: new Date(2015, 5, 10, 15, 10, 2).getTime(), x: "def"},
+                { index: new Date(2015, 5, 10, 15, 10, 2).getTime(), x: "def" },
             ]);
             console.log(await view2.to_json());
 
@@ -3048,53 +3050,53 @@ module.exports = (perspective) => {
                     index: "string",
                     x: "string",
                 },
-                {index: "index"}
+                { index: "index" }
             );
             const view = await tbl.view();
 
-            tbl.update({index: ["a", "d", "b"], x: ["abc", "def", "acc"]});
+            tbl.update({ index: ["a", "d", "b"], x: ["abc", "def", "acc"] });
             tbl.remove(["b"]);
 
-            const view2 = await tbl.view({filter: [["x", "==", "abc"]]});
+            const view2 = await tbl.view({ filter: [["x", "==", "abc"]] });
             await view.delete();
 
-            expect(await view2.to_json()).toEqual([{index: "a", x: "abc"}]);
+            expect(await view2.to_json()).toEqual([{ index: "a", x: "abc" }]);
 
-            tbl.update([{index: "b", x: "abc"}]);
+            tbl.update([{ index: "b", x: "abc" }]);
 
             expect(await view2.to_json()).toEqual([
-                {index: "a", x: "abc"},
-                {index: "b", x: "abc"},
+                { index: "a", x: "abc" },
+                { index: "b", x: "abc" },
             ]);
 
             tbl.remove(["a"]);
 
-            expect(await view2.to_json()).toEqual([{index: "b", x: "abc"}]);
+            expect(await view2.to_json()).toEqual([{ index: "b", x: "abc" }]);
 
             tbl.update([
-                {index: "a", x: "abc"},
-                {index: null, x: "abc"},
+                { index: "a", x: "abc" },
+                { index: null, x: "abc" },
             ]);
 
             expect(await view2.to_json()).toEqual([
-                {index: null, x: "abc"},
-                {index: "a", x: "abc"},
-                {index: "b", x: "abc"},
+                { index: null, x: "abc" },
+                { index: "a", x: "abc" },
+                { index: "b", x: "abc" },
             ]);
 
             const indices = "abcdefghijklmnopqrstuvwxyz".split("");
 
             for (const idx of indices) {
-                tbl.update([{index: idx, x: "abc"}]);
+                tbl.update([{ index: idx, x: "abc" }]);
             }
 
             let result = await view2.to_json();
-            expect(result[0]).toEqual({index: null, x: "abc"});
+            expect(result[0]).toEqual({ index: null, x: "abc" });
 
             result = result.slice(1);
 
             for (let i = 0; i < result.length; i++) {
-                expect(result[i]).toEqual({index: indices[i], x: "abc"});
+                expect(result[i]).toEqual({ index: indices[i], x: "abc" });
             }
 
             await view2.delete();
@@ -3107,45 +3109,45 @@ module.exports = (perspective) => {
                     index: "string",
                     x: "string",
                 },
-                {index: "index"}
+                { index: "index" }
             );
             const view = await tbl.view();
 
-            tbl.update({index: ["a", "d", "b"], x: ["abc", "def", "acc"]});
+            tbl.update({ index: ["a", "d", "b"], x: ["abc", "def", "acc"] });
             tbl.remove(["b"]);
 
-            const view2 = await tbl.view({filter: [["x", "==", "abc"]]});
+            const view2 = await tbl.view({ filter: [["x", "==", "abc"]] });
             await view.delete();
 
-            expect(await view2.to_json()).toEqual([{index: "a", x: "abc"}]);
+            expect(await view2.to_json()).toEqual([{ index: "a", x: "abc" }]);
 
-            tbl.update([{index: "b", x: "abc"}]);
+            tbl.update([{ index: "b", x: "abc" }]);
 
             expect(await view2.to_json()).toEqual([
-                {index: "a", x: "abc"},
-                {index: "b", x: "abc"},
+                { index: "a", x: "abc" },
+                { index: "b", x: "abc" },
             ]);
 
             tbl.remove(["a"]);
 
-            expect(await view2.to_json()).toEqual([{index: "b", x: "abc"}]);
+            expect(await view2.to_json()).toEqual([{ index: "b", x: "abc" }]);
 
             tbl.update([
-                {index: "a", x: "abc"},
-                {index: null, x: "abc"},
+                { index: "a", x: "abc" },
+                { index: null, x: "abc" },
             ]);
 
             expect(await view2.to_json()).toEqual([
-                {index: null, x: "abc"},
-                {index: "a", x: "abc"},
-                {index: "b", x: "abc"},
+                { index: null, x: "abc" },
+                { index: "a", x: "abc" },
+                { index: "b", x: "abc" },
             ]);
 
             // randomize
             let indices = "abcdefghijklmnopqrstuvwxyz"
                 .split("")
                 .map((v) => {
-                    return {value: v, key: Math.random()};
+                    return { value: v, key: Math.random() };
                 })
                 .sort((a, b) => a.key - b.key)
                 .map((v) => v.value);
@@ -3153,18 +3155,18 @@ module.exports = (perspective) => {
             console.log(indices);
 
             for (const idx of indices) {
-                tbl.update([{index: idx, x: "abc"}]);
+                tbl.update([{ index: idx, x: "abc" }]);
             }
 
             let result = await view2.to_json();
-            expect(result[0]).toEqual({index: null, x: "abc"});
+            expect(result[0]).toEqual({ index: null, x: "abc" });
 
             result = result.slice(1);
 
             indices = indices.sort();
 
             for (let i = 0; i < result.length; i++) {
-                expect(result[i]).toEqual({index: indices[i], x: "abc"});
+                expect(result[i]).toEqual({ index: indices[i], x: "abc" });
             }
 
             await view2.delete();

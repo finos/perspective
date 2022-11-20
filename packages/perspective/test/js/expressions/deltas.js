@@ -53,10 +53,10 @@ module.exports = (perspective) => {
                         await table.delete();
                         done();
                     },
-                    {mode: "row"}
+                    { mode: "row" }
                 );
 
-                table.update({x: [1, 3], y: ["HELLO", "WORLD"]});
+                table.update({ x: [1, 3], y: ["HELLO", "WORLD"] });
             });
 
             it("Returns appended rows for normal and expression columns from schema", async function (done) {
@@ -71,17 +71,17 @@ module.exports = (perspective) => {
                 view.on_update(
                     async function (updated) {
                         const expected = [
-                            {x: 1, y: "a", 'upper("y")': "A"},
-                            {x: 2, y: "b", 'upper("y")': "B"},
-                            {x: 3, y: "c", 'upper("y")': "C"},
-                            {x: 4, y: "d", 'upper("y")': "D"},
+                            { x: 1, y: "a", 'upper("y")': "A" },
+                            { x: 2, y: "b", 'upper("y")': "B" },
+                            { x: 3, y: "c", 'upper("y")': "C" },
+                            { x: 4, y: "d", 'upper("y")': "D" },
                         ];
                         await match_delta(perspective, updated.delta, expected);
                         await view.delete();
                         await table.delete();
                         done();
                     },
-                    {mode: "row"}
+                    { mode: "row" }
                 );
 
                 table.update({
@@ -96,7 +96,7 @@ module.exports = (perspective) => {
                         x: [1, 2, 3, 4],
                         y: ["A", "B", "C", "D"],
                     },
-                    {index: "x"}
+                    { index: "x" }
                 );
                 const view = await table.view({
                     expressions: ['lower("y")'],
@@ -106,8 +106,8 @@ module.exports = (perspective) => {
                     async function (updated) {
                         const full = await view.to_columns();
                         const expected = [
-                            {x: 1, y: "HELLO", 'lower("y")': "hello"},
-                            {x: 3, y: "WORLD", 'lower("y")': "world"},
+                            { x: 1, y: "HELLO", 'lower("y")': "hello" },
+                            { x: 3, y: "WORLD", 'lower("y")': "world" },
                         ];
                         expect(full).toEqual({
                             x: [1, 2, 3, 4],
@@ -119,10 +119,10 @@ module.exports = (perspective) => {
                         await table.delete();
                         done();
                     },
-                    {mode: "row"}
+                    { mode: "row" }
                 );
 
-                table.update({x: [1, 3], y: ["HELLO", "WORLD"]});
+                table.update({ x: [1, 3], y: ["HELLO", "WORLD"] });
             });
 
             it("Returns appended rows with missing columns for normal and expression columns", async function (done) {
@@ -139,8 +139,8 @@ module.exports = (perspective) => {
                     async function (updated) {
                         const full = await self.view.to_columns();
                         const expected = [
-                            {x: 1, y: null, 'lower("y")': null},
-                            {x: 3, y: null, 'lower("y")': null},
+                            { x: 1, y: null, 'lower("y")': null },
+                            { x: 3, y: null, 'lower("y")': null },
                         ];
                         expect(full).toEqual({
                             x: [1, 2, 3, 4, 1, 3],
@@ -152,10 +152,10 @@ module.exports = (perspective) => {
                         await table.delete();
                         done();
                     },
-                    {mode: "row"}
+                    { mode: "row" }
                 );
 
-                table.update({x: [1, 3]});
+                table.update({ x: [1, 3] });
             });
         });
 
@@ -173,19 +173,19 @@ module.exports = (perspective) => {
                 view.on_update(
                     async function (updated) {
                         const expected = [
-                            {x: 14, y: 6, 'lower("y")': 6},
-                            {x: 1, y: 1, 'lower("y")': 1},
-                            {x: 3, y: 1, 'lower("y")': 1},
+                            { x: 14, y: 6, 'lower("y")': 6 },
+                            { x: 1, y: 1, 'lower("y")': 1 },
+                            { x: 3, y: 1, 'lower("y")': 1 },
                         ];
                         await match_delta(perspective, updated.delta, expected);
                         await view.delete();
                         await table.delete();
                         done();
                     },
-                    {mode: "row"}
+                    { mode: "row" }
                 );
 
-                table.update({x: [1, 3], y: ["HELLO", "WORLD"]});
+                table.update({ x: [1, 3], y: ["HELLO", "WORLD"] });
             });
 
             it("Returns appended rows for normal and expression columns, 1-sided hidden sorted", async function (done) {
@@ -202,16 +202,16 @@ module.exports = (perspective) => {
 
                 view.on_update(
                     async function (updated) {
-                        const expected = [{x: 14}, {x: 3}, {x: 1}];
+                        const expected = [{ x: 14 }, { x: 3 }, { x: 1 }];
                         await match_delta(perspective, updated.delta, expected);
                         await view.delete();
                         await table.delete();
                         done();
                     },
-                    {mode: "row"}
+                    { mode: "row" }
                 );
 
-                table.update({x: [1, 3], y: ["HELLO", "WORLD"]});
+                table.update({ x: [1, 3], y: ["HELLO", "WORLD"] });
             });
         });
 
@@ -299,10 +299,10 @@ module.exports = (perspective) => {
                         await table.delete();
                         done();
                     },
-                    {mode: "row"}
+                    { mode: "row" }
                 );
 
-                table.update({x: [1, 3], y: ["HELLO", "WORLD"]});
+                table.update({ x: [1, 3], y: ["HELLO", "WORLD"] });
             });
         });
 
@@ -326,8 +326,8 @@ module.exports = (perspective) => {
                 view.on_update(
                     async function (updated) {
                         const expected = [
-                            {x: 1, y: null, 'lower("y")': null},
-                            {x: 3, y: null, 'lower("y")': null},
+                            { x: 1, y: null, 'lower("y")': null },
+                            { x: 3, y: null, 'lower("y")': null },
                         ];
                         const full = await view.to_columns();
                         expect(full).toEqual({
@@ -340,10 +340,10 @@ module.exports = (perspective) => {
                         await table.delete();
                         done();
                     },
-                    {mode: "row"}
+                    { mode: "row" }
                 );
 
-                table.update({x: [1, 3]});
+                table.update({ x: [1, 3] });
             });
 
             it("`on_update` on a view with expression column should contain expression delta when columns are updated", async function (done) {
@@ -352,7 +352,7 @@ module.exports = (perspective) => {
                         x: [1, 2, 3, 4],
                         y: ["A", "B", "C", "D"],
                     },
-                    {index: "x"}
+                    { index: "x" }
                 );
                 const view = await table.view({
                     expressions: ['lower("y")'],
@@ -369,8 +369,8 @@ module.exports = (perspective) => {
                 view.on_update(
                     async function (updated) {
                         const expected = [
-                            {x: 1, y: "ABCD", 'lower("y")': "abcd"},
-                            {x: 3, y: null, 'lower("y")': null},
+                            { x: 1, y: "ABCD", 'lower("y")': "abcd" },
+                            { x: 3, y: null, 'lower("y")': null },
                         ];
                         const full = await view.to_columns();
                         expect(full).toEqual({
@@ -383,10 +383,10 @@ module.exports = (perspective) => {
                         await table.delete();
                         done();
                     },
-                    {mode: "row"}
+                    { mode: "row" }
                 );
 
-                table.update({x: [1, 3], y: ["ABCD", null]});
+                table.update({ x: [1, 3], y: ["ABCD", null] });
             });
 
             it("`on_update` on different views with different expression columns should only be notified of their columns", async function (done) {
@@ -411,8 +411,8 @@ module.exports = (perspective) => {
                 view.on_update(
                     async function (updated) {
                         const expected = [
-                            {x: 1, y: "HELLO", 'lower("y")': "hello"},
-                            {x: 3, y: "WORLD", 'lower("y")': "world"},
+                            { x: 1, y: "HELLO", 'lower("y")': "hello" },
+                            { x: 3, y: "WORLD", 'lower("y")': "world" },
                         ];
                         const full = await view.to_columns();
                         expect(full).toEqual({
@@ -423,14 +423,14 @@ module.exports = (perspective) => {
                         await match_delta(perspective, updated.delta, expected);
                         await view.delete();
                     },
-                    {mode: "row"}
+                    { mode: "row" }
                 );
 
                 view2.on_update(
                     async function (updated) {
                         const expected = [
-                            {x: 1, y: "HELLO", '-"x"': -1},
-                            {x: 3, y: "WORLD", '-"x"': -3},
+                            { x: 1, y: "HELLO", '-"x"': -1 },
+                            { x: 3, y: "WORLD", '-"x"': -3 },
                         ];
                         const full = await view2.to_columns();
                         expect(full).toEqual({
@@ -443,10 +443,10 @@ module.exports = (perspective) => {
                         await table.delete();
                         done();
                     },
-                    {mode: "row"}
+                    { mode: "row" }
                 );
 
-                table.update({x: [1, 3], y: ["HELLO", "WORLD"]});
+                table.update({ x: [1, 3], y: ["HELLO", "WORLD"] });
             });
 
             it("`on_update` on view without expression column should not be notified of expression column", async function (done) {
@@ -469,8 +469,8 @@ module.exports = (perspective) => {
                 view.on_update(
                     async function (updated) {
                         const expected = [
-                            {x: 1, y: "abc"},
-                            {x: 3, y: "def"},
+                            { x: 1, y: "abc" },
+                            { x: 3, y: "def" },
                         ];
                         await match_delta(perspective, updated.delta, expected);
                         await view2.delete();
@@ -478,10 +478,10 @@ module.exports = (perspective) => {
                         await table.delete();
                         done();
                     },
-                    {mode: "row"}
+                    { mode: "row" }
                 );
 
-                table.update({x: [1, 3], y: ["abc", "def"]});
+                table.update({ x: [1, 3], y: ["abc", "def"] });
             });
         });
     });

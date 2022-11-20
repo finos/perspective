@@ -9,7 +9,7 @@
 const fs = require("fs");
 const path = require("path");
 const rimraf = require("rimraf");
-const {TimeoutError} = require("puppeteer");
+const { TimeoutError } = require("puppeteer");
 const notebook_template = require("./notebook_template.json");
 
 const DIST_ROOT = path.join(__dirname, "..", "..", "dist", "umd");
@@ -68,7 +68,7 @@ const generate_notebook = (notebook_name, cells) => {
 };
 
 // Add Jupyterlab-specific bindings to the global Jest objects
-describe.jupyter = (body, {name, root} = {}) => {
+describe.jupyter = (body, { name, root } = {}) => {
     if (!root) throw new Error("Jupyter tests require a test root!");
 
     // Remove the automatically generated workspaces directory, as it
@@ -107,14 +107,14 @@ module.exports = {
         await module.exports.execute_all_cells(page);
         const viewer = await page.waitForSelector(
             ".jp-OutputArea-output perspective-viewer",
-            {visible: true}
+            { visible: true }
         );
         await viewer.evaluate(async (viewer) => await viewer.flush());
         return viewer;
     },
     execute_all_cells: async (page) => {
         await page.waitForFunction(async () => !!document.title);
-        await page.waitForSelector(".p-Widget", {visible: true});
+        await page.waitForSelector(".p-Widget", { visible: true });
         await page.waitForSelector(".jp-NotebookPanel-toolbar", {
             visible: true,
         });

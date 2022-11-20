@@ -114,7 +114,6 @@ if (!String.prototype.includes) {
     };
 }
 
-/* eslint-disable-next-line max-len */
 // from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/includes
 if (!Array.prototype.includes) {
     Object.defineProperty(Array.prototype, "includes", {

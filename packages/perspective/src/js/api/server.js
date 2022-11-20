@@ -7,7 +7,7 @@
  *
  */
 
-import {override_config} from "../config";
+import { override_config } from "../config";
 
 function error_to_json(error) {
     const obj = {};
@@ -313,7 +313,7 @@ export class Server {
         if (!obj && msg.cmd === "view_method") {
             // cannot have a host without a table, but can have a host without a
             // view
-            this.process_error(msg, {message: "View method cancelled"});
+            this.process_error(msg, { message: "View method cancelled" });
             return;
         }
 

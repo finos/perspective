@@ -6,7 +6,7 @@ exports.ResolvePlugin = function ResolvePlugin(options) {
                 const moduleTarget = options[moduleName];
                 const filter = new RegExp("^" + moduleName + "$");
 
-                build.onResolve({filter}, async (args) => {
+                build.onResolve({ filter }, async (args) => {
                     if (args.resolveDir === "") {
                         return;
                     }
@@ -21,7 +21,7 @@ exports.ResolvePlugin = function ResolvePlugin(options) {
                     };
                 });
 
-                build.onLoad({filter, namespace: "resolve"}, async (args) => {
+                build.onLoad({ filter, namespace: "resolve" }, async (args) => {
                     const importerCode = `
                             export * from '${args.path.replace(
                                 args.pluginData.moduleName,
