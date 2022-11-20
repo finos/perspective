@@ -23,7 +23,21 @@ use crate::*;
 #[derive(Clone)]
 pub struct ExpressionEditorElement {
     modal: ModalElement<ExpressionEditor>,
-    blurhandler: Rc<Closure<dyn Fn(web_sys::FocusEvent)>>,
+    blur: Rc<Blur>,
+}
+
+struct Blur {
+    elem: HtmlElement,
+    handler: Closure<dyn Fn(web_sys::FocusEvent)>,
+}
+
+impl Drop for Blur {
+    fn drop(&mut self) {
+        let cb = self.handler.as_ref().as_ref().unchecked_ref();
+        self.elem
+            .remove_event_listener_with_callback("blur", cb)
+            .unwrap();
+    }
 }
 
 impl ExpressionEditorElement {
@@ -55,24 +69,27 @@ impl ExpressionEditorElement {
         });
 
         let modal = ModalElement::new(editor.clone(), props, true);
-        let blurhandler = Rc::new(
-            {
+        let blurhandler = {
+            clone!(modal);
+            move |_event: FocusEvent| {
                 clone!(modal);
-                move |_event: FocusEvent| {
-                    clone!(modal);
-                    ApiFuture::spawn(async move {
-                        await_animation_frame().await?;
-                        modal.send_message(ExpressionEditorMsg::Render);
-                        Ok(())
-                    });
-                }
+                ApiFuture::spawn(async move {
+                    await_animation_frame().await?;
+                    modal.send_message(ExpressionEditorMsg::Render);
+                    Ok(())
+                });
             }
-            .into_closure(),
-        );
+        }
+        .into_closure();
 
         let cb = blurhandler.as_ref().as_ref().unchecked_ref();
         editor.add_event_listener_with_callback("blur", cb).unwrap();
-        ExpressionEditorElement { modal, blurhandler }
+        let blur = Rc::new(Blur {
+            handler: blurhandler,
+            elem: editor.clone(),
+        });
+
+        ExpressionEditorElement { modal, blur }
     }
 
     pub fn open(&mut self, target: HtmlElement) {
@@ -89,9 +106,6 @@ impl ExpressionEditorElement {
     }
 
     pub fn destroy(self) -> ApiResult<()> {
-        let cb = self.blurhandler.as_ref().as_ref().unchecked_ref();
-        let elem = &self.modal.custom_element;
-        elem.remove_event_listener_with_callback("blur", cb)?;
         self.modal.destroy()
     }
 
