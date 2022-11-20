@@ -40,15 +40,15 @@ fn main() -> Result<(), anyhow::Error> {
     build.compile()?.write("./build/css")?;
 
     let mut build = BuildCss::new("./src/themes");
-    build.add("./variables.less");
-    build.add("./fonts.less");
-    build.add("./material.less");
-    build.add("./material-dark.less");
-    build.add("./monokai.less");
-    build.add("./solarized.less");
-    build.add("./solarized-dark.less");
-    build.add("./vaporwave.less");
-    build.add("./themes.less");
+    build.add("variables.less");
+    build.add("fonts.less");
+    build.add("material.less");
+    build.add("material-dark.less");
+    build.add("monokai.less");
+    build.add("solarized.less");
+    build.add("solarized-dark.less");
+    build.add("vaporwave.less");
+    build.add("themes.less");
     build.compile()?.write("./dist/css")?;
 
     println!(

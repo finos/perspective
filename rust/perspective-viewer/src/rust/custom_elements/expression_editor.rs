@@ -23,7 +23,7 @@ use crate::*;
 #[derive(Clone)]
 pub struct ExpressionEditorElement {
     modal: ModalElement<ExpressionEditor>,
-    blur: Rc<Blur>,
+    _blur: Rc<Blur>,
 }
 
 struct Blur {
@@ -84,12 +84,12 @@ impl ExpressionEditorElement {
 
         let cb = blurhandler.as_ref().as_ref().unchecked_ref();
         editor.add_event_listener_with_callback("blur", cb).unwrap();
-        let blur = Rc::new(Blur {
+        let _blur = Rc::new(Blur {
             handler: blurhandler,
             elem: editor.clone(),
         });
 
-        ExpressionEditorElement { modal, blur }
+        ExpressionEditorElement { modal, _blur }
     }
 
     pub fn open(&mut self, target: HtmlElement) {
