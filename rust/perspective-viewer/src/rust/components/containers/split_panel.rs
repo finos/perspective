@@ -300,7 +300,7 @@ impl Component for SplitPanel {
         }
     }
 
-    fn changed(&mut self, ctx: &Context<Self>) -> bool {
+    fn changed(&mut self, ctx: &Context<Self>, _old: &Self::Properties) -> bool {
         assert!(ctx.props().validate());
         let new_len = ctx.props().children.len();
         self.refs.resize(new_len, Default::default());
