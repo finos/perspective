@@ -14,7 +14,7 @@
     "superstore_displays_visible_columns_": "09dd14f0e60da0e8749b7dd514e929f0",
     "superstore_resets_viewable_area_when_the_logical_size_expands_": "e9dd1d275f46f6a0857e0168835d0b38",
     "superstore_resets_viewable_area_when_the_physical_size_expands_": "e469597235cc032619bc095a76f9ad6f",
-    "__GIT_COMMIT__": "ef6df703f94bdda20d81b476d8725782904357db",
+    "__GIT_COMMIT__": "82f3e58191f6e05c750e4f3f10977d0b3a14ea4e",
     "superstore_shows_a_grid_without_any_settings_applied": "192edc6b035af6432c5bd82d295987f1",
     "superstore_pivot_by_a_row": "709a4a6b40153d9bf013f90398ee568d",
     "superstore_pivot_by_two_rows": "23db46ccf9d8327ae992fe3b5f468b3b",
@@ -28,6 +28,6 @@
     "superstore_filters_filters_by_an_alpha_column": "4b9a40c2ffad050ff4cf059e22cb2b68",
     "superstore_filters_filters_with__in__comparator": "5882e2d2694519ba9880d0b2d5b19c44",
     "superstore_perspective-config-update_event_is_fired_when_column_style_is_changed": "3d03b2787f9b903050942052168f755a",
-    "superstore_Column_style_menu_opens_for_numeric_columns": "fc42b6bd729d72974f1f3c91dee18d8b",
-    "superstore_Column_style_menu_opens_for_string_columns": "64ca2b3567212ac3b2a5184b7c033db5"
+    "superstore_Column_style_menu_opens_for_numeric_columns": "bb90da1cce340c8c311850f0b81f0d6a",
+    "superstore_Column_style_menu_opens_for_string_columns": "1c634f208fd1a55ed54a48ccb2c85c14"
 }

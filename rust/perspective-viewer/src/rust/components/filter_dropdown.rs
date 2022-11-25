@@ -13,7 +13,7 @@ use super::modal::*;
 use crate::utils::WeakScope;
 use crate::*;
 
-static CSS: &str = include_str!("../../../build/css/filter-dropdown.css");
+static CSS: &str = include_str!("../../../target/css/filter-dropdown.css");
 
 pub enum FilterDropDownMsg {
     SetValues(Vec<String>),

@@ -37,7 +37,7 @@ fn main() -> Result<(), anyhow::Error> {
         build.add(&src);
     }
 
-    build.compile()?.write("./build/css")?;
+    build.compile("./target/css")?;
 
     let mut build = BuildCss::new("./src/themes");
     build.add("variables.less");
@@ -49,7 +49,7 @@ fn main() -> Result<(), anyhow::Error> {
     build.add("solarized-dark.less");
     build.add("vaporwave.less");
     build.add("themes.less");
-    build.compile()?.write("./dist/css")?;
+    build.compile("./target/themes")?;
 
     println!(
         "cargo:rustc-env=PKG_VERSION={}",

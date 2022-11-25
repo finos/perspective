@@ -47,16 +47,15 @@ impl ExpressionEditorElement {
         alias: Option<String>,
     ) -> ExpressionEditorElement {
         let document = window().unwrap().document().unwrap();
-        let editor = document
+        let elem = document
             .create_element("perspective-expression-editor")
             .unwrap()
             .unchecked_into::<HtmlElement>();
 
         let on_validate = Callback::from({
-            clone!(editor);
+            clone!(elem);
             move |valid| {
-                editor
-                    .toggle_attribute_with_force("validating", valid)
+                elem.toggle_attribute_with_force("validating", valid)
                     .unwrap();
             }
         });
@@ -68,7 +67,7 @@ impl ExpressionEditorElement {
             alias,
         });
 
-        let modal = ModalElement::new(editor.clone(), props, true);
+        let modal = ModalElement::new(elem.clone(), props, true);
         let blurhandler = {
             clone!(modal);
             move |_event: FocusEvent| {
@@ -83,10 +82,10 @@ impl ExpressionEditorElement {
         .into_closure();
 
         let cb = blurhandler.as_ref().as_ref().unchecked_ref();
-        editor.add_event_listener_with_callback("blur", cb).unwrap();
+        elem.add_event_listener_with_callback("blur", cb).unwrap();
         let _blur = Rc::new(Blur {
             handler: blurhandler,
-            elem: editor.clone(),
+            elem,
         });
 
         ExpressionEditorElement { modal, _blur }

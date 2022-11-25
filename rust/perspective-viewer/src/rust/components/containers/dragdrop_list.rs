@@ -197,7 +197,7 @@ where
                 .collect::<Vec<(usize, (bool, Option<yew::virtual_dom::VChild<U>>))>>();
 
             if let Some((x, column)) = &ctx.props().is_dragover {
-                let index = *x as usize;
+                let index = *x;
                 let col_vchild = columns
                     .iter()
                     .map(|z| z.1 .1.as_ref().unwrap())
