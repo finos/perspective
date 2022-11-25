@@ -100,7 +100,7 @@ impl Component for NumberColumnStyle {
         NumberColumnStyle::reset(&ctx.props().config, &ctx.props().default_config)
     }
 
-    fn changed(&mut self, ctx: &Context<Self>) -> bool {
+    fn changed(&mut self, ctx: &Context<Self>, _old: &Self::Properties) -> bool {
         let mut new = NumberColumnStyle::reset(&ctx.props().config, &ctx.props().default_config);
         std::mem::swap(self, &mut new);
         true

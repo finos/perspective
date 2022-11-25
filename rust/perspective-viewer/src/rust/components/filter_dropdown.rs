@@ -105,7 +105,7 @@ impl Component for FilterDropDown {
         }
     }
 
-    fn changed(&mut self, _ctx: &Context<Self>) -> bool {
+    fn changed(&mut self, _ctx: &Context<Self>, _old: &Self::Properties) -> bool {
         false
     }
 

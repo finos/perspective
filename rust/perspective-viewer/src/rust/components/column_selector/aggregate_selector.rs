@@ -65,7 +65,7 @@ impl Component for AggregateSelector {
         }
     }
 
-    fn changed(&mut self, ctx: &Context<Self>) -> bool {
+    fn changed(&mut self, ctx: &Context<Self>, _old: &Self::Properties) -> bool {
         self.aggregates = self.get_dropdown_aggregates(ctx);
         true
     }

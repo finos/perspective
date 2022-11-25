@@ -97,7 +97,7 @@ wasm-bindgen = { version = "=0.2.82", features = ["serde-serialize"] }
 wasm-bindgen-futures = "0.4.20"
 
 # https://github.com/yewstack/yew/issues/2154
-yew = { git = "https://github.com/yewstack/yew", rev = "7438cd3059d58d0922e4c15135961c8fab6f2552", features = ["csr"] }
+yew = { version = "0.20.0", features = ["csr"] }
 
 [dependencies.web-sys]
 version = "0.3.59"
