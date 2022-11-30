@@ -37,7 +37,6 @@ const BUILD = [
         external: ["*.wasm", "*.worker.js"],
         outdir: "dist/esm",
     },
-
     {
         entryPoints: ["src/ts/perspective-viewer.ts"],
         plugins: [
@@ -118,6 +117,7 @@ async function build_all() {
     await Promise.all(POSTBUILD.map(build)).catch(() => process.exit(1));
 
     // legacy compat
+    execSync("cpy target/themes/* dist/css");
     execSync("cpy dist/css/* dist/umd");
 }
 
