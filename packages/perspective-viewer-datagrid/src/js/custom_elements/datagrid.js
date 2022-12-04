@@ -55,6 +55,14 @@ export class HTMLPerspectiveViewerDatagridPluginElement extends HTMLElement {
         return undefined;
     }
 
+    /**
+     * Give the Datagrid a higher priority so it is loaded
+     * over the default charts by default.
+     */
+    get priority() {
+        return 1;
+    }
+
     async draw(view) {
         return await draw.call(this, view);
     }

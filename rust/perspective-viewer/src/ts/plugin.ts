@@ -80,6 +80,18 @@ export interface IPerspectiveViewerPlugin {
     get config_column_names(): string[] | undefined;
 
     /**
+     * The load priority of the plugin. If the plugin shares priority with another,
+     * the first to load has a higher priority.
+     *
+     * A larger number has a higher priority.
+     *
+     * The plugin with the highest priority will be loaded by default by the Perspective viewer.
+     * If you would like to instead begin with a lower priority plugin, choose it explicitly with
+     * a `HTMLPerspectiveViewerPluginElement.restore` call.
+     */
+    get priority(): number | undefined;
+
+    /**
      * Render this plugin using the provided `View`.  While there is no
      * provision to cancel a render in progress per se, calling a method on
      * a `View` which has been deleted will throw an exception.
@@ -197,6 +209,10 @@ export class HTMLPerspectiveViewerPluginElement
 
     get config_column_names(): string[] | undefined {
         return undefined;
+    }
+
+    get priority(): number {
+        return 0;
     }
 
     async update(view: perspective.View): Promise<void> {

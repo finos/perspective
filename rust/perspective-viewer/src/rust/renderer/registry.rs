@@ -26,6 +26,7 @@ pub struct PluginRecord {
     name: String,
     category: String,
     tag_name: String,
+    priority: i32,
 }
 
 /// A global registry of all plugins that have been registered.
@@ -95,9 +96,11 @@ pub impl LocalKey<Rc<RefCell<Vec<PluginRecord>>>> {
                 category: plugin_inst
                     .category()
                     .unwrap_or_else(|| "Custom".to_owned()),
+                priority: plugin_inst.priority().unwrap_or_default(),
             };
-
-            plugin.borrow_mut().push(record);
+            let mut plugins = plugin.borrow_mut();
+            plugins.push(record);
+            plugins.sort_by(|a, b| Ord::cmp(&b.priority, &a.priority));
         });
     }
 
@@ -114,6 +117,7 @@ fn register_default() {
                 name: "Debug".to_owned(),
                 category: "Custom".to_owned(),
                 tag_name: "perspective-viewer-plugin".to_owned(),
+                priority: 0,
             })
         }
     })
