@@ -12,7 +12,7 @@ Commits from individuals not covered under an CLA can not be merged by Perspecti
 
 Need an ICLA? Unsure if you are covered under an existing CCLA? Confused? Email [help@finos.org](mailto:help@finos.org) and the foundation team will help get it sorted out for you. 
 
-If you have any general questions about contributing to Perspective, please feel free to chat with us on [gitter](https://gitter.im/finos/perspective), open an issue on [github](https://github.com/finos/perspective/issues/new), or email [help@finos.org](mailto:finos.org).
+If you have any general questions about contributing to Perspective, please feel free to open an issue on [github](https://github.com/finos/perspective/issues/new), or email [help@finos.org](mailto:finos.org).
 
 ## Guidelines
 
