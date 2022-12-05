@@ -32,7 +32,7 @@ function addDataValues(tooltipDiv, values) {
 }
 
 const formatNumber = (value) =>
-    value === null
+    value === null || value === undefined
         ? "-"
         : value.toLocaleString(undefined, {
               style: "decimal",
