@@ -66,6 +66,8 @@ function xyScatter(container, settings) {
         ? seriesLinearRange(settings, data, "size").range([10, 10000])
         : null;
 
+    const label = settings.realValues[4];
+
     const scale_factor = interpolate_scale([600, 0.1], [1600, 1])(container);
     const series = fc
         .seriesCanvasMulti()
@@ -77,6 +79,7 @@ function xyScatter(container, settings) {
                     series.key,
                     size,
                     color,
+                    label,
                     symbols,
                     scale_factor
                 )
@@ -139,7 +142,7 @@ xyScatter.plugin = {
     initial: {
         type: "number",
         count: 2,
-        names: ["X Axis", "Y Axis", "Color", "Size", "Tooltip"],
+        names: ["X Axis", "Y Axis", "Color", "Size", "Label", "Tooltip"],
     },
     selectMode: "toggle",
 };

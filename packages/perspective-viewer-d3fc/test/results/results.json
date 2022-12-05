@@ -1,5 +1,5 @@
 {
-    "__GIT_COMMIT__": "82f3e58191f6e05c750e4f3f10977d0b3a14ea4e",
+    "__GIT_COMMIT__": "2790e08e20b79865b75dacd318452655ad120b96",
     "area_shows_a_grid_without_any_settings_applied": "67bab9ea6654cc7cf7c7b096824e610a",
     "area_displays_visible_columns_": "9c195f0f7bf184a4cb9e727f1b37b301",
     "area_pivot_by_a_row": "fbae982b73c9cbf91be40a767cbbd3df",
@@ -145,5 +145,7 @@
     "sunburst_filters_filters_with__in__comparator": "80705a191c3675ed34d3058874f09a00",
     "bar_rendering_bugs_correctly_render_when_a_bar_chart_has_non_equidistant_times_on_a_datetime_axis": "96a10ce528c635ca24fa509e899bbb09",
     "events_perspective-config-update_event_is_fired_when_series_axis_is_changed": "c0cf24c214ad730393fdd7d58c843a8d",
-    "events_perspective-config-update_event_is_fired_when_legend_position_is_changed": "9753be00c0d084dfbe592b46f6af6b08"
+    "events_perspective-config-update_event_is_fired_when_legend_position_is_changed": "9753be00c0d084dfbe592b46f6af6b08",
+    "scatter_Scatter_charts_with_a__label__field_render_the_label": "313ffe98bbf4d005b54489937ed7f7ba",
+    "scatter_Scatter_charts_with_a__label__field_render_the_label_when_a_group_by_operation_is_applied": "313ffe98bbf4d005b54489937ed7f7ba"
 }
