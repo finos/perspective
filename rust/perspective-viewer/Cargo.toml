@@ -1,6 +1,6 @@
 [package]
 name = "perspective"
-version = "1.7.2"
+version = "1.8.0"
 authors = ["Andrew Stein <steinlink@gmail.com>"]
 edition = "2021"
 description = "A data visualization and analytics component, especially well-suited for large and/or streaming datasets."
@@ -9,12 +9,7 @@ license = "Apache-2.0"
 homepage = "https://perspective.finos.org"
 keywords = ["experimental"]
 build = "build.rs"
-include = [
-    "build.rs",
-    "src/**/*",
-    "Cargo.toml",
-    "package.json",
-]
+include = ["build.rs", "src/**/*", "Cargo.toml", "package.json"]
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -26,7 +21,7 @@ default = []
 
 [build-dependencies]
 serde_json = { version = "1.0.59", features = ["raw_value"] }
-procss = { version = "0.1.6" }
+procss = { version = "0.1.7" }
 glob = "0.3.0"
 anyhow = "1.0.66"
 
@@ -84,7 +79,10 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0.59", features = ["raw_value"] }
 
 # Async-aware logging that can be disabled at compile-time.
-tracing = { version = ">=0.1.36", features = ["release_max_level_error", "max_level_info"]}
+tracing = { version = ">=0.1.36", features = [
+    "release_max_level_error",
+    "max_level_info",
+] }
 
 # A JS console printer for `tracing`.
 tracing-wasm = ">=0.2.1"
@@ -100,11 +98,11 @@ yew = { version = "0.20.0", features = ["csr"] }
 
 [dependencies.web-sys]
 version = "0.3.59"
-features =  [
+features = [
     # "Performance",
     "Blob",
     "Clipboard",
-    "CssStyleDeclaration", 
+    "CssStyleDeclaration",
     "CssStyleSheet",
     "CssRuleList",
     "CssRule",
@@ -140,7 +138,7 @@ features =  [
     "Navigator",
     "Node",
     "NodeList",
-    'Performance', 
+    'Performance',
     # "TouchEvent",
     # "TouchList",
     # "Touch",
@@ -155,7 +153,7 @@ features =  [
     "StyleSheetList",
     "Url",
     "VisibilityState",
-    "Window"
+    "Window",
 ]
 
 

@@ -32,6 +32,7 @@ const EXCLUDED_SETTINGS = [
     "data",
     "size",
     "colorStyles",
+    "textStyles",
     "agg_paths",
     "treemaps",
 ];
@@ -456,6 +457,7 @@ export function register(...plugins) {
                         let settings = this._settings;
                         if (settings) {
                             delete settings["colorStyles"];
+                            delete settings["textStyles"];
                             await this.draw(...args);
                         }
                     }

@@ -43,6 +43,13 @@ export const initialiseStyles = (container, settings) => {
 
         settings.colorStyles = styles;
     }
+
+    if (!settings.textStyles) {
+        const css = window.getComputedStyle(container);
+        const color = css.getPropertyValue("color");
+        const font = `12px ${css.getPropertyValue("font-family")}`;
+        settings.textStyles = { color, font };
+    }
 };
 
 const getOpacityFromColor = (color) => {

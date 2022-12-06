@@ -39,13 +39,15 @@ export function pointSeriesCanvas(
         const opacity = settings.colorStyles && settings.colorStyles.opacity;
 
         if (label) {
-            context.fillStyle = "#000"; // TODO;
-            context.font = "12px Open Sans";
-            const type = settings.mainValues.find(
-                (x) => x.name === label
-            )?.type;
+            context.fillStyle = settings.textStyles.color;
+            context.font = settings.textStyles.font;
+            const { type } = settings.mainValues.find((x) => x.name === label);
             const value = toValue(type, d.row[label]);
-            context.fillText(value, 0, -10);
+            const offset = size
+                ? Math.round(scale_factor * size(d.size)) * (15 / 1000) + 10
+                : 10;
+
+            context.fillText(value, offset, 4);
         }
 
         context.strokeStyle = withoutOpacity(colorValue);
