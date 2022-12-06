@@ -7,7 +7,7 @@
  *
  */
 
-import {defaultPadding} from "./default";
+import { defaultPadding } from "./default";
 import * as fc from "d3fc";
 
 export const hardLimitZeroPadding = () => {

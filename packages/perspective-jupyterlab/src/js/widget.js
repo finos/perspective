@@ -7,7 +7,7 @@
  *
  */
 
-import {PerspectiveWidget} from "./psp_widget";
+import { PerspectiveWidget } from "./psp_widget";
 
 /**
  * PerspectiveJupyterWidget is the ipywidgets front-end for the Perspective Jupyterlab plugin.

@@ -8,11 +8,11 @@
  */
 
 import "@finos/perspective-viewer";
-import {Widget} from "@lumino/widgets/src/widget";
+import { Widget } from "@lumino/widgets/src/widget";
 
 export class PerspectiveViewerWidget extends Widget {
-    constructor({viewer, node}) {
-        super({node});
+    constructor({ viewer, node }) {
+        super({ node });
         this.viewer = viewer;
         this.master = false;
     }
@@ -103,7 +103,7 @@ export class PerspectiveViewerWidget extends Widget {
             this.viewer.setAttribute("editable", editable);
         }
 
-        const restore_config = () => this.viewer.restore({...viewerConfig});
+        const restore_config = () => this.viewer.restore({ ...viewerConfig });
 
         if (this._is_table_loaded) {
             return restore_config();

@@ -8,8 +8,8 @@
  */
 
 import chroma from "chroma-js";
-import {createDataListener} from "../data_listener";
-import {blend, make_color_record} from "../color_utils.js";
+import { createDataListener } from "../data_listener";
+import { blend, make_color_record } from "../color_utils.js";
 
 function get_rule(regular, tag, def) {
     let color = window.getComputedStyle(regular).getPropertyValue(tag).trim();
@@ -98,7 +98,7 @@ export async function createModel(regular, table, view, extend = {}) {
         get_rule(regular, "--active--color", "#ff0000")
     );
 
-    const _schema = {...schema, ...expression_schema};
+    const _schema = { ...schema, ...expression_schema };
     const _table_schema = {
         ...table_schema,
         ...validated_expressions.expression_schema,

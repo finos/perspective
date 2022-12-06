@@ -1,5 +1,21 @@
 # Changelog
 
+## [v1.7.2](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.7.1...HEAD)
+
+**Closed issues:**
+
+- \[doc\#expressions\]\(https://perspective.finos.org/docs/expressions\) can't visit [\#1997](https://github.com/finos/perspective/issues/1997)
+- How to computer aggregate columns? [\#1981](https://github.com/finos/perspective/issues/1981)
+
+**Merged pull requests:**
+
+- Upgrade to Yew 0.20.0 [\#2018](https://github.com/finos/perspective/pull/2018) ([texodus](https://github.com/texodus))
+- Re-add secondary dependency as primary dependency to fix python tests [\#2013](https://github.com/finos/perspective/pull/2013) ([timkpaine](https://github.com/timkpaine))
+- Cleanup items [\#2012](https://github.com/finos/perspective/pull/2012) ([texodus](https://github.com/texodus))
+- accidentally copying license as readme when disting python [\#1991](https://github.com/finos/perspective/pull/1991) ([timkpaine](https://github.com/timkpaine))
+
 ## [v1.7.1](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.7.0...HEAD)

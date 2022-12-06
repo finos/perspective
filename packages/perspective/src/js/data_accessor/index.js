@@ -7,8 +7,8 @@
  *
  */
 
-import {get_column_type} from "../utils.js";
-import {get_type_config} from "../config/index.js";
+import { get_column_type } from "../utils.js";
+import { get_type_config } from "../config/index.js";
 
 export class DataAccessor {
     constructor() {

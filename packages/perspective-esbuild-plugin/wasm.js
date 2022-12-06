@@ -2,25 +2,28 @@ const fs = require("fs");
 
 exports.WasmPlugin = function WasmPlugin(inline) {
     function setup(build) {
-        build.onResolve({filter: /^\@finos\/perspective.+?\.wasm$/}, (args) => {
-            if (
-                args.namespace === "wasm-stub" ||
-                args.namespace === "wasm-inline"
-            ) {
+        build.onResolve(
+            { filter: /^\@finos\/perspective.+?\.wasm$/ },
+            (args) => {
+                if (
+                    args.namespace === "wasm-stub" ||
+                    args.namespace === "wasm-inline"
+                ) {
+                    return {
+                        path: args.path,
+                        namespace: "wasm",
+                    };
+                }
+
                 return {
                     path: args.path,
-                    namespace: "wasm",
+                    namespace: inline ? "wasm-inline" : "wasm-stub",
                 };
             }
-
-            return {
-                path: args.path,
-                namespace: inline ? "wasm-inline" : "wasm-stub",
-            };
-        });
+        );
 
         build.onLoad(
-            {filter: /.*/, namespace: "wasm-inline"},
+            { filter: /.*/, namespace: "wasm-inline" },
             async (args) => ({
                 contents: `
                     import wasm from ${JSON.stringify(args.path)};
@@ -29,8 +32,10 @@ exports.WasmPlugin = function WasmPlugin(inline) {
             })
         );
 
-        build.onLoad({filter: /.*/, namespace: "wasm-stub"}, async (args) => ({
-            contents: `
+        build.onLoad(
+            { filter: /.*/, namespace: "wasm-stub" },
+            async (args) => ({
+                contents: `
                 import wasm from ${JSON.stringify(args.path)};
                 async function get_wasm() {
                     return new URL(wasm, import.meta.url);
@@ -38,9 +43,10 @@ exports.WasmPlugin = function WasmPlugin(inline) {
 
                 export default get_wasm();
             `,
-        }));
+            })
+        );
 
-        build.onLoad({filter: /.*/, namespace: "wasm"}, async (args) => {
+        build.onLoad({ filter: /.*/, namespace: "wasm" }, async (args) => {
             const path = require.resolve(args.path);
             const contents = await fs.promises.readFile(path);
             return {

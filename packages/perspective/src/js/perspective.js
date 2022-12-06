@@ -7,16 +7,16 @@
  *
  */
 import * as defaults from "./config/constants.js";
-import {get_type_config} from "./config/index.js";
-import {DataAccessor} from "./data_accessor";
-import {extract_vector, extract_map, fill_vector} from "./emscripten.js";
-import {bindall, get_column_type} from "./utils.js";
-import {Server} from "./api/server.js";
+import { get_type_config } from "./config/index.js";
+import { DataAccessor } from "./data_accessor";
+import { extract_vector, extract_map, fill_vector } from "./emscripten.js";
+import { bindall, get_column_type } from "./utils.js";
+import { Server } from "./api/server.js";
 
 import formatters from "./view_formatters";
 
 if (typeof self !== "undefined" && self.performance === undefined) {
-    self.performance = {now: Date.now};
+    self.performance = { now: Date.now };
 }
 
 const WARNED_KEYS = new Set();
@@ -1075,7 +1075,7 @@ export default function (Module) {
      *     - "none" (default): `delta` is `undefined`.
      *     - "row": `delta` is an Arrow of the updated rows.
      */
-    view.prototype.on_update = function (callback, {mode = "none"} = {}) {
+    view.prototype.on_update = function (callback, { mode = "none" } = {}) {
         _call_process(this.table.get_id());
 
         if (["none", "row"].indexOf(mode) === -1) {
@@ -1102,7 +1102,7 @@ export default function (Module) {
                     cache[port_id] = {};
                 }
 
-                let updated = {port_id};
+                let updated = { port_id };
 
                 if (mode === "row") {
                     if (cache[port_id]["row_delta"] === undefined) {
@@ -1735,8 +1735,6 @@ export default function (Module) {
         return typeof value !== "undefined" && value !== null;
     };
 
-    /* eslint-disable max-len */
-
     /**
      * Create a new {@link module:perspective~view} from this table with a
      * specified configuration. For a better understanding of the View
@@ -1878,8 +1876,6 @@ export default function (Module) {
         return v;
     };
 
-    /* eslint-enable max-len */
-
     let meter;
 
     function initialize_profile_thread() {
@@ -2019,7 +2015,7 @@ export default function (Module) {
         let types = schema.types();
         let is_arrow = false;
 
-        data = data.map((idx) => ({[this.index]: idx}));
+        data = data.map((idx) => ({ [this.index]: idx }));
 
         if (data instanceof ArrayBuffer) {
             pdata = new Uint8Array(data);

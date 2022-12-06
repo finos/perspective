@@ -1,4 +1,4 @@
-import {select, line} from "d3";
+import { select, line } from "d3";
 import {
     axisOrdinalTop,
     axisOrdinalBottom,

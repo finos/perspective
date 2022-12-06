@@ -7,7 +7,7 @@
  *
  */
 
-const {convert} = require("@finos/perspective-viewer/dist/cjs/migrate.js");
+const { convert } = require("@finos/perspective-viewer/dist/cjs/migrate.js");
 const utils = require("@finos/perspective-test");
 const path = require("path");
 
@@ -101,13 +101,13 @@ function tests(extract) {
             delete config.viewers.One["settings"];
 
             expect(config).toEqual(current);
-            expect(convert(old, {replace_defaults: true})).toEqual(current);
+            expect(convert(old, { replace_defaults: true })).toEqual(current);
             return extract(page);
         });
     }
 }
 
-utils.with_server({paths: PATHS}, () => {
+utils.with_server({ paths: PATHS }, () => {
     describe.page(
         "workspace-all.html",
         () => {
@@ -132,6 +132,6 @@ utils.with_server({paths: PATHS}, () => {
                 );
             });
         },
-        {root: TEST_ROOT}
+        { root: TEST_ROOT }
     );
 });

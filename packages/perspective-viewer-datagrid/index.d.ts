@@ -1,4 +1,4 @@
-import type {IPerspectiveViewerPlugin} from "@finos/perspective-viewer";
+import type { IPerspectiveViewerPlugin } from "@finos/perspective-viewer";
 
 declare global {
     interface CustomElementRegistry {
@@ -11,7 +11,6 @@ declare global {
     }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface HTMLPerspectiveViewerDatagridPluginElement
     extends IPerspectiveViewerPlugin {}
 

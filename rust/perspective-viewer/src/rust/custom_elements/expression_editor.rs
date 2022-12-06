@@ -23,7 +23,21 @@ use crate::*;
 #[derive(Clone)]
 pub struct ExpressionEditorElement {
     modal: ModalElement<ExpressionEditor>,
-    blurhandler: Rc<Closure<dyn Fn(web_sys::FocusEvent)>>,
+    _blur: Rc<Blur>,
+}
+
+struct Blur {
+    elem: HtmlElement,
+    handler: Closure<dyn Fn(web_sys::FocusEvent)>,
+}
+
+impl Drop for Blur {
+    fn drop(&mut self) {
+        let cb = self.handler.as_ref().as_ref().unchecked_ref();
+        self.elem
+            .remove_event_listener_with_callback("blur", cb)
+            .unwrap();
+    }
 }
 
 impl ExpressionEditorElement {
@@ -33,16 +47,15 @@ impl ExpressionEditorElement {
         alias: Option<String>,
     ) -> ExpressionEditorElement {
         let document = window().unwrap().document().unwrap();
-        let editor = document
+        let elem = document
             .create_element("perspective-expression-editor")
             .unwrap()
             .unchecked_into::<HtmlElement>();
 
         let on_validate = Callback::from({
-            clone!(editor);
+            clone!(elem);
             move |valid| {
-                editor
-                    .toggle_attribute_with_force("validating", valid)
+                elem.toggle_attribute_with_force("validating", valid)
                     .unwrap();
             }
         });
@@ -54,25 +67,28 @@ impl ExpressionEditorElement {
             alias,
         });
 
-        let modal = ModalElement::new(editor.clone(), props, true);
-        let blurhandler = Rc::new(
-            {
+        let modal = ModalElement::new(elem.clone(), props, true);
+        let blurhandler = {
+            clone!(modal);
+            move |_event: FocusEvent| {
                 clone!(modal);
-                move |_event: FocusEvent| {
-                    clone!(modal);
-                    ApiFuture::spawn(async move {
-                        await_animation_frame().await?;
-                        modal.send_message(ExpressionEditorMsg::Render);
-                        Ok(())
-                    });
-                }
+                ApiFuture::spawn(async move {
+                    await_animation_frame().await?;
+                    modal.send_message(ExpressionEditorMsg::Render);
+                    Ok(())
+                });
             }
-            .into_closure(),
-        );
+        }
+        .into_closure();
 
         let cb = blurhandler.as_ref().as_ref().unchecked_ref();
-        editor.add_event_listener_with_callback("blur", cb).unwrap();
-        ExpressionEditorElement { modal, blurhandler }
+        elem.add_event_listener_with_callback("blur", cb).unwrap();
+        let _blur = Rc::new(Blur {
+            handler: blurhandler,
+            elem,
+        });
+
+        ExpressionEditorElement { modal, _blur }
     }
 
     pub fn open(&mut self, target: HtmlElement) {
@@ -89,9 +105,6 @@ impl ExpressionEditorElement {
     }
 
     pub fn destroy(self) -> ApiResult<()> {
-        let cb = self.blurhandler.as_ref().as_ref().unchecked_ref();
-        let elem = &self.modal.custom_element;
-        elem.remove_event_listener_with_callback("blur", cb)?;
         self.modal.destroy()
     }
 

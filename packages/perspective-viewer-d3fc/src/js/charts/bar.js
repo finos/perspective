@@ -7,17 +7,17 @@
  *
  */
 import * as fc from "d3fc";
-import {axisFactory} from "../axis/axisFactory";
-import {chartSvgFactory} from "../axis/chartFactory";
-import {AXIS_TYPES} from "../axis/axisType";
-import {barSeries} from "../series/barSeries";
-import {seriesColors} from "../series/seriesColors";
-import {groupAndStackData} from "../data/groupData";
-import {colorLegend} from "../legend/legend";
-import {filterData} from "../legend/filter";
+import { axisFactory } from "../axis/axisFactory";
+import { chartSvgFactory } from "../axis/chartFactory";
+import { AXIS_TYPES } from "../axis/axisType";
+import { barSeries } from "../series/barSeries";
+import { seriesColors } from "../series/seriesColors";
+import { groupAndStackData } from "../data/groupData";
+import { colorLegend } from "../legend/legend";
+import { filterData } from "../legend/filter";
 import withGridLines from "../gridlines/gridlines";
 
-import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
+import { hardLimitZeroPadding } from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
 
 function barChart(container, settings) {

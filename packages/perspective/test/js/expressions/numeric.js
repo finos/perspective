@@ -1173,12 +1173,12 @@ module.exports = (perspective) => {
                 for (let i = 0; i < 1000; i++) {
                     data.push(i);
                 }
-                table.update({x: data});
+                table.update({ x: data });
                 const view = await table.view({
                     expressions: ["random()"],
                 });
                 const schema = await view.expression_schema();
-                expect(schema).toEqual({"random()": "float"});
+                expect(schema).toEqual({ "random()": "float" });
                 const result = await view.to_columns();
 
                 for (let i = 0; i < 1000; i++) {

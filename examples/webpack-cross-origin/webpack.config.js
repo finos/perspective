@@ -36,14 +36,14 @@ module.exports = {
             {
                 test: /\.css$/,
                 exclude: [/packages/, /node_modules/],
-                use: [{loader: "style-loader"}, {loader: "css-loader"}],
+                use: [{ loader: "style-loader" }, { loader: "css-loader" }],
             },
         ],
     },
     devtool: "source-map",
     devServer: {
         historyApiFallback: true,
-        watchOptions: {aggregateTimeout: 300, poll: 1000},
+        watchOptions: { aggregateTimeout: 300, poll: 1000 },
         headers: {
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods":

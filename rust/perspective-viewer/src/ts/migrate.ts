@@ -51,14 +51,14 @@
  */
 export function convert(
     old: Record<string, unknown> | ArrayBuffer | string,
-    {warn = true, replace_defaults = false}: PerspectiveConvertOptions = {}
+    { warn = true, replace_defaults = false }: PerspectiveConvertOptions = {}
 ): Record<string, unknown> | ArrayBuffer | string {
     if (typeof old === "object" && !(old instanceof ArrayBuffer)) {
         const copy = JSON.parse(JSON.stringify(old));
         if ("viewers" in copy && "detail" in copy) {
-            return migrate_workspace(copy, {warn, replace_defaults});
+            return migrate_workspace(copy, { warn, replace_defaults });
         } else {
-            return migrate_viewer(copy, false, {warn, replace_defaults});
+            return migrate_viewer(copy, false, { warn, replace_defaults });
         }
     } else {
         return old;

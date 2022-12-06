@@ -14,7 +14,7 @@ let port;
 
 describe("WebSocketManager", function () {
     beforeAll(() => {
-        server = new perspective.WebSocketServer({port: 0});
+        server = new perspective.WebSocketServer({ port: 0 });
         port = server._server.address().port;
     });
 
@@ -23,7 +23,7 @@ describe("WebSocketManager", function () {
     });
 
     it("sends initial data client on subscribe", async () => {
-        const data = [{x: 1}];
+        const data = [{ x: 1 }];
         const table = await perspective.table(data);
         server.host_table("test", table);
 
@@ -40,14 +40,14 @@ describe("WebSocketManager", function () {
     it("passes back errors from server", async () => {
         expect.assertions(2);
 
-        const data = [{x: 1}];
+        const data = [{ x: 1 }];
         const table = await perspective.table(data);
         server.host_table("test", table);
 
         const client = perspective.websocket(`ws://localhost:${port}`);
         const client_table = await client.open_table("test");
 
-        client_table.view({columns: ["z"]}).catch((error) => {
+        client_table.view({ columns: ["z"] }).catch((error) => {
             expect(error.message).toBe(
                 "Abort(): Invalid column 'z' found in View columns.\n"
             );
@@ -62,7 +62,7 @@ describe("WebSocketManager", function () {
     });
 
     it("sends initial data multiple client on subscribe", async () => {
-        const data = [{x: 1}];
+        const data = [{ x: 1 }];
         const table = await perspective.table(data);
         server.host_table("test", table);
 
@@ -89,7 +89,7 @@ describe("WebSocketManager", function () {
     it("passes back errors with multiple client on subscribe", async () => {
         expect.assertions(3);
 
-        const data = [{x: 1}];
+        const data = [{ x: 1 }];
         const table = await perspective.table(data);
         server.host_table("test", table);
 
@@ -99,7 +99,7 @@ describe("WebSocketManager", function () {
         const client_1_table = await client_1.open_table("test");
         const client_2_table = await client_2.open_table("test");
 
-        client_1_table.view({columns: ["z"]}).catch((error) => {
+        client_1_table.view({ columns: ["z"] }).catch((error) => {
             expect(error.message).toBe(
                 "Abort(): Invalid column 'z' found in View columns.\n"
             );
@@ -121,7 +121,7 @@ describe("WebSocketManager", function () {
     });
 
     it("sends updates to client on subscribe", async (done) => {
-        const data = [{x: 1}];
+        const data = [{ x: 1 }];
         const table = await perspective.table(data);
         server.host_table("test", table);
 
@@ -129,11 +129,10 @@ describe("WebSocketManager", function () {
         const client_table = await client.open_table("test");
 
         const client_view = await client_table.view();
-        // eslint-disable-next-line no-unused-vars
         const on_update = () => {
             client_view.to_json().then(async (updated_data) => {
                 server.eject_table("test");
-                expect(updated_data).toEqual([{x: 1}, {x: 2}]);
+                expect(updated_data).toEqual([{ x: 1 }, { x: 2 }]);
                 await client.terminate();
                 setTimeout(done);
             });
@@ -142,12 +141,12 @@ describe("WebSocketManager", function () {
         client_view.on_update(on_update);
         client_view.to_json().then((client_data) => {
             expect(client_data).toEqual(data);
-            table.update([{x: 2}]);
+            table.update([{ x: 2 }]);
         });
     });
 
     it("Calls `update` and sends arraybuffers using `binary_length`", async () => {
-        const data = [{x: 1}];
+        const data = [{ x: 1 }];
         const table = await perspective.table(data);
         const view = await table.view();
         const arrow = await view.to_arrow();
@@ -161,14 +160,14 @@ describe("WebSocketManager", function () {
 
         const client_view = await client_table.view();
         const client_data = await client_view.to_json();
-        expect(client_data).toEqual([{x: 1}, {x: 1}]);
+        expect(client_data).toEqual([{ x: 1 }, { x: 1 }]);
 
         await client.terminate();
         server.eject_table("test");
     });
 
     it("Calls `update` and sends arraybuffers using `binary_length` multiple times", async () => {
-        const data = [{x: 1}];
+        const data = [{ x: 1 }];
         const table = await perspective.table(data);
         const view = await table.view();
         const arrow = await view.to_arrow();
@@ -184,14 +183,14 @@ describe("WebSocketManager", function () {
 
         const client_view = await client_table.view();
         const client_data = await client_view.to_json();
-        expect(client_data).toEqual([{x: 1}, {x: 1}, {x: 1}, {x: 1}]);
+        expect(client_data).toEqual([{ x: 1 }, { x: 1 }, { x: 1 }, { x: 1 }]);
 
         await client.terminate();
         server.eject_table("test");
     });
 
     it("Calls `update` and sends arraybuffers using `on_update`", async (done) => {
-        const data = [{x: 1}];
+        const data = [{ x: 1 }];
         const table = await perspective.table(data);
         const view = await table.view();
         const arrow = await view.to_arrow();
@@ -207,7 +206,7 @@ describe("WebSocketManager", function () {
             done();
         };
 
-        view.on_update(updater, {mode: "row"});
+        view.on_update(updater, { mode: "row" });
 
         server.host_table("test", table);
 
@@ -221,6 +220,6 @@ describe("WebSocketManager", function () {
 
         update_port = await client_table.make_port();
 
-        client_table.update(arrow, {port_id: update_port});
+        client_table.update(arrow, { port_id: update_port });
     });
 });

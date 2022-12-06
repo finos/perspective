@@ -7,20 +7,15 @@
  *
  */
 
-@import "../less/fonts";
-@import (reference) "./material.less";
+@import url("ref://material.less");
 
 perspective-viewer,
 perspective-viewer[theme="Solarized"] {
     --theme-name: "Solarized";
 }
 
-perspective-viewer[theme="Solarized"],
-.perspective-viewer-solarized {
-    .perspective-viewer-material();
-    .perspective-viewer-solarized--colors();
-    .perspective-viewer-solarized--datagrid();
-    .perspective-viewer-solarized--d3fc();
+perspective-viewer[theme="Solarized"] {
+    @include perspective-viewer-solarized;
 }
 
 perspective-copy-menu[theme="Solarized"],
@@ -30,15 +25,25 @@ perspective-date-column-style[theme="Solarized"],
 perspective-datetime-column-style[theme="Solarized"],
 perspective-number-column-style[theme="Solarized"],
 perspective-string-column-style[theme="Solarized"],
-perspective-expression-editor[theme="Solarized"],
-.perspective-modal-solarized {
-    .perspective-modal-material();
-    .perspective-viewer-solarized--colors();
+perspective-expression-editor[theme="Solarized"] {
+    @include perspective-modal-solarized;
+}
+
+@mixin perspective-modal-solarized {
+    @include perspective-modal-material;
+    @include perspective-viewer-solarized--colors;
 
     background-color: #fdf6e3;
 }
 
-.perspective-viewer-solarized--colors {
+@mixin perspective-viewer-solarized {
+    @include perspective-viewer-material;
+    @include perspective-viewer-solarized--colors;
+    @include perspective-viewer-solarized--datagrid;
+    @include perspective-viewer-solarized--d3fc;
+}
+
+@mixin perspective-viewer-solarized--colors {
     color: #586e75;
     background: #eee8d5;
     --active--color: #268bd2;
@@ -53,7 +58,7 @@ perspective-expression-editor[theme="Solarized"],
     --boolean--column-type--color: #b58900;
 }
 
-.perspective-viewer-solarized--datagrid {
+@mixin perspective-viewer-solarized--datagrid {
     regular-table {
         --rt-pos-cell--color: #268bd2 !important;
         --rt-neg-cell--color: #cb4b16 !important;
@@ -78,7 +83,7 @@ perspective-expression-editor[theme="Solarized"],
     }
 }
 
-.perspective-viewer-solarized--d3fc {
+@mixin perspective-viewer-solarized--d3fc {
     --d3fc-treedata--labels: black;
     --d3fc-treedata--hover-highlight: black;
 

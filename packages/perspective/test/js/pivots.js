@@ -8,10 +8,10 @@
  */
 
 var data = [
-    {x: 1, y: "a", z: true},
-    {x: 2, y: "b", z: false},
-    {x: 3, y: "c", z: true},
-    {x: 4, y: "d", z: false},
+    { x: 1, y: "a", z: true },
+    { x: 2, y: "b", z: false },
+    { x: 3, y: "c", z: true },
+    { x: 4, y: "d", z: false },
 ];
 
 var meta = {
@@ -21,10 +21,10 @@ var meta = {
 };
 
 var data2 = [
-    {x: 1, y: 1, z: true},
-    {x: 2, y: 1, z: false},
-    {x: 3, y: 2, z: true},
-    {x: 4, y: 2, z: false},
+    { x: 1, y: 1, z: true },
+    { x: 2, y: 1, z: false },
+    { x: 3, y: 2, z: true },
+    { x: 4, y: 2, z: false },
 ];
 
 var data_7 = {
@@ -101,13 +101,13 @@ module.exports = (perspective) => {
         it("old `aggregate` syntax is backwards compatible", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
-                aggregate: [{column: "x", op: "sum"}],
+                aggregate: [{ column: "x", op: "sum" }],
                 group_by: ["z"],
             });
             var answer = [
-                {__ROW_PATH__: [], x: 10},
-                {__ROW_PATH__: [false], x: 6},
-                {__ROW_PATH__: [true], x: 4},
+                { __ROW_PATH__: [], x: 10 },
+                { __ROW_PATH__: [false], x: 6 },
+                { __ROW_PATH__: [true], x: 4 },
             ];
             let result = await view.to_json();
             expect(result).toEqual(answer);
@@ -128,9 +128,9 @@ module.exports = (perspective) => {
             const paths = await view.column_paths();
             expect(paths).toEqual(["__ROW_PATH__", "y", "z"]);
             const answer = [
-                {__ROW_PATH__: [], y: "c", z: true},
-                {__ROW_PATH__: [false], y: "d", z: false},
-                {__ROW_PATH__: [true], y: "c", z: true},
+                { __ROW_PATH__: [], y: "c", z: true },
+                { __ROW_PATH__: [false], y: "d", z: false },
+                { __ROW_PATH__: [true], y: "c", z: true },
             ];
             const result = await view.to_json();
             expect(result).toEqual(answer);
@@ -150,9 +150,9 @@ module.exports = (perspective) => {
             const paths = await view.column_paths();
             expect(paths).toEqual(["__ROW_PATH__", "y", "z"]);
             const answer = [
-                {__ROW_PATH__: [], y: 4, z: 4},
-                {__ROW_PATH__: [false], y: 2, z: 2},
-                {__ROW_PATH__: [true], y: 2, z: 2},
+                { __ROW_PATH__: [], y: 4, z: 4 },
+                { __ROW_PATH__: [false], y: 2, z: 2 },
+                { __ROW_PATH__: [true], y: 2, z: 2 },
             ];
             const result = await view.to_json();
             expect(result).toEqual(answer);
@@ -167,9 +167,9 @@ module.exports = (perspective) => {
                 columns: ["x"],
             });
             var answer = [
-                {__ROW_PATH__: [], x: 10},
-                {__ROW_PATH__: [false], x: 6},
-                {__ROW_PATH__: [true], x: 4},
+                { __ROW_PATH__: [], x: 10 },
+                { __ROW_PATH__: [false], x: 6 },
+                { __ROW_PATH__: [true], x: 4 },
             ];
             let result = await view.to_json();
             expect(result).toEqual(answer);
@@ -181,13 +181,13 @@ module.exports = (perspective) => {
             var table = await perspective.table(data2);
             var view = await table.view({
                 group_by: ["z"],
-                aggregates: {x: ["weighted mean", "y"]},
+                aggregates: { x: ["weighted mean", "y"] },
                 columns: ["x"],
             });
             var answer = [
-                {__ROW_PATH__: [], x: 2.8333333333333335},
-                {__ROW_PATH__: [false], x: 3.3333333333333335},
-                {__ROW_PATH__: [true], x: 2.3333333333333335},
+                { __ROW_PATH__: [], x: 2.8333333333333335 },
+                { __ROW_PATH__: [false], x: 3.3333333333333335 },
+                { __ROW_PATH__: [true], x: 2.3333333333333335 },
             ];
             let result = await view.to_json();
             expect(result).toEqual(answer);
@@ -205,13 +205,13 @@ module.exports = (perspective) => {
             const view = await table.view({
                 group_by: ["z"],
                 columns: ["x"],
-                aggregates: {x: ["weighted mean", "y"]},
+                aggregates: { x: ["weighted mean", "y"] },
             });
 
             const answer = [
-                {__ROW_PATH__: [], x: 2.8333333333333335},
-                {__ROW_PATH__: [false], x: 3.3333333333333335},
-                {__ROW_PATH__: [true], x: 2.3333333333333335},
+                { __ROW_PATH__: [], x: 2.8333333333333335 },
+                { __ROW_PATH__: [false], x: 3.3333333333333335 },
+                { __ROW_PATH__: [true], x: 2.3333333333333335 },
             ];
 
             table.update(data2);
@@ -227,12 +227,12 @@ module.exports = (perspective) => {
             var view = await table.view({
                 group_by: ["z"],
                 columns: ["x"],
-                aggregates: {x: "mean"},
+                aggregates: { x: "mean" },
             });
             var answer = [
-                {__ROW_PATH__: [], x: 2.5},
-                {__ROW_PATH__: [false], x: 3},
-                {__ROW_PATH__: [true], x: 2},
+                { __ROW_PATH__: [], x: 2.5 },
+                { __ROW_PATH__: [false], x: 3 },
+                { __ROW_PATH__: [true], x: 2 },
             ];
             let result = await view.to_json();
             expect(result).toEqual(answer);
@@ -249,12 +249,12 @@ module.exports = (perspective) => {
             const view = await table.view({
                 group_by: ["z"],
                 columns: ["x"],
-                aggregates: {x: "mean"},
+                aggregates: { x: "mean" },
             });
             const answer = [
-                {__ROW_PATH__: [], x: 2.5},
-                {__ROW_PATH__: [false], x: 3},
-                {__ROW_PATH__: [true], x: 2},
+                { __ROW_PATH__: [], x: 2.5 },
+                { __ROW_PATH__: [false], x: 3 },
+                { __ROW_PATH__: [true], x: 2 },
             ];
 
             table.update(data);
@@ -270,12 +270,12 @@ module.exports = (perspective) => {
             var view = await table.view({
                 group_by: ["z"],
                 columns: ["x"],
-                aggregates: {x: "first by index"},
+                aggregates: { x: "first by index" },
             });
             var answer = [
-                {__ROW_PATH__: [], x: 1},
-                {__ROW_PATH__: [false], x: 2},
-                {__ROW_PATH__: [true], x: 1},
+                { __ROW_PATH__: [], x: 1 },
+                { __ROW_PATH__: [false], x: 2 },
+                { __ROW_PATH__: [true], x: 1 },
             ];
             let result = await view.to_json();
             expect(result).toEqual(answer);
@@ -288,12 +288,12 @@ module.exports = (perspective) => {
             var view = await table.view({
                 group_by: ["z"],
                 columns: ["x"],
-                aggregates: {x: "join"},
+                aggregates: { x: "join" },
             });
             var answer = [
-                {__ROW_PATH__: [], x: "1, 2, 3, 4"},
-                {__ROW_PATH__: [false], x: "2, 4"},
-                {__ROW_PATH__: [true], x: "1, 3"},
+                { __ROW_PATH__: [], x: "1, 2, 3, 4" },
+                { __ROW_PATH__: [false], x: "2, 4" },
+                { __ROW_PATH__: [true], x: "1, 3" },
             ];
             let result = await view.to_json();
             expect(result).toEqual(answer);
@@ -312,12 +312,12 @@ module.exports = (perspective) => {
             var view = await table.view({
                 group_by: ["z"],
                 columns: ["y"],
-                aggregates: {y: "join"},
+                aggregates: { y: "join" },
             });
             var answer = [
-                {__ROW_PATH__: [], y: "a"},
-                {__ROW_PATH__: [false], y: ""},
-                {__ROW_PATH__: [true], y: "a, c"},
+                { __ROW_PATH__: [], y: "a" },
+                { __ROW_PATH__: [false], y: "" },
+                { __ROW_PATH__: [true], y: "a, c" },
             ];
             let result = await view.to_json();
             expect(result).toEqual(answer);
@@ -327,7 +327,7 @@ module.exports = (perspective) => {
 
         it("join with nulls", async function () {
             const data = [
-                {country: "US", state: "New York", city: null},
+                { country: "US", state: "New York", city: null },
                 {
                     country: "US",
                     state: "Arizona",
@@ -339,7 +339,7 @@ module.exports = (perspective) => {
             var view = await table.view({
                 group_by: ["country", "state"],
                 columns: ["city"],
-                aggregates: {city: "join"},
+                aggregates: { city: "join" },
             });
             var answer = {
                 __ROW_PATH__: [
@@ -362,16 +362,16 @@ module.exports = (perspective) => {
         });
 
         it("['z'], first by index with appends", async function () {
-            var table = await perspective.table(data, {index: "y"});
+            var table = await perspective.table(data, { index: "y" });
             var view = await table.view({
                 group_by: ["z"],
                 columns: ["x"],
-                aggregates: {x: "first by index"},
+                aggregates: { x: "first by index" },
             });
             const answer = [
-                {__ROW_PATH__: [], x: 1},
-                {__ROW_PATH__: [false], x: 2},
-                {__ROW_PATH__: [true], x: 1},
+                { __ROW_PATH__: [], x: 1 },
+                { __ROW_PATH__: [false], x: 2 },
+                { __ROW_PATH__: [true], x: 1 },
             ];
             table.update({
                 x: [5],
@@ -387,22 +387,22 @@ module.exports = (perspective) => {
         it("['z'], last_minus_first", async function () {
             var table = await perspective.table(
                 [
-                    {x: 1, y: "a", z: true},
-                    {x: 2, y: "b", z: false},
-                    {x: 3, y: "c", z: true},
-                    {x: 4, y: "d", z: false},
+                    { x: 1, y: "a", z: true },
+                    { x: 2, y: "b", z: false },
+                    { x: 3, y: "c", z: true },
+                    { x: 4, y: "d", z: false },
                 ],
-                {index: "y"}
+                { index: "y" }
             );
             var view = await table.view({
                 group_by: ["z"],
                 columns: ["x"],
-                aggregates: {x: "last minus first"},
+                aggregates: { x: "last minus first" },
             });
             const answer = [
-                {__ROW_PATH__: [], x: -1},
-                {__ROW_PATH__: [false], x: 2},
-                {__ROW_PATH__: [true], x: -2},
+                { __ROW_PATH__: [], x: -1 },
+                { __ROW_PATH__: [false], x: 2 },
+                { __ROW_PATH__: [true], x: -2 },
             ];
             table.update({
                 x: [5],
@@ -418,22 +418,22 @@ module.exports = (perspective) => {
         it("['z'], high_minus_low", async function () {
             var table = await perspective.table(
                 [
-                    {x: 1, y: "a", z: true},
-                    {x: 2, y: "b", z: false},
-                    {x: 3, y: "c", z: true},
-                    {x: 4, y: "d", z: false},
+                    { x: 1, y: "a", z: true },
+                    { x: 2, y: "b", z: false },
+                    { x: 3, y: "c", z: true },
+                    { x: 4, y: "d", z: false },
                 ],
-                {index: "y"}
+                { index: "y" }
             );
             var view = await table.view({
                 group_by: ["z"],
                 columns: ["x"],
-                aggregates: {x: "high minus low"},
+                aggregates: { x: "high minus low" },
             });
             const answer = [
-                {__ROW_PATH__: [], x: 3},
-                {__ROW_PATH__: [false], x: 2},
-                {__ROW_PATH__: [true], x: 2},
+                { __ROW_PATH__: [], x: 3 },
+                { __ROW_PATH__: [false], x: 2 },
+                { __ROW_PATH__: [true], x: 2 },
             ];
             table.update({
                 x: [5],
@@ -447,16 +447,16 @@ module.exports = (perspective) => {
         });
 
         it("['z'], first by index with partial updates", async function () {
-            var table = await perspective.table(data, {index: "y"});
+            var table = await perspective.table(data, { index: "y" });
             var view = await table.view({
                 group_by: ["z"],
                 columns: ["x"],
-                aggregates: {x: "first by index"},
+                aggregates: { x: "first by index" },
             });
             const answer = [
-                {__ROW_PATH__: [], x: 5},
-                {__ROW_PATH__: [false], x: 2},
-                {__ROW_PATH__: [true], x: 5},
+                { __ROW_PATH__: [], x: 5 },
+                { __ROW_PATH__: [false], x: 2 },
+                { __ROW_PATH__: [true], x: 5 },
             ];
             table.update({
                 x: [5],
@@ -476,7 +476,7 @@ module.exports = (perspective) => {
                     y: ["A"],
                     index: [1],
                 },
-                {index: "index"}
+                { index: "index" }
             );
 
             const view = await table.view({
@@ -525,7 +525,7 @@ module.exports = (perspective) => {
                     y: [100],
                     index: [1],
                 },
-                {index: "index"}
+                { index: "index" }
             );
 
             const view = await table.view({
@@ -575,7 +575,7 @@ module.exports = (perspective) => {
                     y: [100],
                     index: [1],
                 },
-                {index: "index"}
+                { index: "index" }
             );
 
             const view = await table.view({
@@ -635,7 +635,7 @@ module.exports = (perspective) => {
                     y: [100],
                     index: [1],
                 },
-                {index: "index"}
+                { index: "index" }
             );
 
             const view = await table.view({
@@ -698,7 +698,7 @@ module.exports = (perspective) => {
                     y: ["A"],
                     index: [1],
                 },
-                {index: "index"}
+                { index: "index" }
             );
 
             const view = await table.view({
@@ -749,7 +749,7 @@ module.exports = (perspective) => {
                     z: [1],
                     index: [1],
                 },
-                {index: "index"}
+                { index: "index" }
             );
 
             const view = await table.view({
@@ -830,7 +830,7 @@ module.exports = (perspective) => {
                     y: [null],
                     index: [1],
                 },
-                {index: "index"}
+                { index: "index" }
             );
 
             const view = await table.view({
@@ -909,7 +909,7 @@ module.exports = (perspective) => {
                     y: ["A"],
                     index: [1],
                 },
-                {index: "index"}
+                { index: "index" }
             );
 
             const view = await table.view({
@@ -959,7 +959,7 @@ module.exports = (perspective) => {
                     y: ["A"],
                     index: [1],
                 },
-                {index: "index"}
+                { index: "index" }
             );
 
             const view = await table.view({
@@ -1028,7 +1028,7 @@ module.exports = (perspective) => {
                     y: ["A"],
                     index: [1],
                 },
-                {index: "index"}
+                { index: "index" }
             );
 
             const view = await table.view({
@@ -1161,12 +1161,12 @@ module.exports = (perspective) => {
             var view = await table.view({
                 group_by: ["z"],
                 columns: ["x"],
-                aggregates: {x: "last by index"},
+                aggregates: { x: "last by index" },
             });
             var answer = [
-                {__ROW_PATH__: [], x: 4},
-                {__ROW_PATH__: [false], x: 4},
-                {__ROW_PATH__: [true], x: 3},
+                { __ROW_PATH__: [], x: 4 },
+                { __ROW_PATH__: [false], x: 4 },
+                { __ROW_PATH__: [true], x: 3 },
             ];
             let result = await view.to_json();
             expect(result).toEqual(answer);
@@ -1179,12 +1179,12 @@ module.exports = (perspective) => {
             const view = await table.view({
                 group_by: ["z"],
                 columns: ["x"],
-                aggregates: {x: "last by index"},
+                aggregates: { x: "last by index" },
             });
             const answer = [
-                {__ROW_PATH__: [], x: 5},
-                {__ROW_PATH__: [false], x: 4},
-                {__ROW_PATH__: [true], x: 5},
+                { __ROW_PATH__: [], x: 5 },
+                { __ROW_PATH__: [false], x: 4 },
+                { __ROW_PATH__: [true], x: 5 },
             ];
             table.update({
                 x: [5],
@@ -1198,16 +1198,16 @@ module.exports = (perspective) => {
         });
 
         it("['z'], last by index with partial updates", async function () {
-            const table = await perspective.table(data, {index: "y"});
+            const table = await perspective.table(data, { index: "y" });
             const view = await table.view({
                 group_by: ["z"],
                 columns: ["x"],
-                aggregates: {x: "last by index"},
+                aggregates: { x: "last by index" },
             });
             const answer = [
-                {__ROW_PATH__: [], x: 4},
-                {__ROW_PATH__: [false], x: 4},
-                {__ROW_PATH__: [true], x: 5},
+                { __ROW_PATH__: [], x: 4 },
+                { __ROW_PATH__: [false], x: 4 },
+                { __ROW_PATH__: [true], x: 5 },
             ];
             table.update({
                 x: [5],
@@ -1225,24 +1225,24 @@ module.exports = (perspective) => {
             var view = await table.view({
                 group_by: ["z"],
                 columns: ["x"],
-                aggregates: {x: "last"},
+                aggregates: { x: "last" },
             });
             var answer = [
-                {__ROW_PATH__: [], x: 3},
-                {__ROW_PATH__: [false], x: 4},
-                {__ROW_PATH__: [true], x: 3},
+                { __ROW_PATH__: [], x: 3 },
+                { __ROW_PATH__: [false], x: 4 },
+                { __ROW_PATH__: [true], x: 3 },
             ];
             let result = await view.to_json();
             expect(result).toEqual(answer);
 
             table.update([
-                {x: 1, y: "c", z: true},
-                {x: 2, y: "d", z: false},
+                { x: 1, y: "c", z: true },
+                { x: 2, y: "d", z: false },
             ]);
             var answerAfterUpdate = [
-                {__ROW_PATH__: [], x: 1},
-                {__ROW_PATH__: [false], x: 2},
-                {__ROW_PATH__: [true], x: 1},
+                { __ROW_PATH__: [], x: 1 },
+                { __ROW_PATH__: [false], x: 2 },
+                { __ROW_PATH__: [true], x: 1 },
             ];
             let result2 = await view.to_json();
             expect(result2).toEqual(answerAfterUpdate);
@@ -1257,7 +1257,7 @@ module.exports = (perspective) => {
                     y: [1, 2, 3, 4],
                     z: ["a", "a", "a", "b"],
                 },
-                {index: "y"}
+                { index: "y" }
             );
 
             const view = await table.view({
@@ -1309,7 +1309,7 @@ module.exports = (perspective) => {
             const view = await table.view({
                 group_by: ["y"],
                 columns: ["x"],
-                aggregates: {x: "var"},
+                aggregates: { x: "var" },
             });
 
             const result = await view.to_columns();
@@ -1339,7 +1339,7 @@ module.exports = (perspective) => {
             const view = await table.view({
                 group_by: ["y", "z"],
                 columns: ["x"],
-                aggregates: {x: "var"},
+                aggregates: { x: "var" },
             });
 
             const result = await view.to_columns();
@@ -1362,7 +1362,7 @@ module.exports = (perspective) => {
             const view = await table.view({
                 group_by: ["y"],
                 columns: ["x"],
-                aggregates: {x: "var"},
+                aggregates: { x: "var" },
             });
 
             let result = await view.to_columns();
@@ -1376,7 +1376,7 @@ module.exports = (perspective) => {
                 expect(result.x[i]).toBeCloseTo(expected[i], 6);
             }
 
-            table.update([{x: 0.64294039, y: "a"}]);
+            table.update([{ x: 0.64294039, y: "a" }]);
             result = await view.to_columns();
 
             const expected2 = [
@@ -1401,13 +1401,13 @@ module.exports = (perspective) => {
                     y: ["a", "a", "b", "b", "c", "c"],
                     z: [1, 2, 3, 4, 5, 6],
                 },
-                {index: "z"}
+                { index: "z" }
             );
 
             const view = await table.view({
                 group_by: ["y"],
                 columns: ["x"],
-                aggregates: {x: "var"},
+                aggregates: { x: "var" },
             });
 
             let result = await view.to_columns();
@@ -1421,7 +1421,7 @@ module.exports = (perspective) => {
                 expect(result.x[i]).toBeCloseTo(expected[i], 6);
             }
 
-            table.update([{x: 0.284169685, z: 3}]);
+            table.update([{ x: 0.284169685, z: 3 }]);
             result = await view.to_columns();
 
             const expected2 = [
@@ -1444,7 +1444,7 @@ module.exports = (perspective) => {
             const view = await table.view({
                 group_by: ["y"],
                 columns: ["x"],
-                aggregates: {x: "var"},
+                aggregates: { x: "var" },
             });
 
             const result = await view.to_columns();
@@ -1469,7 +1469,7 @@ module.exports = (perspective) => {
             const view = await table.view({
                 group_by: ["y"],
                 columns: ["x"],
-                aggregates: {x: "var"},
+                aggregates: { x: "var" },
             });
 
             const result = await view.to_columns();
@@ -1487,7 +1487,7 @@ module.exports = (perspective) => {
             const view = await table.view({
                 group_by: ["y"],
                 columns: ["x"],
-                aggregates: {x: "var"},
+                aggregates: { x: "var" },
             });
 
             const result = await view.to_columns();
@@ -1504,7 +1504,7 @@ module.exports = (perspective) => {
             const view = await table.view({
                 group_by: ["y"],
                 columns: ["x"],
-                aggregates: {x: "stddev"},
+                aggregates: { x: "stddev" },
             });
 
             const result = await view.to_columns();
@@ -1536,7 +1536,7 @@ module.exports = (perspective) => {
             const view = await table.view({
                 group_by: ["y", "z"],
                 columns: ["x"],
-                aggregates: {x: "stddev"},
+                aggregates: { x: "stddev" },
             });
 
             const result = await view.to_columns();
@@ -1562,7 +1562,7 @@ module.exports = (perspective) => {
             const view = await table.view({
                 group_by: ["y"],
                 columns: ["x"],
-                aggregates: {x: "stddev"},
+                aggregates: { x: "stddev" },
             });
 
             let result = await view.to_columns();
@@ -1578,7 +1578,7 @@ module.exports = (perspective) => {
                 expect(result.x[i]).toBeCloseTo(expected[i], 6);
             }
 
-            table.update([{x: 0.64294039, y: "a"}]);
+            table.update([{ x: 0.64294039, y: "a" }]);
             result = await view.to_columns();
 
             const expected2 = [
@@ -1604,13 +1604,13 @@ module.exports = (perspective) => {
                     y: ["a", "a", "b", "b", "c", "c"],
                     z: [1, 2, 3, 4, 5, 6],
                 },
-                {index: "z"}
+                { index: "z" }
             );
 
             const view = await table.view({
                 group_by: ["y"],
                 columns: ["x"],
-                aggregates: {x: "stddev"},
+                aggregates: { x: "stddev" },
             });
 
             let result = await view.to_columns();
@@ -1626,7 +1626,7 @@ module.exports = (perspective) => {
                 expect(result.x[i]).toBeCloseTo(expected[i], 6);
             }
 
-            table.update([{x: 0.284169685, z: 3}]);
+            table.update([{ x: 0.284169685, z: 3 }]);
             result = await view.to_columns();
 
             const expected2 = [
@@ -1650,7 +1650,7 @@ module.exports = (perspective) => {
             const view = await table.view({
                 group_by: ["y"],
                 columns: ["x"],
-                aggregates: {x: "stddev"},
+                aggregates: { x: "stddev" },
             });
 
             const result = await view.to_columns();
@@ -1675,7 +1675,7 @@ module.exports = (perspective) => {
             const view = await table.view({
                 group_by: ["y"],
                 columns: ["x"],
-                aggregates: {x: "stddev"},
+                aggregates: { x: "stddev" },
             });
 
             const result = await view.to_columns();
@@ -1693,7 +1693,7 @@ module.exports = (perspective) => {
             const view = await table.view({
                 group_by: ["y"],
                 columns: ["x"],
-                aggregates: {x: "stddev"},
+                aggregates: { x: "stddev" },
             });
 
             const result = await view.to_columns();
@@ -1707,22 +1707,22 @@ module.exports = (perspective) => {
     describe("Aggregates with nulls", function () {
         it("mean", async function () {
             var table = await perspective.table([
-                {x: 3, y: 1},
-                {x: 2, y: 1},
-                {x: null, y: 1},
-                {x: null, y: 1},
-                {x: 4, y: 2},
-                {x: null, y: 2},
+                { x: 3, y: 1 },
+                { x: 2, y: 1 },
+                { x: null, y: 1 },
+                { x: null, y: 1 },
+                { x: 4, y: 2 },
+                { x: null, y: 2 },
             ]);
             var view = await table.view({
                 group_by: ["y"],
                 columns: ["x"],
-                aggregates: {x: "mean"},
+                aggregates: { x: "mean" },
             });
             var answer = [
-                {__ROW_PATH__: [], x: 3},
-                {__ROW_PATH__: [1], x: 2.5},
-                {__ROW_PATH__: [2], x: 4},
+                { __ROW_PATH__: [], x: 3 },
+                { __ROW_PATH__: [1], x: 2.5 },
+                { __ROW_PATH__: [2], x: 4 },
             ];
             let result = await view.to_json();
             expect(result).toEqual(answer);
@@ -1732,23 +1732,23 @@ module.exports = (perspective) => {
 
         it("mean with 0", async function () {
             var table = await perspective.table([
-                {x: 3, y: 1},
-                {x: 3, y: 1},
-                {x: 0, y: 1},
-                {x: null, y: 1},
-                {x: null, y: 1},
-                {x: 4, y: 2},
-                {x: null, y: 2},
+                { x: 3, y: 1 },
+                { x: 3, y: 1 },
+                { x: 0, y: 1 },
+                { x: null, y: 1 },
+                { x: null, y: 1 },
+                { x: 4, y: 2 },
+                { x: null, y: 2 },
             ]);
             var view = await table.view({
                 group_by: ["y"],
                 columns: ["x"],
-                aggregates: {x: "mean"},
+                aggregates: { x: "mean" },
             });
             var answer = [
-                {__ROW_PATH__: [], x: 2.5},
-                {__ROW_PATH__: [1], x: 2},
-                {__ROW_PATH__: [2], x: 4},
+                { __ROW_PATH__: [], x: 2.5 },
+                { __ROW_PATH__: [1], x: 2 },
+                { __ROW_PATH__: [2], x: 4 },
             ];
             let result = await view.to_json();
             expect(result).toEqual(answer);
@@ -1757,25 +1757,25 @@ module.exports = (perspective) => {
         });
 
         it("mean with 0.0 (floats)", async function () {
-            var table = await perspective.table({x: "float", y: "integer"});
+            var table = await perspective.table({ x: "float", y: "integer" });
             table.update([
-                {x: 3, y: 1},
-                {x: 3, y: 1},
-                {x: 0, y: 1},
-                {x: null, y: 1},
-                {x: null, y: 1},
-                {x: 4, y: 2},
-                {x: null, y: 2},
+                { x: 3, y: 1 },
+                { x: 3, y: 1 },
+                { x: 0, y: 1 },
+                { x: null, y: 1 },
+                { x: null, y: 1 },
+                { x: 4, y: 2 },
+                { x: null, y: 2 },
             ]);
             var view = await table.view({
                 group_by: ["y"],
                 columns: ["x"],
-                aggregates: {x: "mean"},
+                aggregates: { x: "mean" },
             });
             var answer = [
-                {__ROW_PATH__: [], x: 2.5},
-                {__ROW_PATH__: [1], x: 2},
-                {__ROW_PATH__: [2], x: 4},
+                { __ROW_PATH__: [], x: 2.5 },
+                { __ROW_PATH__: [1], x: 2 },
+                { __ROW_PATH__: [2], x: 4 },
             ];
             let result = await view.to_json();
             expect(result).toEqual(answer);
@@ -1785,21 +1785,21 @@ module.exports = (perspective) => {
 
         it("sum", async function () {
             var table = await perspective.table([
-                {x: 3, y: 1},
-                {x: 2, y: 1},
-                {x: null, y: 1},
-                {x: null, y: 1},
-                {x: 4, y: 2},
-                {x: null, y: 2},
+                { x: 3, y: 1 },
+                { x: 2, y: 1 },
+                { x: null, y: 1 },
+                { x: null, y: 1 },
+                { x: 4, y: 2 },
+                { x: null, y: 2 },
             ]);
             var view = await table.view({
                 group_by: ["y"],
                 columns: ["x"],
             });
             var answer = [
-                {__ROW_PATH__: [], x: 9},
-                {__ROW_PATH__: [1], x: 5},
-                {__ROW_PATH__: [2], x: 4},
+                { __ROW_PATH__: [], x: 9 },
+                { __ROW_PATH__: [1], x: 5 },
+                { __ROW_PATH__: [2], x: 4 },
             ];
             let result = await view.to_json();
             expect(result).toEqual(answer);
@@ -1809,22 +1809,22 @@ module.exports = (perspective) => {
 
         it("abs sum", async function () {
             var table = await perspective.table([
-                {x: 3, y: 1},
-                {x: 2, y: 1},
-                {x: null, y: 1},
-                {x: null, y: 1},
-                {x: -4, y: 2},
-                {x: null, y: 2},
+                { x: 3, y: 1 },
+                { x: 2, y: 1 },
+                { x: null, y: 1 },
+                { x: null, y: 1 },
+                { x: -4, y: 2 },
+                { x: null, y: 2 },
             ]);
             var view = await table.view({
                 group_by: ["y"],
                 columns: ["x"],
-                aggregates: {x: "abs sum"},
+                aggregates: { x: "abs sum" },
             });
             var answer = [
-                {__ROW_PATH__: [], x: 1},
-                {__ROW_PATH__: [1], x: 5},
-                {__ROW_PATH__: [2], x: 4},
+                { __ROW_PATH__: [], x: 1 },
+                { __ROW_PATH__: [1], x: 5 },
+                { __ROW_PATH__: [2], x: 4 },
             ];
             let result = await view.to_json();
             expect(result).toEqual(answer);
@@ -1834,24 +1834,24 @@ module.exports = (perspective) => {
 
         it("mean after update", async function () {
             var table = await perspective.table([
-                {x: 3, y: 1},
-                {x: null, y: 1},
-                {x: null, y: 2},
+                { x: 3, y: 1 },
+                { x: null, y: 1 },
+                { x: null, y: 2 },
             ]);
             table.update([
-                {x: 2, y: 1},
-                {x: null, y: 1},
-                {x: 4, y: 2},
+                { x: 2, y: 1 },
+                { x: null, y: 1 },
+                { x: 4, y: 2 },
             ]);
             var view = await table.view({
                 group_by: ["y"],
                 columns: ["x"],
-                aggregates: {x: "mean"},
+                aggregates: { x: "mean" },
             });
             var answer = [
-                {__ROW_PATH__: [], x: 3},
-                {__ROW_PATH__: [1], x: 2.5},
-                {__ROW_PATH__: [2], x: 4},
+                { __ROW_PATH__: [], x: 3 },
+                { __ROW_PATH__: [1], x: 2.5 },
+                { __ROW_PATH__: [2], x: 4 },
             ];
             let result = await view.to_json();
             expect(result).toEqual(answer);
@@ -1861,37 +1861,37 @@ module.exports = (perspective) => {
 
         it("mean at aggregate level", async function () {
             var table = await perspective.table([
-                {x: 4, y: 1, z: "a"},
-                {x: null, y: 1, z: "a"},
-                {x: null, y: 2, z: "a"},
+                { x: 4, y: 1, z: "a" },
+                { x: null, y: 1, z: "a" },
+                { x: null, y: 2, z: "a" },
             ]);
             table.update([
-                {x: 1, y: 1, z: "b"},
-                {x: 1, y: 1, z: "b"},
-                {x: null, y: 1, z: "b"},
-                {x: 4, y: 2, z: "b"},
-                {x: null, y: 2, z: "b"},
+                { x: 1, y: 1, z: "b" },
+                { x: 1, y: 1, z: "b" },
+                { x: null, y: 1, z: "b" },
+                { x: 4, y: 2, z: "b" },
+                { x: null, y: 2, z: "b" },
             ]);
             table.update([
-                {x: 2, y: 2, z: "c"},
-                {x: 3, y: 2, z: "c"},
-                {x: null, y: 2, z: "c"},
-                {x: 7, y: 2, z: "c"},
+                { x: 2, y: 2, z: "c" },
+                { x: 3, y: 2, z: "c" },
+                { x: null, y: 2, z: "c" },
+                { x: 7, y: 2, z: "c" },
             ]);
             var view = await table.view({
                 group_by: ["y", "z"],
                 columns: ["x"],
-                aggregates: {x: "mean"},
+                aggregates: { x: "mean" },
             });
             var answer = [
-                {__ROW_PATH__: [], x: 3.142857142857143},
-                {__ROW_PATH__: [1], x: 2},
-                {__ROW_PATH__: [1, "a"], x: 4},
-                {__ROW_PATH__: [1, "b"], x: 1},
-                {__ROW_PATH__: [2], x: 4},
-                {__ROW_PATH__: [2, "a"], x: null},
-                {__ROW_PATH__: [2, "b"], x: 4},
-                {__ROW_PATH__: [2, "c"], x: 4},
+                { __ROW_PATH__: [], x: 3.142857142857143 },
+                { __ROW_PATH__: [1], x: 2 },
+                { __ROW_PATH__: [1, "a"], x: 4 },
+                { __ROW_PATH__: [1, "b"], x: 1 },
+                { __ROW_PATH__: [2], x: 4 },
+                { __ROW_PATH__: [2, "a"], x: null },
+                { __ROW_PATH__: [2, "b"], x: 4 },
+                { __ROW_PATH__: [2, "c"], x: 4 },
             ];
             let result = await view.to_json();
             expect(result).toEqual(answer);
@@ -1901,20 +1901,20 @@ module.exports = (perspective) => {
 
         it("null in pivot column", async function () {
             var table = await perspective.table([
-                {x: null},
-                {x: "x"},
-                {x: "y"},
+                { x: null },
+                { x: "x" },
+                { x: "y" },
             ]);
             var view = await table.view({
                 group_by: ["x"],
                 columns: ["x"],
-                aggregates: {x: "distinct count"},
+                aggregates: { x: "distinct count" },
             });
             var answer = [
-                {__ROW_PATH__: [], x: 3},
-                {__ROW_PATH__: [null], x: 1},
-                {__ROW_PATH__: ["x"], x: 1},
-                {__ROW_PATH__: ["y"], x: 1},
+                { __ROW_PATH__: [], x: 3 },
+                { __ROW_PATH__: [null], x: 1 },
+                { __ROW_PATH__: ["x"], x: 1 },
+                { __ROW_PATH__: ["y"], x: 1 },
             ];
             let result = await view.to_json();
             expect(result).toEqual(answer);
@@ -1924,18 +1924,18 @@ module.exports = (perspective) => {
 
         it("weighted mean", async function () {
             var table = await perspective.table([
-                {a: "a", x: 1, y: 200},
-                {a: "a", x: 2, y: 100},
-                {a: "a", x: 3, y: null},
+                { a: "a", x: 1, y: 200 },
+                { a: "a", x: 2, y: 100 },
+                { a: "a", x: 3, y: null },
             ]);
             var view = await table.view({
                 group_by: ["a"],
-                aggregates: {y: ["weighted mean", "x"]},
+                aggregates: { y: ["weighted mean", "x"] },
                 columns: ["y"],
             });
             var answer = [
-                {__ROW_PATH__: [], y: (1 * 200 + 2 * 100) / (1 + 2)},
-                {__ROW_PATH__: ["a"], y: (1 * 200 + 2 * 100) / (1 + 2)},
+                { __ROW_PATH__: [], y: (1 * 200 + 2 * 100) / (1 + 2) },
+                { __ROW_PATH__: ["a"], y: (1 * 200 + 2 * 100) / (1 + 2) },
             ];
             let result = await view.to_json();
             expect(result).toEqual(answer);
@@ -1947,22 +1947,22 @@ module.exports = (perspective) => {
     describe("Aggregates with negatives", function () {
         it("sum abs", async function () {
             var table = await perspective.table([
-                {x: 3, y: 1},
-                {x: 2, y: 1},
-                {x: 1, y: 1},
-                {x: -1, y: 1},
-                {x: -2, y: 2},
-                {x: -3, y: 2},
+                { x: 3, y: 1 },
+                { x: 2, y: 1 },
+                { x: 1, y: 1 },
+                { x: -1, y: 1 },
+                { x: -2, y: 2 },
+                { x: -3, y: 2 },
             ]);
             var view = await table.view({
                 group_by: ["y"],
                 columns: ["x"],
-                aggregates: {x: "sum abs"},
+                aggregates: { x: "sum abs" },
             });
             var answer = [
-                {__ROW_PATH__: [], x: 12},
-                {__ROW_PATH__: [1], x: 7},
-                {__ROW_PATH__: [2], x: 5},
+                { __ROW_PATH__: [], x: 12 },
+                { __ROW_PATH__: [1], x: 7 },
+                { __ROW_PATH__: [2], x: 5 },
             ];
             let result = await view.to_json();
             expect(answer).toEqual(result);
@@ -1972,22 +1972,22 @@ module.exports = (perspective) => {
 
         it("abs sum", async function () {
             var table = await perspective.table([
-                {x: 3, y: 1},
-                {x: 2, y: 1},
-                {x: -1, y: 1},
-                {x: -1, y: 1},
-                {x: -2, y: 2},
-                {x: -3, y: 2},
+                { x: 3, y: 1 },
+                { x: 2, y: 1 },
+                { x: -1, y: 1 },
+                { x: -1, y: 1 },
+                { x: -2, y: 2 },
+                { x: -3, y: 2 },
             ]);
             var view = await table.view({
                 group_by: ["y"],
                 columns: ["x"],
-                aggregates: {x: "abs sum"},
+                aggregates: { x: "abs sum" },
             });
             var answer = [
-                {__ROW_PATH__: [], x: 2},
-                {__ROW_PATH__: [1], x: 3},
-                {__ROW_PATH__: [2], x: 5},
+                { __ROW_PATH__: [], x: 2 },
+                { __ROW_PATH__: [1], x: 3 },
+                { __ROW_PATH__: [2], x: 5 },
             ];
             let result = await view.to_json();
             expect(answer).toEqual(result);
@@ -2001,14 +2001,14 @@ module.exports = (perspective) => {
             var table = await perspective.table(data);
             var view = await table.view({
                 group_by: ["x"],
-                aggregates: {y: "distinct count", z: "distinct count"},
+                aggregates: { y: "distinct count", z: "distinct count" },
             });
             var answer = [
-                {__ROW_PATH__: [], x: 10, y: 4, z: 2},
-                {__ROW_PATH__: [1], x: 1, y: 1, z: 1},
-                {__ROW_PATH__: [2], x: 2, y: 1, z: 1},
-                {__ROW_PATH__: [3], x: 3, y: 1, z: 1},
-                {__ROW_PATH__: [4], x: 4, y: 1, z: 1},
+                { __ROW_PATH__: [], x: 10, y: 4, z: 2 },
+                { __ROW_PATH__: [1], x: 1, y: 1, z: 1 },
+                { __ROW_PATH__: [2], x: 2, y: 1, z: 1 },
+                { __ROW_PATH__: [3], x: 3, y: 1, z: 1 },
+                { __ROW_PATH__: [4], x: 4, y: 1, z: 1 },
             ];
             let result2 = await view.to_json();
             expect(result2).toEqual(answer);
@@ -2024,24 +2024,24 @@ module.exports = (perspective) => {
                 pos: "integer",
             };
             const rec1 = [
-                {id: 1, name: "John", pos: 100, chg: 1},
-                {id: 2, name: "Mary", pos: 200, chg: 2},
-                {id: 3, name: "Tom", pos: 300, chg: 3},
+                { id: 1, name: "John", pos: 100, chg: 1 },
+                { id: 2, name: "Mary", pos: 200, chg: 2 },
+                { id: 3, name: "Tom", pos: 300, chg: 3 },
             ];
-            const table = await perspective.table(schema, {index: "id"});
+            const table = await perspective.table(schema, { index: "id" });
             table.update(rec1);
             let view = await table.view({
                 group_by: ["id"],
                 columns: ["pos"],
             });
-            let rec2 = [{id: 1, chg: 3}];
+            let rec2 = [{ id: 1, chg: 3 }];
             table.update(rec2);
             let result2 = await view.to_json();
             var answer = [
-                {__ROW_PATH__: [], pos: 600},
-                {__ROW_PATH__: [1], pos: 100},
-                {__ROW_PATH__: [2], pos: 200},
-                {__ROW_PATH__: [3], pos: 300},
+                { __ROW_PATH__: [], pos: 600 },
+                { __ROW_PATH__: [1], pos: 100 },
+                { __ROW_PATH__: [2], pos: 200 },
+                { __ROW_PATH__: [3], pos: 300 },
             ];
             expect(result2).toEqual(answer);
             view.delete();
@@ -2051,24 +2051,24 @@ module.exports = (perspective) => {
         describe("pivoting on column containing null values", function () {
             it("shows one pivot for the nulls on initial load", async function () {
                 const dataWithNulls = [
-                    {name: "Homer", value: 1},
-                    {name: null, value: 1},
-                    {name: null, value: 1},
-                    {name: "Krusty", value: 1},
+                    { name: "Homer", value: 1 },
+                    { name: null, value: 1 },
+                    { name: null, value: 1 },
+                    { name: "Krusty", value: 1 },
                 ];
 
                 var table = await perspective.table(dataWithNulls);
 
                 var view = await table.view({
                     group_by: ["name"],
-                    aggregates: {name: "distinct count"},
+                    aggregates: { name: "distinct count" },
                 });
 
                 const answer = [
-                    {__ROW_PATH__: [], name: 3, value: 4},
-                    {__ROW_PATH__: [null], name: 1, value: 2},
-                    {__ROW_PATH__: ["Homer"], name: 1, value: 1},
-                    {__ROW_PATH__: ["Krusty"], name: 1, value: 1},
+                    { __ROW_PATH__: [], name: 3, value: 4 },
+                    { __ROW_PATH__: [null], name: 1, value: 2 },
+                    { __ROW_PATH__: ["Homer"], name: 1, value: 1 },
+                    { __ROW_PATH__: ["Krusty"], name: 1, value: 1 },
                 ];
 
                 let results = await view.to_json();
@@ -2079,12 +2079,12 @@ module.exports = (perspective) => {
 
             it("shows one pivot for the nulls after updating with a null", async function () {
                 const dataWithNull1 = [
-                    {name: "Homer", value: 1},
-                    {name: null, value: 1},
+                    { name: "Homer", value: 1 },
+                    { name: null, value: 1 },
                 ];
                 const dataWithNull2 = [
-                    {name: null, value: 1},
-                    {name: "Krusty", value: 1},
+                    { name: null, value: 1 },
+                    { name: "Krusty", value: 1 },
                 ];
 
                 var table = await perspective.table(dataWithNull1);
@@ -2092,14 +2092,14 @@ module.exports = (perspective) => {
 
                 var view = await table.view({
                     group_by: ["name"],
-                    aggregates: {name: "distinct count"},
+                    aggregates: { name: "distinct count" },
                 });
 
                 const answer = [
-                    {__ROW_PATH__: [], name: 3, value: 4},
-                    {__ROW_PATH__: [null], name: 1, value: 2},
-                    {__ROW_PATH__: ["Homer"], name: 1, value: 1},
-                    {__ROW_PATH__: ["Krusty"], name: 1, value: 1},
+                    { __ROW_PATH__: [], name: 3, value: 4 },
+                    { __ROW_PATH__: [null], name: 1, value: 2 },
+                    { __ROW_PATH__: ["Homer"], name: 1, value: 1 },
+                    { __ROW_PATH__: ["Krusty"], name: 1, value: 1 },
                 ];
 
                 let results = await view.to_json();
@@ -2115,7 +2115,11 @@ module.exports = (perspective) => {
                 group_by: ["x"],
             });
             let result2 = await view.schema();
-            expect(result2).toEqual({x: "integer", y: "integer", z: "integer"});
+            expect(result2).toEqual({
+                x: "integer",
+                y: "integer",
+                z: "integer",
+            });
             view.delete();
             table.delete();
         });
@@ -2125,10 +2129,10 @@ module.exports = (perspective) => {
             var view = await table.view({
                 group_by: ["x"],
                 columns: ["y"],
-                aggregates: {y: "distinct count"},
+                aggregates: { y: "distinct count" },
             });
             let result2 = await view.schema();
-            expect(result2).toEqual({y: "integer"});
+            expect(result2).toEqual({ y: "integer" });
             view.delete();
             table.delete();
         });
@@ -2138,10 +2142,10 @@ module.exports = (perspective) => {
             var view = await table.view({
                 group_by: ["y"],
                 columns: ["x"],
-                aggregates: {x: "avg"},
+                aggregates: { x: "avg" },
             });
             let result2 = await view.schema();
-            expect(result2).toEqual({x: "float"});
+            expect(result2).toEqual({ x: "float" });
             view.delete();
             table.delete();
         });
@@ -2151,10 +2155,10 @@ module.exports = (perspective) => {
             var view = await table.view({
                 split_by: ["y"],
                 columns: ["x"],
-                aggregates: {x: "avg"},
+                aggregates: { x: "avg" },
             });
             let result2 = await view.schema();
-            expect(result2).toEqual({x: "integer"});
+            expect(result2).toEqual({ x: "integer" });
             view.delete();
             table.delete();
         });
@@ -2256,12 +2260,12 @@ module.exports = (perspective) => {
             var table = await perspective.table(data);
             var view = await table.view({
                 group_by: ["z"],
-                aggregates: {y: "distinct count", z: "distinct count"},
+                aggregates: { y: "distinct count", z: "distinct count" },
             });
             var answer = [
-                {__ROW_PATH__: [], x: 10, y: 4, z: 2},
-                {__ROW_PATH__: [false], x: 6, y: 2, z: 1},
-                {__ROW_PATH__: [true], x: 4, y: 2, z: 1},
+                { __ROW_PATH__: [], x: 10, y: 4, z: 2 },
+                { __ROW_PATH__: [false], x: 6, y: 2, z: 1 },
+                { __ROW_PATH__: [true], x: 4, y: 2, z: 1 },
             ];
             let result2 = await view.to_json();
             expect(result2).toEqual(answer);
@@ -2273,18 +2277,18 @@ module.exports = (perspective) => {
             var table = await perspective.table(data);
             var view = await table.view({
                 group_by: ["x", "z"],
-                aggregates: {y: "distinct count", z: "distinct count"},
+                aggregates: { y: "distinct count", z: "distinct count" },
             });
             var answer = [
-                {__ROW_PATH__: [], x: 10, y: 4, z: 2},
-                {__ROW_PATH__: [1], x: 1, y: 1, z: 1},
-                {__ROW_PATH__: [1, true], x: 1, y: 1, z: 1},
-                {__ROW_PATH__: [2], x: 2, y: 1, z: 1},
-                {__ROW_PATH__: [2, false], x: 2, y: 1, z: 1},
-                {__ROW_PATH__: [3], x: 3, y: 1, z: 1},
-                {__ROW_PATH__: [3, true], x: 3, y: 1, z: 1},
-                {__ROW_PATH__: [4], x: 4, y: 1, z: 1},
-                {__ROW_PATH__: [4, false], x: 4, y: 1, z: 1},
+                { __ROW_PATH__: [], x: 10, y: 4, z: 2 },
+                { __ROW_PATH__: [1], x: 1, y: 1, z: 1 },
+                { __ROW_PATH__: [1, true], x: 1, y: 1, z: 1 },
+                { __ROW_PATH__: [2], x: 2, y: 1, z: 1 },
+                { __ROW_PATH__: [2, false], x: 2, y: 1, z: 1 },
+                { __ROW_PATH__: [3], x: 3, y: 1, z: 1 },
+                { __ROW_PATH__: [3, true], x: 3, y: 1, z: 1 },
+                { __ROW_PATH__: [4], x: 4, y: 1, z: 1 },
+                { __ROW_PATH__: [4, false], x: 4, y: 1, z: 1 },
             ];
             let result2 = await view.to_json();
             expect(result2).toEqual(answer);
@@ -2298,15 +2302,15 @@ module.exports = (perspective) => {
                 group_by: ["x", "z"],
             });
             var answer = [
-                {__ROW_PATH__: [1, true], x: 1, y: 1, z: 1},
-                {__ROW_PATH__: [2], x: 2, y: 1, z: 1},
-                {__ROW_PATH__: [2, false], x: 2, y: 1, z: 1},
-                {__ROW_PATH__: [3], x: 3, y: 1, z: 1},
-                {__ROW_PATH__: [3, true], x: 3, y: 1, z: 1},
-                {__ROW_PATH__: [4], x: 4, y: 1, z: 1},
-                {__ROW_PATH__: [4, false], x: 4, y: 1, z: 1},
+                { __ROW_PATH__: [1, true], x: 1, y: 1, z: 1 },
+                { __ROW_PATH__: [2], x: 2, y: 1, z: 1 },
+                { __ROW_PATH__: [2, false], x: 2, y: 1, z: 1 },
+                { __ROW_PATH__: [3], x: 3, y: 1, z: 1 },
+                { __ROW_PATH__: [3, true], x: 3, y: 1, z: 1 },
+                { __ROW_PATH__: [4], x: 4, y: 1, z: 1 },
+                { __ROW_PATH__: [4, false], x: 4, y: 1, z: 1 },
             ];
-            let result2 = await view.to_json({start_row: 2});
+            let result2 = await view.to_json({ start_row: 2 });
             expect(result2).toEqual(answer);
             view.delete();
             table.delete();
@@ -2317,14 +2321,14 @@ module.exports = (perspective) => {
             var view = await table.view({
                 group_by: ["x", "z"],
                 group_by_depth: 1,
-                aggregates: {y: "distinct count", z: "distinct count"},
+                aggregates: { y: "distinct count", z: "distinct count" },
             });
             var answer = [
-                {__ROW_PATH__: [], x: 10, y: 4, z: 2},
-                {__ROW_PATH__: [1], x: 1, y: 1, z: 1},
-                {__ROW_PATH__: [2], x: 2, y: 1, z: 1},
-                {__ROW_PATH__: [3], x: 3, y: 1, z: 1},
-                {__ROW_PATH__: [4], x: 4, y: 1, z: 1},
+                { __ROW_PATH__: [], x: 10, y: 4, z: 2 },
+                { __ROW_PATH__: [1], x: 1, y: 1, z: 1 },
+                { __ROW_PATH__: [2], x: 2, y: 1, z: 1 },
+                { __ROW_PATH__: [3], x: 3, y: 1, z: 1 },
+                { __ROW_PATH__: [4], x: 4, y: 1, z: 1 },
             ];
             let result2 = await view.to_json();
             expect(result2).toEqual(answer);
@@ -2703,33 +2707,37 @@ module.exports = (perspective) => {
     describe("Expand/Collapse", function () {
         it("Collapse a row in a 2x2 pivot", async function () {
             var table = await perspective.table([
-                {x: 7, y: "A", z: true, a: "AA", b: "BB", c: "CC"},
-                {x: 2, y: "A", z: false, a: "AA", b: "CC", c: "CC"},
-                {x: 5, y: "A", z: true, a: "AA", b: "BB", c: "DD"},
-                {x: 4, y: "A", z: false, a: "AA", b: "CC", c: "DD"},
-                {x: 1, y: "B", z: true, a: "AA", b: "BB", c: "CC"},
-                {x: 8, y: "B", z: false, a: "AA", b: "CC", c: "CC"},
-                {x: 3, y: "B", z: true, a: "BB", b: "BB", c: "DD"},
-                {x: 6, y: "B", z: false, a: "BB", b: "CC", c: "DD"},
-                {x: 9, y: "C", z: true, a: "BB", b: "BB", c: "CC"},
-                {x: 10, y: "C", z: false, a: "BB", b: "CC", c: "CC"},
-                {x: 11, y: "C", z: true, a: "BB", b: "BB", c: "DD"},
-                {x: 12, y: "C", z: false, a: "BB", b: "CC", c: "DD"},
+                { x: 7, y: "A", z: true, a: "AA", b: "BB", c: "CC" },
+                { x: 2, y: "A", z: false, a: "AA", b: "CC", c: "CC" },
+                { x: 5, y: "A", z: true, a: "AA", b: "BB", c: "DD" },
+                { x: 4, y: "A", z: false, a: "AA", b: "CC", c: "DD" },
+                { x: 1, y: "B", z: true, a: "AA", b: "BB", c: "CC" },
+                { x: 8, y: "B", z: false, a: "AA", b: "CC", c: "CC" },
+                { x: 3, y: "B", z: true, a: "BB", b: "BB", c: "DD" },
+                { x: 6, y: "B", z: false, a: "BB", b: "CC", c: "DD" },
+                { x: 9, y: "C", z: true, a: "BB", b: "BB", c: "CC" },
+                { x: 10, y: "C", z: false, a: "BB", b: "CC", c: "CC" },
+                { x: 11, y: "C", z: true, a: "BB", b: "BB", c: "DD" },
+                { x: 12, y: "C", z: false, a: "BB", b: "CC", c: "DD" },
             ]);
             var view = await table.view({
                 split_by: ["z", "b"],
                 group_by: ["y", "a"],
                 columns: ["x"],
-                aggregates: {x: "last"},
+                aggregates: { x: "last" },
             });
 
             let answer = [
-                {__ROW_PATH__: [], "false|CC|x": 12, "true|BB|x": 11},
-                {__ROW_PATH__: ["A"], "false|CC|x": 4, "true|BB|x": 5},
-                {__ROW_PATH__: ["A", "AA"], "false|CC|x": 4, "true|BB|x": 5},
-                {__ROW_PATH__: ["B"], "false|CC|x": 6, "true|BB|x": 3},
-                {__ROW_PATH__: ["C"], "false|CC|x": 12, "true|BB|x": 11},
-                {__ROW_PATH__: ["C", "BB"], "false|CC|x": 12, "true|BB|x": 11},
+                { __ROW_PATH__: [], "false|CC|x": 12, "true|BB|x": 11 },
+                { __ROW_PATH__: ["A"], "false|CC|x": 4, "true|BB|x": 5 },
+                { __ROW_PATH__: ["A", "AA"], "false|CC|x": 4, "true|BB|x": 5 },
+                { __ROW_PATH__: ["B"], "false|CC|x": 6, "true|BB|x": 3 },
+                { __ROW_PATH__: ["C"], "false|CC|x": 12, "true|BB|x": 11 },
+                {
+                    __ROW_PATH__: ["C", "BB"],
+                    "false|CC|x": 12,
+                    "true|BB|x": 11,
+                },
             ];
             view.collapse(3);
             let result2 = await view.to_json();
@@ -2742,24 +2750,24 @@ module.exports = (perspective) => {
     describe("Split by w/sort", function () {
         it("['y'] by ['z'], sorted by 'x'", async function () {
             var table = await perspective.table([
-                {x: 7, y: "A", z: true},
-                {x: 2, y: "A", z: false},
-                {x: 5, y: "A", z: true},
-                {x: 4, y: "A", z: false},
-                {x: 1, y: "B", z: true},
-                {x: 8, y: "B", z: false},
-                {x: 3, y: "B", z: true},
-                {x: 6, y: "B", z: false},
-                {x: 9, y: "C", z: true},
-                {x: 10, y: "C", z: false},
-                {x: 11, y: "C", z: true},
-                {x: 12, y: "C", z: false},
+                { x: 7, y: "A", z: true },
+                { x: 2, y: "A", z: false },
+                { x: 5, y: "A", z: true },
+                { x: 4, y: "A", z: false },
+                { x: 1, y: "B", z: true },
+                { x: 8, y: "B", z: false },
+                { x: 3, y: "B", z: true },
+                { x: 6, y: "B", z: false },
+                { x: 9, y: "C", z: true },
+                { x: 10, y: "C", z: false },
+                { x: 11, y: "C", z: true },
+                { x: 12, y: "C", z: false },
             ]);
             var view = await table.view({
                 split_by: ["z"],
                 group_by: ["y"],
                 sort: [["x", "desc"]],
-                aggregates: {y: "distinct count", z: "distinct count"},
+                aggregates: { y: "distinct count", z: "distinct count" },
             });
 
             let answer = [
@@ -2808,25 +2816,25 @@ module.exports = (perspective) => {
 
         it("['z'] by ['y'], sorted by 'y'", async function () {
             var table = await perspective.table([
-                {x: 7, y: "A", z: true},
-                {x: 2, y: "A", z: false},
-                {x: 5, y: "A", z: true},
-                {x: 4, y: "A", z: false},
-                {x: 1, y: "B", z: true},
-                {x: 8, y: "B", z: false},
-                {x: 3, y: "B", z: true},
-                {x: 6, y: "B", z: false},
-                {x: 9, y: "C", z: true},
-                {x: 10, y: "C", z: false},
-                {x: 11, y: "C", z: true},
-                {x: 12, y: "C", z: false},
+                { x: 7, y: "A", z: true },
+                { x: 2, y: "A", z: false },
+                { x: 5, y: "A", z: true },
+                { x: 4, y: "A", z: false },
+                { x: 1, y: "B", z: true },
+                { x: 8, y: "B", z: false },
+                { x: 3, y: "B", z: true },
+                { x: 6, y: "B", z: false },
+                { x: 9, y: "C", z: true },
+                { x: 10, y: "C", z: false },
+                { x: 11, y: "C", z: true },
+                { x: 12, y: "C", z: false },
             ]);
             var view = await table.view({
                 split_by: ["y"],
                 group_by: ["z"],
                 sort: [["y", "col desc"]],
                 columns: ["x", "y"],
-                aggregates: {x: "sum", y: "any"},
+                aggregates: { x: "sum", y: "any" },
             });
 
             let result2 = await view.to_columns();

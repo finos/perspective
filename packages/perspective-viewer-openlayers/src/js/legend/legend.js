@@ -7,7 +7,7 @@
  *
  */
 
-import {select, axisRight, scaleLinear, range} from "d3";
+import { select, axisRight, scaleLinear, range } from "d3";
 
 const height = 100;
 

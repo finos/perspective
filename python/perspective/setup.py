@@ -53,18 +53,18 @@ version = get_version(os.path.join(here, "perspective", "core", "_version.py"))
 
 requires = [
     "ipywidgets>=7.5.1,<8",
-    "future>=0.16.0",
-    "numpy>=1.13.1",
-    "pandas>=0.22.0",
-    "python-dateutil>=2.8.0",
-    "traitlets>=4.3.2",
+    "future>=0.16.0,<1",
+    "numpy>=1.13.1,<2",
+    "pandas>=0.22.0,<2",
+    "python-dateutil>=2.8.0,<3",
+    "traitlets>=4.3.2,<6",
 ]
 
-requires_aiohttp = ["aiohttp"]
+requires_aiohttp = ["aiohttp>=3,<4"]
 
 requires_jupyter = ["jupyterlab>=3.2,<4"]
 
-requires_starlette = ["fastapi", "starlette"]
+requires_starlette = ["fastapi>=0.70,<1", "starlette>=0.20,<1"]
 
 requires_tornado = ["tornado>=4.5.3,<6.2"]
 
@@ -74,16 +74,17 @@ requires_dev = (
         "Faker>=1.0.0",
         "flake8>=5",
         "flake8-black>=0.3.3",
+        "httpx>=0.23,<1",
         "pip",
-        "psutil",
-        "pybind11>=2.4.0",
+        "psutil>=5,<6",
+        "pybind11>=2.4.0,<3",
         "pyarrow>=0.16.0",
         "pytest>=4.3.0",
-        "pytest-aiohttp",
-        "pytest-asyncio",
-        "pytest-cov>=2.6.1",
-        "pytest-check-links",
-        "pytest-tornado",
+        "pytest-aiohttp>=1",
+        "pytest-asyncio>=0.20",
+        "pytest-cov>=3",
+        "pytest-check-links>=0.7",
+        "pytest-tornado>=0.8",
         "pytz>=2022",
         "Sphinx>=1.8.4",
         "sphinx-markdown-builder>=0.5.2",

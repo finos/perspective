@@ -7,7 +7,7 @@
  *
  */
 import * as fc from "d3fc";
-import {withoutOpacity} from "./seriesColors.js";
+import { withoutOpacity } from "./seriesColors.js";
 
 export function lineSeries(settings, color) {
     let series = fc.seriesSvgLine();

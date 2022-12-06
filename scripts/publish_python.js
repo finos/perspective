@@ -7,12 +7,12 @@
  *
  */
 
-const {execute} = require("./script_utils.js");
+const { execute } = require("./script_utils.js");
 const cp = require("cpy");
 const decompress = require("decompress");
 const decompressUnzip = require("decompress-unzip");
 const fs = require("fs").promises;
-const {Octokit} = require("octokit");
+const { Octokit } = require("octokit");
 const readline = require("readline");
 
 // Artifacts Docs:

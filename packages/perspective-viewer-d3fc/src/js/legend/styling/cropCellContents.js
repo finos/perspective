@@ -7,7 +7,7 @@
  *
  */
 
-import {isElementOverflowing} from "../../utils/utils";
+import { isElementOverflowing } from "../../utils/utils";
 
 export function cropCellContents(legendDiv) {
     const legendCells = legendDiv.select("g.legendCells");

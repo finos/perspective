@@ -7,7 +7,7 @@
  *
  */
 
-const {execute} = require("./script_utils.js");
+const { execute } = require("./script_utils.js");
 
 const inquirer = require("inquirer");
 const fs = require("fs");
@@ -17,7 +17,7 @@ const CONFIG = new Proxy(
         constructor() {
             this.config = [];
             this._values =
-                require("dotenv").config({path: "./.perspectiverc"}).parsed ||
+                require("dotenv").config({ path: "./.perspectiverc" }).parsed ||
                 {};
             if (this._values.PACKAGE && this._values.PACKAGE.startsWith("@")) {
                 this._values.PACKAGE = this._values.PACKAGE.slice(
@@ -46,7 +46,7 @@ const CONFIG = new Proxy(
     })(),
     {
         set: function (target, name, val) {
-            target.add({[name]: val});
+            target.add({ [name]: val });
         },
         get: function (target, name) {
             if (name in target._values) {

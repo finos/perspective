@@ -211,7 +211,7 @@ module.exports = (perspective) => {
                         y: "string",
                         z: "boolean",
                     },
-                    {index: "x"}
+                    { index: "x" }
                 );
 
                 const v1 = await table.view({
@@ -256,7 +256,7 @@ module.exports = (perspective) => {
                         y: "string",
                         z: "boolean",
                     },
-                    {index: "x"}
+                    { index: "x" }
                 );
 
                 const v1 = await table.view({
@@ -297,7 +297,7 @@ module.exports = (perspective) => {
                         y: "string",
                         z: "boolean",
                     },
-                    {index: "x"}
+                    { index: "x" }
                 );
 
                 const v1 = await table.view({
@@ -362,7 +362,7 @@ module.exports = (perspective) => {
                         y: "string",
                         z: "boolean",
                     },
-                    {limit: 2}
+                    { limit: 2 }
                 );
 
                 const v1 = await table.view({
@@ -776,7 +776,7 @@ module.exports = (perspective) => {
                             11, 12, 13, 14, 11, 12, 13, 14,
                         ]);
                     },
-                    {mode: "row"}
+                    { mode: "row" }
                 );
 
                 v2.on_update(
@@ -803,7 +803,7 @@ module.exports = (perspective) => {
                         await table.delete();
                         done();
                     },
-                    {mode: "row"}
+                    { mode: "row" }
                 );
 
                 table.update(expressions_common.data);
@@ -849,7 +849,7 @@ module.exports = (perspective) => {
                             20,
                         ]);
                     },
-                    {mode: "row"}
+                    { mode: "row" }
                 );
 
                 v2.on_update(
@@ -875,7 +875,7 @@ module.exports = (perspective) => {
                         await table.delete();
                         done();
                     },
-                    {mode: "row"}
+                    { mode: "row" }
                 );
 
                 table.update({
@@ -924,7 +924,7 @@ module.exports = (perspective) => {
                             null,
                         ]);
                     },
-                    {mode: "row"}
+                    { mode: "row" }
                 );
 
                 v2.on_update(
@@ -950,7 +950,7 @@ module.exports = (perspective) => {
                         await table.delete();
                         done();
                     },
-                    {mode: "row"}
+                    { mode: "row" }
                 );
 
                 table.update({
@@ -1094,7 +1094,7 @@ module.exports = (perspective) => {
                         y: ["a", "b", "c", "d"],
                         z: [now, now, now, now],
                     },
-                    {index: "x"}
+                    { index: "x" }
                 );
 
                 const v1 = await table.view({

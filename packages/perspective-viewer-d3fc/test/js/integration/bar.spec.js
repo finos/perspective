@@ -13,11 +13,11 @@ const utils = require("@finos/perspective-test");
 const simple_tests = require("@finos/perspective-viewer/test/js/simple_tests.js");
 // const render_warning_tests = require("@finos/perspective-viewer/test/js/render_warning_tests.js");
 
-const {withTemplate} = require("./simple-template");
+const { withTemplate } = require("./simple-template");
 
 withTemplate("bar", "Y Bar");
 withTemplate("bar-x", "X Bar");
-withTemplate("bar-themed", "Y Bar", {template: "themed-template"});
+withTemplate("bar-themed", "Y Bar", { template: "themed-template" });
 
 function get_contents(temp) {
     return async function (page) {
@@ -40,7 +40,7 @@ utils.with_server({}, () => {
             simple_tests.default(get_contents("ybar"));
             // render_warning_tests.default("Y Bar");
         },
-        {root: path.join(__dirname, "..", "..", "..")}
+        { root: path.join(__dirname, "..", "..", "..") }
     );
 
     describe.page(
@@ -49,7 +49,7 @@ utils.with_server({}, () => {
             simple_tests.default(get_contents("xbar"));
             // render_warning_tests.default("X Bar");
         },
-        {root: path.join(__dirname, "..", "..", "..")}
+        { root: path.join(__dirname, "..", "..", "..") }
     );
 
     describe.page(
@@ -58,6 +58,6 @@ utils.with_server({}, () => {
             simple_tests.default(get_contents("ybar"));
             // render_warning_tests.default("Y Bar");
         },
-        {root: path.join(__dirname, "..", "..", "..")}
+        { root: path.join(__dirname, "..", "..", "..") }
     );
 });

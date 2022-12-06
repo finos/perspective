@@ -19,7 +19,7 @@ const PATHS = [
     path.join(TEST_ROOT, "test", "csv"),
 ];
 
-utils.with_server({paths: PATHS}, () => {
+utils.with_server({ paths: PATHS }, () => {
     describe.page(
         "index.html",
         () => {
@@ -44,7 +44,7 @@ utils.with_server({paths: PATHS}, () => {
                 );
             });
         },
-        {root: TEST_ROOT}
+        { root: TEST_ROOT }
     );
 });
 

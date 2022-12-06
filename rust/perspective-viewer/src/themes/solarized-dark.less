@@ -7,22 +7,19 @@
  *
  */
 
-@import "../less/fonts";
-@import (reference) "./material-dark.less";
-@import (reference) "./solarized.less";
+@import url("ref://solarized.less");
 
 perspective-viewer,
 perspective-viewer[theme="Solarized Dark"] {
     --theme-name: "Solarized Dark";
 }
 
-perspective-viewer[theme="Solarized Dark"],
-.perspective-viewer-solarized-dark {
-    .perspective-viewer-material-dark--colors();
-    .perspective-viewer-solarized();
-    .perspective-viewer-solarized-dark--colors();
-    .perspective-viewer-solarized-dark--datagrid();
-    .perspective-viewer-solarized-dark--d3fc();
+perspective-viewer[theme="Solarized Dark"] {
+    @include perspective-viewer-material-dark--colors;
+    @include perspective-viewer-solarized;
+    @include perspective-viewer-solarized-dark--colors;
+    @include perspective-viewer-solarized-dark--datagrid;
+    @include perspective-viewer-solarized-dark--d3fc;
 }
 
 perspective-copy-menu[theme="Solarized Dark"],
@@ -32,14 +29,13 @@ perspective-date-column-style[theme="Solarized Dark"],
 perspective-datetime-column-style[theme="Solarized Dark"],
 perspective-number-column-style[theme="Solarized Dark"],
 perspective-string-column-style[theme="Solarized Dark"],
-perspective-expression-editor[theme="Solarized Dark"],
-.perspective-modal-solarized-dark {
-    .perspective-modal-solarized();
-    .perspective-viewer-solarized-dark--colors();
+perspective-expression-editor[theme="Solarized Dark"] {
+    @include perspective-modal-solarized;
+    @include perspective-viewer-solarized-dark--colors;
     background-color: #073642;
 }
 
-.perspective-viewer-solarized-dark--colors {
+@mixin perspective-viewer-solarized-dark--colors {
     color: #93a1a1;
     background: #002b36;
 
@@ -47,7 +43,7 @@ perspective-expression-editor[theme="Solarized Dark"],
     --plugin--background: #073642;
 }
 
-.perspective-viewer-solarized-dark--datagrid {
+@mixin perspective-viewer-solarized-dark--datagrid {
     regular-table {
 
         table,
@@ -73,7 +69,7 @@ perspective-expression-editor[theme="Solarized Dark"],
     }
 }
 
-.perspective-viewer-solarized-dark--d3fc {
+@mixin perspective-viewer-solarized-dark--d3fc {
     --d3fc-treedata--labels: white;
     --d3fc-treedata--hover-highlight: white;
     --d3fc-axis-ticks--color: #93a1a1;

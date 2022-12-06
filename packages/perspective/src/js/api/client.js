@@ -7,8 +7,8 @@
  *
  */
 
-import {table, proxy_table} from "./table_api.js";
-import {bindall} from "../utils.js";
+import { table, proxy_table } from "./table_api.js";
+import { bindall } from "../utils.js";
 
 /**
  * Perspective's worker API handles and processes asynchronous messages,
@@ -23,7 +23,7 @@ export class Client {
     constructor() {
         this._initialized = false;
         this._worker = {
-            initialized: {value: false},
+            initialized: { value: false },
             transferable: false,
             msg_id: 0,
             handlers: {},
@@ -81,16 +81,16 @@ export class Client {
      */
     async memory_usage() {
         return await new Promise((resolve, reject) => {
-            this.post({cmd: "memory_usage"}, resolve, reject);
+            this.post({ cmd: "memory_usage" }, resolve, reject);
         });
     }
 
     initialize_profile_thread() {
         if (this._worker.initialized.value) {
-            this.send({id: -1, cmd: "init_profile_thread"});
+            this.send({ id: -1, cmd: "init_profile_thread" });
         } else {
             this._worker.messages.push(() =>
-                this.send({id: -1, cmd: "init_profile_thread"})
+                this.send({ id: -1, cmd: "init_profile_thread" })
             );
         }
     }

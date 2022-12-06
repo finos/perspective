@@ -7,17 +7,17 @@
  *
  */
 import * as fc from "d3fc";
-import {axisFactory} from "../axis/axisFactory";
-import {AXIS_TYPES} from "../axis/axisType";
-import {chartSvgFactory} from "../axis/chartFactory";
-import {axisSplitter} from "../axis/axisSplitter";
-import {seriesColors} from "../series/seriesColors";
-import {categoryPointSeries, symbolType} from "../series/categoryPointSeries";
-import {groupData} from "../data/groupData";
-import {symbolLegend} from "../legend/legend";
-import {filterData} from "../legend/filter";
+import { axisFactory } from "../axis/axisFactory";
+import { AXIS_TYPES } from "../axis/axisType";
+import { chartSvgFactory } from "../axis/chartFactory";
+import { axisSplitter } from "../axis/axisSplitter";
+import { seriesColors } from "../series/seriesColors";
+import { categoryPointSeries, symbolType } from "../series/categoryPointSeries";
+import { groupData } from "../data/groupData";
+import { symbolLegend } from "../legend/legend";
+import { filterData } from "../legend/filter";
 import withGridLines from "../gridlines/gridlines";
-import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
+import { hardLimitZeroPadding } from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
 import nearbyTip from "../tooltip/nearbyTip";
 
@@ -88,9 +88,10 @@ function yScatter(container, settings) {
         chart.altAxis(yAxis2);
         // Give the tooltip the information (i.e. 2 datasets with different
         // scales)
-        toolTip
-            .data(splitter.data())
-            .altDataWithScale({yScale: yAxis2.scale, data: splitter.altData()});
+        toolTip.data(splitter.data()).altDataWithScale({
+            yScale: yAxis2.scale,
+            data: splitter.altData(),
+        });
     }
 
     // render

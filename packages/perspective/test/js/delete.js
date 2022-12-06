@@ -10,7 +10,7 @@
 module.exports = (perspective) => {
     describe("Delete", function () {
         it("calls all delete callbacks registered on table", async function () {
-            const table = await perspective.table([{x: 1}]);
+            const table = await perspective.table([{ x: 1 }]);
 
             const cb1 = jest.fn();
             const cb2 = jest.fn();
@@ -25,7 +25,7 @@ module.exports = (perspective) => {
         });
 
         it("remove_delete unregisters table delete callbacks", async function () {
-            const table = await perspective.table([{x: 1}]);
+            const table = await perspective.table([{ x: 1 }]);
 
             const cb1 = jest.fn();
             const cb2 = jest.fn();
@@ -41,7 +41,7 @@ module.exports = (perspective) => {
         });
 
         it("calls all delete callbacks registered on view", async function () {
-            const table = await perspective.table([{x: 1}]);
+            const table = await perspective.table([{ x: 1 }]);
             const view = await table.view();
 
             const cb1 = jest.fn();
@@ -59,7 +59,7 @@ module.exports = (perspective) => {
         });
 
         it("remove_delete unregisters view delete callbacks", async function () {
-            const table = await perspective.table([{x: 1}]);
+            const table = await perspective.table([{ x: 1 }]);
             const view = await table.view();
 
             const cb1 = jest.fn();
@@ -78,7 +78,7 @@ module.exports = (perspective) => {
         });
 
         it("properly removes a failed delete callback on a table", async function (done) {
-            const table = await perspective.table([{x: 1}]);
+            const table = await perspective.table([{ x: 1 }]);
 
             // when a callback throws, it should delete that callback
             table.on_delete(() => {
@@ -90,7 +90,7 @@ module.exports = (perspective) => {
         });
 
         it("properly removes a failed delete callback on a view", async function (done) {
-            const table = await perspective.table([{x: 1}]);
+            const table = await perspective.table([{ x: 1 }]);
             const view = await table.view();
 
             // when a callback throws, it should delete that callback

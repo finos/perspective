@@ -1,4 +1,4 @@
-const {execute, execute_throw} = require("../../scripts/script_utils.js");
+const { execute, execute_throw } = require("../../scripts/script_utils.js");
 const fs = require("fs");
 
 const hashes = JSON.parse(fs.readFileSync("gists.json"));

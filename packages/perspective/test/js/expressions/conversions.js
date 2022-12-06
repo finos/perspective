@@ -112,7 +112,7 @@ module.exports = (perspective) => {
 
     describe("integer()", () => {
         it("Should create integers from scalars", async () => {
-            const table = await perspective.table({x: [1]});
+            const table = await perspective.table({ x: [1] });
             const view = await table.view({
                 expressions: [
                     `//computed\ninteger(999999.999)`,
@@ -157,7 +157,7 @@ module.exports = (perspective) => {
         });
 
         it("Should create integers from integer columns", async () => {
-            const table = await perspective.table({x: "integer"});
+            const table = await perspective.table({ x: "integer" });
 
             const view = await table.view({
                 expressions: [`//computed\ninteger("x")`],
@@ -182,7 +182,7 @@ module.exports = (perspective) => {
         });
 
         it("Should create integers from float columns", async () => {
-            const table = await perspective.table({x: "float"});
+            const table = await perspective.table({ x: "float" });
 
             const view = await table.view({
                 expressions: [`//computed\ninteger("x")`],
@@ -214,7 +214,7 @@ module.exports = (perspective) => {
         });
 
         it("Should create integers from date columns", async () => {
-            const table = await perspective.table({x: "date"});
+            const table = await perspective.table({ x: "date" });
 
             const view = await table.view({
                 expressions: [`//computed\ninteger("x")`],
@@ -247,7 +247,7 @@ module.exports = (perspective) => {
         });
 
         it("Should create integers from datetime columns", async () => {
-            const table = await perspective.table({x: "datetime"});
+            const table = await perspective.table({ x: "datetime" });
 
             const view = await table.view({
                 expressions: [`//computed\ninteger("x")`],
@@ -295,7 +295,7 @@ module.exports = (perspective) => {
 
     describe("float()", () => {
         it("Should create float from scalars", async () => {
-            const table = await perspective.table({x: [1]});
+            const table = await perspective.table({ x: [1] });
             const view = await table.view({
                 expressions: [
                     `//computed\n float(999999.999)`,
@@ -365,7 +365,7 @@ module.exports = (perspective) => {
         });
 
         it("Should create float from integer columns", async () => {
-            const table = await perspective.table({x: "integer"});
+            const table = await perspective.table({ x: "integer" });
 
             const view = await table.view({
                 expressions: [`//computed\nfloat("x")`],
@@ -390,7 +390,7 @@ module.exports = (perspective) => {
         });
 
         it("Should create float from float columns", async () => {
-            const table = await perspective.table({x: "float"});
+            const table = await perspective.table({ x: "float" });
 
             const view = await table.view({
                 expressions: [`//computed\n float("x")`],
@@ -422,7 +422,7 @@ module.exports = (perspective) => {
         });
 
         it("Should create float from date columns", async () => {
-            const table = await perspective.table({x: "date"});
+            const table = await perspective.table({ x: "date" });
 
             const view = await table.view({
                 expressions: [`//computed\nfloat("x")`],
@@ -455,7 +455,7 @@ module.exports = (perspective) => {
         });
 
         it("Should create float from datetime columns", async () => {
-            const table = await perspective.table({x: "datetime"});
+            const table = await perspective.table({ x: "datetime" });
 
             const view = await table.view({
                 expressions: [`//computed\nfloat("x")`],
@@ -559,7 +559,7 @@ module.exports = (perspective) => {
                     idx: [1, 2, 3, 4],
                     x: [1, 2, null, 4],
                 },
-                {index: "idx"}
+                { index: "idx" }
             );
 
             const view = await table.view({
@@ -597,7 +597,7 @@ module.exports = (perspective) => {
                     idx: [1, 2, 3, 4],
                     x: [1, 2, null, 4],
                 },
-                {index: "idx"}
+                { index: "idx" }
             );
 
             const view = await table.view({

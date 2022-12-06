@@ -1206,7 +1206,7 @@ module.exports = (perspective) => {
         });
 
         it("Should only parse first comment as an alias", async () => {
-            const table = await perspective.table({a: [1, 2, 3]});
+            const table = await perspective.table({ a: [1, 2, 3] });
             const view = await table.view({
                 expressions: [
                     "var x := 1 + 2;\n// another comment\nx + 3 + 4 # comment",
@@ -2028,14 +2028,14 @@ module.exports = (perspective) => {
             const table = await perspective.table(
                 expressions_common.int_float_data
             );
-            const view = await table.view({expressions: [expressions[0]]});
+            const view = await table.view({ expressions: [expressions[0]] });
             const view2 = await table.view({
                 expressions: [expressions[0], expressions[1]],
             });
             const view3 = await table.view({
                 expressions: [expressions[0], expressions[1], expressions[2]],
             });
-            const view4 = await table.view({expressions: expressions});
+            const view4 = await table.view({ expressions: expressions });
 
             const schema = await view.schema();
             const schema2 = await view2.schema();

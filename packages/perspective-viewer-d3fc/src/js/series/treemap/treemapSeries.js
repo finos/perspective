@@ -13,9 +13,9 @@ import {
     selectVisibleNodes,
 } from "./treemapLabel";
 import treemapLayout from "./treemapLayout";
-import {changeLevel, returnToLevel} from "./treemapTransitions";
-import {parentControls} from "./treemapControls";
-import {calculateRootLevelMap, saveLabelMap} from "./treemapLevelCalculation";
+import { changeLevel, returnToLevel } from "./treemapTransitions";
+import { parentControls } from "./treemapControls";
+import { calculateRootLevelMap, saveLabelMap } from "./treemapLevelCalculation";
 
 export const nodeLevel = {
     leaf: "leafnode",

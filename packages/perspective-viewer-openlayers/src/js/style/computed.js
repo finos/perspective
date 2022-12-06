@@ -6,7 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import {color, rgb} from "d3-color";
+import { color, rgb } from "d3-color";
 
 export const computedStyle = (container) => {
     const containerStyles = getComputedStyle(container);
@@ -20,7 +20,7 @@ export const toFillAndStroke = (col) => {
     asColor.opacity = 0.5;
     const fill = `${asColor}`;
 
-    return {stroke, fill};
+    return { stroke, fill };
 };
 
 export const lightenRgb = (col, lighten) => {

@@ -8,7 +8,7 @@
  */
 
 import TOOLBAR_STYLE from "../../less/toolbar.less";
-import {toggle_edit_mode, toggle_scroll_lock} from "../model/toolbar";
+import { toggle_edit_mode, toggle_scroll_lock } from "../model/toolbar";
 
 /**
  * The custom element for this plugin's toolbar, a component which displays in
@@ -24,7 +24,7 @@ export class HTMLPerspectiveViewerDatagridToolbarElement extends HTMLElement {
 
         this._initialized = true;
         this.setAttribute("slot", "plugin-settings");
-        this.attachShadow({mode: "open"});
+        this.attachShadow({ mode: "open" });
         this.shadowRoot.innerHTML = `
             <style>
                 ${TOOLBAR_STYLE}

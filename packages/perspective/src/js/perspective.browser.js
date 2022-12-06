@@ -8,17 +8,16 @@
  */
 
 import * as defaults from "./config/constants.js";
-import {get_config, get_type_config as _get_type_config} from "./config";
-import {Client} from "./api/client.js";
-import {WebSocketClient} from "./websocket/client";
+import { get_config, get_type_config as _get_type_config } from "./config";
+import { Client } from "./api/client.js";
+import { WebSocketClient } from "./websocket/client";
 
-import {override_config} from "./config/index.js";
-import {Decompress} from "fflate";
+import { override_config } from "./config/index.js";
+import { Decompress } from "fflate";
 
 import wasm_worker from "@finos/perspective/src/js/perspective.worker.js";
 import wasm from "@finos/perspective/dist/pkg/esm/perspective.cpp.wasm";
 
-// eslint-disable-next-line max-len
 const INLINE_WARNING = `Perspective has been compiled in "inline" mode.`;
 
 function is_gzip(buffer) {
@@ -65,7 +64,7 @@ const _override = /* @__PURE__ */ (function () {
                         const reader = resp.body.getReader();
                         let state = 0;
                         while (true) {
-                            const {value, done} = await reader.read();
+                            const { value, done } = await reader.read();
                             if (done) break;
                             if (
                                 (state === 0 && is_gzip(value.buffer)) ||
@@ -121,7 +120,7 @@ class WebWorkerClient extends Client {
      */
     async register() {
         let _worker;
-        const msg = {cmd: "init", config: get_config()};
+        const msg = { cmd: "init", config: get_config() };
         if (typeof WebAssembly === "undefined") {
             throw new Error("WebAssembly not supported.");
         } else {

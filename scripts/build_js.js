@@ -7,7 +7,7 @@
  *
  */
 
-const {execute} = require("./script_utils.js");
+const { execute } = require("./script_utils.js");
 
 try {
     let scope =

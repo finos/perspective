@@ -53,7 +53,7 @@ utils.with_jupyterlab(process.env.__JUPYTERLAB_PORT__, () => {
 
                     expect(num_rows).toEqual(5);
                 },
-                {timeout: 120000}
+                { timeout: 120000 }
             );
 
             test.jupyterlab(
@@ -426,6 +426,6 @@ assert w.theme == "Material Dark"
                 }
             );
         },
-        {name: "Simple", root: path.join(__dirname, "..", "..")}
+        { name: "Simple", root: path.join(__dirname, "..", "..") }
     );
 });

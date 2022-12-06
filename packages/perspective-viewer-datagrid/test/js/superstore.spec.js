@@ -123,7 +123,7 @@ utils.with_server({}, () => {
             //     await page.evaluate(element => element.setAttribute("columns", '["abc", "def"]'), viewer);
             // });
         },
-        {root: path.join(__dirname, "..", "..")}
+        { root: path.join(__dirname, "..", "..") }
     );
 });
 

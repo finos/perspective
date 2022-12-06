@@ -1,11 +1,13 @@
 const cpy = require("cpy");
-const {WorkerPlugin} = require("@finos/perspective-esbuild-plugin/worker");
+const { WorkerPlugin } = require("@finos/perspective-esbuild-plugin/worker");
 const {
     NodeModulesExternal,
 } = require("@finos/perspective-esbuild-plugin/external");
-const {UMDLoader} = require("@finos/perspective-esbuild-plugin/umd");
-const {build} = require("@finos/perspective-esbuild-plugin/build");
-const {PerspectiveEsbuildPlugin} = require("@finos/perspective-esbuild-plugin");
+const { UMDLoader } = require("@finos/perspective-esbuild-plugin/umd");
+const { build } = require("@finos/perspective-esbuild-plugin/build");
+const {
+    PerspectiveEsbuildPlugin,
+} = require("@finos/perspective-esbuild-plugin");
 
 const BUILD = [
     {
@@ -22,7 +24,7 @@ const BUILD = [
         entryPoints: ["src/js/perspective.node.js"],
         platform: "node",
         plugins: [
-            PerspectiveEsbuildPlugin({wasm: {inline: true}}),
+            PerspectiveEsbuildPlugin({ wasm: { inline: true } }),
             NodeModulesExternal(),
         ],
         outfile: "dist/cjs/perspective.node.js",
@@ -41,13 +43,13 @@ const BUILD = [
             global: "window",
         },
         globalName: "perspective",
-        footer: {js: "window.perspective=perspective;"},
+        footer: { js: "window.perspective=perspective;" },
         format: "cjs",
         entryPoints: ["src/js/perspective.browser.js"],
         plugins: [
             PerspectiveEsbuildPlugin({
-                wasm: {inline: true},
-                worker: {inline: true},
+                wasm: { inline: true },
+                worker: { inline: true },
             }),
             UMDLoader(),
         ],

@@ -7,7 +7,7 @@
  *
  */
 
-import {style_cell_flash} from "./cell_flash.js";
+import { style_cell_flash } from "./cell_flash.js";
 import {
     rgbaToRgb,
     infer_foreground_from_background,

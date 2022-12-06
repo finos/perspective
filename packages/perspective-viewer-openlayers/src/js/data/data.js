@@ -30,7 +30,7 @@ export function getMapData(config) {
                     split.length > 1
                         ? split.slice(0, split.length - 1).join("|")
                         : "__default__";
-                rowPoints[category] = rowPoints[category] || {group, row};
+                rowPoints[category] = rowPoints[category] || { group, row };
                 rowPoints[category][split[split.length - 1]] = row[key];
             });
 

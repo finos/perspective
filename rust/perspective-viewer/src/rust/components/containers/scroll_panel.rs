@@ -232,7 +232,7 @@ where
     /// If the new total row height is different than last time this component
     /// was rendered, we need to double-render to read the container's
     /// potentially updated height.
-    fn changed(&mut self, ctx: &Context<Self>) -> bool {
+    fn changed(&mut self, ctx: &Context<Self>, _old: &Self::Properties) -> bool {
         let total_height = ctx.props().total_height(ctx);
         self.needs_rerender =
             self.needs_rerender || (self.total_height - total_height).abs() > 0.1f64;

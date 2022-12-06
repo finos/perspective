@@ -7,7 +7,7 @@
  *
  */
 
-const {convert} = require("../../dist/cjs/migrate.js");
+const { convert } = require("../../dist/cjs/migrate.js");
 const utils = require("@finos/perspective-test");
 const path = require("path");
 
@@ -66,13 +66,13 @@ const TESTS = [
             editable: null,
             aggregates: null,
             sort: null,
-            plugin_config: {Sales: {color_mode: "gradient", gradient: 10}},
+            plugin_config: { Sales: { color_mode: "gradient", gradient: 10 } },
         },
         {
             plugin: "Datagrid",
             plugin_config: {
                 columns: {
-                    Sales: {number_bg_mode: "gradient", bg_gradient: 10},
+                    Sales: { number_bg_mode: "gradient", bg_gradient: 10 },
                 },
                 editable: false,
                 scroll_lock: true,
@@ -92,7 +92,7 @@ const TESTS = [
             plugin: "Datagrid",
             plugin_config: {
                 columns: {
-                    Sales: {number_color_mode: "gradient", gradient: 10},
+                    Sales: { number_color_mode: "gradient", gradient: 10 },
                 },
                 editable: false,
                 scroll_lock: true,
@@ -288,14 +288,14 @@ utils.with_server({}, () => {
                         delete config.settings;
 
                         expect(config).toEqual(current);
-                        expect(convert(old, {replace_defaults: true})).toEqual(
-                            current
-                        );
+                        expect(
+                            convert(old, { replace_defaults: true })
+                        ).toEqual(current);
                         return await get_contents(page);
                     });
                 }
             });
         },
-        {root: path.join(__dirname, "..", "..")}
+        { root: path.join(__dirname, "..", "..") }
     );
 });

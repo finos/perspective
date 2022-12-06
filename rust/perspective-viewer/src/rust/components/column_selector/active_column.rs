@@ -154,7 +154,7 @@ impl Component for ActiveColumn {
         }
     }
 
-    fn changed(&mut self, ctx: &Context<Self>) -> bool {
+    fn changed(&mut self, ctx: &Context<Self>, _old: &Self::Properties) -> bool {
         self.column_type = ctx.props().get_type();
         self.is_required = ctx.props().get_is_required();
         true

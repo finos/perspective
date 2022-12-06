@@ -7,9 +7,9 @@
  *
  */
 
-const {WasmPlugin} = require("./wasm.js");
-const {WorkerPlugin} = require("./worker.js");
-const {ReplacePlugin} = require("./replace.js");
+const { WasmPlugin } = require("./wasm.js");
+const { WorkerPlugin } = require("./worker.js");
+const { ReplacePlugin } = require("./replace.js");
 
 exports.PerspectiveEsbuildPlugin = function PerspectiveEsbuildPlugin(
     options = {}

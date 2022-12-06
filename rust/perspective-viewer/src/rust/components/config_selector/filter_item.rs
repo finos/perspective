@@ -313,7 +313,7 @@ impl Component for FilterItem {
         }
     }
 
-    fn changed(&mut self, ctx: &Context<Self>) -> bool {
+    fn changed(&mut self, ctx: &Context<Self>, _old: &Self::Properties) -> bool {
         if let Some(input) = ctx.props().get_filter_input() {
             self.input = input;
             true

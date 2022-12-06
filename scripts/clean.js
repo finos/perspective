@@ -7,7 +7,7 @@
  *
  */
 
-const {execute, clean} = require("./script_utils.js");
+const { execute, clean } = require("./script_utils.js");
 
 const glob = require("glob");
 const minimatch = require("minimatch");

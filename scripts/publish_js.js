@@ -7,7 +7,7 @@
  *
  */
 
-const {execute} = require("./script_utils.js");
+const { execute } = require("./script_utils.js");
 const fs = require("fs");
 
 if (!process.env.GITHUB_TOKEN) {
@@ -25,15 +25,15 @@ try {
         --unreleased-only
         --base CHANGELOG.md
         --output CHANGELOG.md
-        --unreleased-label=v1.7.1
-        --since-tag=v1.7.0
+        --unreleased-label=v1.7.2
+        --since-tag=v1.7.1
     `;
 
     execute`git add CHANGELOG.md`;
 
     console.log(`-- Building "@finos/perspective(-*)"`);
     fs.writeFileSync("./.perspectiverc", `PSP_PROJECT=js`);
-    require("dotenv").config({path: "./.perspectiverc"});
+    require("dotenv").config({ path: "./.perspectiverc" });
     execute`yarn clean --deps`;
     execute`rm -rf node_modules`;
     execute`yarn`;
