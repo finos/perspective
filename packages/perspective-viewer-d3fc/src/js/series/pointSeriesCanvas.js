@@ -10,12 +10,14 @@ import { seriesCanvasPoint } from "d3fc";
 import { withOpacity, withoutOpacity } from "./seriesColors";
 import { groupFromKey } from "./seriesKey";
 import { fromDomain } from "./seriesSymbols";
+import { toValue } from "../tooltip/selectionData";
 
 export function pointSeriesCanvas(
     settings,
     seriesKey,
     size,
     color,
+    label,
     symbols,
     scale_factor = 1
 ) {
@@ -35,6 +37,16 @@ export function pointSeriesCanvas(
             d.colorValue !== undefined ? d.colorValue : seriesKey
         );
         const opacity = settings.colorStyles && settings.colorStyles.opacity;
+
+        if (label) {
+            context.fillStyle = "#000"; // TODO;
+            context.font = "12px Open Sans";
+            const type = settings.mainValues.find(
+                (x) => x.name === label
+            )?.type;
+            const value = toValue(type, d.row[label]);
+            context.fillText(value, 0, -10);
+        }
 
         context.strokeStyle = withoutOpacity(colorValue);
         context.fillStyle = withOpacity(colorValue, opacity);
