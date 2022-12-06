@@ -11,6 +11,7 @@ import * as fc from "d3fc";
 import { flattenArray } from "./flatten";
 import { extentLinear as customExtent } from "../d3fc/extent/extentLinear";
 import valueformatter from "./valueFormatter";
+import { getChartContainer } from "../plugin/root";
 
 export const scale = () => d3.scaleLinear();
 
@@ -73,3 +74,89 @@ export const domain = () => {
 export const labelFunction = (valueName) => (d) => d[valueName][0];
 
 export const tickFormatFunction = valueformatter;
+
+export const component = (settings) => {
+    let domain = null;
+    let orient = "horizontal";
+    let settingName = null;
+
+    const getAxis = (s, data) => {
+        try {
+            const container = getChartContainer(s.node());
+            const chart = container.querySelector(".cartesian-chart");
+            const axis = chart.querySelector(`.${data}-axis`);
+            return axis;
+        } catch (e) {
+            return null;
+        }
+    };
+
+    // shrinks a given tick label
+    const shrinkTickLabel = (node) => {
+        const text = d3.select(node).select("text").node();
+        text.style.fontSize = "80%";
+    };
+
+    // resizes ticks if they overflow the axis box
+    const shrinkTicks = (axis, s) => {
+        const axisBox = axis.getBoundingClientRect();
+        s.each((d, i, nodes) => {
+            const tickBox = d3.select(nodes[i]).node().getBoundingClientRect();
+
+            // if the tick is bigger than the axis, resize it
+            if (orient == "vertical" && axisBox.width < tickBox.width) {
+                shrinkTickLabel(nodes[i]);
+            } else if (
+                orient == "horizontal" &&
+                axisBox.height < tickBox.height
+            ) {
+                shrinkTickLabel(nodes[i]);
+            }
+        });
+    };
+
+    const decorate = (s, data, index) => {
+        const axis = getAxis(s, data);
+        if (axis) {
+            shrinkTicks(axis, s);
+        }
+    };
+
+    const getComponent = () => {
+        const components = {
+            bottom: fc.axisBottom,
+            left: fc.axisLeft,
+            top: fc.axisTop,
+            right: fc.axisRight,
+            // size: "100px", // works, but can't measure here
+            decorate,
+        };
+        return components;
+    };
+
+    getComponent.domain = (...args) => {
+        if (!args.length) {
+            return domain;
+        }
+        domain = args[0];
+        return getComponent;
+    };
+
+    getComponent.orient = (...args) => {
+        if (!args.length) {
+            return orient;
+        }
+        orient = args[0];
+        return getComponent;
+    };
+
+    getComponent.settingName = (...args) => {
+        if (!args.length) {
+            return settingName;
+        }
+        settingName = args[0];
+        return getComponent;
+    };
+
+    return getComponent;
+};
