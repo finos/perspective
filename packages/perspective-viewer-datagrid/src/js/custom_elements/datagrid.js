@@ -7,11 +7,11 @@
  *
  */
 
-import {activate} from "../plugin/activate.js";
-import {restore} from "../plugin/restore.js";
-import {connectedCallback} from "../plugin/connected";
-import {save} from "../plugin/save";
-import {draw} from "../plugin/draw";
+import { activate } from "../plugin/activate.js";
+import { restore } from "../plugin/restore.js";
+import { connectedCallback } from "../plugin/connected";
+import { save } from "../plugin/save";
+import { draw } from "../plugin/draw";
 
 /**
  * The custom element class for this plugin.  The interface methods for this
@@ -53,6 +53,14 @@ export class HTMLPerspectiveViewerDatagridPluginElement extends HTMLElement {
 
     get config_column_names() {
         return undefined;
+    }
+
+    /**
+     * Give the Datagrid a higher priority so it is loaded
+     * over the default charts by default.
+     */
+    get priority() {
+        return 1;
     }
 
     async draw(view) {

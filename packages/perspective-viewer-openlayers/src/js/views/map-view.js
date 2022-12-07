@@ -7,20 +7,20 @@
  *
  */
 
-import {getMapData} from "../data/data";
-import {baseMap} from "./base-map";
-import {categoryColorMap} from "../style/categoryColors";
-import {linearColorScale} from "../style/linearColors";
-import {showLegend, hideLegend} from "../legend/legend";
-import {categoryShapeMap} from "../style/categoryShapes";
-import {lightenRgb} from "../style/computed";
+import { getMapData } from "../data/data";
+import { baseMap } from "./base-map";
+import { categoryColorMap } from "../style/categoryColors";
+import { linearColorScale } from "../style/linearColors";
+import { showLegend, hideLegend } from "../legend/legend";
+import { categoryShapeMap } from "../style/categoryShapes";
+import { lightenRgb } from "../style/computed";
 
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 
-import {Feature} from "ol";
-import {fromLonLat} from "ol/proj";
-import {Point} from "ol/geom";
+import { Feature } from "ol";
+import { fromLonLat } from "ol/proj";
+import { Point } from "ol/geom";
 
 const MIN_SIZE = 2;
 const MAX_SIZE = 10;
@@ -122,7 +122,7 @@ function onHighlight(feature, highlighted) {
     });
 }
 
-function sizeMapFromExtents({size_extents}) {
+function sizeMapFromExtents({ size_extents }) {
     if (!!size_extents) {
         // We have the size value
         const range = size_extents.max - size_extents.min;

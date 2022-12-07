@@ -7,7 +7,7 @@
  *
  */
 
-import {getOrCreateElement} from "../../utils/utils";
+import { getOrCreateElement } from "../../utils/utils";
 import template from "../../../html/parent-controls.html";
 
 export function parentControls(container) {

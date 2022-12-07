@@ -6,15 +6,15 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import {axisFactory} from "../axis/axisFactory";
-import {AXIS_TYPES} from "../axis/axisType";
-import {chartCanvasFactory} from "../axis/chartFactory";
-import {heatmapSeries} from "../series/heatmapSeries";
-import {seriesColorRange} from "../series/seriesRange";
-import {heatmapData} from "../data/heatmapData";
-import {filterData} from "../legend/filter";
+import { axisFactory } from "../axis/axisFactory";
+import { AXIS_TYPES } from "../axis/axisType";
+import { chartCanvasFactory } from "../axis/chartFactory";
+import { heatmapSeries } from "../series/heatmapSeries";
+import { seriesColorRange } from "../series/seriesRange";
+import { heatmapData } from "../data/heatmapData";
+import { filterData } from "../legend/filter";
 import withGridLines from "../gridlines/gridlines";
-import {colorRangeLegend} from "../legend/colorRangeLegend";
+import { colorRangeLegend } from "../legend/colorRangeLegend";
 import zoomableChart from "../zoom/zoomableChart";
 import nearbyTip from "../tooltip/nearbyTip";
 

@@ -12,7 +12,7 @@ const path = require("path");
 const utils = require("@finos/perspective-test");
 const simple_tests = require("@finos/perspective-viewer/test/js/simple_tests.js");
 
-const {withTemplate} = require("./simple-template");
+const { withTemplate } = require("./simple-template");
 withTemplate("events", "Y Line");
 
 async function get_contents(page) {
@@ -143,6 +143,6 @@ utils.with_server({}, () => {
                 }
             );
         },
-        {reload_page: false, root: path.join(__dirname, "..", "..", "..")}
+        { reload_page: false, root: path.join(__dirname, "..", "..", "..") }
     );
 });

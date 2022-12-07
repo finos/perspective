@@ -7,7 +7,7 @@
  *
  */
 const fs = require("fs");
-const {WebSocketServer} = require("@finos/perspective");
+const { WebSocketServer } = require("@finos/perspective");
 
 const template = (body) => `
 <!DOCTYPE html>
@@ -51,4 +51,4 @@ for (const key of fs.readdirSync("src")) {
 
 fs.writeFileSync("dist/index.html", template(lis.join("\n")));
 
-new WebSocketServer({assets: [__dirname, "dist", "../../"]});
+new WebSocketServer({ assets: [__dirname, "dist", "../../"] });

@@ -8,17 +8,17 @@
  */
 
 import * as fc from "d3fc";
-import {transposeData} from "../data/transposeData";
-import {axisFactory} from "../axis/axisFactory";
-import {chartSvgFactory} from "../axis/chartFactory";
-import {symbolTypeFromGroups} from "../series/pointSeriesCanvas";
-import {lineSeries} from "../series/lineSeries";
-import {xySplitData} from "../data/xySplitData";
-import {seriesColorsFromGroups} from "../series/seriesColors";
-import {colorGroupLegend} from "../legend/legend";
-import {filterDataByGroup} from "../legend/filter";
+import { transposeData } from "../data/transposeData";
+import { axisFactory } from "../axis/axisFactory";
+import { chartSvgFactory } from "../axis/chartFactory";
+import { symbolTypeFromGroups } from "../series/pointSeriesCanvas";
+import { lineSeries } from "../series/lineSeries";
+import { xySplitData } from "../data/xySplitData";
+import { seriesColorsFromGroups } from "../series/seriesColors";
+import { colorGroupLegend } from "../legend/legend";
+import { filterDataByGroup } from "../legend/filter";
 import withGridLines from "../gridlines/gridlines";
-import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
+import { hardLimitZeroPadding } from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
 import nearbyTip from "../tooltip/nearbyTip";
 

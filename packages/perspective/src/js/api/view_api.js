@@ -7,7 +7,7 @@
  *
  */
 
-import {subscribe, unsubscribe, async_queue} from "./dispatch.js";
+import { subscribe, unsubscribe, async_queue } from "./dispatch.js";
 
 /**
  * Construct a proxy for the view object by creating a "view" message and

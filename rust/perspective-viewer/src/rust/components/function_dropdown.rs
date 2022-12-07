@@ -14,7 +14,7 @@ use crate::exprtk::CompletionItemSuggestion;
 use crate::utils::WeakScope;
 use crate::*;
 
-static CSS: &str = include_str!("../../../build/css/function-dropdown.css");
+static CSS: &str = include_str!("../../../target/css/function-dropdown.css");
 
 pub enum FunctionDropDownMsg {
     SetValues(Vec<CompletionItemSuggestion>),
@@ -106,7 +106,7 @@ impl Component for FunctionDropDown {
         }
     }
 
-    fn changed(&mut self, _ctx: &Context<Self>) -> bool {
+    fn changed(&mut self, _ctx: &Context<Self>, _old: &Self::Properties) -> bool {
         false
     }
 

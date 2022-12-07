@@ -7,9 +7,9 @@
  *
  */
 
-import {drawArc, arcVisible} from "./sunburstArc";
-import {labelVisible, labelTransform, cropLabel} from "./sunburstLabel";
-import {clickHandler} from "./sunburstClick";
+import { drawArc, arcVisible } from "./sunburstArc";
+import { labelVisible, labelTransform, cropLabel } from "./sunburstLabel";
+import { clickHandler } from "./sunburstClick";
 
 export function sunburstSeries() {
     let settings = null;

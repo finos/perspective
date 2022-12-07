@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective",
-    "version": "1.7.1",
+    "version": "1.8.0",
     "description": "Perspective.js",
     "repository": {
         "type": "git",
@@ -60,8 +60,8 @@
         "ws": "^6.1.2"
     },
     "devDependencies": {
-        "@finos/perspective-cpp": "^1.7.1",
-        "@finos/perspective-esbuild-plugin": "^1.7.1",
+        "@finos/perspective-cpp": "^1.8.0",
+        "@finos/perspective-esbuild-plugin": "^1.8.0",
         "jsverify": "^0.8.4",
         "lodash": "^4.17.4",
         "moment": "^2.19.1",

@@ -6,7 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import {Client} from "../api/client.js";
+import { Client } from "../api/client.js";
 
 // Initiate a `ping` to the server every 30 seconds
 const PING_TIMEOUT = 30000;

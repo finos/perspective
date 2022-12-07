@@ -8,8 +8,8 @@
  */
 
 import "@finos/perspective-viewer";
-import {Widget} from "@lumino/widgets";
-import {MIME_TYPE, PSP_CLASS, PSP_CONTAINER_CLASS} from "./utils";
+import { Widget } from "@lumino/widgets";
+import { MIME_TYPE, PSP_CLASS, PSP_CONTAINER_CLASS } from "./utils";
 
 let _increment = 0;
 

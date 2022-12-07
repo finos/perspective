@@ -7,8 +7,8 @@
  *
  */
 
-import {h} from "@lumino/virtualdom/src";
-import {Menu} from "@lumino/widgets/src/menu";
+import { h } from "@lumino/virtualdom/src";
+import { Menu } from "@lumino/widgets/src/menu";
 
 export class MenuRenderer extends Menu.Renderer {
     constructor(element) {
@@ -17,7 +17,7 @@ export class MenuRenderer extends Menu.Renderer {
     }
 
     formatLabel(data) {
-        let {label, mnemonic} = data.item;
+        let { label, mnemonic } = data.item;
         if (mnemonic < 0 || mnemonic >= label.length) {
             return label;
         }
@@ -77,6 +77,6 @@ export class MenuRenderer extends Menu.Renderer {
             .getPropertyValue(`--menu-${name}--content`)
             .replace(/['"]+/g, "")
             .trim();
-        return h.div({className, content}, data.item.iconLabel);
+        return h.div({ className, content }, data.item.iconLabel);
     }
 }

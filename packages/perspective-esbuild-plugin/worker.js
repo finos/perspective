@@ -1,14 +1,14 @@
 const fs = require("fs");
 const path = require("path");
 const esbuild = require("esbuild");
-const {EmptyPlugin} = require("./empty.js");
+const { EmptyPlugin } = require("./empty.js");
 
 exports.WorkerPlugin = function WorkerPlugin(options = {}) {
     const inline = !!options.inline;
     const targetdir = options.targetdir || "build/worker";
     function setup(build) {
         build.onResolve(
-            {filter: /^(\@finos\/perspective).+?worker\.js$/},
+            { filter: /^(\@finos\/perspective).+?worker\.js$/ },
             (args) => {
                 if (args.namespace === "worker-stub") {
                     const outfile = `${targetdir}/` + path.basename(args.path);
@@ -45,10 +45,12 @@ exports.WorkerPlugin = function WorkerPlugin(options = {}) {
             }
         );
 
-        build.onLoad({filter: /.*/, namespace: "worker-stub"}, async (args) => {
-            if (inline) {
-                return {
-                    contents: `
+        build.onLoad(
+            { filter: /.*/, namespace: "worker-stub" },
+            async (args) => {
+                if (inline) {
+                    return {
+                        contents: `
                         import worker from ${JSON.stringify(args.path)};
                         function make_host(a, b) {
                             function addEventListener(type, callback) {
@@ -97,11 +99,11 @@ exports.WorkerPlugin = function WorkerPlugin(options = {}) {
 
                         export default initialize;
                     `,
-                };
-            }
+                    };
+                }
 
-            return {
-                contents: `
+                return {
+                    contents: `
                     import worker from ${JSON.stringify(args.path)};
                     async function get_worker_code() {
                         const url = new URL(worker, import.meta.url);
@@ -158,10 +160,11 @@ exports.WorkerPlugin = function WorkerPlugin(options = {}) {
 
                     export default initialize;
                 `,
-            };
-        });
+                };
+            }
+        );
 
-        build.onLoad({filter: /.*/, namespace: "worker"}, async (args) => {
+        build.onLoad({ filter: /.*/, namespace: "worker" }, async (args) => {
             // Get the subbuild output and delete the temp file
             await args.pluginData.subbuild;
             contents = await fs.promises.readFile(args.pluginData.outfile);
@@ -175,7 +178,7 @@ exports.WorkerPlugin = function WorkerPlugin(options = {}) {
                 path.dirname(build.initialOptions.outfile);
 
             if (!fs.existsSync(outpath)) {
-                fs.mkdirSync(outpath, {recursive: true});
+                fs.mkdirSync(outpath, { recursive: true });
             }
 
             // await fs.promises.writeFile(

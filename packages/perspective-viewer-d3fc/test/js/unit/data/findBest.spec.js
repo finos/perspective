@@ -7,7 +7,7 @@
  *
  */
 
-const {findBestFromData} = require("../../../../src/js/data/findBest");
+const { findBestFromData } = require("../../../../src/js/data/findBest");
 
 describe("findBestFromData should", () => {
     const compareFn = Math.max;

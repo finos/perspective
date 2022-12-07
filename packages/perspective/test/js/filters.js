@@ -13,52 +13,52 @@ yesterday.setDate(yesterday.getDate() - 1);
 var now = new Date();
 
 var data = [
-    {w: now, x: 1, y: "a", z: true},
-    {w: now, x: 2, y: "b", z: false},
-    {w: now, x: 3, y: "c", z: true},
-    {w: yesterday, x: 4, y: "d", z: false},
+    { w: now, x: 1, y: "a", z: true },
+    { w: now, x: 2, y: "b", z: false },
+    { w: now, x: 3, y: "c", z: true },
+    { w: yesterday, x: 4, y: "d", z: false },
 ];
 
 var rdata = [
-    {w: +now, x: 1, y: "a", z: true},
-    {w: +now, x: 2, y: "b", z: false},
-    {w: +now, x: 3, y: "c", z: true},
-    {w: +yesterday, x: 4, y: "d", z: false},
+    { w: +now, x: 1, y: "a", z: true },
+    { w: +now, x: 2, y: "b", z: false },
+    { w: +now, x: 3, y: "c", z: true },
+    { w: +yesterday, x: 4, y: "d", z: false },
 ];
 
 // starting from 09/01/2018 to 12/01/2018
 var date_range_data = [
-    {w: new Date(1535778060000), x: 1, y: "a", z: true}, // Sat Sep 01 2018 01:01:00 GMT-0400
-    {w: new Date(1538370060000), x: 2, y: "b", z: false}, // Mon Oct 01 2018 01:01:00 GMT-0400
-    {w: new Date(1541048460000), x: 3, y: "c", z: true}, // Thu Nov 01 2018 01:01:00 GMT-0400
-    {w: new Date(1543644060000), x: 4, y: "d", z: false}, // Sat Dec 01 2018 01:01:00 GMT-0500
+    { w: new Date(1535778060000), x: 1, y: "a", z: true }, // Sat Sep 01 2018 01:01:00 GMT-0400
+    { w: new Date(1538370060000), x: 2, y: "b", z: false }, // Mon Oct 01 2018 01:01:00 GMT-0400
+    { w: new Date(1541048460000), x: 3, y: "c", z: true }, // Thu Nov 01 2018 01:01:00 GMT-0400
+    { w: new Date(1543644060000), x: 4, y: "d", z: false }, // Sat Dec 01 2018 01:01:00 GMT-0500
 ];
 
 var r_date_range_data = [
-    {w: +new Date(1535778060000), x: 1, y: "a", z: true},
-    {w: +new Date(1538370060000), x: 2, y: "b", z: false},
-    {w: +new Date(1541048460000), x: 3, y: "c", z: true},
-    {w: +new Date(1543644060000), x: 4, y: "d", z: false},
+    { w: +new Date(1535778060000), x: 1, y: "a", z: true },
+    { w: +new Date(1538370060000), x: 2, y: "b", z: false },
+    { w: +new Date(1541048460000), x: 3, y: "c", z: true },
+    { w: +new Date(1543644060000), x: 4, y: "d", z: false },
 ];
 
 const datetime_data = [
-    {x: new Date(2019, 1, 28, 23, 59, 59)}, // 2019/02/28 23:59:59 GMT-0500
-    {x: new Date(2020, 1, 29, 0, 0, 1)}, // 2020/02/29 00:00:01 GMT-0500
-    {x: new Date(2020, 2, 8, 1, 59, 59)}, // 2020/03/8 01:59:59 GMT-0400
-    {x: new Date(2020, 2, 8, 2, 0, 1)}, // 2020/03/8 02:00:01 GMT-0500
-    {x: new Date(2020, 9, 1, 15, 11, 55)}, // 2020/10/01 15:30:55 GMT-0400
-    {x: new Date(2020, 10, 1, 19, 29, 55)}, // 2020/11/01 19:30:55 GMT-0400
-    {x: new Date(2020, 11, 31, 7, 42, 55)}, // 2020/12/31 07:30:55 GMT-0500
+    { x: new Date(2019, 1, 28, 23, 59, 59) }, // 2019/02/28 23:59:59 GMT-0500
+    { x: new Date(2020, 1, 29, 0, 0, 1) }, // 2020/02/29 00:00:01 GMT-0500
+    { x: new Date(2020, 2, 8, 1, 59, 59) }, // 2020/03/8 01:59:59 GMT-0400
+    { x: new Date(2020, 2, 8, 2, 0, 1) }, // 2020/03/8 02:00:01 GMT-0500
+    { x: new Date(2020, 9, 1, 15, 11, 55) }, // 2020/10/01 15:30:55 GMT-0400
+    { x: new Date(2020, 10, 1, 19, 29, 55) }, // 2020/11/01 19:30:55 GMT-0400
+    { x: new Date(2020, 11, 31, 7, 42, 55) }, // 2020/12/31 07:30:55 GMT-0500
 ];
 
 const datetime_data_local = [
-    {x: new Date(2019, 1, 28, 23, 59, 59).toLocaleString()}, // 2019/02/28 23:59:59 GMT-0500
-    {x: new Date(2020, 1, 29, 0, 0, 1).toLocaleString()}, // 2020/02/29 00:00:01 GMT-0500
-    {x: new Date(2020, 2, 8, 1, 59, 59).toLocaleString()}, // 2020/03/8 01:59:59 GMT-0400
-    {x: new Date(2020, 2, 8, 2, 0, 1).toLocaleString()}, // 2020/03/8 02:00:01 GMT-0500
-    {x: new Date(2020, 9, 1, 15, 11, 55).toLocaleString()}, // 2020/10/01 15:30:55 GMT-0400
-    {x: new Date(2020, 10, 1, 19, 29, 55).toLocaleString()}, // 2020/11/01 19:30:55 GMT-0400
-    {x: new Date(2020, 11, 31, 7, 42, 55).toLocaleString()}, // 2020/12/31 07:30:55 GMT-0500
+    { x: new Date(2019, 1, 28, 23, 59, 59).toLocaleString() }, // 2019/02/28 23:59:59 GMT-0500
+    { x: new Date(2020, 1, 29, 0, 0, 1).toLocaleString() }, // 2020/02/29 00:00:01 GMT-0500
+    { x: new Date(2020, 2, 8, 1, 59, 59).toLocaleString() }, // 2020/03/8 01:59:59 GMT-0400
+    { x: new Date(2020, 2, 8, 2, 0, 1).toLocaleString() }, // 2020/03/8 02:00:01 GMT-0500
+    { x: new Date(2020, 9, 1, 15, 11, 55).toLocaleString() }, // 2020/10/01 15:30:55 GMT-0400
+    { x: new Date(2020, 10, 1, 19, 29, 55).toLocaleString() }, // 2020/11/01 19:30:55 GMT-0400
+    { x: new Date(2020, 11, 31, 7, 42, 55).toLocaleString() }, // 2020/12/31 07:30:55 GMT-0500
 ];
 
 module.exports = (perspective) => {
@@ -66,10 +66,10 @@ module.exports = (perspective) => {
         describe("GT & LT", function () {
             it("filters on long strings", async function () {
                 var table = await perspective.table([
-                    {x: 1, y: "123456789012a", z: true},
-                    {x: 2, y: "123456789012a", z: false},
-                    {x: 3, y: "123456789012b", z: true},
-                    {x: 4, y: "123456789012b", z: false},
+                    { x: 1, y: "123456789012a", z: true },
+                    { x: 2, y: "123456789012a", z: false },
+                    { x: 3, y: "123456789012b", z: true },
+                    { x: 4, y: "123456789012b", z: false },
                 ]);
                 var view = await table.view({
                     filter: [["y", "contains", "123456789012a"]],
@@ -152,10 +152,10 @@ module.exports = (perspective) => {
                 };
 
                 const date_results = [
-                    {w: +new Date(1535760000000)}, // Fri Aug 31 2018 20:00:00 GMT-0400
-                    {w: +new Date(1538352000000)}, // Sun Sep 30 2018 20:00:00 GMT-0400
-                    {w: +new Date(1541030400000)}, // Wed Oct 31 2018 20:00:00 GMT-0400
-                    {w: +new Date(1543622400000)}, // Fri Nov 30 2018 19:00:00 GMT-0500
+                    { w: +new Date(1535760000000) }, // Fri Aug 31 2018 20:00:00 GMT-0400
+                    { w: +new Date(1538352000000) }, // Sun Sep 30 2018 20:00:00 GMT-0400
+                    { w: +new Date(1541030400000) }, // Wed Oct 31 2018 20:00:00 GMT-0400
+                    { w: +new Date(1543622400000) }, // Fri Nov 30 2018 19:00:00 GMT-0500
                 ];
 
                 it("w > date as string", async function () {
@@ -205,7 +205,7 @@ module.exports = (perspective) => {
                 let json = await view.to_json();
                 expect(json).toEqual([
                     // empty sum
-                    {__ROW_PATH__: [], w: 0, x: null, y: 0, z: 0},
+                    { __ROW_PATH__: [], w: 0, x: null, y: 0, z: 0 },
                 ]);
                 view.delete();
                 table.delete();
@@ -218,17 +218,17 @@ module.exports = (perspective) => {
                     filter: [["x", "==", 1]],
                 });
                 let json = await view.to_json();
-                expect(json).toEqual([{x: 1}]);
+                expect(json).toEqual([{ x: 1 }]);
 
                 for (let i = 0; i < 5; i++) {
-                    table.update([{x: 1}]);
+                    table.update([{ x: 1 }]);
                 }
 
                 expect(await view.to_columns()).toEqual({
                     x: [1, 1, 1, 1, 1, 1],
                 });
 
-                table.update([{x: 2}]);
+                table.update([{ x: 2 }]);
 
                 expect(await view.to_columns()).toEqual({
                     x: [1, 1, 1, 1, 1, 1],
@@ -258,14 +258,14 @@ module.exports = (perspective) => {
                 expect(out["__ROW_PATH__"]).toEqual([[], [1], [2], [3], [4]]);
 
                 for (let i = 0; i < 5; i++) {
-                    table.update([{x: 1}]);
+                    table.update([{ x: 1 }]);
                 }
 
                 expect(await view.to_columns()).toEqual({
                     x: [1, 1, 1, 1, 1, 1],
                 });
 
-                table.update([{x: 2}]);
+                table.update([{ x: 2 }]);
 
                 expect(await view.to_columns()).toEqual({
                     x: [1, 1, 1, 1, 1, 1],
@@ -465,20 +465,20 @@ module.exports = (perspective) => {
         describe("is null", function () {
             it("returns the correct null cells for string column", async function () {
                 const table = await perspective.table([
-                    {x: 1, y: null},
-                    {x: 2, y: null},
-                    {x: 3, y: "x"},
-                    {x: 4, y: "x"},
-                    {x: 1, y: "y"},
-                    {x: 2, y: "x"},
-                    {x: 3, y: "y"},
+                    { x: 1, y: null },
+                    { x: 2, y: null },
+                    { x: 3, y: "x" },
+                    { x: 4, y: "x" },
+                    { x: 1, y: "y" },
+                    { x: 2, y: "x" },
+                    { x: 3, y: "y" },
                 ]);
                 const view = await table.view({
                     filter: [["y", "is null"]],
                 });
                 const answer = [
-                    {x: 1, y: null},
-                    {x: 2, y: null},
+                    { x: 1, y: null },
+                    { x: 2, y: null },
                 ];
                 const result = await view.to_json();
                 expect(result).toEqual(answer);
@@ -488,20 +488,20 @@ module.exports = (perspective) => {
 
             it("returns the correct null cells for integer column", async function () {
                 const table = await perspective.table([
-                    {x: 1, y: null},
-                    {x: 2, y: null},
-                    {x: 3, y: 1},
-                    {x: 4, y: 2},
-                    {x: 1, y: 3},
-                    {x: 2, y: 4},
-                    {x: 3, y: 5},
+                    { x: 1, y: null },
+                    { x: 2, y: null },
+                    { x: 3, y: 1 },
+                    { x: 4, y: 2 },
+                    { x: 1, y: 3 },
+                    { x: 2, y: 4 },
+                    { x: 3, y: 5 },
                 ]);
                 const view = await table.view({
                     filter: [["y", "is null"]],
                 });
                 const answer = [
-                    {x: 1, y: null},
-                    {x: 2, y: null},
+                    { x: 1, y: null },
+                    { x: 2, y: null },
                 ];
                 const result = await view.to_json();
                 expect(result).toEqual(answer);
@@ -511,20 +511,20 @@ module.exports = (perspective) => {
 
             it("returns the correct null cells for datetime column", async function () {
                 const table = await perspective.table([
-                    {x: 1, y: null},
-                    {x: 2, y: null},
-                    {x: 3, y: "1/1/2019"},
-                    {x: 4, y: "1/1/2019"},
-                    {x: 1, y: "1/1/2019"},
-                    {x: 2, y: "1/1/2019"},
-                    {x: 3, y: "1/1/2019"},
+                    { x: 1, y: null },
+                    { x: 2, y: null },
+                    { x: 3, y: "1/1/2019" },
+                    { x: 4, y: "1/1/2019" },
+                    { x: 1, y: "1/1/2019" },
+                    { x: 2, y: "1/1/2019" },
+                    { x: 3, y: "1/1/2019" },
                 ]);
                 const view = await table.view({
                     filter: [["y", "is null"]],
                 });
                 const answer = [
-                    {x: 1, y: null},
-                    {x: 2, y: null},
+                    { x: 1, y: null },
+                    { x: 2, y: null },
                 ];
                 const result = await view.to_json();
                 expect(result).toEqual(answer);
@@ -536,19 +536,19 @@ module.exports = (perspective) => {
         describe("nulls", function () {
             it("x > 2", async function () {
                 var table = await perspective.table([
-                    {x: 3, y: 1},
-                    {x: 2, y: 1},
-                    {x: null, y: 1},
-                    {x: null, y: 1},
-                    {x: 4, y: 2},
-                    {x: null, y: 2},
+                    { x: 3, y: 1 },
+                    { x: 2, y: 1 },
+                    { x: null, y: 1 },
+                    { x: null, y: 1 },
+                    { x: 4, y: 2 },
+                    { x: null, y: 2 },
                 ]);
                 var view = await table.view({
                     filter: [["x", ">", 2]],
                 });
                 var answer = [
-                    {x: 3, y: 1},
-                    {x: 4, y: 2},
+                    { x: 3, y: 1 },
+                    { x: 4, y: 2 },
                 ];
                 let result = await view.to_json();
                 expect(result).toEqual(answer);
@@ -558,17 +558,17 @@ module.exports = (perspective) => {
 
             it("x < 3", async function () {
                 var table = await perspective.table([
-                    {x: 3, y: 1},
-                    {x: 2, y: 1},
-                    {x: null, y: 1},
-                    {x: null, y: 1},
-                    {x: 4, y: 2},
-                    {x: null, y: 2},
+                    { x: 3, y: 1 },
+                    { x: 2, y: 1 },
+                    { x: null, y: 1 },
+                    { x: null, y: 1 },
+                    { x: 4, y: 2 },
+                    { x: null, y: 2 },
                 ]);
                 var view = await table.view({
                     filter: [["x", "<", 3]],
                 });
-                var answer = [{x: 2, y: 1}];
+                var answer = [{ x: 2, y: 1 }];
                 let result = await view.to_json();
                 expect(result).toEqual(answer);
                 view.delete();
@@ -576,21 +576,24 @@ module.exports = (perspective) => {
             });
 
             it("x > 2.5", async function () {
-                var table = await perspective.table({x: "float", y: "integer"});
+                var table = await perspective.table({
+                    x: "float",
+                    y: "integer",
+                });
                 table.update([
-                    {x: 3.5, y: 1},
-                    {x: 2.5, y: 1},
-                    {x: null, y: 1},
-                    {x: null, y: 1},
-                    {x: 4.5, y: 2},
-                    {x: null, y: 2},
+                    { x: 3.5, y: 1 },
+                    { x: 2.5, y: 1 },
+                    { x: null, y: 1 },
+                    { x: null, y: 1 },
+                    { x: 4.5, y: 2 },
+                    { x: null, y: 2 },
                 ]);
                 var view = await table.view({
                     filter: [["x", ">", 2.5]],
                 });
                 var answer = [
-                    {x: 3.5, y: 1},
-                    {x: 4.5, y: 2},
+                    { x: 3.5, y: 1 },
+                    { x: 4.5, y: 2 },
                 ];
                 let result = await view.to_json();
                 expect(result).toEqual(answer);
@@ -599,14 +602,17 @@ module.exports = (perspective) => {
             });
 
             it("x > null should be an invalid filter", async function () {
-                var table = await perspective.table({x: "float", y: "integer"});
+                var table = await perspective.table({
+                    x: "float",
+                    y: "integer",
+                });
                 const dataSet = [
-                    {x: 3.5, y: 1},
-                    {x: 2.5, y: 1},
-                    {x: null, y: 1},
-                    {x: null, y: 1},
-                    {x: 4.5, y: 2},
-                    {x: null, y: 2},
+                    { x: 3.5, y: 1 },
+                    { x: 2.5, y: 1 },
+                    { x: null, y: 1 },
+                    { x: null, y: 1 },
+                    { x: 4.5, y: 2 },
+                    { x: null, y: 2 },
                 ];
                 table.update(dataSet);
                 var view = await table.view({
@@ -621,20 +627,20 @@ module.exports = (perspective) => {
 
             it("x == 'a'", async function () {
                 var table = await perspective.table([
-                    {x: "b", y: 1},
-                    {x: "a", y: 1},
-                    {x: null, y: 1},
-                    {x: null, y: 1},
-                    {x: "a", y: 2},
-                    {x: "b", y: 2},
-                    {x: null, y: 2},
+                    { x: "b", y: 1 },
+                    { x: "a", y: 1 },
+                    { x: null, y: 1 },
+                    { x: null, y: 1 },
+                    { x: "a", y: 2 },
+                    { x: "b", y: 2 },
+                    { x: null, y: 2 },
                 ]);
                 var view = await table.view({
                     filter: [["x", "==", "a"]],
                 });
                 var answer = [
-                    {x: "a", y: 1},
-                    {x: "a", y: 2},
+                    { x: "a", y: 1 },
+                    { x: "a", y: 2 },
                 ];
                 let result = await view.to_json();
                 expect(result).toEqual(answer);
@@ -644,23 +650,23 @@ module.exports = (perspective) => {
 
             it("x != 'a'", async function () {
                 var table = await perspective.table([
-                    {x: "b", y: 1},
-                    {x: "a", y: 1},
-                    {x: null, y: 1},
-                    {x: null, y: 1},
-                    {x: "a", y: 2},
-                    {x: "b", y: 2},
-                    {x: null, y: 2},
+                    { x: "b", y: 1 },
+                    { x: "a", y: 1 },
+                    { x: null, y: 1 },
+                    { x: null, y: 1 },
+                    { x: "a", y: 2 },
+                    { x: "b", y: 2 },
+                    { x: null, y: 2 },
                 ]);
                 var view = await table.view({
                     filter: [["x", "!=", "a"]],
                 });
                 var answer = [
-                    {x: "b", y: 1},
-                    {x: null, y: 1},
-                    {x: null, y: 1},
-                    {x: "b", y: 2},
-                    {x: null, y: 2},
+                    { x: "b", y: 1 },
+                    { x: null, y: 1 },
+                    { x: null, y: 1 },
+                    { x: "b", y: 2 },
+                    { x: null, y: 2 },
                 ];
                 let result = await view.to_json();
                 expect(result).toEqual(answer);
@@ -670,20 +676,20 @@ module.exports = (perspective) => {
 
             it("x == 'b'", async function () {
                 var table = await perspective.table([
-                    {x: "b", y: 1},
-                    {x: "a", y: 1},
-                    {x: null, y: 1},
-                    {x: null, y: 1},
-                    {x: "a", y: 2},
-                    {x: "b", y: 2},
-                    {x: null, y: 2},
+                    { x: "b", y: 1 },
+                    { x: "a", y: 1 },
+                    { x: null, y: 1 },
+                    { x: null, y: 1 },
+                    { x: "a", y: 2 },
+                    { x: "b", y: 2 },
+                    { x: null, y: 2 },
                 ]);
                 var view = await table.view({
                     filter: [["x", "==", "b"]],
                 });
                 var answer = [
-                    {x: "b", y: 1},
-                    {x: "b", y: 2},
+                    { x: "b", y: 1 },
+                    { x: "b", y: 2 },
                 ];
                 let result = await view.to_json();
                 expect(result).toEqual(answer);

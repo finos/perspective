@@ -7,8 +7,8 @@
  *
  */
 import * as fc from "d3fc";
-import {getChartElement} from "../plugin/root";
-import {withoutOpacity} from "../series/seriesColors.js";
+import { getChartElement } from "../plugin/root";
+import { withoutOpacity } from "../series/seriesColors.js";
 
 // Render a set of labels with the little left/right arrows for moving
 // between axes

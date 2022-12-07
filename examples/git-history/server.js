@@ -7,16 +7,16 @@
  *
  */
 
-const {WebSocketServer, table} = require("@finos/perspective");
+const { WebSocketServer, table } = require("@finos/perspective");
 const exec = require("child_process").exec;
 
 function execute(command, callback) {
-    exec(command, {maxBuffer: 1024 * 5000}, function (error, stdout) {
+    exec(command, { maxBuffer: 1024 * 5000 }, function (error, stdout) {
         callback(stdout);
     });
 }
 
-const server = new WebSocketServer({assets: [__dirname]});
+const server = new WebSocketServer({ assets: [__dirname] });
 
 const schema = {
     Hash: "string",

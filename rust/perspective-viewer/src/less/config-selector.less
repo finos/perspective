@@ -7,8 +7,6 @@
  *
  */
 
-@import "./variables.less";
-
 :host {
     #top_panel.dragdrop-highlight {
         .psp-text-field {
@@ -26,8 +24,10 @@
 
         .row_close {
             display: inline;
-            font-family: var(--column-close--font-family,
-                    var(--button--font-family, "inherit"));
+            font-family: var(
+                --column-close--font-family,
+                var(--button--font-family, "inherit")
+            );
             cursor: pointer;
             min-width: 12px;
             margin-right: 3px;
@@ -83,7 +83,7 @@
                     margin-left: 0px;
                 }
 
-                &>* {
+                & > * {
                     color: transparent;
                 }
             }
@@ -132,14 +132,14 @@
             }
         }
 
-        .rrow>div {
+        .rrow > div {
             display: flex;
             min-height: 24px;
             flex-direction: column;
             justify-content: flex-end;
         }
 
-        .rrow>* {
+        .rrow > * {
             width: 100%;
             padding: 12px 0px 0px 0px;
             margin: -12px 0px -12px 0px;
@@ -163,7 +163,7 @@
             background-size: 100% 200%;
         }
 
-        .psp-text-field>.psp-text-field__input {
+        .psp-text-field > .psp-text-field__input {
             flex-wrap: wrap;
             border: 0px;
             line-height: 20px;
@@ -177,18 +177,18 @@
             margin-bottom: -1px;
 
             // Comma separators
-            &> :not(.config-drop)::after {
+            & > :not(.config-drop)::after {
                 width: 0px;
                 content: ",";
             }
 
-            &> :last-child::after {
+            & > :last-child::after {
                 display: none;
                 content: "" !important;
             }
         }
 
-        .psp-text-field__input+label {
+        .psp-text-field__input + label {
             width: 0px;
             height: 20px;
             line-height: 17px;
@@ -205,7 +205,7 @@
             display: flex !important;
         }
 
-        .psp-text-field__input:not(:empty)+label {
+        .psp-text-field__input:not(:empty) + label {
             position: absolute;
             top: 0px;
             margin: var(--column-drop-label--margin, -10px 0px 0px 0px);

@@ -7,10 +7,10 @@
  *
  */
 
-require("dotenv").config({path: "./.perspectiverc"});
+require("dotenv").config({ path: "./.perspectiverc" });
 
-const {execute_throw} = require("./script_utils.js");
-const {emscripten} = require("../package.json");
+const { execute_throw } = require("./script_utils.js");
+const { emscripten } = require("../package.json");
 const path = require("path");
 const os = require("os");
 const fs = require("fs");

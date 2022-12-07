@@ -62,7 +62,7 @@ const datasource = async function () {
     const arrow = await server_view.to_arrow();
 
     // Create a table in browser memory.
-    const table = await worker.table(arrow, {index: "Row ID"});
+    const table = await worker.table(arrow, { index: "Row ID" });
 
     // Clears the progress bar and overlay - added for user experience.
     console.log(`Finished load in: ${performance.now() - load_start}`);
@@ -111,7 +111,7 @@ const setup_handlers = async () => {
                 });
             }
         },
-        {mode: "row"}
+        { mode: "row" }
     );
 
     // If the server updates, decide whether to apply it to the client table.
@@ -126,7 +126,7 @@ const setup_handlers = async () => {
                 client_table.update(updated.delta);
             }
         },
-        {mode: "row"}
+        { mode: "row" }
     );
 };
 

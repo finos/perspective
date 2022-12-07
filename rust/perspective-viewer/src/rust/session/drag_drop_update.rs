@@ -135,23 +135,23 @@ impl ViewConfig {
             }
             DragTarget::GroupBy => {
                 config.group_by.retain(|x| x != &column);
-                let index = std::cmp::min(index as usize, config.group_by.len());
+                let index = std::cmp::min(index, config.group_by.len());
                 config.group_by.insert(index, column);
                 update.group_by = Some(config.group_by);
             }
             DragTarget::SplitBy => {
                 config.split_by.retain(|x| x != &column);
-                let index = std::cmp::min(index as usize, config.split_by.len());
+                let index = std::cmp::min(index, config.split_by.len());
                 config.split_by.insert(index, column);
                 update.split_by = Some(config.split_by);
             }
             DragTarget::Sort => {
-                let index = std::cmp::min(index as usize, config.sort.len());
+                let index = std::cmp::min(index, config.sort.len());
                 config.sort.insert(index, Sort(column, SortDir::Asc));
                 update.sort = Some(config.sort);
             }
             DragTarget::Filter => {
-                let index = std::cmp::min(index as usize, config.filter.len());
+                let index = std::cmp::min(index, config.filter.len());
                 config.filter.insert(
                     index,
                     Filter(column, FilterOp::EQ, FilterTerm::Scalar(Scalar::Null)),

@@ -22,13 +22,13 @@ describe.skip("groupAndStackData should", () => {
 
     test("use settings data if no specific data is supplied", () => {
         const settings = {
-            crossValues: [{name: "cross1", type: "string"}],
+            crossValues: [{ name: "cross1", type: "string" }],
             data: [
-                {value1: 10, __ROW_PATH__: ["CROSS1.1"]},
-                {value1: 20, __ROW_PATH__: ["CROSS1.2"]},
-                {value1: 30, __ROW_PATH__: ["CROSS1.1"]},
+                { value1: 10, __ROW_PATH__: ["CROSS1.1"] },
+                { value1: 20, __ROW_PATH__: ["CROSS1.2"] },
+                { value1: 30, __ROW_PATH__: ["CROSS1.1"] },
             ],
-            mainValues: [{name: "value1", type: "integer"}],
+            mainValues: [{ name: "value1", type: "integer" }],
             splitValues: [],
         };
 
@@ -38,20 +38,20 @@ describe.skip("groupAndStackData should", () => {
 
     test("use specific data if supplied", () => {
         const suppliedData = [
-            {value1: 10, __ROW_PATH__: ["CROSS1.1"]},
-            {value1: 20, __ROW_PATH__: ["CROSS1.2"]},
-            {value1: 30, __ROW_PATH__: ["CROSS1.1"]},
+            { value1: 10, __ROW_PATH__: ["CROSS1.1"] },
+            { value1: 20, __ROW_PATH__: ["CROSS1.2"] },
+            { value1: 30, __ROW_PATH__: ["CROSS1.1"] },
         ];
         const settings = {
-            crossValues: [{name: "cross1", type: "string"}],
+            crossValues: [{ name: "cross1", type: "string" }],
             data: suppliedData,
-            mainValues: [{name: "value1", type: "integer"}],
+            mainValues: [{ name: "value1", type: "integer" }],
             splitValues: [],
         };
 
         const extraData = suppliedData.concat([
-            {value1: 40, __ROW_PATH__: ["CROSS1.3"]},
-            {value1: 50, __ROW_PATH__: ["CROSS1.3"]},
+            { value1: 40, __ROW_PATH__: ["CROSS1.3"] },
+            { value1: 50, __ROW_PATH__: ["CROSS1.3"] },
         ]);
         const groupedResult = groupAndStackData(settings, extraData);
 

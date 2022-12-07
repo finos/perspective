@@ -6,11 +6,11 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import {labelFunction} from "../axis/axisLabel";
-import {splitIntoMultiSeries} from "./splitIntoMultiSeries";
+import { labelFunction } from "../axis/axisLabel";
+import { splitIntoMultiSeries } from "./splitIntoMultiSeries";
 
 export function groupData(settings, data) {
-    const stack = {stack: false};
+    const stack = { stack: false };
     const groupedSeries = splitIntoMultiSeries(settings, data, stack).map(
         (data) => groupPointDataByMainValue(settings, data, stack)
     );
@@ -24,13 +24,13 @@ export function groupData(settings, data) {
 }
 
 export function groupAndStackData(settings, data) {
-    const stack = {stack: true};
+    const stack = { stack: true };
     return splitIntoMultiSeries(settings, data, stack).map((data) =>
         groupPointDataByMainValue(settings, data, stack)
     );
 }
 
-function seriesDataFn(settings, data, {stack = false}) {
+function seriesDataFn(settings, data, { stack = false }) {
     const labelfn = labelFunction(settings);
 
     return (mainValue) => {
@@ -50,9 +50,9 @@ function seriesDataFn(settings, data, {stack = false}) {
     };
 }
 
-function groupPointDataByMainValue(settings, data, {stack = false}) {
+function groupPointDataByMainValue(settings, data, { stack = false }) {
     // Split data into a group for each aggregate (mainValue)
-    const seriesFn = seriesDataFn(settings, data, {stack});
+    const seriesFn = seriesDataFn(settings, data, { stack });
 
     if (settings.mainValues.length > 1) {
         return settings.mainValues.map(seriesFn);

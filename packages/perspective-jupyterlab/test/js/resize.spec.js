@@ -86,7 +86,7 @@ utils.with_server({}, () => {
                     await document.querySelector("perspective-viewer").flush();
                 });
                 return await page.evaluate(async () => {
-                    await window.__WIDGET__.restore({group_by: ["State"]});
+                    await window.__WIDGET__.restore({ group_by: ["State"] });
                     for (const elem of document.querySelectorAll(
                         "perspective-viewer *"
                     )) {
@@ -97,6 +97,6 @@ utils.with_server({}, () => {
                 });
             });
         },
-        {root: path.join(__dirname, "..", "..")}
+        { root: path.join(__dirname, "..", "..") }
     );
 });

@@ -7,8 +7,6 @@
  *
  */
 
-@import "../../../../rust/perspective-viewer/src/less/variables.less";
-
 .p-TabBar-tabLabel {
     background-color: transparent;
     border: none;
@@ -27,38 +25,37 @@
     cursor: text;
 }
 
-.p-TabBar-tab.p-mod-closable>.p-TabBar-tabCloseIcon:before {
+.p-TabBar-tab.p-mod-closable > .p-TabBar-tabCloseIcon:before {
     content: var(--close-button--content, "\2715");
     font-family: var(--settings--font-family, "Arial");
 }
 
-.p-TabBar-tab>.p-TabBar-tabConfigIcon:before {
+.p-TabBar-tab > .p-TabBar-tabConfigIcon:before {
     content: var(--open-settings-button--content, "\1F527");
     font-family: var(--settings--font-family, "Arial");
     transition: color 0.5s ease;
 }
 
-.p-TabBar-tab.p-mod-current.settings_open>.p-TabBar-tabConfigIcon:before {
+.p-TabBar-tab.p-mod-current.settings_open > .p-TabBar-tabConfigIcon:before {
     content: var(--close-settings-button--content, "\1F527");
     font-family: var(--settings--font-family, "Arial");
 }
 
-.p-TabBar-tab.p-mod-current.linked>.p-TabBar-tabConfigIcon:before {
+.p-TabBar-tab.p-mod-current.linked > .p-TabBar-tabConfigIcon:before {
     color: #22a0ce;
 }
 
-.p-TabBar-tab>.p-TabBar-tabConfigIcon {
+.p-TabBar-tab > .p-TabBar-tabConfigIcon {
     opacity: 0;
     pointer-events: none;
 }
 
-.p-TabBar-tab.p-mod-current>.p-TabBar-tabConfigIcon {
+.p-TabBar-tab.p-mod-current > .p-TabBar-tabConfigIcon {
     opacity: 1;
     pointer-events: all;
 }
 
 .p-mod-current {
-
     .p-TabBar-tabConfigIcon,
     .p-TabBar-tabCloseIcon {
         color: #ccc;
@@ -164,29 +161,31 @@
     border-color: #eaeaea;
 }
 
-.p-TabBar-content>.p-TabBar-tab,
-.p-TabBar-content>.p-TabBar-tab.p-mod-current.settings_open {
+.p-TabBar-content > .p-TabBar-tab,
+.p-TabBar-content > .p-TabBar-tab.p-mod-current.settings_open {
     background-color: var(--workspace-master--background-color, #f2f4f6);
 }
 
-.p-TabBar-content.inactive-blur>.p-TabBar-tab {
-    background-color: var(--workspace-inactive-blur--background-color,
-            transparent);
+.p-TabBar-content.inactive-blur > .p-TabBar-tab {
+    background-color: var(
+        --workspace-inactive-blur--background-color,
+        transparent
+    );
 }
 
 .condensed .p-TabBar-content {
-    &>.p-TabBar-tab.p-mod-current .p-TabBar-tabConfigIcon {
+    & > .p-TabBar-tab.p-mod-current .p-TabBar-tabConfigIcon {
         display: block;
     }
 
-    &>.p-TabBar-tab.p-mod-current.settings_open {
+    & > .p-TabBar-tab.p-mod-current.settings_open {
         .p-TabBar-tabLabel {
             margin-left: 0px;
         }
     }
 }
 
-.p-TabBar-content>.p-TabBar-tab.p-mod-current.settings_open {
+.p-TabBar-content > .p-TabBar-tab.p-mod-current.settings_open {
     border-width: 1px 1px 0px 1px !important;
     border-color: var(--workspace-tabbar--border-color, #ddd);
 
@@ -205,7 +204,7 @@
     }
 }
 
-.p-TabBar-content>.p-TabBar-tab.p-mod-current.perspective_updating {
+.p-TabBar-content > .p-TabBar-tab.p-mod-current.perspective_updating {
     .p-TabBar-tabConfigIcon {
         display: none;
     }
@@ -215,7 +214,7 @@
     }
 }
 
-.p-TabBar-content>.p-TabBar-tab {
+.p-TabBar-content > .p-TabBar-tab {
     max-width: 100000px !important;
     flex: 0 1 100000px !important;
     background: none;
@@ -231,23 +230,23 @@
     border-bottom-width: 0px !important;
 }
 
-.p-TabBar-content>.p-TabBar-tab {
+.p-TabBar-content > .p-TabBar-tab {
     color: #ccc;
 }
 
-.p-TabBar-content>.p-TabBar-tab {
+.p-TabBar-content > .p-TabBar-tab {
     color: #ccc;
 }
 
-.p-TabBar-content>.p-TabBar-tab .p-TabBar-tabLabel {
+.p-TabBar-content > .p-TabBar-tab .p-TabBar-tabLabel {
     color: var(--workspace-secondary--color, #666);
 }
 
-.p-TabBar-content>.p-TabBar-tab:hover {
+.p-TabBar-content > .p-TabBar-tab:hover {
     color: #ccc;
 }
 
-.p-TabBar-content>.p-TabBar-tab.p-mod-current {
+.p-TabBar-content > .p-TabBar-tab.p-mod-current {
     color: var(--workspace-secondary--color, #666);
 }
 
@@ -287,7 +286,7 @@
     max-width: 10000px !important;
 }
 
-.p-TabBar-content>.p-TabBar-tab.p-mod-current {
+.p-TabBar-content > .p-TabBar-tab.p-mod-current {
     color: var(--workspace-tabbar--color, #666) !important;
     border: var(--workspace-tabbar--border, 1px solid #ddd);
     background-color: var(--workspace-tabbar--background-color, white);
@@ -308,6 +307,8 @@
 }
 
 .perspective-workspace.context-menu * .p-TabBar,
-.perspective-workspace.context-menu .p-Widget.workspace-widget:not(.context-focus) .viewer-container {
+.perspective-workspace.context-menu
+    .p-Widget.workspace-widget:not(.context-focus)
+    .viewer-container {
     opacity: 0.2;
 }

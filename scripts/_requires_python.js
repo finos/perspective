@@ -21,7 +21,7 @@ const requires_script = `"import distutils.core; setup = distutils.core.run_setu
         // copy build/config files into python folder
         copy_files_to_python_folder();
 
-        const {stdout: requirements} =
+        const { stdout: requirements } =
             await execute_return`${PYTHON} -c ${requires_script}`;
 
         console.log(`Installing: ${requirements}`);

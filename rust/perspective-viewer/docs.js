@@ -12,14 +12,14 @@
 // https://gist.github.com/davideicardi/787df4a9dc0de66c1db8f5a57e511230
 
 const fs = require("fs");
-const {Transform, PassThrough} = require("stream");
+const { Transform, PassThrough } = require("stream");
 const puppeteer = require("puppeteer");
 
 function concatStreams(streams) {
     let pass = new PassThrough();
     let waiting = streams.length;
     for (let stream of streams) {
-        pass = stream.pipe(pass, {end: false});
+        pass = stream.pipe(pass, { end: false });
         stream.once("end", () => --waiting === 0 && pass.emit("end"));
     }
     return pass;
@@ -71,9 +71,9 @@ concatStreams(inputs)
     });
 
 async function capture_exprtk() {
-    const browser = await puppeteer.launch({headless: true});
+    const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
-    await page.addScriptTag({path: "dist/umd/perspective-viewer.js"});
+    await page.addScriptTag({ path: "dist/umd/perspective-viewer.js" });
     const data = await page.evaluate(async () => {
         await customElements.whenDefined("perspective-viewer");
         const commands = await customElements

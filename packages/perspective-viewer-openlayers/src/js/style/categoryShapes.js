@@ -17,9 +17,9 @@ import {
     symbolWye,
 } from "d3";
 
-import {Polygon, Circle} from "ol/geom";
-import {toContext} from "ol/render";
-import {Style, Fill, Stroke} from "ol/style";
+import { Polygon, Circle } from "ol/geom";
+import { toContext } from "ol/render";
+import { Style, Fill, Stroke } from "ol/style";
 
 const shapes = [
     null,
@@ -35,7 +35,7 @@ let shapePoints = null;
 const defaultValueFn = (d) => d.category;
 export const categoryShapeMap = (container, data, valueFn = defaultValueFn) => {
     const categoryMap = categoryPointsMap(data, valueFn);
-    const style = new Style({renderer: createRenderer(categoryMap)});
+    const style = new Style({ renderer: createRenderer(categoryMap) });
     return () => style;
 };
 
@@ -56,14 +56,14 @@ function categoryPointsMap(data, valueFn) {
 }
 
 function createRenderer(categoryMap) {
-    return (location, {context, feature}) => {
-        const {category, style, scale} = feature.getProperties();
+    return (location, { context, feature }) => {
+        const { category, style, scale } = feature.getProperties();
         const points = categoryMap[category];
 
-        var render = toContext(context, {pixelRatio: 1});
+        var render = toContext(context, { pixelRatio: 1 });
 
-        const fillStyle = new Fill({color: style.fill});
-        const strokeStyle = new Stroke({color: style.stroke});
+        const fillStyle = new Fill({ color: style.fill });
+        const strokeStyle = new Stroke({ color: style.stroke });
         render.setFillStrokeStyle(fillStyle, strokeStyle);
 
         if (points.length) {

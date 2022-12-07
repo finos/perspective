@@ -52,7 +52,7 @@ module.exports = (perspective) => {
                         y: ["d"],
                         z: [true],
                     },
-                    {port_id}
+                    { port_id }
                 );
             }
 
@@ -108,7 +108,7 @@ module.exports = (perspective) => {
         });
 
         it("Should create port IDs in incremental order and allow updates on each port, indexed", async function () {
-            const table = await perspective.table(data, {index: "w"});
+            const table = await perspective.table(data, { index: "w" });
             const port_ids = [];
 
             for (let i = 0; i < 10; i++) {
@@ -125,7 +125,7 @@ module.exports = (perspective) => {
                         y: ["a"],
                         z: [true],
                     },
-                    {port_id}
+                    { port_id }
                 );
             }
 
@@ -140,7 +140,7 @@ module.exports = (perspective) => {
         });
 
         it("Should create port IDs in incremental order and allow random arbitrary updates on each port, indexed", async function () {
-            const table = await perspective.table(data, {index: "w"});
+            const table = await perspective.table(data, { index: "w" });
             const port_ids = [];
 
             for (let i = 0; i < 10; i++) {
@@ -157,7 +157,7 @@ module.exports = (perspective) => {
                         y: ["a"],
                         z: [true],
                     },
-                    {port_id}
+                    { port_id }
                 );
             }
 
@@ -176,7 +176,7 @@ module.exports = (perspective) => {
                 z: [true],
             };
 
-            table.update(update_data, {port_id: 0});
+            table.update(update_data, { port_id: 0 });
 
             const output2 = await view.to_columns();
             expect(output2).toEqual({
@@ -200,7 +200,7 @@ module.exports = (perspective) => {
                 z: [true],
             };
 
-            table.update(update_data2, {port_id: port2});
+            table.update(update_data2, { port_id: port2 });
             const output3 = await view.to_columns();
             expect(output3).toEqual({
                 w: [null, 1.5, 2.5, 3.5, 4.5, 5.5],
@@ -243,7 +243,7 @@ module.exports = (perspective) => {
                             y: ["d"],
                             z: [true],
                         },
-                        {port_id}
+                        { port_id }
                     );
                 }
 
@@ -354,7 +354,7 @@ module.exports = (perspective) => {
             });
 
             it("All views should be notified by partial updates on all ports", async function () {
-                const table = await perspective.table(data, {index: "w"});
+                const table = await perspective.table(data, { index: "w" });
                 const port_ids = [];
 
                 for (let i = 0; i < 10; i++) {
@@ -382,7 +382,7 @@ module.exports = (perspective) => {
                             y: ["d"],
                             z: [false],
                         },
-                        {port_id}
+                        { port_id }
                     );
                 }
 
@@ -470,7 +470,7 @@ module.exports = (perspective) => {
                             y: ["a"],
                             z: [true],
                         },
-                        {port_id}
+                        { port_id }
                     );
                 }
             });
@@ -503,7 +503,7 @@ module.exports = (perspective) => {
                         y: ["a"],
                         z: [true],
                     },
-                    {port_id}
+                    { port_id }
                 );
             });
 
@@ -546,7 +546,7 @@ module.exports = (perspective) => {
                             y: ["a"],
                             z: [true],
                         },
-                        {port_id}
+                        { port_id }
                     );
                 }
             });
@@ -597,7 +597,7 @@ module.exports = (perspective) => {
                             last_port_id++;
                         }
                     },
-                    {mode: "row"}
+                    { mode: "row" }
                 );
 
                 const update_order = _.shuffle([
@@ -612,7 +612,7 @@ module.exports = (perspective) => {
                             y: ["a"],
                             z: [true],
                         },
-                        {port_id}
+                        { port_id }
                     );
                 }
             });
@@ -665,7 +665,7 @@ module.exports = (perspective) => {
                             done();
                         }
                     },
-                    {mode: "row"}
+                    { mode: "row" }
                 );
 
                 const first_port = get_random_int(0, 10);
@@ -682,7 +682,7 @@ module.exports = (perspective) => {
                         y: ["first port"],
                         z: [false],
                     },
-                    {port_id: first_port}
+                    { port_id: first_port }
                 );
 
                 table.update(
@@ -692,7 +692,7 @@ module.exports = (perspective) => {
                         y: ["second port"],
                         z: [true],
                     },
-                    {port_id: second_port}
+                    { port_id: second_port }
                 );
             });
         });
@@ -729,7 +729,7 @@ module.exports = (perspective) => {
                             expect(CLIENT_TO_SERVER_UPDATES).toEqual(1);
                         }
                     },
-                    {mode: "row"}
+                    { mode: "row" }
                 );
 
                 const server_view = await server_table.view();
@@ -750,12 +750,12 @@ module.exports = (perspective) => {
                             done();
                         }
                     },
-                    {mode: "row"}
+                    { mode: "row" }
                 );
 
                 // this should go to the server and round trip back to the
                 // client, but stop when it gets to the client again.
-                client_table.update(data, {port_id: client_port});
+                client_table.update(data, { port_id: client_port });
             });
 
             it("Should allow a client-server round trip without loops and server updates", async function (done) {
@@ -791,7 +791,7 @@ module.exports = (perspective) => {
                             ).toBeLessThanOrEqual(2);
                         }
                     },
-                    {mode: "row"}
+                    { mode: "row" }
                 );
 
                 const server_view = await server_table.view();
@@ -812,18 +812,18 @@ module.exports = (perspective) => {
                             done();
                         }
                     },
-                    {mode: "row"}
+                    { mode: "row" }
                 );
 
                 // this should go to the server and round trip back to the
                 // client, but stop when it gets to the client again.
-                client_table.update(data, {port_id: client_port});
+                client_table.update(data, { port_id: client_port });
 
                 // this should go to the client
                 server_table.update(data);
 
                 // this should go to the server
-                client_table.update(data, {port_id: client_port});
+                client_table.update(data, { port_id: client_port });
             });
 
             it("Should allow multi client-server round trips without loops", async function (done) {
@@ -867,11 +867,10 @@ module.exports = (perspective) => {
                             });
                         }
                     },
-                    {mode: "row"}
+                    { mode: "row" }
                 );
 
                 client_view2.on_update(
-                    // eslint-disable-next-line no-unused-vars
                     async (updated) => {
                         // client2 only reads updates from other clients
                         const results = await client_view2.to_columns();
@@ -891,7 +890,7 @@ module.exports = (perspective) => {
                         server_table.delete();
                         done();
                     },
-                    {mode: "row"}
+                    { mode: "row" }
                 );
 
                 const server_view = await server_table.view();
@@ -903,7 +902,7 @@ module.exports = (perspective) => {
                             client_table.update(updated.delta);
                         }
                     },
-                    {mode: "row"}
+                    { mode: "row" }
                 );
 
                 server_view.on_update(
@@ -912,7 +911,7 @@ module.exports = (perspective) => {
                             client_table2.update(updated.delta);
                         }
                     },
-                    {mode: "row"}
+                    { mode: "row" }
                 );
 
                 // this should go to the server and round trip back to the
@@ -926,7 +925,7 @@ module.exports = (perspective) => {
                             y: "ccc",
                         },
                     ],
-                    {port_id: client_port}
+                    { port_id: client_port }
                 );
             });
         });

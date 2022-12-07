@@ -7,13 +7,11 @@
  *
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import {isEqual} from "underscore";
-import {DOMWidgetView} from "@jupyter-widgets/base";
-import {PerspectiveJupyterWidget} from "./widget";
-import {PerspectiveJupyterClient} from "./client";
+import { isEqual } from "underscore";
+import { DOMWidgetView } from "@jupyter-widgets/base";
+import { PerspectiveJupyterWidget } from "./widget";
+import { PerspectiveJupyterClient } from "./client";
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 import perspective from "@finos/perspective/dist/esm/perspective.js";
 
 /**
@@ -336,7 +334,7 @@ export class PerspectiveView extends DOMWidgetView {
             this._kernel_edit_port = await this._kernel_table.make_port();
         }
 
-        const {plugin_config} = await this.pWidget.viewer.save();
+        const { plugin_config } = await this.pWidget.viewer.save();
         if (plugin_config?.editable) {
             // TODO only evaluated during initial load.
             // Toggling from python after initial load won't
@@ -376,12 +374,12 @@ export class PerspectiveView extends DOMWidgetView {
 
         this._client_view.on_update(
             (updated) => this._client_view_update_callback(updated),
-            {mode: "row"}
+            { mode: "row" }
         );
 
         this._kernel_view.on_update(
             (updated) => this._kernel_view_update_callback(updated),
-            {mode: "row"}
+            { mode: "row" }
         );
     }
 

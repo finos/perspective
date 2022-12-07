@@ -7,20 +7,20 @@
  *
  */
 import * as fc from "d3fc";
-import {axisFactory} from "../axis/axisFactory";
-import {chartCanvasFactory} from "../axis/chartFactory";
+import { axisFactory } from "../axis/axisFactory";
+import { chartCanvasFactory } from "../axis/chartFactory";
 import {
     pointSeriesCanvas,
     symbolTypeFromGroups,
 } from "../series/pointSeriesCanvas";
-import {pointData} from "../data/pointData";
-import {seriesColorsFromGroups} from "../series/seriesColors";
-import {seriesLinearRange, seriesColorRange} from "../series/seriesRange";
-import {symbolLegend} from "../legend/legend";
-import {colorRangeLegend} from "../legend/colorRangeLegend";
-import {filterDataByGroup} from "../legend/filter";
+import { pointData } from "../data/pointData";
+import { seriesColorsFromGroups } from "../series/seriesColors";
+import { seriesLinearRange, seriesColorRange } from "../series/seriesRange";
+import { symbolLegend } from "../legend/legend";
+import { colorRangeLegend } from "../legend/colorRangeLegend";
+import { filterDataByGroup } from "../legend/filter";
 import withGridLines from "../gridlines/gridlines";
-import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
+import { hardLimitZeroPadding } from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
 import nearbyTip from "../tooltip/nearbyTip";
 
@@ -66,6 +66,8 @@ function xyScatter(container, settings) {
         ? seriesLinearRange(settings, data, "size").range([10, 10000])
         : null;
 
+    const label = settings.realValues[4];
+
     const scale_factor = interpolate_scale([600, 0.1], [1600, 1])(container);
     const series = fc
         .seriesCanvasMulti()
@@ -77,6 +79,7 @@ function xyScatter(container, settings) {
                     series.key,
                     size,
                     color,
+                    label,
                     symbols,
                     scale_factor
                 )
@@ -139,7 +142,7 @@ xyScatter.plugin = {
     initial: {
         type: "number",
         count: 2,
-        names: ["X Axis", "Y Axis", "Color", "Size", "Tooltip"],
+        names: ["X Axis", "Y Axis", "Color", "Size", "Label", "Tooltip"],
     },
     selectMode: "toggle",
 };

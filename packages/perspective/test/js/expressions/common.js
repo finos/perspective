@@ -9,31 +9,31 @@
 const arrows = require("./../test_arrows");
 
 exports.data = [
-    {x: 1, y: "a", z: true},
-    {x: 2, y: "b", z: false},
-    {x: 3, y: "c", z: true},
-    {x: 4, y: "d", z: false},
+    { x: 1, y: "a", z: true },
+    { x: 2, y: "b", z: false },
+    { x: 3, y: "c", z: true },
+    { x: 4, y: "d", z: false },
 ];
 
 exports.int_float_data = [
-    {w: 1.5, x: 1, y: "a", z: true},
-    {w: 2.5, x: 2, y: "b", z: false},
-    {w: 3.5, x: 3, y: "c", z: true},
-    {w: 4.5, x: 4, y: "d", z: false},
+    { w: 1.5, x: 1, y: "a", z: true },
+    { w: 2.5, x: 2, y: "b", z: false },
+    { w: 3.5, x: 3, y: "c", z: true },
+    { w: 4.5, x: 4, y: "d", z: false },
 ];
 
 exports.int_float_subtract_data = [
-    {u: 2.5, v: 2, w: 1.5, x: 1, y: "a", z: true},
-    {u: 3.5, v: 3, w: 2.5, x: 2, y: "b", z: false},
-    {u: 4.5, v: 4, w: 3.5, x: 3, y: "c", z: true},
-    {u: 5.5, v: 5, w: 4.5, x: 4, y: "d", z: false},
+    { u: 2.5, v: 2, w: 1.5, x: 1, y: "a", z: true },
+    { u: 3.5, v: 3, w: 2.5, x: 2, y: "b", z: false },
+    { u: 4.5, v: 4, w: 3.5, x: 3, y: "c", z: true },
+    { u: 5.5, v: 5, w: 4.5, x: 4, y: "d", z: false },
 ];
 
 exports.comparison_data = [
-    {u: 0, v: 1.5, w: 1.5, x: 1, x2: 1, y: "a", z: true},
-    {u: 1, v: 2.55, w: 2.5, x: 2, x2: 10, y: "b", z: false},
-    {u: 0, v: 3.5, w: 3.5, x: 3, x2: 3, y: "c", z: true},
-    {u: 1, v: 4.55, w: 4.5, x: 4, x2: 10, y: "d", z: false},
+    { u: 0, v: 1.5, w: 1.5, x: 1, x2: 1, y: "a", z: true },
+    { u: 1, v: 2.55, w: 2.5, x: 2, x2: 10, y: "b", z: false },
+    { u: 0, v: 3.5, w: 3.5, x: 3, x2: 3, y: "c", z: true },
+    { u: 1, v: 4.55, w: 4.5, x: 4, x2: 10, y: "d", z: false },
 ];
 
 exports.cols = [

@@ -7,7 +7,7 @@
  *
  */
 import * as d3 from "d3";
-import {domain} from "../axis/linearAxis";
+import { domain } from "../axis/linearAxis";
 
 export function seriesLinearRange(settings, data, valueName, customExtent) {
     return d3.scaleLinear().domain(getExtent(data, valueName, customExtent));

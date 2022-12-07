@@ -6,14 +6,14 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-const {select} = require("d3");
-const {tooltip} = require("../../../../src/js/tooltip/tooltip");
+const { select } = require("d3");
+const { tooltip } = require("../../../../src/js/tooltip/tooltip");
 
 describe("tooltip with", () => {
     let container = null;
     let testElement = null;
     let settings = null;
-    const data = [{mainValue: 101}];
+    const data = [{ mainValue: 101 }];
 
     const awaitTransition = (selection) => {
         return new Promise((resolve) => {
@@ -51,7 +51,7 @@ describe("tooltip with", () => {
         settings = {
             crossValues: [],
             splitValues: [],
-            mainValues: [{name: "main-1", type: "integer"}],
+            mainValues: [{ name: "main-1", type: "integer" }],
         };
     });
     afterEach(() => {

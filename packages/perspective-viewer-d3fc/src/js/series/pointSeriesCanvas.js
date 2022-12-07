@@ -6,16 +6,18 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import {seriesCanvasPoint} from "d3fc";
-import {withOpacity, withoutOpacity} from "./seriesColors";
-import {groupFromKey} from "./seriesKey";
-import {fromDomain} from "./seriesSymbols";
+import { seriesCanvasPoint } from "d3fc";
+import { withOpacity, withoutOpacity } from "./seriesColors";
+import { groupFromKey } from "./seriesKey";
+import { fromDomain } from "./seriesSymbols";
+import { toValue } from "../tooltip/selectionData";
 
 export function pointSeriesCanvas(
     settings,
     seriesKey,
     size,
     color,
+    label,
     symbols,
     scale_factor = 1
 ) {
@@ -35,6 +37,18 @@ export function pointSeriesCanvas(
             d.colorValue !== undefined ? d.colorValue : seriesKey
         );
         const opacity = settings.colorStyles && settings.colorStyles.opacity;
+
+        if (label) {
+            context.fillStyle = settings.textStyles.color;
+            context.font = settings.textStyles.font;
+            const { type } = settings.mainValues.find((x) => x.name === label);
+            const value = toValue(type, d.row[label]);
+            const offset = size
+                ? Math.round(scale_factor * size(d.size)) * (15 / 1000) + 10
+                : 10;
+
+            context.fillText(value, offset, 4);
+        }
 
         context.strokeStyle = withoutOpacity(colorValue);
         context.fillStyle = withOpacity(colorValue, opacity);

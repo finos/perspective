@@ -82,7 +82,7 @@ module.exports = (perspective) => {
                 c: [2, 2, 4, 4, 5],
             });
             const view = await table.view({
-                aggregates: {column: "last"},
+                aggregates: { column: "last" },
                 group_by: ["column"],
                 expressions: [
                     `//column\nconcat("a", ', ', 'here is a long string, ', "b")`,
@@ -1253,7 +1253,7 @@ module.exports = (perspective) => {
         });
 
         it("Match string with regex, randomized", async () => {
-            const data = {a: []};
+            const data = { a: [] };
 
             for (let i = 0; i < 500; i++) {
                 data.a.push(random_string(100, true));
@@ -1297,7 +1297,7 @@ module.exports = (perspective) => {
         });
 
         it("match_all string with regex, randomized", async () => {
-            const data = {a: []};
+            const data = { a: [] };
 
             for (let i = 0; i < 500; i++) {
                 data.a.push(random_string(100, true));
@@ -1453,7 +1453,7 @@ module.exports = (perspective) => {
                 `search("b", '([A-Za-z]{3})')`,
             ];
 
-            const view = await table.view({expressions});
+            const view = await table.view({ expressions });
 
             const schema = await view.expression_schema();
 
@@ -1530,7 +1530,7 @@ module.exports = (perspective) => {
                 return data;
             };
 
-            const table = await perspective.table({a: get_data(100)});
+            const table = await perspective.table({ a: get_data(100) });
             const expressions = [
                 `// address
             search("a", '^([a-zA-Z0-9._-]+)@');`,
@@ -1540,7 +1540,7 @@ module.exports = (perspective) => {
 
             // Make the same regex 10x - make sure it's ok to cache the regex
             for (let i = 0; i < 10; i++) {
-                const view = await table.view({expressions});
+                const view = await table.view({ expressions });
                 const schema = await view.expression_schema();
                 expect(schema).toEqual({
                     address: "string",
@@ -1585,7 +1585,7 @@ module.exports = (perspective) => {
                 return data;
             };
 
-            const table = await perspective.table({a: get_data(1000)});
+            const table = await perspective.table({ a: get_data(1000) });
             const expression = `// parsed
             var parts[4];
             parts[0] := search("a", '^([0-9]{4})[ -][0-9]{4}[ -][0-9]{4}[ -][0-9]{4}');
@@ -1594,9 +1594,9 @@ module.exports = (perspective) => {
             parts[3] := search("a", '^[0-9]{4}[ -][0-9]{4}[ -][0-9]{4}[ -]([0-9]{4})');
             concat(parts[0], parts[1], parts[2], parts[3])`;
 
-            const view = await table.view({expressions: [expression]});
+            const view = await table.view({ expressions: [expression] });
             const schema = await view.expression_schema();
-            expect(schema).toEqual({parsed: "string"});
+            expect(schema).toEqual({ parsed: "string" });
             const result = await view.to_columns();
 
             for (let i = 0; i < 100; i++) {
@@ -1630,7 +1630,7 @@ module.exports = (perspective) => {
                 return data;
             };
 
-            const table = await perspective.table({a: get_data(1000)});
+            const table = await perspective.table({ a: get_data(1000) });
             const expression = `// parsed
             var parts[4];
             parts[0] := search("a", '^([0-9]{4})[ -][0-9]{4}[ -][0-9]{4}[ -][0-9]{4}');
@@ -1640,9 +1640,9 @@ module.exports = (perspective) => {
             var z := parts[2];
             z`;
 
-            const view = await table.view({expressions: [expression]});
+            const view = await table.view({ expressions: [expression] });
             const schema = await view.expression_schema();
-            expect(schema).toEqual({parsed: "string"});
+            expect(schema).toEqual({ parsed: "string" });
             const result = await view.to_columns();
 
             for (let i = 0; i < 100; i++) {
@@ -1841,7 +1841,7 @@ module.exports = (perspective) => {
                 "// parsed dollars\nvar dollar_vec[2];indexof(\"y\", '^[$]([0-9.]+)', dollar_vec); dollar_vec[0] + dollar_vec[1];",
             ];
 
-            const view = await table.view({expressions});
+            const view = await table.view({ expressions });
             const schema = await view.expression_schema();
             expect(schema).toEqual({
                 "parsed date": "float",
@@ -1886,7 +1886,7 @@ module.exports = (perspective) => {
             `,
             ];
 
-            const view = await table.view({expressions});
+            const view = await table.view({ expressions });
             const schema = await view.expression_schema();
             expect(schema).toEqual({
                 "parsed date": "boolean",
@@ -1939,7 +1939,7 @@ module.exports = (perspective) => {
             float(substring("y", out[0], out[1] - out[0] + 1))`,
             ];
 
-            const view = await table.view({expressions});
+            const view = await table.view({ expressions });
             const schema = await view.expression_schema();
             expect(schema).toEqual({
                 year: "string",
@@ -2048,7 +2048,7 @@ module.exports = (perspective) => {
                     x: ["abc, def, efg", "abcdef", null, "", "12345678"],
                     y: [1, 2, 3, 4, 5],
                 },
-                {index: "y"}
+                { index: "y" }
             );
 
             const view = await table.view({
@@ -2177,7 +2177,7 @@ module.exports = (perspective) => {
                     x: ["abc, def, efg", "abcdef", null, "", "12345678"],
                     y: [1, 2, 3, 4, 5],
                 },
-                {index: "y"}
+                { index: "y" }
             );
 
             const view = await table.view({
@@ -2241,7 +2241,7 @@ module.exports = (perspective) => {
                 return data;
             };
 
-            const table = await perspective.table({a: get_data(100)});
+            const table = await perspective.table({ a: get_data(100) });
             const expressions = [
                 `// ending
             var domain := search(\"a\", '@([a-zA-Z.]+)$');
@@ -2255,7 +2255,7 @@ module.exports = (perspective) => {
 
             // Make the same regex 10x - make sure it's ok to cache the regex
             for (let i = 0; i < 10; i++) {
-                const view = await table.view({expressions});
+                const view = await table.view({ expressions });
                 const schema = await view.expression_schema();
                 expect(schema).toEqual({
                     ending: "string",
@@ -2295,8 +2295,8 @@ module.exports = (perspective) => {
                 index.push(i);
             }
 
-            const table = await perspective.table({a: "string", b: "string"});
-            table.update({a: data, b: index});
+            const table = await perspective.table({ a: "string", b: "string" });
+            table.update({ a: data, b: index });
             const expressions = [
                 `//w\nreplace('abc-def-hijk', '-', '')`,
                 `//x\nreplace("a", '[0-9]{4}$', "b")`,
@@ -2311,7 +2311,7 @@ module.exports = (perspective) => {
                 z: "string",
             });
 
-            const view = await table.view({expressions});
+            const view = await table.view({ expressions });
             const result = await view.to_columns();
 
             for (let i = 0; i < 100; i++) {
@@ -2332,7 +2332,7 @@ module.exports = (perspective) => {
         });
 
         it("replace invalid", async () => {
-            const table = await perspective.table({a: "string", b: "string"});
+            const table = await perspective.table({ a: "string", b: "string" });
 
             const expressions = [
                 `//v\nreplace('abc-def-hijk', '-', 123)`,
@@ -2366,8 +2366,8 @@ module.exports = (perspective) => {
                 index.push(i);
             }
 
-            const table = await perspective.table({a: "string", b: "string"});
-            table.update({a: data, b: index});
+            const table = await perspective.table({ a: "string", b: "string" });
+            table.update({ a: data, b: index });
             const expressions = [
                 `//w\nreplace_all('abc-def-hijk', '-', '')`,
                 `//x\nreplace_all("a", '[0-9]{4}', "b")`,
@@ -2382,7 +2382,7 @@ module.exports = (perspective) => {
                 z: "string",
             });
 
-            const view = await table.view({expressions});
+            const view = await table.view({ expressions });
             const result = await view.to_columns();
 
             for (let i = 0; i < 100; i++) {
@@ -2403,7 +2403,7 @@ module.exports = (perspective) => {
         });
 
         it("replace all invalid", async () => {
-            const table = await perspective.table({a: "string", b: "string"});
+            const table = await perspective.table({ a: "string", b: "string" });
 
             const expressions = [
                 `//v\nreplace_all('abc-def-hijk', '-', 123)`,

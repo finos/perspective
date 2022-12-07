@@ -90,7 +90,7 @@ async function script(page) {
 
     await page.evaluate((viewer) => viewer.toggleConfig(), viewer);
     await page.waitFor(200);
-    await page.mouse.click(300, 300, {button: "right"});
+    await page.mouse.click(300, 300, { button: "right" });
     await page.waitFor(200);
     await page.mouse.click(320, 340);
     await page.waitFor(1000);
@@ -127,7 +127,7 @@ async function script(page) {
     await page.waitFor(200);
     await page.evaluate((viewer) => viewer.toggleConfig(), viewer);
     await page.waitFor(200);
-    await page.mouse.click(300, 300, {button: "right"});
+    await page.mouse.click(300, 300, { button: "right" });
     await page.waitFor(200);
     await page.mouse.click(320, 360);
     await page.waitFor(200);
@@ -162,7 +162,7 @@ async function script(page) {
     // close filter
     await page.evaluate((viewer) => viewer.toggleConfig(), viewer2);
     await page.waitFor(1000);
-    await page.mouse.click(200, 200, {button: "right"});
+    await page.mouse.click(200, 200, { button: "right" });
     await page.waitFor(100);
     await page.mouse.click(220, 220);
     await page.waitFor(200);

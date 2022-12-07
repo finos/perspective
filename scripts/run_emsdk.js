@@ -7,7 +7,7 @@
  *
  */
 
-const {execute_throw} = require("./script_utils.js");
+const { execute_throw } = require("./script_utils.js");
 const path = require("path");
 
 try {

@@ -36,7 +36,7 @@ macro_rules! css {
             $name,
             include_str!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/build/css/",
+                "/target/css/",
                 $name,
                 ".css"
             )),

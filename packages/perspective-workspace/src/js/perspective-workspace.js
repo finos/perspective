@@ -9,12 +9,12 @@
 
 import style from "../less/workspace.less";
 import template from "../html/workspace.html";
-import {PerspectiveWorkspace, SIDE} from "./workspace";
-export {PerspectiveWorkspace} from "./workspace";
-import {MessageLoop} from "@lumino/messaging/src";
-import {Widget} from "@lumino/widgets/src/widget";
-import {bindTemplate} from "./workspace/utils.js";
-export {PerspectiveViewerWidget} from "./workspace/widget";
+import { PerspectiveWorkspace, SIDE } from "./workspace";
+export { PerspectiveWorkspace } from "./workspace";
+import { MessageLoop } from "@lumino/messaging/src";
+import { Widget } from "@lumino/widgets/src/widget";
+import { bindTemplate } from "./workspace/utils.js";
+export { PerspectiveViewerWidget } from "./workspace/widget";
 
 import injectedStyles from "../less/injected.less";
 
@@ -200,7 +200,7 @@ class PerspectiveWorkspaceElement extends HTMLElement {
 
     _register_light_dom_listener() {
         let observer = new MutationObserver(this._light_dom_changed.bind(this));
-        let config = {attributes: false, childList: true, subtree: false};
+        let config = { attributes: false, childList: true, subtree: false };
         observer.observe(this, config);
         this._light_dom_changed();
     }
@@ -210,7 +210,9 @@ class PerspectiveWorkspaceElement extends HTMLElement {
             this.side = this.side || SIDE.LEFT;
 
             const container = this.shadowRoot.querySelector("#container");
-            this.workspace = new PerspectiveWorkspace(this, {side: this.side});
+            this.workspace = new PerspectiveWorkspace(this, {
+                side: this.side,
+            });
 
             this._register_light_dom_listener();
 

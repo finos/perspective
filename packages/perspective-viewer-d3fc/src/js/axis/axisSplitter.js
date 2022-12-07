@@ -6,7 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import {splitterLabels} from "./splitterLabels";
+import { splitterLabels } from "./splitterLabels";
 
 export const axisSplitter = (
     settings,
@@ -89,7 +89,7 @@ export const dataBlankFunction = (sourceData, isIncludedFn) => {
     return sourceData.map((series) => {
         if (!isIncludedFn(series.key)) {
             // Blank this data
-            return series.map((v) => Object.assign({}, v, {mainValue: null}));
+            return series.map((v) => Object.assign({}, v, { mainValue: null }));
         }
         return series;
     });

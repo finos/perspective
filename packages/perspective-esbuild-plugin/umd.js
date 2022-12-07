@@ -1,4 +1,4 @@
-const get_banner = ({globalName}) => ({
+const get_banner = ({ globalName }) => ({
     js: `
     (function (root, factory) {
         if (typeof define === 'function' && define.amd) {

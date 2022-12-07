@@ -43,7 +43,7 @@ export async function selectionListener(
             filter = filter.config.filter;
         }
 
-        await regularTable.draw({preserve_width: true});
+        await regularTable.draw({ preserve_width: true });
         event.handled = true;
         viewer.dispatchEvent(
             new CustomEvent("perspective-select", {
@@ -51,7 +51,7 @@ export async function selectionListener(
                 composed: true,
                 detail: {
                     selected: !is_deselect,
-                    config: {filter},
+                    config: { filter },
                 },
             })
         );

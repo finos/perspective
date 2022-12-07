@@ -8,10 +8,10 @@
  */
 
 import * as fc from "d3fc";
-import {tooltip} from "./tooltip";
-import {withOpacity} from "../series/seriesColors.js";
-import {findBestFromData} from "../data/findBest";
-import {raiseEvent} from "./selectionEvent";
+import { tooltip } from "./tooltip";
+import { withOpacity } from "../series/seriesColors.js";
+import { findBestFromData } from "../data/findBest";
+import { raiseEvent } from "./selectionEvent";
 
 export default () => {
     const base = tooltip().alwaysShow(true);
@@ -115,10 +115,10 @@ export default () => {
                 Math.min
             );
             return dist1(best1) <= dist2(best2)
-                ? {data: best1, scale: yScale}
-                : {data: best2, scale: altDataWithScale.yScale};
+                ? { data: best1, scale: yScale }
+                : { data: best2, scale: altDataWithScale.yScale };
         }
-        return {data: best1, scale: yScale};
+        return { data: best1, scale: yScale };
     };
 
     nearbyTip.scaleFactor = (...args) => {
