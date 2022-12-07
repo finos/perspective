@@ -1865,6 +1865,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("remove_port", &Table::remove_port)
         .function("get_id", &Table::get_id)
         .function("get_pool", &Table::get_pool)
+        .function("broch_test", &Table::broch_test)
         .function("get_gnode", &Table::get_gnode);
     /******************************************************************************
      *

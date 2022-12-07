@@ -261,4 +261,9 @@ Table::process_op_column(t_data_table& data_table, const t_op op) {
     }
 }
 
+t_index
+Table::broch_test() {
+    return 123;
+}
+
 } // namespace perspective

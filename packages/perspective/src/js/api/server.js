@@ -81,6 +81,8 @@ export class Server {
      * @param {*} client_id
      */
     process(msg, client_id) {
+        console.log(`[SERVER] Received message: ${JSON.stringify(msg)})}`)
+
         switch (msg.cmd) {
             case "init_profile_thread":
                 this.perspective.initialize_profile_thread();
@@ -108,6 +110,11 @@ export class Server {
                             msg.args[0],
                             msg.options
                         );
+
+                        console.log("[SERVER] Created table:");
+                        console.log(table);
+                        const r = table._Table.broch_test();
+                        console.log(r);
 
                         // When using the Node server, the `table()` constructor
                         // returns a Promise, but in the Web Worker version,
@@ -235,6 +242,10 @@ export class Server {
                         return;
                     }
                 }
+                break;
+            case "table_broch_test":
+                console.log("table_broch_test, son");
+                console.log(this.perspective);
                 break;
         }
     }
