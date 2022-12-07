@@ -7,25 +7,28 @@
  *
  */
 
-import {column_header_style_listener} from "../style_handlers/column_header.js";
-import {group_header_style_listener} from "../style_handlers/group_header.js";
-import {table_cell_style_listener} from "../style_handlers/table_cell";
+import { column_header_style_listener } from "../style_handlers/column_header.js";
+import { group_header_style_listener } from "../style_handlers/group_header.js";
+import { table_cell_style_listener } from "../style_handlers/table_cell";
 import {
     click_listener,
     mousedown_listener,
 } from "../event_handlers/header_click.js";
 
-import {editable_style_listener} from "../style_handlers/editable.js";
-import {focus_style_listener} from "../style_handlers/focus.js";
-import {focusinListener, focusoutListener} from "../event_handlers/focus.js";
-import {keydownListener, clickListener} from "../event_handlers/edit_click.js";
+import { editable_style_listener } from "../style_handlers/editable.js";
+import { focus_style_listener } from "../style_handlers/focus.js";
+import { focusinListener, focusoutListener } from "../event_handlers/focus.js";
+import {
+    keydownListener,
+    clickListener,
+} from "../event_handlers/edit_click.js";
 
-import {selectionListener} from "../event_handlers/row_select_click";
-import {selectionStyleListener} from "../style_handlers/selection";
-import {deselect_all_listener} from "../event_handlers/deselect_all.js";
+import { selectionListener } from "../event_handlers/row_select_click";
+import { selectionStyleListener } from "../style_handlers/selection";
+import { deselect_all_listener } from "../event_handlers/deselect_all.js";
 
-import {createModel} from "../model/create.js";
-import {dispatch_click_listener} from "../event_handlers/dispatch_click";
+import { createModel } from "../model/create.js";
+import { dispatch_click_listener } from "../event_handlers/dispatch_click";
 
 /**
  * Lazy initialize this plugin with various listeners.

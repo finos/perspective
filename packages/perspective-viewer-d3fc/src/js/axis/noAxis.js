@@ -7,7 +7,7 @@
  *
  */
 import * as d3 from "d3";
-import {flattenArray} from "./flatten";
+import { flattenArray } from "./flatten";
 import minBandwidth from "./minBandwidth";
 import withoutTicks from "./withoutTicks";
 

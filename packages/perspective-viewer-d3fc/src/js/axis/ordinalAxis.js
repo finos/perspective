@@ -9,14 +9,14 @@
 import * as d3 from "d3";
 import * as fc from "d3fc";
 import minBandwidth from "./minBandwidth";
-import {flattenArray} from "./flatten";
+import { flattenArray } from "./flatten";
 import {
     multiAxisBottom,
     multiAxisLeft,
     multiAxisTop,
     multiAxisRight,
 } from "../d3fc/axis/multi-axis";
-import {getChartContainer} from "../plugin/root";
+import { getChartContainer } from "../plugin/root";
 
 export const scale = () => minBandwidth(d3.scaleBand()).padding(0.5);
 
@@ -145,7 +145,7 @@ export const component = (settings) => {
                 if (group.length > 0 && group[group.length - 1].text === s) {
                     group[group.length - 1].domain.push(tick);
                 } else {
-                    group.push({text: s, domain: [tick]});
+                    group.push({ text: s, domain: [tick] });
                 }
             });
         });

@@ -6,7 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import {labelFunction} from "../axis/axisLabel";
+import { labelFunction } from "../axis/axisLabel";
 
 export function splitAndBaseData(settings, data) {
     const labelfn = labelFunction(settings);

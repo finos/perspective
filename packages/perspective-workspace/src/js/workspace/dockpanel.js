@@ -7,10 +7,10 @@
  *
  */
 
-import {DockPanel} from "@lumino/widgets/src/dockpanel";
-import {PerspectiveTabBar} from "./tabbar";
-import {PerspectiveTabBarRenderer} from "./tabbarrenderer";
-import {toArray} from "@lumino/algorithm/src";
+import { DockPanel } from "@lumino/widgets/src/dockpanel";
+import { PerspectiveTabBar } from "./tabbar";
+import { PerspectiveTabBarRenderer } from "./tabbarrenderer";
+import { toArray } from "@lumino/algorithm/src";
 
 class PerspectiveDockPanelRenderer extends DockPanel.Renderer {
     createTabBar() {
@@ -24,7 +24,7 @@ class PerspectiveDockPanelRenderer extends DockPanel.Renderer {
 
 export class PerspectiveDockPanel extends DockPanel {
     constructor() {
-        super({renderer: new PerspectiveDockPanelRenderer()});
+        super({ renderer: new PerspectiveDockPanelRenderer() });
         this._renderer.dock = this;
     }
 

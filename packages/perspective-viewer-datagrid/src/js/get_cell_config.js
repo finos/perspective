@@ -8,7 +8,7 @@
  */
 
 export default async function getCellConfig(
-    {_view, _config},
+    { _view, _config },
     row_idx,
     col_idx
 ) {
@@ -16,7 +16,7 @@ export default async function getCellConfig(
     const split_by = _config.split_by;
     const start_row = row_idx >= 0 ? row_idx : 0;
     const end_row = start_row + 1;
-    const r = await _view.to_json({start_row, end_row});
+    const r = await _view.to_json({ start_row, end_row });
     const row_paths = r.map((x) => x.__ROW_PATH__);
     const group_by_values = row_paths[0] || [];
     const row_filters = group_by
@@ -28,7 +28,7 @@ export default async function getCellConfig(
 
     const column_index = group_by.length > 0 ? col_idx + 1 : col_idx;
     const column_paths = Object.keys(r[0])[column_index];
-    const result = {row: r[0]};
+    const result = { row: r[0] };
     let column_filters = [];
     if (column_paths) {
         const split_by_values = column_paths.split("|");
@@ -43,6 +43,6 @@ export default async function getCellConfig(
     }
 
     const filter = _config.filter.concat(row_filters).concat(column_filters);
-    result.config = {filter};
+    result.config = { filter };
     return result;
 }

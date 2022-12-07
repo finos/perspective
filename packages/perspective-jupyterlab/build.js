@@ -1,11 +1,14 @@
 const cpy = require("cpy");
 
-const {lessLoader} = require("esbuild-plugin-less");
+const { lessLoader } = require("esbuild-plugin-less");
 
-const {WasmPlugin} = require("@finos/perspective-esbuild-plugin/wasm");
-const {WorkerPlugin} = require("@finos/perspective-esbuild-plugin/worker");
-const {UMDLoader} = require("@finos/perspective-esbuild-plugin/umd");
-const {build} = require("@finos/perspective-esbuild-plugin/build");
+const { WasmPlugin } = require("@finos/perspective-esbuild-plugin/wasm");
+const { WorkerPlugin } = require("@finos/perspective-esbuild-plugin/worker");
+const {
+    IgnoreFontsPlugin,
+} = require("@finos/perspective-esbuild-plugin/ignore_fonts");
+const { UMDLoader } = require("@finos/perspective-esbuild-plugin/umd");
+const { build } = require("@finos/perspective-esbuild-plugin/build");
 
 const TEST_BUILD = {
     entryPoints: ["src/js/psp_widget.js"],
@@ -13,9 +16,10 @@ const TEST_BUILD = {
         global: "window",
     },
     plugins: [
+        IgnoreFontsPlugin(),
         lessLoader(),
         WasmPlugin(true),
-        WorkerPlugin({inline: true}),
+        WorkerPlugin({ inline: true }),
         UMDLoader(),
     ],
     globalName: "PerspectiveLumino",
@@ -32,7 +36,12 @@ const PROD_BUILD = {
     define: {
         global: "window",
     },
-    plugins: [lessLoader(), WasmPlugin(true), WorkerPlugin({inline: true})],
+    plugins: [
+        IgnoreFontsPlugin(),
+        lessLoader(),
+        WasmPlugin(true),
+        WorkerPlugin({ inline: true }),
+    ],
     external: ["@jupyter*", "@lumino*"],
     format: "esm",
     loader: {

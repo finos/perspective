@@ -7,7 +7,7 @@
  *
  */
 
-import {is_editable, write_cell} from "./edit_click.js";
+import { is_editable, write_cell } from "./edit_click.js";
 
 export function focusoutListener(table, viewer, selected_position_map, event) {
     if (is_editable.call(this, viewer) && selected_position_map.has(table)) {

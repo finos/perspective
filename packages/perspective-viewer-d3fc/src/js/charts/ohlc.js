@@ -6,7 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import {seriesCanvasOhlc} from "d3fc";
+import { seriesCanvasOhlc } from "d3fc";
 import ohlcCandle from "./ohlcCandle";
 
 const ohlc = ohlcCandle(seriesCanvasOhlc);

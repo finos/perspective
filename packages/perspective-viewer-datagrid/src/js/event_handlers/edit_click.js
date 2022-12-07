@@ -7,7 +7,7 @@
  *
  */
 
-import {focus_style_listener} from "../style_handlers/focus.js";
+import { focus_style_listener } from "../style_handlers/focus.js";
 
 function lock(body) {
     let lock;
@@ -61,7 +61,7 @@ export function write_cell(table, model, active_cell) {
             [model._column_paths[meta.x]]: text,
         };
 
-        model._table.update([msg], {port_id: model._edit_port});
+        model._table.update([msg], { port_id: model._edit_port });
         return true;
     }
 }

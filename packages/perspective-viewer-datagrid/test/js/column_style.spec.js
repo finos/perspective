@@ -38,7 +38,7 @@ utils.with_server({}, () => {
                     const viewer = await page.waitForSelector(
                         "perspective-viewer"
                     );
-                    const {x, y} = await page.evaluate(async (viewer) => {
+                    const { x, y } = await page.evaluate(async (viewer) => {
                         // Await the table load
                         await viewer.getTable();
 
@@ -77,7 +77,7 @@ utils.with_server({}, () => {
                         "perspective-number-column-style"
                     );
 
-                    const {x: xx, y: yy} = await page.evaluate(
+                    const { x: xx, y: yy } = await page.evaluate(
                         async (style_menu) => {
                             // Find the 'bar' button
                             const bar_button =
@@ -119,7 +119,7 @@ utils.with_server({}, () => {
                     const viewer = await page.waitForSelector(
                         "perspective-viewer"
                     );
-                    const {x, y} = await page.evaluate(
+                    const { x, y } = await page.evaluate(
                         async (viewer, selector) => {
                             await viewer.getTable();
                             await viewer.toggleConfig();
@@ -174,7 +174,7 @@ utils.with_server({}, () => {
                 });
             });
         },
-        {root: path.join(__dirname, "..", "..")}
+        { root: path.join(__dirname, "..", "..") }
     );
 });
 

@@ -32,9 +32,9 @@
 #define PSP_TABLE_VERIFY
 #define PSP_GNODE_VERIFY
 #define PSP_TABLE_TRACE
-//#define PSP_DEBUG_HELPER
-//#define PSP_MPROTECT
-//#define PSP_DBG_MALLOC
+// #define PSP_DEBUG_HELPER
+// #define PSP_MPROTECT
+// #define PSP_DBG_MALLOC
 #endif
 
 // Remove once we are c++11 everywhere

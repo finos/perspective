@@ -1,4 +1,4 @@
-const {lessLoader} = require("esbuild-plugin-less");
+const { lessLoader } = require("esbuild-plugin-less");
 const esbuild = require("esbuild");
 const path = require("path");
 const fs = require("fs");
@@ -6,7 +6,7 @@ const crypto = require("crypto");
 
 exports.InlineCSSPlugin = function InlineCSSPlugin() {
     function setup(build) {
-        build.onResolve({filter: /\.less$/}, (args) => {
+        build.onResolve({ filter: /\.less$/ }, (args) => {
             if (args.path.startsWith(".")) {
                 args.path = path.join(path.dirname(args.importer), args.path);
             }
@@ -20,14 +20,14 @@ exports.InlineCSSPlugin = function InlineCSSPlugin() {
                 bundle: true,
             });
 
-            return {path: args.path, pluginData: {outfile, subbuild}};
+            return { path: args.path, pluginData: { outfile, subbuild } };
         });
 
-        build.onLoad({filter: /\.less$/}, async (args) => {
+        build.onLoad({ filter: /\.less$/ }, async (args) => {
             await args.pluginData.subbuild;
             contents = fs.readFileSync(args.pluginData.outfile, "utf8");
             fs.unlinkSync(args.pluginData.outfile);
-            return {contents, loader: "text"};
+            return { contents, loader: "text" };
         });
     }
 

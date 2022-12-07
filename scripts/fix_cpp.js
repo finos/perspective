@@ -7,7 +7,7 @@
  *
  */
 
-const {execute, bash, path} = require("./script_utils.js");
+const { execute, bash, path } = require("./script_utils.js");
 const minimatch = require("minimatch");
 
 function lint(dir) {

@@ -63,7 +63,7 @@ async function drag(page, origin, target) {
     page.setDragInterception(true);
     origin.drop();
     await page.waitFor(100);
-    origin.dragAndDrop(target, {delay: 100000});
+    origin.dragAndDrop(target, { delay: 100000 });
     await page.waitFor(100);
 }
 
@@ -122,7 +122,7 @@ utils.with_server({}, () => {
                     );
                 });
             },
-            {root: path.join(__dirname, "..", "..")}
+            { root: path.join(__dirname, "..", "..") }
         );
 
         describe.page(
@@ -325,7 +325,7 @@ utils.with_server({}, () => {
                             await drag(page, origin, target);
                             return await get_contents(page);
                         },
-                        {reload_page: true}
+                        { reload_page: true }
                     );
 
                     test.capture(
@@ -358,7 +358,7 @@ utils.with_server({}, () => {
                             await drag(page, origin, target);
                             return await get_contents(page);
                         },
-                        {reload_page: true}
+                        { reload_page: true }
                     );
 
                     test.capture(
@@ -391,7 +391,7 @@ utils.with_server({}, () => {
                             await drag(page, origin, target);
                             return await get_contents(page);
                         },
-                        {reload_page: true}
+                        { reload_page: true }
                     );
                     test.capture(
                         "filter in should work",
@@ -466,11 +466,11 @@ utils.with_server({}, () => {
                             });
                             return await get_contents(page);
                         },
-                        {reload_page: true}
+                        { reload_page: true }
                     );
                 });
             },
-            {root: path.join(__dirname, "..", "..")}
+            { root: path.join(__dirname, "..", "..") }
         );
     });
 });

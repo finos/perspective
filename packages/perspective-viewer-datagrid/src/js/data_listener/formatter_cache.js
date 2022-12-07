@@ -7,7 +7,7 @@
  *
  */
 
-import {get_type_config} from "@finos/perspective/src/js/config/index.js";
+import { get_type_config } from "@finos/perspective/src/js/config/index.js";
 
 const FORMATTER_CONS = {
     datetime: Intl.DateTimeFormat,
@@ -51,7 +51,7 @@ export class FormatterCache {
     }
 
     create_number_formatter(type, plugin) {
-        const {format} = get_type_config(type);
+        const { format } = get_type_config(type);
         if (plugin.fixed !== undefined) {
             format.minimumFractionDigits = plugin.fixed;
             format.maximumFractionDigits = plugin.fixed;

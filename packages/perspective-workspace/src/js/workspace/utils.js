@@ -93,7 +93,7 @@ export function registerElement(templateString, styleString, proto) {
             }
             this._initializing = true;
             var node = document.importNode(template.content, true);
-            this.attachShadow({mode: "open"});
+            this.attachShadow({ mode: "open" });
             if (this._vieux) {
                 this._vieux.appendChild(node);
                 node = this._vieux;
@@ -154,6 +154,6 @@ export function registerElement(templateString, styleString, proto) {
 export function bindTemplate(template, ...styleStrings) {
     const style = styleStrings.map((x) => x.toString()).join("\n");
     return function (cls) {
-        return registerElement(template, {toString: () => style}, cls);
+        return registerElement(template, { toString: () => style }, cls);
     };
 }

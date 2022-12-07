@@ -47,6 +47,9 @@ extern "C" {
     #[wasm_bindgen(method, getter)]
     pub fn config_column_names(this: &JsPerspectiveViewerPlugin) -> Option<js_sys::Array>;
 
+    #[wasm_bindgen(method, getter)]
+    pub fn priority(this: &JsPerspectiveViewerPlugin) -> Option<i32>;
+
     #[wasm_bindgen(method)]
     pub fn save(this: &JsPerspectiveViewerPlugin) -> JsValue;
 
@@ -58,7 +61,7 @@ extern "C" {
 
     #[wasm_bindgen(method, catch)]
     pub async fn restyle(
-        this: &JsPerspectiveViewerPlugin, 
+        this: &JsPerspectiveViewerPlugin,
         view: &JsPerspectiveView
     ) -> ApiResult<JsValue>;
 

@@ -11,8 +11,8 @@ const path = require("path");
 
 const utils = require("@finos/perspective-test");
 
-const {withTemplate} = require("./simple-template");
-withTemplate("ohlc", "OHLC", {template: "shares-template"});
+const { withTemplate } = require("./simple-template");
+withTemplate("ohlc", "OHLC", { template: "shares-template" });
 
 utils.with_server({}, () => {
     describe.page(
@@ -64,6 +64,6 @@ utils.with_server({}, () => {
                 await page.shadow_blur();
             });
         },
-        {reload_page: false, root: path.join(__dirname, "..", "..", "..")}
+        { reload_page: false, root: path.join(__dirname, "..", "..", "..") }
     );
 });

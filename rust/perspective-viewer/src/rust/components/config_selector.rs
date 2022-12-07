@@ -164,7 +164,7 @@ impl Component for ConfigSelector {
             }
             ConfigSelectorMsg::Close(index, DragTarget::Sort) => {
                 let mut sort = ctx.props().session.get_view_config().sort.clone();
-                sort.remove(index as usize);
+                sort.remove(index);
                 let sort = Some(sort);
                 let config = ViewConfigUpdate {
                     sort,
@@ -176,7 +176,7 @@ impl Component for ConfigSelector {
             }
             ConfigSelectorMsg::Close(index, DragTarget::GroupBy) => {
                 let mut group_by = ctx.props().session.get_view_config().group_by.clone();
-                group_by.remove(index as usize);
+                group_by.remove(index);
                 let config = ViewConfigUpdate {
                     group_by: Some(group_by),
                     ..ViewConfigUpdate::default()
@@ -187,7 +187,7 @@ impl Component for ConfigSelector {
             }
             ConfigSelectorMsg::Close(index, DragTarget::SplitBy) => {
                 let mut split_by = ctx.props().session.get_view_config().split_by.clone();
-                split_by.remove(index as usize);
+                split_by.remove(index);
                 let config = ViewConfigUpdate {
                     split_by: Some(split_by),
                     ..ViewConfigUpdate::default()
@@ -199,7 +199,7 @@ impl Component for ConfigSelector {
             ConfigSelectorMsg::Close(index, DragTarget::Filter) => {
                 self.filter_dropdown.hide().unwrap();
                 let mut filter = ctx.props().session.get_view_config().filter.clone();
-                filter.remove(index as usize);
+                filter.remove(index);
                 let config = ViewConfigUpdate {
                     filter: Some(filter),
                     ..ViewConfigUpdate::default()
@@ -258,7 +258,7 @@ impl Component for ConfigSelector {
 
     /// Should not render on change, as this component only depends on service
     /// state.
-    fn changed(&mut self, _ctx: &Context<Self>) -> bool {
+    fn changed(&mut self, _ctx: &Context<Self>, _old: &Self::Properties) -> bool {
         false
     }
 

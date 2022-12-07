@@ -10,9 +10,9 @@
 import * as d3 from "d3";
 import * as d3Legend from "d3-svg-legend";
 import scrollableLegend from "./scrollableLegend";
-import {withoutOpacity} from "../series/seriesColors";
-import {getChartElement} from "../plugin/root";
-import {getOrCreateElement} from "../utils/utils";
+import { withoutOpacity } from "../series/seriesColors";
+import { getChartElement } from "../plugin/root";
+import { getOrCreateElement } from "../utils/utils";
 
 const scrollColorLegend = (settings) =>
     scrollableLegend(

@@ -67,7 +67,7 @@ window.addEventListener("DOMContentLoaded", async function () {
         ],
         group_by: ["name"],
         split_by: ["client"],
-        aggregates: {"(-)chg": "avg", "(+)chg": "avg", chg: "avg"},
+        aggregates: { "(-)chg": "avg", "(+)chg": "avg", chg: "avg" },
         sort: [["chg", "desc"]],
         plugin_config: {
             columns: {

@@ -7,10 +7,10 @@
  *
  */
 
-import {ArrayExt} from "@lumino/algorithm/src";
-import {ElementExt} from "@lumino/domutils/src";
-import {TabBar} from "@lumino/widgets/src/tabbar";
-import {TabBarItems, DEFAULT_TITLE} from "./tabbarrenderer";
+import { ArrayExt } from "@lumino/algorithm/src";
+import { ElementExt } from "@lumino/domutils/src";
+import { TabBar } from "@lumino/widgets/src/tabbar";
+import { TabBarItems, DEFAULT_TITLE } from "./tabbarrenderer";
 
 export class PerspectiveTabBar extends TabBar {
     constructor(options = {}) {

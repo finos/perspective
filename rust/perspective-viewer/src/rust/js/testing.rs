@@ -99,7 +99,7 @@ macro_rules! test_html {
                 false
             }
 
-            fn changed(&mut self, _ctx: &Context<Self>) -> bool {
+            fn changed(&mut self, _ctx: &Context<Self>, _old: &Self::Properties) -> bool {
                 true
             }
 
@@ -107,7 +107,6 @@ macro_rules! test_html {
                 html_template! {
                     <style>
                         { "#test{position:absolute;top:0;bottom:0;left:0;right:0;}" }
-                        // { &CSS }
                     </style>
                     <div ref={ ctx.props().root.clone() }>
                         { ctx.props().html.clone() }

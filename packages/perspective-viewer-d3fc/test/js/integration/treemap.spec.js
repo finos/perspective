@@ -12,8 +12,8 @@ const path = require("path");
 const utils = require("@finos/perspective-test");
 const simple_tests = require("@finos/perspective-viewer/test/js/simple_tests.js");
 
-const {withTemplate} = require("./simple-template");
-withTemplate("treemap", "Treemap", {columns: ["Quantity", "Profit"]});
+const { withTemplate } = require("./simple-template");
+withTemplate("treemap", "Treemap", { columns: ["Quantity", "Profit"] });
 
 function get_contents(temp) {
     return async function (page) {
@@ -102,6 +102,6 @@ utils.with_server({}, () => {
             //     await page.waitFor(500);
             // });
         },
-        {root: path.join(__dirname, "..", "..", "..")}
+        { root: path.join(__dirname, "..", "..", "..") }
     );
 });

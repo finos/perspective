@@ -7,8 +7,8 @@
  *
  */
 
-import {seriesColorRange} from "../seriesRange";
-import {seriesColorsFromDistinct} from "../seriesColors";
+import { seriesColorRange } from "../seriesRange";
+import { seriesColorsFromDistinct } from "../seriesColors";
 
 export function treeColor(settings, data) {
     if (

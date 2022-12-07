@@ -7,8 +7,8 @@
  *
  */
 import * as fc from "d3fc";
-import {withOpacity, withoutOpacity} from "./seriesColors";
-import {fromDomain} from "./seriesSymbols";
+import { withOpacity, withoutOpacity } from "./seriesColors";
+import { fromDomain } from "./seriesSymbols";
 
 export function categoryPointSeries(settings, seriesKey, color, symbols) {
     let series = fc.seriesSvgPoint().size(100);

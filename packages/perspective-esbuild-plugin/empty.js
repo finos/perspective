@@ -4,7 +4,7 @@ exports.EmptyPlugin = function EmptyPlugin(options) {
         setup: (build) => {
             for (const moduleName of options) {
                 const filter = new RegExp(moduleName);
-                build.onResolve({filter}, async (args) => {
+                build.onResolve({ filter }, async (args) => {
                     if (args.resolveDir === "") {
                         return;
                     }
@@ -19,7 +19,7 @@ exports.EmptyPlugin = function EmptyPlugin(options) {
                     };
                 });
 
-                build.onLoad({filter, namespace: "empty"}, async (args) => {
+                build.onLoad({ filter, namespace: "empty" }, async (args) => {
                     return {
                         contents: "",
                         resolveDir: args.pluginData.resolveDir,

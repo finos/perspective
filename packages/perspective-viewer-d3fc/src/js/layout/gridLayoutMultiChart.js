@@ -7,7 +7,7 @@
  *
  */
 
-import {getOrCreateElement} from "../utils/utils";
+import { getOrCreateElement } from "../utils/utils";
 
 export function gridLayoutMultiChart() {
     let elementsPrefix = "element-prefix-unset";

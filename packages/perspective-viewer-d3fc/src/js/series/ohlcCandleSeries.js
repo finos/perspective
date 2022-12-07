@@ -7,7 +7,7 @@
  *
  */
 import * as fc from "d3fc";
-import {colorScale, setOpacity} from "../series/seriesColors";
+import { colorScale, setOpacity } from "../series/seriesColors";
 
 const isUp = (d) => d.closeValue >= d.openValue;
 

@@ -153,7 +153,7 @@ const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
             y2AxisDataJoin(container, ["right"])
                 .attr("class", (d) => `y-axis ${d}-axis`)
                 .on("measure", function (event, d) {
-                    const {width, height} = event.detail;
+                    const { width, height } = event.detail;
                     if (d === "left") {
                         d3.select(event.currentTarget)
                             .select("svg")

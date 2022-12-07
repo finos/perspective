@@ -7,8 +7,8 @@
  *
  */
 
-import {select} from "d3";
-import {isElementOverlapping, isElementOverflowing} from "../../utils/utils";
+import { select } from "d3";
+import { isElementOverlapping, isElementOverflowing } from "../../utils/utils";
 
 const minTextSize = 7;
 
@@ -87,7 +87,7 @@ export const lockTextOpacity = (d) =>
 
 export const unlockTextOpacity = (d) => select(d).style("opacity", null);
 
-export const textOpacity = {top: 1, mid: 0.7, lower: 0};
+export const textOpacity = { top: 1, mid: 0.7, lower: 0 };
 
 export const selectVisibleNodes = (nodes) =>
     nodes.filter(

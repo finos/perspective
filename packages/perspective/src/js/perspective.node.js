@@ -7,11 +7,11 @@
  *
  */
 
-const {Client} = require("./api/client.js");
-const {Server} = require("./api/server.js");
-const {WebSocketManager} = require("./websocket/manager");
-const {WebSocketClient} = require("./websocket/client");
-const {get_config, get_type_config} = require("./config/index.js");
+const { Client } = require("./api/client.js");
+const { Server } = require("./api/server.js");
+const { WebSocketManager } = require("./websocket/manager");
+const { WebSocketClient } = require("./websocket/client");
+const { get_config, get_type_config } = require("./config/index.js");
 
 const perspective = require("./perspective.js").default;
 
@@ -20,7 +20,7 @@ const http = require("http");
 const WebSocket = require("ws");
 const process = require("process");
 const path = require("path");
-const {Decompress} = require("fflate");
+const { Decompress } = require("fflate");
 
 const load_perspective =
     require("../../dist/pkg/esm/perspective.cpp.js").default;
@@ -66,7 +66,7 @@ const SYNC_SERVER = new (class extends Server {
     }
 
     post(msg) {
-        SYNC_CLIENT._handle({data: msg});
+        SYNC_CLIENT._handle({ data: msg });
     }
 })();
 
@@ -76,7 +76,7 @@ const SYNC_CLIENT = new (class extends Client {
     }
 })();
 
-SYNC_CLIENT.send({id: -1, cmd: "init"});
+SYNC_CLIENT.send({ id: -1, cmd: "init" });
 
 module.exports = SYNC_CLIENT;
 module.exports.sync_module = () => SYNC_SERVER.perspective;
@@ -142,7 +142,7 @@ function perspective_assets(assets, host_psp) {
                 let content = await read_promise(filePath);
                 if (typeof content !== "undefined") {
                     console.log(`200 ${url}`);
-                    response.writeHead(200, {"Content-Type": contentType});
+                    response.writeHead(200, { "Content-Type": contentType });
                     response.end(
                         content,
                         extname === ".arrow" ? undefined : "utf-8"
@@ -159,7 +159,9 @@ function perspective_assets(assets, host_psp) {
                             ...assets.map((x) => path.join(x, "node_modules")),
                             LOCAL_PATH,
                         ];
-                        let filePath = require.resolve(rootDir + url, {paths});
+                        let filePath = require.resolve(rootDir + url, {
+                            paths,
+                        });
                         let content = await read_promise(filePath);
                         if (typeof content !== "undefined") {
                             console.log(`200 ${url}`);
@@ -196,7 +198,7 @@ function perspective_assets(assets, host_psp) {
 }
 
 class WebSocketServer extends WebSocketManager {
-    constructor({assets, host_psp, port, on_start} = {}) {
+    constructor({ assets, host_psp, port, on_start } = {}) {
         super();
         port = typeof port === "undefined" ? 8080 : port;
         assets = assets || ["./"];

@@ -14,7 +14,7 @@ export async function sortHandler(regularTable, event, target) {
     const sort = sort_method.call(this, column_name);
     this._preserve_focus_state = true;
     const viewer = regularTable.parentElement.parentElement;
-    await viewer.restore({sort});
+    await viewer.restore({ sort });
 }
 
 export function append_sort(column_name) {
@@ -57,7 +57,7 @@ export function create_sort(column_name, sort_dir) {
     }
 }
 
-const ROW_SORT_ORDER = {desc: "asc", asc: undefined};
+const ROW_SORT_ORDER = { desc: "asc", asc: undefined };
 const ROW_COL_SORT_ORDER = {
     desc: "asc",
     asc: "col desc",

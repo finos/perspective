@@ -6,9 +6,9 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import {select} from "d3";
-import {getGroupValues, getSplitValues, getDataValues} from "./selectionData";
-import {get_type_config} from "../../../../perspective/src/js/config";
+import { select } from "d3";
+import { getGroupValues, getSplitValues, getDataValues } from "./selectionData";
+import { get_type_config } from "../../../../perspective/src/js/config";
 
 export function generateHtml(tooltipDiv, data, settings) {
     const tooltipValues = getGroupValues(data, settings)

@@ -1,5 +1,46 @@
 # Changelog
 
+## [v1.8.0](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.7.2...HEAD)
+
+**Implemented enhancements:**
+
+- Display titles on the bubble chart per bubble  [\#2029](https://github.com/finos/perspective/issues/2029)
+- Add labels to Scatter plot points. [\#2033](https://github.com/finos/perspective/pull/2033) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- How to set default plugin to Datagrid [\#2006](https://github.com/finos/perspective/issues/2006)
+- Resize labels to avoid overlap [\#2034](https://github.com/finos/perspective/pull/2034) ([texodus](https://github.com/texodus))
+- Fix Default Plugin Order [\#2028](https://github.com/finos/perspective/pull/2028) ([sinistersnare](https://github.com/sinistersnare))
+
+**Closed issues:**
+
+- Turn on/off Thousand Separator \(comma\) for numbers [\#2021](https://github.com/finos/perspective/issues/2021)
+
+**Merged pull requests:**
+
+- remove reference to gitter from contributing docs [\#2025](https://github.com/finos/perspective/pull/2025) ([timkpaine](https://github.com/timkpaine))
+- Fix cargo src rules, publish to crates.io [\#2019](https://github.com/finos/perspective/pull/2019) ([texodus](https://github.com/texodus))
+- Update docusaurus footer with correct link [\#2015](https://github.com/finos/perspective/pull/2015) ([jaens](https://github.com/jaens))
+
+## [v1.7.2](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.7.1...HEAD)
+
+**Closed issues:**
+
+- \[doc\#expressions\]\(https://perspective.finos.org/docs/expressions\) can't visit [\#1997](https://github.com/finos/perspective/issues/1997)
+- How to computer aggregate columns? [\#1981](https://github.com/finos/perspective/issues/1981)
+
+**Merged pull requests:**
+
+- Upgrade to Yew 0.20.0 [\#2018](https://github.com/finos/perspective/pull/2018) ([texodus](https://github.com/texodus))
+- Re-add secondary dependency as primary dependency to fix python tests [\#2013](https://github.com/finos/perspective/pull/2013) ([timkpaine](https://github.com/timkpaine))
+- Cleanup items [\#2012](https://github.com/finos/perspective/pull/2012) ([texodus](https://github.com/texodus))
+- accidentally copying license as readme when disting python [\#1991](https://github.com/finos/perspective/pull/1991) ([timkpaine](https://github.com/timkpaine))
+
 ## [v1.7.1](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.7.0...HEAD)

@@ -20,7 +20,7 @@ export const focus_style_listener = (table, _viewer, selected_position_map) => {
                 meta.y === selected_position.y
             ) {
                 if (document.activeElement !== td) {
-                    td.focus({preventScroll: true});
+                    td.focus({ preventScroll: true });
                 }
                 return true;
             }

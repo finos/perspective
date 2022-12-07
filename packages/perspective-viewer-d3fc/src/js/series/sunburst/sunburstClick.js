@@ -7,9 +7,9 @@
  *
  */
 
-import {interpolate} from "d3";
-import {drawArc, arcVisible} from "./sunburstArc";
-import {labelVisible, labelTransform} from "./sunburstLabel";
+import { interpolate } from "d3";
+import { drawArc, arcVisible } from "./sunburstArc";
+import { labelVisible, labelTransform } from "./sunburstLabel";
 
 export const clickHandler =
     (data, g, parent, parentTitle, path, label, radius, split, settings) =>

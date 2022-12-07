@@ -134,7 +134,7 @@ where
         false
     }
 
-    fn changed(&mut self, ctx: &Context<Self>) -> bool {
+    fn changed(&mut self, ctx: &Context<Self>, _old: &Self::Properties) -> bool {
         self.selected = ctx.props().selected.clone();
         true
     }

@@ -6,13 +6,13 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import {groupFromKey} from "../series/seriesKey";
+import { groupFromKey } from "../series/seriesKey";
 
 export function filterData(settings, data) {
     const useData = data || settings.data;
     if (settings.hideKeys && settings.hideKeys.length > 0) {
         return useData.map((col) => {
-            const clone = {...col};
+            const clone = { ...col };
             settings.hideKeys.forEach((k) => {
                 delete clone[k];
             });

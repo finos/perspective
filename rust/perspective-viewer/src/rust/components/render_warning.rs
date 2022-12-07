@@ -86,7 +86,7 @@ impl Component for RenderWarning {
         true
     }
 
-    fn changed(&mut self, ctx: &Context<Self>) -> bool {
+    fn changed(&mut self, ctx: &Context<Self>, _old: &Self::Properties) -> bool {
         self.update_warnings(ctx);
         true
     }

@@ -18,7 +18,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     const websocket = perspective.websocket("ws://localhost:8081");
     const worker = perspective.shared_worker();
     const server_table = await websocket.open_table("securities_table");
-    const table = worker.table(await server_table.view(), {limit: 10000});
+    const table = worker.table(await server_table.view(), { limit: 10000 });
 
     const workspace = document.createElement("perspective-workspace");
     document.body.appendChild(workspace);

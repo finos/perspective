@@ -6,7 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-const {start_jlab, kill_jlab} = require("./jlab_start");
+const { start_jlab, kill_jlab } = require("./jlab_start");
 
 module.exports = async function () {
     await start_jlab();

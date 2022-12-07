@@ -6,11 +6,11 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import {labelFunction} from "../axis/axisLabel";
-import {splitIntoMultiSeries} from "./splitIntoMultiSeries";
+import { labelFunction } from "../axis/axisLabel";
+import { splitIntoMultiSeries } from "./splitIntoMultiSeries";
 
 export function pointData(settings, data) {
-    return splitIntoMultiSeries(settings, data, {excludeEmpty: true}).map(
+    return splitIntoMultiSeries(settings, data, { excludeEmpty: true }).map(
         (data) => seriesToPoints(settings, data)
     );
 }

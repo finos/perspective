@@ -13,7 +13,7 @@ function get(url) {
 async function get_feed(feedname, callback) {
     const url = `https://gbfs.citibikenyc.com/gbfs/en/${feedname}.json`;
     const {
-        data: {stations},
+        data: { stations },
         ttl,
     } = await get(url);
     if (typeof callback === "function") {
@@ -53,7 +53,7 @@ async function main() {
     const schema = await merge_schemas(feeds);
 
     // Creating a table by joining feeds with an index
-    const table = await worker.table(schema, {index: "station_id"});
+    const table = await worker.table(schema, { index: "station_id" });
 
     // Load the `table` in the `<perspective-viewer>` DOM reference with the initial `feeds`.
     for (let feed of feeds) {

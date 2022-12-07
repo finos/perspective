@@ -9,7 +9,7 @@
 
 import "./polyfills/index";
 import charts from "../charts/charts";
-import {initialiseStyles} from "../series/colorStyles";
+import { initialiseStyles } from "../series/colorStyles";
 import style from "../../less/chart.less";
 
 import * as d3 from "d3";
@@ -32,6 +32,7 @@ const EXCLUDED_SETTINGS = [
     "data",
     "size",
     "colorStyles",
+    "textStyles",
     "agg_paths",
     "treemaps",
 ];
@@ -75,7 +76,7 @@ export function register(...plugins) {
 
                     connectedCallback() {
                         if (!this._initialized) {
-                            this.attachShadow({mode: "open"});
+                            this.attachShadow({ mode: "open" });
                             this.shadowRoot.innerHTML = `<style>${styleWithD3FC}</style>`;
                             this.shadowRoot.innerHTML += `<div id="container" class="chart"></div>`;
                             this._container =
@@ -265,11 +266,11 @@ export function register(...plugins) {
                                 leaves_only,
                             });
                         } else if (end_col) {
-                            jsonp = view.to_json({end_col, leaves_only});
+                            jsonp = view.to_json({ end_col, leaves_only });
                         } else if (end_row) {
-                            jsonp = view.to_json({end_row, leaves_only});
+                            jsonp = view.to_json({ end_row, leaves_only });
                         } else {
-                            jsonp = view.to_json({leaves_only});
+                            jsonp = view.to_json({ leaves_only });
                         }
 
                         metadata = await Promise.all([
@@ -303,7 +304,7 @@ export function register(...plugins) {
                             return type;
                         };
 
-                        const {columns, group_by, split_by, filter} = config;
+                        const { columns, group_by, split_by, filter } = config;
                         const filtered =
                             group_by.length > 0
                                 ? json.reduce(
@@ -330,12 +331,12 @@ export function register(...plugins) {
                                           }
                                           return acc;
                                       },
-                                      {rows: [], aggs: [], agg_paths: []}
+                                      { rows: [], aggs: [], agg_paths: [] }
                                   )
-                                : {rows: json};
+                                : { rows: json };
                         const dataMap = (col, i) =>
                             !group_by.length
-                                ? {...col, __ROW_PATH__: [i]}
+                                ? { ...col, __ROW_PATH__: [i] }
                                 : col;
                         const mapped = filtered.rows.map(dataMap);
 
@@ -367,7 +368,10 @@ export function register(...plugins) {
                                         this._container.dispatchEvent(
                                             new Event(
                                                 "perspective-plugin-update",
-                                                {bubbles: true, composed: true}
+                                                {
+                                                    bubbles: true,
+                                                    composed: true,
+                                                }
                                             )
                                         );
                                 }
@@ -377,7 +381,7 @@ export function register(...plugins) {
                         };
 
                         this._settings = new Proxy(
-                            {...this._settings, ...settings},
+                            { ...this._settings, ...settings },
                             handler
                         );
 
@@ -453,6 +457,7 @@ export function register(...plugins) {
                         let settings = this._settings;
                         if (settings) {
                             delete settings["colorStyles"];
+                            delete settings["textStyles"];
                             await this.draw(...args);
                         }
                     }
@@ -466,7 +471,7 @@ export function register(...plugins) {
                     }
 
                     save() {
-                        const settings = {...this._settings};
+                        const settings = { ...this._settings };
                         EXCLUDED_SETTINGS.forEach((s) => {
                             delete settings[s];
                         });
@@ -478,7 +483,7 @@ export function register(...plugins) {
                         for (const name of EXCLUDED_SETTINGS) {
                             new_settings[name] = this._settings?.[name];
                         }
-                        this._settings = {...new_settings, ...settings};
+                        this._settings = { ...new_settings, ...settings };
                         this._draw();
                     }
                 }

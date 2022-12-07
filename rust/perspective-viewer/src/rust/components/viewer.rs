@@ -171,7 +171,7 @@ impl Component for PerspectiveViewer {
     /// This top-level component is mounted to the Custom Element, so it has no
     /// API to provide props - but for sanity if needed, just return true on
     /// change.
-    fn changed(&mut self, _ctx: &Context<Self>) -> bool {
+    fn changed(&mut self, _ctx: &Context<Self>, _old: &Self::Properties) -> bool {
         true
     }
 

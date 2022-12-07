@@ -39,7 +39,7 @@ try {
 try {
     let cmd;
     let lint_cmd = `${PYTHON} -m flake8 perspective bench setup.py`;
-    let fix_cmd = `black perspective bench setup.py --exclude tests`;
+    let fix_cmd = `${PYTHON} -m black perspective bench setup.py --exclude tests`;
 
     if (process.env.PSP_DOCKER) {
         cmd = `cd python/perspective && ${IS_FIX ? fix_cmd : lint_cmd}`;

@@ -165,8 +165,8 @@ where
     }
 
     fn calc_anchor_position(&self, target: &HtmlElement) -> (i32, i32) {
-        let height = target.offset_height() as i32;
-        let width = target.offset_width() as i32;
+        let height = target.offset_height();
+        let width = target.offset_width();
         let elem = target.clone().unchecked_into::<HtmlElement>();
         let rect = elem.get_bounding_client_rect();
         let top = rect.top() as i32;
@@ -190,8 +190,8 @@ where
     }
 
     async fn open_within_viewport(&self, target: HtmlElement) -> ApiResult<()> {
-        let height = target.offset_height() as i32;
-        let width = target.offset_width() as i32;
+        let height = target.offset_height();
+        let width = target.offset_width();
         let elem = target.clone().unchecked_into::<HtmlElement>();
         let rect = elem.get_bounding_client_rect();
         let top = rect.top() as i32;
@@ -200,8 +200,8 @@ where
 
         // Default, top left/bottom left
         let msg = ModalMsg::SetPos {
-            top: (top + height - 1) as i32,
-            left: left as i32,
+            top: top + height - 1,
+            left,
             visible: false,
             rev_vert: false,
         };

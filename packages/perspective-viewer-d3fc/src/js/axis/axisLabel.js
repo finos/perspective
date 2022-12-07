@@ -6,12 +6,12 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import {rebindAll} from "d3fc";
-import {axisType} from "./axisType";
-import {labelFunction as noLabel} from "./noAxis";
-import {labelFunction as timeLabel} from "./timeAxis";
-import {labelFunction as linearLabel} from "./linearAxis";
-import {labelFunction as ordinalLabel} from "./ordinalAxis";
+import { rebindAll } from "d3fc";
+import { axisType } from "./axisType";
+import { labelFunction as noLabel } from "./noAxis";
+import { labelFunction as timeLabel } from "./timeAxis";
+import { labelFunction as linearLabel } from "./linearAxis";
+import { labelFunction as ordinalLabel } from "./ordinalAxis";
 
 const labelFunctions = {
     none: noLabel,

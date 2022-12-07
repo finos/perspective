@@ -1,6 +1,6 @@
 [package]
 name = "perspective"
-version = "1.7.1"
+version = "1.8.0"
 authors = ["Andrew Stein <steinlink@gmail.com>"]
 edition = "2021"
 description = "A data visualization and analytics component, especially well-suited for large and/or streaming datasets."
@@ -8,13 +8,8 @@ repository = "https://github.com/finos/perspective"
 license = "Apache-2.0"
 homepage = "https://perspective.finos.org"
 keywords = ["experimental"]
-include = [
-    "build.rs",
-    "src/**/*",
-    "build/css/**/*",
-    "Cargo.toml",
-    "package.json",
-]
+build = "build.rs"
+include = ["build.rs", "src/**/*", "Cargo.toml", "package.json"]
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -26,6 +21,9 @@ default = []
 
 [build-dependencies]
 serde_json = { version = "1.0.59", features = ["raw_value"] }
+procss = { version = "0.1.7" }
+glob = "0.3.0"
+anyhow = "1.0.66"
 
 [dependencies]
 # Provides async `Mutex` for locked sections such as `render`
@@ -81,7 +79,10 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0.59", features = ["raw_value"] }
 
 # Async-aware logging that can be disabled at compile-time.
-tracing = { version = ">=0.1.36", features = ["release_max_level_error", "max_level_info"]}
+tracing = { version = ">=0.1.36", features = [
+    "release_max_level_error",
+    "max_level_info",
+] }
 
 # A JS console printer for `tracing`.
 tracing-wasm = ">=0.2.1"
@@ -93,15 +94,15 @@ wasm-bindgen = { version = "=0.2.82", features = ["serde-serialize"] }
 wasm-bindgen-futures = "0.4.20"
 
 # https://github.com/yewstack/yew/issues/2154
-yew = { git = "https://github.com/yewstack/yew", rev = "7438cd3059d58d0922e4c15135961c8fab6f2552", features = ["csr"] }
+yew = { version = "0.20.0", features = ["csr"] }
 
 [dependencies.web-sys]
 version = "0.3.59"
-features =  [
+features = [
     # "Performance",
     "Blob",
     "Clipboard",
-    "CssStyleDeclaration", 
+    "CssStyleDeclaration",
     "CssStyleSheet",
     "CssRuleList",
     "CssRule",
@@ -137,7 +138,7 @@ features =  [
     "Navigator",
     "Node",
     "NodeList",
-    'Performance', 
+    'Performance',
     # "TouchEvent",
     # "TouchList",
     # "Touch",
@@ -152,7 +153,7 @@ features =  [
     "StyleSheetList",
     "Url",
     "VisibilityState",
-    "Window"
+    "Window",
 ]
 
 

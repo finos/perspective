@@ -10,7 +10,7 @@
 export function splitIntoMultiSeries(
     settings,
     data,
-    {stack = false, excludeEmpty = false} = {}
+    { stack = false, excludeEmpty = false } = {}
 ) {
     const useData = data || settings.data;
 
@@ -26,7 +26,7 @@ export function splitIntoMultiSeries(
 function splitByValuesIntoMultiSeries(
     settings,
     data,
-    {stack = false, excludeEmpty = false}
+    { stack = false, excludeEmpty = false }
 ) {
     // Create a series for each "split" value, each one containing all the
     // "aggregate" values, and "base" values to offset it from the previous

@@ -172,13 +172,8 @@ python/perspective/README.md
 python/perspective/python_junit.xml
 python/perspective/coverage.xml
 python/perspective/bench/stresstest/results
-rust/perspective-viewer/target
+rust/perspective-viewer/target*
 rust/perspective-viewer/pkg
-rust/perspective-viewer/target2
-rust/perspective-viewer/pkg
-
-rust/perspective-viewer/target
-rust/perspective-viewer/target2
 
 .emsdk
 vcpkg

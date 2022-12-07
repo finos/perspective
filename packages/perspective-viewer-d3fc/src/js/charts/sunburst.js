@@ -7,14 +7,14 @@
  *
  */
 
-import {select} from "d3";
-import {treeColor} from "../series/sunburst/sunburstColor";
-import {treeData} from "../data/treeData";
-import {sunburstSeries} from "../series/sunburst/sunburstSeries";
-import {tooltip} from "../tooltip/tooltip";
-import {gridLayoutMultiChart} from "../layout/gridLayoutMultiChart";
-import {colorRangeLegend} from "../legend/colorRangeLegend";
-import {colorLegend} from "../legend/legend";
+import { select } from "d3";
+import { treeColor } from "../series/sunburst/sunburstColor";
+import { treeData } from "../data/treeData";
+import { sunburstSeries } from "../series/sunburst/sunburstSeries";
+import { tooltip } from "../tooltip/tooltip";
+import { gridLayoutMultiChart } from "../layout/gridLayoutMultiChart";
+import { colorRangeLegend } from "../legend/colorRangeLegend";
+import { colorLegend } from "../legend/legend";
 
 function sunburst(container, settings) {
     if (settings.crossValues.length === 0) {
@@ -64,10 +64,10 @@ function sunburst(container, settings) {
             "transform",
             `translate(${containerSize.width / 2}, ${containerSize.height / 2})`
         )
-        .each(function ({split, data}) {
+        .each(function ({ split, data }) {
             const sunburstElement = select(this);
             const svgNode = this.parentNode;
-            const {width, height} = svgNode.getBoundingClientRect();
+            const { width, height } = svgNode.getBoundingClientRect();
 
             const radius =
                 (Math.min(width, height) - 24) /

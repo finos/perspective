@@ -58,8 +58,8 @@ describe("to_format viewport", function () {
         it("start_col 0 is the first col", async function () {
             var table = await perspective.table(data);
             var view = await table.view({});
-            const cols = await view.to_columns({start_col: 0, end_col: 1});
-            expect(cols).toEqual({w: data.w});
+            const cols = await view.to_columns({ start_col: 0, end_col: 1 });
+            expect(cols).toEqual({ w: data.w });
             view.delete();
             table.delete();
         });
@@ -67,8 +67,8 @@ describe("to_format viewport", function () {
         it("start_col 2 is the second col", async function () {
             var table = await perspective.table(data);
             var view = await table.view({});
-            const cols = await view.to_columns({start_col: 1, end_col: 2});
-            expect(cols).toEqual({x: data.x});
+            const cols = await view.to_columns({ start_col: 1, end_col: 2 });
+            expect(cols).toEqual({ x: data.x });
             view.delete();
             table.delete();
         });
@@ -76,8 +76,8 @@ describe("to_format viewport", function () {
         it("start_col 0, end_col 2 is the first two columns", async function () {
             var table = await perspective.table(data);
             var view = await table.view({});
-            const cols = await view.to_columns({start_col: 0, end_col: 2});
-            expect(cols).toEqual({w: data.w, x: data.x});
+            const cols = await view.to_columns({ start_col: 0, end_col: 2 });
+            expect(cols).toEqual({ w: data.w, x: data.x });
             view.delete();
             table.delete();
         });
@@ -89,7 +89,7 @@ describe("to_format viewport", function () {
             var view = await table.view({
                 group_by: ["y"],
             });
-            const cols = await view.to_columns({start_col: 0, end_col: 1});
+            const cols = await view.to_columns({ start_col: 0, end_col: 1 });
             expect(cols).toEqual({
                 __ROW_PATH__: [[], ["a"], ["b"], ["c"], ["d"]],
                 w: [-2, -4, 0, 1, 1],
@@ -103,7 +103,7 @@ describe("to_format viewport", function () {
             var view = await table.view({
                 group_by: ["y"],
             });
-            const cols = await view.to_columns({start_col: 1, end_col: 2});
+            const cols = await view.to_columns({ start_col: 1, end_col: 2 });
             expect(cols).toEqual({
                 __ROW_PATH__: [[], ["a"], ["b"], ["c"], ["d"]],
                 x: [40, 12, 12, 8, 8],
@@ -117,7 +117,7 @@ describe("to_format viewport", function () {
             var view = await table.view({
                 group_by: ["y"],
             });
-            const cols = await view.to_columns({start_col: 0, end_col: 2});
+            const cols = await view.to_columns({ start_col: 0, end_col: 2 });
             expect(cols).toEqual({
                 __ROW_PATH__: [[], ["a"], ["b"], ["c"], ["d"]],
                 w: [-2, -4, 0, 1, 1],
@@ -135,7 +135,7 @@ describe("to_format viewport", function () {
                 group_by: ["y"],
                 split_by: ["z"],
             });
-            const cols = await view.to_columns({start_col: 0, end_col: 1});
+            const cols = await view.to_columns({ start_col: 0, end_col: 1 });
             expect(cols).toEqual({
                 __ROW_PATH__: [[], ["a"], ["b"], ["c"], ["d"]],
                 "false|w": [-9, -9.5, 3.5, -8.5, 5.5],
@@ -150,7 +150,7 @@ describe("to_format viewport", function () {
                 group_by: ["y"],
                 split_by: ["z"],
             });
-            const cols = await view.to_columns({start_col: 1, end_col: 2});
+            const cols = await view.to_columns({ start_col: 1, end_col: 2 });
             expect(cols).toEqual({
                 __ROW_PATH__: [[], ["a"], ["b"], ["c"], ["d"]],
                 "false|x": [20, 4, 8, 1, 7],
@@ -165,7 +165,7 @@ describe("to_format viewport", function () {
                 group_by: ["y"],
                 split_by: ["z"],
             });
-            const cols = await view.to_columns({start_col: 0, end_col: 2});
+            const cols = await view.to_columns({ start_col: 0, end_col: 2 });
             expect(cols).toEqual({
                 __ROW_PATH__: [[], ["a"], ["b"], ["c"], ["d"]],
                 "false|w": [-9, -9.5, 3.5, -8.5, 5.5],
@@ -182,7 +182,7 @@ describe("to_format viewport", function () {
             var view = await table.view({
                 split_by: ["z"],
             });
-            const cols = await view.to_columns({start_col: 0, end_col: 1});
+            const cols = await view.to_columns({ start_col: 0, end_col: 1 });
             expect(cols).toEqual({
                 "false|w": [
                     null,
@@ -212,7 +212,7 @@ describe("to_format viewport", function () {
             var view = await table.view({
                 split_by: ["z"],
             });
-            const cols = await view.to_columns({start_col: 1, end_col: 2});
+            const cols = await view.to_columns({ start_col: 1, end_col: 2 });
             expect(cols).toEqual({
                 "false|x": [
                     null,
@@ -242,7 +242,7 @@ describe("to_format viewport", function () {
             var view = await table.view({
                 split_by: ["z"],
             });
-            const cols = await view.to_columns({start_col: 0, end_col: 2});
+            const cols = await view.to_columns({ start_col: 0, end_col: 2 });
             expect(cols).toEqual({
                 "false|w": [
                     null,

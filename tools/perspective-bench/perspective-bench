@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/* eslint no-var: 0 */
 
-const {registerCmd} = require("@finos/perspective-bench");
+const { registerCmd } = require("@finos/perspective-bench");
 registerCmd();

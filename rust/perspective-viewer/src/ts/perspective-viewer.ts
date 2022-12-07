@@ -31,9 +31,9 @@
 
 import "mobile-drag-drop-shadow-dom";
 
-export {IPerspectiveViewerPlugin} from "./plugin";
-export {HTMLPerspectiveViewerPluginElement} from "./plugin";
-export {IPerspectiveViewerElement} from "./viewer";
+export { IPerspectiveViewerPlugin } from "./plugin";
+export { HTMLPerspectiveViewerPluginElement } from "./plugin";
+export { IPerspectiveViewerElement } from "./viewer";
 
 export * from "./extensions";
 export * from "./migrate";

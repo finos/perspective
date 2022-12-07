@@ -74,7 +74,7 @@ describe("leaks", function () {
         describe("1-sided", function () {
             it("to_json does not leak", async () => {
                 const table = await perspective.table(arr.slice());
-                const view = await table.view({group_by: ["State"]});
+                const view = await table.view({ group_by: ["State"] });
                 await leak_test(async function () {
                     let json = await view.to_json();
                     expect(json.length).toEqual(50);
@@ -88,8 +88,8 @@ describe("leaks", function () {
     describe("table", function () {
         it("update does not leak", async () => {
             const table = await perspective.table(
-                {x: "integer", y: "string"},
-                {index: "x"}
+                { x: "integer", y: "string" },
+                { index: "x" }
             );
             let count = 0;
             const view = await table.view();
@@ -98,7 +98,7 @@ describe("leaks", function () {
             });
 
             await leak_test(async function () {
-                await table.update([{x: 1, y: "TestTestTest"}]);
+                await table.update([{ x: 1, y: "TestTestTest" }]);
                 expect(await table.size()).toEqual(1);
             });
 

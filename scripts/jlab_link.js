@@ -6,7 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-const {execute} = require("./script_utils.js");
+const { execute } = require("./script_utils.js");
 
 // Packages listed as dependencies & dev dependencies inside Jupyterlab plugin
 const packages = [

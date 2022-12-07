@@ -76,7 +76,7 @@ declare module "@finos/perspective" {
         num_columns(): Promise<number>;
         num_rows(): Promise<number>;
         on_delete(callback: () => void): void;
-        on_update(callback: UpdateCallback, options?: {mode?: string}): void;
+        on_update(callback: UpdateCallback, options?: { mode?: string }): void;
         remove_update(callback: UpdateCallback): void;
         remove_delete(callback: () => void): void;
         schema(): Promise<Schema>;
@@ -85,7 +85,9 @@ declare module "@finos/perspective" {
         to_columns(
             options?: SerializeConfig
         ): Promise<Record<string, Array<string | boolean | Date | number>>>;
-        to_csv(options?: SerializeConfig & {config: unknown}): Promise<string>;
+        to_csv(
+            options?: SerializeConfig & { config: unknown }
+        ): Promise<string>;
         to_json(
             options?: SerializeConfig
         ): Promise<Array<Record<string, string | boolean | Date | number>>>;
@@ -102,8 +104,8 @@ declare module "@finos/perspective" {
     export type TableData =
         | string
         | Array<Record<string, Array<string | boolean | Date | number>>>
-        | {[key: string]: Array<string | boolean | Date | number>}
-        | {[key: string]: string}
+        | { [key: string]: Array<string | boolean | Date | number> }
+        | { [key: string]: string }
         | ArrayBuffer;
 
     export interface ExpressionError {
@@ -114,7 +116,7 @@ declare module "@finos/perspective" {
 
     export type ValidatedExpressions = {
         expression_schema: Schema;
-        errors: {[key: string]: ExpressionError};
+        errors: { [key: string]: ExpressionError };
     };
 
     export type TableOptions = {
@@ -141,7 +143,7 @@ declare module "@finos/perspective" {
         columns?: Array<ColumnName>;
         group_by?: Array<ColumnName>;
         split_by?: Array<ColumnName>;
-        aggregates?: {[column_name: string]: Aggregate};
+        aggregates?: { [column_name: string]: Aggregate };
         sort?: Array<Sort>;
         filter?: Array<Filter>;
         expressions?: Array<Expression>;
@@ -158,8 +160,8 @@ declare module "@finos/perspective" {
         ): Promise<ValidatedExpressions>;
         schema(): Promise<Schema>;
         size(): Promise<number>;
-        update(data: TableData, options?: {port_id?: number}): void;
-        remove(data: Array<any>, options?: {port_id?: number}): void;
+        update(data: TableData, options?: { port_id?: number }): void;
+        remove(data: Array<any>, options?: { port_id?: number }): void;
         view(config?: ViewConfig): Promise<View>;
         make_port(): number;
         get_index(): Promise<string | null>;

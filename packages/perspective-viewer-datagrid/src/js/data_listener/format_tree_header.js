@@ -7,8 +7,8 @@
  *
  */
 
-import {PRIVATE_PLUGIN_SYMBOL} from "../model";
-import {format_cell} from "./format_cell.js";
+import { PRIVATE_PLUGIN_SYMBOL } from "../model";
+import { format_cell } from "./format_cell.js";
 
 /**
  * Format a single cell of the `group_by` tree header.
@@ -34,7 +34,7 @@ export function* format_tree_header(paths = [], row_headers, regularTable) {
         if (formatted instanceof HTMLElement) {
             path = path.concat(formatted);
         } else {
-            path = path.concat({toString: () => formatted});
+            path = path.concat({ toString: () => formatted });
         }
 
         path.length = row_headers.length + 1;
