@@ -81,7 +81,7 @@ export class Server {
      * @param {*} client_id
      */
     process(msg, client_id) {
-        console.log(`[SERVER] Received message: ${JSON.stringify(msg)})}`)
+        console.log(`[SERVER] Received message: ${JSON.stringify(msg)})}`);
 
         switch (msg.cmd) {
             case "init_profile_thread":
