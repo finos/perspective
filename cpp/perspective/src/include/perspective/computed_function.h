@@ -271,6 +271,26 @@ namespace computed_function {
     FUNCTION_HEADER(max_fn)
 
     /**
+     * @brief Get the cross product of two vec3s
+     */
+    FUNCTION_HEADER(diff3)
+
+    /**
+     * @brief Get the cross product of two vec3s
+     */
+    FUNCTION_HEADER(norm3)
+
+    /**
+     * @brief Get the cross product of two vec3s
+     */
+    FUNCTION_HEADER(cross_product3)
+
+    /**
+     * @brief Get the dot product of two vec3s
+     */
+    FUNCTION_HEADER(dot_product3)
+
+    /**
      * @brief Get a as percent of b.
      *
      */

@@ -45,6 +45,18 @@ computed_function::min_fn t_computed_expression_parser::MIN_FN
 computed_function::max_fn t_computed_expression_parser::MAX_FN
     = computed_function::max_fn();
 
+computed_function::diff3 t_computed_expression_parser::diff3
+    = computed_function::diff3();
+
+computed_function::norm3 t_computed_expression_parser::norm3
+    = computed_function::norm3();
+
+computed_function::cross_product3 t_computed_expression_parser::cross_product3
+    = computed_function::cross_product3();
+
+computed_function::dot_product3 t_computed_expression_parser::dot_product3
+    = computed_function::dot_product3();
+
 computed_function::length t_computed_expression_parser::LENGTH_FN
     = computed_function::length();
 
@@ -457,6 +469,14 @@ t_computed_function_store::register_computed_functions(
         "min", t_computed_expression_parser::MIN_FN);
     sym_table.add_reserved_function(
         "max", t_computed_expression_parser::MAX_FN);
+    sym_table.add_reserved_function(
+        "diff3", t_computed_expression_parser::diff3);
+    sym_table.add_reserved_function(
+        "norm3", t_computed_expression_parser::norm3);
+    sym_table.add_reserved_function(
+        "cross_product3", t_computed_expression_parser::cross_product3);
+    sym_table.add_reserved_function(
+        "dot_product3", t_computed_expression_parser::dot_product3);        
     sym_table.add_function(
         "percent_of", t_computed_expression_parser::PERCENT_OF_FN);
     sym_table.add_function("is_null", t_computed_expression_parser::IS_NULL_FN);
