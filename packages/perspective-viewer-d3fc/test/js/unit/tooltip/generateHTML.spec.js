@@ -143,4 +143,24 @@ describe("tooltip generateHTML should", () => {
             "main-1: 101",
         ]);
     });
+
+    test("Provide default number formatting for null and undefined types", () => {
+        settings.splitValues.push({ name: "split-1", type: "string" });
+        settings.splitValues.push({ name: "split-2", type: null });
+        settings.splitValues.push({ name: "split-3", type: undefined });
+
+        const data = {
+            key: "ts-1",
+            mainValue: 101,
+        };
+
+        generateHtml(tooltip, data, settings);
+
+        expect(getContent()).toEqual([
+            "split-1: ts-1",
+            "split-2: -",
+            "split-3: -",
+            "main-1: 101",
+        ]);
+    });
 });
