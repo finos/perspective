@@ -78,11 +78,11 @@
         const arrow = await resp.arrayBuffer();
         const el = document.getElementsByTagName('perspective-viewer')[0];
         const table = await WORKER.table(arrow);
-        console.log('table: ', table);
-        console.time('broch_test');
-        let r = table.broch_test();
-        console.timeEnd('broch_test');
-        console.log('broch_test: ', r);
+        // console.log('table: ', table);
+        // console.time('broch_test');
+        // let r = table.broch_test();
+        // console.timeEnd('broch_test');
+        // console.log('broch_test: ', r);
 
         el.load(table);
         el.restore({

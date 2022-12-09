@@ -156,6 +156,18 @@ public:
         bool emit_group_by) const;
 
     /**
+     * @brief Serializes the `View`'s data into the a raw buffer
+     * 
+     * @param start_row
+     * @param end_row
+     * @param start_col
+     * @param end_col
+     * @return std::shared_ptr<std::string>
+     */
+    std::shared_ptr<std::string> to_raw_buffer(std::int32_t start_row,
+        std::int32_t end_row, std::int32_t start_col, std::int32_t end_col) const;
+
+    /**
      * @brief Serializes the `View`'s data into the Apache Arrow format
      * as a bytestring. Using start/end row and column, retrieve a data
      * slice from the view and serialize it using `to_arrow_helper`.
@@ -184,6 +196,9 @@ public:
     std::shared_ptr<std::string> data_slice_to_arrow(
         std::shared_ptr<t_data_slice<CTX_T>> data_slice,
         bool emit_group_by) const;
+
+    std::shared_ptr<std::string> data_slice_to_raw_buffer(
+        std::shared_ptr<t_data_slice<CTX_T>> data_slice) const;
 
     /**
      * @brief Serializes a given data slice into the Apache Arrow format. Can

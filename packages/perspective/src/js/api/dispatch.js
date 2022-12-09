@@ -81,6 +81,7 @@ export function subscribe(method, cmd) {
  */
 export function async_queue(method, cmd) {
     return function () {
+        // Question: Can the `rest` operator be used here, instead of `slice`?
         var args = Array.prototype.slice.call(arguments, 0, arguments.length);
         return new Promise(
             function (resolve, reject) {

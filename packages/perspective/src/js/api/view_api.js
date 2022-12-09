@@ -72,6 +72,8 @@ view.prototype.get_min_max = async_queue("get_min_max");
 
 view.prototype.to_json = async_queue("to_json");
 
+view.prototype.to_raw_buffer = async_queue("to_raw_buffer");
+
 view.prototype.to_arrow = async_queue("to_arrow");
 
 view.prototype.to_columns = async_queue("to_columns");

@@ -839,6 +839,116 @@ export default function (Module) {
         }
     };
 
+    view.prototype.to_raw_buffer = function (options = {}) {
+        // console.log("reached view.to_buffer");
+        // console.log(__MODULE__);
+        let { start_row, start_col, end_row, end_col } =
+            _parse_format_options.bind(this)(options);
+
+        const num_sides = this.sides();
+        const nidx = SIDES[num_sides];
+
+
+        /* */
+        // let get_all_data;
+
+        // if (this.is_unit_context) {
+        //     get_all_data = __MODULE__.get_all_data;
+        // } else {
+        //     get_all_data = __MODULE__[`get_all_data_${nidx}`];
+        // }
+
+        // // console.time("to_buffer_1");
+        // let stuff1 = get_all_data(
+        //     this._View,
+        //     start_row,
+        //     end_row,
+        //     start_col,
+        //     end_col
+        // );
+
+        // return stuff1;
+
+        /* */
+
+        /* */
+        // console.timeEnd("to_buffer_1");
+
+        // console.log("stuff1", stuff1);
+
+        let get_from_data_slice;
+
+        if (this.is_unit_context) {
+            get_from_data_slice = __MODULE__.get_from_data_slice_unit;
+        } else {
+            get_from_data_slice = __MODULE__[`get_from_data_slice_${nidx}`];
+        }
+
+        let stuff2 = [];
+
+        console.time("to_buffer_2");
+        const slice2 = this.get_data_slice(
+          start_row,
+          end_row,
+          start_col,
+          end_col
+        );
+
+        for (let ridx = start_row; ridx < end_row; ridx++) {
+            for (let cidx = start_col; cidx < end_col; cidx++) {
+                // console.log('ridx', ridx, 'cidx', cidx);
+                // let s = this.get_data_slice(slice, ridx, cidx);
+                let s = get_from_data_slice(slice2, ridx, cidx);
+                stuff2.push(s);
+            }
+        }
+        console.timeEnd("to_buffer_2");
+
+        console.log("stuff2", stuff2);
+
+        slice2.delete();
+
+        /* */
+
+        /* */
+
+        // let to_arrow;
+
+        // // Seeing what is in "arrow" format.
+        // if (this.is_unit_context) {
+        //     to_arrow = __MODULE__.to_arrow_unit;
+        // } else {
+        //     to_arrow = __MODULE__[`to_arrow_${nidx}`];
+        // }
+
+        // console.time("to_arrow");
+        // const arrow = to_arrow(this._View, start_row, end_row, start_col, end_col);
+        // console.timeEnd("to_arrow");
+
+        // console.log("arrow", arrow);
+
+        /* */
+
+        /* */
+
+        let to_raw_buffer;
+
+        if (this.is_unit_context) {
+            to_raw_buffer = __MODULE__.to_raw_buffer_unit;
+        } else {
+            to_raw_buffer = __MODULE__[`to_raw_buffer_${nidx}`];
+        }
+
+        console.time("to_raw_buffer");
+        const raw_buffer = to_raw_buffer(this._View, start_row, end_row, start_col, end_col);
+        console.timeEnd("to_raw_buffer");
+
+        // console.log("raw_buffer", raw_buffer);
+        // return raw_buffer;
+
+        return stuff2;
+    };
+
     /**
      * Serializes a view column into a TypedArray.
      *
