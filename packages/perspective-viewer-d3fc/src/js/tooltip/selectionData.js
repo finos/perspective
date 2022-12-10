@@ -40,11 +40,14 @@ export function getGroupValues(data, settings) {
 
 export function getSplitValues(data, settings) {
     if (settings.splitValues.length === 0) return [];
-    const splitValues = data.key
-        ? data.key.split("|")
-        : data.mainValue.split
-        ? data.mainValue.split("|")
-        : [data.mainValue];
+    let splitValues = [data.mainValue];
+
+    if (data.key) {
+        splitValues = data.key.split("|");
+    } else if (data.mainValue?.split) {
+        splitValues = data.mainValue.split("|");
+    }
+
     return settings.splitValues.map((split, i) => ({
         name: split.name,
         value: toValue(split.type, splitValues[i]),
