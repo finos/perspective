@@ -8,6 +8,7 @@
  */
 
 #include <perspective/computed_function.h>
+#include <math.h>
 
 namespace perspective {
 
@@ -1669,6 +1670,112 @@ namespace computed_function {
             }
         }
 
+        return rval;
+    }
+
+    diff3::diff3()
+        : exprtk::igeneric_function<t_tscalar>("VVV") {}
+
+    diff3::~diff3() {}
+
+    t_tscalar
+    diff3::operator()(t_parameter_list parameters) {
+        t_tscalar rval;
+        rval.clear();
+        rval.m_type = DTYPE_BOOL;
+
+        t_vector_view v1(parameters[0]);
+        t_vector_view v2(parameters[1]);
+        t_vector_view out(parameters[2]);
+
+        t_tscalar o1;
+        o1.set(v1[0] - v2[0]);
+
+        t_tscalar o2;
+        o2.set(v1[1] - v2[1]);
+
+        t_tscalar o3;
+        o3.set(v1[2] - v2[2]);
+
+        out[0] = o1;
+        out[1] = o2;
+        out[2] = o3;
+
+        rval.set(true);
+        return rval;
+    }
+
+    norm3::norm3()
+        : exprtk::igeneric_function<t_tscalar>("V") {}
+
+    norm3::~norm3() {}
+
+    t_tscalar
+    norm3::operator()(t_parameter_list parameters) {
+        t_tscalar rval;
+        rval.clear();
+        rval.m_type = DTYPE_FLOAT64;
+        t_vector_view v1(parameters[0]);
+        double a = v1[0].to_double();
+        double b = v1[1].to_double();
+        double c = v1[2].to_double();
+        rval.set(sqrt(pow(a, 2) + pow(b, 2) + pow(c, 2)));
+        return rval;
+    }
+
+    cross_product3::cross_product3()
+        : exprtk::igeneric_function<t_tscalar>("VVV") {}
+
+    cross_product3::~cross_product3() {}
+
+    t_tscalar
+    cross_product3::operator()(t_parameter_list parameters) {
+        t_tscalar rval;
+        rval.clear();
+        rval.m_type = DTYPE_BOOL;
+
+        // Parameters already validated
+        t_vector_view v1(parameters[0]);
+        t_vector_view v2(parameters[1]);
+        t_vector_view out(parameters[2]);
+
+        // a2 * b3 - a3 * b2
+        t_tscalar o1;
+        o1.set(v1[1] * v2[2] - v1[2] * v2[1]);
+
+        // a3 * b1 - a1 * b3,
+        t_tscalar o2;
+        o2.set(v1[2] * v2[0] - v1[0] * v2[2]);
+
+        // a1 * b2 - a2 * b1
+        t_tscalar o3;
+        o3.set(v1[0] * v2[1] - v1[1] * v2[0]);
+
+        out[0] = o1;
+        out[1] = o2;
+        out[2] = o3;
+
+
+        rval.set(true);
+        return rval;
+    }
+
+    dot_product3::dot_product3()
+        : exprtk::igeneric_function<t_tscalar>("VV") {}
+
+    dot_product3::~dot_product3() {}
+
+    t_tscalar
+    dot_product3::operator()(t_parameter_list parameters) {
+        t_tscalar rval;
+        rval.clear();
+        rval.m_type = DTYPE_FLOAT64;
+
+        // Parameters already validated
+        t_vector_view v1(parameters[0]);
+        t_vector_view v2(parameters[1]);
+
+        rval.set(v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2]);
         return rval;
     }
 
