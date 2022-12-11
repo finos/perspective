@@ -68,7 +68,6 @@
 #include "arrow/util/iterator.h"
 #include "arrow/util/logging.h"
 #include "arrow/util/macros.h"
-#include "arrow/util/optional.h"
 #include "arrow/util/task_group.h"
 // #include "arrow/util/thread_pool.h"
 #include "arrow/util/utf8.h"
@@ -351,7 +350,7 @@ class BlockParsingOperator {
         io_context_.pool(), parse_options_, num_csv_cols_, num_rows_seen_, max_num_rows);
 
     std::shared_ptr<Buffer> straddling;
-    std::vector<util::string_view> views;
+    std::vector<std::string_view> views;
     if (block.partial->size() != 0 || block.completion->size() != 0) {
       if (block.partial->size() == 0) {
         straddling = block.completion;
@@ -362,9 +361,9 @@ class BlockParsingOperator {
             straddling,
             ConcatenateBuffers({block.partial, block.completion}, io_context_.pool()));
       }
-      views = {util::string_view(*straddling), util::string_view(*block.buffer)};
+      views = {std::string_view(*straddling), std::string_view(*block.buffer)};
     } else {
-      views = {util::string_view(*block.buffer)};
+      views = {std::string_view(*block.buffer)};
     }
     uint32_t parsed_size;
     if (block.is_final) {
@@ -434,7 +433,7 @@ class ReaderMixin {
                          num_rows_seen_, 1);
       uint32_t parsed_size = 0;
       RETURN_NOT_OK(parser.Parse(
-          util::string_view(reinterpret_cast<const char*>(data), data_end - data),
+          std::string_view(reinterpret_cast<const char*>(data), data_end - data),
           &parsed_size));
       if (parser.num_rows() != 1) {
         return Status::Invalid(
@@ -564,7 +563,7 @@ class ReaderMixin {
         io_context_.pool(), parse_options_, num_csv_cols_, num_rows_seen_, max_num_rows);
 
     std::shared_ptr<Buffer> straddling;
-    std::vector<util::string_view> views;
+    std::vector<std::string_view> views;
     if (partial->size() != 0 || completion->size() != 0) {
       if (partial->size() == 0) {
         straddling = completion;
@@ -574,9 +573,9 @@ class ReaderMixin {
         ARROW_ASSIGN_OR_RAISE(
             straddling, ConcatenateBuffers({partial, completion}, io_context_.pool()));
       }
-      views = {util::string_view(*straddling), util::string_view(*block)};
+      views = {std::string_view(*straddling), std::string_view(*block)};
     } else {
-      views = {util::string_view(*block)};
+      views = {std::string_view(*block)};
     }
     uint32_t parsed_size;
     if (is_final) {
