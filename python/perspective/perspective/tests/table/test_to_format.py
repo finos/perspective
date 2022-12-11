@@ -961,15 +961,15 @@ class TestToFormat(object):
         )
         assert view.to_csv() == '"a (Group by 1)"\n\n1\n'
 
-    def test_to_csv_column_only_no_columns(self):
-        data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
-        tbl = Table(data)
-        view = tbl.view(
-            split_by=["b"],
-            columns=[]
-        )
+    # def test_to_csv_column_only_no_columns(self):
+    #     data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
+    #     tbl = Table(data)
+    #     view = tbl.view(
+    #         split_by=["b"],
+    #         columns=[]
+    #     )
 
-        assert view.to_csv() == ''
+    #     assert view.to_csv() == ''
 
     # implicit index
 

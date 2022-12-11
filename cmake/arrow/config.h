@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#define ARROW_VERSION_MAJOR 8
+#define ARROW_VERSION_MAJOR 10
 #define ARROW_VERSION_MINOR 0
 #define ARROW_VERSION_PATCH 0
 #define ARROW_VERSION ((ARROW_VERSION_MAJOR * 1000) + ARROW_VERSION_MINOR) * 1000 + ARROW_VERSION_PATCH

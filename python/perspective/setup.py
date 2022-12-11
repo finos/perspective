@@ -226,10 +226,10 @@ class PSPBuild(build_ext):
 
         env["PSP_ENABLE_PYTHON"] = "1"
         env["OSX_DEPLOYMENT_TARGET"] = os.environ.get(
-            "PSP_OSX_DEPLOYMENT_TARGET", "10.9"
+            "PSP_OSX_DEPLOYMENT_TARGET", "10.13"
         )
         env["MACOSX_DEPLOYMENT_TARGET"] = os.environ.get(
-            "PSP_OSX_DEPLOYMENT_TARGET", "10.9"
+            "PSP_OSX_DEPLOYMENT_TARGET", "10.13"
         )
 
         if not os.path.exists(self.build_temp):

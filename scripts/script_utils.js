@@ -129,13 +129,13 @@ exports.clean = function clean(...dirs) {
     if (Array.isArray(dirs[0])) {
         const dir = exports.path(...dirs);
         if (fs.existsSync(dir)) {
-            rimraf(dir, rimraf_err);
+            rimraf.sync(dir);
         }
     } else {
         for (let dir of dirs) {
             dir = exports.path([dir]);
             if (fs.existsSync(dir)) {
-                rimraf(dir, rimraf_err);
+                rimraf.sync(dir);
             }
         }
     }

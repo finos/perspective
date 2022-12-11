@@ -3,7 +3,7 @@ project(psp)
 include(CheckCCompilerFlag)
 
 set(CMAKE_BUILD_TYPE "Release")
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # CMAKE POLICIES
@@ -237,12 +237,15 @@ if(PSP_PYTHON_BUILD AND MACOS)
 
     if(x86_64Supported AND arm64Supported)
         set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "Build universal architecture for OSX" FORCE)
+        set(BUILD_MESSAGE "${BUILD_MESSAGE}\n${Cyan}Building Universal${ColorReset}")
     elseif(x86_64Supported)
         set(CMAKE_REQUIRED_LINK_OPTIONS "-arch;x86_64")
-        set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "Build universal architecture for OSX" FORCE)
+        set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "Build x86_64 architecture for OSX" FORCE)
+        set(BUILD_MESSAGE "${BUILD_MESSAGE}\n${Cyan}Building x86_64${ColorReset}")
     elseif(arm64Supported)
         set(CMAKE_REQUIRED_LINK_OPTIONS "-arch;arm64")
-        set(CMAKE_OSX_ARCHITECTURES "arm64" CACHE STRING "Build universal architecture for OSX" FORCE)
+        set(CMAKE_OSX_ARCHITECTURES "arm64" CACHE STRING "Build arm64 architecture for OSX" FORCE)
+        set(BUILD_MESSAGE "${BUILD_MESSAGE}\n${Cyan}Building arm64${ColorReset}")
     endif()
 endif()
 

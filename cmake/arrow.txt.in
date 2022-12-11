@@ -10,7 +10,7 @@ project(arrow-download NONE)
 include(ExternalProject)
 ExternalProject_Add(apachearrow
   GIT_REPOSITORY    https://github.com/apache/arrow.git
-  GIT_TAG           apache-arrow-8.0.0
+  GIT_TAG           apache-arrow-10.0.0
   SOURCE_DIR        "${CMAKE_BINARY_DIR}/arrow-src"
   BINARY_DIR        "${CMAKE_BINARY_DIR}/arrow-build"
   CONFIGURE_COMMAND ""
