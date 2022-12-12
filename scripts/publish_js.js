@@ -25,8 +25,8 @@ try {
         --unreleased-only
         --base CHANGELOG.md
         --output CHANGELOG.md
-        --unreleased-label=v1.8.0
-        --since-tag=v1.7.2
+        --unreleased-label=v1.8.1
+        --since-tag=v1.8.0
     `;
 
     execute`git add CHANGELOG.md`;

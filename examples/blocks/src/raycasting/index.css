@@ -1,0 +1,28 @@
+perspective-viewer {
+    overflow: visible;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+perspective-viewer[theme="Material Light"],
+perspective-viewer[theme="Material Dark"] {
+    --d3fc-positive--gradient: linear-gradient(
+        #94d0ff,
+        #8795e8,
+        #966bff,
+        #ad8cff,
+        #c774e8,
+        #c774a9,
+        #ff6ad5,
+        #ff6a8b,
+        #ff8b8b,
+        #ffa58b,
+        #ffde8b,
+        #cdde8b,
+        #8bde8b,
+        #20de8b
+    );
+}

@@ -137,6 +137,10 @@ public:
     static computed_function::inrange_fn INRANGE_FN;
     static computed_function::min_fn MIN_FN;
     static computed_function::max_fn MAX_FN;
+    static computed_function::diff3 diff3;
+    static computed_function::norm3 norm3;
+    static computed_function::cross_product3 cross_product3;
+    static computed_function::dot_product3 dot_product3;
     static computed_function::length LENGTH_FN;
     static computed_function::is_null IS_NULL_FN;
     static computed_function::is_not_null IS_NOT_NULL_FN;
