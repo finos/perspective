@@ -12,6 +12,8 @@ import { groupFromKey } from "./seriesKey";
 import { fromDomain } from "./seriesSymbols";
 import { toValue } from "../tooltip/selectionData";
 
+const PADDING_FACTOR = 100;
+
 export function pointSeriesCanvas(
     settings,
     seriesKey,
@@ -43,11 +45,24 @@ export function pointSeriesCanvas(
             context.font = settings.textStyles.font;
             const { type } = settings.mainValues.find((x) => x.name === label);
             const value = toValue(type, d.row[label]);
-            const offset = size
-                ? Math.round(scale_factor * size(d.size)) * (15 / 1000) + 10
-                : 10;
 
-            context.fillText(value, offset, 4);
+            let offset = 10;
+
+            if (size) {
+                // `size(d.size)` is area (A) of circle.
+                // A = pi * r^2
+                // r = sqrt(A / pi)
+                let r = Math.sqrt((scale_factor * size(d.size)) / Math.PI);
+
+                // Determine point on circle at 45 degrees using Pythagorean theorem.
+                let c = Math.sqrt(2 * r * r) / 2;
+
+                // Add padding to offset.
+                const padding = PADDING_FACTOR / c;
+                offset = c + padding;
+            }
+
+            context.fillText(value, offset, -offset);
         }
 
         context.strokeStyle = withoutOpacity(colorValue);
