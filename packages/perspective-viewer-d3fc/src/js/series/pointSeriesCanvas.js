@@ -52,10 +52,10 @@ export function pointSeriesCanvas(
                 // `size(d.size)` is area (A) of circle.
                 // A = pi * r^2
                 // r = sqrt(A / pi)
-                let r = Math.sqrt((scale_factor * size(d.size)) / Math.PI);
+                const r = Math.sqrt((scale_factor * size(d.size)) / Math.PI);
 
                 // Determine point on circle at 45 degrees using Pythagorean theorem.
-                let c = Math.sqrt(2 * r * r) / 2;
+                const c = Math.sqrt(2 * r * r) / 2;
 
                 // Add padding to offset.
                 const padding = PADDING_FACTOR / c;
