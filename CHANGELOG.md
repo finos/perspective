@@ -1,5 +1,18 @@
 # Changelog
 
+## [v1.8.1](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.8.0...HEAD)
+
+**Implemented enhancements:**
+
+- Vec3 functions for ExprTK and new example "Ray Casting" [\#2042](https://github.com/finos/perspective/pull/2042) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- Fix parsing of bug related to d3fc splitting selection data \(redux of \#2039\) [\#2043](https://github.com/finos/perspective/pull/2043) ([brochington](https://github.com/brochington))
+- Fix CSS and Scatter Chart positioning bugs [\#2035](https://github.com/finos/perspective/pull/2035) ([texodus](https://github.com/texodus))
+
 ## [v1.8.0](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.7.2...HEAD)
