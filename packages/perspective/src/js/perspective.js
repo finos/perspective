@@ -179,6 +179,8 @@ export default function (Module) {
         this.config = config || {};
         this.view_config = view_config || new view_config();
 
+        this.textDecoder = new TextDecoder("utf-8");
+
         this.is_unit_context =
             this.table.index === "" &&
             sides === 0 &&
@@ -423,6 +425,9 @@ export default function (Module) {
         );
     };
 
+    /**
+     *
+     */
     view.prototype.get_data_slice = function (
         start_row,
         end_row,
@@ -513,6 +518,156 @@ export default function (Module) {
             const nidx = SIDES[num_sides];
             return __MODULE__[`get_min_max_${nidx}`](this._View, colname);
         }
+    };
+
+    /**
+     * Returns the value at the given row and column indices.
+     *
+     * @param {Object} slice A data slice object.
+     * @param {Number} ridx The row index.
+     * @param {Number} cidx The column index.
+     *
+     * @returns {Array<String>} A row of data.
+     */
+    view.prototype.get_from_data_slice = function (slice, ridx, cidx) {
+        if (this.is_unit_context) {
+            return __MODULE__.get_from_data_slice_unit(slice, ridx, cidx);
+        } else {
+            const nidx = SIDES[this.sides()];
+            return __MODULE__[`get_from_data_slice_${nidx}`](slice, ridx, cidx);
+        }
+    };
+
+    /**
+     *
+     */
+    view.prototype.get_row_with_slice = function (
+        slice,
+        row_index,
+        col_start,
+        col_end,
+        col_names
+    ) {
+        const row = {};
+
+        for (let cidx = col_start; cidx < col_end; cidx++) {
+            const cell = this.get_from_data_slice(slice, row_index, cidx);
+
+            if (col_names[cidx]) {
+                row[col_names[cidx]] = cell;
+            }
+        }
+
+        return row;
+    };
+
+    /**
+     *
+     */
+    view.prototype.get_row = function (row_index) {
+        return this.get_rows(row_index, row_index + 1)[0];
+    };
+
+    /**
+     *
+     */
+    view.prototype.get_rows = function (
+        row_start,
+        row_end,
+        col_start = null,
+        col_end = null
+    ) {
+        if (!col_start || !col_end) {
+            const { start_col, end_col } = _parse_format_options.bind(this)({});
+            col_start = start_col;
+            col_end = end_col;
+        }
+
+        const slice = this.get_data_slice(
+            row_start,
+            row_end,
+            col_start,
+            col_end
+        );
+
+        const ns = slice.get_column_names();
+        const col_names = extract_vector_scalar(ns).map((x) =>
+            x.join(defaults.COLUMN_SEPARATOR_STRING)
+        );
+
+        let rows = [];
+
+        for (let ridx = row_start; ridx < row_end; ridx++) {
+            const row = this.get_row_with_slice(
+                slice,
+                ridx,
+                col_start,
+                col_end,
+                col_names
+            );
+            rows.push(row);
+        }
+
+        slice.delete();
+
+        return rows;
+    };
+
+    /**
+     *
+     */
+    view.prototype.get_column = async function (col_name) {
+        // TODO: Is it possible to not have fetch a new schema every time?
+        //       Can it be computed and cached, ala C.O.W.?
+        //       Right now, this take < 1ms on my system.
+        const schema = await this.schema();
+
+        if (!schema[col_name]) return []; // maybe return null, or throw an error?
+
+        const col_type = schema[col_name];
+
+        let data = {};
+
+        switch (col_type) {
+            case "date":
+            // fall-through
+            case "integer":
+            // fall-through
+            case "float":
+                const num_data = await this.col_to_js_typed_array(col_name);
+                data = { type: col_type, data: num_data[0]?.length === 0 ? [] : num_data[0] };
+                break;
+            case "string":
+                // emscripten.cpp:454 for col_to_typed_array<std::string>
+                const str_arrays = await this.col_to_js_typed_array(col_name);
+
+                if (str_arrays[0].length === 0) return []; // Might want to return an error or null instead.
+                // TODO: How should I handle nulls?
+                const [dictArray, offsets, indexArray /*, nullCount, validityMap */] =
+                    str_arrays;
+
+                const dictStr = this.textDecoder.decode(dictArray);
+                const dict = [];
+
+                for (let i = 0; i < offsets.length - 1; i++) {
+                    const start = offsets[i];
+                    const end = offsets[i + 1];
+                    const str = dictStr.slice(start, end);
+                    dict.push(str);
+                }
+
+                data = { type: col_type, dict, indices: indexArray };
+
+                break;
+            case "boolean": // TODO: Is this a type?
+                break;
+            case "datetime": // TODO: Is this a type?
+                break;
+            default:
+                break;
+        }
+
+        return data;
     };
 
     /**
@@ -837,116 +992,6 @@ export default function (Module) {
                 end_col
             );
         }
-    };
-
-    view.prototype.to_raw_buffer = function (options = {}) {
-        // console.log("reached view.to_buffer");
-        // console.log(__MODULE__);
-        let { start_row, start_col, end_row, end_col } =
-            _parse_format_options.bind(this)(options);
-
-        const num_sides = this.sides();
-        const nidx = SIDES[num_sides];
-
-
-        /* */
-        // let get_all_data;
-
-        // if (this.is_unit_context) {
-        //     get_all_data = __MODULE__.get_all_data;
-        // } else {
-        //     get_all_data = __MODULE__[`get_all_data_${nidx}`];
-        // }
-
-        // // console.time("to_buffer_1");
-        // let stuff1 = get_all_data(
-        //     this._View,
-        //     start_row,
-        //     end_row,
-        //     start_col,
-        //     end_col
-        // );
-
-        // return stuff1;
-
-        /* */
-
-        /* */
-        // console.timeEnd("to_buffer_1");
-
-        // console.log("stuff1", stuff1);
-
-        let get_from_data_slice;
-
-        if (this.is_unit_context) {
-            get_from_data_slice = __MODULE__.get_from_data_slice_unit;
-        } else {
-            get_from_data_slice = __MODULE__[`get_from_data_slice_${nidx}`];
-        }
-
-        let stuff2 = [];
-
-        console.time("to_buffer_2");
-        const slice2 = this.get_data_slice(
-          start_row,
-          end_row,
-          start_col,
-          end_col
-        );
-
-        for (let ridx = start_row; ridx < end_row; ridx++) {
-            for (let cidx = start_col; cidx < end_col; cidx++) {
-                // console.log('ridx', ridx, 'cidx', cidx);
-                // let s = this.get_data_slice(slice, ridx, cidx);
-                let s = get_from_data_slice(slice2, ridx, cidx);
-                stuff2.push(s);
-            }
-        }
-        console.timeEnd("to_buffer_2");
-
-        console.log("stuff2", stuff2);
-
-        slice2.delete();
-
-        /* */
-
-        /* */
-
-        // let to_arrow;
-
-        // // Seeing what is in "arrow" format.
-        // if (this.is_unit_context) {
-        //     to_arrow = __MODULE__.to_arrow_unit;
-        // } else {
-        //     to_arrow = __MODULE__[`to_arrow_${nidx}`];
-        // }
-
-        // console.time("to_arrow");
-        // const arrow = to_arrow(this._View, start_row, end_row, start_col, end_col);
-        // console.timeEnd("to_arrow");
-
-        // console.log("arrow", arrow);
-
-        /* */
-
-        /* */
-
-        let to_raw_buffer;
-
-        if (this.is_unit_context) {
-            to_raw_buffer = __MODULE__.to_raw_buffer_unit;
-        } else {
-            to_raw_buffer = __MODULE__[`to_raw_buffer_${nidx}`];
-        }
-
-        console.time("to_raw_buffer");
-        const raw_buffer = to_raw_buffer(this._View, start_row, end_row, start_col, end_col);
-        console.timeEnd("to_raw_buffer");
-
-        // console.log("raw_buffer", raw_buffer);
-        // return raw_buffer;
-
-        return stuff2;
     };
 
     /**

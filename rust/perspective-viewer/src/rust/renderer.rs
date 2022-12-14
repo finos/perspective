@@ -299,7 +299,6 @@ impl Renderer {
 
     async fn draw_view(&self, view: &JsPerspectiveView, is_update: bool) -> ApiResult<()> {
         let plugin = self.get_active_plugin()?;
-        tracing::warn!("Drawing plugin {}", plugin.name());
         let meta = self.metadata().clone();
         let limits = get_row_and_col_limits(view, &meta).await?;
         self.limits_changed.emit_all(limits);

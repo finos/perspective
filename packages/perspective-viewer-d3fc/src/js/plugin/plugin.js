@@ -249,64 +249,31 @@ export function register(...plugins) {
                     }
 
                     async update(view, end_col, end_row, clear = false) {
-                        // console.log('args: ', view, end_col, end_row, clear);                        
-
                         if (this.offsetParent === null) {
                             return;
                         }
 
                         const viewer = this.parentElement;
-                        let jsonp, metadata;
                         // const realValues =
                         //     JSON.parse(viewer.getAttribute("columns"));
                         const realValues = this.config.columns;
                         const leaves_only = chart.plugin.name !== "Sunburst";
 
-                        /* scratch code */
-
-                        console.time('raw buffer');
-                        let buffer = await view.to_raw_buffer({ end_row, end_col, leaves_only });
-                        console.timeEnd('raw buffer');
-
-                        console.log('buffer', buffer);
-
-                        /* end scratch code */
-
-                        if (end_col && end_row) {
-                            jsonp = view.to_json({
-                                end_row,
-                                end_col,
-                                leaves_only,
-                            });
-                        } else if (end_col) {
-                            jsonp = view.to_json({ end_col, leaves_only });
-                        } else if (end_row) {
-                            jsonp = view.to_json({ end_row, leaves_only });
-                        } else {
-                            jsonp = view.to_json({ leaves_only });
-                        }
-
-                        console.time('json');
-                        const json = await jsonp;
-                        console.timeEnd('json');
-                        // console.log('json', json);
-
-                        metadata = await Promise.all([
+                        let [
+                            table_schema,
+                            expression_schema,
+                            view_schema,
+                            json,
+                            config,
+                        ] = await Promise.all([
                             viewer
                                 .getTable()
                                 .then((table) => table.schema(false)),
                             view.expression_schema(false),
                             view.schema(false),
-                            // jsonp,
+                            view.to_json(end_col, end_row, leaves_only),
                             view.get_config(),
                         ]);
-                        let [
-                            table_schema,
-                            expression_schema,
-                            view_schema,
-                            // json,
-                            config,
-                        ] = metadata;
 
                         /**
                          * Retrieve a tree axis column from the table and

@@ -114,15 +114,6 @@ async function to_data_suite() {
         await table.delete();
     }
 
-    // await benchmark({
-    //     name: `.to_raw_buffer()`,
-    //     before_all,
-    //     after_all,
-    //     async test(_perspective, {view}) {
-    //         const _raw = await view.to_raw_buffer();
-    //     },
-    // });
-
     await benchmark({
         name: `.to_arrow()`,
         before_all,

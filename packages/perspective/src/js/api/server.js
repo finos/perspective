@@ -172,7 +172,7 @@ export class Server {
                 f(this._tables[msg.name]);
                 break;
             case "table_method":
-                
+
             case "view_method":
                 this.process_method_call(msg);
                 break;
@@ -238,10 +238,6 @@ export class Server {
                         return;
                     }
                 }
-                break;
-            case "table_broch_test":
-
-                // console.log(this.perspective);
                 break;
         }
     }
