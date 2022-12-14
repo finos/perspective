@@ -1,122 +1,60 @@
 <!--
    
-   Copyright (c) 2017, the Perspective Authors.
-   
-   This file is part of the Perspective library, distributed under the terms of
-   the Apache License 2.0.  The full license can be found in the LICENSE file.
+  Copyright (c) 2017, the Perspective Authors.
+  
+  This file is part of the Perspective library, distributed under the terms of
+  the Apache License 2.0.  The full license can be found in the LICENSE file.
 
 -->
 
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta
-      name="viewport"
-      content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no"
-    />
+   <head>
+       <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no"/>
 
-    <script
-      type="module"
-      src="/node_modules/@finos/perspective/dist/cdn/perspective.js"
-    ></script>
-    <script
-      type="module"
-      src="/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.js"
-    ></script>
-    <script
-      type="module"
-      src="/node_modules/@finos/perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js"
-    ></script>
-    <script
-      type="module"
-      src="/node_modules/@finos/perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js"
-    ></script>
+       <script type="module" src="/node_modules/@finos/perspective/dist/cdn/perspective.js"></script>
+       <script type="module" src="/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.js"></script>
+       <script type="module" src="/node_modules/@finos/perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js"></script>
+       <script type="module" src="/node_modules/@finos/perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js"></script>
 
-    <link
-      rel="stylesheet"
-      crossorigin="anonymous"
-      href="/node_modules/@finos/perspective-viewer/dist/css/themes.css"
-    />
+       <link rel="stylesheet" crossorigin="anonymous" href="/node_modules/@finos/perspective-viewer/dist/css/themes.css" />
 
-    <link
-      rel="preload"
-      href="/node_modules/@finos/perspective/dist/cdn/perspective.cpp.wasm"
-      as="fetch"
-      type="application/wasm"
-      crossorigin="anonymous"
-    />
-    <link
-      rel="preload"
-      href="/node_modules/@finos/perspective-viewer/dist/cdn/perspective_bg.wasm"
-      as="fetch"
-      type="application/wasm"
-      crossorigin="anonymous"
-    />
-    <link
-      rel="preload"
-      href="/node_modules/superstore-arrow/superstore.arrow"
-      as="fetch"
-      type="arraybuffer"
-      crossorigin="anonymous"
-    />
-    <link
-      rel="preload"
-      href="/node_modules/@finos/perspective/dist/cdn/perspective.worker.js"
-      as="fetch"
-      type="application/javascript"
-      crossorigin="anonymous"
-    />
+       <link rel="preload" href="/node_modules/@finos/perspective/dist/cdn/perspective.cpp.wasm" as="fetch" type="application/wasm" crossorigin="anonymous" />
+       <link rel="preload" href="/node_modules/@finos/perspective-viewer/dist/cdn/perspective_bg.wasm" as="fetch" type="application/wasm" crossorigin="anonymous" />
+       <link rel="preload" href="/node_modules/superstore-arrow/superstore.arrow" as="fetch" type="arraybuffer" crossorigin="anonymous" />
+       <link rel="preload" href="/node_modules/@finos/perspective/dist/cdn/perspective.worker.js" as="fetch" type="application/javascript" crossorigin="anonymous" />
 
-    <script type="module">
-      import { worker } from '/node_modules/@finos/perspective/dist/cdn/perspective.js';
+       <script type="module">
+           import {worker} from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
 
-      const WORKER = worker();
-      const REQ = fetch('/node_modules/superstore-arrow/superstore.arrow');
+           const WORKER = worker();
+           const REQ = fetch("/node_modules/superstore-arrow/superstore.arrow");
 
-      async function load() {
-        const resp = await REQ;
-        const arrow = await resp.arrayBuffer();
-        const el = document.getElementsByTagName('perspective-viewer')[0];
-        const table = await WORKER.table(arrow);
-        // console.log('table: ', table);
-        // console.time('broch_test');
-        // let r = table.broch_test();
-        // console.timeEnd('broch_test');
-        // console.log('broch_test: ', r);
+           async function load() {
+               const resp = await REQ;
+               const arrow = await resp.arrayBuffer();
+               const el = document.getElementsByTagName("perspective-viewer")[0];
+               const table = WORKER.table(arrow);
+               el.load(table);
+               el.toggleConfig();
+           }
 
-        el.load(table);
-        el.restore({
-          plugin: 'X/Y Scatter',
-          plugin_config: {},
-          settings: true,
-          theme: 'Material Light',
-          group_by: ['City'],
-          split_by: [],
-          columns: ['Quantity', 'Discount', 'Profit', null, 'Sub-Category'],
-          filter: [],
-          sort: [],
-          expressions: [],
-          aggregates: { 'Sub-Category': 'dominant' },
-        });
+           load();
 
-        // el.toggleConfig();
-      }
+       </script>
 
-      load();
-    </script>
+       <style>
+           perspective-viewer {
+               position: absolute;
+               top: 0;
+               left: 0;
+               bottom: 0;
+               right: 0;
+           }
+       </style>
+   </head>
 
-    <style>
-      perspective-viewer {
-        position: absolute;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        right: 0;
-      }
-    </style>
-  </head>
-
-  <body>
-    <perspective-viewer editable> </perspective-viewer>
-  </body>
+   <body>
+       <perspective-viewer editable> </perspective-viewer>
+   </body>
 </html>
