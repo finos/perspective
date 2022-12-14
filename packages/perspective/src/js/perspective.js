@@ -635,7 +635,10 @@ export default function (Module) {
             // fall-through
             case "float":
                 const num_data = await this.col_to_js_typed_array(col_name);
-                data = { type: col_type, data: num_data[0]?.length === 0 ? [] : num_data[0] };
+                data = {
+                    type: col_type,
+                    data: num_data[0]?.length === 0 ? [] : num_data[0],
+                };
                 break;
             case "string":
                 // emscripten.cpp:454 for col_to_typed_array<std::string>
@@ -643,8 +646,11 @@ export default function (Module) {
 
                 if (str_arrays[0].length === 0) return []; // Might want to return an error or null instead.
                 // TODO: How should I handle nulls?
-                const [dictArray, offsets, indexArray /*, nullCount, validityMap */] =
-                    str_arrays;
+                const [
+                    dictArray,
+                    offsets,
+                    indexArray /*, nullCount, validityMap */,
+                ] = str_arrays;
 
                 const dictStr = this.textDecoder.decode(dictArray);
                 const dict = [];
