@@ -81,8 +81,6 @@ export class Server {
      * @param {*} client_id
      */
     process(msg, client_id) {
-        // console.log(`[SERVER] Received message: ${JSON.stringify(msg)})}`);
-
         switch (msg.cmd) {
             case "init_profile_thread":
                 this.perspective.initialize_profile_thread();
@@ -172,7 +170,6 @@ export class Server {
                 f(this._tables[msg.name]);
                 break;
             case "table_method":
-
             case "view_method":
                 this.process_method_call(msg);
                 break;

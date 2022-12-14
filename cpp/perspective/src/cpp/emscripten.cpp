@@ -211,15 +211,6 @@ namespace binding {
 
     template <typename CTX_T>
     t_val
-    to_raw_buffer(std::shared_ptr<View<CTX_T>> view, std::int32_t start_row,
-        std::int32_t end_row, std::int32_t start_col, std::int32_t end_col) {
-        std::shared_ptr<std::string> s
-            = view->to_raw_buffer(start_row, end_row, start_col, end_col);
-        return str_to_arraybuffer(s)["buffer"];
-    }
-
-    template <typename CTX_T>
-    t_val
     to_csv(std::shared_ptr<View<CTX_T>> view, std::int32_t start_row,
         std::int32_t end_row, std::int32_t start_col, std::int32_t end_col) {
         std::shared_ptr<std::string> s
@@ -1839,28 +1830,6 @@ namespace binding {
 
     template <typename CTX_T>
     t_val
-    get_all_data(std::shared_ptr<View<CTX_T>> view, std::uint32_t start_row,
-        std::uint32_t end_row, std::uint32_t start_col, std::uint32_t end_col) {
-        auto data_slice
-            = view->get_data(start_row, end_row, start_col, end_col);
-
-        t_val arr = t_val::array();
-        
-        for (t_uindex ridx = 0; ridx < end_row; ++ridx) {
-            t_val row = t_val::array();
-            for (t_uindex cidx = 0; cidx < end_col; ++cidx) {
-                auto d = data_slice->get(ridx, cidx);
-                
-                row.set(cidx, scalar_to_val(d));
-            }
-            arr.set(ridx, row);
-        }
-
-        return arr;
-    }
-
-    template <typename CTX_T>
-    t_val
     get_min_max(std::shared_ptr<View<CTX_T>> view, const std::string& colname) {
         t_val arr = t_val::array();
         std::pair<t_tscalar, t_tscalar> min_max = view->get_min_max(colname);
@@ -1896,7 +1865,6 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("remove_port", &Table::remove_port)
         .function("get_id", &Table::get_id)
         .function("get_pool", &Table::get_pool)
-        .function("broch_test", &Table::broch_test)
         .function("get_gnode", &Table::get_gnode);
     /******************************************************************************
      *
@@ -2278,10 +2246,6 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("make_view_zero", &make_view<t_ctx0>);
     function("make_view_one", &make_view<t_ctx1>);
     function("make_view_two", &make_view<t_ctx2>);
-    function("get_all_data_unit", &get_all_data<t_ctxunit>, allow_raw_pointers());
-    function("get_all_data_zero", &get_all_data<t_ctx0>, allow_raw_pointers());
-    function("get_all_data_one", &get_all_data<t_ctx1>, allow_raw_pointers());
-    function("get_all_data_two", &get_all_data<t_ctx2>, allow_raw_pointers());
     function("get_data_slice_unit", &get_data_slice<t_ctxunit>,
         allow_raw_pointers());
     function("get_from_data_slice_unit", &get_from_data_slice<t_ctxunit>,
@@ -2306,10 +2270,6 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("to_arrow_zero", &to_arrow<t_ctx0>);
     function("to_arrow_one", &to_arrow<t_ctx1>);
     function("to_arrow_two", &to_arrow<t_ctx2>);
-    function("to_raw_buffer_unit", &to_raw_buffer<t_ctxunit>, allow_raw_pointers());
-    function("to_raw_buffer_zero", &to_raw_buffer<t_ctx0>, allow_raw_pointers());
-    function("to_raw_buffer_one", &to_raw_buffer<t_ctx1>, allow_raw_pointers());
-    function("to_raw_buffer_two", &to_raw_buffer<t_ctx2>, allow_raw_pointers());
     function("to_csv_unit", &to_csv<t_ctxunit>);
     function("to_csv_zero", &to_csv<t_ctx0>);
     function("to_csv_one", &to_csv<t_ctx1>);

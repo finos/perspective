@@ -2407,7 +2407,6 @@ export default function (Module) {
          * needed
          */
         post(msg, transfer) {
-            // console.log("WebWorkerServer.post", msg);
             self.postMessage(msg, transfer);
         }
 

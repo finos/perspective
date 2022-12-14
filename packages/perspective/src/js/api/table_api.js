@@ -163,10 +163,3 @@ table.prototype.execute = function (f) {
         f: f.toString(),
     });
 };
-
-table.prototype.broch_test = function () {
-    this._worker.post({
-        cmd: "table_broch_test",
-        name: this._name,
-    });
-};

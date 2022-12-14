@@ -539,15 +539,6 @@ View<CTX_T>::to_arrow(std::int32_t start_row, std::int32_t end_row,
 
 template <typename CTX_T>
 std::shared_ptr<std::string>
-View<CTX_T>::to_raw_buffer(std::int32_t start_row, std::int32_t end_row,
-    std::int32_t start_col, std::int32_t end_col) const {
-    std::shared_ptr<t_data_slice<CTX_T>> data_slice
-        = get_data(start_row, end_row, start_col, end_col);
-    return data_slice_to_raw_buffer(data_slice);
-};
-
-template <typename CTX_T>
-std::shared_ptr<std::string>
 View<CTX_T>::to_csv(std::int32_t start_row, std::int32_t end_row,
     std::int32_t start_col, std::int32_t end_col) const {
     std::shared_ptr<t_data_slice<CTX_T>> data_slice
@@ -1041,41 +1032,6 @@ View<CTX_T>::data_slice_to_arrow(
     std::shared_ptr<arrow::Schema> arrow_schema = pairs.first;
     arrow::Result<std::shared_ptr<arrow::ResizableBuffer>> allocated
         = arrow::AllocateResizableBuffer(0);
-    if (!allocated.ok()) {
-        std::stringstream ss;
-        ss << "Failed to allocate buffer: " << allocated.status().message()
-           << std::endl;
-        PSP_COMPLAIN_AND_ABORT(ss.str());
-    }
-
-    std::shared_ptr<arrow::ResizableBuffer> buffer;
-    buffer = *allocated;
-    arrow::io::BufferOutputStream sink(buffer);
-    auto options = arrow::ipc::IpcWriteOptions::Defaults();
-    auto res = arrow::ipc::MakeStreamWriter(&sink, arrow_schema, options);
-    std::shared_ptr<arrow::ipc::RecordBatchWriter> writer = *res;
-    PSP_CHECK_ARROW_STATUS(writer->WriteRecordBatch(*batches));
-    PSP_CHECK_ARROW_STATUS(writer->Close());
-    PSP_CHECK_ARROW_STATUS(sink.Close());
-    return std::make_shared<std::string>(buffer->ToString());
-}
-
-// TODO: For now, this is a copy of the `to_arrow` method.
-template <typename CTX_T>
-std::shared_ptr<std::string>
-View<CTX_T>::data_slice_to_raw_buffer(
-    std::shared_ptr<t_data_slice<CTX_T>> data_slice) const {
-    std::pair<std::shared_ptr<arrow::Schema>,
-        std::shared_ptr<arrow::RecordBatch>>
-        pairs = data_slice_to_batches(true, data_slice);
-    std::shared_ptr<arrow::RecordBatch> batches = pairs.second;
-    std::shared_ptr<arrow::Schema> arrow_schema = pairs.first;
-
-
-    arrow::Result<std::shared_ptr<arrow::ResizableBuffer>> allocated
-        = arrow::AllocateResizableBuffer(0);
-
-
     if (!allocated.ok()) {
         std::stringstream ss;
         ss << "Failed to allocate buffer: " << allocated.status().message()

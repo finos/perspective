@@ -176,8 +176,6 @@ public:
     void set_column_names(const std::vector<std::string>& column_names);
     void set_data_types(const std::vector<t_dtype>& data_types);
 
-    t_index broch_test();
-
 private:
     /**
      * @brief Make sure that the table does not have an explicit index AND an

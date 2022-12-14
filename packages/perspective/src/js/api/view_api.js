@@ -8,7 +8,6 @@
  */
 
 import { subscribe, unsubscribe, async_queue } from "./dispatch.js";
-import ViewData from "./ViewData.js";
 
 /**
  * Construct a proxy for the view object by creating a "view" message and
@@ -72,8 +71,6 @@ view.prototype.get_config = async_queue("get_config");
 view.prototype.get_min_max = async_queue("get_min_max");
 
 view.prototype.to_json = async_queue("to_json");
-
-view.prototype.to_view_data = async_queue("to_view_data");
 
 view.prototype.to_arrow = async_queue("to_arrow");
 
