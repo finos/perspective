@@ -2418,7 +2418,6 @@ export default function (Module) {
          * Perspective WASM code
          */
         init(msg) {
-            // console.log("WebWorkerServer.init", msg);
             if (typeof WebAssembly === "undefined") {
                 throw new Error("WebAssembly not supported");
             } else {
