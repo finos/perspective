@@ -271,7 +271,11 @@ export function register(...plugins) {
                                 .then((table) => table.schema(false)),
                             view.expression_schema(false),
                             view.schema(false),
-                            view.to_json(end_col, end_row, leaves_only),
+                            view.to_json({
+                              ...(end_col ? { end_col } : {}),
+                              ...(end_row ? { end_row } : {}),
+                              leaves_only
+                            }),
                             view.get_config(),
                         ]);
 
