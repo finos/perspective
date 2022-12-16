@@ -1,7 +1,7 @@
-import React, {useEffect, useCallback} from "react";
+import React, { useEffect, useCallback } from "react";
 import clsx from "clsx";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
-import {useColorMode} from "@docusaurus/theme-common";
+import { useColorMode } from "@docusaurus/theme-common";
 import Layout from "@theme/Layout";
 import BrowserOnly from "@docusaurus/BrowserOnly";
 import HomepageFeatures from "@site/src/components/HomepageFeatures";
@@ -9,8 +9,9 @@ import ExecutionEnvironment from "@docusaurus/ExecutionEnvironment";
 import styles from "./index.module.css";
 
 function HomepageHeader() {
-    const {siteConfig} = useDocusaurusContext();
-    const {colorMode, setColorMode} = useColorMode();
+    const { siteConfig } = useDocusaurusContext();
+    console.log(siteConfig);
+    const { colorMode, setColorMode } = useColorMode();
     return (
         <header className={clsx("hero", styles.heroBanner)}>
             <div className="container">
@@ -31,7 +32,7 @@ function HomepageHeader() {
 }
 
 export default function Home() {
-    const {siteConfig} = useDocusaurusContext();
+    const { siteConfig } = useDocusaurusContext();
     if (ExecutionEnvironment.canUseDOM) {
         // The scroll listener
         const handleScroll = useCallback(() => {
