@@ -73,5 +73,5 @@ and/or [Jupyterlab](https://jupyterlab.readthedocs.io/en/stable/).
 
 * [`perspective-viewer-maps` OpenLayers/OpenStreetMap plugin](https://github.com/DevAndyLee/perspective-viewer-maps)
 * [Scott Logic / Perspective Plugin API - How to build a new plugin](https://blog.scottlogic.com/2019/04/23/perspective-plugin-api-how-to-build-a-new-plugin.html)
-* [Streaming, cross-sectional data visualization in Jupyterlab | Junyuan Tan, JupyterCon 2020](http://www.youtube.com/watch?v=IO-HJsGdleE)
+* [Streaming, cross-sectional data visualization in JupyterLab | Junyuan Tan, JupyterCon 2020](http://www.youtube.com/watch?v=IO-HJsGdleE)
 
