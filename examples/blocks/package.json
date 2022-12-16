@@ -8,6 +8,7 @@
         "clean": "rimraf dist",
         "dist": "node dist.js"
     },
+    "main": "index.js",
     "keywords": [],
     "license": "Apache-2.0",
     "dependencies": {

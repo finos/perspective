@@ -5,6 +5,14 @@ title: ExprTK Function Reference
 
 ## ExprTK Function Reference
 
+#### `var`
+
+Declare a new local variable
+
+```
+var ${1:x := 1}
+```
+
 #### `abs`
 
 Absolute value of x
@@ -461,6 +469,24 @@ Boolean value false
 
 ```
 false
+```
+
+#### `if`
+
+An if/else conditional, which evaluates a condition such as:
+ if ("Sales" > 100) { true } else { false }
+
+```
+if (${1:condition}) {} else if (${2:condition}) {} else {}
+```
+
+#### `for`
+
+A for loop, which repeatedly evaluates an incrementing expression such as:
+var x := 0; var y := 1; for (x < 10; x += 1) { y := x + y }
+
+```
+for (${1:expression}) {}
 ```
 
 #### `string`

@@ -4,13 +4,38 @@
 const lightCodeTheme = require("prism-react-renderer/themes/github");
 const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 
+const fs = require("fs");
+
+const { init } = require("blocks");
+
+init();
+
+const examples = fs.readdirSync("static/blocks").map((ex) => {
+    const files = fs
+        .readdirSync(`static/blocks/${ex}`)
+        .filter((x) => !x.startsWith("."))
+        .map((x) => {
+            return {
+                name: x,
+                contents: fs
+                    .readFileSync(`static/blocks/${ex}/${x}`)
+                    .toString(),
+            };
+        });
+
+    return {
+        name: ex,
+        files,
+    };
+});
+
 /** @type {import('@docusaurus/types').Config} */
 const config = {
     title: "Perspective",
     // tagline: "Dinosaurs are cool",
     url: "https://perspective.finos.org",
     baseUrl: "/",
-    onBrokenLinks: "throw",
+    onBrokenLinks: "warn",
     onBrokenMarkdownLinks: "warn",
     favicon: "https://www.finos.org/hubfs/FINOS/finos-logo/favicon.ico",
 
@@ -18,7 +43,11 @@ const config = {
     // If you aren't using GitHub pages, you don't need these.
     organizationName: "finos", // Usually your GitHub org/user name.
     projectName: "perspective", // Usually your repo name.
-    trailingSlash: false,
+    trailingSlash: true,
+
+    customFields: {
+        examples,
+    },
 
     // Even if you don't use internalization, you can use this field to set useful
     // metadata like html lang. For example, if your site is Chinese, you may want
@@ -76,6 +105,11 @@ const config = {
                         docId: "js",
                         position: "right",
                         label: "Docs",
+                    },
+                    {
+                        to: "/examples",
+                        position: "right",
+                        label: "Examples",
                     },
                     {
                         href: "https://github.com/finos/perspective",
