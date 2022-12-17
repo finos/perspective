@@ -3,9 +3,9 @@ export const LAYOUTS = {
         plugin: "Datagrid",
         plugin_config: {
             columns: {
-                chg: {bg_gradient: 16.5, number_bg_mode: "gradient"},
-                "chg (+)": {fg_gradient: 15.83, number_fg_mode: "bar"},
-                "chg (-)": {fg_gradient: 14.58, number_fg_mode: "bar"},
+                chg: { bg_gradient: 16.5, number_bg_mode: "gradient" },
+                "chg (+)": { fg_gradient: 15.83, number_fg_mode: "bar" },
+                "chg (-)": { fg_gradient: 14.58, number_fg_mode: "bar" },
             },
             editable: false,
             scroll_lock: true,
@@ -20,7 +20,7 @@ export const LAYOUTS = {
             '//chg (-)\nif("chg"<0){"chg"}else{0}',
             '//chg (+)\nif("chg">0){"chg"}else{0}',
         ],
-        aggregates: {"chg (+)": "avg", chg: "avg", "chg (-)": "avg"},
+        aggregates: { "chg (+)": "avg", chg: "avg", "chg (-)": "avg" },
     },
     datagrid: {
         plugin: "datagrid",
@@ -29,7 +29,7 @@ export const LAYOUTS = {
             ["name", "desc"],
             ["lastUpdate", "desc"],
         ],
-        aggregates: {name: "last", lastUpdate: "last"},
+        aggregates: { name: "last", lastUpdate: "last" },
         group_by: ["name", "lastUpdate"],
         split_by: ["client"],
         plugin_config: {},
@@ -48,14 +48,14 @@ export const LAYOUTS = {
         sort: [["lastUpdate", "desc"]],
         split_by: ["client"],
         columns: ["bid"],
-        aggregates: {bid: "avg", chg: "avg", name: "last"},
+        aggregates: { bid: "avg", chg: "avg", name: "last" },
     },
     "xy scatter": {
         plugin: "X/Y Scatter",
         group_by: ["name"],
         split_by: [],
-        columns: ["bid", "ask", "chg", "vol"],
-        aggregates: {bid: "avg", ask: "avg", vol: "avg"},
+        columns: ["bid", "ask", "chg", "vol", "name"],
+        aggregates: { bid: "avg", ask: "avg", vol: "avg", name: "dominant" },
         sort: [],
     },
     treemap: {
@@ -63,7 +63,7 @@ export const LAYOUTS = {
         group_by: ["name", "client"],
         split_by: [],
         columns: ["bid", "chg"],
-        aggregates: {bid: "sum", chg: "sum", name: "last"},
+        aggregates: { bid: "sum", chg: "sum", name: "last" },
         sort: [
             ["name", "desc"],
             ["chg", "desc"],

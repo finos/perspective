@@ -1,7 +1,6 @@
 const { execute, execute_throw } = require("../../scripts/script_utils.js");
 const fs = require("fs");
-const { get_examples } = require("./examples.js");
-const hashes = JSON.parse(fs.readFileSync(`${__dirname}/gists.json`));
+const { get_examples, LOCAL_EXAMPLES } = require("./examples.js");
 
 const replacements = {
     "/node_modules/": "https://cdn.jsdelivr.net/npm/",
@@ -32,21 +31,23 @@ const replacements = {
         "perspective-workspace@latest/dist/cdn/perspective-workspace.js",
 };
 
-exports.init = function init() {
-    execute`mkdir -p ${__dirname}/../../docs/static/blocks`;
+exports.dist_examples = function init(
+    outpath = `${__dirname}/../../docs/static/blocks`
+) {
+    execute`mkdir -p ${outpath}`;
     const readme = generate_readme();
     let existing = fs.readFileSync(`${__dirname}/../../README.md`).toString();
     existing = existing.replace(
         /<\!\-\- Examples \-\->([\s\S]+?)<\!\-\- Examples \-\->/gm,
         `<!-- Examples -->\n${readme}\n<!-- Examples -->`
     );
-    fs.writeFileSync(`${__dirname}/../../README.md`, existing);
 
-    for (const name of Object.keys(hashes)) {
+    fs.writeFileSync(`${__dirname}/../../README.md`, existing);
+    for (const name of LOCAL_EXAMPLES) {
         // Copy
         if (fs.existsSync(`${__dirname}/src/${name}`)) {
             for (const filename of fs.readdirSync(`${__dirname}/src/${name}`)) {
-                execute`mkdir -p ${__dirname}/../../docs/static/blocks/${name}`;
+                execute`mkdir -p ${outpath}/${name}`;
                 if (filename.endsWith(".js") || filename.endsWith(".html")) {
                     let filecontents = fs
                         .readFileSync(`${__dirname}/src/${name}/${filename}`)
@@ -58,11 +59,11 @@ exports.init = function init() {
                         );
                     }
                     fs.writeFileSync(
-                        `${__dirname}/../../docs/static/blocks/${name}/${filename}`,
+                        `${outpath}/${name}/${filename}`,
                         filecontents
                     );
                 } else if (filename !== ".git") {
-                    execute`cp ${__dirname}/src/${name}/${filename} ${__dirname}/../../docs/static/blocks/${name}/${filename}`;
+                    execute`cp ${__dirname}/src/${name}/${filename} ${outpath}/${name}/${filename}`;
                 }
             }
         }
@@ -88,7 +89,7 @@ function generate_readme() {
                     .join("")}</tr><tr>${row
                     .map(
                         (y) =>
-                            `<td><a href="${y.url}"><img src="${y.img}"></img></a></td>`
+                            `<td><a href="${y.url}"><img height="125" src="${y.img}"></img></a></td>`
                     )
                     .join("")}</tr>`
         )

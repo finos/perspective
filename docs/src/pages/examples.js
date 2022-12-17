@@ -1,9 +1,7 @@
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect } from "react";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import Layout from "@theme/Layout";
 import ExecutionEnvironment from "@docusaurus/ExecutionEnvironment";
-// import gists from "../../../examples/blocks/gists.json";
-import useBaseUrl from "@docusaurus/useBaseUrl";
 import Link from "@docusaurus/Link";
 import { get_examples } from "blocks/examples.js";
 
@@ -25,7 +23,10 @@ function ExampleTD({ img, url, item }) {
                 <img
                     width="100%"
                     src={img}
-                    style={{ borderRadius: "10px" }}
+                    style={{
+                        borderRadius: "10px",
+                        border: "1px solid var(--ifm-toc-border-color)",
+                    }}
                 ></img>
             </Link>
         </td>
@@ -36,8 +37,6 @@ function ExampleTR({ group }) {
     return (
         <tr>
             {group.map(({ img, name, url }) => {
-                // const img = useBaseUrl(`/blocks/${item}/preview.png`);
-                // const url = useBaseUrl(`/block?example=${item}`);
                 return (
                     <ExampleTD
                         key={name}
@@ -62,26 +61,6 @@ function ExampleTable({ data }) {
             }}
         >
             <tbody>
-                {/* <tr>
-                    <ExampleTD
-                        key="magic"
-                        img={useBaseUrl("/img/mtg_preview.png")}
-                        url="https://texodus.github.io/mtg-perspective/?seasons-in-the-abyss-67"
-                        item="magic"
-                    ></ExampleTD>
-                    <ExampleTD
-                        key="nft"
-                        img="https://raw.githubusercontent.com/sc1f/pudgy-penguin-perspective/pages/meta.png"
-                        url="https://sc1f.github.io/pudgy-penguin-perspective/"
-                        item="nft"
-                    ></ExampleTD>
-                    <ExampleTD
-                        key="nypd ccrb"
-                        img="https://texodus.github.io/nypd-ccrb/preview.png"
-                        url="https://texodus.github.io/nypd-ccrb/"
-                        item="nypd ccrb"
-                    ></ExampleTD>
-                </tr> */}
                 {partition(data, 3).map((x, i) => {
                     return <ExampleTR key={i} group={x}></ExampleTR>;
                 })}
@@ -106,6 +85,7 @@ export default function Home() {
         >
             <br />
             <ExampleTable data={gists} />
+            <br />
             <br />
         </Layout>
     );

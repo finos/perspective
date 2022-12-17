@@ -1,7 +1,5 @@
 {
-    "sizes": [
-        1
-    ],
+    "sizes": [1],
     "detail": {
         "main": {
             "type": "split-area",
@@ -9,64 +7,68 @@
             "children": [
                 {
                     "type": "tab-area",
-                    "widgets": [
-                        "PERSPECTIVE_GENERATED_ID_0"
-                    ],
+                    "widgets": ["PERSPECTIVE_GENERATED_ID_0"],
                     "currentIndex": 0
                 },
                 {
                     "type": "tab-area",
-                    "widgets": [
-                        "PERSPECTIVE_GENERATED_ID_1"
-                    ],
+                    "widgets": ["PERSPECTIVE_GENERATED_ID_1"],
                     "currentIndex": 0
                 }
             ],
-            "sizes": [
-                0.6,
-                0.4
-            ]
+            "sizes": [0.8, 0.2]
         }
     },
     "mode": "globalFilters",
     "viewers": {
         "PERSPECTIVE_GENERATED_ID_0": {
-            "plugin": "X/Y Scatter",
-            "columns": [
-                "lon",
-                "lat",
-                "num_bikes_available"
-            ],
-            "sort": [
-                [
-                    "num_bikes_available",
-                    "asc"
-                ]
-            ],
+            "plugin": "Map Scatter",
             "plugin_config": {
-                "realValues": [
-                    "lon",
-                    "lat",
-                    "num_bikes_available"
-                ]
+                "center": [-8235869.593541528, 4976703.012901576],
+                "zoom": 10
             },
-            "master": false,
             "table": "citibike",
-            "linked": false,
-            "name": "Map"
+            "settings": false,
+            "group_by": [],
+            "split_by": [],
+            "columns": ["lon", "lat", "num_bikes_available", null, null],
+            "filter": [["lon", "!=", 0.0]],
+            "sort": [["num_bikes_available", "asc"]],
+            "expressions": [],
+            "aggregates": {}
         },
         "PERSPECTIVE_GENERATED_ID_1": {
-            "plugin": "datagrid",
-            "columns": [
-                "capacity",
-                "num_bikes_available",
-                "name"
-            ],
-            "sort": [["last_reported", "desc"]],
-            "master": false,
+            "plugin": "Datagrid",
             "table": "citibike",
-            "linked": false,
-            "name": "Recently updated"
+            "plugin_config": {
+                "columns": {
+                    "\"num_bikes_available\" / \"capacity\"": {
+                        "fg_gradient": 1,
+                        "number_fg_mode": "bar"
+                    },
+                    "Available (%)": {
+                        "fg_gradient": 1,
+                        "number_fg_mode": "bar"
+                    },
+                    "num_bikes_available": {
+                        "fg_gradient": 97,
+                        "number_fg_mode": "bar"
+                    }
+                },
+                "editable": false,
+                "scroll_lock": true
+            },
+            "settings": false,
+            "theme": "Material Light",
+            "group_by": [],
+            "split_by": [],
+            "columns": ["Available (%)", "name"],
+            "filter": [],
+            "sort": [["last_reported", "desc"]],
+            "expressions": [
+                "// Available (%)\n\"num_bikes_available\" / \"capacity\""
+            ],
+            "aggregates": {}
         }
     }
 }

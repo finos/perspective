@@ -36,7 +36,7 @@
                 const el = document.getElementsByTagName("perspective-viewer")[0];
                 const table = WORKER.table(arrow);
                 el.load(table);
-                el.toggleConfig();
+                el.restore({settings: true, plugin_config: {editable: true}})
             }
 
             load();

@@ -29,8 +29,8 @@ dependencies to be installed:
 
 -   [CMake](https://cmake.org/) (version 3.15.4 or higher)
 -   [Boost](https://www.boost.org/) (version 1.67 or higher, must be built - not
-    header-only)
--   [Flatbuffers](https://google.github.io/flatbuffers/flatbuffers_guide_building.html)
+    header-only). This can be installed from tarball with the included script
+    `node scripts/install_tools.js`.
 -   [wasm-pack](https://github.com/rustwasm/wasm-pack)
 
 **_This list may be non-exhaustive depending on your OS/environment; please open
@@ -85,11 +85,11 @@ Emscripten SDK, then activate and export the latest `emsdk` environment via
 source emsdk/emsdk_env.sh
 ```
 
-We currently use Emscripten version `2.0.6` — deviating from this specific
-version of Emscripten can introduce various errors that are extremely difficult
-to debug.
+Deviating from this specific version of Emscripten specified in the project's
+`package.json` can introduce various errors that are extremely difficult to
+debug.
 
-To install this specific version of Emscripten:
+To install a specific version of Emscripten (e.g. `2.0.6`):
 
 ```bash
 ./emsdk install 2.0.6
@@ -148,8 +148,6 @@ Install system dependencies through Homebrew:
 
 ```bash
 brew install cmake
-brew install boost
-brew install flatbuffers
 ```
 
 On M1 (Apple Silicon) systems, make sure your brew-installed dependencies are in
@@ -174,21 +172,13 @@ prerequisite tools.
 
 On Ubuntu, CMake will mistakenly resolve the system headers in `/usr/include`
 rather than the emscripten supplied versions. You can resolve this by moving
-`boost` and `flatbuffers` dependencies to somewhere other than `/usr/include` -
-into Perspective's own `src` dir (as per
+`boost` dependencies to somewhere other than `/usr/include` - into Perspective's
+own `src` dir (as per
 [here](http://vclf.blogspot.com/2014/08/emscripten-linking-to-boost-libraries.html)).
 
 ```bash
 apt-get install libboost-all-dev
 cp -r /usr/include/boost ./packages/perspective/src/include/
-
-cd ./packages/perspective/src/include/
-git clone https://github.com/google/flatbuffers.git
-cd flatbuffers
-cmake -G "Unix Makefiles"
-make
-ln -s /usr/local/flatbuffers/flatc /usr/local/bin/flatc
-chmod +x /usr/local/flatbuffers/flatc
 ```
 
 ---
@@ -220,8 +210,8 @@ The Puppeteer/UI tests are a form of
 which use screenshots to compare current and previous behavior of
 `<perspective-viewer>` and its plugins. The results of each comparison are
 stored in each package's `test/results/results.json` file, and the screenshots
-themselves are stored in the package's `tests/screenshots/` directory, though only the
-former should be checked into GIT. When a test in these suites fails, a
+themselves are stored in the package's `tests/screenshots/` directory, though
+only the former should be checked into GIT. When a test in these suites fails, a
 `file.failed.png` and `file.diff.png` are also generated, showing the divergent
 screenshot and a contrast diff respectively, so you can verify that the changed
 behavior either does or does not reflect your patch. If you're confident that
@@ -260,7 +250,6 @@ The most common culprits are:
 
 -   CMake version too old
 -   Boost headers are missing or too old
--   Flatbuffers not installed prior to installing Perspective
 
 #### Timezones in Python Tests
 

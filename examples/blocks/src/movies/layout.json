@@ -1,25 +1,14 @@
 {
-    "sizes": [0.350418410041841, 0.649581589958159],
+    "sizes": [0.34555410083131466, 0.6544458991686853],
     "detail": {
         "main": {
-            "type": "split-area",
-            "orientation": "vertical",
-            "children": [
-                {
-                    "type": "tab-area",
-                    "widgets": [
-                        "PERSPECTIVE_GENERATED_ID_0",
-                        "PERSPECTIVE_GENERATED_ID_3"
-                    ],
-                    "currentIndex": 0
-                },
-                {
-                    "type": "tab-area",
-                    "widgets": ["PERSPECTIVE_GENERATED_ID_1"],
-                    "currentIndex": 0
-                }
+            "type": "tab-area",
+            "widgets": [
+                "PERSPECTIVE_GENERATED_ID_0",
+                "PERSPECTIVE_GENERATED_ID_1",
+                "PERSPECTIVE_GENERATED_ID_3"
             ],
-            "sizes": [0.5, 0.5]
+            "currentIndex": 0
         }
     },
     "mode": "globalFilters",
@@ -29,116 +18,73 @@
     },
     "viewers": {
         "PERSPECTIVE_GENERATED_ID_2": {
-            "selectable": true,
             "plugin": "Datagrid",
-            "group_by": ["Distributor"],
-            "aggregates": {
-                "IMDB Rating": "avg"
-            },
-            "sort": [["US Gross", "desc"]],
-            "columns": ["US Gross"],
-            "expressions": null,
-            "split_by": null,
-            "filter": null,
             "plugin_config": {
                 "columns": {
                     "IMDB Rating": {
-                        "number_color_mode": "gradient",
-                        "pos_color": "#b87ff0",
+                        "gradient": 8.1,
                         "neg_color": "#FF9485",
-                        "gradient": 8.1
+                        "number_color_mode": "gradient",
+                        "pos_color": "#b87ff0"
                     },
                     "US Gross": {
-                        "number_color_mode": "gradient",
-                        "pos_color": "#126e3a",
-                        "neg_color": "#FF9485",
-                        "gradient": 19729862602
+                        "fg_gradient": 19729862602,
+                        "number_fg_mode": "bar"
                     }
-                }
+                },
+                "editable": false,
+                "scroll_lock": true
             },
+            "settings": false,
+            "theme": "Material Dark",
+            "group_by": ["Distributor"],
+            "split_by": [],
+            "columns": ["US Gross"],
+            "filter": [],
+            "sort": [["US Gross", "desc"]],
+            "expressions": [],
+            "aggregates": {},
             "master": true,
             "name": null,
             "table": "movies",
-            "linked": false
+            "linked": false,
+            "selectable": "true"
         },
         "PERSPECTIVE_GENERATED_ID_0": {
-            "plugin": "X/Y Scatter",
-            "group_by": ["Title"],
-            "aggregates": {
-                "IMDB Rating": "avg",
-                "Rotten Tomatoes Rating": "avg",
-                "Director": "last",
-                "Release Date": "last",
-                "MPAA Rating": "last"
-            },
-            "sort": [["US Gross", "asc"]],
-            "columns": [
-                "Rotten Tomatoes Rating",
-                "IMDB Rating",
-                "US Gross",
-                null,
-                "Director",
-                "Release Date",
-                "MPAA Rating"
+            "plugin": "Heatmap",
+            "plugin_config": {},
+            "settings": false,
+            "theme": "Material Dark",
+            "group_by": ["bucket(\"Rotten Tomatoes Rating\", 2.5)"],
+            "split_by": ["bucket(\"IMDB Rating\", 0.25)"],
+            "columns": ["US Gross"],
+            "filter": [["bucket(\"IMDB Rating\", 0.25)", "is not null", null]],
+            "sort": [["bucket(\"IMDB Rating\", 0.25)", "col desc"]],
+            "expressions": [
+                "bucket(\"IMDB Rating\", 0.25)",
+                "bucket(\"Rotten Tomatoes Rating\", 2.5)"
             ],
-            "selectable": null,
-
-            "expressions": null,
-            "split_by": null,
-            "filter": null,
-            "plugin_config": {
-                "realValues": [
-                    "Rotten Tomatoes Rating",
-                    "IMDB Rating",
-                    "US Gross",
-                    null,
-                    "Director",
-                    "Release Date",
-                    "MPAA Rating"
-                ],
-                "zoom": {
-                    "k": 1,
-                    "x": 0,
-                    "y": 0
-                }
+            "aggregates": {
+                "bucket(\"Rotten Tomatoes Rating\", 2.5)": "avg"
             },
             "master": false,
             "name": null,
-            "table": "movies",
-            "linked": false
-        },
-        "PERSPECTIVE_GENERATED_ID_3": {
-            "plugin": "Y Area",
-            "expressions": ["bucket(\"Release Date\", 'Y')"],
-            "group_by": ["bucket(\"Release Date\", 'Y')"],
-            "aggregates": {
-                "Rotten Tomatoes Rating": "avg"
-            },
-            "columns": ["US Gross"],
-            "split_by": ["Major Genre"],
-            "selectable": null,
-
-            "filter": null,
-            "sort": null,
-            "plugin_config": {
-                "realValues": ["US Gross"],
-                "legend": {
-                    "left": "91px",
-                    "top": "25px"
-                }
-            },
-            "master": false,
-            "name": "US Gross by Genre",
             "table": "movies",
             "linked": false
         },
         "PERSPECTIVE_GENERATED_ID_1": {
             "plugin": "Y Line",
-            "expressions": ["bucket(\"Release Date\", 'Y')"],
-            "group_by": ["bucket(\"Release Date\", 'Y')"],
-            "aggregates": {
-                "Rotten Tomatoes Rating": "avg"
+            "plugin_config": {
+                "legend": {
+                    "left": "79px",
+                    "top": "174px"
+                },
+                "splitMainValues": ["Rotten Tomatoes Rating"]
             },
+            "settings": false,
+            "theme": "Material Dark",
+            "group_by": ["bucket(\"Release Date\", 'Y')"],
+            "split_by": [],
             "columns": [
                 "US Gross",
                 "Rotten Tomatoes Rating",
@@ -146,26 +92,36 @@
                 "Worldwide Gross",
                 "US DVD Sales"
             ],
-            "selectable": null,
-            "split_by": null,
-            "filter": null,
-            "sort": null,
-            "plugin_config": {
-                "realValues": [
-                    "US Gross",
-                    "Rotten Tomatoes Rating",
-                    "Production Budget",
-                    "Worldwide Gross",
-                    "US DVD Sales"
-                ],
-                "splitMainValues": ["Rotten Tomatoes Rating"],
-                "legend": {
-                    "left": "79px",
-                    "top": "174px"
-                }
+            "filter": [],
+            "sort": [],
+            "expressions": ["bucket(\"Release Date\", 'Y')"],
+            "aggregates": {
+                "Rotten Tomatoes Rating": "avg"
             },
             "master": false,
             "name": "Ratings vs Sales",
+            "table": "movies",
+            "linked": false
+        },
+        "PERSPECTIVE_GENERATED_ID_3": {
+            "plugin": "Y Area",
+            "plugin_config": {
+                "legend": {
+                    "left": "91px",
+                    "top": "25px"
+                }
+            },
+            "settings": false,
+            "theme": "Material Dark",
+            "group_by": ["bucket(\"Release Date\", 'Y')"],
+            "split_by": ["Major Genre"],
+            "columns": ["US Gross"],
+            "filter": [],
+            "sort": [],
+            "expressions": ["bucket(\"Release Date\", 'Y')"],
+            "aggregates": {},
+            "master": false,
+            "name": "US Gross by Genre",
             "table": "movies",
             "linked": false
         }

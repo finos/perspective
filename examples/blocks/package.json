@@ -4,9 +4,7 @@
     "version": "1.8.1",
     "description": "A collection of simple client-side Perspective examples for `http://bl.ocks.org`.",
     "scripts": {
-        "start": "mkdirp dist && node server.js",
-        "clean": "rimraf dist",
-        "dist": "node dist.js"
+        "start": "mkdirp dist && node server.js"
     },
     "main": "index.js",
     "keywords": [],
