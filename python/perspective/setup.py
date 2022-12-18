@@ -78,7 +78,7 @@ requires_dev = (
         "pip",
         "psutil>=5,<6",
         "pybind11>=2.4.0,<3",
-        "pyarrow>=0.16.0",
+        "pyarrow==8.0.0",
         "pytest>=4.3.0",
         "pytest-aiohttp>=1",
         "pytest-asyncio>=0.20",

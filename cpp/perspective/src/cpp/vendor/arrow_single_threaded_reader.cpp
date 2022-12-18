@@ -373,7 +373,7 @@ class BlockParsingOperator {
       RETURN_NOT_OK(parser->Parse(views, &parsed_size));
     }
     if (count_rows_) {
-      num_rows_seen_ += parser->num_rows();
+      num_rows_seen_ += parser->total_num_rows();
     }
     RETURN_NOT_OK(block.consume_bytes(parsed_size));
     return ParsedBlock{std::move(parser), block.block_index,
@@ -585,7 +585,7 @@ class ReaderMixin {
       RETURN_NOT_OK(parser->Parse(views, &parsed_size));
     }
     if (count_rows_) {
-      num_rows_seen_ += parser->num_rows();
+      num_rows_seen_ += parser->total_num_rows();
     }
     return ParseResult{std::move(parser), static_cast<int64_t>(parsed_size)};
   }
