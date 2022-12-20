@@ -15,8 +15,8 @@
         "write-heading-ids": "docusaurus write-heading-ids"
     },
     "dependencies": {
-        "@docusaurus/core": "2.0.0-beta.21",
-        "@docusaurus/preset-classic": "2.0.0-beta.21",
+        "@docusaurus/core": "2.2.0",
+        "@docusaurus/preset-classic": "2.2.0",
         "@finos/perspective": "^1.8.1",
         "@finos/perspective-viewer": "^1.8.1",
         "@finos/perspective-viewer-d3fc": "^1.8.1",
@@ -30,7 +30,7 @@
         "react-dom": "^17.0.2"
     },
     "devDependencies": {
-        "@docusaurus/module-type-aliases": "2.0.0-beta.21"
+        "@docusaurus/module-type-aliases": "2.2.0"
     },
     "browserslist": {
         "production": [

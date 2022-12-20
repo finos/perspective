@@ -92,17 +92,15 @@ title: ExprTK Function Reference
 
 `;
     for (const item of JSON.parse(data)) {
-        if (item.kind === 1) {
-            md += `#### \`${item.label}\`
+        md += `#### \`${item.label}\`
 
 ${item.documentation}
 
 \`\`\`
-${item.insertText}
+${item.insert_text}
 \`\`\`
 
 `;
-        }
     }
 
     fs.writeFileSync("./exprtk.md", md);
