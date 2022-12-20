@@ -7,11 +7,11 @@
  * from the linear function (clamped) defgined by the input points
  */
 export function interpolate_scale([x1, y1], [x2, y2]) {
-  const m = (y2 - y1) / (x2 - x1);
-  const b = y2 - m * x2;
-  return function (container) {
-      const node = container.node();
-      const shortest_axis = Math.min(node.clientWidth, node.clientHeight);
-      return Math.min(y2, Math.max(y1, m * shortest_axis + b));
-  };
+    const m = (y2 - y1) / (x2 - x1);
+    const b = y2 - m * x2;
+    return function (container) {
+        const node = container.node();
+        const shortest_axis = Math.min(node.clientWidth, node.clientHeight);
+        return Math.min(y2, Math.max(y1, m * shortest_axis + b));
+    };
 }

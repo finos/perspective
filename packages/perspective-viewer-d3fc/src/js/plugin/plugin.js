@@ -11,7 +11,7 @@ import "./polyfills/index";
 import charts from "../charts/charts";
 import { initializeStyles } from "../series/colorStyles";
 import style from "../../less/chart.less";
-import '../index/xy-scatter';
+import "../index/xy-scatter";
 
 import * as d3 from "d3";
 
