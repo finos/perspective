@@ -18,7 +18,7 @@ const BUILD = [
             "src/js/index/line.js",
             "src/js/index/ohlc.js",
             "src/js/index/sunburst.js",
-            "src/js/index/xy-scatter.js",
+            "src/js/index/xy-scatter.ts",
             "src/js/index/y-scatter.js",
         ],
         define: {

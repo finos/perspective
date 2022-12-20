@@ -538,6 +538,12 @@ export default function (Module) {
         }
     };
 
+    view.prototype.get_row_path = function (ridx) {
+        const vec = this._View.get_row_path(ridx);
+
+        return col_path_vector_to_string(vec);
+    };
+
     /**
      *
      */
@@ -616,7 +622,7 @@ export default function (Module) {
     /**
      *
      */
-    view.prototype.get_column = async function (col_name) {
+    view.prototype.get_column = async function (col_name, options) {
         // TODO: Is it possible to not have fetch a new schema every time?
         //       Can it be computed and cached, ala C.O.W.?
         //       Right now, this take < 1ms on my system.
@@ -634,7 +640,11 @@ export default function (Module) {
             case "integer":
             // fall-through
             case "float":
-                const num_data = await this.col_to_js_typed_array(col_name);
+                const num_data = await this.col_to_js_typed_array(
+                    col_name,
+                    options
+                );
+
                 data = {
                     type: col_type,
                     data: num_data[0]?.length === 0 ? [] : num_data[0],
@@ -642,7 +652,10 @@ export default function (Module) {
                 break;
             case "string":
                 // emscripten.cpp:454 for col_to_typed_array<std::string>
-                const str_arrays = await this.col_to_js_typed_array(col_name);
+                const str_arrays = await this.col_to_js_typed_array(
+                    col_name,
+                    options
+                );
 
                 if (str_arrays[0].length === 0) return []; // Might want to return an error or null instead.
                 // TODO: How should I handle nulls?

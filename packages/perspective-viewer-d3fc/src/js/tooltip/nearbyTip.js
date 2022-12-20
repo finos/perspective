@@ -26,16 +26,22 @@ export default () => {
     let yValueName = "mainValue";
     let altDataWithScale = null;
     let scale_factor = 1;
+    let onPointHandler = null;
 
     function nearbyTip(selection) {
         const chartPlotArea = `d3fc-${canvas ? "canvas" : "svg"}.plot-area`;
         if (xScale || yScale) {
             let tooltipData = null;
-            const pointer = fc.pointer().on("point", (event) => {
+            const pointer = fc.pointer().on("point", async (event) => {
                 const closest = event.length
                     ? getClosestDataPoint(event[0])
                     : null;
                 tooltipData = closest ? [closest.data] : [];
+
+                let updatedData = onPointHandler
+                    ? await onPointHandler(tooltipData)
+                    : tooltipData;
+                // console.log("updatedData", updatedData);
                 const useYScale = closest ? closest.scale : yScale;
 
                 renderTip(selection, tooltipData, useYScale);
@@ -197,6 +203,14 @@ export default () => {
             return altDataWithScale;
         }
         altDataWithScale = args[0];
+        return nearbyTip;
+    };
+
+    nearbyTip.onPoint = (func) => {
+        if (func) {
+            onPointHandler = func;
+        }
+
         return nearbyTip;
     };
 

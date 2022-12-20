@@ -69,20 +69,143 @@
 
         <script type="module">
             import { worker } from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
-
             const WORKER = worker();
-            const REQ = fetch(
-                "/node_modules/superstore-arrow/superstore.arrow"
-            );
+            // const REQ = fetch("./github-incidents.arrow");
+            const REQ = fetch('/node_modules/superstore-arrow/superstore.arrow');
+
+            // const REQ = fetch("./github-incidents.arrow");
 
             async function load() {
                 const resp = await REQ;
                 const arrow = await resp.arrayBuffer();
                 const el =
                     document.getElementsByTagName("perspective-viewer")[0];
-                const table = WORKER.table(arrow);
-                el.load(table);
-                el.toggleConfig();
+                const table = await WORKER.table(arrow);
+                // console.log('table: ', table);
+                // console.time('broch_test');
+                // let r = table.broch_test();
+                // console.timeEnd('broch_test');
+                // console.log('broch_test: ', r);
+
+                await el.load(table);
+                // await el.restore({
+                //     plugin: "X/Y Scatter",
+                //     plugin_config: {
+                //         zoom: {
+                //             k: 1.3305290410806867,
+                //             x: -129.90523079086665,
+                //             y: -218.23156375773453,
+                //         },
+                //     },
+                //     settings: true,
+                //     theme: "Material Light",
+                //     group_by: [],
+                //     split_by: [],
+                //     columns: ["Unique Id", "ShieldNo", null, null, null, null],
+                //     filter: [],
+                //     sort: [],
+                //     expressions: [],
+                //     aggregates: {},
+                // });
+                await el.restore({
+                    plugin: "X/Y Scatter",
+                    plugin_config: {},
+                    settings: true,
+                    theme: "Material Light",
+                    group_by: ["Sub-Category"],
+                    split_by: [],
+                    columns: ["Quantity", "Discount", "Profit", null, null],
+                    filter: [],
+                    sort: [],
+                    expressions: [],
+                    aggregates: {},
+                });
+
+                // const view = await table.view({
+                //     group_by: [],
+                //     split_by: [],
+                //     columns: ["Unique Id", "ShieldNo"],
+                //     filter: [],
+                //     sort: [],
+                //     expressions: [],
+                //     aggregates: {},
+                // });
+                const view = await table.view({
+                    group_by: [],
+                    split_by: [],
+                    columns: [
+                        "Sub-Category",
+                        "Discount",
+                        "Profit",
+                        "Order Date",
+                    ],
+                    filter: [],
+                    sort: [],
+                    aggregates: {},
+                });
+
+                // console.log("schema", await view.schema());
+
+                // console.time("json_time");
+                const json = await view.to_json();
+                // console.timeEnd("json_time");
+                console.log("json: ", json);
+
+                const row = await view.get_row(1);
+                console.log("row: ", row);
+
+                const rows = await view.get_rows(1, 10);
+                console.log("rows: ", rows);
+
+                // const c = await view.to_columns();
+                // console.log("c: ", c);
+                const c = await view.get_column('Sub-Category');
+                console.log("c: ", c);
+
+                // console.time("unique_id");
+                // const orderDateData = await view.data.column("Unique Id");
+                // console.timeEnd("unique_id");
+                // console.log("Unique Id: ", orderDateData);
+
+                // console.time("shield_no");
+                // const profitData = await view.data.column("ShieldNo");
+                // console.timeEnd("shield_no");
+                // console.log("ShieldNo: ", profitData);
+
+                // console.time("sub-category");
+                // const subCategoryData = await view.data.column("Sub-Category");
+                // console.timeEnd("sub-category");
+                // console.log("subCategoryData: ", subCategoryData);
+
+                // console.log("columnData", columnData);
+                // const [dictArry, offsets] = columnData;
+                // const dec = new TextDecoder("utf-8");
+                // const dictStr = dec.decode(dictArry);
+                // console.log('dictStr', dictStr);
+
+                // let strs = [];
+                // split the dictStr into an array of strings by the offsets
+                // for (let i = 0; i < offsets.length - 1; i++) {
+                //     const start = offsets[i];
+                //     const end = offsets[i + 1];
+                //     const str = dictStr.slice(start, end);
+                //     strs.push(str);
+                // }
+
+                // const a = await view.data.column('Quantity');
+                // console.log("strs", strs);
+
+                // const a = await view.col_to_js_typed_array('Quantity');
+
+                // const schema = await view.schema();
+
+                // console.log('schema', schema);
+
+                // console.log('a', a);
+
+                view.delete();
+
+                // el.toggleConfig();
             }
 
             load();

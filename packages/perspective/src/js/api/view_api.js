@@ -90,6 +90,8 @@ view.prototype.num_rows = async_queue("num_rows");
 
 view.prototype.set_depth = async_queue("set_depth");
 
+view.prototype.get_row_path = async_queue("get_row_path");
+
 view.prototype.get_row = async_queue("get_row");
 
 view.prototype.get_rows = async_queue("get_rows");

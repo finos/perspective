@@ -1893,6 +1893,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_aggregates", &View<t_ctxunit>::get_aggregates)
         .function("get_filter", &View<t_ctxunit>::get_filter)
         .function("get_sort", &View<t_ctxunit>::get_sort)
+        .function("get_row_path", &View<t_ctxunit>::get_row_path)
         .function("get_step_delta", &View<t_ctxunit>::get_step_delta)
         .function("get_column_dtype", &View<t_ctxunit>::get_column_dtype)
         .function("is_column_only", &View<t_ctxunit>::is_column_only);
@@ -1919,6 +1920,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_aggregates", &View<t_ctx0>::get_aggregates)
         .function("get_filter", &View<t_ctx0>::get_filter)
         .function("get_sort", &View<t_ctx0>::get_sort)
+        .function("get_row_path", &View<t_ctx0>::get_row_path)
         .function("get_step_delta", &View<t_ctx0>::get_step_delta)
         .function("get_column_dtype", &View<t_ctx0>::get_column_dtype)
         .function("is_column_only", &View<t_ctx0>::is_column_only);
@@ -1948,6 +1950,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_aggregates", &View<t_ctx1>::get_aggregates)
         .function("get_filter", &View<t_ctx1>::get_filter)
         .function("get_sort", &View<t_ctx1>::get_sort)
+        .function("get_row_path", &View<t_ctx1>::get_row_path)
         .function("get_step_delta", &View<t_ctx1>::get_step_delta)
         .function("get_column_dtype", &View<t_ctx1>::get_column_dtype)
         .function("is_column_only", &View<t_ctx1>::is_column_only);

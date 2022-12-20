@@ -9,8 +9,9 @@
 
 import "./polyfills/index";
 import charts from "../charts/charts";
-import { initialiseStyles } from "../series/colorStyles";
+import { initializeStyles } from "../series/colorStyles";
 import style from "../../less/chart.less";
+import '../index/xy-scatter';
 
 import * as d3 from "d3";
 
@@ -64,6 +65,7 @@ export function register(...plugins) {
                 .toLowerCase()
                 .replace(/[ \t\r\n\/]*/g, "");
             const plugin_name = `perspective-viewer-d3fc-${name}`;
+
             customElements.define(
                 plugin_name,
                 class extends HTMLElement {
@@ -384,7 +386,7 @@ export function register(...plugins) {
                             this._settings.splitMainValues = [];
                         }
 
-                        initialiseStyles(this._container, this._settings);
+                        initializeStyles(this._container, this._settings);
 
                         if (clear) {
                             this._container.innerHTML = "";

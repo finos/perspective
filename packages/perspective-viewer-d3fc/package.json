@@ -60,7 +60,8 @@
         "d3": "^7.1.1",
         "d3-svg-legend": "^2.25.6",
         "d3fc": "15.2.4",
-        "gradient-parser": "1.0.2"
+        "gradient-parser": "1.0.2",
+        "lodash": "4.17.15"
     },
     "devDependencies": {
         "@finos/perspective-test": "^1.8.1"

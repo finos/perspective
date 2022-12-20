@@ -10,7 +10,7 @@
 import * as d3 from "d3";
 import * as gparser from "gradient-parser";
 
-export const initialiseStyles = (container, settings) => {
+export const initializeStyles = (container, settings) => {
     if (!settings.colorStyles) {
         const styles = {
             scheme: [],
