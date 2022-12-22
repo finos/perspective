@@ -501,7 +501,7 @@ class XYScatterChart extends HTMLElement {
         this.#settings = { ...new_settings, ...settings };
 
         if (view) {
-          this._draw(view);
+            this._draw(view);
         }
     }
 
