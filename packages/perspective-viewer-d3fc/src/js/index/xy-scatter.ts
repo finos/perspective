@@ -272,53 +272,23 @@ class XYScatterChart extends HTMLElement {
         }
 
         const viewer = this.parentElement; // What is the type of parentElement?
-        console.log("viewer", viewer);
-        // const realValues =
-        //     JSON.parse(viewer.getAttribute("columns"));
         const realValues = this.config.columns;
-        const leaves_only = true;
-
-        console.time("old busted (json)");
-        const json = await view.to_json({
-            ...(end_col ? { end_col } : {}),
-            ...(end_row ? { end_row } : {}),
-            leaves_only,
-        });
-        console.timeEnd("old busted (json)");
-
-        console.log("json", json);
 
         const getColOptions = {
             ...(end_row ? { end_row } : {}),
             id: true,
-            leaves_only,
+            leaves_only: true,
         };
 
-        console.time("new hotness (cols)");
-        const rows = await view.get_columns(realValues, getColOptions);
-
-        console.timeEnd("new hotness (cols)");
-
-        console.log("rows", rows);
-
-        let [
-            table_schema,
-            expression_schema,
-            view_schema,
-            // json,
-            config,
-        ] = await Promise.all([
-            // @ts-ignore
-            viewer.getTable().then((table) => table.schema(false)), // TODO: type parentElement.
-            view.expression_schema(false),
-            view.schema(false),
-            // view.to_json({
-            //     ...(end_col ? { end_col } : {}),
-            //     ...(end_row ? { end_row } : {}),
-            //     leaves_only,
-            // }),
-            view.get_config(),
-        ]);
+        let [table_schema, expression_schema, view_schema, rows, config] =
+            await Promise.all([
+                // @ts-ignore
+                viewer.getTable().then((table) => table.schema(false)), // TODO: type parentElement.
+                view.expression_schema(false),
+                view.schema(false),
+                view.get_columns(realValues, getColOptions),
+                view.get_config(),
+            ]);
 
         /**
          * Retrieve a tree axis column from the table and
@@ -338,9 +308,7 @@ class XYScatterChart extends HTMLElement {
         const filtered =
             group_by.length > 0
                 ? rows.reduce(
-                      // ? json.reduce(
                       (acc, col) => {
-                          // console.log("col", col);
                           if (
                               col.__ROW_PATH__ &&
                               col.__ROW_PATH__.length == group_by.length
@@ -359,7 +327,6 @@ class XYScatterChart extends HTMLElement {
                       { rows: [], aggs: [], agg_paths: [] }
                   )
                 : { rows };
-        // :  { rows: json };
         const dataMap = (col, i) =>
             !group_by.length ? { ...col, __ROW_PATH__: [i] } : col;
         const mapped = filtered.rows.map(dataMap);
@@ -399,7 +366,6 @@ class XYScatterChart extends HTMLElement {
             },
         };
 
-        console.log("update settings", settings);
         this.#settings = new Proxy({ ...this.#settings, ...settings }, handler);
 
         // If only a right-axis Y axis remains, reset the alt
@@ -506,10 +472,7 @@ class XYScatterChart extends HTMLElement {
     }
 
     drawXYScatterChart(view, container, settings) {
-        // console.log(container);
         const data = [seriesToPoints(settings, filterDataByGroup(settings))];
-        // const data = pointData(settings, filterDataByGroup(settings));
-
         const symbols = symbolTypeFromGroups(settings);
         const useGroupColors =
             settings.realValues.length <= 2 || settings.realValues[2] === null;
@@ -596,16 +559,6 @@ class XYScatterChart extends HTMLElement {
             .yScale(yAxis.scale)
             .color(useGroupColors && color)
             .size(size)
-            // .onPoint(async (stuff) => {
-            //     console.log('stuff', stuff);
-            //     // if (stuff[0]) {
-            //     //     const p = await view.get_row_path(stuff[0].row.__ROW_ID__);
-            //     //     stuff[0].row.__ROW_PATH__ = p;
-            //     //     stuff[0].crossValue = p[0];
-            //     // }
-
-            //     return stuff;
-            // })
             .data(data);
 
         // render

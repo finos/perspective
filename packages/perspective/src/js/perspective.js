@@ -540,10 +540,39 @@ export default function (Module) {
         }
     };
 
+    /**
+     *
+     */
     view.prototype.get_row_path = function (ridx) {
         const vec = this._View.get_row_path(ridx);
 
         return col_path_vector_to_string(vec);
+    };
+
+    /**
+     *
+     */
+    view.prototype.get_row_path_from_slice = function (slice, ridx, options) {
+        const group_by_length = this.config.group_by.length;
+
+        let path = [];
+
+        const row_path = slice.get_row_path(ridx);
+
+        if (options.leaves_only && row_path.size() < group_by_length) {
+            return path;
+        }
+
+        for (let i = 0; i < row_path.size(); i++) {
+            const s = row_path.get(i);
+            const value = __MODULE__.scalar_to_val(s, false, false);
+            path.push(value);
+            s.delete();
+        }
+
+        row_path.delete();
+
+        return path;
     };
 
     /**
@@ -556,13 +585,17 @@ export default function (Module) {
         col_end,
         col_names
     ) {
-        const row = {};
+        let row = {};
 
         for (let cidx = col_start; cidx < col_end; cidx++) {
             const cell = this.get_from_data_slice(slice, row_index, cidx);
 
             if (col_names[cidx]) {
-                row[col_names[cidx]] = cell;
+                if (col_names[cidx] === "__ROW_PATH__") {
+                    row[col_names[cidx]] = [cell];
+                } else {
+                    row[col_names[cidx]] = cell;
+                }
             }
         }
 
@@ -573,29 +606,25 @@ export default function (Module) {
      *
      */
     view.prototype.get_row = function (row_index) {
-        return this.get_rows(row_index, row_index + 1)[0];
+        return this.get_rows({
+            start_row: row_index,
+            end_row: row_index + 1,
+        })[0];
     };
 
     /**
      *
      */
-    view.prototype.get_rows = function (
-        row_start,
-        row_end,
-        col_start = null,
-        col_end = null
-    ) {
-        if (!col_start || !col_end) {
-            const { start_col, end_col } = _parse_format_options.bind(this)({});
-            col_start = start_col;
-            col_end = end_col;
-        }
+    view.prototype.get_rows = function (options = {}) {
+        const num_sides = this.sides();
+        const { start_row, end_row, start_col, end_col } =
+            _parse_format_options.bind(this)(options);
 
         const slice = this.get_data_slice(
-            row_start,
-            row_end,
-            col_start,
-            col_end
+            start_row,
+            end_row,
+            start_col,
+            end_col
         );
 
         const ns = slice.get_column_names();
@@ -605,15 +634,32 @@ export default function (Module) {
 
         let rows = [];
 
-        for (let ridx = row_start; ridx < row_end; ridx++) {
+        for (let ridx = start_row; ridx < end_row; ridx++) {
             const row = this.get_row_with_slice(
                 slice,
                 ridx,
-                col_start,
-                col_end,
+                start_col,
+                end_col,
                 col_names
             );
-            rows.push(row);
+
+            if (options.id) {
+                if (num_sides === 0) {
+                    row["__ID__"] = get_slice_ids(slice, ridx);
+                } else {
+                    row["__ID__"] = row.__ROW_PATH__;
+                }
+            }
+
+            if (
+                !(
+                    row.__ROW_PATH__ &&
+                    options.leaves_only &&
+                    row.__ROW_PATH__.length < this.config.group_by.length
+                )
+            ) {
+                rows.push(row);
+            }
         }
 
         slice.delete();
@@ -621,14 +667,26 @@ export default function (Module) {
         return rows;
     };
 
+    function get_slice_ids(slice, ridx) {
+        const keys = slice.get_pkeys(ridx, 0);
+        const vals = [];
+        for (let i = 0; i < keys.size(); i++) {
+            const s = keys.get(i);
+            const value = __MODULE__.scalar_to_val(s, false, false);
+            vals.push(value);
+
+            s.delete();
+        }
+        keys.delete();
+
+        return vals;
+    }
+
     view.prototype.get_columns = async function (col_names, options = {}) {
         options = _parse_format_options.bind(this)(options);
         const { start_row, end_row, start_col, end_col } = options;
         const get_ids = !!options.id;
-        const leaves_only = !!options.leaves_only;
         const num_sides = this.sides();
-        const has_row_path = num_sides !== 0 && !this.column_only;
-        const group_by_length = this.config.group_by.length;
 
         const slice = this.get_data_slice(
             start_row,
@@ -654,42 +712,6 @@ export default function (Module) {
         const colsData = cols.map((x) => x.values || x.indices);
         const idxArr = range(start_row, end_row);
 
-        function get_slice_ids(slice, ridx) {
-            const keys = slice.get_pkeys(ridx, 0);
-            const vals = [];
-            for (let i = 0; i < keys.size(); i++) {
-                const s = keys.get(i);
-                const value = __MODULE__.scalar_to_val(s, false, false);
-                vals.push(value);
-
-                s.delete();
-            }
-            keys.delete();
-
-            return vals;
-        }
-
-        function get_row_path(slice, ridx) {
-            let path = [];
-            const row_path = slice.get_row_path(ridx);
-            if (
-                has_row_path &&
-                leaves_only &&
-                row_path.size() < group_by_length
-            ) {
-                return path;
-            }
-
-            for (let i = 0; i < row_path.size(); i++) {
-                const s = row_path.get(i);
-                const value = __MODULE__.scalar_to_val(s, false, false);
-                path.push(value);
-                s.delete();
-            }
-            row_path.delete();
-            return path;
-        }
-
         let rows = zipWith(...[idxArr, ...colsData], (idx, ...x) => {
             let obj = { __IDX__: idx };
 
@@ -699,11 +721,15 @@ export default function (Module) {
 
             if (num_sides !== 0) {
                 if (!this.column_only) {
-                    const rp = get_row_path(slice, idx);
-                    obj["__ROW_PATH__"] = rp;
+                    const row_path = this.get_row_path_from_slice(
+                        slice,
+                        idx,
+                        options
+                    );
+                    obj["__ROW_PATH__"] = row_path;
 
                     if (get_ids) {
-                        obj["__ID__"] = rp;
+                        obj["__ID__"] = row_path;
                     }
                 }
             }
@@ -716,8 +742,22 @@ export default function (Module) {
                 }
             }
 
+            delete obj.__IDX__;
+
             return obj;
+        }).filter((row) => {
+            if (
+                row.__ROW_PATH__ &&
+                options.leaves_only &&
+                row.__ROW_PATH__.length < this.config.group_by.length
+            ) {
+                return false;
+            }
+
+            return true;
         });
+
+        slice.delete();
 
         return rows;
     };
