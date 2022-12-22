@@ -12,6 +12,8 @@ import { DataAccessor } from "./data_accessor";
 import { extract_vector, extract_map, fill_vector } from "./emscripten.js";
 import { bindall, get_column_type } from "./utils.js";
 import { Server } from "./api/server.js";
+import zipWith from "lodash/zipWith";
+import range from "lodash/range";
 
 import formatters from "./view_formatters";
 
@@ -619,6 +621,107 @@ export default function (Module) {
         return rows;
     };
 
+    view.prototype.get_columns = async function (col_names, options = {}) {
+        options = _parse_format_options.bind(this)(options);
+        const { start_row, end_row, start_col, end_col } = options;
+        const get_ids = !!options.id;
+        const leaves_only = !!options.leaves_only;
+        const num_sides = this.sides();
+        const has_row_path = num_sides !== 0 && !this.column_only;
+        const group_by_length = this.config.group_by.length;
+
+        const slice = this.get_data_slice(
+            start_row,
+            end_row,
+            start_col,
+            end_col
+        );
+
+        const columnFetchers = col_names
+            .filter((x) => x !== null)
+            .map(async (colName) => {
+                const col = await this.get_column(colName, options);
+                return {
+                    name: colName,
+                    type: col.type,
+                    values: col.data || col.indices,
+                    dict: col.dict || null,
+                };
+            });
+
+        const cols = await Promise.all([...columnFetchers]);
+
+        const colsData = cols.map((x) => x.values || x.indices);
+        const idxArr = range(start_row, end_row);
+
+        function get_slice_ids(slice, ridx) {
+            const keys = slice.get_pkeys(ridx, 0);
+            const vals = [];
+            for (let i = 0; i < keys.size(); i++) {
+                const s = keys.get(i);
+                const value = __MODULE__.scalar_to_val(s, false, false);
+                vals.push(value);
+
+                s.delete();
+            }
+            keys.delete();
+
+            return vals;
+        }
+
+        function get_row_path(slice, ridx) {
+            let path = [];
+            const row_path = slice.get_row_path(ridx);
+            if (
+                has_row_path &&
+                leaves_only &&
+                row_path.size() < group_by_length
+            ) {
+                return path;
+            }
+
+            for (let i = 0; i < row_path.size(); i++) {
+                const s = row_path.get(i);
+                const value = __MODULE__.scalar_to_val(s, false, false);
+                path.push(value);
+                s.delete();
+            }
+            row_path.delete();
+            return path;
+        }
+
+        let rows = zipWith(...[idxArr, ...colsData], (idx, ...x) => {
+            let obj = { __IDX__: idx };
+
+            if (get_ids && num_sides === 0) {
+                obj["__ID__"] = get_slice_ids(slice, idx);
+            }
+
+            if (num_sides !== 0) {
+                if (!this.column_only) {
+                    const rp = get_row_path(slice, idx);
+                    obj["__ROW_PATH__"] = rp;
+
+                    if (get_ids) {
+                        obj["__ID__"] = rp;
+                    }
+                }
+            }
+
+            for (let i = 0; i < cols.length; i++) {
+                if (cols[i].dict) {
+                    obj[cols[i].name] = cols[i].dict[x[i]];
+                } else {
+                    obj[cols[i].name] = x[i];
+                }
+            }
+
+            return obj;
+        });
+
+        return rows;
+    };
+
     /**
      *
      */
@@ -725,6 +828,7 @@ export default function (Module) {
             start_col,
             end_col
         );
+
         const ns = slice.get_column_names();
         const col_names = extract_vector_scalar(ns).map((x) =>
             x.join(defaults.COLUMN_SEPARATOR_STRING)

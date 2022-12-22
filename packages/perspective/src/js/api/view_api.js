@@ -98,6 +98,8 @@ view.prototype.get_rows = async_queue("get_rows");
 
 view.prototype.get_column = async_queue("get_column");
 
+view.prototype.get_columns = async_queue("get_columns");
+
 view.prototype.get_row_expanded = async_queue("get_row_expanded");
 
 view.prototype.expand = async_queue("expand");

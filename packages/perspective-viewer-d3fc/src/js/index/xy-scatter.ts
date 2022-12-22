@@ -21,7 +21,7 @@ import {
     pointSeriesCanvas,
     symbolTypeFromGroups,
 } from "../series/pointSeriesCanvas";
-import { pointData } from "../data/pointData";
+import { pointData, seriesToPoints } from "../data/pointData";
 import { seriesColorsFromGroups } from "../series/seriesColors";
 import { seriesLinearRange, seriesColorRange } from "../series/seriesRange";
 import { symbolLegend } from "../legend/legend";
@@ -32,7 +32,6 @@ import { hardLimitZeroPadding } from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
 import nearbyTip from "../tooltip/nearbyTip";
 import { interpolate_scale } from "../utils/chartUtils.js";
-import zipWith from "lodash/zipWith";
 
 function getD3FCStyles() {
     const head = document.querySelector("head");
@@ -74,27 +73,6 @@ type PluginSettings = {
     size: any;
 };
 
-export function seriesToPoints(settings, data) {
-    // const labelfn = labelFunction(settings);
-
-    const mappedSeries = data.map((col, i) => ({
-        // crossValue: labelfn(col, i),
-        crossValue: "",
-        mainValues: settings.mainValues.map((v) => col[v.name]),
-        x: col[settings.mainValues[0].name],
-        y: col[settings.mainValues[1].name],
-        colorValue: settings.realValues[2]
-            ? col[settings.realValues[2]]
-            : undefined,
-        size: settings.realValues[3] ? col[settings.realValues[3]] : undefined,
-        key: data.key,
-        row: col,
-    }));
-
-    mappedSeries.key = data.key;
-    return mappedSeries;
-}
-
 class XYScatterChart extends HTMLElement {
     static plugin_name = "perspective-viewer-d3fc-tester";
 
@@ -104,7 +82,7 @@ class XYScatterChart extends HTMLElement {
 
     #renderWarning = true;
 
-    #settings: PluginSettings | null;
+    #settings: PluginSettings | null = null;
 
     #container: HTMLElement | null = null;
 
@@ -113,22 +91,6 @@ class XYScatterChart extends HTMLElement {
     #staged_view: any[] | null = null;
 
     config: any = null;
-
-    constructor() {
-        super();
-
-        this.#settings = null;
-        // this.#settings = {
-        //     realValues: [],
-        //     crossValues: [],
-        //     mainValues: [],
-        //     splitValues: [],
-        //     filter: [],
-        //     data: [],
-        //     agg_paths: [],
-        //     size: null
-        // };
-    }
 
     get name() {
         return "Tester";
@@ -310,13 +272,11 @@ class XYScatterChart extends HTMLElement {
         }
 
         const viewer = this.parentElement; // What is the type of parentElement?
+        console.log("viewer", viewer);
         // const realValues =
         //     JSON.parse(viewer.getAttribute("columns"));
         const realValues = this.config.columns;
         const leaves_only = true;
-
-        // console.log("end_col", end_col);
-        // console.log("end_row", end_row);
 
         console.time("old busted (json)");
         const json = await view.to_json({
@@ -326,44 +286,19 @@ class XYScatterChart extends HTMLElement {
         });
         console.timeEnd("old busted (json)");
 
+        console.log("json", json);
+
         const getColOptions = {
             ...(end_row ? { end_row } : {}),
+            id: true,
+            leaves_only,
         };
 
-        const columnFetchers = realValues
-            .filter((x) => x !== null)
-            .map(async (colName) => {
-                const col = await view.get_column(colName, getColOptions);
-                return {
-                    name: colName,
-                    type: col.type,
-                    values: col.data || col.indices,
-                    dict: col.dict || null,
-                };
-            });
-
         console.time("new hotness (cols)");
+        const rows = await view.get_columns(realValues, getColOptions);
 
-        const cols = await Promise.all(columnFetchers);
-
-        const colData = cols.map((x) => x.values || x.indices);
-
-        let rows = zipWith(...colData, (...x) => {
-            let obj = { __ROW_PATH__: ["__"] };
-            for (let i = 0; i < cols.length; i++) {
-                if (cols[i].dict) {
-                    obj[cols[i].name] = cols[i].dict[x[i] as number];
-                } else {
-                    obj[cols[i].name] = x[i];
-                }
-            }
-            return obj;
-        }).map((r, i) => ({ ...r, __ROW_ID__: i }));
-
-        rows.shift();
         console.timeEnd("new hotness (cols)");
 
-        console.log("json", json);
         console.log("rows", rows);
 
         let [
@@ -428,8 +363,6 @@ class XYScatterChart extends HTMLElement {
         const dataMap = (col, i) =>
             !group_by.length ? { ...col, __ROW_PATH__: [i] } : col;
         const mapped = filtered.rows.map(dataMap);
-
-        console.log("mapped data", mapped);
 
         let settings = {
             realValues,
@@ -522,7 +455,7 @@ class XYScatterChart extends HTMLElement {
     async resize(view) {
         if (this.offsetParent !== null) {
             if (this.#settings?.data !== undefined) {
-                this._draw();
+                this._draw(view);
             } else {
                 const [view, end_col, end_row] = this.#staged_view;
                 this.#staged_view = null;
@@ -531,7 +464,7 @@ class XYScatterChart extends HTMLElement {
         }
     }
 
-    async restyle(...args) {
+    async restyle(...args: [any /* View */, number, number]) {
         let settings = this.#settings;
         if (settings) {
             delete settings["colorStyles"];
@@ -559,12 +492,17 @@ class XYScatterChart extends HTMLElement {
     }
 
     restore(settings) {
+        // @ts-ignore // TODO: Type parentElement as PerspectiveViewerElement.
+        const view = this.parentElement?.getView();
         const new_settings = {};
         for (const name of EXCLUDED_SETTINGS) {
             new_settings[name] = this.#settings?.[name];
         }
         this.#settings = { ...new_settings, ...settings };
-        this._draw();
+
+        if (view) {
+          this._draw(view);
+        }
     }
 
     drawXYScatterChart(view, container, settings) {
@@ -620,6 +558,7 @@ class XYScatterChart extends HTMLElement {
         const axisDefault = () =>
             axisFactory(settings)
                 .settingName("mainValues")
+                // @ts-ignore // TODO: fix upstream types
                 .paddingStrategy(hardLimitZeroPadding())
                 .pad([0.1, 0.1]);
 
@@ -648,6 +587,7 @@ class XYScatterChart extends HTMLElement {
 
         const toolTip = nearbyTip()
             .scaleFactor(scale_factor)
+            // @ts-ignore // TODO: fix upstream types
             .settings(settings)
             .canvas(true)
             .xScale(xAxis.scale)
@@ -656,15 +596,16 @@ class XYScatterChart extends HTMLElement {
             .yScale(yAxis.scale)
             .color(useGroupColors && color)
             .size(size)
-            .onPoint(async (stuff) => {
-                if (stuff[0]) {
-                    const p = await view.get_row_path(stuff[0].row.__ROW_ID__);
-                    stuff[0].row.__ROW_PATH__ = p;
-                    stuff[0].crossValue = p[0];
-                }
+            // .onPoint(async (stuff) => {
+            //     console.log('stuff', stuff);
+            //     // if (stuff[0]) {
+            //     //     const p = await view.get_row_path(stuff[0].row.__ROW_ID__);
+            //     //     stuff[0].row.__ROW_PATH__ = p;
+            //     //     stuff[0].crossValue = p[0];
+            //     // }
 
-                return stuff;
-            })
+            //     return stuff;
+            // })
             .data(data);
 
         // render

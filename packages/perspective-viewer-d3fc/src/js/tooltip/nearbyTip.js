@@ -41,10 +41,10 @@ export default () => {
                 let updatedData = onPointHandler
                     ? await onPointHandler(tooltipData)
                     : tooltipData;
-                // console.log("updatedData", updatedData);
+
                 const useYScale = closest ? closest.scale : yScale;
 
-                renderTip(selection, tooltipData, useYScale);
+                renderTip(selection, updatedData, useYScale);
             });
 
             selection

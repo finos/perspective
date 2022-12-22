@@ -20,7 +20,6 @@ export function seriesToPoints(settings, data) {
 
     const mappedSeries = data.map((col, i) => ({
         crossValue: labelfn(col, i),
-        // crossValue: "",
         mainValues: settings.mainValues.map((v) => col[v.name]),
         x: col[settings.mainValues[0].name],
         y: col[settings.mainValues[1].name],
