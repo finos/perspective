@@ -12,8 +12,8 @@ import { groupFromKey } from "./seriesKey";
 import { fromDomain } from "./seriesSymbols";
 import { toValue } from "../tooltip/selectionData";
 
-const LABEL_PADDING = 5;
-const LABEL_COSINE = 0.7071067811865476; // cos(45 * Math.PI / 180)
+const LABEL_PADDING = 8;
+const LABEL_COSINE = 1;
 
 export function pointSeriesCanvas(
     settings,
@@ -39,32 +39,26 @@ export function pointSeriesCanvas(
         const colorValue = color(
             d.colorValue !== undefined ? d.colorValue : seriesKey
         );
-        const opacity = settings.colorStyles && settings.colorStyles.opacity;
 
+        const opacity = settings.colorStyles && settings.colorStyles.opacity;
         if (label) {
             context.fillStyle = settings.textStyles.color;
             context.font = settings.textStyles.font;
             const { type } = settings.mainValues.find((x) => x.name === label);
             const value = toValue(type, d.row[label]);
-
-            let magnitude = 10;
-
+            let magnitude;
             if (size) {
-                // `size(d.size)` is area (A) of circle.
                 // A = pi * r^2
                 // r = sqrt(A / pi)
                 const radius = Math.sqrt(
                     (scale_factor * size(d.size)) / Math.PI
                 );
 
-                // magnitude = r * cos(45 * Math.PI / 180)
                 magnitude = radius * LABEL_COSINE;
             }
 
             const mag_with_padding = magnitude + LABEL_PADDING;
-
-            // NOTE: Point origin is at the center of the circle, so we need to invert the y-axis.
-            context.fillText(value, mag_with_padding, -mag_with_padding);
+            context.fillText(value, mag_with_padding, 4);
         }
 
         context.strokeStyle = withoutOpacity(colorValue);
