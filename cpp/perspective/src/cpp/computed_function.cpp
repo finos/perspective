@@ -1755,7 +1755,6 @@ namespace computed_function {
         out[1] = o2;
         out[2] = o3;
 
-
         rval.set(true);
         return rval;
     }

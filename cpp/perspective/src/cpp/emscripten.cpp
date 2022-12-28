@@ -2210,7 +2210,6 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .value("DTYPE_DATE", DTYPE_DATE)
         .value("DTYPE_ENUM", DTYPE_ENUM)
         .value("DTYPE_OID", DTYPE_OID)
-        .value("DTYPE_OBJECT", DTYPE_OBJECT)
         .value("DTYPE_F64PAIR", DTYPE_F64PAIR)
         .value("DTYPE_USER_FIXED", DTYPE_USER_FIXED)
         .value("DTYPE_STR", DTYPE_STR)
