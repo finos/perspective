@@ -318,12 +318,7 @@ t_gstate::update_master_column(t_column* master_column,
                 master_column->set_nth<const char*>(master_table_idx,
                     flattened_column->get_nth<const char>(idx));
             } break;
-            case DTYPE_OBJECT: {
-                // inform new column its being copied
-                master_column->set_nth<std::uint64_t>(master_table_idx,
-                    *(flattened_column->get_nth<std::uint64_t>(idx)));
-
-            } break;
+            case DTYPE_OBJECT:
             default: {
                 PSP_COMPLAIN_AND_ABORT("Unexpected type");
             }

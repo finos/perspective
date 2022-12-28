@@ -476,7 +476,7 @@ t_computed_function_store::register_computed_functions(
     sym_table.add_reserved_function(
         "cross_product3", t_computed_expression_parser::cross_product3);
     sym_table.add_reserved_function(
-        "dot_product3", t_computed_expression_parser::dot_product3);        
+        "dot_product3", t_computed_expression_parser::dot_product3);
     sym_table.add_function(
         "percent_of", t_computed_expression_parser::PERCENT_OF_FN);
     sym_table.add_function("is_null", t_computed_expression_parser::IS_NULL_FN);

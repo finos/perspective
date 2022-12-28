@@ -37,6 +37,10 @@ with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
 if sys.version_info.major < 3:
     raise Exception("Requires Python 3.7 or later")
 
+# Check for `cmake`
+if which("cmake") is None and which("cmake.exe") is None:
+    raise Exception("Requires cmake")
+
 
 def get_version(file, name="__version__"):
     """Get the version of the package from the given file by
@@ -54,7 +58,7 @@ version = get_version(os.path.join(here, "perspective", "core", "_version.py"))
 requires = [
     "ipywidgets>=7.5.1,<8",
     "future>=0.16.0,<1",
-    "numpy>=1.13.1,<2",
+    "numpy>=1.21.6,<2",
     "pandas>=0.22.0,<2",
     "python-dateutil>=2.8.0,<3",
     "traitlets>=4.3.2,<6",
@@ -279,7 +283,6 @@ setup(
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",

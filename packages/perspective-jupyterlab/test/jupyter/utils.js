@@ -16,8 +16,8 @@ const DIST_ROOT = path.join(__dirname, "..", "..", "dist", "umd");
 const TEST_CONFIG_ROOT = path.join(__dirname, "..", "config", "jupyter");
 
 const remove_jupyter_artifacts = () => {
-    rimraf(path.join(TEST_CONFIG_ROOT, "lab"), () => {});
-    rimraf(path.join(DIST_ROOT, ".ipynb_checkpoints"), () => {});
+    rimraf.sync(path.join(TEST_CONFIG_ROOT, "lab"));
+    rimraf.sync(path.join(DIST_ROOT, ".ipynb_checkpoints"));
 };
 
 /**

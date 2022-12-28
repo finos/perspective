@@ -39,25 +39,26 @@ const dist_folders = [
     // // https://github.com/actions/virtual-environments
 
     // Mac 11
-    "perspective-python-dist-macos-11-3.7",
     "perspective-python-dist-macos-11-3.8",
     "perspective-python-dist-macos-11-3.9",
+    "perspective-python-dist-macos-11-3.10",
 
     // Ubuntu (Manylinux 2014 docker images)
-    "perspective-python-dist-ubuntu-20.04-3.7",
     "perspective-python-dist-ubuntu-20.04-3.8",
     "perspective-python-dist-ubuntu-20.04-3.9",
+    "perspective-python-dist-ubuntu-20.04-3.10",
 
     // Windows 2019 (No 3.6 on windows)
-    "perspective-python-dist-windows-2019-3.7",
     "perspective-python-dist-windows-2019-3.8",
     "perspective-python-dist-windows-2019-3.9",
+    "perspective-python-dist-windows-2019-3.10",
 
     // Windows 2022
     // NOTE: omit these for now, rely on 2019 wheels
     // "perspective-python-dist-windows-2022-3.7",
     // "perspective-python-dist-windows-2022-3.8",
     // "perspective-python-dist-windows-2022-3.9",
+    // "perspective-python-dist-windows-2022-3.10",
 
     "perspective-python-sdist",
 ];
@@ -65,21 +66,19 @@ const dist_folders = [
 // Artifacts inside those folders
 const wheels = [
     // Mac 11
-    // "cp36-cp36m-macosx_11_0_x86_64",
-    "cp37-cp37m-macosx_11_0_x86_64",
     "cp38-cp38-macosx_11_0_x86_64",
     "cp39-cp39-macosx_11_0_x86_64",
+    "cp310-cp310-macosx_11_0_x86_64",
 
     // Manylinux 2014
-    // "cp36-cp36m-manylinux2014_x86_64",
-    "cp37-cp37m-manylinux2014_x86_64",
     "cp38-cp38-manylinux2014_x86_64",
     "cp39-cp39-manylinux2014_x86_64",
+    "cp310-cp310-manylinux2014_x86_64",
 
     // Windows (use 2019)
-    "cp37-cp37m-win_amd64",
     "cp38-cp38-win_amd64",
     "cp39-cp39-win_amd64",
+    "cp310-cp310-win_amd64",
 ];
 
 // GitHub API Wrapper

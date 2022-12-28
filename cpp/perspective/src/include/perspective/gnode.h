@@ -514,14 +514,8 @@ t_gnode::_process_column(const t_column* fcolumn, const t_column* scolumn,
                 auto trans = calc_transition(prev_existed, row_pre_existed,
                     exists, prev_valid, cur_valid, prev_cur_eq, prev_pkey_eq);
 
-                if (dcolumn->get_dtype() == DTYPE_OBJECT) {
-                    // unsigned types, dates, etc don't make sense
-                    // TODO remove dcolumn?
-                    dcolumn->set_nth<DATA_T>(added_count, DATA_T(0));
-                } else {
-                    dcolumn->set_nth<DATA_T>(added_count,
-                        cur_valid ? cur_value - prev_value : DATA_T(0));
-                }
+                dcolumn->set_nth<DATA_T>(added_count,
+                    cur_valid ? cur_value - prev_value : DATA_T(0));
                 dcolumn->set_valid(added_count, true);
 
                 pcolumn->set_nth<DATA_T>(added_count, prev_value);
@@ -533,20 +527,6 @@ t_gnode::_process_column(const t_column* fcolumn, const t_column* scolumn,
                     added_count, cur_valid ? cur_valid : prev_valid);
 
                 tcolumn->set_nth<std::uint8_t>(idx, trans);
-
-                // if object type and its a duplicate, decrement
-                // the ref count to account for the increment in
-                // fill.cpp
-                if (ccolumn->get_dtype() == DTYPE_OBJECT) {
-                    if (cur_valid && prev_cur_eq) {
-                        fcolumn->notify_object_cleared(idx);
-                    }
-
-                    if ((!cur_valid && prev_valid)
-                        || (cur_valid && prev_valid && !prev_cur_eq)) {
-                        pcolumn->notify_object_cleared(added_count);
-                    }
-                }
             } break;
             case OP_DELETE: {
                 if (row_pre_existed) {
@@ -559,11 +539,6 @@ t_gnode::_process_column(const t_column* fcolumn, const t_column* scolumn,
 
                     ccolumn->set_nth<DATA_T>(added_count, prev_value);
                     ccolumn->set_valid(added_count, prev_valid);
-
-                    if (ccolumn->get_dtype() == DTYPE_OBJECT) {
-                        if (prev_valid)
-                            pcolumn->notify_object_cleared(added_count);
-                    }
 
                     SUPPRESS_WARNINGS_VC(4146)
                     dcolumn->set_nth<DATA_T>(added_count, -prev_value);

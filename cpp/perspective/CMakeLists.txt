@@ -688,13 +688,19 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
             target_compile_options(binding PRIVATE -Wdeprecated-declarations)
             set_property(TARGET psp PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path})
             set_property(TARGET binding PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path})
+
+            target_compile_options(arrow PRIVATE -fvisibility=hidden)
+            target_compile_options(flatbuffers PRIVATE -fvisibility=hidden)
+            target_compile_options(double-conversion PRIVATE -fvisibility=hidden)
+            target_compile_options(re2 PRIVATE -fvisibility=hidden)
+            target_compile_options(psp PRIVATE -fvisibility=hidden)
+            target_compile_options(binding PRIVATE -fvisibility=hidden)    
         else()
             target_compile_options(binding PRIVATE -Wdeprecated-declarations)
         endif()
 
         # Link against minimal arrow static library
         target_link_libraries(psp arrow re2)
-
         target_link_libraries(binding psp)
 
         # The compiled libraries will be put in CMAKE_LIBRARY_OUTPUT_DIRECTORY by default. In the

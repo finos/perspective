@@ -345,7 +345,7 @@ class TestToFormat(object):
             group_by=["a"]
         )
         v = view.to_numpy()
-        assert np.array_equal(v["__ROW_PATH__"], [[], [1]])
+        assert np.array_equal(v["__ROW_PATH__"], np.array([[], [1]], dtype="object"))
         assert np.array_equal(v["a"], np.array([2, 2]))
         assert np.array_equal(v["b"], np.array([4, 4]))
 
@@ -357,7 +357,7 @@ class TestToFormat(object):
             split_by=["b"]
         )
         v = view.to_numpy()
-        assert np.array_equal(v["__ROW_PATH__"], [[], [1]])
+        assert np.array_equal(v["__ROW_PATH__"], np.array([[], [1]], dtype="object"))
         assert np.array_equal(v["2|a"], np.array([2, 2]))
         assert np.array_equal(v["2|b"], np.array([4, 4]))
 

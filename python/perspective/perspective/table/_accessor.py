@@ -273,9 +273,6 @@ class _PerspectiveAccessor(object):
             ):
                 # update float columns with either ints or floats
                 return float(val)
-        elif dtype == t_dtype.DTYPE_OBJECT:
-            # will extract the id from the object
-            pass
         return val
 
     def try_cast_numpy_arrays(self):

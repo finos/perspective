@@ -131,7 +131,7 @@ class _PerspectiveDateValidator(object):
             if isinstance(obj, int):
                 return round(obj / 1000000)
 
-        if isinstance(obj, (int, float, numpy.integer, numpy.float)):
+        if isinstance(obj, (int, float, numpy.integer, numpy.float64, numpy.float32)):
             return _normalize_timestamp(obj)
 
         timetuple = getattr(obj, to_timetuple)()
