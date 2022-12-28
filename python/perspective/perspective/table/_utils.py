@@ -49,7 +49,6 @@ def _dtype_to_pythontype(dtype):
         t_dtype.DTYPE_DATE: date,
         t_dtype.DTYPE_TIME: datetime,
         t_dtype.DTYPE_STR: str,
-        t_dtype.DTYPE_OBJECT: object,
     }
 
     return _extract_type(dtype, mapping)
@@ -70,7 +69,6 @@ def _dtype_to_str(dtype):
         t_dtype.DTYPE_DATE: "date",
         t_dtype.DTYPE_TIME: "datetime",
         t_dtype.DTYPE_STR: "string",
-        t_dtype.DTYPE_OBJECT: "object",
     }
 
     return _extract_type(dtype, mapping)

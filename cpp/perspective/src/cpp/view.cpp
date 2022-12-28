@@ -795,20 +795,7 @@ View<CTX_T>::data_slice_to_batches(
                             }
                         });
                 } break;
-                case DTYPE_OBJECT: {
-                    fields.push_back(
-                        arrow::field(row_path_name, arrow::uint64()));
-                    arr = apachearrow::numeric_col_to_array<arrow::UInt64Type,
-                        std::uint64_t>(extents, [&, rpidx](t_uindex ridx) {
-                        auto depth = m_ctx->unity_get_row_depth(ridx);
-                        if (rpidx < depth) {
-                            return m_ctx->unity_get_row_path(ridx).at(
-                                (depth - 1) - rpidx);
-                        } else {
-                            return mknone();
-                        }
-                    });
-                } break;
+                case DTYPE_OBJECT:
                 default: {
                     std::stringstream ss;
                     ss << "Cannot serialize column `" << row_path_name
@@ -987,15 +974,7 @@ View<CTX_T>::data_slice_to_batches(
                             + (cidx - extents.m_scol)];
                     });
             } break;
-            case DTYPE_OBJECT: {
-                fields.push_back(arrow::field(name, arrow::uint64()));
-                arr = apachearrow::numeric_col_to_array<arrow::UInt64Type,
-                    std::uint64_t>(
-                    extents, [slice, cidx, stride, extents](t_uindex ridx) {
-                        return slice[(ridx - extents.m_srow) * stride
-                            + (cidx - extents.m_scol)];
-                    });
-            } break;
+            case DTYPE_OBJECT:
             default: {
                 std::stringstream ss;
                 ss << "Cannot serialize column `" << name << "` of type `"

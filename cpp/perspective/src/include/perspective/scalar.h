@@ -382,9 +382,7 @@ t_tscalar::compare_common(const t_tscalar& rhs) const {
             return cmp(get_char_ptr(), rhs.get_char_ptr());
         } break;
         case DTYPE_OBJECT: {
-            // Just promote to int64 and compare
-            COMPARER_T<std::uint64_t> cmp;
-            return cmp(m_data.m_uint64, rhs.m_data.m_uint64);
+            PSP_COMPLAIN_AND_ABORT("Object columns not supported");
         } break;
         default: {
 #ifdef PSP_DEBUG

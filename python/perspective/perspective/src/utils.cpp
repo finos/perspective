@@ -190,22 +190,11 @@ namespace binding {
             case DTYPE_INT64: {
                 return py::cast(scalar.to_int64());
             }
-            case DTYPE_OBJECT: {
-                // Extract pointer
-                PyObject* ptr
-                    = static_cast<PyObject*>((void*)scalar.to_uint64());
-
-                // nullptr
-                if (!scalar.to_uint64()) {
-                    return py::none();
-                }
-                // Reconstruct python object
-                return py::cast<py::object>(ptr);
-            }
             case DTYPE_NONE: {
                 return py::none();
             }
             case DTYPE_STR:
+            case DTYPE_OBJECT:
             default: {
                 return py::cast(scalar.to_string());
             }

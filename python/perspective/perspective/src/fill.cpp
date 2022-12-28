@@ -347,20 +347,7 @@ namespace binding {
                     }
                 } break;
                 case DTYPE_OBJECT: {
-                    // Store pointer as uint64 (in 32-bit will promote to
-                    // 64bits, should be ok)
-                    std::uint64_t store = item.is_none()
-                        ? 0
-                        : reinterpret_cast<std::uintptr_t>(item.ptr());
-
-                    // Increment the reference count to account for internal
-                    // storage of the raw pointer (don't actually do this as
-                    // _process_column will handle it)
-                    item.inc_ref(); // don't uncomment
-
-                    // Store the pointer a uint64
-                    col->set_nth(i, store);
-                    col->set_valid(i, store != 0);
+                    PSP_COMPLAIN_AND_ABORT("Object columns not supported");
                 } break;
                 default:
                     break;

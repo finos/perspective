@@ -513,9 +513,7 @@ t_tscalar::canonical(t_dtype dtype) {
         case DTYPE_STR: {
             rval.m_type = DTYPE_STR;
         } break;
-        case DTYPE_OBJECT: {
-            rval.set(nullptr);
-        } break;
+        case DTYPE_OBJECT:
         default: {
             PSP_COMPLAIN_AND_ABORT("Found unknown dtype.");
         }
@@ -978,9 +976,7 @@ t_tscalar::as_bool() const {
         case DTYPE_STR: {
             return m_data.m_charptr != 0;
         } break;
-        case DTYPE_OBJECT: {
-            return bool(get<std::uint64_t>());
-        } break;
+        case DTYPE_OBJECT:
         default: {
 #ifdef PSP_DEBUG
             std::cout << __FILE__ << ":" << __LINE__ << " Reached unknown type "
@@ -1014,7 +1010,6 @@ t_tscalar::to_string(bool for_expr) const {
             ss << get<std::int16_t>();
             return ss.str();
         } break;
-        case DTYPE_OBJECT:
         case DTYPE_UINT64: {
             // treat object pointers as unsigned 64 bit ints
             ss << get<std::uint64_t>();
@@ -1107,6 +1102,7 @@ t_tscalar::to_string(bool for_expr) const {
             }
             return ss.str();
         } break;
+        case DTYPE_OBJECT:
         default: {
             PSP_COMPLAIN_AND_ABORT("Unrecognized dtype");
         }
@@ -1353,10 +1349,7 @@ t_tscalar::to_uint64() const {
         case DTYPE_BOOL: {
             return get<bool>();
         } break;
-        case DTYPE_OBJECT: {
-            // Interpret pointer as 64bit unsigned int
-            return get<std::uint64_t>();
-        } break;
+        case DTYPE_OBJECT:
         case DTYPE_NONE:
         default: {
             return 0;
