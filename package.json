@@ -145,5 +145,8 @@
         "version": "python3 python/perspective/scripts/write_version.py && git add python/perspective/perspective/core/_version.py",
         "jlab_link": "node scripts/jlab_link.js",
         "repl": "node scripts/repl.js"
+    },
+    "dependencies": {
+        "prism-react-renderer": "^1.3.5"
     }
 }

@@ -1,12 +1,13 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
+// installed prism-react-renderer dependency
 const lightCodeTheme = require("prism-react-renderer/themes/github");
 const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 
 const fs = require("fs");
 
-const { init } = require("blocks");
+const  {init}  = require("blocks");
 
 init();
 
