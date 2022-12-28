@@ -1,4 +1,19 @@
-const hashes = require("./gists.json");
+const LOCAL_EXAMPLES = [
+    "fractal",
+    "raycasting",
+    "evictions",
+    "streaming",
+    "covid",
+    "movies",
+    "superstore",
+    "citibike",
+    "olympics",
+    "editable",
+    "csv",
+    //"custom",
+];
+
+exports.LOCAL_EXAMPLES = LOCAL_EXAMPLES;
 
 exports.get_examples = function get_examples(
     root = "https://perspective.finos.org/"
@@ -26,11 +41,11 @@ exports.get_examples = function get_examples(
         },
     ];
 
-    return standalone.concat(
-        Object.keys(hashes).map((x) => ({
-            img: `${root}blocks/${x}/preview.png`,
-            url: `${root}block?example=${x}`,
-            name: x,
-        }))
-    );
+    const hashes = LOCAL_EXAMPLES.map((x) => ({
+        img: `${root}blocks/${x}/preview.png`,
+        url: `${root}block?example=${x}`,
+        name: x,
+    }));
+
+    return standalone.concat(hashes);
 };

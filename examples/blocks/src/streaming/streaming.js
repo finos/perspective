@@ -60,31 +60,27 @@ window.addEventListener("DOMContentLoaded", async function () {
 
     elem.restore({
         plugin: "Datagrid",
+        plugin_config: {
+            columns: {
+                "(+)chg": { fg_gradient: 7.93, number_fg_mode: "bar" },
+                "(-)chg": { fg_gradient: 8.07, number_fg_mode: "bar" },
+                chg: { bg_gradient: 9.97, number_bg_mode: "gradient" },
+            },
+            editable: false,
+            scroll_lock: true,
+        },
+        settings: true,
+        theme: "Material Light",
+        group_by: ["name"],
+        split_by: ["client"],
         columns: ["(-)chg", "chg", "(+)chg"],
+        filter: [],
+        sort: [["chg", "desc"]],
         expressions: [
             '//(-)chg\nif("chg"<0){"chg"}else{0}',
             '//(+)chg\nif("chg">0){"chg"}else{0}',
         ],
-        group_by: ["name"],
-        split_by: ["client"],
-        aggregates: { "(-)chg": "avg", "(+)chg": "avg", chg: "avg" },
-        sort: [["chg", "desc"]],
-        plugin_config: {
-            columns: {
-                "(-)chg": {
-                    number_color_mode: "bar",
-                    gradient: 10,
-                },
-                "(+)chg": {
-                    number_color_mode: "bar",
-                    gradient: 10,
-                },
-                chg: {
-                    number_color_mode: "gradient",
-                    gradient: 10,
-                },
-            },
-        },
+        aggregates: { "(-)chg": "avg", chg: "avg", "(+)chg": "avg" },
     });
 
     // Add more rows every 50ms using the `update()` method on the `table` directly.

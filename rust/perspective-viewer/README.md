@@ -100,7 +100,7 @@ script's package.
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/migrate.ts:52](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/migrate.ts#L52)
+[rust/perspective-viewer/src/ts/migrate.ts:52](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/migrate.ts#L52)
 
 
 # Interface: IPerspectiveViewerElement
@@ -205,7 +205,7 @@ A `Promise` which resolves to a `perspective.Table`
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/viewer.ts:121](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/viewer.ts#L121)
+[rust/perspective-viewer/src/ts/viewer.ts:121](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/viewer.ts#L121)
 
 ___
 
@@ -237,7 +237,7 @@ A `Promise` which ressolves to a `perspective.View`.
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/viewer.ts:142](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/viewer.ts#L142)
+[rust/perspective-viewer/src/ts/viewer.ts:142](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/viewer.ts#L142)
 
 ___
 
@@ -279,7 +279,7 @@ rendered.
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/viewer.ts:63](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/viewer.ts#L63)
+[rust/perspective-viewer/src/ts/viewer.ts:63](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/viewer.ts#L63)
 
 ___
 
@@ -301,7 +301,7 @@ A pointer to this model
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/viewer.ts:424](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/viewer.ts#L424)
+[rust/perspective-viewer/src/ts/viewer.ts:424](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/viewer.ts#L424)
 
 ___
 
@@ -333,7 +333,7 @@ await viewer.reset();
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/viewer.ts:247](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/viewer.ts#L247)
+[rust/perspective-viewer/src/ts/viewer.ts:247](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/viewer.ts#L247)
 
 ___
 
@@ -387,7 +387,7 @@ rendered.
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/viewer.ts:181](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/viewer.ts#L181)
+[rust/perspective-viewer/src/ts/viewer.ts:181](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/viewer.ts#L181)
 
 ___
 
@@ -417,7 +417,7 @@ a serialized element in the chosen format.
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/viewer.ts:205](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/viewer.ts#L205)
+[rust/perspective-viewer/src/ts/viewer.ts:205](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/viewer.ts#L205)
 
 ▸ **save**(`format`): `Promise`<`PerspectiveViewerConfig`\>
 
@@ -433,7 +433,7 @@ a serialized element in the chosen format.
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/viewer.ts:206](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/viewer.ts#L206)
+[rust/perspective-viewer/src/ts/viewer.ts:206](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/viewer.ts#L206)
 
 ▸ **save**(`format`): `Promise`<`ArrayBuffer`\>
 
@@ -449,7 +449,7 @@ a serialized element in the chosen format.
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/viewer.ts:207](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/viewer.ts#L207)
+[rust/perspective-viewer/src/ts/viewer.ts:207](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/viewer.ts#L207)
 
 ▸ **save**(`format`): `Promise`<`string`\>
 
@@ -465,7 +465,7 @@ a serialized element in the chosen format.
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/viewer.ts:208](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/viewer.ts#L208)
+[rust/perspective-viewer/src/ts/viewer.ts:208](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/viewer.ts#L208)
 
 ▸ **save**(`format?`): `Promise`<`string` \| `PerspectiveViewerConfig` \| `ArrayBuffer`\>
 
@@ -481,7 +481,7 @@ a serialized element in the chosen format.
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/viewer.ts:209](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/viewer.ts#L209)
+[rust/perspective-viewer/src/ts/viewer.ts:209](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/viewer.ts#L209)
 
 ___
 
@@ -506,7 +506,7 @@ An `Array` of the plugin instances for this
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/viewer.ts:414](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/viewer.ts#L414)
+[rust/perspective-viewer/src/ts/viewer.ts:414](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/viewer.ts#L414)
 
 ___
 
@@ -537,7 +537,7 @@ The active or requested plugin instance.
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/viewer.ts:401](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/viewer.ts#L401)
+[rust/perspective-viewer/src/ts/viewer.ts:401](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/viewer.ts#L401)
 
 ___
 
@@ -573,7 +573,7 @@ button.addEventListener("click", async () => {
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/viewer.ts:287](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/viewer.ts#L287)
+[rust/perspective-viewer/src/ts/viewer.ts:287](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/viewer.ts#L287)
 
 ___
 
@@ -595,7 +595,7 @@ Download this element's data as a CSV file.
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/viewer.ts:267](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/viewer.ts#L267)
+[rust/perspective-viewer/src/ts/viewer.ts:267](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/viewer.ts#L267)
 
 ___
 
@@ -630,7 +630,7 @@ await viewer.toggleConfig();
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/viewer.ts:384](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/viewer.ts#L384)
+[rust/perspective-viewer/src/ts/viewer.ts:384](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/viewer.ts#L384)
 
 ___
 
@@ -652,7 +652,7 @@ bound to.
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/viewer.ts:258](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/viewer.ts#L258)
+[rust/perspective-viewer/src/ts/viewer.ts:258](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/viewer.ts#L258)
 
 ___
 
@@ -684,7 +684,7 @@ pending state changes have been applied and rendered.
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/viewer.ts:232](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/viewer.ts#L232)
+[rust/perspective-viewer/src/ts/viewer.ts:232](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/viewer.ts#L232)
 
 ___
 
@@ -719,7 +719,7 @@ A promise which resolves to the current edit port.
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/viewer.ts:346](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/viewer.ts#L346)
+[rust/perspective-viewer/src/ts/viewer.ts:346](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/viewer.ts#L346)
 
 ___
 
@@ -758,7 +758,7 @@ finished rendering.
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/viewer.ts:88](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/viewer.ts#L88)
+[rust/perspective-viewer/src/ts/viewer.ts:88](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/viewer.ts#L88)
 
 ___
 
@@ -796,7 +796,7 @@ await viewer.resetThemes(["Material Light", "Material Dark"]);
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/viewer.ts:322](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/viewer.ts#L322)
+[rust/perspective-viewer/src/ts/viewer.ts:322](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/viewer.ts#L322)
 
 ___
 
@@ -816,7 +816,7 @@ as SVG and Canvas attributes.
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/viewer.ts:298](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/viewer.ts#L298)
+[rust/perspective-viewer/src/ts/viewer.ts:298](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/viewer.ts#L298)
 
 ___
 
@@ -846,7 +846,7 @@ await viewer.setAutoSize(false);
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/viewer.ts:104](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/viewer.ts#L104)
+[rust/perspective-viewer/src/ts/viewer.ts:104](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/viewer.ts#L104)
 
 ___
 
@@ -876,7 +876,7 @@ await viewer.setThrottle(1000);
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/viewer.ts:363](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/viewer.ts#L363)
+[rust/perspective-viewer/src/ts/viewer.ts:363](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/viewer.ts#L363)
 
 
 # Interface: IPerspectiveViewerPlugin
@@ -955,7 +955,7 @@ logic.
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/plugin.ts:80](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/plugin.ts#L80)
+[rust/perspective-viewer/src/ts/plugin.ts:80](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/plugin.ts#L80)
 
 ___
 
@@ -977,7 +977,7 @@ identical behavior to 1.
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/plugin.ts:71](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/plugin.ts#L71)
+[rust/perspective-viewer/src/ts/plugin.ts:71](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/plugin.ts#L71)
 
 ___
 
@@ -995,7 +995,7 @@ display name for this plugin in the `<perspective-viewer>` UI.
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/plugin.ts:52](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/plugin.ts#L52)
+[rust/perspective-viewer/src/ts/plugin.ts:52](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/plugin.ts#L52)
 
 ___
 
@@ -1018,7 +1018,7 @@ a `HTMLPerspectiveViewerPluginElement.restore` call.
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/plugin.ts:92](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/plugin.ts#L92)
+[rust/perspective-viewer/src/ts/plugin.ts:92](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/plugin.ts#L92)
 
 ___
 
@@ -1037,7 +1037,7 @@ on column state), leaving existing columns alone.
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/plugin.ts:60](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/plugin.ts#L60)
+[rust/perspective-viewer/src/ts/plugin.ts:60](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/plugin.ts#L60)
 
 ## Methods
 
@@ -1063,7 +1063,7 @@ async clear(): Promise<void> {
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/plugin.ts:136](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/plugin.ts#L136)
+[rust/perspective-viewer/src/ts/plugin.ts:136](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/plugin.ts#L136)
 
 ___
 
@@ -1079,7 +1079,7 @@ Free any resources acquired by this plugin and prepare to be deleted.
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/plugin.ts:171](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/plugin.ts#L171)
+[rust/perspective-viewer/src/ts/plugin.ts:171](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/plugin.ts#L171)
 
 ___
 
@@ -1111,7 +1111,7 @@ async draw(view: perspective.View): Promise<void> {
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/plugin.ts:107](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/plugin.ts#L107)
+[rust/perspective-viewer/src/ts/plugin.ts:107](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/plugin.ts#L107)
 
 ___
 
@@ -1128,7 +1128,7 @@ and the underlying data has not.
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/plugin.ts:142](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/plugin.ts#L142)
+[rust/perspective-viewer/src/ts/plugin.ts:142](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/plugin.ts#L142)
 
 ___
 
@@ -1150,7 +1150,7 @@ Restore this plugin to a state previously returned by `save()`.
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/plugin.ts:166](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/plugin.ts#L166)
+[rust/perspective-viewer/src/ts/plugin.ts:166](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/plugin.ts#L166)
 
 ___
 
@@ -1167,7 +1167,7 @@ plugins which read CSS styles via `window.getComputedStyle()`.
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/plugin.ts:148](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/plugin.ts#L148)
+[rust/perspective-viewer/src/ts/plugin.ts:148](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/plugin.ts#L148)
 
 ___
 
@@ -1191,7 +1191,7 @@ reload.  For example, `@finos/perspective-viewer-d3fc` uses
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/plugin.ts:161](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/plugin.ts#L161)
+[rust/perspective-viewer/src/ts/plugin.ts:161](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/plugin.ts#L161)
 
 ___
 
@@ -1222,6 +1222,6 @@ async update(view: perspective.View): Promise<void> {
 
 #### Defined in
 
-[rust/perspective-viewer/src/ts/plugin.ts:121](https://github.com/finos/perspective/blob/4a289659c/rust/perspective-viewer/src/ts/plugin.ts#L121)
+[rust/perspective-viewer/src/ts/plugin.ts:121](https://github.com/finos/perspective/blob/9371785fa/rust/perspective-viewer/src/ts/plugin.ts#L121)
 
 

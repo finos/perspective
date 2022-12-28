@@ -29,6 +29,24 @@
     text-transform: uppercase;
 }
 
+.timecontrols {
+    display: flex;
+    align-items: center;
+    margin-top: 12px;
+}
+
+.timecontrols * {
+    margin-right: 15px;
+}
+
+.timecontrols span {
+    text-align: end;
+    width: 70px;
+    font-family: "Roboto Mono";
+    opacity: 0.5;
+    font-size: 12px;
+}
+
 .visButton.visButtonActive {
     opacity: 1;
 }
@@ -37,7 +55,6 @@
     -webkit-appearance: none;
     background: transparent;
     border: 1px solid;
-    margin-top: 12px;
     width: 200px;
     height: 10px;
     border-radius: 5px;

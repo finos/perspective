@@ -32,15 +32,22 @@ export async function selectionListener(
         const key_match =
             !!selected &&
             selected.reduce((agg, x, i) => agg && x === id[i], true);
+
         const is_deselect =
             !!selected && id.length === selected.length && key_match;
-        let filter = [];
+
+        let detail = { selected: !is_deselect };
         if (is_deselect) {
             selected_rows_map.delete(regularTable);
         } else {
             selected_rows_map.set(regularTable, id);
             filter = await getCellConfig(this, meta.y, meta.x);
-            filter = filter.config.filter;
+            const { row, column_names, config } = await getCellConfig(
+                this,
+                y,
+                x
+            );
+            detail = { ...detail, row, column_names, config };
         }
 
         await regularTable.draw({ preserve_width: true });
@@ -49,10 +56,7 @@ export async function selectionListener(
             new CustomEvent("perspective-select", {
                 bubbles: true,
                 composed: true,
-                detail: {
-                    selected: !is_deselect,
-                    config: { filter },
-                },
+                detail,
             })
         );
     }

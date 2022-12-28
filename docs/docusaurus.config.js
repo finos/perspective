@@ -6,9 +6,10 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 
 const fs = require("fs");
 
-const { init } = require("blocks");
+// TODO There is a typescript module annoyinglt called `blocks`.
+const { dist_examples } = require("../examples/blocks");
 
-init();
+dist_examples(`${__dirname}/static/blocks`);
 
 const examples = fs.readdirSync("static/blocks").map((ex) => {
     const files = fs
@@ -125,8 +126,12 @@ const config = {
                         title: "Docs",
                         items: [
                             {
-                                label: "Getting Started",
+                                label: "JavaScript User Guide",
                                 to: "/docs/js",
+                            },
+                            {
+                                label: "Python User Guide",
+                                to: "/docs/python",
                             },
                         ],
                     },

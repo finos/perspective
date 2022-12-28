@@ -22,6 +22,7 @@
         "@finos/perspective-viewer-d3fc": "^1.8.1",
         "@finos/perspective-viewer-datagrid": "^1.8.1",
         "@finos/perspective-webpack-plugin": "^1.8.1",
+        "blocks": "^1.8.1",
         "@mdx-js/react": "^1.6.22",
         "clsx": "^1.1.1",
         "perspective-loader": "file:plugins/perspective-loader",

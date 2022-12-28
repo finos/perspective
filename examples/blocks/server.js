@@ -6,8 +6,12 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+
 const fs = require("fs");
 const { WebSocketServer } = require("@finos/perspective");
+const { dist_examples } = require("./index.js");
+
+dist_examples(`${__dirname}/dist`);
 
 const template = (body) => `
 <!DOCTYPE html>
