@@ -537,10 +537,41 @@ View<CTX_T>::to_arrow(std::int32_t start_row, std::int32_t end_row,
     return data_slice_to_arrow(data_slice, emit_group_by);
 };
 
+template <>
+std::shared_ptr<std::string>
+View<t_ctx2>::to_csv(std::int32_t start_row, std::int32_t end_row,
+    std::int32_t start_col, std::int32_t end_col) const {
+
+    // See generic instance.
+    if (is_column_only() && m_ctx->unity_get_column_count() == 0) {
+        return std::make_shared<std::string>("");
+    }
+
+    std::shared_ptr<t_data_slice<t_ctx2>> data_slice
+        = get_data(start_row, end_row, start_col, end_col);
+    return data_slice_to_csv(data_slice);
+};
+
+template <>
+std::shared_ptr<std::string>
+View<t_ctx1>::to_csv(std::int32_t start_row, std::int32_t end_row,
+    std::int32_t start_col, std::int32_t end_col) const {
+    std::shared_ptr<t_data_slice<t_ctx1>> data_slice
+        = get_data(start_row, end_row, start_col, end_col);
+    return data_slice_to_csv(data_slice);
+};
+
 template <typename CTX_T>
 std::shared_ptr<std::string>
 View<CTX_T>::to_csv(std::int32_t start_row, std::int32_t end_row,
     std::int32_t start_col, std::int32_t end_col) const {
+
+    // Arrow has a big whih miscalculates CSV header size as 1 when there are no
+    // columns (and hence no rows) in the dataset, so intercept these calls/
+    if (m_ctx->unity_get_column_count() == 0) {
+        return std::make_shared<std::string>("");
+    }
+
     std::shared_ptr<t_data_slice<CTX_T>> data_slice
         = get_data(start_row, end_row, start_col, end_col);
     return data_slice_to_csv(data_slice);
