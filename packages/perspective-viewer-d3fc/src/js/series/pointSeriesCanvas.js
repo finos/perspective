@@ -12,6 +12,9 @@ import { groupFromKey } from "./seriesKey";
 import { fromDomain } from "./seriesSymbols";
 import { toValue } from "../tooltip/selectionData";
 
+const LABEL_PADDING = 8;
+const LABEL_COSINE = 1;
+
 export function pointSeriesCanvas(
     settings,
     seriesKey,
@@ -36,18 +39,26 @@ export function pointSeriesCanvas(
         const colorValue = color(
             d.colorValue !== undefined ? d.colorValue : seriesKey
         );
-        const opacity = settings.colorStyles && settings.colorStyles.opacity;
 
+        const opacity = settings.colorStyles && settings.colorStyles.opacity;
         if (label) {
             context.fillStyle = settings.textStyles.color;
             context.font = settings.textStyles.font;
             const { type } = settings.mainValues.find((x) => x.name === label);
             const value = toValue(type, d.row[label]);
-            const offset = size
-                ? Math.round(scale_factor * size(d.size)) * (15 / 1000) + 10
-                : 10;
+            let magnitude;
+            if (size) {
+                // A = pi * r^2
+                // r = sqrt(A / pi)
+                const radius = Math.sqrt(
+                    (scale_factor * size(d.size)) / Math.PI
+                );
 
-            context.fillText(value, offset, 4);
+                magnitude = radius * LABEL_COSINE;
+            }
+
+            const mag_with_padding = magnitude + LABEL_PADDING;
+            context.fillText(value, mag_with_padding, 4);
         }
 
         context.strokeStyle = withoutOpacity(colorValue);
