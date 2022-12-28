@@ -148,7 +148,10 @@ def to_format(options, view, output_format):
     if output_format == "numpy":
         for k, v in data.items():
             # TODO push into C++
-            data[k] = np.array(v)
+            if k == "__ROW_PATH__":
+                data[k] = np.array(v, dtype="object")
+            else:
+                data[k] = np.array(v)
 
     return data
 
