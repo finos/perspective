@@ -46,7 +46,7 @@ export function pointSeriesCanvas(
             context.font = settings.textStyles.font;
             const { type } = settings.mainValues.find((x) => x.name === label);
             const value = toValue(type, d.row[label]);
-            let magnitude;
+            let magnitude = 0;
             if (size) {
                 // A = pi * r^2
                 // r = sqrt(A / pi)
