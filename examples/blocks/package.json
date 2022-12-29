@@ -1,7 +1,7 @@
 {
     "name": "blocks",
     "private": true,
-    "version": "1.8.1",
+    "version": "1.9.0",
     "description": "A collection of simple client-side Perspective examples for `http://bl.ocks.org`.",
     "scripts": {
         "start": "mkdirp dist && node server.js"
@@ -10,10 +10,10 @@
     "keywords": [],
     "license": "Apache-2.0",
     "dependencies": {
-        "@finos/perspective": "^1.8.1",
-        "@finos/perspective-viewer": "^1.8.1",
-        "@finos/perspective-viewer-d3fc": "^1.8.1",
-        "@finos/perspective-viewer-datagrid": "^1.8.1",
+        "@finos/perspective": "^1.9.0",
+        "@finos/perspective-viewer": "^1.9.0",
+        "@finos/perspective-viewer-d3fc": "^1.9.0",
+        "@finos/perspective-viewer-datagrid": "^1.9.0",
         "superstore-arrow": "1.0.0"
     }
 }

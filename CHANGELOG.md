@@ -1,5 +1,31 @@
 # Changelog
 
+## [v1.9.0](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.8.1...HEAD)
+
+**Breaking changes:**
+
+- Add Python 3.10 support, deprecate 3.7 [\#2065](https://github.com/finos/perspective/pull/2065) ([texodus](https://github.com/texodus))
+
+**Fixed bugs:**
+
+- Improved point label position [\#2067](https://github.com/finos/perspective/pull/2067) ([texodus](https://github.com/texodus))
+
+**Closed issues:**
+
+- Python `sdist` install error messages are \_terrible\_ [\#2063](https://github.com/finos/perspective/issues/2063)
+- bl.ocks.org down, examples not loading [\#2049](https://github.com/finos/perspective/issues/2049)
+
+**Merged pull requests:**
+
+- Fix CSS compilation for `@finos/perspective-jupyterlab` [\#2069](https://github.com/finos/perspective/pull/2069) ([texodus](https://github.com/texodus))
+- Fix CSS compilation to not inline http resources [\#2068](https://github.com/finos/perspective/pull/2068) ([texodus](https://github.com/texodus))
+- Cleanup examples [\#2057](https://github.com/finos/perspective/pull/2057) ([texodus](https://github.com/texodus))
+- Move examples to `gh-pages` site [\#2054](https://github.com/finos/perspective/pull/2054) ([texodus](https://github.com/texodus))
+- Fix copypasta in code of conduct, fix capitalization in readme [\#2053](https://github.com/finos/perspective/pull/2053) ([timkpaine](https://github.com/timkpaine))
+- Update README gallery [\#2044](https://github.com/finos/perspective/pull/2044) ([texodus](https://github.com/texodus))
+
 ## [v1.8.1](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.8.0...HEAD)
