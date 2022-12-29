@@ -37,16 +37,21 @@ export async function selectionListener(
             !!selected && id.length === selected.length && key_match;
 
         let detail = { selected: !is_deselect };
+        const { row, column_names, config } = await getCellConfig(
+            this,
+            meta.y,
+            meta.x
+        );
+
         if (is_deselect) {
             selected_rows_map.delete(regularTable);
+            detail = {
+                ...detail,
+                row,
+                config: { filter: structuredClone(this._config.filter) },
+            };
         } else {
             selected_rows_map.set(regularTable, id);
-            filter = await getCellConfig(this, meta.y, meta.x);
-            const { row, column_names, config } = await getCellConfig(
-                this,
-                y,
-                x
-            );
             detail = { ...detail, row, column_names, config };
         }
 
