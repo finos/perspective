@@ -954,7 +954,9 @@ jobs:
             ########
             # Macos
             - name: Python Build Steps (Macos)
-              run: yarn _wheel_python --ci --macos
+              run: |
+                  yarn _wheel_python --ci --macos
+                  yarn _wheel_python --ci --macos --arm
               env:
                   PYTHON_VERSION: ${{ matrix.python-version }}
               if: ${{ runner.os == 'macOS' }}
