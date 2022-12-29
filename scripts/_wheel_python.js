@@ -84,7 +84,9 @@ try {
         // cache and numpy paths from the pep-517/518 build in build_python.js
         cmd += `${PYTHON} setup.py build_ext bdist_wheel `;
         if (IS_ARM) {
-          cmd += `--plat-name=macos_11_0_arm64 `;
+            cmd = `CMAKE_OSX_ARCHITECTURES=arm64 ${cmd} --plat-name=macosx_11_0_arm64 `;
+        } else {
+            cmd = `CMAKE_OSX_ARCHITECTURES=x86_64 ${cmd} `;
         }
         cmd += " && mkdir -p ./wheelhouse && cp -v ./dist/*.whl ./wheelhouse ";
     } else {
