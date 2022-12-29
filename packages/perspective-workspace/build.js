@@ -10,9 +10,6 @@ const {
 const {
     IgnoreCSSPlugin,
 } = require("@finos/perspective-esbuild-plugin/ignore_css");
-const {
-    IgnoreFontsPlugin,
-} = require("@finos/perspective-esbuild-plugin/ignore_fonts");
 const { WasmPlugin } = require("@finos/perspective-esbuild-plugin/wasm");
 const { WorkerPlugin } = require("@finos/perspective-esbuild-plugin/worker");
 const { ResolvePlugin } = require("@finos/perspective-esbuild-plugin/resolve");
@@ -36,7 +33,6 @@ const BUILD = [
         plugins: [
             InlineCSSPlugin(),
             IgnoreCSSPlugin(),
-            IgnoreFontsPlugin(),
 
             // Inlining `lumino` and importing the `.ts` source saves _50kb_
             NodeModulesExternal("@lumino"),
@@ -55,7 +51,6 @@ const BUILD = [
         plugins: [
             InlineCSSPlugin(),
             IgnoreCSSPlugin(),
-            IgnoreFontsPlugin(),
             WasmPlugin(true),
             WorkerPlugin({ inline: true }),
         ],
@@ -79,7 +74,6 @@ const BUILD = [
             }),
             InlineCSSPlugin(),
             IgnoreCSSPlugin(),
-            IgnoreFontsPlugin(),
             WasmPlugin(false),
             WorkerPlugin({ inline: false }),
         ],

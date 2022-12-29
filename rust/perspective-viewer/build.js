@@ -15,10 +15,6 @@ const {
 } = require("@finos/perspective-esbuild-plugin/ignore_css");
 
 const {
-    IgnoreFontsPlugin,
-} = require("@finos/perspective-esbuild-plugin/ignore_fonts");
-
-const {
     NodeModulesExternal,
 } = require("@finos/perspective-esbuild-plugin/external");
 
@@ -29,11 +25,7 @@ const BUILD = [
     {
         entryPoints: ["src/ts/perspective-viewer.ts"],
         format: "esm",
-        plugins: [
-            IgnoreCSSPlugin(),
-            IgnoreFontsPlugin(),
-            NodeModulesExternal(),
-        ],
+        plugins: [IgnoreCSSPlugin(), NodeModulesExternal()],
         external: ["*.wasm", "*.worker.js"],
         outdir: "dist/esm",
     },
@@ -41,7 +33,6 @@ const BUILD = [
         entryPoints: ["src/ts/perspective-viewer.ts"],
         plugins: [
             IgnoreCSSPlugin(),
-            IgnoreFontsPlugin(),
             PerspectiveEsbuildPlugin({
                 wasm: { inline: true },
                 worker: { inline: true },
@@ -57,11 +48,7 @@ const BUILD = [
     {
         entryPoints: ["src/ts/perspective-viewer.ts"],
         format: "esm",
-        plugins: [
-            IgnoreCSSPlugin(),
-            IgnoreFontsPlugin(),
-            PerspectiveEsbuildPlugin(),
-        ],
+        plugins: [IgnoreCSSPlugin(), PerspectiveEsbuildPlugin()],
         splitting: true,
         outdir: "dist/cdn",
     },
