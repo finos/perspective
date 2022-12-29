@@ -21,6 +21,7 @@ const {
 } = require("./script_utils.js");
 const IS_DOCKER = process.env.PSP_DOCKER;
 const IS_MACOS = getarg("--macos");
+const IS_ARM = getarg("--arm");
 let IMAGE = "manylinux2014";
 let MANYLINUX_VERSION;
 let PYTHON;
@@ -82,6 +83,9 @@ try {
         // Don't need to do any cleaning here since we will reuse the cmake
         // cache and numpy paths from the pep-517/518 build in build_python.js
         cmd += `${PYTHON} setup.py build_ext bdist_wheel `;
+        if (IS_ARM) {
+          cmd += `--plat-name=macos_11_0_arm64 `;
+        }
         cmd += " && mkdir -p ./wheelhouse && cp -v ./dist/*.whl ./wheelhouse ";
     } else {
         // Windows
