@@ -85,7 +85,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
               with:
                   # for pull_request so we can do HEAD^2
                   fetch-depth: 2
@@ -201,7 +201,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
 
             ##########
             # Caches #
@@ -270,7 +270,7 @@ jobs:
             # Language and Compiler Setup #
             ###############################
             - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v3
+              uses: actions/setup-python@v4
               with:
                   python-version: ${{ matrix.python-version }}
                   cache: "pip"
@@ -425,7 +425,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
 
             ##########
             # Caches #
@@ -462,7 +462,7 @@ jobs:
             # Language and Compiler Setup #
             ###############################
             - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v3
+              uses: actions/setup-python@v4
               with:
                   python-version: ${{ matrix.python-version }}
                   cache: "pip"
@@ -539,7 +539,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
 
             ##########
             # Caches #
@@ -590,7 +590,7 @@ jobs:
             # Language and Compiler Setup #
             ###############################
             - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v3
+              uses: actions/setup-python@v4
               with:
                   python-version: ${{ matrix.python-version }}
                   cache: "pip"
@@ -776,7 +776,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
 
             #####################################################
             # Conditionals                                      #
@@ -867,7 +867,7 @@ jobs:
             # Language and Compiler Setup #
             ###############################
             - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v3
+              uses: actions/setup-python@v4
               with:
                   python-version: ${{ matrix.python-version }}
                   cache: "pip"
@@ -954,7 +954,9 @@ jobs:
             ########
             # Macos
             - name: Python Build Steps (Macos)
-              run: yarn _wheel_python --ci --macos
+              run: |
+                  yarn _wheel_python --ci --macos
+                  yarn _wheel_python --ci --macos --arm
               env:
                   PYTHON_VERSION: ${{ matrix.python-version }}
               if: ${{ runner.os == 'macOS' }}
@@ -1042,7 +1044,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
 
             - uses: actions/download-artifact@v3
               with:
@@ -1121,7 +1123,7 @@ jobs:
             # Language and Compiler Setup #
             ###############################
             - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v3
+              uses: actions/setup-python@v4
               with:
                   python-version: ${{ matrix.python-version }}
                   cache: "pip"
@@ -1248,7 +1250,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
 
             ##########
             # Caches #
@@ -1285,7 +1287,7 @@ jobs:
             # Language and Compiler Setup #
             ###############################
             - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v3
+              uses: actions/setup-python@v4
               with:
                   python-version: ${{ matrix.python-version }}
                   cache: "pip"
@@ -1331,8 +1333,10 @@ jobs:
               run: python -m pip install -U *manylinux2014*.whl --target python/perspective
               if: ${{ runner.os == 'Linux' }}
 
+            # Note, on mac we must install the x86 wheel, the arm64 wheel
+            # would need an arm machine to test
             - name: Install wheel
-              run: python -m pip install -U *.whl --target python/perspective
+              run: python -m pip install -U *x86*.whl --target python/perspective
               if: ${{ runner.os == 'macOS' }}
 
             - name: Install wheel (windows)
@@ -1379,7 +1383,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
 
             ##########
             # Caches #
@@ -1416,7 +1420,7 @@ jobs:
             # Language and Compiler Setup #
             ###############################
             - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v3
+              uses: actions/setup-python@v4
               with:
                   python-version: ${{ matrix.python-version }}
                   cache: "pip"
