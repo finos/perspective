@@ -9,5 +9,5 @@
 
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
-export {PerspectiveView} from "../view";
-export {PerspectiveModel} from "../model";
+export { PerspectiveView } from "../view";
+export { PerspectiveModel } from "../model";
