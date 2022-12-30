@@ -310,7 +310,7 @@ exports.copy_files_to_python_folder = () => {
     });
     fse.copySync(cpp, resolve`${dist}/src`, { preserveTimestamps: true });
     fse.copySync(lic, dlic, { preserveTimestamps: true });
-    fse.copySync(dlic, dreadme, { preserveTimestamps: true });
+    fse.copySync(readme, dreadme, { preserveTimestamps: true });
     fse.copySync(cmake, dcmake, { preserveTimestamps: true });
 };
 
