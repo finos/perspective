@@ -42,11 +42,23 @@ const dev_template = (name) => `
 </li>
 `;
 
-const gists = JSON.parse(fs.readFileSync("gists.json"));
+const gists = [
+    "fractal",
+    "raycasting",
+    "evictions",
+    "streaming",
+    "covid",
+    "movies",
+    "superstore",
+    "citibike",
+    "olympics",
+    "editable",
+    "csv",
+];
 
 const lis = [];
 for (const key of fs.readdirSync("src")) {
-    if (!!gists[key]) {
+    if (gists.indexOf(key) >= 0) {
         lis.push(prod_template(key));
     } else {
         lis.push(dev_template(key));

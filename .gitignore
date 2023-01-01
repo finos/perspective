@@ -19,7 +19,6 @@ package-lock.json
 *.code-workspace
 .history
 /jsconfig.json
-.vscode
 
 # Org-mode
 .org-id-locations
@@ -116,7 +115,6 @@ website/yarn.lock
 website/node_modules
 website/i18n/*
 !website/i18n/en.json
-.vscode
 
 .idea
 cmake-build-debug
@@ -195,3 +193,4 @@ tools/perspective-build/lib
 docs/.docusaurus
 packages/perspective-esbuild-plugin/lib
 docs/static/blocks
+.vscode/c_cpp_properties.json
