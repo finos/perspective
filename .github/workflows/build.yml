@@ -345,50 +345,65 @@ jobs:
             # (listed here in the same order they appear in the directory)
             - uses: actions/upload-artifact@v3
               with:
-                  name: perspective-build
+                  name: perspective-dist
                   path: packages/perspective/dist/
 
             - uses: actions/upload-artifact@v3
               with:
-                  name: perspective-jupyterlab-build
+                  name: perspective-jupyterlab-dist
                   path: packages/perspective-jupyterlab/dist/
 
             - uses: actions/upload-artifact@v3
               with:
-                  name: perspective-viewer-d3fc-build
+                  name: perspective-viewer-d3fc-dist
                   path: packages/perspective-viewer-d3fc/dist
 
             - uses: actions/upload-artifact@v3
               with:
-                  name: perspective-viewer-datagrid-build
+                  name: perspective-viewer-datagrid-dist
                   path: packages/perspective-viewer-datagrid/dist
 
             - uses: actions/upload-artifact@v3
               with:
-                  name: perspective-workspace-build
+                  name: perspective-viewer-openlayers-dist
+                  path: packages/perspective-viewer-openlayers/dist
+
+            - uses: actions/upload-artifact@v3
+              with:
+                  name: perspective-esbuild-plugin-dist
+                  path: packages/perspective-esbuild-plugin/dist
+
+            - uses: actions/upload-artifact@v3
+              with:
+                  name: perspective-webpack-plugin-dist
+                  path: packages/perspective-webpack-plugin/dist
+
+            - uses: actions/upload-artifact@v3
+              with:
+                  name: perspective-cli-dist
+                  path: packages/perspective-cli/dist
+
+            - uses: actions/upload-artifact@v3
+              with:
+                  name: perspective-workspace-dist
                   path: packages/perspective-workspace/dist
 
             - uses: actions/upload-artifact@v3
               with:
-                  name: perspective-viewer-build
+                  name: perspective-viewer-dist
                   path: rust/perspective-viewer/dist
-
-            - uses: actions/upload-artifact@v3
-              with:
-                  name: perspective-viewer-build-build
-                  path: rust/perspective-viewer/build
 
             ######################################################
             # Upload Jupyter artifacts for python build/test/dist
             - uses: actions/upload-artifact@v3
               with:
-                  name: nbextension-build
+                  name: nbextension-dist
                   path: python/perspective/perspective/nbextension
                   # if-no-files-found: error # TODO
 
             - uses: actions/upload-artifact@v3
               with:
-                  name: labextension-build
+                  name: labextension-dist
                   path: python/perspective/perspective/labextension
                   # if-no-files-found: error # TODO
 
@@ -641,38 +656,33 @@ jobs:
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             - uses: actions/download-artifact@v3
               with:
-                  name: perspective-build
+                  name: perspective-dist
                   path: packages/perspective/dist/
 
             - uses: actions/download-artifact@v3
               with:
-                  name: perspective-jupyterlab-build
+                  name: perspective-jupyterlab-dist
                   path: packages/perspective-jupyterlab/dist/
 
             - uses: actions/download-artifact@v3
               with:
-                  name: perspective-viewer-d3fc-build
+                  name: perspective-viewer-d3fc-dist
                   path: packages/perspective-viewer-d3fc/dist
 
             - uses: actions/download-artifact@v3
               with:
-                  name: perspective-viewer-datagrid-build
+                  name: perspective-viewer-datagrid-dist
                   path: packages/perspective-viewer-datagrid/dist
 
             - uses: actions/download-artifact@v3
               with:
-                  name: perspective-workspace-build
+                  name: perspective-workspace-dist
                   path: packages/perspective-workspace/dist
 
             - uses: actions/download-artifact@v3
               with:
-                  name: perspective-viewer-build
+                  name: perspective-viewer-dist
                   path: rust/perspective-viewer/dist
-
-            - uses: actions/download-artifact@v3
-              with:
-                  name: perspective-viewer-build-build
-                  path: rust/perspective-viewer/build
 
             ###############
             # WebAssembly #
@@ -796,13 +806,13 @@ jobs:
             # TODO
             # - uses: actions/download-artifact@v3
             #   with:
-            #     name: nbextension-build
+            #     name: nbextension-dist
             #     python: python/perspective/perspective/nbextension
 
             # TODO
             # - uses: actions/download-artifact@v3
             #   with:
-            #     name: labextension-build
+            #     name: labextension-dist
             #     python: python/perspective/perspective/labextension
 
             ##########
@@ -1048,44 +1058,44 @@ jobs:
 
             - uses: actions/download-artifact@v3
               with:
-                  name: perspective-build
+                  name: perspective-dist
                   path: packages/perspective/dist/
 
             - uses: actions/download-artifact@v3
               with:
-                  name: perspective-jupyterlab-build
+                  name: perspective-jupyterlab-dist
                   path: packages/perspective-jupyterlab/dist/
 
             - uses: actions/download-artifact@v3
               with:
-                  name: perspective-viewer-d3fc-build
+                  name: perspective-viewer-d3fc-dist
                   path: packages/perspective-viewer-d3fc/dist
 
             - uses: actions/download-artifact@v3
               with:
-                  name: perspective-viewer-datagrid-build
+                  name: perspective-viewer-datagrid-dist
                   path: packages/perspective-viewer-datagrid/dist
 
             - uses: actions/download-artifact@v3
               with:
-                  name: perspective-workspace-build
+                  name: perspective-workspace-dist
                   path: packages/perspective-workspace/dist
 
             - uses: actions/download-artifact@v3
               with:
-                  name: perspective-viewer-build
+                  name: perspective-viewer-dist
                   path: rust/perspective-viewer/dist
 
             # TODO
             # - uses: actions/download-artifact@v3
             #   with:
-            #     name: nbextension-build
+            #     name: nbextension-dist
             #     python: python/perspective/perspective/nbextension
 
             # TODO
             # - uses: actions/download-artifact@v3
             #   with:
-            #     name: labextension-build
+            #     name: labextension-dist
             #     python: python/perspective/perspective/labextension
 
             ##########

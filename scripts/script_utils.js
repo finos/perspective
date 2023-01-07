@@ -24,13 +24,6 @@ const isWin = process.platform === "win32";
  * Private
  */
 
-function rimraf_err(e) {
-    if (e) {
-        console.error(e.message);
-        process.exit(1);
-    }
-}
-
 function depath(strings, ...args) {
     if (Array.isArray(strings)) {
         strings = strings.map((x, i) => x + (args[i] || "")).join("");
@@ -80,7 +73,7 @@ const execute_return = async (cmd) => {
     }
 
     const ex = promisify(require("child_process").exec);
-    return await ex(cmd);
+    return await ex(cmd, { maxBuffer: 1024 * 1024 * 100 });
 };
 
 /*******************************************************************************

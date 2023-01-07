@@ -142,7 +142,7 @@
         "fix:json": "prettier --write packages/**/package.json rust/**/package.json examples/**/package.json docs/package.json",
         "fix:python": "node scripts/lint_python.js --fix",
         "fix": "npm-run-all --silent fix:*",
-        "version": "python3 python/perspective/scripts/write_version.py && git add python/perspective/perspective/core/_version.py",
+        "version": "python3 python/perspective/scripts/write_version.py && git add python/perspective/perspective/core/_version.py && node scripts/version.js",
         "jlab_link": "node scripts/jlab_link.js",
         "repl": "node scripts/repl.js"
     }
