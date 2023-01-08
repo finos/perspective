@@ -7,6 +7,12 @@
  *
  */
 
+function it_old_behavior(name, capture) {
+    it(name, function (done) {
+        capture(done);
+    });
+}
+
 module.exports = (perspective) => {
     describe("Delete", function () {
         it("calls all delete callbacks registered on table", async function () {
@@ -77,30 +83,36 @@ module.exports = (perspective) => {
             await table.delete();
         });
 
-        it("properly removes a failed delete callback on a table", async function (done) {
-            const table = await perspective.table([{ x: 1 }]);
+        it_old_behavior(
+            "properly removes a failed delete callback on a table",
+            async function (done) {
+                const table = await perspective.table([{ x: 1 }]);
 
-            // when a callback throws, it should delete that callback
-            table.on_delete(() => {
-                throw new Error("something went wrong!");
-            });
+                // when a callback throws, it should delete that callback
+                table.on_delete(() => {
+                    throw new Error("something went wrong!");
+                });
 
-            table.delete();
-            done();
-        });
+                table.delete();
+                done();
+            }
+        );
 
-        it("properly removes a failed delete callback on a view", async function (done) {
-            const table = await perspective.table([{ x: 1 }]);
-            const view = await table.view();
+        it_old_behavior(
+            "properly removes a failed delete callback on a view",
+            async function (done) {
+                const table = await perspective.table([{ x: 1 }]);
+                const view = await table.view();
 
-            // when a callback throws, it should delete that callback
-            view.on_delete(() => {
-                throw new Error("something went wrong!");
-            });
+                // when a callback throws, it should delete that callback
+                view.on_delete(() => {
+                    throw new Error("something went wrong!");
+                });
 
-            view.delete();
-            table.delete();
-            done();
-        });
+                view.delete();
+                table.delete();
+                done();
+            }
+        );
     });
 };

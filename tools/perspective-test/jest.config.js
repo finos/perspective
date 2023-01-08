@@ -7,12 +7,11 @@
  *
  */
 module.exports = {
-    // rootDir: "../",
     roots: ["test/js/"],
-    verbose: true,
-    testURL: "http://localhost/",
+    testEnvironmentOptions: {
+        url: "http://localhost/",
+    },
     transform: {
-        ".js$": "@finos/perspective-test/src/js/transform.js",
         ".html$": "html-loader-jest",
     },
     transformIgnorePatterns: [
@@ -20,7 +19,8 @@ module.exports = {
     ],
     automock: false,
     setupFiles: ["@finos/perspective-test/src/js/beforeEachSpec.js"],
-    reporters: ["default", "@finos/perspective-test/src/js/reporter.js"],
+    testEnvironment: "@finos/perspective-test/src/js/set_timezone.js",
+    reporters: ["default"],
     globalSetup: "@finos/perspective-test/src/js/globalSetup.js",
     globalTeardown: "@finos/perspective-test/src/js/globalTeardown.js",
 };

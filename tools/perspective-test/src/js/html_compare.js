@@ -15,7 +15,7 @@ const crypto = require("crypto");
  * @param {string} input denormalized xml
  * @returns
  */
-export function normalize_xml(xml) {
+exports.normalize_xml = function normalize_xml(xml) {
     let clean_xml;
     try {
         clean_xml = format_and_clean_xml(xml);
@@ -24,8 +24,8 @@ export function normalize_xml(xml) {
     }
 
     const hash = crypto.createHash("md5").update(clean_xml).digest("hex");
-    return {hash, xml: clean_xml};
-}
+    return { hash, xml: clean_xml };
+};
 
 function format_and_clean_xml(result) {
     return format(result, {

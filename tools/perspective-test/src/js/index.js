@@ -11,12 +11,12 @@ const fs = require("fs");
 const puppeteer = require("puppeteer");
 const path = require("path");
 const execSync = require("child_process").execSync;
-const {track_mouse} = require("./mouse_helper.js");
+const { track_mouse } = require("./mouse_helper.js");
 const readline = require("readline");
 const cons = require("console");
 const private_console = new cons.Console(process.stdout, process.stderr);
 const cp = require("child_process");
-const {normalize_xml} = require("./html_compare.js");
+const { normalize_xml } = require("./html_compare.js");
 
 // Jest does not resolve `exports` field so we must link directly to the file.
 const {
@@ -31,7 +31,7 @@ const {
 
 let __PORT__;
 
-exports.with_server = function with_server({paths}, body) {
+exports.with_server = function with_server({ paths }, body) {
     let server;
     beforeAll(() => {
         if (test_root === "") {
@@ -189,7 +189,9 @@ async function get_new_page() {
 
     // CSS Animations break our screenshot tests, so set the
     // animation playback rate to something extreme.
-    await page._client.send("Animation.setPlaybackRate", {playbackRate: 100.0});
+    await page._client.send("Animation.setPlaybackRate", {
+        playbackRate: 100.0,
+    });
     page.on("console", async (msg) => {
         if (msg.type() === "error" || msg.type() === "warn") {
             const args = await msg.args();
@@ -197,10 +199,10 @@ async function get_new_page() {
                 const val = await arg.jsonValue();
                 // value is serializable
                 if (JSON.stringify(val) !== JSON.stringify({}))
-                    console.log(val);
+                    console.error(val);
                 // value is unserializable (or an empty oject)
                 else {
-                    const {type, subtype, description} = arg._remoteObject;
+                    const { type, subtype, description } = arg._remoteObject;
                     private_console.log(`${subtype}: ${description}`);
                     if (msg.type() === "error")
                         errors.push(`${type}/${subtype}: ${description}`);
@@ -224,7 +226,7 @@ function get_results(filename) {
     }
 }
 
-beforeAll(async (done) => {
+beforeAll(async () => {
     try {
         browser = await puppeteer.connect({
             browserWSEndpoint: process.env.PSP_BROWSER_ENDPOINT,
@@ -249,8 +251,6 @@ beforeAll(async (done) => {
         }
     } catch (e) {
         console.error(e);
-    } finally {
-        done();
     }
 }, 30000);
 
@@ -270,14 +270,14 @@ function write_results(updated, filename) {
     fs.writeFileSync(dir_name, JSON.stringify(results2, null, 4));
 }
 
-afterAll(() => {
+afterAll(async () => {
     try {
         if (process.env.WRITE_TESTS) {
             write_results(new_results, RESULTS_FILENAME);
             write_results(new_debug_results, RESULTS_DEBUG_FILENAME);
         }
         if (page) {
-            page.close();
+            await page.close();
         }
     } catch (e) {
         private_console.error(e);
@@ -300,7 +300,7 @@ function mkdirSyncRec(targetDir) {
 describe.page = (
     url,
     body,
-    {reload_page = false, check_results = true, name, root} = {}
+    { reload_page = false, check_results = true, name, root } = {}
 ) => {
     let _url = url ? url : page_url;
     test_root = root ? root : test_root;
@@ -358,7 +358,7 @@ expect.extend({
 test.run = function run(
     name,
     body,
-    {url = page_url, timeout = 60000, viewport = null}
+    { url = page_url, timeout = 60000, viewport = null }
 ) {
     test(
         name,
@@ -408,8 +408,9 @@ test.capture = function capture(
             const iterations = process.env.PSP_SATURATE ? 10 : 1;
 
             const test_name = `${name.replace(/[ \.']/g, "_")}`;
-            const path_name = `${spec.result.fullName
-                .replace(".html", "")
+            const path_name = `${expect
+                .getState()
+                .currentTestName.replace(".html", "")
                 .replace(/[ \.']/g, "_")}`;
             let dir_name = path.join(
                 test_root,
@@ -438,7 +439,7 @@ test.capture = function capture(
                         `http://127.0.0.1:${__PORT__}/${url}#test=${encodeURIComponent(
                             name
                         )}`,
-                        {waitUntil: "domcontentloaded"}
+                        { waitUntil: "domcontentloaded" }
                     );
                 } else {
                     await page.evaluate(async (x) => {
@@ -498,7 +499,7 @@ test.capture = function capture(
                     throw e;
                 }
 
-                let {xml: result, hash} = normalize_xml(raw_xml);
+                let { xml: result, hash } = normalize_xml(raw_xml);
 
                 if (hash === results[path_name]) {
                     if (

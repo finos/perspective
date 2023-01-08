@@ -10,6 +10,12 @@
 const _ = require("lodash");
 const arrows = require("./test_arrows.js");
 
+function it_old_behavior(name, capture) {
+    it(name, function (done) {
+        capture(done);
+    });
+}
+
 var data = [
     { x: 1, y: "a", z: true },
     { x: 2, y: "b", z: false },
@@ -1210,7 +1216,7 @@ module.exports = (perspective) => {
     });
 
     describe("Notifications", function () {
-        it("`on_update()`", async function (done) {
+        it_old_behavior("`on_update()`", async function (done) {
             var table = await perspective.table(meta);
             var view = await table.view();
             view.on_update(
@@ -1225,27 +1231,30 @@ module.exports = (perspective) => {
             table.update(data);
         });
 
-        it("`on_update` before and after `update()`", async function (done) {
-            var table = await perspective.table(meta);
-            var view = await table.view();
-            table.update(data);
-            var ran = false;
-            view.on_update(
-                async function (updated) {
-                    if (!ran) {
-                        await match_delta(perspective, updated.delta, data);
-                        ran = true;
-                        view.delete();
-                        table.delete();
-                        done();
-                    }
-                },
-                { mode: "row" }
-            );
-            table.update(data);
-        });
+        it_old_behavior(
+            "`on_update` before and after `update()`",
+            async function (done) {
+                var table = await perspective.table(meta);
+                var view = await table.view();
+                table.update(data);
+                var ran = false;
+                view.on_update(
+                    async function (updated) {
+                        if (!ran) {
+                            await match_delta(perspective, updated.delta, data);
+                            ran = true;
+                            view.delete();
+                            table.delete();
+                            done();
+                        }
+                    },
+                    { mode: "row" }
+                );
+                table.update(data);
+            }
+        );
 
-        it("`on_update(table.update) !`", async function (done) {
+        it_old_behavior("`on_update(table.update) !`", async function (done) {
             var table1 = await perspective.table(meta);
             var table2 = await perspective.table(meta);
             var view1 = await table1.view();
@@ -1266,135 +1275,150 @@ module.exports = (perspective) => {
             table1.update(data);
         });
 
-        it("`on_update(table.update)` before and after `update()`", async function (done) {
-            var table1 = await perspective.table(meta);
-            var table2 = await perspective.table(meta);
-            var view1 = await table1.view();
-            var view2 = await table2.view();
+        it_old_behavior(
+            "`on_update(table.update)` before and after `update()`",
+            async function (done) {
+                var table1 = await perspective.table(meta);
+                var table2 = await perspective.table(meta);
+                var view1 = await table1.view();
+                var view2 = await table2.view();
 
-            table1.update(data);
-            table2.update(data);
-            view1.on_update(
-                async function (updated) {
-                    table2.update(updated.delta);
-                    let result = await view2.to_json();
-                    expect(result).toEqual(data.concat(data));
-                    view1.delete();
-                    view2.delete();
-                    table1.delete();
-                    table2.delete();
-                    done();
-                },
-                { mode: "row" }
-            );
-            table1.update(data);
-        });
+                table1.update(data);
+                table2.update(data);
+                view1.on_update(
+                    async function (updated) {
+                        table2.update(updated.delta);
+                        let result = await view2.to_json();
+                        expect(result).toEqual(data.concat(data));
+                        view1.delete();
+                        view2.delete();
+                        table1.delete();
+                        table2.delete();
+                        done();
+                    },
+                    { mode: "row" }
+                );
+                table1.update(data);
+            }
+        );
 
-        it("properly removes a failed update callback on a table", async function (done) {
-            const table = await perspective.table({ x: "integer" });
-            const view = await table.view();
-            let size = await table.size();
-            let counter = 0;
+        it_old_behavior(
+            "properly removes a failed update callback on a table",
+            async function (done) {
+                const table = await perspective.table({ x: "integer" });
+                const view = await table.view();
+                let size = await table.size();
+                let counter = 0;
 
-            // when a callback throws, it should delete that callback
-            view.on_update(() => {
-                counter++;
-                throw new Error("something went wrong!");
-            });
+                // when a callback throws, it should delete that callback
+                view.on_update(() => {
+                    counter++;
+                    throw new Error("something went wrong!");
+                });
 
-            view.on_update(async () => {
-                // failed callback gets removed; non-failing callback gets called
-                let sz = await table.size();
-                expect(counter).toEqual(1);
-                expect(sz).toEqual(size++);
-            });
+                view.on_update(async () => {
+                    // failed callback gets removed; non-failing callback gets called
+                    let sz = await table.size();
+                    expect(counter).toEqual(1);
+                    expect(sz).toEqual(size++);
+                });
 
-            table.update([{ x: 1 }]);
-            table.update([{ x: 2 }]);
-            table.update([{ x: 3 }]);
+                table.update([{ x: 1 }]);
+                table.update([{ x: 2 }]);
+                table.update([{ x: 3 }]);
 
-            const view2 = await table.view(); // create a new view to make sure we process every update transacation.
-            const final_size = await table.size();
-            expect(final_size).toEqual(3);
+                const view2 = await table.view(); // create a new view to make sure we process every update transacation.
+                const final_size = await table.size();
+                expect(final_size).toEqual(3);
 
-            view2.delete();
-            view.delete();
-            table.delete();
-            done();
-        });
-
-        it("`on_update()` that calls operations on the table should not recurse", async function (done) {
-            var table = await perspective.table(meta);
-            var view = await table.view();
-            view.on_update(async function (updated) {
-                expect(updated.port_id).toEqual(0);
-                const json = await view.to_json();
-                // Not checking for correctness, literally just to assert
-                // that the `process()` call triggered by `to_json` will not
-                // infinitely recurse.
-                expect(json).toEqual(await view.to_json());
+                view2.delete();
                 view.delete();
                 table.delete();
                 done();
-            });
-            table.update(data);
-        });
+            }
+        );
 
-        it("`on_update()` should be triggered in sequence", async function (done) {
-            var table = await perspective.table(meta);
-            var view = await table.view();
-
-            let order = [];
-
-            const finish = function () {
-                if (order.length === 3) {
-                    expect(order).toEqual([0, 1, 2]);
+        it_old_behavior(
+            "`on_update()` that calls operations on the table should not recurse",
+            async function (done) {
+                var table = await perspective.table(meta);
+                var view = await table.view();
+                view.on_update(async function (updated) {
+                    expect(updated.port_id).toEqual(0);
+                    const json = await view.to_json();
+                    // Not checking for correctness, literally just to assert
+                    // that the `process()` call triggered by `to_json` will not
+                    // infinitely recurse.
+                    expect(json).toEqual(await view.to_json());
                     view.delete();
                     table.delete();
                     done();
-                }
-            };
-
-            for (let i = 0; i < 3; i++) {
-                view.on_update(() => {
-                    order.push(i);
-                    finish();
                 });
+                table.update(data);
             }
+        );
 
-            table.update(data);
-        });
+        it_old_behavior(
+            "`on_update()` should be triggered in sequence",
+            async function (done) {
+                var table = await perspective.table(meta);
+                var view = await table.view();
 
-        it("`on_update()` should be triggered in sequence across multiple views", async function (done) {
-            var table = await perspective.table(meta);
-            const views = [
-                await table.view(),
-                await table.view(),
-                await table.view(),
-            ];
+                let order = [];
 
-            let order = [];
-
-            const finish = function () {
-                if (order.length === 3) {
-                    expect(order).toEqual([0, 1, 2]);
-                    for (const view of views) {
+                const finish = function () {
+                    if (order.length === 3) {
+                        expect(order).toEqual([0, 1, 2]);
                         view.delete();
+                        table.delete();
+                        done();
                     }
-                    table.delete();
-                    done();
+                };
+
+                for (let i = 0; i < 3; i++) {
+                    view.on_update(() => {
+                        order.push(i);
+                        finish();
+                    });
                 }
-            };
 
-            for (let i = 0; i < views.length; i++) {
-                views[i].on_update(() => {
-                    order.push(i);
-                    finish();
-                });
+                table.update(data);
             }
+        );
 
-            table.update(data);
-        });
+        it_old_behavior(
+            "`on_update()` should be triggered in sequence across multiple views",
+            async function (done) {
+                var table = await perspective.table(meta);
+                const views = [
+                    await table.view(),
+                    await table.view(),
+                    await table.view(),
+                ];
+
+                let order = [];
+
+                const finish = function () {
+                    if (order.length === 3) {
+                        expect(order).toEqual([0, 1, 2]);
+                        for (const view of views) {
+                            view.delete();
+                        }
+                        table.delete();
+                        done();
+                    }
+                };
+
+                for (let i = 0; i < views.length; i++) {
+                    views[i].on_update(() => {
+                        order.push(i);
+                        finish();
+                    });
+                }
+
+                table.update(data);
+            }
+        );
     });
 
     describe("Limit", function () {
@@ -1700,7 +1724,7 @@ module.exports = (perspective) => {
             table.delete();
         });
 
-        it("update and index (int)", async function (done) {
+        it_old_behavior("update and index (int)", async function (done) {
             var table = await perspective.table(meta, { index: "x" });
             var view = await table.view();
             table.update(data);
@@ -1718,7 +1742,7 @@ module.exports = (perspective) => {
             table.update(data_2);
         });
 
-        it("update and index (string)", async function (done) {
+        it_old_behavior("update and index (string)", async function (done) {
             var table = await perspective.table(meta, { index: "y" });
             var view = await table.view();
             table.update(data);
@@ -1760,7 +1784,7 @@ module.exports = (perspective) => {
             table.delete();
         });
 
-        it("partial update", async function (done) {
+        it_old_behavior("partial update", async function (done) {
             var partial = [
                 { x: 5, y: "a" },
                 { y: "b", z: true },
@@ -1792,160 +1816,172 @@ module.exports = (perspective) => {
             table.update(partial);
         });
 
-        it("partial column oriented update", async function (done) {
-            var partial = {
-                x: [5, undefined],
-                y: ["a", "b"],
-                z: [undefined, true],
-            };
+        it_old_behavior(
+            "partial column oriented update",
+            async function (done) {
+                var partial = {
+                    x: [5, undefined],
+                    y: ["a", "b"],
+                    z: [undefined, true],
+                };
 
-            var expected = [
-                { x: 5, y: "a", z: true },
-                { x: 2, y: "b", z: true },
-                { x: 3, y: "c", z: true },
-                { x: 4, y: "d", z: false },
-            ];
-            var table = await perspective.table(meta, { index: "y" });
-            var view = await table.view();
-            table.update(col_data);
-            view.on_update(
-                async function (updated) {
-                    await match_delta(
-                        perspective,
-                        updated.delta,
-                        expected.slice(0, 2)
-                    );
-                    let json = await view.to_json();
-                    expect(json).toEqual(expected);
-                    view.delete();
-                    table.delete();
-                    done();
-                },
-                { mode: "row" }
-            );
-            table.update(partial);
-        });
+                var expected = [
+                    { x: 5, y: "a", z: true },
+                    { x: 2, y: "b", z: true },
+                    { x: 3, y: "c", z: true },
+                    { x: 4, y: "d", z: false },
+                ];
+                var table = await perspective.table(meta, { index: "y" });
+                var view = await table.view();
+                table.update(col_data);
+                view.on_update(
+                    async function (updated) {
+                        await match_delta(
+                            perspective,
+                            updated.delta,
+                            expected.slice(0, 2)
+                        );
+                        let json = await view.to_json();
+                        expect(json).toEqual(expected);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    { mode: "row" }
+                );
+                table.update(partial);
+            }
+        );
 
-        it("Partial column oriented update with new pkey", async function (done) {
-            const data = {
-                x: [0, 1, null, 2, 3],
-                y: ["a", "b", "c", "d", "e"],
-            };
-            const table = await perspective.table(data, { index: "x" });
-            const view = await table.view();
-            const result = await view.to_columns();
+        it_old_behavior(
+            "Partial column oriented update with new pkey",
+            async function (done) {
+                const data = {
+                    x: [0, 1, null, 2, 3],
+                    y: ["a", "b", "c", "d", "e"],
+                };
+                const table = await perspective.table(data, { index: "x" });
+                const view = await table.view();
+                const result = await view.to_columns();
 
-            expect(result).toEqual({
-                x: [null, 0, 1, 2, 3], // null before 0
-                y: ["c", "a", "b", "d", "e"],
-            });
+                expect(result).toEqual({
+                    x: [null, 0, 1, 2, 3], // null before 0
+                    y: ["c", "a", "b", "d", "e"],
+                });
 
-            const expected = {
-                x: [null, 0, 1, 2, 3, 4],
-                y: ["c", "a", "b", "d", "e", "f"],
-            };
+                const expected = {
+                    x: [null, 0, 1, 2, 3, 4],
+                    y: ["c", "a", "b", "d", "e", "f"],
+                };
 
-            view.on_update(
-                async function (updated) {
-                    await match_delta(perspective, updated.delta, [
-                        {
-                            x: 4,
-                            y: "f",
-                        },
-                    ]);
-                    const result2 = await view.to_columns();
-                    expect(result2).toEqual(expected);
-                    view.delete();
-                    table.delete();
-                    done();
-                },
-                { mode: "row" }
-            );
+                view.on_update(
+                    async function (updated) {
+                        await match_delta(perspective, updated.delta, [
+                            {
+                                x: 4,
+                                y: "f",
+                            },
+                        ]);
+                        const result2 = await view.to_columns();
+                        expect(result2).toEqual(expected);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    { mode: "row" }
+                );
 
-            table.update({
-                x: [4],
-                y: ["f"],
-            });
-        });
+                table.update({
+                    x: [4],
+                    y: ["f"],
+                });
+            }
+        );
 
-        it("Partial column oriented update with new pkey, missing columns", async function (done) {
-            const data = {
-                x: [0, 1, null, 2, 3],
-                y: ["a", "b", "c", "d", "e"],
-                z: [true, false, true, false, true],
-            };
-            const table = await perspective.table(data, { index: "x" });
-            const view = await table.view();
-            const result = await view.to_columns();
+        it_old_behavior(
+            "Partial column oriented update with new pkey, missing columns",
+            async function (done) {
+                const data = {
+                    x: [0, 1, null, 2, 3],
+                    y: ["a", "b", "c", "d", "e"],
+                    z: [true, false, true, false, true],
+                };
+                const table = await perspective.table(data, { index: "x" });
+                const view = await table.view();
+                const result = await view.to_columns();
 
-            expect(result).toEqual({
-                x: [null, 0, 1, 2, 3], // null before 0
-                y: ["c", "a", "b", "d", "e"],
-                z: [true, true, false, false, true],
-            });
+                expect(result).toEqual({
+                    x: [null, 0, 1, 2, 3], // null before 0
+                    y: ["c", "a", "b", "d", "e"],
+                    z: [true, true, false, false, true],
+                });
 
-            const expected = {
-                x: [null, 0, 1, 2, 3, 4],
-                y: ["c", "a", "b", "d", "e", "f"],
-                z: [true, true, false, false, true, null],
-            };
+                const expected = {
+                    x: [null, 0, 1, 2, 3, 4],
+                    y: ["c", "a", "b", "d", "e", "f"],
+                    z: [true, true, false, false, true, null],
+                };
 
-            view.on_update(
-                async function (updated) {
-                    await match_delta(perspective, updated.delta, [
-                        {
-                            x: 4,
-                            y: "f",
-                            z: null,
-                        },
-                    ]);
-                    const result2 = await view.to_columns();
-                    expect(result2).toEqual(expected);
-                    view.delete();
-                    table.delete();
-                    done();
-                },
-                { mode: "row" }
-            );
+                view.on_update(
+                    async function (updated) {
+                        await match_delta(perspective, updated.delta, [
+                            {
+                                x: 4,
+                                y: "f",
+                                z: null,
+                            },
+                        ]);
+                        const result2 = await view.to_columns();
+                        expect(result2).toEqual(expected);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    { mode: "row" }
+                );
 
-            table.update({
-                x: [4],
-                y: ["f"],
-            });
-        });
+                table.update({
+                    x: [4],
+                    y: ["f"],
+                });
+            }
+        );
 
-        it("partial column oriented update with entire columns missing", async function (done) {
-            var partial = {
-                y: ["a", "b"],
-                z: [false, true],
-            };
+        it_old_behavior(
+            "partial column oriented update with entire columns missing",
+            async function (done) {
+                var partial = {
+                    y: ["a", "b"],
+                    z: [false, true],
+                };
 
-            var expected = [
-                { x: 1, y: "a", z: false },
-                { x: 2, y: "b", z: true },
-                { x: 3, y: "c", z: true },
-                { x: 4, y: "d", z: false },
-            ];
-            var table = await perspective.table(meta, { index: "y" });
-            var view = await table.view();
-            table.update(col_data);
-            view.on_update(
-                async function (updated) {
-                    await match_delta(
-                        perspective,
-                        updated.delta,
-                        expected.slice(0, 2)
-                    );
-                    let json = await view.to_json();
-                    expect(json).toEqual(expected);
-                    view.delete();
-                    table.delete();
-                    done();
-                },
-                { mode: "row" }
-            );
-            table.update(partial);
-        });
+                var expected = [
+                    { x: 1, y: "a", z: false },
+                    { x: 2, y: "b", z: true },
+                    { x: 3, y: "c", z: true },
+                    { x: 4, y: "d", z: false },
+                ];
+                var table = await perspective.table(meta, { index: "y" });
+                var view = await table.view();
+                table.update(col_data);
+                view.on_update(
+                    async function (updated) {
+                        await match_delta(
+                            perspective,
+                            updated.delta,
+                            expected.slice(0, 2)
+                        );
+                        let json = await view.to_json();
+                        expect(json).toEqual(expected);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    { mode: "row" }
+                );
+                table.update(partial);
+            }
+        );
     });
 
     describe("null handling", function () {
@@ -2557,7 +2593,7 @@ module.exports = (perspective) => {
     });
 
     describe("Remove update", function () {
-        it("Should remove a single update", async function (done) {
+        it_old_behavior("Should remove a single update", async function (done) {
             const cb1 = jest.fn();
             const cb2 = () => {
                 expect(cb1).toBeCalledTimes(0);
@@ -2575,29 +2611,32 @@ module.exports = (perspective) => {
             table.update(data);
         });
 
-        it("Should remove multiple updates", async function (done) {
-            const cb1 = jest.fn();
-            const cb2 = jest.fn();
-            const cb3 = function () {
-                // cb2 should have been called
-                expect(cb1).toBeCalledTimes(0);
-                expect(cb2).toBeCalledTimes(0);
-                setTimeout(() => {
-                    view.delete();
-                    table.delete();
-                    done();
-                }, 0);
-            };
+        it_old_behavior(
+            "Should remove multiple updates",
+            async function (done) {
+                const cb1 = jest.fn();
+                const cb2 = jest.fn();
+                const cb3 = function () {
+                    // cb2 should have been called
+                    expect(cb1).toBeCalledTimes(0);
+                    expect(cb2).toBeCalledTimes(0);
+                    setTimeout(() => {
+                        view.delete();
+                        table.delete();
+                        done();
+                    }, 0);
+                };
 
-            const table = await perspective.table(meta);
-            const view = await table.view();
-            view.on_update(cb1);
-            view.on_update(cb2);
-            view.on_update(cb3);
-            view.remove_update(cb1);
-            view.remove_update(cb2);
-            table.update(data);
-        });
+                const table = await perspective.table(meta);
+                const view = await table.view();
+                view.on_update(cb1);
+                view.on_update(cb2);
+                view.on_update(cb3);
+                view.remove_update(cb1);
+                view.remove_update(cb2);
+                table.update(data);
+            }
+        );
     });
 
     describe("Filtered update and remove", () => {

@@ -36,8 +36,7 @@
         "bench:run": "echo \"No Benchmarks\"",
         "prebuild": "mkdirp dist/esm",
         "build": "node ./build.js",
-        "test:build": "cpy --cwd test \"html/*\" ../dist/umd",
-        "watch": ":",
+        "test:build": "cpy \"test/html/*\" dist/umd",
         "test:run": "jest --rootDir=. --config=../../tools/perspective-test/jest.config.js --color",
         "test:unit": "jest --rootDir=. --roots=test/js/unit --config=../../tools/perspective-test/jest.config.js --color --runInBand",
         "test": "npm-run-all test:build test:run",
@@ -57,12 +56,15 @@
         "@finos/perspective": "^1.9.1",
         "@finos/perspective-viewer": "^1.9.1",
         "chroma-js": "^1.3.4",
-        "d3": "^7.1.1",
+        "d3fc": "^15.2.4",
+        "d3-selection": "^3.0.0",
+        "d3-array": "^3.2.1",
         "d3-svg-legend": "^2.25.6",
-        "d3fc": "15.2.4",
+        "d3": "^7.8.0",
         "gradient-parser": "1.0.2"
     },
     "devDependencies": {
+        "@finos/perspective-esbuild-plugin": "^1.9.1",
         "@finos/perspective-test": "^1.9.1"
     }
 }
