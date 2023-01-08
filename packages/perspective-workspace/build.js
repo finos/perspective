@@ -1,15 +1,7 @@
-const { lessLoader } = require("esbuild-plugin-less");
 const { execSync } = require("child_process");
-
-const {
-    InlineCSSPlugin,
-} = require("@finos/perspective-esbuild-plugin/inline_css");
 const {
     NodeModulesExternal,
 } = require("@finos/perspective-esbuild-plugin/external");
-const {
-    IgnoreCSSPlugin,
-} = require("@finos/perspective-esbuild-plugin/ignore_css");
 const { WasmPlugin } = require("@finos/perspective-esbuild-plugin/wasm");
 const { WorkerPlugin } = require("@finos/perspective-esbuild-plugin/worker");
 const { ResolvePlugin } = require("@finos/perspective-esbuild-plugin/resolve");
@@ -17,28 +9,18 @@ const { build } = require("@finos/perspective-esbuild-plugin/build");
 
 const BUILD = [
     {
-        entryPoints: [
-            "src/themes/material.less",
-            "src/themes/material-dark.less",
-        ],
-        plugins: [lessLoader()],
-        outdir: "dist/css",
-    },
-    {
         entryPoints: ["src/js/perspective-workspace.js"],
         define: {
             global: "window",
         },
         format: "esm",
         plugins: [
-            InlineCSSPlugin(),
-            IgnoreCSSPlugin(),
-
             // Inlining `lumino` and importing the `.ts` source saves _50kb_
             NodeModulesExternal("@lumino"),
         ],
         loader: {
             ".html": "text",
+            ".css": "text",
         },
         external: ["*.wasm"],
         outfile: "dist/esm/perspective-workspace.js",
@@ -48,14 +30,10 @@ const BUILD = [
         define: {
             global: "window",
         },
-        plugins: [
-            InlineCSSPlugin(),
-            IgnoreCSSPlugin(),
-            WasmPlugin(true),
-            WorkerPlugin({ inline: true }),
-        ],
+        plugins: [WasmPlugin(true), WorkerPlugin({ inline: true })],
         format: "iife",
         loader: {
+            ".css": "text",
             ".html": "text",
         },
         outfile: "dist/umd/perspective-workspace.js",
@@ -72,21 +50,86 @@ const BUILD = [
                 "@finos/perspective-viewer":
                     "@finos/perspective-viewer/dist/esm/perspective-viewer.js",
             }),
-            InlineCSSPlugin(),
-            IgnoreCSSPlugin(),
             WasmPlugin(false),
             WorkerPlugin({ inline: false }),
         ],
         format: "esm",
         splitting: true,
         loader: {
+            ".css": "text",
             ".html": "text",
         },
         outdir: "dist/cdn",
     },
 ];
 
+const { BuildCss } = require("@prospective.co/procss/target/cjs/procss.js");
+const fs = require("fs");
+
+function add(builder, path, path2) {
+    builder.add(
+        path,
+        fs.readFileSync(require.resolve(path2 || path)).toString()
+    );
+}
+
 async function build_all() {
+    fs.mkdirSync("build/css", { recursive: true });
+    fs.mkdirSync("dist/css", { recursive: true });
+    const builder3 = new BuildCss("");
+
+    add(builder3, "@lumino/widgets/style/widget.css");
+    add(builder3, "@lumino/widgets/style/accordionpanel.css");
+    add(builder3, "@lumino/widgets/style/commandpalette.css");
+    add(builder3, "@lumino/widgets/style/dockpanel.css");
+    add(builder3, "@lumino/widgets/style/menu.css");
+    add(builder3, "@lumino/widgets/style/menubar.css");
+    add(builder3, "@lumino/widgets/style/scrollbar.css");
+    add(builder3, "@lumino/widgets/style/splitpanel.css");
+    add(builder3, "@lumino/widgets/style/tabbar.css");
+    add(builder3, "@lumino/widgets/style/tabpanel.css");
+
+    add(builder3, "@lumino/widgets/style/menu.css");
+    add(builder3, "@lumino/widgets/style/index.css");
+
+    add(builder3, "./tabbar.less", "./src/less/tabbar.less");
+    add(builder3, "./dockpanel.less", "./src/less/dockpanel.less");
+    add(builder3, "./widget.less", "./src/less/widget.less");
+
+    add(builder3, "./viewer.less", "./src/less/viewer.less");
+    add(builder3, "./menu.less", "./src/less/menu.less");
+    add(builder3, "./workspace.less", "./src/less/workspace.less");
+    add(builder3, "./injected.less", "./src/less/injected.less");
+    fs.writeFileSync(
+        "build/css/workspace.css",
+        builder3.compile().get("workspace.css")
+    );
+
+    fs.writeFileSync(
+        "build/css/injected.css",
+        builder3.compile().get("injected.css")
+    );
+
+    const builder = new BuildCss("");
+    add(builder, "@finos/perspective-viewer/dist/css/material.css");
+    add(builder, "material.scss", "./src/themes/material.less");
+    add(builder, "material2.scss", "./src/themes/material.less");
+    fs.writeFileSync(
+        "dist/css/material.css",
+        builder.compile().get("material2.css")
+    );
+
+    const builder2 = new BuildCss("");
+    add(builder2, "@finos/perspective-viewer/dist/css/material.css");
+    add(builder2, "@finos/perspective-viewer/dist/css/material-dark.css");
+    add(builder2, "@finos/perspective-viewer/src/themes/variables.less");
+    add(builder2, "material.less", "./src/themes/material.less");
+    add(builder2, "material-dark2.scss", "./src/themes/material-dark.less");
+    fs.writeFileSync(
+        "dist/css/material-dark.css",
+        builder2.compile().get("material-dark2.css")
+    );
+
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
     execSync("cpy dist/css/* dist/umd");
 }

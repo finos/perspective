@@ -7,10 +7,10 @@
  *
  */
 
-@import (less) "@finos/perspective-viewer/src/themes/variables.less";
-@import (inline) "@finos/perspective-viewer/dist/css/material-dark.css";
+@import url("ref://@finos/perspective-viewer/src/themes/variables.less");
+@import "@finos/perspective-viewer/dist/css/material-dark.css";
 
-@import (reference) "./material.less";
+@import url("ref://material.less");
 
 perspective-workspace,
 perspective-workspace[theme="Material Dark"],
@@ -19,7 +19,7 @@ perspective-indicator[theme="Material Dark"] {
 }
 
 perspective-workspace {
-    .perspective-workspace-material-base();
+    @include perspective-workspace-material-base;
     background-color: @grey800;
     color: white;
     --workspace-master--background-color: @grey800;
