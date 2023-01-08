@@ -13,8 +13,8 @@
             "require": "./dist/umd/perspective-workspace.js"
         },
         "./esm/": "./dist/esm/",
-        "./src/": "./src/",
-        "./dist/": "./dist/",
+        "./src/*": "./src/*",
+        "./dist/*": "./dist/*",
         "./dist/themes/": "./src/themes/",
         "./package.json": "./package.json"
     },

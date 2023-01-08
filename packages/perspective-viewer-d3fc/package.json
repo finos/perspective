@@ -10,8 +10,8 @@
             "require": "./dist/umd/perspective-viewer-d3fc.js",
             "import": "./dist/esm/perspective-viewer-d3fc.js"
         },
-        "./src/": "./src/",
-        "./dist/": "./dist/",
+        "./src/*": "./src/*",
+        "./dist/*": "./dist/*",
         "./cdn/": "./dist/cdn/",
         "./esm/": "./dist/esm/",
         "./area": "./dist/esm/area.js",

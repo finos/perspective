@@ -84,12 +84,12 @@ module.exports.sync_module = () => SYNC_SERVER.perspective;
 const DEFAULT_ASSETS = [
     "@finos/perspective/dist/cdn",
     "@finos/perspective-bench/dist",
+    "@finos/perspective-workspace/dist/cdn",
+    "@finos/perspective-workspace/dist/css",
     "@finos/perspective-viewer/dist/cdn",
     "@finos/perspective-viewer/dist/css",
     "@finos/perspective-viewer-datagrid/dist/cdn",
     "@finos/perspective-viewer-d3fc/dist/cdn",
-    "@finos/perspective-workspace/dist/cdn",
-    "@finos/perspective-workspace/dist/css",
     "@finos/perspective-jupyterlab/dist/cdn",
 ];
 
@@ -231,6 +231,7 @@ class WebSocketServer extends WebSocketManager {
     }
 
     close() {
+        super.clear();
         this._server.close();
     }
 }

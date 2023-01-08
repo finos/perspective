@@ -24,7 +24,7 @@ export class WebSocketManager extends Server {
         this.chunk_size = 50 * 1000 * 1000;
 
         // clear invalid connections
-        setInterval(() => {
+        this._timer = setInterval(() => {
             Object.entries(this.websockets).forEach(([id, ws]) => {
                 if (ws.isAlive === false) {
                     delete this.websockets[id];
@@ -33,6 +33,10 @@ export class WebSocketManager extends Server {
                 ws.isAlive = false;
             });
         }, 30000);
+    }
+
+    clear() {
+        clearInterval(this._timer);
     }
 
     /**

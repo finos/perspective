@@ -104,14 +104,17 @@ async function host(filename, options) {
 
         const pages = await browser.pages();
 
-        // console.log("Fukc");
         const page = pages[0];
         page.on("close", () => {
             browser.close();
             process.exit(0);
         });
     }
+
+    return server;
 }
+
+module.exports.host = host;
 
 program
     .version(
@@ -158,8 +161,6 @@ program
     .option("-o, --open", "Open a browser automagically.")
     .action(host);
 
-program.parse(process.argv);
-
-if (!process.argv.slice(2).length) {
+if (require.main && !process.argv.slice(2).length) {
     program.help();
 }
