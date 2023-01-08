@@ -7,16 +7,15 @@
  *
  */
 
-const { execute } = require("./script_utils.js");
+const { run_with_scope } = require("./script_utils.js");
 
-try {
-    let scope =
-        process.env.PACKAGE && process.env.PACKAGE !== ""
-            ? `${process.env.PACKAGE}`
-            : "*";
-
-    execute`GODEBUG=asyncpreemptoff=1 lerna exec --scope="@finos/${scope}" -- yarn build`;
-} catch (e) {
-    console.log(e.message);
-    process.exit(1);
+async function run() {
+    try {
+        await run_with_scope`build`;
+    } catch (e) {
+        console.log(e.message);
+        process.exit(1);
+    }
 }
+
+run();

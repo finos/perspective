@@ -156,9 +156,9 @@ function askQuestion(query) {
 
             js_dist_folders = [
                 ...js_dist_folders,
-                ...resp.data.artifacts.filter(
-                    (artifact) => gh_js_dist_folders.indexOf(artifact.name) >= 0
-                ),
+                ...resp.data.artifacts.filter((artifact) => {
+                    return gh_js_dist_folders.indexOf(artifact.name) >= 0;
+                }),
             ];
 
             page += 1;
@@ -169,10 +169,17 @@ function askQuestion(query) {
             `Found ${python_dist_folders.length} python folders, expected ${gh_python_dist_folders.length}`
         );
 
+        console.log(
+            `Found ${js_dist_folders.length} javascript folders, expected ${gh_js_dist_folders.length}`
+        );
+
         // If they vary (e.g. a partial run), ask the user if they're sure
         // they want to proceed
         let proceed = "y";
-        if (python_dist_folders.length !== gh_python_dist_folders.length) {
+        if (
+            python_dist_folders.length !== gh_python_dist_folders.length ||
+            js_dist_folders.length !== gh_js_dist_folders.length
+        ) {
             proceed = "n";
             proceed = await askQuestion("Proceed? (y/N)");
         }
@@ -263,6 +270,7 @@ function askQuestion(query) {
             await Promise.all(
                 js_dist_folders.map(async (artifact) => {
                     // Download the Artifact
+                    console.log;
                     const download = await octokit.request(
                         "GET /repos/{owner}/{repo}/actions/artifacts/{artifact_id}/{archive_format}",
                         {
@@ -316,6 +324,11 @@ function askQuestion(query) {
                 )
             );
 
+            // Print out our results, and what we expected
+            console.log(
+                `Found ${downloaded_pkgs.length} pkgs, expected ${gh_js_dist_folders.length}`
+            );
+
             // If they vary (e.g. a partial run), ask the user if they're sure
             // they want to proceed
             proceed = "y";
@@ -329,12 +342,12 @@ function askQuestion(query) {
                     console.log(
                         `Uploading to pypi:\n\t${downloaded_wheels.join(
                             "\n\t"
-                        )}\nUploading to npm:\n\t${downloaded_pkgs.join(
+                        )}\nUploading to npm:\n\t${gh_js_dist_folders.join(
                             "\n\t"
                         )}`
                     );
                     console.error(
-                        "Skipping twine upload, marked as dry run.\nSet env var COMMIT=1 to run fo real."
+                        "Skipping twine/npm upload, marked as dry run.\nSet env var COMMIT=1 to run fo real."
                     );
                 } else {
                     execute`twine upload ${wheel_folder}/*`;
@@ -343,7 +356,8 @@ function askQuestion(query) {
                         const package = JSON.parse(
                             await fs.readFile(`${path}/../package.json`)
                         );
-                        console.log(`yarn workspace ${package.name} publish`);
+
+                        execute`yarn workspace ${package.name} publish`;
                     }
                 }
             }

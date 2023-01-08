@@ -15,7 +15,7 @@ const args = process.argv.slice(2);
 if (process.env.PSP_PROJECT === undefined || process.env.PSP_PROJECT === "js") {
     try {
         execute(
-            `cd tools/perspective-bench && yarn && sudo nice -n -20 yarn bench`
+            `cd tools/perspective-bench && yarn && sudo nice -n -20 npm run bench`
         );
     } catch (e) {
         process.exit(1);

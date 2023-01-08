@@ -99,7 +99,7 @@ async function build_all() {
     await compile_rust();
 
     // JavaScript
-    execSync("yarn tsc --project tsconfig.json", INHERIT);
+    execSync("npx tsc --project tsconfig.json", INHERIT);
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
     await Promise.all(POSTBUILD.map(build)).catch(() => process.exit(1));
 

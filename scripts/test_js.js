@@ -7,7 +7,15 @@
  *
  */
 
-const { bash, execute, getarg, execute_throw } = require("./script_utils.js");
+const {
+    bash,
+    execute,
+    getarg,
+    execute_throw,
+    run_with_scope,
+    bash_with_scope,
+    PACKAGE_MANAGER,
+} = require("./script_utils.js");
 const minimatch = require("minimatch");
 const fs = require("fs");
 
@@ -48,7 +56,7 @@ function jest_all() {
         PSP_PAUSE_ON_FAILURE=${!!getarg("--interactive")}
         WRITE_TESTS=${IS_WRITE} 
         TZ=UTC 
-        node_modules/.bin/jest 
+        npx jest 
         --rootDir=.
         --config=tools/perspective-test/jest.all.config.js 
         --color
@@ -66,22 +74,20 @@ function jest_all() {
 function jest_single(cmd) {
     console.log(`-- Running "${PACKAGE}" test suite`);
     const RUN_IN_BAND =
-        getarg("--interactive") || IS_JUPYTER ? "--runInBand" : "";
-    return bash`
+        getarg("--interactive") || getarg("--runInBand") || IS_JUPYTER
+            ? "--runInBand"
+            : "";
+    const x = bash`
         PSP_SATURATE=${!!getarg("--saturate")}
         PSP_PAUSE_ON_FAILURE=${!!getarg("--interactive")}
         WRITE_TESTS=${IS_WRITE}
         IS_LOCAL_PUPPETEER=${IS_LOCAL_PUPPETEER}
         TZ=UTC 
-        node_modules/.bin/lerna exec 
-        --concurrency 1 
-        --no-bail
-        --scope="@finos/${PACKAGE}" 
-        -- 
-        yarn ${cmd ? cmd : "test:run"}
-        ${DEBUG_FLAG}
-        ${RUN_IN_BAND}
-        --testNamePattern="${get_regex()}"`;
+        ${bash_with_scope`
+            ${cmd ? cmd : "test:run"}
+            -- ${DEBUG_FLAG} ${RUN_IN_BAND} --testNamePattern="${get_regex()}"`}`;
+
+    return x;
 }
 
 /**
@@ -89,13 +95,9 @@ function jest_single(cmd) {
  */
 function jest_timezone() {
     console.log("-- Running Perspective.js timezone test suite");
-    return bash`
-        node_modules/.bin/lerna exec 
-        --concurrency 1 
-        --no-bail
-        --scope="@finos/perspective" 
+    return bash_with_scope`
+        test_timezone:run
         -- 
-        yarn test_timezone:run
         ${DEBUG_FLAG}
         --testNamePattern="${get_regex()}"`;
 }
@@ -109,11 +111,13 @@ function get_regex() {
 }
 
 try {
-    execute`yarn --silent clean --screenshots`;
+    // must be executed from top-level (without scope) in order to respect the
+    // `--screenshots` flag.
+    execute`${PACKAGE_MANAGER} run clean -- --screenshots`;
 
     if (!IS_JUPYTER) {
         // test:build irrelevant for jupyter tests
-        execute`node_modules/.bin/lerna run test:build --stream --scope="@finos/${PACKAGE}"`;
+        run_with_scope`test:build`;
     }
 
     // if (!PACKAGE || minimatch("perspective-viewer", PACKAGE)) {
@@ -132,7 +136,7 @@ try {
         if (IS_JUPYTER) {
             // Jupyterlab is guaranteed to have started at this point, so
             // copy the test files over and run the tests.
-            execute`node_modules/.bin/lerna run test:jupyter:build --stream --scope="@finos/${PACKAGE}"`;
+            run_with_scope`test:jupyter:build`;
             execute_throw(jest_single("test:jupyter:run"));
             process.exit(0);
         }
