@@ -12,11 +12,6 @@
         "*.js",
         "README.md"
     ],
-    "scripts": {
-        "build": "echo",
-        "test": "echo",
-        "clean": "echo"
-    },
     "repository": {
         "type": "git",
         "url": "https://github.com/finos/perspective/packages/perspective-build"

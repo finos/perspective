@@ -270,7 +270,6 @@ function askQuestion(query) {
             await Promise.all(
                 js_dist_folders.map(async (artifact) => {
                     // Download the Artifact
-                    console.log;
                     const download = await octokit.request(
                         "GET /repos/{owner}/{repo}/actions/artifacts/{artifact_id}/{archive_format}",
                         {
@@ -289,13 +288,26 @@ function askQuestion(query) {
                 })
             );
 
+            async function isError(promise) {
+                try {
+                    await promise;
+                    return false;
+                } catch (e) {
+                    return true;
+                }
+            }
+
             // Unzip the folders
             await Promise.all(
                 js_dist_folders.map(async (artifact) => {
-                    await fs.rm(gh_js_dist_aliases[artifact.name], {
-                        recursive: true,
-                    });
+                    const js_dist_dir = gh_js_dist_aliases[artifact.name];
+                    if (!(await isError(fs.stat(js_dist_dir)))) {
+                        await fs.rm(js_dist_dir, {
+                            recursive: true,
+                        });
+                    }
 
+                    await fs.mkdir(js_dist_dir);
                     await decompress(
                         `${js_dist_folder}/${artifact.name}.zip`,
                         gh_js_dist_aliases[artifact.name],
@@ -363,7 +375,7 @@ function askQuestion(query) {
             }
         }
     } catch (e) {
-        console.error(e.message);
+        console.error(e);
         process.exit(1);
     }
 })();

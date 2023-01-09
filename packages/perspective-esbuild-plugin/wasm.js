@@ -1,30 +1,37 @@
 const fs = require("fs");
+const path = require("path");
 
 exports.WasmPlugin = function WasmPlugin(inline) {
     function setup(build) {
-        build.onResolve(
-            { filter: /^\@finos\/perspective.+?\.wasm$/ },
-            (args) => {
-                if (
-                    args.namespace === "wasm-stub" ||
-                    args.namespace === "wasm-inline"
-                ) {
-                    return {
-                        path: args.path,
-                        namespace: "wasm",
-                    };
-                }
+        build.onResolve({ filter: /\.wasm$/ }, (args) => {
+            if (
+                args.namespace === "wasm-stub" ||
+                args.namespace === "wasm-inline"
+            ) {
+                const entryPoint = path.join(
+                    args.pluginData.resolveDir,
+                    args.path
+                );
 
                 return {
-                    path: args.path,
-                    namespace: inline ? "wasm-inline" : "wasm-stub",
+                    path: entryPoint,
+                    namespace: "wasm",
                 };
             }
-        );
+
+            return {
+                path: args.path,
+                namespace: inline ? "wasm-inline" : "wasm-stub",
+                pluginData: {
+                    resolveDir: args.resolveDir,
+                },
+            };
+        });
 
         build.onLoad(
             { filter: /.*/, namespace: "wasm-inline" },
             async (args) => ({
+                pluginData: args.pluginData,
                 contents: `
                     import wasm from ${JSON.stringify(args.path)};
                     export default Promise.resolve(wasm);
@@ -35,6 +42,7 @@ exports.WasmPlugin = function WasmPlugin(inline) {
         build.onLoad(
             { filter: /.*/, namespace: "wasm-stub" },
             async (args) => ({
+                pluginData: args.pluginData,
                 contents: `
                 import wasm from ${JSON.stringify(args.path)};
                 async function get_wasm() {
@@ -50,6 +58,7 @@ exports.WasmPlugin = function WasmPlugin(inline) {
             const path = require.resolve(args.path);
             const contents = await fs.promises.readFile(path);
             return {
+                pluginData: args.pluginData,
                 contents,
                 loader: inline ? "binary" : "file",
             };

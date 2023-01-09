@@ -80,7 +80,7 @@ async function run() {
 
         await clean_screenshots(scope);
     } catch (e) {
-        console.error(e.message);
+        console.error(e);
         process.exit(1);
     }
 }

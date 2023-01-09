@@ -7,49 +7,55 @@ exports.WorkerPlugin = function WorkerPlugin(options = {}) {
     const inline = !!options.inline;
     const targetdir = options.targetdir || "build/worker";
     function setup(build) {
-        build.onResolve(
-            { filter: /^(\@finos\/perspective).+?worker\.js$/ },
-            (args) => {
-                if (args.namespace === "worker-stub") {
-                    const outfile = `${targetdir}/` + path.basename(args.path);
-                    const subbuild = esbuild.build({
-                        target: ["es2021"],
-                        entryPoints: [require.resolve(args.path)],
-                        outfile,
-                        define: {
-                            global: "self",
-                        },
-                        plugins: [EmptyPlugin(["fs", "path"])],
-                        entryNames: "[name]",
-                        chunkNames: "[name]",
-                        assetNames: "[name]",
-                        minify: !process.env.PSP_DEBUG,
-                        bundle: true,
-                        sourcemap: false,
-                    });
+        build.onResolve({ filter: /\.worker\.js$/ }, (args) => {
+            if (args.namespace === "worker-stub") {
+                const outfile = `${targetdir}/` + path.basename(args.path);
+                const entryPoint = path.join(
+                    args.pluginData.resolveDir,
+                    args.path
+                );
 
-                    return {
-                        path: args.path,
-                        namespace: "worker",
-                        pluginData: {
-                            outfile,
-                            subbuild,
-                        },
-                    };
-                }
+                const subbuild = esbuild.build({
+                    target: ["es2021"],
+                    entryPoints: [entryPoint],
+                    outfile,
+                    define: {
+                        global: "self",
+                    },
+                    plugins: [EmptyPlugin(["fs", "path"])],
+                    entryNames: "[name]",
+                    chunkNames: "[name]",
+                    assetNames: "[name]",
+                    minify: !process.env.PSP_DEBUG,
+                    bundle: true,
+                    sourcemap: false,
+                });
 
                 return {
                     path: args.path,
-                    namespace: "worker-stub",
+                    namespace: "worker",
+                    pluginData: {
+                        outfile,
+                        subbuild,
+                    },
                 };
             }
-        );
+
+            return {
+                path: args.path,
+                namespace: "worker-stub",
+                pluginData: {
+                    resolveDir: args.resolveDir,
+                },
+            };
+        });
 
         build.onLoad(
             { filter: /.*/, namespace: "worker-stub" },
             async (args) => {
                 if (inline) {
                     return {
+                        pluginData: args.pluginData,
                         contents: `
                         import worker from ${JSON.stringify(args.path)};
                         function make_host(a, b) {
@@ -103,6 +109,7 @@ exports.WorkerPlugin = function WorkerPlugin(options = {}) {
                 }
 
                 return {
+                    pluginData: args.pluginData,
                     contents: `
                     import worker from ${JSON.stringify(args.path)};
                     async function get_worker_code() {

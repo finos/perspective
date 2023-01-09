@@ -35,14 +35,6 @@ module.exports = {
                 use: [{ loader: "style-loader" }, { loader: "css-loader" }],
             },
             {
-                test: /\.less$/,
-                use: [
-                    { loader: "style-loader" },
-                    { loader: "css-loader" },
-                    { loader: "less-loader" },
-                ],
-            },
-            {
                 test: /\.(png|jpe?g|gif)$/i,
                 type: "asset/resource",
             },

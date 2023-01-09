@@ -55,7 +55,7 @@
         "mobile-drag-drop-shadow-dom": "3.0.0"
     },
     "devDependencies": {
-        "react": "^16.8.6",
+        "react": "^16.14.0",
         "@finos/perspective-esbuild-plugin": "^1.9.1",
         "@finos/perspective-test": "^1.9.1",
         "cpy": "^9.0.1"

@@ -12,6 +12,7 @@ async function build() {
         outdir: "dist",
         format: "esm",
         bundle: true,
+        target: "es2020",
         loader: {
             ".ttf": "file",
             ".arrow": "file",

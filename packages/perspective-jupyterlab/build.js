@@ -1,4 +1,4 @@
-const cpy = require("cpy");
+const cpy_mod = import("cpy");
 
 const { WasmPlugin } = require("@finos/perspective-esbuild-plugin/wasm");
 const { WorkerPlugin } = require("@finos/perspective-esbuild-plugin/worker");
@@ -52,6 +52,7 @@ function add(builder, path, path2) {
 }
 
 async function build_all() {
+    const { default: cpy } = await cpy_mod;
     fs.mkdirSync("dist/css", { recursive: true });
     const builder3 = new BuildCss("");
 

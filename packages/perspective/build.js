@@ -1,5 +1,4 @@
-const cpy = require("cpy");
-const { WorkerPlugin } = require("@finos/perspective-esbuild-plugin/worker");
+const cpy_mod = import("cpy");
 const {
     NodeModulesExternal,
 } = require("@finos/perspective-esbuild-plugin/external");
@@ -58,7 +57,8 @@ const BUILD = [
 ];
 
 async function build_all() {
-    await cpy(["../../cpp/perspective/dist/esm"], "dist/pkg/esm");
+    const { default: cpy } = await cpy_mod;
+    await cpy(["../../cpp/perspective/dist/esm/*"], "dist/pkg/esm");
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
 }
 

@@ -7,25 +7,25 @@
  *
  */
 
-const DEFAULT_CONFIG = require("./settings.js").default;
+import DEFAULT_CONFIG from "./settings.js";
 
-module.exports.get_types = function () {
-    return Object.keys(module.exports.get_config().types);
-};
+export function get_types() {
+    return Object.keys(get_config().types);
+}
 
-module.exports.get_type_config = function (type) {
+export function get_type_config(type) {
     const config = {};
-    if (module.exports.get_config().types[type]) {
-        Object.assign(config, module.exports.get_config().types[type]);
+    if (get_config().types[type]) {
+        Object.assign(config, get_config().types[type]);
     }
     if (config.type) {
-        const props = module.exports.get_type_config(config.type);
+        const props = get_type_config(config.type);
         Object.assign(props, config);
         return props;
     } else {
         return config;
     }
-};
+}
 
 function isObject(item) {
     return item && typeof item === "object" && !Array.isArray(item);
@@ -49,16 +49,14 @@ function mergeDeep(target, ...sources) {
     return mergeDeep(target, ...sources);
 }
 
-globalThis.__PERSPECTIVE_CONFIG__ = undefined;
-
-module.exports.override_config = function (config) {
+export function override_config(config) {
     if (globalThis.__PERSPECTIVE_CONFIG__) {
         console.warn("Config already initialized!");
     }
     globalThis.__PERSPECTIVE_CONFIG__ = mergeDeep(DEFAULT_CONFIG, config);
-};
+}
 
-module.exports.get_config = function get_config() {
+export function get_config() {
     if (!globalThis.__PERSPECTIVE_CONFIG__) {
         globalThis.__PERSPECTIVE_CONFIG__ = mergeDeep(
             DEFAULT_CONFIG,
@@ -66,4 +64,4 @@ module.exports.get_config = function get_config() {
         );
     }
     return globalThis.__PERSPECTIVE_CONFIG__;
-};
+}

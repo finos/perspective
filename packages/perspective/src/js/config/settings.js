@@ -10,7 +10,7 @@
 /**
  * The default settings which populate `perspective.config.js`.
  */
-module.exports.default = {
+export default {
     /**
      * `types` are the type-specific configuration options.  Each key is the
      * name of a perspective type; their values are configuration objects for

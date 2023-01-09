@@ -48,12 +48,14 @@ export interface IPerspectiveViewerElement {
      * loaded, a `perspective.View` has been created, and the active plugin has
      * rendered.
      * @example <caption>Load perspective.table</caption>
+     *
      * ```javascript
      * const my_viewer = document.getElementById('#my_viewer');
      * const tbl = perspective.table("x,y\n1,a\n2,b");
      * my_viewer.load(tbl);
      * ```
      * @example <caption>Load Promise&lt;perspective.table&gt;</caption>
+     *
      * ```javascript
      * const my_viewer = document.getElementById('#my_viewer');
      * const tbl = perspective.table("x,y\n1,a\n2,b");
@@ -79,6 +81,7 @@ export interface IPerspectiveViewerElement {
      * @returns A `Promise<void>` which resolves when this resize event has
      * finished rendering.
      * @example <caption>Bind `notfyResize()` to browser dimensions</caption>
+     *
      * ```javascript
      * const viewer = document.querySelector("perspective-viewer");
      * viewer.setAutoSize(false);
@@ -97,6 +100,7 @@ export interface IPerspectiveViewerElement {
      * @param autosize Whether to re-render when this element's dimensions
      * change.
      * @example <caption>Disable auto-size</caption>
+     *
      * ```javascript
      * await viewer.setAutoSize(false);
      * ```
@@ -111,6 +115,7 @@ export interface IPerspectiveViewerElement {
      * invoked, or fail immediately.
      * @returns A `Promise` which resolves to a `perspective.Table`
      * @example <caption>Share a `Table`</caption>
+     *
      * ```javascript
      * const viewers = document.querySelectorAll("perspective-viewer");
      * const [viewer1, viewer2] = Array.from(viewers);
@@ -133,6 +138,7 @@ export interface IPerspectiveViewerElement {
      * @category Data
      * @returns A `Promise` which ressolves to a `perspective.View`.
      * @example <caption>Collapse grid to root</caption>
+     *
      * ```javascript
      * const viewer = document.querySelector("perspective-viewer");
      * const view = await viewer.getView();
@@ -172,6 +178,7 @@ export interface IPerspectiveViewerElement {
      * @returns A promise which resolves when the changes have been applied and
      * rendered.
      * @example <caption>Restore a viewer from `localStorage`</caption>
+     *
      * ```javascript
      * const viewer = document.querySelector("perspective-viewer");
      * const token = localStorage.getItem("viewer_state");
@@ -196,6 +203,7 @@ export interface IPerspectiveViewerElement {
      * to infer format.
      * @returns a serialized element in the chosen format.
      * @example <caption>Save a viewer to `localStorage`</caption>
+     *
      * ```javascript
      * const viewer = document.querySelector("perspective-viewer");
      * const token = await viewer.save("string");
@@ -222,6 +230,7 @@ export interface IPerspectiveViewerElement {
      * @returns {Promise<void>} A promise which resolves when the current
      * pending state changes have been applied and rendered.
      * @example <caption>Flush an unawaited `restore()`</caption>
+     *
      * ```javascript
      * const viewer = document.querySelector("perspective-viewer");
      * viewer.restore({group_by: ["State"]});
@@ -356,6 +365,7 @@ export interface IPerspectiveViewerElement {
      * supplied, adaptive throttling is calculated from the average plugin
      * render time.
      * @example <caption>Limit FPS to 1 frame per second</caption>
+     *
      * ```javascript
      * await viewer.setThrottle(1000);
      * ```

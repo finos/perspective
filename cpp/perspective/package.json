@@ -11,9 +11,9 @@
     ],
     "scripts": {
         "build": "node ../../scripts/run_emsdk.js node ./build.js",
-        "clean": "rimraf dist",
-        "test": ":",
-        "test:run": ":",
-        "test:build": ":"
+        "clean": "rimraf dist"
+    },
+    "devDependencies": {
+        "fflate": "^0.7.4"
     }
 }

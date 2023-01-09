@@ -4,11 +4,14 @@ const get_banner = ({ globalName }) => ({
         if (typeof define === 'function' && define.amd) {
             define(['exports'], factory);
         } else if (typeof exports === 'object' && typeof exports.nodeName !== 'string') {
-            factory(exports);
+            factory(exports, module);
         } else {
-            factory((root.${globalName} = {}));
+            const exports = (root.${globalName} = {});
+            const module = {exports}
+            factory(exports, module);
+            root.${globalName} = module.exports;
         }
-    }(typeof self !== 'undefined' ? self : this, function (exports) {
+    }(typeof self !== 'undefined' ? self : this, function (exports, module) {
     `.trimStart(),
 });
 

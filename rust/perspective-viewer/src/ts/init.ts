@@ -9,8 +9,8 @@
  */
 
 import { Decompress } from "fflate";
-import init_wasm, * as wasm_module from "@finos/perspective-viewer/dist/pkg/perspective.js";
-import wasm from "@finos/perspective-viewer/dist/pkg/perspective_bg.wasm";
+import init_wasm, * as wasm_module from "../../dist/pkg/perspective.js";
+import wasm from "../../dist/pkg/perspective_bg.wasm";
 
 // There is no way to provide a default rejection handler within a promise and
 // also not lock the await-er, so this module attaches a global handler to

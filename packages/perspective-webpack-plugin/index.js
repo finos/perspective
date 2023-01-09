@@ -10,7 +10,6 @@
 const { get_config } = require("@finos/perspective");
 const path = require("path");
 const webpack = require("webpack");
-const cssnano = require("cssnano");
 
 class PerspectiveWebpackPlugin {
     constructor(options = {}) {

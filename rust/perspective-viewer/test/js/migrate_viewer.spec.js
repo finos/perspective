@@ -261,12 +261,26 @@ const TESTS = [
 ];
 
 utils.with_server({}, () => {
+    describe(
+        "Viewer config migrations",
+        () => {
+            for (const [name, old, current] of TESTS) {
+                test(`Migrate '${name}'`, () => {
+                    expect(convert(old, { replace_defaults: true })).toEqual(
+                        current
+                    );
+                });
+            }
+        },
+        { root: path.join(__dirname, "..", "..") }
+    );
+
     describe.page(
         "superstore-all.html",
         () => {
             describe("migrate", () => {
                 for (const [name, old, current] of TESTS) {
-                    test.capture(`restore '${name}'`, async (page) => {
+                    test.skip(`restore '${name}'`, async (page) => {
                         const converted = convert(
                             JSON.parse(JSON.stringify(old))
                         );

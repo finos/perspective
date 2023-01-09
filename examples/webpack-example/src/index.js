@@ -21,15 +21,15 @@ const worker = perspective.shared_worker();
 
 // superstore.arrow located in node_modules/superstore-arrow/ and it's
 // configured by 'devServer' in 'webpack.config.js'
-// const req = fetch("./superstore.arrow");
+const req = fetch("./superstore.arrow");
 
 window.addEventListener("DOMContentLoaded", async () => {
     const viewer = document.createElement("perspective-viewer");
     document.body.append(viewer);
 
-    // const resp = await req;
-    // const buffer = await resp.arrayBuffer();
-    const table = worker.table({ x: [1, 2, 3, 4, 5] });
+    const resp = await req;
+    const buffer = await resp.arrayBuffer();
+    const table = worker.table(buffer);
 
     viewer.load(table);
 

@@ -21,14 +21,10 @@
         "access": "public"
     },
     "scripts": {
-        "bench": "npm-run-all bench:build bench:run",
-        "bench:build": ":",
-        "bench:run": ":",
         "build": "node build.js",
         "test:build": "cpy \"test/html/*\" dist/umd",
         "test:run": "jest --rootDir=. --config=../../tools/perspective-test/jest.config.js --color",
         "test": "npm-run-all test:build test:run",
-        "watch": ":",
         "clean": "rimraf dist",
         "clean:screenshots": "rimraf \"test/screenshots/**/*.@(failed|diff).png\""
     },
@@ -36,8 +32,12 @@
         "@finos/perspective": "^1.9.1",
         "@finos/perspective-viewer": "^1.9.1",
         "d3": "^7.1.1",
+        "d3-color": "^3.0.1",
         "gradient-parser": "1.0.2",
         "less": "^4.1.0",
         "ol": "^5.3.2"
+    },
+    "devDependencies": {
+        "@finos/perspective-esbuild-plugin": "^1.9.0"
     }
 }

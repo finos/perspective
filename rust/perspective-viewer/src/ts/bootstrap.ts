@@ -9,7 +9,7 @@
  */
 
 import { WASM_MODULE } from "./init";
-import { PerspectiveViewerElement } from "@finos/perspective-viewer/dist/pkg/perspective.js";
+import { PerspectiveViewerElement } from "../../dist/pkg/perspective.js";
 
 // This can be done automatically by enabling the `defin_web_components_async`
 // feature, but due to async loading, `<perspective-viewer>` methods will not be

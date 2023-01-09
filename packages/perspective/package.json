@@ -43,15 +43,17 @@
         "clean": "rimraf dist"
     },
     "dependencies": {
-        "fflate": "^0.7.2",
+        "fflate": "^0.7.4",
         "ws": "^6.1.2"
     },
     "devDependencies": {
         "@finos/perspective-cpp": "^1.9.1",
         "@finos/perspective-esbuild-plugin": "^1.9.1",
+        "cpy": "^9.0.1",
         "jsverify": "^0.8.4",
         "lodash": "^4.17.4",
         "moment": "^2.19.1",
-        "papaparse": "^5.2.0"
+        "papaparse": "^5.2.0",
+        "superstore-arrow": "^1.0.0"
     }
 }
