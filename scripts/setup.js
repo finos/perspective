@@ -92,7 +92,7 @@ async function focus_package() {
                 }
             },
             filter: (answer) => {
-                if (!answer || answer.length === 8) {
+                if (!answer || answer.length === 9) {
                     return "";
                 } else {
                     return answer;
@@ -140,6 +140,11 @@ async function focus_package() {
                     key: "w",
                     name: "perspective-workspace",
                     value: "perspective-workspace",
+                },
+                {
+                    key: "l",
+                    name: "perspective-cli",
+                    value: "perspective-cli",
                 },
             ],
         },

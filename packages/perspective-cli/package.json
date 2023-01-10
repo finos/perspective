@@ -13,7 +13,9 @@
     "typings": "index.d.ts",
     "scripts": {
         "build": ":",
-        "clean": "rimraf build"
+        "clean": "rimraf build",
+        "test:run": "jest --rootDir=. --config=../../tools/perspective-test/jest.config.js --color",
+        "test": "npm-run-all test:build test:run"
     },
     "repository": {
         "type": "git",
@@ -29,6 +31,7 @@
         "@finos/perspective-viewer": "^1.9.0",
         "@finos/perspective-viewer-d3fc": "^1.9.0",
         "@finos/perspective-viewer-datagrid": "^1.9.0",
+        "@finos/perspective-workspace": "^1.9.0",
         "commander": "^2.19.0",
         "puppeteer": "^13.1.3"
     }
