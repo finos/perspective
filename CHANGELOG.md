@@ -1,5 +1,28 @@
 # Changelog
 
+## [v1.9.1](https://github.com/finos/perspective/tree/HEAD)
+
+[Full Changelog](https://github.com/finos/perspective/compare/v1.9.0...HEAD)
+
+**Implemented enhancements:**
+
+- Add macOS arm wheels to build matrix [\#2072](https://github.com/finos/perspective/pull/2072) ([timkpaine](https://github.com/timkpaine))
+
+**Fixed bugs:**
+
+- CLI 404s on @finos/perspective-viewer-d3fc and @finos/perspective-workspace [\#1968](https://github.com/finos/perspective/issues/1968)
+- Fix `perspective-cli` and add test [\#2079](https://github.com/finos/perspective/pull/2079) ([texodus](https://github.com/texodus))
+
+**Closed issues:**
+
+- Python 3.7 support deprecated  [\#2073](https://github.com/finos/perspective/issues/2073)
+
+**Merged pull requests:**
+
+- Add default .vscode project [\#2074](https://github.com/finos/perspective/pull/2074) ([texodus](https://github.com/texodus))
+- Actually copy readme this time, fixes incomplete \#1991 [\#2071](https://github.com/finos/perspective/pull/2071) ([timkpaine](https://github.com/timkpaine))
+- Fix test regression in chrome [\#2070](https://github.com/finos/perspective/pull/2070) ([texodus](https://github.com/texodus))
+
 ## [v1.9.0](https://github.com/finos/perspective/tree/HEAD)
 
 [Full Changelog](https://github.com/finos/perspective/compare/v1.8.1...HEAD)
