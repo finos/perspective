@@ -2356,6 +2356,11 @@ module.exports = (perspective) => {
                 columns: ["x", "y"],
             });
             let result2 = await view.to_columns();
+            result2 = Object.entries(result2).reduce((obj, [key, val]) => {
+                obj[key.replace(/[^,:\/|A-Z0-9 ]/gi, " ")] = val;
+                return obj;
+            }, {});
+
             expect(result2).toEqual({
                 "4/11/2019, 11:40:35 PM|x": [null, null, 3, 4],
                 "4/11/2019, 11:40:35 PM|y": [null, null, "c", "d"],

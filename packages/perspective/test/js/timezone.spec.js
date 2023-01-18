@@ -7,7 +7,7 @@
  *
  */
 
-const perspective = require("../../../dist/cjs/perspective.node.js");
+const perspective = require("../../dist/cjs/perspective.node.js");
 
 const date_data = [
     { x: new Date(2020, 0, 1) }, // 2020/01/01

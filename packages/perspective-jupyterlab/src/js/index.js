@@ -14,7 +14,6 @@ export * from "./view";
 export * from "./widget";
 
 /* css */
-import "../less/index.less";
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
 import "@finos/perspective-viewer-openlayers/dist/umd/perspective-viewer-openlayers.js";

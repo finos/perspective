@@ -22,6 +22,12 @@ const get_random_int = function (min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
+function it_old_behavior(name, capture) {
+    it(name, function (done) {
+        capture(done);
+    });
+}
+
 module.exports = (perspective) => {
     describe("ports", function () {
         it("Should create port IDs in incremental order", async function () {
@@ -437,158 +443,101 @@ module.exports = (perspective) => {
         });
 
         describe("on_update notifications from different ports", function () {
-            it("All calls to on_update should contain the port ID", async function (done) {
-                const table = await perspective.table(data);
-                const port_ids = [];
+            it_old_behavior(
+                "All calls to on_update should contain the port ID",
+                async function (done) {
+                    const table = await perspective.table(data);
+                    const port_ids = [];
 
-                for (let i = 0; i < 10; i++) {
-                    port_ids.push(await table.make_port());
-                }
-
-                expect(port_ids).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-
-                const view = await table.view();
-
-                // because no updates were called in port 0, start at 1
-                let last_port_id = 1;
-                view.on_update(function (updated) {
-                    expect(updated.port_id).toEqual(last_port_id);
-                    if (last_port_id == 10) {
-                        view.delete();
-                        table.delete();
-                        done();
-                    } else {
-                        last_port_id++;
+                    for (let i = 0; i < 10; i++) {
+                        port_ids.push(await table.make_port());
                     }
-                });
 
-                for (const port_id of port_ids) {
-                    table.update(
-                        {
-                            w: [1.5],
-                            x: [1],
-                            y: ["a"],
-                            z: [true],
-                        },
-                        { port_id }
-                    );
-                }
-            });
+                    expect(port_ids).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 
-            it("Only the port that was updated should be notified in on_update", async function (done) {
-                const table = await perspective.table(data);
-                const port_ids = [];
+                    const view = await table.view();
 
-                for (let i = 0; i < 10; i++) {
-                    port_ids.push(await table.make_port());
-                }
-
-                expect(port_ids).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-
-                const view = await table.view();
-
-                const port_id = get_random_int(1, 9);
-
-                view.on_update(function (updated) {
-                    expect(updated.port_id).toEqual(port_id);
-                    view.delete();
-                    table.delete();
-                    done();
-                });
-
-                table.update(
-                    {
-                        w: [1.5],
-                        x: [1],
-                        y: ["a"],
-                        z: [true],
-                    },
-                    { port_id }
-                );
-            });
-
-            it("All ports should be notified in creation order, regardless of what order the update is called.", async function (done) {
-                const table = await perspective.table(data);
-                const port_ids = [];
-
-                for (let i = 0; i < 10; i++) {
-                    port_ids.push(await table.make_port());
-                }
-
-                expect(port_ids).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-
-                const view = await table.view();
-
-                let last_port_id = 0;
-                let num_updates = 0;
-
-                view.on_update(function (updated) {
-                    expect(updated.port_id).toEqual(last_port_id);
-                    if (last_port_id == 10 && num_updates === 10) {
-                        view.delete();
-                        table.delete();
-                        done();
-                    } else {
-                        num_updates++;
-                        last_port_id++;
-                    }
-                });
-
-                const update_order = _.shuffle([
-                    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-                ]);
-
-                for (const port_id of update_order) {
-                    table.update(
-                        {
-                            w: [1.5],
-                            x: [1],
-                            y: ["a"],
-                            z: [true],
-                        },
-                        { port_id }
-                    );
-                }
-            });
-
-            it("On update callbacks should be able to ignore updates from certain ports.", async function (done) {
-                const table = await perspective.table(data);
-                const update_table = await perspective.table(
-                    await table.schema()
-                );
-                const port_ids = [];
-
-                for (let i = 0; i < 10; i++) {
-                    port_ids.push(await table.make_port());
-                }
-
-                expect(port_ids).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-
-                const view = await table.view();
-
-                let last_port_id = 0;
-                let num_updates = 0;
-
-                view.on_update(
-                    async function (updated) {
+                    // because no updates were called in port 0, start at 1
+                    let last_port_id = 1;
+                    view.on_update(function (updated) {
                         expect(updated.port_id).toEqual(last_port_id);
-
-                        if (![0, 5, 7, 8, 9].includes(updated.port_id)) {
-                            update_table.update(updated.delta);
+                        if (last_port_id == 10) {
+                            view.delete();
+                            table.delete();
+                            done();
+                        } else {
+                            last_port_id++;
                         }
+                    });
 
+                    for (const port_id of port_ids) {
+                        table.update(
+                            {
+                                w: [1.5],
+                                x: [1],
+                                y: ["a"],
+                                z: [true],
+                            },
+                            { port_id }
+                        );
+                    }
+                }
+            );
+
+            it_old_behavior(
+                "Only the port that was updated should be notified in on_update",
+                async function (done) {
+                    const table = await perspective.table(data);
+                    const port_ids = [];
+
+                    for (let i = 0; i < 10; i++) {
+                        port_ids.push(await table.make_port());
+                    }
+
+                    expect(port_ids).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+
+                    const view = await table.view();
+
+                    const port_id = get_random_int(1, 9);
+
+                    view.on_update(function (updated) {
+                        expect(updated.port_id).toEqual(port_id);
+                        view.delete();
+                        table.delete();
+                        done();
+                    });
+
+                    table.update(
+                        {
+                            w: [1.5],
+                            x: [1],
+                            y: ["a"],
+                            z: [true],
+                        },
+                        { port_id }
+                    );
+                }
+            );
+
+            it("All ports should be notified in creation order, regardless of what order the update is called.", function (done) {
+                (async function () {
+                    const table = await perspective.table(data);
+                    const port_ids = [];
+
+                    for (let i = 0; i < 10; i++) {
+                        port_ids.push(await table.make_port());
+                    }
+
+                    expect(port_ids).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+
+                    const view = await table.view();
+
+                    let last_port_id = 0;
+                    let num_updates = 0;
+
+                    view.on_update(function (updated) {
+                        expect(updated.port_id).toEqual(last_port_id);
                         if (last_port_id == 10 && num_updates === 10) {
-                            expect(await update_table.size()).toEqual(6);
-                            const update_view = await update_table.view();
-                            const result = await update_view.to_columns();
-                            expect(result).toEqual({
-                                w: [1.5, 1.5, 1.5, 1.5, 1.5, 1.5],
-                                x: [1, 2, 3, 4, 6, 10],
-                                y: ["a", "a", "a", "a", "a", "a"],
-                                z: [true, true, true, true, true, true],
-                            });
-                            update_view.delete();
-                            update_table.delete();
                             view.delete();
                             table.delete();
                             done();
@@ -596,338 +545,422 @@ module.exports = (perspective) => {
                             num_updates++;
                             last_port_id++;
                         }
-                    },
-                    { mode: "row" }
-                );
+                    });
 
-                const update_order = _.shuffle([
-                    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-                ]);
+                    const update_order = _.shuffle([
+                        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+                    ]);
 
-                for (const port_id of update_order) {
-                    table.update(
-                        {
-                            w: [1.5],
-                            x: [port_id],
-                            y: ["a"],
-                            z: [true],
-                        },
-                        { port_id }
-                    );
-                }
+                    for (const port_id of update_order) {
+                        table.update(
+                            {
+                                w: [1.5],
+                                x: [1],
+                                y: ["a"],
+                                z: [true],
+                            },
+                            { port_id }
+                        );
+                    }
+                })();
             });
+
+            it_old_behavior(
+                "On update callbacks should be able to ignore updates from certain ports.",
+                async function (done) {
+                    const table = await perspective.table(data);
+                    const update_table = await perspective.table(
+                        await table.schema()
+                    );
+                    const port_ids = [];
+
+                    for (let i = 0; i < 10; i++) {
+                        port_ids.push(await table.make_port());
+                    }
+
+                    expect(port_ids).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+
+                    const view = await table.view();
+
+                    let last_port_id = 0;
+                    let num_updates = 0;
+
+                    view.on_update(
+                        async function (updated) {
+                            expect(updated.port_id).toEqual(last_port_id);
+
+                            if (![0, 5, 7, 8, 9].includes(updated.port_id)) {
+                                update_table.update(updated.delta);
+                            }
+
+                            if (last_port_id == 10 && num_updates === 10) {
+                                expect(await update_table.size()).toEqual(6);
+                                const update_view = await update_table.view();
+                                const result = await update_view.to_columns();
+                                expect(result).toEqual({
+                                    w: [1.5, 1.5, 1.5, 1.5, 1.5, 1.5],
+                                    x: [1, 2, 3, 4, 6, 10],
+                                    y: ["a", "a", "a", "a", "a", "a"],
+                                    z: [true, true, true, true, true, true],
+                                });
+                                update_view.delete();
+                                update_table.delete();
+                                view.delete();
+                                table.delete();
+                                done();
+                            } else {
+                                num_updates++;
+                                last_port_id++;
+                            }
+                        },
+                        { mode: "row" }
+                    );
+
+                    const update_order = _.shuffle([
+                        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+                    ]);
+
+                    for (const port_id of update_order) {
+                        table.update(
+                            {
+                                w: [1.5],
+                                x: [port_id],
+                                y: ["a"],
+                                z: [true],
+                            },
+                            { port_id }
+                        );
+                    }
+                }
+            );
         });
 
         describe("deltas", function () {
-            it("Deltas should be unique to each port", async function (done) {
-                const table = await perspective.table(data);
-                const port_ids = [];
+            it_old_behavior(
+                "Deltas should be unique to each port",
+                async function (done) {
+                    const table = await perspective.table(data);
+                    const port_ids = [];
 
-                for (let i = 0; i < 10; i++) {
-                    port_ids.push(await table.make_port());
+                    for (let i = 0; i < 10; i++) {
+                        port_ids.push(await table.make_port());
+                    }
+
+                    expect(port_ids).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+
+                    const view = await table.view();
+
+                    let update_count = 0;
+
+                    view.on_update(
+                        async function (updated) {
+                            const _t = await perspective.table(updated.delta);
+                            const _v = await _t.view();
+                            const result = await _v.to_columns();
+
+                            if (updated.port_id == first_port) {
+                                expect(result).toEqual({
+                                    w: [100],
+                                    x: [first_port],
+                                    y: ["first port"],
+                                    z: [false],
+                                });
+                            } else if (updated.port_id == second_port) {
+                                expect(result).toEqual({
+                                    w: [200],
+                                    x: [second_port],
+                                    y: ["second port"],
+                                    z: [true],
+                                });
+                            }
+
+                            update_count++;
+
+                            if (update_count === 2) {
+                                _v.delete();
+                                _t.delete();
+                                view.delete();
+                                table.delete();
+                                done();
+                            }
+                        },
+                        { mode: "row" }
+                    );
+
+                    const first_port = get_random_int(0, 10);
+                    let second_port = get_random_int(0, 10);
+
+                    if (second_port === first_port) {
+                        second_port = get_random_int(0, 10);
+                    }
+
+                    table.update(
+                        {
+                            w: [100],
+                            x: [first_port],
+                            y: ["first port"],
+                            z: [false],
+                        },
+                        { port_id: first_port }
+                    );
+
+                    table.update(
+                        {
+                            w: [200],
+                            x: [second_port],
+                            y: ["second port"],
+                            z: [true],
+                        },
+                        { port_id: second_port }
+                    );
                 }
-
-                expect(port_ids).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-
-                const view = await table.view();
-
-                let update_count = 0;
-
-                view.on_update(
-                    async function (updated) {
-                        const _t = await perspective.table(updated.delta);
-                        const _v = await _t.view();
-                        const result = await _v.to_columns();
-
-                        if (updated.port_id == first_port) {
-                            expect(result).toEqual({
-                                w: [100],
-                                x: [first_port],
-                                y: ["first port"],
-                                z: [false],
-                            });
-                        } else if (updated.port_id == second_port) {
-                            expect(result).toEqual({
-                                w: [200],
-                                x: [second_port],
-                                y: ["second port"],
-                                z: [true],
-                            });
-                        }
-
-                        update_count++;
-
-                        if (update_count === 2) {
-                            _v.delete();
-                            _t.delete();
-                            view.delete();
-                            table.delete();
-                            done();
-                        }
-                    },
-                    { mode: "row" }
-                );
-
-                const first_port = get_random_int(0, 10);
-                let second_port = get_random_int(0, 10);
-
-                if (second_port === first_port) {
-                    second_port = get_random_int(0, 10);
-                }
-
-                table.update(
-                    {
-                        w: [100],
-                        x: [first_port],
-                        y: ["first port"],
-                        z: [false],
-                    },
-                    { port_id: first_port }
-                );
-
-                table.update(
-                    {
-                        w: [200],
-                        x: [second_port],
-                        y: ["second port"],
-                        z: [true],
-                    },
-                    { port_id: second_port }
-                );
-            });
+            );
         });
 
         describe("Cross-table port operations", function () {
-            it("Should allow a client-server round trip without loops", async function (done) {
-                const client_table = await perspective.table(data);
-                const server_table = await perspective.table(data);
-                const client_port = await client_table.make_port();
+            it_old_behavior(
+                "Should allow a client-server round trip without loops",
+                async function (done) {
+                    const client_table = await perspective.table(data);
+                    const server_table = await perspective.table(data);
+                    const client_port = await client_table.make_port();
 
-                // "get rid" of a random number of ports by creating them
-                for (let i = 0; i < get_random_int(5, 20); i++) {
-                    await server_table.make_port();
-                }
+                    // "get rid" of a random number of ports by creating them
+                    for (let i = 0; i < get_random_int(5, 20); i++) {
+                        await server_table.make_port();
+                    }
 
-                const server_port = await server_table.make_port();
+                    const server_port = await server_table.make_port();
 
-                expect(client_port).toBeLessThan(server_port);
+                    expect(client_port).toBeLessThan(server_port);
 
-                const client_view = await client_table.view();
+                    const client_view = await client_table.view();
 
-                let CLIENT_TO_SERVER_UPDATES = 0;
+                    let CLIENT_TO_SERVER_UPDATES = 0;
 
-                client_view.on_update(
-                    async (updated) => {
-                        if (updated.port_id === client_port) {
-                            server_table.update(updated.delta, {
-                                port_id: server_port,
-                            });
-                            CLIENT_TO_SERVER_UPDATES++;
-                        } else {
-                            // Should not pass forward that update, and break
-                            // the chain.
-                            expect(CLIENT_TO_SERVER_UPDATES).toEqual(1);
-                        }
-                    },
-                    { mode: "row" }
-                );
-
-                const server_view = await server_table.view();
-
-                server_view.on_update(
-                    async (updated) => {
-                        if (updated.port_id !== server_port) {
-                            client_table.update(updated.delta);
-                        } else {
-                            // update is trapped in this state - assert correct
-                            // state and exit the test.
-                            expect(await client_table.size()).toEqual(8);
-                            expect(await server_table.size()).toEqual(8);
-                            client_view.delete();
-                            server_view.delete();
-                            client_table.delete();
-                            server_table.delete();
-                            done();
-                        }
-                    },
-                    { mode: "row" }
-                );
-
-                // this should go to the server and round trip back to the
-                // client, but stop when it gets to the client again.
-                client_table.update(data, { port_id: client_port });
-            });
-
-            it("Should allow a client-server round trip without loops and server updates", async function (done) {
-                const client_table = await perspective.table(data);
-                const server_table = await perspective.table(data);
-                const client_port = await client_table.make_port();
-
-                // "get rid" of a random number of ports by creating them
-                for (let i = 0; i < get_random_int(5, 20); i++) {
-                    await server_table.make_port();
-                }
-
-                const server_port = await server_table.make_port();
-
-                expect(client_port).toBeLessThan(server_port);
-
-                const client_view = await client_table.view();
-
-                let CLIENT_TO_SERVER_UPDATES = 0;
-
-                client_view.on_update(
-                    async (updated) => {
-                        if (updated.port_id === client_port) {
-                            server_table.update(updated.delta, {
-                                port_id: server_port,
-                            });
-                            CLIENT_TO_SERVER_UPDATES++;
-                        } else {
-                            // Should not pass forward that update, and break
-                            // the chain.
-                            expect(
-                                CLIENT_TO_SERVER_UPDATES
-                            ).toBeLessThanOrEqual(2);
-                        }
-                    },
-                    { mode: "row" }
-                );
-
-                const server_view = await server_table.view();
-
-                server_view.on_update(
-                    async (updated) => {
-                        if (updated.port_id !== server_port) {
-                            client_table.update(updated.delta);
-                        } else {
-                            // update is trapped in this state - assert correct
-                            // state and exit the test.
-                            expect(await client_table.size()).toEqual(16);
-                            expect(await server_table.size()).toEqual(16);
-                            client_view.delete();
-                            server_view.delete();
-                            client_table.delete();
-                            server_table.delete();
-                            done();
-                        }
-                    },
-                    { mode: "row" }
-                );
-
-                // this should go to the server and round trip back to the
-                // client, but stop when it gets to the client again.
-                client_table.update(data, { port_id: client_port });
-
-                // this should go to the client
-                server_table.update(data);
-
-                // this should go to the server
-                client_table.update(data, { port_id: client_port });
-            });
-
-            it("Should allow multi client-server round trips without loops", async function (done) {
-                const client_table = await perspective.table(data, {
-                    index: "w",
-                });
-                const client_table2 = await perspective.table(data, {
-                    index: "w",
-                });
-                const server_table = await perspective.table(data, {
-                    index: "w",
-                });
-                const client_port = await client_table.make_port();
-                const client_port2 = await client_table2.make_port();
-
-                // "get rid" of a random number of ports by creating them
-                for (let i = 0; i < get_random_int(5, 20); i++) {
-                    await server_table.make_port();
-                }
-
-                const server_port = await server_table.make_port();
-                const server_port2 = await server_table.make_port();
-
-                expect(client_port).toBeLessThan(server_port);
-                expect(client_port2).toBeLessThan(server_port);
-                expect(client_port).toBeLessThan(server_port2);
-                expect(client_port2).toBeLessThan(server_port2);
-
-                // port numbers can be equal between clients
-                expect(client_port2).toEqual(client_port);
-
-                const client_view = await client_table.view();
-                const client_view2 = await client_table2.view();
-
-                client_view.on_update(
-                    async (updated) => {
-                        // client1 and server handlers are as minimal as can be
-                        if (updated.port_id === client_port) {
-                            server_table.update(updated.delta, {
-                                port_id: server_port,
-                            });
-                        }
-                    },
-                    { mode: "row" }
-                );
-
-                client_view2.on_update(
-                    async (updated) => {
-                        // client2 only reads updates from other clients
-                        const results = await client_view2.to_columns();
-                        expect(results).toEqual({
-                            w: [1.5, 2.5, 3.5, 4.5],
-                            x: [1, 2, 300, 4],
-                            y: ["a", "b", "ccc", "d"],
-                            z: [true, false, true, false],
-                        });
-                        expect(await client_view.to_columns()).toEqual(results);
-                        expect(await server_view.to_columns()).toEqual(results);
-                        client_view.delete();
-                        client_view2.delete();
-                        server_view.delete();
-                        client_table.delete();
-                        client_table2.delete();
-                        server_table.delete();
-                        done();
-                    },
-                    { mode: "row" }
-                );
-
-                const server_view = await server_table.view();
-
-                // Simulate multiple connections to the server
-                server_view.on_update(
-                    async (updated) => {
-                        if (updated.port_id !== server_port) {
-                            client_table.update(updated.delta);
-                        }
-                    },
-                    { mode: "row" }
-                );
-
-                server_view.on_update(
-                    async (updated) => {
-                        if (updated.port_id !== server_port2) {
-                            client_table2.update(updated.delta);
-                        }
-                    },
-                    { mode: "row" }
-                );
-
-                // this should go to the server and round trip back to the
-                // client, but stop when it gets to the client again. It should
-                // reflect on the client2 table though.
-                client_table.update(
-                    [
-                        {
-                            w: 3.5,
-                            x: 300,
-                            y: "ccc",
+                    client_view.on_update(
+                        async (updated) => {
+                            if (updated.port_id === client_port) {
+                                server_table.update(updated.delta, {
+                                    port_id: server_port,
+                                });
+                                CLIENT_TO_SERVER_UPDATES++;
+                            } else {
+                                // Should not pass forward that update, and break
+                                // the chain.
+                                expect(CLIENT_TO_SERVER_UPDATES).toEqual(1);
+                            }
                         },
-                    ],
-                    { port_id: client_port }
-                );
-            });
+                        { mode: "row" }
+                    );
+
+                    const server_view = await server_table.view();
+
+                    server_view.on_update(
+                        async (updated) => {
+                            if (updated.port_id !== server_port) {
+                                client_table.update(updated.delta);
+                            } else {
+                                // update is trapped in this state - assert correct
+                                // state and exit the test.
+                                expect(await client_table.size()).toEqual(8);
+                                expect(await server_table.size()).toEqual(8);
+                                client_view.delete();
+                                server_view.delete();
+                                client_table.delete();
+                                server_table.delete();
+                                done();
+                            }
+                        },
+                        { mode: "row" }
+                    );
+
+                    // this should go to the server and round trip back to the
+                    // client, but stop when it gets to the client again.
+                    client_table.update(data, { port_id: client_port });
+                }
+            );
+
+            it_old_behavior(
+                "Should allow a client-server round trip without loops and server updates",
+                async function (done) {
+                    const client_table = await perspective.table(data);
+                    const server_table = await perspective.table(data);
+                    const client_port = await client_table.make_port();
+
+                    // "get rid" of a random number of ports by creating them
+                    for (let i = 0; i < get_random_int(5, 20); i++) {
+                        await server_table.make_port();
+                    }
+
+                    const server_port = await server_table.make_port();
+
+                    expect(client_port).toBeLessThan(server_port);
+
+                    const client_view = await client_table.view();
+
+                    let CLIENT_TO_SERVER_UPDATES = 0;
+
+                    client_view.on_update(
+                        async (updated) => {
+                            if (updated.port_id === client_port) {
+                                server_table.update(updated.delta, {
+                                    port_id: server_port,
+                                });
+                                CLIENT_TO_SERVER_UPDATES++;
+                            } else {
+                                // Should not pass forward that update, and break
+                                // the chain.
+                                expect(
+                                    CLIENT_TO_SERVER_UPDATES
+                                ).toBeLessThanOrEqual(2);
+                            }
+                        },
+                        { mode: "row" }
+                    );
+
+                    const server_view = await server_table.view();
+
+                    server_view.on_update(
+                        async (updated) => {
+                            if (updated.port_id !== server_port) {
+                                client_table.update(updated.delta);
+                            } else {
+                                // update is trapped in this state - assert correct
+                                // state and exit the test.
+                                expect(await client_table.size()).toEqual(16);
+                                expect(await server_table.size()).toEqual(16);
+                                client_view.delete();
+                                server_view.delete();
+                                client_table.delete();
+                                server_table.delete();
+                                done();
+                            }
+                        },
+                        { mode: "row" }
+                    );
+
+                    // this should go to the server and round trip back to the
+                    // client, but stop when it gets to the client again.
+                    client_table.update(data, { port_id: client_port });
+
+                    // this should go to the client
+                    server_table.update(data);
+
+                    // this should go to the server
+                    client_table.update(data, { port_id: client_port });
+                }
+            );
+
+            it_old_behavior(
+                "Should allow multi client-server round trips without loops",
+                async function (done) {
+                    const client_table = await perspective.table(data, {
+                        index: "w",
+                    });
+                    const client_table2 = await perspective.table(data, {
+                        index: "w",
+                    });
+                    const server_table = await perspective.table(data, {
+                        index: "w",
+                    });
+                    const client_port = await client_table.make_port();
+                    const client_port2 = await client_table2.make_port();
+
+                    // "get rid" of a random number of ports by creating them
+                    for (let i = 0; i < get_random_int(5, 20); i++) {
+                        await server_table.make_port();
+                    }
+
+                    const server_port = await server_table.make_port();
+                    const server_port2 = await server_table.make_port();
+
+                    expect(client_port).toBeLessThan(server_port);
+                    expect(client_port2).toBeLessThan(server_port);
+                    expect(client_port).toBeLessThan(server_port2);
+                    expect(client_port2).toBeLessThan(server_port2);
+
+                    // port numbers can be equal between clients
+                    expect(client_port2).toEqual(client_port);
+
+                    const client_view = await client_table.view();
+                    const client_view2 = await client_table2.view();
+
+                    client_view.on_update(
+                        async (updated) => {
+                            // client1 and server handlers are as minimal as can be
+                            if (updated.port_id === client_port) {
+                                server_table.update(updated.delta, {
+                                    port_id: server_port,
+                                });
+                            }
+                        },
+                        { mode: "row" }
+                    );
+
+                    client_view2.on_update(
+                        async (updated) => {
+                            // client2 only reads updates from other clients
+                            const results = await client_view2.to_columns();
+                            expect(results).toEqual({
+                                w: [1.5, 2.5, 3.5, 4.5],
+                                x: [1, 2, 300, 4],
+                                y: ["a", "b", "ccc", "d"],
+                                z: [true, false, true, false],
+                            });
+                            expect(await client_view.to_columns()).toEqual(
+                                results
+                            );
+                            expect(await server_view.to_columns()).toEqual(
+                                results
+                            );
+                            client_view.delete();
+                            client_view2.delete();
+                            server_view.delete();
+                            client_table.delete();
+                            client_table2.delete();
+                            server_table.delete();
+                            done();
+                        },
+                        { mode: "row" }
+                    );
+
+                    const server_view = await server_table.view();
+
+                    // Simulate multiple connections to the server
+                    server_view.on_update(
+                        async (updated) => {
+                            if (updated.port_id !== server_port) {
+                                client_table.update(updated.delta);
+                            }
+                        },
+                        { mode: "row" }
+                    );
+
+                    server_view.on_update(
+                        async (updated) => {
+                            if (updated.port_id !== server_port2) {
+                                client_table2.update(updated.delta);
+                            }
+                        },
+                        { mode: "row" }
+                    );
+
+                    // this should go to the server and round trip back to the
+                    // client, but stop when it gets to the client again. It should
+                    // reflect on the client2 table though.
+                    client_table.update(
+                        [
+                            {
+                                w: 3.5,
+                                x: 300,
+                                y: "ccc",
+                            },
+                        ],
+                        { port_id: client_port }
+                    );
+                }
+            );
         });
     });
 };

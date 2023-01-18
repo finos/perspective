@@ -15,8 +15,8 @@ import { WebSocketClient } from "./websocket/client";
 import { override_config } from "./config/index.js";
 import { Decompress } from "fflate";
 
-import wasm_worker from "@finos/perspective/src/js/perspective.worker.js";
-import wasm from "@finos/perspective/dist/pkg/esm/perspective.cpp.wasm";
+import wasm_worker from "../../src/js/perspective.worker.js";
+import wasm from "../../dist/pkg/esm/perspective.cpp.wasm";
 
 const INLINE_WARNING = `Perspective has been compiled in "inline" mode.`;
 

@@ -122,7 +122,6 @@ cmake-build-debug
 .python-version
 .pytest_cache
 
-package.json.lerna_backup
 website/static/css/material-dark.css
 
 # CPP Compile

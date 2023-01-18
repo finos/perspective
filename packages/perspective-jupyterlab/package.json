@@ -21,9 +21,9 @@
         "bench:run": "echo \"No Benchmarks\"",
         "clean:screenshots": "rimraf \"screenshots/**/*.@(failed|diff).png\"",
         "test:build": "cpy \"test/html/*\" dist/umd && cpy \"test/csv/*\" dist/umd && cpy \"test/css/*\" dist/umd && node build.js --test",
-        "test:run": "jest --rootDir=. --config=test/config/jest.config.js --color --verbose",
+        "test:run": "jest --rootDir=. --config=test/config/jest.config.js --color",
         "test:jupyter:build": "cpy  \"test/html/*\" dist/umd && cpy \"test/arrow/*\" dist/umd && cpy \"test/css/*\" dist/umd",
-        "test:jupyter:run": "__JUPYTERLAB_PORT__=6538 jest --rootDir=. --config=test/config/jupyter/jest.config.js --color --verbose",
+        "test:jupyter:run": "__JUPYTERLAB_PORT__=6538 jest --rootDir=. --config=test/config/jupyter/jest.config.js --color",
         "test": "npm-run-all test:build test:run",
         "test:jupyter": "npm-run-all test:jupyter:build test:jupyter:run",
         "build": "node build.js",
@@ -43,7 +43,9 @@
     },
     "devDependencies": {
         "@finos/perspective-esbuild-plugin": "^1.9.1",
-        "@finos/perspective-test": "^1.9.1"
+        "@finos/perspective-test": "^1.9.1",
+        "@prospective.co/procss": "^0.1.8",
+        "cpy": "^9.0.1"
     },
     "jupyterlab": {
         "extension": true

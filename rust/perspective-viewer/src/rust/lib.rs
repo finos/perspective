@@ -70,9 +70,7 @@ pub fn get_exprtk_commands() -> ApiResult<Box<[JsValue]>> {
 #[wasm_bindgen(js_name = "defineWebComponents")]
 pub fn js_define_web_components() {
     tracing_wasm::set_as_global_default();
-    define_web_components!(
-        "export * as psp from '@finos/perspective-viewer/dist/pkg/perspective.js'"
-    );
+    define_web_components!("export * as psp from '../../perspective.js'");
 }
 
 /// Register Web Components with the global registry, given a Perspective

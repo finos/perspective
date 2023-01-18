@@ -12,10 +12,7 @@ const fs = require("fs");
 const path = require("path");
 
 const arr = fs.readFileSync(
-    path.join(
-        __dirname,
-        "../../../../node_modules/superstore-arrow/superstore.arrow"
-    )
+    require.resolve("superstore-arrow/superstore.arrow")
 ).buffer;
 
 /**

@@ -44,12 +44,16 @@
     "license": "Apache-2.0",
     "dependencies": {
         "@finos/perspective-viewer": "^1.9.1",
-        "@lumino/algorithm": "1.9.1",
-        "@lumino/commands": "1.20.0",
-        "@lumino/widgets": "1.31.1",
+        "@lumino/algorithm": "^1.9.1",
+        "@lumino/commands": "^1.20.0",
+        "@lumino/domutils": "^1.8.1",
+        "@lumino/messaging": "^1.10.1",
+        "@lumino/virtualdom": "^1.14.1",
+        "@lumino/widgets": "^1.31.1",
         "lodash": "^4.17.4"
     },
     "devDependencies": {
+        "@prospective.co/procss": "^0.1.8",
         "@finos/perspective-esbuild-plugin": "^1.9.1",
         "@finos/perspective-test": "^1.9.1"
     }

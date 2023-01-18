@@ -7,7 +7,7 @@
  *
  */
 
-import style from "../less/workspace.less";
+import style from "../../build/css/workspace.css";
 import template from "../html/workspace.html";
 import { PerspectiveWorkspace, SIDE } from "./workspace";
 export { PerspectiveWorkspace } from "./workspace";
@@ -16,7 +16,7 @@ import { Widget } from "@lumino/widgets/src/widget";
 import { bindTemplate } from "./workspace/utils.js";
 export { PerspectiveViewerWidget } from "./workspace/widget";
 
-import injectedStyles from "../less/injected.less";
+import injectedStyles from "../../build/css/injected.css";
 
 /**
  * A Custom Element for coordinating a set of `<perspective-viewer>` light DOM

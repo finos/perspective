@@ -18,7 +18,6 @@ import { createCommands } from "./commands";
 import { PerspectiveViewerWidget } from "./widget";
 import uniqBy from "lodash/uniqBy";
 import debounce from "lodash/debounce";
-import cloneDeep from "lodash/cloneDeep";
 
 const DEFAULT_WORKSPACE_SIZE = [1, 3];
 
@@ -212,7 +211,7 @@ export class PerspectiveWorkspace extends SplitPanel {
             detail,
             viewers: viewer_configs = [],
             mode = MODE.GLOBAL_FILTERS,
-        } = cloneDeep(value);
+        } = structuredClone(value);
         this.mode = mode;
 
         if (

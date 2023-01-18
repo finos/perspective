@@ -439,6 +439,11 @@ module.exports = (perspective) => {
             ]);
             let view = await table.view();
             let json = await view.to_json({ formatted: true });
+            json = json.map((obj) => {
+                obj.datetime = obj.datetime.replace(/[^:,\/|A-Z0-9 ]/gi, " ");
+                return obj;
+            }, {});
+
             expect(json).toEqual([
                 { datetime: "1/1/16, 12:30:00 AM" },
                 { datetime: "6/15/16, 7:20:00 PM" },

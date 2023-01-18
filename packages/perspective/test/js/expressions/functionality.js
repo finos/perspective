@@ -9,6 +9,12 @@
 
 const expressions_common = require("./common.js");
 
+function it_old_behavior(name, capture) {
+    it(name, function (done) {
+        capture(done);
+    });
+}
+
 /**
  * Tests the functionality of `View`-based expressions, specifically that
  * existing column/view semantics (pivots, aggregates, columns, sorts, filters)
@@ -1595,23 +1601,26 @@ module.exports = (perspective) => {
             await table.delete();
         });
 
-        it("Should not be able to overwrite table column with an expression", async function (done) {
-            expect.assertions(1);
-            const table = await perspective.table(
-                expressions_common.int_float_data
-            );
-            table
-                .view({
-                    expressions: ["// w\nupper('abc')"],
-                })
-                .catch((e) => {
-                    expect(e.message).toMatch(
-                        `Abort(): View creation failed: cannot create expression column 'w' that overwrites a column that already exists.\n`
-                    );
-                    table.delete();
-                    done();
-                });
-        });
+        it_old_behavior(
+            "Should not be able to overwrite table column with an expression",
+            async function (done) {
+                expect.assertions(1);
+                const table = await perspective.table(
+                    expressions_common.int_float_data
+                );
+                table
+                    .view({
+                        expressions: ["// w\nupper('abc')"],
+                    })
+                    .catch((e) => {
+                        expect(e.message).toMatch(
+                            `Abort(): View creation failed: cannot create expression column 'w' that overwrites a column that already exists.\n`
+                        );
+                        table.delete();
+                        done();
+                    });
+            }
+        );
 
         it("Should be able to overwrite expression column with one that returns a different type", async function () {
             const table = await perspective.table(
@@ -1636,29 +1645,32 @@ module.exports = (perspective) => {
             table.delete();
         });
 
-        it("A new view should not reference expression columns it did not create.", async function (done) {
-            expect.assertions(2);
-            const table = await perspective.table(
-                expressions_common.int_float_data
-            );
-            const view = await table.view({
-                expressions: ['"w" + "x"'],
-            });
-            const result = await view.to_columns();
-            expect(result['"w" + "x"']).toEqual([2.5, 4.5, 6.5, 8.5]);
-            table
-                .view({
-                    columns: ['"w" + "x"', "x"],
-                })
-                .catch((e) => {
-                    expect(e.message).toMatch(
-                        `Abort(): Invalid column '"w" + "x"' found in View columns.\n`
-                    );
-                    view.delete();
-                    table.delete();
-                    done();
+        it_old_behavior(
+            "A new view should not reference expression columns it did not create.",
+            async function (done) {
+                expect.assertions(2);
+                const table = await perspective.table(
+                    expressions_common.int_float_data
+                );
+                const view = await table.view({
+                    expressions: ['"w" + "x"'],
                 });
-        });
+                const result = await view.to_columns();
+                expect(result['"w" + "x"']).toEqual([2.5, 4.5, 6.5, 8.5]);
+                table
+                    .view({
+                        columns: ['"w" + "x"', "x"],
+                    })
+                    .catch((e) => {
+                        expect(e.message).toMatch(
+                            `Abort(): Invalid column '"w" + "x"' found in View columns.\n`
+                        );
+                        view.delete();
+                        table.delete();
+                        done();
+                    });
+            }
+        );
 
         it("A view should be able to shadow real columns with an expression column", async function () {
             const table = await perspective.table(

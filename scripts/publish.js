@@ -8,7 +8,7 @@
  */
 
 const { execute } = require("./script_utils.js");
-const cp = require("cpy");
+const cpy_mod = import("cpy");
 const decompress = require("decompress");
 const decompressUnzip = require("decompress-unzip");
 const fs = require("fs").promises;
@@ -34,8 +34,27 @@ if (!process.env.COMMIT) {
     );
 }
 
+const gh_js_dist_aliases = {
+    "perspective-dist": "packages/perspective/dist",
+    "perspective-viewer-dist": "rust/perspective-viewer/dist",
+    "perspective-viewer-datagrid-dist":
+        "packages/perspective-viewer-datagrid/dist",
+    "perspective-viewer-d3fc-dist": "packages/perspective-viewer-d3fc/dist",
+    "perspective-viewer-openlayers-dist":
+        "packages/perspective-viewer-openlayers/dist",
+    "perspective-workspace-dist": "packages/perspective-workspace/dist",
+    "perspective-jupyterlab-dist": "packages/perspective-jupyterlab/dist",
+    "perspective-cli-dist": "packages/perspective-cli/dist",
+    "perspective-esbuild-plugin-dist":
+        "packages/perspective-esbuild-plugin/dist",
+    "perspective-webpack-plugin-dist":
+        "packages/perspective-webpack-plugin/dist",
+};
+
+const gh_js_dist_folders = Object.keys(gh_js_dist_aliases);
+
 // Folders for artifacts on GitHub Actions
-const dist_folders = [
+const gh_python_dist_folders = [
     // // https://github.com/actions/virtual-environments
 
     // Mac 11
@@ -103,6 +122,7 @@ function askQuestion(query) {
 }
 
 (async function () {
+    const { default: cp } = await cpy_mod;
     try {
         // Page to fetch
         let page = 1;
@@ -110,6 +130,7 @@ function askQuestion(query) {
 
         // assets loaded
         let python_dist_folders = [];
+        let js_dist_folders = [];
         do {
             console.log(`Fetching page ${page}`);
 
@@ -128,8 +149,16 @@ function askQuestion(query) {
             python_dist_folders = [
                 ...python_dist_folders,
                 ...resp.data.artifacts.filter(
-                    (artifact) => dist_folders.indexOf(artifact.name) >= 0
+                    (artifact) =>
+                        gh_python_dist_folders.indexOf(artifact.name) >= 0
                 ),
+            ];
+
+            js_dist_folders = [
+                ...js_dist_folders,
+                ...resp.data.artifacts.filter((artifact) => {
+                    return gh_js_dist_folders.indexOf(artifact.name) >= 0;
+                }),
             ];
 
             page += 1;
@@ -137,13 +166,20 @@ function askQuestion(query) {
 
         // Print out our results, and what we expected
         console.log(
-            `Found ${python_dist_folders.length} python folders, expected ${dist_folders.length}`
+            `Found ${python_dist_folders.length} python folders, expected ${gh_python_dist_folders.length}`
+        );
+
+        console.log(
+            `Found ${js_dist_folders.length} javascript folders, expected ${gh_js_dist_folders.length}`
         );
 
         // If they vary (e.g. a partial run), ask the user if they're sure
         // they want to proceed
         let proceed = "y";
-        if (python_dist_folders.length !== dist_folders.length) {
+        if (
+            python_dist_folders.length !== gh_python_dist_folders.length ||
+            js_dist_folders.length !== gh_js_dist_folders.length
+        ) {
             proceed = "n";
             proceed = await askQuestion("Proceed? (y/N)");
         }
@@ -151,8 +187,8 @@ function askQuestion(query) {
         // If everything good, or they say they want to proceed,
         // pull the artifacts locally into a temp folder
         if (proceed.toLowerCase() === "y") {
-            const dist_folder = `perspective-wheel-dist-${process.env.GITHUB_WORKFLOW_ID}`;
-            const wheel_folder = `perspective-wheel-dist-${process.env.GITHUB_WORKFLOW_ID}/wheels`;
+            const dist_folder = `dist/pypi-${process.env.GITHUB_WORKFLOW_ID}`;
+            const wheel_folder = `dist/pypi-wheel-${process.env.GITHUB_WORKFLOW_ID}/wheels`;
 
             // Remove if exists
             await fs.rm(dist_folder, {
@@ -161,8 +197,8 @@ function askQuestion(query) {
             });
 
             // Make directories
-            await fs.mkdir(dist_folder);
-            await fs.mkdir(wheel_folder);
+            await fs.mkdir(dist_folder, { recursive: true });
+            await fs.mkdir(wheel_folder, { recursive: true });
 
             // Download the artifact folders
             await Promise.all(
@@ -223,6 +259,88 @@ function askQuestion(query) {
                 }`
             );
 
+            const js_dist_folder = `dist/npm-${process.env.GITHUB_WORKFLOW_ID}`;
+            await fs.rm(js_dist_folder, {
+                recursive: true,
+                force: true,
+            });
+
+            await fs.mkdir(js_dist_folder, { recursive: true });
+
+            await Promise.all(
+                js_dist_folders.map(async (artifact) => {
+                    // Download the Artifact
+                    const download = await octokit.request(
+                        "GET /repos/{owner}/{repo}/actions/artifacts/{artifact_id}/{archive_format}",
+                        {
+                            owner: "finos",
+                            repo: "perspective",
+                            artifact_id: `${artifact.id}`,
+                            archive_format: "zip",
+                        }
+                    );
+
+                    // Write out the zip file
+                    await fs.appendFile(
+                        `${js_dist_folder}/${artifact.name}.zip`,
+                        Buffer.from(download.data)
+                    );
+                })
+            );
+
+            async function isError(promise) {
+                try {
+                    await promise;
+                    return false;
+                } catch (e) {
+                    return true;
+                }
+            }
+
+            // Unzip the folders
+            await Promise.all(
+                js_dist_folders.map(async (artifact) => {
+                    const js_dist_dir = gh_js_dist_aliases[artifact.name];
+                    if (!(await isError(fs.stat(js_dist_dir)))) {
+                        await fs.rm(js_dist_dir, {
+                            recursive: true,
+                        });
+                    }
+
+                    await fs.mkdir(js_dist_dir);
+                    await decompress(
+                        `${js_dist_folder}/${artifact.name}.zip`,
+                        gh_js_dist_aliases[artifact.name],
+                        {
+                            plugins: [decompressUnzip()],
+                            map: (file) => {
+                                if (
+                                    file.type === "file" &&
+                                    file.path.endsWith("/")
+                                ) {
+                                    file.type = "directory";
+                                }
+                                return file;
+                            },
+                        }
+                    );
+                })
+            );
+
+            // List the wheels
+            const downloaded_pkgs = await fs.readdir(js_dist_folder);
+
+            await Promise.all(
+                js_dist_folders.map((artifact) =>
+                    fs.rm(`${js_dist_folder}/${artifact.name}.zip`)
+                )
+            );
+
+            // Print out our results, and what we expected
+            console.log(
+                `Found ${downloaded_pkgs.length} pkgs, expected ${gh_js_dist_folders.length}`
+            );
+
             // If they vary (e.g. a partial run), ask the user if they're sure
             // they want to proceed
             proceed = "y";
@@ -234,18 +352,30 @@ function askQuestion(query) {
             if (proceed === "y") {
                 if (!process.env.COMMIT) {
                     console.log(
-                        `Uploading:\n\t${downloaded_wheels.join("\n\t")}`
+                        `Uploading to pypi:\n\t${downloaded_wheels.join(
+                            "\n\t"
+                        )}\nUploading to npm:\n\t${gh_js_dist_folders.join(
+                            "\n\t"
+                        )}`
                     );
                     console.error(
-                        "Skipping twine upload, marked as dry run.\nSet env var COMMIT=1 to run fo real."
+                        "Skipping twine/npm upload, marked as dry run.\nSet env var COMMIT=1 to run fo real."
                     );
                 } else {
                     execute`twine upload ${wheel_folder}/*`;
+                    for (const name of gh_js_dist_folders) {
+                        const path = gh_js_dist_aliases[name];
+                        const package = JSON.parse(
+                            await fs.readFile(`${path}/../package.json`)
+                        );
+
+                        execute`yarn workspace ${package.name} publish`;
+                    }
                 }
             }
         }
     } catch (e) {
-        console.error(e.message);
+        console.error(e);
         process.exit(1);
     }
 })();

@@ -7,7 +7,7 @@
  *
  */
 
-@import (inline) "@finos/perspective-viewer/dist/css/material.css";
+@import "@finos/perspective-viewer/dist/css/material.css";
 
 
 perspective-workspace,
@@ -17,7 +17,7 @@ perspective-indicator[theme="Material Light"] {
 }
 
 perspective-workspace {
-    .perspective-workspace-material-base();
+    @include perspective-workspace-material-base;
 }
 
 perspective-viewer[theme="Material Light"].workspace-master-widget {
@@ -33,7 +33,7 @@ perspective-viewer[theme="Material Light"].workspace-master-widget {
     }
 }
 
-.perspective-workspace-material-base() {
+@mixin perspective-workspace-material-base {
     font-family: "Open Sans";
     --open-settings-button--content: "expand_more";
     --close-settings-button--content: "expand_less";

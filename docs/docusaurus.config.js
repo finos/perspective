@@ -57,7 +57,7 @@ const config = {
         defaultLocale: "en",
         locales: ["en"],
     },
-    plugins: ["perspective-loader"],
+    plugins: ["./plugins/perspective-loader"],
     presets: [
         [
             "classic",

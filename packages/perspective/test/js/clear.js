@@ -7,6 +7,12 @@
  *
  */
 
+function it_old_behavior(name, capture) {
+    it(name, function (done) {
+        capture(done);
+    });
+}
+
 module.exports = (perspective) => {
     describe("Clear", function () {
         it("removes the rows from the table", async function () {
@@ -57,74 +63,80 @@ module.exports = (perspective) => {
             table.delete();
         });
 
-        it("replaces the rows in the table with the input data and fires an on_update", async function (done) {
-            const table = await perspective.table([
-                { x: 1, y: 2 },
-                { x: 3, y: 4 },
-            ]);
+        it_old_behavior(
+            "replaces the rows in the table with the input data and fires an on_update",
+            async function (done) {
+                const table = await perspective.table([
+                    { x: 1, y: 2 },
+                    { x: 3, y: 4 },
+                ]);
 
-            const view = await table.view();
+                const view = await table.view();
 
-            const callback = async function (updated) {
-                expect(updated.port_id).toEqual(0);
-                const json = await view.to_json();
-                expect(json).toHaveLength(1);
-                expect(json).toEqual([{ x: 5, y: 6 }]);
-                view.delete();
-                table.delete();
-                done();
-            };
+                const callback = async function (updated) {
+                    expect(updated.port_id).toEqual(0);
+                    const json = await view.to_json();
+                    expect(json).toHaveLength(1);
+                    expect(json).toEqual([{ x: 5, y: 6 }]);
+                    view.delete();
+                    table.delete();
+                    done();
+                };
 
-            view.on_update(callback);
+                view.on_update(callback);
 
-            let json = await view.to_json();
-            expect(json).toHaveLength(2);
-            expect(json).toEqual([
-                { x: 1, y: 2 },
-                { x: 3, y: 4 },
-            ]);
+                let json = await view.to_json();
+                expect(json).toHaveLength(2);
+                expect(json).toEqual([
+                    { x: 1, y: 2 },
+                    { x: 3, y: 4 },
+                ]);
 
-            table.replace([{ x: 5, y: 6 }]);
-        });
+                table.replace([{ x: 5, y: 6 }]);
+            }
+        );
 
-        it("replaces the rows in the table with the input data and fires an on_update with the correct delta", async function (done) {
-            const table = await perspective.table([
-                { x: 1, y: 2 },
-                { x: 3, y: 4 },
-            ]);
+        it_old_behavior(
+            "replaces the rows in the table with the input data and fires an on_update with the correct delta",
+            async function (done) {
+                const table = await perspective.table([
+                    { x: 1, y: 2 },
+                    { x: 3, y: 4 },
+                ]);
 
-            const view = await table.view();
+                const view = await table.view();
 
-            const callback = async function (updated) {
-                expect(updated.port_id).toEqual(0);
-                const table2 = await perspective.table(updated.delta);
-                const view2 = await table2.view();
+                const callback = async function (updated) {
+                    expect(updated.port_id).toEqual(0);
+                    const table2 = await perspective.table(updated.delta);
+                    const view2 = await table2.view();
 
-                const json = await view.to_json();
-                expect(json).toHaveLength(1);
-                expect(json).toEqual([{ x: 5, y: 6 }]);
+                    const json = await view.to_json();
+                    expect(json).toHaveLength(1);
+                    expect(json).toEqual([{ x: 5, y: 6 }]);
 
-                const json2 = await view2.to_json();
-                expect(json2).toEqual(json);
+                    const json2 = await view2.to_json();
+                    expect(json2).toEqual(json);
 
-                view2.delete();
-                table2.delete();
-                view.delete();
-                table.delete();
-                done();
-            };
+                    view2.delete();
+                    table2.delete();
+                    view.delete();
+                    table.delete();
+                    done();
+                };
 
-            view.on_update(callback, { mode: "row" });
+                view.on_update(callback, { mode: "row" });
 
-            let json = await view.to_json();
-            expect(json).toHaveLength(2);
-            expect(json).toEqual([
-                { x: 1, y: 2 },
-                { x: 3, y: 4 },
-            ]);
+                let json = await view.to_json();
+                expect(json).toHaveLength(2);
+                expect(json).toEqual([
+                    { x: 1, y: 2 },
+                    { x: 3, y: 4 },
+                ]);
 
-            table.replace([{ x: 5, y: 6 }]);
-        });
+                table.replace([{ x: 5, y: 6 }]);
+            }
+        );
 
         it("replace the rows in the table atomically", async function () {
             const table = await perspective.table([

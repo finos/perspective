@@ -26,8 +26,7 @@ const load_perspective =
     require("../../dist/pkg/esm/perspective.cpp.js").default;
 
 const LOCAL_PATH = path.join(process.cwd(), "node_modules");
-const buffer =
-    require("@finos/perspective/dist/pkg/esm/perspective.cpp.wasm").default;
+const buffer = require("../../dist/pkg/esm/perspective.cpp.wasm").default;
 
 function deflate(buffer) {
     let parts = [];

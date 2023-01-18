@@ -7,7 +7,15 @@
  *
  */
 
-const { bash, execute, getarg, execute_throw } = require("./script_utils.js");
+const {
+    bash,
+    execute,
+    getarg,
+    execute_throw,
+    run_with_scope,
+    bash_with_scope,
+    PACKAGE_MANAGER,
+} = require("./script_utils.js");
 const minimatch = require("minimatch");
 const fs = require("fs");
 
@@ -48,13 +56,10 @@ function jest_all() {
         PSP_PAUSE_ON_FAILURE=${!!getarg("--interactive")}
         WRITE_TESTS=${IS_WRITE} 
         TZ=UTC 
-        node_modules/.bin/jest 
+        npx jest 
         --rootDir=.
         --config=tools/perspective-test/jest.all.config.js 
         --color
-        --verbose 
-        --maxWorkers=50%
-        --testPathIgnorePatterns='timezone'
         ${getarg("--bail") && "--bail"}
         ${getarg("--debug") || "--silent 2>&1 --noStackTrace"} 
         --testNamePattern="${get_regex()}"`;
@@ -66,38 +71,20 @@ function jest_all() {
 function jest_single(cmd) {
     console.log(`-- Running "${PACKAGE}" test suite`);
     const RUN_IN_BAND =
-        getarg("--interactive") || IS_JUPYTER ? "--runInBand" : "";
-    return bash`
+        getarg("--interactive") || getarg("--runInBand") || IS_JUPYTER
+            ? "--runInBand"
+            : "";
+    const x = bash`
         PSP_SATURATE=${!!getarg("--saturate")}
         PSP_PAUSE_ON_FAILURE=${!!getarg("--interactive")}
         WRITE_TESTS=${IS_WRITE}
         IS_LOCAL_PUPPETEER=${IS_LOCAL_PUPPETEER}
         TZ=UTC 
-        node_modules/.bin/lerna exec 
-        --concurrency 1 
-        --no-bail
-        --scope="@finos/${PACKAGE}" 
-        -- 
-        yarn ${cmd ? cmd : "test:run"}
-        ${DEBUG_FLAG}
-        ${RUN_IN_BAND}
-        --testNamePattern="${get_regex()}"`;
-}
+        ${bash_with_scope`
+            ${cmd ? cmd : "test:run"}
+            -- ${DEBUG_FLAG} ${RUN_IN_BAND} --testNamePattern="${get_regex()}"`}`;
 
-/**
- * Run timezone tests in a new Node process.
- */
-function jest_timezone() {
-    console.log("-- Running Perspective.js timezone test suite");
-    return bash`
-        node_modules/.bin/lerna exec 
-        --concurrency 1 
-        --no-bail
-        --scope="@finos/perspective" 
-        -- 
-        yarn test_timezone:run
-        ${DEBUG_FLAG}
-        --testNamePattern="${get_regex()}"`;
+    return x;
 }
 
 function get_regex() {
@@ -108,48 +95,48 @@ function get_regex() {
     }
 }
 
-try {
-    execute`yarn --silent clean --screenshots`;
+async function run() {
+    try {
+        // must be executed from top-level (without scope) in order to respect the
+        // `--screenshots` flag.
+        execute`${PACKAGE_MANAGER} run clean -- --screenshots`;
 
-    if (!IS_JUPYTER) {
-        // test:build irrelevant for jupyter tests
-        execute`node_modules/.bin/lerna run test:build --stream --scope="@finos/${PACKAGE}"`;
-    }
-
-    // if (!PACKAGE || minimatch("perspective-viewer", PACKAGE)) {
-    //     console.log("-- Running Rust tests");
-    //     execute`yarn lerna --scope=@finos/perspective-viewer exec yarn test:run:rust`;
-    // }
-
-    if (getarg("--quiet")) {
-        // Run all tests with suppressed output.
-        console.log("-- Running jest in quiet mode");
-        execute(silent(jest_timezone()));
-        execute(silent(jest_all()));
-    } else if (process.env.PACKAGE) {
-        // Run tests for a single package.
-
-        if (IS_JUPYTER) {
-            // Jupyterlab is guaranteed to have started at this point, so
-            // copy the test files over and run the tests.
-            execute`node_modules/.bin/lerna run test:jupyter:build --stream --scope="@finos/${PACKAGE}"`;
-            execute_throw(jest_single("test:jupyter:run"));
-            process.exit(0);
+        if (!IS_JUPYTER) {
+            // test:build irrelevant for jupyter tests
+            await run_with_scope`test:build`;
         }
 
-        if (minimatch("perspective", PACKAGE)) {
-            execute(jest_timezone());
-        }
+        // if (!PACKAGE || minimatch("perspective-viewer", PACKAGE)) {
+        //     console.log("-- Running Rust tests");
+        //     execute`yarn lerna --scope=@finos/perspective-viewer exec yarn test:run:rust`;
+        // }
 
-        execute(jest_single());
-    } else {
-        // Run all tests with full output.
-        console.log("-- Running jest in fast mode");
-        execute(jest_timezone());
-        execute(jest_all());
+        if (getarg("--quiet")) {
+            // Run all tests with suppressed output.
+            console.log("-- Running jest in quiet mode");
+            execute(silent(jest_all()));
+        } else if (process.env.PACKAGE) {
+            // Run tests for a single package.
+
+            if (IS_JUPYTER) {
+                // Jupyterlab is guaranteed to have started at this point, so
+                // copy the test files over and run the tests.
+                await run_with_scope`test:jupyter:build`;
+                execute_throw(jest_single("test:jupyter:run"));
+                process.exit(0);
+            }
+
+            execute(jest_single());
+        } else {
+            // Run all tests with full output.
+            console.log("-- Running jest in fast mode");
+            execute(jest_all());
+        }
+        // }
+    } catch (e) {
+        console.log(e.message);
+        process.exit(1);
     }
-    // }
-} catch (e) {
-    console.log(e.message);
-    process.exit(1);
 }
+
+run();

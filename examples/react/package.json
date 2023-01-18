@@ -1,5 +1,5 @@
 {
-    "name": "react",
+    "name": "example-react",
     "private": true,
     "version": "1.9.1",
     "description": "An example app built using `@finos/perspective-viewer`.",
@@ -14,13 +14,13 @@
         "@finos/perspective-viewer": "^1.9.1",
         "@finos/perspective-viewer-d3fc": "^1.9.1",
         "@finos/perspective-viewer-datagrid": "^1.9.1",
-        "react": "16.8.6",
-        "react-dom": "16.8.6"
+        "react": "^16.14.0",
+        "react-dom": "^16.9.17"
     },
     "devDependencies": {
         "@finos/perspective-webpack-plugin": "^1.9.1",
-        "@types/react": "^16.8.6",
-        "@types/react-dom": "^16.9.4",
+        "@types/react": "^16.14.0",
+        "@types/react-dom": "^16.9.17",
         "source-map-loader": "^0.2.4",
         "ts-loader": "^6.2.1"
     }

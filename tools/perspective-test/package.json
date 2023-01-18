@@ -13,8 +13,6 @@
         "url": "https://github.com/finos/perspective/tools/perspective-test"
     },
     "scripts": {
-        "build": ":",
-        "clean": ":",
         "prebench": "mkdirp build",
         "bench": "node bench/versions.js"
     },

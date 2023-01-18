@@ -14,8 +14,6 @@
         "url": "https://github.com/finos/perspective/packages/perspective-bench"
     },
     "scripts": {
-        "build": ":",
-        "clean": ":",
         "bench": "node src/js/bench.js"
     },
     "author": "",

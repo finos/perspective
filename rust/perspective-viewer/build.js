@@ -18,6 +18,8 @@ const {
     NodeModulesExternal,
 } = require("@finos/perspective-esbuild-plugin/external");
 
+const cpy_mod = import("cpy");
+
 const IS_DEBUG =
     !!process.env.PSP_DEBUG || process.argv.indexOf("--debug") >= 0;
 
@@ -99,13 +101,15 @@ async function build_all() {
     await compile_rust();
 
     // JavaScript
-    execSync("yarn tsc --project tsconfig.json", INHERIT);
+    execSync("npx tsc --project tsconfig.json", INHERIT);
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
     await Promise.all(POSTBUILD.map(build)).catch(() => process.exit(1));
 
     // legacy compat
-    execSync("cpy target/themes/* dist/css");
-    execSync("cpy dist/css/* dist/umd");
+    const { default: cpy } = await cpy_mod;
+    cpy("target/themes/*", "dist/css");
+    cpy("target/themes/*", "dist/umd");
+    cpy("dist/pkg/*", "dist/esm");
 }
 
 build_all();
