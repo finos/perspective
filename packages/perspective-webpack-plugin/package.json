@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-webpack-plugin",
-    "version": "1.9.1",
+    "version": "1.9.2",
     "description": "Perspective.js Webpack Plugin",
     "main": "index.js",
     "publishConfig": {
@@ -18,8 +18,8 @@
     "author": "",
     "license": "Apache-2.0",
     "dependencies": {
-        "@finos/perspective": "^1.9.0",
-        "@finos/perspective-viewer": "^1.9.0",
+        "@finos/perspective": "^1.9.2",
+        "@finos/perspective-viewer": "^1.9.2",
         "arraybuffer-loader": "^1.0.2",
         "css-loader": "^6.7.3",
         "exports-loader": "^3.1.0",
