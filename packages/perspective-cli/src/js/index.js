@@ -161,6 +161,10 @@ program
     .option("-o, --open", "Open a browser automagically.")
     .action(host);
 
-if (require.main && !process.argv.slice(2).length) {
-    program.help();
+if (require.main) {
+    if (!process.argv.slice(2).length) {
+        program.help();
+    } else {
+        program.parse(process.argv);
+    }
 }
