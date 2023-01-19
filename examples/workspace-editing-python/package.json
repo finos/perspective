@@ -1,7 +1,7 @@
 {
     "name": "workspace-editing-python",
     "private": true,
-    "version": "1.9.2",
+    "version": "1.9.3",
     "description": "An example app demonstrating client/server editing, built using `@finos/perspective-workspace` and `perspective-python`.",
     "scripts": {
         "start": "yarn webpack && yarn start:server",
@@ -12,14 +12,14 @@
     "keywords": [],
     "license": "Apache-2.0",
     "dependencies": {
-        "@finos/perspective": "^1.9.2",
-        "@finos/perspective-viewer": "^1.9.2",
-        "@finos/perspective-viewer-d3fc": "^1.9.2",
-        "@finos/perspective-viewer-datagrid": "^1.9.2",
-        "@finos/perspective-workspace": "^1.9.2"
+        "@finos/perspective": "^1.9.3",
+        "@finos/perspective-viewer": "^1.9.3",
+        "@finos/perspective-viewer-d3fc": "^1.9.3",
+        "@finos/perspective-viewer-datagrid": "^1.9.3",
+        "@finos/perspective-workspace": "^1.9.3"
     },
     "devDependencies": {
-        "@finos/perspective-webpack-plugin": "^1.9.2",
+        "@finos/perspective-webpack-plugin": "^1.9.3",
         "http-server": "^0.11.1",
         "npm-run-all": "^4.1.3",
         "rimraf": "^2.5.2"

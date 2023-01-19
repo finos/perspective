@@ -1,3 +1,15 @@
+# [v1.9.3](https://github.com/finos/perspective/releases/tag/v1.9.3)
+
+_19 January 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v1.9.2...v1.9.3))
+
+Features
+
+- Add `@finos/perspective-viewer-openlayers` plugin to CLI package [#2087](https://github.com/finos/perspective/pull/2087)
+
+Misc
+
+- Fix script errors in publish and build commands [#2088](https://github.com/finos/perspective/pull/2088)
+
 # [v1.9.2](https://github.com/finos/perspective/releases/tag/v1.9.2)
 
 _18 January 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v1.9.1...v1.9.2))
