@@ -30,7 +30,7 @@ if (!process.env.GITHUB_WORKFLOW_ID) {
 
 if (!process.env.COMMIT) {
     console.warn(
-        "Running a dry run, this WILL NOT publish to pypi. Set the env var COMMIT to publish."
+        "Running a dry run, this WILL NOT publish. Set the env var COMMIT to publish."
     );
 }
 
@@ -350,26 +350,29 @@ function askQuestion(query) {
             }
 
             if (proceed === "y") {
+                const pypi = downloaded_wheels.join("\n\t");
+                const npm = gh_js_dist_folders.join("\n\t");
+                console.log(
+                    `Uploading to pypi:\n\t${pypi}\nUploading to npm:\n\t${npm}`
+                );
+
                 if (!process.env.COMMIT) {
-                    console.log(
-                        `Uploading to pypi:\n\t${downloaded_wheels.join(
-                            "\n\t"
-                        )}\nUploading to npm:\n\t${gh_js_dist_folders.join(
-                            "\n\t"
-                        )}`
-                    );
                     console.error(
                         "Skipping twine/npm upload, marked as dry run.\nSet env var COMMIT=1 to run fo real."
                     );
                 } else {
                     execute`twine upload ${wheel_folder}/*`;
                     for (const name of gh_js_dist_folders) {
-                        const path = gh_js_dist_aliases[name];
+                        const path = gh_js_dist_aliases[name]
+                            .split("/")
+                            .slice(0, -1)
+                            .join("/");
+
                         const package = JSON.parse(
-                            await fs.readFile(`${path}/../package.json`)
+                            await fs.readFile(`${path}/package.json`)
                         );
 
-                        execute`yarn workspace ${package.name} publish`;
+                        execute`npm --workspace ${package.name} publish`;
                     }
                 }
             }
