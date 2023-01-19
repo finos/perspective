@@ -30,10 +30,15 @@ function heatmapChart(container, settings) {
         .excludeType(AXIS_TYPES.linear)
         .settingName("crossValues")
         .valueName("crossValue")(data);
+
     const yAxis = axisFactory(settings)
         .excludeType(AXIS_TYPES.linear)
         .settingName("splitValues")
         .valueName("mainValue")
+        .modifyDomain((d) => {
+            let is_number = !isNaN(d[0]);
+            return is_number ? d.reverse() : d;
+        })
         .orient("vertical")(data);
 
     const chart = chartCanvasFactory(xAxis, yAxis).plotArea(
