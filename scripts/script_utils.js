@@ -299,8 +299,8 @@ const getarg = (exports.getarg = function (flag, ...args) {
 exports.run_with_scope = async function run_recursive(strings, ...args) {
     let scope =
         process.env.PACKAGE && process.env.PACKAGE !== ""
-            ? process.env.PACKAGE.split(",")
-            : [];
+            ? process.env.PACKAGE.split(",").map((x) => `@finos/${x}`)
+            : null;
 
     const { stdout } = await execute_return("npm ls --depth 1 --json");
     const workspaces = JSON.parse(stdout.toString());
@@ -310,8 +310,10 @@ exports.run_with_scope = async function run_recursive(strings, ...args) {
         )
     );
 
-    let uncompiled = Object.keys(workspaces.dependencies).filter((x) =>
-        workspaces.dependencies[x].resolved.startsWith("file:")
+    let uncompiled = Object.keys(workspaces.dependencies).filter(
+        (x) =>
+            workspaces.dependencies[x].resolved.startsWith("file:") &&
+            (scope === null || scope.indexOf(x) >= 0)
     );
 
     const is_valid = new Set(uncompiled);
@@ -376,7 +378,7 @@ exports.run_with_scope = async function run_recursive(strings, ...args) {
         uncompiled = new_uncompiled;
     }
 
-    if (scope.length === 0) {
+    if (scope?.length === 0) {
     }
 };
 
