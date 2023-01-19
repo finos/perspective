@@ -87,6 +87,7 @@ const DEFAULT_ASSETS = [
     "@finos/perspective-workspace/dist/css",
     "@finos/perspective-viewer/dist/cdn",
     "@finos/perspective-viewer/dist/css",
+    "@finos/perspective-viewer-openlayers/dist/cdn",
     "@finos/perspective-viewer-datagrid/dist/cdn",
     "@finos/perspective-viewer-d3fc/dist/cdn",
     "@finos/perspective-jupyterlab/dist/cdn",
