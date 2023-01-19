@@ -54,10 +54,10 @@ utils.with_server({}, () => {
                             theme: "Material Light",
                         });
 
-                        return await utils.get_contents.bind(
-                            null,
-                            "perspective-viewer perspective-viewer-d3fc-ybar"
-                        )(page);
+                        return await utils.get_contents(
+                            "perspective-viewer perspective-viewer-d3fc-ybar",
+                            page
+                        );
                     }
                 );
             });

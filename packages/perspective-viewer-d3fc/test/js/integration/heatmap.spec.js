@@ -20,12 +20,24 @@ utils.with_server({}, () => {
     describe.page(
         "heatmap.html",
         () => {
-            simple_tests.default(
-                utils.get_contents.bind(
-                    null,
-                    "perspective-viewer perspective-viewer-d3fc-heatmap"
-                )
-            );
+            const get_contents = (p) =>
+                utils.get_contents(
+                    "perspective-viewer perspective-viewer-d3fc-heatmap",
+                    p
+                );
+            simple_tests.default(get_contents);
+
+            test.capture("by a numerical column", async (page) => {
+                await page.evaluate(async () => {
+                    const viewer = document.querySelector("perspective-viewer");
+                    await viewer.restore({
+                        split_by: ["Postal Code"],
+                        settings: true,
+                    });
+                });
+
+                return await get_contents(page);
+            });
             // render_warning_tests.default("Heatmap");
         },
         { reload_page: false, root: path.join(__dirname, "..", "..", "..") }

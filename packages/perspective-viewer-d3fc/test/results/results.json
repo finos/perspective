@@ -148,5 +148,6 @@
     "bar-themed_filters_filters_by_a_numeric_column": "c9e4e2fc4e1a12aa7684e8608f46c653",
     "bar-themed_filters_filters_by_an_alpha_column": "d586997539b9f76b0733efad0631749d",
     "bar-themed_filters_filters_with__in__comparator": "914b15437ab74e08463987f7d0166f05",
-    "xyline_correctly_render_when_a_bar_chart_has_non_equidistant_times_on_a_datetime_axis": "f420990315751370e1237e86b4043332"
+    "xyline_correctly_render_when_a_bar_chart_has_non_equidistant_times_on_a_datetime_axis": "f420990315751370e1237e86b4043332",
+    "heatmap_by_a_numerical_column": "c978a9d898ac6dac8b32223aa97d2805"
 }

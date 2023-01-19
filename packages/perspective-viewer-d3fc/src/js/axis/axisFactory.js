@@ -26,6 +26,7 @@ export const axisFactory = (settings) => {
     let settingName = "crossValues";
     let settingValue = null;
     let valueNames = ["crossValue"];
+    let modifyDomain = null;
 
     const optionalParams = ["include", "paddingStrategy", "pad"];
     const optional = {};
@@ -45,7 +46,11 @@ export const axisFactory = (settings) => {
         });
         if (domainFunction.orient) domainFunction.orient(orient);
 
-        const domain = domainFunction(data);
+        let domain = domainFunction(data);
+        if (modifyDomain !== null) {
+            domain = modifyDomain(domain);
+        }
+
         const component = axis.component
             ? createComponent(axis, domain, data)
             : defaultComponent();
@@ -128,6 +133,14 @@ export const axisFactory = (settings) => {
             return valueNames;
         }
         valueNames = args[0];
+        return _factory;
+    };
+
+    _factory.modifyDomain = (...args) => {
+        if (!args.length) {
+            return modifyDomain;
+        }
+        modifyDomain = args[0];
         return _factory;
     };
 

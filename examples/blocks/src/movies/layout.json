@@ -59,7 +59,7 @@
             "split_by": ["bucket(\"IMDB Rating\", 0.25)"],
             "columns": ["US Gross"],
             "filter": [["bucket(\"IMDB Rating\", 0.25)", "is not null", null]],
-            "sort": [["bucket(\"IMDB Rating\", 0.25)", "col desc"]],
+            "sort": [],
             "expressions": [
                 "bucket(\"IMDB Rating\", 0.25)",
                 "bucket(\"Rotten Tomatoes Rating\", 2.5)"

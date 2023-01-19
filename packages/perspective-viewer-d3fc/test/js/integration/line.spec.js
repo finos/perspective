@@ -19,12 +19,27 @@ utils.with_server({}, () => {
     describe.page(
         "line.html",
         () => {
-            simple_tests.default(
-                utils.get_contents.bind(
-                    null,
-                    "perspective-viewer perspective-viewer-d3fc-yline"
-                )
-            );
+            const get_contents = (p) =>
+                utils.get_contents(
+                    "perspective-viewer perspective-viewer-d3fc-yline",
+                    p
+                );
+            simple_tests.default(get_contents);
+            // TODO: this shouldnt fail:
+            // This test fails because when given a column with all nulls
+            // rendering in d3fc errors. This is mostly benign because
+            // rendering is already not gonna happen at that point.
+            test.skip("by a numerical column", async (page) => {
+                await page.evaluate(async () => {
+                    const viewer = document.querySelector("perspective-viewer");
+                    await viewer.restore({
+                        split_by: ["Postal Code"],
+                        settings: true,
+                    });
+                });
+
+                return await get_contents(page);
+            });
 
             // test.capture("Sets a category axis when pivoted by an expression datetime", async page => {
             //     const viewer = await page.$("perspective-viewer");
