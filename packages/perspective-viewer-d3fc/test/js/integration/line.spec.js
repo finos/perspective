@@ -15,25 +15,16 @@ const simple_tests = require("@finos/perspective-viewer/test/js/simple_tests.js"
 const { withTemplate } = require("./simple-template");
 withTemplate("line", "Y Line");
 
-function get_contents(temp) {
-    return async function (page) {
-        return await page.evaluate(async (temp) => {
-            const viewer = document
-                .querySelector(
-                    `perspective-viewer perspective-viewer-d3fc-${temp}`
-                )
-                .shadowRoot.querySelector("svg");
-            viewer.removeAttribute("viewBox");
-            return viewer.outerHTML || "MISSING";
-        }, temp);
-    };
-}
-
 utils.with_server({}, () => {
     describe.page(
         "line.html",
         () => {
-            simple_tests.default(get_contents("yline"));
+            simple_tests.default(
+                utils.get_contents.bind(
+                    null,
+                    "perspective-viewer perspective-viewer-d3fc-yline"
+                )
+            );
 
             // test.capture("Sets a category axis when pivoted by an expression datetime", async page => {
             //     const viewer = await page.$("perspective-viewer");

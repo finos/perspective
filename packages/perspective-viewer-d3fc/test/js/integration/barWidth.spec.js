@@ -19,20 +19,6 @@ withTemplate("bar", "Y Bar");
 withTemplate("bar-x", "X Bar");
 withTemplate("bar-themed", "Y Bar", { template: "themed-template" });
 
-function get_contents(temp) {
-    return async function (page) {
-        return await page.evaluate(async (temp) => {
-            const viewer = document
-                .querySelector(
-                    `perspective-viewer perspective-viewer-d3fc-${temp}`
-                )
-                .shadowRoot.querySelector("d3fc-svg.plot-area svg");
-            viewer.removeAttribute("viewBox");
-            return viewer.outerHTML || "MISSING";
-        }, temp);
-    };
-}
-
 utils.with_server({}, () => {
     describe.page(
         "bar.html",
@@ -68,7 +54,10 @@ utils.with_server({}, () => {
                             theme: "Material Light",
                         });
 
-                        return await get_contents("ybar")(page);
+                        return await utils.get_contents.bind(
+                            null,
+                            "perspective-viewer perspective-viewer-d3fc-ybar"
+                        )(page);
                     }
                 );
             });
