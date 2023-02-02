@@ -15,24 +15,16 @@ const simple_tests = require("@finos/perspective-viewer/test/js/simple_tests.js"
 const { withTemplate } = require("./simple-template");
 withTemplate("treemap", "Treemap", { columns: ["Quantity", "Profit"] });
 
-function get_contents(temp) {
-    return async function (page) {
-        return await page.evaluate(async (temp) => {
-            const viewer = document
-                .querySelector(
-                    `perspective-viewer perspective-viewer-d3fc-${temp}`
-                )
-                .shadowRoot.querySelector("svg");
-            viewer?.removeAttribute("viewBox");
-            return viewer?.outerHTML || "MISSING";
-        }, temp);
-    };
-}
 utils.with_server({}, () => {
     describe.page(
         "treemap.html",
         () => {
-            simple_tests.default(get_contents("treemap"));
+            simple_tests.default(
+                utils.get_contents.bind(
+                    null,
+                    "perspective-viewer perspective-viewer-d3fc-treemap"
+                )
+            );
 
             // test.capture(
             //     "with column position 1 set to null.",

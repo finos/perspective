@@ -195,7 +195,7 @@ module.exports = (perspective) => {
             // and do it again but this time with null as pkey
             let port2 = get_random_int(1, 9);
 
-            if (port2 === port) {
+            while (port2 === port) {
                 port2 = get_random_int(1, 9);
             }
 
@@ -690,7 +690,7 @@ module.exports = (perspective) => {
                     const first_port = get_random_int(0, 10);
                     let second_port = get_random_int(0, 10);
 
-                    if (second_port === first_port) {
+                    while (second_port === first_port) {
                         second_port = get_random_int(0, 10);
                     }
 

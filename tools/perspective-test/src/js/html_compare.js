@@ -90,6 +90,20 @@ function format_and_clean_xml(result) {
                 if (x.attributes?.transform) {
                     delete x.attributes["transform"];
                 }
+
+                if (x.name === "svg" && x.attributes?.viewBox) {
+                    delete x.attributes["viewBox"];
+                }
+
+                if (x.name === "svg" && x.attributes?.height) {
+                    delete x.attributes["height"];
+                }
+
+                // visibility is flaky on D3 from OS to OS.
+                // Just normalize to empty string.
+                if (x.name === "g" && x.attributes) {
+                    x.attributes.visibility = "";
+                }
             }
 
             return true;

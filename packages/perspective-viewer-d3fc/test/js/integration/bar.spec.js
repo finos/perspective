@@ -19,25 +19,15 @@ withTemplate("bar", "Y Bar");
 withTemplate("bar-x", "X Bar");
 withTemplate("bar-themed", "Y Bar", { template: "themed-template" });
 
-function get_contents(temp) {
-    return async function (page) {
-        return await page.evaluate(async (temp) => {
-            const viewer = document
-                .querySelector(
-                    `perspective-viewer perspective-viewer-d3fc-${temp}`
-                )
-                .shadowRoot.querySelector("svg");
-            viewer.removeAttribute("viewBox");
-            return viewer.outerHTML || "MISSING";
-        }, temp);
-    };
-}
-
 utils.with_server({}, () => {
     describe.page(
         "bar.html",
         () => {
-            simple_tests.default(get_contents("ybar"));
+            const get_contents = utils.get_contents.bind(
+                null,
+                "perspective-viewer perspective-viewer-d3fc-ybar"
+            );
+            simple_tests.default(get_contents);
             // render_warning_tests.default("Y Bar");
         },
         { root: path.join(__dirname, "..", "..", "..") }
@@ -46,7 +36,11 @@ utils.with_server({}, () => {
     describe.page(
         "bar-x.html",
         () => {
-            simple_tests.default(get_contents("xbar"));
+            const get_contents = utils.get_contents.bind(
+                null,
+                "perspective-viewer perspective-viewer-d3fc-xbar"
+            );
+            simple_tests.default(get_contents);
             // render_warning_tests.default("X Bar");
         },
         { root: path.join(__dirname, "..", "..", "..") }
@@ -55,7 +49,12 @@ utils.with_server({}, () => {
     describe.page(
         "bar-themed.html",
         () => {
-            simple_tests.default(get_contents("ybar"));
+            simple_tests.default(
+                utils.get_contents.bind(
+                    null,
+                    "perspective-viewer perspective-viewer-d3fc-ybar"
+                )
+            );
             // render_warning_tests.default("Y Bar");
         },
         { root: path.join(__dirname, "..", "..", "..") }

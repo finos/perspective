@@ -15,16 +15,6 @@ const simple_tests = require("@finos/perspective-viewer/test/js/simple_tests.js"
 const { withTemplate } = require("./simple-template");
 withTemplate("events", "Y Line");
 
-async function get_contents(page) {
-    return await page.evaluate(async () => {
-        const viewer = document
-            .querySelector(`perspective-viewer perspective-viewer-d3fc-yline`)
-            .shadowRoot.querySelector("svg");
-        viewer.removeAttribute("viewBox");
-        return viewer.outerHTML || "MISSING";
-    });
-}
-
 utils.with_server({}, () => {
     describe.page(
         "events.html",
@@ -75,7 +65,10 @@ utils.with_server({}, () => {
                     expect(count).toEqual(1);
 
                     // Return the chart contents
-                    return get_contents(page);
+                    return utils.get_contents.bind(
+                        null,
+                        "perspective-viewer perspective-viewer-d3fc-yline"
+                    )(page);
                 }
             );
 
@@ -139,7 +132,11 @@ utils.with_server({}, () => {
                     expect(count).toBeGreaterThan(0);
 
                     // Return the chart contents
-                    return get_contents(page);
+
+                    return utils.get_contents.bind(
+                        null,
+                        "perspective-viewer perspective-viewer-d3fc-yline"
+                    )(page);
                 }
             );
         },

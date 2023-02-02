@@ -325,7 +325,7 @@ describe.page = (
         check_results
     ) {
         throw new Error(`
-        
+
 ERROR: Running in puppeteer tests without "${RESULTS_FILENAME}"
 
 Please re-run with "yarn test --write" to generate initial screenshot diffs
@@ -600,4 +600,17 @@ exports.drag_drop = async function drag_drop(page, origin, target) {
         steps: 100,
     });
     await page.mouse.up();
+};
+
+exports.get_contents = async function get_contents(selector, page) {
+    return await page.evaluate(async (selector) => {
+        const shadow = document.querySelector(selector).shadowRoot;
+        const svgs = shadow.querySelectorAll("svg");
+
+        let all_viewers = "";
+        for (let v of svgs) {
+            all_viewers += v.outerHTML;
+        }
+        return all_viewers;
+    }, selector);
 };
