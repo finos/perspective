@@ -1437,6 +1437,19 @@ export default function (Module) {
         return this._Table.size();
     };
 
+    table.prototype.num_rows = function () {
+        return this.size();
+    };
+
+    table.prototype.num_columns = function () {
+        let schema = this._Table.get_schema();
+        let columns = schema.columns();
+        const size = columns.size();
+        columns.delete();
+        schema.delete();
+        return size - 1;
+    };
+
     /**
      * The schema of this {@link module:perspective~table}.  A schema is an
      * Object whose keys are the columns of this
