@@ -430,7 +430,7 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
         """
         if binary:
             # The front end will read `buffers` properly.
-            self.send(None, buffers=[msg])
+            self.send({}, buffers=[msg])
         else:
             message = _PerspectiveWidgetMessage(msg_id, "cmd", msg)
             self.send(message.to_dict())

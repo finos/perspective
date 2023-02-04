@@ -56,7 +56,7 @@ def get_version(file, name="__version__"):
 version = get_version(os.path.join(here, "perspective", "core", "_version.py"))
 
 requires = [
-    "ipywidgets>=7.5.1,<8",
+    "ipywidgets>=7.5.1,<9",
     "future>=0.16.0,<1",
     "numpy>=1.21.6,<2",
     "pandas>=0.22.0,<2",
@@ -70,7 +70,7 @@ requires_jupyter = ["jupyterlab>=3.2,<4"]
 
 requires_starlette = ["fastapi>=0.70,<1", "starlette>=0.20,<1"]
 
-requires_tornado = ["tornado>=4.5.3,<6.2"]
+requires_tornado = ["tornado>=4.5.3,<7"]
 
 requires_dev = (
     [

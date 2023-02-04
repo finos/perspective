@@ -40,7 +40,7 @@ function isEqual(a, b) {
  */
 export class PerspectiveView extends DOMWidgetView {
     _createElement() {
-        this.pWidget = new PerspectiveJupyterWidget(
+        this.luminoWidget = new PerspectiveJupyterWidget(
             undefined,
             this,
             this.model.get("server"),
@@ -53,7 +53,7 @@ export class PerspectiveView extends DOMWidgetView {
         this._synchronize_state = this._synchronize_state.bind(this);
 
         // add event handler to synchronize
-        this.pWidget.viewer.addEventListener(
+        this.luminoWidget.viewer.addEventListener(
             "perspective-config-update",
             this._synchronize_state
         );
@@ -62,15 +62,15 @@ export class PerspectiveView extends DOMWidgetView {
         this._toggle_editable = this._toggle_editable.bind(this);
 
         // return the node against witch pWidget is bound
-        return this.pWidget.node;
+        return this.luminoWidget.node;
     }
 
     _setElement(el) {
-        if (this.el || el !== this.pWidget.node) {
+        if (this.el || el !== this.luminoWidget.node) {
             // Do not allow the view to be reassigned to a different element.
             throw new Error("Cannot reset the DOM element.");
         }
-        this.el = this.pWidget.node;
+        this.el = this.luminoWidget.node;
     }
 
     /**
@@ -80,11 +80,11 @@ export class PerspectiveView extends DOMWidgetView {
      */
 
     async _synchronize_state(event) {
-        if (!this.pWidget._load_complete) {
+        if (!this.luminoWidget._load_complete) {
             return;
         }
 
-        const config = await this.pWidget.viewer.save();
+        const config = await this.luminoWidget.viewer.save();
 
         for (const name of Object.keys(config)) {
             let new_value = config[name];
@@ -194,19 +194,19 @@ export class PerspectiveView extends DOMWidgetView {
             if (msg.data["cmd"] === "delete") {
                 // Regardless of client mode, if `delete()` is called we need to
                 // clean up the Viewer.
-                this.pWidget.delete();
+                this.luminoWidget.delete();
                 return;
             }
-            if (this.pWidget.client === true) {
+            if (this.luminoWidget.client === true) {
                 // In client mode, we need to directly call the methods on the
                 // viewer
                 const command = msg.data["cmd"];
                 if (command === "update") {
-                    this.pWidget._update(msg.data["data"]);
+                    this.luminoWidget._update(msg.data["data"]);
                 } else if (command === "replace") {
-                    this.pWidget.replace(msg.data["data"]);
+                    this.luminoWidget.replace(msg.data["data"]);
                 } else if (command === "clear") {
-                    this.pWidget.clear();
+                    this.luminoWidget.clear();
                 }
             } else {
                 // Make a deep copy of each message - widget views share the
@@ -248,7 +248,7 @@ export class PerspectiveView extends DOMWidgetView {
     }
 
     async _restore_from_model() {
-        await this.pWidget.restore({
+        await this.luminoWidget.restore({
             plugin: this.model.get("plugin"),
             columns: this.model.get("columns"),
             group_by: this.model.get("group_by"),
@@ -272,17 +272,17 @@ export class PerspectiveView extends DOMWidgetView {
 
     _handle_load_message(msg) {
         const table_options = msg.data["options"] || {};
-        if (this.pWidget.client) {
+        if (this.luminoWidget.client) {
             /**
              * In client mode, retrieve the serialized data and the options
              * passed by the user, and create a new table on the client end.
              */
             const data = msg.data["data"];
             const client_table = this.client_worker.table(data, table_options);
-            this.pWidget.load(client_table);
+            this.luminoWidget.load(client_table);
             this._restore_from_model();
         } else {
-            if (this.pWidget.server && msg.data["table_name"]) {
+            if (this.luminoWidget.server && msg.data["table_name"]) {
                 /**
                  * Get a remote table handle, and load the remote table in
                  * the client for server mode Perspective.
@@ -290,7 +290,7 @@ export class PerspectiveView extends DOMWidgetView {
                 const table = this.perspective_client.open_table(
                     msg.data["table_name"]
                 );
-                this.pWidget.load(table);
+                this.luminoWidget.load(table);
                 this._restore_from_model();
             } else if (msg.data["table_name"]) {
                 // Get a remote table handle from the Jupyter kernel, and mirror
@@ -310,7 +310,7 @@ export class PerspectiveView extends DOMWidgetView {
                             table_options
                         );
 
-                        this.pWidget.load(client_table);
+                        this.luminoWidget.load(client_table);
                         await this._restore_from_model();
 
                         // Need to await the table and get the instance
@@ -344,17 +344,17 @@ export class PerspectiveView extends DOMWidgetView {
         // Need to await the table and get the instance
         // separately as load() only takes a promise
         // to a table and not the instance itself.
-        const table = await this.pWidget.getTable();
+        const table = await this.luminoWidget.getTable();
 
         // Setup ports in advance
         if (!this._client_edit_port) {
-            this._client_edit_port = await this.pWidget.getEditPort();
+            this._client_edit_port = await this.luminoWidget.getEditPort();
         }
         if (!this._kernel_edit_port) {
             this._kernel_edit_port = await this._kernel_table.make_port();
         }
 
-        const { plugin_config } = await this.pWidget.viewer.save();
+        const { plugin_config } = await this.luminoWidget.viewer.save();
         if (plugin_config?.editable) {
             // TODO only evaluated during initial load.
             // Toggling from python after initial load won't
@@ -411,8 +411,8 @@ export class PerspectiveView extends DOMWidgetView {
     remove() {
         // Delete the <perspective-viewer> but do not terminate the shared
         // worker as it is shared across other widgets.
-        this.pWidget.delete();
-        this.pWidget.viewer.removeEventListener(
+        this.luminoWidget.delete();
+        this.luminoWidget.viewer.removeEventListener(
             "perspective-config-update",
             this._synchronize_state
         );
@@ -425,68 +425,68 @@ export class PerspectiveView extends DOMWidgetView {
      */
 
     plugin_changed() {
-        this.pWidget.restore({
+        this.luminoWidget.restore({
             plugin: this.model.get("plugin"),
         });
     }
 
     columns_changed() {
-        this.pWidget.restore({
+        this.luminoWidget.restore({
             columns: this.model.get("columns"),
         });
     }
 
     group_by_changed() {
-        this.pWidget.restore({
+        this.luminoWidget.restore({
             group_by: this.model.get("group_by"),
         });
     }
 
     split_by_changed() {
-        this.pWidget.restore({
+        this.luminoWidget.restore({
             split_by: this.model.get("split_by"),
         });
     }
 
     aggregates_changed() {
-        this.pWidget.restore({
+        this.luminoWidget.restore({
             aggregates: this.model.get("aggregates"),
         });
     }
 
     sort_changed() {
-        this.pWidget.restore({
+        this.luminoWidget.restore({
             sort: this.model.get("sort"),
         });
     }
 
     filter_changed() {
-        this.pWidget.restore({
+        this.luminoWidget.restore({
             filter: this.model.get("filter"),
         });
     }
 
     expressions_changed() {
-        this.pWidget.restore({
+        this.luminoWidget.restore({
             expressions: this.model.get("expressions"),
         });
     }
 
     plugin_config_changed() {
-        this.pWidget.restore({
+        this.luminoWidget.restore({
             plugin_config: this.model.get("plugin_config"),
         });
         this._toggle_editable();
     }
 
     theme_changed() {
-        this.pWidget.restore({
+        this.luminoWidget.restore({
             theme: this.model.get("theme"),
         });
     }
 
     settings_changed() {
-        this.pWidget.restore({
+        this.luminoWidget.restore({
             settings: this.model.get("settings"),
         });
     }
