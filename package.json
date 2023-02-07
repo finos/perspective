@@ -35,6 +35,7 @@
         "python/perspective"
     ],
     "devDependencies": {
+        "@playwright/test": "^1.30.0",
         "@types/ws": "^7.2.2",
         "auto-changelog": "^2.4.0",
         "chalk": "^2.4.2",
@@ -120,6 +121,7 @@
         "fix": "npm-run-all --silent fix:*",
         "version": "node scripts/version.js && python3 python/perspective/scripts/write_version.py && git add python/perspective/perspective/core/_version.py",
         "jlab_link": "node scripts/jlab_link.js",
-        "repl": "node scripts/repl.js"
+        "repl": "node scripts/repl.js",
+        "ptest": "playwright test"
     }
 }
