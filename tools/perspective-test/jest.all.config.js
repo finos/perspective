@@ -1,11 +1,7 @@
 module.exports = {
     roots: [
         "packages/perspective/test/js",
-        "rust/perspective-viewer/test/js",
-        "packages/perspective-viewer-datagrid/test/js",
-        "packages/perspective-viewer-d3fc/test/js",
-        "packages/perspective-workspace/test/js",
-        "packages/perspective-jupyterlab/test/js",
+        // "rust/perspective-viewer/test/js",
     ],
     testEnvironment: "@finos/perspective-test/src/js/set_timezone.js",
     testEnvironmentOptions: {
@@ -28,6 +24,4 @@ module.exports = {
     automock: false,
     setupFiles: ["@finos/perspective-test/src/js/beforeEachSpec.js"],
     reporters: ["default", "jest-junit"],
-    globalSetup: "@finos/perspective-test/src/js/globalSetup.js",
-    globalTeardown: "@finos/perspective-test/src/js/globalTeardown.js",
 };

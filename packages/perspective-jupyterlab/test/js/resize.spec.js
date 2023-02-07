@@ -7,96 +7,116 @@
  *
  */
 
-const utils = require("@finos/perspective-test");
-const path = require("path");
+const { test } = require("@playwright/test");
+import {
+    setupPage,
+    compareContentsToSnapshot,
+    SUPERSTORE_CSV_PATH,
+} from "@finos/perspective-test";
 
-utils.with_server({}, () => {
-    describe.page(
-        "resize.html",
-        () => {
-            test.capture("Config should be hidden by default", async (page) => {
-                await page.waitForFunction(() => !!window.__WIDGET__);
-                return await page.evaluate(async () => {
-                    await window.__WIDGET__.viewer.getTable();
-                    await window.__WIDGET__.viewer.flush();
+test.beforeEach(async ({ page }) => {
+    await setupPage(page, {
+        htmlPage: "/packages/perspective-jupyterlab/dist/umd/resize.html",
+        selector: "#container",
+    });
 
-                    // Linux returns ever-so-slightly different auto width
-                    // column values so we need to strip these.
-                    for (const elem of document.querySelectorAll(
-                        "perspective-viewer *"
-                    )) {
-                        elem.removeAttribute("style");
-                    }
+    await page.evaluate(`(async () => {
+        window.perspective = await import("/perspective.js");
+    })()`);
 
-                    return window.__WIDGET__.viewer.innerHTML;
-                });
-            });
+    await page.evaluate(async (csvPath) => {
+        window.__WIDGET__ = new PerspectiveLumino.PerspectiveWidget();
+        document
+            .getElementById("container")
+            .appendChild(window.__WIDGET__.node);
+        const worker = perspective.worker();
+        const req = await fetch(csvPath);
+        const csv = await req.text();
+        const table = await worker.table(csv);
+        await window.__WIDGET__.load(table);
+    }, SUPERSTORE_CSV_PATH);
+});
 
-            test.capture(
-                "Resize the container causes the widget to resize",
-                async (page) => {
-                    await page.evaluate(async () => {
-                        await document
-                            .querySelector("perspective-viewer")
-                            .toggleConfig();
-                        await document
-                            .querySelector("perspective-viewer")
-                            .getTable();
-                    });
+test.describe("JupyterLab resize", () => {
+    test("Config should be hidden by default", async ({ page }) => {
+        const contents = await page.evaluate(async () => {
+            await window.__WIDGET__.viewer.getTable();
+            await window.__WIDGET__.viewer.flush();
 
-                    await page.evaluate(async () => {
-                        document
-                            .querySelector(".PSPContainer")
-                            .setAttribute(
-                                "style",
-                                "position:absolute;top:0;left:0;width:300px;height:300px"
-                            );
+            // Linux returns ever-so-slightly different auto width
+            // column values so we need to strip these.
+            for (const elem of document.querySelectorAll(
+                "perspective-viewer *"
+            )) {
+                elem.removeAttribute("style");
+            }
 
-                        await document
-                            .querySelector("perspective-viewer")
-                            .notifyResize();
-                    });
+            return window.__WIDGET__.viewer.innerHTML;
+        });
 
-                    return await page.evaluate(async () => {
-                        document.querySelector(".PSPContainer").style =
-                            "position:absolute;top:0;left:0;width:800px;height:600px";
-                        await document
-                            .querySelector("perspective-viewer")
-                            .notifyResize();
+        await compareContentsToSnapshot(contents, [
+            "jupyterlab-resize-config-hidden.txt",
+        ]);
+    });
 
-                        for (const elem of document.querySelectorAll(
-                            "perspective-viewer *"
-                        )) {
-                            elem.removeAttribute("style");
-                        }
+    test("Resize the container causes the widget to resize", async ({
+        page,
+    }) => {
+        await page.evaluate(async () => {
+            await document.querySelector("perspective-viewer").toggleConfig();
+            await document.querySelector("perspective-viewer").getTable();
+        });
 
-                        return window.__WIDGET__.viewer.innerHTML;
-                    });
-                }
-            );
+        await page.evaluate(async () => {
+            document
+                .querySelector(".PSPContainer")
+                .setAttribute(
+                    "style",
+                    "position:absolute;top:0;left:0;width:300px;height:300px"
+                );
 
-            test.capture("group_by traitlet works", async (page) => {
-                await page.evaluate(async () => {
-                    await document
-                        .querySelector("perspective-viewer")
-                        .toggleConfig();
-                    await document
-                        .querySelector("perspective-viewer")
-                        .getTable();
-                    await document.querySelector("perspective-viewer").flush();
-                });
-                return await page.evaluate(async () => {
-                    await window.__WIDGET__.restore({ group_by: ["State"] });
-                    for (const elem of document.querySelectorAll(
-                        "perspective-viewer *"
-                    )) {
-                        elem.removeAttribute("style");
-                    }
+            await document.querySelector("perspective-viewer").notifyResize();
+        });
 
-                    return window.__WIDGET__.viewer.innerHTML;
-                });
-            });
-        },
-        { root: path.join(__dirname, "..", "..") }
-    );
+        const contents = await page.evaluate(async () => {
+            document.querySelector(".PSPContainer").style =
+                "position:absolute;top:0;left:0;width:800px;height:600px";
+            await document.querySelector("perspective-viewer").notifyResize();
+
+            for (const elem of document.querySelectorAll(
+                "perspective-viewer *"
+            )) {
+                elem.removeAttribute("style");
+            }
+
+            return window.__WIDGET__.viewer.innerHTML;
+        });
+
+        await compareContentsToSnapshot(contents, [
+            "jupyterlab-resize-config-shown.txt",
+        ]);
+    });
+
+    test("group_by traitlet works", async ({ page }) => {
+        await page.evaluate(async () => {
+            await document.querySelector("perspective-viewer").toggleConfig();
+            await document.querySelector("perspective-viewer").getTable();
+            await document.querySelector("perspective-viewer").flush();
+        });
+
+        const contents = await page.evaluate(async () => {
+            await window.__WIDGET__.restore({ group_by: ["State"] });
+            for (const elem of document.querySelectorAll(
+                "perspective-viewer *"
+            )) {
+                elem.removeAttribute("style");
+            }
+
+            return window.__WIDGET__.viewer.innerHTML;
+        });
+
+        await compareContentsToSnapshot(contents, [
+            "jupyterlab-resize-group-by-traitlet.txt",
+        ]);
+    });
 });

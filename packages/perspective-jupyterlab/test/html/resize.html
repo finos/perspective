@@ -15,18 +15,27 @@
             href="data:image/x-icon;,"
             type="image/x-icon"
         />
-        <script type="module" src="lumino.js"></script>
-        <script type="module" src="perspective.js"></script>
-        <script type="module" src="perspective-viewer-datagrid.js"></script>
+        <script type="module" src="/packages/perspective-jupyterlab/dist/umd/lumino.js"></script>
+        <script type="module" src="/perspective.js"></script>
+        <script type="module" src="/perspective-viewer-datagrid.js"></script>
 
-        <link rel="stylesheet" href="demo.css" />
+        <style>
+            perspective-viewer {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+            }
+        </style>
     </head>
 
     <body>
-        <div id="container"></div>
+        <div id="container">hello</div>
 
-        <script type="module">
-            import perspective from "./perspective.js";
+        <!-- <script type="module">
+            // import perspective from "./perspective.js";
+            console.log(window.perspective);
             window.__WIDGET__ = new PerspectiveLumino.PerspectiveWidget();
             document
                 .getElementById("container")
@@ -38,6 +47,6 @@
                 const table = worker.table(csv);
                 window.__WIDGET__.load(table);
             })();
-        </script>
+        </script> -->
     </body>
 </html>

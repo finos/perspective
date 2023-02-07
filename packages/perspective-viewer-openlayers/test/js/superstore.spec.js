@@ -7,10 +7,14 @@
  *
  */
 
-const utils = require("@finos/perspective-test");
-const path = require("path");
+import { test } from "@playwright/test";
 
-const simple_tests = require("@finos/perspective-viewer/test/js/simple_tests.js");
+import {
+    setupPage,
+    loadTableAsset,
+    runAllStandardTests,
+    SUPERSTORE_CSV_PATH,
+} from "@finos/perspective-test";
 
 async function get_contents(page) {
     return await page.evaluate(async () => {
@@ -21,12 +25,21 @@ async function get_contents(page) {
     });
 }
 
-utils.with_server({}, () => {
-    describe.page(
-        "superstore.html",
-        () => {
-            simple_tests.default(get_contents);
-        },
-        { root: path.join(__dirname, "..", "..") }
-    );
+test.describe("OpenLayers with superstore data set", () => {
+    test("Contents match generationally", async ({ page }) => {
+        await setupPage(page, {
+            htmlPage: "/tools/perspective-test/src/html/basic-test.html", // Should this be a relative or absolute path?
+            selector: "perspective-viewer",
+        });
+
+        await loadTableAsset(page, SUPERSTORE_CSV_PATH, {
+            plugin: "OpenLayers",
+        });
+
+        await runAllStandardTests(
+            page,
+            "perspective-viewer-openlayers-scatter",
+            get_contents
+        );
+    });
 });
