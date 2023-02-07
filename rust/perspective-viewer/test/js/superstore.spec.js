@@ -7,17 +7,37 @@
  *
  */
 
-const utils = require("@finos/perspective-test");
+import { test } from "@playwright/test";
+import {
+    setupPage,
+    loadTableAsset,
+    addPerspectiveToWindow,
+    SUPERSTORE_CSV_PATH,
+    runAllStandardTests,
+} from "@finos/perspective-test";
 
-const simple_tests = require("./simple_tests.js");
-const path = require("path");
+async function get_contents(page) {
+    return await page.evaluate(async () => {
+        const viewer = document.querySelector(
+            "perspective-viewer perspective-viewer-plugin"
+        );
+        return viewer.innerHTML;
+    });
+}
 
-utils.with_server({}, () => {
-    describe.page(
-        "superstore.html",
-        () => {
-            simple_tests.default();
-        },
-        { reload_page: false, root: path.join(__dirname, "..", "..") }
-    );
+test.describe("Superstore", () => {
+    test("Run simple Superstore tests", async ({ page }) => {
+        await setupPage(page, {
+            htmlPage: "/rust/perspective-viewer/dist/cdn/superstore.html",
+            selector: "perspective-viewer",
+        });
+
+        await addPerspectiveToWindow(page);
+
+        await loadTableAsset(page, SUPERSTORE_CSV_PATH, {
+            plugin: "Debug",
+        });
+
+        await runAllStandardTests(page, "superstore", get_contents);
+    });
 });

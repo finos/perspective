@@ -22,7 +22,7 @@ const fs = require("fs");
 const PACKAGE = process.env.PACKAGE;
 const DEBUG_FLAG = getarg("--debug") ? "" : "--silent";
 const IS_WRITE = !!getarg("--write") || process.env.WRITE_TESTS;
-const IS_LOCAL_PUPPETEER = fs.existsSync("node_modules/puppeteer");
+const IS_LOCAL_PUPPETEER = fs.existsSync("node_modules/puppeteer"); // puppeteer is no longer needed. Remove this.
 
 // Unfortunately we have to handle parts of the Jupyter test case here,
 // as the Jupyter server needs to be run outside of the main Jest process.
@@ -56,18 +56,26 @@ function silent(x) {
  */
 function jest_all() {
     return bash`
-        PSP_SATURATE=${!!getarg("--saturate")} 
+        PSP_SATURATE=${!!getarg("--saturate")}
         PSP_PAUSE_ON_FAILURE=${!!getarg("--interactive")}
-        WRITE_TESTS=${IS_WRITE} 
-        TZ=UTC 
-        npx jest 
+        WRITE_TESTS=${IS_WRITE}
+        TZ=UTC
+        npx jest
         --rootDir=.
-        --config=tools/perspective-test/jest.all.config.js 
+        --config=tools/perspective-test/jest.all.config.js
         --color
         ${getarg("--bail") && "--bail"}
         ${getarg("--debug") || "--silent 2>&1 --noStackTrace"} 
         ${getarg("--runInBand") && "--runInBand"} 
         --testNamePattern="${get_regex()}"`;
+}
+
+/**
+ * Run tests, both integration and unit.
+ */
+function playwright_all() {
+    console.log(`-- Running "${PACKAGE}" Playwright test suite`);
+    return bash`__JUPYTERLAB_PORT__=6538 PACKAGE=${PACKAGE} npx playwright test --config=tools/perspective-test/playwright.config.ts`;
 }
 
 /**
@@ -84,7 +92,7 @@ function jest_single(cmd) {
         PSP_PAUSE_ON_FAILURE=${!!getarg("--interactive")}
         WRITE_TESTS=${IS_WRITE}
         IS_LOCAL_PUPPETEER=${IS_LOCAL_PUPPETEER}
-        TZ=UTC 
+        TZ=UTC
         ${bash_with_scope`
             ${cmd ? cmd : "test:run"}
             -- ${DEBUG_FLAG} ${RUN_IN_BAND} --testNamePattern="${get_regex()}"`}`;
@@ -131,11 +139,14 @@ async function run() {
                 process.exit(0);
             }
 
+            // TODO: Tests now use Playwright (UI tests) and Jest (unit tests).
+            // only run jest_single if we are running unit tests, e.g. the perspective package
             execute(jest_single());
         } else {
             // Run all tests with full output.
             console.log("-- Running jest in fast mode");
             execute(jest_all());
+            execute(playwright_all());
         }
         // }
     } catch (e) {

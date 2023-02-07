@@ -17,52 +17,6 @@
     </head>
 
     <body>
-        <script type="module">
-            import perspective from "./perspective.js";
-
-            class TestChartPluginHighPriority extends customElements.get(
-                "perspective-viewer-plugin"
-            ) {
-                get name() {
-                    return "HighPriority";
-                }
-
-                get priority() {
-                    return 10;
-                }
-            }
-
-            class TestChartPluginLowPriority extends customElements.get(
-                "perspective-viewer-plugin"
-            ) {
-                get name() {
-                    return "LowPriority";
-                }
-
-                get priority() {
-                    return -10;
-                }
-            }
-
-            const Viewer = customElements.get("perspective-viewer");
-            customElements.define("low-priority", TestChartPluginLowPriority);
-            customElements.define("high-priority", TestChartPluginHighPriority);
-            Viewer.registerPlugin("low-priority");
-            Viewer.registerPlugin("high-priority");
-
-            const viewer = document.createElement("perspective-viewer");
-            document.body.appendChild(viewer);
-
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", "superstore.csv", true);
-            xhr.onload = async function () {
-                window.__CSV__ = xhr.response;
-                window.__WORKER__ = perspective.worker();
-                const table = window.__WORKER__.table(xhr.response);
-                const t = await table;
-                await viewer.load(table);
-            };
-            xhr.send(null);
-        </script>
+        <div id="temp-content">Temp Content</div>
     </body>
 </html>

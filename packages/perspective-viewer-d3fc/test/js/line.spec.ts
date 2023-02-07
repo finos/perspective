@@ -7,24 +7,15 @@
  *
  */
 
-import { test } from "@playwright/test";
+import { test, expect } from "@playwright/test";
 import {
     setupPage,
     loadTableAsset,
-    runAllStandardTests,
+    compareSVGContentsToSnapshot,
     SUPERSTORE_CSV_PATH,
 } from "@finos/perspective-test";
 
-async function getDatagridContents(page) {
-    return await page.evaluate(async () => {
-        const viewer = document.querySelector(
-            "perspective-viewer perspective-viewer-datagrid regular-table"
-        );
-        return viewer.innerHTML || "MISSING";
-    });
-}
-
-test.describe("Datagrid with superstore data set", () => {
+test.describe("Line Tests", () => {
     test("Contents match generationally", async ({ page }) => {
         await setupPage(page, {
             htmlPage: "/tools/perspective-test/src/html/basic-test.html", // Should this be a relative or absolute path?
@@ -32,13 +23,13 @@ test.describe("Datagrid with superstore data set", () => {
         });
 
         await loadTableAsset(page, SUPERSTORE_CSV_PATH, {
-            plugin: "Datagrid",
+            plugin: "Y Line",
         });
 
-        await runAllStandardTests(
+        await compareSVGContentsToSnapshot(
             page,
-            "perspective-viewer-datagrid",
-            getDatagridContents
+            "perspective-viewer perspective-viewer-d3fc-yline",
+            ["yline.txt"]
         );
     });
 });

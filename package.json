@@ -35,6 +35,7 @@
         "python/perspective"
     ],
     "devDependencies": {
+        "@playwright/test": "^1.30.0",
         "@types/ws": "^7.2.2",
         "auto-changelog": "^2.4.0",
         "chalk": "^2.4.2",
@@ -120,6 +121,9 @@
         "fix:python": "node scripts/lint_python.js --fix",
         "fix": "npm-run-all --silent fix:*",
         "version": "node scripts/version.js && python3 python/perspective/scripts/write_version.py && git add python/perspective/perspective/core/_version.py",
-        "jlab_link": "pip3 install ./python/perspective --no-build-isolation"
+        "jlab_link": "pip3 install ./python/perspective --no-build-isolation",
+        "test:ui": "__JUPYTERLAB_PORT__=6538 playwright test --config tools/perspective-test/playwright.config.ts",
+        "test:ui:headed": "__JUPYTERLAB_PORT__=6538 playwright test --config tools/perspective-test/playwright.config.ts --headed",
+        "test:ui:debug": "__JUPYTERLAB_PORT__=6538 DEBUG=pw:api playwright test --config tools/perspective-test/playwright.config.ts --headed"
     }
 }
