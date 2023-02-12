@@ -27,7 +27,7 @@ export class PerspectiveJupyterWidget extends PerspectiveWidget {
 
     processMessage(msg) {
         super.processMessage(msg);
-        this._view.processPhosphorMessage(msg);
+        this._view.processLuminoMessage(msg);
     }
 
     /**
