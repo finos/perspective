@@ -39,6 +39,7 @@ export async function mousedown_listener(regularTable, event) {
         target.classList.contains("psp-menu-enabled") &&
         event.clientY - rect.top > 16
     ) {
+        target.classList.add("psp-menu-open");
         const meta = regularTable.getMeta(target);
         const column_name =
             meta.column_header?.[meta.column_header?.length - 1];
@@ -49,11 +50,9 @@ export async function mousedown_listener(regularTable, event) {
             column_type === "date" ||
             column_type === "datetime"
         ) {
-            await regularTable.draw({ preserve_width: true });
             activate_plugin_menu.call(this, regularTable, target);
         } else {
             const [min, max] = await this._view.get_min_max(column_name);
-            await regularTable.draw({ preserve_width: true });
             let bound = Math.max(Math.abs(min), Math.abs(max));
             if (bound > 1) {
                 bound = Math.round(bound * 100) / 100;
