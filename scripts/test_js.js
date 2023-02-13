@@ -47,21 +47,23 @@ function silent(x) {
     return bash`output=$(${x}); ret=$?; echo "\${output}"; exit $ret`;
 }
 
+all_packages = ["@finos/perspective-viewer-d3fc" /* ... */];
+
 /**
  * Run tests for all packages in parallel.
  */
 function jest_all() {
     return bash`
-        PSP_SATURATE=${!!getarg("--saturate")} 
+        PSP_SATURATE=${!!getarg("--saturate")}
         PSP_PAUSE_ON_FAILURE=${!!getarg("--interactive")}
-        WRITE_TESTS=${IS_WRITE} 
-        TZ=UTC 
-        npx jest 
+        WRITE_TESTS=${IS_WRITE}
+        TZ=UTC
+        npx jest
         --rootDir=.
-        --config=tools/perspective-test/jest.all.config.js 
+        --config=tools/perspective-test/jest.all.config.js
         --color
         ${getarg("--bail") && "--bail"}
-        ${getarg("--debug") || "--silent 2>&1 --noStackTrace"} 
+        ${getarg("--debug") || "--silent 2>&1 --noStackTrace"}
         --testNamePattern="${get_regex()}"`;
 }
 
@@ -79,7 +81,7 @@ function jest_single(cmd) {
         PSP_PAUSE_ON_FAILURE=${!!getarg("--interactive")}
         WRITE_TESTS=${IS_WRITE}
         IS_LOCAL_PUPPETEER=${IS_LOCAL_PUPPETEER}
-        TZ=UTC 
+        TZ=UTC
         ${bash_with_scope`
             ${cmd ? cmd : "test:run"}
             -- ${DEBUG_FLAG} ${RUN_IN_BAND} --testNamePattern="${get_regex()}"`}`;

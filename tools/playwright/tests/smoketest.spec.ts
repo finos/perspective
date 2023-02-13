@@ -2,14 +2,14 @@ import { test, expect, defineConfig } from "@playwright/test";
 
 // export default defineConfig({
 //     webServer: {
-//         command: "", //"npm run start blocks",
-//         url: "http://localhost:8080",
+//         command: "npm run start_testserver 6381 d3fc-specific-route", //"npm run start blocks",
+//         port: 6381,
+//         url: "http://localhost:6381",
 //         timeout: 120 * 1000,
 //         reuseExistingServer: !process.env.CI,
 //     },
 //     use: {
-//         // TODO:
-//         baseURL: "http://localhost:8080",
+//         baseURL: "http://localhost:6381",
 //     },
 // });
 

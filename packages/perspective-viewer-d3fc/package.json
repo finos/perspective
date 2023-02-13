@@ -41,7 +41,9 @@
         "test:unit": "jest --rootDir=. --roots=test/js/unit --config=../../tools/perspective-test/jest.config.js --color --runInBand",
         "test": "npm-run-all test:build test:run",
         "clean": "rimraf dist",
-        "clean:screenshots": "rimraf \"test/screenshots/**/*.@(failed|diff).png\""
+        "clean:screenshots": "rimraf \"test/screenshots/**/*.@(failed|diff).png\"",
+        "ptest": "playwright test",
+        "testserver": "npm run ../../scripts/start_testserver.js"
     },
     "publishConfig": {
         "access": "public"

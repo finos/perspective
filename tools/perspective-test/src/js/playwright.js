@@ -9,7 +9,7 @@ import { defineConfig, devices } from "@playwright/test";
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
-export default defineConfig({
+exports.base_config = {
     testDir: "./tools/playwright/tests",
     /* Maximum time one test can run for. */
     timeout: 30 * 1000,
@@ -85,6 +85,6 @@ export default defineConfig({
     /* Run your local dev server before starting the tests */
     webServer: {
         command: "npm run start",
-        port: 3000,
+        port: 6598,
     },
-});
+};

@@ -9,7 +9,10 @@
 
 const path = require("path");
 
+import { test, expect } from "@playwright/test";
+
 const utils = require("@finos/perspective-test");
+
 const simple_tests = require("@finos/perspective-viewer/test/js/simple_tests.js");
 // const render_warning_tests = require("@finos/perspective-viewer/test/js/render_warning_tests.js");
 
