@@ -17,10 +17,6 @@ import { colorRangeLegend } from "../legend/colorRangeLegend";
 import { colorLegend } from "../legend/legend";
 
 function treemap(container, settings) {
-    if (settings.crossValues.length === 0) {
-        console.warn("Unable to render a chart in the absence of any groups.");
-        return;
-    }
     if (!settings.treemaps) settings.treemaps = {};
 
     const data = treeData(settings);

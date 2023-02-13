@@ -17,11 +17,6 @@ import { colorRangeLegend } from "../legend/colorRangeLegend";
 import { colorLegend } from "../legend/legend";
 
 function sunburst(container, settings) {
-    if (settings.crossValues.length === 0) {
-        console.warn("Unable to render a chart in the absence of any groups.");
-        return;
-    }
-
     const data = treeData(settings);
     const color = treeColor(settings, data);
     const sunburstGrid = gridLayoutMultiChart().elementsPrefix("sunburst");
@@ -71,7 +66,7 @@ function sunburst(container, settings) {
 
             const radius =
                 (Math.min(width, height) - 24) /
-                (settings.crossValues.length * 2);
+                Math.max(2, settings.crossValues.length * 2);
             sunburstSeries()
                 .settings(settings)
                 .split(split)

@@ -59,7 +59,13 @@ export function treeData(settings) {
                 }
                 if (i === groups.length - 1) {
                     element.name = groups.slice(-1)[0];
-                    if (groups.length === settings.crossValues.length) {
+                    if (settings.crossValues.length === 0) {
+                        element.size = getDataValue(
+                            d,
+                            settings.mainValues[0],
+                            ""
+                        );
+                    } else if (groups.length === settings.crossValues.length) {
                         const size = getDataValue(
                             d,
                             settings.mainValues[0],
@@ -79,6 +85,7 @@ export function treeData(settings) {
         const chartData = d3.partition().size([2 * Math.PI, root.height + 1])(
             root
         );
+
         chartData.each((d) => {
             d.current = d;
             d.mainValues =
@@ -98,7 +105,8 @@ export function treeData(settings) {
 
             d.key = set[0];
             d.label = toValue(
-                settings.crossValues[d.depth - 1 < 0 ? 0 : d.depth - 1].type,
+                settings.crossValues[d.depth - 1 < 0 ? 0 : d.depth - 1]?.type ||
+                    settings.mainValues[0].type,
                 d.data.name
             );
         });
