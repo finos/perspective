@@ -25,7 +25,7 @@ pub struct PerspectiveNumberColumnStyleElement {
 
 fn on_change(elem: &web_sys::HtmlElement, config: &NumberColumnStyleConfig) {
     let mut event_init = web_sys::CustomEventInit::new();
-    event_init.detail(&JsValue::from_serde(config).unwrap());
+    event_init.detail(&JsValue::from_serde_ext(config).unwrap());
     let event =
         CustomEvent::new_with_event_init_dict("perspective-column-style-change", &event_init);
 

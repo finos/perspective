@@ -127,8 +127,10 @@ impl JsPerspectiveViewerPlugin {
     pub fn get_requirements(&self) -> ApiResult<ViewConfigRequirements> {
         Ok(ViewConfigRequirements {
             min: self.min_config_columns(),
-            mode: self.select_mode().into_serde()?,
-            names: self.config_column_names().map(|x| x.into_serde().unwrap()),
+            mode: self.select_mode().into_serde_ext()?,
+            names: self
+                .config_column_names()
+                .map(|x| x.into_serde_ext().unwrap()),
             max_columns: self.max_columns(),
             max_cells: self.max_cells(),
             name: self.name(),

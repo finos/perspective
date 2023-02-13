@@ -46,7 +46,7 @@ impl PerspectiveDebugPluginElement {
         "Debug".to_owned()
     }
 
-    #[wasm_bindgen(getter, typescript_type = "'select' | 'toggle'")]
+    #[wasm_bindgen(getter)]
     pub fn select_mode(&self) -> String {
         "select".to_owned()
     }

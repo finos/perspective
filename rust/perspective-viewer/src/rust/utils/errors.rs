@@ -58,6 +58,7 @@ macro_rules! define_api_error {
 
 define_api_error!(
     serde_json::Error,
+    serde_wasm_bindgen::Error,
     std::io::Error,
     rmp_serde::encode::Error,
     rmp_serde::decode::Error,

@@ -25,7 +25,7 @@ pub struct PerspectiveStringColumnStyleElement {
 
 fn on_change(elem: &web_sys::HtmlElement, config: &StringColumnStyleConfig) {
     let mut event_init = web_sys::CustomEventInit::new();
-    event_init.detail(&JsValue::from_serde(config).unwrap());
+    event_init.detail(&JsValue::from_serde_ext(config).unwrap());
     let event =
         CustomEvent::new_with_event_init_dict("perspective-column-style-change", &event_init);
 
@@ -49,7 +49,7 @@ impl PerspectiveStringColumnStyleElement {
     /// # Arguments
     /// * `config` - a `ColumnStyle` config in JSON form.
     pub fn reset(&mut self, config: JsValue) -> ApiResult<()> {
-        let msg = StringColumnStyleMsg::Reset(config.into_serde().unwrap());
+        let msg = StringColumnStyleMsg::Reset(config.into_serde_ext().unwrap());
         self.modal.as_apierror()?.send_message(msg);
         Ok(())
     }
@@ -67,9 +67,9 @@ impl PerspectiveStringColumnStyleElement {
         if self.modal.is_some() {
             self.reset(js_config)?;
         } else {
-            let config: StringColumnStyleConfig = js_config.into_serde().unwrap();
+            let config: StringColumnStyleConfig = js_config.into_serde_ext().unwrap();
             let default_config: StringColumnStyleDefaultConfig =
-                js_default_config.into_serde().unwrap();
+                js_default_config.into_serde_ext().unwrap();
 
             let on_change = {
                 clone!(self.elem);

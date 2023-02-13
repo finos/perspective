@@ -61,11 +61,7 @@ impl ViewConfig {
     pub fn as_jsvalue(&self) -> ApiResult<JsPerspectiveViewConfig> {
         let mut new_config = self.clone();
         new_config.columns.retain(|x| x.is_some());
-        Ok(JsValue::from_serde(&new_config).map(|x| x.unchecked_into())?)
-    }
-
-    pub fn is_aggregated(&self) -> bool {
-        !self.group_by.is_empty()
+        Ok(JsValue::from_serde_ext(&new_config).map(|x| x.unchecked_into())?)
     }
 
     pub fn reset(&mut self, reset_expressions: bool) {
@@ -88,6 +84,10 @@ impl ViewConfig {
         changed = Self::_apply(&mut self.aggregates, update.aggregates) || changed;
         changed = Self::_apply(&mut self.expressions, update.expressions) || changed;
         changed
+    }
+
+    pub fn is_aggregated(&self) -> bool {
+        !self.group_by.is_empty()
     }
 
     pub fn is_column_expression_in_use(&self, name: &str) -> bool {
@@ -137,7 +137,7 @@ mod tests {
             }
         });
 
-        let rec: ViewConfig = x.into_serde().unwrap();
+        let rec: ViewConfig = x.into_serde_ext().unwrap();
         assert_eq!(
             *rec.aggregates.get("x").unwrap(),
             Aggregate::MultiAggregate(MultiAggregate::WeightedMean, "y".to_owned())
@@ -150,7 +150,7 @@ mod tests {
             "group_by": ["Test"]
         });
 
-        let rec: ViewConfig = x.into_serde().unwrap();
+        let rec: ViewConfig = x.into_serde_ext().unwrap();
         assert_eq!(rec.group_by, vec!("Test"));
     }
 
@@ -159,7 +159,7 @@ mod tests {
         let x = json!({
             "split_by": ["Test"]
         });
-        let rec: ViewConfig = x.into_serde().unwrap();
+        let rec: ViewConfig = x.into_serde_ext().unwrap();
         assert_eq!(rec.split_by, vec!("Test"));
     }
 
@@ -171,7 +171,7 @@ mod tests {
             .collect::<Array>();
 
         let x = json!({ "filter": [filter] });
-        let rec: ViewConfig = x.into_serde().unwrap();
+        let rec: ViewConfig = x.into_serde_ext().unwrap();
         assert_eq!(
             rec.filter,
             vec!(Filter(
@@ -189,7 +189,7 @@ mod tests {
             .collect::<Array>();
 
         let x = json!({ "filter": [filter] });
-        let rec: ViewConfig = x.into_serde().unwrap();
+        let rec: ViewConfig = x.into_serde_ext().unwrap();
         assert_eq!(
             rec.filter,
             vec!(Filter(
@@ -208,7 +208,7 @@ mod tests {
             .collect::<Array>();
 
         let x = json!({ "sort": [sort] });
-        let rec: ViewConfig = x.into_serde().unwrap();
+        let rec: ViewConfig = x.into_serde_ext().unwrap();
         assert_eq!(rec.sort, vec!(Sort("Test".to_owned(), SortDir::Asc,)));
     }
 
@@ -225,7 +225,7 @@ mod tests {
             .collect::<Array>();
 
         let x = json!({"sort": [sort1, sort2]});
-        let rec: ViewConfig = x.into_serde().unwrap();
+        let rec: ViewConfig = x.into_serde_ext().unwrap();
         assert_eq!(
             rec.sort,
             vec!(

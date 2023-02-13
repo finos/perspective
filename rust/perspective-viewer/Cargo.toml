@@ -78,6 +78,7 @@ serde = { version = "1.0", features = ["derive"] }
 # Support for "unknown"/dictionary types such as `plugin_config`
 serde_json = { version = "1.0.59", features = ["raw_value"] }
 
+serde-wasm-bindgen = "0.4.5"
 # Async-aware logging that can be disabled at compile-time.
 tracing = { version = ">=0.1.36", features = [
     "release_max_level_error",

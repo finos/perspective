@@ -44,7 +44,7 @@ pub trait GetViewerConfigModel: HasSession + HasRenderer + HasTheme {
             let js_plugin = renderer.get_active_plugin()?;
             let settings = renderer.is_settings_open();
             let plugin = js_plugin.name();
-            let plugin_config: serde_json::Value = js_plugin.save().into_serde()?;
+            let plugin_config: serde_json::Value = js_plugin.save().into_serde_ext()?;
             let theme = theme.get_name().await;
             Ok(ViewerConfig {
                 plugin,

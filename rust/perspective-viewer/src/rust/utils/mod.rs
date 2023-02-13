@@ -22,6 +22,7 @@ mod futures;
 mod json;
 mod pubsub;
 mod scope;
+mod serde;
 mod tee;
 mod wasm_abi;
 mod weak_scope;
@@ -44,6 +45,7 @@ pub use wasm_abi::*;
 pub use weak_scope::*;
 
 pub use self::futures::*;
+pub use self::serde::*;
 
 #[macro_export]
 macro_rules! maybe {

@@ -110,7 +110,7 @@ impl ViewerConfig {
             Some(ViewerConfigEncoding::JSONString) => {
                 Ok(JsValue::from(serde_json::to_string(self)?))
             }
-            None | Some(ViewerConfigEncoding::Json) => Ok(JsValue::from_serde(self)?),
+            None | Some(ViewerConfigEncoding::Json) => Ok(JsValue::from_serde_ext(self)?),
         }
     }
 }
@@ -151,7 +151,7 @@ impl ViewerConfigUpdate {
             uint8array.copy_to(&mut slice[..]);
             Ok(rmp_serde::from_slice(&slice)?)
         } else {
-            Ok(update.into_serde()?)
+            Ok(update.into_serde_ext()?)
         }
     }
 }

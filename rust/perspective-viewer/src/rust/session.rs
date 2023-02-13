@@ -199,7 +199,7 @@ impl Session {
         let error_keys = js_sys::Object::keys(&errors);
         if error_keys.length() > 0 {
             let js_err = js_sys::Reflect::get(&errors, &error_keys.get(0))?;
-            Ok(Some(js_err.into_serde().unwrap()))
+            Ok(Some(js_err.into_serde_ext().unwrap()))
         } else {
             Ok(None)
         }
@@ -323,7 +323,7 @@ impl Session {
         if let Err(err) = self.validate_view_config().await {
             web_sys::console::error_3(
                 &"Invalid config, resetting to default".into(),
-                &JsValue::from_serde(&self.borrow().config).unwrap(),
+                &JsValue::from_serde_ext(&self.borrow().config).unwrap(),
                 &err.into(),
             );
 

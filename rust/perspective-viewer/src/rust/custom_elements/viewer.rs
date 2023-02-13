@@ -342,8 +342,8 @@ impl PerspectiveViewerElement {
                 let result = async {
                     let plugin = renderer.get_active_plugin()?;
                     if let Some(plugin_config) = &plugin_config {
-                        let js_config = JsValue::from_serde(plugin_config);
-                        plugin.restore(&js_config?);
+                        let js_config = JsValue::from_serde_ext(plugin_config)?;
+                        plugin.restore(&js_config);
                     }
 
                     session.validate().await?.create_view().await
