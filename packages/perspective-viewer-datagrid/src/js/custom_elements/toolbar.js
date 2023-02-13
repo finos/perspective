@@ -7,7 +7,7 @@
  *
  */
 
-import TOOLBAR_STYLE from "../../less/toolbar.less";
+import TOOLBAR_STYLE from "../../../dist/css/perspective-viewer-datagrid-toolbar.css";
 import { toggle_edit_mode, toggle_scroll_lock } from "../model/toolbar";
 
 /**

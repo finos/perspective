@@ -11,10 +11,6 @@ const {
 } = require("@finos/perspective-esbuild-plugin/rust_wasm");
 
 const {
-    IgnoreCSSPlugin,
-} = require("@finos/perspective-esbuild-plugin/ignore_css");
-
-const {
     NodeModulesExternal,
 } = require("@finos/perspective-esbuild-plugin/external");
 
@@ -27,14 +23,13 @@ const BUILD = [
     {
         entryPoints: ["src/ts/perspective-viewer.ts"],
         format: "esm",
-        plugins: [IgnoreCSSPlugin(), NodeModulesExternal()],
+        plugins: [NodeModulesExternal()],
         external: ["*.wasm", "*.worker.js"],
         outdir: "dist/esm",
     },
     {
         entryPoints: ["src/ts/perspective-viewer.ts"],
         plugins: [
-            IgnoreCSSPlugin(),
             PerspectiveEsbuildPlugin({
                 wasm: { inline: true },
                 worker: { inline: true },
@@ -50,7 +45,7 @@ const BUILD = [
     {
         entryPoints: ["src/ts/perspective-viewer.ts"],
         format: "esm",
-        plugins: [IgnoreCSSPlugin(), PerspectiveEsbuildPlugin()],
+        plugins: [PerspectiveEsbuildPlugin()],
         splitting: true,
         outdir: "dist/cdn",
     },
@@ -82,7 +77,7 @@ async function compile_rust() {
     execSync(`cargo build ${cargo_debug}`, INHERIT);
     await wasm_bindgen("perspective", {
         debug: IS_DEBUG,
-        version: "0.2.82",
+        version: "0.2.83",
         targetdir: "build",
     });
 

@@ -21,7 +21,7 @@ default = []
 
 [build-dependencies]
 serde_json = { version = "1.0.59", features = ["raw_value"] }
-procss = { version = "0.1.7" }
+procss = { version = "0.1.11" }
 glob = "0.3.0"
 anyhow = "1.0.66"
 
@@ -52,7 +52,7 @@ futures = "0.3.12"
 
 # Common utils for verbose `wasm_bindgen` patterns, e.g. event listeners and 
 # globals.
-"gloo" = "0.8.0"
+gloo = "0.8.0"
 
 # General iterator improvements
 itertools = "0.10.1"
@@ -88,7 +88,7 @@ tracing = { version = ">=0.1.36", features = [
 tracing-wasm = ">=0.2.1"
 
 # Browser API bindings
-wasm-bindgen = { version = "=0.2.82", features = ["serde-serialize"] }
+wasm-bindgen = { version = "=0.2.83", features = ["serde-serialize"] }
 
 # Browser `Promise` bindings
 wasm-bindgen-futures = "0.4.20"

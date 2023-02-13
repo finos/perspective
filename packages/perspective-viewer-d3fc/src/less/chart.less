@@ -7,11 +7,8 @@
  *
  */
 
-@import "../../../../rust/perspective-viewer/src/themes/variables.less";
 @import "./gradient_colors.less";
 @import "./series_colors.less";
-
-@sans-serif-fonts: Arial, sans-serif;
 
 :host {
     user-select: none;
@@ -325,7 +322,6 @@
             transition: box-shadow 1s;
             &:hover {
                 background-color: var(--d3fc-legend--background, #ffffff);
-                box-shadow: @elevation1;
                 transition: box-shadow 0.2s, background-color 0.2s;
             }
         }

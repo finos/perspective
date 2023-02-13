@@ -9,7 +9,7 @@
 
 import "regular-table";
 
-import MATERIAL_STYLE from "../less/regular_table.less";
+import MATERIAL_STYLE from "../../dist/css/perspective-viewer-datagrid.css";
 import { HTMLPerspectiveViewerDatagridPluginElement } from "./custom_elements/datagrid.js";
 import { HTMLPerspectiveViewerDatagridToolbarElement } from "./custom_elements/toolbar.js";
 

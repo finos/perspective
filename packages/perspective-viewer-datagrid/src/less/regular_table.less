@@ -7,13 +7,10 @@
  *
  */
 
-@import (less) "./material.less";
-@import (less) "./mitered-headers.less";
-@import (less) "./row-hover.less";
-@import (less) "./column-plugin.less";
-
-@positive: #338dcd; // @blue300
-@negative: #ff5942; // @red300
+@import "./material.less";
+@import "./mitered-headers.less";
+@import "./row-hover.less";
+@import "./column-plugin.less";
 
 // Row Selection
 
@@ -114,8 +111,8 @@ tbody th:empty {
 }
 
 .psp-tree-label:hover:before {
-    color: @positive;
-    text-shadow: 0px 0px 5px @positive;
+    color: var(--active--color);
+    text-shadow: 0px 0px 5px var(--active--color);
 }
 
 regular-table thead tr:last-child th {
@@ -134,10 +131,10 @@ regular-table thead tr:last-child th {
     text-align: left;
 }
 .psp-positive:not(:focus) {
-    color: var(--rt-pos-cell--color, @positive);
+    color: var(--rt-pos-cell--color);
 }
 .psp-negative:not(:focus) {
-    color: var(--rt-neg-cell--color, @negative);
+    color: var(--rt-neg-cell--color);
 }
 
 regular-table table tbody td {
