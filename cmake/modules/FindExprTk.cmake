@@ -54,8 +54,8 @@ mark_as_advanced(ExprTk_INCLUDE_DIR)
 
 if (ExprTk_INCLUDE_DIR)
   file(STRINGS "${ExprTk_INCLUDE_DIR}/exprtk.hpp" _exprtk_version_header
-    REGEX "static const char\\* version")
-  string(REGEX MATCH "static const char\\* version = \"([0-9.]+)\"" _exprtk_version_match "${_exprtk_version_header}")
+    REGEX "static \\* version")
+  string(REGEX MATCH "static \\* version = \"([0-9.]+)\"" _exprtk_version_match "${_exprtk_version_header}")
   set(ExprTk_VERSION "${CMAKE_MATCH_1}")
   unset(_exprtk_version_header)
   unset(_exprtk_version_match)
