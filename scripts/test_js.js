@@ -47,8 +47,6 @@ function silent(x) {
     return bash`output=$(${x}); ret=$?; echo "\${output}"; exit $ret`;
 }
 
-all_packages = ["@finos/perspective-viewer-d3fc" /* ... */];
-
 /**
  * Run tests for all packages in parallel.
  */

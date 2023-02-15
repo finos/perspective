@@ -7,16 +7,32 @@
  *
  */
 
-async function get_contents_default(page) {
-    return await page.evaluate(async () => {
-        const viewer = document.querySelector(
-            "perspective-viewer perspective-viewer-plugin"
-        );
-        return viewer.innerHTML;
-    });
-}
+import { test, expect } from "@playwright/test";
+import path from "path";
 
-exports.default = function (get_contents = get_contents_default) {
+const setupPage = async function (page, testInfo, asset) {
+    await page.goto(path.join(testInfo.project.use.packageURL, asset));
+    await page.waitForSelector("perspective-viewer");
+    await page.evaluate(async () => {
+        await loadTableAsset();
+        const viewer = document.querySelector("perspective-viewer");
+        await viewer.getTable();
+        await viewer.restore({ settings: true });
+    });
+};
+
+exports.setupPage = setupPage;
+
+exports.easy = function (asset, get_contents) {
+    test("shows a grid without any settings applied", async ({
+        page,
+    }, testInfo) => {
+        await setupPage(page, testInfo, asset);
+        return await get_contents(page);
+    });
+};
+
+exports.default = function (get_contents) {
     test.capture("shows a grid without any settings applied", async (page) => {
         await page.evaluate(async () => {
             const viewer = document.querySelector("perspective-viewer");

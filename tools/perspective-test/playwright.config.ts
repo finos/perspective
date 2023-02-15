@@ -14,8 +14,11 @@ const get_base_url = (pkg) =>
     `"http://localhost:7497/packages/${pkg}/dist/umd/"`;
 
 // TODO: add .perspectiverc to env
-const PACKAGES_RAW = process.env.PACKAGES;
-const PACKAGES = PACKAGES_RAW?.split(",") || [
+require("dotenv").config({ path: "./.perspectiverc" });
+const path = require("path");
+
+const PACKAGE = process.env.PACKAGE;
+const PACKAGES = PACKAGE?.split(",") || [
     "perspective-viewer-d3fc",
     "perspective-viewer-datagrid" /* TODO: REST */,
 ];
@@ -25,10 +28,11 @@ const PROJECTS = PACKAGES?.reduce((acc, p) => {
     for (let device of DEVICES) {
         acc.push({
             name: `${p}-${device}`,
-            testDir: `../packages/${p}/test/js`,
-            baseURL: `http://localhost:6598/packages/${p}/dist/umd/`,
+            testDir: path.join(__dirname, `../../packages/${p}/test/js`),
             use: {
                 ...devices[device],
+                packageURL: `/packages/${p}/dist/umd`,
+                baseURL: `http://localhost:6598`,
             },
         });
     }
@@ -73,7 +77,8 @@ export default defineConfig({
     projects: PROJECTS,
     /* Run your local dev server before starting the tests */
     webServer: {
-        command: "npm run start",
+        command: "node ../../scripts/start_test_server.js",
         port: 6598,
+        reuseExistingServer: true,
     },
 });

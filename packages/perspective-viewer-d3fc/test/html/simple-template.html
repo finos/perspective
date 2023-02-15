@@ -1,7 +1,7 @@
 <!--
-   
+
    Copyright (c) 2017, the Perspective Authors.
-   
+
    This file is part of the Perspective library, distributed under the terms of
    the Apache License 2.0.  The full license can be found in the LICENSE file.
 
@@ -10,11 +10,11 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <script type="module" src="perspective.js"></script>
-        <script type="module" src="perspective-viewer.js"></script>
+        <script type="module" src="/perspective.js"></script>
+        <script type="module" src="/perspective-viewer.js"></script>
         <script type="module" src="perspective-viewer-d3fc.js"></script>
 
-        <link rel="stylesheet" href="material.css" />
+        <link rel="stylesheet" href="/material.css" />
 
         <style>
             perspective-viewer {
@@ -35,10 +35,11 @@
         <perspective-viewer> </perspective-viewer>
 
         <script type="module">
-            import perspective from "./perspective.js";
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", "superstore.csv", true);
-            xhr.onload = async function () {
+            import perspective from "/perspective.js";
+            async function loadTableAsset() {
+                let assetPath = "/superstore.csv";
+                let resp = await fetch(assestPath);
+
                 const viewer =
                     document.getElementsByTagName("perspective-viewer")[0];
                 viewer.load(perspective.worker().table(xhr.response));
@@ -46,8 +47,20 @@
                     plugin: "__view_name",
                     columns: __columns,
                 });
-            };
-            xhr.send(null);
+            }
+
+            // var xhr = new XMLHttpRequest();
+            // xhr.open("GET", "superstore.csv", true);
+            // xhr.onload = async function () {
+            //     const viewer =
+            //         document.getElementsByTagName("perspective-viewer")[0];
+            //     viewer.load(perspective.worker().table(xhr.response));
+            //     await viewer.restore({
+            //         plugin: "__view_name",
+            //         columns: __columns,
+            //     });
+            // };
+            // xhr.send(null);
         </script>
     </body>
 </html>

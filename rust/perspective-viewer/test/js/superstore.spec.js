@@ -16,7 +16,15 @@ utils.with_server({}, () => {
     describe.page(
         "superstore.html",
         () => {
-            simple_tests.default();
+            let get_contents = async function get_contents_default(page) {
+                return await page.evaluate(async () => {
+                    const viewer = document.querySelector(
+                        "perspective-viewer perspective-viewer-plugin"
+                    );
+                    return viewer.innerHTML;
+                });
+            };
+            simple_tests.default(get_contents);
         },
         { reload_page: false, root: path.join(__dirname, "..", "..") }
     );

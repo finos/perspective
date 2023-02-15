@@ -9,23 +9,28 @@
 
 const path = require("path");
 
-const utils = require("@finos/perspective-test");
+// const utils = require("@finos/perspective-test");
 const simple_tests = require("@finos/perspective-viewer/test/js/simple_tests.js");
+const utils = require("@finos/perspective-test");
+
+import { test, expect } from "@playwright/test";
 
 const { withTemplate } = require("./simple-template");
 withTemplate("area", "Y Area");
 
-utils.with_server({}, () => {
-    describe.page(
-        "area.html",
-        () => {
-            simple_tests.default(
-                utils.get_contents.bind(
-                    null,
-                    "perspective-viewer perspective-viewer-d3fc-yarea"
-                )
-            );
-        },
-        { root: path.join(__dirname, "..", "..", "..") }
+test.describe("Area Tests", () => {
+    simple_tests.easy("area.html", (page) =>
+        utils.get_contents(
+            page,
+            "perspective-viewer perspective-viewer-d3fc-yarea"
+        )
     );
+
+    test("Can click a button in the Shadow DOM", async ({ page }, testInfo) => {
+        await simple_tests.setupPage(page, testInfo, "area.html");
+        let buttonInShadowDom = await page.waitForSelector("#settings_button");
+        await buttonInShadowDom.click();
+        return true;
+        // return await get_contents(page);
+    });
 });

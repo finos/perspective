@@ -18,7 +18,7 @@ const withTemplate = (
     view,
     { template = SIMPLE_TEMPLATE, columns = DEFAULT_COLUMNS } = {}
 ) => {
-    const dir_name = path.join(__dirname, "..", "..", "..", "dist", "umd");
+    const dir_name = path.join(__dirname, "..", "..", "dist", "umd");
     const templateContent = fs.readFileSync(
         path.join(dir_name, `${template}.html`),
         "utf8"

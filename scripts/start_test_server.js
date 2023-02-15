@@ -2,7 +2,9 @@ const {
     WebSocketServer,
 } = require("@finos/perspective/dist/cjs/perspective.node.js");
 
+const path = require("path");
+
 server = new WebSocketServer({
-    assets: paths || [path.join(test_root, "dist", "umd")],
+    assets: [path.join(__dirname, "..")],
     port: 6598,
 });
