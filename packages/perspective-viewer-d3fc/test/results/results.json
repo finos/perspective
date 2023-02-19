@@ -1,7 +1,7 @@
 {
     "events_perspective-config-update_event_is_fired_when_series_axis_is_changed": "a75579dc157424593d33efff7651db28",
     "events_perspective-config-update_event_is_fired_when_legend_position_is_changed": "01c7817ea82ab76f2a4d9ba47f5dce7a",
-    "__GIT_COMMIT__": "b15e009c0d27ab1c66cdf98d6f408dfa144e8f8e",
+    "__GIT_COMMIT__": "bb8f0663769ade1ab2499c7fe449ed6b8348a47d",
     "xyline_shows_a_grid_without_any_settings_applied": "2aba74b5e5db14953a041e7ebb544a8a",
     "xyline_displays_visible_columns_": "c8bf1c32455f8f8a5210e6ba368ba3db",
     "xyline_pivot_by_a_row": "6bb755705694cc8d7766c988fc98b8b4",
@@ -147,5 +147,6 @@
     "bar-themed_sort_by_an_alpha_column": "829054c44b1e8ae512c6d353b3538425",
     "bar-themed_filters_filters_by_a_numeric_column": "c9e4e2fc4e1a12aa7684e8608f46c653",
     "bar-themed_filters_filters_by_an_alpha_column": "d586997539b9f76b0733efad0631749d",
-    "bar-themed_filters_filters_with__in__comparator": "914b15437ab74e08463987f7d0166f05"
+    "bar-themed_filters_filters_with__in__comparator": "914b15437ab74e08463987f7d0166f05",
+    "xyline_correctly_render_when_a_bar_chart_has_non_equidistant_times_on_a_datetime_axis": "f420990315751370e1237e86b4043332"
 }

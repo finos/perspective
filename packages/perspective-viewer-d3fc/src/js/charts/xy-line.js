@@ -31,7 +31,7 @@ function xyLine(container, settings) {
     const symbols = symbolTypeFromGroups(settings);
 
     let legend = null;
-    if (color.domain().length > 2) {
+    if (color.domain().length >= 2) {
         legend = colorGroupLegend()
             .settings(settings)
             .scale(symbols)
