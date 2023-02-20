@@ -44,6 +44,7 @@ where
     own_focus: bool,
     resize_sub: Rc<RefCell<Option<Subscription>>>,
     anchor: Rc<Cell<ModalAnchor>>,
+    on_blur: Option<Callback<()>>,
 }
 
 /// Anchor point enum, `ModalCornerTargetCorner`
@@ -134,6 +135,7 @@ where
         custom_element: web_sys::HtmlElement,
         props: T::Properties,
         own_focus: bool,
+        on_blur: Option<Callback<()>>,
     ) -> ModalElement<T> {
         custom_element.set_attribute("tabindex", "0").unwrap();
         let init = web_sys::ShadowRootInit::new(web_sys::ShadowRootMode::Open);
@@ -161,6 +163,7 @@ where
             blurhandler,
             resize_sub: Rc::new(RefCell::new(None)),
             anchor: Default::default(),
+            on_blur,
         }
     }
 
@@ -242,6 +245,11 @@ where
             *self.blurhandler.borrow_mut() = Some(
                 (move |_| this.take().and_then(|x| x.hide().ok()).unwrap_or(())).into_closure_mut(),
             );
+
+            self.custom_element
+                .dataset()
+                .set("poscorrected", "true")
+                .unwrap();
 
             self.custom_element.add_event_listener_with_callback(
                 "blur",
@@ -341,6 +349,10 @@ where
                 .body()
                 .unwrap()
                 .remove_child(&self.custom_element)?;
+
+            if let Some(blur) = &self.on_blur {
+                blur.emit(());
+            }
 
             let target = self.target.borrow_mut().take().unwrap();
             let event = web_sys::CustomEvent::new("-perspective-close-expression")?;

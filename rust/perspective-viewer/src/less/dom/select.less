@@ -11,6 +11,7 @@
     .dropdown-width-container {
         position: relative;
         flex: 1 1 auto;
+        height: 100%;
 
         &:after {
             content: attr(data-value) " ";
@@ -38,11 +39,13 @@
         color: inherit;
         padding: 0px 12px 0px 0px;
         font-size: 12px;
-        font-weight: 300;
         font-family: inherit;
         background-color: var(--select--background-color, white);
-        background: var(--select--background,
-                url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB2ZXJzaW9uPSIxLjEiIGlkPSJMYXllcl8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiBoZWlnaHQ9IjIxIiB4PSIwcHgiIHk9IjBweCIKCSB2aWV3Qm94PSIwIDAgNC45IDEwIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA0LjkgMTA7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4KPHN0eWxlIHR5cGU9InRleHQvY3NzIj4KCS5zdDB7ZmlsbDojQUFBQUFBO30KPC9zdHlsZT4KPHRpdGxlPmFycm93czwvdGl0bGU+Cjxwb2x5Z29uIGNsYXNzPSJzdDAiIHBvaW50cz0iMS40LDQuNyAyLjUsMy4yIDMuNSw0LjcgIi8+Cjxwb2x5Z29uIGNsYXNzPSJzdDAiIHBvaW50cz0iMy41LDUuMyAyLjUsNi44IDEuNCw1LjMgIi8+Cjwvc3ZnPg==") no-repeat right 2px center);
+        background-image: url("../../svg/dropdown-selector.svg");
+        background-position: right 2px center;
+        background-repeat: no-repeat;
+        // background: var(--select--background,
+        //         url(../../svg/dropdown-selector.svg) no-repeat right 2px center);
 
         option {
             background: var(--select--background-color, #ffffff);

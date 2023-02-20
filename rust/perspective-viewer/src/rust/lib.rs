@@ -10,6 +10,7 @@
 #![recursion_limit = "1024"]
 #![feature(const_type_name)]
 #![feature(macro_metavar_expr)]
+#![feature(anonymous_lifetime_in_impl_trait)]
 #![warn(
     clippy::all,
     clippy::panic_in_result_fn,
@@ -24,9 +25,9 @@ mod dragdrop;
 mod exprtk;
 mod js;
 mod model;
+mod presentation;
 mod renderer;
 mod session;
-mod theme;
 pub mod utils;
 
 #[cfg(feature = "define_custom_elements_async")]

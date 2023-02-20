@@ -43,7 +43,7 @@ impl FilterDropDownElement {
 
         let column: Rc<RefCell<Option<(usize, String)>>> = Rc::new(RefCell::new(None));
         let props = props!(FilterDropDownProps {});
-        let modal = ModalElement::new(dropdown, props, false);
+        let modal = ModalElement::new(dropdown, props, false, None);
         let values = Rc::new(RefCell::new(None));
         Self {
             modal,

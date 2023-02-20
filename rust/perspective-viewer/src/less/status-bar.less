@@ -9,35 +9,115 @@
  */
 
 :host {
+    #status_bar.titled {
+        padding-right: 108px;
+
+        #menu-bar {
+            opacity: 0.2;
+        }
+    }
+
+    // When settings open ...
+    #main_column #status_bar,
+    #main_column #status_bar.titled {
+        padding-right: 36px;
+
+
+        #menu-bar {
+            opacity: 1;
+        }
+    }
+
     #status_bar {
         overflow: hidden;
         display: flex;
         align-items: center;
+        background: var(--plugin--background);
+        padding-left: 8px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 48px;
 
-        .section {
-            box-shadow: 8px 0px 0px -7px var(--inactive--color, #ccc);
-            display: flex;
+        .input-sizer {
+            display: inline-block;
             align-items: center;
+            position: relative;
+            margin-top: 1px;
+            min-width: 65px;
+            overflow: hidden;
 
-            &:nth-child(2) {
-                flex: 1;
+            &:after,
+            input,
+            textarea {
+                width: auto;
+                grid-area: 1 / 1;
+                font-family: inherit;
             }
 
-            &:nth-child(3) {
-                span:first-child:not(:last-child) {
-                    margin-right: 5px;
-                }
+            input,
+            textarea {
+                // grid-area: 1 / 1;
+                position: absolute;
+                left: 0;
+                right: 0;
+                text-overflow: ellipsis;
+                padding: 0;
+                border: none;
+                background: transparent;
+                font-size: 12px;
+                color: inherit;
+                height: 100%;
+            }
 
-                span:last-child:not(:first-child) {
-                    margin-left: 5px;
+            &:after {
+                content: attr(data-value) " ";
+                color: var(--inactive--color, inherit);
+                visibility: hidden;
+                white-space: nowrap;
+                padding-right: 12px;
+                font-size: 12px;
+            }
+
+            &:focus-within {
+                textarea:focus,
+                input:focus {
+                    outline: none;
                 }
             }
         }
+        
+        .app-title {
+            margin-left: 12px;
+            font-size: 16px;
+        }
 
+        .section {
+            display: flex;
+            align-items: center;
+        }
+
+        #rows {
+            flex: 1 1000 auto;
+            overflow: hidden;
+            span {
+                white-space: nowrap;
+                font-size: 12px;
+            }
+        }
+
+        // Exceptions when the menu bar is visible and the settings panel is closed.
+        
         #menu-bar {
             overflow: hidden;
+            flex: 0 1000000 auto;
             .button {
                 height: 36px;
+                select { 
+                    height: 34px;
+                    font-size: 9px;
+                }
             }
         }
 
@@ -45,22 +125,20 @@
             margin-left: auto;
         }
 
-        #counter-arrow::before {
+        #counter-arrow:before {
             content: var(--status-bar-counter--content, "arrow_back");
         }
 
         span {
-            font-size: 12px;
+            font-size: 9px;
             margin: 0px 10px;
             user-select: none;
             height: 100%;
             line-height: 36px;
 
             &:before {
-                text-transform: none;
                 margin-right: 4px;
-                font-family: var(--button--font-family, inherit);
-                vertical-align: bottom;
+                position: relative;
             }
 
             &:hover {
@@ -73,7 +151,6 @@
         }
 
         span.icon {
-            font-family: var(--button--font-family, inherit);
             height: 100%;
             line-height: 36px;
             margin: 0;
@@ -81,7 +158,9 @@
 
         span#status {
             &:before {
+                top: -1px;
                 color: #ccc;
+                font-size: 8px;
                 content: var(--status-icon--content, "\2B24");
             }
 
@@ -104,52 +183,77 @@
             }
         }
 
+        span.button:before {
+            height: 21px;
+            width: 21px;
+            background-repeat: no-repeat;
+            background-color: var(--icon--color);
+            content: "";
+            -webkit-mask-size: cover;
+            mask-size: cover;
+            pointer-events: none;
+        }
+
         span#export {
             &:before {
-                content: var(--export-button-icon--content, "\2193");
+                -webkit-mask-image:  url("../svg/export-icon.svg");
+                mask-image:  url("../svg/export-icon.svg");
             }
         }
 
         span#lock {
             &:before {
-                content: "lock_open";
+                -webkit-mask-image:  url("../svg/free-scroll-icon.svg");
+                mask-image:  url("../svg/free-scroll-icon.svg");
             }
         }
 
         span#reset {
             &:before {
-                content: var(--reset-button-icon--content, "\27F3");
+                -webkit-mask-image:  url("../svg/revert-icon.svg");
+                mask-image:  url("../svg/revert-icon.svg");
             }
         }
 
         span#copy {
             &:before {
-                content: var(--copy-button-icon--content, "\1F4CB");
+                -webkit-mask-image:  url("../svg/duplicate-icon.svg");
+                mask-image:  url("../svg/duplicate-icon.svg");
             }
         }
 
         span#theme {
-            display: flex;
             &:before {
-                content: var(--theme-button-icon--content, "T");
+                -webkit-mask-image:  url("../svg/theme-icon.svg");
+                mask-image:  url("../svg/theme-icon.svg");
             }
         }
 
         span.button {
+            display: inline-flex;
+            align-items: center;
             margin: 0px;
             padding: 0 5px 0px 10px;
             transition: background-color 0.2s;
             color: var(--inactive--color, #ccc);
+            border: 1px solid transparent;
+            border-radius: 2px;
+            font-size: 9px;
+
             & > span,
             & > .dropdown-width-container {
                 pointer-events: none;
                 overflow: hidden;
                 display: none;
-                font-weight: 300;
             }
 
             &:before {
+                z-index: 1;
                 font-size: 14px;
+            }
+
+            &:hover select {
+                background-color: transparent;
             }
 
             &:hover,
@@ -157,8 +261,8 @@
                 min-width: var(--button--min-width, 75px);
                 color: inherit;
                 cursor: pointer;
-                background-color: rgba(0, 0, 0, 0.05);
                 transition: none;
+                border: 1px solid var(--inactive--color);
 
                 & > span {
                     display: contents;

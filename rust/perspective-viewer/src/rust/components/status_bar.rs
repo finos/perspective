@@ -6,6 +6,7 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use wasm_bindgen::JsCast;
 use web_sys::*;
 use yew::prelude::*;
 
@@ -14,9 +15,9 @@ use crate::components::containers::select::*;
 use crate::components::status_bar_counter::StatusBarRowsCounter;
 use crate::custom_elements::copy_dropdown::*;
 use crate::custom_elements::export_dropdown::*;
+use crate::presentation::Presentation;
 use crate::renderer::*;
 use crate::session::*;
-use crate::theme::Theme;
 #[cfg(test)]
 use crate::utils::WeakScope;
 use crate::utils::*;
@@ -28,14 +29,14 @@ pub struct StatusBarProps {
     pub on_reset: Callback<bool>,
     pub session: Session,
     pub renderer: Renderer,
-    pub theme: Theme,
+    pub presentation: Presentation,
 
     #[cfg(test)]
     #[prop_or_default]
     pub weak_link: WeakScope<StatusBar>,
 }
 
-derive_model!(Renderer, Session, Theme for StatusBarProps);
+derive_model!(Renderer, Session, Presentation for StatusBarProps);
 
 impl PartialEq for StatusBarProps {
     fn eq(&self, other: &Self) -> bool {
@@ -51,6 +52,7 @@ pub enum StatusBarMsg {
     SetTheme(String),
     TableStatsChanged,
     SetIsUpdating(bool),
+    SetTitle(Option<String>),
 }
 
 /// A toolbar with buttons, and `Table` & `View` status information.
@@ -62,7 +64,7 @@ pub struct StatusBar {
     copy_ref: NodeRef,
     export_dropdown: Option<ExportDropDownMenuElement>,
     copy_dropdown: Option<CopyDropDownMenuElement>,
-    _sub: [Subscription; 4],
+    _sub: [Subscription; 5],
 }
 
 impl Component for StatusBar {
@@ -71,9 +73,11 @@ impl Component for StatusBar {
 
     fn create(ctx: &Context<Self>) -> Self {
         enable_weak_link_test!(ctx.props(), ctx.link());
-        let cb = ctx.link().callback(|_| StatusBarMsg::TableStatsChanged);
         let _sub = [
-            ctx.props().session.stats_changed.add_listener(cb),
+            ctx.props()
+                .session
+                .stats_changed
+                .add_listener(ctx.link().callback(|_| StatusBarMsg::TableStatsChanged)),
             ctx.props()
                 .session
                 .view_config_changed
@@ -83,16 +87,20 @@ impl Component for StatusBar {
                 .view_created
                 .add_listener(ctx.link().callback(|_| StatusBarMsg::SetIsUpdating(false))),
             ctx.props()
-                .theme
+                .presentation
                 .theme_config_updated
                 .add_listener(ctx.link().callback(StatusBarMsg::SetThemeConfig)),
+            ctx.props()
+                .presentation
+                .title_changed
+                .add_listener(ctx.link().callback(|_| StatusBarMsg::TableStatsChanged)),
         ];
 
         // Fetch initial theme
-        let theme = ctx.props().theme.clone();
+        let presentation = ctx.props().presentation.clone();
         let on_theme = ctx.link().callback(StatusBarMsg::SetThemeConfig);
         ApiFuture::spawn(async move {
-            on_theme.emit(theme.get_config().await?);
+            on_theme.emit(presentation.get_selected_theme_config().await?);
             Ok(())
         });
 
@@ -127,9 +135,13 @@ impl Component for StatusBar {
                 should_render
             }
             StatusBarMsg::SetTheme(theme_name) => {
-                clone!(ctx.props().renderer, ctx.props().session, ctx.props().theme);
+                clone!(
+                    ctx.props().renderer,
+                    ctx.props().session,
+                    ctx.props().presentation
+                );
                 ApiFuture::spawn(async move {
-                    theme.set_name(Some(&theme_name)).await?;
+                    presentation.set_theme_name(Some(&theme_name)).await?;
                     let view = session.get_view().into_apierror()?;
                     renderer.restyle_all(&view).await
                 });
@@ -150,16 +162,23 @@ impl Component for StatusBar {
                     .open(target);
                 false
             }
+            StatusBarMsg::SetTitle(title) => {
+                ctx.props().presentation.set_title(title);
+                false
+            }
         }
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         let stats = ctx.props().session.get_table_stats();
         let class_name = self.status_class_name(&stats);
-        let is_updating_class_name = if self.is_updating > 0 {
-            "updating"
-        } else {
-            " "
+        let mut is_updating_class_name = classes!();
+        if self.is_updating > 0 {
+            is_updating_class_name.push("updating")
+        };
+
+        if ctx.props().presentation.get_title().is_some() {
+            is_updating_class_name.push("titled")
         };
 
         let reset = ctx
@@ -195,13 +214,48 @@ impl Component for StatusBar {
             }
         };
 
+        let oninput = ctx.link().callback({
+            move |input: InputEvent| {
+                let title = input
+                    .target()
+                    .unwrap()
+                    .unchecked_into::<HtmlInputElement>()
+                    .value();
+
+                let title = if title.trim().is_empty() {
+                    None
+                } else {
+                    Some(title)
+                };
+
+                StatusBarMsg::SetTitle(title)
+            }
+        });
+
         html_template! {
             <LocalStyle href={ css!("status-bar") } />
             <div id={ ctx.props().id.clone() } class={ is_updating_class_name }>
                 <div class="section">
                     <span id="status" class={ class_name }></span>
                 </div>
+                <label
+                    class="input-sizer"
+                    data-value={ ctx.props().presentation.get_title().unwrap_or_default() }>
+
+                    <input
+                        value={ ctx.props().presentation.get_title() }
+                        size="10"
+                        oninput={ oninput }
+                        placeholder="untitled" />
+                </label>
+                <div id="rows" class="section">
+                    <StatusBarRowsCounter stats={ stats } />
+                </div>
                 <div id="menu-bar" class="section">
+                    { theme_button }
+                    <div id="plugin-settings">
+                        <slot name="plugin-settings"></slot>
+                    </div>
                     <span id="reset" class="button" onmousedown={ reset }>
                         <span>{ "Reset" }</span>
                     </span>
@@ -221,33 +275,24 @@ impl Component for StatusBar {
 
                         <span>{ "Copy" }</span>
                     </span>
-                    { theme_button }
-                    <div id="plugin-settings">
-                        <slot name="plugin-settings"></slot>
-                    </div>
                 </div>
-                <div id="rows" class="section">
-                    <StatusBarRowsCounter stats={ stats } />
-                </div>
+
             </div>
         }
     }
 }
 
 impl StatusBar {
-    const fn status_class_name(&self, stats: &Option<TableStats>) -> &'static str {
+    const fn status_class_name(&self, stats: &Option<ViewStats>) -> &'static str {
         match stats {
-            Some(
-                TableStats {
-                    num_rows: Some(_),
-                    virtual_rows: Some(_),
-                    is_pivot: true,
-                }
-                | TableStats {
-                    num_rows: Some(_), ..
-                },
-            ) => "connected",
-            Some(TableStats { num_rows: None, .. }) => "initializing",
+            Some(ViewStats {
+                num_table_cells: Some(_),
+                ..
+            }) => "connected",
+            Some(ViewStats {
+                num_table_cells: None,
+                ..
+            }) => "initializing",
             None => "uninitialized",
         }
     }

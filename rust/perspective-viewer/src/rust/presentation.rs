@@ -6,6 +6,7 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use std::cell::RefCell;
 use std::ops::Deref;
 use std::rc::Rc;
 
@@ -22,63 +23,102 @@ use crate::utils::*;
 /// typically must be performed only once, when `document.styleSheets` is
 /// up-to-date.
 #[derive(Clone)]
-pub struct Theme(Rc<ThemeData>);
+pub struct Presentation(Rc<PresentationHandle>);
 
-impl Deref for Theme {
-    type Target = ThemeData;
+impl Deref for Presentation {
+    type Target = PresentationHandle;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl ImplicitClone for Theme {}
+impl ImplicitClone for Presentation {}
 
-pub struct ThemeData {
+pub struct PresentationHandle {
     viewer_elem: HtmlElement,
-    themes: Mutex<Option<Vec<String>>>,
+    theme_data: Mutex<ThemeData>,
+    name: RefCell<Option<String>>,
+    is_settings_open: RefCell<bool>,
+    pub settings_open_changed: PubSub<bool>,
     pub theme_config_updated: PubSub<(Vec<String>, Option<usize>)>,
+    pub title_changed: PubSub<Option<String>>,
 }
 
-impl Theme {
+#[derive(Default)]
+pub struct ThemeData {
+    themes: Option<Vec<String>>,
+}
+
+impl Presentation {
     pub fn new(elem: &HtmlElement) -> Self {
-        let theme = Self(Rc::new(ThemeData {
+        let theme = Self(Rc::new(PresentationHandle {
             viewer_elem: elem.clone(),
-            themes: Default::default(),
+            name: Default::default(),
+            theme_data: Default::default(),
+            settings_open_changed: Default::default(),
+            is_settings_open: Default::default(),
             theme_config_updated: PubSub::default(),
+            title_changed: PubSub::default(),
         }));
 
         ApiFuture::spawn(theme.clone().init());
         theme
     }
 
+    pub fn get_title(&self) -> Option<String> {
+        self.name.borrow().clone()
+    }
+
+    pub fn set_title(&self, title: Option<String>) {
+        *self.name.borrow_mut() = title.clone();
+        self.title_changed.emit_all(title);
+    }
+
+    pub fn is_settings_open(&self) -> bool {
+        *self.is_settings_open.borrow()
+    }
+
+    pub fn set_settings_open(&self, open: Option<bool>) -> ApiResult<bool> {
+        let open_state = open.unwrap_or_else(|| !*self.is_settings_open.borrow());
+        if *self.is_settings_open.borrow() != open_state {
+            *self.is_settings_open.borrow_mut() = open_state;
+            self.viewer_elem
+                .toggle_attribute_with_force("settings", open_state)?;
+
+            self.settings_open_changed.emit_all(open_state);
+        }
+
+        Ok(open_state)
+    }
+
     async fn init(self) -> ApiResult<()> {
-        self.set_theme_attribute(self.get_name().await.as_deref())
+        self.set_theme_attribute(self.get_selected_theme_name().await.as_deref())
     }
 
     /// Get the available theme names from the browser environment by parsing
     /// readable stylesheets.  This method is memoized - the state can be
     /// flushed by calling `reset()`.
-    pub async fn get_themes(&self) -> ApiResult<Vec<String>> {
-        let mut mutex = self.0.themes.lock().await;
-        if mutex.is_none() {
+    pub async fn get_available_themes(&self) -> ApiResult<Vec<String>> {
+        let mut data = self.0.theme_data.lock().await;
+        if data.themes.is_none() {
             await_dom_loaded().await?;
             let themes = get_theme_names(&self.0.viewer_elem)?;
-            *mutex = Some(themes);
+            data.themes = Some(themes);
         }
 
-        Ok(mutex.clone().unwrap())
+        Ok(data.themes.clone().unwrap())
     }
 
     /// Reset the state.  `styleSheets` will be re-parsed next time
     /// `get_themes()` is called if the `themes` argument is `None`.
-    pub async fn reset(&self, themes: Option<Vec<String>>) {
-        let mut mutex = self.0.themes.lock().await;
-        *mutex = themes;
+    pub async fn reset_available_themes(&self, themes: Option<Vec<String>>) {
+        let mut mutex = self.0.theme_data.lock().await;
+        mutex.themes = themes;
     }
 
-    pub async fn get_config(&self) -> ApiResult<(Vec<String>, Option<usize>)> {
-        let themes = self.get_themes().await?;
+    pub async fn get_selected_theme_config(&self) -> ApiResult<(Vec<String>, Option<usize>)> {
+        let themes = self.get_available_themes().await?;
         let name = self.0.viewer_elem.get_attribute("theme");
         let index = name
             .and_then(|x| themes.iter().position(|y| y == &x))
@@ -90,8 +130,8 @@ impl Theme {
     /// Returns the currently applied theme, or the default theme if no theme
     /// has been set and themes are detected in the `document`, or `None` if
     /// no themes are available.
-    pub async fn get_name(&self) -> Option<String> {
-        let (themes, index) = self.get_config().await.ok()?;
+    pub async fn get_selected_theme_name(&self) -> Option<String> {
+        let (themes, index) = self.get_selected_theme_config().await.ok()?;
         index.and_then(|x| themes.get(x).cloned())
     }
 
@@ -104,8 +144,8 @@ impl Theme {
     }
 
     /// Set the theme by name, or `None` for the default theme.
-    pub async fn set_name(&self, theme: Option<&str>) -> ApiResult<()> {
-        let (themes, _) = self.get_config().await?;
+    pub async fn set_theme_name(&self, theme: Option<&str>) -> ApiResult<()> {
+        let (themes, _) = self.get_selected_theme_config().await?;
         let index = if let Some(theme) = theme {
             self.set_theme_attribute(Some(theme))?;
             themes.iter().position(|x| x == theme)

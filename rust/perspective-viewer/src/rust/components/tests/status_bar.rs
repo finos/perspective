@@ -15,9 +15,9 @@ use web_sys::*;
 use yew::prelude::*;
 
 use crate::components::status_bar::*;
+use crate::presentation::Presentation;
 use crate::renderer::*;
 use crate::session::*;
-use crate::theme::Theme;
 use crate::utils::*;
 use crate::*;
 
@@ -40,7 +40,7 @@ pub async fn test_callbacks_invoked() {
         .unwrap()
         .unchecked_into();
     let session = Session::default();
-    let theme = Theme::new(&elem);
+    let theme = Presentation::new(&elem);
     let renderer = Renderer::new(&elem);
 
     test_html! {
@@ -49,7 +49,7 @@ pub async fn test_callbacks_invoked() {
             weak_link={ link.clone() }
             session={ session }
             renderer={ renderer }
-            theme={ theme }
+            presentation={ theme }
             on_reset={ on_reset }>
         </StatusBar>
     };
@@ -70,7 +70,7 @@ pub async fn test_callbacks_invoked() {
     assert_eq!(token.get(), 1);
 }
 
-async fn gen(stats: &Option<TableStats>) -> (HtmlElement, Session) {
+async fn gen(stats: &Option<ViewStats>) -> (HtmlElement, Session) {
     let link: WeakScope<StatusBar> = WeakScope::default();
     let on_reset = Callback::from(|_| ());
     let session = Session::default();
@@ -82,7 +82,7 @@ async fn gen(stats: &Option<TableStats>) -> (HtmlElement, Session) {
         .unwrap()
         .unchecked_into();
 
-    let theme = Theme::new(&elem);
+    let theme = Presentation::new(&elem);
     let renderer = Renderer::new(&elem);
     let div = test_html! {
         <StatusBar
@@ -90,7 +90,7 @@ async fn gen(stats: &Option<TableStats>) -> (HtmlElement, Session) {
             weak_link={ link.clone() }
             session={ session.clone() }
             renderer={ renderer }
-            theme={ theme }
+            presentation={ theme }
             on_reset={ on_reset }>
         </StatusBar>
     };
@@ -118,10 +118,12 @@ pub async fn test_status_uninitialized() {
 
 #[wasm_bindgen_test]
 pub async fn test_status_initializing() {
-    let stats = Some(TableStats {
-        is_pivot: false,
-        num_rows: None,
-        virtual_rows: None,
+    let stats = Some(ViewStats {
+        is_group_by: false,
+        num_table_cells: None,
+        num_view_cells: None,
+        is_split_by: false,
+        is_filtered: false,
     });
 
     let (div, session) = gen(&stats).await;
@@ -132,10 +134,12 @@ pub async fn test_status_initializing() {
 
 #[wasm_bindgen_test]
 pub async fn test_status_table_loaded() {
-    let stats = Some(TableStats {
-        is_pivot: false,
-        num_rows: Some(12345678),
-        virtual_rows: None,
+    let stats = Some(ViewStats {
+        num_table_cells: Some((12345678, 0)),
+        num_view_cells: None,
+        is_group_by: false,
+        is_split_by: false,
+        is_filtered: false,
     });
 
     let (div, session) = gen(&stats).await;
@@ -148,10 +152,12 @@ pub async fn test_status_table_loaded() {
 
 #[wasm_bindgen_test]
 pub async fn test_status_table_and_view_loaded() {
-    let stats = Some(TableStats {
-        is_pivot: true,
-        num_rows: Some(12345678),
-        virtual_rows: Some(54321),
+    let stats = Some(ViewStats {
+        num_table_cells: Some((12345678, 0)),
+        num_view_cells: Some((54321, 1)),
+        is_group_by: false,
+        is_split_by: false,
+        is_filtered: false,
     });
 
     let (div, session) = gen(&stats).await;

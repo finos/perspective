@@ -31,6 +31,8 @@ struct ResizingState {
     orientation: Orientation,
     reverse: bool,
     body_style: web_sys::CssStyleDeclaration,
+    pointer_id: i32,
+    pointer_elem: HtmlElement,
 }
 
 impl Drop for ResizingState {
@@ -43,10 +45,8 @@ impl Drop for ResizingState {
             let body = document.body().unwrap();
             let mousemove = self.mousemove.as_ref().unchecked_ref();
             body.remove_event_listener_with_callback("mousemove", mousemove)?;
-
             let mouseup = self.mouseup.as_ref().unchecked_ref();
             body.remove_event_listener_with_callback("mouseup", mouseup)?;
-
             self.release_cursor()?;
             Ok(())
         };
@@ -61,44 +61,56 @@ impl ResizingState {
     pub fn new(
         index: usize,
         client_offset: i32,
-        orientation: Orientation,
-        reverse: bool,
-        split_panel: &Scope<SplitPanel>,
+        ctx: &Context<SplitPanel>,
         first_elem: &HtmlElement,
+        pointer_id: i32,
+        pointer_elem: HtmlElement,
     ) -> ApiResult<ResizingState> {
+        let orientation = ctx.props().orientation;
+        let reverse = ctx.props().reverse;
+        let split_panel = ctx.link();
         let document = web_sys::window().unwrap().document().unwrap();
         let body = document.body().unwrap();
+        let total = match orientation {
+            Orientation::Horizontal => first_elem.offset_width(),
+            Orientation::Vertical => first_elem.offset_height(),
+        };
+
+        let alt = match orientation {
+            Orientation::Horizontal => first_elem.offset_height(),
+            Orientation::Vertical => first_elem.offset_width(),
+        };
+
+        let mouseup = split_panel
+            .callback(|_| SplitPanelMsg::StopResizing)
+            .into_closure();
+
+        let mousemove = split_panel
+            .callback(move |event: MouseEvent| {
+                SplitPanelMsg::MoveResizing(match orientation {
+                    Orientation::Horizontal => event.client_x(),
+                    Orientation::Vertical => event.client_y(),
+                })
+            })
+            .into_closure();
+
         let mut state = ResizingState {
             index,
             cursor: "".to_owned(),
             start: client_offset,
             orientation,
             reverse,
-            total: match orientation {
-                Orientation::Horizontal => first_elem.offset_width(),
-                Orientation::Vertical => first_elem.offset_height(),
-            },
-            alt: match orientation {
-                Orientation::Horizontal => first_elem.offset_height(),
-                Orientation::Vertical => first_elem.offset_width(),
-            },
+            total,
+            alt,
             body_style: body.style(),
-            mouseup: split_panel
-                .callback(|_| SplitPanelMsg::StopResizing)
-                .into_closure(),
-            mousemove: split_panel
-                .callback(move |event: MouseEvent| {
-                    SplitPanelMsg::MoveResizing(match orientation {
-                        Orientation::Horizontal => event.client_x(),
-                        Orientation::Vertical => event.client_y(),
-                    })
-                })
-                .into_closure(),
+            mouseup,
+            mousemove,
+            pointer_id,
+            pointer_elem,
         };
 
         state.capture_cursor()?;
         state.register_listeners()?;
-
         Ok(state)
     }
 
@@ -115,8 +127,14 @@ impl ResizingState {
     pub fn get_style(&self, client_offset: i32) -> Option<String> {
         let offset = self.get_offset(client_offset);
         Some(match self.orientation {
-            Orientation::Horizontal => format!("width:{}px", offset),
-            Orientation::Vertical => format!("height:{}px", offset),
+            Orientation::Horizontal => format!(
+                "max-width:{}px;min-width:{}px;width:{}px",
+                offset, offset, offset
+            ),
+            Orientation::Vertical => format!(
+                "max-height:{}px;min-height:{}px;height:{}px",
+                offset, offset, offset
+            ),
         })
     }
 
@@ -134,7 +152,6 @@ impl ResizingState {
         let body = document.body().unwrap();
         let mousemove = self.mousemove.as_ref().unchecked_ref();
         body.add_event_listener_with_callback("mousemove", mousemove)?;
-
         let mouseup = self.mouseup.as_ref().unchecked_ref();
         Ok(body.add_event_listener_with_callback("mouseup", mouseup)?)
     }
@@ -142,17 +159,20 @@ impl ResizingState {
     /// Helper functions capture and release the global cursor while dragging is
     /// occurring.
     fn capture_cursor(&mut self) -> ApiResult<()> {
+        self.pointer_elem.set_pointer_capture(self.pointer_id)?;
         self.cursor = self.body_style.get_property_value("cursor")?;
-        Ok(self
-            .body_style
+        self.body_style
             .set_property("cursor", match self.orientation {
                 Orientation::Horizontal => "col-resize",
                 Orientation::Vertical => "row-resize",
-            })?)
+            })?;
+
+        Ok(())
     }
 
     /// " but for release
     fn release_cursor(&self) -> ApiResult<()> {
+        self.pointer_elem.release_pointer_capture(self.pointer_id)?;
         Ok(self.body_style.set_property("cursor", &self.cursor)?)
     }
 }
@@ -178,6 +198,9 @@ pub struct SplitPanelProps {
 
     #[prop_or_default]
     pub orientation: Orientation,
+
+    #[prop_or_default]
+    pub no_wrap: bool,
 
     #[prop_or_default]
     pub reverse: bool,
@@ -212,7 +235,7 @@ impl PartialEq for SplitPanelProps {
 }
 
 pub enum SplitPanelMsg {
-    StartResizing(usize, i32),
+    StartResizing(usize, i32, i32, HtmlElement),
     MoveResizing(i32),
     StopResizing,
     Reset(usize),
@@ -262,16 +285,10 @@ impl Component for SplitPanel {
                 self.styles[index] = None;
                 self.on_reset = ctx.props().on_reset.clone();
             }
-            SplitPanelMsg::StartResizing(index, client_offset) => {
+            SplitPanelMsg::StartResizing(index, client_offset, pointer_id, pointer_elem) => {
                 let elem = self.refs[index].cast::<HtmlElement>().unwrap();
-                let state = ResizingState::new(
-                    index,
-                    client_offset,
-                    ctx.props().orientation,
-                    ctx.props().reverse,
-                    ctx.link(),
-                    &elem,
-                );
+                let state =
+                    ResizingState::new(index, client_offset, ctx, &elem, pointer_id, pointer_elem);
 
                 self.resize_state = state.ok();
             }
@@ -320,23 +337,25 @@ impl Component for SplitPanel {
             classes.push("orient-reverse");
         }
 
-        html! {
-            <div id={ ctx.props().id.clone() } class={ classes }>
-                <LocalStyle href={ css!("containers/split-panel") } />
-                <SplitPanelChild
-                    style={ self.styles[0].clone() }
-                    ref_={ self.refs[0].clone() }>
+        let contents = html_template! {
+            <LocalStyle href={ css!("containers/split-panel") } />
+            <SplitPanelChild
+                style={ self.styles[0].clone() }
+                ref_={ self.refs[0].clone() }>
 
-                    { iter.next().unwrap() }
-                </SplitPanelChild>
-                {
-                    for iter.enumerate().map(|(i, x)| {
-                        html_template! {
-                            <SplitPanelDivider
-                                i={ i }
-                                orientation={ ctx.props().orientation }
-                                link={ ctx.link().clone() }>
-                            </SplitPanelDivider>
+                { iter.next().unwrap() }
+            </SplitPanelChild>
+            {
+                for iter.enumerate().map(|(i, x)| {
+                    html_template! {
+                        <SplitPanelDivider
+                            i={ i }
+                            orientation={ ctx.props().orientation }
+                            link={ ctx.link().clone() }>
+                        </SplitPanelDivider>
+                        if i == ctx.props().children.len() - 2 {
+                            { x }
+                        } else {
                             <SplitPanelChild
                                 style={ self.styles[i + 1].clone() }
                                 ref_={ self.refs[i + 1].clone() }>
@@ -344,9 +363,19 @@ impl Component for SplitPanel {
                                 { x }
                             </SplitPanelChild>
                         }
-                    })
-                }
-            </div>
+                    }
+                })
+            }
+        };
+
+        if ctx.props().no_wrap {
+            html! {{ contents }}
+        } else {
+            html! {
+                <div id={ ctx.props().id.clone() } class={ classes }>
+                    { contents }
+                </div>
+            }
         }
     }
 }
@@ -370,11 +399,15 @@ fn split_panel_divider(props: &SplitPanelDividerProps) -> Html {
     let orientation = props.orientation;
     let i = props.i;
     let link = props.link.clone();
-    let onmousedown = link.callback(move |event: MouseEvent| {
-        SplitPanelMsg::StartResizing(i, match orientation {
+    let onmousedown = link.callback(move |event: PointerEvent| {
+        let target = event.target().unwrap().unchecked_into::<HtmlElement>();
+        let pointer_id = event.pointer_id();
+        let size = match orientation {
             Orientation::Horizontal => event.client_x(),
             Orientation::Vertical => event.client_y(),
-        })
+        };
+
+        SplitPanelMsg::StartResizing(i, size, pointer_id, target)
     });
 
     let ondblclick = props.link.callback(move |event: MouseEvent| {
@@ -394,7 +427,7 @@ fn split_panel_divider(props: &SplitPanelDividerProps) -> Html {
         <div
             class="split-panel-divider"
             ondragstart={ ondragstart }
-            onmousedown={ onmousedown }
+            onpointerdown={ onmousedown }
             ondblclick={ ondblclick }>
         </div>
     }

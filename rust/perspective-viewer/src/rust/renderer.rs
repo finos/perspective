@@ -53,7 +53,6 @@ pub struct RendererData {
     draw_lock: DebounceMutex,
     pub plugin_changed: PubSub<JsPerspectiveViewerPlugin>,
     pub limits_changed: PubSub<RenderLimits>,
-    pub settings_open_changed: PubSub<bool>,
 }
 
 /// Mutable state
@@ -63,7 +62,6 @@ pub struct RendererMutData {
     plugin_store: PluginStore,
     plugins_idx: Option<usize>,
     timer: MovingWindowRenderTimer,
-    is_settings_open: bool,
 }
 
 type RenderLimits = (usize, usize, Option<usize>, Option<usize>);
@@ -107,11 +105,9 @@ impl Renderer {
                 plugin_store: PluginStore::default(),
                 plugins_idx: None,
                 timer: MovingWindowRenderTimer::default(),
-                is_settings_open: false,
             }),
             draw_lock: Default::default(),
             plugin_changed: Default::default(),
-            settings_open_changed: Default::default(),
             limits_changed: Default::default(),
         }))
     }
@@ -166,25 +162,6 @@ impl Renderer {
         let idx = idx.ok_or_else(|| JsValue::from(format!("No Plugin `{}`", name)))?;
         let result = self.0.borrow_mut().plugin_store.plugins().get(idx).cloned();
         Ok(result.unwrap())
-    }
-
-    pub fn is_settings_open(&self) -> bool {
-        self.0.borrow().is_settings_open
-    }
-
-    pub fn set_settings_open(&self, open: Option<bool>) -> ApiResult<bool> {
-        let open_state = open.unwrap_or_else(|| !self.0.borrow().is_settings_open);
-        if self.0.borrow().is_settings_open != open_state {
-            self.0.borrow_mut().is_settings_open = open_state;
-            self.0
-                .borrow()
-                .viewer_elem
-                .toggle_attribute_with_force("settings", open_state)?;
-
-            self.settings_open_changed.emit_all(open_state);
-        }
-
-        Ok(open_state)
     }
 
     pub async fn restyle_all(&self, view: &JsPerspectiveView) -> ApiResult<JsValue> {

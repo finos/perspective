@@ -73,6 +73,12 @@ extern "C" {
     #[wasm_bindgen(method, catch, js_name = size)]
     pub async fn _size(this: &JsPerspectiveTable) -> ApiResult<JsValue>;
 
+    #[wasm_bindgen(method, catch, js_name = num_rows)]
+    pub async fn _num_rows(this: &JsPerspectiveTable) -> ApiResult<JsValue>;
+
+    #[wasm_bindgen(method, catch, js_name = num_columns)]
+    pub async fn _num_columns(this: &JsPerspectiveTable) -> ApiResult<JsValue>;
+
     #[wasm_bindgen(method, catch, js_name = validate_expressions)]
     pub async fn _validate_expressions(this: &JsPerspectiveTable, exprs: Array) -> ApiResult<JsValue>;
 
@@ -164,7 +170,9 @@ impl JsPerspectiveTable {
 
     async_typed!(_view, view(&self, config: &JsPerspectiveViewConfig) -> JsPerspectiveView);
 
-    async_typed!(_size, size(&self) -> f64);
+    async_typed!(_num_rows, num_rows(&self) -> f64);
+
+    async_typed!(_num_columns, num_columns(&self) -> f64);
 }
 
 impl JsPerspectiveView {

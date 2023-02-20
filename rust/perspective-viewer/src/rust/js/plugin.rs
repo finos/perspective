@@ -103,6 +103,15 @@ impl Default for ColumnSelectMode {
     }
 }
 
+impl ColumnSelectMode {
+    pub fn css(&self) -> yew::Classes {
+        match self {
+            ColumnSelectMode::Toggle => yew::classes!("toggle-mode", "is_column_active"),
+            ColumnSelectMode::Select => yew::classes!("select-mode", "is_column_active"),
+        }
+    }
+}
+
 #[derive(Clone, Debug, Default)]
 pub struct ViewConfigRequirements {
     pub min: Option<usize>,

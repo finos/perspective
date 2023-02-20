@@ -193,33 +193,41 @@ where
                 .children
                 .iter()
                 .map(|x| (true, Some(x)))
-                .enumerate()
-                .collect::<Vec<(usize, (bool, Option<yew::virtual_dom::VChild<U>>))>>();
+                .collect::<Vec<_>>();
 
             if let Some((x, column)) = &ctx.props().is_dragover {
                 let index = *x;
                 let col_vchild = columns
                     .iter()
-                    .map(|z| z.1 .1.as_ref().unwrap())
+                    .map(|z| z.1.as_ref().unwrap())
                     .find(|x| x.props.get_item() == *column)
                     .cloned();
 
-                if !ctx.props().allow_duplicates {
-                    columns.retain(|x| x.1 .1.as_ref().unwrap().props.get_item() != *column);
-                }
+                let changed = if !ctx.props().allow_duplicates {
+                    let old_size = columns.len();
+                    columns.retain(|x| x.1.as_ref().unwrap().props.get_item() != *column);
+                    columns.len() < old_size
+                } else {
+                    false
+                };
 
                 // If inserting into the middle of the list, use
                 // the length of the existing element to prevent
                 // jitter as the underlying dragover zone moves.
                 if index < columns.len() {
-                    columns.insert(index, (index, (false, col_vchild)));
+                    columns.insert(index, (false, col_vchild));
                 } else {
-                    columns.push((index, (false, col_vchild)));
+                    columns.push((false, col_vchild));
+                }
+
+                if changed {
+                    columns.push((true, None));
                 }
             }
 
             columns
                 .into_iter()
+                .enumerate()
                 .map(|(idx, column)| {
                     let close = ctx.props().parent.callback(move |_| V::close(idx));
                     let dragenter = ctx.props().parent.callback({
@@ -235,23 +243,21 @@ where
                     if let (true, Some(column)) = column {
                         html! {
                             <div class="pivot-column" ondragenter={ dragenter }>
-                                {
-                                    Html::from(column)
-                                }
+                                { Html::from(column) }
                                 <span class="row_close" onmousedown={ close }></span>
                             </div>
                         }
                     } else if let (_, Some(column)) = column {
                         html! {
-                            <div class="pivot-column config-drop" ondragenter={ dragenter }>
-                                {
-                                    Html::from(column)
-                                }
+                            <div class="pivot-column" ondragenter={ dragenter }>
+                                { Html::from(column) }
+                                <span class="row_close" style="opacity:0.3"></span>
                             </div>
                         }
                     } else {
                         html! {
-                            <div class="pivot-column config-drop" ondragenter={ dragenter }>
+                            <div class="pivot-column" ondragenter={ dragenter }>
+                                <div class="config-drop"></div>
                             </div>
                         }
                     }
@@ -259,13 +265,8 @@ where
                 .collect::<Html>()
         };
 
-        let style = match self.frozen_size {
-            Some(x) => format!("max-width:{}px;min-width:{}px", x.floor(), x.ceil()),
-            None => "".to_owned(),
-        };
-
         html! {
-            <div style={style} ref={ &self.elem } class="rrow">
+            <div ref={ &self.elem } class="rrow">
                 <div
                     id={ ctx.props().name }
                     ondragover={ dragover }
@@ -277,6 +278,12 @@ where
                     <div class="psp-text-field">
                         <ul class="psp-text-field__input" for={ ctx.props().name }>
                             { columns_html }
+                            if ctx.props().is_dragover.is_none() {
+                                <div class="pivot-column column-empty">
+                                    <div class="pivot-column-draggable" >
+                                    </div>
+                                </div>
+                            }
                         </ul>
                         <label class="pivot-selector-label" for={ ctx.props().name }></label>
                     </div>

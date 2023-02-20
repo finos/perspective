@@ -81,37 +81,38 @@ impl Component for SortItem {
             .link()
             .callback(|event: MouseEvent| SortItemMsg::SortDirClick(event.shift_key()));
 
-        let noderef = NodeRef::default();
         let dragstart = Callback::from({
             let event_name = ctx.props().sort.0.to_owned();
-            let noderef = noderef.clone();
             let dragdrop = ctx.props().dragdrop.clone();
             move |event: DragEvent| {
-                let elem = noderef.cast::<HtmlElement>().unwrap();
-                event.data_transfer().unwrap().set_drag_image(&elem, 0, 0);
-                dragdrop.drag_start(event_name.to_string(), DragEffect::Move(DragTarget::Sort))
+                dragdrop.set_drag_image(&event).unwrap();
+                dragdrop
+                    .notify_drag_start(event_name.to_string(), DragEffect::Move(DragTarget::Sort))
             }
         });
 
         let dragend = Callback::from({
             let dragdrop = ctx.props().dragdrop.clone();
-            move |_event| dragdrop.drag_end()
+            move |_event| dragdrop.notify_drag_end()
         });
 
-        html_template! {
-            <span
+        html! {
+            <div
+                class="pivot-column-draggable"
                 draggable="true"
-                ref={ noderef.clone() }
                 ondragstart={ dragstart }
                 ondragend={ dragend }>
-                {
-                    ctx.props().sort.0.to_owned()
-                }
-            </span>
-            <span
-                class={ format!("sort-icon {}", ctx.props().sort.1) }
-                onmousedown={ onclick }>
-            </span>
+                <div class="pivot-column-border">
+                    <span
+                        class="column_name string">
+                        { ctx.props().sort.0.to_owned() }
+                    </span>
+                    <span
+                        class={ format!("sort-icon {}", ctx.props().sort.1) }
+                        onmousedown={ onclick }>
+                    </span>
+                </div>
+            </div>
         }
     }
 }

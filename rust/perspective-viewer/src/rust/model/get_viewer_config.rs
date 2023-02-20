@@ -12,9 +12,9 @@ use std::pin::Pin;
 use super::columns_iter_set::*;
 use super::structural::*;
 use crate::config::*;
+use crate::presentation::Presentation;
 use crate::renderer::*;
 use crate::session::*;
-use crate::theme::Theme;
 use crate::utils::*;
 use crate::*;
 
@@ -22,7 +22,7 @@ use crate::*;
 /// application state, including the current `Plugin`, `ViewConfig`, and
 /// `Theme`.  `GetViewerConfigModel` provides methods which should be used to
 /// get the applications `ViewerConfig` from across these state objects.
-pub trait GetViewerConfigModel: HasSession + HasRenderer + HasTheme {
+pub trait GetViewerConfigModel: HasSession + HasRenderer + HasPresentation {
     /// As these methods are asynchronous, it is commonly useful to be able to
     /// discretely `.clone()` the state objects for dispatching to `async`.
     /// Calling `.cloned()` yields just the state object clones of
@@ -32,22 +32,24 @@ pub trait GetViewerConfigModel: HasSession + HasRenderer + HasTheme {
         GetViewerConfigModelCloned {
             renderer: self.renderer().clone(),
             session: self.session().clone(),
-            theme: self.theme().clone(),
+            presentation: self.presentation().clone(),
         }
     }
 
     /// Get the current ViewerConfig
     fn get_viewer_config(&self) -> Pin<Box<dyn Future<Output = ApiResult<ViewerConfig>>>> {
-        clone!(self.renderer(), self.session(), self.theme());
+        clone!(self.renderer(), self.session(), self.presentation());
         Box::pin(async move {
             let view_config = session.get_view_config().clone();
             let js_plugin = renderer.get_active_plugin()?;
-            let settings = renderer.is_settings_open();
+            let settings = presentation.is_settings_open();
             let plugin = js_plugin.name();
             let plugin_config: serde_json::Value = js_plugin.save().into_serde_ext()?;
-            let theme = theme.get_name().await;
+            let theme = presentation.get_selected_theme_name().await;
+            let title = presentation.get_title();
             Ok(ViewerConfig {
                 plugin,
+                title,
                 plugin_config,
                 settings,
                 view_config,
@@ -57,16 +59,16 @@ pub trait GetViewerConfigModel: HasSession + HasRenderer + HasTheme {
     }
 }
 
-impl<T: HasRenderer + HasSession + HasTheme> GetViewerConfigModel for T {}
+impl<T: HasRenderer + HasSession + HasPresentation> GetViewerConfigModel for T {}
 
 #[derive(Clone)]
 pub struct GetViewerConfigModelCloned {
     renderer: Renderer,
     session: Session,
-    theme: Theme,
+    presentation: Presentation,
 }
 
-derive_model!(Renderer, Session, Theme for GetViewerConfigModelCloned);
+derive_model!(Renderer, Session, Presentation for GetViewerConfigModelCloned);
 
 pub trait ColumnIteratorModel: HasSession + HasRenderer + HasDragDrop {
     fn column_selector_iter_set<'a>(&'a self, config: &'a ViewConfig) -> ColumnsIteratorSet<'a> {

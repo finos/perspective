@@ -43,8 +43,8 @@ fn main() -> Result<(), anyhow::Error> {
     let mut build = BuildCss::new("./src/themes");
     build.add_file("variables.less");
     build.add_file("fonts.less");
-    build.add_file("material.less");
-    build.add_file("material-dark.less");
+    build.add_file("pro.less");
+    build.add_file("pro-dark.less");
     build.add_file("monokai.less");
     build.add_file("solarized.less");
     build.add_file("solarized-dark.less");

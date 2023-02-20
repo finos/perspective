@@ -94,7 +94,7 @@ impl Default for FunctionDropDownElement {
             .unchecked_into::<HtmlElement>();
 
         let props = props!(FunctionDropDownProps {});
-        let modal = ModalElement::new(dropdown, props, false);
+        let modal = ModalElement::new(dropdown, props, false, None);
         Self {
             modal,
             target: Default::default(),

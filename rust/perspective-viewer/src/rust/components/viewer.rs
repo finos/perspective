@@ -13,7 +13,6 @@ use wasm_bindgen::prelude::*;
 use yew::prelude::*;
 
 use super::column_selector::ColumnSelector;
-use super::config_selector::ConfigSelector;
 use super::containers::split_panel::SplitPanel;
 use super::font_loader::{FontLoader, FontLoaderProps, FontLoaderStatus};
 use super::plugin_selector::PluginSelector;
@@ -23,9 +22,9 @@ use super::style::{LocalStyle, StyleProvider};
 use crate::config::*;
 use crate::dragdrop::*;
 use crate::model::*;
+use crate::presentation::Presentation;
 use crate::renderer::*;
 use crate::session::*;
-use crate::theme::Theme;
 use crate::utils::*;
 use crate::*;
 
@@ -34,7 +33,7 @@ pub struct PerspectiveViewerProps {
     pub elem: web_sys::HtmlElement,
     pub session: Session,
     pub renderer: Renderer,
-    pub theme: Theme,
+    pub presentation: Presentation,
     pub dragdrop: DragDrop,
 
     #[prop_or_default]
@@ -100,11 +99,15 @@ impl Component for PerspectiveViewer {
                 false
             }
             Msg::Reset(all, sender) => {
-                clone!(ctx.props().renderer, ctx.props().session, ctx.props().theme);
+                clone!(
+                    ctx.props().renderer,
+                    ctx.props().session,
+                    ctx.props().presentation
+                );
                 ApiFuture::spawn(async move {
                     session.reset(all);
                     renderer.reset().await;
-                    theme.reset(None).await;
+                    presentation.reset_available_themes(None).await;
                     let result = renderer.draw(session.validate().await?.create_view()).await;
 
                     if let Some(sender) = sender {
@@ -179,7 +182,7 @@ impl Component for PerspectiveViewer {
     /// async callbacks to the Custom Element API.
     fn rendered(&mut self, ctx: &Context<Self>, _first_render: bool) {
         ctx.props()
-            .renderer
+            .presentation
             .set_settings_open(Some(self.settings_open))
             .unwrap();
 
@@ -200,15 +203,21 @@ impl Component for PerspectiveViewer {
     // version.
     fn view(&self, ctx: &Context<Self>) -> Html {
         let settings = ctx.link().callback(|_| Msg::ToggleSettingsInit(None, None));
+        let mut class = classes!("settings-closed");
+        if ctx.props().presentation.get_title().is_some() {
+            class.push("titled");
+        }
+
         html_template! {
             <StyleProvider>
                 <LocalStyle href={ css!("viewer") } />
                 if self.settings_open {
                     <SplitPanel
                         id="app_panel"
+                        reverse=true
                         on_reset={ self.on_dimensions_reset.callback() }
                         on_resize_finished={ ctx.props().render_callback() }>
-                        <div id="side_panel" class="column noselect">
+                        <div id="side_panel" class="column noselect split-panel orient-vertical">
                             <PluginSelector
                                 session={ &ctx.props().session }
                                 renderer={ &ctx.props().renderer }>
@@ -222,11 +231,13 @@ impl Component for PerspectiveViewer {
                             </ColumnSelector>
                         </div>
                         <div id="main_column">
-                            <ConfigSelector
-                                dragdrop={ &ctx.props().dragdrop }
+                            <StatusBar
+                                id="status_bar"
                                 session={ &ctx.props().session }
-                                renderer={ &ctx.props().renderer }>
-                            </ConfigSelector>
+                                renderer={ &ctx.props().renderer }
+                                presentation={ &ctx.props().presentation }
+                                on_reset={ ctx.link().callback(|all| Msg::Reset(all, None)) }>
+                            </StatusBar>
                             <div id="main_panel_container">
                                 <RenderWarning
                                     dimensions={ self.dimensions }
@@ -235,31 +246,40 @@ impl Component for PerspectiveViewer {
                                 </RenderWarning>
                                 <slot></slot>
                             </div>
+                            <div
+                                id="settings_button"
+                                class="noselect button open"
+                                onmousedown={ settings }>
+                            </div>
                         </div>
                     </SplitPanel>
-                    <StatusBar
-                        id="status_bar"
-                        session={ &ctx.props().session }
-                        renderer={ &ctx.props().renderer }
-                        theme={ &ctx.props().theme }
-                        on_reset={ ctx.link().callback(|all| Msg::Reset(all, None)) }>
-                    </StatusBar>
                 } else {
                     <RenderWarning
                         dimensions={ self.dimensions }
                         session={ &ctx.props().session }
                         renderer={ &ctx.props().renderer }>
                     </RenderWarning>
-                    <div id="main_panel_container" class="settings-closed">
+                    if ctx.props().presentation.get_title().is_some() {
+                        <StatusBar
+                            id="status_bar"
+                            session={ &ctx.props().session }
+                            renderer={ &ctx.props().renderer }
+                            presentation={ &ctx.props().presentation }
+                            on_reset={ ctx.link().callback(|all| Msg::Reset(all, None)) }>
+                        </StatusBar>
+                    }
+
+                    <div id="main_panel_container" class={ class }>
                         <slot></slot>
+                    </div>
+                    <div
+                        id="settings_button"
+                        class={ if ctx.props().presentation.get_title().is_some() { "noselect button closed titled" } else { "noselect button closed" } }
+                        onmousedown={ settings }>
                     </div>
                 }
 
-                <div
-                    id="settings_button"
-                    class="noselect button"
-                    onmousedown={ settings }>
-                </div>
+
             </StyleProvider>
             <FontLoader ..self.fonts.clone()></FontLoader>
         }
@@ -288,7 +308,7 @@ impl PerspectiveViewer {
         force: Option<bool>,
         sender: Option<Sender<ApiResult<JsValue>>>,
     ) {
-        let is_open = ctx.props().renderer.is_settings_open();
+        let is_open = ctx.props().presentation.is_settings_open();
         match force {
             Some(force) if is_open == force => {
                 if let Some(sender) = sender {

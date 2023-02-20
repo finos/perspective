@@ -24,6 +24,7 @@ use crate::*;
 pub enum ExpressionEditorMsg {
     Render,
     Reset,
+    Delete,
     SetExpr(Rc<String>),
     SetExprDefault,
     ValidateComplete(Option<PerspectiveValidationError>),
@@ -36,6 +37,7 @@ use ExpressionEditorMsg::*;
 pub struct ExpressionEditorProps {
     pub on_save: Callback<JsValue>,
     pub on_validate: Callback<bool>,
+    pub on_delete: Option<Callback<()>>,
     pub session: Session,
     pub alias: Option<String>,
 
@@ -163,13 +165,21 @@ impl Component for ExpressionEditor {
                     ctx.props().on_save.emit(JsValue::from(&*expr));
                 }
 
-                true
+                false
+            }
+            Delete => {
+                if let Some(on_delete) = &ctx.props().on_delete {
+                    on_delete.emit(());
+                }
+
+                false
             }
         }
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         let reset = ctx.link().callback(|_| Reset);
+        let delete = ctx.link().callback(|_| Delete);
         let save = ctx.link().callback(|_| SaveExpr);
         let reverse_vertical: bool = ctx
             .link()
@@ -180,13 +190,16 @@ impl Component for ExpressionEditor {
 
         let oninput = ctx.link().callback(SetExpr);
         let onsave = ctx.link().callback(|()| SaveExpr);
+        let is_closable = maybe! {
+            let alias = ctx.props().alias.as_ref()?;
+            Some(!ctx.props().session.is_column_expression_in_use(alias))
+        }
+        .unwrap_or_default();
 
         html_template! {
             <StyleProvider>
                 <LocalStyle href={ css!("expression-editor") } />
-                <SplitPanel
-                    id="expression-editor-split-panel">
-
+                <SplitPanel id="expression-editor-split-panel">
                     <SplitPanel
                         orientation={ Orientation::Vertical }
                         reverse={ reverse_vertical }>
@@ -206,19 +219,31 @@ impl Component for ExpressionEditor {
                                     </div>
                                 }
 
-                                <button
-                                    id="psp-expression-editor-button-reset"
-                                    class="psp-expression-editor__button"
-                                    onmousedown={ reset }
-                                    disabled={ !self.edit_enabled }>
-                                    { if self.edit_enabled { "Reset" } else { "" } }
-                                </button>
+                                if is_closable {
+                                    <button
+                                        id="psp-expression-editor-button-delete"
+                                        class="psp-expression-editor__button"
+                                        onmousedown={ delete }>
+                                        { "Delete" }
+                                    </button>
+                                }
+
+                                if ctx.props().alias.is_some() {
+                                    <button
+                                        id="psp-expression-editor-button-reset"
+                                        class="psp-expression-editor__button"
+                                        onmousedown={ reset }
+                                        disabled={ !self.edit_enabled }>
+                                        { "Reset" }
+                                    </button>
+                                }
+
                                 <button
                                     id="psp-expression-editor-button-save"
                                     class="psp-expression-editor__button"
                                     onmousedown={ save }
                                     disabled={ !self.save_enabled }>
-                                    { if self.save_enabled { "Save" } else { "" } }
+                                    { "Save" }
                                 </button>
                             </div>
                         </div>

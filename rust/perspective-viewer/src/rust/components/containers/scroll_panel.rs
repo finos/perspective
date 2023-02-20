@@ -9,49 +9,57 @@
 // Forked from https://github.com/AircastDev/yew-virtual-scroller (Apache 2.0)
 // Adds support for Yew 0.19, auto-width and a simplified message structure.
 
-use std::marker::PhantomData;
 use std::ops::Range;
 use std::rc::Rc;
 
+use itertools::Itertools;
 use web_sys::Element;
 use yew::prelude::*;
+use yew::virtual_dom::VChild;
 
 use crate::components::style::LocalStyle;
 use crate::utils::*;
 use crate::*;
 
-pub struct ScrollPanel<T>
-where
-    T: Into<Html> + PartialEq + 'static,
-{
+#[derive(PartialEq, Properties)]
+pub struct ScrollPanelItemProps {
+    pub size: f64,
+    pub children: Children,
+}
+
+pub struct ScrollPanelItem {}
+
+impl Component for ScrollPanelItem {
+    type Message = ();
+    type Properties = ScrollPanelItemProps;
+
+    fn create(_ctx: &Context<Self>) -> Self {
+        ScrollPanelItem {}
+    }
+
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        ctx.props().children.iter().collect()
+    }
+}
+
+pub struct ScrollPanel {
     viewport_ref: NodeRef,
     viewport_height: f64,
     viewport_width: f64,
     content_window: Option<ContentWindow>,
     needs_rerender: bool,
     total_height: f64,
-    _props: PhantomData<T>,
     _dimensions_reset_sub: Option<Subscription>,
     _resize_sub: Option<Subscription>,
 }
 
 #[derive(Properties)]
-pub struct ScrollPanelProps<T>
-where
-    T: Into<Html> + PartialEq + 'static,
-{
-    pub items: Rc<Vec<T>>,
-    pub row_height: f64,
+pub struct ScrollPanelProps {
+    #[prop_or_default]
+    pub children: Vec<VChild<ScrollPanelItem>>,
 
     #[prop_or_default]
     pub viewport_ref: Option<NodeRef>,
-
-    // Named rows are not the same size as the other columns.
-    #[prop_or_default]
-    pub named_row_count: usize,
-
-    #[prop_or_default]
-    pub named_row_height: f64,
 
     #[prop_or_default]
     pub class: Classes,
@@ -78,25 +86,21 @@ where
     pub drop: Callback<DragEvent>,
 }
 
-impl<T> PartialEq for ScrollPanelProps<T>
-where
-    T: Into<Html> + PartialEq + 'static,
-{
-    fn eq(&self, _rhs: &ScrollPanelProps<T>) -> bool {
-        false
+impl ScrollPanelProps {
+    /// Calculate the total virtual height of this scroll panel from the `size`
+    /// prop of its children.
+    fn total_height(&self) -> f64 {
+        self.children
+            .iter()
+            .map(|x| x.props.size)
+            .reduce(|x, y| x + y)
+            .unwrap_or_default()
     }
 }
 
-impl<T> ScrollPanelProps<T>
-where
-    T: Into<Html> + Clone + PartialEq + 'static,
-{
-    fn total_height(&self, ctx: &Context<ScrollPanel<T>>) -> f64 {
-        let named_col_section_height =
-            ctx.props().named_row_count as f64 * ctx.props().named_row_height;
-
-        (max!(0, ctx.props().items.len() - ctx.props().named_row_count) as f64)
-            .mul_add(ctx.props().row_height, named_col_section_height)
+impl PartialEq for ScrollPanelProps {
+    fn eq(&self, _rhs: &ScrollPanelProps) -> bool {
+        false
     }
 }
 
@@ -107,7 +111,7 @@ pub enum ScrollPanelMsg {
     ResetAutoWidth,
 }
 
-impl<T: Into<Html> + Clone + PartialEq> ScrollPanel<T> {
+impl ScrollPanel {
     fn viewport<'a, 'b: 'a, 'c: 'a>(&'b self, ctx: &'c Context<Self>) -> &'a NodeRef {
         ctx.props()
             .viewport_ref
@@ -120,21 +124,20 @@ impl<T: Into<Html> + Clone + PartialEq> ScrollPanel<T> {
     }
 }
 
+#[derive(PartialEq)]
 struct ContentWindow {
+    scroll_top: f64,
     start_y: f64,
     visible_range: Range<usize>,
 }
 
-impl<T> Component for ScrollPanel<T>
-where
-    T: Into<Html> + Clone + PartialEq + 'static,
-{
+impl Component for ScrollPanel {
     type Message = ScrollPanelMsg;
-    type Properties = ScrollPanelProps<T>;
+    type Properties = ScrollPanelProps;
 
     fn create(ctx: &Context<Self>) -> Self {
-        let link = ctx.link().clone();
         let _dimensions_reset_sub = ctx.props().on_dimensions_reset.as_ref().map(|pubsub| {
+            let link = ctx.link().clone();
             pubsub.add_listener(move |_| {
                 link.send_message_batch(vec![
                     ScrollPanelMsg::ResetAutoWidth,
@@ -143,8 +146,8 @@ where
             })
         });
 
-        let link = ctx.link().clone();
         let _resize_sub = ctx.props().on_resize.as_ref().map(|pubsub| {
+            let link = ctx.link().clone();
             pubsub.add_listener(move |_| {
                 link.send_message_batch(vec![
                     ScrollPanelMsg::UpdateViewportDimensions,
@@ -153,14 +156,14 @@ where
             })
         });
 
+        let total_height = ctx.props().total_height();
         Self {
             viewport_ref: Default::default(),
             viewport_height: 0f64,
             viewport_width: 0f64,
             content_window: None,
             needs_rerender: true,
-            total_height: ctx.props().total_height(ctx),
-            _props: PhantomData,
+            total_height,
             _dimensions_reset_sub,
             _resize_sub,
         }
@@ -174,57 +177,52 @@ where
             }
             ScrollPanelMsg::UpdateViewportDimensions => {
                 let viewport = self.viewport_elem(ctx);
-                self.viewport_height = viewport.client_height() as f64;
-                self.viewport_width = {
-                    let new_width = viewport.client_width() as f64;
-                    max!(self.viewport_width, new_width)
-                };
-
+                let rect = viewport.get_bounding_client_rect();
+                self.viewport_height = rect.height() - 8.0;
+                self.viewport_width = max!(self.viewport_width, rect.width() - 6.0);
                 false
             }
             ScrollPanelMsg::CalculateWindowContent => {
                 let viewport = self.viewport_elem(ctx);
-                let named_col_section_height =
-                    ctx.props().named_row_count as f64 * ctx.props().named_row_height;
-
                 let scroll_top = viewport.scroll_top() as f64;
-                let start_node = if scroll_top > named_col_section_height {
-                    max!(
-                        0,
-                        (((scroll_top - named_col_section_height) / ctx.props().row_height).floor()
-                            as usize
-                            + ctx.props().named_row_count) as isize,
-                    ) as usize
-                } else {
-                    max!(0.0, (scroll_top / ctx.props().named_row_height).floor()) as usize
-                };
+                let mut start_node = 0;
+                let mut start_y = 0_f64;
+                let mut offset = 0_f64;
+                let end_node = ctx
+                    .props()
+                    .children
+                    .iter()
+                    .enumerate()
+                    .find_or_last(|(i, x)| {
+                        if offset + x.props.size < scroll_top {
+                            start_node = *i + 1;
+                            start_y = offset + x.props.size;
+                        }
 
-                let total_visible = min!(
-                    ((self.viewport_height / ctx.props().row_height).ceil()) as usize + 2,
-                    max!(0, ctx.props().items.len() as isize - start_node as isize) as usize,
-                );
+                        offset += x.props.size;
+                        offset > scroll_top + self.viewport_height
+                    })
+                    .map(|x| x.0)
+                    .unwrap_or_default();
 
-                let start_y = (max!(
-                    0,
-                    start_node as isize - ctx.props().named_row_count as isize,
-                ) as f64)
-                    .mul_add(
-                        ctx.props().row_height,
-                        min!(ctx.props().named_row_count, start_node) as f64
-                            * ctx.props().named_row_height,
-                    );
+                // Why is this `end_node + 2`, I can see you asking yourself? `end_node` is the
+                // index of the last visible child, but [`Range`] is an open interval so we must
+                // increment by 1. The next rendered element is always occluded by the parent
+                // container, it may seem unnecessary to render it, however not doing so causing
+                // scroll glitching in Chrome:
+                // * When the first pixel of the `end_node + 1` child is scrolled into view, the
+                //   container element it is embedded in will expand past the end of the scroll
+                //   container.
+                // * Chrome detects this and helpfuls scrolls this new element into view,
+                //   retriggering the on scroll callback.
+                let visible_range = start_node..min!(ctx.props().children.len(), end_node + 2);
+                self.content_window = Some(ContentWindow {
+                    scroll_top,
+                    start_y,
+                    visible_range,
+                });
 
-                let end_node = start_node + total_visible;
-                if end_node > ctx.props().items.len() {
-                    viewport.set_scroll_top(0);
-                    false
-                } else {
-                    self.content_window = Some(ContentWindow {
-                        start_y,
-                        visible_range: start_node..end_node,
-                    });
-                    true
-                }
+                true
             }
         }
     }
@@ -233,7 +231,7 @@ where
     /// was rendered, we need to double-render to read the container's
     /// potentially updated height.
     fn changed(&mut self, ctx: &Context<Self>, _old: &Self::Properties) -> bool {
-        let total_height = ctx.props().total_height(ctx);
+        let total_height = ctx.props().total_height();
         self.needs_rerender =
             self.needs_rerender || (self.total_height - total_height).abs() > 0.1f64;
         self.total_height = total_height;
@@ -248,16 +246,18 @@ where
     fn view(&self, ctx: &Context<Self>) -> Html {
         let content_style = format!("height:{}px", self.total_height);
         let (window_style, windowed_items) = match &self.content_window {
-            None => ("".to_string(), vec![]),
+            None => ("".to_string(), &[][..]),
             Some(cw) => (
-                format!("transform: translateY({}px);", cw.start_y),
-                (&ctx.props().items[cw.visible_range.clone()]).into(),
+                format!(
+                    "position:sticky;top:0;transform:translateY({}px);",
+                    cw.start_y - cw.scroll_top
+                ),
+                (&ctx.props().children[cw.visible_range.clone()]),
             ),
         };
 
         let width_style = format!("width:{}px", max!(self.viewport_width, 0.0));
         let items = if !windowed_items.is_empty() {
-            let items = windowed_items.into_iter().map(|item| item.into());
             let onscroll = ctx.link().batch_callback(|_| {
                 vec![
                     ScrollPanelMsg::UpdateViewportDimensions,
@@ -265,6 +265,8 @@ where
                 ]
             });
 
+            // TODO This glitches - we should use the `sticky` positioning strategy that
+            // `regular-table` uses.
             html! {
                 <div
                     ref={ self.viewport(ctx) }
@@ -276,12 +278,15 @@ where
                     ondrop={ &ctx.props().drop }
                     class={ ctx.props().class.clone() }>
 
-                    <div class="scroll-panel-content" style={ content_style }>
-                        <div class="scroll-panel-container" style={ window_style }>
-                            { for items }
-                            <div class="scroll-panel-auto-width" style={ width_style }>
-                            </div>
+                    <div class="scroll-panel-container" style={ window_style }>
+                        { for windowed_items.iter().cloned().map(Html::from) }
+                        <div
+                            class="scroll-panel-auto-width"
+                            style={ width_style }>
                         </div>
+                    </div>
+                    <div class="scroll-panel-content" style={ content_style }>
+
                     </div>
                 </div>
             }
@@ -291,7 +296,6 @@ where
                     ref={ self.viewport(ctx) }
                     id={ ctx.props().id }
                     class={ ctx.props().class.clone() }>
-
 
                     <div style={ content_style }>
                     </div>

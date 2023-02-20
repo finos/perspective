@@ -85,7 +85,7 @@ impl PerspectiveNumberColumnStyleElement {
                 default_config,
             });
 
-            self.modal = Some(ModalElement::new(self.elem.clone(), props, true));
+            self.modal = Some(ModalElement::new(self.elem.clone(), props, true, None));
         }
 
         ApiFuture::spawn(self.modal.as_apierror()?.clone().open(target, None));

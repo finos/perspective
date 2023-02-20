@@ -6,7 +6,6 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use itertools::Itertools;
 use web_sys::*;
 use yew::prelude::*;
 
@@ -28,12 +27,12 @@ pub struct ActiveColumnProps {
     pub dragdrop: DragDrop,
     pub session: Session,
     pub renderer: Renderer,
-    pub ondragenter: Callback<DragEvent>,
-    pub ondragend: Callback<DragEvent>,
+    pub ondragenter: Callback<()>,
+    pub ondragend: Callback<()>,
     pub onselect: Callback<()>,
 
     #[prop_or_default]
-    pub is_pivot: bool,
+    pub is_aggregated: bool,
 }
 
 impl PartialEq for ActiveColumnProps {
@@ -55,15 +54,6 @@ impl ActiveColumnProps {
         self.get_name()
             .as_ref()
             .and_then(|x| self.session.metadata().get_column_table_type(x))
-    }
-}
-
-impl From<ActiveColumnProps> for yew::Html {
-    fn from(props: ActiveColumnProps) -> Self {
-        let key = format!("{}", props.name);
-        html! {
-            <ActiveColumn key={ key } ..props></ActiveColumn>
-        }
     }
 }
 
@@ -115,6 +105,10 @@ impl ActiveColumnProps {
         self.idx < min_cols
     }
 
+    fn get_aggregate(&self, name: &str) -> Option<Aggregate> {
+        self.session.get_view_config().aggregates.get(name).cloned()
+    }
+
     fn apply_columns(&self, columns: Vec<Option<String>>) {
         let config = ViewConfigUpdate {
             columns: Some(columns),
@@ -127,16 +121,22 @@ impl ActiveColumnProps {
 
 pub enum ActiveColumnMsg {
     DeactivateColumn(String, bool),
+    MouseEnter(bool),
+    MouseLeave(bool),
 }
+
+use ActiveColumnMsg::*;
 
 /// An `ActiveColumn` indicates a column which is part of the `columns` field of
 /// a `ViewConfig`.  It shows additional column details in context (like
 /// selected aggregate), and supports drag/drop and missing entries.
 /// TODO Break this into "Active", "Hover" and "Empty"?
+#[derive(Default)]
 pub struct ActiveColumn {
     add_expression_ref: NodeRef,
     column_type: Option<Type>,
     is_required: bool,
+    mouseover: bool,
 }
 
 impl Component for ActiveColumn {
@@ -144,13 +144,12 @@ impl Component for ActiveColumn {
     type Properties = ActiveColumnProps;
 
     fn create(ctx: &Context<Self>) -> Self {
-        let add_expression_ref = NodeRef::default();
         let column_type = ctx.props().get_type();
         let is_required = ctx.props().get_is_required();
         ActiveColumn {
-            add_expression_ref,
             column_type,
             is_required,
+            ..Default::default()
         }
     }
 
@@ -162,26 +161,38 @@ impl Component for ActiveColumn {
 
     fn update(&mut self, ctx: &Context<Self>, msg: ActiveColumnMsg) -> bool {
         match msg {
-            ActiveColumnMsg::DeactivateColumn(column, shift_key) => {
+            DeactivateColumn(column, shift_key) => {
                 ctx.props().deactivate_column(column, shift_key);
                 ctx.props().onselect.emit(());
                 false
+            }
+            MouseEnter(is_render) => {
+                self.mouseover = is_render;
+                is_render
+            }
+            MouseLeave(is_render) => {
+                self.mouseover = false;
+                is_render
             }
         }
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let mut classes = vec!["column_selector_draggable"];
-        if ctx.props().is_pivot {
+        let mut classes = classes!["column-selector-draggable"];
+        if ctx.props().is_aggregated {
             classes.push("show-aggregate");
         };
+
+        let mut outer_classes = classes!["column-selector-column"];
+        if self.mouseover {
+            outer_classes.push("dragdrop-hover");
+        }
 
         let name = match &ctx.props().name {
             ActiveColumnState::DragOver(label) => {
                 classes.push("dragover");
-                if label.is_some() && !self.is_required {
-                    classes.push("empty-named");
-                }
+                outer_classes.push("dragover-container");
+                classes.push("empty-named");
 
                 (
                     label.clone(),
@@ -192,24 +203,29 @@ impl Component for ActiveColumn {
             ActiveColumnState::Required(label) => (label.clone(), None),
         };
 
-        let col_type = self.column_type;
+        let ondragenter = ctx.props().ondragenter.reform(move |event: DragEvent| {
+            // Safari does not set `relatedTarget` so this event must be allowed to
+            // bubble so we can count entry/exit stacks to determine true
+            // `"dragleave"`.
+            if event.related_target().is_some() {
+                event.stop_propagation();
+                event.prevent_default();
+            }
+        });
 
+        let col_type = self.column_type;
         match (name, col_type) {
             ((label, None), _) => {
                 classes.push("empty-named");
                 html! {
                     <div
-                        class="column-selector-column"
+                        class={ outer_classes }
                         data-label={ label }
                         data-index={ ctx.props().idx.to_string() }
-                        ondragenter={ &ctx.props().ondragenter }>
+                        ondragenter={ ondragenter.clone() }>
 
-                        <span class="is_column_active inactive">
-                        </span>
-                        <div
-                            class={ Itertools::intersperse(classes.iter().cloned(), " ").collect::<String>() }>
-
-                        </div>
+                        <span class="is_column_active inactive"></span>
+                        <div class={ classes }></div>
                     </div>
                 }
             }
@@ -228,55 +244,70 @@ impl Component for ActiveColumn {
                     }))
                 };
 
-                let noderef = NodeRef::default();
-                let dragstart = Callback::from({
+                let ondragend = &ctx.props().ondragend.reform(|_| {});
+                let ondragstart = ctx.link().callback({
                     let event_name = name.to_owned();
-                    let noderef = noderef.clone();
                     let dragdrop = ctx.props().dragdrop.clone();
                     move |event: DragEvent| {
-                        let elem = noderef.cast::<HtmlElement>().unwrap();
-                        event.data_transfer().unwrap().set_drag_image(&elem, 0, 0);
-                        dragdrop.drag_start(
+                        dragdrop.set_drag_image(&event).unwrap();
+                        dragdrop.notify_drag_start(
                             event_name.to_string(),
                             DragEffect::Move(DragTarget::Active),
-                        )
+                        );
+
+                        MouseLeave(false)
                     }
                 });
 
-                let is_expression = ctx.props().session.metadata().is_column_expression(&name);
+                let onmouseout = ctx.link().callback(|_| MouseLeave(true));
+                let onmouseover = ctx
+                    .link()
+                    .callback(|event: MouseEvent| MouseEnter(event.which() == 0));
 
-                let class = if self.is_required {
-                    "is_column_active required"
-                } else {
-                    "is_column_active"
+                let is_expression = ctx.props().session.metadata().is_column_expression(&name);
+                let mut class = ctx.props().renderer.metadata().mode.css();
+                if self.is_required {
+                    class.push("required");
                 };
 
                 html! {
                     <div
-                        class="column-selector-column"
+                        class={ outer_classes }
                         data-label={ label }
                         data-index={ ctx.props().idx.to_string() }
-                        ondragenter={ &ctx.props().ondragenter }>
+                        { onmouseover }
+                        { onmouseout }
+                        ondragenter={ ondragenter.clone() }>
 
                         <span
                             class={ class }
                             onmousedown={ remove_column }>
                         </span>
                         <div
-                            class={ Itertools::intersperse(classes.iter().cloned(), " ").collect::<String>() }
+                            class={ classes }
                             ref={ &self.add_expression_ref }
                             draggable="true"
-                            ondragstart={ dragstart }
-                            ondragend={ &ctx.props().ondragend }>
+                            { ondragstart }
+                            { ondragend }>
 
-                            <span class="column-selector-column-title">
-                                <span
-                                    ref={ noderef.clone() }
-                                    class={ format!("column_name {}", col_type) }>
-                                    {
-                                        name.clone()
-                                    }
+                            <div class="column-selector-column-border">
+
+                                if ctx.props().is_aggregated {
+                                    <AggregateSelector
+                                        column={ name.clone() }
+                                        aggregate={ ctx.props().get_aggregate(&name) }
+                                        renderer={ &ctx.props().renderer }
+                                        session={ &ctx.props().session }>
+                                    </AggregateSelector>
+                                }
+
+                                <span class={ format!("column_name {}", col_type) }>
+                                    { name.clone() }
                                 </span>
+
+                                if !ctx.props().is_aggregated {
+                                    <span class="column-selector--spacer"></span>
+                                }
 
                                 if is_expression {
                                     <ExpressionToolbar
@@ -287,29 +318,7 @@ impl Component for ActiveColumn {
                                         add_expression_ref={ &self.add_expression_ref }>
                                     </ExpressionToolbar>
                                 }
-
-                            </span>
-                            {
-                                if ctx.props().is_pivot {
-                                    let aggregate = ctx
-                                        .props()
-                                        .session
-                                        .get_view_config()
-                                        .aggregates
-                                        .get(&name)
-                                        .cloned();
-                                    html! {
-                                        <AggregateSelector
-                                            column={ name.clone() }
-                                            aggregate={ aggregate }
-                                            renderer={ &ctx.props().renderer }
-                                            session={ &ctx.props().session }>
-                                        </AggregateSelector>
-                                    }
-                                } else {
-                                    html! {}
-                                }
-                            }
+                            </div>
                         </div>
                     </div>
                 }
@@ -320,19 +329,10 @@ impl Component for ActiveColumn {
                 // columns out until the new View forces a re-render (and the
                 // `change()` method on this component checks for this).
 
-                let class =
-                    Itertools::intersperse(classes.iter().cloned(), " ").collect::<String>();
-
                 html! {
-                    <div
-                        class="column-selector-column">
-
-                        <span class="is_column_active inactive">
-                        </span>
-                        <div
-                            class={ class }>
-
-                        </div>
+                    <div class="column-selector-column">
+                        <span class="is_column_active inactive"></span>
+                        <div class={ classes }></div>
                     </div>
                 }
             }

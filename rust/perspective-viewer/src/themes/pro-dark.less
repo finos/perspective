@@ -7,78 +7,80 @@
  *
  */
 
-@import url("ref://material.less");
+@import url("ref://pro.less");
 
 // Register theme for auto-detection
 perspective-viewer,
-perspective-viewer[theme="Material Dark"] {
-    --theme-name: "Material Dark";
+perspective-viewer[theme="Pro Dark"] {
+    --theme-name: "Pro Dark";
 }
 
-perspective-viewer[theme="Material Dark"] {
-    @include perspective-viewer-material-dark;
+perspective-viewer[theme="Pro Dark"] {
+    @include perspective-viewer-pro-dark;
 }
 
-perspective-copy-menu[theme="Material Dark"],
-perspective-export-menu[theme="Material Dark"],
-perspective-filter-dropdown[theme="Material Dark"],
-perspective-date-column-style[theme="Material Dark"],
-perspective-datetime-column-style[theme="Material Dark"],
-perspective-number-column-style[theme="Material Dark"],
-perspective-string-column-style[theme="Material Dark"],
-perspective-expression-editor[theme="Material Dark"] {
-    @include perspective-modal-material-dark;
+perspective-copy-menu[theme="Pro Dark"],
+perspective-export-menu[theme="Pro Dark"],
+perspective-filter-dropdown[theme="Pro Dark"],
+perspective-date-column-style[theme="Pro Dark"],
+perspective-datetime-column-style[theme="Pro Dark"],
+perspective-number-column-style[theme="Pro Dark"],
+perspective-string-column-style[theme="Pro Dark"],
+perspective-expression-editor[theme="Pro Dark"] {
+    @include perspective-modal-pro-dark;
 }
 
-@mixin perspective-viewer-material-dark {
-    @include perspective-viewer-material;
-    @include perspective-viewer-material-dark--colors;
-    @include perspective-viewer-material-dark--datagrid;
-    @include perspective-viewer-material-dark--d3fc;
-    @include perspective-viewer-material-dark--openlayers;
+@mixin perspective-viewer-pro-dark {
+    @include perspective-viewer-pro;
+    @include perspective-viewer-pro-dark--colors;
+    @include perspective-viewer-pro-dark--datagrid;
+    @include perspective-viewer-pro-dark--d3fc;
+    @include perspective-viewer-pro-dark--openlayers;
 }
 
-@mixin perspective-modal-material-dark {
-    @include perspective-modal-material;
-    @include perspective-viewer-material-dark--colors;
+@mixin perspective-modal-pro-dark {
+    @include perspective-modal-pro;
+    @include perspective-viewer-pro-dark--colors;
 
-    background-color: @grey700;
-    border: 1px solid @grey300;
+    background-color: #242526;
+    border: 1px solid #4c505b;
 }
 
-@mixin perspective-viewer-material-dark--colors {
-    background-color: @grey800;
+@mixin perspective-viewer-pro-dark--colors {
+    background-color: #242526;
     color: white;
+    --icon--color: white;
     --active--color: #2770a9;
-    --error--color: @red50;
-    --inactive--color: @grey300;
-    --plugin--background: @grey700;
+    --error--color: #ff9485;
+    --inactive--color: #4c505b;
+    --plugin--background: #242526;
     --modal-target--background: rgba(255, 255, 255, 0.05);
-    --select--background-color: @grey800;
+    --select--background-color: #242526;
     --active--background: rgba(39, 113, 170, 0.5);
-    --expression--operator-color: @grey60;
-    --expression--function-color: @lightblue600;
+    --expression--operator-color: #c5c9d0;
+    --expression--function-color: #22a0ce;
     --expression--error-color: rgb(255, 136, 136);
     --calendar--filter: invert(1);
-    --warning--color: #333;
+    --warning--color: #242526;
+    --warning--background: var(--icon--color);
 
     // Column type indicators
-    --float--column-type--color: @blue50;
-    --string--column-type--color: @red50;
+    --float--column-type--color: #7dc3f0;
+    --string--column-type--color: #ff9485;
     --date--column-type--color: @green50;
     --boolean--column-type--color: @orange50;
 
     // Syntax
     --code-editor-symbol--color: white;
-    --code-editor-literal--color: @blue50;
+    --code-editor-literal--color: #7dc3f0;
     --code-editor-operator--color: rgb(23, 166, 123);
     --code-editor-comment--color: rgb(204, 120, 48);
 }
 
-@mixin perspective-viewer-material-dark--openlayers {
+@mixin perspective-viewer-pro-dark--openlayers {
     --map-tile-url: "http://{a-c}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png";
     --map-attribution--filter: invert(1) hue-rotate(180deg);
-    --map-element-background: @grey700;
+    --map-element-background: #212c2f;
     --map-category-1: rgb(71, 120, 194);
     --map-category-2: rgb(204, 120, 48);
     --map-category-3: rgb(158, 84, 192);
@@ -94,10 +96,10 @@ perspective-expression-editor[theme="Material Dark"] {
             #3289c8 100%);
 }
 
-@mixin perspective-viewer-material-dark--datagrid {
+@mixin perspective-viewer-pro-dark--datagrid {
     regular-table {
-        --rt-pos-cell--color: @blue50;
-        --rt-neg-cell--color: @red50;
+        --rt-pos-cell--color: #7dc3f0;
+        --rt-neg-cell--color: #ff9485;
 
         table {
             color: white;
@@ -111,36 +113,36 @@ perspective-expression-editor[theme="Material Dark"] {
 
             td,
             th {
-                --rt-hover--border-color: @grey200;
-                border-top-color: @grey500;
+                --rt-hover--border-color: #61656e;
+                border-top-color: #3b3f46;
             }
         }
     }
 
     regular-table:hover::-webkit-scrollbar-thumb {
-        background-color: @grey500;
+        background-color: #3b3f46;
     }
 
     tbody th:empty {
         background: linear-gradient(to right,
                 transparent 9px,
-                @grey500 10px,
+                #3b3f46 10px,
                 transparent 11px);
         background-repeat: no-repeat;
         background-position: 0px -10px;
     }
 }
 
-@mixin perspective-viewer-material-dark--d3fc {
-    --d3fc-legend--text: @grey60;
+@mixin perspective-viewer-pro-dark--d3fc {
+    --d3fc-legend--text: #c5c9d0;
     --d3fc-treedata--labels: white;
     --d3fc-treedata--hover-highlight: white;
     --d3fc-tooltip--color: white;
-    --d3fc-axis-ticks--color: @grey60;
-    --d3fc-axis--lines: @grey200;
-    --d3fc-gridline--color: @grey500;
+    --d3fc-axis-ticks--color: #c5c9d0;
+    --d3fc-axis--lines: #61656e;
+    --d3fc-gridline--color: #3b3f46;
     --d3fc-tooltip--background: rgba(42, 44, 47, 1);
-    --d3fc-tooltip--border-color: @grey800;
+    --d3fc-tooltip--border-color: #242526;
     --d3fc-legend--background: rgba(42, 44, 47, 0.8);
 
     --d3fc-series: rgb(71, 120, 194);

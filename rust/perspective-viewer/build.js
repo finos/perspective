@@ -78,7 +78,7 @@ async function compile_rust() {
     await wasm_bindgen("perspective", {
         debug: IS_DEBUG,
         version: "0.2.83",
-        targetdir: "build",
+        targetdir: "target/build",
     });
 
     if (!IS_DEBUG) {

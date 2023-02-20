@@ -35,12 +35,23 @@ perspective-expression-editor[theme="Pro Light"] {
     @include perspective-modal-pro;
 }
 
+perspective-viewer,
+perspective-copy-menu,
+perspective-export-menu,
+perspective-filter-dropdown,
+perspective-date-column-style,
+perspective-datetime-column-style,
+perspective-number-column-style,
+perspective-string-column-style,
+perspective-expression-editor {
+    @include perspective-viewer-pro--icons;
+}
+
 @mixin perspective-viewer-pro {
     @include perspective-viewer-pro--dimensions;
     @include perspective-viewer-pro--colors;
     @include perspective-viewer-pro--fonts;
     @include perspective-viewer-pro--intl;
-    @include perspective-viewer-pro--icons;
     @include perspective-viewer-pro--d3fc;
     @include perspective-viewer-pro--datagrid;
     @include perspective-viewer-pro--openlayers;
@@ -56,16 +67,9 @@ perspective-expression-editor[theme="Pro Light"] {
     --column-style-neg-color--content: "-";
     --save-button-icon--content: "save";
     --reset-button-icon--content: "refresh";
-    // --column-style-radio--appearance: none;
-    // --column-style-radio-checked--content: "radio_button_checked";
-    // --column-style-radio-unchecked--content: "radio_button_unchecked";
-    // --column-style-checkbox--appearance: none;
-    // --column-style-checkbox-checked--content: "check_box";
-    // --column-style-checkbox-unchecked--content: "check_box_outline_blank";
 
     @include perspective-viewer-pro--fonts;
     @include perspective-viewer-pro--colors;
-    @include perspective-viewer-pro--icons;
 }
 
 @mixin perspective-viewer-pro--dimensions {
@@ -89,6 +93,7 @@ perspective-expression-editor[theme="Pro Light"] {
 
 @mixin perspective-viewer-pro--colors {
     color: #161616;
+    background-color: white;
     --icon--color: #161616;
     --inactive--color: #ABABAB;
 

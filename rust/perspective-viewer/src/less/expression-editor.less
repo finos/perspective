@@ -13,7 +13,6 @@
     outline: none;
     font-family: Arial;
     font-size: 12px;
-    font-weight: 300;
     border: inherit;
     box-shadow: 0 2px 4px 0 rgb(0 0 0 / 10%);
     user-select: none;
@@ -34,14 +33,10 @@
         }
 
         .error_icon {
-            color: var(--rt-neg-cell--color, red);
-            font-family: var(--button--font-family);
-            padding: 10px 0 0 10px;
-            width: 26px;
             font-size: 16px;
-
+            padding-right: 20px;
             &:after {
-                content: "error_outline"; //var(--reset-button-icon--content, "\27F3");
+                content: "!";
             }
         }
     }
@@ -78,64 +73,32 @@
     #psp-expression-editor-actions {
         display: flex;
         justify-content: flex-end;
+        align-items: center;
+        height: 36px;
+        padding: 0 12px;
     }
 
     .psp-expression-editor__button {
         font-family: inherit;
-        font-size: 14px;
-        border: none;
+        font-size: 12px;
+        border: 1px solid var(--icon--color);
         margin-left: 6px;
-        padding: 2px 5px;
+        height: 18px;
+        padding: 2px 12px;
         display: flex;
         align-items: center;
+        background: none;
+        color: inherit;
 
-        &:hover {
+        &:not([disabled]):hover {
             cursor: pointer;
-            background-color: rgba(0, 0, 0, 0.05);
+            background-color: var(--icon--color);
+            color: var(--plugin--background);
         }
 
         &[disabled] {
             cursor: not-allowed;
-            opacity: 0.5;
-        }
-
-        &#psp-expression-editor-button-save,
-        &#psp-expression-editor-button-reset {
-            color: inherit;
-            font-family: inherit;
-            font-weight: 300;
-            font-size: 12px;
-            height: 36px;
-            opacity: 0.1;
-            background-color: inherit;
-            transition: background-color 0.2s;
-
-            &:not([disabled]) {
-                opacity: 1;
-            }
-
-            &:before {
-                margin-right: 6px;
-                font-size: 14px;
-                font-family: var(--button--font-family, inherit);
-            }
-
-            &:hover {
-                background-color: rgba(0, 0, 0, 0.05);
-                transition: none;
-            }
-        }
-
-        &#psp-expression-editor-button-save {
-            margin-right: 12px;
-        }
-
-        &#psp-expression-editor-button-save:before {
-            content: var(--save-button-icon--content, "\1F4BE");
-        }
-
-        &#psp-expression-editor-button-reset:before {
-            content: var(--reset-button-icon--content, "\27F3");
+            opacity: 0.2;
         }
     }
 }

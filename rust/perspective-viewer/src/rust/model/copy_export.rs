@@ -33,7 +33,9 @@ fn tag_name_to_package(plugin: &JsPerspectiveViewerPlugin) -> String {
 /// format is desired.  The `CopyExportModel` groups this functionality in a
 /// shared location, rather than distributing in the various state objects
 /// that are relevent per-format.
-pub trait CopyExportModel: HasSession + HasRenderer + HasTheme + GetViewerConfigModel {
+pub trait CopyExportModel:
+    HasSession + HasRenderer + HasPresentation + GetViewerConfigModel
+{
     fn html_as_jsvalue(&self) -> ApiFuture<web_sys::Blob> {
         let view_config = self.get_viewer_config();
         let session = self.session().clone();
@@ -128,4 +130,4 @@ pub trait CopyExportModel: HasSession + HasRenderer + HasTheme + GetViewerConfig
     }
 }
 
-impl<T: HasRenderer + HasSession + HasTheme> CopyExportModel for T {}
+impl<T: HasRenderer + HasSession + HasPresentation> CopyExportModel for T {}

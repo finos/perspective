@@ -15,9 +15,9 @@ use crate::components::viewer::*;
 use crate::config::*;
 use crate::dragdrop::*;
 use crate::js::*;
+use crate::presentation::Presentation;
 use crate::renderer::*;
 use crate::session::*;
-use crate::theme::Theme;
 use crate::utils::*;
 use crate::*;
 
@@ -29,7 +29,7 @@ async fn set_up_html() -> (WeakScope<PerspectiveViewer>, web_sys::ShadowRoot, Se
     let elem: HtmlElement = document.create_element("div").unwrap().unchecked_into();
     let session = Session::default();
     let renderer = Renderer::new(&elem);
-    let theme = Theme::new(&elem);
+    let theme = Presentation::new(&elem);
     let dragdrop = DragDrop::default();
     let div = test_html! {
         <PerspectiveViewer
@@ -38,7 +38,7 @@ async fn set_up_html() -> (WeakScope<PerspectiveViewer>, web_sys::ShadowRoot, Se
             dragdrop={ dragdrop }
             renderer={ renderer }
             session={ session.clone() }
-            theme={ theme }>
+            presentation={ theme }>
         </PerspectiveViewer>
     };
 

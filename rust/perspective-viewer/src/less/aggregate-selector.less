@@ -13,8 +13,11 @@
     .aggregate-selector-wrapper {
         height: 19px;
         display: flex;
-        padding-left: 28px;
-        width: 100%;
+        padding-left: 23px;
+        width: 85px;
+        min-width: 85px;
+        max-width: 85px;
+        flex: 0 0 85px;
 
         label {
             font-size: 10px;
@@ -33,6 +36,13 @@
             overflow: hidden;
             text-overflow: ellipsis;
             padding-right: 12px;
+            border: 1px solid transparent;
+
+            &:hover {
+                border: 1px solid var(--icon--color);
+                border-radius: 2px;
+                transition: none;
+            }
         }
 
         .dropdown-width-container:after {

@@ -12,7 +12,28 @@ use wasm_bindgen::*;
 
 use crate::utils::*;
 
-/// An `async` version of `request_animation_frame`, which resolves on the next
+/// An `async` version of `queueMicrotask()`, curiously absent from [`web_sys`].
+pub async fn await_queue_microtask() -> ApiResult<()> {
+    #[wasm_bindgen]
+    extern "C" {
+        #[wasm_bindgen(js_name = Window)]
+        type QMWindow;
+
+        #[wasm_bindgen(catch, method, structural, js_class = "Window", js_name = queueMicrotask)]
+        fn queue_microtask(this: &QMWindow, callback: &::js_sys::Function) -> Result<i32, JsValue>;
+    }
+
+    let (sender, receiver) = channel::<()>();
+    let jsfun = Closure::once_into_js(move || sender.send(()).unwrap());
+    js_sys::global()
+        .dyn_into::<QMWindow>()
+        .unwrap()
+        .queue_microtask(jsfun.unchecked_ref())?;
+
+    Ok(receiver.await?)
+}
+
+/// An `async` version of `requestAnimationFrame()`, which resolves on the next
 /// animation frame.
 pub async fn await_animation_frame() -> ApiResult<()> {
     let (sender, receiver) = channel::<()>();

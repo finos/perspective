@@ -58,12 +58,6 @@ impl Default for DragState {
 }
 
 impl DragState {
-    fn take(&mut self) -> Self {
-        let mut new = Self::NoDrag;
-        std::mem::swap(self, &mut new);
-        new
-    }
-
     const fn is_drag_in_progress(&self) -> bool {
         !matches!(self, Self::NoDrag)
     }
@@ -100,20 +94,6 @@ impl PartialEq for DragDrop {
 impl ImplicitClone for DragDrop {}
 
 impl DragDrop {
-    pub fn notify_drop(&self) {
-        let action = match self.drag_state.borrow_mut().take() {
-            DragState::DragOverInProgress(
-                DragFrom { column, effect },
-                DragOver { target, index },
-            ) => Some((column, target, effect, index)),
-            _ => None,
-        };
-
-        if let Some(action) = action {
-            self.drop_received.emit_all(action);
-        }
-    }
-
     /// Get the column name currently being drag/dropped.
     pub fn get_drag_column(&self) -> Option<String> {
         match *self.drag_state.borrow() {
@@ -123,22 +103,80 @@ impl DragDrop {
         }
     }
 
+    pub fn set_drag_image(&self, event: &DragEvent) -> ApiResult<()> {
+        let original: HtmlElement = event.target().into_apierror()?.unchecked_into();
+        let elem: HtmlElement = original
+            .children()
+            .get_with_index(0)
+            .unwrap()
+            .clone_node_with_deep(true)?
+            .unchecked_into();
+
+        elem.class_list().toggle("snap-drag-image")?;
+        original.append_child(&elem)?;
+        event.data_transfer().into_apierror()?.set_drag_image(
+            &elem,
+            event.offset_x(),
+            event.offset_y(),
+        );
+
+        ApiFuture::spawn(async move {
+            await_animation_frame().await?;
+            original.remove_child(&elem)?;
+            Ok(())
+        });
+
+        Ok(())
+    }
+
+    // Is the drag/drop state currently in `action`?
+    pub fn is_dragover(&self, drag_target: DragTarget) -> Option<(usize, String)> {
+        match *self.drag_state.borrow() {
+            DragState::DragOverInProgress(
+                DragFrom { ref column, .. },
+                DragOver { target, index },
+            ) if target == drag_target => Some((index, column.clone())),
+            _ => None,
+        }
+    }
+
+    pub fn notify_drop(&self) {
+        let action = match &*self.drag_state.borrow() {
+            DragState::DragOverInProgress(
+                DragFrom { column, effect },
+                DragOver { target, index },
+            ) => Some((column.to_string(), *target, *effect, *index)),
+            _ => None,
+        };
+
+        if let Some(action) = action {
+            *self.drag_state.borrow_mut() = DragState::NoDrag;
+            self.drop_received.emit_all(action);
+        }
+    }
+
     /// Start the drag/drop action with the name of the column being dragged.
-    pub fn drag_start(&self, column: String, effect: DragEffect) {
+    pub fn notify_drag_start(&self, column: String, effect: DragEffect) {
         *self.drag_state.borrow_mut() = DragState::DragInProgress(DragFrom { column, effect });
-        self.dragstart_received.emit_all(effect)
+        let emit = self.dragstart_received.callback();
+        ApiFuture::spawn(async move {
+            await_animation_frame().await?;
+            emit.emit(effect);
+            Ok(())
+        });
     }
 
     /// End the drag/drop action by resetting the state to default.
-    pub fn drag_end(&self) {
-        let should_notify = self.drag_state.borrow_mut().take().is_drag_in_progress();
-        if should_notify {
-            self.dragend_received.emit_all(());
+    pub fn notify_drag_end(&self) {
+        if self.drag_state.borrow().is_drag_in_progress() {
+            *self.drag_state.borrow_mut() = DragState::NoDrag;
+            let emit = self.dragend_received.callback();
+            emit.emit(());
         }
     }
 
     /// Leave the `action` zone.
-    pub fn drag_leave(&self, drag_target: DragTarget) {
+    pub fn notify_drag_leave(&self, drag_target: DragTarget) {
         let reset = match *self.drag_state.borrow() {
             DragState::DragOverInProgress(
                 DragFrom { ref column, effect },
@@ -148,13 +186,13 @@ impl DragDrop {
         };
 
         if let Some((column, effect)) = reset {
-            self.drag_start(column, effect);
+            self.notify_drag_start(column, effect);
         }
     }
 
     // Enter the `action` zone at `index`, which must be <= the number of children
     // in the container.
-    pub fn drag_enter(&self, target: DragTarget, index: usize) -> bool {
+    pub fn notify_drag_enter(&self, target: DragTarget, index: usize) -> bool {
         let mut drag_state = self.drag_state.borrow_mut();
         let should_render = match &*drag_state {
             DragState::DragOverInProgress(_, drag_to) => {
@@ -171,17 +209,6 @@ impl DragDrop {
         };
 
         should_render
-    }
-
-    // Is the drag/drop state currently in `action`?
-    pub fn is_dragover(&self, drag_target: DragTarget) -> Option<(usize, String)> {
-        match *self.drag_state.borrow() {
-            DragState::DragOverInProgress(
-                DragFrom { ref column, .. },
-                DragOver { target, index },
-            ) if target == drag_target => Some((index, column.clone())),
-            _ => None,
-        }
     }
 }
 

@@ -7,7 +7,7 @@
  *
  */
 
-@import url("ref://material.less");
+@import url("ref://pro.less");
 
 perspective-viewer,
 perspective-viewer[theme="Solarized"] {
@@ -30,14 +30,14 @@ perspective-expression-editor[theme="Solarized"] {
 }
 
 @mixin perspective-modal-solarized {
-    @include perspective-modal-material;
+    @include perspective-modal-pro;
     @include perspective-viewer-solarized--colors;
 
     background-color: #fdf6e3;
 }
 
 @mixin perspective-viewer-solarized {
-    @include perspective-viewer-material;
+    @include perspective-viewer-pro;
     @include perspective-viewer-solarized--colors;
     @include perspective-viewer-solarized--datagrid;
     @include perspective-viewer-solarized--d3fc;
@@ -46,6 +46,7 @@ perspective-expression-editor[theme="Solarized"] {
 @mixin perspective-viewer-solarized--colors {
     color: #586e75;
     background: #eee8d5;
+    --icon--color: #586e75;
     --active--color: #268bd2;
     --error--color: #cb4b16;
     --inactive--color: #93a1a1;

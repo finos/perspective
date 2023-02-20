@@ -7,8 +7,7 @@
  *
  */
 
-@import url("https://fonts.googleapis.com/css?display=block&family=Roboto+Mono:200,400%7CMaterial+Icons+Outlined%7COpen+Sans:300,400,700");
-@import url("ref://material-dark.less");
+@import url("ref://pro-dark.less");
 
 perspective-viewer,
 perspective-viewer[theme="Vaporwave"] {
@@ -16,7 +15,7 @@ perspective-viewer[theme="Vaporwave"] {
 }
 
 perspective-viewer[theme="Vaporwave"] {
-    @include perspective-viewer-material-dark;
+    @include perspective-viewer-pro-dark;
     @include perspective-viewer-vaporwave--colors;
     @include perspective-viewer-vaporwave--animation;
     @include perspective-viewer-vaporwave--fonts;
@@ -32,23 +31,17 @@ perspective-datetime-column-style[theme="Vaporwave"],
 perspective-number-column-style[theme="Vaporwave"],
 perspective-string-column-style[theme="Vaporwave"],
 perspective-expression-editor[theme="Vaporwave"] {
-    @include perspective-modal-material-dark;
+    @include perspective-modal-pro-dark;
     @include perspective-viewer-vaporwave--colors;
 
     background-color: #07081d;
 }
 
-@mixin perspective-viewer-vaporwave--fonts {
-    --button--font-family: "Material Icons Outlined";
-    --preload-fonts: "Roboto Mono:200;Open Sans:300,400;Material Icons Outlined:400";
-}
-
 @mixin perspective-viewer-vaporwave--colors {
     color: #49acff;
     background: rgb(7, 8, 29) !important;
-
+    --icon--color: #49acff;
     --inactive--color: rgb(19, 33, 50) !important;
-    --plugin--border: 1px solid rgb(19, 33, 50) !important;
     --plugin--background: rgb(7, 8, 29) !important;
 }
 
