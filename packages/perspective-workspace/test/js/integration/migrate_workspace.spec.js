@@ -68,6 +68,7 @@ const TESTS = [
                     aggregates: {},
                     master: false,
                     linked: false,
+                    title: null,
                 },
             },
             mode: "globalFilters",
@@ -94,7 +95,7 @@ function tests(extract) {
                 return await workspace.save();
             }, converted);
 
-            expect(config.viewers.One.theme).toEqual("Material Light");
+            expect(config.viewers.One.theme).toEqual("Pro Light");
             delete config.viewers.One["theme"];
 
             expect(config.viewers.One.settings).toEqual(false);

@@ -61,6 +61,7 @@ utils.with_server({}, () => {
                         settings: true,
                         sort: [],
                         theme: null,
+                        title: null,
                     });
 
                     return await get_contents(page);

@@ -118,6 +118,7 @@ function migrate_viewer(old, omit_attributes, options) {
             options.replace_defaults ? migrate_nulls : false,
             migrate_plugins,
             migrate_plugin_config,
+            migrate_title,
             omit_attributes
                 ? migrate_attributes_workspace
                 : migrate_attributes_viewer,
@@ -297,6 +298,14 @@ function _migrate_expression(regex1, rep, expression, old, options) {
     } else {
         return expression;
     }
+}
+
+function migrate_title(old) {
+    if (old["title"] === undefined) {
+        old.title = null;
+    }
+
+    return old;
 }
 
 /**

@@ -51,6 +51,7 @@ const TESTS = [
             sort: [],
             expressions: ["bucket(\"Order Date\", 'M')"],
             aggregates: {},
+            title: null,
         },
     ],
     [
@@ -84,6 +85,7 @@ const TESTS = [
             sort: [],
             expressions: [],
             aggregates: {},
+            title: null,
         },
     ],
     [
@@ -124,6 +126,7 @@ const TESTS = [
             sort: [],
             expressions: [],
             aggregates: {},
+            title: null,
         },
     ],
     [
@@ -171,6 +174,7 @@ const TESTS = [
             sort: [],
             expressions: [],
             aggregates: {},
+            title: null,
         },
     ],
     [
@@ -256,6 +260,7 @@ const TESTS = [
             group_by: [],
             expressions: [],
             split_by: [],
+            title: null,
         },
     ],
 ];
@@ -295,7 +300,7 @@ utils.with_server({}, () => {
                             return current;
                         }, converted);
 
-                        expect(config.theme).toEqual("Material Light");
+                        expect(config.theme).toEqual("Pro Light");
                         delete config["theme"];
 
                         expect(config.settings).toEqual(false);

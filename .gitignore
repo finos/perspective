@@ -193,3 +193,4 @@ docs/.docusaurus
 packages/perspective-esbuild-plugin/lib
 docs/static/blocks
 .vscode/c_cpp_properties.json
+py_modules

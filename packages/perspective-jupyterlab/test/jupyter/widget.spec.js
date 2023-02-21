@@ -244,12 +244,13 @@ utils.with_jupyterlab(process.env.__JUPYTERLAB_PORT__, () => {
                         plugin_config: {
                             columns: {},
                             editable: false,
-                            scroll_lock: true,
+                            scroll_lock: false,
                         },
                         settings: true,
                         sort: [],
                         split_by: [],
-                        theme: "Material Light",
+                        theme: "Pro Light",
+                        title: null,
                     });
 
                     await add_and_execute_cell(
@@ -261,7 +262,7 @@ w.filter = ["i8", "<", 50]
 w.group_by = ["date"]
 w.split_by = ["bool"]
 w.sort = ["date", "asc"]
-w.theme = "Material Dark"`
+w.theme = "Pro Dark"`
                     );
 
                     // grab the config again
@@ -281,7 +282,8 @@ w.theme = "Material Dark"`
                         settings: true,
                         sort: [["date", "asc"]],
                         split_by: ["bool"],
-                        theme: "Material Dark",
+                        theme: "Pro Dark",
+                        title: null,
                     });
                 }
             );
@@ -327,12 +329,13 @@ w.theme = "Material Dark"`
                         plugin_config: {
                             columns: {},
                             editable: false,
-                            scroll_lock: true,
+                            scroll_lock: false,
                         },
                         settings: true,
                         sort: [],
                         split_by: [],
-                        theme: "Material Light",
+                        theme: "Pro Light",
+                        title: null,
                     });
 
                     await viewer.evaluate(async (viewer) => {
@@ -344,7 +347,8 @@ w.theme = "Material Dark"`
                             settings: false,
                             sort: [["date", "asc"]],
                             split_by: ["bool"],
-                            theme: "Material Dark",
+                            theme: "Pro Dark",
+                            title: null,
                         });
 
                         return "";
@@ -362,7 +366,7 @@ assert w.split_by == ["bool"]
 assert w.plugin_config == {}
 assert w.settings == False
 assert w.sort == [["date", "asc"]]
-assert w.theme == "Material Dark"
+assert w.theme == "Pro Dark"
 "Passed"`
                         );
                     expect(error_cells_dont_exist).toBe(true);

@@ -52,6 +52,7 @@ utils.with_server({}, () => {
                             settings: false,
                             expressions: [],
                             theme: "Pro Light",
+                            title: null,
                         });
 
                         return await utils.get_contents(

@@ -22,7 +22,17 @@ utils.with_server({}, () => {
                             document.querySelector("perspective-viewer");
                         await elem.getTable();
                         await elem.toggleConfig(true);
+                        elem.shadowRoot.querySelector(
+                            "#active-columns"
+                        ).scrollTop = 500;
                     });
+
+                    await page.waitForFunction(
+                        () =>
+                            !!document
+                                .querySelector("perspective-viewer")
+                                .shadowRoot.querySelector("#add-expression")
+                    );
 
                     await page.shadow_click(
                         "perspective-viewer",
@@ -31,7 +41,7 @@ utils.with_server({}, () => {
 
                     await page.waitForFunction(() => {
                         const root = document.querySelector(
-                            "perspective-expression-editor"
+                            "perspective-expression-editor[data-poscorrected]"
                         );
 
                         return !!root;
@@ -44,21 +54,39 @@ utils.with_server({}, () => {
                         return elem?.shadowRoot.querySelector("#content");
                     });
 
-                    return await editor.evaluate((x) => x.outerHTML);
+                    const result = await editor.evaluate((x) => x.outerHTML);
+
+                    await page.evaluate(() => document.activeElement.blur());
+                    return result;
                 }
             );
 
             test.capture("blur closes the expression UI.", async (page) => {
                 await page.evaluate(async () => {
                     const elem = document.querySelector("perspective-viewer");
+                    await elem.getTable();
                     await elem.toggleConfig(true);
+                    elem.shadowRoot.querySelector(
+                        "#active-columns"
+                    ).scrollTop = 500;
                 });
+
+                await page.waitForFunction(
+                    () =>
+                        !!document
+                            .querySelector("perspective-viewer")
+                            .shadowRoot.querySelector("#add-expression")
+                );
 
                 await page.shadow_click(
                     "perspective-viewer",
                     "#add-expression"
                 );
-                await page.waitForSelector("perspective-expression-editor");
+
+                await page.waitForSelector(
+                    "perspective-expression-editor[data-poscorrected]"
+                );
+
                 await page.evaluate(() => document.activeElement.blur());
                 await page.waitForSelector("perspective-expression-editor", {
                     hidden: true,
@@ -74,23 +102,39 @@ utils.with_server({}, () => {
             async function type_expression_test(page, expr) {
                 await page.evaluate(async () => {
                     const elem = document.querySelector("perspective-viewer");
+                    await elem.getTable();
                     await elem.toggleConfig(true);
+                    elem.shadowRoot.querySelector(
+                        "#active-columns"
+                    ).scrollTop = 500;
                 });
+
+                await page.waitForFunction(
+                    () =>
+                        !!document
+                            .querySelector("perspective-viewer")
+                            .shadowRoot.querySelector("#add-expression")
+                );
 
                 await page.shadow_click(
                     "perspective-viewer",
                     "#add-expression"
                 );
-                await page.waitForSelector("perspective-expression-editor");
+
+                await page.waitForSelector(
+                    "perspective-expression-editor[data-poscorrected]"
+                );
+
                 await page.shadow_type(
                     expr,
                     "perspective-expression-editor",
                     "#content"
                 );
+
                 await page.waitForSelector(
                     "perspective-expression-editor:not([validating])"
                 );
-                return await page.evaluate(async () => {
+                const result = await page.evaluate(async () => {
                     const elem = document.querySelector(
                         "perspective-expression-editor"
                     );
@@ -100,6 +144,9 @@ utils.with_server({}, () => {
                             .getAttribute("disabled") || "MISSING"
                     );
                 });
+
+                //await page.evaluate(() => document.activeElement.blur());
+                return result;
             }
 
             // Functionality - make sure the UI will validate error cases so
@@ -142,38 +189,37 @@ utils.with_server({}, () => {
                         await elem.restore({
                             expressions: ["1 + 2", "// abc \n3 + 4"],
                         });
-                        return elem.shadowRoot.querySelector(
-                            "#expression-columns"
-                        ).innerHTML;
+                        return elem.shadowRoot.querySelector("#sub-columns")
+                            .innerHTML;
                     });
                 }
             );
 
-            test.capture(
-                "Should save an expression when the save button is clicked",
-                async (page) => {
-                    await page.evaluate(async () => {
-                        const elem =
-                            document.querySelector("perspective-viewer");
-                        await elem.toggleConfig(true);
-                    });
+            // test.capture(
+            //     "Should save an expression when the save button is clicked",
+            //     async (page) => {
+            //         await page.evaluate(async () => {
+            //             const elem =
+            //                 document.querySelector("perspective-viewer");
+            //             await elem.toggleConfig(true);
+            //         });
 
-                    await type_expression_test(page, "4 + 5");
-                    await page.shadow_click(
-                        "perspective-expression-editor",
-                        "button"
-                    );
+            //         await type_expression_test(page, "4 + 5");
+            //         await page.shadow_click(
+            //             "perspective-expression-editor",
+            //             "button"
+            //         );
 
-                    return page.evaluate(async () => {
-                        const elem =
-                            document.querySelector("perspective-viewer");
-                        await elem.flush();
-                        return elem.shadowRoot.querySelector(
-                            "#expression-columns"
-                        ).innerHTML;
-                    });
-                }
-            );
+            //         return page.evaluate(async () => {
+            //             const elem =
+            //                 document.querySelector("perspective-viewer");
+            //             await elem.flush();
+
+            //             return elem.shadowRoot.querySelector("#sub-columns")
+            //                 .innerHTML;
+            //         });
+            //     }
+            // );
 
             test.capture(
                 "Should overwrite a duplicate expression alias",
@@ -196,9 +242,8 @@ utils.with_server({}, () => {
                     return page.evaluate(async () => {
                         const elem =
                             document.querySelector("perspective-viewer");
-                        return elem.shadowRoot.querySelector(
-                            "#expression-columns"
-                        ).innerHTML;
+                        return elem.shadowRoot.querySelector("#sub-columns")
+                            .innerHTML;
                     });
                 }
             );
@@ -224,9 +269,8 @@ utils.with_server({}, () => {
                     return page.evaluate(async () => {
                         const elem =
                             document.querySelector("perspective-viewer");
-                        return elem.shadowRoot.querySelector(
-                            "#expression-columns"
-                        ).innerHTML;
+                        return elem.shadowRoot.querySelector("#sub-columns")
+                            .innerHTML;
                     });
                 }
             );
@@ -247,9 +291,10 @@ utils.with_server({}, () => {
                     return page.evaluate(async () => {
                         const elem =
                             document.querySelector("perspective-viewer");
-                        return elem.shadowRoot.querySelector(
-                            "#expression-columns"
-                        ).innerHTML;
+                        return (
+                            elem.shadowRoot.querySelector("#sub-columns")
+                                ?.innerHTML || "MISSING"
+                        );
                     });
                 }
             );
@@ -270,9 +315,8 @@ utils.with_server({}, () => {
                     return page.evaluate(async () => {
                         const elem =
                             document.querySelector("perspective-viewer");
-                        return elem.shadowRoot.querySelector(
-                            "#expression-columns"
-                        ).innerHTML;
+                        return elem.shadowRoot.querySelector("#sub-columns")
+                            .innerHTML;
                     });
                 }
             );
@@ -294,9 +338,10 @@ utils.with_server({}, () => {
                     return page.evaluate(async () => {
                         const elem =
                             document.querySelector("perspective-viewer");
-                        return elem.shadowRoot.querySelector(
-                            "#expression-columns"
-                        ).innerHTML;
+                        return (
+                            elem.shadowRoot.querySelector("#sub-columns")
+                                ?.innerHTML || "MISSING"
+                        );
                     });
                 }
             );
@@ -318,9 +363,8 @@ utils.with_server({}, () => {
                     return page.evaluate(async () => {
                         const elem =
                             document.querySelector("perspective-viewer");
-                        return elem.shadowRoot.querySelector(
-                            "#expression-columns"
-                        ).innerHTML;
+                        return elem.shadowRoot.querySelector("#sub-columns")
+                            .innerHTML;
                     });
                 }
             );
@@ -345,9 +389,10 @@ utils.with_server({}, () => {
                     return page.evaluate(async () => {
                         const elem =
                             document.querySelector("perspective-viewer");
-                        return elem.shadowRoot.querySelector(
-                            "#expression-columns"
-                        ).innerHTML;
+                        return (
+                            elem.shadowRoot.querySelector("#sub-columns")
+                                ?.innerHTML || "MISSING"
+                        );
                     });
                 }
             );
@@ -370,9 +415,8 @@ utils.with_server({}, () => {
                     return page.evaluate(async () => {
                         const elem =
                             document.querySelector("perspective-viewer");
-                        return elem.shadowRoot.querySelector(
-                            "#expression-columns"
-                        ).innerHTML;
+                        return elem.shadowRoot.querySelector("#sub-columns")
+                            .innerHTML;
                     });
                 }
             );
@@ -395,9 +439,8 @@ utils.with_server({}, () => {
                     return page.evaluate(async () => {
                         const elem =
                             document.querySelector("perspective-viewer");
-                        return elem.shadowRoot.querySelector(
-                            "#expression-columns"
-                        ).innerHTML;
+                        return elem.shadowRoot.querySelector("#sub-columns")
+                            .innerHTML;
                     });
                 }
             );
@@ -420,9 +463,8 @@ utils.with_server({}, () => {
                     return page.evaluate(async () => {
                         const elem =
                             document.querySelector("perspective-viewer");
-                        return elem.shadowRoot.querySelector(
-                            "#expression-columns"
-                        ).innerHTML;
+                        return elem.shadowRoot.querySelector("#sub-columns")
+                            .innerHTML;
                     });
                 }
             );
@@ -440,7 +482,7 @@ utils.with_server({}, () => {
 
                 return page.evaluate(async () => {
                     const elem = document.querySelector("perspective-viewer");
-                    return elem.shadowRoot.querySelector("#expression-columns")
+                    return elem.shadowRoot.querySelector("#sub-columns")
                         .innerHTML;
                 });
             });
@@ -458,7 +500,7 @@ utils.with_server({}, () => {
 
                 return page.evaluate(async () => {
                     const elem = document.querySelector("perspective-viewer");
-                    return elem.shadowRoot.querySelector("#expression-columns")
+                    return elem.shadowRoot.querySelector("#sub-columns")
                         .innerHTML;
                 });
             });

@@ -49,6 +49,7 @@ utils.with_server({}, () => {
                     settings: true,
                     sort: [],
                     theme: null,
+                    title: null,
                 });
 
                 return await get_contents(page);
@@ -81,6 +82,7 @@ utils.with_server({}, () => {
                         settings: true,
                         sort: [],
                         theme: null,
+                        title: null,
                     });
 
                     const config2 = await page.evaluate(async () => {
@@ -122,6 +124,7 @@ utils.with_server({}, () => {
                         settings: true,
                         sort: [],
                         theme: null,
+                        title: null,
                     });
 
                     const config3 = await page.evaluate(async (config) => {
@@ -143,6 +146,7 @@ utils.with_server({}, () => {
                         settings: true,
                         sort: [],
                         theme: null,
+                        title: null,
                     });
 
                     return await get_contents(page);
