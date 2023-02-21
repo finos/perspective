@@ -91,6 +91,9 @@ heatmapChart.plugin = {
     max_cells: 50000,
     max_columns: 500,
     render_warning: true,
+    initial: {
+        names: ["Color"],
+    },
 };
 
 export default heatmapChart;

@@ -30,8 +30,8 @@ export class HTMLPerspectiveViewerDatagridToolbarElement extends HTMLElement {
                 ${TOOLBAR_STYLE}
             </style>
             <div id="toolbar">
-                <span id="scroll_lock" class="lock-scroll button">
-                    <span>Align Scroll</span>
+                <span id="scroll_lock" class="button">
+                    <span>Free Scroll</span>
                 </span>
                 <span id="edit_mode" class="button"><span>Read Only</span></span>
             </div>

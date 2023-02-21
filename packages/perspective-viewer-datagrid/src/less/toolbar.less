@@ -36,11 +36,11 @@
 }
 
 #scroll_lock.lock-scroll:before {
-    content: var(--toolbar-scroll-lock-active--content);
+    -webkit-mask-image: var(--toolbar-scroll-lock-active--content);
 }
 
 #scroll_lock:before {
-    content: var(--toolbar-scroll-lock--content);
+    -webkit-mask-image: var(--toolbar-scroll-lock--content);
 }
 
 #select_mode:before {
@@ -48,11 +48,11 @@
 }
 
 #edit_mode:before {
-    content: var(--toolbar-edit-mode--content);
+    -webkit-mask-image: var(--toolbar-edit-mode--content);
 }
 
 #edit_mode.editable:before {
-    content: var(--toolbar-edit-mode-active--content);
+    -webkit-mask-image: var(--toolbar-edit-mode-active--content);
 }
 
 :host(.aggregated) #toolbar #edit_mode {
@@ -60,12 +60,13 @@
 }
 
 .button:before {
-    color: var(--inactive--color, #ccc);
-    line-height: 36px;
-    font-size: 14px;
-    font-family: var(--button--font-family, "Material Icons Outlined");
-    vertical-align: bottom;
-    margin: 0 11px;
+    width: 21px;
+    height: 21px;
+    content: "";
+    -webkit-mask-image: cover;
+    mask-image: cover;
+    background-color: var(--icon--color, #ccc);
+    margin-left: 9.5px;
 }
 
 .button.editable:before,
@@ -74,10 +75,15 @@
 }
 
 .button {
+    display: inline-flex;
+    align-items: center;
     user-select: none;
-    width: 36px;
+    width: 42px;
+    height: 36px;
     box-sizing: border-box;
     white-space: nowrap;
+    border: 1px solid transparent;
+    border-radius: 2px;
 }
 
 .button > span {
@@ -93,16 +99,15 @@
     color: inherit;
     cursor: pointer;
     min-width: var(--button--min-width, 105px);
-    background-color: rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--inactive--color, #8b868045);
 }
 
 .button:hover:before {
-    margin: 0 6px 0 11px;
+    margin: 0 6px 0 9.5px;
 }
 
 .button:hover > span {
     display: contents;
-    font-size: 12px;
-    font-weight: 300;
+    font-size: 9px;
     line-height: 36px;
 }

@@ -41,19 +41,19 @@ export class PerspectiveTabBarRenderer extends TabBar.Renderer {
 
         return h.li(
             { key, className, title, style, dataset },
-            this.renderConfigIcon(),
+            // this.renderConfigIcon(),
             this.renderLabel(data),
             this.renderCloseIcon(),
             h.div({ className: "divider" })
         );
     }
 
-    renderConfigIcon() {
-        return h.div({
-            className: "p-TabBar-tabConfigIcon",
-            id: TabBarItems.Config,
-        });
-    }
+    // renderConfigIcon() {
+    //     return h.div({
+    //         className: "p-TabBar-tabConfigIcon",
+    //         id: TabBarItems.Config,
+    //     });
+    // }
 
     renderCloseIcon() {
         return h.div({

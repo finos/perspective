@@ -8,18 +8,18 @@
  */
 
 @import url("ref://@finos/perspective-viewer/src/themes/variables.less");
-@import "@finos/perspective-viewer/dist/css/material-dark.css";
+@import "@finos/perspective-viewer/dist/css/pro-dark.css";
 
-@import url("ref://material.less");
+@import url("ref://pro.less");
 
 perspective-workspace,
-perspective-workspace[theme="Material Dark"],
-perspective-indicator[theme="Material Dark"] {
-    --theme-name: "Material Dark";
+perspective-workspace[theme="Pro Dark"],
+perspective-indicator[theme="Pro Dark"] {
+    --theme-name: "Pro Dark";
 }
 
 perspective-workspace {
-    @include perspective-workspace-material-base;
+    @include perspective-workspace-pro-base;
     background-color: @grey800;
     color: white;
     --workspace-master--background-color: @grey800;
@@ -29,7 +29,7 @@ perspective-workspace {
     --workspace-secondary--color: @grey60;
 }
 
-perspective-viewer[theme="Material Dark"].workspace-master-widget {
+perspective-viewer[theme="Pro Dark"].workspace-master-widget {
     --plugin--background: @grey800;
 }
 

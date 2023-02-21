@@ -10,6 +10,15 @@
 @import "./gradient_colors.less";
 @import "./series_colors.less";
 
+@mixin icon {
+    background-repeat: no-repeat;
+    background-color: var(--icon--color);
+    content: "";
+    display: inline-block;
+    -webkit-mask-size: cover;
+    mask-size: cover;
+}
+
 :host {
     user-select: none;
     .chart {
@@ -254,19 +263,21 @@
         }
 
         & .y-label.left-label .splitter-label::after {
-            font-family: var(
-                --d3fc-y1-label--font-family,
-                var(--button--font-family, inherit)
-            );
-            content: var(--d3fc-y1-label--content, "\1f847");
+            @include icon;
+            width: 16px;
+            height: 12px;
+            -webkit-mask-image: var(--sort-desc-icon--mask-image);
+            mask-image: var(--sort-desc-icon--mask-image);    
         }
 
         & .y-label.right-label .splitter-label::after {
-            font-family: var(
-                --d3fc-y2-label--font-family,
-                var(--button--font-family, inherit)
-            );
-            content: var(--d3fc-y2-label--content, "\1f845");
+            @include icon;
+            width: 16px;
+            height: 12px;
+            -webkit-mask-image: var(--sort-asc-icon--mask-image);
+            mask-image: var(--sort-asc-icon--mask-image);
+
+
         }
 
         &.ybar .y-axis path,

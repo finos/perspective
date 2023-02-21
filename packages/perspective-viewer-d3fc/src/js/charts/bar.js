@@ -70,6 +70,9 @@ barChart.plugin = {
     max_cells: 1000,
     max_columns: 50,
     render_warning: true,
+    initial: {
+        names: ["X Axis"],
+    },
 };
 
 export default barChart;

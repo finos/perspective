@@ -11,7 +11,7 @@ perspective-viewer[settings] regular-table {
     .psp-header-leaf {
         height: 36px;
         vertical-align: top;
-        padding-top: 2px;
+        padding-top: 3.5px;
     }
 
     .psp-header-leaf:not(.psp-header-corner):before {
@@ -24,7 +24,12 @@ perspective-viewer[settings] regular-table {
         width: calc(100% - 8px);
         left: 5px;
         bottom: 0px;
-        color: var(--inactive--color, #b4b7be);
+        padding-bottom: 1px;
+        margin-bottom: 3px;
+        color: var(--inactive--color, #8b868045);
+        font-size: 9px;
+        border: 1px solid transparent;
+        border-radius: 2px;
     }
 
     .psp-header-leaf.psp-menu-enabled:not(.psp-header-corner):before {
@@ -35,12 +40,13 @@ perspective-viewer[settings] regular-table {
     .psp-header-leaf.psp-menu-open:not(.psp-header-corner) {
         pointer-events: none;
         &:before {
+            border: 1px solid var(--inactive--color);
             content: var(--column-style-close-button--content, "X");
         }
     }
 
     .psp-header-leaf.psp-menu-enabled:hover:before {
-        color: #338dcd;
+        border: 1px solid var(--inactive--color);
     }
 
     // Pin the column resize handle to the top so it does not overlap the

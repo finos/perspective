@@ -20,7 +20,7 @@ export class HTMLPerspectiveViewerDatagridPluginElement extends HTMLElement {
     constructor() {
         super();
         this.regular_table = document.createElement("regular-table");
-        this._is_scroll_lock = true;
+        this._is_scroll_lock = false;
     }
 
     connectedCallback() {
@@ -52,7 +52,7 @@ export class HTMLPerspectiveViewerDatagridPluginElement extends HTMLElement {
     }
 
     get config_column_names() {
-        return undefined;
+        return ["Columns"];
     }
 
     /**
