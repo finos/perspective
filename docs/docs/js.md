@@ -90,7 +90,9 @@ repo under [`examples/esbuild-example`](https://github.com/finos/perspective/tre
 
 ```javascript
 const esbuild = require("esbuild");
-const {PerspectiveEsbuildPlugin} = require("@finos/perspective-esbuild-plugin");
+const {
+    PerspectiveEsbuildPlugin,
+} = require("@finos/perspective-esbuild-plugin");
 
 esbuild.build({
     entryPoints: ["src/index.js"],
@@ -140,7 +142,7 @@ your `.html`'s `<head>` section:
 <link
     rel="stylesheet"
     crossorigin="anonymous"
-    href="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer/dist/css/material.css"
+    href="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer/dist/css/pro.css"
 />
 ```
 
@@ -187,7 +189,7 @@ perspective asset files in a script tag with the `type="module"` attribute set.
 <link
     rel="stylesheet"
     crossorigin="anonymous"
-    href="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer/dist/css/material.css"
+    href="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer/dist/css/pro.css"
 />
 ```
 
@@ -199,7 +201,7 @@ import the `@finos/perspective` module in a `type="module"` script as well:
     import perspective from "https://cdn.jsdelivr.net/npm/@finos/perspective/dist/cdn/perspective.js";
 
     const worker = perspective.worker();
-    const table = agent.table({x: [1, 2, 3, 4, 5]});
+    const table = agent.table({ x: [1, 2, 3, 4, 5] });
     document.querySelector("perspective-viewer").load(table);
 </script>
 ```
@@ -438,9 +440,9 @@ these themes directly into your app, and the `perspective-viewer`s will be
 themed accordingly:
 
 ```javascript
-// Themes based on Google's Material Design Language
-import "@finos/perspective-viewer/dist/css/material.css";
-import "@finos/perspective-viewer/dist/css/material-dark.css";
+// Themes based on Thought Merchants's Prospective design
+import "@finos/perspective-viewer/dist/css/pro.css";
+import "@finos/perspective-viewer/dist/css/pro-dark.css";
 
 // Other themes
 import "@finos/perspective-viewer/dist/css/solarized.css";
@@ -463,7 +465,7 @@ can be directly linked in your HTML file:
 <link
     rel="stylesheet"
     crossorigin="anonymous"
-    href="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer/dist/css/material.css"
+    href="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer/dist/css/pro.css"
 />
 ```
 
@@ -480,7 +482,7 @@ method.
 viewer.resetThemes();
 
 // Set available themes explicitly (they still must be imported as CSS!)
-viewer.resetThemes(["Material Light", "Material Dark"]);
+viewer.resetThemes(["Pro Light", "Pro Dark"]);
 ```
 
 `<perspective-viewer>` will default to the first loaded theme when initialized.
@@ -488,14 +490,14 @@ You may override this via `.restore()`, or provide an initial theme by setting
 the `theme` attribute:
 
 ```html
-<perspective-viewer theme="Material Light"></perspective-viewer>
+<perspective-viewer theme="Pro Light"></perspective-viewer>
 ```
 
 or
 
 ```javascript
 const viewer = document.querySelector("perspective-viewer");
-viewer.restore({theme: "Material Dark"});
+viewer.restore({ theme: "Pro Dark" });
 ```
 
 ### Loading data into `<perspective-viewer>`
@@ -533,7 +535,7 @@ viewer1.load(table);
 viewer2.load(table);
 
 // Both `viewer1` and `viewer2` will reflect this update
-table.update([{x: 5, y: "e", z: true}]);
+table.update([{ x: 5, y: "e", z: true }]);
 ```
 
 ### Server-only via `WebSocketServer()` and Node.js
@@ -547,13 +549,13 @@ footprint.
 In Node.js:
 
 ```javascript
-const {WebSocketServer, table} = require("@finos/perspective");
+const { WebSocketServer, table } = require("@finos/perspective");
 const fs = require("fs");
 
 // Start a WS/HTTP host on port 8080.  The `assets` property allows
 // the `WebSocketServer()` to also serves the file structure rooted in this
 // module's directory.
-const host = new WebSocketServer({assets: [__dirname], port: 8080});
+const host = new WebSocketServer({ assets: [__dirname], port: 8080 });
 
 // Read an arrow file from the file system and host it as a named table.
 const arr = fs.readFileSync(__dirname + "/superstore.arrow");
@@ -721,13 +723,13 @@ of the documentation which has several interactive examples for each
 
 ```javascript
 // Set the plugin (will also update `columns` to plugin-defaults)
-await elem.restore({plugin: "X Bar"});
+await elem.restore({ plugin: "X Bar" });
 
 // Update plugin and columns (only draws once)
-await elem.restore({plugin: "X Bar", columns: ["Sales"]});
+await elem.restore({ plugin: "X Bar", columns: ["Sales"] });
 
 // Open the config panel
-await elem.restore({settings: true});
+await elem.restore({ settings: true });
 
 // Create an expression
 await elem.restore({
@@ -739,13 +741,13 @@ await elem.restore({
 // await elem.restore({columns: ["\"Sales\" + 100"], expressions: []});
 
 // Add a filter
-await elem.restore({filter: [["Sales", "<", 100]]});
+await elem.restore({ filter: [["Sales", "<", 100]] });
 
 // Add a sort, don't remove filter
-await elem.restore({sort: [["Prodit", "desc"]]});
+await elem.restore({ sort: [["Prodit", "desc"]] });
 
 // Reset just filter, preserve sort
-await elem.restore({filter: undefined});
+await elem.restore({ filter: undefined });
 
 // Reset all properties to default e.g. after `load()`
 await elem.reset();

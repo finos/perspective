@@ -59,7 +59,7 @@
                 "scroll_lock": true
             },
             "settings": false,
-            "theme": "Material Light",
+            "theme": "Pro Light",
             "group_by": [],
             "split_by": [],
             "columns": ["Available (%)", "name"],

@@ -1,16 +1,34 @@
 <html>
     <head>
-        <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" />
+        <meta
+            name="viewport"
+            content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no"
+        />
 
-        <link rel='stylesheet' crossorigin="anonymous" href="/node_modules/@finos/perspective-workspace/dist/css/material-dark.css">
-      
-        <script type="module" src="/node_modules/@finos/perspective-workspace/dist/cdn/perspective-workspace.js"></script>
-        <script type="module" src="/node_modules/@finos/perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js"></script>
-        <script type="module" src="/node_modules/@finos/perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js"></script>
-        <script type="module" src="/node_modules/@finos/perspective/dist/cdn/perspective.js"></script>
-        
+        <link
+            rel="stylesheet"
+            crossorigin="anonymous"
+            href="/node_modules/@finos/perspective-workspace/dist/css/pro-dark.css"
+        />
+
+        <script
+            type="module"
+            src="/node_modules/@finos/perspective-workspace/dist/cdn/perspective-workspace.js"
+        ></script>
+        <script
+            type="module"
+            src="/node_modules/@finos/perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js"
+        ></script>
+        <script
+            type="module"
+            src="/node_modules/@finos/perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js"
+        ></script>
+        <script
+            type="module"
+            src="/node_modules/@finos/perspective/dist/cdn/perspective.js"
+        ></script>
+
         <style>
-
             body {
                 display: flex;
                 flex-direction: column;
@@ -26,113 +44,110 @@
 
             perspective-viewer {
                 --d3fc-positive--gradient: linear-gradient(
-                    #94D0FF, 
-                    #8795E8, 
-                    #966bff, 
-                    #AD8CFF,
-                    #C774E8, 
-                    #c774a9, 
-                    #FF6AD5, 
-                    #ff6a8b, 
-                    #ff8b8b, 
+                    #94d0ff,
+                    #8795e8,
+                    #966bff,
+                    #ad8cff,
+                    #c774e8,
+                    #c774a9,
+                    #ff6ad5,
+                    #ff6a8b,
+                    #ff8b8b,
                     #ffa58b,
-                    #ffde8b, 
-                    #cdde8b, 
-                    #8bde8b, 
+                    #ffde8b,
+                    #cdde8b,
+                    #8bde8b,
                     #20de8b
                 ) !important;
 
                 --d3fc-negative--gradient: linear-gradient(
-                    #94D0FF, 
-                    #8795E8, 
-                    #966bff, 
-                    #AD8CFF,
-                    #C774E8, 
-                    #c774a9, 
-                    #FF6AD5, 
-                    #ff6a8b, 
-                    #ff8b8b, 
+                    #94d0ff,
+                    #8795e8,
+                    #966bff,
+                    #ad8cff,
+                    #c774e8,
+                    #c774a9,
+                    #ff6ad5,
+                    #ff6a8b,
+                    #ff8b8b,
                     #ffa58b,
-                    #ffde8b, 
-                    #cdde8b, 
-                    #8bde8b, 
+                    #ffde8b,
+                    #cdde8b,
+                    #8bde8b,
                     #20de8b
                 ) !important;
 
                 --d3fc-full--gradient: linear-gradient(
-                    #94D0FF, 
-                    #8795E8, 
-                    #966bff, 
-                    #AD8CFF,
-                    #C774E8, 
-                    #c774a9, 
-                    #FF6AD5, 
-                    #ff6a8b, 
-                    #ff8b8b, 
+                    #94d0ff,
+                    #8795e8,
+                    #966bff,
+                    #ad8cff,
+                    #c774e8,
+                    #c774a9,
+                    #ff6ad5,
+                    #ff6a8b,
+                    #ff8b8b,
                     #ffa58b,
-                    #ffde8b, 
-                    #cdde8b, 
-                    #8bde8b, 
+                    #ffde8b,
+                    #cdde8b,
+                    #8bde8b,
                     #20de8b
                 ) !important;
             }
-
         </style>
-
     </head>
-    <body> 
-
+    <body>
         <perspective-workspace id="workspace">
             <perspective-viewer table="movies"></perspective-viewer>
         </perspective-workspace>
-      
+
         <script type="module">
+            import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
 
-        import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
+            const SCHEMA = {
+                Title: "string",
+                "US Gross": "float",
+                "Worldwide Gross": "float",
+                "US DVD Sales": "float",
+                "Production Budget": "float",
+                "Release Date": "date",
+                "MPAA Rating": "string",
+                "Running Time min": "integer",
+                Distributor: "string",
+                Source: "string",
+                "Major Genre": "string",
+                "Creative Type": "string",
+                Director: "string",
+                "Rotten Tomatoes Rating": "integer",
+                "IMDB Rating": "float",
+                "IMDB Votes": "integer",
+            };
 
-        const SCHEMA = {
-            "Title": "string",
-            "US Gross": "float",
-            "Worldwide Gross": "float",
-            "US DVD Sales": "float",
-            "Production Budget": "float",
-            "Release Date": "date",
-            "MPAA Rating": "string",
-            "Running Time min": "integer",
-            "Distributor": "string",
-            "Source": "string",
-            "Major Genre": "string",
-            "Creative Type": "string",
-            "Director": "string",
-            "Rotten Tomatoes Rating": "integer",
-            "IMDB Rating": "float",
-            "IMDB Votes": "integer"
-        };
+            const MOVIES_URL = "https://vega.github.io/editor/data/movies.json";
 
-        const MOVIES_URL = "https://vega.github.io/editor/data/movies.json";
+            const datasource = async () => {
+                const request = fetch(MOVIES_URL);
+                const worker = perspective.worker();
+                const response = await request;
+                const json = await response.json();
+                for (const row of json) {
+                    row["Release Date"] = row["Release Date"]
+                        ? new Date(row["Release Date"]) || null
+                        : null;
+                }
+                const table = await worker.table(SCHEMA);
+                table.update(json);
+                return table;
+            };
 
-        const datasource = async () => {
-            const request = fetch(MOVIES_URL);
-            const worker = perspective.worker();
-            const response = await request;
-            const json = await response.json();
-            for (const row of json) {
-                row["Release Date"] = row["Release Date"] ? new Date(row["Release Date"]) || null : null;
-            }
-            const table = await worker.table(SCHEMA);
-            table.update(json);
-            return table;
-        };
+            window.addEventListener("load", async () => {
+                let req = await fetch("layout.json");
+                let layout = await req.json();
 
-        window.addEventListener("load", async () => {
-            let req = await fetch("layout.json");
-            let layout = await req.json();
+                window.workspace.tables.set("movies", datasource());
 
-            window.workspace.tables.set("movies", datasource());
-
-            window.workspace.restore(layout);
-        });
-
+                window.workspace.restore(layout);
+            });
         </script>
     </body>
 </html>

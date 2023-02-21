@@ -70,7 +70,7 @@ window.addEventListener("DOMContentLoaded", async function () {
             scroll_lock: true,
         },
         settings: true,
-        theme: "Material Light",
+        theme: "Pro Light",
         group_by: ["name"],
         split_by: ["client"],
         columns: ["(-)chg", "chg", "(+)chg"],

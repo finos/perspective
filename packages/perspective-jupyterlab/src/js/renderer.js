@@ -140,8 +140,8 @@ export class PerspectiveDocumentWidget extends DocumentWidget {
         // pickup theme from env
         this._psp.theme =
             document.body.getAttribute("data-jp-theme-light") === "false"
-                ? "Material Light"
-                : "Material Dark";
+                ? "Pro Light"
+                : "Pro Dark";
     }
 
     dispose() {
@@ -339,7 +339,7 @@ function activate(app, restorer, themeManager) {
                 ? themeManager.isLight(themeManager.theme)
                 : true;
 
-        const theme = isLight ? "Material Light" : "Material Dark";
+        const theme = isLight ? "Pro Light" : "Pro Dark";
         trackercsv.forEach((pspDocWidget) => {
             pspDocWidget.psp.theme = theme;
         });

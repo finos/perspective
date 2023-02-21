@@ -51,7 +51,7 @@ utils.with_server({}, () => {
                             plugin_config: {},
                             settings: false,
                             expressions: [],
-                            theme: "Material Light",
+                            theme: "Pro Light",
                         });
 
                         return await utils.get_contents(

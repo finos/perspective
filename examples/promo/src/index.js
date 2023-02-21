@@ -13,7 +13,7 @@ import "@finos/perspective-workspace";
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
 
-import "@finos/perspective-workspace/dist/css/material.css";
+import "@finos/perspective-workspace/dist/css/pro.css";
 
 import "./style/index.less";
 

@@ -9,47 +9,50 @@
 
 <!DOCTYPE html>
 <html>
+    <head>
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
+        />
 
-<head>
+        <script src="http://localhost:8080/perspective-viewer"></script>
+        <script src="http://localhost:8080/perspective-viewer-datagrid"></script>
+        <script src="http://localhost:8080/perspective-viewer-d3fc"></script>
+        <script src="http://localhost:8080/perspective"></script>
 
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+        <link rel="stylesheet" href="http://localhost:8080/pro.dark.css" />
 
-    <script src="http://localhost:8080/perspective-viewer"></script>
-    <script src="http://localhost:8080/perspective-viewer-datagrid"></script>
-    <script src="http://localhost:8080/perspective-viewer-d3fc"></script>
-    <script src="http://localhost:8080/perspective"></script>
+        <style>
+            perspective-viewer {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+            }
+        </style>
+    </head>
 
-    <link rel='stylesheet' href="http://localhost:8080/material.dark.css">
+    <body>
+        <perspective-viewer
+            id="viewer"
+            editable
+            plugin="Y Bar"
+            columns='["__TIME__"]'
+            row-pivots='["group", "name"]'
+            column-pivots='["group", "name"]'
+            aggregates="{'__TIME__':'avg'}"
+        >
+        </perspective-viewer>
 
-    <style>
-        perspective-viewer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-        }
-    </style>
-
-</head>
-
-<body>
-
-    <perspective-viewer id="viewer" editable plugin="Y Bar" columns='["__TIME__"]' row-pivots='["group", "name"]'
-        column-pivots='["group", "name"]' aggregates="{'__TIME__':'avg'}">
-    </perspective-viewer>
-
-    <script>
-
-        window.addEventListener('DOMContentLoaded', async function () {
-            const websocket = perspective.websocket("ws://localhost:8888/websocket");
-            const table = websocket.open_table('benchmark_results');
-            document.getElementById('viewer').load(table);
-        });
-
-    </script>
-
-</body>
-
+        <script>
+            window.addEventListener("DOMContentLoaded", async function () {
+                const websocket = perspective.websocket(
+                    "ws://localhost:8888/websocket"
+                );
+                const table = websocket.open_table("benchmark_results");
+                document.getElementById("viewer").load(table);
+            });
+        </script>
+    </body>
 </html>

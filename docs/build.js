@@ -2,7 +2,7 @@ const puppeteer = require("puppeteer");
 const fs = require("fs");
 const cp = require("child_process");
 const EXAMPLES = require("./src/components/ExampleGallery/features.js").default;
-const {convert} = require("@finos/perspective-viewer/dist/cjs/migrate.js");
+const { convert } = require("@finos/perspective-viewer/dist/cjs/migrate.js");
 
 const DEFAULT_VIEWPORT = {
     width: 400,
@@ -41,7 +41,7 @@ async function run_with_theme(page, is_dark = false) {
 
     const files = [];
     for (const idx in EXAMPLES) {
-        const {config, viewport} = EXAMPLES[idx];
+        const { config, viewport } = EXAMPLES[idx];
         await await page.setViewport(viewport || DEFAULT_VIEWPORT);
         const new_config = convert(
             Object.assign(
@@ -88,7 +88,7 @@ async function run_with_theme(page, is_dark = false) {
 }
 
 async function run() {
-    const browser = await puppeteer.launch({headless: true});
+    const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
     await run_with_theme(page);
     await run_with_theme(page, true);
@@ -105,7 +105,7 @@ function template(is_dark) {
         <script src="/node_modules/@finos/perspective-viewer/dist/umd/perspective-viewer.js"></script>
         <script src="/node_modules/@finos/perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js"></script>
         <script src="/node_modules/@finos/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js"></script>
-        <link rel='stylesheet' href="/node_modules/@finos/perspective-viewer/dist/css/material${
+        <link rel='stylesheet' href="/node_modules/@finos/perspective-viewer/dist/css/pro${
             is_dark ? "-dark" : ""
         }.css">
         <style>

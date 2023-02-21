@@ -13,7 +13,7 @@ import "@finos/perspective-viewer";
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc/bar";
 
-import "@finos/perspective-viewer/dist/css/material-dark.css";
+import "@finos/perspective-viewer/dist/css/pro-dark.css";
 
 import "./index.css";
 

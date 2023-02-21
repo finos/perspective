@@ -45,7 +45,7 @@ class PerspectiveTraitlets(HasTraits):
     expressions = List(default_value=[]).tag(sync=True)
     plugin_config = Dict(default_value={}).tag(sync=True)
     settings = Bool(True).tag(sync=True)
-    theme = Unicode("Material Light", allow_none=True).tag(sync=True)
+    theme = Unicode("Pro Light", allow_none=True).tag(sync=True)
     server = Bool(False).tag(sync=True)
     client = Bool(False).tag(sync=True)
 

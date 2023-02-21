@@ -60,7 +60,7 @@ function add(builder, path) {
 async function compile_css() {
     fs.mkdirSync("dist/css", { recursive: true });
     const builder1 = new BuildCss("");
-    add(builder1, "./material.less");
+    add(builder1, "./pro.less");
     add(builder1, "./mitered-headers.less");
     add(builder1, "./row-hover.less");
     add(builder1, "./column-plugin.less");
