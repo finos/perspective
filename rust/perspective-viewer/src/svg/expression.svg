@@ -1,0 +1,10 @@
+<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs></defs>
+    <path d="M 15.915 8.555 L 10.213 14.257" stroke-width="1.00491" stroke-linecap="round" style="stroke: #042121">
+    </path>
+    <path
+        d="M 1.616 14.33 L 3.251 14.33 C 4.28 14.33 5.158 13.586 5.327 12.571 L 6.584 4.992 C 6.752 3.976 7.63 3.232 8.66 3.232 L 11.347 3.232"
+        stroke-width="1.00491" stroke-linecap="round" style="stroke:#042121"></path>
+    <path d="M 10.212 8.555 L 15.914 14.257" stroke-width="1.00491" stroke-linecap="round" style="stroke: #042121">
+    </path>
+</svg>
