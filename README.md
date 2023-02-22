@@ -48,7 +48,7 @@ and/or [Jupyterlab](https://jupyterlab.readthedocs.io/en/stable/).
     -   [Data Binding](https://perspective.finos.org/docs/table.html)
 -   API
     -   [Perspective API](https://github.com/finos/perspective/blob/master/packages/perspective/README.md)
-    -   [Perspective Viewer API](https://github.com/finos/perspective/blob/master/packages/perspective-viewer/README.md)
+    -   [Perspective Viewer API](https://perspective.finos.org/docs/obj/perspective-viewer/)
     -   [Perspective Python API](https://perspective.finos.org/docs/obj/perspective-python.html)
 
 ### Community / Media
