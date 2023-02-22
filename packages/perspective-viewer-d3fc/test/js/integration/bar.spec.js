@@ -23,11 +23,12 @@ utils.with_server({}, () => {
     describe.page(
         "bar.html",
         () => {
-            const get_contents = utils.get_contents.bind(
-                null,
-                "perspective-viewer perspective-viewer-d3fc-ybar"
+            simple_tests.default((p) =>
+                utils.get_contents(
+                    "perspective-viewer perspective-viewer-d3fc-ybar",
+                    p
+                )
             );
-            simple_tests.default(get_contents);
             // render_warning_tests.default("Y Bar");
         },
         { root: path.join(__dirname, "..", "..", "..") }
@@ -49,10 +50,10 @@ utils.with_server({}, () => {
     describe.page(
         "bar-themed.html",
         () => {
-            simple_tests.default(
-                utils.get_contents.bind(
-                    null,
-                    "perspective-viewer perspective-viewer-d3fc-ybar"
+            simple_tests.default((p) =>
+                utils.get_contents(
+                    "perspective-viewer perspective-viewer-d3fc-ybar",
+                    p
                 )
             );
             // render_warning_tests.default("Y Bar");

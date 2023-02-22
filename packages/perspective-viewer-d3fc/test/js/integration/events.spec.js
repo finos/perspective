@@ -65,10 +65,10 @@ utils.with_server({}, () => {
                     expect(count).toEqual(1);
 
                     // Return the chart contents
-                    return utils.get_contents.bind(
-                        null,
-                        "perspective-viewer perspective-viewer-d3fc-yline"
-                    )(page);
+                    return utils.get_contents(
+                        "perspective-viewer perspective-viewer-d3fc-yline",
+                        page
+                    );
                 }
             );
 
@@ -133,10 +133,10 @@ utils.with_server({}, () => {
 
                     // Return the chart contents
 
-                    return utils.get_contents.bind(
-                        null,
-                        "perspective-viewer perspective-viewer-d3fc-yline"
-                    )(page);
+                    return utils.get_contents(
+                        "perspective-viewer perspective-viewer-d3fc-yline",
+                        page
+                    );
                 }
             );
         },

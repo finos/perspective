@@ -19,10 +19,10 @@ utils.with_server({}, () => {
     describe.page(
         "treemap.html",
         () => {
-            simple_tests.default(
-                utils.get_contents.bind(
-                    null,
-                    "perspective-viewer perspective-viewer-d3fc-treemap"
+            simple_tests.default((p) =>
+                utils.get_contents(
+                    "perspective-viewer perspective-viewer-d3fc-treemap",
+                    p
                 )
             );
 

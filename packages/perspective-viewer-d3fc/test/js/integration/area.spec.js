@@ -13,16 +13,17 @@ const utils = require("@finos/perspective-test");
 const simple_tests = require("@finos/perspective-viewer/test/js/simple_tests.js");
 
 const { withTemplate } = require("./simple-template");
+const { util } = require("prettier");
 withTemplate("area", "Y Area");
 
 utils.with_server({}, () => {
     describe.page(
         "area.html",
         () => {
-            simple_tests.default(
-                utils.get_contents.bind(
-                    null,
-                    "perspective-viewer perspective-viewer-d3fc-yarea"
+            simple_tests.default((p) =>
+                utils.get_contents(
+                    "perspective-viewer perspective-viewer-d3fc-yarea",
+                    p
                 )
             );
         },
