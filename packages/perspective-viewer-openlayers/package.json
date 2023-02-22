@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-viewer-openlayers",
-    "version": "1.9.3",
+    "version": "1.9.4",
     "unpkg": "dist/umd/perspective-viewer-openlayers.js",
     "main": "dist/umd/perspective-viewer-openlayers.js",
     "jsdelivr": "dist/umd/perspective-viewer-openlayers.js",
@@ -29,8 +29,8 @@
         "clean:screenshots": "rimraf \"test/screenshots/**/*.@(failed|diff).png\""
     },
     "dependencies": {
-        "@finos/perspective": "^1.9.3",
-        "@finos/perspective-viewer": "^1.9.3",
+        "@finos/perspective": "^1.9.4",
+        "@finos/perspective-viewer": "^1.9.4",
         "d3": "^7.1.1",
         "d3-color": "^3.0.1",
         "gradient-parser": "1.0.2",
@@ -38,6 +38,6 @@
         "ol": "^5.3.2"
     },
     "devDependencies": {
-        "@finos/perspective-esbuild-plugin": "^1.9.3"
+        "@finos/perspective-esbuild-plugin": "^1.9.4"
     }
 }

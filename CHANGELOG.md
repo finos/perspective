@@ -1,3 +1,23 @@
+# [v1.9.4](https://github.com/finos/perspective/releases/tag/v1.9.4)
+
+_22 February 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v1.9.3...v1.9.4))
+
+Features
+
+- Update ExprTk package to 0.0.2 tag [#2103](https://github.com/finos/perspective/pull/2103)
+
+Fixes
+
+- Invert heatmap y-axis [#2113](https://github.com/finos/perspective/pull/2113)
+- Fix legend on X/Y line chart [#2107](https://github.com/finos/perspective/pull/2107)
+- Update dependencies to be compatible with jupyterlab 3.6.1 [#2101](https://github.com/finos/perspective/pull/2101)
+
+Misc
+
+- Update contributing guidelines [#2077](https://github.com/finos/perspective/pull/2077)
+- Updated README.md [#2098](https://github.com/finos/perspective/pull/2098)
+- Update charting tests to cover more HTML [#2092](https://github.com/finos/perspective/pull/2092)
+
 # [v1.9.3](https://github.com/finos/perspective/releases/tag/v1.9.3)
 
 _19 January 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v1.9.2...v1.9.3))
