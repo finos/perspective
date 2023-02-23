@@ -144,7 +144,6 @@ class Suite(object):
 
 
 class Runner(object):
-
     ITERATIONS = 10
 
     def __init__(self, suite):
@@ -165,12 +164,12 @@ class Runner(object):
         class_attrs = self._suite.__class__.__dict__.items()
         instance_attrs = self._suite.__dict__.items()
 
-        for (k, v) in class_attrs:
+        for k, v in class_attrs:
             if hasattr(v, "benchmark") and getattr(v, "benchmark") is True:
                 logging.info("Registering {0}".format(k))
                 self._benchmarks.append(v)
 
-        for (k, v) in instance_attrs:
+        for k, v in instance_attrs:
             if hasattr(v, "benchmark") and getattr(v, "benchmark") is True:
                 logging.info("Registering {0}".format(k))
                 self._benchmarks.append(v)

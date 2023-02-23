@@ -46,7 +46,6 @@ class PerspectiveWebsocketConnection(ABC):
 
 
 class PerspectiveWebsocketClient(PerspectiveClient):
-
     # Ping the server every 30 seconds
     PING_TIMEOUT = 15 * 1000
 

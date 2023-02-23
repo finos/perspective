@@ -38,7 +38,6 @@ def empty_callback(port_id):
 
 
 class PerspectiveBenchmark(Suite):
-
     AGG_OPTIONS = [
         [{"column": "Sales", "op": "sum"}],
         [{"column": "State", "op": "dominant"}],
