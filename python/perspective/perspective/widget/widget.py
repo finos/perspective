@@ -219,7 +219,7 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
         limit=None,
         server=False,
         client=not is_libpsp(),
-        **kwargs
+        **kwargs,
     ):
         """Initialize an instance of :class`~perspective.PerspectiveWidget`
         with the given table/data and viewer configuration.

@@ -27,7 +27,7 @@ try:
 
     CPU_COUNT = os.cpu_count()
 except ImportError:
-    raise Exception("Requires Python 3.7 or later")
+    raise Exception("Requires Python 3.8 or later")
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -35,7 +35,7 @@ with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read().replace("\r\n", "\n")
 
 if sys.version_info.major < 3:
-    raise Exception("Requires Python 3.7 or later")
+    raise Exception("Requires Python 3.8 or later")
 
 # Check for `cmake`
 if which("cmake") is None and which("cmake.exe") is None:
@@ -74,10 +74,8 @@ requires_tornado = ["tornado>=4.5.3,<7"]
 
 requires_dev = (
     [
-        "black==22.8",
+        "black==23.1.0",
         "Faker>=1.0.0",
-        "flake8>=5",
-        "flake8-black>=0.3.3",
         "httpx>=0.23,<1",
         "pip",
         "psutil>=5,<6",
@@ -90,6 +88,7 @@ requires_dev = (
         "pytest-check-links>=0.7",
         "pytest-tornado>=0.8",
         "pytz>=2022",
+        "ruff>=0.0.252",
         "Sphinx>=1.8.4",
         "sphinx-markdown-builder>=0.5.2",
         "wheel",
@@ -286,12 +285,13 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
     ],
     keywords="analytics tools plotting",
     packages=find_packages(exclude=["bench", "bench.*"]),
     include_package_data=True,
     zip_safe=False,
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     install_requires=requires,
     extras_require={
         "aiohttp": requires_aiohttp,

@@ -1,2 +1,27 @@
 [build-system]
 requires = ["setuptools", "wheel", "numpy>=1.13.1,<2"]
+build-backend="setuptools.build_meta"
+
+[tool.black]
+line-length = 88
+target-version = ['py37', 'py38']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  | perspective/tests
+)/
+'''
+
+[tool.ruff]
+line-length = 200
+exclude = [
+    "perspective/tests"
+]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401", "F403"]
+"libpsp.py" = ["F401", "F403"]
+
+[tool.pytest.ini_options]
+asyncio_mode = 'strict'
+testpaths = 'perspective/tests'
