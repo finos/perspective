@@ -34,7 +34,6 @@ class DateTimeEncoder(json.JSONEncoder):
 
 
 class _PerspectiveManagerInternal(object):
-
     # Commands that should be blocked from execution when the manager is in
     # `locked` mode, i.e. its tables and views made immutable from remote
     # modification.

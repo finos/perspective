@@ -59,69 +59,11 @@ function(psp_build_message message)
     set(BUILD_MESSAGE "${BUILD_MESSAGE}\n${message}")
 endfunction()
 
-# ##################################################
-# Helper to grab dependencies from remote sources #
-# ##################################################
-function(psp_build_dep name cmake_file)
-    if(EXISTS ${CMAKE_BINARY_DIR}/${name}-build)
-        psp_build_message("${Cyan}Dependency found - not rebuilding - ${CMAKE_BINARY_DIR}/${name}-build${ColorReset}")
-    else()
-        configure_file(${cmake_file} ${name}-download/CMakeLists.txt)
-
-        execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-            RESULT_VARIABLE result
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${name}-download)
-
-        if(result)
-            message(FATAL_ERROR "CMake step for ${name} failed: ${result}")
-        endif()
-
-        execute_process(COMMAND ${CMAKE_COMMAND} --build .
-            RESULT_VARIABLE result
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${name}-download)
-
-        if(result)
-            message(FATAL_ERROR "Build step for ${name} failed: ${result}")
-        endif()
-    endif()
-
-    if(${name} STREQUAL arrow)
-        # Overwrite arrow's CMakeLists with our custom, minimal CMakeLists.
-        configure_file(${PSP_CMAKE_MODULE_PATH}/${name}/CMakeLists.txt ${CMAKE_BINARY_DIR}/${name}-src/cpp/ COPYONLY)
-        configure_file(${PSP_CMAKE_MODULE_PATH}/${name}/config.h ${CMAKE_BINARY_DIR}/${name}-src/cpp/src/arrow/util/ COPYONLY)
-        add_subdirectory(${CMAKE_BINARY_DIR}/${name}-src/cpp/
-            ${CMAKE_BINARY_DIR}/${name}-build
-            EXCLUDE_FROM_ALL)
-
-        include_directories(${CMAKE_BINARY_DIR}/${name}-src/cpp/src/)
-    elseif(${name} STREQUAL exprtk)
-        # no cmakelists - just include the header
-        include_directories(${CMAKE_BINARY_DIR}/${name}-src)
-    elseif(${name} STREQUAL re2)
-        # Overwrite re2's CMakeLists with our custom CMakeLists.
-        configure_file(${PSP_CMAKE_MODULE_PATH}/${name}/CMakeLists.txt ${CMAKE_BINARY_DIR}/${name}-src/ COPYONLY)
-        include_directories(${CMAKE_BINARY_DIR}/${name}-src)
-
-        add_subdirectory(${CMAKE_BINARY_DIR}/${name}-src
-            ${CMAKE_BINARY_DIR}/${name}-build
-            EXCLUDE_FROM_ALL)
-    else()
-        add_subdirectory(${CMAKE_BINARY_DIR}/${name}-src
-            ${CMAKE_BINARY_DIR}/${name}-build
-            EXCLUDE_FROM_ALL)
-
-        include_directories(${CMAKE_BINARY_DIR}/${name}-src/extras/${name}/include)
-        include_directories(${CMAKE_BINARY_DIR}/${name}-src/include)
-        include_directories(${CMAKE_BINARY_DIR}/${name}-src)
-    endif()
-endfunction()
-
-# #############################
-
 # ######################
 # BUILD CONFIGURATION #
 # ######################
 find_package(Color)
+find_package(InstallDependency)
 
 # OPTIONS
 option(CMAKE_BUILD_TYPE "Release/Debug build" RELEASE)
@@ -391,29 +333,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
         psp_build_message("${Cyan}Using Python ${Python_VERSION}, \nPython_INCLUDE_DIRS: ${Python_INCLUDE_DIRS}, \nPython_LIBRARIES: ${Python_LIBRARIES}, \nPython_EXECUTABLE: ${Python_EXECUTABLE} ${ColorReset}")
         include_directories(${Python_INCLUDE_DIRS})
 
-        if(MACOS)
-            # on mac, use the vanilla pybind11 finder
-            find_package(pybind11)
-
-            if(pybind11_FOUND)
-                # Found PyBind installed by Homebrew
-                set(PYTHON_PYBIND_FOUND pybind11_FOUND)
-            else()
-                # Check if pip installed PyBind is available
-                find_package(Pybind)
-            endif()
-        else()
-            # On Linux/Docker, look for pip installed PyBind only
-            find_package(Pybind)
-        endif()
-
-        if(NOT PYTHON_PYBIND_FOUND)
-            psp_build_message("${Red}PyBind11 could not be located - building from external source${ColorReset}")
-            psp_build_dep("pybind11" "${PSP_CMAKE_MODULE_PATH}/Pybind.txt.in")
-        else()
-            psp_build_message("${Cyan}Found PyBind11 in ${PYTHON_PYBIND_INCLUDE_DIR}${ColorReset}")
-            include_directories(${PYTHON_PYBIND_INCLUDE_DIR})
-        endif()
+        psp_build_dep("pybind11" "${PSP_CMAKE_MODULE_PATH}/Pybind.txt.in")
 
         find_package(NumPy)
 
@@ -439,47 +359,18 @@ message("${Cyan}Building minimal Apache Arrow${ColorReset}")
 # Build arrow dependencies
 psp_build_dep("rapidjson" "${PSP_CMAKE_MODULE_PATH}/rapidjson.txt.in")
 psp_build_dep("double-conversion" "${PSP_CMAKE_MODULE_PATH}/double-conversion.txt.in")
-
-# FIXME: this is a hack to get Flatbuffers working on Azure Win64 by making the
-# headers accessible. The actual flatc executable is installed using
-# Chocolatey for our Azure Windows job.
-find_package(Flatbuffers)
-
-if(NOT FLATBUFFERS_FOUND)
-    psp_build_message("${Cyan}Could not find Flatbuffers${ColorReset}")
-    psp_build_dep("flatbuffers" "${PSP_CMAKE_MODULE_PATH}/flatbuffers.txt.in")
-else()
-    psp_build_message("${Cyan}Found Flatbuffers in ${FLATBUFFERS_INCLUDE_DIR}${ColorReset}")
-    include_directories(${FLATBUFFERS_INCLUDE_DIR})
-endif()
+psp_build_dep("flatbuffers" "${PSP_CMAKE_MODULE_PATH}/flatbuffers.txt.in")
 
 # Build minimal arrow itself
 psp_build_dep("arrow" "${PSP_CMAKE_MODULE_PATH}/arrow.txt.in")
 
 # Build re2 as our regex library
-find_package(re2)
-
-if(NOT re2_FOUND)
-    psp_build_message("${Cyan}Could not find Re2${ColorReset}")
-
-    # this is a workaround for some re2-specific weirdness
-    add_definitions(-DTARGET_OS_OSX=1)
-    psp_build_dep("re2" "${PSP_CMAKE_MODULE_PATH}/re2.txt.in")
-else()
-    psp_build_message("${Cyan}Found re2 in ${RE2_INCLUDE_DIR}${ColorReset}")
-    include_directories(${RE2_INCLUDE_DIR})
-endif()
+# this is a workaround for some re2-specific weirdness
+add_definitions(-DTARGET_OS_OSX=1)
+psp_build_dep("re2" "${PSP_CMAKE_MODULE_PATH}/re2.txt.in")
 
 # Build exprtk for expression parsing
-find_package(exprtk)
-
-if(NOT exprtk_FOUND)
-    psp_build_message("${Cyan}Could not find exprtk${ColorReset}")
-    psp_build_dep("exprtk" "${PSP_CMAKE_MODULE_PATH}/exprtk.txt.in")
-else()
-    psp_build_message("${Cyan}Found exprtk in ${EXPRTK_INCLUDE_DIR}${ColorReset}")
-    include_directories(${EXPRTK_INCLUDE_DIR})
-endif()
+psp_build_dep("exprtk" "${PSP_CMAKE_MODULE_PATH}/exprtk.txt.in")
 
 # ####################
 set(CMAKE_C_FLAGS_RELEASE " \
@@ -689,10 +580,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
             set_property(TARGET psp PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path})
             set_property(TARGET binding PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path})
 
-            target_compile_options(arrow PRIVATE -fvisibility=hidden)
-            target_compile_options(flatbuffers PRIVATE -fvisibility=hidden)
-            target_compile_options(double-conversion PRIVATE -fvisibility=hidden)
-            target_compile_options(re2 PRIVATE -fvisibility=hidden)
             target_compile_options(psp PRIVATE -fvisibility=hidden)
             target_compile_options(binding PRIVATE -fvisibility=hidden)    
         else()

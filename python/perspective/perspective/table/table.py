@@ -200,13 +200,13 @@ class Table(object):
             # full expression string in the UI.
             validated["expression_alias"][expression[0]] = expression[1]
 
-        for (alias, dtype) in expression_schema.items():
+        for alias, dtype in expression_schema.items():
             if not as_string:
                 dtype = _str_to_pythontype(dtype)
 
             validated["expression_schema"][alias] = expression_schema[alias]
 
-        for (alias, error) in expression_errors.items():
+        for alias, error in expression_errors.items():
             error_dict = {}
             error_dict["error_message"] = error.error_message
             error_dict["line"] = error.line
