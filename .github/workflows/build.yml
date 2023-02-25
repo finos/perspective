@@ -193,6 +193,8 @@ jobs:
                     - 3.9
                 node-version: [16.x]
 
+            # NOTE: don't fail fast as sometimes npm blocks the burst of fetches from GHA
+            fail-fast: false
         ##################################
         # Setup matrix job configuration #
         ##################################
@@ -432,6 +434,8 @@ jobs:
                 python-version:
                     - 3.9
 
+            # NOTE: don't fail fast as sometimes npm blocks the burst of fetches from GHA
+            fail-fast: false
         ##################################
         # Setup matrix job configuration #
         ##################################
@@ -546,6 +550,8 @@ jobs:
                     - 3.9
                 node-version: [16.x]
 
+            # NOTE: don't fail fast as sometimes npm blocks the burst of fetches from GHA
+            fail-fast: false
         ##################################
         # Setup matrix job configuration #
         ##################################
@@ -778,6 +784,8 @@ jobs:
                     - is-full-run: false
                       python-version: "3.10"
 
+            # NOTE: don't fail fast as sometimes npm blocks the burst of fetches from GHA
+            fail-fast: false
         ##################################
         # Setup matrix job configuration #
         ##################################
@@ -1045,6 +1053,8 @@ jobs:
                 python-version:
                     - 3.9
                 node-version: [16.x]
+            # NOTE: don't fail fast as sometimes npm blocks the burst of fetches from GHA
+            fail-fast: false
 
         ##################################
         # Setup matrix job configuration #
@@ -1251,6 +1261,8 @@ jobs:
 
                     - is-full-run: false
                       python-version: "3.10"
+            # NOTE: don't fail fast as sometimes npm blocks the burst of fetches from GHA
+            fail-fast: false
 
         ##################################
         # Setup matrix job configuration #
