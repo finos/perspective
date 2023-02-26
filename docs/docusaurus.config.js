@@ -97,7 +97,7 @@ const config = {
                 // title: "Perspective",
                 logo: {
                     alt: "Perspective",
-                    src: "img/logo/logo-light.png",
+                    src: "svg/perspective-logo-light.svg",
                 },
                 items: [
                     // {to: "/blog", label: "News", position: "right"},
@@ -120,7 +120,6 @@ const config = {
                 ],
             },
             footer: {
-                style: "dark",
                 links: [
                     {
                         title: "Docs",

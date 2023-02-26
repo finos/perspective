@@ -9,9 +9,36 @@ import ProjectDescription from "./description.md";
 import JavaScriptDescription from "./javascript.md";
 import PythonDescription from "./python.md";
 
+import Feature1 from "./feature1.md";
+import Feature2 from "./feature2.md";
+import Feature3 from "./feature3.md";
+
+import Svg1 from "@site/static/svg/feature1.svg";
+import Svg2 from "@site/static/svg/feature2.svg";
+import Svg3 from "@site/static/svg/feature3.svg";
+
 const FeatureList = [
     {
-        description: <ProjectDescription />,
+        description: (
+            <div>
+                <ProjectDescription />
+                <br />
+                <h3>Features</h3>
+                <br />
+                <div className={styles.feature}>
+                    <Svg1 className={styles.featureSvg}></Svg1>
+                    <Feature1></Feature1>
+                </div>
+                <div className={styles.feature}>
+                    <Svg2 className={styles.featureSvg}></Svg2>
+                    <Feature2></Feature2>
+                </div>
+                <div className={styles.feature}>
+                    <Svg3 className={styles.featureSvg}></Svg3>
+                    <Feature3></Feature3>
+                </div>
+            </div>
+        ),
     },
     {
         description: <JavaScriptDescription />,
@@ -21,9 +48,9 @@ const FeatureList = [
     },
 ];
 
-function Feature({description}) {
+function Feature({ description }) {
     return (
-        <div className={clsx("col col--4")}>
+        <div className={clsx()}>
             <div className="text--full padding-horiz--md">{description}</div>
         </div>
     );
@@ -33,20 +60,27 @@ export default function HomepageFeatures() {
     return (
         <>
             <section className={styles.features}>
-                <div className="container">
+                <div className={styles.container}>
                     <div className="row">
                         {FeatureList.map((props, idx) => (
-                            <Feature key={idx} {...props} />
+                            <>
+                                <hr></hr>
+                                <br />
+                                <br />
+                                <br />
+                                <Feature key={idx} {...props} />
+                            </>
                         ))}
                     </div>
+                    <br />
+                    <hr></hr>
                 </div>
             </section>
-            {/* <section className={styles.features}>
-                <MediaAppearances />
-            </section> */}
+
             <section className={clsx(styles.gallerySection, styles.features)}>
                 <div className={clsx(styles.gallery, "container")}>
                     <BrowserOnly>{() => <ExampleGallery />}</BrowserOnly>
+                    <hr></hr>
                 </div>
             </section>
         </>

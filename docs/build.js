@@ -116,6 +116,9 @@ function template(is_dark) {
                 right: 0;
                 bottom: 0;
             }
+            perspective-viewer[theme="Pro Light"] {
+                --plugin--background:#f2f4f6
+            }
         </style>
     </head>
     <body>
