@@ -15,7 +15,7 @@ function HomepageHeader() {
     return (
         <header className={clsx("hero", styles.heroBanner)}>
             <div className="container">
-                <img className={clsx(styles.heroBannerLogo)}></img>
+                {/* <img className={clsx(styles.heroBannerLogo)}></img> */}
                 <div className={styles.buttons}>
                     <BrowserOnly>
                         {() => {
@@ -36,30 +36,35 @@ export default function Home() {
     if (ExecutionEnvironment.canUseDOM) {
         // The scroll listener
         const handleScroll = useCallback(() => {
-            const contains = document.body.classList.contains("scrolled");
-            if (document.documentElement.scrollTop > 100 && !contains) {
-                document.body.classList.add("scrolled");
-            } else if (document.documentElement.scrollTop <= 100 && contains) {
-                document.body.classList.remove("scrolled");
+            const elem = document.querySelector(".header-center");
+            const contains = elem.classList.contains("header-shift");
+            if (document.documentElement.scrollTop > 90 && contains) {
+                elem.classList.remove("header-shift");
+            } else if (document.documentElement.scrollTop <= 90 && !contains) {
+                elem.classList.add("header-shift");
             }
         }, []);
 
         // Attach the scroll listener to the div
         useEffect(() => {
+            const elem = document.querySelector(".header-center");
+            elem.classList.add("header-shift");
             document.addEventListener("scroll", handleScroll);
             return () => document.removeEventListener("scroll", handleScroll);
         }, [handleScroll]);
     }
 
     return (
-        <Layout
-            title={`${siteConfig.title}`}
-            description={siteConfig.description}
-        >
-            <HomepageHeader />
-            <main>
-                <HomepageFeatures />
-            </main>
-        </Layout>
+        <div class="header-center header-shift">
+            <Layout
+                title={`${siteConfig.title}`}
+                description={siteConfig.description}
+            >
+                <HomepageHeader />
+                <main>
+                    <HomepageFeatures />
+                </main>
+            </Layout>
+        </div>
     );
 }

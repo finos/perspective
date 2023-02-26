@@ -99,7 +99,7 @@ function OverlayDemo(props) {
         >
             <perspective-viewer
                 ref={perspectiveRef}
-                theme={props.color === "dark" ? "Pro Dark" : "Material Light"}
+                theme={props.color === "dark" ? "Pro Dark" : "Pro Light"}
                 class={clsx(styles.viewer)}
             ></perspective-viewer>
         </div>

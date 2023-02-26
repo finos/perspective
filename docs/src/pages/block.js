@@ -17,10 +17,6 @@ export default function Block() {
     let files = [];
     let example;
     if (ExecutionEnvironment.canUseDOM) {
-        useEffect(() => {
-            document.body.classList.add("scrolled");
-        }, []);
-
         example = getQueryVariable("example");
         if (!example) {
             return (
@@ -39,64 +35,66 @@ export default function Block() {
     const url = useBaseUrl(`/blocks/${example}/index.html`);
 
     return (
-        <Layout
-            title={`${siteConfig.title}`}
-            description={siteConfig.description}
-        >
-            <div
-                style={{
-                    width: "960px",
-                    margin: "0 auto",
-                }}
+        <div class="header-center">
+            <Layout
+                title={`${siteConfig.title}`}
+                description={siteConfig.description}
             >
                 <div
                     style={{
-                        display: "flex",
-                        alignItems: "stretch",
-                        flexDirection: "column",
+                        width: "960px",
+                        margin: "0 auto",
                     }}
                 >
-                    <br />
-                    <h1>{example}</h1>
-                    <BrowserOnly>
-                        {() => (
-                            <>
-                                <iframe
-                                    width="960"
-                                    height="500"
-                                    style={{
-                                        border: "1px solid var(--ifm-toc-border-color)",
-                                        borderRadius: "10px",
-                                    }}
-                                    src={url}
-                                ></iframe>
-                                <br />
-                                <Link
-                                    to={`pathname:///blocks/${example}/index.html`}
-                                    style={{ alignSelf: "flex-end" }}
-                                >
-                                    {"Open in New Tab"}
-                                </Link>
-                                <br />
+                    <div
+                        style={{
+                            display: "flex",
+                            alignItems: "stretch",
+                            flexDirection: "column",
+                        }}
+                    >
+                        <br />
+                        <h1>{example}</h1>
+                        <BrowserOnly>
+                            {() => (
+                                <>
+                                    <iframe
+                                        width="960"
+                                        height="500"
+                                        style={{
+                                            border: "1px solid var(--ifm-toc-border-color)",
+                                            borderRadius: "10px",
+                                        }}
+                                        src={url}
+                                    ></iframe>
+                                    <br />
+                                    <Link
+                                        to={`pathname:///blocks/${example}/index.html`}
+                                        style={{ alignSelf: "flex-end" }}
+                                    >
+                                        {"Open in New Tab"}
+                                    </Link>
+                                    <br />
 
-                                {files.map((x, i) => {
-                                    const ext = x.name.split(".")[1];
-                                    return (
-                                        <CodeBlock
-                                            key={i}
-                                            language={ext}
-                                            title={x.name}
-                                            showLineNumbers
-                                        >
-                                            {x.contents}
-                                        </CodeBlock>
-                                    );
-                                })}
-                            </>
-                        )}
-                    </BrowserOnly>
+                                    {files.map((x, i) => {
+                                        const ext = x.name.split(".")[1];
+                                        return (
+                                            <CodeBlock
+                                                key={i}
+                                                language={ext}
+                                                title={x.name}
+                                                showLineNumbers
+                                            >
+                                                {x.contents}
+                                            </CodeBlock>
+                                        );
+                                    })}
+                                </>
+                            )}
+                        </BrowserOnly>
+                    </div>
                 </div>
-            </div>
-        </Layout>
+            </Layout>
+        </div>
     );
 }
