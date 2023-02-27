@@ -26,9 +26,14 @@ use super::errors::*;
 /// marshalled to a `JsPromise`, avoiding an API which requires type casting to
 /// and from `JsValue` and the associated loss of type safety.
 #[must_use]
-pub struct ApiFuture<T>(Pin<Box<dyn Future<Output = ApiResult<T>>>>);
+pub struct ApiFuture<T>(Pin<Box<dyn Future<Output = ApiResult<T>>>>)
+where
+    Result<T, JsValue>: IntoJsResult + 'static;
 
-impl<T> ApiFuture<T> {
+impl<T> ApiFuture<T>
+where
+    Result<T, JsValue>: IntoJsResult + 'static,
+{
     /// Constructor for `ApiFuture`.  Note that, like a regular `Future`, the
     /// `ApiFuture` created does _not_ execute without being further cast to a
     /// `Promise`, either explicitly or implcitly (when exposed via
@@ -52,6 +57,7 @@ where
 
 impl<T> Default for ApiFuture<T>
 where
+    Result<T, JsValue>: IntoJsResult + 'static,
     T: Default,
 {
     fn default() -> Self {
@@ -81,7 +87,10 @@ where
     }
 }
 
-impl<T> WasmDescribe for ApiFuture<T> {
+impl<T> WasmDescribe for ApiFuture<T>
+where
+    Result<T, JsValue>: IntoJsResult + 'static,
+{
     fn describe() {
         <js_sys::Promise as WasmDescribe>::describe()
     }

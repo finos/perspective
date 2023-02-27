@@ -7,16 +7,23 @@
  *
  */
 
+@mixin icon {
+    background-repeat: no-repeat;
+    background-color: var(--icon--color);
+    content: "";
+    display: inline-block;
+    -webkit-mask-size: cover;
+    mask-size: cover;
+}
+
 :host {
     position: fixed;
     z-index: 10000;
-    padding: 6px;
+    padding: 12px;
     outline: none;
     background-color: #ffffff;
     font-size: 12px;
-    font-weight: 300;
     border: inherit;
-    box-shadow: 0 2px 4px 0 rgb(0 0 0 / 10%);
     user-select: none;
 
     select {
@@ -27,7 +34,6 @@
 
     #column-style-container {
         margin-bottom: 4px;
-        // width: 120px;
     }
 
     label {
@@ -56,8 +62,8 @@
         );
     }
 
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button {
+    input[type=number]:-webkit-inner-spin-button,
+    input[type=number]:-webkit-outer-spin-button {
         opacity: 1;
         background: transparent;
         background-color: transparent;
@@ -79,40 +85,50 @@
     }
 
     input[type="checkbox"] {
-        appearance: var(--column-style-checkbox--appearance, auto);
-        font-family: var(--button--font-family, inherit);
-        font-size: 16px;
-        text-align: center;
+        appearance: none;
 
         &:checked:after {
-            content: var(--column-style-checkbox-checked--content, none);
+            -webkit-mask-image: var(--column-checkbox-on--mask-image);
+            mask-image: var(--column-checkbox-on--mask-image);
         }
 
-        &:not([disabled]):checked:after {
-            color: var(--active--color, red);
+        &[disabled]:after {
+            opacity: 0.2s;
         }
 
         &:after {
-            content: var(--column-style-checkbox-unchecked--content, none);
-            color: var(--inactive--color, #999);
+            @include icon;
+            height: 13px;
+            width: 13px;
+            -webkit-mask-image: var(--column-checkbox-off--mask-image);
+            mask-image: var(--column-checkbox-off--mask-image);
+        }
+
+        &:hover:after {
+            -webkit-mask-image: var(--column-checkbox-hover--mask-image);
+            mask-image: var(--column-checkbox-hover--mask-image);
         }
     }
 
     input[type="radio"] {
-        appearance: var(--column-style-radio--appearance, auto);
-        font-family: var(--button--font-family, inherit);
-        font-size: 16px;
-        font-feature-settings: "liga";
-        text-align: center;
+        appearance: none;
 
         &:checked:after {
-            content: var(--column-style-radio-checked--content, none);
-            color: var(--active--color, red);
+            -webkit-mask-image: var(--column-radio-on--mask-image);
+            mask-image: var(--column-radio-on--mask-image);
         }
 
         &:after {
-            content: var(--column-style-radio-unchecked--content, none);
-            color: var(--inactive--color, #999);
+            @include icon;
+            width: 10px;
+            height: 10px;
+            -webkit-mask-image: var(--column-radio-off--mask-image);
+            mask-image: var(--column-radio-off--mask-image);
+        }
+
+        &:hover:after {
+            -webkit-mask-image: var(--column-radio-hover--mask-image);
+            mask-image: var(--column-radio-hover--mask-image);
         }
     }
 

@@ -10,7 +10,7 @@
 import "./polyfills/index";
 import charts from "../charts/charts";
 import { initialiseStyles } from "../series/colorStyles";
-import style from "../../less/chart.less";
+import style from "../../../dist/css/perspective-viewer-d3fc.css";
 
 import * as d3 from "d3";
 

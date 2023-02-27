@@ -40,34 +40,33 @@ impl Component for PivotItem {
     type Properties = PivotItemProps;
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let noderef = NodeRef::default();
         let dragstart = Callback::from({
             let event_name = ctx.props().column.to_owned();
-            let noderef = noderef.clone();
             let dragdrop = ctx.props().dragdrop.clone();
             let action = ctx.props().action;
             move |event: DragEvent| {
-                let elem = noderef.cast::<HtmlElement>().unwrap();
-                event.data_transfer().unwrap().set_drag_image(&elem, 0, 0);
-                dragdrop.drag_start(event_name.to_string(), DragEffect::Move(action))
+                dragdrop.set_drag_image(&event).unwrap();
+                dragdrop.notify_drag_start(event_name.to_string(), DragEffect::Move(action))
             }
         });
 
         let dragend = Callback::from({
             let dragdrop = ctx.props().dragdrop.clone();
-            move |_event| dragdrop.drag_end()
+            move |_event| dragdrop.notify_drag_end()
         });
 
         html! {
-            <span
+            <div
+                class="pivot-column-draggable"
                 draggable="true"
-                ref={ noderef.clone() }
                 ondragstart={ dragstart }
                 ondragend={ dragend }>
-                {
-                    ctx.props().column.clone()
-                }
-            </span>
+                <div class="pivot-column-border">
+                    <span class="column_name string">
+                        { ctx.props().column.clone() }
+                    </span>
+                </div>
+            </div>
         }
     }
 

@@ -4199,10 +4199,10 @@
   resolved "https://registry.yarnpkg.com/@polka/url/-/url-1.0.0-next.21.tgz#5de5a2385a35309427f6011992b544514d559aa1"
   integrity sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==
 
-"@prospective.co/procss@^0.1.8":
-  version "0.1.8"
-  resolved "https://registry.yarnpkg.com/@prospective.co/procss/-/procss-0.1.8.tgz#7b9266900447b77c838e92448a50c84bd8e8be2a"
-  integrity sha512-YneMxLWpDW+LzOAHlnpuCCXKPE07aS1GVjNlPAJJL531fOfguw56CzlxFiuKZmiInlR1lHR6QBynlVPVnyWofw==
+"@prospective.co/procss@^0.1.12":
+  version "0.1.12"
+  resolved "https://registry.yarnpkg.com/@prospective.co/procss/-/procss-0.1.12.tgz#32d49529c53353f1e1442483274d927df9fc38a2"
+  integrity sha512-2SKOvnvAJc445Zw6rq7ujDPdx3sAQD9LM6YRMwZqZZlX4cQfLFHU/uG2OuqJkHN3T3h5HnnnmvvOQC0+D06CAw==
 
 "@rjsf/core@^3.1.0":
   version "3.2.1"
@@ -4629,11 +4629,6 @@
   integrity sha512-zm6xBQpFDIDM6o9r6HSgDeIcLy82TKWctCXEPbJJcXb5AKmi5BNNdLXneixK4lplX3PqIVcwLBCGE/kAGnlD4A==
   dependencies:
     "@types/node" "*"
-
-"@types/less@^3.0.3":
-  version "3.0.3"
-  resolved "https://registry.yarnpkg.com/@types/less/-/less-3.0.3.tgz#f9451dbb9548d25391107d65d6401a0cfb15db92"
-  integrity sha512-1YXyYH83h6We1djyoUEqTlVyQtCfJAFXELSKW2ZRtjHD4hQ82CC4lvrv5D0l0FLcKBaiPbXyi3MpMsI9ZRgKsw==
 
 "@types/linkify-it@*":
   version "3.0.2"
@@ -8566,14 +8561,6 @@ esbuild-openbsd-64@0.14.54:
   version "0.14.54"
   resolved "https://registry.yarnpkg.com/esbuild-openbsd-64/-/esbuild-openbsd-64-0.14.54.tgz#db4c8495287a350a6790de22edea247a57c5d47b"
   integrity sha512-Qyk7ikT2o7Wu76UsvvDS5q0amJvmRzDyVlL0qf5VLsLchjCa1+IAvd8kTBgUxD7VBUUVgItLkk609ZHUc1oCaw==
-
-esbuild-plugin-less@^1.1.11:
-  version "1.1.11"
-  resolved "https://registry.yarnpkg.com/esbuild-plugin-less/-/esbuild-plugin-less-1.1.11.tgz#4fba11e6f64188cf9453241ee0ff5685fcf87bb1"
-  integrity sha512-W2ps3mPK8eIrP+q5htgtPh9n5cAg/tQgcIdCEX94+QdDIegwUIh1Vd8A4v0W2WVxmESsOInEj3REIoMNmGENmQ==
-  dependencies:
-    "@types/less" "^3.0.3"
-    less "^4.1.3"
 
 esbuild-sunos-64@0.14.54:
   version "0.14.54"

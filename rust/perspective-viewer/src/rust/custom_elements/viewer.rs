@@ -24,9 +24,9 @@ use crate::custom_events::*;
 use crate::dragdrop::*;
 use crate::js::*;
 use crate::model::*;
+use crate::presentation::*;
 use crate::renderer::*;
 use crate::session::Session;
-use crate::theme::*;
 use crate::utils::*;
 use crate::*;
 
@@ -134,12 +134,12 @@ pub struct PerspectiveViewerElement {
     resize_handle: Rc<RefCell<Option<ResizeObserverHandle>>>,
     session: Session,
     renderer: Renderer,
-    theme: Theme,
+    presentation: Presentation,
     _events: CustomEvents,
     _subscriptions: Rc<Subscription>,
 }
 
-derive_model!(Renderer, Session, Theme for PerspectiveViewerElement);
+derive_model!(Renderer, Session, Presentation for PerspectiveViewerElement);
 
 impl CustomElementMetadata for PerspectiveViewerElement {
     const CUSTOM_ELEMENT_NAME: &'static str = "perspective-viewer";
@@ -159,14 +159,14 @@ impl PerspectiveViewerElement {
         // Application State
         let session = Session::default();
         let renderer = Renderer::new(&elem);
-        let theme = Theme::new(&elem);
+        let presentation = Presentation::new(&elem);
 
         // Create Yew App
         let props = yew::props!(PerspectiveViewerProps {
             elem: elem.clone(),
             session: session.clone(),
             renderer: renderer.clone(),
-            theme: theme.clone(),
+            presentation: presentation.clone(),
             dragdrop: DragDrop::default(),
             weak_link: WeakScope::default(),
         });
@@ -182,14 +182,14 @@ impl PerspectiveViewerElement {
             }
         });
 
-        let _events = CustomEvents::new(&elem, &session, &renderer, &theme);
+        let _events = CustomEvents::new(&elem, &session, &renderer, &presentation);
         let resize_handle = ResizeObserverHandle::new(&elem, &renderer, &root);
         PerspectiveViewerElement {
             elem,
             root: Rc::new(RefCell::new(Some(root))),
             session,
             renderer,
-            theme,
+            presentation,
             resize_handle: Rc::new(RefCell::new(Some(resize_handle))),
             _events,
             _subscriptions: Rc::new(update_sub),
@@ -294,30 +294,37 @@ impl PerspectiveViewerElement {
     ///   "json", "string" or "arraybuffer" format.
     pub fn restore(&self, update: JsValue) -> ApiFuture<()> {
         document().blur_active_element();
-        clone!(self.session, self.renderer, self.root, self.theme);
+        clone!(self.session, self.renderer, self.root, self.presentation);
         ApiFuture::new(async move {
             let ViewerConfigUpdate {
                 plugin,
                 plugin_config,
                 settings,
                 theme: theme_name,
+                title,
                 mut view_config,
             } = ViewerConfigUpdate::decode(&update)?;
 
+            if let OptionalUpdate::Update(title) = title {
+                presentation.set_title(Some(title));
+            } else if let OptionalUpdate::SetDefault = title {
+                presentation.set_title(None);
+            }
+
             let needs_restyle = match theme_name {
                 OptionalUpdate::SetDefault => {
-                    let current_name = theme.get_name().await;
+                    let current_name = presentation.get_selected_theme_name().await;
                     if current_name.is_some() {
-                        theme.set_name(None).await?;
+                        presentation.set_theme_name(None).await?;
                         true
                     } else {
                         false
                     }
                 }
                 OptionalUpdate::Update(x) => {
-                    let current_name = theme.get_name().await;
+                    let current_name = presentation.get_selected_theme_name().await;
                     if current_name.is_some() && current_name.as_ref().unwrap() != &x {
-                        theme.set_name(Some(&x)).await?;
+                        presentation.set_theme_name(Some(&x)).await?;
                         true
                     } else {
                         false
@@ -342,8 +349,8 @@ impl PerspectiveViewerElement {
                 let result = async {
                     let plugin = renderer.get_active_plugin()?;
                     if let Some(plugin_config) = &plugin_config {
-                        let js_config = JsValue::from_serde(plugin_config);
-                        plugin.restore(&js_config?);
+                        let js_config = JsValue::from_serde_ext(plugin_config)?;
+                        plugin.restore(&js_config);
                     }
 
                     session.validate().await?.create_view().await
@@ -495,7 +502,7 @@ impl PerspectiveViewerElement {
     /// Set the available theme names available in the status bar UI.
     #[wasm_bindgen(js_name = "resetThemes")]
     pub fn reset_themes(&self, themes: Option<Box<[JsValue]>>) -> ApiFuture<JsValue> {
-        clone!(self.renderer, self.session, self.theme);
+        clone!(self.renderer, self.session, self.presentation);
         ApiFuture::new(async move {
             let themes: Option<Vec<String>> = themes
                 .unwrap_or_default()
@@ -503,16 +510,16 @@ impl PerspectiveViewerElement {
                 .map(|x| x.as_string())
                 .collect();
 
-            let theme_name = theme.get_name().await;
-            theme.reset(themes).await;
-            let reset_theme = theme
-                .get_themes()
+            let theme_name = presentation.get_selected_theme_name().await;
+            presentation.reset_available_themes(themes).await;
+            let reset_theme = presentation
+                .get_available_themes()
                 .await?
                 .iter()
                 .find(|y| theme_name.as_ref() == Some(y))
                 .cloned();
 
-            theme.set_name(reset_theme.as_deref()).await?;
+            presentation.set_theme_name(reset_theme.as_deref()).await?;
             let view = session.get_view().into_apierror()?;
             renderer.restyle_all(&view).await
         })

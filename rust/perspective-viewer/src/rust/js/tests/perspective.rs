@@ -18,7 +18,7 @@ wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 #[wasm_bindgen_test]
 pub async fn test_table_size() {
     let table = get_mock_table().await;
-    let size = table.size().await.unwrap();
+    let size = table.num_rows().await.unwrap();
     assert!(size - 3_f64 < 0.01);
 }
 

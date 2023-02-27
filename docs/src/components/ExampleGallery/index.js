@@ -1,15 +1,15 @@
-import React, {useCallback, useState, useRef} from "react";
+import React, { useCallback, useState, useRef } from "react";
 import clsx from "clsx";
-import {useColorMode} from "@docusaurus/theme-common";
+import { useColorMode } from "@docusaurus/theme-common";
 import useBaseUrl from "@docusaurus/useBaseUrl";
 import EXAMPLES from "./features.js";
 import styles from "./styles.module.css";
 import BrowserOnly from "@docusaurus/BrowserOnly";
 
-const {convert} = require("@finos/perspective-viewer/src/ts/migrate");
+const { convert } = require("@finos/perspective-viewer/src/ts/migrate");
 
 export default function ExampleGallery(props) {
-    const {colorMode} = useColorMode();
+    const { colorMode } = useColorMode();
     const color = colorMode === "dark" ? "_dark" : "";
     const [overlayVisible, setOverlayVisible] = useState(-1);
     const closeOverlayCallback = useCallback(() => {
@@ -52,7 +52,7 @@ export default function ExampleGallery(props) {
 }
 
 function OverlayDemo(props) {
-    const {SUPERSTORE_TABLE} = require("@site/src/data/superstore.js");
+    const { SUPERSTORE_TABLE } = require("@site/src/data/superstore.js");
     const ref = useRef();
     const dismissCallback = useCallback(
         (event) => {
@@ -99,9 +99,7 @@ function OverlayDemo(props) {
         >
             <perspective-viewer
                 ref={perspectiveRef}
-                theme={
-                    props.color === "dark" ? "Material Dark" : "Material Light"
-                }
+                theme={props.color === "dark" ? "Pro Dark" : "Material Light"}
                 class={clsx(styles.viewer)}
             ></perspective-viewer>
         </div>

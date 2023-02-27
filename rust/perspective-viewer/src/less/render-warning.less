@@ -8,7 +8,7 @@
  *
  */
 
-@amber400: #ffca28;
+// @amber400: #ffca28;
 
 :host {
     .plugin_information {
@@ -19,11 +19,17 @@
         flex-direction: row;
         justify-content: flex-start;
         padding: 0.5rem;
-        width: 100%;
         z-index: 10000;
+        user-select: none;
+        left: 48px;
+        right: 48px;
+        padding-left: 24px;
+        padding-right: 24px;
+        border-radius: 24px;
+        align-items: center;
 
         &.plugin_information--warning {
-            background: var(--warning--background, @amber400);
+            background: var(--warning--background, #ffca28);
         }
 
         .plugin_information__text {
@@ -34,8 +40,13 @@
             align-items: center;
         }
 
-        .plugin_information__text:before {
+        .plugin_information__icon {
+            height: 20px;
+        }
+
+        .plugin_information__icon:before {
             content: var(--overflow-hint-icon--content);
+            height: 20px;
             font-family: var(
                 --overflow_hint--font-family,
                 var(--button--font-family, inherit)

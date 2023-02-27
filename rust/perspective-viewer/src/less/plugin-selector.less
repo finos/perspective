@@ -1,0 +1,157 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms
+ * of the Apache License 2.0.  The full license can be found in the LICENSE
+ * file.
+ *
+ */
+
+:host {
+    #side_panel {
+        #plugin_selector_container.open ~ * {
+            opacity: 0;
+        }
+
+        #plugin_selector_container {
+            min-height: 48px;
+            overflow: hidden;
+            display: flex;
+            white-space: nowrap;
+            flex-direction: column;
+            flex: 0 0 auto;
+
+            // Overflow the padding bounds of the container
+            // TODO these bounds exist to protext the resizer and scrollbar (left &
+            // right resp) but we really should find a way to remove it and delegate
+            // to sub-containers.
+            margin: 0 0px 0 -9px;
+
+            #plugin_selector_border {
+                height: 2px;
+                width: 100%;
+                background-color: var(--inactive--color, #6E6E6E);
+                margin-top: 1px;
+            }
+
+            &.open {
+                position: absolute;
+                margin: 0;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+
+                // This element is first in the container but visually "overlaps"
+                // when expanded
+                z-index: 3;
+                color: var(--icon--color, #042121);
+                // background: var(--plugin--background);
+
+                .plugin-select-item {
+                    padding-left: 8px;
+                }
+            }
+
+            .plugin-select-item-name {
+                padding-left: 10px;
+            }
+
+            .plugin-select-item {
+                // width: 48px;
+                padding-left: 9px;
+                height: 48px;
+                display: flex;
+                align-items: center;
+                border-bottom: 1px solid var(--inactive--color, #6E6E6E);
+                cursor: pointer;
+            }
+
+            // Hadn't seen this technique before, makes sizing/positioning these 
+            // trivial.  There's some indication this doesn't work on non-chrome
+            // https://stackoverflow.com/questions/36259410/how-to-set-size-of-svg-image-in-before-pseudo-class
+            // https://stackoverflow.com/questions/21509982/change-svg-fill-color-in-before-or-after-css
+            .plugin-select-item:before {
+                content: "";
+                display: inline-block;
+                height: 35px;
+                width: 40px;
+                -webkit-mask-size: cover;
+                mask-size: cover;
+                background-repeat: no-repeat;
+                background-color: var(--icon--color);
+            }
+
+            .plugin-select-item:hover {
+                background-color: var(--icon--color, #042121);
+                color: var(--plugin--background, #FDFFFD);
+            }
+
+            .plugin-select-item:hover:before {
+                background-color: var(--plugin--background, #FDFFFD);
+            }
+
+            .plugin-select-item[data-plugin="Candlestick"]:before {
+                -webkit-mask-image: url(../svg/mega-menu-icons-candlestick.svg);
+            }
+
+            .plugin-select-item[data-plugin="Heatmap"]:before {
+                -webkit-mask-image: url(../svg/mega-menu-icons-heatmap.svg);
+            }
+
+            .plugin-select-item[data-plugin="Map Scatter"]:before {
+                -webkit-mask-image: url(../svg/mega-menu-icons-map-scatter.svg);
+            }
+
+            .plugin-select-item[data-plugin="OHLC"]:before {
+                -webkit-mask-image: url(../svg/mega-menu-icons-ohlc.svg);
+            }
+
+            .plugin-select-item[data-plugin="Sunburst"]:before {
+                -webkit-mask-image: url(../svg/mega-menu-icons-sunburst.svg);
+            }
+
+            .plugin-select-item[data-plugin="Treemap"]:before {
+                -webkit-mask-image: url(../svg/mega-menu-icons-treemap.svg);
+            }
+
+            .plugin-select-item[data-plugin="X Bar"]:before {
+                -webkit-mask-image: url(../svg/mega-menu-icons-x-bar.svg);
+            }
+
+            .plugin-select-item[data-plugin="X/Y Line"]:before {
+                -webkit-mask-image: url(../svg/mega-menu-icons-x:y-line.svg);
+            }
+
+            .plugin-select-item[data-plugin="X/Y Scatter"]:before {
+                -webkit-mask-image: url(../svg/mega-menu-icons-x:y-scatter.svg);
+            }
+
+            .plugin-select-item[data-plugin="Y Area"]:before {
+                -webkit-mask-image: url(../svg/mega-menu-icons-y-area.svg);
+            }
+
+            .plugin-select-item[data-plugin="Y Bar"]:before {
+                -webkit-mask-image: url(../svg/mega-menu-icons-y-bar.svg);
+            }
+
+            .plugin-select-item[data-plugin="Y Line"]:before {
+                -webkit-mask-image: url(../svg/mega-menu-icons-y-line.svg);
+            }
+
+            .plugin-select-item[data-plugin="Y Scatter"]:before {
+                -webkit-mask-image: url(../svg/mega-menu-icons-y-scatter.svg);
+            }
+
+            .plugin-select-item[data-plugin="Datagrid"]:before {
+                -webkit-mask-image: url(../svg/mega-menu-icons-datagrid.svg);
+            }
+
+        }
+
+        #plugin_selector {
+            flex-grow: 1;
+        }
+    }
+}

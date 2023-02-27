@@ -10,7 +10,7 @@ use wasm_bindgen_test::*;
 use yew::prelude::*;
 
 use crate::components::status_bar_counter::*;
-use crate::session::TableStats;
+use crate::session::ViewStats;
 use crate::utils::await_animation_frame;
 use crate::*;
 
@@ -28,10 +28,12 @@ pub async fn test_counter_none() {
 
 #[wasm_bindgen_test]
 pub async fn test_counter_initializing() {
-    let stats = Some(TableStats {
-        is_pivot: false,
-        num_rows: None,
-        virtual_rows: None,
+    let stats = Some(ViewStats {
+        num_table_cells: None,
+        num_view_cells: None,
+        is_group_by: false,
+        is_split_by: false,
+        is_filtered: false,
     });
 
     let div = test_html! {
@@ -44,10 +46,12 @@ pub async fn test_counter_initializing() {
 
 #[wasm_bindgen_test]
 pub async fn test_counter_some_connected_no_view() {
-    let stats = Some(TableStats {
-        is_pivot: false,
-        num_rows: Some(123456789),
-        virtual_rows: None,
+    let stats = Some(ViewStats {
+        num_table_cells: Some((123456789, 7)),
+        num_view_cells: None,
+        is_group_by: false,
+        is_split_by: false,
+        is_filtered: false,
     });
 
     let div = test_html! {
@@ -60,10 +64,12 @@ pub async fn test_counter_some_connected_no_view() {
 
 #[wasm_bindgen_test]
 pub async fn test_counter_some_connected_no_pivot() {
-    let stats = Some(TableStats {
-        is_pivot: false,
-        num_rows: Some(123456789),
-        virtual_rows: Some(54321),
+    let stats = Some(ViewStats {
+        num_table_cells: Some((123456789, 7)),
+        num_view_cells: Some((54321, 4)),
+        is_group_by: false,
+        is_split_by: false,
+        is_filtered: false,
     });
 
     let div = test_html! {
@@ -76,10 +82,12 @@ pub async fn test_counter_some_connected_no_pivot() {
 
 #[wasm_bindgen_test]
 pub async fn test_counter_some_connected_pivot() {
-    let stats = Some(TableStats {
-        is_pivot: true,
-        num_rows: Some(123456789),
-        virtual_rows: Some(54321),
+    let stats = Some(ViewStats {
+        num_table_cells: Some((123456789, 7)),
+        num_view_cells: Some((54321, 4)),
+        is_group_by: false,
+        is_split_by: false,
+        is_filtered: false,
     });
 
     let div = test_html! {

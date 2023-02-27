@@ -12,9 +12,9 @@
 //! objects (which are conviently derivable with the `derive_model!` macro).
 
 use crate::dragdrop::*;
+use crate::presentation::*;
 use crate::renderer::*;
 use crate::session::*;
-use crate::theme::*;
 
 pub trait HasSession {
     fn session(&self) -> &'_ Session;
@@ -24,8 +24,8 @@ pub trait HasRenderer {
     fn renderer(&self) -> &'_ Renderer;
 }
 
-pub trait HasTheme {
-    fn theme(&self) -> &'_ Theme;
+pub trait HasPresentation {
+    fn presentation(&self) -> &'_ Presentation;
 }
 
 pub trait HasDragDrop {
@@ -55,10 +55,10 @@ macro_rules! derive_model {
             }
         }
     };
-    (Theme for $key:ty) => {
-        impl $crate::model::HasTheme for $key {
-            fn theme(&self) -> &'_ Theme {
-                &self.theme
+    (Presentation for $key:ty) => {
+        impl $crate::model::HasPresentation for $key {
+            fn presentation(&self) -> &'_ Presentation {
+                &self.presentation
             }
         }
     };

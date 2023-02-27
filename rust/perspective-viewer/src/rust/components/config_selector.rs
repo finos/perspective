@@ -33,6 +33,9 @@ pub struct ConfigSelectorProps {
     pub session: Session,
     pub renderer: Renderer,
     pub dragdrop: DragDrop,
+
+    #[prop_or_default]
+    pub ondragenter: Callback<()>,
 }
 
 derive_model!(Renderer, Session for ConfigSelectorProps);
@@ -156,10 +159,14 @@ impl Component for ConfigSelector {
             ConfigSelectorMsg::DragStart(_) | ConfigSelectorMsg::ViewCreated => true,
             ConfigSelectorMsg::DragEnd => true,
             ConfigSelectorMsg::DragOver(index, action) => {
-                ctx.props().dragdrop.drag_enter(action, index)
+                let should_render = ctx.props().dragdrop.notify_drag_enter(action, index);
+                if should_render {
+                    ctx.props().ondragenter.emit(());
+                }
+                should_render
             }
             ConfigSelectorMsg::DragLeave(action) => {
-                ctx.props().dragdrop.drag_leave(action);
+                ctx.props().dragdrop.notify_drag_leave(action);
                 true
             }
             ConfigSelectorMsg::Close(index, DragTarget::Sort) => {
@@ -274,11 +281,16 @@ impl Component for ConfigSelector {
 
         let dragend = Callback::from({
             let dragdrop = ctx.props().dragdrop.clone();
-            move |_event| dragdrop.drag_end()
+            move |_event| dragdrop.notify_drag_end()
         });
 
         html! {
-            <div slot="top_panel" id="top_panel" class={ class } ondragend={ dragend }>
+            <div
+                slot="top_panel"
+                id="top_panel"
+                class={ class }
+                ondragend={ dragend }>
+
                 <LocalStyle href={ css!("config-selector") } />
                 <GroupBySelector
                     name="group_by"
@@ -301,6 +313,7 @@ impl Component for ConfigSelector {
                 <span
                     id="transpose_button"
                     class="rrow centered"
+                    style="display:none"
                     title="Transpose Pivots"
                     onmousedown={ transpose }>
 

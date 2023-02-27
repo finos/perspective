@@ -6,8 +6,6 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use std::rc::Rc;
-
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::*;
@@ -23,27 +21,14 @@ use crate::*;
 #[derive(Clone)]
 pub struct ExpressionEditorElement {
     modal: ModalElement<ExpressionEditor>,
-    _blur: Rc<Blur>,
-}
-
-struct Blur {
-    elem: HtmlElement,
-    handler: Closure<dyn Fn(web_sys::FocusEvent)>,
-}
-
-impl Drop for Blur {
-    fn drop(&mut self) {
-        let cb = self.handler.as_ref().as_ref().unchecked_ref();
-        self.elem
-            .remove_event_listener_with_callback("blur", cb)
-            .unwrap();
-    }
 }
 
 impl ExpressionEditorElement {
     pub fn new(
         session: Session,
         on_save: Callback<JsValue>,
+        on_delete: Option<Callback<()>>,
+        on_blur: Callback<()>,
         alias: Option<String>,
     ) -> ExpressionEditorElement {
         let document = window().unwrap().document().unwrap();
@@ -63,32 +48,13 @@ impl ExpressionEditorElement {
         let props = props!(ExpressionEditorProps {
             on_save,
             on_validate,
+            on_delete,
             session,
             alias,
         });
 
-        let modal = ModalElement::new(elem.clone(), props, true);
-        let blurhandler = {
-            clone!(modal);
-            move |_event: FocusEvent| {
-                clone!(modal);
-                ApiFuture::spawn(async move {
-                    await_animation_frame().await?;
-                    modal.send_message(ExpressionEditorMsg::Render);
-                    Ok(())
-                });
-            }
-        }
-        .into_closure();
-
-        let cb = blurhandler.as_ref().as_ref().unchecked_ref();
-        elem.add_event_listener_with_callback("blur", cb).unwrap();
-        let _blur = Rc::new(Blur {
-            handler: blurhandler,
-            elem,
-        });
-
-        ExpressionEditorElement { modal, _blur }
+        let modal = ModalElement::new(elem, props, true, Some(on_blur));
+        ExpressionEditorElement { modal }
     }
 
     pub fn open(&mut self, target: HtmlElement) {

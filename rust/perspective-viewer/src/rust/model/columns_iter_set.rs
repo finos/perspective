@@ -112,14 +112,14 @@ impl<'a> ColumnsIteratorSet<'a> {
                     .unwrap_or_default();
 
                 let is_dragover_after_last = *to_index == self.config.columns.len();
-                let is_dragover_last = is_dragover_after_last && from_index.is_none()
-                    || (*to_index == self.config.columns.len() - 1 && from_index.is_some());
+                // let is_dragover_last = is_dragover_after_last && from_index.is_none()
+                //     || (*to_index == self.config.columns.len() - 1 && from_index.is_some());
 
-                let tail = if has_blank_tail || is_dragover_last {
-                    [].iter().cloned()
-                } else {
-                    [Some(&None)].iter().cloned()
-                };
+                let tail =// if has_blank_tail || is_dragover_last {
+                    [].iter().cloned();
+                // } else {
+                //     [Some(&None)].iter().cloned()
+                // };
 
                 if is_dragover_after_last && from_index.is_some() {
                     self.to_active_column_state(Box::new(

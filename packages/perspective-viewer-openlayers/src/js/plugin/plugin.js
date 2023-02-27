@@ -9,7 +9,7 @@
 
 import mapView from "../views/map-view";
 import views from "../views/views";
-import css from "../../less/plugin.less";
+import css from "../../../dist/css/perspective-viewer-openlayers.css";
 
 views.forEach(async (plugin) => {
     customElements.define(

@@ -47,7 +47,7 @@ impl ExpressionToolbarProps {
         ApiFuture::spawn(self.update_and_render(update));
     }
 
-    pub fn close_expr(&self) {
+    pub fn close_expr(&self, expression_editor: Option<ExpressionEditorElement>) {
         let expression = self
             .session
             .metadata()
@@ -61,19 +61,25 @@ impl ExpressionToolbarProps {
             ..ViewConfigUpdate::default()
         };
 
-        ApiFuture::spawn(self.update_and_render(config));
-    }
-
-    fn is_closable(&self) -> bool {
-        !self.session.is_column_expression_in_use(&self.name)
+        let task = self.update_and_render(config);
+        ApiFuture::spawn(async move {
+            task.await?;
+            expression_editor
+                .and_then(|elem| elem.destroy().ok())
+                .unwrap();
+            Ok(())
+        });
     }
 }
 
 pub enum ExpressionToolbarMsg {
     Edit,
     Save(JsValue),
+    Delete,
     Close,
 }
+
+use ExpressionToolbarMsg::*;
 
 pub struct ExpressionToolbar {
     expression_editor: Option<ExpressionEditorElement>,
@@ -91,11 +97,13 @@ impl Component for ExpressionToolbar {
 
     fn update(&mut self, ctx: &Context<Self>, msg: ExpressionToolbarMsg) -> bool {
         match msg {
-            ExpressionToolbarMsg::Close => {
-                ctx.props().close_expr();
+            Delete => {
+                let expression_editor = self.expression_editor.take();
+                ctx.props().close_expr(expression_editor);
+
                 false
             }
-            ExpressionToolbarMsg::Save(expression) => {
+            Save(expression) => {
                 let props = ctx.props().clone();
                 let expression_editor = self.expression_editor.take();
                 spawn_local(async move {
@@ -107,8 +115,11 @@ impl Component for ExpressionToolbar {
 
                 false
             }
-            ExpressionToolbarMsg::Edit => {
-                let on_save = ctx.link().callback(ExpressionToolbarMsg::Save);
+            Close => false,
+            Edit => {
+                let on_save = ctx.link().callback(Save);
+                let on_delete = ctx.link().callback(|_| Delete);
+                let on_blur = ctx.link().callback(|_| Close);
                 let target = ctx
                     .props()
                     .add_expression_ref
@@ -118,6 +129,8 @@ impl Component for ExpressionToolbar {
                 let mut element = ExpressionEditorElement::new(
                     ctx.props().session.clone(),
                     on_save,
+                    Some(on_delete),
+                    on_blur,
                     Some(ctx.props().name.to_owned()),
                 );
 
@@ -129,21 +142,8 @@ impl Component for ExpressionToolbar {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let edit = ctx.link().callback(|_| ExpressionToolbarMsg::Edit);
-        let close = ctx.link().callback(|_| ExpressionToolbarMsg::Close);
+        let edit = ctx.link().callback(|_| Edit);
         html_template! {
-            if ctx.props().is_closable() {
-                <span
-                    onmousedown={ close }
-                    class="expression-delete-button">
-                </span>
-            } else {
-                <span
-                    class="expression-delete-button"
-                    style="opacity:0">
-                </span>
-            }
-
             <span
                 onmousedown={ edit }
                 class="expression-edit-button">

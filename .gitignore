@@ -122,7 +122,7 @@ cmake-build-debug
 .python-version
 .pytest_cache
 
-website/static/css/material-dark.css
+website/static/css/pro-dark.css
 
 # CPP Compile
 /src/include/boost
@@ -175,7 +175,7 @@ rust/perspective-viewer/pkg
 .emsdk
 vcpkg
 
-docs/static/css/material-dark.css
+docs/static/css/pro-dark.css
 docs/i18n/en.json
 docs/static/js
 
@@ -193,3 +193,4 @@ docs/.docusaurus
 packages/perspective-esbuild-plugin/lib
 docs/static/blocks
 .vscode/c_cpp_properties.json
+py_modules

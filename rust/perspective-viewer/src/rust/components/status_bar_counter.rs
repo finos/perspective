@@ -9,14 +9,14 @@
 use num_format::{Locale, ToFormattedString};
 use yew::prelude::*;
 
-use crate::session::TableStats;
+use crate::session::ViewStats;
 #[cfg(test)]
 use crate::utils::*;
 use crate::*;
 
 #[derive(Properties)]
 pub struct StatusBarRowsCounterProps {
-    pub stats: Option<TableStats>,
+    pub stats: Option<ViewStats>,
 
     #[cfg(test)]
     #[prop_or_default]
@@ -48,35 +48,84 @@ impl Component for StatusBarRowsCounter {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         match &ctx.props().stats {
-            Some(TableStats {
-                num_rows: Some(num_rows),
-                virtual_rows: Some(virtual_rows),
-                is_pivot: true,
-            }) => {
-                let vrows = virtual_rows.to_formatted_string(&Locale::en);
-                let nrows = num_rows.to_formatted_string(&Locale::en);
+            Some(
+                ViewStats {
+                    num_table_cells: Some((tr, tc)),
+                    num_view_cells: Some((vr, vc)),
+                    is_group_by: true,
+                    ..
+                }
+                | ViewStats {
+                    num_table_cells: Some((tr, tc)),
+                    num_view_cells: Some((vr, vc)),
+                    is_filtered: true,
+                    ..
+                },
+            ) if vc != tc => {
+                let vrows = vr.to_formatted_string(&Locale::en);
+                let nrows = tr.to_formatted_string(&Locale::en);
+                let vcols = vc.to_formatted_string(&Locale::en);
+                let ncols = tc.to_formatted_string(&Locale::en);
                 html_template! {
-                    <span>{ format!("{} ", vrows) }</span>
-                    <span id="counter-arrow" class="icon"></span>
-                    <span>{ format!(" {} rows", nrows) }</span>
+                    <span>{ format!("{} ({}) x {} ({})", vrows, nrows, vcols, ncols) }</span>
                 }
             }
 
-            Some(TableStats {
-                num_rows: Some(num_rows),
+            Some(
+                ViewStats {
+                    num_table_cells: Some((tr, _)),
+                    num_view_cells: Some((vr, vc)),
+                    is_group_by: true,
+                    ..
+                }
+                | ViewStats {
+                    num_table_cells: Some((tr, _)),
+                    num_view_cells: Some((vr, vc)),
+                    is_filtered: true,
+                    ..
+                },
+            ) => {
+                let vrows = vr.to_formatted_string(&Locale::en);
+                let nrows = tr.to_formatted_string(&Locale::en);
+                let vcols = vc.to_formatted_string(&Locale::en);
+                html_template! {
+                    <span>{ format!("{} ({}) x {}", vrows, nrows, vcols) }</span>
+                }
+            }
+
+            Some(ViewStats {
+                num_table_cells: Some((_, tc)),
+                num_view_cells: Some((vr, vc)),
+                ..
+            }) if vc != tc => {
+                let vrows = vr.to_formatted_string(&Locale::en);
+                let vcols = vc.to_formatted_string(&Locale::en);
+                let ncols = tc.to_formatted_string(&Locale::en);
+                html_template! {
+                    <span>{ format!("{} x {} ({})", vrows, vcols, ncols) }</span>
+                }
+            }
+
+            Some(ViewStats {
+                num_table_cells: Some((tr, tc)),
+                ..
+            }) => {
+                let nrows = tr.to_formatted_string(&Locale::en);
+                let ncols = tc.to_formatted_string(&Locale::en);
+                html! {
+                    <span>
+                        { format!("{} x {}", nrows, ncols) }
+                    </span>
+                }
+            }
+            Some(ViewStats {
+                num_table_cells: None,
                 ..
             }) => html! {
-                <span>
-                    { format!("{} rows", &num_rows.to_formatted_string(&Locale::en)) }
-                </span>
+                <span></span>
             },
-
-            Some(TableStats { num_rows: None, .. }) => html! {
-                <span>{ "- rows" }</span>
-            },
-
             None => html! {
-                <span>{ "- rows" }</span>
+                <span></span>
             },
         }
     }

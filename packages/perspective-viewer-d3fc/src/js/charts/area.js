@@ -103,6 +103,9 @@ areaChart.plugin = {
     max_cells: 4000,
     max_columns: 50,
     render_warning: true,
+    initial: {
+        names: ["Y Axis"],
+    },
 };
 
 export default areaChart;

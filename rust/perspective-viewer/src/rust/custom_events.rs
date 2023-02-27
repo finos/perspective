@@ -16,9 +16,9 @@ use web_sys::*;
 use crate::config::*;
 use crate::js::JsPerspectiveViewerPlugin;
 use crate::model::*;
+use crate::presentation::Presentation;
 use crate::renderer::*;
 use crate::session::Session;
-use crate::theme::Theme;
 use crate::utils::*;
 use crate::*;
 
@@ -44,28 +44,33 @@ struct CustomEventsData {
     elem: HtmlElement,
     session: Session,
     renderer: Renderer,
-    theme: Theme,
+    presentation: Presentation,
     last_dispatched: RefCell<Option<ViewerConfig>>,
 }
 
-derive_model!(Renderer, Session, Theme for CustomEventsData);
+derive_model!(Renderer, Session, Presentation for CustomEventsData);
 
 impl CustomEvents {
-    pub fn new(elem: &HtmlElement, session: &Session, renderer: &Renderer, theme: &Theme) -> Self {
+    pub fn new(
+        elem: &HtmlElement,
+        session: &Session,
+        renderer: &Renderer,
+        presentation: &Presentation,
+    ) -> Self {
         let data = CustomEventsDataRc(Rc::new(CustomEventsData {
             elem: elem.clone(),
             session: session.clone(),
             renderer: renderer.clone(),
-            theme: theme.clone(),
+            presentation: presentation.clone(),
             last_dispatched: Default::default(),
         }));
 
-        let theme_sub = theme.theme_config_updated.add_listener({
+        let theme_sub = presentation.theme_config_updated.add_listener({
             clone!(data);
             move |_| data.clone().dispatch_config_update()
         });
 
-        let settings_sub = renderer.settings_open_changed.add_listener({
+        let settings_sub = presentation.settings_open_changed.add_listener({
             clone!(data);
             move |open| {
                 data.dispatch_settings_open_changed(open);
@@ -129,7 +134,7 @@ impl CustomEventsDataRc {
             if viewer_config.view_config != Default::default()
                 && Some(&viewer_config) != self.last_dispatched.borrow().as_ref()
             {
-                let json_config = JsValue::from_serde(&viewer_config)?;
+                let json_config = JsValue::from_serde_ext(&viewer_config)?;
                 let mut event_init = web_sys::CustomEventInit::new();
                 event_init.detail(&json_config);
                 let event = web_sys::CustomEvent::new_with_event_init_dict(

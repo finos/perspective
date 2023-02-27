@@ -33,23 +33,24 @@ fn glob_with_wd(indir: &str, input: &str) -> Vec<String> {
 
 fn main() -> Result<(), anyhow::Error> {
     let mut build = BuildCss::new("./src/less");
-    for src in glob_with_wd("./src/less", "**/*.less") {
-        build.add(&src);
+    let files = glob_with_wd("./src/less", "**/*.less");
+    for src in files.iter() {
+        build.add_file(src);
     }
 
-    build.compile("./target/css")?;
+    build.compile()?.write("./target/css")?;
 
     let mut build = BuildCss::new("./src/themes");
-    build.add("variables.less");
-    build.add("fonts.less");
-    build.add("material.less");
-    build.add("material-dark.less");
-    build.add("monokai.less");
-    build.add("solarized.less");
-    build.add("solarized-dark.less");
-    build.add("vaporwave.less");
-    build.add("themes.less");
-    build.compile("./target/themes")?;
+    build.add_file("variables.less");
+    build.add_file("fonts.less");
+    build.add_file("pro.less");
+    build.add_file("pro-dark.less");
+    build.add_file("monokai.less");
+    build.add_file("solarized.less");
+    build.add_file("solarized-dark.less");
+    build.add_file("vaporwave.less");
+    build.add_file("themes.less");
+    build.compile()?.write("./target/themes")?;
 
     println!(
         "cargo:rustc-env=PKG_VERSION={}",

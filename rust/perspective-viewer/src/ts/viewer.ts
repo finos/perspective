@@ -325,7 +325,7 @@ export interface IPerspectiveViewerElement {
      * @example
      * ```javascript
      * const viewer = document.querySelector("perspective-viewer");
-     * await viewer.resetThemes(["Material Light", "Material Dark"]);
+     * await viewer.resetThemes(["Pro Light", "Pro Dark"]);
      * ```
      */
     resetThemes(themes?: Array<string>): Promise<void>;

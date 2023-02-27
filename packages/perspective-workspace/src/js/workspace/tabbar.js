@@ -52,19 +52,19 @@ export class PerspectiveTabBar extends TabBar {
                 event.preventDefault();
                 break;
 
-            case "dblclick":
-                if (event.target.id === TabBarItems.Label) {
-                    this.onTitleChangeRequest(event);
-                }
-                break;
+            // case "dblclick":
+            //     if (event.target.id === TabBarItems.Label) {
+            //         this.onTitleChangeRequest(event);
+            //     }
+            //     break;
 
             case "mousedown":
-                if (event.target.id === TabBarItems.Config) {
+                if (event.target.id === TabBarItems.Label) {
                     return;
                 }
                 break;
             case "pointerdown":
-                if (event.target.id === TabBarItems.Config) {
+                if (event.target.id === TabBarItems.Label) {
                     const tabs = this.contentNode.children;
 
                     // Find the index of the released tab.

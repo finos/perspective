@@ -1,35 +1,63 @@
 const {
     NodeModulesExternal,
 } = require("@finos/perspective-esbuild-plugin/external");
-const {
-    InlineCSSPlugin,
-} = require("@finos/perspective-esbuild-plugin/inline_css");
 const { UMDLoader } = require("@finos/perspective-esbuild-plugin/umd");
 const { build } = require("@finos/perspective-esbuild-plugin/build");
 
 const BUILD = [
     {
         entryPoints: ["src/js/plugin/plugin.js"],
-        plugins: [InlineCSSPlugin(), NodeModulesExternal()],
+        plugins: [NodeModulesExternal()],
         format: "esm",
         outfile: "dist/esm/perspective-viewer-openlayers.js",
+        loader: {
+            ".css": "text",
+        },
     },
     {
         entryPoints: ["src/js/plugin/plugin.js"],
         globalName: "perspective_openlayers",
-        plugins: [InlineCSSPlugin(), UMDLoader()],
+        plugins: [UMDLoader()],
         format: "cjs",
         outfile: "dist/umd/perspective-viewer-openlayers.js",
+        loader: {
+            ".css": "text",
+        },
     },
     {
         entryPoints: ["src/js/plugin/plugin.js"],
-        plugins: [InlineCSSPlugin()],
+        plugins: [],
         format: "esm",
         outfile: "dist/cdn/perspective-viewer-openlayers.js",
+        loader: {
+            ".css": "text",
+        },
     },
 ];
 
+const { BuildCss } = require("@prospective.co/procss/target/cjs/procss.js");
+const fs = require("fs");
+const path_mod = require("path");
+
+async function compile_css() {
+    fs.mkdirSync("dist/css", { recursive: true });
+    const builder = new BuildCss("");
+    builder.add(
+        "ol/ol.css",
+        fs.readFileSync(require.resolve("ol/ol.css")).toString()
+    );
+    builder.add(
+        "./plugin.less",
+        fs.readFileSync("./src/less/plugin.less").toString()
+    );
+    fs.writeFileSync(
+        "dist/css/perspective-viewer-openlayers.css",
+        builder.compile().get("plugin.css")
+    );
+}
+
 async function build_all() {
+    await compile_css();
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
 }
 

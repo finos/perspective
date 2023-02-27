@@ -97,6 +97,9 @@ columnChart.plugin = {
     max_cells: 1000,
     max_columns: 50,
     render_warning: true,
+    initial: {
+        names: ["Y Axis"],
+    },
 };
 
 export default columnChart;

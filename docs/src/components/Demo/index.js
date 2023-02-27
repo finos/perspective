@@ -34,7 +34,7 @@ async function lazy_load(colorMode, viewer) {
     }
 
     select(viewer, "sparkgrid", {
-        theme: colorMode === "dark" ? "Material Dark" : "Material Light",
+        theme: colorMode === "dark" ? "Pro Dark" : "Pro Light",
     });
 }
 

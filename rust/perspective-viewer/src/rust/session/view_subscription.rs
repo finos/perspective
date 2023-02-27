@@ -19,10 +19,12 @@ use crate::*;
 /// Metadata snapshot of the current `Table()`/`View()` state which may be of
 /// interest to components.
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
-pub struct TableStats {
-    pub is_pivot: bool,
-    pub num_rows: Option<u32>,
-    pub virtual_rows: Option<u32>,
+pub struct ViewStats {
+    pub is_group_by: bool,
+    pub is_split_by: bool,
+    pub is_filtered: bool,
+    pub num_table_cells: Option<(u32, u32)>,
+    pub num_view_cells: Option<(u32, u32)>,
 }
 
 #[derive(Clone)]
@@ -30,7 +32,7 @@ struct ViewSubscriptionData {
     table: JsPerspectiveTable,
     view: View,
     config: ViewConfig,
-    on_stats: Callback<TableStats>,
+    on_stats: Callback<ViewStats>,
     on_update: Callback<()>,
 }
 
@@ -50,14 +52,18 @@ impl ViewSubscriptionData {
     }
 
     /// TODO Use serde to serialize the full view config, instead of calculating
-    /// `is_pivot` here.
+    /// `is_aggregated` here.
     async fn update_view_stats(self) -> ApiResult<JsValue> {
-        let num_rows = self.table.size().await? as u32;
+        let num_rows = self.table.num_rows().await? as u32;
+        let num_cols = self.table.num_columns().await? as u32;
         let virtual_rows = self.view.num_rows().await? as u32;
-        let stats = TableStats {
-            num_rows: Some(num_rows),
-            virtual_rows: Some(virtual_rows),
-            is_pivot: self.config.is_aggregated() || virtual_rows != num_rows,
+        let virtual_cols = self.view.num_columns().await? as u32;
+        let stats = ViewStats {
+            num_table_cells: Some((num_rows, num_cols)),
+            num_view_cells: Some((virtual_rows, virtual_cols)),
+            is_filtered: virtual_rows != num_rows,
+            is_group_by: !self.config.group_by.is_empty(),
+            is_split_by: !self.config.split_by.is_empty(),
         };
 
         self.on_stats.emit(stats);
@@ -80,7 +86,7 @@ impl ViewSubscription {
         table: JsPerspectiveTable,
         view: JsPerspectiveView,
         config: ViewConfig,
-        on_stats: Callback<TableStats>,
+        on_stats: Callback<ViewStats>,
         on_update: Callback<()>,
     ) -> Self {
         let data = ViewSubscriptionData {

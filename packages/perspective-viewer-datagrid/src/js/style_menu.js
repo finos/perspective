@@ -62,7 +62,7 @@ export function activate_plugin_menu(regularTable, target, column_max) {
         default_config.fixed = 0;
     } else {
         this._open_column_styles_menu.pop();
-        regularTable.draw({ preserve_width: true });
+        target.classList.remove("psp-menu-open");
         return;
     }
 
@@ -113,7 +113,7 @@ export function activate_plugin_menu(regularTable, target, column_max) {
             new Event("perspective-config-update")
         );
 
-        await regularTable.draw({ preserve_width: true });
+        target.classList.remove("psp-menu-open");
         MENU.destroy();
     };
 

@@ -122,6 +122,10 @@ table.prototype.is_valid_filter = async_queue(
 
 table.prototype.size = async_queue("size", "table_method");
 
+table.prototype.num_rows = async_queue("num_rows", "table_method");
+
+table.prototype.num_columns = async_queue("num_columns", "table_method");
+
 table.prototype.columns = async_queue("columns", "table_method");
 
 table.prototype.clear = async_queue("clear", "table_method");

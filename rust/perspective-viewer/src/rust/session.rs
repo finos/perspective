@@ -26,7 +26,7 @@ use yew::prelude::*;
 
 use self::metadata::*;
 use self::view::{PerspectiveOwned, View};
-pub use self::view_subscription::TableStats;
+pub use self::view_subscription::ViewStats;
 use self::view_subscription::*;
 use crate::config::*;
 use crate::dragdrop::*;
@@ -61,7 +61,7 @@ pub struct SessionData {
     metadata: SessionMetadata,
     config: ViewConfig,
     view_sub: Option<ViewSubscription>,
-    stats: Option<TableStats>,
+    stats: Option<ViewStats>,
 }
 
 impl Deref for Session {
@@ -199,7 +199,7 @@ impl Session {
         let error_keys = js_sys::Object::keys(&errors);
         if error_keys.length() > 0 {
             let js_err = js_sys::Reflect::get(&errors, &error_keys.get(0))?;
-            Ok(Some(js_err.into_serde().unwrap()))
+            Ok(Some(js_err.into_serde_ext().unwrap()))
         } else {
             Ok(None)
         }
@@ -233,7 +233,7 @@ impl Session {
             .map(|sub| sub.get_view().clone())
     }
 
-    pub fn get_table_stats(&self) -> Option<TableStats> {
+    pub fn get_table_stats(&self) -> Option<ViewStats> {
         self.borrow().stats.clone()
     }
 
@@ -309,11 +309,11 @@ impl Session {
     }
 
     pub fn reset_stats(&self) {
-        self.update_stats(TableStats::default());
+        self.update_stats(ViewStats::default());
     }
 
     #[cfg(test)]
-    pub fn set_stats(&self, stats: TableStats) {
+    pub fn set_stats(&self, stats: ViewStats) {
         self.update_stats(stats)
     }
 
@@ -323,7 +323,7 @@ impl Session {
         if let Err(err) = self.validate_view_config().await {
             web_sys::console::error_3(
                 &"Invalid config, resetting to default".into(),
-                &JsValue::from_serde(&self.borrow().config).unwrap(),
+                &JsValue::from_serde_ext(&self.borrow().config).unwrap(),
                 &err.into(),
             );
 
@@ -360,19 +360,22 @@ impl Session {
 
     /// Update the this `Session`'s `TableStats` data from the `Table`.
     async fn set_initial_stats(&self) -> ApiResult<JsValue> {
-        let table = self.borrow().table.clone();
-        let num_rows = table.unwrap().size().await? as u32;
-        let stats = TableStats {
-            is_pivot: false,
-            num_rows: Some(num_rows),
-            virtual_rows: None,
+        let table = self.borrow().table.clone().unwrap();
+        let num_rows = table.num_rows().await? as u32;
+        let num_cols = table.num_columns().await? as u32;
+        let stats = ViewStats {
+            is_group_by: false,
+            is_split_by: false,
+            is_filtered: false,
+            num_table_cells: Some((num_rows, num_cols)),
+            num_view_cells: None,
         };
 
         self.update_stats(stats);
         Ok(JsValue::UNDEFINED)
     }
 
-    fn update_stats(&self, stats: TableStats) {
+    fn update_stats(&self, stats: ViewStats) {
         self.borrow_mut().stats = Some(stats);
         self.stats_changed.emit_all(());
     }

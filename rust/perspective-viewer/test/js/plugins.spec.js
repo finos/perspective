@@ -57,6 +57,7 @@ utils.with_server({}, () => {
                         sort: [],
                         split_by: [],
                         theme: null,
+                        title: null,
                     };
 
                     expect(saved).toEqual(expected);

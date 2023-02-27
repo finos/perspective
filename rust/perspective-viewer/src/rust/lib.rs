@@ -10,6 +10,7 @@
 #![recursion_limit = "1024"]
 #![feature(const_type_name)]
 #![feature(macro_metavar_expr)]
+#![feature(anonymous_lifetime_in_impl_trait)]
 #![warn(
     clippy::all,
     clippy::panic_in_result_fn,
@@ -24,13 +25,14 @@ mod dragdrop;
 mod exprtk;
 mod js;
 mod model;
+mod presentation;
 mod renderer;
 mod session;
-mod theme;
 pub mod utils;
 
 #[cfg(feature = "define_custom_elements_async")]
 pub use components::{LocalStyle, StyleProvider};
+use utils::JsValueSerdeExt;
 use wasm_bindgen::prelude::*;
 
 use crate::custom_elements::copy_dropdown::CopyDropDownMenuElement;
@@ -55,8 +57,8 @@ pub fn register_plugin(name: &str) {
 pub fn get_exprtk_commands() -> ApiResult<Box<[JsValue]>> {
     crate::exprtk::COMPLETIONS.with(|x| {
         Ok(x.iter()
-            .map(JsValue::from_serde)
-            .collect::<Result<Box<[_]>, serde_json::Error>>()?)
+            .map(<JsValue as JsValueSerdeExt>::from_serde_ext)
+            .collect::<Result<Box<[_]>, serde_wasm_bindgen::Error>>()?)
     })
 }
 

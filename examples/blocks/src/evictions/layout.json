@@ -2,7 +2,7 @@
     "plugin": "Map Scatter",
     "plugin_config": {},
     "settings": true,
-    "theme": "Material Dark",
+    "theme": "Pro Dark",
     "group_by": ["bucket lon", "bucket lat"],
     "split_by": ["neighborhood"],
     "columns": ["bucket lon", "bucket lat", null, null, null],
@@ -14,5 +14,5 @@
         "// bucket lon\nvar x[2];\nindexof(\"shape\", ' .+?( )', x);\nvar y := substring(\"shape\", 7, x[1] - 7);\nbucket(float(y), 0.0025) + 0.00125",
         "// bucket lat\nvar x[2];\nindexof(\"shape\", ' .+?( )', x);\nvar y := substring(\"shape\", x[0], length(\"shape\") - x[1]);\nbucket(float(y), 0.0025) + 0.00125"
     ],
-    "aggregates": {"lon": "avg", "bucket lon": "avg", "bucket lat": "avg"}
+    "aggregates": { "lon": "avg", "bucket lon": "avg", "bucket lat": "avg" }
 }

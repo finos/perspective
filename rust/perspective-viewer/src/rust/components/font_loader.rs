@@ -128,7 +128,7 @@ impl FontLoaderProps {
     /// with a CSS variable of the format:
     /// ```css
     /// perspective-viewer {
-    ///     --preload-fonts: "Roboto Mono:200;Open Sans:300,400;Material Icons:400";
+    ///     --preload-fonts: "Roboto Mono:200;Open Sans:300,400";
     /// }
     /// ```
     async fn load_fonts_task(self) -> ApiResult<JsValue> {

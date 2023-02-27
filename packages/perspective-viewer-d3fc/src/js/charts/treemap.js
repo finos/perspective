@@ -17,10 +17,6 @@ import { colorRangeLegend } from "../legend/colorRangeLegend";
 import { colorLegend } from "../legend/legend";
 
 function treemap(container, settings) {
-    if (settings.crossValues.length === 0) {
-        console.warn("Unable to render a chart in the absence of any groups.");
-        return;
-    }
     if (!settings.treemaps) settings.treemaps = {};
 
     const data = treeData(settings);
@@ -81,7 +77,7 @@ treemap.plugin = {
     type: "Treemap",
     name: "Treemap",
     category: "Hierarchial Chart",
-    max_cells: 5000,
+    max_cells: 3000,
     max_columns: 50,
     render_warning: true,
     initial: {

@@ -49,45 +49,13 @@ pub struct ViewerConfig {
     pub plugin_config: Value,
     pub settings: bool,
     pub theme: Option<String>,
+    pub title: Option<String>,
 
     #[serde(flatten)]
     pub view_config: ViewConfig,
 }
 
 impl ViewerConfig {
-    fn _apply<T: Clone + Default>(field: &mut T, update: OptionalUpdate<T>) -> bool {
-        match update {
-            OptionalUpdate::Missing => false,
-            OptionalUpdate::SetDefault => {
-                *field = T::default();
-                true
-            }
-            OptionalUpdate::Update(update) => {
-                *field = update;
-                true
-            }
-        }
-    }
-
-    fn _apply1<T>(field: &mut T, update: Option<T>) -> bool {
-        match update {
-            None => false,
-            Some(update) => {
-                *field = update;
-                true
-            }
-        }
-    }
-
-    pub fn apply(&mut self, update: ViewerConfigUpdate) -> bool {
-        let mut changed = false;
-        changed = Self::_apply(&mut self.plugin, update.plugin) || changed;
-        changed = Self::_apply1(&mut self.plugin_config, update.plugin_config) || changed;
-        changed = Self::_apply(&mut self.settings, update.settings) || changed;
-        changed = self.view_config.apply_update(update.view_config) || changed;
-        changed
-    }
-
     /// Encode a `ViewerConfig` to a `JsValue` in a supported type.
     pub fn encode(&self, format: &Option<ViewerConfigEncoding>) -> ApiResult<JsValue> {
         match format {
@@ -110,16 +78,19 @@ impl ViewerConfig {
             Some(ViewerConfigEncoding::JSONString) => {
                 Ok(JsValue::from(serde_json::to_string(self)?))
             }
-            None | Some(ViewerConfigEncoding::Json) => Ok(JsValue::from_serde(self)?),
+            None | Some(ViewerConfigEncoding::Json) => Ok(JsValue::from_serde_ext(self)?),
         }
     }
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Deserialize)]
 // #[serde(deny_unknown_fields)]
 pub struct ViewerConfigUpdate {
     #[serde(default)]
     pub plugin: PluginUpdate,
+
+    #[serde(default)]
+    pub title: TitleUpdate,
 
     #[serde(default)]
     pub theme: ThemeUpdate,
@@ -151,7 +122,7 @@ impl ViewerConfigUpdate {
             uint8array.copy_to(&mut slice[..]);
             Ok(rmp_serde::from_slice(&slice)?)
         } else {
-            Ok(update.into_serde()?)
+            Ok(update.into_serde_ext()?)
         }
     }
 }
@@ -167,6 +138,7 @@ pub enum OptionalUpdate<T: Clone> {
 pub type PluginUpdate = OptionalUpdate<String>;
 pub type SettingsUpdate = OptionalUpdate<bool>;
 pub type ThemeUpdate = OptionalUpdate<String>;
+pub type TitleUpdate = OptionalUpdate<String>;
 
 /// Handles `{}` when included as a field with `#[serde(default)]`.
 impl<T: Clone> Default for OptionalUpdate<T> {

@@ -2,7 +2,7 @@ import "@finos/perspective-viewer";
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
 
-import {SUPERSTORE_TABLE} from "@site/src/data/superstore.js";
+import { SUPERSTORE_TABLE } from "@site/src/data/superstore.js";
 
 export async function main(colorMode) {
     const viewers = document.querySelectorAll(
@@ -13,7 +13,7 @@ export async function main(colorMode) {
         viewer.load(SUPERSTORE_TABLE);
         const token = {
             settings: true,
-            theme: colorMode === "dark" ? "Material Dark" : "Material Light",
+            theme: colorMode === "dark" ? "Pro Dark" : "Pro Light",
         };
 
         for (const attribute of viewer.attributes) {

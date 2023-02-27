@@ -36,7 +36,7 @@
                 "scroll_lock": true
             },
             "settings": false,
-            "theme": "Material Dark",
+            "theme": "Pro Dark",
             "group_by": ["Distributor"],
             "split_by": [],
             "columns": ["US Gross"],
@@ -54,7 +54,7 @@
             "plugin": "Heatmap",
             "plugin_config": {},
             "settings": false,
-            "theme": "Material Dark",
+            "theme": "Pro Dark",
             "group_by": ["bucket(\"Rotten Tomatoes Rating\", 2.5)"],
             "split_by": ["bucket(\"IMDB Rating\", 0.25)"],
             "columns": ["US Gross"],
@@ -82,7 +82,7 @@
                 "splitMainValues": ["Rotten Tomatoes Rating"]
             },
             "settings": false,
-            "theme": "Material Dark",
+            "theme": "Pro Dark",
             "group_by": ["bucket(\"Release Date\", 'Y')"],
             "split_by": [],
             "columns": [
@@ -112,7 +112,7 @@
                 }
             },
             "settings": false,
-            "theme": "Material Dark",
+            "theme": "Pro Dark",
             "group_by": ["bucket(\"Release Date\", 'Y')"],
             "split_by": ["Major Genre"],
             "columns": ["US Gross"],

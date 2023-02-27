@@ -128,6 +128,7 @@ impl Component for RenderWarning {
                 <div
                     class="plugin_information plugin_information--warning"
                     id="plugin_information--size">
+                    <span class="plugin_information__icon"></span>
                     <span
                         class="plugin_information__text"
                         id="plugin_information_count">{ warning }</span>

@@ -23,7 +23,7 @@ regular-table:hover {
     scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
 }
 
-.sub-cell-scroll-enabled regular-table table {
+perspective-viewer-datagrid:not(.sub-cell-scroll-disabled) regular-table table {
     tbody td,
     thead th:not(.rt-group-corner) {
         transform: translate(var(--regular-table--transform-x, 0px));
@@ -127,7 +127,7 @@ regular-table {
     // frozen rows
 
     thead tr:last-child th {
-        border-bottom: 1px solid #eaedef;
+        border-bottom: 1px solid #8b868045;
     }
 
     tbody tr:first-child td,

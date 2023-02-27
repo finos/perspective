@@ -954,12 +954,9 @@ export class PerspectiveWorkspace extends SplitPanel {
         }
         const settings = (event) => {
             if (event.detail) {
-                widget.title.className += " settings_open";
+                this._maximize(widget);
             } else {
-                widget.title.className = widget.title.className.replace(
-                    /settings_open/g,
-                    ""
-                );
+                this._unmaximize();
             }
         };
         const contextMenu = (event) => this.showContextMenu(widget, event);

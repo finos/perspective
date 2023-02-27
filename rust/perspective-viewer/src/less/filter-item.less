@@ -8,7 +8,7 @@
  */
 
 :host {
-    ::-webkit-calendar-picker-indicator {
+    :-webkit-calendar-picker-indicator {
         filter: var(--calendar--filter, none);
     }
 
@@ -19,15 +19,15 @@
                 align-items: center;
                 position: relative;
                 margin-top: 1px;
-                font-family: "Open Sans";
                 font-size: 12px;
                 min-width: 45px;
 
-                &::after,
+                &:after,
                 input,
                 textarea {
                     width: auto;
                     grid-area: 1 / 1;
+                    font-family: inherit;
                 }
 
                 input,
@@ -37,18 +37,16 @@
                     border: none;
                     border-bottom: 1px solid var(--inactive--color, #ccc);
                     background: transparent;
-                    font-family: "Open Sans";
                     font-size: 12px;
                     color: inherit;
                 }
 
-                &::after {
+                &:after {
                     content: attr(data-value) " ";
                     color: var(--inactive--color, inherit);
                     visibility: hidden;
                     white-space: nowrap;
                     padding-right: 12px;
-                    font-family: "Open Sans";
                 }
 
                 &.num-filter {
@@ -59,7 +57,7 @@
                     }
                 }
 
-                &.num-filter::after {
+                &.num-filter:after {
                     padding-right: 25px;
                 }
 
@@ -84,10 +82,12 @@
             }
         }
 
+        // The filter comparator
         #filter {
             .pivot-column {
                 .dropdown-width-container {
                     height: 100%;
+                    flex: 0 0 auto;
 
                     select {
                         padding-right: 12px;

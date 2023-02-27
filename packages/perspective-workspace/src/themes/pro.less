@@ -7,20 +7,20 @@
  *
  */
 
-@import "@finos/perspective-viewer/dist/css/material.css";
+@import "@finos/perspective-viewer/dist/css/pro.css";
 
 
 perspective-workspace,
-perspective-workspace[theme="Material Light"],
-perspective-indicator[theme="Material Light"] {
-    --theme-name: "Material Light";
+perspective-workspace[theme="Pro Light"],
+perspective-indicator[theme="Pro Light"] {
+    --theme-name: "Pro Light";
 }
 
 perspective-workspace {
-    @include perspective-workspace-material-base;
+    @include perspective-workspace-pro-base;
 }
 
-perspective-viewer[theme="Material Light"].workspace-master-widget {
+perspective-viewer[theme="Pro Light"].workspace-master-widget {
     background-color: #f2f4f6;
     --plugin--background: #f2f4f6;
 
@@ -33,7 +33,7 @@ perspective-viewer[theme="Material Light"].workspace-master-widget {
     }
 }
 
-@mixin perspective-workspace-material-base {
+@mixin perspective-workspace-pro-base {
     font-family: "Open Sans";
     --open-settings-button--content: "expand_more";
     --close-settings-button--content: "expand_less";

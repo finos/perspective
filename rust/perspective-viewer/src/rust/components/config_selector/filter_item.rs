@@ -359,21 +359,19 @@ impl Component for FilterItem {
             .link()
             .callback(move |event: KeyboardEvent| FilterItemMsg::FilterKeyDown(event.key_code()));
 
-        let dragref = NodeRef::default();
         let dragstart = Callback::from({
             let event_name = ctx.props().filter.0.to_owned();
-            let dragref = dragref.clone();
             let dragdrop = ctx.props().dragdrop.clone();
             move |event: DragEvent| {
-                let elem = dragref.cast::<HtmlElement>().unwrap();
-                event.data_transfer().unwrap().set_drag_image(&elem, 0, 0);
-                dragdrop.drag_start(event_name.to_string(), DragEffect::Move(DragTarget::Filter))
+                dragdrop.set_drag_image(&event).unwrap();
+                dragdrop
+                    .notify_drag_start(event_name.to_string(), DragEffect::Move(DragTarget::Filter))
             }
         });
 
         let dragend = Callback::from({
             let dragdrop = ctx.props().dragdrop.clone();
-            move |_event| dragdrop.drag_end()
+            move |_event| dragdrop.notify_drag_end()
         });
 
         let type_class = match col_type {
@@ -461,39 +459,38 @@ impl Component for FilterItem {
             .map(SelectItem::Option)
             .collect::<Vec<_>>();
 
-        html_template! {
-            <LocalStyle href={ css!("filter-item") } />
-            <span
+        html! {
+            <div
+                class="pivot-column-draggable"
                 draggable="true"
-                ref={ dragref }
                 ondragstart={ dragstart }
                 ondragend={ dragend }>
-                {
-                    filter.0.to_owned()
-                }
-            </span>
-            <FilterOpSelector
-                class="filterop-selector"
-                values={ filter_ops }
-                selected={ filter.1 }
-                on_select={ select }>
-            </FilterOpSelector>
 
-            if !matches!(&filter.1, FilterOp::IsNotNull | FilterOp::IsNull) {
-                if let Some(Type::Bool) = col_type {
-                    {
-                        input_elem
-                    }
-                } else {
-                    <label
-                        class={ format!("input-sizer {}", type_class) }
-                        data-value={ format!("{}", filter.2) }>
-                        {
-                            input_elem
+                <LocalStyle href={ css!("filter-item") } />
+                <div class="pivot-column-border">
+                    <span class="column_name string">
+                        { filter.0.to_owned() }
+                    </span>
+                    <FilterOpSelector
+                        class="filterop-selector"
+                        values={ filter_ops }
+                        selected={ filter.1 }
+                        on_select={ select }>
+                    </FilterOpSelector>
+
+                    if !matches!(&filter.1, FilterOp::IsNotNull | FilterOp::IsNull) {
+                        if let Some(Type::Bool) = col_type {
+                            { input_elem }
+                        } else {
+                            <label
+                                class={ format!("input-sizer {}", type_class) }
+                                data-value={ format!("{}", filter.2) }>
+                                { input_elem }
+                            </label>
                         }
-                    </label>
-                }
-            }
+                    }
+                </div>
+            </div>
         }
     }
 }

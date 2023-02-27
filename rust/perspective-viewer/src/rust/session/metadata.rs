@@ -67,7 +67,7 @@ impl SessionMetadata {
             }
         };
 
-        let table_schema = table.schema().await?.into_serde()?;
+        let table_schema = table.schema().await?.into_serde_ext()?;
         let edit_port = table.make_port().await?;
         Ok(Self(Some(SessionMetadataState {
             column_names,
@@ -81,7 +81,7 @@ impl SessionMetadata {
         &mut self,
         view_schema: &JsPerspectiveViewSchema,
     ) -> ApiResult<()> {
-        let view_schema = view_schema.into_serde()?;
+        let view_schema = view_schema.into_serde_ext()?;
         self.as_mut().unwrap().view_schema = Some(view_schema);
         Ok(())
     }
@@ -95,10 +95,10 @@ impl SessionMetadata {
         }
 
         let expression_alias: HashMap<String, String> =
-            valid_recs.expression_alias().into_serde()?;
+            valid_recs.expression_alias().into_serde_ext()?;
 
         let expression_schema: HashMap<String, Type> =
-            valid_recs.expression_schema().into_serde()?;
+            valid_recs.expression_schema().into_serde_ext()?;
 
         let expression_names = expression_schema.keys().cloned().collect::<HashSet<_>>();
 

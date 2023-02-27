@@ -9,46 +9,43 @@
 
 <!DOCTYPE html>
 <html>
+    <head>
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
+        />
 
-<head>
+        <script src="perspective-viewer.js"></script>
+        <script src="perspective-viewer-datagrid.js"></script>
+        <script src="perspective-viewer-d3fc.js"></script>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+        <script src="perspective.js"></script>
 
-    <script src="perspective-viewer.js"></script>
-    <script src="perspective-viewer-datagrid.js"></script>
-    <script src="perspective-viewer-d3fc.js"></script>
+        <link rel="stylesheet" href="index.css" />
+        <link rel="stylesheet" href="pro.css" />
+    </head>
 
-    <script src="perspective.js"></script>
+    <body>
+        <perspective-viewer
+            id="view1"
+            plugin="Y Area"
+            row-pivots='["week_bucket(Date)"]'
+            column-pivots='["Email"]'
+            columns='["Hash"]'
+            computed-columns='[{"name":"week_bucket(Date)","inputs":["Date"],"computed_function_name":"week_bucket"}]'
+        >
+        </perspective-viewer>
 
-    <link rel='stylesheet' href="index.css">
-    <link rel='stylesheet' href="material.css">
-
-</head>
-
-<body>
-
-    <perspective-viewer 
-        id="view1"
-        plugin="Y Area" 
-        row-pivots='["week_bucket(Date)"]' 
-        column-pivots='["Email"]'
-        columns='["Hash"]'
-        computed-columns='[{"name":"week_bucket(Date)","inputs":["Date"],"computed_function_name":"week_bucket"}]'>
-    
-    </perspective-viewer>
-
-    <script>
-        window.addEventListener('DOMContentLoaded', async function () {
-            var elem = document.getElementById('view1');
-            var client = perspective.websocket();
-            let table = client.open_table('data_source');
-            let view = await table.view();
-            let arrow = await view.to_arrow();
-            let table = await perspective.worker().table(arrow);
-            elem.load(table);
-        });
-    </script>
-
-</body>
-
+        <script>
+            window.addEventListener("DOMContentLoaded", async function () {
+                var elem = document.getElementById("view1");
+                var client = perspective.websocket();
+                let table = client.open_table("data_source");
+                let view = await table.view();
+                let arrow = await view.to_arrow();
+                let table = await perspective.worker().table(arrow);
+                elem.load(table);
+            });
+        </script>
+    </body>
 </html>
