@@ -54,6 +54,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         "plugin_config",
         "theme",
         "settings",
+        "title",
     )
 
     def __init__(
@@ -69,6 +70,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         plugin_config=None,
         settings=True,
         theme=None,
+        title=None,
     ):
         """Initialize an instance of `PerspectiveViewer` with the given viewer
         configuration.  Do not pass a `Table` or data into the constructor -
@@ -132,6 +134,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
         self.plugin_config = validate_plugin_config(plugin_config) or {}
         self.settings = settings
         self.theme = theme
+        self.title = title
 
     @property
     def table(self):
