@@ -49,7 +49,7 @@ if(WIN32)
 # ************************************
 # TKP NOTE: THIS SECTION IS CUSTOM
 # ************************************
-elseif(APPLE)
+elseif(APPLE OR (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten"))
   add_definitions(-DTARGET_OS_OSX=1)
   # assume built-in pthreads on MacOS
   set(CMAKE_THREAD_LIBS_INIT "-lpthread")
