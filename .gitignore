@@ -178,6 +178,7 @@ rust/perspective-viewer/target*
 rust/perspective-viewer/pkg
 python/perspective/perspective/nbextension/static
 python/perspective/perspective/labextension
+python/perspective/wheelhouse
 
 rust/perspective-viewer/target
 rust/perspective-viewer/pkg

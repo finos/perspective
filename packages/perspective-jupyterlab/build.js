@@ -1,5 +1,4 @@
 const cpy_mod = import("cpy");
-const { lessLoader } = require("esbuild-plugin-less");
 const { WasmPlugin } = require("@finos/perspective-esbuild-plugin/wasm");
 const { WorkerPlugin } = require("@finos/perspective-esbuild-plugin/worker");
 const { AMDLoader } = require("@finos/perspective-esbuild-plugin/amd");
@@ -18,12 +17,6 @@ const NBEXTENSION_PATH = path.resolve(
     "nbextension",
     "static"
 );
-
-const THEMES_BUILD = {
-    entryPoints: ["src/less/index.less"],
-    plugins: [WasmPlugin(false), lessLoader()],
-    outdir: "dist/css",
-};
 
 const TEST_BUILD = {
     entryPoints: ["src/js/psp_widget.js"],
@@ -47,8 +40,7 @@ const LAB_BUILD = {
         global: "window",
     },
     plugins: [
-        lessLoader(),
-        WasmPlugin(true), 
+        WasmPlugin(true),
         WorkerPlugin({ inline: true }),
 
         // See note in `rust/perspective-viewer/build.js`
@@ -109,7 +101,9 @@ function add(builder, path, path2) {
 }
 
 const PROD_BUILD = [LAB_BUILD, ...NB_BUILDS];
-const BUILD = process.argv.some((x) => x == "--test") ? TEST_BUILD : PROD_BUILD;
+const BUILD = process.argv.some((x) => x == "--test")
+    ? [TEST_BUILD]
+    : PROD_BUILD;
 
 async function build_all() {
     const { default: cpy } = await cpy_mod;
@@ -123,7 +117,6 @@ async function build_all() {
         builder3.compile().get("index.css")
     );
 
-    await build(THEMES_BUILD);
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
     cpy(["dist/css/*"], "dist/umd");
     cpy(["src/less/*"], "dist/less");

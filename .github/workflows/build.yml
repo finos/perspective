@@ -307,7 +307,7 @@ jobs:
             ################
             # Python
             - name: Install python dependencies
-              run: yarn _requires_python
+              run: pip install jupyter_packaging && yarn _requires_python
 
             ################
             # Linux
@@ -401,13 +401,13 @@ jobs:
               with:
                   name: nbextension-dist
                   path: python/perspective/perspective/nbextension
-                  # if-no-files-found: error # TODO
+                  if-no-files-found: error # TODO
 
             - uses: actions/upload-artifact@v3
               with:
                   name: labextension-dist
                   path: python/perspective/perspective/labextension
-                  # if-no-files-found: error # TODO
+                  if-no-files-found: error # TODO
 
     ##########################################################################################################################
     ##########################################################################################################################
@@ -509,7 +509,7 @@ jobs:
             ################
             # Python
             - name: Install python dependencies
-              run: yarn _requires_python
+              run: pip install jupyter_packaging && yarn _requires_python
 
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
@@ -639,7 +639,7 @@ jobs:
             ################
             # Python
             - name: Install python dependencies
-              run: yarn _requires_python
+              run: pip install jupyter_packaging && yarn _requires_python
 
             ################
             # Rust
@@ -813,13 +813,13 @@ jobs:
             ################
             - uses: actions/download-artifact@v3
               with:
-                  name: nbextension-build
-                  python: python/perspective/perspective/nbextension
+                  name: nbextension-dist
+                  path: python/perspective/perspective/nbextension
 
             - uses: actions/download-artifact@v3
               with:
-                  name: labextension-build
-                  python: python/perspective/perspective/labextension
+                  name: labextension-dist
+                  path: python/perspective/perspective/labextension
 
             ##########
             # Caches #
@@ -914,7 +914,7 @@ jobs:
             ################
             # Python
             - name: Install python dependencies
-              run: yarn _requires_python
+              run: pip install jupyter_packaging && yarn _requires_python
               if: ${{ runner.os != 'Linux' }} # skip on manylinux2014
 
             ################
@@ -1094,17 +1094,15 @@ jobs:
                   name: perspective-viewer-dist
                   path: rust/perspective-viewer/dist
 
-            # TODO
-            # - uses: actions/download-artifact@v3
-            #   with:
-            #     name: nbextension-dist
-            #     python: python/perspective/perspective/nbextension
+            - uses: actions/download-artifact@v3
+              with:
+                name: nbextension-dist
+                path: python/perspective/perspective/nbextension
 
-            # TODO
-            # - uses: actions/download-artifact@v3
-            #   with:
-            #     name: labextension-dist
-            #     python: python/perspective/perspective/labextension
+            - uses: actions/download-artifact@v3
+              with:
+                name: labextension-dist
+                path: python/perspective/perspective/labextension
 
             ##########
             # Caches #
@@ -1169,7 +1167,7 @@ jobs:
             ################
             # Python
             - name: Install python dependencies
-              run: yarn _requires_python
+              run: pip install jupyter_packaging && yarn _requires_python
 
             # Download artifact
             - uses: actions/download-artifact@v3
@@ -1182,12 +1180,6 @@ jobs:
 
             - name: Install wheel (local)
               run: python -m pip install -U *manylinux2014*.whl --target python/perspective
-
-            - name: Install perspective-jupyterlab extension dependencies
-              run: yarn jlab_link
-
-            - name: Install perspective-jupyterlab labextension
-              run: jupyter labextension install packages/perspective-jupyterlab --dev-build=True --no-minimize
 
             - name: Check Installed labextensions
               run: jupyter labextension list
@@ -1335,7 +1327,7 @@ jobs:
             ################
             # Python
             - name: Install python dependencies
-              run: yarn _requires_python
+              run: pip install jupyter_packaging && yarn _requires_python
 
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
@@ -1473,7 +1465,7 @@ jobs:
             ################
             # Python
             - name: Install python dependencies
-              run: yarn _requires_python
+              run: pip install jupyter_packaging && yarn _requires_python
 
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
