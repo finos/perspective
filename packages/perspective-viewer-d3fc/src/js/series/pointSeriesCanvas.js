@@ -42,23 +42,25 @@ export function pointSeriesCanvas(
 
         const opacity = settings.colorStyles && settings.colorStyles.opacity;
         if (label) {
-            context.fillStyle = settings.textStyles.color;
-            context.font = settings.textStyles.font;
             const { type } = settings.mainValues.find((x) => x.name === label);
             const value = toValue(type, d.row[label]);
-            let magnitude = 0;
-            if (size) {
-                // A = pi * r^2
-                // r = sqrt(A / pi)
-                const radius = Math.sqrt(
-                    (scale_factor * size(d.size)) / Math.PI
-                );
+            if (value !== null) {
+                context.fillStyle = settings.textStyles.color;
+                context.font = settings.textStyles.font;
+                let magnitude = 0;
+                if (size) {
+                    // A = pi * r^2
+                    // r = sqrt(A / pi)
+                    const radius = Math.sqrt(
+                        (scale_factor * size(d.size)) / Math.PI
+                    );
 
-                magnitude = radius * LABEL_COSINE;
+                    magnitude = radius * LABEL_COSINE;
+                }
+
+                const mag_with_padding = magnitude + LABEL_PADDING;
+                context.fillText(value, mag_with_padding, 4);
             }
-
-            const mag_with_padding = magnitude + LABEL_PADDING;
-            context.fillText(value, mag_with_padding, 4);
         }
 
         context.strokeStyle = withoutOpacity(colorValue);
