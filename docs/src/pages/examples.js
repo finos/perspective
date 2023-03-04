@@ -56,12 +56,12 @@ function ExampleTable({ data }) {
             style={{
                 display: "flex",
                 margin: "0 auto",
-                width: "1200px",
+                width: "600px",
                 maxWidth: "90%",
             }}
         >
             <tbody>
-                {partition(data, 3).map((x, i) => {
+                {partition(data, 2).map((x, i) => {
                     return <ExampleTR key={i} group={x}></ExampleTR>;
                 })}
             </tbody>
@@ -72,21 +72,18 @@ function ExampleTable({ data }) {
 export default function Home() {
     const { siteConfig } = useDocusaurusContext();
     const gists = get_examples(siteConfig.baseUrl);
-    if (ExecutionEnvironment.canUseDOM) {
-        useEffect(() => {
-            document.body.classList.add("scrolled");
-        }, []);
-    }
 
     return (
-        <Layout
-            title={`${siteConfig.title}`}
-            description={siteConfig.description}
-        >
-            <br />
-            <ExampleTable data={gists} />
-            <br />
-            <br />
-        </Layout>
+        <div class="header-center">
+            <Layout
+                title={`${siteConfig.title}`}
+                description={siteConfig.description}
+            >
+                <br />
+                <ExampleTable data={gists} />
+                <br />
+                <br />
+            </Layout>
+        </div>
     );
 }

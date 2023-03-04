@@ -1,0 +1,20 @@
+<svg width="48" height="59" viewBox="0 0 48 59" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="1" width="45" height="57" rx="2" />
+    <circle cx="10" cy="11" r="2" fill="#666" />
+    <circle cx="10" cy="30" r="2" fill="#666" />
+    <circle cx="10" cy="49" r="2" fill="#666" />
+    <path d="M10 11H0" />
+    <path d="M39 10H17" />
+    <path d="M39 14H17" />
+    <path d="M39 18H17" />
+    <path d="M39 22H17" />
+    <path d="M39 26H17" />
+    <path d="M39 30H17" />
+    <path d="M39 34H17" />
+    <path d="M39 38H17" />
+    <path d="M39 42H17" />
+    <path d="M39 46H17" />
+    <path d="M39 50H17" />
+    <path d="M10 30H0" />
+    <path d="M10 49H0" />
+</svg>

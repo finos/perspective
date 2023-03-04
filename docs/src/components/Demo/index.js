@@ -62,7 +62,6 @@ export function PerspectiveViewerDemo() {
     const viewerRef = useRef();
     const hoverCallback = useCallback(
         (event) => {
-            console.log("WIP");
             setSelected(event.target.getAttribute("id"));
             select(viewerRef.current, `${event.target.getAttribute("id")}`);
         },

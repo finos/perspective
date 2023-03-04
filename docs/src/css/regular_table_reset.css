@@ -1,4 +1,3 @@
-
 td,
 th,
 table,
@@ -6,7 +5,7 @@ tbody,
 table thead {
     border: 0;
     font-size: 12px;
-    font-family: "Open Sans";
+    font-family: "Roboto Mono";
     margin: 0;
     padding: 0;
     vertical-align: middle;
