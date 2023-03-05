@@ -1,6 +1,6 @@
 <br />
 
-![Perspective](https://github.com/finos/perspective/blob/tm-redesign-ii/docs/static/svg/perspective-logo-light.svg?raw=true#gh-light-mode-only)![Perspective](https://github.com/finos/perspective/blob/tm-redesign-ii/docs/static/svg/perspective-logo-dark.svg?raw=true#gh-dark-mode-only)
+![Perspective](https://github.com/finos/perspective/blob/master/docs/static/svg/perspective-logo-light.svg?raw=true#gh-light-mode-only)![Perspective](https://github.com/finos/perspective/blob/master/docs/static/svg/perspective-logo-dark.svg?raw=true#gh-dark-mode-only)
 
 [![npm](https://img.shields.io/npm/v/@finos/perspective.svg?style=flat)](https://www.npmjs.com/package/@finos/perspective)
 [![PyPI](https://img.shields.io/pypi/v/perspective-python.svg?style=flat)](https://pypi.python.org/pypi/perspective-python)
