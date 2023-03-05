@@ -34,7 +34,7 @@ impl Component for ScrollPanelItem {
     type Properties = ScrollPanelItemProps;
 
     fn create(_ctx: &Context<Self>) -> Self {
-        ScrollPanelItem {}
+        Self {}
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
@@ -99,7 +99,7 @@ impl ScrollPanelProps {
 }
 
 impl PartialEq for ScrollPanelProps {
-    fn eq(&self, _rhs: &ScrollPanelProps) -> bool {
+    fn eq(&self, _rhs: &Self) -> bool {
         false
     }
 }

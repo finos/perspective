@@ -10,7 +10,6 @@ use std::collections::HashSet;
 
 use futures::join;
 use itertools::Itertools;
-use js_intern::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
 
@@ -71,7 +70,7 @@ pub trait CopyExportModel:
         let renderer = self.renderer().clone();
         ApiFuture::new(async move {
             let plugin = renderer.get_active_plugin()?;
-            let render = js_sys::Reflect::get(&plugin, js_intern!("render"))?;
+            let render = js_sys::Reflect::get(&plugin, js_intern::js_intern!("render"))?;
             let render_fun = render.unchecked_into::<js_sys::Function>();
             let png = render_fun.call0(&plugin)?;
             let result = JsFuture::from(png.unchecked_into::<js_sys::Promise>())

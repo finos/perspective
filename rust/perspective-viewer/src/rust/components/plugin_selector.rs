@@ -60,7 +60,7 @@ impl Component for PluginSelector {
             }
         });
 
-        PluginSelector {
+        Self {
             options,
             is_open: false,
             _plugin_sub,

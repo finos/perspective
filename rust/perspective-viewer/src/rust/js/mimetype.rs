@@ -31,8 +31,8 @@ impl From<MimeType> for JsValue {
 impl Display for MimeType {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
         fmt.write_str(match self {
-            MimeType::TextPlain => "text/plain",
-            MimeType::ImagePng => "image/png",
+            Self::TextPlain => "text/plain",
+            Self::ImagePng => "image/png",
         })
     }
 }

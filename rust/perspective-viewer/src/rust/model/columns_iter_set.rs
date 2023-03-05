@@ -29,9 +29,9 @@ pub enum ActiveColumnState {
 impl Display for ActiveColumnState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str(match self {
-            ActiveColumnState::Column(Some(label), _) => label,
-            ActiveColumnState::Required(Some(label)) => label,
-            ActiveColumnState::DragOver(Some(label)) => label,
+            Self::Column(Some(label), _) => label,
+            Self::Required(Some(label)) => label,
+            Self::DragOver(Some(label)) => label,
             _ => "",
         })
     }
@@ -112,19 +112,8 @@ impl<'a> ColumnsIteratorSet<'a> {
                     .unwrap_or_default();
 
                 let is_dragover_after_last = *to_index == self.config.columns.len();
-                // let is_dragover_last = is_dragover_after_last && from_index.is_none()
-                //     || (*to_index == self.config.columns.len() - 1 && from_index.is_some());
-
-                let tail =// if has_blank_tail || is_dragover_last {
-                    [].iter().cloned();
-                // } else {
-                //     [Some(&None)].iter().cloned()
-                // };
-
                 if is_dragover_after_last && from_index.is_some() {
-                    self.to_active_column_state(Box::new(
-                        self.config.columns.iter().map(Some).chain(tail),
-                    ))
+                    self.to_active_column_state(Box::new(self.config.columns.iter().map(Some)))
                 } else if is_to_swap || is_from_required {
                     let all_columns = self.config.columns.iter().filter_map(move |x| match x {
                         Some(x) if x == from_column => {
@@ -145,10 +134,7 @@ impl<'a> ColumnsIteratorSet<'a> {
 
                     let after_cols = all_columns.skip(*to_index + 1).map(Some);
                     self.to_active_column_state(Box::new(
-                        before_cols
-                            .chain([None].iter().cloned())
-                            .chain(after_cols)
-                            .chain(tail),
+                        before_cols.chain(std::iter::once(None)).chain(after_cols),
                     ))
                 } else {
                     let to_offset = match to_column {
@@ -175,23 +161,17 @@ impl<'a> ColumnsIteratorSet<'a> {
 
                     let after_cols = all_columns.skip(to_offset).map(Some);
                     self.to_active_column_state(Box::new(
-                        before_cols
-                            .chain([None].iter().cloned())
-                            .chain(after_cols)
-                            .chain(tail),
+                        before_cols.chain(std::iter::once(None)).chain(after_cols),
                     ))
                 }
             }
             _ => {
-                let tail = if has_blank_tail {
-                    [].iter().cloned()
+                let iter = self.config.columns.iter().map(Some);
+                self.to_active_column_state(if has_blank_tail {
+                    Box::new(iter)
                 } else {
-                    [Some(&None)].iter().cloned()
-                };
-
-                self.to_active_column_state(Box::new(
-                    self.config.columns.iter().map(Some).chain(tail),
-                ))
+                    Box::new(iter.chain(std::iter::once(Some(&None))))
+                })
             }
         }
     }

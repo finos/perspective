@@ -40,7 +40,7 @@ impl From<ApiError> for JsValue {
 
 impl From<JsValue> for ApiError {
     fn from(err: JsValue) -> Self {
-        ApiError(err)
+        Self(err)
     }
 }
 

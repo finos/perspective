@@ -8,7 +8,6 @@
 
 use std::rc::Rc;
 
-use js_intern::*;
 use yew::prelude::*;
 
 use super::containers::dropdown_menu::*;
@@ -46,7 +45,7 @@ impl Component for CopyDropDownMenu {
 
     fn view(&self, ctx: &Context<Self>) -> yew::virtual_dom::VNode {
         let plugin = ctx.props().renderer.get_active_plugin().unwrap();
-        let has_render = js_sys::Reflect::has(&plugin, js_intern!("render")).unwrap();
+        let has_render = js_sys::Reflect::has(&plugin, js_intern::js_intern!("render")).unwrap();
         html! {
             <StyleProvider>
                 <DropDownMenu<ExportMethod>
@@ -69,7 +68,7 @@ impl Component for CopyDropDownMenu {
             .plugin_changed
             .add_listener(ctx.link().callback(|_| ()));
 
-        CopyDropDownMenu { _sub }
+        Self { _sub }
     }
 }
 

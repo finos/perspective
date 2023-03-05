@@ -193,7 +193,7 @@ impl Session {
         &self,
         expr: JsValue,
     ) -> Result<Option<PerspectiveValidationError>, JsValue> {
-        let arr = [expr].iter().collect::<js_sys::Array>();
+        let arr = std::iter::once(expr).collect::<js_sys::Array>();
         let table = self.borrow().table.as_ref().unwrap().clone();
         let errors = table.validate_expressions(arr).await?.errors();
         let error_keys = js_sys::Object::keys(&errors);
@@ -335,7 +335,7 @@ impl Session {
     }
 
     async fn get_validated_expression_name(&self, expr: &JsValue) -> ApiResult<String> {
-        let arr = [expr].iter().collect::<js_sys::Array>();
+        let arr = std::iter::once(expr).collect::<js_sys::Array>();
         let table = self.borrow().table.as_ref().unwrap().clone();
         let schema = table.validate_expressions(arr).await?.expression_schema();
         let schema_keys = js_sys::Object::keys(&schema);

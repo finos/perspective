@@ -94,7 +94,7 @@ impl Component for ExpressionEditor {
 
     fn create(ctx: &Context<Self>) -> Self {
         ctx.set_modal_link();
-        ExpressionEditor {
+        Self {
             save_enabled: false,
             edit_enabled: false,
             error: None,

@@ -39,7 +39,7 @@ impl Component for StatusBarRowsCounter {
 
     fn create(_ctx: &Context<Self>) -> Self {
         enable_weak_link_test!(_ctx.props(), _ctx.link());
-        StatusBarRowsCounter {}
+        Self {}
     }
 
     fn update(&mut self, _ctx: &Context<Self>, _msg: Self::Message) -> bool {

@@ -67,7 +67,7 @@ lazy_static = "1.4.0"
 nom = "7.1.1"
 
 # Comma-sep numeric representation
-num-format = "0.4.0"
+num-format = "0.4.4"
 
 # MessagePack serialization
 rmp-serde = "0.15.5"
@@ -76,7 +76,7 @@ rmp-serde = "0.15.5"
 serde = { version = "1.0", features = ["derive"] }
 
 # Support for "unknown"/dictionary types such as `plugin_config`
-serde_json = { version = "1.0.59", features = ["raw_value"] }
+serde_json = { version = "1.0.85", features = ["raw_value"] }
 
 serde-wasm-bindgen = "0.4.5"
 # Async-aware logging that can be disabled at compile-time.

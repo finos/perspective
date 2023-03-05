@@ -44,7 +44,7 @@ where
     type Properties = DropDownMenuProps<T>;
 
     fn create(_ctx: &Context<Self>) -> Self {
-        DropDownMenu {
+        Self {
             _props: Default::default(),
         }
     }

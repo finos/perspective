@@ -17,16 +17,14 @@ pub trait AsBlob {
 
 impl AsBlob for js_sys::ArrayBuffer {
     fn as_blob(&self) -> ApiResult<web_sys::Blob> {
-        let array = [js_sys::Uint8Array::new(self)]
-            .iter()
-            .collect::<js_sys::Array>();
+        let array = std::iter::once(js_sys::Uint8Array::new(self)).collect::<js_sys::Array>();
         Ok(web_sys::Blob::new_with_u8_array_sequence(&array)?)
     }
 }
 
 impl AsBlob for js_sys::JsString {
     fn as_blob(&self) -> ApiResult<web_sys::Blob> {
-        let array = [self].iter().collect::<js_sys::Array>();
+        let array = std::iter::once(self).collect::<js_sys::Array>();
         let mut options = web_sys::BlobPropertyBag::new();
         options.type_("text/plain");
         Ok(web_sys::Blob::new_with_str_sequence_and_options(
@@ -37,9 +35,7 @@ impl AsBlob for js_sys::JsString {
 
 impl AsBlob for js_sys::Object {
     fn as_blob(&self) -> ApiResult<web_sys::Blob> {
-        let array = [js_sys::JSON::stringify(self)?]
-            .iter()
-            .collect::<js_sys::Array>();
+        let array = std::iter::once(js_sys::JSON::stringify(self)?).collect::<js_sys::Array>();
         let mut options = web_sys::BlobPropertyBag::new();
         options.type_("text/plain");
         Ok(web_sys::Blob::new_with_str_sequence_and_options(

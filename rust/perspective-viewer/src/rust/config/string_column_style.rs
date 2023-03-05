@@ -11,11 +11,12 @@ use std::str::FromStr;
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub enum StringColorMode {
     #[serde(rename = "foreground")]
     Foreground,
 
+    #[default]
     #[serde(rename = "background")]
     Background,
 
@@ -23,18 +24,12 @@ pub enum StringColorMode {
     Series,
 }
 
-impl Default for StringColorMode {
-    fn default() -> Self {
-        StringColorMode::Foreground
-    }
-}
-
 impl Display for StringColorMode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let text = match self {
-            StringColorMode::Foreground => "foreground",
-            StringColorMode::Background => "background",
-            StringColorMode::Series => "series",
+            Self::Foreground => "foreground",
+            Self::Background => "background",
+            Self::Series => "series",
         };
 
         write!(f, "{}", text)
@@ -46,15 +41,15 @@ impl FromStr for StringColorMode {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "foreground" => Ok(StringColorMode::Foreground),
-            "background" => Ok(StringColorMode::Background),
-            "series" => Ok(StringColorMode::Series),
+            "foreground" => Ok(Self::Foreground),
+            "background" => Ok(Self::Background),
+            "series" => Ok(Self::Series),
             x => Err(format!("Unknown StringColorMode::{}", x)),
         }
     }
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub enum FormatMode {
     #[serde(rename = "link")]
     Link,
@@ -62,6 +57,7 @@ pub enum FormatMode {
     #[serde(rename = "image")]
     Image,
 
+    #[default]
     #[serde(rename = "bold")]
     Bold,
 
@@ -69,19 +65,13 @@ pub enum FormatMode {
     Italics,
 }
 
-impl Default for FormatMode {
-    fn default() -> Self {
-        FormatMode::Bold
-    }
-}
-
 impl Display for FormatMode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let text = match self {
-            FormatMode::Link => "link",
-            FormatMode::Image => "image",
-            FormatMode::Bold => "bold",
-            FormatMode::Italics => "italics",
+            Self::Link => "link",
+            Self::Image => "image",
+            Self::Bold => "bold",
+            Self::Italics => "italics",
         };
 
         write!(f, "{}", text)
@@ -93,10 +83,10 @@ impl FromStr for FormatMode {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "link" => Ok(FormatMode::Link),
-            "image" => Ok(FormatMode::Image),
-            "bold" => Ok(FormatMode::Bold),
-            "italics" => Ok(FormatMode::Italics),
+            "link" => Ok(Self::Link),
+            "image" => Ok(Self::Image),
+            "bold" => Ok(Self::Bold),
+            "italics" => Ok(Self::Italics),
             x => Err(format!("Unknown format mode {}", x)),
         }
     }

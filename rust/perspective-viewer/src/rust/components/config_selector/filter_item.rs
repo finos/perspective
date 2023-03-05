@@ -238,18 +238,18 @@ impl Component for FilterItem {
             .get_filter_input()
             .unwrap_or_else(|| "".to_owned());
         let input_ref = NodeRef::default();
-        if let Some(Type::Bool) = ctx.props().get_filter_type() {
+        if ctx.props().get_filter_type() == Some(Type::Bool) {
             ctx.props().update_filter_input(input.clone());
         }
 
-        FilterItem { input, input_ref }
+        Self { input, input_ref }
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: FilterItemMsg) -> bool {
         match msg {
             FilterItemMsg::FilterInput(column, input) => {
                 let target = self.input_ref.cast::<HtmlInputElement>().unwrap();
-                let input = if let Some(Type::Bool) = ctx.props().get_filter_type() {
+                let input = if ctx.props().get_filter_type() == Some(Type::Bool) {
                     if target.checked() {
                         "true".to_owned()
                     } else {
@@ -479,7 +479,7 @@ impl Component for FilterItem {
                     </FilterOpSelector>
 
                     if !matches!(&filter.1, FilterOp::IsNotNull | FilterOp::IsNull) {
-                        if let Some(Type::Bool) = col_type {
+                        if col_type == Some(Type::Bool) {
                             { input_elem }
                         } else {
                             <label

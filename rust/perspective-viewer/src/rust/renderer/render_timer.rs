@@ -27,7 +27,7 @@ enum RenderTimerType {
 
 impl Drop for RenderTimerType {
     fn drop(&mut self) {
-        if let RenderTimerType::Moving(closure, _) = self {
+        if let Self::Moving(closure, _) = self {
             let document = window().unwrap().document().unwrap();
             document
                 .remove_event_listener_with_callback(

@@ -36,8 +36,8 @@ impl CustomElementMetadata for ExportDropDownMenuElement {
 #[wasm_bindgen]
 impl ExportDropDownMenuElement {
     #[wasm_bindgen(constructor)]
-    pub fn new(elem: HtmlElement) -> ExportDropDownMenuElement {
-        ExportDropDownMenuElement {
+    pub fn new(elem: HtmlElement) -> Self {
+        Self {
             elem,
             modal: Default::default(),
         }
@@ -64,7 +64,7 @@ impl ExportDropDownMenuElement {
 }
 
 impl ExportDropDownMenuElement {
-    pub fn new_from_model<A: GetViewerConfigModel>(model: &A) -> ExportDropDownMenuElement {
+    pub fn new_from_model<A: GetViewerConfigModel>(model: &A) -> Self {
         let document = window().unwrap().document().unwrap();
         let dropdown = document
             .create_element("perspective-export-menu")

@@ -48,7 +48,7 @@ pub struct ColumnSelectorProps {
 derive_model!(DragDrop, Renderer, Session for ColumnSelectorProps);
 
 impl PartialEq for ColumnSelectorProps {
-    fn eq(&self, _rhs: &ColumnSelectorProps) -> bool {
+    fn eq(&self, _rhs: &Self) -> bool {
         true
     }
 }
@@ -117,7 +117,7 @@ impl Component for ColumnSelector {
             move || link.send_message(ColumnSelectorMsg::HoverActiveIndex(None))
         });
 
-        ColumnSelector {
+        Self {
             _subscriptions: [table_sub, view_sub, drop_sub, drag_sub, dragend_sub],
             named_row_count,
             drag_container,
@@ -219,12 +219,13 @@ impl Component for ColumnSelector {
             active_classes.push("is-aggregated");
         }
 
-        let size = 212.0
-            + 28.0
-                * (config.group_by.len()
-                    + config.split_by.len()
-                    + config.filter.len()
-                    + config.sort.len()) as f64;
+        let size = 28.0f64.mul_add(
+            (config.group_by.len()
+                + config.split_by.len()
+                + config.filter.len()
+                + config.sort.len()) as f64,
+            212.0,
+        );
 
         let config_selector = html_nested! {
             <ScrollPanelItem key={ "config_selector" } { size }>
@@ -319,7 +320,7 @@ impl Component for ColumnSelector {
                     drop={ ondrop }
                     on_resize={ &ctx.props().on_resize }
                     on_dimensions_reset={ &ctx.props().on_dimensions_reset }
-                    children={ [config_selector].into_iter().chain(active_columns).collect::<Vec<_>>() }>
+                    children={ std::iter::once(config_selector).chain(active_columns).collect::<Vec<_>>() }>
                 </ScrollPanel>
             </div>
         };

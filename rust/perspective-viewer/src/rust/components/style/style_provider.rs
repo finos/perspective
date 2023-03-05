@@ -32,7 +32,7 @@ impl Component for StyleProvider {
 
     fn create(_ctx: &Context<Self>) -> Self {
         let cache = StyleCache::default();
-        StyleProvider { cache }
+        Self { cache }
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {

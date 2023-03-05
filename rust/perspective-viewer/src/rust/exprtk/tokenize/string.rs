@@ -52,11 +52,11 @@ enum StringFragment {
 }
 
 impl StringFragment {
-    fn len(&self) -> usize {
+    const fn len(&self) -> usize {
         match self {
-            StringFragment::Literal(s) => *s,
-            StringFragment::EscapedChar => 1,
-            StringFragment::EscapedWS => 0,
+            Self::Literal(s) => *s,
+            Self::EscapedChar => 1,
+            Self::EscapedWS => 0,
         }
     }
 }

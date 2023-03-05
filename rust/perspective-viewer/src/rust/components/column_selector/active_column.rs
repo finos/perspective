@@ -36,7 +36,7 @@ pub struct ActiveColumnProps {
 }
 
 impl PartialEq for ActiveColumnProps {
-    fn eq(&self, _rhs: &ActiveColumnProps) -> bool {
+    fn eq(&self, _rhs: &Self) -> bool {
         false
     }
 }
@@ -146,7 +146,7 @@ impl Component for ActiveColumn {
     fn create(ctx: &Context<Self>) -> Self {
         let column_type = ctx.props().get_type();
         let is_required = ctx.props().get_is_required();
-        ActiveColumn {
+        Self {
             column_type,
             is_required,
             ..Default::default()

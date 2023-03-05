@@ -102,7 +102,7 @@ where
     type Properties = DragDropListProps<T, U>;
 
     fn create(_ctx: &Context<Self>) -> Self {
-        DragDropList {
+        Self {
             parent_type: PhantomData,
             item_type: PhantomData,
             draggable_type: PhantomData,

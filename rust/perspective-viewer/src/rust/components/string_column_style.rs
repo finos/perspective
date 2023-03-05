@@ -104,7 +104,7 @@ impl Component for StringColumnStyle {
 
     fn create(ctx: &Context<Self>) -> Self {
         ctx.set_modal_link();
-        StringColumnStyle {
+        Self {
             config: ctx.props().config.clone(),
         }
     }

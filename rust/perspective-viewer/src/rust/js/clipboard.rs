@@ -44,7 +44,7 @@ fn poll(
         let options = js_sys::Object::new();
         js_sys::Reflect::set(&options, &mimetype.into(), js_val)?;
         let item = ClipboardItem::new(&options);
-        let items = [item].iter().collect::<js_sys::Array>();
+        let items = std::iter::once(item).collect::<js_sys::Array>();
         let _promise = web_sys::window()
             .unwrap()
             .navigator()

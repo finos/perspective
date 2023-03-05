@@ -47,7 +47,7 @@ impl Component for FilterDropDown {
 
     fn create(ctx: &Context<Self>) -> Self {
         ctx.set_modal_link();
-        FilterDropDown {
+        Self {
             values: Some(vec![]),
             selected: 0,
             on_select: None,

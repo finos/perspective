@@ -36,8 +36,8 @@ impl CustomElementMetadata for CopyDropDownMenuElement {
 #[wasm_bindgen]
 impl CopyDropDownMenuElement {
     #[wasm_bindgen(constructor)]
-    pub fn new(elem: HtmlElement) -> CopyDropDownMenuElement {
-        CopyDropDownMenuElement {
+    pub fn new(elem: HtmlElement) -> Self {
+        Self {
             elem,
             modal: Default::default(),
         }
@@ -64,7 +64,7 @@ impl CopyDropDownMenuElement {
 }
 
 impl CopyDropDownMenuElement {
-    pub fn new_from_model<A: GetViewerConfigModel>(model: &A) -> CopyDropDownMenuElement {
+    pub fn new_from_model<A: GetViewerConfigModel>(model: &A) -> Self {
         let document = window().unwrap().document().unwrap();
         let dropdown = document
             .create_element("perspective-copy-menu")

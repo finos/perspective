@@ -32,9 +32,9 @@ impl FromStr for ViewerConfigEncoding {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "json" => Ok(ViewerConfigEncoding::Json),
-            "string" => Ok(ViewerConfigEncoding::String),
-            "arraybuffer" => Ok(ViewerConfigEncoding::ArrayBuffer),
+            "json" => Ok(Self::Json),
+            "string" => Ok(Self::String),
+            "arraybuffer" => Ok(Self::ArrayBuffer),
             x => Err(format!("Unknown format \"{}\"", x).into()),
         }
     }

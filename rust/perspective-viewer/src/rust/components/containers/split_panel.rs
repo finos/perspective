@@ -65,7 +65,7 @@ impl ResizingState {
         first_elem: &HtmlElement,
         pointer_id: i32,
         pointer_elem: HtmlElement,
-    ) -> ApiResult<ResizingState> {
+    ) -> ApiResult<Self> {
         let orientation = ctx.props().orientation;
         let reverse = ctx.props().reverse;
         let split_panel = ctx.link();
@@ -94,7 +94,7 @@ impl ResizingState {
             })
             .into_closure();
 
-        let mut state = ResizingState {
+        let mut state = Self {
             index,
             cursor: "".to_owned(),
             start: client_offset,
@@ -177,16 +177,11 @@ impl ResizingState {
     }
 }
 
-#[derive(Clone, Copy, Eq, PartialEq)]
+#[derive(Clone, Copy, Default, Eq, PartialEq)]
 pub enum Orientation {
+    #[default]
     Horizontal,
     Vertical,
-}
-
-impl Default for Orientation {
-    fn default() -> Orientation {
-        Orientation::Horizontal
-    }
 }
 
 #[derive(Properties, Default)]
@@ -388,7 +383,7 @@ struct SplitPanelDividerProps {
 }
 
 impl PartialEq for SplitPanelDividerProps {
-    fn eq(&self, rhs: &SplitPanelDividerProps) -> bool {
+    fn eq(&self, rhs: &Self) -> bool {
         self.i == rhs.i && self.orientation == rhs.orientation
     }
 }

@@ -318,7 +318,7 @@ pub struct DragDropContainer {
 impl DragDropContainer {
     pub fn new<F: Fn() + 'static, G: Fn() + 'static>(ondragenter: F, ondragleave: G) -> Self {
         let noderef = NodeRef::default();
-        DragDropContainer {
+        Self {
             dragenter: dragenter_helper(ondragenter, noderef.clone()),
             dragleave: dragleave_helper(ondragleave, noderef.clone()),
             noderef,

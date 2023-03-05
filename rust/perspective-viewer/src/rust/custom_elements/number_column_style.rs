@@ -39,8 +39,8 @@ impl CustomElementMetadata for PerspectiveNumberColumnStyleElement {
 #[wasm_bindgen]
 impl PerspectiveNumberColumnStyleElement {
     #[wasm_bindgen(constructor)]
-    pub fn new(elem: web_sys::HtmlElement) -> PerspectiveNumberColumnStyleElement {
-        PerspectiveNumberColumnStyleElement { elem, modal: None }
+    pub fn new(elem: web_sys::HtmlElement) -> Self {
+        Self { elem, modal: None }
     }
 
     /// Reset to a provided JSON config, to be used in place of `new()` when

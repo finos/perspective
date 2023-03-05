@@ -12,7 +12,6 @@ use std::iter::{repeat_with, Iterator};
 use std::rc::Rc;
 
 use futures::future::{join_all, select_all};
-use js_intern::*;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
@@ -32,7 +31,7 @@ pub struct FontLoaderProps {
 }
 
 impl PartialEq for FontLoaderProps {
-    fn eq(&self, _rhs: &FontLoaderProps) -> bool {
+    fn eq(&self, _rhs: &Self) -> bool {
         false
     }
 }
@@ -46,7 +45,7 @@ impl Component for FontLoader {
     type Properties = FontLoaderProps;
 
     fn create(_ctx: &Context<Self>) -> Self {
-        FontLoader {}
+        Self {}
     }
 
     fn update(&mut self, _ctx: &Context<Self>, _msg: ()) -> bool {
@@ -54,7 +53,7 @@ impl Component for FontLoader {
     }
 
     fn view(&self, ctx: &Context<Self>) -> yew::virtual_dom::VNode {
-        if let FontLoaderStatus::Finished = ctx.props().get_status() {
+        if matches!(ctx.props().get_status(), FontLoaderStatus::Finished) {
             html! {}
         } else {
             html_template! {
@@ -90,7 +89,7 @@ pub struct FontLoaderState {
 }
 
 impl FontLoaderProps {
-    pub fn new(elem: &web_sys::HtmlElement, on_update: Callback<()>) -> FontLoaderProps {
+    pub fn new(elem: &web_sys::HtmlElement, on_update: Callback<()>) -> Self {
         let inner = FontLoaderState {
             status: Cell::new(FontLoaderStatus::Uninitialized),
             elem: elem.clone(),
@@ -98,7 +97,7 @@ impl FontLoaderProps {
             fonts: RefCell::new(vec![]),
         };
 
-        let state = yew::props!(FontLoaderProps {
+        let state = yew::props!(Self {
             state: Rc::new(inner),
         });
 
@@ -151,7 +150,7 @@ impl FontLoaderProps {
             let mut block_fonts: PromiseSet = vec![ApiFuture::new(task)];
 
             for entry in font_iter(document.fonts().values()) {
-                let font_face = js_sys::Reflect::get(&entry, js_intern!("value"))?
+                let font_face = js_sys::Reflect::get(&entry, js_intern::js_intern!("value"))?
                     .dyn_into::<web_sys::FontFace>()?;
 
                 // Safari always has to be "different".
@@ -242,7 +241,7 @@ fn font_iter(
     repeat_with(move || iter.next())
         .filter_map(|x| x.ok())
         .take_while(|entry| {
-            !js_sys::Reflect::get(entry, js_intern!("done"))
+            !js_sys::Reflect::get(entry, js_intern::js_intern!("done"))
                 .unwrap()
                 .as_bool()
                 .unwrap()

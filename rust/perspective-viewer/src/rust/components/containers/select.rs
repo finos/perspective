@@ -97,7 +97,7 @@ where
     type Properties = SelectProps<T>;
 
     fn create(_ctx: &Context<Self>) -> Self {
-        Select::<T> {
+        Self {
             select_ref: NodeRef::default(),
             selected: _ctx.props().selected.clone(),
         }

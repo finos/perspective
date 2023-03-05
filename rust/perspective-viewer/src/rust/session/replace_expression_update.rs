@@ -26,7 +26,7 @@ impl ViewConfig {
         new_expression: &str,
     ) -> ViewConfigUpdate {
         let expression = new_expression;
-        let ViewConfig {
+        let Self {
             columns,
             expressions,
             group_by,

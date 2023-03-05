@@ -41,6 +41,7 @@ pub enum Token<'a> {
 
 use Token::*;
 
+#[allow(clippy::use_self)]
 impl<'a> From<Token<'a>> for Html {
     fn from(x: Token<'a>) -> Self {
         html! {
@@ -56,7 +57,7 @@ impl<'a> From<Token<'a>> for Html {
 }
 
 impl<'a> Token<'a> {
-    fn class_name(&self) -> &'static str {
+    const fn class_name(&self) -> &'static str {
         match self {
             Comment(_) => "comment",
             Whitespace(_) => "whitespace",
@@ -72,7 +73,7 @@ impl<'a> Token<'a> {
     /// Note the use of the lifetime `'a` - this function does not work
     /// correctly when it's signature is specified `-> &'_ str` instead, as
     /// `self` and the `str` may have different lifetimes.
-    pub fn content(&self) -> &'a str {
+    pub const fn content(&self) -> &'a str {
         match self {
             Comment(x) => x,
             Whitespace(x) => x,

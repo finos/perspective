@@ -9,7 +9,6 @@
 use std::future::Future;
 use std::pin::Pin;
 
-use js_intern::*;
 use wasm_bindgen::convert::{FromWasmAbi, IntoWasmAbi};
 use wasm_bindgen::describe::WasmDescribe;
 use wasm_bindgen::prelude::*;
@@ -38,8 +37,8 @@ where
     /// `ApiFuture` created does _not_ execute without being further cast to a
     /// `Promise`, either explicitly or implcitly (when exposed via
     /// `wasm_bindgen`).
-    pub fn new<U: Future<Output = ApiResult<T>> + 'static>(x: U) -> ApiFuture<T> {
-        ApiFuture(Box::pin(x))
+    pub fn new<U: Future<Output = ApiResult<T>> + 'static>(x: U) -> Self {
+        Self(Box::pin(x))
     }
 }
 
@@ -51,7 +50,7 @@ where
     /// handle created internally is dropped, but since JavaScript `Promise`
     /// executes on construction, the async invocation persists.
     pub fn spawn<U: Future<Output = ApiResult<T>> + 'static>(x: U) {
-        drop(js_sys::Promise::from(ApiFuture::new(x)))
+        drop(js_sys::Promise::from(Self::new(x)))
     }
 }
 
@@ -61,13 +60,13 @@ where
     T: Default,
 {
     fn default() -> Self {
-        ApiFuture::new(async { Ok(Default::default()) })
+        Self::new(async { Ok(Default::default()) })
     }
 }
 
 impl<T> From<ApiFuture<T>> for JsValue
 where
-    Result<T, JsValue>: IntoJsResult + 'static,
+    Result<T, Self>: IntoJsResult + 'static,
 {
     fn from(fut: ApiFuture<T>) -> Self {
         js_sys::Promise::from(fut).unchecked_into()
@@ -117,7 +116,7 @@ where
 
     #[inline]
     unsafe fn from_abi(js: Self::Abi) -> Self {
-        ApiFuture::new(async move {
+        Self::new(async move {
             let promise = js_sys::Promise::from_abi(js);
             Ok(JsFuture::from(promise).await?.into())
         })
@@ -164,20 +163,22 @@ pub impl Result<JsValue, ApiError> {
                     if err.message() != CANCELLED_MSG {
                         Err(x)
                     } else {
-                        Ok(js_intern!(CANCELLED_MSG).clone())
+                        Ok(js_intern::js_intern!(CANCELLED_MSG).clone())
                     }
                 }
                 _ => match f.as_string() {
-                    Some(x) if x == CANCELLED_MSG => Ok(js_intern!(CANCELLED_MSG).clone()),
+                    Some(x) if x == CANCELLED_MSG => {
+                        Ok(js_intern::js_intern!(CANCELLED_MSG).clone())
+                    }
                     Some(_) => Err(x),
                     _ => {
-                        if js_sys::Reflect::get(&f, js_intern!("message"))
+                        if js_sys::Reflect::get(&f, js_intern::js_intern!("message"))
                             .unwrap()
                             .as_string()
                             .unwrap_or_else(|| "".to_owned())
                             == CANCELLED_MSG
                         {
-                            Ok(js_intern!(CANCELLED_MSG).clone())
+                            Ok(js_intern::js_intern!(CANCELLED_MSG).clone())
                         } else {
                             Err(x)
                         }

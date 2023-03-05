@@ -148,7 +148,7 @@ impl Component for ConfigSelector {
 
         let filter_dropdown = FilterDropDownElement::new(ctx.props().session.clone());
         let _subscriptions = [drop_sub, view_sub, drag_sub, dragend_sub];
-        ConfigSelector {
+        Self {
             filter_dropdown,
             _subscriptions,
         }

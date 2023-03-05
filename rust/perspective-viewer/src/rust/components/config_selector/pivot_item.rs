@@ -71,6 +71,6 @@ impl Component for PivotItem {
     }
 
     fn create(_ctx: &Context<Self>) -> Self {
-        PivotItem {}
+        Self {}
     }
 }

@@ -65,7 +65,7 @@ impl ViewConfig {
     }
 
     pub fn reset(&mut self, reset_expressions: bool) {
-        let mut config = ViewConfig::default();
+        let mut config = Self::default();
         if !reset_expressions {
             config.expressions = self.expressions.clone();
         }
@@ -151,7 +151,7 @@ mod tests {
         });
 
         let rec: ViewConfig = x.into_serde_ext().unwrap();
-        assert_eq!(rec.group_by, vec!("Test"));
+        assert_eq!(rec.group_by, vec!["Test"]);
     }
 
     #[wasm_bindgen_test]
@@ -160,7 +160,7 @@ mod tests {
             "split_by": ["Test"]
         });
         let rec: ViewConfig = x.into_serde_ext().unwrap();
-        assert_eq!(rec.split_by, vec!("Test"));
+        assert_eq!(rec.split_by, vec!["Test"]);
     }
 
     #[wasm_bindgen_test]
@@ -174,11 +174,11 @@ mod tests {
         let rec: ViewConfig = x.into_serde_ext().unwrap();
         assert_eq!(
             rec.filter,
-            vec!(Filter(
+            vec![Filter(
                 "Test".to_owned(),
                 FilterOp::Contains,
                 FilterTerm::Scalar(Scalar::String("aaa".to_owned()))
-            ))
+            )]
         );
     }
 
@@ -192,11 +192,11 @@ mod tests {
         let rec: ViewConfig = x.into_serde_ext().unwrap();
         assert_eq!(
             rec.filter,
-            vec!(Filter(
+            vec![Filter(
                 "Test".to_owned(),
                 FilterOp::LT,
                 FilterTerm::Scalar(Scalar::Float(4_f64))
-            ))
+            )]
         );
     }
 
@@ -209,7 +209,7 @@ mod tests {
 
         let x = json!({ "sort": [sort] });
         let rec: ViewConfig = x.into_serde_ext().unwrap();
-        assert_eq!(rec.sort, vec!(Sort("Test".to_owned(), SortDir::Asc,)));
+        assert_eq!(rec.sort, vec![Sort("Test".to_owned(), SortDir::Asc,)]);
     }
 
     #[wasm_bindgen_test]
@@ -228,10 +228,10 @@ mod tests {
         let rec: ViewConfig = x.into_serde_ext().unwrap();
         assert_eq!(
             rec.sort,
-            vec!(
+            vec![
                 Sort("Test1".to_owned(), SortDir::Asc),
                 Sort("Test2".to_owned(), SortDir::Desc)
-            )
+            ]
         );
     }
 
@@ -255,7 +255,7 @@ mod tests {
         assert_eq!(view_config.group_by.len(), 0);
         let changed = view_config.apply_update(update);
         assert!(changed);
-        assert_eq!(view_config.group_by, vec!("Test".to_owned()));
+        assert_eq!(view_config.group_by, vec!["Test".to_owned()]);
     }
 
     #[wasm_bindgen_test]
@@ -269,7 +269,7 @@ mod tests {
         assert_eq!(view_config.group_by.len(), 0);
         let changed = view_config.apply_update(update);
         assert!(changed);
-        assert_eq!(view_config.group_by, vec!("Test".to_owned()));
+        assert_eq!(view_config.group_by, vec!["Test".to_owned()]);
         assert_eq!(view_config.split_by.len(), 0);
         let update = ViewConfigUpdate {
             split_by: Some(vec!["Test2".to_owned()]),
@@ -278,7 +278,7 @@ mod tests {
 
         let changed = view_config.apply_update(update);
         assert!(changed);
-        assert_eq!(view_config.group_by, vec!("Test".to_owned()));
-        assert_eq!(view_config.split_by, vec!("Test2".to_owned()));
+        assert_eq!(view_config.group_by, vec!["Test".to_owned()]);
+        assert_eq!(view_config.split_by, vec!["Test2".to_owned()]);
     }
 }
