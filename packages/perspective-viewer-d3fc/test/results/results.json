@@ -1,7 +1,7 @@
 {
-    "events_perspective-config-update_event_is_fired_when_series_axis_is_changed": "a75579dc157424593d33efff7651db28",
+    "events_perspective-config-update_event_is_fired_when_series_axis_is_changed": "6ac5967822232cd80853f4f11eb614f1",
     "events_perspective-config-update_event_is_fired_when_legend_position_is_changed": "01c7817ea82ab76f2a4d9ba47f5dce7a",
-    "__GIT_COMMIT__": "6941daaa3596b6d0d9e026c05bb9679525f4039e",
+    "__GIT_COMMIT__": "43dd81da00f8f42eb33d71f3e4aa6a436fdf8f8a",
     "xyline_shows_a_grid_without_any_settings_applied": "2aba74b5e5db14953a041e7ebb544a8a",
     "xyline_displays_visible_columns_": "c8bf1c32455f8f8a5210e6ba368ba3db",
     "xyline_pivot_by_a_row": "6bb755705694cc8d7766c988fc98b8b4",
