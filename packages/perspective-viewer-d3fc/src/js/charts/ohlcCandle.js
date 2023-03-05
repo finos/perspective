@@ -65,6 +65,7 @@ function ohlcCandle(seriesCanvas) {
         const yAxis = axisFactory(settings)
             .settingName("mainValues")
             .valueNames(["lowValue", "highValue"])
+            .memoValue(settings.axisMemo[1])
             .orient("vertical")
             .paddingStrategy(paddingStrategy)(data);
 

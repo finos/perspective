@@ -94,10 +94,13 @@ function xyScatter(container, settings) {
 
     const xAxis = axisDefault()
         .settingValue(settings.mainValues[0].name)
+        .memoValue(settings.axisMemo[0])
         .valueName("x")(data);
+
     const yAxis = axisDefault()
         .orient("vertical")
         .settingValue(settings.mainValues[1].name)
+        .memoValue(settings.axisMemo[1])
         .valueName("y")(data);
 
     const chart = chartCanvasFactory(xAxis, yAxis)

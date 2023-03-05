@@ -35,6 +35,7 @@ function barChart(container, settings) {
     const xAxis = axisFactory(settings)
         .settingName("mainValues")
         .valueName("mainValue")
+        .memoValue(settings.axisMemo[0])
         .excludeType(AXIS_TYPES.ordinal)
         .include([0])
         .paddingStrategy(hardLimitZeroPadding())(data);

@@ -27,6 +27,7 @@ export const axisFactory = (settings) => {
     let settingValue = null;
     let valueNames = ["crossValue"];
     let modifyDomain = null;
+    let memoValue = null;
 
     const optionalParams = ["include", "paddingStrategy", "pad"];
     const optional = {};
@@ -49,6 +50,11 @@ export const axisFactory = (settings) => {
         let domain = domainFunction(data);
         if (modifyDomain !== null) {
             domain = modifyDomain(domain);
+        }
+
+        if (memoValue && typeof domain[0] === "number") {
+            memoValue[0] = domain[0] = Math.min(domain[0], memoValue[0]);
+            memoValue[1] = domain[1] = Math.max(domain[1], memoValue[1]);
         }
 
         const component = axis.component
@@ -87,6 +93,14 @@ export const axisFactory = (settings) => {
         right: fc.axisRight,
         decorate: () => {},
     });
+
+    _factory.memoValue = (...args) => {
+        if (!args.length) {
+            return memoValue;
+        }
+        memoValue = args[0];
+        return _factory;
+    };
 
     _factory.excludeType = (...args) => {
         if (!args.length) {
