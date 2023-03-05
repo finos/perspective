@@ -37,11 +37,7 @@ struct ResizeObserverHandle {
 }
 
 impl ResizeObserverHandle {
-    fn new(
-        elem: &HtmlElement,
-        renderer: &Renderer,
-        root: &AppHandle<PerspectiveViewer>,
-    ) -> Self {
+    fn new(elem: &HtmlElement, renderer: &Renderer, root: &AppHandle<PerspectiveViewer>) -> Self {
         let on_resize = root.callback(|()| Msg::Resize);
         let mut state = ResizeObserverState {
             elem: elem.clone(),
@@ -209,7 +205,11 @@ impl PerspectiveViewerElement {
             .dyn_into::<js_sys::Promise>()
             .unwrap_or_else(|_| js_sys::Promise::resolve(&table));
 
-        let mut config = ViewConfigUpdate::default();
+        let mut config = ViewConfigUpdate {
+            columns: Some(self.session.get_view_config().columns.clone()),
+            ..ViewConfigUpdate::default()
+        };
+
         self.session
             .set_update_column_defaults(&mut config, &self.renderer.metadata());
 
@@ -226,6 +226,7 @@ impl PerspectiveViewerElement {
                 session.validate().await?.create_view().await
             };
 
+            renderer.set_throttle(None);
             renderer.draw(task).await
         })
     }
