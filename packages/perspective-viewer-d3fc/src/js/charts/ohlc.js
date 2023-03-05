@@ -18,8 +18,8 @@ ohlc.plugin = {
     render_warning: true,
     initial: {
         type: "number",
-        count: 4,
-        names: ["Open", "Close", "High", "Low"],
+        count: 1,
+        names: ["Open", "Close", "High", "Low", "Tooltip"],
     },
     selectMode: "toggle",
 };
