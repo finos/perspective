@@ -80,6 +80,12 @@ pub enum SingleAggregate {
     #[serde(rename = "low")]
     Low,
 
+    #[serde(rename = "max")]
+    Max,
+
+    #[serde(rename = "min")]
+    Min,
+
     #[serde(rename = "high minus low")]
     HighMinusLow,
 
@@ -117,6 +123,8 @@ impl Display for SingleAggregate {
             Self::HighMinusLow => "high minus low",
             Self::StdDev => "stddev",
             Self::Var => "var",
+            Self::Max => "max",
+            Self::Min => "min",
         };
 
         write!(fmt, "{}", term)
@@ -149,6 +157,8 @@ impl FromStr for SingleAggregate {
             "join" => Ok(Self::Join),
             "high" => Ok(Self::High),
             "low" => Ok(Self::Low),
+            "max" => Ok(Self::Max),
+            "min" => Ok(Self::Min),
             "high minus low" => Ok(Self::HighMinusLow),
             "stddev" => Ok(Self::StdDev),
             "var" => Ok(Self::Var),
@@ -220,6 +230,8 @@ const NUMBER_AGGREGATES: &[SingleAggregate] = &[
     SingleAggregate::First,
     SingleAggregate::High,
     SingleAggregate::Low,
+    SingleAggregate::Max,
+    SingleAggregate::Min,
     SingleAggregate::HighMinusLow,
     SingleAggregate::LastByIndex,
     SingleAggregate::LastMinusFirst,
