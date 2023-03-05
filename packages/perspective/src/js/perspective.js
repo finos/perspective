@@ -970,6 +970,15 @@ export default function (Module) {
         );
     };
 
+    view.prototype.dimensions = function () {
+        return {
+            num_table_rows: this.table.num_rows(),
+            num_table_columns: this.table.num_columns(),
+            num_view_rows: this._View.num_rows(),
+            num_view_columns: this.num_columns(),
+        };
+    };
+
     /**
      * Whether this row at index `idx` is in an expanded or collapsed state.
      *

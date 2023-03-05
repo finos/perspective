@@ -147,6 +147,17 @@ class Table(object):
         self._state_manager.call_process(self._table.get_id())
         return self._table.size()
 
+    def num_rows(self):
+        """Returns the row count of the :class:`~perspective.Table`."""
+        self._state_manager.call_process(self._table.get_id())
+        return self._table.size()
+
+    def num_columns(self):
+        """Returns the column count of the :class:`~perspective.Table`."""
+        self._state_manager.call_process(self._table.get_id())
+        columns = self._table.get_schema().columns()
+        return sum(1 for col in columns if col != "psp_okey" and col != "__ROW_PATH__")
+
     def schema(self, as_string=False):
         """Returns the schema of this :class:`~perspective.Table`, a :obj:`dict`
         mapping of string column names to python data types.

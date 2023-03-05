@@ -88,6 +88,8 @@ view.prototype.num_columns = async_queue("num_columns");
 
 view.prototype.num_rows = async_queue("num_rows");
 
+view.prototype.dimensions = async_queue("dimensions");
+
 view.prototype.set_depth = async_queue("set_depth");
 
 view.prototype.get_row_expanded = async_queue("get_row_expanded");
