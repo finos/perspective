@@ -10,7 +10,8 @@
 const jsonFormatter = {
     initDataValue: () => [],
     initRowValue: () => ({}),
-    initColumnValue: (data, row, colName) => (row[colName] = []),
+    initColumnValue: (data, colName) => {},
+    initColumnRowPath: (data, row, colName) => (row[colName] = []),
     setColumnValue: (data, row, colName, value) => (row[colName] = value),
     addColumnValue: (data, row, colName, value) => row[colName].unshift(value),
     addRow: (data, row) => data.push(row),
@@ -21,15 +22,16 @@ const jsonFormatter = {
 const jsonTableFormatter = {
     initDataValue: () => new Object(),
     initRowValue: () => {},
+    initColumnValue: (data, colName) => {
+        data[colName] = [];
+    },
     setColumnValue: (data, row, colName, value) => {
-        data[colName] = data[colName] || [];
         data[colName].push(value);
     },
     addColumnValue: (data, row, colName, value) => {
-        data[colName] = data[colName] || [];
         data[colName][data[colName].length - 1].unshift(value);
     },
-    initColumnValue: (data, row, colName) => {
+    initColumnRowPath: (data, row, colName) => {
         data[colName] = data[colName] || [];
         data[colName].push([]);
     },

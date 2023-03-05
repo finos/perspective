@@ -559,6 +559,11 @@ export default function (Module) {
 
         let data = formatter.initDataValue();
 
+        for (let cidx = start_col; cidx < end_col; cidx++) {
+            const col_name = col_names[cidx];
+            formatter.initColumnValue(data, col_name);
+        }
+
         for (let ridx = start_row; ridx < end_row; ridx++) {
             let row_path = has_row_path ? slice.get_row_path(ridx) : undefined;
             if (
@@ -572,7 +577,7 @@ export default function (Module) {
             let row = formatter.initRowValue();
 
             if (get_ids) {
-                formatter.initColumnValue(data, row, "__ID__");
+                formatter.initColumnRowPath(data, row, "__ID__");
             }
 
             for (let cidx = start_col; cidx < end_col; cidx++) {
@@ -582,7 +587,7 @@ export default function (Module) {
 
                 if (cidx === start_col && num_sides !== 0) {
                     if (!this.column_only) {
-                        formatter.initColumnValue(data, row, "__ROW_PATH__");
+                        formatter.initColumnRowPath(data, row, "__ROW_PATH__");
                         for (let i = 0; i < row_path.size(); i++) {
                             const s = row_path.get(i);
                             const value = __MODULE__.scalar_to_val(
@@ -636,7 +641,7 @@ export default function (Module) {
 
             if (get_pkeys) {
                 const keys = slice.get_pkeys(ridx, 0);
-                formatter.initColumnValue(data, row, "__INDEX__");
+                formatter.initColumnRowPath(data, row, "__INDEX__");
                 for (let i = 0; i < keys.size(); i++) {
                     // TODO: if __INDEX__ and set index have the same value,
                     // don't we need to make sure that it only emits one?
@@ -1361,7 +1366,7 @@ export default function (Module) {
      * the schema and construction options.
      */
     table.prototype.clear = function () {
-        _remove_process(this.get_id());
+        _call_process(this.get_id());
         this._Table.reset_gnode(this.gnode_id);
     };
 
@@ -1910,6 +1915,13 @@ export default function (Module) {
             console.log("Profiling initialized");
         }
     }
+
+    table.prototype.query_columns = function (config, format) {
+        const view = this.view(config);
+        const columns = view.to_columns(format);
+        view.delete();
+        return columns;
+    };
 
     /**
      * Updates the rows of a {@link module:perspective~table}. Updated rows are
