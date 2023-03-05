@@ -181,9 +181,9 @@ where
         let drop = Callback::from({
             let dragdrop = ctx.props().dragdrop.clone();
             let link = ctx.link().clone();
-            move |_| {
+            move |event| {
                 link.send_message(DragDropListMsg::Freeze(false));
-                dragdrop.notify_drop();
+                dragdrop.notify_drop(&event);
             }
         });
 

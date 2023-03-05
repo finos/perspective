@@ -202,7 +202,7 @@ impl Component for ColumnSelector {
         let ondragover = Callback::from(|_event: DragEvent| _event.prevent_default());
         let ondrop = Callback::from({
             let dragdrop = ctx.props().dragdrop.clone();
-            move |_| dragdrop.notify_drop()
+            move |event| dragdrop.notify_drop(&event)
         });
 
         let ondragend = Callback::from({
