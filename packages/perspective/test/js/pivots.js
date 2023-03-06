@@ -2362,6 +2362,7 @@ module.exports = (perspective) => {
             }, {});
 
             expect(result2).toEqual({
+                "  ROW PATH  ": [],
                 "4/11/2019, 11:40:35 PM|x": [null, null, 3, 4],
                 "4/11/2019, 11:40:35 PM|y": [null, null, "c", "d"],
                 "4/13/2019, 3:27:15 AM|x": [1, 2, null, null],
@@ -2430,6 +2431,7 @@ module.exports = (perspective) => {
             });
             let result2 = await view.to_columns();
             expect(result2).toEqual({
+                __ROW_PATH__: [],
                 "true|w": [1.5, null, 3.5, null],
                 "true|x": [1, null, 3, null],
                 "true|y": ["a", null, "c", null],

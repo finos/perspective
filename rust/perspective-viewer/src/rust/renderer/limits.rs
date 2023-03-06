@@ -20,8 +20,9 @@ pub async fn get_row_and_col_limits(
     view: &JsPerspectiveView,
     plugin_metadata: &ViewConfigRequirements,
 ) -> Result<(usize, usize, Option<usize>, Option<usize>), JsValue> {
-    let num_cols = view.num_columns().await? as usize;
-    let num_rows = view.num_rows().await? as usize;
+    let dimensions = view.dimensions().await?;
+    let num_cols = dimensions.num_view_columns() as usize;
+    let num_rows = dimensions.num_view_rows() as usize;
     match (plugin_metadata.max_columns, plugin_metadata.render_warning) {
         (Some(_), false) => Ok((num_cols, num_rows, None, None)),
         (max_columns, _) => {

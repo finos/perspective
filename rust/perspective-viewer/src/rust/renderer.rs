@@ -175,7 +175,7 @@ impl Renderer {
             .map(|_| JsValue::UNDEFINED)
     }
 
-    pub fn set_throttle(&mut self, val: Option<f64>) {
+    pub fn set_throttle(&self, val: Option<f64>) {
         self.0.borrow_mut().timer.set_throttle(val);
     }
 

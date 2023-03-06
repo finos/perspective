@@ -51,12 +51,14 @@ function xyLine(container, settings) {
         .settingName("mainValues")
         .settingValue(settings.mainValues[0].name)
         .valueName("crossValue")
+        .memoValue(settings.axisMemo[0])
         .paddingStrategy(paddingStrategy);
 
     const yAxisFactory = axisFactory(settings)
         .settingName("mainValues")
         .settingValue(settings.mainValues[1].name)
         .valueName("mainValue")
+        .memoValue(settings.axisMemo[1])
         .orient("vertical")
         .paddingStrategy(paddingStrategy);
 

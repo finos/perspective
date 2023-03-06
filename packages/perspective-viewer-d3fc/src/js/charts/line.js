@@ -46,6 +46,7 @@ function lineChart(container, settings) {
     const yAxisFactory = axisFactory(settings)
         .settingName("mainValues")
         .valueName("mainValue")
+        .memoValue(settings.axisMemo[0])
         .orient("vertical")
         .paddingStrategy(paddingStrategy);
 

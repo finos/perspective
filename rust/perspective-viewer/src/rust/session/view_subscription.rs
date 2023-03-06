@@ -29,7 +29,6 @@ pub struct ViewStats {
 
 #[derive(Clone)]
 struct ViewSubscriptionData {
-    table: JsPerspectiveTable,
     view: View,
     config: ViewConfig,
     on_stats: Callback<ViewStats>,
@@ -54,10 +53,11 @@ impl ViewSubscriptionData {
     /// TODO Use serde to serialize the full view config, instead of calculating
     /// `is_aggregated` here.
     async fn update_view_stats(self) -> ApiResult<JsValue> {
-        let num_rows = self.table.num_rows().await? as u32;
-        let num_cols = self.table.num_columns().await? as u32;
-        let virtual_rows = self.view.num_rows().await? as u32;
-        let virtual_cols = self.view.num_columns().await? as u32;
+        let dimensions = self.view.dimensions().await?;
+        let num_rows = dimensions.num_table_rows() as u32;
+        let num_cols = dimensions.num_table_columns() as u32;
+        let virtual_rows = dimensions.num_view_rows() as u32;
+        let virtual_cols = dimensions.num_view_columns() as u32;
         let stats = ViewStats {
             num_table_cells: Some((num_rows, num_cols)),
             num_view_cells: Some((virtual_rows, virtual_cols)),
@@ -83,14 +83,12 @@ impl ViewSubscription {
     /// * `on_stats` - a callback for metadata notifications, from Perspective's
     ///   `View.on_update()`.
     pub fn new(
-        table: JsPerspectiveTable,
         view: JsPerspectiveView,
         config: ViewConfig,
         on_stats: Callback<ViewStats>,
         on_update: Callback<()>,
     ) -> Self {
         let data = ViewSubscriptionData {
-            table,
             view: View::new(view),
             config,
             on_stats,
@@ -111,13 +109,6 @@ impl ViewSubscription {
     /// Getter for the underlying `View()`.
     pub const fn get_view(&self) -> &View {
         &self.data.view
-    }
-
-    /// Getter for the underlying `Table()`.
-    /// TODO this is un-used, but I'm leaving it as a reminder that the API
-    /// intends this to be public.
-    pub const fn _table(&self) -> &JsPerspectiveTable {
-        &self.data.table
     }
 }
 

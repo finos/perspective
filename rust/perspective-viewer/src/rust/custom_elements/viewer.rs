@@ -37,11 +37,7 @@ struct ResizeObserverHandle {
 }
 
 impl ResizeObserverHandle {
-    fn new(
-        elem: &HtmlElement,
-        renderer: &Renderer,
-        root: &AppHandle<PerspectiveViewer>,
-    ) -> ResizeObserverHandle {
+    fn new(elem: &HtmlElement, renderer: &Renderer, root: &AppHandle<PerspectiveViewer>) -> Self {
         let on_resize = root.callback(|()| Msg::Resize);
         let mut state = ResizeObserverState {
             elem: elem.clone(),
@@ -55,7 +51,7 @@ impl ResizeObserverHandle {
         let func = _callback.as_ref().unchecked_ref::<js_sys::Function>();
         let observer = ResizeObserver::new(func);
         observer.observe(elem);
-        ResizeObserverHandle {
+        Self {
             elem: elem.clone(),
             _callback,
             observer,
@@ -149,7 +145,7 @@ impl CustomElementMetadata for PerspectiveViewerElement {
 #[wasm_bindgen]
 impl PerspectiveViewerElement {
     #[wasm_bindgen(constructor)]
-    pub fn new(elem: web_sys::HtmlElement) -> PerspectiveViewerElement {
+    pub fn new(elem: web_sys::HtmlElement) -> Self {
         let init = web_sys::ShadowRootInit::new(web_sys::ShadowRootMode::Open);
         let shadow_root = elem
             .attach_shadow(&init)
@@ -184,7 +180,7 @@ impl PerspectiveViewerElement {
 
         let _events = CustomEvents::new(&elem, &session, &renderer, &presentation);
         let resize_handle = ResizeObserverHandle::new(&elem, &renderer, &root);
-        PerspectiveViewerElement {
+        Self {
             elem,
             root: Rc::new(RefCell::new(Some(root))),
             session,
@@ -209,7 +205,11 @@ impl PerspectiveViewerElement {
             .dyn_into::<js_sys::Promise>()
             .unwrap_or_else(|_| js_sys::Promise::resolve(&table));
 
-        let mut config = ViewConfigUpdate::default();
+        let mut config = ViewConfigUpdate {
+            columns: Some(self.session.get_view_config().columns.clone()),
+            ..ViewConfigUpdate::default()
+        };
+
         self.session
             .set_update_column_defaults(&mut config, &self.renderer.metadata());
 
@@ -226,6 +226,7 @@ impl PerspectiveViewerElement {
                 session.validate().await?.create_view().await
             };
 
+            renderer.set_throttle(None);
             renderer.draw(task).await
         })
     }
@@ -307,7 +308,7 @@ impl PerspectiveViewerElement {
 
             if let OptionalUpdate::Update(title) = title {
                 presentation.set_title(Some(title));
-            } else if let OptionalUpdate::SetDefault = title {
+            } else if matches!(title, OptionalUpdate::SetDefault) {
                 presentation.set_title(None);
             }
 
@@ -587,6 +588,7 @@ impl PerspectiveViewerElement {
     /// Internal Only.
     ///
     /// Get this custom element model's raw pointer.
+    #[allow(clippy::use_self)]
     #[wasm_bindgen(js_name = "unsafeGetModel")]
     pub fn unsafe_get_model(&self) -> *const PerspectiveViewerElement {
         std::ptr::addr_of!(*self)

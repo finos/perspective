@@ -30,7 +30,7 @@ impl ExpressionEditorElement {
         on_delete: Option<Callback<()>>,
         on_blur: Callback<()>,
         alias: Option<String>,
-    ) -> ExpressionEditorElement {
+    ) -> Self {
         let document = window().unwrap().document().unwrap();
         let elem = document
             .create_element("perspective-expression-editor")
@@ -54,7 +54,7 @@ impl ExpressionEditorElement {
         });
 
         let modal = ModalElement::new(elem, props, true, Some(on_blur));
-        ExpressionEditorElement { modal }
+        Self { modal }
     }
 
     pub fn open(&mut self, target: HtmlElement) {

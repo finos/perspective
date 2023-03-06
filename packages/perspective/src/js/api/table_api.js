@@ -98,6 +98,8 @@ table.prototype.view = function (config) {
     return new view(this._worker, this._name, config);
 };
 
+table.prototype.query_columns = async_queue("query_columns", "table_method");
+
 // Dispatch table methods that do not create new objects (getters, setters etc.)
 // to the queue for processing.
 table.prototype.get_index = async_queue("get_index", "table_method");

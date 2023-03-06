@@ -90,7 +90,7 @@ where
     type Properties = ModalProps<T>;
 
     fn create(_ctx: &Context<Self>) -> Self {
-        Modal {
+        Self {
             css: ":host{{top:0px;left:0px;opacity:0}}".to_owned(),
             rev_vert: Default::default(),
             _comp: PhantomData::default(),
@@ -161,7 +161,7 @@ impl Component for NoRender {
     type Properties = NoRenderProps;
 
     fn create(_ctx: &Context<Self>) -> Self {
-        NoRender {}
+        Self {}
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {

@@ -51,6 +51,7 @@ function yScatter(container, settings) {
     const yAxisFactory = axisFactory(settings)
         .settingName("mainValues")
         .valueName("mainValue")
+        .memoValue(settings.axisMemo[1])
         .orient("vertical")
         .paddingStrategy(paddingStrategy);
 

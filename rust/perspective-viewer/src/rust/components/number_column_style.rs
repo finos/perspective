@@ -97,11 +97,11 @@ impl Component for NumberColumnStyle {
 
     fn create(ctx: &Context<Self>) -> Self {
         ctx.set_modal_link();
-        NumberColumnStyle::reset(&ctx.props().config, &ctx.props().default_config)
+        Self::reset(&ctx.props().config, &ctx.props().default_config)
     }
 
     fn changed(&mut self, ctx: &Context<Self>, _old: &Self::Properties) -> bool {
-        let mut new = NumberColumnStyle::reset(&ctx.props().config, &ctx.props().default_config);
+        let mut new = Self::reset(&ctx.props().config, &ctx.props().default_config);
         std::mem::swap(self, &mut new);
         true
     }
@@ -109,7 +109,7 @@ impl Component for NumberColumnStyle {
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             NumberColumnStyleMsg::Reset(config, default_config) => {
-                let mut new = NumberColumnStyle::reset(&config, &default_config);
+                let mut new = Self::reset(&config, &default_config);
                 std::mem::swap(self, &mut new);
                 true
             }
@@ -531,7 +531,7 @@ impl NumberColumnStyle {
     fn reset(
         config: &NumberColumnStyleConfig,
         default_config: &NumberColumnStyleDefaultConfig,
-    ) -> NumberColumnStyle {
+    ) -> Self {
         let mut config = config.clone();
         let fg_gradient = match config.fg_gradient {
             Some(x) => x,
@@ -585,7 +585,7 @@ impl NumberColumnStyle {
             }
         };
 
-        NumberColumnStyle {
+        Self {
             config,
             fg_mode,
             bg_mode,

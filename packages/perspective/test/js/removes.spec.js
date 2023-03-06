@@ -356,7 +356,11 @@ describe("Removes", () => {
                                 )
                             );
 
-                            expect(await getter()).toEqual({});
+                            expect(await getter()).toEqual({
+                                float: [],
+                                int: [],
+                                str: [],
+                            });
 
                             table.update({
                                 str: ["def", "abc", "deff"],

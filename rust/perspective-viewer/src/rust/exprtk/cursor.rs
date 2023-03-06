@@ -41,7 +41,7 @@ impl<'a> Cursor<'a> {
     }
 
     /// Is the cursor currently overlapping a token with an error?
-    pub fn is_error(&self) -> bool {
+    pub const fn is_error(&self) -> bool {
         if let Some(err) = &self.err {
             err.line + 1 == self.row as i32
                 && err.column >= self.col as i32
@@ -52,7 +52,7 @@ impl<'a> Cursor<'a> {
     }
 
     /// Is the cursor currently overlapping an  autocomplete-able token?
-    pub fn is_autocomplete(&self, position: u32) -> bool {
+    pub const fn is_autocomplete(&self, position: u32) -> bool {
         position > self.index && position <= self.index + self.txt.len() as u32
     }
 

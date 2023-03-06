@@ -48,7 +48,7 @@ impl Component for FunctionDropDown {
 
     fn create(ctx: &Context<Self>) -> Self {
         ctx.set_modal_link();
-        FunctionDropDown {
+        Self {
             values: Some(vec![]),
             selected: 0,
             on_select: None,

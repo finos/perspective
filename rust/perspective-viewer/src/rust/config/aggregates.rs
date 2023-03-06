@@ -80,6 +80,12 @@ pub enum SingleAggregate {
     #[serde(rename = "low")]
     Low,
 
+    #[serde(rename = "max")]
+    Max,
+
+    #[serde(rename = "min")]
+    Min,
+
     #[serde(rename = "high minus low")]
     HighMinusLow,
 
@@ -93,30 +99,32 @@ pub enum SingleAggregate {
 impl Display for SingleAggregate {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         let term = match self {
-            SingleAggregate::Sum => "sum",
-            SingleAggregate::SumAbs => "sum abs",
-            SingleAggregate::SumNotNull => "sum not null",
-            SingleAggregate::AbsSum => "abs sum",
-            SingleAggregate::PctSumParent => "pct sum parent",
-            SingleAggregate::PctSumGrandTotal => "pct sum grand total",
-            SingleAggregate::Any => "any",
-            SingleAggregate::Unique => "unique",
-            SingleAggregate::Dominant => "dominant",
-            SingleAggregate::Median => "median",
-            SingleAggregate::First => "first",
-            SingleAggregate::LastByIndex => "last by index",
-            SingleAggregate::LastMinusFirst => "last minus first",
-            SingleAggregate::Last => "last",
-            SingleAggregate::Count => "count",
-            SingleAggregate::DistinctCount => "distinct count",
-            SingleAggregate::Avg => "avg",
-            SingleAggregate::Mean => "mean",
-            SingleAggregate::Join => "join",
-            SingleAggregate::High => "high",
-            SingleAggregate::Low => "low",
-            SingleAggregate::HighMinusLow => "high minus low",
-            SingleAggregate::StdDev => "stddev",
-            SingleAggregate::Var => "var",
+            Self::Sum => "sum",
+            Self::SumAbs => "sum abs",
+            Self::SumNotNull => "sum not null",
+            Self::AbsSum => "abs sum",
+            Self::PctSumParent => "pct sum parent",
+            Self::PctSumGrandTotal => "pct sum grand total",
+            Self::Any => "any",
+            Self::Unique => "unique",
+            Self::Dominant => "dominant",
+            Self::Median => "median",
+            Self::First => "first",
+            Self::LastByIndex => "last by index",
+            Self::LastMinusFirst => "last minus first",
+            Self::Last => "last",
+            Self::Count => "count",
+            Self::DistinctCount => "distinct count",
+            Self::Avg => "avg",
+            Self::Mean => "mean",
+            Self::Join => "join",
+            Self::High => "high",
+            Self::Low => "low",
+            Self::HighMinusLow => "high minus low",
+            Self::StdDev => "stddev",
+            Self::Var => "var",
+            Self::Max => "max",
+            Self::Min => "min",
         };
 
         write!(fmt, "{}", term)
@@ -128,30 +136,32 @@ impl FromStr for SingleAggregate {
 
     fn from_str(value: &str) -> ApiResult<Self> {
         match value {
-            "sum" => Ok(SingleAggregate::Sum),
-            "sum abs" => Ok(SingleAggregate::SumAbs),
-            "sum not null" => Ok(SingleAggregate::SumNotNull),
-            "abs sum" => Ok(SingleAggregate::AbsSum),
-            "pct sum parent" => Ok(SingleAggregate::PctSumParent),
-            "pct sum grand total" => Ok(SingleAggregate::PctSumGrandTotal),
-            "any" => Ok(SingleAggregate::Any),
-            "unique" => Ok(SingleAggregate::Unique),
-            "dominant" => Ok(SingleAggregate::Dominant),
-            "median" => Ok(SingleAggregate::Median),
-            "first" => Ok(SingleAggregate::First),
-            "last by index" => Ok(SingleAggregate::LastByIndex),
-            "last minus first" => Ok(SingleAggregate::LastMinusFirst),
-            "last" => Ok(SingleAggregate::Last),
-            "count" => Ok(SingleAggregate::Count),
-            "distinct count" => Ok(SingleAggregate::DistinctCount),
-            "avg" => Ok(SingleAggregate::Avg),
-            "mean" => Ok(SingleAggregate::Mean),
-            "join" => Ok(SingleAggregate::Join),
-            "high" => Ok(SingleAggregate::High),
-            "low" => Ok(SingleAggregate::Low),
-            "high minus low" => Ok(SingleAggregate::HighMinusLow),
-            "stddev" => Ok(SingleAggregate::StdDev),
-            "var" => Ok(SingleAggregate::Var),
+            "sum" => Ok(Self::Sum),
+            "sum abs" => Ok(Self::SumAbs),
+            "sum not null" => Ok(Self::SumNotNull),
+            "abs sum" => Ok(Self::AbsSum),
+            "pct sum parent" => Ok(Self::PctSumParent),
+            "pct sum grand total" => Ok(Self::PctSumGrandTotal),
+            "any" => Ok(Self::Any),
+            "unique" => Ok(Self::Unique),
+            "dominant" => Ok(Self::Dominant),
+            "median" => Ok(Self::Median),
+            "first" => Ok(Self::First),
+            "last by index" => Ok(Self::LastByIndex),
+            "last minus first" => Ok(Self::LastMinusFirst),
+            "last" => Ok(Self::Last),
+            "count" => Ok(Self::Count),
+            "distinct count" => Ok(Self::DistinctCount),
+            "avg" => Ok(Self::Avg),
+            "mean" => Ok(Self::Mean),
+            "join" => Ok(Self::Join),
+            "high" => Ok(Self::High),
+            "low" => Ok(Self::Low),
+            "max" => Ok(Self::Max),
+            "min" => Ok(Self::Min),
+            "high minus low" => Ok(Self::HighMinusLow),
+            "stddev" => Ok(Self::StdDev),
+            "var" => Ok(Self::Var),
             x => Err(format!("Unknown aggregate `{}`", x).into()),
         }
     }
@@ -174,8 +184,8 @@ pub enum Aggregate {
 impl Display for Aggregate {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
         match self {
-            Aggregate::SingleAggregate(x) => write!(fmt, "{}", x)?,
-            Aggregate::MultiAggregate(MultiAggregate::WeightedMean, x) => {
+            Self::SingleAggregate(x) => write!(fmt, "{}", x)?,
+            Self::MultiAggregate(MultiAggregate::WeightedMean, x) => {
                 write!(fmt, "weighted mean by {}", x)?
             }
         };
@@ -189,9 +199,9 @@ impl FromStr for Aggregate {
     fn from_str(input: &str) -> ApiResult<Self> {
         Ok(
             if let Some(stripped) = input.strip_prefix("weighted mean by ") {
-                Aggregate::MultiAggregate(MultiAggregate::WeightedMean, stripped.to_owned())
+                Self::MultiAggregate(MultiAggregate::WeightedMean, stripped.to_owned())
             } else {
-                Aggregate::SingleAggregate(SingleAggregate::from_str(input)?)
+                Self::SingleAggregate(SingleAggregate::from_str(input)?)
             },
         )
     }
@@ -220,6 +230,8 @@ const NUMBER_AGGREGATES: &[SingleAggregate] = &[
     SingleAggregate::First,
     SingleAggregate::High,
     SingleAggregate::Low,
+    SingleAggregate::Max,
+    SingleAggregate::Min,
     SingleAggregate::HighMinusLow,
     SingleAggregate::LastByIndex,
     SingleAggregate::LastMinusFirst,
@@ -239,12 +251,12 @@ const NUMBER_AGGREGATES: &[SingleAggregate] = &[
 impl Type {
     pub fn aggregates_iter(&self) -> Box<dyn Iterator<Item = Aggregate>> {
         match self {
-            Type::Bool | Type::Date | Type::Datetime | Type::String => Box::new(
+            Self::Bool | Self::Date | Self::Datetime | Self::String => Box::new(
                 STRING_AGGREGATES
                     .iter()
                     .map(|x| Aggregate::SingleAggregate(*x)),
             ),
-            Type::Integer | Type::Float => Box::new(
+            Self::Integer | Self::Float => Box::new(
                 NUMBER_AGGREGATES
                     .iter()
                     .map(|x| Aggregate::SingleAggregate(*x)),
@@ -254,10 +266,10 @@ impl Type {
 
     pub const fn default_aggregate(&self) -> Aggregate {
         match self {
-            Type::Bool | Type::Date | Type::Datetime | Type::String => {
+            Self::Bool | Self::Date | Self::Datetime | Self::String => {
                 Aggregate::SingleAggregate(SingleAggregate::Count)
             }
-            Type::Integer | Type::Float => Aggregate::SingleAggregate(SingleAggregate::Sum),
+            Self::Integer | Self::Float => Aggregate::SingleAggregate(SingleAggregate::Sum),
         }
     }
 }

@@ -191,6 +191,8 @@ t_config::setup(const std::vector<std::string>& detail_columns,
             case AGGTYPE_JOIN:
             case AGGTYPE_DOMINANT:
             case AGGTYPE_PY_AGG:
+            case AGGTYPE_MIN:
+            case AGGTYPE_MAX:
             case AGGTYPE_SUM_NOT_NULL:
             case AGGTYPE_SUM_ABS:
             case AGGTYPE_ABS_SUM:

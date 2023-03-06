@@ -102,7 +102,7 @@ where
     type Properties = DragDropListProps<T, U>;
 
     fn create(_ctx: &Context<Self>) -> Self {
-        DragDropList {
+        Self {
             parent_type: PhantomData,
             item_type: PhantomData,
             draggable_type: PhantomData,
@@ -181,9 +181,9 @@ where
         let drop = Callback::from({
             let dragdrop = ctx.props().dragdrop.clone();
             let link = ctx.link().clone();
-            move |_| {
+            move |event| {
                 link.send_message(DragDropListMsg::Freeze(false));
-                dragdrop.notify_drop();
+                dragdrop.notify_drop(&event);
             }
         });
 

@@ -90,24 +90,19 @@ extern "C" {
     pub async fn resize(this: &JsPerspectiveViewerPlugin) -> ApiResult<JsValue>;
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub enum ColumnSelectMode {
+    #[default]
     Toggle,
     Select,
-}
-
-impl Default for ColumnSelectMode {
-    fn default() -> Self {
-        ColumnSelectMode::Toggle
-    }
 }
 
 impl ColumnSelectMode {
     pub fn css(&self) -> yew::Classes {
         match self {
-            ColumnSelectMode::Toggle => yew::classes!("toggle-mode", "is_column_active"),
-            ColumnSelectMode::Select => yew::classes!("select-mode", "is_column_active"),
+            Self::Toggle => yew::classes!("toggle-mode", "is_column_active"),
+            Self::Select => yew::classes!("select-mode", "is_column_active"),
         }
     }
 }

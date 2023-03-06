@@ -13,9 +13,6 @@ use wasm_bindgen::JsCast;
 
 use crate::utils::{ApiError, ApiResult};
 
-// #[cfg(test)]
-// use wasm_bindgen_test::*;
-
 // `wasm-bindgen` only supports `JsValue` return types from `extern async fn`,
 // so use this macro to generate well-typed versions.
 macro_rules! async_typed {
@@ -73,12 +70,6 @@ extern "C" {
     #[wasm_bindgen(method, catch, js_name = size)]
     pub async fn _size(this: &JsPerspectiveTable) -> ApiResult<JsValue>;
 
-    #[wasm_bindgen(method, catch, js_name = num_rows)]
-    pub async fn _num_rows(this: &JsPerspectiveTable) -> ApiResult<JsValue>;
-
-    #[wasm_bindgen(method, catch, js_name = num_columns)]
-    pub async fn _num_columns(this: &JsPerspectiveTable) -> ApiResult<JsValue>;
-
     #[wasm_bindgen(method, catch, js_name = validate_expressions)]
     pub async fn _validate_expressions(this: &JsPerspectiveTable, exprs: Array) -> ApiResult<JsValue>;
 
@@ -111,8 +102,8 @@ extern "C" {
         this: &JsPerspectiveView,
     ) -> ApiResult<JsValue>;
 
-    #[wasm_bindgen(method, catch, js_name = num_rows)]
-    pub async fn _num_rows(this: &JsPerspectiveView) -> ApiResult<JsValue>;
+    #[wasm_bindgen(method, catch, js_name = dimensions)]
+    pub async fn _dimensions(this: &JsPerspectiveView) -> ApiResult<JsValue>;
 
     #[wasm_bindgen(method)]
     pub fn on_update(this: &JsPerspectiveView, callback: &js_sys::Function);
@@ -126,18 +117,9 @@ extern "C" {
     #[wasm_bindgen(method, catch, js_name = num_columns)]
     pub async fn _num_columns(this: &JsPerspectiveView) -> ApiResult<JsValue>;
 
-    // #[wasm_bindgen(method, catch, js_name = get_config)]
-    // pub async fn _get_config(this: &JsPerspectiveView) -> ApiResult<JsValue>;
-
     pub type JsPerspectiveViewConfig;
 
     pub type JsPerspectiveViewConfigUpdate;
-
-    // #[wasm_bindgen(method, getter)]
-    // pub fn group_by(this: &JsPerspectiveViewConfig) -> js_sys::Array;
-
-    // #[wasm_bindgen(method, getter)]
-    // pub fn split_by(this: &JsPerspectiveViewConfig) -> js_sys::Array;
 
     pub type JsPerspectiveValidatedExpressions;
 
@@ -149,6 +131,20 @@ extern "C" {
 
     #[wasm_bindgen(method, getter)]
     pub fn expression_alias(this: &JsPerspectiveValidatedExpressions) -> js_sys::Object;
+
+    pub type JsPerspectiveViewDimensions;
+
+    #[wasm_bindgen(method, getter)]
+    pub fn num_table_rows(this: &JsPerspectiveViewDimensions) -> f64;
+
+    #[wasm_bindgen(method, getter)]
+    pub fn num_table_columns(this: &JsPerspectiveViewDimensions) -> f64;
+
+    #[wasm_bindgen(method, getter)]
+    pub fn num_view_rows(this: &JsPerspectiveViewDimensions) -> f64;
+
+    #[wasm_bindgen(method, getter)]
+    pub fn num_view_columns(this: &JsPerspectiveViewDimensions) -> f64;
 }
 
 impl JsPerspectiveWorker {
@@ -169,10 +165,6 @@ impl JsPerspectiveTable {
     async_typed!(_schema, schema(&self) -> JsPerspectiveTableSchema);
 
     async_typed!(_view, view(&self, config: &JsPerspectiveViewConfig) -> JsPerspectiveView);
-
-    async_typed!(_num_rows, num_rows(&self) -> f64);
-
-    async_typed!(_num_columns, num_columns(&self) -> f64);
 }
 
 impl JsPerspectiveView {
@@ -182,14 +174,11 @@ impl JsPerspectiveView {
 
     async_typed!(_to_columns, to_columns(&self) -> js_sys::Object);
 
-    async_typed!(_num_rows, num_rows(&self) -> f64);
-
-    async_typed!(_num_columns, num_columns(&self) -> f64);
+    async_typed!(_dimensions, dimensions(&self) ->  JsPerspectiveViewDimensions);
 
     async_typed!(_schema, schema(&self) -> JsPerspectiveViewSchema);
 
     async_typed!(_delete, delete(self) -> ());
-    // async_typed!(_get_config, get_config(&self) -> JsPerspectiveViewConfig);
 }
 
 #[derive(Deserialize, Debug, Clone, PartialEq, Eq)]

@@ -48,38 +48,38 @@ pub enum SortDir {
 impl Display for SortDir {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
         write!(fmt, "{}", match self {
-            SortDir::None => "none",
-            SortDir::Desc => "desc",
-            SortDir::Asc => "asc",
-            SortDir::ColDesc => "col desc",
-            SortDir::ColAsc => "col asc",
-            SortDir::DescAbs => "desc abs",
-            SortDir::AscAbs => "asc abs",
-            SortDir::ColDescAbs => "col desc abs",
-            SortDir::ColAscAbs => "col asc abs",
+            Self::None => "none",
+            Self::Desc => "desc",
+            Self::Asc => "asc",
+            Self::ColDesc => "col desc",
+            Self::ColAsc => "col asc",
+            Self::DescAbs => "desc abs",
+            Self::AscAbs => "asc abs",
+            Self::ColDescAbs => "col desc abs",
+            Self::ColAscAbs => "col asc abs",
         })
     }
 }
 
 impl SortDir {
     /// Increment the `SortDir` in logical order, given an `abs()` modifier.
-    pub fn cycle(&self, split_by: bool, abs: bool) -> SortDir {
-        let order: &[SortDir] = match (split_by, abs) {
-            (false, false) => &[SortDir::None, SortDir::Asc, SortDir::Desc],
-            (false, true) => &[SortDir::None, SortDir::AscAbs, SortDir::DescAbs],
+    pub fn cycle(&self, split_by: bool, abs: bool) -> Self {
+        let order: &[Self] = match (split_by, abs) {
+            (false, false) => &[Self::None, Self::Asc, Self::Desc],
+            (false, true) => &[Self::None, Self::AscAbs, Self::DescAbs],
             (true, false) => &[
-                SortDir::None,
-                SortDir::Asc,
-                SortDir::Desc,
-                SortDir::ColAsc,
-                SortDir::ColDesc,
+                Self::None,
+                Self::Asc,
+                Self::Desc,
+                Self::ColAsc,
+                Self::ColDesc,
             ],
             (true, true) => &[
-                SortDir::None,
-                SortDir::AscAbs,
-                SortDir::DescAbs,
-                SortDir::ColAscAbs,
-                SortDir::ColDescAbs,
+                Self::None,
+                Self::AscAbs,
+                Self::DescAbs,
+                Self::ColAscAbs,
+                Self::ColDescAbs,
             ],
         };
 

@@ -64,7 +64,7 @@ impl Component for RenderWarning {
 
     fn create(ctx: &Context<Self>) -> Self {
         // enable_weak_link_test!(props, link);
-        let mut elem = RenderWarning {
+        let mut elem = Self {
             col_warn: None,
             row_warn: None,
         };

@@ -6,7 +6,7 @@ struct X {
 }
 
 impl X {
-    fn test(&self) -> i32 {
+    const fn test(&self) -> i32 {
         1
     }
 }

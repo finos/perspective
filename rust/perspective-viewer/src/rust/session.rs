@@ -131,7 +131,7 @@ impl Session {
         self.borrow_mut().metadata = metadata;
         self.borrow_mut().table = Some(table);
         self.table_loaded.emit_all(());
-        self.set_initial_stats().await
+        Ok(JsValue::UNDEFINED)
     }
 
     pub async fn await_table(&self) -> ApiResult<()> {
@@ -193,7 +193,7 @@ impl Session {
         &self,
         expr: JsValue,
     ) -> Result<Option<PerspectiveValidationError>, JsValue> {
-        let arr = [expr].iter().collect::<js_sys::Array>();
+        let arr = std::iter::once(expr).collect::<js_sys::Array>();
         let table = self.borrow().table.as_ref().unwrap().clone();
         let errors = table.validate_expressions(arr).await?.errors();
         let error_keys = js_sys::Object::keys(&errors);
@@ -335,7 +335,7 @@ impl Session {
     }
 
     async fn get_validated_expression_name(&self, expr: &JsValue) -> ApiResult<String> {
-        let arr = [expr].iter().collect::<js_sys::Array>();
+        let arr = std::iter::once(expr).collect::<js_sys::Array>();
         let table = self.borrow().table.as_ref().unwrap().clone();
         let schema = table.validate_expressions(arr).await?.expression_schema();
         let schema_keys = js_sys::Object::keys(&schema);
@@ -356,23 +356,6 @@ impl Session {
                 .map(|x| x.get_view().clone())
                 .into_apierror()
         }
-    }
-
-    /// Update the this `Session`'s `TableStats` data from the `Table`.
-    async fn set_initial_stats(&self) -> ApiResult<JsValue> {
-        let table = self.borrow().table.clone().unwrap();
-        let num_rows = table.num_rows().await? as u32;
-        let num_cols = table.num_columns().await? as u32;
-        let stats = ViewStats {
-            is_group_by: false,
-            is_split_by: false,
-            is_filtered: false,
-            num_table_cells: Some((num_rows, num_cols)),
-            num_view_cells: None,
-        };
-
-        self.update_stats(stats);
-        Ok(JsValue::UNDEFINED)
     }
 
     fn update_stats(&self, stats: ViewStats) {
@@ -495,7 +478,7 @@ impl<'a> ValidSession<'a> {
         let sub = {
             let config = self.0.borrow().config.clone();
             let on_update = self.0.table_updated.callback();
-            ViewSubscription::new(table, view, config, on_stats, on_update)
+            ViewSubscription::new(view, config, on_stats, on_update)
         };
 
         // self.0.borrow_mut().metadata.as_mut().unwrap().view_schema =

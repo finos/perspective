@@ -48,7 +48,7 @@ impl Component for AddExpressionButton {
     type Properties = AddExpressionButtonProps;
 
     fn create(_ctx: &Context<Self>) -> Self {
-        AddExpressionButton::default()
+        Self::default()
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: AddExpressionButtonMsg) -> bool {

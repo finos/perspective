@@ -175,6 +175,22 @@ class View(object):
         """
         return self._view.num_columns()
 
+    def dimensions(self):
+        """The View and Table aggregated dimensions in the :class:`~perspective.View`.
+
+        Returns:
+            :obj:`dict`: A dictionary with 4 fields indicating the dimensions of
+                both the :class:`~perspective.View` and underlying
+                :class:`~perspective.Table` objects: "num_view_rows",
+                "num_view_columns", "num_table_rows", "num_table_columns"
+        """
+        return {
+            "num_view_rows": self._view.num_rows(),
+            "num_view_columns": self._view.num_columns(),
+            "num_table_rows": self._table.num_rows(),
+            "num_table_columns": self._table.num_columns(),
+        }
+
     def get_row_expanded(self, idx):
         """Returns whether row at `idx` is expanded or collapsed.
 

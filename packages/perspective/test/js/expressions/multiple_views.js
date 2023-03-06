@@ -43,8 +43,8 @@ module.exports = (perspective) => {
                 let result = await v1.to_columns();
                 let result2 = await v2.to_columns();
 
-                expect(result).toEqual({});
-                expect(result2).toEqual({});
+                expect(result).toEqual({ column: [], x: [], y: [], z: [] });
+                expect(result2).toEqual({ column: [], x: [], y: [], z: [] });
 
                 table.update(expressions_common.data);
 
@@ -77,8 +77,8 @@ module.exports = (perspective) => {
                 let result = await v1.to_columns();
                 let result2 = await v2.to_columns();
 
-                expect(result).toEqual({});
-                expect(result2).toEqual({});
+                expect(result).toEqual({ column: [], x: [], y: [], z: [] });
+                expect(result2).toEqual({ column: [], x: [], y: [], z: [] });
 
                 const expected = [];
                 const expected2 = [];
@@ -124,8 +124,8 @@ module.exports = (perspective) => {
                 let result = await v1.to_columns();
                 let result2 = await v2.to_columns();
 
-                expect(result).toEqual({});
-                expect(result2).toEqual({});
+                expect(result).toEqual({ column: [], x: [], y: [], z: [] });
+                expect(result2).toEqual({ column: [], x: [], y: [], z: [] });
 
                 const expected = [];
                 const expected2 = [];
@@ -143,7 +143,12 @@ module.exports = (perspective) => {
                         expected.push(i * 2);
                         expect(result["column"]).toEqual(expected);
                     } else {
-                        expect(result).toEqual({});
+                        expect(result).toEqual({
+                            column: [],
+                            x: [],
+                            y: [],
+                            z: [],
+                        });
                     }
 
                     expected2.push(`A${i}BCD`);
@@ -175,8 +180,8 @@ module.exports = (perspective) => {
                 let result = await v1.to_columns();
                 let result2 = await v2.to_columns();
 
-                expect(result).toEqual({});
-                expect(result2).toEqual({});
+                expect(result).toEqual({ column: [], x: [], y: [], z: [] });
+                expect(result2).toEqual({ column: [], x: [], y: [], z: [] });
 
                 const expected = [];
                 const expected2 = [];
@@ -224,8 +229,8 @@ module.exports = (perspective) => {
                 let result = await v1.to_columns();
                 let result2 = await v2.to_columns();
 
-                expect(result).toEqual({});
-                expect(result2).toEqual({});
+                expect(result).toEqual({ column: [], x: [], y: [], z: [] });
+                expect(result2).toEqual({ column: [], x: [], y: [], z: [] });
 
                 table.update({
                     x: [2, 4, 3, 10, null],
@@ -271,8 +276,8 @@ module.exports = (perspective) => {
                 let result = await v1.to_columns();
                 let result2 = await v2.to_columns();
 
-                expect(result).toEqual({});
-                expect(result2).toEqual({});
+                expect(result).toEqual({ column: [], x: [], y: [], z: [] });
+                expect(result2).toEqual({ column: [], x: [], y: [], z: [] });
 
                 table.update({
                     x: [2, 4, 3, 10, null],
@@ -312,8 +317,8 @@ module.exports = (perspective) => {
                 let result = await v1.to_columns();
                 let result2 = await v2.to_columns();
 
-                expect(result).toEqual({});
-                expect(result2).toEqual({});
+                expect(result).toEqual({ column: [], x: [], y: [], z: [] });
+                expect(result2).toEqual({ column: [], x: [], y: [], z: [] });
 
                 table.update({
                     x: [2, 4, 3, 10, null],
@@ -375,8 +380,8 @@ module.exports = (perspective) => {
                 let result = await v1.to_columns();
                 let result2 = await v2.to_columns();
 
-                expect(result).toEqual({});
-                expect(result2).toEqual({});
+                expect(result).toEqual({ column: [], x: [], y: [], z: [] });
+                expect(result2).toEqual({ column: [], x: [], y: [], z: [] });
 
                 table.update({
                     x: [2, 4, 3, 10, null],
@@ -640,7 +645,7 @@ module.exports = (perspective) => {
                 console.log(result, result2);
 
                 expect(result["column"]).toEqual([8]);
-                expect(result2).toEqual({});
+                expect(result2).toEqual({ column: [], x: [], y: [], z: [] });
 
                 await v2.delete();
                 await v1.delete();
@@ -1025,8 +1030,8 @@ module.exports = (perspective) => {
                 result = await v1.to_columns();
                 result2 = await v2.to_columns();
 
-                expect(result).toEqual({});
-                expect(result2).toEqual({});
+                expect(result).toEqual({ column: [], column2: [] });
+                expect(result2).toEqual({ column: [], column2: [] });
 
                 await v2.delete();
                 await v1.delete();

@@ -473,6 +473,10 @@ str_to_aggtype(const std::string& str) {
         return t_aggtype::AGGTYPE_OR;
     } else if (str == "last" || str == "last_value") {
         return t_aggtype::AGGTYPE_LAST_VALUE;
+    } else if (str == "max") {
+        return t_aggtype::AGGTYPE_MAX;
+    } else if (str == "min") {
+        return t_aggtype::AGGTYPE_MIN;
     } else if (str == "high" || str == "high_water_mark") {
         return t_aggtype::AGGTYPE_HIGH_WATER_MARK;
     } else if (str == "low" || str == "low_water_mark") {

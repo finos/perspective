@@ -28,11 +28,11 @@ pub enum Scalar {
 impl Display for Scalar {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
         match self {
-            Scalar::Float(x) => write!(fmt, "{}", x),
-            Scalar::String(x) => write!(fmt, "{}", x),
-            Scalar::Bool(x) => write!(fmt, "{}", x),
-            Scalar::DateTime(x) => write!(fmt, "{}", x),
-            Scalar::Null => write!(fmt, ""),
+            Self::Float(x) => write!(fmt, "{}", x),
+            Self::String(x) => write!(fmt, "{}", x),
+            Self::Bool(x) => write!(fmt, "{}", x),
+            Self::DateTime(x) => write!(fmt, "{}", x),
+            Self::Null => write!(fmt, ""),
         }
     }
 }
@@ -108,19 +108,19 @@ impl FromStr for FilterOp {
 
     fn from_str(input: &str) -> std::result::Result<Self, <Self as std::str::FromStr>::Err> {
         match input {
-            "contains" => Ok(FilterOp::Contains),
-            "in" => Ok(FilterOp::In),
-            "not in" => Ok(FilterOp::NotIn),
-            "begins with" => Ok(FilterOp::BeginsWith),
-            "ends with" => Ok(FilterOp::EndsWith),
-            "is null" => Ok(FilterOp::IsNull),
-            "is not null" => Ok(FilterOp::IsNotNull),
-            ">" => Ok(FilterOp::GT),
-            "<" => Ok(FilterOp::LT),
-            "==" => Ok(FilterOp::EQ),
-            ">=" => Ok(FilterOp::GTE),
-            "<=" => Ok(FilterOp::LTE),
-            "!=" => Ok(FilterOp::NE),
+            "contains" => Ok(Self::Contains),
+            "in" => Ok(Self::In),
+            "not in" => Ok(Self::NotIn),
+            "begins with" => Ok(Self::BeginsWith),
+            "ends with" => Ok(Self::EndsWith),
+            "is null" => Ok(Self::IsNull),
+            "is not null" => Ok(Self::IsNotNull),
+            ">" => Ok(Self::GT),
+            "<" => Ok(Self::LT),
+            "==" => Ok(Self::EQ),
+            ">=" => Ok(Self::GTE),
+            "<=" => Ok(Self::LTE),
+            "!=" => Ok(Self::NE),
             x => Err(format!("Unknown filter operator {}", x)),
         }
     }
@@ -136,10 +136,10 @@ pub enum FilterTerm {
 impl Display for FilterTerm {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
         match self {
-            FilterTerm::Scalar(x) => {
+            Self::Scalar(x) => {
                 write!(fmt, "{}", x)?;
             }
-            FilterTerm::Array(xs) => write!(
+            Self::Array(xs) => write!(
                 fmt,
                 "{}",
                 Itertools::intersperse(xs.iter().map(|x| format!("{}", x)), ",".to_owned())

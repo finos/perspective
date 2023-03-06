@@ -8,7 +8,6 @@
 
 use std::rc::Rc;
 
-use js_intern::*;
 use yew::prelude::*;
 
 use super::containers::dropdown_menu::*;
@@ -87,7 +86,7 @@ impl Component for ExportDropDownMenu {
     fn view(&self, ctx: &Context<Self>) -> yew::virtual_dom::VNode {
         let callback = ctx.link().callback(|_| ExportDropDownMenuMsg::TitleChange);
         let plugin = ctx.props().renderer.get_active_plugin().unwrap();
-        let has_render = js_sys::Reflect::has(&plugin, js_intern!("render")).unwrap();
+        let has_render = js_sys::Reflect::has(&plugin, js_intern::js_intern!("render")).unwrap();
         html! {
             <StyleProvider>
                 <span class="dropdown-group-label">{ "Save as" }</span>
@@ -128,7 +127,7 @@ impl Component for ExportDropDownMenu {
                 .add_listener(ctx.link().callback(|_| ExportDropDownMenuMsg::TitleChange)),
         );
 
-        ExportDropDownMenu {
+        Self {
             title: "untitled".to_owned(),
             _sub,
             ..Default::default()

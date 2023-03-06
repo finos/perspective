@@ -36,7 +36,7 @@ module.exports = (perspective) => {
             });
             table.clear();
             result = await view.to_columns();
-            expect(result).toEqual({});
+            expect(result).toEqual({ x: [] });
             view.delete();
             table.delete();
         });

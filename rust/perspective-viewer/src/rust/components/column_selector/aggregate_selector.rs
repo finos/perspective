@@ -47,7 +47,7 @@ impl Component for AggregateSelector {
     type Properties = AggregateSelectorProps;
 
     fn create(ctx: &Context<Self>) -> Self {
-        let mut selector = AggregateSelector {
+        let mut selector = Self {
             aggregates: vec![],
             aggregate: ctx.props().aggregate.clone(),
         };

@@ -13,8 +13,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::*;
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub enum DatetimeColorMode {
+    #[default]
     #[serde(rename = "foreground")]
     Foreground,
 
@@ -22,17 +23,11 @@ pub enum DatetimeColorMode {
     Background,
 }
 
-impl Default for DatetimeColorMode {
-    fn default() -> Self {
-        DatetimeColorMode::Foreground
-    }
-}
-
 impl Display for DatetimeColorMode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let text = match self {
-            DatetimeColorMode::Foreground => "foreground",
-            DatetimeColorMode::Background => "background",
+            Self::Foreground => "foreground",
+            Self::Background => "background",
         };
 
         write!(f, "{}", text)
@@ -44,8 +39,8 @@ impl FromStr for DatetimeColorMode {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "foreground" => Ok(DatetimeColorMode::Foreground),
-            "background" => Ok(DatetimeColorMode::Background),
+            "foreground" => Ok(Self::Foreground),
+            "background" => Ok(Self::Background),
             x => Err(format!("Unknown DatetimeColorMode::{}", x)),
         }
     }
@@ -78,7 +73,7 @@ impl DatetimeFormat {
         self == &Self::Medium
     }
 
-    pub fn values() -> &'static [Self] {
+    pub const fn values() -> &'static [Self] {
         &[
             Self::Full,
             Self::Long,
@@ -92,11 +87,11 @@ impl DatetimeFormat {
 impl Display for DatetimeFormat {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let text = match self {
-            DatetimeFormat::Full => "full",
-            DatetimeFormat::Long => "long",
-            DatetimeFormat::Medium => "medium",
-            DatetimeFormat::Short => "short",
-            DatetimeFormat::Disabled => "disabled",
+            Self::Full => "full",
+            Self::Long => "long",
+            Self::Medium => "medium",
+            Self::Short => "short",
+            Self::Disabled => "disabled",
         };
 
         write!(f, "{}", text)
@@ -108,21 +103,21 @@ impl FromStr for DatetimeFormat {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "full" => Ok(DatetimeFormat::Full),
-            "long" => Ok(DatetimeFormat::Long),
-            "medium" => Ok(DatetimeFormat::Medium),
-            "short" => Ok(DatetimeFormat::Short),
-            "disabled" => Ok(DatetimeFormat::Disabled),
+            "full" => Ok(Self::Full),
+            "long" => Ok(Self::Long),
+            "medium" => Ok(Self::Medium),
+            "short" => Ok(Self::Short),
+            "disabled" => Ok(Self::Disabled),
             x => Err(format!("Unknown DatetimeFormat::{}", x)),
         }
     }
 }
 
-fn date_style_default() -> DatetimeFormat {
+const fn date_style_default() -> DatetimeFormat {
     DatetimeFormat::Short
 }
 
-fn time_style_default() -> DatetimeFormat {
+const fn time_style_default() -> DatetimeFormat {
     DatetimeFormat::Medium
 }
 

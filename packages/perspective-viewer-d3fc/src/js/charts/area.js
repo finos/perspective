@@ -47,6 +47,7 @@ function areaChart(container, settings) {
     const yAxisFactory = axisFactory(settings)
         .settingName("mainValues")
         .valueName("mainValue")
+        .memoValue(settings.axisMemo[1])
         .excludeType(AXIS_TYPES.ordinal)
         .orient("vertical")
         .include([0])

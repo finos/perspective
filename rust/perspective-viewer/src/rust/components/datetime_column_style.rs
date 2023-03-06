@@ -133,7 +133,7 @@ impl Component for DatetimeColumnStyle {
 
     fn create(ctx: &Context<Self>) -> Self {
         ctx.set_modal_link();
-        DatetimeColumnStyle {
+        Self {
             config: ctx.props().config.clone(),
         }
     }

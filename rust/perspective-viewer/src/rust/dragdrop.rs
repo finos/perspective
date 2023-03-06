@@ -104,6 +104,12 @@ impl DragDrop {
     }
 
     pub fn set_drag_image(&self, event: &DragEvent) -> ApiResult<()> {
+        event.stop_propagation();
+        if let Some(dt) = event.data_transfer() {
+            dt.set_drop_effect("move");
+            dt.set_data("text/plain", "{}").unwrap();
+        }
+
         let original: HtmlElement = event.target().into_apierror()?.unchecked_into();
         let elem: HtmlElement = original
             .children()
@@ -140,7 +146,9 @@ impl DragDrop {
         }
     }
 
-    pub fn notify_drop(&self) {
+    pub fn notify_drop(&self, event: &DragEvent) {
+        event.prevent_default();
+        event.stop_propagation();
         let action = match &*self.drag_state.borrow() {
             DragState::DragOverInProgress(
                 DragFrom { column, effect },
@@ -318,7 +326,7 @@ pub struct DragDropContainer {
 impl DragDropContainer {
     pub fn new<F: Fn() + 'static, G: Fn() + 'static>(ondragenter: F, ondragleave: G) -> Self {
         let noderef = NodeRef::default();
-        DragDropContainer {
+        Self {
             dragenter: dragenter_helper(ondragenter, noderef.clone()),
             dragleave: dragleave_helper(ondragleave, noderef.clone()),
             noderef,

@@ -90,7 +90,7 @@ impl Component for ExpressionToolbar {
     type Properties = ExpressionToolbarProps;
 
     fn create(_ctx: &Context<Self>) -> Self {
-        ExpressionToolbar {
+        Self {
             expression_editor: None,
         }
     }

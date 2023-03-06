@@ -37,8 +37,8 @@ impl CustomElementMetadata for PerspectiveDebugPluginElement {
 #[wasm_bindgen]
 impl PerspectiveDebugPluginElement {
     #[wasm_bindgen(constructor)]
-    pub fn new(elem: web_sys::HtmlElement) -> PerspectiveDebugPluginElement {
-        PerspectiveDebugPluginElement { elem }
+    pub fn new(elem: web_sys::HtmlElement) -> Self {
+        Self { elem }
     }
 
     #[wasm_bindgen(getter)]

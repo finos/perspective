@@ -36,7 +36,7 @@ impl PartialEq for InactiveColumnProps {
     /// Equality for `InactiveColumnProps` determines when it should re-render,
     /// which is only when it has changed.
     /// TODO Aggregates
-    fn eq(&self, _rhs: &InactiveColumnProps) -> bool {
+    fn eq(&self, _rhs: &Self) -> bool {
         false
     }
 }
@@ -110,7 +110,7 @@ impl Component for InactiveColumn {
     type Properties = InactiveColumnProps;
 
     fn create(_ctx: &Context<Self>) -> Self {
-        InactiveColumn::default()
+        Self::default()
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: InactiveColumnMsg) -> bool {

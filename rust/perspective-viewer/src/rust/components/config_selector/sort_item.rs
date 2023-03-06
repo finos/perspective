@@ -56,7 +56,7 @@ impl Component for SortItem {
     type Properties = SortItemProps;
 
     fn create(_ctx: &Context<Self>) -> Self {
-        SortItem {}
+        Self {}
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: SortItemMsg) -> bool {

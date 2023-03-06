@@ -35,6 +35,7 @@ const EXCLUDED_SETTINGS = [
     "textStyles",
     "agg_paths",
     "treemaps",
+    "axisMemo",
 ];
 
 function getD3FCStyles() {
@@ -244,7 +245,13 @@ export function register(...plugins) {
                         }
 
                         this._staged_view = undefined;
-                        this.config = await this.parentElement.save();
+                        if (this._settings) {
+                            this._settings.axisMemo = [
+                                [Infinity, -Infinity],
+                                [Infinity, -Infinity],
+                            ];
+                        }
+
                         await this.update(view, end_col, end_row, true);
                     }
 
@@ -255,9 +262,6 @@ export function register(...plugins) {
 
                         const viewer = this.parentElement;
                         let jsonp, metadata;
-                        // const realValues =
-                        //     JSON.parse(viewer.getAttribute("columns"));
-                        const realValues = this.config.columns;
                         const leaves_only = chart.plugin.name !== "Sunburst";
                         if (end_col && end_row) {
                             jsonp = view.to_json({
@@ -274,6 +278,7 @@ export function register(...plugins) {
                         }
 
                         metadata = await Promise.all([
+                            viewer.save(),
                             viewer
                                 .getTable()
                                 .then((table) => table.schema(false)),
@@ -283,12 +288,16 @@ export function register(...plugins) {
                             view.get_config(),
                         ]);
                         let [
+                            real_config,
                             table_schema,
                             expression_schema,
                             view_schema,
                             json,
                             config,
                         ] = metadata;
+
+                        this.config = real_config;
+                        const realValues = this.config.columns;
 
                         /**
                          * Retrieve a tree axis column from the table and
@@ -380,8 +389,17 @@ export function register(...plugins) {
                             },
                         };
 
+                        const axisMemo = [
+                            [Infinity, -Infinity],
+                            [Infinity, -Infinity],
+                        ];
+
                         this._settings = new Proxy(
-                            { ...this._settings, ...settings },
+                            {
+                                axisMemo,
+                                ...this._settings,
+                                ...settings,
+                            },
                             handler
                         );
 
@@ -481,10 +499,11 @@ export function register(...plugins) {
                     restore(settings) {
                         const new_settings = {};
                         for (const name of EXCLUDED_SETTINGS) {
-                            new_settings[name] = this._settings?.[name];
+                            if (this._settings?.[name] !== undefined) {
+                                new_settings[name] = this._settings?.[name];
+                            }
                         }
                         this._settings = { ...new_settings, ...settings };
-                        this._draw();
                     }
                 }
             );

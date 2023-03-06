@@ -15,12 +15,12 @@ use crate::*;
 
 wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 
-#[wasm_bindgen_test]
-pub async fn test_table_size() {
-    let table = get_mock_table().await;
-    let size = table.num_rows().await.unwrap();
-    assert!(size - 3_f64 < 0.01);
-}
+// #[wasm_bindgen_test]
+// pub async fn test_table_size() {
+//     let table = get_mock_table().await;
+//     let size = table.num_rows().await.unwrap();
+//     assert!(size - 3_f64 < 0.01);
+// }
 
 #[wasm_bindgen_test]
 pub async fn test_table_validate_valid_expressions() {
@@ -56,7 +56,7 @@ pub async fn test_view_to_csv() {
 pub async fn test_view_num_rows() {
     let table = get_mock_table().await;
     let view = table.view(json!({}).unchecked_ref()).await.unwrap();
-    let num_rows = view.num_rows().await.unwrap();
+    let num_rows = view.dimensions().await.unwrap().num_view_rows();
     assert!(num_rows - 3_f64 < 0.01);
 }
 

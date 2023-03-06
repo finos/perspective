@@ -1415,7 +1415,13 @@ module.exports = (perspective) => {
             });
 
             const result = await view.to_columns();
-            expect(result).toEqual({});
+            expect(result).toEqual({
+                '("w" + "x") * 10': [],
+                w: [],
+                x: [],
+                y: [],
+                z: [],
+            });
 
             table.update(expressions_common.int_float_data);
 
@@ -2437,6 +2443,7 @@ module.exports = (perspective) => {
                 "8.5|y": [null, null, null, "d"],
                 "8.5|z": [null, null, null, false],
                 '8.5|"w" + "x"': [null, null, null, 8.5],
+                __ROW_PATH__: [],
             });
             view.delete();
             table.delete();

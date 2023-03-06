@@ -13,22 +13,17 @@ use serde::{Deserialize, Serialize};
 
 use crate::*;
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub enum NumberForegroundMode {
     #[serde(rename = "disabled")]
     Disabled,
 
+    #[default]
     #[serde(rename = "color")]
     Color,
 
     #[serde(rename = "bar")]
     Bar,
-}
-
-impl Default for NumberForegroundMode {
-    fn default() -> Self {
-        NumberForegroundMode::Color
-    }
 }
 
 /// `Display` and `FromStr` are only used for rendering these types as HTML
@@ -72,8 +67,9 @@ impl NumberForegroundMode {
     }
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub enum NumberBackgroundMode {
+    #[default]
     #[serde(rename = "disabled")]
     Disabled,
 
@@ -85,12 +81,6 @@ pub enum NumberBackgroundMode {
 
     #[serde(rename = "pulse")]
     Pulse,
-}
-
-impl Default for NumberBackgroundMode {
-    fn default() -> Self {
-        NumberBackgroundMode::Disabled
-    }
 }
 
 impl Display for NumberBackgroundMode {

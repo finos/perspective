@@ -48,7 +48,7 @@ where
 }
 
 /// Anchor point enum, `ModalCornerTargetCorner`
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default)]
 enum ModalAnchor {
     BottomRightTopLeft,
     BottomRightBottomLeft,
@@ -56,23 +56,19 @@ enum ModalAnchor {
     BottomLeftTopLeft,
     TopRightTopLeft,
     TopRightBottomRight,
-    TopLeftBottomLeft,
-}
 
-impl Default for ModalAnchor {
-    fn default() -> ModalAnchor {
-        ModalAnchor::TopLeftBottomLeft
-    }
+    #[default]
+    TopLeftBottomLeft,
 }
 
 impl ModalAnchor {
     const fn is_rev_vert(&self) -> bool {
         matches!(
             self,
-            ModalAnchor::BottomLeftTopLeft
-                | ModalAnchor::BottomRightBottomLeft
-                | ModalAnchor::BottomRightTopLeft
-                | ModalAnchor::BottomRightTopRight
+            Self::BottomLeftTopLeft
+                | Self::BottomRightBottomLeft
+                | Self::BottomRightTopLeft
+                | Self::BottomRightTopRight
         )
     }
 }
@@ -136,7 +132,7 @@ where
         props: T::Properties,
         own_focus: bool,
         on_blur: Option<Callback<()>>,
-    ) -> ModalElement<T> {
+    ) -> Self {
         custom_element.set_attribute("tabindex", "0").unwrap();
         let init = web_sys::ShadowRootInit::new(web_sys::ShadowRootMode::Open);
         let shadow_root = custom_element
@@ -155,7 +151,7 @@ where
         )));
 
         let blurhandler = Rc::new(RefCell::new(None));
-        ModalElement {
+        Self {
             root,
             custom_element,
             target: Rc::new(RefCell::new(None)),
