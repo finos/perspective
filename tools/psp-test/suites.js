@@ -7,7 +7,7 @@
  *
  */
 
-exports.default = function (get_contents) {
+exports.basic = function (get_contents) {
     test.capture("shows a grid without any settings applied", async (page) => {
         await page.evaluate(async () => {
             const viewer = document.querySelector("perspective-viewer");

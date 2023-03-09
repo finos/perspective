@@ -22,7 +22,8 @@ const PACKAGES = PACKAGE?.split(",") || [
     "perspective-viewer-d3fc",
     "perspective-viewer-datagrid" /* TODO: REST */,
 ];
-const DEVICES = ["Desktop Chrome", "Desktop Firefox", "Desktop Safari"];
+// const DEVICES = ["Desktop Chrome", "Desktop Firefox", "Desktop Safari"];
+const DEVICES = ["Desktop Chrome"];
 
 const PROJECTS = PACKAGES?.reduce((acc, p) => {
     for (let device of DEVICES) {
