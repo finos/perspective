@@ -98,7 +98,8 @@ export class PerspectiveView extends DOMWidgetView {
                 new_value &&
                 typeof new_value === "string" &&
                 name !== "plugin" &&
-                name !== "theme"
+                name !== "theme" &&
+                name !== "title"
             ) {
                 new_value = JSON.parse(new_value);
             }
@@ -113,8 +114,8 @@ export class PerspectiveView extends DOMWidgetView {
     }
 
     /**
-     * Attach event handlers, and watch the DOM for state changes in order to
-     * reflect them back to Python.
+     * Attach event handlers to the model for state changes in order to
+     * reflect them back to the DOM.
      */
 
     render() {
@@ -131,6 +132,7 @@ export class PerspectiveView extends DOMWidgetView {
         this.model.on("change:plugin_config", this.plugin_config_changed, this);
         this.model.on("change:theme", this.theme_changed, this);
         this.model.on("change:settings", this.settings_changed, this);
+        this.model.on("change:title", this.title_changed, this);
 
         /**
          * Request a table from the manager. If a table has been loaded, proxy
@@ -260,6 +262,7 @@ export class PerspectiveView extends DOMWidgetView {
             plugin_config: this.model.get("plugin_config"),
             theme: this.model.get("theme"),
             settings: this.model.get("settings"),
+            title: this.model.get("title"),
         });
     }
 
@@ -488,6 +491,12 @@ export class PerspectiveView extends DOMWidgetView {
     settings_changed() {
         this.luminoWidget.restore({
             settings: this.model.get("settings"),
+        });
+    }
+
+    title_changed() {
+        this.luminoWidget.restore({
+            title: this.model.get("title"),
         });
     }
 }

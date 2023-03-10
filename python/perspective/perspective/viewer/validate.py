@@ -172,3 +172,7 @@ def validate_expressions(expressions):
 
 def validate_plugin_config(plugin_config):
     return plugin_config
+
+
+def validate_title(title):
+    return title

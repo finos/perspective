@@ -17,6 +17,7 @@ from .validate import (
     validate_filter,
     validate_expressions,
     validate_plugin_config,
+    validate_title,
 )
 
 
@@ -48,6 +49,7 @@ class PerspectiveTraitlets(HasTraits):
     theme = Unicode("Pro Light", allow_none=True).tag(sync=True)
     server = Bool(False).tag(sync=True)
     client = Bool(False).tag(sync=True)
+    title = Unicode(None, allow_none=True).tag(sync=True)
 
     @validate("plugin")
     def _validate_plugin(self, proposal):
@@ -84,3 +86,7 @@ class PerspectiveTraitlets(HasTraits):
     @validate("plugin_config")
     def _validate_plugin_config(self, proposal):
         return validate_plugin_config(proposal.value)
+
+    @validate("title")
+    def _validate_title(self, proposal):
+        return validate_title(proposal.value)
