@@ -21,19 +21,21 @@ from setuptools import Extension, find_packages, setup
 from setuptools.command.build_ext import build_ext
 from setuptools.command.sdist import sdist
 
-from jupyter_packaging import (
-    combine_commands,
-    create_cmdclass,
-    ensure_targets,
-    get_version,
-)
-
 try:
     from shutil import which
 
     CPU_COUNT = os.cpu_count()
 except ImportError:
     raise Exception("Requires Python 3.7 or later")
+
+# try/except on jupyter_packaging to allow setup.py to be evaluated
+try:
+    from jupyter_packaging import get_version
+except ImportError:
+
+    def get_version(file):
+        return "0.0.0"
+
 
 here = os.path.abspath(os.path.dirname(__file__))
 nb_path = os.path.join("perspective", "nbextension", "static")
@@ -48,7 +50,6 @@ if sys.version_info.major < 3:
 # Check for `cmake`
 if which("cmake") is None and which("cmake.exe") is None:
     raise Exception("Requires cmake")
-
 
 version = get_version(os.path.join(here, "perspective", "core", "_version.py"))
 
@@ -80,6 +81,7 @@ requires_dev = (
         "flake8>=5",
         "flake8-black>=0.3.3",
         "httpx>=0.23,<1",
+        "jupyter_packaging==0.12.3",
         "pip",
         "psutil>=5,<6",
         "pybind11>=2.4.0,<3",
@@ -309,20 +311,29 @@ data_files_spec = [
     ),
 ]
 
-cmdclass = create_cmdclass("js", data_files_spec=data_files_spec)
-cmdclass["js"] = combine_commands(
-    ensure_targets(
-        []
-        if SKIP_JS_FILES
-        else [
-            os.path.join("perspective", "nbextension", "static", "index.js"),
-            os.path.join("perspective", "labextension", "package.json"),
-            os.path.join("perspective", "labextension", "static", "style.js"),
-        ]
-    ),
-)
-cmdclass["build_ext"] = PSPBuild
-cmdclass["sdist"] = combine_commands(cmdclass["sdist"], PSPCheckSDist)
+try:
+    from jupyter_packaging import (
+        combine_commands,
+        create_cmdclass,
+        ensure_targets,
+    )
+
+    cmdclass = create_cmdclass("js", data_files_spec=data_files_spec)
+    cmdclass["js"] = combine_commands(
+        ensure_targets(
+            []
+            if SKIP_JS_FILES
+            else [
+                os.path.join("perspective", "nbextension", "static", "index.js"),
+                os.path.join("perspective", "labextension", "package.json"),
+                os.path.join("perspective", "labextension", "static", "style.js"),
+            ]
+        ),
+    )
+    cmdclass["build_ext"] = PSPBuild
+    cmdclass["sdist"] = combine_commands(cmdclass["sdist"], PSPCheckSDist)
+except ImportError:
+    cmdclass = {}
 
 
 setup(

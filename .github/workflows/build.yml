@@ -307,7 +307,7 @@ jobs:
             ################
             # Python
             - name: Install python dependencies
-              run: pip install jupyter_packaging && yarn _requires_python
+              run: yarn _requires_python
 
             ################
             # Linux
@@ -509,7 +509,7 @@ jobs:
             ################
             # Python
             - name: Install python dependencies
-              run: pip install jupyter_packaging && yarn _requires_python
+              run: yarn _requires_python
 
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
@@ -639,7 +639,7 @@ jobs:
             ################
             # Python
             - name: Install python dependencies
-              run: pip install jupyter_packaging && yarn _requires_python
+              run: yarn _requires_python
 
             ################
             # Rust
@@ -914,7 +914,7 @@ jobs:
             ################
             # Python
             - name: Install python dependencies
-              run: pip install jupyter_packaging && yarn _requires_python
+              run: yarn _requires_python
               if: ${{ runner.os != 'Linux' }} # skip on manylinux2014
 
             ################
@@ -1167,7 +1167,7 @@ jobs:
             ################
             # Python
             - name: Install python dependencies
-              run: pip install jupyter_packaging && yarn _requires_python
+              run: yarn _requires_python
 
             # Download artifact
             - uses: actions/download-artifact@v3
@@ -1327,7 +1327,7 @@ jobs:
             ################
             # Python
             - name: Install python dependencies
-              run: pip install jupyter_packaging && yarn _requires_python
+              run: yarn _requires_python
 
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
@@ -1465,7 +1465,7 @@ jobs:
             ################
             # Python
             - name: Install python dependencies
-              run: pip install jupyter_packaging && yarn _requires_python
+              run: yarn _requires_python
 
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
