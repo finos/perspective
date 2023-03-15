@@ -170,7 +170,6 @@ python/perspective/perspective/tests/table/psp_test
 python/perspective/perspective/node/assets/*
 /__pycache__
 python/perspective/pip-wheel-metadata
-python/perspective/README.md
 python/perspective/python_junit.xml
 python/perspective/coverage.xml
 python/perspective/bench/stresstest/results

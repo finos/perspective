@@ -9,5 +9,10 @@
 
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
-export { PerspectiveView } from "../view";
-export { PerspectiveModel } from "../model";
+import "@finos/perspective-viewer-openlayers/dist/umd/perspective-viewer-openlayers.js";
+
+import { PerspectiveView } from "../view";
+import { PerspectiveModel } from "../model";
+
+exports.PerspectiveModel = PerspectiveModel;
+exports.PerspectiveView = PerspectiveView;

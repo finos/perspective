@@ -449,13 +449,12 @@ exports.copy_files_to_python_folder = () => {
     const dist = resolve`${__dirname}/../python/perspective/dist`;
     const cpp = resolve`${__dirname}/../cpp/perspective/src`;
     const cmakelists = resolve`${__dirname}/../cpp/perspective/CMakeLists.txt`;
-    const lic = resolve`${__dirname}/../LICENSE`;
-    const readme = resolve`${__dirname}/../README.md`;
 
     const cmake = resolve`${__dirname}/../cmake`;
     const dcmake = resolve`${dist}/cmake`;
+
+    const lic = resolve`${__dirname}/../LICENSE`;
     const dlic = resolve`${dist}/LICENSE`;
-    const dreadme = resolve`${dist}/../README.md`;
 
     fse.mkdirpSync(dist);
     fse.copySync(cmakelists, resolve`${dist}/CMakeLists.txt`, {

@@ -17,6 +17,8 @@
 // url for the notebook is not known at build time and is therefore computed
 // dynamically.
 
+import THEMES from "../../../dist/css/perspective-jupyterlab.css";
+
 if (window.require) {
     window.require.config({
         map: {
@@ -29,4 +31,8 @@ if (window.require) {
 }
 
 // Export the required load_ipython_extension
-export function load_ipython_extension() {}
+exports.load_ipython_extension = () => {
+    const style = document.createElement("style");
+    style.textContent = THEMES;
+    document.head.appendChild(style);
+};
