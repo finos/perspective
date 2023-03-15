@@ -26,11 +26,7 @@ if (IS_DOCKER) {
     IMAGE = python_image(MANYLINUX_VERSION, PYTHON);
 }
 
-const CMD_TYPE = getarg("--fix")
-    ? "fix"
-    : getarg("--check-manifest")
-    ? "manifest"
-    : "lint";
+const CMD_TYPE = getarg("--fix") ? "fix" : "lint";
 
 // Check that the `PYTHON` command is valid, else default to `python`.
 try {
@@ -44,12 +40,9 @@ try {
     let cmd;
     let lint_cmd = "flake8 perspective bench setup.py";
     let fix_cmd = "black perspective bench setup.py --exclude tests";
-    let check_cmd = "check-manifest -v .";
 
     if (CMD_TYPE === "fix") {
         cmd = fix_cmd;
-    } else if (CMD_TYPE === "manifest") {
-        cmd = check_cmd;
     } else {
         cmd = lint_cmd;
     }
