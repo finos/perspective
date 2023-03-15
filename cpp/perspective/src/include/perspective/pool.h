@@ -19,7 +19,7 @@
 #include <thread>
 #endif
 
-#if defined PSP_ENABLE_WASM
+#if defined PSP_ENABLE_WASM and !defined(PSP_ENABLE_PYTHON)
 #include <emscripten/val.h>
 typedef emscripten::val t_val;
 #elif defined PSP_ENABLE_PYTHON
@@ -53,7 +53,7 @@ public:
     void set_update_delegate(t_val ud);
 #endif
 
-#ifdef PSP_ENABLE_WASM
+#if defined PSP_ENABLE_WASM and !defined PSP_ENABLE_PYTHON
     void register_context(t_uindex gnode_id, const std::string& name,
         t_ctx_type type, std::int32_t ptr);
 #else

@@ -1,0 +1,67 @@
+# Adapted from https://raw.githubusercontent.com/numpy/numpy/main/.github/workflows/emscripten.yml
+name: Pyodide wheel build
+
+on:
+  push:
+    branches:
+      - '*pyodide*'
+  pull_request:
+    branches:
+      - master
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read # to fetch code (actions/checkout)
+
+jobs:
+  build-wasm-emscripten:
+    runs-on: ubuntu-22.04
+    env:
+      PYODIDE_VERSION: 0.23.2
+      # PYTHON_VERSION and EMSCRIPTEN_VERSION are determined by PYODIDE_VERSION.
+      # The appropriate versions can be found in the Pyodide repodata.json
+      # "info" field, or in Makefile.envs:
+      # https://github.com/pyodide/pyodide/blob/main/Makefile.envs#L2
+      PYTHON_VERSION: 3.11.2
+      EMSCRIPTEN_VERSION: 3.1.32
+    steps:
+      - name: Checkout perspective
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+
+      - name: set up python
+        id: setup-python
+        uses: actions/setup-python@57ded4d7d5e986d7296eab16560982c6dd7c923b # v4.6.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - uses: mymindstorm/setup-emsdk@ab889da2abbcbb280f91ec4c215d3bb4f3a8f775 # v12
+        with:
+          version: ${{ env.EMSCRIPTEN_VERSION }}
+          actions-cache-folder: emsdk-cache
+
+      - name: copy files
+        run: |
+          npm install -g yarn
+          yarn --frozen-lockfile
+          yarn build_python --setup-only
+
+      - name: Linux init steps
+        run: sudo node scripts/install_tools.js
+
+      - name: Install pyodide-build
+        run: pip install pyodide-build==$PYODIDE_VERSION
+
+      - name: Build
+        # Without --exports=pyinit, pyodide-build tries to export all symbols from every .o,
+        # which causes the em++ linker command line invocation to be so long
+        # that the command fails.
+        run: pyodide build python/perspective --exports=pyinit
+
+      - name: Upload pyodide wheel
+        uses: actions/upload-artifact@v3
+        with:
+            name: perspective-python-dist-pyodide
+            path: dist/*.whl

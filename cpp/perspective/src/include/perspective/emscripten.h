@@ -9,7 +9,6 @@
 #pragma once
 
 #include <perspective/binding.h>
-#include <boost/optional.hpp>
 #include <emscripten.h>
 #include <emscripten/bind.h>
 

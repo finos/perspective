@@ -56,6 +56,7 @@ requires = [
     "numpy>=1.21.6,<2",
     "pandas>=0.22.0,<2",
     "python-dateutil>=2.8.0,<3",
+    "pytz>=2022",
     "traitlets>=4.3.2,<6",
 ]
 
@@ -85,7 +86,6 @@ requires_dev = (
         "pytest-cov>=3",
         "pytest-check-links>=0.7",
         "pytest-tornado>=0.8",
-        "pytz>=2022",
         "Sphinx>=1.8.4",
         "sphinx-markdown-builder>=0.5.2",
         "wheel",
@@ -139,16 +139,11 @@ class PSPBuild(build_ext):
             "-DPSP_WASM_BUILD=0",
             "-DPSP_PYTHON_BUILD=1",
             "-DPSP_PYTHON_VERSION={}".format(PYTHON_VERSION),
-            "-DPython_ADDITIONAL_VERSIONS={}".format(PYTHON_VERSION),
-            "-DPython_FIND_VERSION={}".format(PYTHON_VERSION),
             "-DPython_EXECUTABLE={}".format(sys.executable).replace("\\", "/"),
-            "-DPYTHON_LIBRARY={}".format(sysconfig.get_config_var("LIBDIR")).replace("\\", "/"),
-            "-DPYTHON_INCLUDE_DIR={}".format(sysconfig.get_config_var("INCLUDEPY")).replace("\\", "/"),
-            "-DPython_ROOT_DIR={}".format(sys.prefix).replace("\\", "/"),
-            "-DPython_ROOT={}".format(sys.prefix).replace("\\", "/"),
+            "-DPYTHON_INCLUDE_DIR={}".format(sysconfig.get_path("include")).replace("\\", "/"),
             "-DPSP_CMAKE_MODULE_PATH={folder}".format(folder=os.path.join(ext.sourcedir, "cmake")).replace("\\", "/"),
             "-DPSP_CPP_SRC={folder}".format(folder=ext.sourcedir).replace("\\", "/"),
-            "-DPSP_PYTHON_SRC={folder}".format(folder=os.path.join(ext.sourcedir, "..", "perspective").replace("\\", "/")),
+            "-DPSP_PYTHON_SRC={folder}".format(folder=os.path.join(ext.sourcedir, "..", "perspective").replace("\\", "/"))
         ]
 
         build_args = ["--config", cfg]

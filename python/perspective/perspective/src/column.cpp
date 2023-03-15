@@ -14,11 +14,13 @@
 #include <perspective/python/column.h>
 #include <perspective/python/base.h>
 
+// Specializations of column object callbacks for Python
+
 namespace perspective {
 
 template <>
 void
-t_column::object_copied<PSP_OBJECT_TYPE>(std::uint64_t ptr) const {
+t_column::object_copied<PSP_OBJECT_TYPE>(t_uindex ptr) const {
     // get what was there and incref if can
     if (ptr) {
         py::handle handle = reinterpret_cast<PSP_OBJECT_TYPE>(ptr);
@@ -28,7 +30,7 @@ t_column::object_copied<PSP_OBJECT_TYPE>(std::uint64_t ptr) const {
 
 template <>
 void
-t_column::object_cleared<PSP_OBJECT_TYPE>(std::uint64_t ptr) const {
+t_column::object_cleared<PSP_OBJECT_TYPE>(t_uindex ptr) const {
     // get what was there and decref if can
     if (ptr) {
         py::handle handle = reinterpret_cast<PSP_OBJECT_TYPE>(ptr);

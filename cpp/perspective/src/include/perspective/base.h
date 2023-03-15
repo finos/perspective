@@ -30,8 +30,8 @@
 #include <iomanip>
 #include <chrono>
 #include <fstream>
-#include <boost/unordered_map.hpp>
 #include <perspective/portable.h>
+#include <boost/functional/hash.hpp>
 #include <stdlib.h>
 
 namespace perspective {
@@ -45,7 +45,7 @@ const double PSP_TABLE_GROW_RATIO = 1.3;
 #else
 #define PSP_RESTRICT __restrict__
 #define PSP_THR_LOCAL __thread
-#endif
+#endif // WIN32
 
 const t_index INVALID_INDEX = -1;
 
@@ -60,7 +60,7 @@ const t_index INVALID_INDEX = -1;
 /**
  * @brief Given an error message, throw the error in the binding language:
  *
- * WASM: throws an `Error()` with the error message.
+ * WASM and Pyodide: throws an `Error()` with the error message.
  * Python: throws a `PerspectiveCppException` with the error message.
  *
  * @param message
@@ -157,7 +157,7 @@ std::is_pod<X>::value && std::is_standard_layout<X>::value , \
 #endif
 
 #define PSP_COMPLAIN_AND_ABORT(X)                                              \
-    psp_abort(X);                                                              \
+    ::perspective::psp_abort(X);                                                              \
     abort();
 
 #define PSP_VERBOSE_ASSERT(...)                                                \

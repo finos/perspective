@@ -445,7 +445,7 @@ exports.python_version = function python_version() {
  * Copy C++/Config/README/LICENSE assets from outer project
  * into python folder
  */
-exports.copy_files_to_python_folder = () => {
+exports.copy_files_to_python_folder = (link_files) => {
     const dist = resolve`${__dirname}/../python/perspective/dist`;
     const cpp = resolve`${__dirname}/../cpp/perspective/src`;
     const cmakelists = resolve`${__dirname}/../cpp/perspective/CMakeLists.txt`;
@@ -455,14 +455,31 @@ exports.copy_files_to_python_folder = () => {
 
     const lic = resolve`${__dirname}/../LICENSE`;
     const dlic = resolve`${dist}/LICENSE`;
+    const readme = resolve`${__dirname}/../README.md`;
+    const dreadme = resolve`${dist}/README.md`;
 
     fse.mkdirpSync(dist);
-    fse.copySync(cmakelists, resolve`${dist}/CMakeLists.txt`, {
-        preserveTimestamps: true,
-    });
-    fse.copySync(cpp, resolve`${dist}/src`, { preserveTimestamps: true });
-    fse.copySync(lic, dlic, { preserveTimestamps: true });
-    fse.copySync(cmake, dcmake, { preserveTimestamps: true });
+    const copies = [
+        [cmakelists, resolve`${dist}/CMakeLists.txt`],
+        [cpp, resolve`${dist}/src`],
+        [lic, dlic],
+        [readme, dreadme],
+        [cmake, dcmake],
+    ];
+    for (let [src, dst] of copies) {
+        if (link_files) {
+            try {
+                fse.symlinkSync(src, dst);
+            } catch (e) {
+                if (e.code == "EEXIST") {
+                    continue;
+                }
+                throw e;
+            }
+        } else {
+            fse.copySync(src, dst, { preserveTimestamps: true });
+        }
+    }
 };
 
 /**
@@ -477,6 +494,8 @@ exports.python_version = function python_version(manylinux) {
             return `/opt/python/cp${v}-cp${v}${
                 v === "37" || v === "36" ? "m" : ""
             }/bin/python`;
+        } else if (getarg("--python311")) {
+            return `/opt/python/cp311-cp311/bin/python`;
         } else if (getarg("--python310")) {
             return `/opt/python/cp310-cp310/bin/python`;
         } else if (getarg("--python39")) {
@@ -491,6 +510,8 @@ exports.python_version = function python_version(manylinux) {
     } else {
         if (process.env.PYTHON_VERSION) {
             return `python${process.env.PYTHON_VERSION}`;
+        } else if (getarg("--python311")) {
+            return "python3.11";
         } else if (getarg("--python310")) {
             return "python3.10";
         } else if (getarg("--python39")) {
