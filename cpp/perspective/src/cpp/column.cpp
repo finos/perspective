@@ -348,20 +348,20 @@ t_column::reserve(t_uindex size) {
 // object storage, specialize only for std::uint64_t
 template <>
 void
-t_column::object_copied<std::uint64_t>(std::uint64_t ptr) const {}
+t_column::object_copied<std::uint64_t>(t_uindex ptr) const {}
 
 void
-t_column::notify_object_copied(std::uint64_t idx) const {
+t_column::notify_object_copied(t_uindex idx) const {
     if (*get_nth_status(idx) == STATUS_VALID)
         object_copied<PSP_OBJECT_TYPE>(*(get_nth<std::uint64_t>(idx)));
 }
 
 template <>
 void
-t_column::object_cleared<std::uint64_t>(std::uint64_t ptr) const {}
+t_column::object_cleared<std::uint64_t>(t_uindex ptr) const {}
 
 void
-t_column::notify_object_cleared(std::uint64_t idx) const {
+t_column::notify_object_cleared(t_uindex idx) const {
     if (*get_nth_status(idx) == STATUS_VALID)
         object_cleared<PSP_OBJECT_TYPE>(*(get_nth<std::uint64_t>(idx)));
 }

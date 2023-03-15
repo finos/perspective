@@ -1913,7 +1913,7 @@ namespace computed_function {
         rval.clear();
 
         // Use 32-bit integers for WASM
-#ifdef PSP_ENABLE_WASM
+#if defined PSP_ENABLE_WASM && !defined(PSP_ENABLE_PYTHON)
         rval.m_type = DTYPE_INT32;
 #else
         rval.m_type = DTYPE_INT64;
@@ -1940,7 +1940,7 @@ namespace computed_function {
             number = val.to_double();
         }
 
-#ifdef PSP_ENABLE_WASM
+#if defined(PSP_ENABLE_WASM) && defined(PSP_ENABLE_PYTHON)
         // check for overflow
         if (number > std::numeric_limits<std::int32_t>::max()
             || number < std::numeric_limits<std::int32_t>::min()) {

@@ -20,10 +20,20 @@ execute_process(
 
 find_path(PYTHON_NUMPY_INCLUDE_DIR numpy/arrayobject.h
   HINTS "${__numpy_path}" "${PYTHON_INCLUDE_PATH}" NO_DEFAULT_PATH)
+# FIXME: find_path() should be setting it to this anyway but is not.  the file
+# exists, as proven by the following execute_process() call
+execute_process (COMMAND bash -c "ls -l ${__numpy_path}/numpy/arrayobject.h")
+set(PYTHON_NUMPY_INCLUDE_DIR "${__numpy_path}")
+message("PYTHON_NUMPY_INCLUDE_DIR ${PYTHON_NUMPY_INCLUDE_DIR}")
+message("${__numpy_path} ${__numpy_version}")
+
 
 if(PYTHON_NUMPY_INCLUDE_DIR)
+  message("wahoo found numpy")
   set(PYTHON_NUMPY_FOUND 1 CACHE INTERNAL "Python numpy found")
 endif(PYTHON_NUMPY_INCLUDE_DIR)
+
+# execute_process (COMMAND bash -c "sleep 1000000")
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(NumPy REQUIRED_VARS PYTHON_NUMPY_INCLUDE_DIR

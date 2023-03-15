@@ -528,6 +528,7 @@ void
 t_lstore::clear() {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+// TODO(tom): is memset still very slow in Emscripten?
 #ifndef PSP_ENABLE_WASM
     memset(m_base, 0, size_t(capacity()));
 #endif

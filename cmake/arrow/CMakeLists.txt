@@ -109,7 +109,7 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/tracing.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/trie.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/unreachable.cc
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/uri.cc
+    # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/uri.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/utf8.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/value_parsing.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/vendored/base64.cpp
@@ -277,11 +277,7 @@ target_compile_definitions(arrow PUBLIC ARROW_STATIC)
 
 # will need built boost filesystem and system .lib to work, even though
 # perspective itself does not use those dependencies
-target_link_libraries(arrow
-    ${double-conversion_LIBRARIES}
-    ${Boost_FILESYSTEM_LIBRARY}
-    ${Boost_SYSTEM_LIBRARY}
-    ${ARROW_TEST_LINK_TOOLCHAIN})
+target_link_libraries(arrow)
 
 # find_package(Flatbuffers)
 
