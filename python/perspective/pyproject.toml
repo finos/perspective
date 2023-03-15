@@ -9,13 +9,3 @@ build-backend = "jupyter_packaging.build_api"
 
 [tool.black]
 exclude = "perspective/tests/*"
-
-[tool.check-manifest]
-ignore = [
-    "dist/**",
-	"perspective/table/*.so",
-	"perspective/table/*.pyd",
-	"perspective/table/*.dll",
-	"perspective/labextension/**",
-	"perspective/nbextension/perspective-nbextension.js ",
-]
