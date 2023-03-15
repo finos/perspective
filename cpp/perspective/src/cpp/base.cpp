@@ -11,7 +11,7 @@
 #include <perspective/base.h>
 #include <cstdint>
 #include <limits>
-#ifdef PSP_ENABLE_WASM
+#if defined PSP_ENABLE_WASM and !defined PSP_ENABLE_PYTHON
 #include <emscripten.h>
 #else
 #include <perspective/exception.h>
@@ -21,7 +21,9 @@ namespace perspective {
 
 void
 psp_abort(const std::string& message) {
-#ifdef PSP_ENABLE_WASM
+// TODO(tom): this may not work in Pyodide because EM_ASM may only work for the main entrypoint
+// TODO(tom): trigger a psp_abort() in Pyodide
+#if defined PSP_ENABLE_WASM && !defined(PSP_ENABLE_PYTHON)
     std::string error = "Abort(): " + message;
     const char* error_cstr = error.c_str();
 

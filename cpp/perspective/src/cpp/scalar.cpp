@@ -15,7 +15,7 @@
 #include <cstring>
 #include <cstdio>
 #include <functional>
-#include <boost/cstdint.hpp>
+#include <cstdint>
 #include <vector>
 #include <boost/algorithm/string/case_conv.hpp>
 #include <sstream>

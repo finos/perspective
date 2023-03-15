@@ -13,9 +13,7 @@
 #include <perspective/update_task.h>
 #include <perspective/compat.h>
 #include <perspective/env_vars.h>
-#ifdef PSP_ENABLE_PYTHON
-#include <thread>
-#endif
+
 #include <chrono>
 
 namespace perspective {
@@ -26,7 +24,7 @@ t_updctx::t_updctx(t_uindex gnode_id, const std::string& ctx)
     : m_gnode_id(gnode_id)
     , m_ctx(ctx) {}
 
-#if defined PSP_ENABLE_WASM
+#if defined PSP_ENABLE_WASM && !defined PSP_ENABLE_PYTHON
 
 t_val
 empty_callback() {
@@ -193,7 +191,9 @@ t_pool::get_trees() {
     return rval;
 }
 
-#ifdef PSP_ENABLE_WASM
+// TODO(tom): these can folded into one definition using t_index (or intptr_t)
+// .          or also replaced with shared_ptr<>
+#if defined PSP_ENABLE_WASM and !defined(PSP_ENABLE_PYTHON)
 void
 t_pool::register_context(t_uindex gnode_id, const std::string& name,
     t_ctx_type type, std::int32_t ptr) {
@@ -223,7 +223,7 @@ t_pool::set_update_delegate(t_val ud) {
 
 void
 t_pool::notify_userspace(t_uindex port_id) {
-#if defined PSP_ENABLE_WASM
+#if defined PSP_ENABLE_WASM && !defined PSP_ENABLE_PYTHON
     m_update_delegate.call<void>("_update_callback", port_id);
 #elif PSP_ENABLE_PYTHON
     if (!m_update_delegate.is_none()) {

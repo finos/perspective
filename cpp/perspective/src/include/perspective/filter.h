@@ -15,7 +15,6 @@
 #include <perspective/mask.h>
 #include <perspective/scalar.h>
 #include <perspective/exports.h>
-#include <boost/scoped_ptr.hpp>
 #include <functional>
 #include <set>
 

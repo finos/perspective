@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7.2)
+cmake_minimum_required(VERSION 3.18.2)
 project(psp)
 include(CheckCCompilerFlag)
 
@@ -56,7 +56,8 @@ endfunction()
 set(BUILD_MESSAGE "")
 
 function(psp_build_message message)
-    set(BUILD_MESSAGE "${BUILD_MESSAGE}\n${message}")
+    message("${message}")
+    # set(BUILD_MESSAGE "${BUILD_MESSAGE}\n${message}")
 endfunction()
 
 # ######################
@@ -108,11 +109,13 @@ endif()
 if(NOT DEFINED PSP_PYTHON_BUILD)
     set(PSP_PYTHON_BUILD OFF)
 elseif(PSP_PYTHON_BUILD)
-    # PSP_PYTHON_BUILD will always run PSP_CPP_BUILD
-    set(PSP_CPP_BUILD ON)
-
     if(NOT DEFINED PSP_PYTHON_VERSION)
         set(PSP_PYTHON_VERSION 3.10)
+    endif()
+    if($ENV{PYODIDE})
+        set(PSP_PYODIDE 1)
+    else()
+        set(PSP_PYODIDE 0)
     endif()
 endif()
 
@@ -212,10 +215,11 @@ if(PSP_WASM_BUILD)
     list(APPEND CMAKE_PREFIX_PATH /usr/local)
 
     # Assumes that Boost includes will be in this folder.
-    include_directories("/usr/local/include" SYSTEM)
+    # include_directories(SYSTEM "/usr/local/include")
+    include_directories(SYSTEM "${CMAKE_SOURCE_DIR}/src/include/perspective/vendor")
 
     # Include this docker-only directory.
-    include_directories("/boost_includes")
+    include_directories(SYSTEM "/boost_includes")
 
     set(EXTENDED_FLAGS " \
         -Wall \
@@ -273,18 +277,24 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     set(ASYNC_MODE_FLAGS "")
 
     # Boost is a system dependency and must be present and built on the system.
-    find_package(Boost REQUIRED)
 
-    if(NOT Boost_FOUND)
-        message(FATAL_ERROR "${Red}Boost could not be located${ColorReset}")
-    else()
-        psp_build_message("${Cyan}Found Boost: `Boost_INCLUDE_DIRS`: ${Boost_INCLUDE_DIRS}, `Boost_LIBRARY_DIRS` - ${Boost_LIBRARY_DIRS} ${ColorReset}")
-        include_directories(${Boost_INCLUDE_DIRS})
+    # FIXME: use find_package, set BOOST_ROOT or BOOST_INCLUDEDIR or something
+    # this just makes it so #include <boost/foo.hpp> will find the header at
+    # src/include/vendor/boost/foo.hpp
+    include_directories(SYSTEM "${CMAKE_SOURCE_DIR}/src/include/perspective/vendor")
 
-        if(WIN32)
-            add_definitions(-DBOOST_UUID_FORCE_AUTO_LINK)
-        endif()
-    endif()
+    # find_package(Boost REQUIRED)
+
+    # if(NOT Boost_FOUND)
+    #     message(FATAL_ERROR "${Red}Boost could not be located${ColorReset}")
+    # else()
+    #     psp_build_message("${Cyan}Found Boost: `Boost_INCLUDE_DIRS`: ${Boost_INCLUDE_DIRS}, `Boost_LIBRARY_DIRS` - ${Boost_LIBRARY_DIRS} ${ColorReset}")
+    #     include_directories(${Boost_INCLUDE_DIRS})
+
+    #     if(WIN32)
+    #         add_definitions(-DBOOST_UUID_FORCE_AUTO_LINK)
+    #     endif()
+    # endif()
 
     if(WIN32)
         foreach(warning 4244 4251 4267 4275 4290 4786 4305 4996)
@@ -318,24 +328,32 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
             find_package(PythonHeaders ${PSP_PYTHON_VERSION} EXACT REQUIRED)
 
             # Run with exact version so its cached for pybind
-            find_package(PythonInterp ${PSP_PYTHON_VERSION} EXACT REQUIRED)
+            # find_package(PythonInterp ${PSP_PYTHON_VERSION} EXACT REQUIRED)
         else()
             psp_build_message("${Cyan}Use python shared libraries${ColorReset}")
-            find_package(Python ${PSP_PYTHON_VERSION} EXACT REQUIRED COMPONENTS Interpreter Development)
-
-            # Run with exact version so its cached for pybind
-            find_package(PythonInterp ${PSP_PYTHON_VERSION} EXACT REQUIRED)
-            find_package(PythonLibs ${PSP_PYTHON_VERSION} EXACT REQUIRED)
+            if(PSP_PYODIDE)
+                find_package(Python ${PSP_PYTHON_VERSION} EXACT REQUIRED COMPONENTS Interpreter)
+            else()
+                find_package(Python ${PSP_PYTHON_VERSION} EXACT REQUIRED COMPONENTS Interpreter Development.Module)
+            endif()
+            message(NOTICE "${PYTHON_FOUND}")
 
             link_directories(${Python_LIBRARY_DIRS})
         endif()
+        message("PYTHON_INCLUDE_DIR ${PYTHON_INCLUDE_DIR}")
+        message("PYTHON_INCLUDE_DIRS ${Python_INCLUDE_DIRS}")
+
+        # message(FATAL_ERROR "fff")
 
         psp_build_message("${Cyan}Using Python ${Python_VERSION}, \nPython_INCLUDE_DIRS: ${Python_INCLUDE_DIRS}, \nPython_LIBRARIES: ${Python_LIBRARIES}, \nPython_EXECUTABLE: ${Python_EXECUTABLE} ${ColorReset}")
         include_directories(${Python_INCLUDE_DIRS})
 
         psp_build_dep("pybind11" "${PSP_CMAKE_MODULE_PATH}/Pybind.txt.in")
 
-        find_package(NumPy)
+        # execute_process (COMMAND bash -c "sleep 1000000")
+        find_package(NumPy REQUIRED)
+
+        # execute_process (COMMAND bash -c "sleep 1000000")
 
         if(NOT PYTHON_NUMPY_FOUND)
             message(FATAL_ERROR "${Red}Numpy could not be located${ColorReset}")
@@ -410,6 +428,7 @@ set(SOURCE_FILES
     ${PSP_CPP_SRC}/src/cpp/compat.cpp
     ${PSP_CPP_SRC}/src/cpp/compat_impl_linux.cpp
     ${PSP_CPP_SRC}/src/cpp/compat_impl_osx.cpp
+    ${PSP_CPP_SRC}/src/cpp/compat_impl_wasm.cpp
     ${PSP_CPP_SRC}/src/cpp/compat_impl_win.cpp
     ${PSP_CPP_SRC}/src/cpp/computed_expression.cpp
     ${PSP_CPP_SRC}/src/cpp/computed_function.cpp
@@ -523,6 +542,7 @@ if(PSP_WASM_BUILD)
         -s MAXIMUM_MEMORY=4gb \
         -s USE_ES6_IMPORT_META=0 \
         -s ERROR_ON_UNDEFINED_SYMBOLS=1 \
+        -s ENVIRONMENT=web,webview,worker \
     ")
 
     add_library(psp ${WASM_SOURCE_FILES})
@@ -563,6 +583,13 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
         # #######################
         add_library(psp SHARED ${PYTHON_SOURCE_FILES})
         add_library(binding SHARED ${PYTHON_BINDING_SOURCE_FILES})
+        if(PSP_PYODIDE)
+            set(PSP_PYTHON_DEFS PSP_ENABLE_WASM=1)
+        else()
+            set(PSP_PYTHON_DEFS PSP_ENABLE_PYTHON_THREADING=1)
+        endif()
+        target_compile_definitions(psp PRIVATE ${PSP_PYTHON_DEFS})
+        target_compile_definitions(binding PRIVATE ${PSP_PYTHON_DEFS})
 
         include_directories(${PSP_PYTHON_SRC}/include)
 
@@ -581,7 +608,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
             set_property(TARGET binding PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path})
 
             target_compile_options(psp PRIVATE -fvisibility=hidden)
-            target_compile_options(binding PRIVATE -fvisibility=hidden)    
+            target_compile_options(binding PRIVATE -fvisibility=hidden)
         else()
             target_compile_options(binding PRIVATE -Wdeprecated-declarations)
         endif()

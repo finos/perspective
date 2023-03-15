@@ -12,7 +12,7 @@
             "internal": "Internal"
         }
     },
-    "emscripten": "3.1.14",
+    "emscripten": "3.1.32",
     "engines": {
         "node": ">=14.18.2"
     },

@@ -11,6 +11,7 @@
 #include <perspective/arrow_loader.h>
 #include <perspective/arrow_writer.h>
 #include <arrow/csv/api.h>
+#include <boost/optional.hpp>
 
 using namespace emscripten;
 using namespace perspective;
