@@ -4,21 +4,20 @@ title: Python User Guide
 ---
 
 Perspective for Python uses the exact same C++ data engine used by the
-[WebAssembly version](js.md). The
-library consists of many of the same abstractions and API as in JavaScript, as
-well as Python-specific data loading support for [NumPy](https://numpy.org/),
-[Pandas](https://pandas.pydata.org/) (and
-[Apache Arrow](https://arrow.apache.org/), as in JavaScript).
+[WebAssembly version](js.md). The library consists of many of the same
+abstractions and API as in JavaScript, as well as Python-specific data loading
+support for [NumPy](https://numpy.org/), [Pandas](https://pandas.pydata.org/)
+(and [Apache Arrow](https://arrow.apache.org/), as in JavaScript).
 
 Additionally, `perspective-python` provides a session manager suitable for
 integration into server systems such as
 [Tornado websockets](https://www.tornadoweb.org/en/stable/websocket.html),
-[AIOHTTP](https://docs.aiohttp.org/en/stable/web_quickstart.html#websockets),
-or [Starlette](https://www.starlette.io/websockets/)/[FastAPI](https://fastapi.tiangolo.com/advanced/websockets/),
-which allows fully _virtual_ Perspective tables to be interacted with by multiple
-`<perspective-viewer>` in a web browser. You can also interact with a Perspective
-table from python clients, and to that end client libraries are implemented for
-both Tornado and AIOHTTP.
+[AIOHTTP](https://docs.aiohttp.org/en/stable/web_quickstart.html#websockets), or
+[Starlette](https://www.starlette.io/websockets/)/[FastAPI](https://fastapi.tiangolo.com/advanced/websockets/),
+which allows fully _virtual_ Perspective tables to be interacted with by
+multiple `<perspective-viewer>` in a web browser. You can also interact with a
+Perspective table from python clients, and to that end client libraries are
+implemented for both Tornado and AIOHTTP.
 
 As `<perspective-viewer>` will only consume the data necessary to render the
 current screen, this runtime mode allows _ludicrously-sized_ datasets with
@@ -38,7 +37,8 @@ The `perspective` module exports several tools:
 -   Perspective webserver handlers that interface seamlessly with
     `<perspective-viewer>` in JavaScript.
     -   `PerspectiveTornadoHandler` for [Tornado](https://www.tornadoweb.org/)
-    -   `PerspectiveStarletteHandler` for [Starlette](https://www.starlette.io/) and [FastAPI](https://fastapi.tiangolo.com)
+    -   `PerspectiveStarletteHandler` for [Starlette](https://www.starlette.io/)
+        and [FastAPI](https://fastapi.tiangolo.com)
     -   `PerspectiveAIOHTTPHandler` for [AIOHTTP](https://docs.aiohttp.org),
     -   `tornado_websocket`, a Tornado-based websocket client
     -   `aiohttp_websocket` an AIOHTTP-based websocket client
@@ -49,10 +49,9 @@ This user's guide provides an overview of the most common ways to use
 Perspective in Python: the `Table` API, the JupyterLab widget, and the Tornado
 handler.
 
-For an understanding of Perspective's core concepts, see the
-[Table](table.md), [View](view.md), and
-[Data Binding](server.md) documentation. For API documentation, see
-the [Python API](obj/perspective-python.md).
+For an understanding of Perspective's core concepts, see the [Table](table.md),
+[View](view.md), and [Data Binding](server.md) documentation. For API
+documentation, see the [Python API](obj/perspective-python.md).
 
 [More Examples](https://github.com/finos/perspective/tree/master/examples) are
 available on GitHub.
@@ -60,13 +59,12 @@ available on GitHub.
 ## Installation
 
 `perspective-python` contains full bindings to the Perspective API, a JupyterLab
-widget, and a WebSocket handlers for several webserver libraries
-that allow you to host Perspective using server-side Python.
+widget, and a WebSocket handlers for several webserver libraries that allow you
+to host Perspective using server-side Python.
 
 In addition to supporting row/columnar formats of data using `dict` and `list`,
 `pandas.DataFrame`, dictionaries of NumPy arrays, NumPy structured arrays, and
 NumPy record arrays are all supported in `perspective-python`.
-
 
 ### PyPI
 
@@ -78,7 +76,8 @@ pip install perspective-python
 
 ### Anaconda
 
-`perspective-python` can also be installed for [Anaconda](https://anaconda.org/) via [Conda Forge](https://conda-forge.org)
+`perspective-python` can also be installed for [Anaconda](https://anaconda.org/)
+via [Conda Forge](https://conda-forge.org)
 
 ```bash
 conda install -c conda-forge perspective
@@ -90,21 +89,15 @@ conda install -c conda-forge perspective
 `<perspective-viewer>`, allowing for fast, intuitive
 transformations/visualizations of various data formats within JupyterLab.
 
-`PerspectiveWidget` is compatible with Jupyterlab 3. To use it, make sure you
-have installed `perspective-python` and then install the extension from the
-Jupyter lab extension directory:
+`PerspectiveWidget` is compatible with Jupyterlab 3 and Jupyter Notebook 6 via a
+[prebuilt extension](https://jupyterlab.readthedocs.io/en/stable/extension/extension_dev.html#prebuilt-extensions).
+To use it, simply install `perspective-python` and the extensions should be
+available.
 
-```bash
-jupyter labextension install @finos/perspective-jupyterlab
-```
-
-If the widget does not display, you might be missing the
-[ipywidgets extension](https://ipywidgets.readthedocs.io/en/latest/user_install.html#installing-the-jupyterlab-extension).
-Install it from the extension directory:
-
-```bash
-jupyter labextension install @jupyter-widgets/jupyterlab-manager
-```
+`perspective-python`'s JupyterLab extension also provides convenient builtin
+viewers for `csv`, `json`, or `arrow` files. Simply right-click on a file with
+this extension and choose the appropriate `Perpective` option from the context
+menu.
 
 ## `Table`
 
@@ -220,8 +213,9 @@ details, see this in-depth
 
 -   Naive `pandas.Timestamp` objects are _always_ treated as UTC times, and will
     be converted to local time when output to the user.
--   Aware `pandas.Timestamp` objects use the time zone specified in `tzinfo`. Use
-    `tz_localize` or `tz_convert` to provide the `Timestamp` with a time zone.
+-   Aware `pandas.Timestamp` objects use the time zone specified in `tzinfo`.
+    Use `tz_localize` or `tz_convert` to provide the `Timestamp` with a time
+    zone.
 
 ### Callbacks and Events
 
@@ -262,8 +256,8 @@ have no identifier.
 
 `PerspectiveManager` offers an interface for hosting multiple
 `perspective.Table` and `perspective.View` instances, extending their interfaces
-to operate with the [JavaScript library](js.md) over a websocket
-connection. `PerspectiveManager` is required to enable `perspective-python` to
+to operate with the [JavaScript library](js.md) over a websocket connection.
+`PerspectiveManager` is required to enable `perspective-python` to
 [operate remotely](js.md#remote-perspective-via-perspective-python-and-tornado)
 using a websocket API.
 
@@ -278,12 +272,12 @@ overall better server performance. There are a few important differences when
 running `PerspectiveManager` in this mode:
 
 -   Calls to methods like `update()` will return immediately, and the reciprocal
-    `on_update()` callbacks will be invoked on an event later scheduled. Calls to
-    other methods which require an up-to-date object, but will still synchronously
-    apply the pending update.
--   Updates will be _conflated_ when multiple calls to `update()` occur before the
-    scheduled application. In such cases, you may receive a single `on_update()`
-    notification for multiple `update()` calls.
+    `on_update()` callbacks will be invoked on an event later scheduled. Calls
+    to other methods which require an up-to-date object, but will still
+    synchronously apply the pending update.
+-   Updates will be _conflated_ when multiple calls to `update()` occur before
+    the scheduled application. In such cases, you may receive a single
+    `on_update()` notification for multiple `update()` calls.
 -   Once `set_loop_callback()` has been called, you may not call Perspective
     functions from any other thread.
 
@@ -357,10 +351,10 @@ section.
 ### Client/Server Replicated Mode
 
 Using Tornado and
-[`PerspectiveTornadoHandler`](python.md#perspectivetornadohandler),
-as well as `Perspective`'s JavaScript library, we can set up "distributed"
-Perspective instances that allows multiple browser `perspective-viewer` clients
-to read from a common `perspective-python` server, as in the
+[`PerspectiveTornadoHandler`](python.md#perspectivetornadohandler), as well as
+`Perspective`'s JavaScript library, we can set up "distributed" Perspective
+instances that allows multiple browser `perspective-viewer` clients to read from
+a common `perspective-python` server, as in the
 [Tornado Example Project](https://github.com/finos/perspective/tree/master/examples/python-tornado).
 
 This architecture works by maintaining two `Tables`—one on the server, and one
