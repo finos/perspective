@@ -171,4 +171,4 @@ def validate_expressions(expressions):
 
 
 def validate_plugin_config(plugin_config):
-    return plugin_config
+    return plugin_config or {}

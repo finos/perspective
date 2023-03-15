@@ -103,6 +103,10 @@ export class PerspectiveView extends DOMWidgetView {
                 new_value = JSON.parse(new_value);
             }
 
+            if (new_value === null && name === "plugin_config") {
+                new_value = {};
+            }
+
             if (!isEqual(new_value, current_value)) {
                 this.model.set(name, new_value);
             }

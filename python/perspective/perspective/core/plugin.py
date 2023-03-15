@@ -43,6 +43,8 @@ class Plugin(Enum):
     CANDLESTICK = "Candlestick"
     OHLC = "OHLC"
 
+    MAP_SCATTER = "Map Scatter"
+
     @staticmethod
     def options():
         return list(c.value for c in Plugin)
