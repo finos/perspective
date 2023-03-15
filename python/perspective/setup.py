@@ -16,6 +16,7 @@ import sys
 import sysconfig
 from codecs import open
 from distutils.version import LooseVersion
+from jupyter_packaging import get_data_files, wrap_installers, get_version
 
 from setuptools import Extension, find_packages, setup
 from setuptools.command.build_ext import build_ext
@@ -27,14 +28,6 @@ try:
     CPU_COUNT = os.cpu_count()
 except ImportError:
     raise Exception("Requires Python 3.7 or later")
-
-# try/except on jupyter_packaging to allow setup.py to be evaluated
-try:
-    from jupyter_packaging import get_version
-except ImportError:
-
-    def get_version(file):
-        return "0.0.0"
 
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -309,31 +302,28 @@ data_files_spec = [
         "perspective/labextension",
         "**",
     ),
+    # Labextension install command
+    (
+        "share/jupyter/labextensions/@finos/perspective-jupyterlab",
+        "perspective/extension",
+        "install.json",
+    ),
 ]
 
-try:
-    from jupyter_packaging import (
-        combine_commands,
-        create_cmdclass,
-        ensure_targets,
-    )
+ensured_targets = (
+    []
+    if SKIP_JS_FILES
+    else [
+        os.path.join("perspective", "nbextension", "static", "index.js"),
+        os.path.join("perspective", "labextension", "package.json"),
+        os.path.join("perspective", "labextension", "static", "style.js"),
+    ]
+)
 
-    cmdclass = create_cmdclass("js", data_files_spec=data_files_spec)
-    cmdclass["js"] = combine_commands(
-        ensure_targets(
-            []
-            if SKIP_JS_FILES
-            else [
-                os.path.join("perspective", "nbextension", "static", "index.js"),
-                os.path.join("perspective", "labextension", "package.json"),
-                os.path.join("perspective", "labextension", "static", "style.js"),
-            ]
-        ),
-    )
-    cmdclass["build_ext"] = PSPBuild
-    cmdclass["sdist"] = combine_commands(cmdclass["sdist"], PSPCheckSDist)
-except ImportError:
-    cmdclass = {}
+cmdclass = {}
+cmdclass["js"] = wrap_installers(ensured_targets=ensured_targets)
+cmdclass["build_ext"] = PSPBuild
+cmdclass["sdist"] = PSPCheckSDist
 
 
 setup(
@@ -355,6 +345,7 @@ setup(
     ],
     keywords="analytics tools plotting",
     packages=find_packages(exclude=["bench", "bench.*"]),
+    data_files=get_data_files(data_files_spec),
     include_package_data=True,
     zip_safe=False,
     python_requires=">=3.7",

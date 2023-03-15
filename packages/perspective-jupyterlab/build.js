@@ -62,7 +62,11 @@ const NB_BUILDS = [
         define: {
             global: "window",
         },
-        plugins: [WasmPlugin(true), WorkerPlugin(true), AMDLoader([])],
+        plugins: [
+            WasmPlugin(true),
+            WorkerPlugin({ inline: true }),
+            AMDLoader([]),
+        ],
         loader: {
             ".ttf": "file",
             ".css": "text",
@@ -78,13 +82,14 @@ const NB_BUILDS = [
         },
         plugins: [
             WasmPlugin(true),
-            WorkerPlugin(true),
-            AMDLoader([`@jupyter-widgets/base`]),
+            WorkerPlugin({ inline: true }),
+            AMDLoader(["@jupyter-widgets/base"]),
         ],
         external: ["@jupyter*"],
         format: "cjs",
         loader: {
             ".ttf": "file",
+            ".css": "text",
         },
         outfile: path.join(NBEXTENSION_PATH, "index.js"),
     },

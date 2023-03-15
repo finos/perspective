@@ -3271,18 +3271,19 @@
   dependencies:
     lodash "^4.17.21"
 
-"@jupyter-widgets/base@^6":
-  version "6.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyter-widgets/base/-/base-6.0.2.tgz#ee6e614eb70f2593fce61eea8731217d869c5a2a"
-  integrity sha512-CIVjSTrqQFzkg9VCdDjrjDqwbba3eZfNigCPFSuKmMVXc+ATAOFczOv9/9uaCPzQ+E+0g6SOLhJ25SpKB0cl9g==
+"@jupyter-widgets/base@^2 || ^3 || ^4 || ^5 || ^6":
+  version "4.1.2"
+  resolved "https://registry.yarnpkg.com/@jupyter-widgets/base/-/base-4.1.2.tgz#b0b1d94232b8e54c77d11c21de4127ca2e22fd69"
+  integrity sha512-URaQ6rUR0ZC1G1g0pSZHcV8W9x5pK/FnC/zSF5/i2QHmjLVfwVRBFt7a8VL88xZG8V4G8tOIDZTTg1NZcHfB0A==
   dependencies:
     "@jupyterlab/services" "^6.0.0"
-    "@lumino/coreutils" "^1.11.1"
-    "@lumino/messaging" "^1.10.1"
-    "@lumino/widgets" "^1.30.0"
-    "@types/backbone" "1.4.14"
+    "@lumino/coreutils" "^1.2.0"
+    "@lumino/messaging" "^1.2.1"
+    "@lumino/widgets" "^1.3.0"
+    "@types/backbone" "^1.4.1"
     "@types/lodash" "^4.14.134"
-    backbone "1.4.0"
+    backbone "1.2.3"
+    base64-js "^1.2.1"
     jquery "^3.1.1"
     lodash "^4.17.4"
 
@@ -3804,7 +3805,7 @@
   resolved "https://registry.yarnpkg.com/@lumino/coreutils/-/coreutils-1.12.0.tgz#fbdef760f736eaf2bd396a5c6fc3a68a4b449b15"
   integrity sha512-DSglh4ylmLi820CNx9soJmDJCpUgymckdWeGWuN0Ash5g60oQvrQDfosVxEhzmNvtvXv45WZEqSBzDP6E5SEmQ==
 
-"@lumino/coreutils@^1.11.0 || ^2.0.0-alpha.6", "@lumino/coreutils@^1.11.1", "@lumino/coreutils@^1.12.1":
+"@lumino/coreutils@^1.11.0 || ^2.0.0-alpha.6", "@lumino/coreutils@^1.12.1", "@lumino/coreutils@^1.2.0":
   version "1.12.1"
   resolved "https://registry.yarnpkg.com/@lumino/coreutils/-/coreutils-1.12.1.tgz#79860c9937483ddf6cda87f6c2b9da8eb1a5d768"
   integrity sha512-JLu3nTHzJk9N8ohZ85u75YxemMrmDzJdNgZztfP7F7T7mxND3YVNCkJG35a6aJ7edu1sIgCjBxOvV+hv27iYvQ==
@@ -3869,7 +3870,7 @@
     "@lumino/algorithm" "^1.9.1"
     "@lumino/collections" "^1.9.1"
 
-"@lumino/messaging@^1.10.3":
+"@lumino/messaging@^1.10.3", "@lumino/messaging@^1.2.1":
   version "1.10.3"
   resolved "https://registry.yarnpkg.com/@lumino/messaging/-/messaging-1.10.3.tgz#b6227bdfc178a8542571625ecb68063691b6af3c"
   integrity sha512-F/KOwMCdqvdEG8CYAJcBSadzp6aI7a47Fr60zAKGqZATSRRRV41q53iXU7HjFPqQqQIvdn9Z7J32rBEAyQAzww==
@@ -3934,7 +3935,7 @@
   dependencies:
     "@lumino/algorithm" "^1.9.2"
 
-"@lumino/widgets@^1.30.0", "@lumino/widgets@^1.37.0", "@lumino/widgets@^1.37.1":
+"@lumino/widgets@^1.3.0", "@lumino/widgets@^1.37.0", "@lumino/widgets@^1.37.1":
   version "1.37.1"
   resolved "https://registry.yarnpkg.com/@lumino/widgets/-/widgets-1.37.1.tgz#d7a2398b276e15e60aff4fec58c035d46549a75b"
   integrity sha512-/whz5B/hL0fjv0bR8JYZ+Emx+CH7HBwXc4TqI9PrrHGm3g6+jRJAyIFGZcQubqkPxxHrRE/VxQgoDKGhINw/Gw==
@@ -4536,10 +4537,10 @@
   dependencies:
     "@babel/types" "^7.3.0"
 
-"@types/backbone@1.4.14":
-  version "1.4.14"
-  resolved "https://registry.yarnpkg.com/@types/backbone/-/backbone-1.4.14.tgz#4b71f0c25d89cfa9a10b18042f0b03d35a53364c"
-  integrity sha512-85ldQ99fiYTJFBlZuAJRaCdvTZKZ2p1fSs3fVf+6Ub6k1X0g0hNJ0qJ/2FOByyyAQYLtbEz3shX5taKQfBKBDw==
+"@types/backbone@^1.4.1":
+  version "1.4.15"
+  resolved "https://registry.yarnpkg.com/@types/backbone/-/backbone-1.4.15.tgz#505323ab8fea11ecaec74cb3f73d569a4e5eb779"
+  integrity sha512-WWeKtYlsIMtDyLbbhkb96taJMEbfQBnuz7yw1u0pkphCOtksemoWhIXhK74VRCY9hbjnsH3rsJu2uUiFtnsEYg==
   dependencies:
     "@types/jquery" "*"
     "@types/underscore" "*"
@@ -5976,12 +5977,12 @@ babel-preset-jest@^25.5.0:
     babel-plugin-jest-hoist "^25.5.0"
     babel-preset-current-node-syntax "^0.1.2"
 
-backbone@1.4.0:
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/backbone/-/backbone-1.4.0.tgz#54db4de9df7c3811c3f032f34749a4cd27f3bd12"
-  integrity sha512-RLmDrRXkVdouTg38jcgHhyQ/2zjg7a8E6sz2zxfz21Hh17xDJYUHBZimVIt5fUyS8vbfpeSmTL3gUjTEvUV3qQ==
+backbone@1.2.3:
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/backbone/-/backbone-1.2.3.tgz#c22cfd07fc86ebbeae61d18929ed115e999d65b9"
+  integrity sha512-1/eXj4agG79UDN7TWnZXcGD6BJrBwLZKCX7zYcBIy9jWf4mrtVkw7IE1VOYFnrKahsmPF9L55Tib9IQRvk027w==
   dependencies:
-    underscore ">=1.8.3"
+    underscore ">=1.7.0"
 
 bail@^1.0.0:
   version "1.0.5"
@@ -6003,7 +6004,7 @@ base16@^1.0.0:
   resolved "https://registry.yarnpkg.com/base16/-/base16-1.0.0.tgz#e297f60d7ec1014a7a971a39ebc8a98c0b681e70"
   integrity sha512-pNdYkNPiJUnEhnfXV56+sQy8+AaPcG3POZAUnwr4EeqCUZFz4u2PePbo3e5Gj4ziYPCWGUZT9RHisvJKnwFuBQ==
 
-base64-js@^1.0.2, base64-js@^1.2.3, base64-js@^1.3.1:
+base64-js@^1.0.2, base64-js@^1.2.1, base64-js@^1.2.3, base64-js@^1.3.1:
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/base64-js/-/base64-js-1.5.1.tgz#1b1b440160a5bf7ad40b650f095963481903930a"
   integrity sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==
@@ -17794,7 +17795,7 @@ unbzip2-stream@1.4.3, unbzip2-stream@^1.0.9:
     buffer "^5.2.1"
     through "^2.3.8"
 
-underscore@>=1.8.3, underscore@~1.13.2:
+underscore@>=1.7.0, underscore@~1.13.2:
   version "1.13.6"
   resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.13.6.tgz#04786a1f589dc6c09f761fc5f45b89e935136441"
   integrity sha512-+A5Sja4HP1M08MaXya7p5LvjuM7K6q/2EaC0+iovj/wOcMsTzMvDFbasi/oSapiwOlt252IqsKqPjCl7huKS0A==
