@@ -8,4 +8,15 @@ requires = [
 build-backend = "jupyter_packaging.build_api"
 
 [tool.black]
-exclude = "perspective/tests/*"
+line-length = 200
+target-version = ['py37', 'py38']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+| perspective/tests
+)/
+'''
+
+[tool.pytest.ini_options]
+asyncio_mode = 'strict'
+testpaths = 'perspective/tests'
