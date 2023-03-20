@@ -21,6 +21,9 @@ const requires_script = `"import distutils.core; setup = distutils.core.run_setu
         // copy build/config files into python folder
         copy_files_to_python_folder();
 
+        // install build meta  deps, this is a necessary evil to keep the setup.py clean
+        execute`${PYTHON} -m pip install -U jupyter_packaging==0.12.3`;
+
         const { stdout: requirements } =
             await execute_return`${PYTHON} -c ${requires_script}`;
 

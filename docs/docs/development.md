@@ -99,33 +99,13 @@ To install a specific version of Emscripten (e.g. `2.0.6`):
 
 ### `perspective-jupyterlab`
 
-To install the Jupyterlab plugin from your local working directory, give
-`jupyter labextension install` the path to the `perspective-jupyterlab` package:
-
-```bash
-jupyter labextension install ./packages/perspective-jupyterlab
-```
+To install the Jupyterlab/Jupyter Notebook plugins from your local working
+directory, simply install `python/perspective` with `pip` as you might normally
+do.
 
 Afterwards, you should see it listed as a "local extension" when you run
-`jupyter labextension list`.
-
-Because we do not inline Perspective into the Jupyterlab plugin, your local
-changes will not show up in Jupyterlab **unless** you use `yarn link` according
-to the directions below:
-
-1. Ensure that your Jupyterlab is built by running `jupyter lab build`.
-2. Inside each directory in `packages`, run
-   [`yarn link`](https://classic.yarnpkg.com/en/docs/cli/link). This will create
-   a symlink to your local build that we will use inside Jupyterlab.
-3. From the Perspective root, run `yarn jlab_link`. This is a script that will
-   find your Jupyterlab installation and tell Jupyterlab to use these symlinks
-   when it looks for Perspective packages, instead of fetching them from NPM.
-4. When you make a local change, make sure you run `yarn build` **and**
-   `jupyter lab build` so that it fetches the newest changes.
-5. Whenever you run `jupyter lab clean`, you will need to run `yarn jlab_link`
-   again to re-register the symlinks.
-
----
+`jupyter labextension list` and as a normal extension when you run
+`jupyter nbextension list`.
 
 ## `perspective-python`
 
@@ -136,7 +116,7 @@ To build the Python library, first configure your project to build Python via
 yarn build
 ```
 
-`perspective-python` supports Python 3.7 and upwards.
+`perspective-python` supports Python 3.8 and upwards.
 
 ---
 
@@ -153,6 +133,10 @@ brew install cmake
 On M1 (Apple Silicon) systems, make sure your brew-installed dependencies are in
 `/opt/homebrew` (the default location), and that `/opt/homebrew/bin` is on the
 `PATH`.
+
+**Note**: Perspective vendors its C++ extensions, so you may run into trouble
+building if you have `brew`-installed versions of libraries, such as
+`flatbuffers`.
 
 ### Windows 10
 
@@ -228,11 +212,6 @@ yarn test --write
 The Python test suite is built on Pytest, and it asserts the correct behavior of
 the Python library.
 
-If you have built the library with the `--python2` flag, make sure to run the
-test suite using the `--python2` flag as well. Running a version of
-`perspective-python` built against Python 2 in Python 3 (and vice versa) is not
-supported.
-
 Verbosity in the tests can be enabled with the `--verbose` flag.
 
 ### Troubleshooting installation from source
@@ -248,7 +227,7 @@ pip install -vv perspective-python
 
 The most common culprits are:
 
--   CMake version too old
+-   CMake version is too old
 -   Boost headers are missing or too old
 
 #### Timezones in Python Tests

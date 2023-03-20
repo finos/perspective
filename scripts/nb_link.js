@@ -6,25 +6,38 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-
 const { execute } = require("./script_utils.js");
 const path = require("path");
 
-const lab_path = path.resolve(
+const nb_path = path.resolve(
     path.join(
         __dirname,
         "..",
         "python",
         "perspective",
         "perspective",
-        "labextension"
+        "nbextension",
+        "static"
+    )
+);
+const json_path = path.resolve(
+    path.join(
+        __dirname,
+        "..",
+        "python",
+        "perspective",
+        "perspective",
+        "extension",
+        "finos-perspective-nbextension.json"
     )
 );
 
 (async function () {
     try {
-        execute`mkdir -p ~/.jupyter/labextensions/@finos/`;
-        execute`ln -s ${lab_path} ~/.jupyter/labextensions/@finos/perspective-jupyterlab`;
+        execute`mkdir -p ~/.jupyter/nbextensions/@finos/`;
+        execute`mkdir -p ~/.jupyter/nbconfig/notebook.d/`;
+        execute`ln -s ${nb_path} ~/.jupyter/nbextensions/@finos/perspective-jupyterlab`;
+        execute`ln -s ${json_path} ~/.jupyter/nbconfig/notebook.d/`;
         console.log("Done");
     } catch (e) {
         console.error(e);

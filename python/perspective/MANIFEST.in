@@ -1,39 +1,35 @@
 include README.md
-include dist/LICENSE
-
 include setup.cfg
 include pyproject.toml
-include .bumpversion.cfg
-include Makefile
-
-# Source files for perspective-python
-graft perspective
-recursive-include perspective/table/
-
-graft perspective/tests
-
-# Documentation
-graft docs
-exclude docs/\#*
-
-# docs subdirs we want to skip
-prune docs/build
-prune docs/gh-pages
-prune docs/dist
-
-# don't ship benchmark
-prune bench
 
 # Use package.json for versioning
 include package.json
 
+# Source files for perspective-python
+graft perspective
+recursive-include perspective/table
+recursive-include perspective/extension *.json
+recursive-include perspective/labextension *.js
+recursive-include perspective/labextension *.json
+recursive-include perspective/nbextension *.js
+
 # C++ build
+include dist/LICENSE
+include dist/CMakeLists.txt
 graft dist/cmake
 graft dist/src
 graft perspective/src
 graft perspective/include
 graft dist/test
-include dist/CMakeLists.txt
+
+# Don't ship documentation
+prune docs
+
+# Don't ship benchmark
+prune bench
+
+# Don't ship scripts
+prune scripts
 
 # Patterns to exclude from any directory
 global-exclude *~

@@ -401,13 +401,13 @@ jobs:
               with:
                   name: nbextension-dist
                   path: python/perspective/perspective/nbextension
-                  # if-no-files-found: error # TODO
+                  if-no-files-found: error # TODO
 
             - uses: actions/upload-artifact@v3
               with:
                   name: labextension-dist
                   path: python/perspective/perspective/labextension
-                  # if-no-files-found: error # TODO
+                  if-no-files-found: error # TODO
 
     ##########################################################################################################################
     ##########################################################################################################################
@@ -715,7 +715,7 @@ jobs:
         ###################################################################
         # Run JS build first, then use the artifacts in the python builds #
         ###################################################################
-        needs: [initialize]
+        needs: [initialize, build_js]
 
         strategy:
             # NOTE: this matrix should build wheels across all supported envs.
@@ -811,17 +811,15 @@ jobs:
             ################
             # JS Artifacts #
             ################
-            # TODO
-            # - uses: actions/download-artifact@v3
-            #   with:
-            #     name: nbextension-dist
-            #     python: python/perspective/perspective/nbextension
+            - uses: actions/download-artifact@v3
+              with:
+                  name: nbextension-dist
+                  path: python/perspective/perspective/nbextension
 
-            # TODO
-            # - uses: actions/download-artifact@v3
-            #   with:
-            #     name: labextension-dist
-            #     python: python/perspective/perspective/labextension
+            - uses: actions/download-artifact@v3
+              with:
+                  name: labextension-dist
+                  path: python/perspective/perspective/labextension
 
             ##########
             # Caches #
@@ -1096,17 +1094,15 @@ jobs:
                   name: perspective-viewer-dist
                   path: rust/perspective-viewer/dist
 
-            # TODO
-            # - uses: actions/download-artifact@v3
-            #   with:
-            #     name: nbextension-dist
-            #     python: python/perspective/perspective/nbextension
+            - uses: actions/download-artifact@v3
+              with:
+                name: nbextension-dist
+                path: python/perspective/perspective/nbextension
 
-            # TODO
-            # - uses: actions/download-artifact@v3
-            #   with:
-            #     name: labextension-dist
-            #     python: python/perspective/perspective/labextension
+            - uses: actions/download-artifact@v3
+              with:
+                name: labextension-dist
+                path: python/perspective/perspective/labextension
 
             ##########
             # Caches #
@@ -1184,12 +1180,6 @@ jobs:
 
             - name: Install wheel (local)
               run: python -m pip install -U *manylinux2014*.whl --target python/perspective
-
-            - name: Install perspective-jupyterlab extension dependencies
-              run: yarn jlab_link
-
-            - name: Install perspective-jupyterlab labextension
-              run: jupyter labextension install packages/perspective-jupyterlab --dev-build=True --no-minimize
 
             - name: Check Installed labextensions
               run: jupyter labextension list

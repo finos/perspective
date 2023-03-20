@@ -133,19 +133,27 @@ docsbuild
 .coverage
 
 # docs generated
+docs/.docusaurus
 docs/_build
+docs/i18n/en.json
 docs/modules.rst
 docs/perspective.*.rst
 docs/python
 package.json.bak
 yarn.lock.bak
+docs/static/arrow/
+docs/static/css/material-dark.css
+docs/static/features
+docs/static/js
+docs/static/js/logo.js
+docs/static/js/logo.js.map
 docs/static/img/**/*
 !docs/static/img/logo/
 !docs/static/img/logo/**
 
-
-docs/static/arrow/
-.perspectiverc
+# Internal
+packages/perspective-esbuild-plugin/lib
+tools/perspective-build/lib
 
 # Python
 *.pyc
@@ -161,31 +169,34 @@ python/perspective/perspective_python.egg-info
 python/perspective/perspective/tests/table/psp_test
 python/perspective/perspective/node/assets/*
 /__pycache__
-docs/static/js/logo.js
-docs/static/js/logo.js.map
 python/perspective/pip-wheel-metadata
-junit.xml
-python/perspective/README.md
 python/perspective/python_junit.xml
 python/perspective/coverage.xml
 python/perspective/bench/stresstest/results
 rust/perspective-viewer/target*
 rust/perspective-viewer/pkg
+python/perspective/perspective/nbextension/static
+python/perspective/perspective/labextension
+python/perspective/wheelhouse
 
+rust/perspective-viewer/target
+rust/perspective-viewer/pkg
+rust/perspective-viewer/target2
+rust/perspective-viewer/pkg
+rust/perspective-viewer/target
+rust/perspective-viewer/target2
+rust/perspective-viewer/target.vscode
+target.vscode
+
+.perspectiverc
+junit.xml
 .emsdk
 vcpkg
 
-docs/static/css/pro-dark.css
-docs/i18n/en.json
-docs/static/js
-
-rust/perspective-viewer/target.vscode
-target.vscode
 
 # jupyterlab test artifacts
 packages/perspective-jupyterlab/test/config/jupyter/lab
 packages/perspective-jupyterlab/test/config/jupyter/migrated
-docs/static/features
 results.debug.json
 
 tools/perspective-build/lib

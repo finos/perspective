@@ -19,15 +19,21 @@
         "bench": "npm-run-all bench:build bench:run",
         "bench:build": "echo \"No Benchmarks\"",
         "bench:run": "echo \"No Benchmarks\"",
+        "build": "npm-run-all build:js build:labextension",
+        "build:js": "node build.js",
+        "build:labextension": "jupyter labextension build .",
+        "clean": "npm-run-all clean:*",
+        "clean:dist": "rimraf dist",
+        "clean:lib": "rimraf lib",
         "clean:screenshots": "rimraf \"screenshots/**/*.@(failed|diff).png\"",
+        "clean:labextension": "rimraf ../../python/perspective/perspective/labextension",
+        "clean:nbextension": "rimraf ../../python/perspective/perspective/nbextension/static",
         "test:build": "cpy \"test/html/*\" dist/umd && cpy \"test/csv/*\" dist/umd && cpy \"test/css/*\" dist/umd && node build.js --test",
         "test:run": "jest --rootDir=. --config=test/config/jest.config.js --color",
         "test:jupyter:build": "cpy  \"test/html/*\" dist/umd && cpy \"test/arrow/*\" dist/umd && cpy \"test/css/*\" dist/umd",
-        "test:jupyter:run": "__JUPYTERLAB_PORT__=6538 jest --rootDir=. --config=test/config/jupyter/jest.config.js --color",
+        "test:jupyter:run": "__JUPYTERLAB_PORT__=6538 jest --rootDir=. --config=test/config/jupyter/jest.config.js --color --verbose",
         "test": "npm-run-all test:build test:run",
         "test:jupyter": "npm-run-all test:jupyter:build test:jupyter:run",
-        "build": "node build.js",
-        "clean": "rimraf dist",
         "version": "yarn build"
     },
     "dependencies": {
@@ -36,7 +42,7 @@
         "@finos/perspective-viewer-d3fc": "^1.9.4",
         "@finos/perspective-viewer-datagrid": "^1.9.4",
         "@finos/perspective-viewer-openlayers": "^1.9.4",
-        "@jupyter-widgets/base": "^6",
+        "@jupyter-widgets/base": "^2 || ^3 || ^4 || ^5 || ^6",
         "@jupyterlab/application": "^3.6.1",
         "@lumino/application": "^1.27.0",
         "@lumino/widgets": "^1.37.0"
@@ -44,10 +50,28 @@
     "devDependencies": {
         "@finos/perspective-esbuild-plugin": "^1.9.4",
         "@finos/perspective-test": "^1.9.4",
+        "@jupyterlab/builder": "^3.4.0",
         "@prospective.co/procss": "^0.1.12",
         "cpy": "^9.0.1"
     },
     "jupyterlab": {
-        "extension": true
+        "extension": true,
+        "outputDir": "../../python/perspective/perspective/labextension",
+        "sharedPackages": {
+            "@jupyter-widgets/base": {
+                "bundled": false,
+                "singleton": true
+            }
+        },
+        "discovery": {
+            "server": {
+                "base": {
+                    "name": "perspective-python"
+                },
+                "managers": [
+                    "pip"
+                ]
+            }
+        }
     }
 }

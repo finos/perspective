@@ -402,7 +402,7 @@ exports.docker = function docker(image = "puppeteer") {
     const IS_MANYLINUX = image.indexOf("manylinux") > -1 ? true : false;
     const IMAGE = `quay.io/pypa/${image}_x86_64`;
     let env_vars = bash`-eWRITE_TESTS=${IS_WRITE} \
-        -ePACKAGE="${PACKAGE}"`;
+         -ePACKAGE="${PACKAGE}"`;
     let flags = IS_CI ? bash`--rm` : bash`--rm -it`;
 
     if (IS_MANYLINUX) {
@@ -411,11 +411,34 @@ exports.docker = function docker(image = "puppeteer") {
     }
 
     return bash`docker run \
-        ${flags} \
-        ${env_vars} \
-        -v${CWD}:/usr/src/app/perspective \
-        -w /usr/src/app/perspective --shm-size=2g -u root \
-        --cpus="${CPUS}.0" ${IMAGE}`;
+         ${flags} \
+         ${env_vars} \
+         -v${CWD}:/usr/src/app/perspective \
+         -w /usr/src/app/perspective --shm-size=2g -u root \
+         --cpus="${CPUS}.0" ${IMAGE}`;
+};
+
+/**
+ * Get the python version to use from env/arguments
+ *
+ * @returns {string} The python version to use
+ */
+exports.python_version = function python_version() {
+    if (process.env.PYTHON_VERSION) {
+        return `python${process.env.PYTHON_VERSION}`;
+    } else if (getarg("--python310")) {
+        return "python3.10";
+    } else if (getarg("--python39")) {
+        return "python3.9";
+    } else if (getarg("--python38")) {
+        return "python3.8";
+    } else if (getarg("--python37")) {
+        return "python3.7";
+    } else if (getarg("--python36")) {
+        return "python3.6";
+    } else {
+        return "python3";
+    }
 };
 
 /**
@@ -426,13 +449,12 @@ exports.copy_files_to_python_folder = () => {
     const dist = resolve`${__dirname}/../python/perspective/dist`;
     const cpp = resolve`${__dirname}/../cpp/perspective/src`;
     const cmakelists = resolve`${__dirname}/../cpp/perspective/CMakeLists.txt`;
-    const lic = resolve`${__dirname}/../LICENSE`;
-    const readme = resolve`${__dirname}/../README.md`;
 
     const cmake = resolve`${__dirname}/../cmake`;
     const dcmake = resolve`${dist}/cmake`;
+
+    const lic = resolve`${__dirname}/../LICENSE`;
     const dlic = resolve`${dist}/LICENSE`;
-    const dreadme = resolve`${dist}/../README.md`;
 
     fse.mkdirpSync(dist);
     fse.copySync(cmakelists, resolve`${dist}/CMakeLists.txt`, {
@@ -440,7 +462,6 @@ exports.copy_files_to_python_folder = () => {
     });
     fse.copySync(cpp, resolve`${dist}/src`, { preserveTimestamps: true });
     fse.copySync(lic, dlic, { preserveTimestamps: true });
-    fse.copySync(readme, dreadme, { preserveTimestamps: true });
     fse.copySync(cmake, dcmake, { preserveTimestamps: true });
 };
 

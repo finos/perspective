@@ -1,2 +1,11 @@
 [build-system]
-requires = ["setuptools", "wheel", "numpy>=1.13.1,<2"]
+requires = [
+    "setuptools",
+    "wheel",
+    "numpy>=1.13.1,<2",
+    "jupyter-packaging==0.12.3",
+]
+build-backend = "jupyter_packaging.build_api"
+
+[tool.black]
+exclude = "perspective/tests/*"
