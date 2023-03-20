@@ -11,11 +11,13 @@ const { execute, bash, path, getarg } = require("./script_utils.js");
 
 const CMD_TYPE = getarg("--fix") ? "fix" : "lint";
 
-
 function lint(dir) {
-    execute(bash`clang-format ${CMD_TYPE === "fix" ? "" : "--dry-run -Werror "} -i -style=file ${dir}`);
+    execute(
+        bash`clang-format ${
+            CMD_TYPE === "fix" ? "" : "--dry-run -Werror "
+        } -i -style=file ${dir}`
+    );
 }
-
 
 try {
     lint(path`./cpp/perspective/src/cpp/*.cpp`);
