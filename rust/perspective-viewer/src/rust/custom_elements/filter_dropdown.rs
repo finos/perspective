@@ -73,10 +73,14 @@ impl FilterDropDownElement {
         match current_column {
             Some(filter_col) if filter_col == column => {
                 let values = filter_values(&input, &self.values);
-                self.modal.send_message_batch(vec![
-                    FilterDropDownMsg::SetCallback(callback),
-                    FilterDropDownMsg::SetValues(values),
-                ]);
+                if values.len() == 1 && values[0] == input {
+                    self.hide().unwrap();
+                } else {
+                    self.modal.send_message_batch(vec![
+                        FilterDropDownMsg::SetCallback(callback),
+                        FilterDropDownMsg::SetValues(values),
+                    ]);
+                }
             }
             _ => {
                 // TODO is this a race condition? `column` and `values` are out-of-sync
@@ -89,12 +93,16 @@ impl FilterDropDownElement {
                         let all_values = session.get_column_values(column.1).await?;
                         *values.borrow_mut() = Some(all_values);
                         let filter_values = filter_values(&input, &values);
-                        modal.send_message_batch(vec![
-                            FilterDropDownMsg::SetCallback(callback),
-                            FilterDropDownMsg::SetValues(filter_values),
-                        ]);
+                        if filter_values.len() == 1 && filter_values[0] == input {
+                            modal.hide()
+                        } else {
+                            modal.send_message_batch(vec![
+                                FilterDropDownMsg::SetCallback(callback),
+                                FilterDropDownMsg::SetValues(filter_values),
+                            ]);
 
-                        modal.open(target, None).await
+                            modal.open(target, None).await
+                        }
                     }
                 });
             }

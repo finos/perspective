@@ -250,11 +250,24 @@ impl Component for ConfigSelector {
             }
             ConfigSelectorMsg::SetFilterValue(index, input) => {
                 let mut filter = ctx.props().session.get_view_config().filter.clone();
-                filter[index].2 = FilterTerm::Scalar(Scalar::String(input));
-                let filter = Some(filter);
-                let update = ViewConfigUpdate {
-                    filter,
-                    ..ViewConfigUpdate::default()
+                let update = if matches!(filter[index].1, FilterOp::In | FilterOp::NotIn) {
+                    let current = filter[index].2.to_string();
+                    let mut tokens = current.split(',').collect::<Vec<_>>();
+                    tokens.pop();
+                    tokens.push(&input);
+                    filter[index].2 = FilterTerm::Scalar(Scalar::String(tokens.join(",")));
+                    let filter = Some(filter);
+                    ViewConfigUpdate {
+                        filter,
+                        ..ViewConfigUpdate::default()
+                    }
+                } else {
+                    filter[index].2 = FilterTerm::Scalar(Scalar::String(input));
+                    let filter = Some(filter);
+                    ViewConfigUpdate {
+                        filter,
+                        ..ViewConfigUpdate::default()
+                    }
                 };
 
                 ApiFuture::spawn(ctx.props().update_and_render(update));
