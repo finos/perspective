@@ -74,11 +74,7 @@ def deconstruct_pandas(data, kwargs=None):
                 if isinstance(v, pd.CategoricalDtype):
                     data[k] = data[k].astype(str)
 
-    if (
-        isinstance(data, pd.DataFrame)
-        and isinstance(data.columns, pd.MultiIndex)
-        and isinstance(data.index, pd.MultiIndex)
-    ):
+    if isinstance(data, pd.DataFrame) and isinstance(data.columns, pd.MultiIndex) and isinstance(data.index, pd.MultiIndex):
         # Row and col pivots
         kwargs["group_by"].extend([str(c) for c in data.index.names])
 
@@ -134,24 +130,8 @@ def deconstruct_pandas(data, kwargs=None):
         # Finally, remap any values columns to have column name 'value'
         data.index.names = new_names
         data = data.reset_index()  # copy
-        data.columns = [
-            str(c)
-            if c
-            in ["index"] + kwargs["group_by"] + kwargs["split_by"] + kwargs["columns"]
-            else "value"
-            for c in data.columns
-        ]
-        kwargs["columns"].extend(
-            [
-                "value"
-                for c in data.columns
-                if c
-                not in ["index"]
-                + kwargs["group_by"]
-                + kwargs["split_by"]
-                + kwargs["columns"]
-            ]
-        )
+        data.columns = [str(c) if c in ["index"] + kwargs["group_by"] + kwargs["split_by"] + kwargs["columns"] else "value" for c in data.columns]
+        kwargs["columns"].extend(["value" for c in data.columns if c not in ["index"] + kwargs["group_by"] + kwargs["split_by"] + kwargs["columns"]])
     elif isinstance(data, pd.DataFrame) and isinstance(data.columns, pd.MultiIndex):
         # Col pivots
         if data.index.name:
@@ -175,19 +155,8 @@ def deconstruct_pandas(data, kwargs=None):
                     kwargs["split_by"].append(str(val))
 
         data.index.names = new_names
-        data.columns = [
-            str(c)
-            if c in ["index"] + kwargs["group_by"] + kwargs["split_by"]
-            else "value"
-            for c in data.columns
-        ]
-        kwargs["columns"].extend(
-            [
-                "value"
-                for c in data.columns
-                if c not in ["index"] + kwargs["group_by"] + kwargs["split_by"]
-            ]
-        )
+        data.columns = [str(c) if c in ["index"] + kwargs["group_by"] + kwargs["split_by"] else "value" for c in data.columns]
+        kwargs["columns"].extend(["value" for c in data.columns if c not in ["index"] + kwargs["group_by"] + kwargs["split_by"]])
 
     elif isinstance(data, pd.DataFrame) and isinstance(data.index, pd.MultiIndex):
         # Group by

@@ -137,12 +137,7 @@ class PerspectiveWebsocketClient(PerspectiveClient):
 
     async def send(self, msg):
         """Send a message to the Websocket endpoint."""
-        if (
-            isinstance(msg, dict)
-            and msg.get("args")
-            and len(msg["args"]) > 0
-            and isinstance(msg["args"][0], (bytes, bytearray))
-        ):
+        if isinstance(msg, dict) and msg.get("args") and len(msg["args"]) > 0 and isinstance(msg["args"][0], (bytes, bytearray)):
             msg["binary_length"] = len(msg["args"][0])
             pre_msg = msg
             binary_msg = pre_msg["args"].pop(0)

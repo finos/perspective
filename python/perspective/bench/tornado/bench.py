@@ -36,11 +36,7 @@ def least_sq(y):
     m = numerator / denominator
     b = y_mean - (m * x_mean)
 
-    print(
-        "Mean {:.2f}, Range: {:.2f}, Bias Coef: {:.2f}, Intercept: {:.2f}".format(
-            numpy.mean(y), y[n - 1] - y[0], m, b
-        )
-    )
+    print("Mean {:.2f}, Range: {:.2f}, Bias Coef: {:.2f}, Intercept: {:.2f}".format(numpy.mean(y), y[n - 1] - y[0], m, b))
 
 
 class PerspectiveTornadoBenchmark(object):
@@ -48,9 +44,7 @@ class PerspectiveTornadoBenchmark(object):
         """A simple test runner for a perspective-python benchmark. See
         `scenarios/gil_test.py` for example usage."""
         self.task = task
-        self.parser = argparse.ArgumentParser(
-            description="Runs a task against a remote `perspective-python` server using multiple websocket clients."
-        )
+        self.parser = argparse.ArgumentParser(description="Runs a task against a remote `perspective-python` server using multiple websocket clients.")
 
         self.parser.add_argument(
             "-c",
@@ -152,16 +146,9 @@ class PerspectiveTornadoBenchmark(object):
         """Calculate interpolation bounds for the given axis and run the
         suite `range` times, stepping the interpolated axis by `step`."""
         start = int(getattr(self, self.interpolate_attr))
-        end = int(
-            getattr(self, self.interpolate_attr)
-            + ((self.interpolate_range - 1) * self.interpolate_step)
-        )
+        end = int(getattr(self, self.interpolate_attr) + ((self.interpolate_range - 1) * self.interpolate_step))
 
-        logging.info(
-            "Interpolating {} over {} runs, range: {} to {}".format(
-                self.interpolate_attr, self.interpolate_range, start, end
-            )
-        )
+        logging.info("Interpolating {} over {} runs, range: {} to {}".format(self.interpolate_attr, self.interpolate_range, start, end))
 
         for i in range(0, self.interpolate_range):
             value = start
@@ -189,9 +176,7 @@ class PerspectiveTornadoBenchmark(object):
         delay = self.delay_time * client_id
 
         if delay > 0:
-            logging.info(
-                "Delaying client {} execution by {} seconds".format(client_id, delay)
-            )
+            logging.info("Delaying client {} execution by {} seconds".format(client_id, delay))
             await asyncio.sleep(delay)
 
         psp_client = await perspective.client.tornado.websocket(self.url)

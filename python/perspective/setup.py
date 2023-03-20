@@ -116,15 +116,10 @@ class PSPBuild(build_ext):
         try:
             out = subprocess.check_output([self.cmake_cmd, "--version"])
         except OSError:
-            raise RuntimeError(
-                "CMake must be installed to build the following extensions: "
-                + ", ".join(e.name for e in self.extensions)
-            )
+            raise RuntimeError("CMake must be installed to build the following extensions: " + ", ".join(e.name for e in self.extensions))
 
         if platform.system() == "Windows":
-            cmake_version = LooseVersion(
-                re.search(r"version\s*([\d.]+)", out.decode()).group(1)
-            )
+            cmake_version = LooseVersion(re.search(r"version\s*([\d.]+)", out.decode()).group(1))
             if cmake_version < "3.1.0":
                 raise RuntimeError("CMake >= 3.1.0 is required on Windows")
 
@@ -138,10 +133,7 @@ class PSPBuild(build_ext):
         PYTHON_VERSION = "{}.{}".format(sys.version_info.major, sys.version_info.minor)
 
         cmake_args = [
-            "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY="
-            + os.path.abspath(os.path.join(extdir, "perspective", "table")).replace(
-                "\\", "/"
-            ),
+            "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=" + os.path.abspath(os.path.join(extdir, "perspective", "table")).replace("\\", "/"),
             "-DCMAKE_BUILD_TYPE=" + cfg,
             "-DPSP_CPP_BUILD=1",
             "-DPSP_WASM_BUILD=0",
@@ -150,23 +142,13 @@ class PSPBuild(build_ext):
             "-DPython_ADDITIONAL_VERSIONS={}".format(PYTHON_VERSION),
             "-DPython_FIND_VERSION={}".format(PYTHON_VERSION),
             "-DPython_EXECUTABLE={}".format(sys.executable).replace("\\", "/"),
-            "-DPYTHON_LIBRARY={}".format(sysconfig.get_config_var("LIBDIR")).replace(
-                "\\", "/"
-            ),
-            "-DPYTHON_INCLUDE_DIR={}".format(
-                sysconfig.get_config_var("INCLUDEPY")
-            ).replace("\\", "/"),
+            "-DPYTHON_LIBRARY={}".format(sysconfig.get_config_var("LIBDIR")).replace("\\", "/"),
+            "-DPYTHON_INCLUDE_DIR={}".format(sysconfig.get_config_var("INCLUDEPY")).replace("\\", "/"),
             "-DPython_ROOT_DIR={}".format(sys.prefix).replace("\\", "/"),
             "-DPython_ROOT={}".format(sys.prefix).replace("\\", "/"),
-            "-DPSP_CMAKE_MODULE_PATH={folder}".format(
-                folder=os.path.join(ext.sourcedir, "cmake")
-            ).replace("\\", "/"),
+            "-DPSP_CMAKE_MODULE_PATH={folder}".format(folder=os.path.join(ext.sourcedir, "cmake")).replace("\\", "/"),
             "-DPSP_CPP_SRC={folder}".format(folder=ext.sourcedir).replace("\\", "/"),
-            "-DPSP_PYTHON_SRC={folder}".format(
-                folder=os.path.join(ext.sourcedir, "..", "perspective").replace(
-                    "\\", "/"
-                )
-            ),
+            "-DPSP_PYTHON_SRC={folder}".format(folder=os.path.join(ext.sourcedir, "..", "perspective").replace("\\", "/")),
         ]
 
         build_args = ["--config", cfg]
@@ -187,9 +169,7 @@ class PSPBuild(build_ext):
 
             cmake_args.extend(
                 [
-                    "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}".format(
-                        cfg.upper(), extdir
-                    ).replace("\\", "/"),
+                    "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}".format(cfg.upper(), extdir).replace("\\", "/"),
                     "-G",
                     os.environ.get("PSP_GENERATOR", msvc),
                 ]
@@ -198,16 +178,12 @@ class PSPBuild(build_ext):
             vcpkg_toolchain_file = os.path.abspath(
                 os.environ.get(
                     "PSP_VCPKG_PATH",
-                    os.path.join(
-                        "..", "..", "vcpkg\\scripts\\buildsystems\\vcpkg.cmake"
-                    ),
+                    os.path.join("..", "..", "vcpkg\\scripts\\buildsystems\\vcpkg.cmake"),
                 )
             )
 
             if os.path.exists(vcpkg_toolchain_file):
-                cmake_args.append(
-                    "-DCMAKE_TOOLCHAIN_FILE={}".format(vcpkg_toolchain_file)
-                )
+                cmake_args.append("-DCMAKE_TOOLCHAIN_FILE={}".format(vcpkg_toolchain_file))
 
             if sys.maxsize > 2**32:
                 # build 64 bit to match python
@@ -222,18 +198,12 @@ class PSPBuild(build_ext):
             cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
             build_args += [
                 "--",
-                "-j2"
-                if os.environ.get("DOCKER", "")
-                else "-j{}".format(env.get("PSP_NUM_CPUS", CPU_COUNT)),
+                "-j2" if os.environ.get("DOCKER", "") else "-j{}".format(env.get("PSP_NUM_CPUS", CPU_COUNT)),
             ]
 
         env["PSP_ENABLE_PYTHON"] = "1"
-        env["OSX_DEPLOYMENT_TARGET"] = os.environ.get(
-            "PSP_OSX_DEPLOYMENT_TARGET", "10.9"
-        )
-        env["MACOSX_DEPLOYMENT_TARGET"] = os.environ.get(
-            "PSP_OSX_DEPLOYMENT_TARGET", "10.9"
-        )
+        env["OSX_DEPLOYMENT_TARGET"] = os.environ.get("PSP_OSX_DEPLOYMENT_TARGET", "10.9")
+        env["MACOSX_DEPLOYMENT_TARGET"] = os.environ.get("PSP_OSX_DEPLOYMENT_TARGET", "10.9")
 
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
@@ -263,21 +233,13 @@ class PSPCheckSDist(sdist):
         for file in ("CMakeLists.txt", "cmake", "src"):
             path = os.path.abspath(os.path.join(here, "dist", file))
             if not os.path.exists(path):
-                raise Exception(
-                    "Path is missing! {}\nMust run `yarn build_python` before building sdist so cmake files are installed".format(
-                        path
-                    )
-                )
+                raise Exception("Path is missing! {}\nMust run `yarn build_python` before building sdist so cmake files are installed".format(path))
         # Check for JS assets
         if not SKIP_JS_FILES:
             for file in ("labextension/package.json", "nbextension/static/index.js"):
                 path = os.path.abspath(os.path.join(here, "perspective", file))
                 if not os.path.exists(path):
-                    raise Exception(
-                        "Path is missing! {}\nMust run `yarn build` before building sdist so JS files are installed".format(
-                            path
-                        )
-                    )
+                    raise Exception("Path is missing! {}\nMust run `yarn build` before building sdist so JS files are installed".format(path))
 
 
 ##############################

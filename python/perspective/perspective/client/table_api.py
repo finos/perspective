@@ -79,9 +79,7 @@ class PerspectiveTableProxy(object):
         return self._async_queue("schema", "table_method", as_string=as_string)
 
     def expression_schema(self, expressions, **kwargs):
-        return self._async_queue(
-            "expression_schema", "table_method", expressions, **kwargs
-        )
+        return self._async_queue("expression_schema", "table_method", expressions, **kwargs)
 
     def columns(self):
         return self._async_queue("columns", "table_method")

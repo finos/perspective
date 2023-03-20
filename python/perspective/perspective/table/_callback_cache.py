@@ -23,9 +23,7 @@ class _PerspectiveCallBackCache(object):
         """
         if not callable(condition):
             raise ValueError("callback filter condition must be a callable function!")
-        self._callbacks = [
-            callback for callback in self._callbacks if condition(callback) is False
-        ]
+        self._callbacks = [callback for callback in self._callbacks if condition(callback) is False]
 
     def pop_callbacks(self, callback_id):
         """Removes and returns a list of callbacks with the given

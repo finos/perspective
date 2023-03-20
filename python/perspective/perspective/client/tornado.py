@@ -55,9 +55,7 @@ class PerspectiveTornadoWebsocketConnection(PerspectiveWebsocketConnection):
 class PerspectiveTornadoClient(PerspectiveWebsocketClient):
     def __init__(self):
         """Create a `PerspectiveTornadoClient` that interfaces with a Perspective server over a Websocket"""
-        super(PerspectiveTornadoClient, self).__init__(
-            PerspectiveTornadoWebsocketConnection()
-        )
+        super(PerspectiveTornadoClient, self).__init__(PerspectiveTornadoWebsocketConnection())
 
 
 async def websocket(url):

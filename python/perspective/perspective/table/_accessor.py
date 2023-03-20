@@ -64,9 +64,7 @@ def _type_to_format(data_or_schema):
                 try:
                     iter(v)
                 except TypeError:
-                    raise NotImplementedError(
-                        "Cannot load dataset of non-iterable type: Data passed in through a dict must be of type `list` or `numpy.ndarray`."
-                    )
+                    raise NotImplementedError("Cannot load dataset of non-iterable type: Data passed in through a dict must be of type `list` or `numpy.ndarray`.")
                 else:
                     return (
                         isinstance(v, numpy.ndarray),
@@ -77,22 +75,13 @@ def _type_to_format(data_or_schema):
     elif isinstance(data_or_schema, numpy.ndarray):
         # structured or record array
         if not isinstance(data_or_schema.dtype.names, tuple):
-            raise NotImplementedError(
-                "Data should be dict of numpy.ndarray or a structured array."
-            )
+            raise NotImplementedError("Data should be dict of numpy.ndarray or a structured array.")
         flattened = _flatten_structure(data_or_schema)
         return True, 1, list(flattened.keys()), flattened
     else:
-        if not (
-            isinstance(data_or_schema, pandas.DataFrame)
-            or isinstance(data_or_schema, pandas.Series)
-        ):
+        if not (isinstance(data_or_schema, pandas.DataFrame) or isinstance(data_or_schema, pandas.Series)):
             # if pandas not installed or is not a dataframe or series
-            raise NotImplementedError(
-                "Invalid data format `{}` - Data must be dataframe, dict, list, numpy.recarray, or a numpy structured array.".format(
-                    type(data_or_schema)
-                )
-            )
+            raise NotImplementedError("Invalid data format `{}` - Data must be dataframe, dict, list, numpy.recarray, or a numpy structured array.".format(type(data_or_schema)))
         else:
             # flatten column/index multiindex
             df, _ = deconstruct_pandas(data_or_schema)
@@ -117,13 +106,7 @@ class _PerspectiveAccessor(object):
             self._data_or_schema,
         ) = _type_to_format(data_or_schema)
         self._date_validator = _PerspectiveDateValidator()
-        self._row_count = (
-            len(self._data_or_schema)
-            if self._format == 0
-            else len(max(self._data_or_schema.values(), key=len))
-            if self._format == 1
-            else 0
-        )
+        self._row_count = len(self._data_or_schema) if self._format == 0 else len(max(self._data_or_schema.values(), key=len)) if self._format == 1 else 0
 
         self._types = []
 
@@ -131,26 +114,16 @@ class _PerspectiveAccessor(object):
         # type `ndarray`
         for name in self._names:
             if not isinstance(name, str):
-                raise PerspectiveError(
-                    "Column names should be strings, not type `{0}`".format(
-                        type(name).__name__
-                    )
-                )
+                raise PerspectiveError("Column names should be strings, not type `{0}`".format(type(name).__name__))
             if self._is_numpy:
                 array = self._data_or_schema[name]
 
                 if not isinstance(array, numpy.ndarray):
-                    raise PerspectiveError(
-                        "Mixed datasets of numpy.ndarray and lists are not supported."
-                    )
+                    raise PerspectiveError("Mixed datasets of numpy.ndarray and lists are not supported.")
 
                 dtype = array.dtype
 
-                if (
-                    name == "index"
-                    and hasattr(data_or_schema, "index")
-                    and isinstance(data_or_schema.index, pandas.DatetimeIndex)
-                ):
+                if name == "index" and hasattr(data_or_schema, "index") and isinstance(data_or_schema.index, pandas.DatetimeIndex):
                     # use the index of the original, unflattened dataframe
                     dtype = _parse_datetime_index(data_or_schema.index)
 
@@ -268,9 +241,7 @@ class _PerspectiveAccessor(object):
                 # update int columns with either ints or floats
                 return int(val)
         elif dtype == t_dtype.DTYPE_FLOAT32 or dtype == t_dtype.DTYPE_FLOAT64:
-            if not isinstance(val, bool) and isinstance(
-                val, _PerspectiveAccessor.INTEGER_TYPES
-            ):
+            if not isinstance(val, bool) and isinstance(val, _PerspectiveAccessor.INTEGER_TYPES):
                 # update float columns with either ints or floats
                 return float(val)
         return val
