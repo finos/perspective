@@ -32,6 +32,7 @@ dependencies to be installed:
     header-only). This can be installed from tarball with the included script
     `node scripts/install_tools.js`.
 -   [wasm-pack](https://github.com/rustwasm/wasm-pack)
+-   [Yarn (v1)](https://classic.yarnpkg.com/). **Important**: Yarn >v1 is not supported, and will cause build errors.
 
 **_This list may be non-exhaustive depending on your OS/environment; please open
 a thread in [Discussions](https://github.com/finos/perspective/discussions) if
