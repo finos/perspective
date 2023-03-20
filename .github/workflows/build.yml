@@ -331,7 +331,7 @@ jobs:
             # WebAssembly #
             ###############
             - name: WebAssembly Lint
-              run: yarn lint_js
+              run: yarn lint:js
 
             - name: WebAssembly Build
               run: yarn build_js --ci
@@ -520,7 +520,7 @@ jobs:
             ########
             # Linux
             - name: Python Lint Steps (Linux)
-              run: yarn lint_python --ci
+              run: yarn lint:python --ci
               env:
                   PYTHON_VERSION: ${{ matrix.python-version }}
 
