@@ -51,6 +51,7 @@ baseMap.save = (container) => {
             zoom: view.getZoom(),
         };
     }
+    return {};
 };
 
 baseMap.initializeView = (container, extent) => {
