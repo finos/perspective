@@ -168,7 +168,7 @@ impl FilterItemProps {
         let mut filter = self.session.get_view_config().filter.clone();
         let filter_item = &mut filter.get_mut(self.idx).expect("Filter on no column");
         let filter_input = match filter_item.1 {
-            FilterOp::In => Some(FilterTerm::Array(
+            FilterOp::NotIn | FilterOp::In => Some(FilterTerm::Array(
                 val.split(',')
                     .map(|x| Scalar::String(x.trim().to_owned()))
                     .collect(),
