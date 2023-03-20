@@ -147,7 +147,6 @@
                     background-color: var(--plugin--background);
                 }
             }
-
         }
 
         .dragdrop-highlight {
@@ -202,8 +201,13 @@
         }
 
         .dragdrop-highlight .column-selector-column .column-selector-border,
-        .dragdrop-highlight .column-selector-column .column-selector-draggable.empty-named,
-        .dragdrop-highlight #top_panel .pivot-column.column-empty .pivot-column-draggable {
+        .dragdrop-highlight
+            .column-selector-column
+            .column-selector-draggable.empty-named,
+        .dragdrop-highlight
+            #top_panel
+            .pivot-column.column-empty
+            .pivot-column-draggable {
             border-color: var(--icon--color);
         }
 
@@ -277,7 +281,7 @@
                 }
 
                 &.empty-named {
-                    cursor: auto ;
+                    cursor: auto;
                     padding-bottom: 0px;
                     margin-bottom: 4px;
                     min-height: 24px;

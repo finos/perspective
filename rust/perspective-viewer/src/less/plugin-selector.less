@@ -31,7 +31,7 @@
             #plugin_selector_border {
                 height: 2px;
                 width: 100%;
-                background-color: var(--inactive--color, #6E6E6E);
+                background-color: var(--inactive--color, #6e6e6e);
                 margin-top: 1px;
             }
 
@@ -64,11 +64,11 @@
                 height: 48px;
                 display: flex;
                 align-items: center;
-                border-bottom: 1px solid var(--inactive--color, #6E6E6E);
+                border-bottom: 1px solid var(--inactive--color, #6e6e6e);
                 cursor: pointer;
             }
 
-            // Hadn't seen this technique before, makes sizing/positioning these 
+            // Hadn't seen this technique before, makes sizing/positioning these
             // trivial.  There's some indication this doesn't work on non-chrome
             // https://stackoverflow.com/questions/36259410/how-to-set-size-of-svg-image-in-before-pseudo-class
             // https://stackoverflow.com/questions/21509982/change-svg-fill-color-in-before-or-after-css
@@ -85,11 +85,11 @@
 
             .plugin-select-item:hover {
                 background-color: var(--icon--color, #042121);
-                color: var(--plugin--background, #FDFFFD);
+                color: var(--plugin--background, #fdfffd);
             }
 
             .plugin-select-item:hover:before {
-                background-color: var(--plugin--background, #FDFFFD);
+                background-color: var(--plugin--background, #fdfffd);
             }
 
             .plugin-select-item[data-plugin="Candlestick"]:before {
@@ -147,7 +147,6 @@
             .plugin-select-item[data-plugin="Datagrid"]:before {
                 -webkit-mask-image: url(../svg/mega-menu-icons-datagrid.svg);
             }
-
         }
 
         #plugin_selector {

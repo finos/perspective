@@ -8,17 +8,16 @@
  *
  */
 
-
 :host(:hover) {
     #menu-bar {
         opacity: 1 !important;
     }
 
-    #settings_button, #settings_button.titled {
+    #settings_button,
+    #settings_button.titled {
         opacity: 1;
     }
 }
-
 
 :host {
     position: relative;
@@ -41,7 +40,7 @@
         height: auto;
         flex-direction: row-reverse;
         & > .split-panel-divider {
-            border-left: 1px solid var(--inactive--color, #6E6E6E);
+            border-left: 1px solid var(--inactive--color, #6e6e6e);
             margin-right: -5px;
         }
     }
@@ -97,13 +96,12 @@
         }
 
         & > .split-panel-divider {
-            border-top: 1px solid var(--inactive--color, #6E6E6E);
-            border-bottom: 2px solid var(--inactive--color, #6E6E6E);
+            border-top: 1px solid var(--inactive--color, #6e6e6e);
+            border-bottom: 2px solid var(--inactive--color, #6e6e6e);
             margin-left: -9px;
             margin-right: 0px;
             flex: 0 0 4px;
         }
-
     }
 
     .noselect {
@@ -216,7 +214,6 @@
         // &:before {
         //     -webkit-mask-image: url(../svg/drawer-tab.svg);
         // }
-
     }
 
     .split-panel {
