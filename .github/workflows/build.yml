@@ -1096,13 +1096,13 @@ jobs:
 
             - uses: actions/download-artifact@v3
               with:
-                name: nbextension-dist
-                path: python/perspective/perspective/nbextension
+                  name: nbextension-dist
+                  path: python/perspective/perspective/nbextension
 
             - uses: actions/download-artifact@v3
               with:
-                name: labextension-dist
-                path: python/perspective/perspective/labextension
+                  name: labextension-dist
+                  path: python/perspective/perspective/labextension
 
             ##########
             # Caches #
