@@ -1303,12 +1303,13 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info,
                 t_tscalar dst_scalar = dst->get_scalar(dst_ridx);
                 old_value.set(dst_scalar);
                 // new_value.set(std::max(dst_scalar, src_scalar));
-                // if (is_expr || old_value.is_nan() || new_value.is_nan() || new_value > old_value) {
-                    auto pkeys = get_pkeys(nidx);
-                    std::vector<double> values;
-                    read_column_from_gstate(gstate, expression_master_table,
-                        spec.get_dependencies()[0].name(), pkeys, values, true);
-                    new_value.set(*std::max_element(values.begin(), values.end()));
+                // if (is_expr || old_value.is_nan() || new_value.is_nan() ||
+                // new_value > old_value) {
+                auto pkeys = get_pkeys(nidx);
+                std::vector<double> values;
+                read_column_from_gstate(gstate, expression_master_table,
+                    spec.get_dependencies()[0].name(), pkeys, values, true);
+                new_value.set(*std::max_element(values.begin(), values.end()));
                 // }
                 dst->set_scalar(dst_ridx, new_value);
             } break;
@@ -1317,12 +1318,13 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info,
                 t_tscalar dst_scalar = dst->get_scalar(dst_ridx);
                 old_value.set(dst_scalar);
                 // new_value.set(std::max(dst_scalar, src_scalar));
-                // if (is_expr || old_value.is_nan() || new_value.is_nan() || new_value < old_value) {
-                    auto pkeys = get_pkeys(nidx);
-                    std::vector<double> values;
-                    read_column_from_gstate(gstate, expression_master_table,
-                        spec.get_dependencies()[0].name(), pkeys, values, true);
-                    new_value.set(*std::min_element(values.begin(), values.end()));
+                // if (is_expr || old_value.is_nan() || new_value.is_nan() ||
+                // new_value < old_value) {
+                auto pkeys = get_pkeys(nidx);
+                std::vector<double> values;
+                read_column_from_gstate(gstate, expression_master_table,
+                    spec.get_dependencies()[0].name(), pkeys, values, true);
+                new_value.set(*std::min_element(values.begin(), values.end()));
                 // }
                 dst->set_scalar(dst_ridx, new_value);
             } break;

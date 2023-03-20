@@ -11,8 +11,7 @@
 
 namespace perspective {
 
-class PERSPECTIVE_EXPORT PerspectiveException
-    : public std::exception {
+class PERSPECTIVE_EXPORT PerspectiveException : public std::exception {
 public:
     explicit PerspectiveException(const char* m)
         : message{m} {}
