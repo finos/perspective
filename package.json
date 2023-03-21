@@ -105,9 +105,10 @@
         "start": "npm run start --workspace",
         "prepush": "npm-run-all lint_js lint_python",
         "prepare": "husky install",
-        "lint_js": "npm-run-all lint:*",
+        "lint_js": "npm run lint:js",
         "lint:js": "prettier --check \"examples/**/*.js\" \"examples/**/*.ts\" \"examples/**/*.tsx\" \"scripts/*.js\" \"rust/**/*.ts\" \"rust/**/*.js\" \"packages/**/*.js\" \"packages/**/*.ts\" \"cpp/**/*.js\"",
-        "lint_python": "node scripts/lint_python.js",
+        "lint_python": "npm run lint:python",
+        "lint:python": "node scripts/lint_python.js",
         "fix:js": "prettier --write \"examples/**/*.js\" \"examples/**/*.ts\" \"examples/**/*.tsx\" \"scripts/*.js\" \"rust/**/*.ts\" \"rust/**/*.js\" \"packages/**/*.js\" \"packages/**/*.ts\" \"cpp/**/*.js\"",
         "fix:md": "prettier docs/docs/*.md --prose-wrap=always --write",
         "fix:yaml": "prettier **/*.yml --write",
@@ -117,9 +118,7 @@
         "fix:json": "prettier --write packages/**/package.json rust/**/package.json examples/**/package.json docs/package.json",
         "fix:python": "node scripts/lint_python.js --fix",
         "fix": "npm-run-all --silent fix:*",
-        "check_python": "node scripts/lint_python.js --check-manifest",
         "version": "node scripts/version.js && python3 python/perspective/scripts/write_version.py && git add python/perspective/perspective/core/_version.py",
-        "jlab_link": "pip3 install ./python/perspective --no-build-isolation",
-        "repl": "node scripts/repl.js"
+        "jlab_link": "pip3 install ./python/perspective --no-build-isolation"
     }
 }

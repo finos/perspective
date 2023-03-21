@@ -233,9 +233,7 @@ class Table(object):
         Returns:
             :obj:`list`: a list of string column names
         """
-        return [
-            name for name in self._table.get_schema().columns() if name != "psp_okey"
-        ]
+        return [name for name in self._table.get_schema().columns() if name != "psp_okey"]
 
     def is_valid_filter(self, filter):
         """Tests whether a given filter expression string is valid, e.g. that
@@ -253,10 +251,7 @@ class Table(object):
         else:
             filter_op = filter[1]
 
-        if (
-            filter_op == t_filter_op.FILTER_OP_IS_NULL
-            or filter_op == t_filter_op.FILTER_OP_IS_NOT_NULL
-        ):
+        if filter_op == t_filter_op.FILTER_OP_IS_NULL or filter_op == t_filter_op.FILTER_OP_IS_NOT_NULL:
             # null/not null operators don't need a comparison value
             return True
 
@@ -320,17 +315,13 @@ class Table(object):
                 _is_csv,
                 port_id,
             )
-            self._state_manager.set_process(
-                self._table.get_pool(), self._table.get_id()
-            )
+            self._state_manager.set_process(self._table.get_pool(), self._table.get_id())
             return
 
         columns = self.columns()
         types = self._table.get_schema().types()
         _accessor = _PerspectiveAccessor(data)
-        _accessor._names = columns + [
-            name for name in _accessor._names if name == "__INDEX__"
-        ]
+        _accessor._names = columns + [name for name in _accessor._names if name == "__INDEX__"]
         _accessor._types = types[: len(columns)]
 
         if _accessor._is_numpy:
@@ -517,10 +508,7 @@ class Table(object):
         registered to it (which must be deleted first).
         """
         if len(self._views) > 0:
-            raise PerspectiveError(
-                "Cannot delete a Table with active views still linked to it "
-                + "- call delete() on each view, and try again."
-            )
+            raise PerspectiveError("Cannot delete a Table with active views still linked to it " + "- call delete() on each view, and try again.")
         self._state_manager.remove_process(self._table.get_id())
         self._table.unregister_gnode(self._gnode_id)
         [cb() for cb in self._delete_callbacks]

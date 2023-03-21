@@ -76,13 +76,9 @@ class PerspectiveClient(object):
                     cmd = handler.get("cmd", None)
 
                     if cmd == "view":
-                        future.set_result(
-                            PerspectiveViewProxy(self, msg["data"]["data"])
-                        )
+                        future.set_result(PerspectiveViewProxy(self, msg["data"]["data"]))
                     elif cmd == "table":
-                        future.set_result(
-                            PerspectiveTableProxy(self, msg["data"]["data"])
-                        )
+                        future.set_result(PerspectiveTableProxy(self, msg["data"]["data"]))
                     else:
                         future.set_result(msg["data"]["data"])
 

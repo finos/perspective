@@ -94,9 +94,7 @@ class PerspectiveManager(_PerspectiveManagerInternal):
         if self._loop_callback is not None:
             # always bind the callback to the table's state manager
             self._loop_callback(lambda: table._table.get_pool().set_event_loop())
-            table._state_manager.queue_process = partial(
-                self._loop_callback, table._state_manager.call_process
-            )
+            table._state_manager.queue_process = partial(self._loop_callback, table._state_manager.call_process)
         self._tables[name] = table
         return name
 
@@ -117,9 +115,7 @@ class PerspectiveManager(_PerspectiveManagerInternal):
         `set_loop_callback()`.
         """
         if self._loop_callback is None:
-            raise PerspectiveError(
-                "Event loop not set on this PerspectiveManager - use set_loop_callback() before calling call_loop()."
-            )
+            raise PerspectiveError("Event loop not set on this PerspectiveManager - use set_loop_callback() before calling call_loop().")
         return self._loop_callback(f, *args, **kwargs)
 
     def set_loop_callback(self, loop_callback):
@@ -141,6 +137,4 @@ class PerspectiveManager(_PerspectiveManagerInternal):
         self._loop_callback = loop_callback
         for table in self._tables.values():
             loop_callback(lambda: table._table.get_pool().set_event_loop())
-            table._state_manager.queue_process = partial(
-                loop_callback, table._state_manager.call_process
-            )
+            table._state_manager.queue_process = partial(loop_callback, table._state_manager.call_process)

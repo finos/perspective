@@ -40,11 +40,7 @@ def _type_to_string(t):
     elif t is bytes or t is str:
         return "string"
     else:
-        raise PerspectiveError(
-            "Unsupported type `{0}` in schema - Perspective supports `int`, `float`, `bool`, `date`, `datetime`, and `str` (or `unicode`).".format(
-                str(t)
-            )
-        )
+        raise PerspectiveError("Unsupported type `{0}` in schema - Perspective supports `int`, `float`, `bool`, `date`, `datetime`, and `str` (or `unicode`).".format(str(t)))
 
 
 def _serialize_datetime(values):
@@ -76,9 +72,7 @@ def _serialize(data):
         # Check if any values are `datetime.date`
         for row in data:
             if not isinstance(row, dict):
-                raise PerspectiveError(
-                    "Received {} in list dataset, expected `dict`!".format(type(row))
-                )
+                raise PerspectiveError("Received {} in list dataset, expected `dict`!".format(type(row)))
 
             for k in row.keys():
                 if type(row[k]) is datetime:
@@ -92,15 +86,10 @@ def _serialize(data):
         for v in data.values():
             if isinstance(v, type):
                 # serialize schema values to string
-                return {
-                    column_name: _type_to_string(data[column_name])
-                    for column_name in data
-                }
+                return {column_name: _type_to_string(data[column_name]) for column_name in data}
             elif isinstance(v, numpy.ndarray):
                 # Convert dicts of numpy arrays to dicts of lists
-                formatted = {
-                    column_name: data[column_name].tolist() for column_name in data
-                }
+                formatted = {column_name: data[column_name].tolist() for column_name in data}
                 break
 
         for column_name in formatted.keys():
@@ -111,9 +100,7 @@ def _serialize(data):
     elif isinstance(data, numpy.ndarray):
         # structured or record array
         if not isinstance(data.dtype.names, tuple):
-            raise NotImplementedError(
-                "Data should be dict of numpy.ndarray or a structured array."
-            )
+            raise NotImplementedError("Data should be dict of numpy.ndarray or a structured array.")
 
         columns = [data[col].tolist() for col in data.dtype.names]
         formatted = dict(zip(data.dtype.names, columns))
@@ -144,9 +131,7 @@ def _serialize(data):
                 d[name] = values.tolist()
         return d
     else:
-        raise NotImplementedError(
-            "Cannot serialize a dataset of `{0}`.".format(str(type(data)))
-        )
+        raise NotImplementedError("Cannot serialize a dataset of `{0}`.".format(str(type(data))))
 
 
 class _PerspectiveWidgetMessage(object):
@@ -219,7 +204,7 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
         limit=None,
         server=False,
         client=not is_libpsp(),
-        **kwargs
+        **kwargs,
     ):
         """Initialize an instance of :class`~perspective.PerspectiveWidget`
         with the given table/data and viewer configuration.
@@ -308,9 +293,7 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
                 from ..libpsp import Table
 
                 if isinstance(data, Table):
-                    raise PerspectiveError(
-                        "Client mode PerspectiveWidget expects data or schema, not a `perspective.Table`!"
-                    )
+                    raise PerspectiveError("Client mode PerspectiveWidget expects data or schema, not a `perspective.Table`!")
 
             if index is not None:
                 self._options["index"] = index
@@ -327,9 +310,7 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
             # for the user to call `load()`.
             if data is None:
                 if index is not None or limit is not None:
-                    raise PerspectiveError(
-                        "Cannot initialize PerspectiveWidget `index` or `limit` without a Table, data, or schema!"
-                    )
+                    raise PerspectiveError("Cannot initialize PerspectiveWidget `index` or `limit` without a Table, data, or schema!")
             else:
                 if index is not None:
                     self._options.update({"index": index})
@@ -529,6 +510,4 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
         if msg_data is not None:
             return _PerspectiveWidgetMessage(-2, "table", msg_data)
         else:
-            raise PerspectiveError(
-                "Widget does not have any data loaded - use the `load()` method to provide it with data."
-            )
+            raise PerspectiveError("Widget does not have any data loaded - use the `load()` method to provide it with data.")

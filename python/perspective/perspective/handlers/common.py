@@ -30,9 +30,7 @@ class PerspectiveHandlerBase(ABC):
         """
         self._manager = kwargs.pop("manager", None)
         if self._manager is None:
-            raise PerspectiveError(
-                "A `PerspectiveManager` instance must be provided to the handler!"
-            )
+            raise PerspectiveError("A `PerspectiveManager` instance must be provided to the handler!")
 
         self._check_origin = kwargs.pop("check_origin", False)
 
@@ -96,9 +94,7 @@ class PerspectiveHandlerBase(ABC):
                     if end >= len(message):
                         end = len(message)
 
-                    asyncio.ensure_future(
-                        self.write_message(message[start:end], binary=True)
-                    )
+                    asyncio.ensure_future(self.write_message(message[start:end], binary=True))
                     start = end
 
                     # Allow the loop to process heartbeats so that client sockets don't

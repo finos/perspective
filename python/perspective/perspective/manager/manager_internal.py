@@ -101,10 +101,7 @@ class _PerspectiveManagerInternal(object):
             msg = json.loads(msg)
 
         if not isinstance(msg, dict):
-            raise PerspectiveError(
-                "Message passed into `_process` should either be a "
-                "JSON-serialized string or a dict."
-            )
+            raise PerspectiveError("Message passed into `_process` should either be a " "JSON-serialized string or a dict.")
 
         if msg.get("binary_length", None):
             # cache the message and wait for the ArrayBuffer that will
@@ -115,10 +112,7 @@ class _PerspectiveManagerInternal(object):
         cmd = msg["cmd"]
 
         if self._is_locked_command(msg) is True:
-            error_string = "`{0}` failed - access denied".format(
-                msg["cmd"]
-                + (("." + msg["method"]) if msg.get("method", None) is not None else "")
-            )
+            error_string = "`{0}` failed - access denied".format(msg["cmd"] + (("." + msg["method"]) if msg.get("method", None) is not None else ""))
             error_message = self._make_error_message(msg["id"], error_string)
             post_callback(self._message_to_json(msg["id"], error_message))
             return
@@ -138,9 +132,7 @@ class _PerspectiveManagerInternal(object):
                 try:
                     # create a new Table and track it
                     data_or_schema = msg["args"][0]
-                    self._tables[msg["name"]] = Table(
-                        data_or_schema, **msg.get("options", {})
-                    )
+                    self._tables[msg["name"]] = Table(data_or_schema, **msg.get("options", {}))
 
                     # Return the Table's name to the front end so it can be
                     # resolved.
@@ -178,9 +170,7 @@ class _PerspectiveManagerInternal(object):
         else:
             table_or_view = self._views.get(msg["name"], None)
             if table_or_view is None:
-                error_message = self._make_error_message(
-                    msg["id"], "View method cancelled"
-                )
+                error_message = self._make_error_message(msg["id"], "View method cancelled")
                 post_callback(self._message_to_json(msg["id"], error_message))
         try:
             if msg.get("subscribe", False) is True:
@@ -217,9 +207,7 @@ class _PerspectiveManagerInternal(object):
                     else:
                         # Return an error when `table.delete()` is called
                         # over the wire API.
-                        raise PerspectiveError(
-                            "table.delete() cannot be called on a remote table, as the remote has full ownership."
-                        )
+                        raise PerspectiveError("table.delete() cannot be called on a remote table, as the remote has full ownership.")
 
                 # Dispatch the method using the expected argument form
                 if msg["method"].startswith("to_"):
@@ -232,15 +220,10 @@ class _PerspectiveManagerInternal(object):
                     if len(arguments) > 1 and isinstance(arguments[1], dict):
                         options = arguments[1]
                     result = getattr(table_or_view, msg["method"])(data, **options)
-                elif (
-                    msg["cmd"] == "table_method"
-                    and msg["method"] == "validate_expressions"
-                ):
+                elif msg["cmd"] == "table_method" and msg["method"] == "validate_expressions":
                     # validate_expressions on the table takes `as_string` in
                     # wargs,
-                    result = getattr(table_or_view, msg["method"])(
-                        *msg.get("args", []), **arguments
-                    )
+                    result = getattr(table_or_view, msg["method"])(*msg.get("args", []), **arguments)
                 else:
                     # otherwise parse arguments as list
                     result = getattr(table_or_view, msg["method"])(*arguments)
@@ -374,9 +357,7 @@ class _PerspectiveManagerInternal(object):
         names = []
 
         if not client_id:
-            raise PerspectiveError(
-                "Cannot garbage collect views that are not linked to a specific client ID!"
-            )
+            raise PerspectiveError("Cannot garbage collect views that are not linked to a specific client ID!")
 
         for name, view in self._views.items():
             if view._client_id == client_id:
@@ -391,11 +372,7 @@ class _PerspectiveManagerInternal(object):
             self._views.pop(name)
 
         if count > 0:
-            logging.debug(
-                "client {} disconnected - GC {} views in memory".format(
-                    client_id, count
-                )
-            )
+            logging.debug("client {} disconnected - GC {} views in memory".format(client_id, count))
 
     def _make_message(self, id, result):
         """Return a serializable message for a successful result."""
@@ -424,13 +401,9 @@ class _PerspectiveManagerInternal(object):
             # Augment the default error message when invalid values are
             # detected, i.e. `NaN`
             if error_string == "Out of range float values are not JSON compliant":
-                error_string = (
-                    "Cannot serialize `NaN`, `Infinity` or `-Infinity` to JSON."
-                )
+                error_string = "Cannot serialize `NaN`, `Infinity` or `-Infinity` to JSON."
 
-            error_message = self._make_error_message(
-                id, "JSON serialization error: {}".format(error_string)
-            )
+            error_message = self._make_error_message(id, "JSON serialization error: {}".format(error_string))
 
             logging.warning(error_message["error"])
             return json.dumps(error_message)

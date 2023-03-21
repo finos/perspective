@@ -20,9 +20,7 @@ def validate_plugin(plugin):
             raise PerspectiveError("Unrecognized `plugin`: {0}".format(plugin))
         return plugin
     else:
-        raise PerspectiveError(
-            "Cannot parse `plugin` of type: {0}".format(str(type(plugin)))
-        )
+        raise PerspectiveError("Cannot parse `plugin` of type: {0}".format(str(type(plugin))))
 
 
 def validate_columns(columns):
@@ -76,14 +74,10 @@ def validate_aggregates(aggregates):
                     v,
                 )
             else:
-                raise PerspectiveError(
-                    "Cannot parse aggregation of type %s", str(type(v))
-                )
+                raise PerspectiveError("Cannot parse aggregation of type %s", str(type(v)))
         return aggregates
     else:
-        raise PerspectiveError(
-            "Cannot parse aggregates type: %s", str(type(aggregates))
-        )
+        raise PerspectiveError("Cannot parse aggregates type: %s", str(type(aggregates)))
 
 
 def validate_sort(sort):
@@ -111,11 +105,7 @@ def validate_filter(filters):
     if filters is None:
         return []
 
-    elif (
-        isinstance(filters, list)
-        and len(filters) > 0
-        and not isinstance(filters[0], list)
-    ):
+    elif isinstance(filters, list) and len(filters) > 0 and not isinstance(filters[0], list):
         # wrap
         filters = [filters]
 
@@ -127,16 +117,10 @@ def validate_filter(filters):
             for i, item in enumerate(f):
                 if i == 1:
                     if item not in ALL_FILTERS:
-                        raise PerspectiveError(
-                            "Unrecognized filter operator: {}".format(item)
-                        )
+                        raise PerspectiveError("Unrecognized filter operator: {}".format(item))
                     elif item not in ("is null", "is not null"):
                         if len(f) != 3:
-                            raise PerspectiveError(
-                                "Cannot parse filter - {} operator must have a comparison value.".format(
-                                    item
-                                )
-                            )
+                            raise PerspectiveError("Cannot parse filter - {} operator must have a comparison value.".format(item))
                 else:
                     if item.__class__.__name__ == "date":
                         f[i] = item.strftime("%m/%d/%Y")
@@ -144,9 +128,7 @@ def validate_filter(filters):
                         f[i] = item.strftime("%Y-%m-%d %H:%M:%S")
         return filters
     else:
-        raise PerspectiveError(
-            "Cannot parse filter type: {}".format(str(type(filters)))
-        )
+        raise PerspectiveError("Cannot parse filter type: {}".format(str(type(filters))))
 
 
 def validate_expressions(expressions):
@@ -160,14 +142,10 @@ def validate_expressions(expressions):
     if isinstance(expressions, list):
         for expr in expressions:
             if not isinstance(expr, str):
-                raise PerspectiveError(
-                    "Cannot parse non-string expression: {}".format(str(type(expr)))
-                )
+                raise PerspectiveError("Cannot parse non-string expression: {}".format(str(type(expr))))
         return expressions
     else:
-        raise PerspectiveError(
-            "Cannot parse expressions of type: {}".format(str(type(expressions)))
-        )
+        raise PerspectiveError("Cannot parse expressions of type: {}".format(str(type(expressions))))
 
 
 def validate_plugin_config(plugin_config):

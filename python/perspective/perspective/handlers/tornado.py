@@ -42,9 +42,7 @@ class PerspectiveTornadoHandler(PerspectiveHandlerBase, WebSocketHandler):
         WebSocketHandler.__init__(self, *args)
 
     def on_message(self, *args, **kwargs):
-        return asyncio.ensure_future(
-            PerspectiveHandlerBase.on_message(self, *args, **kwargs)
-        )
+        return asyncio.ensure_future(PerspectiveHandlerBase.on_message(self, *args, **kwargs))
 
     async def write_message(self, message: str, binary: bool = False) -> None:
         return WebSocketHandler.write_message(self, message=message, binary=binary)

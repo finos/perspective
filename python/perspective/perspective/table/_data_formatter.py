@@ -63,17 +63,12 @@ def to_format(options, view, output_format):
         for cidx in range(options["start_col"], options["end_col"]):
             name = column_names[cidx]
 
-            if (
-                _mod((cidx - (1 if view._sides > 0 else 0)), (num_columns + num_hidden))
-                >= num_columns
-            ):
+            if _mod((cidx - (1 if view._sides > 0 else 0)), (num_columns + num_hidden)) >= num_columns:
                 # don't emit columns used for hidden sort
                 continue
             elif cidx == options["start_col"] and view._sides > 0:
                 if options["has_row_path"]:
-                    paths = [
-                        scalar_to_py(path, False, False) for path in reversed(row_path)
-                    ]
+                    paths = [scalar_to_py(path, False, False) for path in reversed(row_path)]
                     if output_format == "records":
                         data[-1]["__ROW_PATH__"] = paths
                         if options["id"]:
@@ -140,9 +135,7 @@ def to_format(options, view, output_format):
                 for pkey in pkeys:
                     data["__ID__"].append([pkey])
 
-    if output_format in ("dict", "numpy") and (
-        not options["has_row_path"] and ("__ROW_PATH__" in data)
-    ):
+    if output_format in ("dict", "numpy") and (not options["has_row_path"] and ("__ROW_PATH__" in data)):
         del data["__ROW_PATH__"]
 
     if output_format == "numpy":
@@ -200,9 +193,7 @@ def _to_format_helper(view, options=None):
     column_names = []
 
     for n in raw_names:
-        column_names.append(
-            COLUMN_SEPARATOR_STRING.join([path.to_string(False) for path in n])
-        )
+        column_names.append(COLUMN_SEPARATOR_STRING.join([path.to_string(False) for path in n]))
 
     return opts, column_names, data_slice
 
@@ -213,15 +204,12 @@ def _parse_format_options(view, options):
     column_only_offset = 1 if view._sides > 0 or view._column_only else 0
     return {
         "start_row": int(floor(max(options.get("start_row", 0), 0))),
-        "end_row": int(
-            ceil(min(options.get("end_row", view.num_rows()), view.num_rows()))
-        ),
+        "end_row": int(ceil(min(options.get("end_row", view.num_rows()), view.num_rows()))),
         "start_col": int(floor(max(options.get("start_col", 0), 0))),
         "end_col": int(
             ceil(
                 min(
-                    (options.get("end_col", max_cols) + column_only_offset)
-                    * (view._num_hidden_cols() + 1),
+                    (options.get("end_col", max_cols) + column_only_offset) * (view._num_hidden_cols() + 1),
                     max_cols,
                 )
             )

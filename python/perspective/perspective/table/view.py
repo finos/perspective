@@ -148,11 +148,7 @@ class View(object):
         Returns:
             :obj:`list` of 2 elements, the `min` and `max` of the
         """
-        return list(
-            map(
-                lambda x: scalar_to_py(x, False, False), self._view.get_min_max(colname)
-            )
-        )
+        return list(map(lambda x: scalar_to_py(x, False, False), self._view.get_min_max(colname)))
 
     def num_rows(self):
         """The number of aggregated rows in the :class:`~perspective.View`.
@@ -237,9 +233,7 @@ class View(object):
         string_paths = []
 
         for path in paths:
-            string_paths.append(
-                COLUMN_SEPARATOR_STRING.join([p.to_string(False) for p in path])
-            )
+            string_paths.append(COLUMN_SEPARATOR_STRING.join([p.to_string(False) for p in path]))
 
         return string_paths
 
@@ -261,9 +255,7 @@ class View(object):
         if as_string:
             return {item[0]: item[1] for item in self._view.schema().items()}
 
-        return {
-            item[0]: _str_to_pythontype(item[1]) for item in self._view.schema().items()
-        }
+        return {item[0]: _str_to_pythontype(item[1]) for item in self._view.schema().items()}
 
     def expression_schema(self, as_string=False):
         """Returns the expression schema of this :class:`~perspective.View`,
@@ -284,10 +276,7 @@ class View(object):
         if as_string:
             return {item[0]: item[1] for item in self._view.expression_schema().items()}
 
-        return {
-            item[0]: _str_to_pythontype(item[1])
-            for item in self._view.expression_schema().items()
-        }
+        return {item[0]: _str_to_pythontype(item[1]) for item in self._view.expression_schema().items()}
 
     def on_update(self, callback, mode=None):
         """Add a callback to be fired when :func:`perspective.Table.update()` is
@@ -326,19 +315,13 @@ class View(object):
             raise ValueError("Invalid callback - must be a callable function")
 
         if mode not in ["none", "row"]:
-            raise ValueError(
-                'Invalid update mode {} - valid on_update modes are "none" or "row"'.format(
-                    mode
-                )
-            )
+            raise ValueError('Invalid update mode {} - valid on_update modes are "none" or "row"'.format(mode))
 
         if mode == "row":
             if not self._view._get_deltas_enabled():
                 self._view._set_deltas_enabled(True)
 
-        wrapped_callback = partial(
-            self._wrapped_on_update_callback, mode=mode, callback=callback
-        )
+        wrapped_callback = partial(self._wrapped_on_update_callback, mode=mode, callback=callback)
 
         self._update_callbacks.add_callback(
             {
@@ -370,9 +353,7 @@ class View(object):
         self._table._state_manager.call_process(self._table._table.get_id())
         if not callable(callback):
             return ValueError("remove_update callback should be a callable function!")
-        self._update_callbacks.remove_callbacks(
-            lambda cb: cb["orig_callback"] == callback
-        )
+        self._update_callbacks.remove_callbacks(lambda cb: cb["orig_callback"] == callback)
 
     def on_delete(self, callback):
         """Set a callback to be run when the :func:`perspective.View.delete()`

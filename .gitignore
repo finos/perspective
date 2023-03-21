@@ -90,6 +90,7 @@ flycheck_*.el
 *.out
 *.app
 
+# Build artifacts
 build
 CMakeCache.txt
 CMakeFiles
@@ -99,30 +100,48 @@ node_modules
 *.mem
 ftpsync.settings
 *.log
-screenshots/
 Gemfile
 Gemfile.lock
 Vagrantfile
 /packages/sigma
-/packages/fin-hypergrid
-coverage
+cmake-build-debug
+/src/include/boost
+obj
+packages/*/cjs
+cppbuild
+docsbuild
+tools/perspective-build/lib
+packages/perspective-esbuild-plugin/lib
+python/perspective/perspective/nbextension/static
+python/perspective/perspective/labextension
 
+# editor, IDE, OS
 .DS_Store
+.idea
+rust/perspective-viewer/target.vscode
+target.vscode
+.vscode/c_cpp_properties.json
 
+# docs
 website/translated_docs
 website/build/
 website/yarn.lock
 website/node_modules
 website/i18n/*
 !website/i18n/en.json
+website/static/css/material-dark.css
+website/static/css/pro-dark.css
 
-.idea
-cmake-build-debug
+# test artifacts
 .ipynb_checkpoints
 .python-version
 .pytest_cache
-
-website/static/css/pro-dark.css
+.mypy_cache
+.coverage
+coverage
+screenshots/
+junit.xml
+results.debug.json
 
 # CPP Compile
 /src/include/boost
@@ -130,7 +149,6 @@ obj
 packages/*/cjs
 cppbuild
 docsbuild
-.coverage
 
 # docs generated
 docs/.docusaurus
@@ -139,25 +157,28 @@ docs/i18n/en.json
 docs/modules.rst
 docs/perspective.*.rst
 docs/python
-package.json.bak
-yarn.lock.bak
-docs/static/arrow/
-docs/static/css/material-dark.css
-docs/static/features
-docs/static/js
-docs/static/js/logo.js
-docs/static/js/logo.js.map
 docs/static/img/**/*
 !docs/static/img/logo/
 !docs/static/img/logo/**
+docs/static/css/material-dark.css
+docs/i18n/en.json
+docs/.docusaurus
+docs/static/blocks
+docs/static/features
+docs/static/arrow/
+docs/static/js
+docs/static/js/logo.js
+docs/static/js/logo.js.map
+docs/static/css/pro-dark.css
 
-# Internal
-packages/perspective-esbuild-plugin/lib
-tools/perspective-build/lib
+# other
+package.json.bak
+yarn.lock.bak
 
 # Python
 *.pyc
 __pycache__/
+py_modules
 
 # Copied outer source folders
 python/perspective/cmake
@@ -168,40 +189,20 @@ python/cpp
 python/perspective/perspective_python.egg-info
 python/perspective/perspective/tests/table/psp_test
 python/perspective/perspective/node/assets/*
-/__pycache__
 python/perspective/pip-wheel-metadata
 python/perspective/python_junit.xml
 python/perspective/coverage.xml
 python/perspective/bench/stresstest/results
 rust/perspective-viewer/target*
-rust/perspective-viewer/pkg
-python/perspective/perspective/nbextension/static
-python/perspective/perspective/labextension
-python/perspective/wheelhouse
-
-rust/perspective-viewer/target
-rust/perspective-viewer/pkg
-rust/perspective-viewer/target2
-rust/perspective-viewer/pkg
-rust/perspective-viewer/target
-rust/perspective-viewer/target2
 rust/perspective-viewer/target.vscode
-target.vscode
+rust/perspective-viewer/pkg
 
+# config and deps
 .perspectiverc
-junit.xml
 .emsdk
 vcpkg
-
+.vscode/c_cpp_properties.json
 
 # jupyterlab test artifacts
 packages/perspective-jupyterlab/test/config/jupyter/lab
 packages/perspective-jupyterlab/test/config/jupyter/migrated
-results.debug.json
-
-tools/perspective-build/lib
-docs/.docusaurus
-packages/perspective-esbuild-plugin/lib
-docs/static/blocks
-.vscode/c_cpp_properties.json
-py_modules

@@ -25,9 +25,7 @@ if __name__ == "__main__":
         venv_handler.deactivate_virtualenv()
 
     print("Benchmarking perspective-python==master")
-    subprocess.check_output(
-        "python3 {}/perspective_benchmark.py master".format(HERE), shell=True
-    )
+    subprocess.check_output("python3 {}/perspective_benchmark.py master".format(HERE), shell=True)
 
     # Run previous versions in virtualenv
     if not venv_handler.virtualenv_exists():
@@ -41,14 +39,10 @@ if __name__ == "__main__":
 
     for version in VERSIONS[1:]:
         print("Installing perspective-python=={}".format(version))
-        subprocess.check_output(
-            "yes | python3 -m pip uninstall perspective-python", shell=True
-        )
+        subprocess.check_output("yes | python3 -m pip uninstall perspective-python", shell=True)
         subprocess.check_output(
             "yes | python3 -m pip install perspective-python=={}".format(version),
             shell=True,
         )
         print("Benchmarking perspective-python=={}".format(version))
-        subprocess.check_output(
-            "python3 {}/perspective_benchmark.py {}".format(HERE, version), shell=True
-        )
+        subprocess.check_output("python3 {}/perspective_benchmark.py {}".format(HERE, version), shell=True)

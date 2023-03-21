@@ -98,9 +98,7 @@ class _PerspectiveStarletteWebsocketConnection(PerspectiveWebsocketConnection):
 class _PerspectiveStarletteTestClient(PerspectiveWebsocketClient):
     def __init__(self, test_client: TestClient):
         """Create a `PerspectiveStarletteTestClient` that interfaces with a Perspective server over a Websocket"""
-        super(_PerspectiveStarletteTestClient, self).__init__(
-            _PerspectiveStarletteWebsocketConnection(test_client)
-        )
+        super(_PerspectiveStarletteTestClient, self).__init__(_PerspectiveStarletteWebsocketConnection(test_client))
 
 
 async def websocket(test_client: TestClient, url: str):

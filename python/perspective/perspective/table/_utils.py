@@ -14,12 +14,8 @@ from .libbinding import t_dtype
 ALIAS_REGEX = re.compile(r"//(.+)\n")
 EXPRESSION_COLUMN_NAME_REGEX = re.compile(r"\"(.*?[^\\])\"")
 STRING_LITERAL_REGEX = re.compile(r"'(.*?[^\\])'")
-FUNCTION_LITERAL_REGEX = re.compile(
-    r"(bucket|match|match_all|search|indexof)\(.*?,\s*(intern\(\'(.+)\'\)).*\)"
-)
-REPLACE_FN_REGEX = re.compile(
-    r"(replace_all|replace)\(.*?,\s*(intern\(\'(.*)\'\)),.*\)"
-)
+FUNCTION_LITERAL_REGEX = re.compile(r"(bucket|match|match_all|search|indexof)\(.*?,\s*(intern\(\'(.+)\'\)).*\)")
+REPLACE_FN_REGEX = re.compile(r"(replace_all|replace)\(.*?,\s*(intern\(\'(.*)\'\)),.*\)")
 BOOLEAN_LITERAL_REGEX = re.compile(r"([a-zA-Z_]+[a-zA-Z0-9_]*)")
 
 
@@ -108,9 +104,7 @@ def _pythontype_to_str(typestring):
     return _extract_type(typestring, mapping)
 
 
-def _replace_expression_column_name(
-    column_name_map, column_id_map, running_cidx, match_obj
-):
+def _replace_expression_column_name(column_name_map, column_id_map, running_cidx, match_obj):
     """Replace column names in the expression syntax with a column ID,
     filling the column_name_map and column_id_map."""
     column_name = match_obj.group(1)
@@ -140,9 +134,7 @@ def _replace_interned_param(match_obj):
 
     # from fn(param, intern('string'), param, param...) to
     # fn (param, 'string', ...)
-    return "{}'{}'{}".format(
-        full[0:intern_idx], value, full[intern_idx + len(intern_fn) :]
-    )
+    return "{}'{}'{}".format(full[0:intern_idx], value, full[intern_idx + len(intern_fn) :])
 
 
 def _parse_expression_strings(expressions):
@@ -190,9 +182,7 @@ def _parse_expression_strings(expressions):
 
         parsed = re.sub(
             BOOLEAN_LITERAL_REGEX,
-            lambda match: "True"
-            if match.group(0) == "true"
-            else ("False" if match.group(0) == "false" else match.group(0)),
+            lambda match: "True" if match.group(0) == "true" else ("False" if match.group(0) == "false" else match.group(0)),
             parsed,
         )
 

@@ -75,9 +75,7 @@ class PerspectiveAIOHTTPWebsocketConnection(PerspectiveWebsocketConnection):
 class PerspectiveAIOHTTPClient(PerspectiveWebsocketClient):
     def __init__(self, session=None):
         """Create a `PerspectiveAIOHTTPClient` that interfaces with a Perspective server over a Websocket"""
-        super(PerspectiveAIOHTTPClient, self).__init__(
-            PerspectiveAIOHTTPWebsocketConnection(session=session)
-        )
+        super(PerspectiveAIOHTTPClient, self).__init__(PerspectiveAIOHTTPWebsocketConnection(session=session))
 
 
 async def websocket(url, session=None):

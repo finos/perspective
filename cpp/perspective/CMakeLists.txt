@@ -112,7 +112,7 @@ elseif(PSP_PYTHON_BUILD)
     set(PSP_CPP_BUILD ON)
 
     if(NOT DEFINED PSP_PYTHON_VERSION)
-        set(PSP_PYTHON_VERSION 3.7)
+        set(PSP_PYTHON_VERSION 3.10)
     endif()
 endif()
 

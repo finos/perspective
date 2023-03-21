@@ -32,13 +32,9 @@ def make_null_mask(array):
     """
     mask = []
 
-    is_object_or_string_dtype = np.issubdtype(array.dtype, np.str_) or np.issubdtype(
-        array.dtype, np.object_
-    )
+    is_object_or_string_dtype = np.issubdtype(array.dtype, np.str_) or np.issubdtype(array.dtype, np.object_)
 
-    is_datetime_dtype = np.issubdtype(array.dtype, np.datetime64) or np.issubdtype(
-        array.dtype, np.timedelta64
-    )
+    is_datetime_dtype = np.issubdtype(array.dtype, np.datetime64) or np.issubdtype(array.dtype, np.timedelta64)
 
     for i, item in enumerate(array):
         invalid = item is None

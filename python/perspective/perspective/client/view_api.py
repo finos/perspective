@@ -108,9 +108,7 @@ class PerspectiveViewProxy(object):
         return self._async_queue("schema", "view_method", as_string=as_string)
 
     def expression_schema(self, as_string=False):
-        return self._async_queue(
-            "expression_schema", "view_method", as_string=as_string
-        )
+        return self._async_queue("expression_schema", "view_method", as_string=as_string)
 
     def on_update(self, callback, mode=None):
         return self._subscribe("on_update", "view_method", callback, mode=mode)

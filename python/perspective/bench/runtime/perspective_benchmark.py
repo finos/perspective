@@ -208,12 +208,7 @@ class PerspectiveBenchmark(Suite):
         the on update callback that forces resolution of updates across
         25 views."""
         table = Table(self._schema)
-        views = [
-            table.view(
-                group_by=["State", "City"], split_by=["Category", "Sub-Category"]
-            )
-            for i in range(25)
-        ]
+        views = [table.view(group_by=["State", "City"], split_by=["Category", "Sub-Category"]) for i in range(25)]
         for v in views:
             v.on_update(empty_callback)
         update_data = self._get_update_data(1000)
@@ -228,12 +223,7 @@ class PerspectiveBenchmark(Suite):
     def benchmark_view_two_df_updates(self):
         """Benchmark dataframe updates for two-sided views."""
         table = Table(self._df_schema)
-        views = [
-            table.view(
-                group_by=["State", "City"], split_by=["Category", "Sub-Category"]
-            )
-            for i in range(25)
-        ]
+        views = [table.view(group_by=["State", "City"], split_by=["Category", "Sub-Category"]) for i in range(25)]
         for v in views:
             v.on_update(empty_callback)
         update_data = pd.DataFrame(self._get_update_data(1000))
@@ -250,9 +240,7 @@ class PerspectiveBenchmark(Suite):
         for pivot in PerspectiveBenchmark.split_by_OPTIONS:
             if len(pivot) == 0:
                 continue
-            test_meta = make_meta(
-                "view", "two_column_only_{0}_pivot".format(len(pivot))
-            )
+            test_meta = make_meta("view", "two_column_only_{0}_pivot".format(len(pivot)))
             view_constructor = partial(self._table.view, split_by=pivot)
             func = Benchmark(lambda: view_constructor(), meta=test_meta)
             setattr(self, "view_{0}".format(test_meta["name"]), func)
@@ -293,9 +281,7 @@ class PerspectiveBenchmark(Suite):
         """Benchmark each `to_format` method."""
         for name in ("numpy", "dict", "records", "df", "arrow"):
             test_meta = make_meta("to_format", "to_{}".format(name))
-            func = Benchmark(
-                lambda: getattr(self._view, "to_{0}".format(name))(), meta=test_meta
-            )
+            func = Benchmark(lambda: getattr(self._view, "to_{0}".format(name))(), meta=test_meta)
             setattr(self, "to_format_{0}".format(name), func)
 
     def benchmark_to_format_one(self):
@@ -304,13 +290,9 @@ class PerspectiveBenchmark(Suite):
             for pivot in PerspectiveBenchmark.group_by_OPTIONS:
                 if len(pivot) == 0:
                     continue
-                test_meta = make_meta(
-                    "to_format", "to_{0}_r{1}".format(name, len(pivot))
-                )
+                test_meta = make_meta("to_format", "to_{0}_r{1}".format(name, len(pivot)))
                 view = self._table.view(group_by=pivot)
-                func = Benchmark(
-                    lambda: getattr(view, "to_{0}".format(name))(), meta=test_meta
-                )
+                func = Benchmark(lambda: getattr(view, "to_{0}".format(name))(), meta=test_meta)
                 setattr(self, "to_format_{0}".format(test_meta["name"]), func)
 
     def benchmark_to_format_two(self):
@@ -321,13 +303,9 @@ class PerspectiveBenchmark(Suite):
                 CP = PerspectiveBenchmark.split_by_OPTIONS[i]
                 if len(RP) == 0 and len(CP) == 0:
                     continue
-                test_meta = make_meta(
-                    "to_format", "to_{0}_r{1}_c{2}".format(name, len(RP), len(CP))
-                )
+                test_meta = make_meta("to_format", "to_{0}_r{1}_c{2}".format(name, len(RP), len(CP)))
                 view = self._table.view(group_by=RP, split_by=CP)
-                func = Benchmark(
-                    lambda: getattr(view, "to_{0}".format(name))(), meta=test_meta
-                )
+                func = Benchmark(lambda: getattr(view, "to_{0}".format(name))(), meta=test_meta)
                 setattr(self, "to_format_{0}".format(test_meta["name"]), func)
 
     def benchmark_to_format_two_column_only(self):
@@ -337,13 +315,9 @@ class PerspectiveBenchmark(Suite):
             for pivot in PerspectiveBenchmark.split_by_OPTIONS:
                 if len(pivot) == 0:
                     continue
-                test_meta = make_meta(
-                    "to_format", "to_{0}_c_{1}".format(name, len(pivot))
-                )
+                test_meta = make_meta("to_format", "to_{0}_c_{1}".format(name, len(pivot)))
                 view = self._table.view(split_by=pivot)
-                func = Benchmark(
-                    lambda: getattr(view, "to_{0}".format(name))(), meta=test_meta
-                )
+                func = Benchmark(lambda: getattr(view, "to_{0}".format(name))(), meta=test_meta)
                 setattr(self, "to_format_{0}".format(test_meta["name"]), func)
 
 

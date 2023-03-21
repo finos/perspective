@@ -136,14 +136,7 @@ class _PerspectiveDateValidator(object):
 
         timetuple = getattr(obj, to_timetuple)()
 
-        is_datetime_min = (
-            timetuple.tm_year == 1
-            and timetuple.tm_mon == 1
-            and timetuple.tm_mday == 1
-            and timetuple.tm_hour == 0
-            and timetuple.tm_min == 0
-            and timetuple.tm_sec == 0
-        )
+        is_datetime_min = timetuple.tm_year == 1 and timetuple.tm_mon == 1 and timetuple.tm_mday == 1 and timetuple.tm_hour == 0 and timetuple.tm_min == 0 and timetuple.tm_sec == 0
 
         if is_datetime_min:
             # Return beginning of epoch when datetime is datetime.min
@@ -176,9 +169,7 @@ class _PerspectiveDateValidator(object):
         """
         if isinstance(datestring, (bytes, bytearray)):
             datestring = datestring.decode("utf-8")
-        has_separators = bool(
-            search(r"[/. -]", datestring)
-        )  # match commonly-used date separators
+        has_separators = bool(search(r"[/. -]", datestring))  # match commonly-used date separators
         # match commonly-used date separators
 
         dtype = t_dtype.DTYPE_STR

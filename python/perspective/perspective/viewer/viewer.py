@@ -242,10 +242,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
     def save(self):
         """Get the viewer's attribute as a dictionary, symmetric with `restore`
         so that a viewer's configuration can be reproduced."""
-        return {
-            attr: getattr(self, attr)
-            for attr in PerspectiveViewer.PERSISTENT_ATTRIBUTES
-        }
+        return {attr: getattr(self, attr) for attr in PerspectiveViewer.PERSISTENT_ATTRIBUTES}
 
     def restore(self, **kwargs):
         """Restore a given set of attributes, passed as kwargs
