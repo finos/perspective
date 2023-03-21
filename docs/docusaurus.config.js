@@ -14,7 +14,12 @@ dist_examples(`${__dirname}/static/blocks`);
 const examples = fs.readdirSync("static/blocks").map((ex) => {
     const files = fs
         .readdirSync(`static/blocks/${ex}`)
-        .filter((x) => !x.startsWith("."))
+        .filter(
+            (x) =>
+                !x.startsWith(".") &&
+                !x.endsWith(".png") &&
+                !x.endsWith(".arrow")
+        )
         .map((x) => {
             return {
                 name: x,
