@@ -107,12 +107,12 @@ jobs:
                   echo "Full Run: $FULL_RUN"
                   echo "Skip Python: $SKIP_PYTHON"
                   echo "Include Windows: $INCLUDE_WINDOWS"
-                  echo "::set-output name=COMMIT_MSG::$COMMIT_MSG"
-                  echo "::set-output name=SKIP_CI::$SKIP_CI"
-                  echo "::set-output name=SKIP_CACHE::$SKIP_CACHE"
-                  echo "::set-output name=FULL_RUN::$FULL_RUN"
-                  echo "::set-output name=SKIP_PYTHON::$SKIP_PYTHON"
-                  echo "::set-output name=INCLUDE_WINDOWS::$INCLUDE_WINDOWS"
+                  echo "COMMIT_MSG=$COMMIT_MSG" >> $GITHUB_OUTPUT
+                  echo "SKIP_CI=$SKIP_CI" >> $GITHUB_OUTPUT
+                  echo "SKIP_CACHE=$SKIP_CACHE" >> $GITHUB_OUTPUT
+                  echo "FULL_RUN=$FULL_RUN" >> $GITHUB_OUTPUT
+                  echo "SKIP_PYTHON=$SKIP_PYTHON" >> $GITHUB_OUTPUT
+                  echo "INCLUDE_WINDOWS=$INCLUDE_WINDOWS" >> $GITHUB_OUTPUT
               env:
                   SKIP_CI: ${{ contains(github.event.head_commit.message, '[ci-skip]') }}
                   SKIP_CACHE: ${{ contains(github.event.head_commit.message, '[ci-skip-cache]') }}
@@ -130,12 +130,12 @@ jobs:
                   echo "Full Run: $FULL_RUN"
                   echo "Skip Python: $SKIP_PYTHON"
                   echo "Include Windows: $INCLUDE_WINDOWS"
-                  echo "::set-output name=COMMIT_MSG::$COMMIT_MSG"
-                  echo "::set-output name=SKIP_CI::$SKIP_CI"
-                  echo "::set-output name=SKIP_CACHE::$SKIP_CACHE"
-                  echo "::set-output name=FULL_RUN::$FULL_RUN"
-                  echo "::set-output name=SKIP_PYTHON::$SKIP_PYTHON"
-                  echo "::set-output name=INCLUDE_WINDOWS::$INCLUDE_WINDOWS"
+                  echo "COMMIT_MSG=$COMMIT_MSG" >> $GITHUB_OUTPUT
+                  echo "SKIP_CI=$SKIP_CI" >> $GITHUB_OUTPUT
+                  echo "SKIP_CACHE=$SKIP_CACHE" >> $GITHUB_OUTPUT
+                  echo "FULL_RUN=$FULL_RUN" >> $GITHUB_OUTPUT
+                  echo "SKIP_PYTHON=$SKIP_PYTHON" >> $GITHUB_OUTPUT
+                  echo "INCLUDE_WINDOWS=$INCLUDE_WINDOWS" >> $GITHUB_OUTPUT
               env:
                   SKIP_CI: ${{ contains(github.event.pull_request.title, '[ci-skip]') || contains(env.COMMIT_MSG, '[ci-skip]') }}
                   SKIP_CACHE: ${{ contains(github.event.pull_request.title, '[ci-skip-cache]') || contains(env.COMMIT_MSG, '[ci-skip-cache]') }}
@@ -153,12 +153,12 @@ jobs:
                   echo "Full Run: $FULL_RUN"
                   echo "Skip Python: $SKIP_PYTHON"
                   echo "Include Windows: $INCLUDE_WINDOWS"
-                  echo "::set-output name=COMMIT_MSG::$COMMIT_MSG"
-                  echo "::set-output name=SKIP_CI::$SKIP_CI"
-                  echo "::set-output name=SKIP_CACHE::$SKIP_CACHE"
-                  echo "::set-output name=FULL_RUN::$FULL_RUN"
-                  echo "::set-output name=SKIP_PYTHON::$SKIP_PYTHON"
-                  echo "::set-output name=INCLUDE_WINDOWS::$INCLUDE_WINDOWS"
+                  echo "COMMIT_MSG=$COMMIT_MSG" >> $GITHUB_OUTPUT
+                  echo "SKIP_CI=$SKIP_CI" >> $GITHUB_OUTPUT
+                  echo "SKIP_CACHE=$SKIP_CACHE" >> $GITHUB_OUTPUT
+                  echo "FULL_RUN=$FULL_RUN" >> $GITHUB_OUTPUT
+                  echo "SKIP_PYTHON=$SKIP_PYTHON" >> $GITHUB_OUTPUT
+                  echo "INCLUDE_WINDOWS=$INCLUDE_WINDOWS" >> $GITHUB_OUTPUT
               env:
                   SKIP_CI: false
                   SKIP_CACHE: ${{ github.event.inputs.ci-skip-cache }}
@@ -212,7 +212,7 @@ jobs:
             # Yarn Cache
             - name: Get yarn cache directory path
               id: yarn-cache-dir-path
-              run: echo "::set-output name=dir::$(yarn cache dir)"
+              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
               if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
 
             - name: Setup yarn cache
@@ -453,7 +453,7 @@ jobs:
             # Yarn Cache
             - name: Get yarn cache directory path
               id: yarn-cache-dir-path
-              run: echo "::set-output name=dir::$(yarn cache dir)"
+              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
               if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
 
             - name: Setup yarn cache
@@ -569,7 +569,7 @@ jobs:
             # Yarn Cache
             - name: Get yarn cache directory path
               id: yarn-cache-dir-path
-              run: echo "::set-output name=dir::$(yarn cache dir)"
+              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
               if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
 
             - name: Setup yarn cache
@@ -828,7 +828,7 @@ jobs:
             # Yarn Cache
             - name: Get yarn cache directory path
               id: yarn-cache-dir-path
-              run: echo "::set-output name=dir::$(yarn cache dir)"
+              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
               if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
 
             - name: Setup yarn cache
@@ -1111,7 +1111,7 @@ jobs:
             # Yarn Cache
             - name: Get yarn cache directory path
               id: yarn-cache-dir-path
-              run: echo "::set-output name=dir::$(yarn cache dir)"
+              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
               if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
 
             - name: Setup yarn cache
@@ -1271,7 +1271,7 @@ jobs:
             # Yarn Cache
             - name: Get yarn cache directory path
               id: yarn-cache-dir-path
-              run: echo "::set-output name=dir::$(yarn cache dir)"
+              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
               if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
 
             - name: Setup yarn cache
@@ -1404,7 +1404,7 @@ jobs:
             # Yarn Cache
             - name: Get yarn cache directory path
               id: yarn-cache-dir-path
-              run: echo "::set-output name=dir::$(yarn cache dir)"
+              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
               if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
 
             - name: Setup yarn cache
