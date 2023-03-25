@@ -35,7 +35,7 @@ export default function Block() {
     const url = useBaseUrl(`/blocks/${example}/index.html`);
 
     return (
-        <div class="header-center">
+        <div className="header-center">
             <Layout
                 title={`${siteConfig.title}`}
                 description={siteConfig.description}
