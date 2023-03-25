@@ -18,12 +18,12 @@ use crate::session::*;
 use crate::utils::ApiFuture;
 use crate::*;
 
-/// A `SortItem` includes the column name and `SortDir` arrow, a clickable
+/// A `SortColumn` includes the column name and `SortDir` arrow, a clickable
 /// button which cycles through the available `SortDir` states.
-pub struct SortItem {}
+pub struct SortColumn {}
 
 #[derive(Properties)]
-pub struct SortItemProps {
+pub struct SortColumnProps {
     pub sort: Sort,
     pub idx: usize,
     pub session: Session,
@@ -31,15 +31,15 @@ pub struct SortItemProps {
     pub dragdrop: DragDrop,
 }
 
-impl PartialEq for SortItemProps {
+impl PartialEq for SortColumnProps {
     fn eq(&self, other: &Self) -> bool {
         self.sort == other.sort && self.idx == other.idx
     }
 }
 
-derive_model!(Renderer, Session for SortItemProps);
+derive_model!(Renderer, Session for SortColumnProps);
 
-impl DragDropListItemProps for SortItemProps {
+impl DragDropListItemProps for SortColumnProps {
     type Item = Sort;
 
     fn get_item(&self) -> Sort {
@@ -47,25 +47,25 @@ impl DragDropListItemProps for SortItemProps {
     }
 }
 
-pub enum SortItemMsg {
+pub enum SortColumnMsg {
     SortDirClick(bool),
 }
 
-impl Component for SortItem {
-    type Message = SortItemMsg;
-    type Properties = SortItemProps;
+impl Component for SortColumn {
+    type Message = SortColumnMsg;
+    type Properties = SortColumnProps;
 
     fn create(_ctx: &Context<Self>) -> Self {
         Self {}
     }
 
-    fn update(&mut self, ctx: &Context<Self>, msg: SortItemMsg) -> bool {
+    fn update(&mut self, ctx: &Context<Self>, msg: SortColumnMsg) -> bool {
         match msg {
-            SortItemMsg::SortDirClick(shift_key) => {
+            SortColumnMsg::SortDirClick(shift_key) => {
                 let is_split = ctx.props().session.get_view_config().split_by.is_empty();
                 let mut sort = ctx.props().session.get_view_config().sort.clone();
-                let sort_item = &mut sort.get_mut(ctx.props().idx).expect("Sort on no column");
-                sort_item.1 = sort_item.1.cycle(!is_split, shift_key);
+                let sort_column = &mut sort.get_mut(ctx.props().idx).expect("Sort on no column");
+                sort_column.1 = sort_column.1.cycle(!is_split, shift_key);
                 let update = ViewConfigUpdate {
                     sort: Some(sort),
                     ..ViewConfigUpdate::default()
@@ -79,7 +79,7 @@ impl Component for SortItem {
     fn view(&self, ctx: &Context<Self>) -> Html {
         let onclick = ctx
             .link()
-            .callback(|event: MouseEvent| SortItemMsg::SortDirClick(event.shift_key()));
+            .callback(|event: MouseEvent| SortColumnMsg::SortDirClick(event.shift_key()));
 
         let dragstart = Callback::from({
             let event_name = ctx.props().sort.0.to_owned();

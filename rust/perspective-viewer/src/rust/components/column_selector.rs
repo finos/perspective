@@ -9,22 +9,29 @@
 mod active_column;
 mod add_expression_button;
 mod aggregate_selector;
+mod config_selector;
+mod empty_column;
 mod expression_toolbar;
+mod filter_column;
 mod inactive_column;
+mod pivot_column;
+mod sort_column;
 
 use std::iter::*;
 use std::rc::Rc;
 
+pub use empty_column::*;
 use web_sys::*;
 use yew::prelude::*;
 
 use self::active_column::*;
 use self::add_expression_button::AddExpressionButton;
+use self::config_selector::ConfigSelector;
 use self::inactive_column::*;
-use super::config_selector::ConfigSelector;
 use super::containers::scroll_panel::*;
 use super::containers::split_panel::{Orientation, SplitPanel};
 use super::style::LocalStyle;
+use crate::custom_elements::ColumnDropDownElement;
 use crate::dragdrop::*;
 use crate::model::*;
 use crate::renderer::*;
@@ -71,6 +78,7 @@ pub struct ColumnSelector {
     _subscriptions: [Subscription; 5],
     named_row_count: usize,
     drag_container: DragDropContainer,
+    column_dropdown: ColumnDropDownElement,
 }
 
 impl Component for ColumnSelector {
@@ -111,16 +119,17 @@ impl Component for ColumnSelector {
         };
 
         let named_row_count = named.unwrap_or_default();
-
         let drag_container = DragDropContainer::new(|| {}, {
             let link = ctx.link().clone();
             move || link.send_message(ColumnSelectorMsg::HoverActiveIndex(None))
         });
 
+        let column_dropdown = ColumnDropDownElement::new(ctx.props().session.clone());
         Self {
             _subscriptions: [table_sub, view_sub, drop_sub, drag_sub, dragend_sub],
             named_row_count,
             drag_container,
+            column_dropdown,
         }
     }
 
@@ -233,7 +242,8 @@ impl Component for ColumnSelector {
                     dragdrop={ &ctx.props().dragdrop }
                     session={ &ctx.props().session }
                     renderer={ &ctx.props().renderer }
-                    ondragenter={ ctx.link().callback(|()| ColumnSelectorMsg::ViewCreated)}>
+                    onselect={ onselect.clone() }
+                    ondragenter={ ctx.link().callback(|()| ViewCreated)}>
                 </ConfigSelector>
             </ScrollPanelItem>
         };
@@ -247,12 +257,14 @@ impl Component for ColumnSelector {
                 let size = if named_count > 0 { 48.0 } else { 28.0 };
                 named_count = named_count.saturating_sub(1);
                 let key = format!("{}", name);
+                let column_dropdown = self.column_dropdown.clone();
                 html_nested! {
                     <ScrollPanelItem key={ key } { size }>
                         <ActiveColumn
                             { idx }
                             { name }
                             { is_aggregated }
+                            { column_dropdown }
                             dragdrop={ &ctx.props().dragdrop }
                             session={ &ctx.props().session }
                             renderer={ &ctx.props().renderer }

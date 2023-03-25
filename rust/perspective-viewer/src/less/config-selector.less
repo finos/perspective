@@ -81,7 +81,7 @@
                 }
 
                 .input-sizer {
-                    flex: 1 1 auto;
+                    flex: 1 100000 auto;
                 }
             }
 
@@ -97,10 +97,6 @@
                 display: flex;
                 align-items: stretch;
                 cursor: move;
-            }
-
-            &.column-empty .pivot-column-draggable {
-                cursor: auto;
             }
 
             &:not(.column-empty) .pivot-column-border:before {
@@ -126,15 +122,6 @@
                 text-overflow: ellipsis;
                 // max-width: 250px;
                 overflow: hidden;
-            }
-
-            &.column-empty .pivot-column-draggable {
-                background-color: #8b868045;
-                border: 1px solid transparent;
-                padding-bottom: 0px;
-                margin-bottom: 4px;
-                min-height: 24px;
-                width: calc(100% - 7px);
             }
 
             // Column is being dragged-over, e.g. this is the drop indicator.
@@ -287,16 +274,21 @@
 
         #transpose_button {
             cursor: pointer;
-            min-width: 5px;
-            max-width: 5px;
             flex-grow: 0;
-            font-family: Arial;
-            font-size: 12px;
+            font-family: inherit;
+            font-size: 9px;
             user-select: none;
-            padding: 12px 24px 0 0;
+            padding: 0;
+            align-self: center;
+            margin-bottom: -23px;
+            margin-top: 11.5px;
+            align-self: flex-end;
+            z-index: 1;
+            min-height: 0px;
+            margin-right: 30px;
 
             &:hover:before {
-                color: var(--active--color, inherit);
+                color: var(--icon--color, inherit);
             }
 
             &:before {

@@ -6,6 +6,7 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+mod column_dropdown;
 pub mod copy_dropdown;
 pub mod date_column_style;
 pub mod datetime_column_style;
@@ -19,5 +20,6 @@ pub mod number_column_style;
 pub mod string_column_style;
 pub mod viewer;
 
+pub use self::column_dropdown::*;
 pub use self::filter_dropdown::*;
 pub use self::function_dropdown::*;

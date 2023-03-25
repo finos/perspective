@@ -1,0 +1,84 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+@mixin icon {
+    background-repeat: no-repeat;
+    background-color: var(--icon--color);
+    content: "";
+    display: inline-block;
+    -webkit-mask-size: cover;
+    mask-size: cover;
+}
+
+:host {
+    box-sizing: border-box;
+    position: fixed;
+    z-index: 10000;
+    outline: none;
+    font-size: 12px;
+    border: inherit;
+    // box-shadow: 0 2px 4px 0 rgb(0 0 0 / 10%);
+    user-select: none;
+    background-color: var(--icon--color, #fff) !important;
+    color: var(--plugin--background, #333) !important;
+    // padding: 6px 8px;
+    border: 1px solid var(--icon--color) !important;
+    max-width: 300px;
+    overflow: hidden;
+    max-height: 600px;
+    overflow: scroll;
+
+    display: flex;
+    flex-direction: column;
+
+    .selected {
+        background-color: var(--plugin--background) !important;
+        color: var(--icon--color) !important;
+    }
+
+    span {
+        cursor: pointer;
+        padding: 4px 5px;
+    }
+
+    .no-results {
+        padding: 3px 24px 6px 11px;
+        color: var(--error--color);
+        font-size: 8px;
+    }
+
+    #add-expression {
+        &:before {
+            @include icon;
+            width: 14px;
+            height: 12px;
+            margin-right: 5px;
+            -webkit-mask-image: var(--add-expression-icon--mask-image);
+            mask-image: var(--add-expression-icon--mask-image);
+        }
+    }
+}
+
+:host(:hover) {
+    .selected {
+        background-color: var(--icon--color, #fff) !important;
+        color: var(--plugin--background, #333) !important;
+        }
+
+    span:hover,
+    span.selected:hover {
+        background-color: var(--plugin--background) !important;
+        color: var(--icon--color) !important;
+    }
+}
+
+:host(.no-results) {
+    background-color:transparent!important;
+    border:none!important;
+}

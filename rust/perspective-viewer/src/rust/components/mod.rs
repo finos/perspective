@@ -10,8 +10,8 @@
 //! necessary for public Custom Elements.  The rest are internal components of
 //! these 4.
 
+pub mod column_dropdown;
 mod column_selector;
-mod config_selector;
 mod containers;
 mod copy_dropdown;
 pub mod datetime_column_style;
@@ -34,6 +34,7 @@ mod viewer;
 #[cfg(test)]
 mod tests;
 
+pub use self::column_selector::InPlaceColumn;
 pub use self::copy_dropdown::*;
 pub use self::modal::*;
 pub use self::style::*;
