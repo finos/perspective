@@ -13,12 +13,12 @@ let server;
 let port;
 
 describe("WebSocketManager", function () {
-    beforeAll(() => {
+    beforeEach(() => {
         server = new perspective.WebSocketServer({ port: 0 });
         port = server._server.address().port;
     });
 
-    afterAll(() => {
+    afterEach(() => {
         server.close();
     });
 
@@ -225,5 +225,17 @@ describe("WebSocketManager", function () {
 
             client_table.update(arrow, { port_id: update_port });
         })();
+    });
+
+    it("disables ping loop on disconnect", async () => {
+        const data = [{ x: 1 }];
+        const table = await perspective.table(data);
+        server.host_table("test", table);
+        const client = perspective.websocket(`ws://localhost:${port}`);
+        const _client_table = await client.open_table("test");
+        expect(await _client_table.size()).toEqual(1);
+        expect(client._ping_loop).toBeDefined();
+        await server.close();
+        expect(client._ping_loop).toBeUndefined();
     });
 });
