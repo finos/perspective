@@ -7,27 +7,28 @@
  *
  */
 
-import {
-    WebSocketManager,
-    perspective_assets,
-    Table,
-} from "@finos/perspective";
+import { WebSocketManager, perspective_assets } from "@finos/perspective";
 import path from "path";
 import express from "express";
 import expressWs from "express-ws";
-import { AddressInfo } from "net";
+import { securities } from "../../datasources/index.js";
 
-// @ts-ignore
-import { securities } from "../../datasources";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+console.log(path.resolve(__dirname, "../dist"));
 
 const app = expressWs(express()).app;
 
 const manager = new WebSocketManager();
-securities().then((table: Table) => manager.host_table("remote_table", table));
+securities().then((table) => manager.host_table("remote_table", table));
 
 app.ws("/subscribe", (ws) => manager.add_connection(ws));
-app.use("/", perspective_assets([path.resolve(__dirname, "../assets")], true));
+app.use("/", perspective_assets([path.resolve(__dirname, "../dist")], true));
 
 const server = app.listen(8080, () =>
-    console.log(`Listening on port ${(server.address() as AddressInfo).port}`)
+    console.log(`Listening on port ${server.address().port}`)
 );
