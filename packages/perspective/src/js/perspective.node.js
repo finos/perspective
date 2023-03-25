@@ -12,6 +12,7 @@ const { Server } = require("./api/server.js");
 const { WebSocketManager } = require("./websocket/manager");
 const { WebSocketClient } = require("./websocket/client");
 const { get_config, get_type_config } = require("./config/index.js");
+const stoppable = require("stoppable");
 
 const perspective = require("./perspective.js").default;
 
@@ -204,7 +205,9 @@ class WebSocketServer extends WebSocketManager {
         assets = assets || ["./"];
 
         // Serve Perspective files through HTTP
-        this._server = http.createServer(perspective_assets(assets, host_psp));
+        this._server = stoppable(
+            http.createServer(perspective_assets(assets, host_psp))
+        );
 
         // Serve Worker API through WebSockets
         this._wss = new WebSocket.Server({
@@ -230,9 +233,9 @@ class WebSocketServer extends WebSocketManager {
         });
     }
 
-    close() {
+    async close() {
         super.clear();
-        this._server.close();
+        await new Promise((x) => this._server.stop(x));
     }
 }
 
