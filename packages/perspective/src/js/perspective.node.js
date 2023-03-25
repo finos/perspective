@@ -94,9 +94,9 @@ module.exports.sync_module = async () => {
 };
 
 const DEFAULT_ASSETS = [
+    "../../../../tools/perspective-bench/dist",
     "@finos/perspective-test",
     "@finos/perspective/dist/cdn",
-    "@finos/perspective-bench/dist",
     "@finos/perspective-workspace/dist/cdn",
     "@finos/perspective-workspace/dist/css",
     "@finos/perspective-viewer/dist/cdn",

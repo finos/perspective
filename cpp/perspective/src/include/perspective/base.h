@@ -442,7 +442,11 @@ struct t_cchar_umap_cmp
 struct t_cchar_umap_hash {
     inline t_uindex
     operator()(const char* s) const {
-        return boost::hash_range(s, s + std::strlen(s));
+        size_t h = 5381;
+        int c;
+        while ((c = *s++))
+            h = ((h << 5) + h) + c;
+        return h;
     }
 };
 

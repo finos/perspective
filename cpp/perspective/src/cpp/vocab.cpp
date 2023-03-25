@@ -73,9 +73,9 @@ t_vocab::get_interned(const char* s) {
     t_sidxmap::iterator iter = m_map.find(s);
 
     t_uindex idx, bidx, eidx;
-    t_uindex len = strlen(s) + 1;
 
     if (iter == m_map.end()) {
+        t_uindex len = strlen(s) + 1;
         idx = genidx();
 
         bidx = m_vlendata->size();
