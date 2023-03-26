@@ -1,4 +1,4 @@
-/******************************************************************************
+/*
  *
  * Copyright (c) 2017, the Perspective Authors.
  *
@@ -28,38 +28,15 @@ const TICK_RATE = 20;
 // Size limit of the server-side table
 const TABLE_SIZE = 10000;
 
-const SECURITIES = [
-    "AAPL.N",
-    "AMZN.N",
-    "QQQ.N",
-    "NVDA.N",
-    "TSLA.N",
-    "FB.N",
-    "MSFT.N",
-    "TLT.N",
-    "XIV.N",
-    "YY.N",
-    "CSCO.N",
-    "GOOGL.N",
-    "PCLN.N",
-];
-const CLIENTS = [
-    "Homer",
-    "Marge",
-    "Bart",
-    "Lisa",
-    "Maggie",
-    "Moe",
-    "Lenny",
-    "Carl",
-    "Krusty",
-];
+const SECURITIES = ["AAPL.N", "AMZN.N", "QQQ.N", "NVDA.N", "TSLA.N", "FB.N", "MSFT.N", "TLT.N", "XIV.N", "YY.N", "CSCO.N", "GOOGL.N", "PCLN.N",];
+
+const CLIENTS = ["Homer", "Marge", "Bart", "Lisa", "Maggie", "Moe", "Lenny", "Carl", "Krusty",];
 
 const __CACHE__ = [];
 
 perspective.initialize_profile_thread();
 
-/*******************************************************************************
+/*
  *
  * Slow mode (new rows generated on the fly)
  */
@@ -69,9 +46,9 @@ function choose(choices) {
 }
 
 function newRows(total_rows) {
-    const rows = [];
+    const rows = new Array(total_rows);
     for (let x = 0; x < total_rows; x++) {
-        rows.push({
+        rows[x] = {
             name: choose(SECURITIES),
             client: choose(CLIENTS),
             lastUpdate: new Date(),
@@ -79,7 +56,7 @@ function newRows(total_rows) {
             bid: Math.random() * 10 + 90,
             ask: Math.random() * 10 + 100,
             vol: Math.random() * 10 + 100,
-        });
+        };
     }
     return rows;
 }
@@ -95,13 +72,14 @@ async function init_dynamic({ table_size, update_size, tick_rate }) {
 
     // Loop and update the `table` oocasionally.
     (function postRow() {
-        table.update(newRows(update_size));
+        const new_data = newRows(update_size);
+        table.update(new_data);
         setTimeout(postRow, tick_rate);
     })();
     return table;
 }
 
-/*******************************************************************************
+/*
  *
  * Fast mode (rows pre-generated, cached as Arrows)
  */
@@ -124,12 +102,16 @@ async function populate_cache(cache_entries) {
 
 async function init_cached({ table_size, tick_rate, cache_entries }) {
     await populate_cache(cache_entries);
-    const table = await worker.table(newRows(table_size), {
-        limit: table_size,
-    });
+    const cache_tables = await Promise.all(__CACHE__.map(async (arrow) => {
+        const table = await worker.table(arrow);
+        const view = await table.view();
+        return view.to_json();
+    }));
+    const table = await worker.table(cache_tables, {index: 'lastUpdate'});
+    let index = 0;
     (function postRow() {
-        const entry = __CACHE__[Math.floor(Math.random() * __CACHE__.length)];
-        table.update(entry);
+        table.update(cache_tables[index]);
+        index = (index + 1) % cache_entries;
         setTimeout(postRow, tick_rate);
     })();
     return table;
