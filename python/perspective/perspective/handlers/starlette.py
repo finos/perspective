@@ -6,6 +6,7 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
+from starlette.websockets import WebSocketDisconnect
 from .common import PerspectiveHandlerBase
 
 
@@ -44,10 +45,14 @@ class PerspectiveStarletteHandler(PerspectiveHandlerBase):
             self.on_close()
 
     async def write_message(self, message: str, binary: bool = False) -> None:
-        if binary:
-            await self._websocket.send_bytes(message)
-        else:
-            await self._websocket.send_text(message)
+        try:
+            if binary:
+                await self._websocket.send_bytes(message)
+            else:
+                await self._websocket.send_text(message)
+        except WebSocketDisconnect:
+            # ignore error
+            ...
 
     # Use common docstring
     __init__.__doc__ = PerspectiveHandlerBase.__init__.__doc__

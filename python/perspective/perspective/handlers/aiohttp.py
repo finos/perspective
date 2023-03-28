@@ -6,7 +6,7 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-from aiohttp import web, WSMsgType
+from aiohttp import web, WSMsgType, WebSocketError
 
 from .common import PerspectiveHandlerBase
 
@@ -48,10 +48,14 @@ class PerspectiveAIOHTTPHandler(PerspectiveHandlerBase):
             self.on_close()
 
     async def write_message(self, message: str, binary: bool = False) -> None:
-        if binary:
-            await self._ws.send_bytes(message)
-        else:
-            await self._ws.send_str(message)
+        try:
+            if binary:
+                await self._ws.send_bytes(message)
+            else:
+                await self._ws.send_str(message)
+        except WebSocketError:
+            # Ignore error
+            ...
 
     # Use common docstring
     __init__.__doc__ = PerspectiveHandlerBase.__init__.__doc__
