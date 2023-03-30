@@ -12,24 +12,24 @@ import { labelFunction } from "../axis/axisLabel";
 
 export function heatmapData(settings, data) {
     const labelfn = labelFunction(settings);
-    const mainType = axisType(settings)
+    const crossType = axisType(settings)
         .excludeType(AXIS_TYPES.linear)
         .settingName("splitValues")();
 
     const heatmapData = [];
 
     data.forEach((col, i) => {
-        const crossValue = labelfn(col, i);
+        const mainValue = labelfn(col, i);
         Object.keys(col)
             .filter((key) => key !== "__ROW_PATH__")
             .forEach((key) => {
-                const mainValue = getMainValues(key);
+                const crossValue = getCrossValues(key);
                 heatmapData.push({
-                    crossValue: crossValue,
-                    mainValue:
-                        mainType === AXIS_TYPES.time
-                            ? new Date(mainValue)
-                            : mainValue,
+                    mainValue: mainValue,
+                    crossValue:
+                        crossType === AXIS_TYPES.time
+                            ? new Date(crossValue)
+                            : crossValue,
                     colorValue: col[key],
                     row: col,
                 });
@@ -39,7 +39,7 @@ export function heatmapData(settings, data) {
     return heatmapData;
 }
 
-function getMainValues(key) {
+function getCrossValues(key) {
     // Key format is based on "Split By" values plus the value label at the end
     // val1|val2|....|label
     const labels = key.split("|");

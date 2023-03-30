@@ -28,16 +28,20 @@ function heatmapChart(container, settings) {
 
     const xAxis = axisFactory(settings)
         .excludeType(AXIS_TYPES.linear)
-        .settingName("crossValues")
-        .valueName("crossValue")(data);
-
-    const yAxis = axisFactory(settings)
-        .excludeType(AXIS_TYPES.linear)
         .settingName("splitValues")
-        .valueName("mainValue")
+        .valueName("crossValue")
         .modifyDomain((d) => {
             let is_number = !isNaN(d[0]);
             return is_number ? d.reverse() : d;
+        })(data);
+
+    const yAxis = axisFactory(settings)
+        .excludeType(AXIS_TYPES.linear)
+        .settingName("crossValues")
+        .valueName("mainValue")
+        .modifyDomain((d) => {
+            let is_number = typeof d[0];
+            return is_number === 'number' || is_number === 'string' ? d : d.reverse();
         })
         .orient("vertical")(data);
 
