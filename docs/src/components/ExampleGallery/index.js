@@ -28,6 +28,7 @@ export default function ExampleGallery(props) {
                         className={clsx(
                             overlayVisible >= 0 ? styles.dimmed : undefined
                         )}
+                        alt={config.description}
                         src={useBaseUrl(`/features/feature_${i}${color}.png`)}
                         key={i}
                         onClick={clickCallback}

@@ -115,6 +115,7 @@ export function PerspectiveViewerDemo() {
                 </span>
                 <input
                     id="velocity"
+                    aria-label="Demo update rate in messages per second"
                     type="range"
                     className={clsx(styles.freqSlider)}
                     defaultValue={Math.round((freq - 190) * (5 / -9))}
