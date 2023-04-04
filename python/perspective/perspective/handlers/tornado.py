@@ -7,7 +7,7 @@
 #
 
 import asyncio
-from tornado.websocket import WebSocketHandler
+from tornado.websocket import WebSocketHandler, WebSocketClosedError
 
 from .common import PerspectiveHandlerBase
 
@@ -42,10 +42,18 @@ class PerspectiveTornadoHandler(PerspectiveHandlerBase, WebSocketHandler):
         WebSocketHandler.__init__(self, *args)
 
     def on_message(self, *args, **kwargs):
-        return asyncio.ensure_future(PerspectiveHandlerBase.on_message(self, *args, **kwargs))
+        try:
+            return asyncio.ensure_future(PerspectiveHandlerBase.on_message(self, *args, **kwargs))
+        except (WebSocketClosedError, KeyboardInterrupt):
+            # ignore error
+            self.on_close()
 
     async def write_message(self, message: str, binary: bool = False) -> None:
-        return WebSocketHandler.write_message(self, message=message, binary=binary)
+        try:
+            return WebSocketHandler.write_message(self, message=message, binary=binary)
+        except WebSocketClosedError:
+            # ignore error
+            self.on_close()
 
     # Use common docstring
     __init__.__doc__ = PerspectiveHandlerBase.__init__.__doc__
