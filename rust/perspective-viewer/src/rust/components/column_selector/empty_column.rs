@@ -8,7 +8,6 @@
 
 use std::collections::HashSet;
 
-use gloo::utils::document;
 use web_sys::*;
 use yew::prelude::*;
 

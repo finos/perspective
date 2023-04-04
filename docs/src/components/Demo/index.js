@@ -111,7 +111,7 @@ export function PerspectiveViewerDemo() {
                 <span>
                     {freq >= 189
                         ? "paused"
-                        : `${((1000 / freq) * 3).toFixed(0)} msg/s`}
+                        : `${((1000 / freq) * 10).toFixed(0)} msg/s`}
                 </span>
                 <input
                     id="velocity"
@@ -130,7 +130,12 @@ function update(table) {
     if (!REALTIME_PAUSED && FREQ <= 189.9) {
         var viewport_height = document.documentElement.clientHeight;
         if (viewport_height - window.scrollY > 0) {
-            table.update([random_row(), random_row(), random_row()]);
+            let arr = new Array(10);
+            for (let i = 0; i < 10; i++) {
+                arr[i] = random_row();
+            }
+
+            table.update(arr);
         }
     }
 

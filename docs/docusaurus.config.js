@@ -118,6 +118,11 @@ const config = {
                         label: "Examples",
                     },
                     {
+                        href: "https://www.prospective.co/blog",
+                        label: "Blog",
+                        position: "right",
+                    },
+                    {
                         href: "https://github.com/finos/perspective",
                         label: "GitHub",
                         position: "right",
@@ -149,6 +154,11 @@ const config = {
                             {
                                 label: "FINOS",
                                 to: "https://finos.org",
+                            },
+                            {
+                                href: "https://www.prospective.co/blog",
+                                label: "Blog",
+                                position: "right",
                             },
                         ],
                     },

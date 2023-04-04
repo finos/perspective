@@ -55,7 +55,7 @@ export default function Home() {
     }
 
     return (
-        <div class="header-center header-shift">
+        <div className="header-center header-shift">
             <Layout
                 title={`${siteConfig.title}`}
                 description={siteConfig.description}
