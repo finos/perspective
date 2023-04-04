@@ -213,6 +213,7 @@ jobs:
             - name: Get yarn cache directory path
               id: yarn-cache-dir-path
               run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+              shell: bash
               if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
 
             - name: Setup yarn cache
@@ -454,6 +455,7 @@ jobs:
             - name: Get yarn cache directory path
               id: yarn-cache-dir-path
               run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+              shell: bash
               if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
 
             - name: Setup yarn cache
@@ -570,6 +572,7 @@ jobs:
             - name: Get yarn cache directory path
               id: yarn-cache-dir-path
               run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+              shell: bash
               if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
 
             - name: Setup yarn cache
@@ -829,6 +832,7 @@ jobs:
             - name: Get yarn cache directory path
               id: yarn-cache-dir-path
               run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+              shell: bash
               if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
 
             - name: Setup yarn cache
@@ -1112,6 +1116,7 @@ jobs:
             - name: Get yarn cache directory path
               id: yarn-cache-dir-path
               run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+              shell: bash
               if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
 
             - name: Setup yarn cache
@@ -1272,6 +1277,7 @@ jobs:
             - name: Get yarn cache directory path
               id: yarn-cache-dir-path
               run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+              shell: bash
               if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
 
             - name: Setup yarn cache
@@ -1405,6 +1411,7 @@ jobs:
             - name: Get yarn cache directory path
               id: yarn-cache-dir-path
               run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+              shell: bash
               if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
 
             - name: Setup yarn cache
