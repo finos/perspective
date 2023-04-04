@@ -1,10 +1,10 @@
 {
-    "name": "remote-express",
+    "name": "esbuild-remote",
     "private": true,
     "version": "1.9.4",
     "description": "An example of 2 Perspectives, one client and one server, streaming via Apache Arrow.",
     "scripts": {
-        "start": "tsc && node dist/server.js"
+        "start": "node build.js && node server/index.mjs"
     },
     "keywords": [],
     "license": "Apache-2.0",
@@ -17,7 +17,7 @@
         "express-ws": "^5.0.2"
     },
     "devDependencies": {
-        "@types/express": "^4.17.3",
-        "@types/express-ws": "^3.0.0"
+        "@finos/perspective-esbuild-plugin": "^1.9.4",
+        "esbuild": "^0.14.54"
     }
 }

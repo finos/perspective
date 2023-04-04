@@ -74,7 +74,7 @@ export default function Home() {
     const gists = get_examples(siteConfig.baseUrl);
 
     return (
-        <div class="header-center">
+        <div className="header-center">
             <Layout
                 title={`${siteConfig.title}`}
                 description={siteConfig.description}

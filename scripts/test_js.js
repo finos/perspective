@@ -43,6 +43,10 @@ if (getarg("--debug")) {
     );
 }
 
+if (getarg("--runInBand")) {
+    console.log("-- Running tests in single-threaded mode.");
+}
+
 function silent(x) {
     return bash`output=$(${x}); ret=$?; echo "\${output}"; exit $ret`;
 }
@@ -62,6 +66,7 @@ function jest_all() {
         --color
         ${getarg("--bail") && "--bail"}
         ${getarg("--debug") || "--silent 2>&1 --noStackTrace"} 
+        ${getarg("--runInBand") && "--runInBand"} 
         --testNamePattern="${get_regex()}"`;
 }
 

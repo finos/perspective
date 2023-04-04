@@ -84,7 +84,7 @@ impl DragContext<ConfigSelectorMsg> for GroupByContext {
         ConfigSelectorMsg::DragLeave(DragTarget::GroupBy)
     }
 
-    fn new(col: InPlaceColumn) -> ConfigSelectorMsg {
+    fn create(col: InPlaceColumn) -> ConfigSelectorMsg {
         ConfigSelectorMsg::New(DragTarget::GroupBy, col)
     }
 }
@@ -102,7 +102,7 @@ impl DragContext<ConfigSelectorMsg> for SplitByContext {
         ConfigSelectorMsg::DragLeave(DragTarget::SplitBy)
     }
 
-    fn new(col: InPlaceColumn) -> ConfigSelectorMsg {
+    fn create(col: InPlaceColumn) -> ConfigSelectorMsg {
         ConfigSelectorMsg::New(DragTarget::SplitBy, col)
     }
 }
@@ -120,7 +120,7 @@ impl DragContext<ConfigSelectorMsg> for SortDragContext {
         ConfigSelectorMsg::DragLeave(DragTarget::Sort)
     }
 
-    fn new(col: InPlaceColumn) -> ConfigSelectorMsg {
+    fn create(col: InPlaceColumn) -> ConfigSelectorMsg {
         ConfigSelectorMsg::New(DragTarget::Sort, col)
     }
 }
@@ -138,7 +138,7 @@ impl DragContext<ConfigSelectorMsg> for FilterDragContext {
         ConfigSelectorMsg::DragLeave(DragTarget::Filter)
     }
 
-    fn new(col: InPlaceColumn) -> ConfigSelectorMsg {
+    fn create(col: InPlaceColumn) -> ConfigSelectorMsg {
         ConfigSelectorMsg::New(DragTarget::Filter, col)
     }
 }

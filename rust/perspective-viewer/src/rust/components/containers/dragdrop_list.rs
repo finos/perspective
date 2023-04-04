@@ -29,7 +29,7 @@ pub trait DragContext<T> {
     fn close(index: usize) -> T;
     fn dragleave() -> T;
     fn dragenter(index: usize) -> T;
-    fn new(col: InPlaceColumn) -> T;
+    fn create(col: InPlaceColumn) -> T;
 }
 
 #[derive(Properties, Derivative)]
@@ -273,7 +273,7 @@ where
 
         let column_dropdown = ctx.props().column_dropdown.clone();
         let exclude = ctx.props().exclude.clone();
-        let on_select = ctx.props().parent.callback(V::new);
+        let on_select = ctx.props().parent.callback(V::create);
         html! {
             <div ref={ &self.elem } class="rrow">
                 <div

@@ -12,15 +12,20 @@ import { LAYOUTS } from "./layouts.js";
 import styles from "./styles.module.css";
 
 const WORKER = perspective.shared_worker();
+const IS_ROTATE = false;
 
 let TABLE,
     VIEWER,
     FREQ = 100,
     REALTIME_PAUSED = true;
 
+let total = 0;
+let id = "sparkgrid";
+let globalUseSelected;
+
 async function lazy_load(colorMode, viewer) {
     if (TABLE === undefined) {
-        TABLE = await start_streaming();
+        TABLE = await start_streaming(viewer);
     }
 
     if (VIEWER !== undefined && VIEWER !== viewer) {
@@ -33,7 +38,7 @@ async function lazy_load(colorMode, viewer) {
         VIEWER.load(TABLE);
     }
 
-    select(viewer, "sparkgrid", {
+    select(viewer, id, {
         theme: colorMode === "dark" ? "Pro Dark" : "Pro Light",
     });
 }
@@ -57,11 +62,13 @@ function LayoutButton(props) {
 
 export function PerspectiveViewerDemo() {
     const { colorMode } = useColorMode();
-    const [selected, setSelected] = useState("sparkgrid");
+    const [selected, setSelected] = useState(id);
     const [freq, setFreq] = useState(FREQ);
     const viewerRef = useRef();
+    globalUseSelected = setSelected;
     const hoverCallback = useCallback(
         (event) => {
+            total = 0;
             setSelected(event.target.getAttribute("id"));
             select(viewerRef.current, `${event.target.getAttribute("id")}`);
         },
@@ -111,7 +118,7 @@ export function PerspectiveViewerDemo() {
                 <span>
                     {freq >= 189
                         ? "paused"
-                        : `${((1000 / freq) * 3).toFixed(0)} msg/s`}
+                        : `${((1000 / freq) * 10).toFixed(0)} msg/s`}
                 </span>
                 <input
                     id="velocity"
@@ -126,22 +133,37 @@ export function PerspectiveViewerDemo() {
     );
 }
 
-function update(table) {
+function update(table, viewer) {
     if (!REALTIME_PAUSED && FREQ <= 189.9) {
         var viewport_height = document.documentElement.clientHeight;
         if (viewport_height - window.scrollY > 0) {
-            table.update([random_row(), random_row(), random_row()]);
+            let arr = new Array(10);
+            for (let i = 0; i < 10; i++) {
+                arr[i] = random_row();
+            }
+
+            table.update(arr);
         }
     }
 
-    setTimeout(() => update(table), FREQ);
+    total += FREQ;
+    if (total > 5000 && IS_ROTATE) {
+        total = 0;
+        const keys = Object.keys(LAYOUTS);
+        const key = keys[(keys.indexOf(id) + 1) % keys.length];
+        globalUseSelected(key);
+        select(viewer, key);
+    }
+
+    setTimeout(() => update(table, viewer), FREQ);
 }
 
-function select(viewer, id, extra = {}) {
+function select(viewer, _id, extra = {}) {
+    id = _id;
     viewer.restore({ ...LAYOUTS[id], ...extra });
 }
 
-async function start_streaming() {
+async function start_streaming(viewer) {
     var data = [];
     for (var x = 0; x < 1000; x++) {
         data.push(random_row());
@@ -150,7 +172,7 @@ async function start_streaming() {
     var tbl = WORKER.table(data, { index: "id" });
     setTimeout(async function () {
         let table = await tbl;
-        update(table, 0);
+        update(table, viewer);
     });
 
     return tbl;

@@ -30,7 +30,7 @@ export function toggle_scroll_lock(force = undefined) {
     }
 
     this._is_scroll_lock = force;
-    this.classList.toggle("sub-cell-scroll-disabled", !force);
+    this.classList.toggle("sub-cell-scroll-disabled", force);
     if (this._scroll_lock !== undefined) {
         this._scroll_lock.classList.toggle("lock-scroll", force);
         if (!force) {

@@ -1,6 +1,6 @@
 .heroBannerViewer {
-    width: 900px;
-    height: 550px;
+    width: 1000px;
+    height: 600px;
     margin-top: 24px;
     margin-bottom: 48px;
 }
@@ -41,7 +41,7 @@
 
 .timecontrols span {
     text-align: end;
-    width: 70px;
+    width: 80px;
     font-family: "Roboto Mono";
     opacity: 0.5;
     font-size: 12px;

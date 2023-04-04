@@ -1,5 +1,6 @@
 const LOCAL_EXAMPLES = [
     "fractal",
+    "market",
     "raycasting",
     "evictions",
     "streaming",
