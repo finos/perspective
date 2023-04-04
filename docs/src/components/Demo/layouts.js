@@ -1,6 +1,7 @@
 export const LAYOUTS = {
     sparkgrid: {
         plugin: "Datagrid",
+        title: "Market Monitor",
         plugin_config: {
             columns: {
                 chg: { bg_gradient: 16.5, number_bg_mode: "gradient" },
@@ -24,6 +25,7 @@ export const LAYOUTS = {
     },
     datagrid: {
         plugin: "datagrid",
+        title: "Blotter",
         columns: ["ask", "bid", "chg"],
         sort: [
             ["name", "desc"],
@@ -35,6 +37,7 @@ export const LAYOUTS = {
         plugin_config: {},
     },
     "x bar": {
+        title: "Px (Δ)",
         columns: ["chg"],
         plugin: "X Bar",
         sort: [["chg", "asc"]],
@@ -42,6 +45,7 @@ export const LAYOUTS = {
         split_by: ["client"],
     },
     "y line": {
+        title: "Time Series (Px)",
         plugin: "Y Line",
         group_by: ["lastUpdate"],
         split_by: [],
@@ -51,6 +55,7 @@ export const LAYOUTS = {
         aggregates: { bid: "avg", chg: "avg", name: "last" },
     },
     "xy scatter": {
+        title: "Spread Scatter",
         plugin: "X/Y Scatter",
         group_by: ["name"],
         split_by: [],
@@ -60,9 +65,10 @@ export const LAYOUTS = {
     },
     treemap: {
         plugin: "Treemap",
+        title: "Volume Map",
         group_by: ["name", "client"],
         split_by: [],
-        columns: ["bid", "chg"],
+        columns: ["vol", "chg"],
         aggregates: { bid: "sum", chg: "sum", name: "last" },
         sort: [
             ["name", "desc"],
@@ -70,10 +76,13 @@ export const LAYOUTS = {
         ],
     },
     heatmap: {
-        columns: ["vol"],
+        title: "Spread Heatmap",
+        columns: ["name"],
         plugin: "Heatmap",
-        sort: [["vol", "asc"]],
-        group_by: ["name"],
-        split_by: ["client"],
+        expressions: [`bucket("bid",2)`, `bucket("ask",2)`],
+        group_by: [`bucket("bid",2)`],
+        split_by: [`bucket("ask",2)`],
+        sort: [],
+        aggregates: {},
     },
 };

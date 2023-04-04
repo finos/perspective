@@ -10,22 +10,22 @@ For more information, see the
 * [perspective](#module_perspective)
     * [~view](#module_perspective..view)
         * [new view()](#new_module_perspective..view_new)
-        * [.get_config()](#module_perspective..view+get_config) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;object&gt;</code>
+        * [.get_config()](#module_perspective..view+get_config) ⇒ <code>Promise.&lt;object&gt;</code>
         * [.delete()](#module_perspective..view+delete)
-        * [.schema()](#module_perspective..view+schema) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
-        * [.expression_schema()](#module_perspective..view+expression_schema) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
-        * [.column_paths()](#module_perspective..view+column_paths) ⇒ <code>[ &#x27;Array&#x27; ].&lt;String&gt;</code>
-        * [.get_min_max(colname)](#module_perspective..view+get_min_max) ⇒ <code>[ &#x27;Array&#x27; ].&lt;Object&gt;</code>
-        * [.to_columns([options])](#module_perspective..view+to_columns) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Array&gt;</code>
-        * [.to_json([options])](#module_perspective..view+to_json) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Array&gt;</code>
-        * [.to_csv([options])](#module_perspective..view+to_csv) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;string&gt;</code>
-        * [.col_to_js_typed_array(column_name, options)](#module_perspective..view+col_to_js_typed_array) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;TypedArray&gt;</code>
-        * [.to_arrow([options])](#module_perspective..view+to_arrow) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;ArrayBuffer&gt;</code>
-        * [.num_rows()](#module_perspective..view+num_rows) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;number&gt;</code>
-        * [.num_columns()](#module_perspective..view+num_columns) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;number&gt;</code>
-        * [.get_row_expanded()](#module_perspective..view+get_row_expanded) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;bool&gt;</code>
-        * [.expand()](#module_perspective..view+expand) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;void&gt;</code>
-        * [.collapse()](#module_perspective..view+collapse) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;void&gt;</code>
+        * [.schema()](#module_perspective..view+schema) ⇒ <code>Promise.&lt;Object&gt;</code>
+        * [.expression_schema()](#module_perspective..view+expression_schema) ⇒ <code>Promise.&lt;Object&gt;</code>
+        * [.column_paths()](#module_perspective..view+column_paths) ⇒ <code>Array.&lt;String&gt;</code>
+        * [.get_min_max(colname)](#module_perspective..view+get_min_max) ⇒ <code>Array.&lt;Object&gt;</code>
+        * [.to_columns([options])](#module_perspective..view+to_columns) ⇒ <code>Promise.&lt;Array&gt;</code>
+        * [.to_json([options])](#module_perspective..view+to_json) ⇒ <code>Promise.&lt;Array&gt;</code>
+        * [.to_csv([options])](#module_perspective..view+to_csv) ⇒ <code>Promise.&lt;string&gt;</code>
+        * [.col_to_js_typed_array(column_name, options)](#module_perspective..view+col_to_js_typed_array) ⇒ <code>Promise.&lt;TypedArray&gt;</code>
+        * [.to_arrow([options])](#module_perspective..view+to_arrow) ⇒ <code>Promise.&lt;ArrayBuffer&gt;</code>
+        * [.num_rows()](#module_perspective..view+num_rows) ⇒ <code>Promise.&lt;number&gt;</code>
+        * [.num_columns()](#module_perspective..view+num_columns) ⇒ <code>Promise.&lt;number&gt;</code>
+        * [.get_row_expanded()](#module_perspective..view+get_row_expanded) ⇒ <code>Promise.&lt;bool&gt;</code>
+        * [.expand()](#module_perspective..view+expand) ⇒ <code>Promise.&lt;void&gt;</code>
+        * [.collapse()](#module_perspective..view+collapse) ⇒ <code>Promise.&lt;void&gt;</code>
         * [.set_depth()](#module_perspective..view+set_depth)
         * [.on_update(callback)](#module_perspective..view+on_update)
         * [.on_delete(callback)](#module_perspective..view+on_delete)
@@ -39,14 +39,14 @@ For more information, see the
         * [.delete()](#module_perspective..table+delete)
         * [.on_delete(callback)](#module_perspective..table+on_delete)
         * [.remove_delete(callback)](#module_perspective..table+remove_delete)
-        * [.size()](#module_perspective..table+size) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;number&gt;</code>
-        * [.schema()](#module_perspective..table+schema) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
-        * [.validate_expressions(expressions)](#module_perspective..table+validate_expressions) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
+        * [.size()](#module_perspective..table+size) ⇒ <code>Promise.&lt;number&gt;</code>
+        * [.schema()](#module_perspective..table+schema) ⇒ <code>Promise.&lt;Object&gt;</code>
+        * [.validate_expressions(expressions)](#module_perspective..table+validate_expressions) ⇒ <code>Promise.&lt;Object&gt;</code>
         * [.is_valid_filter([filter])](#module_perspective..table+is_valid_filter)
-        * [.view([config])](#module_perspective..table+view) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;view&gt;</code>
+        * [.view([config])](#module_perspective..table+view) ⇒ <code>Promise.&lt;view&gt;</code>
         * [.update(data)](#module_perspective..table+update)
         * [.remove(data)](#module_perspective..table+remove)
-        * [.columns()](#module_perspective..table+columns) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Array.&lt;string&gt;&gt;</code>
+        * [.columns()](#module_perspective..table+columns) ⇒ <code>Promise.&lt;Array.&lt;string&gt;&gt;</code>
 
 
 * * *
@@ -58,22 +58,22 @@ For more information, see the
 
 * [~view](#module_perspective..view)
     * [new view()](#new_module_perspective..view_new)
-    * [.get_config()](#module_perspective..view+get_config) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;object&gt;</code>
+    * [.get_config()](#module_perspective..view+get_config) ⇒ <code>Promise.&lt;object&gt;</code>
     * [.delete()](#module_perspective..view+delete)
-    * [.schema()](#module_perspective..view+schema) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
-    * [.expression_schema()](#module_perspective..view+expression_schema) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
-    * [.column_paths()](#module_perspective..view+column_paths) ⇒ <code>[ &#x27;Array&#x27; ].&lt;String&gt;</code>
-    * [.get_min_max(colname)](#module_perspective..view+get_min_max) ⇒ <code>[ &#x27;Array&#x27; ].&lt;Object&gt;</code>
-    * [.to_columns([options])](#module_perspective..view+to_columns) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Array&gt;</code>
-    * [.to_json([options])](#module_perspective..view+to_json) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Array&gt;</code>
-    * [.to_csv([options])](#module_perspective..view+to_csv) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;string&gt;</code>
-    * [.col_to_js_typed_array(column_name, options)](#module_perspective..view+col_to_js_typed_array) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;TypedArray&gt;</code>
-    * [.to_arrow([options])](#module_perspective..view+to_arrow) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;ArrayBuffer&gt;</code>
-    * [.num_rows()](#module_perspective..view+num_rows) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;number&gt;</code>
-    * [.num_columns()](#module_perspective..view+num_columns) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;number&gt;</code>
-    * [.get_row_expanded()](#module_perspective..view+get_row_expanded) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;bool&gt;</code>
-    * [.expand()](#module_perspective..view+expand) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;void&gt;</code>
-    * [.collapse()](#module_perspective..view+collapse) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;void&gt;</code>
+    * [.schema()](#module_perspective..view+schema) ⇒ <code>Promise.&lt;Object&gt;</code>
+    * [.expression_schema()](#module_perspective..view+expression_schema) ⇒ <code>Promise.&lt;Object&gt;</code>
+    * [.column_paths()](#module_perspective..view+column_paths) ⇒ <code>Array.&lt;String&gt;</code>
+    * [.get_min_max(colname)](#module_perspective..view+get_min_max) ⇒ <code>Array.&lt;Object&gt;</code>
+    * [.to_columns([options])](#module_perspective..view+to_columns) ⇒ <code>Promise.&lt;Array&gt;</code>
+    * [.to_json([options])](#module_perspective..view+to_json) ⇒ <code>Promise.&lt;Array&gt;</code>
+    * [.to_csv([options])](#module_perspective..view+to_csv) ⇒ <code>Promise.&lt;string&gt;</code>
+    * [.col_to_js_typed_array(column_name, options)](#module_perspective..view+col_to_js_typed_array) ⇒ <code>Promise.&lt;TypedArray&gt;</code>
+    * [.to_arrow([options])](#module_perspective..view+to_arrow) ⇒ <code>Promise.&lt;ArrayBuffer&gt;</code>
+    * [.num_rows()](#module_perspective..view+num_rows) ⇒ <code>Promise.&lt;number&gt;</code>
+    * [.num_columns()](#module_perspective..view+num_columns) ⇒ <code>Promise.&lt;number&gt;</code>
+    * [.get_row_expanded()](#module_perspective..view+get_row_expanded) ⇒ <code>Promise.&lt;bool&gt;</code>
+    * [.expand()](#module_perspective..view+expand) ⇒ <code>Promise.&lt;void&gt;</code>
+    * [.collapse()](#module_perspective..view+collapse) ⇒ <code>Promise.&lt;void&gt;</code>
     * [.set_depth()](#module_perspective..view+set_depth)
     * [.on_update(callback)](#module_perspective..view+on_update)
     * [.on_delete(callback)](#module_perspective..view+on_delete)
@@ -107,12 +107,12 @@ await table.view({group_by: ["name"]});
 
 <a name="module_perspective..view+get_config"></a>
 
-#### view.get\_config() ⇒ <code>[ &#x27;Promise&#x27; ].&lt;object&gt;</code>
+#### view.get\_config() ⇒ <code>Promise.&lt;object&gt;</code>
 A copy of the config object passed to the [table#view](table#view) method which
 created this [view](#module_perspective..view).
 
 **Kind**: instance method of [<code>view</code>](#module_perspective..view)  
-**Returns**: <code>[ &#x27;Promise&#x27; ].&lt;object&gt;</code> - Shared the same key/values properties as
+**Returns**: <code>Promise.&lt;object&gt;</code> - Shared the same key/values properties as
 [view](#module_perspective..view)  
 
 * * *
@@ -131,7 +131,7 @@ method to reclaim these.
 
 <a name="module_perspective..view+schema"></a>
 
-#### view.schema() ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
+#### view.schema() ⇒ <code>Promise.&lt;Object&gt;</code>
 The schema of this [view](#module_perspective..view).
 
 A schema is an Object, the keys of which are the columns of this
@@ -141,7 +141,7 @@ be the aggregated types; otherwise these types will be the same as the
 columns in the underlying [table](#module_perspective..table).
 
 **Kind**: instance method of [<code>view</code>](#module_perspective..view)  
-**Returns**: <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code> - A Promise of this
+**Returns**: <code>Promise.&lt;Object&gt;</code> - A Promise of this
 [view](#module_perspective..view)'s schema.  
 **Example**  
 ```js
@@ -156,7 +156,7 @@ const schema = await view.schema(); // {a: "float", b: "string"}
 
 <a name="module_perspective..view+expression_schema"></a>
 
-#### view.expression\_schema() ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
+#### view.expression\_schema() ⇒ <code>Promise.&lt;Object&gt;</code>
 The expression schema of this [view](#module_perspective..view),
 which contains only the expressions created on this view.
 
@@ -167,7 +167,7 @@ be the aggregated types; otherwise these types will be the same as the
 columns in the underlying [table](#module_perspective..table).
 
 **Kind**: instance method of [<code>view</code>](#module_perspective..view)  
-**Returns**: <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code> - A Promise of this
+**Returns**: <code>Promise.&lt;Object&gt;</code> - A Promise of this
 [view](#module_perspective..view)'s expression schema.  
 **Example**  
 ```js
@@ -183,7 +183,7 @@ await view.expression_schema(); // {'"x" + "y" - 100': "float"}
 
 <a name="module_perspective..view+column_paths"></a>
 
-#### view.column\_paths() ⇒ <code>[ &#x27;Array&#x27; ].&lt;String&gt;</code>
+#### view.column\_paths() ⇒ <code>Array.&lt;String&gt;</code>
 Returns an array of strings containing the column paths of the View
 without any of the source columns.
 
@@ -191,17 +191,17 @@ A column path shows the columns that a given cell belongs to after pivots
 are applied.
 
 **Kind**: instance method of [<code>view</code>](#module_perspective..view)  
-**Returns**: <code>[ &#x27;Array&#x27; ].&lt;String&gt;</code> - an Array of Strings containing the column paths.  
+**Returns**: <code>Array.&lt;String&gt;</code> - an Array of Strings containing the column paths.  
 
 * * *
 
 <a name="module_perspective..view+get_min_max"></a>
 
-#### view.get\_min\_max(colname) ⇒ <code>[ &#x27;Array&#x27; ].&lt;Object&gt;</code>
+#### view.get\_min\_max(colname) ⇒ <code>Array.&lt;Object&gt;</code>
 Calculates the [min, max] of the leaf nodes of a column `colname`.
 
 **Kind**: instance method of [<code>view</code>](#module_perspective..view)  
-**Returns**: <code>[ &#x27;Array&#x27; ].&lt;Object&gt;</code> - A tuple of [min, max], whose types are column
+**Returns**: <code>Array.&lt;Object&gt;</code> - A tuple of [min, max], whose types are column
 and aggregate dependent.  
 **Params**
 
@@ -212,11 +212,11 @@ and aggregate dependent.
 
 <a name="module_perspective..view+to_columns"></a>
 
-#### view.to\_columns([options]) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Array&gt;</code>
+#### view.to\_columns([options]) ⇒ <code>Promise.&lt;Array&gt;</code>
 Serializes this view to JSON data in a column-oriented format.
 
 **Kind**: instance method of [<code>view</code>](#module_perspective..view)  
-**Returns**: <code>[ &#x27;Promise&#x27; ].&lt;Array&gt;</code> - A Promise resolving to An array of Objects
+**Returns**: <code>Promise.&lt;Array&gt;</code> - A Promise resolving to An array of Objects
 representing the rows of this [view](#module_perspective..view).  If this
 [view](#module_perspective..view) had a "group_by" config parameter
 supplied when constructed, each row Object will have a "__ROW_PATH__"
@@ -244,11 +244,11 @@ underlying [table](#module_perspective..table) be in the output (as
 
 <a name="module_perspective..view+to_json"></a>
 
-#### view.to\_json([options]) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Array&gt;</code>
+#### view.to\_json([options]) ⇒ <code>Promise.&lt;Array&gt;</code>
 Serializes this view to JSON data in a row-oriented format.
 
 **Kind**: instance method of [<code>view</code>](#module_perspective..view)  
-**Returns**: <code>[ &#x27;Promise&#x27; ].&lt;Array&gt;</code> - A Promise resolving to An array of Objects
+**Returns**: <code>Promise.&lt;Array&gt;</code> - A Promise resolving to An array of Objects
 representing the rows of this [view](#module_perspective..view).  If this
 [view](#module_perspective..view) had a "group_by" config parameter
 supplied when constructed, each row Object will have a "__ROW_PATH__"
@@ -273,11 +273,11 @@ serialize.
 
 <a name="module_perspective..view+to_csv"></a>
 
-#### view.to\_csv([options]) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;string&gt;</code>
+#### view.to\_csv([options]) ⇒ <code>Promise.&lt;string&gt;</code>
 Serializes this view to CSV data in a standard format.
 
 **Kind**: instance method of [<code>view</code>](#module_perspective..view)  
-**Returns**: <code>[ &#x27;Promise&#x27; ].&lt;string&gt;</code> - A Promise resolving to a string in CSV format
+**Returns**: <code>Promise.&lt;string&gt;</code> - A Promise resolving to a string in CSV format
 representing the rows of this [view](#module_perspective..view).  If this
 [view](#module_perspective..view) had a "group_by" config parameter
 supplied when constructed, each row will have prepended those values
@@ -302,11 +302,11 @@ serialize.
 
 <a name="module_perspective..view+col_to_js_typed_array"></a>
 
-#### view.col\_to\_js\_typed\_array(column_name, options) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;TypedArray&gt;</code>
+#### view.col\_to\_js\_typed\_array(column_name, options) ⇒ <code>Promise.&lt;TypedArray&gt;</code>
 Serializes a view column into a TypedArray.
 
 **Kind**: instance method of [<code>view</code>](#module_perspective..view)  
-**Returns**: <code>[ &#x27;Promise&#x27; ].&lt;TypedArray&gt;</code> - A promise resolving to a TypedArray
+**Returns**: <code>Promise.&lt;TypedArray&gt;</code> - A promise resolving to a TypedArray
 representing the data of the column as retrieved from the
 [view](#module_perspective..view) - all pivots, aggregates, sorts, and
 filters have been applied onto the values inside the TypedArray. The
@@ -330,11 +330,11 @@ serialize.
 
 <a name="module_perspective..view+to_arrow"></a>
 
-#### view.to\_arrow([options]) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;ArrayBuffer&gt;</code>
+#### view.to\_arrow([options]) ⇒ <code>Promise.&lt;ArrayBuffer&gt;</code>
 Serializes a view to the Apache Arrow data format.
 
 **Kind**: instance method of [<code>view</code>](#module_perspective..view)  
-**Returns**: <code>[ &#x27;Promise&#x27; ].&lt;ArrayBuffer&gt;</code> - An `ArrayBuffer` in the Apache Arrow
+**Returns**: <code>Promise.&lt;ArrayBuffer&gt;</code> - An `ArrayBuffer` in the Apache Arrow
 format containing data from the view.  
 **Params**
 
@@ -353,41 +353,41 @@ serialize.
 
 <a name="module_perspective..view+num_rows"></a>
 
-#### view.num\_rows() ⇒ <code>[ &#x27;Promise&#x27; ].&lt;number&gt;</code>
+#### view.num\_rows() ⇒ <code>Promise.&lt;number&gt;</code>
 The number of aggregated rows in this [view](#module_perspective..view).
 This is affected by the "group_by" configuration parameter supplied to
 this [view](#module_perspective..view)'s contructor.
 
 **Kind**: instance method of [<code>view</code>](#module_perspective..view)  
-**Returns**: <code>[ &#x27;Promise&#x27; ].&lt;number&gt;</code> - The number of aggregated rows.  
+**Returns**: <code>Promise.&lt;number&gt;</code> - The number of aggregated rows.  
 
 * * *
 
 <a name="module_perspective..view+num_columns"></a>
 
-#### view.num\_columns() ⇒ <code>[ &#x27;Promise&#x27; ].&lt;number&gt;</code>
+#### view.num\_columns() ⇒ <code>Promise.&lt;number&gt;</code>
 The number of aggregated columns in this [view](view).  This is affected
 by the "split_by" configuration parameter supplied to this
 [view](view)'s contructor.
 
 **Kind**: instance method of [<code>view</code>](#module_perspective..view)  
-**Returns**: <code>[ &#x27;Promise&#x27; ].&lt;number&gt;</code> - The number of aggregated columns.  
+**Returns**: <code>Promise.&lt;number&gt;</code> - The number of aggregated columns.  
 
 * * *
 
 <a name="module_perspective..view+get_row_expanded"></a>
 
-#### view.get\_row\_expanded() ⇒ <code>[ &#x27;Promise&#x27; ].&lt;bool&gt;</code>
+#### view.get\_row\_expanded() ⇒ <code>Promise.&lt;bool&gt;</code>
 Whether this row at index `idx` is in an expanded or collapsed state.
 
 **Kind**: instance method of [<code>view</code>](#module_perspective..view)  
-**Returns**: <code>[ &#x27;Promise&#x27; ].&lt;bool&gt;</code> - Whether this row is expanded.  
+**Returns**: <code>Promise.&lt;bool&gt;</code> - Whether this row is expanded.  
 
 * * *
 
 <a name="module_perspective..view+expand"></a>
 
-#### view.expand() ⇒ <code>[ &#x27;Promise&#x27; ].&lt;void&gt;</code>
+#### view.expand() ⇒ <code>Promise.&lt;void&gt;</code>
 Expands the row at index `idx`.
 
 **Kind**: instance method of [<code>view</code>](#module_perspective..view)  
@@ -396,7 +396,7 @@ Expands the row at index `idx`.
 
 <a name="module_perspective..view+collapse"></a>
 
-#### view.collapse() ⇒ <code>[ &#x27;Promise&#x27; ].&lt;void&gt;</code>
+#### view.collapse() ⇒ <code>Promise.&lt;void&gt;</code>
 Collapses the row at index `idx`.
 
 **Kind**: instance method of [<code>view</code>](#module_perspective..view)  
@@ -498,14 +498,14 @@ view.remove_delete(callback);
     * [.delete()](#module_perspective..table+delete)
     * [.on_delete(callback)](#module_perspective..table+on_delete)
     * [.remove_delete(callback)](#module_perspective..table+remove_delete)
-    * [.size()](#module_perspective..table+size) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;number&gt;</code>
-    * [.schema()](#module_perspective..table+schema) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
-    * [.validate_expressions(expressions)](#module_perspective..table+validate_expressions) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
+    * [.size()](#module_perspective..table+size) ⇒ <code>Promise.&lt;number&gt;</code>
+    * [.schema()](#module_perspective..table+schema) ⇒ <code>Promise.&lt;Object&gt;</code>
+    * [.validate_expressions(expressions)](#module_perspective..table+validate_expressions) ⇒ <code>Promise.&lt;Object&gt;</code>
     * [.is_valid_filter([filter])](#module_perspective..table+is_valid_filter)
-    * [.view([config])](#module_perspective..table+view) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;view&gt;</code>
+    * [.view([config])](#module_perspective..table+view) ⇒ <code>Promise.&lt;view&gt;</code>
     * [.update(data)](#module_perspective..table+update)
     * [.remove(data)](#module_perspective..table+remove)
-    * [.columns()](#module_perspective..table+columns) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Array.&lt;string&gt;&gt;</code>
+    * [.columns()](#module_perspective..table+columns) ⇒ <code>Promise.&lt;Array.&lt;string&gt;&gt;</code>
 
 
 * * *
@@ -608,34 +608,34 @@ Unregister a previously registered delete callback with this
 
 <a name="module_perspective..table+size"></a>
 
-#### table.size() ⇒ <code>[ &#x27;Promise&#x27; ].&lt;number&gt;</code>
+#### table.size() ⇒ <code>Promise.&lt;number&gt;</code>
 The number of accumulated rows in this [table](#module_perspective..table).
 This is affected by the "index" configuration parameter supplied to this
 [view](#module_perspective..view)'s contructor - as rows will be
 overwritten when they share an idnex column.
 
 **Kind**: instance method of [<code>table</code>](#module_perspective..table)  
-**Returns**: <code>[ &#x27;Promise&#x27; ].&lt;number&gt;</code> - The number of accumulated rows.  
+**Returns**: <code>Promise.&lt;number&gt;</code> - The number of accumulated rows.  
 
 * * *
 
 <a name="module_perspective..table+schema"></a>
 
-#### table.schema() ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
+#### table.schema() ⇒ <code>Promise.&lt;Object&gt;</code>
 The schema of this [table](#module_perspective..table).  A schema is an
 Object whose keys are the columns of this
 [table](#module_perspective..table), and whose values are their string type
 names.
 
 **Kind**: instance method of [<code>table</code>](#module_perspective..table)  
-**Returns**: <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code> - A Promise of this
+**Returns**: <code>Promise.&lt;Object&gt;</code> - A Promise of this
 [table](#module_perspective..table)'s schema.  
 
 * * *
 
 <a name="module_perspective..table+validate_expressions"></a>
 
-#### table.validate\_expressions(expressions) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Object&gt;</code>
+#### table.validate\_expressions(expressions) ⇒ <code>Promise.&lt;Object&gt;</code>
 Given an array of expressions, return an object containing `expressions`,
 which map expression aliases to data types, and `errors`, which
 maps expression aliases to error messages. If an expression that was
@@ -644,7 +644,7 @@ passed in is not in `expressions`, it is guaranteed to be in `errors`.
 **Kind**: instance method of [<code>table</code>](#module_perspective..table)  
 **Params**
 
-- expressions <code>[ &#x27;Array&#x27; ].&lt;String&gt;</code> - An array of string expressions to
+- expressions <code>Array.&lt;String&gt;</code> - An array of string expressions to
 be validated.
 
 **Example**  
@@ -674,43 +674,43 @@ null or undefined.
 **Kind**: instance method of [<code>table</code>](#module_perspective..table)  
 **Params**
 
-- [filter] <code>[ &#x27;Array&#x27; ].&lt;string&gt;</code> - a filter configuration to test.
+- [filter] <code>Array.&lt;string&gt;</code> - a filter configuration to test.
 
 
 * * *
 
 <a name="module_perspective..table+view"></a>
 
-#### table.view([config]) ⇒ <code>[ &#x27;Promise&#x27; ].&lt;view&gt;</code>
+#### table.view([config]) ⇒ <code>Promise.&lt;view&gt;</code>
 Create a new [view](#module_perspective..view) from this table with a
 specified configuration. For a better understanding of the View
 configuration options, see the
 [Documentation](https://perspective.finos.org/docs/md/view.html).
 
 **Kind**: instance method of [<code>table</code>](#module_perspective..table)  
-**Returns**: <code>[ &#x27;Promise&#x27; ].&lt;view&gt;</code> - A Promise that resolves to a new
+**Returns**: <code>Promise.&lt;view&gt;</code> - A Promise that resolves to a new
 [view](#module_perspective..view) object for the supplied configuration,
 bound to this table.  
 **Params**
 
 - [config] <code>Object</code> - The configuration object for this
 [view](#module_perspective..view).
-    - [.group_by] <code>[ &#x27;Array&#x27; ].&lt;string&gt;</code> - An array of column names to
+    - [.group_by] <code>Array.&lt;string&gt;</code> - An array of column names to
 use as [Group By](https://en.wikipedia.org/wiki/Pivot_table#Row_labels).
-    - [.split_by] <code>[ &#x27;Array&#x27; ].&lt;string&gt;</code> - An array of column names to
+    - [.split_by] <code>Array.&lt;string&gt;</code> - An array of column names to
 use as [Split By](https://en.wikipedia.org/wiki/Pivot_table#Column_labels).
-    - [.columns] <code>[ &#x27;Array&#x27; ].&lt;Object&gt;</code> - An array of column names for the
+    - [.columns] <code>Array.&lt;Object&gt;</code> - An array of column names for the
 output columns. If none are provided, all columns are output.
     - [.aggregates] <code>Object</code> - An object, the keys of which are
 column names, and their respective values are the aggregates calculations
 to use when this view has `group_by`. A column provided to
 `config.columns` without an aggregate in this object, will use the
 default aggregate calculation for its type.
-    - [.filter] <code>[ &#x27;Array&#x27; ].&lt;Array.&lt;string&gt;&gt;</code> - An Array of Filter
+    - [.filter] <code>Array.&lt;Array.&lt;string&gt;&gt;</code> - An Array of Filter
 configurations to apply. A filter configuration is an array of 3
 elements: A column name, a supported filter comparison string (e.g.
 '===', '>'), and a value to compare.
-    - [.sort] <code>[ &#x27;Array&#x27; ].&lt;string&gt;</code> - An Array of Sort configurations to
+    - [.sort] <code>Array.&lt;string&gt;</code> - An Array of Sort configurations to
 apply. A sort configuration is an array of 2 elements: A column name, and
 a sort direction, which are: "none", "asc", "desc", "col asc", "col
 desc", "asc abs", "desc abs", "col asc abs", "col desc abs".
@@ -758,18 +758,18 @@ pushed down to any derived [view](#module_perspective..view) objects.
 **See**: [table](#module_perspective..table)  
 **Params**
 
-- data <code>[ &#x27;Array&#x27; ].&lt;Object&gt;</code> - An array of primary keys to remove.
+- data <code>Array.&lt;Object&gt;</code> - An array of primary keys to remove.
 
 
 * * *
 
 <a name="module_perspective..table+columns"></a>
 
-#### table.columns() ⇒ <code>[ &#x27;Promise&#x27; ].&lt;Array.&lt;string&gt;&gt;</code>
+#### table.columns() ⇒ <code>Promise.&lt;Array.&lt;string&gt;&gt;</code>
 The column names of this table.
 
 **Kind**: instance method of [<code>table</code>](#module_perspective..table)  
-**Returns**: <code>[ &#x27;Promise&#x27; ].&lt;Array.&lt;string&gt;&gt;</code> - An array of column names for this
+**Returns**: <code>Promise.&lt;Array.&lt;string&gt;&gt;</code> - An array of column names for this
 table.  
 
 * * *
