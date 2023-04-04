@@ -1,3 +1,39 @@
+# [v2.0.0](https://github.com/finos/perspective/releases/tag/v2.0.0)
+
+_4 April 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v1.9.4...v2.0.0))
+
+**Breaking**
+
+- Distribute prebuilt JupyterLab extension / Notebook Classic extension (2023 edition) [#2136](https://github.com/finos/perspective/pull/2136)
+- UI Redesign [#2110](https://github.com/finos/perspective/pull/2110)
+
+Features
+
+- Auto-complete text field column selectors [#2156](https://github.com/finos/perspective/pull/2156)
+
+Fixes
+
+- Gracefully handle websocket errors on python side [#2157](https://github.com/finos/perspective/pull/2157)
+- Fix ping loop state, make node server `close` method async [#2151](https://github.com/finos/perspective/pull/2151)
+- Fix autocomplete behavior for `in` and `not in` filter ops [#2142](https://github.com/finos/perspective/pull/2142)
+- fixed filter keyword [#2124](https://github.com/finos/perspective/pull/2124)
+
+Misc
+
+- Run yarn cache path commands in bash shell [#2163](https://github.com/finos/perspective/pull/2163)
+- Fixes for docs site [#2162](https://github.com/finos/perspective/pull/2162)
+- A11y front page labels [#2161](https://github.com/finos/perspective/pull/2161)
+- Fixed deprecated features in GitHub actions [#2141](https://github.com/finos/perspective/pull/2141)
+- Specify that Yarn v1 must be used in development docs. [#2143](https://github.com/finos/perspective/pull/2143)
+- Miscellaneous cleanup from big Jupyter prebuilt overhaul, python 3.7 deprecation, and various other accumulated but unfixed issues [#2144](https://github.com/finos/perspective/pull/2144)
+- Implement `title` field in `PerspectiveWidget` [#2123](https://github.com/finos/perspective/pull/2123)
+- New demo `market` [#2128](https://github.com/finos/perspective/pull/2128)
+- Fix readme logo link [#2129](https://github.com/finos/perspective/pull/2129)
+- Update docs/branding [#2122](https://github.com/finos/perspective/pull/2122)
+- vendor all C++ dependencies at build time, fixes #2075, closes #2076, [#2116](https://github.com/finos/perspective/pull/2116)
+- fix icon filenames for windows [#2118](https://github.com/finos/perspective/pull/2118)
+- New icons [#2111](https://github.com/finos/perspective/pull/2111)
+
 # [v1.9.4](https://github.com/finos/perspective/releases/tag/v1.9.4)
 
 _22 February 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v1.9.3...v1.9.4))
