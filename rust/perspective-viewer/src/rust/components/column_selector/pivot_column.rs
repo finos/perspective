@@ -12,22 +12,22 @@ use yew::prelude::*;
 use crate::components::containers::dragdrop_list::*;
 use crate::dragdrop::*;
 
-pub struct PivotItem {}
+pub struct PivotColumn {}
 
 #[derive(Properties)]
-pub struct PivotItemProps {
+pub struct PivotColumnProps {
     pub column: String,
     pub dragdrop: DragDrop,
     pub action: DragTarget,
 }
 
-impl PartialEq for PivotItemProps {
+impl PartialEq for PivotColumnProps {
     fn eq(&self, other: &Self) -> bool {
         self.column == other.column && self.action == other.action
     }
 }
 
-impl DragDropListItemProps for PivotItemProps {
+impl DragDropListItemProps for PivotColumnProps {
     type Item = String;
 
     fn get_item(&self) -> String {
@@ -35,9 +35,9 @@ impl DragDropListItemProps for PivotItemProps {
     }
 }
 
-impl Component for PivotItem {
+impl Component for PivotColumn {
     type Message = ();
-    type Properties = PivotItemProps;
+    type Properties = PivotColumnProps;
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         let dragstart = Callback::from({

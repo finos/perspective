@@ -6,12 +6,17 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
+use std::collections::HashSet;
+
 use web_sys::*;
 use yew::prelude::*;
 
 use super::aggregate_selector::*;
 use super::expression_toolbar::*;
+use super::InPlaceColumn;
+use crate::components::column_selector::EmptyColumn;
 use crate::config::*;
+use crate::custom_elements::ColumnDropDownElement;
 use crate::dragdrop::*;
 use crate::js::plugin::*;
 use crate::model::*;
@@ -27,6 +32,7 @@ pub struct ActiveColumnProps {
     pub dragdrop: DragDrop,
     pub session: Session,
     pub renderer: Renderer,
+    pub column_dropdown: ColumnDropDownElement,
     pub ondragenter: Callback<()>,
     pub ondragend: Callback<()>,
     pub onselect: Callback<()>,
@@ -123,6 +129,7 @@ pub enum ActiveColumnMsg {
     DeactivateColumn(String, bool),
     MouseEnter(bool),
     MouseLeave(bool),
+    New(InPlaceColumn),
 }
 
 use ActiveColumnMsg::*;
@@ -174,6 +181,40 @@ impl Component for ActiveColumn {
                 self.mouseover = false;
                 is_render
             }
+            New(InPlaceColumn::Column(col)) => {
+                let mut view_config = ctx.props().session.get_view_config().clone();
+                if ctx.props().idx >= view_config.columns.len() {
+                    view_config.columns.push(Some(col));
+                } else {
+                    view_config.columns[ctx.props().idx] = Some(col);
+                }
+
+                let update = ViewConfigUpdate {
+                    columns: Some(view_config.columns),
+                    ..ViewConfigUpdate::default()
+                };
+
+                ApiFuture::spawn(ctx.props().update_and_render(update));
+                true
+            }
+            New(InPlaceColumn::Expression(col)) => {
+                let mut view_config = ctx.props().session.get_view_config().clone();
+                if ctx.props().idx >= view_config.columns.len() {
+                    view_config.columns.push(Some(col.clone()));
+                } else {
+                    view_config.columns[ctx.props().idx] = Some(col.clone());
+                }
+
+                view_config.expressions.push(col);
+                let update = ViewConfigUpdate {
+                    columns: Some(view_config.columns),
+                    expressions: Some(view_config.expressions),
+                    ..ViewConfigUpdate::default()
+                };
+
+                ApiFuture::spawn(ctx.props().update_and_render(update));
+                true
+            }
         }
     }
 
@@ -217,6 +258,18 @@ impl Component for ActiveColumn {
         match (name, col_type) {
             ((label, None), _) => {
                 classes.push("empty-named");
+                let column_dropdown = ctx.props().column_dropdown.clone();
+                let on_select = ctx.link().callback(ActiveColumnMsg::New);
+                let exclude = ctx
+                    .props()
+                    .session
+                    .get_view_config()
+                    .columns
+                    .iter()
+                    .flatten()
+                    .cloned()
+                    .collect::<HashSet<_>>();
+
                 html! {
                     <div
                         class={ outer_classes }
@@ -224,8 +277,7 @@ impl Component for ActiveColumn {
                         data-index={ ctx.props().idx.to_string() }
                         ondragenter={ ondragenter.clone() }>
 
-                        <span class="is_column_active inactive"></span>
-                        <div class={ classes }></div>
+                        <EmptyColumn { column_dropdown }  { exclude } { on_select } />
                     </div>
                 }
             }

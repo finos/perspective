@@ -24,13 +24,13 @@ use crate::utils::{posix_to_utc_str, str_to_utc_posix, ApiFuture};
 use crate::*;
 
 /// A control for a single filter condition.
-pub struct FilterItem {
+pub struct FilterColumn {
     input: String,
     input_ref: NodeRef,
 }
 
 #[derive(Debug)]
-pub enum FilterItemMsg {
+pub enum FilterColumnMsg {
     FilterInput((usize, String), String),
     Close,
     FilterOpSelect(FilterOp),
@@ -38,7 +38,7 @@ pub enum FilterItemMsg {
 }
 
 #[derive(Properties, Clone)]
-pub struct FilterItemProps {
+pub struct FilterColumnProps {
     pub filter: Filter,
     pub idx: usize,
     pub filter_dropdown: FilterDropDownElement,
@@ -48,16 +48,16 @@ pub struct FilterItemProps {
     pub dragdrop: DragDrop,
 }
 
-impl PartialEq for FilterItemProps {
+impl PartialEq for FilterColumnProps {
     fn eq(&self, _rhs: &Self) -> bool {
         false
         // self.idx == other.idx && self.filter == other.filter
     }
 }
 
-derive_model!(Renderer, Session for FilterItemProps);
+derive_model!(Renderer, Session for FilterColumnProps);
 
-impl DragDropListItemProps for FilterItemProps {
+impl DragDropListItemProps for FilterColumnProps {
     type Item = Filter;
 
     fn get_item(&self) -> Filter {
@@ -65,7 +65,7 @@ impl DragDropListItemProps for FilterItemProps {
     }
 }
 
-impl FilterItemProps {
+impl FilterColumnProps {
     /// Does this filter item get a "suggestions" auto-complete modal?
     fn is_suggestable(&self) -> bool {
         (self.filter.1 == FilterOp::EQ
@@ -81,7 +81,7 @@ impl FilterItemProps {
             .get_column_table_type(&self.filter.0)
     }
 
-    // Get the string value, suitable for the `value` field of a `FilterItems`'s
+    // Get the string value, suitable for the `value` field of a `FilterColumns`'s
     // `<input>`.
     fn get_filter_input(&self) -> Option<String> {
         let filter_type = self.get_filter_type()?;
@@ -150,8 +150,8 @@ impl FilterItemProps {
     /// - `op` The new `FilterOp`.
     fn update_filter_op(&self, op: FilterOp) {
         let mut filter = self.session.get_view_config().filter.clone();
-        let filter_item = &mut filter.get_mut(self.idx).expect("Filter on no column");
-        filter_item.1 = op;
+        let filter_column = &mut filter.get_mut(self.idx).expect("Filter on no column");
+        filter_column.1 = op;
         let update = ViewConfigUpdate {
             filter: Some(filter),
             ..ViewConfigUpdate::default()
@@ -166,8 +166,8 @@ impl FilterItemProps {
     /// - `val` The new filter value.
     fn update_filter_input(&self, val: String) {
         let mut filter = self.session.get_view_config().filter.clone();
-        let filter_item = &mut filter.get_mut(self.idx).expect("Filter on no column");
-        let filter_input = match filter_item.1 {
+        let filter_column = &mut filter.get_mut(self.idx).expect("Filter on no column");
+        let filter_input = match filter_column.1 {
             FilterOp::NotIn | FilterOp::In => Some(FilterTerm::Array(
                 val.split(',')
                     .map(|x| Scalar::String(x.trim().to_owned()))
@@ -214,7 +214,7 @@ impl FilterItemProps {
         };
 
         if let Some(input) = filter_input {
-            filter_item.2 = input;
+            filter_column.2 = input;
             let update = ViewConfigUpdate {
                 filter: Some(filter),
                 ..ViewConfigUpdate::default()
@@ -227,9 +227,9 @@ impl FilterItemProps {
 
 type FilterOpSelector = Select<FilterOp>;
 
-impl Component for FilterItem {
-    type Message = FilterItemMsg;
-    type Properties = FilterItemProps;
+impl Component for FilterColumn {
+    type Message = FilterColumnMsg;
+    type Properties = FilterColumnProps;
 
     fn create(ctx: &Context<Self>) -> Self {
         // css!(ctx, "filter-item");
@@ -245,9 +245,9 @@ impl Component for FilterItem {
         Self { input, input_ref }
     }
 
-    fn update(&mut self, ctx: &Context<Self>, msg: FilterItemMsg) -> bool {
+    fn update(&mut self, ctx: &Context<Self>, msg: FilterColumnMsg) -> bool {
         match msg {
-            FilterItemMsg::FilterInput(column, input) => {
+            FilterColumnMsg::FilterInput(column, input) => {
                 let target = self.input_ref.cast::<HtmlInputElement>().unwrap();
                 let input = if ctx.props().get_filter_type() == Some(Type::Bool) {
                     if target.checked() {
@@ -275,38 +275,38 @@ impl Component for FilterItem {
                 ctx.props().update_filter_input(input);
                 false
             }
-            FilterItemMsg::FilterKeyDown(40) => {
+            FilterColumnMsg::FilterKeyDown(40) => {
                 if ctx.props().is_suggestable() {
                     ctx.props().filter_dropdown.item_down();
                     ctx.props().filter_dropdown.item_select();
                 }
                 false
             }
-            FilterItemMsg::FilterKeyDown(38) => {
+            FilterColumnMsg::FilterKeyDown(38) => {
                 if ctx.props().is_suggestable() {
                     ctx.props().filter_dropdown.item_up();
                     ctx.props().filter_dropdown.item_select();
                 }
                 false
             }
-            FilterItemMsg::Close => {
+            FilterColumnMsg::Close => {
                 ctx.props().filter_dropdown.hide().unwrap();
                 false
             }
-            FilterItemMsg::FilterKeyDown(13) => {
+            FilterColumnMsg::FilterKeyDown(13) => {
                 if ctx.props().is_suggestable() {
                     ctx.props().filter_dropdown.item_select();
                     ctx.props().filter_dropdown.hide().unwrap();
                 }
                 false
             }
-            FilterItemMsg::FilterKeyDown(_) => {
+            FilterColumnMsg::FilterKeyDown(_) => {
                 if ctx.props().is_suggestable() {
                     ctx.props().filter_dropdown.reautocomplete();
                 }
                 false
             }
-            FilterItemMsg::FilterOpSelect(op) => {
+            FilterColumnMsg::FilterOpSelect(op) => {
                 ctx.props().update_filter_op(op);
                 true
             }
@@ -332,13 +332,13 @@ impl Component for FilterItem {
             .metadata()
             .get_column_table_type(&column);
 
-        let select = ctx.link().callback(FilterItemMsg::FilterOpSelect);
+        let select = ctx.link().callback(FilterColumnMsg::FilterOpSelect);
 
         let noderef = &self.input_ref;
         let input = ctx.link().callback({
             let column = column.clone();
             move |input: InputEvent| {
-                FilterItemMsg::FilterInput(
+                FilterColumnMsg::FilterInput(
                     (idx, column.clone()),
                     input
                         .target()
@@ -351,13 +351,13 @@ impl Component for FilterItem {
 
         let focus = ctx.link().callback({
             let input = self.input.clone();
-            move |_: FocusEvent| FilterItemMsg::FilterInput((idx, column.clone()), input.clone())
+            move |_: FocusEvent| FilterColumnMsg::FilterInput((idx, column.clone()), input.clone())
         });
 
-        let blur = ctx.link().callback(|_| FilterItemMsg::Close);
+        let blur = ctx.link().callback(|_| FilterColumnMsg::Close);
         let keydown = ctx
             .link()
-            .callback(move |event: KeyboardEvent| FilterItemMsg::FilterKeyDown(event.key_code()));
+            .callback(move |event: KeyboardEvent| FilterColumnMsg::FilterKeyDown(event.key_code()));
 
         let dragstart = Callback::from({
             let event_name = ctx.props().filter.0.to_owned();
@@ -408,6 +408,7 @@ impl Component for FilterItem {
                     size="4"
                     placeholder="Value"
                     class="string-filter"
+                    spellcheck="false"
                     // TODO This is dirty and it may not work in the future.
                     onInput="this.parentNode.dataset.value=this.value"
                     ref={ noderef.clone() }

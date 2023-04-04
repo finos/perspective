@@ -56,8 +56,8 @@ where
     T: Component,
 {
     SetPos {
-        top: i32,
-        left: i32,
+        top: f64,
+        left: f64,
         visible: bool,
         rev_vert: bool,
     },

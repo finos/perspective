@@ -10,9 +10,11 @@ use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 use derivative::Derivative;
+use futures::Future;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::*;
+use yew::html::SendAsMessage;
 use yew::prelude::*;
 
 use crate::components::*;
@@ -48,7 +50,7 @@ where
 }
 
 /// Anchor point enum, `ModalCornerTargetCorner`
-#[derive(Clone, Copy, Default)]
+#[derive(Clone, Copy, Debug, Default)]
 enum ModalAnchor {
     BottomRightTopLeft,
     BottomRightBottomLeft,
@@ -79,19 +81,19 @@ impl ModalAnchor {
 /// coordinates that keeps the element on-screen.
 fn calc_relative_position(
     elem: &HtmlElement,
-    _top: i32,
-    left: i32,
-    height: i32,
-    width: i32,
+    _top: f64,
+    left: f64,
+    height: f64,
+    width: f64,
 ) -> ModalAnchor {
     let window = web_sys::window().unwrap();
     let rect = elem.get_bounding_client_rect();
-    let inner_width = window.inner_width().unwrap().as_f64().unwrap() as i32;
-    let inner_height = window.inner_height().unwrap().as_f64().unwrap() as i32;
-    let rect_top = rect.top() as i32;
-    let rect_height = rect.height() as i32;
-    let rect_width = rect.width() as i32;
-    let rect_left = rect.left() as i32;
+    let inner_width = window.inner_width().unwrap().as_f64().unwrap();
+    let inner_height = window.inner_height().unwrap().as_f64().unwrap();
+    let rect_top = rect.top();
+    let rect_height = rect.height();
+    let rect_width = rect.width();
+    let rect_left = rect.left();
 
     let elem_over_y = inner_height < rect_top + rect_height;
     let elem_over_x = inner_width < rect_left + rect_width;
@@ -103,7 +105,7 @@ fn calc_relative_position(
         (true, _, true, true) => ModalAnchor::BottomRightTopLeft,
         (true, _, true, false) => ModalAnchor::BottomRightBottomLeft,
         (true, true, false, _) => {
-            if left + width - rect_width > 0 {
+            if left + width - rect_width > 0.0 {
                 ModalAnchor::BottomRightTopRight
             } else {
                 ModalAnchor::BottomLeftTopLeft
@@ -112,7 +114,7 @@ fn calc_relative_position(
         (true, false, false, _) => ModalAnchor::BottomLeftTopLeft,
         (false, true, true, _) => ModalAnchor::TopRightTopLeft,
         (false, true, false, _) => {
-            if left + width - rect_width > 0 {
+            if left + width - rect_width > 0.0 {
                 ModalAnchor::TopRightBottomRight
             } else {
                 ModalAnchor::TopLeftBottomLeft
@@ -163,43 +165,45 @@ where
         }
     }
 
-    fn calc_anchor_position(&self, target: &HtmlElement) -> (i32, i32) {
-        let height = target.offset_height();
-        let width = target.offset_width();
-        let elem = target.clone().unchecked_into::<HtmlElement>();
+    fn calc_anchor_position(&self, target: &HtmlElement) -> (f64, f64) {
+        let elem = target.unchecked_ref::<HtmlElement>();
         let rect = elem.get_bounding_client_rect();
-        let top = rect.top() as i32;
-        let left = rect.left() as i32;
+        let height = rect.height();
+        let width = rect.width();
+        let top = rect.top();
+        let left = rect.left();
 
         let self_rect = self.custom_element.get_bounding_client_rect();
-        let rect_height = self_rect.height() as i32;
-        let rect_width = self_rect.width() as i32;
+        let rect_height = self_rect.height();
+        let rect_width = self_rect.width();
 
         match self.anchor.get() {
-            ModalAnchor::BottomRightTopLeft => (top - rect_height, left - rect_width + 1),
+            ModalAnchor::BottomRightTopLeft => (top - rect_height, left - rect_width + 1.0),
             ModalAnchor::BottomRightBottomLeft => {
-                (top - rect_height + height, left - rect_width + 1)
+                (top - rect_height + height, left - rect_width + 1.0)
             }
-            ModalAnchor::BottomRightTopRight => (top - rect_height + 1, left + width - rect_width),
-            ModalAnchor::BottomLeftTopLeft => (top - rect_height + 1, left),
-            ModalAnchor::TopRightTopLeft => (top, left - rect_width + 1),
-            ModalAnchor::TopRightBottomRight => (top + height - 1, left + width - rect_width),
-            ModalAnchor::TopLeftBottomLeft => ((top + height - 1), left),
+            ModalAnchor::BottomRightTopRight => {
+                (top - rect_height + 1.0, left + width - rect_width)
+            }
+            ModalAnchor::BottomLeftTopLeft => (top - rect_height + 1.0, left),
+            ModalAnchor::TopRightTopLeft => (top, left - rect_width + 1.0),
+            ModalAnchor::TopRightBottomRight => (top + height - 1.0, left + width - rect_width),
+            ModalAnchor::TopLeftBottomLeft => ((top + height - 1.0), left),
         }
     }
 
     async fn open_within_viewport(&self, target: HtmlElement) -> ApiResult<()> {
-        let height = target.offset_height();
-        let width = target.offset_width();
-        let elem = target.clone().unchecked_into::<HtmlElement>();
+        let elem = target.unchecked_ref::<HtmlElement>();
         let rect = elem.get_bounding_client_rect();
-        let top = rect.top() as i32;
-        let left = rect.left() as i32;
+        let width = rect.width();
+        let height = rect.height();
+        let top = rect.top();
+        let left = rect.left();
         *self.target.borrow_mut() = Some(target.clone());
 
         // Default, top left/bottom left
         let msg = ModalMsg::SetPos {
-            top: top + height - 1,
+            top: top + height - 1.0,
             left,
             visible: false,
             rev_vert: false,
@@ -277,6 +281,18 @@ where
             .as_ref()
             .unwrap()
             .send_message_batch(msgs.into_iter().map(ModalMsg::SubMsg).collect())
+    }
+
+    pub fn send_future_batch<Fut>(&self, future: Fut)
+    where
+        Fut: Future + 'static,
+        Fut::Output: SendAsMessage<Modal<T>>,
+    {
+        self.root
+            .borrow()
+            .as_ref()
+            .unwrap()
+            .send_future_batch(future)
     }
 
     /// Open this modal by attaching directly to `document.body` with position

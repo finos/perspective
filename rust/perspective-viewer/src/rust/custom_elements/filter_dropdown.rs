@@ -37,7 +37,7 @@ impl FilterDropDownElement {
     pub fn new(session: Session) -> Self {
         let document = window().unwrap().document().unwrap();
         let dropdown = document
-            .create_element("perspective-filter-dropdown")
+            .create_element("perspective-dropdown")
             .unwrap()
             .unchecked_into::<HtmlElement>();
 

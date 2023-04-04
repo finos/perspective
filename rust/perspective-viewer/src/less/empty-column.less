@@ -1,0 +1,32 @@
+:host {
+    .column-empty {
+        width: 100%;
+    }
+
+    .column-empty-input {
+        position: relative;
+        width: calc(100% - 27px);
+        min-height: 28px;
+        display: flex;
+        align-items: stretch;
+        cursor: auto;
+
+        background-color: #8b868045;
+        border: 1px solid transparent;
+        border-radius: 2px;
+        padding-bottom: 0px;
+        margin-bottom: 4px;
+        min-height: 24px;
+        width: calc(100% - 7px);
+        outline: none;
+        padding-left: 10px;
+        font-size: 12px;
+        font-family: inherit;
+    }
+
+    .column-empty-input:focus {
+        color: var(--plugin--background);
+        background-color: var(--icon--color);
+        border: 1px solid var(--icon--color);
+    }
+}
