@@ -54,6 +54,13 @@ function LayoutButton(props) {
             onMouseOver={props.onHover}
             className={clsx(styles.visButton, active)}
             id={props.name}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+                if(e.key === " " || e.key === "Enter"){
+                    props.onHover(e);
+                }
+            }}
         >
             {props.name}
         </div>
