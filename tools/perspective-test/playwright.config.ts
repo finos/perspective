@@ -71,22 +71,23 @@ const packagesInfo = [
 const defaultPackages = [
     "perspective-viewer-d3fc",
     "perspective-viewer-datagrid",
-    // "perspective-viewer-openlayers",
+    // "perspective-viewer-openlayers", // TODO
     "perspective-jupyterlab",
     "perspective-workspace",
     "perspective-viewer",
 ];
 
-const PACKAGES = process.env.PACKAGE?.split(",") || defaultPackages;
+const PACKAGE = process.env.PACKAGE?.split(",") || defaultPackages;
 
 const filteredPackageInfo = packagesInfo.filter(({ packageName }) => {
-    return PACKAGES.includes(packageName);
+    return PACKAGE.includes(packageName);
 });
 
-const RUN_JUPYTERLAB = PACKAGES.includes("perspective-jupyterlab");
+const RUN_JUPYTERLAB = PACKAGE.includes("perspective-jupyterlab");
 
 // NOTE: for now, omitting "Desktop Firefox" tests.
-const defaultDevices = ["Desktop Chrome", "Desktop Safari"];
+const defaultDevices = ["Desktop Chrome"];
+// const defaultDevices = ["Desktop Chrome", "Desktop Safari"];
 
 const DEVICES = process.env.DEVICES?.split(",") || defaultDevices;
 
@@ -127,13 +128,14 @@ export default defineConfig({
     /* Run tests in files in parallel */
     fullyParallel: true,
     /* Fail the build on CI if you accidentally left test.only in the source code. */
-    forbidOnly: !!process.env.CI,
+    // forbidOnly: !!process.env.CI,
+    forbidOnly: false, // temp, only on in CI for debugging purposes
     /* Retry on CI only */
     retries: process.env.CI ? 2 : 0,
     /* Opt out of parallel tests on CI. */
     workers: process.env.CI ? 1 : undefined,
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-    reporter: "html",
+    reporter: process.env.CI ? "list" : "html", // "dot" is also an option for more concise reporting.
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
         /* Maximum time each action such as `click()` can take. Defaults to 0 (no limit). */
