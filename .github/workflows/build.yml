@@ -639,6 +639,10 @@ jobs:
               env:
                   PSP_SKIP_EMSDK_INSTALL: 1
 
+            - name: Install Playwright Browsers
+              shell: bash
+              run: npx playwright install --with-deps
+
             ################
             # Python
             - name: Install python dependencies
@@ -1168,6 +1172,9 @@ jobs:
               run: yarn --frozen-lockfile
               env:
                   PSP_SKIP_EMSDK_INSTALL: 1
+
+            - name: Install Playwright browsers
+              run: npx playwright install --with-deps
 
             ################
             # Python

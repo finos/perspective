@@ -15,6 +15,8 @@ const args = process.argv.slice(2);
 
 const IS_SCREENSHOTS = args.indexOf("--screenshots") !== -1;
 
+// Question: Cleaning of screenshots can be removed, because they are not currently
+// used, right?
 async function clean_screenshots(scope) {
     if (args.indexOf("--all") !== -1) {
         try {

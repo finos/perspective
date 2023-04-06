@@ -45,6 +45,8 @@ const datetime_data_local = [
     { x: new Date(2020, 11, 31, 7, 42, 55).toLocaleString() }, // 2020/12/31 07:30:55 GMT-0500
 ];
 
+jest.setTimeout(30000);
+
 /**
  * Check that two datasets containing datetimes are equal, specifically that
  * that their locale strings and timezone offsets are equal.

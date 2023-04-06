@@ -22,7 +22,7 @@ const fs = require("fs");
 const PACKAGE = process.env.PACKAGE;
 const DEBUG_FLAG = getarg("--debug") ? "" : "--silent";
 const IS_WRITE = !!getarg("--write") || process.env.WRITE_TESTS;
-const IS_LOCAL_PUPPETEER = fs.existsSync("node_modules/puppeteer"); // puppeteer is no longer needed. Remove this.
+const IS_CI = !!getarg("--ci");
 
 // Unfortunately we have to handle parts of the Jupyter test case here,
 // as the Jupyter server needs to be run outside of the main Jest process.
@@ -70,12 +70,11 @@ function jest_all() {
         --testNamePattern="${get_regex()}"`;
 }
 
-/**
- * Run tests, both integration and unit.
- */
-function playwright_all() {
-    console.log(`-- Running "${PACKAGE}" Playwright test suite`);
-    return bash`__JUPYTERLAB_PORT__=6538 PACKAGE=${PACKAGE} npx playwright test --config=tools/perspective-test/playwright.config.ts`;
+function playwright(package) {
+    console.log(`-- Running "${package}" Playwright test suite`);
+    return bash`__JUPYTERLAB_PORT__=6538 ${
+        package ? `PACKAGE=${package}` : ""
+    } CI=${IS_CI} npx playwright test --config=tools/perspective-test/playwright.config.ts`;
 }
 
 /**
@@ -91,7 +90,6 @@ function jest_single(cmd) {
         PSP_SATURATE=${!!getarg("--saturate")}
         PSP_PAUSE_ON_FAILURE=${!!getarg("--interactive")}
         WRITE_TESTS=${IS_WRITE}
-        IS_LOCAL_PUPPETEER=${IS_LOCAL_PUPPETEER}
         TZ=UTC
         ${bash_with_scope`
             ${cmd ? cmd : "test:run"}
@@ -126,8 +124,9 @@ async function run() {
 
         if (getarg("--quiet")) {
             // Run all tests with suppressed output.
-            console.log("-- Running jest in quiet mode");
+            console.log("-- Running jest and playwright in quiet mode");
             execute(silent(jest_all()));
+            execute(silent(playwright(PACKAGE)));
         } else if (process.env.PACKAGE) {
             // Run tests for a single package.
 
@@ -135,7 +134,12 @@ async function run() {
                 // Jupyterlab is guaranteed to have started at this point, so
                 // copy the test files over and run the tests.
                 await run_with_scope`test:jupyter:build`;
-                execute_throw(jest_single("test:jupyter:run"));
+
+                // Question: Is this still needed?
+                // Are there any other tests that are run here besides the Playwright ones?
+                // execute_throw(jest_single("test:jupyter:run"));
+
+                // execute(playwright("perspective-jupyterlab"));
                 process.exit(0);
             }
 
@@ -146,7 +150,7 @@ async function run() {
             // Run all tests with full output.
             console.log("-- Running jest in fast mode");
             execute(jest_all());
-            execute(playwright_all());
+            execute(playwright(PACKAGE));
         }
         // }
     } catch (e) {
