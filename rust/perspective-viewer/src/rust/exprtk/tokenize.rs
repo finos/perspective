@@ -165,4 +165,10 @@ mod tests {
             Literal("2"),
         ]);
     }
+
+    #[wasm_bindgen_test]
+    fn test_escape_strings() {
+        let s = "'test\\/'";
+        assert_eq!(tokenize(s), vec![Literal("'test\\/'"),]);
+    }
 }
