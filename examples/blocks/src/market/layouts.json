@@ -1,5 +1,37 @@
 [
     {
+        "plugin": "Heatmap",
+        "plugin_config": {},
+        "title": "Heatmap",
+        "group_by": ["bucket(\"timestamp\", 'm')"],
+        "split_by": ["bucket(\"price\", 0.5)"],
+        "columns": ["if(\"side\"=='buy'){-1}else{1}"],
+        "filter": [],
+        "sort": [],
+        "expressions": [
+            "bucket(\"timestamp\", 'm')",
+            "bucket(\"price\", 0.5)",
+            "if(\"side\"=='buy'){-1}else{1}"
+        ],
+        "aggregates": {}
+    },
+    {
+        "plugin": "Heatmap",
+        "plugin_config": {},
+        "title": "Heatmap (Closed)",
+        "group_by": ["bucket(\"timestamp\", 'm')"],
+        "split_by": ["bucket(\"price\", 0.25)"],
+        "columns": ["if(\"side\"=='buy'){-1}else{1}"],
+        "filter": [["status", "==", "closed"]],
+        "sort": [],
+        "expressions": [
+            "bucket(\"timestamp\", 'm')",
+            "bucket(\"price\", 0.25)",
+            "if(\"side\"=='buy'){-1}else{1}"
+        ],
+        "aggregates": {}
+    },
+    {
         "plugin": "Y Scatter",
         "plugin_config": {},
         "title": "Closed Orders ((s) bucket)",
@@ -145,38 +177,6 @@
         "expressions": [
             "if(\"side\"=='buy'){-1}else{1}",
             "bucket(\"price\", 0.5)"
-        ],
-        "aggregates": {}
-    },
-    {
-        "plugin": "Heatmap",
-        "plugin_config": {},
-        "title": "Heatmap",
-        "group_by": ["bucket(\"timestamp\", 'm')"],
-        "split_by": ["bucket(\"price\", 0.5)"],
-        "columns": ["if(\"side\"=='buy'){-1}else{1}"],
-        "filter": [],
-        "sort": [],
-        "expressions": [
-            "bucket(\"timestamp\", 'm')",
-            "bucket(\"price\", 0.5)",
-            "if(\"side\"=='buy'){-1}else{1}"
-        ],
-        "aggregates": {}
-    },
-    {
-        "plugin": "Heatmap",
-        "plugin_config": {},
-        "title": "Heatmap (Closed)",
-        "group_by": ["bucket(\"timestamp\", 'm')"],
-        "split_by": ["bucket(\"price\", 0.25)"],
-        "columns": ["if(\"side\"=='buy'){-1}else{1}"],
-        "filter": [["status", "==", "closed"]],
-        "sort": [],
-        "expressions": [
-            "bucket(\"timestamp\", 'm')",
-            "bucket(\"price\", 0.25)",
-            "if(\"side\"=='buy'){-1}else{1}"
         ],
         "aggregates": {}
     },

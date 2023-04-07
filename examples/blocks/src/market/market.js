@@ -244,9 +244,9 @@ window.addEventListener("DOMContentLoaded", async function () {
     const select = document.querySelector("select");
     const button = document.querySelector("button");
     const viewer = document.querySelector("perspective-viewer");
-    await market.poll(progress);
     viewer.load(gui_table);
     viewer.restore({ theme: "Pro Dark", settings, ...layouts[0] });
+    await market.poll(progress);
     for (const layout of layouts) {
         const option = document.createElement("option");
         option.value = layout.title;

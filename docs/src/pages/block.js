@@ -60,7 +60,7 @@ export default function Block() {
                                 <>
                                     <iframe
                                         width="960"
-                                        height="500"
+                                        height="640"
                                         style={{
                                             border: "1px solid var(--ifm-toc-border-color)",
                                             borderRadius: "10px",

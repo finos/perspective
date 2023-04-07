@@ -1,4 +1,6 @@
 const LOCAL_EXAMPLES = [
+    "editable",
+    "csv",
     "fractal",
     "market",
     "raycasting",
@@ -9,9 +11,6 @@ const LOCAL_EXAMPLES = [
     "superstore",
     "citibike",
     "olympics",
-    "editable",
-    "csv",
-    //"custom",
 ];
 
 exports.LOCAL_EXAMPLES = LOCAL_EXAMPLES;
@@ -20,6 +19,11 @@ exports.get_examples = function get_examples(
     root = "https://perspective.finos.org/"
 ) {
     const standalone = [
+        {
+            img: "https://perspective.finos.org/img/jupyterlab.png",
+            url: "http://beta.mybinder.org/v2/gh/finos/perspective/master?urlpath=lab/tree/examples/jupyter-notebooks",
+            name: "jupyterlab",
+        },
         {
             img: "https://perspective.finos.org/img/mtg_preview.png",
             url: "https://texodus.github.io/mtg-perspective/?seasons-in-the-abyss-67",
@@ -35,11 +39,6 @@ exports.get_examples = function get_examples(
             url: "https://texodus.github.io/nypd-ccrb/",
             name: "nypd ccrb",
         },
-        {
-            img: "https://perspective.finos.org/img/jupyterlab.png",
-            url: "http://beta.mybinder.org/v2/gh/finos/perspective/master?urlpath=lab/tree/examples/jupyter-notebooks",
-            name: "jupyterlab",
-        },
     ];
 
     const hashes = LOCAL_EXAMPLES.map((x) => ({
@@ -48,5 +47,5 @@ exports.get_examples = function get_examples(
         name: x,
     }));
 
-    return standalone.concat(hashes);
+    return hashes.concat(standalone);
 };
