@@ -45,12 +45,7 @@ fn poll(
         js_sys::Reflect::set(&options, &mimetype.into(), js_val)?;
         let item = ClipboardItem::new(&options);
         let items = std::iter::once(item).collect::<js_sys::Array>();
-        let _promise = web_sys::window()
-            .unwrap()
-            .navigator()
-            .clipboard()
-            .into_apierror()?
-            .write(&items.into());
+        let _promise = global::clipboard().write(&items.into());
     } else {
         clone!(js_ref);
         if count == 200 {
@@ -62,9 +57,7 @@ fn poll(
                 .into_js_value()
                 .unchecked_into();
 
-        web_sys::window()
-            .unwrap()
-            .set_timeout_with_callback_and_timeout_and_arguments_0(&f, 50)?;
+        global::window().set_timeout_with_callback_and_timeout_and_arguments_0(&f, 50)?;
     }
 
     Ok(())

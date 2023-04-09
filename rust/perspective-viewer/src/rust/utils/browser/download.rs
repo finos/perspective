@@ -8,18 +8,16 @@
 
 use wasm_bindgen::JsCast;
 
-use crate::utils::ApiResult;
+use crate::utils::*;
 
 pub fn download(name: &str, value: &web_sys::Blob) -> ApiResult<()> {
-    let window = web_sys::window().unwrap();
-    let document = window.document().unwrap();
-    let element: web_sys::HtmlElement = document.create_element("a")?.unchecked_into();
+    let element: web_sys::HtmlElement = global::document().create_element("a")?.unchecked_into();
     let blob_url = web_sys::Url::create_object_url_with_blob(value)?;
     element.set_attribute("download", name)?;
     element.set_attribute("href", &blob_url)?;
     element.style().set_property("display", "none")?;
-    document.body().unwrap().append_child(&element)?;
+    global::body().append_child(&element)?;
     element.click();
-    document.body().unwrap().remove_child(&element)?;
+    global::body().remove_child(&element)?;
     Ok(())
 }

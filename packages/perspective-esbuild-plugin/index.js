@@ -9,7 +9,6 @@
 
 const { WasmPlugin } = require("./wasm.js");
 const { WorkerPlugin } = require("./worker.js");
-const { ReplacePlugin } = require("./replace.js");
 
 exports.PerspectiveEsbuildPlugin = function PerspectiveEsbuildPlugin(
     options = {}
@@ -20,28 +19,9 @@ exports.PerspectiveEsbuildPlugin = function PerspectiveEsbuildPlugin(
         targetdir: options.worker?.targetdir,
     });
 
-    // Rust outputs a `URL()` when an explicit path for the wasm
-    // is not specified.  Esbuild ignores this, but webpack does not,
-    // and we always call this method with an explicit path, so this
-    // plugin strips this URL so webpack builds don't fail.
-    const replace_plugin = ReplacePlugin(
-        /["']perspective_bg\.wasm["']/,
-        "undefined"
-    );
-
     function setup(build) {
         wasm_plugin.setup(build);
         worker_plugin.setup(build);
-        // replace_plugin.setup(build);
-        // build.onResolve({filter: /^[A-Za-z0-9\@]/}, (args) => {
-        //     if (!whitelist || !args.path.startsWith(whitelist)) {
-        //         return {
-        //             path: args.path,
-        //             external: true,
-        //             namespace: "skip-node-modules",
-        //         };
-        //     }
-        // });
     }
 
     return {
@@ -49,5 +29,3 @@ exports.PerspectiveEsbuildPlugin = function PerspectiveEsbuildPlugin(
         setup,
     };
 };
-
-// exports.PerspectiveEsbuildPlugin = exports;

@@ -11,9 +11,9 @@ use std::collections::BTreeMap;
 use std::ops::Deref;
 use std::rc::Rc;
 
-use wasm_bindgen::JsCast;
 use web_sys::HtmlStyleElement;
 
+use crate::utils::*;
 use crate::*;
 
 type CSSResource = (&'static str, &'static str);
@@ -70,13 +70,7 @@ impl StyleCache {
     /// Concert a CSS string to an `HtmlStyleElement`, which are memoized due
     /// to their size and DOM performance impact.
     fn into_style(name: &str, css: &str) -> web_sys::HtmlStyleElement {
-        let elem = web_sys::window()
-            .unwrap()
-            .document()
-            .unwrap()
-            .create_element("style")
-            .unwrap();
-
+        let elem = global::document().create_element("style").unwrap();
         elem.set_text_content(Some(css));
         elem.set_attribute("name", name).unwrap();
         elem.unchecked_into()

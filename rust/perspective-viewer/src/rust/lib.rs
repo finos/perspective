@@ -63,6 +63,10 @@ pub fn get_exprtk_commands() -> ApiResult<Box<[JsValue]>> {
     })
 }
 
+thread_local! {
+    static WINDOW: web_sys::Window = web_sys::window().unwrap();
+}
+
 /// Register this crate's Custom Elements in the browser's current session.
 /// This must occur before calling any public API methods on these Custom
 /// Elements from JavaScript, as the methods themselves won't be defined yet.

@@ -10,7 +10,6 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::str::FromStr;
 
-use gloo::utils::document;
 use js_sys::*;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -306,7 +305,7 @@ impl PerspectiveViewerElement {
     ///   "json", "string" or "arraybuffer" format.
     pub fn restore(&self, update: JsValue) -> ApiFuture<()> {
         tracing::info!("Restoring ViewerConfig");
-        document().blur_active_element();
+        global::document().blur_active_element();
         clone!(self.session, self.renderer, self.root, self.presentation);
         ApiFuture::new(async move {
             let ViewerConfigUpdate {
@@ -563,7 +562,7 @@ impl PerspectiveViewerElement {
     ///   toggle.
     #[wasm_bindgen(js_name = "toggleConfig")]
     pub fn toggle_config(&self, force: Option<bool>) -> ApiFuture<JsValue> {
-        document().blur_active_element();
+        global::document().blur_active_element();
         let root = self.root.clone();
         ApiFuture::new(async move {
             let force = force.map(SettingsUpdate::Update);

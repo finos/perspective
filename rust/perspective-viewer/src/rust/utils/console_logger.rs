@@ -16,6 +16,8 @@ use tracing_subscriber::Layer;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
+use crate::utils::*;
+
 /// A struct to implement the `Visit` visitor pattern trait to process
 /// `tracing::Event`s.
 #[derive(Default)]
@@ -133,8 +135,9 @@ impl<S: Subscriber + for<'a> LookupSpan<'a>> Layer<S> for WasmLogger {
                 .insert::<LogLineBuffer>(new_debug_record);
         }
 
-        let perf = web_sys::window().unwrap().performance().unwrap();
-        perf.mark(&format!("t{:x}", id.into_u64())).unwrap();
+        global::performance()
+            .mark(&format!("t{:x}", id.into_u64()))
+            .unwrap();
     }
 
     fn on_record(&self, id: &tracing::Id, values: &tracing::span::Record<'_>, ctx: Context<'_, S>) {
@@ -147,7 +150,7 @@ impl<S: Subscriber + for<'a> LookupSpan<'a>> Layer<S> for WasmLogger {
 
     fn on_close(&self, id: tracing::Id, ctx: Context<'_, S>) {
         if let Some(span_ref) = ctx.span(&id) {
-            let perf = web_sys::window().unwrap().performance().unwrap();
+            let perf = global::performance();
             let meta = span_ref.metadata();
             let mark = format!("t{:x}", id.into_u64());
             let start = perf

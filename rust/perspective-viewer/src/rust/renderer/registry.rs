@@ -17,6 +17,7 @@ use wasm_bindgen::JsCast;
 use web_sys::*;
 
 use crate::js::plugin::*;
+use crate::utils::*;
 
 thread_local! {
     pub static PLUGIN_REGISTRY: Rc<RefCell<Vec<PluginRecord>>> = Rc::new(RefCell::new(vec![]));
@@ -124,10 +125,7 @@ fn register_default() {
 }
 
 fn create_plugin(tag_name: &str) -> JsPerspectiveViewerPlugin {
-    web_sys::window()
-        .unwrap()
-        .document()
-        .unwrap()
+    global::document()
         .create_element(tag_name)
         .unwrap()
         .unchecked_into()

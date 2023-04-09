@@ -41,12 +41,10 @@ impl Drop for ResizingState {
     /// document will continue to call them, causing runtime exceptions.
     fn drop(&mut self) {
         let result: ApiResult<()> = maybe! {
-            let document = web_sys::window().unwrap().document().unwrap();
-            let body = document.body().unwrap();
             let mousemove = self.mousemove.as_ref().unchecked_ref();
-            body.remove_event_listener_with_callback("mousemove", mousemove)?;
+            global::body().remove_event_listener_with_callback("mousemove", mousemove)?;
             let mouseup = self.mouseup.as_ref().unchecked_ref();
-            body.remove_event_listener_with_callback("mouseup", mouseup)?;
+            global::body().remove_event_listener_with_callback("mouseup", mouseup)?;
             self.release_cursor()?;
             Ok(())
         };
@@ -69,8 +67,6 @@ impl ResizingState {
         let orientation = ctx.props().orientation;
         let reverse = ctx.props().reverse;
         let split_panel = ctx.link();
-        let document = web_sys::window().unwrap().document().unwrap();
-        let body = document.body().unwrap();
         let total = match orientation {
             Orientation::Horizontal => first_elem.offset_width(),
             Orientation::Vertical => first_elem.offset_height(),
@@ -102,7 +98,7 @@ impl ResizingState {
             reverse,
             total,
             alt,
-            body_style: body.style(),
+            body_style: global::body().style(),
             mouseup,
             mousemove,
             pointer_id,
@@ -148,12 +144,10 @@ impl ResizingState {
 
     /// Adds the event listeners, the corollary of `Drop`.
     fn register_listeners(&self) -> ApiResult<()> {
-        let document = web_sys::window().unwrap().document().unwrap();
-        let body = document.body().unwrap();
         let mousemove = self.mousemove.as_ref().unchecked_ref();
-        body.add_event_listener_with_callback("mousemove", mousemove)?;
+        global::body().add_event_listener_with_callback("mousemove", mousemove)?;
         let mouseup = self.mouseup.as_ref().unchecked_ref();
-        Ok(body.add_event_listener_with_callback("mouseup", mouseup)?)
+        Ok(global::body().add_event_listener_with_callback("mouseup", mouseup)?)
     }
 
     /// Helper functions capture and release the global cursor while dragging is

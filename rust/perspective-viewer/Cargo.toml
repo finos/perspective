@@ -9,7 +9,16 @@ license = "Apache-2.0"
 homepage = "https://perspective.finos.org"
 keywords = ["experimental"]
 build = "build.rs"
-include = ["build.rs", "src/**/*", "Cargo.toml", "package.json"]
+include = [
+    "build.rs",
+    "src/**/*",
+    "Cargo.toml",
+    "package.json",
+    "tasks/xbuild/*",
+]
+
+[workspace]
+members = ["tasks/bundle"]
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -41,7 +50,7 @@ wasm-bindgen-test = "0.3.13"
 
 [dependencies]
 # Provides async `Mutex` for locked sections such as `render`
-async-std = "1.9.0"
+async-lock = "2.5.0"
 
 # Allow async methods to be used in traits
 async-trait = "^0.1.52"
@@ -63,10 +72,6 @@ flate2 = "1.0.20"
 
 # General async tools
 futures = "0.3.12"
-
-# Common utils for verbose `wasm_bindgen` patterns, e.g. event listeners and 
-# globals.
-gloo = "0.8.0"
 
 # General iterator improvements
 itertools = "0.10.1"
@@ -100,7 +105,7 @@ tracing = { version = ">=0.1.36", features = ["release_max_level_error"] }
 tracing-subscriber = "0.3.15"
 
 # Browser API bindings
-wasm-bindgen = { version = "=0.2.83", features = ["serde-serialize"] }
+wasm-bindgen = { version = "=0.2.84", features = ["serde-serialize"] }
 
 # Browser `Promise` bindings
 wasm-bindgen-futures = "0.4.20"
