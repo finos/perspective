@@ -146,6 +146,7 @@ impl CustomElementMetadata for PerspectiveViewerElement {
 impl PerspectiveViewerElement {
     #[wasm_bindgen(constructor)]
     pub fn new(elem: web_sys::HtmlElement) -> Self {
+        tracing::debug!("Creating <perspective-viewer>");
         let init = web_sys::ShadowRootInit::new(web_sys::ShadowRootMode::Open);
         let shadow_root = elem
             .attach_shadow(&init)
@@ -193,13 +194,16 @@ impl PerspectiveViewerElement {
     }
 
     #[wasm_bindgen(js_name = "connectedCallback")]
-    pub fn connected_callback(&self) {}
+    pub fn connected_callback(&self) {
+        tracing::debug!("Connected <perspective-viewer>");
+    }
 
     /// Loads a promise to a `JsPerspectiveTable` in this viewer.  Historially,
     /// `<perspective-viewer>` has accepted either a `Promise` or `Table` as an
     /// argument, so we preserve that behavior here with some loss of type
     /// precision.
     pub fn load(&self, table: JsValue) -> ApiFuture<()> {
+        tracing::info!("Loading Table");
         let promise = table
             .clone()
             .dyn_into::<js_sys::Promise>()
@@ -220,6 +224,11 @@ impl PerspectiveViewerElement {
                 let table = JsFuture::from(promise)
                     .await?
                     .unchecked_into::<JsPerspectiveTable>();
+
+                tracing::debug!(
+                    "Successfully loaded {:.0} rows from Table",
+                    table.size().await?
+                );
 
                 session.reset_stats();
                 session.set_table(table).await?;
@@ -245,6 +254,8 @@ impl PerspectiveViewerElement {
                 .take()
                 .ok_or("Already deleted!")?
                 .destroy();
+
+            tracing::info!(table_deleted = result, "Deleted <perspective-viewer>");
             Ok(result)
         }))
     }
@@ -294,6 +305,7 @@ impl PerspectiveViewerElement {
     /// - `update` The config to restore to, as returned by `.save()` in either
     ///   "json", "string" or "arraybuffer" format.
     pub fn restore(&self, update: JsValue) -> ApiFuture<()> {
+        tracing::info!("Restoring ViewerConfig");
         document().blur_active_element();
         clone!(self.session, self.renderer, self.root, self.presentation);
         ApiFuture::new(async move {
@@ -432,6 +444,7 @@ impl PerspectiveViewerElement {
     /// # Arguments
     /// - `all` Whether to clear `expressions` also.
     pub fn reset(&self, reset_expressions: Option<bool>) -> ApiFuture<()> {
+        tracing::info!("Resetting config");
         let root = self.root.clone();
         let all = reset_expressions.unwrap_or_default();
         ApiFuture::new(async move {

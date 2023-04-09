@@ -55,19 +55,54 @@ pub struct ViewerConfig {
     pub view_config: ViewConfig,
 }
 
+// `#[serde(flatten)]` makes messagepack 2x as big as they can no longer be
+// struct fields, so make a tuple alternative for serialization in binary.
+type ViewerConfigBinarySerialFormat<'a> = (
+    &'a String,
+    &'a Value,
+    bool,
+    &'a Option<String>,
+    &'a Option<String>,
+    &'a ViewConfig,
+);
+
+type ViewerConfigBinaryDeserialFormat = (
+    PluginUpdate,
+    Option<Value>,
+    SettingsUpdate,
+    ThemeUpdate,
+    TitleUpdate,
+    ViewConfigUpdate,
+);
+
 impl ViewerConfig {
+    fn token(&self) -> ViewerConfigBinarySerialFormat<'_> {
+        (
+            &self.plugin,
+            &self.plugin_config,
+            self.settings,
+            &self.theme,
+            &self.title,
+            &self.view_config,
+        )
+    }
+
     /// Encode a `ViewerConfig` to a `JsValue` in a supported type.
     pub fn encode(&self, format: &Option<ViewerConfigEncoding>) -> ApiResult<JsValue> {
         match format {
             Some(ViewerConfigEncoding::String) => {
                 let mut encoder = ZlibEncoder::new(Vec::new(), Compression::default());
-                let bytes = rmp_serde::to_vec(self)?;
+                let bytes = rmp_serde::to_vec(&self.token())?;
                 encoder.write_all(&bytes)?;
                 let encoded = encoder.finish()?;
                 Ok(JsValue::from(base64::encode(encoded)))
             }
             Some(ViewerConfigEncoding::ArrayBuffer) => {
-                let array = js_sys::Uint8Array::from(&rmp_serde::to_vec(self).unwrap()[..]);
+                let mut encoder = ZlibEncoder::new(Vec::new(), Compression::default());
+                let bytes = rmp_serde::to_vec(&self.token())?;
+                encoder.write_all(&bytes)?;
+                let encoded = encoder.finish()?;
+                let array = js_sys::Uint8Array::from(&encoded[..]);
                 let start = array.byte_offset();
                 let len = array.byte_length();
                 Ok(array
@@ -106,6 +141,19 @@ pub struct ViewerConfigUpdate {
 }
 
 impl ViewerConfigUpdate {
+    fn from_token(
+        (plugin, plugin_config, settings, theme, title, view_config): ViewerConfigBinaryDeserialFormat,
+    ) -> ViewerConfigUpdate {
+        ViewerConfigUpdate {
+            plugin,
+            plugin_config,
+            settings,
+            theme,
+            title,
+            view_config,
+        }
+    }
+
     /// Decode a `JsValue` into a `ViewerConfigUpdate` by auto-detecting format
     /// from JavaScript type.
     pub fn decode(update: &JsValue) -> ApiResult<Self> {
@@ -115,12 +163,17 @@ impl ViewerConfigUpdate {
             let mut decoder = ZlibDecoder::new(&*bytes);
             let mut decoded = vec![];
             decoder.read_to_end(&mut decoded)?;
-            Ok(rmp_serde::from_slice(&decoded)?)
+            let token = rmp_serde::from_slice(&decoded[..])?;
+            Ok(ViewerConfigUpdate::from_token(token))
         } else if update.is_instance_of::<js_sys::ArrayBuffer>() {
             let uint8array = js_sys::Uint8Array::new(update);
             let mut slice = vec![0; uint8array.length() as usize];
             uint8array.copy_to(&mut slice[..]);
-            Ok(rmp_serde::from_slice(&slice)?)
+            let mut decoder = ZlibDecoder::new(&*slice);
+            let mut decoded = vec![];
+            decoder.read_to_end(&mut decoded)?;
+            let token = rmp_serde::from_slice(&decoded[..])?;
+            Ok(ViewerConfigUpdate::from_token(token))
         } else {
             Ok(update.into_serde_ext()?)
         }

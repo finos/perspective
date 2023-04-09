@@ -40,6 +40,7 @@ pub trait UpdateAndRender: HasRenderer + HasSession {
     }
 }
 
+#[tracing::instrument(level = "debug", skip(session, renderer))]
 async fn update_and_render(session: Session, renderer: Renderer) -> ApiResult<()> {
     let view = session.validate().await?;
     renderer.draw(view.create_view()).await?;

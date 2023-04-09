@@ -164,6 +164,8 @@ impl JsPerspectiveTable {
 
     async_typed!(_schema, schema(&self) -> JsPerspectiveTableSchema);
 
+    async_typed!(_size, size(&self) -> f64);
+
     async_typed!(_view, view(&self, config: &JsPerspectiveViewConfig) -> JsPerspectiveView);
 }
 

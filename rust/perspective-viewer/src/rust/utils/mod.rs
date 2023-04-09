@@ -14,6 +14,7 @@
 mod browser;
 mod clone;
 mod closure;
+mod console_logger;
 mod custom_element;
 mod datetime;
 mod debounce;
@@ -33,6 +34,7 @@ mod tests;
 pub use browser::*;
 pub use clone::*;
 pub use closure::*;
+pub use console_logger::*;
 pub use custom_element::*;
 pub use datetime::*;
 pub use debounce::*;
