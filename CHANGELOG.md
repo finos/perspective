@@ -1,3 +1,18 @@
+# [v2.0.1](https://github.com/finos/perspective/releases/tag/v2.0.1)
+
+_10 April 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.0.0...v2.0.1))
+
+Fixes
+
+- Fix drag/drop behavior for duplicate group/split columns [#2177](https://github.com/finos/perspective/pull/2177)
+- Fix expression editor bug with escaped characters in strings [#2178](https://github.com/finos/perspective/pull/2178)
+
+Misc
+
+- Better logging and build for rust/wasm [#2179](https://github.com/finos/perspective/pull/2179)
+- Reorder examples on `README.md` [#2176](https://github.com/finos/perspective/pull/2176)
+- link for dark mode logo in readme [#2166](https://github.com/finos/perspective/pull/2166)
+
 # [v2.0.0](https://github.com/finos/perspective/releases/tag/v2.0.0)
 
 _4 April 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v1.9.4...v2.0.0))

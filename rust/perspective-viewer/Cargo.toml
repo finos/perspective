@@ -1,6 +1,6 @@
 [package]
 name = "perspective"
-version = "2.0.0"
+version = "2.0.1"
 authors = ["Andrew Stein <steinlink@gmail.com>"]
 edition = "2021"
 description = "A data visualization and analytics component, especially well-suited for large and/or streaming datasets."
