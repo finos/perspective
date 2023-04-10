@@ -1,1 +1,1 @@
-628abc4bbb665bf2862fce49502dff54
+<perspective-workspace id="workspace" side="left"><perspective-viewer slot="One" table="superstore" class="workspace-detail-widget" name="One" theme="Pro Light"><perspective-viewer-d3fc-yarea style="position: absolute; inset: 0px; opacity: 1;"></perspective-viewer-d3fc-yarea></perspective-viewer></perspective-workspace>

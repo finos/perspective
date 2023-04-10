@@ -1,1 +1,17 @@
-57d77e42109e9a1de32016924632bd38
+<pre style="margin:0;overflow:scroll;position:absolute;width:100%;height:100%">"Region (Group by 1)","State (Group by 2)","Furniture|Bookcases|Row ID","Furniture|Bookcases|State","Furniture|Bookcases|Sales","Furniture|Chairs|Row ID","Furniture|Chairs|State","Furniture|Chairs|Sales","Furniture|Tables|Row ID","Furniture|Tables|State","Furniture|Tables|Sales","Office Supplies|Art|Row ID","Office Supplies|Art|State","Office Supplies|Art|Sales","Office Supplies|Storage|Row ID","Office Supplies|Storage|State","Office Supplies|Storage|Sales","Technology|Phones|Row ID","Technology|Phones|State","Technology|Phones|Sales"
+,,67,2,3615.8291999999997,75,2,1563.8760000000002,40,3,3708.3915,68,1,1113.024,17,1,665.88,111,4,3946.0699999999997
+"East",,28,1,3083.43,,,,,,,,,,,,,55,1,1029.95
+"East","New York",,,,,,,,,,,,,,,,55,1,1029.95
+"East","Pennsylvania",28,1,3083.43,,,,,,,,,,,,,,,
+"Central",,39,1,532.3992,,,,,,,,,,17,1,665.88,36,1,1097.544
+"Central","Wisconsin",,,,,,,,,,,,,17,1,665.88,,,
+"Central","Texas",39,1,532.3992,,,,,,,,,,,,,36,1,1097.544
+"South",,,,,75,2,1563.8760000000002,4,1,957.5775,,,,,,,,,
+"South","Florida",,,,,,,4,1,957.5775,,,,,,,,,
+"South","Kentucky",,,,2,1,731.94,,,,,,,,,,,,
+"South","Tennessee",,,,73,1,831.936,,,,,,,,,,,,
+"West",,,,,,,,36,2,2750.8140000000003,68,1,1113.024,,,,20,2,1818.576
+"West","Arizona",,,,,,,,,,68,1,1113.024,,,,,,
+"West","Utah",,,,,,,25,1,1044.63,,,,,,,,,
+"West","California",,,,,,,11,1,1706.184,,,,,,,20,2,1818.576
+</pre>

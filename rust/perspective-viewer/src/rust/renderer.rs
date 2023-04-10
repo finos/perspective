@@ -202,7 +202,7 @@ impl Renderer {
         let name = name.unwrap_or(default_plugin_name.as_str());
         let idx = self
             .find_plugin_idx(name)
-            .ok_or_else(|| JsValue::from(format!("Unkown plugin '{}'", name)))?;
+            .ok_or_else(|| JsValue::from(format!("Unknown plugin '{}'", name)))?;
 
         let changed = !matches!(
             self.0.borrow().plugins_idx,

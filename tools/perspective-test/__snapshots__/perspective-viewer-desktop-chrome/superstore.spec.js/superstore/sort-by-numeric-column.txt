@@ -1,1 +1,29 @@
-e5dce1292a841e3ca9e8296a2a0114e1
+<pre style="margin:0;overflow:scroll;position:absolute;width:100%;height:100%">"Region (Group by 1)","State (Group by 2)","Furniture|Bookcases|Row ID","Furniture|Bookcases|Sales","Furniture|Chairs|Row ID","Furniture|Chairs|Sales","Furniture|Furnishings|Row ID","Furniture|Furnishings|Sales","Furniture|Tables|Row ID","Furniture|Tables|Sales","Office Supplies|Appliances|Row ID","Office Supplies|Appliances|Sales","Office Supplies|Art|Row ID","Office Supplies|Art|Sales","Office Supplies|Binders|Row ID","Office Supplies|Binders|Sales","Office Supplies|Envelopes|Row ID","Office Supplies|Envelopes|Sales","Office Supplies|Fasteners|Row ID","Office Supplies|Fasteners|Sales","Office Supplies|Labels|Row ID","Office Supplies|Labels|Sales","Office Supplies|Paper|Row ID","Office Supplies|Paper|Sales","Office Supplies|Storage|Row ID","Office Supplies|Storage|Sales","Technology|Accessories|Row ID","Technology|Accessories|Sales","Technology|Phones|Row ID","Technology|Phones|Sales"
+,,68,3877.7891999999997,403,2771.7809999999995,612,725.8180000000001,40,3708.3915,227,530.09,416,1287.068,886,722.41,153,317.576,54,15.26,142,95.96000000000001,556,353.08399999999995,640,1847.922,330,245.51999999999998,423,4941.238
+"South",,1,261.96,161,1865.8360000000002,74,97.04,4,957.5775,80,208.16,,,81,16.74,84,200.984,,,,,83,91.43199999999999,124,190.768,,,,
+"South","South Carolina",,,86,301.96,,,,,,,,,,,,,,,,,,,,,,,,
+"South","Virginia",,,,,,,,,,,,,,,,,,,,,70,75.88,,,,,,
+"South","Alabama",,,,,,,,,80,208.16,,,81,16.74,,,,,,,,,,,,,,
+"South","Kentucky",1,261.96,2,731.94,,,,,,,,,,,,,,,,,,,,,,,,
+"South","Florida",,,,,,,4,957.5775,,,,,,,,,,,,,,,49,117.984,,,,
+"South","North Carolina",,,,,,,,,,,,,,,84,200.984,,,,,13,15.552,,,,,,
+"South","Tennessee",,,73,831.936,74,97.04,,,,,,,,,,,,,,,,,75,72.784,,,,
+"East",,28,3083.43,82,390.78200000000004,127,220.73000000000002,,,,,128,103.74400000000001,194,69.572,31,3.264,54,15.26,,,116,46.96,56,208.56,108,75,104,1051.75
+"East","Delaware",,,,,,,,,,,,,,,,,,,,,,,,,48,45,49,21.8
+"East","Pennsylvania",28,3083.43,24,71.372,30,124.2,,,,,66,102.06400000000001,62,16.476,31,3.264,,,,,,,,,,,,
+"East","New York",,,58,319.41,97,96.53,,,,,62,1.68,132,53.096,,,54,15.26,,,116,46.96,56,208.56,60,30,55,1029.95
+"West",,,,,,72,128.62,36,2750.8140000000003,10,114.9,266,1163.8639999999998,328,543.6659999999999,,,,,3,14.62,157,153.20999999999998,144,154.76999999999998,90,104.55,200,2273.608
+"West","Oregon",,,,,,,,,,,,,96,5.682,,,,,,,,,,,,,,
+"West","Washington",,,,,,,,,,,,,14,407.976,,,,,,,,,,,,,,
+"West","Utah",,,,,,,25,1044.63,,,,,,,,,,,,,,,18,55.5,,,,
+"West","Arizona",,,,,,,,,,,68,1113.024,,,,,,,,,,,,,,,69,167.968
+"West","California",,,,,72,128.62,11,1706.184,10,114.9,198,50.84,218,130.00799999999998,,,,,3,14.62,157,153.20999999999998,126,99.27,90,104.55,131,2105.64
+"Central",,39,532.3992,160,515.163,339,279.428,,,137,207.03,22,19.46,283,92.432,38,113.328,,,139,81.34,200,61.482000000000006,316,1293.8239999999998,132,65.97,119,1615.88
+"Central","Wisconsin",,,,,,,,,,,,,,,,,,,,,,,17,665.88,,,,
+"Central","Michigan",,,,,,,,,,,,,,,,,,,,,72,19.05,47,211.96,,,,
+"Central","Illinois",,,67,213.115,,,,,,,,,,,,,,,,,,,85,230.376,,,42,147.168
+"Central","Nebraska",,,,,,,,,23,60.34,22,19.46,,,,,,,,,,,,,,,,
+"Central","Indiana",,,53,89.99,52,6.16,,,,,,,50,38.22,,,,,51,75.18,,,,,,,,
+"Central","Minnesota",,,,,94,53.34,,,99,77.88,,,141,50.42,,,,,88,6.16,93,12.96,,,132,65.97,,
+"Central","Texas",39,532.3992,40,212.058,193,219.928,,,15,68.81,,,92,3.792,38,113.328,,,,,35,29.472,167,185.608,,,77,1468.712
+</pre>

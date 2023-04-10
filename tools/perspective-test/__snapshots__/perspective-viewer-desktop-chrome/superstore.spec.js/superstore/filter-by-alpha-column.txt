@@ -1,1 +1,5 @@
-7673f5e4daaec7e961c48cc3d695f4c9
+<pre style="margin:0;overflow:scroll;position:absolute;width:100%;height:100%">"Region (Group by 1)","State (Group by 2)","Furniture|Bookcases|Row ID","Furniture|Bookcases|State","Furniture|Bookcases|Sales","Furniture|Chairs|Row ID","Furniture|Chairs|State","Furniture|Chairs|Sales","Furniture|Furnishings|Row ID","Furniture|Furnishings|State","Furniture|Furnishings|Sales","Office Supplies|Appliances|Row ID","Office Supplies|Appliances|State","Office Supplies|Appliances|Sales","Office Supplies|Binders|Row ID","Office Supplies|Binders|State","Office Supplies|Binders|Sales","Office Supplies|Envelopes|Row ID","Office Supplies|Envelopes|State","Office Supplies|Envelopes|Sales","Office Supplies|Paper|Row ID","Office Supplies|Paper|State","Office Supplies|Paper|Sales","Office Supplies|Storage|Row ID","Office Supplies|Storage|State","Office Supplies|Storage|Sales","Technology|Phones|Row ID","Technology|Phones|State","Technology|Phones|Sales"
+,,39,1,532.3992,40,1,212.058,193,3,219.928,15,1,68.81,92,2,3.792,38,1,113.328,35,1,29.472,167,2,185.608,77,2,1468.712
+"Central",,39,1,532.3992,40,1,212.058,193,3,219.928,15,1,68.81,92,2,3.792,38,1,113.328,35,1,29.472,167,2,185.608,77,2,1468.712
+"Central","Texas",39,1,532.3992,40,1,212.058,193,3,219.928,15,1,68.81,92,2,3.792,38,1,113.328,35,1,29.472,167,2,185.608,77,2,1468.712
+</pre>

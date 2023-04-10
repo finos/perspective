@@ -1,1 +1,20 @@
-571529ea0e7e0a8402e0ee468478c9be
+<pre style="margin:0;overflow:scroll;position:absolute;width:100%;height:100%">"Category (Group by 1)","Sub-Category (Group by 2)","Furniture|Discount","Furniture|Profit","Furniture|Sales","Furniture|Quantity","Office Supplies|Discount","Office Supplies|Profit","Office Supplies|Sales","Office Supplies|Quantity","Technology|Discount","Technology|Profit","Technology|Sales","Technology|Quantity"
+,,4.869999999999999,-1651.3463000000002,11083.7797,99,8.9,741.1687000000002,5169.369999999999,214,1.5999999999999999,785.6685000000001,5186.758,54
+"Furniture",,4.869999999999999,-1651.3463000000002,11083.7797,99,,,,,,,,
+"Furniture","Bookcases",0.8200000000000001,-1670.115,3877.7891999999997,12,,,,,,,,
+"Furniture","Chairs",1.2,131.2134,2771.7809999999995,29,,,,,,,,
+"Furniture","Furnishings",2.2,-54.9878,725.8180000000001,41,,,,,,,,
+"Furniture","Tables",0.65,-57.45690000000002,3708.3915,17,,,,,,,,
+"Office Supplies",,,,,,8.9,741.1687000000002,5169.369999999999,214,,,,
+"Office Supplies","Appliances",,,,,0.8,5.088799999999999,530.09,24,,,,
+"Office Supplies","Art",,,,,0.6000000000000001,145.71020000000001,1287.068,38,,,,
+"Office Supplies","Binders",,,,,5.300000000000001,223.4431,722.41,54,,,,
+"Office Supplies","Envelopes",,,,,0.6000000000000001,99.32409999999999,317.576,18,,,,
+"Office Supplies","Fasteners",,,,,0,6.2566,15.26,7,,,,
+"Office Supplies","Labels",,,,,0,45.162800000000004,95.96000000000001,10,,,,
+"Office Supplies","Paper",,,,,0.4,160.6517,353.08399999999995,24,,,,
+"Office Supplies","Storage",,,,,1.2,55.53140000000001,1847.922,39,,,,
+"Technology",,,,,,,,,,1.5999999999999999,785.6685000000001,5186.758,54
+"Technology","Accessories",,,,,,,,,0,52.743300000000005,245.51999999999998,13
+"Technology","Phones",,,,,,,,,1.5999999999999999,732.9252,4941.238,41
+</pre>
