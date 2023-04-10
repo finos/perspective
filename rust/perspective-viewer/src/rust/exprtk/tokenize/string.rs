@@ -55,7 +55,7 @@ impl StringFragment {
     const fn len(&self) -> usize {
         match self {
             Self::Literal(s) => *s,
-            Self::EscapedChar => 1,
+            Self::EscapedChar => 2,
             Self::EscapedWS => 0,
         }
     }
