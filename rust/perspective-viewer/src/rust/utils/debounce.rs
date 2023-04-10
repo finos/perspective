@@ -10,7 +10,7 @@ use std::cell::Cell;
 use std::future::Future;
 use std::rc::Rc;
 
-use async_std::sync::Mutex;
+use async_lock::Mutex;
 
 use crate::utils::ApiResult;
 

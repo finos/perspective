@@ -1,14 +1,9 @@
 const { execSync } = require("child_process");
 const fs = require("fs");
-const fflate = require("fflate");
 const { build } = require("@finos/perspective-esbuild-plugin/build");
 const {
     PerspectiveEsbuildPlugin,
 } = require("@finos/perspective-esbuild-plugin");
-const {
-    wasm_opt,
-    wasm_bindgen,
-} = require("@finos/perspective-esbuild-plugin/rust_wasm");
 
 const {
     NodeModulesExternal,
@@ -72,28 +67,9 @@ const INHERIT = {
     stderr: "inherit",
 };
 
-async function compile_rust() {
-    const cargo_debug = IS_DEBUG ? "" : "--release";
-    execSync(`cargo build ${cargo_debug}`, INHERIT);
-    await wasm_bindgen("perspective", {
-        debug: IS_DEBUG,
-        version: "0.2.83",
-        targetdir: "target/build",
-    });
-
-    if (!IS_DEBUG) {
-        await wasm_opt("perspective");
-    }
-
-    // Compress wasm
-    const wasm = fs.readFileSync("dist/pkg/perspective_bg.wasm");
-    const compressed = fflate.compressSync(wasm, { level: 9 });
-    fs.writeFileSync("dist/pkg/perspective_bg.wasm", compressed);
-}
-
 async function build_all() {
     // Rust
-    await compile_rust();
+    execSync(`cargo bundle ${IS_DEBUG ? "" : "--release"}`, INHERIT);
 
     // JavaScript
     execSync("npx tsc --project tsconfig.json", INHERIT);

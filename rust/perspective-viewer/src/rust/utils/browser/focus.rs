@@ -8,7 +8,6 @@
 
 use wasm_bindgen::JsCast;
 use web_sys::{Document, HtmlElement};
-// use gloo::utils::document;
 
 /// Blur the current active elemnt, triggering any blur handlers in the
 /// application (e.g. modals). This is often necessary when a DOM update will

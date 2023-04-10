@@ -86,7 +86,7 @@ fn calc_relative_position(
     height: f64,
     width: f64,
 ) -> ModalAnchor {
-    let window = web_sys::window().unwrap();
+    let window = global::window();
     let rect = elem.get_bounding_client_rect();
     let inner_width = window.inner_width().unwrap().as_f64().unwrap();
     let inner_height = window.inner_height().unwrap().as_f64().unwrap();
@@ -210,15 +210,7 @@ where
         };
 
         self.root.borrow().as_ref().unwrap().send_message(msg);
-
-        let window = web_sys::window().unwrap();
-        window
-            .document()
-            .unwrap()
-            .body()
-            .unwrap()
-            .append_child(&self.custom_element)?;
-
+        global::body().append_child(&self.custom_element)?;
         await_animation_frame().await?;
 
         // Check if the modal has been positioned off-screen and re-locate if necessary
@@ -354,14 +346,7 @@ where
                 *self.blurhandler.borrow_mut() = None;
             }
 
-            web_sys::window()
-                .unwrap()
-                .document()
-                .unwrap()
-                .body()
-                .unwrap()
-                .remove_child(&self.custom_element)?;
-
+            global::body().remove_child(&self.custom_element)?;
             if let Some(blur) = &self.on_blur {
                 blur.emit(());
             }

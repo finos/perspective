@@ -6,7 +6,8 @@
 // of the Apache License 2.0.  The full license can be found in the LICENSE
 // file.
 
-use lazy_static::*;
+use std::sync::LazyLock;
+
 use wasm_bindgen::*;
 use web_sys::*;
 use yew::prelude::*;
@@ -28,20 +29,22 @@ extern "C" {
     pub fn supported_values_of(s: &JsValue) -> js_sys::Array;
 }
 
-lazy_static! {
-    static ref ALL_TIMEZONES: Vec<SelectItem<String>> =
-        supported_values_of(&JsValue::from("timeZone"))
-            .iter()
-            .map(|x| SelectItem::Option(x.as_string().unwrap()))
-            .collect();
-    static ref USER_TIMEZONE: String = js_sys::Reflect::get(
+static ALL_TIMEZONES: LazyLock<Vec<SelectItem<String>>> = LazyLock::new(|| {
+    supported_values_of(&JsValue::from("timeZone"))
+        .iter()
+        .map(|x| SelectItem::Option(x.as_string().unwrap()))
+        .collect()
+});
+
+static USER_TIMEZONE: LazyLock<String> = LazyLock::new(|| {
+    js_sys::Reflect::get(
         &js_sys::Intl::DateTimeFormat::new(&json!([]), &json!({})).resolved_options(),
-        &JsValue::from("timeZone")
+        &JsValue::from("timeZone"),
     )
     .unwrap()
     .as_string()
-    .unwrap();
-}
+    .unwrap()
+});
 
 pub enum DatetimeColumnStyleMsg {
     Reset(DatetimeColumnStyleConfig),

@@ -8,7 +8,7 @@
 
 use wasm_bindgen::JsCast;
 
-use crate::utils::{ApiResult, ToApiError};
+use crate::utils::*;
 use crate::*;
 
 /// Utilities for caret position.  DOM elements have different APIs for this
@@ -21,9 +21,8 @@ pub trait CaretPosition {
 
 impl CaretPosition for web_sys::HtmlElement {
     fn set_caret_position(&self, offset: usize) -> ApiResult<()> {
-        let window = web_sys::window().unwrap();
-        let range = window.document().unwrap().create_range()?;
-        let selection = window.get_selection()?.into_apierror()?;
+        let range = global::document().create_range()?;
+        let selection = global::window().get_selection()?.into_apierror()?;
         range.set_start(self, offset as u32)?;
         range.collapse_with_to_start(true);
         selection.remove_all_ranges()?;

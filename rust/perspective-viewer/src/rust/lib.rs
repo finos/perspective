@@ -9,6 +9,7 @@
 // Required by yew's `html` macro.
 #![recursion_limit = "1024"]
 #![feature(const_type_name)]
+#![feature(lazy_cell)]
 #![feature(macro_metavar_expr)]
 #![feature(anonymous_lifetime_in_impl_trait)]
 #![warn(
@@ -62,6 +63,10 @@ pub fn get_exprtk_commands() -> ApiResult<Box<[JsValue]>> {
     })
 }
 
+thread_local! {
+    static WINDOW: web_sys::Window = web_sys::window().unwrap();
+}
+
 /// Register this crate's Custom Elements in the browser's current session.
 /// This must occur before calling any public API methods on these Custom
 /// Elements from JavaScript, as the methods themselves won't be defined yet.
@@ -71,8 +76,9 @@ pub fn get_exprtk_commands() -> ApiResult<Box<[JsValue]>> {
 #[cfg(not(feature = "define_custom_elements_async"))]
 #[wasm_bindgen(js_name = "defineWebComponents")]
 pub fn js_define_web_components() {
-    tracing_wasm::set_as_global_default();
+    crate::utils::set_global_logging();
     define_web_components!("export * as psp from '../../perspective.js'");
+    tracing::info!("Perspective initialized.");
 }
 
 /// Register Web Components with the global registry, given a Perspective

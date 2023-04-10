@@ -8,7 +8,6 @@
 
 use ::futures::channel::oneshot::*;
 use wasm_bindgen::prelude::*;
-use wasm_bindgen::*;
 
 use crate::utils::*;
 
@@ -38,24 +37,20 @@ pub async fn await_queue_microtask() -> ApiResult<()> {
 pub async fn await_animation_frame() -> ApiResult<()> {
     let (sender, receiver) = channel::<()>();
     let jsfun = Closure::once_into_js(move || sender.send(()).unwrap());
-    web_sys::window()
-        .unwrap()
-        .request_animation_frame(jsfun.unchecked_ref())?;
-
+    global::window().request_animation_frame(jsfun.unchecked_ref())?;
     Ok(receiver.await?)
 }
 
 /// An `async` which awaits the browser's `load` event, which is automatically
 /// bypassed if `document.readyState` indicates this has already occurred.
 pub async fn await_dom_loaded() -> ApiResult<()> {
-    let window = web_sys::window().unwrap();
-    let state = window.document().unwrap().ready_state();
+    let state = global::document().ready_state();
     if state == "complete" || state == "loaded" {
         Ok(())
     } else {
         let (sender, receiver) = channel::<()>();
         let jsfun = Closure::once_into_js(move || sender.send(()).unwrap());
-        window.add_event_listener_with_callback("load", jsfun.unchecked_ref())?;
+        global::window().add_event_listener_with_callback("load", jsfun.unchecked_ref())?;
         Ok(receiver.await?)
     }
 }
@@ -68,8 +63,7 @@ pub async fn set_timeout(timeout: i32) -> ApiResult<()> {
         let _ = sender.send(());
     });
 
-    web_sys::window()
-        .unwrap()
+    global::window()
         .set_timeout_with_callback_and_timeout_and_arguments_0(jsfun.unchecked_ref(), timeout)?;
 
     Ok(receiver.await?)

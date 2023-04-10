@@ -131,10 +131,8 @@ impl FontLoaderProps {
     /// }
     /// ```
     async fn load_fonts_task(self) -> ApiResult<JsValue> {
-        let window = web_sys::window().unwrap();
-        let document = window.document().unwrap();
         await_dom_loaded().await?;
-        let txt = window
+        let txt = global::window()
             .get_computed_style(&self.state.elem)?
             .unwrap()
             .get_property_value("--preload-fonts")?;
@@ -149,7 +147,7 @@ impl FontLoaderProps {
             let task = timeout_font_task(family, weight);
             let mut block_fonts: PromiseSet = vec![ApiFuture::new(task)];
 
-            for entry in font_iter(document.fonts().values()) {
+            for entry in font_iter(global::document().fonts().values()) {
                 let font_face = js_sys::Reflect::get(&entry, js_intern::js_intern!("value"))?
                     .dyn_into::<web_sys::FontFace>()?;
 

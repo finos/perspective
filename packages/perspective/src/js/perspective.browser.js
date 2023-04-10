@@ -18,7 +18,7 @@ import { Decompress } from "fflate";
 import wasm_worker from "../../src/js/perspective.worker.js";
 import wasm from "../../dist/pkg/esm/perspective.cpp.wasm";
 
-const INLINE_WARNING = `Perspective has been compiled in "inline" mode.`;
+let IS_INLINE = false;
 
 function is_gzip(buffer) {
     return new Uint32Array(buffer.slice(0, 4))[0] == 559903;
@@ -53,7 +53,7 @@ const _override = /* @__PURE__ */ (function () {
                     }
 
                     if (_wasm.buffer && _wasm.buffer instanceof ArrayBuffer) {
-                        console.info(INLINE_WARNING);
+                        IS_INLINE = true;
                         if (is_gzip(_wasm.buffer)) {
                             decompressor.push(_wasm, true);
                         } else {
@@ -163,15 +163,18 @@ class WebWorkerClient extends Client {
         this._worker = undefined;
     }
 
+    get transferable() {
+        return this._worker?.transferable || false;
+    }
+
+    get inline() {
+        return IS_INLINE;
+    }
+
     _detect_transferable() {
         var ab = new ArrayBuffer(1);
         this._worker.postMessage(ab, [ab]);
         this._worker.transferable = ab.byteLength === 0;
-        if (!this._worker.transferable) {
-            console.warn("Transferable support not detected");
-        } else {
-            console.debug("Transferable support detected");
-        }
     }
 }
 

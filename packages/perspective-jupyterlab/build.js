@@ -3,7 +3,6 @@ const { WasmPlugin } = require("@finos/perspective-esbuild-plugin/wasm");
 const { WorkerPlugin } = require("@finos/perspective-esbuild-plugin/worker");
 const { AMDLoader } = require("@finos/perspective-esbuild-plugin/amd");
 const { UMDLoader } = require("@finos/perspective-esbuild-plugin/umd");
-const { ReplacePlugin } = require("@finos/perspective-esbuild-plugin/replace");
 const { build } = require("@finos/perspective-esbuild-plugin/build");
 const path = require("path");
 
@@ -39,13 +38,7 @@ const LAB_BUILD = {
     define: {
         global: "window",
     },
-    plugins: [
-        WasmPlugin(true),
-        WorkerPlugin({ inline: true }),
-
-        // See note in `rust/perspective-viewer/build.js`
-        ReplacePlugin(/["']perspective_viewer_bg\.wasm["']/, "undefined"),
-    ],
+    plugins: [WasmPlugin(true), WorkerPlugin({ inline: true })],
     external: ["@jupyter*", "@lumino*"],
     format: "esm",
     loader: {

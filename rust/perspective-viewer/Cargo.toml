@@ -9,7 +9,16 @@ license = "Apache-2.0"
 homepage = "https://perspective.finos.org"
 keywords = ["experimental"]
 build = "build.rs"
-include = ["build.rs", "src/**/*", "Cargo.toml", "package.json"]
+include = [
+    "build.rs",
+    "src/**/*",
+    "Cargo.toml",
+    "package.json",
+    "tasks/xbuild/*",
+]
+
+[workspace]
+members = ["tasks/bundle"]
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -19,15 +28,29 @@ path = "src/rust/lib.rs"
 define_custom_elements_async = []
 default = []
 
+[profile.dev]
+panic = "abort"
+opt-level = "s"
+
+[profile.release]
+panic = "abort"
+opt-level = "z"
+codegen-units = 1
+lto = true
+strip = true
+
 [build-dependencies]
 serde_json = { version = "1.0.59", features = ["raw_value"] }
 procss = { version = "0.1.12" }
 glob = "0.3.0"
 anyhow = "1.0.66"
 
+[dev-dependencies]
+wasm-bindgen-test = "0.3.13"
+
 [dependencies]
 # Provides async `Mutex` for locked sections such as `render`
-async-std = "1.9.0"
+async-lock = "2.5.0"
 
 # Allow async methods to be used in traits
 async-trait = "^0.1.52"
@@ -50,18 +73,14 @@ flate2 = "1.0.20"
 # General async tools
 futures = "0.3.12"
 
-# Common utils for verbose `wasm_bindgen` patterns, e.g. event listeners and 
-# globals.
-gloo = "0.8.0"
-
 # General iterator improvements
 itertools = "0.10.1"
 
 # Performance improvements for common string to JS conversions
 js-intern = "0.3.1"
 
-# Memoize Intl locales
-lazy_static = "1.4.0"
+# JavaScript stdlib bindings
+js-sys = "0.3"
 
 # Parse ExprTK for syntax highlighting.
 nom = "7.1.1"
@@ -70,7 +89,7 @@ nom = "7.1.1"
 num-format = "0.4.4"
 
 # MessagePack serialization
-rmp-serde = "0.15.5"
+rmp-serde = "1.1.1"
 
 # Serialization for tokens and JS APIs
 serde = { version = "1.0", features = ["derive"] }
@@ -78,29 +97,25 @@ serde = { version = "1.0", features = ["derive"] }
 # Support for "unknown"/dictionary types such as `plugin_config`
 serde_json = { version = "1.0.85", features = ["raw_value"] }
 
+# Faster struct serialize/deserialize
 serde-wasm-bindgen = "0.4.5"
-# Async-aware logging that can be disabled at compile-time.
-tracing = { version = ">=0.1.36", features = [
-    "release_max_level_error",
-    "max_level_info",
-] }
 
-# A JS console printer for `tracing`.
-tracing-wasm = ">=0.2.1"
+# Async-aware logging that can be disabled at compile-time.
+tracing = { version = ">=0.1.36", features = ["release_max_level_error"] }
+tracing-subscriber = "0.3.15"
 
 # Browser API bindings
-wasm-bindgen = { version = "=0.2.83", features = ["serde-serialize"] }
+wasm-bindgen = { version = "=0.2.84", features = ["serde-serialize"] }
 
 # Browser `Promise` bindings
 wasm-bindgen-futures = "0.4.20"
 
-# https://github.com/yewstack/yew/issues/2154
+# Web framework
 yew = { version = "0.20.0", features = ["csr"] }
 
-[dependencies.web-sys]
-version = "0.3.59"
-features = [
-    # "Performance",
+# Browser stdlib bindings
+web-sys.version = "0.3.59"
+web-sys.features = [
     "Blob",
     "Clipboard",
     "CssStyleDeclaration",
@@ -116,7 +131,6 @@ features = [
     "DomStringMap",
     "DomTokenList",
     "Element",
-    # "DomTokenList",
     "Event",
     "EventTarget",
     "EventListener",
@@ -124,7 +138,6 @@ features = [
     "FontFaceSet",
     "FontFaceSetIterator",
     "FontFaceSetIteratorResult",
-    # "DocumentFragment",
     "HtmlCollection",
     "HtmlElement",
     "HtmlTextAreaElement",
@@ -132,18 +145,14 @@ features = [
     "HtmlSelectElement",
     "InputEvent",
     "KeyboardEvent",
-    # "MouseEvent",
     "MutationObserver",
     "MutationObserverInit",
     "MutationRecord",
     "Navigator",
     "Node",
     "NodeList",
-    'Performance',
-    # "TouchEvent",
-    # "TouchList",
-    # "Touch",
-    # "WheelEvent",
+    "Performance",
+    "PerformanceMark",
     "Range",
     "ReadableStreamDefaultReader",
     "Selection",
@@ -156,21 +165,3 @@ features = [
     "VisibilityState",
     "Window",
 ]
-
-
-[dependencies.js-sys]
-version = "0.3"
-
-[dev-dependencies]
-wasm-bindgen-test = "0.3.13"
-
-[profile.dev]
-panic = "abort"
-opt-level = "s"
-
-[profile.release]
-panic = "abort"
-opt-level = "z"
-codegen-units = 1
-lto = true
-strip = true
