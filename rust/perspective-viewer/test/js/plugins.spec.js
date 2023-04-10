@@ -52,7 +52,6 @@ async function addTestChartPlugins(page) {
 }
 
 test.beforeEach(async ({ page }) => {
-    await page.pause();
     await setupPage(page, {
         htmlPage:
             "/rust/perspective-viewer/dist/cdn/plugin-priority-order.html",

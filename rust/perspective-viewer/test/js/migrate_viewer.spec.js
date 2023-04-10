@@ -281,14 +281,14 @@ test.beforeEach(async ({ page }) => {
     await addPerspectiveToWindow(page);
 
     await loadTableAsset(page, SUPERSTORE_CSV_PATH, {
-        plugin: "Debug",
+        plugin: "Datagrid",
     });
 });
 
 test.describe("Migrate Viewer", () => {
     test.describe("Viewer config migrations", () => {
         for (const [name, old, current] of TESTS) {
-            test(`Migrate '${name}'`, () => {
+            test(`Migrate '${name}'`, async ({ page }) => {
                 expect(convert(old, { replace_defaults: true })).toEqual(
                     current
                 );

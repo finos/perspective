@@ -1,3 +1,5 @@
+// NOTE: This file contains many Typescript semantic errors due to the use of 
+// page.evaluate() with global vars. There is also logic 
 // @ts-nocheck
 
 import { expect, Page } from "@playwright/test";
@@ -184,9 +186,12 @@ export async function compareContentsToSnapshot(
 ) {
     // Right now this creates a lot of individual files. Its a tradeoff between
     // having a lot of files, or reimplementing the snapshot testing logic.
-    const hash = crypto.createHash("md5").update(contents).digest("hex");
+    // const hash = crypto.createHash("md5").update(contents).digest("hex");
 
-    await expect(hash).toMatchSnapshot(snapshotPath);
+    // await expect(hash).toMatchSnapshot(snapshotPath);
+    // const hash = crypto.createHash("md5").update(contents).digest("hex");
+
+    await expect(contents).toMatchSnapshot(snapshotPath);
 }
 
 export async function compareSVGContentsToSnapshot(
