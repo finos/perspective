@@ -5,7 +5,7 @@
     "theme": "Pro Dark",
     "group_by": ["bucket lon", "bucket lat"],
     "split_by": ["neighborhood"],
-    "columns": ["bucket lon", "bucket lat", null, null, null],
+    "columns": ["lon", "lat", null, null, null],
     "filter": [["lon", "is not null", null]],
     "sort": [],
     "expressions": [
