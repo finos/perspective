@@ -10,6 +10,7 @@
 #![recursion_limit = "1024"]
 #![feature(const_type_name)]
 #![feature(macro_metavar_expr)]
+#![feature(let_chains)]
 #![feature(anonymous_lifetime_in_impl_trait)]
 #![warn(
     clippy::all,

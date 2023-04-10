@@ -103,6 +103,23 @@ impl DragDrop {
         }
     }
 
+    pub fn get_drag_target(&self) -> Option<DragTarget> {
+        match *self.drag_state.borrow() {
+            DragState::DragInProgress(DragFrom {
+                effect: DragEffect::Move(target),
+                ..
+            })
+            | DragState::DragOverInProgress(
+                DragFrom {
+                    effect: DragEffect::Move(target),
+                    ..
+                },
+                _,
+            ) => Some(target),
+            _ => None,
+        }
+    }
+
     pub fn set_drag_image(&self, event: &DragEvent) -> ApiResult<()> {
         event.stop_propagation();
         if let Some(dt) = event.data_transfer() {
