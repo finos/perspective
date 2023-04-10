@@ -233,7 +233,7 @@ impl Component for ColumnSelector {
                 + config.split_by.len()
                 + config.filter.len()
                 + config.sort.len()) as f64,
-            212.0,
+            224.0,
         );
 
         let config_selector = html_nested! {

@@ -30,6 +30,7 @@ pub trait DragContext<T> {
     fn dragleave() -> T;
     fn dragenter(index: usize) -> T;
     fn create(col: InPlaceColumn) -> T;
+    fn is_self_move(effect: DragTarget) -> bool;
 }
 
 #[derive(Properties, Derivative)]
@@ -193,43 +194,54 @@ where
             }
         });
 
+        let invalid_drag: bool;
         let columns_html = {
             let mut columns = ctx
                 .props()
                 .children
                 .iter()
                 .map(|x| (true, Some(x)))
+                .enumerate()
                 .collect::<Vec<_>>();
 
-            if let Some((x, column)) = &ctx.props().is_dragover {
+            invalid_drag = if let Some((x, column)) = &ctx.props().is_dragover {
                 let index = *x;
-                let col_vchild = columns
-                    .iter()
-                    .map(|z| z.1.as_ref().unwrap())
-                    .find(|x| x.props.get_item() == *column)
-                    .cloned();
+                let is_append = index == columns.len();
+                let is_self_move = ctx
+                    .props()
+                    .dragdrop
+                    .get_drag_target()
+                    .map(|x| V::is_self_move(x))
+                    .unwrap_or_default();
 
-                let changed = if !ctx.props().allow_duplicates {
-                    let old_size = columns.len();
-                    columns.retain(|x| x.1.as_ref().unwrap().props.get_item() != *column);
-                    columns.len() < old_size
-                } else {
-                    false
-                };
+                let is_duplicate = columns
+                    .iter()
+                    .position(|x| x.1 .1.as_ref().unwrap().props.get_item() == *column);
+
+                if let Some(duplicate) = is_duplicate && !ctx.props().allow_duplicates &&  !is_append {
+                    columns.remove(duplicate);
+                } else if ctx.props().allow_duplicates && !is_append && is_self_move {
+                    columns.remove(is_duplicate.unwrap());
+                }
 
                 // If inserting into the middle of the list, use
                 // the length of the existing element to prevent
                 // jitter as the underlying dragover zone moves.
                 if index < columns.len() {
-                    columns.insert(index, (false, col_vchild));
+                    columns.insert(index, (usize::MAX, (false, None)));
+                    false
+                } else if (!is_append && !ctx.props().allow_duplicates)
+                    || ((!is_append || !is_self_move)
+                        && (is_duplicate.is_none() || ctx.props().allow_duplicates))
+                {
+                    columns.push((usize::MAX, (false, None)));
+                    false
                 } else {
-                    columns.push((false, col_vchild));
+                    true
                 }
-
-                if changed {
-                    columns.push((true, None));
-                }
-            }
+            } else {
+                false
+            };
 
             columns
                 .into_iter()
@@ -246,23 +258,24 @@ where
                         }
                     });
 
-                    if let (true, Some(column)) = column {
+                    if let (key, (true, Some(column))) = column {
                         html! {
-                            <div class="pivot-column" ondragenter={ dragenter }>
+                            <div { key } class="pivot-column" ondragenter={ dragenter }>
                                 { Html::from(column) }
                                 <span class="row_close" onmousedown={ close }></span>
                             </div>
                         }
-                    } else if let (_, Some(column)) = column {
+                    } else if let (key, (_, Some(column))) = column {
                         html! {
-                            <div class="pivot-column" ondragenter={ dragenter }>
+                            <div { key } class="pivot-column" ondragenter={ dragenter }>
                                 { Html::from(column) }
                                 <span class="row_close" style="opacity:0.3"></span>
                             </div>
                         }
                     } else {
+                        let (key, _) = column;
                         html! {
-                            <div class="pivot-column" ondragenter={ dragenter }>
+                            <div { key }  class="pivot-column" ondragenter={ dragenter }>
                                 <div class="config-drop"></div>
                             </div>
                         }
@@ -287,7 +300,7 @@ where
                     <div class="psp-text-field">
                         <ul class="psp-text-field__input" for={ ctx.props().name }>
                             { columns_html }
-                            if ctx.props().is_dragover.is_none() {
+                            if ctx.props().is_dragover.is_none() || invalid_drag {
                                 <EmptyColumn
                                     { column_dropdown }
                                     { exclude }
