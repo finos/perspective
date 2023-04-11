@@ -1,4 +1,4 @@
-<pre style="margin:0;overflow:scroll;position:absolute;width:100%;height:100%">"State (Group by 1)","Discount","Profit","Sales","Quantity"
+<pre style="margin:0;overflow:scroll;position:absolute;width: 100%;height:100%">"State (Group by 1)","Discount","Profit","Sales","Quantity"
 ,15.370000000000001,-124.5090999999999,21439.9077,367
 "Alabama",0,64.2384,224.9,4
 "Arizona",0.4,174.2904,1280.992,12

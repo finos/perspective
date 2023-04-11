@@ -14,6 +14,11 @@ import {
     SUPERSTORE_CSV_PATH,
 } from "@finos/perspective-test";
 
+test.use({
+    locale: "en-US",
+    timezoneId: "America/New_York",
+});
+
 test.beforeEach(async ({ page }) => {
     await setupPage(page, {
         htmlPage: "/packages/perspective-jupyterlab/dist/umd/resize.html",

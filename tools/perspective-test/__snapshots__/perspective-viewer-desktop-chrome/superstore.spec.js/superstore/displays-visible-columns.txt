@@ -1,4 +1,4 @@
-<pre style="margin:0;overflow:scroll;position:absolute;width:100%;height:100%">"Discount","Profit","Sales","Quantity"
+<pre style="margin:0;overflow:scroll;position:absolute;width: 100%;height:100%">"Discount","Profit","Sales","Quantity"
 0,41.9136,261.96,2
 0,219.582,731.94,3
 0,6.8714,14.62,2

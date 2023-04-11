@@ -1,4 +1,4 @@
-<pre style="margin:0;overflow:scroll;position:absolute;width:100%;height:100%">"State (Group by 1)","Furniture|Discount","Furniture|Profit","Furniture|Sales","Furniture|Quantity","Office Supplies|Discount","Office Supplies|Profit","Office Supplies|Sales","Office Supplies|Quantity","Technology|Discount","Technology|Profit","Technology|Sales","Technology|Quantity"
+<pre style="margin:0;overflow:scroll;position:absolute;width: 100%;height:100%">"State (Group by 1)","Furniture|Discount","Furniture|Profit","Furniture|Sales","Furniture|Quantity","Office Supplies|Discount","Office Supplies|Profit","Office Supplies|Sales","Office Supplies|Quantity","Technology|Discount","Technology|Profit","Technology|Sales","Technology|Quantity"
 ,4.869999999999999,-1651.3463000000002,11083.7797,99,8.9,741.1687000000002,5169.369999999999,214,1.5999999999999999,785.6685000000001,5186.758,54
 "Alabama",,,,,0,64.2384,224.9,4,,,,
 "Arizona",,,,,0.2,111.3024,1113.024,8,0.2,62.988,167.968,4

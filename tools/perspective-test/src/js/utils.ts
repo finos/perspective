@@ -1,5 +1,5 @@
-// NOTE: This file contains many Typescript semantic errors due to the use of 
-// page.evaluate() with global vars. There is also logic 
+// NOTE: This file contains many Typescript semantic errors due to the use of
+// page.evaluate() with global vars. There is also logic
 // @ts-nocheck
 
 import { expect, Page } from "@playwright/test";
@@ -157,6 +157,7 @@ export const getSvgContentString = (selector: string) => async (page: Page) => {
                 default:
                     break;
             }
+
             walk(walker, walker.nextNode());
         }
 
@@ -191,7 +192,16 @@ export async function compareContentsToSnapshot(
     // await expect(hash).toMatchSnapshot(snapshotPath);
     // const hash = crypto.createHash("md5").update(contents).digest("hex");
 
-    await expect(contents).toMatchSnapshot(snapshotPath);
+    const cleanedContents = contents
+    // remove empty style="" attributes
+    .replace(/style=""/g, "")
+    // round all css width styles to the nearest pixel
+    .replace(/width: *\d+\.*\d+/g, (match) => {
+        const width = parseFloat(match.split(":")[1]);
+        return `width: ${Math.round(width)}`;
+    });
+
+    await expect(cleanedContents).toMatchSnapshot(snapshotPath);
 }
 
 export async function compareSVGContentsToSnapshot(
@@ -230,26 +240,29 @@ export async function compareShadowDOMContents(page, snapshotFileName) {
 }
 
 export async function shadow_click(page, ...path) {
-    await page.evaluate(({ path }) => {
-        let elem = document;
-        while (path.length > 0) {
-            if (elem.shadowRoot) {
-                elem = elem.shadowRoot;
+    await page.evaluate(
+        ({ path }) => {
+            let elem = document;
+            while (path.length > 0) {
+                if (elem.shadowRoot) {
+                    elem = elem.shadowRoot;
+                }
+                elem = elem.querySelector(path.shift());
             }
-            elem = elem.querySelector(path.shift());
-        }
 
-        function triggerMouseEvent(node, eventType) {
-            var clickEvent = document.createEvent("MouseEvent");
-            clickEvent.initEvent(eventType, true, true);
-            node.dispatchEvent(clickEvent);
-        }
+            function triggerMouseEvent(node, eventType) {
+                var clickEvent = document.createEvent("MouseEvent");
+                clickEvent.initEvent(eventType, true, true);
+                node.dispatchEvent(clickEvent);
+            }
 
-        triggerMouseEvent(elem, "mouseover");
-        triggerMouseEvent(elem, "mousedown");
-        triggerMouseEvent(elem, "mouseup");
-        triggerMouseEvent(elem, "click");
-    }, { path });
+            triggerMouseEvent(elem, "mouseover");
+            triggerMouseEvent(elem, "mousedown");
+            triggerMouseEvent(elem, "mouseup");
+            triggerMouseEvent(elem, "click");
+        },
+        { path }
+    );
 }
 
 export async function shadow_type(page, content, is_incremental, ...path) {

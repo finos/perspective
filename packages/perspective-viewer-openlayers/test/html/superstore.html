@@ -10,8 +10,8 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <script type="module" src="perspective.js"></script>
-        <script type="module" src="perspective-viewer.js"></script>
+        <script type="module" src="/perspective.js"></script>
+        <script type="module" src="/perspective-viewer.js"></script>
         <script type="module" src="perspective-viewer-openlayers.js"></script>
 
         <style>
@@ -31,20 +31,5 @@
 
     <body>
         <perspective-viewer> </perspective-viewer>
-
-        <script type="module">
-            import perspective from "./perspective.js";
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", "superstore.csv", true);
-            xhr.onload = function () {
-                window.__CSV__ = xhr.response;
-                window.__WORKER__ = perspective.worker();
-                const table = perspective.worker().table(xhr.response);
-                document
-                    .getElementsByTagName("perspective-viewer")[0]
-                    .load(table);
-            };
-            xhr.send(null);
-        </script>
     </body>
 </html>
