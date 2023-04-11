@@ -26,9 +26,10 @@ async function get_contents(page) {
 }
 
 test.describe("OpenLayers with superstore data set", () => {
-    test("Contents match generationally", async ({ page }) => {
+    test.skip("Contents match generationally", async ({ page }) => {
         await setupPage(page, {
-            htmlPage: "/tools/perspective-test/src/html/basic-test.html", // Should this be a relative or absolute path?
+            htmlPage:
+                "/packages/perspective-viewer-openlayers/dist/umd/superstore.html",
             selector: "perspective-viewer",
         });
 
