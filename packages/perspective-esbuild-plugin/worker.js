@@ -22,13 +22,12 @@ exports.WorkerPlugin = function WorkerPlugin(options = {}) {
                     define: {
                         global: "self",
                     },
-                    plugins: [EmptyPlugin(["fs", "path"])],
                     entryNames: "[name]",
                     chunkNames: "[name]",
                     assetNames: "[name]",
                     minify: !process.env.PSP_DEBUG,
                     bundle: true,
-                    sourcemap: false,
+                    sourcemap: true,
                 });
 
                 return {

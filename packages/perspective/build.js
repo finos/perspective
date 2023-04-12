@@ -58,7 +58,8 @@ const BUILD = [
 
 async function build_all() {
     const { default: cpy } = await cpy_mod;
-    await cpy(["../../cpp/perspective/dist/esm/*"], "dist/pkg/esm");
+    await cpy(["../../cpp/perspective/dist/web/*"], "dist/pkg/web");
+    await cpy(["../../cpp/perspective/dist/node/*"], "dist/pkg/node");
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
 }
 

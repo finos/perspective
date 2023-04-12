@@ -23,11 +23,10 @@ const process = require("process");
 const path = require("path");
 const { Decompress } = require("fflate");
 
-const load_perspective =
-    require("../../dist/pkg/esm/perspective.cpp.js").default;
+const load_perspective = require("../../dist/pkg/node/perspective.cpp.js");
 
 const LOCAL_PATH = path.join(process.cwd(), "node_modules");
-const buffer = require("../../dist/pkg/esm/perspective.cpp.wasm").default;
+const buffer = require("../../dist/pkg/node/perspective.cpp.wasm").default;
 
 function deflate(buffer) {
     let parts = [];

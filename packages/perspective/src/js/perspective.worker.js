@@ -7,7 +7,7 @@
  *
  */
 
-import load_perspective from "../../dist/pkg/esm/perspective.cpp.js";
+import load_perspective from "../../dist/pkg/web/perspective.cpp.js";
 import perspective from "./perspective.js";
 
 export default globalThis.perspective = perspective(load_perspective);

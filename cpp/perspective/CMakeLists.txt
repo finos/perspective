@@ -265,7 +265,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
         else()
             set(OPT_FLAGS " \
                 -O3 \
-                -g0 \
+                -g1 \
                 ")
         endif()
     endif()
@@ -514,14 +514,12 @@ if(PSP_WASM_BUILD)
         --source-map-base \"\" \
         --memory-init-file 0 \
         --no-entry \
-        -s EXPORT_ES6=1 \
         -s NO_EXIT_RUNTIME=1 \
         -s NO_FILESYSTEM=1 \
         -s ALLOW_MEMORY_GROWTH=1 \
         -s MODULARIZE=1 \
         -s EXPORT_NAME=\"load_perspective\" \
         -s MAXIMUM_MEMORY=4gb \
-        -s USE_ES6_IMPORT_META=0 \
         -s ERROR_ON_UNDEFINED_SYMBOLS=1 \
     ")
 
@@ -534,8 +532,16 @@ if(PSP_WASM_BUILD)
     add_executable(perspective_cjs src/cpp/emscripten.cpp)
     target_link_libraries(perspective_cjs psp)
     target_compile_definitions(perspective_cjs PRIVATE PSP_ENABLE_WASM=1)
-    set_target_properties(perspective_cjs PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./esm/")
+    target_link_options(perspective_cjs PUBLIC -sENVIRONMENT="node" -sUSE_ES6_IMPORT_META=0 -sEXPORT_ES6=0)
+    set_target_properties(perspective_cjs PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./node/")
     set_target_properties(perspective_cjs PROPERTIES OUTPUT_NAME "perspective.cpp")
+
+    add_executable(perspective_esm src/cpp/emscripten.cpp)
+    target_link_libraries(perspective_esm psp)
+    target_compile_definitions(perspective_esm PRIVATE PSP_ENABLE_WASM=1)
+    target_link_options(perspective_esm PUBLIC -sENVIRONMENT="web" -sUSE_ES6_IMPORT_META=1 -sEXPORT_ES6=1)
+    set_target_properties(perspective_esm PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./web/")
+    set_target_properties(perspective_esm PROPERTIES OUTPUT_NAME "perspective.cpp")
 elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     if(NOT WIN32)
         set(CMAKE_SHARED_LIBRARY_SUFFIX .so)
