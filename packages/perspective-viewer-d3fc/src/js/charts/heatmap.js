@@ -100,4 +100,5 @@ heatmapChart.plugin = {
     },
 };
 
+
 export default heatmapChart;
