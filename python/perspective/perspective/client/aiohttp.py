@@ -48,8 +48,13 @@ class PerspectiveAIOHTTPWebsocketConnection(PerspectiveWebsocketConnection):
             elif msg.type == aiohttp.WSMsgType.CLOSE:
                 return
 
-    async def connect(self, url, on_message, max_message_size) -> None:
-        self._ws_cm = self._session.ws_connect(url)
+    async def connect(self, url, on_message, **websocket_connect_kwargs) -> None:
+        max_message_size = websocket_connect_kwargs.pop("max_message_size", None) or websocket_connect_kwargs.pop("max_msg_size", None) or 1024 * 1024 * 1024
+        self._ws_cm = self._session.ws_connect(
+            url,
+            max_msg_size=max_message_size,
+            **websocket_connect_kwargs,
+        )
         self._ws = await self._ws_cm.__aenter__()
         self._on_message = on_message
         self._task = asyncio.create_task(self._receive_messages())

@@ -65,13 +65,14 @@ class PerspectiveWebsocketClient(PerspectiveClient):
         respond with `pong`."""
         await self.send("ping")
 
-    async def connect(self, url):
+    async def connect(self, url, **websocket_connect_kwargs):
         """Connect to the remote websocket, and send the `init` message to
         assert that the Websocket is alive and accepting connections."""
         await self._websocket.connect(
             url,
             on_message=self.on_message,
-            max_message_size=1024 * 1024 * 1024,
+            max_message_size=websocket_connect_kwargs.pop("max_message_size", 1024 * 1024 * 1024),
+            **websocket_connect_kwargs,
         )
 
         await self.send({"id": -1, "cmd": "init"})

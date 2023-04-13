@@ -35,11 +35,12 @@ class PerspectiveTornadoWebsocketConnection(PerspectiveWebsocketConnection):
     def __init__(self):
         self._ws = None
 
-    async def connect(self, url, on_message, max_message_size) -> None:
+    async def connect(self, url, on_message, **websocket_connect_kwargs) -> None:
         self._ws = await websocket_connect(
             url,
             on_message_callback=on_message,
-            max_message_size=max_message_size,
+            max_message_size=websocket_connect_kwargs.pop("max_message_size", 1024 * 1024 * 1024),
+            **websocket_connect_kwargs,
         )
 
     def periodic(self, callback, interval) -> Periodic:
