@@ -634,3 +634,9 @@ class TestTable(object):
         view.on_update(updater, mode="row")
         tbl.replace(data2)
         assert s.get() is True
+
+    def test_float32_table_construction(self):
+        float_data = [{"a": 1.5, "b": 2.5}, {"a": 3.2, "b": 3.1}]
+        tbl = Table(float_data, index="a")
+        assert tbl.size() == 2
+        assert tbl.schema() == {"a": float, "b": float}

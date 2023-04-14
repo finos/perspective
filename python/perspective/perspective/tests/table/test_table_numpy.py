@@ -982,3 +982,53 @@ class TestTableNumpy(object):
             "x": ["string1", "string3"],
             "y": ["string2", "string4"]
         }
+
+    def test_table_float32_to_float64(self):
+        data = {"a": np.array([1.1, 2.2]).astype(np.float32), "b": np.array([3.3, 4.4]).astype(np.float32)}
+        table = Table(data)
+        assert table.size() == 2
+        schema = table.schema()
+        assert schema == {"a": float, "b": float}
+        assert table.view().to_dict() == {
+            "a": [1.100000023841858, 2.200000047683716],
+            "b": [3.299999952316284, 4.400000095367432]
+        }
+
+    def test_table_float64_to_float32(self):
+        data = {"a": np.array([1.1, 2.2]).astype(np.float64), "b": np.array([3.3, 4.4]).astype(np.float64)}
+        table = Table(data)
+        assert table.size() == 2
+        schema = table.schema()
+        assert schema == {"a": float, "b": float}
+        view = table.view()
+        assert view.to_dict() == {
+            "a": [1.1, 2.2],
+            "b": [3.3, 4.4]
+        }
+        view.schema({"a": np.float32, "b": np.float32})
+        assert view.to_dict() == {
+            "a": [1.1, 2.2],
+            "b": [3.3, 4.4]
+        }
+        data["a"] = data["a"].astype(np.float32)
+        data["b"] = data["b"].astype(np.float32)
+        table = Table(data)
+        assert table.size() == 2
+        schema = table.schema()
+        assert schema == {"a": float, "b": float}
+        view = table.view()
+        assert view.to_dict() == {
+            "a": [1.100000023841858, 2.200000047683716],
+            "b": [3.299999952316284, 4.400000095367432]
+        }
+
+    def test_table_float32_to_float64_with_nulls(self):
+        data = {"a": np.array([1.1, np.nan, 2.2]).astype(np.float32), "b": np.array([3.3, 4.4, np.nan]).astype(np.float32)}
+        table = Table(data)
+        assert table.size() == 3
+        schema = table.schema()
+        assert schema == {"a": float, "b": float}
+        assert table.view().to_dict() == {
+            "a": [1.100000023841858, None, 2.200000047683716],
+            "b": [3.299999952316284, 4.400000095367432, None]
+        }
