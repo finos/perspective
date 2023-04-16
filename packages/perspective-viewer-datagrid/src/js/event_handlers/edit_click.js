@@ -209,7 +209,7 @@ export function clickListener(table, _viewer, event) {
         const is_bool = this.get_psp_type(meta) === "boolean";
         const is_null = event.target.textContent === "-";
         if (is_all_editable && is_editable2 && is_bool && !is_null) {
-            write(table, this, event.target);
+            write_cell(table, this, event.target);
         }
     }
 }

@@ -9,30 +9,26 @@
 
 import { test, expect } from "@playwright/test";
 import {
-    setupPage,
-    loadTableAsset,
-    runAllStandardTests,
     getSvgContentString,
-    SUPERSTORE_CSV_PATH,
+    run_standard_tests,
 } from "@finos/perspective-test";
 
 test.describe("Y Scatter Tests", () => {
-    test("Contents match generationally", async ({ page }) => {
-        await setupPage(page, {
-            htmlPage: "/tools/perspective-test/src/html/basic-test.html", // Should this be a relative or absolute path?
-            selector: "perspective-viewer",
+    test.beforeEach(async ({ page }) => {
+        await page.goto("/tools/perspective-test/src/html/basic-test.html", {
+            waitUntil: "networkidle",
         });
 
-        await loadTableAsset(page, SUPERSTORE_CSV_PATH, {
-            plugin: "Y Scatter",
+        await page.evaluate(async () => {
+            await document.querySelector("perspective-viewer")!.restore({
+                plugin: "Y Scatter",
+            });
         });
-
-        await runAllStandardTests(
-            page,
-            "yscatter",
-            getSvgContentString(
-                "perspective-viewer perspective-viewer-d3fc-yscatter"
-            )
-        );
     });
+    run_standard_tests(
+        "yscatter",
+        getSvgContentString(
+            "perspective-viewer perspective-viewer-d3fc-yscatter"
+        )
+    );
 });

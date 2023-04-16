@@ -10,19 +10,14 @@
 const { convert } = require("@finos/perspective-viewer/dist/cjs/migrate.js");
 import { test, expect } from "@playwright/test";
 import {
-    setupPage,
-    loadWorkspace,
     compareLightDOMContents,
     compareShadowDOMContents,
 } from "@finos/perspective-test";
 
 async function setupTestWorkspace(page) {
-    await setupPage(page, {
-        htmlPage: "/tools/perspective-test/src/html/workspace-test.html",
-        selector: "perspective-workspace",
+    await page.goto("/tools/perspective-test/src/html/workspace-test.html", {
+        waitUntil: "networkidle",
     });
-
-    await loadWorkspace(page);
 }
 
 const TESTS = [
@@ -95,6 +90,9 @@ function runTests(context, compare) {
 
             const converted = convert(JSON.parse(JSON.stringify(old)));
             const config = await page.evaluate(async (config) => {
+                if (!window.__TABLE__) {
+                    return { "FUCK YOU": "ASS" };
+                }
                 const workspace = document.getElementById("workspace");
                 await workspace.restore(config);
                 return await workspace.save();

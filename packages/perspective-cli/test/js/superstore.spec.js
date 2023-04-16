@@ -7,19 +7,15 @@
  *
  */
 
-const path = require("path");
 const puppeteer = require("puppeteer");
 
 const { host } = require("../../src/js/index.js");
-
-jest.setTimeout(30000);
 
 describe("CLI", function () {
     it("Tests something", async () => {
         const options = { port: 0 };
         const server = await host("test/csv/test.csv", options);
         const port = server._server.address().port;
-        console.log(port);
 
         const browser = await puppeteer.launch({ headless: true });
         const page = await browser.newPage();

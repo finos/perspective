@@ -9,19 +9,14 @@
 
 import { test } from "@playwright/test";
 import {
-    setupPage,
-    loadWorkspace,
     compareLightDOMContents,
     compareShadowDOMContents,
 } from "@finos/perspective-test";
 
 async function setupTestWorkspace(page) {
-    await setupPage(page, {
-        htmlPage: "/tools/perspective-test/src/html/workspace-test.html",
-        selector: "perspective-workspace",
+    await page.goto("/tools/perspective-test/src/html/workspace-test.html", {
+        waitUntil: "networkidle",
     });
-
-    await loadWorkspace(page);
 
     await page.evaluate(async () => {
         const viewer = document.createElement("perspective-viewer");

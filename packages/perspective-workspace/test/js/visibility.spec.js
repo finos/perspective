@@ -9,8 +9,6 @@
 
 import { test } from "@playwright/test";
 import {
-    setupPage,
-    loadWorkspace,
     compareLightDOMContents,
     compareShadowDOMContents,
 } from "@finos/perspective-test";
@@ -42,8 +40,8 @@ const BAD_LAYOUT = {
             expressions: [],
             aggregates: {},
             master: false,
-            name: "My Data",
-            table: "myData",
+            name: "one",
+            table: "superstore",
             linked: false,
         },
         PERSPECTIVE_GENERATED_ID_1: {
@@ -59,8 +57,8 @@ const BAD_LAYOUT = {
             expressions: [],
             aggregates: {},
             master: false,
-            name: "My Data",
-            table: "myData",
+            name: "two",
+            table: "superstore",
             linked: false,
         },
     },
@@ -72,48 +70,17 @@ function tests(context, compare) {
             page,
         }) => {
             await page.evaluate(async (layout) => {
-                // const viewer = document.createElement("perspective-viewer");
-                // viewer.setAttribute("table", "superstore");
-                // viewer.setAttribute("name", "one");
-                // viewer.setAttribute("slot", "one");
-                // const viewer2 =
-                //     document.createElement("perspective-viewer");
-                // viewer2.setAttribute("table", "superstore");
-                // viewer2.setAttribute("name", "two");
-                // viewer2.setAttribute("slot", "two");
-                // const workspace = document.getElementById("workspace");
-                // workspace.appendChild(viewer);
-                // workspace.appendChild(viewer2);
-                // await workspace.flush();
-
-                // const datasource = async () => {
-                //     const worker = window.perspective.worker();
-                //     const data = [
-                //         {country: "United States", age: 1},
-                //         {country: "China", age: 1},
-                //         {country: "Russia", age: 2},
-                //         {country: "Germany", age: 3},
-                //         {country: "Canada", age: 2},
-                //         {country: "Australia", age: 3},
-                //         {country: "Great Britain", age: 4},
-                //         {country: "South Korea", age: 1},
-                //     ];
-                //     return worker.table(data);
-                // };
-
-                // window.addEventListener("load", async () => {
-                await window.workspace.tables.set("myData", window.__TABLE__);
                 await window.workspace.restore(layout);
             }, BAD_LAYOUT);
 
-            // await page.evaluate(async () => {
-            //     const viewer = document.body.querySelector(
-            //         'perspective-viewer[name="one"]'
-            //     );
-            //     const workspace = document.getElementById("workspace");
-            //     workspace.removeChild(viewer);
-            //     await workspace.flush();
-            // });
+            await page.evaluate(async () => {
+                const viewer = document.body.querySelector(
+                    'perspective-viewer[name="one"]'
+                );
+                const workspace = document.getElementById("workspace");
+                workspace.removeChild(viewer);
+                await workspace.flush();
+            });
 
             return compare(
                 page,
@@ -124,12 +91,9 @@ function tests(context, compare) {
 }
 
 test.beforeEach(async ({ page }) => {
-    await setupPage(page, {
-        htmlPage: "/tools/perspective-test/src/html/workspace-test.html",
-        selector: "perspective-workspace",
+    await page.goto("/tools/perspective-test/src/html/workspace-test.html", {
+        waitUntil: "networkidle",
     });
-
-    await loadWorkspace(page);
 });
 
 test.describe("Workspace Visibility", () => {

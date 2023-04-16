@@ -41,6 +41,10 @@ declare global {
             tagName: "perspective-viewer-plugin",
             options?: ElementCreationOptions
         ): HTMLPerspectiveViewerPluginElement;
+        querySelector<E extends Element = Element>(selectors: string): E | null;
+        querySelector(
+            selectors: "perspective-viewer"
+        ): HTMLPerspectiveViewerElement | null;
     }
 
     interface CustomElementRegistry {

@@ -8,33 +8,12 @@
  */
 
 const { test } = require("@playwright/test");
-import {
-    setupPage,
-    compareContentsToSnapshot,
-    SUPERSTORE_CSV_PATH,
-} from "@finos/perspective-test";
+import { compareContentsToSnapshot } from "@finos/perspective-test";
 
 test.beforeEach(async ({ page }) => {
-    await setupPage(page, {
-        htmlPage: "/packages/perspective-jupyterlab/dist/umd/resize.html",
-        selector: "#container",
+    await page.goto("/@finos/perspective-jupyterlab/dist/umd/resize.html", {
+        waitUntil: "networkidle",
     });
-
-    await page.evaluate(`(async () => {
-        window.perspective = await import("/perspective.js");
-    })()`);
-
-    await page.evaluate(async (csvPath) => {
-        window.__WIDGET__ = new PerspectiveLumino.PerspectiveWidget();
-        document
-            .getElementById("container")
-            .appendChild(window.__WIDGET__.node);
-        const worker = perspective.worker();
-        const req = await fetch(csvPath);
-        const csv = await req.text();
-        const table = await worker.table(csv);
-        await window.__WIDGET__.load(table);
-    }, SUPERSTORE_CSV_PATH);
 });
 
 test.describe("JupyterLab resize", () => {

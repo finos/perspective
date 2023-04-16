@@ -20,9 +20,6 @@
     "types": "index.d.ts",
     "scripts": {
         "build": "node build.js",
-        "test:build": "cpy \"test/html/*\" dist/umd",
-        "test:run": "jest --rootDir=. --config=../../tools/perspective-test/jest.config.js --color",
-        "test": "npm-run-all test:build test:run",
         "clean": "rimraf dist",
         "clean:screenshots": "rimraf \"test/screenshots/**/*.@(failed|diff).png\""
     },

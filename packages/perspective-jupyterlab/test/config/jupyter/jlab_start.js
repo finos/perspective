@@ -89,6 +89,7 @@ exports.start_jlab = function () {
             [
                 "lab",
                 "--no-browser",
+                "--log-level=CRITICAL",
                 `--port=${process.env.__JUPYTERLAB_PORT__}`,
                 `--config=${process.env.JUPYTER_CONFIG_DIR}/jupyter_notebook_config.json`,
             ],
@@ -96,7 +97,7 @@ exports.start_jlab = function () {
                 env: {
                     ...process.env,
                 },
-                stdio: "inherit",
+                // stdio: "inherit",
             }
         );
 

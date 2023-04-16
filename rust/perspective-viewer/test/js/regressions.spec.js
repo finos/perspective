@@ -8,13 +8,7 @@
  */
 
 import { test } from "@playwright/test";
-import {
-    setupPage,
-    loadTableAsset,
-    addPerspectiveToWindow,
-    compareContentsToSnapshot,
-    SUPERSTORE_CSV_PATH,
-} from "@finos/perspective-test";
+import { compareContentsToSnapshot } from "@finos/perspective-test";
 
 async function get_contents(page) {
     return await page.evaluate(async () => {
@@ -26,15 +20,14 @@ async function get_contents(page) {
 }
 
 test.beforeEach(async ({ page }) => {
-    await setupPage(page, {
-        htmlPage: "/rust/perspective-viewer/dist/cdn/superstore.html",
-        selector: "perspective-viewer",
+    await page.goto("/rust/perspective-viewer/test/html/superstore.html", {
+        waitUntil: "networkidle",
     });
 
-    await addPerspectiveToWindow(page);
-
-    await loadTableAsset(page, SUPERSTORE_CSV_PATH, {
-        plugin: "Debug",
+    await page.evaluate(async () => {
+        await document.querySelector("perspective-viewer").restore({
+            plugin: "Debug",
+        });
     });
 });
 

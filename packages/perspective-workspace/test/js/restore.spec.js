@@ -7,33 +7,16 @@
  *
  */
 
-// const utils = require("@finos/perspective-test");
-// const path = require("path");
-
-// const TEST_ROOT = path.join(__dirname, "..", "..", "..");
-// const PATHS = [
-//     path.join(TEST_ROOT, "dist", "umd"),
-//     path.join(TEST_ROOT, "dist", "theme"),
-//     path.join(TEST_ROOT, "test", "html"),
-//     path.join(TEST_ROOT, "test", "css"),
-//     path.join(TEST_ROOT, "test", "csv"),
-// ];
-
 import { test } from "@playwright/test";
 import {
-    setupPage,
-    loadWorkspace,
     compareLightDOMContents,
     compareShadowDOMContents,
 } from "@finos/perspective-test";
 
 test.beforeEach(async ({ page }) => {
-    await setupPage(page, {
-        htmlPage: "/tools/perspective-test/src/html/workspace-test.html",
-        selector: "perspective-workspace",
+    await page.goto("/tools/perspective-test/src/html/workspace-test.html", {
+        waitUntil: "networkidle",
     });
-
-    await loadWorkspace(page);
 });
 
 function tests(context, compare) {
