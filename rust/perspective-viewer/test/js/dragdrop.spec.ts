@@ -8,82 +8,80 @@
  */
 
 import { test, expect } from "@playwright/test";
-import {
-    setupPage,
-    loadTableAsset,
-    compareSVGContentsToSnapshot,
-    runAllStandardTests,
-    getSvgContentString,
-    SUPERSTORE_CSV_PATH,
-} from "@finos/perspective-test";
-import path from "path";
+// import {
+//
+//     compareSVGContentsToSnapshot,
+//     getSvgContentString,
+//     SUPERSTORE_CSV_PATH,
+// } from "@finos/perspective-test";
+// import path from "path";
 
-async function get_contents(page) {
-    return await page.evaluate(async () => {
-        // @ts-ignore
-        const viewer = document
-            .querySelector("perspective-viewer")
-            .shadowRoot.querySelector("#app_panel");
-        return viewer ? viewer.innerHTML : "MISSING";
-    });
-}
+// async function get_contents(page) {
+//     return await page.evaluate(async () => {
+//         // @ts-ignore
+//         const viewer = document
+//             .querySelector("perspective-viewer")
+//             .shadowRoot.querySelector("#app_panel");
+//         return viewer ? viewer.innerHTML : "MISSING";
+//     });
+// }
 
-async function restore_viewer(page, config) {
-    await page.evaluate(async (config) => {
-        const viewer = document.querySelector("perspective-viewer");
-        // @ts-ignore
-        await viewer.getTable();
-        // @ts-ignore
-        await viewer.restore(config);
-    }, config);
-}
+// async function restore_viewer(page, config) {
+//     await page.evaluate(async (config) => {
+//         const viewer = document.querySelector("perspective-viewer");
+//         // @ts-ignore
+//         await viewer.getTable();
+//         // @ts-ignore
+//         await viewer.restore(config);
+//     }, config);
+// }
 
-async function shadow_elem(page, selector) {
-    return await page.evaluateHandle(async (selector) => {
-        const viewer = document.querySelector("perspective-viewer");
-        // @ts-ignore
-        return viewer.shadowRoot.querySelector(selector);
-    }, selector);
-}
+// async function shadow_elem(page, selector) {
+//     return await page.evaluateHandle(async (selector) => {
+//         const viewer = document.querySelector("perspective-viewer");
+//         // @ts-ignore
+//         return viewer.shadowRoot.querySelector(selector);
+//     }, selector);
+// }
 
-async function drag_and_drop(page, origin, target, skip = false) {
-    page.setDragInterception(true);
-    if (!skip) {
-        await page.evaluate(async () => {
-            const viewer = document.querySelector("perspective-viewer");
-            // @ts-ignore
-            window._dragdrop_finished = false;
-            // @ts-ignore
-            viewer.addEventListener("perspective-config-update", () => {
-                // @ts-ignore
-                window._dragdrop_finished = true;
-            });
-        });
-    }
-    await origin.dragAndDrop(target);
-    if (!skip) {
-        // @ts-ignore
-        await page.waitForFunction(() => window._dragdrop_finished);
-    } else {
-        await page.waitFor(300);
-    }
+// async function drag_and_drop(page, origin, target, skip = false) {
+//     page.setDragInterception(true);
+//     if (!skip) {
+//         await page.evaluate(async () => {
+//             const viewer = document.querySelector("perspective-viewer");
+//             // @ts-ignore
+//             window._dragdrop_finished = false;
+//             // @ts-ignore
+//             viewer.addEventListener("perspective-config-update", () => {
+//                 // @ts-ignore
+//                 window._dragdrop_finished = true;
+//             });
+//         });
+//     }
+//     await origin.dragAndDrop(target);
+//     if (!skip) {
+//         // @ts-ignore
+//         await page.waitForFunction(() => window._dragdrop_finished);
+//     } else {
+//         await page.waitFor(300);
+//     }
 
-    await page.evaluate(async () => {
-        // @ts-ignore
-        window._dragdrop_finished = false;
-        const viewer = document.querySelector("perspective-viewer");
-        // @ts-ignore
-        await viewer.flush();
-    });
-}
+//     await page.evaluate(async () => {
+//         // @ts-ignore
+//         window._dragdrop_finished = false;
+//         const viewer = document.querySelector("perspective-viewer");
+//         // @ts-ignore
+//         await viewer.flush();
+//     });
+// }
 
-async function drag(page, origin, target) {
-    page.setDragInterception(true);
-    origin.drop();
-    await page.waitFor(100);
-    origin.dragAndDrop(target, { delay: 100000 });
-    await page.waitFor(100);
-}
+// async function drag(page, origin, target) {
+//     page.setDragInterception(true);
+//     origin.drop();
+//     await page.waitFor(100);
+//     origin.dragAndDrop(target, { delay: 100000 });
+//     await page.waitFor(100);
+// }
 
 test.describe("Drag and drop", () => {
     test("Drag and Drop tests file is being reach, but all tests are currently skipped", async ({

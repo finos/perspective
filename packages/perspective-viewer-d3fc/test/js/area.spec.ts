@@ -8,23 +8,19 @@
  */
 
 import { test } from "@playwright/test";
-import {
-    setupPage,
-    compareSVGContentsToSnapshot,
-    loadTableAsset,
-    SUPERSTORE_CSV_PATH,
-} from "@finos/perspective-test";
+import { compareSVGContentsToSnapshot } from "@finos/perspective-test";
 
 test.describe("Area Tests", () => {
     test("Contents match generationally", async ({ page }) => {
-        await setupPage(page, {
-            htmlPage: "/tools/perspective-test/src/html/basic-test.html", // Should this be a relative or absolute path?
-            selector: "perspective-viewer",
+        await page.goto("/tools/perspective-test/src/html/basic-test.html", {
+            waitUntil: "networkidle",
         });
 
-        await loadTableAsset(page, SUPERSTORE_CSV_PATH, {
-            plugin: "Y Area",
-            columns: ["Sales"],
+        await page.evaluate(async () => {
+            await document.querySelector("perspective-viewer")!.restore({
+                plugin: "Y Area",
+                columns: ["Sales"],
+            });
         });
 
         await compareSVGContentsToSnapshot(

@@ -51,6 +51,10 @@ function deflate(buffer) {
 }
 const SYNC_SERVER = new (class extends Server {
     init(msg) {
+        let done;
+        this._loaded_promise = new Promise((x) => {
+            done = x;
+        });
         buffer
             .then((buffer) => {
                 return load_perspective({
@@ -62,6 +66,7 @@ const SYNC_SERVER = new (class extends Server {
                 core.init();
                 this.perspective = perspective(core);
                 super.init(msg);
+                done();
             });
     }
 
@@ -74,14 +79,22 @@ const SYNC_CLIENT = new (class extends Client {
     send(msg) {
         SYNC_SERVER.process(msg);
     }
+
+    loaded() {
+        return SYNC_SERVER._loaded_promise;
+    }
 })();
 
 SYNC_CLIENT.send({ id: -1, cmd: "init" });
 
 module.exports = SYNC_CLIENT;
-module.exports.sync_module = () => SYNC_SERVER.perspective;
+module.exports.sync_module = async () => {
+    await SYNC_CLIENT.loaded();
+    return SYNC_SERVER.perspective;
+};
 
 const DEFAULT_ASSETS = [
+    "@finos/perspective-test",
     "@finos/perspective/dist/cdn",
     "@finos/perspective-bench/dist",
     "@finos/perspective-workspace/dist/cdn",

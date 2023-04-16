@@ -8,12 +8,7 @@
  */
 
 import { test } from "@playwright/test";
-import {
-    setupPage,
-    loadTableAsset,
-    runAllStandardTests,
-    SUPERSTORE_CSV_PATH,
-} from "@finos/perspective-test";
+import { run_standard_tests } from "@finos/perspective-test";
 
 async function getDatagridContents(page) {
     return await page.evaluate(async () => {
@@ -25,20 +20,17 @@ async function getDatagridContents(page) {
 }
 
 test.describe("Datagrid with superstore data set", () => {
-    test("Contents match generationally", async ({ page }) => {
-        await setupPage(page, {
-            htmlPage: "/tools/perspective-test/src/html/basic-test.html", // Should this be a relative or absolute path?
-            selector: "perspective-viewer",
+    test.beforeEach(async ({ page }) => {
+        await page.goto("/tools/perspective-test/src/html/basic-test.html", {
+            waitUntil: "networkidle",
         });
 
-        await loadTableAsset(page, SUPERSTORE_CSV_PATH, {
-            plugin: "Datagrid",
+        await page.evaluate(async () => {
+            await document.querySelector("perspective-viewer").restore({
+                plugin: "Datagrid",
+            });
         });
-
-        await runAllStandardTests(
-            page,
-            "perspective-viewer-datagrid",
-            getDatagridContents
-        );
     });
+
+    run_standard_tests("perspective-viewer-datagrid", getDatagridContents);
 });

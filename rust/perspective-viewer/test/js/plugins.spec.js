@@ -8,74 +8,12 @@
  */
 
 import { test, expect } from "@playwright/test";
-import {
-    setupPage,
-    addPerspectiveToWindow,
-    SUPERSTORE_CSV_PATH,
-} from "@finos/perspective-test";
-
-async function addTestChartPlugins(page) {
-    await page.evaluate(async () => {
-        class TestChartPluginHighPriority extends customElements.get(
-            "perspective-viewer-plugin"
-        ) {
-            get name() {
-                return "HighPriority";
-            }
-
-            get priority() {
-                return 10;
-            }
-        }
-
-        class TestChartPluginLowPriority extends customElements.get(
-            "perspective-viewer-plugin"
-        ) {
-            get name() {
-                return "LowPriority";
-            }
-
-            get priority() {
-                return -10;
-            }
-        }
-
-        const Viewer = customElements.get("perspective-viewer");
-        customElements.define("low-priority", TestChartPluginLowPriority);
-        customElements.define("high-priority", TestChartPluginHighPriority);
-        Viewer.registerPlugin("low-priority");
-        Viewer.registerPlugin("high-priority");
-
-        const viewer = document.createElement("perspective-viewer");
-        document.body.appendChild(viewer);
-    });
-}
 
 test.beforeEach(async ({ page }) => {
-    await setupPage(page, {
-        htmlPage:
-            "/rust/perspective-viewer/dist/cdn/plugin-priority-order.html",
-        selector: "#temp-content", // perspective-viewer is added in addTestChartPlugins()
-    });
-
-    // Clear temp body content that is used to help load the page.
-    await page.evaluate(() => {
-        document.body.removeChild(document.querySelector("#temp-content"));
-    });
-
-    await addPerspectiveToWindow(page);
-
-    await addTestChartPlugins(page);
-
-    await page.evaluate(async (csvPath) => {
-        const resp = await fetch(csvPath);
-        window.__CSV__ = await resp.text();
-        window.__WORKER__ = window.perspective.worker();
-        const table = await window.__WORKER__.table(window.__CSV__);
-
-        const viewer = document.querySelector("perspective-viewer");
-        await viewer.load(table);
-    }, SUPERSTORE_CSV_PATH);
+    await page.goto(
+        "/@finos/perspective-viewer/test/html/plugin-priority-order.html",
+        { waitUntil: "networkidle" }
+    );
 });
 
 test.describe("Plugin Priority Order", () => {
@@ -119,7 +57,7 @@ test.describe("Plugin Priority Order", () => {
             settings: false,
             sort: [],
             split_by: [],
-            theme: null,
+            theme: "Pro Light",
             title: null,
         };
 

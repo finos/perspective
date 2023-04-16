@@ -10,15 +10,15 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <link
-            rel="shortcut icon"
-            href="data:image/x-icon;,"
-            type="image/x-icon"
-        />
-        <script type="module" src="/packages/perspective-jupyterlab/dist/umd/lumino.js"></script>
-        <script type="module" src="/perspective.js"></script>
+        <script type="module" src="/@finos/perspective-jupyterlab/dist/umd/lumino.js"></script>
         <script type="module" src="/perspective-viewer-datagrid.js"></script>
-
+        <script type="module">
+            window.__WIDGET__ = new PerspectiveLumino.PerspectiveWidget();
+            document
+                .getElementById("container")
+                .appendChild(window.__WIDGET__.node);
+        </script>
+        <script type="module" src="/load-viewer-csv.js"></script>
         <style>
             perspective-viewer {
                 position: absolute;
@@ -32,21 +32,5 @@
 
     <body>
         <div id="container">hello</div>
-
-        <!-- <script type="module">
-            // import perspective from "./perspective.js";
-            console.log(window.perspective);
-            window.__WIDGET__ = new PerspectiveLumino.PerspectiveWidget();
-            document
-                .getElementById("container")
-                .appendChild(window.__WIDGET__.node);
-            const worker = perspective.worker();
-            (async () => {
-                const req = await fetch("superstore.csv");
-                const csv = await req.text();
-                const table = worker.table(csv);
-                window.__WIDGET__.load(table);
-            })();
-        </script> -->
     </body>
 </html>

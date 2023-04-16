@@ -9,18 +9,15 @@
 
 import { test } from "@playwright/test";
 import {
-    setupPage,
-    loadWorkspace,
     compareLightDOMContents,
     compareShadowDOMContents,
 } from "@finos/perspective-test";
 
 async function createOneWorkspace(page) {
+    // await new Promise((x) => setTimeout(x, 2000));
     await page.evaluate(async () => {
-        document.body.innerHTML = `
-            <perspective-workspace>
-                <perspective-viewer table="superstore"></perspective-viewer>
-            </perspective-workspace>
+        document.querySelector("perspective-workspace").innerHTML = `
+            <perspective-viewer table="superstore"></perspective-viewer>
         `;
 
         const workspace = document.body.querySelector("perspective-workspace");
@@ -33,16 +30,14 @@ async function createOneWorkspace(page) {
 
 async function createMultipleViewers(page) {
     await page.evaluate(async () => {
-        document.body.innerHTML = `
-            <perspective-workspace>
-                <perspective-viewer table="superstore"></perspective-viewer>
-                <perspective-viewer table="superstore"></perspective-viewer>
-            </perspective-workspace>
+        document.querySelector("perspective-workspace").innerHTML = `
+            <perspective-viewer table="superstore"></perspective-viewer>
+            <perspective-viewer table="superstore"></perspective-viewer>
         `;
 
         const workspace = document.body.querySelector("perspective-workspace");
 
-        workspace.tables.set("superstore", window.__TABLE__);
+        // workspace.tables.set("superstore", window.__TABLE__);
 
         await workspace.flush();
     });
@@ -50,28 +45,23 @@ async function createMultipleViewers(page) {
 
 async function createMultipleViewersWithNames(page) {
     await page.evaluate(async () => {
-        document.body.innerHTML = `
-            <perspective-workspace>
-                <perspective-viewer name="Table 1" table="superstore"></perspective-viewer>
-                <perspective-viewer name="Table 2" table="superstore"></perspective-viewer>
-            </perspective-workspace>
+        document.querySelector("perspective-workspace").innerHTML = `
+            <perspective-viewer name="Table 1" table="superstore"></perspective-viewer>
+            <perspective-viewer name="Table 2" table="superstore"></perspective-viewer>
         `;
 
         const workspace = document.body.querySelector("perspective-workspace");
 
-        workspace.tables.set("superstore", window.__TABLE__);
+        // workspace.tables.set("superstore", window.__TABLE__);
 
         await workspace.flush();
     });
 }
 
 test.beforeEach(async ({ page }) => {
-    await setupPage(page, {
-        htmlPage: "/tools/perspective-test/src/html/workspace-test.html",
-        selector: "perspective-workspace",
+    await page.goto("/tools/perspective-test/src/html/workspace-test.html", {
+        waitUntil: "networkidle",
     });
-
-    await loadWorkspace(page);
 });
 
 test.describe("Workspace HTML", () => {

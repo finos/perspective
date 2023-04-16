@@ -8,25 +8,22 @@
  */
 
 import { test, expect } from "@playwright/test";
-import {
-    setupPage,
-    loadTableAsset,
-    compareSVGContentsToSnapshot,
-    SUPERSTORE_CSV_PATH,
-} from "@finos/perspective-test";
+import { compareSVGContentsToSnapshot } from "@finos/perspective-test";
+import { HTMLPerspectiveViewerElement } from "@finos/perspective-viewer";
 
 test.describe("Events test", () => {
     test("perspective-config-update event is fired when series axis is changed", async ({
         page,
     }) => {
-        await setupPage(page, {
-            htmlPage: "/tools/perspective-test/src/html/basic-test.html",
-            selector: "perspective-viewer",
+        await page.goto("/@finos/perspective-test/src/html/basic-test.html", {
+            waitUntil: "networkidle",
         });
 
-        await loadTableAsset(page, SUPERSTORE_CSV_PATH, {
-            plugin: "Y Line",
-            columns: ["Sales", "Profit"],
+        await page.evaluate(async () => {
+            await document.querySelector("perspective-viewer")!.restore({
+                plugin: "Y Line",
+                columns: ["Sales", "Profit"],
+            });
         });
 
         await page.evaluate(async () => {
@@ -45,10 +42,9 @@ test.describe("Events test", () => {
         // @ts-ignore
         const axisLabel = (
             await page.waitForFunction(() =>
-                // @ts-ignore
                 document
-                    .querySelector("perspective-viewer-d3fc-yline")
-                    .shadowRoot.querySelector(".y-label .splitter-label")
+                    .querySelector("perspective-viewer-d3fc-yline")!
+                    .shadowRoot!.querySelector(".y-label .splitter-label")
             )
         ).asElement();
 
@@ -79,14 +75,15 @@ test.describe("Events test", () => {
     test("perspective-config-update event is fired when legend position is changed", async ({
         page,
     }) => {
-        await setupPage(page, {
-            htmlPage: "/tools/perspective-test/src/html/basic-test.html",
-            selector: "perspective-viewer",
+        await page.goto("/@finos/perspective-test/src/html/basic-test.html", {
+            waitUntil: "networkidle",
         });
 
-        await loadTableAsset(page, SUPERSTORE_CSV_PATH, {
-            plugin: "Y Line",
-            columns: ["Sales", "Profit"],
+        await page.evaluate(async () => {
+            await document.querySelector("perspective-viewer")!.restore({
+                plugin: "Y Line",
+                columns: ["Sales", "Profit"],
+            });
         });
 
         await page.evaluate(async () => {

@@ -8,13 +8,7 @@
  */
 
 import { test } from "@playwright/test";
-import {
-    setupPage,
-    loadTableAsset,
-    addPerspectiveToWindow,
-    SUPERSTORE_CSV_PATH,
-    runAllStandardTests,
-} from "@finos/perspective-test";
+import { run_standard_tests } from "@finos/perspective-test";
 
 async function get_contents(page) {
     return await page.evaluate(async () => {
@@ -26,18 +20,20 @@ async function get_contents(page) {
 }
 
 test.describe("Superstore", () => {
-    test("Run simple Superstore tests", async ({ page }) => {
-        await setupPage(page, {
-            htmlPage: "/rust/perspective-viewer/dist/cdn/superstore.html",
-            selector: "perspective-viewer",
+    test.beforeEach(async function init({ page }) {
+        await page.goto(
+            "/@finos/perspective-viewer/test/html/superstore.html",
+            {
+                waitUntil: "networkidle",
+            }
+        );
+
+        await page.evaluate(async () => {
+            await document.querySelector("perspective-viewer").restore({
+                plugin: "Debug",
+            });
         });
-
-        await addPerspectiveToWindow(page);
-
-        await loadTableAsset(page, SUPERSTORE_CSV_PATH, {
-            plugin: "Debug",
-        });
-
-        await runAllStandardTests(page, "superstore", get_contents);
     });
+
+    run_standard_tests("superstore", get_contents);
 });

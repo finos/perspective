@@ -124,7 +124,7 @@ declare module "@finos/perspective" {
         limit?: number;
     };
 
-    export type ColumnName = string;
+    export type ColumnName = string | null;
     export type Expression = string;
     export type Filter = [
         ColumnName,

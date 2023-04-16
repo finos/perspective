@@ -7,33 +7,28 @@
  *
  */
 
-import { test, expect } from "@playwright/test";
+import { test } from "@playwright/test";
 import {
-    setupPage,
-    loadTableAsset,
-    runAllStandardTests,
     getSvgContentString,
-    SUPERSTORE_CSV_PATH,
+    run_standard_tests,
 } from "@finos/perspective-test";
 
 test.describe("X/Y Line Tests", () => {
-    test("Contents match generationally", async ({ page }) => {
-        await setupPage(page, {
-            htmlPage: "/tools/perspective-test/src/html/basic-test.html", // Should this be a relative or absolute path?
-            selector: "perspective-viewer",
+    test.beforeEach(async ({ page }) => {
+        await page.goto("/tools/perspective-test/src/html/basic-test.html", {
+            waitUntil: "networkidle",
         });
 
-        await loadTableAsset(page, SUPERSTORE_CSV_PATH, {
-            plugin: "X/Y Line",
-            columns: ["Sales", "Quantity"],
+        await page.evaluate(async () => {
+            await document.querySelector("perspective-viewer")!.restore({
+                plugin: "X/Y Line",
+                columns: ["Sales", "Quantity"],
+            });
         });
-
-        await runAllStandardTests(
-            page,
-            "xyline",
-            getSvgContentString(
-                "perspective-viewer perspective-viewer-d3fc-xyline"
-            )
-        );
     });
+
+    run_standard_tests(
+        "xyline",
+        getSvgContentString("perspective-viewer perspective-viewer-d3fc-xyline")
+    );
 });

@@ -7,9 +7,10 @@
  *
  */
 
-const perspective = require("../../dist/cjs/perspective.node.js");
+const { test, expect } = require("@playwright/test");
+const perspective = require("@finos/perspective");
+
 const fs = require("fs");
-const path = require("path");
 
 const arr = fs.readFileSync(
     require.resolve("superstore-arrow/superstore.arrow")
@@ -26,16 +27,20 @@ const arr = fs.readFileSync(
 async function leak_test(test, num_iterations = 10000) {
     // warmup
     await test();
-    expect((await perspective.memory_usage()).wasmHeap).toEqual(16777216);
-    // const start = (await perspective.memory_usage()).wasmHeap;
+
+    // TODO Playwright uses the same host instance so this may have grown by
+    // the time the suite runs. Could fix with a nod eagent (and test in other
+    // browsers).
+
+    // expect((await perspective.memory_usage()).wasmHeap).toEqual(16777216);
+    const start = (await perspective.memory_usage()).wasmHeap;
 
     for (var i = 0; i < num_iterations; i++) {
         await test();
     }
 
-    // const end = (await perspective.memory_usage()).wasmHeap;
-    // expect(end).toEqual(start);
-    expect((await perspective.memory_usage()).wasmHeap).toEqual(16777216);
+    // expect((await perspective.memory_usage()).wasmHeap).toEqual(16777216);
+    expect((await perspective.memory_usage()).wasmHeap).toEqual(start);
 }
 
 /**
@@ -66,10 +71,10 @@ function generate_expressions() {
     return expressions;
 }
 
-describe("leaks", function () {
-    describe("view", function () {
-        describe("1-sided", function () {
-            it("to_json does not leak", async () => {
+test.describe("leaks", function () {
+    test.describe("view", function () {
+        test.describe("1-sided", function () {
+            test("to_json does not leak", async () => {
                 const table = await perspective.table(arr.slice());
                 const view = await table.view({ group_by: ["State"] });
                 await leak_test(async function () {
@@ -82,8 +87,8 @@ describe("leaks", function () {
         });
     });
 
-    describe("table", function () {
-        it("update does not leak", async () => {
+    test.describe("table", function () {
+        test("update does not leak", async () => {
             const table = await perspective.table(
                 { x: "integer", y: "string" },
                 { index: "x" }
@@ -105,8 +110,8 @@ describe("leaks", function () {
         });
     });
 
-    describe("expression columns", function () {
-        it("0 sided does not leak", async () => {
+    test.describe("expression columns", function () {
+        test("0 sided does not leak", async () => {
             const table = await perspective.table({
                 a: [1, 2, 3, 4],
                 b: [1.5, 2.5, 3.5, 4.5],
@@ -137,7 +142,7 @@ describe("leaks", function () {
          * not per-view, we should be able to leak test the table creation
          * and view creation.
          */
-        it.skip("0 sided regex does not leak", async () => {
+        test.skip("0 sided regex does not leak", async () => {
             const expressions = [
                 "match(\"a\", '.{1}')",
                 "match_all(\"a\", '[a-z]{1}')",
@@ -162,7 +167,7 @@ describe("leaks", function () {
             });
         });
 
-        it.skip("0 sided string does not leak", async () => {
+        test.skip("0 sided string does not leak", async () => {
             const table = await perspective.table({
                 a: "abcdefghijklmnopqrstuvwxyz".split(""),
             });
@@ -188,7 +193,7 @@ describe("leaks", function () {
             await table.delete();
         });
 
-        it("1 sided does not leak", async () => {
+        test("1 sided does not leak", async () => {
             const table = await perspective.table({
                 a: [1, 2, 3, 4],
                 b: [1.5, 2.5, 3.5, 4.5],
@@ -218,7 +223,7 @@ describe("leaks", function () {
             await table.delete();
         });
 
-        it("2 sided does not leak", async () => {
+        test("2 sided does not leak", async () => {
             const table = await perspective.table({
                 a: [1, 2, 3, 4],
                 b: [1.5, 2.5, 3.5, 4.5],

@@ -1,176 +1,166 @@
-import { defineConfig, devices } from "@playwright/test";
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+import { Project, defineConfig, devices } from "@playwright/test";
 import path from "path";
 import * as dotenv from "dotenv";
+import { getarg } from "../../scripts/script_utils";
 
-/**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
-// TODO: add .perspectiverc to env
 dotenv.config({ path: "./.perspectiverc" });
 
+// TODO Don't hardcode this. AFAICT this can only be accomplished by choosing
+// the port before calling the playwright CLI, via env var.
 const TEST_SERVER_PORT = 6598;
 
-// NOTE: Not using process.cwd() so that playwright command can be called from other directories.
-const TOP_LEVEL_CWD = path.join(__dirname, "../../");
+const RUN_JUPYTERLAB = !!process.env.PSP_JUPYTERLAB_TESTS;
 
-const packagesInfo = [
+const PACKAGE = process.env.PACKAGE?.split(",");
+
+const DEVICES = process.env.DEVICES?.split(",") || [
+    "Desktop Chrome",
+    // "Desktop Firefox",
+    // "Desktop Safari",
+];
+
+function path_convert(input) {
+    const a = path.join(__dirname, input);
+    return a.slice(process.cwd().length + 1);
+}
+
+const BROWSER_PACKAGES = [
     {
         packageName: "perspective-viewer",
-        testDir: path.join(TOP_LEVEL_CWD, "rust/perspective-viewer/test/js"),
-        packageURL:
-            "/rust/perspective-viewer/dist/packages/perspective/dist/umd",
+        testDir: "rust/perspective-viewer/test/js",
     },
-
     {
         packageName: "perspective-viewer-datagrid",
-        testDir: path.join(
-            TOP_LEVEL_CWD,
-            "packages/perspective-viewer-datagrid/test/js"
-        ),
-        packageURL: "/packages/perspective-viewer-datagrid/dist/umd",
+        testDir: "packages/perspective-viewer-datagrid/test/js",
     },
-
     {
         packageName: "perspective-viewer-d3fc",
-        testDir: path.join(
-            TOP_LEVEL_CWD,
-            "packages/perspective-viewer-d3fc/test/js"
-        ),
-        packageURL: "/packages/perspective-viewer-d3fc/dist/umd",
+        testDir: "packages/perspective-viewer-d3fc/test/js",
     },
-
     {
         packageName: "perspective-viewer-openlayers",
-        testDir: path.join(
-            TOP_LEVEL_CWD,
-            "packages/perspective-viewer-openlayers/test/js"
-        ),
-        packageURL: "/packages/perspective-viewer-openlayers/dist/umd",
+        testDir: "packages/perspective-viewer-openlayers/test/js",
     },
-
     {
         packageName: "perspective-jupyterlab",
-        testDir: path.join(
-            TOP_LEVEL_CWD,
-            "packages/perspective-jupyterlab/test/js"
-        ),
-        packageURL: "/packages/perspective-jupyterlab/dist/umd",
+        testDir: "packages/perspective-jupyterlab/test/js",
     },
-
     {
         packageName: "perspective-workspace",
-        testDir: path.join(
-            TOP_LEVEL_CWD,
-            "packages/perspective-workspace/test/js"
-        ),
-        packageURL: "/packages/perspective-workspace/dist/umd",
+        testDir: "packages/perspective-workspace/test/js",
     },
 ];
 
-const defaultPackages = [
-    "perspective-viewer-d3fc",
-    "perspective-viewer-datagrid",
-    // "perspective-viewer-openlayers", // TODO
-    "perspective-jupyterlab",
-    "perspective-workspace",
-    "perspective-viewer",
+const NODE_PACKAGES = [
+    {
+        packageName: "perspective",
+        testDir: "packages/perspective/test/js",
+    },
+    {
+        packageName: "perspective-tz",
+        testDir: "packages/perspective/test/tz",
+    },
 ];
 
-const PACKAGE = process.env.PACKAGE?.split(",") || defaultPackages;
+const BROWSER_AND_PYTHON_PACKAGES = [
+    {
+        packageName: "python-perspective-jupyterlab",
+        testDir: "packages/perspective-jupyterlab/test/jupyter",
+    },
+];
 
-const filteredPackageInfo = packagesInfo.filter(({ packageName }) => {
-    return PACKAGE.includes(packageName);
-});
+//const RUN_JUPYTERLAB = PACKAGE.includes("perspective-jupyterlab");
 
-const RUN_JUPYTERLAB = PACKAGE.includes("perspective-jupyterlab");
-
-// NOTE: for now, omitting "Desktop Firefox" tests.
-const defaultDevices = ["Desktop Chrome"];
-// const defaultDevices = ["Desktop Chrome", "Desktop Safari"];
-
-const DEVICES = process.env.DEVICES?.split(",") || defaultDevices;
-
-const projects = Object.values(filteredPackageInfo).reduce(
-    (acc, { packageName, testDir, packageURL }) => {
-        for (let device of DEVICES) {
-            acc.push({
-                name: `${packageName}-${device
-                    .toLowerCase()
-                    .replace(" ", "-")}`,
-                testDir,
-                use: {
-                    ...devices[device],
-                    packageURL,
-                    baseURL: `http://localhost:${TEST_SERVER_PORT}`,
-                },
-            });
+const PROJECTS = (() => {
+    const acc = new Array();
+    if (RUN_JUPYTERLAB) {
+        for (const pkg of BROWSER_AND_PYTHON_PACKAGES) {
+            for (const device of DEVICES) {
+                acc.push({
+                    name: `${pkg.packageName}-${device
+                        .toLowerCase()
+                        .replace(" ", "-")}`,
+                    testDir: path.join(__dirname, "../../", pkg.testDir),
+                    use: {
+                        ...devices[device],
+                        // baseURL: `http://localhost:${TEST_SERVER_PORT}`,
+                        timezoneId: "UTC",
+                    },
+                });
+            }
+        }
+    } else {
+        for (const pkg of NODE_PACKAGES) {
+            if (PACKAGE == undefined || PACKAGE.includes(pkg.packageName)) {
+                acc.push({
+                    name: `${pkg.packageName}-node`,
+                    testDir: path.join(__dirname, "../../", pkg.testDir),
+                });
+            }
         }
 
-        return acc;
-    },
-    [] as object[]
-);
+        for (const pkg of BROWSER_PACKAGES) {
+            if (PACKAGE == undefined || PACKAGE.includes(pkg.packageName)) {
+                for (const device of DEVICES) {
+                    acc.push({
+                        name: `${pkg.packageName}-${device
+                            .toLowerCase()
+                            .replace(" ", "-")}`,
+                        testDir: path.join(__dirname, "../../", pkg.testDir),
+                        use: {
+                            ...devices[device],
+                            baseURL: `http://localhost:${TEST_SERVER_PORT}`,
+                            timezoneId: "UTC",
+                        },
+                    } as Project);
+                }
+            }
+        }
+    }
 
-/**
- * See https://playwright.dev/docs/test-configuration.
- */
+    return acc;
+})();
+
+// See https://playwright.dev/docs/test-configuration.
 export default defineConfig({
-    /* Maximum time one test can run for. */
-    timeout: 80 * 1000,
+    timeout: 300_000,
     expect: {
-        /**
-         * Maximum time expect() should wait for the condition to be met.
-         * For example in `await expect(locator).toHaveText();`
-         */
-        timeout: 5000,
+        timeout: 100_000,
     },
-    /* Run tests in files in parallel */
-    fullyParallel: true,
-    /* Fail the build on CI if you accidentally left test.only in the source code. */
-    // forbidOnly: !!process.env.CI,
-    forbidOnly: false, // temp, only on in CI for debugging purposes
-    /* Retry on CI only */
     retries: process.env.CI ? 2 : 0,
-    /* Opt out of parallel tests on CI. */
-    workers: process.env.CI ? 1 : undefined,
-    /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-    reporter: process.env.CI ? "list" : "html", // "dot" is also an option for more concise reporting.
-    /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+    // quiet: true,
+    reporter: process.env.CI ? "github" : "list",
+    projects: PROJECTS,
+    outputDir: "dist/results",
     use: {
-        /* Maximum time each action such as `click()` can take. Defaults to 0 (no limit). */
         actionTimeout: 0,
-        // /* Base URL to use in actions like `await page.goto('/')`. */
-        // baseURL: "http://localhost:6598",
-
-        /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
         trace: "on-first-retry",
     },
-
     globalSetup: RUN_JUPYTERLAB
         ? require.resolve(
-              path.join(
-                  TOP_LEVEL_CWD,
-                  "packages/perspective-jupyterlab/test/config/jupyter/globalSetup.ts"
-              )
+              "@finos/perspective-jupyterlab/test/config/jupyter/globalSetup.ts"
           )
-        : undefined,
+        : path.join(__dirname, "src/js/global_startup.ts"),
 
     globalTeardown: RUN_JUPYTERLAB
         ? require.resolve(
-              path.join(
-                  TOP_LEVEL_CWD,
-                  "packages/perspective-jupyterlab/test/config/jupyter/globalTeardown.ts"
-              )
+              "@finos/perspective-jupyterlab/test/config/jupyter/globalTeardown.ts"
           )
-        : undefined,
+        : path.join(__dirname, "src/js/global_teardown.ts"),
 
     snapshotPathTemplate:
-        "__snapshots__/{projectName}/{testFilePath}/{arg}{ext}",
-    projects,
-    /* Run your local dev server before starting the tests */
+        "dist/snapshots/{projectName}/{testFilePath}/{arg}{ext}",
     webServer: {
-        command: "node ../../scripts/start_test_server.js",
+        command: "yarn ts-node src/js/start_test_server.ts",
         port: TEST_SERVER_PORT,
         reuseExistingServer: true,
     },

@@ -9,43 +9,42 @@
 
 import { test } from "@playwright/test";
 import {
-    setupPage,
-    loadTableAsset,
     compareSVGContentsToSnapshot,
-    runAllStandardTests,
     getSvgContentString,
-    SUPERSTORE_CSV_PATH,
+    run_standard_tests,
 } from "@finos/perspective-test";
 
 test.beforeEach(async ({ page }) => {
-    await setupPage(page, {
-        htmlPage: "/tools/perspective-test/src/html/basic-test.html", // Should this be a relative or absolute path?
-        selector: "perspective-viewer",
+    await page.goto("/tools/perspective-test/src/html/basic-test.html", {
+        waitUntil: "networkidle",
     });
 });
 
 test.describe("Scatter Tests", () => {
-    test("Contents match generationally", async ({ page }) => {
-        await loadTableAsset(page, SUPERSTORE_CSV_PATH, {
-            plugin: "X/Y Scatter",
-            columns: ["Sales", "Quantity"],
+    test.beforeEach(async ({ page }) => {
+        await page.evaluate(async () => {
+            await document.querySelector("perspective-viewer")!.restore({
+                plugin: "X/Y Scatter",
+                columns: ["Sales", "Quantity"],
+            });
         });
-
-        await runAllStandardTests(
-            page,
-            "xyscatter",
-            getSvgContentString(
-                "perspective-viewer perspective-viewer-d3fc-xyscatter"
-            )
-        );
     });
+
+    run_standard_tests(
+        "xyscatter",
+        getSvgContentString(
+            "perspective-viewer perspective-viewer-d3fc-xyscatter"
+        )
+    );
 
     test("Scatter charts with a 'label' field render the label", async ({
         page,
     }) => {
-        await loadTableAsset(page, SUPERSTORE_CSV_PATH, {
-            plugin: "X/Y Scatter",
-            columns: ["Sales", "Quantity", null, null, "State"],
+        await page.evaluate(async () => {
+            await document.querySelector("perspective-viewer")!.restore({
+                plugin: "X/Y Scatter",
+                columns: ["Sales", "Quantity", null, null, "State"],
+            });
         });
 
         await compareSVGContentsToSnapshot(
@@ -58,11 +57,13 @@ test.describe("Scatter Tests", () => {
     test("Scatter charts with a 'label' field render the label when a group by operation is applied", async ({
         page,
     }) => {
-        await loadTableAsset(page, SUPERSTORE_CSV_PATH, {
-            plugin: "X/Y Scatter",
-            group_by: ["State"],
-            columns: ["Sales", "Quantity", null, null, "City"],
-            aggregates: { City: "dominant" },
+        await page.evaluate(async () => {
+            await document.querySelector("perspective-viewer")!.restore({
+                plugin: "X/Y Scatter",
+                group_by: ["State"],
+                columns: ["Sales", "Quantity", null, null, "City"],
+                aggregates: { City: "dominant" },
+            });
         });
 
         await compareSVGContentsToSnapshot(

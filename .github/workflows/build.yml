@@ -639,9 +639,9 @@ jobs:
               env:
                   PSP_SKIP_EMSDK_INSTALL: 1
 
-            - name: Install Playwright Browsers
-              shell: bash
-              run: npx playwright install --with-deps
+            # - name: Install Playwright Browsers
+            #   shell: bash
+            #   run: npx playwright install --with-deps
 
             ################
             # Python
@@ -689,6 +689,11 @@ jobs:
 
             - uses: actions/download-artifact@v3
               with:
+                  name: perspective-viewer-openlayers-dist
+                  path: packages/perspective-viewer-openlayers/dist
+
+            - uses: actions/download-artifact@v3
+              with:
                   name: perspective-workspace-dist
                   path: packages/perspective-workspace/dist
 
@@ -701,7 +706,7 @@ jobs:
             # WebAssembly #
             ###############
             - name: WebAssembly Test
-              run: yarn test_js --debug --ci
+              run: yarn test_js --ci
 
     ##########################################################################################################################
     ##########################################################################################################################
@@ -1104,13 +1109,13 @@ jobs:
 
             - uses: actions/download-artifact@v3
               with:
-                name: nbextension-dist
-                path: python/perspective/perspective/nbextension
+                  name: nbextension-dist
+                  path: python/perspective/perspective/nbextension
 
             - uses: actions/download-artifact@v3
               with:
-                name: labextension-dist
-                path: python/perspective/perspective/labextension
+                  name: labextension-dist
+                  path: python/perspective/perspective/labextension
 
             ##########
             # Caches #
@@ -1172,9 +1177,6 @@ jobs:
               run: yarn --frozen-lockfile
               env:
                   PSP_SKIP_EMSDK_INSTALL: 1
-
-            - name: Install Playwright browsers
-              run: npx playwright install --with-deps
 
             ################
             # Python

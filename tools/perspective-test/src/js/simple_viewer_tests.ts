@@ -7,219 +7,209 @@
  *
  */
 
-import { Page } from "@playwright/test";
+import { Page, test } from "@playwright/test";
 import { getSvgContentString, compareContentsToSnapshot } from "./utils";
+import type { HTMLPerspectiveViewerElement } from "@finos/perspective-viewer";
 
 export type ContentExtractor = (page: any) => Promise<string>;
 
 async function restoreTable(page, tableSettings: any) {
     return page.evaluate(async (tableSettings) => {
-        const viewer = document.querySelector("perspective-viewer");
-        // @ts-ignore
+        const viewer: HTMLPerspectiveViewerElement =
+            document.querySelector("perspective-viewer")!;
         await viewer.restore(tableSettings);
     }, tableSettings);
 }
 
-async function runSimpleCompareTest(
-    page,
+function runSimpleCompareTest(
     tableSettings: any,
     extractContent: ContentExtractor,
     snapshotPath: string[]
 ) {
-    await restoreTable(page, tableSettings);
-    const content = await extractContent(page);
-
-    await compareContentsToSnapshot(content, snapshotPath);
+    test(snapshotPath[1], async ({ page }) => {
+        await restoreTable(page, tableSettings);
+        const content = await extractContent(page);
+        await compareContentsToSnapshot(content, snapshotPath);
+    });
 }
 
 export async function runRowAndColumnTests(
-    page,
     context: string,
     extractContent: ContentExtractor
 ) {
-    // Show a grid without any settings applied.
-    // FYI/NOTE: this currently doesn't have any svgs, so is empty when using with d3fc tests.
-    await page.evaluate(async () => {
-        const viewer = document.querySelector("perspective-viewer");
-        // @ts-ignore
-        await viewer.getTable(); // Not sure why this is needed...
-        // @ts-ignore
-        await viewer.restore({ settings: true });
-    });
-    const content = await getSvgContentString("perspective-viewer")(page);
-    await compareContentsToSnapshot(content, [
-        context,
-        `show-grid-no-settings.txt`,
-    ]);
-
-    // Displays visible columns.
-    await restoreTable(page, {
-        columns: ["Discount", "Profit", "Sales", "Quantity"],
+    test("Show grid no settings", async ({ page }) => {
+        await page.evaluate(async () => {
+            const viewer: HTMLPerspectiveViewerElement =
+                document.querySelector("perspective-viewer")!;
+            await viewer.getTable(); // Not sure why this is needed...
+            await viewer.restore({ settings: true });
+        });
+        const content = await getSvgContentString("perspective-viewer")(page);
+        await compareContentsToSnapshot(content, [
+            context,
+            `show-grid-no-settings.txt`,
+        ]);
     });
 
-    const visibleColumnContent = await extractContent(page);
+    test("Displays visible columns", async ({ page }) => {
+        await restoreTable(page, {
+            columns: ["Discount", "Profit", "Sales", "Quantity"],
+        });
 
-    await compareContentsToSnapshot(visibleColumnContent, [
-        context,
-        `displays-visible-columns.txt`,
-    ]);
+        const visibleColumnContent = await extractContent(page);
+
+        await compareContentsToSnapshot(visibleColumnContent, [
+            context,
+            `displays-visible-columns.txt`,
+        ]);
+    });
 }
 
-export async function runPivotTests(
-    page,
+export function runPivotTests(
     context: string,
     extractContent: ContentExtractor
 ) {
-    // Pivot by a row
-    await runSimpleCompareTest(
-        page,
-        {
-            group_by: ["State"],
-            settings: true,
-        },
-        extractContent,
-        [context, `pivot-by-row.txt`]
-    );
+    test.describe("Pivot tests", () => {
+        // Pivot by a row
+        runSimpleCompareTest(
+            {
+                group_by: ["State"],
+                settings: true,
+            },
+            extractContent,
+            [context, `pivot-by-row.txt`]
+        );
 
-    // Pivot by two rows
-    await runSimpleCompareTest(
-        page,
-        {
-            group_by: ["Category", "Sub-Category"],
-            settings: true,
-        },
-        extractContent,
-        [context, `pivot-by-two-rows.txt`]
-    );
+        // Pivot by two rows
+        runSimpleCompareTest(
+            {
+                group_by: ["Category", "Sub-Category"],
+                settings: true,
+            },
+            extractContent,
+            [context, `pivot-by-two-rows.txt`]
+        );
 
-    // Pivot by a column
-    await runSimpleCompareTest(
-        page,
-        {
-            split_by: ["Category"],
-            settings: true,
-        },
-        extractContent,
-        [context, `pivot-by-column.txt`]
-    );
+        // Pivot by a column
+        runSimpleCompareTest(
+            {
+                split_by: ["Category"],
+                settings: true,
+            },
+            extractContent,
+            [context, `pivot-by-column.txt`]
+        );
 
-    // Pivot by a row and a column
-    await runSimpleCompareTest(
-        page,
-        {
-            group_by: ["State"],
-            split_by: ["Category"],
-            settings: true,
-        },
-        extractContent,
-        [context, `pivot-by-row-and-column.txt`]
-    );
+        // Pivot by a row and a column
+        runSimpleCompareTest(
+            {
+                group_by: ["State"],
+                split_by: ["Category"],
+                settings: true,
+            },
+            extractContent,
+            [context, `pivot-by-row-and-column.txt`]
+        );
 
-    // Pivot by two rows and two columns
-    await runSimpleCompareTest(
-        page,
-        {
-            group_by: ["Region", "State"],
-            split_by: ["Category", "Sub-Category"],
-            settings: true,
-        },
-        extractContent,
-        [context, `pivot-by-two-rows-and-two-columns.txt`]
-    );
+        // Pivot by two rows and two columns
+        runSimpleCompareTest(
+            {
+                group_by: ["Region", "State"],
+                split_by: ["Category", "Sub-Category"],
+                settings: true,
+            },
+            extractContent,
+            [context, `pivot-by-two-rows-and-two-columns.txt`]
+        );
+    });
 }
 
-export async function runSortTests(
-    page,
+export function runSortTests(
     context: string,
     extractContent: ContentExtractor
 ) {
-    // Sort by a hidden column
-    await runSimpleCompareTest(
-        page,
-        {
-            columns: ["Row ID", "Quantity"],
-            sort: [["Sales", "asc"]],
-            settings: true,
-        },
-        extractContent,
-        [context, `sort-by-hidden-column.txt`]
-    );
+    test.describe("Sort tests", () => {
+        // Sort by a hidden column
+        runSimpleCompareTest(
+            {
+                columns: ["Row ID", "Quantity"],
+                sort: [["Sales", "asc"]],
+                settings: true,
+            },
+            extractContent,
+            [context, `sort-by-hidden-column.txt`]
+        );
 
-    // Sort by a numeric column
-    await runSimpleCompareTest(
-        page,
-        {
-            columns: ["Row ID", "Sales"],
-            sort: [["Quantity", "asc"]],
-            settings: true,
-        },
-        extractContent,
-        [context, `sort-by-numeric-column.txt`]
-    );
+        // Sort by a numeric column
+        runSimpleCompareTest(
+            {
+                columns: ["Row ID", "Sales"],
+                sort: [["Quantity", "asc"]],
+                settings: true,
+            },
+            extractContent,
+            [context, `sort-by-numeric-column.txt`]
+        );
 
-    // Sort by an alpha column
-    await runSimpleCompareTest(
-        page,
-        {
-            columns: ["Row ID", "State", "Sales"],
-            sort: [["State", "asc"]],
-            settings: true,
-        },
-        extractContent,
-        [context, `sort-by-alpha-column.txt`]
-    );
+        // Sort by an alpha column
+        runSimpleCompareTest(
+            {
+                columns: ["Row ID", "State", "Sales"],
+                sort: [["State", "asc"]],
+                settings: true,
+            },
+            extractContent,
+            [context, `sort-by-alpha-column.txt`]
+        );
+    });
 }
 
-export async function runFilterTests(
-    page,
+export function runFilterTests(
     context: string,
     extractContent: ContentExtractor
 ) {
-    // Filter by a numeric column
-    await runSimpleCompareTest(
-        page,
-        {
-            columns: ["Row ID", "State", "Sales"],
-            filter: [["Sales", ">", 500]],
-            settings: true,
-        },
-        extractContent,
-        [context, `filter-by-numeric-column.txt`]
-    );
+    test.describe("Filter tests", () => {
+        // Filter by a numeric column
+        runSimpleCompareTest(
+            {
+                columns: ["Row ID", "State", "Sales"],
+                filter: [["Sales", ">", 500]],
+                settings: true,
+            },
+            extractContent,
+            [context, `filter-by-numeric-column.txt`]
+        );
 
-    // Filter by an alpha column
-    await runSimpleCompareTest(
-        page,
-        {
-            columns: ["Row ID", "State", "Sales"],
-            filter: [["State", "==", "Texas"]],
-            settings: true,
-        },
-        extractContent,
-        [context, `filter-by-alpha-column.txt`]
-    );
+        // Filter by an alpha column
+        runSimpleCompareTest(
+            {
+                columns: ["Row ID", "State", "Sales"],
+                filter: [["State", "==", "Texas"]],
+                settings: true,
+            },
+            extractContent,
+            [context, `filter-by-alpha-column.txt`]
+        );
 
-    // Filter with 'in' comparator
-    await runSimpleCompareTest(
-        page,
-        {
-            columns: ["Row ID", "State", "Sales"],
-            filter: [["State", "in", ["Texas", "California"]]],
-            settings: true,
-        },
-        extractContent,
-        [context, `filter-with-in-comparator.txt`]
-    );
+        // Filter with 'in' comparator
+        runSimpleCompareTest(
+            {
+                columns: ["Row ID", "State", "Sales"],
+                filter: [["State", "in", ["Texas", "California"]]],
+                settings: true,
+            },
+            extractContent,
+            [context, `filter-with-in-comparator.txt`]
+        );
+    });
 }
 
-// NOTE: Make sure that the right test data (superstore.csv?) is loaded before running these tests.
-export async function runAllStandardTests(
-    page: Page,
+export function run_standard_tests(
     context: string,
     extractContent: ContentExtractor
 ) {
-    await runRowAndColumnTests(page, context, extractContent);
-    await runPivotTests(page, context, extractContent);
-    await runSortTests(page, context, extractContent);
-    await runFilterTests(page, context, extractContent);
+    runRowAndColumnTests(context, extractContent);
+    runPivotTests(context, extractContent);
+    runSortTests(context, extractContent);
+    runFilterTests(context, extractContent);
 }

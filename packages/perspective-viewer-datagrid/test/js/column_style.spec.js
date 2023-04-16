@@ -8,12 +8,7 @@
  */
 
 import { test, expect } from "@playwright/test";
-import {
-    setupPage,
-    loadTableAsset,
-    compareContentsToSnapshot,
-    SUPERSTORE_CSV_PATH,
-} from "@finos/perspective-test";
+import { compareContentsToSnapshot } from "@finos/perspective-test";
 
 async function get_contents(
     page,
@@ -64,13 +59,14 @@ test.describe("Column Style Tests", () => {
     test("perspective-config-update event is fired when column style is changed", async ({
         page,
     }) => {
-        await setupPage(page, {
-            htmlPage: "/tools/perspective-test/src/html/basic-test.html", // Should this be a relative or absolute path?
-            selector: "perspective-viewer",
+        await page.goto("/tools/perspective-test/src/html/basic-test.html", {
+            waitUntil: "networkidle",
         });
 
-        await loadTableAsset(page, SUPERSTORE_CSV_PATH, {
-            plugin: "Datagrid",
+        await page.evaluate(async () => {
+            await document.querySelector("perspective-viewer").restore({
+                plugin: "Datagrid",
+            });
         });
 
         const { x, y } = await page.evaluate(async () => {
@@ -141,13 +137,14 @@ test.describe("Column Style Tests", () => {
     });
 
     test("Column style menu opens for numeric columns", async ({ page }) => {
-        await setupPage(page, {
-            htmlPage: "/tools/perspective-test/src/html/basic-test.html",
-            selector: "perspective-viewer",
+        await page.goto("/tools/perspective-test/src/html/basic-test.html", {
+            waitUntil: "networkidle",
         });
 
-        await loadTableAsset(page, SUPERSTORE_CSV_PATH, {
-            plugin: "Datagrid",
+        await page.evaluate(async () => {
+            await document.querySelector("perspective-viewer").restore({
+                plugin: "Datagrid",
+            });
         });
 
         const contents = await test_column(page, "", "number");
@@ -156,13 +153,14 @@ test.describe("Column Style Tests", () => {
     });
 
     test("Column style menu opens for string columns", async ({ page }) => {
-        await setupPage(page, {
-            htmlPage: "/tools/perspective-test/src/html/basic-test.html",
-            selector: "perspective-viewer",
+        await page.goto("/tools/perspective-test/src/html/basic-test.html", {
+            waitUntil: "networkidle",
         });
 
-        await loadTableAsset(page, SUPERSTORE_CSV_PATH, {
-            plugin: "Datagrid",
+        await page.evaluate(async () => {
+            await document.querySelector("perspective-viewer").restore({
+                plugin: "Datagrid",
+            });
         });
 
         const contents = await test_column(page, ":nth-child(2)", "string");

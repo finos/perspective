@@ -10,13 +10,41 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <script type="module" src="/perspective.js"></script>
-        <script type="module" src="perspective-viewer.js"></script>
+        <script type="module" src="/perspective-viewer.js"></script>
+        <script type="module">
+            const BASE = customElements.get("perspective-viewer-plugin");
+            class TestChartPluginHighPriority extends BASE {
+                get name() {
+                    return "HighPriority";
+                }
 
-        <link rel="stylesheet" href="demo.css" />
+                get priority() {
+                    return 10;
+                }
+            }
+
+            class TestChartPluginLowPriority extends BASE {
+                get name() {
+                    return "LowPriority";
+                }
+
+                get priority() {
+                    return -10;
+                }
+            }
+
+            customElements.define("low-priority", TestChartPluginLowPriority);
+            customElements.define("high-priority", TestChartPluginHighPriority);
+            const Viewer = customElements.get("perspective-viewer");
+            Viewer.registerPlugin("low-priority");
+            Viewer.registerPlugin("high-priority");
+        </script>
+
+        <script type="module" src="/load-viewer-csv.js"></script>
+        <link rel="stylesheet" href="../css/demo.css" />
+        <link rel="stylesheet" href="/pro.css" />
     </head>
-
     <body>
-        <div id="temp-content">Temp Content</div>
+        <perspective-viewer></perspective-viewer>
     </body>
 </html>

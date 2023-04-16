@@ -8,13 +8,7 @@
  */
 
 import { test, expect } from "@playwright/test";
-import {
-    setupPage,
-    loadTableAsset,
-    addPerspectiveToWindow,
-    compareContentsToSnapshot,
-    SUPERSTORE_CSV_PATH,
-} from "@finos/perspective-test";
+import { compareContentsToSnapshot } from "@finos/perspective-test";
 
 const { convert } = require("../../dist/cjs/migrate.js");
 
@@ -273,15 +267,14 @@ const TESTS = [
 ];
 
 test.beforeEach(async ({ page }) => {
-    await setupPage(page, {
-        htmlPage: "/rust/perspective-viewer/dist/cdn/superstore-all.html",
-        selector: "perspective-viewer",
+    await page.goto("/rust/perspective-viewer/test/html/superstore-all.html", {
+        waitUntil: "networkidle",
     });
 
-    await addPerspectiveToWindow(page);
-
-    await loadTableAsset(page, SUPERSTORE_CSV_PATH, {
-        plugin: "Datagrid",
+    await page.evaluate(async () => {
+        await document.querySelector("perspective-viewer").restore({
+            plugin: "Datagrid",
+        });
     });
 });
 

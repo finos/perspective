@@ -6,10 +6,11 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+
+const { test, expect } = require("@playwright/test");
 const fs = require("fs");
 const path = require("path");
 const rimraf = require("rimraf");
-const { TimeoutError } = require("puppeteer");
 const notebook_template = require("./notebook_template.json");
 
 const DIST_ROOT = path.join(__dirname, "..", "..", "dist", "umd");
@@ -37,8 +38,8 @@ const generate_notebook = (notebook_name, cells) => {
     nb["cells"] = [
         {
             cell_type: "code",
-            execution_count: null,
             metadata: {},
+            execution_count: null,
             outputs: [],
             source: [
                 "import perspective\n",
@@ -68,21 +69,15 @@ const generate_notebook = (notebook_name, cells) => {
 };
 
 // Add Jupyterlab-specific bindings to the global Jest objects
-describe.jupyter = (body, { name, root } = {}) => {
-    if (!root) throw new Error("Jupyter tests require a test root!");
-
+const describe_jupyter = (body, { name, root } = {}) => {
     // Remove the automatically generated workspaces directory, as it
     // will try to redirect single-document URLs to the last URL opened.
-    beforeEach(remove_jupyter_artifacts);
-    afterAll(remove_jupyter_artifacts);
+    test.beforeEach(remove_jupyter_artifacts);
+    test.afterAll(remove_jupyter_artifacts);
 
     // URL is null because each test.capture_jupyterlab will have its own
     // unique notebook generated.
-    return describe.page(null, body, {
-        check_results: false,
-        name: name,
-        root: root,
-    });
+    return test.describe(`Blank Notebook`, body);
 };
 
 /**
@@ -92,17 +87,22 @@ describe.jupyter = (body, { name, root } = {}) => {
  * @param {*} cells
  * @param {*} body
  */
-test.jupyterlab = async (name, cells, body, args = {}) => {
+const test_jupyter = (name, cells, body, args = {}) => {
     const notebook_name = `${name.replace(/[ \.']/g, "_")}.ipynb`;
     generate_notebook(notebook_name, cells);
-    args = Object.assign(args, {
-        url: `doc/tree/${notebook_name}`,
+    const url = `doc/tree/${notebook_name}`;
+    test(name, async ({ page }) => {
+        await page.goto(
+            `http://127.0.0.1:${process.env.__JUPYTERLAB_PORT__}/${url}`,
+            { waitUntil: "domcontentloaded" }
+        );
+        await body({ page });
     });
-
-    await test.run(name, body, args);
 };
 
 module.exports = {
+    describe_jupyter,
+    test_jupyter,
     default_body: async (page) => {
         await module.exports.execute_all_cells(page);
         const viewer = await page.waitForSelector(
@@ -120,9 +120,10 @@ module.exports = {
         });
 
         // wait for a cell to be active
-        await page.waitForSelector(
-            '.jp-Notebook-ExecutionIndicator:not([data-status="idle"])'
-        );
+        // await page.waitForSelector(
+        //     '.jp-Notebook-ExecutionIndicator:not([data-status="idle"])'
+        // );
+        await new Promise((x) => setTimeout(x, 2000));
 
         await page.waitForSelector(
             '.jp-Notebook-ExecutionIndicator[data-status="idle"]'
@@ -141,27 +142,28 @@ module.exports = {
 
         // find and click the a cell in the notebook
         await page.click(".jp-CodeCell");
-
+        await new Promise((x) => setTimeout(x, 100));
         // find and click the "new cell" button
         await page.click(
             '.jp-Button[data-command="notebook:insert-cell-below"]'
         );
-
+        await new Promise((x) => setTimeout(x, 100));
         // after clicking new cell, the document will auto
         // focus the new cell, so lets grab it
         const el = await page.evaluateHandle(() => document.activeElement);
         await el.type(cell_content);
 
+        await new Promise((x) => setTimeout(x, 100));
         // now while the element is still focused, click the run cell button
         await page.click('.jp-Button[data-command="runmenu:run"]');
-
+        await new Promise((x) => setTimeout(x, 100));
         // wait for kernel to stop running
-        await page.waitForXPath(
-            "//div.jp-InputPrompt[contains(text(),'[*]:')]",
-            {
-                hidden: true,
-            }
-        );
+        // await page.waitForSelector(
+        //     "//div.jp-InputPrompt[contains(text(),'[*]:')]",
+        //     {
+        //         hidden: true,
+        //     }
+        // );
     },
     assert_no_error_in_cell: async (page, cell_content) => {
         // run the cell
@@ -175,7 +177,7 @@ module.exports = {
                 )
                 .then(() => false),
             page
-                .waitForXPath("//div//pre[contains(text(),\"'Passed'\")]")
+                .waitForSelector("//div//pre[contains(text(),\"'Passed'\")]")
                 .then(() => true),
         ]);
     },

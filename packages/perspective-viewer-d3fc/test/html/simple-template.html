@@ -10,11 +10,10 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <script type="module" src="/perspective.js"></script>
         <script type="module" src="/perspective-viewer.js"></script>
-        <script type="module" src="perspective-viewer-d3fc.js"></script>
+        <script type="module" src="/perspective-viewer-d3fc.js"></script>
 
-        <link rel="stylesheet" href="pro.css" />
+        <link rel="stylesheet" href="/pro.css" />
 
         <style>
             perspective-viewer {
@@ -33,34 +32,5 @@
 
     <body>
         <perspective-viewer> </perspective-viewer>
-
-        <script type="module">
-            import perspective from "/perspective.js";
-            async function loadTableAsset() {
-                let assetPath = "/superstore.csv";
-                let resp = await fetch(assestPath);
-
-                const viewer =
-                    document.getElementsByTagName("perspective-viewer")[0];
-                viewer.load(perspective.worker().table(xhr.response));
-                await viewer.restore({
-                    plugin: "__view_name",
-                    columns: __columns,
-                });
-            }
-
-            // var xhr = new XMLHttpRequest();
-            // xhr.open("GET", "superstore.csv", true);
-            // xhr.onload = async function () {
-            //     const viewer =
-            //         document.getElementsByTagName("perspective-viewer")[0];
-            //     viewer.load(perspective.worker().table(xhr.response));
-            //     await viewer.restore({
-            //         plugin: "__view_name",
-            //         columns: __columns,
-            //     });
-            // };
-            // xhr.send(null);
-        </script>
     </body>
 </html>
