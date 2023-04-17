@@ -82,7 +82,7 @@
     "scripts": {
         "postinstall": "npm-run-all postinstall:emsdk postinstall:playwright",
         "postinstall:emsdk": "node scripts/install_emsdk.js",
-        "postinstall:playwright": "npx playwright install",
+        "postinstall:playwright": "npx playwright install --with-deps",
         "build,test": "npm run --silent build && npm run --silent test",
         "build,test,bench": "npm run --silent build && npm run --silent test && npm run --silent bench",
         "build,bench": "npm run --silent build && npm run --silent bench",
