@@ -73,6 +73,7 @@ export const getSvgContentString = (selector: string) => async (page: Page) => {
                 case "g":
                 case "path":
                 case "line":
+                case "circle":
                 case "text":
                     removeAttrs(node);
                     break;
@@ -110,7 +111,7 @@ const IS_DEBUG_IN_ROOT = fs.existsSync(
 export async function compareContentsToSnapshot(
     contents: string,
     snapshotPath: string[]
-) {
+): Promise<void> {
     const cleanedContents = contents
         .replace(/style=""/g, "")
         .replace(/(min-|max-)?(width|height): *\d+\.*\d+(px)?;? */g, "");
@@ -119,7 +120,8 @@ export async function compareContentsToSnapshot(
         await expect(cleanedContents).toMatchSnapshot(snapshotPath);
     }
 
-    const hash = crypto.createHash("md5").update(cleanedContents).digest("hex");
+    // const hash = crypto.createHash("md5").update(cleanedContents).digest("hex");
+    const hash = cleanedContents; // temp for debugging CI.
     await expect(hash).toMatchSnapshot(
         snapshotPath
             .slice(0, -1)
@@ -131,7 +133,7 @@ export async function compareSVGContentsToSnapshot(
     page: Page,
     selector: string,
     snapshotPath: string[]
-) {
+): Promise<void> {
     const svgContent = await getSvgContentString(selector)(page);
     await compareContentsToSnapshot(svgContent, snapshotPath);
 }
@@ -162,7 +164,7 @@ export async function compareShadowDOMContents(page, snapshotFileName) {
     await compareContentsToSnapshot(contents, [snapshotFileName]);
 }
 
-export async function shadow_click(page, ...path) {
+export async function shadow_click(page, ...path): Promise<void> {
     await page.evaluate(
         ({ path }) => {
             let elem: ShadowRoot | Element | Document | null | undefined =
@@ -191,7 +193,12 @@ export async function shadow_click(page, ...path) {
     );
 }
 
-export async function shadow_type(page, content, is_incremental, ...path) {
+export async function shadow_type(
+    page,
+    content,
+    is_incremental,
+    ...path
+): Promise<void> {
     if (typeof is_incremental !== "boolean") {
         path.unshift(is_incremental);
         is_incremental = false;
@@ -244,7 +251,7 @@ export async function shadow_type(page, content, is_incremental, ...path) {
     );
 }
 
-export async function shadow_blur(page) {
+export async function shadow_blur(page): Promise<void> {
     await page.evaluate(() => {
         let elem = document.activeElement;
         while (elem) {

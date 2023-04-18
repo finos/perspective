@@ -7,7 +7,7 @@
  *
  */
 
-import { Page, test } from "@playwright/test";
+import { test } from "@playwright/test";
 import { getSvgContentString, compareContentsToSnapshot } from "./utils";
 import type { HTMLPerspectiveViewerElement } from "@finos/perspective-viewer";
 
