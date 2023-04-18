@@ -220,7 +220,9 @@ jobs:
               uses: actions/cache@v3
               id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
               with:
-                  path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+                  path: |
+                      ~/.cache/ms-playwright
+                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
                   key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
                   restore-keys: |
                       ${{ runner.os }}-yarn-
@@ -462,7 +464,9 @@ jobs:
               uses: actions/cache@v3
               id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
               with:
-                  path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+                  path: |
+                      ~/.cache/ms-playwright
+                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
                   key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
                   restore-keys: |
                       ${{ runner.os }}-yarn-
@@ -579,7 +583,9 @@ jobs:
               uses: actions/cache@v3
               id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
               with:
-                  path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+                  path: |
+                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
+                      ~/.cache/ms-playwright
                   key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
                   restore-keys: |
                       ${{ runner.os }}-yarn-
@@ -844,7 +850,9 @@ jobs:
               uses: actions/cache@v3
               id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
               with:
-                  path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+                  path: |
+                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
+                      ~/.cache/ms-playwright
                   key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
                   restore-keys: |
                       ${{ runner.os }}-yarn-
@@ -1128,7 +1136,9 @@ jobs:
               uses: actions/cache@v3
               id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
               with:
-                  path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+                  path: |
+                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
+                      ~/.cache/ms-playwright
                   key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
                   restore-keys: |
                       ${{ runner.os }}-yarn-
@@ -1173,6 +1183,9 @@ jobs:
               run: yarn --frozen-lockfile
               env:
                   PSP_SKIP_EMSDK_INSTALL: 1
+
+            - name: Install Playwright Browsers
+              run: npx playwright install --with-deps
 
             ################
             # Python
@@ -1289,7 +1302,9 @@ jobs:
               uses: actions/cache@v3
               id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
               with:
-                  path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+                  path: |
+                      ~/.cache/ms-playwright
+                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
                   key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
                   restore-keys: |
                       ${{ runner.os }}-yarn-
@@ -1423,7 +1438,9 @@ jobs:
               uses: actions/cache@v3
               id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
               with:
-                  path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+                  path: |
+                      ~/.cache/ms-playwright
+                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
                   key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
                   restore-keys: |
                       ${{ runner.os }}-yarn-
