@@ -142,6 +142,7 @@ export default defineConfig({
     projects: PROJECTS,
     outputDir: "dist/results",
     use: {
+        viewport: { width: 1280, height: 720 },
         actionTimeout: 0,
         trace: "on-first-retry",
     },
