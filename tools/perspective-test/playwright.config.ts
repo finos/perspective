@@ -10,7 +10,6 @@
 import { Project, defineConfig, devices } from "@playwright/test";
 import path from "path";
 import * as dotenv from "dotenv";
-import { getarg } from "../../scripts/script_utils";
 
 dotenv.config({ path: "./.perspectiverc" });
 
@@ -22,16 +21,23 @@ const RUN_JUPYTERLAB = !!process.env.PSP_JUPYTERLAB_TESTS;
 
 const PACKAGE = process.env.PACKAGE?.split(",");
 
-const DEVICES = process.env.DEVICES?.split(",") || [
-    "Desktop Chrome",
-    // "Desktop Firefox",
-    // "Desktop Safari",
-];
-
-function path_convert(input) {
-    const a = path.join(__dirname, input);
-    return a.slice(process.cwd().length + 1);
-}
+const DEVICE_OPTIONS = {
+    "Desktop Chrome": {
+        launchOptions: {
+            args: [
+                "--js-flags=--expose-gc",
+                "--disable-accelerated-2d-canvas",
+                "--disable-gpu",
+                "--no-sandbox",
+                "--disable-setuid-sandbox",
+                "--disable-dev-shm-usage",
+                "--font-render-hinting=none",
+                '--proxy-server="direct://"',
+                "--proxy-bypass-list=*",
+            ],
+        },
+    },
+};
 
 const BROWSER_PACKAGES = [
     {
@@ -84,7 +90,7 @@ const PROJECTS = (() => {
     const acc = new Array();
     if (RUN_JUPYTERLAB) {
         for (const pkg of BROWSER_AND_PYTHON_PACKAGES) {
-            for (const device of DEVICES) {
+            for (const device of Object.keys(DEVICE_OPTIONS)) {
                 acc.push({
                     name: `${pkg.packageName}-${device
                         .toLowerCase()
@@ -94,6 +100,9 @@ const PROJECTS = (() => {
                         ...devices[device],
                         // baseURL: `http://localhost:${TEST_SERVER_PORT}`,
                         timezoneId: "UTC",
+                        launchOptions: {
+                            args: ["--js-flags=--expose-gc"],
+                        },
                     },
                 });
             }
@@ -110,7 +119,7 @@ const PROJECTS = (() => {
 
         for (const pkg of BROWSER_PACKAGES) {
             if (PACKAGE == undefined || PACKAGE.includes(pkg.packageName)) {
-                for (const device of DEVICES) {
+                for (const device of Object.keys(DEVICE_OPTIONS)) {
                     acc.push({
                         name: `${pkg.packageName}-${device
                             .toLowerCase()
@@ -118,6 +127,7 @@ const PROJECTS = (() => {
                         testDir: path.join(__dirname, "../../", pkg.testDir),
                         use: {
                             ...devices[device],
+                            ...DEVICE_OPTIONS[device],
                             baseURL: `http://localhost:${TEST_SERVER_PORT}`,
                             timezoneId: "UTC",
                         },
@@ -137,7 +147,7 @@ export default defineConfig({
         timeout: 100_000,
     },
     retries: process.env.CI ? 2 : 0,
-    // quiet: true,
+    quiet: true,
     reporter: process.env.CI ? "github" : "list",
     projects: PROJECTS,
     outputDir: "dist/results",
@@ -151,13 +161,11 @@ export default defineConfig({
               "@finos/perspective-jupyterlab/test/config/jupyter/globalSetup.ts"
           )
         : path.join(__dirname, "src/js/global_startup.ts"),
-
     globalTeardown: RUN_JUPYTERLAB
         ? require.resolve(
               "@finos/perspective-jupyterlab/test/config/jupyter/globalTeardown.ts"
           )
         : path.join(__dirname, "src/js/global_teardown.ts"),
-
     snapshotPathTemplate:
         "dist/snapshots/{projectName}/{testFilePath}/{arg}{ext}",
     webServer: {

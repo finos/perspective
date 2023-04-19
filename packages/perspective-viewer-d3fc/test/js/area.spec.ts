@@ -8,10 +8,13 @@
  */
 
 import { test } from "@playwright/test";
-import { compareSVGContentsToSnapshot } from "@finos/perspective-test";
+import {
+    getSvgContentString,
+    run_standard_tests,
+} from "@finos/perspective-test";
 
 test.describe("Area Tests", () => {
-    test("Contents match generationally", async ({ page }) => {
+    test.beforeEach(async ({ page }) => {
         await page.goto("/tools/perspective-test/src/html/basic-test.html", {
             waitUntil: "networkidle",
         });
@@ -22,11 +25,10 @@ test.describe("Area Tests", () => {
                 columns: ["Sales"],
             });
         });
-
-        await compareSVGContentsToSnapshot(
-            page,
-            "perspective-viewer perspective-viewer-d3fc-yarea",
-            ["area.txt"]
-        );
     });
+
+    run_standard_tests(
+        "area",
+        getSvgContentString("perspective-viewer perspective-viewer-d3fc-xyline")
+    );
 });

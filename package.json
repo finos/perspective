@@ -35,6 +35,7 @@
         "python/perspective"
     ],
     "devDependencies": {
+        "@fontsource/roboto-mono": "4.5.10",
         "@playwright/test": "^1.30.0",
         "@types/ws": "^7.2.2",
         "auto-changelog": "^2.4.0",

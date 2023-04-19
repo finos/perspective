@@ -7,11 +7,14 @@
  *
  */
 
-import { test, expect } from "@playwright/test";
-import { compareSVGContentsToSnapshot } from "@finos/perspective-test";
+import { test } from "@playwright/test";
+import {
+    getSvgContentString,
+    run_standard_tests,
+} from "@finos/perspective-test";
 
 test.describe("Line Tests", () => {
-    test("Contents match generationally", async ({ page }) => {
+    test.beforeEach(async ({ page }) => {
         await page.goto("/tools/perspective-test/src/html/basic-test.html", {
             waitUntil: "networkidle",
         });
@@ -19,13 +22,13 @@ test.describe("Line Tests", () => {
         await page.evaluate(async () => {
             await document.querySelector("perspective-viewer")!.restore({
                 plugin: "Y Line",
+                columns: ["Sales", "Quantity"],
             });
         });
-
-        await compareSVGContentsToSnapshot(
-            page,
-            "perspective-viewer perspective-viewer-d3fc-yline",
-            ["yline.txt"]
-        );
     });
+
+    run_standard_tests(
+        "yline",
+        getSvgContentString("perspective-viewer perspective-viewer-d3fc-xyline")
+    );
 });

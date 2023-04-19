@@ -108,10 +108,6 @@ export const getSvgContentString = (selector: string) => async (page: Page) => {
     return content;
 };
 
-const IS_DEBUG_IN_ROOT = fs.existsSync(
-    path.join(__dirname, "../../results.debug.tar.gz")
-);
-
 export async function compareContentsToSnapshot(
     contents: string,
     snapshotPath: string[]
@@ -120,17 +116,7 @@ export async function compareContentsToSnapshot(
         .replace(/style=""/g, "")
         .replace(/(min-|max-)?(width|height): *\d+\.*\d+(px)?;? */g, "");
 
-    if (process.env.CI === undefined || IS_DEBUG_IN_ROOT) {
-        await expect(cleanedContents).toMatchSnapshot(snapshotPath);
-    }
-
-    // const hash = crypto.createHash("md5").update(cleanedContents).digest("hex");
-    const hash = cleanedContents; // temp for debugging CI.
-    await expect(hash).toMatchSnapshot(
-        snapshotPath
-            .slice(0, -1)
-            .concat([snapshotPath.at(-1)!.slice(0, -4) + ".hash.txt"])
-    );
+    await expect(cleanedContents).toMatchSnapshot(snapshotPath);
 }
 
 export async function compareSVGContentsToSnapshot(

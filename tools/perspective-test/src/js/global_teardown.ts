@@ -18,7 +18,6 @@ export default async function run() {
         console.log("\nCreating results.tar.gz");
     }
 
-    // https://github.com/isaacs/node-tar/issues/176#issuecomment-391904257
     await new Promise((x) =>
         tar.create(
             {
@@ -32,42 +31,7 @@ export default async function run() {
                     stat.atime = null;
                     stat.ctime = null;
                     stat.birthtime = null;
-                    return (
-                        !path.startsWith(".DS_Store") &&
-                        (fs.lstatSync(path).isDirectory() ||
-                            path.endsWith(".hash.txt"))
-                    );
-                },
-            },
-            ["tools/perspective-test/dist/snapshots"],
-            x
-        )
-    );
-
-    if (fs.existsSync(`../../dist/results.tar.gz`)) {
-        console.log("Replacing results.debug.tar.gz");
-    } else {
-        console.log("Creating results.debug.tar.gz");
-    }
-
-    await new Promise((x) =>
-        tar.create(
-            {
-                gzip: true,
-                file: path.join(__dirname, "../../dist/results.debug.tar.gz"),
-                sync: false,
-                portable: true,
-                noMtime: true,
-                filter: (path, stat) => {
-                    stat.mtime = null;
-                    stat.atime = null;
-                    stat.ctime = null;
-                    stat.birthtime = null;
-                    return (
-                        !path.startsWith(".DS_Store") &&
-                        (fs.lstatSync(path).isDirectory() ||
-                            !path.endsWith(".hash.txt"))
-                    );
+                    return !path.endsWith(".DS_Store");
                 },
             },
             ["tools/perspective-test/dist/snapshots"],

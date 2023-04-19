@@ -288,12 +288,10 @@ jobs:
                   cache-dependency-path: yarn.lock
 
             - name: Install latest nightly rust
-              uses: actions-rs/toolchain@v1
+              uses: dtolnay/rust-toolchain@nightly
               with:
-                  toolchain: nightly
-                  target: wasm32-unknown-unknown
-                  default: true
-                  override: true
+                  toolchain: nightly-2023-04-07
+                  targets: wasm32-unknown-unknown
                   components: rustfmt, clippy, rust-src
 
             ################
@@ -320,12 +318,6 @@ jobs:
 
             - name: Install CCache
               run: sudo apt install -y ccache
-
-            ################
-            # Wasm
-            - name: Install wasm-pack (Linux and Macos)
-              run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-              if: ${{ runner.os != 'Windows' }}
 
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
@@ -653,18 +645,11 @@ jobs:
             ################
             # Rust
             - name: Install latest nightly rust
-              uses: actions-rs/toolchain@v1
+              uses: dtolnay/rust-toolchain@nightly
               with:
-                  toolchain: nightly
-                  target: wasm32-unknown-unknown
-                  default: true
-                  override: true
-
-            ################
-            # Wasm
-            - name: Install wasm-pack (Linux and Macos)
-              run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-              if: ${{ runner.os != 'Windows' }}
+                  toolchain: nightly-2023-04-07
+                  targets: wasm32-unknown-unknown
+                  components: rustfmt, clippy, rust-src
 
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
@@ -1208,7 +1193,7 @@ jobs:
               run: jupyter labextension list
 
             - name: Run Jupyterlab tests
-              run: yarn test_js --jupyter --debug
+              run: yarn test_js --jupyter
               env:
                   PACKAGE: perspective-jupyterlab
 
