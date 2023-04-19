@@ -47,7 +47,7 @@ test.describe("Regression tests", () => {
 
         const contents = await get_contents(page);
 
-        await compareContentsToSnapshot(contents, [
+        await compareContentsToSnapshot(page, contents, [
             "regressions-not_in-filter-works-correctly.txt",
         ]);
     });

@@ -33,7 +33,7 @@ test.describe("JupyterLab resize", () => {
             return window.__WIDGET__.viewer.innerHTML;
         });
 
-        await compareContentsToSnapshot(contents, [
+        await compareContentsToSnapshot(page, contents, [
             "jupyterlab-resize-config-hidden.txt",
         ]);
     });
@@ -71,7 +71,7 @@ test.describe("JupyterLab resize", () => {
             return window.__WIDGET__.viewer.innerHTML;
         });
 
-        await compareContentsToSnapshot(contents, [
+        await compareContentsToSnapshot(page, contents, [
             "jupyterlab-resize-config-shown.txt",
         ]);
     });
@@ -94,7 +94,7 @@ test.describe("JupyterLab resize", () => {
             return window.__WIDGET__.viewer.innerHTML;
         });
 
-        await compareContentsToSnapshot(contents, [
+        await compareContentsToSnapshot(page, contents, [
             "jupyterlab-resize-group-by-traitlet.txt",
         ]);
     });

@@ -105,7 +105,7 @@ test.describe("Expressions", () => {
 
         await page.evaluate(() => document.activeElement.blur());
 
-        await compareContentsToSnapshot(contents, [
+        await compareContentsToSnapshot(page, contents, [
             "click-on-add-column-button-opens-the-expression-ui.txt",
         ]);
     });
@@ -146,7 +146,7 @@ test.describe("Expressions", () => {
             );
         });
 
-        await compareContentsToSnapshot(contents, [
+        await compareContentsToSnapshot(page, contents, [
             "blur-closes-the-expression-ui.txt",
         ]);
     });
@@ -155,7 +155,7 @@ test.describe("Expressions", () => {
         page,
     }) => {
         const contents = await type_expression_test(page, "abc");
-        await compareContentsToSnapshot(contents, [
+        await compareContentsToSnapshot(page, contents, [
             "an-expression-with-unknown-symbols-should-disable-the-save-button.txt",
         ]);
     });
@@ -168,7 +168,7 @@ test.describe("Expressions", () => {
             '"Sales" + "Category";'
         );
 
-        await compareContentsToSnapshot(contents, [
+        await compareContentsToSnapshot(page, contents, [
             "a-type-invalid-expression-should-disable-the-save-button.txt",
         ]);
     });
@@ -178,7 +178,7 @@ test.describe("Expressions", () => {
     }) => {
         const contents = await type_expression_test(page, '"aaaa" + "Sales";');
 
-        await compareContentsToSnapshot(contents, [
+        await compareContentsToSnapshot(page, contents, [
             "an-expression-with-invalid-input-columns-should-disable-the-save-button.txt",
         ]);
     });
@@ -196,7 +196,7 @@ test.describe("Expressions", () => {
             return elem.shadowRoot.querySelector("#sub-columns").innerHTML;
         });
 
-        await compareContentsToSnapshot(contents, [
+        await compareContentsToSnapshot(page, contents, [
             "should-show-both-aliased-and-non-aliased-expressions-in-columns.txt",
         ]);
     });
@@ -218,7 +218,7 @@ test.describe("Expressions", () => {
             return elem.shadowRoot.querySelector("#sub-columns").innerHTML;
         });
 
-        await compareContentsToSnapshot(contents, [
+        await compareContentsToSnapshot(page, contents, [
             "should-overwrite-a-duplicate-expression-alias.txt",
         ]);
     });
@@ -240,7 +240,7 @@ test.describe("Expressions", () => {
             return elem.shadowRoot.querySelector("#sub-columns").innerHTML;
         });
 
-        await compareContentsToSnapshot(contents, [
+        await compareContentsToSnapshot(page, contents, [
             "should-overwrite-a-duplicate-expression.txt",
         ]);
     });
@@ -265,7 +265,7 @@ test.describe("Expressions", () => {
             );
         });
 
-        await compareContentsToSnapshot(contents, [
+        await compareContentsToSnapshot(page, contents, [
             "resetting-the-viewer-should-delete-all-expressions.txt",
         ]);
     });
@@ -282,12 +282,12 @@ test.describe("Expressions", () => {
             await elem.reset(false);
         });
 
-        const content = await page.evaluate(async () => {
+        const contents = await page.evaluate(async () => {
             const elem = document.querySelector("perspective-viewer");
             return elem.shadowRoot.querySelector("#sub-columns").innerHTML;
         });
 
-        await compareContentsToSnapshot(content, [
+        await compareContentsToSnapshot(page, contents, [
             "resetting-the-viewer-partially-should-not-delete-all-expressions.txt",
         ]);
     });
@@ -313,7 +313,7 @@ test.describe("Expressions", () => {
             );
         });
 
-        await compareContentsToSnapshot(contents, [
+        await compareContentsToSnapshot(page, contents, [
             "resetting-the-viewer-when-expression-as-in-columns-field-should-delete-all-expressions.txt",
         ]);
     });
@@ -336,7 +336,7 @@ test.describe("Expressions", () => {
             return elem.shadowRoot.querySelector("#sub-columns").innerHTML;
         });
 
-        await compareContentsToSnapshot(contents, [
+        await compareContentsToSnapshot(page, contents, [
             "resetting-the-viewer-partially-when-expression-as-in-columns-field-should-not-delete-all-expressions.txt",
         ]);
     });
@@ -365,7 +365,7 @@ test.describe("Expressions", () => {
             );
         });
 
-        await compareContentsToSnapshot(contents, [
+        await compareContentsToSnapshot(page, contents, [
             "resetting-the-viewer-when-expression-as-in-group_by-or-other-field-should-delete-all-expressions.txt",
         ]);
     });
@@ -389,7 +389,7 @@ test.describe("Expressions", () => {
             return elem.shadowRoot.querySelector("#sub-columns").innerHTML;
         });
 
-        await compareContentsToSnapshot(contents, [
+        await compareContentsToSnapshot(page, contents, [
             "expressions-should-persist-when-new-views-are-created-which-dont-use-them.txt",
         ]);
     });
@@ -413,7 +413,7 @@ test.describe("Expressions", () => {
             return elem.shadowRoot.querySelector("#sub-columns").innerHTML;
         });
 
-        await compareContentsToSnapshot(contents, [
+        await compareContentsToSnapshot(page, contents, [
             "expressions-should-persist-when-new-views-are-created-using-them.txt",
         ]);
     });
@@ -435,7 +435,7 @@ test.describe("Expressions", () => {
             return elem.shadowRoot.querySelector("#sub-columns").innerHTML;
         });
 
-        await compareContentsToSnapshot(contents, [
+        await compareContentsToSnapshot(page, contents, [
             "aggregates-for-expressions-should-apply.txt",
         ]);
     });
@@ -456,7 +456,7 @@ test.describe("Expressions", () => {
             return elem.shadowRoot.querySelector("#sub-columns").innerHTML;
         });
 
-        await compareContentsToSnapshot(contents, [
+        await compareContentsToSnapshot(page, contents, [
             "should-sort-by-hidden-expressions.txt",
         ]);
     });
@@ -477,7 +477,7 @@ test.describe("Expressions", () => {
             return elem.shadowRoot.querySelector("#sub-columns").innerHTML;
         });
 
-        await compareContentsToSnapshot(contents, [
+        await compareContentsToSnapshot(page, contents, [
             "should-filter-by-an-expression.txt",
         ]);
     });

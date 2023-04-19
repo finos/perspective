@@ -77,7 +77,7 @@ test.describe("Events", () => {
 
         const contents = await get_contents(page);
 
-        await compareContentsToSnapshot(contents, [
+        await compareContentsToSnapshot(page, contents, [
             "restore-fires-the-perspective-config-update-event.txt",
         ]);
     });

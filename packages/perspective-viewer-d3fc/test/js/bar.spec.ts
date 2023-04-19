@@ -12,7 +12,6 @@ import {
     run_standard_tests,
     getSvgContentString,
 } from "@finos/perspective-test";
-import type { HTMLPerspectiveViewerElement } from "@finos/perspective-viewer";
 
 test.describe("Bar Tests", () => {
     test.describe("Y Bar", () => {

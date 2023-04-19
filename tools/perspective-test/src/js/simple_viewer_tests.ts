@@ -15,8 +15,7 @@ export type ContentExtractor = (page: any) => Promise<string>;
 
 async function restoreTable(page, tableSettings: any) {
     return page.evaluate(async (tableSettings) => {
-        const viewer: HTMLPerspectiveViewerElement =
-            document.querySelector("perspective-viewer")!;
+        const viewer = document.querySelector("perspective-viewer")!;
         await viewer.restore(tableSettings);
     }, tableSettings);
 }
@@ -29,7 +28,7 @@ function runSimpleCompareTest(
     test(snapshotPath[1], async ({ page }) => {
         await restoreTable(page, tableSettings);
         const content = await extractContent(page);
-        await compareContentsToSnapshot(content, snapshotPath);
+        await compareContentsToSnapshot(page, content, snapshotPath);
     });
 }
 
@@ -39,13 +38,12 @@ export async function runRowAndColumnTests(
 ) {
     test("Show grid no settings", async ({ page }) => {
         await page.evaluate(async () => {
-            const viewer: HTMLPerspectiveViewerElement =
-                document.querySelector("perspective-viewer")!;
+            const viewer = document.querySelector("perspective-viewer")!;
             await viewer.getTable(); // Not sure why this is needed...
             await viewer.restore({ settings: true });
         });
         const content = await getSvgContentString("perspective-viewer")(page);
-        await compareContentsToSnapshot(content, [
+        await compareContentsToSnapshot(page, content, [
             context,
             `show-grid-no-settings.txt`,
         ]);
@@ -58,7 +56,7 @@ export async function runRowAndColumnTests(
 
         const visibleColumnContent = await extractContent(page);
 
-        await compareContentsToSnapshot(visibleColumnContent, [
+        await compareContentsToSnapshot(page, visibleColumnContent, [
             context,
             `displays-visible-columns.txt`,
         ]);

@@ -149,7 +149,9 @@ test.describe("Column Style Tests", () => {
 
         const contents = await test_column(page, "", "number");
 
-        await compareContentsToSnapshot(contents, ["number_column_style.txt"]);
+        await compareContentsToSnapshot(page, contents, [
+            "number_column_style.txt",
+        ]);
     });
 
     test("Column style menu opens for string columns", async ({ page }) => {
@@ -165,6 +167,8 @@ test.describe("Column Style Tests", () => {
 
         const contents = await test_column(page, ":nth-child(2)", "string");
 
-        await compareContentsToSnapshot(contents, ["string_column_style.txt"]);
+        await compareContentsToSnapshot(page, contents, [
+            "string_column_style.txt",
+        ]);
     });
 });

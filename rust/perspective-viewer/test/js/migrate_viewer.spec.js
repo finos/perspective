@@ -317,7 +317,7 @@ test.describe("Migrate Viewer", () => {
 
                 const contents = get_contents(page);
 
-                await compareContentsToSnapshot(contents, [
+                await compareContentsToSnapshot(page, contents, [
                     `migrate-restore-${name}.txt`,
                 ]);
             });

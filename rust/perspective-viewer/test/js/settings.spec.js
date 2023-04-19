@@ -47,7 +47,7 @@ test.describe("Settings", () => {
 
         const contents = await get_contents(page);
 
-        await compareContentsToSnapshot(contents, [
+        await compareContentsToSnapshot(page, contents, [
             "opens-settings-when-field-is-set-to-true.txt",
         ]);
     });
@@ -61,7 +61,7 @@ test.describe("Settings", () => {
 
         const contents = await get_contents(page);
 
-        await compareContentsToSnapshot(contents, [
+        await compareContentsToSnapshot(page, contents, [
             "opens-settings-when-field-is-set-to-false.txt",
         ]);
     });

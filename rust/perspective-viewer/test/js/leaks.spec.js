@@ -64,7 +64,7 @@ test.describe.skip("leaks", () => {
             return element.innerHTML;
         });
 
-        await compareContentsToSnapshot(contents, ["does-not-leak.txt"]);
+        await compareContentsToSnapshot(page, contents, ["does-not-leak.txt"]);
     });
 
     test("doesn't leak views when setting group by", async ({ page }) => {
@@ -106,7 +106,7 @@ test.describe.skip("leaks", () => {
             return viewer.innerHTML;
         }, viewer);
 
-        await compareContentsToSnapshot(contents, [
+        await compareContentsToSnapshot(page, contents, [
             "does-not-leak-when-setting-groupby.txt",
         ]);
     });
@@ -142,7 +142,7 @@ test.describe.skip("leaks", () => {
             return viewer.innerHTML;
         }, viewer);
 
-        await compareContentsToSnapshot(contents, [
+        await compareContentsToSnapshot(page, contents, [
             "does-not-leak-when-setting-filters.txt",
         ]);
     });
