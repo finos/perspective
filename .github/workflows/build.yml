@@ -1208,7 +1208,7 @@ jobs:
               run: jupyter labextension list
 
             - name: Run Jupyterlab tests
-              run: yarn test_js --jupyter --debug
+              run: yarn test_js --jupyter
               env:
                   PACKAGE: perspective-jupyterlab
 
