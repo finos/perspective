@@ -76,6 +76,9 @@ export const getSvgContentString = (selector: string) => async (page: Page) => {
                 case "circle":
                 case "text":
                     removeAttrs(node);
+                    if (["label", "segment"].some((c) => node.classList.contains(c))) {
+                        node.textContent = node.textContent.slice(0, 2);
+                    }
                     break;
                 default:
                     break;
