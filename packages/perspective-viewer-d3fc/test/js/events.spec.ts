@@ -9,7 +9,6 @@
 
 import { test, expect } from "@playwright/test";
 import { compareSVGContentsToSnapshot } from "@finos/perspective-test";
-import { HTMLPerspectiveViewerElement } from "@finos/perspective-viewer";
 
 test.describe("Events test", () => {
     test("perspective-config-update event is fired when series axis is changed", async ({

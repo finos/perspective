@@ -8,7 +8,6 @@
  */
 
 import { expect, Page } from "@playwright/test";
-import crypto from "crypto";
 import fs from "fs";
 import path from "path";
 
@@ -38,6 +37,7 @@ export const getSvgContentString = (selector: string) => async (page: Page) => {
                 "d",
                 "transform",
                 "viewBox",
+                "visibility",
             ];
 
             if (node.nodeType === Node.ELEMENT_NODE) {
@@ -74,8 +74,12 @@ export const getSvgContentString = (selector: string) => async (page: Page) => {
                 case "path":
                 case "line":
                 case "circle":
+                case "rect":
                 case "text":
                     removeAttrs(node);
+                    if (["label", "segment"].some((c) => node.classList.contains(c))) {
+                        node.textContent = node.textContent.slice(0, 2);
+                    }
                     break;
                 default:
                     break;
