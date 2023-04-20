@@ -56,17 +56,15 @@ export function getSplitValues(data, settings) {
 
 export function getDataValues(data, settings) {
     if (settings.mainValues.length > 1) {
-        if (data.mainValue) {
-            return [
-                {
-                    name: data.key,
-                    value: data.mainValue - (data.baseValue || 0),
-                },
-            ];
+        if (data.mainValues) {
+            return settings.mainValues.map((main, i) => ({
+                name: main.name,
+                value: toValue(main.type, data.mainValues[i]),
+            }));
         }
-        return settings.mainValues.map((main, i) => ({
+        return settings.mainValues.map((main) => ({
             name: main.name,
-            value: toValue(main.type, data.mainValues[i]),
+            value: toValue(main.type, data.row[main.name]),
         }));
     }
     return [
