@@ -1120,7 +1120,17 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info,
                             std::nth_element(
                                 values.begin(), middle, values.end());
 
-                            return *middle;
+                            if (values.size() % 2 == 0) {
+                                // If there are an even number of values,
+                                // return the average of the two middle elements
+                                t_tscalar median1 = *middle;
+                                t_tscalar median2 = *(middle - 1);
+                                return (median1 + median2) / 2.0;
+                            } else {
+                                // If there are an odd number of values,
+                                // return the middle element
+                                return *middle;
+                            }
                         }
                     }));
 
