@@ -78,7 +78,11 @@ export const getSvgContentString = (selector: string) => async (page: Page) => {
                 case "rect":
                 case "text":
                     removeAttrs(node);
-                    if (["label", "segment"].some((c) => node.classList.contains(c))) {
+                    if (
+                        ["label", "segment"].some((c) =>
+                            node.classList.contains(c)
+                        )
+                    ) {
                         node.textContent = node.textContent.slice(0, 2);
                     }
                     break;
@@ -118,9 +122,6 @@ export async function compareContentsToSnapshot(
     contents: string,
     snapshotPath: string[]
 ): Promise<void> {
-    // wait for fonts to load
-    await page.evaluate(() => document.fonts.ready);
-
     const cleanedContents = contents
         .replace(/style=""/g, "")
         .replace(/(min-|max-)?(width|height): *\d+\.*\d+(px)?;? */g, "");
@@ -270,3 +271,5 @@ export async function shadow_blur(page): Promise<void> {
         }
     });
 }
+
+export type ContentExtractor = (page: any) => Promise<string>;

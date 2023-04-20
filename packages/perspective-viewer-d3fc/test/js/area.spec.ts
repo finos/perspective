@@ -11,10 +11,12 @@ import { test } from "@playwright/test";
 import { compareSVGContentsToSnapshot } from "@finos/perspective-test";
 
 test.describe("Area Tests", () => {
-    test("Contents match generationally", async ({ page }) => {
+    test("Area Tests Contents match generationally", async ({ page }) => {
         await page.goto("/tools/perspective-test/src/html/basic-test.html", {
             waitUntil: "networkidle",
         });
+
+        await page.waitForSelector("perspective-viewer");
 
         await page.evaluate(async () => {
             await document.querySelector("perspective-viewer")!.restore({

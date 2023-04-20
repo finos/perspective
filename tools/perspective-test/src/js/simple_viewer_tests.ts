@@ -25,7 +25,7 @@ function runSimpleCompareTest(
     extractContent: ContentExtractor,
     snapshotPath: string[]
 ) {
-    test(snapshotPath[1], async ({ page }) => {
+    test(snapshotPath.join("-"), async ({ page }) => {
         await restoreTable(page, tableSettings);
         const content = await extractContent(page);
         await compareContentsToSnapshot(page, content, snapshotPath);
@@ -36,7 +36,7 @@ export async function runRowAndColumnTests(
     context: string,
     extractContent: ContentExtractor
 ) {
-    test("Show grid no settings", async ({ page }) => {
+    test(`${context}-Show grid no settings`, async ({ page }) => {
         await page.evaluate(async () => {
             const viewer = document.querySelector("perspective-viewer")!;
             await viewer.getTable(); // Not sure why this is needed...
@@ -49,7 +49,7 @@ export async function runRowAndColumnTests(
         ]);
     });
 
-    test("Displays visible columns", async ({ page }) => {
+    test(`${context}-Displays visible columns`, async ({ page }) => {
         await restoreTable(page, {
             columns: ["Discount", "Profit", "Sales", "Quantity"],
         });

@@ -7,7 +7,7 @@
  *
  */
 
-import { test, expect } from "@playwright/test";
+import { test } from "@playwright/test";
 import {
     getSvgContentString,
     compareContentsToSnapshot,
@@ -216,26 +216,28 @@ export function run_standard_tests(
     runFilterTests(context, extractContent);
 }
 
-test.describe("Treemap Tests", () => {
-    test.beforeEach(async ({ page }) => {
-        await page.goto("/tools/perspective-test/src/html/basic-test.html", {
-            waitUntil: "networkidle",
-        });
+async function get_contents(page) {
+    return await page.evaluate(async () => {
+        const viewer = document.querySelector(
+            "perspective-viewer perspective-viewer-openlayers-scatter"
+        )!;
+        return viewer.innerHTML || "MISSING";
+    });
+}
 
-        await page.waitForSelector("perspective-viewer");
+test.describe("OpenLayers with superstore data set", () => {
+    test.beforeEach(async ({ page }) => {
+        await page.goto(
+            "/@finos/perspective-viewer-openlayers/test/html/superstore.html",
+            { waitUntil: "networkidle" }
+        );
 
         await page.evaluate(async () => {
             await document.querySelector("perspective-viewer")!.restore({
-                plugin: "Treemap",
-                columns: ["Quantity", "Profit"],
+                plugin: "Map Scatter",
             });
         });
     });
 
-    run_standard_tests(
-        "treemap",
-        getSvgContentString(
-            "perspective-viewer perspective-viewer-d3fc-treemap"
-        )
-    );
+    run_standard_tests("perspective-viewer-openlayers-scatter", get_contents);
 });

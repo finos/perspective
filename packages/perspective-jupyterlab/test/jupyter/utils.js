@@ -7,7 +7,7 @@
  *
  */
 
-const { test, expect } = require("@playwright/test");
+const { test } = require("@playwright/test");
 const fs = require("fs");
 const path = require("path");
 const rimraf = require("rimraf");

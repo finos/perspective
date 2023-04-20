@@ -7,13 +7,7 @@
  *
  */
 
-const {
-    bash,
-    execute,
-    getarg,
-    run_with_scope,
-    bash_with_scope,
-} = require("./script_utils.js");
+const { bash, execute, getarg, run_with_scope } = require("./script_utils.js");
 const minimatch = require("minimatch");
 
 // Unfortunately we have to handle parts of the Jupyter test case here,
@@ -44,17 +38,9 @@ function playwright(package, is_jlab) {
         ${is_jlab ? "PSP_JUPYTERLAB_TESTS=1 __JUPYTERLAB_PORT__=6538" : ""}
         ${IS_CI ? "CI=1" : ""}
         ${package ? `PACKAGE=${package}` : ""} 
-        npx playwright test 
+        npx playwright test
         --config=tools/perspective-test/playwright.config.ts 
         ${args}`;
-}
-
-function get_regex() {
-    const regex = getarg`-t`;
-    if (regex) {
-        console.log(`-- Qualifying search '${regex}'`);
-        return regex.replace(/ /g, ".");
-    }
 }
 
 async function run() {

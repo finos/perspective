@@ -18,6 +18,8 @@ test.describe("Bar Width", () => {
             waitUntil: "networkidle",
         });
 
+        await page.waitForSelector("perspective-viewer");
+
         await page.evaluate(async () => {
             await document.querySelector("perspective-viewer")!.restore({
                 plugin: "Y Bar",

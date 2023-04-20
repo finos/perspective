@@ -85,7 +85,7 @@ const TESTS = [
 
 function runTests(context, compare) {
     for (const [name, old, current] of TESTS) {
-        test(`Restore workspace - ${name}`, async ({ page }) => {
+        test(`${context} Restore workspace - ${name}`, async ({ page }) => {
             await setupTestWorkspace(page);
 
             const converted = convert(JSON.parse(JSON.stringify(old)));

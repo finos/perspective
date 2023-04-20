@@ -7,7 +7,7 @@
  *
  */
 
-import { test, expect } from "@playwright/test";
+import { test } from "@playwright/test";
 import {
     getSvgContentString,
     compareContentsToSnapshot,
@@ -216,26 +216,30 @@ export function run_standard_tests(
     runFilterTests(context, extractContent);
 }
 
-test.describe("Treemap Tests", () => {
-    test.beforeEach(async ({ page }) => {
-        await page.goto("/tools/perspective-test/src/html/basic-test.html", {
-            waitUntil: "networkidle",
-        });
+async function get_contents(page) {
+    return await page.evaluate(async () => {
+        const viewer = document.querySelector(
+            "perspective-viewer perspective-viewer-plugin"
+        )!;
+        return viewer.innerHTML;
+    });
+}
 
-        await page.waitForSelector("perspective-viewer");
+test.describe("Superstore", () => {
+    test.beforeEach(async function init({ page }) {
+        await page.goto(
+            "/@finos/perspective-viewer/test/html/superstore.html",
+            {
+                waitUntil: "networkidle",
+            }
+        );
 
         await page.evaluate(async () => {
             await document.querySelector("perspective-viewer")!.restore({
-                plugin: "Treemap",
-                columns: ["Quantity", "Profit"],
+                plugin: "Debug",
             });
         });
     });
 
-    run_standard_tests(
-        "treemap",
-        getSvgContentString(
-            "perspective-viewer perspective-viewer-d3fc-treemap"
-        )
-    );
+    run_standard_tests("superstore", get_contents);
 });

@@ -64,44 +64,64 @@ const BAD_LAYOUT = {
     },
 };
 
-function tests(context, compare) {
-    test.describe("visibility", () => {
-        test("Sunburst charts do not loop forever when disconnected from DOM", async ({
-            page,
-        }) => {
-            await page.evaluate(async (layout) => {
-                await window.workspace.restore(layout);
-            }, BAD_LAYOUT);
-
-            await page.evaluate(async () => {
-                const viewer = document.body.querySelector(
-                    'perspective-viewer[name="one"]'
-                );
-                const workspace = document.getElementById("workspace");
-                workspace.removeChild(viewer);
-                await workspace.flush();
-            });
-
-            return compare(
-                page,
-                `sunburst-charts-does-not-loop-${context}.txt`
-            );
-        });
-    });
-}
-
 test.beforeEach(async ({ page }) => {
     await page.goto("/tools/perspective-test/src/html/workspace-test.html", {
         waitUntil: "networkidle",
     });
+
+    await page.waitForSelector("perspective-workspace");
 });
 
 test.describe("Workspace Visibility", () => {
     test.describe("Light DOM", () => {
-        tests("light-dom", compareLightDOMContents);
+        test.describe("visibility", () => {
+            test("Light DOM Sunburst charts do not loop forever when disconnected from DOM", async ({
+                page,
+            }) => {
+                await page.evaluate(async (layout) => {
+                    await window.workspace.restore(layout);
+                }, BAD_LAYOUT);
+
+                await page.evaluate(async () => {
+                    const viewer = document.body.querySelector(
+                        'perspective-viewer[name="one"]'
+                    );
+                    const workspace = document.getElementById("workspace");
+                    workspace.removeChild(viewer);
+                    await workspace.flush();
+                });
+
+                return compareLightDOMContents(
+                    page,
+                    `sunburst-charts-does-not-loop-light-dom.txt`
+                );
+            });
+        });
     });
 
     test.describe("Shadow DOM", () => {
-        tests("shadow-dom", compareShadowDOMContents);
+        test.describe("visibility", () => {
+            test("ShadowDOM Sunburst charts do not loop forever when disconnected from DOM", async ({
+                page,
+            }) => {
+                await page.evaluate(async (layout) => {
+                    await window.workspace.restore(layout);
+                }, BAD_LAYOUT);
+
+                await page.evaluate(async () => {
+                    const viewer = document.body.querySelector(
+                        'perspective-viewer[name="one"]'
+                    );
+                    const workspace = document.getElementById("workspace");
+                    workspace.removeChild(viewer);
+                    await workspace.flush();
+                });
+
+                return compareShadowDOMContents(
+                    page,
+                    `sunburst-charts-does-not-loop-shadow-dom.txt`
+                );
+            });
+        });
     });
 });
