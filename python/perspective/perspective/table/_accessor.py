@@ -275,6 +275,14 @@ class _PerspectiveAccessor(object):
             elif array.dtype == numpy.int64 and type == t_dtype.DTYPE_FLOAT64:
                 # there cannot be `nan` values in int64
                 self._data_or_schema[name] = array.astype(numpy.float64)
+            elif array.dtype == numpy.float32 and type == t_dtype.DTYPE_FLOAT64:
+                mask = make_null_mask(array)
+                self._numpy_column_masks[name] = mask
+                self._data_or_schema[name] = numpy.float64(array)
+            elif array.dtype == numpy.float32 and type == t_dtype.DTYPE_FLOAT32:
+                mask = make_null_mask(array)
+                self._numpy_column_masks[name] = mask
+                self._data_or_schema[name] = numpy.float32(array)
 
     def _get_numpy_column(self, name):
         """For columnar datasets, return the :obj:`list`/Numpy array that
