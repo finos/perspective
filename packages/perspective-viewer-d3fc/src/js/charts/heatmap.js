@@ -18,6 +18,52 @@ import { colorRangeLegend } from "../legend/colorRangeLegend";
 import zoomableChart from "../zoom/zoomableChart";
 import nearbyTip from "../tooltip/nearbyTip";
 
+export const invertAxesFlag = false;
+
+function invertAxes(flag, settings, data) {
+    let xAxis = axisFactory(settings)
+        .excludeType(AXIS_TYPES.linear)
+        .settingName("crossValues")
+        .valueName("crossValue")(data);
+
+    let yAxis = axisFactory(settings)
+        .excludeType(AXIS_TYPES.linear)
+        .settingName("splitValues")
+        .valueName("mainValue")
+        .modifyDomain((d) => {
+            let is_number = !isNaN(d[0]);
+            return is_number ? d.reverse() : d;
+        })
+        .orient("vertical")(data);
+
+    if (flag === true) {
+        xAxis = axisFactory(settings)
+            .excludeType(AXIS_TYPES.linear)
+            .settingName("splitValues")
+            .valueName("crossValue")
+            .modifyDomain((d) => {
+                let is_number = !isNaN(d[0]);
+                return is_number ? d.reverse() : d;
+            })(data);
+
+        yAxis = axisFactory(settings)
+            .excludeType(AXIS_TYPES.linear)
+            .settingName("crossValues")
+            .valueName("mainValue")
+            .modifyDomain((d) => {
+                let is_number = typeof d[0];
+                return is_number === "number" || is_number === "string"
+                    ? d
+                    : d.reverse();
+            })
+            .orient("vertical")(data);
+    }
+    return {
+        xAxis,
+        yAxis,
+    };
+}
+
 function heatmapChart(container, settings) {
     const data = heatmapData(settings, filterData(settings));
 
@@ -26,24 +72,7 @@ function heatmapChart(container, settings) {
 
     const legend = colorRangeLegend().scale(color);
 
-    const xAxis = axisFactory(settings)
-        .excludeType(AXIS_TYPES.linear)
-        .settingName("splitValues")
-        .valueName("crossValue")
-        .modifyDomain((d) => {
-            let is_number = !isNaN(d[0]);
-            return is_number ? d.reverse() : d;
-        })(data);
-
-    const yAxis = axisFactory(settings)
-        .excludeType(AXIS_TYPES.linear)
-        .settingName("crossValues")
-        .valueName("mainValue")
-        .modifyDomain((d) => {
-            let is_number = typeof d[0];
-            return is_number === 'number' || is_number === 'string' ? d : d.reverse();
-        })
-        .orient("vertical")(data);
+    const { xAxis, yAxis } = invertAxes(invertAxesFlag, settings, data);
 
     const chart = chartCanvasFactory(xAxis, yAxis).plotArea(
         withGridLines(series, settings).canvas(true)

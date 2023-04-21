@@ -9,37 +9,50 @@
 import { axisType } from "../axis/axisType";
 import { AXIS_TYPES } from "../axis/axisType";
 import { labelFunction } from "../axis/axisLabel";
+import { invertAxesFlag } from "../charts/heatmap";
 
 export function heatmapData(settings, data) {
     const labelfn = labelFunction(settings);
-    const crossType = axisType(settings)
+    const mainType = axisType(settings)
         .excludeType(AXIS_TYPES.linear)
         .settingName("splitValues")();
 
     const heatmapData = [];
 
     data.forEach((col, i) => {
-        const mainValue = labelfn(col, i);
+        const crossValue = labelfn(col, i);
         Object.keys(col)
             .filter((key) => key !== "__ROW_PATH__")
             .forEach((key) => {
-                const crossValue = getCrossValues(key);
-                heatmapData.push({
-                    mainValue: mainValue,
-                    crossValue:
-                        crossType === AXIS_TYPES.time
-                            ? new Date(crossValue)
-                            : crossValue,
-                    colorValue: col[key],
-                    row: col,
-                });
+                const mainValue = getMainValues(key);
+                if (invertAxesFlag === false) {
+                    heatmapData.push({
+                        crossValue: crossValue,
+                        mainValue:
+                            mainType === AXIS_TYPES.time
+                                ? new Date(mainValue)
+                                : mainValue,
+                        colorValue: col[key],
+                        row: col,
+                    });
+                } else {
+                    heatmapData.push({
+                        mainValue: crossValue,
+                        crossValue:
+                            mainType === AXIS_TYPES.time
+                                ? new Date(mainValue)
+                                : mainValue,
+                        colorValue: col[key],
+                        row: col,
+                    });
+                }
             });
     });
 
     return heatmapData;
 }
 
-function getCrossValues(key) {
+function getMainValues(key) {
     // Key format is based on "Split By" values plus the value label at the end
     // val1|val2|....|label
     const labels = key.split("|");
