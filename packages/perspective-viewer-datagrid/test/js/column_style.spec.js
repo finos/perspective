@@ -63,6 +63,8 @@ test.describe("Column Style Tests", () => {
             waitUntil: "networkidle",
         });
 
+        await page.waitForFunction(() => !!window.__TABLE_LOADED__);
+
         await page.evaluate(async () => {
             await document.querySelector("perspective-viewer").restore({
                 plugin: "Datagrid",
@@ -141,6 +143,8 @@ test.describe("Column Style Tests", () => {
             waitUntil: "networkidle",
         });
 
+        await page.waitForFunction(() => !!window.__TABLE_LOADED__);
+
         await page.evaluate(async () => {
             await document.querySelector("perspective-viewer").restore({
                 plugin: "Datagrid",
@@ -156,6 +160,8 @@ test.describe("Column Style Tests", () => {
         await page.goto("/tools/perspective-test/src/html/basic-test.html", {
             waitUntil: "networkidle",
         });
+
+        await page.waitForFunction(() => !!window.__TABLE_LOADED__);
 
         await page.evaluate(async () => {
             await document.querySelector("perspective-viewer").restore({

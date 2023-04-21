@@ -18,6 +18,8 @@ test.describe("Events test", () => {
             waitUntil: "networkidle",
         });
 
+        await page.waitForFunction(() => !!window.__TABLE_LOADED__);
+
         await page.evaluate(async () => {
             await document.querySelector("perspective-viewer")!.restore({
                 plugin: "Y Line",
@@ -77,6 +79,8 @@ test.describe("Events test", () => {
         await page.goto("/@finos/perspective-test/src/html/basic-test.html", {
             waitUntil: "networkidle",
         });
+
+        await page.waitForFunction(() => !!window.__TABLE_LOADED__);
 
         await page.evaluate(async () => {
             await document.querySelector("perspective-viewer")!.restore({

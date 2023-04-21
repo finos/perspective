@@ -62,6 +62,10 @@ test.beforeEach(async ({ page }) => {
     await page.goto("/tools/perspective-test/src/html/workspace-test.html", {
         waitUntil: "networkidle",
     });
+
+    await page.waitForFunction(() => !!window.__TABLE__);
+
+    await page.evaluate(() => document.fonts.ready);
 });
 
 test.describe("Workspace HTML", () => {

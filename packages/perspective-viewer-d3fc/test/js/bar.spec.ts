@@ -21,6 +21,8 @@ test.describe("Bar Tests", () => {
                 { waitUntil: "networkidle" }
             );
 
+            await page.waitForFunction(() => !!window.__TABLE_LOADED__);
+
             await page.evaluate(async () => {
                 await document.querySelector("perspective-viewer")!.restore({
                     plugin: "Y Bar",
@@ -44,6 +46,8 @@ test.describe("Bar Tests", () => {
                 { waitUntil: "networkidle" }
             );
 
+            await page.waitForFunction(() => !!window.__TABLE_LOADED__);
+
             await page.evaluate(async () => {
                 await document.querySelector("perspective-viewer")!.restore({
                     plugin: "X Bar",
@@ -65,6 +69,8 @@ test.describe("Bar Tests", () => {
                 "/@finos/perspective-test/src/html/themed-test.html",
                 { waitUntil: "networkidle" }
             );
+
+            await page.waitForFunction(() => !!window.__TABLE_LOADED__);
 
             await page.evaluate(async () => {
                 await document.querySelector("perspective-viewer")!.restore({

@@ -18,6 +18,8 @@ async function setupTestWorkspace(page) {
         waitUntil: "networkidle",
     });
 
+    await page.waitForFunction(() => !!window.__TABLE__);
+
     await page.evaluate(async () => {
         const viewer = document.createElement("perspective-viewer");
         viewer.setAttribute("table", "superstore");

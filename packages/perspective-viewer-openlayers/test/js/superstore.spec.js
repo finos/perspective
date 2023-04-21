@@ -26,6 +26,8 @@ test.describe("OpenLayers with superstore data set", () => {
             { waitUntil: "networkidle" }
         );
 
+        await page.waitForFunction(() => !!window.__TABLE_LOADED__);
+
         await page.evaluate(async () => {
             await document.querySelector("perspective-viewer").restore({
                 plugin: "Map Scatter",

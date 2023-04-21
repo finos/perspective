@@ -14,6 +14,8 @@ test.beforeEach(async ({ page }) => {
         "/@finos/perspective-viewer/test/html/plugin-priority-order.html",
         { waitUntil: "networkidle" }
     );
+
+    await page.waitForFunction(() => !!window.__TABLE_LOADED__);
 });
 
 test.describe("Plugin Priority Order", () => {

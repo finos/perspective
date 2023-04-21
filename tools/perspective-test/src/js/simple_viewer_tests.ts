@@ -14,6 +14,7 @@ import type { PerspectiveViewerConfig } from "@finos/perspective-viewer";
 export type ContentExtractor = (page: any) => Promise<string>;
 
 async function restoreViewer(page, viewerConfig: PerspectiveViewerConfig) {
+    await page.waitForFunction(() => document.fonts.ready);
     return await page.evaluate(async (viewerConfig) => {
         const viewer = document.querySelector("perspective-viewer")!;
         await viewer.restore(viewerConfig);

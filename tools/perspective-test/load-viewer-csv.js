@@ -10,12 +10,15 @@
 import perspective from "/perspective.js";
 
 async function load() {
+    window.__TABLE_LOADED__ = false;
     let resp = await fetch("/@finos/perspective-test/assets/superstore.csv");
     let csv = await resp.text();
     const viewer = document.querySelector("perspective-viewer");
     const worker = perspective.worker();
-    const table = worker.table(csv);
+    const table = await worker.table(csv);
     await viewer.load(table);
+
+    window.__TABLE_LOADED__ = true;
 }
 
 await load();

@@ -14,6 +14,9 @@ test.beforeEach(async ({ page }) => {
     await page.goto("/@finos/perspective-jupyterlab/dist/umd/resize.html", {
         waitUntil: "networkidle",
     });
+
+    await page.waitForFunction(() => document.fonts.ready);
+    await page.waitForFunction(() => !!window.__TABLE_LOADED__);
 });
 
 test.describe("JupyterLab resize", () => {

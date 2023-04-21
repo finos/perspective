@@ -18,6 +18,9 @@ async function setupTestWorkspace(page) {
     await page.goto("/tools/perspective-test/src/html/workspace-test.html", {
         waitUntil: "networkidle",
     });
+
+    await page.waitForFunction(() => document.fonts.ready);
+    await page.waitForFunction(() => !!window.__TABLE__);
 }
 
 const TESTS = [
