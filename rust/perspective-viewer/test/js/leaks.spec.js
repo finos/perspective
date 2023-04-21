@@ -10,6 +10,8 @@
 import { test, expect } from "@playwright/test";
 import { compareContentsToSnapshot } from "@finos/perspective-test";
 
+test.use({ launchOptions: { args: ["--js-flags=--expose-gc"] } });
+
 test.beforeEach(async ({ page }) => {
     await page.goto("/rust/perspective-viewer/test/html/superstore.html", {
         waitUntil: "networkidle",
@@ -22,9 +24,10 @@ test.beforeEach(async ({ page }) => {
     });
 });
 
-test.describe.skip("leaks", () => {
+test.describe("leaks", () => {
     // This originally has a timeout of 120000
     test("doesn't leak elements", async ({ page }) => {
+        // await page.pause();
         let viewer = await page.$("perspective-viewer");
         await page.evaluate(async (viewer) => {
             window.__TABLE__ = await viewer.getTable();
@@ -34,7 +37,9 @@ test.describe.skip("leaks", () => {
         // From a helpful blog
         // https://media-codings.com/articles/automatically-detect-memory-leaks-with-puppeteer
         await page.evaluate(() => window.gc());
-        const { JSHeapUsedSize: heap1 } = await page.metrics();
+        const heap1 = await page.evaluate(
+            () => performance.memory.usedJSHeapSize
+        );
 
         for (var i = 0; i < 500; i++) {
             await page.evaluate(async () => {
@@ -55,7 +60,10 @@ test.describe.skip("leaks", () => {
         // leak ~0.1% per instance.
         // TODO: Not yet sure how to access window.gc() in Playwright
         await page.evaluate(() => window.gc());
-        const { JSHeapUsedSize: heap2 } = await page.metrics();
+
+        const heap2 = await page.evaluate(
+            () => performance.memory.usedJSHeapSize
+        );
         expect((heap2 - heap1) / heap1).toBeLessThan(0.5);
 
         const contents = await page.evaluate(async () => {
@@ -75,7 +83,9 @@ test.describe.skip("leaks", () => {
         }, viewer);
 
         await page.evaluate(() => window.gc());
-        const { JSHeapUsedSize: heap1 } = await page.metrics();
+        const heap1 = await page.evaluate(
+            () => performance.memory.usedJSHeapSize
+        );
 
         for (var i = 0; i < 500; i++) {
             await page.evaluate(async (element) => {
@@ -97,7 +107,9 @@ test.describe.skip("leaks", () => {
         }
 
         await page.evaluate(() => window.gc());
-        const { JSHeapUsedSize: heap2 } = await page.metrics();
+        const heap2 = await page.evaluate(
+            () => performance.memory.usedJSHeapSize
+        );
         expect((heap2 - heap1) / heap1).toBeLessThan(0.1);
 
         const contents = await page.evaluate(async (viewer) => {
@@ -119,7 +131,9 @@ test.describe.skip("leaks", () => {
         }, viewer);
 
         await page.evaluate(() => window.gc());
-        const { JSHeapUsedSize: heap1 } = await page.metrics();
+        const heap1 = await page.evaluate(
+            () => performance.memory.usedJSHeapSize
+        );
 
         for (var i = 0; i < 500; i++) {
             await page.evaluate(async (element) => {
@@ -131,7 +145,9 @@ test.describe.skip("leaks", () => {
         }
 
         await page.evaluate(() => window.gc());
-        const { JSHeapUsedSize: heap2 } = await page.metrics();
+        const heap2 = await page.evaluate(
+            () => performance.memory.usedJSHeapSize
+        );
         expect((heap2 - heap1) / heap1).toBeLessThan(0.05);
 
         const contents = await page.evaluate(async (viewer) => {
