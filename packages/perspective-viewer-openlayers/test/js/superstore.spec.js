@@ -7,10 +7,8 @@
  *
  */
 
-const utils = require("@finos/perspective-test");
-const path = require("path");
-
-const simple_tests = require("@finos/perspective-viewer/test/js/simple_tests.js");
+import { test } from "@playwright/test";
+import { run_standard_tests } from "@finos/perspective-test";
 
 async function get_contents(page) {
     return await page.evaluate(async () => {
@@ -21,12 +19,19 @@ async function get_contents(page) {
     });
 }
 
-utils.with_server({}, () => {
-    describe.page(
-        "superstore.html",
-        () => {
-            simple_tests.default(get_contents);
-        },
-        { root: path.join(__dirname, "..", "..") }
-    );
+test.describe("OpenLayers with superstore data set", () => {
+    test.beforeEach(async ({ page }) => {
+        await page.goto(
+            "/@finos/perspective-viewer-openlayers/test/html/superstore.html",
+            { waitUntil: "networkidle" }
+        );
+
+        await page.evaluate(async () => {
+            await document.querySelector("perspective-viewer").restore({
+                plugin: "Map Scatter",
+            });
+        });
+    });
+
+    run_standard_tests("perspective-viewer-openlayers-scatter", get_contents);
 });

@@ -10,19 +10,10 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <script type="module" src="perspective.js"></script>
-        <script type="module" src="perspective-viewer.js"></script>
-
-        <link rel="stylesheet" href="demo.css" />
-    </head>
-
-    <body>
+        <script type="module" src="/perspective-viewer.js"></script>
         <script type="module">
-            import perspective from "./perspective.js";
-
-            class TestChartPluginHighPriority extends customElements.get(
-                "perspective-viewer-plugin"
-            ) {
+            const BASE = customElements.get("perspective-viewer-plugin");
+            class TestChartPluginHighPriority extends BASE {
                 get name() {
                     return "HighPriority";
                 }
@@ -32,9 +23,7 @@
                 }
             }
 
-            class TestChartPluginLowPriority extends customElements.get(
-                "perspective-viewer-plugin"
-            ) {
+            class TestChartPluginLowPriority extends BASE {
                 get name() {
                     return "LowPriority";
                 }
@@ -44,25 +33,19 @@
                 }
             }
 
-            const Viewer = customElements.get("perspective-viewer");
             customElements.define("low-priority", TestChartPluginLowPriority);
             customElements.define("high-priority", TestChartPluginHighPriority);
+            const Viewer = customElements.get("perspective-viewer");
             Viewer.registerPlugin("low-priority");
             Viewer.registerPlugin("high-priority");
-
-            const viewer = document.createElement("perspective-viewer");
-            document.body.appendChild(viewer);
-
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", "superstore.csv", true);
-            xhr.onload = async function () {
-                window.__CSV__ = xhr.response;
-                window.__WORKER__ = perspective.worker();
-                const table = window.__WORKER__.table(xhr.response);
-                const t = await table;
-                await viewer.load(table);
-            };
-            xhr.send(null);
         </script>
+
+        <script type="module" src="/load-viewer-csv.js"></script>
+        <link rel="stylesheet" href="../css/demo.css" />
+        <link rel="stylesheet" href="/pro.css" />
+        <link rel="stylesheet" href="/@fontsource/roboto-mono/400.css" />
+    </head>
+    <body>
+        <perspective-viewer></perspective-viewer>
     </body>
 </html>

@@ -7,96 +7,95 @@
  *
  */
 
-const utils = require("@finos/perspective-test");
-const path = require("path");
+const { test } = require("@playwright/test");
+import { compareContentsToSnapshot } from "@finos/perspective-test";
 
-utils.with_server({}, () => {
-    describe.page(
-        "resize.html",
-        () => {
-            test.capture("Config should be hidden by default", async (page) => {
-                await page.waitForFunction(() => !!window.__WIDGET__);
-                return await page.evaluate(async () => {
-                    await window.__WIDGET__.viewer.getTable();
-                    await window.__WIDGET__.viewer.flush();
+test.beforeEach(async ({ page }) => {
+    await page.goto("/@finos/perspective-jupyterlab/dist/umd/resize.html", {
+        waitUntil: "networkidle",
+    });
+});
 
-                    // Linux returns ever-so-slightly different auto width
-                    // column values so we need to strip these.
-                    for (const elem of document.querySelectorAll(
-                        "perspective-viewer *"
-                    )) {
-                        elem.removeAttribute("style");
-                    }
+test.describe("JupyterLab resize", () => {
+    test("Config should be hidden by default", async ({ page }) => {
+        const contents = await page.evaluate(async () => {
+            await window.__WIDGET__.viewer.getTable();
+            await window.__WIDGET__.viewer.flush();
 
-                    return window.__WIDGET__.viewer.innerHTML;
-                });
-            });
+            // Linux returns ever-so-slightly different auto width
+            // column values so we need to strip these.
+            for (const elem of document.querySelectorAll(
+                "perspective-viewer *"
+            )) {
+                elem.removeAttribute("style");
+            }
 
-            test.capture(
-                "Resize the container causes the widget to resize",
-                async (page) => {
-                    await page.evaluate(async () => {
-                        await document
-                            .querySelector("perspective-viewer")
-                            .toggleConfig();
-                        await document
-                            .querySelector("perspective-viewer")
-                            .getTable();
-                    });
+            return window.__WIDGET__.viewer.innerHTML;
+        });
 
-                    await page.evaluate(async () => {
-                        document
-                            .querySelector(".PSPContainer")
-                            .setAttribute(
-                                "style",
-                                "position:absolute;top:0;left:0;width:300px;height:300px"
-                            );
+        await compareContentsToSnapshot(contents, [
+            "jupyterlab-resize-config-hidden.txt",
+        ]);
+    });
 
-                        await document
-                            .querySelector("perspective-viewer")
-                            .notifyResize();
-                    });
+    test("Resize the container causes the widget to resize", async ({
+        page,
+    }) => {
+        await page.evaluate(async () => {
+            await document.querySelector("perspective-viewer").toggleConfig();
+            await document.querySelector("perspective-viewer").getTable();
+        });
 
-                    return await page.evaluate(async () => {
-                        document.querySelector(".PSPContainer").style =
-                            "position:absolute;top:0;left:0;width:800px;height:600px";
-                        await document
-                            .querySelector("perspective-viewer")
-                            .notifyResize();
+        await page.evaluate(async () => {
+            document
+                .querySelector(".PSPContainer")
+                .setAttribute(
+                    "style",
+                    "position:absolute;top:0;left:0;width:300px;height:300px"
+                );
 
-                        for (const elem of document.querySelectorAll(
-                            "perspective-viewer *"
-                        )) {
-                            elem.removeAttribute("style");
-                        }
+            await document.querySelector("perspective-viewer").notifyResize();
+        });
 
-                        return window.__WIDGET__.viewer.innerHTML;
-                    });
-                }
-            );
+        const contents = await page.evaluate(async () => {
+            document.querySelector(".PSPContainer").style =
+                "position:absolute;top:0;left:0;width:800px;height:600px";
+            await document.querySelector("perspective-viewer").notifyResize();
 
-            test.capture("group_by traitlet works", async (page) => {
-                await page.evaluate(async () => {
-                    await document
-                        .querySelector("perspective-viewer")
-                        .toggleConfig();
-                    await document
-                        .querySelector("perspective-viewer")
-                        .getTable();
-                    await document.querySelector("perspective-viewer").flush();
-                });
-                return await page.evaluate(async () => {
-                    await window.__WIDGET__.restore({ group_by: ["State"] });
-                    for (const elem of document.querySelectorAll(
-                        "perspective-viewer *"
-                    )) {
-                        elem.removeAttribute("style");
-                    }
+            for (const elem of document.querySelectorAll(
+                "perspective-viewer *"
+            )) {
+                elem.removeAttribute("style");
+            }
 
-                    return window.__WIDGET__.viewer.innerHTML;
-                });
-            });
-        },
-        { root: path.join(__dirname, "..", "..") }
-    );
+            return window.__WIDGET__.viewer.innerHTML;
+        });
+
+        await compareContentsToSnapshot(contents, [
+            "jupyterlab-resize-config-shown.txt",
+        ]);
+    });
+
+    test("group_by traitlet works", async ({ page }) => {
+        await page.evaluate(async () => {
+            await document.querySelector("perspective-viewer").toggleConfig();
+            await document.querySelector("perspective-viewer").getTable();
+            await document.querySelector("perspective-viewer").flush();
+        });
+
+        const contents = await page.evaluate(async () => {
+            await window.__WIDGET__.restore({ group_by: ["State"] });
+            for (const elem of document.querySelectorAll(
+                "perspective-viewer *"
+            )) {
+                elem.removeAttribute("style");
+            }
+
+            return window.__WIDGET__.viewer.innerHTML;
+        });
+
+        await compareContentsToSnapshot(contents, [
+            "jupyterlab-resize-group-by-traitlet.txt",
+        ]);
+    });
 });

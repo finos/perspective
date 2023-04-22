@@ -7,11 +7,11 @@
  *
  */
 
-describe("perspective.js module", function () {
-    it("does not access the WASM module until it is ready", async () => {
-        const tbl = require("../../dist/cjs/perspective.node.js").table([
-            { x: 1 },
-        ]);
+import { test, expect } from "@playwright/test";
+
+test.describe("perspective.js module", function () {
+    test("does not access the WASM module until it is ready", async () => {
+        const tbl = require("@finos/perspective").table([{ x: 1 }]);
         tbl.then(async (table) => {
             const size = await table.size();
             expect(size).toEqual(1);

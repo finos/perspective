@@ -7,7 +7,8 @@
  *
  */
 
-const perspective = require("../../dist/cjs/perspective.node.js");
+const { test, expect } = require("@playwright/test");
+const perspective = require("@finos/perspective");
 
 const data = {
     w: [
@@ -53,9 +54,9 @@ const data = {
     ],
 };
 
-describe("get_min_max", function () {
-    describe("0 sided", function () {
-        it("float column", async function () {
+test.describe("get_min_max", function () {
+    test.describe("0 sided", function () {
+        test("float column", async function () {
             var table = await perspective.table(data);
             var view = await table.view({});
             const range = await view.get_min_max("w");
@@ -64,7 +65,7 @@ describe("get_min_max", function () {
             table.delete();
         });
 
-        it("int column", async function () {
+        test("int column", async function () {
             var table = await perspective.table(data);
             var view = await table.view({});
             const range = await view.get_min_max("x");
@@ -73,7 +74,7 @@ describe("get_min_max", function () {
             table.delete();
         });
 
-        it("string column", async function () {
+        test("string column", async function () {
             var table = await perspective.table(data);
             var view = await table.view({});
             const range = await view.get_min_max("y");
@@ -83,8 +84,8 @@ describe("get_min_max", function () {
         });
     });
 
-    describe("1 sided", function () {
-        it("float col", async function () {
+    test.describe("1 sided", function () {
+        test("float col", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
                 group_by: ["y"],
@@ -95,7 +96,7 @@ describe("get_min_max", function () {
             table.delete();
         });
 
-        it("int col", async function () {
+        test("int col", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
                 group_by: ["y"],
@@ -106,7 +107,7 @@ describe("get_min_max", function () {
             table.delete();
         });
 
-        it("string col", async function () {
+        test("string col", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
                 group_by: ["y"],
@@ -118,8 +119,8 @@ describe("get_min_max", function () {
         });
     });
 
-    describe("2 sided", function () {
-        it("float col", async function () {
+    test.describe("2 sided", function () {
+        test("float col", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
                 group_by: ["y"],
@@ -131,7 +132,7 @@ describe("get_min_max", function () {
             table.delete();
         });
 
-        it("int column", async function () {
+        test("int column", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
                 group_by: ["y"],
@@ -143,7 +144,7 @@ describe("get_min_max", function () {
             table.delete();
         });
 
-        it("string column", async function () {
+        test("string column", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
                 group_by: ["y"],
@@ -156,8 +157,8 @@ describe("get_min_max", function () {
         });
     });
 
-    describe("column only", function () {
-        it("float col", async function () {
+    test.describe("column only", function () {
+        test("float col", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
                 split_by: ["z"],
@@ -168,7 +169,7 @@ describe("get_min_max", function () {
             table.delete();
         });
 
-        it("int col", async function () {
+        test("int col", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
                 split_by: ["z"],
@@ -179,7 +180,7 @@ describe("get_min_max", function () {
             table.delete();
         });
 
-        it("string col", async function () {
+        test("string col", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
                 split_by: ["z"],

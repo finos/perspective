@@ -8,5 +8,8 @@
     "rust-analyzer.linkedProjects": [
         "${workspaceFolder}/rust/perspective-viewer/Cargo.toml"
     ],
-    "rust-analyzer.checkOnSave.command": "clippy"
+    "rust-analyzer.checkOnSave.command": "clippy",
+    "playwright.env": {
+        "TZ": "UTC"
+    }
 }

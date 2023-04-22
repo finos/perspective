@@ -7,7 +7,8 @@
  *
  */
 
-const perspective = require("../../dist/cjs/perspective.node.js");
+const { test, expect } = require("@playwright/test");
+const perspective = require("@finos/perspective");
 
 const data = {
     w: [
@@ -53,9 +54,9 @@ const data = {
     ],
 };
 
-describe("to_format viewport", function () {
-    describe("0 sided", function () {
-        it("start_col 0 is the first col", async function () {
+test.describe("to_format viewport", function () {
+    test.describe("0 sided", function () {
+        test("start_col 0 is the first col", async function () {
             var table = await perspective.table(data);
             var view = await table.view({});
             const cols = await view.to_columns({ start_col: 0, end_col: 1 });
@@ -64,7 +65,7 @@ describe("to_format viewport", function () {
             table.delete();
         });
 
-        it("start_col 2 is the second col", async function () {
+        test("start_col 2 is the second col", async function () {
             var table = await perspective.table(data);
             var view = await table.view({});
             const cols = await view.to_columns({ start_col: 1, end_col: 2 });
@@ -73,7 +74,7 @@ describe("to_format viewport", function () {
             table.delete();
         });
 
-        it("start_col 0, end_col 2 is the first two columns", async function () {
+        test("start_col 0, end_col 2 is the first two columns", async function () {
             var table = await perspective.table(data);
             var view = await table.view({});
             const cols = await view.to_columns({ start_col: 0, end_col: 2 });
@@ -83,8 +84,8 @@ describe("to_format viewport", function () {
         });
     });
 
-    describe("1 sided", function () {
-        it("start_col 0 is the first col", async function () {
+    test.describe("1 sided", function () {
+        test("start_col 0 is the first col", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
                 group_by: ["y"],
@@ -98,7 +99,7 @@ describe("to_format viewport", function () {
             table.delete();
         });
 
-        it("start_col 2 is the second col", async function () {
+        test("start_col 2 is the second col", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
                 group_by: ["y"],
@@ -113,7 +114,7 @@ describe("to_format viewport", function () {
             table.delete();
         });
 
-        it("start_col 0, end_col 2 is the first two columns", async function () {
+        test("start_col 0, end_col 2 is the first two columns", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
                 group_by: ["y"],
@@ -129,8 +130,8 @@ describe("to_format viewport", function () {
         });
     });
 
-    describe("2 sided", function () {
-        it("start_col 0 is the first col", async function () {
+    test.describe("2 sided", function () {
+        test("start_col 0 is the first col", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
                 group_by: ["y"],
@@ -145,7 +146,7 @@ describe("to_format viewport", function () {
             table.delete();
         });
 
-        it("start_col 2 is the second col", async function () {
+        test("start_col 2 is the second col", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
                 group_by: ["y"],
@@ -161,7 +162,7 @@ describe("to_format viewport", function () {
             table.delete();
         });
 
-        it("start_col 0, end_col 2 is the first two columns", async function () {
+        test("start_col 0, end_col 2 is the first two columns", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
                 group_by: ["y"],
@@ -178,8 +179,8 @@ describe("to_format viewport", function () {
         });
     });
 
-    describe("column only", function () {
-        it("start_col 0 is the first col", async function () {
+    test.describe("column only", function () {
+        test("start_col 0 is the first col", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
                 split_by: ["z"],
@@ -210,7 +211,7 @@ describe("to_format viewport", function () {
             table.delete();
         });
 
-        it("start_col 2 is the second col", async function () {
+        test("start_col 2 is the second col", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
                 split_by: ["z"],
@@ -241,7 +242,7 @@ describe("to_format viewport", function () {
             table.delete();
         });
 
-        it("start_col 0, end_col 2 is the first two columns", async function () {
+        test("start_col 0, end_col 2 is the first two columns", async function () {
             var table = await perspective.table(data);
             var view = await table.view({
                 split_by: ["z"],

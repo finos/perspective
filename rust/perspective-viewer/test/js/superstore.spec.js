@@ -7,17 +7,33 @@
  *
  */
 
-const utils = require("@finos/perspective-test");
+import { test } from "@playwright/test";
+import { run_standard_tests } from "@finos/perspective-test";
 
-const simple_tests = require("./simple_tests.js");
-const path = require("path");
+async function get_contents(page) {
+    return await page.evaluate(async () => {
+        const viewer = document.querySelector(
+            "perspective-viewer perspective-viewer-plugin"
+        );
+        return viewer.innerHTML;
+    });
+}
 
-utils.with_server({}, () => {
-    describe.page(
-        "superstore.html",
-        () => {
-            simple_tests.default();
-        },
-        { reload_page: false, root: path.join(__dirname, "..", "..") }
-    );
+test.describe("Superstore", () => {
+    test.beforeEach(async function init({ page }) {
+        await page.goto(
+            "/@finos/perspective-viewer/test/html/superstore.html",
+            {
+                waitUntil: "networkidle",
+            }
+        );
+
+        await page.evaluate(async () => {
+            await document.querySelector("perspective-viewer").restore({
+                plugin: "Debug",
+            });
+        });
+    });
+
+    run_standard_tests("superstore", get_contents);
 });

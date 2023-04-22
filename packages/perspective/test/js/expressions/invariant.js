@@ -6,6 +6,10 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+
+const { test, expect } = require("@playwright/test");
+const perspective = require("@finos/perspective");
+
 const jsc = require("jsverify");
 
 const replicate = (n, g) => jsc.tuple(new Array(n).fill(g));
@@ -28,9 +32,9 @@ const generator = function (length = 100, has_zero = true) {
 /**
  * Uses invariant testing to assert base correctness of computed columns.
  */
-module.exports = (perspective) => {
-    describe("Invariant testing", function () {
-        describe("Inverse expressions should be invariant", function () {
+((perspective) => {
+    test.describe("Invariant testing", function () {
+        test.describe("Inverse expressions should be invariant", function () {
             jsc.property("(x - y) + x == y", generator(), async (data) => {
                 const table = await perspective.table(data);
 
@@ -212,7 +216,7 @@ module.exports = (perspective) => {
             );
         });
 
-        describe("Comparison operations should be pure with the same inputs.", function () {
+        test.describe("Comparison operations should be pure with the same inputs.", function () {
             jsc.property(
                 "== should always be true with the same input column",
                 generator(),
@@ -364,4 +368,4 @@ module.exports = (perspective) => {
             );
         });
     });
-};
+})(perspective);

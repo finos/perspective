@@ -220,7 +220,9 @@ jobs:
               uses: actions/cache@v3
               id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
               with:
-                  path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+                  path: |
+                      ~/.cache/ms-playwright
+                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
                   key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
                   restore-keys: |
                       ${{ runner.os }}-yarn-
@@ -286,12 +288,10 @@ jobs:
                   cache-dependency-path: yarn.lock
 
             - name: Install latest nightly rust
-              uses: actions-rs/toolchain@v1
+              uses: dtolnay/rust-toolchain@nightly
               with:
-                  toolchain: nightly
-                  target: wasm32-unknown-unknown
-                  default: true
-                  override: true
+                  toolchain: nightly-2023-04-07
+                  targets: wasm32-unknown-unknown
                   components: rustfmt, clippy, rust-src
 
             ################
@@ -318,12 +318,6 @@ jobs:
 
             - name: Install CCache
               run: sudo apt install -y ccache
-
-            ################
-            # Wasm
-            - name: Install wasm-pack (Linux and Macos)
-              run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-              if: ${{ runner.os != 'Windows' }}
 
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
@@ -462,7 +456,9 @@ jobs:
               uses: actions/cache@v3
               id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
               with:
-                  path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+                  path: |
+                      ~/.cache/ms-playwright
+                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
                   key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
                   restore-keys: |
                       ${{ runner.os }}-yarn-
@@ -579,7 +575,9 @@ jobs:
               uses: actions/cache@v3
               id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
               with:
-                  path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+                  path: |
+                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
+                      ~/.cache/ms-playwright
                   key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
                   restore-keys: |
                       ${{ runner.os }}-yarn-
@@ -647,18 +645,11 @@ jobs:
             ################
             # Rust
             - name: Install latest nightly rust
-              uses: actions-rs/toolchain@v1
+              uses: dtolnay/rust-toolchain@nightly
               with:
-                  toolchain: nightly
-                  target: wasm32-unknown-unknown
-                  default: true
-                  override: true
-
-            ################
-            # Wasm
-            - name: Install wasm-pack (Linux and Macos)
-              run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-              if: ${{ runner.os != 'Windows' }}
+                  toolchain: nightly-2023-04-07
+                  targets: wasm32-unknown-unknown
+                  components: rustfmt, clippy, rust-src
 
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
@@ -685,6 +676,11 @@ jobs:
 
             - uses: actions/download-artifact@v3
               with:
+                  name: perspective-viewer-openlayers-dist
+                  path: packages/perspective-viewer-openlayers/dist
+
+            - uses: actions/download-artifact@v3
+              with:
                   name: perspective-workspace-dist
                   path: packages/perspective-workspace/dist
 
@@ -697,7 +693,7 @@ jobs:
             # WebAssembly #
             ###############
             - name: WebAssembly Test
-              run: yarn test_js --quiet --ci
+              run: yarn test_js --ci
 
     ##########################################################################################################################
     ##########################################################################################################################
@@ -839,7 +835,9 @@ jobs:
               uses: actions/cache@v3
               id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
               with:
-                  path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+                  path: |
+                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
+                      ~/.cache/ms-playwright
                   key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
                   restore-keys: |
                       ${{ runner.os }}-yarn-
@@ -1100,13 +1098,13 @@ jobs:
 
             - uses: actions/download-artifact@v3
               with:
-                name: nbextension-dist
-                path: python/perspective/perspective/nbextension
+                  name: nbextension-dist
+                  path: python/perspective/perspective/nbextension
 
             - uses: actions/download-artifact@v3
               with:
-                name: labextension-dist
-                path: python/perspective/perspective/labextension
+                  name: labextension-dist
+                  path: python/perspective/perspective/labextension
 
             ##########
             # Caches #
@@ -1123,7 +1121,9 @@ jobs:
               uses: actions/cache@v3
               id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
               with:
-                  path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+                  path: |
+                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
+                      ~/.cache/ms-playwright
                   key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
                   restore-keys: |
                       ${{ runner.os }}-yarn-
@@ -1169,6 +1169,9 @@ jobs:
               env:
                   PSP_SKIP_EMSDK_INSTALL: 1
 
+            - name: Install Playwright Browsers
+              run: npx playwright install --with-deps
+
             ################
             # Python
             - name: Install python dependencies
@@ -1190,7 +1193,7 @@ jobs:
               run: jupyter labextension list
 
             - name: Run Jupyterlab tests
-              run: yarn test_js --jupyter --debug
+              run: yarn test_js --jupyter
               env:
                   PACKAGE: perspective-jupyterlab
 
@@ -1284,7 +1287,9 @@ jobs:
               uses: actions/cache@v3
               id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
               with:
-                  path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+                  path: |
+                      ~/.cache/ms-playwright
+                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
                   key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
                   restore-keys: |
                       ${{ runner.os }}-yarn-
@@ -1418,7 +1423,9 @@ jobs:
               uses: actions/cache@v3
               id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
               with:
-                  path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+                  path: |
+                      ~/.cache/ms-playwright
+                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
                   key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
                   restore-keys: |
                       ${{ runner.os }}-yarn-

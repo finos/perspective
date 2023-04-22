@@ -10,32 +10,16 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <script type="module" src="perspective.js"></script>
-        <script type="module" src="perspective-viewer.js"></script>
-        <script type="module" src="perspective-viewer-datagrid.js"></script>
-        <script type="module" src="perspective-viewer-d3fc.js"></script>
-
-        <link rel="stylesheet" href="demo.css" />
-        <link rel="stylesheet" href="pro.css" />
+        <script type="module" src="/perspective-viewer.js"></script>
+        <script type="module" src="/perspective-viewer-datagrid.js"></script>
+        <script type="module" src="/perspective-viewer-d3fc.js"></script>
+        <script type="module" src="/load-viewer-csv.js"></script>
+        <link rel="stylesheet" href="../css/demo.css" />
+        <link rel="stylesheet" href="/pro.css" />
+        <link rel="stylesheet" href="/@fontsource/roboto-mono/400.css" />
     </head>
 
     <body>
         <perspective-viewer> </perspective-viewer>
-
-        <script type="module">
-            import perspective from "./perspective.js";
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", "superstore.csv", true);
-            xhr.onload = async function () {
-                window.__CSV__ = xhr.response;
-                window.__WORKER__ = perspective.worker();
-                const table = window.__WORKER__.table(xhr.response);
-                const t = await table;
-                await document
-                    .getElementsByTagName("perspective-viewer")[0]
-                    .load(table);
-            };
-            xhr.send(null);
-        </script>
     </body>
 </html>

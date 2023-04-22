@@ -7,7 +7,8 @@
  *
  */
 
-const perspective = require("../../dist/cjs/perspective.node.js");
+const { test, expect } = require("@playwright/test");
+const perspective = require("@finos/perspective");
 
 const _query = async (should_cache, table, config = {}, callback) => {
     let cached_view;
@@ -40,15 +41,15 @@ const SCHEMA = {
     float: "float",
 };
 
-describe("Removes", () => {
+test.describe("Removes", () => {
     for (const cond of [true, false]) {
         const query = _query.bind(undefined, cond);
 
         for (const idx of ["str", "int"]) {
             const string_pkey = idx === "str";
 
-            describe(`View cached? ${cond}, index: ${idx}`, () => {
-                it("Output consistent with filter", async () => {
+            test.describe(`View cached? ${cond}, index: ${idx}`, () => {
+                test("Output consistent with filter", async () => {
                     const table = await perspective.table(SCHEMA, {
                         index: idx,
                     });
@@ -82,7 +83,7 @@ describe("Removes", () => {
                     await table.delete();
                 });
 
-                it("Output consistent with filter, empty string", async () => {
+                test("Output consistent with filter, empty string", async () => {
                     const table = await perspective.table(SCHEMA, {
                         index: idx,
                     });
@@ -128,7 +129,7 @@ describe("Removes", () => {
                     await table.delete();
                 });
 
-                it("Output consistent with filter, null", async () => {
+                test("Output consistent with filter, null", async () => {
                     const table = await perspective.table(SCHEMA, {
                         index: idx,
                     });
@@ -174,7 +175,7 @@ describe("Removes", () => {
                     await table.delete();
                 });
 
-                it("Output consistent with filter, remove before view construction, sorted", async () => {
+                test("Output consistent with filter, remove before view construction, sorted", async () => {
                     const table = await perspective.table(SCHEMA, {
                         index: idx,
                     });
@@ -218,7 +219,7 @@ describe("Removes", () => {
                     await table.delete();
                 });
 
-                it("Output consistent with filter, remove and add identical", async () => {
+                test("Output consistent with filter, remove and add identical", async () => {
                     const table = await perspective.table(SCHEMA, {
                         index: idx,
                     });
@@ -264,7 +265,7 @@ describe("Removes", () => {
                     await table.delete();
                 });
 
-                it("Output consistent with filter, add null and remove other", async () => {
+                test("Output consistent with filter, add null and remove other", async () => {
                     const table = await perspective.table(SCHEMA, {
                         index: idx,
                     });
@@ -331,7 +332,7 @@ describe("Removes", () => {
                     await table.delete();
                 });
 
-                it("Output consistent with filter, remove and add new dataset", async () => {
+                test("Output consistent with filter, remove and add new dataset", async () => {
                     const table = await perspective.table(SCHEMA, {
                         index: idx,
                     });
@@ -387,7 +388,7 @@ describe("Removes", () => {
                     await table.delete();
                 });
 
-                it.skip("Output consistent with filter, remove and add null", async () => {
+                test.skip("Output consistent with filter, remove and add null", async () => {
                     // FIXME
                     const table = await perspective.table(SCHEMA, {
                         index: idx,
@@ -439,7 +440,7 @@ describe("Removes", () => {
                     await table.delete();
                 });
 
-                it.skip("Output consistent with filter, update null", async () => {
+                test.skip("Output consistent with filter, update null", async () => {
                     const table = await perspective.table(SCHEMA, {
                         index: idx,
                     });

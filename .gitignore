@@ -206,3 +206,15 @@ vcpkg
 # jupyterlab test artifacts
 packages/perspective-jupyterlab/test/config/jupyter/lab
 packages/perspective-jupyterlab/test/config/jupyter/migrated
+docs/static/features
+results.debug.json
+
+tools/perspective-build/lib
+docs/.docusaurus
+packages/perspective-esbuild-plugin/lib
+docs/static/blocks
+.vscode/c_cpp_properties.json
+test-results/
+playwright-report/
+playwright/.cache/
+

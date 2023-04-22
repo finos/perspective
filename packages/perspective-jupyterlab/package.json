@@ -29,11 +29,10 @@
         "clean:labextension": "rimraf ../../python/perspective/perspective/labextension",
         "clean:nbextension": "rimraf ../../python/perspective/perspective/nbextension/static",
         "test:build": "cpy \"test/html/*\" dist/umd && cpy \"test/csv/*\" dist/umd && cpy \"test/css/*\" dist/umd && node build.js --test",
-        "test:run": "jest --rootDir=. --config=test/config/jest.config.js --color",
         "test:jupyter:build": "cpy  \"test/html/*\" dist/umd && cpy \"test/arrow/*\" dist/umd && cpy \"test/css/*\" dist/umd",
-        "test:jupyter:run": "__JUPYTERLAB_PORT__=6538 jest --rootDir=. --config=test/config/jupyter/jest.config.js --color --verbose",
-        "test": "npm-run-all test:build test:run",
+        "test:jupyter:run": "__JUPYTERLAB_PORT__=6538 npx playwright test --config ../../tools/perspective-test/playwright.config.js -- --jupyter",
         "test:jupyter": "npm-run-all test:jupyter:build test:jupyter:run",
+        "test": "npm-run-all test:build",
         "version": "yarn build"
     },
     "dependencies": {

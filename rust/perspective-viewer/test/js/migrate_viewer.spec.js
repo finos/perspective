@@ -7,9 +7,10 @@
  *
  */
 
+import { test, expect } from "@playwright/test";
+import { compareContentsToSnapshot } from "@finos/perspective-test";
+
 const { convert } = require("../../dist/cjs/migrate.js");
-const utils = require("@finos/perspective-test");
-const path = require("path");
 
 async function get_contents(page) {
     return await page.evaluate(async () => {
@@ -265,56 +266,61 @@ const TESTS = [
     ],
 ];
 
-utils.with_server({}, () => {
-    describe(
-        "Viewer config migrations",
-        () => {
-            for (const [name, old, current] of TESTS) {
-                test(`Migrate '${name}'`, () => {
-                    expect(convert(old, { replace_defaults: true })).toEqual(
-                        current
-                    );
-                });
-            }
-        },
-        { root: path.join(__dirname, "..", "..") }
-    );
+test.beforeEach(async ({ page }) => {
+    await page.goto("/rust/perspective-viewer/test/html/superstore-all.html", {
+        waitUntil: "networkidle",
+    });
 
-    describe.page(
-        "superstore-all.html",
-        () => {
-            describe("migrate", () => {
-                for (const [name, old, current] of TESTS) {
-                    test.skip(`restore '${name}'`, async (page) => {
-                        const converted = convert(
-                            JSON.parse(JSON.stringify(old))
-                        );
-                        const config = await page.evaluate(async (old) => {
-                            const viewer =
-                                document.querySelector("perspective-viewer");
-                            await viewer.getTable();
-                            old.settings = true;
-                            await viewer.restore(old);
-                            const current = await viewer.save();
-                            current.settings = false;
-                            return current;
-                        }, converted);
+    await page.evaluate(async () => {
+        await document.querySelector("perspective-viewer").restore({
+            plugin: "Datagrid",
+        });
+    });
+});
 
-                        expect(config.theme).toEqual("Pro Light");
-                        delete config["theme"];
-
-                        expect(config.settings).toEqual(false);
-                        delete config.settings;
-
-                        expect(config).toEqual(current);
-                        expect(
-                            convert(old, { replace_defaults: true })
-                        ).toEqual(current);
-                        return await get_contents(page);
-                    });
-                }
+test.describe("Migrate Viewer", () => {
+    test.describe("Viewer config migrations", () => {
+        for (const [name, old, current] of TESTS) {
+            test(`Migrate '${name}'`, async ({ page }) => {
+                expect(convert(old, { replace_defaults: true })).toEqual(
+                    current
+                );
             });
-        },
-        { root: path.join(__dirname, "..", "..") }
-    );
+        }
+    });
+
+    test.describe("migrate", async () => {
+        for (const [name, old, current] of TESTS) {
+            // NOTE: these tests were previously skipped.
+            test.skip(`restore '${name}'`, async ({ page }) => {
+                const converted = convert(JSON.parse(JSON.stringify(old)));
+                const config = await page.evaluate(async (old) => {
+                    const viewer = document.querySelector("perspective-viewer");
+                    await viewer.getTable();
+                    old.settings = true;
+                    await viewer.restore(old);
+                    const current = await viewer.save();
+                    current.settings = false;
+                    return current;
+                }, converted);
+
+                expect(config.theme).toEqual("Pro Light");
+                delete config["theme"];
+
+                expect(config.settings).toEqual(false);
+                delete config.settings;
+
+                expect(config).toEqual(current);
+                expect(convert(old, { replace_defaults: true })).toEqual(
+                    current
+                );
+
+                const contents = get_contents(page);
+
+                await compareContentsToSnapshot(contents, [
+                    `migrate-restore-${name}.txt`,
+                ]);
+            });
+        }
+    });
 });

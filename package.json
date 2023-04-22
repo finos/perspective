@@ -35,6 +35,8 @@
         "python/perspective"
     ],
     "devDependencies": {
+        "@fontsource/roboto-mono": "4.5.10",
+        "@playwright/test": "^1.30.0",
         "@types/ws": "^7.2.2",
         "auto-changelog": "^2.4.0",
         "chalk": "^2.4.2",
@@ -46,12 +48,9 @@
         "esbuild": "^0.14.54",
         "fs-extra": "^8.1.0",
         "glob": "^7.2.0",
-        "html-loader-jest": "^0.2.1",
         "html-webpack-plugin": "^5.1.0",
         "husky": "^7.0.4",
         "inquirer": "^7.0.0",
-        "jest": "^25.1.0",
-        "jest-junit": "^10.0.0",
         "jsdoc-to-markdown": "^8.0.0",
         "less": "^4.1.3",
         "less-loader": "^7.2.1",
@@ -67,10 +66,12 @@
         "sinon": "^7.3.1",
         "stoppable": "^1.1.0",
         "style-loader": "^3.3.1",
+        "tar": "^6.1.13",
         "term-img": "^4.1.0",
         "timezone-mock": "^1.3.6",
         "tiny-glob": "^0.2.9",
         "ts-loader": "^6.2.0",
+        "ts-node": "^10.9.1",
         "typedoc": "^0.23.0",
         "typedoc-plugin-markdown": "^3.14.0",
         "typedoc-plugin-no-inherit": "^1.4.0",
@@ -80,7 +81,9 @@
         "webpack-dev-server": "^4.11.1"
     },
     "scripts": {
-        "postinstall": "node scripts/install_emsdk.js",
+        "postinstall": "npm-run-all postinstall:emsdk postinstall:playwright",
+        "postinstall:emsdk": "node scripts/install_emsdk.js",
+        "postinstall:playwright": "npx playwright install --with-deps",
         "build,test": "npm run --silent build && npm run --silent test",
         "build,test,bench": "npm run --silent build && npm run --silent test && npm run --silent bench",
         "build,bench": "npm run --silent build && npm run --silent bench",
@@ -120,6 +123,9 @@
         "fix:python": "node scripts/lint_python.js --fix",
         "fix": "npm-run-all --silent fix:*",
         "version": "node scripts/version.js && python3 python/perspective/scripts/write_version.py && git add python/perspective/perspective/core/_version.py",
-        "jlab_link": "pip3 install ./python/perspective --no-build-isolation"
+        "jlab_link": "pip3 install ./python/perspective --no-build-isolation",
+        "test:ui": "__JUPYTERLAB_PORT__=6538 playwright test --config tools/perspective-test/playwright.config.ts",
+        "test:ui:headed": "__JUPYTERLAB_PORT__=6538 playwright test --config tools/perspective-test/playwright.config.ts --headed",
+        "test:ui:debug": "__JUPYTERLAB_PORT__=6538 DEBUG=pw:api playwright test --config tools/perspective-test/playwright.config.ts --headed"
     }
 }

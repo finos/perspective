@@ -3,8 +3,8 @@
     "version": "2.0.1",
     "description": "Test utility based on perspective",
     "private": true,
-    "main": "src/js/index.js",
-    "module": "src/js/index.js",
+    "main": "src/js/index",
+    "module": "src/js/index",
     "files": [
         "src/**/*"
     ],

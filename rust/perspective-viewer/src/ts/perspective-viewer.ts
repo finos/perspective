@@ -32,6 +32,7 @@
 export { IPerspectiveViewerPlugin } from "./plugin";
 export { HTMLPerspectiveViewerPluginElement } from "./plugin";
 export { IPerspectiveViewerElement } from "./viewer";
+export { PerspectiveViewerConfig } from "./viewer";
 
 export * from "./extensions";
 export * from "./migrate";

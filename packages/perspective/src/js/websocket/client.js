@@ -7,6 +7,7 @@
  *
  */
 import { Client } from "../api/client.js";
+import WebSocket from "ws";
 
 // Initiate a `ping` to the server every 30 seconds
 const PING_TIMEOUT = 30000;

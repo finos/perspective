@@ -1,3 +1,5 @@
+// KEEP ME, used in perspective
+
 const JSDOMEnvironment = require("jest-environment-jsdom");
 
 module.exports = class TimezoneAwareJSDOMEnvironment extends JSDOMEnvironment {

@@ -7,66 +7,60 @@
  *
  */
 
-const utils = require("@finos/perspective-test");
-const path = require("path");
+import { test, expect } from "@playwright/test";
 
-utils.with_server({}, () => {
-    describe.page(
-        "plugin-priority-order.html",
-        () => {
-            test.capture(
-                "Elements are loaded in priority Order",
-                async (page) => {
-                    let viewer = await page.$("perspective-viewer");
-                    let saved = await page.evaluate(async (viewer) => {
-                        window.__TABLE__ = await viewer.getTable();
-                        await viewer.reset();
-
-                        return await viewer.save();
-                    }, viewer);
-
-                    const expected = {
-                        aggregates: {},
-                        columns: [
-                            "Row ID",
-                            "Order ID",
-                            "Order Date",
-                            "Ship Date",
-                            "Ship Mode",
-                            "Customer ID",
-                            "Segment",
-                            "Country",
-                            "City",
-                            "State",
-                            "Postal Code",
-                            "Region",
-                            "Product ID",
-                            "Category",
-                            "Sub-Category",
-                            "Sales",
-                            "Quantity",
-                            "Discount",
-                            "Profit",
-                        ],
-                        expressions: [],
-                        filter: [],
-                        group_by: [],
-                        plugin: "HighPriority",
-                        plugin_config: {},
-                        settings: false,
-                        sort: [],
-                        split_by: [],
-                        theme: null,
-                        title: null,
-                    };
-
-                    expect(saved).toEqual(expected);
-                },
-                { timeout: 120000 }
-            );
-        },
-        {
-            root: path.join(__dirname, "..", ".."),
-        }
+test.beforeEach(async ({ page }) => {
+    await page.goto(
+        "/@finos/perspective-viewer/test/html/plugin-priority-order.html",
+        { waitUntil: "networkidle" }
     );
+});
+
+test.describe("Plugin Priority Order", () => {
+    test("Elements are loaded in priority Order", async ({ page }) => {
+        let saved = await page.evaluate(async () => {
+            const viewer = document.querySelector("perspective-viewer");
+            window.__TABLE__ = await viewer.getTable();
+            await viewer.reset();
+
+            return await viewer.save();
+        });
+
+        const expected = {
+            aggregates: {},
+            columns: [
+                "Row ID",
+                "Order ID",
+                "Order Date",
+                "Ship Date",
+                "Ship Mode",
+                "Customer ID",
+                "Segment",
+                "Country",
+                "City",
+                "State",
+                "Postal Code",
+                "Region",
+                "Product ID",
+                "Category",
+                "Sub-Category",
+                "Sales",
+                "Quantity",
+                "Discount",
+                "Profit",
+            ],
+            expressions: [],
+            filter: [],
+            group_by: [],
+            plugin: "HighPriority",
+            plugin_config: {},
+            settings: false,
+            sort: [],
+            split_by: [],
+            theme: "Pro Light",
+            title: null,
+        };
+
+        expect(saved).toEqual(expected);
+    });
 });
