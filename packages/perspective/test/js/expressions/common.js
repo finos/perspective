@@ -76,22 +76,36 @@ exports.months_of_year = [
     "12 December",
 ];
 
-exports.second_bucket = function (val) {
-    return new Date(Math.floor(new Date(val).getTime() / 1000) * 1000);
+exports.second_bucket = function (val, multiplicity) {
+    if (multiplicity === undefined) {
+        multiplicity = 1;
+    }
+    const mult = 1000 * multiplicity;
+    return new Date(Math.floor(new Date(val).getTime() / mult) * mult);
 };
 
-exports.minute_bucket = function (val) {
+exports.minute_bucket = function (val, multiplicity) {
+    if (multiplicity === undefined) {
+        multiplicity = 1;
+    }
     let date = new Date(val);
     date.setSeconds(0);
     date.setMilliseconds(0);
+    date.setMinutes(
+        Math.floor(date.getMinutes() / multiplicity) * multiplicity
+    );
     return date;
 };
 
-exports.hour_bucket = function (val) {
+exports.hour_bucket = function (val, multiplicity) {
+    if (multiplicity === undefined) {
+        multiplicity = 1;
+    }
     let date = new Date(val);
     date.setMinutes(0);
     date.setSeconds(0);
     date.setMilliseconds(0);
+    date.setHours(Math.floor(date.getHours() / multiplicity) * multiplicity);
     return date;
 };
 
@@ -115,21 +129,31 @@ exports.week_bucket = function (val) {
     return date;
 };
 
-exports.month_bucket = function (val) {
+exports.month_bucket = function (val, multiplicity) {
+    if (multiplicity === undefined) {
+        multiplicity = 1;
+    }
     let date = new Date(val);
     date.setHours(0);
     date.setMinutes(0);
     date.setSeconds(0);
     date.setDate(1);
+    date.setMonth(Math.floor(date.getMonth() / multiplicity) * multiplicity);
     return date;
 };
 
-exports.year_bucket = function (val) {
+exports.year_bucket = function (val, multiplicity) {
+    if (multiplicity === undefined) {
+        multiplicity = 1;
+    }
     let date = new Date(val);
     date.setHours(0);
     date.setMinutes(0);
     date.setSeconds(0);
     date.setDate(1);
     date.setMonth(0);
+    date.setFullYear(
+        Math.floor(date.getFullYear() / multiplicity) * multiplicity
+    );
     return date;
 };

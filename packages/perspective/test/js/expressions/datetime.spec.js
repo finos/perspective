@@ -719,6 +719,42 @@ const perspective = require("@finos/perspective");
             table.delete();
         });
 
+        test("Bucket (M), date with multiplicity", async () => {
+            const table = await perspective.table({
+                a: "date",
+            });
+
+            const col_name = "bucket(\"a\", '3M')";
+
+            const view = await table.view({
+                expressions: [col_name],
+            });
+
+            table.update({
+                a: [
+                    new Date(2020, 0, 12),
+                    new Date(2020, 1, 15),
+                    new Date(2020, 2, 17),
+                    new Date(2020, 3, 18),
+                    new Date(2020, 4, 29),
+                    new Date(2020, 5, 6),
+                    new Date(2020, 6, 10),
+                    new Date(2020, 7, 30),
+                    new Date(2020, 8, 22),
+                    new Date(2020, 9, 7),
+                    new Date(2020, 10, 1),
+                ],
+            });
+
+            let result = await view.to_columns();
+
+            expect(
+                result[col_name].map((x) => (x ? new Date(x) : null))
+            ).toEqual(result.a.map((x) => common.month_bucket(x, 3)));
+            view.delete();
+            table.delete();
+        });
+
         test("Bucket (Y), date", async function () {
             const table = await perspective.table({
                 a: "date",
@@ -775,6 +811,42 @@ const perspective = require("@finos/perspective");
                     x ? new Date(x) : null
                 )
             ).toEqual(result.a.map((x) => (x ? common.year_bucket(x) : null)));
+            view.delete();
+            table.delete();
+        });
+
+        test("Bucket (Y), date with multiplicity", async () => {
+            const table = await perspective.table({
+                a: "date",
+            });
+
+            const col_name = "bucket(\"a\", '7Y')";
+
+            const view = await table.view({
+                expressions: [col_name],
+            });
+
+            table.update({
+                a: [
+                    new Date(2010, 0, 12),
+                    new Date(2011, 1, 15),
+                    new Date(2012, 2, 17),
+                    new Date(2013, 3, 18),
+                    new Date(2014, 4, 29),
+                    new Date(2015, 5, 6),
+                    new Date(2016, 6, 10),
+                    new Date(2017, 7, 30),
+                    new Date(2018, 8, 22),
+                    new Date(2019, 9, 7),
+                    new Date(2020, 10, 1),
+                ],
+            });
+
+            let result = await view.to_columns();
+
+            expect(
+                result[col_name].map((x) => (x ? new Date(x) : null))
+            ).toEqual(result.a.map((x) => common.year_bucket(x, 7)));
             view.delete();
             table.delete();
         });
@@ -999,6 +1071,37 @@ const perspective = require("@finos/perspective");
             table.delete();
         });
 
+        test("Bucket (s), datetime with multiplicity", async function () {
+            const table = await perspective.table({
+                a: "datetime",
+            });
+
+            const col_name = `bucket("a", '20s')`;
+
+            const view = await table.view({
+                expressions: [col_name],
+            });
+
+            table.update({
+                a: [
+                    new Date(2020, 0, 15, 1, 30, 5),
+                    new Date(2020, 3, 29, 1, 30, 10),
+                    new Date(2020, 4, 30, 1, 30, 19),
+                    new Date(2020, 4, 30, 1, 30, 30),
+                    new Date(2020, 4, 30, 1, 30, 50),
+                ],
+            });
+
+            let result = await view.to_columns();
+            expect(
+                result[col_name].map((x) => (x ? new Date(x) : null))
+            ).toEqual(
+                result.a.map((x) => (x ? common.second_bucket(x, 20) : null))
+            );
+            view.delete();
+            table.delete();
+        });
+
         test("Bucket (m), datetime", async function () {
             const table = await perspective.table({
                 a: "datetime",
@@ -1055,6 +1158,36 @@ const perspective = require("@finos/perspective");
             table.delete();
         });
 
+        test("Bucket (m), datetime with multiplicity", async function () {
+            const table = await perspective.table({
+                a: "datetime",
+            });
+
+            const col_name = `bucket("a", '15m')`;
+
+            const view = await table.view({
+                expressions: [col_name],
+            });
+
+            table.update({
+                a: [
+                    new Date(2020, 0, 15, 1, 0, 0),
+                    new Date(2020, 0, 15, 1, 6, 0),
+                    new Date(2020, 0, 15, 1, 15, 0),
+                    new Date(2020, 0, 15, 1, 29, 0),
+                    new Date(2020, 0, 15, 1, 30, 0),
+                    new Date(2020, 0, 15, 1, 59, 0),
+                ],
+            });
+
+            let result = await view.to_columns();
+            expect(
+                result[col_name].map((x) => (x ? new Date(x) : null))
+            ).toEqual(result.a.map((x) => common.minute_bucket(x, 15)));
+            view.delete();
+            table.delete();
+        });
+
         test("Bucket (h), datetime", async function () {
             const table = await perspective.table({
                 a: "datetime",
@@ -1105,6 +1238,37 @@ const perspective = require("@finos/perspective");
             expect(
                 result[`bucket("a", 'h')`].map((x) => (x ? new Date(x) : null))
             ).toEqual(result.a.map((x) => (x ? common.hour_bucket(x) : null)));
+            view.delete();
+            table.delete();
+        });
+
+        test("Bucket (h), datetime with multiplicity", async function () {
+            const table = await perspective.table({
+                a: "datetime",
+            });
+
+            const col_name = `bucket("a", '6h')`;
+
+            const view = await table.view({
+                expressions: [col_name],
+            });
+
+            table.update({
+                a: [
+                    new Date(2020, 0, 15, 0, 30, 15),
+                    new Date(2020, 0, 15, 5, 30, 15),
+                    new Date(2020, 0, 15, 6, 30, 15),
+                    new Date(2020, 0, 15, 9, 30, 15),
+                    new Date(2020, 0, 15, 15, 30, 15),
+                    new Date(2020, 0, 15, 20, 30, 15),
+                    new Date(2020, 0, 15, 23, 30, 15),
+                ],
+            });
+
+            let result = await view.to_columns();
+            expect(
+                result[col_name].map((x) => (x ? new Date(x) : null))
+            ).toEqual(result.a.map((x) => common.hour_bucket(x, 6)));
             view.delete();
             table.delete();
         });
