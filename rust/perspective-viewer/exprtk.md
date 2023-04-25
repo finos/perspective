@@ -37,6 +37,22 @@ Bucket x by y
 bucket(${1:x}, ${2:y})
 ```
 
+When `x` is numeric, `y` should also be a number.
+
+When `y` is a `date` or a `datetime`, `y` can be one of:
+
+-   `s` -- seconds
+-   `m` -- minutes
+-   `h` -- hours
+-   `D` -- days
+-   `W` -- weeks
+-   `M` -- months
+-   `Y` -- years
+
+In all of these except for days and weeks, a non-negative number can be placed before the unit character.
+For example, `3M` would bucket by 3 months. These must divisible numbers; you can not bucket by
+`7M` or `22s`, but by `30m`, `12h`, etc.
+
 #### `ceil`
 
 Smallest integer >= x
@@ -474,7 +490,7 @@ false
 #### `if`
 
 An if/else conditional, which evaluates a condition such as:
- if ("Sales" > 100) { true } else { false }
+if ("Sales" > 100) { true } else { false }
 
 ```
 if (${1:condition}) {} else if (${2:condition}) {} else {}
@@ -602,4 +618,3 @@ Replaces all non-overlapping matches of pattern in string with replacer, or retu
 ```
 replace(${1:string}, ${2:pattern}, ${3:replacer})
 ```
-

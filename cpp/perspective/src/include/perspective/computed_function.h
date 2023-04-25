@@ -227,16 +227,16 @@ namespace computed_function {
 
         // faster unit lookups, since we are calling this lookup in a tight
         // loop.
-        static tsl::hopscotch_map<std::string, t_date_bucket_unit> UNIT_MAP;
+        static tsl::hopscotch_map<char, t_date_bucket_unit> UNIT_MAP;
     };
 
-    void _second_bucket(t_tscalar& val, t_tscalar& rval);
-    void _minute_bucket(t_tscalar& val, t_tscalar& rval);
-    void _hour_bucket(t_tscalar& val, t_tscalar& rval);
+    void _second_bucket(t_tscalar& val, t_tscalar& rval, t_uindex multiplicity);
+    void _minute_bucket(t_tscalar& val, t_tscalar& rval, t_uindex multiplicity);
+    void _hour_bucket(t_tscalar& val, t_tscalar& rval, t_uindex multiplicity);
     void _day_bucket(t_tscalar& val, t_tscalar& rval);
     void _week_bucket(t_tscalar& val, t_tscalar& rval);
-    void _month_bucket(t_tscalar& val, t_tscalar& rval);
-    void _year_bucket(t_tscalar& val, t_tscalar& rval);
+    void _month_bucket(t_tscalar& val, t_tscalar& rval, t_uindex multiplicity);
+    void _year_bucket(t_tscalar& val, t_tscalar& rval, t_uindex multiplicity);
 
     /**
      * @brief Returns the current datetime. Will be recalculated on view
