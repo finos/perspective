@@ -8,8 +8,6 @@
  */
 
 import { expect, Page } from "@playwright/test";
-import fs from "fs";
-import path from "path";
 
 /**
  * Clean a `<svg>` for serialization/comparison.

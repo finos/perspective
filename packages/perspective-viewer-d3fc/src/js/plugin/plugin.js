@@ -458,7 +458,7 @@ export function register(...plugins) {
                      * causes non-cleared redraws duplicate column labels when calculating column name
                      * resize/repositions - see `treemapLabel.js`.
                      */
-                    async resize(view) {
+                    async resize() {
                         if (this.offsetParent !== null) {
                             if (this._settings?.data !== undefined) {
                                 this._draw();

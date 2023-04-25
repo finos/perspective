@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "module": "esnext",
+    "target": "es2019",
+    "declaration": true,
+    "diagnostics": true,
+    "emitDeclarationOnly": true,
+    "outDir": "dist/esm",
+    "rootDir": "src/ts",
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "typeRoots": [
+      "../../node_modules/@webgpu/types",
+      "../../node_modules/@types"
+    ],
+  },
+}

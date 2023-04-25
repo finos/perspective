@@ -304,6 +304,7 @@ exports.run_with_scope = async function run_recursive(strings, ...args) {
 
     const { stdout } = await execute_return("npm ls --depth 1 --json");
     const workspaces = JSON.parse(stdout.toString());
+
     const compiled = new Set(
         Object.keys(workspaces.dependencies).filter(
             (x) => !workspaces.dependencies[x].resolved.startsWith("file:")
