@@ -49,14 +49,6 @@ function playwright(package, is_jlab) {
         ${args}`;
 }
 
-function get_regex() {
-    const regex = getarg`-t`;
-    if (regex) {
-        console.log(`-- Qualifying search '${regex}'`);
-        return regex.replace(/ /g, ".");
-    }
-}
-
 async function run() {
     try {
         if (!IS_JUPYTER) {

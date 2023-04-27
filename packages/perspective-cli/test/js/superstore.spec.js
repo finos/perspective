@@ -7,18 +7,19 @@
  *
  */
 
-const puppeteer = require("puppeteer");
-
+const { test, expect } = require("@playwright/test");
+const path = require("path");
 const { host } = require("../../src/js/index.js");
 
-describe("CLI", function () {
-    it("Tests something", async () => {
+test.describe("CLI", function () {
+    test("Tests something", async ({ page }) => {
         const options = { port: 0 };
-        const server = await host("test/csv/test.csv", options);
+        const server = await host(
+            path.join(__dirname, "../csv/test.csv"),
+            options
+        );
         const port = server._server.address().port;
 
-        const browser = await puppeteer.launch({ headless: true });
-        const page = await browser.newPage();
         await page.goto(`http://localhost:${port}/`);
         await page.waitForSelector(
             "perspective-viewer perspective-viewer-datagrid"
@@ -35,10 +36,7 @@ describe("CLI", function () {
             { x: 3, y: 4 },
             { x: 5, y: 6 },
         ]);
-
         await page.close();
-        await browser.close();
-        await new Promise((x) => setTimeout(x));
         server.close();
     });
 });

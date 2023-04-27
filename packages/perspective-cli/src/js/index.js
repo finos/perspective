@@ -161,7 +161,7 @@ program
     .option("-o, --open", "Open a browser automagically.")
     .action(host);
 
-if (require.main) {
+if (require.main === module) {
     if (!process.argv.slice(2).length) {
         program.help();
     } else {

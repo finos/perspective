@@ -11,8 +11,10 @@ import tar from "tar";
 import fs from "fs";
 import path from "path";
 
+const RESULTS_PATH = path.join(__dirname, "../../results.tar.gz");
+
 export default async function run() {
-    if (fs.existsSync("../../results.tar.gz")) {
+    if (fs.existsSync(RESULTS_PATH)) {
         console.log("\nReplacing results.tar.gz");
     } else {
         console.log("\nCreating results.tar.gz");
@@ -22,7 +24,7 @@ export default async function run() {
         tar.create(
             {
                 gzip: true,
-                file: path.join(__dirname, "../../results.tar.gz"),
+                file: RESULTS_PATH,
                 sync: false,
                 portable: true,
                 noMtime: true,
