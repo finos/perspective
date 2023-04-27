@@ -10,10 +10,10 @@
 const { execute } = require("./script_utils.js");
 
 try {
-    console.log("-- Installing Boost 1.71.0");
-    execute`wget https://boostorg.jfrog.io/artifactory/main/release/1.71.0/source/boost_1_71_0.tar.gz >/dev/null 2>&1`;
-    execute`tar xfz boost_1_71_0.tar.gz`;
-    process.chdir("boost_1_71_0");
+    console.log("-- Installing Boost 1.81.0");
+    execute`wget https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.gz >/dev/null 2>&1`;
+    execute`tar xfz boost_1_81_0.tar.gz`;
+    process.chdir("boost_1_81_0");
     execute`./bootstrap.sh`;
     execute`./b2 -j8 --with-program_options --with-filesystem --with-system install `;
 } catch (e) {
