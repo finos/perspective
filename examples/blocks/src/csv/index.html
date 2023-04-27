@@ -3,13 +3,12 @@
     <head>
         <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" />
 
-        <script src="/node_modules/@finos/perspective/dist/umd/perspective.js"></script>
-        <script src="/node_modules/@finos/perspective-viewer/dist/umd/perspective-viewer.js"></script>
-        <script src="/node_modules/@finos/perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js"></script>
-        <script src="/node_modules/@finos/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js"></script>
-        <script src="/node_modules/@finos/perspective-viewer-openlayers/dist/umd/perspective-viewer-openlayers.js"></script>
+        <script type="module" src="/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.js"></script>
+        <script type="module" src="/node_modules/@finos/perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js"></script>
+        <script type="module" src="/node_modules/@finos/perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js"></script>
+        <script type="module" src="/node_modules/@finos/perspective-viewer-openlayers/dist/cdn/perspective-viewer-openlayers.js"></script>
 
-        <script src="csv.js"></script>
+        <script type="module" src="csv.js"></script>
 
         <link rel="stylesheet" href="index.css" />
         <link rel="stylesheet" crossorigin="anonymous" href="/node_modules/@finos/perspective-viewer/dist/css/themes.css" />
@@ -18,14 +17,8 @@
     <body>
         <div id="drop-area">
             <form class="my-form">
-                <p>
-                    Upload a CSV file by dragging from your desktop and dropping
-                    onto the dashed region.
-                </p>
-                <p>
-                    (Data is processed in browser, and never sent to any
-                    server).
-                </p>
+                <p>Upload a CSV file by dragging from your desktop and dropping onto the dashed region.</p>
+                <p>(Data is processed in browser, and never sent to any server).</p>
                 <input type="file" id="fileElem" multiple accept="text/csv" />
                 <label class="button" for="fileElem">Select a file</label>
             </form>

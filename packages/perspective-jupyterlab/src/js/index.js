@@ -15,7 +15,7 @@ export * from "./widget";
 
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
-import "@finos/perspective-viewer-openlayers/dist/umd/perspective-viewer-openlayers.js";
+import "@finos/perspective-viewer-openlayers";
 
 // NOTE: only expose the widget here
 import { PerspectiveJupyterPlugin } from "./plugin";

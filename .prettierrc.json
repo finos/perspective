@@ -4,7 +4,8 @@
         {
             "files": ["*.html"],
             "options": {
-                "printWidth": 200
+                "printWidth": 200,
+                "tabWidth": 4
             }
         }
     ]

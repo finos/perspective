@@ -1,7 +1,6 @@
 const {
     NodeModulesExternal,
 } = require("@finos/perspective-esbuild-plugin/external");
-const { UMDLoader } = require("@finos/perspective-esbuild-plugin/umd");
 const { build } = require("@finos/perspective-esbuild-plugin/build");
 
 const BUILD = [
@@ -10,16 +9,6 @@ const BUILD = [
         plugins: [NodeModulesExternal()],
         format: "esm",
         outfile: "dist/esm/perspective-viewer-openlayers.js",
-        loader: {
-            ".css": "text",
-        },
-    },
-    {
-        entryPoints: ["src/js/plugin/plugin.js"],
-        globalName: "perspective_openlayers",
-        plugins: [UMDLoader()],
-        format: "cjs",
-        outfile: "dist/umd/perspective-viewer-openlayers.js",
         loader: {
             ".css": "text",
         },

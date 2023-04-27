@@ -30,19 +30,6 @@ const BUILD = [
         define: {
             global: "window",
         },
-        plugins: [WasmPlugin(true), WorkerPlugin({ inline: true })],
-        format: "iife",
-        loader: {
-            ".css": "text",
-            ".html": "text",
-        },
-        outfile: "dist/umd/perspective-workspace.js",
-    },
-    {
-        entryPoints: ["src/js/perspective-workspace.js"],
-        define: {
-            global: "window",
-        },
         plugins: [
             ResolvePlugin({
                 "@finos/perspective":
@@ -147,7 +134,6 @@ async function build_all() {
     );
 
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
-    execSync("cpy dist/css/* dist/umd");
 }
 
 build_all();

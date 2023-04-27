@@ -1,20 +1,18 @@
 {
     "name": "@finos/perspective-viewer-openlayers",
     "version": "2.0.1",
-    "unpkg": "dist/umd/perspective-viewer-openlayers.js",
-    "main": "dist/umd/perspective-viewer-openlayers.js",
-    "jsdelivr": "dist/umd/perspective-viewer-openlayers.js",
+    "unpkg": "dist/cdn/perspective-viewer-openlayers.js",
+    "jsdelivr": "dist/cdn/perspective-viewer-openlayers.js",
     "exports": {
-        ".": {
-            "require": "./dist/umd/perspective-viewer-openlayers.js",
-            "import": "./dist/esm/perspective-viewer-openlayers.js"
-        },
+        ".": "./dist/esm/perspective-viewer-openlayers.js",
         "./dist/*": "./dist/*",
         "./package.json": "./package.json"
     },
     "files": [
-        "dist/**/*"
+        "dist/**/*",
+        "index.d.ts"
     ],
+    "types": "index.d.ts",
     "author": "",
     "license": "Apache-2.0",
     "publishConfig": {

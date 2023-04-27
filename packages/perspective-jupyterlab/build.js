@@ -2,7 +2,6 @@ const cpy_mod = import("cpy");
 const { WasmPlugin } = require("@finos/perspective-esbuild-plugin/wasm");
 const { WorkerPlugin } = require("@finos/perspective-esbuild-plugin/worker");
 const { AMDLoader } = require("@finos/perspective-esbuild-plugin/amd");
-const { UMDLoader } = require("@finos/perspective-esbuild-plugin/umd");
 const { build } = require("@finos/perspective-esbuild-plugin/build");
 const path = require("path");
 
@@ -22,15 +21,15 @@ const TEST_BUILD = {
     define: {
         global: "window",
     },
-    plugins: [WasmPlugin(true), WorkerPlugin({ inline: true }), UMDLoader()],
+    plugins: [WasmPlugin(true), WorkerPlugin({ inline: true })],
     globalName: "PerspectiveLumino",
-    format: "cjs",
+    format: "esm",
     loader: {
         ".html": "text",
         ".ttf": "file",
         ".css": "text",
     },
-    outfile: "dist/umd/lumino.js",
+    outfile: "dist/esm/lumino.js",
 };
 
 const LAB_BUILD = {
@@ -46,7 +45,7 @@ const LAB_BUILD = {
         ".html": "text",
         ".ttf": "file",
     },
-    outfile: "dist/umd/perspective-jupyterlab.js",
+    outfile: "dist/esm/perspective-jupyterlab.js",
 };
 
 const NB_BUILDS = [
@@ -116,7 +115,6 @@ async function build_all() {
     );
 
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
-    cpy(["dist/css/*"], "dist/umd");
     cpy(["src/less/*"], "dist/less");
 }
 

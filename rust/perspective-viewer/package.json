@@ -7,14 +7,10 @@
         "url": "https://github.com/finos/perspective"
     },
     "license": "Apache-2.0",
-    "unpkg": "dist/umd/perspective-viewer.js",
-    "main": "dist/umd/perspective-viewer.js",
-    "jsdelivr": "dist/umd/perspective-viewer.js",
+    "unpkg": "dist/cdn/perspective-viewer.js",
+    "jsdelivr": "dist/cdn/perspective-viewer.js",
     "exports": {
-        ".": {
-            "require": "./dist/umd/perspective-viewer.js",
-            "import": "./dist/umd/perspective-viewer.js"
-        },
+        ".": "./dist/esm/perspective-viewer.inline.js",
         "./dist/*": "./dist/*",
         "./src/*": "./src/*",
         "./test/*": "./test/*",

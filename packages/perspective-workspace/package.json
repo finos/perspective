@@ -8,21 +8,18 @@
         "index.d.ts"
     ],
     "exports": {
-        ".": {
-            "import": "./dist/umd/perspective-workspace.js",
-            "require": "./dist/umd/perspective-workspace.js"
-        },
+        ".": "./dist/esm/perspective-workspace.js",
         "./esm/": "./dist/esm/",
         "./src/*": "./src/*",
         "./dist/*": "./dist/*",
         "./dist/themes/": "./src/themes/",
         "./package.json": "./package.json"
     },
-    "unpkg": "./dist/umd/perspective-workspace.js",
-    "jsdelivr": "./dist/umd/perspective-workspace.js",
-    "main": "./dist/umd/perspective-workspace.js",
+    "unpkg": "./dist/cdn/perspective-workspace.js",
+    "jsdelivr": "./dist/cdn/perspective-workspace.js",
     "scripts": {
         "build": "node ./build.js",
+        "clean": "rimraf dist"
     },
     "publishConfig": {
         "access": "public"

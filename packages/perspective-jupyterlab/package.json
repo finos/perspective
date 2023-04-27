@@ -6,8 +6,8 @@
         "dist/**/*",
         "src/**/*"
     ],
-    "main": "dist/umd/perspective-jupyterlab.js",
-    "style": "dist/umd/perspective-jupyterlab.css",
+    "main": "dist/esm/perspective-jupyterlab.js",
+    "style": "dist/css/perspective-jupyterlab.css",
     "directories": {
         "dist": "dist/"
     },
@@ -28,6 +28,7 @@
         "clean:labextension": "rimraf ../../python/perspective/perspective/labextension",
         "clean:nbextension": "rimraf ../../python/perspective/perspective/nbextension/static",
         "test:build": "node build.js --test",
+        "test:jupyter:build": "cpy \"test/arrow/*\" dist/esm",
         "test:jupyter": "__JUPYTERLAB_PORT__=6538 npx playwright test --config ../../tools/perspective-test/playwright.config.js -- --jupyter",
         "test": "npm-run-all test:build",
         "version": "yarn build"

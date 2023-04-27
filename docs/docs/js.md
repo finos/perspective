@@ -119,49 +119,11 @@ Perspective can be loaded directly from most CDNs, such as
 [jsdelivr.com](https://www.jsdelivr.com/package/npm/@finos/perspective-viewer),
 which is the easiest way to get started with Perspective in the browser, and
 perfect for spinning up quick instances of `perspective-viewer` without
-installing or bundling. There are two supported builds you may use, a UMD build
-and a `type="module"` ESM build.
+installing or bundling.
 
 While CDNs are great for development builds and small apps, for production usage
 you should incorporate Perspective into your application with a bundler like
 `Webpack`, described above.
-
-#### UMD
-
-This build is equivalent to the _inline_ build described above, and contains all
-JavaScript, CSS, WebAssembly and WebWorker assets bundled in a single `.js`
-file. To use the UMD build from a `jsdelivr.com`, add these scripts to
-your `.html`'s `<head>` section:
-
-```html
-<script src="https://cdn.jsdelivr.net/npm/@finos/perspective"></script>
-<script src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer"></script>
-<script src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-datagrid"></script>
-<script src="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer-d3fc"></script>
-
-<link
-    rel="stylesheet"
-    crossorigin="anonymous"
-    href="https://cdn.jsdelivr.net/npm/@finos/perspective-viewer/dist/css/pro.css"
-/>
-```
-
-Once added to your page, you can access the engine's JavaScript API through the
-`perspective` symbol and the browser's Custom Elements API:
-
-```html
-<script>
-    const worker = window.perspective.worker();
-    const table = await worker.table({ A: [1, 2, 3] });
-    const view = await table.view({ sort: [["A", "desc"]] });
-
-    const viewer = document.createElement("perspective-viewer");
-    viewer.load(table);
-    document.body.appendChild(viewer);
-</script>
-```
-
-#### ESM
 
 This build separates out Perspective's JavaScript, WebAssembly and various
 assets into individual files, allowing the browser to load them lazily, in

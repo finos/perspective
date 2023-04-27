@@ -76,8 +76,8 @@ exports.start_jlab = function () {
             "user_settings"
         );
 
-        // Start jupyterlab with a root to dist/umd where the notebooks will be.
-        process.chdir(path.join(PACKAGE_ROOT, "dist", "umd"));
+        // Start jupyterlab with a root to dist/esm where the notebooks will be.
+        process.chdir(path.join(PACKAGE_ROOT, "dist", "esm"));
 
         console.log("Spawning Jupyterlab process");
 
