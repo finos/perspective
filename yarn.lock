@@ -12060,6 +12060,11 @@ parent-module@^1.0.0:
   dependencies:
     callsites "^3.0.0"
 
+parquet-wasm@^0.3.1:
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/parquet-wasm/-/parquet-wasm-0.3.1.tgz#4c7306cac00e1bfacb00ee9e395a9ef8a4c8623f"
+  integrity sha512-8OMYwh7N+IcQBeKTuDgpvJR7xh/YKPgnQcs29CQW0Q4ziwroRu7N6tQmmsjiCaQ/W7enBNppquj6VAe2fA1yYQ==
+
 parse-entities@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/parse-entities/-/parse-entities-2.0.0.tgz#53c6eb5b9314a1f4ec99fa0fdf7ce01ecda0cbe8"

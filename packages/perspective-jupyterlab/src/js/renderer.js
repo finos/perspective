@@ -17,15 +17,19 @@ import {
 } from "@jupyterlab/apputils";
 
 import { ABCWidgetFactory, DocumentWidget } from "@jupyterlab/docregistry";
+import perspective from "@finos/perspective/dist/esm/perspective.js";
+import init, { readParquet2 } from "parquet-wasm/esm2/arrow2";
+import wasm from "../../../../node_modules/parquet-wasm/esm2/arrow2_bg.wasm";
+
 import { PerspectiveWidget } from "./psp_widget";
 
-import perspective from "@finos/perspective/dist/esm/perspective.js";
 /**
  * The name of the factories that creates widgets.
  */
-const FACTORY_CSV = "CSVPerspective";
-const FACTORY_JSON = "JSONPerspective";
-const FACTORY_ARROW = "ArrowPerspective";
+const FACTORY_CSV = "Perspective-CSV";
+const FACTORY_JSON = "Perspective-JSON";
+const FACTORY_ARROW = "Perspective-Arrow";
+const FACTORY_PARQUET = "Perspective-Parquet";
 const RENDER_TIMEOUT = 1000;
 
 // create here to reuse for exception handling
@@ -76,6 +80,17 @@ export class PerspectiveDocumentWidget extends DocumentWidget {
                 data = Uint8Array.from(
                     atob(this._context.model.toString()),
                     (c) => c.charCodeAt(0)
+                ).buffer;
+            } else if (this._type === "parquet") {
+                // initialize wasm
+                await wasm;
+                await init(wasm);
+
+                // `readParquet` returns arrow ipc format uint8array
+                data = readParquet2(
+                    Uint8Array.from(atob(this._context.model.toString()), (c) =>
+                        c.charCodeAt(0)
+                    )
                 ).buffer;
             } else if (this._type === "json") {
                 data = this._context.model.toJSON();
@@ -199,6 +214,20 @@ export class PerspectiveArrowFactory extends ABCWidgetFactory {
 }
 
 /**
+ * A widget factory for parquet widgets.
+ */
+export class PerspectiveParquetFactory extends ABCWidgetFactory {
+    createNewWidget(context) {
+        return new PerspectiveDocumentWidget(
+            {
+                context,
+            },
+            "parquet"
+        );
+    }
+}
+
+/**
  * Activate cssviewer extension for CSV files
  */
 
@@ -230,10 +259,31 @@ function activate(app, restorer, themeManager) {
         // do nothing
     }
 
+    try {
+        app.docRegistry.addFileType({
+            name: "parquet",
+            displayName: "parquet",
+            extensions: [".parquet"],
+            mimeTypes: ["application/octet-stream"],
+            contentType: "file",
+            fileFormat: "base64",
+        });
+    } catch (_a) {
+        // do nothing
+    }
+
     const factoryarrow = new PerspectiveArrowFactory({
         name: FACTORY_ARROW,
         fileTypes: ["arrow"],
         defaultFor: ["arrow"],
+        readOnly: true,
+        modelName: "base64",
+    });
+
+    const factoryparquet = new PerspectiveParquetFactory({
+        name: FACTORY_PARQUET,
+        fileTypes: ["parquet"],
+        defaultFor: ["parquet"],
         readOnly: true,
         modelName: "base64",
     });
@@ -248,6 +298,10 @@ function activate(app, restorer, themeManager) {
 
     const trackerarrow = new WidgetTracker({
         namespace: "arrowperspective",
+    });
+
+    const trackerparquet = new WidgetTracker({
+        namespace: "parquetperspective",
     });
 
     if (restorer) {
@@ -278,14 +332,25 @@ function activate(app, restorer, themeManager) {
             }),
             name: (widget) => widget.context.path,
         });
+
+        void restorer.restore(trackerparquet, {
+            command: "docmanager:open",
+            args: (widget) => ({
+                path: widget.context.path,
+                factory: FACTORY_PARQUET,
+            }),
+            name: (widget) => widget.context.path,
+        });
     }
 
     app.docRegistry.addWidgetFactory(factorycsv);
     app.docRegistry.addWidgetFactory(factoryjson);
     app.docRegistry.addWidgetFactory(factoryarrow);
+    app.docRegistry.addWidgetFactory(factoryparquet);
     const ftcsv = app.docRegistry.getFileType("csv");
     const ftjson = app.docRegistry.getFileType("json");
     const ftarrow = app.docRegistry.getFileType("arrow");
+    const ftparquet = app.docRegistry.getFileType("parquet");
     factorycsv.widgetCreated.connect((sender, widget) => {
         // Track the widget.
         void trackercsv.add(widget);
@@ -331,6 +396,21 @@ function activate(app, restorer, themeManager) {
         }
     });
 
+    factoryparquet.widgetCreated.connect((sender, widget) => {
+        // Track the widget.
+        void trackerparquet.add(widget);
+
+        // Notify the widget tracker if restore data needs to update.
+        widget.context.pathChanged.connect(() => {
+            void trackerparquet.save(widget);
+        });
+
+        if (ftparquet) {
+            widget.title.iconClass = ftparquet.iconClass || "";
+            widget.title.iconLabel = ftparquet.iconLabel || "";
+        }
+    });
+
     // Keep the themes up-to-date.
     const updateThemes = () => {
         const isLight =
@@ -348,6 +428,10 @@ function activate(app, restorer, themeManager) {
         });
 
         trackerarrow.forEach((pspDocWidget) => {
+            pspDocWidget.psp.theme = theme;
+        });
+
+        trackerparquet.forEach((pspDocWidget) => {
             pspDocWidget.psp.theme = theme;
         });
     };
