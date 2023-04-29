@@ -1121,11 +1121,11 @@ namespace computed_function {
         return rval;
     }
 
-    tsl::hopscotch_map<std::string, t_date_bucket_unit> bucket::UNIT_MAP = {
-        {"s", t_date_bucket_unit::SECONDS}, {"m", t_date_bucket_unit::MINUTES},
-        {"h", t_date_bucket_unit::HOURS}, {"D", t_date_bucket_unit::DAYS},
-        {"W", t_date_bucket_unit::WEEKS}, {"M", t_date_bucket_unit::MONTHS},
-        {"Y", t_date_bucket_unit::YEARS}};
+    tsl::hopscotch_map<char, t_date_bucket_unit> bucket::UNIT_MAP = {
+        {'s', t_date_bucket_unit::SECONDS}, {'m', t_date_bucket_unit::MINUTES},
+        {'h', t_date_bucket_unit::HOURS}, {'D', t_date_bucket_unit::DAYS},
+        {'W', t_date_bucket_unit::WEEKS}, {'M', t_date_bucket_unit::MONTHS},
+        {'Y', t_date_bucket_unit::YEARS}};
 
     bucket::bucket()
         : exprtk::igeneric_function<t_tscalar>("T?") {}
@@ -1175,8 +1175,30 @@ namespace computed_function {
         t_string_view temp_string(gt_unit);
         std::string unit_str
             = std::string(temp_string.begin(), temp_string.end());
-
-        if (bucket::UNIT_MAP.count(unit_str) == 0) {
+        char temp_unit = 0;
+        auto len = unit_str.size();
+        unsigned long multiplicity;
+        t_date_bucket_unit date_unit;
+        if (len == 0) {
+            // Does not type-check!
+            rval.m_status = STATUS_CLEAR;
+            return rval;
+        } else if (len == 1) {
+            // No multiplicity explicity given, defaults to 1.
+            multiplicity = 1;
+            temp_unit = unit_str.at(0);
+        } else {
+            temp_unit = unit_str.at(len - 1);
+            std::string mult = unit_str.substr(0, len - 1);
+            if (!std::all_of(mult.begin(), mult.end(), ::isdigit)) {
+                // multiplicity is not a non-negative integer
+                rval.m_status = STATUS_CLEAR;
+                return rval;
+            }
+            multiplicity = std::stoul(mult);
+        }
+        std::string allowed_units = "smhDWMY";
+        if (allowed_units.find(temp_unit) == std::string::npos) {
             std::cerr << "[bucket] unknown unit in bucket - the valid units "
                          "are 's', 'm', 'h', 'D', 'W', 'M', and 'Y'."
                       << std::endl;
@@ -1184,10 +1206,63 @@ namespace computed_function {
             rval.m_status = STATUS_CLEAR;
             return rval;
         }
+        date_unit = bucket::UNIT_MAP[temp_unit];
 
-        t_date_bucket_unit date_bucket_unit = bucket::UNIT_MAP[unit_str];
+        // type-check multiplicity
+        switch (date_unit) {
+            case t_date_bucket_unit::SECONDS:
+                if (!(multiplicity == 1 || multiplicity == 5
+                        || multiplicity == 10 || multiplicity == 15
+                        || multiplicity == 20 || multiplicity == 30)) {
+                    rval.m_status = STATUS_CLEAR;
+                    return rval;
+                }
+                break;
+            case t_date_bucket_unit::MINUTES:
+                if (!(multiplicity == 1 || multiplicity == 5
+                        || multiplicity == 10 || multiplicity == 15
+                        || multiplicity == 20 || multiplicity == 30)) {
+                    rval.m_status = STATUS_CLEAR;
+                    return rval;
+                }
+                break;
+            case t_date_bucket_unit::HOURS:
+                if (!(multiplicity == 1 || multiplicity == 2
+                        || multiplicity == 3 || multiplicity == 4
+                        || multiplicity == 6 || multiplicity == 12)) {
+                    rval.m_status = STATUS_CLEAR;
+                    return rval;
+                }
+                break;
+            case t_date_bucket_unit::DAYS:
+                // TODO: day multiplicity.
+                if (multiplicity > 31) {
+                    rval.m_status = STATUS_CLEAR;
+                    return rval;
+                }
+                break;
+            case t_date_bucket_unit::WEEKS:
+                // TODO: week multiplicity
+                if (multiplicity > 4) {
+                    rval.m_status = STATUS_CLEAR;
+                    return rval;
+                }
+                break;
+            case t_date_bucket_unit::MONTHS:
+                if (!(multiplicity == 1 || multiplicity == 2
+                        || multiplicity == 3 || multiplicity == 4
+                        || multiplicity == 6)) {
+                    rval.m_status = STATUS_CLEAR;
+                    return rval;
+                }
+                break;
+            case t_date_bucket_unit::YEARS:
+                break;
+            default:
+                PSP_COMPLAIN_AND_ABORT("[bucket] invalid date bucket unit!");
+                break;
+        }
         t_dtype val_dtype = val.get_dtype();
-
         // type-check
         if (!(val_dtype == DTYPE_DATE || val_dtype == DTYPE_TIME)) {
             rval.m_status = STATUS_CLEAR;
@@ -1196,7 +1271,7 @@ namespace computed_function {
         // Depending on unit, datetime columns can result in a date column or a
         // datetime column.
         if (val_dtype == DTYPE_TIME) {
-            switch (date_bucket_unit) {
+            switch (date_unit) {
                 case t_date_bucket_unit::SECONDS:
                 case t_date_bucket_unit::MINUTES:
                 case t_date_bucket_unit::HOURS: {
@@ -1222,15 +1297,15 @@ namespace computed_function {
             return rval;
         }
 
-        switch (date_bucket_unit) {
+        switch (date_unit) {
             case t_date_bucket_unit::SECONDS: {
-                _second_bucket(val, rval);
+                _second_bucket(val, rval, multiplicity);
             } break;
             case t_date_bucket_unit::MINUTES: {
-                _minute_bucket(val, rval);
+                _minute_bucket(val, rval, multiplicity);
             } break;
             case t_date_bucket_unit::HOURS: {
-                _hour_bucket(val, rval);
+                _hour_bucket(val, rval, multiplicity);
             } break;
             case t_date_bucket_unit::DAYS: {
                 _day_bucket(val, rval);
@@ -1239,10 +1314,10 @@ namespace computed_function {
                 _week_bucket(val, rval);
             } break;
             case t_date_bucket_unit::MONTHS: {
-                _month_bucket(val, rval);
+                _month_bucket(val, rval, multiplicity);
             } break;
             case t_date_bucket_unit::YEARS: {
-                _year_bucket(val, rval);
+                _year_bucket(val, rval, multiplicity);
             } break;
             default: {
                 PSP_COMPLAIN_AND_ABORT("[bucket] invalid date bucket unit!");
@@ -1252,14 +1327,29 @@ namespace computed_function {
         return rval;
     }
 
+    /// @brief Buckets a given time into a date at multiplicity*T resolution.
+    /// @tparam T The std::chrono::duration to bucket by.
+    /// @param val The input date.
+    /// @param multiplicity How many Ts to put in a bucket.
+    /// @return The bucketed time.
+    template <typename T>
+    t_time
+    bucket_time(t_tscalar& val, t_uindex multiplicity) {
+        std::chrono::milliseconds millis(val.to_int64());
+        auto raw = std::chrono::duration_cast<T>(millis).count();
+        int64_t bucket
+            = floor(static_cast<double>(raw) / multiplicity) * multiplicity;
+        T refined(bucket);
+        return t_time(
+            std::chrono::duration_cast<std::chrono::milliseconds>(refined)
+                .count());
+    }
+
     void
-    _second_bucket(t_tscalar& val, t_tscalar& rval) {
+    _second_bucket(t_tscalar& val, t_tscalar& rval, t_uindex multiplicity) {
         switch (val.get_dtype()) {
             case DTYPE_TIME: {
-                auto int_ts = val.to_int64();
-                std::int64_t bucketed_ts
-                    = floor(static_cast<double>(int_ts) / 1000) * 1000;
-                rval.set(t_time(bucketed_ts));
+                rval.set(bucket_time<std::chrono::seconds>(val, multiplicity));
             } break;
             default: {
                 // echo the original value back into the column.
@@ -1269,22 +1359,10 @@ namespace computed_function {
     }
 
     void
-    _minute_bucket(t_tscalar& val, t_tscalar& rval) {
+    _minute_bucket(t_tscalar& val, t_tscalar& rval, t_uindex multiplicity) {
         switch (val.get_dtype()) {
             case DTYPE_TIME: {
-                // Convert the int64 to a milliseconds duration timestamp
-                std::chrono::milliseconds ms_timestamp(val.to_int64());
-
-                // Convert milliseconds to minutes
-                std::chrono::minutes m_timestamp
-                    = std::chrono::duration_cast<std::chrono::minutes>(
-                        ms_timestamp);
-
-                // Set a new `t_time` and return it.
-                rval.set(t_time(
-                    std::chrono::duration_cast<std::chrono::milliseconds>(
-                        m_timestamp)
-                        .count()));
+                rval.set(bucket_time<std::chrono::minutes>(val, multiplicity));
             } break;
             default: {
                 rval.set(val);
@@ -1293,22 +1371,10 @@ namespace computed_function {
     }
 
     void
-    _hour_bucket(t_tscalar& val, t_tscalar& rval) {
+    _hour_bucket(t_tscalar& val, t_tscalar& rval, t_uindex multiplicity) {
         switch (val.get_dtype()) {
             case DTYPE_TIME: {
-                // Convert the int64 to a millisecond duration timestamp
-                std::chrono::milliseconds ms_timestamp(val.to_int64());
-
-                // Convert the milliseconds to hours
-                std::chrono::hours hr_timestamp
-                    = std::chrono::duration_cast<std::chrono::hours>(
-                        ms_timestamp);
-
-                // Set a new `t_time` and return it.
-                rval.set(t_time(
-                    std::chrono::duration_cast<std::chrono::milliseconds>(
-                        hr_timestamp)
-                        .count()));
+                rval.set(bucket_time<std::chrono::hours>(val, multiplicity));
             } break;
             default: {
                 rval.set(val);
@@ -1344,6 +1410,7 @@ namespace computed_function {
 
                 rval.set(t_date(year, month, day));
             } break;
+            case DTYPE_DATE:
             default: {
                 // echo the original value back into the column.
                 rval.set(val);
@@ -1434,14 +1501,19 @@ namespace computed_function {
     }
 
     void
-    _month_bucket(t_tscalar& val, t_tscalar& rval) {
+    _month_bucket(t_tscalar& val, t_tscalar& rval, t_uindex multiplicity) {
         switch (val.get_dtype()) {
             case DTYPE_DATE: {
                 t_date date_val = val.get<t_date>();
-                rval.set(t_date(date_val.year(), date_val.month(), 1));
+                auto in_month = date_val.month();
+                int8_t out_month
+                    = floor(static_cast<double>(in_month) / multiplicity)
+                    * multiplicity;
+                rval.set(t_date(date_val.year(), out_month, 1));
             } break;
             case DTYPE_TIME: {
-                // Convert the int64 to a milliseconds duration timestamp
+                // Convert the int64 to a milliseconds duration
+                // timestamp
                 std::chrono::milliseconds ms_timestamp(val.to_int64());
 
                 // Convert the timestamp to a `sys_time` (alias for
@@ -1456,6 +1528,10 @@ namespace computed_function {
                 std::int32_t year
                     = static_cast<std::int32_t>(t->tm_year + 1900);
                 std::int32_t month = static_cast<std::uint32_t>(t->tm_mon);
+                if (multiplicity != 1) {
+                    month = floor(static_cast<double>(month) / multiplicity)
+                        * multiplicity;
+                }
                 rval.set(t_date(year, month, 1));
             } break;
             default:
@@ -1464,11 +1540,14 @@ namespace computed_function {
     }
 
     void
-    _year_bucket(t_tscalar& val, t_tscalar& rval) {
+    _year_bucket(t_tscalar& val, t_tscalar& rval, t_uindex multiplicity) {
         switch (val.get_dtype()) {
             case DTYPE_DATE: {
                 t_date date_val = val.get<t_date>();
-                rval.set(t_date(date_val.year(), 0, 1));
+                rval.set(t_date(
+                    floor(static_cast<double>(date_val.year()) / multiplicity)
+                        * multiplicity,
+                    0, 1));
             } break;
             case DTYPE_TIME: {
                 // Convert the int64 to a milliseconds duration timestamp
@@ -1485,6 +1564,10 @@ namespace computed_function {
                 // Use the `tm` to create the `t_date`
                 std::int32_t year
                     = static_cast<std::int32_t>(t->tm_year + 1900);
+                if (multiplicity != 1) {
+                    year = floor(static_cast<double>(year) / multiplicity)
+                        * multiplicity;
+                }
                 rval.set(t_date(year, 0, 1));
             } break;
             default:
