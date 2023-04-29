@@ -23,9 +23,9 @@ import perspective from "@finos/perspective/dist/esm/perspective.js";
 /**
  * The name of the factories that creates widgets.
  */
-const FACTORY_CSV = "CSVPerspective";
-const FACTORY_JSON = "JSONPerspective";
-const FACTORY_ARROW = "ArrowPerspective";
+const FACTORY_CSV = "Perspective-CSV";
+const FACTORY_JSON = "Perspective-JSON";
+const FACTORY_ARROW = "Perspective-Arrow";
 const RENDER_TIMEOUT = 1000;
 
 // create here to reuse for exception handling
