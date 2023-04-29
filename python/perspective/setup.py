@@ -129,6 +129,9 @@ class PSPBuild(build_ext):
     def build_extension_cmake(self, ext):
         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
         cfg = "Debug" if self.debug else "Release"
+        # TODO(tom): temporary hack until figure out how setting it in setup.cfg
+        # works
+        cfg = "Debug"
 
         PYTHON_VERSION = "{}.{}".format(sys.version_info.major, sys.version_info.minor)
 
@@ -143,7 +146,7 @@ class PSPBuild(build_ext):
             "-DPYTHON_INCLUDE_DIR={}".format(sysconfig.get_path("include")).replace("\\", "/"),
             "-DPSP_CMAKE_MODULE_PATH={folder}".format(folder=os.path.join(ext.sourcedir, "cmake")).replace("\\", "/"),
             "-DPSP_CPP_SRC={folder}".format(folder=ext.sourcedir).replace("\\", "/"),
-            "-DPSP_PYTHON_SRC={folder}".format(folder=os.path.join(ext.sourcedir, "..", "perspective").replace("\\", "/")),
+            "-DPSP_PYTHON_SRC={folder}".format(folder=os.path.join(ext.sourcedir, "..", "perspective").replace("\\", "/"))
         ]
 
         build_args = ["--config", cfg]

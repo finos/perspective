@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.18.2)
 project(psp)
 include(CheckCCompilerFlag)
 
-set(CMAKE_BUILD_TYPE "Release")
+# set(CMAKE_BUILD_TYPE "Release")
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -262,15 +262,31 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
         endif()
     else()
         if(CMAKE_BUILD_TYPE_LOWER STREQUAL debug)
-            set(OPT_FLAGS " \
-                -O0 \
-                -g3 \
-                ")
+            if (PSP_PYODIDE)
+              # TOOD(tom): determine which of these we shouldn't bother setting
+              # because pyodide's pywasmcross.py overrides them
+              set(OPT_FLAGS " \
+                  -O0 \
+                  -g3 \
+                  -gsource-map \
+                  --profiling \
+                  -Wcast-align \
+                  -Wover-aligned \
+                  ")
+            else ()
+              set(OPT_FLAGS " \
+                  -O0 \
+                  -g3 \
+                  ")
+            endif ()
         else()
             set(OPT_FLAGS " \
                 -O3 \
                 -g0 \
                 ")
+            if (PSP_PYODIDE)
+              set(OPT_FLAGS "${OPT_FLAGS} -flto")
+            endif ()
         endif()
     endif()
 
@@ -391,14 +407,21 @@ psp_build_dep("re2" "${PSP_CMAKE_MODULE_PATH}/re2.txt.in")
 psp_build_dep("exprtk" "${PSP_CMAKE_MODULE_PATH}/exprtk.txt.in")
 
 # ####################
-set(CMAKE_C_FLAGS_RELEASE " \
+set(CMAKE_C_FLAGS_DEBUG "")
+set(CMAKE_C_FLAGS " \
     ${CMAKE_C_FLAGS} \
     ${EXTENDED_FLAGS} \
     ${OPT_FLAGS} \
     ")
 
-set(CMAKE_CXX_FLAGS_RELEASE " \
-    ${CMAKE_C_FLAGS} \
+# TODO(tom): we should just build CMAKE_CXX_FLAGS_DEBUG and
+# CMAKE_CXX_FLAGS_RELEASE at the sites where OPT_FLAGS/EXTENDED_FLAGS
+# are set
+# prevents the default debug flags from overriding the debug flags we
+# set in OPT_FLAGS
+set(CMAKE_CXX_FLAGS_DEBUG "")
+set(CMAKE_CXX_FLAGS " \
+    ${CMAKE_CXX_FLAGS} \
     ${EXTENDED_FLAGS} \
     ${OPT_FLAGS} \
     ")
@@ -557,6 +580,27 @@ if(PSP_WASM_BUILD)
     set_target_properties(perspective_cjs PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./esm/")
     set_target_properties(perspective_cjs PROPERTIES OUTPUT_NAME "perspective.cpp")
 elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
+    if (PSP_PYODIDE)
+      # TODO(tom): this is a straight copy of PSP_WASM_BUILD, fix it
+      # TOOD(tom): determine which of these we shouldn't bother setting
+      # because pyodide's pywasmcross.py overrides them
+      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
+          --bind \
+          --source-map-base \"\" \
+          --memory-init-file 0 \
+          --no-entry \
+          -s EXPORT_ES6=1 \
+          -s NO_EXIT_RUNTIME=1 \
+          -s NO_FILESYSTEM=1 \
+          -s ALLOW_MEMORY_GROWTH=1 \
+          -s MODULARIZE=1 \
+          -s EXPORT_NAME=\"load_perspective\" \
+          -s MAXIMUM_MEMORY=4gb \
+          -s USE_ES6_IMPORT_META=0 \
+          -s ERROR_ON_UNDEFINED_SYMBOLS=1 \
+          -s ENVIRONMENT=web,webview,worker \
+      ")
+    endif ()
     if(NOT WIN32)
         set(CMAKE_SHARED_LIBRARY_SUFFIX .so)
 
@@ -634,7 +678,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
         target_compile_options(psp PRIVATE -Wall -Werror)
         target_compile_options(psp PRIVATE $<$<CONFIG:DEBUG>:-fPIC -O0>)
 
-        if(PSP_PYTHON_BUILD)
+        if(PSP_PYTHON_BUILD AND NOT PSP_PYODIDE)
             target_compile_options(binding PRIVATE $<$<CONFIG:DEBUG>:-fPIC -O0>)
         endif()
     elseif(WIN32)
