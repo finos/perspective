@@ -7,7 +7,6 @@
  *
  */
 
-const { get_config } = require("@finos/perspective");
 const path = require("path");
 const webpack = require("webpack");
 
@@ -79,27 +78,6 @@ class PerspectiveWebpackPlugin {
                 type: "javascript/auto",
                 include: [this.options.wasmPath, this.options.viewerPath],
                 loader: require.resolve("arraybuffer-loader"),
-            });
-        }
-
-        const perspective_config = get_config();
-        if (perspective_config) {
-            rules.push({
-                test: /\.js$/,
-                include: /perspective[\\/].+?[\\/]config[\\/]index\.js$/,
-                use: [
-                    {
-                        loader: require.resolve("string-replace-loader"),
-                        options: {
-                            search: "global.__TEMPLATE_CONFIG__",
-                            replace: JSON.stringify(
-                                perspective_config,
-                                null,
-                                4
-                            ),
-                        },
-                    },
-                ],
             });
         }
 

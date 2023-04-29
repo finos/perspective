@@ -30,6 +30,10 @@ module.exports = {
                 exclude: /node_modules/,
                 use: [{ loader: "style-loader" }, { loader: "css-loader" }],
             },
+            {
+                test: /\.arrow$/,
+                use: [{ loader: "arraybuffer-loader" }],
+            },
         ],
     },
     stats: {
@@ -38,12 +42,6 @@ module.exports = {
         version: false,
         builtAt: false,
         entrypoints: false,
-    },
-    devServer: {
-        static: [
-            path.join(__dirname, "dist"),
-            path.join(__dirname, "../../node_modules/superstore-arrow"),
-        ],
     },
     devtool: "source-map",
 };
