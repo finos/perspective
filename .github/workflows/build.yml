@@ -777,12 +777,15 @@ jobs:
                     - is-full-run: false
                       os: macos-11
 
-                    # Exclude Python 3.8, 3.10 builds
+                    # Exclude Python 3.8, 3.10, 3.11 builds
                     - is-full-run: false
                       python-version: 3.8
 
                     - is-full-run: false
                       python-version: "3.10"
+
+                    - is-full-run: false
+                      python-version: 3.11
 
             # NOTE: don't fail fast as sometimes npm blocks the burst of fetches from GHA
             fail-fast: false
