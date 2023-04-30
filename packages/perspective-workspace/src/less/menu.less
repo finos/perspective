@@ -14,16 +14,21 @@
     padding: 8px;
     background: white;
     color: #666;
-    border: 1px solid #ccc;
-    border-left-width: 0px;
-    border-top-width: 0px;
-    border-right-width: 1px;
-    box-shadow: 0 2px 4px #0000001a;
+    border: 1px solid var(--inactive--color);
+    border-radius: 3px;
     max-width: 350px;
 }
 
+.p-Menu.perspective-workspace-menu {
+    .p-Menu-item {
+        padding-left: 37px !important;
+        min-width: var(--min-width)
+    }
+}
+
 .p-Menu-item.p-mod-active {
-    background: rgba(0, 0, 0, 0.1);
+    background-color: var(--icon--color);
+    color: var(--plugin--background);
 }
 
 .p-Menu-item.p-mod-disabled {
@@ -51,13 +56,16 @@
 
 .p-Menu-itemSubmenuIcon {
     width: 24px;
-    height: 12px;
+    height: 18px;
 }
 
 .p-Menu-item {
     display: flex;
     align-items: center;
     outline: none;
+
+    margin: 0 -8px;
+    padding: 0 8px;
 }
 
 .p-Menu-item[data-type="separator"] > div {
@@ -102,12 +110,13 @@
 
 .p-Menu-itemIcon:before {
     content: attr(content);
-    font-family: "Material Icons";
+    font-family: "Roboto Mono";
 }
 
 [data-type="submenu"] .lm-Menu-itemSubmenuIcon:before {
-    content: "chevron_right";
-    font-family: "Material Icons";
+    content: ">";
+    font-family: "Roboto Mono";
+    height: 18px;
 }
 
 .p-mod-drag-image.p-TabBar-tab {

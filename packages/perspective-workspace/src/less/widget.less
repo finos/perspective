@@ -9,8 +9,13 @@
 
 @border-color: 1px solid #eaedef;
 
+.lm-DockPanel:not([data-mode="single-document"]) .viewer-container {
+    border: var(--workspace-tabbar--border, 1px solid var(--inactive--color));
+    border-width: var(--workspace-tabbar--border-width);
+    border-radius: var(--workspace-tabbar--border-radius, 0 0 6px 6px);
+}
+
 .viewer-container {
-    border: var(--workspace-tabbar--border, 1px solid #ddd);
     flex: 1;
     height: 100%;
     overflow: hidden;

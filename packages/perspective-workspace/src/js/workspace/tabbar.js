@@ -11,12 +11,17 @@ import { ArrayExt } from "@lumino/algorithm/src";
 import { ElementExt } from "@lumino/domutils/src";
 import { TabBar } from "@lumino/widgets/src/tabbar";
 import { TabBarItems, DEFAULT_TITLE } from "./tabbarrenderer";
+import { VirtualDOM, VirtualElement } from "@lumino/virtualdom";
+import { CommandRegistry } from "@lumino/commands/src";
+import { MenuRenderer } from "./menu";
+import { Menu } from "@lumino/widgets/src/menu";
 
 export class PerspectiveTabBar extends TabBar {
-    constructor(options = {}) {
+    constructor(workspace, options = {}) {
         super(options);
         this._addEventListeners();
         this.__content_node__;
+        this._workspace = workspace;
     }
 
     onUpdateRequest(msg) {
@@ -25,8 +30,71 @@ export class PerspectiveTabBar extends TabBar {
         // reset - this causes the diff to double some elements.  Memoizing
         // prevent collection from the weakmap.
         this.__content_node__ = this.contentNode;
-        super.onUpdateRequest(msg);
+
+        // super.onUpdateRequest(msg);
+
+        let titles = this._titles;
+        let renderer = this.renderer;
+        let currentTitle = this.currentTitle;
+
+        // Another hack. `TabBar` selects by index and I don't want to fork this
+        // logic, so insert empty divs until the indices match.
+        let content = new Array();
+        for (let i = 0, n = titles.length; i < n; ++i) {
+            let title = titles[i];
+            let current = title === currentTitle;
+            let otherTitles = titles.filter((x) => x !== currentTitle);
+            let onClick;
+            if (otherTitles.length > 0) {
+                onClick = this.onClick.bind(this, otherTitles, i);
+            }
+
+            if (current) {
+                content[i] = renderer.renderTab({
+                    title,
+                    zIndex: titles.length + 1,
+                    current,
+                    onClick,
+                });
+            } else {
+                content[i] = renderer.renderInert();
+            }
+        }
+
+        VirtualDOM.render(content, this.contentNode);
         this._check_shade();
+    }
+
+    onClick(otherTitles, index, event) {
+        const commands = new CommandRegistry();
+        const renderer = new MenuRenderer(null);
+        this._menu = new Menu({ commands, renderer });
+        this._menu.addClass("perspective-workspace-menu");
+        this._menu.dataset.minwidth = this._titles[index];
+        for (const title of otherTitles) {
+            this._menu.addItem({
+                command: "tabbar:switch",
+                args: { title },
+            });
+        }
+
+        commands.addCommand("tabbar:switch", {
+            execute: async ({ title }) => {
+                const index = this._titles.findIndex((t) => t === title);
+                this.currentTitle = title;
+                this.tabActivateRequested.emit({ index, title });
+            },
+            label: ({ title }) => title.label || "untitled",
+            mnemonic: 0,
+        });
+
+        const box = event.target.getBoundingClientRect();
+        this._menu.open(box.x, box.y + box.height);
+        this._menu.aboutToClose.connect(() => {
+            this._menu = undefined;
+        });
+        event.preventDefault();
+        event.stopPropagation();
     }
 
     _check_shade() {
@@ -44,6 +112,7 @@ export class PerspectiveTabBar extends TabBar {
     }
 
     handleEvent(event) {
+        this._menu?.close();
         this.retargetEvent(event);
         switch (event.type) {
             case "contextmenu":
@@ -51,13 +120,6 @@ export class PerspectiveTabBar extends TabBar {
                 this.parent.parent.parent.showContextMenu(widget, event);
                 event.preventDefault();
                 break;
-
-            // case "dblclick":
-            //     if (event.target.id === TabBarItems.Label) {
-            //         this.onTitleChangeRequest(event);
-            //     }
-            //     break;
-
             case "mousedown":
                 if (event.target.id === TabBarItems.Label) {
                     return;
@@ -81,80 +143,16 @@ export class PerspectiveTabBar extends TabBar {
                     }
 
                     const title = this.titles[index];
-                    title.owner.viewer.toggleConfig();
+                    this._workspace._maximize(title.owner);
+                    requestAnimationFrame(() =>
+                        title.owner.viewer.toggleConfig()
+                    );
+
                     return;
                 }
                 break;
         }
         super.handleEvent(event);
-    }
-
-    onTitleChangeRequest(event) {
-        const oldValue = event.target.value;
-
-        const stopEvents = (event) => event.stopPropagation();
-
-        const onCancel = () => {
-            this.title.label = oldValue;
-            event.target.value = oldValue;
-            event.target.setAttribute("readonly", "");
-            removeEventListeners();
-        };
-
-        const onEnter = (event) => {
-            if (event.keyCode === 13) {
-                removeEventListeners();
-                this.currentTitle.owner.name = event.target.value;
-                event.target.value = event.target.value || DEFAULT_TITLE;
-                event.target.setAttribute("readonly", "");
-                event.target.blur();
-            }
-        };
-
-        const listeners = {
-            mousemove: stopEvents,
-            mousedown: stopEvents,
-            mouseup: stopEvents,
-            keydown: onEnter,
-            blur: onCancel,
-        };
-
-        const removeEventListeners = () => {
-            for (let eventName in listeners) {
-                event.target.removeEventListener(
-                    eventName,
-                    listeners[eventName]
-                );
-            }
-        };
-
-        for (let eventName in listeners) {
-            event.target.addEventListener(eventName, listeners[eventName]);
-        }
-
-        event.target.removeAttribute("readonly");
-
-        if (oldValue === DEFAULT_TITLE) {
-            event.target.value = "";
-        }
-
-        event.target.focus();
-    }
-
-    onResize(msg) {
-        super.onResize(msg);
-        this.checkCondensed(msg);
-    }
-
-    checkCondensed(msg) {
-        const approxWidth =
-            (msg ? msg.width : this.node.offsetWidth) /
-            this.contentNode.children.length;
-        if (approxWidth < 400) {
-            this.node.classList.add("condensed");
-        } else {
-            this.node.classList.remove("condensed");
-        }
     }
 
     /**

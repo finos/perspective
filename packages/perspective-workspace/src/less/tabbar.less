@@ -10,14 +10,21 @@
 .p-TabBar-tabLabel {
     background-color: transparent;
     border: none;
-    color: var(--workspace-secondary--color, #666);
+    color: var(--icon--color, #666);
     cursor: pointer;
-    padding: 0px;
+    padding: 0px 6px;
     margin: 0;
-    margin-left: auto;
+    margin-left: 10.5px;
     margin-right: auto;
     flex: 0 1 auto;
+    border-radius: 3px;
+    &:hover {
+        background-color: var(--icon--color);
+        color: var(--plugin--background);
+    }
 }
+
+
 
 // .p-TabBar-tabLabel[value="[untitled]"] {
 //     color: #ddd !important;
@@ -31,7 +38,7 @@
 
 .p-TabBar-tab.p-mod-closable > .p-TabBar-tabCloseIcon:before {
     content: var(--close-button--content, "\2715");
-    font-family: var(--settings--font-family, "Arial");
+    font-family: "Roboto Mono";
 }
 
 .p-TabBar-tab > .p-TabBar-tabConfigIcon:before {
@@ -42,7 +49,7 @@
 
 .p-TabBar-tab.p-mod-current.settings_open > .p-TabBar-tabConfigIcon:before {
     content: var(--close-settings-button--content, "\1F527");
-    font-family: var(--settings--font-family, "Arial");
+    font-family: "Roboto Mono";
 }
 
 .p-TabBar-tab.p-mod-current.linked > .p-TabBar-tabConfigIcon:before {
@@ -62,7 +69,7 @@
 .p-mod-current {
     .p-TabBar-tabConfigIcon,
     .p-TabBar-tabCloseIcon {
-        color: #ccc;
+        color: inherit;
         transition: color 0.2s ease-out;
     }
 
@@ -85,7 +92,7 @@
 }
 
 .p-TabBar-tabLabel:empty::after {
-    content: "[untitled]";
+    content: "untitled";
     color: #aaa;
 }
 
@@ -94,7 +101,7 @@
 }
 
 .p-TabBar-tabLabel:empty::after {
-    content: "[untitled]";
+    content: "untitled";
 }
 
 .divider {
@@ -104,8 +111,22 @@
     right: 32px;
 
     height: 1px;
-    background-color: var(--workspace-tabbar--border-color, #eaeaea);
+    background-color: var(--workspace-tabbar--border-color);
     margin-bottom: 0px;
+}
+
+.p-TabBar-tab .drag-handle {
+    height: 12px;
+    width: 5px;
+    -webkit-mask-image: var(--column-drag-handle--mask-image);
+    mask-image: var(--column-drag-handle--mask-image);
+    margin: 0px 0 0 16.5px;
+    background-repeat: no-repeat;
+    background-color: var(--inactive--color, red);
+    content: "";
+    display: inline-block;
+    -webkit-mask-size: cover;
+    mask-size: cover;
 }
 
 .p-TabBar-tab.p-mod-hidden {
@@ -117,12 +138,12 @@
     display: block;
 }
 
-.p-TabBar-tabLabel input {
-    height: 18px;
-}
+// .p-TabBar-tabLabel input {
+//     height: 18px;
+// }
 
 .p-TabBar {
-    min-height: 24px !important;
+    min-height: 40px !important;
 }
 
 @border-color: 1px solid #eaeaea;
@@ -139,7 +160,7 @@
 .p-TabBar-content {
     padding: 0px;
     overflow: hidden;
-    margin: 0px -4px -1px -4px;
+    // margin: 0px -4px -1px -4px;
     border-bottom: 0px solid #fff !important;
     border-left: #eaeaea;
     border-right: #eaeaea;
@@ -161,14 +182,15 @@
 }
 
 .p-TabBar-tab {
-    margin: 0px 4px;
+    // margin: 0px 4px;
     border-color: #eaeaea;
+    align-items: center;
 }
 
-.p-TabBar-content > .p-TabBar-tab,
-.p-TabBar-content > .p-TabBar-tab.p-mod-current.settings_open {
-    background-color: var(--workspace-master--background-color, #f2f4f6);
-}
+// .p-TabBar-content > .p-TabBar-tab,
+// .p-TabBar-content > .p-TabBar-tab.p-mod-current.settings_open {
+//     // background-color: var(--workspace-master--background-color, #f2f4f6);
+// }
 
 .p-TabBar-content.inactive-blur > .p-TabBar-tab {
     background-color: var(
@@ -223,15 +245,15 @@
     flex: 0 1 100000px !important;
     background: none;
     color: #737373;
-    padding-top: 1px !important;
-    border-style: solid;
-    border-width: 1px;
-    border-color: transparent;
-    height: 26px !important;
-    max-height: 26px !important;
+    // padding-top: 1px !important;
+    // border-style: solid;
+    // border-width: 1px;
+    // border-color: transparent;
+    height: 40px !important;
+    max-height: 40px !important;
     transform: none !important;
     transition: color 0.2s ease-out;
-    border-bottom-width: 0px !important;
+    // border-bottom-width: 0px !important;
 }
 
 .p-TabBar-content > .p-TabBar-tab {
@@ -242,9 +264,9 @@
     color: #ccc;
 }
 
-.p-TabBar-content > .p-TabBar-tab .p-TabBar-tabLabel {
-    color: var(--workspace-secondary--color, #666);
-}
+// .p-TabBar-content > .p-TabBar-tab .p-TabBar-tabLabel {
+//     color: var(--workspace-secondary--color, #666);
+// }
 
 .p-TabBar-content > .p-TabBar-tab:hover {
     color: #ccc;
@@ -260,7 +282,7 @@
 
 .p-TabBar-tabLabel {
     font-family: inherit;
-    font-weight: 400;
+    font-family: "Roboto Mono";
     font-size: 12px;
     line-height: 22px;
     text-align: start;
@@ -272,7 +294,7 @@
 .p-TabBar-tabConfigIcon {
     cursor: pointer !important;
     line-height: 22px !important;
-    padding-right: 8px !important;
+    padding-right: 16.5px !important;
 }
 
 .p-TabBar-tabConfigIcon {
@@ -293,9 +315,11 @@
 .p-TabBar-content > .p-TabBar-tab.p-mod-current {
     color: var(--workspace-tabbar--color, #666) !important;
     border: var(--workspace-tabbar--border, 1px solid #ddd);
+    border-width: var(--workspace-tabbar-tab--border-width);
+    border-radius: 6px 6px 0 0;
     background-color: var(--workspace-tabbar--background-color, white);
-    height: 26px !important;
-    max-height: 26px !important;
+    height: 40px !important;
+    max-height: 40px !important;
 }
 
 .bottom .p-TabBar-tab.p-mod-current {
@@ -315,4 +339,44 @@
     .p-Widget.workspace-widget:not(.context-focus)
     .viewer-container {
     opacity: 0.2;
+}
+
+
+@mixin icon {
+    background-repeat: no-repeat;
+    background-color: var(--icon--color);
+    content: "";
+    display: inline-block;
+    -webkit-mask-size: cover;
+    mask-size: cover;
+}
+
+.bookmarks-button {
+    margin-left: 11px;
+    margin-right: -13px;
+    border-radius: 3px;
+
+    &:hover {
+        background-color: var(--icon--color);
+    }
+}
+
+.bookmarks {
+    cursor: pointer;
+    @include icon;
+    width: 26px;
+    height: 12px;
+    -webkit-mask-image: var(--bookmarks--mask-image);
+    mask-image: var(--bookmarks--mask-image);
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: auto;
+    mask-size: auto;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    padding: 5px;
+
+    &:hover {
+        background-color: var(--plugin--background);
+    }
 }

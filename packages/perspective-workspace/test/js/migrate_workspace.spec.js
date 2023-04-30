@@ -55,7 +55,7 @@ const TESTS = [
             viewers: {
                 One: {
                     table: "superstore",
-                    name: "One",
+                    title: "One",
                     plugin: "Y Area",
                     plugin_config: {},
                     group_by: ["bucket(\"Order Date\", 'M')"],
@@ -67,7 +67,6 @@ const TESTS = [
                     aggregates: {},
                     master: false,
                     linked: false,
-                    title: null,
                 },
             },
             mode: "globalFilters",
@@ -87,12 +86,12 @@ function runTests(context, compare) {
     for (const [name, old, current] of TESTS) {
         test(`Restore workspace - ${name}`, async ({ page }) => {
             await setupTestWorkspace(page);
-
             const converted = convert(JSON.parse(JSON.stringify(old)));
             const config = await page.evaluate(async (config) => {
                 if (!window.__TABLE__) {
-                    return { "FUCK YOU": "ASS" };
+                    return;
                 }
+
                 const workspace = document.getElementById("workspace");
                 await workspace.restore(config);
                 return await workspace.save();

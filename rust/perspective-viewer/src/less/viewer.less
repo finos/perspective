@@ -51,18 +51,23 @@
         // bottom: 0;
         // left: 0;
         // right: 0;
-        height: 48px;
+        height: var(--status-bar--height, 48px);
     }
 
     #main_column {
         display: flex;
         flex-direction: column;
         position: relative;
+        margin: var(--main-column--margin);
+        border: var(--main-column--border);
+        border-width: var(--main-column--border-width);
+        border-radius: var(--main-column--border-radius);
+        overflow: hidden;
     }
 
     #main_panel_container {
         position: absolute;
-        top: 48px;
+        top: var(--status-bar--height, 48px);
         bottom: 0;
         left: 0;
         right: 0;
@@ -72,7 +77,7 @@
         border: var(--plugin--border, none);
 
         &.settings-closed.titled {
-            top: 48px;
+            top: var(--status-bar--height, 48px);
         }
 
         &.settings-closed {
@@ -154,7 +159,8 @@
         position: absolute;
         top: 0;
         right: 0;
-        margin-top: 14px;
+        margin: var(--settings-button--margin, 14px 0 0 0);
+        padding: 0;
         background-color: var(--plugin--background);
         margin-right: 14px;
         padding: 2px 12px;
@@ -181,11 +187,15 @@
     }
 
     #main_column #settings_button {
-        padding: 14px 0 0 0;
-        margin: 0;
+        // padding: 14px 0 0 0;
+        // margin: 0;
         border: none;
         opacity: 1;
         background-color: transparent;
+        margin-right: 0px;
+        padding: 0;
+
+
         &:before {
             display: inline-block;
             height: 18px;

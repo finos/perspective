@@ -15,7 +15,7 @@ export const TabBarItems = {
     Label: "label",
 };
 
-export const DEFAULT_TITLE = "[untitled]";
+export const DEFAULT_TITLE = "untitled";
 
 export class PerspectiveTabBarRenderer extends TabBar.Renderer {
     constructor(maximized) {
@@ -24,12 +24,21 @@ export class PerspectiveTabBarRenderer extends TabBar.Renderer {
     }
 
     renderLabel(data) {
-        return h.input({
-            className: "p-TabBar-tabLabel",
-            readonly: true,
-            id: TabBarItems.Label,
-            value: data.title.label || DEFAULT_TITLE,
-        });
+        return h.span(
+            {
+                className: "p-TabBar-tabLabel",
+                id: TabBarItems.Label,
+            },
+            data.title.label || DEFAULT_TITLE
+        );
+    }
+
+    renderOther(data, title) {
+        return h.span({}, title.label || "untitled");
+    }
+
+    renderInert() {
+        return h.div();
     }
 
     renderTab(data) {
@@ -38,14 +47,29 @@ export class PerspectiveTabBarRenderer extends TabBar.Renderer {
         const style = this.createTabStyle(data);
         let className = this.createTabClass(data);
         const dataset = this.createTabDataset(data);
+        const more = [];
+        if (data.onClick) {
+            more.push(
+                h.div(
+                    { onclick: data.onClick, class: "bookmarks-button" },
+                    h.div({ class: "bookmarks" })
+                )
+            );
+        }
 
         return h.li(
             { key, className, title, style, dataset },
-            // this.renderConfigIcon(),
+            this.renderDragHandle(),
+            ...more,
             this.renderLabel(data),
-            this.renderCloseIcon(),
-            h.div({ className: "divider" })
+            this.renderCloseIcon()
         );
+    }
+
+    renderDragHandle() {
+        return h.div({
+            className: "drag-handle",
+        });
     }
 
     // renderConfigIcon() {

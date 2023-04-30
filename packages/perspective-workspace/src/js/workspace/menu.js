@@ -11,11 +11,6 @@ import { h } from "@lumino/virtualdom/src";
 import { Menu } from "@lumino/widgets/src/menu";
 
 export class MenuRenderer extends Menu.Renderer {
-    constructor(element) {
-        super();
-        this.workspace = element;
-    }
-
     formatLabel(data) {
         let { label, mnemonic } = data.item;
         if (mnemonic < 0 || mnemonic >= label.length) {
@@ -63,20 +58,9 @@ export class MenuRenderer extends Menu.Renderer {
                 onfocus: data.onfocus,
                 ...aria,
             },
-            this.renderIcon(data),
             this.renderLabel(data),
             this.renderShortcut(data),
             this.renderSubmenu(data)
         );
-    }
-
-    renderIcon(data) {
-        let className = this.createIconClass(data);
-        const name = data.item.command.split(":").pop();
-        const content = getComputedStyle(this.workspace)
-            .getPropertyValue(`--menu-${name}--content`)
-            .replace(/['"]+/g, "")
-            .trim();
-        return h.div({ className, content }, data.item.iconLabel);
     }
 }

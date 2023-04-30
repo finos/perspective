@@ -66,9 +66,7 @@ export class PerspectiveWorkspace extends SplitPanel {
         super({ orientation: "horizontal" });
 
         this.addClass("perspective-workspace");
-        this.dockpanel = new PerspectiveDockPanel("main", {
-            enableContextMenu: false,
-        });
+        this.dockpanel = new PerspectiveDockPanel(this);
         this.detailPanel = new Panel();
         this.detailPanel.layout.fitPolicy = "set-no-constraint";
         this.detailPanel.addClass("perspective-scroll-panel");
@@ -410,12 +408,10 @@ export class PerspectiveWorkspace extends SplitPanel {
         if (table_name) {
             const slot = this.node.querySelector(`slot[name=${slot_name}]`);
             if (!slot) {
-                //const name = viewer.getAttribute("name");
                 console.warn(
                     `Undocked ${viewer.outerHTML}, creating default layout`
                 );
                 const widget = this._createWidget({
-                    name: viewer.getAttribute("name"),
                     table: viewer.getAttribute("table"),
                     config: { master: false },
                     viewer,
@@ -455,7 +451,7 @@ export class PerspectiveWorkspace extends SplitPanel {
             this.toggleSingleDocument(widget);
         }
         const config = await widget.save();
-        config.name = config.name ? `${config.name} (duplicate)` : "";
+        config.title = config.title ? `${config.title} (*)` : "";
         const duplicate = this._createWidgetAndNode({ config });
         if (config.linked) {
             this._linkWidget(duplicate);
@@ -782,6 +778,9 @@ export class PerspectiveWorkspace extends SplitPanel {
                 command: "workspace:close",
                 args: { widget },
             });
+            contextMenu.addItem({
+                command: "workspace:help",
+            });
         }
 
         if (this.customCommands.length > 0) {
@@ -804,11 +803,13 @@ export class PerspectiveWorkspace extends SplitPanel {
     }
 
     showContextMenu(widget, event) {
-        const menu = this.createContextMenu(widget);
-        menu.init_overlay();
-        menu.open(event.clientX, event.clientY);
-        event.preventDefault();
-        event.stopPropagation();
+        if (!event.shiftKey) {
+            const menu = this.createContextMenu(widget);
+            menu.init_overlay();
+            menu.open(event.clientX, event.clientY);
+            event.preventDefault();
+            event.stopPropagation();
+        }
     }
 
     /***************************************************************************
@@ -916,7 +917,6 @@ export class PerspectiveWorkspace extends SplitPanel {
     }
 
     _createWidget({ config, node, viewer }) {
-        config.name = config.name || viewer.getAttribute("name");
         if (!node) {
             const slotname = viewer.getAttribute("slot");
             node = this.node.querySelector(`slot[name=${slotname}]`);
@@ -952,25 +952,19 @@ export class PerspectiveWorkspace extends SplitPanel {
         if (this.listeners.has(widget)) {
             this.listeners.get(widget)();
         }
+
         const settings = (event) => {
-            if (event.detail) {
-                this._maximize(widget);
-            } else {
+            if (!event.detail) {
                 this._unmaximize();
             }
         };
+
         const contextMenu = (event) => this.showContextMenu(widget, event);
         const updated = async (event) => {
             this.workspaceUpdated();
-            if (this.mode === MODE.LINKED) {
-                const config = await event.target?.save();
-                if (config) {
-                    const selectable =
-                        this._linkedViewers.length > 0 && !!config["group_by"];
-                    if (selectable !== !!config.selectable) {
-                        event.target.restore({ selectable });
-                    }
-                }
+            const config = await event.target?.save();
+            if (!!config) {
+                widget.title.label = config.title;
             }
         };
 

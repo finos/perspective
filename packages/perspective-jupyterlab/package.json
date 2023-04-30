@@ -50,7 +50,7 @@
         "@finos/perspective-esbuild-plugin": "^2.0.1",
         "@finos/perspective-test": "^2.0.1",
         "@jupyterlab/builder": "^3.4.0",
-        "@prospective.co/procss": "^0.1.12",
+        "@prospective.co/procss": "^0.1.13",
         "cpy": "^9.0.1"
     },
     "jupyterlab": {

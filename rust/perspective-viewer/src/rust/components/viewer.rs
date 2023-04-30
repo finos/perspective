@@ -48,6 +48,12 @@ impl PartialEq for PerspectiveViewerProps {
     }
 }
 
+impl PerspectiveViewerProps {
+    fn is_title(&self) -> bool {
+        !self.presentation.get_is_workspace() && self.presentation.get_title().is_some()
+    }
+}
+
 pub enum Msg {
     Resize,
     Reset(bool, Option<Sender<()>>),
@@ -204,7 +210,7 @@ impl Component for PerspectiveViewer {
     fn view(&self, ctx: &Context<Self>) -> Html {
         let settings = ctx.link().callback(|_| Msg::ToggleSettingsInit(None, None));
         let mut class = classes!("settings-closed");
-        if ctx.props().presentation.get_title().is_some() {
+        if ctx.props().is_title() {
             class.push("titled");
         }
 
@@ -259,7 +265,7 @@ impl Component for PerspectiveViewer {
                         session={ &ctx.props().session }
                         renderer={ &ctx.props().renderer }>
                     </RenderWarning>
-                    if ctx.props().presentation.get_title().is_some() {
+                    if ctx.props().is_title() {
                         <StatusBar
                             id="status_bar"
                             session={ &ctx.props().session }
@@ -272,13 +278,14 @@ impl Component for PerspectiveViewer {
                     <div id="main_panel_container" class={ class }>
                         <slot></slot>
                     </div>
-                    <div
-                        id="settings_button"
-                        class={ if ctx.props().presentation.get_title().is_some() { "noselect button closed titled" } else { "noselect button closed" } }
-                        onmousedown={ settings }>
-                    </div>
+                    if !ctx.props().presentation.get_is_workspace() {
+                        <div
+                            id="settings_button"
+                            class={ if ctx.props().is_title() { "noselect button closed titled" } else { "noselect button closed" } }
+                            onmousedown={ settings }>
+                        </div>
+                    }
                 }
-
 
             </StyleProvider>
             <FontLoader ..self.fonts.clone()></FontLoader>

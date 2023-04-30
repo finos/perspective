@@ -7,7 +7,7 @@
  *
  */
 
-import "@finos/perspective-viewer";
+// import "@finos/perspective-viewer";
 import { Widget } from "@lumino/widgets/src/widget";
 
 export class PerspectiveViewerWidget extends Widget {
@@ -39,16 +39,17 @@ export class PerspectiveViewerWidget extends Widget {
         return this._master;
     }
 
-    set name(value) {
-        if (value != null) {
-            this.viewer.setAttribute("name", value);
-            this.title.label = value;
-            this._name = value;
-        }
-    }
+    // set name(value) {
+    //     if (value != null) {
+    //         this.viewer.setAttribute("name", value);
+    //         this.title.label = value;
+    //         this._name = value;
+    //     }
+    // }
 
     get name() {
-        return this._name;
+        console.error("Test");
+        return this._title;
     }
 
     set linked(value) {
@@ -89,8 +90,9 @@ export class PerspectiveViewerWidget extends Widget {
             ...viewerConfig
         } = config;
         this.master = master;
-        this.name = name;
         this.linked = linked;
+        this._title = config.title;
+        this.title.label = config.title;
         if (table) {
             this.viewer.setAttribute("table", table);
         }
@@ -116,7 +118,6 @@ export class PerspectiveViewerWidget extends Widget {
         let config = {
             ...(await this.viewer.save()),
             master: this.master,
-            name: this.viewer.getAttribute("name"),
             table: this.viewer.getAttribute("table"),
             linked: this.linked,
         };
