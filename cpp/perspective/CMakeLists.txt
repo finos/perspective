@@ -293,24 +293,18 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     set(ASYNC_MODE_FLAGS "")
 
     # Boost is a system dependency and must be present and built on the system.
+    find_package(Boost REQUIRED)
 
-    # FIXME: use find_package, set BOOST_ROOT or BOOST_INCLUDEDIR or something
-    # this just makes it so #include <boost/foo.hpp> will find the header at
-    # src/include/vendor/boost/foo.hpp
-    include_directories(SYSTEM "${CMAKE_SOURCE_DIR}/src/include/perspective/vendor")
+    if(NOT Boost_FOUND)
+        message(FATAL_ERROR "${Red}Boost could not be located${ColorReset}")
+    else()
+        psp_build_message("${Cyan}Found Boost: `Boost_INCLUDE_DIRS`: ${Boost_INCLUDE_DIRS}, `Boost_LIBRARY_DIRS` - ${Boost_LIBRARY_DIRS} ${ColorReset}")
+        include_directories(${Boost_INCLUDE_DIRS})
 
-    # find_package(Boost REQUIRED)
-
-    # if(NOT Boost_FOUND)
-    #     message(FATAL_ERROR "${Red}Boost could not be located${ColorReset}")
-    # else()
-    #     psp_build_message("${Cyan}Found Boost: `Boost_INCLUDE_DIRS`: ${Boost_INCLUDE_DIRS}, `Boost_LIBRARY_DIRS` - ${Boost_LIBRARY_DIRS} ${ColorReset}")
-    #     include_directories(${Boost_INCLUDE_DIRS})
-
-    #     if(WIN32)
-    #         add_definitions(-DBOOST_UUID_FORCE_AUTO_LINK)
-    #     endif()
-    # endif()
+        if(WIN32)
+            add_definitions(-DBOOST_UUID_FORCE_AUTO_LINK)
+        endif()
+    endif()
 
     if(WIN32)
         foreach(warning 4244 4251 4267 4275 4290 4786 4305 4996)
