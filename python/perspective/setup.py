@@ -146,7 +146,7 @@ class PSPBuild(build_ext):
             "-DPYTHON_INCLUDE_DIR={}".format(sysconfig.get_path("include")).replace("\\", "/"),
             "-DPSP_CMAKE_MODULE_PATH={folder}".format(folder=os.path.join(ext.sourcedir, "cmake")).replace("\\", "/"),
             "-DPSP_CPP_SRC={folder}".format(folder=ext.sourcedir).replace("\\", "/"),
-            "-DPSP_PYTHON_SRC={folder}".format(folder=os.path.join(ext.sourcedir, "..", "perspective").replace("\\", "/"))
+            "-DPSP_PYTHON_SRC={folder}".format(folder=os.path.join(ext.sourcedir, "..", "perspective").replace("\\", "/")),
         ]
 
         build_args = ["--config", cfg]
