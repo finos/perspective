@@ -119,6 +119,7 @@ function migrate_viewer(old, omit_attributes, options) {
             migrate_plugins,
             migrate_plugin_config,
             migrate_title,
+            migrate_name_title_workspace,
             omit_attributes
                 ? migrate_attributes_workspace
                 : migrate_attributes_viewer,
@@ -586,6 +587,31 @@ function migrate_attributes_workspace(old, options) {
                     `Deprecated perspective attribute "${attr}" removed`
                 );
             }
+        }
+    }
+
+    return old;
+}
+
+/**
+ * Migrate workspace viewer 'name' which was unified with `title`.
+ * @param old
+ * @param options
+ * @returns
+ */
+function migrate_name_title_workspace(old, options) {
+    if ("name" in old) {
+        if ("title" in old && old.title !== undefined) {
+            old.title = old["name"];
+            if (options.warn) {
+                console.warn(`"name" conflicts with "title"`);
+            }
+        }
+
+        delete old["name"];
+
+        if (options.warn) {
+            console.warn(`"name" unified with "title"`);
         }
     }
 

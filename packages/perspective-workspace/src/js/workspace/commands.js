@@ -17,7 +17,7 @@ export const createCommands = (workspace, indicator) => {
         execute: async (args) => {
             const menu = document.createElement("perspective-export-menu");
             workspace.apply_indicator_theme();
-            menu.unsafe_set_model(await args.widget.viewer.unsafe_get_model());
+            menu.unsafe_set_model(await args.widget.viewer.unsafeGetModel());
             menu.open(indicator);
             args.init_overlay();
             menu.addEventListener("blur", () => {
@@ -26,13 +26,14 @@ export const createCommands = (workspace, indicator) => {
         },
         isEnabled: (args) => {
             if (args.contextMenu.node.isConnected) {
-                indicator.style.top = args.contextMenu.node.offsetTop;
-                indicator.style.left = args.contextMenu.node.offsetLeft;
+                const box = args.contextMenu.node.getBoundingClientRect();
+                indicator.style.top = box.top + "px";
+                indicator.style.left = box.left + "px";
             }
 
             return true;
         },
-        iconClass: "menu-export",
+        // iconClass: "menu-export",
         label: "Export",
         mnemonic: 0,
     });
@@ -41,14 +42,23 @@ export const createCommands = (workspace, indicator) => {
         execute: async (args) => {
             const menu = document.createElement("perspective-copy-menu");
             workspace.apply_indicator_theme();
-            menu.unsafe_set_model(await args.widget.viewer.unsafe_get_model());
+            menu.unsafe_set_model(await args.widget.viewer.unsafeGetModel());
             menu.open(indicator);
             args.init_overlay();
             menu.addEventListener("blur", () => {
                 args.contextMenu.aboutToClose.emit({});
             });
         },
-        iconClass: "menu-copy",
+        isEnabled: (args) => {
+            if (args.contextMenu.node.isConnected) {
+                const box = args.contextMenu.node.getBoundingClientRect();
+                indicator.style.top = box.top + "px";
+                indicator.style.left = box.left + "px";
+            }
+
+            return true;
+        },
+        // iconClass: "menu-copy",
         label: "Copy",
         mnemonic: 0,
     });
@@ -64,7 +74,7 @@ export const createCommands = (workspace, indicator) => {
                 ref: args.widget,
             });
         },
-        iconClass: "menu-new-tables",
+        // iconClass: "menu-new-tables",
         label: (args) => args.table,
     });
 
@@ -80,21 +90,21 @@ export const createCommands = (workspace, indicator) => {
                 ref: args.widget,
             });
         },
-        iconClass: "menu-new-tables",
+        // iconClass: "menu-new-tables",
         isVisible: (args) => args.target_widget.title.label !== "",
-        label: (args) => args.target_widget.title.label,
+        label: (args) => args.target_widget.title.label || "untitled",
     });
 
     commands.addCommand("workspace:reset", {
         execute: (args) => args.widget.viewer.reset(),
-        iconClass: "menu-reset",
+        // iconClass: "menu-reset",
         label: "Reset",
         mnemonic: 0,
     });
 
     commands.addCommand("workspace:duplicate", {
         execute: ({ widget }) => workspace.duplicate(widget),
-        iconClass: "menu-duplicate",
+        // iconClass: "menu-duplicate",
         isVisible: (args) =>
             args.widget.parent === workspace.dockpanel ? true : false,
         label: "Duplicate",
@@ -104,10 +114,10 @@ export const createCommands = (workspace, indicator) => {
     commands.addCommand("workspace:master", {
         execute: (args) => workspace.toggleMasterDetail(args.widget),
         isVisible: () => workspace.mode === MODE.GLOBAL_FILTERS,
-        iconClass: (args) =>
-            args.widget.parent === workspace.dockpanel
-                ? "menu-master"
-                : "menu-detail",
+        // iconClass: (args) =>
+        //     args.widget.parent === workspace.dockpanel
+        //         ? "menu-master"
+        //         : "menu-detail",
         label: (args) =>
             args.widget.parent === workspace.dockpanel
                 ? "Create Global Filter"
@@ -115,43 +125,23 @@ export const createCommands = (workspace, indicator) => {
         mnemonic: 0,
     });
 
-    commands.addCommand("workspace:link", {
-        execute: (args) => workspace.toggleLink(args.widget),
-        isVisible: () => workspace.mode === MODE.LINKED,
-        iconClass: (args) =>
-            workspace.isLinked(args.widget) ? "menu-unlink" : "menu-link",
-        label: (args) => (workspace.isLinked(args.widget) ? "Unlink" : "Link"),
-        mnemonic: 0,
-    });
-
-    commands.addCommand("workspace:maximize", {
-        execute: (args) => workspace.toggleSingleDocument(args.widget),
-        isVisible: (args) =>
-            args.widget.parent === workspace.dockpanel &&
-            workspace.dockpanel.mode !== "single-document",
-        iconClass: "menu-maximize",
-        label: () => "Maximize",
-        mnemonic: 0,
-    });
-
-    commands.addCommand("workspace:minimize", {
-        execute: (args) => workspace.toggleSingleDocument(args.widget),
-        isVisible: (args) =>
-            args.widget.parent === workspace.dockpanel &&
-            workspace.dockpanel.mode === "single-document",
-        iconClass: "menu-minimize",
-        label: () => "Minimize",
-        mnemonic: 0,
-    });
-
     commands.addCommand("workspace:close", {
         execute: (args) => {
             args.widget.close();
         },
-        iconClass: "menu-close",
+        // iconClass: "menu-close",
         label: () => "Close",
         mnemonic: 0,
     });
+
+    commands.addCommand("workspace:help", {
+        // iconClass: "menu-close",
+        label: "Shift+Click for Browser Menu",
+        isEnabled: false,
+        // mnemonic: 0,
+    });
+
+    commands.add;
 
     return commands;
 };

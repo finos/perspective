@@ -40,6 +40,7 @@ pub struct PresentationHandle {
     theme_data: Mutex<ThemeData>,
     name: RefCell<Option<String>>,
     is_settings_open: RefCell<bool>,
+    is_workspace: RefCell<Option<bool>>,
     pub settings_open_changed: PubSub<bool>,
     pub theme_config_updated: PubSub<(Vec<String>, Option<usize>)>,
     pub title_changed: PubSub<Option<String>>,
@@ -58,6 +59,7 @@ impl Presentation {
             theme_data: Default::default(),
             settings_open_changed: Default::default(),
             is_settings_open: Default::default(),
+            is_workspace: Default::default(),
             theme_config_updated: PubSub::default(),
             title_changed: PubSub::default(),
         }));
@@ -73,6 +75,20 @@ impl Presentation {
     pub fn set_title(&self, title: Option<String>) {
         *self.name.borrow_mut() = title.clone();
         self.title_changed.emit_all(title);
+    }
+
+    pub fn get_is_workspace(&self) -> bool {
+        if self.is_workspace.borrow().is_none() {
+            let is_workspace = self
+                .viewer_elem
+                .parent_element()
+                .map(|x| x.tag_name() == "PERSPECTIVE-WORKSPACE")
+                .unwrap_or_default();
+
+            *self.is_workspace.borrow_mut() = Some(is_workspace);
+        }
+
+        self.is_workspace.borrow().unwrap()
     }
 
     pub fn is_settings_open(&self) -> bool {

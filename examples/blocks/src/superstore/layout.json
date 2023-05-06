@@ -32,7 +32,8 @@
             "master": false,
             "name": "Sales Report",
             "table": "superstore",
-            "linked": false
+            "linked": false,
+            "title": "Sales Report 2"
         },
         "PERSPECTIVE_GENERATED_ID_1": {
             "plugin": "datagrid",
@@ -79,7 +80,7 @@
                 }
             },
             "master": false,
-            "name": "Sales Report (by State)",
+            "title": "Sales Report (by State)",
             "table": "superstore",
             "linked": false
         }

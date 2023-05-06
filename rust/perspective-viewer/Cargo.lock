@@ -1075,9 +1075,9 @@ dependencies = [
 
 [[package]]
 name = "procss"
-version = "0.1.12"
+version = "0.1.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "42821a6f68a2e88f52729e747c4230b5b182a3b43be2e01ad0da49259be57c33"
+checksum = "78d332afbc09ce740774a53f4146243535d9b74cc3b547a284868d9638c75776"
 dependencies = [
  "anyhow",
  "base64 0.13.1",

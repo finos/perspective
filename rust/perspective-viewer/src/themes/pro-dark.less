@@ -9,6 +9,19 @@
 
 @import url("ref://pro.less");
 
+perspective-viewer,
+perspective-copy-menu,
+perspective-export-menu,
+perspective-dropdown,
+perspective-date-column-style,
+perspective-datetime-column-style,
+perspective-number-column-style,
+perspective-string-column-style,
+perspective-expression-editor {
+    @include perspective-viewer-pro--icons;
+    @include perspective-viewer-pro--colors;
+}
+
 // Register theme for auto-detection
 perspective-viewer,
 perspective-viewer[theme="Pro Dark"] {

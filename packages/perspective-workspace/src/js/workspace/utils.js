@@ -146,8 +146,6 @@ export function registerElement(templateString, styleString, proto) {
     }
 
     let name = template.getAttribute("id");
-    console.log(`Registered ${name}`);
-
     window.customElements.define(name, _perspective_element);
 }
 

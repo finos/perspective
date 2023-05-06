@@ -90,7 +90,8 @@ impl FilterColumnProps {
             | (Type::Date, FilterTerm::Scalar(Scalar::DateTime(x))) => {
                 if *x > 0_f64 {
                     Some(
-                        Utc.timestamp(*x as i64 / 1000, (*x as u32 % 1000) * 1000)
+                        Utc.timestamp_opt(*x as i64 / 1000, (*x as u32 % 1000) * 1000)
+                            .earliest()?
                             .format("%Y-%m-%d")
                             .to_string(),
                     )

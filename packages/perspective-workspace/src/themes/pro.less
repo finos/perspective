@@ -7,7 +7,9 @@
  *
  */
 
-@import "@finos/perspective-viewer/dist/css/pro.css";
+// @import "@finos/perspective-viewer/dist/css/pro.css";
+// @import "@finos/perspective-viewer/src/themes/variables.less";
+@import url("ref://@finos/perspective-viewer/src/themes/pro.less");
 
 
 perspective-workspace,
@@ -18,26 +20,42 @@ perspective-indicator[theme="Pro Light"] {
 
 perspective-workspace {
     @include perspective-workspace-pro-base;
+    @include perspective-viewer-pro--colors;
+    --column-drag-handle--mask-image: url("../../../../rust/perspective-viewer/src/svg/drag-handle.svg");
+    --bookmarks--mask-image: url("../../../../rust/perspective-viewer/src/svg/bookmark-icon.svg");
+}
+
+.p-Menu {
+    @include perspective-viewer-pro--colors;
+}
+
+perspective-workspace perspective-viewer[settings] {
+    --main-column--margin: 3px 0 3px 3px;
+    --main-column--border: 1px solid var(--inactive--color);
+    --main-column--border-width: 1px 0px 1px 1px;
+    --main-column--border-radius: 6px 0 0 6px;
+    --settings-button--margin: 10px 0 0 0;
+}
+
+perspective-workspace perspective-viewer {
+    --status-bar--height: 38px;
 }
 
 perspective-viewer[theme="Pro Light"].workspace-master-widget {
     background-color: #f2f4f6;
     --plugin--background: #f2f4f6;
-
     regular-table {
-
-        td,
-        th {
+        td, th {
             border-color: #e0e4e9;
         }
     }
 }
 
 @mixin perspective-workspace-pro-base {
-    font-family: "Open Sans";
+    font-family: "Roboto Mono";
     --open-settings-button--content: "expand_more";
     --close-settings-button--content: "expand_less";
-    --close-button--content: "close";
+    --close-button--content: "\2715";
     --settings--font-family: "Material Icons";
     --master-divider--background-color: #243136;
     --menu-maximize--content: "fullscreen";
@@ -54,10 +72,16 @@ perspective-viewer[theme="Pro Light"].workspace-master-widget {
     --menu-close--content: "close";
     --menu-new--content: "description";
     --menu-newview--content: "file_copy";
+
+    --workspace-tabbar--border: 1px solid var(--inactive--color);
+    --workspace-tabbar--border-width: 0px 1px 1px 1px;
+    --workspace-tabbar--border-radius: 0px 0px 6px 6px;
+    --workspace-tabbar--border-color: var(--inactive--color);
+    --workspace-tabbar-tab--border-width: 1px 1px 0 1px;
 }
 
 .p-Menu {
-    font-family: "Open Sans";
+    font-family: "Roboto Mono";
     font-weight: 300;
     color: #161616;
 }

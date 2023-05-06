@@ -8,9 +8,10 @@
  */
 
 @import url("ref://@finos/perspective-viewer/src/themes/variables.less");
-@import "@finos/perspective-viewer/dist/css/pro-dark.css";
+// @import "@finos/perspective-viewer/dist/css/pro-dark.css";
 
 @import url("ref://pro.less");
+@import url("ref://pro-dark-viewer.less");
 
 perspective-workspace,
 perspective-workspace[theme="Pro Dark"],
@@ -18,15 +19,40 @@ perspective-indicator[theme="Pro Dark"] {
     --theme-name: "Pro Dark";
 }
 
+.p-Menu {
+    @include perspective-viewer-pro-dark--colors;
+}
+
+perspective-workspace perspective-viewer {
+    --status-bar--height: 38px;
+}
+
+perspective-workspace perspective-viewer[settings] {
+    --main-column--margin: 3px 0 3px 3px;
+    --main-column--border: 1px solid var(--inactive--color);
+    --main-column--border-width: 1px 0px 1px 1px;
+    --main-column--border-radius: 6px 0 0 6px;
+    --settings-button--margin: 10px 0 0 0;
+}
+
 perspective-workspace {
     @include perspective-workspace-pro-base;
+    @include perspective-viewer-pro-dark--colors;
+    --column-drag-handle--mask-image: url("../../../../rust/perspective-viewer/src/svg/drag-handle.svg");
+    --bookmarks--mask-image: url("../../../../rust/perspective-viewer/src/svg/bookmark-icon.svg");
+
     background-color: @grey800;
     color: white;
     --workspace-master--background-color: @grey800;
-    --workspace-tabbar--background-color: @grey700;
-    --workspace-tabbar--border: 1px solid @grey500;
-    --workspace-tabbar--border-color: @grey500;
+    --workspace-tabbar--background-color: transparent;
+    // --workspace-tabbar--border: 1px solid @grey500;
+    // --workspace-tabbar--border-color: @grey500;
     --workspace-secondary--color: @grey60;
+    --workspace-tabbar--border: 1px solid var(--inactive--color);
+    --workspace-tabbar--border-width: 0px 1px 1px 1px;
+    --workspace-tabbar--border-radius: 0px 0px 6px 6px;
+    --workspace-tabbar--border-color: var(--inactive--color);
+    --workspace-tabbar-tab--border-width: 1px 1px 0 1px;
 }
 
 perspective-viewer[theme="Pro Dark"].workspace-master-widget {
@@ -34,10 +60,12 @@ perspective-viewer[theme="Pro Dark"].workspace-master-widget {
 }
 
 .p-Menu {
-    font-family: "Open Sans";
-    font-weight: 300 !important;
+    // font-family: "Roboto Mono";
+    // font-weight: 300 !important;
     background: @grey700  !important;
     color: white !important;
     border: 1px solid @grey500  !important;
-    box-shadow: 0 2px 4px 0 rgb(0 0 0 / 10%) !important;
+ 
+    font-family: "Roboto Mono";
+    font-weight: 300;
 }

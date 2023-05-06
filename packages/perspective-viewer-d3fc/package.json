@@ -62,6 +62,6 @@
     "devDependencies": {
         "@finos/perspective-esbuild-plugin": "^2.0.1",
         "@finos/perspective-test": "^2.0.1",
-        "@prospective.co/procss": "^0.1.12"
+        "@prospective.co/procss": "^0.1.13"
     }
 }

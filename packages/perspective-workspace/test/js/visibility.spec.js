@@ -74,9 +74,8 @@ function tests(context, compare) {
             }, BAD_LAYOUT);
 
             await page.evaluate(async () => {
-                const viewer = document.body.querySelector(
-                    'perspective-viewer[name="one"]'
-                );
+                const viewer =
+                    document.body.querySelector("perspective-viewer");
                 const workspace = document.getElementById("workspace");
                 workspace.removeChild(viewer);
                 await workspace.flush();

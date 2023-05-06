@@ -33,6 +33,7 @@ perspective-number-column-style[theme="Pro Light"],
 perspective-string-column-style[theme="Pro Light"],
 perspective-expression-editor[theme="Pro Light"] {
     @include perspective-modal-pro;
+    background: white;
 }
 
 perspective-viewer,
@@ -45,6 +46,7 @@ perspective-number-column-style,
 perspective-string-column-style,
 perspective-expression-editor {
     @include perspective-viewer-pro--icons;
+    @include perspective-viewer-pro--colors;
 }
 
 @mixin perspective-viewer-pro {
@@ -93,7 +95,7 @@ perspective-expression-editor {
 
 @mixin perspective-viewer-pro--colors {
     color: #161616;
-    background-color: white;
+    background-color: transparent;
     --icon--color: #161616;
     --inactive--color: #ABABAB;
 

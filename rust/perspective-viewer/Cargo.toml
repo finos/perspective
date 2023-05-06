@@ -41,7 +41,7 @@ strip = true
 
 [build-dependencies]
 serde_json = { version = "1.0.59", features = ["raw_value"] }
-procss = { version = "0.1.12" }
+procss = { version = "0.1.13" }
 glob = "0.3.0"
 anyhow = "1.0.66"
 

@@ -13,18 +13,24 @@ import { PerspectiveTabBarRenderer } from "./tabbarrenderer";
 import { toArray } from "@lumino/algorithm/src";
 
 class PerspectiveDockPanelRenderer extends DockPanel.Renderer {
+    constructor(workspace) {
+        super();
+        this._workspace = workspace;
+    }
+
     createTabBar() {
-        const tabbar = new PerspectiveTabBar({
+        const tabbar = new PerspectiveTabBar(this._workspace, {
             renderer: new PerspectiveTabBarRenderer(),
         });
+
         tabbar.addClass("p-DockPanel-tabBar");
         return tabbar;
     }
 }
 
 export class PerspectiveDockPanel extends DockPanel {
-    constructor() {
-        super({ renderer: new PerspectiveDockPanelRenderer() });
+    constructor(workspace) {
+        super({ renderer: new PerspectiveDockPanelRenderer(workspace) });
         this._renderer.dock = this;
     }
 
@@ -38,7 +44,6 @@ export class PerspectiveDockPanel extends DockPanel {
         }
 
         widget.addClass("widget-blur");
-
         if (this._drag) {
             this._drag._promise.then(() => {
                 if (!widget.node.isConnected) {
