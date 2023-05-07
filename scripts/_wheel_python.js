@@ -53,9 +53,9 @@ try {
         // install deps
         const boost = [
             `yum -y install wget libffi-devel`,
-            `wget https://boostorg.jfrog.io/artifactory/main/release/1.71.0/source/boost_1_71_0.tar.gz >/dev/null`,
-            `tar xfz boost_1_71_0.tar.gz`,
-            "cd boost_1_71_0",
+            `wget https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.gz >/dev/null`,
+            `tar xfz boost_1_81_0.tar.gz`,
+            "cd boost_1_81_0",
             `./bootstrap.sh`,
             `./b2 -j8 --with-program_options --with-filesystem --with-system install`,
             `cd ..`,
