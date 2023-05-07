@@ -9,92 +9,91 @@
 
 <!DOCTYPE html>
 <html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
 
-<head>
+        <script type="module" src="http://localhost:8080/node_modules/perspective-viewer/dist/cdn/perspective-viewer.js"></script>
+        <script type="module" src="http://localhost:8080/node_modules/perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js"></script>
+        <script type="module" src="http://localhost:8080/node_modules/perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js"></script>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+        <link rel="stylesheet" crossorigin="anonymous" href="/node_modules/perspective-viewer/dist/css/themes.css" />
 
-    <script src="http://localhost:8080/node_modules/perspective-viewer/dist/umd/perspective-viewer.js"></script>
-    <script src="http://localhost:8080/node_modules/perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js"></script>
-    <script src="http://localhost:8080/node_modules/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js"></script>
-    <script src="http://localhost:8080/node_modules/perspective/dist/umd/perspective.js"></script>
+        <style>
+            perspective-viewer {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+            }
+        </style>
+    </head>
 
-    <link rel="stylesheet" crossorigin="anonymous" href="/node_modules/perspective-viewer/dist/css/themes.css" />
+    <body>
+        <perspective-viewer id="viewer"></perspective-viewer>
 
-    <style>
-        perspective-viewer{position:absolute;top:0;left:0;right:0;bottom:0;}
-    </style>
+        <script type="module">
+            import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
 
-</head>
+            window.addEventListener("DOMContentLoaded", async function () {
+                /**
+                 * `perspective.websocket` connects to a remote Perspective server
+                 * that accepts WebSocket connections at the specified URL.
+                 *
+                 * Use `perspective.websocket` to set up Perspective in server or
+                 * distributed modes.
+                 */
+                const websocket = perspective.websocket("ws://localhost:8080/websocket");
 
-<body>
-    <perspective-viewer id="viewer"></perspective-viewer>
+                /**
+                 * This shows Perspective running in "distributed mode": a `Table`
+                 * is present on the Python server AND in the browser client, and
+                 * state is automatically synchronized between the two.
+                 *
+                 * To create a Perspective client running in "distributed mode",
+                 * host a `Table` in the Python server, create a `Table` on the
+                 * client through a `View` on the server. This synchronizes the
+                 * server's `Table` with the client's `Table`.
+                 */
+                const worker = perspective.worker();
 
-    <script>
+                /**
+                 * `server_table` is a proxy to the hosted `Table` in the Python
+                 * server. All public API methods are available through this
+                 * proxied table.
+                 */
+                const server_table = await websocket.open_table("data_source_one");
 
-        window.addEventListener('DOMContentLoaded', async function () {
+                /**
+                 * Create a `View` on the server.
+                 */
+                const server_view = await server_table.view();
 
-            /**
-             * `perspective.websocket` connects to a remote Perspective server
-             * that accepts WebSocket connections at the specified URL.
-             * 
-             * Use `perspective.websocket` to set up Perspective in server or
-             * distributed modes.
-             */
-            const websocket = perspective.websocket("ws://localhost:8080/websocket");
+                /**
+                 * When a `View` is passed into `table()` to create a new `Table`,
+                 * it automatically sets up an `on_update` callback to synchronize
+                 * the state of the server and client.
+                 *
+                 * `const table` is a local Perspective `Table` that runs in
+                 * WebAssembly, with its state kept in sync through the WebSocket
+                 * connection. If the WebSocket connection closes/times out, the
+                 * `Table` and its data (and associated viewer) are still fully
+                 * functional, but will not be kept up-to-date with server state.
+                 *
+                 * Use `table.get_index()` in order to create a `Table` on the
+                 * client that has the exact same settings as the server.
+                 *
+                 * For a more complex example of manually controlling state
+                 * synchronization between server and client, see
+                 * `client_server_editing.html`.
+                 */
+                const table = worker.table(server_view, {
+                    index: await server_table.get_index(),
+                });
 
-            /**
-             * This shows Perspective running in "distributed mode": a `Table`
-             * is present on the Python server AND in the browser client, and
-             * state is automatically synchronized between the two.
-             * 
-             * To create a Perspective client running in "distributed mode",
-             * host a `Table` in the Python server, create a `Table` on the
-             * client through a `View` on the server. This synchronizes the
-             * server's `Table` with the client's `Table`.
-             */
-            const worker = perspective.worker();
-
-            /**
-             * `server_table` is a proxy to the hosted `Table` in the Python
-             * server. All public API methods are available through this
-             * proxied table.
-             */
-            const server_table = await websocket.open_table("data_source_one");
-
-            /**
-             * Create a `View` on the server.
-             */
-            const server_view = await server_table.view();
-
-            /**
-             * When a `View` is passed into `table()` to create a new `Table`,
-             * it automatically sets up an `on_update` callback to synchronize
-             * the state of the server and client.
-             * 
-             * `const table` is a local Perspective `Table` that runs in
-             * WebAssembly, with its state kept in sync through the WebSocket
-             * connection. If the WebSocket connection closes/times out, the
-             * `Table` and its data (and associated viewer) are still fully
-             * functional, but will not be kept up-to-date with server state.
-             * 
-             * Use `table.get_index()` in order to create a `Table` on the
-             * client that has the exact same settings as the server.
-             * 
-             * For a more complex example of manually controlling state
-             * synchronization between server and client, see
-             * `client_server_editing.html`.
-             */
-            const table = worker.table(server_view, {
-                index: await server_table.get_index()
+                // Load the local table in the `<perspective-viewer>`.
+                document.getElementById("viewer").load(table);
             });
-            
-            // Load the local table in the `<perspective-viewer>`.
-            document.getElementById('viewer').load(table);
-        });
-
-    </script>
-
-</body>
-
+        </script>
+    </body>
 </html>

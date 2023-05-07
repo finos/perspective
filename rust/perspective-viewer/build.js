@@ -24,13 +24,9 @@ const BUILD = [
     },
     {
         entryPoints: ["src/ts/perspective-viewer.ts"],
-        plugins: [
-            PerspectiveEsbuildPlugin({
-                wasm: { inline: true },
-                worker: { inline: true },
-            }),
-        ],
-        outfile: "dist/umd/perspective-viewer.js",
+        format: "esm",
+        plugins: [PerspectiveEsbuildPlugin({ wasm: { inline: true } })],
+        outfile: "dist/esm/perspective-viewer.inline.js",
     },
     {
         entryPoints: ["src/ts/migrate.ts"],
@@ -79,7 +75,6 @@ async function build_all() {
     // legacy compat
     const { default: cpy } = await cpy_mod;
     cpy("target/themes/*", "dist/css");
-    cpy("target/themes/*", "dist/umd");
     cpy("dist/pkg/*", "dist/esm");
 }
 

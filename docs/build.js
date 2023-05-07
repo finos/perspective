@@ -101,10 +101,9 @@ function template(is_dark) {
     <html>
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
-        <script src="/node_modules/@finos/perspective/dist/umd/perspective.js"></script>
-        <script src="/node_modules/@finos/perspective-viewer/dist/umd/perspective-viewer.js"></script>
-        <script src="/node_modules/@finos/perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js"></script>
-        <script src="/node_modules/@finos/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js"></script>
+        <script type="module" src="/node_modules/@finos/perspective-viewer/dist/cdn/perspective-viewer.js"></script>
+        <script type="module" src="/node_modules/@finos/perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js"></script>
+        <script type="module" src="/node_modules/@finos/perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js"></script>
         <link rel='stylesheet' href="/node_modules/@finos/perspective-viewer/dist/css/pro${
             is_dark ? "-dark" : ""
         }.css">
@@ -124,7 +123,8 @@ function template(is_dark) {
     <body>
         <perspective-viewer editable>
         </perspective-viewer>
-        <script>
+        <script type="module">
+            import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
             const WORKER = window.perspective.worker();
             async function on_load() {
                 var el = document.getElementsByTagName('perspective-viewer')[0];

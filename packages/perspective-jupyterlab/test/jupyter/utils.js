@@ -13,7 +13,7 @@ const path = require("path");
 const rimraf = require("rimraf");
 const notebook_template = require("./notebook_template.json");
 
-const DIST_ROOT = path.join(__dirname, "..", "..", "dist", "umd");
+const DIST_ROOT = path.join(__dirname, "..", "..", "dist", "esm");
 const TEST_CONFIG_ROOT = path.join(__dirname, "..", "config", "jupyter");
 
 const remove_jupyter_artifacts = () => {
@@ -23,7 +23,7 @@ const remove_jupyter_artifacts = () => {
 
 /**
  * Generate a new Jupyter notebook using the standard JSON template, and
- * save it into dist/umd so that the tests can use the resulting notebook.
+ * save it into dist/esm so that the tests can use the resulting notebook.
  *
  * @param {String} notebook_name
  * @param {Array<String>} cells
@@ -63,7 +63,7 @@ const generate_notebook = (notebook_name, cells) => {
         });
     }
 
-    // Write the notebook to dist/umd, which acts as the working directory
+    // Write the notebook to dist/esm, which acts as the working directory
     // for the Jupyterlab test server.
     fs.writeFileSync(notebook_path, JSON.stringify(nb));
 };

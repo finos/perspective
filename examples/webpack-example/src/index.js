@@ -13,25 +13,19 @@ import "@finos/perspective-viewer";
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc/bar";
 
-import "@finos/perspective-viewer/dist/css/pro-dark.css";
+import "@finos/perspective-viewer/dist/css/themes.css";
 
 import "./index.css";
 
-const worker = perspective.shared_worker();
+import superstore from "superstore-arrow/superstore.arrow";
 
-// superstore.arrow located in node_modules/superstore-arrow/ and it's
-// configured by 'devServer' in 'webpack.config.js'
-const req = fetch("./superstore.arrow");
+const worker = perspective.shared_worker();
 
 window.addEventListener("DOMContentLoaded", async () => {
     const viewer = document.createElement("perspective-viewer");
     document.body.append(viewer);
 
-    const resp = await req;
-    const buffer = await resp.arrayBuffer();
-    const table = worker.table(buffer);
-
+    const table = worker.table(superstore);
     viewer.load(table);
-
     window.viewer = viewer;
 });

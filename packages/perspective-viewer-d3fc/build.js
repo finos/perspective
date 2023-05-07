@@ -1,7 +1,6 @@
 const {
     NodeModulesExternal,
 } = require("@finos/perspective-esbuild-plugin/external");
-const { UMDLoader } = require("@finos/perspective-esbuild-plugin/umd");
 const { build } = require("@finos/perspective-esbuild-plugin/build");
 
 const BUILD = [
@@ -42,20 +41,6 @@ const BUILD = [
             ".html": "text",
         },
         outfile: "dist/esm/perspective-viewer-d3fc.js",
-    },
-    {
-        entryPoints: ["src/js/index.js"],
-        define: {
-            global: "window",
-        },
-        globalName: "perspective_viewer_d3fc",
-        plugins: [UMDLoader()],
-        format: "cjs",
-        loader: {
-            ".css": "text",
-            ".html": "text",
-        },
-        outfile: "dist/umd/perspective-viewer-d3fc.js",
     },
     {
         entryPoints: ["src/js/index.js"],

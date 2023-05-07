@@ -10,10 +10,10 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <script type="module" src="/@finos/perspective-jupyterlab/dist/umd/lumino.js"></script>
         <script type="module" src="/perspective-viewer-datagrid.js"></script>
         <script type="module">
-            window.__WIDGET__ = new PerspectiveLumino.PerspectiveWidget();
+            import { PerspectiveWidget } from "/@finos/perspective-jupyterlab/dist/esm/lumino.js";
+            window.__WIDGET__ = new PerspectiveWidget();
             document
                 .getElementById("container")
                 .appendChild(window.__WIDGET__.node);

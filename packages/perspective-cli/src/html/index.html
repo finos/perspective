@@ -10,20 +10,18 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
-        />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
 
         <title>Perspective App</title>
 
-        <script type="module" src="perspective.js"></script>
+        <script type="module" src="perspective-viewer.js"></script>
         <script type="module" src="perspective-viewer-datagrid.js"></script>
         <script type="module" src="perspective-viewer-d3fc.js"></script>
         <script type="module" src="perspective-viewer-openlayers.js"></script>
         <script type="module" src="perspective-workspace.js"></script>
 
-        <link rel="stylesheet" href="pro-dark.css" />
+        <link rel="stylesheet" crossorigin="anonymous" href="@finos/perspective-viewer/dist/css/pro.css" />
+        <link rel="stylesheet" crossorigin="anonymous" href="@finos/perspective-workspace/dist/css/pro.css" />
 
         <style>
             perspective-workspace {

@@ -431,8 +431,15 @@ struct PERSPECTIVE_EXPORT t_cmp_charptr {
     }
 };
 
+template <class Arg1, class Arg2, class Result>
+struct binary_function {
+    using first_argument_type = Arg1;
+    using second_argument_type = Arg2;
+    using result_type = Result;
+};
+
 struct t_cchar_umap_cmp
-    : public std::binary_function<const char*, const char*, bool> {
+    : public binary_function<const char*, const char*, bool> {
     inline bool
     operator()(const char* x, const char* y) const {
         return strcmp(x, y) == 0;

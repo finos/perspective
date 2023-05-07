@@ -73,7 +73,10 @@ concatStreams(inputs)
 async function capture_exprtk() {
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
-    await page.addScriptTag({ path: "dist/umd/perspective-viewer.js" });
+    await page.addScriptTag({
+        type: "module",
+        path: "dist/cdn/perspective-viewer.js",
+    });
     const data = await page.evaluate(async () => {
         await customElements.whenDefined("perspective-viewer");
         const commands = await customElements

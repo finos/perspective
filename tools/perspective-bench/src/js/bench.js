@@ -14,7 +14,7 @@ const VERSIONS = ["@finos/perspective", ...PKG_DEPS];
 
 function load_version(path, i) {
     const module = require(path);
-    let {version} = JSON.parse(
+    let { version } = JSON.parse(
         fs.readFileSync(require.resolve(`${path}/package.json`))
     );
 
@@ -22,7 +22,7 @@ function load_version(path, i) {
         version = `${version} (master)`;
     }
 
-    return {version, perspective: module.default || module};
+    return { version, perspective: module.default || module };
 }
 
 const MODULES = VERSIONS.map(load_version);
@@ -48,11 +48,12 @@ Object.defineProperty(Array.prototype, "sum", {
     },
 });
 
-async function benchmark({name, before, before_all, test, after, after_all}) {
+async function benchmark({ name, before, before_all, test, after, after_all }) {
     let obs_records = [];
     console.log(`${name}`);
     for (let j = 0; j < MODULES.length; j++) {
-        const {version, perspective} = MODULES[j];
+        let { version, perspective } = MODULES[j];
+        perspective.version = version.split(".").map((x) => parseInt(x));
         const args = [];
         args.push_if(await before_all?.(perspective));
         const observations = [];
@@ -106,10 +107,10 @@ async function to_data_suite() {
     async function before_all(perspective) {
         const table = await perspective.table(SUPERSTORE_ARROW.slice());
         const view = await table.view();
-        return {table, view};
+        return { table, view };
     }
 
-    async function after_all(perspective, {table, view}) {
+    async function after_all(perspective, { table, view }) {
         await view.delete();
         await table.delete();
     }
@@ -118,7 +119,7 @@ async function to_data_suite() {
         name: `.to_arrow()`,
         before_all,
         after_all,
-        async test(_perspective, {view}) {
+        async test(_perspective, { view }) {
             const _arrow = await view.to_arrow();
         },
     });
@@ -127,7 +128,7 @@ async function to_data_suite() {
         name: `.to_csv()`,
         before_all,
         after_all,
-        async test(_perspective, {view}) {
+        async test(_perspective, { view }) {
             const _csv = await view.to_csv();
         },
     });
@@ -136,7 +137,7 @@ async function to_data_suite() {
         name: `.to_columns()`,
         before_all,
         after_all,
-        async test(_perspective, {view}) {
+        async test(_perspective, { view }) {
             const _columns = await view.to_columns();
         },
     });
@@ -145,7 +146,7 @@ async function to_data_suite() {
         name: `.to_json()`,
         before_all,
         after_all,
-        async test(_perspective, {view}) {
+        async test(_perspective, { view }) {
             const _json = await view.to_json();
         },
     });
@@ -176,6 +177,21 @@ async function view_suite() {
         after,
         async test(_perspective, table) {
             return await table.view();
+        },
+    });
+
+    await benchmark({
+        name: `.view({group_by})`,
+        before_all,
+        after_all,
+        after,
+        async test(perspective, table) {
+            const [M, m, _] = perspective.version;
+            if ((M === 1 && m >= 2) || M === 2) {
+                return await table.view({ group_by: ["Product Name"] });
+            } else {
+                return await table.view({ row_pivots: ["Product Name"] });
+            }
         },
     });
 }

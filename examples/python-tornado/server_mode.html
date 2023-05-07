@@ -9,39 +9,37 @@
 
 <!DOCTYPE html>
 <html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
 
-<head>
+        <script type="module" src="http://localhost:8080/node_modules/perspective-viewer/dist/cdn/perspective-viewer.js"></script>
+        <script type="module" src="http://localhost:8080/node_modules/perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js"></script>
+        <script type="module" src="http://localhost:8080/node_modules/perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js"></script>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+        <link rel="stylesheet" crossorigin="anonymous" href="/node_modules/perspective-viewer/dist/css/themes.css" />
 
-    <script src="http://localhost:8080/node_modules/perspective-viewer/dist/umd/perspective-viewer.js"></script>
-    <script src="http://localhost:8080/node_modules/perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js"></script>
-    <script src="http://localhost:8080/node_modules/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js"></script>
-    <script src="http://localhost:8080/node_modules/perspective/dist/umd/perspective.js"></script>
+        <style>
+            perspective-viewer {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+            }
+        </style>
+    </head>
 
-    <link rel="stylesheet" crossorigin="anonymous" href="/node_modules/perspective-viewer/dist/css/themes.css" />
+    <body>
+        <perspective-viewer id="viewer" editable> </perspective-viewer>
 
-    <style>
-        perspective-viewer{position:absolute;top:0;left:0;right:0;bottom:0;}
-    </style>
+        <script type="module">
+            import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
+            window.addEventListener("DOMContentLoaded", async function () {
+                // Create a client that expects a Perspective server to accept
+                // Websocket connections at the specified URL.
+                const websocket = perspective.websocket("ws://localhost:8080/websocket");
 
-</head>
-
-<body>
-    <perspective-viewer 
-        id="viewer" 
-        editable>
-    
-    </perspective-viewer>
-
-    <script>
-
-        window.addEventListener('DOMContentLoaded', async function () {
-            // Create a client that expects a Perspective server to accept
-            // Websocket connections at the specified URL.
-            const websocket = perspective.websocket("ws://localhost:8080/websocket");
-
-            /* This shows Perspective running in "server mode": the `table`
+                /* This shows Perspective running in "server mode": the `table`
             variable is a proxy for the `Table` we created on the server.
             
             All operations that are possible through the Javascript API are
@@ -50,14 +48,11 @@
             operations to the Python `Table`, execute the commands,
             and return the result back to Javascript.
             */
-            const table = websocket.open_table('data_source_one');
-            
-            // Load this in the `<perspective-viewer>`.
-            document.getElementById('viewer').load(table);
-        });
+                const table = websocket.open_table("data_source_one");
 
-    </script>
-
-</body>
-
+                // Load this in the `<perspective-viewer>`.
+                document.getElementById("viewer").load(table);
+            });
+        </script>
+    </body>
 </html>

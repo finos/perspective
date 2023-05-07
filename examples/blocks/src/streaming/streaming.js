@@ -1,3 +1,5 @@
+import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
+
 var SECURITIES = [
     "AAPL.N",
     "AMZN.N",

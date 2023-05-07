@@ -2,7 +2,6 @@ const cpy_mod = import("cpy");
 const {
     NodeModulesExternal,
 } = require("@finos/perspective-esbuild-plugin/external");
-const { UMDLoader } = require("@finos/perspective-esbuild-plugin/umd");
 const { build } = require("@finos/perspective-esbuild-plugin/build");
 const {
     PerspectiveEsbuildPlugin,
@@ -41,24 +40,22 @@ const BUILD = [
         define: {
             global: "window",
         },
-        globalName: "perspective",
-        footer: { js: "window.perspective=perspective;" },
-        format: "cjs",
+        format: "esm",
         entryPoints: ["src/js/perspective.browser.js"],
         plugins: [
             PerspectiveEsbuildPlugin({
                 wasm: { inline: true },
                 worker: { inline: true },
             }),
-            UMDLoader(),
         ],
-        outfile: "dist/umd/perspective.js",
+        outfile: "dist/esm/perspective.inline.js",
     },
 ];
 
 async function build_all() {
     const { default: cpy } = await cpy_mod;
-    await cpy(["../../cpp/perspective/dist/esm/*"], "dist/pkg/esm");
+    await cpy(["../../cpp/perspective/dist/web/*"], "dist/pkg/web");
+    await cpy(["../../cpp/perspective/dist/node/*"], "dist/pkg/node");
     await Promise.all(BUILD.map(build)).catch(() => process.exit(1));
 }
 

@@ -9,7 +9,7 @@
 
 import "@finos/perspective-viewer-datagrid";
 import "@finos/perspective-viewer-d3fc";
-import "@finos/perspective-viewer-openlayers/dist/umd/perspective-viewer-openlayers.js";
+import "@finos/perspective-viewer-openlayers";
 
 import { PerspectiveView } from "../view";
 import { PerspectiveModel } from "../model";

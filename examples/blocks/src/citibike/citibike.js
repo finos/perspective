@@ -1,3 +1,5 @@
+import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
+
 // Quick wrapper function for making a GET call.
 function get(url) {
     return new Promise((resolve) => {

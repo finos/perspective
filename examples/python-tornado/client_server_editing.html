@@ -9,99 +9,104 @@
 
 <!DOCTYPE html>
 <html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
 
-<head>
+        <script type="module" src="http://localhost:8080/node_modules/perspective-viewer/dist/cdn/perspective-viewer.js"></script>
+        <script type="module" src="http://localhost:8080/node_modules/perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js"></script>
+        <script type="module" src="http://localhost:8080/node_modules/perspective-viewer-d3fc/dist/cdn/perspective-viewer-d3fc.js"></script>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+        <link rel="stylesheet" crossorigin="anonymous" href="/node_modules/perspective-viewer/dist/css/themes.css" />
 
-    <script src="http://localhost:8080/node_modules/perspective-viewer/dist/umd/perspective-viewer.js"></script>
-    <script src="http://localhost:8080/node_modules/perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js"></script>
-    <script src="http://localhost:8080/node_modules/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js"></script>
-    <script src="http://localhost:8080/node_modules/perspective/dist/umd/perspective.js"></script>
+        <style>
+            perspective-viewer {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+            }
+        </style>
+    </head>
 
-    <link rel="stylesheet" crossorigin="anonymous" href="/node_modules/perspective-viewer/dist/css/themes.css" />
-
-    <style>
-        perspective-viewer{position:absolute;top:0;left:0;right:0;bottom:0;}
-    </style>
-
-</head>
-
-<body>
-
-    <!--
+    <body>
+        <!--
     Clicking on cells in the grid and typing will fire edits back into the Table in memory.
     
     If you open another tab and navigate to the same URL, edits will appear in all the windows in real time.
 
     This allows collaborative editing of the underlying Table, with all updates propagated automatically to all clients.
     -->
-    <perspective-viewer id="viewer" editable></perspective-viewer>
+        <perspective-viewer id="viewer" editable></perspective-viewer>
 
-    <script>
-        /**
-         * This example sets up Perspective in "distributed mode", but manually
-         * controls state synchronization between client and server in order to
-         * enable "edits" from the client to update the server (and all other
-         * clients), and "updates" from the server to notify all clients.
-         *
-         * For a simple example of distributed mode without editing, see
-         * `index.html`.
-         */
-        window.addEventListener('DOMContentLoaded', async function () {
-            const viewer = document.getElementById('viewer');
+        <script type="module">
+            import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
 
-            // Connect to the websocket and create a new webworker
-            const websocket = perspective.websocket("ws://localhost:8080/websocket");
-            const worker = perspective.worker();
+            /**
+             * This example sets up Perspective in "distributed mode", but manually
+             * controls state synchronization between client and server in order to
+             * enable "edits" from the client to update the server (and all other
+             * clients), and "updates" from the server to notify all clients.
+             *
+             * For a simple example of distributed mode without editing, see
+             * `index.html`.
+             */
+            window.addEventListener("DOMContentLoaded", async function () {
+                const viewer = document.getElementById("viewer");
 
-            // Get handles to the `Table` on the server, and create a
-            // `view()` on the server.
-            const server_table = await websocket.open_table("data_source_one");
-            const server_view = await server_table.view();
-            
-            // Serialize the current state of the view to an arrow, and create
-            // a Table on the client that has the same index as the Table
-            // on the server using `get_index()`.
-            //
-            // Client/server editing does not work on an unindexed Table.
-            const arrow = await server_view.to_arrow();
-            const client_table = await worker.table(arrow, {index: "Row ID"});
-            const client_view = await client_table.view();// client -> server
+                // Connect to the websocket and create a new webworker
+                const websocket = perspective.websocket("ws://localhost:8080/websocket");
+                const worker = perspective.worker();
 
-            await viewer.load(Promise.resolve(client_table));
+                // Get handles to the `Table` on the server, and create a
+                // `view()` on the server.
+                const server_table = await websocket.open_table("data_source_one");
+                const server_view = await server_table.view();
 
-            // Create ports on both the client and the server - this allows
-            // the client and server to track which updates are coming from
-            // the server, and which edits are coming from the client
-            // in the browser.
-            const client_edit_port = await viewer.getEditPort();
-            const server_edit_port = await server_table.make_port();
+                // Serialize the current state of the view to an arrow, and create
+                // a Table on the client that has the same index as the Table
+                // on the server using `get_index()`.
+                //
+                // Client/server editing does not work on an unindexed Table.
+                const arrow = await server_view.to_arrow();
+                const client_table = await worker.table(arrow, { index: "Row ID" });
+                const client_view = await client_table.view(); // client -> server
 
-            // When the client updates, if the update comes through the edit
-            // port then forward it to the server.
-            client_view.on_update(updated => {
-                if (updated.port_id === client_edit_port) {
-                    // `update` must be on the `server_edit_port`
-                    server_table.update(updated.delta, {
-                        port_id: server_edit_port
-                    });
-                }
-            }, {mode: "row"});
+                await viewer.load(Promise.resolve(client_table));
 
-            // If the server updates, and the edit is not coming from the
-            // server edit port, then synchronize state with the client.
-            server_view.on_update(updated => {
-                if (updated.port_id !== server_edit_port) {
-                    // any port, we don't care
-                    client_table.update(updated.delta);
-                }
-            }, {mode: "row"});
+                // Create ports on both the client and the server - this allows
+                // the client and server to track which updates are coming from
+                // the server, and which edits are coming from the client
+                // in the browser.
+                const client_edit_port = await viewer.getEditPort();
+                const server_edit_port = await server_table.make_port();
 
-        });
+                // When the client updates, if the update comes through the edit
+                // port then forward it to the server.
+                client_view.on_update(
+                    (updated) => {
+                        if (updated.port_id === client_edit_port) {
+                            // `update` must be on the `server_edit_port`
+                            server_table.update(updated.delta, {
+                                port_id: server_edit_port,
+                            });
+                        }
+                    },
+                    { mode: "row" }
+                );
 
-    </script>
-
-</body>
-
+                // If the server updates, and the edit is not coming from the
+                // server edit port, then synchronize state with the client.
+                server_view.on_update(
+                    (updated) => {
+                        if (updated.port_id !== server_edit_port) {
+                            // any port, we don't care
+                            client_table.update(updated.delta);
+                        }
+                    },
+                    { mode: "row" }
+                );
+            });
+        </script>
+    </body>
 </html>

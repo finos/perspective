@@ -7,14 +7,10 @@
         "url": "https://github.com/finos/perspective"
     },
     "license": "Apache-2.0",
-    "unpkg": "dist/umd/perspective-viewer.js",
-    "main": "dist/umd/perspective-viewer.js",
-    "jsdelivr": "dist/umd/perspective-viewer.js",
+    "unpkg": "dist/cdn/perspective-viewer.js",
+    "jsdelivr": "dist/cdn/perspective-viewer.js",
     "exports": {
-        ".": {
-            "require": "./dist/umd/perspective-viewer.js",
-            "import": "./dist/umd/perspective-viewer.js"
-        },
+        ".": "./dist/esm/perspective-viewer.inline.js",
         "./dist/*": "./dist/*",
         "./src/*": "./src/*",
         "./test/*": "./test/*",
@@ -29,8 +25,7 @@
     "types": "dist/esm/perspective-viewer.d.ts",
     "scripts": {
         "build": "node ./build.js",
-        "clean": "rimraf dist && rimraf pkg && rimraf build",
-        "clean:screenshots": "rimraf \"test/screenshots/**/*.@(failed|diff).png\"",
+        "clean": "rimraf dist && rimraf build",
         "docs": "npm-run-all docs:build docs:concat docs:deploy:*",
         "docs:build": "typedoc --hideBreadcrumbs --out dist/docs --readme none --excludePrivate src/ts/perspective-viewer.ts",
         "docs:concat": "node ./docs.js",
@@ -38,10 +33,7 @@
         "docs:deploy:exprtk": "cat exprtk.md > ../../docs/docs/obj/perspective-viewer-exprtk.md",
         "fix": "yarn lint --fix && cargo fmt",
         "lint": "prettier --check src/ts/**/*",
-        "test:run:rust": "rustup run nightly wasm-pack test --chrome --headless",
-        "test:run": "jest --rootDir=. --config=../../tools/perspective-test/jest.config.js --color --noStackTrace 2>&1",
-        "test:clean": "rm perspective.csv || true",
-        "test": "yarn test:build && npm-run-all -p test:run:rust && yarn test:clean"
+        "test:run:rust": "rustup run nightly wasm-pack test --chrome --headless"
     },
     "publishConfig": {
         "access": "public"

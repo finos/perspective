@@ -1,3 +1,5 @@
+import perspective from "/node_modules/@finos/perspective/dist/cdn/perspective.js";
+
 function generate_mandelbrot(params) {
     return `
 // color
@@ -152,7 +154,7 @@ window.addEventListener("DOMContentLoaded", async function () {
 
     run.addEventListener(
         "click",
-        make_run_click_callback(window.perspective.worker(), {})
+        make_run_click_callback(perspective.worker(), {})
     );
     run.dispatchEvent(new Event("click"));
 });

@@ -8,30 +8,18 @@
         "index.d.ts"
     ],
     "exports": {
-        ".": {
-            "import": "./dist/umd/perspective-workspace.js",
-            "require": "./dist/umd/perspective-workspace.js"
-        },
+        ".": "./dist/esm/perspective-workspace.js",
         "./esm/": "./dist/esm/",
         "./src/*": "./src/*",
         "./dist/*": "./dist/*",
         "./dist/themes/": "./src/themes/",
         "./package.json": "./package.json"
     },
-    "unpkg": "./dist/umd/perspective-workspace.js",
-    "jsdelivr": "./dist/umd/perspective-workspace.js",
-    "main": "./dist/umd/perspective-workspace.js",
+    "unpkg": "./dist/cdn/perspective-workspace.js",
+    "jsdelivr": "./dist/cdn/perspective-workspace.js",
     "scripts": {
-        "bench": "npm-run-all bench:build bench:run",
-        "bench:build": "echo \"No Benchmarks\"",
-        "bench:run": "echo \"No Benchmarks\"",
         "build": "node ./build.js",
-        "clean": "rimraf dist",
-        "clean:screenshots": "rimraf \"test/screenshots/**/*.@(failed|diff).png\"",
-        "test:run": "jest --rootDir=. --config=../../tools/perspective-test/jest.config.js  --color",
-        "test:unit": "jest  --color --config=./config/jest.unit.config.js 2>&1",
-        "test:integration": "jest --color  --config=./config/jest.integration.config.js 2>&1",
-        "watch": "PSP_DEBUG=1 webpack --color --watch --config config/watch.config.js"
+        "clean": "rimraf dist"
     },
     "publishConfig": {
         "access": "public"

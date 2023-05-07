@@ -8,14 +8,12 @@
     },
     "author": "",
     "license": "Apache-2.0",
-    "unpkg": "dist/umd/perspective.js",
-    "jsdelivr": "dist/umd/perspective.js",
-    "main": "dist/umd/perspective.js",
+    "unpkg": "dist/cdn/perspective.js",
+    "jsdelivr": "dist/cdn/perspective.js",
     "exports": {
         ".": {
             "node": "./dist/cjs/perspective.node.js",
-            "require": "./dist/umd/perspective.js",
-            "import": "./dist/umd/perspective.js"
+            "default": "./dist/esm/perspective.inline.js"
         },
         "./dist/*": "./dist/*",
         "./src/*": "./src/*",
@@ -25,7 +23,7 @@
         "access": "public"
     },
     "engines": {
-        "node": ">=12"
+        "node": ">=14"
     },
     "files": [
         "dist/**/*",

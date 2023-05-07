@@ -12,14 +12,14 @@ import fs from "fs";
 import path from "path";
 
 export default async function run() {
-    const results = path.join(__dirname, "../../results.tar.gz");
+    const RESULTS_PATH = path.join(__dirname, "../../results.tar.gz");
     try {
-        if (fs.existsSync(results)) {
+        if (fs.existsSync(RESULTS_PATH)) {
             console.log("Using results.tar.gz");
-            await tar.extract({ file: results, gzip: true });
+            await tar.extract({ file: RESULTS_PATH, gzip: true });
         }
     } catch (e) {
         console.error("Failed to untar results archives");
-        fs.unlinkSync(results);
+        fs.unlinkSync(RESULTS_PATH);
     }
 }

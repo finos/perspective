@@ -9,11 +9,6 @@ const version = JSON.parse(fs.readFileSync("./package.json")).version;
 // directly to the assets.
 const replacements = {
     "/node_modules/": `https://cdn.jsdelivr.net/npm/`,
-    "perspective/dist/umd/perspective.js": `perspective@${version}`,
-    "perspective-viewer/dist/umd/perspective-viewer.js": `perspective-viewer@${version}`,
-    "perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js": `perspective-viewer-datagrid@${version}`,
-    "perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js": `perspective-viewer-d3fc@${version}`,
-    "perspective-workspace/dist/umd/perspective-workspace.js": `perspective-workspace@${version}`,
     "perspective/dist/cdn/perspective.js": `perspective@${version}/dist/cdn/perspective.js`,
     "perspective-viewer/dist/cdn/perspective-viewer.js": `perspective-viewer@${version}/dist/cdn/perspective-viewer.js`,
     "perspective-viewer-datagrid/dist/cdn/perspective-viewer-datagrid.js": `perspective-viewer-datagrid@${version}/dist/cdn/perspective-viewer-datagrid.js`,

@@ -11,7 +11,7 @@ const { test } = require("@playwright/test");
 import { compareContentsToSnapshot } from "@finos/perspective-test";
 
 test.beforeEach(async ({ page }) => {
-    await page.goto("/@finos/perspective-jupyterlab/dist/umd/resize.html", {
+    await page.goto("/@finos/perspective-jupyterlab/test/html/resize.html", {
         waitUntil: "networkidle",
     });
 });

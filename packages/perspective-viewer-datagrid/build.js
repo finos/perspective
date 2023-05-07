@@ -1,7 +1,6 @@
 const {
     NodeModulesExternal,
 } = require("@finos/perspective-esbuild-plugin/external");
-const { UMDLoader } = require("@finos/perspective-esbuild-plugin/umd");
 const { build } = require("@finos/perspective-esbuild-plugin/build");
 
 const BUILD = [
@@ -17,20 +16,6 @@ const BUILD = [
             ".html": "text",
         },
         outfile: "dist/esm/perspective-viewer-datagrid.js",
-    },
-    {
-        define: {
-            global: "window",
-        },
-        entryPoints: ["src/js/index.js"],
-        globalName: "perspective_datagrid",
-        plugins: [UMDLoader()],
-        format: "cjs",
-        loader: {
-            ".css": "text",
-            ".html": "text",
-        },
-        outfile: "dist/umd/perspective-viewer-datagrid.js",
     },
     {
         define: {

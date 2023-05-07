@@ -25,7 +25,7 @@ const WARNED_KEYS = new Set();
  * The main API module for `@finos/perspective`.
  *
  * For more information, see the
- * [Javascript user guide](https://perspective.finos.org/docs/md/js.html).
+ * [Javascript user guide](https://perspective.finos.org/docs/js.html).
  *
  * @module perspective
  */
@@ -2297,10 +2297,10 @@ export default function (Module) {
                 __MODULE__({
                     wasmBinary: msg.buffer,
                     wasmJSMethod: "native-wasm",
+                    locateFile: (x) => x,
                 }).then((mod) => {
                     __MODULE__ = mod;
                     __MODULE__.init();
-                    notify_main_thread();
                     super.init(msg);
                 });
             }
@@ -2316,23 +2316,4 @@ export default function (Module) {
     }
 
     return perspective;
-}
-
-function notify_main_thread() {
-    if (typeof self !== "undefined") {
-        try {
-            if (
-                self.dispatchEvent &&
-                !self._perspective_initialized &&
-                self.document !== null
-            ) {
-                self._perspective_initialized = true;
-                const event = self.document.createEvent("Event");
-                event.initEvent("perspective-ready", false, true);
-                self.dispatchEvent(event);
-            } else if (!self.document && self.postMessage) {
-                self.postMessage({});
-            }
-        } catch (e) {}
-    }
 }

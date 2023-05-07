@@ -12,9 +12,7 @@
     ],
     "typings": "index.d.ts",
     "scripts": {
-        "clean": "rimraf build",
-        "test:run": "jest --rootDir=. --config=../../tools/perspective-test/jest.config.js --color",
-        "test": "npm-run-all test:build test:run"
+        "clean": "rimraf build"
     },
     "repository": {
         "type": "git",

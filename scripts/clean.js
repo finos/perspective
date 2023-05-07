@@ -7,25 +7,11 @@
  *
  */
 
-const { clean, exec_with_scope, run_with_scope } = require("./script_utils.js");
+const { clean, run_with_scope } = require("./script_utils.js");
 
 const glob = require("glob");
 const minimatch = require("minimatch");
 const args = process.argv.slice(2);
-
-const IS_SCREENSHOTS = args.indexOf("--screenshots") !== -1;
-
-// Question: Cleaning of screenshots can be removed, because they are not currently
-// used, right?
-async function clean_screenshots(scope) {
-    if (args.indexOf("--all") !== -1) {
-        try {
-            exec_with_scope`npx rimraf test/screenshots`;
-        } catch (e) {}
-    } else {
-        await run_with_scope`clean:screenshots`;
-    }
-}
 
 async function run() {
     try {
@@ -54,33 +40,24 @@ async function run() {
             );
         }
 
-        let scope =
-            process.env.PACKAGE && process.env.PACKAGE !== ""
-                ? `${process.env.PACKAGE}`
-                : "*";
-
-        if (!IS_SCREENSHOTS) {
-            if (
-                !process.env.PACKAGE ||
-                minimatch("perspective", process.env.PACKAGE)
-            ) {
-                const files = [
-                    "CMakeFiles",
-                    "build",
-                    "cmake_install.cmake",
-                    "CMakeCache.txt",
-                    "compile_commands.json",
-                    "libpsp.a",
-                    "Makefile",
-                ];
-                clean(...files.map((x) => `cpp/perspective/obj/${x}`));
-            }
-
-            await run_with_scope`clean`;
-            clean("docs/build", "docs/python", "docs/obj");
+        if (
+            !process.env.PACKAGE ||
+            minimatch("perspective", process.env.PACKAGE)
+        ) {
+            const files = [
+                "CMakeFiles",
+                "build",
+                "cmake_install.cmake",
+                "CMakeCache.txt",
+                "compile_commands.json",
+                "libpsp.a",
+                "Makefile",
+            ];
+            clean(...files.map((x) => `cpp/perspective/obj/${x}`));
         }
 
-        await clean_screenshots(scope);
+        await run_with_scope`clean`;
+        clean("docs/build", "docs/python", "docs/obj");
     } catch (e) {
         console.error(e);
         process.exit(1);
