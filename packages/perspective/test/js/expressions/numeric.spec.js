@@ -139,6 +139,60 @@ function validate_binary_operations(output, expressions, operator) {
 ((perspective) => {
     test.describe("Numeric operations", function () {
         test.describe("All numeric types", function () {
+            test.describe("aggregates", function () {
+                test(
+                    "integer",
+                    async function () {
+                        const table = await perspective.table({
+                            a: "integer",
+                        });
+
+                        const view = await table.view({
+                            expressions: ['"a"'],
+                        });
+
+                        table.update({
+                            a: [10, 15, 20, 30],
+                        });
+
+                        const result = await view.to_columns();
+                        expect(result['"a"']).toEqual([10, 15, 20, 30]);
+                        expect(result["a"]).toEqual([10, 15, 20, 30]);
+                        await view.delete();
+                        await table.delete();
+                    },
+
+                    test("expression integer column sum", async function () {
+                        const table = await perspective.table({
+                            a: [10, 15, 20, 30],
+                            b: [1, 2, 3, 4],
+                        });
+
+                        const view = await table.view({
+                            group_by: ["b"],
+                            aggregates: {
+                                a: "sum",
+                                b: "sum",
+                            },
+                            expressions: ['"a"'],
+                        });
+
+                        table.update({
+                            a: [40, 50, 60, 70],
+                        });
+
+                        expect(await view.to_columns()).toEqual({
+                            __ROW_PATH__: [[], [null], [1], [2], [3], [4]],
+                            a: [295, 220, 10, 15, 20, 30],
+                            b: [10, 0, 1, 2, 3, 4],
+                            '"a"': [295, 220, 10, 15, 20, 30],
+                        });
+                        await view.delete();
+                        await table.delete();
+                    })
+                );
+            });
+
             test.describe("unary", function () {
                 test("negative", async function () {
                     const table = await perspective.table(

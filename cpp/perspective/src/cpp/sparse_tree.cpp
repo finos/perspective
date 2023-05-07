@@ -973,19 +973,38 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info,
                 t_tscalar src_scalar = src->get_scalar(src_ridx);
                 t_tscalar dst_scalar = dst->get_scalar(dst_ridx);
                 old_value.set(dst_scalar);
-                new_value.set(dst_scalar.add(src_scalar));
 
                 // is_nan returns false for non-float types
                 if (is_expr || old_value.is_nan()) {
                     // if we previously had a NaN, add can't make it finite
                     // again; recalculate entire sum in case it is now finite
                     auto pkeys = get_pkeys(nidx);
-                    std::vector<double> values;
-                    read_column_from_gstate(gstate, expression_master_table,
-                        spec.get_dependencies()[0].name(), pkeys, values, true);
-                    new_value.set(std::accumulate(
-                        values.begin(), values.end(), double(0)));
+                    new_value.set(reduce_from_gstate<
+                        std::function<t_tscalar(std::vector<t_tscalar>&)>>(
+                        gstate, expression_master_table,
+                        spec.get_dependencies()[0].name(), pkeys,
+                        [](std::vector<t_tscalar>& values) {
+                            if (values.empty()) {
+                                return mknone();
+                            }
+
+                            t_tscalar rval;
+                            rval.set(std::uint64_t(0));
+                            rval.m_type = values[0].m_type;
+
+                            for (const auto& v : values) {
+                                if (v.is_nan())
+                                    continue;
+                                rval = rval.add(v);
+                            }
+
+                            return rval;
+                        }));
+                    dst->set_scalar(dst_ridx, new_value);
+                } else {
+                    new_value.set(dst_scalar.add(src_scalar));
                 }
+
                 dst->set_scalar(dst_ridx, new_value);
             } break;
             case AGGTYPE_COUNT: {
@@ -1302,28 +1321,22 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info,
                 t_tscalar src_scalar = src->get_scalar(src_ridx);
                 t_tscalar dst_scalar = dst->get_scalar(dst_ridx);
                 old_value.set(dst_scalar);
-                // new_value.set(std::max(dst_scalar, src_scalar));
-                // if (is_expr || old_value.is_nan() || new_value.is_nan() || new_value > old_value) {
-                    auto pkeys = get_pkeys(nidx);
-                    std::vector<double> values;
-                    read_column_from_gstate(gstate, expression_master_table,
-                        spec.get_dependencies()[0].name(), pkeys, values, true);
-                    new_value.set(*std::max_element(values.begin(), values.end()));
-                // }
+                auto pkeys = get_pkeys(nidx);
+                std::vector<double> values;
+                read_column_from_gstate(gstate, expression_master_table,
+                    spec.get_dependencies()[0].name(), pkeys, values, true);
+                new_value.set(*std::max_element(values.begin(), values.end()));
                 dst->set_scalar(dst_ridx, new_value);
             } break;
             case AGGTYPE_MIN: {
                 t_tscalar src_scalar = src->get_scalar(src_ridx);
                 t_tscalar dst_scalar = dst->get_scalar(dst_ridx);
                 old_value.set(dst_scalar);
-                // new_value.set(std::max(dst_scalar, src_scalar));
-                // if (is_expr || old_value.is_nan() || new_value.is_nan() || new_value < old_value) {
-                    auto pkeys = get_pkeys(nidx);
-                    std::vector<double> values;
-                    read_column_from_gstate(gstate, expression_master_table,
-                        spec.get_dependencies()[0].name(), pkeys, values, true);
-                    new_value.set(*std::min_element(values.begin(), values.end()));
-                // }
+                auto pkeys = get_pkeys(nidx);
+                std::vector<double> values;
+                read_column_from_gstate(gstate, expression_master_table,
+                    spec.get_dependencies()[0].name(), pkeys, values, true);
+                new_value.set(*std::min_element(values.begin(), values.end()));
                 dst->set_scalar(dst_ridx, new_value);
             } break;
             case AGGTYPE_HIGH_WATER_MARK: {
