@@ -52,7 +52,8 @@ async function benchmark({ name, before, before_all, test, after, after_all }) {
     let obs_records = [];
     console.log(`${name}`);
     for (let j = 0; j < MODULES.length; j++) {
-        const { version, perspective } = MODULES[j];
+        let { version, perspective } = MODULES[j];
+        perspective.version = version.split(".").map((x) => parseInt(x));
         const args = [];
         args.push_if(await before_all?.(perspective));
         const observations = [];

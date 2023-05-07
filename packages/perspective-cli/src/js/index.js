@@ -161,7 +161,7 @@ program
     .option("-o, --open", "Open a browser automagically.")
     .action(host);
 
-if (require.main === module) {
+if (require.main.path.endsWith("perspective-cli")) {
     if (!process.argv.slice(2).length) {
         program.help();
     } else {

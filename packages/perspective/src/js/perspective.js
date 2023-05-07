@@ -25,7 +25,7 @@ const WARNED_KEYS = new Set();
  * The main API module for `@finos/perspective`.
  *
  * For more information, see the
- * [Javascript user guide](https://perspective.finos.org/docs/md/js.html).
+ * [Javascript user guide](https://perspective.finos.org/docs/js.html).
  *
  * @module perspective
  */

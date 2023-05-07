@@ -166,15 +166,22 @@ function perspective_assets(assets, host_psp) {
             if (host_psp || typeof host_psp === "undefined") {
                 for (let rootDir of DEFAULT_ASSETS) {
                     try {
-                        let paths = require.resolve.paths(rootDir + url);
-                        paths = [
-                            ...paths,
-                            ...assets.map((x) => path.join(x, "node_modules")),
-                            LOCAL_PATH,
-                        ];
-                        let filePath = require.resolve(rootDir + url, {
-                            paths,
-                        });
+                        let filePath;
+                        if (url.startsWith("/" + rootDir)) {
+                            filePath = require.resolve(url.slice(1));
+                        } else {
+                            let paths = require.resolve.paths(rootDir + url);
+                            paths = [
+                                ...paths,
+                                ...assets.map((x) =>
+                                    path.join(x, "node_modules")
+                                ),
+                                LOCAL_PATH,
+                            ];
+                            filePath = require.resolve(rootDir + url, {
+                                paths,
+                            });
+                        }
                         let content = await read_promise(filePath);
                         if (typeof content !== "undefined") {
                             console.log(`200 ${url}`);
