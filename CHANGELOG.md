@@ -1,3 +1,27 @@
+# [v2.1.0](https://github.com/finos/perspective/releases/tag/v2.1.0)
+
+_7 May 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.0.1...v2.1.0))
+
+**Breaking**
+
+- Remove `umd` builds from all packages [#2211](https://github.com/finos/perspective/pull/2211)
+
+Features
+
+- Update `perspective-workspace` design [#2214](https://github.com/finos/perspective/pull/2214)
+- Add scalar factors to Exprtk `bucket()` [#2210](https://github.com/finos/perspective/pull/2210)
+
+Fixes
+
+- Coerce to float64 when user tries to pass in float32 as float64 - fixes #1717 [#2189](https://github.com/finos/perspective/pull/2189)
+- Handle zero values in line plots [#2191](https://github.com/finos/perspective/pull/2191)
+- pass through websocket connection arguments in python websocket clients, normalize max message size and ensure set for aiohttp [#2187](https://github.com/finos/perspective/pull/2187)
+
+Misc
+
+- rename context menu names for perspective renderers in jupyterlab [#2209](https://github.com/finos/perspective/pull/2209)
+- New `playwright` test suite [#2201](https://github.com/finos/perspective/pull/2201)
+
 # [v2.0.1](https://github.com/finos/perspective/releases/tag/v2.0.1)
 
 _10 April 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.0.0...v2.0.1))
