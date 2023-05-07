@@ -21,6 +21,7 @@ perspective-indicator[theme="Pro Light"] {
 perspective-workspace {
     @include perspective-workspace-pro-base;
     @include perspective-viewer-pro--colors;
+    background-color: #DADADA;
     --column-drag-handle--mask-image: url("../../../../rust/perspective-viewer/src/svg/drag-handle.svg");
     --bookmarks--mask-image: url("../../../../rust/perspective-viewer/src/svg/bookmark-icon.svg");
 }
@@ -77,7 +78,7 @@ perspective-viewer[theme="Pro Light"].workspace-master-widget {
     --workspace-tabbar--border-width: 0px 1px 1px 1px;
     --workspace-tabbar--border-radius: 0px 0px 6px 6px;
     --workspace-tabbar--border-color: var(--inactive--color);
-    --workspace-tabbar-tab--border-width: 1px 1px 0 1px;
+    --workspace-tabbar-tab--border-width: 1px 1px 0px 1px;
 }
 
 .p-Menu {

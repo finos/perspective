@@ -137,7 +137,7 @@ export const createCommands = (workspace, indicator) => {
     commands.addCommand("workspace:help", {
         // iconClass: "menu-close",
         label: "Shift+Click for Browser Menu",
-        isEnabled: false,
+        isEnabled: () => false,
         // mnemonic: 0,
     });
 
