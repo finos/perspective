@@ -159,8 +159,6 @@
 
 .p-TabBar-content {
     padding: 0px;
-    overflow: hidden;
-    // margin: 0px -4px -1px -4px;
     border-bottom: 0px solid #fff !important;
     border-left: #eaeaea;
     border-right: #eaeaea;
@@ -186,11 +184,6 @@
     border-color: #eaeaea;
     align-items: center;
 }
-
-// .p-TabBar-content > .p-TabBar-tab,
-// .p-TabBar-content > .p-TabBar-tab.p-mod-current.settings_open {
-//     // background-color: var(--workspace-master--background-color, #f2f4f6);
-// }
 
 .p-TabBar-content.inactive-blur > .p-TabBar-tab {
     background-color: var(
@@ -245,15 +238,10 @@
     flex: 0 1 100000px !important;
     background: none;
     color: #737373;
-    // padding-top: 1px !important;
-    // border-style: solid;
-    // border-width: 1px;
-    // border-color: transparent;
     height: 40px !important;
     max-height: 40px !important;
     transform: none !important;
     transition: color 0.2s ease-out;
-    // border-bottom-width: 0px !important;
 }
 
 .p-TabBar-content > .p-TabBar-tab {
@@ -263,10 +251,6 @@
 .p-TabBar-content > .p-TabBar-tab {
     color: #ccc;
 }
-
-// .p-TabBar-content > .p-TabBar-tab .p-TabBar-tabLabel {
-//     color: var(--workspace-secondary--color, #666);
-// }
 
 .p-TabBar-content > .p-TabBar-tab:hover {
     color: #ccc;
@@ -316,6 +300,7 @@
     color: var(--workspace-tabbar--color, #666) !important;
     border: var(--workspace-tabbar--border, 1px solid #ddd);
     border-width: var(--workspace-tabbar-tab--border-width);
+    box-shadow: 0 13px 0 -12px var(--inactive--border-color);
     border-radius: 6px 6px 0 0;
     background-color: var(--workspace-tabbar--background-color, white);
     height: 40px !important;
@@ -355,6 +340,7 @@
     margin-left: 11px;
     margin-right: -13px;
     border-radius: 3px;
+    height: 22px;
 
     &:hover {
         background-color: var(--icon--color);

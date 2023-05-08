@@ -1318,7 +1318,6 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info,
                 }
             } break;
             case AGGTYPE_MAX: {
-                t_tscalar src_scalar = src->get_scalar(src_ridx);
                 t_tscalar dst_scalar = dst->get_scalar(dst_ridx);
                 old_value.set(dst_scalar);
                 auto pkeys = get_pkeys(nidx);
@@ -1329,7 +1328,6 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info,
                 dst->set_scalar(dst_ridx, new_value);
             } break;
             case AGGTYPE_MIN: {
-                t_tscalar src_scalar = src->get_scalar(src_ridx);
                 t_tscalar dst_scalar = dst->get_scalar(dst_ridx);
                 old_value.set(dst_scalar);
                 auto pkeys = get_pkeys(nidx);

@@ -38,6 +38,9 @@ function lineChart(container, settings) {
         .pad([0.1, 0.1])
         .padUnit("percent");
 
+    // Check whether we've split some values into a second y-axis
+    const splitter = axisSplitter(settings, transposeData(data)).color(color);
+
     const xAxis = axisFactory(settings)
         .excludeType(AXIS_TYPES.linear)
         .settingName("crossValues")
@@ -46,12 +49,9 @@ function lineChart(container, settings) {
     const yAxisFactory = axisFactory(settings)
         .settingName("mainValues")
         .valueName("mainValue")
-        .memoValue(settings.axisMemo[0])
+        .memoValue(splitter.haveSplit() ? null : settings.axisMemo[0])
         .orient("vertical")
         .paddingStrategy(paddingStrategy);
-
-    // Check whether we've split some values into a second y-axis
-    const splitter = axisSplitter(settings, transposeData(data)).color(color);
 
     const yAxis1 = yAxisFactory(splitter.data());
 

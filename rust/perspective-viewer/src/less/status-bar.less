@@ -22,7 +22,6 @@
     #main_column #status_bar.titled {
         padding-right: 36px;
 
-
         #menu-bar {
             opacity: 1;
         }
@@ -30,6 +29,8 @@
 
     #status_bar {
         overflow: hidden;
+        box-shadow: 0 13px 0 -12px var(--inactive--border-color);
+        z-index: 1;
         display: flex;
         align-items: center;
         background: var(--plugin--background);
@@ -113,9 +114,9 @@
             overflow: hidden;
             flex: 0 1000000 auto;
             .button {
-                height: 36px;
+                height: 22px;
                 select { 
-                    height: 34px;
+                    height: 20px;
                     font-size: 9px;
                 }
             }
@@ -233,11 +234,10 @@
             display: inline-flex;
             align-items: center;
             margin: 0px;
-            padding: 0 5px 0px 10px;
-            transition: background-color 0.2s;
+            padding: 0 5px 0px 5px;
             color: var(--inactive--color, #ccc);
             border: 1px solid transparent;
-            border-radius: 2px;
+            border-radius: 3px;
             font-size: 9px;
 
             & > span,
@@ -262,7 +262,14 @@
                 color: inherit;
                 cursor: pointer;
                 transition: none;
-                border: 1px solid var(--inactive--color);
+                // border: 1px solid var(--inactive--color);
+                background-color: var(--icon--color);
+                color: var(--plugin--background);
+                
+
+                &:before {
+                    background-color: var(--plugin--background);
+                }
 
                 & > span {
                     display: contents;

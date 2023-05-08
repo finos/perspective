@@ -26,7 +26,7 @@ perspective-viewer[settings] regular-table {
         bottom: 0px;
         padding-bottom: 1px;
         margin-bottom: 3px;
-        color: var(--inactive--color, #8b868045);
+        color: var(--inactive--border-color, #8b868045);
         font-size: 9px;
         border: 1px solid transparent;
         border-radius: 2px;
@@ -40,13 +40,13 @@ perspective-viewer[settings] regular-table {
     .psp-header-leaf.psp-menu-open:not(.psp-header-corner) {
         pointer-events: none;
         &:before {
-            border: 1px solid var(--inactive--color);
+            border: 1px solid var(--inactive--border-color);
             content: var(--column-style-close-button--content, "X");
         }
     }
 
     .psp-header-leaf.psp-menu-enabled:hover:before {
-        border: 1px solid var(--inactive--color);
+        border: 1px solid var(--inactive--border-color);
     }
 
     // Pin the column resize handle to the top so it does not overlap the

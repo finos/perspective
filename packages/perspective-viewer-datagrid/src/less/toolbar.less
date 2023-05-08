@@ -60,13 +60,14 @@
 }
 
 .button:before {
-    width: 21px;
+    width: 25px;
     height: 21px;
     content: "";
     -webkit-mask-image: cover;
     mask-image: cover;
     background-color: var(--icon--color, #ccc);
-    margin-left: 9.5px;
+    margin: 0 5px;
+
 }
 
 .button.editable:before,
@@ -78,12 +79,12 @@
     display: inline-flex;
     align-items: center;
     user-select: none;
-    width: 42px;
-    height: 36px;
+    width: 37px;
+    height: 22px;
     box-sizing: border-box;
     white-space: nowrap;
     border: 1px solid transparent;
-    border-radius: 2px;
+    border-radius: 3px;
 }
 
 .button > span {
@@ -93,17 +94,18 @@
 }
 
 .button:hover {
+    background-color: var(--icon--color);
+    color: var(--plugin--background);
     opacity: 1;
     display: flex;
     align-items: center;
-    color: inherit;
     cursor: pointer;
     min-width: var(--button--min-width, 105px);
-    border: 1px solid var(--inactive--color, #8b868045);
 }
 
 .button:hover:before {
-    margin: 0 6px 0 9.5px;
+    background-color: var(--plugin--background);
+    margin: 0 5px 0 5px;
 }
 
 .button:hover > span {
