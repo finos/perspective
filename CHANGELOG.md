@@ -1,6 +1,16 @@
+# [v2.1.1](https://github.com/finos/perspective/releases/tag/v2.1.1)
+
+_8 May 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.1.0...v2.1.1))
+
+Fixes
+
+- Workspace bug fixes [#2218](https://github.com/finos/perspective/pull/2218)
+- Fix windows python builds [#2217](https://github.com/finos/perspective/pull/2217)
+- Fix sum aggregate for integer type expression columns [#2216](https://github.com/finos/perspective/pull/2216)
+
 # [v2.1.0](https://github.com/finos/perspective/releases/tag/v2.1.0)
 
-_7 May 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.0.1...v2.1.0))
+_6 May 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.0.1...v2.1.0))
 
 **Breaking**
 

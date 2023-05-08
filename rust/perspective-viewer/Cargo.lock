@@ -908,7 +908,7 @@ checksum = "d4fd5641d01c8f18a23da7b6fe29298ff4b55afcccdf78973b24cf3175fee32e"
 
 [[package]]
 name = "perspective"
-version = "2.1.0"
+version = "2.1.1"
 dependencies = [
  "anyhow",
  "async-lock",
@@ -941,7 +941,7 @@ dependencies = [
 
 [[package]]
 name = "perspective-bundle"
-version = "2.1.0"
+version = "2.1.1"
 dependencies = [
  "flate2",
  "wasm-bindgen-cli-support",
