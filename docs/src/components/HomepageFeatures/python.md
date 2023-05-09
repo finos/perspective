@@ -1,7 +1,7 @@
 ## Python
 
 \`perspective-python\`, built on the same C++ data engine used by the
-[WebAssembly version](https://perspective.finos.org/docs/md/js.html), implements
+[WebAssembly version](https://perspective.finos.org/docs/obj/perspective-python/), implements
 the Perspective API directly in Python, either as a virtualized server for
 Production, or as an embedded JupyterLab Widget for Research.
 
