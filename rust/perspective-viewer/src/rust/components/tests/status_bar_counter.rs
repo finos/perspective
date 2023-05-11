@@ -11,7 +11,7 @@ use yew::prelude::*;
 
 use crate::components::status_bar_counter::*;
 use crate::session::ViewStats;
-use crate::utils::await_animation_frame;
+use crate::utils::request_animation_frame;
 use crate::*;
 
 wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);

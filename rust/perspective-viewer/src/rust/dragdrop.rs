@@ -144,7 +144,7 @@ impl DragDrop {
         );
 
         ApiFuture::spawn(async move {
-            await_animation_frame().await?;
+            request_animation_frame().await;
             original.remove_child(&elem)?;
             Ok(())
         });
@@ -185,7 +185,7 @@ impl DragDrop {
         *self.drag_state.borrow_mut() = DragState::DragInProgress(DragFrom { column, effect });
         let emit = self.dragstart_received.callback();
         ApiFuture::spawn(async move {
-            await_animation_frame().await?;
+            request_animation_frame().await;
             emit.emit(effect);
             Ok(())
         });

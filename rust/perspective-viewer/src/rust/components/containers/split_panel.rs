@@ -260,9 +260,12 @@ impl Component for SplitPanel {
         assert!(ctx.props().validate());
         enable_weak_link_test!(ctx.props(), ctx.link());
         let len = ctx.props().children.len();
+        // cant just use vec![Default::default(); len] as it would
+        // use the same underlying NodeRef for each element.
+        let refs = Vec::from_iter(std::iter::repeat_with(Default::default).take(len));
         Self {
             resize_state: None,
-            refs: vec![Default::default(); len],
+            refs,
             styles: vec![Default::default(); len],
             on_reset: None,
         }
@@ -309,7 +312,7 @@ impl Component for SplitPanel {
     fn changed(&mut self, ctx: &Context<Self>, _old: &Self::Properties) -> bool {
         assert!(ctx.props().validate());
         let new_len = ctx.props().children.len();
-        self.refs.resize(new_len, Default::default());
+        self.refs.resize_with(new_len, Default::default);
         self.styles.resize(new_len, Default::default());
         true
     }
@@ -342,6 +345,7 @@ impl Component for SplitPanel {
                             orientation={ ctx.props().orientation }
                             link={ ctx.link().clone() }>
                         </SplitPanelDivider>
+
                         if i == ctx.props().children.len() - 2 {
                             { x }
                         } else {
@@ -357,6 +361,7 @@ impl Component for SplitPanel {
             }
         };
 
+        // TODO consider removing this
         if ctx.props().no_wrap {
             html! {{ contents }}
         } else {
@@ -405,7 +410,7 @@ fn split_panel_divider(props: &SplitPanelDividerProps) -> Html {
         SplitPanelMsg::Reset(i)
     });
 
-    // TODO Not sure why, but under some circumstances this can trugger a
+    // TODO Not sure why, but under some circumstances this can trigger a
     // `dragstart`, leading to further drag events which cause perspective
     // havoc.  `event.prevent_default()` in `onmousedown` alternatively fixes
     // this, but also prevents this event from trigger focus-stealing e.g. from
@@ -436,10 +441,9 @@ fn split_panel_child(props: &SplitPanelChildProps) -> Html {
     } else {
         classes!("split-panel-child")
     };
-
     html! {
         <div
-            class={ class }
+            { class }
             ref={ props.ref_.clone() }
             style={ props.style.clone() }>
             { props.children.iter().next().unwrap() }

@@ -59,8 +59,11 @@ test.describe("Column Style Tests", () => {
     test("perspective-config-update event is fired when column style is changed", async ({
         page,
     }) => {
-        await page.goto("/tools/perspective-test/src/html/basic-test.html", {
-            waitUntil: "networkidle",
+        await page.goto("/tools/perspective-test/src/html/basic-test.html");
+        await page.evaluate(async () => {
+            while (!window["__TEST_PERSPECTIVE_READY__"]) {
+                await new Promise((x) => setTimeout(x, 10));
+            }
         });
 
         await page.evaluate(async () => {
@@ -137,8 +140,11 @@ test.describe("Column Style Tests", () => {
     });
 
     test("Column style menu opens for numeric columns", async ({ page }) => {
-        await page.goto("/tools/perspective-test/src/html/basic-test.html", {
-            waitUntil: "networkidle",
+        await page.goto("/tools/perspective-test/src/html/basic-test.html");
+        await page.evaluate(async () => {
+            while (!window["__TEST_PERSPECTIVE_READY__"]) {
+                await new Promise((x) => setTimeout(x, 10));
+            }
         });
 
         await page.evaluate(async () => {
@@ -153,8 +159,11 @@ test.describe("Column Style Tests", () => {
     });
 
     test("Column style menu opens for string columns", async ({ page }) => {
-        await page.goto("/tools/perspective-test/src/html/basic-test.html", {
-            waitUntil: "networkidle",
+        await page.goto("/tools/perspective-test/src/html/basic-test.html");
+        await page.evaluate(async () => {
+            while (!window["__TEST_PERSPECTIVE_READY__"]) {
+                await new Promise((x) => setTimeout(x, 10));
+            }
         });
 
         await page.evaluate(async () => {

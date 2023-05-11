@@ -14,8 +14,11 @@ test.describe("Events test", () => {
     test("perspective-config-update event is fired when series axis is changed", async ({
         page,
     }) => {
-        await page.goto("/@finos/perspective-test/src/html/basic-test.html", {
-            waitUntil: "networkidle",
+        await page.goto("/@finos/perspective-test/src/html/basic-test.html");
+        await page.evaluate(async () => {
+            while (!window["__TEST_PERSPECTIVE_READY__"]) {
+                await new Promise((x) => setTimeout(x, 10));
+            }
         });
 
         await page.evaluate(async () => {
@@ -74,8 +77,11 @@ test.describe("Events test", () => {
     test("perspective-config-update event is fired when legend position is changed", async ({
         page,
     }) => {
-        await page.goto("/@finos/perspective-test/src/html/basic-test.html", {
-            waitUntil: "networkidle",
+        await page.goto("/@finos/perspective-test/src/html/basic-test.html");
+        await page.evaluate(async () => {
+            while (!window["__TEST_PERSPECTIVE_READY__"]) {
+                await new Promise((x) => setTimeout(x, 10));
+            }
         });
 
         await page.evaluate(async () => {

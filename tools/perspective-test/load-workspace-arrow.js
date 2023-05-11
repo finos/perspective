@@ -24,3 +24,5 @@ async function load() {
 }
 
 await load();
+
+window.__TEST_PERSPECTIVE_READY__ = true;

@@ -42,7 +42,7 @@ async fn set_up_html() -> (WeakScope<PerspectiveViewer>, web_sys::ShadowRoot, Se
         </PerspectiveViewer>
     };
 
-    await_animation_frame().await.unwrap();
+    request_animation_frame().await;
     let root: web_sys::ShadowRoot = div.parent_node().unwrap().unchecked_into();
     (link, root, session)
 }
@@ -65,13 +65,15 @@ pub async fn test_settings_closed() {
 pub async fn test_settings_open() {
     let (link, root, _) = set_up_html().await;
     let viewer = link.borrow().clone().unwrap();
-    viewer.send_message(Msg::ToggleSettingsInit(
+    viewer.send_message(PerspectiveViewerMsg::ToggleSettingsInit(
         Some(SettingsUpdate::Update(true)),
         None,
     ));
 
     viewer
-        .send_message_async(|x| Msg::ToggleSettingsComplete(SettingsUpdate::Update(true), x))
+        .send_message_async(|x| {
+            PerspectiveViewerMsg::ToggleSettingsComplete(SettingsUpdate::Update(true), x)
+        })
         .await
         .unwrap();
 
@@ -89,12 +91,12 @@ pub async fn test_load_table() {
     let (link, root, session) = set_up_html().await;
     let table = get_mock_table().await;
     let viewer = link.borrow().clone().unwrap();
-    viewer.send_message(Msg::ToggleSettingsInit(
+    viewer.send_message(PerspectiveViewerMsg::ToggleSettingsInit(
         Some(SettingsUpdate::Update(true)),
         None,
     ));
     session.set_table(table).await.unwrap();
-    await_animation_frame().await.unwrap();
+    request_animation_frame().await;
     assert_eq!(
         root.query_selector("#rows").unwrap().unwrap().inner_html(),
         "<span>3 rows</span>"

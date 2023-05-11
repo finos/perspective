@@ -20,8 +20,11 @@ async function get_contents(page) {
 }
 
 test.beforeEach(async ({ page }) => {
-    await page.goto("/rust/perspective-viewer/test/html/superstore.html", {
-        waitUntil: "networkidle",
+    await page.goto("/rust/perspective-viewer/test/html/superstore.html");
+    await page.evaluate(async () => {
+        while (!window["__TEST_PERSPECTIVE_READY__"]) {
+            await new Promise((x) => setTimeout(x, 10));
+        }
     });
 
     await page.evaluate(async () => {

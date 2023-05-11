@@ -16,7 +16,7 @@ use yew::prelude::*;
 
 use crate::components::number_column_style::*;
 use crate::config::*;
-use crate::utils::{await_animation_frame, WeakScope};
+use crate::utils::{request_animation_frame, WeakScope};
 use crate::*;
 
 wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
@@ -80,7 +80,7 @@ pub async fn test_fixed_msg_overrides_default() {
 
     let column_style = link.borrow().clone().unwrap();
     column_style.send_message(NumberColumnStyleMsg::FixedChanged("2".to_owned()));
-    await_animation_frame().await.unwrap();
+    request_animation_frame().await;
 
     assert_eq!(
         cs_query(&panel_div, "#fixed-examples").inner_text(),
@@ -131,11 +131,11 @@ pub async fn test_color_enabled() {
 
     let column_style = link.borrow().clone().unwrap();
     column_style.send_message(NumberColumnStyleMsg::ForeEnabledChanged(true));
-    await_animation_frame().await.unwrap();
+    request_animation_frame().await;
     assert_eq!(result.borrow().number_fg_mode, NumberForegroundMode::Color);
 
     column_style.send_message(NumberColumnStyleMsg::ForeEnabledChanged(false));
-    await_animation_frame().await.unwrap();
+    request_animation_frame().await;
     assert_eq!(
         result.borrow().number_fg_mode,
         NumberForegroundMode::Disabled
@@ -171,7 +171,7 @@ pub async fn test_color_mode_changed() {
     assert_eq!(result.borrow().number_fg_mode, NumberForegroundMode::Color);
     assert_eq!(result.borrow().pos_fg_color, None);
     column_style.send_message(NumberColumnStyleMsg::ForeEnabledChanged(false));
-    await_animation_frame().await.unwrap();
+    request_animation_frame().await;
 
     assert_eq!(
         result.borrow().number_fg_mode,
@@ -181,7 +181,7 @@ pub async fn test_color_mode_changed() {
     column_style.send_message(NumberColumnStyleMsg::NumberForeModeChanged(
         NumberForegroundMode::Bar,
     ));
-    await_animation_frame().await.unwrap();
+    request_animation_frame().await;
 
     assert_eq!(result.borrow().number_fg_mode, NumberForegroundMode::Bar);
     assert_eq!(result.borrow().pos_fg_color, None);
@@ -221,7 +221,7 @@ pub async fn test_pos_color_changed_override_defaults() {
         Side::Fg,
         "#666".to_owned(),
     ));
-    await_animation_frame().await.unwrap();
+    request_animation_frame().await;
 
     assert_eq!(result.borrow().number_fg_mode, NumberForegroundMode::Color);
     assert_eq!(result.borrow().pos_fg_color, Some("#666".to_owned()));
@@ -230,7 +230,7 @@ pub async fn test_pos_color_changed_override_defaults() {
         Side::Fg,
         "#123".to_owned(),
     ));
-    await_animation_frame().await.unwrap();
+    request_animation_frame().await;
 
     assert_eq!(result.borrow().number_fg_mode, NumberForegroundMode::Color);
     assert_eq!(result.borrow().pos_fg_color, None);
@@ -271,7 +271,7 @@ pub async fn test_pos_color_and_mode_changed_override_defaults() {
         NumberForegroundMode::Bar,
     ));
 
-    await_animation_frame().await.unwrap();
+    request_animation_frame().await;
     assert_eq!(result.borrow().number_fg_mode, NumberForegroundMode::Bar);
     assert_eq!(result.borrow().pos_fg_color, None);
     assert_eq!(result.borrow().neg_fg_color, None);
@@ -280,7 +280,7 @@ pub async fn test_pos_color_and_mode_changed_override_defaults() {
         "#666".to_owned(),
     ));
 
-    await_animation_frame().await.unwrap();
+    request_animation_frame().await;
     assert_eq!(result.borrow().number_fg_mode, NumberForegroundMode::Bar);
     assert_eq!(result.borrow().pos_fg_color, Some("#666".to_owned()));
     assert_eq!(result.borrow().neg_fg_color, Some("#321".to_owned()));
@@ -289,7 +289,7 @@ pub async fn test_pos_color_and_mode_changed_override_defaults() {
         "#123".to_owned(),
     ));
 
-    await_animation_frame().await.unwrap();
+    request_animation_frame().await;
     assert_eq!(result.borrow().number_fg_mode, NumberForegroundMode::Bar);
     assert_eq!(result.borrow().pos_fg_color, None);
     assert_eq!(result.borrow().neg_fg_color, None);

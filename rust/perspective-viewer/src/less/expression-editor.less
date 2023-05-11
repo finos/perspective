@@ -8,52 +8,34 @@
  */
 
 :host {
-    position: fixed;
-    z-index: 10000;
-    outline: none;
-    font-family: Arial;
-    font-size: 12px;
-    border: inherit;
-    box-shadow: 0 2px 4px 0 rgb(0 0 0 / 10%);
-    user-select: none;
-    background-color: white;
-
     #editor-container {
         display: flex;
         flex-direction: column;
         min-width: 0px;
+        border: 1px solid var(--inactive--color);
+        background-color: var(--plugin--background);
+        margin: 8px;
+        border-radius: 3px;
+        overflow: hidden;
 
         .error {
             flex: 1 1 auto;
+            width: 0px;
             display: flex;
             align-items: center;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-        }
-
-        .error_icon {
-            font-size: 16px;
-            padding-right: 20px;
-            &:after {
-                content: "!";
-            }
+            font-size: 12px;
+            color: var(--error--color);
         }
     }
 
-    .split-panel.orient-vertical > .split-panel-divider {
-        margin-bottom: -6px;
+    .split-panel.orient-vertical > .split-panel-child:not(.is-width-override) #editor-container {
+        height: 300px;
     }
 
-    .split-panel.orient-vertical
-        > .split-panel-child:not(.is-width-override)
-        #editor-container {
-        height: 242px;
-    }
-
-    .split-panel:not(.orient-vertical)
-        > .split-panel-child:not(.is-width-override)
-        #editor-container {
+    .split-panel.orient-horizontal > .split-panel-child:not(.is-width-override) #editor-container {
         width: 400px;
     }
 

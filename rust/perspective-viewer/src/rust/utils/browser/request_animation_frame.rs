@@ -34,11 +34,14 @@ pub async fn await_queue_microtask() -> ApiResult<()> {
 
 /// An `async` version of `requestAnimationFrame()`, which resolves on the next
 /// animation frame.
-pub async fn await_animation_frame() -> ApiResult<()> {
+pub async fn request_animation_frame() {
     let (sender, receiver) = channel::<()>();
     let jsfun = Closure::once_into_js(move || sender.send(()).unwrap());
-    global::window().request_animation_frame(jsfun.unchecked_ref())?;
-    Ok(receiver.await?)
+    global::window()
+        .request_animation_frame(jsfun.unchecked_ref())
+        .unwrap();
+
+    receiver.await.unwrap()
 }
 
 /// An `async` which awaits the browser's `load` event, which is automatically

@@ -8,6 +8,32 @@
  *
  */
 
+:host .sidebar_close_button {
+    position: absolute;
+    top: 0;
+    left: -26px;
+    padding-top: 14px;
+    z-index: 10000;
+
+    &:hover {
+        cursor: pointer;
+    }
+
+    &:before {
+        display: inline-block;
+        height: 18px;
+        width: 26px;
+
+        content: "";
+        mask-size: cover;
+        -webkit-mask-size: cover; //40px 35px;
+        background-repeat: no-repeat;
+        background-color: var(--icon--color);
+        mask-image: url(../svg/drawer-tab.svg);
+        -webkit-mask-image: url(../svg/drawer-tab.svg);
+    }
+}
+
 
 :host(:hover) {
     #menu-bar {
@@ -44,6 +70,11 @@
             border-left: 1px solid var(--inactive--color, #6E6E6E);
             margin-right: -5px;
         }
+    }
+
+    #modal_panel > .split-panel-divider {
+        border-left: 1px solid var(--inactive--color, #6E6E6E);
+        margin-right: -5px;
     }
 
     #status_bar {
@@ -89,7 +120,7 @@
         }
     }
 
-    #side_panel {
+    #settings_panel {
         position: relative;
         flex: 0 0 auto;
         padding: var(--side-panel--padding, 10px 2px 0px 11px);
@@ -126,7 +157,12 @@
         /* Non-prefixed version, currently supported by Chrome and Opera */
     }
 
-    .column {
+    .sidebar_column {
+        background: url(../svg/bg-pattern.png);
+        background-size: 4px;
+        background-color: var(--plugin--background);
+        background-attachment: fixed;
+
         display: flex;
         list-style: none;
         flex-direction: column;
@@ -204,9 +240,11 @@
             // content: url(../svg/drawer-tab.svg);;
 
             content: "";
+            mask-size: cover;
             -webkit-mask-size: cover; //40px 35px;
             background-repeat: no-repeat;
             background-color: var(--icon--color);
+            mask-image: url(../svg/drawer-tab.svg);
             -webkit-mask-image: url(../svg/drawer-tab.svg);
         }
 
@@ -230,11 +268,46 @@
 
     }
 
-    .split-panel {
-        .split-panel-child {
-            &:first-child:not(.is-width-override) {
-                max-width: 300px;
-            }
-        }
+    .split-panel.orient-reverse > .split-panel-child:not(:last-child):not(.is-width-override) {
+        max-width: 300px;
+    }
+
+    #expr_panel_header {
+        min-height: 48px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        border-bottom: 1px solid var(--inactive--color, #6E6E6E);
+    }
+
+    #expr_panel_header_title {
+        padding-left: 9px;
+        font-size: 12px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        margin-right: 30px;
+    }
+
+    #expr_panel_border {
+        height: 2px;
+        width: 100%;
+        background-color: var(--inactive--color, #6E6E6E);
+        margin-top: 1px;
+    }
+
+    .expr_editor_column {
+        z-index: 2;
+        width: 100%;
+        min-width: 250px;
+    }
+
+    #modal_panel .is-width-override {
+        min-width: 50px !important;
+    }
+
+    .is-width-override > .expr_editor_column {
+        min-width: unset;
     }
 }

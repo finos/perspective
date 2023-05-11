@@ -30,6 +30,7 @@ use self::config_selector::ConfigSelector;
 use self::inactive_column::*;
 use super::containers::scroll_panel::*;
 use super::containers::split_panel::{Orientation, SplitPanel};
+use super::expression_panel_sidebar::EditorState;
 use super::style::LocalStyle;
 use crate::custom_elements::ColumnDropDownElement;
 use crate::dragdrop::*;
@@ -44,6 +45,11 @@ pub struct ColumnSelectorProps {
     pub session: Session,
     pub renderer: Renderer,
     pub dragdrop: DragDrop,
+
+    pub on_open_expr_panel: Callback<Option<String>>,
+
+    /// This is passed to the add_expression_button for styling.
+    pub editor_state: EditorState,
 
     #[prop_or_default]
     pub on_resize: Option<Rc<PubSub<()>>>,
@@ -270,7 +276,8 @@ impl Component for ColumnSelector {
                             renderer={ &ctx.props().renderer }
                             ondragenter={ ondragenter }
                             ondragend={ &ondragend }
-                            onselect={ &onselect }/>
+                            onselect={ &onselect }
+                            on_open_expr_panel={ &ctx.props().on_open_expr_panel } />
                     </ScrollPanelItem>
                 }
             })
@@ -293,7 +300,8 @@ impl Component for ColumnSelector {
                             session={ &ctx.props().session }
                             renderer={ &ctx.props().renderer }
                             onselect={ &onselect }
-                            ondragend={ &ondragend } />
+                            ondragend={ &ondragend }
+                            on_open_expr_panel={ &ctx.props().on_open_expr_panel } />
                     </ScrollPanelItem>
                 }
             })
@@ -304,12 +312,11 @@ impl Component for ColumnSelector {
         } else {
             28.0
         };
-
         let add_column = html_nested! {
             <ScrollPanelItem key={ "__add_expression__" } size={ size }>
                 <AddExpressionButton
-                    session={ &ctx.props().session }
-                    renderer={ &ctx.props().renderer }>
+                    on_open_expr_panel={ &ctx.props().on_open_expr_panel }
+                    editor_state={ ctx.props().editor_state.clone() }>
                 </AddExpressionButton>
             </ScrollPanelItem>
         };

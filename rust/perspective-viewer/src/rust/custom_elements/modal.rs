@@ -211,7 +211,7 @@ where
 
         self.root.borrow().as_ref().unwrap().send_message(msg);
         global::body().append_child(&self.custom_element)?;
-        await_animation_frame().await?;
+        request_animation_frame().await;
 
         // Check if the modal has been positioned off-screen and re-locate if necessary
         self.anchor.set(calc_relative_position(

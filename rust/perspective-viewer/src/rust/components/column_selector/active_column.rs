@@ -36,6 +36,7 @@ pub struct ActiveColumnProps {
     pub ondragenter: Callback<()>,
     pub ondragend: Callback<()>,
     pub onselect: Callback<()>,
+    pub on_open_expr_panel: Callback<Option<String>>,
 
     #[prop_or_default]
     pub is_aggregated: bool,
@@ -362,13 +363,10 @@ impl Component for ActiveColumn {
                                 }
 
                                 if is_expression {
-                                    <ExpressionToolbar
-                                        session={ &ctx.props().session }
-                                        renderer={ &ctx.props().renderer }
-                                        dragdrop={ &ctx.props().dragdrop }
+                                    <ExprEditButton
                                         name={ name.clone() }
-                                        add_expression_ref={ &self.add_expression_ref }>
-                                    </ExpressionToolbar>
+                                        on_open_expr_panel={ &ctx.props().on_open_expr_panel }
+                                    ></ExprEditButton>
                                 }
                             </div>
                         </div>

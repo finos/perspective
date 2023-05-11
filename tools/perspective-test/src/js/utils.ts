@@ -8,8 +8,6 @@
  */
 
 import { expect, Page } from "@playwright/test";
-import fs from "fs";
-import path from "path";
 
 /**
  * Clean a `<svg>` for serialization/comparison.
@@ -77,7 +75,11 @@ export const getSvgContentString = (selector: string) => async (page: Page) => {
                 case "rect":
                 case "text":
                     removeAttrs(node);
-                    if (["label", "segment"].some((c) => node.classList.contains(c))) {
+                    if (
+                        ["label", "segment"].some((c) =>
+                            node.classList.contains(c)
+                        )
+                    ) {
                         node.textContent = node.textContent.slice(0, 2);
                     }
                     break;
@@ -161,7 +163,7 @@ export async function shadow_click(page, ...path): Promise<void> {
                 document;
             while (path.length > 0) {
                 let elem2 = elem;
-                if (elem2 instanceof Element) {
+                if (elem2 instanceof Element && elem2.shadowRoot !== null) {
                     elem = elem2.shadowRoot;
                 }
 
@@ -200,7 +202,7 @@ export async function shadow_type(
                 document;
             while (path.length > 0) {
                 let elem2 = elem;
-                if (elem2 instanceof Element) {
+                if (elem2 instanceof Element && elem2.shadowRoot !== null) {
                     elem = elem2.shadowRoot;
                 }
 
