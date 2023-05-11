@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.18.2)
 project(psp)
 include(CheckCCompilerFlag)
 
-# set(CMAKE_BUILD_TYPE "Release")
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -215,8 +214,7 @@ if(PSP_WASM_BUILD)
     list(APPEND CMAKE_PREFIX_PATH /usr/local)
 
     # Assumes that Boost includes will be in this folder.
-    # include_directories(SYSTEM "/usr/local/include")
-    include_directories(SYSTEM "${CMAKE_SOURCE_DIR}/src/include/perspective/vendor")
+    include_directories(SYSTEM "/usr/local/include")
 
     # Include this docker-only directory.
     include_directories(SYSTEM "/boost_includes")
@@ -263,8 +261,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     else()
         if(CMAKE_BUILD_TYPE_LOWER STREQUAL debug)
             if (PSP_PYODIDE)
-              # TOOD(tom): determine which of these we shouldn't bother setting
-              # because pyodide's pywasmcross.py overrides them
+              # TODO(tom): does pyodide's wasmcross.py override this?
               set(OPT_FLAGS " \
                   -O0 \
                   -g3 \
@@ -336,9 +333,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
             psp_build_message("${Red}Manylinux build has no python shared libraries${ColorReset}")
             find_package(Python ${PSP_PYTHON_VERSION} EXACT REQUIRED COMPONENTS Interpreter)
             find_package(PythonHeaders ${PSP_PYTHON_VERSION} EXACT REQUIRED)
-
-            # Run with exact version so its cached for pybind
-            # find_package(PythonInterp ${PSP_PYTHON_VERSION} EXACT REQUIRED)
         else()
             psp_build_message("${Cyan}Use python shared libraries${ColorReset}")
             if(PSP_PYODIDE)
@@ -346,24 +340,16 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
             else()
                 find_package(Python ${PSP_PYTHON_VERSION} EXACT REQUIRED COMPONENTS Interpreter Development.Module)
             endif()
-            message(NOTICE "${PYTHON_FOUND}")
 
             link_directories(${Python_LIBRARY_DIRS})
         endif()
-        message("PYTHON_INCLUDE_DIR ${PYTHON_INCLUDE_DIR}")
-        message("PYTHON_INCLUDE_DIRS ${Python_INCLUDE_DIRS}")
-
-        # message(FATAL_ERROR "fff")
 
         psp_build_message("${Cyan}Using Python ${Python_VERSION}, \nPython_INCLUDE_DIRS: ${Python_INCLUDE_DIRS}, \nPython_LIBRARIES: ${Python_LIBRARIES}, \nPython_EXECUTABLE: ${Python_EXECUTABLE} ${ColorReset}")
         include_directories(${Python_INCLUDE_DIRS})
 
         psp_build_dep("pybind11" "${PSP_CMAKE_MODULE_PATH}/Pybind.txt.in")
 
-        # execute_process (COMMAND bash -c "sleep 1000000")
         find_package(NumPy REQUIRED)
-
-        # execute_process (COMMAND bash -c "sleep 1000000")
 
         if(NOT PYTHON_NUMPY_FOUND)
             message(FATAL_ERROR "${Red}Numpy could not be located${ColorReset}")
@@ -575,7 +561,7 @@ if(PSP_WASM_BUILD)
     set_target_properties(perspective_cjs PROPERTIES OUTPUT_NAME "perspective.cpp")
 elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     if (PSP_PYODIDE)
-      # TODO(tom): this is a straight copy of PSP_WASM_BUILD, fix it
+      # TODO(tom): this is a straight copy of PSP_WASM_BUILD, merge them
       # TOOD(tom): determine which of these we shouldn't bother setting
       # because pyodide's pywasmcross.py overrides them
       set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \

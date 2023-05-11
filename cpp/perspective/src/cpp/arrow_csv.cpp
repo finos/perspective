@@ -12,7 +12,6 @@
 #include <arrow/util/value_parsing.h>
 #include <arrow/io/memory.h>
 
-// TODO(tom): No threads in pyodide so we want single_threaded_reader
 #ifdef PSP_ENABLE_WASM
 // This causes build warnings
 // https://github.com/emscripten-core/emscripten/issues/8574
