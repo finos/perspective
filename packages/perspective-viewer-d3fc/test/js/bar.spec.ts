@@ -17,9 +17,13 @@ test.describe("Bar Tests", () => {
     test.describe("Y Bar", () => {
         test.beforeEach(async ({ page }) => {
             await page.goto(
-                "/@finos/perspective-test/src/html/basic-test.html",
-                { waitUntil: "networkidle" }
+                "/@finos/perspective-test/src/html/basic-test.html"
             );
+            await page.evaluate(async () => {
+                while (!window["__TEST_PERSPECTIVE_READY__"]) {
+                    await new Promise((x) => setTimeout(x, 10));
+                }
+            });
 
             await page.evaluate(async () => {
                 await document.querySelector("perspective-viewer")!.restore({
@@ -40,9 +44,13 @@ test.describe("Bar Tests", () => {
     test.describe("X Bar", () => {
         test.beforeEach(async ({ page }) => {
             await page.goto(
-                "/@finos/perspective-test/src/html/basic-test.html",
-                { waitUntil: "networkidle" }
+                "/@finos/perspective-test/src/html/basic-test.html"
             );
+            await page.evaluate(async () => {
+                while (!window["__TEST_PERSPECTIVE_READY__"]) {
+                    await new Promise((x) => setTimeout(x, 10));
+                }
+            });
 
             await page.evaluate(async () => {
                 await document.querySelector("perspective-viewer")!.restore({
@@ -62,9 +70,13 @@ test.describe("Bar Tests", () => {
     test.describe("Y Bar (Themed)", () => {
         test.beforeEach(async ({ page }) => {
             await page.goto(
-                "/@finos/perspective-test/src/html/themed-test.html",
-                { waitUntil: "networkidle" }
+                "/@finos/perspective-test/src/html/themed-test.html"
             );
+            await page.evaluate(async () => {
+                while (!window["__TEST_PERSPECTIVE_READY__"]) {
+                    await new Promise((x) => setTimeout(x, 10));
+                }
+            });
 
             await page.evaluate(async () => {
                 await document.querySelector("perspective-viewer")!.restore({

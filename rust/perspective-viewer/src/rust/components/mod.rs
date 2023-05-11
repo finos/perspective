@@ -17,6 +17,7 @@ pub mod copy_dropdown;
 pub mod datetime_column_style;
 pub mod export_dropdown;
 pub mod expression_editor;
+pub mod expression_panel_sidebar;
 pub mod filter_dropdown;
 pub mod font_loader;
 pub mod form;

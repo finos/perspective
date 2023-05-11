@@ -21,12 +21,12 @@ async function get_contents(page) {
 
 test.describe("Superstore", () => {
     test.beforeEach(async function init({ page }) {
-        await page.goto(
-            "/@finos/perspective-viewer/test/html/superstore.html",
-            {
-                waitUntil: "networkidle",
+        await page.goto("/@finos/perspective-viewer/test/html/superstore.html");
+        await page.evaluate(async () => {
+            while (!window["__TEST_PERSPECTIVE_READY__"]) {
+                await new Promise((x) => setTimeout(x, 10));
             }
-        );
+        });
 
         await page.evaluate(async () => {
             await document.querySelector("perspective-viewer").restore({

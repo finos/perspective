@@ -12,7 +12,6 @@ pub mod date_column_style;
 pub mod datetime_column_style;
 pub mod debug_plugin;
 pub mod export_dropdown;
-pub mod expression_editor;
 mod filter_dropdown;
 mod function_dropdown;
 pub mod modal;

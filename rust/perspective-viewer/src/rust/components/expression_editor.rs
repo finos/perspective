@@ -13,48 +13,27 @@ use yew::prelude::*;
 
 use super::containers::split_panel::*;
 use super::form::code_editor::*;
-use super::modal::*;
-use super::style::{LocalStyle, StyleProvider};
+use super::style::LocalStyle;
 use crate::js::PerspectiveValidationError;
 use crate::session::Session;
-use crate::utils::*;
 use crate::*;
 
 #[derive(Debug)]
 pub enum ExpressionEditorMsg {
-    Render,
     Reset,
     Delete,
     SetExpr(Rc<String>),
-    SetExprDefault,
     ValidateComplete(Option<PerspectiveValidationError>),
     SaveExpr,
 }
 
-use ExpressionEditorMsg::*;
-
-#[derive(Properties)]
+#[derive(Properties, PartialEq)]
 pub struct ExpressionEditorProps {
+    pub session: Session,
     pub on_save: Callback<JsValue>,
     pub on_validate: Callback<bool>,
     pub on_delete: Option<Callback<()>>,
-    pub session: Session,
     pub alias: Option<String>,
-
-    #[prop_or_default]
-    weak_link: WeakScope<ExpressionEditor>,
-}
-
-impl ModalLink<ExpressionEditor> for ExpressionEditorProps {
-    fn weak_link(&self) -> &'_ WeakScope<ExpressionEditor> {
-        &self.weak_link
-    }
-}
-
-impl PartialEq for ExpressionEditorProps {
-    fn eq(&self, _other: &Self) -> bool {
-        false
-    }
 }
 
 impl ExpressionEditorProps {
@@ -93,7 +72,6 @@ impl Component for ExpressionEditor {
     type Properties = ExpressionEditorProps;
 
     fn create(ctx: &Context<Self>) -> Self {
-        ctx.set_modal_link();
         Self {
             save_enabled: false,
             edit_enabled: false,
@@ -104,24 +82,20 @@ impl Component for ExpressionEditor {
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            SetExpr(val) => {
+            ExpressionEditorMsg::SetExpr(val) => {
                 self.expr = val.clone();
                 clone!(ctx.props().session);
                 ctx.props().on_validate.emit(true);
                 ctx.link().send_future(async move {
                     match session.validate_expr(JsValue::from(&*val)).await {
                         Ok(x) => ExpressionEditorMsg::ValidateComplete(x),
-                        Err(_err) => ValidateComplete(None),
+                        Err(_err) => ExpressionEditorMsg::ValidateComplete(None),
                     }
                 });
 
                 true
             }
-            SetExprDefault => {
-                self.expr = ctx.props().initial_expr();
-                false
-            }
-            ValidateComplete(err) => {
+            ExpressionEditorMsg::ValidateComplete(err) => {
                 self.error = err;
                 if self.error.is_none() {
                     let is_edited = maybe!({
@@ -144,7 +118,7 @@ impl Component for ExpressionEditor {
                 ctx.props().on_validate.emit(false);
                 true
             }
-            Reset => {
+            ExpressionEditorMsg::Reset => {
                 self.edit_enabled = false;
                 self.save_enabled = false;
                 maybe!({
@@ -158,8 +132,7 @@ impl Component for ExpressionEditor {
 
                 true
             }
-            Render => true,
-            SaveExpr => {
+            ExpressionEditorMsg::SaveExpr => {
                 if self.save_enabled {
                     let expr = self.expr.to_owned();
                     ctx.props().on_save.emit(JsValue::from(&*expr));
@@ -167,7 +140,7 @@ impl Component for ExpressionEditor {
 
                 false
             }
-            Delete => {
+            ExpressionEditorMsg::Delete => {
                 if let Some(on_delete) = &ctx.props().on_delete {
                     on_delete.emit(());
                 }
@@ -178,18 +151,12 @@ impl Component for ExpressionEditor {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let reset = ctx.link().callback(|_| Reset);
-        let delete = ctx.link().callback(|_| Delete);
-        let save = ctx.link().callback(|_| SaveExpr);
-        let reverse_vertical: bool = ctx
-            .link()
-            .context::<ModalOrientation>(Callback::noop())
-            .unwrap()
-            .0
-            .into();
+        let reset = ctx.link().callback(|_| ExpressionEditorMsg::Reset);
+        let delete = ctx.link().callback(|_| ExpressionEditorMsg::Delete);
+        let save = ctx.link().callback(|_| ExpressionEditorMsg::SaveExpr);
 
-        let oninput = ctx.link().callback(SetExpr);
-        let onsave = ctx.link().callback(|()| SaveExpr);
+        let oninput = ctx.link().callback(ExpressionEditorMsg::SetExpr);
+        let onsave = ctx.link().callback(|()| ExpressionEditorMsg::SaveExpr);
         let is_closable = maybe! {
             let alias = ctx.props().alias.as_ref()?;
             Some(!ctx.props().session.is_column_expression_in_use(alias))
@@ -197,61 +164,59 @@ impl Component for ExpressionEditor {
         .unwrap_or_default();
 
         html_template! {
-            <StyleProvider>
-                <LocalStyle href={ css!("expression-editor") } />
-                <SplitPanel id="expression-editor-split-panel">
-                    <SplitPanel
-                        orientation={ Orientation::Vertical }
-                        reverse={ reverse_vertical }>
+            <LocalStyle href={ css!("expression-editor") } />
+            <SplitPanel orientation={ Orientation::Vertical }>
+                <div id="editor-container">
+                    <CodeEditor
+                        expr={ &self.expr }
+                        error={ self.error.clone().map(|x| x.into()) }
+                        { oninput }
+                        { onsave } />
 
-                        <div id="editor-container">
-                            <CodeEditor
-                                expr={ &self.expr }
-                                error={ self.error.clone().map(|x| x.into()) }
-                                { oninput }
-                                { onsave } />
-
-                            <div id="psp-expression-editor-actions">
-                                if let Some(err) = &self.error {
-                                    <span class="error_icon"></span>
-                                    <div class="error">
-                                        { &err.error_message }
-                                    </div>
-                                }
-
-                                if is_closable {
-                                    <button
-                                        id="psp-expression-editor-button-delete"
-                                        class="psp-expression-editor__button"
-                                        onmousedown={ delete }>
-                                        { "Delete" }
-                                    </button>
-                                }
-
-                                if ctx.props().alias.is_some() {
-                                    <button
-                                        id="psp-expression-editor-button-reset"
-                                        class="psp-expression-editor__button"
-                                        onmousedown={ reset }
-                                        disabled={ !self.edit_enabled }>
-                                        { "Reset" }
-                                    </button>
-                                }
-
-                                <button
-                                    id="psp-expression-editor-button-save"
-                                    class="psp-expression-editor__button"
-                                    onmousedown={ save }
-                                    disabled={ !self.save_enabled }>
-                                    { "Save" }
-                                </button>
+                    <div id="psp-expression-editor-actions">
+                        if let Some(err) = &self.error {
+                            <div class="error">
+                                { &err.error_message }
                             </div>
-                        </div>
-                        <div id="phantom_div"></div>
-                    </SplitPanel>
-                    <div></div>
-                </SplitPanel>
-            </StyleProvider>
+                        }
+
+                        if is_closable {
+                            <button
+                                id="psp-expression-editor-button-delete"
+                                class="psp-expression-editor__button"
+                                onmousedown={ delete }>
+                                { "Delete" }
+                            </button>
+                        }
+
+                        if ctx.props().alias.is_some() {
+                            <button
+                                id="psp-expression-editor-button-reset"
+                                class="psp-expression-editor__button"
+                                onmousedown={ reset }
+                                disabled={ !self.edit_enabled }>
+                                { "Reset" }
+                            </button>
+                        }
+
+                        <button
+                            id="psp-expression-editor-button-save"
+                            class="psp-expression-editor__button"
+                            onmousedown={ save }
+                            disabled={ !self.save_enabled }>
+                            { "Save" }
+                        </button>
+                    </div>
+                </div>
+                <></>
+            </SplitPanel>
         }
+    }
+
+    fn changed(&mut self, ctx: &Context<Self>, old_props: &Self::Properties) -> bool {
+        if ctx.props().alias != old_props.alias {
+            self.expr = ctx.props().initial_expr();
+        }
+        true
     }
 }

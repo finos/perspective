@@ -17,7 +17,7 @@ use wasm_bindgen_futures::JsFuture;
 use web_sys::*;
 use yew::prelude::*;
 
-use crate::components::viewer::{Msg, PerspectiveViewer, PerspectiveViewerProps};
+use crate::components::viewer::{PerspectiveViewer, PerspectiveViewerMsg, PerspectiveViewerProps};
 use crate::config::*;
 use crate::custom_events::*;
 use crate::dragdrop::*;
@@ -37,7 +37,7 @@ struct ResizeObserverHandle {
 
 impl ResizeObserverHandle {
     fn new(elem: &HtmlElement, renderer: &Renderer, root: &AppHandle<PerspectiveViewer>) -> Self {
-        let on_resize = root.callback(|()| Msg::Resize);
+        let on_resize = root.callback(|()| PerspectiveViewerMsg::Resize);
         let mut state = ResizeObserverState {
             elem: elem.clone(),
             renderer: renderer.clone(),
@@ -197,7 +197,7 @@ impl PerspectiveViewerElement {
         tracing::debug!("Connected <perspective-viewer>");
     }
 
-    /// Loads a promise to a `JsPerspectiveTable` in this viewer.  Historially,
+    /// Loads a promise to a `JsPerspectiveTable` in this viewer.  Historically,
     /// `<perspective-viewer>` has accepted either a `Promise` or `Table` as an
     /// argument, so we preserve that behavior here with some loss of type
     /// precision.
@@ -356,7 +356,9 @@ impl PerspectiveViewerElement {
                     .borrow()
                     .as_ref()
                     .ok_or("Already deleted")?
-                    .send_message_async(move |x| Msg::ToggleSettingsComplete(settings, x));
+                    .send_message_async(move |x| {
+                        PerspectiveViewerMsg::ToggleSettingsComplete(settings, x)
+                    });
 
                 let internal_task = async {
                     let plugin = renderer.get_active_plugin()?;
@@ -451,7 +453,7 @@ impl PerspectiveViewerElement {
                 .borrow()
                 .as_ref()
                 .ok_or("Already deleted")?
-                .send_message_async(move |x| Msg::Reset(all, Some(x)));
+                .send_message_async(move |x| PerspectiveViewerMsg::Reset(all, Some(x)));
 
             Ok(task.await?)
         })
@@ -569,7 +571,7 @@ impl PerspectiveViewerElement {
             let task = root
                 .borrow()
                 .as_apierror()?
-                .send_message_async(|x| Msg::ToggleSettingsInit(force, Some(x)));
+                .send_message_async(|x| PerspectiveViewerMsg::ToggleSettingsInit(force, Some(x)));
 
             task.await.map_err(|_| JsValue::from("Cancelled"))?
         })

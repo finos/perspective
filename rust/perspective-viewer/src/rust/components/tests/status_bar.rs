@@ -54,19 +54,19 @@ pub async fn test_callbacks_invoked() {
         </StatusBar>
     };
 
-    await_animation_frame().await.unwrap();
+    request_animation_frame().await;
     assert_eq!(token.get(), 0);
     let status_bar = link.borrow().clone().unwrap();
     status_bar.send_message(StatusBarMsg::Export);
-    await_animation_frame().await.unwrap();
+    request_animation_frame().await;
     assert_eq!(token.get(), 0);
     let status_bar = link.borrow().clone().unwrap();
     status_bar.send_message(StatusBarMsg::Copy);
-    await_animation_frame().await.unwrap();
+    request_animation_frame().await;
     assert_eq!(token.get(), 0);
     let status_bar = link.borrow().clone().unwrap();
     status_bar.send_message(StatusBarMsg::Reset(false));
-    await_animation_frame().await.unwrap();
+    request_animation_frame().await;
     assert_eq!(token.get(), 1);
 }
 
@@ -103,7 +103,7 @@ async fn gen(stats: &Option<ViewStats>) -> (HtmlElement, Session) {
             .send_message(StatusBarMsg::TableStatsChanged);
     }
 
-    await_animation_frame().await.unwrap();
+    request_animation_frame().await;
     (div, session)
 }
 

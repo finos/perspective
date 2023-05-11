@@ -134,7 +134,7 @@ macro_rules! test_html {
         };
 
         yew::Renderer::<TestElement>::with_root_and_props(shadow_root, props).render();
-        await_animation_frame().await.unwrap();
+        request_animation_frame().await;
         root.cast::<web_sys::HtmlElement>()
             .unwrap()
             .children()
