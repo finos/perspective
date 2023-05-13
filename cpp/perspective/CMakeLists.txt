@@ -27,6 +27,9 @@ if(NOT DEFINED PSP_CMAKE_MODULE_PATH)
 endif()
 
 set(CMAKE_MODULE_PATH "${PSP_CMAKE_MODULE_PATH}/modules" ${CMAKE_MODULE_PATH})
+# TODO(tom): why do we need to set both of these...
+set(CMAKE_FIND_ROOT_PATH "${CMAKE_FIND_ROOT_PATH};/usr/local/include")
+set(BOOST_ROOT "/usr/local/include")
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     set(WIN32 ON)
