@@ -58,16 +58,19 @@ const gh_python_dist_folders = [
     // // https://github.com/actions/virtual-environments
 
     // Mac 11
+    "perspective-python-dist-macos-11-3.7",
     "perspective-python-dist-macos-11-3.8",
     "perspective-python-dist-macos-11-3.9",
     "perspective-python-dist-macos-11-3.10",
 
     // Ubuntu (Manylinux 2014 docker images)
+    "perspective-python-dist-ubuntu-20.04-3.7",
     "perspective-python-dist-ubuntu-20.04-3.8",
     "perspective-python-dist-ubuntu-20.04-3.9",
     "perspective-python-dist-ubuntu-20.04-3.10",
 
     // Windows 2019 (No 3.6 on windows)
+    "perspective-python-dist-windows-2019-3.7",
     "perspective-python-dist-windows-2019-3.8",
     "perspective-python-dist-windows-2019-3.9",
     "perspective-python-dist-windows-2019-3.10",
