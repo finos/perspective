@@ -1,6 +1,14 @@
+# [v2.1.2](https://github.com/finos/perspective/releases/tag/v2.1.2)
+
+_16 May 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.1.1...v2.1.2))
+
+Misc
+
+- Public `perspective-viewer` components [#2222](https://github.com/finos/perspective/pull/2222)
+
 # [v2.1.1](https://github.com/finos/perspective/releases/tag/v2.1.1)
 
-_8 May 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.1.0...v2.1.1))
+_7 May 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.1.0...v2.1.1))
 
 Fixes
 
