@@ -25,7 +25,7 @@ static DOM_STYLES: &[CSSResource] = &[css!("dom/checkbox"), css!("dom/select")];
 
 /// A state object for `<style>` snippets used by a yew `Component` with a
 /// `<StyleProvider>` at the root.
-#[derive(Clone, Default)]
+#[derive(Clone)]
 pub struct StyleCache(Rc<StyleCacheData>);
 
 impl Deref for StyleCache {
@@ -43,6 +43,10 @@ impl PartialEq for StyleCache {
 }
 
 impl StyleCache {
+    pub fn new(is_shadow: bool) -> StyleCache {
+        StyleCache(Rc::new(StyleCacheData::new(is_shadow)))
+    }
+
     /// Insert a new stylesheet into this manager, _immediately_ inserting it
     /// into the DOM as well if any other elements are already connected,
     /// bypassing yew rendering;  when the yew `Component::view` method is
@@ -55,7 +59,7 @@ impl StyleCache {
     pub fn add_style(&self, name: &'static str, css: &'static str) {
         let mut map = self.0.styles.borrow_mut();
         if !map.contains_key(name) {
-            let style = Self::into_style(name, css);
+            let style = Self::into_style(name, css, self.0.is_shadow);
             let first = map.values().next().cloned();
             map.insert(name, style.clone());
             if let Some(x) = first {
@@ -69,9 +73,15 @@ impl StyleCache {
 
     /// Concert a CSS string to an `HtmlStyleElement`, which are memoized due
     /// to their size and DOM performance impact.
-    fn into_style(name: &str, css: &str) -> web_sys::HtmlStyleElement {
+    fn into_style(name: &str, css: &str, is_shadow: bool) -> web_sys::HtmlStyleElement {
         let elem = global::document().create_element("style").unwrap();
-        elem.set_text_content(Some(css));
+        if is_shadow {
+            elem.set_text_content(Some(css));
+        } else {
+            let new_css = css.replace(":host", ":root");
+            elem.set_text_content(Some(&new_css));
+        }
+
         elem.set_attribute("name", name).unwrap();
         elem.unchecked_into()
     }
@@ -85,16 +95,18 @@ impl StyleCache {
 /// when rendered to the DOM.
 pub struct StyleCacheData {
     styles: RefCell<BTreeMap<&'static str, web_sys::HtmlStyleElement>>,
+    is_shadow: bool,
 }
 
-impl Default for StyleCacheData {
-    fn default() -> Self {
+impl StyleCacheData {
+    fn new(is_shadow: bool) -> Self {
         let styles = DOM_STYLES
             .iter()
-            .map(|x| (x.0, StyleCache::into_style(x.0, x.1)));
+            .map(|x| (x.0, StyleCache::into_style(x.0, x.1, is_shadow)));
 
         Self {
             styles: RefCell::new(styles.collect()),
+            is_shadow,
         }
     }
 }

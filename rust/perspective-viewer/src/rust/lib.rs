@@ -19,7 +19,7 @@
     clippy::await_holding_refcell_ref
 )]
 
-mod components;
+pub mod components;
 pub mod config;
 pub mod custom_elements;
 mod custom_events;
@@ -32,8 +32,6 @@ mod renderer;
 mod session;
 pub mod utils;
 
-#[cfg(feature = "define_custom_elements_async")]
-pub use components::{LocalStyle, StyleProvider};
 use utils::JsValueSerdeExt;
 use wasm_bindgen::prelude::*;
 

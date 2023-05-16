@@ -17,7 +17,7 @@ use yew::*;
 
 use super::modal::*;
 use super::viewer::PerspectiveViewerElement;
-use crate::components::{CopyDropDownMenu, CopyDropDownMenuProps};
+use crate::components::copy_dropdown::{CopyDropDownMenu, CopyDropDownMenuProps};
 use crate::js::*;
 use crate::model::*;
 use crate::utils::*;

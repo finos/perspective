@@ -15,7 +15,7 @@ use yew::html::ImplicitClone;
 use yew::{props, Callback};
 
 use crate::components::column_dropdown::*;
-use crate::components::InPlaceColumn;
+use crate::components::column_selector::InPlaceColumn;
 use crate::custom_elements::modal::*;
 use crate::session::Session;
 use crate::utils::ApiFuture;

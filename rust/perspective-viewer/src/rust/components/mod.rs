@@ -11,31 +11,32 @@
 //! these 4.
 
 pub mod column_dropdown;
-mod column_selector;
-mod containers;
-mod copy_dropdown;
+pub mod column_selector;
+pub mod containers;
+pub mod copy_dropdown;
 pub mod datetime_column_style;
 pub mod export_dropdown;
 pub mod expression_editor;
 pub mod filter_dropdown;
-mod font_loader;
-mod form;
+pub mod font_loader;
+pub mod form;
 pub mod function_dropdown;
-mod modal;
+pub mod modal;
 pub mod number_column_style;
-mod plugin_selector;
-mod render_warning;
-mod status_bar;
-mod status_bar_counter;
+pub mod plugin_selector;
+pub mod render_warning;
+pub mod status_bar;
+pub mod status_bar_counter;
 pub mod string_column_style;
-mod style;
-mod viewer;
+pub mod style;
+pub mod viewer;
 
 #[cfg(test)]
 mod tests;
 
-pub use self::column_selector::InPlaceColumn;
-pub use self::copy_dropdown::*;
-pub use self::modal::*;
-pub use self::style::*;
-pub use self::viewer::*;
+// pub use self::column_selector::InPlaceColumn;
+// pub use self::containers::*;
+// pub use self::copy_dropdown::*;
+// pub use self::modal::*;
+// pub use self::style::*;
+// pub use self::viewer::*;

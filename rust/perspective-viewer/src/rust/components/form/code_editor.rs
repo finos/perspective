@@ -13,8 +13,8 @@ use wasm_bindgen::JsCast;
 use web_sys::*;
 use yew::prelude::*;
 
-use super::super::LocalStyle;
 use crate::components::form::highlight::highlight;
+use crate::components::style::LocalStyle;
 use crate::custom_elements::FunctionDropDownElement;
 use crate::exprtk::{tokenize, Cursor};
 use crate::js::PerspectiveValidationError;

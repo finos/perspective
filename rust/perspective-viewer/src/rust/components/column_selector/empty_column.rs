@@ -11,7 +11,7 @@ use std::collections::HashSet;
 use web_sys::*;
 use yew::prelude::*;
 
-use crate::components::LocalStyle;
+use crate::components::style::LocalStyle;
 use crate::css;
 use crate::custom_elements::ColumnDropDownElement;
 

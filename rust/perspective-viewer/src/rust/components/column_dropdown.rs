@@ -9,8 +9,8 @@
 use web_sys::*;
 use yew::prelude::*;
 
+use super::column_selector::InPlaceColumn;
 use super::modal::*;
-use super::InPlaceColumn;
 use crate::utils::WeakScope;
 use crate::*;
 

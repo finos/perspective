@@ -157,9 +157,6 @@ docs/i18n/en.json
 docs/modules.rst
 docs/perspective.*.rst
 docs/python
-docs/static/img/**/*
-!docs/static/img/logo/
-!docs/static/img/logo/**
 docs/static/css/material-dark.css
 docs/i18n/en.json
 docs/.docusaurus
