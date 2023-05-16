@@ -17,7 +17,7 @@ use wasm_bindgen_futures::JsFuture;
 use web_sys::*;
 use yew::prelude::*;
 
-use crate::components::{Msg, PerspectiveViewer, PerspectiveViewerProps};
+use crate::components::viewer::{Msg, PerspectiveViewer, PerspectiveViewerProps};
 use crate::config::*;
 use crate::custom_events::*;
 use crate::dragdrop::*;

@@ -15,6 +15,8 @@ use crate::*;
 
 #[derive(Properties, PartialEq)]
 pub struct StyleProviderProps {
+    #[prop_or(true)]
+    pub is_shadow: bool,
     pub children: Children,
 }
 
@@ -30,8 +32,8 @@ impl Component for StyleProvider {
     type Message = ();
     type Properties = StyleProviderProps;
 
-    fn create(_ctx: &Context<Self>) -> Self {
-        let cache = StyleCache::default();
+    fn create(ctx: &Context<Self>) -> Self {
+        let cache = StyleCache::new(ctx.props().is_shadow);
         Self { cache }
     }
 

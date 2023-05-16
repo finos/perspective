@@ -17,7 +17,7 @@ use web_sys::*;
 use yew::html::SendAsMessage;
 use yew::prelude::*;
 
-use crate::components::*;
+use crate::components::modal::*;
 use crate::utils::*;
 
 type BlurHandlerType = Rc<RefCell<Option<Closure<dyn FnMut(FocusEvent)>>>>;

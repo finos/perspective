@@ -9,7 +9,7 @@
 use yew::prelude::*;
 
 use super::containers::select::*;
-use super::LocalStyle;
+use super::style::LocalStyle;
 use crate::config::*;
 use crate::js::*;
 use crate::model::*;

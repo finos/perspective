@@ -9,6 +9,10 @@
  */
 
 :host {
+    .split-panel.orient-reverse > .split-panel-child:not(:last-child):not(.is-width-override) {
+        max-width: 300px;
+    }
+
     .split-panel {
         display: flex;
         height: 100%;
@@ -24,6 +28,10 @@
             & > .split-panel-divider:hover {
                 cursor: row-resize;
             }
+        }
+
+        &.orient-reverse {
+            flex-direction: row-reverse;
         }
 
         &.orient-vertical.orient-reverse {
