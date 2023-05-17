@@ -8,7 +8,7 @@
 
 from pytest import raises
 from perspective import PerspectiveError, PerspectiveViewer,\
-                        PerspectiveWidget, Aggregate
+                        PerspectiveWidget, Aggregate, Table
 
 
 class TestAggregates:
@@ -86,3 +86,29 @@ class TestAggregates:
         for agg in Aggregate:
             viewer.aggregates = {"a": agg}
             assert viewer.aggregates == {"a": agg.value}
+
+    def get_median(self, input_data):
+         table = Table(data=input_data)
+         view = table.view(
+            columns=['Price'],
+            aggregates={'Price':'median'},
+            group_by=['Item'])
+
+         return view.to_json()[0]['Price']
+
+    def test_aggregate_median(self):
+        data = [
+            {'Item':'Book','Price':2.0},
+            {'Item':'Book','Price':3.0},
+            {'Item':'Book','Price':5.0},
+            {'Item':'Book','Price':4.0},
+            {'Item':'Book','Price':8.0},
+            {'Item':'Book','Price':9.0},
+            {'Item':'Book','Price':6.0},
+        ]
+
+        assert self.get_median(data) == 5.0  #List = [2.0,3.0,5.0,4.0,8.0,9.0,6.0], median = 5.0
+        assert self.get_median(data[:2]) == 2.5 #List = [2.0,5.0], median = 2.5
+        assert self.get_median(data[5:]) == 7.5 #List = [9.0,6.0], median = 7.5
+        assert self.get_median(data[1:]) == 5.5 #List = [3.0,5.0,4.0,8.0,9.0,6.0], median = 5.5
+        assert self.get_median(data[::2]) == 5.5 #List = [2.0,5.0,8.0,6.0], median = 5.5

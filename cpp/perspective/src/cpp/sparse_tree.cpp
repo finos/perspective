@@ -1133,13 +1133,24 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info,
                         } else if (values.size() == 1) {
                             return values[0];
                         } else {
-                            std::vector<t_tscalar>::iterator middle
-                                = values.begin() + (values.size() / 2);
+                            int size = values.size();
+                            bool is_even_size = size % 2 == 0;
 
-                            std::nth_element(
-                                values.begin(), middle, values.end());
+                            if (is_even_size){
+                                t_tscalar median_average;
+                                std::vector<t_tscalar>::iterator first_middle = values.begin() + ((size - 1) / 2);
+                                std::vector<t_tscalar>::iterator second_middle = values.begin() + (size / 2);
 
-                            return *middle;
+                                nth_element(values.begin(),  first_middle, values.end());
+                                nth_element(values.begin(), second_middle, values.end());
+
+                                median_average.set((*first_middle + *second_middle) / static_cast<t_tscalar>(2));
+                                return median_average;
+                            }else{
+                                std::vector<t_tscalar>::iterator middle = values.begin() + (size / 2);
+                                std::nth_element(values.begin(), middle, values.end());
+                                return *middle;
+                            }
                         }
                     }));
 
