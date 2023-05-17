@@ -608,19 +608,19 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
         # #######################
         # Python extra targets #
         # #######################
-        add_library(psp SHARED ${PYTHON_SOURCE_FILES})
-        add_library(binding SHARED ${PYTHON_BINDING_SOURCE_FILES})
+        # add_library(psp SHARED ${PYTHON_SOURCE_FILES})
+        add_library(binding SHARED ${PYTHON_SOURCE_FILES} ${PYTHON_BINDING_SOURCE_FILES})
         if(PSP_PYODIDE)
             set(PSP_PYTHON_DEFS PSP_ENABLE_WASM=1)
         else()
             set(PSP_PYTHON_DEFS PSP_ENABLE_PYTHON_THREADING=1)
         endif()
-        target_compile_definitions(psp PRIVATE ${PSP_PYTHON_DEFS})
+        # target_compile_definitions(psp PRIVATE ${PSP_PYTHON_DEFS})
         target_compile_definitions(binding PRIVATE ${PSP_PYTHON_DEFS})
 
         include_directories(${PSP_PYTHON_SRC}/include)
 
-        target_compile_definitions(psp PRIVATE PSP_ENABLE_PYTHON=1)
+        # target_compile_definitions(psp PRIVATE PSP_ENABLE_PYTHON=1)
         target_compile_definitions(binding PRIVATE PSP_ENABLE_PYTHON=1)
 
         if(WIN32)
@@ -629,26 +629,30 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 
             # .dll not importable
             set_property(TARGET binding PROPERTY SUFFIX .pyd)
+        elseif(PSP_PYODIDE)
+            # target_compile_options(psp PRIVATE -fvisibility=hidden)
+            target_compile_options(binding PRIVATE -fvisibility=hidden)
         elseif(MACOS OR NOT MANYLINUX)
             target_compile_options(binding PRIVATE -Wdeprecated-declarations)
-            set_property(TARGET psp PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path})
+            # set_property(TARGET psp PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path})
             set_property(TARGET binding PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path})
 
-            target_compile_options(psp PRIVATE -fvisibility=hidden)
+            # target_compile_options(psp PRIVATE -fvisibility=hidden)
             target_compile_options(binding PRIVATE -fvisibility=hidden)
         else()
             target_compile_options(binding PRIVATE -Wdeprecated-declarations)
         endif()
 
         # Link against minimal arrow static library
-        target_link_libraries(psp arrow re2)
-        target_link_libraries(binding psp)
+        # target_link_libraries(psp arrow re2)
+        # target_link_libraries(binding psp)
+        target_link_libraries(binding arrow re2)
 
         # The compiled libraries will be put in CMAKE_LIBRARY_OUTPUT_DIRECTORY by default. In the
         # setup.py file, we designate this to be in the build/lib.<platform> directory. However,
         # since we want to be able to test perspective in-source, we also copy the libraries into
         # the source folder. These two commands do that.
-        add_custom_command(TARGET psp POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:psp> ${PSP_PYTHON_SRC}/table/)
+        # add_custom_command(TARGET psp POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:psp> ${PSP_PYTHON_SRC}/table/)
         add_custom_command(TARGET binding POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:binding> ${PSP_PYTHON_SRC}/table/)
 
     # #######################
@@ -658,15 +662,15 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     endif()
 
     if(PSP_CPP_BUILD_STRICT AND NOT WIN32)
-        target_compile_options(psp PRIVATE -Wall -Werror)
-        target_compile_options(psp PRIVATE $<$<CONFIG:DEBUG>:-fPIC -O0>)
+        # target_compile_options(psp PRIVATE -Wall -Werror)
+        # target_compile_options(psp PRIVATE $<$<CONFIG:DEBUG>:-fPIC -O0>)
 
         if(PSP_PYTHON_BUILD AND NOT PSP_PYODIDE)
             target_compile_options(binding PRIVATE $<$<CONFIG:DEBUG>:-fPIC -O0>)
         endif()
     elseif(WIN32)
-        target_compile_definitions(psp PRIVATE PERSPECTIVE_EXPORTS=1)
-        target_compile_definitions(psp PRIVATE WIN32=1)
-        target_compile_definitions(psp PRIVATE _WIN32=1)
+        # target_compile_definitions(psp PRIVATE PERSPECTIVE_EXPORTS=1)
+        # target_compile_definitions(psp PRIVATE WIN32=1)
+        # target_compile_definitions(psp PRIVATE _WIN32=1)
     endif()
 endif()
