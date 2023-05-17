@@ -1,3 +1,11 @@
+# [v2.1.3](https://github.com/finos/perspective/releases/tag/v2.1.3)
+
+_17 May 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.1.2...v2.1.3))
+
+Misc
+
+- Add 3.7 wheel [#2223](https://github.com/finos/perspective/pull/2223)
+
 # [v2.1.2](https://github.com/finos/perspective/releases/tag/v2.1.2)
 
 _16 May 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.1.1...v2.1.2))

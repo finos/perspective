@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-esbuild-plugin",
-    "version": "2.1.2",
+    "version": "2.1.3",
     "description": "esbuild plugin for Perspective",
     "author": "",
     "license": "Apache-2.0",
