@@ -730,6 +730,7 @@ jobs:
                     - windows-2022 # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2022-Readme.md
                     - windows-2019 # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2019-Readme.md
                 python-version:
+                    - 3.7
                     - 3.8
                     - 3.9
                     - "3.10"
@@ -776,7 +777,10 @@ jobs:
                     - is-full-run: false
                       os: macos-11
 
-                    # Exclude Python 3.8, 3.10 builds
+                    # Exclude Python 3.7, 3.8, 3.10 builds
+                    - is-full-run: false
+                      python-version: 3.7
+
                     - is-full-run: false
                       python-version: 3.8
 
@@ -1226,6 +1230,7 @@ jobs:
                     - windows-2022 # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2022-Readme.md
                     - windows-2019 # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2019-Readme.md
                 python-version:
+                    - 3.7
                     - 3.8
                     - 3.9
                     - "3.10"
@@ -1253,7 +1258,10 @@ jobs:
                     - is-full-run: false
                       os: macos-11
 
-                    # Exclude Python 3.8, 3.10 builds
+                    # Exclude Python 3.7, 3.8, 3.10 builds
+                    - is-full-run: false
+                      python-version: 3.7
+
                     - is-full-run: false
                       python-version: 3.8
 
