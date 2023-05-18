@@ -21,7 +21,7 @@ fn input_value_format(x: &str) -> Result<&str, JsValue> {
 }
 
 fn get_local_tz() -> FixedOffset {
-    FixedOffset::west_opt(js_sys::Date::new(&0.into()).get_timezone_offset() as i32 * 60).unwrap()
+    FixedOffset::west(js_sys::Date::new(&(1682122531000.0).into()).get_timezone_offset() as i32 * 60)
 }
 
 pub fn posix_to_utc_str(x: f64) -> ApiResult<String> {
