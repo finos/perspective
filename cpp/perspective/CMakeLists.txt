@@ -528,21 +528,24 @@ endif()
 
 message("${BUILD_MESSAGE}\n")
 
+# Common flags for WASM/JS build and Pyodide
+set(PSP_WASM_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
+    --bind \
+    --source-map-base \"\" \
+    --memory-init-file 0 \
+    --no-entry \
+    -s NO_EXIT_RUNTIME=1 \
+    -s NO_FILESYSTEM=1 \
+    -s ALLOW_MEMORY_GROWTH=1 \
+    -s MODULARIZE=1 \
+    -s EXPORT_NAME=\"load_perspective\" \
+    -s MAXIMUM_MEMORY=4gb \
+    -s ERROR_ON_UNDEFINED_SYMBOLS=1 \
+    -s ENVIRONMENT=web,webview,worker \
+")
+
 if(PSP_WASM_BUILD)
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
-        --bind \
-        --source-map-base \"\" \
-        --memory-init-file 0 \
-        --no-entry \
-        -s NO_EXIT_RUNTIME=1 \
-        -s NO_FILESYSTEM=1 \
-        -s ALLOW_MEMORY_GROWTH=1 \
-        -s MODULARIZE=1 \
-        -s EXPORT_NAME=\"load_perspective\" \
-        -s MAXIMUM_MEMORY=4gb \
-        -s ERROR_ON_UNDEFINED_SYMBOLS=1 \
-        -s ENVIRONMENT=web,webview,worker \
-    ")
+    set(CMAKE_EXE_LINKER_FLAGS "${PSP_WASM_LINKER_FLAGS}")
 
     add_library(psp ${WASM_SOURCE_FILES})
     target_compile_definitions(psp PRIVATE PSP_ENABLE_WASM=1)
@@ -564,27 +567,6 @@ if(PSP_WASM_BUILD)
     set_target_properties(perspective_esm PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./web/")
     set_target_properties(perspective_esm PROPERTIES OUTPUT_NAME "perspective.cpp")
 elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
-    if (PSP_PYODIDE)
-      # TODO(tom): this is a straight copy of PSP_WASM_BUILD, merge them
-      # TODO(tom): determine which of these we shouldn't bother setting
-      # because pyodide's pywasmcross.py overrides them
-      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
-          --bind \
-          --source-map-base \"\" \
-          --memory-init-file 0 \
-          --no-entry \
-          -s EXPORT_ES6=1 \
-          -s NO_EXIT_RUNTIME=1 \
-          -s NO_FILESYSTEM=1 \
-          -s ALLOW_MEMORY_GROWTH=1 \
-          -s MODULARIZE=1 \
-          -s EXPORT_NAME=\"load_perspective\" \
-          -s MAXIMUM_MEMORY=4gb \
-          -s USE_ES6_IMPORT_META=0 \
-          -s ERROR_ON_UNDEFINED_SYMBOLS=1 \
-          -s ENVIRONMENT=web,webview,worker \
-      ")
-    endif ()
     if(NOT WIN32)
         set(CMAKE_SHARED_LIBRARY_SUFFIX .so)
 
@@ -612,6 +594,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
         add_library(psp STATIC ${PYTHON_SOURCE_FILES})
         add_library(binding SHARED ${PYTHON_BINDING_SOURCE_FILES})
         if(PSP_PYODIDE)
+            set(CMAKE_EXE_LINKER_FLAGS "${PSP_WASM_LINKER_FLAGS}")
             set(PSP_PYTHON_DEFS PSP_ENABLE_WASM=1)
         else()
             set(PSP_PYTHON_DEFS PSP_ENABLE_PYTHON_THREADING=1)
@@ -662,15 +645,15 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     endif()
 
     if(PSP_CPP_BUILD_STRICT AND NOT WIN32)
-        # target_compile_options(psp PRIVATE -Wall -Werror)
-        # target_compile_options(psp PRIVATE $<$<CONFIG:DEBUG>:-fPIC -O0>)
+        target_compile_options(psp PRIVATE -Wall -Werror)
+        target_compile_options(psp PRIVATE $<$<CONFIG:DEBUG>:-fPIC -O0>)
 
         if(PSP_PYTHON_BUILD AND NOT PSP_PYODIDE)
             target_compile_options(binding PRIVATE $<$<CONFIG:DEBUG>:-fPIC -O0>)
         endif()
     elseif(WIN32)
-        # target_compile_definitions(psp PRIVATE PERSPECTIVE_EXPORTS=1)
-        # target_compile_definitions(psp PRIVATE WIN32=1)
-        # target_compile_definitions(psp PRIVATE _WIN32=1)
+        target_compile_definitions(psp PRIVATE PERSPECTIVE_EXPORTS=1)
+        target_compile_definitions(psp PRIVATE WIN32=1)
+        target_compile_definitions(psp PRIVATE _WIN32=1)
     endif()
 endif()
