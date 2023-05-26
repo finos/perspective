@@ -1,3 +1,12 @@
+# [v2.1.4](https://github.com/finos/perspective/releases/tag/v2.1.4)
+
+_26 May 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.1.3...v2.1.4))
+
+Fixes
+
+- Fix median miscalculation for even-sized item list [#2224](https://github.com/finos/perspective/pull/2224)
+- Fix a bug when calling `load()` with a rejected promise [#2236](https://github.com/finos/perspective/pull/2236)
+
 # [v2.1.3](https://github.com/finos/perspective/releases/tag/v2.1.3)
 
 _17 May 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.1.2...v2.1.3))
