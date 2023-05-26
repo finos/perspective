@@ -6,11 +6,37 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 import numpy as np
+import pyarrow as pa
+import pandas as pd
 from datetime import date, datetime
 from perspective.table import Table
+from pytest import mark
 
 
 class TestUpdate(object):
+    @mark.skip(reason="Fix for null values update yet to be implemented")
+    def test_update_with_missing_or_null_values(self):
+        tbl = Table([{"a": "1", "b": "2"}, {"a": "3", "b": "4"}], index="a")
+        tbl.update([{"a": "1", "b": None}])
+        assert tbl.view().to_records() == [{"a": "1", "b": None}, {"a": "3", "b": "4"}]
+
+        data = pd.DataFrame({"a": ["1"], "b": [None]})
+
+        arrow_table = pa.Table.from_pandas(data, preserve_index=False)
+
+        # write arrow to stream
+        stream = pa.BufferOutputStream()
+        writer = pa.RecordBatchStreamWriter(
+            stream, arrow_table.schema, use_legacy_format=False
+        )
+        writer.write_table(arrow_table)
+        writer.close()
+        arrow = stream.getvalue().to_pybytes()
+
+        tbl.update(arrow)
+        assert tbl.size() == 2
+        assert tbl.view().to_records() == [{"a": "1", "b": ""}, {"a": "3", "b": "4"}]
+
     def test_update_from_schema(self):
         tbl = Table({
             "a": str,
