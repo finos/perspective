@@ -358,15 +358,19 @@ impl PerspectiveViewerElement {
                     .ok_or("Already deleted")?
                     .send_message_async(move |x| Msg::ToggleSettingsComplete(settings, x));
 
-                let plugin = renderer.get_active_plugin()?;
-                if let Some(plugin_config) = &plugin_config {
-                    let js_config = JsValue::from_serde_ext(plugin_config)?;
-                    plugin.restore(&js_config);
-                }
+                let internal_task = async {
+                    let plugin = renderer.get_active_plugin()?;
+                    if let Some(plugin_config) = &plugin_config {
+                        let js_config = JsValue::from_serde_ext(plugin_config)?;
+                        plugin.restore(&js_config);
+                    }
 
-                let result = session.validate().await?.create_view().await;
+                    session.validate().await?.create_view().await
+                }
+                .await;
+
                 task.await?;
-                result
+                internal_task
             });
 
             draw_task.await?;
