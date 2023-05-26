@@ -258,6 +258,8 @@ public:
 
     t_tscalar get_aggregate(t_index idx, t_index aggnum) const;
 
+    t_tscalar get_aggregate_median(std::vector<t_tscalar>& values) const;
+
     void get_child_indices(t_index idx, std::vector<t_index>& out_data) const;
 
     void set_alerts_enabled(bool enabled_state);

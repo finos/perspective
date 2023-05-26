@@ -2507,7 +2507,7 @@ const perspective = require("@finos/perspective");
             const result = await view.to_columns();
             expect(result).toEqual({
                 __ROW_PATH__: [[], [2.5], [4.5], [6.5], [8.5]],
-                '"x" + "z"': [6.5, 2.5, 4.5, 6.5, 8.5],
+                '"x" + "z"': [5.5, 2.5, 4.5, 6.5, 8.5],
                 x: [3, 1, 2, 3, 4],
                 y: [1000, 100, 200, 300, 400],
                 z: [12, 1.5, 2.5, 3.5, 4.5],

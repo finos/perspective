@@ -1127,20 +1127,8 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info,
                 new_value.set(reduce_from_gstate<
                     std::function<t_tscalar(std::vector<t_tscalar>&)>>(gstate,
                     expression_master_table, spec.get_dependencies()[0].name(),
-                    pkeys, [](std::vector<t_tscalar>& values) {
-                        if (values.size() == 0) {
-                            return t_tscalar();
-                        } else if (values.size() == 1) {
-                            return values[0];
-                        } else {
-                            std::vector<t_tscalar>::iterator middle
-                                = values.begin() + (values.size() / 2);
-
-                            std::nth_element(
-                                values.begin(), middle, values.end());
-
-                            return *middle;
-                        }
+                    pkeys, [&](std::vector<t_tscalar>& values) {
+                        return get_aggregate_median(values);
                     }));
 
                 dst->set_scalar(dst_ridx, new_value);
@@ -2018,6 +2006,29 @@ t_stree::get_aggregate(t_index idx, t_index aggnum) const {
         = pidx == INVALID_INDEX ? INVALID_INDEX : get_aggidx(pidx);
 
     return extract_aggregate(m_aggspecs[aggnum], c, agg_ridx, agg_pridx);
+}
+
+t_tscalar
+t_stree::get_aggregate_median(std::vector<t_tscalar>& values) const {
+    int size = values.size();
+    bool is_even_size = size % 2 == 0;
+
+    if (size == 0) {
+        return t_tscalar();
+    } else if (size == 1) {
+        return values[0];
+    } else if (is_even_size && values[0].is_floating_point()) {
+        t_tscalar median_average;
+        std::vector<t_tscalar>::iterator middle = values.begin() + (size / 2);
+        nth_element(values.begin(), middle, values.end());
+        median_average.set(
+            (*middle + *(middle - 1)) / static_cast<t_tscalar>(2));
+        return median_average;
+    } else {
+        std::vector<t_tscalar>::iterator middle = values.begin() + (size / 2);
+        std::nth_element(values.begin(), middle, values.end());
+        return *middle;
+    }
 }
 
 void
