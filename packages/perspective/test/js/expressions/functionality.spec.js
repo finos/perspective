@@ -2491,21 +2491,11 @@ const perspective = require("@finos/perspective");
         });
 
         test("Should be able to aggregate a numeric expression column.", async function () {
-
-            const data = {
+            const table = await perspective.table({
                 x: [1, 2, 3, 4],
                 y: [100, 200, 300, 400],
                 z: [1.5, 2.5, 3.5, 4.5],
-            }
-            const schema = {
-                x:'float',
-                y:'float',
-                z:'float'
-            }
-
-            const table = await perspective.table(schema);
-            table.update(data)
-
+            });
             const view = await table.view({
                 group_by: ['"x" + "z"'],
                 aggregates: {
@@ -2518,7 +2508,7 @@ const perspective = require("@finos/perspective");
             expect(result).toEqual({
                 __ROW_PATH__: [[], [2.5], [4.5], [6.5], [8.5]],
                 '"x" + "z"': [5.5, 2.5, 4.5, 6.5, 8.5],
-                x: [2.5, 1, 2, 3, 4],
+                x: [3, 1, 2, 3, 4],
                 y: [1000, 100, 200, 300, 400],
                 z: [12, 1.5, 2.5, 3.5, 4.5],
             });
@@ -2550,20 +2540,11 @@ const perspective = require("@finos/perspective");
         });
 
         test("Should be able to aggregate a numeric expression column that aliases a real column.", async function () {
-            const data = {
+            const table = await perspective.table({
                 x: [1, 2, 3, 4],
                 y: [100, 200, 300, 400],
                 z: [1.5, 2.5, 3.5, 4.5],
-            }
-            const schema = {
-                x:'float',
-                y:'float',
-                z:'float'
-            }
-
-            const table = await perspective.table(schema);
-            table.update(data)
-
+            });
             const view = await table.view({
                 group_by: ['"x"'],
                 aggregates: {
@@ -2575,8 +2556,8 @@ const perspective = require("@finos/perspective");
             const result = await view.to_columns();
             expect(result).toEqual({
                 __ROW_PATH__: [[], [1], [2], [3], [4]],
-                '"x"': [2.5, 1, 2, 3, 4],
-                x: [2.5, 1, 2, 3, 4],
+                '"x"': [3, 1, 2, 3, 4],
+                x: [3, 1, 2, 3, 4],
                 y: [1000, 100, 200, 300, 400],
                 z: [12, 1.5, 2.5, 3.5, 4.5],
             });
