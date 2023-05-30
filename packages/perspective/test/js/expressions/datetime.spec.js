@@ -381,6 +381,92 @@ const perspective = require("@finos/perspective");
             table.delete();
         });
 
+        test("Certain bucket multiplicities do not validate.", async function () {
+            const table = await perspective.table({
+                x: [1],
+            });
+
+            const validated = await table.validate_expressions([
+                `//bucket0\nbucket("x", '2W')`,
+                `//bucket1\nbucket("x", '3W')`,
+                `//bucket2\nbucket("x", '4W')`,
+                `//bucket3\nbucket("x", '5W')`,
+                `//bucket4\nbucket("x", '2D')`,
+                `//bucket5\nbucket("x", '3D')`,
+                `//bucket6\nbucket("x", '7D')`,
+                `//bucket7\nbucket("x", '10D')`,
+                `//bucket8\nbucket("x", '15D')`,
+                `//bucket9\nbucket("x", '30D')`,
+            ]);
+
+            expect(validated.expression_schema).toEqual({});
+
+            expect(validated.errors).toEqual({
+                bucket0: {
+                    error_message:
+                        "Type Error - inputs do not resolve to a valid expression.",
+                    column: 0,
+                    line: 0,
+                },
+                bucket1: {
+                    error_message:
+                        "Type Error - inputs do not resolve to a valid expression.",
+                    column: 0,
+                    line: 0,
+                },
+                bucket2: {
+                    error_message:
+                        "Type Error - inputs do not resolve to a valid expression.",
+                    column: 0,
+                    line: 0,
+                },
+                bucket3: {
+                    error_message:
+                        "Type Error - inputs do not resolve to a valid expression.",
+                    column: 0,
+                    line: 0,
+                },
+                bucket4: {
+                    error_message:
+                        "Type Error - inputs do not resolve to a valid expression.",
+                    column: 0,
+                    line: 0,
+                },
+                bucket5: {
+                    error_message:
+                        "Type Error - inputs do not resolve to a valid expression.",
+                    column: 0,
+                    line: 0,
+                },
+                bucket6: {
+                    error_message:
+                        "Type Error - inputs do not resolve to a valid expression.",
+                    column: 0,
+                    line: 0,
+                },
+                bucket7: {
+                    error_message:
+                        "Type Error - inputs do not resolve to a valid expression.",
+                    column: 0,
+                    line: 0,
+                },
+                bucket8: {
+                    error_message:
+                        "Type Error - inputs do not resolve to a valid expression.",
+                    column: 0,
+                    line: 0,
+                },
+                bucket9: {
+                    error_message:
+                        "Type Error - inputs do not resolve to a valid expression.",
+                    column: 0,
+                    line: 0,
+                },
+            });
+
+            await table.delete();
+        });
+
         test("Bucket (s), date with nulls", async function () {
             const table = await perspective.table({
                 a: "date",

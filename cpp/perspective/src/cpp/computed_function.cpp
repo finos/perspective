@@ -1236,14 +1236,14 @@ namespace computed_function {
                 break;
             case t_date_bucket_unit::DAYS:
                 // TODO: day multiplicity.
-                if (multiplicity > 31) {
+                if (multiplicity != 1) {
                     rval.m_status = STATUS_CLEAR;
                     return rval;
                 }
                 break;
             case t_date_bucket_unit::WEEKS:
                 // TODO: week multiplicity
-                if (multiplicity > 4) {
+                if (multiplicity != 1) {
                     rval.m_status = STATUS_CLEAR;
                     return rval;
                 }
