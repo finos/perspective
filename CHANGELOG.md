@@ -1,3 +1,21 @@
+# [v2.2.0](https://github.com/finos/perspective/releases/tag/v2.2.0)
+
+_31 May 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.1.4...v2.2.0))
+
+Features
+
+- Moving Expression Editor modal to a sidebar. [#2239](https://github.com/finos/perspective/pull/2239)
+
+Fixes
+
+- Disallow non-1 multiplicity for bucketing weeks and days [#2238](https://github.com/finos/perspective/pull/2238)
+
+Misc
+
+- Developer QoL fixes [#2240](https://github.com/finos/perspective/pull/2240)
+- Add Python 3.11 support [#2234](https://github.com/finos/perspective/pull/2234)
+- Add skip test: _update_with_missing_or_null_values [#2230](https://github.com/finos/perspective/pull/2230)
+
 # [v2.1.4](https://github.com/finos/perspective/releases/tag/v2.1.4)
 
 _26 May 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.1.3...v2.1.4))

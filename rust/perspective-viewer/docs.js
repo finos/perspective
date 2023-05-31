@@ -75,8 +75,9 @@ async function capture_exprtk() {
     const page = await browser.newPage();
     await page.addScriptTag({
         type: "module",
-        path: "dist/cdn/perspective-viewer.js",
+        path: "./dist/esm/perspective-viewer.inline.js",
     });
+
     const data = await page.evaluate(async () => {
         await customElements.whenDefined("perspective-viewer");
         const commands = await customElements
