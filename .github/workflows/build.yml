@@ -734,6 +734,7 @@ jobs:
                     - 3.8
                     - 3.9
                     - "3.10"
+                    - 3.11
                 container:
                     - none # Not manylinux, we will use this space to build the WASM assets
                     - 2014
@@ -777,7 +778,7 @@ jobs:
                     - is-full-run: false
                       os: macos-11
 
-                    # Exclude Python 3.7, 3.8, 3.10 builds
+                    # Exclude Python 3.7, 3.8, 3.10, 3.11 builds
                     - is-full-run: false
                       python-version: 3.7
 
@@ -786,6 +787,9 @@ jobs:
 
                     - is-full-run: false
                       python-version: "3.10"
+
+                    - is-full-run: false
+                      python-version: 3.11
 
             # NOTE: don't fail fast as sometimes npm blocks the burst of fetches from GHA
             fail-fast: false
@@ -1234,6 +1238,7 @@ jobs:
                     - 3.8
                     - 3.9
                     - "3.10"
+                    - 3.11
                 node-version: [16.x]
                 is-full-run:
                     - ${{ needs.initialize.outputs.FULL_RUN == 'true' }}
@@ -1258,7 +1263,7 @@ jobs:
                     - is-full-run: false
                       os: macos-11
 
-                    # Exclude Python 3.7, 3.8, 3.10 builds
+                    # Exclude Python 3.7, 3.8, 3.10, 3.11 builds
                     - is-full-run: false
                       python-version: 3.7
 
@@ -1267,6 +1272,9 @@ jobs:
 
                     - is-full-run: false
                       python-version: "3.10"
+
+                    - is-full-run: false
+                      python-version: 3.11
             # NOTE: don't fail fast as sometimes npm blocks the burst of fetches from GHA
             fail-fast: false
 
