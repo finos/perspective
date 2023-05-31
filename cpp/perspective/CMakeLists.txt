@@ -521,6 +521,8 @@ if(PSP_WASM_BUILD)
         -s EXPORT_NAME=\"load_perspective\" \
         -s MAXIMUM_MEMORY=4gb \
         -s ERROR_ON_UNDEFINED_SYMBOLS=1 \
+        -s NODEJS_CATCH_EXIT=0 \
+        -s NODEJS_CATCH_REJECTION=0 \
     ")
 
     add_library(psp ${WASM_SOURCE_FILES})

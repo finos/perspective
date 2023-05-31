@@ -218,10 +218,10 @@ where
                     .iter()
                     .position(|x| x.1 .1.as_ref().unwrap().props.get_item() == *column);
 
-                if let Some(duplicate) = is_duplicate && !ctx.props().allow_duplicates &&  !is_append {
-                    columns.remove(duplicate);
-                } else if ctx.props().allow_duplicates && !is_append && is_self_move {
-                    columns.remove(is_duplicate.unwrap());
+                if let Some(duplicate) = is_duplicate {
+                    if !is_append && (!ctx.props().allow_duplicates || is_self_move) {
+                        columns.remove(duplicate);
+                    }
                 }
 
                 // If inserting into the middle of the list, use
