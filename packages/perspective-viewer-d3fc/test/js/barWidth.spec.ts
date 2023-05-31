@@ -14,8 +14,11 @@ test.describe("Bar Width", () => {
     test("correctly render when a bar chart has non equidistant times on a datetime axis", async ({
         page,
     }) => {
-        await page.goto("/tools/perspective-test/src/html/basic-test.html", {
-            waitUntil: "networkidle",
+        await page.goto("/tools/perspective-test/src/html/basic-test.html");
+        await page.evaluate(async () => {
+            while (!window["__TEST_PERSPECTIVE_READY__"]) {
+                await new Promise((x) => setTimeout(x, 10));
+            }
         });
 
         await page.evaluate(async () => {

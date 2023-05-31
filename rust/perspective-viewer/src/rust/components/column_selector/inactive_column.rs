@@ -30,6 +30,7 @@ pub struct InactiveColumnProps {
     pub renderer: Renderer,
     pub ondragend: Callback<()>,
     pub onselect: Callback<()>,
+    pub on_open_expr_panel: Callback<Option<String>>,
 }
 
 impl PartialEq for InactiveColumnProps {
@@ -201,13 +202,10 @@ impl Component for InactiveColumn {
                         <span class="column-selector--spacer"></span>
 
                         if is_expression {
-                            <ExpressionToolbar
-                                session={ &ctx.props().session }
-                                renderer={ &ctx.props().renderer }
-                                dragdrop={ &ctx.props().dragdrop }
+                            <ExprEditButton
                                 name={ ctx.props().name.clone() }
-                                add_expression_ref={ &self.add_expression_ref }>
-                            </ExpressionToolbar>
+                                on_open_expr_panel={ &ctx.props().on_open_expr_panel }
+                            ></ExprEditButton>
                         }
                     </div>
                 </div>

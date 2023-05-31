@@ -148,7 +148,13 @@ pub fn code_editor(props: &CodeEditorProps) -> Html {
 
     use_effect({
         clone!(props.expr);
-        move || set_initial_state(&textarea_ref.0, &content_ref.2, &is_connected, &expr)
+        move || {
+            ApiFuture::spawn(async move {
+                request_animation_frame().await;
+                set_initial_state(&textarea_ref.0, &content_ref.2, &is_connected, &expr);
+                Ok(())
+            })
+        }
     });
 
     use_effect_with_deps(

@@ -180,7 +180,7 @@ impl ViewerConfigUpdate {
     }
 }
 
-#[derive(Clone, Serialize)]
+#[derive(Clone, Debug, Serialize)]
 #[serde(untagged)]
 pub enum OptionalUpdate<T: Clone> {
     SetDefault,

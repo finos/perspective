@@ -59,8 +59,11 @@ async function createMultipleViewersWithNames(page) {
 }
 
 test.beforeEach(async ({ page }) => {
-    await page.goto("/tools/perspective-test/src/html/workspace-test.html", {
-        waitUntil: "networkidle",
+    await page.goto("/tools/perspective-test/src/html/workspace-test.html");
+    await page.evaluate(async () => {
+        while (!window["__TEST_PERSPECTIVE_READY__"]) {
+            await new Promise((x) => setTimeout(x, 10));
+        }
     });
 });
 
