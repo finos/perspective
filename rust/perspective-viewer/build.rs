@@ -44,13 +44,16 @@ fn glob_with_wd(indir: &str, input: &str) -> Vec<String> {
 }
 
 fn main() -> Result<(), anyhow::Error> {
+    let out_dir = std::env::var("OUT_DIR").unwrap();
+    let out_path = std::path::Path::new(&out_dir);
+
     let mut build = BuildCss::new("./src/less");
     let files = glob_with_wd("./src/less", "**/*.less");
     for src in files.iter() {
         build.add_file(src);
     }
 
-    build.compile()?.write("./target/css")?;
+    build.compile()?.write(out_path.join("css"))?;
 
     let mut build = BuildCss::new("./src/themes");
     build.add_file("variables.less");
@@ -62,7 +65,7 @@ fn main() -> Result<(), anyhow::Error> {
     build.add_file("solarized-dark.less");
     build.add_file("vaporwave.less");
     build.add_file("themes.less");
-    build.compile()?.write("./target/themes")?;
+    build.compile()?.write(out_path.join("themes"))?;
 
     println!(
         "cargo:rustc-env=PKG_VERSION={}",

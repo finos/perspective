@@ -334,7 +334,7 @@ impl Component for SplitPanel {
         }
 
         let contents = html_template! {
-            <LocalStyle href={ css!("containers/split-panel") } />
+            <LocalStyle href={ css_internal!("containers/split-panel") } />
             <SplitPanelChild
                 style={ self.styles[0].clone() }
                 ref_={ self.refs[0].clone() }>

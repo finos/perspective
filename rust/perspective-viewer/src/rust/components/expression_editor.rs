@@ -168,7 +168,7 @@ impl Component for ExpressionEditor {
         .unwrap_or_default();
 
         html_template! {
-            <LocalStyle href={ css!("expression-editor") } />
+            <LocalStyle href={ css_internal!("expression-editor") } />
             <SplitPanel orientation={ Orientation::Vertical }>
                 <div id="editor-container">
                     <CodeEditor

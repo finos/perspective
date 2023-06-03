@@ -237,7 +237,7 @@ impl Component for StatusBar {
         });
 
         html_template! {
-            <LocalStyle href={ css!("status-bar") } />
+            <LocalStyle href={ css_internal!("status-bar") } />
             <div id={ ctx.props().id.clone() } class={ is_updating_class_name }>
                 <div class="section">
                     <span id="status" class={ class_name }></span>

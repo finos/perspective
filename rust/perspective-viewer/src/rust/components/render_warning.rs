@@ -128,7 +128,7 @@ impl Component for RenderWarning {
 
             let onclick = ctx.link().callback(|_| RenderWarningMsg::DismissWarning);
             html_template! {
-                <LocalStyle href={ css!("render-warning") } />
+                <LocalStyle href={ css_internal!("render-warning") } />
                 <div
                     class="plugin_information plugin_information--warning"
                     id="plugin_information--size">

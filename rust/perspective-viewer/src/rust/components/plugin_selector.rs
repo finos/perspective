@@ -121,7 +121,7 @@ impl Component for PluginSelector {
         });
 
         html_template! {
-            <LocalStyle href={ css!("plugin-selector") } />
+            <LocalStyle href={ css_internal!("plugin-selector") } />
             <div id="plugin_selector_container" { class }>
                 <PluginSelect
                     name={ plugin_name }

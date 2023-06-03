@@ -350,7 +350,7 @@ impl Component for ColumnSelector {
 
         if !inactive_children.is_empty() {
             html_template! {
-                <LocalStyle href={ css!("column-selector") } />
+                <LocalStyle href={ css_internal!("column-selector") } />
                 <SplitPanel no_wrap={ true } orientation={ Orientation::Vertical }>
                     { selected_columns }
                     <ScrollPanel
@@ -362,7 +362,7 @@ impl Component for ColumnSelector {
             }
         } else {
             html_template! {
-                <LocalStyle href={ css!("column-selector") } />
+                <LocalStyle href={ css_internal!("column-selector") } />
                 <div class="split-panel-child">
                     { selected_columns }
                 </div>

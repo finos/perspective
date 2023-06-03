@@ -16,7 +16,7 @@ use web_sys::*;
 use yew::prelude::*;
 
 use crate::components::style::LocalStyle;
-use crate::css;
+use crate::css_internal;
 use crate::custom_elements::ColumnDropDownElement;
 
 #[derive(Default)]
@@ -65,7 +65,7 @@ impl Component for EmptyColumn {
 
         html! {
             <div class="pivot-column column-empty">
-                <LocalStyle href={ css!("empty-column") } />
+                <LocalStyle href={ css_internal!("empty-column") } />
                 <input
                     spellcheck="false"
                     ref={ self.input_ref.clone() }

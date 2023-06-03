@@ -91,7 +91,7 @@ impl Component for AggregateSelector {
 
         let values = self.aggregates.clone();
         html_template! {
-            <LocalStyle href={ css!("aggregate-selector") } />
+            <LocalStyle href={ css_internal!("aggregate-selector") } />
             <div class="aggregate-selector-wrapper">
                 <Select<Aggregate>
                     class={ "aggregate-selector" }

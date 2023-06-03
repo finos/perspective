@@ -278,7 +278,7 @@ impl Component for PerspectiveViewer {
 
         html_template! {
             <StyleProvider>
-                <LocalStyle href={ css!("viewer") } />
+                <LocalStyle href={ css_internal!("viewer") } />
                 if self.settings_open {
                     <SplitPanel
                         id="app_panel"

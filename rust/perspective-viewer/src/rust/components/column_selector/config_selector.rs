@@ -469,7 +469,7 @@ impl Component for ConfigSelector {
                 class={ class }
                 ondragend={ dragend }>
 
-                <LocalStyle href={ css!("config-selector") } />
+                <LocalStyle href={ css_internal!("config-selector") } />
 
                 if !config.group_by.is_empty() && config.split_by.is_empty() {
                     <span

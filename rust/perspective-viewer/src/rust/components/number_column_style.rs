@@ -364,7 +364,7 @@ impl Component for NumberColumnStyle {
 
         html! {
             <StyleProvider>
-                <LocalStyle href={ css!("column-style") } />
+                <LocalStyle href={ css_internal!("column-style") } />
                 <div id="column-style-container">
                     <div class="column-style-label">
                         <label id="fixed-examples" class="indent">{

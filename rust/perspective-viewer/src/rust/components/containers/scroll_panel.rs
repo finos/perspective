@@ -308,7 +308,7 @@ impl Component for ScrollPanel {
         };
 
         html_template! {
-            <LocalStyle href={ css!("containers/scroll-panel") } />
+            <LocalStyle href={ css_internal!("containers/scroll-panel") } />
             { items }
         }
     }

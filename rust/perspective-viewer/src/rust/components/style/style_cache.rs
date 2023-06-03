@@ -25,7 +25,7 @@ type CSSResource = (&'static str, &'static str);
 /// A dictionary of CSS fragments for native HTML elements which should always
 /// be loaded (and perhaps lack yew components wrappers from which to have
 /// their styles registered).
-static DOM_STYLES: &[CSSResource] = &[css!("dom/checkbox"), css!("dom/select")];
+static DOM_STYLES: &[CSSResource] = &[css_internal!("dom/checkbox"), css_internal!("dom/select")];
 
 /// A state object for `<style>` snippets used by a yew `Component` with a
 /// `<StyleProvider>` at the root.
