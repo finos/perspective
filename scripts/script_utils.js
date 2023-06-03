@@ -306,13 +306,13 @@ exports.run_with_scope = async function run_recursive(strings, ...args) {
     const workspaces = JSON.parse(stdout.toString());
     const compiled = new Set(
         Object.keys(workspaces.dependencies).filter(
-            (x) => !workspaces.dependencies[x].resolved.startsWith("file:")
+            (x) => !workspaces.dependencies[x].resolved?.startsWith("file:")
         )
     );
 
     let uncompiled = Object.keys(workspaces.dependencies).filter(
         (x) =>
-            workspaces.dependencies[x].resolved.startsWith("file:") &&
+            workspaces.dependencies[x].resolved?.startsWith("file:") &&
             (scope === null || scope.indexOf(x) >= 0)
     );
 

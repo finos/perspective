@@ -1418,15 +1418,19 @@ jobs:
                   name: perspective-python-dist-${{ matrix.os }}-${{ matrix.python-version }}
 
             # Install artifact in-place so tests work as-is
-            - name: Install wheel
+            - name: Install wheel (Linux)
               run: python -m pip install -U *manylinux2014*.whl --target python/perspective
               if: ${{ runner.os == 'Linux' }}
 
             # Note, on mac we must install the x86 wheel, the arm64 wheel
             # would need an arm machine to test
-            - name: Install wheel
+            - name: Install wheel (OSX)
               run: python -m pip install -U *x86*.whl --target python/perspective
-              if: ${{ runner.os == 'macOS' }}
+              if: ${{ runner.os == 'macOS' && matrix.python-version != '3.11' }}
+
+            - name: Install wheel (OSX 3.11+)
+              run: python -m pip install -U *universal*.whl --target python/perspective
+              if: ${{ runner.os == 'macOS' && matrix.python-version == '3.11' }}
 
             - name: Install wheel (windows)
               run: python -m pip install -U (Get-ChildItem .\*.whl | Select-Object -Expand FullName) --target python/perspective

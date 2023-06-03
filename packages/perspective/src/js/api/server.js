@@ -371,13 +371,18 @@ export class Server {
     }
 
     /**
-     * Send an error to the client.
+     * Send an error to the client. If this method fails, we need to consume it
+     * as this method is frequently called itself from a `catch` block.
      */
     process_error(msg, error) {
-        this.post({
-            id: msg.id,
-            error: error_to_json(error),
-        });
+        try {
+            this.post({
+                id: msg.id,
+                error: error_to_json(error),
+            });
+        } catch (e) {
+            console.error("Error handler failed: {}", error);
+        }
     }
 
     /**
