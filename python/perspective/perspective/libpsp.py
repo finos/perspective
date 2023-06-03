@@ -11,19 +11,19 @@ import os
 
 
 def is_libpsp():
-    """Was libbinding successfully loaded in this module?"""
+    """Was libpsppy successfully loaded in this module?"""
     return __is_libpsp__
 
 
 __is_libpsp__ = True
 
 try:
-    # Load all `libbinding` depending modules in one go, otherwise nothing
-    # dependent on `libbinding` is exposed.
+    # Load all `libpsppy` depending modules in one go, otherwise nothing
+    # dependent on `libpsppy` is exposed.
     from .table import *
     from .manager import *
     from .viewer import *
-    from .table.libbinding import (
+    from .table.libpsppy import (
         init_expression_parser,
     )
 

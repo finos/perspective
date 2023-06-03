@@ -9,7 +9,7 @@
 import re
 from datetime import date, datetime
 from functools import partial
-from .libbinding import t_dtype
+from .libpsppy import t_dtype
 
 ALIAS_REGEX = re.compile(r"//(.+)\n")
 EXPRESSION_COLUMN_NAME_REGEX = re.compile(r"\"(.*?[^\\])\"")

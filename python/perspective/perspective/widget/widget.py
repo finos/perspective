@@ -24,7 +24,7 @@ from ..viewer import PerspectiveViewer
 
 def _type_to_string(t):
     """Convert a type object to a string representing a Perspective-supported
-    type.  Redefine here as we can't have any dependencies on libbinding in
+    type.  Redefine here as we can't have any dependencies on libpsppy in
     client mode.
     """
     if t is int:

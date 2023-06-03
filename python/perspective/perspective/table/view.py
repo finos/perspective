@@ -16,7 +16,7 @@ from ._constants import COLUMN_SEPARATOR_STRING
 from ._utils import _str_to_pythontype
 from ._callback_cache import _PerspectiveCallBackCache
 from ._date_validator import _PerspectiveDateValidator
-from .libbinding import (
+from .libpsppy import (
     make_view_unit,
     make_view_zero,
     make_view_one,

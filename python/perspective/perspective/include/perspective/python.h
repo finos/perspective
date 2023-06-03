@@ -50,7 +50,7 @@ namespace binding {}
  */
 using namespace perspective::binding;
 
-PYBIND11_MODULE(libbinding, m) {
+PYBIND11_MODULE(libpsppy, m) {
     /******************************************************************************
      *
      * PerspectiveCppError

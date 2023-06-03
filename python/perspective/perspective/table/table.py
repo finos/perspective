@@ -19,7 +19,7 @@ from ._utils import (
     _parse_expression_strings,
     _str_to_pythontype,
 )
-from .libbinding import (
+from .libpsppy import (
     make_table,
     str_to_filter_op,
     t_dtype,

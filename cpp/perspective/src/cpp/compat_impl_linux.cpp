@@ -9,6 +9,7 @@
 
 #include <perspective/first.h>
 
+#ifndef PSP_ENABLE_WASM
 #ifdef __linux__
 #include <perspective/compat.h>
 #include <perspective/raii.h>
@@ -183,4 +184,5 @@ psp_dbg_free(void* mem) {
 }
 
 } // end namespace perspective
+#endif
 #endif

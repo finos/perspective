@@ -50,7 +50,7 @@ class _PerspectiveStateManager(object):
         table, and calls `queue_process`, which MUST be implemented by the caller.
 
         Args:
-            pool (:obj`libbinding.t_pool`): a `t_pool` object
+            pool (:obj`libpsppy.t_pool`): a `t_pool` object
             table_id (:obj`int`): a unique ID for the Table
         """
         if table_id not in _PerspectiveStateManager.TO_PROCESS:

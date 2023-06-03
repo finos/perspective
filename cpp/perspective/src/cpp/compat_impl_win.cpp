@@ -7,6 +7,7 @@
  *
  */
 
+#ifndef PSP_ENABLE_WASM
 #ifdef WIN32
 #include <perspective/portable.h>
 #include <perspective/first.h>
@@ -257,4 +258,5 @@ psp_page_aligned_free(void* mem) {
 
 } // end namespace perspective
 
+#endif
 #endif

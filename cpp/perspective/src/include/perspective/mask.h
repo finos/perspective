@@ -12,7 +12,6 @@
 #include <perspective/base.h>
 #include <perspective/exports.h>
 #include <boost/dynamic_bitset.hpp>
-#include <boost/shared_ptr.hpp>
 #include <perspective/simple_bitmask.h>
 
 namespace perspective {

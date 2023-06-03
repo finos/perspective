@@ -19,7 +19,6 @@
 #include <perspective/exprtk.h>
 #include <perspective/expression_vocab.h>
 #include <perspective/regex.h>
-#include <boost/algorithm/string.hpp>
 #include <random>
 #include <type_traits>
 #include <date/date.h>

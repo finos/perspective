@@ -9,7 +9,7 @@
 import numpy as np
 from math import floor, ceil, trunc
 from ._constants import COLUMN_SEPARATOR_STRING
-from .libbinding import (
+from .libpsppy import (
     get_data_slice_unit,
     get_data_slice_zero,
     get_data_slice_one,

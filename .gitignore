@@ -215,3 +215,4 @@ test-results/
 playwright-report/
 playwright/.cache/
 
+.pyodide-xbuildenv

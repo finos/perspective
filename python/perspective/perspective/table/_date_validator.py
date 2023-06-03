@@ -14,7 +14,7 @@ from pytz import UTC
 from pandas import Period
 from re import search
 from time import mktime
-from .libbinding import t_dtype
+from .libpsppy import t_dtype
 
 
 def _normalize_timestamp(obj):

@@ -16,7 +16,7 @@ from ..core.data import deconstruct_numpy, deconstruct_pandas, make_null_mask
 from ..core.data.pd import _parse_datetime_index
 from ..core.exception import PerspectiveError
 from ._date_validator import _PerspectiveDateValidator
-from .libbinding import t_dtype
+from .libpsppy import t_dtype
 
 
 def _flatten_structure(array):
@@ -189,7 +189,7 @@ class _PerspectiveAccessor(object):
         Args:
             cidx (:obj:`int`)
             ridx (:obj:`int`)
-            dtype (:obj:`.libbinding.t_dtype`)
+            dtype (:obj:`.libpsppy.t_dtype`)
 
         Returns:
             object or None
