@@ -38,25 +38,13 @@ macro_rules! css {
     ($name:expr) => {{
         (
             $name,
-            include_str!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/target/css/",
-                $name,
-                ".css"
-            )),
+            include_str!(concat!(env!("OUT_DIR"), "/css/", $name, ".css")),
         )
     }};
     ($path:expr, $name:expr) => {{
         (
             $name,
-            include_str!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/",
-                $path,
-                "/",
-                $name,
-                ".css"
-            )),
+            include_str!(concat!(env!("OUT_DIR"), "/", $path, "/", $name, ".css")),
         )
     }};
 }

@@ -86,8 +86,8 @@ async function build_all() {
 
     // legacy compat
     const { default: cpy } = await cpy_mod;
-    cpy("target/themes/*", "dist/css");
-    cpy("dist/pkg/*", "dist/esm");
+    await cpy("target/themes/*", "dist/css");
+    await cpy("dist/pkg/*", "dist/esm");
 }
 
 build_all();

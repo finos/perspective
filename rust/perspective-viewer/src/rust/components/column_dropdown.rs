@@ -18,7 +18,7 @@ use super::modal::*;
 use crate::utils::WeakScope;
 use crate::*;
 
-static CSS: &str = include_str!("../../../target/css/column-dropdown.css");
+static CSS: &str = include_str!(concat!(env!("OUT_DIR"), "/css/column-dropdown.css"));
 
 pub enum ColumnDropDownMsg {
     SetValues(Vec<InPlaceColumn>, f64),
