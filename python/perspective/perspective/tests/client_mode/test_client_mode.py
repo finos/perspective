@@ -18,18 +18,18 @@ from types import MethodType
 
 
 if os.name == "nt":
-    BINDING = "libbinding.pyd"
+    BINDING = "libpsppy.pyd"
     PSP = "libpsp.dll"
 else:
-    BINDING = "libbinding.so"
+    BINDING = "libpsppy.so"
     PSP = "libpsp.so"
 
-# rename libbinding.so and libpsp.so temporarily to ensure that client mode
+# rename libpsppy.so and libpsp.so temporarily to ensure that client mode
 # works automatically when the C++ build fails.
 lib_path = os.path.join(os.path.dirname(__file__), "..", "..", "table")
 binding = os.path.join(lib_path, BINDING)
 psp = os.path.join(lib_path, PSP)
-new_binding = os.path.join(lib_path, "notlibbinding.so")
+new_binding = os.path.join(lib_path, "notlibpsppy.so")
 new_psp = os.path.join(lib_path, "notlibpsp.so")
 
 

@@ -8,6 +8,6 @@
 
 from .table import Table
 from .view import View
-from .libbinding import PerspectiveCppError
+from .libpsppy import PerspectiveCppError
 
 __all__ = ["Table", "View", "PerspectiveCppError"]

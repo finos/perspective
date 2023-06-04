@@ -11,7 +11,6 @@
 #include <perspective/first.h>
 #include <perspective/exports.h>
 #include <iostream>
-#include <boost/functional/hash.hpp>
 
 namespace perspective {
 struct PERSPECTIVE_EXPORT t_none {

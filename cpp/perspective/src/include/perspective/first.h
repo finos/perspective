@@ -8,8 +8,10 @@
  */
 
 #ifndef PSP_ENABLE_WASM
+#ifdef PSP_ENABLE_PYTHON_THREADING
 #ifndef PSP_PARALLEL_FOR
 #define PSP_PARALLEL_FOR
+#endif
 #endif
 #endif
 

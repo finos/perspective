@@ -7,6 +7,7 @@
  *
  */
 
+#ifndef PSP_ENABLE_WASM
 #ifdef __APPLE__
 
 #include <perspective/first.h>
@@ -187,4 +188,5 @@ psp_dbg_free(void* mem) {
 }
 
 } // end namespace perspective
+#endif
 #endif

@@ -119,12 +119,12 @@ public:
 
     // object storage
     template <typename T>
-    void object_copied(std::uint64_t ptr) const;
-    void notify_object_copied(std::uint64_t ptr) const;
+    void object_copied(t_uindex ptr) const;
+    void notify_object_copied(t_uindex ptr) const;
 
     template <typename T>
-    void object_cleared(std::uint64_t ptr) const;
-    void notify_object_cleared(std::uint64_t ptr) const;
+    void object_cleared(t_uindex ptr) const;
+    void notify_object_cleared(t_uindex ptr) const;
 
     const t_lstore& data_lstore() const;
 
@@ -375,10 +375,10 @@ t_column::set_nth_body(t_uindex idx, DATA_T elem, t_status status) {
 
 // object storage, specialize only for std::uint64_t
 template <>
-void t_column::object_copied<std::uint64_t>(std::uint64_t ptr) const;
+void t_column::object_copied<std::uint64_t>(t_uindex ptr) const;
 
 template <>
-void t_column::object_cleared<std::uint64_t>(std::uint64_t ptr) const;
+void t_column::object_cleared<std::uint64_t>(t_uindex ptr) const;
 
 template <typename DATA_T>
 void

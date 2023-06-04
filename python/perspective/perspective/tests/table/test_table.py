@@ -12,7 +12,7 @@ from datetime import date, datetime
 from perspective.core.exception import PerspectiveError
 from perspective.table import Table
 from perspective.table._state import _PerspectiveStateManager
-from perspective.table.libbinding import PerspectiveCppError, t_filter_op
+from perspective.table.libpsppy import PerspectiveCppError, t_filter_op
 from pytest import raises
 
 

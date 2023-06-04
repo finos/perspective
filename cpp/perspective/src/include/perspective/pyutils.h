@@ -24,7 +24,5 @@ private:
     PyThreadState* m_thread_state;
 };
 
-void _set_event_loop();
-
 } // namespace perspective
 #endif

@@ -20,6 +20,13 @@ execute_process(
 
 find_path(PYTHON_NUMPY_INCLUDE_DIR numpy/arrayobject.h
   HINTS "${__numpy_path}" "${PYTHON_INCLUDE_PATH}" NO_DEFAULT_PATH)
+if(PSP_PYODIDE)
+  # In a pyodide build, find_path fails for some reason, even though
+  #    ${__numpy_path}/numpy/arrayobject.h
+  # exists
+  # execute_process (COMMAND bash -c "ls -l ${__numpy_path}/numpy/arrayobject.h")
+  set(PYTHON_NUMPY_INCLUDE_DIR "${__numpy_path}")
+endif()
 
 if(PYTHON_NUMPY_INCLUDE_DIR)
   set(PYTHON_NUMPY_FOUND 1 CACHE INTERNAL "Python numpy found")

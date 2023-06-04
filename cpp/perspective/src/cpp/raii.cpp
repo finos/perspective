@@ -18,6 +18,7 @@
 
 namespace perspective {
 
+#ifndef PSP_ENABLE_WASM
 t_file_handle::t_file_handle(t_handle value)
     : m_value(value) {}
 
@@ -25,6 +26,7 @@ t_handle
 t_file_handle::value() {
     return m_value;
 }
+#endif
 
 t_mmap_handle::t_mmap_handle(void* value, t_uindex len)
     : m_value(value)

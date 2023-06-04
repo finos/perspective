@@ -11,7 +11,7 @@
 #include <perspective/base.h>
 #include <cstdint>
 #include <limits>
-#ifdef PSP_ENABLE_WASM
+#if defined PSP_ENABLE_WASM
 #include <emscripten.h>
 #else
 #include <perspective/exception.h>
@@ -21,7 +21,7 @@ namespace perspective {
 
 void
 psp_abort(const std::string& message) {
-#ifdef PSP_ENABLE_WASM
+#if defined PSP_ENABLE_WASM
     std::string error = "Abort(): " + message;
     const char* error_cstr = error.c_str();
 

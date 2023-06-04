@@ -31,8 +31,11 @@ if (IS_DOCKER) {
 }
 
 const IS_CI = getarg("--ci");
+// Use symlinks for C++ source rather than copying - handy for development
+const LINK_CPP = getarg("--link-cpp");
 const SETUP_ONLY = getarg("--setup-only");
 const IS_INSTALL = getarg("--install");
+const IS_PYODIDE = getarg("--pyodide");
 
 // Check that the `PYTHON` command is valid, else default to `python`.
 try {
@@ -42,7 +45,7 @@ try {
     PYTHON = "python";
 }
 try {
-    copy_files_to_python_folder();
+    copy_files_to_python_folder(LINK_CPP);
 
     if (SETUP_ONLY) {
         // don't execute any build steps, just copy
@@ -55,6 +58,8 @@ try {
         cmd = bash`${PYTHON} -m pip install -e .[dev] --no-clean`;
     } else if (IS_INSTALL) {
         cmd = `${PYTHON} -m pip install .`;
+    } else if (IS_PYODIDE) {
+        cmd = `pyodide build . --exports=pyinit`;
     } else {
         cmd = bash`${PYTHON} setup.py build -v`;
     }

@@ -9,6 +9,8 @@
 
 #include <perspective/first.h>
 #include <perspective/none.h>
+
+#include <boost/functional/hash.hpp>
 namespace perspective {
 
 t_none::t_none() {}

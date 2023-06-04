@@ -14,6 +14,7 @@
 
 namespace perspective {
 
+#ifndef PSP_ENABLE_WASM
 class t_file_handle {
     t_handle m_value;
 
@@ -24,6 +25,7 @@ public:
     bool valid() const;
     void release();
 };
+#endif
 
 class t_mmap_handle {
     void* m_value;
