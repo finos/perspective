@@ -1,3 +1,15 @@
+# [v2.2.1](https://github.com/finos/perspective/releases/tag/v2.2.1)
+
+_5 June 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.2.0...v2.2.1))
+
+Features
+
+- Pyodide wheel [#2241](https://github.com/finos/perspective/pull/2241)
+
+Fixes
+
+- Fix CSS positioning of expression panel in workspace [#2243](https://github.com/finos/perspective/pull/2243)
+
 # [v2.2.0](https://github.com/finos/perspective/releases/tag/v2.2.0)
 
 _31 May 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.1.4...v2.2.0))
