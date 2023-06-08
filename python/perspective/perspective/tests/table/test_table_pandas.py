@@ -776,6 +776,8 @@ class TestTablePandas(object):
 
     def test_table_read_nat_datetime_col(self):
         data = pd.DataFrame({"str": ["abc", "def"], "datetime": ["NaT", datetime(2019, 7, 11, 11, 0)]})
+        # datetime col is `datetime` in pandas<2, `object` in pandas>=2, so convert
+        data.datetime = pd.to_datetime(data.datetime)
         tbl = Table(data)
         assert tbl.schema() == {
             "index": int,
