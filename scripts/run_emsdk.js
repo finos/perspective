@@ -13,13 +13,16 @@ const path = require("path");
 try {
     const cwd = process.cwd();
     const cmd = process.argv.slice(2).join(" ");
-    const scripts = __dirname;
-    const emsdkdir = path.join(scripts, "..", ".emsdk");
-    const emversion = require("../package.json").emscripten;
+    const emsdkdir = path.join(__dirname, "..", ".emsdk");
+    const emversion = require(path.join(
+        __dirname,
+        "..",
+        "package.json"
+    )).emscripten;
     if (!emversion) {
-        throw new Error("emscripten version not specified in package.json");
+        throw new Error("Emscripten version not specified in package.json");
     }
-    execute_throw`${scripts}/with_emsdk.sh ${emsdkdir} ${emversion} ${cmd}`;
+    execute_throw`cd ${emsdkdir} && . ./emsdk_env.sh >/dev/null 2>&1 && emsdk activate ${emversion} >/dev/null && cd ${cwd} && ${cmd}`;
 } catch (e) {
     console.log(e.message);
     process.exit(1);
