@@ -36,7 +36,7 @@ export default async function run() {
                     return !path.endsWith(".DS_Store");
                 },
             },
-            [path.join(__dirname, "../../dist/snapshots")],
+            [path.join("tools/perspective-test/dist/snapshots")],
             x
         )
     );

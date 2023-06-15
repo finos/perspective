@@ -7,7 +7,7 @@
  *
  */
 
-import { test } from "@playwright/test";
+import { test, expect } from "@playwright/test";
 import {
     compareLightDOMContents,
     compareShadowDOMContents,
@@ -90,44 +90,142 @@ function tests(context, compare) {
         );
     });
 
-    // This test flaps constantly due to mis-ordered HTML attributes and I don't
-    // want to fix it for the value it provides.
-    // test.skip("restore workspace with viewers with generated slotids", async (page) => {
-    //     const config = {
-    //         viewers: {
-    //             PERSPECTIVE_GENERATED_ID_0: {
-    //                 table: "superstore",
-    //                 name: "Test",
-    //                 group_by: ["State"],
-    //                 columns: ["Sales", "Profit"],
-    //             },
-    //         },
-    //         detail: {
-    //             main: {
-    //                 currentIndex: 0,
-    //                 type: "tab-area",
-    //                 widgets: ["PERSPECTIVE_GENERATED_ID_0"],
-    //             },
-    //         },
-    //     };
+    test.skip("save workspace with settings panel open", async ({ page }) => {
+        const config = {
+            viewers: {
+                One: {
+                    table: "superstore",
+                    name: "One",
+                    group_by: ["State"],
+                    columns: ["Sales", "Profit"],
+                },
+                Two: { table: "superstore", name: "Two" },
+            },
+            detail: {
+                main: {
+                    type: "split-area",
+                    orientation: "vertical",
+                    children: [
+                        {
+                            type: "tab-area",
+                            widgets: ["One"],
+                            currentIndex: 0,
+                        },
+                        {
+                            type: "tab-area",
+                            widgets: ["Two"],
+                            currentIndex: 0,
+                        },
+                    ],
+                    sizes: [0.5, 0.5],
+                },
+            },
+        };
 
-    //     await page.evaluate(async (config) => {
-    //         const workspace = document.getElementById("workspace");
-    //         await workspace.restore(config);
-    //     }, config);
+        await page.evaluate(async (config) => {
+            const workspace = document.getElementById("workspace");
+            await workspace.restore(config);
+        }, config);
 
-    //     await page.evaluate(async () => {
-    //         const workspace = document.getElementById("workspace").workspace;
-    //         const widget = workspace.getAllWidgets()[0];
-    //         await workspace.duplicate(widget);
-    //     });
+        const button = await page.locator(".p-TabBar-tabLabel");
+        await button.first().click();
+        const saved = await page.evaluate(async () => {
+            const workspace = document.getElementById("workspace");
+            return await workspace.save();
+        });
 
-    //     await page.evaluate(async () => {
-    //         await workspace.flush();
-    //     });
+        expect(saved).toEqual({
+            sizes: [1],
+            detail: {
+                main: {
+                    type: "split-area",
+                    orientation: "vertical",
+                    children: [
+                        { type: "tab-area", widgets: ["One"], currentIndex: 0 },
+                        { type: "tab-area", widgets: ["Two"], currentIndex: 0 },
+                    ],
+                    sizes: [0.5, 0.5],
+                },
+            },
+            mode: "globalFilters",
+            viewers: {
+                One: {
+                    plugin: "Datagrid",
+                    plugin_config: {
+                        columns: {},
+                        editable: false,
+                        scroll_lock: false,
+                    },
+                    settings: false,
+                    theme: "Pro Light",
+                    title: null,
+                    group_by: ["State"],
+                    split_by: [],
+                    columns: ["Sales", "Profit"],
+                    filter: [],
+                    sort: [],
+                    expressions: [],
+                    aggregates: {},
+                    master: false,
+                    table: "superstore",
+                    linked: false,
+                },
+                Two: {
+                    plugin: "Datagrid",
+                    plugin_config: {
+                        columns: {},
+                        editable: false,
+                        scroll_lock: false,
+                    },
+                    settings: false,
+                    theme: "Pro Light",
+                    title: null,
+                    group_by: [],
+                    split_by: [],
+                    columns: [
+                        "Row ID",
+                        "Order ID",
+                        "Order Date",
+                        "Ship Date",
+                        "Ship Mode",
+                        "Customer ID",
+                        "Customer Name",
+                        "Segment",
+                        "Country",
+                        "City",
+                        "State",
+                        "Postal Code",
+                        "Region",
+                        "Product ID",
+                        "Category",
+                        "Sub-Category",
+                        "Product Name",
+                        "Sales",
+                        "Quantity",
+                        "Discount",
+                        "Profit",
+                    ],
+                    filter: [],
+                    sort: [],
+                    expressions: [],
+                    aggregates: {},
+                    master: false,
+                    table: "superstore",
+                    linked: false,
+                },
+            },
+        });
 
-    //     return extract(page);
-    // });
+        await page.evaluate(async (config) => {
+            const workspace = document.getElementById("workspace");
+            await workspace.restore(config);
+        }, saved);
+
+        return compare(
+            page,
+            `${context}-save-workspace-with-settings-panel-open.txt`
+        );
+    });
 }
 
 test.describe("Workspace restore", () => {
@@ -139,32 +237,3 @@ test.describe("Workspace restore", () => {
         tests("shadow-dom", compareShadowDOMContents);
     });
 });
-
-// utils.with_server({ paths: PATHS }, () => {
-//     describe.page(
-//         "index.html",
-//         () => {
-//             describe("Light DOM", () => {
-//                 tests((page) =>
-//                     page.evaluate(
-//                         async () =>
-//                             document.getElementById("workspace").outerHTML
-//                     )
-//                 );
-//             });
-
-//             describe("Shadow DOM", () => {
-//                 tests((page) =>
-//                     page.evaluate(
-//                         async () =>
-//                             document
-//                                 .getElementById("workspace")
-//                                 .shadowRoot.querySelector("#container")
-//                                 .innerHTML
-//                     )
-//                 );
-//             });
-//         },
-//         { root: TEST_ROOT }
-//     );
-// });

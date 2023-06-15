@@ -169,14 +169,20 @@ export class PerspectiveWorkspace extends SplitPanel {
     }
 
     async save() {
+        const is_settings = this.dockpanel.mode === "single-document";
+        let detail = is_settings
+            ? this._minimizedLayoutSlots
+            : PerspectiveDockPanel.mapWidgets(
+                  (widget) => widget.viewer.getAttribute("slot"),
+                  this.dockpanel.saveLayout()
+              );
+
         const layout = {
             sizes: [...this.relativeSizes()],
-            detail: PerspectiveDockPanel.mapWidgets(
-                (widget) => widget.viewer.getAttribute("slot"),
-                this.dockpanel.saveLayout()
-            ),
+            detail,
             mode: this.mode,
         };
+
         if (this.masterPanel.isAttached) {
             const master = {
                 widgets: this.masterPanel.widgets.map((widget) =>
@@ -186,19 +192,24 @@ export class PerspectiveWorkspace extends SplitPanel {
             };
             layout.master = master;
         }
+
         const viewers = {};
         for (const widget of this.masterPanel.widgets) {
             viewers[widget.viewer.getAttribute("slot")] = await widget.save();
         }
+
         const widgets = PerspectiveDockPanel.getWidgets(
-            this.dockpanel.saveLayout()
+            is_settings ? this._minimizedLayout : this.dockpanel.saveLayout()
         );
+
         await Promise.all(
             widgets.map(async (widget) => {
-                viewers[widget.viewer.getAttribute("slot")] =
-                    await widget.save();
+                const slot = widget.viewer.getAttribute("slot");
+                viewers[slot] = await widget.save();
+                viewers[slot].settings = false;
             })
         );
+
         return { ...layout, viewers };
     }
 
@@ -244,6 +255,7 @@ export class PerspectiveWorkspace extends SplitPanel {
                         callback.bind(this, false),
                         detail
                     );
+                    this.dockpanel.mode = "multiple-document";
                     this.dockpanel.restoreLayout(detailLayout);
                     tasks = tasks.concat(
                         PerspectiveDockPanel.getWidgets(detailLayout).map(
@@ -494,6 +506,11 @@ export class PerspectiveWorkspace extends SplitPanel {
     _maximize(widget) {
         widget.viewer.classList.add("widget-maximize");
         this._minimizedLayout = this.dockpanel.saveLayout();
+        this._minimizedLayoutSlots = PerspectiveDockPanel.mapWidgets(
+            (widget) => widget.viewer.getAttribute("slot"),
+            this.dockpanel.saveLayout()
+        );
+
         this._maximizedWidget = widget;
         this.dockpanel.mode = "single-document";
         this.dockpanel.activateWidget(widget);
@@ -954,7 +971,7 @@ export class PerspectiveWorkspace extends SplitPanel {
         }
 
         const settings = (event) => {
-            if (!event.detail) {
+            if (!event.detail && this.dockpanel.mode === "single-document") {
                 this._unmaximize();
             }
         };
