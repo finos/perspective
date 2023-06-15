@@ -34,26 +34,25 @@ function emsdk(...args) {
     execute_throw`${emsdk} ${args.join(" ")}`;
 }
 
-function upgrade() {
-    console.log(`-- Emscripten not found, installing ${emscripten}`);
-    emsdk_checkout();
+function toolchain_install() {
+    console.log(`-- Installing Emscripten ${emscripten}`);
     emsdk("install", emscripten);
     emsdk("activate", emscripten);
     console.log(`-- Emscripten ${emscripten} installed`);
 }
 
-function check() {
-    try {
-        const emsdkdir = path.join(__dirname, "..", ".emsdk");
-        execute_throw`cd ${emsdkdir} && . ${emsdkdir}/emsdk_env.sh && emcc --version`;
-        return true;
-    } catch (e) {
-        return fs.existsSync(path.join(__dirname, "..", ".emsdk"));
-    }
+function repo_check() {
+    return fs.existsSync(path.join(base(), "emsdk_env.sh"));
 }
 
 if (!process.env.PSP_SKIP_EMSDK_INSTALL) {
-    if (!check()) {
-        upgrade();
+    // if a stale toolchain is still activated in the shell, these vars break
+    // emsdk install in a confusing way.  ensure they are unset
+    for (let ev of ["EMSDK", "EMSDK_NODE", "EMSDK_PYTHON", "SSL_CERT_FILE"]) {
+        delete process.env[ev];
     }
+    if (!repo_check()) {
+        emsdk_checkout();
+    }
+    toolchain_install();
 }
