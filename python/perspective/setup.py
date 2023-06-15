@@ -54,7 +54,7 @@ requires = [
     "ipywidgets>=7.5.1,<9",
     "future>=0.16.0,<1",
     "numpy>=1.21.6,<2",
-    "pandas>=0.22.0,<2",
+    "pandas>=0.22.0,<3",
     "python-dateutil>=2.8.0,<3",
     "traitlets>=4.3.2,<6",
 ]
