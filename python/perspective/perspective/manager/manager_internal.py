@@ -279,7 +279,7 @@ class _PerspectiveManagerInternal(object):
             elif callback_id is not None:
                 # pop the callback from the cache of the manager, and
                 # remove each of them from the underlying table or view
-                popped_callbacks = self._callback_cache.pop_callbacks(callback_id)
+                popped_callbacks = self._callback_cache.pop_callbacks(client_id, callback_id)
 
                 for callback in popped_callbacks:
                     getattr(table_or_view, method)(callback["callback"])

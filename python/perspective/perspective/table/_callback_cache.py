@@ -25,7 +25,7 @@ class _PerspectiveCallBackCache(object):
             raise ValueError("callback filter condition must be a callable function!")
         self._callbacks = [callback for callback in self._callbacks if condition(callback) is False]
 
-    def pop_callbacks(self, callback_id):
+    def pop_callbacks(self, client_id, callback_id):
         """Removes and returns a list of callbacks with the given
         `callback_id`.
 
@@ -40,11 +40,12 @@ class _PerspectiveCallBackCache(object):
         new_callbacks = []
 
         for callback in self._callbacks:
-            if callback["callback_id"] == callback_id:
+            if callback["callback_id"] == callback_id and callback["client_id"] == client_id:
                 popped.append(callback)
             else:
                 new_callbacks.append(callback)
 
+        self._callbacks = new_callbacks
         return popped
 
     def get_callbacks(self):

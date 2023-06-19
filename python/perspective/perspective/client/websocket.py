@@ -9,7 +9,7 @@ import asyncio
 import json
 from abc import ABC, abstractmethod
 
-from .client import PerspectiveClient
+from .base import PerspectiveClient
 from ..manager.manager_internal import DateTimeEncoder
 
 
