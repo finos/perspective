@@ -281,7 +281,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
                 -g1 \
                 ")
             if (PSP_PYODIDE)
-              set(OPT_FLAGS "${OPT_FLAGS} -flto")
+                set(OPT_FLAGS "${OPT_FLAGS} -flto")
             endif ()
         endif()
     endif()
@@ -607,8 +607,8 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 
         include_directories(${PSP_PYTHON_SRC}/include)
 
-        target_compile_definitions(psp PRIVATE PSP_ENABLE_PYTHON=1)
-        target_compile_definitions(psppy PRIVATE PSP_ENABLE_PYTHON=1)
+        target_compile_definitions(psp PRIVATE PSP_ENABLE_PYTHON=1 PSP_PARALLEL_FOR=1)
+        target_compile_definitions(psppy PRIVATE PSP_ENABLE_PYTHON=1 PSP_PARALLEL_FOR=1)
 
         if(WIN32)
             target_compile_definitions(psppy PRIVATE WIN32=1)
