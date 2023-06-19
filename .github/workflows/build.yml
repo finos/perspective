@@ -1313,6 +1313,11 @@ jobs:
                     - is-full-run: false
                       os: macos-11
 
+                    # GitHub Actions are broken on OSX, don't test 3.7 wheels
+                    # https://github.com/actions/setup-python/issues/682
+                    - python-version: 3.7
+                      os: macos-11
+
                     # Exclude Python 3.7, 3.8, 3.10, 3.11 builds
                     - is-full-run: false
                       python-version: 3.7
