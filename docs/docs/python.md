@@ -266,10 +266,8 @@ using a websocket API.
 By default, `perspective` will run with a synchronous interface. Using the
 `PerspectiveManager.set_loop_callback()` method, `perspective` can be configured
 to defer the application of side-effectful calls like `update()` to an event
-loop, such as `tornado.ioloop.IOLoop`. When running in Async mode, Perspective
-will release the GIL for some operations, enabling better parallelism and
-overall better server performance. There are a few important differences when
-running `PerspectiveManager` in this mode:
+loop, such as `tornado.ioloop.IOLoop`. There are a few important differences
+when running `PerspectiveManager` in this mode:
 
 -   Calls to methods like `update()` will return immediately, and the reciprocal
     `on_update()` callbacks will be invoked on an event later scheduled. Calls
@@ -278,11 +276,9 @@ running `PerspectiveManager` in this mode:
 -   Updates will be _conflated_ when multiple calls to `update()` occur before
     the scheduled application. In such cases, you may receive a single
     `on_update()` notification for multiple `update()` calls.
--   Once `set_loop_callback()` has been called, you may not call Perspective
-    functions from any other thread.
 
-For example, using Tornado `IOLoop` you can create a dedicated thread for a
-`PerspectiveManager`:
+For example, using Tornado `IOLoop` you can create a dedicated thread or pool 
+for a `PerspectiveManager`:
 
 ```python
 manager = perspective.PerspectiveManager()
@@ -295,6 +291,23 @@ def perspective_thread():
 thread = threading.Thread(target=perspective_thread)
 thread.daemon = True
 thread.start()
+```
+
+#### Multi-threading
+
+When running in Async mode, Perspective will release the GIL while dispatching
+to an internal thread pool for some operations, enabling better parallelism and
+overall better server performance. However, Perspective's Python interface
+itself will still process queries in a single queue. To enable parallel
+query processing, call `set_loop_callback` with a multi-threaded executor
+such as `concurrent.futures.ThreadPoolExecutor`:
+
+```python
+def perspective_thread():
+    loop = tornado.ioloop.IOLoop()
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        manager.set_loop_callback(loop.run_in_executor, executor)
+        loop.start()
 ```
 
 ### Hosting `Table` and `View` instances

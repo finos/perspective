@@ -93,7 +93,6 @@ class PerspectiveManager(_PerspectiveManagerInternal):
         """
         if self._loop_callback is not None:
             # always bind the callback to the table's state manager
-            self._loop_callback(lambda: table._table.get_pool().set_event_loop())
             table._state_manager.queue_process = partial(self._loop_callback, table._state_manager.call_process)
         self._tables[name] = table
         return name
@@ -118,7 +117,7 @@ class PerspectiveManager(_PerspectiveManagerInternal):
             raise PerspectiveError("Event loop not set on this PerspectiveManager - use set_loop_callback() before calling call_loop().")
         return self._loop_callback(f, *args, **kwargs)
 
-    def set_loop_callback(self, loop_callback):
+    def set_loop_callback(self, loop_callback, *args, **kwargs):
         """Sets this `PerspectiveManager` to run in Async mode, defering
         `update()` application and releasing the GIL for expensive operations.
 
@@ -129,12 +128,15 @@ class PerspectiveManager(_PerspectiveManagerInternal):
             loop_callback: A function which accepts a function reference and
                 its args/kwargs, and schedules it to run on the same thread
                 on which set_loop_callback()` was originally invoked.
+            *args, **kwargs: Values to pass as the first arguments to every
+                invocation of `loop_callbkac`, dsimilar to `functools.partial()`
         """
         if self._loop_callback is not None:
             raise PerspectiveError("PerspectiveManager already has a `loop_callback`")
+        if len(args) > 0 or len(kwargs) > 0:
+            loop_callback = partial(loop_callback, *args, **kwargs)
         if not callable(loop_callback):
             raise PerspectiveError("`loop_callback` must be a function")
         self._loop_callback = loop_callback
         for table in self._tables.values():
-            loop_callback(lambda: table._table.get_pool().set_event_loop())
             table._state_manager.queue_process = partial(loop_callback, table._state_manager.call_process)

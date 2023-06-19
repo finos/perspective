@@ -13,6 +13,7 @@
 #include <sstream>
 
 #include <arrow/csv/writer.h>
+#include <perspective/pyutils.h>
 
 namespace perspective {
 
@@ -76,6 +77,8 @@ template <typename CTX_T>
 View<CTX_T>::~View() {
     auto pool = m_table->get_pool();
     auto gnode = m_table->get_gnode();
+    PSP_GIL_UNLOCK();
+    PSP_WRITE_LOCK(pool->get_lock());
     // TODO: need to invalidate memory used by previous computed columns
     // without affecting views that depend on those computed columns.
     pool->unregister_context(gnode->get_id(), m_name);
@@ -1340,12 +1343,12 @@ View<CTX_T>::is_column_only() const {
     return m_view_config->is_column_only();
 }
 
-#ifdef PSP_ENABLE_PYTHON
+#ifdef PSP_PARALLEL_FOR
 template <typename CTX_T>
-std::thread::id
-View<CTX_T>::get_event_loop_thread_id() const {
-    return m_table->get_pool()->get_event_loop_thread_id();
-};
+boost::shared_mutex*
+View<CTX_T>::get_lock() const {
+    return m_table->get_pool()->get_lock();
+}
 #endif
 
 /******************************************************************************

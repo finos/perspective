@@ -19,13 +19,9 @@
 #include <perspective/tracing.h>
 #include <perspective/env_vars.h>
 #include <perspective/expression_vocab.h>
-
 #include <perspective/utils.h>
 #include <perspective/parallel_for.h>
-
-#ifdef PSP_ENABLE_PYTHON
 #include <perspective/pyutils.h>
-#endif
 
 namespace perspective {
 
@@ -48,6 +44,9 @@ calc_negate(t_tscalar val) {
 
 t_gnode::t_gnode(const t_schema& input_schema, const t_schema& output_schema)
     : m_mode(NODE_PROCESSING_SIMPLE_DATAFLOW)
+#ifdef PSP_PARALLEL_FOR
+    , m_lock(nullptr)
+#endif
     , m_gnode_type(GNODE_TYPE_PKEYED)
     , m_input_schema(input_schema)
     , m_output_schema(output_schema)
@@ -586,10 +585,8 @@ bool
 t_gnode::process(t_uindex port_id) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "Cannot `process` on an uninited gnode.");
-#ifdef PSP_ENABLE_PYTHON
-    PerspectiveScopedGILRelease acquire(m_event_loop_thread_id);
-#endif
-
+    PSP_GIL_UNLOCK();
+    PSP_WRITE_LOCK(m_lock);
     t_process_table_result result = _process_table(port_id);
 
     if (result.m_flattened_data_table) {
@@ -1324,6 +1321,8 @@ t_gnode::clear_input_ports() {
 
 void
 t_gnode::clear_output_ports() {
+    PSP_GIL_UNLOCK();
+    PSP_WRITE_LOCK(m_lock);
     for (t_uindex idx = 0, loop_end = m_oports.size(); idx < loop_end; ++idx) {
         m_oports[idx]->get_table()->clear();
     }
@@ -1356,10 +1355,10 @@ t_gnode::repr() const {
     return ss.str();
 }
 
-#ifdef PSP_ENABLE_PYTHON
+#ifdef PSP_PARALLEL_FOR
 void
-t_gnode::set_event_loop_thread_id(std::thread::id id) {
-    m_event_loop_thread_id = id;
+t_gnode::set_lock(boost::shared_mutex* lock) {
+    m_lock = lock;
 }
 #endif
 

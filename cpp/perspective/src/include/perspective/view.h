@@ -258,8 +258,8 @@ public:
     t_stepdelta get_step_delta(t_index bidx, t_index eidx) const;
     t_dtype get_column_dtype(t_uindex idx) const;
     bool is_column_only() const;
-#ifdef PSP_ENABLE_PYTHON
-    std::thread::id get_event_loop_thread_id() const;
+#ifdef PSP_PARALLEL_FOR
+    boost::shared_mutex* get_lock() const;
 #endif
 
 private:

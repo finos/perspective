@@ -946,7 +946,7 @@ jobs:
             # Windows
             - name: Windows init steps (vc142)
               run: |
-                  vcpkg.exe install boost-algorithm boost-filesystem boost-multi-index boost-multiprecision boost-program-options boost-system boost-unordered boost-uuid
+                  vcpkg.exe install boost-thread boost-algorithm boost-filesystem boost-multi-index boost-multiprecision boost-program-options boost-system boost-unordered boost-uuid
                   vcpkg.exe integrate install
               env:
                   PYTHON_VERSION: ${{ matrix.python-version }}
@@ -956,7 +956,7 @@ jobs:
 
             - name: Windows init steps (vc143)
               run: |
-                  vcpkg.exe install boost-algorithm boost-filesystem boost-multi-index boost-multiprecision boost-program-options boost-system boost-unordered boost-uuid
+                  vcpkg.exe install boost-thread boost-algorithm boost-filesystem boost-multi-index boost-multiprecision boost-program-options boost-system boost-unordered boost-uuid
                   vcpkg.exe integrate install
               env:
                   PYTHON_VERSION: ${{ matrix.python-version }}
