@@ -69,11 +69,6 @@ namespace apachearrow {
     get_scalar<bool>(t_tscalar& t) {
         return t.get<bool>();
     }
-    template <>
-    std::string
-    get_scalar<std::string>(t_tscalar& t) {
-        return t.to_string();
-    }
 
     // std::int32_t
     // get_idx(std::int32_t cidx, std::int32_t ridx, std::int32_t stride,

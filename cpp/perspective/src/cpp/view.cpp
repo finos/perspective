@@ -196,7 +196,7 @@ View<t_ctx0>::column_names(bool skip, std::int32_t depth) const {
     for (t_uindex key = 0, max = m_ctx->unity_get_column_count(); key != max;
          ++key) {
         t_tscalar name = m_ctx->get_column_name(key);
-        if (name.to_string() == "psp_okey") {
+        if (strcmp(name.get<const char*>(), "psp_okey") == 0) {
             continue;
         };
         std::vector<t_tscalar> col_path;
@@ -215,7 +215,7 @@ View<t_ctxunit>::column_names(bool skip, std::int32_t depth) const {
     for (t_uindex key = 0, max = m_ctx->unity_get_column_count(); key != max;
          ++key) {
         t_tscalar name = m_ctx->get_column_name(key);
-        if (name.to_string() == "psp_okey") {
+        if (strcmp(name.get<const char*>(), "psp_okey") == 0) {
             continue;
         };
         std::vector<t_tscalar> col_path;

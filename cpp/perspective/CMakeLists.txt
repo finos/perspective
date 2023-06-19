@@ -279,6 +279,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
             set(OPT_FLAGS " \
                 -O3 \
                 -g1 \
+                -flto \
                 ")
             if (PSP_PYODIDE)
                 set(OPT_FLAGS "${OPT_FLAGS} -flto")

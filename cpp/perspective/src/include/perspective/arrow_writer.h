@@ -122,7 +122,7 @@ namespace apachearrow {
             // auto idx = get_idx(cidx, ridx, stride, extents);
             t_tscalar scalar = f(ridx);
             if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
-                auto adx = vocab.get_interned(scalar.to_string());
+                auto adx = vocab.get_interned(scalar.get<const char*>());
                 indices_builder.UnsafeAppend(adx);
             } else {
                 indices_builder.UnsafeAppendNull();
