@@ -41,7 +41,7 @@ async def session(client):
     """Perform client test."""
     times = numpy.zeros(DOWNLOAD_ITERATIONS)
     table = client.open_table("data_source_one")
-    view = table.view()
+    view = await table.view()
     for i in range(DOWNLOAD_ITERATIONS):
         start = time.time()
         arrow = await view.to_arrow()
