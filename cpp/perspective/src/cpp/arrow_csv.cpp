@@ -71,6 +71,96 @@ ParseYYYY_MM_DD(const char* s, arrow_vendored::date::year_month_day* out) {
     return out->ok();
 }
 
+static inline bool
+ParseYYYY_DD_MM(const char* s, arrow_vendored::date::year_month_day* out) {
+    uint16_t year = 0;
+    uint8_t month = 0;
+    uint8_t day = 0;
+    if (ARROW_PREDICT_FALSE(s[2] != '/') || ARROW_PREDICT_FALSE(s[5] != '/')) {
+        return false;
+    }
+    if (ARROW_PREDICT_FALSE(!arrow::internal::ParseUnsigned(s + 6, 4, &year))) {
+        return false;
+    }
+    if (ARROW_PREDICT_FALSE(
+            !arrow::internal::ParseUnsigned(s + 0, 2, &month))) {
+        return false;
+    }
+    if (ARROW_PREDICT_FALSE(!arrow::internal::ParseUnsigned(s + 3, 2, &day))) {
+        return false;
+    }
+    *out = {arrow_vendored::date::year{year},
+        arrow_vendored::date::month{month}, arrow_vendored::date::day{day}};
+    return out->ok();
+}
+
+static inline bool
+ParseYYYY_D_M(const char* s, arrow_vendored::date::year_month_day* out) {
+    uint16_t year = 0;
+    uint8_t month = 0;
+    uint8_t day = 0;
+
+    if (ARROW_PREDICT_FALSE(s[1] != '/') || ARROW_PREDICT_FALSE(s[3] != '/')) {
+        return false;
+    }
+    if (ARROW_PREDICT_FALSE(!arrow::internal::ParseUnsigned(s + 4, 4, &year))) {
+        return false;
+    }
+    if (ARROW_PREDICT_FALSE(
+            !arrow::internal::ParseUnsigned(s + 0, 1, &month))) {
+        return false;
+    }
+    if (ARROW_PREDICT_FALSE(!arrow::internal::ParseUnsigned(s + 2, 1, &day))) {
+        return false;
+    }
+    *out = {arrow_vendored::date::year{year},
+        arrow_vendored::date::month{month}, arrow_vendored::date::day{day}};
+    return out->ok();
+}
+
+static inline std::string
+extract_string(const char* ch, int start_idx, int number_of_chars) {
+    std::string out = "";
+    for (int i = start_idx; i < start_idx + number_of_chars; i++) {
+        out += ch[i];
+    }
+    return out;
+}
+
+static inline bool
+ParseAM_PM(const char* s, std::chrono::seconds& seconds, int length) {
+    int hour = 0;
+    int twelve_hours = 12;
+    std::string am_pm = "";
+    std::string hour_string = "";
+
+    if (length == 21) {
+        am_pm = extract_string(s, 19, 2);
+        hour_string = extract_string(s, 10, 2);
+        hour = atoi(hour_string.c_str());
+        if (hour == 0) {
+            return false;
+        }
+    } else if (length == 23) {
+        am_pm = extract_string(s, 21, 2);
+        hour_string = extract_string(s, 12, 2);
+        hour = atoi(hour_string.c_str());
+        if (hour == 0) {
+            return false;
+        }
+    }
+
+    if ((am_pm == "PM" || am_pm == "pm") && (hour < twelve_hours)) {
+        std::chrono::hours hours_obj(twelve_hours);
+        seconds = std::chrono::duration_cast<std::chrono::seconds>(hours_obj);
+    } else if ((am_pm == "AM" || am_pm == "am") && (hour == twelve_hours)) {
+        std::chrono::hours hours_obj(twelve_hours);
+        seconds
+            = std::chrono::duration_cast<std::chrono::seconds>(hours_obj) * -1;
+    }
+    return true;
+}
+
 namespace perspective {
 namespace apachearrow {
 
@@ -204,8 +294,71 @@ namespace apachearrow {
         }
     };
 
+    class USTimestampParser : public arrow::TimestampParser {
+    public:
+        bool
+        operator()(const char* s, size_t length, arrow::TimeUnit::type unit,
+            int64_t* out,
+            bool* out_zone_offset_present = NULLPTR) const override {
+
+            if (!arrow::internal::ParseTimestampISO8601(s, length, unit, out)) {
+                if (length == 23) {
+                    arrow_vendored::date::year_month_day ymd;
+                    if (ARROW_PREDICT_FALSE(!ParseYYYY_DD_MM(s, &ymd))) {
+                        return false;
+                    }
+                    std::chrono::seconds seconds;
+                    if (ARROW_PREDICT_FALSE(
+                            !arrow::internal::detail::ParseHH_MM_SS(
+                                s + 12, &seconds))) {
+                        return false;
+                    }
+
+                    std::chrono::seconds am_pm(0);
+                    if (ARROW_PREDICT_FALSE(!ParseAM_PM(s, am_pm, 23))) {
+                        return false;
+                    }
+
+                    *out = ConvertTimePoint(
+                        arrow_vendored::date::sys_days(ymd) + seconds + am_pm,
+                        unit);
+                    return true;
+                } else if (length == 21) {
+                    arrow_vendored::date::year_month_day ymd;
+                    if (ARROW_PREDICT_FALSE(!ParseYYYY_D_M(s, &ymd))) {
+                        return false;
+                    }
+                    std::chrono::seconds seconds;
+                    if (ARROW_PREDICT_FALSE(
+                            !arrow::internal::detail::ParseHH_MM_SS(
+                                s + 10, &seconds))) {
+                        return false;
+                    }
+
+                    std::chrono::seconds am_pm(0);
+                    if (ARROW_PREDICT_FALSE(!ParseAM_PM(s, am_pm, 21))) {
+                        return false;
+                    }
+
+                    *out = ConvertTimePoint(
+                        arrow_vendored::date::sys_days(ymd) + seconds + am_pm,
+                        unit);
+                    return true;
+                }
+                return false;
+            }
+            return true;
+        }
+
+        const char*
+        kind() const override {
+            return "USTimestampParser";
+        }
+    };
+
     std::vector<std::shared_ptr<arrow::TimestampParser>> DATE_PARSERS{
         std::make_shared<CustomISO8601Parser>(),
+        std::make_shared<USTimestampParser>(),
         arrow::TimestampParser::MakeStrptime("%Y-%m-%d\\D%H:%M:%S.%f"),
         arrow::TimestampParser::MakeStrptime(
             "%m/%d/%Y, %I:%M:%S %p"), // US locale string
@@ -218,6 +371,7 @@ namespace apachearrow {
     std::vector<std::shared_ptr<arrow::TimestampParser>> DATE_READERS{
         std::make_shared<UnixTimestampParser>(),
         std::make_shared<CustomISO8601Parser>(),
+        std::make_shared<USTimestampParser>(),
         arrow::TimestampParser::MakeStrptime("%Y-%m-%d\\D%H:%M:%S.%f"),
         arrow::TimestampParser::MakeStrptime(
             "%m/%d/%Y, %I:%M:%S %p"), // US locale string

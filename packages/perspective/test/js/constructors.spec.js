@@ -1148,15 +1148,17 @@ function validate_typed_array(typed_array, column_data) {
             table.delete();
         });
 
-        test.skip("Handles datetime strings in US locale string old", async function () {
+        test("Handles datetime strings in US locale string old", async function () {
             // FIXME: 1/1/2020, 12:30:45 PM = 1/1/2020, 7:30:45 AM UTC, but
             // because C++ strptime in Emscripten parses the time as 12:30:45AM,
             // the output is 12/31/2019 19:30:45 PM UTC. This is clearly wrong.
             const data = {
                 x: [
                     "1/1/2020, 12:30:45 PM",
+                    "1/1/2020, 12:30:45 AM",
                     "03/15/2020, 11:30:45 AM",
                     "06/30/2020, 01:30:45 AM",
+                    "06/30/2020, 01:30:45 PM",
                     "12/31/2020, 11:59:59 PM",
                 ],
             };
@@ -1173,8 +1175,10 @@ function validate_typed_array(typed_array, column_data) {
             const expected = {
                 x: [
                     "1/1/2020, 12:30:45 PM",
+                    "1/1/2020, 12:30:45 AM",
                     "03/15/2020, 11:30:45 AM",
                     "06/30/2020, 01:30:45 AM",
+                    "06/30/2020, 01:30:45 PM",
                     "12/31/2020, 11:59:59 PM",
                 ].map((v) => new Date(v).getTime()),
             };
