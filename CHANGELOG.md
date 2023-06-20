@@ -1,6 +1,23 @@
+# [v2.3.0](https://github.com/finos/perspective/releases/tag/v2.3.0)
+
+_20 June 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.2.1...v2.3.0))
+
+**Breaking**
+
+- Thread-safe python readers [#2261](https://github.com/finos/perspective/pull/2261)
+
+Fixes
+
+- Fix workspace `save()` w/settings [#2257](https://github.com/finos/perspective/pull/2257)
+
+Misc
+
+- Validate installed emsdk version [#2256](https://github.com/finos/perspective/pull/2256)
+- Allow `pandas~=2.0.0` to be installed [#2244](https://github.com/finos/perspective/pull/2244)
+
 # [v2.2.1](https://github.com/finos/perspective/releases/tag/v2.2.1)
 
-_5 June 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.2.0...v2.2.1))
+_4 June 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.2.0...v2.2.1))
 
 Features
 
