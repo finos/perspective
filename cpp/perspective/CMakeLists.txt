@@ -279,9 +279,10 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
             set(OPT_FLAGS " \
                 -O3 \
                 -g1 \
+                -flto \
                 ")
             if (PSP_PYODIDE)
-              set(OPT_FLAGS "${OPT_FLAGS} -flto")
+                set(OPT_FLAGS "${OPT_FLAGS} -flto")
             endif ()
         endif()
     endif()
@@ -291,8 +292,11 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
     # Boost is a system dependency and must be present and built on the system.
     if(PSP_PYODIDE)
         set(CMAKE_FIND_ROOT_PATH "${CMAKE_FIND_ROOT_PATH};/usr/local/")
+        find_package(Boost REQUIRED)
+    else()
+        set(Boost_USE_STATIC_LIBS ON)
+        find_package(Boost REQUIRED COMPONENTS system thread)
     endif()
-    find_package(Boost REQUIRED)
 
     if(NOT Boost_FOUND)
         message(FATAL_ERROR "${Red}Boost could not be located${ColorReset}")
@@ -607,8 +611,8 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 
         include_directories(${PSP_PYTHON_SRC}/include)
 
-        target_compile_definitions(psp PRIVATE PSP_ENABLE_PYTHON=1)
-        target_compile_definitions(psppy PRIVATE PSP_ENABLE_PYTHON=1)
+        target_compile_definitions(psp PRIVATE PSP_ENABLE_PYTHON=1 PSP_PARALLEL_FOR=1)
+        target_compile_definitions(psppy PRIVATE PSP_ENABLE_PYTHON=1 PSP_PARALLEL_FOR=1)
 
         if(WIN32)
             target_compile_definitions(psppy PRIVATE WIN32=1)
@@ -628,7 +632,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
         endif()
 
         # Link against minimal arrow static library
-        target_link_libraries(psp arrow re2)
+        target_link_libraries(psp arrow re2 Boost::thread)
         target_link_libraries(psppy psp)
 
         # The compiled libraries will be put in CMAKE_LIBRARY_OUTPUT_DIRECTORY by default. In the

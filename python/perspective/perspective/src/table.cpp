@@ -77,8 +77,7 @@ namespace binding {
             }
 
             {
-                PerspectiveScopedGILRelease acquire(
-                    pool->get_event_loop_thread_id());
+                PSP_GIL_UNLOCK();
 
                 // With the GIL released, load the arrow
                 if (is_csv) {
@@ -288,8 +287,7 @@ namespace binding {
         std::uint32_t row_count;
 
         if (is_arrow) {
-            PerspectiveScopedGILRelease acquire(
-                pool->get_event_loop_thread_id());
+            PSP_GIL_UNLOCK();
             row_count = arrow_loader.row_count();
             data_table.extend(row_count);
             arrow_loader.fill_table(

@@ -26,10 +26,12 @@
 #include <perspective/regex.h>
 #include <tsl/ordered_map.h>
 #include <perspective/parallel_for.h>
+#include <chrono>
+
 #ifdef PSP_PARALLEL_FOR
 #include <thread>
+#include <boost/thread/shared_mutex.hpp>
 #endif
-#include <chrono>
 
 namespace perspective {
 
@@ -208,8 +210,8 @@ public:
     std::shared_ptr<t_expression_vocab> get_expression_vocab() const;
     std::shared_ptr<t_regex_mapping> get_expression_regex_mapping() const;
 
-#ifdef PSP_ENABLE_PYTHON
-    void set_event_loop_thread_id(std::thread::id id);
+#ifdef PSP_PARALLEL_FOR
+    void set_lock(boost::shared_mutex* lock);
 #endif
 
 protected:
@@ -364,8 +366,8 @@ private:
     std::shared_ptr<t_expression_vocab> m_expression_vocab;
     std::shared_ptr<t_regex_mapping> m_expression_regex_mapping;
 
-#ifdef PSP_ENABLE_PYTHON
-    std::thread::id m_event_loop_thread_id;
+#ifdef PSP_PARALLEL_FOR
+    boost::shared_mutex* m_lock;
 #endif
 };
 

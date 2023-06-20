@@ -58,7 +58,8 @@ const gh_python_dist_folders = [
     // // https://github.com/actions/virtual-environments
 
     // Mac 11
-    "perspective-python-dist-macos-11-3.7",
+    // https://github.com/actions/setup-python/issues/682
+    // "perspective-python-dist-macos-11-3.7",
     "perspective-python-dist-macos-11-3.8",
     "perspective-python-dist-macos-11-3.9",
     "perspective-python-dist-macos-11-3.10",

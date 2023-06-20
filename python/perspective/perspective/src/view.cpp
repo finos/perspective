@@ -272,6 +272,8 @@ namespace binding {
     std::shared_ptr<View<CTX_T>>
     make_view(std::shared_ptr<Table> table, const std::string& name,
         const std::string& separator, t_val view_config, t_val date_parser) {
+        PSP_GIL_READ_LOCK(table->get_pool()->get_lock());
+
         // Use a copy of the table schema that we can freely mutate during
         // `make_view_config` and pass into the context constructors.
         std::shared_ptr<t_schema> schema
@@ -284,8 +286,7 @@ namespace binding {
         std::shared_ptr<t_view_config> config
             = make_view_config<t_val>(gnode, schema, date_parser, view_config);
         {
-            PerspectiveScopedGILRelease acquire(
-                table->get_pool()->get_event_loop_thread_id());
+            PSP_GIL_UNLOCK();
             auto ctx = make_context<CTX_T>(table, schema, config, name);
             auto view_ptr = std::make_shared<View<CTX_T>>(
                 table, ctx, name, separator, config);
@@ -329,7 +330,8 @@ namespace binding {
     py::bytes
     to_arrow_unit(std::shared_ptr<View<t_ctxunit>> view, std::int32_t start_row,
         std::int32_t end_row, std::int32_t start_col, std::int32_t end_col) {
-        PerspectiveScopedGILRelease acquire(view->get_event_loop_thread_id());
+        PSP_GIL_UNLOCK();
+        PSP_READ_LOCK(view->get_lock());
         std::shared_ptr<std::string> str
             = view->to_arrow(start_row, end_row, start_col, end_col, true);
         return py::bytes(*str);
@@ -338,7 +340,8 @@ namespace binding {
     py::bytes
     to_arrow_zero(std::shared_ptr<View<t_ctx0>> view, std::int32_t start_row,
         std::int32_t end_row, std::int32_t start_col, std::int32_t end_col) {
-        PerspectiveScopedGILRelease acquire(view->get_event_loop_thread_id());
+        PSP_GIL_UNLOCK();
+        PSP_READ_LOCK(view->get_lock());
         std::shared_ptr<std::string> str
             = view->to_arrow(start_row, end_row, start_col, end_col, true);
         return py::bytes(*str);
@@ -347,7 +350,8 @@ namespace binding {
     py::bytes
     to_arrow_one(std::shared_ptr<View<t_ctx1>> view, std::int32_t start_row,
         std::int32_t end_row, std::int32_t start_col, std::int32_t end_col) {
-        PerspectiveScopedGILRelease acquire(view->get_event_loop_thread_id());
+        PSP_GIL_UNLOCK();
+        PSP_READ_LOCK(view->get_lock());
         std::shared_ptr<std::string> str
             = view->to_arrow(start_row, end_row, start_col, end_col, true);
         return py::bytes(*str);
@@ -356,7 +360,8 @@ namespace binding {
     py::bytes
     to_arrow_two(std::shared_ptr<View<t_ctx2>> view, std::int32_t start_row,
         std::int32_t end_row, std::int32_t start_col, std::int32_t end_col) {
-        PerspectiveScopedGILRelease acquire(view->get_event_loop_thread_id());
+        PSP_GIL_UNLOCK();
+        PSP_READ_LOCK(view->get_lock());
         std::shared_ptr<std::string> str
             = view->to_arrow(start_row, end_row, start_col, end_col, true);
         return py::bytes(*str);
@@ -365,28 +370,32 @@ namespace binding {
     std::string
     to_csv_unit(std::shared_ptr<View<t_ctxunit>> view, std::int32_t start_row,
         std::int32_t end_row, std::int32_t start_col, std::int32_t end_col) {
-        PerspectiveScopedGILRelease acquire(view->get_event_loop_thread_id());
+        PSP_GIL_UNLOCK();
+        PSP_READ_LOCK(view->get_lock());
         return *view->to_csv(start_row, end_row, start_col, end_col);
     }
 
     std::string
     to_csv_zero(std::shared_ptr<View<t_ctx0>> view, std::int32_t start_row,
         std::int32_t end_row, std::int32_t start_col, std::int32_t end_col) {
-        PerspectiveScopedGILRelease acquire(view->get_event_loop_thread_id());
+        PSP_GIL_UNLOCK();
+        PSP_READ_LOCK(view->get_lock());
         return *view->to_csv(start_row, end_row, start_col, end_col);
     }
 
     std::string
     to_csv_one(std::shared_ptr<View<t_ctx1>> view, std::int32_t start_row,
         std::int32_t end_row, std::int32_t start_col, std::int32_t end_col) {
-        PerspectiveScopedGILRelease acquire(view->get_event_loop_thread_id());
+        PSP_GIL_UNLOCK();
+        PSP_READ_LOCK(view->get_lock());
         return *view->to_csv(start_row, end_row, start_col, end_col);
     }
 
     std::string
     to_csv_two(std::shared_ptr<View<t_ctx2>> view, std::int32_t start_row,
         std::int32_t end_row, std::int32_t start_col, std::int32_t end_col) {
-        PerspectiveScopedGILRelease acquire(view->get_event_loop_thread_id());
+        PSP_GIL_UNLOCK();
+        PSP_READ_LOCK(view->get_lock());
         return *view->to_csv(start_row, end_row, start_col, end_col);
     }
 
@@ -397,7 +406,8 @@ namespace binding {
 
     py::bytes
     get_row_delta_unit(std::shared_ptr<View<t_ctxunit>> view) {
-        PerspectiveScopedGILRelease acquire(view->get_event_loop_thread_id());
+        PSP_GIL_UNLOCK();
+        PSP_READ_LOCK(view->get_lock());
         std::shared_ptr<t_data_slice<t_ctxunit>> slice = view->get_row_delta();
         std::shared_ptr<std::string> arrow
             = view->data_slice_to_arrow(slice, false);
@@ -406,7 +416,8 @@ namespace binding {
 
     py::bytes
     get_row_delta_zero(std::shared_ptr<View<t_ctx0>> view) {
-        PerspectiveScopedGILRelease acquire(view->get_event_loop_thread_id());
+        PSP_GIL_UNLOCK();
+        PSP_READ_LOCK(view->get_lock());
         std::shared_ptr<t_data_slice<t_ctx0>> slice = view->get_row_delta();
         std::shared_ptr<std::string> arrow
             = view->data_slice_to_arrow(slice, false);
@@ -415,7 +426,8 @@ namespace binding {
 
     py::bytes
     get_row_delta_one(std::shared_ptr<View<t_ctx1>> view) {
-        PerspectiveScopedGILRelease acquire(view->get_event_loop_thread_id());
+        PSP_GIL_UNLOCK();
+        PSP_READ_LOCK(view->get_lock());
         std::shared_ptr<t_data_slice<t_ctx1>> slice = view->get_row_delta();
         std::shared_ptr<std::string> arrow
             = view->data_slice_to_arrow(slice, false);
@@ -424,7 +436,8 @@ namespace binding {
 
     py::bytes
     get_row_delta_two(std::shared_ptr<View<t_ctx2>> view) {
-        PerspectiveScopedGILRelease acquire(view->get_event_loop_thread_id());
+        PSP_GIL_UNLOCK();
+        PSP_READ_LOCK(view->get_lock());
         std::shared_ptr<t_data_slice<t_ctx2>> slice = view->get_row_delta();
         std::shared_ptr<std::string> arrow
             = view->data_slice_to_arrow(slice, false);

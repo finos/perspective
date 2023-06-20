@@ -161,31 +161,31 @@ namespace apachearrow {
         std::shared_ptr<arrow::Schema> schema = m_table->schema();
         std::vector<std::shared_ptr<arrow::Field>> fields = schema->fields();
 
-        for (long unsigned int cidx = 0; cidx < m_names.size(); ++cidx) {
+        parallel_for(int(m_names.size()), [&](int cidx) {
             auto name = m_names[cidx];
             t_dtype type = m_types[cidx];
 
-            if (!input_schema.has_column(name)) {
+            if (input_schema.has_column(name)) {
                 // Skip columns that are defined in the arrow but not
                 // in the Table's input schema.
-                continue;
-            }
 
-            auto raw_type = fields[cidx]->type()->name();
+                auto raw_type = fields[cidx]->type()->name();
 
-            if (name == "__INDEX__") {
-                implicit_index = true;
-                std::shared_ptr<t_column> pkey_col_sptr
-                    = tbl.add_column_sptr("psp_pkey", type, true);
-                fill_column(tbl, pkey_col_sptr, "psp_pkey", cidx, type,
-                    raw_type, is_update);
-                tbl.clone_column("psp_pkey", "psp_okey");
-                continue;
-            } else {
-                auto col = tbl.get_column(name);
-                fill_column(tbl, col, name, cidx, type, raw_type, is_update);
+                if (name == "__INDEX__") {
+                    implicit_index = true;
+                    std::shared_ptr<t_column> pkey_col_sptr
+                        = tbl.add_column_sptr("psp_pkey", type, true);
+                    fill_column(tbl, pkey_col_sptr, "psp_pkey", cidx, type,
+                        raw_type, is_update);
+                    tbl.clone_column("psp_pkey", "psp_okey");
+                    // continue;
+                } else {
+                    auto col = tbl.get_column(name);
+                    fill_column(
+                        tbl, col, name, cidx, type, raw_type, is_update);
+                }
             }
-        }
+        });
 
         // Fill index column - recreated every time a `t_data_table` is created.
         if (!implicit_index) {

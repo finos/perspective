@@ -74,7 +74,7 @@ class TestAsync(object):
         tbl.delete()
 
     def test_async_queue_process_csv(self):
-        """Make sure GIL release during CSV loading works"""     
+        """Make sure GIL release during CSV loading works"""
         tbl = Table("x,y,z\n1,a,true\n2,b,false\n3,c,true\n4,d,false")
         manager = PerspectiveManager()
         manager.set_loop_callback(TestAsync.loop.add_callback)
@@ -196,7 +196,7 @@ class TestAsync(object):
         for i in range(5):
             tbl2.update([data[i]])
 
-        assert sentinel["called"] == 6
+        assert sentinel["called"] == 5
 
         @syncify
         def _tbl_task2():
@@ -254,8 +254,8 @@ class TestAsync(object):
 
         assert _tbl_task2() == 10
         assert tbl.size() == 10
-        assert sentinel["async"] == 2
-        assert sentinel["sync"] == 11
+        assert sentinel["async"] == 1
+        assert sentinel["sync"] == 10
 
         tbl.delete()
 
@@ -401,6 +401,6 @@ class TestAsync(object):
 
         assert _get_size() == 11
         assert tbl2.size() == 11
-        assert sentinel["async"] == 2
-        assert sentinel["sync"] == 12
+        assert sentinel["async"] == 1
+        assert sentinel["sync"] == 11
         tbl2.delete()

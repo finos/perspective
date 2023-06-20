@@ -15,8 +15,9 @@
 #include <mutex>
 #include <atomic>
 
-#ifdef PSP_ENABLE_PYTHON
+#ifdef PSP_PARALLEL_FOR
 #include <thread>
+#include <boost/thread/shared_mutex.hpp>
 #endif
 
 #if defined PSP_ENABLE_WASM and !defined(PSP_ENABLE_PYTHON)
@@ -61,9 +62,8 @@ public:
         t_ctx_type type, std::int64_t ptr);
 #endif
 
-#ifdef PSP_ENABLE_PYTHON
-    void set_event_loop();
-    std::thread::id get_event_loop_thread_id() const;
+#ifdef PSP_PARALLEL_FOR
+    boost::shared_mutex* get_lock() const;
 #endif
 
     /**
@@ -110,8 +110,8 @@ protected:
     bool validate_gnode_id(t_uindex gnode_id) const;
 
 private:
-#ifdef PSP_ENABLE_PYTHON
-    std::thread::id m_event_loop_thread_id;
+#ifdef PSP_PARALLEL_FOR
+    boost::shared_mutex* m_lock;
 #endif
     std::mutex m_mtx;
     std::vector<t_gnode*> m_gnodes;

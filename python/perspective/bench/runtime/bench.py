@@ -5,6 +5,7 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+
 import logging
 import os
 import sys
@@ -12,7 +13,6 @@ import signal
 import subprocess
 import venv
 import tornado
-from datetime import datetime
 from timeit import timeit
 from perspective import (
     Table,
@@ -21,6 +21,18 @@ from perspective import (
 )
 
 logging.basicConfig(level=logging.INFO)
+
+ARROW_PATH = os.path.join(
+    os.path.dirname(__file__),
+    "..",
+    "..",
+    "..",
+    "..",
+    "tools",
+    "perspective-bench",
+    "dist",
+    "benchmark-python.arrow",
+)
 
 
 class VirtualEnvHandler(object):
@@ -40,8 +52,8 @@ class VirtualEnvHandler(object):
     def activate_virtualenv(self):
         """Activates the virtualenv at `VIRTUALENV_PATH`."""
         logging.info("Activating virtualenv at: `{}`".format(self._virtualenv_path))
-        subprocess.check_output("source {}/bin/activate".format(self._virtualenv_path), shell=True)
         self._is_activated = True
+        return "source {}/bin/activate".format(self._virtualenv_path)
 
     def create_virtualenv(self):
         """Clears the folder and creates a new virtualenv at
@@ -160,12 +172,12 @@ class Runner(object):
 
         for k, v in class_attrs:
             if hasattr(v, "benchmark") and getattr(v, "benchmark") is True:
-                logging.info("Registering {0}".format(k))
+                logging.debug("Registering {0}".format(k))
                 self._benchmarks.append(v)
 
         for k, v in instance_attrs:
             if hasattr(v, "benchmark") and getattr(v, "benchmark") is True:
-                logging.info("Registering {0}".format(k))
+                logging.debug("Registering {0}".format(k))
                 self._benchmarks.append(v)
 
         # Write results on SIGINT
@@ -200,17 +212,15 @@ class Runner(object):
         )
         self._HOSTING = True
         application.listen(8888)
-        logging.critical("Displaying results at http://localhost:8888")
+        logging.warn("Displaying results at http://localhost:8888")
         loop = tornado.ioloop.IOLoop.current()
         loop.start()
 
     def write_results(self):
         if self._table is None:
             return
-        name = "benchmark_{}_.arrow".format(datetime.now().isoformat())
-        logging.info("Writing results to `{}`".format(name))
-        arrow_path = os.path.join(os.path.dirname(__file__), name)
-        with open(arrow_path, "wb") as file:
+        logging.debug("Writing results to `benchmark-python.arrow`")
+        with open(ARROW_PATH, "wb") as file:
             arrow = self._table.view().to_arrow()
             file.write(arrow)
         self._WROTE_RESULTS = True
@@ -226,12 +236,11 @@ class Runner(object):
         return overall_result
 
     def print_result(self, result):
-        print(
-            "{}::{} ({}):{:30}{:>30}".format(
+        logging.info(
+            "{:<9} {:<14} {:<7} {:>2.4f}s".format(
                 result["group"],
                 result["name"],
                 result["version"],
-                "",
                 result["__TIME__"],
             )
         )
@@ -246,12 +255,12 @@ class Runner(object):
             result["version"] = version
             self.print_result(result)
             if self._table is None:
-                arrow_path = os.path.join(os.path.dirname(__file__), "benchmark.arrow")
-                if os.path.exists(arrow_path):
+                if os.path.exists(ARROW_PATH):
                     # if arrow exists, append to it
-                    with open(arrow_path, "rb") as arr:
+                    with open(ARROW_PATH, "rb") as arr:
                         print("Reading table from pre-existing benchmark.arrow")
                         self._table = Table(arr.read())
+                    self._table.update([result])
                 else:
                     print("Creating new table")
                     self._table = Table([result])

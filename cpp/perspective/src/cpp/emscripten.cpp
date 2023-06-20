@@ -161,7 +161,7 @@ namespace binding {
             default: {
                 std::wstring_convert<utf8convert_type, wchar_t> converter(
                     "", L"<Invalid>");
-                return t_val(converter.from_bytes(scalar.to_string()));
+                return t_val(converter.from_bytes(scalar.get<const char*>()));
             }
         }
     }
@@ -459,7 +459,7 @@ namespace binding {
         for (int idx = 0; idx < data_size; idx++) {
             t_tscalar scalar = data[idx];
             if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
-                auto adx = vocab.get_interned(scalar.to_string());
+                auto adx = vocab.get_interned(scalar.get<const char*>());
                 indexArray.call<void>("fill", t_val(adx), idx, idx + 1);
                 validityMap[idx / 32] |= 1 << (idx % 32);
             } else {
