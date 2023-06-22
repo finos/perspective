@@ -66,6 +66,9 @@ class PerspectiveTableProxy(object):
     def get_limit(self):
         return self._async_queue("get_limit", "table_method")
 
+    def get_num_views(self):
+        return self._async_queue("get_num_views", "table_method")
+
     def clear(self):
         return self._async_queue("clear", "table_method")
 

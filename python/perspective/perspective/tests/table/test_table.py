@@ -574,6 +574,31 @@ class TestTable(object):
         tbl = Table(data)
         assert tbl.get_limit() is None
 
+    # num_views
+
+    def test_table_get_num_views(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        assert tbl.get_num_views() == 0
+        v1 = tbl.view()
+        v2 = tbl.view()
+        v3 = tbl.view()
+        assert tbl.get_num_views() == 3
+
+        v1.delete()
+        v2.delete()
+        assert tbl.get_num_views() == 1
+        failed = False
+        try:
+            tbl.delete()
+        except PerspectiveError:
+            failed = True
+        assert failed
+        v3.delete()
+        assert tbl.get_num_views() == 0
+        tbl.delete()
+
+
     # clear
 
     def test_table_clear(self):

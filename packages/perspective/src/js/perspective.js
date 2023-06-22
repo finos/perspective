@@ -1380,6 +1380,16 @@ export default function (Module) {
     };
 
     /**
+     * @returns The number of views associated to this table.
+     *          Note that this may be more than what is visible on a screen.
+     *          As views are created to manage various internal
+     *          state of the application.
+     */
+    table.prototype.get_num_views = function () {
+        return this.views.length;
+    };
+
+    /**
      * Replace all rows in this {@link module:perspective~table} the input data.
      */
     table.prototype.replace = function (data) {

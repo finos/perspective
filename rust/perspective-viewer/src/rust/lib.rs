@@ -12,7 +12,6 @@
 #![feature(lazy_cell)]
 #![feature(macro_metavar_expr)]
 #![feature(let_chains)]
-#![feature(anonymous_lifetime_in_impl_trait)]
 #![feature(stmt_expr_attributes)]
 #![warn(
     clippy::all,
