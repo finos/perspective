@@ -22,7 +22,13 @@ try:
     # dependent on `libpsppy` is exposed.
     from .table import *
     from .manager import *
-    from .viewer import *
+    # Only try importing viewer if traitlets is available
+    try:
+        import traitlets
+    except ImportError:
+        pass
+    else:
+        from .viewer import *
     from .table.libpsppy import (
         init_expression_parser,
     )
