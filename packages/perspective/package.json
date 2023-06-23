@@ -12,6 +12,7 @@
     "jsdelivr": "dist/cdn/perspective.js",
     "exports": {
         ".": {
+            "types": "./index.d.ts",
             "node": "./dist/cjs/perspective.node.js",
             "default": "./dist/esm/perspective.inline.js"
         },
