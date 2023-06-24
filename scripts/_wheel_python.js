@@ -8,20 +8,19 @@
  */
 
 const {
-    execute,
     docker,
     clean,
-    resolve,
     getarg,
-    bash,
     python_version,
     python_image,
     manylinux_version,
     copy_files_to_python_folder,
 } = require("./script_utils.js");
-const IS_DOCKER = process.env.PSP_DOCKER;
+const sh = require("./sh.js").default;
+const IS_DOCKER = process.env.PSP_DOCKER || getarg("--docker");
 const IS_MACOS = getarg("--macos");
 const IS_ARM = getarg("--arm");
+const { install_boost } = require("./install_tools.js");
 let IMAGE = "manylinux2014";
 let MANYLINUX_VERSION;
 let PYTHON;
@@ -40,74 +39,67 @@ if (IS_DOCKER) {
  * `bdist_wheel`, except it also automatically calls `auditwheel` (Linux) or
  * `delocate` on Mac.
  */
-try {
-    console.log("Copying assets to `dist` folder");
-    copy_files_to_python_folder();
-    const obj = resolve`${__dirname}/../python/perspective/dist/obj`;
-    clean(obj);
 
-    let cmd = bash``;
+console.log("Copying assets to `dist` folder");
+copy_files_to_python_folder();
+const obj = sh.path`${__dirname}/../python/perspective/dist/obj`;
+clean(obj);
 
-    // Create a wheel
-    if (MANYLINUX_VERSION) {
-        // install deps
-        const boost = [
-            `yum -y install wget libffi-devel`,
-            `wget https://boostorg.jfrog.io/artifactory/main/release/1.82.0/source/boost_1_82_0.tar.gz >/dev/null`,
-            `tar xfz boost_1_82_0.tar.gz`,
-            "cd boost_1_82_0",
-            `./bootstrap.sh`,
-            `./b2 -j8 cxxflags=-fPIC cflags=-fPIC -a --with-program_options --with-thread --with-filesystem --with-system install`,
-            `cd ..`,
-        ].join(" && ");
+let cmd = sh();
 
-        // This always runs in docker for now so install boost
-        cmd += ` ${boost} && `;
+// Create a wheel
+if (MANYLINUX_VERSION) {
+    // install deps
+    cmd.and_sh`yum -y install wget libffi-devel`;
 
-        // These are system deps that may only be in place from pep-517/518 so
-        // lets reinstall them to be sure
-        cmd += `${PYTHON} -m pip install -U 'numpy>=1.13.1' jupyter_packaging wheel twine auditwheel && `;
+    // This always runs in docker for now so install boost
+    cmd.and_sh(install_boost());
 
-        // remove the build folder so we completely rebuild (and pick up the
-        // libs we just installed above, since this build method won't use
-        // pep-517/518)
-        cmd += `rm -rf build/ && `;
+    // These are system deps that may only be in place from pep-517/518 so
+    // lets reinstall them to be sure
+    cmd.and_sh`${PYTHON} -m pip install -U 'numpy>=1.13.1' jupyter_packaging wheel twine auditwheel`;
 
-        // now build the wheel in place
-        cmd += `${PYTHON} setup.py build_ext bdist_wheel `;
+    // remove the build folder so we completely rebuild (and pick up the
+    // libs we just installed above, since this build method won't use
+    // pep-517/518)
+    cmd.and_sh`rm -rf build/`;
 
-        // Use auditwheel on Linux - repaired wheels are in
-        // `python/perspective/wheelhouse`.
-        cmd += `&& ${PYTHON} -m auditwheel -v show ./dist/*.whl && ${PYTHON} -m auditwheel -v repair -L .lib ./dist/*.whl `;
-    } else if (IS_MACOS) {
-        // Don't need to do any cleaning here since we will reuse the cmake
-        // cache and numpy paths from the pep-517/518 build in build_python.js
-        cmd += `${PYTHON} setup.py build_ext bdist_wheel `;
-        if (IS_ARM) {
-            cmd = `CMAKE_OSX_ARCHITECTURES=arm64 ${cmd} --plat-name=macosx_11_0_arm64 `;
-        } else {
-            cmd = `CMAKE_OSX_ARCHITECTURES=x86_64 ${cmd} `;
-        }
-        cmd += " && mkdir -p ./wheelhouse && cp -v ./dist/*.whl ./wheelhouse ";
+    // now build the wheel in place
+    cmd.and_sh`${PYTHON} setup.py build_ext bdist_wheel`;
+
+    // Use auditwheel on Linux - repaired wheels are in
+    // `python/perspective/wheelhouse`.
+    cmd.and_sh`${PYTHON} -m auditwheel -v show ./dist/*.whl`;
+    cmd.and_sh`${PYTHON} -m auditwheel -v repair -L .lib ./dist/*.whl`;
+} else if (IS_MACOS) {
+    // Don't need to do any cleaning here since we will reuse the cmake
+    // cache and numpy paths from the pep-517/518 build in build_python.js
+    cmd.and_sh`${PYTHON} setup.py build_ext bdist_wheel`;
+    if (IS_ARM) {
+        cmd.env({ CMAKE_OSX_ARCHITECTURES: "arm64" });
+        cmd.sh`--plat-name=macosx_11_0_arm64 `;
     } else {
-        // Windows
-        cmd += `${PYTHON} setup.py build_ext bdist_wheel `;
+        cmd.env({ CMAKE_OSX_ARCHITECTURES: "86_64" });
     }
 
-    // TODO: MacOS wheel processed with delocate segfaults on
-    // `import perspective`.
+    cmd.and_sh`mkdir -p ./wheelhouse`;
+    cmd.and_sh`cp -v ./dist/*.whl ./wheelhouse`;
+} else {
+    // Windows
+    cmd.and_sh`${PYTHON} setup.py build_ext bdist_wheel`;
+}
 
-    if (IS_DOCKER) {
-        console.log(
-            `Building wheel for \`perspective-python\` using image \`${IMAGE}\` in Docker`
-        );
-        execute`${docker(IMAGE)} bash -c "cd python/perspective && ${cmd}"`;
-    } else {
-        console.log(`Building wheel for \`perspective-python\``);
-        const python_path = resolve`${__dirname}/../python/perspective`;
-        execute`cd ${python_path} && ${cmd}`;
-    }
-} catch (e) {
-    console.error(e.message);
-    process.exit(1);
+// TODO: MacOS wheel processed with delocate segfaults on
+// `import perspective`.
+if (IS_DOCKER) {
+    console.log(
+        `Building wheel for \`perspective-python\` using image \`${IMAGE}\` in Docker`
+    );
+    sh`${sh(docker(IMAGE))} bash -c ${sh`cd python/perspective`
+        .and_sh(cmd)
+        .toString()}`.runSync();
+} else {
+    console.log(`Building wheel for \`perspective-python\``);
+    const python_path = sh.path`${__dirname}/../python/perspective`;
+    sh`cd ${python_path}`.and_sh(cmd).runSync();
 }

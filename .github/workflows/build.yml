@@ -191,7 +191,7 @@ jobs:
                     - ubuntu-20.04 # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-Readme.md
                 python-version:
                     - 3.9
-                node-version: [16.x]
+                node-version: [18.x]
 
             # NOTE: don't fail fast as sometimes npm blocks the burst of fetches from GHA
             fail-fast: false
@@ -546,7 +546,7 @@ jobs:
                     - ubuntu-20.04 # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-Readme.md
                 python-version:
                     - 3.9
-                node-version: [16.x]
+                node-version: [18.x]
 
             # NOTE: don't fail fast as sometimes npm blocks the burst of fetches from GHA
             fail-fast: false
@@ -738,7 +738,7 @@ jobs:
                 container:
                     - none # Not manylinux, we will use this space to build the WASM assets
                     - 2014
-                node-version: [16.x]
+                node-version: [18.x]
                 is-full-run:
                     - ${{ needs.initialize.outputs.FULL_RUN == 'true' }}
                 include-windows-run:
@@ -938,8 +938,8 @@ jobs:
 
             ################
             # Mac
-            - name: Mac init steps
-              run: env HOMEBREW_NO_AUTO_UPDATE=1 brew install boost
+            - name: Install Boost (MacOS)
+              run: sudo node scripts/install_tools.js
               if: ${{ runner.os == 'macOS' }}
 
             ################
@@ -1110,7 +1110,7 @@ jobs:
                     - ubuntu-20.04 # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-Readme.md
                 python-version:
                     - 3.9
-                node-version: [16.x]
+                node-version: [18.x]
             # NOTE: don't fail fast as sometimes npm blocks the burst of fetches from GHA
             fail-fast: false
 
@@ -1289,7 +1289,7 @@ jobs:
                     - 3.9
                     - "3.10"
                     - 3.11
-                node-version: [16.x]
+                node-version: [18.x]
                 is-full-run:
                     - ${{ needs.initialize.outputs.FULL_RUN == 'true' }}
                 include-windows-run:

@@ -7,20 +7,48 @@
  *
  */
 
-const { execute } = require("./script_utils.js");
+const sh = require("./sh.js").default;
 
-try {
-    console.log("-- Installing Boost 1.82.0");
-    execute`wget https://boostorg.jfrog.io/artifactory/main/release/1.82.0/source/boost_1_82_0.tar.gz >/dev/null 2>&1`;
-    execute`tar xfz boost_1_82_0.tar.gz`;
-    process.chdir("boost_1_82_0");
-    execute`./bootstrap.sh`;
-    if (process.platform === "linux") {
-        execute`./b2 -j8 cxxflags=-fPIC cflags=-fPIC -a --with-program_options --with-filesystem --with-thread --with-system install`;
-    } else {
-        execute`./b2 -j8 architecture=arm+x86 cxxflags=-fPIC cflags=-fPIC -a --with-program_options --with-filesystem --with-thread --with-system install`;
+exports.install_boost = function install_boost(version = "1_82_0") {
+    const version_dash = version.replace(/\./g, "_");
+    const version_dot = version.replace(/_/g, ".");
+    const URL = `https://boostorg.jfrog.io/artifactory/main/release/${version_dot}/source/boost_${version_dash}.tar.gz`;
+    const flags = [
+        "-j8",
+        "cxxflags=-fPIC",
+        "cflags=-fPIC",
+        "-a",
+        "--with-program_options",
+        "--with-filesystem",
+        "--with-thread",
+        "--with-system",
+    ].map(sh);
+
+    if (process.platform === "darwin") {
+        flags.push(sh`architecture=arm+x86`);
     }
-} catch (e) {
-    console.log(e.message);
-    process.exit(1);
+
+    const cmd = sh`wget ${URL} >/dev/null 2>&1`;
+    cmd.and_sh`tar xfz boost_1_82_0.tar.gz`;
+    cmd.and_sh`cd boost_1_82_0`;
+    cmd.and_sh`./bootstrap.sh`;
+    cmd.and_sh`./b2 ${flags} install`;
+    cmd.and_sh`cd ..`;
+    return cmd;
+};
+
+// Unit test
+if (process.platform === "darwin") {
+    console.assert(
+        exports.install_boost().toString() ===
+            'wget "https://boostorg.jfrog.io/artifactory/main/release/1.82.0/source/boost_1_82_0.tar.gz" \
+>/dev/null 2>&1 && tar xfz boost_1_82_0.tar.gz && cd boost_1_82_0 && ./bootstrap.sh && \
+./b2 -j8 cxxflags=-fPIC cflags=-fPIC -a --with-program_options --with-filesystem \
+--with-thread --with-system architecture=arm+x86 install'
+    );
+}
+
+if (require.main === module) {
+    console.log("-- Installing Boost 1.82.0");
+    exports.install_boost().runSync();
 }
