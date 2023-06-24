@@ -22,7 +22,8 @@ export function pointSeriesCanvas(
     color,
     label,
     symbols,
-    scale_factor = 1
+    scale_factor = 1,
+    useSeriesKey = False
 ) {
     let series = seriesCanvasPoint()
         .crossValue((d) => d.x)
@@ -36,9 +37,7 @@ export function pointSeriesCanvas(
     }
 
     series.decorate((context, d) => {
-        const colorValue = color(
-            d.colorValue !== undefined ? d.colorValue : seriesKey
-        );
+        let colorValue = useSeriesKey ? color(seriesKey) : color(d.colorValue);
 
         const opacity = settings.colorStyles && settings.colorStyles.opacity;
         if (label) {
