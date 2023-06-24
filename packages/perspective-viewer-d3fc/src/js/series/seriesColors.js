@@ -103,7 +103,9 @@ export function withOpacity(color, opacity = 0.5) {
 export function setOpacity(opacity) {
     return (color) => {
         const decoded = d3.color(color);
-        decoded.opacity = opacity;
+        if (decoded != null) {
+            decoded.opacity = opacity;
+        }
         return decoded + "";
     };
 }
