@@ -166,6 +166,7 @@ declare module "@finos/perspective" {
         make_port(): number;
         get_index(): Promise<string | null>;
         get_limit(): Promise<number | null>;
+        get_num_views(): Promise<number>;
     };
 
     /**** perspective ****/

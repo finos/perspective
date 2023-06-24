@@ -121,6 +121,10 @@ class Table(object):
         specified by the user."""
         return self._limit
 
+    def get_num_views(self):
+        """Returns the number of views associated to this table."""
+        return len(self._views)
+
     def clear(self):
         """Removes all the rows in the :class:`~perspective.Table`, but
         preserves everything else including the schema and any callbacks or

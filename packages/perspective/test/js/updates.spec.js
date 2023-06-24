@@ -1136,6 +1136,26 @@ async function match_delta(perspective, delta, expected) {
             table.delete();
         });
 
+        test.only("Table.get_num_views", async function () {
+            const table = await perspective.table({
+                a: "integer",
+            });
+            const view1 = await table.view();
+            expect(await table.get_num_views()).toBe(1);
+            const view2 = await table.view();
+            const view3 = await table.view();
+            const view4 = await table.view();
+            const view5 = await table.view();
+            expect(await table.get_num_views()).toBe(5);
+            view1.delete();
+            view2.delete();
+            view3.delete();
+            view4.delete();
+            view5.delete();
+            expect(await table.get_num_views()).toBe(0);
+            table.delete();
+        });
+
         test("schema constructor indexed, then arrow update() with more columns than in the Table", async function () {
             const table = await perspective.table(
                 {

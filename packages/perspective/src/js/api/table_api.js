@@ -106,6 +106,8 @@ table.prototype.get_index = async_queue("get_index", "table_method");
 
 table.prototype.get_limit = async_queue("get_limit", "table_method");
 
+table.prototype.get_num_views = async_queue("get_num_views", "table_method");
+
 table.prototype.make_port = async_queue("make_port", "table_method");
 
 table.prototype.remove_port = async_queue("remove_port", "table_method");
