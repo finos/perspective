@@ -7,15 +7,6 @@
  *
  */
 
-const { run_with_scope } = require("./script_utils.js");
+import { run_with_scope } from "./sh_perspective.mjs";
 
-async function run() {
-    try {
-        await run_with_scope`build`;
-    } catch (e) {
-        console.log(e.message);
-        process.exit(1);
-    }
-}
-
-run();
+await run_with_scope`build`;

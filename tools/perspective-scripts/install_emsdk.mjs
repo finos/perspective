@@ -7,21 +7,30 @@
  *
  */
 
-require("dotenv").config({ path: "./.perspectiverc" });
+import pkg from "../../package.json" assert { type: "json" };
+import path from "path";
+import os from "os";
+import fs from "fs";
+import * as dotenv from "dotenv";
+import sh from "./sh.mjs";
+import * as url from "url";
 
-const { execute_throw } = require("./script_utils.js");
-const { emscripten } = require("../package.json");
-const path = require("path");
-const os = require("os");
-const fs = require("fs");
+const __dirname = url.fileURLToPath(new URL(".", import.meta.url)).slice(0, -1);
+
+// console.log(pkg);
+const emscripten = pkg.emscripten;
+
+dotenv.config({
+    path: "./.perspectiverc",
+});
 
 function base() {
-    return path.join(__dirname, "..", ".emsdk");
+    return sh.path`${__dirname}/../../.emsdk`;
 }
 
 function emsdk_checkout() {
     function git(args) {
-        execute_throw`git ${args.join(" ")}`;
+        sh`git ${args}`.runSync();
     }
 
     git(["clone", "https://github.com/emscripten-core/emsdk.git", base()]);
@@ -31,7 +40,7 @@ function emsdk(...args) {
     const basedir = base();
     const suffix = os.type() == "Windows_NT" ? ".bat" : "";
     const emsdk = path.join(basedir, "emsdk" + suffix);
-    execute_throw`${emsdk} ${args.join(" ")}`;
+    sh`${emsdk} ${args}`.runSync();
 }
 
 function toolchain_install() {
@@ -51,8 +60,10 @@ if (!process.env.PSP_SKIP_EMSDK_INSTALL) {
     for (let ev of ["EMSDK", "EMSDK_NODE", "EMSDK_PYTHON", "SSL_CERT_FILE"]) {
         delete process.env[ev];
     }
+
     if (!repo_check()) {
         emsdk_checkout();
     }
+
     toolchain_install();
 }

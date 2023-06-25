@@ -7,27 +7,29 @@
  *
  */
 
-const fs = require("fs");
-require("dotenv").config({ path: "./.perspectiverc" });
+import * as fs from "fs";
+import dotenv from "dotenv";
+
+dotenv.config({ path: "./.perspectiverc" });
 
 if (!fs.existsSync("./.perspectiverc")) {
     console.error("No .perspectiverc, running setup");
     process.env.PSP_BUILD_IMMEDIATELY = 1;
-    require("./setup");
+    await import("./setup");
 } else if (process.env.PSP_PROJECT === "js") {
-    require("./test_js");
+    await import("./test_js.mjs");
 } else if (process.env.PSP_PROJECT === "python") {
-    require("./test_python");
+    await import("./test_python.mjs");
 } else if (process.env.PSP_PROJECT === "cpp") {
-    require("./test_cpp");
+    await import("./test_cpp");
 } else if (process.env.PSP_PROJECT === "") {
-    require("./test_js");
-    require("./test_python");
-    require("./test_cpp");
+    await import("./test_js.mjs");
+    await import("./test_python.mjs");
+    await import("./test_cpp");
 } else {
     console.error(
         `Invalid project "${process.env.PSP_PROJECT}" selected, running setup`
     );
     process.env.PSP_BUILD_IMMEDIATELY = 1;
-    require("./setup");
+    await import("./setup");
 }

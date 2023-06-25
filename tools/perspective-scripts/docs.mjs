@@ -7,11 +7,12 @@
  *
  */
 
-const { execute, run_with_scope } = require("./script_utils.js");
+import { run_with_scope } from "./sh_perspective.mjs";
+import sh from "./sh.mjs";
 
 async function run() {
     try {
-        execute`mkdirp docs/build docs/obj`;
+        sh`mkdirp docs/build docs/obj`.runSync();
         const project = process.env.PSP_PROJECT;
         if (!project || project === "js" || project === "python") {
             await run_with_scope`docs`;

@@ -102,7 +102,7 @@ at all (yet), as it will be updated with values from a real-time data source
 later on. In these cases, create a `table()` with a _schema_.
 
 Once the `Table` has been created with a schema, further `update()` calls will
-conver data types to conform with the schema; a column that is typed as a
+convert data types to conform with the schema; a column that is typed as a
 `datetime`, for example, can be updated with `date` objects, `datetime` objects,
 `pandas.Timestamp`, `numpy.datetime64`, and even valid millisecond/seconds from
 epoch timestamps. Similarly, updating string columns with integer data will

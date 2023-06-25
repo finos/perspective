@@ -10,7 +10,7 @@
         "dist/cjs/**/*"
     ],
     "scripts": {
-        "build": "node ../../scripts/run_emsdk.js node ./build.js",
+        "build": "node ../../tools/perspective-scripts/run_emsdk.mjs node ./build.js",
         "clean": "rimraf dist"
     },
     "devDependencies": {

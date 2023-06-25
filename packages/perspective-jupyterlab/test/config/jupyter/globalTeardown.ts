@@ -7,7 +7,7 @@
  *
  */
 
-import { kill_jlab } from "./jlab_start";
+import { kill_jlab } from "./jlab_start.mjs";
 
 async function globalTeardown() {
     console.log("Reached globalTeardown.js");

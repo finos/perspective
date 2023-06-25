@@ -6,7 +6,7 @@
     "scripts": {
         "start": "mkdirp dist && node server.js"
     },
-    "main": "index.js",
+    "main": "index.mjs",
     "keywords": [],
     "license": "Apache-2.0",
     "dependencies": {

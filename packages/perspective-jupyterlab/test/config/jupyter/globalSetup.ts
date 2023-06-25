@@ -7,7 +7,7 @@
  *
  */
 
-import { start_jlab, kill_jlab } from "./jlab_start";
+import { start_jlab, kill_jlab } from "./jlab_start.mjs";
 
 async function globalSetup() {
     // Start Jupyterlab in the background

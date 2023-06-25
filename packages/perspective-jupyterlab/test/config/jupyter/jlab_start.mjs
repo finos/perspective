@@ -6,10 +6,11 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-const path = require("path");
-const { get } = require("http");
-const { spawn } = require("child_process");
-const { execute } = require("../../../../../scripts/script_utils");
+
+import * as path from "path";
+import { get } from "http";
+import { spawn } from "child_process";
+import sh from "@finos/perspective-scripts/sh.mjs";
 
 const PACKAGE_ROOT = path.join(__dirname, "..", "..", "..");
 
@@ -18,7 +19,7 @@ const PACKAGE_ROOT = path.join(__dirname, "..", "..", "..");
  */
 const kill_jlab = () => {
     console.log("-- Cleaning up Jupyterlab process");
-    execute`ps aux | grep -i '[j]upyter-lab --no-browser' | awk '{print $2}' | xargs kill -9 && echo "[perspective-jupyterlab] JupyterLab process terminated"`;
+    sh`ps aux | grep -i '[j]upyter-lab --no-browser' | awk '{print $2}' | xargs kill -9 && echo "[perspective-jupyterlab] JupyterLab process terminated"`.runSync();
 };
 
 exports.kill_jlab = kill_jlab;
