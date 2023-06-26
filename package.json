@@ -25,6 +25,7 @@
         "rust/perspective-viewer",
         "packages/perspective-viewer-datagrid",
         "packages/perspective-viewer-d3fc",
+        "packages/perspective-gpu",
         "packages/perspective-viewer-openlayers",
         "packages/perspective-workspace",
         "packages/perspective-jupyterlab",
@@ -126,6 +127,7 @@
         "jlab_link": "pip3 install ./python/perspective --no-build-isolation",
         "test:ui": "__JUPYTERLAB_PORT__=6538 playwright test --config tools/perspective-test/playwright.config.ts",
         "test:ui:headed": "__JUPYTERLAB_PORT__=6538 playwright test --config tools/perspective-test/playwright.config.ts --headed",
-        "test:ui:debug": "__JUPYTERLAB_PORT__=6538 DEBUG=pw:api playwright test --config tools/perspective-test/playwright.config.ts --headed"
+        "test:ui:debug": "__JUPYTERLAB_PORT__=6538 DEBUG=pw:api playwright test --config tools/perspective-test/playwright.config.ts --headed",
+        "test-data:gen": "node scripts/generate_test_data.mjs"
     }
 }

@@ -127,6 +127,11 @@ async function focus_package() {
                     value: "perspective-viewer-d3fc",
                 },
                 {
+                    key: "g",
+                    name: "perspective-gpu",
+                    value: "perspective-gpu",
+                },
+                {
                     key: "l",
                     name: "perspective-jupyterlab",
                     value: "perspective-jupyterlab",

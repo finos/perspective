@@ -1,0 +1,31 @@
+{
+    "name": "@finos/perspective-gpu",
+    "version": "0.0.1",
+    "description": "GPU accelerated Perspective",
+    "main": "./dist/umd/perspective-gpu.js",
+    "files": [
+        "dist/**/*",
+        "src/**/*"
+    ],
+    "scripts": {
+        "clean": "rimraf dist",
+        "build": "node ./build.js"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/finos/perspective"
+    },
+    "author": "",
+    "license": "Apache-2.0",
+    "dependencies": {
+        "@finos/perspective": "^2.0.1",
+        "@finos/perspective-viewer": "^2.0.1",
+        "@webgpu/types": "^0.1.31",
+        "chroma-js": "^2.4.2",
+        "d3fc": "^15.2.4",
+        "lodash.debounce": "^4.0.8"
+    }
+}
