@@ -1,0 +1,40 @@
+name: Upload Python build artifacts
+description: "Upload built Python artifacts for use in downstream build and test steps"
+
+inputs:
+    kind:
+        type: choice
+        description: "Kind of asset to upload"
+        options:
+            - wheel
+            - sdist
+            - pyodide
+        default: wheel
+
+runs:
+    using: "composite"
+    steps:
+        - uses: actions/upload-artifact@v3
+          with:
+              name: perspective-python-dist-${{ matrix.os }}-${{ matrix.python-version }}
+              path: python/perspective/dist/*.whl
+          if: ${{ runner.os == 'Windows' && inputs.kind == 'wheel'}}
+
+        - uses: actions/upload-artifact@v3
+          with:
+              name: perspective-python-dist-${{ matrix.os }}-${{ matrix.python-version }}
+              path: python/perspective/wheelhouse/*.whl
+          if: ${{ runner.os != 'Windows' && inputs.kind == 'wheel' }}
+
+        - uses: actions/upload-artifact@v3
+          with:
+              name: perspective-python-sdist
+              path: python/perspective/dist/*.tar.gz
+          if: ${{ matrix.os == 'macos-11' && inputs.kind == 'sdist'}}
+
+        - name: Upload pyodide wheel
+          uses: actions/upload-artifact@v3
+          with:
+              name: perspective-python-dist-pyodide
+              path: dist/*.whl
+          if: ${{ inputs.kind == 'pyodide'}}

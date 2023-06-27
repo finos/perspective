@@ -1,0 +1,83 @@
+name: Upload Python build artifacts
+description: "Upload built Python artifacts for use in downstream build and test steps"
+
+inputs:
+    node:
+        type: string
+        description: "Node version to install"
+        default: ""
+    python:
+        type: string
+        description: "Python version to install"
+        default: ""
+    rust:
+        type: string
+        description: "Rust version to install"
+        default: ""
+    emsdk_install:
+        type: boolean
+        description: "Install emsdk"
+        default: false
+    frozen_lockfile:
+        type: boolean
+        description: "Pass --frozen-lockfile to yarn"
+        default: false
+
+runs:
+    using: "composite"
+    steps:
+        - name: Set up Python ${{ inputs.python }}
+          uses: actions/setup-python@v4
+          with:
+              python-version: ${{ inputs.python }}
+              cache: "pip"
+          if: ${{ inputs.python }}
+
+        - name: Use Node.js ${{ inputs.node }}
+          uses: actions/setup-node@v3
+          with:
+              node-version: ${{ inputs.node }}
+              cache: "yarn"
+              cache-dependency-path: yarn.lock
+          if: ${{ inputs.node }}
+
+        - name: Install latest nightly rust
+          uses: dtolnay/rust-toolchain@nightly
+          with:
+              toolchain: ${{ inputs.rust }}
+              targets: wasm32-unknown-unknown
+              components: rustfmt, clippy, rust-src
+          if: ${{ inputs.rust }}
+
+        - name: Install yarn
+          run: npm install -g yarn
+          shell: bash
+
+        - name: Install js dependencies
+          run: yarn
+          shell: bash
+          if: ${{ !inputs.emsdk_install && !inputs.frozen_lockfile }}
+
+        - name: Install js dependencies
+          run: yarn
+          shell: bash
+          env:
+              PSP_SKIP_EMSDK_INSTALL: 1
+          if: ${{ inputs.emsdk_install && !inputs.frozen_lockfile }}
+
+        - name: Install js dependencies
+          run: yarn --frozen-lockfile
+          shell: bash
+          if: ${{ !inputs.emsdk_install && inputs.frozen_lockfile }}
+
+        - name: Install js dependencies
+          run: yarn --frozen-lockfile
+          shell: bash
+          env:
+              PSP_SKIP_EMSDK_INSTALL: 1
+          if: ${{ inputs.emsdk_install && inputs.frozen_lockfile }}
+
+        - name: Install python dependencies
+          run: yarn _requires_python
+          shell: bash
+          if: ${{ inputs.python }}

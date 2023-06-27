@@ -1,0 +1,109 @@
+name: Setup Caching
+description: "Setup caching for various languages and tooling used"
+
+inputs:
+    yarn:
+        type: boolean
+        description: "Setup yarn cache"
+        default: false
+    python:
+        type: boolean
+        description: "Setup pip cache"
+        default: false
+    emsdk:
+        type: boolean
+        description: "Setup emsdk cache"
+        default: false
+    cargo:
+        type: boolean
+        description: "Setup cargo cache"
+        default: false
+    cpp:
+        type: boolean
+        description: "Setup cpp cache (ccache)"
+        default: false
+    vcpkg:
+        type: boolean
+        description: "Setup vcpkg cache (C++ dependencies)"
+        default: false
+
+runs:
+    using: "composite"
+    steps:
+        ################
+        # Yarn Cache
+        - name: Get yarn cache directory path
+          id: yarn-cache-dir-path
+          run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+          shell: bash
+          if: ${{ inputs.yarn }}
+
+        - name: Setup yarn cache
+          uses: actions/cache@v3
+          id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+          with:
+              path: |
+                  ~/.cache/ms-playwright
+                  ${{ steps.yarn-cache-dir-path.outputs.dir }}
+              key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+              restore-keys: |
+                  ${{ runner.os }}-yarn-
+          if: ${{ inputs.yarn }}
+
+        - name: Setup emsdk cache
+          uses: actions/cache@v3
+          id: emsdk-cache
+          with:
+              path: .emsdk
+              key: ${{ runner.os }}-emsdk-${{ hashFiles('package.json') }}
+              restore-keys: |
+                  ${{ runner.os }}-emsdk-
+          if: ${{ inputs.emsdk }}
+
+        ################
+        # Pip Cache
+        - name: Setup pip cache
+          uses: actions/cache@v3
+          with:
+              path: ~/.cache/pip
+              key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
+              restore-keys: |
+                  ${{ runner.os }}-pip-
+          if: ${{ inputs.python }}
+
+        ################
+        # Cargo Cache
+        - name: Setup cargo cache
+          uses: actions/cache@v3
+          with:
+              path: |
+                  ~/.cargo/bin/
+                  ~/.cargo/registry/index/
+                  ~/.cargo/registry/cache/
+                  ~/.cargo/git/db/
+                  rust/perspective-viewer/target/
+              key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          if: ${{ inputs.cargo }}
+
+        ################
+        # C++ Assets
+        - name: ccache
+          uses: hendrikmuhs/ccache-action@v1.2
+          with:
+              key: ${{ github.job }}-${{ runner.os }}
+          if: ${{ inputs.cpp }}
+
+        ################
+        # vcpkg Cache
+        - name: Setup vcpkg cache
+          uses: actions/cache@v3
+          with:
+              path: |
+                  C:\Users\runneradmin\AppData\Local\vcpkg\archives
+                  C:\vcpkg\packages\
+                  C:\vcpkg\downloads\
+                  C:\vcpkg\buildtrees\
+                  C:\vcpkg\ports\
+              key: vcpkg-${{ hashFiles('cpp/perspective/CMakeLists.txt') }}
+              restore-keys: vcpkg-
+          if: ${{ runner.os == 'Windows' && inputs.vcpkg }}

@@ -29,21 +29,6 @@ on:
                 required: false
                 type: boolean
                 default: false
-            ci-skip-cache:
-                description: "Omit Cache from CI run"
-                required: false
-                type: boolean
-                default: false
-            ci-skip-python:
-                description: "Skip Python components of CI"
-                required: false
-                type: boolean
-                default: false
-            ci-include-windows:
-                description: "Include Windows (Python) components of CI"
-                required: false
-                type: boolean
-                default: false
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -76,12 +61,7 @@ jobs:
         runs-on: ubuntu-20.04
         # Map a step output to a job output
         outputs:
-            COMMIT_MESSAGE: ${{ steps.setup.outputs.COMMIT_MSG }}
-            SKIP_CI: ${{ steps.setuppush.outputs.SKIP_CI || steps.setuppr.outputs.SKIP_CI || steps.setupmanual.outputs.SKIP_CI }}
-            SKIP_CACHE: ${{ steps.setuppush.outputs.SKIP_CACHE || steps.setuppr.outputs.SKIP_CACHE || steps.setupmanual.outputs.SKIP_CACHE }}
-            FULL_RUN: ${{ steps.setuppush.outputs.FULL_RUN || steps.setuppr.outputs.FULL_RUN || steps.setupmanual.outputs.FULL_RUN }}
-            SKIP_PYTHON: ${{ steps.setuppush.outputs.SKIP_PYTHON || steps.setuppr.outputs.SKIP_PYTHON || steps.setupmanual.outputs.SKIP_PYTHON }}
-            INCLUDE_WINDOWS: ${{ steps.setuppush.outputs.INCLUDE_WINDOWS || steps.setuppr.outputs.INCLUDE_WINDOWS || steps.setupmanual.outputs.INCLUDE_WINDOWS }}
+            FULL_BUILD: ${{ steps.setuppush.outputs.FULL_BUILD || steps.setuppr.outputs.FULL_BUILD || steps.setupmanual.outputs.FULL_BUILD }}
 
         steps:
             - name: Checkout
@@ -102,69 +82,33 @@ jobs:
               id: setuppush
               run: |
                   echo "Commit Message: $COMMIT_MSG"
-                  echo "Skip CI: $SKIP_CI"
-                  echo "Skip Cache: $SKIP_CACHE"
-                  echo "Full Run: $FULL_RUN"
-                  echo "Skip Python: $SKIP_PYTHON"
-                  echo "Include Windows: $INCLUDE_WINDOWS"
+                  echo "Full Run: $FULL_BUILD"
                   echo "COMMIT_MSG=$COMMIT_MSG" >> $GITHUB_OUTPUT
-                  echo "SKIP_CI=$SKIP_CI" >> $GITHUB_OUTPUT
-                  echo "SKIP_CACHE=$SKIP_CACHE" >> $GITHUB_OUTPUT
-                  echo "FULL_RUN=$FULL_RUN" >> $GITHUB_OUTPUT
-                  echo "SKIP_PYTHON=$SKIP_PYTHON" >> $GITHUB_OUTPUT
-                  echo "INCLUDE_WINDOWS=$INCLUDE_WINDOWS" >> $GITHUB_OUTPUT
+                  echo "FULL_BUILD=$FULL_BUILD" >> $GITHUB_OUTPUT
               env:
-                  SKIP_CI: ${{ contains(github.event.head_commit.message, '[ci-skip]') }}
-                  SKIP_CACHE: ${{ contains(github.event.head_commit.message, '[ci-skip-cache]') }}
-                  FULL_RUN: ${{ startsWith(github.ref_name, 'v') || contains(github.event.head_commit.message, '[ci-full]') }}
-                  SKIP_PYTHON: ${{ contains(github.event.head_commit.message, '[ci-skip-python]') }}
-                  INCLUDE_WINDOWS: ${{ contains(github.event.head_commit.message, '[ci-include-windows]') }}
+                  FULL_BUILD: ${{ startsWith(github.ref_name, 'v') || contains(github.event.head_commit.message, '[ci-full]') }}
               if: ${{ github.event_name == 'push' }}
 
             - name: Display and Setup Build Args (PR)
               id: setuppr
               run: |
                   echo "Commit Message: $COMMIT_MSG"
-                  echo "Skip CI: $SKIP_CI"
-                  echo "Skip Cache: $SKIP_CACHE"
-                  echo "Full Run: $FULL_RUN"
-                  echo "Skip Python: $SKIP_PYTHON"
-                  echo "Include Windows: $INCLUDE_WINDOWS"
+                  echo "Full Run: $FULL_BUILD"
                   echo "COMMIT_MSG=$COMMIT_MSG" >> $GITHUB_OUTPUT
-                  echo "SKIP_CI=$SKIP_CI" >> $GITHUB_OUTPUT
-                  echo "SKIP_CACHE=$SKIP_CACHE" >> $GITHUB_OUTPUT
-                  echo "FULL_RUN=$FULL_RUN" >> $GITHUB_OUTPUT
-                  echo "SKIP_PYTHON=$SKIP_PYTHON" >> $GITHUB_OUTPUT
-                  echo "INCLUDE_WINDOWS=$INCLUDE_WINDOWS" >> $GITHUB_OUTPUT
+                  echo "FULL_BUILD=$FULL_BUILD" >> $GITHUB_OUTPUT
               env:
-                  SKIP_CI: ${{ contains(github.event.pull_request.title, '[ci-skip]') || contains(env.COMMIT_MSG, '[ci-skip]') }}
-                  SKIP_CACHE: ${{ contains(github.event.pull_request.title, '[ci-skip-cache]') || contains(env.COMMIT_MSG, '[ci-skip-cache]') }}
-                  FULL_RUN: ${{ contains(github.event.pull_request.title, '[ci-full]') || contains(env.COMMIT_MSG, '[ci-full]') }}
-                  SKIP_PYTHON: ${{ contains(github.event.pull_request.title, '[ci-skip-python]') || contains(env.COMMIT_MSG, '[ci-skip-python]') }}
-                  INCLUDE_WINDOWS: ${{ contains(github.event.pull_request.title, '[ci-include-windows]') || contains(env.COMMIT_MSG, '[ci-include-windows]') }}
+                  FULL_BUILD: ${{ contains(github.event.pull_request.title, '[ci-full]') || contains(env.COMMIT_MSG, '[ci-full]') }}
               if: ${{ github.event_name == 'pull_request' }}
 
             - name: Display and Setup Build Args (Manual)
               id: setupmanual
               run: |
                   echo "Commit Message: $COMMIT_MSG"
-                  echo "Skip CI: $SKIP_CI"
-                  echo "Skip Cache: $SKIP_CACHE"
-                  echo "Full Run: $FULL_RUN"
-                  echo "Skip Python: $SKIP_PYTHON"
-                  echo "Include Windows: $INCLUDE_WINDOWS"
+                  echo "Full Run: $FULL_BUILD"
                   echo "COMMIT_MSG=$COMMIT_MSG" >> $GITHUB_OUTPUT
-                  echo "SKIP_CI=$SKIP_CI" >> $GITHUB_OUTPUT
-                  echo "SKIP_CACHE=$SKIP_CACHE" >> $GITHUB_OUTPUT
-                  echo "FULL_RUN=$FULL_RUN" >> $GITHUB_OUTPUT
-                  echo "SKIP_PYTHON=$SKIP_PYTHON" >> $GITHUB_OUTPUT
-                  echo "INCLUDE_WINDOWS=$INCLUDE_WINDOWS" >> $GITHUB_OUTPUT
+                  echo "FULL_BUILD=$FULL_BUILD" >> $GITHUB_OUTPUT
               env:
-                  SKIP_CI: false
-                  SKIP_CACHE: ${{ github.event.inputs.ci-skip-cache }}
-                  FULL_RUN: ${{ github.event.inputs.ci-full }}
-                  SKIP_PYTHON: ${{ github.event.inputs.ci-skip-python }}
-                  INCLUDE_WINDOWS: ${{ github.event.inputs.ci-include-windows }}
+                  FULL_BUILD: ${{ github.event.inputs.ci-full }}
               if: ${{ github.event_name == 'workflow_dispatch' }}
 
     ##########################################################################################################################
@@ -199,7 +143,6 @@ jobs:
         # Setup matrix job configuration #
         ##################################
         runs-on: ${{ matrix.os }}
-        if: ${{ needs.initialize.outputs.SKIP_CI == 'false' }}
 
         steps:
             - name: Checkout
@@ -208,108 +151,29 @@ jobs:
             ##########
             # Caches #
             ##########
-            ################
-            # Yarn Cache
-            - name: Get yarn cache directory path
-              id: yarn-cache-dir-path
-              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-              shell: bash
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            - name: Setup yarn cache
-              uses: actions/cache@v3
-              id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+            - name: Setup caching
+              uses: ./.github/workflows/actions/caches
               with:
-                  path: |
-                      ~/.cache/ms-playwright
-                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
-                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-yarn-
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            - name: Setup emsdk cache
-              uses: actions/cache@v3
-              id: emsdk-cache
-              with:
-                  path: .emsdk
-                  key: ${{ runner.os }}-emsdk-${{ hashFiles('package.json') }}
-                  restore-keys: |
-                      ${{ runner.os }}-emsdk-
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            ################
-            # Pip Cache
-            - name: Setup pip cache
-              uses: actions/cache@v3
-              with:
-                  path: ~/.cache/pip
-                  key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
-                  restore-keys: |
-                      ${{ runner.os }}-pip-
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            ################
-            # Cargo Cache
-            - name: Setup cargo cache
-              uses: actions/cache@v3
-              with:
-                  path: |
-                      ~/.cargo/bin/
-                      ~/.cargo/registry/index/
-                      ~/.cargo/registry/cache/
-                      ~/.cargo/git/db/
-                      rust/perspective-viewer/target/
-                  key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            ################
-            # Build Assets
-            - name: ccache
-              uses: hendrikmuhs/ccache-action@v1.2
-              with:
-                  key: ${{ github.job }}-${{ matrix.os }}
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
+                  python: true
+                  yarn: true
+                  emsdk: true
+                  cargo: true
+                  cpp: true
 
             ###############################
             # Language and Compiler Setup #
             ###############################
-            - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v4
+            - name: Setup languages
+              uses: ./.github/workflows/actions/setup-language
               with:
-                  python-version: ${{ matrix.python-version }}
-                  cache: "pip"
-
-            - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v3
-              with:
-                  node-version: ${{ matrix.node-version }}
-                  cache: "yarn"
-                  cache-dependency-path: yarn.lock
-
-            - name: Install latest nightly rust
-              uses: dtolnay/rust-toolchain@nightly
-              with:
-                  toolchain: nightly-2023-04-07
-                  targets: wasm32-unknown-unknown
-                  components: rustfmt, clippy, rust-src
+                  node: ${{ matrix.node-version }}
+                  python: ${{ matrix.python-version }}
+                  rust: "nightly-2023-04-07"
+                  emsdk_install: true
 
             ################
             # Dependencies #
             ################
-            ################
-            # JS
-            - name: Install yarn
-              run: npm install -g yarn
-
-            - name: Install js dependencies
-              run: yarn
-
-            ################
-            # Python
-            - name: Install python dependencies
-              run: yarn _requires_python
-
             ################
             # Linux
             - name: Linux init steps
@@ -337,72 +201,8 @@ jobs:
             # Compress and upload Artifacts #
             #################################
             ######################################
-            # Upload built JS artifacts for tests
-            #
-            # (listed here in the same order they appear in the directory)
-            - uses: actions/upload-artifact@v3
-              with:
-                  name: perspective-dist
-                  path: packages/perspective/dist/
-
-            - uses: actions/upload-artifact@v3
-              with:
-                  name: perspective-jupyterlab-dist
-                  path: packages/perspective-jupyterlab/dist/
-
-            - uses: actions/upload-artifact@v3
-              with:
-                  name: perspective-viewer-d3fc-dist
-                  path: packages/perspective-viewer-d3fc/dist
-
-            - uses: actions/upload-artifact@v3
-              with:
-                  name: perspective-viewer-datagrid-dist
-                  path: packages/perspective-viewer-datagrid/dist
-
-            - uses: actions/upload-artifact@v3
-              with:
-                  name: perspective-viewer-openlayers-dist
-                  path: packages/perspective-viewer-openlayers/dist
-
-            - uses: actions/upload-artifact@v3
-              with:
-                  name: perspective-esbuild-plugin-dist
-                  path: packages/perspective-esbuild-plugin/dist
-
-            - uses: actions/upload-artifact@v3
-              with:
-                  name: perspective-webpack-plugin-dist
-                  path: packages/perspective-webpack-plugin/dist
-
-            - uses: actions/upload-artifact@v3
-              with:
-                  name: perspective-cli-dist
-                  path: packages/perspective-cli/dist
-
-            - uses: actions/upload-artifact@v3
-              with:
-                  name: perspective-workspace-dist
-                  path: packages/perspective-workspace/dist
-
-            - uses: actions/upload-artifact@v3
-              with:
-                  name: perspective-viewer-dist
-                  path: rust/perspective-viewer/dist
-
-            ######################################################
-            # Upload Jupyter artifacts for python build/test/dist
-            - uses: actions/upload-artifact@v3
-              with:
-                  name: nbextension-dist
-                  path: python/perspective/perspective/nbextension
-                  if-no-files-found: error # TODO
-
-            - uses: actions/upload-artifact@v3
-              with:
-                  name: labextension-dist
-                  path: python/perspective/perspective/labextension
-                  if-no-files-found: error # TODO
+            - name: Upload JS artifacts
+              uses: ./.github/workflows/actions/upload-js-artifacts
 
     ##########################################################################################################################
     ##########################################################################################################################
@@ -428,6 +228,7 @@ jobs:
                     - ubuntu-20.04 # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-Readme.md
                 python-version:
                     - 3.9
+                node-version: [18.x]
 
             # NOTE: don't fail fast as sometimes npm blocks the burst of fetches from GHA
             fail-fast: false
@@ -435,7 +236,6 @@ jobs:
         # Setup matrix job configuration #
         ##################################
         runs-on: ${{ matrix.os }}
-        if: ${{ needs.initialize.outputs.SKIP_CI == 'false' && needs.initialize.outputs.SKIP_PYTHON == 'false' }}
 
         steps:
             - name: Checkout
@@ -444,70 +244,21 @@ jobs:
             ##########
             # Caches #
             ##########
-            ################
-            # Yarn Cache
-            - name: Get yarn cache directory path
-              id: yarn-cache-dir-path
-              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-              shell: bash
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            - name: Setup yarn cache
-              uses: actions/cache@v3
-              id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+            - name: Setup caching
+              uses: ./.github/workflows/actions/caches
               with:
-                  path: |
-                      ~/.cache/ms-playwright
-                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
-                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-yarn-
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            ################
-            # Pip Cache
-            - name: Setup pip cache
-              uses: actions/cache@v3
-              with:
-                  path: ~/.cache/pip
-                  key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
-                  restore-keys: |
-                      ${{ runner.os }}-pip-
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
+                  python: true
+                  yarn: true
 
             ###############################
             # Language and Compiler Setup #
             ###############################
-            - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v4
+            - name: Setup languages
+              uses: ./.github/workflows/actions/setup-language
               with:
-                  python-version: ${{ matrix.python-version }}
-                  cache: "pip"
-
-            - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v3
-              with:
-                  node-version: ${{ matrix.node-version }}
-                  cache: "yarn"
-                  cache-dependency-path: yarn.lock
-
-            ################
-            # Dependencies #
-            ################
-            ################
-            # JS
-            - name: Install yarn
-              run: npm install -g yarn
-
-            - name: Install js dependencies
-              run: yarn
-              env:
-                  PSP_SKIP_EMSDK_INSTALL: 1
-
-            ################
-            # Python
-            - name: Install python dependencies
-              run: yarn _requires_python
+                  node: ${{ matrix.node-version }}
+                  python: ${{ matrix.python-version }}
+                  emsdk_install: true
 
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
@@ -554,7 +305,6 @@ jobs:
         # Setup matrix job configuration #
         ##################################
         runs-on: ${{ matrix.os }}
-        if: ${{ needs.initialize.outputs.SKIP_CI == 'false' }}
 
         steps:
             - name: Checkout
@@ -563,131 +313,29 @@ jobs:
             ##########
             # Caches #
             ##########
-            ################
-            # Yarn Cache
-            - name: Get yarn cache directory path
-              id: yarn-cache-dir-path
-              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-              shell: bash
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            - name: Setup yarn cache
-              uses: actions/cache@v3
-              id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+            - name: Setup caching
+              uses: ./.github/workflows/actions/caches
               with:
-                  path: |
-                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
-                      ~/.cache/ms-playwright
-                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-yarn-
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            ################
-            # Pip Cache
-            - name: Setup pip cache
-              uses: actions/cache@v3
-              with:
-                  path: ~/.cache/pip
-                  key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
-                  restore-keys: |
-                      ${{ runner.os }}-pip-
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            ################
-            # Cargo Cache
-            - name: Setup cargo cache
-              uses: actions/cache@v3
-              with:
-                  path: |
-                      ~/.cargo/bin/
-                      ~/.cargo/registry/index/
-                      ~/.cargo/registry/cache/
-                      ~/.cargo/git/db/
-                      rust/perspective-viewer/target/
-                  key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
+                  python: true
+                  yarn: true
+                  cargo: true
 
             ###############################
             # Language and Compiler Setup #
             ###############################
-            - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v4
+            - name: Setup languages
+              uses: ./.github/workflows/actions/setup-language
               with:
-                  python-version: ${{ matrix.python-version }}
-                  cache: "pip"
-
-            - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v3
-              with:
-                  node-version: ${{ matrix.node-version }}
-                  cache: "yarn"
-                  cache-dependency-path: yarn.lock
-
-            ################
-            # Dependencies #
-            ################
-            ################
-            # JS
-            - name: Install yarn
-              run: npm install -g yarn
-
-            - name: Install js dependencies
-              run: yarn
-              env:
-                  PSP_SKIP_EMSDK_INSTALL: 1
-
-            ################
-            # Python
-            - name: Install python dependencies
-              run: yarn _requires_python
-
-            ################
-            # Rust
-            - name: Install latest nightly rust
-              uses: dtolnay/rust-toolchain@nightly
-              with:
-                  toolchain: nightly-2023-04-07
-                  targets: wasm32-unknown-unknown
-                  components: rustfmt, clippy, rust-src
+                  node: ${{ matrix.node-version }}
+                  python: ${{ matrix.python-version }}
+                  rust: "nightly-2023-04-07"
+                  emsdk_install: true
 
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-            - uses: actions/download-artifact@v3
-              with:
-                  name: perspective-dist
-                  path: packages/perspective/dist/
-
-            - uses: actions/download-artifact@v3
-              with:
-                  name: perspective-jupyterlab-dist
-                  path: packages/perspective-jupyterlab/dist/
-
-            - uses: actions/download-artifact@v3
-              with:
-                  name: perspective-viewer-d3fc-dist
-                  path: packages/perspective-viewer-d3fc/dist
-
-            - uses: actions/download-artifact@v3
-              with:
-                  name: perspective-viewer-datagrid-dist
-                  path: packages/perspective-viewer-datagrid/dist
-
-            - uses: actions/download-artifact@v3
-              with:
-                  name: perspective-viewer-openlayers-dist
-                  path: packages/perspective-viewer-openlayers/dist
-
-            - uses: actions/download-artifact@v3
-              with:
-                  name: perspective-workspace-dist
-                  path: packages/perspective-workspace/dist
-
-            - uses: actions/download-artifact@v3
-              with:
-                  name: perspective-viewer-dist
-                  path: rust/perspective-viewer/dist
+            - name: Download JS artifacts
+              uses: ./.github/workflows/actions/download-js-artifacts
 
             ###############
             # WebAssembly #
@@ -853,9 +501,7 @@ jobs:
                     - 2014
                 node-version: [18.x]
                 is-full-run:
-                    - ${{ needs.initialize.outputs.FULL_RUN == 'true' }}
-                include-windows-run:
-                    - ${{ needs.initialize.outputs.INCLUDE_WINDOWS == 'true' || needs.initialize.outputs.FULL_RUN == 'true' }}
+                    - ${{ needs.initialize.outputs.FULL_BUILD == 'true' }}
                 exclude:
                     ############################
                     # Things to always exclude #
@@ -874,8 +520,7 @@ jobs:
                     ##############################################
                     # Things to exclude if not a full matrix run #
                     ##############################################
-                    # Exclude windows builds if set
-                    - include-windows-run: false
+                    - is-full-run: false
                       os: windows-2022
 
                     - is-full-run: false
@@ -900,7 +545,6 @@ jobs:
         # Setup matrix job configuration #
         ##################################
         runs-on: ${{ matrix.os }}
-        if: ${{ needs.initialize.outputs.SKIP_CI == 'false' && needs.initialize.outputs.SKIP_PYTHON == 'false' }}
 
         steps:
             - name: Checkout
@@ -921,120 +565,43 @@ jobs:
             ################
             # JS Artifacts #
             ################
-            - uses: actions/download-artifact@v3
-              with:
-                  name: nbextension-dist
-                  path: python/perspective/perspective/nbextension
-
-            - uses: actions/download-artifact@v3
-              with:
-                  name: labextension-dist
-                  path: python/perspective/perspective/labextension
+            - name: Download JS artifacts
+              uses: ./.github/workflows/actions/download-js-artifacts
 
             ##########
             # Caches #
             ##########
-            ################
-            # Yarn Cache
-            - name: Get yarn cache directory path
-              id: yarn-cache-dir-path
-              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-              shell: bash
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            - name: Setup yarn cache
-              uses: actions/cache@v3
-              id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+            - name: Setup caching
+              uses: ./.github/workflows/actions/caches
               with:
-                  path: |
-                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
-                      ~/.cache/ms-playwright
-                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-yarn-
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            ################
-            # Pip Cache
-            - name: Setup pip cache
-              uses: actions/cache@v3
-              with:
-                  path: ~/.cache/pip
-                  key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
-                  restore-keys: |
-                      ${{ runner.os }}-pip-
-              if: ${{ runner.os != 'Linux' && needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            ################
-            # Homebrew Cache
-            - name: Setup homebrew cache
-              uses: actions/cache@v3
-              with:
-                  path: |
-                      ~/Library/Caches/Homebrew/boost--*
-                      ~/Library/Caches/Homebrew/downloads/*--boost-*
-                  key: brew-${{ hashFiles('cpp/perspective/CMakeLists.txt') }}
-                  restore-keys: brew-
-              if: ${{ runner.os == 'macOS' && needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            ################
-            # vcpkg Cache
-            - name: Setup vcpkg cache
-              uses: actions/cache@v3
-              with:
-                  path: |
-                      C:\Users\runneradmin\AppData\Local\vcpkg\archives
-                      C:\vcpkg\packages\
-                      C:\vcpkg\downloads\
-                      C:\vcpkg\buildtrees\
-                      C:\vcpkg\ports\
-                  key: vcpkg-${{ hashFiles('cpp/perspective/CMakeLists.txt') }}
-                  restore-keys: vcpkg-
-              if: ${{ runner.os == 'Windows' && needs.initialize.outputs.SKIP_CACHE == 'false' }}
+                  python: true
+                  yarn: true
+                  cargo: true
+                  vcpkg: true
 
             ###############################
             # Language and Compiler Setup #
             ###############################
-            - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v4
+            - name: Setup languages
+              uses: ./.github/workflows/actions/setup-language
               with:
-                  python-version: ${{ matrix.python-version }}
-                  cache: "pip"
-              if: ${{ runner.os != 'Linux' }} # skip on manylinux2014
+                  node: ${{ matrix.node-version }}
+              if: ${{ runner.os == 'Linux' }}
 
-            - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v3
+            - name: Setup languages
+              uses: ./.github/workflows/actions/setup-language
               with:
-                  node-version: ${{ matrix.node-version }}
-                  cache: "yarn"
-                  cache-dependency-path: yarn.lock
-              if: ${{ runner.os != 'Linux' }} # skip on manylinux2014
+                  node: ${{ matrix.node-version }}
+                  python: ${{ matrix.python-version }}
+                  emsdk_install: true
+              if: ${{ runner.os != 'Linux' }}
 
             ################
             # Dependencies #
             ################
             ################
-            # JS
-            - name: Install yarn
-              run: npm install -g yarn
-              if: ${{ runner.os != 'Linux' }}
-
-            - name: Install js dependencies
-              run: yarn
-              env:
-                  PSP_SKIP_EMSDK_INSTALL: 1
-
-            ################
-            # Python
-            - name: Install python dependencies
-              run: yarn _requires_python
-              if: ${{ runner.os != 'Linux' }} # skip on manylinux2014
-
-            ################
             # Linux
             # NOTE: Not necessary because docker images prebuilt.
-            # If we remove docker images, we will need to reenable
-            # this.
             # - name: Linux init steps
             #   run: sudo node tools/perspective-scripts/install_tools.mjs
             #   if: ${{ runner.os == 'Linux' }}
@@ -1101,22 +668,15 @@ jobs:
             ####################
             # Upload artifacts #
             ####################
-            - uses: actions/upload-artifact@v3
+            - name: Upload python artifacts
+              uses: ./.github/workflows/actions/upload-python-artifacts
               with:
-                  name: perspective-python-dist-${{ matrix.os }}-${{ matrix.python-version }}
-                  path: python/perspective/dist/*.whl
-              if: ${{ runner.os == 'Windows' }}
+                  kind: "wheel"
 
-            - uses: actions/upload-artifact@v3
+            - name: Upload python artifacts
+              uses: ./.github/workflows/actions/upload-python-artifacts
               with:
-                  name: perspective-python-dist-${{ matrix.os }}-${{ matrix.python-version }}
-                  path: python/perspective/wheelhouse/*.whl
-              if: ${{ runner.os != 'Windows' }}
-
-            - uses: actions/upload-artifact@v3
-              with:
-                  name: perspective-python-sdist
-                  path: python/perspective/dist/*.tar.gz
+                  kind: "sdist"
               if: ${{ matrix.os == 'macos-11' }}
 
     build_pyodide:
@@ -1166,11 +726,10 @@ jobs:
               # that the command fails.
               run: pyodide build python/perspective --exports=pyinit
 
-            - name: Upload pyodide wheel
-              uses: actions/upload-artifact@v3
+            - name: Upload python artifacts
+              uses: ./.github/workflows/actions/upload-python-artifacts
               with:
-                  name: perspective-python-dist-pyodide
-                  path: dist/*.whl
+                  kind: "pyodide"
 
     ##########################################################################################################################
     ##########################################################################################################################
@@ -1207,122 +766,39 @@ jobs:
         # Setup matrix job configuration #
         ##################################
         runs-on: ${{ matrix.os }}
-        if: ${{ needs.initialize.outputs.SKIP_CI == 'false' && needs.initialize.outputs.SKIP_PYTHON == 'false' }}
 
         steps:
             - name: Checkout
               uses: actions/checkout@v3
 
-            - uses: actions/download-artifact@v3
-              with:
-                  name: perspective-dist
-                  path: packages/perspective/dist/
-
-            - uses: actions/download-artifact@v3
-              with:
-                  name: perspective-jupyterlab-dist
-                  path: packages/perspective-jupyterlab/dist/
-
-            - uses: actions/download-artifact@v3
-              with:
-                  name: perspective-viewer-d3fc-dist
-                  path: packages/perspective-viewer-d3fc/dist
-
-            - uses: actions/download-artifact@v3
-              with:
-                  name: perspective-viewer-datagrid-dist
-                  path: packages/perspective-viewer-datagrid/dist
-
-            - uses: actions/download-artifact@v3
-              with:
-                  name: perspective-workspace-dist
-                  path: packages/perspective-workspace/dist
-
-            - uses: actions/download-artifact@v3
-              with:
-                  name: perspective-viewer-dist
-                  path: rust/perspective-viewer/dist
-
-            - uses: actions/download-artifact@v3
-              with:
-                  name: nbextension-dist
-                  path: python/perspective/perspective/nbextension
-
-            - uses: actions/download-artifact@v3
-              with:
-                  name: labextension-dist
-                  path: python/perspective/perspective/labextension
+            - name: Download JS artifacts
+              uses: ./.github/workflows/actions/download-js-artifacts
 
             ##########
             # Caches #
             ##########
-            ################
-            # Yarn Cache
-            - name: Get yarn cache directory path
-              id: yarn-cache-dir-path
-              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-              shell: bash
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            - name: Setup yarn cache
-              uses: actions/cache@v3
-              id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+            - name: Setup caching
+              uses: ./.github/workflows/actions/caches
               with:
-                  path: |
-                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
-                      ~/.cache/ms-playwright
-                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-yarn-
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            ################
-            # Pip Cache
-            - name: Setup pip cache
-              uses: actions/cache@v3
-              with:
-                  path: ~/.cache/pip
-                  key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
-                  restore-keys: |
-                      ${{ runner.os }}-pip-
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
+                  python: true
+                  yarn: true
 
             ###############################
             # Language and Compiler Setup #
             ###############################
-            - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v4
+            - name: Setup languages
+              uses: ./.github/workflows/actions/setup-language
               with:
-                  python-version: ${{ matrix.python-version }}
-                  cache: "pip"
-
-            - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v3
-              with:
-                  node-version: ${{ matrix.node-version }}
-                  cache: "yarn"
-                  cache-dependency-path: yarn.lock
+                  node: ${{ matrix.node-version }}
+                  python: ${{ matrix.python-version }}
+                  emsdk_install: true
+                  frozen_lockfile: true
 
             ################
             # Dependencies #
             ################
-            ################
-            # JS
-            - name: Install yarn
-              run: npm install -g yarn
-
-            - name: Install js dependencies
-              run: yarn --frozen-lockfile
-              env:
-                  PSP_SKIP_EMSDK_INSTALL: 1
-
             - name: Install Playwright Browsers
               run: npx playwright install --with-deps
-
-            ################
-            # Python
-            - name: Install python dependencies
-              run: yarn _requires_python
 
             # Download artifact
             - uses: actions/download-artifact@v3
@@ -1379,15 +855,12 @@ jobs:
                     - 3.11
                 node-version: [18.x]
                 is-full-run:
-                    - ${{ needs.initialize.outputs.FULL_RUN == 'true' }}
-                include-windows-run:
-                    - ${{ needs.initialize.outputs.INCLUDE_WINDOWS == 'true' || needs.initialize.outputs.FULL_RUN == 'true' }}
+                    - ${{ needs.initialize.outputs.FULL_BUILD == 'true' }}
                 exclude:
                     ##############################################
                     # Things to exclude if not a full matrix run #
                     ##############################################
-                    # Exclude if skipping windows
-                    - include-windows-run: false
+                    - is-full-run: false
                       os: windows-2022
 
                     # Exclude Mac builds
@@ -1418,7 +891,6 @@ jobs:
         # Setup matrix job configuration #
         ##################################
         runs-on: ${{ matrix.os }}
-        if: ${{ needs.initialize.outputs.SKIP_CI == 'false' && needs.initialize.outputs.SKIP_PYTHON == 'false' }}
 
         steps:
             - name: Checkout
@@ -1427,70 +899,21 @@ jobs:
             ##########
             # Caches #
             ##########
-            ################
-            # Yarn Cache
-            - name: Get yarn cache directory path
-              id: yarn-cache-dir-path
-              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-              shell: bash
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            - name: Setup yarn cache
-              uses: actions/cache@v3
-              id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+            - name: Setup caching
+              uses: ./.github/workflows/actions/caches
               with:
-                  path: |
-                      ~/.cache/ms-playwright
-                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
-                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-yarn-
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            ################
-            # Pip Cache
-            - name: Setup pip cache
-              uses: actions/cache@v3
-              with:
-                  path: ~/.cache/pip
-                  key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
-                  restore-keys: |
-                      ${{ runner.os }}-pip-
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
+                  python: true
+                  yarn: true
 
             ###############################
             # Language and Compiler Setup #
             ###############################
-            - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v4
+            - name: Setup languages
+              uses: ./.github/workflows/actions/setup-language
               with:
-                  python-version: ${{ matrix.python-version }}
-                  cache: "pip"
-
-            - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v3
-              with:
-                  node-version: ${{ matrix.node-version }}
-                  cache: "yarn"
-                  cache-dependency-path: yarn.lock
-
-            ################
-            # Dependencies #
-            ################
-            ################
-            # JS
-            - name: Install yarn
-              run: npm install -g yarn
-
-            - name: Install js dependencies
-              run: yarn
-              env:
-                  PSP_SKIP_EMSDK_INSTALL: 1
-
-            ################
-            # Python
-            - name: Install python dependencies
-              run: yarn _requires_python
+                  node: ${{ matrix.node-version }}
+                  python: ${{ matrix.python-version }}
+                  emsdk_install: true
 
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
@@ -1553,12 +976,13 @@ jobs:
                     - ubuntu-20.04 # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-Readme.md
                 python-version:
                     - 3.9
+                node-version: [18.x]
 
         ##################################
         # Setup matrix job configuration #
         ##################################
         runs-on: ${{ matrix.os }}
-        if: ${{ needs.initialize.outputs.FULL_RUN == 'true' }}
+        if: ${{ needs.initialize.outputs.FULL_BUILD == 'true' }}
 
         steps:
             - name: Checkout
@@ -1567,75 +991,30 @@ jobs:
             ##########
             # Caches #
             ##########
-            ################
-            # Yarn Cache
-            - name: Get yarn cache directory path
-              id: yarn-cache-dir-path
-              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-              shell: bash
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            - name: Setup yarn cache
-              uses: actions/cache@v3
-              id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+            - name: Setup caching
+              uses: ./.github/workflows/actions/caches
               with:
-                  path: |
-                      ~/.cache/ms-playwright
-                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
-                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-yarn-
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
-
-            ################
-            # Pip Cache
-            - name: Setup pip cache
-              uses: actions/cache@v3
-              with:
-                  path: ~/.cache/pip
-                  key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
-                  restore-keys: |
-                      ${{ runner.os }}-pip-
-              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
+                  python: true
+                  yarn: true
 
             ###############################
             # Language and Compiler Setup #
             ###############################
-            - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v4
+            - name: Setup languages
+              uses: ./.github/workflows/actions/setup-language
               with:
-                  python-version: ${{ matrix.python-version }}
-                  cache: "pip"
-
-            - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v3
-              with:
-                  node-version: ${{ matrix.node-version }}
-                  cache: "yarn"
-                  cache-dependency-path: yarn.lock
+                  node: ${{ matrix.node-version }}
+                  python: ${{ matrix.python-version }}
+                  emsdk_install: true
+                  frozen_lockfile: true
 
             ################
             # Dependencies #
             ################
             ################
-            # JS
-            - name: Install yarn
-              run: npm install -g yarn
-
-            - name: Install js dependencies
-              run: yarn --frozen-lockfile
-              env:
-                  PSP_SKIP_EMSDK_INSTALL: 1
-
-            ################
             # Linux
             - name: Linux init steps
               run: sudo node tools/perspective-scripts/install_tools.mjs
-
-            ################
-            # Python
-            - name: Install python dependencies
-              run: yarn _requires_python
 
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             #~~~~~~~~~ Build Pipelines ~~~~~~~~~#

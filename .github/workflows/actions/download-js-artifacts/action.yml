@@ -1,0 +1,40 @@
+name: Download JS build artifacts
+description: "Download built JavaScipt artifacts for use in downstream build and test steps"
+
+runs:
+    using: "composite"
+    steps:
+        - uses: actions/download-artifact@v3
+          with:
+              name: perspective-dist
+              path: packages/perspective/dist/
+
+        - uses: actions/download-artifact@v3
+          with:
+              name: perspective-jupyterlab-dist
+              path: packages/perspective-jupyterlab/dist/
+
+        - uses: actions/download-artifact@v3
+          with:
+              name: perspective-viewer-d3fc-dist
+              path: packages/perspective-viewer-d3fc/dist
+
+        - uses: actions/download-artifact@v3
+          with:
+              name: perspective-viewer-datagrid-dist
+              path: packages/perspective-viewer-datagrid/dist
+
+        - uses: actions/download-artifact@v3
+          with:
+              name: perspective-viewer-openlayers-dist
+              path: packages/perspective-viewer-openlayers/dist
+
+        - uses: actions/download-artifact@v3
+          with:
+              name: perspective-workspace-dist
+              path: packages/perspective-workspace/dist
+
+        - uses: actions/download-artifact@v3
+          with:
+              name: perspective-viewer-dist
+              path: rust/perspective-viewer/dist
