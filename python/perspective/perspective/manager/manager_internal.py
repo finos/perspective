@@ -132,6 +132,9 @@ class _PerspectiveManagerInternal(object):
                 # or disable behavior depending on its version.
                 message = self._make_message(msg["id"], flags)
                 post_callback(self._message_to_json(msg["id"], message))
+            elif cmd == "get_hosted_table_names":
+                message = self._make_message(msg["id"], [k for k in self._tables.keys()])
+                post_callback(self._message_to_json(msg["id"], message))
             elif cmd == "table":
                 try:
                     # create a new Table and track it
@@ -158,6 +161,8 @@ class _PerspectiveManagerInternal(object):
             elif cmd == "table_method" or cmd == "view_method":
                 # Call the method on the table/view instance
                 self._process_method_call(msg, post_callback, client_id)
+            else:
+                logging.error("Unknown client message " + str(msg))
         except (PerspectiveError, PerspectiveCppError) as error:
             # Log errors and return them to the client
             error_string = str(error)
