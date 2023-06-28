@@ -24,13 +24,14 @@ const IGNORE_PATHS = fs_sync
         "cmake/*",
         "cpp/perspective/src/cpp/vendor",
         "cpp/perspective/src/include/perspective/vendor",
+        "python/perspective/perspective/core/_version.py",
     ]);
 
 const FIX_PATHS = [
     ["**/*.rs", ["//", "/*", " *", " */"]],
     ["**/*.js", ["//", "/*", " *", " */"]],
     ["**/*.mjs", ["//", "/*", " *", " */"]],
-    ["**/*.css", ["//", "/*", " *", " */"]],
+    // ["**/*.css", ["//", "/*", " *", " */"]],
     ["**/*.scss", ["//", "/*", " *", " */"]],
     ["**/*.less", ["//", "/*", " *", " */"]],
     ["**/*.toml", ["# ", "#"]],

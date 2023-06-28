@@ -34,8 +34,7 @@ function playwright(pkg, is_jlab) {
     console.log(`-- Running ${pkg_name}Playwright test suite`);
     const args = process.argv
         .slice(2)
-        .filter((x) => x !== "--ci" && x !== "--jupyter")
-        .join(" ");
+        .filter((x) => x !== "--ci" && x !== "--jupyter");
 
     const env = {};
     if (is_jlab) {

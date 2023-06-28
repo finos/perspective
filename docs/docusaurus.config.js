@@ -16,9 +16,9 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 const fs = require("fs");
 
 // TODO There is a typescript module annoyinglt called `blocks`.
-const { dist_examples } = require("../examples/blocks");
+const blocks = import("../examples/blocks/index.mjs");
 
-dist_examples(`${__dirname}/static/blocks`);
+blocks.then(({ dist_examples }) => dist_examples(`${__dirname}/static/blocks`));
 
 const examples = fs.readdirSync("static/blocks").map((ex) => {
     const files = fs
