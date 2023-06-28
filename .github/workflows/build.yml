@@ -1033,6 +1033,37 @@ jobs:
                   path: python/perspective/dist/*.tar.gz
               if: ${{ matrix.os == 'macos-11' }}
 
+            ###############################
+            # Upload artifacts to release #
+            ###############################
+
+            - name: Upload dist artifact for Windows
+              if: ${{ runner.os == 'Windows' }}
+              uses: softprops/action-gh-release@v1
+              with:
+                  files: |
+                      python/perspective/dist/*.whl
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Upload wheelhouse artifact for non-Windows
+              if: ${{ runner.os != 'Windows' }}
+              uses: softprops/action-gh-release@v1
+              with:
+                  files: |
+                      python/perspective/wheelhouse/*.whl
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Upload sdist artifact for MacOS
+              if: ${{ matrix.os == 'macos-11' }}
+              uses: softprops/action-gh-release@v1
+              with:
+                  files: |
+                      python/perspective/dist/*.tar.gz
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     build_pyodide:
         runs-on: ubuntu-22.04
         needs: [initialize]
@@ -1082,6 +1113,14 @@ jobs:
               with:
                   name: perspective-python-dist-pyodide
                   path: dist/*.whl
+
+            - name: Upload pyodide wheel to release
+              uses: softprops/action-gh-release@v1
+              with:
+                  files: |
+                      dist/*.whl
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     ##########################################################################################################################
     ##########################################################################################################################
