@@ -14,9 +14,7 @@
         <script type="module">
             import { PerspectiveWidget } from "/@finos/perspective-jupyterlab/dist/esm/lumino.js";
             window.__WIDGET__ = new PerspectiveWidget();
-            document
-                .getElementById("container")
-                .appendChild(window.__WIDGET__.node);
+            document.getElementById("container").appendChild(window.__WIDGET__.node);
         </script>
         <script type="module" src="/load-viewer-csv.js"></script>
         <style>

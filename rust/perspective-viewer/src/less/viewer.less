@@ -1,12 +1,14 @@
-/******************************************************************************
- *
- * Copyright (c) 2017, the Perspective Authors.
- *
- * This file is part of the Perspective library, distributed under the terms
- * of the Apache License 2.0.  The full license can be found in the LICENSE
- * file.
- *
- */
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+// ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+// ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+// ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+// ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+// ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+// ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+// ┃ This file is part of the Perspective library, distributed under the terms ┃
+// ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 :host .sidebar_close_button {
     position: absolute;
@@ -34,17 +36,16 @@
     }
 }
 
-
 :host(:hover) {
     #menu-bar {
         opacity: 1 !important;
     }
 
-    #settings_button, #settings_button.titled {
+    #settings_button,
+    #settings_button.titled {
         opacity: 1;
     }
 }
-
 
 :host {
     position: relative;
@@ -67,7 +68,7 @@
         height: auto;
         flex-direction: row-reverse;
         & > .split-panel-divider {
-            border-left: 1px solid var(--inactive--color, #6E6E6E);
+            border-left: 1px solid var(--inactive--color, #6e6e6e);
             margin-right: -5px;
         }
     }
@@ -78,7 +79,7 @@
     }
 
     #modal_panel > .split-panel-divider {
-        border-left: 1px solid var(--inactive--color, #6E6E6E);
+        border-left: 1px solid var(--inactive--color, #6e6e6e);
         margin-right: -5px;
     }
 
@@ -137,13 +138,12 @@
         }
 
         & > .split-panel-divider {
-            border-top: 1px solid var(--inactive--color, #6E6E6E);
-            border-bottom: 2px solid var(--inactive--color, #6E6E6E);
+            border-top: 1px solid var(--inactive--color, #6e6e6e);
+            border-bottom: 2px solid var(--inactive--color, #6e6e6e);
             margin-left: -9px;
             margin-right: 0px;
             flex: 0 0 4px;
         }
-
     }
 
     .noselect {
@@ -236,7 +236,6 @@
         padding: 0;
         border-radius: 0px;
 
-
         &:before {
             display: inline-block;
             height: 18px;
@@ -269,10 +268,10 @@
         // &:before {
         //     -webkit-mask-image: url(../svg/drawer-tab.svg);
         // }
-
     }
 
-    .split-panel.orient-reverse > .split-panel-child:not(:last-child):not(.is-width-override) {
+    .split-panel.orient-reverse
+        > .split-panel-child:not(:last-child):not(.is-width-override) {
         max-width: 300px;
     }
 
@@ -282,7 +281,7 @@
         display: flex;
         flex-direction: column;
         justify-content: center;
-        border-bottom: 1px solid var(--inactive--color, #6E6E6E);
+        border-bottom: 1px solid var(--inactive--color, #6e6e6e);
     }
 
     #expr_panel_header_title {
@@ -297,7 +296,7 @@
     #expr_panel_border {
         height: 2px;
         width: 100%;
-        background-color: var(--inactive--color, #6E6E6E);
+        background-color: var(--inactive--color, #6e6e6e);
         margin-top: 1px;
     }
 

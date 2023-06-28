@@ -31,7 +31,8 @@ dependencies to be installed:
 -   [Boost](https://www.boost.org/) (version 1.67 or higher, must be built - not
     header-only). This can be installed from tarball with the included script
     `node tools/perspective-scripts/install_tools.mjs`.
--   [Yarn (v1)](https://classic.yarnpkg.com/). **Important**: Yarn >v1 is not supported, and will cause build errors.
+-   [Yarn (v1)](https://classic.yarnpkg.com/). **Important**: Yarn >v1 is not
+    supported, and will cause build errors.
 
 **_This list may be non-exhaustive depending on your OS/environment; please open
 a thread in [Discussions](https://github.com/finos/perspective/discussions) if

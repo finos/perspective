@@ -277,7 +277,7 @@ when running `PerspectiveManager` in this mode:
     the scheduled application. In such cases, you may receive a single
     `on_update()` notification for multiple `update()` calls.
 
-For example, using Tornado `IOLoop` you can create a dedicated thread or pool 
+For example, using Tornado `IOLoop` you can create a dedicated thread or pool
 for a `PerspectiveManager`:
 
 ```python
@@ -298,9 +298,9 @@ thread.start()
 When running in Async mode, Perspective will release the GIL while dispatching
 to an internal thread pool for some operations, enabling better parallelism and
 overall better server performance. However, Perspective's Python interface
-itself will still process queries in a single queue. To enable parallel
-query processing, call `set_loop_callback` with a multi-threaded executor
-such as `concurrent.futures.ThreadPoolExecutor`:
+itself will still process queries in a single queue. To enable parallel query
+processing, call `set_loop_callback` with a multi-threaded executor such as
+`concurrent.futures.ThreadPoolExecutor`:
 
 ```python
 def perspective_thread():

@@ -3,8 +3,7 @@ id: view
 title: View
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+import Tabs from '@theme/Tabs'; import TabItem from '@theme/TabItem';
 
 The View is Perspective's query and serialization interface. It represents a
 query on the `Table`'s dataset and is always created from an existing `Table`
@@ -20,7 +19,7 @@ const table = await perspective.table({
     name: ["a", "b", "c", "d"],
 });
 
-const view = await table.view({columns: ["name"]});
+const view = await table.view({ columns: ["name"] });
 const json = await view.to_json();
 
 view.delete();
@@ -68,7 +67,7 @@ power multiple `view()`s concurrently:
 ```javascript
 const view = await table.view({
     columns: ["Sales"],
-    aggregates: {Sales: "sum"},
+    aggregates: { Sales: "sum" },
     group_by: ["Region", "Country"],
     filter: [["Category", "in", ["Furniture", "Technology"]]],
 });
@@ -108,7 +107,7 @@ Code, which are grouped by City, which are in turn grouped by State.
 <TabItem value="js" label="JavaScript">
 
 ```javascript
-const view = await table.view({group_by: ["a", "c"]});
+const view = await table.view({ group_by: ["a", "c"] });
 ```
 
 </TabItem>
@@ -165,7 +164,7 @@ pivot:
 <TabItem value="js" label="JavaScript">
 
 ```javascript
-const view = await table.view({split_by: ["a", "c"]});
+const view = await table.view({ split_by: ["a", "c"] });
 ```
 
 </TabItem>
@@ -533,8 +532,8 @@ In Javascript, a `table()` can be constructed on a `view()` instance, which will
 return a new `table()` based on the `view()`'s dataset, and all future updates
 that affect the `view()` will be forwarded to the new `table()`. This is
 particularly useful for implementing a
-[Client/Server Replicated](server.md#clientserver-replicated) design,
-by serializing the `View` to an arrow and setting up an `on_update` callback:
+[Client/Server Replicated](server.md#clientserver-replicated) design, by
+serializing the `View` to an arrow and setting up an `on_update` callback:
 
 <Tabs>
 <TabItem value="js" label="JavaScript">
@@ -542,10 +541,10 @@ by serializing the `View` to an arrow and setting up an `on_update` callback:
 ```javascript
 const worker1 = perspective.worker();
 const table = await worker.table(data);
-const view = await table.view({filter: [["State", "==", "Texas"]]});
+const view = await table.view({ filter: [["State", "==", "Texas"]] });
 const table2 = await worker.table(view);
 
-table.update([{State: "Texas", City: "Austin"}]);
+table.update([{ State: "Texas", City: "Austin" }]);
 ```
 
 </TabItem>
