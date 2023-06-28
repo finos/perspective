@@ -1136,7 +1136,7 @@ async function match_delta(perspective, delta, expected) {
             table.delete();
         });
 
-        test.only("Table.get_num_views", async function () {
+        test("Table.get_num_views", async function () {
             const table = await perspective.table({
                 a: "integer",
             });
