@@ -98,7 +98,8 @@ class PerspectiveHandlerBase(ABC):
                     if end >= len(message):
                         end = len(message)
 
-                    asyncio.ensure_future(self.write_message(message[start:end], binary=True))
+                    await asyncio.ensure_future(self.write_message(message[start:end], binary=True))
+
                     start = end
 
                     # Allow the loop to process heartbeats so that client sockets don't

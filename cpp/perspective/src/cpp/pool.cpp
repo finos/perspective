@@ -80,9 +80,6 @@ t_pool::init() {
     }
     m_run.test_and_set(std::memory_order_acquire);
     m_data_remaining.store(false);
-    std::thread t(&t_pool::_process, this);
-    set_thread_name(t, "psp_pool_thread");
-    t.detach();
 }
 
 t_uindex
