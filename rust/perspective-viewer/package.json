@@ -31,8 +31,6 @@
         "docs:concat": "node ./docs.js",
         "docs:deploy:api": "(echo \"---\nid: perspective-viewer\ntitle: perspective-viewer API\n---\n\n\"; cat README.md) > ../../docs/docs/obj/perspective-viewer.md",
         "docs:deploy:exprtk": "cat exprtk.md > ../../docs/docs/obj/perspective-viewer-exprtk.md",
-        "fix": "yarn lint --fix && cargo fmt",
-        "lint": "prettier --check src/ts/**/*",
         "test:run:rust": "rustup run nightly wasm-pack test --chrome --headless"
     },
     "publishConfig": {

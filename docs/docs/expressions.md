@@ -14,9 +14,10 @@ language, an extended version of
 
 ## UI
 
-Expression columns can be created in `<perspective-viewer>` by clicking the
-"New Column" button at the bottom of the column list (in <span style={{color:"red"}}>red</span> below), or via the API by adding the
-expression to the `expressions` config key when calling `restore()`.
+Expression columns can be created in `<perspective-viewer>` by clicking the "New
+Column" button at the bottom of the column list (in <span
+style={{color:"red"}}>red</span> below), or via the API by adding the expression
+to the `expressions` config key when calling `restore()`.
 
 <div id="new_column_highlight">
 <perspective-viewer></perspective-viewer>
@@ -31,8 +32,8 @@ buttons for:
     _all_ usage of the expression column.
 -   _Deleting_ the column. Clicking `Reset` (or calling the `reset()` method)
     will not delete expressions unless the `Shift` key is held (or `true`
-    parameter supplied, respectively). This button only appears if the expression
-    column i unused.
+    parameter supplied, respectively). This button only appears if the
+    expression column i unused.
 
 To use the column, just drag/select the column as you would a normal column,
 e.g. as a "Filter", "Group By", etc. Expression columns cannot be edited or
@@ -52,13 +53,12 @@ its own custom extensions and syntax.
 
 In addition to `float` values which ExprTK supports natively, Perspective's
 expression language also supports Perspective's other types `date`, `datetime`,
-`integer`, `boolean`; as well as rudimentary type-checking, which will report
-an <span>error</span> when the values/columns supplied as
-arguments cannot be resolved to the expected type, e.g. `length(x)` expects an
-argument `x` of type `string` and is not a valid expression for an `x` of
-another type. Perspective supplies a set of _cast_ functions for converting
-between types where possible e.g. `string(x)` to cast a variable `x` to a
-`string`.
+`integer`, `boolean`; as well as rudimentary type-checking, which will report an
+<span>error</span> when the values/columns supplied as arguments cannot be
+resolved to the expected type, e.g. `length(x)` expects an argument `x` of type
+`string` and is not a valid expression for an `x` of another type. Perspective
+supplies a set of _cast_ functions for converting between types where possible
+e.g. `string(x)` to cast a variable `x` to a `string`.
 
 #### Expression Column Name
 
@@ -78,8 +78,8 @@ API and UI as itself (clipped to a reasonable length for the latter).
 
 #### Referencing `Table()` Columns
 
-Columns from the `Table()` can be referenced in an expression with
-_double quotes_.
+Columns from the `Table()` can be referenced in an expression with _double
+quotes_.
 
 ```
 // Expected Sales
@@ -95,8 +95,8 @@ _double quotes_.
 
 #### String Literals
 
-In contrast to standard ExprTK, string literals are declared with
-_single quotes_:
+In contrast to standard ExprTK, string literals are declared with _single
+quotes_:
 
 ```
 // Profitable

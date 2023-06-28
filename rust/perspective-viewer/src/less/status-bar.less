@@ -1,12 +1,14 @@
-/******************************************************************************
- *
- * Copyright (c) 2017, the Perspective Authors.
- *
- * This file is part of the Perspective library, distributed under the terms
- * of the Apache License 2.0.  The full license can be found in the LICENSE
- * file.
- *
- */
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+// ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+// ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+// ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+// ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+// ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+// ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+// ┃ This file is part of the Perspective library, distributed under the terms ┃
+// ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 :host {
     #status_bar.titled {
@@ -89,7 +91,7 @@
                 }
             }
         }
-        
+
         .app-title {
             margin-left: 12px;
             font-size: 16px;
@@ -110,13 +112,13 @@
         }
 
         // Exceptions when the menu bar is visible and the settings panel is closed.
-        
+
         #menu-bar {
             overflow: hidden;
             flex: 0 1000000 auto;
             .button {
                 height: 22px;
-                select { 
+                select {
                     height: 20px;
                     font-size: 9px;
                 }
@@ -198,36 +200,36 @@
 
         span#export {
             &:before {
-                -webkit-mask-image:  url("../svg/export-icon.svg");
-                mask-image:  url("../svg/export-icon.svg");
+                -webkit-mask-image: url("../svg/export-icon.svg");
+                mask-image: url("../svg/export-icon.svg");
             }
         }
 
         span#lock {
             &:before {
-                -webkit-mask-image:  url("../svg/free-scroll-icon.svg");
-                mask-image:  url("../svg/free-scroll-icon.svg");
+                -webkit-mask-image: url("../svg/free-scroll-icon.svg");
+                mask-image: url("../svg/free-scroll-icon.svg");
             }
         }
 
         span#reset {
             &:before {
-                -webkit-mask-image:  url("../svg/revert-icon.svg");
-                mask-image:  url("../svg/revert-icon.svg");
+                -webkit-mask-image: url("../svg/revert-icon.svg");
+                mask-image: url("../svg/revert-icon.svg");
             }
         }
 
         span#copy {
             &:before {
-                -webkit-mask-image:  url("../svg/duplicate-icon.svg");
-                mask-image:  url("../svg/duplicate-icon.svg");
+                -webkit-mask-image: url("../svg/duplicate-icon.svg");
+                mask-image: url("../svg/duplicate-icon.svg");
             }
         }
 
         span#theme {
             &:before {
-                -webkit-mask-image:  url("../svg/theme-icon.svg");
-                mask-image:  url("../svg/theme-icon.svg");
+                -webkit-mask-image: url("../svg/theme-icon.svg");
+                mask-image: url("../svg/theme-icon.svg");
             }
         }
 
@@ -266,7 +268,6 @@
                 // border: 1px solid var(--inactive--color);
                 background-color: var(--icon--color);
                 color: var(--plugin--background);
-                
 
                 &:before {
                     background-color: var(--plugin--background);

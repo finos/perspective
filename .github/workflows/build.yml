@@ -191,7 +191,7 @@ jobs:
                     - ubuntu-20.04 # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-Readme.md
                 python-version:
                     - 3.9
-                node-version: [16.x]
+                node-version: [18.x]
 
             # NOTE: don't fail fast as sometimes npm blocks the burst of fetches from GHA
             fail-fast: false
@@ -313,7 +313,7 @@ jobs:
             ################
             # Linux
             - name: Linux init steps
-              run: sudo node scripts/install_tools.js
+              run: sudo node tools/perspective-scripts/install_tools.mjs
               if: ${{ runner.os == 'Linux' }}
 
             - name: Install CCache
@@ -326,7 +326,7 @@ jobs:
             # WebAssembly #
             ###############
             - name: WebAssembly Lint
-              run: yarn lint_js
+              run: yarn lint
 
             - name: WebAssembly Build
               run: yarn build_js --ci
@@ -518,7 +518,7 @@ jobs:
             ########
             # Linux
             - name: Python Lint Steps (Linux)
-              run: yarn lint_python --ci
+              run: yarn lint
               env:
                   PYTHON_VERSION: ${{ matrix.python-version }}
 
@@ -546,7 +546,7 @@ jobs:
                     - ubuntu-20.04 # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-Readme.md
                 python-version:
                     - 3.9
-                node-version: [16.x]
+                node-version: [18.x]
 
             # NOTE: don't fail fast as sometimes npm blocks the burst of fetches from GHA
             fail-fast: false
@@ -738,7 +738,7 @@ jobs:
                 container:
                     - none # Not manylinux, we will use this space to build the WASM assets
                     - 2014
-                node-version: [16.x]
+                node-version: [18.x]
                 is-full-run:
                     - ${{ needs.initialize.outputs.FULL_RUN == 'true' }}
                 include-windows-run:
@@ -933,13 +933,13 @@ jobs:
             # If we remove docker images, we will need to reenable
             # this.
             # - name: Linux init steps
-            #   run: sudo node scripts/install_tools.js
+            #   run: sudo node tools/perspective-scripts/install_tools.mjs
             #   if: ${{ runner.os == 'Linux' }}
 
             ################
             # Mac
-            - name: Mac init steps
-              run: env HOMEBREW_NO_AUTO_UPDATE=1 brew install boost
+            - name: Install Boost (MacOS)
+              run: sudo node tools/perspective-scripts/install_tools.mjs
               if: ${{ runner.os == 'macOS' }}
 
             ################
@@ -1066,7 +1066,7 @@ jobs:
                   yarn build_python --setup-only
 
             - name: Linux init steps
-              run: sudo node scripts/install_tools.js
+              run: sudo node tools/perspective-scripts/install_tools.mjs
 
             - name: Install pyodide-build
               run: pip install pyodide-build==$PYODIDE_VERSION
@@ -1110,7 +1110,7 @@ jobs:
                     - ubuntu-20.04 # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-Readme.md
                 python-version:
                     - 3.9
-                node-version: [16.x]
+                node-version: [18.x]
             # NOTE: don't fail fast as sometimes npm blocks the burst of fetches from GHA
             fail-fast: false
 
@@ -1289,7 +1289,7 @@ jobs:
                     - 3.9
                     - "3.10"
                     - 3.11
-                node-version: [16.x]
+                node-version: [18.x]
                 is-full-run:
                     - ${{ needs.initialize.outputs.FULL_RUN == 'true' }}
                 include-windows-run:
@@ -1549,7 +1549,7 @@ jobs:
             ################
             # Linux
             - name: Linux init steps
-              run: sudo node scripts/install_tools.js
+              run: sudo node tools/perspective-scripts/install_tools.mjs
 
             ################
             # Python

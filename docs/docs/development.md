@@ -30,8 +30,9 @@ dependencies to be installed:
 -   [CMake](https://cmake.org/) (version 3.15.4 or higher)
 -   [Boost](https://www.boost.org/) (version 1.67 or higher, must be built - not
     header-only). This can be installed from tarball with the included script
-    `node scripts/install_tools.js`.
--   [Yarn (v1)](https://classic.yarnpkg.com/). **Important**: Yarn >v1 is not supported, and will cause build errors.
+    `node tools/perspective-scripts/install_tools.mjs`.
+-   [Yarn (v1)](https://classic.yarnpkg.com/). **Important**: Yarn >v1 is not
+    supported, and will cause build errors.
 
 **_This list may be non-exhaustive depending on your OS/environment; please open
 a thread in [Discussions](https://github.com/finos/perspective/discussions) if

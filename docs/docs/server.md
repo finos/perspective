@@ -3,10 +3,10 @@ id: server
 title: Data Binding
 ---
 
-import Arch1Svg from "@site/static/svg/architecture.svg";
-import Arch2Svg from "@site/static/svg/architecture.sub1.svg";
-import Arch3Svg from "@site/static/svg/architecture.sub2.svg";
-import Arch4Svg from "@site/static/svg/architecture.sub3.svg";
+import Arch1Svg from "@site/static/svg/architecture.svg"; import Arch2Svg from
+"@site/static/svg/architecture.sub1.svg"; import Arch3Svg from
+"@site/static/svg/architecture.sub2.svg"; import Arch4Svg from
+"@site/static/svg/architecture.sub3.svg";
 
 <style>{".markdown svg{width:100%;height:100%"}</style>
 
@@ -75,12 +75,10 @@ deltas, while operations like scrolling, pivots, sorting, etc. are performed on
 the client.
 
 Python servers can make especially good use of additional threads, as
-Perspective will
-[release the GIL](python.md#async-mode) for
-almost all operations. Interactive performance on the client is very good and
-identical to client-only architecture. Updates and edits are seamlessly
-synchonized across clients via their virtual server counterparts using
-websockets and Apache Arrow.
+Perspective will [release the GIL](python.md#async-mode) for almost all
+operations. Interactive performance on the client is very good and identical to
+client-only architecture. Updates and edits are seamlessly synchonized across
+clients via their virtual server counterparts using websockets and Apache Arrow.
 
 #### Python and Tornado server
 

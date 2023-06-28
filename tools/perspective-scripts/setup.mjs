@@ -1,24 +1,28 @@
-/******************************************************************************
- *
- * Copyright (c) 2017, the Perspective Authors.
- *
- * This file is part of the Perspective library, distributed under the terms of
- * the Apache License 2.0.  The full license can be found in the LICENSE file.
- *
- */
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+// ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+// ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+// ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+// ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+// ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+// ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+// ┃ This file is part of the Perspective library, distributed under the terms ┃
+// ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-const { execute } = require("./script_utils.js");
-
-const inquirer = require("inquirer");
-const fs = require("fs");
+import sh from "./sh.mjs";
+import inquirer from "inquirer";
+import fs from "fs";
+import * as dotenv from "dotenv";
 
 const CONFIG = new Proxy(
     new (class {
         constructor() {
             this.config = [];
             this._values =
-                require("dotenv").config({ path: "./.perspectiverc" }).parsed ||
-                {};
+                dotenv.config({
+                    path: "./.perspectiverc",
+                }).parsed || {};
             if (this._values.PACKAGE && this._values.PACKAGE.startsWith("@")) {
                 this._values.PACKAGE = this._values.PACKAGE.slice(
                     2,
@@ -26,7 +30,6 @@ const CONFIG = new Proxy(
                 ).replace(/\|/g, ",");
             }
         }
-
         add(new_config) {
             for (const key in new_config) {
                 const val = new_config[key];
@@ -36,17 +39,18 @@ const CONFIG = new Proxy(
                 }
             }
         }
-
         write() {
             fs.writeFileSync("./.perspectiverc", this.config.join("\n"));
             if (process.env.PSP_BUILD_IMMEDIATELY) {
-                execute`node scripts/build.js`;
+                sh`node tools/perspective-scripts/build.mjs`.runSync();
             }
         }
     })(),
     {
         set: function (target, name, val) {
-            target.add({ [name]: val });
+            target.add({
+                [name]: val,
+            });
         },
         get: function (target, name) {
             if (name in target._values) {
@@ -149,6 +153,7 @@ async function focus_package() {
             ],
         },
     ]);
+
     if (Array.isArray(new_config.PACKAGE)) {
         if (new_config.PACKAGE.length > 0) {
             new_config.PACKAGE = `${new_config.PACKAGE.join(",")}`;
@@ -156,6 +161,7 @@ async function focus_package() {
             new_config.PACKAGE = undefined;
         }
     }
+
     CONFIG.add(new_config);
     await javascript_options();
 }
@@ -193,6 +199,7 @@ async function choose_project() {
             ],
         },
     ]);
+
     CONFIG.add(answers);
     CONFIG.write();
     switch (CONFIG.PSP_PROJECT) {

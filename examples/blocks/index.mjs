@@ -1,8 +1,22 @@
-const { execute, execute_throw } = require("../../scripts/script_utils.js");
-const fs = require("fs");
-const { get_examples, LOCAL_EXAMPLES } = require("./examples.js");
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+// ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+// ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+// ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+// ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+// ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+// ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+// ┃ This file is part of the Perspective library, distributed under the terms ┃
+// ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+import * as fs from "fs";
+import { get_examples, LOCAL_EXAMPLES } from "./examples.js";
+import sh from "@finos/perspective-scripts/sh.mjs";
+import * as url from "url";
 
 const version = JSON.parse(fs.readFileSync("./package.json")).version;
+const __dirname = url.fileURLToPath(new URL(".", import.meta.url)).slice(0, -1);
 
 // TODO jsdelivr has slightly different logic for trailing '/' that causes
 // the wasm assets to not load correctly when using aliases, hence we must link
@@ -19,7 +33,7 @@ const replacements = {
 exports.dist_examples = function init(
     outpath = `${__dirname}/../../docs/static/blocks`
 ) {
-    execute`mkdir -p ${outpath}`;
+    sh`mkdir -p ${outpath}`.runSync();
     const readme = generate_readme();
     let existing = fs.readFileSync(`${__dirname}/../../README.md`).toString();
     existing = existing.replace(
@@ -32,7 +46,7 @@ exports.dist_examples = function init(
         // Copy
         if (fs.existsSync(`${__dirname}/src/${name}`)) {
             for (const filename of fs.readdirSync(`${__dirname}/src/${name}`)) {
-                execute`mkdir -p ${outpath}/${name}`;
+                sh`mkdir -p ${outpath}/${name}`.runSync();
                 if (filename.endsWith(".js") || filename.endsWith(".html")) {
                     let filecontents = fs
                         .readFileSync(`${__dirname}/src/${name}/${filename}`)
@@ -48,7 +62,7 @@ exports.dist_examples = function init(
                         filecontents
                     );
                 } else if (filename !== ".git") {
-                    execute`cp ${__dirname}/src/${name}/${filename} ${outpath}/${name}/${filename}`;
+                    sh`cp ${__dirname}/src/${name}/${filename} ${outpath}/${name}/${filename}`.runSync();
                 }
             }
         }

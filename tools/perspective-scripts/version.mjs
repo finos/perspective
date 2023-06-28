@@ -1,29 +1,28 @@
-/******************************************************************************
- *
- * Copyright (c) 2017, the Perspective Authors.
- *
- * This file is part of the Perspective library, distributed under the terms of
- * the Apache License 2.0.  The full license can be found in the LICENSE file.
- *
- */
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+// ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+// ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+// ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+// ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+// ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+// ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+// ┃ This file is part of the Perspective library, distributed under the terms ┃
+// ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-const { execute, execute_return } = require("./script_utils.js");
-const fs = require("fs");
-const glob = require("glob");
-const { Octokit } = require("octokit");
-const { parseReleases } = require("auto-changelog/src/releases");
-const { fetchTags } = require("auto-changelog/src/tags");
-const { fetchRemote } = require("auto-changelog/src/remote");
+import fs from "fs";
+import glob from "glob";
+import { Octokit } from "octokit";
+import { parseReleases } from "auto-changelog/src/releases.js";
+import { fetchTags } from "auto-changelog/src/tags.js";
+import { fetchRemote } from "auto-changelog/src/remote.js";
+import sh from "./sh.mjs";
 
 if (!process.env.GITHUB_TOKEN) {
     throw new Error("Missing GITHUB_TOKEN");
 }
 
-// if (!NEW_VERSION) {
-//     throw new Error("Missing PUBLISH_VERSION");
-// }
-
-const { version: NEW_VERSION } = require("../package.json");
+const NEW_VERSION = JSON.parse(fs.readFileSync("./package.json")).version;
 
 /**
  * A Github data fetching cache designed to run in parallel with changelog formatting.
@@ -37,22 +36,18 @@ class GithubPRCache {
         this.octokit = new Octokit({
             auth: process.env.GITHUB_TOKEN,
         });
-
         this.next();
     }
-
     async next() {
         let ret;
         if (this._next_req) {
             ret = await this._next_req;
         }
-
         console.log(
             `Fetching Github commits ${(this.page - 1) * 100} - ${
                 this.page * 100 - 1
             }`
         );
-
         this._next_req = this.octokit.request(
             "GET /repos/{owner}/{repo}/pulls?state=closed&per_page={per_page}&page={page}",
             {
@@ -62,27 +57,21 @@ class GithubPRCache {
                 page: this.page++,
             }
         );
-
         return ret;
     }
-
     async get(sha) {
         while (!this.prs.has(sha) && !this.failed) {
             const resp = await this.next();
-
             if (resp.data.length == 0) {
                 this.failed = true;
             }
-
             for (const pr of resp.data) {
                 this.prs.set(pr.merge_commit_sha, pr);
             }
         }
-
         return this.prs.get(sha);
     }
 }
-
 function template_group(label, rows, prs) {
     if (rows.length > 0) {
         const group_prs = rows
@@ -93,7 +82,6 @@ function template_group(label, rows, prs) {
         return "";
     }
 }
-
 function template_release(args) {
     const prs = Object.keys(args.row)
         .map((label) => template_group(label, args.row[label]))
@@ -124,7 +112,6 @@ async function template(json) {
             Fixes: [],
             Misc: [],
         };
-
         for (const merge of release.merges) {
             const pr = await cache.get(merge.commit.hash);
             merge.pr = pr;
@@ -143,10 +130,11 @@ async function template(json) {
                 row.Misc.push(merge);
             }
         }
-
-        changelog += template_release({ row, release });
+        changelog += template_release({
+            row,
+            release,
+        });
     }
-
     return changelog;
 }
 
@@ -164,41 +152,44 @@ async function update_changelog() {
         appendGitTag: "",
         latestVersion: NEW_VERSION,
     };
-
     const remote = await fetchRemote(options);
-    options = { ...options, ...remote };
+    options = {
+        ...options,
+        ...remote,
+    };
     console.log("Fetching tags…");
     const tags = await fetchTags(options);
     console.log(`${tags.length} version tags found…`);
     const onParsed = ({ title }) => console.log(`Fetched ${title}…`);
     const json = await parseReleases(tags, options, onParsed);
     const changelog = await template(json);
-
     fs.writeFileSync("./CHANGELOG.md", changelog);
-    execute`git add CHANGELOG.md`;
+    sh`git add CHANGELOG.md`.runSync();
 }
 
 /**
  * Update all project `package.json` files.
  */
 async function update_package_jsons() {
-    const package = JSON.parse(fs.readFileSync("./package.json"));
-    package.version = NEW_VERSION;
-    const pkg_json = `${JSON.stringify(package, undefined, 4)}\n`;
+    const pkg = JSON.parse(fs.readFileSync("./package.json"));
+    pkg.version = NEW_VERSION;
+    const pkg_json = `${JSON.stringify(pkg, undefined, 4)}\n`;
     fs.writeFileSync("../package.json", pkg_json);
-
     const packages = {};
-    for (const ws of package.workspaces) {
-        for (const path of glob(`${ws}/package.json`, { sync: true })) {
+    for (const ws of pkg.workspaces) {
+        for (const path of glob(`${ws}/package.json`, {
+            sync: true,
+        })) {
             const pkg = JSON.parse(fs.readFileSync(path));
             pkg.version = NEW_VERSION;
-            packages[pkg.name] = { pkg, path };
+            packages[pkg.name] = {
+                pkg,
+                path,
+            };
         }
     }
-
     for (const pkg_name of Object.keys(packages)) {
         const { pkg, path } = packages[pkg_name];
-
         for (const deptype of [
             "dependencies",
             "devDependencies",
@@ -212,21 +203,14 @@ async function update_package_jsons() {
                 }
             }
         }
-
         const pkg_json = `${JSON.stringify(pkg, undefined, 4)}\n`;
         fs.writeFileSync(path, pkg_json);
-        execute(`git add ${path}`);
+        sh`git add ${path}`.runSync();
     }
 }
 
-async function run() {
-    try {
-        await update_changelog();
-        await update_package_jsons();
-    } catch (e) {
-        console.error(e.message);
-        process.exit(1);
-    }
-}
+await update_changelog();
+await update_package_jsons();
 
-run();
+sh`python3 python/perspective/scripts/write_version.py \
+    && git add python/perspective/perspective/core/_version.py`.runSync();

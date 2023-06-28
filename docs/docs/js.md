@@ -4,9 +4,9 @@ title: JavaScript User Guide
 ---
 
 Perspective's JavaScript library offers a configurable UI powered by a fast
-streaming data engine. Developers are able to pick and choose the
-modules they require for their use case, and users are presented with a clean
-user interface through which to analyze data.
+streaming data engine. Developers are able to pick and choose the modules they
+require for their use case, and users are presented with a clean user interface
+through which to analyze data.
 
 [More Examples](https://github.com/finos/perspective/tree/master/examples) are
 available on GitHub.
@@ -49,9 +49,9 @@ correctly form your existing Webpack configuration.
 
 #### Via bundlers (optional)
 
-When importing `perspective` from NPM modules for a browser application, you
-may choose to use a provided bundler plugin to manage the `.worker.js` and
-`.wasm` assets for you. Doing so will improve your application's initial load
+When importing `perspective` from NPM modules for a browser application, you may
+choose to use a provided bundler plugin to manage the `.worker.js` and `.wasm`
+assets for you. Doing so will improve your application's initial load
 performance, as the plugin-assisted bundle version of Perspective:
 
 -   Downloads `.wasm` and `.js` assets in parallel.
@@ -86,7 +86,8 @@ module.exports = {
 
 Applications bundled with `esbuild` can make use of the
 `@finos/perspective-esbuild-plugin` module. A full example can be found in the
-repo under [`examples/esbuild-example`](https://github.com/finos/perspective/tree/master/examples/esbuild-example).
+repo under
+[`examples/esbuild-example`](https://github.com/finos/perspective/tree/master/examples/esbuild-example).
 
 ```javascript
 const esbuild = require("esbuild");
@@ -174,8 +175,8 @@ Perspective is designed for flexibility, allowing developers to pick and choose
 which modules they need for their specific use case. The main modules are:
 
 -   `@finos/perspective`  
-    The data engine library, as both a browser ES6 and Node.js module. Provides a
-    WebAssembly, WebWorker (browser) and Process (node.js) runtime.
+    The data engine library, as both a browser ES6 and Node.js module. Provides
+    a WebAssembly, WebWorker (browser) and Process (node.js) runtime.
 
 -   `@finos/perspective-viewer`  
     A user-configurable visualization widget, bundled as a
@@ -206,13 +207,13 @@ Depending on your requirements, you may need just one, or all, Perspective
 modules. Here are some basic guidelines to help you decide what is most
 appropriate for your project:
 
--   For Perspective's high-performance streaming data engine (in WebAssembly), or
-    for a purely Node.js based application, import:
+-   For Perspective's high-performance streaming data engine (in WebAssembly),
+    or for a purely Node.js based application, import:
 
     -   `@finos/perspective`, as detailed [here](#perspective-library)
 
--   For Perspective as a simple, browser-based data visualization widget, you will
-    need to import:
+-   For Perspective as a simple, browser-based data visualization widget, you
+    will need to import:
 
     -   `@finos/perspective`, detailed [here](#perspective-library)
     -   `@finos/perspective-viewer`, detailed
@@ -370,8 +371,8 @@ await table.delete();
 `perspective` library and formatting its output to the provided visualization
 plugins.
 
-If you are using `webpack` or another bundler which supports ES6 modules,
-you only need to import the `perspective-viewer` libraries somewhere in your
+If you are using `webpack` or another bundler which supports ES6 modules, you
+only need to import the `perspective-viewer` libraries somewhere in your
 application - these modules export nothing, but rather register the components
 for use within your site's regular HTML:
 
@@ -433,9 +434,9 @@ can be directly linked in your HTML file:
 
 Note the `crossorigin="anonymous"` attribute. When including a theme from a
 cross-origin context, this attribute may be required to allow
-`<perspective-viewer>` to detect the theme. If this fails, additional
-themes are added to the `document` after `<perspective-viewer>` init, or for
-any other reason theme auto-detection fails, you may manually inform
+`<perspective-viewer>` to detect the theme. If this fails, additional themes are
+added to the `document` after `<perspective-viewer>` init, or for any other
+reason theme auto-detection fails, you may manually inform
 `<perspective-viewer>` of the available theme names with the `.resetThemes()`
 method.
 
@@ -622,9 +623,9 @@ _*index.html*_
 </script>
 ```
 
-Any operation performed on the `<perspective-viewer>` instance or on
-`table` will be forwarded to Python, which will execute the operation and
-return the results back to JavaScript.
+Any operation performed on the `<perspective-viewer>` instance or on `table`
+will be forwarded to Python, which will execute the operation and return the
+results back to JavaScript.
 
 ### Persistent `<perspective-viewer>` configuration via `save()`/`restore()`.
 
@@ -679,9 +680,8 @@ structure of properties is described via the
 [`ViewerConfig`](https://github.com/finos/perspective/blob/ebced4caa/rust/perspective-viewer/src/ts/viewer.ts#L16)
 and embedded
 [`ViewConfig`](https://github.com/finos/perspective/blob/ebced4caa19435a2a57d4687be7e428a4efc759b/packages/perspective/index.d.ts#L140)
-type declarations, and [`View`](view.md) chapter
-of the documentation which has several interactive examples for each
-`ViewConfig` property.
+type declarations, and [`View`](view.md) chapter of the documentation which has
+several interactive examples for each `ViewConfig` property.
 
 ```javascript
 // Set the plugin (will also update `columns` to plugin-defaults)
