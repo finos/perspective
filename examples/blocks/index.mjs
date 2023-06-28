@@ -30,7 +30,7 @@ const replacements = {
     "perspective-workspace/dist/cdn/perspective-workspace.js": `perspective-workspace@${version}/dist/cdn/perspective-workspace.js`,
 };
 
-exports.dist_examples = function init(
+export function dist_examples(
     outpath = `${__dirname}/../../docs/static/blocks`
 ) {
     sh`mkdir -p ${outpath}`.runSync();
@@ -67,7 +67,7 @@ exports.dist_examples = function init(
             }
         }
     }
-};
+}
 
 function partition(input, spacing) {
     let output = [];
