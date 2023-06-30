@@ -10,9 +10,14 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-const fs = require("fs");
-const { WebSocketServer } = require("@finos/perspective");
-const { dist_examples } = require("./index.js");
+import fs from "fs";
+import { WebSocketServer } from "@finos/perspective";
+import { dist_examples } from "./index.mjs";
+
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 dist_examples(`${__dirname}/dist`);
 

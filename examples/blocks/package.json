@@ -4,7 +4,7 @@
     "version": "2.3.0",
     "description": "A collection of simple client-side Perspective examples for `http://bl.ocks.org`.",
     "scripts": {
-        "start": "mkdirp dist && node server.js"
+        "start": "mkdirp dist && node server.mjs"
     },
     "main": "index.mjs",
     "keywords": [],
