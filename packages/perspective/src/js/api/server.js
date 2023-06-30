@@ -88,6 +88,12 @@ export class Server {
             case "init_profile_thread":
                 this.perspective.initialize_profile_thread();
                 break;
+            case "get_hosted_table_names":
+                this.post({
+                    id: msg.id,
+                    data: Object.keys(this._tables),
+                });
+                break;
             case "memory_usage":
                 this.post({
                     id: msg.id,

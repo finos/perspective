@@ -88,6 +88,12 @@ export class Client {
         });
     }
 
+    async get_hosted_table_names() {
+        return await new Promise((resolve, reject) => {
+            this.post({ cmd: "get_hosted_table_names" }, resolve, reject);
+        });
+    }
+
     initialize_profile_thread() {
         if (this._worker.initialized.value) {
             this.send({ id: -1, cmd: "init_profile_thread" });

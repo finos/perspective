@@ -247,4 +247,18 @@ test.describe("WebSocketManager", function () {
         await server.close();
         expect(client._ping_loop).toBeUndefined();
     });
+
+    test("Can get hosted table names", async () => {
+        const data = [{ x: 1 }];
+        const host_table_name = "test";
+        const table = await perspective.table(data);
+        server.host_table(host_table_name, table);
+
+        const client = perspective.websocket(`ws://localhost:${port}`);
+        const table_names = await client.get_hosted_table_names();
+        expect(table_names).toEqual([host_table_name]);
+
+        await client.terminate();
+        server.eject_table(host_table_name);
+    });
 });

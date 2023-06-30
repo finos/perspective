@@ -95,6 +95,10 @@ class PerspectiveClient(object):
         implemented by a child class."""
         raise NotImplementedError()
 
+    def get_hosted_table_names(self):
+        msg = {"cmd": "get_hosted_table_names"}
+        return self.post(msg)
+
     def post(self, msg, future=None, keep_alive=False):
         """Given a message and an associated `Future` object, store the future
         and send the message to the server."""
