@@ -54,7 +54,7 @@ class PerspectiveTornadoHandler(PerspectiveHandlerBase, WebSocketHandler):
 
     async def write_message(self, message: str, binary: bool = False) -> None:
         try:
-            return WebSocketHandler.write_message(self, message=message, binary=binary)
+            return await WebSocketHandler.write_message(self, message=message, binary=binary)
         except WebSocketClosedError:
             # ignore error
             self.on_close()

@@ -427,6 +427,7 @@ PYBIND11_MODULE(libpsppy, m) {
      */
     m.def("str_to_filter_op", &str_to_filter_op);
     m.def("make_table", &make_table_py);
+    m.def("update_table", &update_table_py);
     m.def("make_view_unit", &make_view_unit);
     m.def("make_view_zero", &make_view_ctx0);
     m.def("make_view_one", &make_view_ctx1);

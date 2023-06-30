@@ -32,26 +32,12 @@ namespace binding {
      */
 
     std::shared_ptr<Table>
-    make_table_py(t_val table, t_data_accessor accessor, std::uint32_t limit,
-        std::string index, t_op op, bool is_update, bool is_arrow, bool is_csv,
-        t_uindex port_id) {
-        bool table_initialized = !table.is_none();
-        std::shared_ptr<t_pool> pool;
-        std::shared_ptr<Table> tbl;
-        std::shared_ptr<t_gnode> gnode;
-        std::uint32_t offset;
+    _make_table_py(std::shared_ptr<Table> tbl, std::shared_ptr<t_gnode> gnode,
+        std::shared_ptr<t_pool> pool, std::uint32_t offset,
+        t_data_accessor accessor, std::uint32_t limit, std::string index,
+        t_op op, bool is_update, bool is_arrow, bool is_csv, t_uindex port_id) {
+        bool table_initialized = is_update;
         void* ptr = nullptr;
-
-        // If the Table has already been created, use it
-        if (table_initialized) {
-            tbl = table.cast<std::shared_ptr<Table>>();
-            pool = tbl->get_pool();
-            gnode = tbl->get_gnode();
-            offset = tbl->get_offset();
-            is_update = (is_update || gnode->mapping_size() > 0);
-        } else {
-            pool = std::make_shared<t_pool>();
-        }
 
         std::vector<std::string> column_names;
         std::vector<t_dtype> data_types;
@@ -317,6 +303,36 @@ namespace binding {
 
         // pool->_process();
         return tbl;
+    }
+
+    std::shared_ptr<Table>
+    make_table_py(t_data_accessor accessor, std::uint32_t limit,
+        std::string index, t_op op, bool is_arrow, bool is_csv,
+        t_uindex port_id) {
+
+        std::shared_ptr<t_pool> pool = std::make_shared<t_pool>();
+        std::shared_ptr<Table> tbl;
+        std::shared_ptr<t_gnode> gnode;
+
+        return _make_table_py(tbl, gnode, pool, 0, accessor, limit, index, op,
+            false, is_arrow, is_csv, port_id);
+    }
+
+    std::shared_ptr<Table>
+    update_table_py(t_val table, t_data_accessor accessor, std::uint32_t limit,
+        std::string index, t_op op, bool is_arrow, bool is_csv,
+        t_uindex port_id) {
+
+        std::shared_ptr<Table> tbl = table.cast<std::shared_ptr<Table>>();
+        std::shared_ptr<t_pool> pool = tbl->get_pool();
+
+        // this deadlocks
+        PSP_GIL_WRITE_LOCK(pool->get_lock());
+        std::shared_ptr<t_gnode> gnode = tbl->get_gnode();
+        std::uint32_t offset = tbl->get_offset();
+
+        return _make_table_py(tbl, gnode, pool, offset, accessor, limit, index,
+            op, true, is_arrow, is_csv, port_id);
     }
 
 } // namespace binding

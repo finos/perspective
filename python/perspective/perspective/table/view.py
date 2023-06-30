@@ -423,6 +423,7 @@ class View(object):
         self._delete_callbacks.remove_callbacks(lambda cb: cb == callback)
 
     def to_arrow(self, **kwargs):
+        self._table._state_manager.call_process(self._table._table.get_id())
         options = _parse_format_options(self, kwargs)
         if self._is_unit_context:
             return to_arrow_unit(
