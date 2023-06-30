@@ -193,7 +193,13 @@ impl FilterColumnProps {
                     if val.is_empty() {
                         None
                     } else if let Ok(num) = val.parse::<f64>() {
-                        Some(FilterTerm::Scalar(Scalar::Float(num)))
+                        let scalar: Scalar = 
+                        if num.to_string().len() < val.len() {
+                            Scalar::String(val)
+                        } else {
+                            Scalar::Float(num)
+                        };
+                        Some(FilterTerm::Scalar(scalar))
                     } else {
                         None
                     }
@@ -401,6 +407,7 @@ impl Component for FilterColumn {
                 <input
                     type="number"
                     placeholder="Value"
+                    step="0.001"
                     class="num-filter"
                     ref={ noderef.clone() }
                     onkeydown={ keydown }
