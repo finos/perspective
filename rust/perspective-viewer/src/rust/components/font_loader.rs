@@ -25,7 +25,12 @@ use crate::html_template;
 use crate::utils::*;
 
 const FONT_DOWNLOAD_TIMEOUT_MS: i32 = 1000;
-const FONT_TEST_SAMPLE: &str = "ABCD";
+
+/// This test string is injected into the DOM with the target `font-family`
+/// applied. It is important for this string to contain the correct unicode
+/// range, as otherwise the browser may download the latin-only variant of the
+/// font which will later be invalidated.
+const FONT_TEST_SAMPLE: &str = "ABCDΔ";
 
 /// `state` is private to force construction of props with the `::new()` static
 /// method, which initializes the async `load_fonts_task()` method.
