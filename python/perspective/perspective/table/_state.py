@@ -69,10 +69,9 @@ class _PerspectiveStateManager(object):
         Args:
             table_id (:obj`int`): The unique ID of the Table
         """
-        pool = _PerspectiveStateManager.TO_PROCESS.get(table_id, None)
+        pool = _PerspectiveStateManager.TO_PROCESS.pop(table_id, None)
         if pool is not None:
             pool._process()
-            self.remove_process(table_id)
 
     def remove_process(self, table_id):
         """Remove a pool from the execution cache, indicating that it should no
