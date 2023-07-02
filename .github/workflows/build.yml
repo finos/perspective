@@ -1069,7 +1069,7 @@ jobs:
               run: sudo node tools/perspective-scripts/install_tools.mjs
 
             - name: Install pyodide-build
-              run: pip install pyodide-build==$PYODIDE_VERSION
+              run: pip install pyodide-build==$PYODIDE_VERSION "pydantic<2"
 
             - name: Build
               # Without --exports=pyinit, pyodide-build tries to export all symbols from every .o,
