@@ -10,7 +10,7 @@
         "src/**/*",
         "perspective"
     ],
-    "typings": "index.d.ts",
+    "types": "index.d.ts",
     "scripts": {
         "clean": "rimraf build"
     },

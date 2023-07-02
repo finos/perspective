@@ -10,7 +10,10 @@
     "unpkg": "dist/cdn/perspective-viewer.js",
     "jsdelivr": "dist/cdn/perspective-viewer.js",
     "exports": {
-        ".": "./dist/esm/perspective-viewer.inline.js",
+        ".": {
+            "types": "./dist/esm/perspective-viewer.d.ts",
+            "default": "./dist/esm/perspective-viewer.inline.js"
+        },
         "./dist/*": "./dist/*",
         "./src/*": "./src/*",
         "./test/*": "./test/*",
