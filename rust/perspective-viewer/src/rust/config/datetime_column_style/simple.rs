@@ -10,66 +10,40 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-mod color_mode;
-mod custom;
-mod custom_format;
-mod simple;
-mod simple_format;
-
-pub use color_mode::*;
-pub use custom::*;
-pub use custom_format::*;
 use serde::{Deserialize, Serialize};
-pub use simple::*;
-pub use simple_format::*;
 
-use crate::*;
+use super::simple_format::*;
 
-/// `Simple` case has all default-able keys and must be last!
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-#[serde(untagged)]
-pub enum DatetimeFormatType {
-    Custom(CustomDatetimeStyleConfig),
-    Simple(SimpleDatetimeStyleConfig),
+const fn date_style_default() -> SimpleDatetimeFormat {
+    SimpleDatetimeFormat::Short
 }
 
-
-/// A model for the JSON serialized style configuration for a column of type
-/// `datetime`.
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-pub struct DatetimeColumnStyleConfig {
-    #[serde(flatten)]
-    pub _format: DatetimeFormatType,
-
-    #[serde(rename = "timeZone", skip_serializing_if = "Option::is_none")]
-    pub time_zone: Option<String>,
-
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub datetime_color_mode: Option<DatetimeColorMode>,
-
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub color: Option<String>,
+const fn time_style_default() -> SimpleDatetimeFormat {
+    SimpleDatetimeFormat::Medium
 }
 
-impl Default for DatetimeColumnStyleConfig {
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub struct SimpleDatetimeStyleConfig {
+    #[serde(
+        default = "date_style_default",
+        rename = "dateStyle",
+        skip_serializing_if = "SimpleDatetimeFormat::is_short"
+    )]
+    pub date_style: SimpleDatetimeFormat,
+
+    #[serde(
+        default = "time_style_default",
+        rename = "timeStyle",
+        skip_serializing_if = "SimpleDatetimeFormat::is_medium"
+    )]
+    pub time_style: SimpleDatetimeFormat,
+}
+
+impl Default for SimpleDatetimeStyleConfig {
     fn default() -> Self {
         Self {
-            _format: DatetimeFormatType::Simple(SimpleDatetimeStyleConfig {
-                date_style: SimpleDatetimeFormat::Short,
-                time_style: SimpleDatetimeFormat::Medium,
-            }),
-            time_zone: Default::default(),
-            datetime_color_mode: Default::default(),
-            color: Default::default(),
+            date_style: SimpleDatetimeFormat::Short,
+            time_style: SimpleDatetimeFormat::Medium,
         }
     }
 }
-
-derive_wasm_abi!(DatetimeColumnStyleConfig, FromWasmAbi, IntoWasmAbi);
-
-#[derive(Clone, Default, Deserialize, Eq, PartialEq, Serialize)]
-pub struct DatetimeColumnStyleDefaultConfig {
-    pub color: String,
-}
-
-derive_wasm_abi!(DatetimeColumnStyleDefaultConfig, FromWasmAbi);

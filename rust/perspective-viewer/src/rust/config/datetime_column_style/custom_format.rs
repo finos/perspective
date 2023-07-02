@@ -10,66 +10,80 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-mod color_mode;
-mod custom;
-mod custom_format;
-mod simple;
-mod simple_format;
+use std::fmt::Display;
+use std::str::FromStr;
 
-pub use color_mode::*;
-pub use custom::*;
-pub use custom_format::*;
 use serde::{Deserialize, Serialize};
-pub use simple::*;
-pub use simple_format::*;
 
-use crate::*;
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub enum CustomDatetimeFormat {
+    #[serde(rename = "long")]
+    Long,
 
-/// `Simple` case has all default-able keys and must be last!
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-#[serde(untagged)]
-pub enum DatetimeFormatType {
-    Custom(CustomDatetimeStyleConfig),
-    Simple(SimpleDatetimeStyleConfig),
+    #[serde(rename = "short")]
+    Short,
+
+    #[serde(rename = "narrow")]
+    Narrow,
+
+    #[serde(rename = "numeric")]
+    Numeric,
+
+    #[serde(rename = "2-digit")]
+    TwoDigit,
+
+    #[serde(rename = "disabled")]
+    Disabled,
 }
 
+impl CustomDatetimeFormat {
+    pub const fn values() -> &'static [Self] {
+        &[
+            Self::Long,
+            Self::Short,
+            Self::Narrow,
+            Self::Numeric,
+            Self::TwoDigit,
+            Self::Disabled,
+        ]
+    }
 
-/// A model for the JSON serialized style configuration for a column of type
-/// `datetime`.
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-pub struct DatetimeColumnStyleConfig {
-    #[serde(flatten)]
-    pub _format: DatetimeFormatType,
+    pub fn values_1() -> &'static [Self] {
+        &[Self::Numeric, Self::TwoDigit, Self::Disabled]
+    }
 
-    #[serde(rename = "timeZone", skip_serializing_if = "Option::is_none")]
-    pub time_zone: Option<String>,
-
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub datetime_color_mode: Option<DatetimeColorMode>,
-
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub color: Option<String>,
-}
-
-impl Default for DatetimeColumnStyleConfig {
-    fn default() -> Self {
-        Self {
-            _format: DatetimeFormatType::Simple(SimpleDatetimeStyleConfig {
-                date_style: SimpleDatetimeFormat::Short,
-                time_style: SimpleDatetimeFormat::Medium,
-            }),
-            time_zone: Default::default(),
-            datetime_color_mode: Default::default(),
-            color: Default::default(),
-        }
+    pub fn values_2() -> &'static [Self] {
+        &[Self::Long, Self::Narrow, Self::Short, Self::Disabled]
     }
 }
 
-derive_wasm_abi!(DatetimeColumnStyleConfig, FromWasmAbi, IntoWasmAbi);
+impl Display for CustomDatetimeFormat {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let text = match self {
+            Self::Long => "long",
+            Self::Short => "short",
+            Self::Narrow => "narrow",
+            Self::Numeric => "numeric",
+            Self::TwoDigit => "2-digit",
+            Self::Disabled => "disabled",
+        };
 
-#[derive(Clone, Default, Deserialize, Eq, PartialEq, Serialize)]
-pub struct DatetimeColumnStyleDefaultConfig {
-    pub color: String,
+        write!(f, "{}", text)
+    }
 }
 
-derive_wasm_abi!(DatetimeColumnStyleDefaultConfig, FromWasmAbi);
+impl FromStr for CustomDatetimeFormat {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "long" => Ok(Self::Long),
+            "short" => Ok(Self::Short),
+            "narrow" => Ok(Self::Narrow),
+            "numeric" => Ok(Self::Numeric),
+            "2-digit" => Ok(Self::TwoDigit),
+            "disabled" => Ok(Self::Disabled),
+            x => Err(format!("Unknown DatetimeFormat::{}", x)),
+        }
+    }
+}

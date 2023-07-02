@@ -10,66 +10,74 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-mod color_mode;
-mod custom;
-mod custom_format;
-mod simple;
-mod simple_format;
+use std::fmt::Display;
+use std::str::FromStr;
 
-pub use color_mode::*;
-pub use custom::*;
-pub use custom_format::*;
 use serde::{Deserialize, Serialize};
-pub use simple::*;
-pub use simple_format::*;
 
-use crate::*;
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub enum SimpleDatetimeFormat {
+    #[serde(rename = "full")]
+    Full,
 
-/// `Simple` case has all default-able keys and must be last!
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-#[serde(untagged)]
-pub enum DatetimeFormatType {
-    Custom(CustomDatetimeStyleConfig),
-    Simple(SimpleDatetimeStyleConfig),
+    #[serde(rename = "long")]
+    Long,
+
+    #[serde(rename = "medium")]
+    Medium,
+
+    #[serde(rename = "short")]
+    Short,
+
+    #[serde(rename = "disabled")]
+    Disabled,
 }
 
+impl SimpleDatetimeFormat {
+    pub fn is_short(&self) -> bool {
+        self == &Self::Short
+    }
 
-/// A model for the JSON serialized style configuration for a column of type
-/// `datetime`.
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-pub struct DatetimeColumnStyleConfig {
-    #[serde(flatten)]
-    pub _format: DatetimeFormatType,
+    pub fn is_medium(&self) -> bool {
+        self == &Self::Medium
+    }
 
-    #[serde(rename = "timeZone", skip_serializing_if = "Option::is_none")]
-    pub time_zone: Option<String>,
-
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub datetime_color_mode: Option<DatetimeColorMode>,
-
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub color: Option<String>,
-}
-
-impl Default for DatetimeColumnStyleConfig {
-    fn default() -> Self {
-        Self {
-            _format: DatetimeFormatType::Simple(SimpleDatetimeStyleConfig {
-                date_style: SimpleDatetimeFormat::Short,
-                time_style: SimpleDatetimeFormat::Medium,
-            }),
-            time_zone: Default::default(),
-            datetime_color_mode: Default::default(),
-            color: Default::default(),
-        }
+    pub const fn values() -> &'static [Self] {
+        &[
+            Self::Full,
+            Self::Long,
+            Self::Medium,
+            Self::Short,
+            Self::Disabled,
+        ]
     }
 }
 
-derive_wasm_abi!(DatetimeColumnStyleConfig, FromWasmAbi, IntoWasmAbi);
+impl Display for SimpleDatetimeFormat {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let text = match self {
+            Self::Full => "full",
+            Self::Long => "long",
+            Self::Medium => "medium",
+            Self::Short => "short",
+            Self::Disabled => "disabled",
+        };
 
-#[derive(Clone, Default, Deserialize, Eq, PartialEq, Serialize)]
-pub struct DatetimeColumnStyleDefaultConfig {
-    pub color: String,
+        write!(f, "{}", text)
+    }
 }
 
-derive_wasm_abi!(DatetimeColumnStyleDefaultConfig, FromWasmAbi);
+impl FromStr for SimpleDatetimeFormat {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "full" => Ok(Self::Full),
+            "long" => Ok(Self::Long),
+            "medium" => Ok(Self::Medium),
+            "short" => Ok(Self::Short),
+            "disabled" => Ok(Self::Disabled),
+            x => Err(format!("Unknown DatetimeFormat::{}", x)),
+        }
+    }
+}

@@ -10,6 +10,9 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+mod custom;
+mod simple;
+
 use std::sync::LazyLock;
 
 use wasm_bindgen::*;
@@ -23,6 +26,8 @@ use super::containers::select::*;
 use super::form::color_selector::*;
 use super::modal::{ModalLink, SetModalLink};
 use super::style::{LocalStyle, StyleProvider};
+use crate::components::datetime_column_style::custom::DatetimeStyleCustom;
+use crate::components::datetime_column_style::simple::DatetimeStyleSimple;
 use crate::config::*;
 use crate::utils::WeakScope;
 use crate::*;
@@ -52,11 +57,9 @@ static USER_TIMEZONE: LazyLock<String> = LazyLock::new(|| {
 
 pub enum DatetimeColumnStyleMsg {
     Reset(DatetimeColumnStyleConfig),
+    SimpleDatetimeStyleConfigChanged(SimpleDatetimeStyleConfig),
+    CustomDatetimeStyleConfigChanged(CustomDatetimeStyleConfig),
     TimezoneEnabled,
-    DateEnabled,
-    TimeEnabled,
-    DateStyleChanged(DatetimeFormat),
-    TimeStyleChanged(DatetimeFormat),
     TimezoneChanged(String),
     ColorModeEnabled(bool),
     ColorModeChanged(DatetimeColorMode),
@@ -95,6 +98,7 @@ impl PartialEq for DatetimeColumnStyleProps {
 /// The `ColumnStyle` component stores its UI state privately in its own struct,
 /// rather than its props (which has two version of this data itself, the
 /// JSON serializable config record and the defaults record).
+#[derive(Debug)]
 pub struct DatetimeColumnStyle {
     config: DatetimeColumnStyleConfig,
 }
@@ -157,26 +161,6 @@ impl Component for DatetimeColumnStyle {
                 self.dispatch_config(ctx);
                 true
             }
-            DatetimeColumnStyleMsg::DateEnabled => {
-                self.config.date_style = DatetimeFormat::Short;
-                self.dispatch_config(ctx);
-                true
-            }
-            DatetimeColumnStyleMsg::TimeEnabled => {
-                self.config.time_style = DatetimeFormat::Medium;
-                self.dispatch_config(ctx);
-                true
-            }
-            DatetimeColumnStyleMsg::DateStyleChanged(format) => {
-                self.config.date_style = format;
-                self.dispatch_config(ctx);
-                true
-            }
-            DatetimeColumnStyleMsg::TimeStyleChanged(format) => {
-                self.config.time_style = format;
-                self.dispatch_config(ctx);
-                true
-            }
             DatetimeColumnStyleMsg::TimezoneChanged(val) => {
                 if *USER_TIMEZONE != val {
                     self.config.time_zone = Some(val);
@@ -208,6 +192,17 @@ impl Component for DatetimeColumnStyle {
                 self.dispatch_config(ctx);
                 true
             }
+
+            DatetimeColumnStyleMsg::SimpleDatetimeStyleConfigChanged(simple) => {
+                self.config._format = DatetimeFormatType::Simple(simple);
+                self.dispatch_config(ctx);
+                true
+            }
+            DatetimeColumnStyleMsg::CustomDatetimeStyleConfigChanged(custom) => {
+                self.config._format = DatetimeFormatType::Custom(custom);
+                self.dispatch_config(ctx);
+                true
+            }
         }
     }
 
@@ -235,70 +230,10 @@ impl Component for DatetimeColumnStyle {
             .link()
             .callback(|_| DatetimeColumnStyleMsg::TimezoneEnabled);
 
-        let on_date_reset = ctx.link().callback(|_| DatetimeColumnStyleMsg::DateEnabled);
-        let on_time_reset = ctx.link().callback(|_| DatetimeColumnStyleMsg::TimeEnabled);
-
-        // TODO this checkbox should be disabled if the timezone is local but
-        // can't set `checked=false`.
         html! {
             <StyleProvider>
                 <LocalStyle href={ css!("column-style") } />
                 <div id="column-style-container">
-
-                    if ctx.props().enable_time_config {
-                        <div class="column-style-label">
-                            <label class="indent">{ "Timezone" }</label>
-                        </div>
-                        <div class="section">
-                            <input
-                                type="checkbox"
-                                onchange={ on_time_zone_reset }
-                                checked={ self.config.time_zone.is_some() } />
-
-                            <Select<String>
-                                wrapper_class="indent"
-                                values={ ALL_TIMEZONES.iter().cloned().collect::<Vec<_>>() }
-                                selected={ self.config.time_zone.as_ref().unwrap_or(&*USER_TIMEZONE).clone() }
-                                on_select={ ctx.link().callback(DatetimeColumnStyleMsg::TimezoneChanged) }>
-                            </Select<String>>
-                        </div>
-
-                        <div class="column-style-label">
-                            <label class="indent">{ "Time Style" }</label>
-                        </div>
-                        <div class="section">
-                            <input
-                                type="checkbox"
-                                onchange={ on_time_reset }
-                                checked={ !self.config.time_style.is_medium() } />
-
-                            <Select<DatetimeFormat>
-                                wrapper_class="indent"
-                                selected={ self.config.time_style }
-                                on_select={ ctx.link().callback(DatetimeColumnStyleMsg::TimeStyleChanged) }
-                                values={ DatetimeFormat::values().iter().map(|x| SelectItem::Option(*x)).collect::<Vec<_>>() } >
-                            </Select<DatetimeFormat>>
-                        </div>
-                    }
-
-
-                    <div class="column-style-label">
-                        <label class="indent">{ "Date Style" }</label>
-                    </div>
-                    <div class="section">
-                        <input
-                            type="checkbox"
-                            onchange={ on_date_reset }
-                            checked={ !self.config.date_style.is_short() } />
-
-                        <Select<DatetimeFormat>
-                            wrapper_class="indent"
-                            selected={ self.config.date_style }
-                            on_select={ ctx.link().callback(DatetimeColumnStyleMsg::DateStyleChanged) }
-                            values={ DatetimeFormat::values().iter().map(|x| SelectItem::Option(*x)).collect::<Vec<_>>() } >
-                        </Select<DatetimeFormat>>
-                    </div>
-
                     <div class="column-style-label">
                         <label class="indent">{ "Color" }</label>
                     </div>
@@ -325,6 +260,59 @@ impl Component for DatetimeColumnStyle {
                             </RadioListItem<DatetimeColorMode>>
                         </RadioList<DatetimeColorMode>>
                     </div>
+
+                    if ctx.props().enable_time_config {
+                        <div class="column-style-label">
+                            <label class="indent">{ "Timezone" }</label>
+                        </div>
+                        <div class="section">
+                            <input
+                                type="checkbox"
+                                onchange={ on_time_zone_reset }
+                                checked={ self.config.time_zone.is_some() } />
+
+                            <Select<String>
+                                wrapper_class="indent"
+                                values={ ALL_TIMEZONES.iter().cloned().collect::<Vec<_>>() }
+                                selected={ self.config.time_zone.as_ref().unwrap_or(&*USER_TIMEZONE).clone() }
+                                on_select={ ctx.link().callback(DatetimeColumnStyleMsg::TimezoneChanged) }>
+                            </Select<String>>
+                        </div>
+                    }
+
+
+                    if let DatetimeFormatType::Simple(config) = &self.config._format {
+                        if ctx.props().enable_time_config {
+                            <button
+                                id="datetime_format"
+                                data-title={ "Simple" }
+                                data-title-hover={ "Switch to Custom" }
+                                onclick={ ctx.link().callback(|_| DatetimeColumnStyleMsg::CustomDatetimeStyleConfigChanged(CustomDatetimeStyleConfig::default()))}>
+                            </button>
+                        }
+
+                        <DatetimeStyleSimple
+                            enable_time_config={ ctx.props().enable_time_config }
+                            on_change={ ctx.link().callback(DatetimeColumnStyleMsg::SimpleDatetimeStyleConfigChanged) }
+                            config={ config.clone() }>
+                        </DatetimeStyleSimple>
+                    } else if let DatetimeFormatType::Custom(config) = &self.config._format {
+                        if ctx.props().enable_time_config {
+                            <button
+                                id="datetime_format"
+                                data-title={ "Custom" }
+                                data-title-hover={ "Switch to Simple" }
+                                onclick={ ctx.link().callback(|_| DatetimeColumnStyleMsg::SimpleDatetimeStyleConfigChanged(SimpleDatetimeStyleConfig::default()))}>
+                            </button>
+                        }
+
+                        <DatetimeStyleCustom
+                            enable_time_config={ ctx.props().enable_time_config }
+                            on_change={ ctx.link().callback(DatetimeColumnStyleMsg::CustomDatetimeStyleConfigChanged) }
+                            config={ config.clone() }>
+                        </DatetimeStyleCustom>
+                    }
+
                 </div>
             </StyleProvider>
         }

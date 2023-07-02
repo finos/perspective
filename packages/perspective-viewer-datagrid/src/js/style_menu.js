@@ -30,9 +30,7 @@ export function activate_plugin_menu(regularTable, target, column_max) {
             }[column_type]
         }-column-style`
     );
-    // const column_name =
-    //     target_meta.column_header[target_meta.column_header.length - 1];
-    // const column_type = this._schema[column_name];
+
     let default_config;
     if (is_numeric) {
         default_config = {
