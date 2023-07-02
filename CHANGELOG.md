@@ -1,3 +1,26 @@
+# [v2.3.1](https://github.com/finos/perspective/releases/tag/v2.3.1)
+
+_2 July 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.3.0...v2.3.1))
+
+Features
+
+- Add `custom` format mode to `datetime` columns in Datagrid [#2286](https://github.com/finos/perspective/pull/2286)
+- Add `get_hosted_table_names` to js and python server apis. [#2281](https://github.com/finos/perspective/pull/2281)
+
+Fixes
+
+- Fix python segfault in multi-threaded execution [#2283](https://github.com/finos/perspective/pull/2283)
+- Fix OSX arm64 wheels [#2272](https://github.com/finos/perspective/pull/2272)
+- Write custom parser for us locale time string format [#2262](https://github.com/finos/perspective/pull/2262)
+
+Misc
+
+- Fix build regression in python dependency [#2285](https://github.com/finos/perspective/pull/2285)
+- Fix bug preventing blocks example server from starting. [#2282](https://github.com/finos/perspective/pull/2282)
+- Fix bad CSS headers and update formatted CSS test snapshots [#2280](https://github.com/finos/perspective/pull/2280)
+- Remove accidental test.only, ensure it never happens again [#2276](https://github.com/finos/perspective/pull/2276)
+- Add API to give number of views into table [#2267](https://github.com/finos/perspective/pull/2267)
+
 # [v2.3.0](https://github.com/finos/perspective/releases/tag/v2.3.0)
 
 _20 June 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.2.1...v2.3.0))
