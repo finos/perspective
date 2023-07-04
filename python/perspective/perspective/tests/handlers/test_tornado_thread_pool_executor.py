@@ -96,7 +96,7 @@ class TestPerspectiveTornadoHandlerAsyncMode(object):
         client = await websocket("ws://127.0.0.1:{}/websocket".format(port))
         return client
 
-    @pytest.mark.gen_test(run_sync=False)
+    @pytest.mark.gen_test(run_sync=False, timeout=30)
     async def test_tornado_handler_async_manager_thread(
         self, app, http_client, http_port, sentinel
     ):
