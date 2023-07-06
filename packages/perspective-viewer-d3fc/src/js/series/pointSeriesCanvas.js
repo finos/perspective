@@ -36,7 +36,9 @@ export function pointSeriesCanvas(
     }
 
     series.decorate((context, d) => {
-        let colorValue = color(d.colorValue);
+        const colorValue = color(
+            d.colorValue !== undefined ? d.colorValue : seriesKey
+        );
 
         const opacity = settings.colorStyles && settings.colorStyles.opacity;
         if (label) {

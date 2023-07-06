@@ -16,6 +16,9 @@ export function seriesColors(settings) {
     return colorScale().settings(settings).domain(domain)();
 }
 
+// TODO: We're iterating over all the data here to get the unique values for each colorBy field.
+// This is the only way to do it since we don't know the range of these values ahead of time.
+// This should be WASM-side code.
 export function seriesColorsFromField(settings, field) {
     const data = settings.data;
     const key = settings.realValues[field];
@@ -111,7 +114,7 @@ export function withOpacity(color, opacity = 0.5) {
 export function setOpacity(opacity) {
     return (color) => {
         const decoded = d3.color(color);
-        if (decoded != null) {
+        if (decoded !== null && decoded !== undefined) {
             decoded.opacity = opacity;
         }
         return decoded + "";

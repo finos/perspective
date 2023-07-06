@@ -66,10 +66,8 @@ function xyScatter(container, settings) {
             if (hasSplitBy) {
                 color = seriesColorsFromDistinct(settings, data);
                 // TODO: Legend should have cartesian product labels (ColorBy|SplitBy)
-                legend = symbolLegend()
-                    .settings(settings)
-                    .scale(symbols)
-                    .color(color);
+                // For now, just use monocolor legends.
+                legend = symbolLegend().settings(settings).scale(symbols);
             } else {
                 color = seriesColorsFromField(settings, colorByField);
                 legend = colorLegend().settings(settings).scale(color);
@@ -80,7 +78,7 @@ function xyScatter(container, settings) {
         }
     } else {
         color = seriesColorsFromGroups(settings);
-        legend = symbolLegend().settings(settings).scale(symbols).color(color);
+        legend = symbolLegend().settings(settings).scale(symbols);
     }
 
     const size = settings.realValues[3]
