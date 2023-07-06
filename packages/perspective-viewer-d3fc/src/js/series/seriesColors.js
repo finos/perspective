@@ -16,6 +16,18 @@ export function seriesColors(settings) {
     return colorScale().settings(settings).domain(domain)();
 }
 
+export function seriesColorsFromField(settings, field) {
+    const data = settings.data;
+    const key = settings.realValues[field];
+    const domain = data
+        .map((obj) => obj[key])
+        .reduce((accum, val) => {
+            if (!accum.includes(val)) accum.push(val);
+            return accum;
+        }, []);
+    return colorScale().settings(settings).domain(domain)();
+}
+
 export function seriesColorsFromDistinct(settings, data) {
     let domain = Array.from(new Set(data));
     return colorScale().settings(settings).domain(domain)();

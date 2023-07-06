@@ -7,6 +7,7 @@
  *
  */
 import * as fc from "d3fc";
+import * as d3 from "d3";
 import { axisFactory } from "../axis/axisFactory";
 import { chartCanvasFactory } from "../axis/chartFactory";
 import {
@@ -15,12 +16,12 @@ import {
 } from "../series/pointSeriesCanvas";
 import { pointData } from "../data/pointData";
 import {
-    seriesColors,
+    seriesColorsFromField,
     seriesColorsFromGroups,
     seriesColorsFromDistinct,
 } from "../series/seriesColors";
 import { seriesLinearRange, seriesColorRange } from "../series/seriesRange";
-import { symbolLegend, colorLegend } from "../legend/legend";
+import { symbolLegend, colorLegend, colorGroupLegend } from "../legend/legend";
 import { colorRangeLegend } from "../legend/colorRangeLegend";
 import { filterDataByGroup } from "../legend/filter";
 import withGridLines from "../gridlines/gridlines";
@@ -49,39 +50,37 @@ function interpolate_scale([x1, y1], [x2, y2]) {
 function xyScatter(container, settings) {
     const data = pointData(settings, filterDataByGroup(settings));
     const symbols = symbolTypeFromGroups(settings);
-    const useGroupColors =
-        settings.realValues.length <= 2 || settings.realValues[2] === null;
     let color = null;
     let legend = null;
 
-    let hasColorBy = settings.realValues[2] !== null && settings.realValues[2] !== undefined;
-    let isColoredByString = settings.mainValues.find(
-            (x) => x.name === settings.realValues[2]
-        )?.type === "string";
+    const colorByField = 2;
+    const colorByValue = settings.realValues[colorByField];
+    let hasColorBy = colorByValue !== null && colorByValue !== undefined;
+    let isColoredByString =
+        settings.mainValues.find((x) => x.name === colorByValue)?.type ===
+        "string";
     let hasSplitBy = settings.splitValues.length > 0;
 
     if (hasColorBy) {
         if (isColoredByString) {
             if (hasSplitBy) {
                 color = seriesColorsFromDistinct(settings, data);
-                legend = symbolLegend().settings(settings).scale(symbols).color(color);
+                // TODO: Legend should have cartesian product labels (ColorBy|SplitBy)
+                legend = symbolLegend()
+                    .settings(settings)
+                    .scale(symbols)
+                    .color(color);
             } else {
-                color = seriesColors(settings, data);
-                // TODO: Legend should be cartesian product colorBy x groupBy
-                // needs HybridLegend
+                color = seriesColorsFromField(settings, colorByField);
+                legend = colorLegend().settings(settings).scale(color);
             }
         } else {
             color = seriesColorRange(settings, data, "colorValue");
             legend = colorRangeLegend().scale(color);
         }
     } else {
-        // TODO: SeriesSymbolsFromGroups(settings);
         color = seriesColorsFromGroups(settings);
-
-        legend = symbolLegend()
-            .settings(settings)
-            .scale(symbols)
-            .color(color);
+        legend = symbolLegend().settings(settings).scale(symbols).color(color);
     }
 
     const size = settings.realValues[3]
@@ -103,7 +102,7 @@ function xyScatter(container, settings) {
                     color,
                     label,
                     symbols,
-                    scale_factor,
+                    scale_factor
                 )
             )
         );
@@ -148,7 +147,7 @@ function xyScatter(container, settings) {
         .xValueName("x")
         .yValueName("y")
         .yScale(yAxis.scale)
-        .color(useGroupColors && color)
+        .color(!hasColorBy && color)
         .size(size)
         .data(data);
 

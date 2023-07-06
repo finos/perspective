@@ -22,8 +22,7 @@ export function pointSeriesCanvas(
     color,
     label,
     symbols,
-    scale_factor = 1,
-    
+    scale_factor = 1
 ) {
     let series = seriesCanvasPoint()
         .crossValue((d) => d.x)
