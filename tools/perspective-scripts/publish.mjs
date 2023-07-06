@@ -17,6 +17,10 @@ import { promises as fs } from "fs";
 import { Octokit } from "octokit";
 import readline from "readline";
 
+const CURRENT_TAG = execSync("git describe --exact-match --tags")
+    .toString()
+    .trim();
+
 // Artifacts Docs:
 // https://docs.github.com/en/rest/actions/artifacts
 // Example run:
@@ -57,6 +61,7 @@ const gh_js_dist_folders = Object.keys(gh_js_dist_aliases);
 // Folders for artifacts on GitHub Actions
 const gh_python_dist_folders = [
     // // https://github.com/actions/virtual-environments
+    "perspective-python-dist-pyodide",
 
     // Mac 11
     // https://github.com/actions/setup-python/issues/682
@@ -90,6 +95,7 @@ const gh_python_dist_folders = [
 
 // Artifacts inside those folders
 const wheels = [
+    "cp311-cp311-emscripten_3_1_32_wasm32",
     // Mac 11
     "cp37-cp37-macosx_11_0_x86_64",
     "cp38-cp38-macosx_11_0_x86_64",
@@ -116,7 +122,10 @@ const octokit = new Octokit({
 });
 
 // Helper function to prompt for user input
-function askQuestion(query) {
+function askQuestion(query, ciDecision = "y") {
+    if (process.env.CI) {
+        return Promise.resolve("y");
+    }
     // https://stackoverflow.com/questions/18193953/waiting-for-user-to-enter-input-in-node-js
     const rl = readline.createInterface({
         input: process.stdin,
@@ -184,7 +193,7 @@ if (
     js_dist_folders.length !== gh_js_dist_folders.length
 ) {
     proceed = "n";
-    proceed = await askQuestion("Proceed? (y/N)");
+    proceed = await askQuestion("Proceed? (y/N)", "n");
 }
 
 // If everything good, or they say they want to proceed,
@@ -207,6 +216,23 @@ if (proceed.toLowerCase() === "y") {
         recursive: true,
     });
 
+    const release = await octokit.request(
+        "POST /repos/{owner}/{repo}/releases",
+        {
+            owner: "finos",
+            repo: "perspective",
+            tag_name: CURRENT_TAG,
+            name: CURRENT_TAG,
+            body: "Release of perspective",
+            draft: false,
+            prerelease: false,
+            generate_release_notes: false,
+            headers: {
+                "X-GitHub-Api-Version": "2022-11-28",
+            },
+        }
+    );
+
     // Download the artifact folders
     await Promise.all(
         python_dist_folders.map(async (artifact) => {
@@ -221,11 +247,25 @@ if (proceed.toLowerCase() === "y") {
                 }
             );
 
-            // Write out the zip file
-            await fs.appendFile(
-                `${dist_folder}/${artifact.name}.zip`,
-                Buffer.from(download.data)
-            );
+            await octokit.request({
+                method: "POST",
+                url: release.data.upload_url,
+                owner: "finos",
+                repo: "perspective",
+                data: download.data,
+                name: `${artifact.name}.zip`,
+                headers: {
+                    "X-GitHub-Api-Version": "2022-11-28",
+                },
+            });
+
+            if (!artifact.name.includes("pyodide")) {
+                // Write out the zip file
+                await fs.appendFile(
+                    `${dist_folder}/${artifact.name}.zip`,
+                    Buffer.from(download.data)
+                );
+            }
         })
     );
 
@@ -285,6 +325,18 @@ if (proceed.toLowerCase() === "y") {
                     archive_format: "zip",
                 }
             );
+
+            await octokit.request({
+                method: "POST",
+                url: release.data.upload_url,
+                owner: "finos",
+                repo: "perspective",
+                data: download.data,
+                name: `${artifact.name}.zip`,
+                headers: {
+                    "X-GitHub-Api-Version": "2022-11-28",
+                },
+            });
 
             // Write out the zip file
             await fs.appendFile(

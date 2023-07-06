@@ -1033,37 +1033,6 @@ jobs:
                   path: python/perspective/dist/*.tar.gz
               if: ${{ matrix.os == 'macos-11' }}
 
-            ###############################
-            # Upload artifacts to release #
-            ###############################
-
-            - name: Upload dist artifact for Windows
-              if: ${{ runner.os == 'Windows' }}
-              uses: softprops/action-gh-release@v1
-              with:
-                  files: |
-                      python/perspective/dist/*.whl
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-            - name: Upload wheelhouse artifact for non-Windows
-              if: ${{ runner.os != 'Windows' }}
-              uses: softprops/action-gh-release@v1
-              with:
-                  files: |
-                      python/perspective/wheelhouse/*.whl
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-            - name: Upload sdist artifact for MacOS
-              if: ${{ matrix.os == 'macos-11' }}
-              uses: softprops/action-gh-release@v1
-              with:
-                  files: |
-                      python/perspective/dist/*.tar.gz
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
     build_pyodide:
         runs-on: ubuntu-22.04
         needs: [initialize]
@@ -1113,14 +1082,6 @@ jobs:
               with:
                   name: perspective-python-dist-pyodide
                   path: dist/*.whl
-
-            - name: Upload pyodide wheel to release
-              uses: softprops/action-gh-release@v1
-              with:
-                  files: |
-                      dist/*.whl
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     ##########################################################################################################################
     ##########################################################################################################################
@@ -1613,3 +1574,39 @@ jobs:
 
     ##########################################################################################################################
     ##########################################################################################################################
+
+    ##########################################
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    #~~~~~~~~~~~~~~~/#########\~~~~~~~~~~~~~~#
+    #~~~~~~~~~~~~~~|##|~~~~~|##|~~~~~~~~~~~~~#
+    #~~~~~~~~~~~~~~|##|~~~~~|##|~~~~~~~~~~~~~#
+    #~~~~~~~~~~~~~~|###########|~~~~~~~~~~~~~#
+    #~~~~~~~~~~~~~~|##|~~~~~|##|~~~~~~~~~~~~~#
+    #~~~~~~~~~~~~~~|##|~~~~~|##|~~~~~~~~~~~~~#
+    #~~~~~~~~~~~~~~~\#########/~~~~~~~~~~~~~~#
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    # Stage Eight - Publish Artifacts        #
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+    publish:
+        needs: [test_js_and_python, test_python, test_python_sdist]
+        if: startsWith(github.ref, 'refs/tags/v')
+        runs-on: ubuntu-22.04
+        steps:
+            - uses: actions/checkout@v2
+
+            - name: Install yarn
+              run: npm install -g yarn
+
+            - name: Install js dependencies
+              run: yarn --frozen-lockfile
+              env:
+                  PSP_SKIP_EMSDK_INSTALL: 1
+
+            - name: Run publish script
+              run: node tools/perspective-scripts/publish.mjs
+              env:
+                  CI: true
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  GITHUB_WORKFLOW_ID: ${{ github.run_id }}
+                  COMMIT: ${{ github.sha }}
