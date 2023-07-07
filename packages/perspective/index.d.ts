@@ -103,6 +103,7 @@ declare module "@finos/perspective" {
         to_json(
             options?: SerializeConfig
         ): Promise<Array<Record<string, string | boolean | Date | number>>>;
+        set_depth(depth?: number): void;
     };
 
     /**** Table ****/
@@ -162,7 +163,7 @@ declare module "@finos/perspective" {
     };
 
     export type Table = {
-        columns(): Array<string>;
+        columns(): Promise<Array<string>>;
         clear(): Promise<void>;
         replace(data: TableData): Promise<void>;
         delete(): Promise<void>;
