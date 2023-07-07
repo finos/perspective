@@ -1589,24 +1589,176 @@ jobs:
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
     publish:
-        needs: [test_js_and_python, test_python, test_python_sdist]
+        needs:
+            [
+                test_js_and_python,
+                test_python,
+                test_python_sdist,
+                build_pyodide,
+                test_js,
+            ]
         if: startsWith(github.ref, 'refs/tags/v')
         runs-on: ubuntu-22.04
         steps:
             - uses: actions/checkout@v2
 
-            - name: Install yarn
-              run: npm install -g yarn
+            # TODO: `actions/upload-artifact` succedds with a warning when the
+            # path is empty, but `actions/downlaod-artifact` fails, and 3 JS
+            # packages have no `dist`.
 
-            - name: Install js dependencies
-              run: yarn --frozen-lockfile
-              env:
-                  PSP_SKIP_EMSDK_INSTALL: 1
+            # - uses: actions/download-artifact@v3
+            #   with:
+            #       name: perspective-cli-dist
+            #       path: packages/perspective-cli/dist
 
-            - name: Run publish script
-              run: node tools/perspective-scripts/publish.mjs
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-dist
+                  path: packages/perspective/dist/
+
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-jupyterlab-dist
+                  path: packages/perspective-jupyterlab/dist/
+
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-viewer-d3fc-dist
+                  path: packages/perspective-viewer-d3fc/dist
+
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-viewer-datagrid-dist
+                  path: packages/perspective-viewer-datagrid/dist
+
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-viewer-openlayers-dist
+                  path: packages/perspective-viewer-openlayers/dist
+
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-workspace-dist
+                  path: packages/perspective-workspace/dist
+
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-viewer-dist
+                  path: rust/perspective-viewer/dist
+
+            # - uses: actions/download-artifact@v3
+            #   with:
+            #       name: perspective-esbuild-plugin-dist
+            #       path: packages/perspective-esbuild-plugin/dist
+
+            # - uses: actions/download-artifact@v3
+            #   with:
+            #       name: perspective-webpack-plugin-dist
+            #       path: packages/perspective-webpack-plugin/dist
+
+            - uses: actions/download-artifact@v3
+              with:
+                  name: nbextension-dist
+                  path: python/perspective/perspective/nbextension
+
+            - uses: actions/download-artifact@v3
+              with:
+                  name: labextension-dist
+                  path: python/perspective/perspective/labextension
+
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-python-dist-ubuntu-20.04-3.7
+
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-python-dist-ubuntu-20.04-3.8
+
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-python-dist-ubuntu-20.04-3.9
+
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-python-dist-ubuntu-20.04-3.10
+
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-python-dist-ubuntu-20.04-3.11
+
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-python-dist-macos-11-3.7
+
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-python-dist-macos-11-3.8
+
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-python-dist-macos-11-3.9
+
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-python-dist-macos-11-3.10
+
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-python-dist-macos-11-3.11
+
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-python-dist-windows-2019-3.7
+
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-python-dist-windows-2019-3.8
+
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-python-dist-windows-2019-3.9
+
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-python-dist-windows-2019-3.10
+
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-python-dist-windows-2019-3.11
+
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-python-dist-pyodide
+
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-python-sdist
+
+            - name: NPM pack
+              run: |
+                  npm pack \
+                      --workspace=@finos/perspective \
+                      --workspace=@finos/perspective-viewer \
+                      --workspace=@finos/perspective-viewer-datagrid \
+                      --workspace=@finos/perspective-viewer-d3fc \
+                      --workspace=@finos/perspective-viewer-openlayers \
+                      --workspace=@finos/perspective-workspace \
+                      --workspace=@finos/perspective-cli \
+                      --workspace=@finos/perspective-webpack-plugin \
+                      --workspace=@finos/perspective-esbuild-plugin \
+                      --workspace=@finos/perspective-jupyterlab
+
+            - name: Debug
+              run: ls -lah
+
+            - name: Release wheels
+              uses: softprops/action-gh-release@v1
+              with:
+                  draft: true
+                  generate_release_notes: true
+                  files: |
+                      *.whl
+                      *.tar.gz
+                      *.tgz
               env:
-                  CI: true
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  GITHUB_WORKFLOW_ID: ${{ github.run_id }}
-                  COMMIT: ${{ github.sha }}
