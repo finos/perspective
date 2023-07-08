@@ -231,20 +231,23 @@ class PSPBuild(build_ext):
 class PSPCheckSDist(sdist):
     def run(self):
         self.run_check()
-        super(PSPCheckSDist, self).run()
+        super().run()
 
     def run_check(self):
-        # Check for C++ assets
-        for file in ("CMakeLists.txt", "cmake", "src"):
-            path = os.path.abspath(os.path.join(here, "dist", file))
+        required_cpp_files = ["CMakeLists.txt", "cmake", "src"]
+        required_js_files = ["labextension/package.json", "nbextension/static/index.js"]
+
+        for file in required_cpp_files:
+            path = os.path.join(here, "dist", file)
             if not os.path.exists(path):
-                raise Exception("Path is missing! {}\nMust run `yarn build_python` before building sdist so cmake files are installed".format(path))
-        # Check for JS assets
+                raise Exception(f"Path is missing! {path}\nMust run `yarn build_python` before building sdist to install CMake files.")
+
         if not SKIP_JS_FILES:
-            for file in ("labextension/package.json", "nbextension/static/index.js"):
-                path = os.path.abspath(os.path.join(here, "perspective", file))
+            for file in required_js_files:
+                path = os.path.join(here, "perspective", file)
                 if not os.path.exists(path):
-                    raise Exception("Path is missing! {}\nMust run `yarn build` before building sdist so JS files are installed".format(path))
+                    raise Exception(f"Path is missing! {path}\nMust run `yarn build` before building sdist to install JS files.")
+
 
 
 ##############################
