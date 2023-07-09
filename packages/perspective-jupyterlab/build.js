@@ -29,7 +29,7 @@ const NBEXTENSION_PATH = path.resolve(
 );
 
 const TEST_BUILD = {
-    entryPoints: ["src/js/psp_widget.js"],
+    entryPoints: ["src/ts/psp_widget.ts"],
     define: {
         global: "window",
     },
@@ -37,6 +37,7 @@ const TEST_BUILD = {
     globalName: "PerspectiveLumino",
     format: "esm",
     loader: {
+        ".ts": "ts",
         ".html": "text",
         ".ttf": "file",
         ".css": "text",
@@ -45,7 +46,7 @@ const TEST_BUILD = {
 };
 
 const LAB_BUILD = {
-    entryPoints: ["src/js/index.js"],
+    entryPoints: ["src/ts/index.ts"],
     define: {
         global: "window",
     },
@@ -53,6 +54,7 @@ const LAB_BUILD = {
     external: ["@jupyter*", "@lumino*"],
     format: "esm",
     loader: {
+        ".ts": "ts",
         ".css": "text",
         ".html": "text",
         ".ttf": "file",
@@ -62,7 +64,7 @@ const LAB_BUILD = {
 
 const NB_BUILDS = [
     {
-        entryPoints: ["src/js/notebook/extension.js"],
+        entryPoints: ["src/ts/notebook/extension.js"],
         define: {
             global: "window",
         },
@@ -72,6 +74,7 @@ const NB_BUILDS = [
             AMDLoader([]),
         ],
         loader: {
+            ".ts": "ts",
             ".ttf": "file",
             ".css": "text",
         },
@@ -80,7 +83,7 @@ const NB_BUILDS = [
         outfile: path.join(NBEXTENSION_PATH, "extension.js"),
     },
     {
-        entryPoints: ["src/js/notebook/index.js"],
+        entryPoints: ["src/ts/notebook/index.js"],
         define: {
             global: "window",
         },
@@ -92,6 +95,7 @@ const NB_BUILDS = [
         external: ["@jupyter*"],
         format: "cjs",
         loader: {
+            ".ts": "ts",
             ".ttf": "file",
             ".css": "text",
         },

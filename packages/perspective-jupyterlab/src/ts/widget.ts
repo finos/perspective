@@ -10,36 +10,59 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { DOMWidgetModel } from "@jupyter-widgets/base";
-import { PERSPECTIVE_VERSION } from "./version";
+import { DOMWidgetView } from "@jupyter-widgets/base";
+import { Message } from "@lumino/messaging";
 
-/**
- * TODO: document
- */
-export class PerspectiveModel extends DOMWidgetModel {
-    defaults() {
-        return {
-            ...super.defaults(),
-            _model_name: PerspectiveModel.model_name,
-            _model_module: PerspectiveModel.model_module,
-            _model_module_version: PerspectiveModel.model_module_version,
-            _view_name: PerspectiveModel.view_name,
-            _view_module: PerspectiveModel.view_module,
-            _view_module_version: PerspectiveModel.view_module_version,
-            server: false,
-            client: false,
-        };
-    }
-}
+import { PerspectiveWidget } from "./psp_widget";
 
-PerspectiveModel.serializers = {
-    ...DOMWidgetModel.serializers,
-    // Add any extra serializers here
+export type PerspectiveJupyterWidgetOptions = {
+    view: DOMWidgetView;
 };
 
-PerspectiveModel.model_name = "PerspectiveModel";
-PerspectiveModel.model_module = "@finos/perspective-jupyterlab";
-PerspectiveModel.model_module_version = PERSPECTIVE_VERSION;
-PerspectiveModel.view_name = "PerspectiveView";
-PerspectiveModel.view_module = "@finos/perspective-jupyterlab";
-PerspectiveModel.view_module_version = PERSPECTIVE_VERSION;
+/**
+ * PerspectiveJupyterWidget is the ipywidgets front-end for the Perspective Jupyterlab plugin.
+ */
+export class PerspectiveJupyterWidget extends PerspectiveWidget {
+    private _view: DOMWidgetView;
+
+    constructor(
+        name = "Perspective",
+        view: DOMWidgetView,
+        server?: boolean,
+        client?: boolean
+    ) {
+        super(name, view.el, server, client);
+        this._view = view;
+    }
+
+    /**
+     * Process the lumino message.
+     *
+     * Any custom lumino widget used inside a Jupyter widget should override
+     * the processMessage function like this.
+     */
+
+    processMessage(msg: Message) {
+        super.processMessage(msg);
+        this._view.processLuminoMessage(msg);
+    }
+
+    /**
+     * Dispose the widget.
+     *
+     * This causes the view to be destroyed as well with 'remove'
+     */
+
+    dispose() {
+        if (this.isDisposed) {
+            return;
+        }
+
+        super.dispose();
+        if (this._view) {
+            this._view.remove();
+        }
+
+        this._view = null;
+    }
+}

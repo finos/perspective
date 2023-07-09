@@ -11,7 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import { ActivityMonitor } from "@jupyterlab/coreutils";
-import { ILayoutRestorer } from "@jupyterlab/application";
+import { ILayoutRestorer, JupyterFrontEnd } from "@jupyterlab/application";
 import {
     IThemeManager,
     WidgetTracker,
@@ -19,10 +19,15 @@ import {
     showDialog,
 } from "@jupyterlab/apputils";
 
-import { ABCWidgetFactory, DocumentWidget } from "@jupyterlab/docregistry";
+import {
+    ABCWidgetFactory,
+    DocumentWidget,
+    DocumentRegistry,
+    Context as DocRegistryContext,
+} from "@jupyterlab/docregistry";
 import { PerspectiveWidget } from "./psp_widget";
 
-import perspective from "@finos/perspective/dist/esm/perspective.js";
+import perspective from "@finos/perspective";
 /**
  * The name of the factories that creates widgets.
  */
@@ -47,15 +52,26 @@ const baddialog = () => {
 
 const WORKER = perspective.worker();
 export class PerspectiveDocumentWidget extends DocumentWidget {
-    constructor(options, type = "csv") {
+    _monitor: ActivityMonitor<DocumentRegistry.IModel, void>;
+    _psp: PerspectiveWidget & {
+        theme?: string;
+    };
+    _type: string;
+    _context: DocRegistryContext;
+
+    constructor(
+        options: { context: DocRegistryContext; reveal?: Promise<any> },
+        type = "csv"
+    ) {
+        const content = new PerspectiveWidget("Perspective");
         super({
-            content: new PerspectiveWidget("Perspective"),
+            content,
             context: options.context,
             reveal: options.reveal,
         });
 
         this._monitor = null;
-        this._psp = this.content;
+        this._psp = content;
         this._type = type;
         this._context = options.context;
         this._context.ready.then(() => {
@@ -162,8 +178,9 @@ export class PerspectiveDocumentWidget extends DocumentWidget {
 /**
  * A widget factory for CSV widgets.
  */
-export class PerspectiveCSVFactory extends ABCWidgetFactory {
-    createNewWidget(context) {
+
+export class PerspectiveCSVFactory extends ABCWidgetFactory<PerspectiveDocumentWidget> {
+    createNewWidget(context: DocRegistryContext) {
         return new PerspectiveDocumentWidget(
             {
                 context,
@@ -176,8 +193,8 @@ export class PerspectiveCSVFactory extends ABCWidgetFactory {
 /**
  * A widget factory for JSON widgets.
  */
-export class PerspectiveJSONFactory extends ABCWidgetFactory {
-    createNewWidget(context) {
+export class PerspectiveJSONFactory extends ABCWidgetFactory<PerspectiveDocumentWidget> {
+    createNewWidget(context: DocRegistryContext) {
         return new PerspectiveDocumentWidget(
             {
                 context,
@@ -190,8 +207,8 @@ export class PerspectiveJSONFactory extends ABCWidgetFactory {
 /**
  * A widget factory for arrow widgets.
  */
-export class PerspectiveArrowFactory extends ABCWidgetFactory {
-    createNewWidget(context) {
+export class PerspectiveArrowFactory extends ABCWidgetFactory<PerspectiveDocumentWidget> {
+    createNewWidget(context: DocRegistryContext) {
         return new PerspectiveDocumentWidget(
             {
                 context,
@@ -205,7 +222,11 @@ export class PerspectiveArrowFactory extends ABCWidgetFactory {
  * Activate cssviewer extension for CSV files
  */
 
-function activate(app, restorer, themeManager) {
+function activate(
+    app: JupyterFrontEnd,
+    restorer: ILayoutRestorer,
+    themeManager: IThemeManager
+) {
     const factorycsv = new PerspectiveCSVFactory({
         name: FACTORY_CSV,
         fileTypes: ["csv"],
@@ -257,29 +278,29 @@ function activate(app, restorer, themeManager) {
         // Handle state restoration.
         void restorer.restore(trackercsv, {
             command: "docmanager:open",
-            args: (widget) => ({
+            args: (widget: PerspectiveDocumentWidget) => ({
                 path: widget.context.path,
                 factory: FACTORY_CSV,
             }),
-            name: (widget) => widget.context.path,
+            name: (widget: PerspectiveDocumentWidget) => widget.context.path,
         });
 
         void restorer.restore(trackerjson, {
             command: "docmanager:open",
-            args: (widget) => ({
+            args: (widget: PerspectiveDocumentWidget) => ({
                 path: widget.context.path,
                 factory: FACTORY_JSON,
             }),
-            name: (widget) => widget.context.path,
+            name: (widget: PerspectiveDocumentWidget) => widget.context.path,
         });
 
         void restorer.restore(trackerarrow, {
             command: "docmanager:open",
-            args: (widget) => ({
+            args: (widget: PerspectiveDocumentWidget) => ({
                 path: widget.context.path,
                 factory: FACTORY_ARROW,
             }),
-            name: (widget) => widget.context.path,
+            name: (widget: PerspectiveDocumentWidget) => widget.context.path,
         });
     }
 
@@ -342,15 +363,15 @@ function activate(app, restorer, themeManager) {
                 : true;
 
         const theme = isLight ? "Pro Light" : "Pro Dark";
-        trackercsv.forEach((pspDocWidget) => {
+        trackercsv.forEach((pspDocWidget: PerspectiveDocumentWidget) => {
             pspDocWidget.psp.theme = theme;
         });
 
-        trackerjson.forEach((pspDocWidget) => {
+        trackerjson.forEach((pspDocWidget: PerspectiveDocumentWidget) => {
             pspDocWidget.psp.theme = theme;
         });
 
-        trackerarrow.forEach((pspDocWidget) => {
+        trackerarrow.forEach((pspDocWidget: PerspectiveDocumentWidget) => {
             pspDocWidget.psp.theme = theme;
         });
     };
@@ -366,7 +387,7 @@ function activate(app, restorer, themeManager) {
 export const PerspectiveRenderers = {
     activate: activate,
     id: "@finos/perspective-jupyterlab-renderers",
-    requires: [],
+    requires: [] as unknown[],
     optional: [ILayoutRestorer, IThemeManager],
     autoStart: true,
 };

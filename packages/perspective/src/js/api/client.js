@@ -107,7 +107,7 @@ export class Client {
     /**
      * Must be implemented in order to transport commands to the server.
      */
-    send() {
+    send(_x) {
         throw new Error("send() not implemented");
     }
 

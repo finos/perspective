@@ -10,29 +10,31 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { IJupyterWidgetRegistry } from "@jupyter-widgets/base";
-import { PerspectiveModel } from "./model";
-import { PerspectiveView } from "./view";
-import { PERSPECTIVE_VERSION } from "./version";
-const EXTENSION_ID = "@finos/perspective-jupyterlab";
+export * from "./client";
+export * from "./model";
+export * from "./version";
+export * from "./view";
+export * from "./widget";
 
-/**
- * PerspectiveJupyterPlugin Defines the Jupyterlab plugin, and registers `PerspectiveModel` and `PerspectiveView`
- * to be called on initialization.
- */
-export const PerspectiveJupyterPlugin = {
-    id: EXTENSION_ID,
-    // @ts-ignore
-    requires: [IJupyterWidgetRegistry],
-    activate: (app, registry) => {
-        registry.registerWidget({
-            name: EXTENSION_ID,
-            version: PERSPECTIVE_VERSION,
-            exports: {
-                PerspectiveModel: PerspectiveModel,
-                PerspectiveView: PerspectiveView,
-            },
-        });
-    },
-    autoStart: true,
-};
+import "@finos/perspective-viewer-datagrid";
+import "@finos/perspective-viewer-d3fc";
+import "@finos/perspective-viewer-openlayers";
+
+// NOTE: only expose the widget here
+import { PerspectiveJupyterPlugin } from "./plugin";
+
+declare global {
+    interface Window {
+        _JUPYTERLAB?: boolean;
+    }
+}
+
+let plugins = [PerspectiveJupyterPlugin];
+
+// Conditionally import renderers if running in jupyterlab only
+if (window && window._JUPYTERLAB) {
+    const { PerspectiveRenderers } = require("./renderer");
+    plugins.push(PerspectiveRenderers);
+}
+
+export default plugins;

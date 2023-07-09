@@ -11,7 +11,14 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import "@finos/perspective-viewer";
+import {
+    HTMLPerspectiveViewerElement,
+    PerspectiveViewerConfig,
+} from "@finos/perspective-viewer";
+
 import { Widget } from "@lumino/widgets";
+import { Table, TableData } from "@finos/perspective";
+import { Message } from "@lumino/messaging";
 import { MIME_TYPE, PSP_CLASS, PSP_CONTAINER_CLASS } from "./utils";
 
 let _increment = 0;
@@ -22,7 +29,17 @@ let _increment = 0;
  * @class PerspectiveWidget (name) TODO: document
  */
 export class PerspectiveWidget extends Widget {
-    constructor(name = "Perspective", bindto, server, client) {
+    public server?: boolean;
+    public client?: boolean;
+    public _load_complete?: boolean;
+    private _viewer: HTMLPerspectiveViewerElement;
+
+    constructor(
+        name = "Perspective",
+        bindto?: HTMLElement,
+        server?: boolean,
+        client?: boolean
+    ) {
         super({
             node: bindto || document.createElement("div"),
         });
@@ -44,12 +61,12 @@ export class PerspectiveWidget extends Widget {
      *
      */
 
-    onAfterShow(msg) {
+    onAfterShow(msg: Message) {
         this.viewer.notifyResize(true);
         super.onAfterShow(msg);
     }
 
-    onActivateRequest(msg) {
+    onActivateRequest(msg: Message) {
         if (this.isAttached) {
             this.viewer.focus();
         }
@@ -64,7 +81,7 @@ export class PerspectiveWidget extends Widget {
         return await this.viewer.save();
     }
 
-    async restore(config) {
+    async restore(config: PerspectiveViewerConfig) {
         return await this.viewer.restore(config);
     }
 
@@ -74,7 +91,7 @@ export class PerspectiveWidget extends Widget {
      * @param table A `perspective.table` object.
      */
 
-    async load(table) {
+    async load(table: Promise<Table>) {
         await this.viewer.load(table);
         this._load_complete = true;
     }
@@ -85,7 +102,7 @@ export class PerspectiveWidget extends Widget {
      * @param data
      */
 
-    async _update(data) {
+    async _update(data: TableData) {
         const table = await this.viewer.getTable(true);
         await table.update(data);
     }
@@ -106,7 +123,7 @@ export class PerspectiveWidget extends Widget {
      * @param data
      */
 
-    async replace(data) {
+    async replace(data: TableData) {
         const table = await this.viewer.getTable(true);
         await table.replace(data);
     }
@@ -171,7 +188,7 @@ export class PerspectiveWidget extends Widget {
         }
     }
 
-    static createNode(node) {
+    static createNode(node: HTMLElement) {
         node.classList.add("p-Widget");
         node.classList.add(PSP_CONTAINER_CLASS);
         const viewer = document.createElement("perspective-viewer");

@@ -12,11 +12,26 @@
 
 import { DOMWidgetView } from "@jupyter-widgets/base";
 import { PerspectiveJupyterWidget } from "./widget";
-import { PerspectiveJupyterClient } from "./client";
+import { PerspectiveJupyterClient, PerspectiveJupyterMessage } from "./client";
 
-import perspective from "@finos/perspective/dist/esm/perspective.js";
+import perspective, {
+    PerspectiveWorker,
+    Table,
+    View,
+} from "@finos/perspective";
 
-function isEqual(a, b) {
+import "@finos/perspective-viewer";
+import { proxy_table } from "@finos/perspective/api/table_api";
+
+// Type of first parameter to @finos/perspective UpdateCallback
+export type TableUpdate = {
+    port_id: number;
+    delta:
+        | Array<Record<string, Array<string | boolean | Date | number>>>
+        | ArrayBuffer;
+};
+
+function isEqual(a: any, b: any) {
     if (a === b) return true;
     if (typeof a != "object" || typeof b != "object" || a == null || b == null)
         return false;
@@ -37,11 +52,32 @@ function isEqual(a, b) {
     return true;
 }
 
+// proxy_table assigns itself table's prototype which means it has all
+// of table's methods, but Typescript doesn't see that
+type ProxyTable = proxy_table & Table;
+
 /**
  * `PerspectiveView` defines the plugin's DOM and how the plugin interacts with
  * the DOM.
  */
 export class PerspectiveView extends DOMWidgetView {
+    luminoWidget: PerspectiveJupyterWidget;
+    perspective_client: PerspectiveJupyterClient;
+    _pending_binary?: unknown;
+    _pending_port_id?: unknown;
+    _client_worker?: PerspectiveWorker;
+
+    _client_view?: View;
+
+    _kernel_table?: ProxyTable;
+    _kernel_view?: View;
+
+    _client_edit_port: number;
+    _kernel_edit_port: number;
+
+    _client_view_update_callback: (updated?: TableUpdate) => void;
+    _kernel_view_update_callback: (updated?: TableUpdate) => void;
+
     _createElement() {
         this.luminoWidget = new PerspectiveJupyterWidget(
             undefined,
@@ -68,7 +104,7 @@ export class PerspectiveView extends DOMWidgetView {
         return this.luminoWidget.node;
     }
 
-    _setElement(el) {
+    _setElement(el: HTMLElement) {
         if (this.el || el !== this.luminoWidget.node) {
             // Do not allow the view to be reassigned to a different element.
             throw new Error("Cannot reset the DOM element.");
@@ -82,16 +118,15 @@ export class PerspectiveView extends DOMWidgetView {
      * @param mutations
      */
 
-    async _synchronize_state(event) {
+    async _synchronize_state(_event: unknown) {
         if (!this.luminoWidget._load_complete) {
             return;
         }
 
         const config = await this.luminoWidget.viewer.save();
 
-        for (const name of Object.keys(config)) {
-            let new_value = config[name];
-
+        for (const [name, value] of Object.entries(config)) {
+            let new_value = value;
             const current_value = this.model.get(name);
             if (typeof new_value === "undefined") {
                 continue;
@@ -162,7 +197,10 @@ export class PerspectiveView extends DOMWidgetView {
      * @param msg {PerspectiveJupyterMessage}
      */
 
-    _handle_message(msg, buffers) {
+    _handle_message(
+        msg: PerspectiveJupyterMessage,
+        buffers: { buffer: unknown[] }[]
+    ) {
         if (this._pending_binary && buffers.length === 1) {
             // Handle binary messages from the widget, which (unlike the
             // tornado handler), does not send messages in chunks.
@@ -280,7 +318,7 @@ export class PerspectiveView extends DOMWidgetView {
      * @param {PerspectiveJupyterMessage} msg
      */
 
-    _handle_load_message(msg) {
+    _handle_load_message(msg: PerspectiveJupyterMessage) {
         const table_options = msg.data["options"] || {};
         if (this.luminoWidget.client) {
             /**
@@ -300,7 +338,8 @@ export class PerspectiveView extends DOMWidgetView {
                 const table = this.perspective_client.open_table(
                     msg.data["table_name"]
                 );
-                this.luminoWidget.load(table);
+                // Casting proxy_table to Table-compatible interface
+                this.luminoWidget.load(table as unknown as Promise<ProxyTable>);
                 this._restore_from_model();
             } else if (msg.data["table_name"]) {
                 // Get a remote table handle from the Jupyter kernel, and mirror
@@ -309,8 +348,8 @@ export class PerspectiveView extends DOMWidgetView {
                     .open_table(msg.data["table_name"])
                     .then(async (kernel_table) => {
                         // setup kernel table and view
-                        this._kernel_table = kernel_table;
-                        this._kernel_view = await kernel_table.view();
+                        this._kernel_table = kernel_table as ProxyTable;
+                        this._kernel_view = await this._kernel_table.view();
 
                         const arrow = await this._kernel_view.to_arrow();
 
@@ -376,7 +415,7 @@ export class PerspectiveView extends DOMWidgetView {
             // When the client updates, if the update
             // comes through the edit port then forward
             // it to the server.
-            this._client_view_update_callback = (updated) => {
+            this._client_view_update_callback = (updated: TableUpdate) => {
                 if (updated.port_id === this._client_edit_port) {
                     this._kernel_table.update(updated.delta, {
                         port_id: this._kernel_edit_port,
@@ -387,7 +426,7 @@ export class PerspectiveView extends DOMWidgetView {
             // If the server updates, and the edit is
             // not coming from the server edit port,
             // then synchronize state with the client.
-            this._kernel_view_update_callback = (updated) => {
+            this._kernel_view_update_callback = (updated: TableUpdate) => {
                 if (updated.port_id !== this._kernel_edit_port) {
                     table.update(updated.delta); // any port, we dont care
                 }
@@ -398,7 +437,7 @@ export class PerspectiveView extends DOMWidgetView {
 
             // Load the table and mirror updates from the
             // kernel.
-            this._kernel_view_update_callback = (updated) =>
+            this._kernel_view_update_callback = (updated: TableUpdate) =>
                 table.update(updated.delta);
         }
 

@@ -10,7 +10,17 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { Client } from "@finos/perspective/src/js/api/client.js";
+import { Client } from "@finos/perspective/api/client";
+import { DOMWidgetView } from "@jupyter-widgets/base";
+
+/**
+ * The schema for a message passed to and from `PerspectiveJupyterClient`.
+ */
+export interface PerspectiveJupyterMessage {
+    id: number;
+    type: string;
+    data: any;
+}
 
 /**
  * `PerspectiveJupyterClient` acts as a message bus between the frontend and
@@ -22,6 +32,8 @@ import { Client } from "@finos/perspective/src/js/api/client.js";
  * `@finos/perspective/api`.
  */
 export class PerspectiveJupyterClient extends Client {
+    view: DOMWidgetView;
+
     /**
      * Create a new instance of the client.
      *
@@ -29,7 +41,7 @@ export class PerspectiveJupyterClient extends Client {
      * Python backend.
      */
 
-    constructor(view) {
+    constructor(view: DOMWidgetView) {
         super();
         this.view = view;
     }
@@ -43,7 +55,7 @@ export class PerspectiveJupyterClient extends Client {
      * @param msg {any} the message to pass to the `PerspectiveManager`.
      */
 
-    send(msg) {
+    send(msg: any) {
         // Handle calls to `update` with a binary by setting `binary_length`
         // to true, so the kernel knows to handle the arraybuffer properly.
         if (

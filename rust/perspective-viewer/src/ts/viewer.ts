@@ -16,6 +16,8 @@ export type PerspectiveViewerConfig = perspective.ViewConfig & {
     plugin?: string;
     settings?: boolean;
     plugin_config?: any;
+    theme?: string;
+    title?: string;
 };
 
 /**

@@ -10,45 +10,43 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import { PerspectiveWidget } from "./psp_widget";
+import { DOMWidgetModel } from "@jupyter-widgets/base";
+import { PERSPECTIVE_VERSION } from "./version";
 
 /**
- * PerspectiveJupyterWidget is the ipywidgets front-end for the Perspective Jupyterlab plugin.
+ * TODO: document
  */
-export class PerspectiveJupyterWidget extends PerspectiveWidget {
-    constructor(name = "Perspective", view, server, client) {
-        super(name, view.el, server, client);
-        this._view = view;
-    }
+export class PerspectiveModel extends DOMWidgetModel {
+    static model_name: string;
+    static model_module: string;
+    static model_module_version: string;
+    static view_name: string;
+    static view_module: string;
+    static view_module_version: string;
 
-    /**
-     * Process the lumino message.
-     *
-     * Any custom lumino widget used inside a Jupyter widget should override
-     * the processMessage function like this.
-     */
-
-    processMessage(msg) {
-        super.processMessage(msg);
-        this._view.processLuminoMessage(msg);
-    }
-
-    /**
-     * Dispose the widget.
-     *
-     * This causes the view to be destroyed as well with 'remove'
-     */
-
-    dispose() {
-        if (this.isDisposed) {
-            return;
-        }
-
-        super.dispose();
-        if (this._view) {
-            this._view.remove();
-        }
-
-        this._view = null;
+    defaults() {
+        return {
+            ...super.defaults(),
+            _model_name: PerspectiveModel.model_name,
+            _model_module: PerspectiveModel.model_module,
+            _model_module_version: PerspectiveModel.model_module_version,
+            _view_name: PerspectiveModel.view_name,
+            _view_module: PerspectiveModel.view_module,
+            _view_module_version: PerspectiveModel.view_module_version,
+            server: false,
+            client: false,
+        };
     }
 }
+
+PerspectiveModel.serializers = {
+    ...DOMWidgetModel.serializers,
+    // Add any extra serializers here
+};
+
+PerspectiveModel.model_name = "PerspectiveModel";
+PerspectiveModel.model_module = "@finos/perspective-jupyterlab";
+PerspectiveModel.model_module_version = PERSPECTIVE_VERSION;
+PerspectiveModel.view_name = "PerspectiveView";
+PerspectiveModel.view_module = "@finos/perspective-jupyterlab";
+PerspectiveModel.view_module_version = PERSPECTIVE_VERSION;
