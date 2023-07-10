@@ -754,6 +754,37 @@ export default function (Module) {
         return to_format.call(this, options, formatters.jsonTableFormatter);
     };
 
+    view.prototype.to_columns_string = function (options) {
+        const num_sides = this.sides();
+        if (num_sides === 0) {
+            _call_process(this.table.get_id());
+            options = _parse_format_options.bind(this)(options);
+            const start_row = options.start_row;
+            const end_row = options.end_row;
+            const start_col = options.start_col;
+            const end_col = options.end_col;
+            const hidden = this._num_hidden();
+
+            const is_formatted = options.formatted;
+            const get_pkeys = !!options.index;
+            const get_ids = !!options.id;
+            const leaves_only = !!options.leaves_only;
+            const num_sides = this.sides();
+            const has_row_path = num_sides !== 0 && !this.column_only;
+            const nidx = SIDES[num_sides];
+
+            return this._View.to_columns(
+                start_row,
+                end_row,
+                start_col,
+                end_col,
+                get_ids
+            );
+        } else {
+            throw new Error("Not yet implemented");
+        }
+    };
+
     /**
      * Serializes this view to JSON data in a row-oriented format.
      *

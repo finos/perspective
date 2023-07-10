@@ -142,6 +142,9 @@ public:
     std::shared_ptr<t_data_slice<CTX_T>> get_data(t_uindex start_row,
         t_uindex end_row, t_uindex start_col, t_uindex end_col) const;
 
+    std::string to_columns(t_uindex start_row, t_uindex end_row,
+        t_uindex start_col, t_uindex end_col, bool get_ids) const;
+
     /**
      * @brief Serializes the `View`'s data into the Apache Arrow format
      * as a bytestring. Using start/end row and column, retrieve a data

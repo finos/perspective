@@ -45,7 +45,8 @@ export function createDataListener() {
                 id: true,
             };
 
-            columns = await this._view.to_columns(new_window);
+            columns = await this._view.to_columns_string(new_window);
+            columns = JSON.parse(columns);
             this._last_window = new_window;
             this._ids = columns.__ID__;
             this._reverse_columns = this._column_paths

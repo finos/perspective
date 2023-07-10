@@ -14,6 +14,9 @@
 #include <perspective/view.h>
 #include <perspective/arrow_writer.h>
 #include <sstream>
+#include <rapidjson/writer.h>
+#include <rapidjson/stringbuffer.h>
+#include <boost/algorithm/string/join.hpp>
 
 #include <arrow/csv/writer.h>
 #include <perspective/pyutils.h>
@@ -406,6 +409,117 @@ template <typename T>
 std::pair<t_tscalar, t_tscalar>
 View<T>::get_min_max(const std::string& colname) const {
     return m_ctx->get_min_max(colname);
+}
+
+template <>
+std::string
+View<t_ctxunit>::to_columns(t_uindex start_row, t_uindex end_row,
+    t_uindex start_col, t_uindex end_col, bool get_ids) const {
+    std::vector<t_tscalar> slice
+        = m_ctx->get_data(start_row, end_row, start_col, end_col);
+    auto col_names = column_names();
+    rapidjson::StringBuffer s;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(s);
+    writer.StartObject();
+    // for (auto c = col_names.begin(); c != col_names.end(); ++c) {
+    //     std::stringstream column_name;
+    //     for (auto i = 0; i < c->size() - 1; ++i) {
+    //         column_name << (*c)[i] << "|";
+    //     }
+
+    //     column_name << c[c->size() - 1];
+    //     // std::cout << column_name.str() << std::endl;
+    //     const std::string& tmp = column_name.str();
+    //     writer.Key(tmp.c_str());
+    //     writer.StartArray();
+    //     writer.EndArray();
+    // }
+
+    writer.EndObject();
+    return s.GetString();
+}
+
+template <>
+std::string
+View<t_ctx0>::to_columns(t_uindex start_row, t_uindex end_row,
+    t_uindex start_col, t_uindex end_col, bool get_ids) const {
+    std::vector<t_tscalar> slice
+        = m_ctx->get_data(start_row, end_row, start_col, end_col);
+    auto col_names = column_names();
+    rapidjson::StringBuffer s;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(s);
+    writer.StartObject();
+    for (auto c = start_col; c < end_col; ++c) {
+        std::stringstream column_name;
+
+        for (auto i = 0; i < col_names[c].size() - 1; ++i) {
+            column_name << col_names[c][i].get<const char*>() << "|";
+        }
+
+        column_name << col_names[c][col_names[c].size() - 1].get<const char*>();
+        const std::string& tmp = column_name.str();
+
+        writer.Key(tmp.c_str());
+        writer.StartArray();
+        for (auto x = start_row; x < end_row; ++x) {
+            //  (ridx - m_start_row) * m_stride + (cidx - m_start_col)
+            const t_tscalar& scalar
+                = slice[(x - start_row) * (end_col - start_col)
+                    + (c - start_col)];
+            switch (scalar.get_dtype()) {
+                case DTYPE_INT32:
+                    writer.Int(scalar.get<int32_t>());
+                    break;
+                case DTYPE_FLOAT64:
+                    writer.Double(scalar.get<double>());
+                    break;
+                case DTYPE_STR:
+                    writer.String(scalar.get<const char*>());
+                    break;
+                case DTYPE_TIME:
+                case DTYPE_DATE:
+                    writer.Double(scalar.get<double>());
+                    break;
+                default:
+                    break;
+            }
+        }
+        writer.EndArray();
+    }
+
+    if (get_ids) {
+        writer.Key("__ID__");
+        writer.StartArray();
+        for (auto x = start_row; x < end_row; ++x) {
+            std::pair<t_uindex, t_uindex> pair{x, 0};
+            std::vector<std::pair<t_uindex, t_uindex>> vec{pair};
+            const auto keys = m_ctx->get_pkeys(vec);
+            const t_tscalar& scalar = keys[0];
+            writer.StartArray();
+            switch (scalar.get_dtype()) {
+                case DTYPE_INT32:
+                    writer.Int(scalar.get<int32_t>());
+                    break;
+                case DTYPE_FLOAT64:
+                    writer.Double(scalar.get<double>());
+                    break;
+                case DTYPE_STR:
+                    writer.String(scalar.get<const char*>());
+                    break;
+                case DTYPE_TIME:
+                case DTYPE_DATE:
+                    writer.Double(scalar.get<double>());
+                    break;
+                default:
+                    break;
+            }
+            writer.EndArray();
+        }
+        writer.EndArray();
+    }
+
+    writer.EndObject();
+    return s.GetString();
 }
 
 template <>
