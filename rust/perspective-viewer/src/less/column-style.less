@@ -1,11 +1,14 @@
-/******************************************************************************
- *
- * Copyright (c) 2017, the Perspective Authors.
- *
- * This file is part of the Perspective library, distributed under the terms of
- * the Apache License 2.0.  The full license can be found in the LICENSE file.
- *
- */
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+// ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+// ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+// ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+// ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+// ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+// ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+// ┃ This file is part of the Perspective library, distributed under the terms ┃
+// ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 @mixin icon {
     background-repeat: no-repeat;
@@ -19,7 +22,7 @@
 :host {
     position: fixed;
     z-index: 10000;
-    padding: 12px;
+    padding: 8px 12px;
     outline: none;
     background-color: #ffffff;
     font-size: 12px;
@@ -46,7 +49,7 @@
     }
 
     input.parameter {
-        max-width: 80px;
+        width: 80px;
         background: none;
         color: inherit;
         border: 0px solid transparent;
@@ -54,6 +57,7 @@
     }
 
     input.parameter[type="number"] {
+        flex: 1 1 auto;
         text-align: right;
         border-bottom-width: 1px;
         border-color: var(
@@ -62,8 +66,8 @@
         );
     }
 
-    input[type=number]:-webkit-inner-spin-button,
-    input[type=number]:-webkit-outer-spin-button {
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
         opacity: 1;
         background: transparent;
         background-color: transparent;
@@ -157,13 +161,16 @@
         cursor: pointer;
         padding: 0;
         margin-right: 4px;
+        font-family: inherit;
+        overflow: hidden;
+        border-radius: 3px;
 
         &:before {
             position: absolute;
             font-family: var(--button--font-family, inherit);
-            margin-top: 11px;
+            margin-top: 4px;
             margin-left: 12px;
-            font-size: 12px;
+            font-size: 20px;
             content: var(--column-style-pos-color--content, "+");
             color: white;
         }
@@ -171,6 +178,24 @@
         &#neg-color-param:before {
             content: var(--column-style-neg-color--content, "-");
         }
+    }
+
+    ::-webkit-color-swatch-wrapper {
+        padding: 0;
+    }
+
+    ::-webkit-color-swatch {
+        border: 0;
+        border-radius: 0;
+    }
+
+    ::-moz-color-swatch,
+    ::-moz-focus-inner {
+        border: 0;
+    }
+
+    ::-moz-focus-inner {
+        padding: 0;
     }
 
     .operator {
@@ -188,5 +213,32 @@
 
     input[type="checkbox"]:not(:disabled) {
         cursor: pointer;
+    }
+
+    button#datetime_format {
+        appearance: none;
+        background: none;
+        color: inherit;
+        border: 1px solid var(--inactive--color);
+        border-radius: 3px;
+        font-family: inherit;
+        padding: 6px;
+        font-size: 10px;
+        width: 100%;
+        cursor: pointer;
+
+        &:before {
+            content: attr(data-title);
+        }
+
+        &:hover {
+            border-color: var(--icon--color);
+            background-color: var(--icon--color);
+            color: var(--plugin--background);
+        }
+
+        &:hover:before {
+            content: attr(data-title-hover);
+        }
     }
 }

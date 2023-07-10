@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-test",
-    "version": "2.3.0",
+    "version": "2.3.1",
     "description": "Test utility based on perspective",
     "private": true,
     "main": "src/js/index",
@@ -19,7 +19,7 @@
     "author": "",
     "license": "Apache-2.0",
     "dependencies": {
-        "@finos/perspective": "^2.3.0",
+        "@finos/perspective": "^2.3.1",
         "xml-formatter": "2.4.0"
     }
 }

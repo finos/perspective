@@ -2,3 +2,5 @@ dist/
 build/
 node_modules/
 target/
+.emsdk/
+boost*/

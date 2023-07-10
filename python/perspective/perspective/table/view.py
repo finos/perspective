@@ -1,10 +1,14 @@
-################################################################################
-#
-# Copyright (c) 2019, the Perspective Authors.
-#
-# This file is part of the Perspective library, distributed under the terms of
-# the Apache License 2.0.  The full license can be found in the LICENSE file.
-#
+#  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+#  ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+#  ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+#  ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+#  ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+#  ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+#  ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+#  ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+#  ┃ This file is part of the Perspective library, distributed under the terms ┃
+#  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+#  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import pandas
 from functools import partial, wraps
@@ -419,6 +423,7 @@ class View(object):
         self._delete_callbacks.remove_callbacks(lambda cb: cb == callback)
 
     def to_arrow(self, **kwargs):
+        self._table._state_manager.call_process(self._table._table.get_id())
         options = _parse_format_options(self, kwargs)
         if self._is_unit_context:
             return to_arrow_unit(

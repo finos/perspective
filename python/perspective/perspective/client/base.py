@@ -1,10 +1,15 @@
-################################################################################
-#
-# Copyright (c) 2019, the Perspective Authors.
-#
-# This file is part of the Perspective library, distributed under the terms of
-# the Apache License 2.0.  The full license can be found in the LICENSE file.
-#
+#  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+#  ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+#  ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+#  ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+#  ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+#  ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+#  ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+#  ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+#  ┃ This file is part of the Perspective library, distributed under the terms ┃
+#  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+#  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
 import asyncio
 
 from random import random
@@ -89,6 +94,10 @@ class PerspectiveClient(object):
         """Send the message to the Perspective server implementation - must be
         implemented by a child class."""
         raise NotImplementedError()
+
+    def get_hosted_table_names(self):
+        msg = {"cmd": "get_hosted_table_names"}
+        return self.post(msg)
 
     def post(self, msg, future=None, keep_alive=False):
         """Given a message and an associated `Future` object, store the future

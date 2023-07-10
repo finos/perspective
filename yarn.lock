@@ -9063,6 +9063,18 @@ github-slugger@^1.4.0:
   resolved "https://registry.yarnpkg.com/github-slugger/-/github-slugger-1.4.0.tgz#206eb96cdb22ee56fdc53a28d5a302338463444e"
   integrity sha512-w0dzqw/nt51xMVmlaV1+JRzN+oCa1KfcgGEWhxUG16wbdA+Xnt/yoFO8Z8x/V82ZcZ0wy6ln9QDup5avbhiDhQ==
 
+glob-gitignore@^1.0.14:
+  version "1.0.14"
+  resolved "https://registry.yarnpkg.com/glob-gitignore/-/glob-gitignore-1.0.14.tgz#8b708cb029e73bd388d22f7f935213aa93a1e7c2"
+  integrity sha512-YuAEPqL58bOQDqDF2kMv009rIjSAtPs+WPzyGbwRWK+wD0UWQVRoP34Pz6yJ6ivco65C9tZnaIt0I3JCuQ8NZQ==
+  dependencies:
+    glob "^7.1.3"
+    ignore "^5.0.5"
+    lodash.difference "^4.5.0"
+    lodash.union "^4.6.0"
+    make-array "^1.0.5"
+    util.inherits "^1.0.3"
+
 glob-parent@^5.1.2, glob-parent@~5.1.2:
   version "5.1.2"
   resolved "https://registry.yarnpkg.com/glob-parent/-/glob-parent-5.1.2.tgz#869832c58034fe68a4093c17dc15e8340d8401c4"
@@ -9697,7 +9709,7 @@ ignore-walk@^3.0.1:
   dependencies:
     minimatch "^3.0.4"
 
-ignore@^5.1.1:
+ignore@^5.0.5, ignore@^5.1.1:
   version "5.2.4"
   resolved "https://registry.yarnpkg.com/ignore/-/ignore-5.2.4.tgz#a291c0c6178ff1b960befe47fcdec301674a6324"
   integrity sha512-MAb38BcSbH0eHNBxn7ql2NH/kX33OkB3lZ1BNdh7ENeRChHTYsTvWrMubiIAMNS2llXEEgZ1MUOBtXChP3kaFQ==
@@ -10848,6 +10860,11 @@ lodash.debounce@^4.0.8:
   resolved "https://registry.yarnpkg.com/lodash.debounce/-/lodash.debounce-4.0.8.tgz#82d79bff30a67c4005ffd5e2515300ad9ca4d7af"
   integrity sha1-gteb/zCmfEAF/9XiUVMArZyk168=
 
+lodash.difference@^4.5.0:
+  version "4.5.0"
+  resolved "https://registry.yarnpkg.com/lodash.difference/-/lodash.difference-4.5.0.tgz#9ccb4e505d486b91651345772885a2df27fd017c"
+  integrity sha512-dS2j+W26TQ7taQBGN8Lbbq04ssV3emRw4NY58WErlTO29pIqS0HmoT5aJ9+TUQ1N3G+JOZSji4eugsWwGp9yPA==
+
 lodash.escape@^4.0.1:
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/lodash.escape/-/lodash.escape-4.0.1.tgz#c9044690c21e04294beaa517712fded1fa88de98"
@@ -10912,6 +10929,11 @@ lodash.pick@^4.4.0:
   version "4.4.0"
   resolved "https://registry.yarnpkg.com/lodash.pick/-/lodash.pick-4.4.0.tgz#52f05610fff9ded422611441ed1fc123a03001b3"
   integrity sha1-UvBWEP/53tQiYRRB7R/BI6AwAbM=
+
+lodash.union@^4.6.0:
+  version "4.6.0"
+  resolved "https://registry.yarnpkg.com/lodash.union/-/lodash.union-4.6.0.tgz#48bb5088409f16f1821666641c44dd1aaae3cd88"
+  integrity sha512-c4pB2CdGrGdjMKYLA+XiRDO7Y0PRQbm/Gzg8qMj+QH+pFVAoTp5sBpO0odL3FjoPCGjK96p6qsP+yQoiLoOBcw==
 
 lodash.uniq@4.5.0, lodash.uniq@^4.5.0:
   version "4.5.0"
@@ -11010,6 +11032,11 @@ lunr-mutable-indexes@2.3.2:
   version "2.3.9"
   resolved "https://registry.yarnpkg.com/lunr/-/lunr-2.3.9.tgz#18b123142832337dd6e964df1a5a7707b25d35e1"
   integrity sha512-zTU3DaZaF3Rt9rhN3uBMGQD3dD2/vFQqnvZCDv4dl5iOzq2IZQqTxu90r4E5J+nP70J3ilqVCrbho2eWaeW8Ow==
+
+make-array@^1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/make-array/-/make-array-1.0.5.tgz#326a7635c756a9f61ce0b2a6fdd5cc3460419bcb"
+  integrity sha512-sgK2SAzxT19rWU+qxKUcn6PAh/swiIiz2F8C2cZjLc1z4iwYIfdoihqFIDQ8BDzAGtWPYJ6Sr13K1j/DXynDLA==
 
 make-dir@^1.0.0:
   version "1.3.0"
@@ -13839,10 +13866,10 @@ regjsparser@^0.9.1:
   dependencies:
     jsesc "~0.5.0"
 
-regular-table@=0.5.6:
-  version "0.5.6"
-  resolved "https://registry.yarnpkg.com/regular-table/-/regular-table-0.5.6.tgz#9b14ab61590ff41c709986ef7ca66ade427bde4b"
-  integrity sha512-lScNtcqjNcPaFYSeDRNsC+t2P/IzYCLKJNls1hBQAyTtWatX94zO87n2ExEPCnbbkKHGYEZ8Uo8Dgvcw34yTQA==
+regular-table@=0.5.7:
+  version "0.5.7"
+  resolved "https://registry.yarnpkg.com/regular-table/-/regular-table-0.5.7.tgz#424f5dfa6e1fb95d1fc8e0b3ee299cea6289d540"
+  integrity sha512-BcneWdPuabfdVxqoEKe6U7qgtXpbNxQnL/pGdMbU4G4ldYifEQm+ihyBiUz4JwVqQZtgY8TU+8xzpgWNg8bgiw==
 
 relateurl@^0.2.7:
   version "0.2.7"
@@ -15950,6 +15977,11 @@ util-deprecate@^1.0.1, util-deprecate@^1.0.2, util-deprecate@~1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/util-deprecate/-/util-deprecate-1.0.2.tgz#450d4dc9fa70de732762fbd2d4a28981419a0ccf"
   integrity sha1-RQ1Nyfpw3nMnYvvS1KKJgUGaDM8=
+
+util.inherits@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/util.inherits/-/util.inherits-1.0.3.tgz#a9c626a0d06d34829d47ba56cab1278d745f9ce6"
+  integrity sha512-gMirHcfcq5D87nXDwbZqf5vl65S0mpMZBsHXJsXOO3Hc3G+JoQLwgaJa1h+PL7h3WhocnuLqoe8CuvMlztkyCA==
 
 utila@~0.4:
   version "0.4.0"

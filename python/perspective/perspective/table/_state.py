@@ -1,10 +1,14 @@
-################################################################################
-#
-# Copyright (c) 2019, the Perspective Authors.
-#
-# This file is part of the Perspective library, distributed under the terms of
-# the Apache License 2.0.  The full license can be found in the LICENSE file.
-#
+#  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+#  ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+#  ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+#  ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+#  ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+#  ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+#  ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+#  ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+#  ┃ This file is part of the Perspective library, distributed under the terms ┃
+#  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+#  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 
 class _PerspectiveStateManager(object):
@@ -65,10 +69,9 @@ class _PerspectiveStateManager(object):
         Args:
             table_id (:obj`int`): The unique ID of the Table
         """
-        pool = _PerspectiveStateManager.TO_PROCESS.get(table_id, None)
+        pool = _PerspectiveStateManager.TO_PROCESS.pop(table_id, None)
         if pool is not None:
             pool._process()
-            self.remove_process(table_id)
 
     def remove_process(self, table_id):
         """Remove a pool from the execution cache, indicating that it should no

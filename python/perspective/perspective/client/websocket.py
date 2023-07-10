@@ -1,14 +1,19 @@
-################################################################################
-#
-# Copyright (c) 2019, the Perspective Authors.
-#
-# This file is part of the Perspective library, distributed under the terms of
-# the Apache License 2.0.  The full license can be found in the LICENSE file.
-#
+#  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+#  ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+#  ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+#  ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+#  ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+#  ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+#  ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+#  ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+#  ┃ This file is part of the Perspective library, distributed under the terms ┃
+#  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+#  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
 import asyncio
 import json
 from abc import ABC, abstractmethod
-
+from threading import Lock
 from .base import PerspectiveClient
 from ..manager.manager_internal import DateTimeEncoder
 
@@ -59,6 +64,8 @@ class PerspectiveWebsocketClient(PerspectiveClient):
         self._pending_binary_length = 0
         self._pending_port_id = None
         self._full_binary = b""
+        self._json_queue = []
+        self._lock = Lock()
 
     async def _send_ping(self):
         """Send a `ping` heartbeat message to the server's Websocket, which will
@@ -88,11 +95,16 @@ class PerspectiveWebsocketClient(PerspectiveClient):
     def on_message(self, msg):
         """When a message is received, send it to the `_handle` method, or
         await the incoming binary from the server."""
+
         if msg == "pong":
             # Do not respond to server pong heartbeats - only send them
             return
 
-        if self._pending_binary is not None:
+        self._lock.acquire()
+        if self._pending_binary is not None and isinstance(msg, str):
+            self._json_queue.append(msg)
+
+        elif self._pending_binary is not None:
             binary_msg = msg
 
             self._full_binary += binary_msg
@@ -103,6 +115,7 @@ class PerspectiveWebsocketClient(PerspectiveClient):
 
             else:
                 # Wait for the next chunk
+                self._lock.release()
                 return
 
             result = {"data": {"id": self._pending_binary, "data": binary_msg}}
@@ -113,13 +126,26 @@ class PerspectiveWebsocketClient(PerspectiveClient):
                     "delta": binary_msg,
                 }
 
-            self._handle(result)
-
             # Clear flags for special binary message flow
             self._pending_binary = None
             self._pending_binary_length = None
             self._pending_port_id = None
             self._full_binary = b""
+
+            # self._lock.release()
+            self._handle(result)
+            for msg in self._json_queue:
+                msg = json.loads(msg)
+                if msg.get("binary_length"):
+                    self._pending_binary = msg["id"]
+                    self._pending_binary_length = msg["binary_length"]
+
+                    if msg.get("data") and msg["data"].get("port_id", None) is not None:
+                        self._pending_port_id = msg["data"].get("port_id")
+                else:
+                    self._handle({"data": msg})
+
+            self._json_queue = []
 
         elif isinstance(msg, str):
             msg = json.loads(msg)
@@ -135,6 +161,7 @@ class PerspectiveWebsocketClient(PerspectiveClient):
         else:
             # websocket client sometimes calls None on disconnect ..
             pass
+        self._lock.release()
 
     async def send(self, msg):
         """Send a message to the Websocket endpoint."""

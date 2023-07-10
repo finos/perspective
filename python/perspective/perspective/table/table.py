@@ -1,10 +1,14 @@
-################################################################################
-#
-# Copyright (c) 2019, the Perspective Authors.
-#
-# This file is part of the Perspective library, distributed under the terms of
-# the Apache License 2.0.  The full license can be found in the LICENSE file.
-#
+#  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+#  ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+#  ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+#  ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+#  ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+#  ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+#  ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+#  ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+#  ┃ This file is part of the Perspective library, distributed under the terms ┃
+#  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+#  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 from datetime import date, datetime
 
@@ -21,6 +25,7 @@ from ._utils import (
 )
 from .libpsppy import (
     make_table,
+    update_table,
     str_to_filter_op,
     t_dtype,
     t_filter_op,
@@ -77,12 +82,10 @@ class Table(object):
         # for `index` and 4294967295 for `limit`, but always store `self._index`
         # and `self._limit` as user-provided kwargs or `None`.
         self._table = make_table(
-            None,
             _accessor,
             self._limit or 4294967295,
             self._index or "",
             t_op.OP_INSERT,
-            False,
             self._is_arrow,
             self._is_csv,
             0,
@@ -308,13 +311,12 @@ class Table(object):
 
         if _is_arrow:
             _accessor = data
-            self._table = make_table(
+            self._table = update_table(
                 self._table,
                 _accessor,
                 self._limit or 4294967295,
                 self._index or "",
                 t_op.OP_INSERT,
-                True,
                 _is_arrow,
                 _is_csv,
                 port_id,
@@ -342,13 +344,12 @@ class Table(object):
             else:
                 _accessor._types.append(t_dtype.DTYPE_INT32)
 
-        self._table = make_table(
+        self._table = update_table(
             self._table,
             _accessor,
             self._limit or 4294967295,
             self._index or "",
             t_op.OP_INSERT,
-            True,
             False,
             False,
             port_id,
@@ -380,13 +381,12 @@ class Table(object):
         _accessor._names = [self._index]
         _accessor._types = types
 
-        t = make_table(
+        t = update_table(
             self._table,
             _accessor,
             self._limit or 4294967295,
             self._index or "",
             t_op.OP_DELETE,
-            True,
             False,
             False,
             port_id,

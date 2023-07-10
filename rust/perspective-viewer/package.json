@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-viewer",
-    "version": "2.3.0",
+    "version": "2.3.1",
     "description": "The `<perspective-viewer>` Custom Element, frontend for Perspective.js",
     "repository": {
         "type": "git",
@@ -31,21 +31,19 @@
         "docs:concat": "node ./docs.js",
         "docs:deploy:api": "(echo \"---\nid: perspective-viewer\ntitle: perspective-viewer API\n---\n\n\"; cat README.md) > ../../docs/docs/obj/perspective-viewer.md",
         "docs:deploy:exprtk": "cat exprtk.md > ../../docs/docs/obj/perspective-viewer-exprtk.md",
-        "fix": "yarn lint --fix && cargo fmt",
-        "lint": "prettier --check src/ts/**/*",
         "test:run:rust": "rustup run nightly wasm-pack test --chrome --headless"
     },
     "publishConfig": {
         "access": "public"
     },
     "dependencies": {
-        "@finos/perspective": "^2.3.0",
+        "@finos/perspective": "^2.3.1",
         "fflate": "^0.7.4"
     },
     "devDependencies": {
         "react": "^16.14.0",
-        "@finos/perspective-esbuild-plugin": "^2.3.0",
-        "@finos/perspective-test": "^2.3.0",
+        "@finos/perspective-esbuild-plugin": "^2.3.1",
+        "@finos/perspective-test": "^2.3.1",
         "cpy": "^9.0.1"
     }
 }

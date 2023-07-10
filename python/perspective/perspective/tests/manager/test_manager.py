@@ -1,10 +1,14 @@
-################################################################################
-#
-# Copyright (c) 2019, the Perspective Authors.
-#
-# This file is part of the Perspective library, distributed under the terms of
-# the Apache License 2.0.  The full license can be found in the LICENSE file.
-#
+#  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+#  ┃ ██████ ██████ ██████       █      █      █      █      █ █▄  ▀███ █       ┃
+#  ┃ ▄▄▄▄▄█ █▄▄▄▄▄ ▄▄▄▄▄█  ▀▀▀▀▀█▀▀▀▀▀ █ ▀▀▀▀▀█ ████████▌▐███ ███▄  ▀█ █ ▀▀▀▀▀ ┃
+#  ┃ █▀▀▀▀▀ █▀▀▀▀▀ █▀██▀▀ ▄▄▄▄▄ █ ▄▄▄▄▄█ ▄▄▄▄▄█ ████████▌▐███ █████▄   █ ▄▄▄▄▄ ┃
+#  ┃ █      ██████ █  ▀█▄       █ ██████      █      ███▌▐███ ███████▄ █       ┃
+#  ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+#  ┃ Copyright (c) 2017, the Perspective Authors.                              ┃
+#  ┃ ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌ ┃
+#  ┃ This file is part of the Perspective library, distributed under the terms ┃
+#  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
+#  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import json
 import time
@@ -62,6 +66,26 @@ class TestPerspectiveManager(object):
         manager.host_table("table1", table)
         table.update({"a": [4, 5, 6], "b": ["d", "e", "f"]})
         assert manager.get_table("table1").size() == 6
+
+    def test_manager_get_hosted_table_names(self):
+        manager = PerspectiveManager()
+        table = Table(data)
+        manager.host_table("table1", table)
+        assert manager.get_table_names() == ["table1"]
+
+        manager.host_table("table2", table)
+        assert manager.get_table_names() == ["table1", "table2"]
+
+    def test_manager_get_hosted_table_names_with_cmd(self):
+        manager = PerspectiveManager()
+        table = Table(data)
+        manager.host_table("table1", table)
+        message = {"id": 1, "cmd": "get_hosted_table_names"}
+        post_callback = partial(
+            self.validate_post,
+            expected={"id": 1, "data": ["table1"]},
+        )
+        manager._process(message, post_callback)
 
     def test_manager_create_table(self):
         message = {"id": 1, "name": "table1", "cmd": "table", "args": [data]}

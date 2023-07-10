@@ -3,8 +3,7 @@ id: table
 title: Table
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+import Tabs from '@theme/Tabs'; import TabItem from '@theme/TabItem';
 
 The `Table` is Perspective's columnar data frame, analogous to a Pandas
 `DataFrame` or Apache Arrow. `Table` supports appending data, in-place updates,
@@ -26,10 +25,10 @@ arbitrary set of columns from the `Table`.
 
 ```javascript
 var data = [
-    {x: 1, y: "a", z: true},
-    {x: 2, y: "b", z: false},
-    {x: 3, y: "c", z: true},
-    {x: 4, y: "d", z: false},
+    { x: 1, y: "a", z: true },
+    { x: 2, y: "b", z: false },
+    { x: 3, y: "c", z: true },
+    { x: 4, y: "d", z: false },
 ];
 
 const table1 = await worker.table(data);
@@ -102,7 +101,7 @@ at all (yet), as it will be updated with values from a real-time data source
 later on. In these cases, create a `table()` with a _schema_.
 
 Once the `Table` has been created with a schema, further `update()` calls will
-conver data types to conform with the schema; a column that is typed as a
+convert data types to conform with the schema; a column that is typed as a
 `datetime`, for example, can be updated with `date` objects, `datetime` objects,
 `pandas.Timestamp`, `numpy.datetime64`, and even valid millisecond/seconds from
 epoch timestamps. Similarly, updating string columns with integer data will
@@ -128,7 +127,7 @@ name to be used as an index:
 <TabItem value="js" label="JavaScript">
 
 ```javascript
-const indexed_table = await perspective.table(data, {index: "a"});
+const indexed_table = await perspective.table(data, { index: "a" });
 ```
 
 </TabItem>
@@ -151,7 +150,7 @@ property with an integer indicating the maximum rows:
 <TabItem value="js" label="JavaScript">
 
 ```javascript
-const limit_table = await perspective.table(data, {limit: 1000});
+const limit_table = await perspective.table(data, { limit: 1000 });
 ```
 
 </TabItem>
@@ -207,7 +206,7 @@ which rows to update:
 <TabItem value="js" label="JavaScript">
 
 ```javascript
-indexed_table.update({id: [1, 4], name: ["x", "y"]});
+indexed_table.update({ id: [1, 4], name: ["x", "y"] });
 ```
 
 </TabItem>
@@ -232,7 +231,7 @@ values set to `undefined` in Javascript), will be omitted from `table()`s with
 <TabItem value="js" label="JavaScript">
 
 ```javascript
-table.update([{x: 3, y: null}]); // `z` missing
+table.update([{ x: 3, y: null }]); // `z` missing
 ```
 
 </TabItem>
