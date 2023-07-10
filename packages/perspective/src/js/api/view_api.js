@@ -79,6 +79,8 @@ view.prototype.to_arrow = async_queue("to_arrow");
 
 view.prototype.to_columns = async_queue("to_columns");
 
+view.prototype.to_columns_string = async_queue("to_columns_string");
+
 view.prototype.to_csv = async_queue("to_csv");
 
 view.prototype.schema = async_queue("schema");

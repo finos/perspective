@@ -1899,7 +1899,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_sort", &View<t_ctxunit>::get_sort)
         .function("get_step_delta", &View<t_ctxunit>::get_step_delta)
         .function("get_column_dtype", &View<t_ctxunit>::get_column_dtype)
-        .function("is_column_only", &View<t_ctxunit>::is_column_only);
+        .function("is_column_only", &View<t_ctxunit>::is_column_only)
+        .function("to_columns", &View<t_ctxunit>::to_columns);
 
     class_<View<t_ctx0>>("View_ctx0")
         .constructor<std::shared_ptr<Table>, std::shared_ptr<t_ctx0>,
@@ -1925,7 +1926,9 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_sort", &View<t_ctx0>::get_sort)
         .function("get_step_delta", &View<t_ctx0>::get_step_delta)
         .function("get_column_dtype", &View<t_ctx0>::get_column_dtype)
-        .function("is_column_only", &View<t_ctx0>::is_column_only);
+        .function("is_column_only", &View<t_ctx0>::is_column_only)
+        .function("to_columns", &View<t_ctx0>::to_columns);
+    ;
 
     class_<View<t_ctx1>>("View_ctx1")
         .constructor<std::shared_ptr<Table>, std::shared_ptr<t_ctx1>,
@@ -1954,7 +1957,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_sort", &View<t_ctx1>::get_sort)
         .function("get_step_delta", &View<t_ctx1>::get_step_delta)
         .function("get_column_dtype", &View<t_ctx1>::get_column_dtype)
-        .function("is_column_only", &View<t_ctx1>::is_column_only);
+        .function("is_column_only", &View<t_ctx1>::is_column_only)
+        .function("to_columns", &View<t_ctx1>::to_columns);
 
     class_<View<t_ctx2>>("View_ctx2")
         .constructor<std::shared_ptr<Table>, std::shared_ptr<t_ctx2>,
@@ -1984,7 +1988,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_row_path", &View<t_ctx2>::get_row_path)
         .function("get_step_delta", &View<t_ctx2>::get_step_delta)
         .function("get_column_dtype", &View<t_ctx2>::get_column_dtype)
-        .function("is_column_only", &View<t_ctx2>::is_column_only);
+        .function("is_column_only", &View<t_ctx2>::is_column_only)
+        .function("to_columns", &View<t_ctx2>::to_columns);
 
     /******************************************************************************
      *

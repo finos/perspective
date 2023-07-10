@@ -46,6 +46,7 @@ export function createDataListener() {
             };
 
             columns = await this._view.to_columns(new_window);
+
             this._last_window = new_window;
             this._ids = columns.__ID__;
             this._reverse_columns = this._column_paths

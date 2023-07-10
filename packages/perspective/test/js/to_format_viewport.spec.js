@@ -110,7 +110,6 @@ test.describe("to_format viewport", function () {
             const cols = await view.to_columns({ start_col: 1, end_col: 2 });
             expect(cols).toEqual({
                 __ROW_PATH__: [[], ["a"], ["b"], ["c"], ["d"]],
-                w: [],
                 x: [40, 12, 12, 8, 8],
             });
             view.delete();
@@ -158,7 +157,6 @@ test.describe("to_format viewport", function () {
             const cols = await view.to_columns({ start_col: 1, end_col: 2 });
             expect(cols).toEqual({
                 __ROW_PATH__: [[], ["a"], ["b"], ["c"], ["d"]],
-                "false|w": [],
                 "false|x": [20, 4, 8, 1, 7],
             });
             view.delete();
@@ -221,7 +219,7 @@ test.describe("to_format viewport", function () {
             });
             const cols = await view.to_columns({ start_col: 1, end_col: 2 });
             expect(cols).toEqual({
-                "false|w": [],
+                __ROW_PATH__: [],
                 "false|x": [
                     null,
                     2,

@@ -751,7 +751,79 @@ export default function (Module) {
      * comma-separated column paths.
      */
     view.prototype.to_columns = function (options) {
-        return to_format.call(this, options, formatters.jsonTableFormatter);
+        const schema = this.schema();
+
+        let parsed_json = JSON.parse(this.to_columns_string(options));
+
+        const corrected_json = Object.entries(parsed_json).map(([key, val]) => {
+            let col_type = schema[key];
+            let v = val;
+
+            // Convert date epoch numbers.
+            // Also handle Infinity and -Infinity in floats,
+            // which are returned as strings since JSON doesn't support them.
+            if (col_type === "date" || col_type === "float") {
+                v = val.map((x) => (x !== null ? Number(x) : null));
+            }
+
+            return [key, v];
+        });
+
+        return Object.fromEntries(corrected_json);
+    };
+
+    /**
+     *  Serializes this view to a string of JSON data. Useful if you want to
+     *  save additional round trip serialize/deserialize cycles.
+     */
+    view.prototype.to_columns_string = function (options) {
+        const num_sides = this.sides();
+
+        switch (num_sides) {
+            case 0:
+            case 1:
+
+            case 2:
+                _call_process(this.table.get_id());
+                options = _parse_format_options.bind(this)(options);
+                const start_row = options.start_row;
+                const end_row = options.end_row;
+                const start_col = options.start_col;
+                const end_col = options.end_col;
+                const hidden = this._num_hidden();
+
+                const is_formatted = options.formatted;
+                const get_pkeys = !!options.index;
+                const get_ids = !!options.id;
+                const leaves_only = !!options.leaves_only;
+                const num_sides = this.sides();
+                const has_row_path = num_sides !== 0 && !this.column_only;
+                const nidx = SIDES[num_sides];
+
+                const config = this.get_config();
+                const columns_length = config.columns.length;
+                const group_by_length = config.group_by.length;
+
+                return this._View.to_columns(
+                    start_row,
+                    end_row,
+                    start_col,
+                    end_col,
+                    hidden,
+                    is_formatted,
+                    get_pkeys,
+                    get_ids,
+                    leaves_only,
+                    num_sides,
+                    has_row_path,
+                    nidx,
+                    columns_length,
+                    group_by_length
+                );
+
+            default:
+                throw new Error("Unknown context type");
+        }
     };
 
     /**

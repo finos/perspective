@@ -576,10 +576,6 @@ const data3 = {
                 expect(paths).toEqual(["d|w", "c|w", "b|w", "a|w"]);
                 const answer = {
                     __ROW_PATH__: [],
-                    "a|x": [],
-                    "b|x": [],
-                    "c|x": [],
-                    "d|x": [],
                     "d|w": [null, null, null, 4.5, null, null, null, 8.5],
                     "c|w": [null, null, 3.5, null, null, null, 7.5, null],
                     "b|w": [null, 2.5, null, null, null, 6.5, null, null],
@@ -609,8 +605,6 @@ const data3 = {
                 const result = await view.to_columns();
                 expect(result).toEqual({
                     __ROW_PATH__: [],
-                    "a|y": [],
-                    "b|y": [],
                     "a|x": [null, 1, 2, 3],
                     "b|x": [4, null, null, null],
                 });
@@ -635,8 +629,6 @@ const data3 = {
                 const result = await view.to_columns();
                 expect(result).toEqual({
                     __ROW_PATH__: [],
-                    "a|y": [],
-                    "b|y": [],
                     "b|x": [null, null, null, 4],
                     "a|x": [1, 2, 3, null],
                 });
@@ -668,8 +660,6 @@ const data3 = {
                 const result = await view.to_columns();
                 expect(result).toEqual({
                     __ROW_PATH__: [],
-                    "a|y": [],
-                    "b|y": [],
                     "a|x": [null, 1, 2, 3],
                     "b|x": [4, null, null, null],
                 });
@@ -700,8 +690,6 @@ const data3 = {
                 const result = await view.to_columns();
                 expect(result).toEqual({
                     __ROW_PATH__: [],
-                    "a|y": [],
-                    "b|y": [],
                     "b|x": [null, null, null, 4],
                     "a|x": [1, 2, 3, null],
                 });
@@ -728,8 +716,6 @@ const data3 = {
                 let result = await view.to_columns();
                 expect(result).toEqual({
                     __ROW_PATH__: [],
-                    "a|y": [],
-                    "b|y": [],
                     "b|x": [null, null, null, 4],
                     "a|x": [1, 2, 3, null],
                 });
@@ -781,10 +767,6 @@ const data3 = {
                 expect(paths).toEqual(["__ROW_PATH__", "x|z", "y|z"]);
                 const expected = {
                     __ROW_PATH__: [[], ["a"], ["b"], ["c"]],
-                    "x|x": [],
-                    "x|y": [],
-                    "y|x": [],
-                    "y|y": [],
                     "x|z": [7, 3, null, 4],
                     "y|z": [3, null, 3, null],
                 };
@@ -813,10 +795,6 @@ const data3 = {
                 expect(paths).toEqual(["__ROW_PATH__", "y|z", "x|z"]);
                 const expected = {
                     __ROW_PATH__: [[], ["c"], ["b"], ["a"]],
-                    "x|x": [],
-                    "x|y": [],
-                    "y|x": [],
-                    "y|y": [],
                     "y|z": [3, null, 3, null],
                     "x|z": [7, 4, null, 3],
                 };
@@ -842,11 +820,8 @@ const data3 = {
                 expect(paths).toEqual(["__ROW_PATH__", "a|z", "b|z", "c|z"]);
                 const expected = {
                     __ROW_PATH__: [[], ["x"], ["y"]],
-                    "a|x": [],
                     "a|z": [3, 3, null],
-                    "b|x": [],
                     "b|z": [3, null, 3],
-                    "c|x": [],
                     "c|z": [4, 4, null],
                 };
                 const result = await view.to_columns();
