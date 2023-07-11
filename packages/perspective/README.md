@@ -35,6 +35,7 @@ For more information, see the
         * [.get_index()](#module_perspective..table+get_index)
         * [.get_limit()](#module_perspective..table+get_limit)
         * [.clear()](#module_perspective..table+clear)
+        * [.get_num_views()](#module_perspective..table+get_num_views) ⇒
         * [.replace()](#module_perspective..table+replace)
         * [.delete()](#module_perspective..table+delete)
         * [.on_delete(callback)](#module_perspective..table+on_delete)
@@ -494,6 +495,7 @@ view.remove_delete(callback);
     * [.get_index()](#module_perspective..table+get_index)
     * [.get_limit()](#module_perspective..table+get_limit)
     * [.clear()](#module_perspective..table+clear)
+    * [.get_num_views()](#module_perspective..table+get_num_views) ⇒
     * [.replace()](#module_perspective..table+replace)
     * [.delete()](#module_perspective..table+delete)
     * [.on_delete(callback)](#module_perspective..table+on_delete)
@@ -552,6 +554,17 @@ Remove all rows in this [table](#module_perspective..table) while preserving
 the schema and construction options.
 
 **Kind**: instance method of [<code>table</code>](#module_perspective..table)  
+
+* * *
+
+<a name="module_perspective..table+get_num_views"></a>
+
+#### table.get\_num\_views() ⇒
+**Kind**: instance method of [<code>table</code>](#module_perspective..table)  
+**Returns**: The number of views associated to this table.
+         Note that this may be more than what is visible on a screen.
+         As views are created to manage various internal
+         state of the application.  
 
 * * *
 

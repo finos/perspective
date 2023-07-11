@@ -1,6 +1,11 @@
 # [v2.3.1](https://github.com/finos/perspective/releases/tag/v2.3.1)
 
-_2 July 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.3.0...v2.3.1))
+_4 July 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.3.1...v2.3.1))
+
+
+# [v2.3.1](https://github.com/finos/perspective/releases/tag/v2.3.1)
+
+_4 July 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.3.0...v2.3.1))
 
 Features
 
@@ -9,6 +14,7 @@ Features
 
 Fixes
 
+- Fix racing tests. [#2290](https://github.com/finos/perspective/pull/2290)
 - Fix python segfault in multi-threaded execution [#2283](https://github.com/finos/perspective/pull/2283)
 - Fix OSX arm64 wheels [#2272](https://github.com/finos/perspective/pull/2272)
 - Write custom parser for us locale time string format [#2262](https://github.com/finos/perspective/pull/2262)
