@@ -1529,13 +1529,6 @@ export default function (Module) {
         const expression_idx_map = {};
 
         for (let expression_string of expressions) {
-            if (expression_string.includes('""')) {
-                console.error(
-                    `Skipping expression '${expression_string}', as it cannot reference an empty column!`
-                );
-                continue;
-            }
-
             // Map of column names to column IDs, so that we generate
             // column IDs correctly without collision.
             let column_name_map = {};
