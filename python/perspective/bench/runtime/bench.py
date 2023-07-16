@@ -57,7 +57,7 @@ class VirtualEnvHandler(object):
         """Activates the virtualenv at `VIRTUALENV_PATH`."""
         logging.info("Activating virtualenv at: `{}`".format(self._virtualenv_path))
         self._is_activated = True
-        return "source {}/bin/activate".format(self._virtualenv_path)
+        return ". {}/bin/activate".format(self._virtualenv_path)
 
     def create_virtualenv(self):
         """Clears the folder and creates a new virtualenv at
@@ -223,10 +223,21 @@ class Runner(object):
     def write_results(self):
         if self._table is None:
             return
+
         logging.debug("Writing results to `benchmark-python.arrow`")
+        if not os.path.exists(os.path.dirname(ARROW_PATH)):
+            os.makedirs(os.path.dirname(ARROW_PATH))
+
         with open(ARROW_PATH, "wb") as file:
             arrow = self._table.view().to_arrow()
             file.write(arrow)
+
+        html_path = os.path.join(os.path.dirname(__file__), "benchmark-python.html")
+        out_path = os.path.join(os.path.dirname(ARROW_PATH), "benchmark-python.html")
+        with open(html_path, "r") as input:
+            with open(out_path, "w") as output:
+                output.write(input.read())
+
         self._WROTE_RESULTS = True
 
     def run_method(self, func, *args, **kwargs):
@@ -262,7 +273,7 @@ class Runner(object):
                 if os.path.exists(ARROW_PATH):
                     # if arrow exists, append to it
                     with open(ARROW_PATH, "rb") as arr:
-                        print("Reading table from pre-existing benchmark.arrow")
+                        print("Reading table from pre-existing benchmark-python.arrow")
                         self._table = Table(arr.read())
                     self._table.update([result])
                 else:
