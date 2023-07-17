@@ -83,9 +83,10 @@
         "webpack-dev-server": "^4.11.1"
     },
     "scripts": {
-        "postinstall": "npm-run-all postinstall:emsdk postinstall:playwright",
+        "postinstall": "npm-run-all postinstall:*",
         "postinstall:emsdk": "node tools/perspective-scripts/install_emsdk.mjs",
         "postinstall:playwright": "npx playwright install --with-deps",
+        "postinstall:vscode": "cp -n ./.vscode/settings.default.json ./.vscode/settings.json || true",
         "build,test": "npm run --silent build && npm run --silent test",
         "build_js": "node tools/perspective-scripts/build_js.mjs",
         "build": "node tools/perspective-scripts/build.mjs",
