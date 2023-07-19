@@ -17,9 +17,12 @@ dotenv.config({ path: "./.perspectiverc" });
 const args = process.argv.slice(2);
 
 if (process.env.PSP_PROJECT === undefined || process.env.PSP_PROJECT === "js") {
-    sh`yarn && sudo nice -n -20 npm run bench`
+    sh`yarn && nice -n 0 npm run bench`
         .cwd("tools/perspective-bench")
         .runSync();
 } else {
-    sh`python3 ${args}`.env({ PYTHONPATH: "./python/perspective" }).runSync();
+    sh`PYTHONPATH=python/perspective nice -n 0 python3 python/perspective/bench/runtime/run_perspective_benchmark.py`
+        // .env({ PYTHONPATH: "python/perspective" })
+        .log()
+        .runSync();
 }

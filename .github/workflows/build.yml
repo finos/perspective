@@ -695,6 +695,120 @@ jobs:
             - name: WebAssembly Test
               run: yarn test_js --ci
 
+    #############################         ##############################
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~#         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    #~~~~~~~~~~/########\~~~~~~~#         #~~~~~~~~~|##########|~~~~~~~#
+    #~~~~~~~~~|##|~~~~|##|~~~~~~#         #~~~~~~~~~|##|~~~~~~~~~~~~~~~#
+    #~~~~~~~~~~~~~~~~~|##|~~~~~~#         #~~~~~~~~~|##|~~~~~~~~~~~~~~~#
+    #~~~~~~~~~~~~~|######|~~~~~~#         #~~~~~~~~~|##########|~~~~~~~#
+    #~~~~~~~~~~~~~~~~~|##|~~~~~~#         #~~~~~~~~~~~~~~~~~|##|~~~~~~~#
+    #~~~~~~~~~|##|~~~~|##|~~~~~~#         #~~~~~~~~~|##|~~~~|##|~~~~~~~#
+    #~~~~~~~~~\#########/~~~~~~~#         #~~~~~~~~~|##########|~~~~~~~#
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~#  #####  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    # Stage Three And a Half    #  # . #  # Benchmarking               #
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~#  #####  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    benchmark_js:
+        needs: [build_js]
+        if: startsWith(github.ref, 'refs/tags/v')
+        strategy:
+            matrix:
+                os: [ubuntu-20.04]
+                node-version: [18.x]
+        runs-on: ${{ matrix.os }}
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+
+            ##########
+            # Caches #
+            ##########
+            ################
+            # Yarn Cache
+            - name: Get yarn cache directory path
+              id: yarn-cache-dir-path
+              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+              shell: bash
+              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
+
+            - name: Setup yarn cache
+              uses: actions/cache@v3
+              id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+              with:
+                  path: |
+                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
+                      ~/.cache/ms-playwright
+                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-yarn-
+              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
+
+            - name: Use Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v3
+              with:
+                  node-version: ${{ matrix.node-version }}
+                  cache: "yarn"
+                  cache-dependency-path: yarn.lock
+
+            ################
+            # Dependencies #
+            ################
+            ################
+            # JS
+            - name: Install yarn
+              run: npm install -g yarn
+
+            - name: Install js dependencies
+              run: yarn
+              env:
+                  PSP_SKIP_EMSDK_INSTALL: 1
+
+            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+            #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
+            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-dist
+                  path: packages/perspective/dist/
+
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-jupyterlab-dist
+                  path: packages/perspective-jupyterlab/dist/
+
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-viewer-d3fc-dist
+                  path: packages/perspective-viewer-d3fc/dist
+
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-viewer-datagrid-dist
+                  path: packages/perspective-viewer-datagrid/dist
+
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-viewer-openlayers-dist
+                  path: packages/perspective-viewer-openlayers/dist
+
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-workspace-dist
+                  path: packages/perspective-workspace/dist
+
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-viewer-dist
+                  path: rust/perspective-viewer/dist
+
+            - name: Benchmarks
+              run: yarn bench
+
+            - uses: actions/upload-artifact@v3
+              with:
+                  name: perspective-js-benchmarks
+                  path: tools/perspective-bench/dist/benchmark-js.arrow
+
     ##########################################################################################################################
     ##########################################################################################################################
 
@@ -1034,7 +1148,10 @@ jobs:
               if: ${{ matrix.os == 'macos-11' }}
 
     build_pyodide:
-        runs-on: ubuntu-22.04
+        strategy:
+            matrix:
+                os: [ubuntu-20.04]
+        runs-on: ${{ matrix.os }}
         needs: [initialize]
         env:
             PYODIDE_VERSION: 0.23.2
@@ -1575,6 +1692,132 @@ jobs:
     ##########################################################################################################################
     ##########################################################################################################################
 
+    ############################         ##############################
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~#         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    #~~~~~~|#############|~~~~~#         #~~~~~~~~~|##########|~~~~~~~#
+    #~~~~~~|#|~~~~~~~/##/~~~~~~#         #~~~~~~~~~|##|~~~~~~~~~~~~~~~#
+    #~~~~~~|#|~~~~~/##/~~~~~~~~#         #~~~~~~~~~|##|~~~~~~~~~~~~~~~#
+    #~~~~~~~~~~~~/##/~~~~~~~~~~#         #~~~~~~~~~|##########|~~~~~~~#
+    #~~~~~~~~~~/##/~~~~~~~~~~~~#         #~~~~~~~~~~~~~~~~~|##|~~~~~~~#
+    #~~~~~~~~/##/~~~~~~~~~~~~~~#         #~~~~~~~~~|##|~~~~|##|~~~~~~~#
+    #~~~~~~/##/~~~~~~~~~~~~~~~~#         #~~~~~~~~~|##########|~~~~~~~#
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~#  #####  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    # Stage Seven and a Half   #  # . #  # Benchmarking               #
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~#  #####  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    benchmark_python:
+        ######################################################################
+        # Run Python build first, then use the artifacts in the python tests #
+        ######################################################################
+        needs: [build_python]
+        strategy:
+            matrix:
+                os: [ubuntu-20.04]
+                python-version: [3.9]
+                node-version: [18.x]
+        if: startsWith(github.ref, 'refs/tags/v')
+        runs-on: ${{ matrix.os }}
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+
+            ##########
+            # Caches #
+            ##########
+            ################
+            # Yarn Cache
+            - name: Get yarn cache directory path
+              id: yarn-cache-dir-path
+              run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+              shell: bash
+              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
+
+            - name: Setup yarn cache
+              uses: actions/cache@v3
+              id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+              with:
+                  path: |
+                      ~/.cache/ms-playwright
+                      ${{ steps.yarn-cache-dir-path.outputs.dir }}
+                  key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-yarn-
+              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
+
+            ################
+            # Pip Cache
+            - name: Setup pip cache
+              uses: actions/cache@v3
+              with:
+                  path: ~/.cache/pip
+                  key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
+                  restore-keys: |
+                      ${{ runner.os }}-pip-
+              if: ${{ needs.initialize.outputs.SKIP_CACHE == 'false' }}
+
+            ###############################
+            # Language and Compiler Setup #
+            ###############################
+            - name: Set up Python ${{ matrix.python-version }}
+              uses: actions/setup-python@v4
+              with:
+                  python-version: ${{ matrix.python-version }}
+                  cache: "pip"
+
+            - name: Use Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v3
+              with:
+                  node-version: ${{ matrix.node-version }}
+                  cache: "yarn"
+                  cache-dependency-path: yarn.lock
+
+            ################
+            # Dependencies #
+            ################
+            ################
+            # JS
+            - name: Install yarn
+              run: npm install -g yarn
+
+            - name: Install js dependencies
+              run: yarn
+              env:
+                  PSP_SKIP_EMSDK_INSTALL: 1
+
+            ################
+            # Python
+            - name: Install python dependencies
+              run: yarn _requires_python
+
+            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+            #~~~~~~~~~ Build Pipelines ~~~~~~~~~#
+            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+            #################
+            # Python - Test #
+            #################
+            # Download artifact
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-python-dist-${{ matrix.os }}-${{ matrix.python-version }}
+
+            # Install artifact in-place so tests work as-is
+            - name: Install wheel (Linux)
+              run: python -m pip install -U *manylinux2014*.whl --target python/perspective
+              if: ${{ runner.os == 'Linux' }}
+
+            - name: Run Benchmark
+              run: yarn bench
+              shell: bash
+              env:
+                  PSP_PROJECT: python
+
+            - uses: actions/upload-artifact@v3
+              with:
+                  name: perspective-python-benchmarks
+                  path: tools/perspective-bench/dist/benchmark-python.arrow
+
+    ##########################################################################################################################
+    ##########################################################################################################################
+
     ##########################################
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     #~~~~~~~~~~~~~~~/#########\~~~~~~~~~~~~~~#
@@ -1596,9 +1839,14 @@ jobs:
                 test_python_sdist,
                 build_pyodide,
                 test_js,
+                benchmark_js,
+                benchmark_python,
             ]
         if: startsWith(github.ref, 'refs/tags/v')
-        runs-on: ubuntu-22.04
+        strategy:
+            matrix:
+                os: [ubuntu-20.04]
+        runs-on: ${{ matrix.os }}
         steps:
             - uses: actions/checkout@v2
 
@@ -1734,6 +1982,14 @@ jobs:
               with:
                   name: perspective-python-sdist
 
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-js-benchmarks
+
+            - uses: actions/download-artifact@v3
+              with:
+                  name: perspective-python-benchmarks
+
             - name: NPM pack
               run: |
                   npm pack \
@@ -1760,5 +2016,6 @@ jobs:
                       *.whl
                       *.tar.gz
                       *.tgz
+                      *.arrow
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

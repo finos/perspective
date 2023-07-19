@@ -34,9 +34,19 @@ async function persist_to_arrow(obs_records) {
     const view = await table.view();
     await table.update(obs_records);
     const arrow = await view.to_arrow();
+    if (!fs.existsSync(path.join(__dirname, "../../dist/"))) {
+        fs.mkdirSync(path.join(__dirname, "../../dist/"));
+    }
+
     fs.writeFileSync(
-        path.join(__dirname, "../../dist/benchmark.arrow"),
+        path.join(__dirname, "../../dist/benchmark-js.arrow"),
         Buffer.from(arrow),
+        "binary"
+    );
+
+    fs.writeFileSync(
+        path.join(__dirname, "../../dist/benchmark.html"),
+        fs.readFileSync(path.join(__dirname, "../html/benchmark.html")),
         "binary"
     );
 }

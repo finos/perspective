@@ -17,7 +17,13 @@ import logging
 
 if __name__ == "__main__":
     """Benchmark the `perspective-python` runtime locally."""
-    VERSIONS = ["master", "2.2.1", "2.2.0"]
+    VERSIONS = [
+        "master",
+        "2.3.1",
+        # "2.3.0",
+        "2.2.1",
+        "2.2.0",
+    ]
 
     # Access the benchmark virtualenv
     HERE = os.path.abspath(os.path.dirname(__file__))

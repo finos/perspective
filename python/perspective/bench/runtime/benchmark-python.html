@@ -37,12 +37,13 @@
             window.addEventListener("DOMContentLoaded", async () => {
                 const el = document.getElementsByTagName("perspective-viewer")[0];
                 el.addEventListener("perspective-config-update", async () => localStorage.setItem("layout", JSON.stringify(await el.save())));
-                const req = await fetch("benchmark-js.arrow");
+                const req = await fetch("benchmark-python.arrow");
                 const arrow = await req.arrayBuffer();
                 const worker = perspective.worker();
                 const table = await worker.table(arrow);
                 el.load(table);
                 el.restore(JSON.parse(localStorage.getItem("layout")));
+                el.toggleConfig();
             });
         </script>
     </body>
