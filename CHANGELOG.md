@@ -1,7 +1,17 @@
-# [v2.3.1](https://github.com/finos/perspective/releases/tag/v2.3.1)
+# [v2.3.2](https://github.com/finos/perspective/releases/tag/v2.3.2)
 
-_4 July 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.3.1...v2.3.1))
+_20 July 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.3.1...v2.3.2))
 
+Fixes
+
+- Fix expression column aggregate calculation with `group_by` after `remove()` [#2311](https://github.com/finos/perspective/pull/2311)
+- Fix empty column name validation in ExprTk editor [#2302](https://github.com/finos/perspective/pull/2302)
+- Fix XY-Scatter Plots Colors - Rebased [#2303](https://github.com/finos/perspective/pull/2303)
+
+Misc
+
+- Publish benchmarks [#2310](https://github.com/finos/perspective/pull/2310)
+- Add GitHub Releases [#2294](https://github.com/finos/perspective/pull/2294)
 
 # [v2.3.1](https://github.com/finos/perspective/releases/tag/v2.3.1)
 
