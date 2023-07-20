@@ -46,6 +46,11 @@ t_expression_tables::t_expression_tables(
     m_transitions->init();
 }
 
+t_data_table*
+t_expression_tables::get_table() const {
+    return m_master.get();
+}
+
 void
 t_expression_tables::calculate_transitions(
     std::shared_ptr<t_data_table> existed) {

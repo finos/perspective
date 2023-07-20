@@ -467,7 +467,7 @@ t_gnode::update_context_from_state(CTX_T* ctx, const std::string& name,
         std::shared_ptr<t_expression_tables> ctx_expression_tables
             = ctx->get_expression_tables();
         std::shared_ptr<t_data_table> joined_flattened
-            = flattened->join(ctx_expression_tables->m_master);
+            = flattened->join(ctx_expression_tables->m_flattened);
         ctx->notify(*joined_flattened);
     } else {
         // Just use the table from the gnode

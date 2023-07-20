@@ -52,6 +52,8 @@ struct t_expression_tables {
 
     void reset();
 
+    t_data_table* get_table() const;
+
     // master table is calculated from t_gstate's master table
     std::shared_ptr<t_data_table> m_master;
 
