@@ -871,8 +871,8 @@ t_gnode::_register_context(
             ctx->reset();
 
             if (should_update) {
-                ctx->compute_expressions(
-                    pkeyed_table, expression_vocab, expression_regex_mapping);
+                ctx->compute_expressions(m_gstate->get_table(), pkeyed_table,
+                    expression_vocab, expression_regex_mapping);
                 update_context_from_state<t_ctx2>(ctx, name, pkeyed_table);
             }
         } break;
@@ -880,10 +880,10 @@ t_gnode::_register_context(
             set_ctx_state<t_ctx1>(ptr_);
             t_ctx1* ctx = static_cast<t_ctx1*>(ptr_);
             ctx->reset();
-
             if (should_update) {
-                ctx->compute_expressions(
-                    pkeyed_table, expression_vocab, expression_regex_mapping);
+                ctx->compute_expressions(m_gstate->get_table(), pkeyed_table,
+                    expression_vocab, expression_regex_mapping);
+
                 update_context_from_state<t_ctx1>(ctx, name, pkeyed_table);
             }
         } break;
@@ -891,10 +891,9 @@ t_gnode::_register_context(
             set_ctx_state<t_ctx0>(ptr_);
             t_ctx0* ctx = static_cast<t_ctx0*>(ptr_);
             ctx->reset();
-
             if (should_update) {
-                ctx->compute_expressions(
-                    pkeyed_table, expression_vocab, expression_regex_mapping);
+                ctx->compute_expressions(m_gstate->get_table(), pkeyed_table,
+                    expression_vocab, expression_regex_mapping);
                 update_context_from_state<t_ctx0>(ctx, name, pkeyed_table);
             }
         } break;
@@ -914,8 +913,8 @@ t_gnode::_register_context(
             ctx->reset();
 
             if (should_update) {
-                ctx->compute_expressions(
-                    pkeyed_table, expression_vocab, expression_regex_mapping);
+                ctx->compute_expressions(m_gstate->get_table(), pkeyed_table,
+                    expression_vocab, expression_regex_mapping);
                 update_context_from_state<t_ctx_grouped_pkey>(
                     ctx, name, pkeyed_table);
             }
@@ -999,23 +998,27 @@ t_gnode::_compute_expressions(std::shared_ptr<t_data_table> flattened_masked) {
         switch (ctxh.get_type()) {
             case TWO_SIDED_CONTEXT: {
                 t_ctx2* ctx = static_cast<t_ctx2*>(ctxh.m_ctx);
-                ctx->compute_expressions(flattened_masked, expression_vocab,
+                ctx->compute_expressions(m_gstate->get_table(),
+                    flattened_masked, expression_vocab,
                     expression_regex_mapping);
             } break;
             case ONE_SIDED_CONTEXT: {
                 t_ctx1* ctx = static_cast<t_ctx1*>(ctxh.m_ctx);
-                ctx->compute_expressions(flattened_masked, expression_vocab,
+                ctx->compute_expressions(m_gstate->get_table(),
+                    flattened_masked, expression_vocab,
                     expression_regex_mapping);
             } break;
             case ZERO_SIDED_CONTEXT: {
                 t_ctx0* ctx = static_cast<t_ctx0*>(ctxh.m_ctx);
-                ctx->compute_expressions(flattened_masked, expression_vocab,
+                ctx->compute_expressions(m_gstate->get_table(),
+                    flattened_masked, expression_vocab,
                     expression_regex_mapping);
             } break;
             case GROUPED_PKEY_CONTEXT: {
                 t_ctx_grouped_pkey* ctx
                     = static_cast<t_ctx_grouped_pkey*>(ctxh.m_ctx);
-                ctx->compute_expressions(flattened_masked, expression_vocab,
+                ctx->compute_expressions(m_gstate->get_table(),
+                    flattened_masked, expression_vocab,
                     expression_regex_mapping);
             } break;
             case UNIT_CONTEXT:
