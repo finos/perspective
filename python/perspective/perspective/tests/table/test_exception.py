@@ -22,10 +22,7 @@ class TestException(object):
             # creating view with unknown column should throw
             tbl.view(group_by=["b"])
 
-        assert (
-            str(ex.value)
-            == "Invalid column 'b' found in View group_by.\n"
-        )
+        assert str(ex.value) == "Invalid column 'b' found in View group_by.\n"
 
     def test_exception_from_core_catch_generic(self):
         tbl = Table({"a": [1, 2, 3]})
@@ -33,10 +30,7 @@ class TestException(object):
         with raises(Exception) as ex:
             tbl.view(group_by=["b"])
 
-        assert (
-            str(ex.value)
-            == "Invalid column 'b' found in View group_by.\n"
-        )
+        assert str(ex.value) == "Invalid column 'b' found in View group_by.\n"
 
     def test_exception_from_core_correct_types(self):
         tbl = Table({"a": [1, 2, 3]})
@@ -46,15 +40,9 @@ class TestException(object):
             tbl.view()
             tbl.delete()
 
-        assert (
-            str(ex.value)
-            == "Cannot delete a Table with active views still linked to it - call delete() on each view, and try again."
-        )
+        assert str(ex.value) == "Cannot delete a Table with active views still linked to it - call delete() on each view, and try again."
 
         with raises(PerspectiveCppError) as ex:
             tbl.view(group_by=["b"])
 
-        assert (
-            str(ex.value)
-            == "Invalid column 'b' found in View group_by.\n"
-        )
+        assert str(ex.value) == "Invalid column 'b' found in View group_by.\n"

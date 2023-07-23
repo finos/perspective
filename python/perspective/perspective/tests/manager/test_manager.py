@@ -464,9 +464,7 @@ class TestPerspectiveManager(object):
         manager._process(message, post_callback)
 
     def test_manager_view_expression_schema(self):
-        post_callback = partial(
-            self.validate_post, expected={"id": 2, "data": {"abc": "float"}}
-        )
+        post_callback = partial(self.validate_post, expected={"id": 2, "data": {"abc": "float"}})
 
         make_view_message = {
             "id": 1,
@@ -558,9 +556,7 @@ class TestPerspectiveManager(object):
         assert s.get() is True
 
     def test_manager_to_dict_with_nan(self, util, sentinel):
-        data = util.make_arrow(
-            ["a"], [[1.5, np.nan, 2.5, np.nan]], types=[pa.float64()]
-        )
+        data = util.make_arrow(["a"], [[1.5, np.nan, 2.5, np.nan]], types=[pa.float64()])
         s = sentinel(False)
 
         def handle_to_dict(msg):

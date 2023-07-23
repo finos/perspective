@@ -125,9 +125,7 @@ class TestPerspectiveTornadoHandler(object):
         assert size2 == 20
 
     @pytest.mark.gen_test(run_sync=False)
-    async def test_tornado_handler_table_update_port(
-        self, app, http_client, http_port, sentinel
-    ):
+    async def test_tornado_handler_table_update_port(self, app, http_client, http_port, sentinel):
         table_name = str(random.random())
         _table = Table(data)
         MANAGER.host_table(table_name, _table)
@@ -160,9 +158,7 @@ class TestPerspectiveTornadoHandler(object):
         assert s.get() is True
 
     @pytest.mark.gen_test(run_sync=False)
-    async def test_tornado_handler_table_update_row_delta(
-        self, app, http_client, http_port, sentinel
-    ):
+    async def test_tornado_handler_table_update_row_delta(self, app, http_client, http_port, sentinel):
         table_name = str(random.random())
         _table = Table(data)
         MANAGER.host_table(table_name, _table)
@@ -192,9 +188,7 @@ class TestPerspectiveTornadoHandler(object):
         assert s.get() is True
 
     @pytest.mark.gen_test(run_sync=False)
-    async def test_tornado_handler_table_update_row_delta_port(
-        self, app, http_client, http_port, sentinel
-    ):
+    async def test_tornado_handler_table_update_row_delta_port(self, app, http_client, http_port, sentinel):
         table_name = str(random.random())
         _table = Table(data)
         MANAGER.host_table(table_name, _table)
@@ -248,9 +242,7 @@ class TestPerspectiveTornadoHandler(object):
         assert output == {"a": [i for i in range(5, 10)]}
 
     @pytest.mark.gen_test(run_sync=False)
-    async def test_tornado_handler_create_view(
-        self, app, http_client, http_port, sentinel
-    ):
+    async def test_tornado_handler_create_view(self, app, http_client, http_port, sentinel):
         table_name = str(random.random())
         _table = Table(data)
         MANAGER.host_table(table_name, _table)
@@ -265,9 +257,7 @@ class TestPerspectiveTornadoHandler(object):
         }
 
     @pytest.mark.gen_test(run_sync=False)
-    async def test_tornado_handler_create_view_errors(
-        self, app, http_client, http_port, sentinel
-    ):
+    async def test_tornado_handler_create_view_errors(self, app, http_client, http_port, sentinel):
         table_name = str(random.random())
         _table = Table(data)
         MANAGER.host_table(table_name, _table)
@@ -281,9 +271,7 @@ class TestPerspectiveTornadoHandler(object):
         assert str(exc.value) == "Invalid column 'abcde' found in View columns.\n"
 
     @pytest.mark.gen_test(run_sync=False)
-    async def test_tornado_handler_create_view_to_arrow(
-        self, app, http_client, http_port, sentinel
-    ):
+    async def test_tornado_handler_create_view_to_arrow(self, app, http_client, http_port, sentinel):
         table_name = str(random.random())
         _table = Table(data)
         MANAGER.host_table(table_name, _table)
@@ -297,9 +285,7 @@ class TestPerspectiveTornadoHandler(object):
         assert Table(output).schema(as_string=True) == expected
 
     @pytest.mark.gen_test(run_sync=False)
-    async def test_tornado_handler_create_view_to_arrow_update(
-        self, app, http_client, http_port, sentinel
-    ):
+    async def test_tornado_handler_create_view_to_arrow_update(self, app, http_client, http_port, sentinel):
         table_name = str(random.random())
         _table = Table(data)
         MANAGER.host_table(table_name, _table)

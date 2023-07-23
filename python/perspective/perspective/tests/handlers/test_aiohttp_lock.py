@@ -59,9 +59,7 @@ class TestPerspectiveAIOHTTPHandlerChunked(object):
         Perspective aiottp server.
         """
         client = await aiohttp_client(app)
-        return await websocket(
-            "http://{}:{}/websocket".format(client.host, client.port), client.session
-        )
+        return await websocket("http://{}:{}/websocket".format(client.host, client.port), client.session)
 
     @pytest.mark.asyncio
     async def test_aiohttp_handler_lock_inflight(self, app, aiohttp_client):

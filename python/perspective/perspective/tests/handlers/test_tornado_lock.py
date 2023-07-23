@@ -83,9 +83,7 @@ class TestPerspectiveTornadoHandlerChunked(object):
         return client
 
     @pytest.mark.gen_test(run_sync=False)
-    async def test_tornado_handler_lock_inflight(
-        self, app, http_client, http_port, sentinel
-    ):
+    async def test_tornado_handler_lock_inflight(self, app, http_client, http_port, sentinel):
         table_name = str(random.random())
         _table = Table(data)
         MANAGER.host_table(table_name, _table)

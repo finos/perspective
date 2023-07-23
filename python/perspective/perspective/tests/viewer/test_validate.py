@@ -17,7 +17,6 @@ import perspective.viewer.validate as validate
 
 
 class TestValidate:
-
     def test_validate_plugin_valid_instance(self):
         assert validate.validate_plugin(Plugin.XBAR) == "X Bar"
 

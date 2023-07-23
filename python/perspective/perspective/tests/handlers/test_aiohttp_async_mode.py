@@ -67,9 +67,7 @@ class TestPerspectiveAIOHttpHandlerAsyncMode(object):
 
     async def websocket_client(self, app, aiohttp_client):
         client = await aiohttp_client(app)
-        return await websocket(
-            "http://{}:{}/websocket".format(client.host, client.port), client.session
-        )
+        return await websocket("http://{}:{}/websocket".format(client.host, client.port), client.session)
 
     @pytest.mark.asyncio
     async def test_aiohttp_handler_async_manager_thread(self, app, aiohttp_client):

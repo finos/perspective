@@ -30,30 +30,14 @@ class TestWidget:
         widget = PerspectiveWidget(data, plugin="X Bar")
         assert widget.plugin == "X Bar"
         load_msg = widget._make_load_message()
-        assert load_msg.to_dict() == {
-            "id": -2,
-            "type": "table",
-            "data": {
-                "table_name": widget.table_name,
-                "options": {}
-            }
-        }
+        assert load_msg.to_dict() == {"id": -2, "type": "table", "data": {"table_name": widget.table_name, "options": {}}}
 
     def test_widget_indexed(self):
         data = {"a": np.arange(0, 50)}
         widget = PerspectiveWidget(data, plugin="X Bar", index="a")
         assert widget.plugin == "X Bar"
         load_msg = widget._make_load_message()
-        assert load_msg.to_dict() == {
-            "id": -2,
-            "type": "table",
-            "data": {
-                "table_name": widget.table_name,
-                "options": {
-                    "index": "a"
-                }
-            }
-        }
+        assert load_msg.to_dict() == {"id": -2, "type": "table", "data": {"table_name": widget.table_name, "options": {"index": "a"}}}
 
     def test_widget_no_data(self):
         widget = PerspectiveWidget(None, plugin="X Bar", group_by=["a"])
@@ -61,14 +45,7 @@ class TestWidget:
         assert widget.group_by == ["a"]
 
     def test_widget_schema(self):
-        schema = {
-            "a": int,
-            "b": float,
-            "c": bool,
-            "d": date,
-            "e": datetime,
-            "f": str
-        }
+        schema = {"a": int, "b": float, "c": bool, "d": date, "e": datetime, "f": str}
         widget = PerspectiveWidget(schema)
         assert widget.table.schema() == schema
 
@@ -101,14 +78,7 @@ class TestWidget:
         widget.load(table)
 
         load_msg = widget._make_load_message()
-        assert load_msg.to_dict() == {
-            "id": -2,
-            "type": "table",
-            "data": {
-                "table_name": widget.table_name,
-                "options": {}
-            }
-        }
+        assert load_msg.to_dict() == {"id": -2, "type": "table", "data": {"table_name": widget.table_name, "options": {}}}
 
     def test_widget_eventual_data_server(self):
         widget = PerspectiveWidget(None, plugin="X Bar", server=True)
@@ -120,7 +90,7 @@ class TestWidget:
             "type": "table",
             "data": {
                 "table_name": widget.table_name,
-            }
+            },
         }
 
     def test_widget_eventual_data_indexed(self):
@@ -128,16 +98,7 @@ class TestWidget:
         assert widget.plugin == "X Bar"
         widget.load({"a": np.arange(0, 50)}, index="a")
         load_msg = widget._make_load_message()
-        assert load_msg.to_dict() == {
-            "id": -2,
-            "type": "table",
-            "data": {
-                "table_name": widget.table_name,
-                "options": {
-                    "index": "a"
-                }
-            }
-        }
+        assert load_msg.to_dict() == {"id": -2, "type": "table", "data": {"table_name": widget.table_name, "options": {"index": "a"}}}
 
     def test_widget_eventual_table_indexed(self):
         table = Table({"a": np.arange(0, 50)}, index="a")
@@ -145,46 +106,21 @@ class TestWidget:
         assert widget.plugin == "X Bar"
         widget.load(table)
         load_msg = widget._make_load_message()
-        assert load_msg.to_dict() == {
-            "id": -2,
-            "type": "table",
-            "data": {
-                "table_name": widget.table_name,
-                "options": {
-                    "index": "a"
-                }
-            }
-        }
+        assert load_msg.to_dict() == {"id": -2, "type": "table", "data": {"table_name": widget.table_name, "options": {"index": "a"}}}
 
     def test_widget_load_table(self):
         table = Table({"a": np.arange(0, 50)})
         widget = PerspectiveWidget(table, plugin="X Bar")
         assert widget.plugin == "X Bar"
         load_msg = widget._make_load_message()
-        assert load_msg.to_dict() == {
-            "id": -2,
-            "type": "table",
-            "data": {
-                "table_name": widget.table_name,
-                "options": {}
-            }
-        }
+        assert load_msg.to_dict() == {"id": -2, "type": "table", "data": {"table_name": widget.table_name, "options": {}}}
 
     def test_widget_load_table_indexed(self):
         table = Table({"a": np.arange(0, 50)}, index="a")
         widget = PerspectiveWidget(table, plugin="X Bar")
         assert widget.plugin == "X Bar"
         load_msg = widget._make_load_message()
-        assert load_msg.to_dict() == {
-            "id": -2,
-            "type": "table",
-            "data": {
-                "table_name": widget.table_name,
-                "options": {
-                    "index": "a"
-                }
-            }
-        }
+        assert load_msg.to_dict() == {"id": -2, "type": "table", "data": {"table_name": widget.table_name, "options": {"index": "a"}}}
 
     def test_widget_load_table_ignore_limit(self):
         table = Table({"a": np.arange(0, 50)})
@@ -211,13 +147,7 @@ class TestWidget:
         table = Table({"a": np.arange(0, 50)})
         widget = PerspectiveWidget(table, server=True)
         load_msg = widget._make_load_message()
-        assert load_msg.to_dict() == {
-            "id": -2,
-            "type": "table",
-            "data": {
-                "table_name": widget.table_name
-            }
-        }
+        assert load_msg.to_dict() == {"id": -2, "type": "table", "data": {"table_name": widget.table_name}}
 
     def test_widget_no_data_with_server(self):
         # should fail
@@ -235,13 +165,7 @@ class TestWidget:
         # then succeed
         widget.load(Table({"a": np.arange(0, 50)}))
         load_msg = widget._make_load_message()
-        assert load_msg.to_dict() == {
-            "id": -2,
-            "type": "table",
-            "data": {
-                "table_name": widget.table_name
-            }
-        }
+        assert load_msg.to_dict() == {"id": -2, "type": "table", "data": {"table_name": widget.table_name}}
 
     # clear
 
@@ -276,9 +200,7 @@ class TestWidget:
     def test_widget_delete(self):
         data = {"a": np.arange(0, 50)}
         widget = PerspectiveWidget(data)
-        mocked_post = partial(mock_post, assert_msg={
-            "cmd": "delete"
-        })
+        mocked_post = partial(mock_post, assert_msg={"cmd": "delete"})
         widget.post = MethodType(mocked_post, widget)
         widget.delete()
         assert widget.table is None
@@ -294,9 +216,7 @@ class TestWidget:
 
         assert len(widget.manager._views) == 1
 
-        mocked_post = partial(mock_post, assert_msg={
-            "cmd": "delete"
-        })
+        mocked_post = partial(mock_post, assert_msg={"cmd": "delete"})
 
         widget.post = MethodType(mocked_post, widget)
         widget.delete()

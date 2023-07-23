@@ -17,7 +17,6 @@ from pytest import mark
 
 
 class TestTableInfer(object):
-
     def test_table_infer_int(self):
         data = {"a": [None, None, None, None, 1, 0, 1, 1, 1]}
         tbl = Table(data)
@@ -32,38 +31,20 @@ class TestTableInfer(object):
         bool_data = [{"a": True, "b": False}, {"a": True, "b": True}]
         tbl = Table(bool_data)
         assert tbl.size() == 2
-        assert tbl.schema() == {
-            "a": bool,
-            "b": bool
-        }
+        assert tbl.schema() == {"a": bool, "b": bool}
 
     def test_table_infer_bool_str(self):
         bool_data = [{"a": "True", "b": "False"}, {"a": "True", "b": "True"}]
         tbl = Table(bool_data)
         assert tbl.size() == 2
-        assert tbl.schema() == {
-            "a": bool,
-            "b": bool
-        }
+        assert tbl.schema() == {"a": bool, "b": bool}
 
     def test_table_bool_infer_str_all_formats_from_schema(self):
-        bool_data = [
-            {"a": "True", "b": "False"},
-            {"a": "t", "b": "f"},
-            {"a": "true", "b": "false"},
-            {"a": 1, "b": 0},
-            {"a": "on", "b": "off"}
-        ]
+        bool_data = [{"a": "True", "b": "False"}, {"a": "t", "b": "f"}, {"a": "true", "b": "false"}, {"a": 1, "b": 0}, {"a": "on", "b": "off"}]
         tbl = Table(bool_data)
-        assert tbl.schema() == {
-            "a": bool,
-            "b": bool
-        }
+        assert tbl.schema() == {"a": bool, "b": bool}
         assert tbl.size() == 5
-        assert tbl.view().to_dict() == {
-            "a": [True, True, True, True, True],
-            "b": [False, False, False, False, False]
-        }
+        assert tbl.view().to_dict() == {"a": [True, True, True, True, True], "b": [False, False, False, False, False]}
 
     def test_table_infer_bool(self):
         data = {"a": [None, None, None, None, True, True, True]}
@@ -159,7 +140,7 @@ class TestTableInfer(object):
         assert tbl.schema() == {"a": datetime}
 
     def test_table_strict_datetime_infer(self):
-        data = {"a": ['10', '9', '8', '7', '6', '5', '4', '3', '2', '1']}
+        data = {"a": ["10", "9", "8", "7", "6", "5", "4", "3", "2", "1"]}
         tbl = Table(data)
         assert tbl.schema() == {"a": str}
 

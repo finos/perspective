@@ -73,9 +73,7 @@ class Util:
 
         batch = pa.RecordBatch.from_arrays(arrays, names)
         table = pa.Table.from_batches([batch])
-        writer = pa.RecordBatchStreamWriter(
-            stream, table.schema, use_legacy_format=legacy
-        )
+        writer = pa.RecordBatchStreamWriter(stream, table.schema, use_legacy_format=legacy)
 
         writer.write_table(table)
         writer.close()
@@ -96,9 +94,7 @@ class Util:
         stream = pa.BufferOutputStream()
         table = pa.Table.from_pandas(df, schema=schema)
 
-        writer = pa.RecordBatchStreamWriter(
-            stream, table.schema, use_legacy_format=legacy
-        )
+        writer = pa.RecordBatchStreamWriter(stream, table.schema, use_legacy_format=legacy)
 
         writer.write_table(table)
         writer.close()
@@ -138,9 +134,7 @@ class Util:
 
         batch = pa.RecordBatch.from_arrays(arrays, names)
         table = pa.Table.from_batches([batch])
-        writer = pa.RecordBatchStreamWriter(
-            stream, table.schema, use_legacy_format=legacy
-        )
+        writer = pa.RecordBatchStreamWriter(stream, table.schema, use_legacy_format=legacy)
 
         writer.write_table(table)
         writer.close()
@@ -220,9 +214,7 @@ def superstore(count=100):
         dat["Row ID"] = id
         dat["Order ID"] = "{}-{}".format(fake.ein(), fake.zipcode())
         dat["Order Date"] = fake.date_this_year()
-        dat["Ship Date"] = fake.date_between_dates(dat["Order Date"]).strftime(
-            "%Y-%m-%d"
-        )
+        dat["Ship Date"] = fake.date_between_dates(dat["Order Date"]).strftime("%Y-%m-%d")
         dat["Order Date"] = dat["Order Date"].strftime("%Y-%m-%d")
         dat["Ship Mode"] = choice(["First Class", "Standard Class", "Second Class"])
         dat["Ship Mode"] = choice(["First Class", "Standard Class", "Second Class"])

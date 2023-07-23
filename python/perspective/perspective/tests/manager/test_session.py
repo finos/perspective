@@ -19,7 +19,7 @@ data = {"a": [1, 2, 3], "b": ["a", "b", "c"]}
 
 class TestPerspectiveSession(object):
     def post(self, msg):
-        '''boilerplate callback to simulate a client's `post()` method.'''
+        """boilerplate callback to simulate a client's `post()` method."""
         msg = json.loads(msg)
         assert msg["id"] is not None
 
@@ -66,10 +66,7 @@ class TestPerspectiveSession(object):
 
             message = json.loads(msg)
 
-            assert message["data"] == {
-                "a": [1, 2, 3, 1, 2, 3],
-                "b": ["a", "b", "c", "str1", "str2", "str3"]
-            }
+            assert message["data"] == {"a": [1, 2, 3, 1, 2, 3], "b": ["a", "b", "c", "str1", "str2", "str3"]}
 
         manager = PerspectiveManager()
         sessions = [manager.new_session() for i in range(5)]
@@ -127,9 +124,7 @@ class TestPerspectiveSession(object):
             s.set(s.get() + 100)
 
         # simulate a client that holds callbacks by id
-        callbacks = {
-            3: callback
-        }
+        callbacks = {3: callback}
 
         def post_update(msg):
             # when `on_update` is triggered, this callback gets the message
@@ -138,9 +133,7 @@ class TestPerspectiveSession(object):
             assert message["id"] is not None
             if message["id"] == 3:
                 # trigger callback
-                assert message["data"] == {
-                    "port_id": 0
-                }
+                assert message["data"] == {"port_id": 0}
                 callbacks[message["id"]](message["data"])
 
         # hook into the created view and pass it the callback
@@ -194,9 +187,7 @@ class TestPerspectiveSession(object):
             s.set(s.get() + 100)
 
         # simulate a client that holds callbacks by id
-        callbacks = {
-            3: callback
-        }
+        callbacks = {3: callback}
 
         def post_update(msg):
             # when `on_update` is triggered, this callback gets the message
@@ -205,9 +196,7 @@ class TestPerspectiveSession(object):
             assert message["id"] is not None
             if message["id"] == 3:
                 # trigger callback
-                assert message["data"] == {
-                    "port_id": 0
-                }
+                assert message["data"] == {"port_id": 0}
                 callbacks[message["id"]](message["data"])
 
         # create a view and an on_update on each session
@@ -243,7 +232,7 @@ class TestPerspectiveSession(object):
 
         assert "view" + str(random_session_id) not in manager._views.keys()
         assert len(manager._views.keys()) == 4
-        
+
         for callback in manager._callback_cache:
             assert callback["client_id"] != random_client_id
 
