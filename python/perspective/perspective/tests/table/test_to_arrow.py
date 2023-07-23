@@ -25,7 +25,15 @@ class TestToArrow(object):
         assert tbl2.view().to_dict() == data
 
     def test_to_arrow_big_numbers_symmetric(self):
-        data = {"a": [1, 2, 3, 4], "b": [1.7976931348623157e308, 1.7976931348623157e308, 1.7976931348623157e308, 1.7976931348623157e308]}
+        data = {
+            "a": [1, 2, 3, 4],
+            "b": [
+                1.7976931348623157e308,
+                1.7976931348623157e308,
+                1.7976931348623157e308,
+                1.7976931348623157e308,
+            ],
+        }
         tbl = Table(data)
         assert tbl.schema() == {"a": int, "b": float}
         arr = tbl.view().to_arrow()
@@ -185,7 +193,7 @@ class TestToArrow(object):
         assert tbl.schema() == {"a": int, "b": float}
         arr = tbl.view().to_arrow(start_row=2, end_row=2)
         tbl2 = Table(arr)
-        assert tbl2.view().to_dict() == {}
+        assert tbl2.view().to_dict() == {"a": [], "b": []}
 
     def test_to_arrow_start_row_invalid(self):
         data = {"a": [None, 1, None, 2, 3], "b": [1.5, 2.5, None, 3.5, None]}

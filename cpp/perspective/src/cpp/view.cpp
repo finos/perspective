@@ -173,7 +173,7 @@ View<CTX_T>::column_names(bool skip, std::int32_t depth) const {
 
     for (t_uindex key = 0, max = m_ctx->unity_get_column_count(); key != max;
          ++key) {
-        std::string name = aggregate_names[key % aggregate_names.size()];
+        const std::string& name = aggregate_names[key % aggregate_names.size()];
 
         if (name == "psp_okey") {
             continue;
@@ -326,9 +326,9 @@ View<t_ctxunit>::schema() const {
 template <>
 std::map<std::string, std::string>
 View<t_ctx0>::schema() const {
-    t_schema schema = m_ctx->get_schema();
-    std::vector<t_dtype> _types = schema.types();
-    std::vector<std::string> names = schema.columns();
+    const t_schema& schema = m_ctx->get_schema();
+    const std::vector<t_dtype>& _types = schema.types();
+    const std::vector<std::string>& names = schema.columns();
 
     std::map<std::string, t_dtype> types;
     for (std::size_t i = 0, max = names.size(); i != max; ++i) {
@@ -364,7 +364,7 @@ View<CTX_T>::expression_schema() const {
     }
 
     for (const auto& expr : m_expressions) {
-        std::string expression_alias = expr->get_expression_alias();
+        const std::string& expression_alias = expr->get_expression_alias();
         new_schema[expression_alias] = dtype_to_str(expr->get_dtype());
 
         if (m_row_pivots.size() > 0 && !is_column_only()) {
@@ -385,9 +385,9 @@ View<t_ctxunit>::expression_schema() const {
 template <>
 std::map<std::string, std::string>
 View<t_ctx0>::expression_schema() const {
-    t_schema schema = m_ctx->get_schema();
-    std::vector<t_dtype> _types = schema.types();
-    std::vector<std::string> names = schema.columns();
+    const t_schema& schema = m_ctx->get_schema();
+    const std::vector<t_dtype>& _types = schema.types();
+    const std::vector<std::string>& names = schema.columns();
 
     std::map<std::string, t_dtype> types;
     for (std::size_t i = 0, max = names.size(); i != max; ++i) {
@@ -397,7 +397,7 @@ View<t_ctx0>::expression_schema() const {
     std::map<std::string, std::string> new_schema;
 
     for (const auto& expr : m_expressions) {
-        std::string expression_alias = expr->get_expression_alias();
+        const std::string& expression_alias = expr->get_expression_alias();
         new_schema[expression_alias] = dtype_to_str(expr->get_dtype());
     }
 
@@ -1394,19 +1394,11 @@ View<CTX_T>::_map_aggregate_types(
 
 template <typename CTX_T>
 void
-View<CTX_T>::write_scalar(t_tscalar scalar,
+View<CTX_T>::write_scalar(t_tscalar scalar, bool is_formatted,
     rapidjson::Writer<rapidjson::StringBuffer>& writer) const {
 
-    auto str_val = scalar.to_string();
-
-    if (str_val == "null" || str_val == "nan") {
+    if (!scalar.is_valid()) {
         writer.Null();
-        return;
-    } else if (str_val == "inf") {
-        writer.String("Infinity");
-        return;
-    } else if (str_val == "-inf") {
-        writer.String("-Infinity");
         return;
     }
 
@@ -1418,38 +1410,55 @@ View<CTX_T>::write_scalar(t_tscalar scalar,
             writer.Bool(scalar.get<bool>());
             break;
         case DTYPE_UINT8:
-        case DTYPE_UINT16:
-        case DTYPE_UINT32:
         case DTYPE_INT8:
             writer.Int(scalar.get<int8_t>());
             break;
+        case DTYPE_UINT16:
         case DTYPE_INT16:
             writer.Int(scalar.get<int16_t>());
             break;
+        case DTYPE_UINT32:
         case DTYPE_INT32:
             writer.Int(scalar.get<int32_t>());
             break;
+        case DTYPE_UINT64:
         case DTYPE_INT64:
             writer.Int64(scalar.get<int64_t>());
             break;
         case DTYPE_FLOAT32:
-            writer.Double(scalar.get<float>());
+            if (scalar.is_nan()) {
+                writer.Null();
+            } else {
+                writer.Double(scalar.get<float>());
+            }
             break;
         case DTYPE_FLOAT64:
-            writer.Double(scalar.get<double>());
+            if (scalar.is_nan()) {
+                writer.Null();
+            } else {
+                writer.Double(scalar.get<double>());
+            }
             break;
         case DTYPE_STR:
             writer.String(scalar.get<const char*>());
             break;
-        case DTYPE_UINT64:
         case DTYPE_TIME:
-            writer.Int64(scalar.get<int64_t>());
+            if (is_formatted) {
+                writer.String(scalar.to_string().c_str());
+            } else {
+                writer.Int64(scalar.get<int64_t>());
+            }
+
             break;
         case DTYPE_DATE: {
-            t_date date_val = scalar.get<t_date>();
-            tm t = date_val.get_tm();
-            time_t epoch_delta = mktime(&t);
-            writer.Double(epoch_delta * 1000);
+            if (is_formatted) {
+                writer.String(scalar.to_string().c_str());
+            } else {
+                t_date date_val = scalar.get<t_date>();
+                tm t = date_val.get_tm();
+                time_t epoch_delta = mktime(&t);
+                writer.Double(epoch_delta * 1000);
+            }
             break;
         }
 
@@ -1461,14 +1470,21 @@ View<CTX_T>::write_scalar(t_tscalar scalar,
 template <typename CTX_T>
 void
 View<CTX_T>::write_row_path(t_uindex start_row, t_uindex end_row,
-    bool has_row_path,
+    bool has_row_path, bool leaves_only, bool is_formatted,
     rapidjson::Writer<rapidjson::StringBuffer>& writer) const {
 
-    writer.Key("__ROW_PATH__");
-    writer.StartArray();
-
     if (has_row_path) {
+        writer.Key("__ROW_PATH__");
+        writer.StartArray();
+        t_uindex depth = m_row_pivots.size();
+
         for (auto r = start_row; r < end_row; ++r) {
+            if (has_row_path && leaves_only) {
+                if (m_ctx->unity_get_row_depth(r) < depth) {
+                    continue;
+                }
+            }
+
             writer.StartArray();
             const auto row_path = get_row_path(r);
 
@@ -1476,21 +1492,21 @@ View<CTX_T>::write_row_path(t_uindex start_row, t_uindex end_row,
             for (auto entry = row_path.size(); entry > 0; entry--) {
                 const t_tscalar& scalar = row_path[entry - 1];
 
-                write_scalar(scalar, writer);
+                write_scalar(scalar, is_formatted, writer);
             }
 
             writer.EndArray();
         }
+        writer.EndArray();
     }
-
-    writer.EndArray();
 }
 
 template <typename CTX_T>
 void
 View<CTX_T>::write_column(t_uindex c, t_uindex start_row, t_uindex end_row,
+    bool has_row_path, bool leaves_only, bool is_formatted,
     std::shared_ptr<t_data_slice<CTX_T>> slice,
-    std::vector<std::vector<t_tscalar>> col_names,
+    const std::vector<std::vector<t_tscalar>>& col_names,
     rapidjson::Writer<rapidjson::StringBuffer>& writer) const {
 
     std::stringstream column_name;
@@ -1503,14 +1519,20 @@ View<CTX_T>::write_column(t_uindex c, t_uindex start_row, t_uindex end_row,
 
     column_name << col_names[c][col_names[c].size() - 1].get<const char*>();
     const std::string& tmp = column_name.str();
-
+    t_uindex depth = m_row_pivots.size();
     writer.Key(tmp.c_str());
     writer.StartArray();
 
     for (auto r = start_row; r < end_row; ++r) {
+        if (has_row_path && leaves_only) {
+            if (m_ctx->unity_get_row_depth(r) < depth) {
+                continue;
+            }
+        }
+
         auto scalar = slice->get(r, c);
 
-        write_scalar(scalar, writer);
+        write_scalar(scalar, is_formatted, writer);
     }
 
     writer.EndArray();
@@ -1519,20 +1541,27 @@ View<CTX_T>::write_column(t_uindex c, t_uindex start_row, t_uindex end_row,
 template <typename CTX_T>
 void
 View<CTX_T>::write_index_column(t_uindex start_row, t_uindex end_row,
+    bool has_row_path, bool leaves_only, bool is_formatted,
     std::shared_ptr<t_data_slice<CTX_T>> slice,
     rapidjson::Writer<rapidjson::StringBuffer>& writer) const {
-
+    t_uindex depth = m_row_pivots.size();
     writer.Key("__INDEX__");
     writer.StartArray();
 
     for (auto r = start_row; r < end_row; ++r) {
+        if (has_row_path && leaves_only) {
+            if (m_ctx->unity_get_row_depth(r) < depth) {
+                continue;
+            }
+        }
+
         std::vector<t_tscalar> keys = slice->get_pkeys(r, 0);
 
         writer.StartArray();
         for (auto i = keys.size(); i > 0; --i) {
             auto scalar = keys[i - 1];
 
-            write_scalar(scalar, writer);
+            write_scalar(scalar, is_formatted, writer);
         }
 
         writer.EndArray();
@@ -1548,8 +1577,8 @@ template <>
 std::string
 View<t_ctxunit>::to_columns(t_uindex start_row, t_uindex end_row,
     t_uindex start_col, t_uindex end_col, t_uindex hidden, bool is_formatted,
-    bool get_pkeys, bool get_ids, bool leaves_only, t_uindex num_sides,
-    bool has_row_path, std::string nidx, t_uindex columns_length,
+    bool get_pkeys, bool get_ids, bool _leaves_only, t_uindex num_sides,
+    bool _has_row_path, std::string nidx, t_uindex columns_length,
     t_uindex group_by_length) const {
 
     auto slice = get_data(start_row, end_row, start_col, end_col);
@@ -1561,8 +1590,14 @@ View<t_ctxunit>::to_columns(t_uindex start_row, t_uindex end_row,
 
     writer.StartObject();
 
+    if (start_row == end_row || start_col == end_col) {
+        writer.EndObject();
+        return s.GetString();
+    }
+
     for (auto c = start_col; c < end_col; ++c) {
-        write_column(c, start_row, end_row, slice, col_names, writer);
+        write_column(c, start_row, end_row, false, false, is_formatted, slice,
+            col_names, writer);
     }
 
     if (get_ids) {
@@ -1574,11 +1609,8 @@ View<t_ctxunit>::to_columns(t_uindex start_row, t_uindex end_row,
             std::vector<std::pair<t_uindex, t_uindex>> vec{pair};
             const auto keys = m_ctx->get_pkeys(vec);
             const t_tscalar& scalar = keys[0];
-
             writer.StartArray();
-
-            write_scalar(scalar, writer);
-
+            write_scalar(scalar, is_formatted, writer);
             writer.EndArray();
         }
 
@@ -1593,37 +1625,35 @@ template <>
 std::string
 View<t_ctx0>::to_columns(t_uindex start_row, t_uindex end_row,
     t_uindex start_col, t_uindex end_col, t_uindex hidden, bool is_formatted,
-    bool get_pkeys, bool get_ids, bool leaves_only, t_uindex num_sides,
-    bool has_row_path, std::string nidx, t_uindex columns_length,
+    bool get_pkeys, bool get_ids, bool _leaves_only, t_uindex num_sides,
+    bool _has_row_path, std::string nidx, t_uindex columns_length,
     t_uindex group_by_length) const {
-
     auto slice = get_data(start_row, end_row, start_col, end_col);
     auto col_names = slice->get_column_names();
     auto schema = m_ctx->get_schema();
-
     rapidjson::StringBuffer s;
     rapidjson::Writer<rapidjson::StringBuffer> writer(s);
-
     writer.StartObject();
-
     for (auto c = start_col; c < end_col; ++c) {
-        write_column(c, start_row, end_row, slice, col_names, writer);
+        write_column(c, start_row, end_row, false, false, is_formatted, slice,
+            col_names, writer);
+    }
+
+    if (get_pkeys) {
+        write_index_column(
+            start_row, end_row, false, false, is_formatted, slice, writer);
     }
 
     if (get_ids) {
         writer.Key("__ID__");
         writer.StartArray();
-
         for (auto x = start_row; x < end_row; ++x) {
             std::pair<t_uindex, t_uindex> pair{x, 0};
             std::vector<std::pair<t_uindex, t_uindex>> vec{pair};
             const auto keys = m_ctx->get_pkeys(vec);
             const t_tscalar& scalar = keys[0];
-
             writer.StartArray();
-
-            write_scalar(scalar, writer);
-
+            write_scalar(scalar, is_formatted, writer);
             writer.EndArray();
         }
 
@@ -1641,29 +1671,21 @@ View<t_ctx1>::to_columns(t_uindex start_row, t_uindex end_row,
     bool get_pkeys, bool get_ids, bool leaves_only, t_uindex num_sides,
     bool has_row_path, std::string nidx, t_uindex columns_length,
     t_uindex group_by_length) const {
-
     auto slice = get_data(start_row, end_row, start_col, end_col);
     auto col_names = slice->get_column_names();
-
     rapidjson::StringBuffer s;
     rapidjson::Writer<rapidjson::StringBuffer> writer(s);
-
     writer.StartObject();
-
-    write_row_path(start_row, end_row, true, writer);
-
+    write_row_path(start_row, end_row, true, leaves_only, is_formatted, writer);
     if (get_ids) {
         writer.Key("__ID__");
         writer.StartArray();
-
         for (auto r = start_row; r < end_row; ++r) {
             writer.StartArray();
             const auto row_path = m_ctx->get_row_path(r);
-
             for (auto entry = row_path.size(); entry > 0; entry--) {
                 const t_tscalar& scalar = row_path[entry - 1];
-
-                write_scalar(scalar, writer);
+                write_scalar(scalar, is_formatted, writer);
             }
 
             writer.EndArray();
@@ -1672,18 +1694,20 @@ View<t_ctx1>::to_columns(t_uindex start_row, t_uindex end_row,
         writer.EndArray();
     }
 
+    // Hidden columns are always at the end of the column names
+    // list, and we need to skip them from the output.
     for (auto c = start_col + 1; c < end_col; ++c) {
-        // Hidden columns are always at the end of the column names
-        // list, and we need to skip them from the output.
         if ((c - 1) > columns_length - hidden) {
             continue;
         } else {
-            write_column(c, start_row, end_row, slice, col_names, writer);
+            write_column(c, start_row, end_row, true, leaves_only, is_formatted,
+                slice, col_names, writer);
         }
     }
 
     if (get_pkeys) {
-        write_index_column(start_row, end_row, slice, writer);
+        write_index_column(
+            start_row, end_row, true, leaves_only, is_formatted, slice, writer);
     }
 
     writer.EndObject();
@@ -1697,30 +1721,22 @@ View<t_ctx2>::to_columns(t_uindex start_row, t_uindex end_row,
     bool get_pkeys, bool get_ids, bool leaves_only, t_uindex num_sides,
     bool has_row_path, std::string nidx, t_uindex columns_length,
     t_uindex group_by_length) const {
-
     auto slice = get_data(start_row, end_row, start_col, end_col);
     auto col_names = slice->get_column_names();
-
     rapidjson::StringBuffer s;
     rapidjson::Writer<rapidjson::StringBuffer> writer(s);
-
     writer.StartObject();
-
-    write_row_path(start_row, end_row, has_row_path, writer);
-
+    write_row_path(
+        start_row, end_row, has_row_path, leaves_only, is_formatted, writer);
     if (get_ids) {
         writer.Key("__ID__");
         writer.StartArray();
-
         for (auto r = start_row; r < end_row; ++r) {
             writer.StartArray();
-
             const auto row_path = m_ctx->get_row_path(r);
-
             for (auto entry = row_path.size(); entry > 0; entry--) {
                 const t_tscalar& scalar = row_path[entry - 1];
-
-                write_scalar(scalar, writer);
+                write_scalar(scalar, is_formatted, writer);
             }
 
             writer.EndArray();
@@ -1735,12 +1751,14 @@ View<t_ctx2>::to_columns(t_uindex start_row, t_uindex end_row,
         if (((c - 1) % (columns_length + hidden)) >= columns_length) {
             continue;
         } else {
-            write_column(c, start_row, end_row, slice, col_names, writer);
+            write_column(c, start_row, end_row, has_row_path, leaves_only,
+                is_formatted, slice, col_names, writer);
         }
     }
 
     if (get_pkeys) {
-        write_index_column(start_row, end_row, slice, writer);
+        write_index_column(start_row, end_row, has_row_path, leaves_only,
+            is_formatted, slice, writer);
     }
 
     writer.EndObject();

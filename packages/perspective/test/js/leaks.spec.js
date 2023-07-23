@@ -87,6 +87,17 @@ test.describe("leaks", function () {
                 view.delete();
                 table.delete();
             });
+
+            test("to_columns_string does not leak", async () => {
+                const table = await perspective.table(arr.slice());
+                const view = await table.view({ group_by: ["State"] });
+                await leak_test(async function () {
+                    let json = await view.to_columns_string();
+                    expect(json.length).toEqual(6722);
+                });
+                view.delete();
+                table.delete();
+            });
         });
     });
 
@@ -110,6 +121,19 @@ test.describe("leaks", function () {
             expect(count).toBeGreaterThan(0);
             view.delete();
             table.delete();
+        });
+
+        test.skip("csv loading does not leak", async () => {
+            const table = await perspective.table(arr.slice());
+            const view = await table.view();
+            const csv = await view.to_csv({ end_row: 10 });
+            view.delete();
+            table.delete();
+            await leak_test(async function () {
+                const table = await perspective.table(csv);
+                expect(await table.size()).toEqual(10);
+                await table.delete();
+            });
         });
     });
 

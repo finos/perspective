@@ -562,10 +562,7 @@ class TestPerspectiveManager(object):
         def handle_to_dict(msg):
             s.set(True)
             message = json.loads(msg)
-            assert message == {
-                "id": 2,
-                "error": "JSON serialization error: Cannot serialize `NaN`, `Infinity` or `-Infinity` to JSON.",
-            }
+            assert message == {"id": 2, "data": {"a": [1.5, None, 2.5, None]}}
 
         message = {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view"}
         manager = PerspectiveManager()

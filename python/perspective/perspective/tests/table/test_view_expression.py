@@ -637,7 +637,7 @@ class TestViewExpression(object):
         }
         table.clear()
         assert view.schema() == {"a": int, "b": int, "computed": float}
-        assert view.to_columns() == {}
+        assert view.to_columns() == {"a": [], "b": [], "computed": []}
 
     def test_view_expression_create_replace(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
@@ -738,9 +738,9 @@ class TestViewExpression(object):
 
         assert view2.schema() == {"a": int, "b": int, "computed2": float}
 
-        assert view.to_columns() == {}
+        assert view.to_columns() == {"a": [], "b": [], "computed": []}
 
-        assert view2.to_columns() == {}
+        assert view2.to_columns() == {"a": [], "b": [], "computed2": []}
 
     def test_view_expression_multiple_views_should_all_replace(self):
         table = Table({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})

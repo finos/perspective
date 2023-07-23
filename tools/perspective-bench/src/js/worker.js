@@ -244,9 +244,9 @@ async function table_suite() {
 }
 
 async function bench_all() {
-    await to_data_suite();
-    await view_suite();
     await table_suite();
+    await view_suite();
+    await to_data_suite();
     process.send({ finished: true });
 }
 

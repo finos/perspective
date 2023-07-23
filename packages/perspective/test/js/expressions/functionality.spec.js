@@ -2450,7 +2450,6 @@ const perspective = require("@finos/perspective");
                 "8.5|y": [null, null, null, "d"],
                 "8.5|z": [null, null, null, false],
                 '8.5|"w" + "x"': [null, null, null, 8.5],
-                __ROW_PATH__: [],
             });
             view.delete();
             table.delete();

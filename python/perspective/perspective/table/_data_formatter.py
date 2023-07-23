@@ -213,8 +213,8 @@ def _parse_format_options(view, options):
         "end_col": int(
             ceil(
                 min(
-                    (options.get("end_col", max_cols) + column_only_offset) * (view._num_hidden_cols() + 1),
                     max_cols,
+                    (options.get("end_col") + column_only_offset if "end_col" in options else max_cols) * (view._num_hidden_cols() + 1),
                 )
             )
         ),

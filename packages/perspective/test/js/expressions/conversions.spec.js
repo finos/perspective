@@ -361,10 +361,10 @@ const perspective = require("@finos/perspective");
             expect(result["computed12"]).toEqual([null]);
             expect(result["computed13"]).toEqual([2147483648.1234566]);
             expect(result["computed14"]).toEqual([-2147483649]);
-            expect(result["computed15"]).toEqual([Infinity]);
-            expect(result["computed16"]).toEqual([-Infinity]);
-            expect(result["computed17"]).toEqual([Infinity]);
-            expect(result["computed18"]).toEqual([-Infinity]);
+            expect(result["computed15"]).toEqual([null]);
+            expect(result["computed16"]).toEqual([null]);
+            expect(result["computed17"]).toEqual([null]);
+            expect(result["computed18"]).toEqual([null]);
 
             await view.delete();
             await table.delete();

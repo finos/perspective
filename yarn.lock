@@ -13866,10 +13866,10 @@ regjsparser@^0.9.1:
   dependencies:
     jsesc "~0.5.0"
 
-regular-table@=0.5.7:
-  version "0.5.7"
-  resolved "https://registry.yarnpkg.com/regular-table/-/regular-table-0.5.7.tgz#424f5dfa6e1fb95d1fc8e0b3ee299cea6289d540"
-  integrity sha512-BcneWdPuabfdVxqoEKe6U7qgtXpbNxQnL/pGdMbU4G4ldYifEQm+ihyBiUz4JwVqQZtgY8TU+8xzpgWNg8bgiw==
+regular-table@=0.5.9:
+  version "0.5.9"
+  resolved "https://registry.yarnpkg.com/regular-table/-/regular-table-0.5.9.tgz#a5bfeeb67e3bcc9ab4e9f11cd9c3a40777267aa9"
+  integrity sha512-Ck5HYNS7lzsxsDWDBYzrCpwM1wsp5fMY42Ks730Otwq2U+XAlARJMg2tRexy+V8bLy9wiq+SH8EMC/yKqccLCA==
 
 relateurl@^0.2.7:
   version "0.2.7"

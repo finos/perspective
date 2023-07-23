@@ -19,6 +19,7 @@ if __name__ == "__main__":
     """Benchmark the `perspective-python` runtime locally."""
     VERSIONS = [
         "master",
+        "2.3.2",
         "2.3.1",
         # "2.3.0",
         "2.2.1",
@@ -28,7 +29,7 @@ if __name__ == "__main__":
     # Access the benchmark virtualenv
     HERE = os.path.abspath(os.path.dirname(__file__))
     VIRTUALENV_NAME = "benchmark_venv"
-    VIRTUALENV_PATH = os.path.join(HERE, VIRTUALENV_NAME)
+    VIRTUALENV_PATH = os.path.join(HERE, "..", "..", "..", "..", VIRTUALENV_NAME)
     venv_handler = VirtualEnvHandler(VIRTUALENV_PATH)
 
     print("Benchmarking perspective-python==master")

@@ -358,7 +358,7 @@ const std = (nums) => {
                     "null, aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                     "null, aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                     "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                    null,
+                    "null",
                 ],
             };
             let result = await view.to_columns();
@@ -2355,7 +2355,7 @@ const std = (nums) => {
             table.delete();
         });
 
-        test("['z'] only, datetime column", async function ({ page }) {
+        test("['z'] only, datetime column", async function () {
             var table = await perspective.table(data_8);
             var view = await table.view({
                 split_by: ["z"],
@@ -2364,7 +2364,6 @@ const std = (nums) => {
             let result2 = await view.to_columns();
 
             expect(result2).toEqual({
-                __ROW_PATH__: [],
                 "2019-04-11 23:40:35.065|x": [null, null, 3, 4],
                 "2019-04-11 23:40:35.065|y": [null, null, "c", "d"],
                 "2019-04-13 03:27:15.065|x": [1, 2, null, null],
@@ -2434,7 +2433,6 @@ const std = (nums) => {
             });
             let result2 = await view.to_columns();
             expect(result2).toEqual({
-                __ROW_PATH__: [],
                 "true|w": [1.5, null, 3.5, null],
                 "true|x": [1, null, 3, null],
                 "true|y": ["a", null, "c", null],

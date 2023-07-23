@@ -129,18 +129,21 @@ public:
     std::pair<t_tscalar, t_tscalar> get_min_max(
         const std::string& colname) const;
 
-    void write_scalar(t_tscalar scalar,
+    void write_scalar(t_tscalar scalar, bool is_formatted,
         rapidjson::Writer<rapidjson::StringBuffer>& writer) const;
 
     void write_row_path(t_uindex start_row, t_uindex end_row, bool has_row_path,
+        bool leaves_only, bool is_formatted,
         rapidjson::Writer<rapidjson::StringBuffer>& writer) const;
 
     void write_column(t_uindex c, t_uindex start_row, t_uindex end_row,
+        bool has_row_path, bool leaves_only, bool is_formatted,
         std::shared_ptr<t_data_slice<CTX_T>> slice,
-        std::vector<std::vector<t_tscalar>> col_names,
+        const std::vector<std::vector<t_tscalar>>& col_names,
         rapidjson::Writer<rapidjson::StringBuffer>& writer) const;
 
     void write_index_column(t_uindex start_row, t_uindex end_row,
+        bool has_row_path, bool leaves_only, bool is_formatted,
         std::shared_ptr<t_data_slice<CTX_T>> slice,
         rapidjson::Writer<rapidjson::StringBuffer>& writer) const;
 

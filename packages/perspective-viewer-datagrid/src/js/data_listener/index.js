@@ -45,7 +45,9 @@ export function createDataListener() {
                 id: true,
             };
 
-            columns = await this._view.to_columns(new_window);
+            columns = JSON.parse(
+                await this._view.to_columns_string(new_window)
+            );
 
             this._last_window = new_window;
             this._ids = columns.__ID__;

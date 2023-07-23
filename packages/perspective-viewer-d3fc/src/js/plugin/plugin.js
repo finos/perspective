@@ -267,17 +267,23 @@ export function register(...plugins) {
                         let jsonp, metadata;
                         const leaves_only = chart.plugin.name !== "Sunburst";
                         if (end_col && end_row) {
-                            jsonp = view.to_json({
+                            jsonp = view.to_columns_string({
                                 end_row,
                                 end_col,
                                 leaves_only,
                             });
                         } else if (end_col) {
-                            jsonp = view.to_json({ end_col, leaves_only });
+                            jsonp = view.to_columns_string({
+                                end_col,
+                                leaves_only,
+                            });
                         } else if (end_row) {
-                            jsonp = view.to_json({ end_row, leaves_only });
+                            jsonp = view.to_columns_string({
+                                end_row,
+                                leaves_only,
+                            });
                         } else {
-                            jsonp = view.to_json({ leaves_only });
+                            jsonp = view.to_columns_string({ leaves_only });
                         }
 
                         metadata = await Promise.all([
@@ -295,9 +301,22 @@ export function register(...plugins) {
                             table_schema,
                             expression_schema,
                             view_schema,
-                            json,
+                            json_string,
                             config,
                         ] = metadata;
+
+                        let json2 = JSON.parse(json_string);
+                        const keys = Object.keys(json2);
+                        let json = {
+                            row(ridx) {
+                                const obj = {};
+                                for (const name of keys) {
+                                    obj[name] = json2[name][ridx];
+                                }
+
+                                return obj;
+                            },
+                        };
 
                         this.config = real_config;
                         const realValues = this.config.columns;
@@ -317,10 +336,12 @@ export function register(...plugins) {
                         };
 
                         const { columns, group_by, split_by, filter } = config;
+                        const first_col = json2[Object.keys(json2)[0]] || [];
                         const filtered =
                             group_by.length > 0
-                                ? json.reduce(
-                                      (acc, col) => {
+                                ? first_col.reduce(
+                                      (acc, _, idx) => {
+                                          const col = json.row(idx);
                                           if (
                                               col.__ROW_PATH__ &&
                                               col.__ROW_PATH__.length ==
@@ -345,7 +366,12 @@ export function register(...plugins) {
                                       },
                                       { rows: [], aggs: [], agg_paths: [] }
                                   )
-                                : { rows: json };
+                                : {
+                                      rows: first_col.map((_, idx) =>
+                                          json.row(idx)
+                                      ),
+                                  };
+
                         const dataMap = (col, i) =>
                             !group_by.length
                                 ? { ...col, __ROW_PATH__: [i] }

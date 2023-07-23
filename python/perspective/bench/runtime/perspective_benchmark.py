@@ -184,9 +184,12 @@ class PerspectiveBenchmark(Suite):
         for name in (
             "arrow",
             "csv",
+            "columns",
+            "records",
         ):
-            test_meta = make_meta("to_format", "to_{}".format(name))
-            func = Benchmark(lambda: getattr(self._view, "to_{0}".format(name))(), meta=test_meta)
+            method = "to_{0}".format(name)
+            test_meta = make_meta("to_format", method)
+            func = Benchmark(getattr(self._view, method), meta=test_meta)
             setattr(self, "to_format_{0}".format(name), func)
 
     def benchmark_to_format_one(self):
@@ -194,13 +197,16 @@ class PerspectiveBenchmark(Suite):
         for name in (
             "arrow",
             "csv",
+            "columns",
+            "records",
         ):
             for pivot in PerspectiveBenchmark.group_by_OPTIONS:
                 if len(pivot) == 0:
                     continue
                 test_meta = make_meta("to_format", "to_{0}_r{1}".format(name, len(pivot)))
                 view = self._table.view(group_by=pivot)
-                func = Benchmark(lambda: getattr(view, "to_{0}".format(name))(), meta=test_meta)
+                method = "to_{0}".format(name)
+                func = Benchmark(getattr(view, method), meta=test_meta)
                 setattr(self, "to_format_{0}".format(test_meta["name"]), func)
 
     def benchmark_to_format_two(self):
@@ -208,6 +214,8 @@ class PerspectiveBenchmark(Suite):
         for name in (
             "arrow",
             "csv",
+            "columns",
+            "records",
         ):
             for i in range(len(PerspectiveBenchmark.group_by_OPTIONS)):
                 RP = PerspectiveBenchmark.group_by_OPTIONS[i]
@@ -216,7 +224,8 @@ class PerspectiveBenchmark(Suite):
                     continue
                 test_meta = make_meta("to_format", "to_{0}_r{1}_c{2}".format(name, len(RP), len(CP)))
                 view = self._table.view(group_by=RP, split_by=CP)
-                func = Benchmark(lambda: getattr(view, "to_{0}".format(name))(), meta=test_meta)
+                method = "to_{0}".format(name)
+                func = Benchmark(getattr(view, method), meta=test_meta)
                 setattr(self, "to_format_{0}".format(test_meta["name"]), func)
 
 

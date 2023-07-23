@@ -153,3 +153,6 @@ class PerspectiveViewProxy(object):
 
     def to_columns(self, **kwargs):
         return self._async_queue("to_columns", "view_method", **kwargs)
+
+    def to_columns_string(self, **kwargs):
+        return self._async_queue("to_columns_string", "view_method", **kwargs)

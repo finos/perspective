@@ -42,7 +42,11 @@ class TestView(object):
         assert view.num_rows() == 3
         assert view.num_columns() == 2
         assert view.schema() == {"a": int, "b": int}
-        assert view.to_records() == [{"__ROW_PATH__": [], "a": 4, "b": 6}, {"__ROW_PATH__": [1], "a": 1, "b": 2}, {"__ROW_PATH__": [3], "a": 3, "b": 4}]
+        assert view.to_records() == [
+            {"__ROW_PATH__": [], "a": 4, "b": 6},
+            {"__ROW_PATH__": [1], "a": 1, "b": 2},
+            {"__ROW_PATH__": [3], "a": 3, "b": 4},
+        ]
 
     def test_view_two(self):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
@@ -64,7 +68,10 @@ class TestView(object):
         assert view.num_rows() == 2
         assert view.num_columns() == 4
         assert view.schema() == {"a": int, "b": int}
-        assert view.to_records() == [{"2|a": 1, "2|b": 2, "4|a": None, "4|b": None}, {"2|a": None, "2|b": None, "4|a": 3, "4|b": 4}]
+        assert view.to_records() == [
+            {"2|a": 1, "2|b": 2, "4|a": None, "4|b": None},
+            {"2|a": None, "2|b": None, "4|a": 3, "4|b": 4},
+        ]
 
     # column path
 
@@ -115,7 +122,15 @@ class TestView(object):
         tbl = Table(data)
         view = tbl.view(group_by=["a"], split_by=["b"])
         paths = view.column_paths()
-        assert paths == ["__ROW_PATH__", "1.5|a", "1.5|b", "2.5|a", "2.5|b", "3.5|a", "3.5|b"]
+        assert paths == [
+            "__ROW_PATH__",
+            "1.5|a",
+            "1.5|b",
+            "2.5|a",
+            "2.5|b",
+            "3.5|a",
+            "3.5|b",
+        ]
 
     def test_view_column_path_two_column_only(self):
         data = {"a": [1, 2, 3], "b": [1.5, 2.5, 3.5]}
@@ -178,7 +193,7 @@ class TestView(object):
         tbl = Table(data)
         view = tbl.view(columns=[])
         assert view.num_columns() == 0
-        assert view.to_records() == [{}, {}]
+        assert view.to_records() == []
 
     def test_view_no_columns_pivoted(self):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
@@ -201,7 +216,17 @@ class TestView(object):
         assert view.to_records() == [{"b": 2, "a": 1}, {"b": 4, "a": 3}]
 
     def test_view_dataframe_column_order(self):
-        table = Table(pd.DataFrame({"0.1": [5, 6, 7, 8], "-0.05": [5, 6, 7, 8], "0.0": [1, 2, 3, 4], "-0.1": [1, 2, 3, 4], "str": ["a", "b", "c", "d"]}))
+        table = Table(
+            pd.DataFrame(
+                {
+                    "0.1": [5, 6, 7, 8],
+                    "-0.05": [5, 6, 7, 8],
+                    "0.0": [1, 2, 3, 4],
+                    "-0.1": [1, 2, 3, 4],
+                    "str": ["a", "b", "c", "d"],
+                }
+            )
+        )
         view = table.view(columns=["-0.1", "-0.05", "0.0", "0.1"], group_by=["str"])
         assert view.column_paths() == ["__ROW_PATH__", "-0.1", "-0.05", "0.0", "0.1"]
 
@@ -209,16 +234,26 @@ class TestView(object):
         """If `columns` is provided, order is always guaranteed."""
         data = [{"a": 1, "b": 2, "c": 3, "d": 4}, {"a": 3, "b": 4, "c": 5, "d": 6}]
         tbl = Table(data)
-        view = tbl.view(group_by=["a"], columns=["a", "b", "c", "d"], aggregates={"d": "avg", "c": "avg", "b": "last", "a": "last"})
+        view = tbl.view(
+            group_by=["a"],
+            columns=["a", "b", "c", "d"],
+            aggregates={"d": "avg", "c": "avg", "b": "last", "a": "last"},
+        )
 
         order = ["__ROW_PATH__", "a", "b", "c", "d"]
         assert view.column_paths() == order
 
     def test_view_df_aggregate_order_with_columns(self):
         """If `columns` is provided, order is always guaranteed."""
-        data = pd.DataFrame({"a": [1, 2, 3], "b": [2, 3, 4], "c": [3, 4, 5], "d": [4, 5, 6]}, columns=["d", "a", "c", "b"])
+        data = pd.DataFrame(
+            {"a": [1, 2, 3], "b": [2, 3, 4], "c": [3, 4, 5], "d": [4, 5, 6]},
+            columns=["d", "a", "c", "b"],
+        )
         tbl = Table(data)
-        view = tbl.view(group_by=["a"], aggregates={"d": "avg", "c": "avg", "b": "last", "a": "last"})
+        view = tbl.view(
+            group_by=["a"],
+            aggregates={"d": "avg", "c": "avg", "b": "last", "a": "last"},
+        )
 
         order = ["__ROW_PATH__", "index", "d", "a", "c", "b"]
         assert view.column_paths() == order
@@ -228,7 +263,11 @@ class TestView(object):
         tbl = Table(data)
         view = tbl.view(group_by=["a"], aggregates={"c": "avg", "a": "last"}, columns=[])
         assert view.column_paths() == ["__ROW_PATH__"]
-        assert view.to_records() == [{"__ROW_PATH__": []}, {"__ROW_PATH__": [1]}, {"__ROW_PATH__": [3]}]
+        assert view.to_records() == [
+            {"__ROW_PATH__": []},
+            {"__ROW_PATH__": [1]},
+            {"__ROW_PATH__": [3]},
+        ]
 
     def test_view_aggregates_default_column_order(self):
         """Order of columns are entirely determined by the `columns` kwarg. If
@@ -300,50 +339,98 @@ class TestView(object):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
         tbl = Table(data)
         view = tbl.view(aggregates={"a": "avg"}, group_by=["a"])
-        assert view.to_records() == [{"__ROW_PATH__": [], "a": 2.0, "b": 6}, {"__ROW_PATH__": [1], "a": 1.0, "b": 2}, {"__ROW_PATH__": [3], "a": 3.0, "b": 4}]
+        assert view.to_records() == [
+            {"__ROW_PATH__": [], "a": 2.0, "b": 6},
+            {"__ROW_PATH__": [1], "a": 1.0, "b": 2},
+            {"__ROW_PATH__": [3], "a": 3.0, "b": 4},
+        ]
 
     def test_view_aggregate_str(self):
         data = [{"a": "abc", "b": 2}, {"a": "def", "b": 4}]
         tbl = Table(data)
         view = tbl.view(aggregates={"a": "count"}, group_by=["a"])
-        assert view.to_records() == [{"__ROW_PATH__": [], "a": 2, "b": 6}, {"__ROW_PATH__": ["abc"], "a": 1, "b": 2}, {"__ROW_PATH__": ["def"], "a": 1, "b": 4}]
+        assert view.to_records() == [
+            {"__ROW_PATH__": [], "a": 2, "b": 6},
+            {"__ROW_PATH__": ["abc"], "a": 1, "b": 2},
+            {"__ROW_PATH__": ["def"], "a": 1, "b": 4},
+        ]
 
     def test_view_aggregate_datetime(self):
-        data = [{"a": datetime(2019, 10, 1, 11, 30)}, {"a": datetime(2019, 10, 1, 11, 30)}]
+        data = [
+            {"a": datetime(2019, 10, 1, 11, 30)},
+            {"a": datetime(2019, 10, 1, 11, 30)},
+        ]
         tbl = Table(data)
         view = tbl.view(aggregates={"a": "distinct count"}, group_by=["a"])
-        assert view.to_records() == [{"__ROW_PATH__": [], "a": 1}, {"__ROW_PATH__": [datetime(2019, 10, 1, 11, 30)], "a": 1}]
+        assert view.to_records() == [
+            {"__ROW_PATH__": [], "a": 1},
+            {"__ROW_PATH__": [datetime(2019, 10, 1, 11, 30)], "a": 1},
+        ]
 
     def test_view_aggregate_datetime_leading_zeroes(self):
-        data = [{"a": datetime(2019, 1, 1, 5, 5, 5)}, {"a": datetime(2019, 1, 1, 5, 5, 5)}]
+        data = [
+            {"a": datetime(2019, 1, 1, 5, 5, 5)},
+            {"a": datetime(2019, 1, 1, 5, 5, 5)},
+        ]
         tbl = Table(data)
         view = tbl.view(aggregates={"a": "distinct count"}, group_by=["a"])
-        assert view.to_records() == [{"__ROW_PATH__": [], "a": 1}, {"__ROW_PATH__": [datetime(2019, 1, 1, 5, 5, 5)], "a": 1}]
+        assert view.to_records() == [
+            {"__ROW_PATH__": [], "a": 1},
+            {"__ROW_PATH__": [datetime(2019, 1, 1, 5, 5, 5)], "a": 1},
+        ]
 
     def test_view_aggregate_mean(self):
-        data = [{"a": "a", "x": 1, "y": 200}, {"a": "a", "x": 2, "y": 100}, {"a": "a", "x": 3, "y": None}]
+        data = [
+            {"a": "a", "x": 1, "y": 200},
+            {"a": "a", "x": 2, "y": 100},
+            {"a": "a", "x": 3, "y": None},
+        ]
         tbl = Table(data)
         view = tbl.view(aggregates={"y": "mean"}, group_by=["a"], columns=["y"])
-        assert view.to_records() == [{"__ROW_PATH__": [], "y": 300 / 2}, {"__ROW_PATH__": ["a"], "y": 300 / 2}]
+        assert view.to_records() == [
+            {"__ROW_PATH__": [], "y": 300 / 2},
+            {"__ROW_PATH__": ["a"], "y": 300 / 2},
+        ]
 
     def test_view_aggregate_mean_from_schema(self):
-        data = [{"a": "a", "x": 1, "y": 200}, {"a": "a", "x": 2, "y": 100}, {"a": "a", "x": 3, "y": None}]
+        data = [
+            {"a": "a", "x": 1, "y": 200},
+            {"a": "a", "x": 2, "y": 100},
+            {"a": "a", "x": 3, "y": None},
+        ]
         tbl = Table({"a": str, "x": int, "y": float})
         view = tbl.view(aggregates={"y": "mean"}, group_by=["a"], columns=["y"])
         tbl.update(data)
-        assert view.to_records() == [{"__ROW_PATH__": [], "y": 300 / 2}, {"__ROW_PATH__": ["a"], "y": 300 / 2}]
+        assert view.to_records() == [
+            {"__ROW_PATH__": [], "y": 300 / 2},
+            {"__ROW_PATH__": ["a"], "y": 300 / 2},
+        ]
 
     def test_view_aggregate_weighted_mean(self):
-        data = [{"a": "a", "x": 1, "y": 200}, {"a": "a", "x": 2, "y": 100}, {"a": "a", "x": 3, "y": None}]
+        data = [
+            {"a": "a", "x": 1, "y": 200},
+            {"a": "a", "x": 2, "y": 100},
+            {"a": "a", "x": 3, "y": None},
+        ]
         tbl = Table(data)
         view = tbl.view(aggregates={"y": ["weighted mean", "x"]}, group_by=["a"], columns=["y"])
-        assert view.to_records() == [{"__ROW_PATH__": [], "y": (1.0 * 200 + 2 * 100) / (1.0 + 2)}, {"__ROW_PATH__": ["a"], "y": (1.0 * 200 + 2 * 100) / (1.0 + 2)}]
+        assert view.to_records() == [
+            {"__ROW_PATH__": [], "y": (1.0 * 200 + 2 * 100) / (1.0 + 2)},
+            {"__ROW_PATH__": ["a"], "y": (1.0 * 200 + 2 * 100) / (1.0 + 2)},
+        ]
 
     def test_view_aggregate_weighted_mean_with_negative_weights(self):
-        data = [{"a": "a", "x": 1, "y": 200}, {"a": "a", "x": -2, "y": 100}, {"a": "a", "x": 3, "y": None}]
+        data = [
+            {"a": "a", "x": 1, "y": 200},
+            {"a": "a", "x": -2, "y": 100},
+            {"a": "a", "x": 3, "y": None},
+        ]
         tbl = Table(data)
         view = tbl.view(aggregates={"y": ["weighted mean", "x"]}, group_by=["a"], columns=["y"])
-        assert view.to_records() == [{"__ROW_PATH__": [], "y": (1 * 200 + (-2) * 100) / (1 - 2)}, {"__ROW_PATH__": ["a"], "y": (1 * 200 + (-2) * 100) / (1 - 2)}]
+        assert view.to_records() == [
+            {"__ROW_PATH__": [], "y": (1 * 200 + (-2) * 100) / (1 - 2)},
+            {"__ROW_PATH__": ["a"], "y": (1 * 200 + (-2) * 100) / (1 - 2)},
+        ]
 
     def test_view_variance(self):
         data = {"x": list(np.random.rand(10)), "y": ["a" for _ in range(10)]}
@@ -357,7 +444,21 @@ class TestView(object):
         assert result["x"] == approx([expected, expected])
 
     def test_view_variance_multi(self):
-        data = {"a": [91.96, 258.576, 29.6, 243.16, 36.24, 25.248, 79.99, 206.1, 31.5, 55.6], "b": [1 if i % 2 == 0 else 0 for i in range(10)]}
+        data = {
+            "a": [
+                91.96,
+                258.576,
+                29.6,
+                243.16,
+                36.24,
+                25.248,
+                79.99,
+                206.1,
+                31.5,
+                55.6,
+            ],
+            "b": [1 if i % 2 == 0 else 0 for i in range(10)],
+        }
         table = Table(data)
         view = table.view(aggregates={"a": "var"}, group_by=["b"])
 
@@ -390,14 +491,40 @@ class TestView(object):
         assert result["a"][2] == approx(np.var([0.5, 0.8]))
 
     def test_view_variance_multi_update(self):
-        data = {"a": [91.96, 258.576, 29.6, 243.16, 36.24, 25.248, 79.99, 206.1, 31.5, 55.6], "b": [1 if i % 2 == 0 else 0 for i in range(10)]}
+        data = {
+            "a": [
+                91.96,
+                258.576,
+                29.6,
+                243.16,
+                36.24,
+                25.248,
+                79.99,
+                206.1,
+                31.5,
+                55.6,
+            ],
+            "b": [1 if i % 2 == 0 else 0 for i in range(10)],
+        }
         table = Table(data)
         view = table.view(aggregates={"a": "var"}, group_by=["b"])
 
         result = view.to_columns()
         expected_total = data["a"]
-        expected_zero = [data["a"][1], data["a"][3], data["a"][5], data["a"][7], data["a"][9]]
-        expected_one = [data["a"][0], data["a"][2], data["a"][4], data["a"][6], data["a"][8]]
+        expected_zero = [
+            data["a"][1],
+            data["a"][3],
+            data["a"][5],
+            data["a"][7],
+            data["a"][9],
+        ]
+        expected_one = [
+            data["a"][0],
+            data["a"][2],
+            data["a"][4],
+            data["a"][6],
+            data["a"][8],
+        ]
 
         assert result["a"] == approx([np.var(expected_total), np.var(expected_zero), np.var(expected_one)])
 
@@ -415,14 +542,40 @@ class TestView(object):
         assert result["a"][-1] is None
 
     def test_view_variance_multi_update_delta(self):
-        data = {"a": [91.96, 258.576, 29.6, 243.16, 36.24, 25.248, 79.99, 206.1, 31.5, 55.6], "b": [1 if i % 2 == 0 else 0 for i in range(10)]}
+        data = {
+            "a": [
+                91.96,
+                258.576,
+                29.6,
+                243.16,
+                36.24,
+                25.248,
+                79.99,
+                206.1,
+                31.5,
+                55.6,
+            ],
+            "b": [1 if i % 2 == 0 else 0 for i in range(10)],
+        }
         table = Table(data)
         view = table.view(aggregates={"a": "var"}, group_by=["b"])
 
         result = view.to_columns()
         expected_total = data["a"]
-        expected_zero = [data["a"][1], data["a"][3], data["a"][5], data["a"][7], data["a"][9]]
-        expected_one = [data["a"][0], data["a"][2], data["a"][4], data["a"][6], data["a"][8]]
+        expected_zero = [
+            data["a"][1],
+            data["a"][3],
+            data["a"][5],
+            data["a"][7],
+            data["a"][9],
+        ]
+        expected_one = [
+            data["a"][0],
+            data["a"][2],
+            data["a"][4],
+            data["a"][6],
+            data["a"][8],
+        ]
 
         assert result["a"] == approx([np.var(expected_total), np.var(expected_zero), np.var(expected_one)])
 
@@ -458,19 +611,50 @@ class TestView(object):
         table.update(update_data)
 
     def test_view_variance_multi_update_indexed(self):
-        data = {"a": [91.96, 258.576, 29.6, 243.16, 36.24, 25.248, 79.99, 206.1, 31.5, 55.6], "b": [1 if i % 2 == 0 else 0 for i in range(10)], "c": [i for i in range(10)]}
+        data = {
+            "a": [
+                91.96,
+                258.576,
+                29.6,
+                243.16,
+                36.24,
+                25.248,
+                79.99,
+                206.1,
+                31.5,
+                55.6,
+            ],
+            "b": [1 if i % 2 == 0 else 0 for i in range(10)],
+            "c": [i for i in range(10)],
+        }
         table = Table(data, index="c")
         view = table.view(aggregates={"a": "var"}, group_by=["b"])
 
         result = view.to_columns()
         expected_total = data["a"]
-        expected_zero = [data["a"][1], data["a"][3], data["a"][5], data["a"][7], data["a"][9]]
-        expected_one = [data["a"][0], data["a"][2], data["a"][4], data["a"][6], data["a"][8]]
+        expected_zero = [
+            data["a"][1],
+            data["a"][3],
+            data["a"][5],
+            data["a"][7],
+            data["a"][9],
+        ]
+        expected_one = [
+            data["a"][0],
+            data["a"][2],
+            data["a"][4],
+            data["a"][6],
+            data["a"][8],
+        ]
 
         assert result["a"] == approx([np.var(expected_total), np.var(expected_zero), np.var(expected_one)])
 
         # "b" = 2 here should result in null var because the group size is 1
-        update_data = {"a": [15.12, 9.102, 0.99, 12.8], "b": [1, 0, 1, 2], "c": [1, 5, 2, 7]}
+        update_data = {
+            "a": [15.12, 9.102, 0.99, 12.8],
+            "b": [1, 0, 1, 2],
+            "c": [1, 5, 2, 7],
+        }
 
         table.update(update_data)
 
@@ -494,19 +678,50 @@ class TestView(object):
         assert result["a"][-1] is None
 
     def test_view_variance_multi_update_indexed_delta(self):
-        data = {"a": [91.96, 258.576, 29.6, 243.16, 36.24, 25.248, 79.99, 206.1, 31.5, 55.6], "b": [1 if i % 2 == 0 else 0 for i in range(10)], "c": [i for i in range(10)]}
+        data = {
+            "a": [
+                91.96,
+                258.576,
+                29.6,
+                243.16,
+                36.24,
+                25.248,
+                79.99,
+                206.1,
+                31.5,
+                55.6,
+            ],
+            "b": [1 if i % 2 == 0 else 0 for i in range(10)],
+            "c": [i for i in range(10)],
+        }
         table = Table(data, index="c")
         view = table.view(aggregates={"a": "var", "b": "last", "c": "last"}, group_by=["b"])
 
         result = view.to_columns()
         expected_total = data["a"]
-        expected_zero = [data["a"][1], data["a"][3], data["a"][5], data["a"][7], data["a"][9]]
-        expected_one = [data["a"][0], data["a"][2], data["a"][4], data["a"][6], data["a"][8]]
+        expected_zero = [
+            data["a"][1],
+            data["a"][3],
+            data["a"][5],
+            data["a"][7],
+            data["a"][9],
+        ]
+        expected_one = [
+            data["a"][0],
+            data["a"][2],
+            data["a"][4],
+            data["a"][6],
+            data["a"][8],
+        ]
 
         assert result["a"] == approx([np.var(expected_total), np.var(expected_zero), np.var(expected_one)])
 
         # 2 here should result in null var because the group size is 1
-        update_data = {"a": [15.12, 9.102, 0.99, 12.8], "b": [1, 0, 1, 2], "c": [0, 4, 1, 6]}
+        update_data = {
+            "a": [15.12, 9.102, 0.99, 12.8],
+            "b": [1, 0, 1, 2],
+            "c": [0, 4, 1, 6],
+        }
 
         def cb1(port_id, delta):
             table2 = Table(delta)
@@ -569,7 +784,21 @@ class TestView(object):
         assert result["x"] == approx([expected, expected])
 
     def test_view_standard_deviation_multi(self):
-        data = {"a": [91.96, 258.576, 29.6, 243.16, 36.24, 25.248, 79.99, 206.1, 31.5, 55.6], "b": [1 if i % 2 == 0 else 0 for i in range(10)]}
+        data = {
+            "a": [
+                91.96,
+                258.576,
+                29.6,
+                243.16,
+                36.24,
+                25.248,
+                79.99,
+                206.1,
+                31.5,
+                55.6,
+            ],
+            "b": [1 if i % 2 == 0 else 0 for i in range(10)],
+        }
         table = Table(data)
         view = table.view(aggregates={"a": "stddev"}, group_by=["b"])
 
@@ -602,14 +831,40 @@ class TestView(object):
         assert result["a"][2] == approx(np.std([0.5, 0.8]))
 
     def test_view_standard_deviation_multi_update(self):
-        data = {"a": [91.96, 258.576, 29.6, 243.16, 36.24, 25.248, 79.99, 206.1, 31.5, 55.6], "b": [1 if i % 2 == 0 else 0 for i in range(10)]}
+        data = {
+            "a": [
+                91.96,
+                258.576,
+                29.6,
+                243.16,
+                36.24,
+                25.248,
+                79.99,
+                206.1,
+                31.5,
+                55.6,
+            ],
+            "b": [1 if i % 2 == 0 else 0 for i in range(10)],
+        }
         table = Table(data)
         view = table.view(aggregates={"a": "stddev"}, group_by=["b"])
 
         result = view.to_columns()
         expected_total = data["a"]
-        expected_zero = [data["a"][1], data["a"][3], data["a"][5], data["a"][7], data["a"][9]]
-        expected_one = [data["a"][0], data["a"][2], data["a"][4], data["a"][6], data["a"][8]]
+        expected_zero = [
+            data["a"][1],
+            data["a"][3],
+            data["a"][5],
+            data["a"][7],
+            data["a"][9],
+        ]
+        expected_one = [
+            data["a"][0],
+            data["a"][2],
+            data["a"][4],
+            data["a"][6],
+            data["a"][8],
+        ]
 
         assert result["a"] == approx([np.std(expected_total), np.std(expected_zero), np.std(expected_one)])
 
@@ -627,14 +882,40 @@ class TestView(object):
         assert result["a"][-1] is None
 
     def test_view_standard_deviation_multi_update_delta(self):
-        data = {"a": [91.96, 258.576, 29.6, 243.16, 36.24, 25.248, 79.99, 206.1, 31.5, 55.6], "b": [1 if i % 2 == 0 else 0 for i in range(10)]}
+        data = {
+            "a": [
+                91.96,
+                258.576,
+                29.6,
+                243.16,
+                36.24,
+                25.248,
+                79.99,
+                206.1,
+                31.5,
+                55.6,
+            ],
+            "b": [1 if i % 2 == 0 else 0 for i in range(10)],
+        }
         table = Table(data)
         view = table.view(aggregates={"a": "stddev"}, group_by=["b"])
 
         result = view.to_columns()
         expected_total = data["a"]
-        expected_zero = [data["a"][1], data["a"][3], data["a"][5], data["a"][7], data["a"][9]]
-        expected_one = [data["a"][0], data["a"][2], data["a"][4], data["a"][6], data["a"][8]]
+        expected_zero = [
+            data["a"][1],
+            data["a"][3],
+            data["a"][5],
+            data["a"][7],
+            data["a"][9],
+        ]
+        expected_one = [
+            data["a"][0],
+            data["a"][2],
+            data["a"][4],
+            data["a"][6],
+            data["a"][8],
+        ]
 
         assert result["a"] == approx([np.std(expected_total), np.std(expected_zero), np.std(expected_one)])
 
@@ -670,19 +951,50 @@ class TestView(object):
         table.update(update_data)
 
     def test_view_standard_deviation_multi_update_indexed(self):
-        data = {"a": [91.96, 258.576, 29.6, 243.16, 36.24, 25.248, 79.99, 206.1, 31.5, 55.6], "b": [1 if i % 2 == 0 else 0 for i in range(10)], "c": [i for i in range(10)]}
+        data = {
+            "a": [
+                91.96,
+                258.576,
+                29.6,
+                243.16,
+                36.24,
+                25.248,
+                79.99,
+                206.1,
+                31.5,
+                55.6,
+            ],
+            "b": [1 if i % 2 == 0 else 0 for i in range(10)],
+            "c": [i for i in range(10)],
+        }
         table = Table(data, index="c")
         view = table.view(aggregates={"a": "stddev"}, group_by=["b"])
 
         result = view.to_columns()
         expected_total = data["a"]
-        expected_zero = [data["a"][1], data["a"][3], data["a"][5], data["a"][7], data["a"][9]]
-        expected_one = [data["a"][0], data["a"][2], data["a"][4], data["a"][6], data["a"][8]]
+        expected_zero = [
+            data["a"][1],
+            data["a"][3],
+            data["a"][5],
+            data["a"][7],
+            data["a"][9],
+        ]
+        expected_one = [
+            data["a"][0],
+            data["a"][2],
+            data["a"][4],
+            data["a"][6],
+            data["a"][8],
+        ]
 
         assert result["a"] == approx([np.std(expected_total), np.std(expected_zero), np.std(expected_one)])
 
         # "b" = 2 here should result in null stddev because the group size is 1
-        update_data = {"a": [15.12, 9.102, 0.99, 12.8], "b": [1, 0, 1, 2], "c": [1, 5, 2, 7]}
+        update_data = {
+            "a": [15.12, 9.102, 0.99, 12.8],
+            "b": [1, 0, 1, 2],
+            "c": [1, 5, 2, 7],
+        }
 
         table.update(update_data)
 
@@ -706,19 +1018,50 @@ class TestView(object):
         assert result["a"][-1] is None
 
     def test_view_standard_deviation_multi_update_indexed_delta(self):
-        data = {"a": [91.96, 258.576, 29.6, 243.16, 36.24, 25.248, 79.99, 206.1, 31.5, 55.6], "b": [1 if i % 2 == 0 else 0 for i in range(10)], "c": [i for i in range(10)]}
+        data = {
+            "a": [
+                91.96,
+                258.576,
+                29.6,
+                243.16,
+                36.24,
+                25.248,
+                79.99,
+                206.1,
+                31.5,
+                55.6,
+            ],
+            "b": [1 if i % 2 == 0 else 0 for i in range(10)],
+            "c": [i for i in range(10)],
+        }
         table = Table(data, index="c")
         view = table.view(aggregates={"a": "stddev", "b": "last", "c": "last"}, group_by=["b"])
 
         result = view.to_columns()
         expected_total = data["a"]
-        expected_zero = [data["a"][1], data["a"][3], data["a"][5], data["a"][7], data["a"][9]]
-        expected_one = [data["a"][0], data["a"][2], data["a"][4], data["a"][6], data["a"][8]]
+        expected_zero = [
+            data["a"][1],
+            data["a"][3],
+            data["a"][5],
+            data["a"][7],
+            data["a"][9],
+        ]
+        expected_one = [
+            data["a"][0],
+            data["a"][2],
+            data["a"][4],
+            data["a"][6],
+            data["a"][8],
+        ]
 
         assert result["a"] == approx([np.std(expected_total), np.std(expected_zero), np.std(expected_one)])
 
         # 2 here should result in null stddev because the group size is 1
-        update_data = {"a": [15.12, 9.102, 0.99, 12.8], "b": [1, 0, 1, 2], "c": [0, 4, 1, 6]}
+        update_data = {
+            "a": [15.12, 9.102, 0.99, 12.8],
+            "b": [1, 0, 1, 2],
+            "c": [0, 4, 1, 6],
+        }
 
         def cb1(port_id, delta):
             table2 = Table(delta)
@@ -793,13 +1136,22 @@ class TestView(object):
         data = [{"a": date(2019, 7, 11), "b": 2}, {"a": date(2019, 7, 12), "b": 4}]
         tbl = Table(data)
         view = tbl.view(sort=[["a", "desc"]])
-        assert view.to_records() == [{"a": datetime(2019, 7, 12), "b": 4}, {"a": datetime(2019, 7, 11), "b": 2}]
+        assert view.to_records() == [
+            {"a": datetime(2019, 7, 12), "b": 4},
+            {"a": datetime(2019, 7, 11), "b": 2},
+        ]
 
     def test_view_sort_datetime(self):
-        data = [{"a": datetime(2019, 7, 11, 8, 15), "b": 2}, {"a": datetime(2019, 7, 11, 8, 16), "b": 4}]
+        data = [
+            {"a": datetime(2019, 7, 11, 8, 15), "b": 2},
+            {"a": datetime(2019, 7, 11, 8, 16), "b": 4},
+        ]
         tbl = Table(data)
         view = tbl.view(sort=[["a", "desc"]])
-        assert view.to_records() == [{"a": datetime(2019, 7, 11, 8, 16), "b": 4}, {"a": datetime(2019, 7, 11, 8, 15), "b": 2}]
+        assert view.to_records() == [
+            {"a": datetime(2019, 7, 11, 8, 16), "b": 4},
+            {"a": datetime(2019, 7, 11, 8, 15), "b": 2},
+        ]
 
     def test_view_sort_hidden(self):
         data = [{"a": 1.1, "b": 2}, {"a": 1.2, "b": 4}]
@@ -808,7 +1160,11 @@ class TestView(object):
         assert view.to_records() == [{"b": 4}, {"b": 2}]
 
     def test_view_sort_avg_nan(self):
-        data = {"w": [3.5, 4.5, None, None, None, None, 1.5, 2.5], "x": [1, 2, 3, 4, 4, 3, 2, 1], "y": ["a", "b", "c", "d", "e", "f", "g", "h"]}
+        data = {
+            "w": [3.5, 4.5, None, None, None, None, 1.5, 2.5],
+            "x": [1, 2, 3, 4, 4, 3, 2, 1],
+            "y": ["a", "b", "c", "d", "e", "f", "g", "h"],
+        }
         tbl = Table(data)
         view = tbl.view(
             columns=["x", "w"],
@@ -817,13 +1173,27 @@ class TestView(object):
             aggregates={"w": "avg", "x": "unique"},
         )
         assert view.to_dict() == {
-            "__ROW_PATH__": [[], ["c"], ["d"], ["e"], ["f"], ["g"], ["h"], ["a"], ["b"]],
+            "__ROW_PATH__": [
+                [],
+                ["c"],
+                ["d"],
+                ["e"],
+                ["f"],
+                ["g"],
+                ["h"],
+                ["a"],
+                ["b"],
+            ],
             "w": [3, None, None, None, None, 1.5, 2.5, 3.5, 4.5],
             "x": [None, 3, 4, 4, 3, 2, 1, 1, 2],
         }
 
     def test_view_sort_sum_nan(self):
-        data = {"w": [3.5, 4.5, None, None, None, None, 1.5, 2.5], "x": [1, 2, 3, 4, 4, 3, 2, 1], "y": ["a", "b", "c", "d", "e", "f", "g", "h"]}
+        data = {
+            "w": [3.5, 4.5, None, None, None, None, 1.5, 2.5],
+            "x": [1, 2, 3, 4, 4, 3, 2, 1],
+            "y": ["a", "b", "c", "d", "e", "f", "g", "h"],
+        }
         tbl = Table(data)
         view = tbl.view(
             columns=["x", "w"],
@@ -831,10 +1201,28 @@ class TestView(object):
             sort=[["w", "asc"]],
             aggregates={"w": "sum", "x": "unique"},
         )
-        assert view.to_dict() == {"__ROW_PATH__": [[], ["c"], ["d"], ["e"], ["f"], ["g"], ["h"], ["a"], ["b"]], "w": [12, 0, 0, 0, 0, 1.5, 2.5, 3.5, 4.5], "x": [None, 3, 4, 4, 3, 2, 1, 1, 2]}
+        assert view.to_dict() == {
+            "__ROW_PATH__": [
+                [],
+                ["c"],
+                ["d"],
+                ["e"],
+                ["f"],
+                ["g"],
+                ["h"],
+                ["a"],
+                ["b"],
+            ],
+            "w": [12, 0, 0, 0, 0, 1.5, 2.5, 3.5, 4.5],
+            "x": [None, 3, 4, 4, 3, 2, 1, 1, 2],
+        }
 
     def test_view_sort_unique_nan(self):
-        data = {"w": [3.5, 4.5, None, None, None, None, 1.5, 2.5], "x": [1, 2, 3, 4, 4, 3, 2, 1], "y": ["a", "b", "c", "d", "e", "f", "g", "h"]}
+        data = {
+            "w": [3.5, 4.5, None, None, None, None, 1.5, 2.5],
+            "x": [1, 2, 3, 4, 4, 3, 2, 1],
+            "y": ["a", "b", "c", "d", "e", "f", "g", "h"],
+        }
         tbl = Table(data)
         view = tbl.view(
             columns=["x", "w"],
@@ -843,7 +1231,17 @@ class TestView(object):
             aggregates={"w": "unique", "x": "unique"},
         )
         assert view.to_dict() == {
-            "__ROW_PATH__": [[], ["c"], ["d"], ["e"], ["f"], ["g"], ["h"], ["a"], ["b"]],
+            "__ROW_PATH__": [
+                [],
+                ["c"],
+                ["d"],
+                ["e"],
+                ["f"],
+                ["g"],
+                ["h"],
+                ["a"],
+                ["b"],
+            ],
             "w": [None, None, None, None, None, 1.5, 2.5, 3.5, 4.5],
             "x": [None, 3, 4, 4, 3, 2, 1, 1, 2],
         }
@@ -947,37 +1345,55 @@ class TestView(object):
         assert view.to_records() == [{"a": datetime(2019, 7, 11), "b": 2}]
 
     def test_view_filter_datetime_eq(self):
-        data = [{"a": datetime(2019, 7, 11, 8, 15), "b": 2}, {"a": datetime(2019, 7, 11, 8, 16), "b": 4}]
+        data = [
+            {"a": datetime(2019, 7, 11, 8, 15), "b": 2},
+            {"a": datetime(2019, 7, 11, 8, 16), "b": 4},
+        ]
         tbl = Table(data)
         view = tbl.view(filter=[["a", "==", datetime(2019, 7, 11, 8, 15)]])
         assert view.to_records() == [{"a": datetime(2019, 7, 11, 8, 15), "b": 2}]
 
     def test_view_filter_datetime_neq(self):
-        data = [{"a": datetime(2019, 7, 11, 8, 15), "b": 2}, {"a": datetime(2019, 7, 11, 8, 16), "b": 4}]
+        data = [
+            {"a": datetime(2019, 7, 11, 8, 15), "b": 2},
+            {"a": datetime(2019, 7, 11, 8, 16), "b": 4},
+        ]
         tbl = Table(data)
         view = tbl.view(filter=[["a", "!=", datetime(2019, 7, 11, 8, 15)]])
         assert view.to_records() == [{"a": datetime(2019, 7, 11, 8, 16), "b": 4}]
 
     def test_view_filter_datetime_np_eq(self):
-        data = [{"a": datetime(2019, 7, 11, 8, 15), "b": 2}, {"a": datetime(2019, 7, 11, 8, 16), "b": 4}]
+        data = [
+            {"a": datetime(2019, 7, 11, 8, 15), "b": 2},
+            {"a": datetime(2019, 7, 11, 8, 16), "b": 4},
+        ]
         tbl = Table(data)
         view = tbl.view(filter=[["a", "==", np.datetime64(datetime(2019, 7, 11, 8, 15))]])
         assert view.to_records() == [{"a": datetime(2019, 7, 11, 8, 15), "b": 2}]
 
     def test_view_filter_datetime_np_neq(self):
-        data = [{"a": datetime(2019, 7, 11, 8, 15), "b": 2}, {"a": datetime(2019, 7, 11, 8, 16), "b": 4}]
+        data = [
+            {"a": datetime(2019, 7, 11, 8, 15), "b": 2},
+            {"a": datetime(2019, 7, 11, 8, 16), "b": 4},
+        ]
         tbl = Table(data)
         view = tbl.view(filter=[["a", "!=", np.datetime64(datetime(2019, 7, 11, 8, 15))]])
         assert view.to_records() == [{"a": datetime(2019, 7, 11, 8, 16), "b": 4}]
 
     def test_view_filter_datetime_str_eq(self):
-        data = [{"a": datetime(2019, 7, 11, 8, 15), "b": 2}, {"a": datetime(2019, 7, 11, 8, 16), "b": 4}]
+        data = [
+            {"a": datetime(2019, 7, 11, 8, 15), "b": 2},
+            {"a": datetime(2019, 7, 11, 8, 16), "b": 4},
+        ]
         tbl = Table(data)
         view = tbl.view(filter=[["a", "==", "2019/7/11 8:15"]])
         assert view.to_records() == [{"a": datetime(2019, 7, 11, 8, 15), "b": 2}]
 
     def test_view_filter_datetime_str_neq(self):
-        data = [{"a": datetime(2019, 7, 11, 8, 15), "b": 2}, {"a": datetime(2019, 7, 11, 8, 16), "b": 4}]
+        data = [
+            {"a": datetime(2019, 7, 11, 8, 15), "b": 2},
+            {"a": datetime(2019, 7, 11, 8, 16), "b": 4},
+        ]
         tbl = Table(data)
         view = tbl.view(filter=[["a", "!=", "2019/7/11 8:15"]])
         assert view.to_records() == [{"a": datetime(2019, 7, 11, 8, 16), "b": 4}]
@@ -1223,7 +1639,11 @@ class TestView(object):
 
         tbl = Table(data)
         view = tbl.view(group_by=["a"])
-        assert view.to_dict() == {"__ROW_PATH__": [[], [1], [3]], "a": [4, 1, 3], "b": [6, 2, 4]}
+        assert view.to_dict() == {
+            "__ROW_PATH__": [[], [1], [3]],
+            "a": [4, 1, 3],
+            "b": [6, 2, 4],
+        }
         view.on_update(cb1, mode="row")
         tbl.update(update_data)
 
@@ -1315,7 +1735,17 @@ class TestView(object):
         update_data = {"a": [5], "b": [6]}
 
         def cb1(port_id, delta):
-            compare_delta(delta, {"2|a": [1, None], "2|b": [2, None], "4|a": [3, None], "4|b": [4, None], "6|a": [5, 5], "6|b": [6, 6]})
+            compare_delta(
+                delta,
+                {
+                    "2|a": [1, None],
+                    "2|b": [2, None],
+                    "4|a": [3, None],
+                    "4|b": [4, None],
+                    "6|a": [5, 5],
+                    "6|b": [6, 6],
+                },
+            )
 
         tbl = Table(data)
         view = tbl.view(group_by=["a"], split_by=["b"])
@@ -1333,7 +1763,15 @@ class TestView(object):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
 
         def cb1(port_id, delta):
-            compare_delta(delta, {"2|a": [1, 1, None], "2|b": [2, 2, None], "4|a": [3, None, 3], "4|b": [4, None, 4]})
+            compare_delta(
+                delta,
+                {
+                    "2|a": [1, 1, None],
+                    "2|b": [2, 2, None],
+                    "4|a": [3, None, 3],
+                    "4|b": [4, None, 4],
+                },
+            )
 
         tbl = Table({"a": int, "b": int})
         view = tbl.view(group_by=["a"], split_by=["b"])
@@ -1344,7 +1782,15 @@ class TestView(object):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}, {"a": 3, "b": 5}]
 
         def cb1(port_id, delta):
-            compare_delta(delta, {"2|a": [1, 1, None], "2|b": [2, 2, None], "5|a": [3, None, 3], "5|b": [5, None, 5]})
+            compare_delta(
+                delta,
+                {
+                    "2|a": [1, 1, None],
+                    "2|b": [2, 2, None],
+                    "5|a": [3, None, 3],
+                    "5|b": [5, None, 5],
+                },
+            )
 
         tbl = Table({"a": int, "b": int}, index="a")
         view = tbl.view(group_by=["a"], split_by=["b"])
@@ -1356,7 +1802,17 @@ class TestView(object):
         update_data = {"a": [5], "b": [6]}
 
         def cb1(port_id, delta):
-            compare_delta(delta, {"2|a": [1, None], "2|b": [2, None], "4|a": [3, None], "4|b": [4, None], "6|a": [5, 5], "6|b": [6, 6]})
+            compare_delta(
+                delta,
+                {
+                    "2|a": [1, None],
+                    "2|b": [2, None],
+                    "4|a": [3, None],
+                    "4|b": [4, None],
+                    "6|a": [5, 5],
+                    "6|b": [6, 6],
+                },
+            )
 
         tbl = Table(data)
         view = tbl.view(split_by=["b"])
@@ -1374,7 +1830,17 @@ class TestView(object):
         update_data = {"a": [5], "b": [6]}
 
         def cb1(port_id, delta):
-            compare_delta(delta, {"2|a": [1, None], "2|b": [2, None], "5|a": [3, None], "5|b": [5, None], "6|a": [5, 5], "6|b": [6, 6]})
+            compare_delta(
+                delta,
+                {
+                    "2|a": [1, None],
+                    "2|b": [2, None],
+                    "5|a": [3, None],
+                    "5|b": [5, None],
+                    "6|a": [5, 5],
+                    "6|b": [6, 6],
+                },
+            )
 
         tbl = Table(data, index="a")
         view = tbl.view(split_by=["b"])
@@ -1391,7 +1857,15 @@ class TestView(object):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
 
         def cb1(port_id, delta):
-            compare_delta(delta, {"2|a": [1, 1, None], "2|b": [2, 2, None], "4|a": [3, None, 3], "4|b": [4, None, 4]})
+            compare_delta(
+                delta,
+                {
+                    "2|a": [1, 1, None],
+                    "2|b": [2, 2, None],
+                    "4|a": [3, None, 3],
+                    "4|b": [4, None, 4],
+                },
+            )
 
         tbl = Table({"a": int, "b": int})
         view = tbl.view(split_by=["b"])
@@ -1402,7 +1876,15 @@ class TestView(object):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}, {"a": 3, "b": 5}]
 
         def cb1(port_id, delta):
-            compare_delta(delta, {"2|a": [1, 1, None], "2|b": [2, 2, None], "5|a": [3, None, 3], "5|b": [5, None, 5]})
+            compare_delta(
+                delta,
+                {
+                    "2|a": [1, 1, None],
+                    "2|b": [2, 2, None],
+                    "5|a": [3, None, 3],
+                    "5|b": [5, None, 5],
+                },
+            )
 
         tbl = Table({"a": int, "b": int}, index="a")
         view = tbl.view(split_by=["b"])
@@ -1602,7 +2084,13 @@ class TestView(object):
         data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
         tbl = Table(data)
         with raises(PerspectiveCppError) as ex:
-            tbl.view(group_by=["a"], split_by=["c"], filter=[["a", ">", 1]], aggregates={"a": "avg"}, sort=[["x", "desc"]])
+            tbl.view(
+                group_by=["a"],
+                split_by=["c"],
+                filter=[["a", ">", 1]],
+                aggregates={"a": "avg"},
+                sort=[["x", "desc"]],
+            )
         assert str(ex.value) == "Invalid column 'x' found in View sorts.\n"
 
     def test_invalid_columns_not_in_expression_should_throw(self):
@@ -1622,6 +2110,14 @@ class TestView(object):
     def test_should_not_throw_valid_expression_config(self):
         data = [{"a": 1, "b": 2, "c": "a"}, {"a": 3, "b": 4, "c": "b"}]
         tbl = Table(data)
-        view = tbl.view(aggregates={"abc": "dominant"}, columns=["abc"], sort=[["abc", "desc"]], filter=[["abc", "==", "A"]], group_by=["abc"], split_by=["abc"], expressions=["// abc \n 'hello!'"])
+        view = tbl.view(
+            aggregates={"abc": "dominant"},
+            columns=["abc"],
+            sort=[["abc", "desc"]],
+            filter=[["abc", "==", "A"]],
+            group_by=["abc"],
+            split_by=["abc"],
+            expressions=["// abc \n 'hello!'"],
+        )
 
         assert view.schema() == {"abc": str}
