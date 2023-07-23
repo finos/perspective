@@ -1580,10 +1580,10 @@ View<t_ctxunit>::to_columns(t_uindex start_row, t_uindex end_row,
     bool get_pkeys, bool get_ids, bool _leaves_only, t_uindex num_sides,
     bool _has_row_path, std::string nidx, t_uindex columns_length,
     t_uindex group_by_length) const {
-
+    PSP_GIL_UNLOCK();
+    PSP_READ_LOCK(get_lock());
     auto slice = get_data(start_row, end_row, start_col, end_col);
-    auto col_names = slice->get_column_names();
-    auto schema = m_ctx->get_schema();
+    auto& col_names = slice->get_column_names();
 
     rapidjson::StringBuffer s;
     rapidjson::Writer<rapidjson::StringBuffer> writer(s);
@@ -1628,9 +1628,12 @@ View<t_ctx0>::to_columns(t_uindex start_row, t_uindex end_row,
     bool get_pkeys, bool get_ids, bool _leaves_only, t_uindex num_sides,
     bool _has_row_path, std::string nidx, t_uindex columns_length,
     t_uindex group_by_length) const {
+    PSP_GIL_UNLOCK();
+    PSP_READ_LOCK(get_lock());
     auto slice = get_data(start_row, end_row, start_col, end_col);
-    auto col_names = slice->get_column_names();
-    auto schema = m_ctx->get_schema();
+    const std::vector<std::vector<t_tscalar>>& col_names
+        = slice->get_column_names();
+
     rapidjson::StringBuffer s;
     rapidjson::Writer<rapidjson::StringBuffer> writer(s);
     writer.StartObject();
@@ -1671,8 +1674,11 @@ View<t_ctx1>::to_columns(t_uindex start_row, t_uindex end_row,
     bool get_pkeys, bool get_ids, bool leaves_only, t_uindex num_sides,
     bool has_row_path, std::string nidx, t_uindex columns_length,
     t_uindex group_by_length) const {
+    PSP_GIL_UNLOCK();
+    PSP_READ_LOCK(get_lock());
+
     auto slice = get_data(start_row, end_row, start_col, end_col);
-    auto col_names = slice->get_column_names();
+    const auto& col_names = slice->get_column_names();
     rapidjson::StringBuffer s;
     rapidjson::Writer<rapidjson::StringBuffer> writer(s);
     writer.StartObject();
@@ -1721,8 +1727,10 @@ View<t_ctx2>::to_columns(t_uindex start_row, t_uindex end_row,
     bool get_pkeys, bool get_ids, bool leaves_only, t_uindex num_sides,
     bool has_row_path, std::string nidx, t_uindex columns_length,
     t_uindex group_by_length) const {
-    auto slice = get_data(start_row, end_row, start_col, end_col);
-    auto col_names = slice->get_column_names();
+    PSP_GIL_UNLOCK();
+    PSP_READ_LOCK(get_lock());
+    const auto slice = get_data(start_row, end_row, start_col, end_col);
+    const auto& col_names = slice->get_column_names();
     rapidjson::StringBuffer s;
     rapidjson::Writer<rapidjson::StringBuffer> writer(s);
     writer.StartObject();
