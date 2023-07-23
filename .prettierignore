@@ -4,3 +4,4 @@ node_modules/
 target/
 .emsdk/
 boost*/
+py_modules

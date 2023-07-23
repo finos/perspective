@@ -66,6 +66,7 @@ pub struct SessionData {
     config: ViewConfig,
     view_sub: Option<ViewSubscription>,
     stats: Option<ViewStats>,
+    is_clean: bool,
 }
 
 impl Deref for Session {
@@ -107,6 +108,7 @@ impl Session {
     /// # Arguments
     /// - `keep_expressions` Whether to reset the `expressions` property.
     pub fn reset(&self, reset_expressions: bool) {
+        self.borrow_mut().is_clean = false;
         self.borrow_mut().view_sub = None;
         self.borrow_mut().config.reset(reset_expressions);
     }
@@ -306,8 +308,9 @@ impl Session {
     /// Update the config, setting the `columns` property to the plugin defaults
     /// if provided.
     pub fn update_view_config(&self, config_update: ViewConfigUpdate) {
-        self.borrow_mut().view_sub = None;
         if self.borrow_mut().config.apply_update(config_update) {
+            self.borrow_mut().view_sub = None;
+            self.0.borrow_mut().is_clean = false;
             self.view_config_changed.emit_all(());
         }
     }
@@ -452,6 +455,12 @@ impl Session {
         self.borrow_mut().config = config;
         Ok(())
     }
+
+    fn reset_clean(&self) -> bool {
+        let mut is_clean = true;
+        std::mem::swap(&mut is_clean, &mut self.0.borrow_mut().is_clean);
+        is_clean
+    }
 }
 
 /// A newtype wrapper which only provides `create_view()`
@@ -463,31 +472,34 @@ impl<'a> ValidSession<'a> {
     /// the original `&Session`.
     pub async fn create_view(&self) -> Result<&'a Session, ApiError> {
         let js_config = self.0.borrow().config.as_jsvalue()?;
-        let table = self
-            .0
-            .borrow()
-            .table
-            .clone()
-            .ok_or("`restore()` called before `load()`")?;
+        if !self.0.reset_clean() {
+            let table = self
+                .0
+                .borrow()
+                .table
+                .clone()
+                .ok_or("`restore()` called before `load()`")?;
 
-        let view = table.view(&js_config).await?;
-        let view_schema = view.schema().await?;
-        self.0.metadata_mut().update_view_schema(&view_schema)?;
+            let view = table.view(&js_config).await?;
+            let view_schema = view.schema().await?;
+            self.0.metadata_mut().update_view_schema(&view_schema)?;
 
-        let on_stats = Callback::from({
-            let this = self.0.clone();
-            move |stats| this.update_stats(stats)
-        });
+            let on_stats = Callback::from({
+                let this = self.0.clone();
+                move |stats| this.update_stats(stats)
+            });
 
-        let sub = {
-            let config = self.0.borrow().config.clone();
-            let on_update = self.0.table_updated.callback();
-            ViewSubscription::new(view, config, on_stats, on_update)
-        };
+            let sub = {
+                let config = self.0.borrow().config.clone();
+                let on_update = self.0.table_updated.callback();
+                ViewSubscription::new(view, config, on_stats, on_update)
+            };
 
-        // self.0.borrow_mut().metadata.as_mut().unwrap().view_schema =
-        // Some(view_schema);
-        self.0.borrow_mut().view_sub = Some(sub);
+            // self.0.borrow_mut().metadata.as_mut().unwrap().view_schema =
+            // Some(view_schema);
+            self.0.borrow_mut().view_sub = Some(sub);
+        }
+
         Ok(self.0)
     }
 }
