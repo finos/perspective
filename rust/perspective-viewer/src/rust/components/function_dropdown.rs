@@ -18,7 +18,7 @@ use crate::exprtk::CompletionItemSuggestion;
 use crate::utils::WeakScope;
 use crate::*;
 
-static CSS: &str = include_str!("../../../target/css/function-dropdown.css");
+static CSS: &str = include_str!(concat!(env!("OUT_DIR"), "/css/function-dropdown.css"));
 
 pub enum FunctionDropDownMsg {
     SetValues(Vec<CompletionItemSuggestion>),
