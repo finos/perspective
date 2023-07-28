@@ -9,7 +9,7 @@
 #  ┃ This file is part of the Perspective library, distributed under the terms ┃
 #  ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-
+import pandas
 from datetime import date, datetime
 
 from ..core.exception import PerspectiveError
@@ -71,6 +71,9 @@ class Table(object):
         if self._is_arrow:
             _accessor = data
         else:
+            if isinstance(data, pandas.DataFrame):
+                if data[data.columns[0]].dtypes == "string":
+                    data = data.astype("object")
             _accessor = _PerspectiveAccessor(data)
 
         self._date_validator = _PerspectiveDateValidator()

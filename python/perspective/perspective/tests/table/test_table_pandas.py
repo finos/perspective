@@ -916,3 +916,15 @@ class TestTablePandas(object):
         df_both = pd.DataFrame(np.random.randn(3, 16), index=['A', 'B', 'C'], columns=index)
         table = Table(df_both)
         assert table.size() == 48
+
+    def test_table_dataframe_for_dtype_equals_string(self):
+        df = pd.DataFrame({"a": ["aa", "bbb"], "b": ["dddd", "dd"]}, dtype="string")
+        table = Table(df)
+        view = table.view()
+
+        assert table.size() == 2
+
+        assert table.schema() == {"index": int, "a": str, "b": str}
+
+        view_df = view.to_df()
+        assert view_df.to_dict() == {"index": {0: 0, 1: 1}, "a": {0: "aa", 1: "bbb"}, "b": {0: "dddd", 1: "dd"}}
