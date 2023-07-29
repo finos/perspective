@@ -16,7 +16,6 @@ from perspective import PerspectiveViewer, Table
 
 
 class TestViewer:
-
     def test_viewer_get_table(self):
         table = Table({"a": [1, 2, 3]})
         viewer = PerspectiveViewer()
@@ -52,12 +51,7 @@ class TestViewer:
 
     def test_viewer_load_schema(self):
         viewer = PerspectiveViewer()
-        viewer.load({
-            "a": str,
-            "b": int,
-            "c": bool,
-            "d": str
-        })
+        viewer.load({"a": str, "b": int, "c": bool, "d": str})
         for col in viewer.columns:
             assert col in ["a", "b", "c", "d"]
 
@@ -84,6 +78,7 @@ class TestViewer:
         viewer.load({"b": [1, 2, 3]})
         assert viewer.group_by == []
         assert viewer.theme == "Pro Dark"  # should not break UI
+
     def test_viewer_load_np(self):
         table = Table({"a": np.arange(1, 100)})
         viewer = PerspectiveViewer()
@@ -119,9 +114,7 @@ class TestViewer:
         viewer.update({"a": [4, 5, 6]})
         assert table.size() == 6
         assert viewer.table.size() == 6
-        assert viewer.table.view().to_dict() == {
-            "a": [1, 2, 3, 4, 5, 6]
-        }
+        assert viewer.table.view().to_dict() == {"a": [1, 2, 3, 4, 5, 6]}
 
     def test_viewer_update_list(self):
         table = Table({"a": [1, 2, 3]})
@@ -130,9 +123,7 @@ class TestViewer:
         viewer.update([{"a": 4}, {"a": 5}, {"a": 6}])
         assert table.size() == 6
         assert viewer.table.size() == 6
-        assert viewer.table.view().to_dict() == {
-            "a": [1, 2, 3, 4, 5, 6]
-        }
+        assert viewer.table.view().to_dict() == {"a": [1, 2, 3, 4, 5, 6]}
 
     def test_viewer_update_df(self):
         table = Table({"a": [1, 2, 3]})
@@ -141,9 +132,7 @@ class TestViewer:
         viewer.update(pd.DataFrame({"a": [4, 5, 6]}))
         assert table.size() == 6
         assert viewer.table.size() == 6
-        assert viewer.table.view().to_dict() == {
-            "a": [1, 2, 3, 4, 5, 6]
-        }
+        assert viewer.table.view().to_dict() == {"a": [1, 2, 3, 4, 5, 6]}
 
     def test_viewer_update_dict_partial(self):
         table = Table({"a": [1, 2, 3], "b": [5, 6, 7]}, index="a")
@@ -152,10 +141,7 @@ class TestViewer:
         viewer.update({"a": [1, 2, 3], "b": [8, 9, 10]})
         assert table.size() == 3
         assert viewer.table.size() == 3
-        assert viewer.table.view().to_dict() == {
-            "a": [1, 2, 3],
-            "b": [8, 9, 10]
-        }
+        assert viewer.table.view().to_dict() == {"a": [1, 2, 3], "b": [8, 9, 10]}
 
     # clear
 
@@ -165,9 +151,7 @@ class TestViewer:
         viewer.load(table)
         viewer.clear()
         assert viewer.table.size() == 0
-        assert viewer.table.schema() == {
-            "a": int
-        }
+        assert viewer.table.schema() == {"a": int}
 
     # replace
 
@@ -177,12 +161,8 @@ class TestViewer:
         viewer.load(table)
         viewer.replace({"a": [4, 5, 6]})
         assert viewer.table.size() == 3
-        assert viewer.table.schema() == {
-            "a": int
-        }
-        assert viewer.table.view().to_dict() == {
-            "a": [4, 5, 6]
-        }
+        assert viewer.table.schema() == {"a": int}
+        assert viewer.table.view().to_dict() == {"a": [4, 5, 6]}
 
     # reset
 
@@ -218,11 +198,7 @@ class TestViewer:
 
     def test_save_restore(self):
         table = Table({"a": [1, 2, 3]})
-        viewer = PerspectiveViewer(
-            plugin="X Bar",
-            filter=[["a", "==", 2]],
-            expressions=['"a" * 2']
-        )
+        viewer = PerspectiveViewer(plugin="X Bar", filter=[["a", "==", 2]], expressions=['"a" * 2'])
         viewer.load(table)
 
         # Save config
@@ -249,13 +225,7 @@ class TestViewer:
         viewer = PerspectiveViewer(plugin="Datagrid", plugin_config={"columns": {"a": {"fixed": 4}}})
         config = viewer.save()
 
-        assert config["plugin_config"] == {
-            "columns": {
-                "a": {
-                    "fixed": 4
-                }
-            }
-        }
+        assert config["plugin_config"] == {"columns": {"a": {"fixed": 4}}}
 
         viewer.reset()
         assert viewer.plugin_config == {}

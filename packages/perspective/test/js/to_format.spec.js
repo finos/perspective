@@ -82,7 +82,7 @@ const pivoted_output = [
             let json = await view.to_json({
                 start_col: 5,
             });
-            expect(json).toEqual([{}, {}, {}, {}]);
+            expect(json).toEqual([]);
             view.delete();
             table.delete();
         });
@@ -126,7 +126,7 @@ const pivoted_output = [
                 start_col: 2,
             });
 
-            expect(json).toEqual([{}, {}, {}, {}]);
+            expect(json).toEqual([]);
             view.delete();
             table.delete();
         });
@@ -431,8 +431,8 @@ const pivoted_output = [
             let view = await table.view();
             let json = await view.to_json({ formatted: true });
             expect(json).toEqual([
-                { datetime: "6/13/16" },
-                { datetime: "6/14/16" },
+                { datetime: "2016-06-13" },
+                { datetime: "2016-06-14" },
             ]);
             view.delete();
             table.delete();
@@ -445,14 +445,9 @@ const pivoted_output = [
             ]);
             let view = await table.view();
             let json = await view.to_json({ formatted: true });
-            json = json.map((obj) => {
-                obj.datetime = obj.datetime.replace(/[^:,\/|A-Z0-9 ]/gi, " ");
-                return obj;
-            }, {});
-
             expect(json).toEqual([
-                { datetime: "1/1/16, 12:30:00 AM" },
-                { datetime: "6/15/16, 7:20:00 PM" },
+                { datetime: "2016-01-01 00:30:00.000" },
+                { datetime: "2016-06-15 19:20:00.000" },
             ]);
             view.delete();
             table.delete();

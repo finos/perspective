@@ -64,9 +64,7 @@ class TestPerspectiveTornadoHandlerChunked(object):
         return client
 
     @pytest.mark.gen_test(run_sync=False)
-    async def test_tornado_handler_create_view_to_arrow_chunked(
-        self, app, http_client, http_port, sentinel
-    ):
+    async def test_tornado_handler_create_view_to_arrow_chunked(self, app, http_client, http_port, sentinel):
         table_name = str(random.random())
         _table = Table(data)
         MANAGER.host_table(table_name, _table)
@@ -80,9 +78,7 @@ class TestPerspectiveTornadoHandlerChunked(object):
         assert Table(output).schema(as_string=True) == expected
 
     @pytest.mark.gen_test(run_sync=False)
-    async def test_tornado_handler_create_view_to_arrow_update_chunked(
-        self, app, http_client, http_port, sentinel
-    ):
+    async def test_tornado_handler_create_view_to_arrow_update_chunked(self, app, http_client, http_port, sentinel):
         table_name = str(random.random())
         _table = Table(data)
         MANAGER.host_table(table_name, _table)
@@ -100,9 +96,7 @@ class TestPerspectiveTornadoHandlerChunked(object):
         assert size2 == 110
 
     @pytest.mark.gen_test(run_sync=False)
-    async def test_tornado_handler_update_chunked_interleaved_with_trivial(
-        self, app, http_client, http_port, sentinel
-    ):
+    async def test_tornado_handler_update_chunked_interleaved_with_trivial(self, app, http_client, http_port, sentinel):
         """Tests that, when a chunked response `output_fut` is interleaved with
         a response belonging to another message ID (and not binary encoded)
         `size3`, both messages de-multiplex correclty and succeed.

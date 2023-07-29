@@ -40,9 +40,7 @@ MANAGER = PerspectiveManager()
 
 
 async def websocket_handler(websocket: WebSocket):
-    handler = PerspectiveStarletteHandler(
-        manager=MANAGER, websocket=websocket, chunk_size=500
-    )
+    handler = PerspectiveStarletteHandler(manager=MANAGER, websocket=websocket, chunk_size=500)
     await handler.run()
 
 

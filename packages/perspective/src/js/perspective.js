@@ -17,8 +17,6 @@ import { extract_vector, extract_map, fill_vector } from "./emscripten.js";
 import { bindall, get_column_type } from "./utils.js";
 import { Server } from "./api/server.js";
 
-import formatters from "./view_formatters";
-
 if (typeof self !== "undefined" && self.performance === undefined) {
     self.performance = { now: Date.now };
 }
@@ -520,167 +518,6 @@ export default function (Module) {
     };
 
     /**
-     * Generic base function from which `to_json`, `to_columns` etc. derives.
-     *
-     * @private
-     */
-    const to_format = function (options, formatter) {
-        _call_process(this.table.get_id());
-        options = _parse_format_options.bind(this)(options);
-        const start_row = options.start_row;
-        const end_row = options.end_row;
-        const start_col = options.start_col;
-        const end_col = options.end_col;
-        const hidden = this._num_hidden();
-
-        const is_formatted = options.formatted;
-        const get_pkeys = !!options.index;
-        const get_ids = !!options.id;
-        const leaves_only = !!options.leaves_only;
-        const num_sides = this.sides();
-        const has_row_path = num_sides !== 0 && !this.column_only;
-        const nidx = SIDES[num_sides];
-
-        let get_from_data_slice;
-
-        if (this.is_unit_context) {
-            get_from_data_slice = __MODULE__.get_from_data_slice_unit;
-        } else {
-            get_from_data_slice = __MODULE__[`get_from_data_slice_${nidx}`];
-        }
-
-        const slice = this.get_data_slice(
-            start_row,
-            end_row,
-            start_col,
-            end_col
-        );
-        const ns = slice.get_column_names();
-        const col_names = extract_vector_scalar(ns).map((x) =>
-            x.join(defaults.COLUMN_SEPARATOR_STRING)
-        );
-        const schema = this.schema();
-
-        let data = formatter.initDataValue();
-
-        for (let cidx = start_col; cidx < end_col; cidx++) {
-            const col_name = col_names[cidx];
-            formatter.initColumnValue(data, col_name);
-        }
-
-        for (let ridx = start_row; ridx < end_row; ridx++) {
-            let row_path = has_row_path ? slice.get_row_path(ridx) : undefined;
-            if (
-                has_row_path &&
-                leaves_only &&
-                row_path.size() < this.config.group_by.length
-            ) {
-                row_path.delete();
-                continue;
-            }
-            let row = formatter.initRowValue();
-
-            if (get_ids) {
-                formatter.initColumnRowPath(data, row, "__ID__");
-            }
-
-            for (let cidx = start_col; cidx < end_col; cidx++) {
-                const col_name = col_names[cidx];
-                const col_type = schema[col_name];
-                const type_config = get_type_config(col_type);
-
-                if (cidx === start_col && num_sides !== 0) {
-                    if (!this.column_only) {
-                        formatter.initColumnRowPath(data, row, "__ROW_PATH__");
-                        for (let i = 0; i < row_path.size(); i++) {
-                            const s = row_path.get(i);
-                            const value = __MODULE__.scalar_to_val(
-                                s,
-                                false,
-                                false
-                            );
-                            s.delete();
-                            formatter.addColumnValue(
-                                data,
-                                row,
-                                "__ROW_PATH__",
-                                value
-                            );
-                            if (get_ids) {
-                                formatter.addColumnValue(
-                                    data,
-                                    row,
-                                    "__ID__",
-                                    value
-                                );
-                            }
-                        }
-                    }
-                } else if (
-                    (cidx - (num_sides > 0 ? 1 : 0)) %
-                        (this.config.columns.length + hidden) >=
-                    this.config.columns.length
-                ) {
-                    // Hidden columns are always at the end of the column names
-                    // list, and we need to skip them from the output.
-                    continue;
-                } else {
-                    let value = get_from_data_slice(slice, ridx, cidx);
-                    if (is_formatted && value !== null && value !== undefined) {
-                        if (col_type === "datetime" || col_type === "date") {
-                            // TODO Annoyingly, CSV occupies the gray area of
-                            // needing formatting _just_ for Date and Datetime -
-                            // e.g., 10000 will format as CSV `"10,000.00"
-                            // Otherwise, this would not need to be conditional.
-                            value = new Date(value);
-                            value = value.toLocaleString(
-                                [],
-                                type_config.format
-                            );
-                        }
-                    }
-                    formatter.setColumnValue(data, row, col_name, value);
-                }
-            }
-
-            if (get_pkeys) {
-                const keys = slice.get_pkeys(ridx, 0);
-                formatter.initColumnRowPath(data, row, "__INDEX__");
-                for (let i = 0; i < keys.size(); i++) {
-                    // TODO: if __INDEX__ and set index have the same value,
-                    // don't we need to make sure that it only emits one?
-                    const s = keys.get(i);
-                    const value = __MODULE__.scalar_to_val(s, false, false);
-                    s.delete();
-                    formatter.addColumnValue(data, row, "__INDEX__", value);
-                }
-                keys.delete();
-            }
-
-            // we could add an api to just clone the index column if
-            // it's already calculated
-            if (get_ids && num_sides === 0) {
-                const keys = slice.get_pkeys(ridx, 0);
-                for (let i = 0; i < keys.size(); i++) {
-                    const s = keys.get(i);
-                    const value = __MODULE__.scalar_to_val(s, false, false);
-                    s.delete();
-                    formatter.addColumnValue(data, row, "__ID__", value);
-                }
-                keys.delete();
-            }
-
-            if (row_path) {
-                row_path.delete();
-            }
-            formatter.addRow(data, row);
-        }
-
-        slice.delete();
-        return formatter.formatData(data, options.config);
-    };
-
-    /**
      * Generic base function for returning serialized data for a single column.
      *
      * @private
@@ -751,7 +588,47 @@ export default function (Module) {
      * comma-separated column paths.
      */
     view.prototype.to_columns = function (options) {
-        return to_format.call(this, options, formatters.jsonTableFormatter);
+        return JSON.parse(this.to_columns_string(options));
+    };
+
+    /**
+     *  Serializes this view to a string of JSON data. Useful if you want to
+     *  save additional round trip serialize/deserialize cycles.
+     */
+    view.prototype.to_columns_string = function (options) {
+        _call_process(this.table.get_id());
+        options = _parse_format_options.bind(this)(options);
+        const start_row = options.start_row;
+        const end_row = options.end_row;
+        const start_col = options.start_col;
+        const end_col = options.end_col;
+        const hidden = this._num_hidden();
+        const is_formatted = options.formatted;
+        const get_pkeys = !!options.index;
+        const get_ids = !!options.id;
+        const leaves_only = !!options.leaves_only;
+        const num_sides = this.sides();
+        const has_row_path = num_sides !== 0 && !this.column_only;
+        const nidx = SIDES[num_sides];
+        const config = this.get_config();
+        const columns_length = config.columns.length;
+        const group_by_length = config.group_by.length;
+        return this._View.to_columns(
+            start_row,
+            end_row,
+            start_col,
+            end_col,
+            hidden,
+            is_formatted,
+            get_pkeys,
+            get_ids,
+            leaves_only,
+            num_sides,
+            has_row_path,
+            nidx,
+            columns_length,
+            group_by_length
+        );
     };
 
     /**
@@ -779,7 +656,17 @@ export default function (Module) {
      * comma-separated column paths.
      */
     view.prototype.to_json = function (options) {
-        return to_format.call(this, options, formatters.jsonFormatter);
+        const cols = this.to_columns(options);
+        const colnames = Object.keys(cols);
+        const first_col = cols[colnames[0]] || [];
+        return first_col.map((_, idx) => {
+            const obj = {};
+            for (const key of colnames) {
+                obj[key] = cols[key][idx];
+            }
+
+            return obj;
+        });
     };
 
     /**

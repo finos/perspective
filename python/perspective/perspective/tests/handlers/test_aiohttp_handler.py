@@ -60,9 +60,7 @@ class TestPerspectiveAIOHTTPHandler(object):
         Perspective aiottp server.
         """
         client = await aiohttp_client(app)
-        return await websocket(
-            "http://{}:{}/websocket".format(client.host, client.port), client.session
-        )
+        return await websocket("http://{}:{}/websocket".format(client.host, client.port), client.session)
 
     @pytest.mark.asyncio
     async def test_aiohttp_handler_init_terminate(self, app, aiohttp_client):
@@ -123,9 +121,7 @@ class TestPerspectiveAIOHTTPHandler(object):
         assert size2 == 20
 
     @pytest.mark.asyncio
-    async def test_aiohttp_handler_table_update_port(
-        self, app, aiohttp_client, sentinel
-    ):
+    async def test_aiohttp_handler_table_update_port(self, app, aiohttp_client, sentinel):
         table_name = str(random.random())
         _table = Table(data)
         MANAGER.host_table(table_name, _table)
@@ -158,9 +154,7 @@ class TestPerspectiveAIOHTTPHandler(object):
         assert s.get() is True
 
     @pytest.mark.asyncio
-    async def test_aiohttp_handler_table_update_row_delta(
-        self, app, aiohttp_client, sentinel
-    ):
+    async def test_aiohttp_handler_table_update_row_delta(self, app, aiohttp_client, sentinel):
         table_name = str(random.random())
         _table = Table(data)
         MANAGER.host_table(table_name, _table)
@@ -190,9 +184,7 @@ class TestPerspectiveAIOHTTPHandler(object):
         assert s.get() is True
 
     @pytest.mark.asyncio
-    async def test_aiohttp_handler_table_update_row_delta_port(
-        self, app, aiohttp_client, sentinel
-    ):
+    async def test_aiohttp_handler_table_update_row_delta_port(self, app, aiohttp_client, sentinel):
         table_name = str(random.random())
         _table = Table(data)
         MANAGER.host_table(table_name, _table)
@@ -289,9 +281,7 @@ class TestPerspectiveAIOHTTPHandler(object):
         assert Table(output).schema(as_string=True) == expected
 
     @pytest.mark.asyncio
-    async def test_aiohttp_handler_create_view_to_arrow_update(
-        self, app, aiohttp_client
-    ):
+    async def test_aiohttp_handler_create_view_to_arrow_update(self, app, aiohttp_client):
         table_name = str(random.random())
         _table = Table(data)
         MANAGER.host_table(table_name, _table)

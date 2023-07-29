@@ -22,6 +22,8 @@
 #include <perspective/data_slice.h>
 #include <perspective/table.h>
 #include <perspective/view_config.h>
+#include <rapidjson/writer.h>
+#include <rapidjson/stringbuffer.h>
 #include <cstddef>
 #include <memory>
 #include <map>
@@ -127,10 +129,28 @@ public:
     std::pair<t_tscalar, t_tscalar> get_min_max(
         const std::string& colname) const;
 
+    void write_scalar(t_tscalar scalar, bool is_formatted,
+        rapidjson::Writer<rapidjson::StringBuffer>& writer) const;
+
+    void write_row_path(t_uindex start_row, t_uindex end_row, bool has_row_path,
+        bool leaves_only, bool is_formatted,
+        rapidjson::Writer<rapidjson::StringBuffer>& writer) const;
+
+    void write_column(t_uindex c, t_uindex start_row, t_uindex end_row,
+        bool has_row_path, bool leaves_only, bool is_formatted,
+        std::shared_ptr<t_data_slice<CTX_T>> slice,
+        const std::vector<std::vector<t_tscalar>>& col_names,
+        rapidjson::Writer<rapidjson::StringBuffer>& writer) const;
+
+    void write_index_column(t_uindex start_row, t_uindex end_row,
+        bool has_row_path, bool leaves_only, bool is_formatted,
+        std::shared_ptr<t_data_slice<CTX_T>> slice,
+        rapidjson::Writer<rapidjson::StringBuffer>& writer) const;
+
     /**
-     * @brief Returns shared pointer to a t_data_slice object, which contains
-     * the underlying slice of data as well as the metadata required to
-     * interface with it.
+     * @brief Returns shared pointer to a t_data_slice object, which
+     * contains the underlying slice of data as well as the metadata
+     * required to interface with it.
      *
      * @tparam
      * @param start_row
@@ -141,6 +161,12 @@ public:
      */
     std::shared_ptr<t_data_slice<CTX_T>> get_data(t_uindex start_row,
         t_uindex end_row, t_uindex start_col, t_uindex end_col) const;
+
+    std::string to_columns(t_uindex start_row, t_uindex end_row,
+        t_uindex start_col, t_uindex end_col, t_uindex hidden,
+        bool is_formatted, bool get_pkeys, bool get_ids, bool leaves_only,
+        t_uindex num_sides, bool has_row_path, std::string nidx,
+        t_uindex columns_length, t_uindex group_by_length) const;
 
     /**
      * @brief Serializes the `View`'s data into the Apache Arrow format

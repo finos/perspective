@@ -226,9 +226,7 @@ class TestAsync(object):
             return f(*args, **kwargs)
 
         short_delay_queue_process = partial(_counter, "sync")
-        long_delay_queue_process = partial(
-            TestAsync.loop.add_timeout, 1, _counter, "async"
-        )
+        long_delay_queue_process = partial(TestAsync.loop.add_timeout, 1, _counter, "async")
 
         tbl = Table({"a": int, "b": float, "c": str})
         tbl2 = Table({"a": int, "b": float, "c": str})

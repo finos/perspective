@@ -112,6 +112,7 @@ PYBIND11_MODULE(libpsppy, m) {
         .def("get_min_max", &View<t_ctxunit>::get_min_max)
         .def("get_step_delta", &View<t_ctxunit>::get_step_delta)
         .def("get_column_dtype", &View<t_ctxunit>::get_column_dtype)
+        .def("to_columns", &View<t_ctxunit>::to_columns)
         .def("is_column_only", &View<t_ctxunit>::is_column_only);
 
     py::class_<View<t_ctx0>, std::shared_ptr<View<t_ctx0>>>(m, "View_ctx0")
@@ -136,6 +137,7 @@ PYBIND11_MODULE(libpsppy, m) {
         .def("get_min_max", &View<t_ctx0>::get_min_max)
         .def("get_step_delta", &View<t_ctx0>::get_step_delta)
         .def("get_column_dtype", &View<t_ctx0>::get_column_dtype)
+        .def("to_columns", &View<t_ctx0>::to_columns)
         .def("is_column_only", &View<t_ctx0>::is_column_only);
 
     py::class_<View<t_ctx1>, std::shared_ptr<View<t_ctx1>>>(m, "View_ctx1")
@@ -163,6 +165,7 @@ PYBIND11_MODULE(libpsppy, m) {
         .def("get_min_max", &View<t_ctx1>::get_min_max)
         .def("get_step_delta", &View<t_ctx1>::get_step_delta)
         .def("get_column_dtype", &View<t_ctx1>::get_column_dtype)
+        .def("to_columns", &View<t_ctx1>::to_columns)
         .def("is_column_only", &View<t_ctx1>::is_column_only);
 
     py::class_<View<t_ctx2>, std::shared_ptr<View<t_ctx2>>>(m, "View_ctx2")
@@ -191,6 +194,7 @@ PYBIND11_MODULE(libpsppy, m) {
         .def("get_row_path", &View<t_ctx2>::get_row_path)
         .def("get_step_delta", &View<t_ctx2>::get_step_delta)
         .def("get_column_dtype", &View<t_ctx2>::get_column_dtype)
+        .def("to_columns", &View<t_ctx2>::to_columns)
         .def("is_column_only", &View<t_ctx2>::is_column_only);
 
     /******************************************************************************

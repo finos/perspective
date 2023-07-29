@@ -37,9 +37,7 @@ MANAGER = PerspectiveManager()
 
 
 async def websocket_handler(request):
-    handler = PerspectiveAIOHTTPHandler(
-        manager=MANAGER, request=request, chunk_size=500
-    )
+    handler = PerspectiveAIOHTTPHandler(manager=MANAGER, request=request, chunk_size=500)
     await handler.run()
 
 
@@ -61,14 +59,10 @@ class TestPerspectiveAIOHTTPHandlerChunked(object):
         Perspective aiottp server.
         """
         client = await aiohttp_client(app)
-        return await websocket(
-            "http://{}:{}/websocket".format(client.host, client.port), client.session
-        )
+        return await websocket("http://{}:{}/websocket".format(client.host, client.port), client.session)
 
     @pytest.mark.asyncio
-    async def test_aiohttp_handler_create_view_to_arrow_chunked(
-        self, app, aiohttp_client
-    ):
+    async def test_aiohttp_handler_create_view_to_arrow_chunked(self, app, aiohttp_client):
         table_name = str(random.random())
         _table = Table(data)
         MANAGER.host_table(table_name, _table)
@@ -82,9 +76,7 @@ class TestPerspectiveAIOHTTPHandlerChunked(object):
         assert Table(output).schema(as_string=True) == expected
 
     @pytest.mark.asyncio
-    async def test_aiohttp_handler_create_view_to_arrow_update_chunked(
-        self, app, aiohttp_client
-    ):
+    async def test_aiohttp_handler_create_view_to_arrow_update_chunked(self, app, aiohttp_client):
         table_name = str(random.random())
         _table = Table(data)
         MANAGER.host_table(table_name, _table)
@@ -102,9 +94,7 @@ class TestPerspectiveAIOHTTPHandlerChunked(object):
         assert size2 == 110
 
     @pytest.mark.asyncio
-    async def test_aiohttp_handler_update_chunked_interleaved_with_trivial(
-        self, app, aiohttp_client
-    ):
+    async def test_aiohttp_handler_update_chunked_interleaved_with_trivial(self, app, aiohttp_client):
         """Tests that, when a chunked response `output_fut` is interleaved with
         a response belonging to another message ID (and not binary encoded)
         `size3`, both messages de-multiplex correclty and succeed.

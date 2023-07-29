@@ -11,6 +11,8 @@
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import pandas
+import json
+import datetime
 from functools import partial, wraps
 from random import random
 
@@ -487,9 +489,34 @@ class View(object):
                 represents a row of the current state of the
                 :class:`~perspective.View`.
         """
-        return to_format(kwargs, self, "records")
+        columns = self.to_columns(**kwargs)
+        colnames = list(columns.keys())
+        if len(colnames) > 0:
+            if colnames[0] in columns:
+                nrows = len(columns[colnames[0]])
+                return [{key: columns[key][i] for key in colnames} for i in range(nrows)]
+        return []
 
-    def to_dict(self, **options):
+    def to_columns_string(self, **kwargs):
+        options = _parse_format_options(self, kwargs)
+        return self._view.to_columns(
+            options["start_row"],
+            options["end_row"],
+            options["start_col"],
+            options["end_col"],
+            self._num_hidden_cols(),
+            kwargs.get("formatted", False),
+            kwargs.get("index", False),
+            kwargs.get("id", False),
+            kwargs.get("leaves_only", False),
+            self._sides,
+            self._sides != 0 and not self._column_only,
+            "zero" if self._sides == 0 else "one" if self._sides == 1 else "two",
+            len(self._config.get_columns()),
+            len(self._config.get_group_by()),
+        )
+
+    def to_dict(self, **kwargs):
         """Serialize the :class:`~perspective.View`'s dataset into a :obj:`dict`
         of :obj:`str` keys and :obj:`list` values.  Each key is a column name,
         and the associated value is the column's data packed into a :obj:`list`.
@@ -514,7 +541,43 @@ class View(object):
             :obj:`dict`: A dictionary with string keys and list values, where
                 key = column name and value = column values.
         """
-        return to_format(options, self, "dict")
+        data = json.loads(self.to_columns_string(**kwargs))
+        schema = self.schema(True)
+        table_schema = self._table.schema(True)
+        out = {}
+
+        for name, col in data.items():
+            if schema.get(name.split("|")[-1], "") in (
+                "date",
+                "datetime",
+            ) or schema.get(
+                name, ""
+            ) in ("date", "datetime"):
+                out[name] = list(
+                    map(
+                        lambda x: datetime.datetime.fromtimestamp(x / 1000) if x is not None else None,
+                        col,
+                    )
+                )
+            else:
+                out[name] = col
+
+        for idx, name in enumerate(self._config.get_group_by()):
+            if table_schema.get(name, "") in ("date", "datetime"):
+                row_path_col = out["__ROW_PATH__"]
+                for row in row_path_col:
+                    if idx < len(row):
+                        row[idx] = datetime.datetime.fromtimestamp(row[idx] / 1000) if row[idx] is not None else None
+
+        if kwargs.get("index", False) and table_schema.get(self._table._index, "") in (
+            "date",
+            "datetime",
+        ):
+            row_path_col = out["__INDEX__"]
+            for idx in range(len(row_path_col)):
+                row_path_col[idx][0] = datetime.datetime.fromtimestamp(row_path_col[idx][0] / 1000) if row_path_col[idx][0] is not None else None
+
+        return out
 
     def to_numpy(self, **options):
         """Serialize the view's dataset into a :obj:`dict` of :obj:`str` keys

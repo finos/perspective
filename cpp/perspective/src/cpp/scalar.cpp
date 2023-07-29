@@ -1039,11 +1039,16 @@ t_tscalar::to_string(bool for_expr) const {
                 auto d = get<t_date>();
                 ss << "date(" << d.year() << ", " << d.month() << ", "
                    << d.day() << ")";
-            } else {
-                ss << get<t_date>();
-            }
 
-            return ss.str();
+                return ss.str();
+            } else {
+                t_date date_val = get<t_date>();
+                tm t = date_val.get_tm();
+                time_t epoch_delta = mktime(&t);
+                std::chrono::milliseconds timestamp(epoch_delta * 1000);
+                date::sys_time<std::chrono::milliseconds> ts(timestamp);
+                return date::format("%F", ts);
+            }
         } break;
         case DTYPE_BOOL: {
             ss << std::boolalpha << get<bool>();
@@ -1063,28 +1068,7 @@ t_tscalar::to_string(bool for_expr) const {
             // local time and not UTC.
             std::chrono::milliseconds timestamp(to_int64());
             date::sys_time<std::chrono::milliseconds> ts(timestamp);
-            std::time_t temp = std::chrono::system_clock::to_time_t(ts);
-            std::tm* t = std::localtime(&temp);
-
-            // use a mix of strftime and date::format
-            std::string buffer;
-            buffer.resize(64);
-
-            // write y-m-d h:m in local time into buffer, and if successful
-            // write the rest of the date, otherwise print the date in UTC.
-            std::size_t len
-                = strftime(&buffer[0], buffer.size(), "%Y-%m-%d %H:%M:", t);
-            if (len > 0) {
-                buffer.resize(len);
-                ss << buffer;
-                ss << date::format(
-                    "%S", ts); // represent second and millisecond
-            } else {
-                std::cerr << to_int64() << " failed strftime" << std::endl;
-                ss << date::format("%Y-%m-%d %H:%M:%S UTC", ts);
-            }
-
-            return ss.str();
+            return date::format("%F %T", ts);
         } break;
         case DTYPE_STR: {
             if (for_expr) {
@@ -1595,9 +1579,9 @@ t_tscalar::can_store_inplace(const char* s) {
 bool
 t_tscalar::is_nan() const {
     if (m_type == DTYPE_FLOAT64)
-        return std::isnan(get<double>());
+        return std::isnan(get<double>()) || std::isinf(get<double>());
     if (m_type == DTYPE_FLOAT32)
-        return std::isnan(get<float>());
+        return std::isnan(get<float>()) || std::isinf(get<float>());
     return false;
 }
 

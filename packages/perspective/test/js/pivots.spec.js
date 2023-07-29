@@ -2362,18 +2362,14 @@ const std = (nums) => {
                 columns: ["x", "y"],
             });
             let result2 = await view.to_columns();
-            result2 = Object.entries(result2).reduce((obj, [key, val]) => {
-                obj[key.replace(/[^,:\/|A-Z0-9 ]/gi, " ")] = val;
-                return obj;
-            }, {});
 
             expect(result2).toEqual({
-                "  ROW PATH  ": [],
-                "4/11/2019, 11:40:35 PM|x": [null, null, 3, 4],
-                "4/11/2019, 11:40:35 PM|y": [null, null, "c", "d"],
-                "4/13/2019, 3:27:15 AM|x": [1, 2, null, null],
-                "4/13/2019, 3:27:15 AM|y": ["a", "b", null, null],
+                "2019-04-11 23:40:35.065|x": [null, null, 3, 4],
+                "2019-04-11 23:40:35.065|y": [null, null, "c", "d"],
+                "2019-04-13 03:27:15.065|x": [1, 2, null, null],
+                "2019-04-13 03:27:15.065|y": ["a", "b", null, null],
             });
+
             view.delete();
             table.delete();
         });
@@ -2437,7 +2433,6 @@ const std = (nums) => {
             });
             let result2 = await view.to_columns();
             expect(result2).toEqual({
-                __ROW_PATH__: [],
                 "true|w": [1.5, null, 3.5, null],
                 "true|x": [1, null, 3, null],
                 "true|y": ["a", null, "c", null],

@@ -15,7 +15,7 @@ import * as url from "url";
 
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url)).slice(0, -1);
 
-const cmd = sh`black perspective bench setup.py --exclude tests`;
+const cmd = sh`black perspective bench setup.py`;
 
 if (process.env.PSP_DOCKER) {
     cmd = sh`cd python/perspective`.sh(cmd);

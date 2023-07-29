@@ -11,12 +11,10 @@
 #  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 from pytest import raises
-from perspective import PerspectiveError, PerspectiveViewer,\
-                        PerspectiveWidget, Sort
+from perspective import PerspectiveError, PerspectiveViewer, PerspectiveWidget, Sort
 
 
 class TestSort(object):
-
     def test_sort_widget_load(self):
         data = {"a": [1, 2, 3], "b": ["a", "b", "c"]}
         widget = PerspectiveWidget(data, sort=[["a", Sort.DESC]])
