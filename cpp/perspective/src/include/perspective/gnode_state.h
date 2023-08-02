@@ -199,6 +199,8 @@ public:
     // Getters
     std::shared_ptr<t_data_table> get_table() const;
     std::shared_ptr<t_data_table> get_pkeyed_table() const;
+    std::shared_ptr<t_data_table> get_pkeyed_table(const t_schema& schema,
+        const std::shared_ptr<t_data_table> table) const;
 
     const t_schema& get_input_schema() const;
     const t_schema& get_output_schema() const;

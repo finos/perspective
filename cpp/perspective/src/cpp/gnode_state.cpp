@@ -547,10 +547,16 @@ t_gstate::get_pkey_dtype() const {
 
 std::shared_ptr<t_data_table>
 t_gstate::get_pkeyed_table() const {
+    return get_pkeyed_table(m_input_schema, m_table);
+}
+
+std::shared_ptr<t_data_table>
+t_gstate::get_pkeyed_table(
+    const t_schema& schema, const std::shared_ptr<t_data_table> table) const {
     // If there are no removes, just return the gstate table. Removes would
     // cause m_mapping to be smaller than m_table.
-    if (m_mapping.size() == m_table->size())
-        return m_table;
+    if (m_mapping.size() == table->size())
+        return table;
 
     // Otherwise mask out the removed rows and return the table.
     auto mask = get_cpp_mask();
@@ -558,22 +564,19 @@ t_gstate::get_pkeyed_table() const {
     // count = total number of rows - number of removed rows
     t_uindex table_size = mask.count();
 
-    const auto& schema_columns = m_input_schema.m_columns;
+    const auto& schema_columns = schema.m_columns;
     t_uindex num_columns = schema_columns.size();
 
-    // Clone from the gstate master table
-    const std::shared_ptr<t_data_table>& master_table = m_table;
-
     std::shared_ptr<t_data_table> rval
-        = std::make_shared<t_data_table>(m_input_schema, table_size);
+        = std::make_shared<t_data_table>(schema, table_size);
     rval->init();
     rval->set_size(table_size);
 
     parallel_for(int(num_columns),
-        [&schema_columns, rval, master_table, &mask](int colidx) {
+        [&schema_columns, rval, table, &mask](int colidx) {
             const std::string& colname = schema_columns[colidx];
             rval->set_column(
-                colname, master_table->get_const_column(colname)->clone(mask));
+                colname, table->get_const_column(colname)->clone(mask));
         }
 
     );
