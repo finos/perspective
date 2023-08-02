@@ -50,6 +50,8 @@ struct t_expression_tables {
     // Calculate the `t_transitions` value for each row.
     void calculate_transitions(std::shared_ptr<t_data_table> existed);
 
+    void set_flattened(std::shared_ptr<t_data_table> flattened);
+
     void reset();
 
     t_data_table* get_table() const;

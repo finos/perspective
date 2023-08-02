@@ -52,6 +52,19 @@ t_expression_tables::get_table() const {
 }
 
 void
+t_expression_tables::set_flattened(std::shared_ptr<t_data_table> flattened) {
+    t_uindex flattened_num_rows = flattened->size();
+    reserve_transitional_table_size(flattened_num_rows);
+    set_transitional_table_size(flattened_num_rows);
+    const t_schema& schema = m_flattened->get_schema();
+    const std::vector<std::string>& column_names = schema.m_columns;
+    for (const auto& colname : column_names) {
+        m_flattened->set_column(
+            colname, flattened->get_column(colname)->clone());
+    }
+}
+
+void
 t_expression_tables::calculate_transitions(
     std::shared_ptr<t_data_table> existed) {
     const t_schema& schema = m_transitions->get_schema();
