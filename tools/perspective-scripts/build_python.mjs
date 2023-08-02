@@ -47,9 +47,9 @@ if (SETUP_ONLY) {
 
 let cmd;
 if (IS_CI) {
-    cmd = sh`${PYTHON} -m pip install -e .[dev] --no-clean`;
+    cmd = sh`${PYTHON} -m pip install -r ./requirements-dev.txt -e .[dev] --no-clean`;
 } else if (IS_INSTALL) {
-    cmd = sh`${PYTHON} -m pip install .`;
+    cmd = sh`${PYTHON} -m pip install -r ./requirements-dev.txt .`;
 } else if (IS_PYODIDE) {
     cmd = sh`pyodide build . --exports=pyinit`;
 } else {

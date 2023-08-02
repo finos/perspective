@@ -1359,10 +1359,10 @@ jobs:
 
             # Install artifact
             - name: Install wheel (system)
-              run: python -m pip install -U *manylinux2014*.whl
+              run: python -m pip install -r python/perspective/requirements-dev.txt *manylinux2014*.whl
 
             - name: Install wheel (local)
-              run: python -m pip install -U *manylinux2014*.whl --target python/perspective
+              run: python -m pip install -r python/perspective/requirements-dev.txt *manylinux2014*.whl --target python/perspective
 
             - name: Check Installed labextensions
               run: jupyter labextension list
@@ -1541,21 +1541,21 @@ jobs:
 
             # Install artifact in-place so tests work as-is
             - name: Install wheel (Linux)
-              run: python -m pip install -U *manylinux2014*.whl --target python/perspective
+              run: python -m pip install -r python/perspective/requirements-dev.txt *manylinux2014*.whl --target python/perspective
               if: ${{ runner.os == 'Linux' }}
 
             # Note, on mac we must install the x86 wheel, the arm64 wheel
             # would need an arm machine to test
             - name: Install wheel (OSX)
-              run: python -m pip install -U *x86*.whl --target python/perspective
+              run: python -m pip install -r python/perspective/requirements-dev.txt *x86*.whl --target python/perspective
               if: ${{ runner.os == 'macOS' && matrix.python-version != '3.11' }}
 
             - name: Install wheel (OSX 3.11+)
-              run: python -m pip install -U *universal*.whl --target python/perspective
+              run: python -m pip install -r python/perspective/requirements-dev.txt *universal*.whl --target python/perspective
               if: ${{ runner.os == 'macOS' && matrix.python-version == '3.11' }}
 
             - name: Install wheel (windows)
-              run: python -m pip install -U (Get-ChildItem .\*.whl | Select-Object -Expand FullName) --target python/perspective
+              run: python -m pip install -r python/perspective/requirements-dev.txt (Get-ChildItem .\*.whl | Select-Object -Expand FullName) --target python/perspective
               if: ${{ runner.os == 'Windows' }}
 
             # Run tests
@@ -1683,7 +1683,7 @@ jobs:
 
             # Install sdist
             - name: Install sdist
-              run: python -m pip install perspective*.tar.gz
+              run: python -m pip install -r python/perspective/requirements-dev.txt perspective*.tar.gz
 
             # Test sdist
             - name: Run tests against from-scratch sdist build
@@ -1801,7 +1801,7 @@ jobs:
 
             # Install artifact in-place so tests work as-is
             - name: Install wheel (Linux)
-              run: python -m pip install -U *manylinux2014*.whl --target python/perspective
+              run: python -m pip install -r python/perspective/requirements-dev.txt *manylinux2014*.whl --target python/perspective
               if: ${{ runner.os == 'Linux' }}
 
             - name: Run Benchmark
