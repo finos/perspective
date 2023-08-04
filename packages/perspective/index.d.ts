@@ -97,27 +97,44 @@ declare module "@finos/perspective" {
         to_arrow(options?: SerializeConfig): Promise<ArrayBuffer>;
         to_columns(
             options?: SerializeConfig
-        ): Promise<Record<string, Array<string | boolean | Date | number>>>;
+        ): Promise<
+            Record<string, Array<string | boolean | Date | number | null>>
+        >;
         to_csv(
             options?: SerializeConfig & { config: unknown }
         ): Promise<string>;
         to_json(
             options?: SerializeConfig
-        ): Promise<Array<Record<string, string | boolean | Date | number>>>;
+        ): Promise<
+            Array<Record<string, string | boolean | Date | number | null>>
+        >;
     };
 
     /**** Table ****/
     export type UpdateCallback = (updated: {
         port_id: number;
         delta:
-            | Array<Record<string, Array<string | boolean | Date | number>>>
+            | Array<
+                  Record<string, Array<string | boolean | Date | number | null>>
+              >
             | ArrayBuffer;
     }) => void;
 
     export type TableData =
         | string
-        | Array<Record<string, Array<string | boolean | Date | number>>>
-        | { [key: string]: Array<string | boolean | Date | number> }
+        // TODO: I don't think this type is actually supported?
+        // Like:
+        // [{
+        //   a: [1,2,3,4],
+        //   b: [4,5,6,7]
+        //   }, {
+        //       a: [-5,6,3,1],
+        //       b: [1,3,2,4]
+        //   }
+        // }]
+        //| Array<Record<string, Array<string | boolean | Date | number | null>>>
+        | Array<Record<string, string | boolean | Date | number | null>>
+        | { [key: string]: Array<string | boolean | Date | number | null> }
         | { [key: string]: string }
         | ArrayBuffer;
 

@@ -25,6 +25,7 @@ import {
     DocumentRegistry,
     Context as DocRegistryContext,
 } from "@jupyterlab/docregistry";
+
 import { PerspectiveWidget } from "./psp_widget";
 
 import perspective from "@finos/perspective";
@@ -97,10 +98,16 @@ export class PerspectiveDocumentWidget extends DocumentWidget {
                     (c) => c.charCodeAt(0)
                 ).buffer;
             } else if (this._type === "json") {
-                data = this._context.model.toJSON();
-                if (Array.isArray(data) && data.length > 0) {
+                const json = this._context.model.toJSON();
+                if (Array.isArray(json) && json.length > 0) {
                     // already is records form, load directly
-                    data = data;
+                    // we're making an assertion here about the object contents which could be wrong
+                    // since this data may not be runtime type checked
+                    // TODO: look into making these blobs which passes through jupyter machinery better typed
+                    data = json as Record<
+                        string,
+                        string | boolean | number | null
+                    >[];
                 } else {
                     // Column-oriented or single records JSON
                     // don't handle for now, just need to implement
@@ -144,8 +151,20 @@ export class PerspectiveDocumentWidget extends DocumentWidget {
                         this.context.model.fromString(resultAsB64);
                         this.context.save();
                     } else if (this._type === "json") {
+                        // TODO: Gotta fix this - need to do something about Date values
+
                         const result = await view.to_json();
-                        this.context.model.fromJSON(result);
+                        for (let [_key, val] of Object.entries(result)) {
+                            if (val instanceof Date) {
+                                throw new Error("Dates unsupported");
+                            }
+                        }
+                        this.context.model.fromJSON(
+                            result as Record<
+                                string,
+                                string | number | boolean
+                            >[]
+                        );
                         this.context.save();
                     }
                 });
