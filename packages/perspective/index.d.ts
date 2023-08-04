@@ -123,14 +123,14 @@ declare module "@finos/perspective" {
     export type TableData =
         | string
         // TODO: I don't think this type is actually supported?
-        // Like:
+        // It's like this:
         // [{
-        //   a: [1,2,3,4],
-        //   b: [4,5,6,7]
-        //   }, {
-        //       a: [-5,6,3,1],
-        //       b: [1,3,2,4]
-        //   }
+        //   a: [1,2],
+        //   b: [4,5]
+        // },
+        // {
+        //   a: [-5,6],
+        //   b: [1,3]
         // }]
         //| Array<Record<string, Array<string | boolean | Date | number | null>>>
         | Array<Record<string, string | boolean | Date | number | null>>

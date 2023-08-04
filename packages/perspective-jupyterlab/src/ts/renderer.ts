@@ -156,7 +156,7 @@ export class PerspectiveDocumentWidget extends DocumentWidget {
                         const result = await view.to_json();
                         for (let [_key, val] of Object.entries(result)) {
                             if (val instanceof Date) {
-                                throw new Error("Dates unsupported");
+                                throw new Error("TODO: Dates unsupported");
                             }
                         }
                         this.context.model.fromJSON(
