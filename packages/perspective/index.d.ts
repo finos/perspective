@@ -113,10 +113,10 @@ declare module "@finos/perspective" {
     /**** Table ****/
     export type UpdateCallback = (updated: {
         port_id: number;
-        delta:
-            | Array<
-                  Record<string, Array<string | boolean | Date | number | null>>
-              >
+        delta: // | Array<
+        //       Record<string, Array<string | boolean | Date | number | null>>
+        //   >
+        | Array<Record<string, string | boolean | Date | number | null>>
             | ArrayBuffer;
     }) => void;
 
