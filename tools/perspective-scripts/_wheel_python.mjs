@@ -59,7 +59,7 @@ if (IS_DOCKER) {
 
     // These are system deps that may only be in place from pep-517/518 so
     // lets reinstall them to be sure
-    cmd.sh`${PYTHON} -m pip install -U 'numpy>=1.13.1' jupyter_packaging wheel twine auditwheel`;
+    cmd.sh`${PYTHON} -m pip install  'numpy>=1.13.1' jupyter_packaging wheel twine auditwheel`;
 
     // remove the build folder so we completely rebuild (and pick up the
     // libs we just installed above, since this build method won't use

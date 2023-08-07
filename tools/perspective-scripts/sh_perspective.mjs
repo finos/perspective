@@ -253,6 +253,15 @@ export const copy_files_to_python_folder = (link_files) => {
     }
 };
 
+export function py_requirements() {
+    const version = sh`python3 --version`
+        .execSync()
+        .replace("Python ", "")
+        .replace(".", "")
+        .replace(/\..*?$/m, "");
+    return `python/perspective/requirements-${version}.txt`;
+}
+
 /**
  * Get the python version to use from env/arguments
  *

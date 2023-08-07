@@ -17,6 +17,7 @@ import {
     getarg,
     python_version,
     copy_files_to_python_folder,
+    py_requirements,
 } from "./sh_perspective.mjs";
 
 const IS_CI = getarg("--ci");
@@ -47,9 +48,9 @@ if (SETUP_ONLY) {
 
 let cmd;
 if (IS_CI) {
-    cmd = sh`${PYTHON} -m pip install -e .[dev] --no-clean`;
+    cmd = sh`${PYTHON} -m pip install -r ${py_requirements()} -e .[dev] --no-clean`;
 } else if (IS_INSTALL) {
-    cmd = sh`${PYTHON} -m pip install .`;
+    cmd = sh`${PYTHON} -m pip install -r ${py_requirements()} .`;
 } else if (IS_PYODIDE) {
     cmd = sh`pyodide build . --exports=pyinit`;
 } else {

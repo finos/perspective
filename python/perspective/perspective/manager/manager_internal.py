@@ -355,7 +355,7 @@ class _PerspectiveManagerInternal(object):
         else:
             msg = self._make_message(id, None)
 
-        if len(args) > 1 and type(args[1]) == bytes:
+        if len(args) > 1 and type(args[1]) is bytes:
             self._process_bytes(args[1], msg, post_callback)
         else:
             post_callback(self._message_to_json(msg["id"], msg))
