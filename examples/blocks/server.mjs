@@ -61,7 +61,7 @@ const gists = [
     "citibike",
     "olympics",
     "editable",
-    "csv",
+    "file",
 ];
 
 const lis = [];

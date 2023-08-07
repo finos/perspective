@@ -380,6 +380,7 @@ psp_build_message("${Cyan}Building minimal Apache Arrow${ColorReset}")
 psp_build_dep("rapidjson" "${PSP_CMAKE_MODULE_PATH}/rapidjson.txt.in")
 psp_build_dep("double-conversion" "${PSP_CMAKE_MODULE_PATH}/double-conversion.txt.in")
 psp_build_dep("flatbuffers" "${PSP_CMAKE_MODULE_PATH}/flatbuffers.txt.in")
+psp_build_dep("lz4" "${PSP_CMAKE_MODULE_PATH}/lz4.txt.in")
 
 # Build minimal arrow itself
 psp_build_dep("arrow" "${PSP_CMAKE_MODULE_PATH}/arrow.txt.in")
@@ -626,7 +627,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
             set_property(TARGET psppy PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path})
 
             target_compile_options(psp PRIVATE -fvisibility=hidden)
-            target_compile_options(psppy PRIVATE -fvisibility=hidden)    
+            target_compile_options(psppy PRIVATE -fvisibility=hidden)
         else()
             target_compile_options(psppy PRIVATE -Wdeprecated-declarations)
         endif()

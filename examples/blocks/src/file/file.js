@@ -82,7 +82,7 @@ window.addEventListener("DOMContentLoaded", function () {
     function uploadFile(file) {
         let reader = new FileReader();
         reader.onload = function (fileLoadedEvent) {
-            let txt = fileLoadedEvent.target.result;
+            let data = fileLoadedEvent.target.result;
 
             // Remove the `dropArea` from the DOM.
             const parent = dropArea.parentElement;
@@ -92,11 +92,15 @@ window.addEventListener("DOMContentLoaded", function () {
             const psp = document.createElement("perspective-viewer");
             parent.appendChild(psp);
 
-            // Load the CSV data into `<perspective-viewer>`.
-            psp.load(worker.table(txt));
+            // Load the file data into `<perspective-viewer>`.
+            psp.load(worker.table(data));
         };
 
-        // Read the contents of the CSV - triggering the onload when finished.
-        reader.readAsText(file);
+        // Read the contents of the file - triggering the onload when finished.
+        if (file.name.endsWith(".feather") || file.name.endsWith(".arrow")) {
+            reader.readAsArrayBuffer(file);
+        } else {
+            reader.readAsText(file);
+        }
     }
 });
