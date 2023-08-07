@@ -87,6 +87,8 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/byte_size.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/cancel.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/compression.cc
+    # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/compression_zstd.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/compression_lz4.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/counting_semaphore.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/cpu_info.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/debug.cc
@@ -139,7 +141,6 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/message.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/metadata_internal.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/options.cc
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/reader.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/writer.cc
 
     # Compute
@@ -214,6 +215,8 @@ set(ARROW_SRCS
 if(PSP_PYTHON_BUILD)
     set(ARROW_SRCS
         ${ARROW_SRCS}
+        # use standard reader in Python builds.
+        ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/reader.cc
         ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/file.cc
         ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/tensor/coo_converter.cc
         ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/tensor/csf_converter.cc
@@ -230,6 +233,11 @@ if(PSP_PYTHON_BUILD)
             ${ARROW_SRCS}
             ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/vendored/musl/strptime.c)
     endif()
+else()
+    set(ARROW_SRCS
+        ${ARROW_SRCS}
+        # Use our vendored reader that does not use threads.
+        ${PSP_CPP_SRC}/src/cpp/vendor/single_threaded_reader.cpp)
 endif()
 
 set_property(SOURCE util/io_util.cc
@@ -274,6 +282,8 @@ add_library(arrow STATIC ${ARROW_SRCS})
 
 target_compile_definitions(arrow PUBLIC ARROW_NO_DEPRECATED_API)
 target_compile_definitions(arrow PUBLIC ARROW_STATIC)
+# target_compile_definitions(arrow PUBLIC ARROW_WITH_ZSTD=ON)
+target_compile_definitions(arrow PUBLIC ARROW_WITH_LZ4)
 
 # will need built boost filesystem and system .lib to work, even though
 # perspective itself does not use those dependencies
@@ -281,6 +291,7 @@ target_link_libraries(arrow
     ${double-conversion_LIBRARIES}
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}
+    lz4_static
     ${ARROW_TEST_LINK_TOOLCHAIN})
 
 # find_package(Flatbuffers)

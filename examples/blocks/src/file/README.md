@@ -1,5 +1,5 @@
-A simple CSV loader demo of [Perspective](https://github.com/finos/perspective). The
-given CSV must be in a form Perspective's `Table()` constructor supports:
+A simple file loader demo of [Perspective](https://github.com/finos/perspective). The
+given CSV/Feather must be in a form Perspective's `Table()` constructor supports:
 
 -   First row must be column names.
 -   Subsequent rows should be mono-typed (but if not you will just get `string` columns
