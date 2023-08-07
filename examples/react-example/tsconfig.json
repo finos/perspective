@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "moduleResolution": "node",
+        "moduleResolution": "bundler",
         "target": "es5",
         "lib": ["es6", "dom"],
         "module": "esnext",
@@ -26,8 +26,6 @@
         "experimentalDecorators": true,
         "downlevelIteration": true,
         "pretty": true
-      },
-    "exclude": [
-        "node_modules",
-    ]
+    },
+    "exclude": ["node_modules"]
 }
