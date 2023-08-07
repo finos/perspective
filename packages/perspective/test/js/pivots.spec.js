@@ -2374,6 +2374,28 @@ const std = (nums) => {
             table.delete();
         });
 
+        test("['y'] only, date column", async function () {
+            const table = await perspective.table([
+                { x: "a", y: new Date("1997/2/5") },
+                { x: "b", y: new Date("1998/2/5") },
+                { x: "c", y: new Date("1999/2/5") },
+            ]);
+            const view = await table.view({
+                split_by: ["y"],
+            });
+            const paths = await view.column_paths();
+            expect(paths).toEqual([
+                "1997-02-05|x",
+                "1997-02-05|y",
+                "1998-02-05|x",
+                "1998-02-05|y",
+                "1999-02-05|x",
+                "1999-02-05|y",
+            ]);
+            view.delete();
+            table.delete();
+        });
+
         test("['x'] only, column-oriented input", async function () {
             var table = await perspective.table(data_7);
             var view = await table.view({

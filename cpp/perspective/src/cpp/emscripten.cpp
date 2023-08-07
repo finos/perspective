@@ -141,8 +141,9 @@ namespace binding {
                 }
             }
             case DTYPE_DATE: {
-                return t_date_to_jsdate(scalar.get<t_date>())
-                    .call<t_val>("getTime");
+                return cast_string ? t_val(scalar.to_string())
+                                   : t_date_to_jsdate(scalar.get<t_date>())
+                                         .call<t_val>("getTime");
             }
             case DTYPE_UINT8:
             case DTYPE_UINT16:
