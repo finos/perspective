@@ -1054,7 +1054,6 @@ t_ctx2::get_column_dtype(t_uindex idx) const {
 
 void
 t_ctx2::compute_expressions(std::shared_ptr<t_data_table> master,
-    std::shared_ptr<t_data_table> flattened,
     t_expression_vocab& expression_vocab, t_regex_mapping& regex_mapping) {
     // Clear the transitional expression tables on the context so they are
     // ready for the next update.
@@ -1062,10 +1061,6 @@ t_ctx2::compute_expressions(std::shared_ptr<t_data_table> master,
 
     std::shared_ptr<t_data_table> master_expression_table
         = m_expression_tables->m_master;
-
-    t_uindex flattened_num_rows = flattened->size();
-    m_expression_tables->reserve_transitional_table_size(flattened_num_rows);
-    m_expression_tables->set_transitional_table_size(flattened_num_rows);
 
     // Set the master table to the right size.
     t_uindex num_rows = master->size();
@@ -1077,9 +1072,6 @@ t_ctx2::compute_expressions(std::shared_ptr<t_data_table> master,
         // Compute the expressions on the master table.
         expr->compute(
             master, master_expression_table, expression_vocab, regex_mapping);
-
-        expr->compute(flattened, m_expression_tables->m_flattened,
-            expression_vocab, regex_mapping);
     }
 }
 

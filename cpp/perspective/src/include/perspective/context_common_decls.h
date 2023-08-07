@@ -97,7 +97,6 @@ std::shared_ptr<t_expression_tables> get_expression_tables() const;
 // Given shared pointers to data tables from the gnode, use them to
 // compute the results of expression columns.
 void compute_expressions(std::shared_ptr<t_data_table> master,
-    std::shared_ptr<t_data_table> flattened_masked,
     t_expression_vocab& expression_vocab, t_regex_mapping& regex_mapping);
 
 void compute_expressions(std::shared_ptr<t_data_table> master,
