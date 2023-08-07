@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-viewer",
-    "version": "2.3.2",
+    "version": "2.4.0",
     "description": "The `<perspective-viewer>` Custom Element, frontend for Perspective.js",
     "repository": {
         "type": "git",
@@ -30,7 +30,7 @@
         "build": "node ./build.js",
         "clean": "rimraf dist && rimraf build",
         "docs": "npm-run-all docs:build docs:concat docs:deploy:*",
-        "docs:build": "typedoc --hideBreadcrumbs --out dist/docs --readme none --excludePrivate src/ts/perspective-viewer.ts",
+        "docs:build": "typedoc --plugin typedoc-plugin-markdown --hideBreadcrumbs --out dist/docs --readme none --excludePrivate src/ts/perspective-viewer.ts",
         "docs:concat": "node ./docs.js",
         "docs:deploy:api": "(echo \"---\nid: perspective-viewer\ntitle: perspective-viewer API\n---\n\n\"; cat README.md) > ../../docs/docs/obj/perspective-viewer.md",
         "docs:deploy:exprtk": "cat exprtk.md > ../../docs/docs/obj/perspective-viewer-exprtk.md",
@@ -40,13 +40,13 @@
         "access": "public"
     },
     "dependencies": {
-        "@finos/perspective": "^2.3.2",
+        "@finos/perspective": "^2.4.0",
         "fflate": "^0.7.4"
     },
     "devDependencies": {
         "react": "^16.14.0",
-        "@finos/perspective-esbuild-plugin": "^2.3.2",
-        "@finos/perspective-test": "^2.3.2",
+        "@finos/perspective-esbuild-plugin": "^2.4.0",
+        "@finos/perspective-test": "^2.4.0",
         "cpy": "^9.0.1"
     }
 }

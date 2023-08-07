@@ -85,6 +85,7 @@ declare module "@finos/perspective" {
     /**** View ****/
     export type View = {
         delete(): Promise<void>;
+        expression_schema(): Promise<Schema>;
         num_columns(): Promise<number>;
         num_rows(): Promise<number>;
         on_delete(callback: () => void): void;
@@ -92,7 +93,7 @@ declare module "@finos/perspective" {
         remove_update(callback: UpdateCallback): void;
         remove_delete(callback: () => void): void;
         schema(): Promise<Schema>;
-        expression_schema(): Promise<Schema>;
+        set_depth(depth?: number): void;
         to_arrow(options?: SerializeConfig): Promise<ArrayBuffer>;
         to_columns(
             options?: SerializeConfig
@@ -162,7 +163,7 @@ declare module "@finos/perspective" {
     };
 
     export type Table = {
-        columns(): Array<string>;
+        columns(): Promise<Array<string>>;
         clear(): Promise<void>;
         replace(data: TableData): Promise<void>;
         delete(): Promise<void>;

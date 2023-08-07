@@ -113,7 +113,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
             ...     group_by=["a"],
             ...     sort=[["b", "desc"]],
             ...     filter=[["a", ">", 1]],
-            ...     expressions=["// new column \n \"Sales\" + \"Profit\""]
+            ...     expressions=["\"a\" + 100"]
             ... )
         """
 

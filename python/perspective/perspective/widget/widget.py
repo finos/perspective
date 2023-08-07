@@ -248,7 +248,7 @@ class PerspectiveWidget(DOMWidget, PerspectiveViewer):
             ...     group_by=["a"],
             ...     sort=[["b", "desc"]],
             ...     filter=[["a", ">", 1]],
-            ...     expressions=["// new column \n \"Sales\" + \"Profit\""])
+            ...     expressions=["\"a\" + 100"])
         """
         # Trigger special flow when receiving an ArrayBuffer/binary
         self._pending_binary = None

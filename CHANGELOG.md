@@ -1,3 +1,22 @@
+# [v2.4.0](https://github.com/finos/perspective/releases/tag/v2.4.0)
+
+_7 August 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.3.2...v2.4.0))
+
+**Breaking**
+
+- Add `to_columns_string()` C++ JSON API [#2315](https://github.com/finos/perspective/pull/2315)
+
+Fixes
+
+- Fix TypeScript 5 `moduleResolution: "bundler"` support [#2289](https://github.com/finos/perspective/pull/2289)
+- Fix `update()` with `expressions` overcalc [#2328](https://github.com/finos/perspective/pull/2328)
+- Fix over-calculation in when loading data in `perspective-viewer` [#2323](https://github.com/finos/perspective/pull/2323)
+
+Misc
+
+- Pin Python dependency versions [#2327](https://github.com/finos/perspective/pull/2327)
+- Fix build.rs escaping OUT_DIR [#2313](https://github.com/finos/perspective/pull/2313)
+
 # [v2.3.2](https://github.com/finos/perspective/releases/tag/v2.3.2)
 
 _20 July 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.3.1...v2.3.2))

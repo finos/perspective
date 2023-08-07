@@ -181,30 +181,32 @@ async function view_suite() {
         },
     });
 
-    await benchmark({
-        name: `.view({expressions: ["Sales" + "Profit"]})`,
-        before_all,
-        after_all,
-        after,
-        async test(perspective, { table, schema }) {
-            const [M, m, _] = perspective.version;
-            // const columns = Object.keys(schema);
-            columns = [`"Sales" + "Profit"`];
-            if ((M === 1 && m >= 2) || M === 2) {
-                return await table.view({
-                    columns,
-                    group_by: ["Product Name"],
-                    expressions: [`"Sales" + "Profit"`],
-                });
-            } else {
-                return await table.view({
-                    columns,
-                    row_pivots: ["Product Name"],
-                    expressions: [`"Sales" + "Profit"`],
-                });
-            }
-        },
-    });
+    // await benchmark({
+    //     name: `.view({expressions: ["Sales" + "Profit"]})`,
+    //     before_all,
+    //     after_all,
+    //     after,
+    //     async test(perspective, { table, schema }) {
+    //         const [M, m, _] = perspective.version;
+    //         // const columns = Object.keys(schema);
+    //         columns = [`"Sales" + "Profit"`];
+    //         if (M === 0 && m < 9) {
+
+    //         } else if ((M === 1 && m >= 2) || M === 2) {
+    //             return await table.view({
+    //                 columns,
+    //                 group_by: ["Product Name"],
+    //                 expressions: [`"Sales" + "Profit"`],
+    //             });
+    //         } else {
+    //             return await table.view({
+    //                 columns,
+    //                 row_pivots: ["Product Name"],
+    //                 expressions: [`"Sales" + "Profit"`],
+    //             });
+    //         }
+    //     },
+    // });
 
     await benchmark({
         name: `.view({group_by, aggregates: "median"})`,

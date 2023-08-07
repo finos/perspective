@@ -47,10 +47,12 @@ if __name__ == "__main__":
     if not venv_handler.virtualenv_exists():
         venv_handler.create_virtualenv()
 
+    last_version = "master"
     for version in VERSIONS[1:]:
         env["PSP_VERSION"] = version
         env["PYTHONPATH"] = ""
-        logging.info("Installing perspective-python=={}".format(version))
+        logging.info("Uninstalling perspective-python=={}".format(last_version))
+        last_version = version
         logging.debug(
             subprocess.check_output(
                 "{} && yes | python3 -m pip uninstall perspective-python".format(venv_handler.activate_virtualenv()),
@@ -58,9 +60,10 @@ if __name__ == "__main__":
                 env=env,
             )
         )
+        logging.info("Installing perspective-python=={}".format(version))
         logging.debug(
             subprocess.check_output(
-                "{} && yes | python3 -m pip install perspective-python=={}".format(venv_handler.activate_virtualenv(), version),
+                "{} && yes | python3 -m pip install perspective-python[dev]=={}".format(venv_handler.activate_virtualenv(), version),
                 shell=True,
                 env=env,
             )

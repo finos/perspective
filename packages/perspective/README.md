@@ -17,6 +17,7 @@ For more information, see the
         * [.column_paths()](#module_perspective..view+column_paths) ⇒ <code>Array.&lt;String&gt;</code>
         * [.get_min_max(colname)](#module_perspective..view+get_min_max) ⇒ <code>Array.&lt;Object&gt;</code>
         * [.to_columns([options])](#module_perspective..view+to_columns) ⇒ <code>Promise.&lt;Array&gt;</code>
+        * [.to_columns_string()](#module_perspective..view+to_columns_string)
         * [.to_json([options])](#module_perspective..view+to_json) ⇒ <code>Promise.&lt;Array&gt;</code>
         * [.to_csv([options])](#module_perspective..view+to_csv) ⇒ <code>Promise.&lt;string&gt;</code>
         * [.col_to_js_typed_array(column_name, options)](#module_perspective..view+col_to_js_typed_array) ⇒ <code>Promise.&lt;TypedArray&gt;</code>
@@ -66,6 +67,7 @@ For more information, see the
     * [.column_paths()](#module_perspective..view+column_paths) ⇒ <code>Array.&lt;String&gt;</code>
     * [.get_min_max(colname)](#module_perspective..view+get_min_max) ⇒ <code>Array.&lt;Object&gt;</code>
     * [.to_columns([options])](#module_perspective..view+to_columns) ⇒ <code>Promise.&lt;Array&gt;</code>
+    * [.to_columns_string()](#module_perspective..view+to_columns_string)
     * [.to_json([options])](#module_perspective..view+to_json) ⇒ <code>Promise.&lt;Array&gt;</code>
     * [.to_csv([options])](#module_perspective..view+to_csv) ⇒ <code>Promise.&lt;string&gt;</code>
     * [.col_to_js_typed_array(column_name, options)](#module_perspective..view+col_to_js_typed_array) ⇒ <code>Promise.&lt;TypedArray&gt;</code>
@@ -240,6 +242,16 @@ serialize.
 underlying [table](#module_perspective..table) be in the output (as
 `"__INDEX__"`).
 
+
+* * *
+
+<a name="module_perspective..view+to_columns_string"></a>
+
+#### view.to\_columns\_string()
+Serializes this view to a string of JSON data. Useful if you want to
+ save additional round trip serialize/deserialize cycles.
+
+**Kind**: instance method of [<code>view</code>](#module_perspective..view)  
 
 * * *
 

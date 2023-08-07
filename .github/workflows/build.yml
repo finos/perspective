@@ -1712,7 +1712,7 @@ jobs:
         strategy:
             matrix:
                 os: [ubuntu-20.04]
-                python-version: [3.9]
+                python-version: [3.11]
                 node-version: [18.x]
         if: startsWith(github.ref, 'refs/tags/v')
         runs-on: ${{ matrix.os }}
@@ -1801,7 +1801,7 @@ jobs:
 
             # Install artifact in-place so tests work as-is
             - name: Install wheel (Linux)
-              run: python -m pip install -U --no-dependencies *manylinux2014*.whl --target python/perspective
+              run: python -m pip install -U *manylinux2014*.whl --target python/perspective
               if: ${{ runner.os == 'Linux' }}
 
             - name: Run Benchmark
