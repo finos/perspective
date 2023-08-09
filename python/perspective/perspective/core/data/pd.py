@@ -78,6 +78,12 @@ def deconstruct_pandas(data, kwargs=None):
                 if isinstance(v, pd.CategoricalDtype):
                     data[k] = data[k].astype(str)
 
+    # convert StringDtype to str
+    if isinstance(data, pd.DataFrame) and hasattr(pd, "CategoricalDtype"):
+        for k, v in data.dtypes.items():
+            if isinstance(v, pd.StringDtype):
+                data[k] = data[k].astype(str)
+
     if isinstance(data, pd.DataFrame) and isinstance(data.columns, pd.MultiIndex) and isinstance(data.index, pd.MultiIndex):
         # Row and col pivots
         kwargs["group_by"].extend([str(c) for c in data.index.names])
