@@ -97,24 +97,26 @@ class TestPerspectiveTornadoHandlerAsyncMode(object):
         client = await websocket("ws://127.0.0.1:{}/websocket".format(port))
         return client
 
-    @pytest.mark.gen_test(run_sync=False)
-    async def test_tornado_handler_async_manager_thread(self, app, http_client, http_port, sentinel):
-        table_name = str(random.random())
-        _table = Table(data)
-        MANAGER.host_table(table_name, _table)
+    def test_tornado_handler_async_manager_thread(self, io_loop, app, http_client, http_port, sentinel):
+        async def test_tornado_handler_async_manager_thread(self, app, http_client, http_port, sentinel):
+            table_name = str(random.random())
+            _table = Table(data)
+            MANAGER.host_table(table_name, _table)
 
-        client = await self.websocket_client(http_port)
-        table = client.open_table(table_name)
-        view = await table.view()
-        reqs = []
-        for x in range(10):
-            reqs.append(table.update(data))
-            reqs.append(view.to_arrow())
+            client = await self.websocket_client(http_port)
+            table = client.open_table(table_name)
+            view = await table.view()
+            reqs = []
+            for x in range(10):
+                reqs.append(table.update(data))
+                reqs.append(view.to_arrow())
 
-        await asyncio.gather(*reqs)
-        # views = await asyncio.gather(*[table.view() for _ in range(5)])
-        # outputs = await asyncio.gather(*[view.to_arrow() for view in views])
-        expected = await table.schema()
-        records = await view.to_records()
+            await asyncio.gather(*reqs)
+            # views = await asyncio.gather(*[table.view() for _ in range(5)])
+            # outputs = await asyncio.gather(*[view.to_arrow() for view in views])
+            expected = await table.schema()
+            records = await view.to_records()
 
-        assert len(records) == 110
+            assert len(records) == 110
+
+        io_loop.asyncio_loop.run_until_complete(test_tornado_handler_async_manager_thread(self, app, http_client, http_port, sentinel))

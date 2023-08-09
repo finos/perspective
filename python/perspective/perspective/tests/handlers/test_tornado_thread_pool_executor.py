@@ -96,35 +96,37 @@ class TestPerspectiveTornadoHandlerAsyncMode(object):
         client = await websocket("ws://127.0.0.1:{}/websocket".format(port))
         return client
 
-    @pytest.mark.gen_test(run_sync=False, timeout=30)
-    async def test_tornado_handler_async_manager_thread(self, app, http_client, http_port, sentinel):
-        global data
-        table_name = str(random.random())
-        _table = Table(data)
-        data = _table.view().to_arrow()
-        MANAGER.host_table(table_name, _table)
-        assert _table.size() == 100
+    def test_tornado_handler_async_manager_thread(self, io_loop, app, http_client, http_port, sentinel):
+        async def test_tornado_handler_async_manager_thread(self, app, http_client, http_port, sentinel):
+            global data
+            table_name = str(random.random())
+            _table = Table(data)
+            data = _table.view().to_arrow()
+            MANAGER.host_table(table_name, _table)
+            assert _table.size() == 100
 
-        client = await self.websocket_client(http_port)
-        table = client.open_table(table_name)
-        view = await table.view()
-        reqs = []
-        for x in range(10):
-            reqs.append(table.update(data))
-            reqs.append(view.to_arrow())
+            client = await self.websocket_client(http_port)
+            table = client.open_table(table_name)
+            view = await table.view()
+            reqs = []
+            for x in range(10):
+                reqs.append(table.update(data))
+                reqs.append(view.to_arrow())
 
-        await asyncio.gather(*reqs)
-        # await asyncio.sleep(5)
+            await asyncio.gather(*reqs)
+            # await asyncio.sleep(5)
 
-        # In single-threaded execution, "read" methods like `to_arrow` flush the
-        # pending updates queue, so that `to_arrow()` following an `update()`
-        # always reflects the update. In multi-threaded execution, this is much
-        # harder to guarantee. In practice for the Perspective, it's only useful
-        # for tests anyway, so in this case, it is enough to test that the
-        # result is eventually correct
-        record_size = await table.size()
-        while record_size != 1100:
+            # In single-threaded execution, "read" methods like `to_arrow` flush the
+            # pending updates queue, so that `to_arrow()` following an `update()`
+            # always reflects the update. In multi-threaded execution, this is much
+            # harder to guarantee. In practice for the Perspective, it's only useful
+            # for tests anyway, so in this case, it is enough to test that the
+            # result is eventually correct
             record_size = await table.size()
+            while record_size != 110:
+                record_size = await table.size()
 
-        records = await view.to_records()
-        assert len(records) == 1100
+            records = await view.to_records()
+            assert len(records) == 1100
+
+        io_loop.asyncio_loop.run_until_complete(test_tornado_handler_async_manager_thread(self, app, http_client, http_port, sentinel))
