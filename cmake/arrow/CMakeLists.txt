@@ -26,6 +26,7 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/array_dict.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/array_nested.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/array_primitive.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/array_run_end.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/builder_adaptive.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/builder_base.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/builder_binary.cc
@@ -33,6 +34,7 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/builder_dict.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/builder_nested.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/builder_primitive.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/builder_run_end.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/builder_union.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/concatenate.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/data.cc
@@ -76,6 +78,7 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/stdio.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/transform.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/async_util.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/atfork_internal.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/basic_decimal.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/bit_block_counter.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/bit_run_reader.cc
@@ -90,7 +93,6 @@ set(ARROW_SRCS
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/compression_zstd.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/compression_lz4.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/counting_semaphore.cc
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/cpu_info.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/debug.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/decimal.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/delimiting.cc
@@ -102,6 +104,7 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/key_value_metadata.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/memory.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/mutex.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/ree_util.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/string.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/string_builder.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/task_group.cc
@@ -149,20 +152,12 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/api_vector.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/cast.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec.cc
-
-    # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec/aggregate_node.cc
-    # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec/exec_plan.cc
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec/expression.cc
-
-    # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec/filter_node.cc
-    # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec/project_node.cc
-    # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec/source_node.cc
-    # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec/sink_node.cc
-    # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec/order_by_impl.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/expression.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/function.cc
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/function_internal.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/function_internal.cc    
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernel.cc
-
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/ordering.cc
+    
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/registry.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/aggregate_basic.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/aggregate_mode.cc
@@ -176,6 +171,7 @@ set(ARROW_SRCS
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/scalar_boolean.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/scalar_cast_boolean.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/scalar_cast_dictionary.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/scalar_cast_extension.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/scalar_cast_internal.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/scalar_cast_nested.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/scalar_cast_numeric.cc
@@ -221,6 +217,7 @@ if(PSP_PYTHON_BUILD)
         ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/tensor/coo_converter.cc
         ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/tensor/csf_converter.cc
         ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/tensor/csx_converter.cc
+        ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/cpu_info.cc
 
         # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/time.cc
         # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/vendored/double-conversion/bignum-dtoa.cc

@@ -23,7 +23,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
-#include <iostream>
+#include <memory>
 #include <numeric>
 #include <string>
 #include <type_traits>
@@ -56,7 +56,6 @@
 #include "arrow/util/endian.h"
 #include "arrow/util/key_value_metadata.h"
 #include "arrow/util/logging.h"
-#include "arrow/util/make_unique.h"
 #include "arrow/util/parallel.h"
 #include "arrow/util/string.h"
 #include "arrow/util/thread_pool.h"
@@ -75,7 +74,6 @@ namespace flatbuf = org::apache::arrow::flatbuf;
 
 using internal::checked_cast;
 using internal::checked_pointer_cast;
-using internal::GetByteWidth;
 
 namespace ipc {
 
@@ -469,6 +467,13 @@ namespace ipc {
         }
 
         Status
+        Visit(const RunEndEncodedType& type) {
+            out_->buffers.resize(1);
+            RETURN_NOT_OK(LoadCommon(type.id()));
+            return LoadChildren(type.fields());
+        }
+
+        Status
         Visit(const ExtensionType& type) {
             return LoadType(*type.storage_type());
         }
@@ -510,6 +515,10 @@ namespace ipc {
         int64_t compressed_size = buf->size() - sizeof(int64_t);
         int64_t uncompressed_size
             = bit_util::FromLittleEndian(util::SafeLoadAs<int64_t>(data));
+
+        if (uncompressed_size == -1) {
+            return SliceBuffer(buf, sizeof(int64_t), compressed_size);
+        }
 
         ARROW_ASSIGN_OR_RAISE(auto uncompressed,
             AllocateBuffer(uncompressed_size, options.memory_pool));
@@ -1323,6 +1332,7 @@ namespace ipc {
         ReadRecordBatchWithCustomMetadata(int i) override {
             DCHECK_GE(i, 0);
             DCHECK_LT(i, num_record_batches());
+
             auto cached_metadata = cached_metadata_.find(i);
             if (cached_metadata != cached_metadata_.end()) {
                 auto result = ReadCachedRecordBatch(i, cached_metadata->second)
@@ -1366,7 +1376,7 @@ namespace ipc {
             ARROW_ASSIGN_OR_RAISE(auto batch_with_metadata,
                 ReadRecordBatchInternal(*message->metadata(), schema_,
                     field_inclusion_mask_, context, reader.get()));
-            ++stats_.num_record_batches;
+            stats_.num_record_batches.fetch_add(1, std::memory_order_relaxed);
             return batch_with_metadata;
         }
 
@@ -1418,7 +1428,7 @@ namespace ipc {
             RETURN_NOT_OK(UnpackSchemaMessage(footer_->schema(), options,
                 &dictionary_memo_, &schema_, &out_schema_,
                 &field_inclusion_mask_, &swap_endian_));
-            ++stats_.num_messages;
+            stats_.num_messages.fetch_add(1, std::memory_order_relaxed);
             return Status::OK();
         }
 
@@ -1454,7 +1464,8 @@ namespace ipc {
                         options, &self->dictionary_memo_, &self->schema_,
                         &self->out_schema_, &self->field_inclusion_mask_,
                         &self->swap_endian_));
-                    ++self->stats_.num_messages;
+                    self->stats_.num_messages.fetch_add(
+                        1, std::memory_order_relaxed);
                     return Status::OK();
                 });
         }
@@ -1471,7 +1482,7 @@ namespace ipc {
 
         ReadStats
         stats() const override {
-            return stats_;
+            return stats_.poll();
         }
 
         Result<AsyncGenerator<std::shared_ptr<RecordBatch>>>
@@ -1519,7 +1530,8 @@ namespace ipc {
                 Future<std::shared_ptr<Message>> metadata_loaded
                     = all_metadata_ready.Then(
                         [this, index]() -> Result<std::shared_ptr<Message>> {
-                            ++stats_.num_messages;
+                            stats_.num_messages.fetch_add(
+                                1, std::memory_order_relaxed);
                             FileBlock block = GetRecordBatchBlock(index);
                             ARROW_ASSIGN_OR_RAISE(
                                 std::shared_ptr<Buffer> metadata,
@@ -1551,6 +1563,31 @@ namespace ipc {
     private:
         friend class WholeIpcFileRecordBatchGenerator;
 
+        struct AtomicReadStats {
+            std::atomic<int64_t> num_messages{0};
+            std::atomic<int64_t> num_record_batches{0};
+            std::atomic<int64_t> num_dictionary_batches{0};
+            std::atomic<int64_t> num_dictionary_deltas{0};
+            std::atomic<int64_t> num_replaced_dictionaries{0};
+
+            /// \brief Capture a copy of the current counters
+            ReadStats
+            poll() const {
+                ReadStats stats;
+                stats.num_messages
+                    = num_messages.load(std::memory_order_relaxed);
+                stats.num_record_batches
+                    = num_record_batches.load(std::memory_order_relaxed);
+                stats.num_dictionary_batches
+                    = num_dictionary_batches.load(std::memory_order_relaxed);
+                stats.num_dictionary_deltas
+                    = num_dictionary_deltas.load(std::memory_order_relaxed);
+                stats.num_replaced_dictionaries
+                    = num_replaced_dictionaries.load(std::memory_order_relaxed);
+                return stats;
+            }
+        };
+
         FileBlock
         GetRecordBatchBlock(int i) const {
             return FileBlockFromFlatbuffer(footer_->recordBatches()->Get(i));
@@ -1566,7 +1603,7 @@ namespace ipc {
             const FieldsLoaderFunction& fields_loader = {}) {
             ARROW_ASSIGN_OR_RAISE(auto message,
                 arrow::ipc::ReadMessageFromBlock(block, file_, fields_loader));
-            ++stats_.num_messages;
+            stats_.num_messages.fetch_add(1, std::memory_order_relaxed);
             return std::move(message);
         }
 
@@ -1578,7 +1615,8 @@ namespace ipc {
                 ARROW_ASSIGN_OR_RAISE(
                     auto message, ReadMessageFromBlock(GetDictionaryBlock(i)));
                 RETURN_NOT_OK(ReadOneDictionary(message.get(), context));
-                ++stats_.num_dictionary_batches;
+                stats_.num_dictionary_batches.fetch_add(
+                    1, std::memory_order_relaxed);
             }
             return Status::OK();
         }
@@ -1595,7 +1633,8 @@ namespace ipc {
                 return Status::Invalid(
                     "Unsupported dictionary replacement in IPC file");
             } else if (kind == DictionaryKind::Delta) {
-                ++stats_.num_dictionary_deltas;
+                stats_.num_dictionary_deltas.fetch_add(
+                    1, std::memory_order_relaxed);
             }
             return Status::OK();
         }
@@ -1821,7 +1860,7 @@ namespace ipc {
         Future<std::shared_ptr<RecordBatch>>
         ReadCachedRecordBatch(
             int index, Future<std::shared_ptr<Message>> message_fut) {
-            ++stats_.num_record_batches;
+            stats_.num_record_batches.fetch_add(1, std::memory_order_relaxed);
             return dictionary_load_finished_
                 .Then([message_fut] { return message_fut; })
                 .Then([this, index](const std::shared_ptr<Message>& message_obj)
@@ -1955,7 +1994,7 @@ namespace ipc {
         // Schema with deselected fields dropped
         std::shared_ptr<Schema> out_schema_;
 
-        ReadStats stats_;
+        AtomicReadStats stats_;
         std::shared_ptr<io::internal::ReadRangeCache> metadata_cache_;
         std::unordered_set<int> cached_data_blocks_;
         Future<> dictionary_load_finished_;
@@ -2396,7 +2435,7 @@ namespace ipc {
             std::shared_ptr<DataType> indices_type;
             RETURN_NOT_OK(internal::GetSparseCOOIndexMetadata(
                 sparse_index, &indices_type));
-            const int64_t indices_elsize = GetByteWidth(*indices_type);
+            const int64_t indices_elsize = indices_type->byte_width();
 
             auto* indices_buffer = sparse_index->indicesBuffer();
             ARROW_ASSIGN_OR_RAISE(auto indices_data,
@@ -2438,7 +2477,7 @@ namespace ipc {
             std::shared_ptr<DataType> indptr_type, indices_type;
             RETURN_NOT_OK(internal::GetSparseCSXIndexMetadata(
                 sparse_index, &indptr_type, &indices_type));
-            const int indptr_byte_width = GetByteWidth(*indptr_type);
+            const int indptr_byte_width = indptr_type->byte_width();
 
             auto* indptr_buffer = sparse_index->indptrBuffer();
             ARROW_ASSIGN_OR_RAISE(auto indptr_data,
@@ -2451,7 +2490,7 @@ namespace ipc {
 
             std::vector<int64_t> indices_shape({non_zero_length});
             const auto indices_minimum_bytes
-                = indices_shape[0] * GetByteWidth(*indices_type);
+                = indices_shape[0] * indices_type->byte_width();
             if (indices_minimum_bytes > indices_buffer->length()) {
                 return Status::Invalid(
                     "shape is inconsistent to the size of indices buffer");
@@ -2650,7 +2689,7 @@ namespace ipc {
 
         Result<size_t>
         ReadSparseTensorBodyBufferCount(const Buffer& metadata) {
-            SparseTensorFormat::type format_id;
+            SparseTensorFormat::type format_id{};
             std::vector<int64_t> shape;
 
             RETURN_NOT_OK(internal::GetSparseTensorMetadata(
