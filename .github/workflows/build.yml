@@ -842,7 +842,6 @@ jobs:
                     - ubuntu-20.04 # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-Readme.md
                     - macos-11 # https://github.com/actions/virtual-environments/blob/main/images/macos/macos-11-Readme.md
                     - windows-2022 # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2022-Readme.md
-                    - windows-2019 # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2019-Readme.md
                 python-version:
                     - 3.7
                     - 3.8
@@ -868,9 +867,6 @@ jobs:
                     - os: windows-2022
                       container: 2014
 
-                    - os: windows-2019
-                      container: 2014
-
                     # Exclude non-manylinux builds on linux
                     - os: ubuntu-20.04
                       container: none
@@ -881,13 +877,6 @@ jobs:
                     # Exclude windows builds if set
                     - include-windows-run: false
                       os: windows-2022
-
-                    - include-windows-run: false
-                      os: windows-2019
-
-                    # Exclude Windows 2019 bulds
-                    - is-full-run: false
-                      os: windows-2019
 
                     - is-full-run: false
                       os: macos-11
@@ -1058,16 +1047,6 @@ jobs:
 
             ################
             # Windows
-            - name: Windows init steps (vc142)
-              run: |
-                  vcpkg.exe install boost-thread boost-algorithm boost-filesystem boost-multi-index boost-multiprecision boost-program-options boost-system boost-unordered boost-uuid
-                  vcpkg.exe integrate install
-              env:
-                  PYTHON_VERSION: ${{ matrix.python-version }}
-                  VCPKG_DEFAULT_TRIPLET: x64-windows
-                  VCPKG_PLATFORM_TOOLSET: v142
-              if: ${{ matrix.os == 'windows-2019' }}
-
             - name: Windows init steps (vc143)
               run: |
                   vcpkg.exe install boost-thread boost-algorithm boost-filesystem boost-multi-index boost-multiprecision boost-program-options boost-system boost-unordered boost-uuid
@@ -1112,13 +1091,6 @@ jobs:
 
             ##########
             # Windows
-            - name: Python Build Steps (Windows vc14.2)
-              run: yarn _wheel_python --ci
-              env:
-                  PSP_GENERATOR: Visual Studio 16 2019
-                  PSP_VCPKG_PATH: C:/vcpkg/scripts/buildsystems/vcpkg.cmake
-              if: ${{ matrix.os == 'windows-2019' }}
-
             - name: Python Build Steps (Windows vc14.3)
               run: yarn _wheel_python --ci
               env:
@@ -1399,7 +1371,6 @@ jobs:
                     - ubuntu-20.04 # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-Readme.md
                     - macos-11 # https://github.com/actions/virtual-environments/blob/main/images/macos/macos-11-Readme.md
                     - windows-2022 # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2022-Readme.md
-                    - windows-2019 # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2019-Readme.md
                 python-version:
                     - 3.7
                     - 3.8
@@ -1418,13 +1389,6 @@ jobs:
                     # Exclude if skipping windows
                     - include-windows-run: false
                       os: windows-2022
-
-                    - include-windows-run: false
-                      os: windows-2019
-
-                    # Exclude Windows 2019 bulds
-                    - is-full-run: false
-                      os: windows-2019
 
                     # Exclude Mac builds
                     - is-full-run: false
@@ -1956,23 +1920,23 @@ jobs:
 
             - uses: actions/download-artifact@v3
               with:
-                  name: perspective-python-dist-windows-2019-3.7
+                  name: perspective-python-dist-windows-2022-3.7
 
             - uses: actions/download-artifact@v3
               with:
-                  name: perspective-python-dist-windows-2019-3.8
+                  name: perspective-python-dist-windows-2022-3.8
 
             - uses: actions/download-artifact@v3
               with:
-                  name: perspective-python-dist-windows-2019-3.9
+                  name: perspective-python-dist-windows-2022-3.9
 
             - uses: actions/download-artifact@v3
               with:
-                  name: perspective-python-dist-windows-2019-3.10
+                  name: perspective-python-dist-windows-2022-3.10
 
             - uses: actions/download-artifact@v3
               with:
-                  name: perspective-python-dist-windows-2019-3.11
+                  name: perspective-python-dist-windows-2022-3.11
 
             - uses: actions/download-artifact@v3
               with:
