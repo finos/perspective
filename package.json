@@ -77,7 +77,7 @@
         "typedoc": "^0.24.8",
         "typedoc-plugin-markdown": "^3.15.4",
         "typedoc-plugin-no-inherit": "^1.4.0",
-        "typescript": "5.1.6",
+        "typescript": "^5.1.6",
         "webpack": "^5.60.0",
         "webpack-cli": "^4.7.0",
         "webpack-dev-server": "^4.11.1"
@@ -108,5 +108,11 @@
         "fix": "node tools/perspective-scripts/fix.mjs",
         "version": "node tools/perspective-scripts/version.mjs",
         "jlab_link": "pip3 install ./python/perspective --no-build-isolation"
+    },
+    "dependencies": {
+        "@types/jest": "^29.5.3",
+        "@types/node": "^17.0.42",
+        "@types/react": "^18.0.12",
+        "@types/react-dom": "^18.2.7"
     }
 }
