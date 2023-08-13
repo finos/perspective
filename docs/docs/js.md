@@ -521,7 +521,7 @@ const fs = require("fs");
 const host = new WebSocketServer({ assets: [__dirname], port: 8080 });
 
 // Read an arrow file from the file system and host it as a named table.
-const arr = fs.readFileSync(__dirname + "/superstore.arrow");
+const arr = fs.readFileSync(__dirname + "/superstore.lz4.arrow");
 table(arr).then((table) => {
     host.host_table("table_one", table);
 });

@@ -415,7 +415,6 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif()
 
 set(SOURCE_FILES
-    ${PSP_CPP_SRC}/src/cpp/vendor/arrow_compute_registry.cpp
     ${PSP_CPP_SRC}/src/cpp/aggregate.cpp
     ${PSP_CPP_SRC}/src/cpp/aggspec.cpp
     ${PSP_CPP_SRC}/src/cpp/arg_sort.cpp
@@ -510,7 +509,7 @@ set(PYTHON_SOURCE_FILES ${SOURCE_FILES}
 )
 
 set(WASM_SOURCE_FILES ${SOURCE_FILES}
-    ${PSP_CPP_SRC}/src/cpp/vendor/arrow_single_threaded_reader.cpp
+    # ${PSP_CPP_SRC}/src/cpp/vendor/arrow_single_threaded_reader.cpp
 )
 
 set(PYTHON_BINDING_SOURCE_FILES

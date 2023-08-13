@@ -229,7 +229,7 @@ class Runner(object):
             os.makedirs(os.path.dirname(ARROW_PATH))
 
         with open(ARROW_PATH, "wb") as file:
-            arrow = self._table.view().to_arrow()
+            arrow = self._table.view().to_arrow(compression=None)
             file.write(arrow)
 
         html_path = os.path.join(os.path.dirname(__file__), "benchmark-python.html")

@@ -182,7 +182,7 @@ public:
      */
     std::shared_ptr<std::string> to_arrow(std::int32_t start_row,
         std::int32_t end_row, std::int32_t start_col, std::int32_t end_col,
-        bool emit_group_by) const;
+        bool emit_group_by, bool compress) const;
 
     /**
      * @brief Serializes the `View`'s data into the Apache Arrow format
@@ -211,8 +211,8 @@ public:
      * @return std::shared_ptr<std::string>
      */
     std::shared_ptr<std::string> data_slice_to_arrow(
-        std::shared_ptr<t_data_slice<CTX_T>> data_slice,
-        bool emit_group_by) const;
+        std::shared_ptr<t_data_slice<CTX_T>> data_slice, bool emit_group_b,
+        bool compress) const;
 
     /**
      * @brief Serializes a given data slice into the Apache Arrow format. Can

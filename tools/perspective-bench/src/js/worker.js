@@ -37,6 +37,19 @@ const SUPERSTORE_ARROW = fs.readFileSync(
     require.resolve("superstore-arrow/superstore.arrow")
 ).buffer;
 
+const SUPERSTORE_FEATHER = fs.readFileSync(
+    require.resolve("superstore-arrow/superstore.lz4.arrow")
+).buffer;
+
+function new_table(perspective) {
+    const [M, m, _] = perspective.version;
+    if (M >= 2 && m >= 5) {
+        return SUPERSTORE_ARROW.slice();
+    } else {
+        return SUPERSTORE_ARROW.slice();
+    }
+}
+
 const ITERATIONS = 10;
 const WARM_UP_ITERATIONS = 1;
 
@@ -89,7 +102,7 @@ async function benchmark({ name, before, before_all, test, after, after_all }) {
 
 async function to_data_suite() {
     async function before_all(perspective) {
-        const table = await perspective.table(SUPERSTORE_ARROW.slice());
+        const table = await perspective.table(new_table(perspective));
         const view = await table.view();
         return { table, view };
     }
@@ -138,9 +151,9 @@ async function to_data_suite() {
 
 async function view_suite() {
     async function before_all(perspective) {
-        const table = await perspective.table(SUPERSTORE_ARROW.slice());
+        const table = await perspective.table(new_table(perspective));
         for (let i = 0; i < 4; i++) {
-            await table.update(SUPERSTORE_ARROW.slice());
+            await table.update(new_table(perspective));
         }
 
         const schema = await table.schema();
@@ -238,7 +251,7 @@ async function view_suite() {
 
 async function table_suite() {
     async function before_all(perspective) {
-        const table = await perspective.table(SUPERSTORE_ARROW.slice());
+        const table = await perspective.table(new_table(perspective));
         const view = await table.view();
         const csv = await view.to_csv();
         await view.delete();
@@ -253,7 +266,7 @@ async function table_suite() {
             await table.delete();
         },
         async test(perspective) {
-            return await perspective.table(SUPERSTORE_ARROW.slice());
+            return await perspective.table(new_table(perspective));
         },
     });
 

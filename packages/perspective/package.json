@@ -52,6 +52,6 @@
         "jsverify": "^0.8.4",
         "lodash": "^4.17.4",
         "moment": "^2.19.1",
-        "superstore-arrow": "^1.0.0"
+        "superstore-arrow": "^3.0.0"
     }
 }

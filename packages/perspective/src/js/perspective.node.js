@@ -114,6 +114,7 @@ const CONTENT_TYPES = {
     ".css": "text/css",
     ".json": "application/json",
     ".arrow": "arraybuffer",
+    ".feather": "arraybuffer",
     ".wasm": "application/wasm",
 };
 
@@ -161,7 +162,9 @@ function perspective_assets(assets, host_psp) {
                     response.writeHead(200, { "Content-Type": contentType });
                     response.end(
                         content,
-                        extname === ".arrow" ? undefined : "utf-8"
+                        extname === ".arrow" || extname === ".feather"
+                            ? undefined
+                            : "utf-8"
                     );
                     return;
                 }
@@ -193,7 +196,9 @@ function perspective_assets(assets, host_psp) {
                             });
                             response.end(
                                 content,
-                                extname === ".arrow" ? undefined : "utf-8"
+                                extname === ".arrow" || extname === ".feather"
+                                    ? undefined
+                                    : "utf-8"
                             );
                             return;
                         }

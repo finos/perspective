@@ -10,12 +10,41 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import perspective from "@finos/perspective";
-import SUPERSTORE_URL from "superstore-arrow/superstore.lz4.arrow";
+const { test, expect } = require("@playwright/test");
+const perspective = require("@finos/perspective");
 
-export const SUPERSTORE_TABLE = (async function () {
-    const worker = perspective.shared_worker();
-    const req = await fetch(SUPERSTORE_URL);
-    const arrow = await req.arrayBuffer();
-    return await worker.table(arrow.slice());
-})();
+const fs = require("fs");
+
+const superstore_uncompressed = fs.readFileSync(
+    require.resolve("superstore-arrow/superstore.arrow")
+).buffer;
+
+const superstore_lz4 = fs.readFileSync(
+    require.resolve("superstore-arrow/superstore.lz4.arrow")
+).buffer;
+
+test.describe("Arrow IPC", function () {
+    test.describe("to_arrow()", function () {
+        test("to_arrow() compressed is serializable roundtrip", async () => {
+            let table = await perspective.table(
+                superstore_uncompressed.slice()
+            );
+
+            let view = await table.view();
+            let arr = await view.to_arrow({ compression: "lz4" });
+            expect(arr).toEqual(superstore_lz4);
+            expect(arr.byteLength).toBeLessThan(
+                superstore_uncompressed.byteLength
+            );
+
+            view.delete();
+            table.delete();
+            table = await perspective.table(arr);
+            view = await table.view();
+            let arr2 = await view.to_arrow({ compression: null });
+            expect(arr2.byteLength).toBeGreaterThan(arr.byteLength);
+            view.delete();
+            table.delete();
+        });
+    });
+});

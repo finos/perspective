@@ -135,7 +135,7 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/column_decoder.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/options.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/parser.cc
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/reader.cc
+    # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/reader.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/writer.cc
 
     # IPC
@@ -157,6 +157,7 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/function_internal.cc    
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernel.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/ordering.cc
+
     
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/registry.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/aggregate_basic.cc
@@ -193,6 +194,7 @@ set(ARROW_SRCS
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/vector_nested.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/vector_replace.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/vector_selection.cc
+    ${PSP_CPP_SRC}/src/cpp/vendor/arrow_compute_registry.cpp
 
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/vector_sort.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/row_encoder.cc
@@ -213,11 +215,13 @@ if(PSP_PYTHON_BUILD)
         ${ARROW_SRCS}
         # use standard reader in Python builds.
         ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/reader.cc
+        ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/reader.cc
         ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/file.cc
         ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/tensor/coo_converter.cc
         ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/tensor/csf_converter.cc
         ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/tensor/csx_converter.cc
         ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/cpu_info.cc
+        ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/union_util.cc
 
         # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/time.cc
         # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/vendored/double-conversion/bignum-dtoa.cc
@@ -234,7 +238,8 @@ else()
     set(ARROW_SRCS
         ${ARROW_SRCS}
         # Use our vendored reader that does not use threads.
-        ${PSP_CPP_SRC}/src/cpp/vendor/single_threaded_reader.cpp)
+        ${PSP_CPP_SRC}/src/cpp/vendor/single_threaded_reader.cpp
+        ${PSP_CPP_SRC}/src/cpp/vendor/arrow_single_threaded_reader.cpp)
 endif()
 
 set_property(SOURCE util/io_util.cc

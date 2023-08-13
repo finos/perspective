@@ -424,7 +424,7 @@ class View(object):
             return ValueError("remove_delete callback should be a callable function!")
         self._delete_callbacks.remove_callbacks(lambda cb: cb == callback)
 
-    def to_arrow(self, **kwargs):
+    def to_arrow(self, compression="lz4", **kwargs):
         self._table._state_manager.call_process(self._table._table.get_id())
         options = _parse_format_options(self, kwargs)
         if self._is_unit_context:
@@ -434,6 +434,7 @@ class View(object):
                 options["end_row"],
                 options["start_col"],
                 options["end_col"],
+                compression == "lz4",
             )
         elif self._sides == 0:
             return to_arrow_zero(
@@ -442,6 +443,7 @@ class View(object):
                 options["end_row"],
                 options["start_col"],
                 options["end_col"],
+                compression == "lz4",
             )
         elif self._sides == 1:
             return to_arrow_one(
@@ -450,6 +452,7 @@ class View(object):
                 options["end_row"],
                 options["start_col"],
                 options["end_col"],
+                compression == "lz4",
             )
         else:
             return to_arrow_two(
@@ -458,6 +461,7 @@ class View(object):
                 options["end_row"],
                 options["start_col"],
                 options["end_col"],
+                compression == "lz4",
             )
 
     def to_records(self, **kwargs):

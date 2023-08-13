@@ -20,7 +20,7 @@ import "@finos/perspective-viewer/dist/css/themes.css";
 
 import "./index.css";
 
-import superstore from "superstore-arrow/superstore.arrow";
+import superstore from "superstore-arrow/superstore.lz4.arrow";
 
 const worker = perspective.shared_worker();
 
