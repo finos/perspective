@@ -79,7 +79,7 @@ def deconstruct_pandas(data, kwargs=None):
                     data[k] = data[k].astype(str)
 
     # convert StringDtype to str
-    if isinstance(data, pd.DataFrame) and hasattr(pd, "CategoricalDtype"):
+    if isinstance(data, pd.DataFrame) and hasattr(pd, "StringDtype"):
         for k, v in data.dtypes.items():
             if isinstance(v, pd.StringDtype):
                 data[k] = data[k].astype(str)
