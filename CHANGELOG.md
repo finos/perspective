@@ -1,6 +1,18 @@
+# [v2.5.0](https://github.com/finos/perspective/releases/tag/v2.5.0)
+
+_14 August 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.4.0...v2.5.0))
+
+**Breaking**
+
+- LZ4 compression for Apache Arrow  [#2339](https://github.com/finos/perspective/pull/2339)
+
+Misc
+
+- prune win 2019 from ci, switch over to windows-2022 only [#2333](https://github.com/finos/perspective/pull/2333)
+
 # [v2.4.0](https://github.com/finos/perspective/releases/tag/v2.4.0)
 
-_7 August 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.3.2...v2.4.0))
+_9 August 2023_ ([Full changelog](https://github.com/finos/perspective/compare/v2.3.2...v2.4.0))
 
 **Breaking**
 
