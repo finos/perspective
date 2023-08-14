@@ -18,7 +18,7 @@ import "@finos/perspective-viewer-d3fc";
 import "./index.less";
 
 const datasource = async () => {
-    const req = fetch("./superstore.arrow");
+    const req = fetch("./superstore.lz4.arrow");
     const resp = await req;
     const buffer = await resp.arrayBuffer();
     const worker = perspective.shared_worker();

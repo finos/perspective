@@ -773,7 +773,6 @@ export default function (Module) {
      * @async
      *
      * @param {Object} [options] An optional configuration object.
-     *
      * @param {number} options.start_row The starting row index from which to
      * serialize.
      * @param {number} options.end_row The ending row index from which to
@@ -782,7 +781,8 @@ export default function (Module) {
      * serialize.
      * @param {number} options.end_col The ending column index from which to
      * serialize.
-     *
+     * @param {number} options.compression The compression codec to use. Can be
+     * `null` or `"lz4"` (default).
      * @returns {Promise<ArrayBuffer>} An `ArrayBuffer` in the Apache Arrow
      * format containing data from the view.
      */
@@ -794,6 +794,8 @@ export default function (Module) {
         const start_col = options.start_col;
         const end_col = options.end_col;
         const sides = this.sides();
+        const compression =
+            "compression" in options ? options.compression === "lz4" : true;
 
         if (this.is_unit_context) {
             return __MODULE__.to_arrow_unit(
@@ -801,7 +803,8 @@ export default function (Module) {
                 start_row,
                 end_row,
                 start_col,
-                end_col
+                end_col,
+                compression
             );
         } else if (sides === 0) {
             return __MODULE__.to_arrow_zero(
@@ -809,7 +812,8 @@ export default function (Module) {
                 start_row,
                 end_row,
                 start_col,
-                end_col
+                end_col,
+                compression
             );
         } else if (sides === 1) {
             return __MODULE__.to_arrow_one(
@@ -817,7 +821,8 @@ export default function (Module) {
                 start_row,
                 end_row,
                 start_col,
-                end_col
+                end_col,
+                compression
             );
         } else if (sides === 2) {
             return __MODULE__.to_arrow_two(
@@ -825,7 +830,8 @@ export default function (Module) {
                 start_row,
                 end_row,
                 start_col,
-                end_col
+                end_col,
+                compression
             );
         }
     };

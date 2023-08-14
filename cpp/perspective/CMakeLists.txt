@@ -3,7 +3,7 @@ project(psp)
 include(CheckCCompilerFlag)
 
 set(CMAKE_BUILD_TYPE "Release")
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # CMAKE POLICIES
@@ -380,6 +380,7 @@ psp_build_message("${Cyan}Building minimal Apache Arrow${ColorReset}")
 psp_build_dep("rapidjson" "${PSP_CMAKE_MODULE_PATH}/rapidjson.txt.in")
 psp_build_dep("double-conversion" "${PSP_CMAKE_MODULE_PATH}/double-conversion.txt.in")
 psp_build_dep("flatbuffers" "${PSP_CMAKE_MODULE_PATH}/flatbuffers.txt.in")
+psp_build_dep("lz4" "${PSP_CMAKE_MODULE_PATH}/lz4.txt.in")
 
 # Build minimal arrow itself
 psp_build_dep("arrow" "${PSP_CMAKE_MODULE_PATH}/arrow.txt.in")
@@ -414,7 +415,6 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif()
 
 set(SOURCE_FILES
-    ${PSP_CPP_SRC}/src/cpp/vendor/arrow_compute_registry.cpp
     ${PSP_CPP_SRC}/src/cpp/aggregate.cpp
     ${PSP_CPP_SRC}/src/cpp/aggspec.cpp
     ${PSP_CPP_SRC}/src/cpp/arg_sort.cpp
@@ -509,7 +509,7 @@ set(PYTHON_SOURCE_FILES ${SOURCE_FILES}
 )
 
 set(WASM_SOURCE_FILES ${SOURCE_FILES}
-    ${PSP_CPP_SRC}/src/cpp/vendor/arrow_single_threaded_reader.cpp
+    # ${PSP_CPP_SRC}/src/cpp/vendor/arrow_single_threaded_reader.cpp
 )
 
 set(PYTHON_BINDING_SOURCE_FILES
@@ -626,7 +626,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
             set_property(TARGET psppy PROPERTY INSTALL_RPATH ${CMAKE_INSTALL_RPATH} ${module_origin_path})
 
             target_compile_options(psp PRIVATE -fvisibility=hidden)
-            target_compile_options(psppy PRIVATE -fvisibility=hidden)    
+            target_compile_options(psppy PRIVATE -fvisibility=hidden)
         else()
             target_compile_options(psppy PRIVATE -Wdeprecated-declarations)
         endif()

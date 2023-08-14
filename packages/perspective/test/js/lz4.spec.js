@@ -10,69 +10,41 @@
 // ┃ of the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-import fs from "fs";
-import { WebSocketServer } from "@finos/perspective";
-import { dist_examples } from "./index.mjs";
+const { test, expect } = require("@playwright/test");
+const perspective = require("@finos/perspective");
 
-import { fileURLToPath } from "url";
-import { dirname } from "path";
+const fs = require("fs");
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const superstore_uncompressed = fs.readFileSync(
+    require.resolve("superstore-arrow/superstore.arrow")
+).buffer;
 
-dist_examples(`${__dirname}/dist`);
+const superstore_lz4 = fs.readFileSync(
+    require.resolve("superstore-arrow/superstore.lz4.arrow")
+).buffer;
 
-const template = (body) => `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
-</head>
-<body>
-    <ul id="list">
-        ${body}
-    </ul>
-</body>
-</html>
-`;
+test.describe("Arrow IPC", function () {
+    test.describe("to_arrow()", function () {
+        test("to_arrow() compressed is serializable roundtrip", async () => {
+            let table = await perspective.table(
+                superstore_uncompressed.slice()
+            );
 
-const prod_template = (name) => `
-<li>
-    <a href="src/${name}/index.html">local</a>
-    <a href="dist/${name}/index.html">dist</a>
-    ${name}
-</li>
-`;
+            let view = await table.view();
+            let arr = await view.to_arrow({ compression: "lz4" });
+            expect(arr).toEqual(superstore_lz4);
+            expect(arr.byteLength).toBeLessThan(
+                superstore_uncompressed.byteLength
+            );
 
-const dev_template = (name) => `
-<li>
-    <a href="src/${name}/index.html">local</a>
-    ${name}
-</li>
-`;
-
-const gists = [
-    "fractal",
-    "raycasting",
-    "evictions",
-    "streaming",
-    "covid",
-    "movies",
-    "superstore",
-    "citibike",
-    "olympics",
-    "editable",
-    "file",
-];
-
-const lis = [];
-for (const key of fs.readdirSync("src")) {
-    if (gists.indexOf(key) >= 0) {
-        lis.push(prod_template(key));
-    } else {
-        lis.push(dev_template(key));
-    }
-}
-
-fs.writeFileSync("dist/index.html", template(lis.join("\n")));
-
-new WebSocketServer({ assets: [__dirname, "dist", "../../"] });
+            view.delete();
+            table.delete();
+            table = await perspective.table(arr);
+            view = await table.view();
+            let arr2 = await view.to_arrow({ compression: null });
+            expect(arr2.byteLength).toBeGreaterThan(arr.byteLength);
+            view.delete();
+            table.delete();
+        });
+    });
+});

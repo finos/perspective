@@ -207,9 +207,10 @@ namespace binding {
     template <typename CTX_T>
     t_val
     to_arrow(std::shared_ptr<View<CTX_T>> view, std::int32_t start_row,
-        std::int32_t end_row, std::int32_t start_col, std::int32_t end_col) {
-        std::shared_ptr<std::string> s
-            = view->to_arrow(start_row, end_row, start_col, end_col, true);
+        std::int32_t end_row, std::int32_t start_col, std::int32_t end_col,
+        bool compress) {
+        std::shared_ptr<std::string> s = view->to_arrow(
+            start_row, end_row, start_col, end_col, true, compress);
         return str_to_arraybuffer(s)["buffer"];
     }
 
@@ -226,7 +227,7 @@ namespace binding {
     t_val
     get_row_delta(std::shared_ptr<View<CTX_T>> view) {
         auto slice = view->get_row_delta();
-        auto row_delta = view->data_slice_to_arrow(slice, false);
+        auto row_delta = view->data_slice_to_arrow(slice, false, false);
         return str_to_arraybuffer(row_delta)["buffer"];
     }
 

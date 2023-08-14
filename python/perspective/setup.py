@@ -188,7 +188,7 @@ class PSPBuild(build_ext):
             )
 
             if os.path.exists(vcpkg_toolchain_file):
-                cmake_args.append("-DCMAKE_TOOLCHAIN_FILE={}".format(vcpkg_toolchain_file))
+                cmake_args.append("-DCMAKE_TOOLCHAIN_FILE={}".format(vcpkg_toolchain_file.replace("\\", "/")))
 
             if sys.maxsize > 2**32:
                 # build 64 bit to match python
@@ -207,8 +207,8 @@ class PSPBuild(build_ext):
             ]
 
         env["PSP_ENABLE_PYTHON"] = "1"
-        env["OSX_DEPLOYMENT_TARGET"] = os.environ.get("PSP_OSX_DEPLOYMENT_TARGET", "10.9")
-        env["MACOSX_DEPLOYMENT_TARGET"] = os.environ.get("PSP_OSX_DEPLOYMENT_TARGET", "10.9")
+        env["OSX_DEPLOYMENT_TARGET"] = os.environ.get("PSP_OSX_DEPLOYMENT_TARGET", "10.13")
+        env["MACOSX_DEPLOYMENT_TARGET"] = os.environ.get("PSP_OSX_DEPLOYMENT_TARGET", "10.13")
 
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)

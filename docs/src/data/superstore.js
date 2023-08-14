@@ -11,7 +11,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 import perspective from "@finos/perspective";
-import SUPERSTORE_URL from "superstore-arrow/superstore.arrow";
+import SUPERSTORE_URL from "superstore-arrow/superstore.lz4.arrow";
 
 export const SUPERSTORE_TABLE = (async function () {
     const worker = perspective.shared_worker();

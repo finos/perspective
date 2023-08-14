@@ -16,7 +16,7 @@ const perspective = require("@finos/perspective");
 const fs = require("fs");
 
 const arr = fs.readFileSync(
-    require.resolve("superstore-arrow/superstore.arrow")
+    require.resolve("superstore-arrow/superstore.lz4.arrow")
 ).buffer;
 
 /**

@@ -26,6 +26,7 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/array_dict.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/array_nested.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/array_primitive.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/array_run_end.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/builder_adaptive.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/builder_base.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/builder_binary.cc
@@ -33,6 +34,7 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/builder_dict.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/builder_nested.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/builder_primitive.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/builder_run_end.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/builder_union.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/concatenate.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/data.cc
@@ -76,6 +78,7 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/stdio.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/transform.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/async_util.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/atfork_internal.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/basic_decimal.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/bit_block_counter.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/bit_run_reader.cc
@@ -87,8 +90,9 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/byte_size.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/cancel.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/compression.cc
+    # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/compression_zstd.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/compression_lz4.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/counting_semaphore.cc
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/cpu_info.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/debug.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/decimal.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/delimiting.cc
@@ -100,6 +104,7 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/key_value_metadata.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/memory.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/mutex.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/ree_util.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/string.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/string_builder.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/task_group.cc
@@ -130,7 +135,7 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/column_decoder.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/options.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/parser.cc
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/reader.cc
+    # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/reader.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/writer.cc
 
     # IPC
@@ -139,7 +144,6 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/message.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/metadata_internal.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/options.cc
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/reader.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/writer.cc
 
     # Compute
@@ -148,20 +152,13 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/api_vector.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/cast.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec.cc
-
-    # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec/aggregate_node.cc
-    # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec/exec_plan.cc
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec/expression.cc
-
-    # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec/filter_node.cc
-    # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec/project_node.cc
-    # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec/source_node.cc
-    # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec/sink_node.cc
-    # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/exec/order_by_impl.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/expression.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/function.cc
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/function_internal.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/function_internal.cc    
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernel.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/ordering.cc
 
+    
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/registry.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/aggregate_basic.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/aggregate_mode.cc
@@ -175,6 +172,7 @@ set(ARROW_SRCS
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/scalar_boolean.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/scalar_cast_boolean.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/scalar_cast_dictionary.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/scalar_cast_extension.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/scalar_cast_internal.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/scalar_cast_nested.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/scalar_cast_numeric.cc
@@ -196,6 +194,7 @@ set(ARROW_SRCS
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/vector_nested.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/vector_replace.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/vector_selection.cc
+    ${PSP_CPP_SRC}/src/cpp/vendor/arrow_compute_registry.cpp
 
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/vector_sort.cc
     # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compute/kernels/row_encoder.cc
@@ -214,10 +213,15 @@ set(ARROW_SRCS
 if(PSP_PYTHON_BUILD)
     set(ARROW_SRCS
         ${ARROW_SRCS}
+        # use standard reader in Python builds.
+        ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/reader.cc
+        ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/reader.cc
         ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/file.cc
         ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/tensor/coo_converter.cc
         ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/tensor/csf_converter.cc
         ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/tensor/csx_converter.cc
+        ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/cpu_info.cc
+        ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/union_util.cc
 
         # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/time.cc
         # ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/vendored/double-conversion/bignum-dtoa.cc
@@ -230,6 +234,12 @@ if(PSP_PYTHON_BUILD)
             ${ARROW_SRCS}
             ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/vendored/musl/strptime.c)
     endif()
+else()
+    set(ARROW_SRCS
+        ${ARROW_SRCS}
+        # Use our vendored reader that does not use threads.
+        ${PSP_CPP_SRC}/src/cpp/vendor/single_threaded_reader.cpp
+        ${PSP_CPP_SRC}/src/cpp/vendor/arrow_single_threaded_reader.cpp)
 endif()
 
 set_property(SOURCE util/io_util.cc
@@ -274,6 +284,8 @@ add_library(arrow STATIC ${ARROW_SRCS})
 
 target_compile_definitions(arrow PUBLIC ARROW_NO_DEPRECATED_API)
 target_compile_definitions(arrow PUBLIC ARROW_STATIC)
+# target_compile_definitions(arrow PUBLIC ARROW_WITH_ZSTD=ON)
+target_compile_definitions(arrow PUBLIC ARROW_WITH_LZ4)
 
 # will need built boost filesystem and system .lib to work, even though
 # perspective itself does not use those dependencies
@@ -281,6 +293,7 @@ target_link_libraries(arrow
     ${double-conversion_LIBRARIES}
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}
+    lz4_static
     ${ARROW_TEST_LINK_TOOLCHAIN})
 
 # find_package(Flatbuffers)

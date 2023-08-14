@@ -34,7 +34,7 @@ file_path = os.path.join(
     "..",
     "node_modules",
     "superstore-arrow",
-    "superstore.arrow",
+    "superstore.lz4.arrow",
 )
 
 
@@ -65,7 +65,7 @@ def perspective_thread(manager):
 
 
 def get_table():
-    """Get a test table, made from "superstore.arrow" repeated `TABLE_SCALAR`
+    """Get a test table, made from "superstore.lz4.arrow" repeated `TABLE_SCALAR`
     times."""
     with open(file_path, mode="rb") as file:
         arrow = file.read()

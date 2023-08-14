@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.7.2)
 # Helper to grab dependencies from remote sources #
 # ##################################################
 function(psp_build_dep name cmake_file)
-    if(EXISTS ${CMAKE_BINARY_DIR}/${name}-build)
+    if(EXISTS ${CMAKE_BINARY_DIR}/${name}-build AND NOT name STREQUAL "lz4")
         psp_build_message("${Cyan}Dependency found - not rebuilding - ${CMAKE_BINARY_DIR}/${name}-build${ColorReset}")
     else()
         configure_file(${cmake_file} ${name}-download/CMakeLists.txt)
@@ -46,6 +46,12 @@ function(psp_build_dep name cmake_file)
         add_subdirectory(${CMAKE_BINARY_DIR}/${name}-src
             ${CMAKE_BINARY_DIR}/${name}-build
             EXCLUDE_FROM_ALL)
+    elseif(${name} STREQUAL lz4)
+        # lz4's CMakeLists.txt is in a subdir, build/cmake
+        add_subdirectory(${CMAKE_BINARY_DIR}/${name}-src/build/cmake
+            ${CMAKE_BINARY_DIR}/${name}-build
+            EXCLUDE_FROM_ALL)
+        include_directories(${CMAKE_BINARY_DIR}/${name}-src/lib)
     else()
         add_subdirectory(${CMAKE_BINARY_DIR}/${name}-src
             ${CMAKE_BINARY_DIR}/${name}-build

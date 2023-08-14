@@ -13,7 +13,7 @@
 import perspective from "/perspective.js";
 
 async function load() {
-    let resp = await fetch("/superstore-arrow/superstore.arrow");
+    let resp = await fetch("/superstore-arrow/superstore.lz4.arrow");
     let arrow = await resp.arrayBuffer();
     const worker = perspective.worker();
     const table = await worker.table(arrow);
