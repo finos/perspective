@@ -3082,5 +3082,124 @@ const std = (nums) => {
             view.delete();
             table.delete();
         });
+
+        test("Sum value flips back and forth when a new view is created upon table update", async function () {
+
+            var answer = [
+                [
+                    { __ROW_PATH__: [], ticker: 2, pnl: 200 },
+                    { __ROW_PATH__: ['AAPL'], ticker: 1, pnl: 100 },
+                    { __ROW_PATH__: ['IBM'], ticker: 1, pnl: 100 }
+                ],
+                [
+                    { __ROW_PATH__: [], ticker: 2, pnl: 100 },
+                    { __ROW_PATH__: ['AAPL'], ticker: 1, pnl: 0 },
+                    { __ROW_PATH__: ['IBM'], ticker: 1, pnl: 100 }
+                ],
+                [
+                    { __ROW_PATH__: [], ticker: 2, pnl: 200 },
+                    { __ROW_PATH__: ['AAPL'], ticker: 1, pnl: 100 },
+                    { __ROW_PATH__: ['IBM'], ticker: 1, pnl: 100 }
+                ],
+                [
+                    { __ROW_PATH__: [], ticker: 2, pnl: 100 },
+                    { __ROW_PATH__: ['AAPL'], ticker: 1, pnl: 0 },
+                    { __ROW_PATH__: ['IBM'], ticker: 1, pnl: 100 }
+                ],
+                [
+                    { __ROW_PATH__: [], ticker: 2, pnl: 200 },
+                    { __ROW_PATH__: ['AAPL'], ticker: 1, pnl: 100 },
+                    { __ROW_PATH__: ['IBM'], ticker: 1, pnl: 100 }
+                ],
+                [
+                    { __ROW_PATH__: [], ticker: 2, pnl: 100 },
+                    { __ROW_PATH__: ['AAPL'], ticker: 1, pnl: 0 },
+                    { __ROW_PATH__: ['IBM'], ticker: 1, pnl: 100 }
+                ]
+            ];
+
+            const schema = { "ticker": "string", "pnl": "integer" };
+            const data = [
+                { "ticker": "IBM", "pnl": 100 },
+                { "ticker": "AAPL", "pnl": 100 }
+            ]
+            const table = await perspective.table(schema, { index: "ticker" });
+            table.update(data)
+
+            let flip = true;
+            for (let i = 0; i < 6; i++) {
+                const view = await table.view({
+                    group_by: ["ticker"],
+                    columns: [
+                        "ticker",
+                        "pnl",
+                    ],
+                })
+                let result = await view.to_json();
+                expect(result).toEqual(answer[i]);
+                table.update([{ "ticker": "AAPL", "pnl": flip ? null : 100 }]);
+                flip = !flip;
+            }
+        });
+
+        test("Sum value increments when no new view is created upon table update", async function () {
+
+            var answer = [
+                [
+                    { __ROW_PATH__: [], ticker: 2, pnl: 200 },
+                    { __ROW_PATH__: ['AAPL'], ticker: 1, pnl: 100 },
+                    { __ROW_PATH__: ['IBM'], ticker: 1, pnl: 100 }
+                ],
+                [
+                    { __ROW_PATH__: [], ticker: 2, pnl: 200 },
+                    { __ROW_PATH__: ['AAPL'], ticker: 1, pnl: 100 },
+                    { __ROW_PATH__: ['IBM'], ticker: 1, pnl: 100 }
+                ],
+                [
+                    { __ROW_PATH__: [], ticker: 2, pnl: 300 },
+                    { __ROW_PATH__: ['AAPL'], ticker: 1, pnl: 200 },
+                    { __ROW_PATH__: ['IBM'], ticker: 1, pnl: 100 }
+                ],
+                [
+                    { __ROW_PATH__: [], ticker: 2, pnl: 300 },
+                    { __ROW_PATH__: ['AAPL'], ticker: 1, pnl: 200 },
+                    { __ROW_PATH__: ['IBM'], ticker: 1, pnl: 100 }
+                ],
+                [
+                    { __ROW_PATH__: [], ticker: 2, pnl: 400 },
+                    { __ROW_PATH__: ['AAPL'], ticker: 1, pnl: 300 },
+                    { __ROW_PATH__: ['IBM'], ticker: 1, pnl: 100 }
+                ],
+                [
+                    { __ROW_PATH__: [], ticker: 2, pnl: 400 },
+                    { __ROW_PATH__: ['AAPL'], ticker: 1, pnl: 300 },
+                    { __ROW_PATH__: ['IBM'], ticker: 1, pnl: 100 }
+                ]
+            ];
+
+            const schema = { "ticker": "string", "pnl": "integer" };
+            const data = [
+                { "ticker": "IBM", "pnl": 100 },
+                { "ticker": "AAPL", "pnl": 100 }
+            ]
+            const table = await perspective.table(schema, { index: "ticker" });
+            table.update(data)
+
+            const view = await table.view({
+                group_by: ["ticker"],
+                columns: [
+                    "ticker",
+                    "pnl",
+                ],
+            })
+
+            let flip = true;
+            for (let i = 0; i < 6; i++) {
+                let result = await view.to_json();
+                expect(result).toEqual(answer[i]);
+                table.update([{ "ticker": "AAPL", "pnl": flip ? null : 100 }]);
+                flip = !flip;
+            }
+        });
     });
 })(perspective);
