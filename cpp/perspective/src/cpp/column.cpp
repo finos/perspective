@@ -115,7 +115,7 @@ t_column::t_column(t_dtype dtype, bool missing_enabled,
     LOG_CONSTRUCTOR("t_column");
     m_isvlen = is_vlen_dtype(m_dtype);
 
-    if (is_vlen_dtype(dtype)) {
+    if (m_isvlen) {
         t_lstore_recipe vlendata_args(a);
         t_lstore_recipe extents_args(a);
 
@@ -160,8 +160,10 @@ t_column::init() {
         m_status->init();
     }
 
-    if (is_deterministic_sized(m_dtype))
+    if (is_deterministic_sized(m_dtype)) {
         m_elemsize = get_dtype_size(m_dtype);
+    }
+    
     m_init = true;
     COLUMN_CHECK_VALUES();
 }
