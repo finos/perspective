@@ -181,19 +181,33 @@ public:
 
 class PERSPECTIVE_EXPORT t_aggregate {
 public:
+    typedef void (*DTYPE_ACTION_T)(const t_aggregate*);
+    typedef std::array<DTYPE_ACTION_T, DTYPE_MAX_ENUM> DTYPE_ACTIONS_T;
+    typedef std::array<std::optional<DTYPE_ACTIONS_T>, AGGTYPE_MAX_ENUM> AGGTYPE_ACTIONS_T;
+
     t_aggregate(const t_dtree& tree, t_aggtype aggtype,
         std::vector<std::shared_ptr<const t_column>> icolumns,
         std::shared_ptr<t_column> column);
     void init();
 
     template <typename AGGIMPL_T>
-    void build_aggregate();
-
+    friend void build_aggregate(const t_aggregate*);
+    
 private:
     const t_dtree& m_tree;
     t_aggtype m_aggtype;
     std::vector<std::shared_ptr<const t_column>> m_icolumns;
     std::shared_ptr<t_column> m_ocolumn;
+
+    constexpr static DTYPE_ACTIONS_T gen_sum_actions();
+    constexpr static DTYPE_ACTIONS_T gen_mul_actions();
+    constexpr static DTYPE_ACTIONS_T gen_count_actions();
+    constexpr static DTYPE_ACTIONS_T gen_mean_actions();
+    constexpr static DTYPE_ACTIONS_T gen_hwm_actions();
+    constexpr static DTYPE_ACTIONS_T gen_lwm_actions();
+
+    constexpr static AGGTYPE_ACTIONS_T gen_aggtype_actions();
+    static const AGGTYPE_ACTIONS_T AGGTYPE_ACTIONS;
 };
 
 template <typename AGGIMPL_T,
@@ -238,23 +252,23 @@ build_aggregate_helper(AGGIMPL_T& aggimpl, t_index bcidx, t_index ecidx,
 
 template <typename AGGIMPL_T>
 void
-t_aggregate::build_aggregate() {
+build_aggregate(const t_aggregate* agg) {
 
     typedef typename AGGIMPL_T::t_rolling t_rolling;
     typedef typename AGGIMPL_T::t_raw_data t_raw_data;
     typedef typename t_dtree::t_tnode t_node;
 
-    t_depth n_levels = m_tree.last_level();
+    t_depth n_levels = agg->m_tree.last_level();
 
     AGGIMPL_T aggimpl;
 
     typedef typename t_dtree::t_tnode t_tnode;
-    t_column* ocolumn = m_ocolumn.get();
+    t_column* ocolumn = agg->m_ocolumn.get();
 
-    PSP_VERBOSE_ASSERT(m_icolumns.size() == 1,
+    PSP_VERBOSE_ASSERT(agg->m_icolumns.size() == 1,
         "Multiple input dependencies not supported yet");
 
-    const t_column* icptr = m_icolumns[0].get();
+    const t_column* icptr = agg->m_icolumns[0].get();
     t_uindex icptr_size = icptr->size();
 
     if (icptr_size == 0) {
@@ -262,19 +276,19 @@ t_aggregate::build_aggregate() {
     }
 
     std::vector<t_raw_data> buffer(icptr_size);
-    const t_column* lcptr = m_tree.get_leaf_cptr();
+    const t_column* lcptr = agg->m_tree.get_leaf_cptr();
     const t_uindex* base_lcptr = lcptr->get<const t_uindex>(0);
 
     for (t_index level_idx = n_levels; level_idx > -1; level_idx--) {
         std::pair<t_index, t_index> markers
-            = m_tree.get_level_markers(level_idx);
+            = agg->m_tree.get_level_markers(level_idx);
 
         t_index bidx = markers.first;
         t_index eidx = markers.second;
 
         if (level_idx == n_levels) {
             for (t_index nidx = bidx; nidx < eidx; nidx++) {
-                const t_node* n_ = m_tree.get_node_ptr(nidx);
+                const t_node* n_ = agg->m_tree.get_node_ptr(nidx);
                 const t_tnode& n = *n_;
                 const t_uindex* blptr = base_lcptr + n.m_flidx;
                 const t_uindex* elptr = blptr + n.m_nleaves;
@@ -291,7 +305,7 @@ t_aggregate::build_aggregate() {
         } else {
             // for all nodes in level
             for (t_index nidx = bidx; nidx < eidx; nidx++) {
-                const t_node* n_ = m_tree.get_node_ptr(nidx);
+                const t_node* n_ = agg->m_tree.get_node_ptr(nidx);
                 const t_node& n = *n_;
 
                 t_index bcidx = n.m_fcidx;
