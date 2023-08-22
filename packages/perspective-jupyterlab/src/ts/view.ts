@@ -26,9 +26,9 @@ import { proxy_table } from "@finos/perspective/api/table_api";
 // Type of first parameter to @finos/perspective UpdateCallback
 export type TableUpdate = {
     port_id: number;
-    delta: // TODO: I don't think this type is right, it would correspond to an array of structures of arrays
-    // | Array<Record<string, Array<string | boolean | Date | number>>>
-    Array<Record<string, string | boolean | Date | number>> | ArrayBuffer;
+    delta:
+        | Array<Record<string, string | boolean | Date | number>>
+        | ArrayBuffer;
 };
 
 function isEqual(a: any, b: any) {

@@ -113,26 +113,13 @@ declare module "@finos/perspective" {
     /**** Table ****/
     export type UpdateCallback = (updated: {
         port_id: number;
-        delta: // | Array<
-        //       Record<string, Array<string | boolean | Date | number | null>>
-        //   >
-        | Array<Record<string, string | boolean | Date | number | null>>
+        delta:
+            | Array<Record<string, string | boolean | Date | number | null>>
             | ArrayBuffer;
     }) => void;
 
     export type TableData =
         | string
-        // TODO: I don't think this type is actually supported?
-        // It's like this:
-        // [{
-        //   a: [1,2],
-        //   b: [4,5]
-        // },
-        // {
-        //   a: [-5,6],
-        //   b: [1,3]
-        // }]
-        //| Array<Record<string, Array<string | boolean | Date | number | null>>>
         | Array<Record<string, string | boolean | Date | number | null>>
         | { [key: string]: Array<string | boolean | Date | number | null> }
         | { [key: string]: string }
